@@ -1,0 +1,16 @@
+Installing and Running Shindig Gadget Server
+============================================
+
+1) Install Maven 2.0 (see http://maven.apache.org)
+
+2) Make sure the JAVA_HOME environment variable is set to the location of your
+   JDK/JRE, and that the maven executable is in your PATH.
+
+3) From java/gadgets/...
+   * mvn package - Builds Gadget Server and runs tests.
+   * mvn jetty:run - Builds Gadget Server (no tests), installs Servlet at localhost:8080.
+
+4) Hit server at http://localhost:8080/gadgets/ifr?url=<gadget-url>
+   Example: http://localhost:8080/gadgets/ifr?url=http://www.labpixies.com/campaigns/todo/todo.xml
+
+For more information, see http://incubator.apache.org/projects/shindig.html
