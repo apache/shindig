@@ -1,0 +1,58 @@
+Using Shindig Gadget Container JavaScript
+=========================================
+
+1) Try out the samples.
+   These provide examples of Gadget Container using gmodules.com for rendering.
+   Point your web browser at the following, substituting your Shindig code directory
+   for <shindig-dir>:
+   * file:///shindig-dir/javascript/container/sample1.html
+   * file:///shindig-dir/javascript/container/sample3.html
+
+   Samples #2 and #4 need to be run in the context of a webserver for cookie and
+   container-gadget communication support. Start up your favorite browser and point 
+   it at the .../shindig/javascript/container directory (here abbreviated <shindig-js-dir>):
+   * http://yourserver:yourport/shindig-js-dir/sample2.html
+   * http://yourserver:yourport/shindig-js-dir/sample4.html
+
+2) Play around with the code.
+
+   A) Create an HTML file including the following <head> boilerplate:
+      <script type="text/javascript" src="json.js"></script>
+      <script type="text/javascript" src="http://www.google.com/ig/ifpc.js"></script>
+      <script type="text/javascript" src="cookies.js"></script>
+      <script type="text/javascript" src="gadgets.js"></script>
+
+   B) For each Gadget you wish to add to the page:
+      i) Create it. Example, for Gadget whose spec is at http://foo.com/spec.xml
+      var gadget = gadgets.container.createGadget({ specUrl: "http://foo.com/spec.xml" });
+
+      ii) Add it to the container. Example:
+      gadgets.container.addGadget(gadget);
+
+      iii) Ensure the Gadget's chrome ID is defined. This is the ID of the elements
+           in which the Gadget is rendered. The way these are specified differs
+           depending on the LayoutManager being used. Example with default LayoutManager:
+      gadgets.container.layoutManager.setGadgetChromeIds([ 'gadget-id-1' ]);
+
+      iv) Render it. The chrome element must exist when this call is performed (ie.
+          this must occur onLoad of the document.body or in inline script).
+      gadgets.container.renderGadget(gadget);
+
+          You may also render several added Gadgets at once:
+      gadgets.container.renderGadgets();
+
+   C) Explore samples 2, 3, and 4 for examples using different LayoutManagers and
+      supporting UserPrefs storage.
+
+3) Try it with your own Gadget Server.
+   A) Set up your own Shindig Gadget Server. See its README for details.
+
+   B) Assume your server is running on http://yourserver:yourport/gadgets/...
+      Before step 2.B.iv, call the following to point the Gadget at your server:
+      gadget.setServerBase('http://yourserver:yourport/gadgets');
+
+NOTE: In the short term, when rendering Gadgets using gmodules.com certain
+      functionality tied to inter-frame communication will not work,
+      such as SetPrefs and dynamically setting IFRAME height.
+
+For more information, see http://incubator.apache.org/projects/shindig.html
