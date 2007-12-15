@@ -77,7 +77,19 @@ public interface GadgetSpec {
   }
 
   public ContentType getContentType();
+
+  /**
+   * Must be a URL type gadget.
+   *
+   * @return The URL for this gadget spec.
+   * @throws IllegalStateException if contentType is not URL.
+   */
   public URL getContentHref();
+
+  /**
+   * @return The HTML content for this gadget spec.
+   * @throws IllegalStateException if contentType is not HTML.
+   */
   public String getContentData();
 
   /**

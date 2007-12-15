@@ -135,11 +135,13 @@ public class Gadget implements GadgetView {
    */
   public URL getTitleURL() {
     URL ret = null;
-    String urlStr = baseSpec.getTitleURL().toString();
-    try {
-      ret = new URL(substitutions.substitute(urlStr));
-    } catch (MalformedURLException e) {
-      return null;
+    if (baseSpec.getTitleURL() != null) {
+      String urlStr = baseSpec.getTitleURL().toString();
+      try {
+        ret = new URL(substitutions.substitute(urlStr));
+      } catch (MalformedURLException e) {
+        return null;
+      }
     }
     return ret;
   }
@@ -264,12 +266,9 @@ public class Gadget implements GadgetView {
 
   /**
    * @return URL of gadget to render of type == URL; null if malformed/missing
+   * @throws IllegalStateException if contentType is not URL.
    */
   public URL getContentHref() {
-    if (getContentType() != ContentType.URL) {
-      return null;
-    }
-
     URL ret = null;
     String urlStr = baseSpec.getContentHref().toString();
     try {
@@ -282,6 +281,7 @@ public class Gadget implements GadgetView {
 
   /**
    * @return Gadget contents with all substitutions applied
+   * @throws IllegalStateException if contentType is not HTML.
    */
   public String getContentData() {
     return substitutions.substitute(baseSpec.getContentData());

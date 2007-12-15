@@ -13,7 +13,6 @@
  */
 package org.apache.shindig.gadgets;
 
-import java.io.IOException;
 import java.io.InputStream;
 
 /**
@@ -24,8 +23,9 @@ public class Utf8InputStream extends InputStream {
   private int position = 0;
 
   @Override
-  public int read() throws IOException {
+  public int read() {
     if (position == 0
+        && content.length >= 3
         && content[0] == (byte)0xEF
         && content[1] == (byte)0xBB
         && content[2] == (byte)0xBF) {
