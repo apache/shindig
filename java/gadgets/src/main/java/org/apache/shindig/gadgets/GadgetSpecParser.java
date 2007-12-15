@@ -507,10 +507,16 @@ public class GadgetSpecParser {
     }
 
     public URL getContentHref() {
+      if (contentType != ContentType.URL) {
+        throw new IllegalStateException("contentType must be URL");
+      }
       return contentHref;
     }
 
     public String getContentData() {
+      if (contentType != ContentType.HTML) {
+        throw new IllegalStateException("contentType must be HTML");
+      }
       return contentData;
     }
   }

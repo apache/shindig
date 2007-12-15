@@ -106,19 +106,21 @@ public class Substitutions {
    *
    * @param input
    *        The base string, with substitution markers.
-   * @return The substituted string.
+   * @return The substituted string or null if {@code input} is null.
    */
   public String substitute(String input) {
-    for (Type type : Type.values()) {
-      input = substituteType(type, input);
+    if (input != null) {
+      for (Type type : Type.values()) {
+        input = substituteType(type, input);
+      }
     }
     return input;
   }
 
   /**
    * Performs string substitution only for the specified type. If no
-   * substitution for the given string was provided, the output is left
-   * untouched.
+   * substitution for {@code input} was provided or {@code input} is null,
+   * the output is left untouched.
    *
    * @param type
    *        The type you wish to perform substitutions for.
@@ -127,8 +129,8 @@ public class Substitutions {
    * @return The substituted string.
    */
   public String substituteType(Type type, String input) {
-    if (!input.contains(type.prefix) ||
-         substitutions.get(type).size() == 0) {
+    if (input == null || substitutions.get(type).size() == 0 ||
+        !input.contains(type.prefix)) {
       return input;
     }
 

@@ -28,7 +28,8 @@ public class ProxyServlet extends HttpServlet {
   private final static ProxyHandler handler = new ProxyHandler();
   protected void doGet(HttpServletRequest request, HttpServletResponse response)
       throws ServletException, IOException {
-    if (request.getServletPath().equals("/gadgets/jsonp")) {
+    String output = request.getParameter("output");
+    if (output != null && output.equals("js")) {
       handler.fetchJson(request, response);
     } else {
       handler.fetch(request, response);
