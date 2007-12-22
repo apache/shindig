@@ -1,0 +1,14 @@
+Running:
+  Use Apache and mod_proxy with bcmath enabled pointed at this directory
+
+
+Major TODO Items:
+* Replace RSA.class.php with OpenSSL
+* Support Profiles
+* Support Friends
+* Support Persistence
+* Support Activity Stream
+* Switch over to the Shindig Javascript
+* Support OpenSocial 0.6
+* Documentation
+* Support proxied API requests (makeRequest)
