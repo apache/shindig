@@ -30,12 +30,12 @@ public class BidiSubstituter implements GadgetFeature {
    * @param locale Locale of message bundle to retrieve
    * @return The message bundle, or null if not found
    */
-  private GadgetSpec.MessageBundle getBundle(GadgetSpec spec,
-                                             Locale locale) {
-    List<GadgetSpec.MessageBundle> bundles = spec.getMessageBundles();
-    for (GadgetSpec.MessageBundle bundle : bundles) {
-      if (bundle.getLocale().equals(locale)) {
-        return bundle;
+  private GadgetSpec.LocaleSpec getLocaleSpec(GadgetSpec spec,
+                                              Locale locale) {
+    List<GadgetSpec.LocaleSpec> localeSpecs = spec.getLocaleSpecs();
+    for (GadgetSpec.LocaleSpec locSpec : localeSpecs) {
+      if (locSpec.getLocale().equals(locale)) {
+        return locSpec;
       }
     }
     return null;
@@ -58,17 +58,17 @@ public class BidiSubstituter implements GadgetFeature {
                       Map<String, String> params) {
     Substitutions subst = gadget.getSubstitutions();
     Locale locale = context.getLocale();
-    // Find an appropriate bundle for the ltr flag.
-    GadgetSpec.MessageBundle bundle = getBundle(gadget, locale);
-    if (null == bundle) {
-      bundle = getBundle(gadget, new Locale(locale.getLanguage(), "all"));
+    // Find an appropriate locale for the ltr flag.
+    GadgetSpec.LocaleSpec locSpec = getLocaleSpec(gadget, locale);
+    if (locSpec == null) {
+      locSpec = getLocaleSpec(gadget, new Locale(locale.getLanguage(), "all"));
     }
-    if (null == bundle) {
-      bundle = getBundle(gadget, new Locale("all", "all"));
+    if (locSpec == null) {
+      locSpec = getLocaleSpec(gadget, new Locale("all", "all"));
     }
     boolean rtl = false;
-    if (bundle != null) {
-      rtl = bundle.isRightToLeft();
+    if (locSpec != null) {
+      rtl = locSpec.isRightToLeft();
     }
     subst.addSubstitution(Substitutions.Type.BIDI,
                           "START_EDGE",

@@ -13,6 +13,7 @@
  */
 package org.apache.shindig.gadgets;
 
+import org.apache.shindig.util.Check;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NamedNodeMap;
@@ -23,6 +24,8 @@ import org.xml.sax.SAXException;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
+import java.net.URISyntaxException;
+import java.net.URI;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -126,8 +129,8 @@ public class GadgetSpecParser {
     Node titleUrl = attrs.getNamedItem("title_url");
     if (null != titleUrl) {
       try {
-        spec.titleUrl = new URL(titleUrl.getNodeValue());
-      } catch (MalformedURLException e) {
+        spec.titleUrl = new URI(titleUrl.getNodeValue());
+      } catch (URISyntaxException e) {
         throw new SpecParserException(
             "Malformed \"title_url\": " + titleUrl.getNodeValue());
       }
@@ -137,7 +140,7 @@ public class GadgetSpecParser {
     for (int i = 0, j = children.getLength(); i < j; ++i) {
       Node child = children.item(i);
       if (child.getNodeName().equals("Locale")) {
-        spec.messageBundles.add(processLocale(children.item(i), id.getURL()));
+        spec.localeSpecs.add(processLocale(children.item(i), id.getURI()));
       }
     }
 
@@ -150,11 +153,11 @@ public class GadgetSpecParser {
    * @param locale Root node of Locale section
    * @param baseUrl Base url for relative spec paths
    * @return Message bundle object resulting from parsing
-   * @throws SpecParserException If a malformed message bundle URL is found
+   * @throws SpecParserException If a malformed message bundle URI is found
    */
   private ParsedGadgetSpec.ParsedMessageBundle processLocale(
       Node locale,
-      URL baseUrl) throws SpecParserException {
+      URI baseUrl) throws SpecParserException {
     NamedNodeMap attrs = locale.getAttributes();
     Node messagesAttr = attrs.getNamedItem("messages");
     Node languageAttr = attrs.getNamedItem("lang");
@@ -190,7 +193,9 @@ public class GadgetSpecParser {
     ParsedGadgetSpec.ParsedMessageBundle bundle =
         new ParsedGadgetSpec.ParsedMessageBundle();
     try {
-      bundle.url = new URL(baseUrl, messages);
+      bundle.url = new URI(new URL(baseUrl.toURL(), messages).toString());
+    } catch (URISyntaxException e) {
+      throw new SpecParserException("Invalid message bundle url: " + messages);
     } catch (MalformedURLException e) {
       throw new SpecParserException("Invalid message bundle url: " + messages);
     }
@@ -255,8 +260,8 @@ public class GadgetSpecParser {
       Node href = attrs.getNamedItem("href");
       if (href != null) {
         try {
-          spec.contentHref = new URL(href.getNodeValue());
-        } catch (MalformedURLException e) {
+          spec.contentHref = new URI(href.getNodeValue());
+        } catch (URISyntaxException e) {
           throw new SpecParserException("Malformed <Content> href value");
         }
       }
@@ -324,17 +329,17 @@ public class GadgetSpecParser {
     private String description;
     private String directoryTitle;
     private ContentType contentType;
-    private URL contentHref;
+    private URI contentHref;
     private String contentData;
     private List<Icon> icons = new ArrayList<Icon>();
-    private List<MessageBundle> messageBundles = new ArrayList<MessageBundle>();
+    private List<LocaleSpec> localeSpecs = new ArrayList<LocaleSpec>();
     private List<String> preloads = new ArrayList<String>();
     private Map<String, FeatureSpec> requires
         = new HashMap<String, FeatureSpec>();
     private String screenshot;
     private String thumbnail;
     private String title;
-    private URL titleUrl;
+    private URI titleUrl;
     private List<UserPref> userPrefs = new ArrayList<UserPref>();
 
     public GadgetSpec copy() {
@@ -348,7 +353,7 @@ public class GadgetSpecParser {
       spec.contentHref = contentHref;
       spec.contentData = contentData;
       spec.icons = new ArrayList<Icon>(icons);
-      spec.messageBundles = new ArrayList<MessageBundle>(messageBundles);
+      spec.localeSpecs = new ArrayList<LocaleSpec>(localeSpecs);
       spec.preloads = new ArrayList<String>(preloads);
       spec.requires = new HashMap<String, FeatureSpec>(requires);
       spec.screenshot = screenshot;
@@ -377,14 +382,14 @@ public class GadgetSpecParser {
 
     private static class ParsedIcon implements Icon {
       private String mode;
-      private URL url;
+      private URI url;
       private String type;
 
       public String getMode() {
         return mode;
       }
 
-      public URL getURL() {
+      public URI getURI() {
         return url;
       }
 
@@ -397,12 +402,12 @@ public class GadgetSpecParser {
       return icons;
     }
 
-    private static class ParsedMessageBundle implements MessageBundle {
-      private URL url;
+    private static class ParsedMessageBundle implements LocaleSpec {
+      private URI url;
       private Locale locale;
       private boolean rightToLeft;
 
-      public URL getURL() {
+      public URI getURI() {
         return url;
       }
 
@@ -415,8 +420,8 @@ public class GadgetSpecParser {
       }
     }
 
-    public List<MessageBundle> getMessageBundles() {
-      return messageBundles;
+    public List<LocaleSpec> getLocaleSpecs() {
+      return localeSpecs;
     }
 
     public List<String> getPreloads() {
@@ -457,7 +462,7 @@ public class GadgetSpecParser {
       return title;
     }
 
-    public URL getTitleURL() {
+    public URI getTitleURI() {
       return titleUrl;
     }
 
@@ -506,17 +511,15 @@ public class GadgetSpecParser {
       return contentType;
     }
 
-    public URL getContentHref() {
-      if (contentType != ContentType.URL) {
-        throw new IllegalStateException("contentType must be URL");
-      }
+    public URI getContentHref() {
+      Check.is(contentType == ContentType.URL,
+               "getContentHref() requires contentType URL");
       return contentHref;
     }
 
     public String getContentData() {
-      if (contentType != ContentType.HTML) {
-        throw new IllegalStateException("contentType must be HTML");
-      }
+      Check.is(contentType == ContentType.HTML,
+               "getContentData() requires contentType HTML");
       return contentData;
     }
   }

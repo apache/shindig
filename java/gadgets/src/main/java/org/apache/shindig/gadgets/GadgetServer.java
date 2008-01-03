@@ -13,6 +13,7 @@
  */
 package org.apache.shindig.gadgets;
 
+import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -145,10 +146,6 @@ public class GadgetServer {
       if (gadgetException != null) {
         System.err.println(gadgetException.getCode().toString());
         gadgetException.printStackTrace();
-        Throwable t = gadgetException.getCause();
-        if (t != null) {
-          t.printStackTrace();
-        }
         // Add to list of all exceptions caught, clear jobs, and continue
         // to aggressively catch as many exceptions as possible. Since
         // tasks are running anyway, we may as well get their results in
@@ -287,7 +284,14 @@ public class GadgetServer {
         return;
       }
 
-      byte[] xml = fetcher.fetch(gadgetId.getURL()).getByteArray();
+      byte[] xml = null;
+      try {
+        xml = fetcher.fetch(gadgetId.getURI().toURL()).getByteArray();
+      } catch (MalformedURLException e) {
+        throw new GadgetException(
+            GadgetException.Code.FAILED_TO_RETRIEVE_CONTENT,
+            "Malformed gadget spec URL: " + gadgetId.getURI().toString());
+      }
       GadgetSpecParser specParser = new GadgetSpecParser();
       GadgetSpec spec = specParser.parse(gadgetId, xml);
       wc.gadget = new Gadget(gadgetId, spec);
@@ -300,7 +304,7 @@ public class GadgetServer {
   private static class EnqueueFeaturesTask extends WorkflowTask {
     @Override
     public void run(WorkflowContext wc) throws GadgetException {
-      List<String> needed = new LinkedList<String>();
+      Set<String> needed = new HashSet<String>();
       Set<String> optionalNames = new HashSet<String>();
       Map<String, GadgetSpec.FeatureSpec> requires = wc.gadget.getRequires();
       for (Map.Entry<String, GadgetSpec.FeatureSpec> entry : requires.entrySet()) {
@@ -311,9 +315,9 @@ public class GadgetServer {
       }
 
       // Retrieve needed feature processors from registry
-      List<GadgetFeatureRegistry.Entry> resultsFound =
-          new LinkedList<GadgetFeatureRegistry.Entry>();
-      List<String> resultsMissing = new LinkedList<String>();
+      Set<GadgetFeatureRegistry.Entry> resultsFound =
+          new HashSet<GadgetFeatureRegistry.Entry>();
+      Set<String> resultsMissing = new HashSet<String>();
       GadgetFeatureRegistry.getIncludedFeatures(needed,
                                                 resultsFound,
                                                 resultsMissing);
@@ -354,16 +358,16 @@ public class GadgetServer {
         // sanity check: each depends on the spec having been loaded
         prepareDeps.add(specLoadDep);
 
-        for (String featureDep : entry.getDependencies()) {
+        for (GadgetFeatureRegistry.Entry featureDep : entry.getDependencies()) {
           // prepare depends on all its own deps...
           WorkflowDependency prepareNeedsDep =
               new WorkflowDependency(WorkflowDependency.Type.FEATURE_PREPARE,
-                                     featureDep);
+                                     featureDep.getName());
           prepareDeps.add(prepareNeedsDep);
 
           WorkflowDependency processNeedsDep =
             new WorkflowDependency(WorkflowDependency.Type.FEATURE_PROCESS,
-                                   featureDep);
+                                   featureDep.getName());
           // Can't process until all dependencies prepare() and process()
           // have completed.
           processDeps.add(prepareNeedsDep);

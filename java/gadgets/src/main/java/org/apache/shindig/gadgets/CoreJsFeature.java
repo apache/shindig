@@ -19,9 +19,27 @@ import java.util.Map;
  * Adds all core javascript dependencies that are needed by all gadgets.
  */
 public class CoreJsFeature extends JsLibraryFeature {
+
+  static {
+    JsLibrary.register("core", "../../javascript/gadgets/core.js",
+                       JsLibrary.Type.FILE, null, null);
+    JsLibrary.register("util", "../../javascript/gadgets/util.js",
+                       JsLibrary.Type.FILE, null, null);
+    JsLibrary.register("prefs", "../../javascript/gadgets/prefs.js",
+                       JsLibrary.Type.FILE, null, null);
+    JsLibrary.register("io", "../../javascript/gadgets/io.js",
+                       JsLibrary.Type.FILE, null, null);
+    JsLibrary.register("legacy", "../../javascript/gadgets/legacy.js",
+                       JsLibrary.Type.FILE, null, null);
+  }
+
   @Override
   public void process(Gadget gadget, GadgetContext context,
-      Map<String, String> params) {
-    gadget.addJsLibrary(JsLibrary.file("http://gmodules.com/ig/extern_js/f/CgJlbhICdXMrMAE4ACw/6gZqwg2JpuM.js"));
+      Map<String, String> params) throws GadgetException {
+    gadget.addJsLibrary(JsLibrary.file("core", "core"));
+    gadget.addJsLibrary(JsLibrary.file("core", "util"));
+    gadget.addJsLibrary(JsLibrary.file("core", "prefs"));
+    gadget.addJsLibrary(JsLibrary.file("core", "io"));
+    gadget.addJsLibrary(JsLibrary.file("core", "legacy"));
   }
 }

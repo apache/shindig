@@ -13,7 +13,8 @@
  */
 package org.apache.shindig.gadgets;
 
-import java.net.URL;
+import java.net.MalformedURLException;
+import java.net.URI;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -35,12 +36,12 @@ public class MessageBundleSubstituter implements GadgetFeature {
    * @param locale Locale corresponding to the request
    * @return The message bundle, or null if not found
    */
-  private GadgetSpec.MessageBundle getBundle(GadgetSpec spec,
-                                             Locale locale) {
-    List<GadgetSpec.MessageBundle> bundles = spec.getMessageBundles();
-    for (GadgetSpec.MessageBundle bundle : bundles) {
-      if (bundle.getLocale().equals(locale)) {
-        return bundle;
+  private GadgetSpec.LocaleSpec getLocaleSpec(GadgetSpec spec,
+                                              Locale locale) {
+    List<GadgetSpec.LocaleSpec> localeSpecs = spec.getLocaleSpecs();
+    for (GadgetSpec.LocaleSpec locSpec : localeSpecs) {
+      if (locSpec.getLocale().equals(locale)) {
+        return locSpec;
       }
     }
     return null;
@@ -52,26 +53,35 @@ public class MessageBundleSubstituter implements GadgetFeature {
   public void prepare(GadgetView gadget, GadgetContext context,
                       Map<String, String> params) throws GadgetException {
     Locale locale = context.getLocale();
-    GadgetSpec.MessageBundle bundleData = getBundle(gadget, locale);
-    if (null == bundleData) {
+    GadgetSpec.LocaleSpec localeData = getLocaleSpec(gadget, locale);
+    if (localeData == null) {
       // en-all
-      bundleData = getBundle(gadget, new Locale(locale.getLanguage(), "all"));
+      localeData = getLocaleSpec(gadget,
+                                 new Locale(locale.getLanguage(), "all"));
     }
-    if (null == bundleData) {
+    if (localeData == null) {
       // all-all
-      bundleData = getBundle(gadget, new Locale("all", "all"));
+      localeData = getLocaleSpec(gadget, new Locale("all", "all"));
     }
 
-    if (null != bundleData) {
-      URL url = bundleData.getURL();
-      if (null != url) {
+    if (localeData != null) {
+      URI uri = localeData.getURI();
+      if (uri != null) {
         // We definitely need a bundle, now we need to fetch it.
-        bundle = context.getMessageBundleCache().get(url.toString());
-        if (null == bundle) {
-          byte[] data = context.getHttpFetcher().fetch(url).getByteArray();
+        bundle = context.getMessageBundleCache().get(uri.toString());
+        if (bundle == null) {
+          byte[] data = null;
+          try {
+            data = context.getHttpFetcher().fetch(uri.toURL()).getByteArray();
+          } catch (MalformedURLException e) {
+            throw new GadgetException(
+                GadgetException.Code.FAILED_TO_RETRIEVE_CONTENT,
+                String.format("Malformed message bundle URL: %s",
+                              uri.toString()));
+          }
           if (data.length > 0) {
             bundle = parser.parse(data);
-            context.getMessageBundleCache().put(url.toString(), bundle);
+            context.getMessageBundleCache().put(uri.toString(), bundle);
           }
         }
       }
@@ -84,9 +94,9 @@ public class MessageBundleSubstituter implements GadgetFeature {
   public void process(Gadget gadget, GadgetContext context,
                       Map<String, String> params) {
     if (null != bundle) {
+      gadget.setCurrentMessageBundle(bundle);
       gadget.getSubstitutions().addSubstitutions(Substitutions.Type.MESSAGE,
                                                  bundle.getMessages());
     }
   }
-
 }
