@@ -19,8 +19,8 @@ package org.apache.shindig.gadgets;
 
 import static org.apache.shindig.gadgets.GadgetSpecTestFixture.DATETIME_ID;
 import static org.apache.shindig.gadgets.GadgetSpecTestFixture.DATETIME_SPEC;
-import static org.apache.shindig.gadgets.GadgetSpecTestFixture.DATETIME_URL;
-import static org.apache.shindig.gadgets.GadgetSpecTestFixture.DATETIME_URL_STRING;
+import static org.apache.shindig.gadgets.GadgetSpecTestFixture.DATETIME_URI;
+import static org.apache.shindig.gadgets.GadgetSpecTestFixture.DATETIME_URI_STRING;
 import static org.apache.shindig.gadgets.GadgetSpecTestFixture.DATETIME_XML;
 import static org.apache.shindig.gadgets.GadgetSpecTestFixture.EN_US_LOCALE;
 import static org.easymock.EasyMock.eq;
@@ -50,9 +50,9 @@ public class GadgetServerTest extends EasyMockTestCase {
   public void testGadgetSpecNotInCache() throws Exception {
     RemoteContent results = new RemoteContent(200, DATETIME_XML.getBytes(), null);
 
-    expect(specCache.get(eq(DATETIME_URL_STRING))).andReturn(null);
-    expect(fetcher.fetch(eq(DATETIME_URL))).andReturn(results);
-    specCache.put(eq(DATETIME_URL_STRING), isA(GadgetSpec.class));
+    expect(specCache.get(eq(DATETIME_URI_STRING))).andReturn(null);
+    expect(fetcher.fetch(eq(DATETIME_URI.toURL()))).andReturn(results);
+    specCache.put(eq(DATETIME_URI_STRING), isA(GadgetSpec.class));
     replay();
 
     Gadget gadget = gadgetServer.processGadget(DATETIME_ID, UserPrefs.EMPTY, EN_US_LOCALE,
@@ -61,7 +61,7 @@ public class GadgetServerTest extends EasyMockTestCase {
   }
 
   public void testGadgetSpecInCache() throws Exception {
-    expect(specCache.get(eq(DATETIME_URL_STRING))).andReturn(DATETIME_SPEC);
+    expect(specCache.get(eq(DATETIME_URI_STRING))).andReturn(DATETIME_SPEC);
     replay();
 
     Gadget gadget = gadgetServer.processGadget(DATETIME_ID, UserPrefs.EMPTY, EN_US_LOCALE,
@@ -73,9 +73,9 @@ public class GadgetServerTest extends EasyMockTestCase {
   public void testBasicGadget() throws Exception {
     RemoteContent results = new RemoteContent(200, DATETIME_XML.getBytes(), null);
 
-    expect(specCache.get(eq(DATETIME_URL_STRING))).andReturn(null);
-    expect(fetcher.fetch(eq(DATETIME_URL))).andReturn(results);
-    specCache.put(eq(DATETIME_URL_STRING), isA(GadgetSpec.class));
+    expect(specCache.get(eq(DATETIME_URI_STRING))).andReturn(null);
+    expect(fetcher.fetch(eq(DATETIME_URI.toURL()))).andReturn(results);
+    specCache.put(eq(DATETIME_URI_STRING), isA(GadgetSpec.class));
     replay();
 
     Gadget gadget = gadgetServer.processGadget(DATETIME_ID, UserPrefs.EMPTY, EN_US_LOCALE,

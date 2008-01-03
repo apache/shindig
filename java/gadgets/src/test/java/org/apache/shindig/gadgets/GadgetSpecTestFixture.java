@@ -17,8 +17,8 @@
  */
 package org.apache.shindig.gadgets;
 
-import java.net.MalformedURLException;
-import java.net.URL;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -34,8 +34,8 @@ public class GadgetSpecTestFixture {
   private static final String DATETIME_TITLE = "Hello, World!";
   private static final String DATETIME_CONTENT = "Goodbye, World!";
 
-  static final String DATETIME_URL_STRING = "http://www.google.com/ig/modules/datetime.xml";
-  static final URL DATETIME_URL;
+  static final String DATETIME_URI_STRING = "http://www.google.com/ig/modules/datetime.xml";
+  static final URI DATETIME_URI;
   static final int DATETIME_MODULE_ID = 1;
   static final GadgetView.ID DATETIME_ID;
   static final String DATETIME_XML = "<?xml version=\"1.0\"?>" +
@@ -58,7 +58,7 @@ public class GadgetSpecTestFixture {
         public String getContentData() {
           return DATETIME_CONTENT;
         }
-        public URL getContentHref() {
+        public URI getContentHref() {
           return null;
         }
         public ContentType getContentType() {
@@ -73,8 +73,8 @@ public class GadgetSpecTestFixture {
         public List<Icon> getIcons() {
           return null;
         }
-        public List<MessageBundle> getMessageBundles() {
-          return new LinkedList<MessageBundle>();
+        public List<LocaleSpec> getLocaleSpecs() {
+          return new LinkedList<LocaleSpec>();
         }
         public List<String> getPreloads() {
           return null;
@@ -91,7 +91,7 @@ public class GadgetSpecTestFixture {
         public String getTitle() {
           return DATETIME_TITLE;
         }
-        public URL getTitleURL() {
+        public URI getTitleURI() {
           return null;
         }
         public List<UserPref> getUserPrefs() {
@@ -101,10 +101,10 @@ public class GadgetSpecTestFixture {
 
   static {
     try {
-      DATETIME_URL = new URL(DATETIME_URL_STRING);
-    } catch (MalformedURLException e) {
+      DATETIME_URI = new URI(DATETIME_URI_STRING);
+    } catch (URISyntaxException e) {
       throw new RuntimeException("Cannot initialize fixture", e);
     }
-    DATETIME_ID = new Gadget.GadgetId(DATETIME_URL, DATETIME_MODULE_ID);
+    DATETIME_ID = new Gadget.GadgetId(DATETIME_URI, DATETIME_MODULE_ID);
   }
 }

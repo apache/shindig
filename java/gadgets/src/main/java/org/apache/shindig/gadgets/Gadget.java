@@ -13,8 +13,8 @@
  */
 package org.apache.shindig.gadgets;
 
-import java.net.MalformedURLException;
-import java.net.URL;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -47,11 +47,11 @@ public class Gadget implements GadgetView {
   private final List<JsLibrary> jsLibraries;
 
   public static class GadgetId implements GadgetView.ID {
-    private final URL url;
+    private final URI uri;
     private final int moduleId;
 
-    public GadgetId(URL url, int moduleId) {
-      this.url = url;
+    public GadgetId(URI uri, int moduleId) {
+      this.uri = uri;
       this.moduleId = moduleId;
     }
 
@@ -59,7 +59,7 @@ public class Gadget implements GadgetView {
     public boolean equals(Object comp) {
       if (comp instanceof GadgetView.ID) {
         GadgetView.ID id = (GadgetView.ID)comp;
-        return id.getURL() == url &&
+        return id.getURI() == uri &&
                id.getModuleId() == moduleId;
       } else {
         return false;
@@ -69,13 +69,13 @@ public class Gadget implements GadgetView {
     @Override
     public int hashCode() {
       int result = 17;
-      result = (37 * result) + url.hashCode();
+      result = (37 * result) + uri.hashCode();
       result = (37 * result) + moduleId;
       return result;
     }
 
-    public URL getURL() {
-      return url;
+    public URI getURI() {
+      return uri;
     }
 
     public int getModuleId() {
@@ -83,7 +83,7 @@ public class Gadget implements GadgetView {
     }
 
     public String getKey() {
-      return url.toString();
+      return uri.toString();
     }
   }
 
@@ -131,15 +131,15 @@ public class Gadget implements GadgetView {
   }
 
   /**
-   * @return URL used as a target for Gadget's title link, or null if malformed
+   * @return URI used as a target for Gadget's title link, or null if malformed
    */
-  public URL getTitleURL() {
-    URL ret = null;
-    if (baseSpec.getTitleURL() != null) {
-      String urlStr = baseSpec.getTitleURL().toString();
+  public URI getTitleURI() {
+    URI ret = null;
+    if (baseSpec.getTitleURI() != null) {
+      String uriStr = baseSpec.getTitleURI().toString();
       try {
-        ret = new URL(substitutions.substitute(urlStr));
-      } catch (MalformedURLException e) {
+        ret = new URI(substitutions.substitute(uriStr));
+      } catch (URISyntaxException e) {
         return null;
       }
     }
@@ -175,18 +175,18 @@ public class Gadget implements GadgetView {
     return baseSpec.getAuthorEmail();
   }
 
-  // TODO: make this URL?
+  // TODO: make this URI?
   public String getScreenshot() {
     return baseSpec.getScreenshot();
   }
 
-  // TODO: make this URL?
+  // TODO: make this URI?
   public String getThumbnail() {
     return baseSpec.getThumbnail();
   }
 
-  public List<MessageBundle> getMessageBundles() {
-    return new ArrayList<MessageBundle>(baseSpec.getMessageBundles());
+  public List<LocaleSpec> getLocaleSpecs() {
+    return new ArrayList<LocaleSpec>(baseSpec.getLocaleSpecs());
   }
 
   /**
@@ -229,7 +229,7 @@ public class Gadget implements GadgetView {
   }
 
   /**
-   * @return List of all preload URLs declared, with substitutions applied
+   * @return List of all preload URIs declared, with substitutions applied
    */
   public List<String> getPreloads() {
     List<String> ret = new LinkedList<String>();
@@ -265,15 +265,15 @@ public class Gadget implements GadgetView {
   }
 
   /**
-   * @return URL of gadget to render of type == URL; null if malformed/missing
+   * @return URI of gadget to render of type == URL; null if malformed/missing
    * @throws IllegalStateException if contentType is not URL.
    */
-  public URL getContentHref() {
-    URL ret = null;
-    String urlStr = baseSpec.getContentHref().toString();
+  public URI getContentHref() {
+    URI ret = null;
+    String uriStr = baseSpec.getContentHref().toString();
     try {
-      ret = new URL(substitutions.substitute(urlStr));
-    } catch (MalformedURLException e) {
+      ret = new URI(substitutions.substitute(uriStr));
+    } catch (URISyntaxException e) {
       return null;
     }
     return ret;
@@ -285,6 +285,14 @@ public class Gadget implements GadgetView {
    */
   public String getContentData() {
     return substitutions.substitute(baseSpec.getContentData());
+  }
+
+  private MessageBundle currentMessageBundle = MessageBundle.EMPTY;
+  public MessageBundle getCurrentMessageBundle() {
+    return currentMessageBundle;
+  }
+  public void setCurrentMessageBundle(MessageBundle bundle) {
+    currentMessageBundle = bundle;
   }
 
   /**

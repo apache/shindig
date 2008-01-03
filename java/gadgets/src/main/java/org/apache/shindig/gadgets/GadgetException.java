@@ -23,19 +23,24 @@ public class GadgetException extends Exception {
     // Catch-all for internal errors
     INTERNAL_SERVER_ERROR,
 
+    // User-data related errors.
+    INVALID_USER_DATA,
+
     // General xml
     EMPTY_XML_DOCUMENT,
     MALFORMED_XML_DOCUMENT,
 
+    // HTTP errors
     FAILED_TO_RETRIEVE_CONTENT,
 
+    // Feature-related errors
     UNSUPPORTED_FEATURE,
 
     // Interface component errors.
-    MISSING_SPEC_CACHE,
     MISSING_MESSAGE_BUNDLE_CACHE,
     MISSING_REMOTE_OBJECT_FETCHER,
-    
+    MISSING_SPEC_CACHE,
+
     // Caja error
     MALFORMED_FOR_SAFE_INLINING
   }
@@ -45,12 +50,12 @@ public class GadgetException extends Exception {
   public GadgetException(Code code) {
     this.code = code;
   }
-  
+
   public GadgetException(Code code, Throwable cause) {
     super(cause);
     this.code = code;
   }
-  
+
   public GadgetException(Code code, String msg) {
     super(msg);
     this.code = code;

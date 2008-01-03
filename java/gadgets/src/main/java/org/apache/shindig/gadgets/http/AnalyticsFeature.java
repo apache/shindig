@@ -15,6 +15,7 @@ package org.apache.shindig.gadgets.http;
 
 import org.apache.shindig.gadgets.Gadget;
 import org.apache.shindig.gadgets.GadgetContext;
+import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.JsLibrary;
 import org.apache.shindig.gadgets.JsLibraryFeature;
 
@@ -24,17 +25,18 @@ import java.util.Map;
  * Adds support for analytics.
  */
 public class AnalyticsFeature extends JsLibraryFeature {
+  private static final String FEATURE_NAME = "analytics";
   private static final String URCHIN_JS
-      = "http://gmodules.com/ig/f/8JdLW-FnPCU/lib/liburchin.js";
+      = "http://www.gmodules.com/ig/f/8JdLW-FnPCU/lib/liburchin.js";
   private static final String ANALYTICS_JS
-      = "http://gmodules.com//ig/f/ltPUpXpo9mk/lib/libanalytics.js";
+      = "http://www.gmodules.com/ig/f/ltPUpXpo9mk/lib/libanalytics.js";
   /**
    * {@inheritDoc}
    */
   @Override
   public void process(Gadget gadget, GadgetContext context,
-      Map<String, String> params) {
-    gadget.addJsLibrary(JsLibrary.file(URCHIN_JS));
-    gadget.addJsLibrary(JsLibrary.file(ANALYTICS_JS));
+      Map<String, String> params) throws GadgetException {
+    gadget.addJsLibrary(JsLibrary.uri(FEATURE_NAME, URCHIN_JS));
+    gadget.addJsLibrary(JsLibrary.uri(FEATURE_NAME, ANALYTICS_JS));
   }
 }

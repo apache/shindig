@@ -22,6 +22,7 @@ import java.util.Map;
  */
 public class MessageBundle {
   private Map<String, String> messages = new HashMap<String, String>();
+  public static final MessageBundle EMPTY = new MessageBundle();
 
   /**
    * @return A read-only view of the message bundle.
@@ -33,5 +34,10 @@ public class MessageBundle {
   public MessageBundle(Map<String, String> messages) {
     Map<String, String> tempMap = new HashMap<String, String>(messages);
     this.messages = Collections.unmodifiableMap(tempMap);
+  }
+
+  @SuppressWarnings("unchecked")
+  private MessageBundle() {
+    this.messages = Collections.EMPTY_MAP;
   }
 }

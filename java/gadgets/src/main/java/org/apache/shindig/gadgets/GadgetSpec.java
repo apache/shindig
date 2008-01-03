@@ -13,7 +13,7 @@
  */
 package org.apache.shindig.gadgets;
 
-import java.net.URL;
+import java.net.URI;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -23,7 +23,7 @@ import java.util.Map;
  */
 public interface GadgetSpec {
   public String getTitle();
-  public URL getTitleURL();
+  public URI getTitleURI();
   public String getDirectoryTitle();
   public String getDescription();
   public String getAuthor();
@@ -31,13 +31,13 @@ public interface GadgetSpec {
   public String getScreenshot();
   public String getThumbnail();
 
-  public static interface MessageBundle {
+  public static interface LocaleSpec {
     public Locale getLocale();
-    public URL getURL();
+    public URI getURI();
     public boolean isRightToLeft();
   }
 
-  public List<MessageBundle> getMessageBundles();
+  public List<LocaleSpec> getLocaleSpecs();
 
   public static interface FeatureSpec {
     public String getName();
@@ -49,7 +49,7 @@ public interface GadgetSpec {
   public List<String> getPreloads();
 
   public static interface Icon {
-    public URL getURL();
+    public URI getURI();
     public String getMode();
     public String getType();
   }
@@ -79,12 +79,12 @@ public interface GadgetSpec {
   public ContentType getContentType();
 
   /**
-   * Must be a URL type gadget.
+   * Must be a URI type gadget.
    *
-   * @return The URL for this gadget spec.
-   * @throws IllegalStateException if contentType is not URL.
+   * @return The URI for this gadget spec.
+   * @throws IllegalStateException if contentType is not URI.
    */
-  public URL getContentHref();
+  public URI getContentHref();
 
   /**
    * @return The HTML content for this gadget spec.

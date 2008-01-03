@@ -13,7 +13,7 @@
  */
 package org.apache.shindig.gadgets;
 
-import java.net.URL;
+import java.net.URI;
 
 /**
  * A read-only view of the gadget.
@@ -26,7 +26,7 @@ public interface GadgetView extends GadgetSpec {
     /**
      * @return The url of the gadget.
      */
-    public URL getURL();
+    public URI getURI();
 
     /**
      * @return The unique identifier for this instance of the gadget.
@@ -48,5 +48,10 @@ public interface GadgetView extends GadgetSpec {
    * @return The substitution coordinator.
    */
   public Substitutions getSubstitutions();
+
+  /**
+   * @return The current message bundle for this rendering job.
+   */
+  public MessageBundle getCurrentMessageBundle();
 
 }
