@@ -1,6 +1,4 @@
 /**
- * Copyright 2007 Google Inc.
- *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -102,7 +100,7 @@ opensocial.Environment.prototype.getParams = function() {
  * @class
  *
  * The types of objects in this container.
- * 
+ *
  * <p>
  * <b>See also:</b>
  * <a href="opensocial.Environment.html#supportsField">

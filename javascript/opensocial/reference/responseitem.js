@@ -1,6 +1,4 @@
 /**
- * Copyright 2007 Google Inc.
- *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -71,7 +69,7 @@ opensocial.ResponseItem.Error = {
 
   /**
    * The gadget does not have access to the requested data.
-   * To get access, use 
+   * To get access, use
    * <a href="opensocial.html#requestPermission">
    * opensocial.requestPermission()</a>.
    *
@@ -105,7 +103,7 @@ opensocial.ResponseItem.Error = {
 
 /**
  * If the request had an error, returns the error code.
- * The error code can be container-specific 
+ * The error code can be container-specific
  * or one of the values defined by
  * <a href="opensocial.ResponseItem.Error.html"><code>Error</code></a>.
  *
