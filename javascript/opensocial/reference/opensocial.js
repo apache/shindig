@@ -1,6 +1,4 @@
 /**
- * Copyright 2007 Google Inc.
- *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -225,7 +223,7 @@ opensocial.ContentRequestParameters = {
   /**
    * The method to use when fetching content from the URL;
    * defaults to <code>MethodType.GET</a></code>.
-   * Specified as a 
+   * Specified as a
    * <a href="opensocial.ContentRequestParameters.MethodType.html">MethodType</a>.
    *
    * @member opensocial.ContentRequestParameters

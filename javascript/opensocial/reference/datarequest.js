@@ -1,6 +1,4 @@
 /**
- * Copyright 2007 Google Inc.
- *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -114,7 +112,7 @@ opensocial.DataRequest.prototype.add = function(request, opt_key) {
 /**
  * Sends a data request to the server in order to get a data response.
  * Although the server may optimize these requests,
- * they will always be executed 
+ * they will always be executed
  * as though they were serial.
  *
  * @param {Function} opt_callback The function to call with the
