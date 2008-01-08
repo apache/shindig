@@ -22,12 +22,12 @@ import org.apache.shindig.gadgets.GadgetFeatureRegistry;
 import org.apache.shindig.gadgets.GadgetServer;
 import org.apache.shindig.gadgets.GadgetSpec;
 import org.apache.shindig.gadgets.GadgetView;
+import org.apache.shindig.gadgets.JsFeatureLoader;
 import org.apache.shindig.gadgets.JsLibrary;
 import org.apache.shindig.gadgets.MessageBundle;
 import org.apache.shindig.gadgets.RemoteContentFetcher;
+import org.apache.shindig.gadgets.RenderingContext;
 import org.apache.shindig.gadgets.UserPrefs;
-import org.json.JSONException;
-import org.json.JSONObject;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
@@ -36,11 +36,13 @@ import java.net.URISyntaxException;
 import java.net.URLEncoder;
 import java.util.Enumeration;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
+import javax.servlet.ServletConfig;
+import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -49,16 +51,14 @@ import javax.servlet.http.HttpServletResponse;
  * Servlet for rendering Gadgets, typically in an IFRAME.
  */
 public class GadgetRenderingServlet extends HttpServlet {
-  private final GadgetServer gadgetServer;
-  private final String jsServicePath;
+  private GadgetServer gadgetServer;
+  private String jsServicePath;
+  private GadgetFeatureRegistry registry;
   private static final String USERPREF_PARAM_PREFIX = "up_";
   private static final String LIBS_PARAM_NAME = "libs";
   private static final String JS_FILE_SUFFIX = ".js";
   public static final String DEFAULT_JS_SERVICE_PATH = "js/";
 
-  static {
-    GadgetFeatureRegistry.register("analytics", null, AnalyticsFeature.class);
-  }
 
   /**
    * Creates a {@code GadgetRenderingServlet} with default executor,
@@ -69,6 +69,30 @@ public class GadgetRenderingServlet extends HttpServlet {
          new BasicGadgetDataCache<MessageBundle>(),
          new BasicGadgetDataCache<GadgetSpec>(),
          new BasicRemoteContentFetcher(1024 * 1024));
+  }
+
+  @Override
+  @SuppressWarnings("unchecked")
+  public void init(ServletConfig config) {
+    ServletContext context = config.getServletContext();
+    String coreFeatures = context.getInitParameter("core-js-features");
+    String otherFeatures = context.getInitParameter("other-js-features");
+    String jsPath = context.getInitParameter("js-service-path");
+    if (jsPath == null) {
+      jsPath = DEFAULT_JS_SERVICE_PATH;
+    }
+    jsServicePath = jsPath;
+    try {
+      registry = new GadgetFeatureRegistry(coreFeatures);
+      gadgetServer.setGadgetFeatureRegistry(registry);
+      if (otherFeatures != null) {
+        JsFeatureLoader jsLoader = new JsFeatureLoader();
+        jsLoader.loadFeatures(otherFeatures, registry);
+      }
+    } catch (GadgetException e) {
+      e.printStackTrace();
+      System.exit(1);
+    }
   }
 
   /**
@@ -86,8 +110,6 @@ public class GadgetRenderingServlet extends HttpServlet {
     gadgetServer.setMessageBundleCache(mbCache);
     gadgetServer.setSpecCache(specCache);
     gadgetServer.setContentFetcher(fetcher);
-    // TODO: make injectable
-    jsServicePath = DEFAULT_JS_SERVICE_PATH;
   }
 
   @Override
@@ -125,12 +147,11 @@ public class GadgetRenderingServlet extends HttpServlet {
       gadget = gadgetServer.processGadget(gadgetId,
                                           getPrefsFromRequest(req),
                                           context.getLocale(),
-                                          GadgetServer.RenderingContext.GADGET);
+                                          RenderingContext.GADGET);
+      outputGadget(gadget, resp);
     } catch (GadgetServer.GadgetProcessException e) {
       outputErrors(e, resp);
     }
-
-    outputGadget(gadget, resp);
   }
 
   private void outputGadget(Gadget gadget, HttpServletResponse resp)
@@ -162,20 +183,25 @@ public class GadgetRenderingServlet extends HttpServlet {
                   "body{margin: 0px;padding: 0px;background-color:white;}" +
                   "</style>");
     markup.append("</head><body>");
+    StringBuilder externJs = new StringBuilder();
+    StringBuilder inlineJs = new StringBuilder();
+    String externFmt = "<script src=\"%s\"></script>\n";
     for (JsLibrary library : gadget.getJsLibraries()) {
-      markup.append(library.toString());
+      if (library.getType() == JsLibrary.Type.URL) {
+        externJs.append(String.format(externFmt, library.getContent()));
+      } else {
+        inlineJs.append(library.getContent()).append("\n");
+      }
     }
-    JSONObject json = new JSONObject();
-    try {
-      json.put("proxyUrl", "http://www.gmodules.com/ig/proxy?url=%url%");
-      json.put("jsonProxyUrl", "/gadgets/proxy?url=%url%&output=js");
-    } catch (JSONException e) {
-      // This shouldn't ever happen.
+    if (inlineJs.length() > 0) {
+      markup.append("<script><!--\n").append(inlineJs)
+          .append("\n-->\n</script>");
     }
-    markup.append("<script>gadgets.IO.init(" +json.toString()+ ");</script>");
+    if (externJs.length() > 0) {
+      markup.append(externJs);
+    }
     markup.append(gadget.getContentData());
-    // TODO: use renamespaced API
-
+    markup.append("<script>gadgets.util.runOnLoadHandlers();</script>");
     markup.append("</body></html>");
 
     resp.getOutputStream().print(markup.toString());
@@ -188,12 +214,8 @@ public class GadgetRenderingServlet extends HttpServlet {
     // TODO: userprefs on the fragment rather than query string
     String prefsQuery = getPrefsQueryString(gadget.getUserPrefValues());
     String libsQuery = null;
-    try {
-      libsQuery = getLibsQueryString(gadget.getJsLibraries());
-    } catch (GadgetException e) {
-      resp.sendError(HttpServletResponse.SC_BAD_REQUEST, e.getMessage());
-      return;
-    }
+
+    libsQuery = getLibsQueryString(gadget.getRequires().keySet());
 
     URI redirURI = gadget.getContentHref();
     try {
@@ -228,11 +250,12 @@ public class GadgetRenderingServlet extends HttpServlet {
     resp.getOutputStream().print(markup.toString());
   }
 
+  @SuppressWarnings("unchecked")
   private UserPrefs getPrefsFromRequest(HttpServletRequest req) {
     Map<String, String> prefs = new HashMap<String, String>();
-    Enumeration paramNames = req.getParameterNames();
+    Enumeration<String> paramNames = req.getParameterNames();
     while (paramNames.hasMoreElements()) {
-      String paramName = (String)paramNames.nextElement();
+      String paramName = paramNames.nextElement();
       if (paramName.startsWith(USERPREF_PARAM_PREFIX)) {
         String prefName = paramName.substring(USERPREF_PARAM_PREFIX.length());
         prefs.put(prefName, req.getParameter(paramName));
@@ -241,55 +264,43 @@ public class GadgetRenderingServlet extends HttpServlet {
     return new UserPrefs(prefs);
   }
 
-  private String getPrefsQueryString(Map<String, String> prefVals) {
-    StringBuilder builder = new StringBuilder();
-    for (Map.Entry<String, String> prefEntry : prefVals.entrySet()) {
-      builder.append("&");
+  private String getPrefsQueryString(UserPrefs prefVals) {
+    StringBuilder buf = new StringBuilder();
+    for (Map.Entry<String, String> prefEntry : prefVals.getPrefs().entrySet()) {
+      buf.append("&");
       try {
-        builder.append(USERPREF_PARAM_PREFIX +
-                       URLEncoder.encode(prefEntry.getKey(), "UTF8") +
-                       "=" +
-                       URLEncoder.encode(prefEntry.getValue(), "UTF8"));
+        buf.append(USERPREF_PARAM_PREFIX)
+               .append(URLEncoder.encode(prefEntry.getKey(), "UTF8"))
+               .append("=")
+               .append(URLEncoder.encode(prefEntry.getValue(), "UTF8"));
       } catch (UnsupportedEncodingException e) {
         // If UTF8 is somehow not supported, we may as well bail.
         // Not a whole lot we can do without such support.
         throw new RuntimeException("Unexpected error: UTF8 not supported.");
       }
     }
-    return builder.toString();
+    return buf.toString();
   }
 
-  private String getLibsQueryString(List<JsLibrary> jsLibs)
-      throws GadgetException {
-    StringBuilder libBuilder = new StringBuilder();
-    libBuilder.append("&").append(LIBS_PARAM_NAME).append("=");
-    libBuilder.append(jsServicePath);
-    StringBuilder errBuilder = new StringBuilder();
-    int numErrs = 0;
-    for (int i = 0; i < jsLibs.size(); ++i) {
-      if (i > 0) {
-        // Builds a consolidated lib spec, collapsing several features into
-        // a single <script src="libspec"/> tag load for type=URL gadgets
-        libBuilder.append(JsLibrary.ALIAS_SEPARATOR);
-      }
-      JsLibrary jsLib = jsLibs.get(i);
-      String alias = jsLib.getAlias();
-      if (alias == null) {
-        numErrs++;
-        errBuilder.append(" ").append(jsLib.getFeature());
+  private String getLibsQueryString(Set<String> features) {
+    StringBuilder buf = new StringBuilder();
+    buf.append("&").append(LIBS_PARAM_NAME).append("=");
+    buf.append(jsServicePath);
+    if (features.size() == 0) {
+      buf.append("core");
+    } else {
+      boolean first = false;
+      for (String feature : features) {
+        if (first) {
+          first = false;
+        } else {
+          buf.append(":");
+        }
+        buf.append(feature);
       }
     }
-    libBuilder.append(JS_FILE_SUFFIX);
+    buf.append(JS_FILE_SUFFIX);
 
-    if (numErrs > 0) {
-      throw new GadgetException(
-          GadgetException.Code.UNSUPPORTED_FEATURE,
-          String.format("The following feature%s not supported " +
-                        "for type=url gadgets:%s",
-                        numErrs == 1 ? " is" : "s are",
-                        errBuilder.toString()));
-    }
-
-    return libBuilder.toString();
+    return buf.toString();
   }
 }

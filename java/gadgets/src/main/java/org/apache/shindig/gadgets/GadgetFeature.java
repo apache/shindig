@@ -17,23 +17,23 @@ import java.util.Map;
 
 /**
  * Base interface providing Gadget Server's primary extensibility mechanism.
- * 
+ *
  * During processing of a {@code Gadget}, a tree of {@code GadgetFeature}
  * objects is constructed based on the &lt;Require&gt; and &lt;Optional&gt;
  * tags declared in its {@code GadgetSpec}, and the dependencies registered
  * for these in {@code GadgetFeatureRegistry}.
- * 
+ *
  * Each {@code GadgetFeature}'s prepare method is called first - potentially
  * in parallel with many others whose dependencies have also been satisfied.
  * Once this has completed, its process method is called. Prepare is useful
  * for async operations such as retrieval of a remote resource; all
  * {@code Gadget} modifications occur in process.
- * 
+ *
  * To extend the Gadget Server's feature set, simply implement this interface
  * and register your class with {@code GadgetFeatureRegistry}, indicating
  * which other {@code GadgetFeature} features are needed before yours can
  * operate successfully.
- * 
+ *
  * Each feature <i>must</i> be instantiable by a no-argument constructor,
  * and will <i>always</i> be instantiated this way. As such, it is recommended
  * not to define a constructor for a feature at all.

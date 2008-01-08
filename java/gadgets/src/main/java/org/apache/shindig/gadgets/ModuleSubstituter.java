@@ -18,7 +18,18 @@ import java.util.Map;
 /**
  * Populates MODULE hangman variables in the substitution coordinator.
  */
-public class ModuleSubstituter implements GadgetFeature {
+class ModuleSubstituter implements GadgetFeatureFactory {
+  private final static ModuleSubstituterFeature feature
+      = new ModuleSubstituterFeature();
+  /**
+   * {@inheritDoc}
+   */
+  public GadgetFeature create() {
+    return feature;
+  }
+}
+
+class ModuleSubstituterFeature implements GadgetFeature {
 
   /**
    * {@inheritDoc}
@@ -36,5 +47,11 @@ public class ModuleSubstituter implements GadgetFeature {
       Map<String, String> params) {
     gadget.getSubstitutions().addSubstitution(Substitutions.Type.MODULE, "ID",
         Integer.toString(gadget.getId().getModuleId()));
+
+    if (context.getRenderingContext() == RenderingContext.GADGET) {
+      String format = "gadgets.PrefStore_.setDefaultModuleId(%d);";
+      String fmtStr = String.format(format, gadget.getId().getModuleId());
+      gadget.addJsLibrary(JsLibrary.create(JsLibrary.Type.INLINE, fmtStr));
+    }
   }
 }

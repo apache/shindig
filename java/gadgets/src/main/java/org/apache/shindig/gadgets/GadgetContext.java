@@ -35,6 +35,11 @@ public class GadgetContext {
     return locale;
   }
 
+  private final RenderingContext renderingContext;
+  public RenderingContext getRenderingContext() {
+    return renderingContext;
+  }
+
   /**
    * Creates a context for the current gadget.
    * @param httpFetcher
@@ -43,9 +48,11 @@ public class GadgetContext {
    */
   public GadgetContext(RemoteContentFetcher httpFetcher,
                        GadgetDataCache<MessageBundle> messageBundleCache,
-                       Locale locale) {
+                       Locale locale,
+                       RenderingContext renderingContext) {
     this.httpFetcher = httpFetcher;
     this.messageBundleCache = messageBundleCache;
     this.locale = locale;
+    this.renderingContext = renderingContext;
   }
 }

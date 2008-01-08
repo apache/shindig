@@ -21,7 +21,20 @@ import java.util.Map;
  * Provides static hangman substitutions for bidirectional language support.
  * Useful for generating internationalized layouts using CSS.
  */
-public class BidiSubstituter implements GadgetFeature {
+
+public class BidiSubstituter implements GadgetFeatureFactory {
+  private final static BidiSubstituterFeature feature
+      = new BidiSubstituterFeature();
+
+  /**
+   * {@inheritDoc}
+   */
+  public GadgetFeature create() {
+    return feature;
+  }
+}
+
+class BidiSubstituterFeature implements GadgetFeature {
 
   /**
    * Fetches a message bundle spec from the {@code GadgetSpec} for the
@@ -49,9 +62,7 @@ public class BidiSubstituter implements GadgetFeature {
   }
 
   /**
-   * Populates bidi substitutions.
-   * @param gadget Gadget object to process
-   * @param context Context in which Gadget is being processed
+   * {@inheritDoc}
    */
   public void process(Gadget gadget,
                       GadgetContext context,

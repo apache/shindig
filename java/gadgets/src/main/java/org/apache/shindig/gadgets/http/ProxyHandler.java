@@ -64,7 +64,7 @@ public class ProxyHandler {
     } catch (JSONException e) {
       output = "";
     }
-
+    response.setStatus(HttpServletResponse.SC_OK);
     setCachingHeaders(response);
     response.setContentType("application/json; charset=utf-8");
     response.setHeader("Content-Disposition", "attachment;filename=p.txt");
@@ -81,7 +81,7 @@ public class ProxyHandler {
     RemoteContent results = fetcher.fetch(origin);
     int status = results.getHttpStatusCode();
     response.setStatus(status);
-    if (status == 200) {
+    if (status == HttpServletResponse.SC_OK) {
       // Fill out the response.
       setCachingHeaders(response);
       Map<String, List<String>> headers = results.getAllHeaders();
