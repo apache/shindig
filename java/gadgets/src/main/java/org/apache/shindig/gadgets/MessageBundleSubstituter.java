@@ -13,6 +13,9 @@
  */
 package org.apache.shindig.gadgets;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.util.List;
@@ -23,7 +26,16 @@ import java.util.Map;
  * Adds message bundle hangman variable substitution and programmatic JavaScript
  * access to message bundle strings.
  */
-public class MessageBundleSubstituter implements GadgetFeature {
+public class MessageBundleSubstituter implements GadgetFeatureFactory {
+  /**
+   * {@inheritDoc}
+   */
+  public GadgetFeature create() {
+    return new MessageBundleSubstituterFeature();
+  }
+}
+
+class MessageBundleSubstituterFeature implements GadgetFeature {
   private static final MessageBundleParser parser
       = new MessageBundleParser();
 
@@ -97,6 +109,33 @@ public class MessageBundleSubstituter implements GadgetFeature {
       gadget.setCurrentMessageBundle(bundle);
       gadget.getSubstitutions().addSubstitutions(Substitutions.Type.MESSAGE,
                                                  bundle.getMessages());
+
+      RenderingContext rc = context.getRenderingContext();
+      if (rc == RenderingContext.GADGET) {
+        Map<String, String> msgs = bundle.getMessages();
+        JSONObject json = new JSONObject();
+        try {
+          for (Map.Entry<String, String> entry : msgs.entrySet()) {
+            json.put(entry.getKey(), entry.getValue());
+          }
+        } catch (JSONException e) {
+          throw new RuntimeException(e);
+        }
+
+        int moduleId = gadget.getId().getModuleId();
+        Locale locale = context.getLocale();
+        StringBuilder js = new StringBuilder();
+        String setMsgFmt = "gadgets.PrefStore_.setMsg(%d, %s);";
+        String setLangFmt = "gadgets.PrefStore_.setLanguage(%d, \"%s\");";
+        String setCountryFmt = "gadgets.PrefStore_.setCountry(%d, \"%s\");";
+
+        js.append(String.format(setMsgFmt, moduleId, json.toString()));
+        js.append(String.format(setLangFmt, moduleId, locale.getLanguage()));
+        js.append(String.format(setCountryFmt, moduleId, locale.getCountry()));
+
+        String jsStr = js.toString();
+        gadget.addJsLibrary(JsLibrary.create(JsLibrary.Type.INLINE, jsStr));
+      }
     }
   }
 }

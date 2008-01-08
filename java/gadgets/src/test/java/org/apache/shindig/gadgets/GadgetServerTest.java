@@ -27,8 +27,6 @@ import static org.easymock.EasyMock.eq;
 import static org.easymock.EasyMock.expect;
 import static org.easymock.EasyMock.isA;
 
-import org.apache.shindig.gadgets.EasyMockTestCase;
-
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
@@ -41,7 +39,9 @@ public class GadgetServerTest extends EasyMockTestCase {
   @SuppressWarnings(value="unchecked")
   final GadgetDataCache<MessageBundle> bundleCache = mock(GadgetDataCache.class);
 
-  public GadgetServerTest() {
+  public GadgetServerTest() throws GadgetException {
+    GadgetFeatureRegistry registry = new GadgetFeatureRegistry(null);
+    gadgetServer.setGadgetFeatureRegistry(registry);
     gadgetServer.setContentFetcher(fetcher);
     gadgetServer.setSpecCache(specCache);
     gadgetServer.setMessageBundleCache(bundleCache);
@@ -56,7 +56,7 @@ public class GadgetServerTest extends EasyMockTestCase {
     replay();
 
     Gadget gadget = gadgetServer.processGadget(DATETIME_ID, UserPrefs.EMPTY, EN_US_LOCALE,
-                                               GadgetServer.RenderingContext.GADGET);
+                                               RenderingContext.GADGET);
     verify();
   }
 
@@ -65,7 +65,7 @@ public class GadgetServerTest extends EasyMockTestCase {
     replay();
 
     Gadget gadget = gadgetServer.processGadget(DATETIME_ID, UserPrefs.EMPTY, EN_US_LOCALE,
-                                               GadgetServer.RenderingContext.GADGET);
+                                               RenderingContext.GADGET);
     assertSame(DATETIME_SPEC, gadget.getBaseSpec());
     verify();
   }
@@ -79,7 +79,7 @@ public class GadgetServerTest extends EasyMockTestCase {
     replay();
 
     Gadget gadget = gadgetServer.processGadget(DATETIME_ID, UserPrefs.EMPTY, EN_US_LOCALE,
-                                               GadgetServer.RenderingContext.GADGET);
+                                               RenderingContext.GADGET);
     assertEquals("Hello, World!", gadget.getTitle());
     assertEquals("Goodbye, World!", gadget.getContentData());
     verify();

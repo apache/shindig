@@ -18,62 +18,73 @@ import org.apache.shindig.util.Check;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.logging.Logger;
 
 /**
  * Maintains a registry of all {@code GadgetFeature} types supported by
  * a given Gadget Server installation.
  *
- * To register a feature, simply create a static initialization block in its
- * class definition:
- * <pre>
- *   static {
- *     GadgetFeatureRegistry.register("my.feature.name",
- *                                    { "my.dep1", "my.dep2" },
- *                                    MyFeature.class);
- *   }
- * </pre>
+ * To register a feature:
+ * GadgetFeatureRegistry registry = // get your global registry
+ * registry.register("my-feature", null, new MyFeatureFactory());
  */
 public class GadgetFeatureRegistry {
-  private static final Map<String, Entry> features =
-      new HashMap<String, Entry>();
-  private static final Map<String, Entry> core =
-      new HashMap<String, Entry>();
+  private final Map<String, Entry> features = new HashMap<String, Entry>();
+  private final Map<String, Entry> core =  new HashMap<String, Entry>();
 
   // Constants used for internal feature names.
   private final static String FEAT_MSG_BUNDLE = "core.msgbundlesubst";
   private final static String FEAT_BIDI = "core.bidisubst";
   private final static String FEAT_MODULE = "core.modulesubst";
   private final static String FEAT_USER_PREF_SUBST = "core.prefsubst";
-  private final static String FEAT_CORE_JS = "core.js";
-  private final static String FEAT_PREFS_JS = "core.prefs";
 
-  // Initialization of core components, providing a minimal base context
-  // in which all Gadgets operate. This set should be kept as minimal as
-  // possible. Anything added as registerCore will automatically become a
-  // dependency of every other feature.
-  static {
-    // Substitution jobs are not order-dependent, because the actual order that
-    // they are evaluated in is determined in Substitutions.java. The order
-    // defined here is not important.
-    registerCore(FEAT_MSG_BUNDLE, null, MessageBundleSubstituter.class);
-    registerCore(FEAT_BIDI, null, BidiSubstituter.class);
-    registerCore(FEAT_MODULE, null, ModuleSubstituter.class);
-    registerCore(FEAT_USER_PREF_SUBST, null, UserPrefSubstituter.class);
+  private boolean coreDone = false;
 
-    // Core JS loading.
-    registerCore(FEAT_CORE_JS, null, CoreJsFeature.class);
+  private final static Logger logger
+      = Logger.getLogger("org.apache.shindig.gadgets");
 
-    String[] msgBundleDep = {FEAT_MSG_BUNDLE};
-    registerCore(FEAT_PREFS_JS, msgBundleDep, UserPrefFeature.class);
+  /**
+   * Creates the gadget feature registry and loads all default dependencies.
+   * @param coreJsPath
+   */
+  public GadgetFeatureRegistry(String coreJsPath) throws GadgetException {
+    registerCore(coreJsPath);
+  }
 
-    // Do not call registerCore after this point!
-
-    // Optional core features.
-    register("ifpc", null, NoOpFeature.class);
-    String[] setPrefsDep = {"ifpc"};
-    register("setprefs", setPrefsDep, SetPrefsFeature.class);
+  /**
+   * Registers all core functionality providing a minimal base context
+   * in which all Gadgets operate. This set should be kept as minimal as
+   * possible. Anything added as registerCore will automatically become a
+   * dependency of every other feature.
+   *
+   * @param coreJsPath Path to the directory that contains core Javascript
+   *     feature xml files.
+   */
+  private void registerCore(String coreJsPath) throws GadgetException {
+    List<String> coreDeps = null;
+    if (coreJsPath != null) {
+      JsFeatureLoader loader = new JsFeatureLoader();
+      List<Entry> coreJs = loader.loadFeatures(coreJsPath, this);
+      coreDeps = new LinkedList<String>();
+      for (Entry entry : coreJs) {
+        coreDeps.add(entry.getName());
+        core.put(entry.getName(), entry);
+      }
+    }
+    // Everything depends on core JS being set up first because in gadget
+    // rendering mode, we pre-populate some of the data.
+    core.put(FEAT_MSG_BUNDLE,
+        register(FEAT_MSG_BUNDLE, coreDeps, new MessageBundleSubstituter()));
+    core.put(FEAT_BIDI, register(FEAT_BIDI, coreDeps, new BidiSubstituter()));
+    core.put(FEAT_MODULE,
+        register(FEAT_MODULE, coreDeps, new ModuleSubstituter()));
+    core.put(FEAT_USER_PREF_SUBST,
+        register(FEAT_USER_PREF_SUBST, coreDeps, new UserPrefSubstituter()));
+    coreDone = true;
   }
 
   /**
@@ -86,41 +97,26 @@ public class GadgetFeatureRegistry {
    * 'com.google.gadgets.skins'.
    *
    * @param name Name of the feature to register, ideally using the conventions
-   * described
+   *     described
    * @param deps List of strings indicating features on which {@code feature}
-   * depends to operate correctly, which need to process the {@code Gadget}
-   * before it does
+   *     depends to operate correctly, which need to process the {@code Gadget}
+   *     before it does
    * @param feature Class implementing the feature
    */
-  public static void register(String name,
-                              String[] deps,
-                              Class<? extends GadgetFeature> feature) {
+  public Entry register(String name, List<String> deps,
+                        GadgetFeatureFactory feature) {
     // Core entries must come first.
-    Entry entry = new Entry(name, deps, feature);
-    entry.deps.addAll(core.values());
-    features.put(name, entry);
-    validateFeatureGraph();
-  }
-
-  /**
-   * Registers a {@code GadgetFeature} which is <i>always</i> run when
-   * processing a {@code Gadget}, and on which all other features
-   * implicitly depend. Use of this mechanism should be as sparing as possible
-   * to optimize performance. Never call registerCore after calling register!
-   *
-   * @param name
-   * @param deps
-   * @param feature
-   */
-  private static void registerCore(String name,
-                                   String[] deps,
-                                   Class<? extends GadgetFeature> feature) {
-    Entry entry = new Entry(name, deps, feature);
-    // We update features directly to avoid creating unnecessary dependencies
-    // between core modules.
-    features.put(name, entry);
-    core.put(name, entry);
-    validateFeatureGraph();
+    Entry entry = features.get(name);
+    if (entry == null) {
+      logger.info("Registering feature: " + name);
+      entry = new Entry(name, deps, feature, this);
+      if (coreDone) {
+        entry.deps.addAll(core.values());
+      }
+      features.put(name, entry);
+      validateFeatureGraph();
+    }
+    return entry;
   }
 
   /**
@@ -145,9 +141,9 @@ public class GadgetFeatureRegistry {
    * @param resultsMissing Set of feature identifiers that could not be found
    * @return True if all features were retrieved
    */
-  public static boolean getIncludedFeatures(Set<String> needed,
-                                            Set<Entry> resultsFound,
-                                            Set<String> resultsMissing) {
+  public boolean getIncludedFeatures(Set<String> needed,
+                                     Set<Entry> resultsFound,
+                                     Set<String> resultsMissing) {
     resultsFound.clear();
     resultsMissing.clear();
     if (needed.size() == 0) {
@@ -172,7 +168,7 @@ public class GadgetFeatureRegistry {
    * @param name
    * @return The entry, or null if it does not exist.
    */
-  static Entry getEntry(String name) {
+  Entry getEntry(String name) {
     return features.get(name);
   }
 
@@ -192,18 +188,19 @@ public class GadgetFeatureRegistry {
     private final String name;
     private final Set<Entry> deps;
     private final Set<Entry> readDeps;
-    private final Class<? extends GadgetFeature> feature;
+    private final GadgetFeatureFactory feature;
 
     private Entry(String name,
-                  String[] deps,
-                  Class<? extends GadgetFeature> feature)
+                  List<String> deps,
+                  GadgetFeatureFactory feature,
+                  GadgetFeatureRegistry registry)
         throws IllegalStateException {
       this.name = name;
       this.deps = new HashSet<Entry>();
       this.readDeps = Collections.unmodifiableSet(this.deps);
       if (deps != null) {
         for (String dep : deps) {
-          Entry entry = GadgetFeatureRegistry.getEntry(dep);
+          Entry entry = registry.getEntry(dep);
           Check.notNull(entry, "Dependency " + dep + " is not registered.");
           this.deps.add(entry);
         }
@@ -245,7 +242,7 @@ public class GadgetFeatureRegistry {
     /**
      * @return Class implementing the feature
      */
-    public Class<? extends GadgetFeature> getFeature() {
+    public GadgetFeatureFactory getFeature() {
       return feature;
     }
   }

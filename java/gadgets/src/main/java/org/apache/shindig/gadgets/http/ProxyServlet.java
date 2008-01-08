@@ -26,6 +26,7 @@ import javax.servlet.http.HttpServletResponse;
 
 public class ProxyServlet extends HttpServlet {
   private final static ProxyHandler handler = new ProxyHandler();
+  @Override
   protected void doGet(HttpServletRequest request, HttpServletResponse response)
       throws ServletException, IOException {
     String output = request.getParameter("output");

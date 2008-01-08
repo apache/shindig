@@ -13,12 +13,27 @@
  */
 package org.apache.shindig.gadgets;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.util.Map;
 
 /**
  * Substitutes user prefs into the spec.
  */
-public class UserPrefSubstituter implements GadgetFeature {
+public class UserPrefSubstituter implements GadgetFeatureFactory {
+  private final static UserPrefSubstituterFeature feature
+      = new UserPrefSubstituterFeature();
+
+  /**
+  * {@inheritDoc}
+  */
+  public GadgetFeature create() {
+    return feature;
+  }
+}
+
+class UserPrefSubstituterFeature implements GadgetFeature {
 
   /**
    * {@inheritDoc}
@@ -33,10 +48,17 @@ public class UserPrefSubstituter implements GadgetFeature {
   public void process(Gadget gadget, GadgetContext context,
                       Map<String, String> params) {
     Substitutions substitutions = gadget.getSubstitutions();
-    Map<String, String> upValues = gadget.getUserPrefValues();
+    UserPrefs upValues = gadget.getUserPrefValues();
+
+    JSONObject json = null;
+
+    if (context.getRenderingContext() == RenderingContext.GADGET) {
+      json = new JSONObject();
+    }
+
     for (GadgetSpec.UserPref pref : gadget.getUserPrefs()) {
       String name = pref.getName();
-      String value = upValues.get(name);
+      String value = upValues.getPref(name);
       if (value == null) {
         value = pref.getDefaultValue();
       }
@@ -44,6 +66,21 @@ public class UserPrefSubstituter implements GadgetFeature {
         value = "";
       }
       substitutions.addSubstitution(Substitutions.Type.USER_PREF, name, value);
+
+      if (json != null) {
+        try {
+          json.put(name, value);
+        } catch (JSONException e) {
+          throw new RuntimeException(e);
+        }
+      }
+    }
+
+    if (json != null) {
+      String setPrefFmt = "gadgets.PrefStore_.setPref(%d, %s);";
+      int moduleId = gadget.getId().getModuleId();
+      String setPrefStr = String.format(setPrefFmt, moduleId, json.toString());
+      gadget.addJsLibrary(JsLibrary.create(JsLibrary.Type.INLINE, setPrefStr));
     }
   }
 }

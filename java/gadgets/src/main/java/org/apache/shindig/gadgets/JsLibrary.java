@@ -16,119 +16,81 @@ package org.apache.shindig.gadgets;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.InputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.logging.Logger;
 
 /**
- * Manages registration and retrieval of JavaScript libraries and injected
- * code that support many Gadget features. {@code JsLibraryFeature} classes are
- * the primary consumers of this functionality. Each such feature uses
- * the {@code register()} method to register and validate the gadget and
- * container JS code that supports the feature. This code may be deployed
- * as a separate file or as a Resource retrieved from the classpath.
- * The {@code JsLibraryFeature} will typically then inject JS code into a
- * {@code Gadget} using the {@code inline} and {@code file} methods.
- *
- * In addition, registration assists in serving of JS resources to type=URL
- * gadgets. Features requiring {@code inline} code are not supported by
- * such gadgets at present.
+ * Represents a javascript library, either as an external resource (url)
+ * or as an inline script.
  */
 public final class JsLibrary {
-  // Server/client library registration
-  // TODO: support base directory specification (as flag?)
-  private static final Map<String, Entry> libraries;
-  public static final String ALIAS_SEPARATOR = ":";
-
-  static {
-    libraries = new HashMap<String, Entry>();
+  private Type type;
+  public Type getType() {
+    return type;
+  }
+  private String content;
+  public String getContent() {
+    return content;
   }
 
-  /**
-   * Contains gadget- and container-side JS loaded from registered resources.
-   */
-  private static final class Entry {
-    private String gadgetJs;
-    private String containerJs;
+  private static final Logger logger
+      = Logger.getLogger("org.apache.shindig.gadgets");
+
+  @Override
+  public String toString() {
+    if (type == Type.URL) {
+      return "<script src=\"" + content + "\"></script>";
+    } else {
+      return "<script><!--\n" + content + "\n--></script>";
+    }
   }
 
   /**
    * Indicates how to load a given resource.
    */
   public static enum Type {
-    FILE, RESOURCE
-  }
+    FILE, RESOURCE, URL, INLINE;
 
-  /**
-   * Register a JS library. {@code alias} must be unique among all resources
-   * registered in the server instance, and cannot contain character ":"
-   * ({@code ALIAS_SEPARATOR}).
-   * @param alias Identifier for the JS library
-   * @param gadgetJsName Name of gadget-side JS resource, or null if not needed
-   * @param gadgetJsType Type of gadget-side JS resource, or null if not needed
-   * @param containerJsName Name of container JS resource, or null if not needed
-   * @param containerJsType Type of container JS resource, or null if not needed
-   */
-  public static final void register(String alias,
-                                    String gadgetJsName,
-                                    Type gadgetJsType,
-                                    String containerJsName,
-                                    Type containerJsType) {
-    if (alias.indexOf(ALIAS_SEPARATOR) >= 0) {
-      throw new RuntimeException(
-          String.format("Invalid JsLibrary alias %s - contains char %s",
-                        alias,
-                        ALIAS_SEPARATOR));
-    }
-
-    Entry entry = new Entry();
-    entry.gadgetJs = loadData(gadgetJsName, gadgetJsType);
-    entry.containerJs = loadData(containerJsName, containerJsType);
-    libraries.put(alias, entry);
-  }
-
-  /**
-   * Retrieves gadget-side JavaScript for the given {@code alias}, which
-   * may optionally be a composite alias keying several pieces of code.
-   * @param alias Identifier, possibly composite, of JS to load
-   * @return JS code keyed by alias
-   */
-  public static final String getGadgetJs(String alias) {
-    return getJs(alias, true);
-  }
-
-  /**
-   * Retrieves container-side JavaScript for the given {@code alias}, which
-   * may optionally be a composite alias keying several pieces of code.
-   * @param alias Identifier, possibly composite, of JS to load
-   * @return JS code keyed by alias
-   */
-  public static final String getContainerJs(String alias) {
-    return getJs(alias, false);
-  }
-
-  private static final String getJs(String alias, boolean isGadget) {
-    StringBuilder builder = new StringBuilder();
-    String[] components = alias.split(ALIAS_SEPARATOR);
-    for (String component : components) {
-      Entry entry = libraries.get(component);
-      if (entry == null) {
-        return null;
-      }
-      if (isGadget) {
-        builder.append(entry.gadgetJs);
+    /**
+     * Returns the type named by the given string.
+     */
+    public static Type parse(String name) {
+      if (name.equals("file")) {
+        return FILE;
+      } else if (name.equals("url")) {
+        return URL;
+      } else if (name.equals("resource")) {
+        return RESOURCE;
       } else {
-        builder.append(entry.containerJs);
+        return INLINE;
       }
     }
-    return builder.toString();
   }
 
-  private static final String loadData(String name, Type type) {
+  /**
+   * Creates a new js library.
+   *
+   * @param type If FILE or RESOURCE, the content will be loaded from disk.
+   *     if URL or INLINE, the content will be handled the same as html <script>
+   * @return The newly created library.
+   */
+  public static JsLibrary create(Type type, String content) {
+    if (type == Type.FILE || type == Type.RESOURCE) {
+      logger.info("Loading js from: " + content);
+      content = loadData(content, type);
+    }
+    return new JsLibrary(type, content);
+  }
+
+  /**
+   * Loads an external resource.
+   * @param name
+   * @param type
+   * @return The contents of the file or resource named by @code name.
+   */
+  private static String loadData(String name, Type type) {
     if (type == Type.FILE) {
       return loadFile(name);
     } else if (type == Type.RESOURCE) {
@@ -137,7 +99,12 @@ public final class JsLibrary {
     return null;
   }
 
-  private static final String loadFile(String fileName) {
+  /**
+   * Loads a file
+   * @param fileName
+   * @return The contents of the file.
+   */
+  private static String loadFile(String fileName) {
     if (fileName == null) {
       // Valid case: no JS needed for container or gadget for feature.
       // Blank String provided for this case.
@@ -169,7 +136,12 @@ public final class JsLibrary {
     return loadFromInputStream(fis, fileName, "file");
   }
 
-  private static final String loadResource(String name) {
+  /**
+   * Loads a resource.
+   * @param name
+   * @return The contents of the named resource.
+   */
+  private static String loadResource(String name) {
      InputStream stream =
          JsLibrary.class.getClassLoader().getResourceAsStream(name);
      if (stream == null) {
@@ -179,9 +151,15 @@ public final class JsLibrary {
      return loadFromInputStream(stream, name, "resource");
   }
 
-  private static final String loadFromInputStream(InputStream is,
-                                                  String name,
-                                                  String type) {
+  /**
+   * Loads content from the given input stream.
+   * @param is
+   * @param name
+   * @param type
+   * @return The contents of the stream.
+   */
+  private static String loadFromInputStream(InputStream is, String name,
+                                            String type) {
     ByteArrayOutputStream baos = new ByteArrayOutputStream();
     byte[] buf = new byte[8192];
     int read = 0;
@@ -203,104 +181,12 @@ public final class JsLibrary {
     return ret;
   }
 
-  // Instance
-  private String featureName;
-  private URI sourceUri;
-  private String alias;
-  private String content;
-
   /**
-   * @return The string representation of the JsLibrary object.
+   * @param type
+   * @param content
    */
-  @Override
-  public String toString() {
-    // TODO: escape sourceUrl / content. Not a real security concern, but
-    // an easy mistake to make.
-    if (sourceUri != null) {
-      return "<script src=\"" + sourceUri.toString() + "\"></script>";
-    } else if (content != null) {
-      return "<script><!--\n" + content + "\n--></script>";
-    } else {
-      return "";
-    }
-  }
-
-  /**
-   * Creates a new JsLibrary from the specified URI.
-   * @param featureName Feature associated with this library
-   * @param uriStr URI of the feature JS
-   * @return The newly created {@code JsLibrary} object.
-   * @throws GadgetException On programmer error, specifying invalid URL
-   */
-  public static JsLibrary uri(String featureName, String uriStr)
-      throws GadgetException {
-    URI uri = null;
-    try {
-      uri = new URI(uriStr);
-    } catch (URISyntaxException e) {
-      throw new GadgetException(GadgetException.Code.INTERNAL_SERVER_ERROR, e);
-    }
-    JsLibrary library = new JsLibrary(featureName);
-    library.sourceUri = uri;
-    // TODO: Consider scheme for retrieving and caching lib for later
-    // retrieval by (randomly-generated) alias
-    return library;
-  }
-
-  /**
-   * Creates a new JsLibrary from the specified source file.
-   * @param featureName Feature associated with this library
-   * @param alias Alias for the file resource; must be pre-registered
-   * @return The newly created {@code JsLibrary} object.
-   * @throws GadgetException On programmer error in creating a feature
-   */
-  public static JsLibrary file(String featureName, String alias)
-      throws GadgetException {
-    Entry entry = libraries.get(alias);
-    if (entry == null) {
-      throw new GadgetException(
-          GadgetException.Code.INTERNAL_SERVER_ERROR,
-          String.format("Misconfigured feature, unknown alias %s", alias));
-    }
-    JsLibrary library = new JsLibrary(featureName);
-    library.alias = alias;
-    library.content = entry.gadgetJs;
-    return library;
-  }
-
-  /**
-   * Creates a new {@code JsLibrary} from the specified code.
-   * @param featureName Feature associated with this library
-   * @param content Ad hoc JavaScript to be inserted into a gadget
-   * @return The newly created {@code JsLibrary} object.
-   */
-  public static JsLibrary inline(String featureName, String content) {
-    JsLibrary library = new JsLibrary(featureName);
-    library.content = content;
-    // TODO: Consider scheme for writing this data to persistence store
-    // for later retrieval, supporting more features via type=URL
-    return library;
-  }
-
-  /**
-   * @return An alias referencing the JS, if available; null otherwise.
-   */
-  public String getAlias() {
-    return alias;
-  }
-
-  /**
-   * @return Feature name applicable to this library.
-   */
-  public String getFeature() {
-    return featureName;
-  }
-
-  /**
-   * Constructs a {@code JsLibrary}
-   * @param featureName Name of the feature associated with this library.
-   */
-  private JsLibrary(String featureName) {
-    this.featureName = featureName;
+  private JsLibrary(Type type, String content) {
+    this.type = type;
+    this.content = content;
   }
 }

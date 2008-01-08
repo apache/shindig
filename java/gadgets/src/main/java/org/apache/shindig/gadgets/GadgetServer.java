@@ -28,12 +28,17 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorCompletionService;
 import java.util.concurrent.Future;
+import java.util.logging.Logger;
 
 public class GadgetServer {
   private final Executor executor;
+  private GadgetFeatureRegistry registry;
   private GadgetDataCache<GadgetSpec> specCache;
   private GadgetDataCache<MessageBundle> messageBundleCache;
   private RemoteContentFetcher fetcher;
+
+  private static final Logger logger
+      = Logger.getLogger("org.apache.shindig.gadgets");
 
   public GadgetServer(Executor executor) {
     this.executor = executor;
@@ -51,10 +56,19 @@ public class GadgetServer {
     this.fetcher = fetcher;
   }
 
-  public static enum RenderingContext {
-    CONTAINER, GADGET
+  public void setGadgetFeatureRegistry(GadgetFeatureRegistry registry) {
+    this.registry = registry;
   }
 
+  /**
+   * Process a single gadget.
+   * @param gadgetId
+   * @param userPrefs
+   * @param locale
+   * @param rctx
+   * @return The processed gadget.
+   * @throws GadgetProcessException
+   */
   public Gadget processGadget(Gadget.ID gadgetId,
                               UserPrefs userPrefs,
                               Locale locale,
@@ -71,24 +85,32 @@ public class GadgetServer {
       throw new GadgetProcessException(
           GadgetException.Code.MISSING_REMOTE_OBJECT_FETCHER);
     }
+    if (registry == null) {
+      throw new GadgetProcessException(
+          GadgetException.Code.MISSING_FEATURE_REGISTRY);
+    }
 
     // Queue/tree of all jobs to be run for successful processing
-    GadgetContext gc = new GadgetContext(fetcher, messageBundleCache, locale);
+    GadgetContext gc
+        = new GadgetContext(fetcher, messageBundleCache, locale, rctx);
     WorkflowContext wc = new WorkflowContext(gc);
 
     // Bootstrap tree of jobs to process
     WorkflowDependency cacheLoadDep =
         new WorkflowDependency(WorkflowDependency.Type.CORE, CACHE_LOAD);
-    wc.jobsToRun.addJob(new CacheLoadTask(gadgetId, specCache), cacheLoadDep);
+    wc.jobsToRun.addJob(new CacheLoadTask(gadgetId, userPrefs, specCache),
+                        cacheLoadDep);
 
     WorkflowDependency urlFetchDep =
         new WorkflowDependency(WorkflowDependency.Type.CORE, URL_FETCH);
-    wc.jobsToRun.addJob(new SpecLoadTask(fetcher, gadgetId, specCache),
-                        urlFetchDep, cacheLoadDep);
+    wc.jobsToRun.addJob(
+        new SpecLoadTask(fetcher, gadgetId, userPrefs, specCache), urlFetchDep,
+        cacheLoadDep);
 
     WorkflowDependency enqueueFeatDep =
         new WorkflowDependency(WorkflowDependency.Type.CORE, ENQUEUE_FEATURES);
-    wc.jobsToRun.addJob(new EnqueueFeaturesTask(), enqueueFeatDep, urlFetchDep);
+    wc.jobsToRun.addJob(new EnqueueFeaturesTask(registry), enqueueFeatDep,
+                        urlFetchDep);
 
     // Instantiate CompletionService
     CompletionService<GadgetException> processor =
@@ -144,7 +166,7 @@ public class GadgetServer {
       }
 
       if (gadgetException != null) {
-        System.err.println(gadgetException.getCode().toString());
+        logger.severe(gadgetException.getCode().toString());
         gadgetException.printStackTrace();
         // Add to list of all exceptions caught, clear jobs, and continue
         // to aggressively catch as many exceptions as possible. Since
@@ -237,30 +259,28 @@ public class GadgetServer {
     }
 
     private boolean ready(Set<WorkflowDependency> depsDone) {
-      for (WorkflowDependency dep : deps) {
-        if (!depsDone.contains(dep)) {
-          return false;
-        }
-      }
-      return true;
+      return depsDone.containsAll(deps);
     }
   }
 
   private static class CacheLoadTask extends WorkflowTask {
     private final GadgetView.ID gadgetId;
+    private final UserPrefs prefs;
     private final GadgetDataCache<GadgetSpec> specCache;
 
     private CacheLoadTask(GadgetView.ID gadgetId,
+                          UserPrefs prefs,
                           GadgetDataCache<GadgetSpec> specCache) {
       this.gadgetId = gadgetId;
       this.specCache = specCache;
+      this.prefs = prefs;
     }
 
     @Override
     public void run(WorkflowContext wc) throws GadgetException {
       GadgetSpec spec = specCache.get(gadgetId.getKey());
       if (spec != null) {
-        wc.gadget = new Gadget(gadgetId, spec);
+        wc.gadget = new Gadget(gadgetId, spec, prefs);
       }
     }
   }
@@ -269,12 +289,15 @@ public class GadgetServer {
     private final RemoteContentFetcher fetcher;
     private final GadgetView.ID gadgetId;
     private final GadgetDataCache<GadgetSpec> specCache;
+    private final UserPrefs prefs;
 
     private SpecLoadTask(RemoteContentFetcher fetcher, GadgetView.ID gadgetId,
+                         UserPrefs prefs,
                          GadgetDataCache<GadgetSpec> specCache) {
       this.fetcher = fetcher;
       this.gadgetId = gadgetId;
       this.specCache = specCache;
+      this.prefs = prefs;
     }
 
     @Override
@@ -294,7 +317,7 @@ public class GadgetServer {
       }
       GadgetSpecParser specParser = new GadgetSpecParser();
       GadgetSpec spec = specParser.parse(gadgetId, xml);
-      wc.gadget = new Gadget(gadgetId, spec);
+      wc.gadget = new Gadget(gadgetId, spec, prefs);
       // This isn't a separate job because if it is we'd just need another
       // flag telling us not to store to the cache.
       specCache.put(wc.gadget.getId().getKey(), wc.gadget.copy());
@@ -302,6 +325,12 @@ public class GadgetServer {
   }
 
   private static class EnqueueFeaturesTask extends WorkflowTask {
+    private final GadgetFeatureRegistry registry;
+
+    private EnqueueFeaturesTask(GadgetFeatureRegistry registry) {
+      this.registry = registry;
+    }
+
     @Override
     public void run(WorkflowContext wc) throws GadgetException {
       Set<String> needed = new HashSet<String>();
@@ -318,9 +347,7 @@ public class GadgetServer {
       Set<GadgetFeatureRegistry.Entry> resultsFound =
           new HashSet<GadgetFeatureRegistry.Entry>();
       Set<String> resultsMissing = new HashSet<String>();
-      GadgetFeatureRegistry.getIncludedFeatures(needed,
-                                                resultsFound,
-                                                resultsMissing);
+      registry.getIncludedFeatures(needed, resultsFound, resultsMissing);
 
       // Classify features this server is missing
       List<String> missingRequired = new LinkedList<String>();
@@ -334,12 +361,8 @@ public class GadgetServer {
       }
 
       if (missingRequired.size() > 0) {
-        // TODO: throw MissingFeaturesException, subclass of GadgetException,
-        // which is then processed at termination of the jobs loop
-        for (String missing : missingRequired) {
-          System.err.println("Unsupported: " + missing);
-        }
-        throw new GadgetException(GadgetException.Code.UNSUPPORTED_FEATURE);
+        throw new GadgetException(GadgetException.Code.UNSUPPORTED_FEATURE,
+            missingRequired.get(0));
       }
 
       if (missingOptional.size() > 0) {
@@ -389,21 +412,13 @@ public class GadgetServer {
 
         // Then add a new job for each task, with appropriate execution
         // precursors/dependencies, to the jobs queue
-        try {
-          GadgetFeature feature = entry.getFeature().newInstance();
-          wc.jobsToRun.addJob(new FeaturePrepareTask(entry.getName(), feature),
-                              prepareDep,
-                              prepareDeps.toArray(new WorkflowDependency[]{}));
-          wc.jobsToRun.addJob(new FeatureProcessTask(entry.getName(), feature),
-                              processDep,
-                              processDeps.toArray(new WorkflowDependency[]{}));
-        } catch (InstantiationException e) {
-          System.err.println("Unable to instantiate "
-                             + entry.getFeature().getName());
-        } catch (IllegalAccessException e) {
-          System.err.println("Unable to call no-arg constructor for "
-                             + entry.getFeature().getName());
-        }
+        GadgetFeature feature = entry.getFeature().create();
+        wc.jobsToRun.addJob(new FeaturePrepareTask(entry.getName(), feature),
+            prepareDep,
+            prepareDeps.toArray(new WorkflowDependency[prepareDeps.size()]));
+        wc.jobsToRun.addJob(new FeatureProcessTask(entry.getName(), feature),
+            processDep,
+            processDeps.toArray(new WorkflowDependency[processDeps.size()]));
       }
     }
   }

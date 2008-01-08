@@ -31,6 +31,25 @@
         <artifactId>maven-jetty-plugin</artifactId>
       </plugin>
     </plugins>
+    <resources>
+      <resource>
+        <targetPath>features</targetPath>
+        <directory>../../features</directory>
+        <includes>
+          <include>**/*</include>
+        </includes>
+        <excludes>
+          <exclude>core/*</exclude>
+        </excludes>
+      </resource>
+      <resource>
+        <targetPath>core-features</targetPath>
+        <directory>../../features</directory>
+        <includes>
+          <include>core/*</include>
+        </includes>
+      </resource>
+    </resources>
   </build>
   <dependencies>
     <dependency>

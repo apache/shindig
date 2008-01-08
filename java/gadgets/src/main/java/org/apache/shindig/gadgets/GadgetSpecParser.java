@@ -52,7 +52,7 @@ public class GadgetSpecParser {
    * @throws SpecParserException If {@code data} does not represent a valid
    * {@code GadgetSpec}
    */
-  public GadgetSpec parse(Gadget.ID id, byte[] xml)
+  public GadgetSpec parse(GadgetView.ID id, byte[] xml)
       throws SpecParserException {
     if (null == xml || xml.length == 0) {
       throw new SpecParserException("Empty XML document.");
@@ -192,12 +192,14 @@ public class GadgetSpecParser {
 
     ParsedGadgetSpec.ParsedMessageBundle bundle =
         new ParsedGadgetSpec.ParsedMessageBundle();
-    try {
-      bundle.url = new URI(new URL(baseUrl.toURL(), messages).toString());
-    } catch (URISyntaxException e) {
-      throw new SpecParserException("Invalid message bundle url: " + messages);
-    } catch (MalformedURLException e) {
-      throw new SpecParserException("Invalid message bundle url: " + messages);
+    if (messages != null) {
+      try {
+        bundle.url = new URI(new URL(baseUrl.toURL(), messages).toString());
+      } catch (URISyntaxException e) {
+        throw new SpecParserException("Bad message bundle url: " + messages);
+      } catch (MalformedURLException e) {
+        throw new SpecParserException("Bad message bundle url: " + messages);
+      }
     }
     bundle.locale = new Locale(language, country);
     bundle.rightToLeft = rightToLeft;

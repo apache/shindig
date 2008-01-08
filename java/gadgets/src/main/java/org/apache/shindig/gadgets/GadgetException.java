@@ -23,6 +23,9 @@ public class GadgetException extends Exception {
     // Catch-all for internal errors
     INTERNAL_SERVER_ERROR,
 
+    // Configuration errors
+    INVALID_PATH,
+
     // User-data related errors.
     INVALID_USER_DATA,
 
@@ -37,6 +40,7 @@ public class GadgetException extends Exception {
     UNSUPPORTED_FEATURE,
 
     // Interface component errors.
+    MISSING_FEATURE_REGISTRY,
     MISSING_MESSAGE_BUNDLE_CACHE,
     MISSING_REMOTE_OBJECT_FETCHER,
     MISSING_SPEC_CACHE,

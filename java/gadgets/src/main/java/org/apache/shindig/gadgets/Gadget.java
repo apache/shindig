@@ -17,7 +17,6 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -43,7 +42,7 @@ public class Gadget implements GadgetView {
   private final ID id;
   private final GadgetSpec baseSpec;
   private final Substitutions substitutions;
-  private final Map<String, String> userPrefValues;
+  private final UserPrefs userPrefValues;
   private final List<JsLibrary> jsLibraries;
 
   public static class GadgetId implements GadgetView.ID {
@@ -91,12 +90,13 @@ public class Gadget implements GadgetView {
    * Create a new {@code Gadget} devoid of processing modifications.
    * @param id Identifier used to retrieve {@code baseSpec}
    * @param baseSpec Base (immutable) {@code GadgetSpec} on which this is based
+   * @param prefs User prefs for this gadget.
    */
-  public Gadget(ID id, GadgetSpec baseSpec) {
+  public Gadget(ID id, GadgetSpec baseSpec, UserPrefs prefs) {
     this.id = id;
     this.baseSpec = baseSpec;
     substitutions = new Substitutions();
-    userPrefValues = new HashMap<String, String>();
+    userPrefValues = prefs;
     jsLibraries = new LinkedList<JsLibrary>();
   }
 
@@ -253,8 +253,8 @@ public class Gadget implements GadgetView {
     return Collections.unmodifiableList(baseSpec.getUserPrefs());
   }
 
-  public Map<String, String> getUserPrefValues() {
-    return Collections.unmodifiableMap(userPrefValues);
+  public UserPrefs getUserPrefValues() {
+    return userPrefValues;
   }
 
   /**

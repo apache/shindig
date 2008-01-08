@@ -19,7 +19,15 @@
     "http://java.sun.com/dtd/web-app_2_3.dtd">
 
 <web-app>
-
+  <!-- configuration -->
+  <context-param>
+    <param-name>core-js-features</param-name>
+    <param-value>res://core-features/</param-value>
+  </context-param>
+  <context-param>
+    <param-name>other-js-features</param-name>
+    <param-value>res://features/</param-value>
+  </context-param>
   <!-- Render a Gadget -->
 
   <servlet>
@@ -48,4 +56,14 @@
     <url-pattern>/proxy</url-pattern>
   </servlet-mapping>
 
+  <!-- javascript serving -->
+  <servlet>
+    <servlet-name>js</servlet-name>
+    <servlet-class>org.apache.shindig.gadgets.http.JsServlet</servlet-class>
+  </servlet>
+  
+  <servlet-mapping>
+    <servlet-name>js</servlet-name>
+    <url-pattern>/js/*</url-pattern>
+  </servlet-mapping>
 </web-app>
