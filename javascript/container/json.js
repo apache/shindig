@@ -28,7 +28,10 @@ SOFTWARE.
     JSON.parse(text) takes a JSON text and produces a JavaScript value. It will
     return false if there is an error.
 */
-var JSON = function () {
+
+var gadgets = gadgets || {};
+
+gadgets.JSON = function () {
     var m = {
             '\b': '\\b',
             '\t': '\\t',
@@ -139,3 +142,6 @@ var JSON = function () {
         }
     };
 }();
+
+var JSON = gadgets.JSON;
+
