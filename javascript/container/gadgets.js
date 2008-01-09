@@ -1,11 +1,23 @@
-// Copyright 2007 Google Inc.
-// All Rights Reserved.
+/**
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements. See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership. The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License. You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations under the License.
+ */
 
 /**
  * @fileoverview Open Gadget Container
- *
- * @author jyang@google.com (Jun Yang)
- * @author wangz@google.com (Zhen Wang)
  */
 
 // -----
@@ -417,6 +429,7 @@ gadgets.Gadget.prototype.getMainContent = function(continuation) {
 
 gadgets.IfrGadget = function(opt_params) {
   gadgets.Gadget.call(this, opt_params);
+  this.serverBase_ = 'http://www.gmodules.com/ig/'; // default gadget server
 };
 
 gadgets.IfrGadget.inherits(gadgets.Gadget);
@@ -453,6 +466,14 @@ gadgets.IfrGadget.prototype.getUserPrefsDialogContent = function(continuation) {
       this.cssClassGadgetUserPrefsDialog + '"></div>');
 };
 
+gadgets.IfrGadget.prototype.setServerBase = function(url) {
+  this.serverBase_ = url;
+};
+
+gadgets.IfrGadget.prototype.getServerBase = function() {
+  return this.serverBase_;
+};
+
 gadgets.IfrGadget.prototype.getMainContent = function(continuation) {
   var iframeId = this.getIframeId();
   continuation('<div class="' + this.cssClassGadgetContent + '"><iframe id="' +
@@ -470,7 +491,7 @@ gadgets.IfrGadget.prototype.getUserPrefsDialogId = function() {
 };
 
 gadgets.IfrGadget.prototype.getIframeUrl = function() {
-  return 'http://www.gmodules.com/ig/ifr?url=' +
+  return this.serverBase_ + 'ifr?url=' +
       encodeURIComponent(this.specUrl) + '&synd=' + this.SYND + '&mid=' +
       this.id + '&parent=' + encodeURIComponent(gadgets.container.parentUrl_) +
       '&ogc=' + document.location.host + this.getUserPrefsParams();
