@@ -1,19 +1,11 @@
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//     http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-//
+// Copyright 2007 Google Inc.
+// All Rights Reserved.
 
 /**
  * @fileoverview Open Gadget Container
+ *
+ * @author jyang@google.com (Jun Yang)
+ * @author wangz@google.com (Zhen Wang)
  */
 
 // -----
@@ -31,7 +23,7 @@ Function.prototype.inherits = function(parentCtor) {
 // -----------
 // gadgets
 
-var gadgets = {};
+var gadgets = gadgets || {};
 
 gadgets.error = {};
 gadgets.error.SUBCLASS_RESPONSIBILITY = 'subclass responsibility';
@@ -219,9 +211,8 @@ gadgets.GadgetService.prototype.setUserPref = function(id) {
  */
 gadgets.IfrGadgetService = function() {
   gadgets.GadgetService.call(this);
-
-  _IFPC.registerService('resize_iframe', this.setHeight);
-  _IFPC.registerService('set_pref', this.setUserPref);
+  gadgets.IFPC_.registerService('resize_iframe', this.setHeight);
+  gadgets.IFPC_.registerService('set_pref', this.setUserPref);
 };
 
 gadgets.IfrGadgetService.inherits(gadgets.GadgetService);
@@ -426,7 +417,6 @@ gadgets.Gadget.prototype.getMainContent = function(continuation) {
 
 gadgets.IfrGadget = function(opt_params) {
   gadgets.Gadget.call(this, opt_params);
-  this.serverBase_ = 'http://www.gmodules.com/ig/';  // default server
 };
 
 gadgets.IfrGadget.inherits(gadgets.Gadget);
@@ -463,15 +453,6 @@ gadgets.IfrGadget.prototype.getUserPrefsDialogContent = function(continuation) {
       this.cssClassGadgetUserPrefsDialog + '"></div>');
 };
 
-// TODO: Move this API to Container rather than Gadget
-gadgets.IfrGadget.prototype.setServerBase = function(url) {
-  this.serverBase_ = url;
-};
-
-gadgets.IfrGadget.prototype.getServerBase = function() {
-  return this.serverBase_;
-};
-
 gadgets.IfrGadget.prototype.getMainContent = function(continuation) {
   var iframeId = this.getIframeId();
   continuation('<div class="' + this.cssClassGadgetContent + '"><iframe id="' +
@@ -489,7 +470,7 @@ gadgets.IfrGadget.prototype.getUserPrefsDialogId = function() {
 };
 
 gadgets.IfrGadget.prototype.getIframeUrl = function() {
-  return this.serverBase_ + 'ifr?url=' +
+  return 'http://www.gmodules.com/ig/ifr?url=' +
       encodeURIComponent(this.specUrl) + '&synd=' + this.SYND + '&mid=' +
       this.id + '&parent=' + encodeURIComponent(gadgets.container.parentUrl_) +
       '&ogc=' + document.location.host + this.getUserPrefsParams();
