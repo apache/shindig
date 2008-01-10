@@ -49,7 +49,7 @@ Using Shindig Gadget Container JavaScript
 
    B) Assume your server is running on http://yourserver:yourport/gadgets/...
       Before step 2.B.iv, call the following to point the Gadget at your server:
-      gadget.setServerBase('http://yourserver:yourport/gadgets');
+      gadget.setServerBase('http://yourserver:yourport/gadgets/');
 
 NOTE: In the short term, when rendering Gadgets using gmodules.com certain
       functionality tied to inter-frame communication will not work,
