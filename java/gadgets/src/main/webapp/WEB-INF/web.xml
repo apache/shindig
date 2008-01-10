@@ -22,11 +22,11 @@
   <!-- configuration -->
   <context-param>
     <param-name>core-js-features</param-name>
-    <param-value>res://core-features/</param-value>
+    <param-value>res://features/core-features.txt</param-value>
   </context-param>
   <context-param>
     <param-name>other-js-features</param-name>
-    <param-value>res://features/</param-value>
+    <param-value>res://features/features.txt</param-value>
   </context-param>
   <!-- Render a Gadget -->
 
