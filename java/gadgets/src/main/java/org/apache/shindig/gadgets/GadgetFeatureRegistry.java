@@ -156,11 +156,22 @@ public class GadgetFeatureRegistry {
       if (entry == null) {
         resultsMissing.add(featureName);
       } else {
-        resultsFound.addAll(entry.deps);
-        resultsFound.add(entry);
+        addEntryToSet(resultsFound, entry);
       }
     }
     return resultsMissing.size() == 0;
+  }
+
+  /**
+   * Recursively add all dependencies.
+   * @param results
+   * @param entry
+   */
+  private void addEntryToSet(Set<Entry> results, Entry entry) {
+    for (Entry dep : entry.deps) {
+      addEntryToSet(results, dep);
+    }
+    results.add(entry);
   }
 
   /**
