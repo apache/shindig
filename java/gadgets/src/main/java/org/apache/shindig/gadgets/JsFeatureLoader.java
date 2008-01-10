@@ -211,14 +211,14 @@ public class JsFeatureLoader {
       FileInputStream fis = null;
       try {
         byte[] content = load(new FileInputStream(file));
-        feature = parse(content, file.getParent(), false);
+        feature = parse(content, file.getParent() + "/", false);
       } catch (IOException e) {
-        logger.warning("Error reading file: " + file.toString());
+        logger.warning("Error reading file: " + file.getAbsolutePath());
       } catch (GadgetException ge) {
-        logger.warning("Failed parsing file: " + file.toString());
+        logger.warning("Failed parsing file: " + file.getAbsolutePath());
       }
     } else {
-      logger.warning("Unable to read file: " + file.toString());
+      logger.warning("Unable to read file: " + file.getAbsolutePath());
     }
     return feature;
   }
