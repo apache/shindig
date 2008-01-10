@@ -1,4 +1,5 @@
 features/analytics/feature.xml
+features/caja/feature.xml
 features/core/feature.xml
 features/ifpc/feature.xml
 features/json/feature.xml
