@@ -25,12 +25,19 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.JarURLConnection;
+import java.net.URL;
+import java.net.URLConnection;
+import java.net.URISyntaxException;
+import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.jar.JarEntry;
+import java.util.jar.JarFile;
 import java.util.logging.Logger;
 
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -71,10 +78,12 @@ public class JsFeatureLoader {
       GadgetFeatureRegistry registry) throws GadgetException {
     Map<String, ParsedFeature> deps = new HashMap<String, ParsedFeature>();
     if (path.startsWith("res://")) {
-      loadResources(path.substring(6), deps);
+      logger.info("Loading resources from: " + path);
+      loadResources(new String[]{path.substring(6)}, deps);
     } else {
+      logger.info("Loading files from: " + path);
       File file = new File(path);
-      loadFiles(file, deps);
+      loadFiles(new File[]{file}, deps);
     }
 
     List<GadgetFeatureRegistry.Entry> entries
@@ -95,55 +104,76 @@ public class JsFeatureLoader {
 
   /**
    * Loads features from directories recursively.
-   * @param dir The directory to examine.
+   * @param files The files to examine.
    * @param features The set of all loaded features
    * @throws GadgetException
    */
-  private void loadFiles(File dir, Map<String, ParsedFeature> features)
+  private void loadFiles(File[] files, Map<String, ParsedFeature> features)
       throws GadgetException {
-    logger.info("Loading files from: " + dir.getAbsolutePath());
-    if (dir.isDirectory()) {
-      for (File file : dir.listFiles()) {
-        if (file.isDirectory()) {
-          loadFiles(file, features);
-        } else if (file.getName().equals("feature.xml")) {
-          ParsedFeature feature = processFile(file);
-          if (feature != null) {
-            features.put(feature.name, feature);
-          }
+    for (File file : files) {
+      if (file.isDirectory()) {
+        loadFiles(file.listFiles(), features);
+      } else if (file.getName().equals("feature.xml")) {
+        ParsedFeature feature = processFile(file);
+        if (feature != null) {
+          features.put(feature.name, feature);
         }
-      }
-    } else {
-      ParsedFeature feature = processFile(dir);
-      if (feature != null) {
-        features.put(feature.name, feature);
       }
     }
   }
 
   /**
    * Loads resources recursively.
-   * @param file The location of the resource, either feature.xml or
-   *    features.txt
+   * @param files The base paths to look for feature.xml
    * @param features The set of all loaded features
    * @throws GadgetException
    */
-  private void loadResources(String file, Map<String, ParsedFeature> features)
+  private void loadResources(String[] files, Map<String, ParsedFeature> features)
       throws GadgetException {
-    logger.info("Loading resource from: " + file);
-    if (file.endsWith(".txt")) {
-      String[] names = readResourceList(file);
-      for (String name : names) {
-        loadResources(name, features);
+    ClassLoader cl = JsFeatureLoader.class.getClassLoader();
+    try {
+      for (String file : files) {
+        file = file.trim();
+        if (file.endsWith(".txt")) {
+          loadResources(readResourceList(file), features);
+        } else if (file.endsWith("feature.xml")) {
+          ParsedFeature feature = processResource(file);
+          if (feature != null) {
+            features.put(feature.name, feature);
+          }
+        } else {
+          Enumeration<URL> mappedResources = cl.getResources(file);
+          while (mappedResources.hasMoreElements()) {
+            URL resourceUrl =  mappedResources.nextElement();
+            if (resourceUrl.getProtocol().equals("file")) {
+              File f = new File(resourceUrl.toURI());
+              loadFiles(new File[]{f}, features);
+            } else {
+              URLConnection urlConnection = resourceUrl.openConnection();
+              if (urlConnection instanceof JarURLConnection) {
+                JarURLConnection jarUrlConn = (JarURLConnection)urlConnection;
+                JarFile jar = jarUrlConn.getJarFile();
+
+                Enumeration<JarEntry> jarEntries = jar.entries();
+                while (jarEntries.hasMoreElements()) {
+                  JarEntry jarEntry =  jarEntries.nextElement();
+                  if (jarEntry.getName().startsWith(file) &&
+                      jarEntry.getName().endsWith("feature.xml")) {
+                    ParsedFeature feature = processResource(jarEntry.getName());
+                    if (feature != null) {
+                      features.put(feature.name, feature);
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
       }
-    }
-    else if (file.endsWith("feature.xml")) {
-      ParsedFeature feature = processResource(file);
-      if (feature != null) {
-        features.put(feature.name, feature);
-      }
-    } else {
-      logger.warning("Unknown resource file: " + file);
+    } catch (IOException ioe) {
+      throw new GadgetException(GadgetException.Code.INVALID_PATH, ioe);
+    } catch (URISyntaxException use) {
+      throw new GadgetException(GadgetException.Code.INVALID_PATH, use);
     }
   }
 
