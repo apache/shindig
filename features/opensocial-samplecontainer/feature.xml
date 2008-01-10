@@ -30,9 +30,9 @@
          true, false);
      var viewerFriend1 = container.newPerson({'id' : 3,
          'name' : 'viewer friend 1!'});
-
+     
      container.resetData(viewer, owner,
-         container.newCollection([viewerFriend1]), null, null, null, data);
+         container.newCollection([viewerFriend1]));
     </script>
   </gadget>
 </feature>
