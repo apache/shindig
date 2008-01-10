@@ -57,8 +57,13 @@ public class JsFeatureLoader {
    * Loads all of the gadgets in the directory specified by path. Invalid
    * features will not cause this to fail, but passing an invalid path will.
    *
-   * @param path The directory to load gadgets from. If prefixed with res://
-   *     All resources matching the name will be loaded.
+   * @param path The file or directory to load the feature from. If feature.xml
+   *    is passed in directly, it will be loaded as a single feature. If a
+   *    directory is passed, any features in that directory (recursively) will
+   *    be loaded. If res://*.txt is passed, we will look for named resources
+   *    in the text file. If path is prefixed with res://, the file
+   *    is treated as a resource, and all references are assumed to be
+   *    resources as well.
    * @return A list of the newly loaded features.
    * @throws GadgetException
    */
@@ -97,52 +102,64 @@ public class JsFeatureLoader {
   private void loadFiles(File dir, Map<String, ParsedFeature> features)
       throws GadgetException {
     logger.info("Loading files from: " + dir.getAbsolutePath());
-    if (!dir.isDirectory()) {
-      throw new GadgetException(GadgetException.Code.INVALID_PATH);
-    }
-    for (File file : dir.listFiles()) {
-      if (file.isDirectory()) {
-        loadFiles(file, features);
-      } else if (file.getName().equals("feature.xml")) {
-        ParsedFeature feature = processFile(file);
-        if (feature != null) {
-          features.put(feature.name, feature);
+    if (dir.isDirectory()) {
+      for (File file : dir.listFiles()) {
+        if (file.isDirectory()) {
+          loadFiles(file, features);
+        } else if (file.getName().equals("feature.xml")) {
+          ParsedFeature feature = processFile(file);
+          if (feature != null) {
+            features.put(feature.name, feature);
+          }
         }
+      }
+    } else {
+      ParsedFeature feature = processFile(dir);
+      if (feature != null) {
+        features.put(feature.name, feature);
       }
     }
   }
 
   /**
    * Loads resources recursively.
-   * @param path The base path to look for feature.xml
+   * @param file The location of the resource, either feature.xml or
+   *    features.txt
    * @param features The set of all loaded features
    * @throws GadgetException
    */
-  private void loadResources(String path, Map<String, ParsedFeature> features)
+  private void loadResources(String file, Map<String, ParsedFeature> features)
       throws GadgetException {
-    logger.info("Loading resources from: " + path);
+    logger.info("Loading resource from: " + file);
+    if (file.endsWith(".txt")) {
+      String[] names = readResourceList(file);
+      for (String name : names) {
+        loadResources(name, features);
+      }
+    }
+    else if (file.endsWith("feature.xml")) {
+      ParsedFeature feature = processResource(file);
+      if (feature != null) {
+        features.put(feature.name, feature);
+      }
+    } else {
+      logger.warning("Unknown resource file: " + file);
+    }
+  }
+
+  /**
+   * @param path Location of the resource list.
+   * @return A list of resources from the list.
+   */
+  private String[] readResourceList(String path) {
     ClassLoader cl = JsFeatureLoader.class.getClassLoader();
     InputStream is = cl.getResourceAsStream(path);
     if (is == null) {
-      throw new GadgetException(GadgetException.Code.INVALID_PATH, path);
-    }
-    String contents = new String(load(is));
-    // TODO: verify that \n is used for all jar / war directory files, or find
-    // a cleaner way to iterate over all files in a directory found with
-    // getResource().
-    String[] files = contents.split("\n");
-    for (String file : files) {
-      if (file.length() > 1) { // Length test avoids empty lines.
-        if (file.equals("feature.xml")) {
-          ParsedFeature feature = processResource(path + "/" + file.trim());
-          if (feature != null) {
-            features.put(feature.name, feature);
-          }
-        } else if (!file.contains(".")) {
-          // Avoid anything that looks like a regular file.
-          loadResources(path + file, features);
-        }
-      }
+      logger.warning("Unable to locate resource: " + path);
+      return new String[0];
+    } else {
+      String names = new String(load(is));
+      return names.split("\n");
     }
   }
 

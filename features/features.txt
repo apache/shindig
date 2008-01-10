@@ -1,0 +1,7 @@
+features/analytics/feature.xml
+features/core/feature.xml
+features/ifpc/feature.xml
+features/json/feature.xml
+features/opensocial-reference/feature.xml
+features/opensocial-samplecontainer/feature.xml
+features/setprefs/feature.xml
