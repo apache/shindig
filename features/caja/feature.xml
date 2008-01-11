@@ -12,12 +12,15 @@
   See the License for the specific language governing permissions and
   limitations under the License.
 
-  TODO(doll): The caja.js file referenced here should come from maven 
+  TODO(doll): The caja.js file referenced here should come from maven
   or something. We should not have our own copy of it.
 -->
 <feature>
   <name>caja</name>
   <gadget>
-    <script src="caja.js"/>
+    <script src="caja.js"></script>
+    <!--Be default permissive.js should not be included.
+        Including this file turns off all caja security rules. -->
+    <!--<script src="permissive.js"></script>-->
   </gadget>
 </feature>
