@@ -40,7 +40,14 @@ gadgets.Prefs.prototype.set = function(key, value) {
   } else {
     gadgets.PrefStore_.setPref(this.moduleId_, key, value);
   }
-  // TODO: Update user pref store somehow.
+
+  var modId = 'remote_module_' + this.getModuleId();
+  var params = gadgets.util.getUrlParameters();
+  var ifpcRelay = (params.parent || '') + '/ig/ifpc_relay';
+  var ifpcArgs = Array.prototype.slice.call(arguments);
+  ifpcArgs.unshift(''); // security token placeholder
+  ifpcArgs.unshift(modId);
+  gadgets.IFPC_.call(modId, 'set_pref', ifpcArgs, ifpcRelay, null, '');
 };
 
 /**
@@ -58,8 +65,6 @@ gadgets.Prefs.prototype.setArray = function(key, val) {
   for (var i = 0, j = val.length; i < j; ++i) {
     val[i] = val[i].replace(/\|/g, "%7C");
   }
-  gadgets.PrefStore_.setPref(this.moduleId_, key, val.join("|"));
-
-  // TODO: Update user pref store somehow. Where do we hook into the container?
+  this.set(key, val.join('|'));
 };
 
