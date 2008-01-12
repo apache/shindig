@@ -21,9 +21,7 @@
  * @constructor
  * @private
  */
-opensocial.Container = function() {
-  this.cajaEnabled_ = false;
-};
+opensocial.Container = function() {};
 
 
 /**
@@ -290,8 +288,7 @@ opensocial.Container.prototype.newFetchActivitiesRequest = function(idSpec,
  */
 opensocial.Container.prototype.newCollection = function(array, opt_offset,
     opt_totalSize) {
-  return this.wrapCollectionWithCaja_(new opensocial.Collection(array,
-      opt_offset, opt_totalSize));
+  return new opensocial.Collection(array, opt_offset, opt_totalSize);
 };
 
 
@@ -302,8 +299,7 @@ opensocial.Container.prototype.newCollection = function(array, opt_offset,
  */
 opensocial.Container.prototype.newPerson = function(opt_params, opt_isOwner,
     opt_isViewer) {
-  return this.wrapPersonWithCaja_(new opensocial.Person(opt_params, opt_isOwner,
-      opt_isViewer));
+  return new opensocial.Person(opt_params, opt_isOwner, opt_isViewer);
 };
 
 
@@ -321,7 +317,7 @@ opensocial.Container.prototype.newPerson = function(opt_params, opt_isOwner,
  */
 opensocial.Container.prototype.newActivity = function(title,
     opt_params) {
-  return this.wrapActivityWithCaja_(new opensocial.Activity(title, opt_params));
+  return new opensocial.Activity(title, opt_params);
 };
 
 
@@ -340,8 +336,7 @@ opensocial.Container.prototype.newActivity = function(title,
  */
 opensocial.Container.prototype.newActivityMediaItem = function(mimeType, url,
     opt_params) {
-  return this.wrapActivityMediaItemWithCaja_(
-      new opensocial.Activity.MediaItem(mimeType, url, opt_params));
+  return new opensocial.Activity.MediaItem(mimeType, url, opt_params);
 };
 
 
@@ -352,8 +347,8 @@ opensocial.Container.prototype.newActivityMediaItem = function(mimeType, url,
  */
 opensocial.Container.prototype.newResponseItem = function(originalDataRequest,
     data, opt_errorCode, opt_errorMessage) {
-  return this.wrapResponseItemWithCaja_(new opensocial.ResponseItem(
-      originalDataRequest, data, opt_errorCode, opt_errorMessage));
+  return new opensocial.ResponseItem(originalDataRequest, data, opt_errorCode,
+      opt_errorMessage);
 };
 
 
@@ -364,8 +359,7 @@ opensocial.Container.prototype.newResponseItem = function(originalDataRequest,
  */
 opensocial.Container.prototype.newDataResponse = function(responseItems,
     opt_globalError) {
-  return this.wrapDataResponseWithCaja_(new opensocial.DataResponse(
-      responseItems, opt_globalError));
+  return new opensocial.DataResponse(responseItems, opt_globalError);
 };
 
 
@@ -377,7 +371,7 @@ opensocial.Container.prototype.newDataResponse = function(responseItems,
  * @private
  */
 opensocial.Container.prototype.newDataRequest = function() {
-  return this.wrapDataRequestWithCaja_(new opensocial.DataRequest());
+  return new opensocial.DataRequest();
 };
 
 
@@ -389,8 +383,8 @@ opensocial.Container.prototype.newDataRequest = function() {
  */
 opensocial.Container.prototype.newEnvironment = function(domain, surface,
     supportedSurfaces, supportedFields, opt_params) {
-  return this.wrapEnvironmentWithCaja_(new opensocial.Environment(domain,
-      surface, supportedSurfaces, supportedFields, opt_params));
+  return new opensocial.Environment(domain, surface, supportedSurfaces,
+      supportedFields, opt_params);
 };
 
 
@@ -402,8 +396,7 @@ opensocial.Container.prototype.newEnvironment = function(domain, surface,
  */
 opensocial.Container.prototype.newSurface = function(name,
     opt_isPrimaryContent) {
-  return this.wrapSurfaceWithCaja_(new opensocial.Surface(name,
-      opt_isPrimaryContent));
+  return new opensocial.Surface(name, opt_isPrimaryContent);
 };
 
 
@@ -439,38 +432,34 @@ opensocial.Container.prototype.enableCaja = function() {
 
   var outers = caja.copy(___.sharedOuters);
 
-  // TODO(doll): Is this the way all containers should do this?
+  // TODO(doll): We need to add caja allows for the gadgets namespace so that
+  // this works properly. It does not belong in gadgets.
   var igOnload = window["_IG_RegisterOnloadHandler"];
   if (igOnload) {
     outers._IG_RegisterOnloadHandler = ___.simpleFunc(igOnload);
   }
 
-  // TODO(doll): Remove need for this
-  outers.expose = function expose(name, func) {
-    // TODO(benl): we should check that name does not contain
-    // anything except numbers and letters.
-    eval(name + ' = func;');
+  outers.emitHtml___ = function emitHtml(var_args) {
+    var html = Array.prototype.slice.call(arguments, 0).join('');
+    document.write(html);
   };
-
-  outers.emitHtml___ = function emitHtml(html) {
-    // TODO(doll): This only works for the sample container. Really emitHtml
-    // should be a passed in function
-    var oldHtml = document.getElementById("gadgetContent").innerHTML;
-    document.getElementById("gadgetContent").innerHTML = oldHtml + html;
-  };
-
 
   outers.document = function() {};
   outers.document.getElementById = function(id) {
     // TODO(benl): namespace-ize id.
-    var element = document.getElementById(id);
-    // TODO(benl): replace innerHTML with hidden getter/setter
-    ___.allowSet(element, 'innerHTML');
+    var element = document.getElementById("DOM-PREFIX-" + id);
+    if (element !== null) {
+      ___.useSetHandler(element, 'innerHTML', function(html) {
+        var temp = html_sanitize(html);
+        return this.innerHTML = temp;
+      });
+    }
     return element;
   };
 
   ___.allowCall(outers.document, 'getElementById');
 
+  // Adding all of the available opensocial calls as defined in the spec
   outers.opensocial = opensocial;
   ___.allowCall(outers.opensocial, 'requestCreateActivity');
   ___.allowCall(outers.opensocial, 'hasPermission');
@@ -481,122 +470,74 @@ opensocial.Container.prototype.enableCaja = function() {
   ___.allowCall(outers.opensocial, 'newActivity');
   ___.allowCall(outers.opensocial, 'newActivityMediaItem');
 
+  ___.allowCall(opensocial.Collection.prototype, 'getById');
+  ___.allowCall(opensocial.Collection.prototype, 'size');
+  ___.allowCall(opensocial.Collection.prototype, 'each');
+  ___.allowCall(opensocial.Collection.prototype, 'asArray');
+  ___.allowCall(opensocial.Collection.prototype, 'getTotalSize');
+  ___.allowCall(opensocial.Collection.prototype, 'getOffset');
+
+  // TODO(doll): Call caja method to support all array calls once it exists
+  ___.allowCall(Array.prototype, 'push');
+  ___.allowCall(Array.prototype, 'sort');
+
+  ___.allowCall(opensocial.Person.prototype, 'getId');
+  ___.allowCall(opensocial.Person.prototype, 'getDisplayName');
+  ___.allowCall(opensocial.Person.prototype, 'getField');
+  ___.allowCall(opensocial.Person.prototype, 'isViewer');
+  ___.allowCall(opensocial.Person.prototype, 'isOwner');
+
+  ___.allowCall(opensocial.Activity.prototype, 'getId');
+  ___.allowCall(opensocial.Activity.prototype, 'getField');
+
+  ___.allowCall(opensocial.Activity.MediaItem.prototype, 'getField');
+
+  ___.allowCall(opensocial.ResponseItem.prototype, 'hadError');
+  ___.allowCall(opensocial.ResponseItem.prototype, 'getError');
+  ___.allowCall(opensocial.ResponseItem.prototype, 'getOriginalDataRequest');
+  ___.allowCall(opensocial.ResponseItem.prototype, 'getData');
+
+  ___.allowCall(opensocial.DataResponse.prototype, 'hadError');
+  ___.allowCall(opensocial.DataResponse.prototype, 'get');
+
+  ___.allowCall(opensocial.DataRequest.prototype, 'getRequestObjects');
+  ___.allowCall(opensocial.DataRequest.prototype, 'add');
+  ___.allowCall(opensocial.DataRequest.prototype, 'send');
+  ___.allowCall(opensocial.DataRequest.prototype, 'newFetchPersonRequest');
+  ___.allowCall(opensocial.DataRequest.prototype, 'newFetchPeopleRequest');
+  ___.allowCall(opensocial.DataRequest.prototype, 'newFetchGlobalAppDataRequest');
+  ___.allowCall(opensocial.DataRequest.prototype, 'newFetchInstanceAppDataRequest');
+  ___.allowCall(opensocial.DataRequest.prototype, 'newUpdateInstanceAppDataRequest');
+  ___.allowCall(opensocial.DataRequest.prototype, 'newFetchPersonAppDataRequest');
+  ___.allowCall(opensocial.DataRequest.prototype, 'newUpdatePersonAppDataRequest');
+  ___.allowCall(opensocial.DataRequest.prototype, 'newFetchActivitiesRequest');
+
+  ___.allowCall(opensocial.Environment.prototype, 'getDomain');
+  ___.allowCall(opensocial.Environment.prototype, 'getSurface');
+  ___.allowCall(opensocial.Environment.prototype, 'getSupportedSurfaces');
+  ___.allowCall(opensocial.Environment.prototype, 'getParams');
+  ___.allowCall(opensocial.Environment.prototype, 'supportsField');
+  ___.allowCall(opensocial.Environment.prototype, 'hasCapability');
+
+  ___.allowCall(opensocial.Surface.prototype, 'getName');
+  ___.allowCall(opensocial.Surface.prototype, 'isPrimaryContent');
+
   var moduleHandler = ___.freeze({
     getOuters: ___.simpleFunc(function() { return outers; }),
     handle: ___.simpleFunc(function(newModule) { newModule(outers); })
   });
 
-
- this.cajaEnabled_ = true;
   ___.setNewModuleHandler(moduleHandler);
 };
 
+/**
+ * Default taming is to return obj itself. Depending on
+ * other taming decisions, it may be more appropriate to
+ * return an interposed wrapper.
+ */
+function plugin_tamed(obj) { return obj; }
 
-opensocial.Container.prototype.wrapCollectionWithCaja_ = function(collection) {
-  if (this.cajaEnabled_) {
-    ___.allowCall(collection, 'getById');
-    ___.allowCall(collection, 'size');
-    ___.allowCall(collection, 'each');
-    ___.allowCall(collection, 'asArray');
-    ___.allowCall(collection, 'getTotalSize');
-    ___.allowCall(collection, 'getOffset');
-
-    // TODO(doll): Call caja method to support all array calls once it exists
-    ___.allowCall(collection.asArray(), 'push');
-    ___.allowCall(collection.asArray(), 'sort');
-  }
-  return collection;
-};
-
-
-opensocial.Container.prototype.wrapPersonWithCaja_ = function(person) {
-  if (this.cajaEnabled_) {
-    ___.allowCall(person, 'getId');
-    ___.allowCall(person, 'getDisplayName');
-    ___.allowCall(person, 'getField');
-    ___.allowCall(person, 'isViewer');
-    ___.allowCall(person, 'isOwner');
-  }
-  return person;
-};
-
-
-opensocial.Container.prototype.wrapActivityWithCaja_ = function(activity) {
-  if (this.cajaEnabled_) {
-    ___.allowCall(activity, 'getId');
-    ___.allowCall(activity, 'getField');
-  }
-  return activity;
-};
-
-
-opensocial.Container.prototype.wrapActivityMediaItemWithCaja_ = function(
-    mediaItem) {
-  if (this.cajaEnabled_) {
-    ___.allowCall(mediaItem, 'getField');
-  }
-  return mediaItem;
-};
-
-
-opensocial.Container.prototype.wrapResponseItemWithCaja_ = function(
-    responseItem) {
-  if (this.cajaEnabled_) {
-    ___.allowCall(responseItem, 'hadError');
-    ___.allowCall(responseItem, 'getError');
-    ___.allowCall(responseItem, 'getOriginalDataRequest');
-    ___.allowCall(responseItem, 'getData');
-  }
-  return responseItem;
-};
-
-
-opensocial.Container.prototype.wrapDataResponseWithCaja_ = function(
-    dataResponse) {
-  if (this.cajaEnabled_) {
-    ___.allowCall(dataResponse, 'hadError');
-    ___.allowCall(dataResponse, 'get');
-  }
-  return dataResponse;
-};
-
-
-opensocial.Container.prototype.wrapDataRequestWithCaja_ = function(request) {
-  if (this.cajaEnabled_) {
-    ___.allowCall(request, 'getRequestObjects');
-    ___.allowCall(request, 'add');
-    ___.allowCall(request, 'send');
-    ___.allowCall(request, 'newFetchPersonRequest');
-    ___.allowCall(request, 'newFetchPeopleRequest');
-    ___.allowCall(request, 'newFetchGlobalAppDataRequest');
-    ___.allowCall(request, 'newFetchInstanceAppDataRequest');
-    ___.allowCall(request, 'newUpdateInstanceAppDataRequest');
-    ___.allowCall(request, 'newFetchPersonAppDataRequest');
-    ___.allowCall(request, 'newUpdatePersonAppDataRequest');
-    ___.allowCall(request, 'newFetchActivitiesRequest');
-  }
-  return request;
-};
-
-
-opensocial.Container.prototype.wrapEnvironmentWithCaja_ = function(
-    environment) {
-  if (this.cajaEnabled_) {
-    ___.allowCall(environment, 'getDomain');
-    ___.allowCall(environment, 'getSurface');
-    ___.allowCall(environment, 'getSupportedSurfaces');
-    ___.allowCall(environment, 'getParams');
-    ___.allowCall(environment, 'supportsField');
-    ___.allowCall(environment, 'hasCapability');
-  }
-  return environment;
-};
-
-
-opensocial.Container.prototype.wrapSurfaceWithCaja_ = function(surface) {
-  if (this.cajaEnabled_) {
-    ___.allowCall(surface, 'getName');
-    ___.allowCall(surface, 'isPrimaryContent');
-  }
-  return surface;
-};
+function plugin_dispatchEvent___(thisNode, event, pluginId, handlerName) {
+  return ___.getOuters(pluginId)[handlerName](plugin_tamed(thisNode),
+      plugin_tamed(event));
+}

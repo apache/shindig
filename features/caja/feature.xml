@@ -23,6 +23,7 @@ specific language governing permissions and limitations under the License.
   <name>caja</name>
   <gadget>
     <script src="caja.js"></script>
+    <script src="html-sanitizer.js"></script>
     <!--Be default permissive.js should not be included.
         Including this file turns off all caja security rules. -->
     <!--<script src="permissive.js"></script>-->
