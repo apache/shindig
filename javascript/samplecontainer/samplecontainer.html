@@ -1,0 +1,78 @@
+<html>
+<head>
+<title>Gadget testing container</title>
+<link rel="stylesheet" href="../container/gadgets.css">
+<style type="text/css">
+  body {
+    font-family: arial, sans-serif;
+  }
+
+  .gadgets-gadget {
+    height: 100%;
+    width: 100%;
+  }
+
+  #headerDiv {
+    padding: 10px;
+    margin-bottom: 20px;
+    background-color: #e5ecf9;
+    color: #3366cc;
+    font-size: larger;
+    font-weight: bold;
+  }
+
+  .subTitle {
+    font-size: smaller;
+    float: right;
+  }
+
+</style>
+<script type="text/javascript" src="../container/json.js"></script>
+<script type="text/javascript" src="../container/ifpc.js"></script>
+<script type="text/javascript" src="../container/cookies.js"></script>
+<script type="text/javascript" src="../container/gadgets.js"></script>
+<script type="text/javascript">
+
+var specUrl = 'http://hosting.gmodules.com/ig/gadgets/file/117247905274371511495/caja-clickme.xml';
+var gadget;
+
+function initGadget() {
+  var cookieUrl = decodeURIComponent(goog.net.cookies.get('sampleContainerGadgetUrl'));
+  if (cookieUrl && cookieUrl != "undefined") {
+    specUrl = cookieUrl;
+  }
+
+  document.getElementById("gadgetUrl").value = specUrl;
+
+  gadget = gadgets.container.createGadget({'specUrl': specUrl});;
+  gadget.setServerBase('http://localhost:8080/gadgets/');
+
+  gadgets.container.addGadget(gadget);
+  gadgets.container.layoutManager.setGadgetChromeIds(['gadget-chrome']);
+  gadgets.container.renderGadgets();
+};
+
+function changeGadgetUrl() {
+  specUrl = document.getElementById("gadgetUrl").value;
+  gadget.specUrl = specUrl;
+  goog.net.cookies.set('sampleContainerGadgetUrl', encodeURIComponent(specUrl));
+
+  gadgets.container.renderGadgets();
+};
+
+</script>
+</head>
+<body onLoad="initGadget();">
+  <div id="headerDiv">
+    <div style="float:left">Gadget testing container</div>
+    <div class="subTitle">
+      Displaying gadget:
+      <input type="text" size="75" id="gadgetUrl"/>
+      <input type="button" value="reset" onclick="changeGadgetUrl();"/>
+    </div>
+    <div style="clear:both; height: 1px;">&nbsp;</div>
+  </div>
+
+  <div id="gadget-chrome" class="gadgets-gadget-chrome" style="width:80%; height:100%"></div>
+</body>
+</html>

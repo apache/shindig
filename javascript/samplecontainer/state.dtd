@@ -1,0 +1,39 @@
+<!ELEMENT container (viewer, owner?, viewerFriends?, ownerFriends?, appId?,
+    globalAppData?, instanceAppData?, personAppData?, activities?)>
+
+<!ELEMENT viewer (person)>
+<!ELEMENT owner (person)>
+<!ELEMENT viewerFriends (person*)>
+<!ELEMENT ownerFriends (person*)>
+<!ELEMENT appId CDATA #REQUIRED>
+
+<!ELEMENT person>
+<!ATTLIST person id CDATA #REQUIRED
+    name CDATA #IMPLIED
+    thumbnailUrl CDATA #IMPLIED
+    profileUrl CDATA #IMPLIED>
+
+<!ELEMENT globalAppData (data*)>
+<!ELEMENT instanceAppData (data*)>
+<!ELEMENT personAppData (data*)>
+
+<!ELEMENT data (#PCDATA)>
+<!ATTLIST data field CDATA #REQUIRED person CDATA #IMPLIED>
+
+<!ELEMENT activities (stream*)>
+<!ELEMENT stream (activity*)>
+<!ATTLIST stream title CDATA #REQUIRED
+    url CDATA #IMPLIED
+    userId CDATA #IMPLIED
+    sourceUrl CDATA #IMPLIED
+    faviconUrl CDATA #IMPLIED>
+<!ELEMENT activity (mediaItem*) (#PCDATA)>
+<!ATTLIST activity title CDATA #REQUIRED
+    id CDATA #REQUIRED
+    externalId CDATA #IMPLIED
+    body CDATA #IMPLIED
+    url CDATA #IMPLIED
+    postedTime CDATA #IMPLIED>
+<!ATTLIST mediaItem mimeType CDATA #REQUIRED
+    url CDATA #REQUIRED
+    type CDATA #IMPLIED>
