@@ -47,6 +47,7 @@
  */
 opensocial.SampleContainer = function() {
   opensocial.Container.call(this);
+  this.resetData(this.newPerson());
 };
 opensocial.SampleContainer.inherits(opensocial.Container);
 

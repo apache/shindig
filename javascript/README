@@ -9,7 +9,7 @@ Using Shindig Gadget Container JavaScript
    * file:///shindig-dir/javascript/container/sample3.html
 
    Samples #2 and #4 need to be run in the context of a webserver for cookie and
-   container-gadget communication support. Start up your favorite browser and point 
+   container-gadget communication support. Start up your favorite browser and point
    it at the .../shindig/javascript/container directory (here abbreviated <shindig-js-dir>):
    * http://yourserver:yourport/shindig-js-dir/sample2.html
    * http://yourserver:yourport/shindig-js-dir/sample4.html
@@ -50,6 +50,25 @@ Using Shindig Gadget Container JavaScript
    B) Assume your server is running on http://yourserver:yourport/gadgets/...
       Before step 2.B.iv, call the following to point the Gadget at your server:
       gadget.setServerBase('http://yourserver:yourport/gadgets/');
+
+4) Run the opensocial sample container
+   A) Set up your own Shindig Gadget Server. See its README for details.
+
+   B) From within the java/gadgets directory run the following commands
+      i) Copy the sample container code into the webapp directory so that the
+         shindig server will serve it for you.
+      cp -r ../../javascript/container/ src/main/webapp/
+      cp -r ../../javascript/samplecontainer/ src/main/webapp/
+
+      ii) Restart shindig
+      mvn jetty:run
+
+    C) Hit the sample container at
+    http://yourserver:yourport/gadgets/samplecontainer/samplecontainer.html
+
+    D) See the sample container help document for more details on how it works:
+    http://yourserver:yourport/gadgets/samplecontainer/getting-started.html
+
 
 NOTE: In the short term, when rendering Gadgets using gmodules.com certain
       functionality tied to inter-frame communication will not work,

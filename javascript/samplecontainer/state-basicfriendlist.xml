@@ -1,0 +1,13 @@
+<container>
+  <viewer>
+    <person id="john.doe@mydomain.com" name="John Doe"></person>
+  </viewer>
+
+  <viewerFriends>
+     <person id="jane.doe@mydomain.com" name="Jane Doe"></person>
+     <person id="george.doe@mydomain.com" name="George Doe"></person>
+     <person id="peter.doe@mydomain.com" name="Peter Doe"></person>
+     <person id="susan.doe@mydomain.com" name="Susan Doe"></person>
+  </viewerFriends>
+
+</container>

@@ -21,22 +21,77 @@ specific language governing permissions and limitations under the License.
   <dependency>opensocial-reference</dependency>
   <dependency>caja</dependency>
   <gadget>
-    <script src="samplecontainer.js"/>
+    <script src="samplecontainer.js"></script>
+    <script src="caja-compatible-jquery.js"></script>
+    <script src="statefileparser.js"></script>
     <script>
-     opensocial.Container.setContainer(new opensocial.SampleContainer());
-     opensocial.Container.get().enableCaja();
+      opensocial.Container.setContainer(new opensocial.SampleContainer());
+      opensocial.Container.get().enableCaja();
 
-     // remove when have state parsing or server side impl
-     var container = opensocial.Container.get();
-     var viewer = container.newPerson({'id' : 1, 'name' : 'viewer guy'},
-         false, true);
-     var owner = container.newPerson({'id' : 2, 'name' : 'owner guy'},
-         true, false);
-     var viewerFriend1 = container.newPerson({'id' : 3,
-         'name' : 'viewer friend 1!'});
-     
-     container.resetData(viewer, owner,
-         container.newCollection([viewerFriend1]));
+      var stateUrl = "/gadgets/samplecontainer/state-basicfriendlist.xml";
+      <!--TODO(doll): The cookies.js file needs to be moved into a feature so we can use it here-->
+      <!--var cookieUrl = decodeURIComponent(goog.net.cookies.get('sampleContainerStateUrl'));-->
+      <!--if (cookieUrl &amp;&amp; cookieUrl != "undefined") {-->
+        <!--stateUrl = cookieUrl;-->
+      <!--}-->
+
+      var messageDiv = {"innerHTML" : "ignoring for now"};
+
+      function toggleStateType() {
+        if (document.getElementById("stateTypeUrl").checked) {
+          document.getElementById("stateUrl").style.display = "block";
+          document.getElementById("stateXml").style.display = "none";
+        } else {
+          document.getElementById("stateUrl").style.display = "none";
+          document.getElementById("stateXml").style.display = "block";
+        }
+      }
+
+      function showXmlState() {
+        document.getElementById("stateTypeUrl").checked = false;
+        document.getElementById("stateTypeXml").checked = true;
+        toggleStateType();
+      }
+
+      function changeState() {
+        if (document.getElementById("stateTypeUrl").checked) {
+          changeStateUrl();
+        } else {
+          changeStateXml();
+        }
+      }
+
+      function changeStateUrl() {
+        stateUrl = document.getElementById("stateUrl").value;
+        StateFileParser.refreshState(stateUrl, messageDiv,
+            opensocial.Container.get(), function() {gadgets.util.runOnLoadHandlers(); dumpState();});
+      }
+
+      function changeStateXml() {
+        var stateXml = document.getElementById("stateXml").value;
+        var stateXmlObject = (new DOMParser()).parseFromString(stateXml, "text/xml");
+        StateFileParser.onLoadState(stateXmlObject, null, messageDiv,
+            opensocial.Container.get(), function() {window.console.log(messageDiv.innerHTML); gadgets.util.runOnLoadHandlers();});
+      }
+
+      function dumpState() {
+        StateFileParser.dumpState(opensocial.Container.get(), document.getElementById("stateXml"));
+      }
+
+      var stateHtml = "&lt;div style=\"padding: 5px; margin-bottom: 20px; background-color: #FAFAD2;"
+          + "color: #DAA520; font-size: smaller; font-weight:bold\"&gt;Displaying state:"
+          + "&lt;input type=\"radio\" id=\"stateTypeUrl\" name=\"stateType\" value=\"url\" onclick=\"toggleStateType()\" checked=\"checked\" &gt;use url&lt;/input&gt;"
+          + "&lt;input type=\"radio\" id=\"stateTypeXml\" name=\"stateType\" value=\"xml\" onclick=\"toggleStateType()\"&gt;use textbox&lt;/input&gt;"
+          + "&lt;input type=\"button\" value=\"load\" onclick=\"changeState();\"/&gt;"
+          + "&lt;input type=\"button\" value=\"dump\" onclick=\"dumpState(); showXmlState();\"/&gt;"
+          + "&lt;input type=\"text\" size=\"75\" id=\"stateUrl\" style=\"display:block;\"/&gt;"
+          + "&lt;textarea id=\"stateXml\" rows=\"15\" cols=\"120\" style=\"display:none;\" &gt;&lt;/textarea&gt;"
+          + "&lt;/div&gt;";
+
+      document.write(stateHtml);
+      document.getElementById("stateUrl").value = stateUrl;
+      changeStateUrl();
+
     </script>
   </gadget>
 </feature>
