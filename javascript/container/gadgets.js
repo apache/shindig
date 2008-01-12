@@ -225,6 +225,7 @@ gadgets.IfrGadgetService = function() {
   gadgets.GadgetService.call(this);
   gadgets.IFPC_.registerService('resize_iframe', this.setHeight);
   gadgets.IFPC_.registerService('set_pref', this.setUserPref);
+  gadgets.IFPC_.registerService('set_title', this.setTitle);
 };
 
 gadgets.IfrGadgetService.inherits(gadgets.GadgetService);
@@ -237,7 +238,10 @@ gadgets.IfrGadgetService.prototype.setHeight = function(elementId, height) {
 };
 
 gadgets.IfrGadgetService.prototype.setTitle = function(gadget, title) {
-  throw Error(gadgets.error.TO_BE_DONE);
+  var element = document.getElementById(gadget + '_title');
+  if (element) {
+    element.innerHTML = title.replace(/&/g, '&amp;').replace(/</g, '&lt;');
+  }
 };
 
 /**
@@ -451,7 +455,8 @@ gadgets.IfrGadget.prototype.cssClassTitleButton = 'gadgets-gadget-title-button';
 gadgets.IfrGadget.prototype.cssClassGadgetContent = 'gadgets-gadget-content';
 
 gadgets.IfrGadget.prototype.getTitleBarContent = function(continuation) {
-  continuation('<div class="' + this.cssClassTitleBar + '"><span class="' +
+  continuation('<div class="' + this.cssClassTitleBar + '"><span id="' +
+      this.getIframeId() + '_title" class="' +
       this.cssClassTitle + '">Title</span> | <span class="' +
       this.cssClassTitleButtonBar +
       '"><a href="#" onclick="gadgets.container.getGadget(' + this.id +

@@ -28,6 +28,11 @@ gadgets.Window = gadgets.Window || {};
  * @param {String} title Preferred title.
  */
 gadgets.Window.setTitle = function(title) {
-  // TODO
+  var modId = 'remote_module_' + (new gadgets.Prefs()).getModuleId();
+  var ifpcRelay = gadgets.util.getUrlParameters().parent || '';
+  gadgets.IFPC_.call(modId, 'set_title', [modId, title], ifpcRelay, null, '');
 };
+
+// Alias for legacy code
+var _IG_SetTitle = gadgets.Window.setTitle;
 
