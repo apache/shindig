@@ -21,6 +21,7 @@
  * to change the height of a gadget dynamically.
  */
 
+var gadgets = gadgets || {};
 gadgets.Window = gadgets.Window || {};
 
 /**

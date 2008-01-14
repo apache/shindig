@@ -21,6 +21,7 @@
  * to set the title of a gadget dynamically.
  */
 
+var gadgets = gadgets || {};
 gadgets.Window = gadgets.Window || {};
 
 /**
