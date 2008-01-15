@@ -33,7 +33,9 @@
 <script type="text/javascript" src="../container/gadgets.js"></script>
 <script type="text/javascript">
 
-var specUrl = 'http://hosting.gmodules.com/ig/gadgets/file/117247905274371511495/caja-clickme.xml';
+var specUrl = 'enter_your_gadget_here.xml';
+var useCaja = false;
+var useCache = true;
 var gadget;
 
 function initGadget() {
@@ -53,12 +55,37 @@ function initGadget() {
 };
 
 function changeGadgetUrl() {
+  useCaja = document.getElementById("useCajaCheckbox").checked;
+  useCache = document.getElementById("useCacheCheckbox").checked;
+
   specUrl = document.getElementById("gadgetUrl").value;
   gadget.specUrl = specUrl;
   goog.net.cookies.set('sampleContainerGadgetUrl', encodeURIComponent(specUrl));
 
   gadgets.container.renderGadgets();
 };
+
+
+SampleContainerGadget = function(opt_params) {
+  gadgets.IfrGadget.call(this, opt_params);
+};
+
+SampleContainerGadget.inherits(gadgets.IfrGadget);
+
+SampleContainerGadget.prototype.getIframeUrl = function() {
+  var url = this.serverBase_ + 'ifr?url=' +
+      encodeURIComponent(this.specUrl) + '&synd=' + this.SYND + '&mid=' +
+      this.id + '&parent=' + encodeURIComponent(gadgets.container.parentUrl_) +
+      '&ogc=' + document.location.host + this.getUserPrefsParams();
+  if (useCaja) {
+    url += "&caja=1";
+  }
+  if (!useCache) {
+    url += "&bpc=1";
+  }
+  return url;
+};
+gadgets.container.gadgetClass = SampleContainerGadget;
 
 </script>
 </head>
@@ -68,6 +95,8 @@ function changeGadgetUrl() {
     <div class="subTitle">
       Displaying gadget:
       <input type="text" size="75" id="gadgetUrl"/>
+      <input type="checkbox" id="useCajaCheckbox"/>use caja
+      <input type="checkbox" id="useCacheCheckbox" checked="true"/>use cache
       <input type="button" value="reset" onclick="changeGadgetUrl();"/>
     </div>
     <div style="clear:both; height: 1px;">&nbsp;</div>
