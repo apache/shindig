@@ -71,7 +71,7 @@ specific language governing permissions and limitations under the License.
         var stateXml = document.getElementById("stateXml").value;
         var stateXmlObject = (new DOMParser()).parseFromString(stateXml, "text/xml");
         StateFileParser.onLoadState(stateXmlObject, null, messageDiv,
-            opensocial.Container.get(), function() {window.console.log(messageDiv.innerHTML); gadgets.util.runOnLoadHandlers();});
+            opensocial.Container.get(), function() {gadgets.util.runOnLoadHandlers();});
       }
 
       function dumpState() {
