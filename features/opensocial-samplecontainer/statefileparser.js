@@ -74,7 +74,6 @@ StateFileParser.refreshState = function(stateUrl, gadgetMessageDiv,
  */
 StateFileParser.onLoadState = function(xmlState, stateUrl, gadgetMessageDiv,
     container, callback) {
-  window.console.log(xmlState);
   // Get the high level container node
   var containerNode = $(xmlState).find('container')[0];
   if (!containerNode) {
@@ -219,7 +218,6 @@ StateFileParser.loadPerson = function(container, xmlNode, isViewer, isOwner) {
  * Dumps the current state of the container in XML.
  */
 StateFileParser.dumpState = function(container, stateDiv) {
-  window.console.log("dumping state");
   var xmlText = '<container>\n';
 
   xmlText += '  <viewer>\n';
@@ -339,7 +337,6 @@ StateFileParser.dumpState = function(container, stateDiv) {
   xmlText += '  </activities>\n';
 
   xmlText += '</container>';
-  window.console.log("got to the end with this " + xmlText);
   stateDiv.value = xmlText;
 };
 
