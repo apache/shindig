@@ -32,6 +32,8 @@
                 <include>**/*.js</include>
                 <include>**/*.html</include>
                 <include>**/*.css</include>
+                <include>**/*.dtd</include>
+                <include>**/*.xml</include>
               </includes>
             </resource>
           </webResources>
