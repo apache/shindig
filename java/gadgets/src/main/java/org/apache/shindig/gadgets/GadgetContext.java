@@ -39,20 +39,29 @@ public class GadgetContext {
   public RenderingContext getRenderingContext() {
     return renderingContext;
   }
+  
+  private final ProcessingOptions options;
+  public ProcessingOptions getOptions() {
+    return options;
+  }
 
   /**
    * Creates a context for the current gadget.
    * @param httpFetcher
    * @param messageBundleCache
    * @param locale
+   * @param renderingContext
+   * @param options
    */
   public GadgetContext(RemoteContentFetcher httpFetcher,
                        GadgetDataCache<MessageBundle> messageBundleCache,
                        Locale locale,
-                       RenderingContext renderingContext) {
+                       RenderingContext renderingContext,
+                       ProcessingOptions options) {
     this.httpFetcher = httpFetcher;
     this.messageBundleCache = messageBundleCache;
     this.locale = locale;
     this.renderingContext = renderingContext;
+    this.options = options != null ? options : new ProcessingOptions();
   }
 }

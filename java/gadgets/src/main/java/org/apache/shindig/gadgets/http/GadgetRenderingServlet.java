@@ -25,6 +25,7 @@ import org.apache.shindig.gadgets.GadgetView;
 import org.apache.shindig.gadgets.JsFeatureLoader;
 import org.apache.shindig.gadgets.JsLibrary;
 import org.apache.shindig.gadgets.MessageBundle;
+import org.apache.shindig.gadgets.ProcessingOptions;
 import org.apache.shindig.gadgets.RemoteContentFetcher;
 import org.apache.shindig.gadgets.RenderingContext;
 import org.apache.shindig.gadgets.UserPrefs;
@@ -141,13 +142,20 @@ public class GadgetRenderingServlet extends HttpServlet {
 
     BasicHttpContext context = new BasicHttpContext(req);
     GadgetView.ID gadgetId = new Gadget.GadgetId(uri, moduleId);
+    ProcessingOptions options = new ProcessingOptions();
+    String noCacheParam = req.getParameter("nocache");
+    if (noCacheParam == null) {
+      noCacheParam = req.getParameter("bpc");
+    }
+    options.ignoreCache = (noCacheParam != null && noCacheParam.equals("1"));
 
     Gadget gadget = null;
     try {
       gadget = gadgetServer.processGadget(gadgetId,
                                           getPrefsFromRequest(req),
                                           context.getLocale(),
-                                          RenderingContext.GADGET);
+                                          RenderingContext.GADGET,
+                                          options);
       outputGadget(gadget, resp);
     } catch (GadgetServer.GadgetProcessException e) {
       outputErrors(e, resp);
