@@ -6,8 +6,11 @@
   <viewerFriends>
      <person id="jane.doe@mydomain.com" name="Jane Doe"></person>
      <person id="george.doe@mydomain.com" name="George Doe"></person>
-     <person id="peter.doe@mydomain.com" name="Peter Doe"></person>
-     <person id="susan.doe@mydomain.com" name="Susan Doe"></person>
   </viewerFriends>
+
+  <personAppData>
+    <data person="george.doe@mydomain.com" field="count">2</data>
+    <data person="jane.doe@mydomain.com" field="count">7</data>
+  </personAppData>
 
 </container>
