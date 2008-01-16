@@ -16,6 +16,7 @@ package org.apache.shindig.gadgets.http;
 import org.apache.shindig.gadgets.BasicGadgetDataCache;
 import org.apache.shindig.gadgets.BasicRemoteContentFetcher;
 import org.apache.shindig.gadgets.Gadget;
+import org.apache.shindig.gadgets.GadgetContentFilter;
 import org.apache.shindig.gadgets.GadgetDataCache;
 import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.GadgetFeatureRegistry;
@@ -37,6 +38,8 @@ import java.net.URISyntaxException;
 import java.net.URLEncoder;
 import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Executor;
@@ -55,11 +58,11 @@ public class GadgetRenderingServlet extends HttpServlet {
   private GadgetServer gadgetServer;
   private String jsServicePath;
   private GadgetFeatureRegistry registry;
+  private static final String CAJA_PARAM = "caja";
   private static final String USERPREF_PARAM_PREFIX = "up_";
   private static final String LIBS_PARAM_NAME = "libs";
   private static final String JS_FILE_SUFFIX = ".js";
   public static final String DEFAULT_JS_SERVICE_PATH = "js/";
-
 
   /**
    * Creates a {@code GadgetRenderingServlet} with default executor,
@@ -145,6 +148,13 @@ public class GadgetRenderingServlet extends HttpServlet {
     ProcessingOptions options = new ProcessingOptions();
     options.ignoreCache = getIgnoreCache(req);
 
+    // Prepare a list of GadgetContentFilters applied to the output
+    List<GadgetContentFilter> contentFilters =
+        new LinkedList<GadgetContentFilter>();
+    if (getUseCaja(req)) {
+      contentFilters.add(new CajaContentFilter(uri));
+    }
+    
     Gadget gadget = null;
     try {
       gadget = gadgetServer.processGadget(gadgetId,
@@ -152,17 +162,19 @@ public class GadgetRenderingServlet extends HttpServlet {
                                           context.getLocale(),
                                           RenderingContext.GADGET,
                                           options);
-      outputGadget(gadget, resp);
+      outputGadget(gadget, contentFilters, resp);
     } catch (GadgetServer.GadgetProcessException e) {
       outputErrors(e, resp);
     }
   }
 
-  private void outputGadget(Gadget gadget, HttpServletResponse resp)
-      throws IOException {
+  private void outputGadget(Gadget gadget,
+                            List<GadgetContentFilter> contentFilters,
+                            HttpServletResponse resp)
+      throws IOException, GadgetServer.GadgetProcessException {
     switch(gadget.getContentType()) {
     case HTML:
-      outputHtmlGadget(gadget, resp);
+      outputHtmlGadget(gadget, contentFilters, resp);
       break;
     case URL:
       outputUrlGadget(gadget, resp);
@@ -174,8 +186,10 @@ public class GadgetRenderingServlet extends HttpServlet {
     }
   }
 
-  private void outputHtmlGadget(Gadget gadget, HttpServletResponse resp)
-      throws IOException {
+  private void outputHtmlGadget(Gadget gadget,
+                                List<GadgetContentFilter> contentFilters,
+                                HttpServletResponse resp)
+      throws IOException, GadgetServer.GadgetProcessException {
     resp.setContentType("text/html");
 
     StringBuilder markup = new StringBuilder();
@@ -190,6 +204,7 @@ public class GadgetRenderingServlet extends HttpServlet {
     StringBuilder externJs = new StringBuilder();
     StringBuilder inlineJs = new StringBuilder();
     String externFmt = "<script src=\"%s\"></script>\n";
+    
     for (JsLibrary library : gadget.getJsLibraries()) {
       if (library.getType() == JsLibrary.Type.URL) {
         externJs.append(String.format(externFmt, library.getContent()));
@@ -197,14 +212,30 @@ public class GadgetRenderingServlet extends HttpServlet {
         inlineJs.append(library.getContent()).append("\n");
       }
     }
+    
     if (inlineJs.length() > 0) {
       markup.append("<script><!--\n").append(inlineJs)
-          .append("\n-->\n</script>");
+            .append("\n-->\n</script>");
     }
+    
     if (externJs.length() > 0) {
       markup.append(externJs);
     }
-    markup.append(gadget.getContentData());
+    
+    List<GadgetException> gadgetExceptions = new LinkedList<GadgetException>();
+    String content = gadget.getContentData();
+    for (GadgetContentFilter filter : contentFilters) {
+      try {
+        content = filter.filter(content);
+      } catch (GadgetException e) {
+        gadgetExceptions.add(e);
+      }
+    }
+    if (gadgetExceptions.size() > 0) {
+      throw new GadgetServer.GadgetProcessException(gadgetExceptions);
+    }
+    
+    markup.append(content);
     markup.append("<script>gadgets.util.runOnLoadHandlers();</script>");
     markup.append("</body></html>");
 
@@ -314,5 +345,10 @@ public class GadgetRenderingServlet extends HttpServlet {
       noCacheParam = req.getParameter("bpc");
     }
     return noCacheParam != null && noCacheParam.equals("1");
+  }
+  
+  protected boolean getUseCaja(HttpServletRequest req) {
+    String cajaParam = req.getParameter(CAJA_PARAM);
+    return cajaParam != null && cajaParam.equals("1");
   }
 }
