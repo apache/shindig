@@ -36,6 +36,7 @@ public class GadgetServer {
   private GadgetDataCache<GadgetSpec> specCache;
   private GadgetDataCache<MessageBundle> messageBundleCache;
   private RemoteContentFetcher fetcher;
+  private GadgetBlacklist gadgetBlacklist;
 
   private static final Logger logger
       = Logger.getLogger("org.apache.shindig.gadgets");
@@ -58,6 +59,10 @@ public class GadgetServer {
 
   public void setGadgetFeatureRegistry(GadgetFeatureRegistry registry) {
     this.registry = registry;
+  }
+
+  public void setGadgetBlacklist(GadgetBlacklist gadgetBlacklist) {
+    this.gadgetBlacklist = gadgetBlacklist;
   }
 
   /**
@@ -104,8 +109,8 @@ public class GadgetServer {
     WorkflowDependency urlFetchDep =
         new WorkflowDependency(WorkflowDependency.Type.CORE, URL_FETCH);
     wc.jobsToRun.addJob(
-        new SpecLoadTask(fetcher, gadgetId, userPrefs, specCache), urlFetchDep,
-        cacheLoadDep);
+        new SpecLoadTask(fetcher, gadgetId, userPrefs, specCache, gadgetBlacklist),
+        urlFetchDep, cacheLoadDep);
 
     WorkflowDependency enqueueFeatDep =
         new WorkflowDependency(WorkflowDependency.Type.CORE, ENQUEUE_FEATURES);
@@ -290,18 +295,27 @@ public class GadgetServer {
     private final GadgetView.ID gadgetId;
     private final GadgetDataCache<GadgetSpec> specCache;
     private final UserPrefs prefs;
+    private final GadgetBlacklist blacklist;
 
     private SpecLoadTask(RemoteContentFetcher fetcher, GadgetView.ID gadgetId,
                          UserPrefs prefs,
-                         GadgetDataCache<GadgetSpec> specCache) {
+                         GadgetDataCache<GadgetSpec> specCache,
+                         GadgetBlacklist blacklist) {
       this.fetcher = fetcher;
       this.gadgetId = gadgetId;
       this.specCache = specCache;
       this.prefs = prefs;
+      this.blacklist = blacklist;
     }
 
     @Override
     public void run(WorkflowContext wc) throws GadgetException {
+      if (blacklist != null && blacklist.isBlacklisted(gadgetId.getURI())) {
+        throw new GadgetException(
+            GadgetException.Code.BLACKLISTED_GADGET,
+            "Gadget blacklisted at: " + gadgetId.getURI());
+      }
+
       if (wc.gadget != null) {
         // Already retrieved: do nothing.
         return;

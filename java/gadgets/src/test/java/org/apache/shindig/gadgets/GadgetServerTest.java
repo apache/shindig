@@ -84,4 +84,24 @@ public class GadgetServerTest extends EasyMockTestCase {
     assertEquals("Goodbye, World!", gadget.getContentData());
     verify();
   }
+
+  public void testBlacklistedGadget() throws Exception {
+    GadgetBlacklist blacklist = mock(GadgetBlacklist.class);
+    gadgetServer.setGadgetBlacklist(blacklist);
+
+    expect(specCache.get(eq(DATETIME_URI_STRING))).andReturn(null);
+    expect(blacklist.isBlacklisted(eq(DATETIME_URI))).andReturn(true);
+    replay();
+
+    try {
+      gadgetServer.processGadget(DATETIME_ID, UserPrefs.EMPTY, EN_US_LOCALE,
+                                 RenderingContext.GADGET);
+      fail();
+    } catch (GadgetServer.GadgetProcessException ex) {
+      assertEquals(1, ex.getComponents().size());
+      assertEquals(GadgetException.Code.BLACKLISTED_GADGET,
+                   ex.getComponents().get(0).getCode());
+    }
+    verify();
+  }
 }

@@ -46,7 +46,10 @@ public class GadgetException extends Exception {
     MISSING_SPEC_CACHE,
 
     // Caja error
-    MALFORMED_FOR_SAFE_INLINING
+    MALFORMED_FOR_SAFE_INLINING,
+
+    // Blacklisting
+    BLACKLISTED_GADGET
   }
 
   private final Code code;
