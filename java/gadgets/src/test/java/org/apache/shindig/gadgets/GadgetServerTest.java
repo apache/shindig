@@ -56,7 +56,7 @@ public class GadgetServerTest extends EasyMockTestCase {
     replay();
 
     Gadget gadget = gadgetServer.processGadget(DATETIME_ID, UserPrefs.EMPTY, EN_US_LOCALE,
-                                               RenderingContext.GADGET);
+                                               RenderingContext.GADGET, null);
     verify();
   }
 
@@ -65,7 +65,7 @@ public class GadgetServerTest extends EasyMockTestCase {
     replay();
 
     Gadget gadget = gadgetServer.processGadget(DATETIME_ID, UserPrefs.EMPTY, EN_US_LOCALE,
-                                               RenderingContext.GADGET);
+                                               RenderingContext.GADGET, null);
     assertSame(DATETIME_SPEC, gadget.getBaseSpec());
     verify();
   }
@@ -79,7 +79,7 @@ public class GadgetServerTest extends EasyMockTestCase {
     replay();
 
     Gadget gadget = gadgetServer.processGadget(DATETIME_ID, UserPrefs.EMPTY, EN_US_LOCALE,
-                                               RenderingContext.GADGET);
+                                               RenderingContext.GADGET, null);
     assertEquals("Hello, World!", gadget.getTitle());
     assertEquals("Goodbye, World!", gadget.getContentData());
     verify();
@@ -95,7 +95,7 @@ public class GadgetServerTest extends EasyMockTestCase {
 
     try {
       gadgetServer.processGadget(DATETIME_ID, UserPrefs.EMPTY, EN_US_LOCALE,
-                                 RenderingContext.GADGET);
+                                 RenderingContext.GADGET, null);
       fail();
     } catch (GadgetServer.GadgetProcessException ex) {
       assertEquals(1, ex.getComponents().size());

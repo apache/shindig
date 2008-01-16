@@ -71,13 +71,15 @@ public class GadgetServer {
    * @param userPrefs
    * @param locale
    * @param rctx
+   * @param options
    * @return The processed gadget.
    * @throws GadgetProcessException
    */
   public Gadget processGadget(Gadget.ID gadgetId,
                               UserPrefs userPrefs,
                               Locale locale,
-                              RenderingContext rctx)
+                              RenderingContext rctx,
+                              ProcessingOptions options)
       throws GadgetProcessException {
     if (specCache == null) {
       throw new GadgetProcessException(GadgetException.Code.MISSING_SPEC_CACHE);
@@ -97,7 +99,7 @@ public class GadgetServer {
 
     // Queue/tree of all jobs to be run for successful processing
     GadgetContext gc
-        = new GadgetContext(fetcher, messageBundleCache, locale, rctx);
+        = new GadgetContext(fetcher, messageBundleCache, locale, rctx, options);
     WorkflowContext wc = new WorkflowContext(gc);
 
     // Bootstrap tree of jobs to process
@@ -283,6 +285,10 @@ public class GadgetServer {
 
     @Override
     public void run(WorkflowContext wc) throws GadgetException {
+      if (wc.context.getOptions().ignoreCache) {
+        return;
+      }
+      
       GadgetSpec spec = specCache.get(gadgetId.getKey());
       if (spec != null) {
         wc.gadget = new Gadget(gadgetId, spec, prefs);
@@ -329,12 +335,16 @@ public class GadgetServer {
             GadgetException.Code.FAILED_TO_RETRIEVE_CONTENT,
             "Malformed gadget spec URL: " + gadgetId.getURI().toString());
       }
+      
       GadgetSpecParser specParser = new GadgetSpecParser();
       GadgetSpec spec = specParser.parse(gadgetId, xml);
       wc.gadget = new Gadget(gadgetId, spec, prefs);
+      
       // This isn't a separate job because if it is we'd just need another
       // flag telling us not to store to the cache.
-      specCache.put(wc.gadget.getId().getKey(), wc.gadget.copy());
+      if (!wc.context.getOptions().ignoreCache) {
+        specCache.put(wc.gadget.getId().getKey(), wc.gadget.copy());
+      }
     }
   }
 
