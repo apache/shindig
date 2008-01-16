@@ -75,6 +75,7 @@ public class GadgetFeatureRegistry {
         core.put(entry.getName(), entry);
       }
     }
+    
     // Everything depends on core JS being set up first because in gadget
     // rendering mode, we pre-populate some of the data.
     core.put(FEAT_MSG_BUNDLE,

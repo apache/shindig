@@ -56,7 +56,7 @@
   </build>
   <repositories>
     <repository>
-      <id>google-caja</id>
+      <id>caja</id>
       <url>http://google-caja.googlecode.com/svn/maven</url>
     </repository>
   </repositories>
@@ -80,12 +80,6 @@
       <scope>compile</scope>
     </dependency>
     <dependency>
-      <groupId>caja</groupId>
-      <artifactId>caja</artifactId>
-      <version>r339</version>
-      <scope>compile</scope>
-    </dependency>
-    <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
       <version>4.4</version>
@@ -102,6 +96,12 @@
       <artifactId>easymockclassextension</artifactId>
       <version>2.2.2</version>
       <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>caja</groupId>
+      <artifactId>caja</artifactId>
+      <version>r394</version>
+      <scope>compile</scope>
     </dependency>
   </dependencies>
   <distributionManagement>
