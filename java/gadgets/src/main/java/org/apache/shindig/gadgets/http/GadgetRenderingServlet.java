@@ -143,11 +143,7 @@ public class GadgetRenderingServlet extends HttpServlet {
     BasicHttpContext context = new BasicHttpContext(req);
     GadgetView.ID gadgetId = new Gadget.GadgetId(uri, moduleId);
     ProcessingOptions options = new ProcessingOptions();
-    String noCacheParam = req.getParameter("nocache");
-    if (noCacheParam == null) {
-      noCacheParam = req.getParameter("bpc");
-    }
-    options.ignoreCache = (noCacheParam != null && noCacheParam.equals("1"));
+    options.ignoreCache = getIgnoreCache(req);
 
     Gadget gadget = null;
     try {
@@ -310,5 +306,13 @@ public class GadgetRenderingServlet extends HttpServlet {
     buf.append(JS_FILE_SUFFIX);
 
     return buf.toString();
+  }
+  
+  protected boolean getIgnoreCache(HttpServletRequest req) {
+    String noCacheParam = req.getParameter("nocache");
+    if (noCacheParam == null) {
+      noCacheParam = req.getParameter("bpc");
+    }
+    return noCacheParam != null && noCacheParam.equals("1");
   }
 }
