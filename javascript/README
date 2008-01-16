@@ -54,14 +54,8 @@ Using Shindig Gadget Container JavaScript
 4) Run the opensocial sample container
    A) Set up your own Shindig Gadget Server. See its README for details.
 
-   B) From within the java/gadgets directory run the following commands
-      i) Copy the sample container code into the webapp directory so that the
-         shindig server will serve it for you.
-      cp -r ../../javascript/container/ src/main/webapp/
-      cp -r ../../javascript/samplecontainer/ src/main/webapp/
-
-      ii) Restart shindig
-      mvn jetty:run
+   B) Start shindig using
+      mvn jetty:run-war
 
     C) Hit the sample container at
     http://yourserver:yourport/gadgets/samplecontainer/samplecontainer.html

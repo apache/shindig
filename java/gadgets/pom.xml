@@ -34,6 +34,9 @@
                 <include>**/*.css</include>
                 <include>**/*.dtd</include>
                 <include>**/*.xml</include>
+                <include>**/*.gif</include>
+                <include>**/*.png</include>
+                <include>**/*.jpg</include>
               </includes>
             </resource>
           </webResources>

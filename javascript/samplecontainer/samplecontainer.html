@@ -33,7 +33,7 @@
 <script type="text/javascript" src="../container/gadgets.js"></script>
 <script type="text/javascript">
 
-var specUrl = 'enter_your_gadget_here.xml';
+var specUrl = 'http://localhost:8080/gadgets/samplecontainer/examples/SocialHelloWorld.xml';
 var useCaja = false;
 var useCache = true;
 var gadget;
@@ -47,7 +47,7 @@ function initGadget() {
   document.getElementById("gadgetUrl").value = specUrl;
 
   gadget = gadgets.container.createGadget({'specUrl': specUrl});;
-  gadget.setServerBase('http://localhost:8080/gadgets/');
+  gadget.setServerBase('../');
 
   gadgets.container.addGadget(gadget);
   gadgets.container.layoutManager.setGadgetChromeIds(['gadget-chrome']);
