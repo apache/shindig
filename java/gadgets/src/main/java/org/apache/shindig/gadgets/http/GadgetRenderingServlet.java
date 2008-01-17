@@ -278,6 +278,8 @@ public class GadgetRenderingServlet extends HttpServlet {
     markup.append("<pre>");
     for (GadgetException error : errs.getComponents()) {
       markup.append(error.getCode().toString());
+      markup.append(" ");
+      markup.append(error.getMessage().toString());
       markup.append("\n");
     }
     markup.append("</pre>");
