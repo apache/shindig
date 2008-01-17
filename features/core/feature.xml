@@ -22,6 +22,7 @@ specific language governing permissions and limitations under the License.
     <script src="core.js"/>
     <script src="util.js"/>
     <script src="prefs.js"/>
+    <script src="json.js"/>    
     <script src="io.js"/>
     <script><![CDATA[
       gadgets.io.init({

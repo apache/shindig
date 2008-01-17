@@ -18,7 +18,6 @@ specific language governing permissions and limitations under the License.
 -->
 <feature>
   <name>ifpc</name>
-  <dependency>json</dependency>
   <gadget>
     <script src="ifpc.js"/>
   </gadget>
