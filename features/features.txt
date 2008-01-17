@@ -8,3 +8,4 @@ features/opensocial-samplecontainer/feature.xml
 features/setprefs/feature.xml
 features/dynamic-height/feature.xml
 features/settitle/feature.xml
+features/flash/feature.xml
