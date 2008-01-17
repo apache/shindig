@@ -59,7 +59,7 @@ gadgets.io = function() {
     //    and / or passing the url in the http headers.
     txt = txt.substr(UNPARSEABLE_CRUFT.length);
     // TODO: safe JSON parser.
-    var data = eval("(" + txt + ")");
+    var data = gadgets.JSON.parse(txt);
     data = data[url];
     var resp = {
      text: data.body,
@@ -68,7 +68,7 @@ gadgets.io = function() {
     switch (params.contentType) {
       case "json":
         // TODO: safe JSON parser.
-        resp.data = eval("(" + resp.text + ")");
+        resp.data = gadgets.JSON.parse(resp.text);
         break;
      case "dom":
       var dom;
