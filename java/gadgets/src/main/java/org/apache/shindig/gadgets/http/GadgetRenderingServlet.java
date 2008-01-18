@@ -23,7 +23,6 @@ import org.apache.shindig.gadgets.GadgetFeatureRegistry;
 import org.apache.shindig.gadgets.GadgetServer;
 import org.apache.shindig.gadgets.GadgetSpec;
 import org.apache.shindig.gadgets.GadgetView;
-import org.apache.shindig.gadgets.JsFeatureLoader;
 import org.apache.shindig.gadgets.JsLibrary;
 import org.apache.shindig.gadgets.MessageBundle;
 import org.apache.shindig.gadgets.ProcessingOptions;
@@ -79,20 +78,15 @@ public class GadgetRenderingServlet extends HttpServlet {
   @SuppressWarnings("unchecked")
   public void init(ServletConfig config) {
     ServletContext context = config.getServletContext();
-    String coreFeatures = context.getInitParameter("core-js-features");
-    String otherFeatures = context.getInitParameter("other-js-features");
+    String features = context.getInitParameter("features");
     String jsPath = context.getInitParameter("js-service-path");
     if (jsPath == null) {
       jsPath = DEFAULT_JS_SERVICE_PATH;
     }
     jsServicePath = jsPath;
     try {
-      registry = new GadgetFeatureRegistry(coreFeatures);
+      registry = new GadgetFeatureRegistry(features);
       gadgetServer.setGadgetFeatureRegistry(registry);
-      if (otherFeatures != null) {
-        JsFeatureLoader jsLoader = new JsFeatureLoader();
-        jsLoader.loadFeatures(otherFeatures, registry);
-      }
     } catch (GadgetException e) {
       e.printStackTrace();
       System.exit(1);
@@ -229,17 +223,24 @@ public class GadgetRenderingServlet extends HttpServlet {
     String externFmt = "<script src=\"%s\"></script>\n";
 
     for (JsLibrary library : gadget.getJsLibraries()) {
-      if (library.getType() == JsLibrary.Type.URL) {
+      JsLibrary.Type type = library.getType();
+      if (type == JsLibrary.Type.URL) {
         // TODO: This case needs to be handled more gracefully by the js
         // servlet. We should probably inline external JS as well.
         externJs.append(String.format(externFmt, library.getContent()));
-      } else if (options.forceJsLibs == null) {
+      } else if (type == JsLibrary.Type.INLINE) {
         inlineJs.append(library.getContent()).append("\n");
+      } else {
+        // FILE or RESOURCE
+        if (options.forceJsLibs == null) {
+          inlineJs.append(library.getContent()).append("\n");
+        } // otherwise it was already included by options.forceJsLibs.
       }
     }
 
+    // Forced libs first.
     if (options.forceJsLibs != null) {
-      externJs.append(String.format(externFmt,
+      markup.append(String.format(externFmt,
           DEFAULT_JS_SERVICE_PATH + options.forceJsLibs + JS_FILE_SUFFIX));
     }
 

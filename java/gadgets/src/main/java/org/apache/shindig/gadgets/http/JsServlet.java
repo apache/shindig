@@ -16,7 +16,6 @@ package org.apache.shindig.gadgets.http;
 import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.GadgetFeatureFactory;
 import org.apache.shindig.gadgets.GadgetFeatureRegistry;
-import org.apache.shindig.gadgets.JsFeatureLoader;
 import org.apache.shindig.gadgets.JsLibrary;
 import org.apache.shindig.gadgets.JsLibraryFeatureFactory;
 import org.apache.shindig.gadgets.RenderingContext;
@@ -42,15 +41,10 @@ public class JsServlet extends HttpServlet {
   @Override
   public void init(ServletConfig config) {
     ServletContext context = config.getServletContext();
-    String coreFeatures = context.getInitParameter("core-js-features");
-    String otherFeatures = context.getInitParameter("other-js-features");
+    String features = context.getInitParameter("features");
     String jsPath = context.getInitParameter("js-service-path");
     try {
-      registry = new GadgetFeatureRegistry(coreFeatures);
-      if (otherFeatures != null) {
-        JsFeatureLoader jsLoader = new JsFeatureLoader();
-        jsLoader.loadFeatures(otherFeatures, registry);
-      }
+      registry = new GadgetFeatureRegistry(features);
     } catch (GadgetException e) {
       e.printStackTrace();
       throw new RuntimeException(e);
