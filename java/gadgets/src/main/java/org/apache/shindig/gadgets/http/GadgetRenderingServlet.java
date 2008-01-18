@@ -147,6 +147,7 @@ public class GadgetRenderingServlet extends HttpServlet {
     GadgetView.ID gadgetId = new Gadget.GadgetId(uri, moduleId);
     ProcessingOptions options = new ProcessingOptions();
     options.ignoreCache = getIgnoreCache(req);
+    options.forceJsLibs = getForceJsLibs(req);
 
     // Prepare a list of GadgetContentFilters applied to the output
     List<GadgetContentFilter> contentFilters =
@@ -162,22 +163,33 @@ public class GadgetRenderingServlet extends HttpServlet {
                                           context.getLocale(),
                                           RenderingContext.GADGET,
                                           options);
-      outputGadget(gadget, contentFilters, resp);
+      outputGadget(gadget, options, contentFilters, resp);
     } catch (GadgetServer.GadgetProcessException e) {
       outputErrors(e, resp);
     }
   }
 
+  /**
+   * Renders a successfully processed gadget.
+   *
+   * @param gadget
+   * @param options
+   * @param contentFilters
+   * @param resp
+   * @throws IOException
+   * @throws GadgetServer.GadgetProcessException
+   */
   private void outputGadget(Gadget gadget,
+                            ProcessingOptions options,
                             List<GadgetContentFilter> contentFilters,
                             HttpServletResponse resp)
       throws IOException, GadgetServer.GadgetProcessException {
     switch(gadget.getContentType()) {
     case HTML:
-      outputHtmlGadget(gadget, contentFilters, resp);
+      outputHtmlGadget(gadget, options, contentFilters, resp);
       break;
     case URL:
-      outputUrlGadget(gadget, resp);
+      outputUrlGadget(gadget, options, resp);
       break;
     default:
       resp.sendError(HttpServletResponse.SC_BAD_REQUEST,
@@ -186,7 +198,18 @@ public class GadgetRenderingServlet extends HttpServlet {
     }
   }
 
+  /**
+   * Handles type=html gadget output.
+   *
+   * @param gadget
+   * @param options
+   * @param contentFilters
+   * @param resp
+   * @throws IOException
+   * @throws GadgetServer.GadgetProcessException
+   */
   private void outputHtmlGadget(Gadget gadget,
+                                ProcessingOptions options,
                                 List<GadgetContentFilter> contentFilters,
                                 HttpServletResponse resp)
       throws IOException, GadgetServer.GadgetProcessException {
@@ -207,10 +230,17 @@ public class GadgetRenderingServlet extends HttpServlet {
 
     for (JsLibrary library : gadget.getJsLibraries()) {
       if (library.getType() == JsLibrary.Type.URL) {
+        // TODO: This case needs to be handled more gracefully by the js
+        // servlet. We should probably inline external JS as well.
         externJs.append(String.format(externFmt, library.getContent()));
-      } else {
+      } else if (options.forceJsLibs == null) {
         inlineJs.append(library.getContent()).append("\n");
       }
+    }
+
+    if (options.forceJsLibs != null) {
+      externJs.append(String.format(externFmt,
+          DEFAULT_JS_SERVICE_PATH + options.forceJsLibs + JS_FILE_SUFFIX));
     }
 
     if (inlineJs.length() > 0) {
@@ -242,15 +272,20 @@ public class GadgetRenderingServlet extends HttpServlet {
     resp.getOutputStream().print(markup.toString());
   }
 
-  private void outputUrlGadget(Gadget gadget, HttpServletResponse resp)
-      throws IOException {
+  private void outputUrlGadget(Gadget gadget,
+      ProcessingOptions options, HttpServletResponse resp) throws IOException {
     // UserPrefs portion of query string to tack on
     // TODO: generalize this as injectedArgs on Gadget object
     // TODO: userprefs on the fragment rather than query string
     String prefsQuery = getPrefsQueryString(gadget.getUserPrefValues());
     String libsQuery = null;
 
-    libsQuery = getLibsQueryString(gadget.getRequires().keySet());
+    if (options.forceJsLibs == null) {
+      libsQuery = getLibsQueryString(gadget.getRequires().keySet());
+    } else {
+      libsQuery
+          = DEFAULT_JS_SERVICE_PATH + options.forceJsLibs + JS_FILE_SUFFIX;
+    }
 
     URI redirURI = gadget.getContentHref();
     try {
@@ -341,6 +376,10 @@ public class GadgetRenderingServlet extends HttpServlet {
     return buf.toString();
   }
 
+  /**
+   * @param req
+   * @return Whether or not to ignore the cache.
+   */
   protected boolean getIgnoreCache(HttpServletRequest req) {
     String noCacheParam = req.getParameter("nocache");
     if (noCacheParam == null) {
@@ -349,6 +388,18 @@ public class GadgetRenderingServlet extends HttpServlet {
     return noCacheParam != null && noCacheParam.equals("1");
   }
 
+  /**
+   * @param req
+   * @return Forced JS libs, or null if no forcing is to be done.
+   */
+  protected String getForceJsLibs(HttpServletRequest req) {
+    return req.getParameter("libs");
+  }
+
+  /**
+   * @param req
+   * @return Whether or not to use caja.
+   */
   protected boolean getUseCaja(HttpServletRequest req) {
     String cajaParam = req.getParameter(CAJA_PARAM);
     return cajaParam != null && cajaParam.equals("1");

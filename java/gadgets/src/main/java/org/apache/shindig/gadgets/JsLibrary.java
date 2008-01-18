@@ -24,6 +24,8 @@ import java.util.logging.Logger;
 /**
  * Represents a javascript library, either as an external resource (url)
  * or as an inline script.
+ * TODO: pull in url type libraries and treat them the same as file, resource,
+ * or inline scripts.
  */
 public final class JsLibrary {
   private Type type;
