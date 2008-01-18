@@ -19,5 +19,18 @@ package org.apache.shindig.gadgets;
  * become a catch-all for unnecessary pieces of functionality.
  */
 public class ProcessingOptions {
+
+  /**
+   * Whether or not to bypass the gadget and message bundle caches for the
+   * current request.
+   */
   public boolean ignoreCache = false;
+
+  /**
+   * Overrides javascript library processing by forcing the use of a fixed set
+   * of libraries. This is mainly intended for use by parent sites that are
+   * using the core library to fetch meta data for many gadgets and aggregating
+   * the required libraries.
+   */
+  public String forceJsLibs = null;
 }
