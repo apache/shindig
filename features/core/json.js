@@ -134,7 +134,7 @@ gadgets.JSON = function () {
         parse: function (text) {
             try {
                 return !(/[^,:{}\[\]0-9.\-+Eaeflnr-u \n\r\t]/.test(
-                        text.replace(/"(\\.|[^"\\])*"/g, ''))) &&
+                        text.replace(/("(\\.|[^"\\])*")|('(\\.|[^'\\])*')/g, ''))) &&
                     eval('(' + text + ')');
             } catch (e) {
                 return false;
