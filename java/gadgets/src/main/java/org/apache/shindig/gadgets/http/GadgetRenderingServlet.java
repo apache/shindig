@@ -154,7 +154,7 @@ public class GadgetRenderingServlet extends HttpServlet {
     if (getUseCaja(req)) {
       contentFilters.add(new CajaContentFilter(uri));
     }
-    
+
     Gadget gadget = null;
     try {
       gadget = gadgetServer.processGadget(gadgetId,
@@ -204,7 +204,7 @@ public class GadgetRenderingServlet extends HttpServlet {
     StringBuilder externJs = new StringBuilder();
     StringBuilder inlineJs = new StringBuilder();
     String externFmt = "<script src=\"%s\"></script>\n";
-    
+
     for (JsLibrary library : gadget.getJsLibraries()) {
       if (library.getType() == JsLibrary.Type.URL) {
         externJs.append(String.format(externFmt, library.getContent()));
@@ -212,16 +212,16 @@ public class GadgetRenderingServlet extends HttpServlet {
         inlineJs.append(library.getContent()).append("\n");
       }
     }
-    
+
     if (inlineJs.length() > 0) {
       markup.append("<script><!--\n").append(inlineJs)
             .append("\n-->\n</script>");
     }
-    
+
     if (externJs.length() > 0) {
       markup.append(externJs);
     }
-    
+
     List<GadgetException> gadgetExceptions = new LinkedList<GadgetException>();
     String content = gadget.getContentData();
     for (GadgetContentFilter filter : contentFilters) {
@@ -234,7 +234,7 @@ public class GadgetRenderingServlet extends HttpServlet {
     if (gadgetExceptions.size() > 0) {
       throw new GadgetServer.GadgetProcessException(gadgetExceptions);
     }
-    
+
     markup.append(content);
     markup.append("<script>gadgets.util.runOnLoadHandlers();</script>");
     markup.append("</body></html>");
@@ -326,7 +326,7 @@ public class GadgetRenderingServlet extends HttpServlet {
     if (features.size() == 0) {
       buf.append("core");
     } else {
-      boolean first = false;
+      boolean first = true;
       for (String feature : features) {
         if (first) {
           first = false;
@@ -340,7 +340,7 @@ public class GadgetRenderingServlet extends HttpServlet {
 
     return buf.toString();
   }
-  
+
   protected boolean getIgnoreCache(HttpServletRequest req) {
     String noCacheParam = req.getParameter("nocache");
     if (noCacheParam == null) {
@@ -348,7 +348,7 @@ public class GadgetRenderingServlet extends HttpServlet {
     }
     return noCacheParam != null && noCacheParam.equals("1");
   }
-  
+
   protected boolean getUseCaja(HttpServletRequest req) {
     String cajaParam = req.getParameter(CAJA_PARAM);
     return cajaParam != null && cajaParam.equals("1");
