@@ -48,44 +48,47 @@ public class GadgetFeatureRegistry {
       = Logger.getLogger("org.apache.shindig.gadgets");
 
   /**
-   * Creates the gadget feature registry and loads all default dependencies.
-   * @param coreJsPath
+   * Creates the gadget feature registry and loads an initial set of features.
+   * Any 'core' features loaded at this point will automatically become
+   * dependencies for every other feature.
+   * @param featurePath
    */
-  public GadgetFeatureRegistry(String coreJsPath) throws GadgetException {
-    registerCore(coreJsPath);
+  public GadgetFeatureRegistry(String featurePath) throws GadgetException {
+    registerFeatures(featurePath);
   }
 
   /**
-   * Registers all core functionality providing a minimal base context
-   * in which all Gadgets operate. This set should be kept as minimal as
-   * possible. Anything added as registerCore will automatically become a
-   * dependency of every other feature.
+   * Recursively loads a set of features from a path in the filesystem or
+   * from the classpath.
    *
-   * @param coreJsPath Path to the directory that contains core Javascript
-   *     feature xml files.
+   * @param featurePath Path to the directory that contains feature xml files.
    */
-  private void registerCore(String coreJsPath) throws GadgetException {
-    List<String> coreDeps = null;
-    if (coreJsPath != null) {
-      JsFeatureLoader loader = new JsFeatureLoader();
-      List<Entry> coreJs = loader.loadFeatures(coreJsPath, this);
-      coreDeps = new LinkedList<String>();
+  public void registerFeatures(String featurePath) throws GadgetException {
+    if (featurePath == null) return;
+
+    List<String> coreDeps = new LinkedList<String>();
+    JsFeatureLoader loader = new JsFeatureLoader();
+    List<Entry> coreJs = loader.loadFeatures(featurePath, this);
+
+    if (!coreDone) {
       for (Entry entry : coreJs) {
-        coreDeps.add(entry.getName());
-        core.put(entry.getName(), entry);
+        if (entry.name.startsWith("core")) {
+          coreDeps.add(entry.getName());
+          core.put(entry.getName(), entry);
+        }
       }
+
+      // Everything depends on core JS being set up first because in gadget
+      // rendering mode, we pre-populate some of the data.
+      core.put(FEAT_MSG_BUNDLE,
+          register(FEAT_MSG_BUNDLE, coreDeps, new MessageBundleSubstituter()));
+      core.put(FEAT_BIDI, register(FEAT_BIDI, coreDeps, new BidiSubstituter()));
+      core.put(FEAT_MODULE,
+          register(FEAT_MODULE, coreDeps, new ModuleSubstituter()));
+      core.put(FEAT_USER_PREF_SUBST,
+          register(FEAT_USER_PREF_SUBST, coreDeps, new UserPrefSubstituter()));
+      coreDone = true;
     }
-    
-    // Everything depends on core JS being set up first because in gadget
-    // rendering mode, we pre-populate some of the data.
-    core.put(FEAT_MSG_BUNDLE,
-        register(FEAT_MSG_BUNDLE, coreDeps, new MessageBundleSubstituter()));
-    core.put(FEAT_BIDI, register(FEAT_BIDI, coreDeps, new BidiSubstituter()));
-    core.put(FEAT_MODULE,
-        register(FEAT_MODULE, coreDeps, new ModuleSubstituter()));
-    core.put(FEAT_USER_PREF_SUBST,
-        register(FEAT_USER_PREF_SUBST, coreDeps, new UserPrefSubstituter()));
-    coreDone = true;
   }
 
   /**
