@@ -101,7 +101,6 @@ public class JsServlet extends HttpServlet {
               JsLibraryFeatureFactory jsLib = (JsLibraryFeatureFactory)feature;
               for (JsLibrary lib : jsLib.getLibraries(context)) {
                 // TODO: type url js files fail here.
-                // TODO: resolve dependencies correctly.
                 if (lib.getType() != JsLibrary.Type.URL) {
                   jsData.append(lib.getContent());
                 }
@@ -116,12 +115,25 @@ public class JsServlet extends HttpServlet {
         resp.setStatus(HttpServletResponse.SC_NOT_FOUND);
         return;
       }
-
+      setCachingHeaders(resp);
       resp.setContentType("text/javascript");
       resp.setContentLength(jsData.length());
       resp.getOutputStream().write(jsData.toString().getBytes());
     } else {
       resp.setStatus(HttpServletResponse.SC_NOT_FOUND);
     }
+  }
+
+  /**
+   * Sets HTTP headers that instruct the browser to cache indefinitely.
+   * Implementations should take care to use cache-busting techniques on the
+   * url.
+   *
+   * @param response The HTTP response
+   */
+  private void setCachingHeaders(HttpServletResponse response) {
+    response.setHeader("Cache-Control", "public,max-age=2592000");
+    response.setDateHeader("Expires", System.currentTimeMillis()
+                                     + 2592000000L);
   }
 }
