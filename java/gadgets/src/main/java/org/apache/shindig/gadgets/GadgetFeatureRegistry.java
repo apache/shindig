@@ -64,14 +64,16 @@ public class GadgetFeatureRegistry {
    * @param featurePath Path to the directory that contains feature xml files.
    */
   public void registerFeatures(String featurePath) throws GadgetException {
-    if (featurePath == null) return;
+    if (featurePath == null) {
+      return;
+    }
 
     List<String> coreDeps = new LinkedList<String>();
     JsFeatureLoader loader = new JsFeatureLoader();
-    List<Entry> coreJs = loader.loadFeatures(featurePath, this);
+    List<Entry> jsFeatures = loader.loadFeatures(featurePath, this);
 
     if (!coreDone) {
-      for (Entry entry : coreJs) {
+      for (Entry entry : jsFeatures) {
         if (entry.name.startsWith("core")) {
           coreDeps.add(entry.getName());
           core.put(entry.getName(), entry);
@@ -87,6 +89,14 @@ public class GadgetFeatureRegistry {
           register(FEAT_MODULE, coreDeps, new ModuleSubstituter()));
       core.put(FEAT_USER_PREF_SUBST,
           register(FEAT_USER_PREF_SUBST, coreDeps, new UserPrefSubstituter()));
+
+      // Make sure non-core features depend on core.
+      for (Entry entry : jsFeatures) {
+        if (!entry.name.startsWith("core")) {
+          entry.deps.addAll(core.values());
+        }
+      }
+
       coreDone = true;
     }
   }
