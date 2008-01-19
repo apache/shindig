@@ -15,7 +15,7 @@
 var gadgets = gadgets || {};
 
 /**
- * General purpose utilities.
+ * @fileoverview General purpose utilities that gadgets can use.
  */
 gadgets.util = function() {
   /**
@@ -40,113 +40,112 @@ gadgets.util = function() {
   }
 
   var parameters = null;
-
-  /**
-   * @return {Object} Parameters passed into the query string.
-   */
-  function getUrlParameters() {
-    if (parameters !== null) {
-      return parameters;
-    }
-    parameters = {};
-    var pairs = parseUrlParams();
-    var unesc = window.decodeURIComponent ? decodeURIComponent : unescape;
-    for (var i = 0, j = pairs.length; i < j; ++i) {
-      var pos = pairs[i].indexOf('=');
-      if (pos === -1) {
-        continue;
-      }
-      var argName = pairs[i].substring(0, pos);
-      var value = pairs[i].substring(pos + 1);
-      // difference to IG_Prefs, is that args doesn't replace spaces in argname:
-      // unclear on if it should do: argname = argname.replace(/\+/g, " ");
-      value = value.replace(/\+/g, " ");
-      parameters[argName] = unesc(value);
-    }
-    return parameters;
-  }
-
-  /**
-   * Creates a closure which is suitable for passing as a callback.
-   *
-   * @param {Object} scope The execution scope. May be null if there is no
-   *     need to associate a specific instance of an object with this callback.
-   * @param {Function} callback The callback to invoke when this is run.
-   *     any arguments passed in will be passed after your initial arguments.
-   * @param {Object} var_args Any number of arguments may be passed to the
-   *     callback. They will be received in the order they are passed in.
-   */
-  function makeClosure(scope, callback, var_args) {
-    // arguments isn't a real array, so we copy it into one.
-    var tmpArgs = [];
-    for (var i = 2, j = arguments.length; i < j; ++i) {
-     tmpArgs.push(arguments[i]);
-    }
-    return function() {
-      // append new arguments.
-      for (var i = 0, j = arguments.length; i < j; ++i) {
-        tmpArgs.push(arguments[i]);
-      }
-      callback.apply(scope, tmpArgs);
-    };
-  }
-
   var features = {};
-
-  /**
-   * @param {String} feature The feature to get parameters for.
-   * @return {Object} The parameters for the given feature, or null.
-   */
-  function getFeatureParameters(feature) {
-    return typeof features[feature] === "undefined" ? null : features[feature];
-  }
-
-  /**
-   * @param {String} feature The feature to test for.
-   * @return {Boolean} True if the feature is supported.
-   */
-  function hasFeature(feature) {
-    return typeof features[feature] === "undefined";
-  }
-
   var onLoadHandlers = [];
 
-  /**
-   * Registers an onload handler.
-   * @param {Function} callback The handler to run.
-   */
-  function registerOnLoadHandler(callback) {
-    onLoadHandlers.push(callback);
-  }
+  return /** @scope gadgets.util */ {
 
-  /**
-   * Runs all functions registered via registerOnLoadHandler.
-   */
-  function runOnLoadHandlers() {
-    for (var i = 0, j = onLoadHandlers.length; i < j; ++i) {
-      onLoadHandlers[i]();
+    /**
+     * Gets the url parameters.
+     *
+     * @return {Object} Parameters passed into the query string.
+     */
+    getUrlParameters : function () {
+      if (parameters !== null) {
+        return parameters;
+      }
+      parameters = {};
+      var pairs = parseUrlParams();
+      var unesc = window.decodeURIComponent ? decodeURIComponent : unescape;
+      for (var i = 0, j = pairs.length; i < j; ++i) {
+        var pos = pairs[i].indexOf('=');
+        if (pos === -1) {
+          continue;
+        }
+        var argName = pairs[i].substring(0, pos);
+        var value = pairs[i].substring(pos + 1);
+        // difference to IG_Prefs, is that args doesn't replace spaces in
+        // argname. Unclear on if it should do:
+        // argname = argname.replace(/\+/g, " ");
+        value = value.replace(/\+/g, " ");
+        parameters[argName] = unesc(value);
+      }
+      return parameters;
+    },
+
+    /**
+     * Creates a closure which is suitable for passing as a callback.
+     *
+     * @param {Object} scope The execution scope. May be null if there is no
+     *     need to associate a specific instance of an object with this
+     *     callback.
+     * @param {Function} callback The callback to invoke when this is run.
+     *     any arguments passed in will be passed after your initial arguments.
+     * @param {Object} var_args Any number of arguments may be passed to the
+     *     callback. They will be received in the order they are passed in.
+     */
+    makeClosure : function (scope, callback, var_args) {
+      // arguments isn't a real array, so we copy it into one.
+      var tmpArgs = [];
+      for (var i = 2, j = arguments.length; i < j; ++i) {
+       tmpArgs.push(arguments[i]);
+      }
+      return function() {
+        // append new arguments.
+        for (var i = 0, j = arguments.length; i < j; ++i) {
+          tmpArgs.push(arguments[i]);
+        }
+        callback.apply(scope, tmpArgs);
+      };
+    },
+
+    /**
+     * Gets the feature parameters.
+     *
+     * @param {String} feature The feature to get parameters for.
+     * @return {Object} The parameters for the given feature, or null.
+     */
+    getFeatureParameters : function (feature) {
+      return typeof features[feature] === "undefined"
+          ? null : features[feature];
+    },
+
+    /**
+     * Returns whether the current feature is supported.
+     *
+     * @param {String} feature The feature to test for.
+     * @return {Boolean} True if the feature is supported.
+     */
+    hasFeature : function (feature) {
+      return typeof features[feature] === "undefined";
+    },
+
+    /**
+     * Registers an onload handler.
+     * @param {Function} callback The handler to run.
+     */
+    registerOnLoadHandler : function (callback) {
+      onLoadHandlers.push(callback);
+    },
+
+    /**
+     * Runs all functions registered via registerOnLoadHandler.
+     * @private Only to be used by the container, not gadgets.
+     */
+    runOnLoadHandlers : function () {
+      for (var i = 0, j = onLoadHandlers.length; i < j; ++i) {
+        onLoadHandlers[i]();
+      }
+    },
+
+    /**
+     * @param {Object} featureData The features that are supported, and
+     *    their parameters.
+     * @private Only to be used by the container, not gadgets.
+     */
+    init : function (featureData) {
+      features = featureData;
     }
-  }
-
-  /**
-   *  @param {Object} featureData The features that are supported, and
-   *    their parameters.
-   */
-  function init(featureData) {
-    features = featureData;
-  }
-
-  // Export public API.
-  return {
-    getUrlParameters: getUrlParameters,
-    getFeatureParameters: getFeatureParameters,
-    hasFeature: hasFeature,
-    makeClosure: makeClosure,
-    registerOnLoadHandler: registerOnLoadHandler,
-
-    // only used by container
-    runOnLoadHandlers: runOnLoadHandlers,
-    init: init
   };
 }();
 

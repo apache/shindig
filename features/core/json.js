@@ -19,18 +19,22 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-/*
-    The global object JSON contains two methods.
-
-    JSON.stringify(value) takes a JavaScript value and produces a JSON text.
-    The value must not be cyclical.
-
-    JSON.parse(text) takes a JSON text and produces a JavaScript value. It will
-    return false if there is an error.
+/**
+ * @fileoverview
+ * The global object JSON contains two methods.
+ *
+ * JSON.stringify(value) takes a JavaScript value and produces a JSON text.
+ * The value must not be cyclical.
+ *
+ * JSON.parse(text) takes a JSON text and produces a JavaScript value. It will
+ * return false if there is an error.
 */
 
 var gadgets = gadgets || {};
 
+/**
+ * @scope gadgets.JSON
+ */
 gadgets.JSON = function () {
     var m = {
             '\b': '\\b',
@@ -45,9 +49,11 @@ gadgets.JSON = function () {
             'boolean': function (x) {
                 return String(x);
             },
+           /** @private */
             number: function (x) {
                 return isFinite(x) ? String(x) : 'null';
             },
+            /** @private */
             string: function (x) {
                 if (/["\\\x00-\x1f]/.test(x)) {
                     x = x.replace(/([\x00-\x1f\\"])/g, function(a, b) {
@@ -63,6 +69,7 @@ gadgets.JSON = function () {
                 }
                 return '"' + x + '"';
             },
+            /** @private */
             object: function (x) {
                 if (x) {
                     var a = [], b, f, i, l, v;
@@ -114,9 +121,13 @@ gadgets.JSON = function () {
     return {
         copyright: '(c)2005 JSON.org',
         license: 'http://www.JSON.org/license.html',
-/*
-    Stringify a JavaScript value, producing a JSON text.
-*/
+
+        /**
+         * Stringifies a JavaScript value, producing a JSON text.
+         *
+         * @param {Object} v The object to stringify.
+         * @return {String} The stringified object.
+         */
         stringify: function (v) {
             var f = s[typeof v];
             if (f) {
@@ -127,10 +138,16 @@ gadgets.JSON = function () {
             }
             return null;
         },
-/*
-    Parse a JSON text, producing a JavaScript value.
-    It returns false if there is a syntax error.
-*/
+
+        /**
+         * Parses a JSON text, producing a JavaScript value.
+         * It returns false if there is a syntax error.
+         *
+         * @param {String} text The string to transform into an object. Usually
+         *     the result of a previous stringify call.
+         * @return {Object} The object parsed from the passed in text. False if
+         *     an error occurred.
+         */
         parse: function (text) {
             try {
                 return !(/[^,:{}\[\]0-9.\-+Eaeflnr-u \n\r\t]/.test(

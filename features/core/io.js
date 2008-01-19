@@ -15,8 +15,10 @@
 var gadgets = gadgets || {};
 
 /**
- * Provides remote content retrieval facilities. Available to every gadget.
+ * @fileoverview Provides remote content retrieval facilities.
+ *     Available to every gadget.
  */
+
 gadgets.io = function() {
   /**
    * Holds configuration-related data such as proxy urls.
@@ -91,79 +93,76 @@ gadgets.io = function() {
    callback(resp);
   }
 
-  /**
-   * Retrieves the content at the specified url.
-   *
-   * @param {String} url The url to fetch.
-   * @param {Function} callback Invoked when the request completes. The
-   *     response object will be passed in as a parameter.
-   * @param {Object} opt_params Optional parameters. May be modified.
-   *
-   * <pre>
-   * gadgets.IO.makeRequest(url, fn, {type: gadgets.IO.ContentType.JSON});
-   * </pre>
-   */
-  function makeRequest(url, callback, opt_params) {
-    var xhr = makeXhr();
-    var params = opt_params || {};
-    var newUrl = config.jsonProxyUrl.replace("%url%", encodeURIComponent(url));
-    xhr.open(params.postData ? "POST" : "GET", newUrl, true);
-    if (callback) {
-      xhr.onreadystatechange = gadgets.util.makeClosure(null, processResponse,
-                                                        url,
-                                                        callback,
-                                                        params,
-                                                        xhr);
+  return /** @scope gadgets.io */ {
+    /**
+     * Retrieves the content at the specified url.
+     *
+     * Example:
+     * <pre>
+     * gadgets.IO.makeRequest(url, fn, {type: gadgets.IO.ContentType.JSON});
+     * </pre>
+     *
+     * @param {String} url The url to fetch.
+     * @param {Function} callback Invoked when the request completes. The
+     *     response object will be passed in as a parameter.
+     * @param {Object} opt_params Optional parameters. May be modified.
+     */
+    makeRequest : function (url, callback, opt_params) {
+      var xhr = makeXhr();
+      var params = opt_params || {};
+      var newUrl = config.jsonProxyUrl.replace("%url%",
+          encodeURIComponent(url));
+      xhr.open(params.postData ? "POST" : "GET", newUrl, true);
+      if (callback) {
+        xhr.onreadystatechange = gadgets.util.makeClosure(null,
+            processResponse, url, callback, params, xhr);
+      }
+      xhr.send(params.postData);
+    },
+
+    /**
+     * Converts an input object into a url encoded data string (key=value&...)
+     *
+     * @param {Object} fields The post fields you wish to encode
+     * @return {String} The processed post data. This will include a trialing
+     *    ampersand (&).
+     */
+    encodeValues : function (fields) {
+      var buf = [];
+      for (var i in fields) {
+        buf.push(encodeURIComponent(i));
+        buf.push("=");
+        buf.push(encodeURIComponent(fields[i]));
+        buf.push("&");
+      }
+      return buf.join("");
+    },
+
+    /**
+     * Gets the proxy version of the passed in url.
+     *
+     * @param {String} url The url to get the proxy url for.
+     * @return {String} The proxied version of the url.
+     */
+    getProxyUrl : function (url) {
+      return config.proxyUrl.replace("%url%", encodeURIComponent(url));
+    },
+
+    /**
+     * Initializes fetchers
+     *
+     * @param {Object} configuration Configuration settings.
+     *     Required:
+     *       - proxyUrl: The url for content proxy requests. Include %url%
+     *           as a placeholder for the actual url.
+     *       - jsonProxyUrl: The url for dynamic proxy requests. Include %url%
+     *           as a placeholder for the actual url.
+     */
+    init : function (configuration) {
+      config = configuration;
+      if (!config.proxyUrl || !config.jsonProxyUrl) {
+        throw new Error("proxyUrl and jsonProxyUrl are required.");
+      }
     }
-    xhr.send(params.postData);
-  }
-
-  /**
-   * Converts an input object into a url encoded data string (key=value&...)
-   *
-   * @param {Object} fields The post fields you wish to encode
-   * @return {String} The processed post data. This will include a trialing
-   *    ampersand (&).
-   */
-  function encodeValues(fields) {
-    var buf = [];
-    for (var i in fields) {
-      buf.push(encodeURIComponent(i));
-      buf.push("=");
-      buf.push(encodeURIComponent(fields[i]));
-      buf.push("&");
-    }
-    return buf.join("");
-  }
-
-  /**
-   * @param {String} url The url to get the proxy url for.
-   * @return {String} The proxied version of the url.
-   */
-  function getProxyUrl(url) {
-    return config.proxyUrl.replace("%url%", encodeURIComponent(url));
-  }
-
-  /**
-   * Initializes fetchers
-   * @param {Object} configuration Configuration settings.
-   *     Required:
-   *       - proxyUrl: The url for content proxy requests. Include %url%
-   *           as a placeholder for the actual url.
-   *       - jsonProxyUrl: The url for dynamic proxy requests. Include %url%
-   *           as a placeholder for the actual url.
-   */
-  function init(configuration) {
-    config = configuration;
-    if (!config.proxyUrl || !config.jsonProxyUrl) {
-      throw new Error("proxyUrl and jsonProxyUrl are required.");
-    }
-  }
-
-  return {
-    makeRequest: makeRequest,
-    getProxyUrl: getProxyUrl,
-    encodeValues: encodeValues,
-    init: init
   };
 }();
