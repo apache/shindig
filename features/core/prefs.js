@@ -13,6 +13,8 @@
  */
 
 /**
+ * @fileoverview
+ *
  * Provides access to user prefs, module dimensions, and messages.
  *
  * Clients can access their preferences by constructing an instance of
@@ -62,44 +64,48 @@ gadgets.PrefStore_ = function() {
   /**
    * Adds a new user preference to the stored set for the given module id.
    *
-   * @param {Number | String} moduleId The module id to add the pref for.
+   * @param {String | Number} moduleId The module id to add the pref for.
    * @param {String} key The key to add. May be an object where keys = key and
    *     values = value.
-   * @param {String} value The value for the key. Optional.
+   * @param {String} opt_value An optional value used to set the value of the
+   *     key.
    */
-  function setPref(moduleId, key, value) {
+  function setPref(moduleId, key, opt_value) {
     var module = getModuleData(moduleId);
     if (typeof key !== "string") {
       for (var i in key) {
         module.prefs[i] = key[i];
       }
     } else {
-      module.prefs[key] = value;
+      module.prefs[key] = opt_value;
     }
   }
 
   /**
    * Adds a new message to the stored set for the given module id.
    *
-   * @param {Number | String} moduleId The module id to add the pref for.
+   * @param {String | Number} moduleId The module id to add the pref for.
    * @param {String | Object} key The key to add. May be an object where keys =
    *     key and values = value.
-   * @param {String} value The value for the key. Optional.
+   * @param {String} opt_value An optional value used to set the value of the
+   *     key.
    */
-  function setMsg(moduleId, key, value) {
+  function setMsg(moduleId, key, opt_value) {
     var module = getModuleData(moduleId);
     if (typeof key !== "string") {
       for (var i in key) {
         module.msgs[i] = key[i];
       }
     } else {
-      module.msgs[key] = value;
+      module.msgs[key] = opt_value;
     }
   }
 
   var defaultModuleId = 0;
 
   /**
+   * Sets the default module id.
+   *
    * @param {String | Number} moduleId The module id to set as default.
    */
   function setDefaultModuleId(moduleId) {
@@ -107,6 +113,8 @@ gadgets.PrefStore_ = function() {
   }
 
   /**
+   * Gets the default module id.
+   *
    * @return {String | Number} The default module id.
    */
   function getDefaultModuleId() {
@@ -114,8 +122,10 @@ gadgets.PrefStore_ = function() {
   }
 
   /**
-   * @param {Number | String} moduleId The module id to set the language for.
-   * @param {String} language The language to use.
+   * Sets the default language for this module id.
+   *
+   * @param {String | Number} moduleId The module id to set the language for.
+   * @param {String} language The language code as an ISO 639-1 code.
    */
   function setLanguage(moduleId, language) {
     getModuleData(moduleId).language = language;
@@ -123,20 +133,24 @@ gadgets.PrefStore_ = function() {
 
   /**
    * Sets the default country for this module id.
+   *
+   * @param {String | Number} moduleId The id of the gagdet instance.
+   * @param {String} country The country code as an ISO 3166-1 alpha-2 code.
    */
   function setCountry(moduleId, country) {
     getModuleData(moduleId).country = country;
   }
 
-  // Export public API.
+  // Export public API for the gadget container code. Gadget authors should
+  // not use this class.
   return {
-    setPref:setPref,
-    setMsg:setMsg,
-    setCountry:setCountry,
-    setLanguage:setLanguage,
-    getModuleData:getModuleData,
-    setDefaultModuleId:setDefaultModuleId,
-    getDefaultModuleId:getDefaultModuleId
+    setPref: setPref,
+    setMsg: setMsg,
+    setCountry: setCountry,
+    setLanguage: setLanguage,
+    getModuleData: getModuleData,
+    setDefaultModuleId: setDefaultModuleId,
+    getDefaultModuleId: getDefaultModuleId
   };
 }();
 
@@ -160,6 +174,8 @@ gadgets.Prefs = function(moduleId) {
  * Static pref parser. Parses all parameters from the url and stores them
  * for later use when creating a new gadgets.Prefs object.
  * You should only ever call this if you are a type=url gadget.
+ *
+ * @param {String | Number} moduleId The id of the gagdet instance.
  */
 gadgets.Prefs.parseUrl = function(moduleId) {
   var prefs = {};
@@ -192,7 +208,8 @@ gadgets.Prefs.parseUrl = function(moduleId) {
 /**
  * Internal helper for pref fetching.
  * @param {String} key The key to fetch.
- * @return {String}
+ * @return {Object?} The preference.
+ * @private
  */
 gadgets.Prefs.prototype.getPref_ = function(key) {
   var val = this.prefs_[key];
@@ -200,7 +217,7 @@ gadgets.Prefs.prototype.getPref_ = function(key) {
 }
 
 /**
- * Retrieves the named preference as a string.
+ * Retrieves a string preference.
  * @param {String} key The preference to fetch.
  * @return {String} The preference. If not set, an empty string.
  */
@@ -210,7 +227,7 @@ gadgets.Prefs.prototype.getString = function(key) {
 };
 
 /**
- * Retrieves the named preference as an integer.
+ * Retrieves an integer preference.
  * @param {String} key The preference to fetch.
  * @return {Number} The preference. If not set, 0.
  */
@@ -220,7 +237,7 @@ gadgets.Prefs.prototype.getInt = function(key) {
 };
 
 /**
- * Retrieve the named preference as a floating point value.
+ * Retrieves a floating point preference.
  * @param {String} key The preference to fetch.
  * @return {Number} The preference. If not set, 0.
  */
@@ -230,7 +247,7 @@ gadgets.Prefs.prototype.getFloat = function(key) {
 };
 
 /**
- * Retrieves the named preference as a boolean.
+ * Retrieves a boolean preference.
  * @param {String} key The preference to fetch.
  * @return {Boolean} The preference. If not set, false.
  */
@@ -244,15 +261,20 @@ gadgets.Prefs.prototype.getBool = function(key) {
 
 /**
  * Stores a preference.
- * @param {String | Object} key The pref to store.
- * @param {String} val The values to store.
+ * Note: If the gadget needs to store an Array it should use setArray instead of
+ * this call.
+ * Note: The gadget must require the feature setprefs in
+ * order to use this call.
+ *
+ * @param {String} key The pref to store.
+ * @param {Object} val The values to store.
  */
 gadgets.Prefs.prototype.set = function(key, value) {
   throw new Error("setprefs feature required to make this call.");
 };
 
 /**
- * Retrieves the named preference as an array.
+ * Retrieves an array preference.
  * @param {String} key The preference to fetch.
  * @return {Array.<String>} The preference. If not set, an empty array.
  *     UserPref values that were not declared as lists will be treated as
@@ -272,9 +294,11 @@ gadgets.Prefs.prototype.getArray = function(key) {
 };
 
 /**
- * Stores a preference from the given list.
+ * Stores an array preference. The gadget must require the feature setprefs in
+ * order to use this call.
+ *
  * @param {String} key The pref to store.
- * @param {Array.<String | Number>} val The values to store.
+ * @param {Array} val The values to store.
  */
 gadgets.Prefs.prototype.setArray = function(key, val) {
   throw new Error("setprefs feature required to make this call.");
@@ -291,10 +315,13 @@ gadgets.Prefs.prototype.getMsg = function(key) {
 };
 
 /**
+ * <p>
  * The regex pulls out the text before and after the positional argument
  * and digs down for a possible example value in case no actual value
  * was provided.  It is used by the function getMsgFormatted.
+ * </p>
  *
+ * <pre>
  * Example: "Foo <ph name="number"><ex>bar</ex>%1</ph> baz."
  * 0 = "Foo <ph name="number"><ex>bar</ex>%1</ph> baz." : match for the
  *     whole regex.
@@ -310,9 +337,11 @@ gadgets.Prefs.prototype.getMsg = function(key) {
  *
  * 5 = " baz." : matches final (.*) in regex
  *
- * TODO: this may need to be a single line even though it's > 80 characters
- * because some browsers may not properly interepret the line continuation.
+ * </pre>
+ * @private
  */
+ // TODO: this may need to be a single line even though it's > 80 characters
+ // because some browsers may not properly interepret the line continuation.
 gadgets.Prefs.MESSAGE_SUBST_REGEX =
     /(.*)(\<ph.*?\>\s*(\<ex\>(.*?)\<\/ex\>)?\s*%1\s*\<\/ph\>)(.*)/;
 
@@ -323,7 +352,7 @@ gadgets.Prefs.MESSAGE_SUBST_REGEX =
  * Eventually we may provide controls to return different default messages.
  *
  * @param {String} key The message to fetch.
- * @param {String} subst ????
+ * @param {String} opt_subst An optional string to substitute into the message.
  * @return {String} The formatted string.
  */
 gadgets.Prefs.prototype.getMsgFormatted = function(key, opt_subst) {
@@ -342,6 +371,8 @@ gadgets.Prefs.prototype.getMsgFormatted = function(key, opt_subst) {
 };
 
 /**
+ * Gets the current country, returned as ISO 3166-1 alpha-2 code.
+ *
  * @return {String} The country for this module instance.
  */
 gadgets.Prefs.prototype.getCountry = function() {
@@ -349,6 +380,9 @@ gadgets.Prefs.prototype.getCountry = function() {
 };
 
 /**
+ * Gets the current language the gadget should use when rendering, returned as a
+ * ISO 639-1 language code.
+ *
  * @return {String} The language for this module instance.
  */
 gadgets.Prefs.prototype.getLang = function() {
@@ -356,6 +390,8 @@ gadgets.Prefs.prototype.getLang = function() {
 };
 
 /**
+ * Gets the module id for the current instance.
+ *
  * @return {String | Number} The module id for this module instance.
  */
 gadgets.Prefs.prototype.getModuleId = function() {
