@@ -28,6 +28,7 @@ public class GadgetException extends Exception {
 
     // User-data related errors.
     INVALID_USER_DATA,
+    INVALID_GADGET_TOKEN,
 
     // General xml
     EMPTY_XML_DOCUMENT,
