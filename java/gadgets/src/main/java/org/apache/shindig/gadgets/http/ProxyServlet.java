@@ -1,21 +1,25 @@
 /*
- * $Id$
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
  *
- * Copyright 2007 The Apache Software Foundation
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  */
 package org.apache.shindig.gadgets.http;
+
+import org.apache.shindig.gadgets.BasicGadgetSigner;
+import org.apache.shindig.gadgets.GadgetSigner;
 
 import java.io.IOException;
 
@@ -26,14 +30,32 @@ import javax.servlet.http.HttpServletResponse;
 
 public class ProxyServlet extends HttpServlet {
   private final static ProxyHandler handler = new ProxyHandler();
+  private final GadgetSigner signer;
+
   @Override
   protected void doGet(HttpServletRequest request, HttpServletResponse response)
       throws ServletException, IOException {
     String output = request.getParameter("output");
     if (output != null && output.equals("js")) {
-      handler.fetchJson(request, response);
+      handler.fetchJson(request, response, signer);
     } else {
-      handler.fetch(request, response);
+      handler.fetch(request, response, signer);
     }
+  }
+
+  /**
+   * Constructs a ProxyServlet with the default (non-secure) GadgetSigner.
+   */
+  public ProxyServlet() {
+    this(new BasicGadgetSigner());
+  }
+
+  /**
+   * Creates a ProxyServlet using the specified GadgetSigner.
+   *
+   * @param signer
+   */
+  public ProxyServlet(GadgetSigner signer) {
+    this.signer = signer;
   }
 }

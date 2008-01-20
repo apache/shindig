@@ -1,23 +1,27 @@
 /*
- * $Id$
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
  *
- * Copyright 2007 The Apache Software Foundation
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  */
 package org.apache.shindig.gadgets.http;
 
 import org.apache.shindig.gadgets.BasicRemoteContentFetcher;
+import org.apache.shindig.gadgets.GadgetException;
+import org.apache.shindig.gadgets.GadgetSigner;
+import org.apache.shindig.gadgets.GadgetToken;
 import org.apache.shindig.gadgets.RemoteContent;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -42,11 +46,14 @@ public class ProxyHandler {
       new BasicRemoteContentFetcher(MAX_PROXY_SIZE);
 
   public void fetchJson(HttpServletRequest request,
-                        HttpServletResponse response)
+                        HttpServletResponse response,
+                        GadgetSigner signer)
       throws ServletException, IOException {
-    // TODO: If this request is coming in on a Host: that does not match
-    // the configured gadget rendering host, we should check for edit tokens
-    // somehow.
+
+    if (signer != null) {
+      // We're just going to toss away the token, but it should exist.
+      extractAndValidateToken(request, signer);
+    }
 
     // Validate url= parameter
     URL origin = extractAndValidateUrl(request);
@@ -73,8 +80,15 @@ public class ProxyHandler {
   }
 
   public void fetch(HttpServletRequest request,
-                    HttpServletResponse response)
+                    HttpServletResponse response,
+                    GadgetSigner signer)
       throws ServletException, IOException {
+
+    if (signer != null) {
+      // We're just going to toss away the token, but it should exist.
+      extractAndValidateToken(request, signer);
+    }
+
     // Validate url= parameter
     URL origin = extractAndValidateUrl(request);
 
@@ -130,6 +144,22 @@ public class ProxyHandler {
       throw new ServletException("Malformed url parameter");
     }
     return origin;
+  }
+
+  /**
+   * @return A valid token for the given input.
+   */
+  private GadgetToken extractAndValidateToken(HttpServletRequest request,
+      GadgetSigner signer) throws ServletException {
+    String token = request.getParameter("t");
+    if (token == null) {
+      token = "";
+    }
+    try {
+      return signer.createToken(token);
+    } catch (GadgetException e) {
+      throw new ServletException(e);
+    }
   }
 
   /**
