@@ -17,7 +17,6 @@ import org.apache.shindig.gadgets.BasicGadgetDataCache;
 import org.apache.shindig.gadgets.BasicRemoteContentFetcher;
 import org.apache.shindig.gadgets.Gadget;
 import org.apache.shindig.gadgets.GadgetContentFilter;
-import org.apache.shindig.gadgets.GadgetDataCache;
 import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.GadgetFeatureRegistry;
 import org.apache.shindig.gadgets.GadgetServer;
@@ -26,7 +25,6 @@ import org.apache.shindig.gadgets.GadgetView;
 import org.apache.shindig.gadgets.JsLibrary;
 import org.apache.shindig.gadgets.MessageBundle;
 import org.apache.shindig.gadgets.ProcessingOptions;
-import org.apache.shindig.gadgets.RemoteContentFetcher;
 import org.apache.shindig.gadgets.RenderingContext;
 import org.apache.shindig.gadgets.UserPrefs;
 
@@ -41,7 +39,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
 import javax.servlet.ServletConfig;
@@ -56,6 +53,7 @@ import javax.servlet.http.HttpServletResponse;
 public class GadgetRenderingServlet extends HttpServlet {
   private GadgetServer gadgetServer;
   private String jsServicePath;
+  private boolean usingCustomServer = false;
   private GadgetFeatureRegistry registry;
   private static final String CAJA_PARAM = "caja";
   private static final String USERPREF_PARAM_PREFIX = "up_";
@@ -68,46 +66,42 @@ public class GadgetRenderingServlet extends HttpServlet {
    * caches, etc.
    */
   public GadgetRenderingServlet() {
-    this(Executors.newCachedThreadPool(),
-         new BasicGadgetDataCache<MessageBundle>(),
-         new BasicGadgetDataCache<GadgetSpec>(),
-         new BasicRemoteContentFetcher(1024 * 1024));
+    gadgetServer = new GadgetServer(Executors.newCachedThreadPool());
+    gadgetServer.setMessageBundleCache(
+        new BasicGadgetDataCache<MessageBundle>());
+    gadgetServer.setSpecCache(new BasicGadgetDataCache<GadgetSpec>());
+    gadgetServer.setContentFetcher(new BasicRemoteContentFetcher(1024 * 1024));
+  }
+
+  /**
+   * Creates a servlet using a pre-configured server. Using this method
+   * will cause init to ignore feature loading parameters.
+   * @param server
+   */
+  public GadgetRenderingServlet(GadgetServer server) {
+    gadgetServer = server;
+    usingCustomServer = true;
   }
 
   @Override
   @SuppressWarnings("unchecked")
   public void init(ServletConfig config) {
     ServletContext context = config.getServletContext();
-    String features = context.getInitParameter("features");
     String jsPath = context.getInitParameter("js-service-path");
     if (jsPath == null) {
       jsPath = DEFAULT_JS_SERVICE_PATH;
     }
     jsServicePath = jsPath;
-    try {
-      registry = new GadgetFeatureRegistry(features);
-      gadgetServer.setGadgetFeatureRegistry(registry);
-    } catch (GadgetException e) {
-      e.printStackTrace();
-      System.exit(1);
+    if (!usingCustomServer) {
+      String features = context.getInitParameter("features");
+      try {
+        registry = new GadgetFeatureRegistry(features);
+        gadgetServer.setGadgetFeatureRegistry(registry);
+      } catch (GadgetException e) {
+        e.printStackTrace();
+        System.exit(1);
+      }
     }
-  }
-
-  /**
-   * A la carte rendering server creation.
-   * @param executor
-   * @param mbCache
-   * @param specCache
-   * @param fetcher
-   */
-  public GadgetRenderingServlet(Executor executor,
-                                GadgetDataCache<MessageBundle> mbCache,
-                                GadgetDataCache<GadgetSpec> specCache,
-                                RemoteContentFetcher fetcher) {
-    gadgetServer = new GadgetServer(executor);
-    gadgetServer.setMessageBundleCache(mbCache);
-    gadgetServer.setSpecCache(specCache);
-    gadgetServer.setContentFetcher(fetcher);
   }
 
   @Override
