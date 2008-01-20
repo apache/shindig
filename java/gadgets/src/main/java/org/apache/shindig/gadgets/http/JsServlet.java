@@ -73,9 +73,10 @@ public class JsServlet extends HttpServlet {
   protected void doGet(HttpServletRequest req, HttpServletResponse resp)
       throws IOException {
     // Use the last component as filename; prefix is ignored
-    String path = req.getPathTranslated();
-    String[] pathComponents = path.split("/");
-    String resourceName = pathComponents[pathComponents.length-1];
+    String uri = req.getRequestURI();
+    // We only want the file name part. There will always be at least 1 slash
+    // (the server root), so this is always safe.
+    String resourceName = uri.substring(uri.lastIndexOf("/") + 1);
     if (resourceName.endsWith(".js")) {
       // Lop off the suffix for lookup purposes
       resourceName = resourceName.substring(
