@@ -36,18 +36,36 @@ import javax.servlet.http.HttpServletResponse;
  * Used by type=URL gadgets in loading JavaScript resources.
  */
 public class JsServlet extends HttpServlet {
-  private GadgetFeatureRegistry registry;
+  private GadgetFeatureRegistry registry = null;
+
+  /**
+   * Create a JsServlet using a pre-configured feature registry.
+   * @param registry
+   */
+  public JsServlet(GadgetFeatureRegistry registry) {
+    this.registry = registry;
+  }
+
+  /**
+   * Creates a JsServlet without a default registry; the registry will be
+   * created automatically when init is called.
+   */
+  public JsServlet() {
+    registry = null;
+  }
 
   @Override
   public void init(ServletConfig config) {
     ServletContext context = config.getServletContext();
-    String features = context.getInitParameter("features");
-    String jsPath = context.getInitParameter("js-service-path");
-    try {
-      registry = new GadgetFeatureRegistry(features);
-    } catch (GadgetException e) {
-      e.printStackTrace();
-      throw new RuntimeException(e);
+
+    if (registry == null) {
+      String features = context.getInitParameter("features");
+      try {
+        registry = new GadgetFeatureRegistry(features);
+      } catch (GadgetException e) {
+        e.printStackTrace();
+        throw new RuntimeException(e);
+      }
     }
   }
 
