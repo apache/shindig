@@ -22,12 +22,12 @@ specific language governing permissions and limitations under the License.
     <script src="core.js"/>
     <script src="util.js"/>
     <script src="prefs.js"/>
-    <script src="json.js"/>    
+    <script src="json.js"/>
     <script src="io.js"/>
     <script><![CDATA[
       gadgets.io.init({
         proxyUrl: "http://www.gmodules.com/ig/proxy?url=%url%",
-        jsonProxyUrl: "/gadgets/proxy?url=%url%&output=js"
+        jsonProxyUrl: "proxy?url=%url%&output=js"
       });
     ]]></script>
     <script src="legacy.js"/>
