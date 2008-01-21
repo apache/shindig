@@ -26,9 +26,10 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.JarURLConnection;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLConnection;
-import java.net.URISyntaxException;
+import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -150,6 +151,7 @@ public class JsFeatureLoader {
               loadFiles(new File[]{f}, features);
             } else {
               URLConnection urlConnection = resourceUrl.openConnection();
+              List<String> featurePaths = new ArrayList<String>();
               if (urlConnection instanceof JarURLConnection) {
                 JarURLConnection jarUrlConn = (JarURLConnection)urlConnection;
                 JarFile jar = jarUrlConn.getJarFile();
@@ -159,11 +161,14 @@ public class JsFeatureLoader {
                   JarEntry jarEntry =  jarEntries.nextElement();
                   if (jarEntry.getName().startsWith(file) &&
                       jarEntry.getName().endsWith("feature.xml")) {
-                    ParsedFeature feature = processResource(jarEntry.getName());
-                    if (feature != null) {
-                      features.put(feature.name, feature);
-                    }
+                    featurePaths.add(jarEntry.getName());
                   }
+                }
+              }
+              for (String path : featurePaths) {
+                ParsedFeature feature = processResource(path);
+                if (feature != null) {
+                  features.put(feature.name, feature);
                 }
               }
             }
