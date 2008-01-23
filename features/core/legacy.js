@@ -34,34 +34,19 @@ function _IG_FetchContent(url, callback, opt_params) {
 
 function _IG_FetchXmlContent(url, callback, opt_params) {
   var params = opt_params || {};
-  params.contentType = "dom";
+  params.CONTENT_TYPE = "DOM";
   var cb = gadgets.util.makeClosure(null, _IG_Fetch_wrapper, callback);
   gadgets.io.makeRequest(url, cb, params);
 }
 
-function _IG_FetchFeedAsJSON_cb(callback, obj) {
-  if (obj.data.fr_1) {
-    callback(obj.data.fr_1);
-  } else {
-    callback(null);
-  }
-}
-
-// NOTE: this implementation does not batch calls as is the case on igoogle.
+// TODO: The server doesn't actually support FEED. Fix this!
 function _IG_FetchFeedAsJSON(url, callback, numItems, getDescriptions,
                              opt_params) {
   var params = opt_params || {};
-  // TODO: this no longer works. The proxy needs to support POST requests
-  // to make it work.
-  var finalUrl = "http://www.gmodules.com/ig/feedjson?fr_1=";
-  finalUrl += gadgets.io.encodeValues({
-    url: encodeURIComponent(url),
-    val: numItems,
-    sum: getDescriptions ? 1 : 0
-  });
-  params.contentType = "json";
-  var cb = gadgets.util.makeClosure(null, _IG_FetchFeedAsJSON_cb, callback);
-  gadgets.io.makeRequest(finalUrl, cb, params);
+  params.CONTENT_TYPE = "FEED";
+  params.NUM_ENTRIES = numItems;
+  params.GET_SUMMARIES = getDescriptions;
+  gadgets.io.makeRequest(url, callback, params);
 }
 
 function _IG_GetCachedUrl(url) {

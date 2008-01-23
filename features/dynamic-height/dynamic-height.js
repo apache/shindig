@@ -17,19 +17,19 @@
  */
 
 /**
- * @fileoverview This library augments gadgets.Window with functionality
+ * @fileoverview This library augments gadgets.window with functionality
  * to change the height of a gadget dynamically.
  */
 
 var gadgets = gadgets || {};
-gadgets.Window = gadgets.Window || {};
+gadgets.window = gadgets.window || {};
 
 /**
  * Detects the inner dimensions of a frame.
  * See: http://www.quirksmode.org/viewport/compatibility.html
  * @returns {Object} An object with width and height properties.
  */
-gadgets.Window.getViewportDimensions = function() {
+gadgets.window.getViewportDimensions = function() {
   var x,y;
   if (self.innerHeight) {
     // all except Explorer
@@ -55,7 +55,7 @@ gadgets.Window.getViewportDimensions = function() {
  * Adjusts the gadget height
  * @param {Number} opt_height Preferred height in pixels.
  */
-gadgets.Window.adjustHeight = function(opt_height) {
+gadgets.window.adjustHeight = function(opt_height) {
   var newHeight = parseInt(opt_height, 10);
   if (isNaN(newHeight)) {
     // Resize the gadget to fit its content.
@@ -71,7 +71,7 @@ gadgets.Window.adjustHeight = function(opt_height) {
     // to figure out.
 
     // Get the height of the viewport
-    var vh = gadgets.Window.getViewportDimensions().height;
+    var vh = gadgets.window.getViewportDimensions().height;
     var body = document.body;
     var docEl = document.documentElement;
     if (document.compatMode == 'CSS1Compat' && docEl.scrollHeight) {
@@ -113,17 +113,17 @@ gadgets.Window.adjustHeight = function(opt_height) {
   }
 
   // Only make the IFPC call if height has changed
-  if (newHeight != gadgets.Window.oldHeight_) {
-    gadgets.Window.oldHeight_ = newHeight;
+  if (newHeight != gadgets.window.oldHeight_) {
+    gadgets.window.oldHeight_ = newHeight;
     var modId = 'remote_module_' + (new gadgets.Prefs()).getModuleId();
     var ifpcRelay = gadgets.util.getUrlParameters().parent || '';
-    gadgets.IFPC_.call(modId, "resize_iframe", [modId, newHeight],
+    gadgets.ifpc_.call(modId, "resize_iframe", [modId, newHeight],
       ifpcRelay, null, '');
   }
 };
 
 // Alias for legacy code
-var _IG_AdjustIFrameHeight = gadgets.Window.adjustHeight;
+var _IG_AdjustIFrameHeight = gadgets.window.adjustHeight;
 
-// TODO Attach gadgets.Window.adjustHeight to the onresize event
+// TODO Attach gadgets.window.adjustHeight to the onresize event
 

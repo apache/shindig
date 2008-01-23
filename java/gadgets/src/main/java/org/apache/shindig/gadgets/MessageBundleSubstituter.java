@@ -125,9 +125,9 @@ class MessageBundleSubstituterFeature implements GadgetFeature {
         int moduleId = gadget.getId().getModuleId();
         Locale locale = context.getLocale();
         StringBuilder js = new StringBuilder();
-        String setMsgFmt = "gadgets.PrefStore_.setMsg(%d, %s);";
-        String setLangFmt = "gadgets.PrefStore_.setLanguage(%d, \"%s\");";
-        String setCountryFmt = "gadgets.PrefStore_.setCountry(%d, \"%s\");";
+        String setMsgFmt = "gadgets.prefs_.setMsg(%d, %s);";
+        String setLangFmt = "gadgets.prefs_.setLanguage(%d, \"%s\");";
+        String setCountryFmt = "gadgets.prefs_.setCountry(%d, \"%s\");";
 
         js.append(String.format(setMsgFmt, moduleId, json.toString()));
         js.append(String.format(setLangFmt, moduleId, locale.getLanguage()));

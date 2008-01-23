@@ -22,14 +22,14 @@
  */
 
 var gadgets = gadgets || {};
-gadgets.Flash = gadgets.Flash || {};
+gadgets.flash = gadgets.flash || {};
 
 /**
  * Detects Flash Player and its major version.
  * @return {Number} The major version of Flash Player
  *                  or 0 if Flash is not supported.
  */
-gadgets.Flash.getMajorVersion = function() {
+gadgets.flash.getMajorVersion = function() {
   var flashMajorVersion = 0;
   if (navigator.plugins && navigator.mimeTypes && navigator.mimeTypes.length) {
     // Flash detection for browsers using Netscape's plugin architecture
@@ -71,7 +71,7 @@ gadgets.Flash.getMajorVersion = function() {
  *       passed to the Flash movie on creation. The values must be HTML-escaped.
  * @return {Boolean} Whether the function call completes successfully.
  */
-gadgets.Flash.embedFlash = function(swfUrl, swfContainer, opt_params) {
+gadgets.flash.embedFlash = function(swfUrl, swfContainer, opt_params) {
   switch (typeof swfContainer) {
     case 'string':
       swfContainer = document.getElementById(swfContainer);
@@ -92,7 +92,7 @@ gadgets.Flash.embedFlash = function(swfUrl, swfContainer, opt_params) {
       return false;
   }
 
-  var ver = gadgets.Flash.getMajorVersion();
+  var ver = gadgets.flash.getMajorVersion();
   if (ver) {
     var swfVer = parseInt(opt_params.swf_version, 10);
     if (isNaN(swfVer)) {
@@ -166,18 +166,19 @@ gadgets.Flash.embedFlash = function(swfUrl, swfContainer, opt_params) {
 
 /**
  * Injects a cached Flash file into the DOM tree.
- * Accepts the same parameters as gadgets.Flash.embedFlash does.
+ * Accepts the same parameters as gadgets.flash.embedFlash does.
  * @return {Boolean} Whether the function call completes successfully.
  */
-gadgets.Flash.embedCachedFlash = function() {
+gadgets.flash.embedCachedFlash = function() {
   var args = Array.prototype.slice.call(arguments);
+  // TODO: This needs to use gadgets.io.getProxyUrl()
   args[0] = 'http://' + document.location.host + '/gadgets/proxy?url=' +
             args[0];
-  gadgets.Flash.embedFlash.apply(this, args);
+  gadgets.flash.embedFlash.apply(this, args);
 };
 
 // Aliases for legacy code
-var _IG_GetFlashMajorVersion = gadgets.Flash.getMajorVersion;
-var _IG_EmbedFlash = gadgets.Flash.embedFlash;
-var _IG_EmbedCachedFlash = gadgets.Flash.embedCachedFlash;
+var _IG_GetFlashMajorVersion = gadgets.flash.getMajorVersion;
+var _IG_EmbedFlash = gadgets.flash.embedFlash;
+var _IG_EmbedCachedFlash = gadgets.flash.embedCachedFlash;
 

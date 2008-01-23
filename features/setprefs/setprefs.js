@@ -36,9 +36,9 @@ gadgets.Prefs.prototype.set = function(key, value) {
     for (var i = 0, j = arguments.length; i < j; i += 2) {
       obj[arguments[i]] = arguments[i + 1];
     }
-    gadgets.PrefStore_.setPref(this.moduleId_, obj);
+    gadgets.prefs_.setPref(this.moduleId_, obj);
   } else {
-    gadgets.PrefStore_.setPref(this.moduleId_, key, value);
+    gadgets.prefs_.setPref(this.moduleId_, key, value);
   }
 
   var modId = 'remote_module_' + this.getModuleId();
@@ -47,7 +47,7 @@ gadgets.Prefs.prototype.set = function(key, value) {
   var ifpcArgs = Array.prototype.slice.call(arguments);
   ifpcArgs.unshift(''); // security token placeholder
   ifpcArgs.unshift(modId);
-  gadgets.IFPC_.call(modId, 'set_pref', ifpcArgs, ifpcRelay, null, '');
+  gadgets.ifpc_.call(modId, 'set_pref', ifpcArgs, ifpcRelay, null, '');
 };
 
 /**

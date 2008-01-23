@@ -35,7 +35,7 @@ var gadgets = gadgets || {};
 /**
  * @scope gadgets.JSON
  */
-gadgets.JSON = function () {
+gadgets.json = function () {
     var m = {
             '\b': '\\b',
             '\t': '\\t',

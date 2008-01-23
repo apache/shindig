@@ -49,7 +49,7 @@ class ModuleSubstituterFeature implements GadgetFeature {
         Integer.toString(gadget.getId().getModuleId()));
 
     if (context.getRenderingContext() == RenderingContext.GADGET) {
-      String format = "gadgets.PrefStore_.setDefaultModuleId(%d);";
+      String format = "gadgets.prefs_.setDefaultModuleId(%d);";
       String fmtStr = String.format(format, gadget.getId().getModuleId());
       gadget.addJsLibrary(JsLibrary.create(JsLibrary.Type.INLINE, fmtStr));
     }

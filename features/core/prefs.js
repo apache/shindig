@@ -41,7 +41,7 @@ var gadgets = gadgets || {};
  * Stores preferences for the default shindig implementation.
  * @private
  */
-gadgets.PrefStore_ = function() {
+gadgets.prefs_ = function() {
   var modules = {};
 
   /**
@@ -160,11 +160,11 @@ gadgets.PrefStore_ = function() {
  */
 gadgets.Prefs = function(moduleId) {
   if (typeof moduleId === "undefined") {
-    this.moduleId_ = gadgets.PrefStore_.getDefaultModuleId();
+    this.moduleId_ = gadgets.prefs_.getDefaultModuleId();
   } else {
     this.moduleId_ = moduleId;
   }
-  this.data_ = gadgets.PrefStore_.getModuleData(this.moduleId_);
+  this.data_ = gadgets.prefs_.getModuleData(this.moduleId_);
   // This is used to eliminate one hash table lookup per value fetched.
   this.prefs_ = this.data_.prefs;
   this.msgs_ = this.data_.msgs;
@@ -198,11 +198,11 @@ gadgets.Prefs.parseUrl = function(moduleId) {
       }
     }
   }
-  gadgets.PrefStore_.setDefaultModuleId(moduleId);
-  gadgets.PrefStore_.setPref(moduleId, prefs);
-  gadgets.PrefStore_.setMsg(moduleId, msgs);
-  gadgets.PrefStore_.setLanguage(moduleId, language);
-  gadgets.PrefStore_.setCountry(moduleId, country);
+  gadgets.prefs_.setDefaultModuleId(moduleId);
+  gadgets.prefs_.setPref(moduleId, prefs);
+  gadgets.prefs_.setMsg(moduleId, msgs);
+  gadgets.prefs_.setLanguage(moduleId, language);
+  gadgets.prefs_.setCountry(moduleId, country);
 };
 
 /**
