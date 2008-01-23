@@ -113,7 +113,7 @@ gadgets.IFramePool_.prototype.clear = function() {
 /**
  * Inter-frame procedure call
  */
-gadgets.IFPC_ = function() {
+gadgets.ifpc_ = function() {
 
   var CALLBACK_ID_PREFIX_ = "cbid";
   var CALLBACK_SERVICE_NAME_ = "ifpc_callback";
@@ -253,7 +253,7 @@ gadgets.IFPC_ = function() {
     // Also see this blogged account of the bug:
     // http://the-stickman.com/web-development/javascript/iframes-xmlhttprequest-bug-in-firefox
     var fn = function() {
-      win.gadgets.IFPC_.handleRequest(argsString);
+      win.gadgets.ifpc_.handleRequest(argsString);
     };
 
     if (window.ActiveXObject) { // MSIE
@@ -409,7 +409,7 @@ gadgets.IFPC_ = function() {
     for(var i = 0; i < args.length; i++) {
       var arg = decodeURIComponent(args[i]);
       try {
-        arg = gadgets.JSON.parse(arg);
+        arg = gadgets.json.parse(arg);
       } catch (e) {
         // unexpected, but ok - treat as a string
       }
@@ -458,7 +458,7 @@ gadgets.IFPC_ = function() {
   function encodeArgs_(args) {
     var argsEscaped = [];
     for(var i = 0; i < args.length; i++) {
-      var arg = gadgets.JSON.stringify(args[i]);
+      var arg = gadgets.json.stringify(args[i]);
       argsEscaped.push(encodeURIComponent(arg));
     }
     return argsEscaped.join('&');
@@ -481,5 +481,5 @@ gadgets.IFPC_ = function() {
 }();
 
 // Alias for legacy code
-var _IFPC = gadgets.IFPC_;
+var _IFPC = gadgets.ifpc_;
 

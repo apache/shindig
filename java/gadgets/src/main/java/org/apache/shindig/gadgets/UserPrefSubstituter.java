@@ -77,7 +77,7 @@ class UserPrefSubstituterFeature implements GadgetFeature {
     }
 
     if (json != null) {
-      String setPrefFmt = "gadgets.PrefStore_.setPref(%d, %s);";
+      String setPrefFmt = "gadgets.prefs_.setPref(%d, %s);";
       int moduleId = gadget.getId().getModuleId();
       String setPrefStr = String.format(setPrefFmt, moduleId, json.toString());
       gadget.addJsLibrary(JsLibrary.create(JsLibrary.Type.INLINE, setPrefStr));

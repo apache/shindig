@@ -17,23 +17,23 @@
  */
 
 /**
- * @fileoverview This library augments gadgets.Window with functionality
+ * @fileoverview This library augments gadets.window with functionality
  * to set the title of a gadget dynamically.
  */
 
 var gadgets = gadgets || {};
-gadgets.Window = gadgets.Window || {};
+gadets.window = gadets.window || {};
 
 /**
  * Sets the gadget title.
  * @param {String} title Preferred title.
  */
-gadgets.Window.setTitle = function(title) {
+gadets.window.setTitle = function(title) {
   var modId = 'remote_module_' + (new gadgets.Prefs()).getModuleId();
   var ifpcRelay = gadgets.util.getUrlParameters().parent || '';
   gadgets.IFPC_.call(modId, 'set_title', [modId, title], ifpcRelay, null, '');
 };
 
 // Alias for legacy code
-var _IG_SetTitle = gadgets.Window.setTitle;
+var _IG_SetTitle = gadets.window.setTitle;
 

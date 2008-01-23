@@ -60,19 +60,18 @@ gadgets.io = function() {
     //    to begin with, and we can solve this problem by using post requests
     //    and / or passing the url in the http headers.
     txt = txt.substr(UNPARSEABLE_CRUFT.length);
-    // TODO: safe JSON parser.
-    var data = gadgets.JSON.parse(txt);
+    var data = gadgets.json.parse(txt);
     data = data[url];
     var resp = {
      text: data.body,
      errors: []
     };
-    switch (params.contentType) {
-      case "json":
-        // TODO: safe JSON parser.
-        resp.data = gadgets.JSON.parse(resp.text);
+    switch (params.CONTENT_TYPE) {
+      case "JSON":
+      case "FEED":
+        resp.data = gadgets.json.parse(resp.text);
         break;
-     case "dom":
+     case "DOM":
       var dom;
       if (window.ActiveXObject) {
         dom = new ActiveXObject("Microsoft.XMLDOM");
@@ -95,24 +94,31 @@ gadgets.io = function() {
 
   return /** @scope gadgets.io */ {
     /**
-     * Retrieves the content at the specified url.
+     * Fetches content from the provided URL and feeds that content into the
+     * callback function.
      *
      * Example:
      * <pre>
-     * gadgets.IO.makeRequest(url, fn, {type: gadgets.IO.ContentType.JSON});
+     * gadgets.io.makeRequest(url, fn,
+     *    {contentType: gadgets.io.ContentType.FEED});
      * </pre>
      *
-     * @param {String} url The url to fetch.
-     * @param {Function} callback Invoked when the request completes. The
-     *     response object will be passed in as a parameter.
-     * @param {Object} opt_params Optional parameters. May be modified.
+     * @param {String} url The URL where the content is located
+     * @param {Function} callback The function to call with the data from the
+     *     URL once it is fetched
+     * @param {Map.&lt;gadgets.io.RequestParameters, Object&gt;} opt_params
+     *     Additional
+     *     <a href="gadgets.io.RequestParameters.html">parameters</a>
+     *     to pass to the request
      */
     makeRequest : function (url, callback, opt_params) {
+      // TODO: This method also needs to respect all members of
+      // gadgets.io.RequestParameters, and validate them.
       var xhr = makeXhr();
       var params = opt_params || {};
       var newUrl = config.jsonProxyUrl.replace("%url%",
           encodeURIComponent(url));
-      xhr.open(params.postData ? "POST" : "GET", newUrl, true);
+      xhr.open(params.METHOD || "GET", newUrl, true);
       if (callback) {
         xhr.onreadystatechange = gadgets.util.makeClosure(null,
             processResponse, url, callback, params, xhr);
@@ -166,3 +172,175 @@ gadgets.io = function() {
     }
   };
 }();
+
+// TODO: This can all be removed after the spec is published. This is only
+// here to satisfy documentation requirements.
+
+/**
+ * @static
+ * @class
+ * Used by the
+ * <a href="gadgets.io.html#makeRequest">
+ * <code>gadgets.io.makeRequest()</code></a> method.
+ * @name gadgets.io.RequestParameters
+ */
+gadgets.io.RequestParameters = {
+  /**
+   * The method to use when fetching content from the URL;
+   * defaults to <code>MethodType.GET</a></code>.
+   * Specified as a
+   * <a href="gadgets.io.MethodType.html">MethodType</a>.
+   *
+   * @member gadgets.io.RequestParameters
+   */
+   METHOD : 'METHOD',
+
+  /**
+   * The type of content that lives at the URL;
+   * defaults to <code>ContentType.HTML</code>.
+   * Specified as a
+   * <a href="gadgets.io.ContentType.html">
+   * ContentType</a>.
+   *
+   * @member gadgets.io.RequestParameters
+   */
+  CONTENT_TYPE : "CONTENT_TYPE",
+
+  /**
+   * The data to send to the URL using the POST method.
+   * Specified as a <code>String</code>
+   * Defaults to null.
+   *
+   * @member gadgets.io.RequestParameters
+   */
+  POST_DATA : "POST_DATA",
+
+  /**
+   * The HTTP headers to send to the URL.
+   * Specified as a <code>Map.<String,String></code>
+   * Defaults to null.
+   *
+   * @member gadgets.io.RequestParameters
+   */
+  HEADERS : "HEADERS",
+
+  /**
+   * The type of authentication to use when fetching the content;
+   * defaults to <code>AuthorizationType.NONE</code>.
+   * Specified as an
+   * <a href="gadgets.io.AuthorizationType.html">
+   * AuthorizationType</a>.
+   *
+   * @member gadgets.io.RequestParameters
+   */
+  AUTHORIZATION : 'AUTHORIZATION',
+
+
+  /**
+   * If the content is a feed, the number of entries to fetch;
+   * defaults to 3.
+   * Specified as a <code>Number</code>.
+   *
+   * @member gadgets.io.RequestParameters
+   */
+  NUM_ENTRIES : 'NUM_ENTRIES',
+
+  /**
+   * If the content is a feed, whether to fetch summaries for that feed;
+   * defaults to false.
+   * Specified as a <code>Boolean</code>.
+   *
+   * @member gadgets.io.RequestParameters
+   */
+  GET_SUMMARIES : 'GET_SUMMARIES'
+};
+
+
+/**
+ * @static
+ * @class
+ * Used by
+ * <a href="gadgets.io.RequestParameters.html">
+ * RequestParameters</a>.
+ * @name gadgets.io.MethodType
+ */
+gadgets.io.MethodType = {
+  /** @member gadgets.io.MethodType */
+  GET : 'GET',
+
+  /** @member gadgets.io.MethodType */
+  POST : 'POST',
+
+  /**
+  * @member gadgets.io.MethodType
+  * Not supported by all containers.
+  */
+  PUT : 'PUT',
+
+  /**
+  * @member gadgets.io.MethodType
+  * Not supported by all containers.
+  */
+  DELETE : 'DELETE',
+
+  /**
+   * @member gadgets.io.MethodType
+   * Not supported by all containers.
+   */
+  HEAD : 'HEAD'
+};
+
+
+/**
+ * @static
+ * @class
+ * Used by
+ * <a href="gadgets.io.RequestParameters.html">
+ * RequestParameters</a>.
+ * @name gadgets.io.ContentType
+ */
+gadgets.io.ContentType = {
+  /**
+   * Returns text, used for fetching html.
+   * @member gadgets.io.ContentType
+   */
+  TEXT : 'TEXT',
+
+  /**
+   * Returns a dom object, used for fetching xml.
+   * @member gadgets.io.ContentType
+   */
+  DOM : 'DOM',
+
+  /**
+   * Returns a json object.
+   * @member gadgets.io.ContentType
+   */
+  JSON : 'JSON',
+
+  /**
+   * Returns a json representation of a feed.
+   * @member gadgets.io.ContentType
+   */
+  FEED : 'FEED'
+};
+
+
+/**
+ * @static
+ * @class
+ * Used by
+ * <a href="gadgets.io.RequestParameters.html">
+ * RequestParameters</a>.
+ * @name gadgets.io.AuthorizationType
+ */
+gadgets.io.AuthorizationType = {
+  /** @member gadgets.io.AuthorizationType */
+  NONE : 'NONE',
+
+  /** @member gadgets.io.AuthorizationType */
+  SIGNED : 'SIGNED',
+
+  /** @member gadgets.io.AuthorizationType */
+  AUTHENTICATED : 'AUTHENTICATED'
+};
