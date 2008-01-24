@@ -9,3 +9,4 @@ features/opensocial-reference/feature.xml
 features/opensocial-samplecontainer/feature.xml
 features/setprefs/feature.xml
 features/settitle/feature.xml
+features/minimessage/feature.xml
