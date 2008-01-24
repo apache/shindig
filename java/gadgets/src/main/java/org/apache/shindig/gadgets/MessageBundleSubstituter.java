@@ -84,7 +84,8 @@ class MessageBundleSubstituterFeature implements GadgetFeature {
         if (bundle == null) {
           byte[] data = null;
           try {
-            data = context.getHttpFetcher().fetch(uri.toURL()).getByteArray();
+            data = context.getHttpFetcher().fetch(
+                uri.toURL(), context.getOptions()).getByteArray();
           } catch (MalformedURLException e) {
             throw new GadgetException(
                 GadgetException.Code.FAILED_TO_RETRIEVE_CONTENT,

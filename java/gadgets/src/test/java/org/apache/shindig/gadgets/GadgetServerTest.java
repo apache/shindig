@@ -51,14 +51,16 @@ public class GadgetServerTest extends EasyMockTestCase {
 
   public void testGadgetSpecNotInCache() throws Exception {
     RemoteContent results = new RemoteContent(200, DATETIME_XML.getBytes(), null);
+    ProcessingOptions options = new ProcessingOptions();
 
     expect(specCache.get(eq(DATETIME_URI_STRING))).andReturn(null);
-    expect(fetcher.fetch(eq(DATETIME_URI.toURL()))).andReturn(results);
+    expect(fetcher.fetch(eq(DATETIME_URI.toURL()),
+                         eq(options))).andReturn(results);
     specCache.put(eq(DATETIME_URI_STRING), isA(GadgetSpec.class));
     replay();
 
     Gadget gadget = gadgetServer.processGadget(DATETIME_ID, UserPrefs.EMPTY, EN_US_LOCALE,
-                                               RenderingContext.GADGET, null);
+                                               RenderingContext.GADGET, options);
     verify();
   }
 
@@ -74,14 +76,16 @@ public class GadgetServerTest extends EasyMockTestCase {
 
   public void testBasicGadget() throws Exception {
     RemoteContent results = new RemoteContent(200, DATETIME_XML.getBytes(), null);
+    ProcessingOptions options = new ProcessingOptions();
 
     expect(specCache.get(eq(DATETIME_URI_STRING))).andReturn(null);
-    expect(fetcher.fetch(eq(DATETIME_URI.toURL()))).andReturn(results);
+    expect(fetcher.fetch(eq(DATETIME_URI.toURL()),
+                         eq(options))).andReturn(results);
     specCache.put(eq(DATETIME_URI_STRING), isA(GadgetSpec.class));
     replay();
 
     Gadget gadget = gadgetServer.processGadget(DATETIME_ID, UserPrefs.EMPTY, EN_US_LOCALE,
-                                               RenderingContext.GADGET, null);
+                                               RenderingContext.GADGET, options);
     assertEquals("Hello, World!", gadget.getTitle());
     assertEquals("Goodbye, World!", gadget.getContentData());
     verify();

@@ -43,7 +43,7 @@ public class BasicRemoteContentFetcher implements RemoteContentFetcher {
   }
 
   /** {@inheritDoc} */
-  public RemoteContent fetch(URL url) {
+  public RemoteContent fetch(URL url, ProcessingOptions options) {
     ByteArrayOutputStream out = new ByteArrayOutputStream();
 
     int responseCode;

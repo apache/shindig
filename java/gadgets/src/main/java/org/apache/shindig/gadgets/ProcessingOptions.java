@@ -17,20 +17,27 @@ package org.apache.shindig.gadgets;
  * Contains flags that effect how a given {@code GadgetServer.processGadget}
  * call operates. Care should be taken with this class to ensure it doesn't
  * become a catch-all for unnecessary pieces of functionality.
+ * 
+ * This class's methods are designed to be overridden depending on the context
+ * of the request. Its default implementations provide default values for
+ * each supported flag.
  */
 public class ProcessingOptions {
-
   /**
-   * Whether or not to bypass the gadget and message bundle caches for the
-   * current request.
+   * @return Whether or not to bypass caching behavior for the current request.
    */
-  public boolean ignoreCache = false;
+  public boolean getIgnoreCache() {
+    return false;
+  }
 
   /**
    * Overrides javascript library processing by forcing the use of a fixed set
    * of libraries. This is mainly intended for use by parent sites that are
    * using the core library to fetch meta data for many gadgets and aggregating
    * the required libraries.
+   * @return Libs path to use
    */
-  public String forceJsLibs = null;
+  public String getForcedJsLibs() {
+    return null;
+  }
 }
