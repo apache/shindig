@@ -16,5 +16,5 @@ package org.apache.shindig.gadgets;
 import java.net.URL;
 
 public interface RemoteContentFetcher {
-  public RemoteContent fetch(URL url);
+  public RemoteContent fetch(URL url, ProcessingOptions options);
 }

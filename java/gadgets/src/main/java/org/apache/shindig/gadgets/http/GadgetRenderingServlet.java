@@ -141,9 +141,7 @@ public class GadgetRenderingServlet extends HttpServlet {
 
     BasicHttpContext context = new BasicHttpContext(req);
     GadgetView.ID gadgetId = new Gadget.GadgetId(uri, moduleId);
-    ProcessingOptions options = new ProcessingOptions();
-    options.ignoreCache = getIgnoreCache(req);
-    options.forceJsLibs = getForceJsLibs(req);
+    ProcessingOptions options = new HttpProcessingOptions(req);
 
     // Prepare a list of GadgetContentFilters applied to the output
     List<GadgetContentFilter> contentFilters =
@@ -234,16 +232,18 @@ public class GadgetRenderingServlet extends HttpServlet {
         inlineJs.append(library.getContent()).append("\n");
       } else {
         // FILE or RESOURCE
-        if (options.forceJsLibs == null) {
+        if (options.getForcedJsLibs() == null) {
           inlineJs.append(library.getContent()).append("\n");
         } // otherwise it was already included by options.forceJsLibs.
       }
     }
 
     // Forced libs first.
-    if (options.forceJsLibs != null) {
+    if (options.getForcedJsLibs() != null) {
       markup.append(String.format(externFmt,
-          DEFAULT_JS_SERVICE_PATH + options.forceJsLibs + JS_FILE_SUFFIX));
+                                  DEFAULT_JS_SERVICE_PATH +
+                                  options.getForcedJsLibs() +
+                                  JS_FILE_SUFFIX));
     }
 
     if (inlineJs.length() > 0) {
@@ -283,11 +283,12 @@ public class GadgetRenderingServlet extends HttpServlet {
     String prefsQuery = getPrefsQueryString(gadget.getUserPrefValues());
     String libsQuery = null;
 
-    if (options.forceJsLibs == null) {
+    if (options.getForcedJsLibs() == null) {
       libsQuery = getLibsQueryString(gadget.getRequires().keySet());
     } else {
-      libsQuery
-          = DEFAULT_JS_SERVICE_PATH + options.forceJsLibs + JS_FILE_SUFFIX;
+      libsQuery = DEFAULT_JS_SERVICE_PATH +
+                  options.getForcedJsLibs() +
+                  JS_FILE_SUFFIX;
     }
 
     URI redirURI = gadget.getContentHref();
@@ -377,26 +378,6 @@ public class GadgetRenderingServlet extends HttpServlet {
     buf.append(JS_FILE_SUFFIX);
 
     return buf.toString();
-  }
-
-  /**
-   * @param req
-   * @return Whether or not to ignore the cache.
-   */
-  protected boolean getIgnoreCache(HttpServletRequest req) {
-    String noCacheParam = req.getParameter("nocache");
-    if (noCacheParam == null) {
-      noCacheParam = req.getParameter("bpc");
-    }
-    return noCacheParam != null && noCacheParam.equals("1");
-  }
-
-  /**
-   * @param req
-   * @return Forced JS libs, or null if no forcing is to be done.
-   */
-  protected String getForceJsLibs(HttpServletRequest req) {
-    return req.getParameter("libs");
   }
 
   /**

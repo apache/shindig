@@ -198,11 +198,9 @@ public class GadgetServer {
         try {
           gadgetException = latestResult.get();
         } catch (ExecutionException e) {
-          // TODO: convert into gadgetException with internal error type
           gadgetException = new GadgetException(
               GadgetException.Code.INTERNAL_SERVER_ERROR, e);
         } catch (InterruptedException e) {
-          // TODO: convert into gadgetException with internal error type
           gadgetException = new GadgetException(
               GadgetException.Code.INTERNAL_SERVER_ERROR, e);
         }
@@ -321,7 +319,7 @@ public class GadgetServer {
 
     @Override
     public void run(WorkflowContext wc) throws GadgetException {
-      if (wc.context.getOptions().ignoreCache) {
+      if (wc.context.getOptions().getIgnoreCache()) {
         return;
       }
 
@@ -339,7 +337,8 @@ public class GadgetServer {
     private final UserPrefs prefs;
     private final GadgetBlacklist blacklist;
 
-    private SpecLoadTask(RemoteContentFetcher fetcher, GadgetView.ID gadgetId,
+    private SpecLoadTask(RemoteContentFetcher fetcher,
+                         GadgetView.ID gadgetId,
                          UserPrefs prefs,
                          GadgetDataCache<GadgetSpec> specCache,
                          GadgetBlacklist blacklist) {
@@ -365,7 +364,8 @@ public class GadgetServer {
 
       byte[] xml = null;
       try {
-        xml = fetcher.fetch(gadgetId.getURI().toURL()).getByteArray();
+        xml = fetcher.fetch(
+            gadgetId.getURI().toURL(), wc.context.getOptions()).getByteArray();
       } catch (MalformedURLException e) {
         throw new GadgetException(
             GadgetException.Code.FAILED_TO_RETRIEVE_CONTENT,
@@ -378,7 +378,7 @@ public class GadgetServer {
 
       // This isn't a separate job because if it is we'd just need another
       // flag telling us not to store to the cache.
-      if (!wc.context.getOptions().ignoreCache) {
+      if (!wc.context.getOptions().getIgnoreCache()) {
         specCache.put(wc.gadget.getId().getKey(), wc.gadget.copy());
       }
     }

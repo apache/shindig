@@ -22,6 +22,7 @@ import org.apache.shindig.gadgets.BasicRemoteContentFetcher;
 import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.GadgetSigner;
 import org.apache.shindig.gadgets.GadgetToken;
+import org.apache.shindig.gadgets.ProcessingOptions;
 import org.apache.shindig.gadgets.RemoteContent;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -59,8 +60,7 @@ public class ProxyHandler {
     URL origin = extractAndValidateUrl(request);
 
     // Fetch the content and convert it into JSON.
-
-    RemoteContent results = fetcher.fetch(origin);
+    RemoteContent results = fetcher.fetch(origin, new ProcessingOptions());
     String output;
     try {
       String json = new JSONObject().put(origin.toString(), new JSONObject()
@@ -91,8 +91,7 @@ public class ProxyHandler {
 
     // Validate url= parameter
     URL origin = extractAndValidateUrl(request);
-
-    RemoteContent results = fetcher.fetch(origin);
+    RemoteContent results = fetcher.fetch(origin, new ProcessingOptions());
     int status = results.getHttpStatusCode();
     response.setStatus(status);
     if (status == HttpServletResponse.SC_OK) {
