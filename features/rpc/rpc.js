@@ -23,11 +23,16 @@
 
 var gadgets = gadgets || {};
 
+/**
+ * @static
+ * @class Provides operations for making rpc calls.
+ * @name gadgets.rpc
+ */
 gadgets.rpc = function() {
-  return {
+  return /** @scope gadgets.rpc */ {
     /**
      * Registers an RPC service.
-     * @param {string} serviceName Service name to register.
+     * @param {String} serviceName Service name to register.
      * @param {Function} handler Service handler.
      */
     register: function(serviceName, handler) {
@@ -36,7 +41,7 @@ gadgets.rpc = function() {
 
     /**
      * Unregisters an RPC service.
-     * @param {string} serviceName Service name to unregister.
+     * @param {String} serviceName Service name to unregister.
      */
     unregister: function(serviceName) {
       // TODO
@@ -61,9 +66,9 @@ gadgets.rpc = function() {
 
     /**
      * Calls an RPC service.
-     * @param {string} targetId Id of the RPC service provider.
+     * @param {String} targetId Id of the RPC service provider.
      *                          Empty if calling the parent container.
-     * @param {string} serviceName Service name to call.
+     * @param {String} serviceName Service name to call.
      * @param {Function|null} callback Callback function (if any) to process
      *                                 the return value of the RPC request.
      * @param {*} var_args Parameters for the RPC request.

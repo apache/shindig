@@ -22,11 +22,18 @@
  */
 
 var gadgets = gadgets || {};
+
+/**
+ * @static
+ * @class Provides operations for getting information about and modifying the
+ *     window the gadget is placed in.
+ * @name gadgets.window
+ */
 gadgets.window = gadgets.window || {};
 
 /**
  * Sets the gadget title.
- * @param {String} title Preferred title.
+ * @param {String} title The preferred title.
  */
 gadgets.window.setTitle = function(title) {
   var modId = 'remote_module_' + (new gadgets.Prefs()).getModuleId();

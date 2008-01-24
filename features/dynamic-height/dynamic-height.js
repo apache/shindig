@@ -22,11 +22,19 @@
  */
 
 var gadgets = gadgets || {};
+
+/**
+ * @static
+ * @class Provides operations for getting information about and modifying the
+ *     window the gadget is placed in.
+ * @name gadgets.window
+ */
 gadgets.window = gadgets.window || {};
 
 /**
  * Detects the inner dimensions of a frame.
- * See: http://www.quirksmode.org/viewport/compatibility.html
+ * See: http://www.quirksmode.org/viewport/compatibility.html for more
+ * information.
  * @returns {Object} An object with width and height properties.
  */
 gadgets.window.getViewportDimensions = function() {
@@ -53,7 +61,8 @@ gadgets.window.getViewportDimensions = function() {
 
 /**
  * Adjusts the gadget height
- * @param {Number} opt_height Preferred height in pixels.
+ * @param {Number} opt_height An optional preferred height in pixels. If not
+ *     specified, will attempt to fit the gadget to its content.
  */
 gadgets.window.adjustHeight = function(opt_height) {
   var newHeight = parseInt(opt_height, 10);
