@@ -31,6 +31,22 @@
         <groupId>org.mortbay.jetty</groupId>
         <artifactId>maven-jetty-plugin</artifactId>
       </plugin>
+      <plugin>
+        <artifactId>maven-source-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>attach-sources</id>
+            <phase>package</phase>
+            <goals>
+              <goal>jar</goal>
+            </goals>
+          </execution>
+        </executions>
+        <configuration>
+          <excludeResources>true</excludeResources>
+          <attach>true</attach>
+        </configuration>
+      </plugin>
     </plugins>
     <resources>
       <resource>
