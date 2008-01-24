@@ -374,7 +374,7 @@ var html_sanitize = (function () {
   }
 
   function escapeAttrib(s) {
-    return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/&/g, '&gt;')
+    return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
       .replace(/\"/g, '&quot;');
   }
 
@@ -404,7 +404,7 @@ var html_sanitize = (function () {
             value = opt_urlXform(value);
           }
           if ((flags & NMTOKEN_TYPE) && opt_nmTokenXform) {
-            value = opt_nmTokenXForm(value);
+            value = opt_nmTokenXform(value);
           }
           if (null == value) { continue; }
           tok = name + '="' + escapeAttrib(value) + '"';

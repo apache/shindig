@@ -450,7 +450,14 @@ opensocial.Container.prototype.enableCaja = function() {
     var element = document.getElementById("DOM-PREFIX-" + id);
     if (element !== null) {
       ___.useSetHandler(element, 'innerHTML', function(html) {
-        var temp = html_sanitize(html);
+        var temp = html_sanitize(html, null,
+            function (nmtokens) {
+              var tokens = nmtokens.split(/\s+/g);
+              for (var i = 0; i < tokens.length; ++i) {
+                if (tokens[i]) { tokens[i] = 'DOM-PREFIX-' + tokens[i]; }
+              }
+              return tokens.join(' ');
+            });
         return this.innerHTML = temp;
       });
     }
@@ -458,6 +465,10 @@ opensocial.Container.prototype.enableCaja = function() {
   };
 
   ___.allowCall(outers.document, 'getElementById');
+
+  // Temporarily adding some gadgets calls to the opensocial code.
+  // This should move into the gadgets js code very soon.
+  outers.gadgets = gadgets;
 
   // Adding all of the available opensocial calls as defined in the spec
   outers.opensocial = opensocial;

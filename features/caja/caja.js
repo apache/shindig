@@ -107,20 +107,32 @@ var ___;
   ////////////////////////////////////////////////////////////////////////
 
   /**
-   * The initial default ___.log(str) does nothing.
+   * The initial default logging function does nothing.
    * <p>
    * Note: JavaScript has no macros, so even in the "does nothing"
    * case, remember that the arguments are still evaluated.
    */
-  var myLogFunc_ = function(str) {};
+  var myLogFunc_ = function(str, opt_stop) {};
 
   /**
-   * Gets the currently registered ___.log(str) function.
+   * Gets the currently registered logging function.
    */
   function getLogFunc() { return myLogFunc_; }
 
   /**
-   * Register newLogFunc to be called by ___.log(str)
+   * Register newLogFunc as the current logging function, to be called
+   * by <tt>___.log(str)</tt> and <tt>___.fail(...)</tt>.
+   * <p>
+   * A logging function is assumed to have the signature
+   * <tt>(str, opt_stop)</tt>, where<ul>
+   * <li><tt>str</tt> is the diagnostic string to be logged, and
+   * <li><tt>opt_stop</tt>, if present and <tt>true</tt>, indicates
+   *     that normal flow control is about to be terminated by a
+   *     throw. This provides the logging function the opportunity to
+   *     terminate normal control flow in its own way, such as by
+   *     invoking an undefined method, in order to trigger a Firebug
+   *     stacktrace.
+   * </ul>
    */
   function setLogFunc(newLogFunc) { myLogFunc_ = newLogFunc; }
 
@@ -140,7 +152,7 @@ var ___;
    */
   function fail(var_args) {
     var message = Array.prototype.slice.call(arguments, 0).join('');
-    log(message);
+    myLogFunc_(message, true);
     throw new Error(message);
   }
 
@@ -653,7 +665,7 @@ var ___;
     if (isCtor(meth)) {
       fail("constructors can't be methods: ", meth);
     }
-    if (isSimpleFunc(constr)) {
+    if (isSimpleFunc(meth)) {
       fail("Simple functions can't be methods: ", meth);
     }
     meth.___METHOD_OF___ = asCtorOnly(constr);
@@ -715,27 +727,45 @@ var ___;
     fail("Untamed functions can't be called as methods: ", meth);
   }
 
- /**
-  * Only simple functions or primitive casts can be called
-  * as simple functions.
-  */
- function asSimpleFunc(fun) {
-   if (isSimpleFunc(fun)) {
-     return primFreeze(fun);
-   }
+  /** Only simple functions can be called as simple functions */
+  function asSimpleFunc(fun) {
+    if (isSimpleFunc(fun)) {
+      return primFreeze(fun);
+    }
 
-   enforceType(fun, 'function');
-   if (isCtor(fun)) {
-     if (fun === String || fun === Number || fun === Boolean) {
-       return fun;
-     }
-     fail("Constructors can't be called as simple functions: ", fun);
-   }
-   if (isMethod(fun)) {
-     fail("Methods can't be called as simple functions: ", fun);
-   }
-   fail("Untamed functions can't be called as simple functions: ", fun);
- }
+    enforceType(fun, 'function');
+    if (isCtor(fun)) {
+      if (fun === Number || fun === String || fun === Boolean) {
+        // TODO(erights): To avoid accidents, <tt>method</tt>,
+        // <tt>simpleFunc</tt>, and <tt>ctor</tt> each ensure that
+        // these classifications are exclusive. A function can be
+        // classified as in at most one of these categories. However,
+        // some primordial type conversion functions like
+        // <tt>String</tt> need to be invocable both ways, so we
+        // should probably relax this constraint.
+        // <p>
+        // But before we do, we should reexamine other
+        // implications. For example, simple-functions, when called
+        // reflectively by <tt>call</tt> or <tt>apply</tt> (and
+        // therefore <tt>bind</tt>), ignore their first argument,
+        // whereas constructors can be called reflectively by
+        // <tt>call</tt> to do super-initialization on behalf of a
+        // derived constructor.
+        // <p>
+        // Curiously, ES3 also defines function behavior different
+        // from constructor behavior for <tt>Object</tt>,
+        // <tt>Date</tt>, <tt>RegExp</tt>, and <tt>Error</tt>. (Not
+        // sure about <tt>Array</tt>.) We should understand these as
+        // well before introducing a proper solution.
+        return fun;
+      }
+      fail("Constructors can't be called as simple functions: ", fun);
+    }
+    if (isMethod(fun)) {
+      fail("Methods can't be called as simple functions: ", fun);
+    }
+    fail("Untamed functions can't be called as simple functions: ", fun);
+  }
 
   /**
    * Sets constr.prototype[name] = member.

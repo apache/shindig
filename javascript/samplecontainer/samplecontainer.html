@@ -36,6 +36,7 @@
 var specUrl = 'http://localhost:8080/gadgets/samplecontainer/examples/SocialHelloWorld.xml';
 var useCaja = false;
 var useCache = true;
+var usePermissive = false;
 var gadget;
 
 function initGadget() {
@@ -57,6 +58,7 @@ function initGadget() {
 function changeGadgetUrl() {
   useCaja = document.getElementById("useCajaCheckbox").checked;
   useCache = document.getElementById("useCacheCheckbox").checked;
+  usePermissive = document.getElementById("usePermissiveCheckbox").checked;
 
   specUrl = document.getElementById("gadgetUrl").value;
   gadget.specUrl = specUrl;
@@ -81,7 +83,10 @@ SampleContainerGadget.prototype.getIframeUrl = function() {
     url += "&caja=1";
   }
   if (!useCache) {
-    url += "&bpc=1";
+    url += "&nocache=1";
+  }
+  if (usePermissive) {
+    url += "&usepermissive=1";
   }
   return url;
 };
@@ -96,7 +101,8 @@ gadgets.container.gadgetClass = SampleContainerGadget;
       Displaying gadget:
       <input type="text" size="75" id="gadgetUrl"/>
       <input type="checkbox" id="useCajaCheckbox"/>use caja
-      <input type="checkbox" id="useCacheCheckbox" checked="true"/>use cache
+      <input type="checkbox" id="usePermissiveCheckbox"/>use permissive
+      <div style="display:none"><input type="checkbox" id="useCacheCheckbox" checked="true"/>use cache</div>
       <input type="button" value="reset" onclick="changeGadgetUrl();"/>
     </div>
     <div style="clear:both; height: 1px;">&nbsp;</div>
