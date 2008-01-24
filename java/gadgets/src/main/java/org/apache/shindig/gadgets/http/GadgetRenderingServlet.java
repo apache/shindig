@@ -20,6 +20,7 @@ import org.apache.shindig.gadgets.GadgetContentFilter;
 import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.GadgetFeatureRegistry;
 import org.apache.shindig.gadgets.GadgetServer;
+import org.apache.shindig.gadgets.GadgetServerConfig;
 import org.apache.shindig.gadgets.GadgetSpec;
 import org.apache.shindig.gadgets.GadgetView;
 import org.apache.shindig.gadgets.JsLibrary;
@@ -51,10 +52,9 @@ import javax.servlet.http.HttpServletResponse;
  * Servlet for rendering Gadgets, typically in an IFRAME.
  */
 public class GadgetRenderingServlet extends HttpServlet {
-  private GadgetServer gadgetServer;
+  private final GadgetServer gadgetServer;
+  private final GadgetServerConfig serverConfig;
   private String jsServicePath;
-  private boolean usingCustomServer = false;
-  private GadgetFeatureRegistry registry;
   private static final String CAJA_PARAM = "caja";
   private static final String USERPREF_PARAM_PREFIX = "up_";
   private static final String LIBS_PARAM_NAME = "libs";
@@ -64,13 +64,19 @@ public class GadgetRenderingServlet extends HttpServlet {
   /**
    * Creates a {@code GadgetRenderingServlet} with default executor,
    * caches, etc.
+   *
+   * Note that features aren't loaded until init() is called.
+   *
+   * @throws GadgetException If something went wrong during configuration.
    */
-  public GadgetRenderingServlet() {
-    gadgetServer = new GadgetServer(Executors.newCachedThreadPool());
-    gadgetServer.setMessageBundleCache(
-        new BasicGadgetDataCache<MessageBundle>());
-    gadgetServer.setSpecCache(new BasicGadgetDataCache<GadgetSpec>());
-    gadgetServer.setContentFetcher(new BasicRemoteContentFetcher(1024 * 1024));
+  public GadgetRenderingServlet() throws GadgetException {
+    serverConfig = new GadgetServerConfig()
+        .setExecutor(Executors.newCachedThreadPool())
+        .setMessageBundleCache(new BasicGadgetDataCache<MessageBundle>())
+        .setSpecCache(new BasicGadgetDataCache<GadgetSpec>())
+        .setContentFetcher(new BasicRemoteContentFetcher(1024 * 1024))
+        .setFeatureRegistry(new GadgetFeatureRegistry(null));
+    gadgetServer = new GadgetServer(serverConfig);
   }
 
   /**
@@ -80,7 +86,9 @@ public class GadgetRenderingServlet extends HttpServlet {
    */
   public GadgetRenderingServlet(GadgetServer server) {
     gadgetServer = server;
-    usingCustomServer = true;
+    // Set this to null to indicate that all configuration has been done
+    // custom.
+    serverConfig = null;
   }
 
   @Override
@@ -92,11 +100,11 @@ public class GadgetRenderingServlet extends HttpServlet {
       jsPath = DEFAULT_JS_SERVICE_PATH;
     }
     jsServicePath = jsPath;
-    if (!usingCustomServer) {
+    if (serverConfig != null) {
+      // Using the default server.
       String features = context.getInitParameter("features");
       try {
-        registry = new GadgetFeatureRegistry(features);
-        gadgetServer.setGadgetFeatureRegistry(registry);
+        serverConfig.getFeatureRegistry().registerFeatures(features);
       } catch (GadgetException e) {
         e.printStackTrace();
         System.exit(1);

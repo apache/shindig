@@ -1,17 +1,23 @@
-/*
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+/**
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements. See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership. The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License. You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations under the License.
  */
 package org.apache.shindig.gadgets;
+
+import org.apache.shindig.util.Check;
 
 import java.net.MalformedURLException;
 import java.util.ArrayList;
@@ -41,8 +47,36 @@ public class GadgetServer {
   private static final Logger logger
       = Logger.getLogger("org.apache.shindig.gadgets");
 
+  /**
+   * Creates a GadgetServer without a config.
+   *
+   * @deprecated Replaced by {@link #GadgetServer(GadgetConfig)}.
+   * @param executor
+   */
+  @Deprecated
   public GadgetServer(Executor executor) {
     this.executor = executor;
+  }
+
+  /**
+   * Creates a GadgetServer using the provided configuration.
+   *
+   * @param config
+   * @throws IllegalArgumentException When missing required fields aren't set.
+   */
+  public GadgetServer(GadgetServerConfig config) {
+    executor = config.getExecutor();
+    Check.notNull(executor, "setExecutor is required.");
+    registry = config.getFeatureRegistry();
+    Check.notNull(registry, "setFeatureRegistry is required.");
+    specCache = config.getSpecCache();
+    Check.notNull(specCache, "setSpecCache is required.");
+    messageBundleCache = config.getMessageBundleCache();
+    Check.notNull(messageBundleCache, "setMessageBundleCache is required.");
+    fetcher = config.getContentFetcher();
+    Check.notNull(fetcher, "setContentFetcher is required.");
+
+    gadgetBlacklist = config.getGadgetBlacklist();
   }
 
   public void setSpecCache(GadgetDataCache<GadgetSpec> specCache) {
@@ -67,6 +101,7 @@ public class GadgetServer {
 
   /**
    * Process a single gadget.
+   *
    * @param gadgetId
    * @param userPrefs
    * @param locale
@@ -75,12 +110,13 @@ public class GadgetServer {
    * @return The processed gadget.
    * @throws GadgetProcessException
    */
-  public Gadget processGadget(Gadget.ID gadgetId,
+  public Gadget processGadget(GadgetView.ID gadgetId,
                               UserPrefs userPrefs,
                               Locale locale,
                               RenderingContext rctx,
                               ProcessingOptions options)
       throws GadgetProcessException {
+    // TODO: Remove dep checks when GadgetServer(Executor) is removed.
     if (specCache == null) {
       throw new GadgetProcessException(GadgetException.Code.MISSING_SPEC_CACHE);
     }
@@ -288,7 +324,7 @@ public class GadgetServer {
       if (wc.context.getOptions().ignoreCache) {
         return;
       }
-      
+
       GadgetSpec spec = specCache.get(gadgetId.getKey());
       if (spec != null) {
         wc.gadget = new Gadget(gadgetId, spec, prefs);
@@ -335,11 +371,11 @@ public class GadgetServer {
             GadgetException.Code.FAILED_TO_RETRIEVE_CONTENT,
             "Malformed gadget spec URL: " + gadgetId.getURI().toString());
       }
-      
+
       GadgetSpecParser specParser = new GadgetSpecParser();
       GadgetSpec spec = specParser.parse(gadgetId, xml);
       wc.gadget = new Gadget(gadgetId, spec, prefs);
-      
+
       // This isn't a separate job because if it is we'd just need another
       // flag telling us not to store to the cache.
       if (!wc.context.getOptions().ignoreCache) {
