@@ -21,19 +21,25 @@ SOFTWARE.
 
 /**
  * @fileoverview
- * The global object JSON contains two methods.
+ * The global object gadgets.json contains two methods.
  *
- * JSON.stringify(value) takes a JavaScript value and produces a JSON text.
- * The value must not be cyclical.
+ * gadgets.json.stringify(value) takes a JavaScript value and produces a JSON
+ * text. The value must not be cyclical.
  *
- * JSON.parse(text) takes a JSON text and produces a JavaScript value. It will
- * return false if there is an error.
+ * gadgets.json.parse(text) takes a JSON text and produces a JavaScript value.
+ * It will return false if there is an error.
 */
 
 var gadgets = gadgets || {};
 
 /**
- * @scope gadgets.JSON
+ * @static
+ * @class Provides operations for translating objects to and from JSON.
+ * @name gadgets.json
+ */
+
+/**
+ * @scope gadgets.json
  */
 gadgets.json = function () {
     var m = {
@@ -160,5 +166,5 @@ gadgets.json = function () {
     };
 }();
 
-var JSON = gadgets.JSON;
+var JSON = gadgets.json;
 

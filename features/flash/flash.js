@@ -22,6 +22,12 @@
  */
 
 var gadgets = gadgets || {};
+
+/**
+ * @static
+ * @class Embeds Flash content in gadgets.
+ * @name gadgets.flash
+ */
 gadgets.flash = gadgets.flash || {};
 
 /**
@@ -55,22 +61,15 @@ gadgets.flash.getMajorVersion = function() {
 /**
  * Injects a Flash file into the DOM tree.
  * @param {String} swfUrl SWF URL.
- * @param {String|Object} swfContainer The id or object reference of an existing
- *                        html container element.
- * @param {Object} opt_params An optional object that may contain one or more
- *                 fields:
- *       {Number} .swf_version
- *         Minimal Flash Player version required.
- *       {Number|String} .width, .height
- *         Preferred width and height. (Default value: '100%')
- *       {String} .base
- *         The base attribute enforces the base location from which the URL
- *         loads. This prevents confusion about the location to which relative
- *         links are relative. (Default value: the path of swfUrl)
- *       Other fields such as .quality and .id can also be defined and will be
- *       passed to the Flash movie on creation. The values must be HTML-escaped.
+ * @param {String | Object} swfContainer The id or object reference of an
+ *     existing html container element.
+ * @param {Number} swfVersion Minimal Flash Player version required.
+ * @param {Object} opt_params An optional object that may contain any valid html
+ *     parameter. All attributes will be passed through to the flash movie on
+ *     creation.
  * @return {Boolean} Whether the function call completes successfully.
  */
+// TODO The shindig implementation does not match the spec described above!
 gadgets.flash.embedFlash = function(swfUrl, swfContainer, opt_params) {
   switch (typeof swfContainer) {
     case 'string':

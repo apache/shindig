@@ -17,6 +17,13 @@ var gadgets = gadgets || {};
 /**
  * @fileoverview General purpose utilities that gadgets can use.
  */
+
+/**
+ * @static
+ * @class Provides general purpose utility functions.
+ * @name gadgets.util
+ */
+
 gadgets.util = function() {
   /**
    * Parses url parameters into an object.

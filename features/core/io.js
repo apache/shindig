@@ -19,6 +19,12 @@ var gadgets = gadgets || {};
  *     Available to every gadget.
  */
 
+/**
+ * @static
+ * @class Provides remote content retrieval functions.
+ * @name gadgets.io
+ */
+
 gadgets.io = function() {
   /**
    * Holds configuration-related data such as proxy urls.
@@ -163,6 +169,7 @@ gadgets.io = function() {
      *           as a placeholder for the actual url.
      *       - jsonProxyUrl: The url for dynamic proxy requests. Include %url%
      *           as a placeholder for the actual url.
+     * @private
      */
     init : function (configuration) {
       config = configuration;
@@ -190,8 +197,6 @@ gadgets.io.RequestParameters = {
    * defaults to <code>MethodType.GET</a></code>.
    * Specified as a
    * <a href="gadgets.io.MethodType.html">MethodType</a>.
-   *
-   * @member gadgets.io.RequestParameters
    */
    METHOD : 'METHOD',
 
@@ -201,8 +206,6 @@ gadgets.io.RequestParameters = {
    * Specified as a
    * <a href="gadgets.io.ContentType.html">
    * ContentType</a>.
-   *
-   * @member gadgets.io.RequestParameters
    */
   CONTENT_TYPE : "CONTENT_TYPE",
 
@@ -210,8 +213,6 @@ gadgets.io.RequestParameters = {
    * The data to send to the URL using the POST method.
    * Specified as a <code>String</code>
    * Defaults to null.
-   *
-   * @member gadgets.io.RequestParameters
    */
   POST_DATA : "POST_DATA",
 
@@ -219,8 +220,6 @@ gadgets.io.RequestParameters = {
    * The HTTP headers to send to the URL.
    * Specified as a <code>Map.<String,String></code>
    * Defaults to null.
-   *
-   * @member gadgets.io.RequestParameters
    */
   HEADERS : "HEADERS",
 
@@ -230,8 +229,6 @@ gadgets.io.RequestParameters = {
    * Specified as an
    * <a href="gadgets.io.AuthorizationType.html">
    * AuthorizationType</a>.
-   *
-   * @member gadgets.io.RequestParameters
    */
   AUTHORIZATION : 'AUTHORIZATION',
 
@@ -240,8 +237,6 @@ gadgets.io.RequestParameters = {
    * If the content is a feed, the number of entries to fetch;
    * defaults to 3.
    * Specified as a <code>Number</code>.
-   *
-   * @member gadgets.io.RequestParameters
    */
   NUM_ENTRIES : 'NUM_ENTRIES',
 
@@ -249,8 +244,6 @@ gadgets.io.RequestParameters = {
    * If the content is a feed, whether to fetch summaries for that feed;
    * defaults to false.
    * Specified as a <code>Boolean</code>.
-   *
-   * @member gadgets.io.RequestParameters
    */
   GET_SUMMARIES : 'GET_SUMMARIES'
 };
@@ -265,26 +258,25 @@ gadgets.io.RequestParameters = {
  * @name gadgets.io.MethodType
  */
 gadgets.io.MethodType = {
-  /** @member gadgets.io.MethodType */
+  /** The default type. */
   GET : 'GET',
 
-  /** @member gadgets.io.MethodType */
+  /**
+  * Not supported by all containers.
+  */
   POST : 'POST',
 
   /**
-  * @member gadgets.io.MethodType
   * Not supported by all containers.
   */
   PUT : 'PUT',
 
   /**
-  * @member gadgets.io.MethodType
   * Not supported by all containers.
   */
   DELETE : 'DELETE',
 
   /**
-   * @member gadgets.io.MethodType
    * Not supported by all containers.
    */
   HEAD : 'HEAD'
@@ -302,25 +294,21 @@ gadgets.io.MethodType = {
 gadgets.io.ContentType = {
   /**
    * Returns text, used for fetching html.
-   * @member gadgets.io.ContentType
    */
   TEXT : 'TEXT',
 
   /**
    * Returns a dom object, used for fetching xml.
-   * @member gadgets.io.ContentType
    */
   DOM : 'DOM',
 
   /**
    * Returns a json object.
-   * @member gadgets.io.ContentType
    */
   JSON : 'JSON',
 
   /**
    * Returns a json representation of a feed.
-   * @member gadgets.io.ContentType
    */
   FEED : 'FEED'
 };
@@ -335,12 +323,12 @@ gadgets.io.ContentType = {
  * @name gadgets.io.AuthorizationType
  */
 gadgets.io.AuthorizationType = {
-  /** @member gadgets.io.AuthorizationType */
+  /** No authorization */
   NONE : 'NONE',
 
-  /** @member gadgets.io.AuthorizationType */
+  /** The request will be signed by the container */
   SIGNED : 'SIGNED',
 
-  /** @member gadgets.io.AuthorizationType */
+  /** The container will use full authentication */
   AUTHENTICATED : 'AUTHENTICATED'
 };

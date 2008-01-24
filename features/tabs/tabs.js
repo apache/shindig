@@ -23,16 +23,17 @@
 var gadgets = gadgets || {};
 
 /**
- * Tabs class.
- * @param {string} opt_moduleId Optional suffix for the ID of tab container.
- * @param {string} opt_defaultTab Optional tab name that specifies the name of
+ * @class A class gadgets can use to make tabs.
+ * @description Creates a new Tabs object
+ *
+ * @param {String} opt_moduleId Optional suffix for the ID of tab container.
+ * @param {String} opt_defaultTab Optional tab name that specifies the name of
  *                   of the tab that is selected after initialization.
  *                   If this parameter is omitted, the first tab is selected by
  *                   default.
  * @param {Element} opt_container The HTML element to contain the tabs.  If
  *                    omitted, a new div element is created and inserted at the
  *                    very top.
- * @constructor
  */
 gadgets.Tabs = function(opt_moduleId, opt_defaultTab, opt_container) {
   // TODO
@@ -40,7 +41,7 @@ gadgets.Tabs = function(opt_moduleId, opt_defaultTab, opt_container) {
 
 /**
  * Adds a new tab based on the name-value pairs specified in opt_params.
- * @param {string} tabName Label of the tab to create.
+ * @param {String} tabName Label of the tab to create.
  * @param {Object} opt_params Optional parameter object. The following
  *                   properties are supported:
  *                   .contentContainer An existing HTML element to be used as
@@ -52,7 +53,7 @@ gadgets.Tabs = function(opt_moduleId, opt_defaultTab, opt_container) {
  *                     the mouse cursor over the tab.
  *                   .index The index at which to insert the tab. If omitted,
  *                     the new tab is appended to the end.
- * @return {string} DOM id of the tab container.
+ * @return {String} DOM id of the tab container.
  */
 gadgets.Tabs.prototype.addTab = function(tabName, opt_params) {
   // TODO
@@ -60,7 +61,7 @@ gadgets.Tabs.prototype.addTab = function(tabName, opt_params) {
 
 /**
  * Removes a tab at tabIndex and all of its associated content.
- * @param {number} tabIndex Index of the tab to remove.
+ * @param {Number} tabIndex Index of the tab to remove.
  */
 gadgets.Tabs.prototype.removeTab = function(tabIndex) {
   // TODO
@@ -77,7 +78,7 @@ gadgets.Tabs.prototype.getSelectedTab = function() {
 /**
  * Selects the tab at tabIndex and fires the tab's callback function if it
  * exists. If the tab is already selected, the callback is not fired.
- * @param {number} tabIndex Index of the tab to select.
+ * @param {Number} tabIndex Index of the tab to select.
  */
 gadgets.Tabs.prototype.setSelectedTab = function(tabIndex) {
   // TODO
@@ -86,8 +87,8 @@ gadgets.Tabs.prototype.setSelectedTab = function(tabIndex) {
 /**
  * Swaps the positions of tabs at tabIndex1 and tabIndex2. The selected tab
  * does not change, and no callback functions are called.
- * @param {number} tabIndex1 Index of the first tab to swap.
- * @param {number} tabIndex2 Index of the secnod tab to swap.
+ * @param {Number} tabIndex1 Index of the first tab to swap.
+ * @param {Number} tabIndex2 Index of the secnod tab to swap.
  */
 gadgets.Tabs.prototype.swapTabs = function(tabIndex1, tabIndex2) {
   // TODO
@@ -104,8 +105,8 @@ gadgets.Tabs.prototype.getTabs = function() {
 
 /**
  * Sets the alignment of tabs. Tabs are center-aligned by default.
- * @param {string} align 'left', 'center', or 'right'.
- * @param {number} opt_offset Optional parameter to set the number of pixels
+ * @param {String} align 'left', 'center', or 'right'.
+ * @param {Number} opt_offset Optional parameter to set the number of pixels
  *                   to offset tabs from the left or right edge. The default
  *                   value is 3px.
  */
@@ -115,7 +116,7 @@ gadgets.Tabs.prototype.alignTabs = function(align, opt_offset) {
 
 /**
  * Shows or hides tabs and all associated content.
- * @param {boolean} display true to show tabs; false to hide tabs.
+ * @param {Boolean} display true to show tabs; false to hide tabs.
  */
 gadgets.Tabs.prototype.displayTabs = function(display) {
   // TODO

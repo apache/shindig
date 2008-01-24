@@ -155,14 +155,18 @@ gadgets.prefs_ = function() {
 }();
 
 /**
- * @constructor
- * @param {String | Number} moduleId The module id to create prefs for.
+ * @class A class gadgets can use to get user preference information.
+ *
+ * @description Creates a new Prefs object
+ * @param {String | Number} opt_moduleId An optional parameters specifying the
+ *     module id to create prefs for. If not provided, the default module id
+ *     will be used.
  */
-gadgets.Prefs = function(moduleId) {
-  if (typeof moduleId === "undefined") {
+gadgets.Prefs = function(opt_moduleId) {
+  if (typeof opt_moduleId === "undefined") {
     this.moduleId_ = gadgets.prefs_.getDefaultModuleId();
   } else {
-    this.moduleId_ = moduleId;
+    this.moduleId_ = opt_moduleId;
   }
   this.data_ = gadgets.prefs_.getModuleData(this.moduleId_);
   // This is used to eliminate one hash table lookup per value fetched.
