@@ -27,12 +27,12 @@
  * Modules with type=url can also use this library to parse arguments passed
  * by URL, but this is not the common case:
  *
- *   <script src="http://apache.org/shindig/prefs.js"></script>
- *   <script>
+ *   &lt;script src="http://apache.org/shindig/prefs.js"&gt;&lt;/script&gt;
+ *   &lt;script&gt;
  *   gadgets.Prefs.parseUrl();
  *   var prefs = new gadgets.Prefs();
  *   var name = prefs.getString("name");
- *   </script>
+ *   &lt;/script&lg;
  */
 
 var gadgets = gadgets || {};

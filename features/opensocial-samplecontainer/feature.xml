@@ -61,6 +61,14 @@ specific language governing permissions and limitations under the License.
         }
       }
 
+      function initSampleContainer() {
+        var usePermissive = gadgets.util.getUrlParameters()["usepermissive"];
+        if (usePermissive) {
+          ___.getKeeper().setEnabled(true);
+        }
+        changeStateUrl();
+      }
+
       function changeStateUrl() {
         stateUrl = document.getElementById("stateUrl").value;
         StateFileParser.refreshState(stateUrl, messageDiv,
@@ -90,7 +98,7 @@ specific language governing permissions and limitations under the License.
 
       document.write(stateHtml);
       document.getElementById("stateUrl").value = stateUrl;
-      changeStateUrl();
+      initSampleContainer();
 
     </script>
   </gadget>
