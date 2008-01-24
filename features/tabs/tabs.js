@@ -23,6 +23,55 @@
 var gadgets = gadgets || {};
 
 /**
+ * @class Tab class for gadgets.
+ * @param {gadgets.Tabs} handle The associated gadgets.Tabs instance.
+ * @constructor
+ */
+gadgets.Tab = function(handle) {
+  // TODO
+};
+
+/**
+ * Returns the label of the tab as a string (may contain HTML).
+ * @return {String} The label of the tab.
+ */
+gadgets.Tab.prototype.getName = function() {
+  // TODO
+};
+
+/**
+ * Returns the HTML element that contains the tab's label.
+ * @return {Element} The HTML element of the tab's label.
+ */
+gadgets.Tab.prototype.getNameContainer = function() {
+  // TODO
+};
+
+/**
+ * Returns the HTML element where the tab content is rendered.
+ * @return {Element} The HTML element of the content container.
+ */
+gadgets.Tab.prototype.getContentContainer = function() {
+  // TODO
+};
+
+/**
+ * Returns the callback function that is executed when the tab is selected.
+ * @return {Function} The callback function of the tab.
+ */
+gadgets.Tab.prototype.getCallback = function() {
+  // TODO
+};
+
+/**
+ * Returns the tab's index.
+ * @return {Number} The tab's index.
+ */
+gadgets.Tab.prototype.getIndex = function() {
+  // TODO
+};
+
+/**
  * @class A class gadgets can use to make tabs.
  * @description Creates a new Tabs object
  *
@@ -34,6 +83,7 @@ var gadgets = gadgets || {};
  * @param {Element} opt_container The HTML element to contain the tabs.  If
  *                    omitted, a new div element is created and inserted at the
  *                    very top.
+ * @constructor
  */
 gadgets.Tabs = function(opt_moduleId, opt_defaultTab, opt_container) {
   // TODO
@@ -69,7 +119,7 @@ gadgets.Tabs.prototype.removeTab = function(tabIndex) {
 
 /**
  * Returns the currently selected tab object.
- * @return {Object} The currently selected tab object.
+ * @return {gadgets.Tab} The currently selected tab object.
  */
 gadgets.Tabs.prototype.getSelectedTab = function() {
   // TODO
@@ -97,7 +147,7 @@ gadgets.Tabs.prototype.swapTabs = function(tabIndex1, tabIndex2) {
 
 /**
  * Returns an array of all existing tab objects.
- * @return {Array.<Object>} Array of all existing tab objects.
+ * @return {Array.<gadgets.Tab>} Array of all existing tab objects.
  */
 gadgets.Tabs.prototype.getTabs = function() {
   // TODO
@@ -124,7 +174,7 @@ gadgets.Tabs.prototype.displayTabs = function(display) {
 
 /**
  * Returns the tab headers container element.
- * @return {Object} The tab headers container element.
+ * @return {Element} The tab headers container element.
  */
 gadgets.Tabs.prototype.getHeaderContainer = function() {
   // TODO
