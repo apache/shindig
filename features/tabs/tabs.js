@@ -30,7 +30,7 @@ var gadgets = gadgets || {};
  */
 
 /**
- * @param {gadgets.Tabs} handle The associated gadgets.Tabs instance.
+ * @param {gadgets.TabSet} handle The associated gadgets.TabSet instance.
  * @private
  * @constructor
  */
@@ -80,7 +80,7 @@ gadgets.Tab.prototype.getIndex = function() {
 
 /**
  * @class A class gadgets can use to make tabs.
- * @description Creates a new Tabs object
+ * @description Creates a new TabSet object
  *
  * @param {String} opt_moduleId Optional suffix for the ID of tab container.
  * @param {String} opt_defaultTab Optional tab name that specifies the name of
@@ -91,7 +91,7 @@ gadgets.Tab.prototype.getIndex = function() {
  *                    omitted, a new div element is created and inserted at the
  *                    very top.
  */
-gadgets.Tabs = function(opt_moduleId, opt_defaultTab, opt_container) {
+gadgets.TabSet = function(opt_moduleId, opt_defaultTab, opt_container) {
   // TODO
 };
 
@@ -111,7 +111,7 @@ gadgets.Tabs = function(opt_moduleId, opt_defaultTab, opt_container) {
  *                     the new tab is appended to the end.
  * @return {String} DOM id of the tab container.
  */
-gadgets.Tabs.prototype.addTab = function(tabName, opt_params) {
+gadgets.TabSet.prototype.addTab = function(tabName, opt_params) {
   // TODO
 };
 
@@ -119,7 +119,7 @@ gadgets.Tabs.prototype.addTab = function(tabName, opt_params) {
  * Removes a tab at tabIndex and all of its associated content.
  * @param {Number} tabIndex Index of the tab to remove.
  */
-gadgets.Tabs.prototype.removeTab = function(tabIndex) {
+gadgets.TabSet.prototype.removeTab = function(tabIndex) {
   // TODO
 };
 
@@ -127,7 +127,7 @@ gadgets.Tabs.prototype.removeTab = function(tabIndex) {
  * Returns the currently selected tab object.
  * @return {gadgets.Tab} The currently selected tab object.
  */
-gadgets.Tabs.prototype.getSelectedTab = function() {
+gadgets.TabSet.prototype.getSelectedTab = function() {
   // TODO
 };
 
@@ -136,7 +136,7 @@ gadgets.Tabs.prototype.getSelectedTab = function() {
  * exists. If the tab is already selected, the callback is not fired.
  * @param {Number} tabIndex Index of the tab to select.
  */
-gadgets.Tabs.prototype.setSelectedTab = function(tabIndex) {
+gadgets.TabSet.prototype.setSelectedTab = function(tabIndex) {
   // TODO
 };
 
@@ -146,7 +146,7 @@ gadgets.Tabs.prototype.setSelectedTab = function(tabIndex) {
  * @param {Number} tabIndex1 Index of the first tab to swap.
  * @param {Number} tabIndex2 Index of the secnod tab to swap.
  */
-gadgets.Tabs.prototype.swapTabs = function(tabIndex1, tabIndex2) {
+gadgets.TabSet.prototype.swapTabs = function(tabIndex1, tabIndex2) {
   // TODO
 };
 
@@ -155,7 +155,7 @@ gadgets.Tabs.prototype.swapTabs = function(tabIndex1, tabIndex2) {
  * Returns an array of all existing tab objects.
  * @return {Array.<gadgets.Tab>} Array of all existing tab objects.
  */
-gadgets.Tabs.prototype.getTabs = function() {
+gadgets.TabSet.prototype.getTabs = function() {
   // TODO
 };
 
@@ -166,7 +166,7 @@ gadgets.Tabs.prototype.getTabs = function() {
  *                   to offset tabs from the left or right edge. The default
  *                   value is 3px.
  */
-gadgets.Tabs.prototype.alignTabs = function(align, opt_offset) {
+gadgets.TabSet.prototype.alignTabs = function(align, opt_offset) {
   // TODO
 };
 
@@ -174,7 +174,7 @@ gadgets.Tabs.prototype.alignTabs = function(align, opt_offset) {
  * Shows or hides tabs and all associated content.
  * @param {Boolean} display true to show tabs; false to hide tabs.
  */
-gadgets.Tabs.prototype.displayTabs = function(display) {
+gadgets.TabSet.prototype.displayTabs = function(display) {
   // TODO
 };
 
@@ -182,13 +182,13 @@ gadgets.Tabs.prototype.displayTabs = function(display) {
  * Returns the tab headers container element.
  * @return {Element} The tab headers container element.
  */
-gadgets.Tabs.prototype.getHeaderContainer = function() {
+gadgets.TabSet.prototype.getHeaderContainer = function() {
   // TODO
 };
 
 // Aliases for legacy code
 
-var _IG_Tabs = gadgets.Tabs;
+var _IG_Tabs = gadgets.TabSet;
 _IG_Tabs.prototype.moveTabs = _IG_Tabs.prototype.swapTabs;
 _IG_Tabs.prototype.addDynamicTab = function(tabName, callback) {
   return this.addTab(tabName, {callback: callback});
