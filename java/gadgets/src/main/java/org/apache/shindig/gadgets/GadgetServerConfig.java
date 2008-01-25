@@ -23,7 +23,9 @@ import java.util.concurrent.Executor;
  * Stores configuration data for a GadgetServer.
  *
  * The main purpose of this class is to allow for better readability of
- * GadgetServer ctor parameters.
+ * GadgetServer ctor parameters and to simplify interacting with its components.
+ *
+ *
  *
  * Usage:
  *
@@ -37,71 +39,41 @@ import java.util.concurrent.Executor;
  * Any missing data will result in GadgetServer throwing an IllegalArgsException
  * unless noted as "optional" here.
  */
-public class GadgetServerConfig {
-
-  private Executor executor;
-
-  public Executor getExecutor() {
-    return executor;
-  }
+public class GadgetServerConfig extends GadgetServerConfigReader  {
 
   public GadgetServerConfig setExecutor(Executor executor) {
     this.executor = executor;
     return this;
   }
 
-  private GadgetFeatureRegistry featureRegistry;
-
-  public GadgetFeatureRegistry getFeatureRegistry() {
-    return featureRegistry;
-  }
-
-  public GadgetServerConfig setFeatureRegistry(GadgetFeatureRegistry featureRegistry) {
+  public GadgetServerConfig setFeatureRegistry(
+      GadgetFeatureRegistry featureRegistry) {
     this.featureRegistry = featureRegistry;
     return this;
   }
 
-  private GadgetDataCache<GadgetSpec> specCache;
-
-  public GadgetDataCache<GadgetSpec> getSpecCache() {
-    return specCache;
-  }
-
-  public GadgetServerConfig setSpecCache(GadgetDataCache<GadgetSpec> specCache) {
+  public GadgetServerConfig setSpecCache(
+      GadgetDataCache<GadgetSpec> specCache) {
     this.specCache = specCache;
     return this;
   }
 
-  private GadgetDataCache<MessageBundle> messageBundleCache;
-
-  public GadgetDataCache<MessageBundle> getMessageBundleCache() {
-    return messageBundleCache;
-  }
-
-  public GadgetServerConfig setMessageBundleCache(GadgetDataCache<MessageBundle> mbCache) {
+  public GadgetServerConfig setMessageBundleCache(
+      GadgetDataCache<MessageBundle> mbCache) {
     messageBundleCache = mbCache;
     return this;
   }
 
-  private RemoteContentFetcher contentFetcher;
-
-  public RemoteContentFetcher getContentFetcher() {
-    return contentFetcher;
-  }
-
-  public GadgetServerConfig setContentFetcher(RemoteContentFetcher contentFetcher) {
+  public GadgetServerConfig setContentFetcher(
+      RemoteContentFetcher contentFetcher) {
     this.contentFetcher = contentFetcher;
     return this;
   }
 
   // Optional
-  private GadgetBlacklist gadgetBlacklist;
 
-  public GadgetBlacklist getGadgetBlacklist() {
-    return gadgetBlacklist;
-  }
-
-  public GadgetServerConfig setGadgetBlacklist(GadgetBlacklist gadgetBlacklist) {
+  public GadgetServerConfig setGadgetBlacklist(
+      GadgetBlacklist gadgetBlacklist) {
     this.gadgetBlacklist = gadgetBlacklist;
     return this;
   }
