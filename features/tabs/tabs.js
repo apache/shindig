@@ -24,7 +24,14 @@ var gadgets = gadgets || {};
 
 /**
  * @class Tab class for gadgets.
+ *
+ * @name gadgets.Tab
+ * @description Creates a new Tab
+ */
+
+/**
  * @param {gadgets.Tabs} handle The associated gadgets.Tabs instance.
+ * @private
  * @constructor
  */
 gadgets.Tab = function(handle) {
@@ -83,7 +90,6 @@ gadgets.Tab.prototype.getIndex = function() {
  * @param {Element} opt_container The HTML element to contain the tabs.  If
  *                    omitted, a new div element is created and inserted at the
  *                    very top.
- * @constructor
  */
 gadgets.Tabs = function(opt_moduleId, opt_defaultTab, opt_container) {
   // TODO
