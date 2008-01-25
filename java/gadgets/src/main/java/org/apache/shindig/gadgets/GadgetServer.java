@@ -37,12 +37,7 @@ import java.util.concurrent.Future;
 import java.util.logging.Logger;
 
 public class GadgetServer {
-  private final Executor executor;
-  private GadgetFeatureRegistry registry;
-  private GadgetDataCache<GadgetSpec> specCache;
-  private GadgetDataCache<MessageBundle> messageBundleCache;
-  private RemoteContentFetcher fetcher;
-  private GadgetBlacklist gadgetBlacklist;
+  private final GadgetServerConfig config;
 
   private static final Logger logger
       = Logger.getLogger("org.apache.shindig.gadgets");
@@ -50,53 +45,80 @@ public class GadgetServer {
   /**
    * Creates a GadgetServer without a config.
    *
-   * @deprecated Replaced by {@link #GadgetServer(GadgetConfig)}.
+   * @deprecated Replaced by {@link #GadgetServer(GadgetServerConfigReader)}.
    * @param executor
    */
   @Deprecated
   public GadgetServer(Executor executor) {
-    this.executor = executor;
+    config = new GadgetServerConfig();
+    config.setExecutor(executor);
   }
 
   /**
    * Creates a GadgetServer using the provided configuration.
    *
-   * @param config
+   * @param configuration
    * @throws IllegalArgumentException When missing required fields aren't set.
    */
-  public GadgetServer(GadgetServerConfig config) {
-    executor = config.getExecutor();
-    Check.notNull(executor, "setExecutor is required.");
-    registry = config.getFeatureRegistry();
-    Check.notNull(registry, "setFeatureRegistry is required.");
-    specCache = config.getSpecCache();
-    Check.notNull(specCache, "setSpecCache is required.");
-    messageBundleCache = config.getMessageBundleCache();
-    Check.notNull(messageBundleCache, "setMessageBundleCache is required.");
-    fetcher = config.getContentFetcher();
-    Check.notNull(fetcher, "setContentFetcher is required.");
+  public GadgetServer(GadgetServerConfigReader configuration) {
+    Check.notNull(configuration.getExecutor(), "Executor is required.");
+    Check.notNull(configuration.getFeatureRegistry(),
+        "FeatureRegistry is required.");
+    Check.notNull(configuration.getSpecCache(), "SpecCache is required.");
+    Check.notNull(configuration.getMessageBundleCache(),
+        "MessageBundleCache is required.");
+    Check.notNull(configuration.getContentFetcher(),
+        "ContentFetcher is required.");
 
-    gadgetBlacklist = config.getGadgetBlacklist();
+    config = new GadgetServerConfig();
+    config.copyFrom(configuration);
   }
 
+  /**
+   * @deprecated Replaced by {@link #GadgetServer(GadgetServerConfigReader)}.
+   */
+  @Deprecated
   public void setSpecCache(GadgetDataCache<GadgetSpec> specCache) {
-    this.specCache = specCache;
+    config.setSpecCache(specCache);
   }
 
+  /**
+   * @deprecated Replaced by {@link #GadgetServer(GadgetServerConfigReader)}.
+   */
+  @Deprecated
   public void setMessageBundleCache(GadgetDataCache<MessageBundle> cache) {
-    messageBundleCache = cache;
+    config.setMessageBundleCache(cache);
   }
 
+  /**
+   * @deprecated Replaced by {@link #GadgetServer(GadgetServerConfigReader)}.
+   */
+  @Deprecated
   public void setContentFetcher(RemoteContentFetcher fetcher) {
-    this.fetcher = fetcher;
+    config.setContentFetcher(fetcher);
   }
 
+  /**
+   * @deprecated Replaced by {@link #GadgetServer(GadgetServerConfigReader)}.
+   */
+  @Deprecated
   public void setGadgetFeatureRegistry(GadgetFeatureRegistry registry) {
-    this.registry = registry;
+    config.setFeatureRegistry(registry);
   }
 
+  /**
+   * @deprecated Replaced by {@link #GadgetServer(GadgetServerConfigReader)}.
+   */
+  @Deprecated
   public void setGadgetBlacklist(GadgetBlacklist gadgetBlacklist) {
-    this.gadgetBlacklist = gadgetBlacklist;
+    config.setGadgetBlacklist(gadgetBlacklist);
+  }
+
+  /**
+   * @return A read-only view of the server's configuration.
+   */
+  public GadgetServerConfigReader getConfig() {
+    return config;
   }
 
   /**
@@ -117,47 +139,58 @@ public class GadgetServer {
                               ProcessingOptions options)
       throws GadgetProcessException {
     // TODO: Remove dep checks when GadgetServer(Executor) is removed.
-    if (specCache == null) {
+    if (config.getSpecCache() == null) {
       throw new GadgetProcessException(GadgetException.Code.MISSING_SPEC_CACHE);
     }
-    if (messageBundleCache == null ) {
+    if (config.getMessageBundleCache() == null ) {
       throw new GadgetProcessException(
           GadgetException.Code.MISSING_MESSAGE_BUNDLE_CACHE);
     }
-    if (fetcher == null) {
+    if (config.getContentFetcher() == null) {
       throw new GadgetProcessException(
           GadgetException.Code.MISSING_REMOTE_OBJECT_FETCHER);
     }
-    if (registry == null) {
+    if (config.getFeatureRegistry() == null) {
       throw new GadgetProcessException(
           GadgetException.Code.MISSING_FEATURE_REGISTRY);
     }
 
     // Queue/tree of all jobs to be run for successful processing
-    GadgetContext gc
-        = new GadgetContext(fetcher, messageBundleCache, locale, rctx, options);
+    GadgetContext gc = new GadgetContext(config.getContentFetcher(),
+                                         config.getMessageBundleCache(),
+                                         locale,
+                                         rctx,
+                                         options);
     WorkflowContext wc = new WorkflowContext(gc);
 
     // Bootstrap tree of jobs to process
     WorkflowDependency cacheLoadDep =
         new WorkflowDependency(WorkflowDependency.Type.CORE, CACHE_LOAD);
-    wc.jobsToRun.addJob(new CacheLoadTask(gadgetId, userPrefs, specCache),
-                        cacheLoadDep);
+
+    CacheLoadTask cacheLoadTask = new CacheLoadTask(gadgetId,
+                                                    userPrefs,
+                                                    config.getSpecCache());
+    wc.jobsToRun.addJob(cacheLoadTask, cacheLoadDep);
 
     WorkflowDependency urlFetchDep =
         new WorkflowDependency(WorkflowDependency.Type.CORE, URL_FETCH);
-    wc.jobsToRun.addJob(
-        new SpecLoadTask(fetcher, gadgetId, userPrefs, specCache, gadgetBlacklist),
-        urlFetchDep, cacheLoadDep);
+
+    SpecLoadTask specLoadTask = new SpecLoadTask(config.getContentFetcher(),
+                                                 gadgetId,
+                                                 userPrefs,
+                                                 config.getSpecCache(),
+                                                 config.getGadgetBlacklist());
+    wc.jobsToRun.addJob(specLoadTask, urlFetchDep, cacheLoadDep);
 
     WorkflowDependency enqueueFeatDep =
         new WorkflowDependency(WorkflowDependency.Type.CORE, ENQUEUE_FEATURES);
-    wc.jobsToRun.addJob(new EnqueueFeaturesTask(registry), enqueueFeatDep,
+    wc.jobsToRun.addJob(new EnqueueFeaturesTask(config.getFeatureRegistry()),
+                        enqueueFeatDep,
                         urlFetchDep);
 
     // Instantiate CompletionService
     CompletionService<GadgetException> processor =
-        new ExecutorCompletionService<GadgetException>(executor);
+        new ExecutorCompletionService<GadgetException>(config.getExecutor());
 
     // All exceptions caught during processing
     List<GadgetException> gadgetExceptions = new LinkedList<GadgetException>();
