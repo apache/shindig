@@ -11,3 +11,5 @@ features/setprefs/feature.xml
 features/settitle/feature.xml
 features/minimessage/feature.xml
 features/tabs/feature.xml
+features/skins/feature.xml
+features/views/feature.xml
