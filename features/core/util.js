@@ -20,14 +20,14 @@ var gadgets = gadgets || {};
 
 /**
  * @static
- * @class Provides general purpose utility functions.
+ * @class Provides general-purpose utility functions.
  * @name gadgets.util
  */
 
 gadgets.util = function() {
   /**
-   * Parses url parameters into an object.
-   * @return {Array.<String>} the parameters.
+   * Parses URL parameters into an object.
+   * @return {Array.&lt;String&gt;} The parameters
    */
   function parseUrlParams() {
     // Get settings from url, 'hash' takes precedence over 'search' component
@@ -53,9 +53,10 @@ gadgets.util = function() {
   return /** @scope gadgets.util */ {
 
     /**
-     * Gets the url parameters.
+     * Gets the URL parameters.
      *
-     * @return {Object} Parameters passed into the query string.
+     * @return {Object} Parameters passed into the query string
+     * @member gadgets.util
      */
     getUrlParameters : function () {
       if (parameters !== null) {
@@ -81,15 +82,19 @@ gadgets.util = function() {
     },
 
     /**
-     * Creates a closure which is suitable for passing as a callback.
+     * Creates a closure that is suitable for passing as a callback.
+     * Any number of arguments
+     * may be passed to the callback;
+     * they will be received in the order they are passed in.
      *
-     * @param {Object} scope The execution scope. May be null if there is no
+     * @param {Object} scope The execution scope; may be null if there is no
      *     need to associate a specific instance of an object with this
-     *     callback.
-     * @param {Function} callback The callback to invoke when this is run.
-     *     any arguments passed in will be passed after your initial arguments.
-     * @param {Object} var_args Any number of arguments may be passed to the
-     *     callback. They will be received in the order they are passed in.
+     *     callback
+     * @param {Function} callback The callback to invoke when this is run;
+     *     any arguments passed in will be passed after your initial arguments
+     * @param {Object} var_args Initial arguments to be passed to the callback
+     *
+     * @member gadgets.util
      */
     makeClosure : function (scope, callback, var_args) {
       // arguments isn't a real array, so we copy it into one.
@@ -109,8 +114,10 @@ gadgets.util = function() {
     /**
      * Gets the feature parameters.
      *
-     * @param {String} feature The feature to get parameters for.
-     * @return {Object} The parameters for the given feature, or null.
+     * @param {String} feature The feature to get parameters for
+     * @return {Object} The parameters for the given feature, or null
+     *
+     * @member gadgets.util
      */
     getFeatureParameters : function (feature) {
       return typeof features[feature] === "undefined"
@@ -120,8 +127,10 @@ gadgets.util = function() {
     /**
      * Returns whether the current feature is supported.
      *
-     * @param {String} feature The feature to test for.
-     * @return {Boolean} True if the feature is supported.
+     * @param {String} feature The feature to test for
+     * @return {Boolean} True if the feature is supported
+     *
+     * @member gadgets.util
      */
     hasFeature : function (feature) {
       return typeof features[feature] === "undefined";
@@ -129,7 +138,9 @@ gadgets.util = function() {
 
     /**
      * Registers an onload handler.
-     * @param {Function} callback The handler to run.
+     * @param {Function} callback The handler to run
+     *
+     * @member gadgets.util
      */
     registerOnLoadHandler : function (callback) {
       onLoadHandlers.push(callback);

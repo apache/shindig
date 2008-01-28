@@ -33,7 +33,7 @@ var gadgets = gadgets || {};
  *
  * @description Used to create messages that will appear to the user within the
  *     gadget.
- * @param {String} opt_moduleId Optional module Id.
+ * @param {String} opt_moduleId Optional module Id
  * @param {Element} opt_container Optional HTML container element where
  *                                mini-messages will appear.
  */
@@ -47,7 +47,7 @@ gadgets.MiniMessage = function(opt_moduleId, opt_container) {
 /**
  * Helper function that creates a container HTML element where mini-messages
  * will be appended to.  The container element is inserted at the top of gadget.
- * @return {Element} An HTML div element as the message container.
+ * @return {Element} An HTML div element as the message container
  * @private
  */
 gadgets.MiniMessage.prototype.createContainer_ = function() {
@@ -66,7 +66,7 @@ gadgets.MiniMessage.prototype.createContainer_ = function() {
 
 /**
  * Helper function that dynamically inserts CSS rules to the page.
- * @param {String} cssText CSS rules to inject.
+ * @param {String} cssText CSS rules to inject
  * @private
  */
 gadgets.MiniMessage.addCSS_ = function(cssText) {
@@ -85,8 +85,8 @@ gadgets.MiniMessage.addCSS_ = function(cssText) {
 
 /**
  * Helper function that expands a class name into two class names.
- * @param {String} label The CSS class name.
- * @return {String} "X Xn", with n is the ID of this module.
+ * @param {String} label The CSS class name
+ * @return {String} "X Xn", with n is the ID of this module
  * @private
  */
 gadgets.MiniMessage.prototype.cascade_ = function(label) {
@@ -97,10 +97,10 @@ gadgets.MiniMessage.prototype.cascade_ = function(label) {
  * Helper function that returns a function that dismisses a message by removing
  * the message table element from the DOM.  The action is cancelled if the
  * callback function returns false.
- * @param {Element} element HTML element to remove.
+ * @param {Element} element HTML element to remove
  * @param {Function} opt_callback Optional callback function to be called when
  *                                the message is dismissed.
- * @return {Function} A function that dismisses the specified message.
+ * @return {Function} A function that dismisses the specified message
  * @private
  */
 gadgets.MiniMessage.prototype.dismissFunction_ = function(element, opt_callback) {
@@ -117,13 +117,13 @@ gadgets.MiniMessage.prototype.dismissFunction_ = function(element, opt_callback)
 };
 
 /**
- * Creates a dismissible message with an [x] icon allowing users to dismiss
- * the message. When the message is dismissed, it is removed from the DOM,
- * and the optional callback function is called, if defined.
- * @param {String | Object} message The message as an HTML string or DOM element.
+ * Creates a dismissible message with an [[]x] icon that allows users to dismiss
+ * the message. When the message is dismissed, it is removed from the DOM
+ * and the optional callback function, if defined, is called.
+ * @param {String | Object} message The message as an HTML string or DOM element
  * @param {Function} opt_callback Optional callback function to be called when
- *                                the message is dismissed.
- * @return {Element} HTML element of the created message.
+ *                                the message is dismissed
+ * @return {Element} HTML element of the created message
  */
 gadgets.MiniMessage.prototype.createDismissibleMessage = function(message,
                                                          opt_callback) {
@@ -142,14 +142,15 @@ gadgets.MiniMessage.prototype.createDismissibleMessage = function(message,
 };
 
 /**
- * Creates a timer message that displays for x seconds. When the timer expires,
- * the message is dismissed, and the optional callback function is executed.
- * @param {String | Object} message The message as an HTML string or DOM element.
+ * Creates a message that displays for the specified number of seconds.
+ * When the timer expires,
+ * the message is dismissed and the optional callback function is executed.
+ * @param {String | Object} message The message as an HTML string or DOM element
  * @param {number} seconds Number of seconds to wait before dismissing
- *                         the message.
+ *                         the message
  * @param {Function} opt_callback Optional callback function to be called when
- *                                the message is dismissed.
- * @return {Element} HTML element of the created message.
+ *                                the message is dismissed
+ * @return {Element} HTML element of the created message
  */
 gadgets.MiniMessage.prototype.createTimerMessage = function(message, seconds,
                                                             opt_callback) {
@@ -160,9 +161,9 @@ gadgets.MiniMessage.prototype.createTimerMessage = function(message, seconds,
 
 /**
  * Creates a static message that can only be dismissed programmatically
- * by calling dismissMessage().
- * @param {String | Object} message The message as an HTML string or DOM element.
- * @return {Element} HTML element of the created message.
+ * (by calling dismissMessage()).
+ * @param {String | Object} message The message as an HTML string or DOM element
+ * @return {Element} HTML element of the created message
  */
 gadgets.MiniMessage.prototype.createStaticMessage = function(message) {
   // Generate and assign unique DOM ID to table.
@@ -204,7 +205,7 @@ gadgets.MiniMessage.prototype.createStaticMessage = function(message) {
 
 /**
  * Dismisses the specified message.
- * @param {Element} message HTML element of the message to remove.
+ * @param {Element} message HTML element of the message to remove
  */
 gadgets.MiniMessage.prototype.dismissMessage = function(message) {
   this.dismissFunction_(message)();

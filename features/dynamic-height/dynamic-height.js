@@ -36,6 +36,7 @@ gadgets.window = gadgets.window || {};
  * See: http://www.quirksmode.org/viewport/compatibility.html for more
  * information.
  * @returns {Object} An object with width and height properties.
+ * @member gadgets.window
  */
 gadgets.window.getViewportDimensions = function() {
   var x,y;
@@ -63,6 +64,7 @@ gadgets.window.getViewportDimensions = function() {
  * Adjusts the gadget height
  * @param {Number} opt_height An optional preferred height in pixels. If not
  *     specified, will attempt to fit the gadget to its content.
+ * @member gadgets.window
  */
 gadgets.window.adjustHeight = function(opt_height) {
   var newHeight = parseInt(opt_height, 10);

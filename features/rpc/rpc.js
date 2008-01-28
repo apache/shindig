@@ -34,6 +34,8 @@ gadgets.rpc = function() {
      * Registers an RPC service.
      * @param {String} serviceName Service name to register.
      * @param {Function} handler Service handler.
+     *
+     * @member gadgets.rpc
      */
     register: function(serviceName, handler) {
       // TODO
@@ -42,6 +44,8 @@ gadgets.rpc = function() {
     /**
      * Unregisters an RPC service.
      * @param {String} serviceName Service name to unregister.
+     *
+     * @member gadgets.rpc
      */
     unregister: function(serviceName) {
       // TODO
@@ -51,6 +55,8 @@ gadgets.rpc = function() {
      * Registers a default service handler to processes all unknown
      * RPC calls which fail silently by default.
      * @param {Function} handler Service handler.
+     *
+     * @member gadgets.rpc
      */
     registerDefault: function(handler) {
       // TODO
@@ -59,6 +65,8 @@ gadgets.rpc = function() {
     /**
      * Unregisters the default service handler. Future unknown RPC
      * calls will fail silently.
+     *
+     * @member gadgets.rpc
      */
     unregisterDefault: function() {
       // TODO
@@ -72,6 +80,8 @@ gadgets.rpc = function() {
      * @param {Function|null} callback Callback function (if any) to process
      *                                 the return value of the RPC request.
      * @param {*} var_args Parameters for the RPC request.
+     *
+     * @member gadgets.rpc
      */
     call: function(targetId, serviceName, callback, var_args) {
       // TODO
