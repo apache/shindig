@@ -155,7 +155,7 @@ gadgets.prefs_ = function() {
 }();
 
 /**
- * @class 
+ * @class
  * Provides access to user preferences, module dimensions, and messages.
  *
  * Clients can access their preferences by constructing an instance of
@@ -234,7 +234,7 @@ gadgets.Prefs.prototype.getPref_ = function(key) {
 }
 
 /**
- * Retrieves a string preference.
+ * Retrieves a preference as a string.
  * @param {String} key The preference to fetch
  * @return {String} The preference; if not set, an empty string
  */
@@ -244,7 +244,7 @@ gadgets.Prefs.prototype.getString = function(key) {
 };
 
 /**
- * Retrieves an integer preference.
+ * Retrieves a preference as an integer.
  * @param {String} key The preference to fetch
  * @return {Number} The preference; if not set, 0
  */
@@ -254,7 +254,7 @@ gadgets.Prefs.prototype.getInt = function(key) {
 };
 
 /**
- * Retrieves a floating-point preference.
+ * Retrieves a preference as a floating-point value.
  * @param {String} key The preference to fetch
  * @return {Number} The preference; if not set, 0
  */
@@ -264,7 +264,7 @@ gadgets.Prefs.prototype.getFloat = function(key) {
 };
 
 /**
- * Retrieves a boolean preference.
+ * Retrieves a preference as a boolean.
  * @param {String} key The preference to fetch
  * @return {Boolean} The preference; if not set, false
  */
@@ -295,7 +295,7 @@ gadgets.Prefs.prototype.set = function(key, value) {
 };
 
 /**
- * Retrieves an array preference.
+ * Retrieves a preference as an array.
  * UserPref values that were not declared as lists are treated as
  * one-element arrays.
  *
