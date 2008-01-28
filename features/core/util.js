@@ -57,6 +57,7 @@ gadgets.util = function() {
      *
      * @return {Object} Parameters passed into the query string
      * @member gadgets.util
+     * @private Implementation detail.
      */
     getUrlParameters : function () {
       if (parameters !== null) {
@@ -95,6 +96,7 @@ gadgets.util = function() {
      * @param {Object} var_args Initial arguments to be passed to the callback
      *
      * @member gadgets.util
+     * @private Implementation detail.
      */
     makeClosure : function (scope, callback, var_args) {
       // arguments isn't a real array, so we copy it into one.
@@ -167,4 +169,3 @@ gadgets.util = function() {
   };
 }();
 
-// TODO: Check for any other commonly used aliases

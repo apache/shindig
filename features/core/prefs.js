@@ -338,61 +338,6 @@ gadgets.Prefs.prototype.getMsg = function(key) {
 };
 
 /**
- * <p>
- * The regex pulls out the text before and after the positional argument
- * and digs down for a possible example value in case no actual value
- * was provided.  It is used by the function getMsgFormatted.
- * </p>
- *
- * <pre>
- * Example: "Foo <ph name="number"><ex>bar</ex>%1</ph> baz."
- * 0 = "Foo <ph name="number"><ex>bar</ex>%1</ph> baz." : match for the
- *     whole regex.
- *
- * 1 = "Foo " : matches first (.*) in regex
- *
- * 2 = "<ph name="number"><ex>bar</ex>%1</ph>" : matches
- *     (\<ph.*?\>\s*(\<ex\>(.*?)\<\/ex\>)?\s*%1\s*\<\/ph\>) in regex
- * 3 = "<ex>bar</ex>" : matches (\<ex\>(.*?)\<\/ex\>)? in regex, since it
- *     is an optional param it may have the value "undefined"
- * 4 = "bar" : matches (.*?) in regex (it is a non-greedy regex)
- *     if 3=undefined then 4 = "undefined".
- *
- * 5 = " baz." : matches final (.*) in regex
- *
- * </pre>
- * @private
- */
- // TODO: this may need to be a single line even though it's > 80 characters
- // because some browsers may not properly interepret the line continuation.
-gadgets.Prefs.MESSAGE_SUBST_REGEX =
-    /(.*)(\<ph.*?\>\s*(\<ex\>(.*?)\<\/ex\>)?\s*%1\s*\<\/ph\>)(.*)/;
-
-/**
- * Returns a message value with the positional argument opt_subst in place if
- * it is provided or the provided example value if it is not, or the empty
- * string if the message is not found.
- *
- * @param {String} key The message to fetch
- * @param {String} opt_subst An optional string to substitute into the message
- * @return {String} The formatted string
- */
-gadgets.Prefs.prototype.getMsgFormatted = function(key, opt_subst) {
-  var val = this.getMsg(key);
-
-  var result = val.match(gadgets.Prefs.MESSAGE_SUBST_REGEX);
-  // Allows string that should be getMsg to also call getMsgFormatted
-  if (!result || !result[0]) {
-    return val;
-  }
-  if (typeof opt_subst === "undefined") {
-    var sub = result[4] || "";
-    return result[1] + sub + result[5];
-  }
-  return result[1] + opt_subst + result[5];
-};
-
-/**
  * Gets the current country, returned as ISO 3166-1 alpha-2 code.
  *
  * @return {String} The country for this module instance
