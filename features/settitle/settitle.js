@@ -34,7 +34,7 @@ gadgets.window = gadgets.window || {};
 gadgets.window.setTitle = function(title) {
   var modId = 'remote_module_' + (new gadgets.Prefs()).getModuleId();
   var ifpcRelay = gadgets.util.getUrlParameters().parent || '';
-  gadgets.IFPC_.call(modId, 'set_title', [modId, title], ifpcRelay, null, '');
+  gadgets.ifpc_.call(modId, 'set_title', [modId, title], ifpcRelay, null, '');
 };
 
 // Alias for legacy code

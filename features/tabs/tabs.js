@@ -43,7 +43,10 @@ var gadgets = gadgets || {};
  * @constructor
  */
 gadgets.Tab = function(handle) {
-  // TODO
+  this.handle_ = handle;
+  this.td_ = null;
+  this.contentContainer_ = null;
+  this.callback_ = null;
 };
 
 /**
@@ -51,7 +54,7 @@ gadgets.Tab = function(handle) {
  * @return {String} The label of the tab.
  */
 gadgets.Tab.prototype.getName = function() {
-  // TODO
+  return this.td_.innerHTML;
 };
 
 /**
@@ -59,7 +62,7 @@ gadgets.Tab.prototype.getName = function() {
  * @return {Element} The HTML element of the tab's label.
  */
 gadgets.Tab.prototype.getNameContainer = function() {
-  // TODO
+  return this.td_;
 };
 
 /**
@@ -67,7 +70,7 @@ gadgets.Tab.prototype.getNameContainer = function() {
  * @return {Element} The HTML element of the content container.
  */
 gadgets.Tab.prototype.getContentContainer = function() {
-  // TODO
+  return this.contentContainer_;
 };
 
 /**
@@ -75,7 +78,7 @@ gadgets.Tab.prototype.getContentContainer = function() {
  * @return {Function} The callback function of the tab.
  */
 gadgets.Tab.prototype.getCallback = function() {
-  // TODO
+  return this.callback_;
 };
 
 /**
@@ -83,7 +86,13 @@ gadgets.Tab.prototype.getCallback = function() {
  * @return {Number} The tab's index.
  */
 gadgets.Tab.prototype.getIndex = function() {
-  // TODO
+  var tabs = this.handle_.getTabs();
+  for (var i = 0; i < tabs.length; ++i) {
+    if (this === tabs[i]) {
+      return i;
+    }
+  }
+  return -1;
 };
 
 /**
@@ -164,7 +173,7 @@ gadgets.TabSet.prototype.swapTabs = function(tabIndex1, tabIndex2) {
  * @return {Array.&lt;gadgets.Tab&gt;} Array of all existing tab objects.
  */
 gadgets.TabSet.prototype.getTabs = function() {
-  // TODO
+  return this.tabs_;
 };
 
 /**
