@@ -223,9 +223,9 @@ gadgets.GadgetService.prototype.setUserPref = function(id) {
  */
 gadgets.IfrGadgetService = function() {
   gadgets.GadgetService.call(this);
-  gadgets.IFPC_.registerService('resize_iframe', this.setHeight);
-  gadgets.IFPC_.registerService('set_pref', this.setUserPref);
-  gadgets.IFPC_.registerService('set_title', this.setTitle);
+  gadgets.ifpc_.registerService('resize_iframe', this.setHeight);
+  gadgets.ifpc_.registerService('set_pref', this.setUserPref);
+  gadgets.ifpc_.registerService('set_title', this.setTitle);
 };
 
 gadgets.IfrGadgetService.inherits(gadgets.GadgetService);
