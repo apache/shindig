@@ -23,17 +23,13 @@
 
 var gadgets = gadgets || {};
 
-/**
- * @static
- * @class Provides operations for getting information about and modifying the
- *     window the gadget is placed in.
- * @name gadgets.window
- */
+/* NOTE: no class comment because one already exists in dynamic-height */
 gadgets.window = gadgets.window || {};
 
 /**
  * Sets the gadget title.
  * @param {String} title The preferred title.
+ * @scope gadgets.window
  */
 gadgets.window.setTitle = function(title) {
   var modId = 'remote_module_' + (new gadgets.Prefs()).getModuleId();

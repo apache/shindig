@@ -24,9 +24,17 @@ var gadgets = gadgets || {};
 
 /**
  * @class Tab class for gadgets.
+ * You create tabs using the TabSet addTab() method.
+ * To get Tab objects,
+ * use the TabSet getSelectedTab() or getTabs() methods.
+ *
+ * <p>
+ * <b>See also:</b>
+ * <a href="gadgets.TabSet.html">TabSet</a>
+ * </p>
  *
  * @name gadgets.Tab
- * @description Creates a new Tab
+ * @description Creates a new Tab.
  */
 
 /**
@@ -153,7 +161,7 @@ gadgets.TabSet.prototype.swapTabs = function(tabIndex1, tabIndex2) {
 
 /**
  * Returns an array of all existing tab objects.
- * @return {Array.<gadgets.Tab>} Array of all existing tab objects.
+ * @return {Array.&lt;gadgets.Tab&gt;} Array of all existing tab objects.
  */
 gadgets.TabSet.prototype.getTabs = function() {
   // TODO

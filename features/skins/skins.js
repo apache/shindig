@@ -37,6 +37,8 @@ gadgets.skins = gadgets.skins || {};
  *    keys are defined in <a href="gadgets.skins.Property.html"><code>
  *    gadgets.skins.Property</code></a>
  * @return {String} The data
+ *
+ * @member gadgets.skins
  */
 gadgets.skins.getProperty = function(propertyKey) {};
 
@@ -50,12 +52,27 @@ gadgets.skins.getProperty = function(propertyKey) {};
  * @name gadgets.skins.Property
  */
 gadgets.skins.Property = {
-  /** An image to use in the background of the gadget */
+  /**
+   * An image to use in the background of the gadget.
+   * @member gadgets.skins.Property
+   */
   BG_IMAGE : 'BG_IMAGE',
-  /** The color of the background of the gadget */
+
+  /**
+   * The color of the background of the gadget.
+   * @member gadgets.skins.Property
+   */
   BG_COLOR : 'BG_COLOR',
-  /** The color that the main font should use */
+
+  /**
+   * The color that the main font should use.
+   * @member gadgets.skins.Property
+   */
   FONT_COLOR : 'FONT_COLOR',
-  /** The color that anchor tags should use */
+
+  /**
+   * The color that anchor tags should use.
+   * @member gadgets.skins.Property
+   */
   ANCHOR_COLOR : 'ANCHOR_COLOR'
 };

@@ -34,6 +34,8 @@ gadgets.flash = gadgets.flash || {};
  * Detects Flash Player and its major version.
  * @return {Number} The major version of Flash Player
  *                  or 0 if Flash is not supported.
+ *
+ * @member gadgets.flash
  */
 gadgets.flash.getMajorVersion = function() {
   var flashMajorVersion = 0;
@@ -68,6 +70,8 @@ gadgets.flash.getMajorVersion = function() {
  *     parameter. All attributes will be passed through to the flash movie on
  *     creation.
  * @return {Boolean} Whether the function call completes successfully.
+ *
+ * @member gadgets.flash
  */
 // TODO The shindig implementation does not match the spec described above!
 gadgets.flash.embedFlash = function(swfUrl, swfContainer, opt_params) {
@@ -167,6 +171,8 @@ gadgets.flash.embedFlash = function(swfUrl, swfContainer, opt_params) {
  * Injects a cached Flash file into the DOM tree.
  * Accepts the same parameters as gadgets.flash.embedFlash does.
  * @return {Boolean} Whether the function call completes successfully.
+ *
+ * @member gadgets.flash
  */
 gadgets.flash.embedCachedFlash = function() {
   var args = Array.prototype.slice.call(arguments);

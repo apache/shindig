@@ -38,6 +38,8 @@ gadgets.views = gadgets.views || {};
  * @param {gadgets.views.View} view The view to navigate to
  * @param {Map.&lt;String, String&gt;} opt_params Parameters to pass to the
  *     gadget after it has been navigated to on the surface
+ *
+ * @member gadgets.views
  */
 gadgets.views.requestNavigateTo = function(surface, opt_params) {
   return opensocial.Container.get().requestNavigateTo(surface, opt_params);
@@ -47,6 +49,7 @@ gadgets.views.requestNavigateTo = function(surface, opt_params) {
  * Returns the current view.
  *
  * @return {gadgets.views.View} The current view
+ * @member gadgets.views
  */
 gadgets.views.getCurrentView = function() {
   return this.surface;
@@ -58,6 +61,7 @@ gadgets.views.getCurrentView = function() {
  *
  * @return {Map&lt;gadgets.views.ViewType | String, gadgets.views.View&gt;} All
  *   supported views, keyed by their name attribute.
+ * @member gadgets.views
  */
 gadgets.views.getSupportedViews = function() {
   return this.supportedSurfaces;
@@ -69,6 +73,7 @@ gadgets.views.getSupportedViews = function() {
  * gadgets.views.requestNavigateTo
  *
  * @return {Map.&lt;String, String&gt;} The parameter map
+ * @member gadgets.views
  */
 gadgets.views.getParams = function() {
   return this.params;
@@ -122,17 +127,23 @@ gadgets.views.ViewType = {
   * A view where the gadget is displayed in a very large mode. It should be the
   * only thing on the page. In a social context, this is usually called the
   * canvas page.
+  *
+  * @member gadgets.views.ViewType
   */
   FULL_PAGE : 'FULL_PAGE',
 
  /**
   * A view where the gadget is displayed in a small area usually on a page with
   * other gadgets. In a social context, this is usually called the profile page.
+  *
+  * @member gadgets.views.ViewType
   */
   DASHBOARD : 'DASHBOARD',
 
  /**
   * A view where the gadget is displayed in a small separate window by itself.
+  *
+  * @member gadgets.views.ViewType
   */
   POPUP : 'POPUP'
 };

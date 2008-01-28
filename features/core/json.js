@@ -129,10 +129,12 @@ gadgets.json = function () {
         license: 'http://www.JSON.org/license.html',
 
         /**
-         * Stringifies a JavaScript value, producing a JSON text.
+         * Converts a JavaScript value to a JSON string.
          *
-         * @param {Object} v The object to stringify.
-         * @return {String} The stringified object.
+         * @param {Object} v The object to convert
+         * @return {String} The JSON equivalent
+	 *
+         * @member gadgets.json
          */
         stringify: function (v) {
             var f = s[typeof v];
@@ -146,13 +148,14 @@ gadgets.json = function () {
         },
 
         /**
-         * Parses a JSON text, producing a JavaScript value.
-         * It returns false if there is a syntax error.
+         * Parses a JSON string, producing a JavaScript value.
          *
-         * @param {String} text The string to transform into an object. Usually
-         *     the result of a previous stringify call.
-         * @return {Object} The object parsed from the passed in text. False if
-         *     an error occurred.
+         * @param {String} text The string to transform into an object &mdash;
+	 *     usually the result of a previous stringify call
+         * @return {Object} The object parsed from the passed in text; false if
+         *     an error occurred
+	 *
+         * @member gadgets.json
          */
         parse: function (text) {
             try {
