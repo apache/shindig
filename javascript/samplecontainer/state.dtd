@@ -1,5 +1,5 @@
 <!ELEMENT container (viewer, owner?, viewerFriends?, ownerFriends?, appId?,
-    globalAppData?, instanceAppData?, personAppData?, activities?)>
+    personAppData?, activities?)>
 
 <!ELEMENT viewer (person)>
 <!ELEMENT owner (person)>
@@ -13,8 +13,6 @@
     thumbnailUrl CDATA #IMPLIED
     profileUrl CDATA #IMPLIED>
 
-<!ELEMENT globalAppData (data*)>
-<!ELEMENT instanceAppData (data*)>
 <!ELEMENT personAppData (data*)>
 
 <!ELEMENT data (#PCDATA)>

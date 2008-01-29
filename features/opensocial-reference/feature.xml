@@ -21,13 +21,21 @@ specific language governing permissions and limitations under the License.
   <gadget>
     <script src="opensocial.js"/>
     <script src="activity.js"/>
+    <script src="address.js"/>
+    <script src="bodytype.js"/>
     <script src="collection.js"/>
     <script src="container.js"/>
     <script src="datarequest.js"/>
     <script src="dataresponse.js"/>
+    <script src="email.js"/>
+    <script src="enum.js"/>
     <script src="environment.js"/>
+    <script src="message.js"/>
+    <script src="name.js"/>
+    <script src="organization.js"/>
     <script src="person.js"/>
+    <script src="phone.js"/>
     <script src="responseitem.js"/>
-    <script src="surface.js"/>
+    <script src="url.js"/>
   </gadget>
 </feature>

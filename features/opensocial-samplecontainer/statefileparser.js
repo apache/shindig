@@ -121,22 +121,6 @@ StateFileParser.onLoadState = function(xmlState, stateUrl, gadgetMessageDiv,
   });
 
   // Build the App data
-  var globalAppData = {};
-  var globalDataNode = $(containerNode).find('globalAppData')[0];
-  if (globalDataNode) {
-    $(globalDataNode).find('data').each(function() {
-      globalAppData[$(this).attr('field')] = $(this).text();
-    });
-  }
-
-  var instanceAppData = {};
-  var instanceDataNode = $(containerNode).find('instanceAppData')[0];
-  if (instanceDataNode) {
-    $(instanceDataNode).find('data').each(function() {
-      instanceAppData[$(this).attr('field')] = $(this).text();
-    });
-  }
-
   var personAppData = {};
   var personDataNode = $(containerNode).find('personAppData')[0];
   if (personDataNode) {
@@ -193,8 +177,8 @@ StateFileParser.onLoadState = function(xmlState, stateUrl, gadgetMessageDiv,
   // Initialize the sample container with the state that has been read
   container.resetData(viewer, owner,
       container.newCollection(viewerFriends),
-      container.newCollection(ownerFriends), globalAppData,
-      instanceAppData, personAppData, activities, appId);
+      container.newCollection(ownerFriends),
+      personAppData, activities, appId);
   callback();
 };
 
@@ -241,26 +225,6 @@ StateFileParser.dumpState = function(container, stateDiv) {
   xmlText += '  </ownerFriends>\n';
 
   // Dump App Data
-  xmlText += '  <globalAppData>\n';
-  for (var field in container.globalAppData) {
-    if (___.canInnocentEnum(container.globalAppData, field)) {
-      xmlText += '    <data field="' + field + '">';
-      xmlText += container.globalAppData[field];
-      xmlText += '</data>\n';
-    }
-  }
-  xmlText += '  </globalAppData>\n';
-
-  xmlText += '  <instanceAppData>\n';
-  for (var field in container.instanceAppData) {
-    if (___.canInnocentEnum(container.instanceAppData, field)) {
-      xmlText += '    <data field="' + field + '">';
-      xmlText += container.instanceAppData[field];
-      xmlText += '</data>\n';
-    }
-  }
-  xmlText += '  </instanceAppData>\n';
-
   xmlText += '  <personAppData>\n';
   for (var person in container.personAppData) {
     if (___.canInnocentEnum(container.personAppData, person)) {
