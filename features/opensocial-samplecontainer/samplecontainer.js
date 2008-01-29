@@ -28,21 +28,6 @@
 
 /**
  * Implements the opensocial.Container apis.
- *
- * @param {Person} viewer Person object that corresponds to the viewer.
- * @param {Person} opt_owner Person object that corresponds to the owner.
- * @param {Collection.<Person>} opt_viewerFriends A collection of the
- *    viewer's friends
- * @param {Collection.<Person>} opt_ownerFriends A collection of the
- *    owner's friends
- * @param {Map.<String, String>} opt_globalAppData map from key to value
- *    of the global app data
- * @param {Map.<String, String>} opt_instanceAppData map from key to value
- *    of this gadget's instance data
- * @param {Map.<Person, Map.<String, String>>} opt_personAppData map
- *    from person to a map of app data key value pairs.
- * @param {Map.<String, Array.<Activity>>} opt_activities A map of
- *    person ids to the activities they have.
  * @constructor
  */
 opensocial.SampleContainer = function() {
@@ -52,15 +37,27 @@ opensocial.SampleContainer = function() {
 opensocial.SampleContainer.inherits(opensocial.Container);
 
 
+/**
+ *
+ * @param {Person} viewer Person object that corresponds to the viewer.
+ * @param {Person} opt_owner Person object that corresponds to the owner.
+ * @param {Collection.<Person>} opt_viewerFriends A collection of the
+ *    viewer's friends
+ * @param {Collection.<Person>} opt_ownerFriends A collection of the
+ *    owner's friends
+ * @param {Map.<Person, Map.<String, String>>} opt_personAppData map
+ *    from person to a map of app data key value pairs.
+ * @param {Map.<String, Array.<Activity>>} opt_activities A map of
+ *    person ids to the activities they have.
+ * @param {String} opt_appId An optional application id
+ */
 opensocial.SampleContainer.prototype.resetData = function(viewer,
-    opt_owner, opt_viewerFriends, opt_ownerFriends, opt_globalAppData,
-    opt_instanceAppData, opt_personAppData, opt_activities, opt_appId) {
+    opt_owner, opt_viewerFriends, opt_ownerFriends, opt_personAppData,
+    opt_activities, opt_appId) {
   this.viewer = viewer;
   this.owner = opt_owner;
   this.viewerFriends = opt_viewerFriends || this.newCollection([]);
   this.ownerFriends = opt_ownerFriends || this.newCollection([]);
-  this.globalAppData = opt_globalAppData || {};
-  this.instanceAppData = opt_instanceAppData || {};
   this.personAppData = opt_personAppData || {};
   this.activities = opt_activities || {};
   this.appId = opt_appId || 'sampleContainerAppId';
@@ -68,7 +65,6 @@ opensocial.SampleContainer.prototype.resetData = function(viewer,
 
 
 opensocial.SampleContainer.prototype.getEnvironment = function() {
-  var canvasSurface = this.newSurface("canvas", true);
   var supportedFields = {
     'person' : {
       'id' : true,
@@ -100,8 +96,7 @@ opensocial.SampleContainer.prototype.getEnvironment = function() {
   };
 
   // In a real container this environment will probably be static
-  return this.newEnvironment("samplecontainer", canvasSurface, [canvasSurface],
-     supportedFields, this.params);
+  return this.newEnvironment("samplecontainer", supportedFields);
 };
 
 
@@ -137,25 +132,6 @@ opensocial.SampleContainer.prototype.requestPermission = function(permissions,
   if (opt_callback) {
     opt_callback();
   }
-};
-
-
-opensocial.SampleContainer.prototype.requestNavigateTo = function(surface,
-    opt_params) {
-  // The sample container only supports one surface so that part of navigation
-  // does not make sense. It does however support parameters and so we set the
-  // new parameters. Real containers should do something a lot more complicated.
-  this.params = opt_params;
-  // TODO(doll): Change this to use a log
-  alert("This gadget has been navigated and has new parameters");
-  // TODO(doll): We should somehow reload the gadget here
-};
-
-
-opensocial.SampleContainer.prototype.makeRequest = function(url, callback,
-    opt_params) {
-  // TODO(doll): Add support for this
-  alert("The sample container does not yet support makeRequest calls.");
 };
 
 
@@ -273,28 +249,6 @@ opensocial.SampleContainer.prototype.requestData = function(dataRequest,
             persons.length);
         break;
 
-      case 'FETCH_GLOBAL_APP_DATA' :
-        var values = {};
-        var keys =  request.keys;
-        for (var i = 0; i < keys.length; i++) {
-          values[keys[i]] = this.globalAppData[keys[i]];
-        }
-        requestedValue = values;
-        break;
-
-      case 'FETCH_INSTANCE_APP_DATA' :
-        var values = {};
-        var keys =  request.keys;
-        for (var i = 0; i < keys.length; i++) {
-          values[keys[i]] = this.instanceAppData[keys[i]];
-        }
-        requestedValue = values;
-        break;
-
-      case 'UPDATE_INSTANCE_APP_DATA' :
-        this.instanceAppData[request.key] = request.value;
-        break;
-
       case 'FETCH_PERSON_APP_DATA' :
         var ids = this.getIds(request.idSpec);
 
@@ -397,50 +351,6 @@ opensocial.SampleContainer.prototype.newFetchPersonRequest = function(id,
 opensocial.SampleContainer.prototype.newFetchPeopleRequest = function(idSpec,
     opt_params) {
   return {'type' : 'FETCH_PEOPLE', 'idSpec' : idSpec, 'params': opt_params};
-};
-
-
-/**
- * Used to request global app data.
- * When processed, returns a Map&lt;String, String&gt; object.
- *
- * @param {Array.<String> | String} keys The keys you want data for. This
- *     can be an array of key names, a single key name, or "*" to mean
- *     "all keys".
- * @return {Object} a request object
- */
-opensocial.SampleContainer.prototype.newFetchGlobalAppDataRequest = function(
-    keys) {
-  return {'type' : 'FETCH_GLOBAL_APP_DATA', 'keys' : keys};
-};
-
-
-/**
- * Used to request instance app data.
- * When processed, returns a Map&lt;String, String&gt; object.
- *
- * @param {Array.<String> | String} keys The keys you want data for. This
- *     can be an array of key names, a single key name, or "*" to mean
- *     "all keys".
- * @return {Object} a request object
- */
-opensocial.SampleContainer.prototype.newFetchInstanceAppDataRequest = function(
-    keys) {
-  return {'type' : 'FETCH_INSTANCE_APP_DATA', 'keys' : keys};
-};
-
-
-/**
- * Used to request an update of an app instance field from the server.
- * When processed, does not return any data.
- *
- * @param {String} key The name of the key
- * @param {String} value The value
- * @return {Object} a request object
- */
-opensocial.SampleContainer.prototype.newUpdateInstanceAppDataRequest = function(
-    key, value) {
-  return {'type' : 'UPDATE_INSTANCE_APP_DATA', 'key' : key, 'value' : value};
 };
 
 
