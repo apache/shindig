@@ -1,4 +1,4 @@
-/**
+/*
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -10,7 +10,9 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
+ */
+
+/**
  * @fileoverview Representation of a environment.
  */
 
@@ -31,24 +33,15 @@
  * Base interface for all environment objects.
  *
  * @param {String} domain The current domain
- * @param {opensocial.Surface} surface The current surface
- * @param {Array.&lt;Surface&gt;} supportedSurfaces
- *    The surfaces supported by this container
  * @param {Map.&lt;String, Map.&lt;String, Boolean&gt;&gt;} supportedFields
  *    The fields supported by this container
- * @param {Map.&lt;String, String&gt;} opt_params
- *    The params this gadget has access to
  *
  * @private
  * @constructor
  */
-opensocial.Environment = function(domain, surface, supportedSurfaces,
-    supportedFields, opt_params) {
+opensocial.Environment = function(domain, supportedFields) {
   this.domain = domain;
-  this.surface = surface;
-  this.supportedSurfaces = supportedSurfaces;
   this.supportedFields = supportedFields;
-  this.params = opt_params || {};
 };
 
 
@@ -60,38 +53,6 @@ opensocial.Environment = function(domain, surface, supportedSurfaces,
  */
 opensocial.Environment.prototype.getDomain = function() {
   return this.domain;
-};
-
-
-/**
- * Returns the current surface.
- *
- * @return {opensocial.Surface}
- *    The current <a href="opensocial.Surface.html">surface</a>
- */
-opensocial.Environment.prototype.getSurface = function() {
-  return this.surface;
-};
-
-
-/**
- * Returns an array of all the supported surfaces.
- *
- * @return {Array.&lt;opensocial.Surface&gt;}
- *    All supported <a href="opensocial.Surface.html">surfaces</a>
- */
-opensocial.Environment.prototype.getSupportedSurfaces = function() {
-  return this.supportedSurfaces;
-};
-
-
-/**
- * Returns the parameters passed into this gadget.
- *
- * @return {Map.&lt;String, String&gt;} The parameter map
- */
-opensocial.Environment.prototype.getParams = function() {
-  return this.params;
 };
 
 
@@ -116,11 +77,55 @@ opensocial.Environment.ObjectType = {
   /**
    * @member opensocial.Environment.ObjectType
    */
+  ADDRESS : 'address',
+  /**
+   * @member opensocial.Environment.ObjectType
+   */
+  BODY_TYPE : 'bodyType',
+  /**
+   * @member opensocial.Environment.ObjectType
+   */
+  EMAIL : 'email',
+  /**
+   * @member opensocial.Environment.ObjectType
+   */
+  NAME : 'name',
+  /**
+   * @member opensocial.Environment.ObjectType
+   */
+  ORGANIZATION : 'organization',
+  /**
+   * @member opensocial.Environment.ObjectType
+   */
+  PHONE : 'phone',
+  /**
+   * @member opensocial.Environment.ObjectType
+   */
+  URL : 'url',
+  /**
+   * @member opensocial.Environment.ObjectType
+   */
   ACTIVITY : 'activity',
   /**
    * @member opensocial.Environment.ObjectType
    */
-  ACTIVITY_MEDIA_ITEM : 'activityMediaItem'
+  ACTIVITY_MEDIA_ITEM : 'activityMediaItem',
+  /**
+   * @member opensocial.Environment.ObjectType
+   */
+  MESSAGE : 'message',
+  /**
+   * @member opensocial.Environment.ObjectType
+   */
+  MESSAGE_TYPE : 'messageType',
+  /**
+   * @member opensocial.Environment.ObjectType
+   */
+  SORT_ORDER : 'sortOrder',
+  /**
+   * @member opensocial.Environment.ObjectType
+   */
+  FILTER_TYPE : 'filterType'
 };
 
 
@@ -138,26 +143,4 @@ opensocial.Environment.prototype.supportsField = function(objectType,
     fieldName) {
   var supportedObjectFields = this.supportedFields[objectType] || [];
   return !!supportedObjectFields[fieldName];
-};
-
-
-/**
- * Returns true if the specified function is supported in this container.
- *
- * @param {String} functionName The function name
- * @return {Boolean} True if this container supports the function
- */
-opensocial.Environment.prototype.hasCapability = function(functionName) {
-  var splitNames = functionName.split(".");
-  var parentObject = window;
-
-  for (var i = 0; i < splitNames.length; i++) {
-    var childObject = parentObject[splitNames[i]];
-    if (!childObject) {
-      return false;
-    } else {
-      parentObject = childObject;
-    }
-  }
-  return true;
 };

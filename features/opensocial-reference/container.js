@@ -1,4 +1,4 @@
-/**
+/*
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -10,7 +10,9 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
+ */
+
+/**
  * @fileoverview Interface for containers of people functionality.
  */
 
@@ -66,6 +68,60 @@ opensocial.Container.get = function() {
  */
 opensocial.Container.prototype.getEnvironment = function() {};
 
+/**
+ * Requests the container to send a specific message to the specified users. If
+ * the container does not support this method the callback will be called with a
+ * opensocial.ResponseItem. The response item will have its error code set to
+ * NOT_IMPLEMENTED.
+ *
+ * @param {Array.&lt;String&gt; | String} recipients An ID, array of IDs, or a
+ *     group reference; the supported keys are VIEWER, OWNER, VIEWER_FRIENDS,
+ *    OWNER_FRIENDS, or a single ID within one of those groups
+ * @param {opensocial.Message} message The message to send to the specified
+ *     users.
+ * @param {Function} opt_callback The function to call once the request has been
+ *    processed; either this callback will be called or the gadget will be
+ *    reloaded from scratch. This function will be passed one parameter, an
+ *    opensocial.ResponseItem. The error code will be set to reflect whether
+ *    there were any problems with the request. If there was no error, the
+ *    message was sent. If there was an error, you can use the response item's
+ *    getErrorCode method to determine how to proceed. The data on the response
+ *    item will not be set.
+ *
+ * @member opensocial
+ * @private
+ */
+opensocial.Container.prototype.requestSendMessage = function(recipients,
+    message, opt_callback) {};
+
+
+/**
+ * Requests the container to share this gadget with the specified users. If the
+ * container does not support this method the callback will be called with a
+ * opensocial.ResponseItem. The response item will have its error code set to
+ * NOT_IMPLEMENTED.
+ *
+ * @param {Array.&lt;String&gt; | String} recipients An ID, array of IDs, or a
+ *     group reference; the supported keys are VIEWER, OWNER, VIEWER_FRIENDS,
+ *    OWNER_FRIENDS, or a single ID within one of those groups
+ * @param {opensocial.Message} reason The reason the user wants the gadget to
+ *     share itself. This reason can be used by the container when prompting the
+ *     user for permission to share the app. It may also be ignored.
+ * @param {Function} opt_callback The function to call once the request has been
+ *    processed; either this callback will be called or the gadget will be
+ *    reloaded from scratch. This function will be passed one parameter, an
+ *    opensocial.ResponseItem. The error code will be set to reflect whether
+ *    there were any problems with the request. If there was no error, the
+ *    sharing request was sent. If there was an error, you can use the response
+ *    item's getErrorCode method to determine how to proceed. The data on the
+ *    response item will not be set.
+ *
+ * @member opensocial
+ * @private
+ */
+opensocial.Container.prototype.requestShareApp = function(recipients, reason,
+    opt_callback) {};
+
 
 /**
  * Request for the container to make the specified person not a friend.
@@ -115,36 +171,6 @@ opensocial.Container.prototype.requestPermission = function(permissions, reason,
 
 
 /**
- * Attempts to navigate to this gadget on a different surface. If the container
- * supports parameters will pass the optional parameters along to the gadget on
- * the new surface.
- *
- * @param {opensocial.Surface} surface The surface to navigate to
- * @param {Map.<String, String>} opt_params Params to pass to the gadget after
- *    it has been navigated to on the surface
- *
- * @private
- */
-opensocial.Container.prototype.requestNavigateTo = function(surface,
-    opt_params) {};
-
-
-/**
- * Fetches content from the provided URL and feeds that content into the
- * callback function.
- * @param {String} url The URL where the content is located
- * @param {Function} callback The function to call with the data from the URL
- *     once it is fetched
- * @param {Map.<opensocial.ContentRequestParameters, Object>} opt_params
- *     Additional parameters to pass to the request
- *
- * @private
- */
-opensocial.Container.prototype.makeRequest = function(url, callback,
-    opt_params) {};
-
-
-/**
  * Calls the callback function with a dataResponse object containing the data
  * asked for in the dataRequest object.
  *
@@ -186,47 +212,6 @@ opensocial.Container.prototype.newFetchPersonRequest = function(id,
  */
 opensocial.Container.prototype.newFetchPeopleRequest = function(idSpec,
     opt_params) {};
-
-
-/**
- * Used to request global app data.
- * When processed, returns a Map&lt;String, String&gt; object.
- *
- * @param {Array.<String> | String} keys The keys you want data for. This
- *     can be an array of key names, a single key name, or "*" to mean
- *     "all keys".
- * @return {Object} a request object
- * @private
- */
-opensocial.Container.prototype.newFetchGlobalAppDataRequest = function(
-    keys) {};
-
-
-/**
- * Used to request instance app data.
- * When processed, returns a Map&lt;String, String&gt; object.
- *
- * @param {Array.<String> | String} keys The keys you want data for. This
- *     can be an array of key names, a single key name, or "*" to mean
- *     "all keys".
- * @return {Object} a request object
- * @private
- */
-opensocial.Container.prototype.newFetchInstanceAppDataRequest = function(
-    keys) {};
-
-
-/**
- * Used to request an update of an app instance field from the server.
- * When processed, does not return any data.
- *
- * @param {String} key The name of the key
- * @param {String} value The value
- * @return {Object} a request object
- * @private
- */
-opensocial.Container.prototype.newUpdateInstanceAppDataRequest = function(key,
-    value) {};
 
 
 /**
@@ -341,6 +326,27 @@ opensocial.Container.prototype.newActivityMediaItem = function(mimeType, url,
 
 
 /**
+ * Creates a media item associated with an activity.
+ * Represents images, movies, and audio.
+ * Used when creating activities on the server.
+ *
+ * @param {String} body The main text of the message.
+ * @param {Map.&lt;opensocial.Message.Field, Object&gt;} opt_params
+ *    Any other fields that should be set on the message object;
+ *    all of the defined
+ *    <a href="opensocial.Message.Field.html">Field</a>s
+ *    are supported
+ *
+ * @return {opensocial.Message} The new
+ *    <a href="opensocial.Message.html">message</a> object
+ * @member opensocial
+ */
+opensocial.Container.prototype.newMessage = function(body, opt_params) {
+  return new opensocial.Message(body, opt_params);
+};
+
+
+/**
  * Creates a new response item with caja support if enabled.
  * @return {opensocial.ResponseItem} the response item object
  * @private
@@ -381,22 +387,9 @@ opensocial.Container.prototype.newDataRequest = function() {
  * @return {opensocial.Environment} the environment object
  * @private
  */
-opensocial.Container.prototype.newEnvironment = function(domain, surface,
-    supportedSurfaces, supportedFields, opt_params) {
-  return new opensocial.Environment(domain, surface, supportedSurfaces,
-      supportedFields, opt_params);
-};
-
-
-/**
- * Get a new surface object.
- *
- * @return {opensocial.Surface} the surface object
- * @private
- */
-opensocial.Container.prototype.newSurface = function(name,
-    opt_isPrimaryContent) {
-  return new opensocial.Surface(name, opt_isPrimaryContent);
+opensocial.Container.prototype.newEnvironment = function(domain,
+    supportedFields) {
+  return new opensocial.Environment(domain, supportedFields);
 };
 
 
@@ -416,6 +409,7 @@ opensocial.Container.isArray = function(val) {
  */
 var caja;
 var ___;
+var html_sanitize;
 
 /**
  * Enable Caja support
@@ -429,6 +423,7 @@ opensocial.Container.prototype.enableCaja = function() {
 
   ___ = window["___"];
   caja = window["caja"];
+  html_sanitize = window["html_sanitize"];
 
   var outers = caja.copy(___.sharedOuters);
 
@@ -446,7 +441,6 @@ opensocial.Container.prototype.enableCaja = function() {
 
   outers.document = function() {};
   outers.document.getElementById = function(id) {
-    // TODO(benl): namespace-ize id.
     var element = document.getElementById("DOM-PREFIX-" + id);
     if (element !== null) {
       ___.useSetHandler(element, 'innerHTML', function(html) {
@@ -472,14 +466,16 @@ opensocial.Container.prototype.enableCaja = function() {
 
   // Adding all of the available opensocial calls as defined in the spec
   outers.opensocial = opensocial;
+  ___.allowCall(outers.opensocial, 'requestSendMessage');
+  ___.allowCall(outers.opensocial, 'requestShareApp');
   ___.allowCall(outers.opensocial, 'requestCreateActivity');
   ___.allowCall(outers.opensocial, 'hasPermission');
   ___.allowCall(outers.opensocial, 'requestPermission');
-  ___.allowCall(outers.opensocial, 'requestNavigateTo');
   ___.allowCall(outers.opensocial, 'getEnvironment');
   ___.allowCall(outers.opensocial, 'newDataRequest');
   ___.allowCall(outers.opensocial, 'newActivity');
   ___.allowCall(outers.opensocial, 'newActivityMediaItem');
+  ___.allowCall(outers.opensocial, 'newMessage');
 
   ___.allowCall(opensocial.Collection.prototype, 'getById');
   ___.allowCall(opensocial.Collection.prototype, 'size');
@@ -497,6 +493,14 @@ opensocial.Container.prototype.enableCaja = function() {
   ___.allowCall(opensocial.Person.prototype, 'getField');
   ___.allowCall(opensocial.Person.prototype, 'isViewer');
   ___.allowCall(opensocial.Person.prototype, 'isOwner');
+
+  ___.allowCall(opensocial.Address.prototype, 'getField');
+  ___.allowCall(opensocial.BodyType.prototype, 'getField');
+  ___.allowCall(opensocial.Email.prototype, 'getField');
+  ___.allowCall(opensocial.Name.prototype, 'getField');
+  ___.allowCall(opensocial.Organization.prototype, 'getField');
+  ___.allowCall(opensocial.Phone.prototype, 'getField');
+  ___.allowCall(opensocial.Url.prototype, 'getField');
 
   ___.allowCall(opensocial.Activity.prototype, 'getId');
   ___.allowCall(opensocial.Activity.prototype, 'getField');
@@ -516,22 +520,18 @@ opensocial.Container.prototype.enableCaja = function() {
   ___.allowCall(opensocial.DataRequest.prototype, 'send');
   ___.allowCall(opensocial.DataRequest.prototype, 'newFetchPersonRequest');
   ___.allowCall(opensocial.DataRequest.prototype, 'newFetchPeopleRequest');
-  ___.allowCall(opensocial.DataRequest.prototype, 'newFetchGlobalAppDataRequest');
-  ___.allowCall(opensocial.DataRequest.prototype, 'newFetchInstanceAppDataRequest');
-  ___.allowCall(opensocial.DataRequest.prototype, 'newUpdateInstanceAppDataRequest');
   ___.allowCall(opensocial.DataRequest.prototype, 'newFetchPersonAppDataRequest');
   ___.allowCall(opensocial.DataRequest.prototype, 'newUpdatePersonAppDataRequest');
   ___.allowCall(opensocial.DataRequest.prototype, 'newFetchActivitiesRequest');
 
   ___.allowCall(opensocial.Environment.prototype, 'getDomain');
-  ___.allowCall(opensocial.Environment.prototype, 'getSurface');
-  ___.allowCall(opensocial.Environment.prototype, 'getSupportedSurfaces');
-  ___.allowCall(opensocial.Environment.prototype, 'getParams');
   ___.allowCall(opensocial.Environment.prototype, 'supportsField');
-  ___.allowCall(opensocial.Environment.prototype, 'hasCapability');
 
-  ___.allowCall(opensocial.Surface.prototype, 'getName');
-  ___.allowCall(opensocial.Surface.prototype, 'isPrimaryContent');
+  ___.allowCall(opensocial.Enum.prototype, 'getKey');
+  ___.allowCall(opensocial.Enum.prototype, 'getDisplayValue');
+
+  ___.allowCall(opensocial.Message.prototype, 'getField');
+  ___.allowCall(opensocial.Message.prototype, 'setField');
 
   var moduleHandler = ___.freeze({
     getOuters: ___.simpleFunc(function() { return outers; }),
@@ -545,6 +545,7 @@ opensocial.Container.prototype.enableCaja = function() {
  * Default taming is to return obj itself. Depending on
  * other taming decisions, it may be more appropriate to
  * return an interposed wrapper.
+ * @private
  */
 function plugin_tamed(obj) { return obj; }
 
