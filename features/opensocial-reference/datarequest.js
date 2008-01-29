@@ -1,4 +1,4 @@
-/**
+/*
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -10,7 +10,9 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
+ */
+
+/**
  * @fileoverview Object used to request social information from the container.
  * This includes data for friends, profiles, app data, and activities.
  *
@@ -22,7 +24,7 @@
 /**
  * @class
  * <p>
- * Creates an item to request social information from the container.
+ * Used to request social information from the container.
  * This includes data for friends, profiles, app data, and activities.
  * All apps that require access to people information
  * should send a DataRequest.
@@ -372,52 +374,6 @@ opensocial.DataRequest.prototype.newFetchPeopleRequest = function(idSpec,
 
 
 /**
- * Creates an item to request global app data.
- * When processed, returns a Map&lt;String, String&gt; object.
- *
- * @param {Array.&lt;String&gt; | String} keys The keys you want data for; this
- *     can be an array of key names, a single key name, or "*" to mean
- *     "all keys"
- * @return {Object} A request object
- */
-opensocial.DataRequest.prototype.newFetchGlobalAppDataRequest = function(keys) {
-  return opensocial.Container.get().newFetchGlobalAppDataRequest(
-      this.asArray(keys));
-};
-
-
-/**
- * Creates an item to request instance app data.
- * When processed, returns a Map&lt;String, String&gt; object.
- *
- * @param {Array.&lt;String&gt; | String} keys The keys you want data for; this
- *     can be an array of key names, a single key name, or "*" to mean
- *     "all keys"
- * @return {Object} A request object
- */
-opensocial.DataRequest.prototype.newFetchInstanceAppDataRequest =
-    function(keys) {
-  return opensocial.Container.get().newFetchInstanceAppDataRequest(
-      this.asArray(keys));
-};
-
-
-/**
- * Creates an item to request an update of an app instance field from the
- * server. When processed, does not return any data.
- *
- * @param {String} key The name of the key. This may only contain alphanumeric
- *     (A-Za-z0-9) characters, underscore(_), dot(.) or dash(-).
- * @param {String} value The value
- * @return {Object} A request object
- */
-opensocial.DataRequest.prototype.newUpdateInstanceAppDataRequest = function(key,
-    value) {
-  return opensocial.Container.get().newUpdateInstanceAppDataRequest(key, value);
-};
-
-
-/**
  * Creates an item to request app data for the given people.
  * When processed, returns a Map&lt;
  * <a href="opensocial.DataRequest.PersonId.html">PersonId</a>,
@@ -464,6 +420,7 @@ opensocial.DataRequest.prototype.newUpdatePersonAppDataRequest = function(id,
  * <a href="opensocial.DataRequest.html#newFetchActivitiesRequest">
  * <code>DataRequest.newFetchActivitiesRequest()</code></a>.
  * @name opensocial.DataRequest.ActivityRequestFields
+ * @private
  */
 opensocial.DataRequest.ActivityRequestFields = {
   /**
@@ -488,9 +445,8 @@ opensocial.DataRequest.ActivityRequestFields = {
  *    a single ID within one of those groups.
  * @param {Map.&lt;opensocial.DataRequest.ActivityRequestFields, Object&gt;}
  *  opt_params
- *    Additional
- *    <a href="opensocial.DataRequest.ActivityRequestFields.html">parameters</a>
- *    to pass to the request
+ *    Additional parameters
+ *    to pass to the request; not currently used
  * @return {Object} A request object
  */
 opensocial.DataRequest.prototype.newFetchActivitiesRequest = function(idSpec,

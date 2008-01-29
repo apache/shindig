@@ -10,7 +10,9 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
+ */
+
+/**
  * @fileoverview Collection of multiple objects with useful accessors.
  *
  * May also represent subset of a larger collection (i.e. page 1 of 10), and
