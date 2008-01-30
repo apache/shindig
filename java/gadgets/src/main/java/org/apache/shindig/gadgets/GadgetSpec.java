@@ -68,6 +68,8 @@ public interface GadgetSpec {
     }
 
     public DataType getDataType();
+
+    public Map<String, String> getEnumValues();
   }
 
   public List<UserPref> getUserPrefs();

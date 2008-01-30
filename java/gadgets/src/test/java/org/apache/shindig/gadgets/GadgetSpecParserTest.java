@@ -16,6 +16,8 @@ package org.apache.shindig.gadgets;
 import junit.framework.TestCase;
 
 import java.net.URI;
+import java.util.List;
+import java.util.Map;
 
 public class GadgetSpecParserTest extends TestCase {
 
@@ -48,5 +50,35 @@ public class GadgetSpecParserTest extends TestCase {
 
     assertEquals("Hello!", spec.getContentData());
     assertEquals("Hello, world!", spec.getTitle());
+  }
+
+  public void testEnumParsing() throws Exception {
+    BasicGadgetId id = new BasicGadgetId();
+    id.uri = new URI("http://example.org/text.xml");
+    id.moduleId = 1;
+    byte[] xml = ("<?xml version=\"1.0\"?>" +
+                 "<Module>" +
+                 "<ModulePrefs title=\"Test Enum\">" +
+                 "<UserPref name=\"test\" datatype=\"enum\">" +
+                 "<EnumValue value=\"0\" display_value=\"Zero\"/>" +
+                 "<EnumValue value=\"1\" display_value=\"One\"/>" +
+                 "</UserPref>" +
+                 "</ModulePrefs>" +
+                 "<Content type=\"html\">Hello!</Content>" +
+                 "</Module>").getBytes();
+    GadgetSpec spec = parser.parse(id, xml);
+
+    List<GadgetSpec.UserPref> prefs = spec.getUserPrefs();
+
+    assertEquals(1, prefs.size());
+    GadgetSpec.UserPref pref = prefs.get(0);
+    assertEquals("test", pref.getName());
+
+    Map<String, String> enumValues = pref.getEnumValues();
+
+    assertEquals(2, enumValues.size());
+
+    assertEquals("Zero", enumValues.get("0"));
+    assertEquals("One", enumValues.get("1"));
   }
 }
