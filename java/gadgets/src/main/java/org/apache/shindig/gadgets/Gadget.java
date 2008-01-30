@@ -97,7 +97,7 @@ public class Gadget implements GadgetView {
     this.baseSpec = baseSpec;
     substitutions = new Substitutions();
     userPrefValues = prefs;
-    jsLibraries = new LinkedList<JsLibrary>();
+    jsLibraries = Collections.synchronizedList(new LinkedList<JsLibrary>());
   }
 
   /**
