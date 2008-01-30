@@ -28,6 +28,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
+import java.util.Collections;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CompletionService;
 import java.util.concurrent.ExecutionException;
@@ -318,7 +319,7 @@ public class GadgetServer {
 
     private WorkflowContext(GadgetContext context) {
       this.context = context;
-      this.depsDone = new HashSet<WorkflowDependency>();
+      this.depsDone = Collections.synchronizedSet(new HashSet<WorkflowDependency>());
       this.jobsToRun = new WorkflowJobList(this);
     }
   }
