@@ -2,11 +2,15 @@
 // container that only supports 0.7, including this file should allow the gadget
 // to run without making any changes.
 
-opensocial.requestNavigateTo = gadgets.views.requestNavigateTo;
+opensocial.requestNavigateTo = function() {
+  return gadgets.views.requestNavigateTo();
+};
 
 // If using enums, gadgets are ok.
 // TODO: Translate hardcoded string params to the new gadgets values
-opensocial.makeRequest = gadgets.io.makeRequest;
+opensocial.makeRequest = function() {
+  return gadgets.io.makeRequest();
+};
 
 opensocial.ContentRequestParameters = {
   METHOD : gadgets.io.RequestParameters.METHOD,
@@ -77,9 +81,15 @@ gadgets.views.View.prototype.isPrimaryContent = function() {
 // Note: The names of views may have changed in a container between 0.6 and 0.7
 // but that is container specific
 
-opensocial.Environment.prototype.getSurface = gadgets.views.getCurrentView;
-opensocial.Environment.prototype.getSupportedSurfaces
-    = gadgets.views.getSupportedViews;
-opensocial.Environment.prototype.getParams = gadgets.views.getParams;
-
-opensocial.Environment.prototype.hasCapability = gadgets.util.hasFeature;
+opensocial.Environment.prototype.getSurface = function() {
+  return gadgets.views.getCurrentView();
+};
+opensocial.Environment.prototype.getSupportedSurfaces = function() {
+  return gadgets.views.getSupportedViews();
+};
+opensocial.Environment.prototype.getParams = function() {
+  return gadgets.views.getParams();
+};
+opensocial.Environment.prototype.hasCapability = function() {
+  return gadgets.util.hasFeature();
+};
