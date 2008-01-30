@@ -24,8 +24,8 @@ import org.xml.sax.SAXException;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
-import java.net.URISyntaxException;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -242,6 +242,23 @@ public class GadgetSpecParser {
       up.defaultValue = defaultValue.getNodeValue();
     }
 
+    // Check for enum types.
+    up.enumValues = new HashMap<String, String>();
+    NodeList children = pref.getChildNodes();
+    for (int i = 0, j = children.getLength(); i < j; ++i) {
+      Node child = children.item(i);
+      if (child.getNodeName().equals("EnumValue")) {
+        NamedNodeMap childAttrs = child.getAttributes();
+
+        // Must have both name and value.
+        Node value = childAttrs.getNamedItem("value");
+        Node displayValue = childAttrs.getNamedItem("display_value");
+        if (value != null && displayValue != null) {
+          up.enumValues.put(value.getTextContent(),
+                            displayValue.getTextContent());
+        }
+      }
+    }
     return up;
   }
 
@@ -474,6 +491,7 @@ public class GadgetSpecParser {
       private String defaultValue;
       private boolean required;
       private DataType dataType;
+      private Map<String, String> enumValues;
 
       private static DataType parse(String str) {
         for (DataType dt : UserPref.DataType.values()) {
@@ -502,6 +520,10 @@ public class GadgetSpecParser {
 
       public DataType getDataType() {
         return dataType;
+      }
+
+      public Map<String, String> getEnumValues() {
+        return enumValues;
       }
     }
 
