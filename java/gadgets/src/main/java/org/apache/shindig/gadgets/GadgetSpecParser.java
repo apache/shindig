@@ -58,7 +58,7 @@ public class GadgetSpecParser {
       throw new SpecParserException("Empty XML document.");
     }
 
-    Document doc  ;
+    Document doc;
     try {
       DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
       InputSource is = new InputSource(new Utf8InputStream(xml));
@@ -87,10 +87,8 @@ public class GadgetSpecParser {
     }
 
     NodeList content = root.getElementsByTagName("Content");
-    if (content.getLength() != 1) {
-      throw new SpecParserException("Missing or duplicated <Content>");
-    } else {
-      processContent(spec, content.item(0));
+    for (int i = 0, j = content.getLength(); i < j; ++i) {
+      processContent(spec, content.item(i));
     }
 
     NodeList requires = root.getElementsByTagName("Require");
@@ -286,10 +284,15 @@ public class GadgetSpecParser {
       }
     } else {
       spec.contentType = GadgetSpec.ContentType.HTML;
+      Node viewNode = attrs.getNamedItem("view");
+      String viewStr = (viewNode == null) ? "" : viewNode.getNodeValue();
+      String views[] = viewStr.split(",");
       Node child = content.getFirstChild();
       String contentData = content.getTextContent();
       if (contentData.length() > 0) {
-        spec.contentData = contentData;
+        for (String view : views) {
+          spec.addContent(view, contentData);
+        }
       } else {
         throw new SpecParserException("Empty or malformed <Content> section!");
       }
@@ -349,7 +352,8 @@ public class GadgetSpecParser {
     private String directoryTitle;
     private ContentType contentType;
     private URI contentHref;
-    private String contentData;
+    private Map<String, StringBuilder> contentData
+        = new HashMap<String, StringBuilder>();
     private List<Icon> icons = new ArrayList<Icon>();
     private List<LocaleSpec> localeSpecs = new ArrayList<LocaleSpec>();
     private List<String> preloads = new ArrayList<String>();
@@ -370,7 +374,7 @@ public class GadgetSpecParser {
       spec.directoryTitle = directoryTitle;
       spec.contentType = contentType;
       spec.contentHref = contentHref;
-      spec.contentData = contentData;
+      spec.contentData = new HashMap<String, StringBuilder>(contentData);
       spec.icons = new ArrayList<Icon>(icons);
       spec.localeSpecs = new ArrayList<LocaleSpec>(localeSpecs);
       spec.preloads = new ArrayList<String>(preloads);
@@ -542,9 +546,31 @@ public class GadgetSpecParser {
     }
 
     public String getContentData() {
+      return getContentData(DEFAULT_VIEW);
+    }
+    
+    public String getContentData(String view) {
       Check.is(contentType == ContentType.HTML,
                "getContentData() requires contentType HTML");
-      return contentData;
+      if (view == null || view == "") {
+        view = DEFAULT_VIEW;
+      }
+      if (!contentData.containsKey(view)) {
+        return null;
+      }
+      return contentData.get(view).toString();
+    }
+    
+    public synchronized void addContent(String view, String content) {
+      if (view == null || view.equals("")) {
+        view = DEFAULT_VIEW;
+      }
+
+      if (!contentData.containsKey(view)) {
+        contentData.put(view, new StringBuilder());
+      }
+      
+      contentData.get(view).append(content);
     }
   }
 }

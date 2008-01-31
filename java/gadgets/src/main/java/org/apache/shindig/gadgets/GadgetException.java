@@ -48,6 +48,9 @@ public class GadgetException extends Exception {
 
     // Caja error
     MALFORMED_FOR_SAFE_INLINING,
+    
+    // View errors
+    UNKNOWN_VIEW_SPECIFIED,
 
     // Blacklisting
     BLACKLISTED_GADGET

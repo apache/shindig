@@ -151,13 +151,15 @@ public class GadgetRenderingServlet extends HttpServlet {
     }
 
     Gadget gadget = null;
+    String view = req.getParameter("view");
+    view = (view == null || view == "") ? GadgetSpec.DEFAULT_VIEW : view;
     try {
       gadget = gadgetServer.processGadget(gadgetId,
                                           getPrefsFromRequest(req),
                                           context.getLocale(),
                                           RenderingContext.GADGET,
                                           options);
-      outputGadget(gadget, options, contentFilters, resp);
+      outputGadget(gadget, view, options, contentFilters, resp);
     } catch (GadgetServer.GadgetProcessException e) {
       outputErrors(e, resp);
     }
@@ -167,6 +169,7 @@ public class GadgetRenderingServlet extends HttpServlet {
    * Renders a successfully processed gadget.
    *
    * @param gadget
+   * @param view
    * @param options
    * @param contentFilters
    * @param resp
@@ -174,13 +177,14 @@ public class GadgetRenderingServlet extends HttpServlet {
    * @throws GadgetServer.GadgetProcessException
    */
   private void outputGadget(Gadget gadget,
+                            String view,
                             ProcessingOptions options,
                             List<GadgetContentFilter> contentFilters,
                             HttpServletResponse resp)
       throws IOException, GadgetServer.GadgetProcessException {
     switch(gadget.getContentType()) {
     case HTML:
-      outputHtmlGadget(gadget, options, contentFilters, resp);
+      outputHtmlGadget(gadget, view, options, contentFilters, resp);
       break;
     case URL:
       outputUrlGadget(gadget, options, resp);
@@ -196,6 +200,7 @@ public class GadgetRenderingServlet extends HttpServlet {
    * Handles type=html gadget output.
    *
    * @param gadget
+   * @param view
    * @param options
    * @param contentFilters
    * @param resp
@@ -203,6 +208,7 @@ public class GadgetRenderingServlet extends HttpServlet {
    * @throws GadgetServer.GadgetProcessException
    */
   private void outputHtmlGadget(Gadget gadget,
+                                String view,
                                 ProcessingOptions options,
                                 List<GadgetContentFilter> contentFilters,
                                 HttpServletResponse resp)
@@ -256,14 +262,24 @@ public class GadgetRenderingServlet extends HttpServlet {
     }
 
     List<GadgetException> gadgetExceptions = new LinkedList<GadgetException>();
-    String content = gadget.getContentData();
-    for (GadgetContentFilter filter : contentFilters) {
-      try {
-        content = filter.filter(content);
-      } catch (GadgetException e) {
-        gadgetExceptions.add(e);
+    String content = gadget.getContentData(view);
+    if (content == null) {
+      // unknown view
+      gadgetExceptions.add(
+          new GadgetException(
+              GadgetException.Code.UNKNOWN_VIEW_SPECIFIED,
+              "View: '" + view + "' invalid for gadget: " +
+              gadget.getId().getKey()));
+    } else {
+      for (GadgetContentFilter filter : contentFilters) {
+        try {
+          content = filter.filter(content);
+        } catch (GadgetException e) {
+          gadgetExceptions.add(e);
+        }
       }
     }
+    
     if (gadgetExceptions.size() > 0) {
       throw new GadgetServer.GadgetProcessException(gadgetExceptions);
     }

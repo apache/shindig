@@ -284,7 +284,16 @@ public class Gadget implements GadgetView {
    * @throws IllegalStateException if contentType is not HTML.
    */
   public String getContentData() {
-    return substitutions.substitute(baseSpec.getContentData());
+    return getContentData(null);
+  }
+  
+  /**
+   * @param view ID of the view whose content to retrieve
+   * @return Gadget contents for the given view with all substitutions applied
+   * @throws IllegalStateException if contentType is not HTML
+   */
+  public String getContentData(String view) {
+    return substitutions.substitute(baseSpec.getContentData(view));
   }
 
   private MessageBundle currentMessageBundle = MessageBundle.EMPTY;
