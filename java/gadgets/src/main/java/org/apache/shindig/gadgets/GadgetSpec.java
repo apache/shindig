@@ -22,6 +22,8 @@ import java.util.Map;
  * Represents a Gadget specification.
  */
 public interface GadgetSpec {
+  public static final String DEFAULT_VIEW = "default";
+  
   public String getTitle();
   public URI getTitleURI();
   public String getDirectoryTitle();
@@ -75,7 +77,7 @@ public interface GadgetSpec {
   public List<UserPref> getUserPrefs();
 
   public static enum ContentType {
-      HTML, URL
+    HTML, URL
   }
 
   public ContentType getContentType();
@@ -89,10 +91,18 @@ public interface GadgetSpec {
   public URI getContentHref();
 
   /**
-   * @return The HTML content for this gadget spec.
+   * @return The HTML content for the default view of this gadget spec.
    * @throws IllegalStateException if contentType is not HTML.
    */
   public String getContentData();
+  
+  /**
+   * @param view Identifier of the desired view to retrieve. 
+   * @return The HTML content for the specified view of this gadget spec,
+   *         or null if no such view was defined.
+   * @throws IllegalStateException if contentType is not HTML.
+   */
+  public String getContentData(String view);
 
   /**
    * @return A copy of the spec. This is NOT the same as clone().

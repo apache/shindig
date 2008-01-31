@@ -108,7 +108,7 @@
     <dependency>
       <groupId>caja</groupId>
       <artifactId>caja</artifactId>
-      <version>r394</version>
+      <version>r422</version>
       <scope>compile</scope>
     </dependency>
   </dependencies>
