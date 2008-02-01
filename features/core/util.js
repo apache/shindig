@@ -114,6 +114,23 @@ gadgets.util = function() {
     },
 
     /**
+     * Utility function for generating an "enum" from an array.
+     *
+     * @param {Array.<String>} values The values to generate.
+     * @return {Map&lt;String,String&gt;} An object with member fields to handle
+     *   the enum.
+     *
+     * @private Implementation detail.
+     */
+    makeEnum : function (values) {
+      var obj = {};
+      for (var i = 0, v; v = values[i]; ++i) {
+        obj[v] = v;
+      }
+      return obj;
+    },
+
+    /**
      * Gets the feature parameters.
      *
      * @param {String} feature The feature to get parameters for
