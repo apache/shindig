@@ -160,7 +160,7 @@ public class GadgetSpecParser {
     Node messagesAttr = attrs.getNamedItem("messages");
     Node languageAttr = attrs.getNamedItem("lang");
     Node countryAttr = attrs.getNamedItem("country");
-    Node rtlAttr = attrs.getNamedItem("rtl");
+    Node rtlAttr = attrs.getNamedItem("language_direction");
 
     String messages = null;
     if (null != messagesAttr) {
@@ -181,10 +181,8 @@ public class GadgetSpecParser {
       language = languageAttr.getNodeValue();
     }
 
-    boolean rightToLeft;
-    if (null == rtlAttr) {
-      rightToLeft = false;
-    } else {
+    boolean rightToLeft = false;
+    if (rtlAttr != null && rtlAttr.getTextContent().equals("rtl")) {
       rightToLeft = true;
     }
 
@@ -548,19 +546,25 @@ public class GadgetSpecParser {
     public String getContentData() {
       return getContentData(DEFAULT_VIEW);
     }
-    
+
     public String getContentData(String view) {
       Check.is(contentType == ContentType.HTML,
                "getContentData() requires contentType HTML");
       if (view == null || view == "") {
         view = DEFAULT_VIEW;
       }
-      if (!contentData.containsKey(view)) {
-        return null;
+
+      StringBuilder content = contentData.get(view);
+      if (content == null) {
+        return "";
+      } else {
+        return content.toString();
       }
-      return contentData.get(view).toString();
     }
-    
+
+    // TODO: Synchronizing this seems unnecessary...a parse job should never
+    // happen across threads, and addContent *can't* be called anywhere but
+    // within a call to GadgetSpecParser.parse()
     public synchronized void addContent(String view, String content) {
       if (view == null || view.equals("")) {
         view = DEFAULT_VIEW;
@@ -569,7 +573,7 @@ public class GadgetSpecParser {
       if (!contentData.containsKey(view)) {
         contentData.put(view, new StringBuilder());
       }
-      
+
       contentData.get(view).append(content);
     }
   }

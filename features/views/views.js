@@ -24,126 +24,86 @@
 var gadgets = gadgets || {};
 
 /**
- * @static
- * @class Provides operations for dealing with Views.
- * @name gadgets.views
+ * Implements the gadgets.views API spec. See
+ * http://code.google.com/apis/gadgets/docs/reference/gadgets.views.html
  */
-gadgets.views = gadgets.views || {};
+gadgets.views = function() {
 
-/**
- * Attempts to navigate to this gadget in a different view. If the container
- * supports parameters will pass the optional parameters along to the gadget in
- * the new view.
- *
- * @param {gadgets.views.View} view The view to navigate to
- * @param {Map.&lt;String, String&gt;} opt_params Parameters to pass to the
- *     gadget after it has been navigated to on the surface
- *
- * @member gadgets.views
- */
-gadgets.views.requestNavigateTo = function(surface, opt_params) {
-  return opensocial.Container.get().requestNavigateTo(surface, opt_params);
+  /**
+   * Reference to the current view object.
+   */
+  var currentView = null;
+
+  /**
+   * Map of all supported views for this container.
+   */
+  var supportedViews = {};
+
+  /**
+   * Map of parameters passed to the current request.
+   */
+  var params = {};
+
+  return {
+    requestNavigateTo : function(view, opt_params) {
+      // TODO: Actually implementing this is going to require gadgets.rpc or
+      // ifpc or something.
+    },
+
+    getCurrentView : function() {
+      return currentView;
+    },
+
+    getSupportedViews : function() {
+      return supportedViews;
+    },
+
+    getParams : function() {
+      return params;
+    },
+
+    /**
+     * Initializes views. Assumes that the current view is the "view"
+     * url parameter (or default if "view" isn't supported), and that
+     * all view parameters are in the form view-<name>
+     * TODO: Use unified configuration when it becomes available.
+     * @param {Map&lt;String, Boolean&gt;} supported The views you support,
+     *   where keys = name of the view and values = isOnlyVisible
+     */
+    init : function(supported) {
+      if (typeof supported["default"] === "undefined") {
+        throw new Error("default view required!");
+      }
+
+      for (var s in supported) if (supported.hasOwnProperty(s)) {
+        supportedViews[s] = new gadgets.views.View(s, supported[s]);
+      }
+
+      var urlParams = gadgets.util.getUrlParameters();
+      // extract all parameters prefixed with "view-".
+      for (var p in urlParams) if (urlParams.hasOwnProperty(p)) {
+        if (p.substring(0, 5) === "view-") {
+          params[p.substr(5)] = urlParams[p];
+        }
+      }
+      currentView = supportedViews[urlParams.view] || supportedViews["default"];
+    }
+  };
+}();
+
+gadgets.views.View = function(name, opt_isOnlyVisible) {
+  this.name_ = name;
+  this.isOnlyVisible_ = !!opt_isOnlyVisible;
 };
 
-/**
- * Returns the current view.
- *
- * @return {gadgets.views.View} The current view
- * @member gadgets.views
- */
-gadgets.views.getCurrentView = function() {
-  return this.surface;
-};
-
-/**
- * Returns a map of all the supported views. Keys each gadgets.view.View by
- * its name.
- *
- * @return {Map&lt;gadgets.views.ViewType | String, gadgets.views.View&gt;} All
- *   supported views, keyed by their name attribute.
- * @member gadgets.views
- */
-gadgets.views.getSupportedViews = function() {
-  return this.supportedSurfaces;
-};
-
-/**
- * Returns the parameters passed into this gadget for this view. Does not
- * include all url parameters, only the ones passed into
- * gadgets.views.requestNavigateTo
- *
- * @return {Map.&lt;String, String&gt;} The parameter map
- * @member gadgets.views
- */
-gadgets.views.getParams = function() {
-  return this.params;
-};
-
-
-/**
- * @class Base interface for all view objects.
- * @name gadgets.views.View
- */
-
-/**
- * @private
- * @constructor
- */
-gadgets.views.View = function(name, opt_isOnlyVisibleGadgetValue) {
-  this.name = name;
-  this.isOnlyVisibleGadgetValue = !!opt_isOnlyVisibleGadgetValue;
-};
-
-/**
- * Returns the name of this view.
- *
- * @return {gadgets.views.ViewType | String} The view name, usually specified as
- * a gadgets.views.ViewType
- */
 gadgets.views.View.prototype.getName = function() {
-  return this.name;
+  return this.name_;
 };
 
-/**
- * Returns true if the gadget is the only visible gadget in this view.
- * On a canvas page or in maximize mode this is most likely true; on a profile
- * page or in dashboard mode, it is most likely false.
- *
- * @return {boolean} True if the gadget is the only visible gadget; otherwise, false
- */
 gadgets.views.View.prototype.isOnlyVisibleGadget = function() {
-  return this.isOnlyVisibleGadgetValue;
+  return this.isOnlyVisible_;
 };
 
-
-/**
- * @static
- * @class
- * Used by <a href="gadgets.views.View.html"> View</a>s.
- * @name gadgets.views.ViewType
- */
-gadgets.views.ViewType = {
- /**
-  * A view where the gadget is displayed in a very large mode. It should be the
-  * only thing on the page. In a social context, this is usually called the
-  * canvas page.
-  *
-  * @member gadgets.views.ViewType
-  */
-  FULL_PAGE : 'FULL_PAGE',
-
- /**
-  * A view where the gadget is displayed in a small area usually on a page with
-  * other gadgets. In a social context, this is usually called the profile page.
-  *
-  * @member gadgets.views.ViewType
-  */
-  DASHBOARD : 'DASHBOARD',
-
- /**
-  * A view where the gadget is displayed in a small separate window by itself.
-  *
-  * @member gadgets.views.ViewType
-  */
-  POPUP : 'POPUP'
-};
+gadgets.views.ViewType = gadgets.util.makeEnum([
+  "FULL_PAGE", "DASHBOARD", "POPUP"
+]);

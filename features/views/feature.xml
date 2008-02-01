@@ -18,7 +18,12 @@ specific language governing permissions and limitations under the License.
 -->
 <feature>
   <name>views</name>
+  <!-- <dependency>ifpc</dependency> -->
   <gadget>
     <script src="views.js"/>
+    <!-- TODO: Clean this up and unify the configuration model -->
+    <script>
+      gadgets.views.init({"default" : false});
+    </script>
   </gadget>
 </feature>
