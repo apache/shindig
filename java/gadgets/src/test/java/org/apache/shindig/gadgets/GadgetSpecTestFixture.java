@@ -58,6 +58,9 @@ public class GadgetSpecTestFixture {
         public String getContentData() {
           return DATETIME_CONTENT;
         }
+        public String getContentData(String s) {
+          return DATETIME_CONTENT;
+        }
         public URI getContentHref() {
           return null;
         }
