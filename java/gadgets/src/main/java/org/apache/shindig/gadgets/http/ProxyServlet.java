@@ -29,8 +29,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 public class ProxyServlet extends HttpServlet {
-  private final static ProxyHandler handler = new ProxyHandler();
   private final GadgetSigner signer;
+  private final ProxyHandler handler;
 
   @Override
   protected void doGet(HttpServletRequest request, HttpServletResponse response)
@@ -43,19 +43,27 @@ public class ProxyServlet extends HttpServlet {
     }
   }
 
+  @Override
+  protected void doPost(HttpServletRequest request, HttpServletResponse response)
+      throws ServletException, IOException {
+    // Currently they are identical
+    doGet(request, response);
+  }
+
   /**
    * Constructs a ProxyServlet with the default (non-secure) GadgetSigner.
    */
   public ProxyServlet() {
-    this(new BasicGadgetSigner());
+    this(new BasicGadgetSigner(), new ProxyHandler());
   }
 
   /**
    * Creates a ProxyServlet using the specified GadgetSigner.
-   *
-   * @param signer
+   * @param signer Used to sign and verify requests
+   * @param handler Used to fetch proxied content
    */
-  public ProxyServlet(GadgetSigner signer) {
+  public ProxyServlet(GadgetSigner signer, ProxyHandler handler) {
     this.signer = signer;
+    this.handler = handler;
   }
 }

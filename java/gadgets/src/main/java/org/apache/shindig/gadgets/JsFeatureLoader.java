@@ -367,6 +367,9 @@ public class JsFeatureLoader {
           content = srcNode.getTextContent();
           if (content.startsWith("http://")) {
             type = JsLibrary.Type.URL;
+          } else if (content.startsWith("//")) {
+            type = JsLibrary.Type.URL;
+            content = content.substring(1);
           } else if (content.startsWith("res://")) {
             content = content.substring(6);
             type = JsLibrary.Type.RESOURCE;

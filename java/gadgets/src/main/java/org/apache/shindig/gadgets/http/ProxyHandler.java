@@ -24,13 +24,16 @@ import org.apache.shindig.gadgets.GadgetSigner;
 import org.apache.shindig.gadgets.GadgetToken;
 import org.apache.shindig.gadgets.ProcessingOptions;
 import org.apache.shindig.gadgets.RemoteContent;
+import org.apache.shindig.gadgets.RemoteContentFetcher;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.net.URLDecoder;
 import java.util.List;
 import java.util.Map;
 
@@ -43,27 +46,34 @@ public class ProxyHandler {
   private static final int TWO_HOURS_IN_MS = 7200000;
   private static final int ONE_HOUR_IN_SECS = 3600;
   private static final int MAX_PROXY_SIZE = 1024 * 1024;
-  private static final BasicRemoteContentFetcher fetcher =
-      new BasicRemoteContentFetcher(MAX_PROXY_SIZE);
+  
+  private final RemoteContentFetcher fetcher;
+
+  public ProxyHandler() {
+    this(new BasicRemoteContentFetcher(MAX_PROXY_SIZE));
+  }
+  
+  public ProxyHandler(RemoteContentFetcher fetcher) {
+    this.fetcher = fetcher;
+  }
 
   public void fetchJson(HttpServletRequest request,
                         HttpServletResponse response,
                         GadgetSigner signer)
       throws ServletException, IOException {
 
-    if (signer != null) {
-      // We're just going to toss away the token, but it should exist.
-      extractAndValidateToken(request, signer);
-    }
-
-    // Validate url= parameter
-    URL origin = extractAndValidateUrl(request);
+    GadgetToken token = extractAndValidateToken(request, signer);
+    URL originalUrl = extractAndValidateUrl(request);
+    URL signedUrl = signUrl(originalUrl, token, request);
 
     // Fetch the content and convert it into JSON.
-    RemoteContent results = fetcher.fetch(origin, new ProcessingOptions());
+    // TODO: Fetcher needs to handle variety of HTTP methods.
+    RemoteContent results = fetchContent(signedUrl, request,
+        new ProcessingOptions());
+
     String output;
     try {
-      String json = new JSONObject().put(origin.toString(), new JSONObject()
+      String json = new JSONObject().put(originalUrl.toString(), new JSONObject()
           .put("body", new String(results.getByteArray()))
           .put("rc", results.getHttpStatusCode())
           ).toString();
@@ -84,14 +94,14 @@ public class ProxyHandler {
                     GadgetSigner signer)
       throws ServletException, IOException {
 
-    if (signer != null) {
-      // We're just going to toss away the token, but it should exist.
-      extractAndValidateToken(request, signer);
-    }
+    GadgetToken token = extractAndValidateToken(request, signer);
+    URL originalUrl = extractAndValidateUrl(request);
+    URL signedUrl = signUrl(originalUrl, token, request);
 
-    // Validate url= parameter
-    URL origin = extractAndValidateUrl(request);
-    RemoteContent results = fetcher.fetch(origin, new ProcessingOptions());
+    // TODO: Fetcher needs to handle variety of HTTP methods.
+    RemoteContent results = fetchContent(signedUrl, request,
+        new ProcessingOptions());
+
     int status = results.getHttpStatusCode();
     response.setStatus(status);
     if (status == HttpServletResponse.SC_OK) {
@@ -112,6 +122,25 @@ public class ProxyHandler {
         }
       }
       response.getOutputStream().write(results.getByteArray());
+    }
+  }
+
+  /**
+   * Fetch the content for a request
+   */
+  private RemoteContent fetchContent(URL signedUrl, HttpServletRequest request,
+      ProcessingOptions procOptions) throws ServletException {
+    try {
+      if (request.getMethod().equals("POST")) {
+        String data = request.getParameter("postData");
+        return fetcher.fetchByPost(signedUrl,
+            URLDecoder.decode(data, request.getCharacterEncoding()).getBytes(),
+            procOptions);
+      } else {
+        return fetcher.fetch(signedUrl, new ProcessingOptions());
+      }
+    } catch (UnsupportedEncodingException uee) {
+      throw new ServletException(uee);
     }
   }
 
@@ -147,17 +176,19 @@ public class ProxyHandler {
 
   /**
    * @return A valid token for the given input.
+   * @throws ServletException
    */
   private GadgetToken extractAndValidateToken(HttpServletRequest request,
       GadgetSigner signer) throws ServletException {
-    String token = request.getParameter("t");
-    if (token == null) {
-      token = "";
-    }
     try {
+      if (signer == null) return null;
+      String token = request.getParameter("st");
+      if (token == null) {
+        token = "";
+      }
       return signer.createToken(token);
-    } catch (GadgetException e) {
-      throw new ServletException(e);
+    } catch (GadgetException ge) {
+      throw new ServletException(ge);
     }
   }
 
@@ -173,4 +204,23 @@ public class ProxyHandler {
     response.setDateHeader("Expires", System.currentTimeMillis()
                                      + TWO_HOURS_IN_MS);
   }
+
+  /**
+   * Sign a URL with a GadgetToken if needed
+   * @return 
+   */
+  private URL signUrl(URL originalUrl, GadgetToken token,
+      HttpServletRequest request) throws ServletException {
+    try {
+      if (token == null ||
+          !"signed".equals(request.getParameter("authz"))) {
+        return originalUrl;
+      }
+      return token.signUrl(originalUrl, "GET", // TODO: request.getMethod() 
+          request.getParameterMap());
+    } catch (GadgetException ge) {
+      throw new ServletException(ge);
+    }
+  }
+
 }
