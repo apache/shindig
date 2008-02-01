@@ -550,7 +550,7 @@ public class GadgetSpecParser {
     public String getContentData(String view) {
       Check.is(contentType == ContentType.HTML,
                "getContentData() requires contentType HTML");
-      if (view == null || view == "") {
+      if (view == null || view.length() == 0) {
         view = DEFAULT_VIEW;
       }
 

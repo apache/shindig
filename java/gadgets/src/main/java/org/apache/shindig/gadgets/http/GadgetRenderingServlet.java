@@ -152,7 +152,7 @@ public class GadgetRenderingServlet extends HttpServlet {
 
     Gadget gadget = null;
     String view = req.getParameter("view");
-    view = (view == null || view == "") ? GadgetSpec.DEFAULT_VIEW : view;
+    view = (view == null || view.length() == 0) ? GadgetSpec.DEFAULT_VIEW : view;
     try {
       gadget = gadgetServer.processGadget(gadgetId,
                                           getPrefsFromRequest(req),
