@@ -126,12 +126,25 @@ gadgets.io = function() {
       var params = opt_params || {};
       var newUrl = config.jsonProxyUrl.replace("%url%",
           encodeURIComponent(url));
+
+      // Check if authorization is requested
+      if (opt_params.AUTHORIZATION &&
+          gadgets.io.AuthorizationType[opt_params.AUTHORIZATION.toUpperCase()]
+              != gadgets.io.AuthorizationType.NONE) {
+        newUrl += "&authz=" + opt_params.AUTHORIZATION.toLowerCase();
+        // Add the security-token if available
+        if (gadgets.util.getUrlParameters()["st"]) {
+          newUrl += "&st=" + gadgets.util.getUrlParameters()["st"];
+        }
+      }
+      // TODO: Fetcher cannot distinguish between GET & POST yet.
       xhr.open(params.METHOD || "GET", newUrl, true);
       if (callback) {
         xhr.onreadystatechange = gadgets.util.makeClosure(null,
             processResponse, url, callback, params, xhr);
       }
-      xhr.send(params.postData);
+      xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+      xhr.send("postData=" + encodeURIComponent(params.postData));
     },
 
     /**

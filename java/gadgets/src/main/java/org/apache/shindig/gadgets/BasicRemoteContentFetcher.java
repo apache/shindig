@@ -13,9 +13,6 @@
  */
 package org.apache.shindig.gadgets;
 
-import org.apache.shindig.gadgets.RemoteContentFetcher;
-import org.apache.shindig.gadgets.RemoteContent;
-
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -54,6 +51,41 @@ public class BasicRemoteContentFetcher implements RemoteContentFetcher {
       fetcher = (HttpURLConnection) url.openConnection();
       fetcher.setInstanceFollowRedirects(true);
       fetcher.setConnectTimeout(CONNECT_TIMEOUT_MS);
+
+      responseCode = fetcher.getResponseCode();
+      headers = fetcher.getHeaderFields();
+
+      byte chunk[] = new byte[8192];
+      int chunkSize;
+      InputStream in = fetcher.getInputStream();
+      while (out.size() < maxObjSize && (chunkSize = in.read(chunk)) != -1) {
+        out.write(chunk, 0, chunkSize);
+      }
+    } catch (IOException e) {
+      responseCode = 500;
+    }
+
+    return new RemoteContent(responseCode, out.toByteArray(), headers);
+  }
+
+  public RemoteContent fetchByPost(URL url, byte[] postData,
+      ProcessingOptions options) {
+    ByteArrayOutputStream out = new ByteArrayOutputStream();
+    
+    int responseCode;
+    HttpURLConnection fetcher;
+    Map<String, List<String>> headers = null;
+
+    try {
+      fetcher = (HttpURLConnection) url.openConnection();
+      fetcher.setRequestMethod("POST");
+      fetcher.setInstanceFollowRedirects(true);
+      fetcher.setConnectTimeout(CONNECT_TIMEOUT_MS);
+      fetcher.setRequestProperty("Content-Length", "" + postData.length);
+      fetcher.setUseCaches(false);
+      fetcher.setDoInput(true);
+      fetcher.setDoOutput(true);
+      fetcher.getOutputStream().write(postData);
 
       responseCode = fetcher.getResponseCode();
       headers = fetcher.getHeaderFields();

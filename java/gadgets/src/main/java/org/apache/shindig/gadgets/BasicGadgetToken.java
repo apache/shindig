@@ -18,6 +18,9 @@
  */
 package org.apache.shindig.gadgets;
 
+import java.net.URL;
+import java.util.Map;
+
 /**
  * Primitive token implementation that uses stings as tokens.
  */
@@ -31,11 +34,21 @@ class BasicGadgetToken implements GadgetToken {
     return token;
   }
 
+
   /**
    * Generates a token from an input string
-   * @param token
+   * @param token String form of token
    */
   public BasicGadgetToken(String token) {
     this.token = token;
+  }
+
+  /**
+   * {@inheritDoc}
+   * Signer that does not sign.
+   */
+  public URL signUrl(URL uri, String httpMethod, Map parameters)
+      throws GadgetException {
+    return uri;
   }
 }
