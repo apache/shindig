@@ -21,4 +21,7 @@ specific language governing permissions and limitations under the License.
   <gadget>
     <script src="ifpc.js"/>
   </gadget>
+  <container>
+    <script src="ifpc.js"/>
+  </container>
 </feature>
