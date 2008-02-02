@@ -18,12 +18,20 @@ specific language governing permissions and limitations under the License.
 -->
 <feature>
   <name>views</name>
-  <!-- <dependency>ifpc</dependency> -->
+  <!-- TODO: Use rpc when it becomes available -->
+  <dependency>ifpc</dependency>
   <gadget>
     <script src="views.js"/>
     <!-- TODO: Clean this up and unify the configuration model -->
-    <script>
-      gadgets.views.init({"default" : false});
+    <script><![CDATA[
+      gadgets.views.init({
+        // Some standard views. Feel free to change these to use whatever
+        // views your container supports.
+        "default" : false,
+        "profile" : false,
+        "canvas" : true
+      });
+    ]]>
     </script>
   </gadget>
 </feature>
