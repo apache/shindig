@@ -556,10 +556,14 @@ public class GadgetSpecParser {
 
       StringBuilder content = contentData.get(view);
       if (content == null) {
-        return "";
-      } else {
-        return content.toString();
+        content = contentData.get(DEFAULT_VIEW);
       }
+
+      if (content == null) {
+        return "";
+      }
+
+      return content.toString();
     }
 
     // TODO: Synchronizing this seems unnecessary...a parse job should never
