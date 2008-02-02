@@ -88,7 +88,7 @@ StateFileParser.onLoadState = function(xmlState, stateUrl, gadgetMessageDiv,
   var viewerNode = $(containerNode).find('viewer')[0];
   if (viewerNode) {
     viewer = StateFileParser.loadPerson(container,
-        $(viewerNode).find('person')[0], true);
+        $(viewerNode).find('person')[0], false, true);
   }
 
   // Get the owner node
@@ -96,15 +96,15 @@ StateFileParser.onLoadState = function(xmlState, stateUrl, gadgetMessageDiv,
   var ownerNode = $(containerNode).find('owner')[0];
   if (ownerNode) {
     owner = StateFileParser.loadPerson(container,
-        $(ownerNode).find('person')[0], false, true);
+        $(ownerNode).find('person')[0], true);
   }
 
   // If the id of the owner is the same as the viewer, then set the viewer
   // as the primary source of truth
   if (!owner || (viewer && owner.getId() == viewer.getId())) {
     owner = viewer;
-    owner.isViewer = true;
-    owner.isOwner = true;
+    owner.isViewer_ = true;
+    owner.isOwner_ = true;
   }
 
   // Build the friends list
@@ -188,13 +188,13 @@ StateFileParser.onLoadState = function(xmlState, stateUrl, gadgetMessageDiv,
  * viewer, owner or friend. Return value is the person object.
  * @private
  */
-StateFileParser.loadPerson = function(container, xmlNode, isViewer, isOwner) {
+StateFileParser.loadPerson = function(container, xmlNode, isOwner, isViewer) {
   var fields = {
     'id' : $(xmlNode).attr(opensocial.Person.Field.ID),
     'name' : $(xmlNode).attr(opensocial.Person.Field.NAME),
     'thumbnailUrl' : $(xmlNode).attr(opensocial.Person.Field.THUMBNAIL_URL),
     'profileUrl' : $(xmlNode).attr(opensocial.Person.Field.PROFILE_URL)};
-  return container.newPerson(fields, isViewer, isOwner);
+  return container.newPerson(fields, isOwner, isViewer);
 };
 
 
