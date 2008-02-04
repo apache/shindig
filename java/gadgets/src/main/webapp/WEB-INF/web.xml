@@ -15,51 +15,52 @@
 
 -->
 <!DOCTYPE web-app
-    PUBLIC "-//Sun Microsystems, Inc.//DTD Web Application 2.3//EN"
-    "http://java.sun.com/dtd/web-app_2_3.dtd">
+        PUBLIC "-//Sun Microsystems, Inc.//DTD Web Application 2.3//EN"
+        "http://java.sun.com/dtd/web-app_2_3.dtd">
 
 <web-app>
-  <!-- configuration -->
-  <context-param>
-    <param-name>features</param-name>
-    <param-value>res://features/features.txt</param-value>
-  </context-param>
-  <!-- Render a Gadget -->
+    <!-- configuration -->
+    <context-param>
+        <param-name>features</param-name>
+        <param-value>res://features/features.txt</param-value>
+    </context-param>
 
-  <servlet>
-    <servlet-name>xml-to-html</servlet-name>
-    <servlet-class>
-      org.apache.shindig.gadgets.http.GadgetRenderingServlet
-    </servlet-class>
-  </servlet>
+    <!-- Render a Gadget -->
+    <servlet>
+        <servlet-name>xml-to-html</servlet-name>
+        <servlet-class>
+            org.apache.shindig.gadgets.http.GadgetRenderingServlet
+        </servlet-class>
+    </servlet>
 
-  <servlet-mapping>
-    <servlet-name>xml-to-html</servlet-name>
-    <url-pattern>/ifr</url-pattern>
-  </servlet-mapping>
+    <!-- Proxy -->
+    <servlet>
+        <servlet-name>proxy</servlet-name>
+        <servlet-class>
+            org.apache.shindig.gadgets.http.ProxyServlet
+        </servlet-class>
+    </servlet>
 
-  <!-- Proxy -->
 
-  <servlet>
-    <servlet-name>proxy</servlet-name>
-    <servlet-class>
-      org.apache.shindig.gadgets.http.ProxyServlet
-    </servlet-class>
-  </servlet>
+    <!-- javascript serving -->
+    <servlet>
+        <servlet-name>js</servlet-name>
+        <servlet-class>org.apache.shindig.gadgets.http.JsServlet</servlet-class>
+    </servlet>
 
-  <servlet-mapping>
-    <servlet-name>proxy</servlet-name>
-    <url-pattern>/proxy</url-pattern>
-  </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>js</servlet-name>
+        <url-pattern>/js/*</url-pattern>
+    </servlet-mapping>
 
-  <!-- javascript serving -->
-  <servlet>
-    <servlet-name>js</servlet-name>
-    <servlet-class>org.apache.shindig.gadgets.http.JsServlet</servlet-class>
-  </servlet>
-  
-  <servlet-mapping>
-    <servlet-name>js</servlet-name>
-    <url-pattern>/js/*</url-pattern>
-  </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>proxy</servlet-name>
+        <url-pattern>/proxy</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
+        <servlet-name>xml-to-html</servlet-name>
+        <url-pattern>/ifr</url-pattern>
+    </servlet-mapping>
+
 </web-app>
