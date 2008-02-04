@@ -36,6 +36,7 @@ import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorCompletionService;
 import java.util.concurrent.Future;
 import java.util.logging.Logger;
+import java.util.logging.Level;
 
 public class GadgetServer {
   private final GadgetServerConfig config;
@@ -241,8 +242,8 @@ public class GadgetServer {
       }
 
       if (gadgetException != null) {
-        logger.severe(gadgetException.getCode().toString());
-        gadgetException.printStackTrace();
+        logger.log(Level.SEVERE, gadgetException.getCode().toString(), gadgetException);
+        
         // Add to list of all exceptions caught, clear jobs, and continue
         // to aggressively catch as many exceptions as possible. Since
         // tasks are running anyway, we may as well get their results in
