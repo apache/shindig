@@ -570,7 +570,7 @@ public class GadgetSpecParser {
     // happen across threads, and addContent *can't* be called anywhere but
     // within a call to GadgetSpecParser.parse()
     public synchronized void addContent(String view, String content) {
-      if (view == null || view.equals("")) {
+      if (view == null || view.length() == 0) {
         view = DEFAULT_VIEW;
       }
 
