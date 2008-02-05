@@ -52,7 +52,9 @@ gadgets.views = function() {
       var ifpcRelay = gadgets.util.getUrlParameters().parent || '';
       gadgets.ifpc_.call("remote_iframe_" + prefs.getModuleId(),
                          "requestNavigateTo",
-                         [view.getName(), opt_params],
+                        ["remote_iframe_" + prefs.getModuleId(),
+                          view.getName(),
+                         opt_params],
                          ifpcRelay,
                          null,
                          '');
@@ -90,7 +92,8 @@ gadgets.views = function() {
       var urlParams = gadgets.util.getUrlParameters();
       // View parameters are passed as a single parameter.
       if (urlParams["view-params"]) {
-        var tmpParams = gadgets.json.parse(urlParams["view-params"]);
+        var tmpParams = gadgets.json.parse(
+            decodeURIComponent(urlParams["view-params"]));
         if (tmpParams) {
           params = tmpParams;
         }
