@@ -1,1 +1,1 @@
-var gadgets = {};
+var gadgets = gadgets || {};
