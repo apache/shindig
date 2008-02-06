@@ -92,7 +92,6 @@ public class GadgetRenderingServlet extends HttpServlet {
   }
 
   @Override
-  @SuppressWarnings("unchecked")
   public void init(ServletConfig config) {
     ServletContext context = config.getServletContext();
     String jsPath = context.getInitParameter("js-service-path");
@@ -189,10 +188,12 @@ public class GadgetRenderingServlet extends HttpServlet {
     case URL:
       outputUrlGadget(gadget, options, resp);
       break;
-    default:
-      resp.sendError(HttpServletResponse.SC_BAD_REQUEST,
-                     "Unexpected reror: unknown gadget type");
-      break;
+    // default makes no sense here, as this is an enum, we want to insure that
+    // we cover all cases of the enum, so leave it out.
+//    default:
+//      resp.sendError(HttpServletResponse.SC_BAD_REQUEST,
+//                     "Unexpected reror: unknown gadget type");
+//      break;
     }
   }
 
@@ -402,6 +403,6 @@ public class GadgetRenderingServlet extends HttpServlet {
    */
   protected boolean getUseCaja(HttpServletRequest req) {
     String cajaParam = req.getParameter(CAJA_PARAM);
-    return cajaParam != null && cajaParam.equals("1");
+    return "1".equals(cajaParam);
   }
 }

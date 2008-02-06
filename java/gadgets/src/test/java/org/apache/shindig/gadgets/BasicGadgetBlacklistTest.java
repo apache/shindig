@@ -28,6 +28,7 @@ public class BasicGadgetBlacklistTest extends TestCase {
 
   @Override
   protected void setUp() throws Exception {
+    super.setUp();
     someUri = new URI("http://bla.com/foo.xml");
   }
 

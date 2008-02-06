@@ -285,7 +285,7 @@ public class GadgetServer {
   }
 
   private static class WorkflowDependency {
-    private static enum Type {
+    private enum Type {
       CORE, FEATURE_PREPARE, FEATURE_PROCESS
     }
 
@@ -428,9 +428,10 @@ public class GadgetServer {
 
     @Override
     public void run(WorkflowContext wc) throws GadgetException {
-      Set<String> needed = new HashSet<String>();
-      Set<String> optionalNames = new HashSet<String>();
       Map<String, GadgetSpec.FeatureSpec> requires = wc.gadget.getRequires();
+      Set<String> needed = new HashSet<String>(requires.size());
+      Set<String> optionalNames = new HashSet<String>();
+        
       for (Map.Entry<String, GadgetSpec.FeatureSpec> entry : requires.entrySet()) {
         needed.add(entry.getKey());
         if (entry.getValue().isOptional()) {
@@ -440,8 +441,8 @@ public class GadgetServer {
 
       // Retrieve needed feature processors from registry
       Set<GadgetFeatureRegistry.Entry> resultsFound =
-          new HashSet<GadgetFeatureRegistry.Entry>();
-      Set<String> resultsMissing = new HashSet<String>();
+          new HashSet<GadgetFeatureRegistry.Entry>(needed.size());
+      Set<String> resultsMissing = new HashSet<String>(0);
       registry.getIncludedFeatures(needed, resultsFound, resultsMissing);
 
       // Classify features this server is missing

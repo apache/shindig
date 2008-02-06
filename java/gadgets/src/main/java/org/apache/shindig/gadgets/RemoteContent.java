@@ -73,11 +73,10 @@ public class RemoteContent {
    * @param name
    * @return All headers with the given name.
    */
-  @SuppressWarnings("unchecked")
   public List<String> getHeaders(String name) {
     List<String> ret = headers.get(name);
     if (ret == null) {
-      return Collections.EMPTY_LIST;
+      return Collections.emptyList();
     } else {
       return Collections.unmodifiableList(ret);
     }

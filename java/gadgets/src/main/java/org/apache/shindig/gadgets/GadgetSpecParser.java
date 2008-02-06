@@ -77,9 +77,8 @@ public class GadgetSpecParser {
     NodeList modulePrefs = root.getElementsByTagName("ModulePrefs");
     if (modulePrefs.getLength() != 1) {
       throw new SpecParserException("Missing or duplicated <ModulePrefs>");
-    } else {
-      processModulePrefs(id, modulePrefs.item(0), spec);
     }
+    processModulePrefs(id, modulePrefs.item(0), spec);
 
     NodeList userPrefs = root.getElementsByTagName("UserPref");
     for (int i = 0, j = userPrefs.getLength(); i < j; ++i) {
@@ -120,9 +119,8 @@ public class GadgetSpecParser {
     Node title = attrs.getNamedItem("title");
     if (null == title) {
       throw new SpecParserException("Missing \"title\" attribute.");
-    } else {
-      spec.title = title.getNodeValue();
     }
+    spec.title = title.getNodeValue();
 
     Node titleUrl = attrs.getNamedItem("title_url");
     if (null != titleUrl) {
@@ -182,7 +180,7 @@ public class GadgetSpecParser {
     }
 
     boolean rightToLeft = false;
-    if (rtlAttr != null && rtlAttr.getTextContent().equals("rtl")) {
+    if ("rtl".equals(rtlAttr.getTextContent())) {
       rightToLeft = true;
     }
 
@@ -216,9 +214,8 @@ public class GadgetSpecParser {
     Node name = attrs.getNamedItem("name");
     if (null == name) {
       throw new SpecParserException("All UserPrefs must have name attributes.");
-    } else {
-      up.name = name.getNodeValue();
     }
+    up.name = name.getNodeValue();
 
     Node displayName = attrs.getNamedItem("display_name");
     if (null != displayName) {
@@ -270,7 +267,7 @@ public class GadgetSpecParser {
     Node type = attrs.getNamedItem("type");
     if (null == type) {
       throw new SpecParserException("No content type specified!");
-    } else if (type.getNodeValue().equals("url")) {
+    } else if ("url".equals(type.getNodeValue())) {
       spec.contentType = GadgetSpec.ContentType.URL;
       Node href = attrs.getNamedItem("href");
       if (href != null) {
@@ -284,7 +281,7 @@ public class GadgetSpecParser {
       spec.contentType = GadgetSpec.ContentType.HTML;
       Node viewNode = attrs.getNamedItem("view");
       String viewStr = (viewNode == null) ? "" : viewNode.getNodeValue();
-      String views[] = viewStr.split(",");
+      String[] views = viewStr.split(",");
       Node child = content.getFirstChild();
       String contentData = content.getTextContent();
       if (contentData.length() > 0) {
@@ -321,7 +318,7 @@ public class GadgetSpecParser {
       NodeList children = feature.getChildNodes();
       for (int i = 0, j = children.getLength(); i < j; ++i) {
         Node child = children.item(i);
-        if (child.getNodeName().equals("Param")) {
+        if ("Param".equals(child.getNodeName())) {
           NamedNodeMap paramAttrs = child.getAttributes();
           Node paramName = paramAttrs.getNamedItem("name");
           if (paramName != null) {

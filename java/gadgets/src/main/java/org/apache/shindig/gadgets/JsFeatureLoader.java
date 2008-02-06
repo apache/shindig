@@ -114,7 +114,7 @@ public class JsFeatureLoader {
     for (File file : files) {
       if (file.isDirectory()) {
         loadFiles(file.listFiles(), features);
-      } else if (file.getName().equals("feature.xml")) {
+      } else if ("feature.xml".equals(file.getName())) {
         ParsedFeature feature = processFile(file);
         if (feature != null) {
           features.put(feature.name, feature);
@@ -146,7 +146,7 @@ public class JsFeatureLoader {
           Enumeration<URL> mappedResources = cl.getResources(file);
           while (mappedResources.hasMoreElements()) {
             URL resourceUrl =  mappedResources.nextElement();
-            if (resourceUrl.getProtocol().equals("file")) {
+            if ("file".equals(resourceUrl.getProtocol())) {
               File f = new File(resourceUrl.toURI());
               loadFiles(new File[]{f}, features);
             } else {
@@ -349,7 +349,7 @@ public class JsFeatureLoader {
     for (int i = 0, j = libraries.getLength(); i < j; ++i) {
       Node node = libraries.item(i);
       String nodeValue = node.getNodeName();
-      if (nodeValue != null && nodeValue.equals("script")) {
+      if ("script".equals(nodeValue)) {
         NamedNodeMap attrs = node.getAttributes();
         Node srcNode = attrs.getNamedItem("src");
         String content;
