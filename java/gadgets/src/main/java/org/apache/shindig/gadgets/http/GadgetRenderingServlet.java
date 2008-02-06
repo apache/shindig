@@ -235,11 +235,11 @@ public class GadgetRenderingServlet extends HttpServlet {
         // servlet. We should probably inline external JS as well.
         externJs.append(String.format(externFmt, library.getContent()));
       } else if (type == JsLibrary.Type.INLINE) {
-        inlineJs.append(library.getContent()).append("\n");
+        inlineJs.append(library.getContent()).append('\n');
       } else {
         // FILE or RESOURCE
         if (options.getForcedJsLibs() == null) {
-          inlineJs.append(library.getContent()).append("\n");
+          inlineJs.append(library.getContent()).append('\n');
         } // otherwise it was already included by options.forceJsLibs.
       }
     }
@@ -333,9 +333,9 @@ public class GadgetRenderingServlet extends HttpServlet {
     markup.append("<pre>");
     for (GadgetException error : errs.getComponents()) {
       markup.append(error.getCode().toString());
-      markup.append(" ");
-      markup.append(error.getMessage().toString());
-      markup.append("\n");
+      markup.append(' ');
+      markup.append(error.getMessage());
+      markup.append('\n');
     }
     markup.append("</pre>");
     markup.append("</body></html>");
@@ -359,11 +359,11 @@ public class GadgetRenderingServlet extends HttpServlet {
   private String getPrefsQueryString(UserPrefs prefVals) {
     StringBuilder buf = new StringBuilder();
     for (Map.Entry<String, String> prefEntry : prefVals.getPrefs().entrySet()) {
-      buf.append("&");
+      buf.append('&');
       try {
         buf.append(USERPREF_PARAM_PREFIX)
                .append(URLEncoder.encode(prefEntry.getKey(), "UTF8"))
-               .append("=")
+               .append('=')
                .append(URLEncoder.encode(prefEntry.getValue(), "UTF8"));
       } catch (UnsupportedEncodingException e) {
         // If UTF8 is somehow not supported, we may as well bail.
@@ -376,7 +376,7 @@ public class GadgetRenderingServlet extends HttpServlet {
 
   private String getLibsQueryString(Set<String> features) {
     StringBuilder buf = new StringBuilder();
-    buf.append("&").append(LIBS_PARAM_NAME).append("=");
+    buf.append('&').append(LIBS_PARAM_NAME).append('=');
     buf.append(jsServicePath);
     if (features.size() == 0) {
       buf.append("core");
@@ -386,7 +386,7 @@ public class GadgetRenderingServlet extends HttpServlet {
         if (first) {
           first = false;
         } else {
-          buf.append(":");
+          buf.append(':');
         }
         buf.append(feature);
       }

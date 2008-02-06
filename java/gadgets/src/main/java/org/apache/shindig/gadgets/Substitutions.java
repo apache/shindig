@@ -15,6 +15,7 @@ package org.apache.shindig.gadgets;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.EnumMap;
 
 /**
  * Performs string substitutions for message bundles, user prefs, and bidi
@@ -59,7 +60,7 @@ public class Substitutions {
      *        The placeholder prefix for substituted strings.
      */
     Type(String prefix) {
-      this.prefix = "__" + prefix + "_";
+      this.prefix = "__" + prefix + '_';
     }
 
     public String getPrefix() {
@@ -68,7 +69,7 @@ public class Substitutions {
   }
 
   private Map<Type, Map<String, String>> substitutions =
-      new HashMap<Type, Map<String, String>>();
+      new EnumMap<Type, Map<String, String>>(Type.class);
 
   /**
    * Create a basic substitution coordinator.
@@ -134,7 +135,7 @@ public class Substitutions {
       return input;
     }
 
-    StringBuffer output = new StringBuffer();
+    StringBuilder output = new StringBuilder();
     for (int i = 0, j = input.length(); i < j; ++i) {
       if (input.regionMatches(i, type.prefix, 0, type.prefix.length())) {
         // Look for a trailing "__". If we don't find it, then this isn't a

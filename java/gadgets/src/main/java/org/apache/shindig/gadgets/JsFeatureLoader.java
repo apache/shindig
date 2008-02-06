@@ -215,13 +215,8 @@ public class JsFeatureLoader {
       InputStream is = cl.getResourceAsStream(name);
       if (is != null) {
         byte[] content = load(is);
-        int lastSlash = name.lastIndexOf("/");
-        String base = null;
-        if (lastSlash == -1) {
-          base = name;
-        } else {
-          base = name.substring(0, lastSlash + 1);
-        }
+        int lastSlash = name.lastIndexOf('/');
+        String base = (lastSlash == -1) ? name : name.substring(0, lastSlash + 1);
         feature = parse(content, base, true);
       }
     } catch (GadgetException ge) {
@@ -243,10 +238,9 @@ public class JsFeatureLoader {
     logger.info("Loading file: " + file.getName());
     ParsedFeature feature = null;
     if (file.canRead()) {
-      FileInputStream fis = null;
       try {
         byte[] content = load(new FileInputStream(file));
-        feature = parse(content, file.getParent() + "/", false);
+        feature = parse(content, file.getParent() + '/', false);
       } catch (IOException e) {
         logger.warning("Error reading file: " + file.getAbsolutePath());
       } catch (GadgetException ge) {
@@ -403,7 +397,7 @@ public class JsFeatureLoader {
   private byte[] load(InputStream is) {
     ByteArrayOutputStream baos = new ByteArrayOutputStream();
     byte[] buf = new byte[8192];
-    int read = 0;
+    int read;
     try {
       while ((read = is.read(buf)) > 0) {
         baos.write(buf, 0, read);

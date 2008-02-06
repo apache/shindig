@@ -85,11 +85,11 @@ public class CajaContentFilter implements GadgetContentFilter {
     List<GadgetException> exceptions = new ArrayList<GadgetException>();
     
     if (cause != null) {
-      errbuilder.append(cause).append("\n");
+      errbuilder.append(cause).append('\n');
     }
     
     for (Message m : mq.getMessages()) {
-      errbuilder.append(m.format(mc)).append("\n");
+      errbuilder.append(m.format(mc)).append('\n');
     }
     
     throw new GadgetException(
