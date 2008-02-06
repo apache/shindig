@@ -19,7 +19,7 @@ package org.apache.shindig.gadgets;
  * the Code enumeration.
  */
 public class GadgetException extends Exception {
-  public static enum Code {
+  public enum Code {
     // Catch-all for internal errors
     INTERNAL_SERVER_ERROR,
 

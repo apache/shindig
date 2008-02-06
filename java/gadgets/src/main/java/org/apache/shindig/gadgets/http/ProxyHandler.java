@@ -131,7 +131,7 @@ public class ProxyHandler {
   private RemoteContent fetchContent(URL signedUrl, HttpServletRequest request,
       ProcessingOptions procOptions) throws ServletException {
     try {
-      if (request.getMethod().equals("POST")) {
+      if ("POST".equals(request.getMethod())) {
         String data = request.getParameter("postData");
         return fetcher.fetchByPost(signedUrl,
             URLDecoder.decode(data, request.getCharacterEncoding()).getBytes(),

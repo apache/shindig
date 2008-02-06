@@ -52,18 +52,18 @@ public final class JsLibrary {
   /**
    * Indicates how to load a given resource.
    */
-  public static enum Type {
+  public enum Type {
     FILE, RESOURCE, URL, INLINE;
 
     /**
      * Returns the type named by the given string.
      */
     public static Type parse(String name) {
-      if (name.equals("file")) {
+      if ("file".equals(name)) {
         return FILE;
-      } else if (name.equals("url")) {
+      } else if ("url".equals(name)) {
         return URL;
-      } else if (name.equals("resource")) {
+      } else if ("resource".equals(name)) {
         return RESOURCE;
       } else {
         return INLINE;

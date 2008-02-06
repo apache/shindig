@@ -65,7 +65,7 @@ public interface GadgetSpec {
     public String getDefaultValue();
     public boolean isRequired();
 
-    public static enum DataType {
+    public enum DataType {
       STRING, HIDDEN, BOOL, ENUM, LIST, NUMBER
     }
 
@@ -76,7 +76,7 @@ public interface GadgetSpec {
 
   public List<UserPref> getUserPrefs();
 
-  public static enum ContentType {
+  public enum ContentType {
     HTML, URL
   }
 

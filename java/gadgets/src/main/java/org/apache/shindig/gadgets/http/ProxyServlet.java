@@ -36,7 +36,7 @@ public class ProxyServlet extends HttpServlet {
   protected void doGet(HttpServletRequest request, HttpServletResponse response)
       throws ServletException, IOException {
     String output = request.getParameter("output");
-    if (output != null && output.equals("js")) {
+    if ("js".equals(output)) {
       handler.fetchJson(request, response, signer);
     } else {
       handler.fetch(request, response, signer);

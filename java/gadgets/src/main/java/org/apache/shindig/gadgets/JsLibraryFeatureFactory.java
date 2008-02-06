@@ -64,10 +64,9 @@ class JsLibraryFeature implements GadgetFeature {
    * @param gadgetLibrary The library for the gadget, may be null.
    * @param containerLibrary The library for the container, may be null.
    */
-  @SuppressWarnings("unchecked")
   public JsLibraryFeature(JsLibrary gadgetLibrary, JsLibrary containerLibrary) {
     if (gadgetLibrary == null) {
-      gadgetLibraries = Collections.EMPTY_LIST;
+      gadgetLibraries = Collections.emptyList();
     } else {
       gadgetLibraries = new LinkedList<JsLibrary>();
       gadgetLibraries.add(gadgetLibrary);
@@ -75,7 +74,7 @@ class JsLibraryFeature implements GadgetFeature {
     }
 
     if (containerLibrary == null) {
-      containerLibraries = Collections.EMPTY_LIST;
+      containerLibraries = Collections.emptyList();
     } else {
       containerLibraries = new LinkedList<JsLibrary>();
       containerLibraries.add(containerLibrary);
@@ -88,11 +87,10 @@ class JsLibraryFeature implements GadgetFeature {
    * @param gLibraries Libraries to serve for the gadget.
    * @param cLibraries Libraries to serve for the container.
    */
-  @SuppressWarnings("unchecked")
   public JsLibraryFeature(List<JsLibrary> gLibraries,
                           List<JsLibrary> cLibraries) {
     if (gLibraries == null) {
-      gadgetLibraries = Collections.EMPTY_LIST;
+      gadgetLibraries = Collections.emptyList();
     } else {
       gadgetLibraries = new LinkedList<JsLibrary>();
       gadgetLibraries.addAll(gLibraries);
@@ -100,7 +98,7 @@ class JsLibraryFeature implements GadgetFeature {
     }
 
     if (cLibraries == null) {
-      containerLibraries = Collections.EMPTY_LIST;
+      containerLibraries = Collections.emptyList();
     } else {
       containerLibraries = new LinkedList<JsLibrary>();
       containerLibraries.addAll(cLibraries);

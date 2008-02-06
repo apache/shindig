@@ -55,7 +55,7 @@ public class BasicRemoteContentFetcher implements RemoteContentFetcher {
       responseCode = fetcher.getResponseCode();
       headers = fetcher.getHeaderFields();
 
-      byte chunk[] = new byte[8192];
+      byte[] chunk = new byte[8192];
       int chunkSize;
       InputStream in = fetcher.getInputStream();
       while (out.size() < maxObjSize && (chunkSize = in.read(chunk)) != -1) {
@@ -90,7 +90,7 @@ public class BasicRemoteContentFetcher implements RemoteContentFetcher {
       responseCode = fetcher.getResponseCode();
       headers = fetcher.getHeaderFields();
 
-      byte chunk[] = new byte[8192];
+      byte[] chunk = new byte[8192];
       int chunkSize;
       InputStream in = fetcher.getInputStream();
       while (out.size() < maxObjSize && (chunkSize = in.read(chunk)) != -1) {

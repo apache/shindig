@@ -53,7 +53,13 @@ import java.util.Map;
  *Check.that(string, anyOf(startsWith("foo"), endsWith("bar")));</pre>
  */
 public final class Check {
-  /**
+    /**
+     * Private constructor for this class, do not allow instantiation
+     */
+    private Check() {
+    }
+
+    /**
    * Checks that {@code condition} is {@code true}.
    *
    * @throws IllegalStateException if the check fails.

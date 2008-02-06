@@ -217,12 +217,11 @@ public class Gadget implements GadgetView {
    * @param feature
    * @return The parameters, or an empty map.
    */
-  @SuppressWarnings("unchecked")
   public static Map<String, String> getFeatureParams(Gadget gadget,
                                                      String feature) {
     GadgetSpec.FeatureSpec spec = gadget.getRequires().get(feature);
     if (spec == null) {
-      return Collections.EMPTY_MAP;
+      return Collections.emptyMap();
     } else {
       return spec.getParams();
     }

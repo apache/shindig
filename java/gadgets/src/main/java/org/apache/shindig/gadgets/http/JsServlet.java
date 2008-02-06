@@ -97,7 +97,7 @@ public class JsServlet extends HttpServlet {
     if (registry.getIncludedFeatures(needed, found, missing)) {
       String containerParam = req.getParameter("c");
       RenderingContext context;
-      context = containerParam != null && containerParam.equals("1") ?
+      context = "1".equals(containerParam) ?
                 RenderingContext.CONTAINER :
                 RenderingContext.GADGET;
 

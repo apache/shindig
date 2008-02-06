@@ -50,9 +50,8 @@ public class UserPrefs {
   /**
    * Creates an empty user prefs object.
    */
-  @SuppressWarnings("unchecked")
   private UserPrefs() {
     // just use the empty map.
-    this.prefs = Collections.EMPTY_MAP;
+    this.prefs = Collections.emptyMap();
   }
 }

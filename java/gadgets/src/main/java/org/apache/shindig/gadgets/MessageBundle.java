@@ -36,8 +36,7 @@ public class MessageBundle {
     this.messages = Collections.unmodifiableMap(tempMap);
   }
 
-  @SuppressWarnings("unchecked")
   private MessageBundle() {
-    this.messages = Collections.EMPTY_MAP;
+    this.messages = Collections.emptyMap();
   }
 }

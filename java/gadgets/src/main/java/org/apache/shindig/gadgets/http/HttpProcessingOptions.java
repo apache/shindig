@@ -51,7 +51,7 @@ public class HttpProcessingOptions extends ProcessingOptions {
     if (noCacheParam == null) {
       noCacheParam = req.getParameter("bpc");
     }
-    return noCacheParam != null && noCacheParam.equals("1");
+    return "1".equals(noCacheParam);
   }
 
   /**
