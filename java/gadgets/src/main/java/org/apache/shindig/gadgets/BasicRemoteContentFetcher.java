@@ -81,7 +81,7 @@ public class BasicRemoteContentFetcher implements RemoteContentFetcher {
       fetcher.setRequestMethod("POST");
       fetcher.setInstanceFollowRedirects(true);
       fetcher.setConnectTimeout(CONNECT_TIMEOUT_MS);
-      fetcher.setRequestProperty("Content-Length", "" + postData.length);
+      fetcher.setRequestProperty("Content-Length", String.valueOf(postData.length));
       fetcher.setUseCaches(false);
       fetcher.setDoInput(true);
       fetcher.setDoOutput(true);

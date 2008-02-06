@@ -57,7 +57,7 @@ public class BasicGadgetSigner implements GadgetSigner {
 
   /**
    * Create signer
-   * @param timeToLive
+   * @param timeToLive basic TTL in milliseconds
    */
   public BasicGadgetSigner(long timeToLive) {
     this.timeToLive = timeToLive;

@@ -59,6 +59,7 @@ public class BasicGadgetBlacklist implements GadgetBlacklist {
   /**
    * Constructs a new blacklist from the given file.
    *
+   * @param blacklistFile file containing blacklist entries
    * @throws IOException if reading the file fails
    * @throws PatternSyntaxException if an invalid regular expression occurs in
    *    the file

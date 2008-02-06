@@ -21,7 +21,7 @@ import java.util.Map;
  * Name/value mapping of messages retrieved from a message bundle.
  */
 public class MessageBundle {
-  private Map<String, String> messages = new HashMap<String, String>();
+  private Map<String, String> messages;
   public static final MessageBundle EMPTY = new MessageBundle();
 
   /**
