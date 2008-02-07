@@ -13,7 +13,6 @@
  */
 package org.apache.shindig.gadgets.http;
 
-import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.GadgetFeatureFactory;
 import org.apache.shindig.gadgets.GadgetFeatureRegistry;
 import org.apache.shindig.gadgets.JsLibrary;
@@ -26,7 +25,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import javax.servlet.ServletConfig;
-import javax.servlet.ServletContext;
+import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -36,42 +35,24 @@ import javax.servlet.http.HttpServletResponse;
  * Used by type=URL gadgets in loading JavaScript resources.
  */
 public class JsServlet extends HttpServlet {
-  private GadgetFeatureRegistry registry = null;
-
-  /**
-   * Create a JsServlet using a pre-configured feature registry.
-   * @param registry
-   */
-  public JsServlet(GadgetFeatureRegistry registry) {
-    this.registry = registry;
-  }
-
-  /**
-   * Creates a JsServlet without a default registry; the registry will be
-   * created automatically when init is called.
-   */
-  public JsServlet() {
-    registry = null;
-  }
+  private CrossServletState servletState;
+  private static final long START_TIME = System.currentTimeMillis();
 
   @Override
-  public void init(ServletConfig config) {
-    ServletContext context = config.getServletContext();
-
-    if (registry == null) {
-      String features = context.getInitParameter("features");
-      try {
-        registry = new GadgetFeatureRegistry(features);
-      } catch (GadgetException e) {
-        e.printStackTrace();
-        throw new RuntimeException(e);
-      }
-    }
+  public void init(ServletConfig config) throws ServletException {
+    servletState = CrossServletState.get(config);
   }
 
   @Override
   protected void doGet(HttpServletRequest req, HttpServletResponse resp)
       throws IOException {
+    // If an If-Modified-Since header is ever provided, we always say
+    // not modified. This is because when there actually is a change,
+    // cache busting should occur.
+    if (req.getHeader("If-Modified-Since") != null) {
+      resp.setStatus(HttpServletResponse.SC_NOT_MODIFIED);
+      return;
+    }
     // Use the last component as filename; prefix is ignored
     String uri = req.getRequestURI();
     // We only want the file name part. There will always be at least 1 slash
@@ -94,6 +75,8 @@ public class JsServlet extends HttpServlet {
         = new HashSet<GadgetFeatureRegistry.Entry>();
     Set<String> missing = new HashSet<String>();
 
+    GadgetFeatureRegistry registry
+        = servletState.getGadgetServer().getConfig().getFeatureRegistry();
     if (registry.getIncludedFeatures(needed, found, missing)) {
       String containerParam = req.getParameter("c");
       RenderingContext context;
@@ -105,6 +88,8 @@ public class JsServlet extends HttpServlet {
 
       Set<GadgetFeatureRegistry.Entry> done
           = new HashSet<GadgetFeatureRegistry.Entry>();
+
+      // TODO: This doesn't work correctly under JDK 1.5, but it does under 1.6
       do {
         for (GadgetFeatureRegistry.Entry entry : found) {
           if (!done.contains(entry) &&
@@ -145,8 +130,15 @@ public class JsServlet extends HttpServlet {
    * @param response The HTTP response
    */
   private void setCachingHeaders(HttpServletResponse response) {
-    response.setHeader("Cache-Control", "public,max-age=2592000");
-    response.setDateHeader("Expires", System.currentTimeMillis()
-                                     + 2592000000L);
+
+    // Most browsers accept this. 2030 is the last round year before
+    // the end of time.
+    response.setHeader("Expires", "Tue, 01 Jan 2030 00:00:01 GMT");
+
+    // IE seems to need this (10 years should be enough).
+    response.setHeader("Cache-Control", "public,max-age=315360000");
+
+    // Firefox requires this for certain cases.
+    response.setDateHeader("Last-Modified", START_TIME);
   }
 }

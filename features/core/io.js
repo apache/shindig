@@ -82,37 +82,37 @@ gadgets.io = function() {
       case "FEED":
         resp.data = gadgets.json.parse(resp.text);
         if (!resp.data) {
-          resp.errors = ["failed to parse JSON"];
+          resp.errors.push("failed to parse JSON");
           resp.data = null;
         }
         break;
-     case "DOM":
-      var dom;
-      if (window.ActiveXObject) {
-        dom = new ActiveXObject("Microsoft.XMLDOM");
-        dom.async = false;
-        dom.validateOnParse = false;
-        dom.resolveExternals = false;
-        if (!dom.loadXML(resp.text)) {
-          resp.errors = ["failed to parse XML"];
+      case "DOM":
+        var dom;
+        if (window.ActiveXObject) {
+          dom = new ActiveXObject("Microsoft.XMLDOM");
+          dom.async = false;
+          dom.validateOnParse = false;
+          dom.resolveExternals = false;
+          if (!dom.loadXML(resp.text)) {
+            resp.errors.push("failed to parse XML");
+          } else {
+            resp.data = dom;
+          }
         } else {
-          resp.data = dom;
+          var parser = new DOMParser();
+          dom = parser.parseFromString(resp.text, "text/xml");
+          if ("parsererror" == dom.documentElement.nodeName) {
+            resp.errors.push("failed to parse XML");
+          } else {
+            resp.data = dom;
+          }
         }
-      } else {
-        var parser = new DOMParser();
-        dom = parser.parseFromString(resp.text, "text/xml");
-        if ("parsererror" == dom.documentElement.nodeName) {
-          resp.errors = ["failed to parse XML"];
-        } else {
-          resp.data = dom;
-        }
-      }
-      break;
-    default:
-      resp.data = resp.text;
-      break;
-   }
-   callback(resp);
+        break;
+      default:
+        resp.data = resp.text;
+        break;
+    }
+    callback(resp);
   }
 
   return /** @scope gadgets.io */ {
@@ -145,10 +145,8 @@ gadgets.io = function() {
           encodeURIComponent(url));
 
       // Check if authorization is requested
-      if (opt_params && opt_params.AUTHORIZATION &&
-          gadgets.io.AuthorizationType[opt_params.AUTHORIZATION.toUpperCase()]
-              != gadgets.io.AuthorizationType.NONE) {
-        newUrl += "&authz=" + opt_params.AUTHORIZATION.toLowerCase();
+      if (params.AUTHORIZATION && params.AUTHORIZATION !== "NONE") {
+        newUrl += "&authz=" + params.AUTHORIZATION.toLowerCase();
         // Add the security-token if available
         if (gadgets.util.getUrlParameters()["st"]) {
           newUrl += "&st=" + gadgets.util.getUrlParameters()["st"];
@@ -160,10 +158,11 @@ gadgets.io = function() {
         xhr.onreadystatechange = gadgets.util.makeClosure(null,
             processResponse, url, callback, params, xhr);
       }
-      if (params.METHOD == "POST") {
-        xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
-        if (params.postData) {
-          xhr.send("postData=" + encodeURIComponent(params.postData));
+      if (params.METHOD === "POST") {
+        xhr.setRequestHeader('Content-Type',
+            'application/x-www-form-urlencoded');
+        if (params.POST_DATA) {
+          xhr.send("postData=" + encodeURIComponent(params.POST_DATA));
         } else {
           xhr.send("postData=");
         }
@@ -225,189 +224,25 @@ gadgets.io = function() {
   };
 }();
 
-// TODO: This can all be removed after the spec is published. This is only
-// here to satisfy documentation requirements.
+gadgets.io.RequestParameters = gadgets.util.makeEnum([
+  "METHOD",
+  "CONTENT_TYPE",
+  "POST_DATA",
+  "HEADERS",
+  "AUTHORIZATION",
+  "NUM_ENTRIES",
+  "GET_SUMMARIES"
+]);
 
-/**
- * @static
- * @class
- * Used by the
- * <a href="gadgets.io.html#makeRequest">
- * <code>gadgets.io.makeRequest()</code></a> method.
- * @name gadgets.io.RequestParameters
- */
-gadgets.io.RequestParameters = {
-  /**
-   * The method to use when fetching content from the URL;
-   * defaults to <code>MethodType.GET</a></code>.
-   * Specified as a
-   * <a href="gadgets.io.MethodType.html">MethodType</a>.
-   *
-   * @member gadgets.io.RequestParameters
-   */
-   METHOD : 'METHOD',
+// PUT, DELETE, and HEAD not supported currently.
+gadgets.io.MethodType = gadgets.util.makeEnum([
+  "GET", "POST", "PUT", "DELETE", "HEAD"
+]);
 
-  /**
-   * The type of content that lives at the URL;
-   * defaults to <code>ContentType.HTML</code>.
-   * Specified as a
-   * <a href="gadgets.io.ContentType.html">
-   * ContentType</a>.
-   *
-   * @member gadgets.io.RequestParameters
-   */
-  CONTENT_TYPE : "CONTENT_TYPE",
+gadgets.io.ContentType = gadgets.util.makeEnum([
+  "TEXT", "DOM", "JSON", "FEED"
+]);
 
-  /**
-   * The data to send to the URL using the POST method;
-   * defaults to null.
-   * Specified as a <code>String</code>.
-   *
-   * @member gadgets.io.RequestParameters
-   */
-  POST_DATA : "POST_DATA",
-
-  /**
-   * The HTTP headers to send to the URL;
-   * defaults to null.
-   * Specified as a <code>Map.&lt;String,String&gt;</code>.
-   *
-   * @member gadgets.io.RequestParameters
-   */
-  HEADERS : "HEADERS",
-
-  /**
-   * The type of authentication to use when fetching the content;
-   * defaults to <code>AuthorizationType.NONE</code>.
-   * Specified as an
-   * <a href="gadgets.io.AuthorizationType.html">
-   * AuthorizationType</a>.
-   *
-   * @member gadgets.io.RequestParameters
-   */
-  AUTHORIZATION : 'AUTHORIZATION',
-
-
-  /**
-   * If the content is a feed, the number of entries to fetch;
-   * defaults to 3.
-   * Specified as a <code>Number</code>.
-   *
-   * @member gadgets.io.RequestParameters
-   */
-  NUM_ENTRIES : 'NUM_ENTRIES',
-
-  /**
-   * If the content is a feed, whether to fetch summaries for that feed;
-   * defaults to false.
-   * Specified as a <code>Boolean</code>.
-   *
-   * @member gadgets.io.RequestParameters
-   */
-  GET_SUMMARIES : 'GET_SUMMARIES'
-};
-
-
-/**
- * @static
- * @class
- * Used by
- * <a href="gadgets.io.RequestParameters.html">
- * RequestParameters</a>.
- * @name gadgets.io.MethodType
- */
-gadgets.io.MethodType = {
-  /**
-   * The default type.
-   * @member gadgets.io.MethodType
-   */
-  GET : 'GET',
-
-  /**
-   * Not supported by all containers.
-   * @member gadgets.io.MethodType
-   */
-  POST : 'POST',
-
-  /**
-   * Not supported by all containers.
-   * @member gadgets.io.MethodType
-   */
-  PUT : 'PUT',
-
-  /**
-   * Not supported by all containers.
-   * @member gadgets.io.MethodType
-   */
-  DELETE : 'DELETE',
-
-  /**
-   * Not supported by all containers.
-   * @member gadgets.io.MethodType
-   */
-  HEAD : 'HEAD'
-};
-
-
-/**
- * @static
- * @class
- * Used by
- * <a href="gadgets.io.RequestParameters.html">
- * RequestParameters</a>.
- * @name gadgets.io.ContentType
- */
-gadgets.io.ContentType = {
-  /**
-   * Returns text; used for fetching HTML.
-   * @member gadgets.io.ContentType
-   */
-  TEXT : 'TEXT',
-
-  /**
-   * Returns a DOM object; used for fetching XML.
-   * @member gadgets.io.ContentType
-   */
-  DOM : 'DOM',
-
-  /**
-   * Returns a JSON object.
-   * @member gadgets.io.ContentType
-   */
-  JSON : 'JSON',
-
-  /**
-   * Returns a JSON representation of a feed.
-   * @member gadgets.io.ContentType
-   */
-  FEED : 'FEED'
-};
-
-
-/**
- * @static
- * @class
- * Used by
- * <a href="gadgets.io.RequestParameters.html">
- * RequestParameters</a>.
- * @name gadgets.io.AuthorizationType
- */
-gadgets.io.AuthorizationType = {
-  /**
-   * No authorization.
-   * @member gadgets.io.AuthorizationType
-   */
-  NONE : 'NONE',
-
-  /**
-   * The request will be signed by the container.
-   * @member gadgets.io.AuthorizationType
-   */
-  SIGNED : 'SIGNED',
-
-  /**
-   * The container will use full authentication.
-   * @member gadgets.io.AuthorizationType
-   */
-  AUTHENTICATED : 'AUTHENTICATED'
-};
+gadgets.io.AuthorizationType = gadgets.util.makeEnum([
+  "NONE", "SIGNED", "AUTHENTICATED"
+]);
