@@ -168,7 +168,7 @@ gadgets.io = function() {
           xhr.send("postData=");
         }
       } else {
-        xhr.send();
+        xhr.send(null);
       }
     },
 
