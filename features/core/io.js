@@ -60,6 +60,11 @@ gadgets.io = function() {
     if (xobj.readyState !== 4) {
       return;
     }
+    if (xobj.status !== 200) {
+      // TODO Need to work on standardizing errors
+      callback({errors : ["Error " + xobj.status] });
+      return;
+    }
     var txt = xobj.responseText;
     // remove unparseable cruft.
     // TODO: really remove this by eliminating it. It's not any real security
@@ -76,6 +81,10 @@ gadgets.io = function() {
       case "JSON":
       case "FEED":
         resp.data = gadgets.json.parse(resp.text);
+        if (!resp.data) {
+          resp.errors = ["failed to parse JSON"];
+          resp.data = null;
+        }
         break;
      case "DOM":
       var dom;
@@ -84,12 +93,20 @@ gadgets.io = function() {
         dom.async = false;
         dom.validateOnParse = false;
         dom.resolveExternals = false;
-        dom.loadXML(resp.text);
+        if (!dom.loadXML(resp.text)) {
+          resp.errors = ["failed to parse XML"];
+        } else {
+          resp.data = dom;
+        }
       } else {
         var parser = new DOMParser();
         dom = parser.parseFromString(resp.text, "text/xml");
+        if ("parsererror" == dom.documentElement.nodeName) {
+          resp.errors = ["failed to parse XML"];
+        } else {
+          resp.data = dom;
+        }
       }
-      resp.data = dom;
       break;
     default:
       resp.data = resp.text;
@@ -128,7 +145,7 @@ gadgets.io = function() {
           encodeURIComponent(url));
 
       // Check if authorization is requested
-      if (opt_params.AUTHORIZATION &&
+      if (opt_params && opt_params.AUTHORIZATION &&
           gadgets.io.AuthorizationType[opt_params.AUTHORIZATION.toUpperCase()]
               != gadgets.io.AuthorizationType.NONE) {
         newUrl += "&authz=" + opt_params.AUTHORIZATION.toLowerCase();
@@ -143,8 +160,16 @@ gadgets.io = function() {
         xhr.onreadystatechange = gadgets.util.makeClosure(null,
             processResponse, url, callback, params, xhr);
       }
-      xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
-      xhr.send("postData=" + encodeURIComponent(params.postData));
+      if (params.METHOD == "POST") {
+        xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+        if (params.postData) {
+          xhr.send("postData=" + encodeURIComponent(params.postData));
+        } else {
+          xhr.send("postData=");
+        }
+      } else {
+        xhr.send();
+      }
     },
 
     /**

@@ -34,6 +34,8 @@ import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLDecoder;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.List;
 import java.util.Map;
 
@@ -71,22 +73,26 @@ public class ProxyHandler {
     RemoteContent results = fetchContent(signedUrl, request,
         new ProcessingOptions());
 
-    String output;
-    try {
-      String json = new JSONObject().put(originalUrl.toString(), new JSONObject()
-          .put("body", new String(results.getByteArray()))
-          .put("rc", results.getHttpStatusCode())
-          ).toString();
-      output = UNPARSEABLE_CRUFT + json;
-    } catch (JSONException e) {
-      output = "";
+    response.setStatus(results.getHttpStatusCode());
+    if (results.getHttpStatusCode() == HttpServletResponse.SC_OK) {
+      String output;
+      try {
+        // Use raw param as key as URL may have to be decoded
+        String json = new JSONObject().put(request.getParameter("url"), new JSONObject()
+            .put("body", new String(results.getByteArray()))
+            .put("rc", results.getHttpStatusCode())
+            ).toString();
+        output = UNPARSEABLE_CRUFT + json;
+      } catch (JSONException e) {
+        output = "";
+      }
+
+      setCachingHeaders(response);
+      response.setContentType("application/json; charset=utf-8");
+      response.setHeader("Content-Disposition", "attachment;filename=p.txt");
+      PrintWriter pw = response.getWriter();
+      pw.write(output);
     }
-    response.setStatus(HttpServletResponse.SC_OK);
-    setCachingHeaders(response);
-    response.setContentType("application/json; charset=utf-8");
-    response.setHeader("Content-Disposition", "attachment;filename=p.txt");
-    PrintWriter pw = response.getWriter();
-    pw.write(output);
   }
 
   public void fetch(HttpServletRequest request,
@@ -152,26 +158,42 @@ public class ProxyHandler {
    * @return A URL object of the URL
    * @throws ServletException if the URL fails security checks or is malformed.
    */
-  private URL extractAndValidateUrl(HttpServletRequest request)
+  private URL extractAndValidateUrl(HttpServletRequest request)                                                                 
       throws ServletException {
     String url = request.getParameter("url");
     if (url == null) {
       throw new ServletException("Missing url parameter");
     }
 
-    // TODO: are there other tests that should be here?
-    // url.matches("[a-zA-Z0-9_:%&#+-]+"), perhaps?
-    if (!url.startsWith("http://")) {
-      throw new ServletException("url parameter does not start with http://");
-    }
-
-    URL origin;
     try {
-      origin = new URL(url);
-    } catch (MalformedURLException e) {
-      throw new ServletException("Malformed url parameter");
+      URI origin = new URI(request.getParameter("url"));
+      if (origin.getScheme() == null) {
+        // No scheme, assume it was double-encoded.
+        origin = new URI(
+            URLDecoder.decode(request.getParameter("url"), request.getCharacterEncoding()));
+        if (origin.getScheme() == null) {
+          throw new ServletException("Invalid URL " + origin.toString());
+        }
+      }
+      if (!origin.getScheme().equals("http")) {
+        throw new ServletException("Unsupported protocol: " + origin.getScheme());
+      }
+      if (origin.getPath() == null || origin.getPath().length() == 0) {
+        // Forcibly set the path to "/" if it is empty
+        origin = new URI(origin.getScheme(),
+            origin.getUserInfo(), origin.getHost(),
+            origin.getPort(),
+            "/", origin.getQuery(),
+            origin.getFragment());
+      }
+      return origin.toURL();
+    } catch (URISyntaxException use) {
+      throw new ServletException("Malformed URL " + use.getMessage());
+    } catch (MalformedURLException mfe) {
+      throw new ServletException("Malformed URL " + mfe.getMessage());
+    } catch (UnsupportedEncodingException uee) {
+      throw new ServletException("Unsupported encoding " + uee.getMessage());
     }
-    return origin;
   }
 
   /**
