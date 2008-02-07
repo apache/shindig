@@ -27,29 +27,48 @@ import static org.easymock.EasyMock.eq;
 import static org.easymock.EasyMock.expect;
 import static org.easymock.EasyMock.isA;
 
-import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
 public class GadgetServerTest extends EasyMockTestCase {
-  final Executor executor = Executors.newCachedThreadPool();
-  final GadgetServer gadgetServer;
+  GadgetServer gadgetServer;
   final RemoteContentFetcher fetcher = mock(RemoteContentFetcher.class);
   @SuppressWarnings(value="unchecked")
   final GadgetDataCache<GadgetSpec> specCache = mock(GadgetDataCache.class);
   @SuppressWarnings(value="unchecked")
   final GadgetDataCache<MessageBundle> bundleCache = mock(GadgetDataCache.class);
 
-  public GadgetServerTest() throws GadgetException {
-    // TODO: need to test for configuration errors.
-    gadgetServer = new GadgetServer(new GadgetServerConfig()
-        .setExecutor(executor)
-        .setSpecCache(specCache)
-        .setMessageBundleCache(bundleCache)
-        .setFeatureRegistry(new GadgetFeatureRegistry(null))
-        .setContentFetcher(fetcher));
+  void initServer(GadgetServerConfigReader customConfig) throws GadgetException {
+    GadgetServerConfig config = new GadgetServerConfig();
+
+    if (customConfig != null) {
+      config.copyFrom(customConfig);
+    }
+
+    if (config.getExecutor() == null) {
+      config.setExecutor(Executors.newCachedThreadPool());
+    }
+
+    if (config.getSpecCache() == null) {
+      config.setSpecCache(specCache);
+    }
+
+    if (config.getMessageBundleCache() == null) {
+      config.setMessageBundleCache(bundleCache);
+    }
+
+    if (config.getFeatureRegistry() == null) {
+      config.setFeatureRegistry(new GadgetFeatureRegistry(null));
+    }
+
+    if (config.getContentFetcher() == null) {
+      config.setContentFetcher(fetcher);
+    }
+
+    gadgetServer = new GadgetServer(config);
   }
 
   public void testGadgetSpecNotInCache() throws Exception {
+    initServer(null);
     RemoteContent results = new RemoteContent(200, DATETIME_XML.getBytes(), null);
     ProcessingOptions options = new ProcessingOptions();
 
@@ -65,6 +84,7 @@ public class GadgetServerTest extends EasyMockTestCase {
   }
 
   public void testGadgetSpecInCache() throws Exception {
+    initServer(null);
     expect(specCache.get(eq(DATETIME_URI_STRING))).andReturn(DATETIME_SPEC);
     replay();
 
@@ -75,6 +95,7 @@ public class GadgetServerTest extends EasyMockTestCase {
   }
 
   public void testBasicGadget() throws Exception {
+    initServer(null);
     RemoteContent results = new RemoteContent(200, DATETIME_XML.getBytes(), null);
     ProcessingOptions options = new ProcessingOptions();
 
@@ -93,8 +114,7 @@ public class GadgetServerTest extends EasyMockTestCase {
 
   public void testBlacklistedGadget() throws Exception {
     GadgetBlacklist blacklist = mock(GadgetBlacklist.class);
-    gadgetServer.setGadgetBlacklist(blacklist);
-
+    initServer(new GadgetServerConfig().setGadgetBlacklist(blacklist));
     expect(specCache.get(eq(DATETIME_URI_STRING))).andReturn(null);
     expect(blacklist.isBlacklisted(eq(DATETIME_URI))).andReturn(true);
     replay();

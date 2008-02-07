@@ -16,9 +16,8 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.shindig.gadgets.http;
 
-import org.apache.shindig.gadgets.GadgetServerConfigReader;
+package org.apache.shindig.gadgets.http;
 
 import java.io.IOException;
 
@@ -28,35 +27,22 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-public class ProxyServlet extends HttpServlet {
-  private CrossServletState servletState;
-  private ProxyHandler proxyHandler;
-
-  @Override
-  public void init(ServletConfig config) throws ServletException {
-    servletState = CrossServletState.get(config);
-    GadgetServerConfigReader serverConfig
-        = servletState.getGadgetServer().getConfig();
-    proxyHandler = new ProxyHandler(serverConfig.getContentFetcher());
-  }
+/**
+ * Handles RPC metadata requests.
+ */
+public class RpcServlet extends HttpServlet {
+  private CrossServletState state;
 
   @Override
   protected void doGet(HttpServletRequest request, HttpServletResponse response)
       throws ServletException, IOException {
-    String output = request.getParameter("output");
-    if ("js".equals(output)) {
-      proxyHandler.fetchJson(
-          request, response, servletState.getGadgetSigner(request));
-    } else {
-      proxyHandler.fetch(
-          request, response, servletState.getGadgetSigner(request));
-    }
   }
 
   @Override
-  protected void doPost(HttpServletRequest request, HttpServletResponse response)
-      throws ServletException, IOException {
-    // Currently they are identical
-    doGet(request, response);
+  public void init(ServletConfig config) throws ServletException {
+    state = CrossServletState.get(config);
+  }
+
+  public RpcServlet() {
   }
 }

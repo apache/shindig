@@ -22,39 +22,21 @@ import org.apache.shindig.util.Check;
 import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
-import java.util.Collections;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CompletionService;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorCompletionService;
 import java.util.concurrent.Future;
-import java.util.logging.Logger;
-import java.util.logging.Level;
 
 public class GadgetServer {
-  private final GadgetServerConfig config;
-
-  private static final Logger logger
-      = Logger.getLogger("org.apache.shindig.gadgets");
-
-  /**
-   * Creates a GadgetServer without a config.
-   *
-   * @deprecated Replaced by {@link #GadgetServer(GadgetServerConfigReader)}.
-   * @param executor
-   */
-  @Deprecated
-  public GadgetServer(Executor executor) {
-    config = new GadgetServerConfig();
-    config.setExecutor(executor);
-  }
+  private final GadgetServerConfigReader config;
 
   /**
    * Creates a GadgetServer using the provided configuration.
@@ -72,48 +54,8 @@ public class GadgetServer {
     Check.notNull(configuration.getContentFetcher(),
         "ContentFetcher is required.");
 
-    config = new GadgetServerConfig();
+    config = new GadgetServerConfigReader();
     config.copyFrom(configuration);
-  }
-
-  /**
-   * @deprecated Replaced by {@link #GadgetServer(GadgetServerConfigReader)}.
-   */
-  @Deprecated
-  public void setSpecCache(GadgetDataCache<GadgetSpec> specCache) {
-    config.setSpecCache(specCache);
-  }
-
-  /**
-   * @deprecated Replaced by {@link #GadgetServer(GadgetServerConfigReader)}.
-   */
-  @Deprecated
-  public void setMessageBundleCache(GadgetDataCache<MessageBundle> cache) {
-    config.setMessageBundleCache(cache);
-  }
-
-  /**
-   * @deprecated Replaced by {@link #GadgetServer(GadgetServerConfigReader)}.
-   */
-  @Deprecated
-  public void setContentFetcher(RemoteContentFetcher fetcher) {
-    config.setContentFetcher(fetcher);
-  }
-
-  /**
-   * @deprecated Replaced by {@link #GadgetServer(GadgetServerConfigReader)}.
-   */
-  @Deprecated
-  public void setGadgetFeatureRegistry(GadgetFeatureRegistry registry) {
-    config.setFeatureRegistry(registry);
-  }
-
-  /**
-   * @deprecated Replaced by {@link #GadgetServer(GadgetServerConfigReader)}.
-   */
-  @Deprecated
-  public void setGadgetBlacklist(GadgetBlacklist gadgetBlacklist) {
-    config.setGadgetBlacklist(gadgetBlacklist);
   }
 
   /**
@@ -140,22 +82,6 @@ public class GadgetServer {
                               RenderingContext rctx,
                               ProcessingOptions options)
       throws GadgetProcessException {
-    // TODO: Remove dep checks when GadgetServer(Executor) is removed.
-    if (config.getSpecCache() == null) {
-      throw new GadgetProcessException(GadgetException.Code.MISSING_SPEC_CACHE);
-    }
-    if (config.getMessageBundleCache() == null ) {
-      throw new GadgetProcessException(
-          GadgetException.Code.MISSING_MESSAGE_BUNDLE_CACHE);
-    }
-    if (config.getContentFetcher() == null) {
-      throw new GadgetProcessException(
-          GadgetException.Code.MISSING_REMOTE_OBJECT_FETCHER);
-    }
-    if (config.getFeatureRegistry() == null) {
-      throw new GadgetProcessException(
-          GadgetException.Code.MISSING_FEATURE_REGISTRY);
-    }
 
     // Queue/tree of all jobs to be run for successful processing
     GadgetContext gc = new GadgetContext(config.getContentFetcher(),
@@ -242,8 +168,6 @@ public class GadgetServer {
       }
 
       if (gadgetException != null) {
-        logger.log(Level.SEVERE, gadgetException.getCode().toString(), gadgetException);
-        
         // Add to list of all exceptions caught, clear jobs, and continue
         // to aggressively catch as many exceptions as possible. Since
         // tasks are running anyway, we may as well get their results in
@@ -320,7 +244,8 @@ public class GadgetServer {
 
     private WorkflowContext(GadgetContext context) {
       this.context = context;
-      this.depsDone = Collections.synchronizedSet(new HashSet<WorkflowDependency>());
+      this.depsDone
+          = Collections.synchronizedSet(new HashSet<WorkflowDependency>());
       this.jobsToRun = new WorkflowJobList(this);
     }
   }
@@ -431,8 +356,9 @@ public class GadgetServer {
       Map<String, GadgetSpec.FeatureSpec> requires = wc.gadget.getRequires();
       Set<String> needed = new HashSet<String>(requires.size());
       Set<String> optionalNames = new HashSet<String>();
-        
-      for (Map.Entry<String, GadgetSpec.FeatureSpec> entry : requires.entrySet()) {
+
+      for (Map.Entry<String, GadgetSpec.FeatureSpec> entry :
+        requires.entrySet()) {
         needed.add(entry.getKey());
         if (entry.getValue().isOptional()) {
           optionalNames.add(entry.getKey());

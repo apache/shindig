@@ -146,6 +146,13 @@ public class GadgetFeatureRegistry {
   }
 
   /**
+   * @return All registered features.
+   */
+  public Map<String, Entry> getAllFeatures() {
+    return Collections.unmodifiableMap(features);
+  }
+
+  /**
    * Attempts to retrieve all the {@code GadgetFeature} classes specified
    * in the {@code needed} list. Those that are found are returned in
    * {@code resultsFound}, while the names of those that are missing are

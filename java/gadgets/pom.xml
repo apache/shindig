@@ -28,6 +28,7 @@
             <resource>
               <!-- this is relative to the pom.xml directory -->
               <directory>../../javascript/</directory>
+              <targetPath>files</targetPath>
               <includes>
                 <include>**/*.*</include>
               </includes>

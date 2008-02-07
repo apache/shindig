@@ -13,18 +13,13 @@
  */
 package org.apache.shindig.gadgets.http;
 
-import org.apache.shindig.gadgets.BasicGadgetDataCache;
-import org.apache.shindig.gadgets.BasicRemoteContentFetcher;
 import org.apache.shindig.gadgets.Gadget;
 import org.apache.shindig.gadgets.GadgetContentFilter;
 import org.apache.shindig.gadgets.GadgetException;
-import org.apache.shindig.gadgets.GadgetFeatureRegistry;
 import org.apache.shindig.gadgets.GadgetServer;
-import org.apache.shindig.gadgets.GadgetServerConfig;
 import org.apache.shindig.gadgets.GadgetSpec;
 import org.apache.shindig.gadgets.GadgetView;
 import org.apache.shindig.gadgets.JsLibrary;
-import org.apache.shindig.gadgets.MessageBundle;
 import org.apache.shindig.gadgets.ProcessingOptions;
 import org.apache.shindig.gadgets.RenderingContext;
 import org.apache.shindig.gadgets.UserPrefs;
@@ -39,11 +34,11 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.Executors;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.servlet.ServletConfig;
-import javax.servlet.ServletContext;
+import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -52,63 +47,17 @@ import javax.servlet.http.HttpServletResponse;
  * Servlet for rendering Gadgets, typically in an IFRAME.
  */
 public class GadgetRenderingServlet extends HttpServlet {
-  private final GadgetServer gadgetServer;
-  private final GadgetServerConfig serverConfig;
-  private String jsServicePath;
+  private CrossServletState servletState;
   private static final String CAJA_PARAM = "caja";
   private static final String USERPREF_PARAM_PREFIX = "up_";
   private static final String LIBS_PARAM_NAME = "libs";
-  private static final String JS_FILE_SUFFIX = ".js";
-  public static final String DEFAULT_JS_SERVICE_PATH = "js/";
+  private static final Logger logger
+      = Logger.getLogger("org.apache.shindig.gadgets");
 
-  /**
-   * Creates a {@code GadgetRenderingServlet} with default executor,
-   * caches, etc.
-   *
-   * Note that features aren't loaded until init() is called.
-   *
-   * @throws GadgetException If something went wrong during configuration.
-   */
-  public GadgetRenderingServlet() throws GadgetException {
-    serverConfig = new GadgetServerConfig()
-        .setExecutor(Executors.newCachedThreadPool())
-        .setMessageBundleCache(new BasicGadgetDataCache<MessageBundle>())
-        .setSpecCache(new BasicGadgetDataCache<GadgetSpec>())
-        .setContentFetcher(new BasicRemoteContentFetcher(1024 * 1024))
-        .setFeatureRegistry(new GadgetFeatureRegistry(null));
-    gadgetServer = new GadgetServer(serverConfig);
-  }
-
-  /**
-   * Creates a servlet using a pre-configured server. Using this method
-   * will cause init to ignore feature loading parameters.
-   * @param server
-   */
-  public GadgetRenderingServlet(GadgetServer server) {
-    gadgetServer = server;
-    // Set this to null to indicate that all configuration has been done
-    // custom.
-    serverConfig = null;
-  }
 
   @Override
-  public void init(ServletConfig config) {
-    ServletContext context = config.getServletContext();
-    String jsPath = context.getInitParameter("js-service-path");
-    if (jsPath == null) {
-      jsPath = DEFAULT_JS_SERVICE_PATH;
-    }
-    jsServicePath = jsPath;
-    if (serverConfig != null) {
-      // Using the default server.
-      String features = context.getInitParameter("features");
-      try {
-        serverConfig.getFeatureRegistry().registerFeatures(features);
-      } catch (GadgetException e) {
-        e.printStackTrace();
-        System.exit(1);
-      }
-    }
+  public void init(ServletConfig config) throws ServletException {
+    servletState = CrossServletState.get(config);
   }
 
   @Override
@@ -153,11 +102,9 @@ public class GadgetRenderingServlet extends HttpServlet {
     String view = req.getParameter("view");
     view = (view == null || view.length() == 0) ? GadgetSpec.DEFAULT_VIEW : view;
     try {
-      gadget = gadgetServer.processGadget(gadgetId,
-                                          getPrefsFromRequest(req),
-                                          context.getLocale(),
-                                          RenderingContext.GADGET,
-                                          options);
+      gadget = servletState.getGadgetServer().processGadget(gadgetId,
+          getPrefsFromRequest(req), context.getLocale(),
+          RenderingContext.GADGET, options);
       outputGadget(gadget, view, options, contentFilters, resp);
     } catch (GadgetServer.GadgetProcessException e) {
       outputErrors(e, resp);
@@ -188,12 +135,6 @@ public class GadgetRenderingServlet extends HttpServlet {
     case URL:
       outputUrlGadget(gadget, options, resp);
       break;
-    // default makes no sense here, as this is an enum, we want to insure that
-    // we cover all cases of the enum, so leave it out.
-//    default:
-//      resp.sendError(HttpServletResponse.SC_BAD_REQUEST,
-//                     "Unexpected reror: unknown gadget type");
-//      break;
     }
   }
 
@@ -218,6 +159,7 @@ public class GadgetRenderingServlet extends HttpServlet {
 
     StringBuilder markup = new StringBuilder();
     markup.append("<html><head>");
+    // TODO: This is so wrong.
     markup.append("<style type=\"text/css\">" +
                   "body,td,div,span,p{font-family:arial,sans-serif;}" +
                   "a {color:#0000cc;}a:visited {color:#551a8b;}" +
@@ -228,6 +170,7 @@ public class GadgetRenderingServlet extends HttpServlet {
     StringBuilder externJs = new StringBuilder();
     StringBuilder inlineJs = new StringBuilder();
     String externFmt = "<script src=\"%s\"></script>\n";
+    String forcedLibs = options.getForcedJsLibs();
 
     for (JsLibrary library : gadget.getJsLibraries()) {
       JsLibrary.Type type = library.getType();
@@ -239,18 +182,17 @@ public class GadgetRenderingServlet extends HttpServlet {
         inlineJs.append(library.getContent()).append('\n');
       } else {
         // FILE or RESOURCE
-        if (options.getForcedJsLibs() == null) {
+        if (forcedLibs == null) {
           inlineJs.append(library.getContent()).append('\n');
         } // otherwise it was already included by options.forceJsLibs.
       }
     }
 
     // Forced libs first.
-    if (options.getForcedJsLibs() != null) {
-      markup.append(String.format(externFmt,
-                                  DEFAULT_JS_SERVICE_PATH +
-                                  options.getForcedJsLibs() +
-                                  JS_FILE_SUFFIX));
+
+    if (forcedLibs != null) {
+      String[] libs = forcedLibs.split(":");
+      markup.append(String.format(externFmt, servletState.getJsUrl(libs)));
     }
 
     if (inlineJs.length() > 0) {
@@ -280,7 +222,7 @@ public class GadgetRenderingServlet extends HttpServlet {
         }
       }
     }
-    
+
     if (gadgetExceptions.size() > 0) {
       throw new GadgetServer.GadgetProcessException(gadgetExceptions);
     }
@@ -294,28 +236,31 @@ public class GadgetRenderingServlet extends HttpServlet {
 
   private void outputUrlGadget(Gadget gadget,
       ProcessingOptions options, HttpServletResponse resp) throws IOException {
-    // UserPrefs portion of query string to tack on
     // TODO: generalize this as injectedArgs on Gadget object
-    // TODO: userprefs on the fragment rather than query string
-    String prefsQuery = getPrefsQueryString(gadget.getUserPrefValues());
-    String libsQuery = null;
 
-    if (options.getForcedJsLibs() == null) {
-      libsQuery = getLibsQueryString(gadget.getRequires().keySet());
-    } else {
-      libsQuery = DEFAULT_JS_SERVICE_PATH +
-                  options.getForcedJsLibs() +
-                  JS_FILE_SUFFIX;
-    }
-
+    // Preserve existing query string parameters.
     URI redirURI = gadget.getContentHref();
+    StringBuilder query = new StringBuilder(redirURI.getQuery());
+
+    // TODO: userprefs on the fragment rather than query string
+    query.append(getPrefsQueryString(gadget.getUserPrefValues()));
+
+    String[] libs;
+    String forcedLibs = options.getForcedJsLibs();
+    if (forcedLibs == null) {
+      libs = (String[])gadget.getRequires().keySet().toArray();
+    } else {
+      libs = forcedLibs.split(":");
+    }
+    appendLibsToQuery(libs, query);
+
     try {
       redirURI = new URI(redirURI.getScheme(),
                          redirURI.getUserInfo(),
                          redirURI.getHost(),
                          redirURI.getPort(),
                          redirURI.getPath(),
-                         redirURI.getQuery() + prefsQuery + libsQuery,
+                         query.toString(),
                          redirURI.getFragment());
     } catch (URISyntaxException e) {
       // Not really ever going to happen; input values are already OK.
@@ -337,6 +282,10 @@ public class GadgetRenderingServlet extends HttpServlet {
       markup.append(' ');
       markup.append(error.getMessage());
       markup.append('\n');
+
+      // Log the errors here for now. We might want different severity levels
+      // for different error codes.
+      logger.log(Level.INFO, "Failed to render gadget", error);
     }
     markup.append("</pre>");
     markup.append("</body></html>");
@@ -363,9 +312,9 @@ public class GadgetRenderingServlet extends HttpServlet {
       buf.append('&');
       try {
         buf.append(USERPREF_PARAM_PREFIX)
-               .append(URLEncoder.encode(prefEntry.getKey(), "UTF8"))
-               .append('=')
-               .append(URLEncoder.encode(prefEntry.getValue(), "UTF8"));
+           .append(URLEncoder.encode(prefEntry.getKey(), "UTF8"))
+           .append("=")
+           .append(URLEncoder.encode(prefEntry.getValue(), "UTF8"));
       } catch (UnsupportedEncodingException e) {
         // If UTF8 is somehow not supported, we may as well bail.
         // Not a whole lot we can do without such support.
@@ -375,26 +324,16 @@ public class GadgetRenderingServlet extends HttpServlet {
     return buf.toString();
   }
 
-  private String getLibsQueryString(Set<String> features) {
-    StringBuilder buf = new StringBuilder();
-    buf.append('&').append(LIBS_PARAM_NAME).append('=');
-    buf.append(jsServicePath);
-    if (features.size() == 0) {
-      buf.append("core");
-    } else {
-      boolean first = true;
-      for (String feature : features) {
-        if (first) {
-          first = false;
-        } else {
-          buf.append(':');
-        }
-        buf.append(feature);
-      }
-    }
-    buf.append(JS_FILE_SUFFIX);
-
-    return buf.toString();
+  /**
+   * Appends libs to the query string.
+   * @param libs
+   * @param query
+   */
+  private void appendLibsToQuery(String[] libs, StringBuilder query) {
+    query.append("&")
+         .append(LIBS_PARAM_NAME)
+         .append("=")
+         .append(servletState.getJsUrl(libs));
   }
 
   /**

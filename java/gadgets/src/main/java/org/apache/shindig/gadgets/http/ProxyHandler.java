@@ -18,7 +18,6 @@
  */
 package org.apache.shindig.gadgets.http;
 
-import org.apache.shindig.gadgets.BasicRemoteContentFetcher;
 import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.GadgetSigner;
 import org.apache.shindig.gadgets.GadgetToken;
@@ -48,13 +47,9 @@ public class ProxyHandler {
   private static final int TWO_HOURS_IN_MS = 7200000;
   private static final int ONE_HOUR_IN_SECS = 3600;
   private static final int MAX_PROXY_SIZE = 1024 * 1024;
-  
+
   private final RemoteContentFetcher fetcher;
 
-  public ProxyHandler() {
-    this(new BasicRemoteContentFetcher(MAX_PROXY_SIZE));
-  }
-  
   public ProxyHandler(RemoteContentFetcher fetcher) {
     this.fetcher = fetcher;
   }
@@ -203,7 +198,9 @@ public class ProxyHandler {
   private GadgetToken extractAndValidateToken(HttpServletRequest request,
       GadgetSigner signer) throws ServletException {
     try {
-      if (signer == null) return null;
+      if (signer == null) {
+        return null;
+      }
       String token = request.getParameter("st");
       if (token == null) {
         token = "";
@@ -229,7 +226,7 @@ public class ProxyHandler {
 
   /**
    * Sign a URL with a GadgetToken if needed
-   * @return 
+   * @return
    */
   private URL signUrl(URL originalUrl, GadgetToken token,
       HttpServletRequest request) throws ServletException {
@@ -238,7 +235,7 @@ public class ProxyHandler {
           !"signed".equals(request.getParameter("authz"))) {
         return originalUrl;
       }
-      return token.signUrl(originalUrl, "GET", // TODO: request.getMethod() 
+      return token.signUrl(originalUrl, "GET", // TODO: request.getMethod()
           request.getParameterMap());
     } catch (GadgetException ge) {
       throw new ServletException(ge);
