@@ -180,7 +180,7 @@ public class GadgetSpecParser {
     }
 
     boolean rightToLeft = false;
-    if ("rtl".equals(rtlAttr.getTextContent())) {
+    if (rtlAttr != null && "rtl".equals(rtlAttr.getTextContent())) {
       rightToLeft = true;
     }
 
