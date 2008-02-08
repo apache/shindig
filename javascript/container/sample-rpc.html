@@ -1,0 +1,92 @@
+<html>
+<head>
+<title>RPC Demo</title>
+<style>
+  .gadget {
+    border: solid 1px #000;
+    margin: 10px;
+    float: left;
+    text-align: center;
+  }
+  .gadget h2 {
+    background: #ccf;
+    border-bottom: solid 1px #000;
+    margin: 0;
+    padding: 5px;
+  }
+  .gadget iframe {
+    margin: 5px;
+    border: none;
+    height: 300px;
+    width: 300px;
+  }
+</style>
+</head>
+<body>
+<script src="../../js/core.js"></script>
+<script>
+  function makeXhr() {
+    if (window.XMLHttpRequest) {
+      return new XMLHttpRequest();
+    } else if (window.ActiveXObject) {
+      var x = new ActiveXObject("Msxml2.XMLHTTP");
+      if (!x) {
+        x = new ActiveXObject("Microsoft.XMLHTTP");
+      }
+      return x;
+    }
+  }
+
+  function renderGadgets(obj) {
+    var gadgetList = obj.gadgets;
+    var features = {};
+    for (var i = 0, gadget; gadget = gadgetList[i]; ++i) {
+      for (var j = 0, feature; feature = gadget.features[i]; ++i) {
+        features[feature] = true;
+      }
+    }
+    var libs = [];
+    for (var lib in features) {libs.push(lib);}
+    libs.sort();
+    libs = libs.join("");
+    for (var i = 0, gadget; gadget = gadgetList[i]; ++i) {
+      var newGadget = document.createElement("div");
+      newGadget.innerHTML = ['<h2>', gadget.title, '</h2>',
+        '<iframe src="', gadget.content, '&libs=', libs ,'" id="remote_iframe_', gadget.moduleId, '"></iframe>'
+      ].join("");
+      newGadget.className = "gadget";
+      document.body.appendChild(newGadget);
+    }
+  }
+
+  function processResp(xhr, callback) {
+    if (xhr.readyState !== 4) {return;}
+    callback(gadgets.json.parse(xhr.responseText));
+  }
+
+  var request = {
+    context: {
+      country: "US",
+      language: "en",
+      view: "default"
+    },
+    gadgets: [
+      {
+        url: "http://www.google.com/ig/modules/hello.xml",
+        moduleId: 1
+      },
+      {
+        url: "http://www.labpixies.com/campaigns/todo/todo.xml",
+        moduleId: 2
+      }
+    ]
+  };
+
+  var xhr = makeXhr();
+  xhr.open("POST", "../../rpc", true);
+  xhr.onreadystatechange = gadgets.util.makeClosure(null, processResp, xhr, renderGadgets);
+  var req = gadgets.json.stringify(request);
+  xhr.send(req);
+</script>
+</body>
+</html>

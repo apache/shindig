@@ -34,6 +34,7 @@ import org.apache.shindig.gadgets.JsLibrary;
 import org.apache.shindig.gadgets.JsLibraryFeatureFactory;
 import org.apache.shindig.gadgets.MessageBundle;
 import org.apache.shindig.gadgets.RenderingContext;
+import org.apache.shindig.gadgets.UserPrefs;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
@@ -85,11 +86,30 @@ public class DefaultCrossServletState extends CrossServletState {
     // We don't have any meaningful data in the current request anyway, so
     // we'll just do this statically.
     StringBuilder buf = new StringBuilder();
+
     try {
-      buf.append(iframePath)
-          .append("url=")
-          .append(
-              URLEncoder.encode(gadget.getId().getURI().toString(),"UTF-8"));
+      String url = gadget.getId().getURI().toString();
+      if (gadget.getContentType().equals(GadgetSpec.ContentType.HTML)) {
+        buf.append(iframePath)
+           .append("url=")
+           .append(URLEncoder.encode(url, "UTF-8"));
+      } else {
+        // type = url
+        buf.append(url);
+        if (url.indexOf('?') == -1) {
+          buf.append('?');
+        } else {
+          buf.append('&');
+        }
+      }
+
+      UserPrefs prefs = gadget.getUserPrefValues();
+      for (Map.Entry<String, String> entry : prefs.getPrefs().entrySet()) {
+        buf.append("&up_")
+           .append(entry.getKey())
+           .append("=")
+           .append(URLEncoder.encode(entry.getValue(), "UTF-8"));
+      }
     } catch (UnsupportedEncodingException e) {
       throw new RuntimeException("UTF-8 Not supported!", e);
     }
