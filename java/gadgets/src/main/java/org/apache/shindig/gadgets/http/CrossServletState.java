@@ -95,6 +95,10 @@ public abstract class CrossServletState {
   /**
    * Constructs a url for generating an iframe for the given gadget.
    * This only applies for RPC calls that must generate an iframe.
+   *
+   * TODO: The second parameter here should be something else (perhaps a
+   * context object). A better choice would probably be to add the view params
+   * to ProcessingOptions and pass that here.
    */
   public abstract String getIframeUrl(Gadget gadget,  HttpServletRequest req);
 
