@@ -231,7 +231,7 @@ public class GadgetRenderingServlet extends HttpServlet {
     markup.append("<script>gadgets.util.runOnLoadHandlers();</script>");
     markup.append("</body></html>");
 
-    resp.getOutputStream().print(markup.toString());
+    resp.getWriter().print(markup.toString());
   }
 
   private void outputUrlGadget(Gadget gadget,

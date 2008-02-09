@@ -82,6 +82,8 @@ public class RpcServlet extends HttpServlet {
       JsonRpcRequest req = new JsonRpcRequest(postBody);
       JSONObject out = req.process(state);
       response.setStatus(HttpServletResponse.SC_OK);
+      response.setContentType("application/json; charset=utf-8");
+      response.setHeader("Content-Disposition", "attachment;filename=rpc.txt");
       response.getWriter().write(out.toString());
     } catch (UnsupportedEncodingException e) {
       response.setStatus(HttpServletResponse.SC_BAD_REQUEST);

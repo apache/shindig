@@ -1,19 +1,19 @@
-/*
- * $Id$
+/**
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements. See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership. The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License. You may obtain a copy of the License at
  *
- * Copyright 2007 The Apache Software Foundation
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations under the License.
  */
 package org.apache.shindig.gadgets;
 
@@ -29,22 +29,22 @@ import java.util.Map;
  * Contains useful static objects for testing classes that deal with GadgetSpecs.
  */
 public class GadgetSpecTestFixture {
-  static final Locale EN_US_LOCALE = new Locale("en", "US");
+  public static final Locale EN_US_LOCALE = new Locale("en", "US");
 
   private static final String DATETIME_TITLE = "Hello, World!";
   private static final String DATETIME_CONTENT = "Goodbye, World!";
 
-  static final String DATETIME_URI_STRING = "http://www.google.com/ig/modules/datetime.xml";
-  static final URI DATETIME_URI;
-  static final int DATETIME_MODULE_ID = 1;
-  static final GadgetView.ID DATETIME_ID;
-  static final String DATETIME_XML = "<?xml version=\"1.0\"?>" +
+  public static final String DATETIME_URI_STRING = "http://www.google.com/ig/modules/datetime.xml";
+  public static final URI DATETIME_URI;
+  public static final int DATETIME_MODULE_ID = 1;
+  public static final GadgetView.ID DATETIME_ID;
+  public static final String DATETIME_XML = "<?xml version=\"1.0\"?>" +
                                      "<Module>" +
                                      "  <ModulePrefs title=\"" + DATETIME_TITLE + "\"/>" +
                                      "  <Content type=\"html\">" + DATETIME_CONTENT + "</Content>" +
                                      "</Module>";
 
-  static final GadgetSpec DATETIME_SPEC =
+  public static final GadgetSpec DATETIME_SPEC =
       new GadgetSpec() {
         public GadgetSpec copy() {
           throw new UnsupportedOperationException();

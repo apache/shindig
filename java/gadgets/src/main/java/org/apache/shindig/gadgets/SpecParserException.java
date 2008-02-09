@@ -17,21 +17,14 @@ package org.apache.shindig.gadgets;
  * Exceptions for Gadget Spec parsing.
  */
 public class SpecParserException extends GadgetException {
-  private String message;
-
   /**
    * @param message
    */
   public SpecParserException(String message) {
-    super(GadgetException.Code.MALFORMED_XML_DOCUMENT);
-    this.message = message;
+    super(GadgetException.Code.MALFORMED_XML_DOCUMENT, message);
   }
 
-  /**
-   * @return The message for this exception.
-   */
-  @Override
-  public String getMessage() {
-    return message;
+  public SpecParserException(GadgetException.Code code) {
+    super(code);
   }
 }

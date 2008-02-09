@@ -21,6 +21,7 @@ import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
 import java.io.IOException;
+import java.io.StringReader;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -52,15 +53,15 @@ public class MessageBundleParser {
    * @return Message bundle resulting from the parse
    * @throws GadgetException If the bundle is empty or malformed
    */
-  public MessageBundle parse(byte[] xml) throws GadgetException {
-    if (null == xml || xml.length == 0) {
+  public MessageBundle parse(String xml) throws GadgetException {
+    if (xml.length() == 0) {
       throw new GadgetException(GadgetException.Code.EMPTY_XML_DOCUMENT);
     }
 
     Document doc;
     try {
       DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-      InputSource is = new InputSource(new Utf8InputStream(xml));
+      InputSource is = new InputSource(new StringReader(xml));
       doc = factory.newDocumentBuilder().parse(is);
     } catch (SAXException e) {
       throw new GadgetException(GadgetException.Code.MALFORMED_XML_DOCUMENT);
