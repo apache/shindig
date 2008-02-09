@@ -73,10 +73,11 @@ public class ProxyHandler {
       String output;
       try {
         // Use raw param as key as URL may have to be decoded
-        String json = new JSONObject().put(request.getParameter("url"), new JSONObject()
-            .put("body", new String(results.getByteArray()))
-            .put("rc", results.getHttpStatusCode())
-            ).toString();
+        JSONObject resp = new JSONObject()
+            .put("body", results.getResponseAsString())
+            .put("rc", results.getHttpStatusCode());
+        String json = new JSONObject()
+            .put(request.getParameter("url"), new JSONObject()).toString();
         output = UNPARSEABLE_CRUFT + json;
       } catch (JSONException e) {
         output = "";
@@ -153,7 +154,7 @@ public class ProxyHandler {
    * @return A URL object of the URL
    * @throws ServletException if the URL fails security checks or is malformed.
    */
-  private URL extractAndValidateUrl(HttpServletRequest request)                                                                 
+  private URL extractAndValidateUrl(HttpServletRequest request)
       throws ServletException {
     String url = request.getParameter("url");
     if (url == null) {
@@ -164,8 +165,8 @@ public class ProxyHandler {
       URI origin = new URI(request.getParameter("url"));
       if (origin.getScheme() == null) {
         // No scheme, assume it was double-encoded.
-        origin = new URI(
-            URLDecoder.decode(request.getParameter("url"), request.getCharacterEncoding()));
+        origin = new URI(URLDecoder.decode(request.getParameter("url"),
+                         request.getCharacterEncoding()));
         if (origin.getScheme() == null) {
           throw new ServletException("Invalid URL " + origin.toString());
         }

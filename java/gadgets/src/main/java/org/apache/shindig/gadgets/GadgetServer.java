@@ -322,10 +322,9 @@ public class GadgetServer {
         return;
       }
 
-      byte[] xml = null;
+      RemoteContent xml = null;
       try {
-        xml = fetcher.fetch(
-            gadgetId.getURI().toURL(), wc.context.getOptions()).getByteArray();
+        xml = fetcher.fetch(gadgetId.getURI().toURL(), wc.context.getOptions());
       } catch (MalformedURLException e) {
         throw new GadgetException(
             GadgetException.Code.FAILED_TO_RETRIEVE_CONTENT,
@@ -333,7 +332,7 @@ public class GadgetServer {
       }
 
       GadgetSpecParser specParser = new GadgetSpecParser();
-      GadgetSpec spec = specParser.parse(gadgetId, xml);
+      GadgetSpec spec = specParser.parse(gadgetId, xml.getResponseAsString());
       wc.gadget = new Gadget(gadgetId, spec, prefs);
 
       // This isn't a separate job because if it is we'd just need another

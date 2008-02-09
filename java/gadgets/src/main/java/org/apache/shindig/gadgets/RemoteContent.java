@@ -13,6 +13,7 @@
  */
 package org.apache.shindig.gadgets;
 
+import java.io.UnsupportedEncodingException;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -23,20 +24,27 @@ import java.util.Map;
  * Represents the results of an HTTP content retrieval operation.
  */
 public class RemoteContent {
-  private int httpStatusCode = -1;
-  private byte[] resultBody = new byte[0];
-  private Map<String, List<String>> headers;
+  private final int httpStatusCode;
+  private static final String DEFAULT_ENCODING = "UTF-8";
+  private final String encoding;
+
+  // Used to lazily convert to a string representation of the input.
+  private String responseString = null;
+  private final byte[] responseBytes;
+  private final Map<String, List<String>> headers;
 
   /**
    * @param httpStatusCode
    * @param resultBody
    * @param headers May be null.
    */
-  public RemoteContent(int httpStatusCode, byte[] resultBody,
+  public RemoteContent(int httpStatusCode, byte[] responseBytes,
                        Map<String, List<String>> headers) {
     this.httpStatusCode = httpStatusCode;
-    if (resultBody != null) {
-      this.resultBody = resultBody;
+    if (responseBytes == null) {
+      this.responseBytes = new byte[0];
+    } else {
+      this.responseBytes = responseBytes;
     }
 
     Map<String, List<String>> tempHeaders = new HashMap<String, List<String>>();
@@ -52,6 +60,26 @@ public class RemoteContent {
     }
 
     this.headers = Collections.unmodifiableMap(tempHeaders);
+    this.encoding = detectEncoding();
+  }
+
+  /**
+   * Attempts to determine the encoding of the body. If it can't be determined,
+   * we use DEFAULT_ENCODING instead.
+   * @return The detected encoding or DEFAULT_ENCODING.
+   */
+  private String detectEncoding() {
+    String contentType = getHeader("Content-Type");
+    if (contentType != null) {
+      String[] parts = contentType.split(";");
+      if (parts.length == 2) {
+        int offset = parts[1].indexOf("charset=");
+        if (offset != -1) {
+          return parts[1].substring(offset + 8);
+        }
+      }
+    }
+    return DEFAULT_ENCODING;
   }
 
   public int getHttpStatusCode() {
@@ -59,7 +87,35 @@ public class RemoteContent {
   }
 
   public byte[] getByteArray() {
-    return resultBody;
+    return responseBytes;
+  }
+
+  public String getEncoding() {
+    return encoding;
+  }
+
+  /**
+   * Attempts to convert the response body to a string using the Content-Type
+   * header. If no Content-Type header is specified (or it doesn't include an
+   * encoding), we will assume it is UTF-8.
+   *
+   * @return The body as a string.
+   */
+  public String getResponseAsString() {
+    if (responseString == null) {
+      try {
+        String response = new String(responseBytes, encoding);
+        // Strip BOM.
+        if (response.length() > 0 && response.codePointAt(0) == 0xFEFF) {
+          responseString = response.substring(1);
+        } else {
+          responseString = response;
+        }
+      } catch (UnsupportedEncodingException e) {
+        responseString = "Unable to convert from encoding: " + encoding;
+      }
+    }
+    return responseString;
   }
 
   /**

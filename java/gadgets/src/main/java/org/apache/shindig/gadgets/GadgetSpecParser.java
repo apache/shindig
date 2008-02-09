@@ -23,6 +23,7 @@ import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
 import java.io.IOException;
+import java.io.StringReader;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -47,28 +48,28 @@ public class GadgetSpecParser {
    * content.
    *
    * @param id Gadget.ID object that resulted in the provided data
-   * @param xml The raw input xml
+   * @param xml The raw input xml.
    * @return A new GadgetSpec
    * @throws SpecParserException If {@code data} does not represent a valid
    * {@code GadgetSpec}
    */
-  public GadgetSpec parse(GadgetView.ID id, byte[] xml)
+  public GadgetSpec parse(GadgetView.ID id, String xml)
       throws SpecParserException {
-    if (null == xml || xml.length == 0) {
-      throw new SpecParserException("Empty XML document.");
+    if (xml.length() == 0) {
+      throw new SpecParserException(GadgetException.Code.EMPTY_XML_DOCUMENT);
     }
 
     Document doc;
     try {
       DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-      InputSource is = new InputSource(new Utf8InputStream(xml));
+      InputSource is = new InputSource(new StringReader(xml));
       doc = factory.newDocumentBuilder().parse(is);
     } catch (SAXException e) {
-      throw new SpecParserException("Malformed XML document.");
+      throw new SpecParserException(e.getMessage());
     } catch (ParserConfigurationException e) {
-      throw new SpecParserException("Malformed XML document.");
+      throw new SpecParserException(e.getMessage());
     } catch (IOException e) {
-      throw new SpecParserException("Malformed XML document.");
+      throw new SpecParserException(e.getMessage());
     }
 
     ParsedGadgetSpec spec = new ParsedGadgetSpec();

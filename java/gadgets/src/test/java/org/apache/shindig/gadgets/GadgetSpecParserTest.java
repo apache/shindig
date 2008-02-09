@@ -41,11 +41,11 @@ public class GadgetSpecParserTest extends TestCase {
     BasicGadgetId id = new BasicGadgetId();
     id.uri = new URI("http://example.org/text.xml");
     id.moduleId = 1;
-    byte[] xml = ("<?xml version=\"1.0\"?>" +
+    String xml = "<?xml version=\"1.0\"?>" +
                  "<Module>" +
                  "<ModulePrefs title=\"Hello, world!\"/>" +
                  "<Content type=\"html\">Hello!</Content>" +
-                 "</Module>").getBytes();
+                 "</Module>";
     GadgetSpec spec = parser.parse(id, xml);
 
     assertEquals("Hello!", spec.getContentData());
@@ -56,7 +56,7 @@ public class GadgetSpecParserTest extends TestCase {
     BasicGadgetId id = new BasicGadgetId();
     id.uri = new URI("http://example.org/text.xml");
     id.moduleId = 1;
-    byte[] xml = ("<?xml version=\"1.0\"?>" +
+    String xml = "<?xml version=\"1.0\"?>" +
                  "<Module>" +
                  "<ModulePrefs title=\"Test Enum\">" +
                  "<UserPref name=\"test\" datatype=\"enum\">" +
@@ -65,7 +65,7 @@ public class GadgetSpecParserTest extends TestCase {
                  "</UserPref>" +
                  "</ModulePrefs>" +
                  "<Content type=\"html\">Hello!</Content>" +
-                 "</Module>").getBytes();
+                 "</Module>";
     GadgetSpec spec = parser.parse(id, xml);
 
     List<GadgetSpec.UserPref> prefs = spec.getUserPrefs();

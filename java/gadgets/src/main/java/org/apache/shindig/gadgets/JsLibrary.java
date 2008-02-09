@@ -13,12 +13,12 @@
  */
 package org.apache.shindig.gadgets;
 
-import java.io.ByteArrayOutputStream;
+import org.apache.shindig.util.InputStreamConsumer;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.UnsupportedEncodingException;
 import java.util.logging.Logger;
 
 /**
@@ -130,12 +130,11 @@ public final class JsLibrary {
     FileInputStream fis = null;
     try {
       fis = new FileInputStream(fileName);
+      return InputStreamConsumer.readToString(fis);
     } catch (IOException e) {
       throw new RuntimeException(
           String.format("Error reading file %s", fileName), e);
     }
-
-    return loadFromInputStream(fis, fileName, "file");
   }
 
   /**
@@ -144,44 +143,21 @@ public final class JsLibrary {
    * @return The contents of the named resource.
    */
   private static String loadResource(String name) {
-     InputStream stream =
-         JsLibrary.class.getClassLoader().getResourceAsStream(name);
-     if (stream == null) {
+     try {
+       InputStream stream =
+            JsLibrary.class.getClassLoader().getResourceAsStream(name);
+       if (stream == null) {
+         throw new RuntimeException(
+             String.format("Could not find resource %s", name));
+       }
+       return InputStreamConsumer.readToString(stream);
+     } catch (IOException e) {
        throw new RuntimeException(
            String.format("Could not find resource %s", name));
      }
-     return loadFromInputStream(stream, name, "resource");
   }
 
-  /**
-   * Loads content from the given input stream.
-   * @param is
-   * @param name
-   * @param type
-   * @return The contents of the stream.
-   */
-  private static String loadFromInputStream(InputStream is, String name,
-                                            String type) {
-    ByteArrayOutputStream baos = new ByteArrayOutputStream();
-    byte[] buf = new byte[8192];
-    int read = 0;
-    try {
-      while ((read = is.read(buf)) > 0) {
-        baos.write(buf, 0, read);
-      }
-    } catch (IOException e) {
-      throw new RuntimeException(
-          String.format("Error reading %s %s", type, name), e);
-    }
 
-    String ret = null;
-    try {
-      ret = new String(baos.toByteArray(), "UTF8");
-    } catch (UnsupportedEncodingException e) {
-      throw new RuntimeException("Unexpected error: UTF8 encoding unsupported");
-    }
-    return ret;
-  }
 
   /**
    * @param type

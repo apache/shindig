@@ -82,20 +82,18 @@ class MessageBundleSubstituterFeature implements GadgetFeature {
         // We definitely need a bundle, now we need to fetch it.
         bundle = context.getMessageBundleCache().get(uri.toString());
         if (bundle == null) {
-          byte[] data = null;
+          RemoteContent data = null;
           try {
-            data = context.getHttpFetcher().fetch(
-                uri.toURL(), context.getOptions()).getByteArray();
+            data = context.getHttpFetcher().fetch(uri.toURL(),
+                                                  context.getOptions());
           } catch (MalformedURLException e) {
             throw new GadgetException(
                 GadgetException.Code.FAILED_TO_RETRIEVE_CONTENT,
                 String.format("Malformed message bundle URL: %s",
                               uri.toString()));
           }
-          if (data.length > 0) {
-            bundle = parser.parse(data);
-            context.getMessageBundleCache().put(uri.toString(), bundle);
-          }
+          bundle = parser.parse(data.getResponseAsString());
+          context.getMessageBundleCache().put(uri.toString(), bundle);
         }
       }
     }

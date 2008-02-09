@@ -13,14 +13,13 @@
  */
 package org.apache.shindig.gadgets;
 
+import org.apache.shindig.util.InputStreamConsumer;
 import org.w3c.dom.Document;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
-import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -186,14 +185,18 @@ public class JsFeatureLoader {
    * @param path Location of the resource list.
    * @return A list of resources from the list.
    */
-  private String[] readResourceList(String path) {
+  private String[] readResourceList(String path) throws IOException {
     ClassLoader cl = JsFeatureLoader.class.getClassLoader();
     InputStream is = cl.getResourceAsStream(path);
     if (is == null) {
       logger.warning("Unable to locate resource: " + path);
       return new String[0];
     } else {
-      String names = new String(load(is));
+      String names = InputStreamConsumer.readToString(is);
+      if (names == null) {
+        logger.warning("Unable to load resource: " + path);
+        return new String[0];
+      }
       return names.split("\n");
     }
   }
@@ -214,10 +217,9 @@ public class JsFeatureLoader {
       ClassLoader cl = JsFeatureLoader.class.getClassLoader();
       InputStream is = cl.getResourceAsStream(name);
       if (is != null) {
-        byte[] content = load(is);
         int lastSlash = name.lastIndexOf('/');
         String base = (lastSlash == -1) ? name : name.substring(0, lastSlash + 1);
-        feature = parse(content, base, true);
+        feature = parse(is, base, true);
       }
     } catch (GadgetException ge) {
       logger.warning("Failed to load resource: " + name);
@@ -239,8 +241,8 @@ public class JsFeatureLoader {
     ParsedFeature feature = null;
     if (file.canRead()) {
       try {
-        byte[] content = load(new FileInputStream(file));
-        feature = parse(content, file.getParent() + '/', false);
+        feature = parse(
+            new FileInputStream(file), file.getParent() + '/', false);
       } catch (IOException e) {
         logger.warning("Error reading file: " + file.getAbsolutePath());
       } catch (GadgetException ge) {
@@ -282,22 +284,18 @@ public class JsFeatureLoader {
 
   /**
    * Parses the input into a dom tree.
-   * @param xml
+   * @param is
    * @param path The path the file was loaded from.
    * @param isResource True if the file was a resource.
    * @return A dom tree representing the feature.
    * @throws GadgetException
    */
-  private ParsedFeature parse(byte[] xml, String path, boolean isResource)
+  private ParsedFeature parse(InputStream is, String path, boolean isResource)
       throws GadgetException {
-    if (null == xml || xml.length == 0) {
-      throw new GadgetException(GadgetException.Code.EMPTY_XML_DOCUMENT);
-    }
 
     Document doc;
     try {
       DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-      InputSource is = new InputSource(new Utf8InputStream(xml));
       doc = factory.newDocumentBuilder().parse(is);
     } catch (SAXException e) {
       throw new GadgetException(GadgetException.Code.MALFORMED_XML_DOCUMENT, e);
@@ -387,26 +385,6 @@ public class JsFeatureLoader {
         }
       }
     }
-  }
-
-  /**
-   * Loads content from the specified stream.
-   * @param is
-   * @return The contents of the file.
-   */
-  private byte[] load(InputStream is) {
-    ByteArrayOutputStream baos = new ByteArrayOutputStream();
-    byte[] buf = new byte[8192];
-    int read;
-    try {
-      while ((read = is.read(buf)) > 0) {
-        baos.write(buf, 0, read);
-      }
-    } catch (IOException e) {
-      return new byte[0];
-    }
-
-    return baos.toByteArray();
   }
 }
 
