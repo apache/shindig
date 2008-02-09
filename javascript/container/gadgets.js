@@ -334,7 +334,7 @@ gadgets.FloatLeftLayoutManager.prototype.getGadgetChrome =
   if (layoutRoot) {
     var chrome = document.createElement('div');
     chrome.className = 'gadgets-gadget-chrome';
-    chrome.style.float = 'left'
+    chrome.style.cssFloat = 'left'
     layoutRoot.appendChild(chrome);
     return chrome;
   } else {

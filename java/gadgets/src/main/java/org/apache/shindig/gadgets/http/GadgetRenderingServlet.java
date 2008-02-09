@@ -155,7 +155,7 @@ public class GadgetRenderingServlet extends HttpServlet {
                                 List<GadgetContentFilter> contentFilters,
                                 HttpServletResponse resp)
       throws IOException, GadgetServer.GadgetProcessException {
-    resp.setContentType("text/html");
+    resp.setContentType("text/html; charset=UTF-8");
 
     StringBuilder markup = new StringBuilder();
     markup.append("<html><head>");
@@ -274,6 +274,7 @@ public class GadgetRenderingServlet extends HttpServlet {
                             HttpServletResponse resp)
       throws IOException {
     // TODO: make this way more robust
+    resp.sendError(HttpServletResponse.SC_BAD_REQUEST);
     StringBuilder markup = new StringBuilder();
     markup.append("<html><body>");
     markup.append("<pre>");

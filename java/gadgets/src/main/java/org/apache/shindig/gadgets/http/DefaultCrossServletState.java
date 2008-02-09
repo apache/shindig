@@ -92,7 +92,8 @@ public class DefaultCrossServletState extends CrossServletState {
       if (gadget.getContentType().equals(GadgetSpec.ContentType.HTML)) {
         buf.append(iframePath)
            .append("url=")
-           .append(URLEncoder.encode(url, "UTF-8"));
+           .append(URLEncoder.encode(url, "UTF-8"))
+           .append("&");
       } else {
         // type = url
         buf.append(url);
@@ -102,6 +103,8 @@ public class DefaultCrossServletState extends CrossServletState {
           buf.append('&');
         }
       }
+
+      buf.append("mid=").append(gadget.getId().getModuleId());
 
       UserPrefs prefs = gadget.getUserPrefValues();
       for (Map.Entry<String, String> entry : prefs.getPrefs().entrySet()) {
