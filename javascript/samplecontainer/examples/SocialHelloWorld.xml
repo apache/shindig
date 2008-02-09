@@ -17,7 +17,7 @@
      }
 
      div.bubble {
-	background-image: url(/gadgets/samplecontainer/examples/bubble.gif);
+	background-image: url(/gadgets/files/samplecontainer/examples/bubble.gif);
 	background-repeat: no-repeat;
 	width: 202px;
 	height: 66px;
@@ -81,7 +81,7 @@
              && allPeople[i].getField('thumbnailUrl').indexOf('null') == -1) {
            html += '<img src="' + allPeople[i].getField('thumbnailUrl') + '"/>';
          } else {
-           html += '<img src="/gadgets/samplecontainer/examples/nophoto.gif"/>';
+           html += '<img src="/gadgets/files/samplecontainer/examples/nophoto.gif"/>';
          }
          html += '<br style="clear:both"></div>';
        }

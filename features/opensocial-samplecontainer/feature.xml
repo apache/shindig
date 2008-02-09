@@ -28,7 +28,7 @@ specific language governing permissions and limitations under the License.
       opensocial.Container.setContainer(new opensocial.SampleContainer());
       opensocial.Container.get().enableCaja();
 
-      var stateUrl = "/gadgets/samplecontainer/state-basicfriendlist.xml";
+      var stateUrl = "/gadgets/files/samplecontainer/state-basicfriendlist.xml";
       <!--TODO(doll): The cookies.js file needs to be moved into a feature so we can use it here-->
       <!--var cookieUrl = decodeURIComponent(goog.net.cookies.get('sampleContainerStateUrl'));-->
       <!--if (cookieUrl &amp;&amp; cookieUrl != "undefined") {-->

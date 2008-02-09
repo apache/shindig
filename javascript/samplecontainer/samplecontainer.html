@@ -48,7 +48,7 @@ function initGadget() {
   document.getElementById("gadgetUrl").value = specUrl;
 
   gadget = gadgets.container.createGadget({'specUrl': specUrl});;
-  gadget.setServerBase('../');
+  gadget.setServerBase('../../');
 
   gadgets.container.addGadget(gadget);
   gadgets.container.layoutManager.setGadgetChromeIds(['gadget-chrome']);
