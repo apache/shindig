@@ -58,10 +58,10 @@ Using Shindig Gadget Container JavaScript
       mvn jetty:run-war
 
     C) Hit the sample container at
-    http://yourserver:yourport/gadgets/samplecontainer/samplecontainer.html
+    http://yourserver:yourport/gadgets/files/samplecontainer/samplecontainer.html
 
     D) See the sample container help document for more details on how it works:
-    http://yourserver:yourport/gadgets/samplecontainer/getting-started.html
+    http://yourserver:yourport/gadgets/files/samplecontainer/getting-started.html
 
 
 NOTE: In the short term, when rendering Gadgets using gmodules.com certain
