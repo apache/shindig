@@ -77,7 +77,7 @@ public class ProxyHandler {
             .put("body", results.getResponseAsString())
             .put("rc", results.getHttpStatusCode());
         String json = new JSONObject()
-            .put(request.getParameter("url"), new JSONObject()).toString();
+            .put(request.getParameter("url"), resp).toString();
         output = UNPARSEABLE_CRUFT + json;
       } catch (JSONException e) {
         output = "";
