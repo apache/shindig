@@ -482,7 +482,27 @@ opensocial.Person.prototype.getId = function() {
  * @return {String} The display name
  */
 opensocial.Person.prototype.getDisplayName = function() {
-  return this.getField(opensocial.Person.Field.NAME);
+  var name = '';
+  var s = '';
+
+  var name = this.getField(opensocial.Person.Field.NAME);
+  // Try unstructed field first
+  s = name.getField(opensocial.Name.Field.UNSTRUCTURED);
+
+  if (s) return(s);
+
+  // Next try to construct the name from the individual components
+  s = '';
+  for (var field in [name.getField(opensocial.Name.Field.HONORIFIC_PREFIX),
+                     name.getField(opensocial.Name.Field.GIVEN_NAME),
+                     name.getField(opensocial.Name.Field.FAMILY_NAME),
+                     name.getField(opensocial.Name.Field.HONORIFIC_SUFFIX),
+                     name.getField(opensocial.Name.Field.ADDITIONAL_NAME)]) {
+      if (name.getField(field)) {
+          s += name.getField(field) + ' ';
+      }
+  }
+  return s.replace(/^\s+|\s+$/g, '') ;
 };
 
 
