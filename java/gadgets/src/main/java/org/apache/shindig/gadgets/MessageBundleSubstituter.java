@@ -20,7 +20,6 @@ package org.apache.shindig.gadgets;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.net.MalformedURLException;
 import java.net.URI;
 import java.util.List;
 import java.util.Locale;
@@ -87,10 +86,9 @@ class MessageBundleSubstituterFeature implements GadgetFeature {
         bundle = context.getMessageBundleCache().get(uri.toString());
         if (bundle == null) {
           RemoteContent data = null;
-          try {
-            data = context.getHttpFetcher().fetch(uri.toURL(),
-                                                  context.getOptions());
-          } catch (MalformedURLException e) {
+          data = context.getHttpFetcher().fetch(new RemoteContentRequest(uri),
+                                                context.getOptions());
+          if (data.getHttpStatusCode() != RemoteContent.SC_OK) {
             throw new GadgetException(
                 GadgetException.Code.FAILED_TO_RETRIEVE_CONTENT,
                 String.format("Malformed message bundle URL: %s",
@@ -108,6 +106,16 @@ class MessageBundleSubstituterFeature implements GadgetFeature {
    */
   public void process(Gadget gadget, GadgetContext context,
                       Map<String, String> params) {
+    StringBuilder js = new StringBuilder();
+    int moduleId = gadget.getId().getModuleId();
+    Locale locale = context.getLocale();
+
+    String setLangFmt = "gadgets.prefs_.setLanguage(%d, \"%s\");";
+    String setCountryFmt = "gadgets.prefs_.setCountry(%d, \"%s\");";
+
+    js.append(String.format(setLangFmt, moduleId, locale.getLanguage()));
+    js.append(String.format(setCountryFmt, moduleId, locale.getCountry()));
+
     if (null != bundle) {
       gadget.setCurrentMessageBundle(bundle);
       gadget.getSubstitutions().addSubstitutions(Substitutions.Type.MESSAGE,
@@ -125,20 +133,10 @@ class MessageBundleSubstituterFeature implements GadgetFeature {
           throw new RuntimeException(e);
         }
 
-        int moduleId = gadget.getId().getModuleId();
-        Locale locale = context.getLocale();
-        StringBuilder js = new StringBuilder();
         String setMsgFmt = "gadgets.prefs_.setMsg(%d, %s);";
-        String setLangFmt = "gadgets.prefs_.setLanguage(%d, \"%s\");";
-        String setCountryFmt = "gadgets.prefs_.setCountry(%d, \"%s\");";
-
         js.append(String.format(setMsgFmt, moduleId, json.toString()));
-        js.append(String.format(setLangFmt, moduleId, locale.getLanguage()));
-        js.append(String.format(setCountryFmt, moduleId, locale.getCountry()));
-
-        String jsStr = js.toString();
-        gadget.addJsLibrary(JsLibrary.create(JsLibrary.Type.INLINE, jsStr));
       }
     }
+    gadget.addJsLibrary(JsLibrary.create(JsLibrary.Type.INLINE, js.toString()));
   }
 }
