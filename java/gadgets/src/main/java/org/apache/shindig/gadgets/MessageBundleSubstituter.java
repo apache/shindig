@@ -20,6 +20,7 @@ package org.apache.shindig.gadgets;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.net.MalformedURLException;
 import java.net.URI;
 import java.util.List;
 import java.util.Locale;
@@ -86,9 +87,10 @@ class MessageBundleSubstituterFeature implements GadgetFeature {
         bundle = context.getMessageBundleCache().get(uri.toString());
         if (bundle == null) {
           RemoteContent data = null;
-          data = context.getHttpFetcher().fetch(new RemoteContentRequest(uri),
-                                                context.getOptions());
-          if (data.getHttpStatusCode() != RemoteContent.SC_OK) {
+          try {
+            data = context.getHttpFetcher().fetch(uri.toURL(),
+                                                  context.getOptions());
+          } catch (MalformedURLException e) {
             throw new GadgetException(
                 GadgetException.Code.FAILED_TO_RETRIEVE_CONTENT,
                 String.format("Malformed message bundle URL: %s",
