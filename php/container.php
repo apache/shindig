@@ -1,16 +1,21 @@
-<?php 
+<?php
 /*
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
  *
  *     http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  */
 ?><?php require_once 'config.php' ?>
 <?php
@@ -45,10 +50,10 @@ function do_curl_request($url, $postcontents = null) {
             $errno = curl_errno($curl);
             error_log("Error fetching $url : $errno");
         }
-        
+
     	$data = ob_get_contents();
     	ob_end_clean();
-    	
+
     	$retcode = curl_getinfo($curl, CURLINFO_HTTP_CODE);
     curl_close($curl);
     return array('code' => $retcode, 'data' => $data, 'errno' => $errno);
@@ -85,7 +90,7 @@ $iframeParentLocation = $_GET['location'];
 $url = $decryptedData['url'];
 $gadgetUrl = $url;
 $embedOwnerName = $decryptedData['owner'];
-if (isset($decryptedData['viewer']) && $decryptedData['viewer'] !== '') { 
+if (isset($decryptedData['viewer']) && $decryptedData['viewer'] !== '') {
     $loggedInUser = $decryptedData['viewer'];
 }
 
@@ -118,7 +123,7 @@ class Simple_Parser
     var $current_column;
     var $data = array();
     var $datas = array();
-   
+
     function parse($data)
     {
         $this->parser = xml_parser_create('UTF-8');
@@ -189,22 +194,22 @@ function getPersonData($user, $appUrlMd5, $xark, $appOrigin) {
     // $postcontents['app'] = $appUrlMd5;
     // $postcontents['xark'] = $xark;
     // $postcontents['origin'] = $appOrigin;
-    //     
+    //
     //     $request = do_curl_request('http://' . $appOrigin . XN_AtomHelper::$DOMAIN_SUFFIX . '/gadgets/index/backendApi', $postcontents);
     // return $request['data'];
     return "({})";
 }
 
-$preloadedUserData = getPersonData($embedOwnerName, $appUrlMd5, $xark, $appOrigin);	
+$preloadedUserData = getPersonData($embedOwnerName, $appUrlMd5, $xark, $appOrigin);
 if (isset($loggedInUser)) {
-	$preloadedViewerData = getPersonData($loggedInUser, $appUrlMd5, $xark, $appOrigin);	
+	$preloadedViewerData = getPersonData($loggedInUser, $appUrlMd5, $xark, $appOrigin);
 }
 else {
 	$preloadedViewerData = '{}';
 }
 
-error_log('gadgetWrapper: data preload (owner): '.$preloadedUserData);	
-error_log('gadgetWrapper: data preload (viewer): '.$preloadedViewerData);	
+error_log('gadgetWrapper: data preload (owner): '.$preloadedUserData);
+error_log('gadgetWrapper: data preload (viewer): '.$preloadedViewerData);
 
 function getObjKey($user, $app)
 {
@@ -223,12 +228,12 @@ function getGadgetAppDataQuery($user, $app)
 	error_log('apporigin = ' . $appOrigin);
 	return $contentQuery;
 }
-////-----------------HARDWIRED FOR ILIKE/DEMO		
+////-----------------HARDWIRED FOR ILIKE/DEMO
 
 if ($gadgetType == 'url') {
-	$gadgetUrl = $xml_parser->data['MODULE'][0]['child']['CONTENT'][0][attribs]['HREF'];	
+	$gadgetUrl = $xml_parser->data['MODULE'][0]['child']['CONTENT'][0][attribs]['HREF'];
 ?>
-<iframe frameborder="0" width="340" style="padding: 0; margin: 0;" height="<?php echo $gadgetHeight; ?>" 
+<iframe frameborder="0" width="340" style="padding: 0; margin: 0;" height="<?php echo $gadgetHeight; ?>"
 src="<?php echo $gadgetUrl; ?>">
 </iframe>
 <?php
@@ -269,11 +274,11 @@ var onloadHandler = null;
 var completedLoading = false;
 var preloadedUserData = <?php echo $preloadedUserData ? $preloadedUserData : null ?>;
 var preloadedViewerData = <?php echo $preloadedViewerData ? $preloadedViewerData : null ?>;
-var hashAppName = '<?php echo $appUrlMd5 ?>';   
+var hashAppName = '<?php echo $appUrlMd5 ?>';
 
 function _IG_RegisterOnloadHandler(fun) {
 	onloadHandler = fun;
-}                                                      
+}
 
 opensocial.registerOnloadHandler = function(fun) {
 	onloadHandler = fun;
@@ -290,8 +295,8 @@ function _IG_FetchContent(urlx, callback, refresh) {
 opensocial.fetchContent = function(urlx, callback, refresh) {
 	console.log('proxy call URL='+urlx);
 		dojo.io.bind({url: "/proxy.php?op=proxy&url="+escape(urlx),
-				 load: function(type,data,evt) { console.log('Received data on IG_Fetch'); callback(data); }, 
-				 mimetype: "text/plain" }	    
+				 load: function(type,data,evt) { console.log('Received data on IG_Fetch'); callback(data); },
+				 mimetype: "text/plain" }
 		);
 }
 
@@ -305,7 +310,7 @@ _IG_Tabs.prototype.numTabs = function() {}
 _IG_Tabs.prototype.currentTab = function() {};
 
 
-function _IG_Analytics(a,b) {}; 
+function _IG_Analytics(a,b) {};
 
 __MODULE_ID__ = 10;
 
@@ -313,11 +318,11 @@ __MODULE_ID__ = 10;
 console.log('preloaded data = ');
 console.log(preloadedUserData);
 console.log('END preloaded data = ');
- 	
+
  	this.data = preloadedUserData || new Array();
- 	
+
  }
- 
+
  _IG_Prefs.prototype.set = function(key, value) {
  	if (xnGetViewer().getId() != xnGetOwner().getId()) {
  		//don't allow writes if the person logged in is not the owner.
@@ -342,17 +347,17 @@ console.log('END preloaded data = ');
  	shindig.api.post("/gadgets/index/api", content, handlers);
 
  	this.data[key] = value;
- 	
+
  }
 
  _IG_Prefs.prototype.getString = function(key) {
  	return this.data[key];
  }
 
- 
+
  _IG_Prefs.prototype.getBool = function(key) {
  	return Boolean(this.data[key]);
- }                                  
+ }
 
  function  _IG_AdjustIFrameHeight()
  {
@@ -368,7 +373,7 @@ console.log('END preloaded data = ');
          }
     <?php } ?>
  }
- 
+
 <?php
 
 function getFriendsJSON($screenName)
@@ -401,7 +406,7 @@ error_log('gadgetWrapper: user is logged in ');
 }
 
 if ($owner == null) {
-	//if we got here either we are not logged in, or the viewer != owner, so we load the owner 
+	//if we got here either we are not logged in, or the viewer != owner, so we load the owner
 	$owner = 'brianm'; //XN_Profile::load($embedOwnerName);
 	$ownerFriends = getFriendsJSON($embedOwnerName);
 }
@@ -409,11 +414,11 @@ if ($owner == null) {
 error_log('gadgetWrapper: done getting remote data for ' . $url);
 ?>
         		//todo load the app data
-var xnOwner = new opensocial.ShindigPerson('brianm', 
-                                        'Brian McCallister', 
-                                        '', 
-                                        'http://api.ning.com/files/iLsNX-7w48WXQ7TwAtd6*9TmG2Ajf3mdiGnNZp7ZIvQ_/8464126.bin?width=32&height=32', 
-                                        '', 
+var xnOwner = new opensocial.ShindigPerson('brianm',
+                                        'Brian McCallister',
+                                        '',
+                                        'http://api.ning.com/files/iLsNX-7w48WXQ7TwAtd6*9TmG2Ajf3mdiGnNZp7ZIvQ_/8464126.bin?width=32&height=32',
+                                        '',
                                         new Array(),
                                         '');
 var xnOwnerFriends = '{}'; //<?php  // echo $ownerFriends ?>;
@@ -428,12 +433,12 @@ var xnViewer = new opensocial.ShindigPerson('xn_anonymous', 'Anonymous', '', '',
 else {
 	if ($viewerIsOwner) {
 ?>
-var xnViewer = xnOwner;		
+var xnViewer = xnOwner;
 <?php
 	}
 	else {
 ?>
-var xnViewer = new opensocial.ShindigPerson('<%= $user->screenName %>', '<%= $user->fullName %>', '', '<%= $user->thumbnailUrl(32,32); %>', '', new Array(),'');	
+var xnViewer = new opensocial.ShindigPerson('<%= $user->screenName %>', '<%= $user->fullName %>', '', '<%= $user->thumbnailUrl(32,32); %>', '', new Array(),'');
 <?php
 	}
 }
@@ -441,22 +446,22 @@ var xnViewer = new opensocial.ShindigPerson('<%= $user->screenName %>', '<%= $us
 
 
 function xnGetViewer() {
-	
+
 	return xnViewer;
 }
 
 function xnGetOwner() {
-	
+
 	return xnOwner;
 }
 
 function xnGetViewerFriends() {
-	
+
 	return xnViewerFriends;
 }
 
 function xnGetOwnerFriends() {
-	
+
 	return xnOwnerFriends;
 }
 
@@ -464,12 +469,12 @@ opensocial.Container.get().init(hashAppName);
 
 </script>
 <div id="__os_gadget_body">
-<?php 
+<?php
 
 $moduleContent = str_replace('<script src="http://sandbox.orkut.com/js/gen/People.js"></script>', '', $moduleContent);
 $moduleContent = str_replace('<script type="text/javascript" src="http://sandbox.orkut.com/js/gen/People.js"></script>', '', $moduleContent);
 //$moduleContent = str_replace('params += "&f=" + person.getId();', 'params += "&f=" + person.obj_.getId();', $moduleContent);
-$moduleContent = str_replace('http://sandbox.orkut.com/Application.aspx?appId=918178148210', 
+$moduleContent = str_replace('http://sandbox.orkut.com/Application.aspx?appId=918178148210',
 									'/gadgets/index/canvas?user=' . $owner->screenName . '&feedUrl=' . urlencode($gadgetUrl) . ((!$moduleName || $moduleName == '' ? '' : ('&title=' . urlencode($moduleName)))), $moduleContent);
 
 //echo 'TEST: <a target="_top" href="' . '/gadgets/index/canvas?user=' . $owner->screenName . '&feedUrl=' . urlencode($gadgetUrl) . ((!$moduleName || $moduleName == '' ? '' : ('&title=' . urlencode($moduleName)))) . '">test canvas link</a><br/>';
@@ -483,7 +488,7 @@ print $moduleContent ?>
 </script>
 
 <?php
-	
+
 }
 ?>
 </div>
