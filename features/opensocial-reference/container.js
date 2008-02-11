@@ -300,9 +300,8 @@ opensocial.Container.prototype.newPerson = function(opt_params, opt_isOwner,
  * @return {opensocial.Activity} the activity object
  * @private
  */
-opensocial.Container.prototype.newActivity = function(title,
-    opt_params) {
-  return new opensocial.Activity(title, opt_params);
+opensocial.Container.prototype.newActivity = function(opt_params) {
+  return new opensocial.Activity(opt_params);
 };
 
 
