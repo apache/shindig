@@ -158,8 +158,8 @@ StateFileParser.onLoadState = function(xmlState, stateUrl, gadgetMessageDiv,
         {'type' : $(this).attr('type')}));
       });
       activities[userId].push(container.newActivity(
-          $(this).attr('title'),
-      {'id' : $(this).attr('id'),
+      {'title' : $(this).attr('title'),
+        'id' : $(this).attr('id'),
         'externalId' : $(this).attr('externalId'),
         'body' : $(this).attr('body'),
         'appId' : appId,
