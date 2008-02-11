@@ -1,15 +1,20 @@
 /*
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
  *
  *     http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  */
 
 /**
@@ -270,21 +275,21 @@ opensocial.newDataRequest = function() {
  * <b>See also:</b>
  * <a href="#requestCreateActivity">requestCreateActivity()</a>,
  * </p>
- * 
+ *
  * <p>It is only required to set one of TITLE_ID or TITLE. In addition, if you
  * are using any variables in your title or title template,
  * you must set TEMPLATE_PARAMS.</p>
- * 
+ *
  * <p>Other possible fields to set are: URL, MEDIA_ITEMS, BODY_ID, BODY,
  * EXTERNAL_ID, PRIORITY, STREAM_TITLE, STREAM_URL, STREAM_SOURCE_URL,
  * and STREAM_FAVICON_URL.</p>
- * 
+ *
  * <p>Containers are only required to use TITLE_ID or TITLE, and may choose to
  * ignore additional parameters.</p>
- * 
+ *
  * <p>See <a href="opensocial.Activity.Field.html">Field</a>s are supported for
  * more details.</p>
- * 
+ *
  * @param {Map.&lt;opensocial.Activity.Field, Object&gt;} params
  *    Parameters defining the activity.
  * @return {opensocial.Activity} The new
