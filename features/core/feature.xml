@@ -27,7 +27,7 @@
     <script><![CDATA[
       gadgets.io.init({
         proxyUrl: "http://www.gmodules.com/ig/proxy?url=%url%",
-        jsonProxyUrl: "proxy?url=%url%&output=js"
+        jsonProxyUrl: "proxy?output=js"
       });
     ]]></script>
     <script src="legacy.js"/>

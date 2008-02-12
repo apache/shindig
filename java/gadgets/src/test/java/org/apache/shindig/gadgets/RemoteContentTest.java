@@ -20,6 +20,9 @@ package org.apache.shindig.gadgets;
 
 import junit.framework.TestCase;
 
+import org.apache.shindig.util.InputStreamConsumer;
+
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -78,12 +81,13 @@ public class RemoteContentTest extends TestCase {
     assertEquals("\u4F60\u597D", content.getResponseAsString());
   }
 
-  public void testPreserveBinaryData() {
+  public void testPreserveBinaryData() throws Exception {
     byte[] data = new byte[] {
         (byte)0x00, (byte)0xDE, (byte)0xEA, (byte)0xDB, (byte)0xEE, (byte)0xF0
     };
     addHeader("Content-Type", "application/octet-stream");
     RemoteContent content = new RemoteContent(200, data, headers);
-    assertEquals(data, content.getByteArray());
+    byte[] out = InputStreamConsumer.readToByteArray(content.getResponse());
+    assertTrue(Arrays.equals(data, out));
   }
 }

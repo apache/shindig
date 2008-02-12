@@ -24,17 +24,22 @@ import org.apache.shindig.gadgets.GadgetToken;
 import org.apache.shindig.gadgets.ProcessingOptions;
 import org.apache.shindig.gadgets.RemoteContent;
 import org.apache.shindig.gadgets.RemoteContentFetcher;
+import org.apache.shindig.gadgets.RemoteContentRequest;
+import org.apache.shindig.util.InputStreamConsumer;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
-import java.net.URL;
-import java.net.URLDecoder;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.net.URL;
+import java.net.URLDecoder;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -44,9 +49,6 @@ import javax.servlet.http.HttpServletResponse;
 
 public class ProxyHandler {
   private static final String UNPARSEABLE_CRUFT = "throw 1; < don't be evil' >";
-  private static final int TWO_HOURS_IN_MS = 7200000;
-  private static final int ONE_HOUR_IN_SECS = 3600;
-  private static final int MAX_PROXY_SIZE = 1024 * 1024;
 
   private final RemoteContentFetcher fetcher;
 
@@ -58,15 +60,16 @@ public class ProxyHandler {
                         HttpServletResponse response,
                         GadgetSigner signer)
       throws ServletException, IOException {
-
     GadgetToken token = extractAndValidateToken(request, signer);
-    URL originalUrl = extractAndValidateUrl(request);
+    String url = request.getParameter("url");
+    URL originalUrl = validateUrl(url);
     URL signedUrl = signUrl(originalUrl, token, request);
 
     // Fetch the content and convert it into JSON.
     // TODO: Fetcher needs to handle variety of HTTP methods.
-    RemoteContent results = fetchContent(signedUrl, request,
-        new ProcessingOptions());
+    RemoteContent results = fetchContent(signedUrl,
+                                         request,
+                                         new HttpProcessingOptions(request));
 
     response.setStatus(results.getHttpStatusCode());
     if (results.getHttpStatusCode() == HttpServletResponse.SC_OK) {
@@ -76,8 +79,7 @@ public class ProxyHandler {
         JSONObject resp = new JSONObject()
             .put("body", results.getResponseAsString())
             .put("rc", results.getHttpStatusCode());
-        String json = new JSONObject()
-            .put(request.getParameter("url"), resp).toString();
+        String json = new JSONObject().put(url, resp).toString();
         output = UNPARSEABLE_CRUFT + json;
       } catch (JSONException e) {
         output = "";
@@ -86,8 +88,7 @@ public class ProxyHandler {
       setCachingHeaders(response);
       response.setContentType("application/json; charset=utf-8");
       response.setHeader("Content-Disposition", "attachment;filename=p.txt");
-      PrintWriter pw = response.getWriter();
-      pw.write(output);
+      response.getWriter().write(output);
     }
   }
 
@@ -95,14 +96,14 @@ public class ProxyHandler {
                     HttpServletResponse response,
                     GadgetSigner signer)
       throws ServletException, IOException {
-
     GadgetToken token = extractAndValidateToken(request, signer);
-    URL originalUrl = extractAndValidateUrl(request);
+    URL originalUrl = validateUrl(request.getParameter("url"));
     URL signedUrl = signUrl(originalUrl, token, request);
 
     // TODO: Fetcher needs to handle variety of HTTP methods.
-    RemoteContent results = fetchContent(signedUrl, request,
-        new ProcessingOptions());
+    RemoteContent results = fetchContent(signedUrl,
+                                         request,
+                                         new HttpProcessingOptions(request));
 
     int status = results.getHttpStatusCode();
     response.setStatus(status);
@@ -123,56 +124,114 @@ public class ProxyHandler {
           }
         }
       }
-      response.getOutputStream().write(results.getByteArray());
+      response.getOutputStream().write(
+          InputStreamConsumer.readToByteArray(results.getResponse()));
     }
   }
 
   /**
    * Fetch the content for a request
    */
-  private RemoteContent fetchContent(URL signedUrl, HttpServletRequest request,
-      ProcessingOptions procOptions) throws ServletException {
+  @SuppressWarnings("unchecked")
+  private RemoteContent fetchContent(URL signedUrl,
+                                     HttpServletRequest request,
+                                     ProcessingOptions procOptions)
+      throws ServletException {
+    String encoding = request.getCharacterEncoding();
+    if (encoding == null) {
+      encoding = "UTF-8";
+    }
     try {
       if ("POST".equals(request.getMethod())) {
-        String data = request.getParameter("postData");
-        return fetcher.fetchByPost(signedUrl,
-            URLDecoder.decode(data, request.getCharacterEncoding()).getBytes(),
-            procOptions);
+        String method = getParameter(request, "httpMethod", "GET");
+        String postData = URLDecoder.decode(
+            getParameter(request, "postData", ""), encoding);
+
+        Map<String, List<String>> headers;
+        String headerData = request.getParameter("headers");
+        if (headerData == null) {
+          headers = Collections.emptyMap();
+        } else {
+          if (headerData.length() == 0) {
+            headers = Collections.emptyMap();
+          } else {
+            // We actually only accept single key value mappings now.
+            headers = new HashMap<String, List<String>>();
+            String[] headerList = headerData.split("&");
+            for (String header : headerList) {
+              String[] parts = header.split("=");
+              if (parts.length != 2) {
+                // Malformed headers
+                return RemoteContent.ERROR;
+              }
+              headers.put(URLDecoder.decode(parts[0], encoding),
+                  Arrays.asList(URLDecoder.decode(parts[1], encoding)));
+            }
+          }
+        }
+
+        removeUnsafeHeaders(headers);
+
+        RemoteContentRequest req = new RemoteContentRequest(
+            signedUrl.toURI(), headers, postData.getBytes());
+        if ("POST".equals(method)) {
+          return fetcher.fetchByPost(req, procOptions);
+        } else {
+          return fetcher.fetch(req, procOptions);
+        }
       } else {
-        return fetcher.fetch(signedUrl, new ProcessingOptions());
+        Map<String, List<String>> headers = new HashMap<String, List<String>>();
+        Enumeration<String> headerNames = request.getHeaderNames();
+        while (headerNames.hasMoreElements()) {
+          String header = headerNames.nextElement();
+          headers.put(header, Collections.list(request.getHeaders(header)));
+        }
+        removeUnsafeHeaders(headers);
+        RemoteContentRequest req
+            = new RemoteContentRequest(signedUrl.toURI(), headers);
+        return fetcher.fetch(req, procOptions);
       }
-    } catch (UnsupportedEncodingException uee) {
-      throw new ServletException(uee);
+    } catch (UnsupportedEncodingException e) {
+      throw new ServletException(e);
+    } catch (URISyntaxException e) {
+      throw new ServletException(e);
     }
   }
 
   /**
-   * Gets the url= parameter from the request and applies some basic sanity
-   * checking.
+   * Removes unsafe headers from the header set.
+   * @param headers
+   */
+  private void removeUnsafeHeaders(Map<String, List<String>> headers) {
+    // Host must be removed.
+    final String[] badHeaders = new String[] {
+        // No legitimate reason to over ride these.
+        // TODO: We probably need to test variations as well.
+        "Host", "Accept-Encoding", "Accept"
+    };
+    for (String bad : badHeaders) {
+      headers.remove(bad);
+    }
+  }
+
+  /**
+   * Validates that the given url is valid for this reques.t
    *
-   * @param request The HTTP request from the browser.
+   * @param url
    * @return A URL object of the URL
    * @throws ServletException if the URL fails security checks or is malformed.
    */
-  private URL extractAndValidateUrl(HttpServletRequest request)
-      throws ServletException {
-    String url = request.getParameter("url");
+  private URL validateUrl(String url) throws ServletException {
     if (url == null) {
-      throw new ServletException("Missing url parameter");
+      throw new ServletException("url parameter is missing.");
     }
-
     try {
-      URI origin = new URI(request.getParameter("url"));
+      URI origin = new URI(url);
       if (origin.getScheme() == null) {
-        // No scheme, assume it was double-encoded.
-        origin = new URI(URLDecoder.decode(request.getParameter("url"),
-                         request.getCharacterEncoding()));
-        if (origin.getScheme() == null) {
-          throw new ServletException("Invalid URL " + origin.toString());
-        }
+        throw new ServletException("Invalid URL " + origin.toString());
       }
       if (!origin.getScheme().equals("http")) {
-        throw new ServletException("Unsupported protocol: " + origin.getScheme());
+        throw new ServletException("Unsupported scheme: " + origin.getScheme());
       }
       if (origin.getPath() == null || origin.getPath().length() == 0) {
         // Forcibly set the path to "/" if it is empty
@@ -187,8 +246,6 @@ public class ProxyHandler {
       throw new ServletException("Malformed URL " + use.getMessage());
     } catch (MalformedURLException mfe) {
       throw new ServletException("Malformed URL " + mfe.getMessage());
-    } catch (UnsupportedEncodingException uee) {
-      throw new ServletException("Unsupported encoding " + uee.getMessage());
     }
   }
 
@@ -202,10 +259,7 @@ public class ProxyHandler {
       if (signer == null) {
         return null;
       }
-      String token = request.getParameter("st");
-      if (token == null) {
-        token = "";
-      }
+      String token = getParameter(request, "st", "");
       return signer.createToken(token);
     } catch (GadgetException ge) {
       throw new ServletException(ge);
@@ -213,34 +267,43 @@ public class ProxyHandler {
   }
 
   /**
-   * Sets HTTP headers that instruct the browser to cache for 2 hours.
+   * Sets HTTP caching headers
    *
    * @param response The HTTP response
    */
   private void setCachingHeaders(HttpServletResponse response) {
-    // TODO: figure out why we're not using the same amount of time for these
-    // headers.
-    response.setHeader("Cache-Control", "public,max-age=" + ONE_HOUR_IN_SECS);
-    response.setDateHeader("Expires", System.currentTimeMillis()
-                                     + TWO_HOURS_IN_MS);
+    // TODO: Re-implement caching behavior if appropriate.
+    response.setHeader("Cache-Control", "private; max-age=0");
+    response.setDateHeader("Expires", System.currentTimeMillis() - 30);
   }
 
   /**
    * Sign a URL with a GadgetToken if needed
-   * @return
+   * @return The signed url.
    */
+  @SuppressWarnings("unchecked")
   private URL signUrl(URL originalUrl, GadgetToken token,
       HttpServletRequest request) throws ServletException {
     try {
-      if (token == null ||
-          !"signed".equals(request.getParameter("authz"))) {
+      if (token == null || !"signed".equals(request.getParameter("authz"))) {
         return originalUrl;
       }
-      return token.signUrl(originalUrl, "GET", // TODO: request.getMethod()
-          request.getParameterMap());
+      String method = getParameter(request, "httpMethod", "GET");
+      return token.signUrl(originalUrl, method, request.getParameterMap());
     } catch (GadgetException ge) {
       throw new ServletException(ge);
     }
   }
 
+  /**
+   * Extracts the first parameter from the parameter map with the given name.
+   * @param request
+   * @param name
+   * @return The parameter, if found, or defaultValue
+   */
+  private static String getParameter(HttpServletRequest request,
+                                     String name, String defaultValue) {
+    String ret = request.getParameter(name);
+    return ret == null ? defaultValue : ret;
+  }
 }

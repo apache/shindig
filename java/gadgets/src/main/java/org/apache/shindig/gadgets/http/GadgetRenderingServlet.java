@@ -38,6 +38,7 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -244,7 +245,8 @@ public class GadgetRenderingServlet extends HttpServlet {
 
     // Preserve existing query string parameters.
     URI redirURI = gadget.getContentHref();
-    StringBuilder query = new StringBuilder(redirURI.getQuery());
+    String queryStr = redirURI.getQuery();
+    StringBuilder query = new StringBuilder(queryStr == null ? "" : queryStr);
 
     // TODO: userprefs on the fragment rather than query string
     query.append(getPrefsQueryString(gadget.getUserPrefValues()));
@@ -252,7 +254,8 @@ public class GadgetRenderingServlet extends HttpServlet {
     String[] libs;
     String forcedLibs = options.getForcedJsLibs();
     if (forcedLibs == null) {
-      libs = (String[])gadget.getRequires().keySet().toArray();
+      Set<String> reqs = gadget.getRequires().keySet();
+      libs = reqs.toArray(new String[reqs.size()]);
     } else {
       libs = forcedLibs.split(":");
     }

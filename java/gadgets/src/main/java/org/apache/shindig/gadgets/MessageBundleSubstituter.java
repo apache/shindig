@@ -7,7 +7,7 @@
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
@@ -20,7 +20,6 @@ package org.apache.shindig.gadgets;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.net.MalformedURLException;
 import java.net.URI;
 import java.util.List;
 import java.util.Locale;
@@ -87,10 +86,9 @@ class MessageBundleSubstituterFeature implements GadgetFeature {
         bundle = context.getMessageBundleCache().get(uri.toString());
         if (bundle == null) {
           RemoteContent data = null;
-          try {
-            data = context.getHttpFetcher().fetch(uri.toURL(),
-                                                  context.getOptions());
-          } catch (MalformedURLException e) {
+          data = context.getHttpFetcher().fetch(new RemoteContentRequest(uri),
+                                                context.getOptions());
+          if (data.getHttpStatusCode() != RemoteContent.SC_OK) {
             throw new GadgetException(
                 GadgetException.Code.FAILED_TO_RETRIEVE_CONTENT,
                 String.format("Malformed message bundle URL: %s",

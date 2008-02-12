@@ -106,7 +106,7 @@ gadgets.io = function() {
         } else {
           var parser = new DOMParser();
           dom = parser.parseFromString(resp.text, "text/xml");
-          if ("parsererror" == dom.documentElement.nodeName) {
+          if ("parsererror" === dom.documentElement.nodeName) {
             resp.errors.push("failed to parse XML");
           } else {
             resp.data = dom;
@@ -146,34 +146,36 @@ gadgets.io = function() {
       // gadgets.io.RequestParameters, and validate them.
       var xhr = makeXhr();
       var params = opt_params || {};
-      var newUrl = config.jsonProxyUrl.replace("%url%",
-          encodeURIComponent(url));
+
+      xhr.open("POST", config.jsonProxyUrl, true);
+      if (callback) {
+        xhr.onreadystatechange = gadgets.util.makeClosure(
+            null, processResponse, url, callback, params, xhr);
+      }
+      // We always send a POST request; we just hide the details.
+      xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
 
       // Check if authorization is requested
+      var auth, st;
       if (params.AUTHORIZATION && params.AUTHORIZATION !== "NONE") {
-        newUrl += "&authz=" + params.AUTHORIZATION.toLowerCase();
-        // Add the security-token if available
-        if (gadgets.util.getUrlParameters()["st"]) {
-          newUrl += "&st=" + gadgets.util.getUrlParameters()["st"];
-        }
+        auth = params.AUTHORIZATION.toLowerCase();
+        st = gadgets.util.getUrlParameters().st;
       }
-      // TODO: Fetcher cannot distinguish between GET & POST yet.
-      xhr.open(params.METHOD || "GET", newUrl, true);
-      if (callback) {
-        xhr.onreadystatechange = gadgets.util.makeClosure(null,
-            processResponse, url, callback, params, xhr);
+
+      var headers = params.HEADERS || {};
+      if (params.METHOD === "POST" && !headers["Content-Type"]) {
+        headers["Content-Type"] = "application/x-www-form-urlencoded";
       }
-      if (params.METHOD === "POST") {
-        xhr.setRequestHeader('Content-Type',
-            'application/x-www-form-urlencoded');
-        if (params.POST_DATA) {
-          xhr.send("postData=" + encodeURIComponent(params.POST_DATA));
-        } else {
-          xhr.send("postData=");
-        }
-      } else {
-        xhr.send(null);
-      }
+
+      var postData = {
+        url: url,
+        httpMethod : params.METHOD || "GET",
+        headers: gadgets.io.encodeValues(headers),
+        postData : params.POST_DATA || "",
+        authz : auth || "",
+        st : st || "",
+      };
+      xhr.send(gadgets.io.encodeValues(postData));
     },
 
     /**
@@ -181,18 +183,22 @@ gadgets.io = function() {
      * (key=value&amp;...)
      *
      * @param {Object} fields The post fields you wish to encode
-     * @return {String} The processed post data; this will include a trailing
-     *    ampersand (&)
+     * @return {String} The processed post data in www-form-urlencoded format.
      *
      * @member gadgets.io
      */
     encodeValues : function (fields) {
       var buf = [];
+      var first = false;
       for (var i in fields) {
+        if (!first) {
+          first = true;
+        } else {
+          buf.push("&");
+        }
         buf.push(encodeURIComponent(i));
         buf.push("=");
         buf.push(encodeURIComponent(fields[i]));
-        buf.push("&");
       }
       return buf.join("");
     },
