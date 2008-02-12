@@ -37,6 +37,22 @@ opensocial.ContentRequestParameters.AuthenticationType = {
   AUTHENTICATED : gadgets.io.AuthorizationType.AUTHENTICATED
 };
 
+
+opensocial.Person.prototype.getFieldOld = opensocial.Person.prototype.getField;
+
+opensocial.Person.prototype.getField = function(fieldname) {
+    if (fieldname == opensocial.Person.Field.NAME) {
+        return this.getFieldOld(opensocial.Person.Field.NAME).getField(opensocial.Name.Field.UNSTRUCTURED);
+    } else {
+        return this.getFieldOld(fieldname);
+    }
+}
+
+opensocial.Person.prototype.getDisplayNameOld = opensocial.Person.getDisplayName;
+opensocial.Person.prototype.getDisplayName = function() {
+    return this.getFieldOld(opensocial.Person.Field.NAME).getField(opensocial.Name.Field.UNSTRUCTURED);
+}
+
 opensocial.newActivityOld = opensocial.newActivity;
 opensocial.newActivity = function(title, opt_params) {
   opt_params['title'] = title;
