@@ -59,8 +59,7 @@ public class CajaContentFilter implements GadgetContentFilter {
         throw new UriCallbackException(externalReference);
       }
 
-      public URI rewrite(ExternalReference externalReference, String string)
-          throws UriCallbackException {
+      public URI rewrite(ExternalReference externalReference, String string) {
         return externalReference.getUri();
       }
     };

@@ -72,8 +72,10 @@ public class GadgetServerTest extends EasyMockTestCase {
     RemoteContent results = new RemoteContent(200, DATETIME_XML.getBytes(), null);
     ProcessingOptions options = new ProcessingOptions();
 
+    RemoteContentRequest req = new RemoteContentRequest(DATETIME_URI);
+
     expect(specCache.get(eq(DATETIME_URI_STRING))).andReturn(null);
-    expect(fetcher.fetch(eq(DATETIME_URI.toURL()),
+    expect(fetcher.fetch(eq(req),
                          eq(options))).andReturn(results);
     specCache.put(eq(DATETIME_URI_STRING), isA(GadgetSpec.class));
     replay();
@@ -99,8 +101,10 @@ public class GadgetServerTest extends EasyMockTestCase {
     RemoteContent results = new RemoteContent(200, DATETIME_XML.getBytes(), null);
     ProcessingOptions options = new ProcessingOptions();
 
+    RemoteContentRequest req = new RemoteContentRequest(DATETIME_URI);
+
     expect(specCache.get(eq(DATETIME_URI_STRING))).andReturn(null);
-    expect(fetcher.fetch(eq(DATETIME_URI.toURL()),
+    expect(fetcher.fetch(eq(req),
                          eq(options))).andReturn(results);
     specCache.put(eq(DATETIME_URI_STRING), isA(GadgetSpec.class));
     replay();

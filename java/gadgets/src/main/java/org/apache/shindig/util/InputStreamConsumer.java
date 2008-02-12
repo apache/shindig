@@ -21,31 +21,56 @@ package org.apache.shindig.util;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 
 /**
- * Used to consume an entire input stream. Don't use this for network
- * streams or any other stream that doesn't have a known length. This is
- * intended for reading resources from jars and the local file system only.
+ * Used to consume entire input streams and transform them into data buffers.
+ * These are all blocking routines and should never be called from a thread
+ * that will cause deadlock.
  */
 public class InputStreamConsumer {
 
   /**
-   * Loads content and returns it as a raw byte array.
+   * Consumes the entire contents of the stream. Only safe to use if you are
+   * sure that you're consuming a fixed-size buffer.
    * @param is
    * @return The contents of the stream.
    * @throws IOException on stream reading error.
    */
   public static byte[] readToByteArray(InputStream is) throws IOException {
-    ByteArrayOutputStream baos = new ByteArrayOutputStream();
-    byte[] buf = new byte[8192];
-    int read = 0;
+    return readToByteArray(is, Integer.MAX_VALUE);
+  }
 
-    while ((read = is.read(buf)) > 0) {
-      baos.write(buf, 0, read);
+  /**
+   * Reads at most maxBytes bytes from the stream.
+   * @param is
+   * @param maxBytes
+   * @return The bytes that were read
+   * @throws IOException
+   */
+  public static byte[] readToByteArray(InputStream is, int maxBytes)
+      throws IOException {
+    ByteArrayOutputStream out = new ByteArrayOutputStream();
+    byte[] chunk = new byte[8192];
+    int chunkSize;
+    while (out.size() < maxBytes && (chunkSize = is.read(chunk)) != -1) {
+      out.write(chunk, 0, chunkSize);
     }
+    return out.toByteArray();
+  }
 
-    return baos.toByteArray();
+  /**
+   * Loads content from the given input stream as a UTF-8-encoded string.
+   * Use only when you're sure of the finite length of the input stream.
+   * If you're not sure, use {@code readToString(InputStream, maxBytes)}.
+   *
+   * @param is
+   * @return The contents of the stream.
+   * @throws IOException on stream reading error.
+   */
+  public static String readToString(InputStream is) throws IOException {
+    return readToString(is, Integer.MAX_VALUE);
   }
 
   /**
@@ -55,13 +80,29 @@ public class InputStreamConsumer {
    * @return The contents of the stream.
    * @throws IOException on stream reading error.
    */
-  public static String readToString(InputStream is) throws IOException {
-    byte[] bytes = readToByteArray(is);
+  public static String readToString(InputStream is, int maxBytes)
+      throws IOException {
+    byte[] bytes = readToByteArray(is, maxBytes);
     try {
       return new String(bytes, "UTF-8");
     } catch (UnsupportedEncodingException e) {
       // UTF-8 is required by the Java spec.
       throw new RuntimeException("UTF-8 not supported!", e);
     }
+  }
+
+  /**
+   * Consumes all of is and sends it to os. This is not the same as
+   * Piped Input / Output streams because it reads the entire input first.
+   * This means that you won't get deadlock, but it also means that this is
+   * not necessarily suitable for normal piping tasks. Use a piped stream for
+   * that sort of work.
+   *
+   * @param is
+   * @param os
+   * @throws IOException
+   */
+  public static void pipe(InputStream is, OutputStream os) throws IOException {
+    os.write(readToByteArray(is));
   }
 }

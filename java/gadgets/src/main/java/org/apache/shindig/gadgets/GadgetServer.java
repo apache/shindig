@@ -19,7 +19,6 @@ package org.apache.shindig.gadgets;
 
 import org.apache.shindig.util.Check;
 
-import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -322,10 +321,9 @@ public class GadgetServer {
         return;
       }
 
-      RemoteContent xml = null;
-      try {
-        xml = fetcher.fetch(gadgetId.getURI().toURL(), wc.context.getOptions());
-      } catch (MalformedURLException e) {
+      RemoteContentRequest req = new RemoteContentRequest(gadgetId.getURI());
+      RemoteContent xml = fetcher.fetch(req, wc.context.getOptions());
+      if (xml.getHttpStatusCode() != RemoteContent.SC_OK) {
         throw new GadgetException(
             GadgetException.Code.FAILED_TO_RETRIEVE_CONTENT,
             "Malformed gadget spec URL: " + gadgetId.getURI().toString());

@@ -17,11 +17,10 @@
  */
 package org.apache.shindig.gadgets;
 
-import java.io.ByteArrayOutputStream;
+import org.apache.shindig.util.InputStreamConsumer;
+
 import java.io.IOException;
-import java.io.InputStream;
 import java.net.HttpURLConnection;
-import java.net.URL;
 import java.util.List;
 import java.util.Map;
 
@@ -43,67 +42,82 @@ public class BasicRemoteContentFetcher implements RemoteContentFetcher {
     this.maxObjSize = maxObjSize;
   }
 
-  /** {@inheritDoc} */
-  public RemoteContent fetch(URL url, ProcessingOptions options) {
-    ByteArrayOutputStream out = new ByteArrayOutputStream();
-
-    int responseCode;
+  /**
+   * Initializes the connection.
+   *
+   * @param request
+   * @param options
+   * @return The opened connection
+   * @throws IOException
+   */
+  private HttpURLConnection getConnection(RemoteContentRequest request,
+      ProcessingOptions options) throws IOException {
     HttpURLConnection fetcher;
-    Map<String, List<String>> headers = null;
-
-    try {
-      fetcher = (HttpURLConnection) url.openConnection();
-      fetcher.setInstanceFollowRedirects(true);
-      fetcher.setConnectTimeout(CONNECT_TIMEOUT_MS);
-
-      responseCode = fetcher.getResponseCode();
-      headers = fetcher.getHeaderFields();
-
-      byte[] chunk = new byte[8192];
-      int chunkSize;
-      InputStream in = fetcher.getInputStream();
-      while (out.size() < maxObjSize && (chunkSize = in.read(chunk)) != -1) {
-        out.write(chunk, 0, chunkSize);
+    fetcher = (HttpURLConnection)request.getUri().toURL().openConnection();
+    fetcher.setInstanceFollowRedirects(true);
+    fetcher.setConnectTimeout(CONNECT_TIMEOUT_MS);
+    Map<String, List<String>> reqHeaders = request.getAllHeaders();
+    for (Map.Entry<String, List<String>> entry : reqHeaders.entrySet()) {
+      List<String> value = entry.getValue();
+      if (value.size() == 1) {
+        fetcher.setRequestProperty(entry.getKey(), value.get(0));
+      } else {
+        StringBuilder headerList = new StringBuilder();
+        boolean first = false;
+        for (String val : value) {
+          if (!first) {
+            first = true;
+          } else {
+            headerList.append(",");
+          }
+          headerList.append(val);
+        }
+        fetcher.setRequestProperty(entry.getKey(), headerList.toString());
       }
-    } catch (IOException e) {
-      responseCode = 500;
     }
-
-    return new RemoteContent(responseCode, out.toByteArray(), headers);
+    fetcher.setDefaultUseCaches(!options.getIgnoreCache());
+    return fetcher;
   }
 
-  public RemoteContent fetchByPost(URL url, byte[] postData,
-      ProcessingOptions options) {
-    ByteArrayOutputStream out = new ByteArrayOutputStream();
-    
-    int responseCode;
-    HttpURLConnection fetcher;
-    Map<String, List<String>> headers = null;
+  /**
+   * @param fetcher
+   * @return A RemoteContent object made by consuming the response of the
+   *     given HttpURLConnection.
+   */
+  private RemoteContent makeResponse(HttpURLConnection fetcher)
+      throws IOException {
+    Map<String, List<String>> headers = fetcher.getHeaderFields();
+    int responseCode = fetcher.getResponseCode();
+    byte[] body = InputStreamConsumer.readToByteArray(
+        fetcher.getInputStream(), maxObjSize);
+    return new RemoteContent(responseCode, body, headers);
+  }
 
+  /** {@inheritDoc} */
+  public RemoteContent fetch(RemoteContentRequest request,
+                             ProcessingOptions options) {
     try {
-      fetcher = (HttpURLConnection) url.openConnection();
+      return makeResponse(getConnection(request, options));
+    } catch (IOException e) {
+      return RemoteContent.ERROR;
+    }
+  }
+
+  public RemoteContent fetchByPost(RemoteContentRequest request,
+                                   ProcessingOptions options) {
+    try {
+      HttpURLConnection fetcher = getConnection(request, options);
       fetcher.setRequestMethod("POST");
-      fetcher.setInstanceFollowRedirects(true);
-      fetcher.setConnectTimeout(CONNECT_TIMEOUT_MS);
-      fetcher.setRequestProperty("Content-Length", String.valueOf(postData.length));
+      fetcher.setRequestProperty("Content-Length",
+                                 String.valueOf(request.getPostBodyLength()));
       fetcher.setUseCaches(false);
       fetcher.setDoInput(true);
       fetcher.setDoOutput(true);
-      fetcher.getOutputStream().write(postData);
-
-      responseCode = fetcher.getResponseCode();
-      headers = fetcher.getHeaderFields();
-
-      byte[] chunk = new byte[8192];
-      int chunkSize;
-      InputStream in = fetcher.getInputStream();
-      while (out.size() < maxObjSize && (chunkSize = in.read(chunk)) != -1) {
-        out.write(chunk, 0, chunkSize);
-      }
+      InputStreamConsumer.pipe(request.getPostBody(),
+                               fetcher.getOutputStream());
+      return makeResponse(fetcher);
     } catch (IOException e) {
-      responseCode = 500;
+      return RemoteContent.ERROR;
     }
-
-    return new RemoteContent(responseCode, out.toByteArray(), headers);
   }
 }

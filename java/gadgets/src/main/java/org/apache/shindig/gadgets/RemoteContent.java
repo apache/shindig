@@ -17,10 +17,12 @@
  */
 package org.apache.shindig.gadgets;
 
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -28,9 +30,15 @@ import java.util.Map;
  * Represents the results of an HTTP content retrieval operation.
  */
 public class RemoteContent {
+  // Replicate HTTP status codes here.
+  public final static int SC_OK = 200;
+  public final static int SC_INTERNAL_SERVER_ERROR = 500;
+
   private final int httpStatusCode;
   private static final String DEFAULT_ENCODING = "UTF-8";
   private final String encoding;
+
+  public static final RemoteContent ERROR = new RemoteContent();
 
   // Used to lazily convert to a string representation of the input.
   private String responseString = null;
@@ -38,8 +46,18 @@ public class RemoteContent {
   private final Map<String, List<String>> headers;
 
   /**
+   * Create a dummy empty map. Access via RemoteContent.ERROR
+   */
+  private RemoteContent() {
+    this.httpStatusCode = SC_INTERNAL_SERVER_ERROR;
+    this.responseBytes = new byte[0];
+    this.encoding = DEFAULT_ENCODING;
+    this.headers = Collections.emptyMap();
+  }
+
+  /**
    * @param httpStatusCode
-   * @param resultBody
+   * @param responseBytes
    * @param headers May be null.
    */
   public RemoteContent(int httpStatusCode, byte[] responseBytes,
@@ -48,22 +66,22 @@ public class RemoteContent {
     if (responseBytes == null) {
       this.responseBytes = new byte[0];
     } else {
-      this.responseBytes = responseBytes;
+      this.responseBytes = new byte[responseBytes.length];
+      System.arraycopy(
+          responseBytes, 0, this.responseBytes, 0, responseBytes.length);
     }
 
-    Map<String, List<String>> tempHeaders = new HashMap<String, List<String>>();
-
-    if (headers != null) {
-      for (Map.Entry<String, List<String>> header : headers.entrySet()) {
-        List<String> values = new LinkedList<String>();
-        for (String value : header.getValue()) {
-          values.add(value);
-        }
-        tempHeaders.put(header.getKey(), values);
+    if (headers == null) {
+      this.headers = Collections.emptyMap();
+    } else {
+      Map<String, List<String>> tmpHeaders
+          = new HashMap<String, List<String>>();
+      for (Map.Entry<String, List<String>> entry : headers.entrySet()) {
+        List<String> newList = new ArrayList<String>(entry.getValue());
+        tmpHeaders.put(entry.getKey(), Collections.unmodifiableList(newList));
       }
+      this.headers = Collections.unmodifiableMap(tmpHeaders);
     }
-
-    this.headers = Collections.unmodifiableMap(tempHeaders);
     this.encoding = detectEncoding();
   }
 
@@ -90,12 +108,18 @@ public class RemoteContent {
     return httpStatusCode;
   }
 
-  public byte[] getByteArray() {
-    return responseBytes;
-  }
-
+  /**
+   * @return The encoding of the response body, if we're able to determine it.
+   */
   public String getEncoding() {
     return encoding;
+  }
+
+  /**
+   * @return An input stream suitable for reading the entirety of the response.
+   */
+  public InputStream getResponse() {
+    return new ByteArrayInputStream(responseBytes);
   }
 
   /**
@@ -138,7 +162,7 @@ public class RemoteContent {
     if (ret == null) {
       return Collections.emptyList();
     } else {
-      return Collections.unmodifiableList(ret);
+      return ret;
     }
   }
 

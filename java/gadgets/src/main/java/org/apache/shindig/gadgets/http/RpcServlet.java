@@ -19,9 +19,10 @@
 
 package org.apache.shindig.gadgets.http;
 
+import org.apache.shindig.util.InputStreamConsumer;
+
 import org.json.JSONObject;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.logging.Level;
@@ -58,19 +59,12 @@ public class RpcServlet extends HttpServlet {
       return;
     }
 
-    ServletInputStream reader = request.getInputStream();
-    ByteArrayOutputStream os = new ByteArrayOutputStream();
-    byte[] buf = new byte[1024 * 8];
-    int read = 0;
-
-    while ((read = reader.read(buf, 0, buf.length)) > 0) {
-      os.write(buf, 0, read);
-      if (os.size() > length) {
-        // Bad request, we're leaving now.
-        logger.info("Wrong size. Length: " + length + " real: " + os.size());
-        response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-        return;
-      }
+    ServletInputStream is = request.getInputStream();
+    byte[] body = InputStreamConsumer.readToByteArray(is, length);
+    if (body.length != length) {
+      logger.info("Wrong size. Length: " + length + " real: " + body.length);
+      response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+      return;
     }
 
     try {
@@ -78,7 +72,7 @@ public class RpcServlet extends HttpServlet {
       if (encoding == null) {
         encoding = "UTF-8";
       }
-      String postBody = new String(os.toByteArray(), encoding);
+      String postBody = new String(body, encoding);
       JsonRpcRequest req = new JsonRpcRequest(postBody);
       JSONObject out = req.process(state);
       response.setStatus(HttpServletResponse.SC_OK);

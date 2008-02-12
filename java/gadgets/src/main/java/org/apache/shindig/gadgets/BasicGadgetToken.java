@@ -19,6 +19,7 @@
 package org.apache.shindig.gadgets;
 
 import java.net.URL;
+import java.util.Collection;
 import java.util.Map;
 
 /**
@@ -47,8 +48,8 @@ class BasicGadgetToken implements GadgetToken {
    * {@inheritDoc}
    * Signer that does not sign.
    */
-  public URL signUrl(URL uri, String httpMethod, Map parameters)
-      throws GadgetException {
+  public URL signUrl(URL uri, String httpMethod,
+      Map<String, Collection<String>> parameters) {
     return uri;
   }
 }

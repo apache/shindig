@@ -19,6 +19,7 @@
 package org.apache.shindig.gadgets;
 
 import java.net.URL;
+import java.util.Collection;
 import java.util.Map;
 
 /**
@@ -45,6 +46,6 @@ public interface GadgetToken {
    * @return The signed URL
    * @throws GadgetException
    */
-  public URL signUrl(URL uri, String httpMethod, Map parameters)
-      throws GadgetException;
+  public URL signUrl(URL uri, String httpMethod,
+      Map<String, Collection<String>> parameters) throws GadgetException;
 }
