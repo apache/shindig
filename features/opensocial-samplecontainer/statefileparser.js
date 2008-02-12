@@ -193,7 +193,8 @@ StateFileParser.onLoadState = function(xmlState, stateUrl, gadgetMessageDiv,
 StateFileParser.loadPerson = function(container, xmlNode, isOwner, isViewer) {
   var fields = {
     'id' : $(xmlNode).attr(opensocial.Person.Field.ID),
-    'name' : $(xmlNode).attr(opensocial.Person.Field.NAME),
+    'name' : new opensocial.Name(
+        {'unstructured' : $(xmlNode).attr(opensocial.Person.Field.NAME)}),
     'thumbnailUrl' : $(xmlNode).attr(opensocial.Person.Field.THUMBNAIL_URL),
     'profileUrl' : $(xmlNode).attr(opensocial.Person.Field.PROFILE_URL)};
   return container.newPerson(fields, isOwner, isViewer);
@@ -328,11 +329,19 @@ StateFileParser.dumpPerson = function(personObj) {
   xmlText += StateFileParser.dumpPersonField(personObj,
       opensocial.Person.Field.ID);
   xmlText += StateFileParser.dumpPersonField(personObj,
-      opensocial.Person.Field.NAME);
-  xmlText += StateFileParser.dumpPersonField(personObj,
       opensocial.Person.Field.THUMBNAIL_URL);
   xmlText += StateFileParser.dumpPersonField(personObj,
       opensocial.Person.Field.PROFILE_URL);
+
+  // TODO: Change the sample container to understand all of the name fields
+  var name = personObj.getField(opensocial.Person.Field.NAME);
+  if (name) {
+    var unstructured = name.getField(opensocial.Name.Field.UNSTRUCTURED);
+    if (unstructured) {
+      xmlText += ' name="' + unstructured + '"';
+    }
+  }
+
   xmlText += '></person>\n';
   return xmlText;
 };

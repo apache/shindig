@@ -480,6 +480,13 @@ opensocial.Person.prototype.getId = function() {
 };
 
 
+var ORDERED_NAME_FIELDS_ = [
+    opensocial.Name.Field.HONORIFIC_PREFIX,
+    opensocial.Name.Field.GIVEN_NAME,
+    opensocial.Name.Field.FAMILY_NAME,
+    opensocial.Name.Field.HONORIFIC_SUFFIX,
+    opensocial.Name.Field.ADDITIONAL_NAME];
+
 /**
  * Gets a text display name for this person; guaranteed to return
  * a useful string.
@@ -487,27 +494,27 @@ opensocial.Person.prototype.getId = function() {
  * @return {String} The display name
  */
 opensocial.Person.prototype.getDisplayName = function() {
-  var name = '';
-  var s = '';
-
   var name = this.getField(opensocial.Person.Field.NAME);
-  // Try unstructed field first
-  s = name.getField(opensocial.Name.Field.UNSTRUCTURED);
+  if (name) {
+    // Try unstructured field first
+    var unstructured = name.getField(opensocial.Name.Field.UNSTRUCTURED);
+    if (unstructured) {
+      return unstructured;
+    }
 
-  if (s) return(s);
-
-  // Next try to construct the name from the individual components
-  s = '';
-  for (var field in [name.getField(opensocial.Name.Field.HONORIFIC_PREFIX),
-                     name.getField(opensocial.Name.Field.GIVEN_NAME),
-                     name.getField(opensocial.Name.Field.FAMILY_NAME),
-                     name.getField(opensocial.Name.Field.HONORIFIC_SUFFIX),
-                     name.getField(opensocial.Name.Field.ADDITIONAL_NAME)]) {
-      if (name.getField(field)) {
-          s += name.getField(field) + ' ';
+    // Next try to construct the name from the individual components
+    var fullName = '';
+    for (var i = 0; i < ORDERED_NAME_FIELDS_.length; i++) {
+      var nameValue = name.getField(ORDERED_NAME_FIELDS_[i]);
+      if (nameValue) {
+        fullName += nameValue + ' ';
       }
+    }
+    return fullName.replace(/^\s+|\s+$/g, '') ;
   }
-  return s.replace(/^\s+|\s+$/g, '') ;
+
+  // Finally, try the nickname field
+  return this.getField(opensocial.Person.Field.NICKNAME);
 };
 
 
