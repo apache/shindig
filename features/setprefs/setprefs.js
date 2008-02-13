@@ -42,7 +42,7 @@ gadgets.Prefs.prototype.set = function(key, value) {
     gadgets.prefs_.setPref(this.moduleId_, key, value);
   }
 
-  var modId = 'remote_module_' + this.getModuleId();
+  var modId = 'remote_iframe_' + this.getModuleId();
   var params = gadgets.util.getUrlParameters();
   var ifpcRelay = (params.parent || '') + '/ig/ifpc_relay';
   var ifpcArgs = Array.prototype.slice.call(arguments);

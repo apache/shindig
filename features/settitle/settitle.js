@@ -32,7 +32,7 @@ gadgets.window = gadgets.window || {};
  * @scope gadgets.window
  */
 gadgets.window.setTitle = function(title) {
-  var modId = 'remote_module_' + (new gadgets.Prefs()).getModuleId();
+  var modId = 'remote_iframe_' + (new gadgets.Prefs()).getModuleId();
   var ifpcRelay = gadgets.util.getUrlParameters().parent || '';
   gadgets.ifpc_.call(modId, 'set_title', [modId, title], ifpcRelay, null, '');
 };

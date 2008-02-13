@@ -126,7 +126,7 @@ gadgets.window.adjustHeight = function(opt_height) {
   // Only make the IFPC call if height has changed
   if (newHeight != gadgets.window.oldHeight_) {
     gadgets.window.oldHeight_ = newHeight;
-    var modId = 'remote_module_' + (new gadgets.Prefs()).getModuleId();
+    var modId = 'remote_iframe_' + (new gadgets.Prefs()).getModuleId();
     var ifpcRelay = gadgets.util.getUrlParameters().parent || '';
     gadgets.ifpc_.call(modId, "resize_iframe", [modId, newHeight],
       ifpcRelay, null, '');
