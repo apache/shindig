@@ -438,7 +438,7 @@ gadgets.IfrGadget = function(opt_params) {
 
 gadgets.IfrGadget.inherits(gadgets.Gadget);
 
-gadgets.IfrGadget.prototype.GADGET_IFRAME_PREFIX_ = 'remote_module_';
+gadgets.IfrGadget.prototype.GADGET_IFRAME_PREFIX_ = 'remote_iframe_';
 
 gadgets.IfrGadget.prototype.SYND = 'gadgets';
 
