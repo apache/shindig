@@ -97,7 +97,12 @@ opensocial.Container.prototype.getEnvironment = function() {};
  * @private
  */
 opensocial.Container.prototype.requestSendMessage = function(recipients,
-    message, opt_callback) {};
+    message, opt_callback) {
+  if (opt_callback) {
+    opt_callback(new opensocial.ResponseItem(
+        null, null, opensocial.ResponseItem.Error.NOT_IMPLEMENTED, null));
+  }
+};
 
 
 /**
@@ -125,7 +130,12 @@ opensocial.Container.prototype.requestSendMessage = function(recipients,
  * @private
  */
 opensocial.Container.prototype.requestShareApp = function(recipients, reason,
-    opt_callback) {};
+    opt_callback) {
+  if (opt_callback) {
+    opt_callback(new opensocial.ResponseItem(
+        null, null, opensocial.ResponseItem.Error.NOT_IMPLEMENTED, null));
+  }
+};
 
 
 /**
@@ -143,7 +153,12 @@ opensocial.Container.prototype.requestShareApp = function(recipients, reason,
  * @private
  */
 opensocial.Container.prototype.requestCreateActivity = function(activity,
-    priority, opt_callback) {};
+    priority, opt_callback) {
+  if (opt_callback) {
+    opt_callback(new opensocial.ResponseItem(
+        null, null, opensocial.ResponseItem.Error.NOT_IMPLEMENTED, null));
+  }
+};
 
 
 /**
@@ -155,7 +170,9 @@ opensocial.Container.prototype.requestCreateActivity = function(activity,
  *
  * @private
  */
-opensocial.Container.prototype.hasPermission = function(permission) {};
+opensocial.Container.prototype.hasPermission = function(permission) {
+  return false;
+};
 
 
 /**
@@ -172,7 +189,12 @@ opensocial.Container.prototype.hasPermission = function(permission) {};
  * @private
  */
 opensocial.Container.prototype.requestPermission = function(permissions, reason,
-    opt_callback) {};
+    opt_callback) {
+  if (opt_callback) {
+    opt_callback(new opensocial.ResponseItem(
+        null, null, opensocial.ResponseItem.Error.NOT_IMPLEMENTED, null));
+  }
+};
 
 
 /**
