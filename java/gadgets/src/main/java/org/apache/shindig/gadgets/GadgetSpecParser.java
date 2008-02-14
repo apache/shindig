@@ -251,9 +251,12 @@ public class GadgetSpecParser {
         // Must have both name and value.
         Node value = childAttrs.getNamedItem("value");
         Node displayValue = childAttrs.getNamedItem("display_value");
-        if (value != null && displayValue != null) {
-          up.enumValues.put(value.getTextContent(),
-                            displayValue.getTextContent());
+        if (value != null) {
+          String valueText = value.getTextContent();
+          String displayText = displayValue == null
+              ? valueText
+              : displayValue.getTextContent();
+          up.enumValues.put(valueText, displayText);
         }
       }
     }
