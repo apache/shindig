@@ -1,16 +1,16 @@
 <container>
   <viewer>
-    <person id="john.doe@mydomain.com" name="John Doe"></person>
+    <person id="john.doe" name="John Doe"></person>
   </viewer>
 
   <viewerFriends>
-     <person id="jane.doe@mydomain.com" name="Jane Doe"></person>
-     <person id="george.doe@mydomain.com" name="George Doe"></person>
+     <person id="jane.doe" name="Jane Doe"></person>
+     <person id="george.doe" name="George Doe"></person>
   </viewerFriends>
 
   <personAppData>
-    <data person="george.doe@mydomain.com" field="count">2</data>
-    <data person="jane.doe@mydomain.com" field="count">7</data>
+    <data person="george.doe" field="count">2</data>
+    <data person="jane.doe" field="count">7</data>
   </personAppData>
 
 </container>
