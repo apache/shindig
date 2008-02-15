@@ -168,6 +168,8 @@ opensocial.SampleContainer.prototype.getIds = function(idSpec) {
 };
 
 
+var keyRestrictionExpr = /^[\w\.\-]*$/g;
+
 /**
  * This method returns the data requested about the viewer and his/her friends.
  * Since this is an in memory container, it is merely returning the member
@@ -273,6 +275,13 @@ opensocial.SampleContainer.prototype.requestData = function(dataRequest,
       case 'UPDATE_PERSON_APP_DATA' :
         var userId = request.id;
         // Gadgets can only edit viewer data
+        if (!request.key.match(keyRestrictionExpr)) {
+          errorCode = opensocial.ResponseItem.Error.BAD_REQUEST;
+          errorMessage = "app data keys can only container alphanumeric "
+              + "characters, dots, dashes, or underscores";
+          break;
+        }
+
         if (userId == opensocial.DataRequest.PersonId.VIEWER
             || userId == this.viewer.getId()) {
           userId = this.viewer.getId();
