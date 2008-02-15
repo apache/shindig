@@ -440,7 +440,7 @@ gadgets.IfrGadget.inherits(gadgets.Gadget);
 
 gadgets.IfrGadget.prototype.GADGET_IFRAME_PREFIX_ = 'remote_iframe_';
 
-gadgets.IfrGadget.prototype.SYND = 'gadgets';
+gadgets.IfrGadget.prototype.SYND = 'shindig';
 
 gadgets.IfrGadget.prototype.cssClassGadget = 'gadgets-gadget';
 gadgets.IfrGadget.prototype.cssClassTitleBar = 'gadgets-gadget-title-bar';
