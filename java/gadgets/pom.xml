@@ -29,16 +29,10 @@ under the License.
   <artifactId>gadgets</artifactId>
   <version>1-SNAPSHOT</version>
   <packaging>war</packaging>
-
-  <name>Shindig Java Gadget Server</name>
-
-  <url>http://shindig.apache.org</url>
-  <licenses>
-    <license>
-      <name>Apache 2</name>
-      <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
-    </license>
-  </licenses>
+  <name>Apache Shindig Java Gadget Server</name>
+  <description>
+    Server part of Shindig for hosting OpenSocial applications.
+  </description>
 
   <scm>
     <connection>scm:svn:http://svn.apache.org/repos/asf/incubator/shindig/trunk/java/gadgets</connection>
