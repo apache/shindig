@@ -30,7 +30,7 @@ under the License.
   <version>1-SNAPSHOT</version>
   <packaging>war</packaging>
 
-  <name>Shindig Gadget Server</name>
+  <name>Shindig Java Gadget Server</name>
 
   <url>http://shindig.apache.org</url>
   <licenses>

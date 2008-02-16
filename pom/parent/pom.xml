@@ -32,7 +32,7 @@ under the License.
   <packaging>pom</packaging>
 
   <name>Apache Shindig Project Parent</name>
-  <description>Shindig will develop a JavaScript container and implementations of the backend APIs and proxy required for hosting OpenSocial applications.</description>
+  <description>Parent POM defining settings that can be used across Shindig</description>
   <url>http://incubator.apache.org/shindig</url>
   <inceptionYear>2007</inceptionYear>
 
@@ -52,9 +52,9 @@ under the License.
   </issueManagement>
 
   <scm>
-    <connection>scm:svn:http://svn.apache.org/repos/asf/incubator/shindig/trunk/pom</connection>
-    <developerConnection>scm:svn:https://svn.apache.org/repos/asf/incubator/shindig/trunk/pom</developerConnection>
-    <url>http://svn.apache.org/viewvc/incubator/shindig/trunk/pom</url>
+    <connection>scm:svn:http://svn.apache.org/repos/asf/incubator/shindig/trunk/pom/parent</connection>
+    <developerConnection>scm:svn:https://svn.apache.org/repos/asf/incubator/shindig/trunk/pom/parent</developerConnection>
+    <url>http://svn.apache.org/viewvc/incubator/shindig/trunk/pom/parent</url>
   </scm>
 
   <distributionManagement>
@@ -109,6 +109,8 @@ under the License.
           <configuration>
             <source>1.5</source>
             <target>1.5</target>
+            <showDeprecation>true</showDeprecation>
+            <compilerArgument>-Xlint:unchecked,deprecation,fallthrough,finally</compilerArgument>
           </configuration>
         </plugin>
         <plugin>
