@@ -48,6 +48,27 @@
         <configuration>
           <source>1.5</source>
           <target>1.5</target>
+          <fork>true</fork>
+          <compilerArguments>
+            <!-- A common distribution of hamcrest library includes .java files that are newer than the corresponding .class files.  Because sourcepath defaults to classpath, if we do not set this, then we end up with some of hamcrest's classes in our jar.  This is silly and not what we want, so we explicitly set sourcepath to something that is not a directory.  If you have a directory on your machine that is called /not_a_directory and contains .java files that are newer than .class files with a similar name that are imported by our code, then you will probably experience trouble. -->
+            <sourcepath>/not_a_directory</sourcepath>
+          </compilerArguments>
+        </configuration>
+      </plugin>
+      <plugin>
+        <artifactId>maven-source-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>attach-sources</id>
+            <phase>package</phase>
+            <goals>
+              <goal>jar</goal>
+            </goals>
+          </execution>
+        </executions>
+        <configuration>
+          <excludeResources>true</excludeResources>
+          <attach>true</attach>
         </configuration>
       </plugin>
       <plugin>
