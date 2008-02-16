@@ -31,7 +31,7 @@ under the License.
   <version>1-SNAPSHOT</version>
   <packaging>pom</packaging>
 
-  <name>Apache Shindig</name>
+  <name>Apache Shindig Project Parent</name>
   <description>Shindig will develop a JavaScript container and implementations of the backend APIs and proxy required for hosting OpenSocial applications.</description>
   <url>http://incubator.apache.org/shindig</url>
   <inceptionYear>2007</inceptionYear>
@@ -170,10 +170,6 @@ under the License.
       </plugins>
     </pluginManagement>
   </build>
-
-  <modules>
-      <module>java/gadgets</module>
-  </modules>
 
   <profiles>
     <profile>
