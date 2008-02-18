@@ -37,6 +37,14 @@ find . -path '*/.svn' -prune -o  -name "*.htm*" -print0 | xargs -0  -r  svn prop
 find . -path '*/.svn' -prune -o  -name "*.htm*" -print0 | xargs -0  -r  svn propset svn:mime-type text/html
 find . -path '*/.svn' -prune -o  -name "*.htm*" -print0 | xargs -0  -r  svn propset svn:keywords "Rev Date"
 
+find . -path '*/.svn' -prune -o  -name "*.css" -print0 | xargs -0  -r  svn propset svn:eol-style native
+find . -path '*/.svn' -prune -o  -name "*.css" -print0 | xargs -0  -r  svn propset svn:mime-type text/css
+find . -path '*/.svn' -prune -o  -name "*.css" -print0 | xargs -0  -r  svn propset svn:keywords "Rev Date"
+
+find . -path '*/.svn' -prune -o  -name "*.js" -print0 | xargs -0  -r  svn propset svn:eol-style native
+find . -path '*/.svn' -prune -o  -name "*.js" -print0 | xargs -0  -r  svn propset svn:mime-type text/javascript
+find . -path '*/.svn' -prune -o  -name "*.js" -print0 | xargs -0  -r  svn propset svn:keywords "Rev Date"
+
 find . -path '*/.svn' -prune -o  -name "README*" -print0 | xargs -0  -r  svn propset svn:eol-style native
 find . -path '*/.svn' -prune -o  -name "README*" -print0 | xargs -0  -r  svn propset svn:mime-type text/plain
 
