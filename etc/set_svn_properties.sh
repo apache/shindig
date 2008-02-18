@@ -4,86 +4,85 @@
 # on Linux is probably the best option
 
 
-find . -name "*.java" | xargs -n 1 -r svn propset svn:eol-style native
-find . -name "*.java" | xargs -n 1 -r  svn propset svn:keywords "Rev Date"
+find . -path '*/.svn' -prune -o  -name "*.java" -print0 | xargs -0  -r svn propset svn:eol-style native
+find . -path '*/.svn' -prune -o  -name "*.java" -print0 | xargs -0  -r  svn propset svn:keywords "Rev Date"
 
+find . -path '*/.svn' -prune -o  -name "*.xml" -print0 | xargs -0  -r  svn propset svn:mime-type text/xml
+find . -path '*/.svn' -prune -o  -name "*.xml" -print0 | xargs -0  -r  svn propset svn:eol-style native
+find . -path '*/.svn' -prune -o  -name "*.xml" -print0 | xargs -0  -r  svn propset svn:keywords "Rev Date"
 
-find . -name "*.xml" | xargs -n 1 -r  svn propset svn:mime-type text/xml
-find . -name "*.xml" | xargs -n 1 -r  svn propset svn:eol-style native
-find . -name "*.xml" | xargs -n 1 -r  svn propset svn:keywords "Rev Date"
+find . -path '*/.svn' -prune -o  -name "*.xsl" -print0 | xargs -0  -r  svn propset svn:mime-type text/xml
+find . -path '*/.svn' -prune -o  -name "*.xsl" -print0 | xargs -0  -r  svn propset svn:eol-style native
+find . -path '*/.svn' -prune -o  -name "*.xsl" -print0 | xargs -0  -r  svn propset svn:keywords "Rev Date"
 
-find . -name "*.xsl" | xargs -n 1 -r  svn propset svn:mime-type text/xml
-find . -name "*.xsl" | xargs -n 1 -r  svn propset svn:eol-style native
-find . -name "*.xsl" | xargs -n 1 -r  svn propset svn:keywords "Rev Date"
+find . -path '*/.svn' -prune -o  -name "*.xsd" -print0 | xargs -0  -r  svn propset svn:mime-type text/xml
+find . -path '*/.svn' -prune -o  -name "*.xsd" -print0 | xargs -0  -r  svn propset svn:eol-style native
+find . -path '*/.svn' -prune -o  -name "*.xsd" -print0 | xargs -0  -r  svn propset svn:keywords "Rev Date"
 
-find . -name "*.xsd" | xargs -n 1 -r  svn propset svn:mime-type text/xml
-find . -name "*.xsd" | xargs -n 1 -r  svn propset svn:eol-style native
-find . -name "*.xsd" | xargs -n 1 -r  svn propset svn:keywords "Rev Date"
+find . -path '*/.svn' -prune -o  -name "*.wsdl" -print0 | xargs -0  -r  svn propset svn:mime-type text/xml
+find . -path '*/.svn' -prune -o  -name "*.wsdl" -print0 | xargs -0  -r  svn propset svn:eol-style native
+find . -path '*/.svn' -prune -o  -name "*.wsdl" -print0 | xargs -0  -r  svn propset svn:keywords "Rev Date"
 
-find . -name "*.wsdl" | xargs -n 1 -r  svn propset svn:mime-type text/xml
-find . -name "*.wsdl" | xargs -n 1 -r  svn propset svn:eol-style native
-find . -name "*.wsdl" | xargs -n 1 -r  svn propset svn:keywords "Rev Date"
+find . -path '*/.svn' -prune -o  -name "*.properties" -print0 | xargs -0  -r  svn propset svn:mime-type text/plain
+find . -path '*/.svn' -prune -o  -name "*.properties" -print0 | xargs -0  -r  svn propset svn:eol-style native
+find . -path '*/.svn' -prune -o  -name "*.properties" -print0 | xargs -0  -r  svn propset svn:keywords "Rev Date"
 
-find . -name "*.properties" | xargs -n 1 -r  svn propset svn:mime-type text/plain
-find . -name "*.properties" | xargs -n 1 -r  svn propset svn:eol-style native
-find . -name "*.properties" | xargs -n 1 -r  svn propset svn:keywords "Rev Date"
+find . -path '*/.svn' -prune -o  -name "*.txt" -print0 | xargs -0  -r  svn propset svn:eol-style native
+find . -path '*/.svn' -prune -o  -name "*.txt" -print0 | xargs -0  -r  svn propset svn:mime-type text/plain
 
-find . -name "*.txt" | xargs -n 1 -r  svn propset svn:eol-style native
-find . -name "*.txt" | xargs -n 1 -r  svn propset svn:mime-type text/plain
+find . -path '*/.svn' -prune -o  -name "*.htm*" -print0 | xargs -0  -r  svn propset svn:eol-style native
+find . -path '*/.svn' -prune -o  -name "*.htm*" -print0 | xargs -0  -r  svn propset svn:mime-type text/html
+find . -path '*/.svn' -prune -o  -name "*.htm*" -print0 | xargs -0  -r  svn propset svn:keywords "Rev Date"
 
-find . -name "*.htm*" | xargs -n 1 -r  svn propset svn:eol-style native
-find . -name "*.htm*" | xargs -n 1 -r  svn propset svn:mime-type text/html
-find . -name "*.htm*" | xargs -n 1 -r  svn propset svn:keywords "Rev Date"
+find . -path '*/.svn' -prune -o  -name "README*" -print0 | xargs -0  -r  svn propset svn:eol-style native
+find . -path '*/.svn' -prune -o  -name "README*" -print0 | xargs -0  -r  svn propset svn:mime-type text/plain
 
-find . -name "README*" | grep -v ".svn" | xargs -n 1 -r  svn propset svn:eol-style native
-find . -name "README*" | grep -v ".svn" | xargs -n 1 -r  svn propset svn:mime-type text/plain
+find . -path '*/.svn' -prune -o  -name "LICENSE*" -print0 | xargs -0  -r  svn propset svn:eol-style native
+find . -path '*/.svn' -prune -o  -name "LICENSE*" -print0 | xargs -0  -r  svn propset svn:mime-type text/plain
 
-find . -name "LICENSE*" | grep -v ".svn" | xargs -n 1 -r  svn propset svn:eol-style native
-find . -name "LICENSE*" | grep -v ".svn" | xargs -n 1 -r  svn propset svn:mime-type text/plain
+find . -path '*/.svn' -prune -o  -name "NOTICE*" -print0 | xargs -0  -r  svn propset svn:eol-style native
+find . -path '*/.svn' -prune -o  -name "NOTICE*" -print0 | xargs -0  -r  svn propset svn:mime-type text/plain
 
-find . -name "NOTICE*" | grep -v ".svn" | xargs -n 1 -r  svn propset svn:eol-style native
-find . -name "NOTICE*" | grep -v ".svn" | xargs -n 1 -r  svn propset svn:mime-type text/plain
+find . -path '*/.svn' -prune -o  -name "TODO*" -print0 | xargs -0  -r  svn propset svn:eol-style native
+find . -path '*/.svn' -prune -o  -name "TODO*" -print0 | xargs -0  -r  svn propset svn:mime-type text/plain
 
-find . -name "TODO*" | grep -v ".svn" | xargs -n 1 -r  svn propset svn:eol-style native
-find . -name "TODO*" | grep -v ".svn" | xargs -n 1 -r  svn propset svn:mime-type text/plain
+find . -path '*/.svn' -prune -o  -name "KEYS*" -print0 | xargs -0  -r  svn propset svn:eol-style native
+find . -path '*/.svn' -prune -o  -name "KEYS*" -print0 | xargs -0  -r  svn propset svn:mime-type text/plain
 
-find . -name "KEYS*" | grep -v ".svn" | xargs -n 1 -r  svn propset svn:eol-style native
-find . -name "KEYS*" | grep -v ".svn" | xargs -n 1 -r  svn propset svn:mime-type text/plain
+find . -path '*/.svn' -prune -o  -name "*.png" -print0 | xargs -0  -r  svn propset svn:mime-type image/png
+find . -path '*/.svn' -prune -o  -name "*.gif" -print0 | xargs -0  -r  svn propset svn:mime-type image/gif
+find . -path '*/.svn' -prune -o  -name "*.jpg" -print0 | xargs -0  -r  svn propset svn:mime-type image/jpeg
+find . -path '*/.svn' -prune -o  -name "*.jpeg" -print0 | xargs -0  -r  svn propset svn:mime-type image/jpeg
 
-find . -name "*.png" | xargs -n 1 -r  svn propset svn:mime-type image/png
-find . -name "*.gif" | xargs -n 1 -r  svn propset svn:mime-type image/gif
-find . -name "*.jpg" | xargs -n 1 -r  svn propset svn:mime-type image/jpeg
-find . -name "*.jpeg" | xargs -n 1 -r  svn propset svn:mime-type image/jpeg
+find . -path '*/.svn' -prune -o  -name "*.fragment" -print0 | xargs -0  -r  svn propset svn:eol-style native
+find . -path '*/.svn' -prune -o  -name "*.fragment" -print0 | xargs -0  -r  svn propset svn:mime-type text/xml
 
-find . -name "*.fragment" | xargs -n 1 -r  svn propset svn:eol-style native
-find . -name "*.fragment" | xargs -n 1 -r  svn propset svn:mime-type text/xml
+find . -path '*/.svn' -prune -o  -name "*.wsdd" -print0 | xargs -0  -r  svn propset svn:mime-type text/xml
+find . -path '*/.svn' -prune -o  -name "*.wsdd" -print0 | xargs -0  -r  svn propset svn:eol-style native
 
-find . -name "*.wsdd" | xargs -n 1 -r  svn propset svn:mime-type text/xml
-find . -name "*.wsdd" | xargs -n 1 -r  svn propset svn:eol-style native
+find . -path '*/.svn' -prune -o  -name "ChangeLog*" -print0 | xargs -0  -r  svn propset svn:eol-style native
+find . -path '*/.svn' -prune -o  -name "ChangeLog*" -print0 | xargs -0  -r  svn propset svn:mime-type text/plain
 
-find . -name "ChangeLog*" | grep -v ".svn" | xargs -n 1 -r  svn propset svn:eol-style native
-find . -name "ChangeLog*" | grep -v ".svn" | xargs -n 1 -r  svn propset svn:mime-type text/plain
+find . -path '*/.svn' -prune -o  -name "*.sh" -print0 | xargs -0  -r  svn propset svn:eol-style native
+find . -path '*/.svn' -prune -o  -name "*.sh" -print0 | xargs -0  -r  svn propset svn:mime-type text/plain
+find . -path '*/.svn' -prune -o  -name "*.sh" -print0 | xargs -0  -r  svn propset svn:executable ""
 
-find . -name "*.sh" | grep -v ".svn" | xargs -n 1 -r  svn propset svn:eol-style native
-find . -name "*.sh" | grep -v ".svn" | xargs -n 1 -r  svn propset svn:mime-type text/plain
-find . -name "*.sh" | grep -v ".svn" | xargs -n 1 -r  svn propset svn:executable ""
+find . -path '*/.svn' -prune -o  -name "*.bat" -print0 | xargs -0  -r  svn propset svn:eol-style native
+find . -path '*/.svn' -prune -o  -name "*.bat" -print0 | xargs -0  -r  svn propset svn:mime-type text/plain
+find . -path '*/.svn' -prune -o  -name "*.bat" -print0 | xargs -0  -r  svn propset svn:executable ""
 
-find . -name "*.bat" | grep -v ".svn" | xargs -n 1 -r  svn propset svn:eol-style native
-find . -name "*.bat" | grep -v ".svn" | xargs -n 1 -r  svn propset svn:mime-type text/plain
-find . -name "*.bat" | grep -v ".svn" | xargs -n 1 -r  svn propset svn:executable ""
+find . -path '*/.svn' -prune -o  -name "*.cmd" -print0 | xargs -0  -r  svn propset svn:eol-style native
+find . -path '*/.svn' -prune -o  -name "*.cmd" -print0 | xargs -0  -r  svn propset svn:mime-type text/plain
+find . -path '*/.svn' -prune -o  -name "*.cmd" -print0 | xargs -0  -r  svn propset svn:executable ""
 
-find . -name "*.cmd" | grep -v ".svn" | xargs -n 1 -r  svn propset svn:eol-style native
-find . -name "*.cmd" | grep -v ".svn" | xargs -n 1 -r  svn propset svn:mime-type text/plain
-find . -name "*.cmd" | grep -v ".svn" | xargs -n 1 -r  svn propset svn:executable ""
+find . -path '*/.svn' -prune -o  -name "INSTALL*" -print0 | xargs -0  -r  svn propset svn:eol-style native
+find . -path '*/.svn' -prune -o  -name "INSTALL*" -print0 | xargs -0  -r  svn propset svn:mime-type text/plain
 
-find . -name "INSTALL*" | grep -v ".svn" | xargs -n 1 -r  svn propset svn:eol-style native
-find . -name "INSTALL*" | grep -v ".svn" | xargs -n 1 -r  svn propset svn:mime-type text/plain
+find . -path '*/.svn' -prune -o  -name "COPYING*" -print0 | xargs -0  -r  svn propset svn:eol-style native
+find . -path '*/.svn' -prune -o  -name "COPYING*" -print0 | xargs -0  -r  svn propset svn:mime-type text/plain
 
-find . -name "COPYING*" | grep -v ".svn" | xargs -n 1 -r  svn propset svn:eol-style native
-find . -name "COPYING*" | grep -v ".svn" | xargs -n 1 -r  svn propset svn:mime-type text/plain
+find . -path '*/.svn' -prune -o  -name "NEWS*" -print0 | xargs -0  -r  svn propset svn:eol-style native
+find . -path '*/.svn' -prune -o  -name "NEWS*" -print0 | xargs -0  -r  svn propset svn:mime-type text/plain
 
-find . -name "NEWS*" | grep -v ".svn" | xargs -n 1 -r  svn propset svn:eol-style native
-find . -name "NEWS*" | grep -v ".svn" | xargs -n 1 -r  svn propset svn:mime-type text/plain
-
-find . -name "DISCLAIMER*" | grep -v ".svn" | xargs -n 1 -r  svn propset svn:eol-style native
-find . -name "DISCLAIMER*" | grep -v ".svn" | xargs -n 1 -r  svn propset svn:mime-type text/plain
+find . -path '*/.svn' -prune -o  -name "DISCLAIMER*" -print0 | xargs -0  -r  svn propset svn:eol-style native
+find . -path '*/.svn' -prune -o  -name "DISCLAIMER*" -print0 | xargs -0  -r  svn propset svn:mime-type text/plain
