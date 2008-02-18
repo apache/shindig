@@ -7,6 +7,9 @@
 find . -path '*/.svn' -prune -o  -name "*.java" -print0 | xargs -0  -r svn propset svn:eol-style native
 find . -path '*/.svn' -prune -o  -name "*.java" -print0 | xargs -0  -r  svn propset svn:keywords "Rev Date"
 
+find . -path '*/.svn' -prune -o  -name "*.php" -print0 | xargs -0  -r svn propset svn:eol-style native
+find . -path '*/.svn' -prune -o  -name "*.php" -print0 | xargs -0  -r  svn propset svn:keywords "Rev Date"
+
 find . -path '*/.svn' -prune -o  -name "*.xml" -print0 | xargs -0  -r  svn propset svn:mime-type text/xml
 find . -path '*/.svn' -prune -o  -name "*.xml" -print0 | xargs -0  -r  svn propset svn:eol-style native
 find . -path '*/.svn' -prune -o  -name "*.xml" -print0 | xargs -0  -r  svn propset svn:keywords "Rev Date"
@@ -86,3 +89,6 @@ find . -path '*/.svn' -prune -o  -name "NEWS*" -print0 | xargs -0  -r  svn props
 
 find . -path '*/.svn' -prune -o  -name "DISCLAIMER*" -print0 | xargs -0  -r  svn propset svn:eol-style native
 find . -path '*/.svn' -prune -o  -name "DISCLAIMER*" -print0 | xargs -0  -r  svn propset svn:mime-type text/plain
+
+svn propset svn:ignore -F etc/svn-ignores .
+svn propset svn:ignore -F etc/svn-ignores java/gadgets 
