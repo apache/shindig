@@ -335,23 +335,18 @@ public class GadgetRenderingServlet extends HttpServlet {
                             HttpServletResponse resp)
       throws IOException {
     // TODO: make this way more robust
-    resp.sendError(HttpServletResponse.SC_BAD_REQUEST);
-    StringBuilder markup = new StringBuilder();
-    markup.append("<html><body>");
-    markup.append("<pre>");
+    StringBuilder err = new StringBuilder();
     for (GadgetException error : errs.getComponents()) {
-      markup.append(error.getCode().toString());
-      markup.append(' ');
-      markup.append(error.getMessage());
-      markup.append('\n');
+      err.append(error.getCode().toString());
+      err.append(' ');
+      err.append(error.getMessage());
+      err.append('\n');
 
       // Log the errors here for now. We might want different severity levels
       // for different error codes.
       logger.log(Level.INFO, "Failed to render gadget", error);
     }
-    markup.append("</pre>");
-    markup.append("</body></html>");
-    resp.getOutputStream().print(markup.toString());
+    resp.sendError(HttpServletResponse.SC_BAD_REQUEST, err.toString());
   }
 
   @SuppressWarnings("unchecked")
