@@ -6,8 +6,8 @@
  * Dual licensed under the MIT (MIT-LICENSE.txt)
  * and GPL (GPL-LICENSE.txt) licenses.
  *
- * $Date: 2007/09/28 $
- * $Rev: 3353 $
+ * $Date$
+ * $Rev$
  */
     
     // Map over jQuery in case of overwrite
