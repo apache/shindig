@@ -23,7 +23,6 @@
 </style>
 </head>
 <body>
-<script src="../../js/core.js"></script>
 <script>
   function makeXhr() {
     if (window.XMLHttpRequest) {
@@ -41,19 +40,24 @@
     var gadgetList = obj.gadgets;
     var features = {};
     for (var i = 0, gadget; gadget = gadgetList[i]; ++i) {
-      for (var j = 0, feature; feature = gadget.features[i]; ++i) {
+      var feats = gadget.features || [];
+      for (var j = 0, feature; feature = feats[j]; ++j) {
         features[feature] = true;
       }
     }
     var libs = [];
     for (var lib in features) {libs.push(lib);}
     libs.sort();
-    libs = libs.join("");
+    libs = libs.join(":");
     for (var i = 0, gadget; gadget = gadgetList[i]; ++i) {
       var newGadget = document.createElement("div");
-      newGadget.innerHTML = ['<h2>', gadget.title, '</h2>',
-        '<iframe src="', gadget.content, '&libs=', libs ,'" id="remote_iframe_', gadget.moduleId, '"></iframe>'
-      ].join("");
+      if (gadget.errors && gadget.errors.length > 0) {
+        newGadget.innerHTML = ["Unable to process gadget: ", gadget.url, ". Errors: <pre>", gadget.errors.join("\n"), "</pre>"].join("");
+      } else {
+        newGadget.innerHTML = ['<h2>', gadget.title, '</h2>',
+          '<iframe src="', gadget.content, '&libs=', libs ,'" id="remote_iframe_', gadget.moduleId, '"></iframe>'
+        ].join("");
+      }
       newGadget.className = "gadget";
       document.body.appendChild(newGadget);
     }
@@ -78,6 +82,10 @@
       {
         url: "http://www.labpixies.com/campaigns/todo/todo.xml",
         moduleId: 2
+      },
+      {
+        url: "http://www.example.org/fake/fake/fake.xml",
+        moduleId: 3
       }
     ]
   };

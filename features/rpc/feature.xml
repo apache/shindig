@@ -17,8 +17,16 @@ KIND, either express or implied. See the License for the
 specific language governing permissions and limitations under the License.
 -->
 <feature>
+<!--
+Required config:
+
+parentRelayUrl: The url of the relay file for this service.
+-->
   <name>rpc</name>
   <gadget>
     <script src="rpc.js"/>
   </gadget>
+  <container>
+    <script src="rpc.js"/>
+  </container>
 </feature>

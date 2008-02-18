@@ -17,10 +17,11 @@
  */
 package org.apache.shindig.gadgets.http;
 
+import org.apache.shindig.gadgets.GadgetFeature;
 import org.apache.shindig.gadgets.GadgetFeatureFactory;
 import org.apache.shindig.gadgets.GadgetFeatureRegistry;
 import org.apache.shindig.gadgets.JsLibrary;
-import org.apache.shindig.gadgets.JsLibraryFeatureFactory;
+import org.apache.shindig.gadgets.ProcessingOptions;
 import org.apache.shindig.gadgets.RenderingContext;
 
 import java.io.IOException;
@@ -57,6 +58,7 @@ public class JsServlet extends HttpServlet {
       resp.setStatus(HttpServletResponse.SC_NOT_MODIFIED);
       return;
     }
+
     // Use the last component as filename; prefix is ignored
     String uri = req.getRequestURI();
     // We only want the file name part. There will always be at least 1 slash
@@ -93,19 +95,19 @@ public class JsServlet extends HttpServlet {
       Set<GadgetFeatureRegistry.Entry> done
           = new HashSet<GadgetFeatureRegistry.Entry>();
 
+      ProcessingOptions opts = new HttpProcessingOptions(req);
+
       // TODO: This doesn't work correctly under JDK 1.5, but it does under 1.6
       do {
         for (GadgetFeatureRegistry.Entry entry : found) {
           if (!done.contains(entry) &&
               done.containsAll(entry.getDependencies())) {
-            GadgetFeatureFactory feature = entry.getFeature();
-            if (feature instanceof JsLibraryFeatureFactory) {
-              JsLibraryFeatureFactory jsLib = (JsLibraryFeatureFactory)feature;
-              for (JsLibrary lib : jsLib.getLibraries(context)) {
-                // TODO: type url js files fail here.
-                if (lib.getType() != JsLibrary.Type.URL) {
-                  jsData.append(lib.getContent());
-                }
+            GadgetFeatureFactory factory = entry.getFeature();
+            GadgetFeature feature = factory.create();
+            for (JsLibrary lib : feature.getJsLibraries(context, opts)) {
+              // TODO: type url js files fail here.
+              if (lib.getType() != JsLibrary.Type.URL) {
+                jsData.append(lib.getContent());
               }
             }
             done.add(entry);

@@ -17,31 +17,23 @@
  */
 package org.apache.shindig.gadgets;
 
-import org.apache.shindig.util.InputStreamConsumer;
+import org.apache.shindig.util.ResourceLoader;
 import org.w3c.dom.Document;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
+import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.net.JarURLConnection;
-import java.net.URISyntaxException;
-import java.net.URL;
-import java.net.URLConnection;
-import java.util.ArrayList;
-import java.util.Enumeration;
+import java.io.StringReader;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.jar.JarEntry;
-import java.util.jar.JarFile;
 import java.util.logging.Logger;
 
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -60,6 +52,8 @@ import javax.xml.parsers.ParserConfigurationException;
  * loader.loadFeatures("/home/user/my-features/", registry);
  */
 public class JsFeatureLoader {
+
+  private static final String FEATURE_FILE_NAME = "feature.xml";
 
   private static final Logger logger
       = Logger.getLogger("org.apache.shindig.gadgets");
@@ -81,13 +75,22 @@ public class JsFeatureLoader {
   public List<GadgetFeatureRegistry.Entry> loadFeatures(String path,
       GadgetFeatureRegistry registry) throws GadgetException {
     Map<String, ParsedFeature> deps = new HashMap<String, ParsedFeature>();
-    if (path.startsWith("res://")) {
-      logger.info("Loading resources from: " + path);
-      loadResources(new String[]{path.substring(6)}, deps);
-    } else {
-      logger.info("Loading files from: " + path);
-      File file = new File(path);
-      loadFiles(new File[]{file}, deps);
+    try {
+      if (path.startsWith("res://")) {
+        path = path.substring(6);
+        logger.info("Loading resources from: " + path);
+        if (path.endsWith(".txt")) {
+          loadResources(ResourceLoader.getContent(path).split("\n"), deps);
+        } else {
+          loadResources(new String[]{path}, deps);
+        }
+      } else {
+        logger.info("Loading files from: " + path);
+        File file = new File(path);
+        loadFiles(new File[]{file}, deps);
+      }
+    } catch (IOException e) {
+      throw new GadgetException(GadgetException.Code.INVALID_PATH, e);
     }
 
     List<GadgetFeatureRegistry.Entry> entries
@@ -117,7 +120,7 @@ public class JsFeatureLoader {
     for (File file : files) {
       if (file.isDirectory()) {
         loadFiles(file.listFiles(), features);
-      } else if ("feature.xml".equals(file.getName())) {
+      } else if (FEATURE_FILE_NAME.equals(file.getName())) {
         ParsedFeature feature = processFile(file);
         if (feature != null) {
           features.put(feature.name, feature);
@@ -128,107 +131,26 @@ public class JsFeatureLoader {
 
   /**
    * Loads resources recursively.
-   * @param files The base paths to look for feature.xml
-   * @param features The set of all loaded features
+   * @param paths The base paths to look for feature.xml
+   * @param feats The set of all loaded features
    * @throws GadgetException
    */
-  private void loadResources(String[] files, Map<String, ParsedFeature> features)
+  private void loadResources(String[] paths, Map<String, ParsedFeature> feats)
       throws GadgetException {
-    ClassLoader cl = JsFeatureLoader.class.getClassLoader();
     try {
-      for (String file : files) {
-        file = file.trim();
-        if (file.endsWith(".txt")) {
-          loadResources(readResourceList(file), features);
-        } else if (file.endsWith("feature.xml")) {
-          ParsedFeature feature = processResource(file);
-          if (feature != null) {
-            features.put(feature.name, feature);
-          }
-        } else {
-          Enumeration<URL> mappedResources = cl.getResources(file);
-          while (mappedResources.hasMoreElements()) {
-            URL resourceUrl =  mappedResources.nextElement();
-            if ("file".equals(resourceUrl.getProtocol())) {
-              File f = new File(resourceUrl.toURI());
-              loadFiles(new File[]{f}, features);
-            } else {
-              URLConnection urlConnection = resourceUrl.openConnection();
-              List<String> featurePaths = new ArrayList<String>();
-              if (urlConnection instanceof JarURLConnection) {
-                JarURLConnection jarUrlConn = (JarURLConnection)urlConnection;
-                JarFile jar = jarUrlConn.getJarFile();
-
-                Enumeration<JarEntry> jarEntries = jar.entries();
-                while (jarEntries.hasMoreElements()) {
-                  JarEntry jarEntry =  jarEntries.nextElement();
-                  if (jarEntry.getName().startsWith(file) &&
-                      jarEntry.getName().endsWith("feature.xml")) {
-                    featurePaths.add(jarEntry.getName());
-                  }
-                }
-              }
-              for (String path : featurePaths) {
-                ParsedFeature feature = processResource(path);
-                if (feature != null) {
-                  features.put(feature.name, feature);
-                }
-              }
-            }
-          }
+      Map<String, String> contents
+          = ResourceLoader.getContent(paths, FEATURE_FILE_NAME);
+      for (Map.Entry<String, String> entry : contents.entrySet()) {
+        String parent = entry.getKey();
+        parent = parent.substring(0, parent.lastIndexOf(FEATURE_FILE_NAME));
+        ParsedFeature feature = parse(entry.getValue(), parent, true);
+        if (feature != null) {
+          feats.put(feature.name, feature);
         }
       }
-    } catch (IOException ioe) {
-      throw new GadgetException(GadgetException.Code.INVALID_PATH, ioe);
-    } catch (URISyntaxException use) {
-      throw new GadgetException(GadgetException.Code.INVALID_PATH, use);
+    } catch (IOException e) {
+      throw new GadgetException(GadgetException.Code.INVALID_PATH, e);
     }
-  }
-
-  /**
-   * @param path Location of the resource list.
-   * @return A list of resources from the list.
-   */
-  private String[] readResourceList(String path) throws IOException {
-    ClassLoader cl = JsFeatureLoader.class.getClassLoader();
-    InputStream is = cl.getResourceAsStream(path);
-    if (is == null) {
-      logger.warning("Unable to locate resource: " + path);
-      return new String[0];
-    } else {
-      String names = InputStreamConsumer.readToString(is);
-      if (names == null) {
-        logger.warning("Unable to load resource: " + path);
-        return new String[0];
-      }
-      return names.split("\n");
-    }
-  }
-
-  /**
-   * Loads a single feature from a resource.
-   *
-   * If the resource can't be loaded, an error will be printed but no exception
-   * will be thrown.
-   *
-   * @param name The resource that contains the feature description.
-   * @return The parsed feature.
-   */
-  private ParsedFeature processResource(String name) {
-    logger.info("Loading resource: " + name);
-    ParsedFeature feature = null;
-    try {
-      ClassLoader cl = JsFeatureLoader.class.getClassLoader();
-      InputStream is = cl.getResourceAsStream(name);
-      if (is != null) {
-        int lastSlash = name.lastIndexOf('/');
-        String base = (lastSlash == -1) ? name : name.substring(0, lastSlash + 1);
-        feature = parse(is, base, true);
-      }
-    } catch (GadgetException ge) {
-      logger.warning("Failed to load resource: " + name);
-    }
-    return feature;
   }
 
   /**
@@ -245,11 +167,12 @@ public class JsFeatureLoader {
     ParsedFeature feature = null;
     if (file.canRead()) {
       try {
-        feature = parse(
-            new FileInputStream(file), file.getParent() + '/', false);
+        feature = parse(ResourceLoader.getContent(file),
+                        file.getParent() + '/',
+                        false);
       } catch (IOException e) {
         logger.warning("Error reading file: " + file.getAbsolutePath());
-      } catch (GadgetException ge) {
+      } catch (GadgetException e) {
         logger.warning("Failed parsing file: " + file.getAbsolutePath());
       }
     } else {
@@ -268,8 +191,9 @@ public class JsFeatureLoader {
    * @param all Map of all features that can be loaded during this operation.
    */
   private GadgetFeatureRegistry.Entry register(GadgetFeatureRegistry registry,
-      ParsedFeature feature, Set<String> registered,
-      Map<String, ParsedFeature> all) {
+                                               ParsedFeature feature,
+                                               Set<String> registered,
+                                               Map<String, ParsedFeature> all) {
     if (registered.contains(feature.name)) {
       return null;
     }
@@ -288,18 +212,19 @@ public class JsFeatureLoader {
 
   /**
    * Parses the input into a dom tree.
-   * @param is
+   * @param xml
    * @param path The path the file was loaded from.
    * @param isResource True if the file was a resource.
    * @return A dom tree representing the feature.
    * @throws GadgetException
    */
-  private ParsedFeature parse(InputStream is, String path, boolean isResource)
+  private ParsedFeature parse(String xml, String path, boolean isResource)
       throws GadgetException {
 
     Document doc;
     try {
       DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+      InputSource is = new InputSource(new StringReader(xml));
       doc = factory.newDocumentBuilder().parse(is);
     } catch (SAXException e) {
       throw new GadgetException(GadgetException.Code.MALFORMED_XML_DOCUMENT, e);

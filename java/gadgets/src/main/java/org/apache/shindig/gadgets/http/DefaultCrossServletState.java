@@ -24,6 +24,7 @@ import org.apache.shindig.gadgets.BasicGadgetSigner;
 import org.apache.shindig.gadgets.BasicRemoteContentFetcher;
 import org.apache.shindig.gadgets.Gadget;
 import org.apache.shindig.gadgets.GadgetException;
+import org.apache.shindig.gadgets.GadgetFeature;
 import org.apache.shindig.gadgets.GadgetFeatureFactory;
 import org.apache.shindig.gadgets.GadgetFeatureRegistry;
 import org.apache.shindig.gadgets.GadgetServer;
@@ -31,9 +32,10 @@ import org.apache.shindig.gadgets.GadgetServerConfig;
 import org.apache.shindig.gadgets.GadgetSigner;
 import org.apache.shindig.gadgets.GadgetSpec;
 import org.apache.shindig.gadgets.JsLibrary;
-import org.apache.shindig.gadgets.JsLibraryFeatureFactory;
 import org.apache.shindig.gadgets.MessageBundle;
+import org.apache.shindig.gadgets.OpenSocialFeatureFactory;
 import org.apache.shindig.gadgets.RenderingContext;
+import org.apache.shindig.gadgets.SyndicatorConfig;
 import org.apache.shindig.gadgets.UserPrefs;
 
 import java.io.UnsupportedEncodingException;
@@ -163,15 +165,23 @@ public class DefaultCrossServletState extends CrossServletState {
 
     // features could be null, but that would probably be a bad idea.
     String features = context.getInitParameter("features");
+    String syndicators = context.getInitParameter("syndicators");
     try {
       gadgetSigner = new BasicGadgetSigner();
+      SyndicatorConfig syndicatorConfig = new SyndicatorConfig(syndicators);
       GadgetFeatureRegistry registry = new GadgetFeatureRegistry(features);
+
+      // We'll add the opensocial-0.7 feature manually for now.
+      // TODO: Something better than this ugly hack.
+      OpenSocialFeatureFactory.register(registry, syndicatorConfig);
+
       GadgetServerConfig config =  new GadgetServerConfig()
           .setExecutor(Executors.newCachedThreadPool())
           .setMessageBundleCache(new BasicGadgetDataCache<MessageBundle>())
           .setSpecCache(new BasicGadgetDataCache<GadgetSpec>())
           .setContentFetcher(new BasicRemoteContentFetcher(1024 * 1024))
-          .setFeatureRegistry(registry);
+          .setFeatureRegistry(registry)
+          .setSyndicatorConfig(syndicatorConfig);
       gadgetServer = new GadgetServer(config);
 
       // Grab all static javascript, concatenate it together, and generate
@@ -181,12 +191,10 @@ public class DefaultCrossServletState extends CrossServletState {
       for (Map.Entry<String, GadgetFeatureRegistry.Entry> entry :
           registry.getAllFeatures().entrySet()) {
         GadgetFeatureFactory factory = entry.getValue().getFeature();
-        if (factory instanceof JsLibraryFeatureFactory) {
-          JsLibraryFeatureFactory lib = (JsLibraryFeatureFactory)factory;
-          for (RenderingContext rc : RenderingContext.values()) {
-            for (JsLibrary library : lib.getLibraries(rc)) {
-              jsBuf.append(library.getContent());
-            }
+        GadgetFeature feature = factory.create();
+        for (RenderingContext rc : RenderingContext.values()) {
+          for (JsLibrary library : feature.getJsLibraries(rc, null)) {
+            jsBuf.append(library.getContent());
           }
         }
       }

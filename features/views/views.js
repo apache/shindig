@@ -44,20 +44,49 @@ gadgets.views = function() {
    */
   var params = {};
 
+  /**
+   * Initializes views. Assumes that the current view is the "view"
+   * url parameter (or default if "view" isn't supported), and that
+   * all view parameters are in the form view-<name>
+   * TODO: Use unified configuration when it becomes available.
+   *
+   */
+  function init(config) {
+    var supported = config["views"];
+
+    for (var s in supported) if (supported.hasOwnProperty(s)) {
+      var obj = supported[s];
+      supportedViews[s] = new gadgets.views.View(s, obj.isOnlyVisible);
+      var aliases = obj.aliases || [];
+      for (var i = 0, alias; alias = aliases[i]; ++i) {
+        supportedViews[alias] = new gadgets.views.View(s, obj.isOnlyVisible);
+      }
+    }
+
+    var urlParams = gadgets.util.getUrlParameters();
+    // View parameters are passed as a single parameter.
+    if (urlParams["view-params"]) {
+      var tmpParams = gadgets.json.parse(
+          decodeURIComponent(urlParams["view-params"]));
+      if (tmpParams) {
+        params = tmpParams;
+      }
+    }
+    currentView = supportedViews[urlParams.view] || supportedViews["default"];
+  }
+
+  var requiredConfig = {
+    "default": new gadgets.config.LikeValidator({
+      "isOnlyVisible" : gadgets.config.BooleanValidator
+    })
+  };
+
+  gadgets.config.register("views", requiredConfig, init);
+
   return {
     requestNavigateTo : function(view, opt_params) {
-      // TODO: Actually implementing this is going to require gadgets.rpc or
-      // ifpc or something.
-      var prefs = new gadgets.Prefs();
-      var ifpcRelay = gadgets.util.getUrlParameters().parent || '';
-      gadgets.ifpc_.call("remote_iframe_" + prefs.getModuleId(),
-                         "requestNavigateTo",
-                        ["remote_iframe_" + prefs.getModuleId(),
-                          view.getName(),
-                         opt_params],
-                         ifpcRelay,
-                         null,
-                         '');
+      gadgets.rpc.call(
+          null, "requestNavigateTo", null, view.getName(), opt_params);
     },
 
     getCurrentView : function() {
@@ -70,35 +99,6 @@ gadgets.views = function() {
 
     getParams : function() {
       return params;
-    },
-
-    /**
-     * Initializes views. Assumes that the current view is the "view"
-     * url parameter (or default if "view" isn't supported), and that
-     * all view parameters are in the form view-<name>
-     * TODO: Use unified configuration when it becomes available.
-     * @param {Map&lt;String, Boolean&gt;} supported The views you support,
-     *   where keys = name of the view and values = isOnlyVisible
-     */
-    init : function(supported) {
-      if (typeof supported["default"] === "undefined") {
-        throw new Error("default view required!");
-      }
-
-      for (var s in supported) if (supported.hasOwnProperty(s)) {
-        supportedViews[s] = new gadgets.views.View(s, supported[s]);
-      }
-
-      var urlParams = gadgets.util.getUrlParameters();
-      // View parameters are passed as a single parameter.
-      if (urlParams["view-params"]) {
-        var tmpParams = gadgets.json.parse(
-            decodeURIComponent(urlParams["view-params"]));
-        if (tmpParams) {
-          params = tmpParams;
-        }
-      }
-      currentView = supportedViews[urlParams.view] || supportedViews["default"];
     }
   };
 }();

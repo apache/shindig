@@ -55,9 +55,9 @@ public class JsonRpcGadgetJob implements Callable<Gadget> {
                                         RenderingContext.CONTAINER,
                                         new JsonRpcProcessingOptions(context));
     } catch (URISyntaxException e) {
-      throw new RpcException("Bad url");
+      throw new RpcException(gadget, "Bad url");
     } catch (GadgetServer.GadgetProcessException e) {
-      throw new RpcException("Failed to process gadget.", e);
+      throw new RpcException(gadget, e);
     }
   }
 

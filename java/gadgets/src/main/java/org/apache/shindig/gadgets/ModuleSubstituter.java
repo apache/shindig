@@ -33,22 +33,15 @@ class ModuleSubstituter implements GadgetFeatureFactory {
   }
 }
 
-class ModuleSubstituterFeature implements GadgetFeature {
+class ModuleSubstituterFeature extends GadgetFeature {
 
   /**
    * {@inheritDoc}
    */
-  public void prepare(GadgetView gadget, GadgetContext context,
-      Map<String, String> params) {
-    // TODO Auto-generated method stub
-
-  }
-
-  /**
-   * {@inheritDoc}
-   */
+  @Override
   public void process(Gadget gadget, GadgetContext context,
-      Map<String, String> params) {
+      Map<String, String> params) throws GadgetException {
+    super.process(gadget, context, params);
     gadget.getSubstitutions().addSubstitution(Substitutions.Type.MODULE, "ID",
         Integer.toString(gadget.getId().getModuleId()));
 

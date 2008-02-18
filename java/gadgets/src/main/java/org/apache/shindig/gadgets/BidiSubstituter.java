@@ -27,7 +27,7 @@ import java.util.Map;
  */
 
 public class BidiSubstituter implements GadgetFeatureFactory {
-  private final static BidiSubstituterFeature feature
+  private final static GadgetFeature feature
       = new BidiSubstituterFeature();
 
   /**
@@ -38,7 +38,7 @@ public class BidiSubstituter implements GadgetFeatureFactory {
   }
 }
 
-class BidiSubstituterFeature implements GadgetFeature {
+class BidiSubstituterFeature extends GadgetFeature {
 
   /**
    * Fetches a message bundle spec from the {@code GadgetSpec} for the
@@ -58,19 +58,13 @@ class BidiSubstituterFeature implements GadgetFeature {
     return null;
   }
 
-  /** {@inheritDoc} */
-  public void prepare(GadgetView spec,
-                      GadgetContext context,
-                      Map<String, String> params) {
-    // Nothing here.
-  }
-
   /**
    * {@inheritDoc}
    */
-  public void process(Gadget gadget,
-                      GadgetContext context,
-                      Map<String, String> params) {
+  @Override
+  public void process(Gadget gadget, GadgetContext context,
+      Map<String, String> params) throws GadgetException {
+    super.process(gadget, context, params);
     Substitutions subst = gadget.getSubstitutions();
     Locale locale = context.getLocale();
     // Find an appropriate locale for the ltr flag.

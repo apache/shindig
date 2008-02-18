@@ -45,4 +45,11 @@ public class ProcessingOptions {
   public String getForcedJsLibs() {
     return null;
   }
+
+  /**
+   * @return The syndicator of the current request.
+   */
+  public String getSyndicator() {
+    return SyndicatorConfig.DEFAULT_SYNDICATOR;
+  }
 }

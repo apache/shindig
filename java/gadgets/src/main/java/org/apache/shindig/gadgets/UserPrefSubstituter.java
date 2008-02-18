@@ -26,7 +26,7 @@ import java.util.Map;
  * Substitutes user prefs into the spec.
  */
 public class UserPrefSubstituter implements GadgetFeatureFactory {
-  private final static UserPrefSubstituterFeature feature
+  private final static GadgetFeature feature
       = new UserPrefSubstituterFeature();
 
   /**
@@ -37,20 +37,15 @@ public class UserPrefSubstituter implements GadgetFeatureFactory {
   }
 }
 
-class UserPrefSubstituterFeature implements GadgetFeature {
+class UserPrefSubstituterFeature extends GadgetFeature {
 
   /**
    * {@inheritDoc}
    */
-  public void prepare(GadgetView gadget, GadgetContext context,
-                      Map<String, String> params) {
-  }
-
-  /**
-   * {@inheritDoc}
-   */
+  @Override
   public void process(Gadget gadget, GadgetContext context,
-                      Map<String, String> params) {
+                      Map<String, String> params) throws GadgetException {
+    super.process(gadget, context, params);
     Substitutions substitutions = gadget.getSubstitutions();
     UserPrefs upValues = gadget.getUserPrefValues();
 

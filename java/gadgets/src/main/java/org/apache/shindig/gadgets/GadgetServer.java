@@ -83,8 +83,7 @@ public class GadgetServer {
       throws GadgetProcessException {
 
     // Queue/tree of all jobs to be run for successful processing
-    GadgetContext gc = new GadgetContext(config.getContentFetcher(),
-                                         config.getMessageBundleCache(),
+    GadgetContext gc = new GadgetContext(config,
                                          locale,
                                          rctx,
                                          options);

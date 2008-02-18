@@ -43,4 +43,14 @@ public class RpcException extends Exception {
     super(cause);
     this.gadget = gadget;
   }
+
+  public RpcException(JsonRpcGadget gadget, String message) {
+    super(message);
+    this.gadget = gadget;
+  }
+
+  public RpcException(JsonRpcGadget gadget, String message, Throwable cause) {
+    super(message, cause);
+    this.gadget = gadget;
+  }
 }

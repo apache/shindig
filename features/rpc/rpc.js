@@ -29,37 +29,33 @@ var gadgets = gadgets || {};
  * @name gadgets.rpc
  */
 gadgets.rpc = function() {
-  var services_ = {};
-  var iframePool_ = [];
-  var relayUrl_ = {};
-  var callId_ = 0;
-  var callbacks_ = {};
+  var services = {};
+  var iframePool = [];
+  var relayUrl = {};
+  var callId = 0;
+  var callbacks = {};
 
   // Pick the most efficient RPC relay mechanism
-  var relayChannel_ = typeof document.postMessage === 'function' ? 'dpm' :
-                      typeof window.postMessage === 'function' ? 'wpm' :
-                      'ifpc';
-  if (relayChannel_ === 'dpm' || relayChannel_ === 'wpm') {
+  var relayChannel = typeof document.postMessage === 'function' ? 'dpm' :
+                     typeof window.postMessage === 'function' ? 'wpm' :
+                     'ifpc';
+  if (relayChannel === 'dpm' || relayChannel === 'wpm') {
     document.addEventListener('message', function(packet) {
       // TODO validate packet.domain for security reasons
       process(gadgets.json.parse(packet.data));
     }, false);
   }
 
-  // Parent relay URL retrieval
-  var args = gadgets.util.getUrlParameters();
-  relayUrl_['..'] = args.rpc_relay || args.parent;
-
   // Default RPC handler
-  services_[''] = function() {
+  services[''] = function() {
     throw new Error('Unknown RPC service: ' + this.s);
   };
 
   // Special RPC handler for callbacks
-  services_['__cb'] = function(callbackId, result) {
-    var callback = callbacks_[callbackId];
+  services['__cb'] = function(callbackId, result) {
+    var callback = callbacks[callbackId];
     if (callback) {
-      delete callbacks_[callbackId];
+      delete callbacks[callbackId];
       callback(result);
     }
   };
@@ -72,7 +68,7 @@ gadgets.rpc = function() {
   function process(rpc) {
     if (rpc && typeof rpc.s === 'string' && typeof rpc.f === 'string' &&
         rpc.a instanceof Array) {
-      var result = (services_[rpc.s] || services_['']).apply(rpc, rpc.a);
+      var result = (services[rpc.s] || services['']).apply(rpc, rpc.a);
       if (rpc.c) {
         gadgets.rpc.call(rpc.f, '__cb', null, rpc.c, result);
       }
@@ -87,8 +83,8 @@ gadgets.rpc = function() {
   function emitInvisibleIframe(src) {
     var iframe;
     // Recycle IFrames
-    for (var i = iframePool_.length - 1; i >=0; --i) {
-      var ifr = iframePool_[i];
+    for (var i = iframePool.length - 1; i >=0; --i) {
+      var ifr = iframePool[i];
       if (ifr && (ifr.recyclable || ifr.readyState === 'complete')) {
         ifr.parentNode.removeChild(ifr);
         if (window.ActiveXObject) {
@@ -96,8 +92,8 @@ gadgets.rpc = function() {
           // cannot reuse the IFRAME because a navigational click sound will
           // be triggered when we set the SRC attribute.
           // Other browsers scan the pool for a free iframe to reuse.
-          iframePool_[i] = ifr = null;
-          iframePool_.splice(i, 1);
+          iframePool[i] = ifr = null;
+          iframePool.splice(i, 1);
         } else {
           ifr.recyclable = false;
           iframe = ifr;
@@ -112,10 +108,25 @@ gadgets.rpc = function() {
       iframe.style.visibility = 'hidden';
       iframe.style.position = 'absolute';
       iframe.onload = function() { this.recyclable = true; };
-      iframePool_.push(iframe);
+      iframePool.push(iframe);
     }
     iframe.src = src;
     setTimeout(function() { document.body.appendChild(iframe); }, 0);
+  }
+
+  // gadgets.config might not be available, such as when serving container js.
+  if (gadgets.config) {
+    /**
+     * Initializes RPC from the provided configuration.
+     */
+    function init(config) {
+      relayUrl['..'] = config.rpc.parentRelayUrl;
+    }
+
+    var requiredConfig = {
+      parentRelayUrl : gadgets.config.NonEmptyStringValidator
+    };
+    gadgets.config.register("rpc", requiredConfig, init);
   }
 
   return /** @scope gadgets.rpc */ {
@@ -127,7 +138,7 @@ gadgets.rpc = function() {
      * @member gadgets.rpc
      */
     register: function(serviceName, handler) {
-      services_[serviceName] = handler;
+      services[serviceName] = handler;
     },
 
     /**
@@ -137,7 +148,7 @@ gadgets.rpc = function() {
      * @member gadgets.rpc
      */
     unregister: function(serviceName) {
-      delete services_[serviceName];
+      delete services[serviceName];
     },
 
     /**
@@ -148,7 +159,7 @@ gadgets.rpc = function() {
      * @member gadgets.rpc
      */
     registerDefault: function(handler) {
-      services_[''] = handler;
+      services[''] = handler;
     },
 
     /**
@@ -158,12 +169,12 @@ gadgets.rpc = function() {
      * @member gadgets.rpc
      */
     unregisterDefault: function() {
-      delete services_[''];
+      delete services[''];
     },
 
     /**
      * Calls an RPC service.
-     * @param {String} targetId Id of the RPC service provider.
+     * @param {String} targetId Module Id of the RPC service provider.
      *                          Empty if calling the parent container.
      * @param {String} serviceName Service name to call.
      * @param {Function|null} callback Callback function (if any) to process
@@ -173,20 +184,27 @@ gadgets.rpc = function() {
      * @member gadgets.rpc
      */
     call: function(targetId, serviceName, callback, var_args) {
-      ++callId_;
+      ++callId;
       targetId = targetId || '..';
       if (callback) {
-        callbacks_[callId_] = callback;
+        callbacks[callId] = callback;
       }
-      var from = targetId === '..' ? window.name : '..';
+      var from;
+      if (targetId === '..') {
+        from = window.name;
+      } else {
+        from = '..';
+        targetId = idFormat.replace(/%targetId%/g, targetId);
+      }
+
       var rpcData = gadgets.json.stringify({
         s: serviceName,
         f: from,
-        c: callback ? callId_ : 0,
+        c: callback ? callId : 0,
         a: Array.prototype.slice.call(arguments, 3)
       });
 
-      switch (relayChannel_) {
+      switch (relayChannel) {
       case 'dpm': // use document.postMessage
         var targetDoc = targetId === '..' ? parent.document :
                                             frames[targetId].document;
@@ -197,15 +215,13 @@ gadgets.rpc = function() {
         targetWin.postMessage(rpcData);
         break;
       default: // use 'ifpc' as a fallback mechanism
-        var relayUrl = gadgets.rpc.getRelayUrl(targetId);
-        if (/^http[s]?:\/\//.test(relayUrl)) {
-          // IFrame packet format:
-          // # targetId & sourceId@callId & packetNum & packetId & packetData
-          // TODO split message if too long
-          var src = [relayUrl, '#', targetId, '&', from, '@', callId_,
-                     '&1&0&', encodeURIComponent(rpcData)].join('');
-          emitInvisibleIframe(src);
-        }
+        var relay = gadgets.rpc.getRelayUrl(targetId);
+        // IFrame packet format:
+        // # targetId & sourceId@callId & packetNum & packetId & packetData
+        // TODO split message if too long
+        var src = [relay, '#', targetId, '&', from, '@', callId,
+                   '&1&0&', rpcData].join('');
+        emitInvisibleIframe(src);
       }
     },
 
@@ -217,7 +233,7 @@ gadgets.rpc = function() {
      * @member gadgets.rpc
      */
     getRelayUrl: function(targetId) {
-      return relayUrl_[targetId];
+      return relayUrl[targetId];
     },
 
     /**
@@ -228,7 +244,7 @@ gadgets.rpc = function() {
      * @member gadgets.rpc
      */
     setRelayUrl: function(targetId, relayUrl) {
-      relayUrl_[targetId] = relayUrl;
+      relayUrl[targetId] = relayUrl;
     },
 
     /**
@@ -242,7 +258,7 @@ gadgets.rpc = function() {
      * @member gadgets.rpc
      */
     getRelayChannel: function() {
-      return relayChannel_;
+      return relayChannel;
     },
 
     /**
@@ -258,7 +274,7 @@ gadgets.rpc = function() {
       if (fragment.length > 4) {
         // TODO parse fragment[1..3] to merge multi-fragment messages
         process(gadgets.json.parse(
-                decodeURIComponent(fragment[fragment.length - 1])));
+            decodeURIComponent(fragment[fragment.length - 1])));
       }
     }
   };

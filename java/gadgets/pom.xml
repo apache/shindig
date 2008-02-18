@@ -61,7 +61,7 @@ under the License.
               </includes>
             </resource>
           </webResources>
-         </configuration>  
+         </configuration>
       </plugin>
       <plugin>
           <groupId>org.apache.maven.plugins </groupId>
@@ -102,11 +102,72 @@ under the License.
         <groupId>org.mortbay.jetty</groupId>
         <artifactId>maven-jetty-plugin</artifactId>
       </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-jar-plugin</artifactId>
+        <executions>
+          <execution>
+            <phase>package</phase>
+            <goals>
+              <goal>jar</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <!-- TODO: Replace this with the more generic javascript plugin that
+             allows the use of arbitrary compressor / compilers.
+             The maven-javascript-plugin does not seem to work.
+        -->
+        <!-- <groupId>net.sf.hammerfest</groupId> -->
+        <!-- <artifactId>maven-javascript-plugin</artifactId> -->
+        <groupId>net.sf.alchim</groupId>
+        <artifactId>yuicompressor-maven-plugin</artifactId>
+        <executions>
+          <execution>
+            <goals>
+              <goal>compress</goal>
+            </goals>
+          </execution>
+        </executions>
+        <configuration>
+          <nosuffix>true</nosuffix>
+          <excludes>
+            <!-- don't bother with other file types. -->
+            <exclude>**/*.xml</exclude>
+            <exclude>**/*.html</exclude>
+            <exclude>**/*.gif</exclude>
+            <exclude>**/*.jpeg</exclude>
+            <exclude>**/*.png</exclude>
+            <!-- Syndicator files are JSON, not javascript -->
+            <exclude>**/*syndicator.js</exclude>
+            <!-- open social files produce too many warnings -->
+            <exclude>**/opensocial-*/*</exclude>
+          </excludes>
+        </configuration>
+      </plugin>
     </plugins>
     <resources>
       <resource>
         <targetPath>features</targetPath>
         <directory>../../features</directory>
+      </resource>
+      <resource>
+        <targetPath>syndicators/default</targetPath>
+        <directory>../../config</directory>
+        <includes>
+          <include>syndicator.js</include>
+        </includes>
+      </resource>
+      <resource>
+        <!-- duplicated here for the jar build. -->
+        <!-- TODO: Eliminate duplicate copies in WAR output -->
+        <!-- this is relative to the pom.xml directory -->
+        <directory>../../javascript/</directory>
+        <targetPath>files</targetPath>
+        <includes>
+          <include>**/*.*</include>
+        </includes>
       </resource>
     </resources>
   </build>

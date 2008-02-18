@@ -67,16 +67,27 @@ public class GadgetServerConfigReader  {
     return gadgetBlacklist;
   }
 
+  protected SyndicatorConfig syndicatorConfig;
+
+  public SyndicatorConfig getSyndicatorConfig() {
+    if (syndicatorConfig == null) {
+      return SyndicatorConfig.EMPTY;
+    }
+    return syndicatorConfig;
+  }
+
   /**
    * Copies all fields from {@code base} into this instance.
    * @param base
    */
   public void copyFrom(GadgetServerConfigReader base) {
+    // We use the getters here just in case any methods were overridden.
     executor = base.getExecutor();
     featureRegistry = base.getFeatureRegistry();
     contentFetcher = base.getContentFetcher();
     specCache = base.getSpecCache();
     messageBundleCache = base.getMessageBundleCache();
     gadgetBlacklist = base.getGadgetBlacklist();
+    syndicatorConfig = base.getSyndicatorConfig();
   }
 }

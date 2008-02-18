@@ -24,14 +24,9 @@ import java.util.Locale;
  * generic functionality such as retrieval of remote data and caching.
  */
 public class GadgetContext {
-  private final RemoteContentFetcher httpFetcher;
-  public RemoteContentFetcher getHttpFetcher() {
-    return httpFetcher;
-  }
-
-  private final GadgetDataCache<MessageBundle> messageBundleCache;
-  public GadgetDataCache<MessageBundle> getMessageBundleCache() {
-    return messageBundleCache;
+  private final GadgetServerConfigReader config;
+  public GadgetServerConfigReader getServerConfig() {
+    return config;
   }
 
   private final Locale locale;
@@ -43,7 +38,7 @@ public class GadgetContext {
   public RenderingContext getRenderingContext() {
     return renderingContext;
   }
-  
+
   private final ProcessingOptions options;
   public ProcessingOptions getOptions() {
     return options;
@@ -51,19 +46,16 @@ public class GadgetContext {
 
   /**
    * Creates a context for the current gadget.
-   * @param httpFetcher
-   * @param messageBundleCache
+   * @param config
    * @param locale
    * @param renderingContext
    * @param options
    */
-  public GadgetContext(RemoteContentFetcher httpFetcher,
-                       GadgetDataCache<MessageBundle> messageBundleCache,
+  public GadgetContext(GadgetServerConfigReader config,
                        Locale locale,
                        RenderingContext renderingContext,
                        ProcessingOptions options) {
-    this.httpFetcher = httpFetcher;
-    this.messageBundleCache = messageBundleCache;
+    this.config = config;
     this.locale = locale;
     this.renderingContext = renderingContext;
     this.options = options != null ? options : new ProcessingOptions();

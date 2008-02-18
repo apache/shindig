@@ -82,9 +82,8 @@ public class InputStreamConsumer {
    */
   public static String readToString(InputStream is, int maxBytes)
       throws IOException {
-    byte[] bytes = readToByteArray(is, maxBytes);
     try {
-      return new String(bytes, "UTF-8");
+      return new String(readToByteArray(is, maxBytes), "UTF-8");
     } catch (UnsupportedEncodingException e) {
       // UTF-8 is required by the Java spec.
       throw new RuntimeException("UTF-8 not supported!", e);
