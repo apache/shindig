@@ -29,10 +29,12 @@ import javax.servlet.http.HttpServletRequest;
 public class HttpProcessingOptions extends ProcessingOptions {
   private final boolean ignoreCache;
   private final String forceJsLibs;
+  private final String syndicator;
 
   public HttpProcessingOptions(HttpServletRequest req) {
     ignoreCache = getIgnoreCache(req);
     forceJsLibs = getForceJsLibs(req);
+    syndicator = getSyndicator(req);
   }
 
   /** {@inheritDoc} */
@@ -45,6 +47,15 @@ public class HttpProcessingOptions extends ProcessingOptions {
   @Override
   public boolean getIgnoreCache() {
     return ignoreCache;
+  }
+
+  /** {@inheritDoc} */
+  @Override
+  public String getSyndicator() {
+    if (syndicator == null) {
+      return super.getSyndicator();
+    }
+    return syndicator;
   }
 
   /**
@@ -65,5 +76,13 @@ public class HttpProcessingOptions extends ProcessingOptions {
    */
   protected static String getForceJsLibs(HttpServletRequest req) {
     return req.getParameter("libs");
+  }
+
+  /**
+   * @param req
+   * @return Forced JS libs, or null if no forcing is to be done.
+   */
+  protected static String getSyndicator(HttpServletRequest req) {
+    return req.getParameter("syndicator");
   }
 }

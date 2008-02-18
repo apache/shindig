@@ -87,11 +87,11 @@ function _gel(el) {
  * @return {Array.<HTMLElement>} All elements of this tag type.
  */
 function _gelstn(tag) {
-  if (n === "*" && document.all) {
+  if (tag === "*" && document.all) {
     return document.all;
   }
   return document.getElementsByTagName ?
-         document.getElementsByTagName(n) : [];
+         document.getElementsByTagName(tag) : [];
 }
 
 /**

@@ -29,6 +29,7 @@ public class GadgetException extends Exception {
 
     // Configuration errors
     INVALID_PATH,
+    INVALID_CONFIG,
 
     // User-data related errors.
     INVALID_USER_DATA,
@@ -52,7 +53,7 @@ public class GadgetException extends Exception {
 
     // Caja error
     MALFORMED_FOR_SAFE_INLINING,
-    
+
     // View errors
     UNKNOWN_VIEW_SPECIFIED,
 

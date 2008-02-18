@@ -223,22 +223,22 @@ gadgets.GadgetService.prototype.setUserPref = function(id) {
  */
 gadgets.IfrGadgetService = function() {
   gadgets.GadgetService.call(this);
-  gadgets.ifpc_.registerService('resize_iframe', this.setHeight);
-  gadgets.ifpc_.registerService('set_pref', this.setUserPref);
-  gadgets.ifpc_.registerService('set_title', this.setTitle);
+  gadgets.rpc.register('resize_iframe', this.setHeight);
+  gadgets.rpc.register('set_pref', this.setUserPref);
+  gadgets.rpc.register('set_title', this.setTitle);
 };
 
 gadgets.IfrGadgetService.inherits(gadgets.GadgetService);
 
-gadgets.IfrGadgetService.prototype.setHeight = function(elementId, height) {
-  var element = document.getElementById(elementId);
+gadgets.IfrGadgetService.prototype.setHeight = function(height) {
+  var element = document.getElementById(this.f);
   if (element) {
     element.style.height = height + 'px';
   }
 };
 
-gadgets.IfrGadgetService.prototype.setTitle = function(gadget, title) {
-  var element = document.getElementById(gadget + '_title');
+gadgets.IfrGadgetService.prototype.setTitle = function(title) {
+  var element = document.getElementById(this.f + '_title');
   if (element) {
     element.innerHTML = title.replace(/&/g, '&amp;').replace(/</g, '&lt;');
   }
@@ -252,12 +252,12 @@ gadgets.IfrGadgetService.prototype.setTitle = function(gadget, title) {
  * @param {String} value Value of user preference
  * More names and values may follow
  */
-gadgets.IfrGadgetService.prototype.setUserPref = function(gadgetFrameId) {
+gadgets.IfrGadgetService.prototype.setUserPref = function() {
   // Quick hack to extract the gadget id from module id
-  var id = parseInt(gadgetFrameId.match(/_([0-9]+)$/)[1], 10);
+  var id = parseInt(this.f.match(/_([0-9]+)$/)[1], 10);
   var gadget = gadgets.container.getGadget(id);
   var prefs = gadget.getUserPrefs();
-  for (var i = 2; i < arguments.length; i += 2) {
+  for (var i = 0, j = arguments.length; i < j; i += 2) {
     prefs[arguments[i]] = arguments[i + 1];
   }
   gadget.setUserPrefs(prefs);
@@ -433,14 +433,14 @@ gadgets.Gadget.prototype.getMainContent = function(continuation) {
 
 gadgets.IfrGadget = function(opt_params) {
   gadgets.Gadget.call(this, opt_params);
-  this.serverBase_ = 'http://www.gmodules.com/ig/'; // default gadget server
+  this.serverBase_ = '../../' // default gadget server
 };
 
 gadgets.IfrGadget.inherits(gadgets.Gadget);
 
 gadgets.IfrGadget.prototype.GADGET_IFRAME_PREFIX_ = 'remote_iframe_';
 
-gadgets.IfrGadget.prototype.SYND = 'shindig';
+gadgets.IfrGadget.prototype.SYND = 'default';
 
 gadgets.IfrGadget.prototype.cssClassGadget = 'gadgets-gadget';
 gadgets.IfrGadget.prototype.cssClassTitleBar = 'gadgets-gadget-title-bar';
@@ -498,8 +498,7 @@ gadgets.IfrGadget.prototype.getUserPrefsDialogId = function() {
 gadgets.IfrGadget.prototype.getIframeUrl = function() {
   return this.serverBase_ + 'ifr?url=' +
       encodeURIComponent(this.specUrl) + '&synd=' + this.SYND + '&mid=' +
-      this.id + '&parent=' + encodeURIComponent(gadgets.container.parentUrl_) +
-      '&ogc=' + document.location.host + this.getUserPrefsParams();
+      this.id + this.getUserPrefsParams();
 };
 
 gadgets.IfrGadget.prototype.getUserPrefsParams = function() {

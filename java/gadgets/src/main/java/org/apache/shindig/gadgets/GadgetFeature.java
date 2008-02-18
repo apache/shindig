@@ -17,6 +17,8 @@
  */
 package org.apache.shindig.gadgets;
 
+import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -42,9 +44,48 @@ import java.util.Map;
  * and will <i>always</i> be instantiated this way. As such, it is recommended
  * not to define a constructor for a feature at all.
  */
-public interface GadgetFeature {
+public abstract class GadgetFeature {
+
+  /**
+   * Performs any pre-processing required to handle this feature.
+   * By default this does nothing.
+   *
+   * @param gadget
+   * @param context
+   * @param params
+   * @throws GadgetException
+   */
   public void prepare(GadgetView gadget, GadgetContext context,
-                      Map<String, String> params) throws GadgetException;
+                      Map<String, String> params) throws GadgetException {
+    // by default we do nothing, we just don't want to force all features
+    // to implement this.
+  }
+
+  /**
+   * Performs post-processing required to handle this feature.
+   * By default this also does nothing.
+   *
+   * @param gadget
+   * @param context
+   * @param params
+   * @throws GadgetException
+   */
   public void process(Gadget gadget, GadgetContext context,
-                      Map<String, String> params) throws GadgetException;
+      Map<String, String> params) throws GadgetException {
+    // we do nothing here as well.
+  }
+
+  /**
+   * This is used by various consumers to retrieve all javascript libraries
+   * that this feature uses without necessarily processing them.
+   * This is primarily used by features that simply pass-through libraries.
+   *
+   * @param context
+   * @param options
+   * @return A list of all libraries needed by this feature for the request.
+   */
+  public List<JsLibrary> getJsLibraries(RenderingContext context,
+                                        ProcessingOptions options) {
+    return Collections.emptyList();
+  }
 }

@@ -38,7 +38,7 @@ public class MessageBundleSubstituter implements GadgetFeatureFactory {
   }
 }
 
-class MessageBundleSubstituterFeature implements GadgetFeature {
+class MessageBundleSubstituterFeature extends GadgetFeature {
   private static final MessageBundleParser parser
       = new MessageBundleParser();
 
@@ -65,8 +65,10 @@ class MessageBundleSubstituterFeature implements GadgetFeature {
   /**
    * {@inheritDoc}
    */
+  @Override
   public void prepare(GadgetView gadget, GadgetContext context,
                       Map<String, String> params) throws GadgetException {
+    super.prepare(gadget, context, params);
     Locale locale = context.getLocale();
     GadgetSpec.LocaleSpec localeData = getLocaleSpec(gadget, locale);
     if (localeData == null) {
@@ -79,15 +81,17 @@ class MessageBundleSubstituterFeature implements GadgetFeature {
       localeData = getLocaleSpec(gadget, new Locale("all", "all"));
     }
 
+    GadgetServerConfigReader config = context.getServerConfig();
+
     if (localeData != null) {
       URI uri = localeData.getURI();
       if (uri != null) {
         // We definitely need a bundle, now we need to fetch it.
-        bundle = context.getMessageBundleCache().get(uri.toString());
+        bundle = config.getMessageBundleCache().get(uri.toString());
         if (bundle == null) {
           RemoteContent data = null;
-          data = context.getHttpFetcher().fetch(new RemoteContentRequest(uri),
-                                                context.getOptions());
+          data = config.getContentFetcher().fetch(new RemoteContentRequest(uri),
+                                                  context.getOptions());
           if (data.getHttpStatusCode() != RemoteContent.SC_OK) {
             throw new GadgetException(
                 GadgetException.Code.FAILED_TO_RETRIEVE_CONTENT,
@@ -95,7 +99,7 @@ class MessageBundleSubstituterFeature implements GadgetFeature {
                               uri.toString()));
           }
           bundle = parser.parse(data.getResponseAsString());
-          context.getMessageBundleCache().put(uri.toString(), bundle);
+          config.getMessageBundleCache().put(uri.toString(), bundle);
         }
       }
     }
@@ -104,8 +108,10 @@ class MessageBundleSubstituterFeature implements GadgetFeature {
   /**
    * {@inheritDoc}
    */
+  @Override
   public void process(Gadget gadget, GadgetContext context,
-                      Map<String, String> params) {
+                      Map<String, String> params) throws GadgetException {
+    super.process(gadget, context, params);
     StringBuilder js = new StringBuilder();
     int moduleId = gadget.getId().getModuleId();
     Locale locale = context.getLocale();

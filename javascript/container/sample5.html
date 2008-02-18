@@ -4,8 +4,7 @@
 <title>Sample: set-pref support</title>
 <!-- default container look and feel -->
 <link rel="stylesheet" href="gadgets.css">
-<script type="text/javascript" src="json.js"></script>
-<script type="text/javascript" src="ifpc.js"></script>
+<script type="text/javascript" src="../../js/rpc.js?c=1"></script>
 <script type="text/javascript" src="cookies.js"></script>
 <script type="text/javascript" src="gadgets.js"></script>
 <script type="text/javascript">
@@ -17,7 +16,6 @@ function init() {
 
   gadgets.container.setParentUrl('ifpc_relay.html');
   var gadget = gadgets.container.createGadget({specUrl: specUrl0});
-  gadget.setServerBase('http://localhost:8080/gadgets/'); 
   gadgets.container.addGadget(gadget);
 };
 

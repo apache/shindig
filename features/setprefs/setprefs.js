@@ -42,13 +42,14 @@ gadgets.Prefs.prototype.set = function(key, value) {
     gadgets.prefs_.setPref(this.moduleId_, key, value);
   }
 
-  var modId = 'remote_iframe_' + this.getModuleId();
-  var params = gadgets.util.getUrlParameters();
-  var ifpcRelay = (params.parent || '') + '/ig/ifpc_relay';
-  var ifpcArgs = Array.prototype.slice.call(arguments);
-  ifpcArgs.unshift(''); // security token placeholder
-  ifpcArgs.unshift(modId);
-  gadgets.ifpc_.call(modId, 'set_pref', ifpcArgs, ifpcRelay, null, '');
+  var args = [
+    null, // go to parent
+    "set_pref", // service name
+    null // no callback
+  ];
+  // and add the other params...
+  args.concat(Array.prototype.slice.call(arguments));
+  gadgets.rpc.call.apply(gadgets.rpc, args);
 };
 
 /**

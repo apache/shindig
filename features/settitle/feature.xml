@@ -18,7 +18,7 @@ specific language governing permissions and limitations under the License.
 -->
 <feature>
   <name>settitle</name>
-  <dependency>ifpc</dependency>
+  <dependency>rpc</dependency>
   <gadget>
     <script src="settitle.js"/>
   </gadget>

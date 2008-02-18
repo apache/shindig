@@ -17,21 +17,16 @@ KIND, either express or implied. See the License for the
 specific language governing permissions and limitations under the License.
 -->
 <feature>
+<!--
+Required configuration:
+A map of view names to view attributes. Examples:
+
+
+-->
+
   <name>views</name>
-  <!-- TODO: Use rpc when it becomes available -->
-  <dependency>ifpc</dependency>
+  <dependency>rpc</dependency>
   <gadget>
     <script src="views.js"/>
-    <!-- TODO: Clean this up and unify the configuration model -->
-    <script><![CDATA[
-      gadgets.views.init({
-        // Some standard views. Feel free to change these to use whatever
-        // views your container supports.
-        "default" : false,
-        "profile" : false,
-        "canvas" : true
-      });
-    ]]>
-    </script>
   </gadget>
 </feature>

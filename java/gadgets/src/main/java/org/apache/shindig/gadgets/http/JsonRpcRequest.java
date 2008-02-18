@@ -99,23 +99,27 @@ public class JsonRpcRequest {
         out.append("gadgets", gadgetJson);
       } catch (InterruptedException e) {
         throw new RpcException("Incomplete processing", e);
-      } catch (ExecutionException e) {
-        throw new RpcException("Incomplete processing", e);
-      } catch (RuntimeException rte) {
-        if (!(rte.getCause() instanceof RpcException)) {
-          throw rte;
+      } catch (ExecutionException ee) {
+        if (!(ee.getCause() instanceof RpcException)) {
+          throw new RpcException("Incomplete processing", ee);
         }
-        RpcException e = (RpcException)rte.getCause();
+        RpcException e = (RpcException)ee.getCause();
         // Just one gadget failed; mark it as such.
         try {
+          JsonRpcGadget gadget = e.getGadget();
+
+          if (gadget == null) {
+            throw e;
+          }
+
           JSONObject errorObj = new JSONObject();
-          errorObj.put("url", e.getGadget().getUrl())
-                  .put("moduleId", e.getGadget().getModuleId());
+          errorObj.put("url", gadget.getUrl())
+                  .put("moduleId", gadget.getModuleId());
           if (e.getCause() instanceof GadgetServer.GadgetProcessException) {
             GadgetServer.GadgetProcessException gpe
                 = (GadgetServer.GadgetProcessException)e.getCause();
             for (GadgetException ge : gpe.getComponents()) {
-              errorObj.append("errors", e.getMessage());
+              errorObj.append("errors", ge.getMessage());
             }
           } else {
             errorObj.append("errors", e.getMessage());

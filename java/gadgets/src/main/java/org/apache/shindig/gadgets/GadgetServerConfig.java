@@ -77,4 +77,9 @@ public class GadgetServerConfig extends GadgetServerConfigReader  {
     this.gadgetBlacklist = gadgetBlacklist;
     return this;
   }
+
+  public GadgetServerConfig setSyndicatorConfig(SyndicatorConfig config) {
+    syndicatorConfig = config;
+    return this;
+  }
 }

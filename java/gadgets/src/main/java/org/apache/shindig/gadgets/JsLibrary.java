@@ -17,12 +17,10 @@
  */
 package org.apache.shindig.gadgets;
 
-import org.apache.shindig.util.InputStreamConsumer;
+import org.apache.shindig.util.ResourceLoader;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.logging.Logger;
 
 /**
@@ -131,10 +129,8 @@ public final class JsLibrary {
           String.format("JsLibrary cannot be read: %s", fileName));
     }
 
-    FileInputStream fis = null;
     try {
-      fis = new FileInputStream(fileName);
-      return InputStreamConsumer.readToString(fis);
+      return ResourceLoader.getContent(file);
     } catch (IOException e) {
       throw new RuntimeException(
           String.format("Error reading file %s", fileName), e);
@@ -148,16 +144,10 @@ public final class JsLibrary {
    */
   private static String loadResource(String name) {
      try {
-       InputStream stream =
-            JsLibrary.class.getClassLoader().getResourceAsStream(name);
-       if (stream == null) {
-         throw new RuntimeException(
-             String.format("Could not find resource %s", name));
-       }
-       return InputStreamConsumer.readToString(stream);
+       return ResourceLoader.getContent(name);
      } catch (IOException e) {
        throw new RuntimeException(
-           String.format("Could not find resource %s", name));
+           String.format("Could not find resource %s", name), e);
      }
   }
 

@@ -17,6 +17,7 @@
  */
 package org.apache.shindig.gadgets;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
@@ -32,20 +33,10 @@ import java.util.Map;
  *     new JsLibraryFeatureFactory(mylib));
  */
 public class JsLibraryFeatureFactory implements GadgetFeatureFactory {
-  private JsLibraryFeature feature;
+  private final JsLibraryFeature feature;
 
   public GadgetFeature create() {
     return feature;
-  }
-
-  /**
-   * @param context
-   * @return A list of all JS libraries used by this feature
-   */
-  public List<JsLibrary> getLibraries(RenderingContext context) {
-    return context == RenderingContext.GADGET ?
-        feature.gadgetLibraries :
-        feature.containerLibraries;
   }
 
   public JsLibraryFeatureFactory(JsLibrary gadgetLibrary,
@@ -56,9 +47,12 @@ public class JsLibraryFeatureFactory implements GadgetFeatureFactory {
                                  List<JsLibrary> containerLibraries) {
     this.feature = new JsLibraryFeature(gadgetLibraries, containerLibraries);
   }
+  protected JsLibraryFeatureFactory() {
+    feature = null;
+  }
 }
 
-class JsLibraryFeature implements GadgetFeature {
+class JsLibraryFeature extends GadgetFeature {
   List<JsLibrary> containerLibraries;
   List<JsLibrary> gadgetLibraries;
 
@@ -72,17 +66,15 @@ class JsLibraryFeature implements GadgetFeature {
     if (gadgetLibrary == null) {
       gadgetLibraries = Collections.emptyList();
     } else {
-      gadgetLibraries = new LinkedList<JsLibrary>();
-      gadgetLibraries.add(gadgetLibrary);
-      gadgetLibraries = Collections.unmodifiableList(gadgetLibraries);
+      gadgetLibraries
+          = Collections.unmodifiableList(Arrays.asList(gadgetLibrary));
     }
 
     if (containerLibrary == null) {
       containerLibraries = Collections.emptyList();
     } else {
-      containerLibraries = new LinkedList<JsLibrary>();
-      containerLibraries.add(containerLibrary);
-      containerLibraries = Collections.unmodifiableList(containerLibraries);
+      containerLibraries
+          = Collections.unmodifiableList(Arrays.asList(containerLibrary));
     }
   }
 
@@ -96,33 +88,39 @@ class JsLibraryFeature implements GadgetFeature {
     if (gLibraries == null) {
       gadgetLibraries = Collections.emptyList();
     } else {
-      gadgetLibraries = new LinkedList<JsLibrary>();
-      gadgetLibraries.addAll(gLibraries);
-      gadgetLibraries = Collections.unmodifiableList(gadgetLibraries);
+      gadgetLibraries
+          = Collections.unmodifiableList(new LinkedList<JsLibrary>(gLibraries));
     }
 
     if (cLibraries == null) {
       containerLibraries = Collections.emptyList();
     } else {
-      containerLibraries = new LinkedList<JsLibrary>();
-      containerLibraries.addAll(cLibraries);
-      containerLibraries = Collections.unmodifiableList(containerLibraries);
+      containerLibraries
+        = Collections.unmodifiableList(new LinkedList<JsLibrary>(cLibraries));
     }
   }
 
   /**
    * {@inheritDoc}
    */
-  public void prepare(GadgetView gadget, GadgetContext context,
-      Map<String, String> params) {
-    // Do nothing.
+  @Override
+  public List<JsLibrary> getJsLibraries(RenderingContext context,
+                                        ProcessingOptions options) {
+    if (context == RenderingContext.GADGET) {
+      return gadgetLibraries;
+    } else if (context == RenderingContext.CONTAINER) {
+      return containerLibraries;
+    }
+    return Collections.emptyList();
   }
 
   /**
    * {@inheritDoc}
    */
+  @Override
   public void process(Gadget gadget, GadgetContext context,
-      Map<String, String> params) {
+      Map<String, String> params) throws GadgetException {
+    super.process(gadget, context, params);
     List<JsLibrary> libraries;
     if (context.getRenderingContext() == RenderingContext.GADGET) {
       libraries = gadgetLibraries;

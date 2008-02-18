@@ -34,15 +34,17 @@ public class GadgetSpecTestFixture {
   private static final String DATETIME_TITLE = "Hello, World!";
   private static final String DATETIME_CONTENT = "Goodbye, World!";
 
-  public static final String DATETIME_URI_STRING = "http://www.google.com/ig/modules/datetime.xml";
+  public static final String DATETIME_URI_STRING
+      = "http://www.google.com/ig/modules/datetime.xml";
   public static final URI DATETIME_URI;
   public static final int DATETIME_MODULE_ID = 1;
   public static final GadgetView.ID DATETIME_ID;
-  public static final String DATETIME_XML = "<?xml version=\"1.0\"?>" +
-                                     "<Module>" +
-                                     "  <ModulePrefs title=\"" + DATETIME_TITLE + "\"/>" +
-                                     "  <Content type=\"html\">" + DATETIME_CONTENT + "</Content>" +
-                                     "</Module>";
+  public static final String DATETIME_XML
+      = "<?xml version=\"1.0\"?>" +
+        "<Module>" +
+        "  <ModulePrefs title=\"" + DATETIME_TITLE + "\"/>" +
+        "  <Content type=\"html\">" + DATETIME_CONTENT + "</Content>" +
+        "</Module>";
 
   public static final GadgetSpec DATETIME_SPEC =
       new GadgetSpec() {

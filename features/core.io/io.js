@@ -120,6 +120,20 @@ gadgets.io = function() {
     callback(resp);
   }
 
+  /**
+   * @param {Object} configuration Configuration settings
+   * @private
+   */
+  function init (configuration) {
+    config = configuration["core.io"];
+  }
+
+  var requiredConfig = {
+    proxyUrl: new gadgets.config.RegExValidator(/.*%url%.*/),
+    jsonProxyUrl: gadgets.config.NonEmptyStringValidator
+  };
+  gadgets.config.register("core.io", requiredConfig, init);
+
   return /** @scope gadgets.io */ {
     /**
      * Fetches content from the provided URL and feeds that content into the
@@ -213,24 +227,6 @@ gadgets.io = function() {
      */
     getProxyUrl : function (url) {
       return config.proxyUrl.replace("%url%", encodeURIComponent(url));
-    },
-
-    /**
-     * Initializes fetchers
-     *
-     * @param {Object} configuration Configuration settings
-     *     Required:
-     *       - proxyUrl: The url for content proxy requests. Include %url%
-     *           as a placeholder for the actual url.
-     *       - jsonProxyUrl: The url for dynamic proxy requests. Include %url%
-     *           as a placeholder for the actual url.
-     * @private
-     */
-    init : function (configuration) {
-      config = configuration;
-      if (!config.proxyUrl || !config.jsonProxyUrl) {
-        throw new Error("proxyUrl and jsonProxyUrl are required.");
-      }
     }
   };
 }();

@@ -21,20 +21,27 @@ import org.apache.shindig.gadgets.Gadget;
 import org.apache.shindig.gadgets.GadgetContentFilter;
 import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.GadgetServer;
+import org.apache.shindig.gadgets.GadgetServerConfigReader;
 import org.apache.shindig.gadgets.GadgetSpec;
 import org.apache.shindig.gadgets.GadgetView;
 import org.apache.shindig.gadgets.JsLibrary;
 import org.apache.shindig.gadgets.ProcessingOptions;
 import org.apache.shindig.gadgets.RenderingContext;
+import org.apache.shindig.gadgets.SyndicatorConfig;
 import org.apache.shindig.gadgets.UserPrefs;
+import org.apache.shindig.gadgets.GadgetFeatureRegistry.Entry;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URLEncoder;
+import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -195,9 +202,17 @@ public class GadgetRenderingServlet extends HttpServlet {
 
     // Forced libs first.
 
+    Set<String> reqs;
+
     if (forcedLibs != null) {
       String[] libs = forcedLibs.split(":");
+      reqs = new HashSet<String>();
+      for (String l : libs) {
+        reqs.add(l);
+      }
       markup.append(String.format(externFmt, servletState.getJsUrl(libs)));
+    } else {
+      reqs = gadget.getRequires().keySet();
     }
 
     if (inlineJs.length() > 0) {
@@ -207,6 +222,45 @@ public class GadgetRenderingServlet extends HttpServlet {
 
     if (externJs.length() > 0) {
       markup.append(externJs);
+    }
+
+    // One more thing -- we have to output the gadgets js config.
+    // config *should* be handled by a feature, but unfortunately there's
+    // no way to make this feature always be the last item in the output.
+    // oh well.
+
+    GadgetServerConfigReader serverConfig
+        = servletState.getGadgetServer().getConfig();
+    SyndicatorConfig syndConf = serverConfig.getSyndicatorConfig();
+    JSONObject syndFeatures = syndConf.getJsonObject(options.getSyndicator(),
+                                                     "gadgets.features");
+
+    if (syndFeatures != null) {
+      // now we just want configuration for the features that we actually use.
+      // TODO: this is too much manual work, and we should probably just
+      // modify the gadget object to keep the list of transitive dependencies
+      Set<Entry> found = new HashSet<Entry>();
+
+      // Nothing can ever be missing at this point since that would have
+      // thrown an exception already.
+      Set<String> empty = Collections.emptySet();
+      serverConfig.getFeatureRegistry().getIncludedFeatures(reqs, found, empty);
+
+      Set<String> features = new HashSet<String>(found.size());
+      for (Entry entry : found) {
+        features.add(entry.getName());
+      }
+      String[] featArray = features.toArray(new String[features.size()]);
+
+      try {
+        JSONObject featureConfig = new JSONObject(syndFeatures, featArray);
+        markup.append("<script><!--\ngadgets.config.init(")
+              .append(featureConfig.toString())
+              .append(");\n-->\n</script>");
+      } catch (JSONException e) {
+        // shouldn't ever happen since we've already validated our JSON output.
+        throw new RuntimeException(e);
+      }
     }
 
     List<GadgetException> gadgetExceptions = new LinkedList<GadgetException>();

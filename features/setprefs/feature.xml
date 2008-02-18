@@ -18,7 +18,7 @@ specific language governing permissions and limitations under the License.
 -->
 <feature>
   <name>setprefs</name>
-  <dependency>ifpc</dependency>
+  <dependency>rpc</dependency>
   <gadget>
     <script src="setprefs.js"/>
   </gadget>

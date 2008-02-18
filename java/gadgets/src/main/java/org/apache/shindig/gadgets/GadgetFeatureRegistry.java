@@ -40,6 +40,10 @@ public class GadgetFeatureRegistry {
   private final Map<String, Entry> features = new HashMap<String, Entry>();
   private final Map<String, Entry> core =  new HashMap<String, Entry>();
 
+  // Caches the transitive dependencies to enable faster lookups.
+  private final Map<Set<String>, Set<Entry>> transitiveDeps
+      = new HashMap<Set<String>, Set<Entry>>();
+
   // Constants used for internal feature names.
   private final static String FEAT_MSG_BUNDLE = "core.msgbundlesubst";
   private final static String FEAT_BIDI = "core.bidisubst";
@@ -169,22 +173,36 @@ public class GadgetFeatureRegistry {
   public boolean getIncludedFeatures(Set<String> needed,
                                      Set<Entry> resultsFound,
                                      Set<String> resultsMissing) {
-    resultsFound.clear();
-    resultsMissing.clear();
     if (needed.size() == 0) {
       // Shortcut for gadgets that don't have any explicit dependencies.
       resultsFound.addAll(core.values());
       return true;
     }
-    for (String featureName : needed) {
-      Entry entry = features.get(featureName);
-      if (entry == null) {
-        resultsMissing.add(featureName);
-      } else {
-        addEntryToSet(resultsFound, entry);
+    // We use the cache only for situations where all needed are available.
+    // if any are missing, the result won't be cached.
+    Set<Entry> cache = transitiveDeps.get(needed);
+    if (cache != null) {
+      resultsFound.addAll(cache);
+      return true;
+    } else {
+      for (String featureName : needed) {
+        Entry entry = features.get(featureName);
+        if (entry == null) {
+          resultsMissing.add(featureName);
+        } else {
+          addEntryToSet(resultsFound, entry);
+        }
+      }
+
+      if (resultsMissing.size() == 0) {
+        // Store to cache
+        transitiveDeps.put(
+            Collections.unmodifiableSet(new HashSet<String>(needed)),
+            Collections.unmodifiableSet(new HashSet<Entry>(resultsFound)));
+        return true;
       }
     }
-    return resultsMissing.size() == 0;
+    return false;
   }
 
   /**
@@ -206,15 +224,6 @@ public class GadgetFeatureRegistry {
    */
   Entry getEntry(String name) {
     return features.get(name);
-  }
-
-  public static class NoOpFeature implements GadgetFeature {
-    public void prepare(GadgetView gadget, GadgetContext context,
-        Map<String, String> params) {
-    }
-    public void process(Gadget gadget, GadgetContext context,
-        Map<String, String> params) {
-    }
   }
 
   /**
