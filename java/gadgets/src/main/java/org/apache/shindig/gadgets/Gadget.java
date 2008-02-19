@@ -179,14 +179,16 @@ public class Gadget implements GadgetView {
     return baseSpec.getAuthorEmail();
   }
 
-  // TODO: make this URI?
-  public String getScreenshot() {
+  public URI getScreenshot() {
     return baseSpec.getScreenshot();
   }
 
-  // TODO: make this URI?
-  public String getThumbnail() {
+  public URI getThumbnail() {
     return baseSpec.getThumbnail();
+  }
+
+  public List<String> getCategories() {
+    return baseSpec.getCategories();
   }
 
   public List<LocaleSpec> getLocaleSpecs() {
@@ -289,7 +291,7 @@ public class Gadget implements GadgetView {
   public String getContentData() {
     return getContentData(null);
   }
-  
+
   /**
    * @param view ID of the view whose content to retrieve
    * @return Gadget contents for the given view with all substitutions applied

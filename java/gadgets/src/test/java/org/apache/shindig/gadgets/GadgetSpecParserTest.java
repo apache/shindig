@@ -42,25 +42,35 @@ public class GadgetSpecParserTest extends TestCase {
     }
   }
 
-  public void testBasicGadget() throws Exception {
+  private GadgetSpec parse(String specXml) throws Exception {
     BasicGadgetId id = new BasicGadgetId();
     id.uri = new URI("http://example.org/text.xml");
     id.moduleId = 1;
+    return parser.parse(id, specXml);
+  }
+
+  private void assertParseException(String specXml) throws Exception {
+    try {
+      GadgetSpec spec = parse(specXml);
+      fail();
+    } catch (SpecParserException ex) {
+      // expected
+    }
+  }
+
+  public void testBasicGadget() throws Exception {
     String xml = "<?xml version=\"1.0\"?>" +
                  "<Module>" +
                  "<ModulePrefs title=\"Hello, world!\"/>" +
                  "<Content type=\"html\">Hello!</Content>" +
                  "</Module>";
-    GadgetSpec spec = parser.parse(id, xml);
+    GadgetSpec spec = parse(xml);
 
     assertEquals("Hello!", spec.getContentData());
     assertEquals("Hello, world!", spec.getTitle());
   }
 
   public void testEnumParsing() throws Exception {
-    BasicGadgetId id = new BasicGadgetId();
-    id.uri = new URI("http://example.org/text.xml");
-    id.moduleId = 1;
     String xml = "<?xml version=\"1.0\"?>" +
                  "<Module>" +
                  "<ModulePrefs title=\"Test Enum\">" +
@@ -71,7 +81,7 @@ public class GadgetSpecParserTest extends TestCase {
                  "</ModulePrefs>" +
                  "<Content type=\"html\">Hello!</Content>" +
                  "</Module>";
-    GadgetSpec spec = parser.parse(id, xml);
+    GadgetSpec spec = parse(xml);
 
     List<GadgetSpec.UserPref> prefs = spec.getUserPrefs();
 
@@ -85,5 +95,40 @@ public class GadgetSpecParserTest extends TestCase {
 
     assertEquals("Zero", enumValues.get("0"));
     assertEquals("One", enumValues.get("1"));
+  }
+
+  public void testNonCanonicalMetadata() throws Exception {
+    String desc = "World greetings";
+    String dirTitle = "Dir title";
+    String cat = "hello";
+    String cat2 = "hello2";
+    String thumb = "http://foo.com/bar.xml";
+    String xml = "<?xml version=\"1.0\"?>" +
+                 "<Module>" +
+                 "<ModulePrefs title=\"Hello, world!\"" +
+                 " description=\"" + desc + "\"" +
+                 " directory_title=\"" + dirTitle + "\"" +
+                 " thumbnail=\"" + thumb + "\"" +
+                 " category=\"" + cat + "\" category2=\"" + cat2 + "\"/>" +
+                 "<Content type=\"html\">Hello!</Content>" +
+                 "</Module>";
+    GadgetSpec spec = parse(xml);
+
+    assertEquals(desc, spec.getDescription());
+    assertEquals(dirTitle, spec.getDirectoryTitle());
+    assertEquals(thumb, spec.getThumbnail().toString());
+    assertEquals(2, spec.getCategories().size());
+    assertEquals(cat, spec.getCategories().get(0));
+    assertEquals(cat2, spec.getCategories().get(1));
+  }
+
+  public void testIllegalUris() throws Exception {
+    String xml = "<?xml version=\"1.0\"?>" +
+                 "<Module>" +
+                 "<ModulePrefs title=\"Hello, world!\"" +
+                 " thumbnail=\"foo.com#bar#png\"/>" +
+                 "<Content type=\"html\">Hello!</Content>" +
+                 "</Module>";
+    assertParseException(xml);
   }
 }

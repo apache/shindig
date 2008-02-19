@@ -35,6 +35,7 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -46,6 +47,8 @@ import javax.xml.parsers.ParserConfigurationException;
  * Parses Gadget spec XML into a basic data structure.
  */
 public class GadgetSpecParser {
+
+  private static final String[] CATEGORY_ATTRS = {"category", "category2"};
 
   /**
    * Parses the raw input XML and returns a new GadgetSpec with the processed
@@ -127,13 +130,18 @@ public class GadgetSpecParser {
     }
     spec.title = title.getNodeValue();
 
-    Node titleUrl = attrs.getNamedItem("title_url");
-    if (null != titleUrl) {
-      try {
-        spec.titleUrl = new URI(titleUrl.getNodeValue());
-      } catch (URISyntaxException e) {
-        throw new SpecParserException(
-            "Malformed \"title_url\": " + titleUrl.getNodeValue());
+    spec.titleUrl = getUriAttributeOrNull(attrs, "title_url");
+    spec.description = getAttributeOrNull(attrs, "description");
+    spec.directoryTitle = getAttributeOrNull(attrs, "directory_title");
+    spec.author = getAttributeOrNull(attrs, "author");
+    spec.authorEmail = getAttributeOrNull(attrs, "author_email");
+    spec.thumbnail = getUriAttributeOrNull(attrs, "thumbnail");
+    spec.screenshot = getUriAttributeOrNull(attrs, "screenshot");
+
+    for (String attrName : CATEGORY_ATTRS) {
+      String attr = getAttributeOrNull(attrs, attrName);
+      if (attr != null) {
+        spec.categories.add(attr);
       }
     }
 
@@ -146,6 +154,30 @@ public class GadgetSpecParser {
     }
 
     // TODO: Icon parsing
+  }
+
+  private String getAttributeOrNull(NamedNodeMap attrs, String attrName) {
+    Node attr = attrs.getNamedItem(attrName);
+    if (null != attr) {
+      return attr.getNodeValue();
+    }
+    return null;
+  }
+
+  private URI getUriAttributeOrNull(NamedNodeMap attrs, String attrName)
+      throws SpecParserException {
+    Node attr = attrs.getNamedItem(attrName);
+    if (null != attr) {
+      try {
+        return new URI(attr.getNodeValue());
+      } catch (URISyntaxException e) {
+        // TODO: This is really not a great way to ensure valid URL's. All
+        // kinds of invalid URL's are parsed as valid URI's.
+        throw new SpecParserException(
+            "Malformed \"" + attrName + "\": " + attr.getNodeValue());
+      }
+    }
+    return null;
   }
 
   /**
@@ -362,11 +394,12 @@ public class GadgetSpecParser {
     private List<String> preloads = new ArrayList<String>();
     private Map<String, FeatureSpec> requires
         = new HashMap<String, FeatureSpec>();
-    private String screenshot;
-    private String thumbnail;
+    private URI screenshot;
+    private URI thumbnail;
     private String title;
     private URI titleUrl;
     private List<UserPref> userPrefs = new ArrayList<UserPref>();
+    private List<String> categories = new ArrayList<String>();
 
     public GadgetSpec copy() {
       // TODO: actually clone this thing.
@@ -387,6 +420,7 @@ public class GadgetSpecParser {
       spec.title = title;
       spec.titleUrl = titleUrl;
       spec.userPrefs = new ArrayList<UserPref>(userPrefs);
+      spec.categories = new ArrayList<String>(categories);
       return spec;
     }
 
@@ -476,11 +510,11 @@ public class GadgetSpecParser {
       return requires;
     }
 
-    public String getScreenshot() {
+    public URI getScreenshot() {
       return screenshot;
     }
 
-    public String getThumbnail() {
+    public URI getThumbnail() {
       return thumbnail;
     }
 
@@ -536,6 +570,10 @@ public class GadgetSpecParser {
 
     public List<UserPref> getUserPrefs() {
       return userPrefs;
+    }
+
+    public List<String> getCategories() {
+      return categories;
     }
 
     public ContentType getContentType() {
