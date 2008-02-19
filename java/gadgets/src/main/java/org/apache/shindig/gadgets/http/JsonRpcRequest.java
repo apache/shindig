@@ -28,9 +28,11 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.net.URI;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.CompletionService;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorCompletionService;
@@ -79,10 +81,9 @@ public class JsonRpcRequest {
                       outGadget.getContentType().toString().toLowerCase());
 
         // Features.
-        gadgetJson.put("features", new JSONArray());
-        for (String feature : outGadget.getRequires().keySet()) {
-          gadgetJson.append("features", feature);
-        }
+        Set<String> feats = outGadget.getRequires().keySet();
+        String[] features = feats.toArray(new String[feats.size()]);
+        gadgetJson.put("features", features);
 
         JSONObject prefs = new JSONObject();
 
@@ -93,12 +94,47 @@ public class JsonRpcRequest {
               .put("type", pref.getDataType().toString().toLowerCase())
               .put("default", pref.getDefaultValue())
               .put("enumValues", pref.getEnumValues());
+          prefs.put(pref.getName(), up);
         }
         gadgetJson.put("userPrefs", prefs);
 
         // Content
         String iframeUrl = servletState.getIframeUrl(outGadget, options);
         gadgetJson.put("content", iframeUrl);
+
+        // Extended spec data.
+        String directoryTitle = outGadget.getDirectoryTitle();
+        if (directoryTitle != null) {
+          gadgetJson.put("directoryTitle", directoryTitle);
+        }
+
+        URI thumbnail = outGadget.getThumbnail();
+        if (thumbnail != null) {
+          gadgetJson.put("thumbnail", thumbnail.toString());
+        }
+
+        URI screenshot = outGadget.getScreenshot();
+        if (screenshot != null) {
+          gadgetJson.put("screenshot", screenshot.toString());
+        }
+
+        String author = outGadget.getAuthor();
+        if (author != null) {
+          gadgetJson.put("author", author);
+        }
+
+        String authorEmail = outGadget.getAuthorEmail();
+        if (authorEmail != null) {
+          gadgetJson.put("authorEmail", authorEmail);
+        }
+
+        // Categories
+        List<String> cats = outGadget.getCategories();
+        if (cats != null) {
+          String[] categories = cats.toArray(new String[cats.size()]);
+          gadgetJson.put("categories", outGadget.getCategories().toArray());
+        }
+
         out.append("gadgets", gadgetJson);
       } catch (InterruptedException e) {
         throw new RpcException("Incomplete processing", e);

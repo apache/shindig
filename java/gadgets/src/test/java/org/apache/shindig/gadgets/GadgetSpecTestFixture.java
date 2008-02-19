@@ -87,10 +87,10 @@ public class GadgetSpecTestFixture {
         public Map<String, FeatureSpec> getRequires() {
           return new HashMap<String, FeatureSpec>();
         }
-        public String getScreenshot() {
+        public URI getScreenshot() {
           return null;
         }
-        public String getThumbnail() {
+        public URI getThumbnail() {
           return null;
         }
         public String getTitle() {
@@ -101,6 +101,9 @@ public class GadgetSpecTestFixture {
         }
         public List<UserPref> getUserPrefs() {
           return new LinkedList<UserPref>();
+        }
+        public List<String> getCategories() {
+          return new LinkedList<String>();
         }
       };
 

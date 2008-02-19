@@ -27,15 +27,16 @@ import java.util.Map;
  */
 public interface GadgetSpec {
   public static final String DEFAULT_VIEW = "default";
-  
+
   public String getTitle();
   public URI getTitleURI();
   public String getDirectoryTitle();
   public String getDescription();
   public String getAuthor();
   public String getAuthorEmail();
-  public String getScreenshot();
-  public String getThumbnail();
+  public URI getScreenshot();
+  public URI getThumbnail();
+  public List<String> getCategories();
 
   public static interface LocaleSpec {
     public Locale getLocale();
@@ -99,9 +100,9 @@ public interface GadgetSpec {
    * @throws IllegalStateException if contentType is not HTML.
    */
   public String getContentData();
-  
+
   /**
-   * @param view Identifier of the desired view to retrieve. 
+   * @param view Identifier of the desired view to retrieve.
    * @return The HTML content for the specified view of this gadget spec,
    *         or null if no such view was defined.
    * @throws IllegalStateException if contentType is not HTML.
