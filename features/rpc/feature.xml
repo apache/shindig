@@ -21,6 +21,11 @@ specific language governing permissions and limitations under the License.
 Required config:
 
 parentRelayUrl: The url of the relay file for this service.
+
+Optional config:
+
+useLegacyProtocol: Boolean
+(if true, all calls to rpc.call will use the same wire format as ifpc).
 -->
   <name>rpc</name>
   <gadget>

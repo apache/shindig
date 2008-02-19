@@ -32,6 +32,7 @@ gadgets.rpc = function() {
   var services = {};
   var iframePool = [];
   var relayUrl = {};
+  var useLegacyProtocol = {};
   var callId = 0;
   var callbacks = {};
 
@@ -59,6 +60,21 @@ gadgets.rpc = function() {
       callback(result);
     }
   };
+
+  /**
+   * Encodes arguments for the legacy IFPC wire format.
+   *
+   * @param {Object} args
+   * @return {String} the encoded args
+   */
+  function encodeLegacyData(args) {
+    var stringify = gadgets.json.stringify;
+    var argsEscaped = [];
+    for(var i = 0, j = args.length; i < j; ++i) {
+      argsEscaped.push(encodeURIComponent(stringify(args[i])));
+    }
+    return argsEscaped.join('&');
+  }
 
   /**
    * Helper function to process an RPC request
@@ -121,6 +137,7 @@ gadgets.rpc = function() {
      */
     function init(config) {
       relayUrl['..'] = config.rpc.parentRelayUrl;
+      useLegacyProtocol['..'] = !!config.rpc.useLegacyProtocol;
     }
 
     var requiredConfig = {
@@ -194,15 +211,7 @@ gadgets.rpc = function() {
         from = window.name;
       } else {
         from = '..';
-        targetId = idFormat.replace(/%targetId%/g, targetId);
       }
-
-      var rpcData = gadgets.json.stringify({
-        s: serviceName,
-        f: from,
-        c: callback ? callId : 0,
-        a: Array.prototype.slice.call(arguments, 3)
-      });
 
       switch (relayChannel) {
       case 'dpm': // use document.postMessage
@@ -216,11 +225,26 @@ gadgets.rpc = function() {
         break;
       default: // use 'ifpc' as a fallback mechanism
         var relay = gadgets.rpc.getRelayUrl(targetId);
-        // IFrame packet format:
-        // # targetId & sourceId@callId & packetNum & packetId & packetData
+
         // TODO split message if too long
-        var src = [relay, '#', targetId, '&', from, '@', callId,
-                   '&1&0&', rpcData].join('');
+        var src;
+        if (useLegacyProtocol[targetId]) {
+          // #iframe_id&callId&num_packets&packet_num&block_of_data
+          var legacyData = [from, serviceName, null, null, from].concat(
+              Array.prototype.slice.call(arguments, 3));
+          src = [relay, '#', encodeLegacyData([from, '&', callId, '&1&0&',
+                 encodeLegacyData(legacyData)])].join('');
+        } else {
+          var rpcData = gadgets.json.stringify({
+            s: serviceName,
+            f: from,
+            c: callback ? callId : 0,
+            a: Array.prototype.slice.call(arguments, 3)
+          });
+          // # targetId & sourceId@callId & packetNum & packetId & packetData
+          src = [relay, '#', targetId, '&', from, '@', callId,
+                 '&1&0&', rpcData].join('');
+        }
         emitInvisibleIframe(src);
       }
     },

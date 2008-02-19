@@ -25,6 +25,7 @@
 <script src="../../js/core.js?c=1"></script>
 <body>
 <script>
+  gadgets.ifpc_.registerService("set_pref", onSetPref);
   function makeXhr() {
     if (window.XMLHttpRequest) {
       return new XMLHttpRequest();
@@ -56,7 +57,7 @@
         newGadget.innerHTML = ["Unable to process gadget: ", gadget.url, ". Errors: <pre>", gadget.errors.join("\n"), "</pre>"].join("");
       } else {
         newGadget.innerHTML = ['<h2>', gadget.title, '</h2>',
-          '<iframe src="', gadget.content, '&libs=', libs ,'" id="remote_iframe_', gadget.moduleId, '"></iframe>'
+          '<iframe src="', gadget.content, '&libs=', libs ,'" id="remote_iframe_', gadget.moduleId, '" name="remote_iframe_', gadget.moduleId, '"></iframe>'
         ].join("");
       }
       newGadget.className = "gadget";

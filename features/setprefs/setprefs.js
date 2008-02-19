@@ -45,10 +45,9 @@ gadgets.Prefs.prototype.set = function(key, value) {
   var args = [
     null, // go to parent
     "set_pref", // service name
-    null // no callback
-  ];
-  // and add the other params...
-  args.concat(Array.prototype.slice.call(arguments));
+    null, // no callback
+    gadgets.util.getUrlParameters().ifpctok || 0 // Legacy IFPC "security".
+  ].concat(Array.prototype.slice.call(arguments));
   gadgets.rpc.call.apply(gadgets.rpc, args);
 };
 
