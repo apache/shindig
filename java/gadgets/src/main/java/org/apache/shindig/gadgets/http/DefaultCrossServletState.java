@@ -34,6 +34,7 @@ import org.apache.shindig.gadgets.GadgetSpec;
 import org.apache.shindig.gadgets.JsLibrary;
 import org.apache.shindig.gadgets.MessageBundle;
 import org.apache.shindig.gadgets.OpenSocialFeatureFactory;
+import org.apache.shindig.gadgets.ProcessingOptions;
 import org.apache.shindig.gadgets.RenderingContext;
 import org.apache.shindig.gadgets.SyndicatorConfig;
 import org.apache.shindig.gadgets.UserPrefs;
@@ -84,7 +85,7 @@ public class DefaultCrossServletState extends CrossServletState {
    * {@inheritDoc}
    */
   @Override
-  public String getIframeUrl(Gadget gadget, HttpServletRequest req) {
+  public String getIframeUrl(Gadget gadget, ProcessingOptions opts) {
     // We don't have any meaningful data in the current request anyway, so
     // we'll just do this statically.
     StringBuilder buf = new StringBuilder();
@@ -107,6 +108,7 @@ public class DefaultCrossServletState extends CrossServletState {
       }
 
       buf.append("mid=").append(gadget.getId().getModuleId());
+      buf.append("&synd=").append(opts.getSyndicator());
 
       UserPrefs prefs = gadget.getUserPrefValues();
       for (Map.Entry<String, String> entry : prefs.getPrefs().entrySet()) {
@@ -128,7 +130,7 @@ public class DefaultCrossServletState extends CrossServletState {
    * {@inheritDoc}
    */
   @Override
-  public String getJsUrl(String[] features) {
+  public String getJsUrl(String[] features, ProcessingOptions opts) {
     StringBuilder buf = new StringBuilder();
     buf.append(jsPath);
     if (features == null || features.length == 0) {
@@ -144,7 +146,10 @@ public class DefaultCrossServletState extends CrossServletState {
         buf.append(feature);
       }
     }
-    buf.append(".js?v=").append(jsCacheParam);
+    buf.append(".js?v=")
+       .append(jsCacheParam)
+       .append("&synd=")
+       .append(opts.getSyndicator());
     return buf.toString();
   }
 

@@ -66,6 +66,6 @@
   "rpc" : {
     // This should never be on the same host in a production environment!
     // Only use this for TESTING!
-    "parentRelayUrl" : "files/container/rpc_relay.html"
+    "parentRelayUrl" : "files/container/rpc_relay.html",
   },
 }}

@@ -22,6 +22,7 @@ package org.apache.shindig.gadgets.http;
 import org.apache.shindig.gadgets.Gadget;
 import org.apache.shindig.gadgets.GadgetServer;
 import org.apache.shindig.gadgets.GadgetSigner;
+import org.apache.shindig.gadgets.ProcessingOptions;
 
 import java.util.logging.Logger;
 
@@ -90,7 +91,7 @@ public abstract class CrossServletState {
    * @param features
    * @return The url to retrieve the appropriate JS.
    */
-  public abstract String getJsUrl(String[] features);
+  public abstract String getJsUrl(String[] features, ProcessingOptions opts);
 
   /**
    * Constructs a url for generating an iframe for the given gadget.
@@ -100,7 +101,7 @@ public abstract class CrossServletState {
    * context object). A better choice would probably be to add the view params
    * to ProcessingOptions and pass that here.
    */
-  public abstract String getIframeUrl(Gadget gadget,  HttpServletRequest req);
+  public abstract String getIframeUrl(Gadget gadget,  ProcessingOptions opts);
 
   /**
    * Initializes this handler using the provided implementation.
