@@ -27,9 +27,20 @@ import org.apache.shindig.gadgets.ProcessingOptions;
 public class JsonRpcProcessingOptions extends ProcessingOptions {
   private final JsonRpcContext context;
 
+  /** {@inheritDoc} */
   @Override
   public boolean getIgnoreCache() {
     return context.getIgnoreCache();
+  }
+
+  /** {@inheritDoc} */
+  @Override
+  public String getSyndicator() {
+    String syndicator = context.getSyndicator();
+    if (syndicator == null) {
+      return super.getSyndicator();
+    }
+    return syndicator;
   }
 
   public JsonRpcProcessingOptions(JsonRpcContext context) {

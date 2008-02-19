@@ -23,6 +23,7 @@ import org.apache.shindig.gadgets.Gadget;
 import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.GadgetServer;
 import org.apache.shindig.gadgets.GadgetSpec;
+import org.apache.shindig.gadgets.ProcessingOptions;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -60,6 +61,8 @@ public class JsonRpcRequest {
       processor.submit(new JsonRpcGadgetJob(server, context, gadget));
     }
 
+    ProcessingOptions options = new JsonRpcProcessingOptions(context);
+
     int numJobs = gadgets.size();
     do {
       try {
@@ -94,7 +97,7 @@ public class JsonRpcRequest {
         gadgetJson.put("userPrefs", prefs);
 
         // Content
-        String iframeUrl = servletState.getIframeUrl(outGadget, null);
+        String iframeUrl = servletState.getIframeUrl(outGadget, options);
         gadgetJson.put("content", iframeUrl);
         out.append("gadgets", gadgetJson);
       } catch (InterruptedException e) {

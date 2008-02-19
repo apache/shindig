@@ -29,6 +29,7 @@ public class JsonRpcContext {
   private final String language;
   private final String country;
   private final String view;
+  private final String syndicator;
   private final boolean ignoreCache;
 
   public String getLanguage() {
@@ -47,6 +48,10 @@ public class JsonRpcContext {
     return ignoreCache;
   }
 
+  public String getSyndicator() {
+    return syndicator;
+  }
+
   /**
    * @param json
    * @throws JSONException
@@ -55,10 +60,7 @@ public class JsonRpcContext {
     language = json.getString("language");
     country = json.getString("country");
     view = json.getString("view");
-    if (json.has("ignoreCache")) {
-      ignoreCache = json.getBoolean("ignoreCache");
-    } else {
-      ignoreCache = false;
-    }
+    ignoreCache = json.optBoolean("ignoreCache");
+    syndicator = json.optString("syndicator");
   }
 }
