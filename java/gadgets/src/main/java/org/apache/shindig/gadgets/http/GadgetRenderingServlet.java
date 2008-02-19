@@ -201,18 +201,12 @@ public class GadgetRenderingServlet extends HttpServlet {
     }
 
     // Forced libs first.
-
-    Set<String> reqs;
-
     if (forcedLibs != null) {
       String[] libs = forcedLibs.split(":");
-      reqs = new HashSet<String>();
-      for (String l : libs) {
-        reqs.add(l);
-      }
-      markup.append(String.format(externFmt, servletState.getJsUrl(libs)));
+      String jsUrl = servletState.getJsUrl(libs, options);
+      markup.append(String.format(externFmt, jsUrl));
     } else {
-      reqs = gadget.getRequires().keySet();
+      appendJsConfig(options, gadget.getRequires().keySet(), inlineJs);
     }
 
     if (inlineJs.length() > 0) {
@@ -222,45 +216,6 @@ public class GadgetRenderingServlet extends HttpServlet {
 
     if (externJs.length() > 0) {
       markup.append(externJs);
-    }
-
-    // One more thing -- we have to output the gadgets js config.
-    // config *should* be handled by a feature, but unfortunately there's
-    // no way to make this feature always be the last item in the output.
-    // oh well.
-
-    GadgetServerConfigReader serverConfig
-        = servletState.getGadgetServer().getConfig();
-    SyndicatorConfig syndConf = serverConfig.getSyndicatorConfig();
-    JSONObject syndFeatures = syndConf.getJsonObject(options.getSyndicator(),
-                                                     "gadgets.features");
-
-    if (syndFeatures != null) {
-      // now we just want configuration for the features that we actually use.
-      // TODO: this is too much manual work, and we should probably just
-      // modify the gadget object to keep the list of transitive dependencies
-      Set<Entry> found = new HashSet<Entry>();
-
-      // Nothing can ever be missing at this point since that would have
-      // thrown an exception already.
-      Set<String> empty = Collections.emptySet();
-      serverConfig.getFeatureRegistry().getIncludedFeatures(reqs, found, empty);
-
-      Set<String> features = new HashSet<String>(found.size());
-      for (Entry entry : found) {
-        features.add(entry.getName());
-      }
-      String[] featArray = features.toArray(new String[features.size()]);
-
-      try {
-        JSONObject featureConfig = new JSONObject(syndFeatures, featArray);
-        markup.append("<script><!--\ngadgets.config.init(")
-              .append(featureConfig.toString())
-              .append(");\n-->\n</script>");
-      } catch (JSONException e) {
-        // shouldn't ever happen since we've already validated our JSON output.
-        throw new RuntimeException(e);
-      }
     }
 
     List<GadgetException> gadgetExceptions = new LinkedList<GadgetException>();
@@ -313,7 +268,7 @@ public class GadgetRenderingServlet extends HttpServlet {
     } else {
       libs = forcedLibs.split(":");
     }
-    appendLibsToQuery(libs, query);
+    appendLibsToQuery(libs, query, options);
 
     try {
       redirURI = new URI(redirURI.getScheme(),
@@ -385,12 +340,14 @@ public class GadgetRenderingServlet extends HttpServlet {
    * Appends libs to the query string.
    * @param libs
    * @param query
+   * @param opts
    */
-  private void appendLibsToQuery(String[] libs, StringBuilder query) {
+  private void appendLibsToQuery(
+      String[] libs, StringBuilder query, ProcessingOptions opts) {
     query.append("&")
          .append(LIBS_PARAM_NAME)
          .append("=")
-         .append(servletState.getJsUrl(libs));
+         .append(servletState.getJsUrl(libs, opts));
   }
 
   /**
@@ -400,5 +357,50 @@ public class GadgetRenderingServlet extends HttpServlet {
   protected boolean getUseCaja(HttpServletRequest req) {
     String cajaParam = req.getParameter(CAJA_PARAM);
     return "1".equals(cajaParam);
+  }
+
+  /**
+   * @param options
+   * @param reqs The features you require.
+   * @param js Existing js, to which the configuration will be appended.
+   */
+  private void appendJsConfig(
+      ProcessingOptions options, Set<String> reqs, StringBuilder js) {
+    // config *should* be handled by a feature, but unfortunately there's
+    // no way to make this feature always be the last item in the output.
+    // oh well.
+
+    GadgetServerConfigReader serverConfig
+        = servletState.getGadgetServer().getConfig();
+    SyndicatorConfig syndConf = serverConfig.getSyndicatorConfig();
+    JSONObject syndFeatures = syndConf.getJsonObject(options.getSyndicator(),
+                                                     "gadgets.features");
+    if (syndFeatures != null) {
+      // now we just want configuration for the features that we actually use.
+      // TODO: this is too much manual work, and we should probably just
+      // modify the gadget object to keep the list of transitive dependencies
+      Set<Entry> found = new HashSet<Entry>();
+
+      // Nothing can ever be missing at this point since that would have
+      // thrown an exception already.
+      Set<String> empty = Collections.emptySet();
+      serverConfig.getFeatureRegistry().getIncludedFeatures(reqs, found, empty);
+
+      Set<String> features = new HashSet<String>(found.size());
+      for (Entry entry : found) {
+        features.add(entry.getName());
+      }
+      String[] featArray = features.toArray(new String[features.size()]);
+
+      try {
+        JSONObject featureConfig = new JSONObject(syndFeatures, featArray);
+        js.append("gadgets.config.init(")
+          .append(featureConfig.toString())
+          .append(");");
+      } catch (JSONException e) {
+        // shouldn't ever happen since we've already validated our JSON output.
+        throw new RuntimeException(e);
+      }
+    }
   }
 }

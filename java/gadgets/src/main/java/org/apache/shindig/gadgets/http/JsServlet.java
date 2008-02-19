@@ -20,9 +20,13 @@ package org.apache.shindig.gadgets.http;
 import org.apache.shindig.gadgets.GadgetFeature;
 import org.apache.shindig.gadgets.GadgetFeatureFactory;
 import org.apache.shindig.gadgets.GadgetFeatureRegistry;
+import org.apache.shindig.gadgets.GadgetServerConfigReader;
 import org.apache.shindig.gadgets.JsLibrary;
 import org.apache.shindig.gadgets.ProcessingOptions;
 import org.apache.shindig.gadgets.RenderingContext;
+import org.apache.shindig.gadgets.SyndicatorConfig;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.IOException;
 import java.util.Arrays;
@@ -96,12 +100,14 @@ public class JsServlet extends HttpServlet {
           = new HashSet<GadgetFeatureRegistry.Entry>();
 
       ProcessingOptions opts = new HttpProcessingOptions(req);
+      Set<String> features = new HashSet<String>(found.size());
 
       // TODO: This doesn't work correctly under JDK 1.5, but it does under 1.6
       do {
         for (GadgetFeatureRegistry.Entry entry : found) {
           if (!done.contains(entry) &&
               done.containsAll(entry.getDependencies())) {
+            features.add(entry.getName());
             GadgetFeatureFactory factory = entry.getFeature();
             GadgetFeature feature = factory.create();
             for (JsLibrary lib : feature.getJsLibraries(context, opts)) {
@@ -119,6 +125,25 @@ public class JsServlet extends HttpServlet {
         resp.setStatus(HttpServletResponse.SC_NOT_FOUND);
         return;
       }
+
+      GadgetServerConfigReader serverConfig
+          = servletState.getGadgetServer().getConfig();
+      SyndicatorConfig syndConf = serverConfig.getSyndicatorConfig();
+      JSONObject syndFeatures = syndConf.getJsonObject(opts.getSyndicator(),
+                                                       "gadgets.features");
+
+      if (syndFeatures != null) {
+        String[] featArray = features.toArray(new String[features.size()]);
+        try {
+          JSONObject featureConfig = new JSONObject(syndFeatures, featArray);
+          jsData.append("gadgets.config.init(")
+                .append(featureConfig.toString())
+                .append(");");
+        } catch (JSONException e) {
+          throw new RuntimeException(e);
+        }
+      }
+
       setCachingHeaders(resp);
       resp.setContentType("text/javascript");
       resp.setContentLength(jsData.length());
