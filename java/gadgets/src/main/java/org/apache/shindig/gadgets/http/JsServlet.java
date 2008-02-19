@@ -132,7 +132,7 @@ public class JsServlet extends HttpServlet {
       JSONObject syndFeatures = syndConf.getJsonObject(opts.getSyndicator(),
                                                        "gadgets.features");
 
-      if (syndFeatures != null) {
+      if (syndFeatures != null && context != RenderingContext.CONTAINER) {
         String[] featArray = features.toArray(new String[features.size()]);
         try {
           JSONObject featureConfig = new JSONObject(syndFeatures, featArray);

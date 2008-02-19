@@ -22,6 +22,7 @@
   }
 </style>
 </head>
+<script src="../../js/core.js?c=1"></script>
 <body>
 <script>
   function makeXhr() {
@@ -63,16 +64,17 @@
     }
   }
 
-  function processResp(xhr, callback) {
+  function processResp(xhr) {
     if (xhr.readyState !== 4) {return;}
-    callback(gadgets.json.parse(xhr.responseText));
+    renderGadgets(gadgets.json.parse(xhr.responseText));
   }
 
   var request = {
     context: {
       country: "US",
       language: "en",
-      view: "default"
+      view: "default",
+      syndicator: "default"
     },
     gadgets: [
       {
@@ -92,7 +94,11 @@
 
   var xhr = makeXhr();
   xhr.open("POST", "../../rpc", true);
-  xhr.onreadystatechange = gadgets.util.makeClosure(null, processResp, xhr, renderGadgets);
+  xhr.onreadystatechange = function(xobj) {
+    return function() {
+      processResp(xobj);
+    };
+  }(xhr);
   var req = gadgets.json.stringify(request);
   xhr.send(req);
 </script>
