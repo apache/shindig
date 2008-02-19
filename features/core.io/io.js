@@ -187,7 +187,7 @@ gadgets.io = function() {
         headers: gadgets.io.encodeValues(headers),
         postData : params.POST_DATA || "",
         authz : auth || "",
-        st : st || "",
+        st : st || ""
       };
       xhr.send(gadgets.io.encodeValues(postData));
     },
