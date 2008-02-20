@@ -18,6 +18,7 @@ specific language governing permissions and limitations under the License.
 -->
 <feature>
   <name>analytics</name>
+  <dependency>core</dependency>
   <gadget>
     <script src="http://www.google.com/ig/lib/liburchin.js"/>
     <script src="http://www.google.com/ig/lib/libanalytics.js"/>
