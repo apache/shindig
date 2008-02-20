@@ -26,8 +26,10 @@ import org.json.JSONObject;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.logging.Logger;
@@ -145,14 +147,30 @@ public class SyndicatorConfig {
    */
   private void loadResources(String[] files)  throws GadgetException {
     try {
-      Map<String, String> contents
-          = ResourceLoader.getContent(files, SYNDICATOR_FILE_NAME);
-      for (String entry : contents.values()) {
-        loadFromString(entry);
+      for (String entry : files) {
+        String content = ResourceLoader.getContent(entry);
+        loadFromString(content);
       }
     } catch (IOException e) {
       throw new GadgetException(GadgetException.Code.INVALID_PATH, e);
     }
+  }
+
+  /**
+   * Returns names on the json object. Used instead of JSONObject.getNames to
+   * provide backwards compatibility with older JSON releases.
+   *
+   * @param obj
+   * @return An array of all keys in the object.
+   */
+  private static String[] getNames(JSONObject obj) throws JSONException {
+    JSONArray arr = obj.names();
+    List<String> items = new ArrayList<String>(arr.length());
+    for (int i = 0, j = arr.length(); i < j; ++i) {
+      items.add(i, arr.getString(i));
+    }
+
+    return items.toArray(new String[items.size()]);
   }
 
   /**
@@ -167,9 +185,10 @@ public class SyndicatorConfig {
   private JSONObject mergeObjects(JSONObject base, JSONObject merge)
       throws JSONException {
     // Clone the initial object (JSONObject doesn't support "clone").
-    JSONObject clone = new JSONObject(base, JSONObject.getNames(base));
+
+    JSONObject clone = new JSONObject(base, getNames(base));
     // Walk parameter list for the merged object and merge recursively.
-    String[] fields = JSONObject.getNames(merge);
+    String[] fields = getNames(merge);
     for (String field : fields) {
       Object existing = clone.opt(field);
       Object update = merge.get(field);
