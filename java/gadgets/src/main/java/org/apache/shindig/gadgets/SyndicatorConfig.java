@@ -45,7 +45,6 @@ import java.util.logging.Logger;
 public class SyndicatorConfig {
   public static final SyndicatorConfig EMPTY = new SyndicatorConfig();
   private final Map<String, JSONObject> config;
-  public static final String SYNDICATOR_FILE_NAME = "syndicator.js";
   public static final String DEFAULT_SYNDICATOR = "default";
   public static final String SYNDICATOR_KEY = "gadgets.syndicator";
   private static final Logger logger
@@ -131,7 +130,7 @@ public class SyndicatorConfig {
       for (File file : files) {
         if (file.isDirectory()) {
           loadFiles(file.listFiles());
-        } else if (SYNDICATOR_FILE_NAME.equals(file.getName())) {
+        } else {
           loadFromString(ResourceLoader.getContent(file));
         }
       }

@@ -53,8 +53,6 @@ import javax.xml.parsers.ParserConfigurationException;
  */
 public class JsFeatureLoader {
 
-  private static final String FEATURE_FILE_NAME = "feature.xml";
-
   private static final Logger logger
       = Logger.getLogger("org.apache.shindig.gadgets");
 
@@ -120,7 +118,7 @@ public class JsFeatureLoader {
     for (File file : files) {
       if (file.isDirectory()) {
         loadFiles(file.listFiles(), features);
-      } else if (FEATURE_FILE_NAME.equals(file.getName())) {
+      } else if (file.getName().endsWith(".xml")) {
         ParsedFeature feature = processFile(file);
         if (feature != null) {
           features.put(feature.name, feature);
@@ -138,12 +136,10 @@ public class JsFeatureLoader {
   private void loadResources(String[] paths, Map<String, ParsedFeature> feats)
       throws GadgetException {
     try {
-      Map<String, String> contents
-          = ResourceLoader.getContent(paths, FEATURE_FILE_NAME);
-      for (Map.Entry<String, String> entry : contents.entrySet()) {
-        String parent = entry.getKey();
-        parent = parent.substring(0, parent.lastIndexOf(FEATURE_FILE_NAME));
-        ParsedFeature feature = parse(entry.getValue(), parent, true);
+      for (String file : paths) {
+        String content = ResourceLoader.getContent(file);
+        String parent = file.substring(0, file.lastIndexOf('/') + 1);
+        ParsedFeature feature = parse(content, parent, true);
         if (feature != null) {
           feats.put(feature.name, feature);
         }
