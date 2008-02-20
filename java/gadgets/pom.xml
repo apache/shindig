@@ -140,7 +140,7 @@ under the License.
             <exclude>**/*.jpeg</exclude>
             <exclude>**/*.png</exclude>
             <!-- Syndicator files are JSON, not javascript -->
-            <exclude>**/*syndicator.js</exclude>
+            <exclude>**/*syndicator*.js</exclude>
             <!-- open social files produce too many warnings -->
             <exclude>**/opensocial-*/*</exclude>
           </excludes>
