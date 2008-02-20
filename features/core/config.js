@@ -118,15 +118,15 @@ gadgets.config = function() {
      */
     init: function(config, opt_noValidation) {
       configuration = config;
-      for (var name in components) {
+      for (var name in components) if (components.hasOwnProperty(name)) {
         var component = components[name],
             conf = config[name],
             validators = component.validators;
         if (!opt_noValidation) {
-          for (var validator in validators) {
-            if (!validators[validator](conf[validator])) {
-              throw new Error('Invalid config value "' + conf[validator] +
-                  '" for parameter "' + validator + '" in component "' +
+          for (var v in validators) if (validators.hasOwnProperty(v)) {
+            if (!validators[v](conf[v])) {
+              throw new Error('Invalid config value "' + conf[v] +
+                  '" for parameter "' + v + '" in component "' +
                   name + '"');
             }
           }

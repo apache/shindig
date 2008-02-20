@@ -143,6 +143,8 @@ under the License.
             <exclude>**/*syndicator*.js</exclude>
             <!-- open social files produce too many warnings -->
             <exclude>**/opensocial-*/*</exclude>
+						<!-- Caja has some bugs too -->
+						<exclude>**/caja/*.js</exclude>
           </excludes>
         </configuration>
       </plugin>
