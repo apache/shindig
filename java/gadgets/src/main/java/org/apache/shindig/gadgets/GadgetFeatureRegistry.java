@@ -130,7 +130,7 @@ public class GadgetFeatureRegistry {
     // Core entries must come first.
     Entry entry = features.get(name);
     if (entry == null) {
-      logger.info("Registering feature: " + name);
+      logger.info("Registering feature: " + name + " with deps " + deps);
       entry = new Entry(name, deps, feature, this);
       if (coreDone) {
         entry.deps.addAll(core.values());
