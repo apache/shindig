@@ -38,7 +38,6 @@ import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URLEncoder;
-import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -380,11 +379,8 @@ public class GadgetRenderingServlet extends HttpServlet {
       // TODO: this is too much manual work, and we should probably just
       // modify the gadget object to keep the list of transitive dependencies
       Set<Entry> found = new HashSet<Entry>();
-
-      // Nothing can ever be missing at this point since that would have
-      // thrown an exception already.
-      Set<String> empty = Collections.emptySet();
-      serverConfig.getFeatureRegistry().getIncludedFeatures(reqs, found, empty);
+      Set<String> miss = new HashSet<String>();
+      serverConfig.getFeatureRegistry().getIncludedFeatures(reqs, found, miss);
 
       Set<String> features = new HashSet<String>(found.size());
       for (Entry entry : found) {
