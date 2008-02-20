@@ -25,7 +25,10 @@
  */
 // goog.provide('goog.net.cookies');
 // TODO: find the official solution for a cookies library
-var goog = {net: {cookies: {}}};
+var goog = goog || {};
+goog.net = goog.net || {};
+goog.net.cookies = goog.net.cookies || {};
+
 
 goog.JsType_ = {
   UNDEFINED: 'undefined'
