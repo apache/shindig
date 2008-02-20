@@ -18,6 +18,7 @@ specific language governing permissions and limitations under the License.
 -->
 <feature>
   <name>tabs</name>
+  <dependency>core</dependency>
   <gadget>
     <script src="tabs.js"/>
   </gadget>
