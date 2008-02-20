@@ -83,6 +83,6 @@ public class HttpProcessingOptions extends ProcessingOptions {
    * @return Forced JS libs, or null if no forcing is to be done.
    */
   protected static String getSyndicator(HttpServletRequest req) {
-    return req.getParameter("syndicator");
+    return req.getParameter("synd");
   }
 }
