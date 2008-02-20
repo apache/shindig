@@ -246,18 +246,17 @@ gadgets.IfrGadgetService.prototype.setTitle = function(title) {
 
 /**
  * Sets one or more user preferences
- * @param {String} gadgetFrameId Frame ID of the gadget that initiates the call
- * @param {String} dummy
+ * @param {String} editToken
  * @param {String} name Name of user preference
  * @param {String} value Value of user preference
  * More names and values may follow
  */
-gadgets.IfrGadgetService.prototype.setUserPref = function() {
+gadgets.IfrGadgetService.prototype.setUserPref = function(editToken, name, value) {
   // Quick hack to extract the gadget id from module id
   var id = parseInt(this.f.match(/_([0-9]+)$/)[1], 10);
   var gadget = gadgets.container.getGadget(id);
   var prefs = gadget.getUserPrefs();
-  for (var i = 0, j = arguments.length; i < j; i += 2) {
+  for (var i = 1, j = arguments.length; i < j; i += 2) {
     prefs[arguments[i]] = arguments[i + 1];
   }
   gadget.setUserPrefs(prefs);
