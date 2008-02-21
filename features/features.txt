@@ -4,7 +4,6 @@ features/core.io/feature.xml
 features/core/feature.xml
 features/dynamic-height/feature.xml
 features/flash/feature.xml
-features/ifpc/feature.xml
 features/minimessage/feature.xml
 features/opensocial-reference/feature.xml
 features/opensocial-samplecontainer/feature.xml

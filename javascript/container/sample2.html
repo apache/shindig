@@ -16,7 +16,6 @@ my.gadgetSpecUrls = [
   'http://www.labpixies.com/campaigns/todo/todo.xml'
 ];
 
-var containerParentUrl = 'ifpc_relay.html';
 
 // This container lays out and renders gadgets itself.
 
@@ -32,7 +31,6 @@ my.LayoutManager.prototype.getGadgetChrome = function(gadget) {
 };
 
 my.init = function() {
-  gadgets.container.setParentUrl(containerParentUrl);
   gadgets.container.layoutManager = new my.LayoutManager();
 };
 
