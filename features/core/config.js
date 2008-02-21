@@ -190,7 +190,7 @@ gadgets.config = function() {
      * Validates that the value is a boolean.
      */
     BooleanValidator: function(data) {
-      return !!data;
+      return typeof data === "boolean";
     },
 
     /**
