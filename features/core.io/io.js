@@ -184,7 +184,7 @@ gadgets.io = function() {
       var postData = {
         url: url,
         httpMethod : params.METHOD || "GET",
-        headers: gadgets.io.encodeValues(headers),
+        headers: gadgets.io.encodeValues(headers, false),
         postData : params.POST_DATA || "",
         authz : auth || "",
         st : st || ""
@@ -197,22 +197,26 @@ gadgets.io = function() {
      * (key=value&amp;...)
      *
      * @param {Object} fields The post fields you wish to encode
+     * @param {Boolean} opt_noEscaping An optional parameter specifying whether
+     *     to turn off escaping of the parameters. Defaults to false.
      * @return {String} The processed post data in www-form-urlencoded format.
      *
      * @member gadgets.io
      */
-    encodeValues : function (fields) {
+    encodeValues : function (fields, opt_noEscaping) {
+      var escape = !opt_noEscaping;
+
       var buf = [];
       var first = false;
-      for (var i in fields) {
+      for (var i in fields) if (fields.hasOwnProperty(i)) {
         if (!first) {
           first = true;
         } else {
           buf.push("&");
         }
-        buf.push(encodeURIComponent(i));
+        buf.push(escape ? encodeURIComponent(i) : i);
         buf.push("=");
-        buf.push(encodeURIComponent(fields[i]));
+        buf.push(escape ? encodeURIComponent(fields[i]) : fields[i]);
       }
       return buf.join("");
     },
