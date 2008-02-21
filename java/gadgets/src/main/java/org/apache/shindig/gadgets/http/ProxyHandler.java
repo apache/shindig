@@ -59,7 +59,7 @@ public class ProxyHandler {
   public void fetchJson(HttpServletRequest request,
                         HttpServletResponse response,
                         GadgetSigner signer)
-      throws ServletException, IOException {
+      throws ServletException, IOException, GadgetException {
     GadgetToken token = extractAndValidateToken(request, signer);
     String url = request.getParameter("url");
     URL originalUrl = validateUrl(url);
@@ -95,7 +95,7 @@ public class ProxyHandler {
   public void fetch(HttpServletRequest request,
                     HttpServletResponse response,
                     GadgetSigner signer)
-      throws ServletException, IOException {
+      throws ServletException, IOException, GadgetException {
     GadgetToken token = extractAndValidateToken(request, signer);
     URL originalUrl = validateUrl(request.getParameter("url"));
     URL signedUrl = signUrl(originalUrl, token, request);
@@ -251,19 +251,15 @@ public class ProxyHandler {
 
   /**
    * @return A valid token for the given input.
-   * @throws ServletException
+   * @throws GadgetException
    */
   private GadgetToken extractAndValidateToken(HttpServletRequest request,
-      GadgetSigner signer) throws ServletException {
-    try {
-      if (signer == null) {
-        return null;
-      }
-      String token = getParameter(request, "st", "");
-      return signer.createToken(token);
-    } catch (GadgetException ge) {
-      throw new ServletException(ge);
+      GadgetSigner signer) throws GadgetException {
+    if (signer == null) {
+      return null;
     }
+    String token = getParameter(request, "st", "");
+    return signer.createToken(token);
   }
 
   /**
@@ -283,16 +279,12 @@ public class ProxyHandler {
    */
   @SuppressWarnings("unchecked")
   private URL signUrl(URL originalUrl, GadgetToken token,
-      HttpServletRequest request) throws ServletException {
-    try {
-      if (token == null || !"signed".equals(request.getParameter("authz"))) {
-        return originalUrl;
-      }
-      String method = getParameter(request, "httpMethod", "GET");
-      return token.signUrl(originalUrl, method, request.getParameterMap());
-    } catch (GadgetException ge) {
-      throw new ServletException(ge);
+      HttpServletRequest request) throws GadgetException {
+    if (token == null || !"signed".equals(request.getParameter("authz"))) {
+      return originalUrl;
     }
+    String method = getParameter(request, "httpMethod", "GET");
+    return token.signUrl(originalUrl, method, request.getParameterMap());
   }
 
   /**

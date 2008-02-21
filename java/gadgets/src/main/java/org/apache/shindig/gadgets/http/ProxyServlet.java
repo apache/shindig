@@ -19,8 +19,11 @@
 package org.apache.shindig.gadgets.http;
 
 import org.apache.shindig.gadgets.GadgetServerConfigReader;
+import org.apache.shindig.gadgets.GadgetException;
 
 import java.io.IOException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
@@ -29,6 +32,10 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 public class ProxyServlet extends HttpServlet {
+
+  private static final Logger logger
+      = Logger.getLogger("org.apache.shindig.gadgets");
+
   private CrossServletState servletState;
   private ProxyHandler proxyHandler;
 
@@ -44,12 +51,16 @@ public class ProxyServlet extends HttpServlet {
   protected void doGet(HttpServletRequest request, HttpServletResponse response)
       throws ServletException, IOException {
     String output = request.getParameter("output");
-    if ("js".equals(output)) {
-      proxyHandler.fetchJson(
-          request, response, servletState.getGadgetSigner(request));
-    } else {
-      proxyHandler.fetch(
-          request, response, servletState.getGadgetSigner(request));
+    try {
+      if ("js".equals(output)) {
+        proxyHandler.fetchJson(
+            request, response, servletState.getGadgetSigner(request));
+      } else {
+        proxyHandler.fetch(
+            request, response, servletState.getGadgetSigner(request));
+      }
+    } catch (GadgetException ge) {
+      outputError(ge, response);
     }
   }
 
@@ -58,5 +69,17 @@ public class ProxyServlet extends HttpServlet {
       throws ServletException, IOException {
     // Currently they are identical
     doGet(request, response);
+  }
+
+  private void outputError(GadgetException excep, HttpServletResponse resp) throws IOException {
+    StringBuilder err = new StringBuilder();
+    err.append(excep.getCode().toString());
+    err.append(' ');
+    err.append(excep.getMessage());
+
+    // Log the errors here for now. We might want different severity levels
+    // for different error codes.
+    logger.log(Level.INFO, "Proxy request failed", err);
+    resp.sendError(HttpServletResponse.SC_BAD_REQUEST, err.toString());
   }
 }
