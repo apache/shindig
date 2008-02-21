@@ -28,6 +28,7 @@ import org.xml.sax.SAXException;
 import java.io.File;
 import java.io.IOException;
 import java.io.StringReader;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -70,7 +71,7 @@ public class JsFeatureLoader {
    * @return A list of the newly loaded features.
    * @throws GadgetException
    */
-  public List<GadgetFeatureRegistry.Entry> loadFeatures(String path,
+  public Set<GadgetFeatureRegistry.Entry> loadFeatures(String path,
       GadgetFeatureRegistry registry) throws GadgetException {
     Map<String, ParsedFeature> deps = new HashMap<String, ParsedFeature>();
     try {
@@ -91,20 +92,16 @@ public class JsFeatureLoader {
       throw new GadgetException(GadgetException.Code.INVALID_PATH, e);
     }
 
-    List<GadgetFeatureRegistry.Entry> entries
-        = new LinkedList<GadgetFeatureRegistry.Entry>();
+
 
     // This ensures that we register everything in the right order.
-    Set<String> registered = new HashSet<String>();
+    Set<GadgetFeatureRegistry.Entry> registered
+        = new HashSet<GadgetFeatureRegistry.Entry>();
     for (Map.Entry<String, ParsedFeature> entry : deps.entrySet()) {
       ParsedFeature feature = entry.getValue();
-      GadgetFeatureRegistry.Entry feat
-          = register(registry, feature, registered, deps);
-      if (feat != null) {
-        entries.add(feat);
-      }
+      register(registry, feature, registered, deps);
     }
-    return entries;
+    return Collections.unmodifiableSet(registered);
   }
 
   /**
@@ -142,6 +139,8 @@ public class JsFeatureLoader {
         ParsedFeature feature = parse(content, parent, true);
         if (feature != null) {
           feats.put(feature.name, feature);
+        } else {
+          logger.warning("Failed to parse feature: " + file);
         }
       }
     } catch (IOException e) {
@@ -186,24 +185,21 @@ public class JsFeatureLoader {
    * @param registered Set of all features registered during this operation.
    * @param all Map of all features that can be loaded during this operation.
    */
-  private GadgetFeatureRegistry.Entry register(GadgetFeatureRegistry registry,
-                                               ParsedFeature feature,
-                                               Set<String> registered,
-                                               Map<String, ParsedFeature> all) {
-    if (registered.contains(feature.name)) {
-      return null;
-    }
-
-    for (String dep : feature.deps) {
-      if (all.containsKey(dep) && !registered.contains(dep)) {
-        register(registry, all.get(dep), registered, all);
+  private void register(GadgetFeatureRegistry registry,
+                        ParsedFeature feature,
+                        Set<GadgetFeatureRegistry.Entry> registered,
+                        Map<String, ParsedFeature> all) {
+    if (!registered.contains(feature.name)) {
+      for (String dep : feature.deps) {
+        if (all.containsKey(dep) && !registered.contains(dep)) {
+          register(registry, all.get(dep), registered, all);
+        }
       }
-    }
 
-    JsLibraryFeatureFactory factory
-        = new JsLibraryFeatureFactory(feature.gadgetJs, feature.containerJs);
-    registered.add(feature.name);
-    return registry.register(feature.name, feature.deps, factory);
+      JsLibraryFeatureFactory factory
+          = new JsLibraryFeatureFactory(feature.gadgetJs, feature.containerJs);
+      registered.add(registry.register(feature.name, feature.deps, factory));
+    }
   }
 
   /**
@@ -237,7 +233,8 @@ public class JsFeatureLoader {
 
     NodeList nameNode = doc.getElementsByTagName("name");
     if (nameNode.getLength() != 1) {
-      throw new GadgetException(GadgetException.Code.MALFORMED_XML_DOCUMENT);
+      throw new GadgetException(GadgetException.Code.MALFORMED_XML_DOCUMENT,
+          "No name provided");
     }
     feature.name = nameNode.item(0).getTextContent();
 

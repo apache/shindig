@@ -35,6 +35,7 @@ gadgets.rpc = function() {
   var useLegacyProtocol = {};
   var callId = 0;
   var callbacks = {};
+  var parentUrl = gadgets.util.getUrlParameters().parent || '';
 
   // Pick the most efficient RPC relay mechanism
   var relayChannel = typeof document.postMessage === 'function' ? 'dpm' :
@@ -141,7 +142,13 @@ gadgets.rpc = function() {
      * Initializes RPC from the provided configuration.
      */
     function init(config) {
-      relayUrl['..'] = config.rpc.parentRelayUrl;
+      // Allow for wild card parent relay files as long as it's from a
+      // white listed domain. This is enforced by the rendering servlet.
+      if (config.rpc.parentRelayUrl.substring(0, 7) === 'http://') {
+        relayUrl['..'] = config.rpc.parentRelayUrl;
+      } else {
+        relayUrl['..'] = parentUrl + config.rpc.parentRelayUrl;
+      }
       useLegacyProtocol['..'] = !!config.rpc.useLegacyProtocol;
     }
 

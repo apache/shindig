@@ -78,15 +78,17 @@ public class GadgetFeatureRegistry {
 
     List<String> coreDeps = new LinkedList<String>();
     JsFeatureLoader loader = new JsFeatureLoader();
-    List<Entry> jsFeatures = loader.loadFeatures(featurePath, this);
+    Set<Entry> jsFeatures = loader.loadFeatures(featurePath, this);
 
     if (!coreDone) {
       for (Entry entry : jsFeatures) {
-        if (entry.name.startsWith("core")) {
+        if (entry.name.startsWith("core") || entry.name.equals("core")) {
           coreDeps.add(entry.getName());
           core.put(entry.getName(), entry);
         }
       }
+
+      logger.info("Core dependencies: " + coreDeps);
 
       // Everything depends on core JS being set up first because in gadget
       // rendering mode, we pre-populate some of the data.
@@ -100,7 +102,7 @@ public class GadgetFeatureRegistry {
 
       // Make sure non-core features depend on core.
       for (Entry entry : jsFeatures) {
-        if (!entry.name.startsWith("core")) {
+        if (!entry.name.startsWith("core") && !entry.name.equals("core")) {
           entry.deps.addAll(core.values());
         }
       }
@@ -275,6 +277,8 @@ public class GadgetFeatureRegistry {
       if (rhs instanceof Entry) {
         Entry entry = (Entry)rhs;
         return name.equals(entry.name);
+      } else if (rhs instanceof String) {
+        return name.equals(rhs);
       }
       return false;
     }

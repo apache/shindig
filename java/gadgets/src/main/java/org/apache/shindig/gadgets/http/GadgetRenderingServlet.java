@@ -30,6 +30,7 @@ import org.apache.shindig.gadgets.RenderingContext;
 import org.apache.shindig.gadgets.SyndicatorConfig;
 import org.apache.shindig.gadgets.UserPrefs;
 import org.apache.shindig.gadgets.GadgetFeatureRegistry.Entry;
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -47,6 +48,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.regex.Pattern;
 
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
@@ -65,7 +67,6 @@ public class GadgetRenderingServlet extends HttpServlet {
   private static final Logger logger
       = Logger.getLogger("org.apache.shindig.gadgets");
 
-
   @Override
   public void init(ServletConfig config) throws ServletException {
     servletState = CrossServletState.get(config);
@@ -74,6 +75,7 @@ public class GadgetRenderingServlet extends HttpServlet {
   @Override
   protected void doGet(HttpServletRequest req, HttpServletResponse resp)
       throws IOException {
+
     String urlParam = req.getParameter("url");
     if (urlParam == null) {
       resp.sendError(HttpServletResponse.SC_BAD_REQUEST,
@@ -92,15 +94,22 @@ public class GadgetRenderingServlet extends HttpServlet {
       return;
     }
 
+    if (!validateParent(req)) {
+      logger.info("Invalid parent");
+      resp.sendError(HttpServletResponse.SC_BAD_REQUEST,
+          "Unsupported parent parameter. Check your syndicator code.");
+      return;
+    }
+
     int moduleId = 0;
     String mid = req.getParameter("mid");
     if (mid != null) {
       moduleId = Integer.parseInt(mid);
     }
 
+    ProcessingOptions options = new HttpProcessingOptions(req);
     BasicHttpContext context = new BasicHttpContext(req);
     GadgetView.ID gadgetId = new Gadget.GadgetId(uri, moduleId);
-    ProcessingOptions options = new HttpProcessingOptions(req);
 
     // Prepare a list of GadgetContentFilters applied to the output
     List<GadgetContentFilter> contentFilters =
@@ -398,5 +407,50 @@ public class GadgetRenderingServlet extends HttpServlet {
         throw new RuntimeException(e);
       }
     }
+  }
+
+  /**
+   * Validates that the parent parameter was acceptable.
+   *
+   * @param request
+   * @return True if the parent parameter is valid for the current
+   *     syndicator.
+   */
+  private boolean validateParent(HttpServletRequest request) {
+    String syndicator = request.getParameter("synd");
+    if (syndicator == null) {
+      syndicator = SyndicatorConfig.DEFAULT_SYNDICATOR;
+    }
+
+    String parent = request.getParameter("parent");
+
+    if (parent == null) {
+      // If there is no parent parameter, we are still safe because no
+      // dependent code ever has to trust it anyway.
+      return true;
+    }
+
+    SyndicatorConfig syndConf
+        = servletState.getGadgetServer().getConfig().getSyndicatorConfig();
+
+    try {
+      JSONArray parents = syndConf.getJsonArray(syndicator, "gadgets.parent");
+
+      if (parents == null) {
+        return true;
+      } else {
+        // We need to check each possible parent parameter against this regex.
+        for (int i = 0, j = parents.length(); i < j; ++i) {
+          // TODO: Should patterns be cached? Recompiling every request
+          // seems wasteful.
+          if (Pattern.matches(parents.getString(i), parent)) {
+            return true;
+          }
+        }
+      }
+    } catch (JSONException e) {
+      logger.log(Level.WARNING, "Configuration error", e);
+    }
+    return false;
   }
 }

@@ -20,7 +20,7 @@
 <feature>
   <name>opensocial-reference</name>
 	<!-- all known opensocial implementations assume that ifpc is present. -->
-	<dependency>rpc</dependency>
+	<dependency>ifpc</dependency>
   <gadget>
     <script src="opensocial.js"/>
     <script src="activity.js"/>
