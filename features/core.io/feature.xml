@@ -28,6 +28,9 @@
       encoded inside of the POST body.
 -->
   <name>core.io</name>
+	<!-- core.io needs an explicit core dependency to ensure that the graph
+	    is resolved in the correct order.
+	-->
   <dependency>core</dependency>
   <gadget>
     <script src="io.js"/>

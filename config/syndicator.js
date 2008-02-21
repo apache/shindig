@@ -38,6 +38,13 @@
 // Location of opensocial-0.7 javascript (loaded server-side).
 "opensocial.0.7.location" : null, // not supported by default. over ride this in
                                   // your own syndicator file.
+// Set of regular expressions to validate the parent parameter. This is
+// necessary to support situations where you want a single syndicator to support
+// multiple possible host names (such as for localized domains, such as
+// <language>.example.org. If left as null, the parent parameter will be
+// ignored; otherwise, any requests that do not include a parent
+// value matching this set will return a 404 error.
+"gadgets.parent" : null,
 
 // This config data will be passed down to javascript. Please
 // configure your object using the feature name rather than
@@ -47,7 +54,8 @@
 // See individual feature.xml files for configuration details.
 "gadgets.features" : {
   "core.io" : {
-    "proxyUrl" : "http://www.gmodules.com/ig/proxy?url=%url%",
+  	// Note: /proxy is an open proxy. Be careful how you explose this!
+    "proxyUrl" : "proxy?url=%url%",
     "jsonProxyUrl" : "proxy?output=js",
   },
   "views" : {
@@ -64,9 +72,14 @@
     },
   },
   "rpc" : {
+  	// Path to the relay file. Automatically appended to the parent
+  	// parameter if it passes input validation and is not null.
     // This should never be on the same host in a production environment!
     // Only use this for TESTING!
     "parentRelayUrl" : "files/container/rpc_relay.html",
+
+    // If true, this will use the legacy ifpc wire format when making rpc
+    // requests.
     "useLegacyProtocol" : false,
   },
 }}

@@ -21,7 +21,6 @@ specific language governing permissions and limitations under the License.
 -->
 <feature>
   <name>caja</name>
-  <dependency>core</dependency>
   <gadget>
     <script src="caja.js"></script>
     <script src="html-sanitizer.js"></script>
