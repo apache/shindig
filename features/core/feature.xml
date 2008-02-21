@@ -27,6 +27,7 @@
     <script src="legacy.js"/>
   </gadget>
   <container>
+    <script src="util.js"/>
     <script src="json.js"/>
   </container>
 </feature>
