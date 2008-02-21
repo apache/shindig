@@ -217,6 +217,13 @@ gadgets.rpc = function() {
       } else {
         from = '..';
       }
+      // Not used by legacy, create it anyway...
+      var rpcData = gadgets.json.stringify({
+        s: serviceName,
+        f: from,
+        c: callback ? callId : 0,
+        a: Array.prototype.slice.call(arguments, 3)
+      });
 
       switch (relayChannel) {
       case 'dpm': // use document.postMessage
@@ -240,12 +247,6 @@ gadgets.rpc = function() {
           src = [relay, '#', encodeLegacyData([from, '&', callId, '&1&0&',
                  encodeLegacyData(legacyData)])].join('');
         } else {
-          var rpcData = gadgets.json.stringify({
-            s: serviceName,
-            f: from,
-            c: callback ? callId : 0,
-            a: Array.prototype.slice.call(arguments, 3)
-          });
           // # targetId & sourceId@callId & packetNum & packetId & packetData
           src = [relay, '#', targetId, '&', from, '@', callId,
                  '&1&0&', rpcData].join('');
