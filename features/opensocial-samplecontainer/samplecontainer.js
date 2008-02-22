@@ -37,6 +37,7 @@
 opensocial.SampleContainer = function() {
   opensocial.Container.call(this);
   this.resetData(this.newPerson());
+  this.doEvil_ = false;
 };
 opensocial.SampleContainer.inherits(opensocial.Container);
 
@@ -421,4 +422,46 @@ opensocial.SampleContainer.prototype.newUpdatePersonAppDataRequest = function(
 opensocial.SampleContainer.prototype.newFetchActivitiesRequest = function(
     idSpec, opt_params) {
   return {'type' : 'FETCH_ACTIVITIES', 'idSpec' : idSpec};
+};
+
+/**
+ * If the doEvil flag is set, will attempt to insert script tags into all fields
+ * @return {opensocial.Person} the person object
+ */
+opensocial.SampleContainer.prototype.newPerson = function(opt_params,
+    opt_isOwner, opt_isViewer) {
+  opt_params = opt_params || {};
+  opt_params["id"] = this.makeEvilString(opt_params["id"]);
+
+  return new opensocial.Person(opt_params, opt_isOwner, opt_isViewer);
+};
+
+/**
+ * If the doEvil flag is set, will attempt to insert script tags into all fields
+ * @return {opensocial.Name} the name object
+ */
+opensocial.SampleContainer.prototype.newName = function(opt_params) {
+  opt_params = opt_params || {};
+  opt_params["unstructured"] = this.makeEvilString(opt_params["unstructured"]);
+  return new opensocial.Name(opt_params);
+};
+
+opensocial.SampleContainer.prototype.makeEvilString = function(string) {
+  var redefineNewDataRequest = "opensocial.newDataRequest = function("
+      + ") { alert('Ha! I attacked you!')}; ";
+  var makePageRed = "document.body.style.backgroundColor = 'red'; ";
+
+  var scriptPrefix = "<div onMouseOver=\"" + redefineNewDataRequest
+      + makePageRed + "\">";
+  var scriptSuffix = "</div>";
+
+  if (this.doEvil_) {
+    return scriptPrefix + string + scriptSuffix;
+  } else {
+    return string;
+  }
+};
+
+opensocial.SampleContainer.prototype.setEvilness = function(doEvil) {
+  this.doEvil_ = doEvil;
 };

@@ -86,12 +86,18 @@ specific language governing permissions and limitations under the License.
         StateFileParser.dumpState(opensocial.Container.get(), document.getElementById("stateXml"));
       }
 
+      function changeEvilness() {
+        opensocial.Container.get().setEvilness(document.getElementById("doEvilCheckbox").checked);
+        changeState();
+      }
+
       var stateHtml = "&lt;div style=\"padding: 5px; margin-bottom: 20px; background-color: #FAFAD2;"
           + "color: #DAA520; font-size: smaller; font-weight:bold\"&gt;Displaying state:"
           + "&lt;input type=\"radio\" id=\"stateTypeUrl\" name=\"stateType\" value=\"url\" onclick=\"toggleStateType()\" checked=\"checked\" &gt;use url&lt;/input&gt;"
           + "&lt;input type=\"radio\" id=\"stateTypeXml\" name=\"stateType\" value=\"xml\" onclick=\"toggleStateType()\"&gt;use textbox&lt;/input&gt;"
           + "&lt;input type=\"button\" value=\"load\" onclick=\"changeState();\"/&gt;"
           + "&lt;input type=\"button\" value=\"dump\" onclick=\"dumpState(); showXmlState();\"/&gt;"
+          + "&lt;input type=\"checkbox\" id=\"doEvilCheckbox\" onclick=\"changeEvilness();\" &gt;do evil&lt;/input&gt;"
           + "&lt;input type=\"text\" size=\"75\" id=\"stateUrl\" style=\"display:block;\"/&gt;"
           + "&lt;textarea id=\"stateXml\" rows=\"15\" cols=\"120\" style=\"display:none;\" &gt;&lt;/textarea&gt;"
           + "&lt;/div&gt;";

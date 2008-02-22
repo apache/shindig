@@ -193,7 +193,7 @@ StateFileParser.onLoadState = function(xmlState, stateUrl, gadgetMessageDiv,
 StateFileParser.loadPerson = function(container, xmlNode, isOwner, isViewer) {
   var fields = {
     'id' : $(xmlNode).attr(opensocial.Person.Field.ID),
-    'name' : new opensocial.Name(
+    'name' : container.newName(
         {'unstructured' : $(xmlNode).attr(opensocial.Person.Field.NAME)}),
     'thumbnailUrl' : $(xmlNode).attr(opensocial.Person.Field.THUMBNAIL_URL),
     'profileUrl' : $(xmlNode).attr(opensocial.Person.Field.PROFILE_URL)};
