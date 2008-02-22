@@ -23,6 +23,11 @@
 
 JsonContainer = function() {
   opensocial.Container.call(this);
+
+  var supportedFields = {};
+  supportedFields["person"] = {"id" : true, "name" : true};
+  supportedFields["activity"] = {}; // TODO: Support acitvities
+  this.environment_ = new opensocial.Environment("shindig", supportedFields);
 };
 JsonContainer.inherits(opensocial.Container);
 
