@@ -138,12 +138,7 @@ function _unesc(str) {
  * @return The escaped string.
  */
 function _hesc(str) {
-  // '<' and '>'
-  str = str.replace(/</g, "&lt;").replace(/>/g, "&gt;");
-  // '"' and '
-  str = str.replace(/"/g, "&quot;").replace(/'/g, "&#39;");
-
-  return str;
+  return gadgets.util.escapeString(str);
 }
 
 /**

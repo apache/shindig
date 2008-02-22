@@ -70,6 +70,9 @@ gadgets.views = function() {
           decodeURIComponent(urlParams["view-params"]));
       if (tmpParams) {
         params = tmpParams;
+        for (var p in params) if (params.hasOwnProperty(p)) {
+          params[p] = gadgets.util.escapeString(params[p]);
+        }
       }
     }
     currentView = supportedViews[urlParams.view] || supportedViews["default"];
@@ -84,19 +87,47 @@ gadgets.views = function() {
   gadgets.config.register("views", requiredConfig, init);
 
   return {
+    /**
+     * Attempts to navigate to this gadget in a different view. If the container
+     * supports parameters will pass the optional parameters along to the gadget
+     * in the new view.
+     *
+     * @param {gadgets.views.View} view The view to navigate to
+     * @param {Map.&lt;String, String&gt;} opt_params Parameters to pass to the
+     *     gadget after it has been navigated to on the surface
+     */
     requestNavigateTo : function(view, opt_params) {
       gadgets.rpc.call(
           null, "requestNavigateTo", null, view.getName(), opt_params);
     },
 
+    /**
+     * Returns the current view.
+     *
+     * @return {gadgets.views.View} The current view
+     */
     getCurrentView : function() {
       return currentView;
     },
 
+    /**
+     * Returns a map of all the supported views. Keys each gadgets.view.View by
+     * its name.
+     *
+     * @return {Map&lt;gadgets.views.ViewType | String, gadgets.views.View&gt;}
+     *   All supported views, keyed by their name attribute.
+     */
     getSupportedViews : function() {
       return supportedViews;
     },
 
+    /**
+     * Returns the parameters passed into this gadget for this view. Does not
+     * include all url parameters, only the ones passed into
+     * gadgets.views.requestNavigateTo
+     *
+     * @return {Map.&lt;String, String&gt;} The parameter map
+     */
     getParams : function() {
       return params;
     }
@@ -108,10 +139,16 @@ gadgets.views.View = function(name, opt_isOnlyVisible) {
   this.isOnlyVisible_ = !!opt_isOnlyVisible;
 };
 
+/**
+ * @return {String} The view name.
+ */
 gadgets.views.View.prototype.getName = function() {
   return this.name_;
 };
 
+/**
+ * @return {Boolean} True if this is the only visible gadget on the page.
+ */
 gadgets.views.View.prototype.isOnlyVisibleGadget = function() {
   return this.isOnlyVisible_;
 };

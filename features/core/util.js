@@ -157,7 +157,7 @@ gadgets.util = function() {
      * @member gadgets.util
      */
     hasFeature : function (feature) {
-      return typeof features[feature] === "undefined";
+      return typeof features[feature] !== "undefined";
     },
 
     /**
@@ -178,6 +178,40 @@ gadgets.util = function() {
       for (var i = 0, j = onLoadHandlers.length; i < j; ++i) {
         onLoadHandlers[i]();
       }
+    },
+
+    /**
+     * Escapes the input using html entities to make it safer.
+     *
+     * Currently only escapes &lt; &gt; ' and &quot; All known browsers handle
+     * &amp; without issue.
+     *
+     * Currently not in the spec -- future proposals may change
+     * how this is handled.
+     *
+     * TODO: Parsing the string would probably be more accurate and faster than
+     * a bunch of regular expressions.
+     *
+     * @param {String} str The string to escape
+     * @return {String} The escaped string
+     */
+    escapeString : function(str) {
+      return str.replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#39;");
+    },
+
+    /**
+     * Reverses escapeString
+     *
+     * @param {String} str The string to unescape.
+     */
+    unescapeString : function(str) {
+      return str.replace(/&lt;/g, "<")
+                .replace(/&gt;/g, ">")
+                .replace(/&quot;/g, '"')
+                .replace(/&#39/g, "'");
     },
 
     /**
