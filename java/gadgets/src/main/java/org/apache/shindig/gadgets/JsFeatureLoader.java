@@ -287,7 +287,9 @@ public class JsFeatureLoader {
           }
         }
         JsLibrary library = JsLibrary.create(type, content);
-        feature.addLibrary(renderingContext, syndicator, library);
+        for (String synd : syndicator.split(",")) {
+          feature.addLibrary(renderingContext, synd.trim(), library);
+        }
       }
     }
   }
