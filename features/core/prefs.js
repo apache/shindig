@@ -240,12 +240,14 @@ gadgets.Prefs.prototype.getPref_ = function(key) {
 
 /**
  * Retrieves a preference as a string.
+ * Returned value will be html entity escaped.
+ *
  * @param {String} key The preference to fetch
  * @return {String} The preference; if not set, an empty string
  */
 gadgets.Prefs.prototype.getString = function(key) {
   var val = this.getPref_(key);
-  return val === null ? "" : val;
+  return val === null ? "" : gadgets.util.escapeString(val);
 };
 
 /**
@@ -312,8 +314,9 @@ gadgets.Prefs.prototype.getArray = function(key) {
   if (val !== null) {
     var arr = val.split("|");
     // Decode pipe characters.
+    var esc = gadgets.util.escapeString;
     for (var i = 0, j = arr.length; i < j; ++i) {
-      arr[i] = arr[i].replace(/%7C/g, "|");
+      arr[i] = esc(arr[i].replace(/%7C/g, "|"));
     }
     return arr;
   }
