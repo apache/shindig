@@ -25,7 +25,19 @@
     <script src="jsoncontainer.js"></script>
     <script src="batchrequest.js"></script>
     <script>
-      opensocial.Container.setContainer(new JsonContainer());
+      ShindigContainer = function() {
+        var supportedFields = {
+          'person' : ['id', 'name', 'thumbnailUrl', 'profileUrl'],
+          'activity' : ['id', 'title'] // TODO: Support acitvities
+        };
+
+        // TODO: Support relative paths
+        JsonContainer.call(this, "http://localhost:8080/gadgets/socialdata",
+          "shindig", supportedFields);
+      };
+      ShindigContainer.inherits(JsonContainer);
+
+      opensocial.Container.setContainer(new ShindigContainer());
       opensocial.Container.get().enableCaja();
     </script>
   </gadget>
