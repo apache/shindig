@@ -35,9 +35,6 @@
 // to share configuration.
 {"gadgets.syndicator" : ["default"],
 
-// Location of opensocial-0.7 javascript (loaded server-side).
-"opensocial.0.7.location" : null, // not supported by default. over ride this in
-                                  // your own syndicator file.
 // Set of regular expressions to validate the parent parameter. This is
 // necessary to support situations where you want a single syndicator to support
 // multiple possible host names (such as for localized domains, such as

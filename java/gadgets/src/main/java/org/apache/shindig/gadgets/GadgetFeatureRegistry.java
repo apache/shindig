@@ -17,8 +17,6 @@
  */
 package org.apache.shindig.gadgets;
 
-import org.apache.shindig.util.Check;
-
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -103,7 +101,7 @@ public class GadgetFeatureRegistry {
       // Make sure non-core features depend on core.
       for (Entry entry : jsFeatures) {
         if (!entry.name.startsWith("core") && !entry.name.equals("core")) {
-          entry.deps.addAll(core.values());
+          entry.deps.addAll(core.keySet());
         }
       }
 
@@ -129,17 +127,13 @@ public class GadgetFeatureRegistry {
    */
   public Entry register(String name, List<String> deps,
                         GadgetFeatureFactory feature) {
-    // Core entries must come first.
-    Entry entry = features.get(name);
-    if (entry == null) {
-      logger.info("Registering feature: " + name + " with deps " + deps);
-      entry = new Entry(name, deps, feature, this);
-      if (coreDone) {
-        entry.deps.addAll(core.values());
-      }
-      features.put(name, entry);
-      validateFeatureGraph();
+    logger.info("Registering feature: " + name + " with deps " + deps);
+    Entry entry = new Entry(name, deps, feature, this);
+    if (coreDone) {
+      entry.deps.addAll(core.keySet());
     }
+    features.put(name, entry);
+    validateFeatureGraph();
     return entry;
   }
 
@@ -213,8 +207,8 @@ public class GadgetFeatureRegistry {
    * @param entry
    */
   private void addEntryToSet(Set<Entry> results, Entry entry) {
-    for (Entry dep : entry.deps) {
-      addEntryToSet(results, dep);
+    for (String dep : entry.deps) {
+      addEntryToSet(results, features.get(dep));
     }
     results.add(entry);
   }
@@ -233,8 +227,8 @@ public class GadgetFeatureRegistry {
    */
   public static class Entry {
     private final String name;
-    private final Set<Entry> deps;
-    private final Set<Entry> readDeps;
+    private final Set<String> deps;
+    private final Set<String> readDeps;
     private final GadgetFeatureFactory feature;
 
     private Entry(String name,
@@ -243,14 +237,10 @@ public class GadgetFeatureRegistry {
                   GadgetFeatureRegistry registry)
         throws IllegalStateException {
       this.name = name;
-      this.deps = new HashSet<Entry>();
+      this.deps = new HashSet<String>();
       this.readDeps = Collections.unmodifiableSet(this.deps);
       if (deps != null) {
-        for (String dep : deps) {
-          Entry entry = registry.getEntry(dep);
-          Check.notNull(entry, "Dependency " + dep + " is not registered.");
-          this.deps.add(entry);
-        }
+        this.deps.addAll(deps);
       }
       this.feature = feature;
     }
@@ -265,7 +255,7 @@ public class GadgetFeatureRegistry {
     /**
      * @return List of identifiers on which feature depends
      */
-    public Set<Entry> getDependencies() {
+    public Set<String> getDependencies() {
       return readDeps;
     }
 
@@ -277,8 +267,6 @@ public class GadgetFeatureRegistry {
       if (rhs instanceof Entry) {
         Entry entry = (Entry)rhs;
         return name.equals(entry.name);
-      } else if (rhs instanceof String) {
-        return name.equals(rhs);
       }
       return false;
     }

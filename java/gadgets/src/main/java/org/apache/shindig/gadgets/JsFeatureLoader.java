@@ -18,8 +18,8 @@
 package org.apache.shindig.gadgets;
 
 import org.apache.shindig.util.ResourceLoader;
+import org.apache.shindig.util.XmlUtil;
 import org.w3c.dom.Document;
-import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
@@ -28,7 +28,6 @@ import org.xml.sax.SAXException;
 import java.io.File;
 import java.io.IOException;
 import java.io.StringReader;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -73,35 +72,49 @@ public class JsFeatureLoader {
    */
   public Set<GadgetFeatureRegistry.Entry> loadFeatures(String path,
       GadgetFeatureRegistry registry) throws GadgetException {
-    Map<String, ParsedFeature> deps = new HashMap<String, ParsedFeature>();
+    List<ParsedFeature> features = new LinkedList<ParsedFeature>();
     try {
       if (path.startsWith("res://")) {
         path = path.substring(6);
         logger.info("Loading resources from: " + path);
         if (path.endsWith(".txt")) {
-          loadResources(ResourceLoader.getContent(path).split("\n"), deps);
+          loadResources(ResourceLoader.getContent(path).split("\n"), features);
         } else {
-          loadResources(new String[]{path}, deps);
+          loadResources(new String[]{path}, features);
         }
       } else {
         logger.info("Loading files from: " + path);
         File file = new File(path);
-        loadFiles(new File[]{file}, deps);
+        loadFiles(new File[]{file}, features);
       }
     } catch (IOException e) {
       throw new GadgetException(GadgetException.Code.INVALID_PATH, e);
     }
 
-
-
-    // This ensures that we register everything in the right order.
-    Set<GadgetFeatureRegistry.Entry> registered
+    Set<GadgetFeatureRegistry.Entry> entries
         = new HashSet<GadgetFeatureRegistry.Entry>();
-    for (Map.Entry<String, ParsedFeature> entry : deps.entrySet()) {
-      ParsedFeature feature = entry.getValue();
-      register(registry, feature, registered, deps);
+    for (ParsedFeature feature : features) {
+      JsLibraryFeatureFactory factory
+          = new JsLibraryFeatureFactory(feature.libraries);
+      entries.add(registry.register(feature.name, feature.deps, factory));
     }
-    return Collections.unmodifiableSet(registered);
+    return entries;
+  }
+
+  /**
+   * Parses and registers a single feature xml.
+   * Used for testing.
+   *
+   * @param xml
+   * @return The parsed feature.
+   */
+  public GadgetFeatureRegistry.Entry loadFeature(
+      GadgetFeatureRegistry registry, String xml) throws GadgetException {
+    ParsedFeature feature = parse(xml, "", false);
+
+    JsLibraryFeatureFactory factory
+        = new JsLibraryFeatureFactory(feature.libraries);
+    return registry.register(feature.name, null, factory);
   }
 
   /**
@@ -110,7 +123,7 @@ public class JsFeatureLoader {
    * @param features The set of all loaded features
    * @throws GadgetException
    */
-  private void loadFiles(File[] files, Map<String, ParsedFeature> features)
+  private void loadFiles(File[] files, List<ParsedFeature> features)
       throws GadgetException {
     for (File file : files) {
       if (file.isDirectory()) {
@@ -118,7 +131,7 @@ public class JsFeatureLoader {
       } else if (file.getName().endsWith(".xml")) {
         ParsedFeature feature = processFile(file);
         if (feature != null) {
-          features.put(feature.name, feature);
+          features.add(feature);
         }
       }
     }
@@ -127,18 +140,19 @@ public class JsFeatureLoader {
   /**
    * Loads resources recursively.
    * @param paths The base paths to look for feature.xml
-   * @param feats The set of all loaded features
+   * @param features The set of all loaded features
    * @throws GadgetException
    */
-  private void loadResources(String[] paths, Map<String, ParsedFeature> feats)
+  private void loadResources(String[] paths, List<ParsedFeature> features)
       throws GadgetException {
     try {
       for (String file : paths) {
+        logger.info("Processing resource: " + file);
         String content = ResourceLoader.getContent(file);
         String parent = file.substring(0, file.lastIndexOf('/') + 1);
         ParsedFeature feature = parse(content, parent, true);
         if (feature != null) {
-          feats.put(feature.name, feature);
+          features.add(feature);
         } else {
           logger.warning("Failed to parse feature: " + file);
         }
@@ -174,32 +188,6 @@ public class JsFeatureLoader {
       logger.warning("Unable to read file: " + file.getAbsolutePath());
     }
     return feature;
-  }
-
-  /**
-   * Registers a feature and ensures that dependencies are registered in the
-   * proper order.
-   *
-   * @param registry The registry to store the newly registered features to.
-   * @param feature The feature to register.
-   * @param registered Set of all features registered during this operation.
-   * @param all Map of all features that can be loaded during this operation.
-   */
-  private void register(GadgetFeatureRegistry registry,
-                        ParsedFeature feature,
-                        Set<GadgetFeatureRegistry.Entry> registered,
-                        Map<String, ParsedFeature> all) {
-    if (!registered.contains(feature.name)) {
-      for (String dep : feature.deps) {
-        if (all.containsKey(dep) && !registered.contains(dep)) {
-          register(registry, all.get(dep), registered, all);
-        }
-      }
-
-      JsLibraryFeatureFactory factory
-          = new JsLibraryFeatureFactory(feature.gadgetJs, feature.containerJs);
-      registered.add(registry.register(feature.name, feature.deps, factory));
-    }
   }
 
   /**
@@ -240,12 +228,12 @@ public class JsFeatureLoader {
 
     NodeList gadgets = doc.getElementsByTagName("gadget");
     for (int i = 0, j = gadgets.getLength(); i < j; ++i) {
-      processContext(feature, gadgets.item(i), false);
+      processContext(feature, gadgets.item(i), RenderingContext.GADGET);
     }
 
     NodeList containers = doc.getElementsByTagName("container");
     for (int i = 0, j = containers.getLength(); i < j; ++i) {
-      processContext(feature, containers.item(i), true);
+      processContext(feature, containers.item(i), RenderingContext.CONTAINER);
     }
 
     NodeList dependencies = doc.getElementsByTagName("dependency");
@@ -261,24 +249,25 @@ public class JsFeatureLoader {
    * to the feature.
    * @param feature
    * @param context
-   * @param isContainer
+   * @param renderingContext
    */
   private void processContext(ParsedFeature feature, Node context,
-                              boolean isContainer) {
+                              RenderingContext renderingContext) {
     NodeList libraries = context.getChildNodes();
+    String syndicator = XmlUtil.getAttribute(context, "synd",
+        SyndicatorConfig.DEFAULT_SYNDICATOR);
     for (int i = 0, j = libraries.getLength(); i < j; ++i) {
       Node node = libraries.item(i);
       String nodeValue = node.getNodeName();
       if ("script".equals(nodeValue)) {
-        NamedNodeMap attrs = node.getAttributes();
-        Node srcNode = attrs.getNamedItem("src");
+        String source = XmlUtil.getAttribute(node, "src");
         String content;
         JsLibrary.Type type;
-        if (srcNode == null) {
+        if (source == null) {
           type = JsLibrary.Type.INLINE;
           content = node.getTextContent();
         } else {
-          content = srcNode.getTextContent();
+          content = source;
           if (content.startsWith("http://")) {
             type = JsLibrary.Type.URL;
           } else if (content.startsWith("//")) {
@@ -298,13 +287,7 @@ public class JsFeatureLoader {
           }
         }
         JsLibrary library = JsLibrary.create(type, content);
-        if (library != null) {
-          if (isContainer) {
-            feature.containerJs.add(library);
-          } else {
-            feature.gadgetJs.add(library);
-          }
-        }
+        feature.addLibrary(renderingContext, syndicator, library);
       }
     }
   }
@@ -317,7 +300,27 @@ class ParsedFeature {
   public String name = "";
   public String basePath = "";
   public boolean isResource = false;
-  public List<JsLibrary> containerJs = new LinkedList<JsLibrary>();
-  public List<JsLibrary> gadgetJs = new LinkedList<JsLibrary>();
-  public List<String> deps = new LinkedList<String>();
+  final Map<RenderingContext, Map<String, List<JsLibrary>>> libraries;
+  final List<String> deps;
+
+  public ParsedFeature() {
+    libraries = new HashMap<RenderingContext, Map<String, List<JsLibrary>>>();
+    deps = new LinkedList<String>();
+  }
+
+  public void addLibrary(RenderingContext ctx, String synd, JsLibrary library) {
+    Map<String, List<JsLibrary>> ctxLibs = libraries.get(ctx);
+    if (ctxLibs == null) {
+      ctxLibs = new HashMap<String, List<JsLibrary>>();
+      libraries.put(ctx, ctxLibs);
+    }
+
+    List<JsLibrary> syndLibs = ctxLibs.get(synd);
+    if (syndLibs == null) {
+      syndLibs = new LinkedList<JsLibrary>();
+      ctxLibs.put(synd, syndLibs);
+    }
+
+    syndLibs.add(library);
+  }
 }
