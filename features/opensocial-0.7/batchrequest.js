@@ -30,7 +30,6 @@ BatchRequest = function(jsonText, opt_callback, opt_path, opt_params) {
   this.params_ = opt_params || {};
   this.params_['request'] = jsonText;
 
-  // TODO: Make the opt_path easy to configure within jsoncontainer
   this.path_ = opt_path || 'http://localhost:8080/gadgets/socialdata';
   this.callback_ = opt_callback;
 };

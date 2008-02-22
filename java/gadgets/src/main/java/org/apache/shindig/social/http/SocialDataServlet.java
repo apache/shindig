@@ -43,7 +43,7 @@ public class SocialDataServlet extends HttpServlet {
     // TODO: Get the security token
     // TODO: Allow saving data
     // TODO: Don't use string concatentation for json output
-    // TODO: etc, etc, etc 
+    // TODO: etc, etc, etc
 
     String requestParam = req.getParameter("request");
     try {
@@ -52,7 +52,7 @@ public class SocialDataServlet extends HttpServlet {
       int length = requestItems.length();
 
       for (int i = 0; i < length; i++) {
-        String jsonData = "";
+        String jsonData = "{}";
 
         JSONObject requestItem = requestItems.getJSONObject(i);
         String type = requestItem.getString("type");
@@ -74,6 +74,7 @@ public class SocialDataServlet extends HttpServlet {
             jsonData = "{'jane.doe' : {'count' : 7}, " +
                 "'george.doe' : {'count' : 2}}";
           }
+
         }
 
         jsonResponse += "{'response' : " + jsonData + "}";

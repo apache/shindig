@@ -21,13 +21,22 @@
  */
 
 
-JsonContainer = function() {
+JsonContainer = function(baseUrl, domain, supportedFieldsArray) {
   opensocial.Container.call(this);
 
-  var supportedFields = {};
-  supportedFields["person"] = {"id" : true, "name" : true};
-  supportedFields["activity"] = {}; // TODO: Support acitvities
-  this.environment_ = new opensocial.Environment("shindig", supportedFields);
+  var supportedFieldsMap = {};
+  for (var objectType in supportedFieldsArray) {
+    if (supportedFieldsArray.hasOwnProperty(objectType)){
+      supportedFieldsMap[objectType] = {};
+      for (var i = 0; i < supportedFieldsArray[objectType].length; i++) {
+        var supportedField = supportedFieldsArray[objectType][i];
+        supportedFieldsMap[objectType][supportedField] = true;
+      }
+    }
+  }
+
+  this.environment_ = new opensocial.Environment(domain, supportedFieldsMap);
+  this.baseUrl_ = baseUrl;
 };
 JsonContainer.inherits(opensocial.Container);
 
@@ -79,7 +88,7 @@ JsonContainer.prototype.requestData = function(dataRequest, callback) {
     callback(dataResponse);
   };
 
-  new BatchRequest(jsonText, sendResponse).send();
+  new BatchRequest(jsonText, sendResponse, this.baseUrl_).send();
 };
 
 JsonContainer.prototype.newFetchPersonRequest = function(id,
