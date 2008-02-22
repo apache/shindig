@@ -196,10 +196,14 @@ gadgets.util = function() {
      * @return {String} The escaped string
      */
     escapeString : function(str) {
-      return str.replace(/</g, "&lt;")
-                .replace(/>/g, "&gt;")
-                .replace(/"/g, "&quot;")
-                .replace(/'/g, "&#39;");
+      if (typeof str == "string") {
+        return str.replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/"/g, "&quot;")
+            .replace(/'/g, "&#39;");
+      } else {
+        return str;
+      }
     },
 
     /**
