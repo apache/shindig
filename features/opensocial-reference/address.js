@@ -142,5 +142,5 @@ opensocial.Address.Field = {
  * @return {String} The data
  */
 opensocial.Address.prototype.getField = function(key) {
-  return this.fields_[key];
+  return gadgets.util.escapeString(this.fields_[key]);
 };

@@ -354,7 +354,7 @@ opensocial.Activity.prototype.getId = function() {
  * @member opensocial.Activity
  */
 opensocial.Activity.prototype.getField = function(key) {
-  return this.fields_[key];
+  return gadgets.util.escapeString(this.fields_[key]);
 };
 
 
@@ -467,7 +467,7 @@ opensocial.Activity.MediaItem.Field = {
  * @return {String} The data
  */
 opensocial.Activity.MediaItem.prototype.getField = function(key) {
-  return this.fields_[key];
+  return gadgets.util.escapeString(this.fields_[key]);
 };
 
 

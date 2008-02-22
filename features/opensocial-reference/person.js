@@ -527,7 +527,7 @@ opensocial.Person.prototype.getDisplayName = function() {
  * @return {String} The data
  */
 opensocial.Person.prototype.getField = function(key) {
-  return this.fields_[key];
+  return gadgets.util.escapeString(this.fields_[key]);
 };
 
 

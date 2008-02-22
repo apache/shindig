@@ -97,5 +97,5 @@ opensocial.BodyType.Field = {
  * @return {String} The data
  */
 opensocial.BodyType.prototype.getField = function(key) {
-  return this.fields_[key];
+  return gadgets.util.escapeString(this.fields_[key]);
 };

@@ -103,5 +103,5 @@ opensocial.Name.Field = {
  * @return {String} The data
  */
 opensocial.Name.prototype.getField = function(key) {
-  return this.fields_[key];
+  return gadgets.util.escapeString(this.fields_[key]);
 };

@@ -135,7 +135,7 @@ opensocial.Message.Type = {
  * @member opensocial.Message
  */
 opensocial.Message.prototype.getField = function(key) {
-  return this.fields_[key];
+  return gadgets.util.escapeString(this.fields_[key]);
 };
 
 
