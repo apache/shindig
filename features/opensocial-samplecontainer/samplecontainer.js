@@ -241,6 +241,9 @@ opensocial.SampleContainer.prototype.requestData = function(dataRequest,
             }
             if (person != null) {
               persons.push(person);
+            } else {
+              errorCode = opensocial.ResponseItem.Error.BAD_REQUEST;
+              errorMessage = "The idSpec parameter " + idSpec[i] + " is invalid.";
             }
           }
         }
