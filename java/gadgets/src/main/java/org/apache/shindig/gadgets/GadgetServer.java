@@ -399,16 +399,16 @@ public class GadgetServer {
         // sanity check: each depends on the spec having been loaded
         prepareDeps.add(specLoadDep);
 
-        for (GadgetFeatureRegistry.Entry featureDep : entry.getDependencies()) {
+        for (String dep : entry.getDependencies()) {
           // prepare depends on all its own deps...
           WorkflowDependency prepareNeedsDep =
               new WorkflowDependency(WorkflowDependency.Type.FEATURE_PREPARE,
-                                     featureDep.getName());
+                                     dep);
           prepareDeps.add(prepareNeedsDep);
 
           WorkflowDependency processNeedsDep =
             new WorkflowDependency(WorkflowDependency.Type.FEATURE_PROCESS,
-                                   featureDep.getName());
+                                   dep);
           // Can't process until all dependencies prepare() and process()
           // have completed.
           processDeps.add(prepareNeedsDep);

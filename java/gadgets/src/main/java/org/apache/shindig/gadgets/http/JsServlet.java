@@ -96,17 +96,12 @@ public class JsServlet extends HttpServlet {
 
       StringBuilder jsData = new StringBuilder();
 
-      Set<GadgetFeatureRegistry.Entry> done
-          = new HashSet<GadgetFeatureRegistry.Entry>();
-
       ProcessingOptions opts = new HttpProcessingOptions(req);
       Set<String> features = new HashSet<String>(found.size());
-
-      // TODO: This doesn't work correctly under JDK 1.5, but it does under 1.6
       do {
         for (GadgetFeatureRegistry.Entry entry : found) {
-          if (!done.contains(entry) &&
-              done.containsAll(entry.getDependencies())) {
+          if (!features.contains(entry.getName()) &&
+              features.containsAll(entry.getDependencies())) {
             features.add(entry.getName());
             GadgetFeatureFactory factory = entry.getFeature();
             GadgetFeature feature = factory.create();
@@ -116,10 +111,9 @@ public class JsServlet extends HttpServlet {
                 jsData.append(lib.getContent());
               }
             }
-            done.add(entry);
           }
         }
-      } while (done.size() != found.size());
+      } while (features.size() != found.size());
 
       if (jsData.length() == 0) {
         resp.setStatus(HttpServletResponse.SC_NOT_FOUND);

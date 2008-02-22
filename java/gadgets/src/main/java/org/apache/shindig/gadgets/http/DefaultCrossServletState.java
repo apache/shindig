@@ -33,9 +33,7 @@ import org.apache.shindig.gadgets.GadgetSigner;
 import org.apache.shindig.gadgets.GadgetSpec;
 import org.apache.shindig.gadgets.JsLibrary;
 import org.apache.shindig.gadgets.MessageBundle;
-import org.apache.shindig.gadgets.OpenSocialFeatureFactory;
 import org.apache.shindig.gadgets.ProcessingOptions;
-import org.apache.shindig.gadgets.RenderingContext;
 import org.apache.shindig.gadgets.SyndicatorConfig;
 import org.apache.shindig.gadgets.UserPrefs;
 
@@ -176,10 +174,6 @@ public class DefaultCrossServletState extends CrossServletState {
       SyndicatorConfig syndicatorConfig = new SyndicatorConfig(syndicators);
       GadgetFeatureRegistry registry = new GadgetFeatureRegistry(features);
 
-      // We'll add the opensocial-0.7 feature manually for now.
-      // TODO: Something better than this ugly hack.
-      OpenSocialFeatureFactory.register(registry, syndicatorConfig);
-
       GadgetServerConfig config =  new GadgetServerConfig()
           .setExecutor(Executors.newCachedThreadPool())
           .setMessageBundleCache(new BasicGadgetDataCache<MessageBundle>())
@@ -197,10 +191,8 @@ public class DefaultCrossServletState extends CrossServletState {
           registry.getAllFeatures().entrySet()) {
         GadgetFeatureFactory factory = entry.getValue().getFeature();
         GadgetFeature feature = factory.create();
-        for (RenderingContext rc : RenderingContext.values()) {
-          for (JsLibrary library : feature.getJsLibraries(rc, null)) {
-            jsBuf.append(library.getContent());
-          }
+        for (JsLibrary library : feature.getJsLibraries(null, null)) {
+          jsBuf.append(library.getContent());
         }
       }
       MessageDigest md;

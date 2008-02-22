@@ -17,7 +17,6 @@
  */
 package org.apache.shindig.gadgets;
 
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
@@ -39,13 +38,12 @@ public class JsLibraryFeatureFactory implements GadgetFeatureFactory {
     return feature;
   }
 
-  public JsLibraryFeatureFactory(JsLibrary gadgetLibrary,
-                                 JsLibrary containerLibrary) {
-    this.feature = new JsLibraryFeature(gadgetLibrary, containerLibrary);
-  }
-  public JsLibraryFeatureFactory(List<JsLibrary> gadgetLibraries,
-                                 List<JsLibrary> containerLibraries) {
-    this.feature = new JsLibraryFeature(gadgetLibraries, containerLibraries);
+  /**
+   * @param libraries The libraries to serve when this feature is used.
+   */
+  public JsLibraryFeatureFactory(
+      Map<RenderingContext, Map<String, List<JsLibrary>>> libraries) {
+    this.feature = new JsLibraryFeature(libraries);
   }
   protected JsLibraryFeatureFactory() {
     feature = null;
@@ -53,51 +51,18 @@ public class JsLibraryFeatureFactory implements GadgetFeatureFactory {
 }
 
 class JsLibraryFeature extends GadgetFeature {
-  List<JsLibrary> containerLibraries;
-  List<JsLibrary> gadgetLibraries;
-
-  /**
-   * Creates a JsLibraryFeature with a single library for gadget & container.
-   *
-   * @param gadgetLibrary The library for the gadget, may be null.
-   * @param containerLibrary The library for the container, may be null.
-   */
-  public JsLibraryFeature(JsLibrary gadgetLibrary, JsLibrary containerLibrary) {
-    if (gadgetLibrary == null) {
-      gadgetLibraries = Collections.emptyList();
-    } else {
-      gadgetLibraries
-          = Collections.unmodifiableList(Arrays.asList(gadgetLibrary));
-    }
-
-    if (containerLibrary == null) {
-      containerLibraries = Collections.emptyList();
-    } else {
-      containerLibraries
-          = Collections.unmodifiableList(Arrays.asList(containerLibrary));
-    }
-  }
+  final Map<RenderingContext, Map<String, List<JsLibrary>>> libraries;
 
   /**
    * Creates a JsLibraryFeature with multiple gadget and/or container libraries.
-   * @param gLibraries Libraries to serve for the gadget.
-   * @param cLibraries Libraries to serve for the container.
+   * @param libraries
    */
-  public JsLibraryFeature(List<JsLibrary> gLibraries,
-                          List<JsLibrary> cLibraries) {
-    if (gLibraries == null) {
-      gadgetLibraries = Collections.emptyList();
-    } else {
-      gadgetLibraries
-          = Collections.unmodifiableList(new LinkedList<JsLibrary>(gLibraries));
-    }
-
-    if (cLibraries == null) {
-      containerLibraries = Collections.emptyList();
-    } else {
-      containerLibraries
-        = Collections.unmodifiableList(new LinkedList<JsLibrary>(cLibraries));
-    }
+  public JsLibraryFeature(
+      Map<RenderingContext, Map<String, List<JsLibrary>>> libraries) {
+    // TODO: technically we should copy this, but since currently the callers
+    // always pass us something that won't be modified anyway, we're safe.
+    // Copying this structure is painful.
+    this.libraries = Collections.unmodifiableMap(libraries);
   }
 
   /**
@@ -106,12 +71,32 @@ class JsLibraryFeature extends GadgetFeature {
   @Override
   public List<JsLibrary> getJsLibraries(RenderingContext context,
                                         ProcessingOptions options) {
-    if (context == RenderingContext.GADGET) {
-      return gadgetLibraries;
-    } else if (context == RenderingContext.CONTAINER) {
-      return containerLibraries;
+    List<JsLibrary> libs = null;
+
+    if (context == null || options == null) {
+      // for this special case we return all JS libraries in a single list.
+      libs = new LinkedList<JsLibrary>();
+      for (Map.Entry<RenderingContext, Map<String, List<JsLibrary>>> i :
+          libraries.entrySet()) {
+        for (Map.Entry<String, List<JsLibrary>> e : i.getValue().entrySet()) {
+          libs.addAll(e.getValue());
+        }
+      }
+    } else {
+      Map<String, List<JsLibrary>> contextLibs = libraries.get(context);
+      if (contextLibs != null) {
+        libs = contextLibs.get(options.getSyndicator());
+        if (libs == null) {
+          // Try default.
+          libs = contextLibs.get(SyndicatorConfig.DEFAULT_SYNDICATOR);
+        }
+      }
     }
-    return Collections.emptyList();
+
+    if (libs == null) {
+      return Collections.emptyList();
+    }
+    return libs;
   }
 
   /**
@@ -121,13 +106,8 @@ class JsLibraryFeature extends GadgetFeature {
   public void process(Gadget gadget, GadgetContext context,
       Map<String, String> params) throws GadgetException {
     super.process(gadget, context, params);
-    List<JsLibrary> libraries;
-    if (context.getRenderingContext() == RenderingContext.GADGET) {
-      libraries = gadgetLibraries;
-    } else {
-      libraries = containerLibraries;
-    }
-    for (JsLibrary library : libraries) {
+    for (JsLibrary library : getJsLibraries(context.getRenderingContext(),
+                                            context.getOptions())) {
       gadget.addJsLibrary(library);
     }
   }

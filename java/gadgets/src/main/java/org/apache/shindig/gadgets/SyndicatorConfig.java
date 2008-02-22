@@ -217,19 +217,20 @@ public class SyndicatorConfig {
     try {
       JSONObject contents = new JSONObject(json);
       JSONArray syndicators = contents.getJSONArray(SYNDICATOR_KEY);
-      if (syndicators.length() == 1 &&
-          DEFAULT_SYNDICATOR.equals(syndicators.get(0).toString())) {
-        config.put(DEFAULT_SYNDICATOR, contents);
-        return;
-      } else {
-        JSONObject defaultSynd = config.get(DEFAULT_SYNDICATOR);
-        if (defaultSynd == null) {
+      JSONObject defaultSynd = config.get(DEFAULT_SYNDICATOR);
+      if (defaultSynd == null) {
+        if (DEFAULT_SYNDICATOR.equals(syndicators.get(0))) {
+          defaultSynd = contents;
+          config.put(DEFAULT_SYNDICATOR, contents);
+        } else {
           throw new GadgetException(GadgetException.Code.INVALID_CONFIG,
                                     "No default config registered");
         }
-        for (int i = 0, j = syndicators.length(); i < j; ++i) {
-          // Copy the default object and produce a new one.
-          String syndicator = syndicators.get(i).toString();
+      }
+      for (int i = 0, j = syndicators.length(); i < j; ++i) {
+        // Copy the default object and produce a new one.
+        String syndicator = syndicators.getString(i);
+        if (!DEFAULT_SYNDICATOR.equals(syndicator)) {
           config.put(syndicator, mergeObjects(defaultSynd, contents));
         }
       }
