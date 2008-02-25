@@ -273,7 +273,7 @@ gadgets.ifpc_ = function() {
    * @param {String} packet encoded parameters
    */
   function handleRequest(packet) {
-    var packet = decodeArgs_(packet);
+    packet = decodeArgs_(packet);
 
     var iframeId = packet.shift();
     var callId = packet.shift();
@@ -312,7 +312,7 @@ gadgets.ifpc_ = function() {
 
       var args = decodeArgs_(data);
 
-      var iframeId = args.shift();
+      iframeId = args.shift();
       var serviceName = args.shift();
       var remote_relay_url = args.shift();
       var callbackId = args.shift();

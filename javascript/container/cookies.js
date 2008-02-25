@@ -164,7 +164,7 @@ goog.net.cookies.remove = function(name, opt_path, opt_domain) {
 goog.net.cookies.getKeyValues_ = function() {
   var cookie = String(document.cookie);
   var parts = cookie.split(/\s*;\s*/);
-  var keys = [], values = [], index, part, pair;
+  var keys = [], values = [], index, part;
   for (var i = 0; part = parts[i]; i++) {
     index = part.indexOf('=');
 

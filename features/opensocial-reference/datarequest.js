@@ -333,8 +333,6 @@ opensocial.DataRequest.prototype.asArray = function(keys) {
 opensocial.DataRequest.prototype.newFetchPersonRequest = function(id,
     opt_params) {
   opt_params = opt_params || {};
-  var fields = opensocial.DataRequest.PeopleRequestFields;
-
   this.addDefaultProfileFields(opt_params);
 
   return opensocial.Container.get().newFetchPersonRequest(id, opt_params);

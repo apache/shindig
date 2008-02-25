@@ -52,9 +52,6 @@ StateFileParser.refreshState = function(stateUrl, gadgetMessageDiv,
   'If the state does not load make sure your URLs are in the same ' +
   'domain as this page.';
 
-  var me = this;
-
-
   $.ajax({type: "GET", url: stateUrl, dataType: "xml", timeout: 5000,
     error: function() {
       gadgetMessageDiv.innerHTML
@@ -110,7 +107,6 @@ StateFileParser.onLoadState = function(xmlState, stateUrl, gadgetMessageDiv,
   }
 
   // Build the friends list
-  var me = this;
   var viewerFriends = new Array();
   var friendsNode = $(containerNode).find('viewerFriends')[0];
   $(friendsNode).find('person').each(function() {
@@ -231,11 +227,11 @@ StateFileParser.dumpState = function(container, stateDiv) {
   xmlText += '  <personAppData>\n';
   for (var person in container.personAppData) {
     if (___.canInnocentEnum(container.personAppData, person)) {
-      for (var field in container.personAppData[person]) {
-        if (___.canInnocentEnum(container.personAppData[person], field)) {
+      for (var personField in container.personAppData[person]) {
+        if (___.canInnocentEnum(container.personAppData[person], personField)) {
           xmlText += '    <data person="' + person + '" ';
-          xmlText += 'field="' + field + '">';
-          xmlText += container.personAppData[person][field];
+          xmlText += 'field="' + personField + '">';
+          xmlText += container.personAppData[person][personField];
           xmlText += '</data>\n';
         }
       }
@@ -255,13 +251,13 @@ StateFileParser.dumpState = function(container, stateDiv) {
           continue;
         }
         xmlText += '    <stream';
-        for (var field in StateFileParser.STREAM_FIELDS) {
-          if (___.canInnocentEnum(StateFileParser.STREAM_FIELDS, field)) {
-            var value = activity.getField(field);
-            if (value == null) {
+        for (var streamField in StateFileParser.STREAM_FIELDS) {
+          if (___.canInnocentEnum(StateFileParser.STREAM_FIELDS, streamField)) {
+            var streamValue = activity.getField(streamField);
+            if (streamValue == null) {
               continue;
             }
-            xmlText += ' ' + field + '="' + value + '"';
+            xmlText += ' ' + streamField + '="' + streamValue + '"';
           }
         }
         xmlText += '>\n';
@@ -269,14 +265,14 @@ StateFileParser.dumpState = function(container, stateDiv) {
       }
 
       xmlText += '      <activity';
-      for (var field in activity.fields_) {
-        if (___.canInnocentEnum(activity.fields_, field)) {
-          var value = activity.getField(field);
-          if (value == null || field == 'mediaItems'
-              || field in StateFileParser.STREAM_FIELDS) {
+      for (var activityField in activity.fields_) {
+        if (___.canInnocentEnum(activity.fields_, activityField)) {
+          var activityValue = activity.getField(activityField);
+          if (activityValue == null || activityField == 'mediaItems'
+              || activityField in StateFileParser.STREAM_FIELDS) {
             continue;
           }
-          xmlText += ' ' + field + '="' + value + '"';
+          xmlText += ' ' + activityField + '="' + activityValue + '"';
         }
       }
       xmlText += '>';

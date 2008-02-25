@@ -148,7 +148,7 @@ function _hesc(str) {
  * @return The stripped string.
  */
 function _striptags(str) {
-  return s.replace(/<\/?[^>]+>/g, "");
+  return str.replace(/<\/?[^>]+>/g, "");
 }
 
 /**
@@ -213,14 +213,15 @@ function _max(a, b) {
  */
 function _exportSymbols(name, sym) {
   var obj = {};
+
   for (var i = 0, j = sym.length; i < j; i += 2) {
     obj[sym[i]] = sym[i + 1];
   }
   var parts = name.split(".");
   var attach = window;
-  for (var i = 0, j = parts.length - 1; i < j; ++i) {
+  for (var k = 0, l = parts.length - 1; k < l; ++k) {
     var tmp = {};
-    attach[parts[i]] = tmp;
+    attach[parts[k]] = tmp;
     attach = tmp;
   }
   attach[parts[parts.length - 1]] = obj;
