@@ -148,14 +148,14 @@ opensocial.SampleContainer.prototype.requestPermission = function(permissions,
 opensocial.SampleContainer.prototype.getIds = function(idSpec) {
   var ids = [];
   if (idSpec == opensocial.DataRequest.Group.VIEWER_FRIENDS) {
-    var friends = this.viewerFriends.asArray();
-    for (var i = 0; i < friends.length; i++) {
-      ids.push(friends[i].getId());
+    var viewerFriends = this.viewerFriends.asArray();
+    for (var i = 0; i < viewerFriends.length; i++) {
+      ids.push(viewerFriends[i].getId());
     }
   } else if (idSpec == opensocial.DataRequest.Group.OWNER_FRIENDS) {
-    var friends = this.ownerFriends.asArray();
-    for (var i = 0; i < friends.length; i++) {
-      ids.push(friends[i].getId());
+    var ownerFriends = this.ownerFriends.asArray();
+    for (var j = 0; j < ownerFriends.length; j++) {
+      ids.push(ownerFriends[j].getId());
     }
   } else if (idSpec == opensocial.DataRequest.PersonId.VIEWER) {
     ids.push(this.viewer.getId());
@@ -263,8 +263,8 @@ opensocial.SampleContainer.prototype.requestData = function(dataRequest,
         var ids = this.getIds(request.idSpec);
 
         var values = {};
-        for (var i = 0; i < ids.length; i++) {
-          var id = ids[i];
+        for (var idIndex = 0; idIndex < ids.length; idIndex++) {
+          var id = ids[idIndex];
           if (this.personAppData[id]) {
             values[id] = {};
             for (var j = 0; j < request.keys.length; j++) {
@@ -299,11 +299,11 @@ opensocial.SampleContainer.prototype.requestData = function(dataRequest,
         break;
 
       case 'FETCH_ACTIVITIES' :
-        var ids = this.getIds(request.idSpec);
+        var allIds = this.getIds(request.idSpec);
 
         var requestedActivities = [];
-        for (var i = 0; i < ids.length; i++) {
-          var activitiesForId = this.activities[ids];
+        for (var k = 0; k < allIds.length; k++) {
+          var activitiesForId = this.activities[allIds[k]];
           if (activitiesForId) {
             requestedActivities = requestedActivities.concat(activitiesForId);
           }

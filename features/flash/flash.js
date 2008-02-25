@@ -49,10 +49,10 @@ gadgets.flash.getMajorVersion = function() {
     // Flash detection for IE
     // This is done by trying to create an ActiveX object with the name
     // "ShockwaveFlash.ShockwaveFlash.{majorVersion}".
-    for (var i = 9; i > 0; i--) {
+    for (var version = 9; version > 0; version--) {
       try {
-        new ActiveXObject("ShockwaveFlash.ShockwaveFlash." + i);
-        return i;
+        new ActiveXObject("ShockwaveFlash.ShockwaveFlash." + version);
+        return version;
       } catch (e) {
       }
     }
@@ -147,14 +147,14 @@ gadgets.flash.embedFlash = function(swfUrl, swfContainer, opt_params) {
         }
 
         html = '<object';
-        for (var prop in attr) {
-          html += ' ' + prop + '="' + attr[prop] + '"';
+        for (var attrProp in attr) {
+          html += ' ' + attrProp + '="' + attr[attrProp] + '"';
         }
         html += '>';
-        for (var prop in opt_params) {
-          if (!/^swf_/.test(prop) && !attr[prop]) {
-            html += '<param name="' + prop +
-              '" value="' + opt_params[prop] + '" />';
+        for (var paramsProp in opt_params) {
+          if (!/^swf_/.test(paramsProp) && !attr[paramsProp]) {
+            html += '<param name="' + paramsProp +
+              '" value="' + opt_params[paramsProp] + '" />';
           }
         }
         html += '</object>';
