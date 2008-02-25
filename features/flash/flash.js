@@ -176,9 +176,7 @@ gadgets.flash.embedFlash = function(swfUrl, swfContainer, opt_params) {
  */
 gadgets.flash.embedCachedFlash = function() {
   var args = Array.prototype.slice.call(arguments);
-  // TODO: This needs to use gadgets.io.getProxyUrl()
-  args[0] = 'http://' + document.location.host + '/gadgets/proxy?url=' +
-            args[0];
+  args[0] = gadgets.io.getProxyUrl(args[0]);
   gadgets.flash.embedFlash.apply(this, args);
 };
 
