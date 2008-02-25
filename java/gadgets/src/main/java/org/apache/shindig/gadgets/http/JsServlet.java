@@ -108,7 +108,11 @@ public class JsServlet extends HttpServlet {
             for (JsLibrary lib : feature.getJsLibraries(context, opts)) {
               // TODO: type url js files fail here.
               if (lib.getType() != JsLibrary.Type.URL) {
-                jsData.append(lib.getContent());
+                if (opts.getDebug()) {
+                  jsData.append(lib.getDebugContent());
+                } else {
+                  jsData.append(lib.getContent());
+                }
               }
             }
           }
@@ -139,7 +143,7 @@ public class JsServlet extends HttpServlet {
       }
 
       setCachingHeaders(resp);
-      resp.setContentType("text/javascript");
+      resp.setContentType("text/javascript; charset=utf-8");
       resp.setContentLength(jsData.length());
       resp.getOutputStream().write(jsData.toString().getBytes());
     } else {

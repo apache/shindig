@@ -30,13 +30,18 @@ import java.util.logging.Logger;
  * or inline scripts.
  */
 public final class JsLibrary {
-  private Type type;
+  private final Type type;
   public Type getType() {
     return type;
   }
-  private String content;
+  private final String content;
   public String getContent() {
     return content;
+  }
+
+  private final String debugContent;
+  public String getDebugContent() {
+    return debugContent;
   }
 
   private static final Logger logger
@@ -78,14 +83,28 @@ public final class JsLibrary {
    *
    * @param type If FILE or RESOURCE, the content will be loaded from disk.
    *     if URL or INLINE, the content will be handled the same as html <script>
+   * @param content If FILE or RESOURCE, we will also look for a file
+   *     named file.opt.ext for every file.ext, and if present we will
+   *     use that as the standard content and file.ext as the debug content.
    * @return The newly created library.
    */
   public static JsLibrary create(Type type, String content) {
+    String optimizedContent = null;
+    String debugContent;
     if (type == Type.FILE || type == Type.RESOURCE) {
-      logger.info("Loading js from: " + content);
-      content = loadData(content, type);
+      if (content.endsWith(".js")) {
+        optimizedContent = loadData(
+            content.substring(0, content.length() - 3) + ".opt.js", type);
+      }
+      debugContent = loadData(content, type);
+      if (optimizedContent == null || optimizedContent.length() == 0) {
+        optimizedContent = debugContent;
+      }
+    } else {
+      debugContent = content;
+      optimizedContent = content;
     }
-    return new JsLibrary(type, content);
+    return new JsLibrary(type, optimizedContent, debugContent);
   }
 
   /**
@@ -95,6 +114,7 @@ public final class JsLibrary {
    * @return The contents of the file or resource named by @code name.
    */
   private static String loadData(String name, Type type) {
+    logger.info("Loading js from: " + name + " type: " + type.toString());
     if (type == Type.FILE) {
       return loadFile(name);
     } else if (type == Type.RESOURCE) {
@@ -132,8 +152,8 @@ public final class JsLibrary {
     try {
       return ResourceLoader.getContent(file);
     } catch (IOException e) {
-      throw new RuntimeException(
-          String.format("Error reading file %s", fileName), e);
+      logger.warning("Error reading file: " + fileName);
+      return null;
     }
   }
 
@@ -146,8 +166,8 @@ public final class JsLibrary {
      try {
        return ResourceLoader.getContent(name);
      } catch (IOException e) {
-       throw new RuntimeException(
-           String.format("Could not find resource %s", name), e);
+       logger.warning("Could not find resource: " + name);
+       return null;
      }
   }
 
@@ -157,8 +177,9 @@ public final class JsLibrary {
    * @param type
    * @param content
    */
-  private JsLibrary(Type type, String content) {
+  private JsLibrary(Type type, String content, String debugContent) {
     this.type = type;
     this.content = content;
+    this.debugContent = debugContent;
   }
 }

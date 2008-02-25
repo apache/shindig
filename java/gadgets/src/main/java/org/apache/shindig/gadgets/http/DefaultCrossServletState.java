@@ -128,7 +128,7 @@ public class DefaultCrossServletState extends CrossServletState {
    * {@inheritDoc}
    */
   @Override
-  public String getJsUrl(String[] features, ProcessingOptions opts) {
+  public String getJsUrl(String[] features, ProcessingOptions options) {
     StringBuilder buf = new StringBuilder();
     buf.append(jsPath);
     if (features == null || features.length == 0) {
@@ -147,7 +147,9 @@ public class DefaultCrossServletState extends CrossServletState {
     buf.append(".js?v=")
        .append(jsCacheParam)
        .append("&synd=")
-       .append(opts.getSyndicator());
+       .append(options.getSyndicator())
+       .append("&debug=")
+       .append(options.getDebug() ? "1" : "0");
     return buf.toString();
   }
 

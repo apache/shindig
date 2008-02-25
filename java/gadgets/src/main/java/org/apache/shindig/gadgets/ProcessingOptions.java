@@ -52,4 +52,11 @@ public class ProcessingOptions {
   public String getSyndicator() {
     return SyndicatorConfig.DEFAULT_SYNDICATOR;
   }
+
+  /**
+   * @return Whether or not to show debug output.
+   */
+  public boolean getDebug() {
+    return true;
+  }
 }

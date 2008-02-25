@@ -30,11 +30,13 @@ public class HttpProcessingOptions extends ProcessingOptions {
   private final boolean ignoreCache;
   private final String forceJsLibs;
   private final String syndicator;
+  private final boolean debug;
 
   public HttpProcessingOptions(HttpServletRequest req) {
     ignoreCache = getIgnoreCache(req);
     forceJsLibs = getForceJsLibs(req);
     syndicator = getSyndicator(req);
+    debug = getDebug(req);
   }
 
   /** {@inheritDoc} */
@@ -56,6 +58,12 @@ public class HttpProcessingOptions extends ProcessingOptions {
       return super.getSyndicator();
     }
     return syndicator;
+  }
+
+  /** {@inheritDoc} */
+  @Override
+  public boolean getDebug() {
+    return debug;
   }
 
   /**
@@ -84,5 +92,13 @@ public class HttpProcessingOptions extends ProcessingOptions {
    */
   protected static String getSyndicator(HttpServletRequest req) {
     return req.getParameter("synd");
+  }
+
+  /**
+   * @param req
+   * @return True if the debug parameter is set.
+   */
+  protected static boolean getDebug(HttpServletRequest req) {
+    return "1".equals(req.getParameter("debug"));
   }
 }

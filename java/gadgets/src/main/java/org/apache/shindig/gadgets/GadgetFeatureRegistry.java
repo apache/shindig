@@ -181,6 +181,7 @@ public class GadgetFeatureRegistry {
       resultsFound.addAll(cache);
       return true;
     } else {
+      resultsFound.addAll(core.values());
       for (String featureName : needed) {
         Entry entry = features.get(featureName);
         if (entry == null) {
