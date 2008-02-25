@@ -198,25 +198,23 @@ gadgets.util = function() {
      */
     escape : function(input, opt_escapeObjects) {
 
-      if (typeof input == "string") {
+      if (!input) {
+        return input;
+      } else if (typeof input == "string") {
         return gadgets.util.escapeString(input);
-
       } else if (typeof input == "array") {
         for (var i = 0; i < input.length; i++) {
           input[i] = gadgets.util.escape(input[i]);
         }
-
-      } else if (opt_escapeObjects) {
+      } else if (typeof input == "object" && opt_escapeObjects) {
         var newObject = {};
         for (var field in input) if (input.hasOwnProperty(field)) {
           newObject[gadgets.util.escapeString(field)]
               = gadgets.util.escape(input[field], true);
         }
         return newObject;
-
-      } else {
-        return input;
       }
+      return input;
     },
 
     /**
