@@ -131,7 +131,7 @@ under the License.
           </execution>
         </executions>
         <configuration>
-          <nosuffix>true</nosuffix>
+          <suffix>.opt</suffix>
           <excludes>
             <!-- don't bother with other file types. -->
             <exclude>**/*.xml</exclude>
@@ -141,8 +141,6 @@ under the License.
             <exclude>**/*.png</exclude>
             <!-- Syndicator files are JSON, not javascript -->
             <exclude>**/*syndicator*.js</exclude>
-            <!-- open social files produce too many warnings -->
-            <exclude>**/opensocial-*/*</exclude>
 						<!-- Caja has some bugs too -->
 						<exclude>**/caja/*.js</exclude>
           </excludes>

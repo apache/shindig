@@ -199,11 +199,15 @@ public class GadgetRenderingServlet extends HttpServlet {
         // servlet. We should probably inline external JS as well.
         externJs.append(String.format(externFmt, library.getContent()));
       } else if (type == JsLibrary.Type.INLINE) {
-        inlineJs.append(library.getContent()).append('\n');
+        inlineJs.append(library.getContent());
       } else {
         // FILE or RESOURCE
         if (forcedLibs == null) {
-          inlineJs.append(library.getContent()).append('\n');
+          if (options.getDebug()) {
+            inlineJs.append(library.getDebugContent());
+          } else {
+            inlineJs.append(library.getContent());
+          }
         } // otherwise it was already included by options.forceJsLibs.
       }
     }

@@ -44,7 +44,7 @@ public class ResourceLoader {
   public static String getContent(String resource)
       throws IOException, FileNotFoundException {
     ClassLoader cl = ResourceLoader.class.getClassLoader();
-    InputStream is = cl.getResourceAsStream(resource);
+    InputStream is = cl.getResourceAsStream(resource.trim());
     if (is == null) {
       throw new FileNotFoundException("Can not locate resource: " + resource);
     }
