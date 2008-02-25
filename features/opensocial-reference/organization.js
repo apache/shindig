@@ -140,5 +140,5 @@ opensocial.Organization.Field = {
  * @return {String} The data
  */
 opensocial.Organization.prototype.getField = function(key) {
-  return gadgets.util.escapeString(this.fields_[key]);
+  return gadgets.util.escape(this.fields_[key]);
 };

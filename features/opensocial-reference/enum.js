@@ -80,7 +80,7 @@ opensocial.Enum = function(key, displayValue) {
  *     below.
  */
 opensocial.Enum.prototype.getKey = function() {
-  return gadgets.util.escapeString(this.key);
+  return gadgets.util.escape(this.key);
 };
 
 
@@ -91,7 +91,7 @@ opensocial.Enum.prototype.getKey = function() {
  * @return {String} The enum's value.
  */
 opensocial.Enum.prototype.getDisplayValue = function() {
-  return gadgets.util.escapeString(this.displayValue);
+  return gadgets.util.escape(this.displayValue);
 };
 
 

@@ -183,6 +183,45 @@ gadgets.util = function() {
     /**
      * Escapes the input using html entities to make it safer.
      *
+     * If the input is a string, uses gadgets.util.escapeString.
+     * If it is an array, calls escape on each of the array elements
+     * if it is an object, will only escape all the mapped keys and values if
+     * the opt_escapeObjects flag is set. This operation involves creating an
+     * entirely new object so only set the flag when the input is a simple
+     * string to string map.
+     * Otherwise, does not attempt to modify the input.
+     *
+     * @param {Object} input The object to escape
+     * @param {Boolean} opt_escapeObjects Whether to escape objects.
+     * @return {Object} The escaped object
+     * @private Only to be used by the container, not gadgets.
+     */
+    escape : function(input, opt_escapeObjects) {
+
+      if (typeof input == "string") {
+        return gadgets.util.escapeString(input);
+
+      } else if (typeof input == "array") {
+        for (var i = 0; i < input.length; i++) {
+          input[i] = gadgets.util.escape(input[i]);
+        }
+
+      } else if (opt_escapeObjects) {
+        var newObject = {};
+        for (var field in input) if (input.hasOwnProperty(field)) {
+          newObject[gadgets.util.escapeString(field)]
+              = gadgets.util.escape(input[field], true);
+        }
+        return newObject;
+
+      } else {
+        return input;
+      }
+    },
+
+    /**
+     * Escapes the input using html entities to make it safer.
+     *
      * Currently only escapes &lt; &gt; ' and &quot; All known browsers handle
      * &amp; without issue.
      *
@@ -196,14 +235,10 @@ gadgets.util = function() {
      * @return {String} The escaped string
      */
     escapeString : function(str) {
-      if (typeof str == "string") {
-        return str.replace(/</g, "&lt;")
-            .replace(/>/g, "&gt;")
-            .replace(/"/g, "&quot;")
-            .replace(/'/g, "&#39;");
-      } else {
-        return str;
-      }
+      return str.replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;")
+          .replace(/"/g, "&quot;")
+          .replace(/'/g, "&#39;");
     },
 
     /**

@@ -128,7 +128,11 @@ JsonContainer.prototype.createPersonFromJson = function(serverJson) {
 JsonContainer.prototype.newFetchPersonAppDataRequest = function(
     idSpec, keys) {
   return new RequestItem({'type' : 'FETCH_PERSON_APP_DATA', 'idSpec' : idSpec,
-    'keys' : keys});
+      'keys' : keys},
+      function (appData) {
+        return new opensocial.ResponseItem(null,
+            gadgets.util.escape(appData, true)); // TODO: Original request
+      });
 };
 
 JsonContainer.prototype.newUpdatePersonAppDataRequest = function(
