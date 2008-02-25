@@ -73,8 +73,8 @@ gadgets.flash.getMajorVersion = function() {
  *
  * @member gadgets.flash
  */
-// TODO The shindig implementation does not match the spec described above!
-gadgets.flash.embedFlash = function(swfUrl, swfContainer, opt_params) {
+gadgets.flash.embedFlash = function(swfUrl, swfContainer, swfVersion, 
+    opt_params) {
   switch (typeof swfContainer) {
     case 'string':
       swfContainer = document.getElementById(swfContainer);
@@ -97,7 +97,7 @@ gadgets.flash.embedFlash = function(swfUrl, swfContainer, opt_params) {
 
   var ver = gadgets.flash.getMajorVersion();
   if (ver) {
-    var swfVer = parseInt(opt_params.swf_version, 10);
+    var swfVer = parseInt(swfVersion, 10);
     if (isNaN(swfVer)) {
       swfVer = 0;
     }
@@ -182,6 +182,13 @@ gadgets.flash.embedCachedFlash = function() {
 
 // Aliases for legacy code
 var _IG_GetFlashMajorVersion = gadgets.flash.getMajorVersion;
-var _IG_EmbedFlash = gadgets.flash.embedFlash;
-var _IG_EmbedCachedFlash = gadgets.flash.embedCachedFlash;
+var _IG_EmbedFlash = function(swfUrl, swfContainer, opt_params) {
+  gadgets.flash.embedFlash(swfUrl, swfContainer, opt_params.swf_version,
+      opt_params);
+};
+
+var _IG_EmbedCachedFlash = function(swfUrl, swfContainer, opt_params) {
+  gadgets.flash.embedCachedFlash(swfUrl, swfContainer, opt_params.swf_version,
+      opt_params);
+};
 
