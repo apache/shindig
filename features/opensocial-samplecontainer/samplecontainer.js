@@ -273,7 +273,7 @@ opensocial.SampleContainer.prototype.requestData = function(dataRequest,
             }
           }
         }
-        requestedValue = values;
+        requestedValue = gadgets.util.escape(values, true);
         break;
 
       case 'UPDATE_PERSON_APP_DATA' :
@@ -290,7 +290,7 @@ opensocial.SampleContainer.prototype.requestData = function(dataRequest,
             || userId == this.viewer.getId()) {
           userId = this.viewer.getId();
           this.personAppData[userId] = this.personAppData[userId] || {};
-          this.personAppData[userId][request.key] = request.value;
+          this.personAppData[userId][request.key] = String(request.value);
         } else {
           errorCode = opensocial.ResponseItem.Error.FORBIDDEN;
           errorMessage = 'gadgets can only edit viewer app data';
