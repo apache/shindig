@@ -94,6 +94,12 @@ public class GadgetRenderingServlet extends HttpServlet {
       return;
     }
 
+    if (!"http".equals(uri.getScheme()) && !"https".equals(uri.getScheme())) {
+      resp.sendError(HttpServletResponse.SC_BAD_REQUEST,
+                     "Unsupported scheme (must be http or https).");
+      return;
+    }
+
     if (!validateParent(req)) {
       logger.info("Invalid parent");
       resp.sendError(HttpServletResponse.SC_BAD_REQUEST,
