@@ -452,6 +452,8 @@ gadgets.IfrGadget.prototype.cssClassGadgetUserPrefsDialogActionBar =
     'gadgets-gadget-user-prefs-dialog-action-bar';
 gadgets.IfrGadget.prototype.cssClassTitleButton = 'gadgets-gadget-title-button';
 gadgets.IfrGadget.prototype.cssClassGadgetContent = 'gadgets-gadget-content';
+gadgets.IfrGadget.prototype.rpcToken = (0xFFFFFFFF * Math.random()) | 0;
+gadgets.IfrGadget.prototype.rpcRelay = 'files/rpc_relay.html';
 
 gadgets.IfrGadget.prototype.getTitleBarContent = function(continuation) {
   continuation('<div class="' + this.cssClassTitleBar + '"><span id="' +
@@ -480,6 +482,8 @@ gadgets.IfrGadget.prototype.getServerBase = function() {
 
 gadgets.IfrGadget.prototype.getMainContent = function(continuation) {
   var iframeId = this.getIframeId();
+  gadgets.rpc.setRelayUrl(iframeId, this.serverBase_ + this.rpcRelay);
+  gadgets.rpc.setAuthToken(iframeId, this.rpcToken);
   continuation('<div class="' + this.cssClassGadgetContent + '"><iframe id="' +
       iframeId + '" name="' + iframeId + '" class="' + this.cssClassGadget +
       '" src="' + this.getIframeUrl() +
@@ -497,7 +501,7 @@ gadgets.IfrGadget.prototype.getUserPrefsDialogId = function() {
 gadgets.IfrGadget.prototype.getIframeUrl = function() {
   return this.serverBase_ + 'ifr?url=' +
       encodeURIComponent(this.specUrl) + '&synd=' + this.SYND + '&mid=' +
-      this.id + this.getUserPrefsParams();
+      this.id + "&rpctoken=" + this.rpcToken + this.getUserPrefsParams();
 };
 
 gadgets.IfrGadget.prototype.getUserPrefsParams = function() {

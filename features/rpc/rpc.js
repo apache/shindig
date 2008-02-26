@@ -33,9 +33,13 @@ gadgets.rpc = function() {
   var iframePool = [];
   var relayUrl = {};
   var useLegacyProtocol = {};
+  var authToken = {};
   var callId = 0;
   var callbacks = {};
-  var parentUrl = gadgets.util.getUrlParameters().parent || '';
+
+  var params = gadgets.util.getUrlParameters();
+  var parentUrl = params.parent || '';
+  authToken['..'] = params.rpctoken || params.ifpctok || params.st;
 
   // Pick the most efficient RPC relay mechanism
   var relayChannel = typeof document.postMessage === 'function' ? 'dpm' :
@@ -85,6 +89,13 @@ gadgets.rpc = function() {
   function process(rpc) {
     if (rpc && typeof rpc.s === 'string' && typeof rpc.f === 'string' &&
         rpc.a instanceof Array) {
+      // Validate auth token.
+      if (authToken[rpc.f]) {
+        // We allow type coercion here because all the url params are strings.
+        if (authToken[rpc.f] != rpc.t) {
+          throw new Error("Invalid auth token.");
+        }
+      }
       var result = (services[rpc.s] || services['']).apply(rpc, rpc.a);
       if (rpc.c) {
         gadgets.rpc.call(rpc.f, '__cb', null, rpc.c, result);
@@ -229,7 +240,8 @@ gadgets.rpc = function() {
         s: serviceName,
         f: from,
         c: callback ? callId : 0,
-        a: Array.prototype.slice.call(arguments, 3)
+        a: Array.prototype.slice.call(arguments, 3),
+        t: authToken[targetId]
       });
 
       switch (relayChannel) {
@@ -277,11 +289,26 @@ gadgets.rpc = function() {
      * Sets the relay URL of a target frame.
      * @param {String} targetId Name of the target frame.
      * @param {String} relayUrl Full relay URL of the target frame.
+     * @param {Boolean} opt_useLegacy True if this relay needs the legacy IFPC
+     *     wire format.
      *
      * @member gadgets.rpc
      */
-    setRelayUrl: function(targetId, relayUrl) {
+    setRelayUrl: function(targetId, relayUrl, opt_useLegacy) {
       relayUrl[targetId] = relayUrl;
+      useLegacyProtocol[targetId] = !!opt_useLegacy;
+    },
+
+    /**
+     * Sets the auth token of a target frame.
+     * @param {String} targetId Name of the target frame.
+     * @param {String} token The authentication token to use for all
+     *     calls to or from this target id.
+     *
+     * @member gadgets.rpc
+     */
+    setAuthToken: function(targetId, token) {
+      authToken[targetId] = token;
     },
 
     /**

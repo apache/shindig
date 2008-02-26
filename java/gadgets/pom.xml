@@ -123,7 +123,7 @@ under the License.
         <!-- <artifactId>maven-javascript-plugin</artifactId> -->
         <groupId>net.sf.alchim</groupId>
         <artifactId>yuicompressor-maven-plugin</artifactId>
-        <version>0.6</version>
+        <version>0.6.2</version>
         <executions>
           <execution>
             <goals>
