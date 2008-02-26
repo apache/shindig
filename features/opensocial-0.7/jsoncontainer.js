@@ -66,7 +66,7 @@ JsonContainer.prototype.requestData = function(dataRequest, callback) {
   var sendResponse = function(result) {
     result = result.data;
 
-    if (!result || result['globalError']) {
+    if (!result || result['error']) {
       callback(new opensocial.DataResponse({}, true));
       return;
     }
@@ -78,8 +78,10 @@ JsonContainer.prototype.requestData = function(dataRequest, callback) {
     for (var i = 0; i < responses.length; i++) {
       var response = responses[i];
       var rawData = response['response'];
+      var error = response['error'];
 
-      var processedData = requestObjects[i].request.processResponse(rawData);
+      var processedData = requestObjects[i].request.processResponse(rawData,
+          error);
       globalError = globalError || processedData.hadError();
       responseMap[requestObjects[i].key] = processedData;
     }
@@ -95,9 +97,9 @@ JsonContainer.prototype.newFetchPersonRequest = function(id,
     opt_params) {
   var me = this;
   var peopleRequest = this.newFetchPeopleRequest(id, opt_params);
-  peopleRequest.processResponse = function(rawJson) {
+  peopleRequest.processResponse = function(rawJson, error) {
     return new opensocial.ResponseItem(null,
-        me.createPersonFromJson(rawJson[0]));
+        me.createPersonFromJson(rawJson[0]), error);
   };
   return peopleRequest;
 };
@@ -107,14 +109,14 @@ JsonContainer.prototype.newFetchPeopleRequest = function(idSpec,
   var me = this;
   return new RequestItem(
       {'type' : 'FETCH_PEOPLE', 'idSpec' : idSpec, 'params': opt_params},
-      function(rawJson) {
+      function(rawJson, error) {
         var people = [];
         for (var i = 0; i < rawJson.length; i++) {
           people.push(me.createPersonFromJson(rawJson[i]));
           // TODO: isOwner, isViewer
         }
         return new opensocial.ResponseItem(null, // TODO: Original request
-            new opensocial.Collection(people));
+            new opensocial.Collection(people), error);
       });
 };
 
@@ -129,9 +131,9 @@ JsonContainer.prototype.newFetchPersonAppDataRequest = function(
     idSpec, keys) {
   return new RequestItem({'type' : 'FETCH_PERSON_APP_DATA', 'idSpec' : idSpec,
       'keys' : keys},
-      function (appData) {
+      function (appData, error) {
         return new opensocial.ResponseItem(null,
-            gadgets.util.escape(appData, true)); // TODO: Original request
+            gadgets.util.escape(appData, true), error); // TODO: Original request
       });
 };
 
@@ -144,20 +146,20 @@ JsonContainer.prototype.newUpdatePersonAppDataRequest = function(
 JsonContainer.prototype.newFetchActivitiesRequest = function(
     idSpec, opt_params) {
   return new RequestItem({'type' : 'FETCH_ACTIVITIES', 'idSpec' : idSpec},
-      function(rawJson) {
+      function(rawJson, error) {
         var activities = [];
         for (var i = 0; i < rawJson.length; i++) {
           activities.push(new opensocial.Activity(rawJson[i]));
         }
         return new opensocial.ResponseItem(null, // TODO: Original request
-            {'activities' : new opensocial.Collection(activities)});
+            {'activities' : new opensocial.Collection(activities)}, error);
       });
 };
 
 RequestItem = function(jsonParams, processResponse) {
   this.jsonParams = jsonParams;
   this.processResponse = processResponse ||
-    function (rawJson) {
-      return new opensocial.ResponseItem(null, rawJson); // TODO: Original request
+    function (rawJson, error) {
+      return new opensocial.ResponseItem(null, rawJson, error); // TODO: Original request
     };
 };
