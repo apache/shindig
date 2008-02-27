@@ -55,6 +55,43 @@ gadgets.util = function() {
   var features = {};
   var onLoadHandlers = [];
 
+  // Maps code points to the value to replace them with.
+  // If the value is "false", the character is removed entirely, otherwise
+  // it will be replaced with an html entity.
+  var escapeCodePoints = {
+   // nul; most browsers truncate because they use c strings under the covers.
+   0 : false,
+   // new line
+   10 : true,
+   // carriage return
+   13 : true,
+   // double quote
+   34 : true,
+   // single quote
+   39 : true,
+   // less than
+   60 : true,
+   // greater than
+   62 : true,
+   // Backslash
+   92 : true,
+   // line separator
+   8232 : true,
+   // paragraph separator
+   8233 : true
+  };
+
+  /**
+   * Regular expression callback that returns strings from unicode code points.
+   *
+   * @param {Array} match Ignored
+   * @param {String} value The codepoint value to convert
+   * @return {String} The character corresponding to value.
+   */
+  function unescapeEntity(match, value) {
+    return String.fromCharCode(value);
+  }
+
   return /** @scope gadgets.util */ {
 
     /**
@@ -197,16 +234,15 @@ gadgets.util = function() {
      * @private Only to be used by the container, not gadgets.
      */
     escape : function(input, opt_escapeObjects) {
-
       if (!input) {
         return input;
-      } else if (typeof input == "string") {
+      } else if (typeof input === "string") {
         return gadgets.util.escapeString(input);
-      } else if (typeof input == "array") {
-        for (var i = 0; i < input.length; i++) {
+      } else if (typeof input === "array") {
+        for (var i = 0, j = input.length; i < j; ++i) {
           input[i] = gadgets.util.escape(input[i]);
         }
-      } else if (typeof input == "object" && opt_escapeObjects) {
+      } else if (typeof input === "object" && opt_escapeObjects) {
         var newObject = {};
         for (var field in input) if (input.hasOwnProperty(field)) {
           newObject[gadgets.util.escapeString(field)]
@@ -220,9 +256,6 @@ gadgets.util = function() {
     /**
      * Escapes the input using html entities to make it safer.
      *
-     * Currently only escapes &lt; &gt; ' and &quot; All known browsers handle
-     * &amp; without issue.
-     *
      * Currently not in the spec -- future proposals may change
      * how this is handled.
      *
@@ -233,10 +266,18 @@ gadgets.util = function() {
      * @return {String} The escaped string
      */
     escapeString : function(str) {
-      return str.replace(/</g, "&lt;")
-          .replace(/>/g, "&gt;")
-          .replace(/"/g, "&quot;")
-          .replace(/'/g, "&#39;");
+      var out = [], ch, shouldEscape;
+      for (var i = 0, j = str.length; i < j; ++i) {
+        ch = str.charCodeAt(i);
+        shouldEscape = escapeCodePoints[ch];
+        if (shouldEscape === true) {
+          out.push("&#", ch, ";");
+        } else if (shouldEscape !== false) {
+          // undefined or null are OK.
+          out.push(str.charAt(i));
+        }
+      }
+      return out.join("");
     },
 
     /**
@@ -245,10 +286,7 @@ gadgets.util = function() {
      * @param {String} str The string to unescape.
      */
     unescapeString : function(str) {
-      return str.replace(/&lt;/g, "<")
-                .replace(/&gt;/g, ">")
-                .replace(/&quot;/g, '"')
-                .replace(/&#39/g, "'");
+      return str.replace(/&#([0-9]+);/g, unescapeEntity);
     },
 
     /**
