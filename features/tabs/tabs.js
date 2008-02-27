@@ -190,6 +190,11 @@ gadgets.TabSet = function(opt_moduleId, opt_defaultTab, opt_container) {
  * @return {String} DOM id of the tab container.
  */
 gadgets.TabSet.prototype.addTab = function(tabName, opt_params) {
+  // Legacy support
+  if (typeof opt_params === 'string') {
+    opt_params = {contentContainer: arguments[1], callback: arguments[2]};
+  }
+
   var params = opt_params || {};
 
   var tabIndex = -1;
