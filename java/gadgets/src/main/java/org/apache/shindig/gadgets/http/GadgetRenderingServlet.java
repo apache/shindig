@@ -196,32 +196,27 @@ public class GadgetRenderingServlet extends HttpServlet {
     View view = gadget.getView(options.getView());
 
     // use single character for tab to simulate indentation within source code
-    String t = "  ";
+    /*String t = "  ";
     String n = "\n";
     if (!options.getDebug()) {
       t = "";
       n = "";
+    }*/
+
+    if (!view.getQuirks()) {
+      markup.append("<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01//EN\" \"http://www.w3.org/TR/html4/strict.dtd\">");
     }
 
-    if (!view.getQuirks())
-      markup.append("<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01//EN\" \"http://www.w3.org/TR/html4/strict.dtd\">"+n);
-
     // TODO: This is so wrong.
-    markup.append(
-        "<html>"+n+
-        t+"<head>"+n+
-        t+t+"<style type=\"text/css\">"+n+
-        t+t+t+"body,td,div,span,p{font-family:arial,sans-serif;}"+n+
-        t+t+t+"a {color:#0000cc;}a:visited {color:#551a8b;}"+n+
-        t+t+t+"a:active {color:#ff0000;}"+n+
-        t+t+t+"body{margin: 0px;padding: 0px;background-color:white;}"+n+
-        t+t+"</style>"+n+
-        t+"</head>"+n+
-        t+"<body>"+n);
+    markup.append("<style type=\"text/css\">")
+          .append("body,td,div,span,p{font-family:arial,sans-serif;}")
+          .append("a {color:#0000cc;}a:visited {color:#551a8b;}")
+          .append("a:active {color:#ff0000;}")
+          .append("body{margin: 0px;padding: 0px;background-color:white;}")
+          .append("</style>");
     StringBuilder externJs = new StringBuilder();
     StringBuilder inlineJs = new StringBuilder();
-    String externFmt =
-        t+t+"<script src=\"%s\"></script>"+n;
+    String externFmt = "<script src=\"%s\"></script>";
     String forcedLibs = options.getForcedJsLibs();
 
     for (JsLibrary library : gadget.getJsLibraries()) {
@@ -263,7 +258,7 @@ public class GadgetRenderingServlet extends HttpServlet {
     }
 
     List<GadgetException> gadgetExceptions = new LinkedList<GadgetException>();
-    String content = view.getData();
+    String content = gadget.getContentData(options.getView());
     if (content == null) {
       // unknown view
       gadgetExceptions.add(
@@ -286,11 +281,8 @@ public class GadgetRenderingServlet extends HttpServlet {
     }
 
     markup.append(content);
-    markup.append(
-        t+t+"<script>gadgets.util.runOnLoadHandlers();</script>"+n);
-    markup.append(
-        t+"</body>"+n+
-        "</html>");
+    markup.append("<script>gadgets.util.runOnLoadHandlers();</script>");
+    markup.append("</body></html>");
 
     resp.getWriter().print(markup.toString());
   }
