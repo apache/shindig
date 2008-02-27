@@ -514,6 +514,11 @@ public class GadgetServer {
       this.components.add(new GadgetException(code));
     }
 
+    public GadgetProcessException(GadgetException.Code code, String message) {
+      this.components = new ArrayList<GadgetException>();
+      this.components.add(new GadgetException(code, message));
+    }
+
     public List<GadgetException> getComponents() {
       return components;
     }

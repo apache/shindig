@@ -101,7 +101,7 @@ public abstract class CrossServletState {
    * context object). A better choice would probably be to add the view params
    * to ProcessingOptions and pass that here.
    */
-  public abstract String getIframeUrl(Gadget gadget,  ProcessingOptions opts);
+  public abstract String getIframeUrl(Gadget gadget, ProcessingOptions opts);
 
   /**
    * Initializes this handler using the provided implementation.

@@ -82,35 +82,54 @@ public interface GadgetSpec {
   public List<UserPref> getUserPrefs();
 
   public enum ContentType {
-    HTML, URL
+    HTML, URL;
+
+    public static ContentType parse(String type) {
+      if ("url".equals(type)) {
+        return URL;
+      }
+      return HTML;
+    }
   }
 
-  public ContentType getContentType();
-
-  /**
-   * Must be a URI type gadget.
-   *
-   * @return The URI for this gadget spec.
-   * @throws IllegalStateException if contentType is not URI.
-   */
-  public URI getContentHref();
-
-  /**
-   * @return The HTML content for the default view of this gadget spec.
-   * @throws IllegalStateException if contentType is not HTML.
-   */
-  public String getContentData();
+  public static interface View {
+    /**
+     * @return Content type for the view, either HTML or URL
+     */
+    public ContentType getType();
+    /**
+     * Must be a URI type gadget.
+     *
+     * @return The URI for this gadget spec.
+     * @throws IllegalStateException if contentType is not URI.
+     */
+    public URI getHref();
+    /**
+     * @return The HTML content for the default view of this gadget spec.
+     * @throws IllegalStateException if contentType is not HTML.
+     */
+    public String getData();
+    /**
+     * @return Whether to use quirks or standards mode.
+     *         If standards mode, then add appropriate DOCTYPE.
+     */
+    public boolean getQuirks();
+  }
 
   /**
    * @param view Identifier of the desired view to retrieve.
-   * @return The HTML content for the specified view of this gadget spec,
+   * @return The View for the specified view of this gadget spec,
    *         or null if no such view was defined.
-   * @throws IllegalStateException if contentType is not HTML.
    */
-  public String getContentData(String view);
+  public View getView(String view);
 
   /**
    * @return A copy of the spec. This is NOT the same as clone().
    */
   public GadgetSpec copy();
+
+  /**
+   * @return Info string for all views on attributes/contents
+   */
+  public String toString();
 }

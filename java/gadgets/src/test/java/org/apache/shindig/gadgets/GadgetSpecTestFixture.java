@@ -34,17 +34,17 @@ public class GadgetSpecTestFixture {
   private static final String DATETIME_TITLE = "Hello, World!";
   private static final String DATETIME_CONTENT = "Goodbye, World!";
 
-  public static final String DATETIME_URI_STRING
-      = "http://www.google.com/ig/modules/datetime.xml";
+  public static final String DATETIME_URI_STRING =
+      "http://www.google.com/ig/modules/datetime.xml";
   public static final URI DATETIME_URI;
   public static final int DATETIME_MODULE_ID = 1;
   public static final GadgetView.ID DATETIME_ID;
-  public static final String DATETIME_XML
-      = "<?xml version=\"1.0\"?>" +
-        "<Module>" +
-        "  <ModulePrefs title=\"" + DATETIME_TITLE + "\"/>" +
-        "  <Content type=\"html\">" + DATETIME_CONTENT + "</Content>" +
-        "</Module>";
+  public static final String DATETIME_XML =
+      "<?xml version=\"1.0\"?>" +
+      "<Module>" +
+      "  <ModulePrefs title=\"" + DATETIME_TITLE + "\"/>" +
+      "  <Content type=\"html\">" + DATETIME_CONTENT + "</Content>" +
+      "</Module>";
 
   public static final GadgetSpec DATETIME_SPEC =
       new GadgetSpec() {
@@ -57,17 +57,21 @@ public class GadgetSpecTestFixture {
         public String getAuthorEmail() {
           return null;
         }
-        public String getContentData() {
-          return DATETIME_CONTENT;
-        }
-        public String getContentData(String s) {
-          return DATETIME_CONTENT;
-        }
-        public URI getContentHref() {
-          return null;
-        }
-        public ContentType getContentType() {
-          return ContentType.HTML;
+        public View getView(String viewName) {
+          return new View() {
+            public ContentType getType() {
+              return ContentType.HTML;
+            }
+            public URI getHref() {
+              return null;
+            }
+            public String getData() {
+              return DATETIME_CONTENT;
+            }
+            public boolean getQuirks() {
+              return true;
+            }
+          };
         }
         public String getDescription() {
           return null;
@@ -104,6 +108,10 @@ public class GadgetSpecTestFixture {
         }
         public List<String> getCategories() {
           return new LinkedList<String>();
+        }
+        @Override
+        public String toString() {
+          return "";
         }
       };
 

@@ -31,12 +31,14 @@ public class HttpProcessingOptions extends ProcessingOptions {
   private final String forceJsLibs;
   private final String syndicator;
   private final boolean debug;
+  private final String view;
 
   public HttpProcessingOptions(HttpServletRequest req) {
     ignoreCache = getIgnoreCache(req);
     forceJsLibs = getForceJsLibs(req);
     syndicator = getSyndicator(req);
     debug = getDebug(req);
+    view = getView(req);
   }
 
   /** {@inheritDoc} */
@@ -66,6 +68,12 @@ public class HttpProcessingOptions extends ProcessingOptions {
     return debug;
   }
 
+  /** {@inheritDoc} */
+  @Override
+  public String getView() {
+    return view;
+  }
+
   /**
    * @param req
    * @return Whether or not to ignore the cache.
@@ -75,7 +83,11 @@ public class HttpProcessingOptions extends ProcessingOptions {
     if (noCacheParam == null) {
       noCacheParam = req.getParameter("bpc");
     }
-    return "1".equals(noCacheParam);
+    // interpret empty value string as true
+    if (noCacheParam == null || noCacheParam.equals("0")) {
+      return false;
+    }
+    return true;
   }
 
   /**
@@ -99,6 +111,18 @@ public class HttpProcessingOptions extends ProcessingOptions {
    * @return True if the debug parameter is set.
    */
   protected static boolean getDebug(HttpServletRequest req) {
-    return "1".equals(req.getParameter("debug"));
+    String value = req.getParameter("debug");
+    if (value == null || value.equals("0")) {
+      return false;
+    }
+    return true;
+  }
+
+  /**
+   * @param req
+   * @return Name of view to use
+   */
+  protected static String getView(HttpServletRequest req) {
+    return req.getParameter("view");
   }
 }

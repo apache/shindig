@@ -46,4 +46,10 @@ public class JsonRpcProcessingOptions extends ProcessingOptions {
   public JsonRpcProcessingOptions(JsonRpcContext context) {
     this.context = context;
   }
+
+  /** {@inheritDoc} */
+  @Override
+  public String getView() {
+    return context.getView();
+  }
 }

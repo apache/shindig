@@ -78,7 +78,8 @@ public class JsonRpcRequest {
                   .put("moduleId", outGadget.getId().getModuleId())
                   .put("title", outGadget.getTitle())
                   .put("contentType",
-                      outGadget.getContentType().toString().toLowerCase());
+                      outGadget.getView(options.getView()).getType()
+                      .toString().toLowerCase());
 
         // Features.
         Set<String> feats = outGadget.getRequires().keySet();

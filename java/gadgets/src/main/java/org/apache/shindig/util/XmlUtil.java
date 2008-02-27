@@ -21,6 +21,9 @@ package org.apache.shindig.util;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 
+import java.net.URI;
+import java.net.URISyntaxException;
+
 public class XmlUtil {
 
   /**
@@ -47,5 +50,34 @@ public class XmlUtil {
    */
   public static String getAttribute(Node node, String attr) {
     return getAttribute(node, attr, null);
+  }
+
+  /**
+   * Retrieves an attribute as a URI.
+   * @param node
+   * @param attr
+   * @return The parsed uri, or def if the attribute doesn't exist or can not
+   *     be parsed as a URI.
+   */
+  public static URI getUriAttribute(Node node, String attr, URI def) {
+    String uri = getAttribute(node, attr);
+    if (uri != null) {
+      try {
+        return new URI(uri);
+      } catch (URISyntaxException e) {
+        return def;
+      }
+    }
+    return def;
+  }
+
+  /**
+   * Retrieves an attribute as a URI.
+   * @param node
+   * @param attr
+   * @return The parsed uri, or null.
+   */
+  public static URI getUriAttribute(Node node, String attr) {
+    return getUriAttribute(node, attr, null);
   }
 }

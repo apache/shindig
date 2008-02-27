@@ -30,6 +30,7 @@ import org.apache.shindig.gadgets.RenderingContext;
 import org.apache.shindig.gadgets.SyndicatorConfig;
 import org.apache.shindig.gadgets.UserPrefs;
 import org.apache.shindig.gadgets.GadgetFeatureRegistry.Entry;
+import org.apache.shindig.gadgets.GadgetSpec.View;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -75,7 +76,6 @@ public class GadgetRenderingServlet extends HttpServlet {
   @Override
   protected void doGet(HttpServletRequest req, HttpServletResponse resp)
       throws IOException {
-
     String urlParam = req.getParameter("url");
     if (urlParam == null) {
       resp.sendError(HttpServletResponse.SC_BAD_REQUEST,
@@ -131,7 +131,7 @@ public class GadgetRenderingServlet extends HttpServlet {
       gadget = servletState.getGadgetServer().processGadget(gadgetId,
           getPrefsFromRequest(req), context.getLocale(),
           RenderingContext.GADGET, options);
-      outputGadget(gadget, view, options, contentFilters, resp);
+      outputGadget(gadget, options, contentFilters, resp);
     } catch (GadgetServer.GadgetProcessException e) {
       outputErrors(e, resp);
     }
@@ -141,7 +141,6 @@ public class GadgetRenderingServlet extends HttpServlet {
    * Renders a successfully processed gadget.
    *
    * @param gadget
-   * @param view
    * @param options
    * @param contentFilters
    * @param resp
@@ -149,18 +148,30 @@ public class GadgetRenderingServlet extends HttpServlet {
    * @throws GadgetServer.GadgetProcessException
    */
   private void outputGadget(Gadget gadget,
-                            String view,
                             ProcessingOptions options,
                             List<GadgetContentFilter> contentFilters,
                             HttpServletResponse resp)
       throws IOException, GadgetServer.GadgetProcessException {
-    switch(gadget.getContentType()) {
-    case HTML:
-      outputHtmlGadget(gadget, view, options, contentFilters, resp);
-      break;
-    case URL:
-      outputUrlGadget(gadget, options, resp);
-      break;
+    View view = gadget.getView(options.getView());
+    if (view == null) {
+      String viewName = options.getView();
+      if (viewName != null) {
+        throw new GadgetServer.GadgetProcessException(
+            GadgetException.Code.INVALID_PARAMETER,
+            "Requested view '" + viewName + "' does not exist in this gadget.");
+      } else {
+        throw new GadgetServer.GadgetProcessException(
+            GadgetException.Code.MISSING_PARAMETER,
+            "View must be specified as Gadget does not have default view.");
+      }
+    }
+    switch(view.getType()) {
+      case HTML:
+        outputHtmlGadget(gadget, options, contentFilters, resp);
+        break;
+      case URL:
+        outputUrlGadget(gadget, options, resp);
+        break;
     }
   }
 
@@ -176,26 +187,41 @@ public class GadgetRenderingServlet extends HttpServlet {
    * @throws GadgetServer.GadgetProcessException
    */
   private void outputHtmlGadget(Gadget gadget,
-                                String view,
                                 ProcessingOptions options,
                                 List<GadgetContentFilter> contentFilters,
                                 HttpServletResponse resp)
       throws IOException, GadgetServer.GadgetProcessException {
     resp.setContentType("text/html; charset=UTF-8");
-
     StringBuilder markup = new StringBuilder();
-    markup.append("<html><head>");
+    View view = gadget.getView(options.getView());
+
+    // use single character for tab to simulate indentation within source code
+    String t = "  ";
+    String n = "\n";
+    if (!options.getDebug()) {
+      t = "";
+      n = "";
+    }
+
+    if (!view.getQuirks())
+      markup.append("<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01//EN\" \"http://www.w3.org/TR/html4/strict.dtd\">"+n);
+
     // TODO: This is so wrong.
-    markup.append("<style type=\"text/css\">" +
-                  "body,td,div,span,p{font-family:arial,sans-serif;}" +
-                  "a {color:#0000cc;}a:visited {color:#551a8b;}" +
-                  "a:active {color:#ff0000;}" +
-                  "body{margin: 0px;padding: 0px;background-color:white;}" +
-                  "</style>");
-    markup.append("</head><body>");
+    markup.append(
+        "<html>"+n+
+        t+"<head>"+n+
+        t+t+"<style type=\"text/css\">"+n+
+        t+t+t+"body,td,div,span,p{font-family:arial,sans-serif;}"+n+
+        t+t+t+"a {color:#0000cc;}a:visited {color:#551a8b;}"+n+
+        t+t+t+"a:active {color:#ff0000;}"+n+
+        t+t+t+"body{margin: 0px;padding: 0px;background-color:white;}"+n+
+        t+t+"</style>"+n+
+        t+"</head>"+n+
+        t+"<body>"+n);
     StringBuilder externJs = new StringBuilder();
     StringBuilder inlineJs = new StringBuilder();
-    String externFmt = "<script src=\"%s\"></script>\n";
+    String externFmt =
+        t+t+"<script src=\"%s\"></script>"+n;
     String forcedLibs = options.getForcedJsLibs();
 
     for (JsLibrary library : gadget.getJsLibraries()) {
@@ -237,13 +263,13 @@ public class GadgetRenderingServlet extends HttpServlet {
     }
 
     List<GadgetException> gadgetExceptions = new LinkedList<GadgetException>();
-    String content = gadget.getContentData(view);
+    String content = view.getData();
     if (content == null) {
       // unknown view
       gadgetExceptions.add(
           new GadgetException(
               GadgetException.Code.UNKNOWN_VIEW_SPECIFIED,
-              "View: '" + view + "' invalid for gadget: " +
+              "View: '" + options.getView() + "' invalid for gadget: " +
               gadget.getId().getKey()));
     } else {
       for (GadgetContentFilter filter : contentFilters) {
@@ -260,18 +286,21 @@ public class GadgetRenderingServlet extends HttpServlet {
     }
 
     markup.append(content);
-    markup.append("<script>gadgets.util.runOnLoadHandlers();</script>");
-    markup.append("</body></html>");
+    markup.append(
+        t+t+"<script>gadgets.util.runOnLoadHandlers();</script>"+n);
+    markup.append(
+        t+"</body>"+n+
+        "</html>");
 
     resp.getWriter().print(markup.toString());
   }
 
-  private void outputUrlGadget(Gadget gadget,
-      ProcessingOptions options, HttpServletResponse resp) throws IOException {
+  private void outputUrlGadget(Gadget gadget,  ProcessingOptions options,
+      HttpServletResponse resp) throws IOException {
     // TODO: generalize this as injectedArgs on Gadget object
 
     // Preserve existing query string parameters.
-    URI redirURI = gadget.getContentHref();
+    URI redirURI = gadget.getView(options.getView()).getHref();
     String queryStr = redirURI.getQuery();
     StringBuilder query = new StringBuilder(queryStr == null ? "" : queryStr);
 

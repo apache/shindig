@@ -263,42 +263,28 @@ public class Gadget implements GadgetView {
   }
 
   /**
-   * @return Type of gadget to render
+   * @return debug string of internal state
    */
-  public ContentType getContentType() {
-    return baseSpec.getContentType();
+  @Override
+  public String toString() {
+    return baseSpec.toString();
   }
 
   /**
-   * @return URI of gadget to render of type == URL; null if malformed/missing
-   * @throws IllegalStateException if contentType is not URL.
+   * @param viewName of the view whose content to retrieve
+   * @return fully parsed View object
    */
-  public URI getContentHref() {
-    URI ret = null;
-    String uriStr = baseSpec.getContentHref().toString();
-    try {
-      ret = new URI(substitutions.substitute(uriStr));
-    } catch (URISyntaxException e) {
-      return null;
-    }
-    return ret;
+  public View getView(String viewName) {
+    return baseSpec.getView(viewName);
   }
 
   /**
-   * @return Gadget contents with all substitutions applied
-   * @throws IllegalStateException if contentType is not HTML.
-   */
-  public String getContentData() {
-    return getContentData(null);
-  }
-
-  /**
-   * @param view ID of the view whose content to retrieve
+   * @param viewName of the view whose content to retrieve
    * @return Gadget contents for the given view with all substitutions applied
    * @throws IllegalStateException if contentType is not HTML
    */
-  public String getContentData(String view) {
-    return substitutions.substitute(baseSpec.getContentData(view));
+  public String getContentData(String viewName) {
+    return substitutions.substitute(getView(viewName).getData());
   }
 
   private MessageBundle currentMessageBundle = MessageBundle.EMPTY;
