@@ -18,9 +18,9 @@
 package org.apache.shindig.gadgets;
 
 import org.apache.shindig.util.Check;
+import org.apache.shindig.util.XmlUtil;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
-import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
@@ -121,24 +121,21 @@ public class GadgetSpecParser {
                                   Node prefs,
                                   ParsedGadgetSpec spec)
       throws SpecParserException {
-    NamedNodeMap attrs = prefs.getAttributes();
-
-    Node title = attrs.getNamedItem("title");
+    String title = XmlUtil.getAttribute(prefs, "title");
     if (null == title) {
       throw new SpecParserException("Missing \"title\" attribute.");
     }
-    spec.title = title.getNodeValue();
-
-    spec.titleUrl = getUriAttributeOrNull(attrs, "title_url");
-    spec.description = getAttributeOrNull(attrs, "description");
-    spec.directoryTitle = getAttributeOrNull(attrs, "directory_title");
-    spec.author = getAttributeOrNull(attrs, "author");
-    spec.authorEmail = getAttributeOrNull(attrs, "author_email");
-    spec.thumbnail = getUriAttributeOrNull(attrs, "thumbnail");
-    spec.screenshot = getUriAttributeOrNull(attrs, "screenshot");
+    spec.title = title;
+    spec.titleUrl = XmlUtil.getUriAttribute(prefs, "title_url");
+    spec.description = XmlUtil.getAttribute(prefs, "description");
+    spec.directoryTitle = XmlUtil.getAttribute(prefs, "directory_title");
+    spec.author = XmlUtil.getAttribute(prefs, "author");
+    spec.authorEmail = XmlUtil.getAttribute(prefs, "author_email");
+    spec.thumbnail = XmlUtil.getUriAttribute(prefs, "thumbnail");
+    spec.screenshot = XmlUtil.getUriAttribute(prefs, "screenshot");
 
     for (String attrName : CATEGORY_ATTRS) {
-      String attr = getAttributeOrNull(attrs, attrName);
+      String attr = XmlUtil.getAttribute(prefs, attrName);
       if (attr != null) {
         spec.categories.add(attr);
       }
@@ -147,36 +144,12 @@ public class GadgetSpecParser {
     NodeList children = prefs.getChildNodes();
     for (int i = 0, j = children.getLength(); i < j; ++i) {
       Node child = children.item(i);
-      if (child.getNodeName().equals("Locale")) {
+      if ("Locale".equals(child.getNodeName())) {
         spec.localeSpecs.add(processLocale(children.item(i), id.getURI()));
       }
     }
 
     // TODO: Icon parsing
-  }
-
-  private String getAttributeOrNull(NamedNodeMap attrs, String attrName) {
-    Node attr = attrs.getNamedItem(attrName);
-    if (null != attr) {
-      return attr.getNodeValue();
-    }
-    return null;
-  }
-
-  private URI getUriAttributeOrNull(NamedNodeMap attrs, String attrName)
-      throws SpecParserException {
-    Node attr = attrs.getNamedItem(attrName);
-    if (null != attr) {
-      try {
-        return new URI(attr.getNodeValue());
-      } catch (URISyntaxException e) {
-        // TODO: This is really not a great way to ensure valid URL's. All
-        // kinds of invalid URL's are parsed as valid URI's.
-        throw new SpecParserException(
-            "Malformed \"" + attrName + "\": " + attr.getNodeValue());
-      }
-    }
-    return null;
   }
 
   /**
@@ -188,35 +161,15 @@ public class GadgetSpecParser {
    * @throws SpecParserException If a malformed message bundle URI is found
    */
   private ParsedGadgetSpec.ParsedMessageBundle processLocale(
-      Node locale,
-      URI baseUrl) throws SpecParserException {
-    NamedNodeMap attrs = locale.getAttributes();
-    Node messagesAttr = attrs.getNamedItem("messages");
-    Node languageAttr = attrs.getNamedItem("lang");
-    Node countryAttr = attrs.getNamedItem("country");
-    Node rtlAttr = attrs.getNamedItem("language_direction");
+      Node locale, URI baseUrl) throws SpecParserException {
+    String messages = XmlUtil.getAttribute(locale, "messages");
+    String country = XmlUtil.getAttribute(locale, "country", "all");
+    String language = XmlUtil.getAttribute(locale, "lang", "all");
 
-    String messages = null;
-    if (null != messagesAttr) {
-      messages = messagesAttr.getNodeValue();
-    }
-
-    String country;
-    if (null == countryAttr) {
-      country = "all";
-    } else {
-      country = countryAttr.getNodeValue();
-    }
-
-    String language;
-    if (null == languageAttr) {
-      language = "all";
-    } else {
-      language = languageAttr.getNodeValue();
-    }
-
+    String direction
+        = XmlUtil.getAttribute(locale, "language_direction", "ltr");
     boolean rightToLeft = false;
-    if (rtlAttr != null && "rtl".equals(rtlAttr.getTextContent())) {
+    if ("rtl".equals(direction)) {
       rightToLeft = true;
     }
 
@@ -246,48 +199,28 @@ public class GadgetSpecParser {
   private ParsedGadgetSpec.ParsedUserPref processUserPref(Node pref)
       throws SpecParserException {
     ParsedGadgetSpec.ParsedUserPref up = new ParsedGadgetSpec.ParsedUserPref();
-    NamedNodeMap attrs = pref.getAttributes();
-    Node name = attrs.getNamedItem("name");
-    if (null == name) {
+
+    String name = XmlUtil.getAttribute(pref, "name");
+    if (name == null) {
       throw new SpecParserException("All UserPrefs must have name attributes.");
     }
-    up.name = name.getNodeValue();
+    up.name = name;
 
-    Node displayName = attrs.getNamedItem("display_name");
-    if (null != displayName) {
-      up.displayName = displayName.getNodeValue();
-    }
-
-    Node dataType = attrs.getNamedItem("datatype");
-    if (null == dataType) {
-      up.dataType = GadgetSpec.UserPref.DataType.STRING;
-    } else {
-      up.dataType =
-          ParsedGadgetSpec.ParsedUserPref.parse(dataType.getNodeValue());
-    }
-
-    Node defaultValue = attrs.getNamedItem("default_value");
-    if (null != defaultValue) {
-      up.defaultValue = defaultValue.getNodeValue();
-    }
+    up.displayName = XmlUtil.getAttribute(pref, "display_name");
+    up.dataType = ParsedGadgetSpec.ParsedUserPref.parse(
+        XmlUtil.getAttribute(pref, "datatype"));
+    up.defaultValue = XmlUtil.getAttribute(pref, "default_value");
 
     // Check for enum types.
     up.enumValues = new HashMap<String, String>();
     NodeList children = pref.getChildNodes();
     for (int i = 0, j = children.getLength(); i < j; ++i) {
       Node child = children.item(i);
-      if (child.getNodeName().equals("EnumValue")) {
-        NamedNodeMap childAttrs = child.getAttributes();
-
-        // Must have both name and value.
-        Node value = childAttrs.getNamedItem("value");
-        Node displayValue = childAttrs.getNamedItem("display_value");
+      if ("EnumValue".equals(child.getNodeName())) {
+        String value = XmlUtil.getAttribute(child, "value");
         if (value != null) {
-          String valueText = value.getTextContent();
-          String displayText = displayValue == null
-              ? valueText
-              : displayValue.getTextContent();
-          up.enumValues.put(valueText, displayText);
+          up.enumValues.put(value,
+              XmlUtil.getAttribute(child, "display_value", value));
         }
       }
     }
@@ -302,36 +235,13 @@ public class GadgetSpecParser {
    */
   private void processContent(ParsedGadgetSpec spec, Node content)
       throws SpecParserException {
-    NamedNodeMap attrs = content.getAttributes();
-    Node type = attrs.getNamedItem("type");
-    if (null == type) {
-      throw new SpecParserException("No content type specified!");
-    } else if ("url".equals(type.getNodeValue())) {
-      spec.contentType = GadgetSpec.ContentType.URL;
-      Node href = attrs.getNamedItem("href");
-      if (href != null) {
-        try {
-          spec.contentHref = new URI(href.getNodeValue());
-        } catch (URISyntaxException e) {
-          throw new SpecParserException("Malformed <Content> href value");
-        }
-      }
-    } else {
-      spec.contentType = GadgetSpec.ContentType.HTML;
-      Node viewNode = attrs.getNamedItem("view");
-      String viewStr = (viewNode == null) ? "" : viewNode.getNodeValue();
-      String[] views = viewStr.split(",");
-      Node child = content.getFirstChild();
-      String contentData = content.getTextContent();
-      if (contentData.length() > 0) {
-        for (String view : views) {
-          spec.addContent(view, contentData);
-        }
-      } else {
-        throw new SpecParserException("Empty or malformed <Content> section!");
-      }
+    String[] viewNames
+        = XmlUtil.getAttribute(content, "view", "default").split(",");
+    for (String viewName : viewNames) {
+      spec.addContent(viewName.trim(), content);
     }
   }
+
 
   /**
    * Processes &ltlOptional&gt; and &lt;Require&gt; tags.
@@ -345,9 +255,8 @@ public class GadgetSpecParser {
                               Node feature,
                               boolean required)
       throws SpecParserException {
-    NamedNodeMap attrs = feature.getAttributes();
-    Node name = attrs.getNamedItem("feature");
-    if (name == null || name.getNodeValue().length() == 0) {
+    String name = XmlUtil.getAttribute(feature, "feature");
+    if (name == null) {
       throw new SpecParserException(
           "Feature not specified in <" +
           (required ? "Required" : "Optional") +
@@ -358,10 +267,9 @@ public class GadgetSpecParser {
       for (int i = 0, j = children.getLength(); i < j; ++i) {
         Node child = children.item(i);
         if ("Param".equals(child.getNodeName())) {
-          NamedNodeMap paramAttrs = child.getAttributes();
-          Node paramName = paramAttrs.getNamedItem("name");
-          if (paramName != null) {
-            params.put(paramName.getNodeValue(), child.getTextContent());
+          String param = XmlUtil.getAttribute(child, "name");
+          if (param != null) {
+            params.put(param, child.getTextContent());
           } else {
             throw new SpecParserException("Missing name attribute in <Param>.");
           }
@@ -369,7 +277,7 @@ public class GadgetSpecParser {
       }
       ParsedGadgetSpec.ParsedFeatureSpec featureSpec =
         new ParsedGadgetSpec.ParsedFeatureSpec();
-      featureSpec.name = name.getNodeValue();
+      featureSpec.name = name;
       featureSpec.optional = !required;
       featureSpec.params = params;
       spec.requires.put(featureSpec.name, featureSpec);
@@ -384,10 +292,8 @@ public class GadgetSpecParser {
     private String authorEmail;
     private String description;
     private String directoryTitle;
-    private ContentType contentType;
-    private URI contentHref;
-    private Map<String, StringBuilder> contentData
-        = new HashMap<String, StringBuilder>();
+    private Map<String, ParsedView> views
+        = new HashMap<String, ParsedView>();
     private List<Icon> icons = new ArrayList<Icon>();
     private List<LocaleSpec> localeSpecs = new ArrayList<LocaleSpec>();
     private List<String> preloads = new ArrayList<String>();
@@ -407,9 +313,7 @@ public class GadgetSpecParser {
       spec.authorEmail = authorEmail;
       spec.description = description;
       spec.directoryTitle = directoryTitle;
-      spec.contentType = contentType;
-      spec.contentHref = contentHref;
-      spec.contentData = new HashMap<String, StringBuilder>(contentData);
+      spec.views = new HashMap<String, ParsedView>(views);
       spec.icons = new ArrayList<Icon>(icons);
       spec.localeSpecs = new ArrayList<LocaleSpec>(localeSpecs);
       spec.preloads = new ArrayList<String>(preloads);
@@ -571,56 +475,135 @@ public class GadgetSpecParser {
       return userPrefs;
     }
 
+
+    private static class ParsedView implements View {
+      private static final String QUIRKS_ATTR_NAME = "quirks";
+      private static final String TYPE_ATTR_NAME = "type";
+      private static final String HREF_ATTR_NAME = "href";
+      private URI href = null;
+      private ContentType type = null;
+      private boolean quirks = true;
+      private final StringBuilder builder = new StringBuilder();
+
+      /**
+       * Appends to an existing view.
+       * @param node
+       * @throws SpecParserException
+       */
+      public void append(Node node)
+          throws SpecParserException {
+        String newType = XmlUtil.getAttribute(node, TYPE_ATTR_NAME);
+        if (newType != null) {
+          ContentType contentType = ContentType.parse(newType);
+          if (type != null && !type.equals(contentType)) {
+            throw new SpecParserException(
+                GadgetException.Code.INVALID_PARAMETER,
+                "Can't mix content types for the same view.");
+          }
+          type = contentType;
+        }
+        String quirkAttr = XmlUtil.getAttribute(node, QUIRKS_ATTR_NAME);
+        if (quirkAttr != null) {
+          if ("false".equals(quirkAttr)) {
+            quirks = false;
+          } else {
+            quirks = true;
+          }
+        }
+        href = XmlUtil.getUriAttribute(node, HREF_ATTR_NAME, href);
+        if (ContentType.URL.equals(type) && href == null) {
+          throw new SpecParserException(GadgetException.Code.INVALID_PARAMETER,
+              "href attribute is required for type=url gadgets. " +
+              "It is either missing or malformed");
+        } else if (ContentType.HTML.equals(type) && href != null) {
+          throw new SpecParserException(GadgetException.Code.INVALID_PARAMETER,
+              "href attribute is not allowed for type=html gadgets.");
+        }
+        builder.append(node.getTextContent());
+      }
+
+      public ContentType getType() {
+        return type;
+      }
+
+      /**
+       * Must be a URI type gadget.
+       *
+       * @return The URI for this gadget spec.
+       * @throws IllegalStateException if contentType is not URI.
+       */
+      public URI getHref() {
+        Check.eq(type, ContentType.URL,
+            "Attempted to get href of a non-url type gadget!");
+        return href;
+      }
+
+      /**
+       * @return The HTML content for the default view of this gadget spec.
+       * @throws IllegalStateException if contentType is not HTML.
+       */
+      public String getData() {
+        return builder.toString();
+      }
+
+      public boolean getQuirks() {
+        return quirks;
+      }
+
+      @Override
+      public String toString() {
+        return String.format(
+            "<Content quirks=\"%s\" href=\"%s\"><![CDATA[%s]]></Content>",
+            quirks ? "true" : "false",
+            href == null ? "" : href.toString(),
+            builder.toString());
+      }
+    }
+
+    @Override
+    public String toString() {
+      StringBuilder buf = new StringBuilder();
+      buf.append("\nGadget Spec Debug String: ")
+         .append(views.size())
+         .append(" views");
+      for (Map.Entry<String, ParsedView> entry : views.entrySet()) {
+        buf.append("\nView = ")
+           .append(entry.getKey())
+           .append("\n")
+           .append(entry.getValue().toString());
+      }
+      return buf.toString();
+    }
+
+    public View getView(String viewName) {
+      if (viewName == null || viewName.length() == 0) {
+        viewName = DEFAULT_VIEW;
+      }
+      return views.get(viewName);
+    }
+
     public List<String> getCategories() {
       return categories;
     }
 
-    public ContentType getContentType() {
-      return contentType;
-    }
-
-    public URI getContentHref() {
-      Check.is(contentType == ContentType.URL,
-               "getContentHref() requires contentType URL");
-      return contentHref;
-    }
-
-    public String getContentData() {
-      return getContentData(DEFAULT_VIEW);
-    }
-
-    public String getContentData(String view) {
-      Check.is(contentType == ContentType.HTML,
-               "getContentData() requires contentType HTML");
+    /**
+     * Adds content to a view. Creates the view if it doesn't exist, and
+     * appends if it does.
+     *
+     * @param view
+     * @param node
+     * @throws SpecParserException
+     */
+    void addContent(String view, Node node)
+        throws SpecParserException {
       if (view == null || view.length() == 0) {
         view = DEFAULT_VIEW;
       }
 
-      StringBuilder content = contentData.get(view);
-      if (content == null) {
-        content = contentData.get(DEFAULT_VIEW);
+      if (!views.containsKey(view)) {
+        views.put(view, new ParsedView());
       }
-
-      if (content == null) {
-        return "";
-      }
-
-      return content.toString();
-    }
-
-    // TODO: Synchronizing this seems unnecessary...a parse job should never
-    // happen across threads, and addContent *can't* be called anywhere but
-    // within a call to GadgetSpecParser.parse()
-    public synchronized void addContent(String view, String content) {
-      if (view == null || view.length() == 0) {
-        view = DEFAULT_VIEW;
-      }
-
-      if (!contentData.containsKey(view)) {
-        contentData.put(view, new StringBuilder());
-      }
-
-      contentData.get(view).append(content);
+      views.get(view).append(node);
     }
   }
 }

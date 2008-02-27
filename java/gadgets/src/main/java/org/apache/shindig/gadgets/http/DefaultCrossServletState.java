@@ -87,10 +87,10 @@ public class DefaultCrossServletState extends CrossServletState {
     // We don't have any meaningful data in the current request anyway, so
     // we'll just do this statically.
     StringBuilder buf = new StringBuilder();
-
     try {
       String url = gadget.getId().getURI().toString();
-      if (gadget.getContentType().equals(GadgetSpec.ContentType.HTML)) {
+      GadgetSpec.View view = gadget.getView(opts.getView());
+      if (view.getType().equals(GadgetSpec.ContentType.HTML)) {
         buf.append(iframePath)
            .append("url=")
            .append(URLEncoder.encode(url, "UTF-8"))

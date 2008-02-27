@@ -45,6 +45,11 @@ public class GadgetException extends Exception {
     // Feature-related errors
     UNSUPPORTED_FEATURE,
 
+    // General error, should be accompanied by message
+    INVALID_PARAMETER,
+    MISSING_PARAMETER,
+    UNRECOGNIZED_PARAMETER,
+
     // Interface component errors.
     MISSING_FEATURE_REGISTRY,
     MISSING_MESSAGE_BUNDLE_CACHE,

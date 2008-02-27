@@ -31,4 +31,8 @@ public class SpecParserException extends GadgetException {
   public SpecParserException(GadgetException.Code code) {
     super(code);
   }
+
+  public SpecParserException(GadgetException.Code code, String message) {
+    super(code, message);
+  }
 }

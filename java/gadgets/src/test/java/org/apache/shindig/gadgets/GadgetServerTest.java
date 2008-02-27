@@ -112,7 +112,7 @@ public class GadgetServerTest extends EasyMockTestCase {
     Gadget gadget = gadgetServer.processGadget(DATETIME_ID, UserPrefs.EMPTY, EN_US_LOCALE,
                                                RenderingContext.GADGET, options);
     assertEquals("Hello, World!", gadget.getTitle());
-    assertEquals("Goodbye, World!", gadget.getContentData());
+    assertEquals("Goodbye, World!", gadget.getView(null).getData());
     verify();
   }
 

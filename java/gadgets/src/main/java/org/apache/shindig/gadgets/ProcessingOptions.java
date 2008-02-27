@@ -59,4 +59,11 @@ public class ProcessingOptions {
   public boolean getDebug() {
     return true;
   }
+
+  /**
+   * @return Name of view to show
+   */
+  public String getView() {
+    return null;
+  }
 }
