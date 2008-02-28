@@ -288,14 +288,14 @@ gadgets.rpc = function() {
     /**
      * Sets the relay URL of a target frame.
      * @param {String} targetId Name of the target frame.
-     * @param {String} relayUrl Full relay URL of the target frame.
+     * @param {String} url Full relay URL of the target frame.
      * @param {Boolean} opt_useLegacy True if this relay needs the legacy IFPC
      *     wire format.
      *
      * @member gadgets.rpc
      */
-    setRelayUrl: function(targetId, relayUrl, opt_useLegacy) {
-      relayUrl[targetId] = relayUrl;
+    setRelayUrl: function(targetId, url, opt_useLegacy) {
+      relayUrl[targetId] = url;
       useLegacyProtocol[targetId] = !!opt_useLegacy;
     },
 
