@@ -207,6 +207,7 @@ public class GadgetRenderingServlet extends HttpServlet {
       markup.append("<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01//EN\" \"http://www.w3.org/TR/html4/strict.dtd\">");
     }
 
+    markup.append("<html><head>");
     // TODO: This is so wrong.
     markup.append("<style type=\"text/css\">")
           .append("body,td,div,span,p{font-family:arial,sans-serif;}")
@@ -214,6 +215,7 @@ public class GadgetRenderingServlet extends HttpServlet {
           .append("a:active {color:#ff0000;}")
           .append("body{margin: 0px;padding: 0px;background-color:white;}")
           .append("</style>");
+    markup.append("</head><body>");
     StringBuilder externJs = new StringBuilder();
     StringBuilder inlineJs = new StringBuilder();
     String externFmt = "<script src=\"%s\"></script>";
