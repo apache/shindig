@@ -76,7 +76,9 @@ gadgets.io = function() {
     //    to begin with, and we can solve this problem by using post requests
     //    and / or passing the url in the http headers.
     txt = txt.substr(UNPARSEABLE_CRUFT.length);
-    var data = gadgets.json.parse(txt);
+    // We are using eval directly here because the outer response comes from a
+    // trusted source, and json parsing is slow in IE.
+    var data = eval("(" + txt + ")");
     data = data[url];
     var resp = {
      text: data.body,
