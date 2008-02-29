@@ -452,7 +452,7 @@ gadgets.IfrGadget.prototype.cssClassGadgetUserPrefsDialogActionBar =
     'gadgets-gadget-user-prefs-dialog-action-bar';
 gadgets.IfrGadget.prototype.cssClassTitleButton = 'gadgets-gadget-title-button';
 gadgets.IfrGadget.prototype.cssClassGadgetContent = 'gadgets-gadget-content';
-gadgets.IfrGadget.prototype.rpcToken = (0xFFFFFFFF * Math.random()) | 0;
+gadgets.IfrGadget.prototype.rpcToken = (0x7FFFFFFF * Math.random()) | 0;
 gadgets.IfrGadget.prototype.rpcRelay = 'files/rpc_relay.html';
 
 gadgets.IfrGadget.prototype.getTitleBarContent = function(continuation) {
