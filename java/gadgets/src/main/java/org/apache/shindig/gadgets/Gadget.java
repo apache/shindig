@@ -275,7 +275,11 @@ public class Gadget implements GadgetView {
    * @return fully parsed View object
    */
   public View getView(String viewName) {
-    return baseSpec.getView(viewName);
+    View view = baseSpec.getView(viewName);
+    if (view == null) {
+      view = baseSpec.getView(GadgetSpec.DEFAULT_VIEW);
+    }
+    return view;
   }
 
   /**
