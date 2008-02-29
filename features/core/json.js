@@ -122,7 +122,7 @@ gadgets.json = function () {
         // placeholder for non-JSON values.
         l = value.length;
         for (i = 0; i < l; i += 1) {
-          a.push(stringify(value[i], whitelist) || 'null');
+          a.push(stringify(value[i]) || 'null');
         }
         // Join all of the elements together and wrap them in brackets.
         return '[' + a.join(',') + ']';
