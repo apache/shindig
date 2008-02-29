@@ -136,11 +136,10 @@ gadgets.json = function () {
           }
         }
       }
+      // Join all of the member texts together and wrap them in braces.
+      return '{' + a.join(',') + '}';
     }
-    // Join all of the member texts together and wrap them in braces.
-    return '{' + a.join(',') + '}';
   }
-
 
   return {
     stringify: stringify,
