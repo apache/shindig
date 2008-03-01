@@ -79,4 +79,15 @@
     // requests.
     "useLegacyProtocol" : false,
   },
+  // Skin defaults
+  "skins" : {
+    "properties" : {
+         "BG_COLOR": "",
+         "BG_IMAGE": "",
+         "BG_POSITION": "",
+         "BG_REPEAT": "",
+         "FONT_COLOR": "",
+         "ANCHOR_COLOR": "",
+    }
+  },
 }}

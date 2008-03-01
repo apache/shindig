@@ -28,20 +28,48 @@ var gadgets = gadgets || {};
  *     currently shown skin.
  * @name gadgets.skins
  */
-gadgets.skins = gadgets.skins || {};
+gadgets.skins = function() {
+  var skinProperties = {};
 
-/**
- * Fetches the display property mapped to the given key.
- *
- * @param {String} propertyKey The key to get data for;
- *    keys are defined in <a href="gadgets.skins.Property.html"><code>
- *    gadgets.skins.Property</code></a>
- * @return {String} The data
- *
- * @member gadgets.skins
- */
-gadgets.skins.getProperty = function(propertyKey) {};
+  var requiredConfig = {
+    "properties": gadgets.config.ExistsValidator
+  };
 
+  gadgets.config.register("skins", requiredConfig, function(config) {
+        skinProperties = config["skins"].properties;
+      });
+
+
+  return {
+    /**
+     * Override the default properties with a new set of properties.
+     *
+     * @param {Object} properties The mapping of property names to values
+     */
+    init : function(properties) {
+      skinProperties = properties;
+    },
+
+    /**
+     * Fetches the display property mapped to the given key.
+     *
+     * @param {String} propertyKey The key to get data for;
+     *    keys are defined in <a href="gadgets.skins.Property.html"><code>
+     *    gadgets.skins.Property</code></a>
+     * @return {String} The data
+     *
+     * @member gadgets.skins
+     */
+    getProperty : function(propertyKey) {
+
+      var property = skinProperties[propertyKey];
+      if (property) {                                        
+        return property;
+      }
+      return "";
+    }
+  }
+}();
 /**
  * @static
  * @class
@@ -71,8 +99,21 @@ gadgets.skins.Property = {
   FONT_COLOR : 'FONT_COLOR',
 
   /**
+   * The positioning of the background image
+   * @member gadgets.skins.Property
+   */
+  BG_POSITION : 'BG_POSITION',
+
+  /**
+   * The repeat characteristics for the background image
+   * @member gadgets.skins.Property
+   */
+  BG_REPEAT : 'BG_REPEAT',
+
+  /**
    * The color that anchor tags should use.
    * @member gadgets.skins.Property
    */
   ANCHOR_COLOR : 'ANCHOR_COLOR'
+
 };
