@@ -39,7 +39,7 @@ gadgets.rpc = function() {
 
   var params = gadgets.util.getUrlParameters();
   var parentUrl = params.parent || '';
-  authToken['..'] = params.rpctoken || params.ifpctok || params.st;
+  authToken['..'] = params.rpctoken || params.ifpctok || 0;
 
   // Pick the most efficient RPC relay mechanism
   var relayChannel = typeof document.postMessage === 'function' ? 'dpm' :

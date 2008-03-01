@@ -194,7 +194,7 @@ gadgets.config = function() {
     },
 
     /**
-     * Similar to the ECMAScript4 virtual typing system, ensures that
+     * Similar to the ECMAScript 4 virtual typing system, ensures that
      * whatever object was passed in is "like" the existing object.
      * Doesn't actually do type validation though, but instead relies
      * on other validators.
@@ -212,7 +212,7 @@ gadgets.config = function() {
      */
     LikeValidator : function(test) {
       return function(data) {
-        for (var member in test) {
+        for (var member in test) if (test.hasOwnProperty(member)) {
           var t = test[member];
           if (!t(data[member])) {
             return false;
