@@ -38,7 +38,6 @@ gadgets.rpc = function() {
   var callbacks = {};
 
   var params = gadgets.util.getUrlParameters();
-  var parentUrl = params.parent || '';
   authToken['..'] = params.rpctoken || params.ifpctok || 0;
 
   // Pick the most efficient RPC relay mechanism
@@ -158,7 +157,18 @@ gadgets.rpc = function() {
       if (config.rpc.parentRelayUrl.substring(0, 7) === 'http://') {
         relayUrl['..'] = config.rpc.parentRelayUrl;
       } else {
-        relayUrl['..'] = parentUrl + config.rpc.parentRelayUrl;
+        // It's a relative path, and we must append to the parent.
+        // We're relying on the server validating the parent parameter in this
+        // case. Because of this, parent may only be passed in the query, not
+        // the fragment.
+        var params = document.location.search.substring(0).split("&");
+        for (var i = 0, param; param = params[i]; ++i) {
+          // Only the first parent can be validated.
+          if (param.indexOf("parent=") === 0) {
+            relayUrl['..'] = param.substring(7) + config.rpc.parentRelayUrl;
+            break;
+          }
+        }
       }
       useLegacyProtocol['..'] = !!config.rpc.useLegacyProtocol;
     }
