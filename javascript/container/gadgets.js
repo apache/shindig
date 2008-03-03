@@ -274,7 +274,7 @@ gadgets.LayoutManager = function() {
 };
 
 /**
- * Gets the HTML element that is the chrome of a gadget into which the cotnent
+ * Gets the HTML element that is the chrome of a gadget into which the content
  * of the gadget can be rendered.
  * @param {Object} gadget Gadget instance
  * @return {Object} HTML element that is the chrome for the given gadget
@@ -346,7 +346,7 @@ gadgets.FloatLeftLayoutManager.prototype.getGadgetChrome =
 // Gadget
 
 /**
- * Creates a new instance of gadget.  Optoinal parameters are set as instance
+ * Creates a new instance of gadget.  Optional parameters are set as instance
  * variables.
  * @constructor
  * @param {Object} params Parameters to set on gadget.  Common parameters:
