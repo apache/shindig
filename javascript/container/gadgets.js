@@ -354,12 +354,17 @@ gadgets.FloatLeftLayoutManager.prototype.getGadgetChrome =
  *    "private": Whether gadget spec is accessible only privately, which means
  *        browser can load it but not gadget server
  *    "spec": Gadget Specification in XML
+ *    "viewParams": a javascript object containing attribute value pairs
+ *        for this gadgets
+ *    "secureToken": an encoded token that is passed on the URL hash
+ *    "hashData": Query-string like data that will be added to the 
+ *        hash portion of the URL.
  */
 gadgets.Gadget = function(params) {
   this.userPrefs_ = {};
 
   if (params) {
-    for (var name in params) {
+    for (var name in params)  if (params.hasOwnProperty(name)) {
       this[name] = params[name];
     }
   }
@@ -499,9 +504,20 @@ gadgets.IfrGadget.prototype.getUserPrefsDialogId = function() {
 };
 
 gadgets.IfrGadget.prototype.getIframeUrl = function() {
-  return this.serverBase_ + 'ifr?url=' +
-      encodeURIComponent(this.specUrl) + '&synd=' + this.SYND + '&mid=' +
-      this.id + "&rpctoken=" + this.rpcToken + this.getUserPrefsParams();
+  return this.serverBase_ + 'ifr?' +
+      'url=' + encodeURIComponent(this.specUrl) + 
+      '&synd=' + this.SYND + 
+      '&mid=' +  this.id + 
+      '&nocache=' + gadgets.container.nocache_ +
+      '&country=' + gadgets.container.country_ +
+      '&lang=' + gadgets.container.language_ +
+      '&view=' + gadgets.container.view_ +
+       this.getUserPrefsParams() +
+      '#rpctoken=' + this.rpcToken + 
+      (this.secureToken ? '&st=' + (this.secureToken || "") : '') +
+      (this.viewParams ? 
+          '&view-params=' +  encodeURIComponent(JSON.stringify(this.viewParams)) : '') +
+      (this.hashData ? this.hashData : '');
 };
 
 gadgets.IfrGadget.prototype.getUserPrefsParams = function() {
@@ -602,6 +618,10 @@ gadgets.IfrGadget.prototype.refresh = function() {
 gadgets.Container = function() {
   this.gadgets_ = {};
   this.parentUrl_ = '';
+  this.country_ = 'ALL';
+  this.language_ = 'ALL';
+  this.view_ = 'default';
+  this.nocache_ = 1;
 };
 
 gadgets.Container.inherits(gadgets.Extensible);
@@ -626,6 +646,22 @@ gadgets.Container.prototype.layoutManager =
 
 gadgets.Container.prototype.setParentUrl = function(url) {
   this.parentUrl_ = url;
+};
+
+gadgets.Container.prototype.setCountry = function(country) {
+  this.country_ = country;
+};
+
+gadgets.Container.prototype.setNoCache = function(nocache) {
+  this.nocache_ = nocache;
+};
+
+gadgets.Container.prototype.setLanguage = function(language) {
+  this.language_ = language;
+};
+
+gadgets.Container.prototype.setView = function(view) {
+    this.view_ = view;
 };
 
 gadgets.Container.prototype.getGadgetKey_ = function(instanceId) {
