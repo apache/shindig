@@ -359,6 +359,9 @@ gadgets.FloatLeftLayoutManager.prototype.getGadgetChrome =
  *    "secureToken": an encoded token that is passed on the URL hash
  *    "hashData": Query-string like data that will be added to the 
  *        hash portion of the URL.
+ *    "title": the default title to use for the title bar.
+ *    "height": height of the gadget
+ *    "width": width of the gadget
  */
 gadgets.Gadget = function(params) {
   this.userPrefs_ = {};
@@ -493,7 +496,10 @@ gadgets.IfrGadget.prototype.getMainContent = function(continuation) {
   continuation('<div class="' + this.cssClassGadgetContent + '"><iframe id="' +
       iframeId + '" name="' + iframeId + '" class="' + this.cssClassGadget +
       '" src="' + this.getIframeUrl() +
-      '" frameborder="0" scrolling="no"></iframe></div>');
+      '" frameborder="no" scrolling="no"' + 
+      (this.height ? ' height="' + this.height + '"' : '') +
+      (this.width ? ' width="' + this.width + '"' : '') + 
+      '></iframe></div>');
 };
 
 gadgets.IfrGadget.prototype.getIframeId = function() {
