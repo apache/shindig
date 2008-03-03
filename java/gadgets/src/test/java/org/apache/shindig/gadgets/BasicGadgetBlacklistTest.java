@@ -39,6 +39,7 @@ public class BasicGadgetBlacklistTest extends TestCase {
 
   private GadgetBlacklist createBlacklist(String contents) throws IOException {
     File temp = File.createTempFile("blacklist_test", ".txt");
+    temp.deleteOnExit();
     BufferedWriter out = new BufferedWriter(new FileWriter(temp));
     out.write(contents);
     out.close();
