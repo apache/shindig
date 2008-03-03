@@ -253,7 +253,7 @@ public class SyndicatorConfig {
         path = path.substring(6);
         logger.info("Loading resources from: " + path);
         if (path.endsWith(".txt")) {
-          loadResources(ResourceLoader.getContent(path).split("\n"));
+          loadResources(ResourceLoader.getContent(path).split("[\r\n]+"));
         } else {
           loadResources(new String[]{path});
         }
