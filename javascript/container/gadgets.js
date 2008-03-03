@@ -524,7 +524,7 @@ gadgets.IfrGadget.prototype.getIframeUrl = function() {
       (this.secureToken ? '&st=' + (this.secureToken || "") : '') +
       (this.viewParams ? 
           '&view-params=' +  encodeURIComponent(JSON.stringify(this.viewParams)) : '') +
-      (this.hashData ? this.hashData : '');
+      (this.hashData ? '&' + this.hashData : '');
 };
 
 gadgets.IfrGadget.prototype.getUserPrefsParams = function() {
