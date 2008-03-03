@@ -138,16 +138,19 @@ public class Gadget implements GadgetView {
    * @return URI used as a target for Gadget's title link, or null if malformed
    */
   public URI getTitleURI() {
-    URI ret = null;
-    if (baseSpec.getTitleURI() != null) {
-      String uriStr = baseSpec.getTitleURI().toString();
+    return substitutedURI(baseSpec.getTitleURI());
+  }
+
+  private URI substitutedURI(URI uri) {
+    if (uri != null) {
+      String uriStr = uri.toString();
       try {
-        ret = new URI(substitutions.substitute(uriStr));
+        return new URI(substitutions.substitute(uriStr));
       } catch (URISyntaxException e) {
         return null;
       }
     }
-    return ret;
+    return null;
   }
 
   /**
@@ -180,11 +183,11 @@ public class Gadget implements GadgetView {
   }
 
   public URI getScreenshot() {
-    return baseSpec.getScreenshot();
+    return substitutedURI(baseSpec.getScreenshot());
   }
 
   public URI getThumbnail() {
-    return baseSpec.getThumbnail();
+    return substitutedURI(baseSpec.getThumbnail());
   }
 
   public List<String> getCategories() {
