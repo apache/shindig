@@ -61,12 +61,7 @@ gadgets.skins = function() {
      * @member gadgets.skins
      */
     getProperty : function(propertyKey) {
-
-      var property = skinProperties[propertyKey];
-      if (property) {                                        
-        return property;
-      }
-      return "";
+      return skinProperties[propertyKey] || "";
     }
   }
 }();
