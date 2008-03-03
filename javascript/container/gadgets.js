@@ -461,14 +461,15 @@ gadgets.IfrGadget.prototype.rpcToken = (0x7FFFFFFF * Math.random()) | 0;
 gadgets.IfrGadget.prototype.rpcRelay = 'files/rpc_relay.html';
 
 gadgets.IfrGadget.prototype.getTitleBarContent = function(continuation) {
-  continuation('<div class="' + this.cssClassTitleBar + '"><span id="' +
+  continuation('<div id="' + this.cssClassTitleBar + '-' + this.id + 
+      'class="' + this.cssClassTitleBar + '"><span id="' +
       this.getIframeId() + '_title" class="' +
-      this.cssClassTitle + '">Title</span> | <span class="' +
+      this.cssClassTitle + '">' + (this.title ? this.title : 'Title') + '</span> | <span class="' +
       this.cssClassTitleButtonBar +
       '"><a href="#" onclick="gadgets.container.getGadget(' + this.id +
-      ').handleOpenUserPrefsDialog()" class="' + this.cssClassTitleButton +
+      ').handleOpenUserPrefsDialog();return false;" class="' + this.cssClassTitleButton +
       '">settings</a> <a href="#" onclick="gadgets.container.getGadget(' +
-      this.id + ').handleToggle()" class="' + this.cssClassTitleButton +
+      this.id + ').handleToggle();return false;" class="' + this.cssClassTitleButton +
       '">toggle</a></span></div>');
 };
 
