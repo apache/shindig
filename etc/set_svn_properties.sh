@@ -43,7 +43,7 @@ find . -path '*/.svn' -prune -o  -name "*.css" -print0 | xargs -0  -r  svn props
 
 find . -path '*/.svn' -prune -o  -name "*.js" -print0 | xargs -0  -r  svn propset svn:eol-style native
 find . -path '*/.svn' -prune -o  -name "*.js" -print0 | xargs -0  -r  svn propset svn:mime-type text/javascript
-find . -path '*/.svn' -prune -o  -name "*.js" -print0 | xargs -0  -r  svn propset svn:keywords "Author Date Id Revision Rev"
+find . -path '*/.svn' -prune -o  -name "*.js" -print | grep -v jquery | xargs  -r  svn propset svn:keywords "Author Date Id Revision Rev"
 
 find . -path '*/.svn' -prune -o  -name "README*" -print0 | xargs -0  -r  svn propset svn:eol-style native
 find . -path '*/.svn' -prune -o  -name "README*" -print0 | xargs -0  -r  svn propset svn:mime-type text/plain
