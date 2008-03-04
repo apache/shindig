@@ -74,41 +74,40 @@ gadgets.skins = function() {
  * method.
  * @name gadgets.skins.Property
  */
-gadgets.skins.Property = {
+gadgets.skins.Property =  gadgets.util.makeEnum([
   /**
    * An image to use in the background of the gadget.
    * @member gadgets.skins.Property
    */
-  BG_IMAGE : 'BG_IMAGE',
+  'BG_IMAGE',
 
   /**
    * The color of the background of the gadget.
    * @member gadgets.skins.Property
    */
-  BG_COLOR : 'BG_COLOR',
+  'BG_COLOR',
 
   /**
    * The color that the main font should use.
    * @member gadgets.skins.Property
    */
-  FONT_COLOR : 'FONT_COLOR',
+  'FONT_COLOR',
 
   /**
    * The positioning of the background image
    * @member gadgets.skins.Property
    */
-  BG_POSITION : 'BG_POSITION',
+  'BG_POSITION',
 
   /**
    * The repeat characteristics for the background image
    * @member gadgets.skins.Property
    */
-  BG_REPEAT : 'BG_REPEAT',
+  'BG_REPEAT',
 
   /**
    * The color that anchor tags should use.
    * @member gadgets.skins.Property
    */
-  ANCHOR_COLOR : 'ANCHOR_COLOR'
-
-};
+  'ANCHOR_COLOR'
+]);
