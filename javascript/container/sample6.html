@@ -14,6 +14,8 @@ function init() {
   gadgets.container.layoutManager =
       new gadgets.FloatLeftLayoutManager('gadget-parent');
 
+  // An example of explicitly setting the parentUrl
+  gadgets.container.setParentUrl("http://" + document.location.host + '/');
   var gadget = gadgets.container.createGadget({specUrl: specUrl0, title: "Dynamic Height Demo", width: 500});
   gadgets.container.addGadget(gadget);
 };

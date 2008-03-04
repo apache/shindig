@@ -166,7 +166,7 @@ gadgets.rpc = function() {
         for (var i = 0, param; param = params[i]; ++i) {
           // Only the first parent can be validated.
           if (param.indexOf("parent=") === 0) {
-            parentParam = param.substring(7);
+            parentParam = decodeURIComponent(param.substring(7));
             break;
           }
         }
