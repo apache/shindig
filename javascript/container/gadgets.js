@@ -362,6 +362,8 @@ gadgets.FloatLeftLayoutManager.prototype.getGadgetChrome =
  *    "title": the default title to use for the title bar.
  *    "height": height of the gadget
  *    "width": width of the gadget
+ *    "debug": send debug=1 to the gadget server, gets us uncompressed
+ *        javascript
  */
 gadgets.Gadget = function(params) {
   this.userPrefs_ = {};
@@ -465,7 +467,7 @@ gadgets.IfrGadget.prototype.rpcRelay = 'files/rpc_relay.html';
 
 gadgets.IfrGadget.prototype.getTitleBarContent = function(continuation) {
   continuation('<div id="' + this.cssClassTitleBar + '-' + this.id + 
-      'class="' + this.cssClassTitleBar + '"><span id="' +
+      '" class="' + this.cssClassTitleBar + '"><span id="' +
       this.getIframeId() + '_title" class="' +
       this.cssClassTitle + '">' + (this.title ? this.title : 'Title') + '</span> | <span class="' +
       this.cssClassTitleButtonBar +
@@ -519,7 +521,8 @@ gadgets.IfrGadget.prototype.getIframeUrl = function() {
       '&country=' + gadgets.container.country_ +
       '&lang=' + gadgets.container.language_ +
       '&view=' + gadgets.container.view_ +
-       this.getUserPrefsParams() +
+      (this.debug ? '&debug=1' : '') +
+      this.getUserPrefsParams() +
       '#rpctoken=' + this.rpcToken + 
       (this.secureToken ? '&st=' + (this.secureToken || "") : '') +
       (this.viewParams ? 
