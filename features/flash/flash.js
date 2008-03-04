@@ -65,7 +65,6 @@ gadgets.flash.getMajorVersion = function() {
  * @param {String} swfUrl SWF URL.
  * @param {String | Object} swfContainer The id or object reference of an
  *     existing html container element.
- * @param {Number} swfVersion Minimal Flash Player version required.
  * @param {Object} opt_params An optional object that may contain any valid html
  *     parameter. All attributes will be passed through to the flash movie on
  *     creation.

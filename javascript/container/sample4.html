@@ -14,6 +14,7 @@ function init() {
   gadgets.container.layoutManager =
       new gadgets.FloatLeftLayoutManager('gadget-parent');
 
+  gadgets.container.setParentUrl("http://" + document.location.host + '/');
   gadgets.container.addGadget(
       gadgets.container.createGadget({specUrl: specUrl0}));
 };
