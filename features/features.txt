@@ -15,4 +15,5 @@ features/setprefs/feature.xml
 features/settitle/feature.xml
 features/skins/feature.xml
 features/tabs/feature.xml
+features/drag/feature.xml
 features/views/feature.xml

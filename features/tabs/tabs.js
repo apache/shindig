@@ -190,11 +190,6 @@ gadgets.TabSet = function(opt_moduleId, opt_defaultTab, opt_container) {
  * @return {String} DOM id of the tab container.
  */
 gadgets.TabSet.prototype.addTab = function(tabName, opt_params) {
-  // Legacy support
-  if (typeof opt_params === 'string') {
-    opt_params = {contentContainer: arguments[1], callback: arguments[2]};
-  }
-
   var params = opt_params || {};
 
   var tabIndex = -1;
@@ -639,3 +634,14 @@ _IG_Tabs.prototype.addDynamicTab = function(tabName, callback) {
   return this.addTab(tabName, {callback: callback});
 };
 
+(function(){
+  var addTab_ = _IG_Tabs.prototype.addTab;
+  _IG_Tabs.prototype.addTab = function(tabName) {
+    if (typeof arguments[1] === 'string') {
+      addTab_.call(this, tabName,
+                   {contentContainer: arguments[1], callback: arguments[2]});
+    } else {
+      addTab_.apply(this, arguments);
+    }
+  };
+})();
