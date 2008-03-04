@@ -162,13 +162,15 @@ gadgets.rpc = function() {
         // case. Because of this, parent may only be passed in the query, not
         // the fragment.
         var params = document.location.search.substring(0).split("&");
+        var parentParam = "";
         for (var i = 0, param; param = params[i]; ++i) {
           // Only the first parent can be validated.
           if (param.indexOf("parent=") === 0) {
-            relayUrl['..'] = param.substring(7) + config.rpc.parentRelayUrl;
+            parentParam = param.substring(7);
             break;
           }
         }
+        relayUrl['..'] = parentParam + config.rpc.parentRelayUrl;
       }
       useLegacyProtocol['..'] = !!config.rpc.useLegacyProtocol;
     }
