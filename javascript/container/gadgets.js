@@ -521,6 +521,7 @@ gadgets.IfrGadget.prototype.getIframeUrl = function() {
       '&country=' + gadgets.container.country_ +
       '&lang=' + gadgets.container.language_ +
       '&view=' + gadgets.container.view_ +
+      (gadgets.container.parentUrl_ ? '&parent=' + encodeURIComponent(gadgets.container.parentUrl_) : '') +
       (this.debug ? '&debug=1' : '') +
       this.getUserPrefsParams() +
       '#rpctoken=' + this.rpcToken + 
@@ -744,8 +745,7 @@ gadgets.IfrContainer.prototype.setParentUrl = function(url) {
     url = document.location.href.match(/^[^?#]+\//)[0] + url;
   }
 
-  /* Nasty hack to get around the hardcoded /ig/ifpc_relay URL */
-  this.parentUrl_ = url + '?';
+  this.parentUrl_ = url;
 };
 
 /**
