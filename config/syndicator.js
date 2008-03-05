@@ -28,8 +28,8 @@
 // as you would for javascript objects, e.g. gadgets.features
 // rather than "features".
 
-// NOTE: Please leave trailing commas to reduce errors when adding new fields.
-// All known common server-side JSON parsers will handle this without issue.
+// NOTE: Please _don't_ leave trailing commas because the php json parser
+// errors out on this.
 
 // Syndicator must be an array; this allows multiple syndicators
 // to share configuration.
@@ -53,20 +53,20 @@
   "core.io" : {
   	// Note: /proxy is an open proxy. Be careful how you explose this!
     "proxyUrl" : "proxy?url=%url%",
-    "jsonProxyUrl" : "proxy?output=js",
+    "jsonProxyUrl" : "proxy?output=js"
   },
   "views" : {
     "default" : {
       "isOnlyVisible" : false,
-      "aliases": ["DASHBOARD"],
+      "aliases": ["DASHBOARD"]
     },
     "profile" : {
-      "isOnlyVisible" : false,
+      "isOnlyVisible" : false
     },
     "canvas" : {
       "isOnlyVisible" : true,
       "aliases" : ["FULL_PAGE"]
-    },
+    }
   },
   "rpc" : {
   	// Path to the relay file. Automatically appended to the parent
@@ -77,7 +77,7 @@
 
     // If true, this will use the legacy ifpc wire format when making rpc
     // requests.
-    "useLegacyProtocol" : false,
+    "useLegacyProtocol" : false
   },
   // Skin defaults
   "skins" : {
@@ -87,7 +87,7 @@
          "BG_POSITION": "",
          "BG_REPEAT": "",
          "FONT_COLOR": "",
-         "ANCHOR_COLOR": "",
+         "ANCHOR_COLOR": ""
     }
-  },
+  }
 }}
