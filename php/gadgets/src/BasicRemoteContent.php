@@ -1,0 +1,56 @@
+<?
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements. See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership. The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License. You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations under the License.
+ * 
+ */
+
+class BasicRemoteContent extends RemoteContent {
+	
+	public function fetch($requests, $options)
+	{
+		global $config;
+		$cache = new $config['data_cache']();
+		if ($requests instanceof RemoteContentRequest) {
+			$requests = array($requests);
+		}
+		$remoteContentFetcher = new BasicRemoteContentFetcher();
+		$ret = array();
+		foreach ( $requests as $request ) {
+			if (! ($request instanceof RemoteContentRequest)) {
+				throw new RemoteContentException("Invalid request type in remoteContent");
+			}
+			// determine which requests we can load from cache, and which we have to actually fetch
+			if (! $options->ignoreCache && ($cachedRequest = $cache->get(md5($request->toHash()))) !== false) {
+				$ret[] = $cachedRequest;
+			} else {
+				$remoteContentFetcher->addRequest($request);
+			}
+		}
+		if ($remoteContentFetcher->pendingRequests()) {
+			$requests = $remoteContentFetcher->fetchRequests();
+			// store the objects we just fetched in cache
+			foreach ( $requests as $request ) {
+				if ($request->getHttpCode() == '200') {
+					// only cache requests that returned a 200 OK
+					$cache->set(md5($request->toHash()), $request);
+				}
+			}
+			$ret = array_merge($requests, $ret);
+		}
+		return $ret;
+	}
+}
