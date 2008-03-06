@@ -21,11 +21,13 @@ import org.apache.shindig.social.IdSpec;
 import org.apache.shindig.social.Name;
 import org.apache.shindig.social.PeopleHandler;
 import org.apache.shindig.social.Person;
+import org.apache.shindig.social.Phone;
 import org.json.JSONException;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.NodeList;
+import org.w3c.dom.Node;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -90,7 +92,16 @@ public class BasicPeopleHandler implements PeopleHandler {
 
       String name = attributes.getNamedItem("name").getNodeValue();
       String id = attributes.getNamedItem("id").getNodeValue();
-      allPeople.put(id, new Person(id, new Name(name)));
+      Person person = new Person(id, new Name(name));
+
+      Node phoneItem = attributes.getNamedItem("phone");
+      if (phoneItem != null) {
+        String phone = phoneItem.getNodeValue();
+        Phone[] phones = {new Phone(phone, null)};
+        person.setPhoneNumbers(phones);
+      }
+
+      allPeople.put(id, person);
       ids.add(id);
     }
 

@@ -4,7 +4,7 @@
   </viewer>
 
   <viewerFriends>
-     <person id="jane.doe" name="Jane Doe"></person>
+     <person id="jane.doe" name="Jane Doe" phone="867-5309"></person>
      <person id="george.doe" name="George Doe"></person>
   </viewerFriends>
 
