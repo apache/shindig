@@ -25,73 +25,57 @@
 class BasicRemoteContentFetcher extends remoteContentFetcher {
 	private $requests = array();
 	
-	public function addRequests($requests)
+	public function fetchRequest($request)
 	{
-		foreach ( $request as $request ) {
-			$this->addRequest($request);
-		}
-	}
-	
-	public function addRequest(remoteContentRequest $request)
-	{
-		$url = $request->getUrl();
-		if (empty($url)) {
-			throw new remoteContentException("Invalid or empty url specified in remoteContentFetcher");
-		}
-		$this->requests[] = $request;
-	}
-	
-	public function fetchRequests()
-	{
-		$ret = array();
-		$mh = curl_multi_init();
-		// Setup each request based on its options
-		foreach ( $this->requests as $request ) {
-			$request->handle = curl_init();
-			curl_setopt($request->handle, CURLOPT_URL, $request->getUrl());
-			curl_setopt($request->handle, CURLOPT_FOLLOWLOCATION, 1);
-			curl_setopt($request->handle, CURLOPT_RETURNTRANSFER, 1);
-			curl_setopt($request->handle, CURLOPT_HEADER, 1);
-			if ($request->hasHeaders()) {
-				curl_setopt($request->handle, CURLOPT_HTTPHEADER, array($request->getHeaders()));
+		$request->handle = curl_init();
+		curl_setopt($request->handle, CURLOPT_URL, $request->getUrl());
+		curl_setopt($request->handle, CURLOPT_FOLLOWLOCATION, 1);
+		curl_setopt($request->handle, CURLOPT_RETURNTRANSFER, 1);
+		curl_setopt($request->handle, CURLOPT_AUTOREFERER, 1);
+		curl_setopt($request->handle, CURLOPT_MAXREDIRS, 10);
+		curl_setopt($request->handle, CURLOPT_CONNECTTIMEOUT, 10);
+		curl_setopt($request->handle, CURLOPT_TIMEOUT, 20);
+		curl_setopt($request->handle, CURLOPT_HEADER, 1);
+		if ($request->hasHeaders()) {
+			$headers = explode("\n", $request->getHeaders());
+			$outHeaders = array();
+			foreach ( $headers as $header ) {
+				if (strpos($header, ':')) {
+					$key = trim(substr($header, 0, strpos($header, ':')));
+					$val = trim(substr($header, strpos($header, ':') + 1));
+					if (strcasecmp($key, "Transfer-Encoding") != 0 && strcasecmp($key, "Cache-Control") != 0 && strcasecmp($key, "Expires") != 0 && strcasecmp($key, "Content-Length") != 0) {
+						$outHeaders[] = "$key: $val";
+					}
+				}
 			}
-			if ($request->isPost()) {
-				curl_setopt($request->handle, CURLOPT_POST, 1);
-				curl_setopt($request->handle, CURLOPT_POSTFIELDS, $request->getPostBody());
-			}
-			curl_multi_add_handle($mh, $request->handle);
+			curl_setopt($request->handle, CURLOPT_HTTPHEADER, $outHeaders);
 		}
-		// Execute the multi fetch
-		$running = null;
-		do {
-			curl_multi_exec($mh, $running);
-		} while ( $running > 0 );
-		
-		// Done, close handles
-		foreach ( $this->requests as $key => $request ) {
-			$content = curl_multi_getcontent($request->handle);
-			$body = substr($content, strpos($content, "\r\n\r\n") + 4);
+		if ($request->isPost()) {
+			curl_setopt($request->handle, CURLOPT_POST, 1);
+			curl_setopt($request->handle, CURLOPT_POSTFIELDS, $request->getPostBody());
+		}
+		// Execute the request
+		$content = @curl_exec($request->handle);
+		$header = '';
+		$body = '';
+		// on redirects and such we get multiple headers back from curl it seems, we really only want the last one
+		while ( substr($content, 0, strlen('HTTP')) == 'HTTP' && strpos($content, "\r\n\r\n") !== false) {
 			$header = substr($content, 0, strpos($content, "\r\n\r\n"));
-			$httpCode = curl_getinfo($request->handle, CURLINFO_HTTP_CODE);
-			$contentType = curl_getinfo($request->handle, CURLINFO_CONTENT_TYPE);
-			$request->setHttpCode($httpCode);
-			$request->setContentType($contentType);
-			$request->setResponseHeaders($header);
-			$request->setResponseContent($body);
-			$request->setResponseSize(strlen($content));
-			curl_multi_remove_handle($mh, $request->handle);
-			unset($request->handle);
+			$body = substr($content, strlen($header) + 4);
+			$content = substr($content, strlen($header) + 4);
 		}
-		curl_multi_close($mh);
-		
-		$ret = $this->requests;
-		// empty our requests queue
-		$this->requests = array();
-		return $ret;
-	}
-	
-	public function pendingRequests()
-	{
-		return count($this->requests);
+		$httpCode = curl_getinfo($request->handle, CURLINFO_HTTP_CODE);
+		$contentType = curl_getinfo($request->handle, CURLINFO_CONTENT_TYPE);
+		if (!$httpCode) {
+			$httpCode = '404';
+		}
+		$request->setHttpCode($httpCode);
+		$request->setContentType($contentType);
+		$request->setResponseHeaders($header);
+		$request->setResponseContent($body);
+		$request->setResponseSize(strlen($content));
+		curl_close($request->handle);
+		unset($request->handle);		
+		return $request;
 	}
 }

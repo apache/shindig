@@ -65,7 +65,7 @@ class MessageBundleSubstituterFeature extends GadgetFeature {
 				// We definitely need a bundle, now we need to fetch it.
 				// Doing it a little different then the java version since our fetcher and cache are intergrated
 				$fetcher = $context->getHttpFetcher();
-				list($response) = $fetcher->fetch(new remoteContentRequest($uri), $context->getOptions());
+				$response = $fetcher->fetch(new remoteContentRequest($uri));
 				//TODO caching the parsed bundle instead of just the xml data would be a lot more efficient and speedy
 				$this->bundle = $this->parser->parse($response->getResponseContent());				
 			}

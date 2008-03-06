@@ -31,6 +31,7 @@ class HttpServlet {
 	private $lastModified = false;
 	private $contentType = 'text/html';
 	private $charset = 'UTF-8';
+	public  $noHeaders = false;
 	
 	public function __construct()
 	{
@@ -40,47 +41,49 @@ class HttpServlet {
 	
 	public function __destruct()
 	{
-		die();
-		// attempt at some propper header handling from php
-		// this departs a little from the shindig code but it should give is valid http protocol handling
-		header("Content-Type: $this->contentType; charset={$this->charset}");
-		header('Connection: Keep-Alive');
-		header('Keep-Alive: timeout=15, max=30');
-		header('Accept-Ranges: bytes');
-		header('Content-Length: ' . ob_get_length());
-		header('Cache-Control: public,max-age=' . CACHE_TIME . ',must-revalidate');
-		header("Expires: " . gmdate("D, d M Y H:i:s", time() + CACHE_TIME) . " GMT");
-		$content = ob_get_clean();
-		// Obey browsers (or proxy's) request to send a fresh copy if we recieve a no-cache pragma or cache-control request
-		if (! isset($_SERVER['HTTP_PRAGMA']) || ! strstr(strtolower($_SERVER['HTTP_PRAGMA']), 'no-cache') && (! isset($_SERVER['HTTP_CACHE_CONTROL']) || ! strstr(strtolower($_SERVER['HTTP_CACHE_CONTROL']), 'no-cache'))) {
-			// If the browser send us a E-TAG check if it matches (sha1 sum of content), if so send a not modified header instead of content
-			$etag = md5($content);
-			if (isset($_SERVER['HTTP_IF_NONE_MATCH']) && $_SERVER['HTTP_IF_NONE_MATCH'] == $etag) {
-				header("ETag: \"$etag\"");
-				if ($this->lastModified) {
-					header('Last-Modified: ' . gmdate('D, d M Y H:i:s', $this->lastModified));
-				}
-				header("HTTP/1.1 304 Not Modified");
-				header('Content-Length: 0');
-				die();
-			}
-			header("ETag: \"$etag\"");
-			// If no etag is present, then check if maybe this browser supports if_modified_since tags,
-			// check it against our lastModified (if it's set)
-			if (isset($_SERVER['HTTP_IF_MODIFIED_SINCE']) && $this->lastModified && ! isset($_SERVER['HTTP_IF_NONE_MATCH'])) {
-				$if_modified_since = strtotime($_SERVER['HTTP_IF_MODIFIED_SINCE']);
-				if ($this->lastModified <= $if_modified_since) {
-					header('Last-Modified: ' . gmdate('D, d M Y H:i:s', $this->lastModified));
+		global $config;
+		if (!$this->noHeaders) {
+			// attempt at some propper header handling from php
+			// this departs a little from the shindig code but it should give is valid http protocol handling
+			header("Content-Type: $this->contentType; charset={$this->charset}");
+			header('Connection: Keep-Alive');
+			header('Keep-Alive: timeout=15, max=30');
+			header('Accept-Ranges: bytes');
+			header('Content-Length: ' . ob_get_length());
+			header('Cache-Control: public,max-age=' . $config['cache_time'] . ',must-revalidate');
+			header("Expires: " . gmdate("D, d M Y H:i:s", time() + $config['cache_time']) . " GMT");
+			$content = ob_get_clean();
+			// Obey browsers (or proxy's) request to send a fresh copy if we recieve a no-cache pragma or cache-control request
+			if (! isset($_SERVER['HTTP_PRAGMA']) || ! strstr(strtolower($_SERVER['HTTP_PRAGMA']), 'no-cache') && (! isset($_SERVER['HTTP_CACHE_CONTROL']) || ! strstr(strtolower($_SERVER['HTTP_CACHE_CONTROL']), 'no-cache'))) {
+				// If the browser send us a E-TAG check if it matches (sha1 sum of content), if so send a not modified header instead of content
+				$etag = sha1($content);
+				if (isset($_SERVER['HTTP_IF_NONE_MATCH']) && $_SERVER['HTTP_IF_NONE_MATCH'] == $etag) {
+					header("ETag: \"$etag\"");
+					if ($this->lastModified) {
+						header('Last-Modified: ' . gmdate('D, d M Y H:i:s', $this->lastModified));
+					}
 					header("HTTP/1.1 304 Not Modified");
 					header('Content-Length: 0');
 					die();
 				}
+				header("ETag: \"$etag\"");
+				// If no etag is present, then check if maybe this browser supports if_modified_since tags,
+				// check it against our lastModified (if it's set)
+				if (isset($_SERVER['HTTP_IF_MODIFIED_SINCE']) && $this->lastModified && ! isset($_SERVER['HTTP_IF_NONE_MATCH'])) {
+					$if_modified_since = strtotime($_SERVER['HTTP_IF_MODIFIED_SINCE']);
+					if ($this->lastModified <= $if_modified_since) {
+						header('Last-Modified: ' . gmdate('D, d M Y H:i:s', $this->lastModified));
+						header("HTTP/1.1 304 Not Modified");
+						header('Content-Length: 0');
+						die();
+					}
+				}
+				if ($this->lastModified) {
+					header('Last-Modified: ' . gmdate('D, d M Y H:i:s', $this->lastModified));
+				}
 			}
-			if ($this->lastModified) {
-				header('Last-Modified: ' . gmdate('D, d M Y H:i:s', $this->lastModified));
-			}
+			echo $content;
 		}
-		echo $content;
 	}
 	
 	public function setContentType($type)

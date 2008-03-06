@@ -30,14 +30,14 @@ class Substitutions {
 	
 	public function __construct()
 	{
-		foreach ($this->types as $key => $type) {
+		foreach ($this->types as $type) {
 			$this->substitutions[$type] = array();
 		}
 	}
 
 	public function addSubstitution($type, $key, $value)
 	{
-		$this->substitutions[$type][$key] = $value;
+		$this->substitutions[$type]["__{$type}_{$key}__"] = $value;
 	}
 	
 	public function addSubstitutions($type, $array)
@@ -49,7 +49,7 @@ class Substitutions {
 	
 	public function substitute($input)
 	{
-		foreach ($this->types as $key => $type) {
+		foreach ($this->types as $type) {
 			$input = $this->substituteType($type, $input);
 		}
 		return $input;
@@ -57,22 +57,6 @@ class Substitutions {
 	
 	public function substituteType($type, $input)
 	{
-		$prefix = "__{$type}_";
-		if (empty($input) || (count($this->substitutions[$type]) == 0) || (strpos($input, $prefix) === false)) {
-			return $input;
-		}
-		while (($start = strpos($input, $prefix) + strlen($prefix)) !== false) {
-			$end   = strpos($input, '__', $start);
-			if ($end !== false) {
-				$name = substr($input, $start, $end - $start);
-				if (isset($this->substitutions[$type][$name])) {
-					$replacement = $this->substitutions[$type][$name];
-					$input       = str_replace("{$prefix}{$name}__", $replacement, $input);
-				}
-			} else {
-				break;
-			}
-		}
-		return $input;
+		return str_replace(array_keys($this->substitutions[$type]), array_values($this->substitutions[$type]), $input); 
 	}
 }

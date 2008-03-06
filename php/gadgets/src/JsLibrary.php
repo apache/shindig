@@ -18,7 +18,7 @@
  * 
  */
 
-class jsLibrary {
+class JsLibrary {
 	private $types = array('FILE', 'RESOURCE', 'URL', 'INLINE');
 	private $type;
 	private $content;
@@ -51,7 +51,7 @@ class jsLibrary {
 	static function create($type, $content)
 	{
 		if ($type == 'FILE' || $type == 'RESOURCE') {
-			$content = jsLibrary::loadData($content, $type);
+			$content = JsLibrary::loadData($content, $type);
 		}
 		return new JsLibrary($type, $content);
 	}
@@ -60,7 +60,7 @@ class jsLibrary {
 	{
 		// we don't really do 'resources', so limiting this to files only
 		if ($type == 'FILE') {
-			return jsLibrary::loadFile($name);
+			return JsLibrary::loadFile($name);
 		}
 		return null;
 	}
@@ -80,7 +80,7 @@ class jsLibrary {
 			throw new Exception("JsLibrary file not readable: $fileName");
 		}
 		if (!($content = @file_get_contents($fileName))) {
-			throw new Exception("jsLibrary error reading file: $fileName");
+			throw new Exception("JsLibrary error reading file: $fileName");
 		}
 		return $content;
 	}

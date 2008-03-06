@@ -30,11 +30,10 @@ class GadgetServer {
 	private $gadgetId;
 	private $userPrefs;
 	private $renderingContext;
-	private $options;
 	private $locale;
 	private $httpFetcher;
 	
-	public function processGadget($gadgetId, $userPrefs, $locale, $rctx, $options, $httpFetcher, $registry)
+	public function processGadget($gadgetId, $userPrefs, $locale, $rctx, $httpFetcher, $registry)
 	{
 		global $config;
 		$this->gadgetId = $gadgetId;
@@ -42,9 +41,8 @@ class GadgetServer {
 		$this->renderingContext = $rctx;
 		$this->locale = $locale;
 		$this->registry = $registry;
-		$this->options = $options;
 		$this->httpFetcher = $httpFetcher;
-		$this->gc = new GadgetContext($httpFetcher, $locale, $rctx, $options, $registry);
+		$this->gc = new GadgetContext($httpFetcher, $locale, $rctx, $registry);
 		$this->blacklist = new $config['blacklist_class']();
 		$gadget = $this->specLoad();
 		$this->featuresLoad($gadget);
@@ -57,13 +55,12 @@ class GadgetServer {
 			throw new GadgetException("Gadget is blacklisted");
 		}
 		$request = new remoteContentRequest($this->gadgetId->getURI());
-		list($xml) = $this->httpFetcher->fetch($request, $this->options);
+		$xml = $this->httpFetcher->fetch($request);
 		if ($xml->getHttpCode() != '200') {
 			throw new GadgetException("Failed to retrieve gadget content");
 		}
 		$specParser = new GadgetSpecParser();
-		$spec = $specParser->parse($xml->getResponseContent());
-		$gadget = new Gadget($this->gadgetId, $spec, $this->userPrefs);
+		$gadget = $specParser->parse($xml->getResponseContent(), $this->gadgetId, $this->userPrefs);
 		return $gadget;
 	}
 	

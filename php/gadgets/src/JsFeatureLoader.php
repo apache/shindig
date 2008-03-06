@@ -30,10 +30,7 @@ class JsFeatureLoader {
 		// so the caching of the dep loading just about doubles our performance :)
 		// Only downside is that if you modify the features directory, your have to clean the cache too
 		$cache = new $config['data_cache']();
-		if (($deps = $cache->get(md5($path))) === false) {
-			$deps = $this->loadFiles($path, $deps);
-			$cache->set(md5($path), $deps);
-		}
+		$deps = $this->loadFiles($path, $deps);
 		// This ensures that we register everything in the right order.
 		foreach ( $deps as $entry ) {
 			$feature = $entry;
@@ -124,7 +121,6 @@ class JsFeatureLoader {
 				// inline content
 				$type = 'INLINE';
 				$content = (string)$script;
-			
 			} else {
 				$content = trim($attributes['src']);
 				if (strtolower(substr($content, 0, strlen("http://"))) == "http://") {
@@ -137,7 +133,7 @@ class JsFeatureLoader {
 					$content = $feature->basePath.'/'.$content;
 				}
 			}
-			$library = jsLibrary::create($type, $content);
+			$library = JsLibrary::create($type, $content);
 			if ($library != null) {
 				if ($isContainer) {
 					$feature->containerJs[] = $library;
