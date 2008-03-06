@@ -17,18 +17,21 @@
  */
 package org.apache.shindig.social;
 
-public class Name {
-  String unstructured;
+/**
+ * see
+ * http://code.google.com/apis/opensocial/docs/0.7/reference/opensocial.Name.Field.html
+ *
+ */
+public class Name extends AbstractSocialData {
+  private String additionalName;
+  private String familyName;
+  private String givenName;
+  private String honorificPrefix;
+  private String honorificSuffix;
+  private String unstructured;
 
   public Name(String unstructured) {
     this.unstructured = unstructured;
-  }
-
-  // TODO: Use an auto translator
-  public String toJson() {
-    return "{"
-        + "\"unstructured\" : \"" + unstructured + "\""
-        + "}";
   }
 
   public String getUnstructured() {
@@ -37,5 +40,45 @@ public class Name {
 
   public void setUnstructured(String unstructured) {
     this.unstructured = unstructured;
+  }
+
+  public String getAdditionalName() {
+    return additionalName;
+  }
+
+  public void setAdditionalName(String additionalName) {
+    this.additionalName = additionalName;
+  }
+
+  public String getFamilyName() {
+    return familyName;
+  }
+
+  public void setFamilyName(String familyName) {
+    this.familyName = familyName;
+  }
+
+  public String getGivenName() {
+    return givenName;
+  }
+
+  public void setGivenName(String givenName) {
+    this.givenName = givenName;
+  }
+
+  public String getHonorificPrefix() {
+    return honorificPrefix;
+  }
+
+  public void setHonorificPrefix(String honorificPrefix) {
+    this.honorificPrefix = honorificPrefix;
+  }
+
+  public String getHonorificSuffix() {
+    return honorificSuffix;
+  }
+
+  public void setHonorificSuffix(String honorificSuffix) {
+    this.honorificSuffix = honorificSuffix;
   }
 }
