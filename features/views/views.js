@@ -78,13 +78,7 @@ gadgets.views = function() {
     currentView = supportedViews[urlParams.view] || supportedViews["default"];
   }
 
-  var requiredConfig = {
-    "default": new gadgets.config.LikeValidator({
-      "isOnlyVisible" : gadgets.config.BooleanValidator
-    })
-  };
-
-  gadgets.config.register("views", requiredConfig, init);
+  gadgets.config.register("views", null, init);
 
   return {
     /**
