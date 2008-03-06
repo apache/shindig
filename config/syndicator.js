@@ -56,12 +56,9 @@
     "jsonProxyUrl" : "proxy?output=js"
   },
   "views" : {
-    "default" : {
-      "isOnlyVisible" : false,
-      "aliases": ["DASHBOARD"]
-    },
     "profile" : {
-      "isOnlyVisible" : false
+      "isOnlyVisible" : false,
+      "aliases": ["DASHBOARD", "default"]
     },
     "canvas" : {
       "isOnlyVisible" : true,
