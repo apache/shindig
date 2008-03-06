@@ -31,10 +31,10 @@ public class Person {
   // TODO: Use an auto translator
   public String toJson() {
     return "{"
-        + "'id' : '" + id + "', "
-        + "'name' : " + name.toJson() + ", "
-        + "'thumbnailUrl' : '" + thumbnailUrl + "', "
-        + "'profileUrl' : '" + profileUrl + "'"
+        + "\"id\" : \"" + id + "\", "
+        + "\"name\" : " + name.toJson() + ", "
+        + "\"thumbnailUrl\" : \"" + thumbnailUrl + "\", "
+        + "\"profileUrl\" : \"" + profileUrl + "\""
         + "}";
   }
 

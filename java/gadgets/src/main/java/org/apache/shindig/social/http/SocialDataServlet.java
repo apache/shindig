@@ -48,8 +48,8 @@ public class SocialDataServlet extends HttpServlet {
   private static final Logger logger
       = Logger.getLogger("org.apache.shindig.social");
   private static final String BAD__REQUEST__RESPONSE =
-      "{'responses' : {}, 'error' : '"
-      + ResponseError.BAD_REQUEST.toJson() + "'}";
+      "{\"responses\" : {}, \"error\" : \""
+      + ResponseError.BAD_REQUEST.toJson() + "\"}";
 
   // TODO: get through injection
   private PeopleHandler peopleHandler = new BasicPeopleHandler();
@@ -77,7 +77,7 @@ public class SocialDataServlet extends HttpServlet {
 
   private String createResponse(String requestParam) throws JSONException {
     JSONArray requestItems = new JSONArray(requestParam);
-    String jsonResponse = "{'responses' : [";
+    String jsonResponse = "{\"responses\" : [";
     int length = requestItems.length();
 
     for (int i = 0; i < length; i++) {
@@ -102,10 +102,10 @@ public class SocialDataServlet extends HttpServlet {
             break;
         }
 
-        jsonResponse += "{'response' : " + jsonData + "}";
+        jsonResponse += "{\"response\" : " + jsonData + "}";
       } catch (IllegalArgumentException e) {
-        jsonResponse += "{'response' : {}, 'error' : '"
-            + ResponseError.BAD_REQUEST.toJson() + "'}";
+        jsonResponse += "{\"response\" : {}, \"error\" : \""
+            + ResponseError.BAD_REQUEST.toJson() + "\"}";
       }
 
       if (i < length - 1) {
@@ -124,12 +124,12 @@ public class SocialDataServlet extends HttpServlet {
 
     for (String userId : people.keySet()) {
       Map<String, String> userData = people.get(userId);
-      jsonData += "'" + userId + "' : {";
+      jsonData += "\"" + userId + "\" : {";
 
       if (userData != null) {
         for (String dataKey : userData.keySet()) {
           String dataValue = userData.get(dataKey);
-          jsonData += "'" + dataKey + "' : '" + dataValue + "' ";
+          jsonData += "\"" + dataKey + "\" : \"" + dataValue + "\" ";
         }
       }
 

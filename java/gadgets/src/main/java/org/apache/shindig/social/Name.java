@@ -27,7 +27,7 @@ public class Name {
   // TODO: Use an auto translator
   public String toJson() {
     return "{"
-        + "'unstructured' : '" + unstructured + "'"
+        + "\"unstructured\" : \"" + unstructured + "\""
         + "}";
   }
 
