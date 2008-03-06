@@ -19,7 +19,7 @@ package org.apache.shindig.social;
 
 import junit.framework.TestCase;
 
-public class PersonTest extends TestCase {
+public class AbstractSocialDataTest extends TestCase {
   private Person johnDoe;
 
   @Override
