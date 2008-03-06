@@ -75,13 +75,14 @@ JsonContainer.prototype.requestData = function(dataRequest, callback) {
     var globalError = false;
 
     var responseMap = {};
+
     for (var i = 0; i < responses.length; i++) {
       var response = responses[i];
       var rawData = response['response'];
       var error = response['error'];
 
-      var processedData = requestObjects[i].request.processResponse(rawData,
-          error);
+      var processedData = requestObjects[i].request.processResponse(
+          requestObjects[i].request, rawData, error);
       globalError = globalError || processedData.hadError();
       responseMap[requestObjects[i].key] = processedData;
     }
@@ -93,73 +94,69 @@ JsonContainer.prototype.requestData = function(dataRequest, callback) {
   new BatchRequest(jsonText, sendResponse, this.baseUrl_).send();
 };
 
-JsonContainer.prototype.newFetchPersonRequest = function(id,
-    opt_params) {
-  var me = this;
+JsonContainer.prototype.newFetchPersonRequest = function(id, opt_params) {
   var peopleRequest = this.newFetchPeopleRequest(id, opt_params);
-  peopleRequest.processResponse = function(rawJson, error) {
-    return new opensocial.ResponseItem(null,
-        me.createPersonFromJson(rawJson[0]), error);
-  };
-  return peopleRequest;
+
+  var me = this;
+  return new RequestItem(peopleRequest.jsonParams,
+      function(rawJson) {
+        return me.createPersonFromJson(rawJson[0]);
+      });
 };
 
-JsonContainer.prototype.newFetchPeopleRequest = function(idSpec,
-    opt_params) {
+JsonContainer.prototype.newFetchPeopleRequest = function(idSpec, opt_params) {
   var me = this;
   return new RequestItem(
       {'type' : 'FETCH_PEOPLE', 'idSpec' : idSpec, 'params': opt_params},
-      function(rawJson, error) {
+      function(rawJson) {
         var people = [];
         for (var i = 0; i < rawJson.length; i++) {
           people.push(me.createPersonFromJson(rawJson[i]));
-          // TODO: isOwner, isViewer
         }
-        return new opensocial.ResponseItem(null, // TODO: Original request
-            new opensocial.Collection(people), error);
+        return new opensocial.Collection(people);
       });
 };
 
 JsonContainer.prototype.createPersonFromJson = function(serverJson) {
-  // TODO: Probably move this into a subclass of person and make it cover
-  // all fields
-  var name = new opensocial.Name(serverJson["name"]);
-  return new opensocial.Person({"id" : serverJson["id"], "name" : name});
+  // TODO: isOwner, isViewer
+  return new JsonPerson(serverJson);
 }
 
-JsonContainer.prototype.newFetchPersonAppDataRequest = function(
-    idSpec, keys) {
+JsonContainer.prototype.newFetchPersonAppDataRequest = function(idSpec, keys) {
   return new RequestItem({'type' : 'FETCH_PERSON_APP_DATA', 'idSpec' : idSpec,
       'keys' : keys},
-      function (appData, error) {
-        return new opensocial.ResponseItem(null,
-            gadgets.util.escape(appData, true), error); // TODO: Original request
+      function (appData) {
+        return gadgets.util.escape(appData, true);
       });
 };
 
-JsonContainer.prototype.newUpdatePersonAppDataRequest = function(
-    id, key, value) {
+JsonContainer.prototype.newUpdatePersonAppDataRequest = function(id, key,
+    value) {
   return new RequestItem({'type' : 'UPDATE_PERSON_APP_DATA', 'id' : id,
     'key' : key, 'value' : value});
 };
 
-JsonContainer.prototype.newFetchActivitiesRequest = function(
-    idSpec, opt_params) {
+JsonContainer.prototype.newFetchActivitiesRequest = function(idSpec,
+    opt_params) {
   return new RequestItem({'type' : 'FETCH_ACTIVITIES', 'idSpec' : idSpec},
-      function(rawJson, error) {
+      function(rawJson) {
         var activities = [];
         for (var i = 0; i < rawJson.length; i++) {
           activities.push(new opensocial.Activity(rawJson[i]));
         }
-        return new opensocial.ResponseItem(null, // TODO: Original request
-            {'activities' : new opensocial.Collection(activities)}, error);
+        return {'activities' : new opensocial.Collection(activities)};
       });
 };
 
-RequestItem = function(jsonParams, processResponse) {
+RequestItem = function(jsonParams, processData) {
   this.jsonParams = jsonParams;
-  this.processResponse = processResponse ||
-    function (rawJson, error) {
-      return new opensocial.ResponseItem(null, rawJson, error); // TODO: Original request
+  this.processData = processData ||
+    function (rawJson) {
+      return rawJson;
     };
+
+  this.processResponse = function(originalDataRequest, rawJson, error) {
+    return new opensocial.ResponseItem(originalDataRequest,
+        this.processData(rawJson), error);
+  }
 };

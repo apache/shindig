@@ -17,11 +17,9 @@
  */
 package org.apache.shindig.social;
 
-import org.json.JSONException;
-
+import java.util.List;
 import java.util.Map;
 
 public interface DataHandler {
-  public Map<String, Map<String, String>> getPersonData(IdSpec idSpec)
-      throws JSONException;
+  public Map<String, Map<String, String>> getPersonData(List<String> ids);
 }

@@ -22,5 +22,20 @@ import org.json.JSONException;
 import java.util.List;
 
 public interface PeopleHandler {
-  public List<Person> getPeople(IdSpec idSpec) throws JSONException;
+  /**
+   * Returns a list of people ids that the other handlers (currently data
+   * and activities) can use to fetch their own objects
+   *
+   * @param idSpec The idSpec to translate into ids
+   * @return a list of person ids
+   * @throws JSONException If the idSpec is malformed
+   */
+  public List<String> getIds(IdSpec idSpec) throws JSONException;
+
+  /**
+   * Returns a list of people that correspond to the passed in person ids.
+   * @param ids The ids of the people to fetch.
+   * @return a list of people.
+   */
+  public List<Person> getPeople(List<String> ids);
 }
