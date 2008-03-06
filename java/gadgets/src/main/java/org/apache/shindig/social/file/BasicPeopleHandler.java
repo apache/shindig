@@ -17,37 +17,99 @@
  */
 package org.apache.shindig.social.file;
 
+import org.apache.shindig.social.IdSpec;
+import org.apache.shindig.social.Name;
 import org.apache.shindig.social.PeopleHandler;
 import org.apache.shindig.social.Person;
-import org.apache.shindig.social.Name;
-import org.apache.shindig.social.IdSpec;
 import org.json.JSONException;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.NamedNodeMap;
+import org.w3c.dom.NodeList;
 
-import java.util.List;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class BasicPeopleHandler implements PeopleHandler {
-  public List<Person> getPeople(IdSpec idSpec) throws JSONException {
-    // TODO: Actually read from file
-    // TODO: Use the opensource Collections library
-    ArrayList<Person> people = new ArrayList<Person>();
+  private Map<IdSpec.Type, List<String>> idMap
+      = new HashMap<IdSpec.Type, List<String>>();
+  private Map<String, Person> allPeople
+      = new HashMap<String, Person>();
 
-    switch (idSpec.getType()) {
-      case VIEWER:
-      case OWNER:
-        people.add(new Person("john.doe", new Name("John Doe")));
-        break;
-      case VIEWER_FRIENDS:
-      case OWNER_FRIENDS:
-        people.add(new Person("jane.doe", new Name("Jane Doe")));
-        people.add(new Person("jane.doe", new Name("George Doe")));
-        break;
-      case USER_IDS:
-        List<String> userIds = idSpec.fetchUserIds();
-        for (String userId : userIds) {
-          people.add(new Person(userId, new Name(userId)));
-        }
+  public BasicPeopleHandler() {
+    // TODO: Get file from user in web ui
+    String stateFile = "http://localhost:8080/gadgets/files/samplecontainer/state-basicfriendlist.xml";
+    XmlStateFileFetcher fetcher = new XmlStateFileFetcher(stateFile);
+    Document doc = fetcher.fetchStateDocument(true);
+    setupData(doc);
+  }
+
+  private void setupData(Document stateDocument) {
+    Element root = stateDocument.getDocumentElement();
+
+    // TODO: Eventually the viewer and owner shouldn't be hardcoded. You should
+    // be able to visit other allPeople's "profile" pages in the sample container
+    setupPeopleInXmlTag(root, "viewer", IdSpec.Type.VIEWER);
+    setupPeopleInXmlTag(root, "owner", IdSpec.Type.OWNER);
+    setupPeopleInXmlTag(root, "viewerFriends", IdSpec.Type.VIEWER_FRIENDS);
+    setupPeopleInXmlTag(root, "ownerFriends", IdSpec.Type.OWNER_FRIENDS);
+
+    // Handle empty people
+    if (idMap.get(IdSpec.Type.OWNER).isEmpty()) {
+      idMap.put(IdSpec.Type.OWNER, idMap.get(IdSpec.Type.VIEWER));
+    }
+
+    if (idMap.get(IdSpec.Type.OWNER_FRIENDS).isEmpty()) {
+      idMap.put(IdSpec.Type.OWNER_FRIENDS,
+          idMap.get(IdSpec.Type.VIEWER_FRIENDS));
+    }
+  }
+
+  // Adds all people in the xml tag to the allPeople map.
+  // Also returns the relevant ids
+  private void setupPeopleInXmlTag(Element root, String tagName,
+      IdSpec.Type idType) {
+    // TODO: Use the opensource Collections library
+    List<String> ids = new ArrayList<String>();
+
+    NodeList elements = root.getElementsByTagName(tagName);
+    if (elements == null || elements.item(0) == null) {
+      idMap.put(idType, ids);
+      return;
+    }
+
+    NodeList personNodes = elements.item(0).getChildNodes();
+
+    for (int i = 0; i < personNodes.getLength(); i++) {
+      NamedNodeMap attributes = personNodes.item(i).getAttributes();
+      if (attributes == null) {
+        continue;
+      }
+
+      String name = attributes.getNamedItem("name").getNodeValue();
+      String id = attributes.getNamedItem("id").getNodeValue();
+      allPeople.put(id, new Person(id, new Name(name)));
+      ids.add(id);
+    }
+
+    idMap.put(idType, ids);
+  }
+
+  public List<Person> getPeople(List<String> ids) {
+    List<Person> people = new ArrayList<Person>();
+    for (String id : ids) {
+      people.add(allPeople.get(id));
     }
     return people;
+  }
+
+  public List<String> getIds(IdSpec idSpec) throws JSONException {
+    if (idSpec.getType() == IdSpec.Type.USER_IDS) {
+      return idSpec.fetchUserIds();
+    } else {
+      return idMap.get(idSpec.getType());
+    }
   }
 }

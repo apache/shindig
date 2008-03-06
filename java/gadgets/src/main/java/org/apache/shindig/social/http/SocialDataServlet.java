@@ -26,6 +26,7 @@ import org.apache.shindig.social.PeopleHandler;
 import org.apache.shindig.social.Person;
 import org.apache.shindig.social.IdSpec;
 import org.apache.shindig.social.DataHandler;
+import static org.apache.shindig.social.IdSpec.*;
 import org.apache.shindig.social.file.BasicPeopleHandler;
 import org.apache.shindig.social.file.BasicDataHandler;
 
@@ -83,17 +84,21 @@ public class SocialDataServlet extends HttpServlet {
       String jsonData = "{}";
 
       JSONObject requestItem = requestItems.getJSONObject(i);
-      SocialDataType type = SocialDataType.valueOf(
-          requestItem.getString("type"));
 
       try {
+        SocialDataType type = SocialDataType.valueOf(
+            requestItem.getString("type"));
+
+        String jsonSpec = requestItem.getString("idSpec");
+        List<String> peopleIds = peopleHandler.getIds(fromJson(jsonSpec));
+
         switch (type) {
           case FETCH_PEOPLE :
-            jsonData = handleFetchPeople(requestItem);
+            jsonData = handleFetchPeople(peopleIds);
             break;
 
           case FETCH_PERSON_APP_DATA :
-            jsonData = handleFetchData(requestItem);
+            jsonData = handleFetchData(peopleIds);
             break;
         }
 
@@ -111,21 +116,21 @@ public class SocialDataServlet extends HttpServlet {
     return jsonResponse;
   }
 
-  private String handleFetchData(JSONObject requestItem) throws JSONException {
-    String jsonSpec = requestItem.getString("idSpec");
+  private String handleFetchData(List<String> peopleIds) {
     Map<String, Map<String,String>> people
-        = dataHandler.getPersonData(IdSpec.fromJson(jsonSpec));
+        = dataHandler.getPersonData(peopleIds);
 
     String jsonData = "{";
 
     for (String userId : people.keySet()) {
       Map<String, String> userData = people.get(userId);
-
       jsonData += "'" + userId + "' : {";
 
-      for (String dataKey : userData.keySet()) {
-        String dataValue = userData.get(dataKey);
-        jsonData += "'" + dataKey + "' : '" + dataValue + "' ";
+      if (userData != null) {
+        for (String dataKey : userData.keySet()) {
+          String dataValue = userData.get(dataKey);
+          jsonData += "'" + dataKey + "' : '" + dataValue + "' ";
+        }
       }
 
       jsonData += "}, ";
@@ -136,11 +141,8 @@ public class SocialDataServlet extends HttpServlet {
     return jsonData;
   }
 
-  private String handleFetchPeople(JSONObject requestItem)
-      throws JSONException {
-    String jsonSpec = requestItem.getString("idSpec");
-
-    List<Person> people = peopleHandler.getPeople(IdSpec.fromJson(jsonSpec));
+  private String handleFetchPeople(List<String> peopleIds) {
+    List<Person> people = peopleHandler.getPeople(peopleIds);
     if (people.isEmpty()) {
       return "{}";
     }
@@ -153,4 +155,5 @@ public class SocialDataServlet extends HttpServlet {
 
     return jsonData;
   }
+
 }

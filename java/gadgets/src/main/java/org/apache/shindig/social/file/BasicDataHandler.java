@@ -18,47 +18,92 @@
 package org.apache.shindig.social.file;
 
 import org.apache.shindig.social.DataHandler;
-import org.apache.shindig.social.IdSpec;
-import org.json.JSONException;
+import org.w3c.dom.Document;
+import org.w3c.dom.NamedNodeMap;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+import org.w3c.dom.Element;
 
-import java.util.Map;
-import java.util.List;
 import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class BasicDataHandler implements DataHandler {
-  public Map<String, Map<String, String>> getPersonData(IdSpec idSpec)
-      throws JSONException {
-    // TODO: Actually read from file
+  Map<String, Map<String, String>> allData
+      = new HashMap<String, Map<String, String>>();
+
+  public BasicDataHandler() {
+    // TODO: Should use guice here for one global thingy and get url from web ui
+    String stateFile = "http://localhost:8080/gadgets/files/samplecontainer/state-basicfriendlist.xml";
+    XmlStateFileFetcher fetcher = new XmlStateFileFetcher(stateFile);
+    Document doc = fetcher.fetchStateDocument(true);
+    setupData(doc);
+  }
+
+  private void setupData(Document stateDocument) {
+    Element root = stateDocument.getDocumentElement();
+
+    NodeList elements = root.getElementsByTagName("personAppData");
+    NodeList personDataNodes = elements.item(0).getChildNodes();
+
+    for (int i = 0; i < personDataNodes.getLength(); i++) {
+      Node personDataNode = personDataNodes.item(i);
+      NamedNodeMap attributes = personDataNode.getAttributes();
+      if (attributes == null) {
+        continue;
+      }
+
+      String id = attributes.getNamedItem("person").getNodeValue();
+      String field = attributes.getNamedItem("field").getNodeValue();
+      String value = personDataNode.getTextContent();
+
+      Map<String, String> currentData = allData.get(id);
+      if (currentData == null) {
+        currentData = new HashMap<String, String>();
+        allData.put(id, currentData);
+      }
+      currentData.put(field, value);
+    }
+  }
+
+  public Map<String, Map<String, String>> getPersonData(List<String> ids) {
     // TODO: Use the opensource Collections library
-    Map<String, Map<String, String>> map =
+    Map<String, Map<String, String>> data =
         new HashMap<String, Map<String, String>>();
 
-    switch (idSpec.getType()) {
-      case VIEWER:
-      case OWNER:
-        Map<String, String> data = new HashMap<String, String>();
-        data.put("count", "3");
-
-        map.put("john.doe", data);
-        break;
-      case VIEWER_FRIENDS:
-      case OWNER_FRIENDS:
-        Map<String, String> janeData = new HashMap<String, String>();
-        janeData.put("count", "7");
-        Map<String, String> georgeData = new HashMap<String, String>();
-        georgeData.put("count", "2");
-
-        map.put("jane.doe", janeData);
-        map.put("george.doe", georgeData);
-        break;
-      case USER_IDS:
-        List<String> userIds = idSpec.fetchUserIds();
-        for (String userId : userIds) {
-          Map<String, String> userData = new HashMap<String, String>();
-          userData.put("count", "1");
-          map.put(userId, userData);
-        }
+    for (String id : ids) {
+      data.put(id, allData.get(id));
     }
-    return map;
+
+    return data;
   }
+
+  /**
+   * Determines whether the input is a valid key. Valid keys match the regular
+   * expression [\w\-\.]+. The logic is not done using java.util.regex.* as
+   * that is 20X slower.
+   *
+   * @param key the key to validate.
+   * @return true if the key is a valid appdata key, false otherwise.
+   */
+  // TODO: Use this method
+  public static boolean isValidKey(String key) {
+    if (key == null || key.length() == 0) {
+      return false;
+    }
+    for (int i = 0; i < key.length(); ++i) {
+      char c = key.charAt(i);
+      if ((c >= 'a' && c <= 'z') ||
+          (c >= 'A' && c <= 'Z') ||
+          (c >= '0' && c <= '9') ||
+          (c == '-') ||
+          (c == '_') ||
+          (c == '.')) {
+        continue;
+      }
+      return false;
+    }
+    return true;
+  }
+
 }
