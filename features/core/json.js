@@ -109,10 +109,7 @@ gadgets.json = function () {
       if (!value) {
         return 'null';
       }
-    // If the object has a toJSON method, call it, and stringify the result.
-      if (typeof value.toJSON === 'function') {
-        return stringify(value.toJSON());
-      }
+      // toJSON check removed; re-implement when it doesn't break other libs.
       a = [];
       if (typeof value.length === 'number' &&
           !(value.propertyIsEnumerable('length'))) {

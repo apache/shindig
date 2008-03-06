@@ -151,7 +151,7 @@ gadgets.util = function() {
         for (var i = 0, j = arguments.length; i < j; ++i) {
           tmpArgs.push(arguments[i]);
         }
-        callback.apply(scope, tmpArgs);
+        return callback.apply(scope, tmpArgs);
       };
     },
 
