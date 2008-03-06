@@ -19,8 +19,5 @@
  */
 
 abstract class RemoteContentFetcher {
-	abstract public function addRequests($requests);
-	abstract public function addRequest(remoteContentRequest $request);
-	abstract public function fetchRequests();
-	abstract public function pendingRequests();
+	abstract public function fetchRequest($request);
 }

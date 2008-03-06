@@ -26,6 +26,9 @@
  * it's kept in the spirit of the java variant as much as possible
  */
 
+class RemoteContentException extends Exception {
+}
+
 abstract class RemoteContent {
-	abstract public function fetch($requests, $options);
+	abstract public function fetch($request);
 }

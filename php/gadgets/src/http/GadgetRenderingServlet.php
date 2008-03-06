@@ -18,14 +18,9 @@
  * 
  */
 
-include_once ('src/UserPrefs.php');
-include_once ('src/Gadget.php');
-include_once ('src/GadgetException.php');
-include_once ('src/GadgetServer.php');
-include_once ('src/GadgetSpecParser.php');
-include_once ('src/GadgetFeatureRegistry.php');
-include_once ('src/HttpProcessingOptions.php');
-include_once ("src/{$config['remote_content']}.php");
+include ('src/Gadget.php');
+
+define('DEFAULT_VIEW', 'default');
 
 class GadgetRenderingServlet extends HttpServlet {
 	
@@ -38,18 +33,23 @@ class GadgetRenderingServlet extends HttpServlet {
 			}
 			$url = trim($_GET['url']);
 			$moduleId = isset($_GET['mid']) && is_numeric($_GET['mid']) ? intval($_GET['mid']) : 0;
-			$options = new HttpProcessingOptions();
 			$httpFetcher = new $config['remote_content']();
 			$view = ! empty($_GET['view']) ? $_GET['view'] : DEFAULT_VIEW;
 			$gadgetId = new GadgetId($url, $moduleId);
 			$prefs = $this->getPrefsFromRequest();
 			$locale = $this->getLocaleFromRequest();
-			$registry = new GadgetFeatureRegistry($config['features_path']);
+			$cache = new $config['data_cache']();
+			// Profiling showed 40% of the processing time was spend in the feature registry
+			// So by caching this and making it a one time initialization, we almost double the performance  
+			if (! ($registry = $cache->get(sha1($config['features_path'])))) {
+				$registry = new GadgetFeatureRegistry($config['features_path']);
+				$cache->set(sha1($config['features_path']), $registry);
+			}
 			// skipping the contentFilters bit, since there's no way to include caja yet
 			// hopefully a rpc service or command line version will be available at some point
 			$gadgetServer = new GadgetServer();
-			$gadget = $gadgetServer->processGadget($gadgetId, $prefs, $locale, 'GADGET', $options, $httpFetcher, $registry);
-			$this->outputGadget($gadget, $view, $options);
+			$gadget = $gadgetServer->processGadget($gadgetId, $prefs, $locale, 'GADGET', $httpFetcher, $registry);
+			$this->outputGadget($gadget, $view);
 		} catch ( Exception $e ) {
 			$this->outputError($e);
 		}
@@ -62,26 +62,26 @@ class GadgetRenderingServlet extends HttpServlet {
 		echo "<h1>Error</h1>";
 		echo $e->getMessage();
 		if ($config['debug']) {
-			echo "<p><b>Debug info:</b></p><div style='overflow:auto; height:300px; border:1px solid #000000'><pre>";
+			echo "<p><b>Debug backtrace (set debug to false in the config to disable this)</b></p><div style='overflow:auto; height:300px; border:1px solid #000000'><pre>";
 			print_r(debug_backtrace());
 			echo "</pre></div>>";
 		}
 		echo "</body></html>";
 	}
 	
-	private function outputGadget($gadget, $view, $options)
+	private function outputGadget($gadget, $view)
 	{
 		switch ( $gadget->getContentType()) {
 			case 'HTML' :
-				$this->outputHtmlGadget($gadget, $view, $options);
+				$this->outputHtmlGadget($gadget, $view);
 				break;
 			case 'URL' :
-				$this->outputUrlGadget($gadget, $options);
+				$this->outputUrlGadget($gadget);
 				break;
 		}
 	}
 	
-	private function outputHtmlGadget($gadget, $view, $options)
+	private function outputHtmlGadget($gadget, $view)
 	{
 		global $config;
 		$this->setContentType("text/html; charset=UTF-8");
@@ -93,7 +93,7 @@ class GadgetRenderingServlet extends HttpServlet {
 		$externJs = "";
 		$inlineJs = "";
 		$externFmt = "<script src=\"%s\"></script>";
-		$forcedLibs = $options->getForcedJsLibs();
+		$forcedLibs = $config['focedJsLibs'];
 		foreach ( $gadget->getJsLibraries() as $library ) {
 			$type = $library->getType();
 			if ($type == 'URL') {
@@ -107,7 +107,7 @@ class GadgetRenderingServlet extends HttpServlet {
 				if ($forcedLibs == null) {
 					$inlineJs .= $library->getContent() . "\n";
 				}
-				// otherwise it was already included by options.forceJsLibs.
+				// otherwise it was already included by config.forceJsLibs.
 			}
 		}
 		// Forced libs first.
@@ -123,13 +123,13 @@ class GadgetRenderingServlet extends HttpServlet {
 			$output .= $externJs;
 		}
 		//FIXME quick hack to make it work with the new syndicator.js config, needs a propper implimentation later
-		if (!file_exists($config['syndicator_config']) || !is_readable($config['syndicator_config'])) {
+		if (! file_exists($config['syndicator_config']) || ! is_readable($config['syndicator_config'])) {
 			throw new GadgetException("Invalid syndicator config");
 		}
 		// remove both /* */ and // style comments, they crash the json_decode function
-		$contents = preg_replace('/\/\/.*$/m','',preg_replace('@/\\*(?:.|[\\n\\r])*?\\*/@', '', file_get_contents($config['syndicator_config'])));
+		$contents = preg_replace('/\/\/.*$/m', '', preg_replace('@/\\*(?:.|[\\n\\r])*?\\*/@', '', file_get_contents($config['syndicator_config'])));
 		$syndData = json_decode($contents, true);
-		$output .= '<script>gadgets.config.init('.json_encode($syndData['gadgets.features']).');</script>';
+		$output .= '<script>gadgets.config.init(' . json_encode($syndData['gadgets.features']) . ');</script>';
 		$gadgetExceptions = array();
 		$content = $gadget->getContentData($view);
 		if (empty($content)) {
@@ -145,8 +145,9 @@ class GadgetRenderingServlet extends HttpServlet {
 		echo $output;
 	}
 	
-	private function outputUrlGadget($gadget, $options)
+	private function outputUrlGadget($gadget)
 	{
+		global $config;
 		// Preserve existing query string parameters.
 		$redirURI = $gadget->getContentHref();
 		$queryStr = strpos($redirURI, '?') !== false ? substr($redirURI, strpos($redirURI, '?')) : '';
@@ -154,7 +155,7 @@ class GadgetRenderingServlet extends HttpServlet {
 		// TODO: userprefs on the fragment rather than query string
 		$query .= $this->getPrefsQueryString($gadget->getUserPrefValues());
 		$libs = array();
-		$forcedLibs = $options->getForcedJsLibs();
+		$forcedLibs = $config['focedJsLibs'];
 		if ($forcedLibs == null) {
 			$reqs = $gadget->getRequires();
 			foreach ( $reqs as $key => $val ) {
@@ -163,7 +164,7 @@ class GadgetRenderingServlet extends HttpServlet {
 		} else {
 			$libs = explode(':', $forcedLibs);
 		}
-		$query .= $this->appendLibsToQuery($libs);
+		$query .= $this->appendLibsToQuery($libs, $gadget);
 		// code bugs out with me because of the invalid url syntax since we dont have a URI class to fix it for us
 		// this works around that
 		if (substr($query, 0, 1) == '&') {
@@ -174,12 +175,13 @@ class GadgetRenderingServlet extends HttpServlet {
 		die();
 	}
 	
-	private function appendLibsToQuery($libs)
+	private function appendLibsToQuery($libs, $gadget)
 	{
+		global $config;
 		$ret = "&";
-		$ret .= LIBS_PARAM_NAME;
+		$ret .= $config['libs_param_name'];
 		$ret .= "=";
-		$ret .= $this->getJsUrl($libs);
+		$ret .= $this->getJsUrl($libs, $gadget);
 		return $ret;
 	}
 	
@@ -197,8 +199,9 @@ class GadgetRenderingServlet extends HttpServlet {
 		return $ret;
 	}
 	
-	private function getJsUrl($libs)
+	private function getJsUrl($libs, $gadget)
 	{
+		global $config;
 		$buf = '';
 		if (! is_array($libs) || ! count($libs)) {
 			$buf = 'core';
@@ -213,8 +216,16 @@ class GadgetRenderingServlet extends HttpServlet {
 				$buf .= $lib;
 			}
 		}
-		//FIXME add sha1 / md5 checksum of all js content as unique key as 'version'
-		$buf .= ".js?v=";
+		// Build a version string from the sha1() checksum of all included javascript
+		// to ensure the client always has the right version
+		$inlineJs = '';
+		foreach ( $gadget->getJsLibraries() as $library ) {
+			$type = $library->getType();
+			if ($type != 'URL') {
+				$inlineJs .= $library->getContent() . "\n";
+			}
+		}
+		$buf .= ".js?v=" . sha1($inlineJs);
 		return $buf;
 	}
 	

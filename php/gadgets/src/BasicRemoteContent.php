@@ -20,36 +20,23 @@
 
 class BasicRemoteContent extends RemoteContent {
 	
-	public function fetch($requests, $options)
+	public function fetch($request)
 	{
 		global $config;
 		$cache = new $config['data_cache']();
-		if ($requests instanceof RemoteContentRequest) {
-			$requests = array($requests);
-		}
 		$remoteContentFetcher = new BasicRemoteContentFetcher();
-		$ret = array();
-		foreach ( $requests as $request ) {
-			if (! ($request instanceof RemoteContentRequest)) {
-				throw new RemoteContentException("Invalid request type in remoteContent");
-			}
-			// determine which requests we can load from cache, and which we have to actually fetch
-			if (! $options->ignoreCache && ($cachedRequest = $cache->get(md5($request->toHash()))) !== false) {
-				$ret[] = $cachedRequest;
-			} else {
-				$remoteContentFetcher->addRequest($request);
-			}
+		if (! ($request instanceof RemoteContentRequest)) {
+			throw new RemoteContentException("Invalid request type in remoteContent");
 		}
-		if ($remoteContentFetcher->pendingRequests()) {
-			$requests = $remoteContentFetcher->fetchRequests();
-			// store the objects we just fetched in cache
-			foreach ( $requests as $request ) {
-				if ($request->getHttpCode() == '200') {
-					// only cache requests that returned a 200 OK
-					$cache->set(md5($request->toHash()), $request);
-				}
+		// determine which requests we can load from cache, and which we have to actually fetch
+		if (! $config['ignoreCache'] && ($cachedRequest = $cache->get($request->toHash())) !== false) {
+			$ret = $cachedRequest;
+		} else {
+			$ret = $remoteContentFetcher->fetchRequest($request);
+			// only cache requests that returned a 200 OK
+			if ($request->getHttpCode() == '200') {
+				$cache->set($request->toHash(), $request);
 			}
-			$ret = array_merge($requests, $ret);
 		}
 		return $ret;
 	}

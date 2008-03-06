@@ -26,16 +26,14 @@
 class GadgetContext {
 	private $httpFetcher;
 	private $locale;
-	private $options;
 	private $renderingContext;
 	private $registry;
 	
-	public function __construct(RemoteContent $httpFetcher, Locale $locale, $renderingContext, ProcessingOptions $options, GadgetFeatureRegistry $registry)
+	public function __construct(RemoteContent $httpFetcher, Locale $locale, $renderingContext, GadgetFeatureRegistry $registry)
 	{
 		$this->httpFetcher = $httpFetcher;
 		$this->locale = $locale;
 		$this->renderingContext = $renderingContext;
-		$this->options = $options;
 		$this->registry = $registry;
 	}
 	
@@ -58,10 +56,4 @@ class GadgetContext {
 	{
 		return $this->registry;
 	}
-	
-	public function getOptions()
-	{
-		return $this->options;
-	}
-
 }

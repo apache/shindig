@@ -20,9 +20,6 @@
 
 include_once ("src/{$config['gadget_token']}.php");
 include_once ("src/{$config['gadget_signer']}.php");
-include_once ("src/HttpProcessingOptions.php");
-
-//TODO make sure this all works, especially the header passthru and post parts
 
 // according to features/core/io.js, this is high on the list of things to scrap
 define('UNPARSEABLE_CRUFT', "throw 1; < don't be evil' >");
@@ -35,85 +32,107 @@ class ProxyHandler {
 		$this->fetcher = $fetcher;
 	}
 	
-	public function fetchJson($signer, $method)
+	public function fetchJson($url, $signer, $method)
 	{
 		$token = $this->extractAndValidateToken($signer);
-		$url = $_GET['url'];
 		$originalUrl = $this->validateUrl($url);
 		$signedUrl = $this->signUrl($originalUrl, $token);
 		// Fetch the content and convert it into JSON.
 		// TODO: Fetcher needs to handle variety of HTTP methods.
-		$result = $this->fetchContent($signedUrl, new HttpProcessingOptions(), $method);
+		$result = $this->fetchContent($signedUrl, $method);
 		$status = (int)$result->getHttpCode();
-		header("HTTP/1.1 $status", true);
+		//header("HTTP/1.1 $status", true);
 		if ($status == 200) {
 			$output = '';
-			$json = array('body' => $result->getResponseContent(), 'rc' => $status, 'url' => $url);
+			$json = array($url => array('body' => $result->getResponseContent(), 'rc' => $status));
 			$json = json_encode($json);
 			$output = UNPARSEABLE_CRUFT . $json;
 			$this->setCachingHeaders();
-			header("application/json; charset=utf-8");
-			header("Content-Disposition", "attachment;filename=p.txt");
+			header("application/json; charset=utf-8", true);
 			echo $output;
+		} else {
+			@ob_end_clean();
+			header("HTTP/1.0 404 Not Found", true);
+			echo "<html><body><h1>404 - Not Found</h1></body></html>";
 		}
+		die();
 	}
 	
-	public function fetch($signer, $method)
+	public function fetch($url, $signer, $method)
 	{
 		$token = $this->extractAndValidateToken($signer);
-		$originalUrl = $this->validateUrl($_GET['url']);
+		$originalUrl = $this->validateUrl($url);
 		$signedUrl = $this->signUrl($originalUrl, $token);
 		//TODO: Fetcher needs to handle variety of HTTP methods.
-		$result = $this->fetchContent($signedUrl, new HttpProcessingOptions(), $method);
+		$result = $this->fetchContent($signedUrl, $method);
 		// TODO: Fetcher needs to handle variety of HTTP methods.
 		$status = (int)$result->getHttpCode();
-		header("HTTP/1.1 $status", true);
 		if ($status == 200) {
 			$headers = explode("\n", $result->getResponseHeaders());
 			foreach ( $headers as $header ) {
-				header($header);
+				if (strpos($header, ':')) {
+					$key = trim(substr($header, 0, strpos($header, ':')));
+					$val = trim(substr($header, strpos($header, ':') + 1));
+					if (strcasecmp($key, "Transfer-Encoding") != 0 && strcasecmp($key, "Cache-Control") != 0 && strcasecmp($key, "Expires") != 0 && strcasecmp($key, "Content-Length") != 0) {
+						header("$key: $val");
+					}
+				}
 			}
 			$this->setCachingHeaders();
 			// then echo the content
 			echo $result->getResponseContent();
+		} else {
+			@ob_end_clean();
+			header("HTTP/1.0 404 Not Found", true);
+			echo "<html><body><h1>404 - Not Found ($status)</h1>";
+			echo "</body></html>";
 		}
+		// make sure the HttpServlet destructor doesn't override ours
+		die();
 	}
 	
-	private function fetchContent($signedUrl, $procOptions, $method)
+	private function fetchContent($signedUrl, $method)
 	{
 		//TODO get actual character encoding from the request
 
 		// Extract the request headers from the $_SERVER super-global (this -does- unfortunatly mean that any header that php doesn't understand won't be proxied thru though)
 		// if this turns out to be a problem we could add support for HTTP_RAW_HEADERS, but this depends on a php.ini setting, so i'd rather prevent that from being required
 		$headers = '';
-		foreach ( $_SERVER as $key => $val ) {
-			if (substr($key, 0, strlen('HTTP_')) == 'HTTP_') {
-				// massage the header key to something a bit more propper (example 'HTTP_ACCEPT_LANGUAGE' becomes 'Accept-Language')
-				// TODO: We probably need to test variations as well.
-				$key = str_replace(' ', '_', ucwords(strtolower(str_replace('-', ' ', substr($key, strlen('HTTP_'))))));
-				if ($key != 'Keep_alive' && $key != 'Connection' && $key != 'Host' && $key != 'Accept' && $key != 'Accept-Encoding') {
-					// propper curl header format according to http://www.php.net/manual/en/function.curl-setopt.php#80099
-					$headers .= "$key: $val\n";
-				}
+		$requestHeaders = $this->request_headers();
+		foreach ( $requestHeaders as $key => $val ) {
+			if ($key != 'Keep-alive' && $key != 'Connection' && $key != 'Host' && $key != 'Accept' && $key != 'Accept-Encoding') {
+				// propper curl header format according to http://www.php.net/manual/en/function.curl-setopt.php#80099
+				$headers .= "$key: $val\n";
 			}
 		}
 		if ($method == 'POST') {
-			$postData = '';
-			$first = true;
-			foreach ( $_POST as $key => $val ) {
-				if (! $first) {
-					$postData .= '&';
-				} else {
-					$first = false;
-				}
-				// make sure all the keys and val's are propperly encoded
-				$postData .= urlencode(urldecode($key)) . '=' . urlencode(urldecode($val));
+			$data = isset($_GET['postData']) ? $_GET['postData'] : false;
+			if (! $data) {
+				$data = isset($_POST['postData']) ? $_POST['postData'] : false;
 			}
+			$postData = '';
+			if ($data) {
+				$data = urldecode($data);
+				$entries = explode('&', $data);
+				foreach ( $entries as $entry ) {
+					$parts = explode('=', $entry);
+					// Process only if its a valid value=something pair
+					if (count($parts) == 2) {
+						$postData .= urlencode($parts[0]) . '=' . urlencode($parts[1]) . '&';
+					}
+				}
+				// chop of the trailing &
+				if (strlen($postData)) {
+					$postData = substr($postData, 0, strlen($postData) - 1);
+				}
+			}
+			// even if postData is an empty string, it will still post (since RemoteContentRquest checks if its false)
+			// so the request to POST is still honored
 			$request = new RemoteContentRequest($signedUrl, $headers, $postData);
-			list($request) = $this->fetcher->fetch($request, $procOptions);
+			$request = $this->fetcher->fetch($request);
 		} else {
 			$request = new RemoteContentRequest($signedUrl, $headers);
-			list($request) = $this->fetcher->fetch($request, $procOptions);
+			$request = $this->fetcher->fetch($request);
 		}
 		return $request;
 	}
@@ -121,8 +140,8 @@ class ProxyHandler {
 	private function setCachingHeaders()
 	{
 		// TODO: Re-implement caching behavior if appropriate.
-		header("Cache-Control", "private; max-age=0");
-		header("Expires", time() - 30);
+		header("Cache-Control: private; max-age=0", true);
+		header("Expires: " . gmdate("D, d M Y H:i:s", time() - 3000) . " GMT", true);
 	}
 	
 	private function validateUrl($url)
@@ -136,17 +155,45 @@ class ProxyHandler {
 		if ($signer == null) {
 			return null;
 		}
-		$token = isset($_GET["st"]) ? $_GET["st"] : '';
+		$token = isset($_GET["st"]) ? $_GET["st"] : false;
+		if ($token) {
+			$token = isset($_POST['st']) ? $_POST['st'] : '';
+		}
 		return $signer->createToken($token);
 	}
 	
 	private function signUrl($originalUrl, $token)
 	{
-		if ($token == null || (isset($_GET['authz']) && $_GET['authz'] != 'signed')) {
+		$authz = isset($_GET['authz']) ? $_GET['authz'] : false;
+		if (! $authz) {
+			$authz = isset($_POST['authz']) ? $_POST['authz'] : '';
+		}
+		if ($token == null || $authz != 'signed') {
 			return $originalUrl;
 		}
-		$method = isset($_GET['httpMethod']) ? $_GET['httpMethod'] : 'GET';
+		$method = isset($_GET['httpMethod']) ? $_GET['httpMethod'] : false;
+		if ($method) {
+			$method = isset($_POST['httpMethod']) ? $_POST['httpMethod'] : 'GET';
+		}
 		return $token->signUrl($originalUrl, $method);
 	}
-
+	
+	function request_headers()
+	{
+		// Try to use apache's request headers if available
+		if (function_exists("apache_request_headers")) {
+			if (($headers = apache_request_headers())) {
+				return $headers;
+			}
+		}
+		// if that failed, try to create them from the _SERVER superglobal
+		$headers = array();
+		foreach ( array_keys($_SERVER) as $skey ) {
+			if (substr($skey, 0, 5) == "HTTP_") {
+				$headername = str_replace(" ", "-", ucwords(strtolower(str_replace("_", " ", substr($skey, 0, 5)))));
+				$headers[$headername] = $_SERVER[$skey];
+			}
+		}
+		return $headers;
+	}
 }

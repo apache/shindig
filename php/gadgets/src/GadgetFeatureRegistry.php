@@ -158,13 +158,3 @@ class GadgetFeatureRegistryEntry {
 	}
 }
 
-class NoOpFeature extends GadgetFeature {
-	
-	public function prepare($gadget, $context, $params)
-	{
-	}
-	
-	public function process($gadget, $context, $params)
-	{
-	}
-}

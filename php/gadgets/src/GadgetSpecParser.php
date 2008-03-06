@@ -18,11 +18,13 @@
  * 
  */
 
+class SpecParserException extends Exception {
+}
+
 class GadgetSpecParser {
 	//public function parse(GadgetId $id, String $xml)
-	public function parse($xml)
+	public function parse($xml, $id, $prefs)
 	{
-		$id = 1;
 		if (empty($xml)) {
 			throw new SpecParserException("Empty XML document");
 		}
@@ -33,29 +35,28 @@ class GadgetSpecParser {
 		if (count($doc->ModulePrefs) != 1) {
 			throw new SpecParserException("Missing or duplicated <ModulePrefs>");
 		}
-		$spec = new ParsedGadgetSpec();
-		$spec->id = $id;
+		$gadget = new Gadget($id, $prefs);
 		// process ModulePref attributes
-		$this->processModulePrefs($id, $spec, $doc->ModulePrefs);
+		$this->processModulePrefs($id, $gadget, $doc->ModulePrefs);
 		// process UserPrefs, if any
 		foreach ( $doc->UserPref as $pref ) {
-			$this->processUserPref($spec, $pref);
+			$this->processUserPref($gadget, $pref);
 		}
 		foreach ( $doc->Content as $content ) {
-			$this->processContent($spec, $content);
+			$this->processContent($gadget, $content);
 		}
 		//FIXME : should we add an else { throw new SpecParserException("Missing <Content> block"); } here ? Java version doesn't but it seems like we should ?
 		foreach ( $doc->ModulePrefs->Require as $feature ) {
-			$this->processFeature($spec, $feature, true);
+			$this->processFeature($gadget, $feature, true);
 		}
 		foreach ( $doc->ModulePrefs->Optional as $feature ) {
-			$this->processFeature($spec, $feature, false);
+			$this->processFeature($gadget, $feature, false);
 		}
 		//TODO java version has a todo here for parsing icons
-		return $spec;
+		return $gadget;
 	}
 	
-	private function processModulePrefs($id, &$spec, $ModulePrefs)
+	private function processModulePrefs($id, &$gadget, $ModulePrefs)
 	{
 		$attributes = $ModulePrefs->attributes();
 		if (empty($attributes['title'])) {
@@ -63,16 +64,16 @@ class GadgetSpecParser {
 		}
 		// Get ModulePrefs attributes
 		// (trim is used here since it not only cleans up the text, but also auto-casts the SimpleXMLElement to a string)
-		$spec->title = trim($attributes['title']);
-		$spec->author = isset($attributes['author']) ? trim($attributes['author']) : '';
-		$spec->authorEmail = isset($attributes['author_email']) ? trim($attributes['author_email']) : '';
-		$spec->description = isset($attributes['description']) ? trim($attributes['description']) : '';
-		$spec->directoryTitle = isset($attributes['directory_title']) ? trim($attributes['directory_title']) : '';
-		$spec->screenshot = isset($attributes['screenshot']) ? trim($attributes['screenshot']) : '';
-		$spec->thumbnail = isset($attributes['thumbnail']) ? trim($attributes['thumbnail']) : '';
-		$spec->titleUrl = isset($attributes['title_url']) ? trim($attributes['title_url']) : '';
+		$gadget->title = trim($attributes['title']);
+		$gadget->author = isset($attributes['author']) ? trim($attributes['author']) : '';
+		$gadget->authorEmail = isset($attributes['author_email']) ? trim($attributes['author_email']) : '';
+		$gadget->description = isset($attributes['description']) ? trim($attributes['description']) : '';
+		$gadget->directoryTitle = isset($attributes['directory_title']) ? trim($attributes['directory_title']) : '';
+		$gadget->screenshot = isset($attributes['screenshot']) ? trim($attributes['screenshot']) : '';
+		$gadget->thumbnail = isset($attributes['thumbnail']) ? trim($attributes['thumbnail']) : '';
+		$gadget->titleUrl = isset($attributes['title_url']) ? trim($attributes['title_url']) : '';
 		foreach ( $ModulePrefs->Locale as $locale ) {
-			$spec->localeSpecs[] = $this->processLocale($locale);
+			$gadget->localeSpecs[] = $this->processLocale($locale);
 		}
 	
 	}
@@ -85,7 +86,7 @@ class GadgetSpecParser {
 		$countryAttr = isset($attributes['country']) ? trim($attributes['country']) : 'all';
 		$rtlAttr = isset($attributes['language_direction']) ? trim($attributes['language_direction']) : '';
 		$rightToLeft = $rtlAttr == 'rtl';
-		$locale = new ParsedMessageBundle();
+		$locale = new LocaleSpec();
 		$locale->rightToLeft = $rightToLeft;
 		//FIXME java seems to use a baseurl here, probably for the http:// part but i'm not sure yet. Should verify behavior later to see if i got it right
 		$locale->url = $messageAttr;
@@ -93,10 +94,10 @@ class GadgetSpecParser {
 		return $locale;
 	}
 	
-	private function processUserPref(&$spec, $pref)
+	private function processUserPref(&$gadget, $pref)
 	{
 		$attributes = $pref->attributes();
-		$preference = new ParsedUserPref();
+		$preference = new UserPref();
 		if (empty($attributes['name'])) {
 			throw new SpecParserException("All UserPrefs must have name attributes.");
 		}
@@ -117,10 +118,10 @@ class GadgetSpecParser {
 				$preference->enumValues[$valueText] = $displayText;
 			}
 		}
-		$spec->userPrefs[] = $preference;
+		$gadget->userPrefs[] = $preference;
 	}
 	
-	private function processContent(&$spec, $content)
+	private function processContent(&$gadget, $content)
 	{
 		$attributes = $content->attributes();
 		if (empty($attributes['type'])) {
@@ -132,22 +133,22 @@ class GadgetSpecParser {
 				throw new SpecParserException("Malformed <Content> href value");
 			}
 			$url = trim($attributes['href']);
-			$spec->contentType = 'URL';
-			$spec->contentHref = $url;
+			$gadget->contentType = 'URL';
+			$gadget->contentHref = $url;
 		} else {
-			$spec->contentType = 'HTML';
+			$gadget->contentType = 'HTML';
 			$html = (string)$content; // no trim here since empty lines can have structural meaning, so typecast to string instead
 			$view = isset($attributes['view']) ? trim($attributes['view']) : '';
 			$views = explode(',', $view);
 			foreach ( $views as $view ) {
-				$spec->addContent($view, $html);
+				$gadget->addContent($view, $html);
 			}
 		}
 	}
 	
-	private function processFeature(&$spec, $feature, $required)
+	private function processFeature(&$gadget, $feature, $required)
 	{
-		$featureSpec = new ParsedFeatureSpec();
+		$featureSpec = new FeatureSpec();
 		$attributes = $feature->attributes();
 		if (empty($attributes['feature'])) {
 			throw new SpecParserException("Feature not specified in <" . (required ? "Required" : "Optional") . "> tag");
@@ -163,226 +164,6 @@ class GadgetSpecParser {
 			$value = trim($param);
 			$featureSpec->params[$name] = $value;
 		}
-		$spec->requires[$featureSpec->name] = $featureSpec;
+		$gadget->requires[$featureSpec->name] = $featureSpec;
 	}
 }
-
-class ParsedIcon extends Icon {
-	public $mode;
-	public $url;
-	public $type;
-	
-	public function getMode()
-	{
-		return $this->mode;
-	}
-	
-	public function getURI()
-	{
-		return $this->url;
-	}
-	
-	public function getType()
-	{
-		return $this->type;
-	}
-}
-
-class ParsedFeatureSpec extends FeatureSpec {
-	public $name;
-	public $params = array();
-	public $optional;
-	
-	public function getName()
-	{
-		return $this->name;
-	}
-	
-	public function getParams()
-	{
-		return $this->params;
-	}
-	
-	public function isOptional()
-	{
-		return $this->optional;
-	}
-}
-
-class ParsedUserPref extends UserPref {
-	public $name;
-	public $displayName;
-	public $defaultValue;
-	public $required;
-	public $enumValues;
-	public $contentType;
-	
-	public function getName()
-	{
-		return $this->name;
-	}
-	
-	public function getDisplayName()
-	{
-		return $this->displayName;
-	}
-	
-	public function getDefaultValue()
-	{
-		return $this->defaultValue;
-	}
-	
-	public function isRequired()
-	{
-		return $this->required;
-	}
-	
-	public function getDataType()
-	{
-		return $this->dataType;
-	}
-	
-	public function getEnumValues()
-	{
-		return $this->enumValues;
-	}
-}
-
-class ParsedMessageBundle extends LocaleSpec {
-	public $url;
-	public $locale;
-	public $rightToLeft;
-	
-	public function getURI()
-	{
-		return $this->url;
-	}
-	
-	public function getLocale()
-	{
-		return $this->locale;
-	}
-	
-	public function isRightToLeft()
-	{
-		return $this->rightToLeft;
-	}
-}
-
-class ParsedGadgetSpec extends GadgetSpec {
-	public $id;
-	public $author;
-	public $authorEmail;
-	public $description;
-	public $directoryTitle;
-	public $contentType;
-	public $contentHref;
-	public $contentData = array();
-	public $icons = array();
-	public $localeSpecs = array();
-	public $preloads = array();
-	public $requires = array();
-	public $screenshot;
-	public $thumbnail;
-	public $title;
-	public $titleUrl;
-	public $userPrefs = array();
-	
-	public function addContent($view, $data)
-	{
-		if (empty($view)) {
-			$view = DEFAULT_VIEW;
-		}
-		if (! isset($this->contentData[$view])) {
-			$this->contentData[$view] = '';
-		}
-		$this->contentData[$view] .= $data;
-	}
-	
-	public function getAuthor()
-	{
-		return $this->author;
-	}
-	
-	public function getAuthorEmail()
-	{
-		return $this->authorEmail;
-	}
-	
-	public function getContentData($view = false)
-	{
-		if ($this->contentType != 'HTML') {
-			throw new SpecParserException("getContentData() requires contentType HTML");
-		}
-		if (empty($view) || !$view) {
-			$view = DEFAULT_VIEW;
-		}
-		return isset($this->contentData[$view]) ? trim($this->contentData[$view]) : '';
-	}
-	
-	public function getContentHref()
-	{
-		return $this->getContentType() == 'URL' ? $this->contentHref : null;
-	}
-	
-	public function getContentType()
-	{
-		return $this->contentType;
-	}
-	
-	public function getDescription()
-	{
-		return $this->description;
-	}
-	
-	public function getDirectoryTitle()
-	{
-		return $this->directoryTitle;
-	}
-	
-	public function getIcons()
-	{
-		return $this->icons;
-	}
-	
-	public function getLocaleSpecs()
-	{
-		return $this->localeSpecs;
-	}
-	
-	public function getPreloads()
-	{
-		return $this->preloads;
-	}
-	
-	public function getRequires()
-	{
-		return $this->requires;
-	}
-	
-	public function getScreenshot()
-	{
-		return $this->screenshot;
-	}
-	
-	public function getThumbnail()
-	{
-		return $this->thumbnail;
-	}
-	
-	public function getTitle()
-	{
-		return $this->title;
-	}
-	
-	public function getTitleURI()
-	{
-		return $this->titleUrl;
-	}
-	
-	public function getUserPrefs()
-	{
-		return $this->userPrefs;
-	}
-}
-
