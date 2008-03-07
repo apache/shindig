@@ -7,11 +7,6 @@
     font-family: arial, sans-serif;
   }
 
-  .gadgets-gadget {
-    height: 100%;
-    width: 100%;
-  }
-
   #headerDiv {
     padding: 10px;
     margin-bottom: 20px;
@@ -32,21 +27,43 @@
 <script type="text/javascript" src="../container/gadgets.js"></script>
 <script type="text/javascript">
 
-var specUrl = 'http://hosting.gmodules.com/ig/gadgets/file/117247905274371511495/SocialHelloWorld.xml';
+var parentUrl = document.location.href;
+var baseUrl = parentUrl.substring(0, parentUrl.indexOf('samplecontainer.html'))
+
+var gadgetUrl = baseUrl + 'examples/SocialHelloWorld.xml';
+var gadgetUrlCookie = 'sampleContainerGadgetUrl';
+
+var stateFileUrl = baseUrl + 'state-basicfriendlist.xml';
+var stateFileUrlCookie = 'sampleContainerStateFileUrl';
+
 var useCaja = false;
 var useCache = true;
 var usePermissive = false;
+var doEvil = false;  // TODO: make evilness work.
 var gadget;
 
+// TODO: Should be able to dump the state somehow
+
 function initGadget() {
-  var cookieUrl = decodeURIComponent(goog.net.cookies.get('sampleContainerGadgetUrl'));
-  if (cookieUrl && cookieUrl != "undefined") {
-    specUrl = cookieUrl;
+  // Fetch cookies
+  var cookieGadgetUrl = decodeURIComponent(goog.net.cookies.get(gadgetUrlCookie));
+  if (cookieGadgetUrl && cookieGadgetUrl != "undefined") {
+    gadgetUrl = cookieGadgetUrl;
   }
 
-  document.getElementById("gadgetUrl").value = specUrl;
+  var cookieStateFileUrl = decodeURIComponent(goog.net.cookies.get(stateFileUrlCookie));
+  if (cookieStateFileUrl && cookieStateFileUrl != "undefined") {
+    stateFileUrl = cookieStateFileUrl;
+  }
 
-  gadget = gadgets.container.createGadget({'specUrl': specUrl});;
+  // Pass state file to server
+  document.getElementById("stateFileUrl").value = stateFileUrl;
+  // TODO: Pass the state file to the server
+
+  // Render gadget
+  document.getElementById("gadgetUrl").value = gadgetUrl;
+
+  gadget = gadgets.container.createGadget({'specUrl': gadgetUrl});;
   gadget.setServerBase('../../');
 
   gadgets.container.addGadget(gadget);
@@ -58,10 +75,15 @@ function changeGadgetUrl() {
   useCaja = document.getElementById("useCajaCheckbox").checked;
   useCache = document.getElementById("useCacheCheckbox").checked;
   usePermissive = document.getElementById("usePermissiveCheckbox").checked;
+  doEvil = document.getElementById("doEvilCheckbox").checked;
 
-  specUrl = document.getElementById("gadgetUrl").value;
-  gadget.specUrl = specUrl;
-  goog.net.cookies.set('sampleContainerGadgetUrl', encodeURIComponent(specUrl));
+  stateFileUrl = document.getElementById("stateFileUrl").value;
+  // TODO: reset the state file
+  goog.net.cookies.set(stateFileUrlCookie, encodeURIComponent(stateFileUrl));
+
+  gadgetUrl = document.getElementById("gadgetUrl").value;
+  gadget.specUrl = gadgetUrl;
+  goog.net.cookies.set(gadgetUrlCookie, encodeURIComponent(gadgetUrl));
 
   gadgets.container.renderGadgets();
 };
@@ -97,16 +119,23 @@ gadgets.container.gadgetClass = SampleContainerGadget;
   <div id="headerDiv">
     <div style="float:left">Gadget testing container</div>
     <div class="subTitle">
-      Displaying gadget:
-      <input type="text" size="75" id="gadgetUrl"/>
+      Displaying gadget: <input type="text" size="75" id="gadgetUrl"/>
+      <input type="checkbox" id="useCacheCheckbox" checked="true"/>use cache
       <input type="checkbox" id="useCajaCheckbox"/>use caja
       <input type="checkbox" id="usePermissiveCheckbox"/>use permissive
-      <input type="checkbox" id="useCacheCheckbox" checked="true"/>use cache
-      <input type="button" value="reset" onclick="changeGadgetUrl();"/>
+
+      <br/>
+
+      Using state: <input type="text" size="75" id="stateFileUrl"/>
+      <input type="checkbox" id="doEvilCheckbox" checked="true"/>do evil
+
+      <br/>
+
+      <input type="button" value="reset all" onclick="changeGadgetUrl();"/>
     </div>
     <div style="clear:both; height: 1px;">&nbsp;</div>
   </div>
 
-  <div id="gadget-chrome" class="gadgets-gadget-chrome" style="width:80%; height:100%"></div>
+  <div id="gadget-chrome" class="gadgets-gadget-chrome" style="width:80%;"></div>
 </body>
 </html>
