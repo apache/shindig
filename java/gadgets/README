@@ -10,6 +10,8 @@ Installing and Running Shindig Gadget Server
    * mvn package - Builds Gadget Server and runs tests.
    * mvn jetty:run - Builds Gadget Server (no tests), installs Servlet at localhost:8080.
      - To run on a different port, use: mvn -Djetty.port=<port> jetty:run
+   * mvn jetty:run-war - If you want to use the sample container or use any of
+     the sample files you need to run in this mode.
 
 4) Hit server at http://localhost:<port>/gadgets/ifr?url=<gadget-url>
    Example: http://localhost:<port>/gadgets/ifr?url=http://www.labpixies.com/campaigns/todo/todo.xml
