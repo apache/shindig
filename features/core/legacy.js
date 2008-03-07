@@ -65,6 +65,19 @@ function _IG_RegisterOnloadHandler(callback) {
   gadgets.util.registerOnLoadHandler(callback);
 }
 
+// _IG_Callback takes the arguments in the scope the callback is executed and
+// places them first in the argument array. MakeClosure takes the arguments
+// from the scope at callback construction and pushes them first in the array
+function _IG_Callback(handler_func, var_args) {
+  var orig_args = arguments;
+  return function() {
+    var combined_args = Array.prototype.slice.call(arguments);
+    // call the handler with all args combined
+    handler_func.apply(null,
+      combined_args.concat(Array.prototype.slice.call(orig_args, 1)));
+  };
+}
+
 var _args = gadgets.util.getUrlParameters;
 
 /**
