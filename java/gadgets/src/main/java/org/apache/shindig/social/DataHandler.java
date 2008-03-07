@@ -22,4 +22,15 @@ import java.util.Map;
 
 public interface DataHandler {
   public Map<String, Map<String, String>> getPersonData(List<String> ids);
+
+  /**
+   * Updates the data key for the given person with the new value.
+   *
+   * @param id The person the data is for.
+   * @param key The key of the data.
+   * @param value The new value of the data.
+   * @return true if there was an error in updating the app data
+   */
+  // TODO: Somehow we need to generalize error handling
+  public boolean updatePersonData(String id, String key, String value);
 }

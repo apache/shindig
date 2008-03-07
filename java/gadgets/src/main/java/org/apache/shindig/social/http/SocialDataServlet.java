@@ -59,7 +59,6 @@ public class SocialDataServlet extends HttpServlet {
   protected void doPost(HttpServletRequest req, HttpServletResponse resp)
       throws IOException {
     // TODO: Get the security token
-    // TODO: Allow saving data
     // TODO: Don't use string concatenation for json output
     // TODO: etc, etc, etc
 
@@ -100,9 +99,16 @@ public class SocialDataServlet extends HttpServlet {
           case FETCH_PERSON_APP_DATA :
             jsonData = handleFetchData(peopleIds);
             break;
+
+          case UPDATE_PERSON_APP_DATA:
+            jsonData = handleUpdateData(peopleIds, requestItem);
+            break;
         }
 
         jsonResponse += "{\"response\" : " + jsonData + "}";
+      } catch (JSONException e) {
+        jsonResponse += "{\"response\" : {}, \"error\" : \""
+            + ResponseError.BAD_REQUEST.toJson() + "\"}";
       } catch (IllegalArgumentException e) {
         jsonResponse += "{\"response\" : {}, \"error\" : \""
             + ResponseError.BAD_REQUEST.toJson() + "\"}";
@@ -139,6 +145,24 @@ public class SocialDataServlet extends HttpServlet {
     jsonData += "}";
 
     return jsonData;
+  }
+
+  private String handleUpdateData(List<String> peopleIds,
+      JSONObject requestItem) throws JSONException {
+
+    // We only support updating one person right now
+    String id = peopleIds.get(0);
+
+    String key = requestItem.getString("key");
+    String value = requestItem.getString("value");
+
+    // TODO: Clean this error handling up
+    boolean success = dataHandler.updatePersonData(id, key, value);
+    if (!success) {
+      throw new IllegalArgumentException();
+    } else {
+      return "{}";
+    }
   }
 
   private String handleFetchPeople(List<String> peopleIds) {

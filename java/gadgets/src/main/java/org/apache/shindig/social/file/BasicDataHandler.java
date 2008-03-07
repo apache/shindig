@@ -29,10 +29,17 @@ import java.util.List;
 import java.util.Map;
 
 public class BasicDataHandler implements DataHandler {
-  Map<String, Map<String, String>> allData
-      = new HashMap<String, Map<String, String>>();
+  // TODO: This obviously won't work on multiple servers
+  // If we care then we should do something about it
+  private static Map<String, Map<String, String>> allData;
 
   public BasicDataHandler() {
+    if (allData != null) {
+      return;
+    }
+
+    allData = new HashMap<String, Map<String, String>>();
+
     // TODO: Should use guice here for one global thingy and get url from web ui
     String stateFile = "http://localhost:8080/gadgets/files/samplecontainer/state-basicfriendlist.xml";
     XmlStateFileFetcher fetcher = new XmlStateFileFetcher(stateFile);
@@ -78,6 +85,21 @@ public class BasicDataHandler implements DataHandler {
     return data;
   }
 
+  public boolean updatePersonData(String id, String key, String value) {
+    if (!isValidKey(key)) {
+      return false;
+    }
+
+    Map<String, String> personData = allData.get(id);
+    if (personData == null) {
+      personData = new HashMap<String, String>();
+      allData.put(id, personData);
+    }
+
+    personData.put(key, value);
+    return true;
+  }
+
   /**
    * Determines whether the input is a valid key. Valid keys match the regular
    * expression [\w\-\.]+. The logic is not done using java.util.regex.* as
@@ -86,7 +108,6 @@ public class BasicDataHandler implements DataHandler {
    * @param key the key to validate.
    * @return true if the key is a valid appdata key, false otherwise.
    */
-  // TODO: Use this method
   public static boolean isValidKey(String key) {
     if (key == null || key.length() == 0) {
       return false;

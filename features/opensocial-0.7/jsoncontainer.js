@@ -132,7 +132,7 @@ JsonContainer.prototype.newFetchPersonAppDataRequest = function(idSpec, keys) {
 
 JsonContainer.prototype.newUpdatePersonAppDataRequest = function(id, key,
     value) {
-  return new RequestItem({'type' : 'UPDATE_PERSON_APP_DATA', 'id' : id,
+  return new RequestItem({'type' : 'UPDATE_PERSON_APP_DATA', 'idSpec' : id,
     'key' : key, 'value' : value});
 };
 
