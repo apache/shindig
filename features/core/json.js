@@ -158,9 +158,9 @@ gadgets.json = function () {
           replace(/(?:^|:|,)(?:\s*\[)+/g, ''))) {
         return eval('(' + text + ')');
       }
-      // If the text is not JSON parseable, then a SyntaxError is thrown.
+      // If the text is not JSON parseable, then return false.
 
-      throw new Error('parseJSON');
+      return false;
     }
   };
 }();
