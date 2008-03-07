@@ -280,7 +280,7 @@ gadgets.rpc = function() {
         } else {
           // # targetId & sourceId@callId & packetNum & packetId & packetData
           src = [relay, '#', targetId, '&', from, '@', callId,
-                 '&1&0&', rpcData].join('');
+                 '&1&0&', encodeURIComponent(rpcData)].join('');
         }
         emitInvisibleIframe(src);
       }
