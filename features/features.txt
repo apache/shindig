@@ -8,7 +8,6 @@ features/minimessage/feature.xml
 features/opensocial-0.6/feature.xml
 features/opensocial-0.7/feature.xml
 features/opensocial-reference/feature.xml
-features/opensocial-samplecontainer/feature.xml
 features/rpc/feature.xml
 features/ifpc/feature.xml
 features/setprefs/feature.xml

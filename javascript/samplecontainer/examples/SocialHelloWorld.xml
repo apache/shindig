@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Module>
  <ModulePrefs title="Social Hello World">
-   <Require feature="opensocial-samplecontainer"></Require>
+   <Require feature="opensocial-0.7"></Require>
+   <Require feature="dynamic-height"></Require>
  </ModulePrefs>
  <Content type="html">
    <![CDATA[
@@ -24,7 +25,7 @@
 	padding: 12px 0px 0px 12px;
 	font-weight: bold;
 	font-size: 18px;
-	float: right;	
+	float: right;
     }
 
     .c0 { color: #008000; }
@@ -47,37 +48,38 @@
    </style>
 
    <script type="text/javascript">
-     var hellos = new Array('Hello World', 'Hallo Welt', 'Ciao a tutti', 'Hola mundo', 
+     var hellos = new Array('Hello World', 'Hallo Welt', 'Ciao a tutti', 'Hola mundo',
        '&#1055;&#1086;&#1103;&#1074;&#1083;&#1077;&#1085;&#1080;&#1077; &#1085;&#1072; &#1089;&#1074;&#1077;&#1090;', '&#12371;&#12435;&#12395;&#12385;&#12399;&#19990;&#30028;', '&#20320;&#22909;&#19990;&#30028;', '&#50668;&#47084;&#48516;, &#50504;&#45397;&#54616;&#49464;&#50836;');
      var numberOfStyles = 6;
      var viewerCount;
 
+     var allPeople, viewerFriendData;
      function render(data) {
        var viewer = data.get('viewer').getData();
-       var allPeople = data.get('viewerFriends').getData().asArray() || new Array();
+       allPeople = data.get('viewerFriends').getData().asArray() || new Array();
        if (viewer) {
          allPeople.push(viewer);
        }
 
        var viewerData = data.get('viewerData').getData() || {};
        viewerCount = getCount(viewerData[viewer.getId()]);
-       
-       var viewerFriendData = data.get('viewerFriendData').getData() || {};
+
+       viewerFriendData = data.get('viewerFriendData').getData() || {};
        viewerFriendData[viewer.getId()] = viewerData[viewer.getId()];
 
        var html = '';
        for (var i = 0; i < allPeople.length; i++) {
          var count = getCount(viewerFriendData[allPeople[i].getId()]);
-         if (count == 0) { 
+         if (count == 0) {
            //continue;
          }
-         
+
          html += '<div class="person">';
          html += '<div class="bubble c' + count % numberOfStyles + '">' + hellos[count % hellos.length];
          html += '<div class="name">' + allPeople[i].getDisplayName() + ' (' + count + ')';
          html += '</div></div>';
-     
-         if (allPeople[i].getField('thumbnailUrl') 
+
+         if (allPeople[i].getField('thumbnailUrl')
              && allPeople[i].getField('thumbnailUrl').indexOf('null') == -1) {
            html += '<img src="' + allPeople[i].getField('thumbnailUrl') + '"/>';
          } else {
@@ -86,6 +88,8 @@
          html += '<br style="clear:both"></div>';
        }
        document.getElementById('helloworlds').innerHTML = html;
+
+       gadgets.window.adjustHeight();
      }
 
      function getCount(data) {
@@ -98,7 +102,7 @@
        req.add(req.newUpdatePersonAppDataRequest('VIEWER', 'count', viewerCount), 'updateData');
        req.send(initData);
      }
-     
+
      function initData() {
        var req = opensocial.newDataRequest();
        req.add(req.newFetchPersonRequest('VIEWER'), 'viewer');
