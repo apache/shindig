@@ -722,6 +722,15 @@ gadgets.Container.prototype.getNextGadgetInstanceId = function() {
   return this.nextGadgetInstanceId_++;
 };
 
+/**
+ * Refresh all the gadgets in the container.
+ */
+gadgets.Container.prototype.refreshGadgets = function() {
+  for (var key in this.gadgets_) {
+    this.gadgets_[key].refresh();
+  }
+};
+
 
 // ------------
 // IfrContainer
