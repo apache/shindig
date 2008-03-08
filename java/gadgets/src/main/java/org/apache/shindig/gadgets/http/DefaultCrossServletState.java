@@ -197,6 +197,13 @@ public class DefaultCrossServletState extends CrossServletState {
           jsBuf.append(library.getContent());
         }
       }
+
+      // Include the syndicator in the hash
+      for (String syndicator : syndicatorConfig.getSyndicators()) {
+        jsBuf.append(syndicatorConfig.getJsonObject(syndicator,  null)
+            .toString());
+      }
+
       MessageDigest md;
       try {
         md = MessageDigest.getInstance("MD5");

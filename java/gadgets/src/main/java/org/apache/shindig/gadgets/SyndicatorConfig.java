@@ -103,6 +103,9 @@ public class SyndicatorConfig {
     if (syndicatorData == null) {
       return null;
     }
+    if (parameter == null) {
+      return syndicatorData;
+    }
     return syndicatorData.optJSONObject(parameter);
   }
 
