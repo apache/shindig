@@ -231,6 +231,10 @@ gadgets.IfrGadgetService = function() {
 gadgets.IfrGadgetService.inherits(gadgets.GadgetService);
 
 gadgets.IfrGadgetService.prototype.setHeight = function(height) {
+  if (height > gadgets.container.maxheight_) {
+    height = gadgets.container.maxheight_;
+  }
+  
   var element = document.getElementById(this.f);
   if (element) {
     element.style.height = height + 'px';
@@ -633,6 +637,9 @@ gadgets.Container = function() {
   this.language_ = 'ALL';
   this.view_ = 'default';
   this.nocache_ = 1;
+
+  // signed max int
+  this.maxheight_ = 0x7FFFFFFF;
 };
 
 gadgets.Container.inherits(gadgets.Extensible);
@@ -672,8 +679,12 @@ gadgets.Container.prototype.setLanguage = function(language) {
 };
 
 gadgets.Container.prototype.setView = function(view) {
-    this.view_ = view;
+  this.view_ = view;
 };
+
+gadgets.Container.prototype.setMaxHeight = function(maxheight) {
+  this.maxheight_ = maxheight;
+};  
 
 gadgets.Container.prototype.getGadgetKey_ = function(instanceId) {
   return 'gadget_' + instanceId;
