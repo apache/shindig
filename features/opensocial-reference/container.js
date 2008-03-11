@@ -431,11 +431,26 @@ opensocial.Container.isArray = function(val) {
 
 
 /**
- * Caja Support
+ * Caja Support.  See features/caja/*.js
  */
 var caja;
 var ___;
 var html_sanitize;
+var attachDocumentStub;
+var plugin_dispatchEvent___;
+// See features/caja/domita.js for uriCallback's contract.
+var uriCallback = {
+  rewrite: function rewrite(uri, mimeTypes) {
+    uri = String(uri);
+    // By default, only allow references to anchors.
+    if (/^#/.test(uri)) {
+      return '#' + encodeURIComponent(decodeUriComponent(uri.substring(1)));
+    }
+    // This callback can be replaced with one that passes the URL through
+    // a proxy that checks the mimetype.
+    return null;
+  }
+};
 
 /**
  * Enable Caja support
@@ -450,6 +465,7 @@ opensocial.Container.prototype.enableCaja = function() {
   ___ = window["___"];
   caja = window["caja"];
   html_sanitize = window["html_sanitize"];
+  attachDocumentStub = window["attachDocumentStub"];
 
   var outers = caja.copy(___.sharedOuters);
 
@@ -460,31 +476,7 @@ opensocial.Container.prototype.enableCaja = function() {
     outers._IG_RegisterOnloadHandler = ___.simpleFunc(igOnload);
   }
 
-  outers.emitHtml___ = function emitHtml(var_args) {
-    var html = Array.prototype.slice.call(arguments, 0).join('');
-    document.write(html);
-  };
-
-  outers.document = function() {};
-  outers.document.getElementById = function(id) {
-    var element = document.getElementById("DOM-PREFIX-" + id);
-    if (element !== null) {
-      ___.useSetHandler(element, 'innerHTML', function(html) {
-        var temp = html_sanitize(html, null,
-            function (nmtokens) {
-              var tokens = nmtokens.split(/\s+/g);
-              for (var i = 0; i < tokens.length; ++i) {
-                if (tokens[i]) { tokens[i] = 'DOM-PREFIX-' + tokens[i]; }
-              }
-              return tokens.join(' ');
-            });
-        return this.innerHTML = temp;
-      });
-    }
-    return element;
-  };
-
-  ___.allowCall(outers.document, 'getElementById');
+  attachDocumentStub('pre-', uriCallback, outers);
 
   // Temporarily adding some gadgets calls to the opensocial code.
   // This should move into the gadgets js code very soon.
@@ -492,33 +484,19 @@ opensocial.Container.prototype.enableCaja = function() {
 
   // Adding all of the available opensocial calls as defined in the spec
   outers.opensocial = opensocial;
-  ___.allowCall(outers.opensocial, 'requestSendMessage');
-  ___.allowCall(outers.opensocial, 'requestShareApp');
-  ___.allowCall(outers.opensocial, 'requestCreateActivity');
-  ___.allowCall(outers.opensocial, 'hasPermission');
-  ___.allowCall(outers.opensocial, 'requestPermission');
-  ___.allowCall(outers.opensocial, 'getEnvironment');
-  ___.allowCall(outers.opensocial, 'newDataRequest');
-  ___.allowCall(outers.opensocial, 'newActivity');
-  ___.allowCall(outers.opensocial, 'newActivityMediaItem');
-  ___.allowCall(outers.opensocial, 'newMessage');
+  ___.all2(
+      ___.allowCall, outers.opensocial,
+      ['requestSendMessage', 'requestShareApp', 'requestCreateActivity',
+       'hasPermission', 'requestPermission', 'getEnvironment', 'newDataRequest',
+       'newActivity', 'newActivityMediaItem', 'newMessage']);
 
-  ___.allowCall(opensocial.Collection.prototype, 'getById');
-  ___.allowCall(opensocial.Collection.prototype, 'size');
-  ___.allowCall(opensocial.Collection.prototype, 'each');
-  ___.allowCall(opensocial.Collection.prototype, 'asArray');
-  ___.allowCall(opensocial.Collection.prototype, 'getTotalSize');
-  ___.allowCall(opensocial.Collection.prototype, 'getOffset');
+  ___.all2(
+      ___.allowCall, opensocial.Collection.prototype,
+      ['getById', 'size', 'each', 'asArray', 'getTotalSize', 'getOffset']);
 
-  // TODO(doll): Call caja method to support all array calls once it exists
-  ___.allowCall(Array.prototype, 'push');
-  ___.allowCall(Array.prototype, 'sort');
-
-  ___.allowCall(opensocial.Person.prototype, 'getId');
-  ___.allowCall(opensocial.Person.prototype, 'getDisplayName');
-  ___.allowCall(opensocial.Person.prototype, 'getField');
-  ___.allowCall(opensocial.Person.prototype, 'isViewer');
-  ___.allowCall(opensocial.Person.prototype, 'isOwner');
+  ___.all2(
+      ___.allowCall, opensocial.Person.prototype,
+      ['getId', 'getDisplayName', 'getField', 'isViewer', 'isOwner']);
 
   ___.allowCall(opensocial.Address.prototype, 'getField');
   ___.allowCall(opensocial.BodyType.prototype, 'getField');
@@ -541,14 +519,11 @@ opensocial.Container.prototype.enableCaja = function() {
   ___.allowCall(opensocial.DataResponse.prototype, 'hadError');
   ___.allowCall(opensocial.DataResponse.prototype, 'get');
 
-  ___.allowCall(opensocial.DataRequest.prototype, 'getRequestObjects');
-  ___.allowCall(opensocial.DataRequest.prototype, 'add');
-  ___.allowCall(opensocial.DataRequest.prototype, 'send');
-  ___.allowCall(opensocial.DataRequest.prototype, 'newFetchPersonRequest');
-  ___.allowCall(opensocial.DataRequest.prototype, 'newFetchPeopleRequest');
-  ___.allowCall(opensocial.DataRequest.prototype, 'newFetchPersonAppDataRequest');
-  ___.allowCall(opensocial.DataRequest.prototype, 'newUpdatePersonAppDataRequest');
-  ___.allowCall(opensocial.DataRequest.prototype, 'newFetchActivitiesRequest');
+  ___.all2(
+      ___.allowCall, opensocial.DataRequest.prototype,
+      ['getRequestObjects', 'add', 'send', 'newFetchPersonRequest',
+       'newFetchPeopleRequest', 'newFetchPersonAppDataRequest',
+       'newUpdatePersonAppDataRequest', 'newFetchActivitiesRequest']);
 
   ___.allowCall(opensocial.Environment.prototype, 'getDomain');
   ___.allowCall(opensocial.Environment.prototype, 'supportsField');
@@ -566,16 +541,3 @@ opensocial.Container.prototype.enableCaja = function() {
 
   ___.setNewModuleHandler(moduleHandler);
 };
-
-/**
- * Default taming is to return obj itself. Depending on
- * other taming decisions, it may be more appropriate to
- * return an interposed wrapper.
- * @private
- */
-function plugin_tamed(obj) { return obj; }
-
-function plugin_dispatchEvent___(thisNode, event, pluginId, handlerName) {
-  return ___.getOuters(pluginId)[handlerName](plugin_tamed(thisNode),
-      plugin_tamed(event));
-}
