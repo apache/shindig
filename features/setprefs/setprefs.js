@@ -37,9 +37,9 @@ gadgets.Prefs.prototype.set = function(key, value) {
     for (var i = 0, j = arguments.length; i < j; i += 2) {
       obj[arguments[i]] = arguments[i + 1];
     }
-    gadgets.prefs_.setPref(this.moduleId_, obj);
+    gadgets.Prefs.setInternal_(obj);
   } else {
-    gadgets.prefs_.setPref(this.moduleId_, key, value);
+    gadgets.Prefs.setInternal_(key, value);
   }
 
   var args = [
@@ -67,6 +67,6 @@ gadgets.Prefs.prototype.setArray = function(key, val) {
   for (var i = 0, j = val.length; i < j; ++i) {
     val[i] = val[i].replace(/\|/g, "%7C");
   }
-  this.set(key, val.join('|'));
+  gadgets.Prefs.setInternal_(key, val.join('|'));
 };
 

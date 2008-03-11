@@ -19,7 +19,6 @@ package org.apache.shindig.gadgets;
 
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 
 /**
  * Base interface providing Gadget Server's primary extensibility mechanism.
@@ -29,11 +28,8 @@ import java.util.Map;
  * tags declared in its {@code GadgetSpec}, and the dependencies registered
  * for these in {@code GadgetFeatureRegistry}.
  *
- * Each {@code GadgetFeature}'s prepare method is called first - potentially
+ * Each {@code GadgetFeature}'s process method is called - potentially
  * in parallel with many others whose dependencies have also been satisfied.
- * Once this has completed, its process method is called. Prepare is useful
- * for async operations such as retrieval of a remote resource; all
- * {@code Gadget} modifications occur in process.
  *
  * To extend the Gadget Server's feature set, simply implement this interface
  * and register your class with {@code GadgetFeatureRegistry}, indicating
@@ -47,32 +43,18 @@ import java.util.Map;
 public abstract class GadgetFeature {
 
   /**
-   * Performs any pre-processing required to handle this feature.
+   * Performs processing required to handle this feature.
    * By default this does nothing.
    *
-   * @param gadget
-   * @param context
-   * @param params
-   * @throws GadgetException
-   */
-  public void prepare(GadgetView gadget, GadgetContext context,
-                      Map<String, String> params) throws GadgetException {
-    // by default we do nothing, we just don't want to force all features
-    // to implement this.
-  }
-
-  /**
-   * Performs post-processing required to handle this feature.
-   * By default this also does nothing.
+   * Only invoked if isJsOnly is false.
    *
    * @param gadget
    * @param context
-   * @param params
    * @throws GadgetException
    */
-  public void process(Gadget gadget, GadgetContext context,
-      Map<String, String> params) throws GadgetException {
-    // we do nothing here as well.
+  public void process(Gadget gadget, GadgetContext context)
+      throws GadgetException {
+    // By default we do nothing.
   }
 
   /**
@@ -81,11 +63,18 @@ public abstract class GadgetFeature {
    * This is primarily used by features that simply pass-through libraries.
    *
    * @param context
-   * @param options
    * @return A list of all libraries needed by this feature for the request.
    */
-  public List<JsLibrary> getJsLibraries(RenderingContext context,
-                                        ProcessingOptions options) {
+  public List<JsLibrary> getJsLibraries(GadgetContext context) {
     return Collections.emptyList();
+  }
+
+  /**
+   * @return True if this feature only exists to satisfy javascript dependencies
+   *     if this is true, there is no need to run prepare or process, and it
+   *     can be run serially.
+   */
+  public boolean isJsOnly() {
+    return false;
   }
 }

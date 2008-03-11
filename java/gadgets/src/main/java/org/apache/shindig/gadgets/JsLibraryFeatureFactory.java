@@ -67,13 +67,15 @@ class JsLibraryFeature extends GadgetFeature {
 
   /**
    * {@inheritDoc}
+   *
+   * If context is null, all libraries will be returned rather than just
+   * the libraries for the specified context.
    */
   @Override
-  public List<JsLibrary> getJsLibraries(RenderingContext context,
-                                        ProcessingOptions options) {
+  public List<JsLibrary> getJsLibraries(GadgetContext context) {
     List<JsLibrary> libs = null;
 
-    if (context == null || options == null) {
+    if (context == null) {
       // for this special case we return all JS libraries in a single list.
       libs = new LinkedList<JsLibrary>();
       for (Map.Entry<RenderingContext, Map<String, List<JsLibrary>>> i :
@@ -83,9 +85,10 @@ class JsLibraryFeature extends GadgetFeature {
         }
       }
     } else {
-      Map<String, List<JsLibrary>> contextLibs = libraries.get(context);
+      Map<String, List<JsLibrary>> contextLibs
+          = libraries.get(context.getRenderingContext());
       if (contextLibs != null) {
-        libs = contextLibs.get(options.getSyndicator());
+        libs = contextLibs.get(context.getSyndicator());
         if (libs == null) {
           // Try default.
           libs = contextLibs.get(SyndicatorConfig.DEFAULT_SYNDICATOR);
@@ -99,16 +102,8 @@ class JsLibraryFeature extends GadgetFeature {
     return libs;
   }
 
-  /**
-   * {@inheritDoc}
-   */
   @Override
-  public void process(Gadget gadget, GadgetContext context,
-      Map<String, String> params) throws GadgetException {
-    super.process(gadget, context, params);
-    for (JsLibrary library : getJsLibraries(context.getRenderingContext(),
-                                            context.getOptions())) {
-      gadget.addJsLibrary(library);
-    }
+  public boolean isJsOnly() {
+    return true;
   }
 }

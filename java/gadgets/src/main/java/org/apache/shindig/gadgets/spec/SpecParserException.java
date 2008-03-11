@@ -15,32 +15,23 @@
  * KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-package org.apache.shindig.gadgets;
+package org.apache.shindig.gadgets.spec;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
+import org.apache.shindig.gadgets.GadgetException;
+import org.apache.shindig.util.XmlException;
 
 /**
- * Name/value mapping of messages retrieved from a message bundle.
+ * Exceptions for Gadget Spec parsing.
  */
-public class MessageBundle {
-  private Map<String, String> messages;
-  public static final MessageBundle EMPTY = new MessageBundle();
-
+public class SpecParserException extends GadgetException {
   /**
-   * @return A read-only view of the message bundle.
+   * @param message
    */
-  public Map<String, String> getMessages() {
-    return messages;
+  public SpecParserException(String message) {
+    super(GadgetException.Code.MALFORMED_XML_DOCUMENT, message);
   }
 
-  public MessageBundle(Map<String, String> messages) {
-    Map<String, String> tempMap = new HashMap<String, String>(messages);
-    this.messages = Collections.unmodifiableMap(tempMap);
-  }
-
-  private MessageBundle() {
-    this.messages = Collections.emptyMap();
+  public SpecParserException(XmlException e) {
+    super(GadgetException.Code.MALFORMED_XML_DOCUMENT, e);
   }
 }

@@ -17,47 +17,76 @@
  */
 package org.apache.shindig.gadgets;
 
+import org.apache.shindig.gadgets.spec.GadgetSpec;
+
+import java.net.URI;
 import java.util.Locale;
 
 /**
- * Bundles together per-server data and helper mechanisms providing
- * generic functionality such as retrieval of remote data and caching.
+ * Bundles together context data for the current request with server config
+ * data.
  */
 public class GadgetContext {
-  private final GadgetServerConfigReader config;
-  public GadgetServerConfigReader getServerConfig() {
-    return config;
-  }
-
-  private final Locale locale;
-  public Locale getLocale() {
-    return locale;
-  }
-
-  private final RenderingContext renderingContext;
-  public RenderingContext getRenderingContext() {
-    return renderingContext;
-  }
-
-  private final ProcessingOptions options;
-  public ProcessingOptions getOptions() {
-    return options;
+  /**
+   * @return The url for this gadget.
+   */
+  public URI getUrl() {
+    return null;
   }
 
   /**
-   * Creates a context for the current gadget.
-   * @param config
-   * @param locale
-   * @param renderingContext
-   * @param options
+   * @return The module id for this request.
    */
-  public GadgetContext(GadgetServerConfigReader config,
-                       Locale locale,
-                       RenderingContext renderingContext,
-                       ProcessingOptions options) {
-    this.config = config;
-    this.locale = locale;
-    this.renderingContext = renderingContext;
-    this.options = options != null ? options : new ProcessingOptions();
+  public int getModuleId() {
+    return 0;
+  }
+
+  /**
+   * @return The locale for this request.
+   */
+  public Locale getLocale() {
+    return GadgetSpec.DEFAULT_LOCALE;
+  }
+
+  /**
+   * @return The rendering context for this request.
+   */
+  public RenderingContext getRenderingContext() {
+    return RenderingContext.GADGET;
+  }
+
+  /**
+   * @return Whether or not to bypass caching behavior for the current request.
+   */
+  public boolean getIgnoreCache() {
+    return false;
+  }
+
+  /**
+   * @return The syndicator of the current request.
+   */
+  public String getSyndicator() {
+    return SyndicatorConfig.DEFAULT_SYNDICATOR;
+  }
+
+  /**
+   * @return Whether or not to show debug output.
+   */
+  public boolean getDebug() {
+    return false;
+  }
+
+  /**
+   * @return Name of view to show
+   */
+  public String getView() {
+    return GadgetSpec.DEFAULT_VIEW;
+  }
+
+  /**
+   * @return The user prefs for the current request.
+   */
+  public UserPrefs getUserPrefs() {
+    return UserPrefs.EMPTY;
   }
 }

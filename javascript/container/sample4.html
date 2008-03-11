@@ -4,7 +4,7 @@
 <title>Sample: set-pref support</title>
 <!-- default container look and feel -->
 <link rel="stylesheet" href="gadgets.css">
-<script type="text/javascript" src="../../js/rpc.js?c=1"></script>
+<script type="text/javascript" src="../../js/rpc.js?c=1&debug=1"></script>
 <script type="text/javascript" src="cookies.js"></script>
 <script type="text/javascript" src="gadgets.js"></script>
 <script type="text/javascript">
@@ -14,7 +14,6 @@ function init() {
   gadgets.container.layoutManager =
       new gadgets.FloatLeftLayoutManager('gadget-parent');
 
-  gadgets.container.setParentUrl("http://" + document.location.host + '/');
   gadgets.container.addGadget(
       gadgets.container.createGadget({specUrl: specUrl0}));
 };

@@ -32,13 +32,16 @@ import java.util.Map;
 public class RemoteContent {
   // Replicate HTTP status codes here.
   public final static int SC_OK = 200;
+  public final static int SC_NOT_FOUND = 404;
   public final static int SC_INTERNAL_SERVER_ERROR = 500;
 
   private final int httpStatusCode;
   private static final String DEFAULT_ENCODING = "UTF-8";
   private final String encoding;
 
-  public static final RemoteContent ERROR = new RemoteContent();
+  public static final RemoteContent ERROR
+      = new RemoteContent(SC_INTERNAL_SERVER_ERROR);
+  public static final RemoteContent NOT_FOUND = new RemoteContent(SC_NOT_FOUND);
 
   // Used to lazily convert to a string representation of the input.
   private String responseString = null;
@@ -48,8 +51,8 @@ public class RemoteContent {
   /**
    * Create a dummy empty map. Access via RemoteContent.ERROR
    */
-  private RemoteContent() {
-    this.httpStatusCode = SC_INTERNAL_SERVER_ERROR;
+  private RemoteContent(int statusCode) {
+    this.httpStatusCode = statusCode;
     this.responseBytes = new byte[0];
     this.encoding = DEFAULT_ENCODING;
     this.headers = Collections.emptyMap();

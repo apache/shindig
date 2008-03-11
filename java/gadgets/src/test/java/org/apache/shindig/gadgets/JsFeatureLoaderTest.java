@@ -17,13 +17,16 @@
  */
 package org.apache.shindig.gadgets;
 
-import junit.framework.TestCase;
+import static org.easymock.EasyMock.eq;
+import static org.easymock.EasyMock.expect;
 
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.net.URI;
 import java.util.List;
 
-public class JsFeatureLoaderTest extends TestCase {
-
-  GadgetFeatureRegistry registry;
+public class JsFeatureLoaderTest extends GadgetTestFixture {
   JsFeatureLoader loader;
 
   private static final String FEATURE_NAME = "test";
@@ -31,12 +34,11 @@ public class JsFeatureLoaderTest extends TestCase {
   private static final String ALT_JS_CONTENT = "function test(){while(true);}";
   private static final String SYND_A = "test";
   private static final String SYND_B = "wuwowowaefdf";
-
+  private static final URI JS_URL = URI.create("http://example.org/feature.js");
 
   @Override
   public void setUp() throws Exception {
-    registry = new GadgetFeatureRegistry(null);
-    loader = new JsFeatureLoader();
+    loader = new JsFeatureLoader(fetcher);
   }
 
   public void testBasicLoading() throws Exception {
@@ -50,8 +52,7 @@ public class JsFeatureLoaderTest extends TestCase {
 
     assertEquals(FEATURE_NAME, entry.getName());
     GadgetFeature feature = entry.getFeature().create();
-    List<JsLibrary> libs = feature.getJsLibraries(RenderingContext.GADGET,
-                                                  new ProcessingOptions());
+    List<JsLibrary> libs = feature.getJsLibraries(new GadgetContext());
     assertEquals(1, libs.size());
     assertEquals(JsLibrary.Type.INLINE, libs.get(0).getType());
     assertEquals(DEF_JS_CONTENT, libs.get(0).getContent());
@@ -70,22 +71,60 @@ public class JsFeatureLoaderTest extends TestCase {
     GadgetFeatureRegistry.Entry entry = loader.loadFeature(registry, xml);
     GadgetFeature feature = entry.getFeature().create();
     List<JsLibrary> libs;
-    libs = feature.getJsLibraries(RenderingContext.GADGET,
-                                  new SyndOptions(SYND_A));
+    libs = feature.getJsLibraries(new SyndContext(SYND_A));
     assertEquals(DEF_JS_CONTENT, libs.get(0).getContent());
-   libs = feature.getJsLibraries(RenderingContext.GADGET,
-                                 new SyndOptions(SYND_B));
+    libs = feature.getJsLibraries(new SyndContext(SYND_B));
     assertEquals(ALT_JS_CONTENT, libs.get(0).getContent());
+  }
+
+  public void testFileReferences() throws Exception {
+    File temp = File.createTempFile(getName(), ".js-noopt");
+    BufferedWriter out = new BufferedWriter(new FileWriter(temp));
+    out.write(DEF_JS_CONTENT);
+    out.close();
+    String xml = "<feature>" +
+                 "  <name>" + FEATURE_NAME + "</name>" +
+                 "  <gadget>" +
+                 "    <script src=\"" + temp.getPath() + "\"/>" +
+                 "  </gadget>" +
+                 "</feature>";
+    GadgetFeatureRegistry.Entry entry = loader.loadFeature(registry, xml);
+    GadgetFeature feature = entry.getFeature().create();
+    List<JsLibrary> libs = feature.getJsLibraries(new GadgetContext());
+    assertEquals(1, libs.size());
+    assertEquals(DEF_JS_CONTENT, libs.get(0).getContent());
+    assertEquals(FEATURE_NAME, libs.get(0).getFeature());
+  }
+
+  public void testUrlReferences() throws Exception {
+    String xml = "<feature>" +
+                 "  <name>" + FEATURE_NAME + "</name>" +
+                 "  <gadget>" +
+                 "    <script src=\"" + JS_URL + "\"/>" +
+                 "  </gadget>" +
+                 "</feature>";
+    RemoteContentRequest request = new RemoteContentRequest(JS_URL);
+    RemoteContent response
+        = new RemoteContent(200, ALT_JS_CONTENT.getBytes(), null);
+    expect(fetcher.fetch(eq(request))).andReturn(response);
+    replay();
+    GadgetFeatureRegistry.Entry entry = loader.loadFeature(registry, xml);
+    verify();
+    GadgetFeature feature = entry.getFeature().create();
+    List<JsLibrary> libs = feature.getJsLibraries(new GadgetContext());
+    assertEquals(1, libs.size());
+    assertEquals(ALT_JS_CONTENT, libs.get(0).getContent());
+    assertEquals(FEATURE_NAME, libs.get(0).getFeature());
   }
 }
 
-class SyndOptions extends ProcessingOptions {
+class SyndContext extends GadgetContext {
   private final String syndicator;
   @Override
   public String getSyndicator() {
     return syndicator;
   }
-  public SyndOptions(String syndicator) {
+  public SyndContext(String syndicator) {
     this.syndicator = syndicator;
   }
 }

@@ -20,16 +20,16 @@
 package org.apache.shindig.gadgets.http;
 
 import org.apache.shindig.gadgets.Gadget;
+import org.apache.shindig.gadgets.GadgetContext;
 import org.apache.shindig.gadgets.GadgetServer;
 import org.apache.shindig.gadgets.GadgetSigner;
-import org.apache.shindig.gadgets.ProcessingOptions;
 
+import java.util.Set;
 import java.util.logging.Logger;
 
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
 
 /**
  * Loads shared configuration and creates appropriate class instances for
@@ -79,10 +79,9 @@ public abstract class CrossServletState {
   public abstract GadgetServer getGadgetServer();
 
   /**
-   * @param req The request that a signing token is needed for.
-   * @return A unique GadgetSigner for the request
+   * @return A gadget signer implementation
    */
-  public abstract GadgetSigner getGadgetSigner(HttpServletRequest req);
+  public abstract GadgetSigner getGadgetSigner();
 
   /**
    * Constructs a url for retrieving javascript for the given
@@ -91,17 +90,17 @@ public abstract class CrossServletState {
    * @param features
    * @return The url to retrieve the appropriate JS.
    */
-  public abstract String getJsUrl(String[] features, ProcessingOptions opts);
+  public abstract String getJsUrl(Set<String> features, GadgetContext context);
 
   /**
    * Constructs a url for generating an iframe for the given gadget.
    * This only applies for RPC calls that must generate an iframe.
    *
-   * TODO: The second parameter here should be something else (perhaps a
-   * context object). A better choice would probably be to add the view params
-   * to ProcessingOptions and pass that here.
+   * @param gadget
+   * @return The url for the iframe; may have both query string and fragment
+   *     parameters, so caution should be taken when adding your own data.
    */
-  public abstract String getIframeUrl(Gadget gadget, ProcessingOptions opts);
+  public abstract String getIframeUrl(Gadget gadget);
 
   /**
    * Initializes this handler using the provided implementation.

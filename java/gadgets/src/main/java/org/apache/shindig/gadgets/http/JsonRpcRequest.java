@@ -20,15 +20,18 @@
 package org.apache.shindig.gadgets.http;
 
 import org.apache.shindig.gadgets.Gadget;
+import org.apache.shindig.gadgets.GadgetContext;
 import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.GadgetServer;
-import org.apache.shindig.gadgets.GadgetSpec;
-import org.apache.shindig.gadgets.ProcessingOptions;
+import org.apache.shindig.gadgets.spec.GadgetSpec;
+import org.apache.shindig.gadgets.spec.ModulePrefs;
+import org.apache.shindig.gadgets.spec.UserPref;
+import org.apache.shindig.gadgets.spec.View;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.net.URI;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
@@ -42,8 +45,7 @@ import java.util.concurrent.ExecutorCompletionService;
  *
  */
 public class JsonRpcRequest {
-  private final JsonRpcContext context;
-  private final List<JsonRpcGadget> gadgets;
+  private final List<GadgetContext> gadgets;
 
   /**
    * Processes the request and returns a JSON object
@@ -59,83 +61,59 @@ public class JsonRpcRequest {
     CompletionService<Gadget> processor =
       new ExecutorCompletionService<Gadget>(server.getConfig().getExecutor());
 
-    for (JsonRpcGadget gadget : gadgets) {
-      processor.submit(new JsonRpcGadgetJob(server, context, gadget));
+    for (GadgetContext gadget : gadgets) {
+      processor.submit(new JsonRpcGadgetJob(server, gadget));
     }
-
-    ProcessingOptions options = new JsonRpcProcessingOptions(context);
 
     int numJobs = gadgets.size();
     do {
       try {
-        Gadget outGadget = processor.take().get();
+        Gadget gadget = processor.take().get();
         JSONObject gadgetJson = new JSONObject();
 
-        if (outGadget.getTitleURI() != null) {
-          gadgetJson.put("titleUrl", outGadget.getTitleURI().toString());
+        GadgetSpec spec = gadget.getSpec();
+        ModulePrefs prefs = spec.getModulePrefs();
+
+        JSONObject views = new JSONObject();
+        for (View view : spec.getViews().values()) {
+          views.put(view.getName(), new JSONObject()
+               // .put("content", view.getContent())
+               .put("type", view.getType().toString().toLowerCase())
+               .put("quirks", view.getQuirks()));
         }
-        gadgetJson.put("url", outGadget.getId().getURI().toString())
-                  .put("moduleId", outGadget.getId().getModuleId())
-                  .put("title", outGadget.getTitle())
-                  .put("contentType",
-                      outGadget.getView(options.getView()).getType()
-                      .toString().toLowerCase());
 
         // Features.
-        Set<String> feats = outGadget.getRequires().keySet();
+        Set<String> feats = prefs.getFeatures().keySet();
         String[] features = feats.toArray(new String[feats.size()]);
-        gadgetJson.put("features", features);
 
-        JSONObject prefs = new JSONObject();
+        JSONObject userPrefs = new JSONObject();
 
         // User pref specs
-        for (GadgetSpec.UserPref pref : outGadget.getUserPrefs()) {
+        for (UserPref pref : spec.getUserPrefs()) {
           JSONObject up = new JSONObject()
               .put("displayName", pref.getDisplayName())
               .put("type", pref.getDataType().toString().toLowerCase())
               .put("default", pref.getDefaultValue())
               .put("enumValues", pref.getEnumValues());
-          prefs.put(pref.getName(), up);
-        }
-        gadgetJson.put("userPrefs", prefs);
-
-        // Content
-        String iframeUrl = servletState.getIframeUrl(outGadget, options);
-        gadgetJson.put("content", iframeUrl);
-
-        // Extended spec data.
-        String directoryTitle = outGadget.getDirectoryTitle();
-        if (directoryTitle != null) {
-          gadgetJson.put("directoryTitle", directoryTitle);
+          userPrefs.put(pref.getName(), up);
         }
 
-        URI thumbnail = outGadget.getThumbnail();
-        if (thumbnail != null) {
-          gadgetJson.put("thumbnail", thumbnail.toString());
-        }
-
-        URI screenshot = outGadget.getScreenshot();
-        if (screenshot != null) {
-          gadgetJson.put("screenshot", screenshot.toString());
-        }
-
-        String author = outGadget.getAuthor();
-        if (author != null) {
-          gadgetJson.put("author", author);
-        }
-
-        String authorEmail = outGadget.getAuthorEmail();
-        if (authorEmail != null) {
-          gadgetJson.put("authorEmail", authorEmail);
-        }
-
-        // Categories
-        List<String> cats = outGadget.getCategories();
-        if (cats != null) {
-          String[] categories = cats.toArray(new String[cats.size()]);
-          gadgetJson.put("categories", outGadget.getCategories().toArray());
-        }
-
+        gadgetJson.put("iframeUrl", servletState.getIframeUrl(gadget))
+                  .put("url", gadget.getContext().getUrl().toString())
+                  .put("moduleId", gadget.getContext().getModuleId())
+                  .put("title", prefs.getTitle())
+                  .put("titleUrl", prefs.getTitleUrl().toString())
+                  .put("views", views)
+                  .put("features", features)
+                  .put("userPrefs", userPrefs)
+                  // extended meta data
+                  .put("directoryTitle", prefs.getDirectoryTitle())
+                  .put("thumbnail", prefs.getThumbnail().toString())
+                  .put("screenshot", prefs.getScreenshot().toString())
+                  .put("author", prefs.getAuthor())
+                  .put("authorEmail", prefs.getAuthorEmail())
+                  .put("categories", prefs.getCategories())
+                  .put("screenshot", prefs.getScreenshot().toString());
         out.append("gadgets", gadgetJson);
       } catch (InterruptedException e) {
         throw new RpcException("Incomplete processing", e);
@@ -146,21 +124,18 @@ public class JsonRpcRequest {
         RpcException e = (RpcException)ee.getCause();
         // Just one gadget failed; mark it as such.
         try {
-          JsonRpcGadget gadget = e.getGadget();
+          GadgetContext context = e.getContext();
 
-          if (gadget == null) {
+          if (context == null) {
             throw e;
           }
 
           JSONObject errorObj = new JSONObject();
-          errorObj.put("url", gadget.getUrl())
-                  .put("moduleId", gadget.getModuleId());
-          if (e.getCause() instanceof GadgetServer.GadgetProcessException) {
-            GadgetServer.GadgetProcessException gpe
-                = (GadgetServer.GadgetProcessException)e.getCause();
-            for (GadgetException ge : gpe.getComponents()) {
-              errorObj.append("errors", ge.getMessage());
-            }
+          errorObj.put("url", context.getUrl())
+                  .put("moduleId", context.getModuleId());
+          if (e.getCause() instanceof GadgetException) {
+            GadgetException gpe = (GadgetException)e.getCause();
+            errorObj.append("errors", gpe.getMessage());
           } else {
             errorObj.append("errors", e.getMessage());
           }
@@ -186,11 +161,10 @@ public class JsonRpcRequest {
       if (gadgets.length() == 0) {
         throw new RpcException("No gadgets requested.");
       }
-      this.context = new JsonRpcContext(context);
 
-      List<JsonRpcGadget> gadgetList = new LinkedList<JsonRpcGadget>();
+      List<GadgetContext> gadgetList = new LinkedList<GadgetContext>();
       for (int i = 0, j = gadgets.length(); i < j; ++i) {
-        gadgetList.add(new JsonRpcGadget(gadgets.getJSONObject(i)));
+        gadgetList.add(new JsonRpcGadgetContext(context, gadgets.getJSONObject(i)));
       }
       this.gadgets = Collections.unmodifiableList(gadgetList);
     } catch (JSONException e) {

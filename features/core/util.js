@@ -299,4 +299,7 @@ gadgets.util = function() {
     }
   };
 }();
+// Initialize url parameters so that hash data is pulled in before it can be
+// altered by a click.
+gadgets.util.getUrlParameters();
 

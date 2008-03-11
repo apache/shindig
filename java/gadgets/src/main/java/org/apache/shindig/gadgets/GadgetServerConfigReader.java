@@ -17,6 +17,9 @@
  */
 package org.apache.shindig.gadgets;
 
+import org.apache.shindig.gadgets.spec.GadgetSpec;
+import org.apache.shindig.gadgets.spec.MessageBundle;
+
 import java.util.concurrent.Executor;
 
 /**
@@ -43,16 +46,16 @@ public class GadgetServerConfigReader  {
     return featureRegistry;
   }
 
-  protected GadgetDataCache<GadgetSpec> specCache;
+  protected DataFetcher<GadgetSpec> gadgetSpecFetcher;
 
-  public GadgetDataCache<GadgetSpec> getSpecCache() {
-    return specCache;
+  public DataFetcher<GadgetSpec> getGadgetSpecFetcher() {
+    return gadgetSpecFetcher;
   }
 
-  protected GadgetDataCache<MessageBundle> messageBundleCache;
+  protected DataFetcher<MessageBundle> messageBundleFetcher;
 
-  public GadgetDataCache<MessageBundle> getMessageBundleCache() {
-    return messageBundleCache;
+  public DataFetcher<MessageBundle> getMessageBundleFetcher() {
+    return messageBundleFetcher;
   }
 
   protected RemoteContentFetcher contentFetcher;
@@ -85,8 +88,8 @@ public class GadgetServerConfigReader  {
     executor = base.getExecutor();
     featureRegistry = base.getFeatureRegistry();
     contentFetcher = base.getContentFetcher();
-    specCache = base.getSpecCache();
-    messageBundleCache = base.getMessageBundleCache();
+    gadgetSpecFetcher = base.getGadgetSpecFetcher();
+    messageBundleFetcher = base.getMessageBundleFetcher();
     gadgetBlacklist = base.getGadgetBlacklist();
     syndicatorConfig = base.getSyndicatorConfig();
   }

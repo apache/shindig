@@ -5,7 +5,6 @@ import org.apache.shindig.gadgets.RemoteContentFetcher;
 import org.apache.shindig.gadgets.BasicRemoteContentFetcher;
 import org.apache.shindig.gadgets.RemoteContent;
 import org.apache.shindig.gadgets.RemoteContentRequest;
-import org.apache.shindig.gadgets.ProcessingOptions;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
@@ -45,8 +44,7 @@ public class XmlStateFileFetcher {
     // TODO: Eventually get the fetcher and processing options from a
     // config file, just like the GadgetServer
     RemoteContentFetcher fetcher = new BasicRemoteContentFetcher(1024 * 1024);
-    RemoteContent xml = fetcher.fetch(new RemoteContentRequest(uri),
-        new ProcessingOptions());
+    RemoteContent xml = fetcher.fetch(new RemoteContentRequest(uri));
 
     InputSource is = new InputSource(new StringReader(
         xml.getResponseAsString()));

@@ -17,69 +17,28 @@
  */
 package org.apache.shindig.gadgets;
 
-import org.json.JSONException;
-import org.json.JSONObject;
+import org.apache.shindig.gadgets.spec.GadgetSpec;
+import org.apache.shindig.gadgets.spec.UserPref;
 
-import java.util.Map;
+import org.apache.commons.lang.StringEscapeUtils;
 
 /**
  * Substitutes user prefs into the spec.
  */
-public class UserPrefSubstituter implements GadgetFeatureFactory {
-  private final static GadgetFeature feature
-      = new UserPrefSubstituterFeature();
-
-  /**
-  * {@inheritDoc}
-  */
-  public GadgetFeature create() {
-    return feature;
-  }
-}
-
-class UserPrefSubstituterFeature extends GadgetFeature {
-
-  /**
-   * {@inheritDoc}
-   */
-  @Override
-  public void process(Gadget gadget, GadgetContext context,
-                      Map<String, String> params) throws GadgetException {
-    super.process(gadget, context, params);
-    Substitutions substitutions = gadget.getSubstitutions();
-    UserPrefs upValues = gadget.getUserPrefValues();
-
-    JSONObject json = null;
-
-    if (context.getRenderingContext() == RenderingContext.GADGET) {
-      json = new JSONObject();
-    }
-
-    for (GadgetSpec.UserPref pref : gadget.getUserPrefs()) {
+public class UserPrefSubstituter {
+  public static void addSubstitutions(Substitutions substituter,
+      GadgetSpec spec, UserPrefs values) {
+    for (UserPref pref : spec.getUserPrefs()) {
       String name = pref.getName();
-      String value = upValues.getPref(name);
+      String value = values.getPref(name);
       if (value == null) {
         value = pref.getDefaultValue();
-      }
-      if (value == null) {
-        value = "";
-      }
-      substitutions.addSubstitution(Substitutions.Type.USER_PREF, name, value);
-
-      if (json != null) {
-        try {
-          json.put(name, value);
-        } catch (JSONException e) {
-          throw new RuntimeException(e);
+        if (value == null) {
+          value = "";
         }
       }
-    }
-
-    if (json != null) {
-      String setPrefFmt = "gadgets.prefs_.setPref(%d, %s);";
-      int moduleId = gadget.getId().getModuleId();
-      String setPrefStr = String.format(setPrefFmt, moduleId, json.toString());
-      gadget.addJsLibrary(JsLibrary.create(JsLibrary.Type.INLINE, setPrefStr));
+      substituter.addSubstitution(Substitutions.Type.USER_PREF, name,
+          StringEscapeUtils.escapeHtml(value));
     }
   }
 }

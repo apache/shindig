@@ -21,6 +21,9 @@ import org.apache.shindig.util.ResourceLoader;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
@@ -34,14 +37,32 @@ public final class JsLibrary {
   public Type getType() {
     return type;
   }
+
+  /**
+   * The content of the library. May be optimized through minification or
+   * other compression techniques. Use debugContent to get the unmodified
+   * version.
+   */
   private final String content;
   public String getContent() {
     return content;
   }
 
+  /**
+   * Unmodified content. May be identical to content if no optimized version of
+   * the script exists.
+   */
   private final String debugContent;
   public String getDebugContent() {
     return debugContent;
+  }
+
+  /**
+   * The feature that this library belongs to; may be null;
+   */
+  private final String feature;
+  public String getFeature() {
+    return feature;
   }
 
   private static final Logger logger
@@ -86,25 +107,43 @@ public final class JsLibrary {
    * @param content If FILE or RESOURCE, we will also look for a file
    *     named file.opt.ext for every file.ext, and if present we will
    *     use that as the standard content and file.ext as the debug content.
+   * @param feature The name of the feature that this library was created for
+   *     may be null.
+   * @param fetcher Used to retrieve Type.URL; if null, Type.URL will not be
+   *     kept as a url reference, otherwise the file will be fetched and treated
+   *     as a FILE type.
    * @return The newly created library.
    */
-  public static JsLibrary create(Type type, String content) {
+  public static JsLibrary create(Type type, String content, String feature,
+      RemoteContentFetcher fetcher) {
     String optimizedContent = null;
     String debugContent;
-    if (type == Type.FILE || type == Type.RESOURCE) {
-      if (content.endsWith(".js")) {
-        optimizedContent = loadData(
-            content.substring(0, content.length() - 3) + ".opt.js", type);
-      }
-      debugContent = loadData(content, type);
-      if (optimizedContent == null || optimizedContent.length() == 0) {
-        optimizedContent = debugContent;
-      }
-    } else {
-      debugContent = content;
-      optimizedContent = content;
+    switch (type) {
+      case FILE:
+      case RESOURCE:
+        if (content.endsWith(".js")) {
+          optimizedContent = loadData(
+              content.substring(0, content.length() - 3) + ".opt.js", type);
+        }
+        debugContent = loadData(content, type);
+        if (optimizedContent == null || optimizedContent.length() == 0) {
+          optimizedContent = debugContent;
+        }
+        break;
+      case URL:
+        if (fetcher == null) {
+          debugContent = optimizedContent = content;
+        } else {
+          type = Type.FILE;
+          debugContent = optimizedContent = loadDataFromUrl(content, fetcher);
+        }
+        break;
+      default:
+        debugContent = content;
+        optimizedContent = content;
+        break;
     }
-    return new JsLibrary(type, optimizedContent, debugContent);
+    return new JsLibrary(feature, type, optimizedContent, debugContent);
   }
 
   /**
@@ -124,6 +163,32 @@ public final class JsLibrary {
   }
 
   /**
+   * Retrieves js content from the given url.
+   *
+   * @param url
+   * @param fetcher
+   * @return The contents of the JS file, or null if it can't be fetched.
+   */
+  private static String loadDataFromUrl(String url,
+      RemoteContentFetcher fetcher) {
+    try {
+      logger.info("Attempting to load js from: " + url);
+      URI uri = new URI(url);
+      RemoteContentRequest request = new RemoteContentRequest(uri);
+      RemoteContent response = fetcher.fetch(request);
+      if (response.getHttpStatusCode() == RemoteContent.SC_OK) {
+        return response.getResponseAsString();
+      } else {
+        logger.warning("Unable to retrieve remote library from " + url);
+        return null;
+      }
+    } catch (URISyntaxException e) {
+      logger.log(Level.WARNING, "Malformed URL: " + url, e);
+      return null;
+    }
+  }
+
+  /**
    * Loads a file
    * @param fileName
    * @return The contents of the file.
@@ -137,16 +202,16 @@ public final class JsLibrary {
 
     File file = new File(fileName);
     if (!file.exists()) {
-      throw new RuntimeException(
-          String.format("JsLibrary file missing: %s", fileName));
+      logger.warning("File not found: " + fileName);
+      return null;
     }
     if (!file.isFile()) {
-      throw new RuntimeException(
-          String.format("JsLibrary is not a file: %s", fileName));
+      logger.warning("JsLibrary is not a file: " + fileName);
+      return null;
     }
     if (!file.canRead()) {
-      throw new RuntimeException(
-          String.format("JsLibrary cannot be read: %s", fileName));
+      logger.warning("JsLibrary cannot be read: " + fileName);
+      return null;
     }
 
     try {
@@ -171,13 +236,15 @@ public final class JsLibrary {
      }
   }
 
-
-
   /**
+   * @param feature
    * @param type
    * @param content
+   * @param debugContent
    */
-  private JsLibrary(Type type, String content, String debugContent) {
+  private JsLibrary(String feature, Type type, String content,
+      String debugContent) {
+    this.feature = feature;
     this.type = type;
     this.content = content;
     this.debugContent = debugContent;

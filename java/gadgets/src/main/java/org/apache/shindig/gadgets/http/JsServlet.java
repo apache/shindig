@@ -17,16 +17,11 @@
  */
 package org.apache.shindig.gadgets.http;
 
+import org.apache.shindig.gadgets.GadgetContext;
 import org.apache.shindig.gadgets.GadgetFeature;
 import org.apache.shindig.gadgets.GadgetFeatureFactory;
 import org.apache.shindig.gadgets.GadgetFeatureRegistry;
-import org.apache.shindig.gadgets.GadgetServerConfigReader;
 import org.apache.shindig.gadgets.JsLibrary;
-import org.apache.shindig.gadgets.ProcessingOptions;
-import org.apache.shindig.gadgets.RenderingContext;
-import org.apache.shindig.gadgets.SyndicatorConfig;
-import org.json.JSONException;
-import org.json.JSONObject;
 
 import java.io.IOException;
 import java.util.Arrays;
@@ -45,7 +40,6 @@ import javax.servlet.http.HttpServletResponse;
  */
 public class JsServlet extends HttpServlet {
   private CrossServletState servletState;
-  private static final long START_TIME = System.currentTimeMillis();
 
   @Override
   public void init(ServletConfig config) throws ServletException {
@@ -58,7 +52,8 @@ public class JsServlet extends HttpServlet {
     // If an If-Modified-Since header is ever provided, we always say
     // not modified. This is because when there actually is a change,
     // cache busting should occur.
-    if (req.getHeader("If-Modified-Since") != null) {
+    if (req.getHeader("If-Modified-Since") != null &&
+        req.getParameter("v") != null) {
       resp.setStatus(HttpServletResponse.SC_NOT_MODIFIED);
       return;
     }
@@ -88,15 +83,10 @@ public class JsServlet extends HttpServlet {
     GadgetFeatureRegistry registry
         = servletState.getGadgetServer().getConfig().getFeatureRegistry();
     if (registry.getIncludedFeatures(needed, found, missing)) {
-      String containerParam = req.getParameter("c");
-      RenderingContext context;
-      context = "1".equals(containerParam) ?
-                RenderingContext.CONTAINER :
-                RenderingContext.GADGET;
-
       StringBuilder jsData = new StringBuilder();
 
-      ProcessingOptions opts = new HttpProcessingOptions(req);
+      // Probably incorrect to be using a context here...
+      GadgetContext context = new HttpGadgetContext(req);
       Set<String> features = new HashSet<String>(found.size());
       do {
         for (GadgetFeatureRegistry.Entry entry : found) {
@@ -105,10 +95,9 @@ public class JsServlet extends HttpServlet {
             features.add(entry.getName());
             GadgetFeatureFactory factory = entry.getFeature();
             GadgetFeature feature = factory.create();
-            for (JsLibrary lib : feature.getJsLibraries(context, opts)) {
-              // TODO: type url js files fail here.
+            for (JsLibrary lib : feature.getJsLibraries(context)) {
               if (lib.getType() != JsLibrary.Type.URL) {
-                if (opts.getDebug()) {
+                if (context.getDebug()) {
                   jsData.append(lib.getDebugContent());
                 } else {
                   jsData.append(lib.getContent());
@@ -124,50 +113,18 @@ public class JsServlet extends HttpServlet {
         return;
       }
 
-      GadgetServerConfigReader serverConfig
-          = servletState.getGadgetServer().getConfig();
-      SyndicatorConfig syndConf = serverConfig.getSyndicatorConfig();
-      JSONObject syndFeatures = syndConf.getJsonObject(opts.getSyndicator(),
-                                                       "gadgets.features");
-
-      if (syndFeatures != null && context != RenderingContext.CONTAINER) {
-        String[] featArray = features.toArray(new String[features.size()]);
-        try {
-          JSONObject featureConfig = new JSONObject(syndFeatures, featArray);
-          jsData.append("gadgets.config.init(")
-                .append(featureConfig.toString())
-                .append(");");
-        } catch (JSONException e) {
-          throw new RuntimeException(e);
-        }
+      if (req.getParameter("v") != null) {
+        // Versioned files get cached indefinitely
+        HttpUtil.setCachingHeaders(resp, 0);
+      } else {
+        // Unversioned files get cached for 1 hour.
+        HttpUtil.setCachingHeaders(resp, 60 * 60);
       }
-
-      setCachingHeaders(resp);
       resp.setContentType("text/javascript; charset=utf-8");
       resp.setContentLength(jsData.length());
       resp.getOutputStream().write(jsData.toString().getBytes());
     } else {
       resp.setStatus(HttpServletResponse.SC_NOT_FOUND);
     }
-  }
-
-  /**
-   * Sets HTTP headers that instruct the browser to cache indefinitely.
-   * Implementations should take care to use cache-busting techniques on the
-   * url.
-   *
-   * @param response The HTTP response
-   */
-  private void setCachingHeaders(HttpServletResponse response) {
-
-    // Most browsers accept this. 2030 is the last round year before
-    // the end of time.
-    response.setHeader("Expires", "Tue, 01 Jan 2030 00:00:01 GMT");
-
-    // IE seems to need this (10 years should be enough).
-    response.setHeader("Cache-Control", "public,max-age=315360000");
-
-    // Firefox requires this for certain cases.
-    response.setDateHeader("Last-Modified", START_TIME);
   }
 }

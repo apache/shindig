@@ -29,7 +29,7 @@ public class BasicGadgetSigner implements GadgetSigner {
    * {@inheritDoc}
    */
   public GadgetToken createToken(Gadget gadget) {
-    String uri = gadget.getId().getURI().toString();
+    String uri = gadget.getSpec().getUrl().toString();
     long expiry = System.currentTimeMillis() + this.timeToLive;
     return new BasicGadgetToken(uri + '$' + expiry);
   }
