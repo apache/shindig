@@ -74,6 +74,8 @@ function initGadget() {
 function changeGadgetUrl() {
   useCaja = document.getElementById("useCajaCheckbox").checked;
   useCache = document.getElementById("useCacheCheckbox").checked;
+  gadgets.container.nocache_ = useCache ? 0 : 1;
+
   usePermissive = document.getElementById("usePermissiveCheckbox").checked;
   doEvil = document.getElementById("doEvilCheckbox").checked;
 
@@ -95,21 +97,16 @@ SampleContainerGadget = function(opt_params) {
 
 SampleContainerGadget.inherits(gadgets.IfrGadget);
 
-SampleContainerGadget.prototype.getIframeUrl = function() {
-  var url = this.serverBase_ + 'ifr?url=' +
-      encodeURIComponent(this.specUrl) + '&synd=' + this.SYND + '&mid=' +
-      this.id + '&parent=' + encodeURIComponent(gadgets.container.parentUrl_) +
-      '&ogc=' + document.location.host + this.getUserPrefsParams();
+SampleContainerGadget.prototype.getAdditionalParams = function() {
+  var params = ''
+
   if (useCaja) {
-    url += "&caja=1";
-  }
-  if (!useCache) {
-    url += "&nocache=1";
+    params += "&caja=1";
   }
   if (usePermissive) {
-    url += "&usepermissive=1";
+    params += "&usepermissive=1";
   }
-  return url;
+  return params;
 };
 gadgets.container.gadgetClass = SampleContainerGadget;
 

@@ -234,7 +234,7 @@ gadgets.IfrGadgetService.prototype.setHeight = function(height) {
   if (height > gadgets.container.maxheight_) {
     height = gadgets.container.maxheight_;
   }
-  
+
   var element = document.getElementById(this.f);
   if (element) {
     element.style.height = height + 'px';
@@ -361,7 +361,7 @@ gadgets.FloatLeftLayoutManager.prototype.getGadgetChrome =
  *    "viewParams": a javascript object containing attribute value pairs
  *        for this gadgets
  *    "secureToken": an encoded token that is passed on the URL hash
- *    "hashData": Query-string like data that will be added to the 
+ *    "hashData": Query-string like data that will be added to the
  *        hash portion of the URL.
  *    "title": the default title to use for the title bar.
  *    "height": height of the gadget
@@ -440,6 +440,14 @@ gadgets.Gadget.prototype.getMainContent = function(continuation) {
   throw Error(gadgets.error.SUBCLASS_RESPONSIBILITY);
 };
 
+/*
+ * Gets additional parameters to append to the iframe url
+ * Override this method if you need any custom params.
+ */
+gadgets.Gadget.prototype.getAdditionalParams = function() {
+  return '';
+}
+
 
 // ---------
 // IfrGadget
@@ -470,7 +478,7 @@ gadgets.IfrGadget.prototype.rpcToken = (0x7FFFFFFF * Math.random()) | 0;
 gadgets.IfrGadget.prototype.rpcRelay = 'files/rpc_relay.html';
 
 gadgets.IfrGadget.prototype.getTitleBarContent = function(continuation) {
-  continuation('<div id="' + this.cssClassTitleBar + '-' + this.id + 
+  continuation('<div id="' + this.cssClassTitleBar + '-' + this.id +
       '" class="' + this.cssClassTitleBar + '"><span id="' +
       this.getIframeId() + '_title" class="' +
       this.cssClassTitle + '">' + (this.title ? this.title : 'Title') + '</span> | <span class="' +
@@ -502,9 +510,9 @@ gadgets.IfrGadget.prototype.getMainContent = function(continuation) {
   continuation('<div class="' + this.cssClassGadgetContent + '"><iframe id="' +
       iframeId + '" name="' + iframeId + '" class="' + this.cssClassGadget +
       '" src="' + this.getIframeUrl() +
-      '" frameborder="no" scrolling="no"' + 
+      '" frameborder="no" scrolling="no"' +
       (this.height ? ' height="' + this.height + '"' : '') +
-      (this.width ? ' width="' + this.width + '"' : '') + 
+      (this.width ? ' width="' + this.width + '"' : '') +
       '></iframe></div>');
 };
 
@@ -518,19 +526,20 @@ gadgets.IfrGadget.prototype.getUserPrefsDialogId = function() {
 
 gadgets.IfrGadget.prototype.getIframeUrl = function() {
   return this.serverBase_ + 'ifr?' +
-      'url=' + encodeURIComponent(this.specUrl) + 
-      '&synd=' + this.SYND + 
-      '&mid=' +  this.id + 
+      'url=' + encodeURIComponent(this.specUrl) +
+      '&synd=' + this.SYND +
+      '&mid=' +  this.id +
       '&nocache=' + gadgets.container.nocache_ +
       '&country=' + gadgets.container.country_ +
       '&lang=' + gadgets.container.language_ +
       '&view=' + gadgets.container.view_ +
       (gadgets.container.parentUrl_ ? '&parent=' + encodeURIComponent(gadgets.container.parentUrl_) : '') +
       (this.debug ? '&debug=1' : '') +
+      this.getAdditionalParams() +
       this.getUserPrefsParams() +
-      '#rpctoken=' + this.rpcToken + 
+      '#rpctoken=' + this.rpcToken +
       (this.secureToken ? '&st=' + (this.secureToken || "") : '') +
-      (this.viewParams ? 
+      (this.viewParams ?
           '&view-params=' +  encodeURIComponent(JSON.stringify(this.viewParams)) : '') +
       (this.hashData ? '&' + this.hashData : '');
 };
@@ -684,7 +693,7 @@ gadgets.Container.prototype.setView = function(view) {
 
 gadgets.Container.prototype.setMaxHeight = function(maxheight) {
   this.maxheight_ = maxheight;
-};  
+};
 
 gadgets.Container.prototype.getGadgetKey_ = function(instanceId) {
   return 'gadget_' + instanceId;
