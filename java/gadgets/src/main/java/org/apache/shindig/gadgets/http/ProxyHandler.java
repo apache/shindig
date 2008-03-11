@@ -214,7 +214,7 @@ public class ProxyHandler {
     final String[] badHeaders = new String[] {
         // No legitimate reason to over ride these.
         // TODO: We probably need to test variations as well.
-        "Host"
+        "Host", "Accept", "Accept-Encoding"
     };
     for (String bad : badHeaders) {
       headers.remove(bad);
