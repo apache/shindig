@@ -20,14 +20,10 @@
 package org.apache.shindig.gadgets.http;
 
 import org.apache.shindig.gadgets.Gadget;
+import org.apache.shindig.gadgets.GadgetContext;
+import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.GadgetServer;
-import org.apache.shindig.gadgets.GadgetView;
-import org.apache.shindig.gadgets.RenderingContext;
-import org.apache.shindig.gadgets.UserPrefs;
 
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.util.Locale;
 import java.util.concurrent.Callable;
 
 /**
@@ -35,8 +31,7 @@ import java.util.concurrent.Callable;
  */
 public class JsonRpcGadgetJob implements Callable<Gadget> {
   private final GadgetServer gadgetServer;
-  private final JsonRpcContext context;
-  private final JsonRpcGadget gadget;
+  private final GadgetContext context;
 
   /**
    * {@inheritDoc}
@@ -44,28 +39,16 @@ public class JsonRpcGadgetJob implements Callable<Gadget> {
    *  @throws RpcException
    */
   public Gadget call() throws RpcException {
-    GadgetView.ID gadgetId;
     try {
-      gadgetId = new Gadget.GadgetId(new URI(gadget.getUrl()),
-                                     gadget.getModuleId());
-      return gadgetServer.processGadget(gadgetId,
-                                        new UserPrefs(gadget.getUserPrefs()),
-                                        new Locale(context.getLanguage(),
-                                                   context.getCountry()),
-                                        RenderingContext.CONTAINER,
-                                        new JsonRpcProcessingOptions(context));
-    } catch (URISyntaxException e) {
-      throw new RpcException(gadget, "Bad url");
-    } catch (GadgetServer.GadgetProcessException e) {
-      throw new RpcException(gadget, e);
+      return gadgetServer.processGadget(context);
+    } catch (GadgetException e) {
+      throw new RpcException(context, e);
     }
   }
 
   public JsonRpcGadgetJob(GadgetServer gadgetServer,
-                          JsonRpcContext context,
-                          JsonRpcGadget gadget) {
+                          GadgetContext context) {
     this.gadgetServer = gadgetServer;
     this.context = context;
-    this.gadget = gadget;
   }
 }

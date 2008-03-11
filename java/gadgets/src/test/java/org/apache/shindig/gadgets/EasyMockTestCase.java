@@ -17,9 +17,9 @@
  */
 package org.apache.shindig.gadgets;
 
-import junit.framework.TestCase;
-
 import org.easymock.EasyMock;
+
+import junit.framework.TestCase;
 
 import java.util.ArrayList;
 import java.util.List;

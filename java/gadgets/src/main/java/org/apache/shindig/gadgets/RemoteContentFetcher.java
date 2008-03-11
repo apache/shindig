@@ -19,22 +19,10 @@ package org.apache.shindig.gadgets;
 
 
 public interface RemoteContentFetcher {
-
   /**
    * Fetch content using the HTTP GET method
    * @param request The request to fetch.
-   * @param options Additional options
    * @return RemoteContent
    */
-  public RemoteContent fetch(RemoteContentRequest request,
-                             ProcessingOptions options);
-
-  /**
-   * Fetch content using the HTTP POST method
-   * @param request The request to fetch.
-   * @param options Additional options
-   * @return RemoteContent
-   */
-  public RemoteContent fetchByPost(RemoteContentRequest request,
-                                   ProcessingOptions options);
+  public RemoteContent fetch(RemoteContentRequest request);
 }

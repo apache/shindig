@@ -19,10 +19,11 @@
 
 package org.apache.shindig.gadgets.http;
 
-import org.apache.shindig.gadgets.BasicGadgetDataCache;
+import org.apache.shindig.gadgets.BasicGadgetBlacklist;
 import org.apache.shindig.gadgets.BasicGadgetSigner;
 import org.apache.shindig.gadgets.BasicRemoteContentFetcher;
 import org.apache.shindig.gadgets.Gadget;
+import org.apache.shindig.gadgets.GadgetContext;
 import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.GadgetFeature;
 import org.apache.shindig.gadgets.GadgetFeatureFactory;
@@ -30,23 +31,26 @@ import org.apache.shindig.gadgets.GadgetFeatureRegistry;
 import org.apache.shindig.gadgets.GadgetServer;
 import org.apache.shindig.gadgets.GadgetServerConfig;
 import org.apache.shindig.gadgets.GadgetSigner;
-import org.apache.shindig.gadgets.GadgetSpec;
+import org.apache.shindig.gadgets.GadgetSpecFetcher;
 import org.apache.shindig.gadgets.JsLibrary;
-import org.apache.shindig.gadgets.MessageBundle;
-import org.apache.shindig.gadgets.ProcessingOptions;
+import org.apache.shindig.gadgets.MessageBundleFetcher;
+import org.apache.shindig.gadgets.RemoteContentFetcher;
 import org.apache.shindig.gadgets.SyndicatorConfig;
 import org.apache.shindig.gadgets.UserPrefs;
+import org.apache.shindig.gadgets.spec.GadgetSpec;
+import org.apache.shindig.gadgets.spec.View;
+import org.apache.shindig.util.HashUtil;
 
+import java.io.File;
+import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.Executors;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
 
 /**
  * A handler which uses all of the basic versions of classes.
@@ -75,7 +79,7 @@ public class DefaultCrossServletState extends CrossServletState {
    * Just returns the same gadget signer no matter the request.
    */
   @Override
-  public GadgetSigner getGadgetSigner(HttpServletRequest req) {
+  public GadgetSigner getGadgetSigner() {
     return gadgetSigner;
   }
 
@@ -83,14 +87,14 @@ public class DefaultCrossServletState extends CrossServletState {
    * {@inheritDoc}
    */
   @Override
-  public String getIframeUrl(Gadget gadget, ProcessingOptions opts) {
-    // We don't have any meaningful data in the current request anyway, so
-    // we'll just do this statically.
+  public String getIframeUrl(Gadget gadget) {
+    GadgetContext context = gadget.getContext();
     StringBuilder buf = new StringBuilder();
     try {
-      String url = gadget.getId().getURI().toString();
-      GadgetSpec.View view = gadget.getView(opts.getView());
-      if (view.getType().equals(GadgetSpec.ContentType.HTML)) {
+      GadgetSpec spec = gadget.getSpec();
+      String url = context.getUrl().toString();
+      View view = spec.getView(context.getView());
+      if (view.getType().equals(View.ContentType.HTML)) {
         buf.append(iframePath)
            .append("url=")
            .append(URLEncoder.encode(url, "UTF-8"))
@@ -105,10 +109,11 @@ public class DefaultCrossServletState extends CrossServletState {
         }
       }
 
-      buf.append("mid=").append(gadget.getId().getModuleId());
-      buf.append("&synd=").append(opts.getSyndicator());
+      buf.append("mid=").append(context.getModuleId());
+      buf.append("&synd=").append(context.getSyndicator());
+      buf.append("&v=").append(gadget.getSpec().getChecksum());
 
-      UserPrefs prefs = gadget.getUserPrefValues();
+      UserPrefs prefs = context.getUserPrefs();
       for (Map.Entry<String, String> entry : prefs.getPrefs().entrySet()) {
         buf.append("&up_")
            .append(entry.getKey())
@@ -119,8 +124,6 @@ public class DefaultCrossServletState extends CrossServletState {
       throw new RuntimeException("UTF-8 Not supported!", e);
     }
 
-    // TODO: extract user prefs, current view, etc. from <req>. Currently
-    // consumers of the response are on their own for this.
     return buf.toString();
   }
 
@@ -128,10 +131,10 @@ public class DefaultCrossServletState extends CrossServletState {
    * {@inheritDoc}
    */
   @Override
-  public String getJsUrl(String[] features, ProcessingOptions options) {
+  public String getJsUrl(Set<String> features, GadgetContext context) {
     StringBuilder buf = new StringBuilder();
     buf.append(jsPath);
-    if (features == null || features.length == 0) {
+    if (features == null || features.size() == 0) {
       buf.append("core");
     } else {
       boolean firstDone = false;
@@ -147,9 +150,9 @@ public class DefaultCrossServletState extends CrossServletState {
     buf.append(".js?v=")
        .append(jsCacheParam)
        .append("&synd=")
-       .append(options.getSyndicator())
+       .append(context.getSyndicator())
        .append("&debug=")
-       .append(options.getDebug() ? "1" : "0");
+       .append(context.getDebug() ? "1" : "0");
     return buf.toString();
   }
 
@@ -168,21 +171,33 @@ public class DefaultCrossServletState extends CrossServletState {
       iframePath = DEFAULT_IFRAME_PREFIX;
     }
 
-    // features could be null, but that would probably be a bad idea.
-    String features = context.getInitParameter("features");
-    String syndicators = context.getInitParameter("syndicators");
     try {
+      String features = context.getInitParameter("features");
+      String syndicators = context.getInitParameter("syndicators");
+      String blacklist = context.getInitParameter("blacklist");
       gadgetSigner = new BasicGadgetSigner();
+      RemoteContentFetcher fetcher = new BasicRemoteContentFetcher(1024 * 1024);
       SyndicatorConfig syndicatorConfig = new SyndicatorConfig(syndicators);
-      GadgetFeatureRegistry registry = new GadgetFeatureRegistry(features);
+      GadgetFeatureRegistry registry
+          = new GadgetFeatureRegistry(features, fetcher);
 
       GadgetServerConfig config =  new GadgetServerConfig()
           .setExecutor(Executors.newCachedThreadPool())
-          .setMessageBundleCache(new BasicGadgetDataCache<MessageBundle>())
-          .setSpecCache(new BasicGadgetDataCache<GadgetSpec>())
-          .setContentFetcher(new BasicRemoteContentFetcher(1024 * 1024))
+          .setMessageBundleFetcher(new MessageBundleFetcher(fetcher))
+          .setGadgetSpecFetcher(new GadgetSpecFetcher(fetcher))
+          .setContentFetcher(fetcher)
           .setFeatureRegistry(registry)
           .setSyndicatorConfig(syndicatorConfig);
+
+      if (blacklist != null) {
+        File file = new File(blacklist);
+        try {
+          config.setGadgetBlacklist(new BasicGadgetBlacklist(file));
+        } catch (IOException e) {
+          throw new GadgetException(GadgetException.Code.INVALID_CONFIG,
+              "Unable to load blacklist file: " + blacklist);
+        }
+      }
       gadgetServer = new GadgetServer(config);
 
       // Grab all static javascript, concatenate it together, and generate
@@ -193,35 +208,12 @@ public class DefaultCrossServletState extends CrossServletState {
           registry.getAllFeatures().entrySet()) {
         GadgetFeatureFactory factory = entry.getValue().getFeature();
         GadgetFeature feature = factory.create();
-        for (JsLibrary library : feature.getJsLibraries(null, null)) {
+        for (JsLibrary library : feature.getJsLibraries(null)) {
           jsBuf.append(library.getContent());
         }
       }
 
-      // Include the syndicator in the hash
-      for (String syndicator : syndicatorConfig.getSyndicators()) {
-        jsBuf.append(syndicatorConfig.getJsonObject(syndicator,  null)
-            .toString());
-      }
-
-      MessageDigest md;
-      try {
-        md = MessageDigest.getInstance("MD5");
-      } catch (NoSuchAlgorithmException noMD5) {
-        try {
-          md = MessageDigest.getInstance("SHA");
-        } catch (NoSuchAlgorithmException noSha) {
-          throw new ServletException("No suitable MessageDigest found!");
-        }
-      }
-      byte[] hash = md.digest(jsBuf.toString().getBytes());
-      // Convert to hex. This might be a waste of bytes (32) -- could be
-      // replaced with a base64 implementation.
-      StringBuffer hexString = new StringBuffer();
-      for (byte b : hash) {
-        hexString.append(Integer.toHexString(0xFF & b));
-      }
-      jsCacheParam = hexString.toString();
+      jsCacheParam = HashUtil.checksum(jsBuf.toString().getBytes());
     } catch (GadgetException e) {
       throw new ServletException(e);
     }

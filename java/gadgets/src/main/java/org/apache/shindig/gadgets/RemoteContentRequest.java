@@ -105,21 +105,37 @@ public class RemoteContentRequest {
     }
   }
 
+  private final String method;
+  public String getMethod() {
+    return method;
+  }
+
   private final URI uri;
   public URI getUri() {
     return uri;
   }
 
+  private final Options options;
+  public Options getOptions() {
+    return options;
+  }
+
   /**
    *
+   * @param method
    * @param uri
    * @param headers
    * @param postBody
+   * @param options
    */
-  public RemoteContentRequest(URI uri,
+  public RemoteContentRequest(String method,
+                              URI uri,
                               Map<String, List<String>> headers,
-                              byte[] postBody) {
+                              byte[] postBody,
+                              Options options) {
+    this.method = method;
     this.uri = uri;
+    this.options = options;
     // Copy the headers
     if (headers == null) {
       this.headers = Collections.emptyMap();
@@ -148,16 +164,111 @@ public class RemoteContentRequest {
     }
   }
 
-  public RemoteContentRequest(URI uri, Map<String, List<String>> headers) {
-    this(uri, headers, null);
-  }
-
-  public RemoteContentRequest(URI uri, byte[] postBody) {
-    this(uri, null, postBody);
-  }
-
+  /**
+   * Basic GET request.
+   *
+   * @param uri
+   */
   public RemoteContentRequest(URI uri) {
-    this(uri, null, null);
+    this("GET", uri, null, null, DEFAULT_OPTIONS);
+  }
+
+  /**
+   * GET with options
+   *
+   * @param uri
+   * @param options
+   */
+  public RemoteContentRequest(URI uri, Options options) {
+    this("GET", uri, null, null, options);
+  }
+
+  /**
+   * GET request with custom headers and default options
+   * @param uri
+   * @param headers
+   */
+  public RemoteContentRequest(URI uri, Map<String, List<String>> headers) {
+    this("GET", uri, headers, null, DEFAULT_OPTIONS);
+  }
+
+  /**
+   * GET request with custom headers + options
+   * @param uri
+   * @param headers
+   * @param options
+   */
+  public RemoteContentRequest(URI uri, Map<String, List<String>> headers,
+      Options options) {
+    this("GET", uri, headers, null, options);
+  }
+
+  /**
+   * Basic POST request
+   * @param uri
+   * @param postBody
+   */
+  public RemoteContentRequest(URI uri, byte[] postBody) {
+    this("POST", uri, null, postBody, DEFAULT_OPTIONS);
+  }
+
+  /**
+   * POST request with options
+   * @param uri
+   * @param postBody
+   * @param options
+   */
+  public RemoteContentRequest(URI uri, byte[] postBody, Options options) {
+    this("POST", uri, null, postBody, options);
+  }
+
+  /**
+   * POST request with headers
+   * @param uri
+   * @param headers
+   * @param postBody
+   */
+  public RemoteContentRequest(URI uri, Map<String, List<String>> headers,
+      byte[] postBody) {
+    this("POST", uri, headers, postBody, DEFAULT_OPTIONS);
+  }
+
+  /**
+   * POST request with options + headers
+   * @param uri
+   * @param headers
+   * @param postBody
+   * @param options
+   */
+  public RemoteContentRequest(URI uri, Map<String, List<String>> headers,
+      byte[] postBody, Options options) {
+    this("POST", uri, headers, postBody, options);
+  }
+
+  @Override
+  public String toString() {
+    StringBuilder buf = new StringBuilder();
+    buf.append(method).append(" ").append(uri.getPath()).append(" HTTP/1.1\r\n")
+       .append("Host: ").append(uri.getHost())
+       .append(uri.getPort() == 80 ? "" : ":" + uri.getPort())
+       .append("\r\n");
+
+    for (Map.Entry<String, List<String>> entry : headers.entrySet()) {
+      buf.append(entry.getKey()).append(": ");
+      boolean first = false;
+      for (String header : entry.getValue()) {
+        if (!first) {
+          first = true;
+        } else {
+          buf.append(", ");
+        }
+        buf.append(header);
+      }
+      buf.append("\r\n");
+    }
+   buf.append("\r\n");
+   buf.append(new String(postBody));
+   return buf.toString();
   }
 
   @Override
@@ -165,10 +276,23 @@ public class RemoteContentRequest {
     if (rhs == this) {return true;}
     if (rhs instanceof RemoteContentRequest) {
       RemoteContentRequest req = (RemoteContentRequest)rhs;
-      return uri.equals(req.uri) &&
+      return method.equals(req.method) &&
+             uri.equals(req.uri) &&
              Arrays.equals(postBody, req.postBody) &&
              headers.equals(req.headers);
     }
     return false;
+  }
+
+  public static final Options DEFAULT_OPTIONS = new Options();
+
+  /**
+   * Bag of options for making a request.
+   *
+   * This object is mutable to keep us sane. Don't mess with it once you've
+   * sent it to RemoteContentRequest or bad things might happen.
+   */
+  public static class Options {
+    public boolean ignoreCache = false;
   }
 }

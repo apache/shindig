@@ -18,8 +18,8 @@
  */
 package org.apache.shindig.gadgets.http;
 
-import org.apache.shindig.gadgets.GadgetServerConfigReader;
 import org.apache.shindig.gadgets.GadgetException;
+import org.apache.shindig.gadgets.GadgetServerConfigReader;
 
 import java.io.IOException;
 import java.util.logging.Level;
@@ -53,11 +53,9 @@ public class ProxyServlet extends HttpServlet {
     String output = request.getParameter("output");
     try {
       if ("js".equals(output)) {
-        proxyHandler.fetchJson(
-            request, response, servletState.getGadgetSigner(request));
+        proxyHandler.fetchJson(request, response, servletState);
       } else {
-        proxyHandler.fetch(
-            request, response, servletState.getGadgetSigner(request));
+        proxyHandler.fetch(request, response, servletState);
       }
     } catch (GadgetException ge) {
       outputError(ge, response);
@@ -65,13 +63,14 @@ public class ProxyServlet extends HttpServlet {
   }
 
   @Override
-  protected void doPost(HttpServletRequest request, HttpServletResponse response)
-      throws ServletException, IOException {
+  protected void doPost(HttpServletRequest request,
+      HttpServletResponse response) throws ServletException, IOException {
     // Currently they are identical
     doGet(request, response);
   }
 
-  private void outputError(GadgetException excep, HttpServletResponse resp) throws IOException {
+  private void outputError(GadgetException excep, HttpServletResponse resp)
+      throws IOException {
     StringBuilder err = new StringBuilder();
     err.append(excep.getCode().toString());
     err.append(' ');

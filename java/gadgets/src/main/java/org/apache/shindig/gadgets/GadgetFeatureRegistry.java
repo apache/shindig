@@ -42,13 +42,9 @@ public class GadgetFeatureRegistry {
   private final Map<Set<String>, Set<Entry>> transitiveDeps
       = new HashMap<Set<String>, Set<Entry>>();
 
-  // Constants used for internal feature names.
-  private final static String FEAT_MSG_BUNDLE = "core.msgbundlesubst";
-  private final static String FEAT_BIDI = "core.bidisubst";
-  private final static String FEAT_MODULE = "core.modulesubst";
-  private final static String FEAT_USER_PREF_SUBST = "core.prefsubst";
-
   private boolean coreDone = false;
+
+  private final RemoteContentFetcher fetcher;
 
   private final static Logger logger
       = Logger.getLogger("org.apache.shindig.gadgets");
@@ -58,8 +54,11 @@ public class GadgetFeatureRegistry {
    * Any 'core' features loaded at this point will automatically become
    * dependencies for every other feature.
    * @param featurePath
+   * @param fetcher
    */
-  public GadgetFeatureRegistry(String featurePath) throws GadgetException {
+  public GadgetFeatureRegistry(String featurePath, RemoteContentFetcher fetcher)
+      throws GadgetException {
+    this.fetcher = fetcher;
     registerFeatures(featurePath);
   }
 
@@ -75,7 +74,7 @@ public class GadgetFeatureRegistry {
     }
 
     List<String> coreDeps = new LinkedList<String>();
-    JsFeatureLoader loader = new JsFeatureLoader();
+    JsFeatureLoader loader = new JsFeatureLoader(fetcher);
     Set<Entry> jsFeatures = loader.loadFeatures(featurePath, this);
 
     if (!coreDone) {
@@ -87,16 +86,6 @@ public class GadgetFeatureRegistry {
       }
 
       logger.info("Core dependencies: " + coreDeps);
-
-      // Everything depends on core JS being set up first because in gadget
-      // rendering mode, we pre-populate some of the data.
-      core.put(FEAT_MSG_BUNDLE,
-          register(FEAT_MSG_BUNDLE, coreDeps, new MessageBundleSubstituter()));
-      core.put(FEAT_BIDI, register(FEAT_BIDI, coreDeps, new BidiSubstituter()));
-      core.put(FEAT_MODULE,
-          register(FEAT_MODULE, coreDeps, new ModuleSubstituter()));
-      core.put(FEAT_USER_PREF_SUBST,
-          register(FEAT_USER_PREF_SUBST, coreDeps, new UserPrefSubstituter()));
 
       // Make sure non-core features depend on core.
       for (Entry entry : jsFeatures) {

@@ -20,6 +20,7 @@
 package org.apache.shindig.gadgets;
 
 import org.apache.shindig.util.ResourceLoader;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -88,6 +89,9 @@ public class SyndicatorConfig {
     JSONObject syndicatorData = config.get(syndicator);
     if (syndicatorData == null) {
       return null;
+    }
+    if (parameter == null) {
+      return syndicatorData;
     }
     return syndicatorData.opt(parameter);
   }

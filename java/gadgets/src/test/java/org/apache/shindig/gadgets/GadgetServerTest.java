@@ -17,120 +17,98 @@
  */
 package org.apache.shindig.gadgets;
 
-import static org.apache.shindig.gadgets.GadgetSpecTestFixture.DATETIME_ID;
-import static org.apache.shindig.gadgets.GadgetSpecTestFixture.DATETIME_SPEC;
-import static org.apache.shindig.gadgets.GadgetSpecTestFixture.DATETIME_URI;
-import static org.apache.shindig.gadgets.GadgetSpecTestFixture.DATETIME_URI_STRING;
-import static org.apache.shindig.gadgets.GadgetSpecTestFixture.DATETIME_XML;
-import static org.apache.shindig.gadgets.GadgetSpecTestFixture.EN_US_LOCALE;
 import static org.easymock.EasyMock.eq;
 import static org.easymock.EasyMock.expect;
-import static org.easymock.EasyMock.isA;
 
-import java.util.concurrent.Executors;
+import org.apache.shindig.gadgets.spec.GadgetSpec;
+import org.apache.shindig.gadgets.spec.MessageBundle;
 
-public class GadgetServerTest extends EasyMockTestCase {
-  GadgetServer gadgetServer;
-  final RemoteContentFetcher fetcher = mock(RemoteContentFetcher.class);
-  @SuppressWarnings(value="unchecked")
-  final GadgetDataCache<GadgetSpec> specCache = mock(GadgetDataCache.class);
-  @SuppressWarnings(value="unchecked")
-  final GadgetDataCache<MessageBundle> bundleCache = mock(GadgetDataCache.class);
+import java.net.URI;
+import java.util.HashMap;
+import java.util.Map;
 
-  void initServer(GadgetServerConfigReader customConfig) throws GadgetException {
-    GadgetServerConfig config = new GadgetServerConfig();
+public class GadgetServerTest extends GadgetTestFixture {
 
-    if (customConfig != null) {
-      config.copyFrom(customConfig);
+  private final static URI SPEC_URL = URI.create("http://example.org/g.xml");
+  private final static URI BUNDLE_URL = URI.create("http://example.org/m.xml");
+  private final static GadgetContext BASIC_CONTEXT = new GadgetContext() {
+    @Override
+    public URI getUrl() {
+      return SPEC_URL;
     }
+  };
+  private final static String BASIC_SPEC_XML
+      = "<Module>" +
+        "  <ModulePrefs title=\"GadgetServerTest\"/>" +
+        "  <Content type=\"html\">Hello, world!</Content>" +
+        "</Module>";
 
-    if (config.getExecutor() == null) {
-      config.setExecutor(Executors.newCachedThreadPool());
-    }
+  private final static String BASIC_BUNDLE_XML
+      = "<messagebundle>" +
+        "  <msg name=\"title\">TITLE</msg>" +
+       "</messagebundle>";
 
-    if (config.getSpecCache() == null) {
-      config.setSpecCache(specCache);
-    }
+  public void testGadgetSpecLookup() throws Exception {
+    GadgetSpec spec = new GadgetSpec(SPEC_URL, BASIC_SPEC_XML);
+    RemoteContentRequest req = new RemoteContentRequest(SPEC_URL);
 
-    if (config.getMessageBundleCache() == null) {
-      config.setMessageBundleCache(bundleCache);
-    }
-
-    if (config.getFeatureRegistry() == null) {
-      config.setFeatureRegistry(new GadgetFeatureRegistry(null));
-    }
-
-    if (config.getContentFetcher() == null) {
-      config.setContentFetcher(fetcher);
-    }
-
-    gadgetServer = new GadgetServer(config);
-  }
-
-  public void testGadgetSpecNotInCache() throws Exception {
-    initServer(null);
-    RemoteContent results = new RemoteContent(200, DATETIME_XML.getBytes(), null);
-    ProcessingOptions options = new ProcessingOptions();
-
-    RemoteContentRequest req = new RemoteContentRequest(DATETIME_URI);
-
-    expect(specCache.get(eq(DATETIME_URI_STRING))).andReturn(null);
-    expect(fetcher.fetch(eq(req),
-                         eq(options))).andReturn(results);
-    specCache.put(eq(DATETIME_URI_STRING), isA(GadgetSpec.class));
+    expect(specFetcher.fetch(eq(SPEC_URL), eq(false))).andReturn(spec);
     replay();
 
-    Gadget gadget = gadgetServer.processGadget(DATETIME_ID, UserPrefs.EMPTY, EN_US_LOCALE,
-                                               RenderingContext.GADGET, options);
+    Gadget gadget = gadgetServer.processGadget(BASIC_CONTEXT);
     verify();
   }
 
-  public void testGadgetSpecInCache() throws Exception {
-    initServer(null);
-    expect(specCache.get(eq(DATETIME_URI_STRING))).andReturn(DATETIME_SPEC);
+  public void testSubstitutionsDone() throws Exception {
+    String gadgetXml
+        = "<Module>" +
+          "  <ModulePrefs title=\"__MSG_title__\">" +
+          "    <Locale messages=\"" + BUNDLE_URL.toString() + "\"/>" +
+          "  </ModulePrefs>" +
+          "  <UserPref name=\"body\" datatype=\"string\"/>" +
+          "  <Content type=\"html\">__UP_body__</Content>" +
+          "</Module>";
+
+    GadgetContext context = new GadgetContext() {
+      @Override
+      public URI getUrl() {
+        return SPEC_URL;
+      }
+
+      @Override
+      public UserPrefs getUserPrefs() {
+        Map<String, String> map = new HashMap<String, String>();
+        map.put("body", "BODY");
+        return new UserPrefs(map);
+      }
+    };
+
+    GadgetSpec spec = new GadgetSpec(SPEC_URL, gadgetXml);
+    MessageBundle bundle = new MessageBundle(BASIC_BUNDLE_XML);
+
+    expect(specFetcher.fetch(eq(SPEC_URL), eq(false))).andReturn(spec);
+    expect(bundleFetcher.fetch(eq(BUNDLE_URL), eq(false))).andReturn(bundle);
     replay();
 
-    Gadget gadget = gadgetServer.processGadget(DATETIME_ID, UserPrefs.EMPTY, EN_US_LOCALE,
-                                               RenderingContext.GADGET, null);
-    assertSame(DATETIME_SPEC, gadget.getBaseSpec());
-    verify();
-  }
+    Gadget gadget = gadgetServer.processGadget(context);
 
-  public void testBasicGadget() throws Exception {
-    initServer(null);
-    RemoteContent results = new RemoteContent(200, DATETIME_XML.getBytes(), null);
-    ProcessingOptions options = new ProcessingOptions();
+    // No verification because the cache store ops happen on separate threads
+    // and easy mock doesn't handle that properly.
 
-    RemoteContentRequest req = new RemoteContentRequest(DATETIME_URI);
-
-    expect(specCache.get(eq(DATETIME_URI_STRING))).andReturn(null);
-    expect(fetcher.fetch(eq(req),
-                         eq(options))).andReturn(results);
-    specCache.put(eq(DATETIME_URI_STRING), isA(GadgetSpec.class));
-    replay();
-
-    Gadget gadget = gadgetServer.processGadget(DATETIME_ID, UserPrefs.EMPTY, EN_US_LOCALE,
-                                               RenderingContext.GADGET, options);
-    assertEquals("Hello, World!", gadget.getTitle());
-    assertEquals("Goodbye, World!", gadget.getView(null).getData());
-    verify();
+    assertEquals("TITLE", gadget.getSpec().getModulePrefs().getTitle());
+    assertEquals("BODY",
+        gadget.getSpec().getView(GadgetSpec.DEFAULT_VIEW).getContent());
   }
 
   public void testBlacklistedGadget() throws Exception {
-    GadgetBlacklist blacklist = mock(GadgetBlacklist.class);
-    initServer(new GadgetServerConfig().setGadgetBlacklist(blacklist));
-    expect(specCache.get(eq(DATETIME_URI_STRING))).andReturn(null);
-    expect(blacklist.isBlacklisted(eq(DATETIME_URI))).andReturn(true);
+    expect(blacklist.isBlacklisted(eq(SPEC_URL))).andReturn(true);
     replay();
 
     try {
-      gadgetServer.processGadget(DATETIME_ID, UserPrefs.EMPTY, EN_US_LOCALE,
-                                 RenderingContext.GADGET, null);
-      fail();
-    } catch (GadgetServer.GadgetProcessException ex) {
-      assertEquals(1, ex.getComponents().size());
-      assertEquals(GadgetException.Code.BLACKLISTED_GADGET,
-                   ex.getComponents().get(0).getCode());
+      gadgetServer.processGadget(BASIC_CONTEXT);
+      fail("No exception thrown when a gadget is black listed!");
+    } catch (GadgetException e) {
+      assertEquals(GadgetException.Code.BLACKLISTED_GADGET, e.getCode());
     }
     verify();
   }

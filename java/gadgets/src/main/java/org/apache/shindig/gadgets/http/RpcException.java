@@ -19,38 +19,40 @@
 
 package org.apache.shindig.gadgets.http;
 
+import org.apache.shindig.gadgets.GadgetContext;
+
 /**
  * Contains RPC-specific exceptions.
  */
 public class RpcException extends Exception {
-  private final JsonRpcGadget gadget;
+  private final GadgetContext context;
 
-  public JsonRpcGadget getGadget() {
-    return gadget;
+  public GadgetContext getContext() {
+    return context;
   }
 
   public RpcException(String message) {
     super(message);
-    gadget = null;
+    context = null;
   }
 
   public RpcException(String message, Throwable cause) {
     super(message, cause);
-    gadget = null;
+    context = null;
   }
 
-  public RpcException(JsonRpcGadget gadget, Throwable cause) {
+  public RpcException(GadgetContext context, Throwable cause) {
     super(cause);
-    this.gadget = gadget;
+    this.context = context;
   }
 
-  public RpcException(JsonRpcGadget gadget, String message) {
+  public RpcException(GadgetContext context, String message) {
     super(message);
-    this.gadget = gadget;
+    this.context = context;
   }
 
-  public RpcException(JsonRpcGadget gadget, String message, Throwable cause) {
+  public RpcException(GadgetContext context, String message, Throwable cause) {
     super(message, cause);
-    this.gadget = gadget;
+    this.context = context;
   }
 }

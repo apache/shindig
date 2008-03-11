@@ -17,6 +17,9 @@
  */
 package org.apache.shindig.gadgets;
 
+import org.apache.shindig.gadgets.spec.GadgetSpec;
+import org.apache.shindig.gadgets.spec.MessageBundle;
+
 import java.util.concurrent.Executor;
 
 /**
@@ -52,15 +55,15 @@ public class GadgetServerConfig extends GadgetServerConfigReader  {
     return this;
   }
 
-  public GadgetServerConfig setSpecCache(
-      GadgetDataCache<GadgetSpec> specCache) {
-    this.specCache = specCache;
+  public GadgetServerConfig setGadgetSpecFetcher(
+      DataFetcher<GadgetSpec> gadgetSpecFetcher) {
+    this.gadgetSpecFetcher = gadgetSpecFetcher;
     return this;
   }
 
-  public GadgetServerConfig setMessageBundleCache(
-      GadgetDataCache<MessageBundle> mbCache) {
-    messageBundleCache = mbCache;
+  public GadgetServerConfig setMessageBundleFetcher(
+      DataFetcher<MessageBundle> messageBundleFetcher) {
+    this.messageBundleFetcher = messageBundleFetcher;
     return this;
   }
 

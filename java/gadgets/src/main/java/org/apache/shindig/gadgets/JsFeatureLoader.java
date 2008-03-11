@@ -18,16 +18,14 @@
 package org.apache.shindig.gadgets;
 
 import org.apache.shindig.util.ResourceLoader;
+import org.apache.shindig.util.XmlException;
 import org.apache.shindig.util.XmlUtil;
-import org.w3c.dom.Document;
-import org.w3c.dom.Node;
+
+import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
-import org.xml.sax.InputSource;
-import org.xml.sax.SAXException;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.StringReader;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -35,9 +33,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.logging.Logger;
-
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
 
 /**
  * Provides a mechanism for loading a group of js features from a directory.
@@ -47,11 +42,13 @@ import javax.xml.parsers.ParserConfigurationException;
  *
  * Usage:
  * GadgetFeatureRegistry registry = // get your feature registry.
- * JsFeatureLoader loader = new JsFeatureLoader();
+ * JsFeatureLoader loader = new JsFeatureLoader(fetcher);
  * loader.loadFeatures("res://features/", registry);
  * loader.loadFeatures("/home/user/my-features/", registry);
  */
 public class JsFeatureLoader {
+
+  private final RemoteContentFetcher fetcher;
 
   private static final Logger logger
       = Logger.getLogger("org.apache.shindig.gadgets");
@@ -200,17 +197,10 @@ public class JsFeatureLoader {
    */
   private ParsedFeature parse(String xml, String path, boolean isResource)
       throws GadgetException {
-
-    Document doc;
+    Element doc;
     try {
-      DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-      InputSource is = new InputSource(new StringReader(xml));
-      doc = factory.newDocumentBuilder().parse(is);
-    } catch (SAXException e) {
-      throw new GadgetException(GadgetException.Code.MALFORMED_XML_DOCUMENT, e);
-    } catch (ParserConfigurationException e) {
-      throw new GadgetException(GadgetException.Code.MALFORMED_XML_DOCUMENT, e);
-    } catch (IOException e) {
+      doc = XmlUtil.parse(xml);
+    } catch (XmlException e) {
       throw new GadgetException(GadgetException.Code.MALFORMED_XML_DOCUMENT, e);
     }
 
@@ -228,12 +218,13 @@ public class JsFeatureLoader {
 
     NodeList gadgets = doc.getElementsByTagName("gadget");
     for (int i = 0, j = gadgets.getLength(); i < j; ++i) {
-      processContext(feature, gadgets.item(i), RenderingContext.GADGET);
+      processContext(feature, (Element)gadgets.item(i), RenderingContext.GADGET);
     }
 
     NodeList containers = doc.getElementsByTagName("container");
     for (int i = 0, j = containers.getLength(); i < j; ++i) {
-      processContext(feature, containers.item(i), RenderingContext.CONTAINER);
+      processContext(feature, (Element)containers.item(i),
+          RenderingContext.CONTAINER);
     }
 
     NodeList dependencies = doc.getElementsByTagName("dependency");
@@ -251,47 +242,53 @@ public class JsFeatureLoader {
    * @param context
    * @param renderingContext
    */
-  private void processContext(ParsedFeature feature, Node context,
+  private void processContext(ParsedFeature feature, Element context,
                               RenderingContext renderingContext) {
-    NodeList libraries = context.getChildNodes();
     String syndicator = XmlUtil.getAttribute(context, "synd",
         SyndicatorConfig.DEFAULT_SYNDICATOR);
+    NodeList libraries = context.getElementsByTagName("script");
     for (int i = 0, j = libraries.getLength(); i < j; ++i) {
-      Node node = libraries.item(i);
-      String nodeValue = node.getNodeName();
-      if ("script".equals(nodeValue)) {
-        String source = XmlUtil.getAttribute(node, "src");
-        String content;
-        JsLibrary.Type type;
-        if (source == null) {
-          type = JsLibrary.Type.INLINE;
-          content = node.getTextContent();
+      Element script = (Element)libraries.item(i);
+      boolean inlineOk = XmlUtil.getBoolAttribute(script, "inline", true);
+      String source = XmlUtil.getAttribute(script, "src");
+      String content;
+      JsLibrary.Type type;
+      if (source == null) {
+        type = JsLibrary.Type.INLINE;
+        content = script.getTextContent();
+      } else {
+        content = source;
+        if (content.startsWith("http://")) {
+          type = JsLibrary.Type.URL;
+        } else if (content.startsWith("//")) {
+          type = JsLibrary.Type.URL;
+          content = content.substring(1);
+        } else if (content.startsWith("res://")) {
+          content = content.substring(6);
+          type = JsLibrary.Type.RESOURCE;
+        } else if (feature.isResource) {
+          // Note: Any features loaded as resources will assume that their
+          // paths point to resources as well.
+          content = feature.basePath + content;
+          type = JsLibrary.Type.RESOURCE;
         } else {
-          content = source;
-          if (content.startsWith("http://")) {
-            type = JsLibrary.Type.URL;
-          } else if (content.startsWith("//")) {
-            type = JsLibrary.Type.URL;
-            content = content.substring(1);
-          } else if (content.startsWith("res://")) {
-            content = content.substring(6);
-            type = JsLibrary.Type.RESOURCE;
-          } else if (feature.isResource) {
-            // Note: Any features loaded as resources will assume that their
-            // paths point to resources as well.
-            content = feature.basePath + content;
-            type = JsLibrary.Type.RESOURCE;
-          } else {
-            content = feature.basePath + content;
-            type = JsLibrary.Type.FILE;
-          }
-        }
-        JsLibrary library = JsLibrary.create(type, content);
-        for (String synd : syndicator.split(",")) {
-          feature.addLibrary(renderingContext, synd.trim(), library);
+          content = feature.basePath + content;
+          type = JsLibrary.Type.FILE;
         }
       }
+      JsLibrary library = JsLibrary.create(
+          type, content, feature.name, inlineOk ? fetcher : null);
+      for (String synd : syndicator.split(",")) {
+        feature.addLibrary(renderingContext, synd.trim(), library);
+      }
     }
+  }
+
+  /**
+   * @param fetcher
+   */
+  public JsFeatureLoader(RemoteContentFetcher fetcher) {
+    this.fetcher = fetcher;
   }
 }
 

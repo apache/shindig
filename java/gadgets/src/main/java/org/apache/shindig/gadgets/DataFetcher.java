@@ -20,42 +20,30 @@ package org.apache.shindig.gadgets;
 import java.net.URI;
 
 /**
- * A read-only view of the gadget.
+ * Interface for retrieving a specific type of content from external resources
+ *
+ * Implementations may provide their own caching layer and define how resources
+ * are retrieved.
+ *
+ * @param <T> Type of data that this fetcher fetches.
  */
-public interface GadgetView extends GadgetSpec {
+public interface DataFetcher<T> {
   /**
-   * A unique identifier for this gadget.
+   * Retrieve an object from the fetcher.
+   *
+   * @param url The url where the object can be located.
+   * @param forceReload True to disable caches and go directly to the source.
+   * @return The object, if it can be retrieved.
+   * @throws GadgetException If the object can't be retrieved or is not a valid
+   *     format for this data type.
    */
-  public interface ID {
-    /**
-     * @return The url of the gadget.
-     */
-    public URI getURI();
-
-    /**
-     * @return The unique identifier for this instance of the gadget.
-     */
-    public int getModuleId();
-
-    /**
-     * @return A string representing this gadget that can be used for caching.
-     */
-    public String getKey();
-  }
+  public T fetch(URI url, boolean forceReload) throws GadgetException;
 
   /**
-   * @return This gadget's identifier.
+   * Invalidates any cache entries for the given url.
+   *
+   * @param url
+   * @throws GadgetException
    */
-  public ID getId();
-
-  /**
-   * @return The substitution coordinator.
-   */
-  public Substitutions getSubstitutions();
-
-  /**
-   * @return The current message bundle for this rendering job.
-   */
-  public MessageBundle getCurrentMessageBundle();
-
+  public void invalidate(URI url) throws GadgetException;
 }

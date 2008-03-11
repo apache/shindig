@@ -19,14 +19,16 @@ package org.apache.shindig.gadgets;
 
 import org.apache.shindig.util.InputStreamConsumer;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.HttpURLConnection;
+import java.net.URLConnection;
 import java.util.List;
 import java.util.Map;
 
 /**
  * Implementation of a {@code RemoteObjectFetcher} using standard java.net
- * classes. Only supports HTTP fetching at present.
+ * classes.
  */
 public class BasicRemoteContentFetcher implements RemoteContentFetcher {
   private static final int CONNECT_TIMEOUT_MS = 5000;
@@ -46,36 +48,37 @@ public class BasicRemoteContentFetcher implements RemoteContentFetcher {
    * Initializes the connection.
    *
    * @param request
-   * @param options
    * @return The opened connection
    * @throws IOException
    */
-  private HttpURLConnection getConnection(RemoteContentRequest request,
-      ProcessingOptions options) throws IOException {
-    HttpURLConnection fetcher;
-    fetcher = (HttpURLConnection)request.getUri().toURL().openConnection();
-    fetcher.setInstanceFollowRedirects(true);
+  private URLConnection getConnection(RemoteContentRequest request)
+      throws IOException {
+    URLConnection fetcher;
+    fetcher = request.getUri().toURL().openConnection();
     fetcher.setConnectTimeout(CONNECT_TIMEOUT_MS);
-    Map<String, List<String>> reqHeaders = request.getAllHeaders();
-    for (Map.Entry<String, List<String>> entry : reqHeaders.entrySet()) {
-      List<String> value = entry.getValue();
-      if (value.size() == 1) {
-        fetcher.setRequestProperty(entry.getKey(), value.get(0));
-      } else {
-        StringBuilder headerList = new StringBuilder();
-        boolean first = false;
-        for (String val : value) {
-          if (!first) {
-            first = true;
-          } else {
-            headerList.append(",");
+    if (fetcher instanceof HttpURLConnection) {
+      ((HttpURLConnection)fetcher).setInstanceFollowRedirects(true);
+      Map<String, List<String>> reqHeaders = request.getAllHeaders();
+      for (Map.Entry<String, List<String>> entry : reqHeaders.entrySet()) {
+        List<String> value = entry.getValue();
+        if (value.size() == 1) {
+          fetcher.setRequestProperty(entry.getKey(), value.get(0));
+        } else {
+          StringBuilder headerList = new StringBuilder();
+          boolean first = false;
+          for (String val : value) {
+            if (!first) {
+              first = true;
+            } else {
+              headerList.append(",");
+            }
+            headerList.append(val);
           }
-          headerList.append(val);
+          fetcher.setRequestProperty(entry.getKey(), headerList.toString());
         }
-        fetcher.setRequestProperty(entry.getKey(), headerList.toString());
       }
     }
-    fetcher.setDefaultUseCaches(!options.getIgnoreCache());
+    fetcher.setDefaultUseCaches(!request.getOptions().ignoreCache);
     return fetcher;
   }
 
@@ -84,39 +87,40 @@ public class BasicRemoteContentFetcher implements RemoteContentFetcher {
    * @return A RemoteContent object made by consuming the response of the
    *     given HttpURLConnection.
    */
-  private RemoteContent makeResponse(HttpURLConnection fetcher)
+  private RemoteContent makeResponse(URLConnection fetcher)
       throws IOException {
     Map<String, List<String>> headers = fetcher.getHeaderFields();
-    int responseCode = fetcher.getResponseCode();
+    int responseCode;
+    if (fetcher instanceof HttpURLConnection) {
+      responseCode = ((HttpURLConnection)fetcher).getResponseCode();
+    } else {
+      responseCode = RemoteContent.SC_OK;
+    }
     byte[] body = InputStreamConsumer.readToByteArray(
         fetcher.getInputStream(), maxObjSize);
     return new RemoteContent(responseCode, body, headers);
   }
 
   /** {@inheritDoc} */
-  public RemoteContent fetch(RemoteContentRequest request,
-                             ProcessingOptions options) {
+  public RemoteContent fetch(RemoteContentRequest request) {
     try {
-      return makeResponse(getConnection(request, options));
-    } catch (IOException e) {
-      return RemoteContent.ERROR;
-    }
-  }
-
-  public RemoteContent fetchByPost(RemoteContentRequest request,
-                                   ProcessingOptions options) {
-    try {
-      HttpURLConnection fetcher = getConnection(request, options);
-      fetcher.setRequestMethod("POST");
-      fetcher.setRequestProperty("Content-Length",
-                                 String.valueOf(request.getPostBodyLength()));
-      fetcher.setUseCaches(false);
-      fetcher.setDoInput(true);
-      fetcher.setDoOutput(true);
-      InputStreamConsumer.pipe(request.getPostBody(),
-                               fetcher.getOutputStream());
+      URLConnection fetcher = getConnection(request);
+      if ("POST".equals(request.getMethod()) &&
+          fetcher instanceof HttpURLConnection) {
+        ((HttpURLConnection)fetcher).setRequestMethod("POST");
+        fetcher.setRequestProperty("Content-Length",
+                                   String.valueOf(request.getPostBodyLength()));
+        fetcher.setUseCaches(false);
+        fetcher.setDoInput(true);
+        fetcher.setDoOutput(true);
+        InputStreamConsumer.pipe(request.getPostBody(),
+                                 fetcher.getOutputStream());
+      }
       return makeResponse(fetcher);
     } catch (IOException e) {
+      if (e instanceof FileNotFoundException) {
+        return RemoteContent.NOT_FOUND;
+      }
       return RemoteContent.ERROR;
     }
   }

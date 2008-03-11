@@ -35,7 +35,6 @@ class BasicGadgetToken implements GadgetToken {
     return token;
   }
 
-
   /**
    * Generates a token from an input string
    * @param token String form of token

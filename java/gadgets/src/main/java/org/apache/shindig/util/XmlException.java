@@ -15,38 +15,16 @@
  * KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-package org.apache.shindig.gadgets.http;
+package org.apache.shindig.util;
 
-import javax.servlet.http.HttpServletRequest;
-
-import java.util.Locale;
-
-public class BasicHttpContext {
-  private String country;
-  private String language;
-  
-  private static final String DEFAULT_VALUE = "all";
-  
-  public BasicHttpContext(HttpServletRequest request) {
-    language = request.getParameter("lang");
-    country = request.getParameter("country");
-    if (language == null) {
-      language = DEFAULT_VALUE;
-    }
-    if (country == null) {
-      country = DEFAULT_VALUE;
-    }
+public class XmlException extends Exception {
+  public XmlException(String message, Exception cause) {
+    super(message, cause);
   }
-  
-  public String getCountry() {
-    return country;
+  public XmlException(Exception cause) {
+    super(cause);
   }
-
-  public String getLanguage() {
-    return language;
-  }
-  
-  public Locale getLocale() {
-    return new Locale(language, country);
+  public XmlException(String message) {
+    super(message);
   }
 }

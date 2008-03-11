@@ -43,12 +43,17 @@ public class UserPrefs {
     return prefs.get(name);
   }
 
+  @Override
+  public String toString() {
+    return prefs.toString();
+  }
+
   /**
-   * @param prefs
+   * @param prefs The preferences to populate.
    */
   public UserPrefs(Map<String, String> prefs) {
-    Map<String, String> tempMap = new HashMap<String, String>(prefs);
-    this.prefs = Collections.unmodifiableMap(tempMap);
+    this.prefs
+        = Collections.unmodifiableMap(new HashMap<String, String>(prefs));
   }
 
   /**

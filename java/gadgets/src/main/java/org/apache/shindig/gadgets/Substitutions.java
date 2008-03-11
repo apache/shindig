@@ -17,15 +17,15 @@
  */
 package org.apache.shindig.gadgets;
 
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.EnumMap;
 
 /**
  * Performs string substitutions for message bundles, user prefs, and bidi
  * variables.
- *
- * @author etnu
  */
 public class Substitutions {
 
@@ -106,20 +106,12 @@ public class Substitutions {
   }
 
   /**
-   * Substitutes all substitutions into the given string. The order of
-   * substitutions is the same as defined for Type.
-   *
-   * @param input
-   *        The base string, with substitution markers.
-   * @return The substituted string or null if {@code input} is null.
+   * @param type
+   * @param name
+   * @return The substitution set under the given type / name, or null.
    */
-  public String substitute(String input) {
-    if (input != null) {
-      for (Type type : Type.values()) {
-        input = substituteType(type, input);
-      }
-    }
-    return input;
+  public String getSubstitution(Type type, String name) {
+    return substitutions.get(type).get(name);
   }
 
   /**
@@ -133,9 +125,19 @@ public class Substitutions {
    *        The base string, with substitution markers.
    * @return The substituted string.
    */
-  public String substituteType(Type type, String input) {
-    if (input == null || substitutions.get(type).size() == 0 ||
-        !input.contains(type.prefix)) {
+  public String substituteString(Type type, String input) {
+    if (input == null) {
+      return null;
+    }
+
+    if (type == null) {
+      for (Type t : Type.values()) {
+        input = substituteString(t, input);
+      }
+      return input;
+    }
+
+    if (substitutions.get(type).size() == 0 || !input.contains(type.prefix)) {
       return input;
     }
 
@@ -167,5 +169,22 @@ public class Substitutions {
     }
 
     return output.toString();
+  }
+
+  /**
+   * Substitutes a uri
+   * @param type The type to substitute, or null for all types.
+   * @param uri
+   * @return The substituted uri, or a dummy value if the result is invalid.
+   */
+  public URI substituteUri(Type type, URI uri) {
+    if (uri == null) {
+      return null;
+    }
+    try {
+      return new URI(substituteString(type, uri.toString()));
+    } catch (URISyntaxException e) {
+      return URI.create("");
+    }
   }
 }
