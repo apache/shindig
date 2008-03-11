@@ -40,7 +40,7 @@ public class Person extends AbstractSocialData{
   private Date dateOfBirth;
   // drinker : Person's drinking status, specified as an opensocial.Enum with
   // the enum's key referencing opensocial.Enum.Drinker.
-  // emails :Emails associated with the person, specified as an Array of Emails.
+  private Email[] emails;
   private String ethnicity;
   private String fashion;
   private String[] food;
@@ -52,11 +52,10 @@ public class Person extends AbstractSocialData{
   @Mandatory private String id;
   private String[] interests;
   private String jobInterests;
-  // private Organization[] jobs;
+  private Organization[] jobs;
   private String[] languagesSpoken;
   private String livingArrangement;
-  // lookingFor : Person's statement about who or what they are looking for, or
-  // what they are interested in meeting people for.
+  private String lookingFor;
   private String[] movies;
   private String[] music;
   @Mandatory private Name name;
@@ -64,15 +63,15 @@ public class Person extends AbstractSocialData{
   private String pets;
   private Phone[] phoneNumbers;
   private String politicalViews;
-  // private Url profileSong
+  private Url profileSong;
   private String profileUrl;
-  // private Url profileVideo
+  private Url profileVideo;
   private String[] quotes;
   private String relationshipStatus;
   private String religion;
   private String romance;
   private String scaredOf;
-  // private Organization[] schools;
+  private Organization[] schools;
   private String sexualOrientation;
   // smoker Person's smoking status, specified as an opensocial.Enum with the
   // enum's key referencing opensocial.Enum.Smoker.
@@ -80,12 +79,11 @@ public class Person extends AbstractSocialData{
   private String status;
   private String[] tags;
   private String thumbnailUrl;
-  // time_zone Person's time zone, specified as the difference in minutes
-  // between Greenwich Mean Time (GMT) and the user's local time.
+  private Long timeZone;
   private String[] turnOffs;
   private String[] turnOns;
   private String[] tvShows;
-  // private Url[] urls;
+  private Url[] urls;
 
   public Person(String id, Name name) {
     this.id = id;
@@ -172,6 +170,14 @@ public class Person extends AbstractSocialData{
     this.dateOfBirth = dateOfBirth;
   }
 
+  public Email[] getEmails() {
+    return emails;
+  }
+
+  public void setEmails(Email[] emails) {
+    this.emails = emails;
+  }
+
   public String getEthnicity() {
     return ethnicity;
   }
@@ -244,6 +250,14 @@ public class Person extends AbstractSocialData{
     this.jobInterests = jobInterests;
   }
 
+  public Organization[] getJobs() {
+    return jobs;
+  }
+
+  public void setJobs(Organization[] jobs) {
+    this.jobs = jobs;
+  }
+
   public String[] getLanguagesSpoken() {
     return languagesSpoken;
   }
@@ -258,6 +272,14 @@ public class Person extends AbstractSocialData{
 
   public void setLivingArrangement(String livingArrangement) {
     this.livingArrangement = livingArrangement;
+  }
+
+  public String getLookingFor() {
+    return lookingFor;
+  }
+
+  public void setLookingFor(String lookingFor) {
+    this.lookingFor = lookingFor;
   }
 
   public String[] getMovies() {
@@ -316,12 +338,28 @@ public class Person extends AbstractSocialData{
     this.politicalViews = politicalViews;
   }
 
+  public Url getProfileSong() {
+    return profileSong;
+  }
+
+  public void setProfileSong(Url profileSong) {
+    this.profileSong = profileSong;
+  }
+
   public String getProfileUrl() {
     return profileUrl;
   }
 
   public void setProfileUrl(String profileUrl) {
     this.profileUrl = profileUrl;
+  }
+
+  public Url getProfileVideo() {
+    return profileVideo;
+  }
+
+  public void setProfileVideo(Url profileVideo) {
+    this.profileVideo = profileVideo;
   }
 
   public String[] getQuotes() {
@@ -364,6 +402,14 @@ public class Person extends AbstractSocialData{
     this.scaredOf = scaredOf;
   }
 
+  public Organization[] getSchools() {
+    return schools;
+  }
+
+  public void setSchools(Organization[] schools) {
+    this.schools = schools;
+  }
+
   public String getSexualOrientation() {
     return sexualOrientation;
   }
@@ -404,6 +450,14 @@ public class Person extends AbstractSocialData{
     this.thumbnailUrl = thumbnailUrl;
   }
 
+  public Long getTimeZone() {
+    return timeZone;
+  }
+
+  public void setTimeZone(Long timeZone) {
+    this.timeZone = timeZone;
+  }
+
   public String[] getTurnOffs() {
     return turnOffs;
   }
@@ -426,5 +480,13 @@ public class Person extends AbstractSocialData{
 
   public void setTvShows(String[] tvShows) {
     this.tvShows = tvShows;
+  }
+
+  public Url[] getUrls() {
+    return urls;
+  }
+
+  public void setUrls(Url[] urls) {
+    this.urls = urls;
   }
 }
