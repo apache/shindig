@@ -177,6 +177,10 @@ under the License.
       <id>caja</id>
       <url>http://google-caja.googlecode.com/svn/maven</url>
     </repository>
+    <repository>
+      <id>oauth</id>
+      <url>http://oauth.googlecode.com/svn/code/maven</url>
+    </repository>
   </repositories>
 
   <dependencies>
@@ -218,6 +222,12 @@ under the License.
       <groupId>caja</groupId>
       <artifactId>caja</artifactId>
       <version>r422</version>
+      <scope>compile</scope>
+    </dependency>
+    <dependency>
+      <groupId>net.oauth</groupId> 
+      <artifactId>core</artifactId>
+      <version>20080229</version>
       <scope>compile</scope>
     </dependency>
 		<dependency>
