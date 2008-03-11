@@ -23,7 +23,10 @@ specific language governing permissions and limitations under the License.
   <name>caja</name>
   <gadget>
     <script src="caja.js"></script>
+    <script src="html4-defs.js"></script>
     <script src="html-sanitizer.js"></script>
+    <script src="unicode.js"></script>
+    <script src="domita.js"></script>
     <script src="log-to-console.js"></script>
     <script src="permissive.js"></script>
   </gadget>
