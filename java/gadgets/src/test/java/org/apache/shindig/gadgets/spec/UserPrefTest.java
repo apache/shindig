@@ -85,12 +85,8 @@ public class UserPrefTest extends TestCase {
 
   public void testMissingDataType() throws Exception {
     String xml = "<UserPref name=\"name\"/>";
-    try {
-      UserPref pref = new UserPref(XmlUtil.parse(xml));
-      fail("No exception thrown when datatype is missing");
-    } catch (SpecParserException e) {
-      // OK
-    }
+    UserPref pref = new UserPref(XmlUtil.parse(xml));
+    assertEquals(UserPref.DataType.STRING, pref.getDataType());
   }
 
   public void testMissingEnumValue() throws Exception {
