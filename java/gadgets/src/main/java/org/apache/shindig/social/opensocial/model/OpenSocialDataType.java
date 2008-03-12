@@ -15,8 +15,8 @@
  * KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-package org.apache.shindig.social;
+package org.apache.shindig.social.opensocial.model;
 
-public enum SocialDataType {
+public enum OpenSocialDataType {
   FETCH_PEOPLE, FETCH_PERSON_APP_DATA, UPDATE_PERSON_APP_DATA, FETCH_ACTIVITIES
 }

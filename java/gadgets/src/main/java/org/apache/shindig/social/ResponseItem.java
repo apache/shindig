@@ -21,7 +21,7 @@ package org.apache.shindig.social;
  * Represents the response items that get handed back as json within the
  * DataResponse
  */
-public class ResponseItem<T> extends AbstractSocialData {
+public class ResponseItem<T> extends AbstractGadgetData {
   private ResponseError error;
 
   // Must be compatible with AbstractSocialData.toJson. This means it should be

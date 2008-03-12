@@ -1,4 +1,4 @@
-package org.apache.shindig.social.file;
+package org.apache.shindig.social.samplecontainer;
 
 import org.w3c.dom.Document;
 import org.apache.shindig.gadgets.RemoteContentFetcher;

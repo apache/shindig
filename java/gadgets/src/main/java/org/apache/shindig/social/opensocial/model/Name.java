@@ -15,14 +15,16 @@
  * KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-package org.apache.shindig.social;
+package org.apache.shindig.social.opensocial.model;
+
+import org.apache.shindig.social.AbstractGadgetData;
 
 /**
  * see
  * http://code.google.com/apis/opensocial/docs/0.7/reference/opensocial.Name.Field.html
  *
  */
-public class Name extends AbstractSocialData {
+public class Name extends AbstractGadgetData {
   private String additionalName;
   private String familyName;
   private String givenName;

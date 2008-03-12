@@ -34,7 +34,9 @@ import java.util.Map;
  * @author Vincent Demay
  *
  */
-public abstract class AbstractSocialData {
+// TODO: Move from an inheritance model to a class that can translate any java
+// object based on its getters
+public abstract class AbstractGadgetData {
 
   private static final Class[] EMPTY_PARAM = {};
   private static final Object[] EMPTY_OBJECT = {};
@@ -100,9 +102,9 @@ public abstract class AbstractSocialData {
   }
 
   private Object translateObjectToJson(Object val) throws JSONException {
-    if (val instanceof AbstractSocialData[]) {
+    if (val instanceof AbstractGadgetData[]) {
       JSONArray array = new JSONArray();
-      for (Object asd : (AbstractSocialData[]) val) {
+      for (Object asd : (AbstractGadgetData[]) val) {
         array.put(translateObjectToJson(asd));
       }
       return array;
@@ -124,8 +126,8 @@ public abstract class AbstractSocialData {
       }
       return map;
 
-    } else if (val instanceof AbstractSocialData) {
-      return ((AbstractSocialData) val).toJson();
+    } else if (val instanceof AbstractGadgetData) {
+      return ((AbstractGadgetData) val).toJson();
     }
 
     // Fallback to returning the original object. This works fine for primitive

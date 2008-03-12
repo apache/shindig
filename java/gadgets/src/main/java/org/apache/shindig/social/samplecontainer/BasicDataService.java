@@ -15,11 +15,11 @@
  * KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-package org.apache.shindig.social.file;
+package org.apache.shindig.social.samplecontainer;
 
-import org.apache.shindig.social.DataHandler;
 import org.apache.shindig.social.ResponseItem;
 import org.apache.shindig.social.ResponseError;
+import org.apache.shindig.social.opensocial.DataService;
 import org.w3c.dom.Document;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
@@ -31,12 +31,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class BasicDataHandler implements DataHandler {
+public class BasicDataService implements DataService {
   // TODO: This obviously won't work on multiple servers
   // If we care then we should do something about it
   private static Map<String, Map<String, String>> allData;
 
-  public BasicDataHandler() {
+  public BasicDataService() {
     if (allData != null) {
       return;
     }

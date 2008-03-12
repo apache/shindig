@@ -64,7 +64,7 @@
   <servlet>
     <servlet-name>socialdata</servlet-name>
     <servlet-class>
-      org.apache.shindig.social.http.SocialDataServlet
+      org.apache.shindig.social.GadgetDataServlet
     </servlet-class>
   </servlet>
 

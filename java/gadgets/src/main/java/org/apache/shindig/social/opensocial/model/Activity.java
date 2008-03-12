@@ -15,9 +15,12 @@
  * KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-package org.apache.shindig.social;
+package org.apache.shindig.social.opensocial.model;
 
-public class Activity extends AbstractSocialData {
+import org.apache.shindig.social.Mandatory;
+import org.apache.shindig.social.AbstractGadgetData;
+
+public class Activity extends AbstractGadgetData {
   private String appId;
   private String body;
   private String bodyId;
