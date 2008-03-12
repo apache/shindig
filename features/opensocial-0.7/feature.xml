@@ -26,20 +26,36 @@
     <script src="jsoncontainer.js"></script>
     <script src="batchrequest.js"></script>
     <script>
-      ShindigContainer = function() {
-        var supportedFields = {
-          'person' : ['id', 'name', 'thumbnailUrl', 'profileUrl'],
-          'activity' : ['id', 'title'] // TODO: Support acitvities
-        };
-
-        // TODO: Support relative paths
-        JsonContainer.call(this, "http://localhost:8080/gadgets/socialdata",
-          "shindig", supportedFields);
+      var requiredConfig = {
+        "path": gadgets.config.NonEmptyStringValidator,
+        "domain": gadgets.config.NonEmptyStringValidator,
+        "enableCaja": gadgets.config.BooleanValidator,
+        "supportedFields": gadgets.config.ExistsValidator
       };
-      ShindigContainer.inherits(JsonContainer);
 
-      opensocial.Container.setContainer(new ShindigContainer());
-      opensocial.Container.get().enableCaja();
+      gadgets.config.register("opensocial-0.7", requiredConfig,
+        function(config) {
+          var configParams = config["opensocial-0.7"];
+
+          ShindigContainer = function() {
+            var path = configParams.path;
+            if (path.indexOf("http") != 0) {
+              var parentUrl = document.location.protocol + "//"
+                  + document.location.host;
+              path = parentUrl + path;
+            }
+
+            JsonContainer.call(this, path,
+                configParams.domain, configParams.supportedFields);
+          };
+          ShindigContainer.inherits(JsonContainer);
+
+          opensocial.Container.setContainer(new ShindigContainer());
+
+          if (configParams.enableCaja) {
+            opensocial.Container.get().enableCaja();
+          }
+      });
     </script>
   </gadget>
 </feature>
