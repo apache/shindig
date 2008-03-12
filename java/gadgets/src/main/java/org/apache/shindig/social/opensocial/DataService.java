@@ -15,12 +15,14 @@
  * KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-package org.apache.shindig.social;
+package org.apache.shindig.social.opensocial;
+
+import org.apache.shindig.social.ResponseItem;
 
 import java.util.List;
 import java.util.Map;
 
-public interface DataHandler {
+public interface DataService {
   public ResponseItem<Map<String, Map<String, String>>> getPersonData(List<String> ids);
 
   /**

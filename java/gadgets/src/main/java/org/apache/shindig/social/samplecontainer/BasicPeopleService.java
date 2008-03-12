@@ -15,9 +15,14 @@
  * KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-package org.apache.shindig.social.file;
+package org.apache.shindig.social.samplecontainer;
 
-import org.apache.shindig.social.*;
+import org.apache.shindig.social.opensocial.PeopleService;
+import org.apache.shindig.social.opensocial.model.IdSpec;
+import org.apache.shindig.social.opensocial.model.Person;
+import org.apache.shindig.social.opensocial.model.Phone;
+import org.apache.shindig.social.opensocial.model.Name;
+import org.apache.shindig.social.ResponseItem;
 import org.json.JSONException;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -30,13 +35,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class BasicPeopleHandler implements PeopleHandler {
+public class BasicPeopleService implements PeopleService {
   private Map<IdSpec.Type, List<String>> idMap
       = new HashMap<IdSpec.Type, List<String>>();
   private Map<String, Person> allPeople
       = new HashMap<String, Person>();
 
-  public BasicPeopleHandler() {
+  public BasicPeopleService() {
     // TODO: Get file from user in web ui
     String stateFile = "http://localhost:8080/gadgets/files/samplecontainer/state-basicfriendlist.xml";
     XmlStateFileFetcher fetcher = new XmlStateFileFetcher(stateFile);

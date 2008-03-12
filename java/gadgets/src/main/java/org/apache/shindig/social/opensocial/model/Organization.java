@@ -15,7 +15,9 @@
  * KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-package org.apache.shindig.social;
+package org.apache.shindig.social.opensocial.model;
+
+import org.apache.shindig.social.AbstractGadgetData;
 
 import java.util.Date;
 
@@ -24,7 +26,7 @@ import java.util.Date;
  * http://code.google.com/apis/opensocial/docs/0.7/reference/opensocial.Organization.Field.html
  *
  */
-public class Organization extends AbstractSocialData {
+public class Organization extends AbstractGadgetData {
   private Address address;
   private String description;
   private Date endDate;

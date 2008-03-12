@@ -15,7 +15,10 @@
  * KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-package org.apache.shindig.social;
+package org.apache.shindig.social.opensocial.model;
+
+import org.apache.shindig.social.AbstractGadgetData;
+import org.apache.shindig.social.Mandatory;
 
 import java.util.Date;
 
@@ -24,7 +27,7 @@ import java.util.Date;
  * http://code.google.com/apis/opensocial/docs/0.7/reference/opensocial.Person.Field.html
  *
  */
-public class Person extends AbstractSocialData{
+public class Person extends AbstractGadgetData {
   // TODO: Create the rest of the person fields and objects
   // TODO: Change all of the array objects to list objects for easier
   // manipulation

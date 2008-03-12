@@ -15,28 +15,32 @@
  * KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-package org.apache.shindig.social;
+package org.apache.shindig.social.opensocial.model;
+
+import org.apache.shindig.social.Mandatory;
+import org.apache.shindig.social.AbstractGadgetData;
 
 /**
  * see
- * http://code.google.com/apis/opensocial/docs/0.7/reference/opensocial.Email.Field.html
+ * http://code.google.com/apis/opensocial/docs/0.7/reference/opensocial.Phone.Field.html
  *
  */
-public class Email extends AbstractSocialData {
-  private String address;
+public class Phone extends AbstractGadgetData {
+  @Mandatory private String number;
   private String type;
 
-  public Email(String address, String type) {
-    this.address = address;
+  public Phone(String number, String type) {
+    super();
+    this.number = number;
     this.type = type;
   }
 
-  public String getAddress() {
-    return address;
+  public String getNumber() {
+    return number;
   }
 
-  public void setAddress(String address) {
-    this.address = address;
+  public void setNumber(String number) {
+    this.number = number;
   }
 
   public String getType() {

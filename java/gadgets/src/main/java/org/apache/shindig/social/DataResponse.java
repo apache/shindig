@@ -24,7 +24,7 @@ import java.util.ArrayList;
 /**
  * Represents the response object which gets passed as json to the gadget
  */
-public class DataResponse extends AbstractSocialData {
+public class DataResponse extends AbstractGadgetData {
   @Mandatory private List<ResponseItem> responses;
   private ResponseError error;
 

@@ -15,15 +15,17 @@
  * KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-package org.apache.shindig.social.http;
+package org.apache.shindig.social;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.apache.shindig.social.*;
-import static org.apache.shindig.social.IdSpec.*;
-import org.apache.shindig.social.file.BasicPeopleHandler;
-import org.apache.shindig.social.file.BasicDataHandler;
+import org.apache.shindig.social.samplecontainer.BasicPeopleService;
+import org.apache.shindig.social.samplecontainer.BasicDataService;
+import org.apache.shindig.social.opensocial.PeopleService;
+import org.apache.shindig.social.opensocial.DataService;
+import org.apache.shindig.social.opensocial.model.IdSpec;
+import org.apache.shindig.social.opensocial.model.OpenSocialDataType;
 
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -39,13 +41,13 @@ import javax.servlet.http.HttpServletResponse;
  * Servlet for serving social data. This is a very basic hardcoded inital file.
  * This will expand to be more sophisticated as time goes on.
  */
-public class SocialDataServlet extends HttpServlet {
+public class GadgetDataServlet extends HttpServlet {
   private static final Logger logger
       = Logger.getLogger("org.apache.shindig.social");
 
   // TODO: get through injection
-  private PeopleHandler peopleHandler = new BasicPeopleHandler();
-  private DataHandler dataHandler = new BasicDataHandler();
+  private PeopleService peopleHandler = new BasicPeopleService();
+  private DataService dataHandler = new BasicDataService();
 
   @Override
   protected void doPost(HttpServletRequest req, HttpServletResponse resp)
@@ -80,12 +82,13 @@ public class SocialDataServlet extends HttpServlet {
       JSONObject requestItem = requestItems.getJSONObject(i);
 
       try {
-        SocialDataType type = SocialDataType.valueOf(
+        OpenSocialDataType type = OpenSocialDataType.valueOf(
             requestItem.getString("type"));
 
         String jsonSpec = requestItem.getString("idSpec");
-        List<String> peopleIds = peopleHandler.getIds(fromJson(jsonSpec));
+        List<String> peopleIds = peopleHandler.getIds(IdSpec.fromJson(jsonSpec));
 
+        // TODO: Abstract this logic into handlers which register
         switch (type) {
           case FETCH_PEOPLE :
             response = peopleHandler.getPeople(peopleIds);

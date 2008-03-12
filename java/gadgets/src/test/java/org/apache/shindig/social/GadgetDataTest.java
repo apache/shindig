@@ -19,13 +19,14 @@ package org.apache.shindig.social;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.apache.shindig.social.opensocial.model.*;
 
 import junit.framework.TestCase;
 
 import java.util.Map;
 import java.util.HashMap;
 
-public class SocialDataTest extends TestCase {
+public class GadgetDataTest extends TestCase {
   private Person johnDoe;
   private Activity activity;
 

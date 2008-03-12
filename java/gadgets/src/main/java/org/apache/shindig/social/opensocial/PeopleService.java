@@ -15,13 +15,16 @@
  * KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-package org.apache.shindig.social;
+package org.apache.shindig.social.opensocial;
 
 import org.json.JSONException;
+import org.apache.shindig.social.opensocial.model.Person;
+import org.apache.shindig.social.opensocial.model.IdSpec;
+import org.apache.shindig.social.ResponseItem;
 
 import java.util.List;
 
-public interface PeopleHandler {
+public interface PeopleService {
   /**
    * Returns a list of people ids that the other handlers (currently data
    * and activities) can use to fetch their own objects
