@@ -17,25 +17,39 @@
  */
 package org.apache.shindig.social;
 
-import org.json.JSONException;
+/**
+ * Represents the response items that get handed back as json within the
+ * DataResponse
+ */
+public class ResponseItem<T> extends AbstractSocialData {
+  private ResponseError error;
 
-import java.util.List;
+  // Must be compatible with AbstractSocialData.toJson. This means it should be
+  // an AbstractSocialData or a collection of AbstractSocialData
+  @Mandatory private T response;
 
-public interface PeopleHandler {
-  /**
-   * Returns a list of people ids that the other handlers (currently data
-   * and activities) can use to fetch their own objects
-   *
-   * @param idSpec The idSpec to translate into ids
-   * @return a list of person ids
-   * @throws JSONException If the idSpec is malformed
-   */
-  public List<String> getIds(IdSpec idSpec) throws JSONException;
+  public ResponseItem(ResponseError error, T response) {
+    this.error = error;
+    this.response = response;
+  }
 
-  /**
-   * Returns a list of people that correspond to the passed in person ids.
-   * @param ids The ids of the people to fetch.
-   * @return a list of people.
-   */
-  public ResponseItem<List<Person>> getPeople(List<String> ids);
+  public ResponseItem(T response) {
+    this(null, response);
+  }
+
+  public ResponseError getError() {
+    return error;
+  }
+
+  public void setError(ResponseError error) {
+    this.error = error;
+  }
+
+  public T getResponse() {
+    return response;
+  }
+
+  public void setResponse(T response) {
+    this.response = response;
+  }
 }

@@ -17,25 +17,39 @@
  */
 package org.apache.shindig.social;
 
-import org.json.JSONException;
-
 import java.util.List;
+import java.util.ArrayList;
 
-public interface PeopleHandler {
-  /**
-   * Returns a list of people ids that the other handlers (currently data
-   * and activities) can use to fetch their own objects
-   *
-   * @param idSpec The idSpec to translate into ids
-   * @return a list of person ids
-   * @throws JSONException If the idSpec is malformed
-   */
-  public List<String> getIds(IdSpec idSpec) throws JSONException;
 
-  /**
-   * Returns a list of people that correspond to the passed in person ids.
-   * @param ids The ids of the people to fetch.
-   * @return a list of people.
-   */
-  public ResponseItem<List<Person>> getPeople(List<String> ids);
+/**
+ * Represents the response object which gets passed as json to the gadget
+ */
+public class DataResponse extends AbstractSocialData {
+  @Mandatory private List<ResponseItem> responses;
+  private ResponseError error;
+
+  public DataResponse(ResponseError error) {
+    this.error = error;
+    this.responses = new ArrayList<ResponseItem>();
+  }
+
+  public DataResponse(List<ResponseItem> responses) {
+    this.responses = responses;
+  }
+
+  public List<ResponseItem> getResponses() {
+    return responses;
+  }
+
+  public void setResponses(List<ResponseItem> responses) {
+    this.responses = responses;
+  }
+
+  public ResponseError getError() {
+    return error;
+  }
+
+  public void setError(ResponseError error) {
+    this.error = error;
+  }
 }

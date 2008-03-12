@@ -20,12 +20,7 @@ package org.apache.shindig.social.http;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.apache.shindig.social.ResponseError;
-import org.apache.shindig.social.SocialDataType;
-import org.apache.shindig.social.PeopleHandler;
-import org.apache.shindig.social.Person;
-import org.apache.shindig.social.IdSpec;
-import org.apache.shindig.social.DataHandler;
+import org.apache.shindig.social.*;
 import static org.apache.shindig.social.IdSpec.*;
 import org.apache.shindig.social.file.BasicPeopleHandler;
 import org.apache.shindig.social.file.BasicDataHandler;
@@ -34,7 +29,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.logging.Logger;
 import java.util.List;
-import java.util.Map;
+import java.util.ArrayList;
 
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -47,9 +42,6 @@ import javax.servlet.http.HttpServletResponse;
 public class SocialDataServlet extends HttpServlet {
   private static final Logger logger
       = Logger.getLogger("org.apache.shindig.social");
-  private static final String BAD__REQUEST__RESPONSE =
-      "{\"responses\" : {}, \"error\" : \""
-      + ResponseError.BAD_REQUEST.toJson() + "\"}";
 
   // TODO: get through injection
   private PeopleHandler peopleHandler = new BasicPeopleHandler();
@@ -59,28 +51,31 @@ public class SocialDataServlet extends HttpServlet {
   protected void doPost(HttpServletRequest req, HttpServletResponse resp)
       throws IOException {
     // TODO: Get the security token
-    // TODO: Don't use string concatenation for json output
     // TODO: etc, etc, etc
 
     String requestParam = req.getParameter("request");
-    String response;
+    DataResponse response;
     try {
-      response = createResponse(requestParam);
+      response = new DataResponse(createResponse(requestParam));
     } catch (JSONException e) {
-      response = BAD__REQUEST__RESPONSE;
+      response = new DataResponse(ResponseError.BAD_REQUEST);
     }
 
     PrintWriter writer = resp.getWriter();
-    writer.write(response);
+    writer.write(response.toJson().toString());
   }
 
-  private String createResponse(String requestParam) throws JSONException {
+  private List<ResponseItem> createResponse(String requestParam)
+      throws JSONException {
+    // TODO: Improve json input handling. The json request should get auto
+    // translated into objects
     JSONArray requestItems = new JSONArray(requestParam);
-    String jsonResponse = "{\"responses\" : [";
+    List<ResponseItem> responseItems = new ArrayList<ResponseItem>();
     int length = requestItems.length();
 
     for (int i = 0; i < length; i++) {
-      String jsonData = "{}";
+      ResponseItem response = new ResponseItem<Object>(
+          ResponseError.NOT_IMPLEMENTED);
 
       JSONObject requestItem = requestItems.getJSONObject(i);
 
@@ -93,91 +88,34 @@ public class SocialDataServlet extends HttpServlet {
 
         switch (type) {
           case FETCH_PEOPLE :
-            jsonData = handleFetchPeople(peopleIds);
+            response = peopleHandler.getPeople(peopleIds);
             break;
 
           case FETCH_PERSON_APP_DATA :
-            jsonData = handleFetchData(peopleIds);
+            response = dataHandler.getPersonData(peopleIds);
             break;
 
           case UPDATE_PERSON_APP_DATA:
-            jsonData = handleUpdateData(peopleIds, requestItem);
+            // We only support updating one person right now
+            String id = peopleIds.get(0);
+
+            String key = requestItem.getString("key");
+            String value = requestItem.getString("value");
+
+            response = dataHandler.updatePersonData(id, key, value);
             break;
         }
 
-        jsonResponse += "{\"response\" : " + jsonData + "}";
       } catch (JSONException e) {
-        jsonResponse += "{\"response\" : {}, \"error\" : \""
-            + ResponseError.BAD_REQUEST.toJson() + "\"}";
+        response = new ResponseItem<Object>(ResponseError.BAD_REQUEST);
       } catch (IllegalArgumentException e) {
-        jsonResponse += "{\"response\" : {}, \"error\" : \""
-            + ResponseError.BAD_REQUEST.toJson() + "\"}";
+        response = new ResponseItem<Object>(ResponseError.BAD_REQUEST);
       }
 
-      if (i < length - 1) {
-        jsonResponse += ",";
-      }
-    }
-    jsonResponse += "]}";
-    return jsonResponse;
-  }
-
-  private String handleFetchData(List<String> peopleIds) {
-    Map<String, Map<String,String>> people
-        = dataHandler.getPersonData(peopleIds);
-
-    String jsonData = "{";
-
-    for (String userId : people.keySet()) {
-      Map<String, String> userData = people.get(userId);
-      jsonData += "\"" + userId + "\" : {";
-
-      if (userData != null) {
-        for (String dataKey : userData.keySet()) {
-          String dataValue = userData.get(dataKey);
-          jsonData += "\"" + dataKey + "\" : \"" + dataValue + "\" ";
-        }
-      }
-
-      jsonData += "}, ";
+      responseItems.add(response);
     }
 
-    jsonData += "}";
-
-    return jsonData;
-  }
-
-  private String handleUpdateData(List<String> peopleIds,
-      JSONObject requestItem) throws JSONException {
-
-    // We only support updating one person right now
-    String id = peopleIds.get(0);
-
-    String key = requestItem.getString("key");
-    String value = requestItem.getString("value");
-
-    // TODO: Clean this error handling up
-    boolean success = dataHandler.updatePersonData(id, key, value);
-    if (!success) {
-      throw new IllegalArgumentException();
-    } else {
-      return "{}";
-    }
-  }
-
-  private String handleFetchPeople(List<String> peopleIds) {
-    List<Person> people = peopleHandler.getPeople(peopleIds);
-    if (people.isEmpty()) {
-      return "{}";
-    }
-
-    String jsonData = "[";
-    for (Person person : people) {
-      jsonData += person.toJson() + ",";
-    }
-    jsonData += "]";
-
-    return jsonData;
+    return responseItems;
   }
 
 }

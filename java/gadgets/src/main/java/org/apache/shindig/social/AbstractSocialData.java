@@ -23,6 +23,9 @@ import org.json.JSONObject;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
+import java.util.List;
+import java.util.Collection;
+import java.util.Map;
 
 /**
  * Autoconvert a pojo in a JSONObject If a value is set to null will not be
@@ -82,26 +85,51 @@ public abstract class AbstractSocialData {
     String getterName = field.getName();
     getterName = "get" + getterName.substring(0, 1).toUpperCase()
         + getterName.substring(1, getterName.length());
+
     Object val = this.getClass().getMethod(getterName, EMPTY_PARAM).invoke(
         this, EMPTY_OBJECT);
     String name = field.getName();
     if (val != null) {
-      if (val instanceof AbstractSocialData[]) {
-        JSONArray array = new JSONArray();
-        for (AbstractSocialData asd : (AbstractSocialData[]) val) {
-          array.put(asd.toJson());
-        }
-        val = array;
-      } else if (val instanceof AbstractSocialData) {
-        // get json object
-        val = ((AbstractSocialData) val).toJson();
-      }
-      object.put(name, val);
+      object.put(name, translateObjectToJson(val));
     } else {
       if (mandatory) {
         throw new RuntimeException(name
             + " is a mandory value, it should not be null");
       }
     }
+  }
+
+  private Object translateObjectToJson(Object val) throws JSONException {
+    if (val instanceof AbstractSocialData[]) {
+      JSONArray array = new JSONArray();
+      for (Object asd : (AbstractSocialData[]) val) {
+        array.put(translateObjectToJson(asd));
+      }
+      return array;
+
+    } else if (val instanceof List) {
+      JSONArray list = new JSONArray();
+      for (Object item : (List) val) {
+        list.put(translateObjectToJson(item));
+      }
+      return list;
+
+    } else if (val instanceof Map) {
+      JSONObject map = new JSONObject();
+      // TODO: Support more than just a map from String to Object
+      Map<String, Object> originalMap = (Map<String, Object>) val;
+
+      for (String item : originalMap.keySet()) {
+        map.put(item, translateObjectToJson(originalMap.get(item)));
+      }
+      return map;
+
+    } else if (val instanceof AbstractSocialData) {
+      return ((AbstractSocialData) val).toJson();
+    }
+
+    // Fallback to returning the original object. This works fine for primitive
+    // types and JSONObject types.
+    return val;
   }
 }

@@ -22,6 +22,9 @@ import org.json.JSONObject;
 
 import junit.framework.TestCase;
 
+import java.util.Map;
+import java.util.HashMap;
+
 public class SocialDataTest extends TestCase {
   private Person johnDoe;
   private Activity activity;
@@ -104,4 +107,25 @@ public class SocialDataTest extends TestCase {
     assertEquals(expectedItem.getType().toString(),
         actualItem.getString("type"));
   }
+
+  public void testMapsToJson() throws Exception {
+    Map<String, Map<String, String>> map =
+        new HashMap<String, Map<String, String>>();
+
+    Map<String, String> item1Map = new HashMap<String, String>();
+    item1Map.put("value", "1");
+    map.put("item1", item1Map);
+
+    Map<String, String> item2Map = new HashMap<String, String>();
+    item2Map.put("value", "2");
+    map.put("item2", item2Map);
+
+    ResponseItem response = new ResponseItem(map);
+    JSONObject result = response.toJson();
+
+    JSONObject jsonMap = result.getJSONObject("response");
+    assertEquals("1", jsonMap.getJSONObject("item1").getString("value"));
+    assertEquals("2", jsonMap.getJSONObject("item2").getString("value"));
+  }
+
 }
