@@ -19,7 +19,7 @@
  */
 
 class JsServlet extends HttpServlet {
-	
+
 	public function doGet()
 	{
 		global $config;
@@ -53,13 +53,13 @@ class JsServlet extends HttpServlet {
 			$jsData = '';
 			$done = array();
 			do {
-				foreach ( $found as $entry ) {
+				foreach ($found as $entry) {
 					if (! in_array($entry, $done)) {
 						$feat = $registry->getEntry($entry);
 						$feature = $feat->getFeature();
 						if ($feature instanceof JsLibraryFeatureFactory) {
 							$jsLib = $feature;
-							foreach ( $jsLib->getLibraries($context) as $lib ) {
+							foreach ($jsLib->getLibraries($context) as $lib) {
 								if ($lib->getType() != 'URL') {
 									$jsData .= $lib->getContent();
 								}
@@ -68,30 +68,27 @@ class JsServlet extends HttpServlet {
 						$done[] = $entry;
 					}
 				}
-			} while ( count($done) != count($found) );
+			} while (count($done) != count($found));
 			if (! strlen($jsData)) {
 				header("HTTP/1.0 404 Not Found", true);
 				die();
 			}
-			if (!isset($_GET['c']) || $_GET['c'] != 1) {
-				$contents = preg_replace('/\/\/.*$/m','',preg_replace('@/\\*(?:.|[\\n\\r])*?\\*/@', '', file_get_contents($config['syndicator_config'])));
+			if (! isset($_GET['c']) || $_GET['c'] != 1) {
+				$contents = preg_replace('/\/\/.*$/m', '', preg_replace('@/\\*(?:.|[\\n\\r])*?\\*/@', '', file_get_contents($config['syndicator_config'])));
 				$syndData = json_decode($contents, true);
-				$jsData .= "\ngadgets.config.init(".json_encode($syndData['gadgets.features']).");\n";
+				$jsData .= "\ngadgets.config.init(" . json_encode($syndData['gadgets.features']) . ");\n";
 			}
 			$this->setCachingHeaders();
 			header('Content-Length: ' . strlen($jsData));
+			header("Content-Type: text/javascript");
 			echo $jsData;
-			//FIXME quick hack to make it work with the new syndicator.js config, needs a propper implimentation later
-			if (!file_exists($config['syndicator_config']) || !is_readable($config['syndicator_config'])) {
-				throw new GadgetException("Invalid syndicator config");
-			}
 		} else {
 			header("HTTP/1.0 404 Not Found", true);
 		
 		}
 		die();
 	}
-	
+
 	private function setCachingHeaders()
 	{
 		header("Expires: Tue, 01 Jan 2030 00:00:01 GMT");

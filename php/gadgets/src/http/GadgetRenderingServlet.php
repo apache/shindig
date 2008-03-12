@@ -54,6 +54,7 @@ class GadgetRenderingServlet extends HttpServlet {
 			$this->outputError($e);
 		}
 	}
+	
 	private function outputError($e)
 	{
 		global $config;
@@ -129,7 +130,13 @@ class GadgetRenderingServlet extends HttpServlet {
 		// remove both /* */ and // style comments, they crash the json_decode function
 		$contents = preg_replace('/\/\/.*$/m', '', preg_replace('@/\\*(?:.|[\\n\\r])*?\\*/@', '', file_get_contents($config['syndicator_config'])));
 		$syndData = json_decode($contents, true);
-		$output .= '<script>gadgets.config.init(' . json_encode($syndData['gadgets.features']) . ');</script>';
+		
+		$msgs = '';
+		if ($gadget->getMessageBundle()) {
+			$bundle = $gadget->getMessageBundle();
+			$msgs = json_encode($bundle->getMessages());
+		}
+		$output .= "\n<script>\ngadgets.config.init(" . json_encode($syndData['gadgets.features']) . ");\ngadgets.Prefs.setMessages_(".$msgs.");\n</script>\n";
 		$gadgetExceptions = array();
 		$content = $gadget->getContentData($view);
 		if (empty($content)) {

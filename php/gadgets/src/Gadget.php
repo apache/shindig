@@ -30,7 +30,7 @@ class Gadget {
 	private $jsLibraries;
 	private $substitutions;
 	private $userPrefValues;
-	private $currentMessageBundle = array();
+	private $messageBundle = array();
 	// As in UserPref, no enums so fake it
 	public $contentTypes    = array('HTML', 'URL');
 	public $id;
@@ -94,9 +94,9 @@ class Gadget {
 		return $this->substitutions->substitute($this->getContentType() == 'URL' ? $this->contentHref : null);
 	}
 	
-	public function getCurrentMessageBundle()
+	public function getMessageBundle()
 	{
-		return $this->currentMessageBundle;
+		return $this->messageBundle;
 	}
 	
 	public function getDescription()
@@ -194,9 +194,9 @@ class Gadget {
 		return $this->userPrefValues;
 	}
 	
-	public function setCurrentMessageBundle($messageBundle)
+	public function setMessageBundle($messageBundle)
 	{
-		$this->currentMessageBundle = $messageBundle;
+		$this->messageBundle = $messageBundle;
 	}
 	
 	/* gadget Spec functions */

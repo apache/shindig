@@ -22,7 +22,7 @@
  * Basic remote content fetcher, uses curl_multi to fetch multiple resources at the same time
  */
 
-class BasicRemoteContentFetcher extends remoteContentFetcher {
+class BasicRemoteContentFetcher extends RemoteContentFetcher {
 	private $requests = array();
 	
 	public function fetchRequest($request)

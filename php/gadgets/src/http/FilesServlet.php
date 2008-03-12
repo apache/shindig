@@ -38,6 +38,19 @@ class FilesServlet extends HttpServlet {
 			echo "<html><body><h1>404 - Not Found</h1></body></html>";
 			die();
 		}
+		$dot = strrpos($file, '.');
+		if ($dot) {
+			$ext = strtolower(substr($file, $dot+1));
+			if ($ext == 'html' || $ext == 'htm') {
+				$this->setContentType('text/html');
+			} elseif ($ext == 'js') {
+				$this->setContentType('text/javascript');
+			} elseif ($ext == 'css') {
+				$this->setContentType('text/css');
+			}
+		}
+		$this->setNoCache(true);
+		$this->setLastModified(filemtime($file));
 		readfile($file);
 	}
 }
