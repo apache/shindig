@@ -118,7 +118,12 @@ public class GadgetServer {
       bundle = MessageBundle.EMPTY;
       dir = "ltr";
     } else {
-      bundle = getBundle(localeSpec, context);
+      if (localeSpec.getMessages() != null &&
+          localeSpec.getMessages().toString().length() > 0) {
+        bundle = getBundle(localeSpec, context);
+      } else {
+        bundle = MessageBundle.EMPTY;
+      }
       dir = localeSpec.getLanguageDirection();
     }
 
