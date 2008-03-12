@@ -54,7 +54,7 @@ class GadgetServer {
 		if ($this->blacklist != null && $this->blacklist->isBlacklisted($this->gadgetId->getURI())) {
 			throw new GadgetException("Gadget is blacklisted");
 		}
-		$request = new remoteContentRequest($this->gadgetId->getURI());
+		$request = new RemoteContentRequest($this->gadgetId->getURI());
 		$xml = $this->httpFetcher->fetch($request);
 		if ($xml->getHttpCode() != '200') {
 			throw new GadgetException("Failed to retrieve gadget content");
@@ -63,9 +63,98 @@ class GadgetServer {
 		$gadget = $specParser->parse($xml->getResponseContent(), $this->gadgetId, $this->userPrefs);
 		return $gadget;
 	}
+		
+	private function getBundle($localeSpec, $context)
+	{
+		if ($localeSpec != null) {
+			$uri = $localeSpec->getURI();
+			if ($uri != null) {
+				$fetcher = $context->getHttpFetcher();
+				$response = $fetcher->fetch(new RemoteContentRequest($uri));
+				$parser = new MessageBundleParser();
+				$bundle = $parser->parse($response->getResponseContent());
+				return $bundle;				
+			}
+		}
+		return null;
+	}
+	
+	private function localeSpec($gadget, $locale)
+	{
+		$localeSpecs = $gadget->getLocaleSpecs();
+		foreach ( $localeSpecs as $locSpec ) {
+			//fix me
+			if ($locSpec->getLocale()->equals($locale)) {
+				return $locSpec;
+			}
+		}
+		return null;
+	}
+	
+	private function getLocaleSpec($gadget)
+	{
+		$locale = $this->gc->getLocale();
+		// en-US
+		$localeSpec = $this->localeSpec($gadget, $locale);
+		if ($localeSpec == null) {
+			// en-all
+			$localeSpec = $this->localeSpec($gadget, new Locale($locale->getLanguage(), "all"));
+		}
+		if ($localeSpec == null) {
+			// all-all
+			$localeSpec = $this->localeSpec($gadget, new Locale("all", "all"));
+		}
+		return $localeSpec;
+	}
 	
 	private function featuresLoad($gadget)
 	{
+		//NOTE i've been a bit liberal here with folding code into this function, while it did get a bit long, the many include()'s are slowing us down
+		// Should really clean this up a bit in the future though
+		$localeSpec = $this->getLocaleSpec($gadget);
+		
+		// get the message bundle for this gadget
+		$bundle = $this->getBundle($localeSpec, $this->gc);
+		
+		//FIXME this is a half-assed solution between following the refactoring and maintaining some of the old code, fixing this up later
+		$gadget->setMessageBundle($bundle);
+		
+		// perform substitutions
+		$substitutor = $gadget->getSubstitutions();
+		
+		// Module ID
+		$substitutor->addSubstitution('MODULE', "ID", $gadget->getId()->getModuleId());
+		
+		// Messages (multi-language)
+		if ($bundle) {
+			$gadget->getSubstitutions()->addSubstitutions('MSG', $bundle->getMessages());
+		}
+		
+		// Bidi support
+		$rtl = false;
+		if ($localeSpec != null) {
+			$rtl = $localeSpec->isRightToLeft();
+		}
+		$substitutor->addSubstitution('BIDI', "START_EDGE", $rtl ? "right" : "left");
+		$substitutor->addSubstitution('BIDI', "END_EDGE", $rtl ? "left" : "right");
+		$substitutor->addSubstitution('BIDI', "DIR", $rtl ? "rtl" : "ltr");
+		$substitutor->addSubstitution('BIDI', "REVERSE_DIR", $rtl ? "ltr" : "rtl");
+		
+		// userPref's
+		$upValues = $gadget->getUserPrefValues();
+		foreach ( $gadget->getUserPrefs() as $pref ) {
+			$name = $pref->getName();
+			$value = $upValues->getPref($name);
+			if ($value == null) {
+				$value = $pref->getDefaultValue();
+			}
+			if ($value == null) {
+				$value = "";
+			}
+			$substitutor->addSubstitution('USER_PREF', $name, $value);
+		}
+		
+		// Process required / desired features
 		$requires = $gadget->getRequires();
 		$needed = array();
 		$optionalNames = array();

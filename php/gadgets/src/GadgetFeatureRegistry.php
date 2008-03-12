@@ -33,10 +33,6 @@ class GadgetFeatureRegistry {
 		if (empty($featurePath) || $featurePath == null) {
 			return;
 		}
-		$FEAT_MSG_BUNDLE = "core.msgbundlesubst";
-		$FEAT_BIDI = "core.bidisubst";
-		$FEAT_MODULE = "core.modulesubst";
-		$FEAT_USER_PREF_SUBST = "core.prefsubst";
 		$coreDeps = array();
 		$loader = new JsFeatureLoader();
 		$jsFeatures = $loader->loadFeatures($featurePath, $this);
@@ -47,14 +43,6 @@ class GadgetFeatureRegistry {
 					$this->core[$entry->name] = $entry->name;
 				}
 			}
-			$this->core[$FEAT_MSG_BUNDLE] = $FEAT_MSG_BUNDLE;
-			$this->register($FEAT_MSG_BUNDLE, $coreDeps, new MessageBundleSubstituter());
-			$this->core[$FEAT_BIDI] = $FEAT_BIDI;
-			$this->register($FEAT_BIDI, $coreDeps, new BidiSubstituter());
-			$this->core[$FEAT_MODULE] = $FEAT_MODULE;
-			$this->register($FEAT_MODULE, $coreDeps, new ModuleSubstituter());
-			$this->core[$FEAT_USER_PREF_SUBST] = $FEAT_USER_PREF_SUBST;
-			$this->register($FEAT_USER_PREF_SUBST, $coreDeps, new UserPrefSubstituter());
 			// Make sure non-core features depend on core.
 			foreach ( $jsFeatures as $entry ) {
 				if (strtolower(substr($entry->name, 0, strlen('core'))) != 'core') {
