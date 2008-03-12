@@ -86,5 +86,17 @@
          "FONT_COLOR": "",
          "ANCHOR_COLOR": ""
     }
+  },
+  "opensocial-0.7" : {
+    // Path to fetch opensocial data from
+    // If relative, will be appended to the document.location.host
+    "path" : "/gadgets/socialdata",
+    "domain" : "shindig",
+    "enableCaja" : true,
+    "supportedFields" : {
+       "person" : ["id", "name", "thumbnailUrl", "profileUrl"],
+       "activity" : ["id", "title"]
+    }
   }
+
 }}

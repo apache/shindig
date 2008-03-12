@@ -26,11 +26,11 @@
  *   Will be called with the JSON data as the only parameter.
  * @constructor
  */
-BatchRequest = function(jsonText, opt_callback, opt_path, opt_params) {
+BatchRequest = function(path, jsonText, opt_callback, opt_params) {
   this.params_ = opt_params || {};
   this.params_['request'] = jsonText;
 
-  this.path_ = opt_path || 'http://localhost:8080/gadgets/socialdata';
+  this.path_ = path;
   this.callback_ = opt_callback;
 };
 

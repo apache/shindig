@@ -91,7 +91,7 @@ JsonContainer.prototype.requestData = function(dataRequest, callback) {
     callback(dataResponse);
   };
 
-  new BatchRequest(jsonText, sendResponse, this.baseUrl_).send();
+  new BatchRequest(this.baseUrl_, jsonText, sendResponse).send();
 };
 
 JsonContainer.prototype.newFetchPersonRequest = function(id, opt_params) {
