@@ -156,13 +156,14 @@ public class GadgetRenderer {
     StringBuilder inlineJs = new StringBuilder();
     String externFmt = "<script src=\"%s\"></script>";
     String forcedLibs = request.getParameter("libs");
-    Set<String> libs;
-    if (forcedLibs == null) {
-      libs = new HashSet<String>();
-    } else {
-      libs = new HashSet<String>();
-      for (String lib : forcedLibs.split(":")) {
-        libs.add(lib);
+    Set<String> libs = new HashSet<String>();
+    if (forcedLibs != null) {
+      if (forcedLibs.trim().length() == 0) {
+        libs.add("core");
+      } else {
+        for (String lib : forcedLibs.split(":")) {
+          libs.add(lib);
+        }
       }
     }
 
