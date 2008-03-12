@@ -118,11 +118,10 @@ public abstract class AbstractGadgetData {
 
     } else if (val instanceof Map) {
       JSONObject map = new JSONObject();
-      // TODO: Support more than just a map from String to Object
-      Map<String, Object> originalMap = (Map<String, Object>) val;
+      Map originalMap = (Map) val;
 
-      for (String item : originalMap.keySet()) {
-        map.put(item, translateObjectToJson(originalMap.get(item)));
+      for (Object item : originalMap.keySet()) {
+        map.put(item.toString(), translateObjectToJson(originalMap.get(item)));
       }
       return map;
 

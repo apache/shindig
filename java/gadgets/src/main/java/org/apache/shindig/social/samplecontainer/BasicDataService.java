@@ -32,52 +32,13 @@ import java.util.List;
 import java.util.Map;
 
 public class BasicDataService implements DataService {
-  // TODO: This obviously won't work on multiple servers
-  // If we care then we should do something about it
-  private static Map<String, Map<String, String>> allData;
-
-  public BasicDataService() {
-    if (allData != null) {
-      return;
-    }
-
-    allData = new HashMap<String, Map<String, String>>();
-
-    // TODO: Should use guice here for one global thingy and get url from web ui
-    String stateFile = "http://localhost:8080/gadgets/files/samplecontainer/state-basicfriendlist.xml";
-    XmlStateFileFetcher fetcher = new XmlStateFileFetcher(stateFile);
-    Document doc = fetcher.fetchStateDocument(true);
-    setupData(doc);
-  }
-
-  private void setupData(Document stateDocument) {
-    Element root = stateDocument.getDocumentElement();
-
-    NodeList elements = root.getElementsByTagName("personAppData");
-    NodeList personDataNodes = elements.item(0).getChildNodes();
-
-    for (int i = 0; i < personDataNodes.getLength(); i++) {
-      Node personDataNode = personDataNodes.item(i);
-      NamedNodeMap attributes = personDataNode.getAttributes();
-      if (attributes == null) {
-        continue;
-      }
-
-      String id = attributes.getNamedItem("person").getNodeValue();
-      String field = attributes.getNamedItem("field").getNodeValue();
-      String value = personDataNode.getTextContent();
-
-      Map<String, String> currentData = allData.get(id);
-      if (currentData == null) {
-        currentData = new HashMap<String, String>();
-        allData.put(id, currentData);
-      }
-      currentData.put(field, value);
-    }
-  }
 
   public ResponseItem<Map<String, Map<String, String>>> getPersonData(
       List<String> ids) {
+
+    Map<String, Map<String, String>> allData
+        = XmlStateFileFetcher.get().getAppData();
+
     // TODO: Use the opensource Collections library
     Map<String, Map<String, String>> data =
         new HashMap<String, Map<String, String>>();
@@ -94,13 +55,7 @@ public class BasicDataService implements DataService {
       return new ResponseItem<Object>(ResponseError.BAD_REQUEST, null);
     }
 
-    Map<String, String> personData = allData.get(id);
-    if (personData == null) {
-      personData = new HashMap<String, String>();
-      allData.put(id, personData);
-    }
-
-    personData.put(key, value);
+    XmlStateFileFetcher.get().setAppData(id, key, value);
     return new ResponseItem<JSONObject>(new JSONObject());
   }
 
