@@ -31,7 +31,7 @@
 
 //TODO add cache stampeding prevention using file locking mechanisms
 
-class FileCache extends Cache {
+class CacheFile extends Cache {
 	
 	function get($key)
 	{

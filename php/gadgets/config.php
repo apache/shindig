@@ -25,7 +25,7 @@ $config = array(
 	'remote_content' => 'BasicRemoteContent',
 	'gadget_signer' => 'BasicGadgetSigner',
 	'gadget_token' => 'BasicGadgetToken',
-	'data_cache' => 'FileCache',
+	'data_cache' => 'CacheFile',
 
 	// gadget server specific settings
 	'userpref_param_prefix'=> 'up_',
@@ -35,6 +35,11 @@ $config = array(
 	
 	// show debugging output ?
 	'debug'=> true,
+
+	// if your using memcached, these values are used for locating the server
+	// if your not using memcached, ignore these values
+	'cache_host' => 'localhost',
+	'cache_port'   => 11211,
 	
 	// global cache age policy and location
 	'cache_time'=> 24*60*60,
