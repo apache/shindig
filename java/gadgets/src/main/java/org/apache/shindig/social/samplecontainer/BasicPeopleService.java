@@ -36,80 +36,10 @@ import java.util.List;
 import java.util.Map;
 
 public class BasicPeopleService implements PeopleService {
-  private Map<IdSpec.Type, List<String>> idMap
-      = new HashMap<IdSpec.Type, List<String>>();
-  private Map<String, Person> allPeople
-      = new HashMap<String, Person>();
-
-  public BasicPeopleService() {
-    // TODO: Get file from user in web ui
-    String stateFile = "http://localhost:8080/gadgets/files/samplecontainer/state-basicfriendlist.xml";
-    XmlStateFileFetcher fetcher = new XmlStateFileFetcher(stateFile);
-    Document doc = fetcher.fetchStateDocument(true);
-    setupData(doc);
-  }
-
-  private void setupData(Document stateDocument) {
-    Element root = stateDocument.getDocumentElement();
-
-    // TODO: Eventually the viewer and owner shouldn't be hardcoded. You should
-    // be able to visit other allPeople's "profile" pages in the sample container
-    setupPeopleInXmlTag(root, "viewer", IdSpec.Type.VIEWER);
-    setupPeopleInXmlTag(root, "owner", IdSpec.Type.OWNER);
-    setupPeopleInXmlTag(root, "viewerFriends", IdSpec.Type.VIEWER_FRIENDS);
-    setupPeopleInXmlTag(root, "ownerFriends", IdSpec.Type.OWNER_FRIENDS);
-
-    // Handle empty people
-    if (idMap.get(IdSpec.Type.OWNER).isEmpty()) {
-      idMap.put(IdSpec.Type.OWNER, idMap.get(IdSpec.Type.VIEWER));
-    }
-
-    if (idMap.get(IdSpec.Type.OWNER_FRIENDS).isEmpty()) {
-      idMap.put(IdSpec.Type.OWNER_FRIENDS,
-          idMap.get(IdSpec.Type.VIEWER_FRIENDS));
-    }
-  }
-
-  // Adds all people in the xml tag to the allPeople map.
-  // Also returns the relevant ids
-  private void setupPeopleInXmlTag(Element root, String tagName,
-      IdSpec.Type idType) {
-    // TODO: Use the opensource Collections library
-    List<String> ids = new ArrayList<String>();
-
-    NodeList elements = root.getElementsByTagName(tagName);
-    if (elements == null || elements.item(0) == null) {
-      idMap.put(idType, ids);
-      return;
-    }
-
-    NodeList personNodes = elements.item(0).getChildNodes();
-
-    for (int i = 0; i < personNodes.getLength(); i++) {
-      NamedNodeMap attributes = personNodes.item(i).getAttributes();
-      if (attributes == null) {
-        continue;
-      }
-
-      String name = attributes.getNamedItem("name").getNodeValue();
-      String id = attributes.getNamedItem("id").getNodeValue();
-      Person person = new Person(id, new Name(name));
-
-      Node phoneItem = attributes.getNamedItem("phone");
-      if (phoneItem != null) {
-        String phone = phoneItem.getNodeValue();
-        Phone[] phones = {new Phone(phone, null)};
-        person.setPhoneNumbers(phones);
-      }
-
-      allPeople.put(id, person);
-      ids.add(id);
-    }
-
-    idMap.put(idType, ids);
-  }
 
   public ResponseItem<List<Person>> getPeople(List<String> ids) {
+    Map<String, Person> allPeople = XmlStateFileFetcher.get().getAllPeople();
+
     List<Person> people = new ArrayList<Person>();
     for (String id : ids) {
       people.add(allPeople.get(id));
@@ -118,6 +48,9 @@ public class BasicPeopleService implements PeopleService {
   }
 
   public List<String> getIds(IdSpec idSpec) throws JSONException {
+    Map<IdSpec.Type, List<String>> idMap
+        = XmlStateFileFetcher.get().getIdMap();
+
     if (idSpec.getType() == IdSpec.Type.USER_IDS) {
       return idSpec.fetchUserIds();
     } else {
