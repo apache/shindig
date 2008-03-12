@@ -28,6 +28,7 @@ import org.apache.shindig.gadgets.GadgetServerConfigReader;
 import org.apache.shindig.gadgets.JsLibrary;
 import org.apache.shindig.gadgets.SyndicatorConfig;
 import org.apache.shindig.gadgets.spec.Feature;
+import org.apache.shindig.gadgets.spec.LocaleSpec;
 import org.apache.shindig.gadgets.spec.MessageBundle;
 import org.apache.shindig.gadgets.spec.ModulePrefs;
 import org.apache.shindig.gadgets.spec.View;
@@ -101,6 +102,11 @@ public class GadgetRenderer {
       outputGadget(gadget);
     } catch (GadgetException e) {
       outputErrors(e);
+    } catch (Exception e) {
+      logger.log(Level.WARNING, "Unhandled exception ", e);
+      outputErrors(new GadgetException(
+          GadgetException.Code.INTERNAL_SERVER_ERROR,
+          "There was a problem rendering the gadget: " + e.getMessage()));
     }
   }
 
@@ -147,13 +153,23 @@ public class GadgetRenderer {
 
     // TODO: Substitute gadgets.skins values in here.
     String boilerPlate
-        = "<style type=\"text/css\">" +
+        = "<html><head><style type=\"text/css\">" +
           "body,td,div,span,p{font-family:arial,sans-serif;}" +
           "a {color:#0000cc;}a:visited {color:#551a8b;}" +
           "a:active {color:#ff0000;}" +
           "body{margin: 0px;padding: 0px;background-color:white;}" +
-          "</style></head></body>";
+          "</style></head>";
     markup.append(boilerPlate);
+    LocaleSpec localeSpec = gadget.getSpec().getModulePrefs().getLocale(
+        gadget.getContext().getLocale());
+    if (localeSpec == null) {
+      markup.append("<body>");
+    } else {
+      markup.append("<body dir=\"")
+            .append(localeSpec.getLanguageDirection())
+            .append("\">");
+    }
+
     StringBuilder externJs = new StringBuilder();
     StringBuilder inlineJs = new StringBuilder();
     String externFmt = "<script src=\"%s\"></script>";
