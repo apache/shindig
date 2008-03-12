@@ -27,7 +27,9 @@ import org.apache.shindig.gadgets.GadgetFeatureRegistry;
 import org.apache.shindig.gadgets.GadgetServerConfigReader;
 import org.apache.shindig.gadgets.JsLibrary;
 import org.apache.shindig.gadgets.SyndicatorConfig;
+import org.apache.shindig.gadgets.spec.Feature;
 import org.apache.shindig.gadgets.spec.MessageBundle;
+import org.apache.shindig.gadgets.spec.ModulePrefs;
 import org.apache.shindig.gadgets.spec.View;
 
 import org.json.JSONArray;
@@ -206,7 +208,7 @@ public class GadgetRenderer {
       libs.add(library.getFeature());
     }
 
-    appendJsConfig(libs, inlineJs);
+    appendJsConfig(gadget, libs, inlineJs);
 
     // message bundles for prefs object.
     MessageBundle bundle = gadget.getMessageBundle();
@@ -318,13 +320,39 @@ public class GadgetRenderer {
   }
 
   /**
+   * Appends javascript configuration to the bottom of an existing script block.
+   *
+   * Appends special configuration for gadgets.util.hasFeature and
+   * gadgets.util.getFeatureParams to the output js.
+   *
+   * This can't be handled via the normal configuration mechanism because it is
+   * something that varies per request.
+   *
+   * Only explicitly <Require>'d and <Optional> features will be added.
+   *
+   * @param gadget
    * @param reqs The features you require.
    * @param js Existing js, to which the configuration will be appended.
    */
-  private void appendJsConfig(Set<String> reqs, StringBuilder js) {
+  private void appendJsConfig(Gadget gadget, Set<String> reqs,
+      StringBuilder js) {
     GadgetServerConfigReader config = state.getGadgetServer().getConfig();
     SyndicatorConfig syndConf = config.getSyndicatorConfig();
-    js.append(HttpUtil.getJsConfig(syndConf, context, reqs));
+    JSONObject json = HttpUtil.getJsConfig(syndConf, context, reqs);
+    // Add gadgets.util support. This is calculated dynamically based on
+    // request inputs.
+    ModulePrefs prefs = gadget.getSpec().getModulePrefs();
+    JSONObject featureMap = new JSONObject();
+    try {
+      for (Feature feature : prefs.getFeatures().values()) {
+        featureMap.put(feature.getName(), feature.getParams());
+      }
+      json.put("core.util", featureMap);
+    } catch (JSONException e) {
+      // Shouldn't be possible.
+      throw new RuntimeException(e);
+    }
+    js.append("gadgets.config.init(").append(json.toString()).append(");");
   }
 
   /**

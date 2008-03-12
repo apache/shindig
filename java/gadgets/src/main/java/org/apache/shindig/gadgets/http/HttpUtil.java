@@ -68,20 +68,18 @@ public class HttpUtil {
    * @param context
    * @param features
    */
-  public static String getJsConfig(SyndicatorConfig config,
+  public static JSONObject getJsConfig(SyndicatorConfig config,
       GadgetContext context, Set<String> features) {
     JSONObject syndFeatures = config.getJsonObject(context.getSyndicator(),
                                                    "gadgets.features");
     if (syndFeatures != null) {
       String[] featArray = features.toArray(new String[features.size()]);
       try {
-        JSONObject featureConfig = new JSONObject(syndFeatures, featArray);
-        return "\ngadgets.config.init(" + featureConfig.toString() +
-               (context.getDebug() ? ");" : ", true);");
+        return new JSONObject(syndFeatures, featArray);
       } catch (JSONException e) {
-        return "";
+        return null;
       }
     }
-    return "";
+    return new JSONObject();
   }
 }

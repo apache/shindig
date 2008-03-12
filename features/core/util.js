@@ -92,6 +92,14 @@ gadgets.util = function() {
     return String.fromCharCode(value);
   }
 
+  /**
+   * Initializes feature parameters.
+   */
+  function init(config) {
+    features = config["core.util"] || {};
+  }
+  gadgets.config.register("core.util", null, init);
+
   return /** @scope gadgets.util */ {
 
     /**
@@ -142,12 +150,13 @@ gadgets.util = function() {
      */
     makeClosure : function (scope, callback, var_args) {
       // arguments isn't a real array, so we copy it into one.
-      var tmpArgs = [];
+      var baseArgs = [];
       for (var i = 2, j = arguments.length; i < j; ++i) {
-       tmpArgs.push(arguments[i]);
+       baseArgs.push(arguments[i]);
       }
       return function() {
         // append new arguments.
+        var tmpArgs = baseArgs.slice();
         for (var i = 0, j = arguments.length; i < j; ++i) {
           tmpArgs.push(arguments[i]);
         }
@@ -287,15 +296,6 @@ gadgets.util = function() {
      */
     unescapeString : function(str) {
       return str.replace(/&#([0-9]+);/g, unescapeEntity);
-    },
-
-    /**
-     * @param {Object} featureData The features that are supported, and
-     *    their parameters.
-     * @private Only to be used by the container, not gadgets.
-     */
-    init : function (featureData) {
-      features = featureData;
     }
   };
 }();
