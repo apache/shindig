@@ -156,10 +156,7 @@ public class UserPref {
     defaultValue = XmlUtil.getAttribute(element, "default_value", "");
     required = XmlUtil.getBoolAttribute(element, "required");
 
-    String dataType = XmlUtil.getAttribute(element, "datatype");
-    if (dataType == null) {
-      throw new SpecParserException("UserPref@datatype is required.");
-    }
+    String dataType = XmlUtil.getAttribute(element, "datatype", "string");
     this.dataType = DataType.parse(dataType);
 
     NodeList children = element.getElementsByTagName("EnumValue");
