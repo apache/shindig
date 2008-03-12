@@ -54,7 +54,7 @@
 
   <!-- Metadata RPC -->
   <servlet>
-    <servlet-name>rpc</servlet-name>
+    <servlet-name>metadata</servlet-name>
     <servlet-class>
       org.apache.shindig.gadgets.http.RpcServlet
     </servlet-class>
@@ -90,8 +90,8 @@
   </servlet-mapping>
 
   <servlet-mapping>
-    <servlet-name>rpc</servlet-name>
-    <url-pattern>/rpc</url-pattern>
+    <servlet-name>metadata</servlet-name>
+    <url-pattern>/metadata</url-pattern>
   </servlet-mapping>
 
   <servlet-mapping>

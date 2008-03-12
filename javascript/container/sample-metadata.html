@@ -1,6 +1,6 @@
 <html>
 <head>
-<title>RPC Demo</title>
+<title>Metadata Demo</title>
 <style>
   .gadget {
     border: solid 1px #000;
@@ -93,7 +93,7 @@
   };
 
   var xhr = makeXhr();
-  xhr.open("POST", "../../rpc", true);
+  xhr.open("POST", "../../metadata", true);
   xhr.onreadystatechange = function(xobj) {
     return function() {
       processResp(xobj);
