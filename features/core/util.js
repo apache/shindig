@@ -98,7 +98,9 @@ gadgets.util = function() {
   function init(config) {
     features = config["core.util"] || {};
   }
-  gadgets.config.register("core.util", null, init);
+  if (gadgets.config) {
+    gadgets.config.register("core.util", null, init);
+  }
 
   return /** @scope gadgets.util */ {
 

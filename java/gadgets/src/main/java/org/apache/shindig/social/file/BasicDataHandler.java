@@ -18,11 +18,14 @@
 package org.apache.shindig.social.file;
 
 import org.apache.shindig.social.DataHandler;
+import org.apache.shindig.social.ResponseItem;
+import org.apache.shindig.social.ResponseError;
 import org.w3c.dom.Document;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.w3c.dom.Element;
+import org.json.JSONObject;
 
 import java.util.HashMap;
 import java.util.List;
@@ -73,7 +76,8 @@ public class BasicDataHandler implements DataHandler {
     }
   }
 
-  public Map<String, Map<String, String>> getPersonData(List<String> ids) {
+  public ResponseItem<Map<String, Map<String, String>>> getPersonData(
+      List<String> ids) {
     // TODO: Use the opensource Collections library
     Map<String, Map<String, String>> data =
         new HashMap<String, Map<String, String>>();
@@ -82,12 +86,12 @@ public class BasicDataHandler implements DataHandler {
       data.put(id, allData.get(id));
     }
 
-    return data;
+    return new ResponseItem<Map<String, Map<String, String>>>(data);
   }
 
-  public boolean updatePersonData(String id, String key, String value) {
+  public ResponseItem updatePersonData(String id, String key, String value) {
     if (!isValidKey(key)) {
-      return false;
+      return new ResponseItem<Object>(ResponseError.BAD_REQUEST, null);
     }
 
     Map<String, String> personData = allData.get(id);
@@ -97,7 +101,7 @@ public class BasicDataHandler implements DataHandler {
     }
 
     personData.put(key, value);
-    return true;
+    return new ResponseItem<JSONObject>(new JSONObject());
   }
 
   /**

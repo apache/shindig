@@ -21,7 +21,7 @@ import java.util.List;
 import java.util.Map;
 
 public interface DataHandler {
-  public Map<String, Map<String, String>> getPersonData(List<String> ids);
+  public ResponseItem<Map<String, Map<String, String>>> getPersonData(List<String> ids);
 
   /**
    * Updates the data key for the given person with the new value.
@@ -29,8 +29,7 @@ public interface DataHandler {
    * @param id The person the data is for.
    * @param key The key of the data.
    * @param value The new value of the data.
-   * @return true if there was an error in updating the app data
+   * @return ResponseItem a response item with the error code set if there was a problem
    */
-  // TODO: Somehow we need to generalize error handling
-  public boolean updatePersonData(String id, String key, String value);
+  public ResponseItem updatePersonData(String id, String key, String value);
 }

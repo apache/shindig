@@ -17,11 +17,7 @@
  */
 package org.apache.shindig.social.file;
 
-import org.apache.shindig.social.IdSpec;
-import org.apache.shindig.social.Name;
-import org.apache.shindig.social.PeopleHandler;
-import org.apache.shindig.social.Person;
-import org.apache.shindig.social.Phone;
+import org.apache.shindig.social.*;
 import org.json.JSONException;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -108,12 +104,12 @@ public class BasicPeopleHandler implements PeopleHandler {
     idMap.put(idType, ids);
   }
 
-  public List<Person> getPeople(List<String> ids) {
+  public ResponseItem<List<Person>> getPeople(List<String> ids) {
     List<Person> people = new ArrayList<Person>();
     for (String id : ids) {
       people.add(allPeople.get(id));
     }
-    return people;
+    return new ResponseItem<List<Person>>(people);
   }
 
   public List<String> getIds(IdSpec idSpec) throws JSONException {
