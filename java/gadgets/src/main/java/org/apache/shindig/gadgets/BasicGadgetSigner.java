@@ -18,55 +18,31 @@
  */
 package org.apache.shindig.gadgets;
 
+import org.apache.shindig.util.BlobCrypterException;
+
 /**
  * A GadgetSigner implementation that just provides dummy data to satisfy
  * tests and API calls. Do not use this for any security applications.
  */
 public class BasicGadgetSigner implements GadgetSigner {
-  private final long timeToLive;
 
   /**
    * {@inheritDoc}
-   */
-  public GadgetToken createToken(Gadget gadget) {
-    String uri = gadget.getSpec().getUrl().toString();
-    long expiry = System.currentTimeMillis() + this.timeToLive;
-    return new BasicGadgetToken(uri + '$' + expiry);
-  }
-
-  /**
-   * {@inheritDoc}
-   * This implementation only validates non-empty tokens. Empty tokens
-   * are considered to always be valid.
+   * 
+   * Returns a token with some faked out values.
    */
   public GadgetToken createToken(String stringToken) throws GadgetException {
-    if (stringToken != null && stringToken.length() != 0) {
-      String[] parts = stringToken.split("\\$");
-      if (parts.length != 2) {
-        throw new GadgetException(GadgetException.Code.INVALID_GADGET_TOKEN,
-            "Invalid token format.");
-      }
-      long expiry = Long.parseLong(parts[1]);
-      if (expiry < System.currentTimeMillis()) {
-        throw new GadgetException(GadgetException.Code.INVALID_GADGET_TOKEN,
-            "Expired token.");
-      }
+    try {
+      return new BasicGadgetToken("fakeowner", "fakeviewer", "fakeapp",
+          "fakedomain");
+    } catch (BlobCrypterException e) {
+      throw new GadgetException(GadgetException.Code.INVALID_GADGET_TOKEN, e);
     }
-    return new BasicGadgetToken(stringToken);
-  }
-
-  /**
-   * Create signer
-   * @param timeToLive basic TTL in milliseconds
-   */
-  public BasicGadgetSigner(long timeToLive) {
-    this.timeToLive = timeToLive;
   }
 
   /**
    * Creates a signer with 24 hour token expiry
    */
   public BasicGadgetSigner() {
-    this(24L * 60 * 60 * 1000);
   }
 }

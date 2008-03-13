@@ -24,6 +24,7 @@ import org.apache.shindig.gadgets.GadgetToken;
 import org.apache.shindig.gadgets.RemoteContent;
 import org.apache.shindig.gadgets.RemoteContentFetcher;
 import org.apache.shindig.gadgets.RemoteContentRequest;
+import org.apache.shindig.gadgets.RequestSigner;
 import org.apache.shindig.util.InputStreamConsumer;
 
 import org.json.JSONException;
@@ -150,7 +151,7 @@ public class ProxyHandler {
           return new RemoteContent(HttpServletResponse.SC_UNAUTHORIZED,
               "Invalid security token.".getBytes(), null);
         }
-        signedUrl = signUrl(originalUrl, token, request);
+        signedUrl = signUrl(state, originalUrl, token, request);
       } else {
         signedUrl = originalUrl;
       }
@@ -278,10 +279,12 @@ public class ProxyHandler {
    * @return The signed url.
    */
   @SuppressWarnings("unchecked")
-  private URL signUrl(URL originalUrl, GadgetToken token,
+  private URL signUrl(CrossServletState state, URL originalUrl, GadgetToken token,
       HttpServletRequest request) throws GadgetException {
     String method = getParameter(request, "httpMethod", "GET");
-    return token.signUrl(originalUrl, method, request.getParameterMap());
+    String body = getParameter(request, "postBody", null);
+    RequestSigner signer = state.makeSignedFetchRequestSigner(token);
+    return signer.signRequest(method, originalUrl, body);
   }
 
   /**

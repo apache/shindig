@@ -23,6 +23,8 @@ import org.apache.shindig.gadgets.Gadget;
 import org.apache.shindig.gadgets.GadgetContext;
 import org.apache.shindig.gadgets.GadgetServer;
 import org.apache.shindig.gadgets.GadgetSigner;
+import org.apache.shindig.gadgets.GadgetToken;
+import org.apache.shindig.gadgets.RequestSigner;
 
 import java.util.Set;
 import java.util.logging.Logger;
@@ -101,6 +103,26 @@ public abstract class CrossServletState {
    *     parameters, so caution should be taken when adding your own data.
    */
   public abstract String getIframeUrl(Gadget gadget);
+
+  /**
+   * Constructs a RequestSigner object that can be used to sign requests from
+   * the given gadget token to implement signed fetch.
+   * 
+   * @param token the decrypted, verified security token
+   * @return a request signer implementing signed fetch.
+   * 
+   * @see org.apache.shindig.gadgets.SignedFetchRequestSigner
+   */
+  public abstract RequestSigner makeSignedFetchRequestSigner(GadgetToken token);
+
+  /**
+   * Constructs a RequestSigner object that can be used to sign requests from
+   * the given gadget token to implement full OAuth.
+   * 
+   * @param token the decrypted, verified security token
+   * @return a request signer implementing signed fetch.
+   */
+  public abstract RequestSigner makeOAuthRequestSigner(GadgetToken token);
 
   /**
    * Initializes this handler using the provided implementation.

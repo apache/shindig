@@ -78,6 +78,16 @@ public class GadgetTestFixture extends EasyMockTestCase {
     public void init(ServletContext config) {
 
     }
+
+    @Override
+    public RequestSigner makeOAuthRequestSigner(GadgetToken token) {
+      return null;
+    }
+
+    @Override
+    public RequestSigner makeSignedFetchRequestSigner(GadgetToken token) {
+      return null;
+    }
   };
 
   public GadgetTestFixture() {
