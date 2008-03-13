@@ -22,10 +22,12 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.apache.shindig.social.samplecontainer.BasicPeopleService;
 import org.apache.shindig.social.samplecontainer.BasicDataService;
+import org.apache.shindig.social.samplecontainer.BasicActivitiesService;
 import org.apache.shindig.social.opensocial.PeopleService;
 import org.apache.shindig.social.opensocial.DataService;
 import org.apache.shindig.social.opensocial.model.IdSpec;
 import org.apache.shindig.social.opensocial.model.OpenSocialDataType;
+import org.apache.shindig.social.opensocial.model.Activity;
 import org.apache.shindig.social.*;
 
 import java.io.IOException;
@@ -49,6 +51,8 @@ public class OpenSocialDataHandler implements GadgetDataHandler {
   // TODO: get through injection
   private static PeopleService peopleHandler = new BasicPeopleService();
   private static DataService dataHandler = new BasicDataService();
+  private static ActivitiesService activitiesHandler
+      = new BasicActivitiesService();
 
   public boolean shouldHandle(String requestType) {
     try {
@@ -87,6 +91,20 @@ public class OpenSocialDataHandler implements GadgetDataHandler {
 
           response = dataHandler.updatePersonData(id, key, value);
           break;
+
+        case FETCH_ACTIVITIES:
+          response = activitiesHandler.getActivities(peopleIds);
+          break;
+
+        case CREATE_ACTIVITY:
+          // We only support creating an activity for one person right now
+          String personId = peopleIds.get(0);
+
+          // TODO: We need to get the other fields from the json..
+          // so json -> pojo
+          Activity activity = new Activity("5", personId);
+          activity.setTitle("Temporary title - we don't read json right now");
+          response = activitiesHandler.createActivity(personId, activity);
       }
 
     } catch (JSONException e) {

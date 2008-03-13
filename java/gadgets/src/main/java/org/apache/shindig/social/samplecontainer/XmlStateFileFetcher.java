@@ -9,6 +9,8 @@ import org.apache.shindig.social.opensocial.model.IdSpec;
 import org.apache.shindig.social.opensocial.model.Person;
 import org.apache.shindig.social.opensocial.model.Name;
 import org.apache.shindig.social.opensocial.model.Phone;
+import org.apache.shindig.social.opensocial.model.Activity;
+import org.apache.shindig.social.opensocial.model.MediaItem;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
@@ -40,7 +42,6 @@ public class XmlStateFileFetcher {
     return fetcher;
   }
 
-
   private URI stateFile;
   private Document document;
 
@@ -49,6 +50,7 @@ public class XmlStateFileFetcher {
   private Map<String, Map<String, String>> allData;
   private Map<IdSpec.Type, List<String>> idMap;
   private Map<String, Person> allPeople;
+  private Map<String, List<Activity>> allActivities;
 
   private XmlStateFileFetcher() {
    try {
@@ -57,6 +59,15 @@ public class XmlStateFileFetcher {
       throw new RuntimeException(
           "The default state file could not be fetched. ", e);
     }
+  }
+
+  public void resetStateFile(URI stateFile) {
+    this.stateFile = stateFile;
+    this.document = null;
+    this.allData = null;
+    this.idMap = null;
+    this.allPeople = null;
+    this.allActivities = null;
   }
 
   private Document fetchStateDocument() {
@@ -212,13 +223,92 @@ public class XmlStateFileFetcher {
     idMap.put(idType, ids);
   }
 
+  public Map<String, List<Activity>> getActivities() {
+    if (allActivities == null) {
+      setupActivities();
+    }
 
-  public void resetStateFile(URI stateFile) {
-    this.stateFile = stateFile;
-    this.document = null;
-    this.allData = null;
-    this.idMap = null;
-    this.allPeople = null;
+    return allActivities;
   }
 
+  private void setupActivities() {
+    allActivities = new HashMap<String, List<Activity>>();
+
+    Element root = this.fetchStateDocument().getDocumentElement();
+    NodeList activitiesElements = root.getElementsByTagName("activities");
+
+    if (activitiesElements != null && activitiesElements.item(0) != null) {
+      NodeList streamItems = activitiesElements.item(0).getChildNodes();
+
+      for (int i = 0; i < streamItems.getLength(); i++) {
+        Node streamItem = streamItems.item(i);
+        NamedNodeMap streamParams = streamItem.getAttributes();
+        String streamTitle = "", userId = "";
+        if (streamParams != null) {
+          streamTitle = streamParams.getNamedItem("title").getNodeValue();
+          userId = streamParams.getNamedItem("userId").getNodeValue();
+        }
+
+        createActivities(streamItem, userId, streamTitle);
+      }
+    }
+  }
+
+  private void createActivities(Node streamItem, String userId,
+      String streamTitle) {
+    NodeList activityItems = streamItem.getChildNodes();
+    if (activityItems != null) {
+      for (int i = 0; i < activityItems.getLength(); i++) {
+        Node activityItem = activityItems.item(i);
+        NamedNodeMap activityParams = activityItem.getAttributes();
+        if (activityParams == null) {
+          continue;
+        }
+
+        String title = activityParams.getNamedItem("title").getNodeValue();
+        String body = activityParams.getNamedItem("body").getNodeValue();
+        String id = activityParams.getNamedItem("id").getNodeValue();
+
+        Activity activity = new Activity(id, userId);
+        activity.setStreamTitle(streamTitle);
+        activity.setTitle(title);
+        activity.setBody(body);
+        activity.setMediaItems(getMediaItems(activityItem));
+
+        createActivity(userId, activity);
+      }
+    }
+  }
+
+  private List<MediaItem> getMediaItems(Node activityItem) {
+    List<MediaItem> media = new ArrayList<MediaItem>();
+
+    NodeList mediaItems = activityItem.getChildNodes();
+    if (mediaItems != null) {
+      for (int i = 0; i < mediaItems.getLength(); i++) {
+        NamedNodeMap mediaParams = mediaItems.item(i).getAttributes();
+        if (mediaParams != null) {
+          String typeString = mediaParams.getNamedItem("type").getNodeValue();
+          String mimeType = mediaParams.getNamedItem("mimeType").getNodeValue();
+          String url = mediaParams.getNamedItem("url").getNodeValue();
+
+          media.add(new MediaItem(mimeType,
+              MediaItem.Type.valueOf(typeString), url));
+        }
+      }
+    }
+
+    return media;
+  }
+
+  public void createActivity(String userId, Activity activity) {
+    if (allActivities == null) {
+      setupActivities();
+    }
+
+    if (allActivities.get(userId) == null) {
+      allActivities.put(userId, new ArrayList<Activity>());
+    }
+    allActivities.get(userId).add(activity);
+  }
 }

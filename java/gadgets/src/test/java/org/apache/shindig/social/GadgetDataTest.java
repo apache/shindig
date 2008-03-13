@@ -25,6 +25,8 @@ import junit.framework.TestCase;
 
 import java.util.Map;
 import java.util.HashMap;
+import java.util.List;
+import java.util.ArrayList;
 
 public class GadgetDataTest extends TestCase {
   private Person johnDoe;
@@ -50,10 +52,10 @@ public class GadgetDataTest extends TestCase {
     };
     johnDoe.setEmails(emails);
 
-    activity = new Activity("activityId", "appId", johnDoe.getId());
-    MediaItem[] mediaItems = {
-        new MediaItem("image/jpg", MediaItem.Type.IMAGE, "http://foo.bar")
-    };
+    activity = new Activity("activityId", johnDoe.getId());
+
+    List<MediaItem> mediaItems = new ArrayList<MediaItem>();
+    mediaItems.add(new MediaItem("image/jpg", MediaItem.Type.IMAGE, "http://foo.bar"));
     activity.setMediaItems(mediaItems);
   }
 
@@ -94,13 +96,12 @@ public class GadgetDataTest extends TestCase {
   public void testActivityToJson() throws Exception {
     JSONObject result = activity.toJson();
     assertEquals(activity.getUserId(), result.getString("userId"));
-    assertEquals(activity.getAppId(), result.getString("appId"));
     assertEquals(activity.getId(), result.getString("id"));
 
     JSONArray mediaItemsArray = result.getJSONArray("mediaItems");
     assertEquals(1, mediaItemsArray.length());
 
-    MediaItem expectedItem = activity.getMediaItems()[0];
+    MediaItem expectedItem = activity.getMediaItems().get(0);
     JSONObject actualItem = mediaItemsArray.getJSONObject(0);
 
     assertEquals(expectedItem.getUrl(), actualItem.getString("url"));
@@ -121,7 +122,8 @@ public class GadgetDataTest extends TestCase {
     item2Map.put("value", "2");
     map.put("item2", item2Map);
 
-    ResponseItem response = new ResponseItem(map);
+    ResponseItem response 
+        = new ResponseItem<Map<String, Map<String, String>>>(map);
     JSONObject result = response.toJson();
 
     JSONObject jsonMap = result.getJSONObject("response");

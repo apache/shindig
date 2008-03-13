@@ -20,28 +20,30 @@ package org.apache.shindig.social.opensocial.model;
 import org.apache.shindig.social.Mandatory;
 import org.apache.shindig.social.AbstractGadgetData;
 
+import java.util.Map;
+import java.util.List;
+
 public class Activity extends AbstractGadgetData {
   private String appId;
   private String body;
   private String bodyId;
   private String externalId;
   @Mandatory private String id;
-  private MediaItem[] mediaItems;
+  private List<MediaItem> mediaItems;
   private Long postedTime;
   private Float priority;
   private String streamFaviconUrl;
   private String streamSourceUrl;
   private String streamTitle;
   private String streamUrl;
-  // private Map<String, String> templateParams
+  private Map<String, String> templateParams;
   private String title;
   private String titleId;
   private String url;
   @Mandatory private String userId;
 
-  public Activity(String id, String appId, String userId) {
+  public Activity(String id, String userId) {
     this.id = id;
-    this.appId = appId;
     this.userId = userId;
   }
 
@@ -85,11 +87,11 @@ public class Activity extends AbstractGadgetData {
     this.id = id;
   }
 
-  public MediaItem[] getMediaItems() {
+  public List<MediaItem> getMediaItems() {
     return mediaItems;
   }
 
-  public void setMediaItems(MediaItem[] mediaItems) {
+  public void setMediaItems(List<MediaItem> mediaItems) {
     this.mediaItems = mediaItems;
   }
 
@@ -139,6 +141,14 @@ public class Activity extends AbstractGadgetData {
 
   public void setStreamUrl(String streamUrl) {
     this.streamUrl = streamUrl;
+  }
+
+  public Map<String, String> getTemplateParams() {
+    return templateParams;
+  }
+
+  public void setTemplateParams(Map<String, String> templateParams) {
+    this.templateParams = templateParams;
   }
 
   public String getTitle() {
