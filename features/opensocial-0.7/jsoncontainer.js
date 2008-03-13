@@ -44,6 +44,17 @@ JsonContainer.prototype.getEnvironment = function() {
   return this.environment_;
 };
 
+JsonContainer.prototype.requestCreateActivity = function(activity,
+    priority, opt_callback) {
+  opt_callback = opt_callback || {};
+
+  var req = opensocial.newDataRequest();
+  req.add(this.newCreateActivityRequest('VIEWER', activity), 'key');
+  req.send(function(response) {
+    opt_callback(response.get('key'));
+  });
+};
+
 JsonContainer.prototype.createJson = function(requestObjects) {
   var jsonObjects = [];
   for (var i = 0; i < requestObjects.length; i++) {
@@ -80,9 +91,10 @@ JsonContainer.prototype.requestData = function(dataRequest, callback) {
       var response = responses[i];
       var rawData = response['response'];
       var error = response['error'];
+      var errorMessage = response['errorMessage'];
 
       var processedData = requestObjects[i].request.processResponse(
-          requestObjects[i].request, rawData, error);
+          requestObjects[i].request, rawData, error, errorMessage);
       globalError = globalError || processedData.hadError();
       responseMap[requestObjects[i].key] = processedData;
     }
@@ -142,10 +154,16 @@ JsonContainer.prototype.newFetchActivitiesRequest = function(idSpec,
       function(rawJson) {
         var activities = [];
         for (var i = 0; i < rawJson.length; i++) {
-          activities.push(new opensocial.Activity(rawJson[i]));
+          activities.push(new JsonActivity(rawJson[i]));
         }
         return {'activities' : new opensocial.Collection(activities)};
       });
+};
+
+JsonContainer.prototype.newCreateActivityRequest = function(idSpec,
+    activity) {
+  return new RequestItem({'type' : 'CREATE_ACTIVITY', 'idSpec' : idSpec,
+    'activity' : activity});
 };
 
 RequestItem = function(jsonParams, processData) {
@@ -155,8 +173,9 @@ RequestItem = function(jsonParams, processData) {
       return rawJson;
     };
 
-  this.processResponse = function(originalDataRequest, rawJson, error) {
+  this.processResponse = function(originalDataRequest, rawJson, error,
+      errorMessage) {
     return new opensocial.ResponseItem(originalDataRequest,
-        this.processData(rawJson), error);
+        this.processData(rawJson), error, errorMessage);
   }
 };
