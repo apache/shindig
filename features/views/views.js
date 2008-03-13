@@ -56,6 +56,9 @@ gadgets.views = function() {
 
     for (var s in supported) if (supported.hasOwnProperty(s)) {
       var obj = supported[s];
+      if (!obj) {
+        continue;
+      }
       supportedViews[s] = new gadgets.views.View(s, obj.isOnlyVisible);
       var aliases = obj.aliases || [];
       for (var i = 0, alias; alias = aliases[i]; ++i) {
