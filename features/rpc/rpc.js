@@ -274,7 +274,7 @@ gadgets.rpc = function() {
         if (useLegacyProtocol[targetId]) {
           // #iframe_id&callId&num_packets&packet_num&block_of_data
           src = [relay, '#', encodeLegacyData([from, callId, 1, 0,
-                 encodeLegacyData([from, serviceName, null, null].concat(
+                 encodeLegacyData([from, serviceName, '', '', from].concat(
                  Array.prototype.slice.call(arguments, 3)))])].join('');
         } else {
           // # targetId & sourceId@callId & packetNum & packetId & packetData
