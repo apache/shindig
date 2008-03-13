@@ -23,6 +23,7 @@
   <dependency>caja</dependency>
   <gadget>
     <script src="jsonperson.js"></script>
+    <script src="jsonactivity.js"></script>
     <script src="jsoncontainer.js"></script>
     <script src="batchrequest.js"></script>
     <script>
