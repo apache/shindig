@@ -17,14 +17,9 @@
  */
 package org.apache.shindig.social.samplecontainer;
 
-import org.apache.shindig.social.ResponseItem;
 import org.apache.shindig.social.ResponseError;
+import org.apache.shindig.social.ResponseItem;
 import org.apache.shindig.social.opensocial.DataService;
-import org.w3c.dom.Document;
-import org.w3c.dom.NamedNodeMap;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
-import org.w3c.dom.Element;
 import org.json.JSONObject;
 
 import java.util.HashMap;

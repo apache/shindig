@@ -42,7 +42,7 @@ public class StateFileDataHandler implements GadgetDataHandler {
   public boolean shouldHandle(String requestType) {
      try {
       // There should be a cleaner way to do this...
-      RequestType.valueOf(requestType);                                         
+      RequestType.valueOf(requestType);
       return true;
     } catch (IllegalArgumentException e) {
       return false;
@@ -62,6 +62,7 @@ public class StateFileDataHandler implements GadgetDataHandler {
         state.put("people", fetcher.getAllPeople());
         state.put("idMap", fetcher.getIdMap());
         state.put("data", fetcher.getAppData());
+        state.put("activities", fetcher.getActivities());
         response = new ResponseItem<Map<String, Object>>(state);
         break;
       case SET_STATE:
