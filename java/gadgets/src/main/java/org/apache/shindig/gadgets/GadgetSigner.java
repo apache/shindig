@@ -19,34 +19,13 @@
 package org.apache.shindig.gadgets;
 
 /**
- *  Handles generation of signing tokens for various request types.
- *  Implementations are free to define their own signing parameters in any
- *  way that is suitable for their site.
+ *  Handles verification of gadget security tokens.
  */
 public interface GadgetSigner {
 
   /**
-   * Generates a token for the given gadget.
-   * Implementations should also add their own user-related context data
-   * to the token.
-   *
-   * @param gadget
-   * @return The token representation of the input data.
-   */
-  public GadgetToken createToken(Gadget gadget);
-
-  /**
-   * Generates a token from an input string. This call must produce a token that
-   * will validate against a token produced directly from a gadget so that the
-   * following function will always returns a valid GadgetToken:
-   *
-   * <code>
-   * GadgetToken testToken(Gadget gadget, GadgetSigner signer) {
-   *   GadgetToken token = signer.createToken(gadget);
-   *   return signer.createToken(token.toSerialForm());
-   * }
-   * </code>
-   *
+   * Decrypts and verifies a gadget security token to return a gadget token.
+   * 
    * @param tokenString String representation of the token to be created.
    * @return The token representation of the input data.
    * @throws GadgetException If tokenString is not a valid token

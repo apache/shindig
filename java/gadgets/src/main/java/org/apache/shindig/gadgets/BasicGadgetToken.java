@@ -18,16 +18,33 @@
  */
 package org.apache.shindig.gadgets;
 
-import java.net.URL;
-import java.util.Collection;
+import org.apache.shindig.util.BlobCrypter;
+import org.apache.shindig.util.BlobCrypterException;
+
+import java.util.HashMap;
 import java.util.Map;
 
 /**
  * Primitive token implementation that uses stings as tokens.
  */
 class BasicGadgetToken implements GadgetToken {
+  /** serialized form of the token */
   private final String token;
-
+  
+  /** data from the token */
+  private final Map<String, String> tokenData;
+  
+  /** tool to use for signing and encrypting the token */
+  private BlobCrypter crypter = new BlobCrypter(INSECURE_KEY);
+  
+  private static final byte[] INSECURE_KEY =
+    { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+  
+  private static final String OWNER_KEY = "o";
+  private static final String APP_KEY = "a";
+  private static final String VIEWER_KEY = "v";
+  private static final String DOMAIN_KEY = "d";
+  
   /**
    * {@inheritDoc}
    */
@@ -38,17 +55,50 @@ class BasicGadgetToken implements GadgetToken {
   /**
    * Generates a token from an input string
    * @param token String form of token
+   * @param maxAge max age of the token (in seconds)
+   * @throws BlobCrypterException 
    */
-  public BasicGadgetToken(String token) {
+  public BasicGadgetToken(String token, int maxAge)
+  throws BlobCrypterException {
     this.token = token;
+    this.tokenData = crypter.unwrap(token, maxAge);
+  }
+  
+  public BasicGadgetToken(String owner, String viewer, String app,
+      String domain) throws BlobCrypterException {
+    tokenData = new HashMap<String, String>();
+    tokenData.put(OWNER_KEY, owner);
+    tokenData.put(VIEWER_KEY, viewer);
+    tokenData.put(APP_KEY, app);
+    tokenData.put(DOMAIN_KEY, domain);
+    token = crypter.wrap(tokenData);
   }
 
   /**
    * {@inheritDoc}
-   * Signer that does not sign.
    */
-  public URL signUrl(URL uri, String httpMethod,
-      Map<String, Collection<String>> parameters) {
-    return uri;
+  public String getAppId() {
+    return tokenData.get(APP_KEY);
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  public String getDomain() {
+    return tokenData.get(DOMAIN_KEY);
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  public String getOwnerId() {
+    return tokenData.get(OWNER_KEY);
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  public String getViewerId() {
+    return tokenData.get(VIEWER_KEY);
   }
 }

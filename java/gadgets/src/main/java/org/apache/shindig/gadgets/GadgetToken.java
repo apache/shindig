@@ -18,13 +18,9 @@
  */
 package org.apache.shindig.gadgets;
 
-import java.net.URL;
-import java.util.Collection;
-import java.util.Map;
-
 /**
  * An abstract representation of a signing token.
- * Use in conjuction with @code GadgetSigner.
+ * Use in conjunction with @code GadgetSigner.
  */
 public interface GadgetToken {
 
@@ -37,15 +33,23 @@ public interface GadgetToken {
    */
   public String toSerialForm();
 
+  /**
+   * @return the owner from the token, or null if there is none.
+   */
+  public String getOwnerId();
 
   /**
-   * Sign a URL using this token
-   * @param uri The URL to sign
-   * @param httpMethod The HTTP method used
-   * @param parameters associated with the signing request
-   * @return The signed URL
-   * @throws GadgetException
+   * @return the viewer from the token, or null if there is none.
    */
-  public URL signUrl(URL uri, String httpMethod,
-      Map<String, Collection<String>> parameters) throws GadgetException;
+  public String getViewerId();
+
+  /**
+   * @return the application id from the token, or null if there is none.
+   */
+  public String getAppId();
+  
+  /**
+   * @return the domain from the token, or null if there is none.
+   */
+  public String getDomain();
 }
