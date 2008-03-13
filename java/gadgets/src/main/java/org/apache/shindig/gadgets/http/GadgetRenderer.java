@@ -218,6 +218,7 @@ public class GadgetRenderer {
           }
         }
       }
+      inlineJs.append(";\n");
     }
 
     for (JsLibrary library : gadget.getJsLibraries()) {
