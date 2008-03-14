@@ -124,7 +124,7 @@ gadgets.Prefs.setMessages_ = function(messages) {
  * @return {String} The preference; if not set, an empty string
  */
 gadgets.Prefs.prototype.getString = function(key) {
-  return prefs[key] ? gadgets.util.escapeString(val) : "";
+  return prefs[key] ? gadgets.util.escapeString(prefs[key]) : "";
 };
 
 /**
