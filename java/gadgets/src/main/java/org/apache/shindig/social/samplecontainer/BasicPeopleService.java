@@ -17,21 +17,13 @@
  */
 package org.apache.shindig.social.samplecontainer;
 
+import org.apache.shindig.social.ResponseItem;
 import org.apache.shindig.social.opensocial.PeopleService;
 import org.apache.shindig.social.opensocial.model.IdSpec;
 import org.apache.shindig.social.opensocial.model.Person;
-import org.apache.shindig.social.opensocial.model.Phone;
-import org.apache.shindig.social.opensocial.model.Name;
-import org.apache.shindig.social.ResponseItem;
 import org.json.JSONException;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.NamedNodeMap;
-import org.w3c.dom.NodeList;
-import org.w3c.dom.Node;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 

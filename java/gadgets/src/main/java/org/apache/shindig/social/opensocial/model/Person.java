@@ -21,6 +21,7 @@ import org.apache.shindig.social.AbstractGadgetData;
 import org.apache.shindig.social.Mandatory;
 
 import java.util.Date;
+import java.util.List;
 
 /**
  * see
@@ -29,64 +30,62 @@ import java.util.Date;
  */
 public class Person extends AbstractGadgetData {
   // TODO: Create the rest of the person fields and objects
-  // TODO: Change all of the array objects to list objects for easier
-  // manipulation
   private String aboutMe;
-  private String[] activities;
-  private Address[] addresses;
+  private List<String> activities;
+  private List<Address> addresses;
   private Integer age;
   private BodyType bodyType;
-  private String[] books;
-  private String[] cars;
+  private List<String> books;
+  private List<String> cars;
   private String children;
   private Address currentLocation;
   private Date dateOfBirth;
   // drinker : Person's drinking status, specified as an opensocial.Enum with
   // the enum's key referencing opensocial.Enum.Drinker.
-  private Email[] emails;
+  private List<Email> emails;
   private String ethnicity;
   private String fashion;
-  private String[] food;
+  private List<String> food;
   // gender : Person's gender, specified as an opensocial.Enum with the enum's
   // key referencing opensocial.Enum.Gender.
   private String happiestWhen;
-  private String[] hereos;
+  private List<String> hereos;
   private String humor;
   @Mandatory private String id;
-  private String[] interests;
+  private List<String> interests;
   private String jobInterests;
-  private Organization[] jobs;
-  private String[] languagesSpoken;
+  private List<Organization> jobs;
+  private List<String> languagesSpoken;
   private String livingArrangement;
   private String lookingFor;
-  private String[] movies;
-  private String[] music;
+  private List<String> movies;
+  private List<String> music;
   @Mandatory private Name name;
   private String nickname;
   private String pets;
-  private Phone[] phoneNumbers;
+  private List<Phone> phoneNumbers;
   private String politicalViews;
   private Url profileSong;
   private String profileUrl;
   private Url profileVideo;
-  private String[] quotes;
+  private List<String> quotes;
   private String relationshipStatus;
   private String religion;
   private String romance;
   private String scaredOf;
-  private Organization[] schools;
+  private List<Organization> schools;
   private String sexualOrientation;
   // smoker Person's smoking status, specified as an opensocial.Enum with the
   // enum's key referencing opensocial.Enum.Smoker.
-  private String[] sports;
+  private List<String> sports;
   private String status;
-  private String[] tags;
+  private List<String> tags;
   private String thumbnailUrl;
   private Long timeZone;
-  private String[] turnOffs;
-  private String[] turnOns;
-  private String[] tvShows;
-  private Url[] urls;
+  private List<String> turnOffs;
+  private List<String> turnOns;
+  private List<String> tvShows;
+  private List<Url> urls;
 
   public Person(String id, Name name) {
     this.id = id;
@@ -101,19 +100,19 @@ public class Person extends AbstractGadgetData {
     this.aboutMe = aboutMe;
   }
 
-  public String[] getActivities() {
+  public List<String> getActivities() {
     return activities;
   }
 
-  public void setActivities(String[] activities) {
+  public void setActivities(List<String> activities) {
     this.activities = activities;
   }
 
-  public Address[] getAddresses() {
+  public List<Address> getAddresses() {
     return addresses;
   }
 
-  public void setAddresses(Address[] addresses) {
+  public void setAddresses(List<Address> addresses) {
     this.addresses = addresses;
   }
 
@@ -133,19 +132,19 @@ public class Person extends AbstractGadgetData {
     this.bodyType = bodyType;
   }
 
-  public String[] getBooks() {
+  public List<String> getBooks() {
     return books;
   }
 
-  public void setBooks(String[] books) {
+  public void setBooks(List<String> books) {
     this.books = books;
   }
 
-  public String[] getCars() {
+  public List<String> getCars() {
     return cars;
   }
 
-  public void setCars(String[] cars) {
+  public void setCars(List<String> cars) {
     this.cars = cars;
   }
 
@@ -173,11 +172,11 @@ public class Person extends AbstractGadgetData {
     this.dateOfBirth = dateOfBirth;
   }
 
-  public Email[] getEmails() {
+  public List<Email> getEmails() {
     return emails;
   }
 
-  public void setEmails(Email[] emails) {
+  public void setEmails(List<Email> emails) {
     this.emails = emails;
   }
 
@@ -197,11 +196,11 @@ public class Person extends AbstractGadgetData {
     this.fashion = fashion;
   }
 
-  public String[] getFood() {
+  public List<String> getFood() {
     return food;
   }
 
-  public void setFood(String[] food) {
+  public void setFood(List<String> food) {
     this.food = food;
   }
 
@@ -213,11 +212,11 @@ public class Person extends AbstractGadgetData {
     this.happiestWhen = happiestWhen;
   }
 
-  public String[] getHereos() {
+  public List<String> getHereos() {
     return hereos;
   }
 
-  public void setHereos(String[] hereos) {
+  public void setHereos(List<String> hereos) {
     this.hereos = hereos;
   }
 
@@ -237,11 +236,11 @@ public class Person extends AbstractGadgetData {
     this.id = id;
   }
 
-  public String[] getInterests() {
+  public List<String> getInterests() {
     return interests;
   }
 
-  public void setInterests(String[] interests) {
+  public void setInterests(List<String> interests) {
     this.interests = interests;
   }
 
@@ -253,19 +252,19 @@ public class Person extends AbstractGadgetData {
     this.jobInterests = jobInterests;
   }
 
-  public Organization[] getJobs() {
+  public List<Organization> getJobs() {
     return jobs;
   }
 
-  public void setJobs(Organization[] jobs) {
+  public void setJobs(List<Organization> jobs) {
     this.jobs = jobs;
   }
 
-  public String[] getLanguagesSpoken() {
+  public List<String> getLanguagesSpoken() {
     return languagesSpoken;
   }
 
-  public void setLanguagesSpoken(String[] languagesSpoken) {
+  public void setLanguagesSpoken(List<String> languagesSpoken) {
     this.languagesSpoken = languagesSpoken;
   }
 
@@ -285,19 +284,19 @@ public class Person extends AbstractGadgetData {
     this.lookingFor = lookingFor;
   }
 
-  public String[] getMovies() {
+  public List<String> getMovies() {
     return movies;
   }
 
-  public void setMovies(String[] movies) {
+  public void setMovies(List<String> movies) {
     this.movies = movies;
   }
 
-  public String[] getMusic() {
+  public List<String> getMusic() {
     return music;
   }
 
-  public void setMusic(String[] music) {
+  public void setMusic(List<String> music) {
     this.music = music;
   }
 
@@ -325,11 +324,11 @@ public class Person extends AbstractGadgetData {
     this.pets = pets;
   }
 
-  public Phone[] getPhoneNumbers() {
+  public List<Phone> getPhoneNumbers() {
     return phoneNumbers;
   }
 
-  public void setPhoneNumbers(Phone[] phoneNumbers) {
+  public void setPhoneNumbers(List<Phone> phoneNumbers) {
     this.phoneNumbers = phoneNumbers;
   }
 
@@ -365,11 +364,11 @@ public class Person extends AbstractGadgetData {
     this.profileVideo = profileVideo;
   }
 
-  public String[] getQuotes() {
+  public List<String> getQuotes() {
     return quotes;
   }
 
-  public void setQuotes(String[] quotes) {
+  public void setQuotes(List<String> quotes) {
     this.quotes = quotes;
   }
 
@@ -405,11 +404,11 @@ public class Person extends AbstractGadgetData {
     this.scaredOf = scaredOf;
   }
 
-  public Organization[] getSchools() {
+  public List<Organization> getSchools() {
     return schools;
   }
 
-  public void setSchools(Organization[] schools) {
+  public void setSchools(List<Organization> schools) {
     this.schools = schools;
   }
 
@@ -421,11 +420,11 @@ public class Person extends AbstractGadgetData {
     this.sexualOrientation = sexualOrientation;
   }
 
-  public String[] getSports() {
+  public List<String> getSports() {
     return sports;
   }
 
-  public void setSports(String[] sports) {
+  public void setSports(List<String> sports) {
     this.sports = sports;
   }
 
@@ -437,11 +436,11 @@ public class Person extends AbstractGadgetData {
     this.status = status;
   }
 
-  public String[] getTags() {
+  public List<String> getTags() {
     return tags;
   }
 
-  public void setTags(String[] tags) {
+  public void setTags(List<String> tags) {
     this.tags = tags;
   }
 
@@ -461,35 +460,35 @@ public class Person extends AbstractGadgetData {
     this.timeZone = timeZone;
   }
 
-  public String[] getTurnOffs() {
+  public List<String> getTurnOffs() {
     return turnOffs;
   }
 
-  public void setTurnOffs(String[] turnOffs) {
+  public void setTurnOffs(List<String> turnOffs) {
     this.turnOffs = turnOffs;
   }
 
-  public String[] getTurnOns() {
+  public List<String> getTurnOns() {
     return turnOns;
   }
 
-  public void setTurnOns(String[] turnOns) {
+  public void setTurnOns(List<String> turnOns) {
     this.turnOns = turnOns;
   }
 
-  public String[] getTvShows() {
+  public List<String> getTvShows() {
     return tvShows;
   }
 
-  public void setTvShows(String[] tvShows) {
+  public void setTvShows(List<String> tvShows) {
     this.tvShows = tvShows;
   }
 
-  public Url[] getUrls() {
+  public List<Url> getUrls() {
     return urls;
   }
 
-  public void setUrls(Url[] urls) {
+  public void setUrls(List<Url> urls) {
     this.urls = urls;
   }
 }

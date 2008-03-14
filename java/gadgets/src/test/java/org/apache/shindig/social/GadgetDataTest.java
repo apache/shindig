@@ -35,21 +35,19 @@ public class GadgetDataTest extends TestCase {
   @Override
   public void setUp() throws Exception {
     johnDoe = new Person("johnDoeId", new Name("John Doe"));
-    Phone[] phones = {
-        new Phone("+33H000000000", "home"),
-        new Phone("+33M000000000", "mobile"),
-        new Phone("+33W000000000", "work")};
+    List<Phone> phones = new ArrayList<Phone>();
+    phones.add(new Phone("+33H000000000", "home"));
+    phones.add(new Phone("+33M000000000", "mobile"));
+    phones.add(new Phone("+33W000000000", "work"));
     johnDoe.setPhoneNumbers(phones);
 
-    Address[] addresses = {
-      new Address("My home address")
-    };
+    List<Address> addresses = new ArrayList<Address>();
+    addresses.add(new Address("My home address"));
     johnDoe.setAddresses(addresses);
 
-    Email[] emails = {
-      new Email("john.doe@work.bar", "work"),
-      new Email("john.doe@home.bar", "home"),
-    };
+    List<Email> emails = new ArrayList<Email>();
+    emails.add(new Email("john.doe@work.bar", "work"));
+    emails.add(new Email("john.doe@home.bar", "home"));
     johnDoe.setEmails(emails);
 
     activity = new Activity("activityId", johnDoe.getId());
@@ -67,15 +65,15 @@ public class GadgetDataTest extends TestCase {
     assertEquals(johnDoe.getName().getUnstructured(),
         result.getJSONObject("name").getString("unstructured"));
 
-    assertEquals(johnDoe.getAddresses()[0].getUnstructuredAddress(),
+    assertEquals(johnDoe.getAddresses().get(0).getUnstructuredAddress(),
         result.getJSONArray("addresses").getJSONObject(0)
             .getString("unstructuredAddress"));
 
     JSONArray phoneArray = result.getJSONArray("phoneNumbers");
     assertEquals(3, phoneArray.length());
 
-    for (int i = 0; i < johnDoe.getPhoneNumbers().length; i++) {
-      Phone expectedPhone = johnDoe.getPhoneNumbers()[i];
+    for (int i = 0; i < johnDoe.getPhoneNumbers().size(); i++) {
+      Phone expectedPhone = johnDoe.getPhoneNumbers().get(i);
       JSONObject actualPhone = phoneArray.getJSONObject(i);
       assertEquals(expectedPhone.getType(), actualPhone.getString("type"));
       assertEquals(expectedPhone.getNumber(), actualPhone.getString("number"));
@@ -84,8 +82,8 @@ public class GadgetDataTest extends TestCase {
     JSONArray emailArray = result.getJSONArray("emails");
     assertEquals(2, emailArray.length());
 
-    for (int i = 0; i < johnDoe.getEmails().length; i++) {
-      Email expectedEmail = johnDoe.getEmails()[i];
+    for (int i = 0; i < johnDoe.getEmails().size(); i++) {
+      Email expectedEmail = johnDoe.getEmails().get(i);
       JSONObject actualEmail = emailArray.getJSONObject(i);
       assertEquals(expectedEmail.getType(), actualEmail.getString("type"));
       assertEquals(expectedEmail.getAddress(),
@@ -122,7 +120,7 @@ public class GadgetDataTest extends TestCase {
     item2Map.put("value", "2");
     map.put("item2", item2Map);
 
-    ResponseItem response 
+    ResponseItem response
         = new ResponseItem<Map<String, Map<String, String>>>(map);
     JSONObject result = response.toJson();
 
