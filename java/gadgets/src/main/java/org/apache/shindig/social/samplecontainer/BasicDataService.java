@@ -47,7 +47,9 @@ public class BasicDataService implements DataService {
 
   public ResponseItem updatePersonData(String id, String key, String value) {
     if (!isValidKey(key)) {
-      return new ResponseItem<Object>(ResponseError.BAD_REQUEST, null);
+      return new ResponseItem<Object>(ResponseError.BAD_REQUEST,
+          "The person data key had invalid characters",
+          new JSONObject());
     }
 
     XmlStateFileFetcher.get().setAppData(id, key, value);

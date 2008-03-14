@@ -51,8 +51,7 @@ public class StateFileDataHandler implements GadgetDataHandler {
 
   public ResponseItem handleRequest(RequestItem request) {
     RequestType type = RequestType.valueOf(request.getType());
-    ResponseItem response = new ResponseItem<Object>(
-        ResponseError.NOT_IMPLEMENTED);
+    ResponseItem response = null;
 
     XmlStateFileFetcher fetcher = XmlStateFileFetcher.get();
 
@@ -71,9 +70,12 @@ public class StateFileDataHandler implements GadgetDataHandler {
           fetcher.resetStateFile(new URI(stateFile));
           response = new ResponseItem<Object>(new JSONObject());
         } catch (URISyntaxException e) {
-          response = new ResponseItem<Object>(ResponseError.BAD_REQUEST);
+          response = new ResponseItem<Object>(ResponseError.BAD_REQUEST,
+              "The state file was not a valid url", new JSONObject());
         } catch (JSONException e) {
-          response = new ResponseItem<Object>(ResponseError.BAD_REQUEST);
+          response = new ResponseItem<Object>(ResponseError.BAD_REQUEST,
+              "The request did not have a valid fileUrl parameter",
+              new JSONObject());
         }
         break;
       case SET_EVILNESS:
@@ -82,7 +84,9 @@ public class StateFileDataHandler implements GadgetDataHandler {
           fetcher.setEvilness(doEvil);
           response = new ResponseItem<Object>(new JSONObject());
         } catch (JSONException e) {
-          response = new ResponseItem<Object>(ResponseError.BAD_REQUEST);
+          response = new ResponseItem<Object>(ResponseError.BAD_REQUEST,
+              "The request did not have a valid doEvil parameter",
+              new JSONObject());
         }
         break;
     }

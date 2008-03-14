@@ -67,7 +67,9 @@ public class OpenSocialDataHandler implements GadgetDataHandler {
   public ResponseItem handleRequest(RequestItem request) {
     OpenSocialDataType type = OpenSocialDataType.valueOf(request.getType());
     ResponseItem response = new ResponseItem<Object>(
-        ResponseError.NOT_IMPLEMENTED);
+        ResponseError.NOT_IMPLEMENTED,
+        request.getType() + " has not been implemented yet.",
+        new JSONObject());
 
     try {
       String jsonSpec = request.getParams().getString("idSpec");
@@ -108,9 +110,11 @@ public class OpenSocialDataHandler implements GadgetDataHandler {
       }
 
     } catch (JSONException e) {
-      response = new ResponseItem<Object>(ResponseError.BAD_REQUEST);
+      response = new ResponseItem<Object>(ResponseError.BAD_REQUEST,
+          "The json request had a bad format", new JSONObject());
     } catch (IllegalArgumentException e) {
-      response = new ResponseItem<Object>(ResponseError.BAD_REQUEST);
+      response = new ResponseItem<Object>(ResponseError.BAD_REQUEST,
+          "The json request had a bad idSpec", new JSONObject());
     }
 
     return response;
