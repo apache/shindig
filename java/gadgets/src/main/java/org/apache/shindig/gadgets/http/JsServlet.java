@@ -102,6 +102,7 @@ public class JsServlet extends HttpServlet {
                 } else {
                   jsData.append(lib.getContent());
                 }
+                jsData.append(";\n");
               }
             }
           }
