@@ -49,7 +49,7 @@ public class Person extends AbstractGadgetData {
   // gender : Person's gender, specified as an opensocial.Enum with the enum's
   // key referencing opensocial.Enum.Gender.
   private String happiestWhen;
-  private List<String> hereos;
+  private List<String> heroes;
   private String humor;
   @Mandatory private String id;
   private List<String> interests;
@@ -212,12 +212,12 @@ public class Person extends AbstractGadgetData {
     this.happiestWhen = happiestWhen;
   }
 
-  public List<String> getHereos() {
-    return hereos;
+  public List<String> getHeroes() {
+    return heroes;
   }
 
-  public void setHereos(List<String> hereos) {
-    this.hereos = hereos;
+  public void setHeroes(List<String> heroes) {
+    this.heroes = heroes;
   }
 
   public String getHumor() {
