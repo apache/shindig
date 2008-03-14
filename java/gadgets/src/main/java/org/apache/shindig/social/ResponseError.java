@@ -30,7 +30,8 @@ public enum ResponseError {
     this.jsonValue = jsonValue;
   }
 
-  public String toJson() {
+  @Override
+  public String toString() {
     return jsonValue;
   }
 }

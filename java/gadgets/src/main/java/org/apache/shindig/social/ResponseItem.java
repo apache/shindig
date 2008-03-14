@@ -23,18 +23,20 @@ package org.apache.shindig.social;
  */
 public class ResponseItem<T> extends AbstractGadgetData {
   private ResponseError error;
+  private String errorMessage;
 
   // Must be compatible with AbstractSocialData.toJson. This means it should be
   // an AbstractSocialData or a collection of AbstractSocialData
   @Mandatory private T response;
 
-  public ResponseItem(ResponseError error, T response) {
+  public ResponseItem(ResponseError error, String errorMessage, T response) {
     this.error = error;
+    this.errorMessage = errorMessage;
     this.response = response;
   }
 
   public ResponseItem(T response) {
-    this(null, response);
+    this(null, null, response);
   }
 
   public ResponseError getError() {
@@ -43,6 +45,14 @@ public class ResponseItem<T> extends AbstractGadgetData {
 
   public void setError(ResponseError error) {
     this.error = error;
+  }
+
+  public String getErrorMessage() {
+    return errorMessage;
+  }
+
+  public void setErrorMessage(String errorMessage) {
+    this.errorMessage = errorMessage;
   }
 
   public T getResponse() {

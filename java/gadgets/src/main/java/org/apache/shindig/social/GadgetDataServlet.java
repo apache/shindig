@@ -73,7 +73,7 @@ public class GadgetDataServlet extends HttpServlet {
   protected void doPost(HttpServletRequest req, HttpServletResponse resp)
       throws IOException {
     // TODO: Get the security token and pass the viewer and owner along in the
-    // request items 
+    // request items
 
     String requestParam = req.getParameter("request");
 
@@ -98,12 +98,14 @@ public class GadgetDataServlet extends HttpServlet {
     int length = requestItems.length();
 
     for (int i = 0; i < length; i++) {
-      ResponseItem response = new ResponseItem<Object>(
-          ResponseError.NOT_IMPLEMENTED);
-
       JSONObject jsonRequest = requestItems.getJSONObject(i);
       RequestItem requestItem = new RequestItem(jsonRequest.getString("type"),
           jsonRequest);
+
+      ResponseItem response = new ResponseItem<Object>(
+          ResponseError.NOT_IMPLEMENTED,
+          requestItem.getType() + " has not been implemented yet.",
+          new JSONObject());
 
       for (GadgetDataHandler handler : handlers) {
         if (handler.shouldHandle(requestItem.getType())) {

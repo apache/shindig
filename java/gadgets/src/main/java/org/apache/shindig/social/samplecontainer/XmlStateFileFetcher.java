@@ -127,10 +127,13 @@ public class XmlStateFileFetcher {
   }
 
   public Map<String, Map<String, String>> getAppData() {
-    if (allData != null) {
-      return allData;
+    if (allData == null) {
+      setupAppData();
     }
+    return allData;
+  }
 
+  private void setupAppData() {
     allData = new HashMap<String, Map<String, String>>();
 
     Element root = fetchStateDocument().getDocumentElement();
@@ -156,13 +159,11 @@ public class XmlStateFileFetcher {
       }
       currentData.put(field, turnEvil(value));
     }
-
-    return allData;
   }
 
   public void setAppData(String id, String key, String value) {
     if (allData == null) {
-      setupPeopleData();
+      setupAppData();
     }
 
     Map<String, String> personData = allData.get(id);
