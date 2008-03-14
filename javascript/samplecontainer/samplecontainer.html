@@ -53,10 +53,8 @@ var stateFileUrlCookie = 'sampleContainerStateFileUrl';
 var useCaja = false;
 var useCache = true;
 var usePermissive = false;
-var doEvil = false;  // TODO: make evilness work.
+var doEvil = false;
 var gadget;
-
-// TODO: Should be able to dump the state somehow
 
 function initGadget() {
   // Fetch cookies
@@ -92,6 +90,7 @@ function changeGadgetUrl() {
 
   usePermissive = document.getElementById("usePermissiveCheckbox").checked;
   doEvil = document.getElementById("doEvilCheckbox").checked;
+  setEvilBit();
 
   stateFileUrl = document.getElementById("stateFileUrl").value;
   reloadStateFile();
@@ -124,33 +123,25 @@ SampleContainerGadget.prototype.getAdditionalParams = function() {
 };
 gadgets.container.gadgetClass = SampleContainerGadget;
 
+function setEvilBit() {
+  sendRequestToServer([{"type" : "SET_EVILNESS", "doEvil" : doEvil}]);
+};
+
 function reloadStateFile() {
-  // TODO: Should re-use the jsoncontainer code somehow
-  var jsonRequest = gadgets.json.stringify(
-      [{"type" : "SET_STATE", "fileUrl" : stateFileUrl}]);
-
-  var makeRequestParams = {
-    "CONTENT_TYPE" : "JSON",
-    "METHOD" : "POST",
-    "AUTHORIZATION" : "SIGNED",
-    "POST_DATA" : encodeValues({'request' : jsonRequest})};
-
-  makeRequest(socialDataPath,
-      function(data) {
-        data = data.data;
-        if (!data || data['error'] ||
-            !data['responses'][0] || data['responses'][0]['error']) {
-          alert("The state file you requested could not be loaded");
-        }
-
-      },
-      makeRequestParams);
+  sendRequestToServer([{"type" : "SET_STATE", "fileUrl" : stateFileUrl}]);
 };
 
 function dumpStateFile() {
+  sendRequestToServer([{"type" : "DUMP_STATE"}],
+      function(data) {
+        document.getElementById('gadgetState').innerHTML
+            = gadgets.json.stringify(data['responses'][0]['response']);
+      });
+};
+
+function sendRequestToServer(jsonRequest, opt_callback) {
   // TODO: Should re-use the jsoncontainer code somehow
-  var jsonRequest = gadgets.json.stringify(
-      [{"type" : "DUMP_STATE"}]);
+  jsonRequest = gadgets.json.stringify(jsonRequest);
 
   var makeRequestParams = {
     "CONTENT_TYPE" : "JSON",
@@ -163,15 +154,14 @@ function dumpStateFile() {
         data = data.data;
         if (!data || data['error'] ||
             !data['responses'][0] || data['responses'][0]['error']) {
-          alert("The state file could not be dumped");
+          alert("The request to the server caused an error.");
         } else {
-          document.getElementById('gadgetState').innerHTML
-              = gadgets.json.stringify(data['responses'][0]['response']);
+          if (opt_callback) {
+            opt_callback(data);
+          }
         }
-
       },
       makeRequestParams);
-
 };
 
 
@@ -194,7 +184,6 @@ function processResponse(url, callback, params, xobj) {
     return;
   }
   if (xobj.status !== 200) {
-    // TODO Need to work on standardizing errors
     callback({errors : ["Error " + xobj.status] });
     return;
   }
@@ -252,7 +241,7 @@ function encodeValues(fields, opt_noEscaping) {
       <br/>
 
       Using state: <input type="text" size="75" id="stateFileUrl"/>
-      <input type="checkbox" id="doEvilCheckbox" checked="true"/>do evil
+      <input type="checkbox" id="doEvilCheckbox"/>do evil
 
       <br/>
 

@@ -7,9 +7,9 @@ import org.apache.shindig.gadgets.RemoteContent;
 import org.apache.shindig.gadgets.RemoteContentRequest;
 import org.apache.shindig.social.opensocial.model.IdSpec;
 import org.apache.shindig.social.opensocial.model.Person;
-import org.apache.shindig.social.opensocial.model.Name;
-import org.apache.shindig.social.opensocial.model.Phone;
 import org.apache.shindig.social.opensocial.model.Activity;
+import org.apache.shindig.social.opensocial.model.Phone;
+import org.apache.shindig.social.opensocial.model.Name;
 import org.apache.shindig.social.opensocial.model.MediaItem;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
@@ -21,16 +21,31 @@ import java.net.URISyntaxException;
 import java.io.StringReader;
 import java.io.IOException;
 import java.util.Map;
-import java.util.HashMap;
 import java.util.List;
+import java.util.HashMap;
 import java.util.ArrayList;
 
 /**
  * @author Cassandra Doll <doll@google.com>
  */
 public class XmlStateFileFetcher {
-  private static String defaultStateUrl =
-      "http://localhost:8080/gadgets/files/samplecontainer/state-basicfriendlist.xml";
+  private static final String DEFAULT_STATE_URL
+      = "http://localhost:8080/gadgets/files/samplecontainer/"
+      + "state-basicfriendlist.xml";
+
+  // Evil javascript strings
+  private static final String REDEFINE_NEW_DATA_REQUEST
+      = "opensocial.newDataRequest = "
+      + "function() { alert('Ha! I attacked you!')}; ";
+
+  private static final String MAKE_PAGE_RED
+      = "document.body.style.backgroundColor = 'red'; ";
+
+  private static final String SCRIPT_PREFIX = "<div onMouseOver=\""
+      + REDEFINE_NEW_DATA_REQUEST + MAKE_PAGE_RED + "\">";
+
+  private static final String SCRIPT_SUFFIX = "</div>";
+
 
   // TODO: Should use guice here This static fetcher is very gross.
   private static XmlStateFileFetcher fetcher;
@@ -44,6 +59,7 @@ public class XmlStateFileFetcher {
 
   private URI stateFile;
   private Document document;
+  private boolean doEvil = false;
 
   // TODO: This obviously won't work on multiple servers
   // If we care then we should do something about it
@@ -54,7 +70,7 @@ public class XmlStateFileFetcher {
 
   private XmlStateFileFetcher() {
    try {
-      this.stateFile = new URI(defaultStateUrl);
+      stateFile = new URI(DEFAULT_STATE_URL);
     } catch (URISyntaxException e) {
       throw new RuntimeException(
           "The default state file could not be fetched. ", e);
@@ -63,11 +79,15 @@ public class XmlStateFileFetcher {
 
   public void resetStateFile(URI stateFile) {
     this.stateFile = stateFile;
-    this.document = null;
-    this.allData = null;
-    this.idMap = null;
-    this.allPeople = null;
-    this.allActivities = null;
+    document = null;
+    allData = null;
+    idMap = null;
+    allPeople = null;
+    allActivities = null;
+  }
+
+  public void setEvilness(boolean doEvil) {
+    this.doEvil = doEvil;
   }
 
   private Document fetchStateDocument() {
@@ -98,6 +118,14 @@ public class XmlStateFileFetcher {
     }
   }
 
+  private String turnEvil(String originalString) {
+    if (doEvil) {
+     return SCRIPT_PREFIX + originalString + SCRIPT_SUFFIX;
+    } else {
+      return originalString;
+    }
+  }
+
   public Map<String, Map<String, String>> getAppData() {
     if (allData != null) {
       return allData;
@@ -105,7 +133,7 @@ public class XmlStateFileFetcher {
 
     allData = new HashMap<String, Map<String, String>>();
 
-    Element root = this.fetchStateDocument().getDocumentElement();
+    Element root = fetchStateDocument().getDocumentElement();
 
     NodeList elements = root.getElementsByTagName("personAppData");
     NodeList personDataNodes = elements.item(0).getChildNodes();
@@ -126,7 +154,7 @@ public class XmlStateFileFetcher {
         currentData = new HashMap<String, String>();
         allData.put(id, currentData);
       }
-      currentData.put(field, value);
+      currentData.put(field, turnEvil(value));
     }
 
     return allData;
@@ -161,7 +189,7 @@ public class XmlStateFileFetcher {
   }
 
   private void setupPeopleData() {
-    Element root = this.fetchStateDocument().getDocumentElement();
+    Element root = fetchStateDocument().getDocumentElement();
 
     idMap = new HashMap<IdSpec.Type, List<String>>();
     allPeople = new HashMap<String, Person>();
@@ -207,12 +235,13 @@ public class XmlStateFileFetcher {
 
       String name = attributes.getNamedItem("name").getNodeValue();
       String id = attributes.getNamedItem("id").getNodeValue();
-      Person person = new Person(id, new Name(name));
+      Person person = new Person(id, new Name(turnEvil(name)));
 
       Node phoneItem = attributes.getNamedItem("phone");
       if (phoneItem != null) {
         String phone = phoneItem.getNodeValue();
-        Phone[] phones = {new Phone(phone, null)};
+        List<Phone> phones = new ArrayList<Phone>();
+        phones.add(new Phone(turnEvil(phone), null));
         person.setPhoneNumbers(phones);
       }
 
@@ -234,7 +263,7 @@ public class XmlStateFileFetcher {
   private void setupActivities() {
     allActivities = new HashMap<String, List<Activity>>();
 
-    Element root = this.fetchStateDocument().getDocumentElement();
+    Element root = fetchStateDocument().getDocumentElement();
     NodeList activitiesElements = root.getElementsByTagName("activities");
 
     if (activitiesElements != null && activitiesElements.item(0) != null) {
@@ -270,9 +299,9 @@ public class XmlStateFileFetcher {
         String id = activityParams.getNamedItem("id").getNodeValue();
 
         Activity activity = new Activity(id, userId);
-        activity.setStreamTitle(streamTitle);
-        activity.setTitle(title);
-        activity.setBody(body);
+        activity.setStreamTitle(turnEvil(streamTitle));
+        activity.setTitle(turnEvil(title));
+        activity.setBody(turnEvil(body));
         activity.setMediaItems(getMediaItems(activityItem));
 
         createActivity(userId, activity);

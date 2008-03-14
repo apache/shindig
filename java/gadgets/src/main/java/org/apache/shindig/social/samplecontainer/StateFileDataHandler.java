@@ -36,7 +36,7 @@ import java.util.HashMap;
 public class StateFileDataHandler implements GadgetDataHandler {
 
   public enum RequestType {
-    DUMP_STATE, SET_STATE
+    DUMP_STATE, SET_STATE, SET_EVILNESS
   }
 
   public boolean shouldHandle(String requestType) {
@@ -76,7 +76,15 @@ public class StateFileDataHandler implements GadgetDataHandler {
           response = new ResponseItem<Object>(ResponseError.BAD_REQUEST);
         }
         break;
-
+      case SET_EVILNESS:
+        try {
+          boolean doEvil = request.getParams().getBoolean("doEvil");
+          fetcher.setEvilness(doEvil);
+          response = new ResponseItem<Object>(new JSONObject());
+        } catch (JSONException e) {
+          response = new ResponseItem<Object>(ResponseError.BAD_REQUEST);
+        }
+        break;
     }
 
     return response;
