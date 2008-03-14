@@ -52,7 +52,7 @@ public class GadgetSpecFetcher implements DataFetcher<GadgetSpec> {
   public GadgetSpec fetch(URI url, boolean forceReload) throws GadgetException {
     GadgetSpec spec = null;
     if (!forceReload) {
-      cache.get(url);
+      spec = cache.get(url);
     }
     if (spec == null) {
       RemoteContentRequest request = new RemoteContentRequest(url);

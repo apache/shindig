@@ -53,7 +53,7 @@ public class MessageBundleFetcher implements DataFetcher<MessageBundle> {
       throws GadgetException {
     MessageBundle bundle = null;
     if (!forceReload) {
-      cache.get(url);
+      bundle = cache.get(url);
     }
     if (bundle == null) {
       RemoteContentRequest request = new RemoteContentRequest(url);
