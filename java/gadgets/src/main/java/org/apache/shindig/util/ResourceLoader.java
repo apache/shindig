@@ -24,15 +24,11 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.logging.Logger;
 
 /**
  * Handles loading contents from resource and file system files.
  */
 public class ResourceLoader {
-
-  private static final Logger logger
-    = Logger.getLogger("org.apache.shindig.util");
 
   /**
    * Reads the contents of a resource as a string.

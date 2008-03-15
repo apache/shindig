@@ -64,7 +64,6 @@ public class MessageBundleFetcher implements DataFetcher<MessageBundle> {
         cache.put(url, bundle);
       } else {
         String error = "Unable to get content from " + url.toString();
-        logger.info(error);
         throw new GadgetException(
             GadgetException.Code.FAILED_TO_RETRIEVE_CONTENT, error);
       }
