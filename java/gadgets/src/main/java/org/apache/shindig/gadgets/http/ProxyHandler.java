@@ -73,25 +73,23 @@ public class ProxyHandler {
 
     // Fetch the content and convert it into JSON.
     RemoteContent results = fetchContent(request, state);
-    response.setStatus(results.getHttpStatusCode());
-    if (results.getHttpStatusCode() == HttpServletResponse.SC_OK) {
-      String output;
-      try {
-        // Use raw param as key as URL may have to be decoded
-        JSONObject resp = new JSONObject()
-            .put("body", results.getResponseAsString())
-            .put("rc", results.getHttpStatusCode());
-        String url = request.getParameter("url");
-        JSONObject json = new JSONObject().put(url, resp);
-        output = UNPARSEABLE_CRUFT + json.toString();
-      } catch (JSONException e) {
-        output = "";
-      }
-      response.setContentType("application/json; charset=utf-8");
-      response.setHeader("Pragma", "no-cache");
-      response.setHeader("Content-Disposition", "attachment;filename=p.txt");
-      response.getWriter().write(output);
+    response.setStatus(HttpServletResponse.SC_OK);
+    String output;
+    try {
+      // Use raw param as key as URL may have to be decoded
+      JSONObject resp = new JSONObject()
+          .put("body", results.getResponseAsString())
+          .put("rc", results.getHttpStatusCode());
+      String url = request.getParameter("url");
+      JSONObject json = new JSONObject().put(url, resp);
+      output = UNPARSEABLE_CRUFT + json.toString();
+    } catch (JSONException e) {
+      output = "";
     }
+    response.setContentType("application/json; charset=utf-8");
+    response.setHeader("Pragma", "no-cache");
+    response.setHeader("Content-Disposition", "attachment;filename=p.txt");
+    response.getWriter().write(output);
   }
 
   public void fetch(HttpServletRequest request,
@@ -282,7 +280,7 @@ public class ProxyHandler {
   private URL signUrl(CrossServletState state, URL originalUrl, GadgetToken token,
       HttpServletRequest request) throws GadgetException {
     String method = getParameter(request, "httpMethod", "GET");
-    String body = getParameter(request, "postBody", null);
+    String body = getParameter(request, "postData", null);
     RequestSigner signer = state.makeSignedFetchRequestSigner(token);
     return signer.signRequest(method, originalUrl, body);
   }

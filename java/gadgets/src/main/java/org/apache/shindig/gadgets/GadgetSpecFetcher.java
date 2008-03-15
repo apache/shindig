@@ -63,7 +63,6 @@ public class GadgetSpecFetcher implements DataFetcher<GadgetSpec> {
         cache.put(url, spec);
       } else {
         String error = "Unable to get content from " + url.toString();
-        logger.info(error);
         throw new GadgetException(
             GadgetException.Code.FAILED_TO_RETRIEVE_CONTENT, error);
       }
