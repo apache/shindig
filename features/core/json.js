@@ -153,7 +153,7 @@ gadgets.json = function () {
 // we look to see that the remaining characters are only whitespace or ']' or
 // ',' or ':' or '{' or '}'. If that is so, then the text is safe for eval.
 
-      if (/^[\],:{}\s]*$/.test(text.replace(/\\./g, '@').
+      if (/^[\],:{}\s]*$/.test(text.replace(/\\["\\\/b-u]/g, '@').
           replace(/"[^"\\\n\r]*"|true|false|null|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?/g, ']').
           replace(/(?:^|:|,)(?:\s*\[)+/g, ''))) {
         return eval('(' + text + ')');
