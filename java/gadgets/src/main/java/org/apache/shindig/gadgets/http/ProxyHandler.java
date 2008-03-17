@@ -52,7 +52,14 @@ import javax.servlet.http.HttpServletResponse;
 
 public class ProxyHandler {
   private static final String UNPARSEABLE_CRUFT = "throw 1; < don't be evil' >";
-
+  private static final String POST_DATA_PARAM = "postData";
+  private static final String METHOD_PARAM = "httpMethod";
+  private static final String SECURITY_TOKEN_PARAM = "st";
+  private static final String HEADERS_PARAM = "headers";
+  private static final String NOCACHE_PARAM = "nocache";
+  private static final String URL_PARAM = "url";
+  private static final String AUTHZ_PARAM = "authz";
+  
   private final RemoteContentFetcher fetcher;
 
   private final static Set<String> DISALLOWED_RESPONSE_HEADERS
@@ -80,7 +87,7 @@ public class ProxyHandler {
       JSONObject resp = new JSONObject()
           .put("body", results.getResponseAsString())
           .put("rc", results.getHttpStatusCode());
-      String url = request.getParameter("url");
+      String url = request.getParameter(URL_PARAM);
       JSONObject json = new JSONObject().put(url, resp);
       output = UNPARSEABLE_CRUFT + json.toString();
     } catch (JSONException e) {
@@ -140,10 +147,10 @@ public class ProxyHandler {
     }
 
     try {
-      URL originalUrl = validateUrl(request.getParameter("url"));
+      URL originalUrl = validateUrl(request.getParameter(URL_PARAM));
       GadgetSigner signer = state.getGadgetSigner();
       URL signedUrl;
-      if ("signed".equals(request.getParameter("authz"))) {
+      if ("signed".equals(request.getParameter(AUTHZ_PARAM))) {
         GadgetToken token = extractAndValidateToken(request, signer);
         if (token == null) {
           return new RemoteContent(HttpServletResponse.SC_UNAUTHORIZED,
@@ -158,11 +165,11 @@ public class ProxyHandler {
       byte[] postBody = null;
 
       if ("POST".equals(method)) {
-        method = getParameter(request, "httpMethod", "GET");
+        method = getParameter(request, METHOD_PARAM, "GET");
         postBody = URLDecoder.decode(
-            getParameter(request, "postData", ""), encoding).getBytes();
+            getParameter(request, POST_DATA_PARAM, ""), encoding).getBytes();
 
-        String headerData = request.getParameter("headers");
+        String headerData = request.getParameter(HEADERS_PARAM);
         if (headerData == null || headerData.length() == 0) {
           headers = Collections.emptyMap();
         } else {
@@ -193,7 +200,7 @@ public class ProxyHandler {
 
       RemoteContentRequest.Options options
           = new RemoteContentRequest.Options();
-      options.ignoreCache = "1".equals(request.getParameter("nocache"));
+      options.ignoreCache = "1".equals(request.getParameter(NOCACHE_PARAM));
       RemoteContentRequest req = new RemoteContentRequest(
           method, signedUrl.toURI(), headers, postBody, options);
       return fetcher.fetch(req);
@@ -268,7 +275,7 @@ public class ProxyHandler {
     if (signer == null) {
       return null;
     }
-    String token = getParameter(request, "st", "");
+    String token = getParameter(request, SECURITY_TOKEN_PARAM, "");
     return signer.createToken(token);
   }
 
@@ -279,8 +286,8 @@ public class ProxyHandler {
   @SuppressWarnings("unchecked")
   private URL signUrl(CrossServletState state, URL originalUrl, GadgetToken token,
       HttpServletRequest request) throws GadgetException {
-    String method = getParameter(request, "httpMethod", "GET");
-    String body = getParameter(request, "postData", null);
+    String method = getParameter(request, METHOD_PARAM, "GET");
+    String body = getParameter(request, POST_DATA_PARAM, null);
     RequestSigner signer = state.makeSignedFetchRequestSigner(token);
     return signer.signRequest(method, originalUrl, body);
   }
