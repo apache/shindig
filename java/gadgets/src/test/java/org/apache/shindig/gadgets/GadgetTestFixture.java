@@ -21,8 +21,10 @@ package org.apache.shindig.gadgets;
 
 
 import org.apache.shindig.gadgets.http.CrossServletState;
+import org.apache.shindig.gadgets.http.ProxyHandler;
 import org.apache.shindig.gadgets.spec.GadgetSpec;
 import org.apache.shindig.gadgets.spec.MessageBundle;
+import org.apache.shindig.util.BlobCrypterException;
 
 import java.util.Set;
 import java.util.concurrent.Executors;
@@ -35,6 +37,7 @@ public class GadgetTestFixture extends EasyMockTestCase {
   public final HttpServletRequest request = mock(HttpServletRequest.class, true);
   public final HttpServletResponse response = mock(HttpServletResponse.class, true);
   public final GadgetServer gadgetServer;
+  public final ProxyHandler proxyHandler;
   public final RemoteContentFetcher fetcher = mock(RemoteContentFetcher.class, true);
   @SuppressWarnings(value="unchecked")
   public final DataFetcher<GadgetSpec> specFetcher = mock(DataFetcher.class, true);
@@ -51,7 +54,17 @@ public class GadgetTestFixture extends EasyMockTestCase {
 
     @Override
     public GadgetSigner getGadgetSigner() {
-      return null;
+      return new GadgetSigner() {
+        @Override
+        public GadgetToken createToken(String tokenString)
+            throws GadgetException {
+          try {
+            return new BasicGadgetToken("owner", "viewer", "app", "domain");
+          } catch (BlobCrypterException e) {
+            throw new GadgetException(GadgetException.Code.INVALID_GADGET_TOKEN, e);
+          }
+        }
+      };
     }
 
     @Override
@@ -86,7 +99,26 @@ public class GadgetTestFixture extends EasyMockTestCase {
 
     @Override
     public RequestSigner makeSignedFetchRequestSigner(GadgetToken token) {
-      return null;
+      // Real implementations should use their own key, probably pulled from
+      // disk rather than hardcoded in the source.
+      final String PRIVATE_KEY_TEXT =
+        "MIICdgIBADANBgkqhkiG9w0BAQEFAASCAmAwggJcAgEAAoGBALRiMLAh9iimur8V" +
+        "A7qVvdqxevEuUkW4K+2KdMXmnQbG9Aa7k7eBjK1S+0LYmVjPKlJGNXHDGuy5Fw/d" +
+        "7rjVJ0BLB+ubPK8iA/Tw3hLQgXMRRGRXXCn8ikfuQfjUS1uZSatdLB81mydBETlJ" +
+        "hI6GH4twrbDJCR2Bwy/XWXgqgGRzAgMBAAECgYBYWVtleUzavkbrPjy0T5FMou8H" +
+        "X9u2AC2ry8vD/l7cqedtwMPp9k7TubgNFo+NGvKsl2ynyprOZR1xjQ7WgrgVB+mm" +
+        "uScOM/5HVceFuGRDhYTCObE+y1kxRloNYXnx3ei1zbeYLPCHdhxRYW7T0qcynNmw" +
+        "rn05/KO2RLjgQNalsQJBANeA3Q4Nugqy4QBUCEC09SqylT2K9FrrItqL2QKc9v0Z" +
+        "zO2uwllCbg0dwpVuYPYXYvikNHHg+aCWF+VXsb9rpPsCQQDWR9TT4ORdzoj+Nccn" +
+        "qkMsDmzt0EfNaAOwHOmVJ2RVBspPcxt5iN4HI7HNeG6U5YsFBb+/GZbgfBT3kpNG" +
+        "WPTpAkBI+gFhjfJvRw38n3g/+UeAkwMI2TJQS4n8+hid0uus3/zOjDySH3XHCUno" +
+        "cn1xOJAyZODBo47E+67R4jV1/gzbAkEAklJaspRPXP877NssM5nAZMU0/O/NGCZ+" +
+        "3jPgDUno6WbJn5cqm8MqWhW1xGkImgRk+fkDBquiq4gPiT898jusgQJAd5Zrr6Q8" +
+        "AO/0isr/3aa6O6NLQxISLKcPDk2NOccAfS/xOtfOz4sJYM3+Bs4Io9+dZGSDCA54" +
+        "Lw03eHTNQghS0A==";
+      final String PRIVATE_KEY_NAME = "shindig-insecure-key";
+      return new SignedFetchRequestSigner(token, PRIVATE_KEY_NAME,
+          PRIVATE_KEY_TEXT);
     }
   };
 
@@ -107,5 +139,6 @@ public class GadgetTestFixture extends EasyMockTestCase {
     config.setFeatureRegistry(registry);
     config.setGadgetBlacklist(blacklist);
     gadgetServer = new GadgetServer(config);
+    proxyHandler = new ProxyHandler(fetcher);
   }
 }
