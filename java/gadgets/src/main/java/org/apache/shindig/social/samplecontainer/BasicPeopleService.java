@@ -22,6 +22,7 @@ import org.apache.shindig.social.opensocial.PeopleService;
 import org.apache.shindig.social.opensocial.model.IdSpec;
 import org.apache.shindig.social.opensocial.model.Person;
 import org.apache.shindig.social.opensocial.model.ApiCollection;
+import org.apache.shindig.gadgets.GadgetToken;
 import org.json.JSONException;
 
 import java.util.ArrayList;
@@ -41,12 +42,19 @@ public class BasicPeopleService implements PeopleService {
   };
 
   public ResponseItem<ApiCollection<Person>> getPeople(List<String> ids,
-      SortOrder sortOrder, FilterType filter, int first, int max) {
+      SortOrder sortOrder, FilterType filter, int first, int max, GadgetToken token) {
     Map<String, Person> allPeople = XmlStateFileFetcher.get().getAllPeople();
 
     List<Person> people = new ArrayList<Person>();
     for (String id : ids) {
-      people.add(allPeople.get(id));
+      Person person = allPeople.get(id);
+      if (id.equals(token.getViewerId())) {
+        person.setIsViewer(true);
+      }
+      if (id.equals(token.getOwnerId())) {
+        person.setIsOwner(true);
+      }
+      people.add(person);
     }
 
     // We can pretend that by default the people are in top friends order
@@ -66,14 +74,29 @@ public class BasicPeopleService implements PeopleService {
     return new ResponseItem<ApiCollection<Person>>(collection);
   }
 
-  public List<String> getIds(IdSpec idSpec) throws JSONException {
-    Map<IdSpec.Type, List<String>> idMap
-        = XmlStateFileFetcher.get().getIdMap();
+  public List<String> getIds(IdSpec idSpec, GadgetToken token)
+      throws JSONException {
+    Map<String, List<String>> friendIds
+        = XmlStateFileFetcher.get().getFriendIds();
 
-    if (idSpec.getType() == IdSpec.Type.USER_IDS) {
-      return idSpec.fetchUserIds();
-    } else {
-      return idMap.get(idSpec.getType());
+    List<String> ids = new ArrayList<String>();
+    switch(idSpec.getType()) {
+      case OWNER:
+        ids.add(token.getOwnerId());
+        break;
+      case VIEWER:
+        ids.add(token.getViewerId());
+        break;
+      case OWNER_FRIENDS:
+        ids.addAll(friendIds.get(token.getOwnerId()));
+        break;
+      case VIEWER_FRIENDS:
+        ids.addAll(friendIds.get(token.getOwnerId()));
+        break;
+      case USER_IDS:
+        ids.addAll(idSpec.fetchUserIds());
+        break;
     }
+    return ids;
   }
 }

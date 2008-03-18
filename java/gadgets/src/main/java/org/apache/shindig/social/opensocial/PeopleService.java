@@ -22,6 +22,7 @@ import org.apache.shindig.social.opensocial.model.Person;
 import org.apache.shindig.social.opensocial.model.IdSpec;
 import org.apache.shindig.social.opensocial.model.ApiCollection;
 import org.apache.shindig.social.ResponseItem;
+import org.apache.shindig.gadgets.GadgetToken;
 
 import java.util.List;
 
@@ -34,7 +35,8 @@ public interface PeopleService {
    * @return a list of person ids
    * @throws JSONException If the idSpec is malformed
    */
-  public List<String> getIds(IdSpec idSpec) throws JSONException;
+  public List<String> getIds(IdSpec idSpec, GadgetToken token)
+      throws JSONException;
 
   public enum SortOrder {
     topFriends, name
@@ -54,5 +56,6 @@ public interface PeopleService {
    * @return a list of people.
    */
   public ResponseItem<ApiCollection<Person>> getPeople(List<String> ids,
-      SortOrder sortOrder, FilterType filter, int first, int max);
+      SortOrder sortOrder, FilterType filter, int first, int max,
+      GadgetToken token);
 }

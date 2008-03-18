@@ -1,10 +1,7 @@
-<!ELEMENT container (viewer, owner?, viewerFriends?, ownerFriends?, appId?,
+<!ELEMENT container (people, appId?,
     personAppData?, activities?)>
 
-<!ELEMENT viewer (person)>
-<!ELEMENT owner (person)>
-<!ELEMENT viewerFriends (person*)>
-<!ELEMENT ownerFriends (person*)>
+<!ELEMENT people (person*)>
 <!ELEMENT appId CDATA #REQUIRED>
 
 <!ELEMENT person>

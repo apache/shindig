@@ -22,6 +22,9 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.apache.shindig.social.samplecontainer.StateFileDataHandler;
 import org.apache.shindig.social.opensocial.OpenSocialDataHandler;
+import org.apache.shindig.gadgets.GadgetException;
+import org.apache.shindig.gadgets.GadgetToken;
+import org.apache.shindig.gadgets.http.CrossServletState;
 
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -29,6 +32,8 @@ import java.util.logging.Logger;
 import java.util.List;
 import java.util.ArrayList;
 
+import javax.servlet.ServletConfig;
+import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -63,18 +68,27 @@ public class GadgetDataServlet extends HttpServlet {
     handlers.add(new StateFileDataHandler());
   }
 
+  private CrossServletState servletState;
+
+  @Override
+  public void init(ServletConfig config) throws ServletException {
+    servletState = CrossServletState.get(config);
+  }
+
   @Override
   protected void doPost(HttpServletRequest req, HttpServletResponse resp)
       throws IOException {
-    // TODO: Get the security token and pass the viewer and owner along in the
-    // request items
 
     String requestParam = req.getParameter("request");
+    String token = req.getParameter("st");
 
     DataResponse response;
     try {
-      response = new DataResponse(createResponse(requestParam));
+      response = new DataResponse(createResponse(requestParam, token));
     } catch (JSONException e) {
+      response = new DataResponse(ResponseError.BAD_REQUEST);
+    } catch (GadgetException e) {
+      logger.info("Request was made with invalid security token: " + token);
       response = new DataResponse(ResponseError.BAD_REQUEST);
     }
 
@@ -82,8 +96,13 @@ public class GadgetDataServlet extends HttpServlet {
     writer.write(response.toJson().toString());
   }
 
-  private List<ResponseItem> createResponse(String requestParam)
-      throws JSONException {
+  private List<ResponseItem> createResponse(String requestParam, String token)
+      throws JSONException, GadgetException {
+    if (token == null || token.trim().isEmpty()) {
+      throw new GadgetException(GadgetException.Code.INVALID_GADGET_TOKEN);
+    }
+    GadgetToken securityToken = servletState.getGadgetSigner().createToken(token);
+
     // TODO: Improve json input handling. The json request should get auto
     // translated into objects
     List<ResponseItem> responseItems = new ArrayList<ResponseItem>();
@@ -94,7 +113,7 @@ public class GadgetDataServlet extends HttpServlet {
     for (int i = 0; i < length; i++) {
       JSONObject jsonRequest = requestItems.getJSONObject(i);
       RequestItem requestItem = new RequestItem(jsonRequest.getString("type"),
-          jsonRequest);
+          jsonRequest, securityToken);
 
       ResponseItem response = new ResponseItem<Object>(
           ResponseError.NOT_IMPLEMENTED,
