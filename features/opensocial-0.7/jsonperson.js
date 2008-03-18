@@ -23,7 +23,7 @@
  * @private
  * @constructor
  */
-JsonPerson = function(opt_params, opt_isOwner, opt_isViewer) {
+JsonPerson = function(opt_params) {
   opt_params = opt_params || {};
 
   // TODO: doesn't handle dateOfBirth, drinker, smoker, or gender yet
@@ -41,8 +41,8 @@ JsonPerson = function(opt_params, opt_isOwner, opt_isViewer) {
       opensocial.Organization);
   JsonPerson.constructArrayObject(opt_params, "urls", opensocial.Url);
 
-  
-  opensocial.Person.call(this, opt_params, opt_isOwner, opt_isViewer);
+  opensocial.Person.call(this, opt_params, opt_params['isOwner'],
+      opt_params['isViewer']);
 };
 JsonPerson.inherits(opensocial.Person);
 
