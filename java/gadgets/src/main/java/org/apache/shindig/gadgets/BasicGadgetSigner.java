@@ -28,13 +28,14 @@ public class BasicGadgetSigner implements GadgetSigner {
 
   /**
    * {@inheritDoc}
-   * 
+   *
    * Returns a token with some faked out values.
    */
   public GadgetToken createToken(String stringToken) throws GadgetException {
     try {
-      return new BasicGadgetToken("fakeowner", "fakeviewer", "fakeapp",
-          "fakedomain");
+      String[] tokens = stringToken.split(":");
+      return new BasicGadgetToken(tokens[0], tokens[1], tokens[2],
+          tokens[3]);
     } catch (BlobCrypterException e) {
       throw new GadgetException(GadgetException.Code.INVALID_GADGET_TOKEN, e);
     }
