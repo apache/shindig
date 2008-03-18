@@ -381,7 +381,7 @@ public class ModulePrefs {
        .append(" thumbnail=\"").append(thumbnail).append("\"")
        .append(" height=\"").append(height).append("\"")
        .append(" width=\"").append(width).append("\"")
-       .append(" category1=\"").append(categories.get(0)).append("\"")
+       .append(" category=\"").append(categories.get(0)).append("\"")
        .append(" category2=\"").append(categories.get(1)).append("\"")
        .append(" show_stats=\"").append(showStats).append("\"")
        .append(" show_in_directory=\"").append(showInDirectory).append("\"")
@@ -447,7 +447,7 @@ public class ModulePrefs {
       this.width = Integer.parseInt(width);
     }
     categories = Arrays.asList(
-        XmlUtil.getAttribute(element, "category1", ""),
+        XmlUtil.getAttribute(element, "category", ""),
         XmlUtil.getAttribute(element, "category2", ""));
 
     // Child elements
