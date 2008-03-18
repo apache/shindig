@@ -40,6 +40,7 @@ import org.json.JSONObject;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -179,9 +180,7 @@ public class GadgetRenderer {
       if (forcedLibs.trim().length() == 0) {
         libs.add("core");
       } else {
-        for (String lib : forcedLibs.split(":")) {
-          libs.add(lib);
-        }
+        libs.addAll(Arrays.asList(forcedLibs.split(":")));
       }
     }
 
@@ -254,6 +253,8 @@ public class GadgetRenderer {
           .append("</body></html>");
     if (request.getParameter("v") != null) {
       // Versioned files get cached indefinitely
+      HttpUtil.setCachingHeaders(response);
+    } else if ("1".equals(request.getParameter("nocache"))) {
       HttpUtil.setCachingHeaders(response, 0);
     } else {
       // Unversioned files get cached for 5 minutes.

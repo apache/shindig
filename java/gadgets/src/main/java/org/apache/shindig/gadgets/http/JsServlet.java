@@ -116,7 +116,7 @@ public class JsServlet extends HttpServlet {
 
       if (req.getParameter("v") != null) {
         // Versioned files get cached indefinitely
-        HttpUtil.setCachingHeaders(resp, 0);
+        HttpUtil.setCachingHeaders(resp);
       } else {
         // Unversioned files get cached for 1 hour.
         HttpUtil.setCachingHeaders(resp, 60 * 60);
