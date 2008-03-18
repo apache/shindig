@@ -455,7 +455,7 @@ public class ModulePrefs {
     FeatureVisitor featureVisitor = new FeatureVisitor();
     IconVisitor iconVisitor = new IconVisitor();
     LocaleVisitor localeVisitor = new LocaleVisitor(specUrl);
-    Map<String, ElementVisitor> visitors = new HashMap<String, ElementVisitor>();
+    Map<String, ElementVisitor> visitors = new HashMap<String, ElementVisitor>(5,1);
     visitors.put("Preload", preloadVisitor);
     visitors.put("Optional", featureVisitor);
     visitors.put("Require", featureVisitor);

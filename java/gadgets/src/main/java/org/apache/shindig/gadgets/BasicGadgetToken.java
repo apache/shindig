@@ -66,7 +66,7 @@ class BasicGadgetToken implements GadgetToken {
   
   public BasicGadgetToken(String owner, String viewer, String app,
       String domain) throws BlobCrypterException {
-    tokenData = new HashMap<String, String>();
+    tokenData = new HashMap<String, String>(5,1);
     tokenData.put(OWNER_KEY, owner);
     tokenData.put(VIEWER_KEY, viewer);
     tokenData.put(APP_KEY, app);

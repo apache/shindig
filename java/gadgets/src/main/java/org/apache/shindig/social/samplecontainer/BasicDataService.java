@@ -36,7 +36,7 @@ public class BasicDataService implements DataService {
 
     // TODO: Use the opensource Collections library
     Map<String, Map<String, String>> data =
-        new HashMap<String, Map<String, String>>();
+        new HashMap<String, Map<String, String>>(ids.size(), 1);
 
     for (String id : ids) {
       data.put(id, allData.get(id));
