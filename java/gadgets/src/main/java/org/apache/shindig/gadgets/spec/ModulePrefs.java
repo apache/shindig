@@ -428,11 +428,11 @@ public class ModulePrefs {
     directoryTitle = XmlUtil.getAttribute(element, "directory_title", "");
     screenshot = XmlUtil.getUriAttribute(element, "screenshot", emptyUri);
     thumbnail = XmlUtil.getUriAttribute(element, "thumbnail", emptyUri);
-    showStats = XmlUtil.getAttribute(element, "show_stats", "") == "true";
-    showInDirectory = XmlUtil.getAttribute(element, "show_in_directory", "") == "true";
-    singleton = XmlUtil.getAttribute(element, "singleton", "") == "true";
-    scaling = XmlUtil.getAttribute(element, "scaling", "") == "true";
-    scrolling = XmlUtil.getAttribute(element, "scrolling", "") == "true";
+    showStats = XmlUtil.getBoolAttribute(element, "show_stats");
+    showInDirectory = XmlUtil.getBoolAttribute(element, "show_in_directory");
+    singleton = XmlUtil.getBoolAttribute(element, "singleton");
+    scaling = XmlUtil.getBoolAttribute(element, "scaling");
+    scrolling = XmlUtil.getBoolAttribute(element, "scrolling");
 
     String height = XmlUtil.getAttribute(element, "height");
     if (height == null) {
