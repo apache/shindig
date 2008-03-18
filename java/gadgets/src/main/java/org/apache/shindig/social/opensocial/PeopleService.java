@@ -20,6 +20,7 @@ package org.apache.shindig.social.opensocial;
 import org.json.JSONException;
 import org.apache.shindig.social.opensocial.model.Person;
 import org.apache.shindig.social.opensocial.model.IdSpec;
+import org.apache.shindig.social.opensocial.model.ApiCollection;
 import org.apache.shindig.social.ResponseItem;
 
 import java.util.List;
@@ -35,10 +36,23 @@ public interface PeopleService {
    */
   public List<String> getIds(IdSpec idSpec) throws JSONException;
 
+  public enum SortOrder {
+    topFriends, name
+  }
+
+  public enum FilterType {
+    all, hasApp
+  }
+
   /**
    * Returns a list of people that correspond to the passed in person ids.
    * @param ids The ids of the people to fetch.
+   * @param sortOrder How to sort the people
+   * @param filter How the people should be filtered.
+   * @param first The index of the first person to fetch.
+   * @param max The max number of people to fetch.
    * @return a list of people.
    */
-  public ResponseItem<List<Person>> getPeople(List<String> ids);
+  public ResponseItem<ApiCollection<Person>> getPeople(List<String> ids,
+      SortOrder sortOrder, FilterType filter, int first, int max);
 }

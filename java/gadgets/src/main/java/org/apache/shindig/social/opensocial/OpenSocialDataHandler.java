@@ -17,24 +17,21 @@
  */
 package org.apache.shindig.social.opensocial;
 
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.json.JSONArray;
 import org.apache.shindig.social.samplecontainer.BasicPeopleService;
 import org.apache.shindig.social.samplecontainer.BasicDataService;
 import org.apache.shindig.social.samplecontainer.BasicActivitiesService;
 import org.apache.shindig.social.opensocial.PeopleService;
 import org.apache.shindig.social.opensocial.DataService;
 import org.apache.shindig.social.opensocial.model.IdSpec;
-import org.apache.shindig.social.opensocial.model.OpenSocialDataType;
 import org.apache.shindig.social.opensocial.model.Activity;
 import org.apache.shindig.social.*;
 
-import java.io.IOException;
-import java.io.PrintWriter;
 import java.util.logging.Logger;
+import java.util.logging.Level;
 import java.util.List;
-import java.util.ArrayList;
 
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -53,6 +50,12 @@ public class OpenSocialDataHandler implements GadgetDataHandler {
   private static DataService dataHandler = new BasicDataService();
   private static ActivitiesService activitiesHandler
       = new BasicActivitiesService();
+
+  public enum OpenSocialDataType {
+    FETCH_PEOPLE,
+    FETCH_PERSON_APP_DATA, UPDATE_PERSON_APP_DATA,
+    FETCH_ACTIVITIES, CREATE_ACTIVITY
+  }
 
   public boolean shouldHandle(String requestType) {
     try {
@@ -77,7 +80,18 @@ public class OpenSocialDataHandler implements GadgetDataHandler {
 
       switch (type) {
         case FETCH_PEOPLE :
-          response = peopleHandler.getPeople(peopleIds);
+          JSONArray profileDetail = request.getParams().getJSONArray("profileDetail");
+          PeopleService.SortOrder sortOrder = PeopleService.SortOrder.valueOf(
+              request.getParams().getString("sortOrder"));
+          PeopleService.FilterType filter = PeopleService.FilterType.valueOf(
+              request.getParams().getString("filter"));
+          int first = request.getParams().getInt("first");
+          int max = request.getParams().getInt("max");
+
+          // TODO: Should we put this in the requestitem and pass the whole
+          // thing along?
+          response = peopleHandler.getPeople(peopleIds, sortOrder, filter,
+              first, max);
           break;
 
         case FETCH_PERSON_APP_DATA :
@@ -107,12 +121,15 @@ public class OpenSocialDataHandler implements GadgetDataHandler {
           Activity activity = new Activity("5", personId);
           activity.setTitle("Temporary title - we don't read json right now");
           response = activitiesHandler.createActivity(personId, activity);
+          break;
       }
 
     } catch (JSONException e) {
+      logger.log(Level.INFO, e.getMessage());
       response = new ResponseItem<Object>(ResponseError.BAD_REQUEST,
           "The json request had a bad format", new JSONObject());
     } catch (IllegalArgumentException e) {
+      logger.log(Level.INFO, e.getMessage());
       response = new ResponseItem<Object>(ResponseError.BAD_REQUEST,
           "The json request had a bad idSpec", new JSONObject());
     }

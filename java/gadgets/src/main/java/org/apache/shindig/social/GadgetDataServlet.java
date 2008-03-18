@@ -20,14 +20,8 @@ package org.apache.shindig.social;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.apache.shindig.social.samplecontainer.BasicPeopleService;
-import org.apache.shindig.social.samplecontainer.BasicDataService;
 import org.apache.shindig.social.samplecontainer.StateFileDataHandler;
-import org.apache.shindig.social.opensocial.PeopleService;
-import org.apache.shindig.social.opensocial.DataService;
 import org.apache.shindig.social.opensocial.OpenSocialDataHandler;
-import org.apache.shindig.social.opensocial.model.IdSpec;
-import org.apache.shindig.social.opensocial.model.OpenSocialDataType;
 
 import java.io.IOException;
 import java.io.PrintWriter;

@@ -26,7 +26,7 @@ JsonContainer = function(baseUrl, domain, supportedFieldsArray) {
 
   var supportedFieldsMap = {};
   for (var objectType in supportedFieldsArray) {
-    if (supportedFieldsArray.hasOwnProperty(objectType)){
+    if (supportedFieldsArray.hasOwnProperty(objectType)) {
       supportedFieldsMap[objectType] = {};
       for (var i = 0; i < supportedFieldsArray[objectType].length; i++) {
         var supportedField = supportedFieldsArray[objectType][i];
@@ -112,20 +112,28 @@ JsonContainer.prototype.newFetchPersonRequest = function(id, opt_params) {
   var me = this;
   return new RequestItem(peopleRequest.jsonParams,
       function(rawJson) {
-        return me.createPersonFromJson(rawJson[0]);
+        return me.createPersonFromJson(rawJson['items'][0]);
       });
 };
 
 JsonContainer.prototype.newFetchPeopleRequest = function(idSpec, opt_params) {
   var me = this;
   return new RequestItem(
-      {'type' : 'FETCH_PEOPLE', 'idSpec' : idSpec, 'params': opt_params},
+      {'type' : 'FETCH_PEOPLE',
+        'idSpec' : idSpec,
+        'profileDetail': opt_params['profileDetail'],
+        'sortOrder': opt_params['sortOrder'] || 'topFriends',
+        'filter': opt_params['filter'] || 'all',
+        'first': opt_params['first'] || 0,
+        'max': opt_params['max'] || 20},
       function(rawJson) {
+        var jsonPeople = rawJson['items'];
         var people = [];
-        for (var i = 0; i < rawJson.length; i++) {
-          people.push(me.createPersonFromJson(rawJson[i]));
+        for (var i = 0; i < jsonPeople.length; i++) {
+          people.push(me.createPersonFromJson(jsonPeople[i]));
         }
-        return new opensocial.Collection(people);
+        return new opensocial.Collection(people, rawJson['offset'],
+            rawJson['totalSize']);
       });
 };
 
@@ -176,6 +184,6 @@ RequestItem = function(jsonParams, processData) {
   this.processResponse = function(originalDataRequest, rawJson, error,
       errorMessage) {
     return new opensocial.ResponseItem(originalDataRequest,
-        this.processData(rawJson), error, errorMessage);
+        error ? null : this.processData(rawJson), error, errorMessage);
   }
 };
