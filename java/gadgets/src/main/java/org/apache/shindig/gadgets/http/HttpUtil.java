@@ -38,19 +38,24 @@ public class HttpUtil {
   private static final int DEFAULT_TTL = 60 * 60 * 24 * 365;
 
   /**
+   * Sets default caching Headers (Expires, Cache-Control, Last-Modified)
+   *
+   * @param response The HTTP response
+   */
+  public static void setCachingHeaders(HttpServletResponse response) {
+    setCachingHeaders(response, DEFAULT_TTL);
+  }
+
+  /**
    * Sets HTTP headers that instruct the browser to cache indefinitely.
    * Implementations should take care to use cache-busting techniques on the
    * url.
    *
    * @param response The HTTP response
-   * @param ttl The time to cache for, in seconds. If 0, DEFAULT_TTL will
-   *   be used.
+   * @param ttl The time to cache for, in seconds. If 0, then insure that
+   * this object is not cached.
    */
   public static void setCachingHeaders(HttpServletResponse response, int ttl) {
-    if (ttl == 0) {
-      ttl = DEFAULT_TTL;
-    }
-
     response.setDateHeader("Expires",
         System.currentTimeMillis() + (1000L * ttl));
 
