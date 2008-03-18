@@ -124,18 +124,105 @@ public class ModulePrefs {
     return directoryTitle;
   }
 
-  /*
-   * The following ModulePrefs attributes are skipped:
+  /**
+   * ModulePrefs@author_affiliation
    *
-   * author_affiliation
-   * author_location
-   * author_photo
-   * author_aboutme
-   * author_quote
-   * author_link
-   * show_stats
-   * show_in_directory
+   * Message Bundles
    */
+  private String authorAffiliation;
+  public String getAuthorAffiliation() {
+    return authorAffiliation;
+  }
+
+  /**
+   * ModulePrefs@author_location
+   *
+   * Message Bundles
+   */
+  private String authorLocation;
+  public String getAuthorLocation() {
+    return authorLocation;
+  }
+
+  /**
+   * ModulePrefs@author_photo
+   *
+   * Message Bundles
+   */
+  private String authorPhoto;
+  public String getAuthorPhoto() {
+    return authorPhoto;
+  }
+
+  /**
+   * ModulePrefs@author_aboutme
+   *
+   * Message Bundles
+   */
+  private String authorAboutme;
+  public String getAuthorAboutme() {
+    return authorAboutme;
+  }
+
+  /**
+   * ModulePrefs@author_quote
+   *
+   * Message Bundles
+   */
+  private String authorQuote;
+  public String getAuthorQuote() {
+    return authorQuote;
+  }
+
+  /**
+   * ModulePrefs@author_link
+   *
+   * Message Bundles
+   */
+  private String authorLink;
+  public String getAuthorLink() {
+    return authorLink;
+  }
+
+  /**
+   * ModulePrefs@show_stats
+   */
+  private boolean showStats;
+  public boolean getShowStats() {
+    return showStats;
+  }
+
+  /**
+   * ModulePrefs@show_in_directory
+   */
+  private boolean showInDirectory;
+  public boolean getShowInDirectory() {
+    return showInDirectory;
+  }
+
+  /**
+   * ModulePrefs@singleton
+   */
+  private boolean singleton;
+  public boolean getSingleton() {
+    return singleton;
+  }
+
+  /**
+   * ModulePrefs@scaling
+   */
+  private boolean scaling;
+  public boolean getScaling() {
+    return scaling;
+  }
+
+  /**
+   * ModulePrefs@scrolling
+   */
+  private boolean scrolling;
+  public boolean getScrolling() {
+    return scrolling;
+  }
 
   /**
    * ModuleSpec@width
@@ -162,15 +249,6 @@ public class ModulePrefs {
   public List<String> getCategories() {
     return categories;
   }
-
-  /**
-   * Skipped:
-   *
-   * singleton
-   * render_inline
-   * scaling
-   * scrolling
-   */
 
   /**
    * ModuleSpec.Require
@@ -291,6 +369,12 @@ public class ModulePrefs {
        .append(" title=\"").append(title).append("\"")
        .append(" author=\"").append(author).append("\"")
        .append(" author_email=\"").append(authorEmail).append("\"")
+       .append(" author_affiliation=\"").append(authorAffiliation).append("\"")
+       .append(" author_location=\"").append(authorLocation).append("\"")
+       .append(" author_photo=\"").append(authorPhoto).append("\"")
+       .append(" author_aboutme=\"").append(authorAboutme).append("\"")
+       .append(" author_quote=\"").append(authorQuote).append("\"")
+       .append(" author_link=\"").append(authorLink).append("\"")
        .append(" description=\"").append(description).append("\"")
        .append(" directory_title=\"").append(directoryTitle).append("\"")
        .append(" screenshot=\"").append(screenshot).append("\"")
@@ -299,6 +383,11 @@ public class ModulePrefs {
        .append(" width=\"").append(width).append("\"")
        .append(" category1=\"").append(categories.get(0)).append("\"")
        .append(" category2=\"").append(categories.get(1)).append("\"")
+       .append(" show_stats=\"").append(showStats).append("\"")
+       .append(" show_in_directory=\"").append(showInDirectory).append("\"")
+       .append(" singleton=\"").append(singleton).append("\"")
+       .append(" scaling=\"").append(scaling).append("\"")
+       .append(" scrolling=\"").append(scrolling).append("\"")
        .append(">\n");
     for (URI preload : preloads) {
       buf.append("<Preload href=\"").append(preload).append("\"/>\n");
@@ -329,10 +418,21 @@ public class ModulePrefs {
     titleUrl = XmlUtil.getUriAttribute(element, "title_url", emptyUri);
     author = XmlUtil.getAttribute(element, "author", "");
     authorEmail = XmlUtil.getAttribute(element, "author_email", "");
+    authorAffiliation = XmlUtil.getAttribute(element, "author_affiliation", "");
+    authorLocation = XmlUtil.getAttribute(element, "author_location", "");
+    authorPhoto = XmlUtil.getAttribute(element, "author_photo", "");
+    authorAboutme = XmlUtil.getAttribute(element, "author_aboutme", "");
+    authorQuote = XmlUtil.getAttribute(element, "author_quote", "");
+    authorLink = XmlUtil.getAttribute(element, "author_link", "");
     description = XmlUtil.getAttribute(element, "description", "");
     directoryTitle = XmlUtil.getAttribute(element, "directory_title", "");
     screenshot = XmlUtil.getUriAttribute(element, "screenshot", emptyUri);
     thumbnail = XmlUtil.getUriAttribute(element, "thumbnail", emptyUri);
+    showStats = XmlUtil.getAttribute(element, "show_stats", "") == "true";
+    showInDirectory = XmlUtil.getAttribute(element, "show_in_directory", "") == "true";
+    singleton = XmlUtil.getAttribute(element, "singleton", "") == "true";
+    scaling = XmlUtil.getAttribute(element, "scaling", "") == "true";
+    scrolling = XmlUtil.getAttribute(element, "scrolling", "") == "true";
 
     String height = XmlUtil.getAttribute(element, "height");
     if (height == null) {
