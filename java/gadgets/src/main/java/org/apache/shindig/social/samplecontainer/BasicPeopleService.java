@@ -21,22 +21,49 @@ import org.apache.shindig.social.ResponseItem;
 import org.apache.shindig.social.opensocial.PeopleService;
 import org.apache.shindig.social.opensocial.model.IdSpec;
 import org.apache.shindig.social.opensocial.model.Person;
+import org.apache.shindig.social.opensocial.model.ApiCollection;
 import org.json.JSONException;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Collections;
+import java.util.Comparator;
 
 public class BasicPeopleService implements PeopleService {
+  private static final Comparator<Person> NAME_COMPARATOR
+      = new Comparator<Person>() {
+    public int compare(Person person, Person person1) {
+      String name = person.getName().getUnstructured();
+      String name1 = person1.getName().getUnstructured();
+      return name.compareTo(name1);
+    }
+  };
 
-  public ResponseItem<List<Person>> getPeople(List<String> ids) {
+  public ResponseItem<ApiCollection<Person>> getPeople(List<String> ids,
+      SortOrder sortOrder, FilterType filter, int first, int max) {
     Map<String, Person> allPeople = XmlStateFileFetcher.get().getAllPeople();
 
     List<Person> people = new ArrayList<Person>();
     for (String id : ids) {
       people.add(allPeople.get(id));
     }
-    return new ResponseItem<List<Person>>(people);
+
+    // We can pretend that by default the people are in top friends order
+    if (sortOrder.equals(SortOrder.name)) {
+      Collections.sort(people, NAME_COMPARATOR);
+    }
+
+    // TODO: The samplecontainer doesn't really have the concept of HAS_APP so
+    // we can't support any filters yet. We should fix this.
+
+    int totalSize = people.size();
+    int last = first + max;
+    people = people.subList(first, Math.min(last, totalSize));
+
+    ApiCollection<Person> collection = new ApiCollection<Person>(people, first,
+        totalSize);
+    return new ResponseItem<ApiCollection<Person>>(collection);
   }
 
   public List<String> getIds(IdSpec idSpec) throws JSONException {
