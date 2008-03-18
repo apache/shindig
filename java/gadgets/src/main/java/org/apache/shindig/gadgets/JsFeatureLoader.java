@@ -26,12 +26,7 @@ import org.w3c.dom.NodeList;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.logging.Logger;
 
 /**
@@ -303,7 +298,7 @@ class ParsedFeature {
   final List<String> deps;
 
   public ParsedFeature() {
-    libraries = new HashMap<RenderingContext, Map<String, List<JsLibrary>>>();
+    libraries = new EnumMap<RenderingContext, Map<String, List<JsLibrary>>>(RenderingContext.class);
     deps = new LinkedList<String>();
   }
 

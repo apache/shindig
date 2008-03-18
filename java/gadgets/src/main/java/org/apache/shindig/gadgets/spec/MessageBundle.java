@@ -68,9 +68,10 @@ public class MessageBundle {
       throw new SpecParserException(e);
     }
 
-    Map<String, String> messages = new HashMap<String, String>();
 
     NodeList nodes = doc.getElementsByTagName("msg");
+    Map<String, String> messages = new HashMap<String, String>(nodes.getLength(), 1);
+
     for (int i = 0, j = nodes.getLength(); i < j; ++i) {
       Element msg = (Element)nodes.item(i);
       String name = XmlUtil.getAttribute(msg, "name");

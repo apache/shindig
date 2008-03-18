@@ -121,11 +121,10 @@ public class BlobCrypter {
    */
   private byte[] serializeAndTimestamp(Map<String, String> in)
   throws UnsupportedEncodingException {
-    StringBuffer sb = new StringBuffer();
-    Iterator<Map.Entry<String,String>> vals = in.entrySet().iterator();
+    StringBuilder sb = new StringBuilder();
 
-    while (vals.hasNext()) {
-      Map.Entry<String, String> val = vals.next();
+    for (Map.Entry<String, String> stringStringEntry : in.entrySet()) {
+      Map.Entry<String, String> val = stringStringEntry;
       sb.append(URLEncoder.encode(val.getKey(), UTF8));
       sb.append("=");
       sb.append(URLEncoder.encode(val.getValue(), UTF8));

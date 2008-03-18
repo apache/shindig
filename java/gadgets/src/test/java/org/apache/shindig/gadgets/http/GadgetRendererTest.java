@@ -31,6 +31,7 @@ import java.net.URI;
 import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.Arrays;
 
 public class GadgetRendererTest extends GadgetTestFixture {
 
@@ -89,9 +90,7 @@ public class GadgetRendererTest extends GadgetTestFixture {
   public void testForcedLibsIncluded() throws Exception {
     String content = parseBasicGadget();
     Set<String> libs = new HashSet<String>();
-    for (String lib : LIBS.split(":")) {
-      libs.add(lib);
-    }
+    libs.addAll(Arrays.asList(LIBS.split(":")));
     String libStr = state.getJsUrl(libs, null);
     assertTrue(-1 != content.indexOf("<script src=\"" + libStr + "\">"));
   }
