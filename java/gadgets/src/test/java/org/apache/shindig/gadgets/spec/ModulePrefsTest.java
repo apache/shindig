@@ -41,7 +41,7 @@ public class ModulePrefsTest extends TestCase {
                  " directory_title=\"directory_title\"" +
                  " width=\"1\"" +
                  " height=\"2\"" +
-                 " category1=\"category1\"" +
+                 " category=\"category\"" +
                  " category2=\"category2\">" +
                  "  <Require feature=\"require\"/>" +
                  "  <Optional feature=\"optional\"/>" +
@@ -60,7 +60,7 @@ public class ModulePrefsTest extends TestCase {
     assertEquals("directory_title", prefs.getDirectoryTitle());
     assertEquals(1, prefs.getWidth());
     assertEquals(2, prefs.getHeight());
-    assertEquals("category1", prefs.getCategories().get(0));
+    assertEquals("category", prefs.getCategories().get(0));
     assertEquals("category2", prefs.getCategories().get(1));
     assertEquals(true, prefs.getFeatures().get("require").getRequired());
     assertEquals(false, prefs.getFeatures().get("optional").getRequired());
