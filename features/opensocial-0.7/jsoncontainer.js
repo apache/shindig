@@ -38,16 +38,7 @@ JsonContainer = function(baseUrl, domain, supportedFieldsArray) {
   this.environment_ = new opensocial.Environment(domain, supportedFieldsMap);
   this.baseUrl_ = baseUrl;
 
-  // TODO: Need to fix this for inlined gadgets as there is no URL.
-  var hash = document.location.hash || '#';
-  var hashData = hash.substring(1).split('&');
-  for (var i = 0; i < hashData.length; i++) {
-    var parts = hashData[i].split('=');
-    if (parts[0] == 'st') {
-      this.securityToken_ = parts[1];
-      break;
-    }
-  }
+  this.securityToken_ = gadgets.util.getUrlParameters().st;
 };
 JsonContainer.inherits(opensocial.Container);
 
