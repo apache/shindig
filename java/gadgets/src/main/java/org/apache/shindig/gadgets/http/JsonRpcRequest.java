@@ -112,8 +112,21 @@ public class JsonRpcRequest {
                   .put("screenshot", prefs.getScreenshot().toString())
                   .put("author", prefs.getAuthor())
                   .put("authorEmail", prefs.getAuthorEmail())
+                  .put("authorAffiliation", prefs.getAuthorAffiliation())
+                  .put("authorLocation", prefs.getAuthorLocation())
+                  .put("authorPhoto", prefs.getAuthorPhoto())
+                  .put("authorAboutme", prefs.getAuthorAboutme())
+                  .put("authorQuote", prefs.getAuthorQuote())
+                  .put("authorLink", prefs.getAuthorLink())
                   .put("categories", prefs.getCategories())
-                  .put("screenshot", prefs.getScreenshot().toString());
+                  .put("screenshot", prefs.getScreenshot().toString())
+                  .put("height", prefs.getHeight())
+                  .put("width", prefs.getWidth())
+                  .put("showStats", prefs.getShowStats())
+                  .put("showInDirectory", prefs.getShowInDirectory())
+                  .put("singleton", prefs.getSingleton())
+                  .put("scaling", prefs.getScaling())
+                  .put("scrolling", prefs.getScrolling());
         out.append("gadgets", gadgetJson);
       } catch (InterruptedException e) {
         throw new RpcException("Incomplete processing", e);
