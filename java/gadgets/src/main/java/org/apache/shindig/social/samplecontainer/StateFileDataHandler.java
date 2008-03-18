@@ -59,7 +59,7 @@ public class StateFileDataHandler implements GadgetDataHandler {
       case DUMP_STATE:
         Map<String, Object> state = new HashMap<String, Object>();
         state.put("people", fetcher.getAllPeople());
-        state.put("idMap", fetcher.getIdMap());
+        state.put("friendIds", fetcher.getFriendIds());
         state.put("data", fetcher.getAppData());
         state.put("activities", fetcher.getActivities());
         response = new ResponseItem<Map<String, Object>>(state);

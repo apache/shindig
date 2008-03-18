@@ -1,29 +1,32 @@
 package org.apache.shindig.social.samplecontainer;
 
-import org.w3c.dom.*;
-import org.apache.shindig.gadgets.RemoteContentFetcher;
 import org.apache.shindig.gadgets.BasicRemoteContentFetcher;
 import org.apache.shindig.gadgets.RemoteContent;
+import org.apache.shindig.gadgets.RemoteContentFetcher;
 import org.apache.shindig.gadgets.RemoteContentRequest;
-import org.apache.shindig.social.opensocial.model.IdSpec;
-import org.apache.shindig.social.opensocial.model.Person;
 import org.apache.shindig.social.opensocial.model.Activity;
-import org.apache.shindig.social.opensocial.model.Phone;
-import org.apache.shindig.social.opensocial.model.Name;
 import org.apache.shindig.social.opensocial.model.MediaItem;
+import org.apache.shindig.social.opensocial.model.Name;
+import org.apache.shindig.social.opensocial.model.Person;
+import org.apache.shindig.social.opensocial.model.Phone;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.NamedNodeMap;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
+import java.io.IOException;
+import java.io.StringReader;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.io.StringReader;
-import java.io.IOException;
-import java.util.Map;
-import java.util.List;
-import java.util.HashMap;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * @author Cassandra Doll <doll@google.com>
@@ -64,7 +67,7 @@ public class XmlStateFileFetcher {
   // TODO: This obviously won't work on multiple servers
   // If we care then we should do something about it
   private Map<String, Map<String, String>> allData;
-  private Map<IdSpec.Type, List<String>> idMap;
+  private Map<String, List<String>> friendIdMap;
   private Map<String, Person> allPeople;
   private Map<String, List<Activity>> allActivities;
 
@@ -81,7 +84,7 @@ public class XmlStateFileFetcher {
     this.stateFile = stateFile;
     document = null;
     allData = null;
-    idMap = null;
+    friendIdMap = null;
     allPeople = null;
     allActivities = null;
   }
@@ -175,11 +178,11 @@ public class XmlStateFileFetcher {
     personData.put(key, value);
   }
 
-  public Map<IdSpec.Type, List<String>> getIdMap() {
-    if (idMap == null) {
+  public Map<String, List<String>> getFriendIds() {
+    if (friendIdMap == null) {
       setupPeopleData();
     }
-    return idMap;
+    return friendIdMap;
   }
 
   public Map<String, Person> getAllPeople() {
@@ -192,44 +195,25 @@ public class XmlStateFileFetcher {
   private void setupPeopleData() {
     Element root = fetchStateDocument().getDocumentElement();
 
-    idMap = new HashMap<IdSpec.Type, List<String>>();
     allPeople = new HashMap<String, Person>();
-
-    // TODO: Eventually the viewer and owner shouldn't be hardcoded. You should
-    // be able to visit other allPeople's "profile" pages in the sample container
-    setupPeopleInXmlTag(root, "viewer", IdSpec.Type.VIEWER);
-    setupPeopleInXmlTag(root, "owner", IdSpec.Type.OWNER);
-    setupPeopleInXmlTag(root, "viewerFriends", IdSpec.Type.VIEWER_FRIENDS);
-    setupPeopleInXmlTag(root, "ownerFriends", IdSpec.Type.OWNER_FRIENDS);
-
-    // Handle empty people
-    if (idMap.get(IdSpec.Type.OWNER).isEmpty()) {
-      idMap.put(IdSpec.Type.OWNER, idMap.get(IdSpec.Type.VIEWER));
-    }
-
-    if (idMap.get(IdSpec.Type.OWNER_FRIENDS).isEmpty()) {
-      idMap.put(IdSpec.Type.OWNER_FRIENDS,
-          idMap.get(IdSpec.Type.VIEWER_FRIENDS));
-    }
+    friendIdMap = new HashMap<String, List<String>>();
+    setupPeopleInXmlTag(root, "people");
   }
 
   // Adds all people in the xml tag to the allPeople map.
-  // Also puts ids into the idMap under the idType key
-  private void setupPeopleInXmlTag(Element root, String tagName,
-      IdSpec.Type idType) {
+  // Also puts friends ids into the friendIdMap
+  private void setupPeopleInXmlTag(Element root, String tagName) {
     // TODO: Use the opensource Collections library
-    List<String> ids = new ArrayList<String>();
-
     NodeList elements = root.getElementsByTagName(tagName);
     if (elements == null || elements.item(0) == null) {
-      idMap.put(idType, ids);
       return;
     }
 
     NodeList personNodes = elements.item(0).getChildNodes();
 
     for (int i = 0; i < personNodes.getLength(); i++) {
-      NamedNodeMap attributes = personNodes.item(i).getAttributes();
+      Node personNode = personNodes.item(i);
+      NamedNodeMap attributes = personNode.getAttributes();
       if (attributes == null) {
         continue;
       }
@@ -247,10 +231,20 @@ public class XmlStateFileFetcher {
       }
 
       allPeople.put(id, person);
-      ids.add(id);
+      friendIdMap.put(id, getFriends(personNode));
     }
+  }
 
-    idMap.put(idType, ids);
+  private List<String> getFriends(Node personNode) {
+    List<String> friends = new ArrayList<String>();
+    NodeList friendNodes = personNode.getChildNodes();
+    for (int j = 0; j < friendNodes.getLength(); j++) {
+      String friendId = friendNodes.item(j).getTextContent();
+      if (friendId != null && !friendId.trim().isEmpty()) {
+        friends.add(friendId.trim());
+      }
+    }
+    return friends;
   }
 
   public Map<String, List<Activity>> getActivities() {

@@ -1,12 +1,16 @@
 <container>
-  <viewer>
-    <person id="john.doe" name="John Doe"></person>
-  </viewer>
-
-  <viewerFriends>
-     <person id="jane.doe" name="Jane Doe" phone="867-5309"></person>
-     <person id="george.doe" name="George Doe"></person>
-  </viewerFriends>
+  <people>
+    <person id="john.doe" name="John Doe">
+      <friend>jane.doe</friend>
+      <friend>george.doe</friend>
+    </person>
+    <person id="jane.doe" name="Jane Doe" phone="867-5309">
+      <friend>john.doe</friend>
+    </person>
+    <person id="george.doe" name="George Doe">
+      <friend>john.doe</friend>
+    </person>
+  </people>
 
   <personAppData>
     <data person="george.doe" field="count">2</data>

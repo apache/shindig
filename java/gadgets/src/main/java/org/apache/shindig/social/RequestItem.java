@@ -18,6 +18,7 @@
 package org.apache.shindig.social;
 
 import org.json.JSONObject;
+import org.apache.shindig.gadgets.GadgetToken;
 
 /**
  * Represents the request items that come from the json. Each RequestItem should
@@ -26,10 +27,12 @@ import org.json.JSONObject;
 public class RequestItem extends AbstractGadgetData {
   private String type;
   private JSONObject params;
+  private GadgetToken token;
 
-  public RequestItem(String type, JSONObject params) {
+  public RequestItem(String type, JSONObject params, GadgetToken token) {
     this.type = type;
     this.params = params;
+    this.token = token;
   }
 
   public String getType() {
@@ -46,5 +49,13 @@ public class RequestItem extends AbstractGadgetData {
 
   public void setParams(JSONObject params) {
     this.params = params;
+  }
+
+  public GadgetToken getToken() {
+    return token;
+  }
+
+  public void setToken(GadgetToken token) {
+    this.token = token;
   }
 }

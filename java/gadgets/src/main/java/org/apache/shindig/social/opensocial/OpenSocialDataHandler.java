@@ -27,7 +27,10 @@ import org.apache.shindig.social.opensocial.PeopleService;
 import org.apache.shindig.social.opensocial.DataService;
 import org.apache.shindig.social.opensocial.model.IdSpec;
 import org.apache.shindig.social.opensocial.model.Activity;
-import org.apache.shindig.social.*;
+import org.apache.shindig.social.ResponseError;
+import org.apache.shindig.social.RequestItem;
+import org.apache.shindig.social.GadgetDataHandler;
+import org.apache.shindig.social.ResponseItem;
 
 import java.util.logging.Logger;
 import java.util.logging.Level;
@@ -75,23 +78,25 @@ public class OpenSocialDataHandler implements GadgetDataHandler {
         new JSONObject());
 
     try {
-      String jsonSpec = request.getParams().getString("idSpec");
-      List<String> peopleIds = peopleHandler.getIds(IdSpec.fromJson(jsonSpec));
+      JSONObject params = request.getParams();
+      String jsonSpec = params.getString("idSpec");
+      List<String> peopleIds = peopleHandler.getIds(IdSpec.fromJson(jsonSpec),
+          request.getToken());
 
       switch (type) {
         case FETCH_PEOPLE :
-          JSONArray profileDetail = request.getParams().getJSONArray("profileDetail");
+          JSONArray profileDetail = params.getJSONArray("profileDetail");
           PeopleService.SortOrder sortOrder = PeopleService.SortOrder.valueOf(
-              request.getParams().getString("sortOrder"));
+              params.getString("sortOrder"));
           PeopleService.FilterType filter = PeopleService.FilterType.valueOf(
-              request.getParams().getString("filter"));
-          int first = request.getParams().getInt("first");
-          int max = request.getParams().getInt("max");
+              params.getString("filter"));
+          int first = params.getInt("first");
+          int max = params.getInt("max");
 
           // TODO: Should we put this in the requestitem and pass the whole
           // thing along?
           response = peopleHandler.getPeople(peopleIds, sortOrder, filter,
-              first, max);
+              first, max, request.getToken());
           break;
 
         case FETCH_PERSON_APP_DATA :
@@ -102,8 +107,8 @@ public class OpenSocialDataHandler implements GadgetDataHandler {
           // We only support updating one person right now
           String id = peopleIds.get(0);
 
-          String key = request.getParams().getString("key");
-          String value = request.getParams().getString("value");
+          String key = params.getString("key");
+          String value = params.getString("value");
 
           response = dataHandler.updatePersonData(id, key, value);
           break;
