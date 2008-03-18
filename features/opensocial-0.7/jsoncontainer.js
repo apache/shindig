@@ -37,6 +37,17 @@ JsonContainer = function(baseUrl, domain, supportedFieldsArray) {
 
   this.environment_ = new opensocial.Environment(domain, supportedFieldsMap);
   this.baseUrl_ = baseUrl;
+
+  // TODO: Need to fix this for inlined gadgets as there is no URL.
+  var hash = document.location.hash || '#';
+  var hashData = hash.substring(1).split('&');
+  for (var i = 0; i < hashData.length; i++) {
+    var parts = hashData[i].split('=');
+    if (parts[0] == 'st') {
+      this.securityToken_ = parts[1];
+      break;
+    }
+  }
 };
 JsonContainer.inherits(opensocial.Container);
 
@@ -103,7 +114,8 @@ JsonContainer.prototype.requestData = function(dataRequest, callback) {
     callback(dataResponse);
   };
 
-  new BatchRequest(this.baseUrl_, jsonText, sendResponse).send();
+  new BatchRequest(this.baseUrl_, jsonText, sendResponse,
+      {'st' : this.securityToken_}).send();
 };
 
 JsonContainer.prototype.newFetchPersonRequest = function(id, opt_params) {
@@ -138,7 +150,6 @@ JsonContainer.prototype.newFetchPeopleRequest = function(idSpec, opt_params) {
 };
 
 JsonContainer.prototype.createPersonFromJson = function(serverJson) {
-  // TODO: isOwner, isViewer
   return new JsonPerson(serverJson);
 }
 

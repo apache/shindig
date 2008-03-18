@@ -56,6 +56,9 @@ var usePermissive = false;
 var doEvil = false;
 var gadget;
 
+var viewerId = "john.doe";
+var ownerId = "john.doe";
+
 function initGadget() {
   // Fetch cookies
   var cookieGadgetUrl = decodeURIComponent(goog.net.cookies.get(gadgetUrlCookie));
@@ -78,6 +81,11 @@ function initGadget() {
   gadget = gadgets.container.createGadget({'specUrl': gadgetUrl});;
   gadget.setServerBase('../../');
 
+  // Viewer and Owner
+  document.getElementById("viewerId").value = viewerId;
+  document.getElementById("ownerId").value = ownerId;
+  gadget.secureToken = generateSecureToken();
+
   gadgets.container.addGadget(gadget);
   gadgets.container.layoutManager.setGadgetChromeIds(['gadget-chrome']);
   gadgets.container.renderGadgets();
@@ -96,6 +104,10 @@ function changeGadgetUrl() {
   reloadStateFile();
   goog.net.cookies.set(stateFileUrlCookie, encodeURIComponent(stateFileUrl));
 
+  viewerId = document.getElementById("viewerId").value;
+  ownerId = document.getElementById("ownerId").value;
+  gadget.secureToken = generateSecureToken();
+
   gadgetUrl = document.getElementById("gadgetUrl").value;
   gadget.specUrl = gadgetUrl;
   goog.net.cookies.set(gadgetUrlCookie, encodeURIComponent(gadgetUrl));
@@ -103,6 +115,10 @@ function changeGadgetUrl() {
   gadgets.container.renderGadgets();
 };
 
+function generateSecureToken() {
+  // TODO: Use a real app id
+  return [ownerId, viewerId, "samplecontainerapp", "shindig"].join(":");
+}
 
 SampleContainerGadget = function(opt_params) {
   gadgets.IfrGadget.call(this, opt_params);
@@ -147,7 +163,8 @@ function sendRequestToServer(jsonRequest, opt_callback) {
     "CONTENT_TYPE" : "JSON",
     "METHOD" : "POST",
     "AUTHORIZATION" : "SIGNED",
-    "POST_DATA" : encodeValues({'request' : jsonRequest})};
+    "POST_DATA" : encodeValues({'request' : jsonRequest,
+      'st' : generateSecureToken()})};
 
   makeRequest(socialDataPath,
       function(data) {
@@ -242,6 +259,11 @@ function encodeValues(fields, opt_noEscaping) {
 
       Using state: <input type="text" size="75" id="stateFileUrl"/>
       <input type="checkbox" id="doEvilCheckbox"/>do evil
+
+      <br/>
+      <br/>
+      Viewer id: <input type="text" size="20" id="viewerId"/>
+      Owner id: <input type="text" size="20" id="ownerId"/>
 
       <br/>
 

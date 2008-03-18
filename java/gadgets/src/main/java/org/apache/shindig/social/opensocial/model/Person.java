@@ -87,6 +87,10 @@ public class Person extends AbstractGadgetData {
   private List<String> tvShows;
   private List<Url> urls;
 
+  // Note: Not in the opensocial js person object directly
+  private boolean isOwner = false;
+  private boolean isViewer = false;
+
   public Person(String id, Name name) {
     this.id = id;
     this.name = name;
@@ -490,5 +494,21 @@ public class Person extends AbstractGadgetData {
 
   public void setUrls(List<Url> urls) {
     this.urls = urls;
+  }
+
+  public boolean getIsOwner() {
+    return isOwner;
+  }
+
+  public void setIsOwner(boolean isOwner) {
+    this.isOwner = isOwner;
+  }
+
+  public boolean getIsViewer() {
+    return isViewer;
+  }
+
+  public void setIsViewer(boolean isViewer) {
+    this.isViewer = isViewer;
   }
 }
