@@ -322,9 +322,9 @@ public class GadgetRenderer {
    * @param query
    */
   private void appendLibsToQuery(Set<String> libs, StringBuilder query) {
-    query.append("&")
+    query.append('&')
          .append(LIBS_PARAM_NAME)
-         .append("=")
+         .append('=')
          .append(state.getJsUrl(libs, context));
   }
 

@@ -123,11 +123,11 @@ public class UserPref {
        .append(required)
        .append("\" datatype=\"")
        .append(dataType.toString().toLowerCase())
-       .append("\"");
+       .append('\"');
     if (enumValues.size() == 0) {
       buf.append("/>");
     } else {
-      buf.append("\n");
+      buf.append('\n');
       for (Map.Entry<String, String> entry : enumValues.entrySet()) {
         buf.append("<EnumValue value=\"")
            .append(entry.getKey())

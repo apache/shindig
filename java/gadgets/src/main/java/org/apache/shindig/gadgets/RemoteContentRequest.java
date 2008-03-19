@@ -248,7 +248,7 @@ public class RemoteContentRequest {
   @Override
   public String toString() {
     StringBuilder buf = new StringBuilder();
-    buf.append(method).append(" ").append(uri.getPath()).append(" HTTP/1.1\r\n")
+    buf.append(method).append(' ').append(uri.getPath()).append(" HTTP/1.1\r\n")
        .append("Host: ").append(uri.getHost())
        .append(uri.getPort() == 80 ? "" : ":" + uri.getPort())
        .append("\r\n");

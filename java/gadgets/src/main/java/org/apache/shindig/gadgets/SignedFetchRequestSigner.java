@@ -184,7 +184,7 @@ public class SignedFetchRequestSigner implements RequestSigner {
       }
       String finalQuery = OAuth.formEncode(newQuery);
       return new URL(resource.getProtocol(), resource.getHost(),
-          resource.getPort(), resource.getPath() + "?" + finalQuery);
+          resource.getPort(), resource.getPath() + '?' + finalQuery);
     } catch (Exception e) {
       throw new GadgetException(GadgetException.Code.INTERNAL_SERVER_ERROR,
           e);

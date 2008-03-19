@@ -46,7 +46,7 @@ public class HashUtil {
     byte[] hash = md.digest(data);
     // Convert to hex. possibly change to base64 in the future for smaller
     // signatures.
-    StringBuilder hexString = new StringBuilder();
+    StringBuilder hexString = new StringBuilder(hash.length * 2 + 2);
     for (byte b : hash) {
       hexString.append(Integer.toHexString(0xFF & b));
     }

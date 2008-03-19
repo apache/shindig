@@ -159,7 +159,7 @@ public class ProxyHandlerTest extends GadgetTestFixture {
     public void appendTo(StringBuffer sb) {
       sb.append("SignedFetchArgumentMatcher(");
       sb.append(expectedUrl);
-      sb.append(")");
+      sb.append(')');
     }
 
     @Override

@@ -130,12 +130,12 @@ public class GadgetSpec {
   public String toString() {
     StringBuilder buf = new StringBuilder();
     buf.append("<Module>\n")
-       .append(modulePrefs).append("\n");
+       .append(modulePrefs).append('\n');
     for (UserPref pref : userPrefs) {
-      buf.append(pref).append("\n");
+      buf.append(pref).append('\n');
     }
     for (Map.Entry<String, View> view : views.entrySet()) {
-      buf.append(view.getValue()).append("\n");
+      buf.append(view.getValue()).append('\n');
     }
     buf.append("</Module>");
     return buf.toString();

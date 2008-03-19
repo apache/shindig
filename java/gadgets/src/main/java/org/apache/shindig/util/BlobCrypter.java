@@ -126,12 +126,12 @@ public class BlobCrypter {
     for (Map.Entry<String, String> stringStringEntry : in.entrySet()) {
       Map.Entry<String, String> val = stringStringEntry;
       sb.append(URLEncoder.encode(val.getKey(), UTF8));
-      sb.append("=");
+      sb.append('=');
       sb.append(URLEncoder.encode(val.getValue(), UTF8));
-      sb.append("&");
+      sb.append('&');
     }
     sb.append(TIMESTAMP_KEY);
-    sb.append("=");
+    sb.append('=');
     sb.append(timeSource.currentTimeMillis()/1000);
     return sb.toString().getBytes(UTF8);
   }
