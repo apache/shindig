@@ -240,7 +240,7 @@ public class XmlStateFileFetcher {
     NodeList friendNodes = personNode.getChildNodes();
     for (int j = 0; j < friendNodes.getLength(); j++) {
       String friendId = friendNodes.item(j).getTextContent();
-      if (friendId != null && !friendId.trim().isEmpty()) {
+      if (friendId != null && friendId.trim().length() != 0) {
         friends.add(friendId.trim());
       }
     }
