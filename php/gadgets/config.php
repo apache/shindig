@@ -16,7 +16,7 @@ $config = array(
 	// Otherwise also checkout the features, config and javascript directories and set
 	// these to their locations
 	'features_path' =>  realpath(dirname(__FILE__)).'/../../features/',
-	'syndicator_config' =>  realpath(dirname(__FILE__)).'/../../config/syndicator.js',
+	'syndicator_path' =>  realpath(dirname(__FILE__)).'/../../config/',
 	'javascript_path' =>  realpath(dirname(__FILE__)).'/../../javascript/',
 
 	// If you want to use the yuicompressor (http://developer.yahoo.com/yui/compressor/) to minify your javascript
