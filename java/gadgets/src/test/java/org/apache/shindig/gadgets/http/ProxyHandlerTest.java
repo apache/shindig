@@ -36,45 +36,45 @@ public class ProxyHandlerTest extends GadgetTestFixture {
 
   private final static String URL_ONE = "http://www.example.com/test.html";
   private final static String DATA_ONE = "hello world";
-      
+
   final ByteArrayOutputStream baos = new ByteArrayOutputStream();
   final PrintWriter writer = new PrintWriter(baos);
-  
+
   private void expectGetAndReturnData(String url, byte[] data) throws Exception {
     RemoteContentRequest req = new RemoteContentRequest(
         "GET", new URI(url), null, null, new RemoteContentRequest.Options());
     RemoteContent resp = new RemoteContent(200, data, null);
     expect(fetcher.fetch(req)).andReturn(resp);
   }
-  
+
   private void expectPostAndReturnData(String url, byte[] body, byte[] data) throws Exception {
     RemoteContentRequest req = new RemoteContentRequest(
         "POST", new URI(url), null, body, new RemoteContentRequest.Options());
     RemoteContent resp = new RemoteContent(200, data, null);
     expect(fetcher.fetch(req)).andReturn(resp);
   }
-  
+
   private void setupPostRequestMock(String url, String body) throws Exception {
     setupGenericRequestMock("POST", url);
     expect(request.getParameter("postData")).andReturn(body).atLeastOnce();
   }
-  
+
   private void setupGetRequestMock(String url) throws Exception {
-    setupGenericRequestMock("GET", url);    
+    setupGenericRequestMock("GET", url);
   }
-  
+
   private void setupGenericRequestMock(String method, String url) throws Exception {
     expect(request.getMethod()).andReturn("POST").atLeastOnce();
     expect(request.getParameter("httpMethod")).andReturn(method).atLeastOnce();
     expect(request.getParameter("url")).andReturn(url).atLeastOnce();
-    expect(response.getWriter()).andReturn(writer).atLeastOnce(); 
+    expect(response.getWriter()).andReturn(writer).atLeastOnce();
   }
-  
+
   private JSONObject readJSONResponse(String body) throws Exception {
-    String json = body.substring("throw 1; < don't be evil' >".length(), body.length());  
+    String json = body.substring("throw 1; < don't be evil' >".length(), body.length());
     return new JSONObject(json);
   }
-  
+
   public void testFetchJson() throws Exception {
     setupGetRequestMock(URL_ONE);
     expectGetAndReturnData(URL_ONE, DATA_ONE.getBytes());
@@ -87,7 +87,7 @@ public class ProxyHandlerTest extends GadgetTestFixture {
     assertEquals(200, info.getInt("rc"));
     assertEquals(DATA_ONE, info.get("body"));
   }
-  
+
   public void testFetchDecodedUrl() throws Exception {
     String origUrl = "http://www.example.com";
     String cleanedUrl = "http://www.example.com/";
@@ -102,7 +102,7 @@ public class ProxyHandlerTest extends GadgetTestFixture {
     assertEquals(200, info.getInt("rc"));
     assertEquals(DATA_ONE, info.get("body"));
   }
-  
+
   public void testEmptyDocument() throws Exception {
     setupGetRequestMock(URL_ONE);
     expectGetAndReturnData(URL_ONE, "".getBytes());
@@ -115,7 +115,7 @@ public class ProxyHandlerTest extends GadgetTestFixture {
     assertEquals(200, info.getInt("rc"));
     assertEquals("", info.get("body"));
   }
-  
+
   public void testPostRequest() throws Exception {
     String body = "abc";
     setupPostRequestMock(URL_ONE, body);
@@ -127,9 +127,9 @@ public class ProxyHandlerTest extends GadgetTestFixture {
     JSONObject json = readJSONResponse(baos.toString());
     JSONObject info = json.getJSONObject(URL_ONE);
     assertEquals(200, info.getInt("rc"));
-    assertEquals(DATA_ONE, info.get("body"));      
+    assertEquals(DATA_ONE, info.get("body"));
   }
-  
+
   public void testSignedGetRequest() throws Exception {
     setupGetRequestMock(URL_ONE);
     expect(request.getParameter("st")).andReturn("fake-token").atLeastOnce();
@@ -141,7 +141,7 @@ public class ProxyHandlerTest extends GadgetTestFixture {
     verify();
     writer.close();
   }
-  
+
   private RemoteContentRequest looksLikeSignedFetch(String url) {
     EasyMock.reportMatcher(new SignedFetchArgumentMatcher(url));
     return null;
@@ -154,15 +154,13 @@ public class ProxyHandlerTest extends GadgetTestFixture {
     public SignedFetchArgumentMatcher(String expectedUrl) {
       this.expectedUrl = expectedUrl;
     }
-    
-    @Override
+
     public void appendTo(StringBuffer sb) {
       sb.append("SignedFetchArgumentMatcher(");
       sb.append(expectedUrl);
       sb.append(')');
     }
 
-    @Override
     public boolean matches(Object arg0) {
       RemoteContentRequest request = (RemoteContentRequest)arg0;
       String url = request.getUri().toASCIIString();
@@ -170,6 +168,6 @@ public class ProxyHandlerTest extends GadgetTestFixture {
           url.contains("opensocial_ownerid") && url.contains("opensocial_viewerid") &&
           url.contains("opensocial_appid") && url.contains("opensocial_appid"));
     }
-    
+
   }
 }
