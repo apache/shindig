@@ -18,8 +18,21 @@
  * 
  */
 
+/**
+ * This class serves files from the shindig_root/javascript directory, it was created
+ * so that the shindig examples and javascript files would work out of the box with
+ * the php version too
+ */
 class FilesServlet extends HttpServlet {
 	
+	/**
+	 * Handles the get file request, if the file exists and is in the correct
+	 * location it's echo'd to the browser (with a basic content type guessing
+	 * based on the file extention, ie .js becomes text/javascript).
+	 * If the file location falls outside of the shindig/javascript root a
+	 * 400 Bad Request is returned, and if the file is inside of the root
+	 * but doesn't exist a 404 error is returned
+	 */
 	public function doGet()
 	{
 		global $config;

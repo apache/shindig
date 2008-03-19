@@ -23,7 +23,6 @@
  * usefull in a multi-server envirionment then the file based caching,
  * (in a single server setup file based caching is actually faster)
  */
-
 class CacheMemcache extends Cache {
 	private $connection = false;
 

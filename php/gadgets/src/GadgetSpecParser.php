@@ -18,12 +18,12 @@
  * 
  */
 
-class SpecParserException extends Exception {
-}
+class SpecParserException extends Exception {}
 
 class GadgetSpecParser {
+
 	//public function parse(GadgetId $id, String $xml)
-	public function parse($xml, $id, $prefs)
+	public function parse($xml, $context)
 	{
 		if (empty($xml)) {
 			throw new SpecParserException("Empty XML document");
@@ -35,28 +35,28 @@ class GadgetSpecParser {
 		if (count($doc->ModulePrefs) != 1) {
 			throw new SpecParserException("Missing or duplicated <ModulePrefs>");
 		}
-		$gadget = new Gadget($id, $prefs);
+		$gadget = new Gadget($context->getGadgetId(), $context);
 		// process ModulePref attributes
-		$this->processModulePrefs($id, $gadget, $doc->ModulePrefs);
+		$this->processModulePrefs($gadget, $doc->ModulePrefs);
 		// process UserPrefs, if any
-		foreach ( $doc->UserPref as $pref ) {
+		foreach ($doc->UserPref as $pref) {
 			$this->processUserPref($gadget, $pref);
 		}
-		foreach ( $doc->Content as $content ) {
+		foreach ($doc->Content as $content) {
 			$this->processContent($gadget, $content);
 		}
 		//FIXME : should we add an else { throw new SpecParserException("Missing <Content> block"); } here ? Java version doesn't but it seems like we should ?
-		foreach ( $doc->ModulePrefs->Require as $feature ) {
+		foreach ($doc->ModulePrefs->Require as $feature) {
 			$this->processFeature($gadget, $feature, true);
 		}
-		foreach ( $doc->ModulePrefs->Optional as $feature ) {
+		foreach ($doc->ModulePrefs->Optional as $feature) {
 			$this->processFeature($gadget, $feature, false);
 		}
 		//TODO java version has a todo here for parsing icons
 		return $gadget;
 	}
-	
-	private function processModulePrefs($id, &$gadget, $ModulePrefs)
+
+	private function processModulePrefs(&$gadget, $ModulePrefs)
 	{
 		$attributes = $ModulePrefs->attributes();
 		if (empty($attributes['title'])) {
@@ -72,12 +72,11 @@ class GadgetSpecParser {
 		$gadget->screenshot = isset($attributes['screenshot']) ? trim($attributes['screenshot']) : '';
 		$gadget->thumbnail = isset($attributes['thumbnail']) ? trim($attributes['thumbnail']) : '';
 		$gadget->titleUrl = isset($attributes['title_url']) ? trim($attributes['title_url']) : '';
-		foreach ( $ModulePrefs->Locale as $locale ) {
+		foreach ($ModulePrefs->Locale as $locale) {
 			$gadget->localeSpecs[] = $this->processLocale($locale);
 		}
-	
 	}
-	
+
 	private function processLocale($locale)
 	{
 		$attributes = $locale->attributes();
@@ -93,7 +92,7 @@ class GadgetSpecParser {
 		$locale->locale = new Locale($languageAttr, $countryAttr);
 		return $locale;
 	}
-	
+
 	private function processUserPref(&$gadget, $pref)
 	{
 		$attributes = $pref->attributes();
@@ -107,7 +106,7 @@ class GadgetSpecParser {
 		$preference->dataType = isset($attributes['datatype']) && in_array(strtoupper($attributes['datatype']), $preference->DataTypes) ? strtoupper($attributes['datatype']) : 'STRING';
 		$preference->defaultValue = isset($attributes['default_value']) ? trim($attributes['default_value']) : '';
 		if (isset($pref->EnumValue)) {
-			foreach ( $pref->EnumValue as $enum ) {
+			foreach ($pref->EnumValue as $enum) {
 				$attr = $enum->attributes();
 				// java based shindig doesn't throw an exception here, but it -is- invalid and should trigger a parse error
 				if (empty($attr['value'])) {
@@ -120,7 +119,7 @@ class GadgetSpecParser {
 		}
 		$gadget->userPrefs[] = $preference;
 	}
-	
+
 	private function processContent(&$gadget, $content)
 	{
 		$attributes = $content->attributes();
@@ -137,15 +136,15 @@ class GadgetSpecParser {
 			$gadget->contentHref = $url;
 		} else {
 			$gadget->contentType = 'HTML';
-			$html = (string)$content; // no trim here since empty lines can have structural meaning, so typecast to string instead
+			$html = (string) $content; // no trim here since empty lines can have structural meaning, so typecast to string instead
 			$view = isset($attributes['view']) ? trim($attributes['view']) : '';
 			$views = explode(',', $view);
-			foreach ( $views as $view ) {
+			foreach ($views as $view) {
 				$gadget->addContent($view, $html);
 			}
 		}
 	}
-	
+
 	private function processFeature(&$gadget, $feature, $required)
 	{
 		$featureSpec = new FeatureSpec();
@@ -155,7 +154,7 @@ class GadgetSpecParser {
 		}
 		$featureSpec->name = trim($attributes['feature']);
 		$featureSpec->optional = ! $required;
-		foreach ( $feature->Param as $param ) {
+		foreach ($feature->Param as $param) {
 			$attr = $param->attributes();
 			if (empty($attr['name'])) {
 				throw new SpecParserException("Missing name attribute in <Param>.");

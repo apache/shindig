@@ -18,8 +18,12 @@
  * 
  */
 
+/**
+ * This event handler deals with the /js/core:caja:etc.js request which content type=url gadgets can use
+ * to retrieve our features javascript code
+ */
 class JsServlet extends HttpServlet {
-
+	
 	public function doGet()
 	{
 		global $config;
