@@ -75,7 +75,7 @@ public class GadgetTestFixture extends EasyMockTestCase {
         if (!first) {
           first = true;
         } else {
-          bs.append(":");
+          bs.append(':');
         }
         bs.append(lib);
       }

@@ -35,7 +35,7 @@ public class ViewTest extends TestCase {
 
     String xml = "<Content" +
                  " type=\"html\"" +
-                 " view=\"" + viewName + "\"" +
+                 " view=\"" + viewName + '\"' +
                  " quirks=\"false\"><![CDATA[" +
                     content +
                  "]]></Content>";

@@ -70,7 +70,7 @@ public class BasicRemoteContentFetcher implements RemoteContentFetcher {
             if (!first) {
               first = true;
             } else {
-              headerList.append(",");
+              headerList.append(',');
             }
             headerList.append(val);
           }

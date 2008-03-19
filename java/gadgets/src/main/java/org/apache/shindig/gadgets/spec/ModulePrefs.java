@@ -366,40 +366,40 @@ public class ModulePrefs {
   public String toString() {
     StringBuilder buf = new StringBuilder();
     buf.append("<ModulePrefs")
-       .append(" title=\"").append(title).append("\"")
-       .append(" author=\"").append(author).append("\"")
-       .append(" author_email=\"").append(authorEmail).append("\"")
-       .append(" author_affiliation=\"").append(authorAffiliation).append("\"")
-       .append(" author_location=\"").append(authorLocation).append("\"")
-       .append(" author_photo=\"").append(authorPhoto).append("\"")
-       .append(" author_aboutme=\"").append(authorAboutme).append("\"")
-       .append(" author_quote=\"").append(authorQuote).append("\"")
-       .append(" author_link=\"").append(authorLink).append("\"")
-       .append(" description=\"").append(description).append("\"")
-       .append(" directory_title=\"").append(directoryTitle).append("\"")
-       .append(" screenshot=\"").append(screenshot).append("\"")
-       .append(" thumbnail=\"").append(thumbnail).append("\"")
-       .append(" height=\"").append(height).append("\"")
-       .append(" width=\"").append(width).append("\"")
-       .append(" category=\"").append(categories.get(0)).append("\"")
-       .append(" category2=\"").append(categories.get(1)).append("\"")
-       .append(" show_stats=\"").append(showStats).append("\"")
-       .append(" show_in_directory=\"").append(showInDirectory).append("\"")
-       .append(" singleton=\"").append(singleton).append("\"")
-       .append(" scaling=\"").append(scaling).append("\"")
-       .append(" scrolling=\"").append(scrolling).append("\"")
+       .append(" title=\"").append(title).append('\"')
+       .append(" author=\"").append(author).append('\"')
+       .append(" author_email=\"").append(authorEmail).append('\"')
+       .append(" author_affiliation=\"").append(authorAffiliation).append('\"')
+       .append(" author_location=\"").append(authorLocation).append('\"')
+       .append(" author_photo=\"").append(authorPhoto).append('\"')
+       .append(" author_aboutme=\"").append(authorAboutme).append('\"')
+       .append(" author_quote=\"").append(authorQuote).append('\"')
+       .append(" author_link=\"").append(authorLink).append('\"')
+       .append(" description=\"").append(description).append('\"')
+       .append(" directory_title=\"").append(directoryTitle).append('\"')
+       .append(" screenshot=\"").append(screenshot).append('\"')
+       .append(" thumbnail=\"").append(thumbnail).append('\"')
+       .append(" height=\"").append(height).append('\"')
+       .append(" width=\"").append(width).append('\"')
+       .append(" category=\"").append(categories.get(0)).append('\"')
+       .append(" category2=\"").append(categories.get(1)).append('\"')
+       .append(" show_stats=\"").append(showStats).append('\"')
+       .append(" show_in_directory=\"").append(showInDirectory).append('\"')
+       .append(" singleton=\"").append(singleton).append('\"')
+       .append(" scaling=\"").append(scaling).append('\"')
+       .append(" scrolling=\"").append(scrolling).append('\"')
        .append(">\n");
     for (URI preload : preloads) {
       buf.append("<Preload href=\"").append(preload).append("\"/>\n");
     }
     for (Feature feature : features.values()) {
-      buf.append(feature).append("\n");
+      buf.append(feature).append('\n');
     }
     for (Icon icon : icons) {
-      buf.append(icon).append("\n");
+      buf.append(icon).append('\n');
     }
     for (LocaleSpec locale : locales.values()) {
-      buf.append(locale).append("\n");
+      buf.append(locale).append('\n');
     }
     buf.append("</ModulePrefs>");
     return buf.toString();

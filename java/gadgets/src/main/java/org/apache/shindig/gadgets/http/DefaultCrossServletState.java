@@ -101,7 +101,7 @@ public class DefaultCrossServletState extends CrossServletState {
         buf.append(iframePath)
            .append("url=")
            .append(URLEncoder.encode(url, "UTF-8"))
-           .append("&");
+           .append('&');
       } else {
         // type = url
         buf.append(url);
@@ -120,7 +120,7 @@ public class DefaultCrossServletState extends CrossServletState {
       for (Map.Entry<String, String> entry : prefs.getPrefs().entrySet()) {
         buf.append("&up_")
            .append(entry.getKey())
-           .append("=")
+           .append('=')
            .append(URLEncoder.encode(entry.getValue(), "UTF-8"));
       }
     } catch (UnsupportedEncodingException e) {
@@ -143,7 +143,7 @@ public class DefaultCrossServletState extends CrossServletState {
       boolean firstDone = false;
       for (String feature : features) {
         if (firstDone) {
-          buf.append(":");
+          buf.append(':');
         } else {
           firstDone = true;
         }
