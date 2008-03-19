@@ -98,7 +98,7 @@ public class GadgetDataServlet extends HttpServlet {
 
   private List<ResponseItem> createResponse(String requestParam, String token)
       throws JSONException, GadgetException {
-    if (token == null || token.trim().isEmpty()) {
+    if (token == null || token.trim().length() == 0) {
       throw new GadgetException(GadgetException.Code.INVALID_GADGET_TOKEN);
     }
     GadgetToken securityToken = servletState.getGadgetSigner().createToken(token);
