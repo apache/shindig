@@ -59,21 +59,31 @@ public class GadgetDataServlet extends HttpServlet {
       = Logger.getLogger("org.apache.shindig.social");
 
   // TODO: get through injection
-  private static List<GadgetDataHandler> handlers
+  private static final List<GadgetDataHandler> handlers
       = new ArrayList<GadgetDataHandler>();
-
-  static {
-    // TODO: Should we just use a map from String type to Handler?
-    handlers.add(new OpenSocialDataHandler());
-    handlers.add(new StateFileDataHandler());
-  }
-
-  private CrossServletState servletState;
 
   @Override
   public void init(ServletConfig config) throws ServletException {
+    super.init(config);
     servletState = CrossServletState.get(config);
+
+    String handlerNames = config.getInitParameter("handlers");
+    if (handlerNames == null) {
+      handlers.add(new OpenSocialDataHandler());
+      handlers.add(new StateFileDataHandler());
+    } else {
+      for (String handlerName : handlerNames.split(",")) {
+        try {
+          GadgetDataHandler handler = (GadgetDataHandler) (Class.forName(handlerName)).newInstance();
+          handlers.add(handler);
+        } catch (Exception ex) {
+          throw new ServletException(ex);
+        }
+      }
+    }
   }
+
+  private CrossServletState servletState;
 
   @Override
   protected void doPost(HttpServletRequest req, HttpServletResponse resp)

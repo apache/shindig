@@ -66,6 +66,13 @@
     <servlet-class>
       org.apache.shindig.social.GadgetDataServlet
     </servlet-class>
+    <init-param>
+<!--
+      Add your custom classes that handle opensocial requests here
+      <param-name>handlers</param-name>
+      <parame-value>com.muysite.OpenSocialDataHandler</param-value>
+-->
+    </init-param> 
   </servlet>
 
   <!-- javascript serving -->
