@@ -20,41 +20,43 @@
 
 include ('src/Gadget.php');
 
-define('DEFAULT_VIEW', 'default');
-
+/**
+ * This class deals with the gadget rendering requests (in default config this
+ * would be /gadgets/ifr?url=<some gadget's url>). It uses the gadget server and
+ * gadget context to render the xml to a valid html file, and outputs it.
+ * 
+ */
 class GadgetRenderingServlet extends HttpServlet {
-	
+
+	/**
+	 * Creates the gadget using the GadgetServer class and calls outputGadget
+	 *
+	 */
 	public function doGet()
 	{
-		global $config;
 		try {
 			if (empty($_GET['url'])) {
 				throw new GadgetException("Missing required parameter: url");
 			}
-			$url = trim($_GET['url']);
-			$moduleId = isset($_GET['mid']) && is_numeric($_GET['mid']) ? intval($_GET['mid']) : 0;
-			$httpFetcher = new $config['remote_content']();
-			$view = ! empty($_GET['view']) ? $_GET['view'] : DEFAULT_VIEW;
-			$gadgetId = new GadgetId($url, $moduleId);
-			$prefs = $this->getPrefsFromRequest();
-			$locale = $this->getLocaleFromRequest();
-			$cache = new $config['data_cache']();
-			// Profiling showed 40% of the processing time was spend in the feature registry
-			// So by caching this and making it a one time initialization, we almost double the performance  
-			if (! ($registry = $cache->get(sha1($config['features_path'])))) {
-				$registry = new GadgetFeatureRegistry($config['features_path']);
-				$cache->set(sha1($config['features_path']), $registry);
-			}
-			// skipping the contentFilters bit, since there's no way to include caja yet
-			// hopefully a rpc service or command line version will be available at some point
+			// GadgetContext builds up all the contextual variables (based on the url or post) 
+			// plus instances all required classes (feature registry, fetcher, blacklist, etc)
+			$context = new GadgetContext('GADGET');
+			// Unfortunatly we can't do caja content filtering here, hoping we'll have a RPC service
+			// or command line caja to use for this at some point 
 			$gadgetServer = new GadgetServer();
-			$gadget = $gadgetServer->processGadget($gadgetId, $prefs, $locale, 'GADGET', $httpFetcher, $registry);
-			$this->outputGadget($gadget, $view);
-		} catch ( Exception $e ) {
+			$gadget = $gadgetServer->processGadget($context);
+			$this->outputGadget($gadget, $context);
+		} catch (Exception $e) {
 			$this->outputError($e);
 		}
 	}
-	
+
+	/**
+	 * If an error occured (Exception) this function echo's the Exception's message
+	 * and if the config['debug'] is true, shows the debug backtrace in a div
+	 *
+	 * @param Exception $e the exception to show
+	 */
 	private function outputError($e)
 	{
 		global $config;
@@ -69,33 +71,50 @@ class GadgetRenderingServlet extends HttpServlet {
 		}
 		echo "</body></html>";
 	}
-	
+
+	/**
+	 * Takes the gadget to output, and depending on its content type calls either outputHtml-
+	 * or outputUrlGadget
+	 *
+	 * @param Gadget $gadget gadget to render
+	 * @param string $view the view to render (only valid with a html content type)
+	 */
 	private function outputGadget($gadget, $view)
 	{
-		switch ( $gadget->getContentType()) {
-			case 'HTML' :
+		switch ($gadget->getContentType()) {
+			case 'HTML':
 				$this->outputHtmlGadget($gadget, $view);
 				break;
-			case 'URL' :
+			case 'URL':
 				$this->outputUrlGadget($gadget);
 				break;
 		}
 	}
-	
-	private function outputHtmlGadget($gadget, $view)
+
+	/**
+	 * Outputs a html content type gadget.
+	 * It creates a html page, with the javascripts from the features inline into the page, plus
+	 * calls to 'gadgets.config.init' with the syndicator configuration (config/syndicator.js) and
+	 * 'gadgets.Prefs.setMessages_' with all the substitutions. For external javascripts it adds
+	 * a <script> tag.
+	 *
+	 * @param Gadget $gadget
+	 * @param GadgetContext $context
+	 */
+	private function outputHtmlGadget($gadget, $context)
 	{
 		global $config;
 		$this->setContentType("text/html; charset=UTF-8");
 		$output = '';
-		$output .= "<html><head>";
+		$output .= "<html>\n<head>\n";
 		// TODO: This is so wrong. (todo copied from java shindig, but i would agree with it :))
-		$output .= "<style type=\"text/css\">body,td,div,span,p{font-family:arial,sans-serif;} a {color:#0000cc;}a:visited {color:#551a8b;}a:active {color:#ff0000;}body{margin: 0px;padding: 0px;background-color:white;}</style>";
-		$output .= "</head><body>";
+		$output .= "<style type=\"text/css\">body,td,div,span,p{font-family:arial,sans-serif;} a {color:#0000cc;}a:visited {color:#551a8b;}a:active {color:#ff0000;}body{margin: 0px;padding: 0px;background-color:white;}</style>\n";
+		$output .= "</head>\n<body>\n";
 		$externJs = "";
 		$inlineJs = "";
 		$externFmt = "<script src=\"%s\"></script>";
-		$forcedLibs = $config['focedJsLibs'];
-		foreach ( $gadget->getJsLibraries() as $library ) {
+		$forcedLibs = $context->getForcedJsLibs();
+		foreach ($gadget->getJsLibraries() as $library) {
 			$type = $library->getType();
 			if ($type == 'URL') {
 				// TODO: This case needs to be handled more gracefully by the js
@@ -112,13 +131,12 @@ class GadgetRenderingServlet extends HttpServlet {
 			}
 		}
 		// Forced libs first.
-		//FIXME this doesnt make any sense to me yet, should make it actually do something :-)
 		if (! empty($forcedLibs)) {
 			$libs = explode(':', $forcedLibs);
 			$output .= sprintf($externFmt, $this->getJsUrl($libs));
 		}
 		if (strlen($inlineJs) > 0) {
-			$output .= "<script><!--\n" . $inlineJs . "\n-->\n</script>";
+			$output .= "<script><!--\n" . $inlineJs . "\n-->\n</script>\n";
 		}
 		if (strlen($externJs) > 0) {
 			$output .= $externJs;
@@ -130,28 +148,35 @@ class GadgetRenderingServlet extends HttpServlet {
 		// remove both /* */ and // style comments, they crash the json_decode function
 		$contents = preg_replace('/\/\/.*$/m', '', preg_replace('@/\\*(?:.|[\\n\\r])*?\\*/@', '', file_get_contents($config['syndicator_config'])));
 		$syndData = json_decode($contents, true);
-		
+		// build the messages to include in the gadgets.Prefs.setMessages_() javascript call
 		$msgs = '';
 		if ($gadget->getMessageBundle()) {
 			$bundle = $gadget->getMessageBundle();
 			$msgs = json_encode($bundle->getMessages());
 		}
-		$output .= "\n<script>\ngadgets.config.init(" . json_encode($syndData['gadgets.features']) . ");\ngadgets.Prefs.setMessages_(".$msgs.");\n</script>\n";
+		// Add the gadget.config.init and gadgets.Prefs.setMessages_ calls to the document
+		$output .= "\n<script>\ngadgets.config.init(" . json_encode($syndData['gadgets.features']) . ");\ngadgets.Prefs.setMessages_(" . $msgs . ");\n</script>\n";
 		$gadgetExceptions = array();
-		$content = $gadget->getContentData($view);
+		$content = $gadget->getContentData($context->getView());
 		if (empty($content)) {
 			// unknown view
-			$gadgetExceptions[] = "View: '" . $view . "' invalid for gadget: " . $gadget->getId()->getKey();
+			$gadgetExceptions[] = "View: '" . $context->getView() . "' invalid for gadget: " . $gadget->getId()->getKey();
 		}
 		if (count($gadgetExceptions)) {
 			throw new GadgetException(print_r($gadgetExceptions, true));
 		}
 		$output .= $content . "\n";
-		$output .= "<script>gadgets.util.runOnLoadHandlers();</script>";
-		$output .= "</body></html>";
+		$output .= "<script>gadgets.util.runOnLoadHandlers();</script>\n";
+		$output .= "</body>\n</html>";
 		echo $output;
 	}
-	
+
+	/**
+	 * Output's a URL content type gadget, it adds libs=<list:of:js:libraries>.js and user preferences
+	 * to the href url, and redirects the browser to it
+	 *
+	 * @param Gadget $gadget
+	 */
 	private function outputUrlGadget($gadget)
 	{
 		global $config;
@@ -165,7 +190,7 @@ class GadgetRenderingServlet extends HttpServlet {
 		$forcedLibs = $config['focedJsLibs'];
 		if ($forcedLibs == null) {
 			$reqs = $gadget->getRequires();
-			foreach ( $reqs as $key => $val ) {
+			foreach ($reqs as $key => $val) {
 				$libs[] = $key;
 			}
 		} else {
@@ -181,7 +206,15 @@ class GadgetRenderingServlet extends HttpServlet {
 		header('Location: ' . $redirURI);
 		die();
 	}
-	
+
+	/**
+	 * Returns the requested libs (from getjsUrl) with the libs_param_name prepended
+	 * ie: in libs=core:caja:etc.js format
+	 *
+	 * @param string $libs the libraries
+	 * @param Gadget $gadget
+	 * @return string the libs=... string to append to the redirection url
+	 */
 	private function appendLibsToQuery($libs, $gadget)
 	{
 		global $config;
@@ -191,12 +224,19 @@ class GadgetRenderingServlet extends HttpServlet {
 		$ret .= $this->getJsUrl($libs, $gadget);
 		return $ret;
 	}
-	
+
+	/**
+	 * Returns the user preferences in &up_<name>=<val> format
+	 *
+	 * @param array $libs array of features this gadget requires
+	 * @param Gadget $gadget
+	 * @return string the up_<name>=<val> string to use in the redirection url
+	 */
 	private function getPrefsQueryString($prefVals)
 	{
 		global $config;
 		$ret = '';
-		foreach ( $prefVals->getPrefs() as $key => $val ) {
+		foreach ($prefVals->getPrefs() as $key => $val) {
 			$ret .= '&';
 			$ret .= $config['userpref_param_prefix'];
 			$ret .= urlencode($key);
@@ -205,16 +245,23 @@ class GadgetRenderingServlet extends HttpServlet {
 		}
 		return $ret;
 	}
-	
+
+	/**
+	 * generates the library string (core:caja:etc.js) including a checksum of all the
+	 * javascript content (?v=<sha1 of js) for cache busting
+	 *
+	 * @param string $libs
+	 * @param Gadget $gadget
+	 * @return string the list of libraries in core:caja:etc.js?v=checksum> format
+	 */
 	private function getJsUrl($libs, $gadget)
 	{
-		global $config;
 		$buf = '';
 		if (! is_array($libs) || ! count($libs)) {
 			$buf = 'core';
 		} else {
 			$firstDone = false;
-			foreach ( $libs as $lib ) {
+			foreach ($libs as $lib) {
 				if ($firstDone) {
 					$buf .= ':';
 				} else {
@@ -226,7 +273,7 @@ class GadgetRenderingServlet extends HttpServlet {
 		// Build a version string from the sha1() checksum of all included javascript
 		// to ensure the client always has the right version
 		$inlineJs = '';
-		foreach ( $gadget->getJsLibraries() as $library ) {
+		foreach ($gadget->getJsLibraries() as $library) {
 			$type = $library->getType();
 			if ($type != 'URL') {
 				$inlineJs .= $library->getContent() . "\n";
@@ -235,44 +282,4 @@ class GadgetRenderingServlet extends HttpServlet {
 		$buf .= ".js?v=" . sha1($inlineJs);
 		return $buf;
 	}
-	
-	// since we don't have a java style request.locale. we create our own
-	// this parses formats like 'en', 'en-us', 'en-us;en-gb' etc
-	//TODO should really verify that this really works with all locale strings and that it doesn't trip over priority weight fields
-	private function getLocaleFromRequest()
-	{
-		$language = 'all';
-		$country = 'all';
-		if (! empty($_SERVER['HTTP_ACCEPT_LANGUAGE'])) {
-			$acceptLanguage = explode(';', $_SERVER['HTTP_ACCEPT_LANGUAGE']);
-			$acceptLanguage = $acceptLanguage[0];
-			if (strpos($acceptLanguage, '-') !== false) {
-				$lang = explode('-', $acceptLanguage);
-				$language = $lang[0];
-				$country = $lang[1];
-				if (strpos($country, ',') !== false) {
-					$country = explode(',', $country);
-					$country = $country[0];
-				}
-			} else {
-				$language = $acceptLanguage;
-			}
-		
-		}
-		return new Locale($language, $country);
-	}
-	
-	private function getPrefsFromRequest()
-	{
-		global $config;
-		$prefs = array();
-		foreach ( $_GET as $key => $val ) {
-			if (substr($key, 0, strlen($config['userpref_param_prefix'])) == $config['userpref_param_prefix']) {
-				$name = substr($key, strlen($config['userpref_param_prefix']));
-				$prefs[$name] = $val;
-			}
-		}
-		return new UserPrefs($prefs);
-	}
-
 }

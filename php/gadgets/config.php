@@ -19,6 +19,11 @@ $config = array(
 	'syndicator_config' =>  realpath(dirname(__FILE__)).'/../../config/syndicator.js',
 	'javascript_path' =>  realpath(dirname(__FILE__)).'/../../javascript/',
 
+	// If you want to use the yuicompressor (http://developer.yahoo.com/yui/compressor/) to minify your javascript
+	// set this to the yuicompressor-?.jar's file path
+	//NOTE: not used yet, will be in the next patch
+	'compressor_path' => realpath(dirname(__FILE__)).'/bin/yuicompressor-2.3.5.jar',
+
 	// Configurable classes to use, this way we provide extensibility for what 
 	// backends the gadget server uses for its logic functionality. 
 	'blacklist_class' => 'BasicGadgetBlacklist',
@@ -46,10 +51,5 @@ $config = array(
 	'cache_root'=> '/tmp/shindig',
 	
 	// In some cases we need to know the site root (for features forinstance)
-	'base_path'=> realpath(dirname(__FILE__)),
-
-	// We combine global and per request state in the config since it saves a good bit of code
-	// and global classes & variables, these are the HttpProcessingOptions
-	'ignoreCache' => (isset($_GET['nocache']) && intval($_GET['nocache']) == 1) || (isset($_GET['bpc']) && intval($_GET['bpc']) == 1),
-	'focedJsLibs' => isset($_GET['libs']) ? trim($_GET['libs']) : null
+	'base_path'=> realpath(dirname(__FILE__))
 );

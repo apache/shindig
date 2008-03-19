@@ -24,65 +24,48 @@
  */
 
 class GadgetServer {
-	private $registry;
-	private $blacklist;
-	private $gc;
-	private $gadgetId;
-	private $userPrefs;
-	private $renderingContext;
-	private $locale;
-	private $httpFetcher;
-	
-	public function processGadget($gadgetId, $userPrefs, $locale, $rctx, $httpFetcher, $registry)
+
+	public function processGadget($context)
 	{
-		global $config;
-		$this->gadgetId = $gadgetId;
-		$this->userPrefs = $userPrefs;
-		$this->renderingContext = $rctx;
-		$this->locale = $locale;
-		$this->registry = $registry;
-		$this->httpFetcher = $httpFetcher;
-		$this->gc = new GadgetContext($httpFetcher, $locale, $rctx, $registry);
-		$this->blacklist = new $config['blacklist_class']();
-		$gadget = $this->specLoad();
-		$this->featuresLoad($gadget);
+		$gadget = $this->specLoad($context);
+		$this->featuresLoad($gadget, $context);
 		return $gadget;
 	}
-	
-	private function specLoad()
+
+	private function specLoad($context)
 	{
-		if ($this->blacklist != null && $this->blacklist->isBlacklisted($this->gadgetId->getURI())) {
+		if ($context->getBlacklist() != null && $context->getBlacklist()->isBlacklisted($context->getUrl())) {
 			throw new GadgetException("Gadget is blacklisted");
 		}
-		$request = new RemoteContentRequest($this->gadgetId->getURI());
-		$xml = $this->httpFetcher->fetch($request);
+		$request = new RemoteContentRequest($context->geturl());
+		$xml = $context->getHttpFetcher()->fetch($request, $context);
 		if ($xml->getHttpCode() != '200') {
 			throw new GadgetException("Failed to retrieve gadget content");
 		}
 		$specParser = new GadgetSpecParser();
-		$gadget = $specParser->parse($xml->getResponseContent(), $this->gadgetId, $this->userPrefs);
+		$gadget = $specParser->parse($xml->getResponseContent(), $context);
 		return $gadget;
 	}
-		
+
 	private function getBundle($localeSpec, $context)
 	{
 		if ($localeSpec != null) {
 			$uri = $localeSpec->getURI();
 			if ($uri != null) {
 				$fetcher = $context->getHttpFetcher();
-				$response = $fetcher->fetch(new RemoteContentRequest($uri));
+				$response = $fetcher->fetch(new RemoteContentRequest($uri), $context);
 				$parser = new MessageBundleParser();
 				$bundle = $parser->parse($response->getResponseContent());
-				return $bundle;				
+				return $bundle;
 			}
 		}
 		return null;
 	}
-	
+
 	private function localeSpec($gadget, $locale)
 	{
 		$localeSpecs = $gadget->getLocaleSpecs();
-		foreach ( $localeSpecs as $locSpec ) {
+		foreach ($localeSpecs as $locSpec) {
 			//fix me
 			if ($locSpec->getLocale()->equals($locale)) {
 				return $locSpec;
@@ -90,10 +73,10 @@ class GadgetServer {
 		}
 		return null;
 	}
-	
-	private function getLocaleSpec($gadget)
+
+	private function getLocaleSpec($gadget, $context)
 	{
-		$locale = $this->gc->getLocale();
+		$locale = $context->getLocale();
 		// en-US
 		$localeSpec = $this->localeSpec($gadget, $locale);
 		if ($localeSpec == null) {
@@ -106,15 +89,15 @@ class GadgetServer {
 		}
 		return $localeSpec;
 	}
-	
-	private function featuresLoad($gadget)
+
+	private function featuresLoad($gadget, $context)
 	{
 		//NOTE i've been a bit liberal here with folding code into this function, while it did get a bit long, the many include()'s are slowing us down
 		// Should really clean this up a bit in the future though
-		$localeSpec = $this->getLocaleSpec($gadget);
+		$localeSpec = $this->getLocaleSpec($gadget, $context);
 		
 		// get the message bundle for this gadget
-		$bundle = $this->getBundle($localeSpec, $this->gc);
+		$bundle = $this->getBundle($localeSpec, $context);
 		
 		//FIXME this is a half-assed solution between following the refactoring and maintaining some of the old code, fixing this up later
 		$gadget->setMessageBundle($bundle);
@@ -142,7 +125,7 @@ class GadgetServer {
 		
 		// userPref's
 		$upValues = $gadget->getUserPrefValues();
-		foreach ( $gadget->getUserPrefs() as $pref ) {
+		foreach ($gadget->getUserPrefs() as $pref) {
 			$name = $pref->getName();
 			$value = $upValues->getPref($name);
 			if ($value == null) {
@@ -158,7 +141,7 @@ class GadgetServer {
 		$requires = $gadget->getRequires();
 		$needed = array();
 		$optionalNames = array();
-		foreach ( $requires as $key => $entry ) {
+		foreach ($requires as $key => $entry) {
 			$needed[] = $key;
 			if ($entry->isOptional()) {
 				$optionalNames[] = $key;
@@ -168,8 +151,8 @@ class GadgetServer {
 		$resultsMissing = array();
 		$missingOptional = array();
 		$missingRequired = array();
-		$this->registry->getIncludedFeatures($needed, $resultsFound, $resultsMissing);
-		foreach ( $resultsMissing as $missingResult ) {
+		$context->getRegistry()->getIncludedFeatures($needed, $resultsFound, $resultsMissing);
+		foreach ($resultsMissing as $missingResult) {
 			if (in_array($missingResult, $optionalNames)) {
 				$missingOptional[$missingResult] = $missingResult;
 			} else {
@@ -181,18 +164,18 @@ class GadgetServer {
 		}
 		// create features
 		$features = array();
-		foreach ( $resultsFound as $entry ) {
-			$features[$entry] = $this->registry->getEntry($entry)->getFeature()->create();
+		foreach ($resultsFound as $entry) {
+			$features[$entry] = $context->getRegistry()->getEntry($entry)->getFeature()->create();
 		}
 		// prepare them
-		foreach ( $features as $key => $feature ) {
-			$params = $gadget->getFeatureParams($gadget, $this->registry->getEntry($key));
-			$feature->prepare($gadget, $this->gc, $params);
+		foreach ($features as $key => $feature) {
+			$params = $gadget->getFeatureParams($gadget, $context->getRegistry()->getEntry($key));
+			$feature->prepare($gadget, $context, $params);
 		}
 		// and process them
-		foreach ( $features as $key => $feature ) {
-			$params = $gadget->getFeatureParams($gadget, $this->registry->getEntry($key));
-			$feature->process($gadget, $this->gc, $params);
+		foreach ($features as $key => $feature) {
+			$params = $gadget->getFeatureParams($gadget, $context->getRegistry()->getEntry($key));
+			$feature->process($gadget, $context, $params);
 		}
 	}
 }

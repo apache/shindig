@@ -23,10 +23,6 @@
  * Mixed with some essentials to make propper http header handling
  * happen in php.
  */
-
-class ServletException extends Exception {
-}
-
 class HttpServlet {
 	private $lastModified = false;
 	private $contentType = 'text/html';
@@ -34,12 +30,22 @@ class HttpServlet {
 	public $noHeaders = false;
 	private $noCache = false;
 	
+	/**
+	 * Enables output buffering so we can do correct header handling in the destructor
+	 *
+	 */
 	public function __construct()
 	{
 		// to do our header magic, we need output buffering on
 		ob_start();
 	}
 	
+	/**
+	 * Enter description here...
+	 * If noHeaders is false, it adds all the correct http/1.1 headers to the request
+	 * and deals with modified/expires/e-tags/etc. This makes the server behave more like
+	 * a real http server.
+	 */
 	public function __destruct()
 	{
 		global $config;
@@ -92,40 +98,65 @@ class HttpServlet {
 		}
 	}
 	
+	/**
+	 * Sets the content type of this request (forinstance: text/html or text/javascript, etc) 
+	 *
+	 * @param string $type content type header to use
+	 */
 	public function setContentType($type)
 	{
 		$this->contentType = $type;
 	}
 	
+	/**
+	 * Returns the current content type 
+	 *
+	 * @return string content type string
+	 */
 	public function getContentType()
 	{
 		return $this->contentType;
 	}
 	
+	/**
+	 * returns the current last modified time stamp
+	 *
+	 * @return int timestamp
+	 */
 	public function getLastModified()
 	{
 		return $this->lastModified;
 	}
 	
+	/**
+	 * Sets the last modified timestamp. It automaticly checks if this timestamp
+	 * is larger then its current timestamp, and if not ignores the call
+	 *
+	 * @param int $modified timestamp
+	 */
 	public function setLastModified($modified)
 	{
 		$this->lastModified = max($this->lastModified, $modified);
 	}
 	
+	/**
+	 * Sets the noCache boolean. If its set to true, no-caching headers will be send
+	 * (pragma no cache, expiration in the past)
+	 *
+	 * @param boolean $cache send no-cache headers?
+	 */
 	public function setNoCache($cache = false)
 	{
 		$this->noCache = $cache;
 	}
 	
+	/**
+	 * returns the noCache boolean
+	 *
+	 * @return boolean
+	 */
 	public function getNoCache()
 	{
 		return $this->noCache;
-	}
-	
-	public function error($msg)
-	{
-		@ob_end_clean();
-		header("HTTP/1.0 400 Bad Request", true);
-		echo "<html><body><h1>400 - $msg</h1></body></html>";
 	}
 }

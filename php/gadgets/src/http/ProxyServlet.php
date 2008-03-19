@@ -22,36 +22,36 @@ include_once ("src/{$config['gadget_signer']}.php");
 include_once ("src/http/ProxyHandler.php");
 
 class ProxyServlet extends HttpServlet {
-	
+
 	public function doGet()
 	{
 		global $config;
-		$this->noHeaders = true;	
+		$this->noHeaders = true;
+		$context = new GadgetContext('GADGET');
 		// those should be doable in one statement, but php seems to still evauluate the second ? and : pair,
 		// so throws an error about undefined index on post, even though it found it in get ... odd bug 
 		$url = isset($_GET['url']) ? $_GET['url'] : false;
-		if (!$url) {
+		if (! $url) {
 			$url = isset($_POST['url']) ? $_POST['url'] : false;
 		}
 		$url = urldecode($url);
 		$method = isset($_GET['httpMethod']) ? $_GET['httpMethod'] : false;
-		if (!$method) {
-			$method = isset($_POST['httpMethod']) ? $_POST['httpMethod'] : 'GET'; 
+		if (! $method) {
+			$method = isset($_POST['httpMethod']) ? $_POST['httpMethod'] : 'GET';
 		}
-		if (!$url) {
+		if (! $url) {
 			header("HTTP/1.0 400 Bad Request", true);
 			echo "<html><body><h1>400 - Missing url parameter</h1></body></html>";
 		}
 		$gadgetSigner = new $config['gadget_signer']();
-		$httpFetcher = new $config['remote_content']();
-		$proxyHandler = new ProxyHandler($httpFetcher);
+		$proxyHandler = new ProxyHandler($context);
 		if (! empty($_GET['output']) && $_GET['output'] == 'js') {
 			$proxyHandler->fetchJson($url, $gadgetSigner, $method);
 		} else {
 			$proxyHandler->fetch($url, $gadgetSigner, $method);
 		}
 	}
-	
+
 	public function doPost()
 	{
 		$this->doGet();

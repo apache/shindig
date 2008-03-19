@@ -38,7 +38,7 @@ include_once ('config.php');
 
 function __autoload($className)
 {
-	require_once 'src/' . $className . '.php';
+	require 'src/' . $className . '.php';
 }
 
 $servletMap = array($config['web_prefix'] . '/files' => 'FilesServlet', $config['web_prefix'] . '/js' => 'JsServlet', $config['web_prefix'] . '/proxy' => 'ProxyServlet', $config['web_prefix'] . '/ifr' => 'GadgetRenderingServlet', $config['web_prefix'] . '/rpc' => 'RpcServlet');
