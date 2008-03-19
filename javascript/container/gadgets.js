@@ -363,6 +363,7 @@ gadgets.FloatLeftLayoutManager.prototype.getGadgetChrome =
  *    "secureToken": an encoded token that is passed on the URL hash
  *    "hashData": Query-string like data that will be added to the
  *        hash portion of the URL.
+ *    "specVersion": a hash value used to add a v= param to allow for better caching
  *    "title": the default title to use for the title bar.
  *    "height": height of the gadget
  *    "width": width of the gadget
@@ -533,6 +534,7 @@ gadgets.IfrGadget.prototype.getIframeUrl = function() {
       '&country=' + gadgets.container.country_ +
       '&lang=' + gadgets.container.language_ +
       '&view=' + gadgets.container.view_ +
+      (this.specVersion ? '&v=' + this.specVersion : '') +
       (gadgets.container.parentUrl_ ? '&parent=' + encodeURIComponent(gadgets.container.parentUrl_) : '') +
       (this.debug ? '&debug=1' : '') +
       this.getAdditionalParams() +
