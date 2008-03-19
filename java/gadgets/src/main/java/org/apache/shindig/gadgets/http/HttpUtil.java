@@ -47,7 +47,7 @@ public class HttpUtil {
   }
 
   /**
-   * Sets HTTP headers that instruct the browser to cache indefinitely.
+   * Sets HTTP headers that instruct the browser to cache content.
    * Implementations should take care to use cache-busting techniques on the
    * url.
    *
@@ -59,12 +59,17 @@ public class HttpUtil {
     response.setDateHeader("Expires",
         System.currentTimeMillis() + (1000L * ttl));
 
-    // IE seems to need this (10 years should be enough).
-    response.setHeader("Cache-Control", "public,max-age=" +
-        Integer.toString(ttl));
-
+    if (ttl == 0) {
+      response.setHeader("Pragma", "no-cache");
+      response.setHeader("Cache-Control", "no-cache");
+    } else {
+      // IE seems to need this (10 years should be enough).
+      response.setHeader("Cache-Control", "public,max-age=" +
+          Integer.toString(ttl));
+    }
     // Firefox requires this for certain cases.
     response.setDateHeader("Last-Modified", START_TIME);
+
   }
 
   /**
