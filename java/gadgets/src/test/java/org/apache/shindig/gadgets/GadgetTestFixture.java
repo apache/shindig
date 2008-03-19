@@ -55,7 +55,6 @@ public class GadgetTestFixture extends EasyMockTestCase {
     @Override
     public GadgetSigner getGadgetSigner() {
       return new GadgetSigner() {
-        @Override
         public GadgetToken createToken(String tokenString)
             throws GadgetException {
           try {
