@@ -22,9 +22,11 @@ class JsLibrary {
 	private $types = array('FILE', 'RESOURCE', 'URL', 'INLINE');
 	private $type;
 	private $content;
+	private $featureName; // used to track what feature this belongs to
 	
-	public function __construct($type, $content)
+	public function __construct($type, $content, $featureName = '')
 	{
+		$this->featureName = $featureName;
 		$this->type = $type;
 		$this->content = $content;
 	}
@@ -39,6 +41,11 @@ class JsLibrary {
 		return $this->content;
 	}
 	
+	public function getFeatureName()
+	{
+		return $this->featureName;
+	}
+	
 	public function toString()
 	{
 		if ($this->type == 'URL') {
@@ -50,10 +57,17 @@ class JsLibrary {
 	
 	static function create($type, $content)
 	{
-		if ($type == 'FILE' || $type == 'RESOURCE') {
+		$feature = '';
+		if ($type == 'FILE') {
+			$feature = dirname($content);
+			if (substr($feature,strlen($feature) - 1, 1) == '/') {
+				// strip tailing /, if any, so that the following strrpos works in any situation
+				$feature = substr($feature, 0, strlen($feature) - 1);
+			}
+			$feature = substr($feature, strrpos($feature, '/') + 1);
 			$content = JsLibrary::loadData($content, $type);
 		}
-		return new JsLibrary($type, $content);
+		return new JsLibrary($type, $content, $feature);
 	}
 	
 	static private function loadData($name, $type)

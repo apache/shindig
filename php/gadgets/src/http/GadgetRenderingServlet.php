@@ -103,7 +103,6 @@ class GadgetRenderingServlet extends HttpServlet {
 	 */
 	private function outputHtmlGadget($gadget, $context)
 	{
-		global $config;
 		$this->setContentType("text/html; charset=UTF-8");
 		$output = '';
 		$output .= "<html>\n<head>\n";
@@ -119,7 +118,7 @@ class GadgetRenderingServlet extends HttpServlet {
 			if ($type == 'URL') {
 				// TODO: This case needs to be handled more gracefully by the js
 				// servlet. We should probably inline external JS as well.
-				$externJs .= sprintf($externFmt, $library->getContent());
+				$externJs .= sprintf($externFmt, $library->getContent())."\n";
 			} else if ($type == 'INLINE') {
 				$inlineJs .= $library->getContent() . "\n";
 			} else {
@@ -133,7 +132,7 @@ class GadgetRenderingServlet extends HttpServlet {
 		// Forced libs first.
 		if (! empty($forcedLibs)) {
 			$libs = explode(':', $forcedLibs);
-			$output .= sprintf($externFmt, $this->getJsUrl($libs));
+			$output .= sprintf($externFmt, $this->getJsUrl($libs))."\n";
 		}
 		if (strlen($inlineJs) > 0) {
 			$output .= "<script><!--\n" . $inlineJs . "\n-->\n</script>\n";
@@ -141,21 +140,12 @@ class GadgetRenderingServlet extends HttpServlet {
 		if (strlen($externJs) > 0) {
 			$output .= $externJs;
 		}
-		//FIXME quick hack to make it work with the new syndicator.js config, needs a propper implimentation later
-		if (! file_exists($config['syndicator_config']) || ! is_readable($config['syndicator_config'])) {
-			throw new GadgetException("Invalid syndicator config");
-		}
-		// remove both /* */ and // style comments, they crash the json_decode function
-		$contents = preg_replace('/\/\/.*$/m', '', preg_replace('@/\\*(?:.|[\\n\\r])*?\\*/@', '', file_get_contents($config['syndicator_config'])));
-		$syndData = json_decode($contents, true);
-		// build the messages to include in the gadgets.Prefs.setMessages_() javascript call
-		$msgs = '';
-		if ($gadget->getMessageBundle()) {
-			$bundle = $gadget->getMessageBundle();
-			$msgs = json_encode($bundle->getMessages());
-		}
-		// Add the gadget.config.init and gadgets.Prefs.setMessages_ calls to the document
-		$output .= "\n<script>\ngadgets.config.init(" . json_encode($syndData['gadgets.features']) . ");\ngadgets.Prefs.setMessages_(" . $msgs . ");\n</script>\n";
+
+		$output .= "<script><!--\n";
+		$output .= $this->appendJsConfig($context, $gadget);
+		$output .= $this->appendMessages($gadget);
+		$output .= "-->\n</script>\n";
+		
 		$gadgetExceptions = array();
 		$content = $gadget->getContentData($context->getView());
 		if (empty($content)) {
@@ -281,5 +271,30 @@ class GadgetRenderingServlet extends HttpServlet {
 		}
 		$buf .= ".js?v=" . sha1($inlineJs);
 		return $buf;
+	}
+	
+	private function appendJsConfig($context, $gadget)
+	{
+		$syndicator = $context->getSyndicator();
+		$syndicatorConfig = $context->getSyndicatorConfig();
+		$gadgetConfig = array();
+		$featureConfig = $syndicatorConfig->getConfig($syndicator, 'gadgets.features');
+		foreach ($gadget->getJsLibraries() as $library) {
+			$feature = $library->getFeatureName();
+			if (!isset($gadgetConfig[$feature]) && !empty($featureConfig[$feature])) {
+				$gadgetConfig[$feature] = $featureConfig[$feature];
+			}
+		}
+		return "gadgets.config.init(" . json_encode($gadgetConfig) . ");\n";
+	}
+	
+	private function appendMessages($gadget)
+	{
+		$msgs = '';
+		if ($gadget->getMessageBundle()) {
+			$bundle = $gadget->getMessageBundle();
+			$msgs = json_encode($bundle->getMessages());
+		}
+		return "gadgets.Prefs.setMessages_($msgs);\n";
 	}
 }

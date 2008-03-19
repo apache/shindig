@@ -39,6 +39,8 @@ class GadgetContext {
 	private $blacklist = null;
 	private $ignoreCache = null;
 	private $forcedJsLibs = null;
+	private $syndicatorConfig = null; 
+	private $syndicator = null;
 
 	public function __construct($renderingContext)
 	{
@@ -51,8 +53,20 @@ class GadgetContext {
 		$this->setUrl($this->getUrlParam());
 		$this->setModuleId($this->getModuleIdParam());
 		$this->setView($this->getViewParam());
+		$this->setSyndicator($this->getSyndicatorParam());
 		//NOTE All classes are inititialized when called (aka lazy loading) because we don't 
 		//need all of them in every situation
+	}
+	
+	private function getSyndicatorParam()
+	{
+		$synd = 'default';
+		if (!empty($_GET['synd'])) {
+			$synd = $_GET['synd'];
+		} elseif (!empty($_POST['synd'])) {
+			$synd = $_POST['synd'];
+		}
+		return $synd;
 	}
 
 	private function getIgnoreCacheParam()
@@ -160,6 +174,25 @@ class GadgetContext {
 		}
 		return new Locale($language, $country);
 	}
+	
+	private function instanceSyndicatorConfig()
+	{
+		global $config;
+		return new SyndicatorConfig($config['syndicator_path']);
+	}
+	
+	public function getSyndicator()
+	{
+		return $this->syndicator;
+	}
+	
+	public function getSyndicatorConfig()
+	{
+		if ($this->syndicatorConfig == null) {
+			$this->syndicatorConfig = $this->instanceSyndicatorConfig();
+		}
+		return $this->syndicatorConfig;
+	}
 
 	public function getCache()
 	{
@@ -206,6 +239,16 @@ class GadgetContext {
 	public function getView()
 	{
 		return $this->view;
+	}
+	
+	public function setSyndicator($syndicator)
+	{
+		$this->syndicator = $syndicator;
+	}
+	
+	public function setSyndicatorConfig($syndicatorConfig)
+	{
+		$this->syndicatorConfig = $syndicatorConfig;
 	}
 
 	public function setBlacklist($blacklist)
