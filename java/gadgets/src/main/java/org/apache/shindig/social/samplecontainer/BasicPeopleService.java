@@ -48,13 +48,15 @@ public class BasicPeopleService implements PeopleService {
     List<Person> people = new ArrayList<Person>();
     for (String id : ids) {
       Person person = allPeople.get(id);
-      if (id.equals(token.getViewerId())) {
-        person.setIsViewer(true);
+      if (person != null) {
+        if (id.equals(token.getViewerId())) {
+          person.setIsViewer(true);
+        }
+        if (id.equals(token.getOwnerId())) {
+          person.setIsOwner(true);
+        }
+        people.add(person);
       }
-      if (id.equals(token.getOwnerId())) {
-        person.setIsOwner(true);
-      }
-      people.add(person);
     }
 
     // We can pretend that by default the people are in top friends order
