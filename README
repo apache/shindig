@@ -7,4 +7,7 @@ Welcome to Apache Shindig!
   Container JavaScript to enable your page to render Gadgets using
   gmodules.com or a server started up as described above.
 
+* Read php/gadgets/README for instructions on how to run a php gadget server
+  instead of a java gadget server
+
 For more information, see http://incubator.apache.org/projects/shindig.html
