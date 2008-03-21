@@ -17,6 +17,8 @@
  */
 package org.apache.shindig.social.samplecontainer;
 
+import org.apache.shindig.gadgets.GadgetToken;
+
 import org.apache.shindig.social.ResponseItem;
 import org.apache.shindig.social.opensocial.ActivitiesService;
 import org.apache.shindig.social.opensocial.model.Activity;
@@ -31,7 +33,8 @@ import java.util.Date;
  * @author Cassandra Doll <doll@google.com>
  */
 public class BasicActivitiesService implements ActivitiesService {
-  public ResponseItem<List<Activity>> getActivities(List<String> ids) {
+  public ResponseItem<List<Activity>> getActivities(List<String> ids, 
+      GadgetToken token) {
     Map<String, List<Activity>> allActivities =
         XmlStateFileFetcher.get().getActivities();
 
@@ -48,7 +51,8 @@ public class BasicActivitiesService implements ActivitiesService {
     return new ResponseItem<List<Activity>>(activities);
   }
 
-  public ResponseItem createActivity(String personId, Activity activity) {
+  public ResponseItem createActivity(String personId, Activity activity, 
+        GadgetToken token) {
     // TODO: Validate the activity and do any template expanding
     activity.setUserId(personId);
     activity.setPostedTime(new Date().getTime());
