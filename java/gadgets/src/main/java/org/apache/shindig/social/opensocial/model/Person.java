@@ -40,14 +40,12 @@ public class Person extends AbstractGadgetData {
   private String children;
   private Address currentLocation;
   private Date dateOfBirth;
-  // drinker : Person's drinking status, specified as an opensocial.Enum with
-  // the enum's key referencing opensocial.Enum.Drinker.
+  private Enum<Enum.Drinker> drinker;
   private List<Email> emails;
   private String ethnicity;
   private String fashion;
   private List<String> food;
-  // gender : Person's gender, specified as an opensocial.Enum with the enum's
-  // key referencing opensocial.Enum.Gender.
+  private Enum<Enum.Gender> gender;
   private String happiestWhen;
   private List<String> heroes;
   private String humor;
@@ -75,8 +73,7 @@ public class Person extends AbstractGadgetData {
   private String scaredOf;
   private List<Organization> schools;
   private String sexualOrientation;
-  // smoker Person's smoking status, specified as an opensocial.Enum with the
-  // enum's key referencing opensocial.Enum.Smoker.
+  private Enum<Enum.Smoker> smoker;
   private List<String> sports;
   private String status;
   private List<String> tags;
@@ -176,6 +173,14 @@ public class Person extends AbstractGadgetData {
     this.dateOfBirth = dateOfBirth;
   }
 
+  public Enum<Enum.Drinker> getDrinker() {
+    return this.drinker;
+  }
+
+  public void setDrinker(Enum<Enum.Drinker> newDrinker) {
+    this.drinker = newDrinker;
+  }
+
   public List<Email> getEmails() {
     return emails;
   }
@@ -206,6 +211,14 @@ public class Person extends AbstractGadgetData {
 
   public void setFood(List<String> food) {
     this.food = food;
+  }
+
+  public Enum<Enum.Gender> getGender() {
+    return this.gender;
+  }
+
+  public void setGender(Enum<Enum.Gender> newGender) {
+    this.gender = newGender;
   }
 
   public String getHappiestWhen() {
@@ -422,6 +435,14 @@ public class Person extends AbstractGadgetData {
 
   public void setSexualOrientation(String sexualOrientation) {
     this.sexualOrientation = sexualOrientation;
+  }
+
+  public Enum<Enum.Smoker> getSmoker() {
+    return this.smoker;
+  }
+
+  public void setSmoker(Enum<Enum.Smoker> newSmoker) {
+    this.smoker = newSmoker;
   }
 
   public List<String> getSports() {
