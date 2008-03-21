@@ -20,6 +20,9 @@ package org.apache.shindig.social.opensocial;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONArray;
+
+import org.apache.shindig.gadgets.GadgetToken;
+
 import org.apache.shindig.social.samplecontainer.BasicPeopleService;
 import org.apache.shindig.social.samplecontainer.BasicDataService;
 import org.apache.shindig.social.samplecontainer.BasicActivitiesService;
@@ -100,7 +103,7 @@ public class OpenSocialDataHandler implements GadgetDataHandler {
           break;
 
         case FETCH_PERSON_APP_DATA :
-          response = dataHandler.getPersonData(peopleIds);
+          response = dataHandler.getPersonData(peopleIds, request.getToken());
           break;
 
         case UPDATE_PERSON_APP_DATA:
@@ -110,11 +113,11 @@ public class OpenSocialDataHandler implements GadgetDataHandler {
           String key = params.getString("key");
           String value = params.getString("value");
 
-          response = dataHandler.updatePersonData(id, key, value);
+          response = dataHandler.updatePersonData(id, key, value, request.getToken());
           break;
 
         case FETCH_ACTIVITIES:
-          response = activitiesHandler.getActivities(peopleIds);
+          response = activitiesHandler.getActivities(peopleIds, request.getToken());
           break;
 
         case CREATE_ACTIVITY:
@@ -125,7 +128,7 @@ public class OpenSocialDataHandler implements GadgetDataHandler {
           // so json -> pojo
           Activity activity = new Activity("5", personId);
           activity.setTitle("Temporary title - we don't read json right now");
-          response = activitiesHandler.createActivity(personId, activity);
+          response = activitiesHandler.createActivity(personId, activity, request.getToken());
           break;
       }
 
