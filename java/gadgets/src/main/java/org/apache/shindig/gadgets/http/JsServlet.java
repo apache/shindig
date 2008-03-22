@@ -96,7 +96,7 @@ public class JsServlet extends HttpServlet {
             GadgetFeatureFactory factory = entry.getFeature();
             GadgetFeature feature = factory.create();
             for (JsLibrary lib : feature.getJsLibraries(context)) {
-              if (lib.getType() != JsLibrary.Type.URL) {
+              if (!lib.getType().equals(JsLibrary.Type.URL)) {
                 if (context.getDebug()) {
                   jsData.append(lib.getDebugContent());
                 } else {

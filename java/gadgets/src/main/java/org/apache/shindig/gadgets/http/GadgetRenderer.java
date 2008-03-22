@@ -120,10 +120,11 @@ public class GadgetRenderer {
    */
   private void outputGadget(Gadget gadget) throws IOException, GadgetException {
     String viewName = context.getView();
-    View view = gadget.getSpec().getView(viewName);
+    View view = HttpUtil.getView(gadget,
+        state.getGadgetServer().getConfig().getSyndicatorConfig());
     if (view == null) {
-      throw new GadgetException(GadgetException.Code.UNKNOWN_VIEW_SPECIFIED,
-          "No appropriate view could be found for this gadget");
+        throw new GadgetException(GadgetException.Code.UNKNOWN_VIEW_SPECIFIED,
+            "No appropriate view could be found for this gadget");
     }
     switch(view.getType()) {
       case HTML:
@@ -215,9 +216,9 @@ public class GadgetRenderer {
           } else {
             inlineJs.append(library.getContent());
           }
+          inlineJs.append(";\n");
         }
       }
-      inlineJs.append(";\n");
     }
 
     for (JsLibrary library : gadget.getJsLibraries()) {

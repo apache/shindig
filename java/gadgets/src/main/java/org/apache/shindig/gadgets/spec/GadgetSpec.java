@@ -91,11 +91,7 @@ public class GadgetSpec {
    * @return The view object, if it exists, or null.
    */
   public View getView(String name) {
-    View view = views.get(name);
-    if (view == null && !name.equals(DEFAULT_VIEW)) {
-      return views.get(DEFAULT_VIEW);
-    }
-    return view;
+    return views.get(name);
   }
 
   /**

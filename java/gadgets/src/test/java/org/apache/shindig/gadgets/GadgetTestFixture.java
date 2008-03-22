@@ -45,7 +45,8 @@ public class GadgetTestFixture extends EasyMockTestCase {
   public final DataFetcher<MessageBundle> bundleFetcher
       = mock(DataFetcher.class);
   public final GadgetBlacklist blacklist = mock(GadgetBlacklist.class, true);
-  public final GadgetFeatureRegistry registry;
+  public GadgetFeatureRegistry registry;
+  public SyndicatorConfig syndicatorConfig;
   public final CrossServletState state = new CrossServletState() {
     @Override
     public GadgetServer getGadgetServer() {
@@ -127,14 +128,21 @@ public class GadgetTestFixture extends EasyMockTestCase {
     config.setGadgetSpecFetcher(specFetcher);
     config.setMessageBundleFetcher(bundleFetcher);
     config.setContentFetcher(fetcher);
-    GadgetFeatureRegistry temp = null;
     try {
-      temp = new GadgetFeatureRegistry(null, fetcher);
+      registry = new GadgetFeatureRegistry(null, fetcher);
     } catch (Exception e) {
       e.printStackTrace();
       fail("Failed to create feature registry");
     }
-    registry = temp;
+
+    try {
+      syndicatorConfig = new SyndicatorConfig(null);
+    } catch (Exception e) {
+      e.printStackTrace();
+      fail("Failed to create syndicator config");
+    }
+
+    config.setSyndicatorConfig(syndicatorConfig);
     config.setFeatureRegistry(registry);
     config.setGadgetBlacklist(blacklist);
     gadgetServer = new GadgetServer(config);
