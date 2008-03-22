@@ -96,7 +96,11 @@ public class DefaultCrossServletState extends CrossServletState {
     try {
       GadgetSpec spec = gadget.getSpec();
       String url = context.getUrl().toString();
-      View view = spec.getView(context.getView());
+      View view = HttpUtil.getView(gadget,
+          gadgetServer.getConfig().getSyndicatorConfig());
+      if (view == null) {
+        return "";
+      }
       if (view.getType().equals(View.ContentType.HTML)) {
         buf.append(iframePath)
            .append("url=")

@@ -22,10 +22,10 @@ package org.apache.shindig.gadgets;
 import static org.apache.shindig.gadgets.SyndicatorConfig.DEFAULT_SYNDICATOR;
 import static org.apache.shindig.gadgets.SyndicatorConfig.SYNDICATOR_KEY;
 
-import junit.framework.TestCase;
-
 import org.json.JSONArray;
 import org.json.JSONObject;
+
+import junit.framework.TestCase;
 
 /**
  *
@@ -111,5 +111,11 @@ public class SyndicatorConfigTest extends TestCase {
                                                       ARRAY_NAME);
     JSONArray defaultArray = new JSONArray(ARRAY_VALUE);
     assertEquals(defaultArrayTest.toString(), defaultArray.toString());
+  }
+
+  public void testPathQuery() throws Exception {
+    String path = NESTED_KEY + "/" + NESTED_NAME;
+    String data = config.get(DEFAULT_SYNDICATOR, path);
+    assertEquals(NESTED_VALUE, data);
   }
 }

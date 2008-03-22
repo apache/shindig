@@ -33,6 +33,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
@@ -59,6 +60,42 @@ public class SyndicatorConfig {
   }
 
   /**
+   * Fetches a configuration parameter as a JSON object, array, string, or
+   * number, ensuring that it can be safely passed to javascript without any
+   * additional filtering.
+   *
+   * @param syndicator
+   * @param parameter The value to fetch. May be specified as an x-path like
+   *     object reference such as "gadgets/features/views".
+   * @return A configuration parameter as a JSON object or null if not set or
+   *     can't be interpreted as JSON.
+   */
+  public Object getJson(String syndicator, String parameter) {
+    JSONObject data = config.get(syndicator);
+    if (data == null) {
+      return null;
+    }
+    if (parameter == null) {
+      return data;
+    }
+
+    try {
+      for (String param : parameter.split("/")) {
+        Object next = data.get(param);
+        if (next instanceof JSONObject) {
+          data = (JSONObject)next;
+        } else {
+          return next;
+        }
+      }
+      return data;
+    } catch (JSONException e) {
+      logger.log(Level.WARNING, "Failed to get JSON config", e);
+      return null;
+    }
+  }
+
+  /**
    * Attempts to fetch a parameter for the given syndicator, or the default
    * syndicator if the specified syndicator is not supported.
    *
@@ -67,33 +104,8 @@ public class SyndicatorConfig {
    * @return A configuration parameter as a string, or null if not set.
    */
   public String get(String syndicator, String parameter) {
-    JSONObject syndicatorData = config.get(syndicator);
-    if (syndicatorData == null) {
-      return null;
-    }
-    Object value = syndicatorData.opt(parameter);
-    return value == null ? null : value.toString();
-  }
-
-  /**
-   * Fetches a configuration parameter as a JSON object, array, string, or
-   * number, ensuring that it can be safely passed to javascript without any
-   * additional filtering.
-   *
-   * @param syndicator
-   * @param parameter
-   * @return A configuration parameter as a JSON object or null if not set or
-   *     can't be interpreted as JSON.
-   */
-  public Object getJson(String syndicator, String parameter) {
-    JSONObject syndicatorData = config.get(syndicator);
-    if (syndicatorData == null) {
-      return null;
-    }
-    if (parameter == null) {
-      return syndicatorData;
-    }
-    return syndicatorData.opt(parameter);
+    Object data = getJson(syndicator, parameter);
+    return data == null ? null : data.toString();
   }
 
   /**
@@ -103,14 +115,11 @@ public class SyndicatorConfig {
    *     can't be interpreted as JSON.
    */
   public JSONObject getJsonObject(String syndicator, String parameter) {
-    JSONObject syndicatorData = config.get(syndicator);
-    if (syndicatorData == null) {
-      return null;
+    Object data = getJson(syndicator, parameter);
+    if (data instanceof JSONObject) {
+      return (JSONObject)data;
     }
-    if (parameter == null) {
-      return syndicatorData;
-    }
-    return syndicatorData.optJSONObject(parameter);
+    return null;
   }
 
   /**
@@ -120,11 +129,11 @@ public class SyndicatorConfig {
    *     can't be interpreted as JSON.
    */
   public JSONArray getJsonArray(String syndicator, String parameter) {
-    JSONObject syndicatorData = config.get(syndicator);
-    if (syndicatorData == null) {
-      return null;
+    Object data = getJson(syndicator, parameter);
+    if (data instanceof JSONArray) {
+      return (JSONArray)data;
     }
-    return syndicatorData.optJSONArray(parameter);
+    return null;
   }
 
   /**
