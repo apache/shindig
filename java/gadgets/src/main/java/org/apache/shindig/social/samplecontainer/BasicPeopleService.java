@@ -28,6 +28,7 @@ import org.json.JSONException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.Collections;
 import java.util.Comparator;
 
@@ -42,7 +43,8 @@ public class BasicPeopleService implements PeopleService {
   };
 
   public ResponseItem<ApiCollection<Person>> getPeople(List<String> ids,
-      SortOrder sortOrder, FilterType filter, int first, int max, GadgetToken token) {
+      SortOrder sortOrder, FilterType filter, int first, int max, 
+      Set<String> profileDetails, GadgetToken token) {
     Map<String, Person> allPeople = XmlStateFileFetcher.get().getAllPeople();
 
     List<Person> people = new ArrayList<Person>();
