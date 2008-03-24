@@ -41,6 +41,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.TreeMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -174,7 +175,7 @@ public class ProxyHandler {
           headers = Collections.emptyMap();
         } else {
           // We actually only accept single key value mappings now.
-          headers = new HashMap<String, List<String>>();
+          headers = new TreeMap<String, List<String>>(String.CASE_INSENSITIVE_ORDER);
           String[] headerList = headerData.split("&");
           for (String header : headerList) {
             String[] parts = header.split("=");
