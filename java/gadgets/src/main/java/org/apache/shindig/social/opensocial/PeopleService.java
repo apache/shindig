@@ -25,6 +25,7 @@ import org.apache.shindig.social.ResponseItem;
 import org.apache.shindig.gadgets.GadgetToken;
 
 import java.util.List;
+import java.util.Set;
 
 public interface PeopleService {
   /**
@@ -57,5 +58,5 @@ public interface PeopleService {
    */
   public ResponseItem<ApiCollection<Person>> getPeople(List<String> ids,
       SortOrder sortOrder, FilterType filter, int first, int max,
-      GadgetToken token);
+      Set<String> profileDetails, GadgetToken token);
 }

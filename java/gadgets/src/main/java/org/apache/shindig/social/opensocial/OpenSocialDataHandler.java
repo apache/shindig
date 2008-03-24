@@ -37,7 +37,9 @@ import org.apache.shindig.social.ResponseItem;
 
 import java.util.logging.Logger;
 import java.util.logging.Level;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -89,6 +91,12 @@ public class OpenSocialDataHandler implements GadgetDataHandler {
       switch (type) {
         case FETCH_PEOPLE :
           JSONArray profileDetail = params.getJSONArray("profileDetail");
+
+          Set<String> profileDetailFields = new HashSet<String>(profileDetail.length() + 1, 1);
+          for (int i = 0; i < profileDetail.length(); i++) {
+            profileDetailFields.add(profileDetail.getString(i));
+          }
+
           PeopleService.SortOrder sortOrder = PeopleService.SortOrder.valueOf(
               params.getString("sortOrder"));
           PeopleService.FilterType filter = PeopleService.FilterType.valueOf(
@@ -99,7 +107,7 @@ public class OpenSocialDataHandler implements GadgetDataHandler {
           // TODO: Should we put this in the requestitem and pass the whole
           // thing along?
           response = peopleHandler.getPeople(peopleIds, sortOrder, filter,
-              first, max, request.getToken());
+              first, max, profileDetailFields, request.getToken());
           break;
 
         case FETCH_PERSON_APP_DATA :
