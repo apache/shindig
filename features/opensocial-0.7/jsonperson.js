@@ -41,11 +41,24 @@ JsonPerson = function(opt_params) {
       opensocial.Organization);
   JsonPerson.constructArrayObject(opt_params, "urls", opensocial.Url);
 
+  JsonPerson.constructEnum(opt_params, "gender");
+  JsonPerson.constructEnum(opt_params, "smoker");
+  JsonPerson.constructEnum(opt_params, "drinker");
+
   opensocial.Person.call(this, opt_params, opt_params['isOwner'],
       opt_params['isViewer']);
 };
 JsonPerson.inherits(opensocial.Person);
 
+// Converts the fieldName into an instance of a opensocial.Enum
+JsonPerson.constructEnum = function(map, fieldName) {
+  var fieldValue = map[fieldName];
+  if (fieldValue) {
+    map[fieldName] = new opensocial.Enum(fieldValue.key, fieldValue.displayValue);
+  }
+}
+
+// Converts the fieldName into an instance of the specified object
 JsonPerson.constructObject = function(map, fieldName, className) {
   var fieldValue = map[fieldName];
   if (fieldValue) {
