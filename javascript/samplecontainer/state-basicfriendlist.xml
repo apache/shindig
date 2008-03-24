@@ -1,13 +1,13 @@
 <container>
   <people>
-    <person id="john.doe" name="John Doe">
+    <person id="john.doe" name="John Doe" gender="M">
       <friend>jane.doe</friend>
       <friend>george.doe</friend>
     </person>
-    <person id="jane.doe" name="Jane Doe" phone="867-5309">
+    <person id="jane.doe" name="Jane Doe" phone="867-5309" gender="F">
       <friend>john.doe</friend>
     </person>
-    <person id="george.doe" name="George Doe">
+    <person id="george.doe" name="George Doe" gender="M">
       <friend>john.doe</friend>
     </person>
   </people>

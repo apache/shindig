@@ -73,15 +73,15 @@
          if (count == 0) {
            //continue;
          }
-
+         
          html += '<div class="person">';
          html += '<div class="bubble c' + count % numberOfStyles + '">' + hellos[count % hellos.length];
-         html += '<div class="name">' + allPeople[i].getDisplayName() + ' (' + count + ')';
+         html += '<div class="name">' + allPeople[i].getDisplayName() + ' (' + count + ') ' + allPeople[i].getField(opensocial.Person.Field.GENDER).getDisplayValue();
          html += '</div></div>';
 
-         if (allPeople[i].getField('thumbnailUrl')
-             && allPeople[i].getField('thumbnailUrl').indexOf('null') == -1) {
-           html += '<img src="' + allPeople[i].getField('thumbnailUrl') + '"/>';
+         if (allPeople[i].getField(opensocial.Person.Field.THUMBNAIL_URL)
+             && allPeople[i].getField(opensocial.Person.Field.THUMBNAIL_URL).indexOf('null') == -1) {
+           html += '<img src="' + allPeople[i].getField(opensocial.Person.Field.THUMBNAIL_URL) + '"/>';
          } else {
            html += '<img src="/gadgets/files/samplecontainer/examples/nophoto.gif"/>';
          }

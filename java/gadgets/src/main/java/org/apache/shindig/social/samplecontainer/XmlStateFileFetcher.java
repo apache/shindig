@@ -9,6 +9,7 @@ import org.apache.shindig.social.opensocial.model.MediaItem;
 import org.apache.shindig.social.opensocial.model.Name;
 import org.apache.shindig.social.opensocial.model.Person;
 import org.apache.shindig.social.opensocial.model.Phone;
+import org.apache.shindig.social.opensocial.model.Enum;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NamedNodeMap;
@@ -229,6 +230,16 @@ public class XmlStateFileFetcher {
         phones.add(new Phone(turnEvil(phone), null));
         person.setPhoneNumbers(phones);
       }
+
+      Node genderItem = attributes.getNamedItem("gender");
+      if (genderItem != null) {
+        String gender = genderItem.getNodeValue();
+        if ("F".equals(gender)) {
+          person.setGender(new Enum<Enum.Gender>(Enum.Gender.FEMALE, "Female"));
+        } else if ("M".equals(gender)) {
+          person.setGender(new Enum<Enum.Gender>(Enum.Gender.MALE, "Male"));
+        }
+      } 
 
       allPeople.put(id, person);
       friendIdMap.put(id, getFriends(personNode));
