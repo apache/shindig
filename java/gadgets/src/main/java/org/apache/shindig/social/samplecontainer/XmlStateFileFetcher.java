@@ -235,11 +235,11 @@ public class XmlStateFileFetcher {
       if (genderItem != null) {
         String gender = genderItem.getNodeValue();
         if ("F".equals(gender)) {
-          person.setGender(new Enum<Enum.Gender>(Enum.Gender.FEMALE, "Female"));
+          person.setGender(new Enum<Enum.Gender>(Enum.Gender.FEMALE));
         } else if ("M".equals(gender)) {
-          person.setGender(new Enum<Enum.Gender>(Enum.Gender.MALE, "Male"));
+          person.setGender(new Enum<Enum.Gender>(Enum.Gender.MALE));
         }
-      } 
+      }
 
       allPeople.put(id, person);
       friendIdMap.put(id, getFriends(personNode));
