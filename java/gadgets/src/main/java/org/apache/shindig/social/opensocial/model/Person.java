@@ -29,7 +29,6 @@ import java.util.List;
  *
  */
 public class Person extends AbstractGadgetData {
-  // TODO: Create the rest of the person fields and objects
   private String aboutMe;
   private List<String> activities;
   private List<Address> addresses;

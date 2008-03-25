@@ -24,104 +24,128 @@ import org.apache.shindig.social.Mandatory;
 /**
  * see
  * http://code.google.com/apis/opensocial/docs/0.7/reference/opensocial.Enum.html
- * 
+ *
  * Base class for all Enum objects. This class allows containers to use constants
  * for fields that have a common set of values.
  *
  */
-public final class Enum<E extends java.lang.Enum<E>> extends AbstractGadgetData {
-  @Mandatory private String displayValue = null;
-  private java.lang.Enum<E> key = null;
+public final class Enum<E extends Enum.EnumKey> extends AbstractGadgetData {
+  @Mandatory private String displayValue;
+  private E key = null;
+
+  public interface EnumKey {
+    String getDisplayValue();
+  }
 
   /**
    * public java.lang.Enum for opensocial.Enum.Drinker
    */
-  public enum Drinker {
-    HEAVILY("HEAVILY"),
-    NO("NO"),
-    OCCASIONALLY("OCCASIONALLY"),
-    QUIT("QUIT"),
-    QUITTING("QUITTING"),
-    REGULARLY("REGULARLY"),
-    SOCIALLY("SOCIALLY"),
-    YES("YES");
+  public enum Drinker implements EnumKey {
+    HEAVILY("HEAVILY", "Heavily"),
+    NO("NO", "No"),
+    OCCASIONALLY("OCCASIONALLY", "Occasionally"),
+    QUIT("QUIT", "Quit"),
+    QUITTING("QUITTING", "Quitting"),
+    REGULARLY("REGULARLY", "Regularly"),
+    SOCIALLY("SOCIALLY", "Socially"),
+    YES("YES", "Yes");
 
     private final String jsonString;
+    private final String displayValue;
 
-    private Drinker(String jsonString) {
+    private Drinker(String jsonString, String displayValue) {
       this.jsonString = jsonString;
+      this.displayValue = displayValue;
     }
 
     @Override
     public String toString() {
       return this.jsonString;
+    }
+
+    public String getDisplayValue() {
+      return displayValue;
     }
   }
 
   /**
    * public java.lang.Enum for opensocial.Enum.Gender
    */
-  public enum Gender {
-    FEMALE("FEMALE"),
-    MALE("MALE");
+  public enum Gender implements EnumKey {
+    FEMALE("FEMALE", "Female"),
+    MALE("MALE", "Male");
 
     private final String jsonString;
+    private final String displayValue;
 
-    private Gender(String jsonString) {
+    private Gender(String jsonString, String displayValue) {
       this.jsonString = jsonString;
+      this.displayValue = displayValue;
     }
 
     @Override
     public String toString() {
       return this.jsonString;
+    }
+
+    public String getDisplayValue() {
+      return displayValue;
     }
   }
 
   /**
    * public java.lang.Enum for opensocial.Enum.Smoker
    */
-  public enum Smoker {
-    HEAVILY("HEAVILY"),
-    NO("NO"),
-    OCCASIONALLY("OCCASIONALLY"),
-    QUIT("QUIT"),
-    QUITTING("QUITTING"),
-    REGULARLY("REGULARLY"),
-    SOCIALLY("SOCIALLY"),
-    YES("YES");
+  public enum Smoker implements EnumKey {
+    HEAVILY("HEAVILY", "Heavily"),
+    NO("NO", "No"),
+    OCCASIONALLY("OCCASIONALLY", "Ocasionally"),
+    QUIT("QUIT", "Quit"),
+    QUITTING("QUITTING", "Quitting"),
+    REGULARLY("REGULARLY", "Regularly"),
+    SOCIALLY("SOCIALLY", "Socially"),
+    YES("YES", "Yes");
 
     private final String jsonString;
+    private final String displayValue;
 
-    private Smoker(String jsonString) {
+    private Smoker(String jsonString, String displayValue) {
       this.jsonString = jsonString;
+      this.displayValue = displayValue;
     }
 
     @Override
     public String toString() {
       return this.jsonString;
     }
+
+    public String getDisplayValue() {
+      return displayValue;
+    }
   }
 
   /**
-   * Constructor
-   * @param initKey java.lang.Enum initial key
-   * @param initValue String initial display value
-   * @throws NullPointerException if initValue is null
+   * Constructs a Enum object.
+   * @param key EnumKey The key to use
+   * @param displayValue String The display value
    */
-  public Enum(java.lang.Enum<E> initKey, String initValue) throws NullPointerException {
-    
-    if (null != initValue) {
-      this.displayValue = initValue;
-      this.key = initKey;
-    }
-    else {
-      throw new NullPointerException("Enum.setDisplayValue cannot be set to null");
-    }
+  public Enum(E key, String displayValue) {
+    this.key = key;
+    this.displayValue = displayValue;
+  }
+
+  /**
+   * Constructs a Enum object.
+   * @param key The key to use. Will use the value from getDisplayValue() as
+   *     the display value.
+   */
+  public Enum(E key) {
+    this(key, key.getDisplayValue());
   }
 
   /**
    * Gets the value of this Enum. This is the string displayed to the user.
-   * If the container supports localization, the string will be localized.
+   * If the container supports localization, the string should be localized.
    * @return the Enum's user visible value
    */
   public String getDisplayValue() {
@@ -130,18 +154,11 @@ public final class Enum<E extends java.lang.Enum<E>> extends AbstractGadgetData 
 
   /**
    * Sets the value of this Enum. This is the string displayed to the user.
-   * If the container supports localization, the string will be localized.
-   * @throws NullPointerException if the String passed is null.
+   * If the container supports localization, the string should be localized.
+   * @param displayValue The value to set.
    */
-  public void setDisplayValue(String newStr) throws NullPointerException {
-    if (null != newStr) {
-      // TODO: Is this string localized??
-//      this.key = SmokerKey.get(newStr.trim().toUpperCase());
-      this.displayValue = newStr;
-    }
-    else {
-      throw new NullPointerException("Enum.setDisplayValue cannot be set to null");
-    }
+  public void setDisplayValue(String displayValue) {
+    this.displayValue = displayValue;
   }
 
   /**
@@ -149,28 +166,17 @@ public final class Enum<E extends java.lang.Enum<E>> extends AbstractGadgetData 
    * Use this for logic within your gadget.
    * @return java.lang.Enum key object for this Enum.
    */
-  public java.lang.Enum<E> getKey() {
+  public E getKey() {
     return this.key;
   }
 
   /**
    * Sets the key for this Enum.
    * Use this for logic within your gadget.
+   * @param key The value to set.
    */
-  public void setKey(java.lang.Enum<E> newKey) {
-    this.key = newKey;
+  public void setKey(E key) {
+    this.key = key;
   }
 
-
-  /**
-   * Helper method that converts a String to an equivalent key value (if any)
-   * @param value the String value to be matched with appropriate keys.
-   * @return the matching java.lang.Enum key matching the string, if any
-   */
-  public java.lang.Enum<E> stringToKey(String value) {
-    if ((null != value) && (null != key)) {
-      return java.lang.Enum.valueOf(key.getDeclaringClass(), value);
-    }
-    return null;
-  }
 }
