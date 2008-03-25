@@ -143,51 +143,22 @@ gadgets.UserPrefStore.prototype.savePrefs = function(gadget) {
 };
 
 
-// ------------------------
-// CookieBasedUserPrefStore
+// -------------
+// DefaultUserPrefStore
 
 /**
- * Cookie-based user preference store.
+ * User preference store implementation.
+ * TODO: Turn this into a real implementation that is production safe
  * @constructor
  */
-gadgets.CookieBasedUserPrefStore = function() {
+gadgets.DefaultUserPrefStore = function() {
   gadgets.UserPrefStore.call(this);
 };
+gadgets.DefaultUserPrefStore.inherits(gadgets.UserPrefStore);
 
-gadgets.CookieBasedUserPrefStore.inherits(gadgets.UserPrefStore);
+gadgets.DefaultUserPrefStore.prototype.getPrefs = function(gadget) { };
 
-gadgets.CookieBasedUserPrefStore.prototype.USER_PREFS_PREFIX =
-    'gadgetUserPrefs-';
-
-gadgets.CookieBasedUserPrefStore.prototype.getPrefs = function(gadget) {
-  var userPrefs = {};
-  var cookieName = this.USER_PREFS_PREFIX + gadget.id;
-  var cookie = goog.net.cookies.get(cookieName);
-  if (cookie) {
-    var pairs = cookie.split('&');
-    for (var i = 0; i < pairs.length; i++) {
-      var nameValue = pairs[i].split('=');
-      var name = decodeURIComponent(nameValue[0]);
-      var value = decodeURIComponent(nameValue[1]);
-      userPrefs[name] = value;
-    }
-  }
-
-  return userPrefs;
-};
-
-gadgets.CookieBasedUserPrefStore.prototype.savePrefs = function(gadget) {
-  var pairs = [];
-  for (var name in gadget.getUserPrefs()) {
-    var value = gadget.getUserPref(name);
-    var pair = encodeURIComponent(name) + '=' + encodeURIComponent(value);
-    pairs.push(pair);
-  }
-
-  var cookieName = this.USER_PREFS_PREFIX + gadget.id;
-  var cookieValue = pairs.join('&');
-  goog.net.cookies.set(cookieName, cookieValue);
-};
+gadgets.DefaultUserPrefStore.prototype.savePrefs = function(gadget) { };
 
 
 // -------------
@@ -665,8 +636,7 @@ gadgets.Container.inherits(gadgets.Extensible);
 
 gadgets.Container.prototype.gadgetClass = gadgets.Gadget;
 
-gadgets.Container.prototype.userPrefStore =
-    new gadgets.CookieBasedUserPrefStore();
+gadgets.Container.prototype.userPrefStore = new gadgets.DefaultUserPrefStore();
 
 gadgets.Container.prototype.gadgetService = new gadgets.GadgetService();
 
