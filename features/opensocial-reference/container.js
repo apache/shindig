@@ -444,7 +444,7 @@ var uriCallback = {
     uri = String(uri);
     // By default, only allow references to anchors.
     if (/^#/.test(uri)) {
-      return '#' + encodeURIComponent(decodeUriComponent(uri.substring(1)));
+      return '#' + encodeURIComponent(decodeURIComponent(uri.substring(1)));
     }
     // This callback can be replaced with one that passes the URL through
     // a proxy that checks the mimetype.
