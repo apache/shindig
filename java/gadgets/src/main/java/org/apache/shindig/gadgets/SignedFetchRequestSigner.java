@@ -44,11 +44,11 @@ import java.util.regex.Pattern;
  */
 public class SignedFetchRequestSigner implements RequestSigner {
 
-  protected static final String OPENSOCIAL_OWNERID = "opensocial_ownerid";
+  protected static final String OPENSOCIAL_OWNERID = "opensocial_owner_id";
 
-  protected static final String OPENSOCIAL_VIEWERID = "opensocial_viewerid";
+  protected static final String OPENSOCIAL_VIEWERID = "opensocial_viewer_id";
 
-  protected static final String OPENSOCIAL_APPID = "opensocial_appid";
+  protected static final String OPENSOCIAL_APPID = "opensocial_app_id";
   
   protected static final String XOAUTH_PUBLIC_KEY =
     "xoauth_signature_publickey";

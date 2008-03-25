@@ -167,8 +167,7 @@ public class ProxyHandler {
 
       if ("POST".equals(method)) {
         method = getParameter(request, METHOD_PARAM, "GET");
-        postBody = URLDecoder.decode(
-            getParameter(request, POST_DATA_PARAM, ""), encoding).getBytes();
+        postBody = getParameter(request, POST_DATA_PARAM, "").getBytes();
 
         String headerData = request.getParameter(HEADERS_PARAM);
         if (headerData == null || headerData.length() == 0) {

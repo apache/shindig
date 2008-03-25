@@ -79,16 +79,16 @@ public class SignedFetchRequestSignerTest extends TestCase {
     URL unsigned = new URL("http://test");
     URL out = signer.signRequest("GET", unsigned, null);
     List<OAuth.Parameter> queryParams = OAuth.decodeForm(out.getQuery());
-    Assert.assertTrue(contains(queryParams, "opensocial_ownerid", "o"));
-    Assert.assertTrue(contains(queryParams, "opensocial_viewerid", "v"));
-    Assert.assertTrue(contains(queryParams, "opensocial_appid", "a"));
+    Assert.assertTrue(contains(queryParams, "opensocial_owner_id", "o"));
+    Assert.assertTrue(contains(queryParams, "opensocial_viewer_id", "v"));
+    Assert.assertTrue(contains(queryParams, "opensocial_app_id", "a"));
     Assert.assertTrue(contains(queryParams, OAuth.OAUTH_CONSUMER_KEY, "d"));
     Assert.assertTrue(
         contains(queryParams, "xoauth_signature_publickey", "foo"));
   }
   
   public void testTrickyParametersInQuery() throws Exception {
-    String tricky = "%6fpensocial_ownerid=gotcha";
+    String tricky = "%6fpensocial_owner_id=gotcha";
     URL unsigned = new URL("http://test?" + tricky);
     URL out = signer.signRequest("GET", unsigned, null);
     Assert.assertFalse(out.getQuery().contains("gotcha"));
@@ -97,7 +97,7 @@ public class SignedFetchRequestSignerTest extends TestCase {
   
   public void testTrickyParametersInBody() throws Exception {
     URL unsigned = new URL("http://test");
-    String tricky = "%6fpensocial_ownerid=gotcha";
+    String tricky = "%6fpensocial_owner_id=gotcha";
     URL out = signer.signRequest("POST", unsigned, tricky);
     assertSignatureInvalid("POST", out.toString(), tricky);       
   }
