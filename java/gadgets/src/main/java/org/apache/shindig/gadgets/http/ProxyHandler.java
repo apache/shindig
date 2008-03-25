@@ -188,7 +188,7 @@ public class ProxyHandler {
         }
       } else {
         postBody = null;
-        headers = new HashMap<String, List<String>>();
+        headers = new TreeMap<String, List<String>>(String.CASE_INSENSITIVE_ORDER);
         Enumeration<String> headerNames = request.getHeaderNames();
         while (headerNames.hasMoreElements()) {
           String header = headerNames.nextElement();
