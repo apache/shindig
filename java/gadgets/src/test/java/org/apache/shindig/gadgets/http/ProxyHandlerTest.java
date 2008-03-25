@@ -165,8 +165,9 @@ public class ProxyHandlerTest extends GadgetTestFixture {
       RemoteContentRequest request = (RemoteContentRequest)arg0;
       String url = request.getUri().toASCIIString();
       return (url.startsWith(expectedUrl) &&
-          url.contains("opensocial_ownerid") && url.contains("opensocial_viewerid") &&
-          url.contains("opensocial_appid") && url.contains("opensocial_appid"));
+          url.contains("opensocial_owner_id") &&
+          url.contains("opensocial_viewer_id") &&
+          url.contains("opensocial_app_id"));
     }
 
   }
