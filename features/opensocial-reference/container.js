@@ -435,9 +435,7 @@ opensocial.Container.isArray = function(val) {
  */
 var caja;
 var ___;
-var html_sanitize;
 var attachDocumentStub;
-var plugin_dispatchEvent___;
 // See features/caja/domita.js for uriCallback's contract.
 var uriCallback = {
   rewrite: function rewrite(uri, mimeTypes) {
@@ -464,7 +462,6 @@ opensocial.Container.prototype.enableCaja = function() {
 
   ___ = window["___"];
   caja = window["caja"];
-  html_sanitize = window["html_sanitize"];
   attachDocumentStub = window["attachDocumentStub"];
 
   var outers = caja.copy(___.sharedOuters);

@@ -16,7 +16,7 @@
 
   .streamtitle {
     background-color: #E0ECFF;
-    border-top 1px solid: blue;
+    border-top: 1px solid blue;
     padding: .25em;
   }
 
@@ -89,6 +89,12 @@
     float: right;
     width: 47%;
   }
+
+  #addActivity {
+    display:none;
+    border: 2px solid blue;
+    padding: .5em;
+  }
 </style>
 
 <script type="text/javascript">
@@ -107,7 +113,7 @@ function refreshActivities() {
 
 function postNewActivity() {
   var activityElement = document.getElementById('newActivity');
-  var mediaItem = [opensocial.newActivityMediaItem("image", viewer.getField('thumbnailUrl'), {'type' : 'IMAGE'})];
+  var mediaItem = new Array(opensocial.newActivityMediaItem("image", viewer.getField('thumbnailUrl'), {'type' : 'IMAGE'}));
   var activity = opensocial.newActivity({ 'title' : viewer.getDisplayName() + ' wrote: ' + activityElement.value,
     'body' : 'write back!', 'mediaItems' : mediaItem});
 
@@ -137,7 +143,7 @@ function handleActivities(dataResponse) {
     html += '<div class="streamdescription"><a href="' + activities[i].url + '">' + activities[i].getField('title') + '</a></div>';
 
     html += '<div class="streamcontents">';
-    html += '<img src="http://www.google.com/s2/sharing/resources/static/images/quot.png?hl=en_US"/>'
+    html += '<img src="http://www.google.com/s2/sharing/resources/static/images/quot.png?hl=en_US"/>';
 
     var body = activities[i].getField('body') || '';
     html += '<span class="streamhtmlcontents">' + body + '</span>';
@@ -178,10 +184,10 @@ function hideShowDiv(divToShow, divToHide) {
 <div class="streamtitle">Activities from your friends</div>
 <div class="addActivityDiv">
   <a id="addActivityText" href="#" onclick="hideShowDiv('addActivity','addActivityText'); return false;"> Add your own activity </a>
-  <span id="addActivity" style="display:none; border: 2px solid steelblue; padding: .5em;">
-    <input id="newActivity" type="text"></input>
-    <input type="button" onclick="postNewActivity(); return false;" value="add"></input>
-    <input type="button" onclick="hideShowDiv('addActivityText','addActivity'); return false;" value="cancel"></input>
+  <span id="addActivity">
+    <input id="newActivity" type="text"/>
+    <input type="button" onclick="postNewActivity(); return false;" value="add"/>
+    <input type="button" onclick="hideShowDiv('addActivityText','addActivity'); return false;" value="cancel"/>
   </span>
 </div>
 <div id="stream" style="display:none"></div>
