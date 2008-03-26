@@ -30,7 +30,7 @@ import java.util.Map;
 public class BasicDataService implements DataService {
 
   public ResponseItem<Map<String, Map<String, String>>> getPersonData(
-        List<String> ids, GadgetToken token) {
+        List<String> ids, List<String> keys, GadgetToken token) {
 
     Map<String, Map<String, String>> allData
         = XmlStateFileFetcher.get().getAppData();
@@ -40,13 +40,24 @@ public class BasicDataService implements DataService {
         new HashMap<String, Map<String, String>>(ids.size(), 1);
 
     for (String id : ids) {
-      data.put(id, allData.get(id));
+      Map<String, String> allPersonData = allData.get(id);
+      if (allPersonData != null) {
+        Map<String, String> personData = new HashMap<String, String>();
+        for (String key : allPersonData.keySet()) {
+          if (keys.contains(key)) {
+            personData.put(key, allPersonData.get(key));
+          }
+        }
+
+        data.put(id, personData);
+      }
     }
 
     return new ResponseItem<Map<String, Map<String, String>>>(data);
   }
 
-  public ResponseItem updatePersonData(String id, String key, String value, GadgetToken token) {
+  public ResponseItem updatePersonData(String id, String key, String value,
+      GadgetToken token) {
     if (!isValidKey(key)) {
       return new ResponseItem<Object>(ResponseError.BAD_REQUEST,
           "The person data key had invalid characters",
