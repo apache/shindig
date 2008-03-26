@@ -42,6 +42,6 @@ BatchRequest.prototype.send = function() {
     "AUTHORIZATION" : "SIGNED",
     "POST_DATA" : gadgets.io.encodeValues(this.params_)};
 
-  gadgets.io.makeRequest(this.path_, this.callback_,
+  gadgets.io.makeNonProxiedRequest(this.path_, this.callback_,
       makeRequestParams);
 };

@@ -39,14 +39,7 @@
           var configParams = config["opensocial-0.7"];
 
           ShindigContainer = function() {
-            var path = configParams.path;
-            if (path.indexOf("http") != 0) {
-              var parentUrl = document.location.protocol + "//"
-                  + document.location.host;
-              path = parentUrl + path;
-            }
-
-            JsonContainer.call(this, path,
+            JsonContainer.call(this, configParams.path,
                 configParams.domain, configParams.supportedFields);
           };
           ShindigContainer.inherits(JsonContainer);

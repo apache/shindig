@@ -51,6 +51,41 @@ gadgets.io = function() {
     }
   }
 
+  /**
+   * Checks the xobj for errors, may call the callback with an error response
+   * if the error is fatal.
+   *
+   * @param {Object} xobj The XHR object to check
+   * @param {Function} callback The callback to call if the error is fatal
+   * @return true if the xobj is not ready to be processed
+   */
+  function hadError(xobj, callback) {
+    if (xobj.readyState !== 4) {
+      return true;
+    }
+    if (xobj.status !== 200) {
+      // TODO Need to work on standardizing errors
+      callback({errors : ["Error " + xobj.status]});
+      return true;
+    }
+    return false;
+  }
+
+  /**
+   * Handles non-proxied XHR callback processing.
+   *
+   * @param {String} url
+   * @param {Function} callback
+   * @param {Object} params
+   * @param {Object} xobj
+   */
+  function processNonProxiedResponse(url, callback, params, xobj) {
+    if (hadError(xobj, callback)) {
+      return;
+    }
+    callback(transformResponseData(params, xobj.responseText));
+  }
+
   var UNPARSEABLE_CRUFT = "throw 1; < don't be evil' >";
 
   /**
@@ -62,12 +97,7 @@ gadgets.io = function() {
    * @param {Object} xobj
    */
   function processResponse(url, callback, params, xobj) {
-    if (xobj.readyState !== 4) {
-      return;
-    }
-    if (xobj.status !== 200) {
-      // TODO Need to work on standardizing errors
-      callback({errors : ["Error " + xobj.status] });
+    if (hadError(xobj, callback)) {
       return;
     }
     var txt = xobj.responseText;
@@ -80,8 +110,13 @@ gadgets.io = function() {
     // trusted source, and json parsing is slow in IE.
     var data = eval("(" + txt + ")");
     data = data[url];
+
+    callback(transformResponseData(params, data.body));
+  }
+
+  function transformResponseData(params, serverResponse) {
     var resp = {
-     text: data.body,
+     text: serverResponse,
      errors: []
     };
     switch (params.CONTENT_TYPE) {
@@ -119,7 +154,31 @@ gadgets.io = function() {
         resp.data = resp.text;
         break;
     }
-    callback(resp);
+
+    return resp;
+  }
+
+  /**
+   * Sends an XHR post request
+   *
+   * @param realUrl The url to fetch data from that was requested by the gadget
+   * @param proxyUrl The url to proxy through
+   * @param callback The function to call once the data is fetched
+   * @param postData The data to post to the proxyUrl
+   * @param params The params to use when processing the response
+   * @param processResponseFunction The function that should process the
+   *     response from the sever before calling the callback
+   */
+  function makePostRequest(realUrl, proxyUrl, callback, postData, params,
+      processResponseFunction) {
+    var xhr = makeXhr();
+    xhr.open("POST", proxyUrl, true);
+    if (callback) {
+      xhr.onreadystatechange = gadgets.util.makeClosure(
+          null, processResponseFunction, realUrl, callback, params, xhr);
+    }
+    xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+    xhr.send(postData);
   }
 
   /**
@@ -160,16 +219,8 @@ gadgets.io = function() {
     makeRequest : function (url, callback, opt_params) {
       // TODO: This method also needs to respect all members of
       // gadgets.io.RequestParameters, and validate them.
-      var xhr = makeXhr();
-      var params = opt_params || {};
 
-      xhr.open("POST", config.jsonProxyUrl, true);
-      if (callback) {
-        xhr.onreadystatechange = gadgets.util.makeClosure(
-            null, processResponse, url, callback, params, xhr);
-      }
-      // We always send a POST request; we just hide the details.
-      xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+      var params = opt_params || {};
 
       // Check if authorization is requested
       var auth, st;
@@ -191,7 +242,18 @@ gadgets.io = function() {
         authz : auth || "",
         st : st || ""
       };
-      xhr.send(gadgets.io.encodeValues(postData));
+
+      makePostRequest(url, config.jsonProxyUrl, callback,
+          gadgets.io.encodeValues(postData), params, processResponse);
+    },
+
+    /**
+     * @private
+     */
+    makeNonProxiedRequest : function (relativeUrl, callback, opt_params) {
+      var params = opt_params || {};
+      makePostRequest(relativeUrl, relativeUrl, callback, params.POST_DATA,
+          params, processNonProxiedResponse);
     },
 
     /**
