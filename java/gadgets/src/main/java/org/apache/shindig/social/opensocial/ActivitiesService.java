@@ -31,7 +31,8 @@ public interface ActivitiesService {
    * @param token A valid GadgetToken
    * @return a response item with the list of activities.
    */
-  public ResponseItem<List<Activity>> getActivities(List<String> ids, GadgetToken token);
+  public ResponseItem<List<Activity>> getActivities(List<String> ids,
+      GadgetToken token);
 
   /**
    * Creates the passed in activity for the given user. Once createActivity is
@@ -41,5 +42,6 @@ public interface ActivitiesService {
    * @param token A valid GadgetToken
    * @return a response item containing any errors
    */
-  public ResponseItem createActivity(String personId, Activity activity, GadgetToken token);
+  public ResponseItem createActivity(String personId, Activity activity,
+      GadgetToken token);
 }

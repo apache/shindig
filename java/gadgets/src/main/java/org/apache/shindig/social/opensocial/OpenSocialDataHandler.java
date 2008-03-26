@@ -40,6 +40,7 @@ import java.util.logging.Level;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.ArrayList;
 
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -92,7 +93,8 @@ public class OpenSocialDataHandler implements GadgetDataHandler {
         case FETCH_PEOPLE :
           JSONArray profileDetail = params.getJSONArray("profileDetail");
 
-          Set<String> profileDetailFields = new HashSet<String>(profileDetail.length() + 1, 1);
+          Set<String> profileDetailFields = new HashSet<String>(
+              profileDetail.length() + 1, 1);
           for (int i = 0; i < profileDetail.length(); i++) {
             profileDetailFields.add(profileDetail.getString(i));
           }
@@ -111,7 +113,14 @@ public class OpenSocialDataHandler implements GadgetDataHandler {
           break;
 
         case FETCH_PERSON_APP_DATA :
-          response = dataHandler.getPersonData(peopleIds, request.getToken());
+          JSONArray jsonKeys = params.getJSONArray("keys");
+          List<String> keys = new ArrayList<String>(jsonKeys.length());
+          for (int i = 0; i < jsonKeys.length(); i++) {
+            keys.add(jsonKeys.getString(i));
+          }
+
+          response = dataHandler.getPersonData(peopleIds, keys,
+              request.getToken());
           break;
 
         case UPDATE_PERSON_APP_DATA:
@@ -121,11 +130,13 @@ public class OpenSocialDataHandler implements GadgetDataHandler {
           String key = params.getString("key");
           String value = params.getString("value");
 
-          response = dataHandler.updatePersonData(id, key, value, request.getToken());
+          response = dataHandler.updatePersonData(id, key, value,
+              request.getToken());
           break;
 
         case FETCH_ACTIVITIES:
-          response = activitiesHandler.getActivities(peopleIds, request.getToken());
+          response = activitiesHandler.getActivities(peopleIds,
+              request.getToken());
           break;
 
         case CREATE_ACTIVITY:
@@ -136,7 +147,8 @@ public class OpenSocialDataHandler implements GadgetDataHandler {
           // so json -> pojo
           Activity activity = new Activity("5", personId);
           activity.setTitle("Temporary title - we don't read json right now");
-          response = activitiesHandler.createActivity(personId, activity, request.getToken());
+          response = activitiesHandler.createActivity(personId, activity,
+              request.getToken());
           break;
       }
 
