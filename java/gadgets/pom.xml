@@ -220,7 +220,7 @@ under the License.
     <dependency>
       <groupId>caja</groupId>
       <artifactId>caja</artifactId>
-      <version>r422</version>
+      <version>r820</version>
       <scope>compile</scope>
     </dependency>
     <dependency>
