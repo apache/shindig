@@ -89,7 +89,7 @@
   },
   "opensocial-0.7" : {
     // Path to fetch opensocial data from
-    // If relative, will be appended to the document.location.host
+    // Must be on the same domain as the gadget rendering server
     "path" : "/gadgets/socialdata",
     "domain" : "shindig",
     "enableCaja" : true,
