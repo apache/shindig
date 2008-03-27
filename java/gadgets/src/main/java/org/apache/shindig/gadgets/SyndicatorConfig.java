@@ -138,15 +138,20 @@ public class SyndicatorConfig {
 
   /**
    * Loads syndicators from directories recursively.
+   *
+   * Only files with a .js or .json extension will be loaded.
+   *
    * @param files The files to examine.
    * @throws GadgetException
    */
   private void loadFiles(File[] files) throws GadgetException {
     try {
       for (File file : files) {
+        logger.info("Reading syndicator config: " + file.getName());
         if (file.isDirectory()) {
           loadFiles(file.listFiles());
-        } else {
+        } else if (file.getName().endsWith(".js") ||
+                   file.getName().endsWith(".json")) {
           loadFromString(ResourceLoader.getContent(file));
         }
       }
@@ -154,7 +159,7 @@ public class SyndicatorConfig {
       throw new GadgetException(GadgetException.Code.INVALID_PATH, e);
     }
   }
-
+ 
   /**
    * Loads resources recursively.
    * @param files The base paths to look for syndicator.xml
