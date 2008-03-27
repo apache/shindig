@@ -543,7 +543,8 @@ gadgets.IfrGadget.prototype.handleOpenUserPrefsDialog = function() {
     this.showUserPrefsDialog();
   } else {
     var gadget = this;
-    window['ig_callback_' + this.id] = function(userPrefsDialogContent) {
+    var igCallbackName = 'ig_callback_' + this.id;
+    window[igCallbackName] = function(userPrefsDialogContent) {
       gadget.userPrefsDialogContentLoaded = true;
       gadget.buildUserPrefsDialog(userPrefsDialogContent);
       gadget.showUserPrefsDialog();
@@ -566,9 +567,10 @@ gadgets.IfrGadget.prototype.buildUserPrefsDialog = function(content) {
   userPrefsDialog.childNodes[0].style.display = '';
 };
 
-gadgets.IfrGadget.prototype.showUserPrefsDialog = function(show) {
+gadgets.IfrGadget.prototype.showUserPrefsDialog = function(opt_show) {
   var userPrefsDialog = document.getElementById(this.getUserPrefsDialogId());
-  userPrefsDialog.style.display = (show || show == undefined) ? '' : 'none';
+  userPrefsDialog.style.display = (opt_show || opt_show == undefined)
+      ? '' : 'none';
 }
 
 gadgets.IfrGadget.prototype.hideUserPrefsDialog = function() {

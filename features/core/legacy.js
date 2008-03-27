@@ -20,6 +20,7 @@
  // All functions in this file should be treated as deprecated legacy routines.
  // Gadget authors are explicitly discouraged from using any of them.
 
+var JSON = gadgets.json;
 var _IG_Prefs = gadgets.Prefs;
 
 // Yes, these technically modifiy gadget.Prefs as well. Unfortunately,

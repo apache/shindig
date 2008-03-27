@@ -165,5 +165,3 @@ gadgets.json = function () {
   };
 }();
 
-var JSON = gadgets.json;
-
