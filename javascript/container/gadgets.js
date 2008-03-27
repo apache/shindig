@@ -182,6 +182,7 @@ gadgets.IfrGadgetService = function() {
   gadgets.rpc.register('resize_iframe', this.setHeight);
   gadgets.rpc.register('set_pref', this.setUserPref);
   gadgets.rpc.register('set_title', this.setTitle);
+  gadgets.rpc.register('requestNavigateTo', this.requestNavigateTo);
 };
 
 gadgets.IfrGadgetService.inherits(gadgets.GadgetService);
@@ -211,15 +212,60 @@ gadgets.IfrGadgetService.prototype.setTitle = function(title) {
  * @param {String} value Value of user preference
  * More names and values may follow
  */
-gadgets.IfrGadgetService.prototype.setUserPref = function(editToken, name, value) {
-  // Quick hack to extract the gadget id from module id
-  var id = parseInt(this.f.match(/_([0-9]+)$/)[1], 10);
+gadgets.IfrGadgetService.prototype.setUserPref = function(editToken, name,
+    value) {
+  var id = this.getGadgetIdFromModuleId(this.f);
   var gadget = gadgets.container.getGadget(id);
   var prefs = gadget.getUserPrefs();
   for (var i = 1, j = arguments.length; i < j; i += 2) {
     prefs[arguments[i]] = arguments[i + 1];
   }
   gadget.setUserPrefs(prefs);
+};
+
+/**
+ * Navigates the page to a new url based on a gadgets requested view and
+ * parameters.
+ */
+gadgets.IfrGadgetService.prototype.requestNavigateTo = function(view,
+    opt_params) {
+  var id = this.getGadgetIdFromModuleId(this.f);
+  var url = this.getUrlForView(view);
+
+  if (opt_params) {
+    var paramStr = JSON.stringify(opt_params);
+    if (paramStr.length > 0) {
+      url += '&appParams=' + encodeURIComponent(paramStr);
+    }
+  }
+
+  if (url && document.location.href.indexOf(url) == -1) {
+    document.location.href = url;
+  }
+};
+
+/**
+ * This is a silly implementation that will need to be overriden by almost all
+ * real containers.
+ * TODO: Find a better default for this function
+ *
+ * @param view The view name to get the url for
+ */
+gadgets.IfrGadgetService.prototype.getUrlForView = function(
+    view) {
+  if (view === 'canvas') {
+    return '/canvas';
+  } else if (view === 'profile') {
+    return '/profile';
+  } else {
+    return null;
+  }
+}
+
+gadgets.IfrGadgetService.prototype.getGadgetIdFromModuleId = function(
+    moduleId) {
+  // Quick hack to extract the gadget id from module id
+  return parseInt(moduleId.match(/_([0-9]+)$/)[1], 10);
 };
 
 
