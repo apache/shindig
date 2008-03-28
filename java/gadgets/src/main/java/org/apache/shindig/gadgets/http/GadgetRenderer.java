@@ -252,11 +252,12 @@ public class GadgetRenderer {
     markup.append(content)
           .append("<script>gadgets.util.runOnLoadHandlers();</script>")
           .append("</body></html>");
-    if (request.getParameter("v") != null) {
+
+    if ("1".equals(request.getParameter("nocache"))) {
+      HttpUtil.setCachingHeaders(response, 0);
+    } else if (request.getParameter("v") != null) {
       // Versioned files get cached indefinitely
       HttpUtil.setCachingHeaders(response);
-    } else if ("1".equals(request.getParameter("nocache"))) {
-      HttpUtil.setCachingHeaders(response, 0);
     } else {
       // Unversioned files get cached for 5 minutes.
       // TODO: This should be configurable

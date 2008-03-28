@@ -43,6 +43,7 @@ public class GadgetRenderingServlet extends HttpServlet {
     // not modified. This is because when there actually is a change,
     // cache busting should occur.
     if (req.getHeader("If-Modified-Since") != null &&
+        !"1".equals(req.getParameter("nocache")) &&
         req.getParameter("v") != null) {
       resp.setStatus(HttpServletResponse.SC_NOT_MODIFIED);
       return;
