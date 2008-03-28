@@ -1,6 +1,7 @@
 package org.apache.shindig.social.samplecontainer;
 
 import org.apache.shindig.gadgets.BasicRemoteContentFetcher;
+import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.RemoteContent;
 import org.apache.shindig.gadgets.RemoteContentFetcher;
 import org.apache.shindig.gadgets.RemoteContentRequest;
@@ -94,7 +95,7 @@ public class XmlStateFileFetcher {
     this.doEvil = doEvil;
   }
 
-  private Document fetchStateDocument() {
+  private Document fetchStateDocument() throws GadgetException {
     if (document != null) {
       return document;
     }
@@ -130,14 +131,14 @@ public class XmlStateFileFetcher {
     }
   }
 
-  public Map<String, Map<String, String>> getAppData() {
+  public Map<String, Map<String, String>> getAppData() throws GadgetException {
     if (allData == null) {
       setupAppData();
     }
     return allData;
   }
 
-  private void setupAppData() {
+  private void setupAppData() throws GadgetException {
     allData = new HashMap<String, Map<String, String>>();
 
     Element root = fetchStateDocument().getDocumentElement();
@@ -165,7 +166,7 @@ public class XmlStateFileFetcher {
     }
   }
 
-  public void setAppData(String id, String key, String value) {
+  public void setAppData(String id, String key, String value) throws GadgetException {
     if (allData == null) {
       setupAppData();
     }
@@ -179,21 +180,21 @@ public class XmlStateFileFetcher {
     personData.put(key, value);
   }
 
-  public Map<String, List<String>> getFriendIds() {
+  public Map<String, List<String>> getFriendIds() throws GadgetException {
     if (friendIdMap == null) {
       setupPeopleData();
     }
     return friendIdMap;
   }
 
-  public Map<String, Person> getAllPeople() {
+  public Map<String, Person> getAllPeople() throws GadgetException {
     if (allPeople == null) {
       setupPeopleData();
     }
     return allPeople;
   }
 
-  private void setupPeopleData() {
+  private void setupPeopleData() throws GadgetException {
     Element root = fetchStateDocument().getDocumentElement();
 
     allPeople = new HashMap<String, Person>();
@@ -258,7 +259,7 @@ public class XmlStateFileFetcher {
     return friends;
   }
 
-  public Map<String, List<Activity>> getActivities() {
+  public Map<String, List<Activity>> getActivities() throws GadgetException {
     if (allActivities == null) {
       setupActivities();
     }
@@ -266,7 +267,7 @@ public class XmlStateFileFetcher {
     return allActivities;
   }
 
-  private void setupActivities() {
+  private void setupActivities() throws GadgetException {
     allActivities = new HashMap<String, List<Activity>>();
 
     Element root = fetchStateDocument().getDocumentElement();
@@ -290,7 +291,7 @@ public class XmlStateFileFetcher {
   }
 
   private void createActivities(Node streamItem, String userId,
-      String streamTitle) {
+      String streamTitle) throws GadgetException {
     NodeList activityItems = streamItem.getChildNodes();
     if (activityItems != null) {
       for (int i = 0; i < activityItems.getLength(); i++) {
@@ -336,7 +337,7 @@ public class XmlStateFileFetcher {
     return media;
   }
 
-  public void createActivity(String userId, Activity activity) {
+  public void createActivity(String userId, Activity activity) throws GadgetException {
     if (allActivities == null) {
       setupActivities();
     }

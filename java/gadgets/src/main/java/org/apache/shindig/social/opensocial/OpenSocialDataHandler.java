@@ -21,6 +21,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONArray;
 
+import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.GadgetToken;
 
 import org.apache.shindig.social.samplecontainer.BasicPeopleService;
@@ -76,7 +77,7 @@ public class OpenSocialDataHandler implements GadgetDataHandler {
     }
   }
 
-  public ResponseItem handleRequest(RequestItem request) {
+  public ResponseItem handleRequest(RequestItem request) throws GadgetException {
     OpenSocialDataType type = OpenSocialDataType.valueOf(request.getType());
     ResponseItem response = new ResponseItem<Object>(
         ResponseError.NOT_IMPLEMENTED,

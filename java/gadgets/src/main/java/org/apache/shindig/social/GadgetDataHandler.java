@@ -17,6 +17,8 @@
  */
 package org.apache.shindig.social;
 
+import org.apache.shindig.gadgets.GadgetException;
+
 public interface GadgetDataHandler {
   /**
    * Determines whether this handler should be used to process the request
@@ -32,6 +34,7 @@ public interface GadgetDataHandler {
    *
    * @param request The request from the json
    * @return The corresponding response item
+   * @throws GadgetException 
    */
-  ResponseItem handleRequest(RequestItem request);
+  ResponseItem handleRequest(RequestItem request) throws GadgetException;
 }

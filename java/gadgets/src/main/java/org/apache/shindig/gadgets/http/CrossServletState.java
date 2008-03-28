@@ -21,10 +21,12 @@ package org.apache.shindig.gadgets.http;
 
 import org.apache.shindig.gadgets.Gadget;
 import org.apache.shindig.gadgets.GadgetContext;
+import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.GadgetServer;
 import org.apache.shindig.gadgets.GadgetSigner;
 import org.apache.shindig.gadgets.GadgetToken;
-import org.apache.shindig.gadgets.RequestSigner;
+import org.apache.shindig.gadgets.RemoteContentFetcher;
+import org.apache.shindig.util.BlobCrypter;
 
 import java.util.Set;
 import java.util.logging.Logger;
@@ -105,24 +107,16 @@ public abstract class CrossServletState {
   public abstract String getIframeUrl(Gadget gadget);
 
   /**
-   * Constructs a RequestSigner object that can be used to sign requests from
-   * the given gadget token to implement signed fetch.
-   * 
+   * Constructs a RemoteFetcher object that signs requests and then forwards
+   * them to the next content fetcher in the chain.
+   *
+   * @param remoteFetcher 
    * @param token the decrypted, verified security token
    * @return a request signer implementing signed fetch.
    * 
-   * @see org.apache.shindig.gadgets.SignedFetchRequestSigner
+   * @see org.apache.shindig.gadgets.SigningFetcher
    */
-  public abstract RequestSigner makeSignedFetchRequestSigner(GadgetToken token);
-
-  /**
-   * Constructs a RequestSigner object that can be used to sign requests from
-   * the given gadget token to implement full OAuth.
-   * 
-   * @param token the decrypted, verified security token
-   * @return a request signer implementing signed fetch.
-   */
-  public abstract RequestSigner makeOAuthRequestSigner(GadgetToken token);
+  public abstract RemoteContentFetcher makeSigningFetcher(RemoteContentFetcher remoteFetcher, GadgetToken token);
 
   /**
    * Initializes this handler using the provided implementation.
