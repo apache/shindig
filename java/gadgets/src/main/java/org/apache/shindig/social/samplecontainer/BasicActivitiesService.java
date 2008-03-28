@@ -17,6 +17,7 @@
  */
 package org.apache.shindig.social.samplecontainer;
 
+import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.GadgetToken;
 
 import org.apache.shindig.social.ResponseItem;
@@ -34,7 +35,7 @@ import java.util.Date;
  */
 public class BasicActivitiesService implements ActivitiesService {
   public ResponseItem<List<Activity>> getActivities(List<String> ids, 
-      GadgetToken token) {
+      GadgetToken token) throws GadgetException {
     Map<String, List<Activity>> allActivities =
         XmlStateFileFetcher.get().getActivities();
 
@@ -52,7 +53,7 @@ public class BasicActivitiesService implements ActivitiesService {
   }
 
   public ResponseItem createActivity(String personId, Activity activity, 
-        GadgetToken token) {
+        GadgetToken token) throws GadgetException {
     // TODO: Validate the activity and do any template expanding
     activity.setUserId(personId);
     activity.setPostedTime(new Date().getTime());

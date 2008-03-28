@@ -17,7 +17,7 @@
  */
 package org.apache.shindig.gadgets;
 
-import org.easymock.EasyMock;
+import org.easymock.classextension.EasyMock;
 
 import junit.framework.TestCase;
 

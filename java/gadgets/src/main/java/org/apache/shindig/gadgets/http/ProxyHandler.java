@@ -24,7 +24,6 @@ import org.apache.shindig.gadgets.GadgetToken;
 import org.apache.shindig.gadgets.RemoteContent;
 import org.apache.shindig.gadgets.RemoteContentFetcher;
 import org.apache.shindig.gadgets.RemoteContentRequest;
-import org.apache.shindig.gadgets.RequestSigner;
 import org.apache.shindig.util.InputStreamConsumer;
 
 import org.json.JSONException;
@@ -32,15 +31,12 @@ import org.json.JSONObject;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
-import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.net.URL;
 import java.net.URLDecoder;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Enumeration;
-import java.util.HashMap;
 import java.util.TreeMap;
 import java.util.HashSet;
 import java.util.List;
@@ -60,8 +56,10 @@ public class ProxyHandler {
   private static final String NOCACHE_PARAM = "nocache";
   private static final String URL_PARAM = "url";
   private static final String AUTHZ_PARAM = "authz";
+  private static final String UNSIGNED_FETCH = "none";
+  private static final String SIGNED_FETCH = "signed";
   
-  private final RemoteContentFetcher fetcher;
+  private final RemoteContentFetcher remoteFetcher;
 
   private final static Set<String> DISALLOWED_RESPONSE_HEADERS
     = new HashSet<String>();
@@ -71,25 +69,49 @@ public class ProxyHandler {
   }
 
   public ProxyHandler(RemoteContentFetcher fetcher) {
-    this.fetcher = fetcher;
+    this.remoteFetcher = fetcher;
   }
 
+  /**
+   * Information about our chain of RemoteContentFetchers.
+   *
+   * This class is kind of silly at the moment, but it'll be useful once
+   * we need to peek at the state of intermediate fetchers in the chain.
+   * (Which we will need to do for OAuth.)
+   */
+  private static class FetcherChain {
+    public RemoteContentFetcher fetcher;
+    
+    public FetcherChain(RemoteContentFetcher fetcher) {
+      this.fetcher = fetcher;
+    }
+  }
+  
   public void fetchJson(HttpServletRequest request,
                         HttpServletResponse response,
                         CrossServletState state)
       throws ServletException, IOException, GadgetException {
+    
+    // Build up the request to make
+    RemoteContentRequest rcr = buildRemoteContentRequest(request);
+    
+    // Figure out whether we need to sign the request
+    FetcherChain chain = buildFetcherChain(request, response, state);
 
-    // Fetch the content and convert it into JSON.
-    RemoteContent results = fetchContent(request, state);
-    response.setStatus(HttpServletResponse.SC_OK);
+    // Dispatch the request and serialize the response.
+    RemoteContent results = chain.fetcher.fetch(rcr);
+
     String output;
     try {
+      JSONObject resp = new JSONObject();
+      response.setStatus(HttpServletResponse.SC_OK);
+      if (results != null) {
+        resp.put("body", results.getResponseAsString());
+        resp.put("rc", results.getHttpStatusCode());
+      }
       // Use raw param as key as URL may have to be decoded
-      JSONObject resp = new JSONObject()
-          .put("body", results.getResponseAsString())
-          .put("rc", results.getHttpStatusCode());
-      String url = request.getParameter(URL_PARAM);
-      JSONObject json = new JSONObject().put(url, resp);
+      String originalUrl = request.getParameter(URL_PARAM);
+      JSONObject json = new JSONObject().put(originalUrl, resp);
       output = UNPARSEABLE_CRUFT + json.toString();
     } catch (JSONException e) {
       output = "";
@@ -100,12 +122,113 @@ public class ProxyHandler {
     response.getWriter().write(output);
   }
 
+  @SuppressWarnings("unchecked")
+  private RemoteContentRequest buildRemoteContentRequest(HttpServletRequest request)
+  throws ServletException {
+    try {
+
+      String encoding = request.getCharacterEncoding();
+      if (encoding == null) {
+        encoding = "UTF-8";
+      }
+
+      String method = request.getMethod();
+      Map<String, List<String>> headers = null;
+      byte[] postBody = null;
+
+      if ("POST".equals(method)) {
+        method = getParameter(request, METHOD_PARAM, "GET");
+        postBody = getParameter(request, POST_DATA_PARAM, "").getBytes();
+
+        String headerData = request.getParameter(HEADERS_PARAM);
+        if (headerData == null || headerData.length() == 0) {
+          headers = Collections.emptyMap();
+        } else {
+          // We actually only accept single key value mappings now.
+          headers = new TreeMap<String, List<String>>(String.CASE_INSENSITIVE_ORDER);
+          String[] headerList = headerData.split("&");
+          for (String header : headerList) {
+            String[] parts = header.split("=");
+            if (parts.length != 2) {
+              // Malformed headers
+              throw new GadgetException(GadgetException.Code.INTERNAL_SERVER_ERROR,
+              "malformed header specified");
+            }
+            headers.put(URLDecoder.decode(parts[0], encoding),
+                Arrays.asList(URLDecoder.decode(parts[1], encoding)));
+          }
+        }
+      } else {
+        postBody = null;
+        headers = new TreeMap<String, List<String>>(String.CASE_INSENSITIVE_ORDER);
+        Enumeration<String> headerNames = request.getHeaderNames();
+        while (headerNames.hasMoreElements()) {
+          String header = headerNames.nextElement();
+          headers.put(header, Collections.list(request.getHeaders(header)));
+        }
+      }
+
+      removeUnsafeHeaders(headers);
+
+      RemoteContentRequest.Options options
+        = new RemoteContentRequest.Options();
+      options.ignoreCache = "1".equals(request.getParameter(NOCACHE_PARAM));
+      URI target = validateUrl(request.getParameter(URL_PARAM));
+      RemoteContentRequest req = new RemoteContentRequest(
+          method, target, headers, postBody, options);
+
+      return req;
+    } catch (UnsupportedEncodingException e) {
+      throw new ServletException(e);
+    } catch (GadgetException e) {
+      throw new ServletException(e);
+    }
+  }
+
+  /**
+   * At the moment our fetcher chain is short.  In the future we might add
+   * additional layers for things like caching or throttling.
+   */
+  private FetcherChain buildFetcherChain(HttpServletRequest request,
+      HttpServletResponse response, CrossServletState state) throws GadgetException {
+    String authzType = getParameter(request, AUTHZ_PARAM, "");
+    if (authzType.equals("") || authzType.equals(UNSIGNED_FETCH)) {
+      return new FetcherChain(remoteFetcher);
+    }
+    GadgetSigner signer = state.getGadgetSigner();
+    if (signer == null) {
+      throw new GadgetException(GadgetException.Code.UNSUPPORTED_FEATURE,
+          "authenticated makeRequest not supported");
+    } 
+    String tokenString = getParameter(request, SECURITY_TOKEN_PARAM, "");
+    GadgetToken securityToken = signer.createToken(tokenString);
+    if (securityToken == null) {
+      throw new GadgetException(GadgetException.Code.INVALID_GADGET_TOKEN);
+    }
+    RemoteContentFetcher realFetcher = null;
+    if (authzType.equals(SIGNED_FETCH)) {
+      realFetcher = state.makeSigningFetcher(remoteFetcher, securityToken);
+    }
+    if (realFetcher == null) {
+      throw new GadgetException(GadgetException.Code.UNSUPPORTED_FEATURE,
+          String.format("Unsupported auth type %s", authzType));
+    }
+    return new FetcherChain(realFetcher);
+  }
+
+  
+  /**
+   * This is called for embedding images inline in gadgets, e.g. via img src links
+   * created via IG_Embed.
+   */
   public void fetch(HttpServletRequest request,
                     HttpServletResponse response,
                     CrossServletState state)
       throws ServletException, IOException, GadgetException {
-    RemoteContent results = fetchContent(request, state);
-
+    RemoteContentRequest rcr = buildRemoteContentRequest(request);
+    RemoteContent results = remoteFetcher.fetch(rcr);
+    
+    // TODO: why are we checking for caching headers *after* we sent the request?
     if (request.getHeader("If-Modified-Since") != null) {
       response.setStatus(HttpServletResponse.SC_NOT_MODIFIED);
       return;
@@ -135,83 +258,6 @@ public class ProxyHandler {
   }
 
   /**
-   * Fetch the content for a request
-   *
-   * @param request
-   */
-  @SuppressWarnings("unchecked")
-  private RemoteContent fetchContent(HttpServletRequest request,
-      CrossServletState state) throws ServletException, GadgetException {
-    String encoding = request.getCharacterEncoding();
-    if (encoding == null) {
-      encoding = "UTF-8";
-    }
-
-    try {
-      URL originalUrl = validateUrl(request.getParameter(URL_PARAM));
-      GadgetSigner signer = state.getGadgetSigner();
-      URL signedUrl;
-      if ("signed".equals(request.getParameter(AUTHZ_PARAM))) {
-        GadgetToken token = extractAndValidateToken(request, signer);
-        if (token == null) {
-          return new RemoteContent(HttpServletResponse.SC_UNAUTHORIZED,
-              "Invalid security token.".getBytes(), null);
-        }
-        signedUrl = signUrl(state, originalUrl, token, request);
-      } else {
-        signedUrl = originalUrl;
-      }
-      String method = request.getMethod();
-      Map<String, List<String>> headers = null;
-      byte[] postBody = null;
-
-      if ("POST".equals(method)) {
-        method = getParameter(request, METHOD_PARAM, "GET");
-        postBody = getParameter(request, POST_DATA_PARAM, "").getBytes();
-
-        String headerData = request.getParameter(HEADERS_PARAM);
-        if (headerData == null || headerData.length() == 0) {
-          headers = Collections.emptyMap();
-        } else {
-          // We actually only accept single key value mappings now.
-          headers = new TreeMap<String, List<String>>(String.CASE_INSENSITIVE_ORDER);
-          String[] headerList = headerData.split("&");
-          for (String header : headerList) {
-            String[] parts = header.split("=");
-            if (parts.length != 2) {
-              // Malformed headers
-              return RemoteContent.ERROR;
-            }
-            headers.put(URLDecoder.decode(parts[0], encoding),
-                Arrays.asList(URLDecoder.decode(parts[1], encoding)));
-          }
-        }
-      } else {
-        postBody = null;
-        headers = new TreeMap<String, List<String>>(String.CASE_INSENSITIVE_ORDER);
-        Enumeration<String> headerNames = request.getHeaderNames();
-        while (headerNames.hasMoreElements()) {
-          String header = headerNames.nextElement();
-          headers.put(header, Collections.list(request.getHeaders(header)));
-        }
-      }
-
-      removeUnsafeHeaders(headers);
-
-      RemoteContentRequest.Options options
-          = new RemoteContentRequest.Options();
-      options.ignoreCache = "1".equals(request.getParameter(NOCACHE_PARAM));
-      RemoteContentRequest req = new RemoteContentRequest(
-          method, signedUrl.toURI(), headers, postBody, options);
-      return fetcher.fetch(req);
-    } catch (UnsupportedEncodingException e) {
-      throw new ServletException(e);
-    } catch (URISyntaxException e) {
-      throw new ServletException(e);
-    }
-  }
-
-  /**
    * Removes unsafe headers from the header set.
    * @param headers
    */
@@ -229,12 +275,14 @@ public class ProxyHandler {
 
   /**
    * Validates that the given url is valid for this request.
+   * 
+   * non-private for testing only.
    *
    * @param urlToValidate
    * @return A URL object of the URL
    * @throws ServletException if the URL fails security checks or is malformed.
    */
-  private URL validateUrl(String urlToValidate) throws ServletException {
+   URI validateUrl(String urlToValidate) throws ServletException {
     if (urlToValidate == null) {
       throw new ServletException("url parameter is missing.");
     }
@@ -257,39 +305,10 @@ public class ProxyHandler {
                       "/", url.getQuery(),
                       url.getFragment());
       }
-      return url.toURL();
+      return url;
     } catch (URISyntaxException use) {
       throw new ServletException("Malformed URL " + use.getMessage());
-    } catch (MalformedURLException mfe) {
-      throw new ServletException("Malformed URL " + mfe.getMessage());
     }
-  }
-
-  /**
-   * @param request
-   * @return A valid token for the given input.
-   * @throws GadgetException
-   */
-  private GadgetToken extractAndValidateToken(HttpServletRequest request,
-      GadgetSigner signer) throws GadgetException {
-    if (signer == null) {
-      return null;
-    }
-    String token = getParameter(request, SECURITY_TOKEN_PARAM, "");
-    return signer.createToken(token);
-  }
-
-  /**
-   * Sign a URL with a GadgetToken if needed
-   * @return The signed url.
-   */
-  @SuppressWarnings("unchecked")
-  private URL signUrl(CrossServletState state, URL originalUrl, GadgetToken token,
-      HttpServletRequest request) throws GadgetException {
-    String method = getParameter(request, METHOD_PARAM, "GET");
-    String body = getParameter(request, POST_DATA_PARAM, null);
-    RequestSigner signer = state.makeSignedFetchRequestSigner(token);
-    return signer.signRequest(method, originalUrl, body);
   }
 
   /**
