@@ -93,7 +93,12 @@ public class GadgetTestFixture extends EasyMockTestCase {
     }
 
     @Override
-    public RemoteContentFetcher makeSigningFetcher(RemoteContentFetcher fetcher, GadgetToken token) {
+    public RequestSigner makeOAuthRequestSigner(GadgetToken token) {
+      return null;
+    }
+
+    @Override
+    public RequestSigner makeSignedFetchRequestSigner(GadgetToken token) {
       // Real implementations should use their own key, probably pulled from
       // disk rather than hardcoded in the source.
       final String PRIVATE_KEY_TEXT =
@@ -112,8 +117,8 @@ public class GadgetTestFixture extends EasyMockTestCase {
         "AO/0isr/3aa6O6NLQxISLKcPDk2NOccAfS/xOtfOz4sJYM3+Bs4Io9+dZGSDCA54" +
         "Lw03eHTNQghS0A==";
       final String PRIVATE_KEY_NAME = "shindig-insecure-key";
-      return SigningFetcher.makeFromB64PrivateKey(
-          fetcher, token, PRIVATE_KEY_NAME, PRIVATE_KEY_TEXT);
+      return new SignedFetchRequestSigner(token, PRIVATE_KEY_NAME,
+          PRIVATE_KEY_TEXT);
     }
   };
 

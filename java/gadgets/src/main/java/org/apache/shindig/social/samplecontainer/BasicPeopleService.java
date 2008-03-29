@@ -22,7 +22,6 @@ import org.apache.shindig.social.opensocial.PeopleService;
 import org.apache.shindig.social.opensocial.model.IdSpec;
 import org.apache.shindig.social.opensocial.model.Person;
 import org.apache.shindig.social.opensocial.model.ApiCollection;
-import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.GadgetToken;
 import org.json.JSONException;
 
@@ -45,7 +44,7 @@ public class BasicPeopleService implements PeopleService {
 
   public ResponseItem<ApiCollection<Person>> getPeople(List<String> ids,
       SortOrder sortOrder, FilterType filter, int first, int max, 
-      Set<String> profileDetails, GadgetToken token) throws GadgetException {
+      Set<String> profileDetails, GadgetToken token) {
     Map<String, Person> allPeople = XmlStateFileFetcher.get().getAllPeople();
 
     List<Person> people = new ArrayList<Person>();
@@ -80,7 +79,7 @@ public class BasicPeopleService implements PeopleService {
   }
 
   public List<String> getIds(IdSpec idSpec, GadgetToken token)
-      throws JSONException, GadgetException {
+      throws JSONException {
     Map<String, List<String>> friendIds
         = XmlStateFileFetcher.get().getFriendIds();
 

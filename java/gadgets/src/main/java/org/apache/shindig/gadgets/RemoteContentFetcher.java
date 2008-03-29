@@ -18,29 +18,11 @@
 package org.apache.shindig.gadgets;
 
 
-/**
- * Fetches data over HTTP.
- * 
- * Subclasses can use a chain-of-responsibility pattern to add functionality
- * to the fetching process.  For example, a SigningFetcher can talk to a
- * CachingFetcher can talk to a ThrottlingFetcher that talks to a
- * RemoteFetcher that gets the actual data.
- */
-public abstract class RemoteContentFetcher {
-
-  /** next fetcher in the chain, may be null */
-  protected RemoteContentFetcher nextFetcher;
-
-  protected RemoteContentFetcher(RemoteContentFetcher nextFetcher) {
-    this.nextFetcher = nextFetcher;
-  }
-  
+public interface RemoteContentFetcher {
   /**
-   * Fetch HTTP content.
-   *
+   * Fetch content using the HTTP GET method
    * @param request The request to fetch.
    * @return RemoteContent
-   * @throws GadgetException 
    */
-  public abstract RemoteContent fetch(RemoteContentRequest request) throws GadgetException;
+  public RemoteContent fetch(RemoteContentRequest request);
 }

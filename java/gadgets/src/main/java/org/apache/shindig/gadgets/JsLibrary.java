@@ -113,10 +113,9 @@ public final class JsLibrary {
    *     kept as a url reference, otherwise the file will be fetched and treated
    *     as a FILE type.
    * @return The newly created library.
-   * @throws GadgetException 
    */
   public static JsLibrary create(Type type, String content, String feature,
-      RemoteContentFetcher fetcher) throws GadgetException {
+      RemoteContentFetcher fetcher) {
     String optimizedContent = null;
     String debugContent;
     switch (type) {
@@ -169,10 +168,9 @@ public final class JsLibrary {
    * @param url
    * @param fetcher
    * @return The contents of the JS file, or null if it can't be fetched.
-   * @throws GadgetException 
    */
   private static String loadDataFromUrl(String url,
-      RemoteContentFetcher fetcher) throws GadgetException {
+      RemoteContentFetcher fetcher) {
     try {
       logger.info("Attempting to load js from: " + url);
       URI uri = new URI(url);

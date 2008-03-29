@@ -17,7 +17,6 @@
  */
 package org.apache.shindig.social.samplecontainer;
 
-import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.GadgetToken;
 import org.apache.shindig.social.ResponseError;
 import org.apache.shindig.social.ResponseItem;
@@ -31,7 +30,7 @@ import java.util.Map;
 public class BasicDataService implements DataService {
 
   public ResponseItem<Map<String, Map<String, String>>> getPersonData(
-        List<String> ids, List<String> keys, GadgetToken token) throws GadgetException {
+        List<String> ids, List<String> keys, GadgetToken token) {
 
     Map<String, Map<String, String>> allData
         = XmlStateFileFetcher.get().getAppData();
@@ -58,7 +57,7 @@ public class BasicDataService implements DataService {
   }
 
   public ResponseItem updatePersonData(String id, String key, String value,
-      GadgetToken token) throws GadgetException {
+      GadgetToken token) {
     if (!isValidKey(key)) {
       return new ResponseItem<Object>(ResponseError.BAD_REQUEST,
           "The person data key had invalid characters",

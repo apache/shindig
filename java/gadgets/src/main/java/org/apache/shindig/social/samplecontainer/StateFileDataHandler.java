@@ -19,7 +19,6 @@ package org.apache.shindig.social.samplecontainer;
 
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.social.ResponseItem;
 import org.apache.shindig.social.ResponseError;
 import org.apache.shindig.social.GadgetDataHandler;
@@ -50,7 +49,7 @@ public class StateFileDataHandler implements GadgetDataHandler {
     }
   }
 
-  public ResponseItem handleRequest(RequestItem request) throws GadgetException {
+  public ResponseItem handleRequest(RequestItem request) {
     RequestType type = RequestType.valueOf(request.getType());
     ResponseItem response = null;
 

@@ -30,7 +30,7 @@ import java.util.Map;
  * Implementation of a {@code RemoteObjectFetcher} using standard java.net
  * classes.
  */
-public class BasicRemoteContentFetcher extends RemoteContentFetcher {
+public class BasicRemoteContentFetcher implements RemoteContentFetcher {
   private static final int CONNECT_TIMEOUT_MS = 5000;
 
   private final int maxObjSize;
@@ -41,7 +41,6 @@ public class BasicRemoteContentFetcher extends RemoteContentFetcher {
    * @param maxObjSize Maximum size, in bytes, of object to fetch
    */
   public BasicRemoteContentFetcher(int maxObjSize) {
-    super(null);
     this.maxObjSize = maxObjSize;
   }
 

@@ -49,8 +49,6 @@ public class BlobCrypterTest {
     checkString("ab");
     checkString("dfkljdasklsdfklasdjfklajsdfkljasdklfjasdkljfaskldjf");
     checkString(Crypto.getRandomString(500));
-    checkString("foo bar baz");
-    checkString("foo\nbar\nbaz");
   }
 
   private void checkString(String string) throws Exception {
