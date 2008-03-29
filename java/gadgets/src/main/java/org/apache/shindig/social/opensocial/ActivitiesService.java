@@ -17,7 +17,6 @@
  */
 package org.apache.shindig.social.opensocial;
 
-import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.GadgetToken;
 
 import org.apache.shindig.social.ResponseItem;
@@ -31,10 +30,9 @@ public interface ActivitiesService {
    * @param ids The ids of the people to fetch activities for.
    * @param token A valid GadgetToken
    * @return a response item with the list of activities.
-   * @throws GadgetException 
    */
   public ResponseItem<List<Activity>> getActivities(List<String> ids,
-      GadgetToken token) throws GadgetException;
+      GadgetToken token);
 
   /**
    * Creates the passed in activity for the given user. Once createActivity is
@@ -43,8 +41,7 @@ public interface ActivitiesService {
    * @param activity The activity to create.
    * @param token A valid GadgetToken
    * @return a response item containing any errors
-   * @throws GadgetException 
    */
   public ResponseItem createActivity(String personId, Activity activity,
-      GadgetToken token) throws GadgetException;
+      GadgetToken token);
 }

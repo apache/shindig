@@ -22,18 +22,16 @@ import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.codec.digest.DigestUtils;
 
 import java.io.UnsupportedEncodingException;
-import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.security.GeneralSecurityException;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 
 /**
  * Utility class for managing signed, encrypted, and time stamped blobs.
  * Blobs are made up of name/value pairs.  Time stamps are automatically
  * included under BlobCrypter.TIMESTAMP_KEY.
- * 
- * Thread safe.
  */
 public class BlobCrypter {
 
@@ -176,8 +174,8 @@ public class BlobCrypter {
     String[] items = base.split("[&=]");
     Map<String, String> map = new HashMap<String, String>();
     for (int i=0; i < items.length; ) {
-      String key = URLDecoder.decode(items[i++], UTF8);
-      String val = URLDecoder.decode(items[i++], UTF8);
+      String key = items[i++];
+      String val = items[i++];
       map.put(key, val);
     }
     return map;

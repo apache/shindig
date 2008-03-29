@@ -22,7 +22,6 @@ package org.apache.shindig.gadgets.http;
 import org.apache.shindig.gadgets.BasicGadgetBlacklist;
 import org.apache.shindig.gadgets.BasicGadgetSigner;
 import org.apache.shindig.gadgets.BasicRemoteContentFetcher;
-import org.apache.shindig.gadgets.DataFetcher;
 import org.apache.shindig.gadgets.Gadget;
 import org.apache.shindig.gadgets.GadgetContext;
 import org.apache.shindig.gadgets.GadgetException;
@@ -37,7 +36,8 @@ import org.apache.shindig.gadgets.GadgetToken;
 import org.apache.shindig.gadgets.JsLibrary;
 import org.apache.shindig.gadgets.MessageBundleFetcher;
 import org.apache.shindig.gadgets.RemoteContentFetcher;
-import org.apache.shindig.gadgets.SigningFetcher;
+import org.apache.shindig.gadgets.RequestSigner;
+import org.apache.shindig.gadgets.SignedFetchRequestSigner;
 import org.apache.shindig.gadgets.SyndicatorConfig;
 import org.apache.shindig.gadgets.UserPrefs;
 import org.apache.shindig.gadgets.spec.GadgetSpec;
@@ -47,8 +47,6 @@ import org.apache.shindig.util.HashUtil;
 import java.io.File;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.net.URLEncoder;
 import java.util.Map;
 import java.util.Set;
@@ -229,8 +227,12 @@ public class DefaultCrossServletState extends CrossServletState {
   }
 
   @Override
-  public RemoteContentFetcher makeSigningFetcher(
-      RemoteContentFetcher fetcher, GadgetToken token) {
+  public RequestSigner makeOAuthRequestSigner(GadgetToken token) {
+    return null;
+  }
+
+  @Override
+  public RequestSigner makeSignedFetchRequestSigner(GadgetToken token) {
     // Real implementations should use their own key, probably pulled from
     // disk rather than hardcoded in the source.
     final String PRIVATE_KEY_TEXT =
@@ -249,7 +251,7 @@ public class DefaultCrossServletState extends CrossServletState {
       "AO/0isr/3aa6O6NLQxISLKcPDk2NOccAfS/xOtfOz4sJYM3+Bs4Io9+dZGSDCA54" +
       "Lw03eHTNQghS0A==";
     final String PRIVATE_KEY_NAME = "shindig-insecure-key";
-    return SigningFetcher.makeFromB64PrivateKey(
-        fetcher, token, PRIVATE_KEY_NAME, PRIVATE_KEY_TEXT);
+    return new SignedFetchRequestSigner(token, PRIVATE_KEY_NAME,
+        PRIVATE_KEY_TEXT);
   }
 }

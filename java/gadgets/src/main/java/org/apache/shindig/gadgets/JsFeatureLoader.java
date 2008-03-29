@@ -238,8 +238,7 @@ public class JsFeatureLoader {
    * @param renderingContext
    */
   private void processContext(ParsedFeature feature, Element context,
-                              RenderingContext renderingContext) 
-  throws GadgetException {
+                              RenderingContext renderingContext) {
     String syndicator = XmlUtil.getAttribute(context, "synd",
         SyndicatorConfig.DEFAULT_SYNDICATOR);
     NodeList libraries = context.getElementsByTagName("script");

@@ -33,6 +33,9 @@ import java.util.Map;
  * Holds request data for passing to a RemoteContentFetcher.
  * Instances of this object are immutable.
  *
+ * TODO: We should probably just stick the method in here. Having separate
+ * calls for POST vs. get seems unnecessary.
+ *
  * TODO: This naming seems really ridiculous now. Why don't we just call it
  * what it is -- an HTTP request?
  */
@@ -44,13 +47,6 @@ public class RemoteContentRequest {
    */
   public InputStream getPostBody() {
     return new ByteArrayInputStream(postBody);
-  }
-  
-  /**
-   * @return the post body bytes
-   */
-  public byte[] getPostBodyBytes() {
-    return postBody;
   }
 
   /**

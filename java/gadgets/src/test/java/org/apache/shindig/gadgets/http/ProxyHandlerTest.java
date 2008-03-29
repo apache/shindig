@@ -25,7 +25,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.PrintWriter;
 import java.net.URI;
 
-import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.GadgetTestFixture;
 import org.apache.shindig.gadgets.RemoteContent;
 import org.apache.shindig.gadgets.RemoteContentRequest;
@@ -143,54 +142,17 @@ public class ProxyHandlerTest extends GadgetTestFixture {
     writer.close();
   }
 
-  public void testSignedPostRequest() throws Exception {
-    String postBody = "foo=bar%20baz";
-    setupPostRequestMock(URL_ONE, postBody);
-    expect(request.getParameter("st")).andReturn("fake-token").atLeastOnce();
-    expect(request.getParameter("authz")).andReturn("signed").atLeastOnce();
-    RemoteContent resp = new RemoteContent(200, DATA_ONE.getBytes(), null);
-    expect(fetcher.fetch(
-        looksLikeSignedFetch(URL_ONE, postBody.getBytes()))).andReturn(resp);
-    replay();
-    proxyHandler.fetchJson(request, response, state);
-    verify();
-    writer.close();
-  }
-  
-  public void testInvalidSigningType() throws Exception {
-    setupGetRequestMock(URL_ONE);
-    expect(request.getParameter("st")).andReturn("fake-token").atLeastOnce();
-    expect(request.getParameter("authz")).andReturn("garbage").atLeastOnce();
-    replay();
-    try {
-      proxyHandler.fetchJson(request, response, state);
-      fail("proxyHandler accepted invalid authz type");
-    } catch (GadgetException e) {
-      assertEquals(GadgetException.Code.UNSUPPORTED_FEATURE, e.getCode());
-    }
-  }
-  
   private RemoteContentRequest looksLikeSignedFetch(String url) {
-    return looksLikeSignedFetch(url, null);
-  }
-  
-  private RemoteContentRequest looksLikeSignedFetch(String url, byte[] postBody) {
-    EasyMock.reportMatcher(new SignedFetchArgumentMatcher(url, postBody));
+    EasyMock.reportMatcher(new SignedFetchArgumentMatcher(url));
     return null;
   }
 
   private class SignedFetchArgumentMatcher implements IArgumentMatcher {
 
     private String expectedUrl;
-    private byte[] postBody;
 
     public SignedFetchArgumentMatcher(String expectedUrl) {
-      this(expectedUrl, null);
-    }
-    
-    public SignedFetchArgumentMatcher(String expectedUrl, byte[] postBody) {
       this.expectedUrl = expectedUrl;
-      this.postBody = postBody;
     }
 
     public void appendTo(StringBuffer sb) {
@@ -202,95 +164,11 @@ public class ProxyHandlerTest extends GadgetTestFixture {
     public boolean matches(Object arg0) {
       RemoteContentRequest request = (RemoteContentRequest)arg0;
       String url = request.getUri().toASCIIString();
-      if (url.startsWith(expectedUrl) &&
-          url.contains("opensocial_owner_id") && 
+      return (url.startsWith(expectedUrl) &&
+          url.contains("opensocial_owner_id") &&
           url.contains("opensocial_viewer_id") &&
-          url.contains("opensocial_app_id") &&
-          byteArrayEquals(postBody, request.getPostBodyBytes())) {
-        return true;
-      }
-      return false;
+          url.contains("opensocial_app_id"));
     }
 
-    private boolean byteArrayEquals(byte[] expected, byte[] actual) {
-      if (expected == null) {
-        expected = new byte[0];
-      }
-      if (actual == null) {
-        actual = new byte[0];
-      }
-      if (expected.length != actual.length) {
-        return false;
-      }
-      for (int i=0; i < expected.length; i++) {
-        if (expected[i] != actual[i]) {
-          return false;
-        }
-      }
-      return true;
-    }
-  }
-  
-  public void testValidateUrlNoPath() throws Exception {
-    URI url = proxyHandler.validateUrl("http://www.example.com");
-    assertEquals("http", url.getScheme());
-    assertEquals("www.example.com", url.getHost());
-    assertEquals(-1, url.getPort());
-    assertEquals("/", url.getPath());
-    assertNull(url.getQuery());
-    assertNull(url.getFragment());
-  }
-  
-  public void testValidateUrlWithPath() throws Exception {
-    URI url = proxyHandler.validateUrl("http://www.example.com/foo");
-    assertEquals("http", url.getScheme());
-    assertEquals("www.example.com", url.getHost());
-    assertEquals(-1, url.getPort());
-    assertEquals("/foo", url.getPath());
-    assertNull(url.getQuery());
-    assertNull(url.getFragment());
-  }
-  
-  public void testValidateUrlWithPort() throws Exception {
-    URI url = proxyHandler.validateUrl("http://www.example.com:8080/foo");
-    assertEquals("http", url.getScheme());
-    assertEquals("www.example.com", url.getHost());
-    assertEquals(8080, url.getPort());
-    assertEquals("/foo", url.getPath());
-    assertNull(url.getQuery());
-    assertNull(url.getFragment());
-  }
-  
-  public void testValidateUrlWithEncodedPath() throws Exception {
-    URI url = proxyHandler.validateUrl("http://www.example.com:8080/foo%20bar");
-    assertEquals("http", url.getScheme());
-    assertEquals("www.example.com", url.getHost());
-    assertEquals(8080, url.getPort());
-    assertEquals("/foo%20bar", url.getRawPath());
-    assertEquals("/foo bar", url.getPath());
-    assertNull(url.getQuery());
-    assertNull(url.getFragment());    
-  }
-  
-  public void testValidateUrlWithEncodedQuery() throws Exception {
-    URI url = proxyHandler.validateUrl("http://www.example.com:8080/foo?q=with%20space");
-    assertEquals("http", url.getScheme());
-    assertEquals("www.example.com", url.getHost());
-    assertEquals(8080, url.getPort());
-    assertEquals("/foo", url.getPath());
-    assertEquals("q=with%20space", url.getRawQuery());
-    assertEquals("q=with space", url.getQuery());
-    assertNull(url.getFragment());    
-  }
-  
-  public void testValidateUrlWithNoPathAndEncodedQuery() throws Exception {
-    URI url = proxyHandler.validateUrl("http://www.example.com?q=with%20space");
-    assertEquals("http", url.getScheme());
-    assertEquals("www.example.com", url.getHost());
-    assertEquals(-1, url.getPort());
-    assertEquals("/", url.getPath());
-    assertEquals("q=with%20space", url.getRawQuery());
-    assertEquals("q=with space", url.getQuery());
-    assertNull(url.getFragment());        
   }
 }
