@@ -101,7 +101,7 @@ public class GadgetDataServlet extends HttpServlet {
       logger.info("Request was made with invalid security token: " + token);
       response = new DataResponse(ResponseError.BAD_REQUEST);
     }
-
+    resp.setContentType("application/json; charset=utf-8");
     PrintWriter writer = resp.getWriter();
     writer.write(response.toJson().toString());
   }
