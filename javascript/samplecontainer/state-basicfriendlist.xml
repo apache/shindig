@@ -1,14 +1,20 @@
+<?xml version="1.0" encoding="UTF-8" ?>
 <container>
   <people>
     <person id="john.doe" name="John Doe" gender="M">
       <friend>jane.doe</friend>
       <friend>george.doe</friend>
+      <friend>maija.m</friend>
     </person>
     <person id="jane.doe" name="Jane Doe" phone="867-5309" gender="F">
       <friend>john.doe</friend>
     </person>
     <person id="george.doe" name="George Doe" gender="M">
       <friend>john.doe</friend>
+    </person>
+    <person id="mario.rossi" name="Mario Rossi" gender="M">
+    </person>
+    <person id="maija.m" name="Maija Meikäläinen" gender="F">
     </person>
   </people>
 
