@@ -262,8 +262,8 @@ public class ModulePrefs {
   /**
    * ModuleSpec.Preload
    */
-  private final List<URI> preloads;
-  public List<URI> getPreloads() {
+  private final List<Preload> preloads;
+  public List<Preload> getPreloads() {
     return preloads;
   }
 
@@ -389,8 +389,8 @@ public class ModulePrefs {
        .append(" scaling=\"").append(scaling).append('\"')
        .append(" scrolling=\"").append(scrolling).append('\"')
        .append(">\n");
-    for (URI preload : preloads) {
-      buf.append("<Preload href=\"").append(preload).append("\"/>\n");
+    for (Preload preload : preloads) {
+      buf.append(preload).append("\n");
     }
     for (Feature feature : features.values()) {
       buf.append(feature).append('\n');
@@ -489,13 +489,10 @@ interface ElementVisitor {
  * Processes ModulePrefs.Preload into a list.
  */
 class PreloadVisitor implements ElementVisitor {
-  final List<URI> preloads = new LinkedList<URI>();
+  final List<Preload> preloads = new LinkedList<Preload>();
   public void visit(Element element) throws SpecParserException {
-    URI href = XmlUtil.getUriAttribute(element, "href");
-    if (href == null) {
-      throw new SpecParserException("Preload@href is required.");
-    }
-    preloads.add(href);
+    Preload preload = new Preload(element);
+    preloads.add(preload);
   }
 }
 

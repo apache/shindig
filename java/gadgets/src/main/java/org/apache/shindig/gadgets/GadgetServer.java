@@ -21,6 +21,7 @@ import org.apache.shindig.gadgets.spec.Feature;
 import org.apache.shindig.gadgets.spec.GadgetSpec;
 import org.apache.shindig.gadgets.spec.LocaleSpec;
 import org.apache.shindig.gadgets.spec.MessageBundle;
+import org.apache.shindig.gadgets.spec.Preload;
 import org.apache.shindig.util.Check;
 
 import java.util.HashMap;
@@ -176,7 +177,17 @@ public class GadgetServer {
   private void runTasks(Gadget gadget,
       Map<GadgetFeatureRegistry.Entry, GadgetFeature> tasks)
       throws GadgetException {
-    CompletionService<GadgetException> processor
+
+    // Immediately enqueue all the preloads
+    CompletionService<RemoteContent> preloadProcessor
+        = new ExecutorCompletionService<RemoteContent>(config.getExecutor());
+    for (Preload preload : gadget.getSpec().getModulePrefs().getPreloads()) {
+      gadget.getPreloadMap().put(preload,
+          preloadProcessor.submit(
+              new PreloadTask(preload, getConfig().getContentFetcher())));
+    }
+
+    CompletionService<GadgetException> featureProcessor
         = new ExecutorCompletionService<GadgetException>(config.getExecutor());
     // FeatureTask is OK has a hash key because we want actual instances, not
     // names.
@@ -196,14 +207,14 @@ public class GadgetServer {
         if (task.depsDone(done)) {
           pending.remove(task);
           running.add(task);
-          processor.submit(task);
+          featureProcessor.submit(task);
         }
       }
 
       if (running.size() > 0) {
         try {
           Future<GadgetException> future;
-          while ((future = processor.take()) != null) {
+          while ((future = featureProcessor.take()) != null) {
             GadgetException e = future.get();
             if (future.get() != null) {
               throw future.get();
@@ -296,5 +307,23 @@ class FeatureTask implements Callable<GadgetException> {
     this.gadget = gadget;
     this.context = context;
     this.dependencies = dependencies;
+  }
+}
+
+/**
+ * Provides a task for preloading data into the gadget content
+ */
+class PreloadTask implements Callable<RemoteContent> {
+  private final Preload preload;
+  private final RemoteContentFetcher fetcher;
+
+  public RemoteContent call() {
+    RemoteContentRequest request = new RemoteContentRequest(preload.getHref());
+    return fetcher.fetch(request);
+  }
+
+  public PreloadTask(Preload preload, RemoteContentFetcher fetcher) {
+    this.preload = preload;
+    this.fetcher = fetcher;
   }
 }

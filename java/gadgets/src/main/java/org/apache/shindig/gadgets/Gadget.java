@@ -19,8 +19,12 @@ package org.apache.shindig.gadgets;
 
 import org.apache.shindig.gadgets.spec.GadgetSpec;
 import org.apache.shindig.gadgets.spec.MessageBundle;
+import org.apache.shindig.gadgets.spec.Preload;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.Future;
 
 /**
  * Intermediary representation of all state associated with processing
@@ -58,6 +62,12 @@ public class Gadget {
   private final List<JsLibrary> jsLibraries;
   public List<JsLibrary> getJsLibraries() {
     return jsLibraries;
+  }
+
+  private final Map<Preload, Future<RemoteContent>> preloads
+      = new HashMap<Preload, Future<RemoteContent>>();
+  public Map<Preload, Future<RemoteContent>> getPreloadMap() {
+    return preloads;
   }
 
   /**

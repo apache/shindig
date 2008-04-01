@@ -182,6 +182,33 @@ gadgets.io = function() {
   }
 
   /**
+   * Satisfy a request with data that is prefetched as per the gadget Preload
+   * directive. The preloader will only satisfy a request for a specific piece
+   * of content once.
+   *
+   * @param postData The definition of the request to be executed by the proxy
+   * @param params The params to use when processing the response
+   * @param callback The function to call once the data is fetched
+   * @return true if the request can be satisfied by the preloaded content
+   *         false otherwise
+   */
+  function respondWithPreload(postData, params, callback) {
+    if (gadgets.io.preloaded && gadgets.io.preloaded[postData.url]) {
+      var preload = gadgets.io.preloaded[postData.url];
+      if (postData.httpMethod == "GET" && postData.authz == "none") {
+        delete gadgets.io.preloaded[postData.url];
+        if (preload.rc !== 200) {
+          callback({errors : ["Error " + preload.rc]});
+        } else {
+          callback(transformResponseData(params, preload.body));
+        }
+        return true;
+      }
+    }
+    return false;
+  }
+
+  /**
    * @param {Object} configuration Configuration settings
    * @private
    */
@@ -239,12 +266,14 @@ gadgets.io = function() {
         httpMethod : params.METHOD || "GET",
         headers: gadgets.io.encodeValues(headers, false),
         postData : params.POST_DATA || "",
-        authz : auth || "",
+        authz : auth || "none",
         st : st || ""
       };
 
-      makePostRequest(url, config.jsonProxyUrl, callback,
-          gadgets.io.encodeValues(postData), params, processResponse);
+      if (!respondWithPreload(postData, params, callback, processResponse)) {
+        makePostRequest(url, config.jsonProxyUrl, callback,
+            gadgets.io.encodeValues(postData), params, processResponse);
+      }
     },
 
     /**
