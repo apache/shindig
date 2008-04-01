@@ -45,7 +45,7 @@ public class ModulePrefsTest extends TestCase {
                  " category2=\"category2\">" +
                  "  <Require feature=\"require\"/>" +
                  "  <Optional feature=\"optional\"/>" +
-                 "  <Preload href=\"preload\"/>" +
+                 "  <Preload href=\"http://www.google.com\"/>" +
                  "  <Icon/>" +
                  "  <Locale/>" +
                  "</ModulePrefs>";
@@ -64,7 +64,8 @@ public class ModulePrefsTest extends TestCase {
     assertEquals("category2", prefs.getCategories().get(1));
     assertEquals(true, prefs.getFeatures().get("require").getRequired());
     assertEquals(false, prefs.getFeatures().get("optional").getRequired());
-    assertEquals("preload", prefs.getPreloads().get(0).toString());
+    assertEquals("http://www.google.com",
+        prefs.getPreloads().get(0).getHref().toString());
     assertEquals(1, prefs.getIcons().size());
     assertEquals(1, prefs.getLocales().size());
   }

@@ -26,13 +26,14 @@ import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.GadgetFeatureRegistry;
 import org.apache.shindig.gadgets.GadgetServerConfigReader;
 import org.apache.shindig.gadgets.JsLibrary;
+import org.apache.shindig.gadgets.RemoteContent;
 import org.apache.shindig.gadgets.SyndicatorConfig;
 import org.apache.shindig.gadgets.spec.Feature;
 import org.apache.shindig.gadgets.spec.LocaleSpec;
 import org.apache.shindig.gadgets.spec.MessageBundle;
 import org.apache.shindig.gadgets.spec.ModulePrefs;
+import org.apache.shindig.gadgets.spec.Preload;
 import org.apache.shindig.gadgets.spec.View;
-
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -44,7 +45,10 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Pattern;
@@ -232,6 +236,32 @@ public class GadgetRenderer {
 
     String msgs = new JSONObject(bundle.getMessages()).toString();
     inlineJs.append("gadgets.Prefs.setMessages_(").append(msgs).append(");");
+
+    // Output preloads. We will allow the gadget render to continue
+    // even if a preload fails
+    JSONObject resp = new JSONObject();
+    for (Map.Entry<Preload, Future<RemoteContent>> entry : gadget
+        .getPreloadMap().entrySet()) {
+      try {
+        // Use raw param as key as URL may have to be decoded
+        JSONObject jsonEntry = new JSONObject();
+        jsonEntry.put("body", entry.getValue().get().getResponseAsString()).
+            put("rc", entry.getValue().get().getHttpStatusCode());
+        resp.put(entry.getKey().getHref().toString(), jsonEntry);
+      } catch (JSONException je) {
+        logger.log(Level.INFO,
+            "Error outputting preload for " + entry.getKey().getHref(), je);
+      } catch (InterruptedException ie) {
+        logger.log(Level.INFO,
+            "Error scheduling preload for " + entry.getKey().getHref(), ie);
+      } catch (ExecutionException ee) {
+        logger.log(Level.INFO,
+            "Error executing preload for " + entry.getKey().getHref(),
+            ee.getCause());
+      }
+    }
+    inlineJs.append("\ngadgets.io.preloaded = ").append(resp.toString())
+        .append(";\n");
 
     if (inlineJs.length() > 0) {
       markup.append("<script><!--\n").append(inlineJs)
