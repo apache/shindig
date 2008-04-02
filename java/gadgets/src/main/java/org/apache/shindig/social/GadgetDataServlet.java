@@ -89,6 +89,7 @@ public class GadgetDataServlet extends HttpServlet {
   protected void doPost(HttpServletRequest req, HttpServletResponse resp)
       throws IOException {
 
+    req.setCharacterEncoding("UTF-8");
     String requestParam = req.getParameter("request");
     String token = req.getParameter("st");
 
