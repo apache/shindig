@@ -62,7 +62,7 @@ class ProxyHandler {
 			$json = json_encode($json);
 			$output = UNPARSEABLE_CRUFT . $json;
 			$this->setCachingHeaders();
-			header("application/json; charset=utf-8", true);
+			header("Content-Type: application/json; charset=utf-8", true);
 			echo $output;
 		} else {
 			@ob_end_clean();
