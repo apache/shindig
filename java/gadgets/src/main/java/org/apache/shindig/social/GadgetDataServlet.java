@@ -17,24 +17,27 @@
  */
 package org.apache.shindig.social;
 
+import org.apache.shindig.gadgets.GadgetException;
+import org.apache.shindig.gadgets.GadgetToken;
+import org.apache.shindig.gadgets.GadgetTokenDecoder;
+import org.apache.shindig.gadgets.http.InjectedServlet;
+import org.apache.shindig.social.opensocial.OpenSocialDataHandler;
+import org.apache.shindig.social.samplecontainer.StateFileDataHandler;
+
+import com.google.inject.Inject;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.apache.shindig.social.samplecontainer.StateFileDataHandler;
-import org.apache.shindig.social.opensocial.OpenSocialDataHandler;
-import org.apache.shindig.gadgets.GadgetException;
-import org.apache.shindig.gadgets.GadgetToken;
-import org.apache.shindig.gadgets.http.CrossServletState;
 
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.util.logging.Logger;
-import java.util.List;
 import java.util.ArrayList;
+import java.util.List;
+import java.util.logging.Logger;
 
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
-import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -54,7 +57,7 @@ import javax.servlet.http.HttpServletResponse;
  *
  * This class is meant to work with the logic in jsoncontainer.js.
  */
-public class GadgetDataServlet extends HttpServlet {
+public class GadgetDataServlet extends InjectedServlet {
   private static final Logger logger
       = Logger.getLogger("org.apache.shindig.social");
 
@@ -62,10 +65,17 @@ public class GadgetDataServlet extends HttpServlet {
   private static final List<GadgetDataHandler> handlers
       = new ArrayList<GadgetDataHandler>();
 
+
+  private GadgetTokenDecoder gadgetTokenDecoder;
+
+  @Inject
+  public void setGadgetTokenDecoder(GadgetTokenDecoder gadgetTokenDecoder) {
+   this.gadgetTokenDecoder = gadgetTokenDecoder;
+  }
+
   @Override
   public void init(ServletConfig config) throws ServletException {
     super.init(config);
-    servletState = CrossServletState.get(config);
 
     String handlerNames = config.getInitParameter("handlers");
     if (handlerNames == null) {
@@ -74,7 +84,8 @@ public class GadgetDataServlet extends HttpServlet {
     } else {
       for (String handlerName : handlerNames.split(",")) {
         try {
-          GadgetDataHandler handler = (GadgetDataHandler) (Class.forName(handlerName)).newInstance();
+          GadgetDataHandler handler
+              = (GadgetDataHandler) (Class.forName(handlerName)).newInstance();
           handlers.add(handler);
         } catch (Exception ex) {
           throw new ServletException(ex);
@@ -82,8 +93,6 @@ public class GadgetDataServlet extends HttpServlet {
       }
     }
   }
-
-  private CrossServletState servletState;
 
   @Override
   protected void doPost(HttpServletRequest req, HttpServletResponse resp)
@@ -112,7 +121,7 @@ public class GadgetDataServlet extends HttpServlet {
     if (token == null || token.trim().length() == 0) {
       throw new GadgetException(GadgetException.Code.INVALID_GADGET_TOKEN);
     }
-    GadgetToken securityToken = servletState.getGadgetSigner().createToken(token);
+    GadgetToken securityToken = gadgetTokenDecoder.createToken(token);
 
     // TODO: Improve json input handling. The json request should get auto
     // translated into objects

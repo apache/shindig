@@ -17,10 +17,12 @@
  */
 package org.apache.shindig.gadgets;
 
+import com.google.inject.Inject;
+import com.google.inject.name.Named;
+
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -35,66 +37,33 @@ import java.util.logging.Logger;
  * registry.register("my-feature", null, new MyFeatureFactory());
  */
 public class GadgetFeatureRegistry {
-  private final Map<String, Entry> features = new HashMap<String, Entry>();
-  private final Map<String, Entry> core =  new HashMap<String, Entry>();
+  private final Map<String, Entry> features;
+  private final Map<String, Entry> core;
 
   // Caches the transitive dependencies to enable faster lookups.
   private final Map<Set<String>, Set<Entry>> transitiveDeps
       = new HashMap<Set<String>, Set<Entry>>();
 
-  private boolean coreDone = false;
-
-  private final RemoteContentFetcher fetcher;
+  private boolean graphComplete = false;
 
   private final static Logger logger
       = Logger.getLogger("org.apache.shindig.gadgets");
 
   /**
-   * Creates the gadget feature registry and loads an initial set of features.
-   * Any 'core' features loaded at this point will automatically become
-   * dependencies for every other feature.
-   * @param featurePath
-   * @param fetcher
-   */
-  public GadgetFeatureRegistry(String featurePath, RemoteContentFetcher fetcher)
-      throws GadgetException {
-    this.fetcher = fetcher;
-    registerFeatures(featurePath);
-  }
-
-  /**
-   * Recursively loads a set of features from a path in the filesystem or
-   * from the classpath.
+   * Creates a new feature registry and loads the specified features.
    *
-   * @param featurePath Path to the directory that contains feature xml files.
+   * @param contentFetcher
+   * @param featureFiles
+   * @throws GadgetException
    */
-  public void registerFeatures(String featurePath) throws GadgetException {
-    if (featurePath == null) {
-      return;
-    }
-
-    List<String> coreDeps = new LinkedList<String>();
-    JsFeatureLoader loader = new JsFeatureLoader(fetcher);
-    Set<Entry> jsFeatures = loader.loadFeatures(featurePath, this);
-
-    if (!coreDone) {
-      for (Entry entry : jsFeatures) {
-        if (entry.name.startsWith("core") || entry.name.equals("core")) {
-          coreDeps.add(entry.getName());
-          core.put(entry.getName(), entry);
-        }
-      }
-
-      logger.info("Core dependencies: " + coreDeps);
-
-      // Make sure non-core features depend on core.
-      for (Entry entry : jsFeatures) {
-        if (!entry.name.startsWith("core") && !entry.name.equals("core")) {
-          entry.deps.addAll(core.keySet());
-        }
-      }
-
-      coreDone = true;
+  @Inject
+  public GadgetFeatureRegistry(@Named("features.default") String featureFiles,
+      RemoteContentFetcher contentFetcher) throws GadgetException {
+    features = new HashMap<String, Entry>();
+    core = new HashMap<String, Entry>();
+    if (featureFiles != null) {
+      JsFeatureLoader loader = new JsFeatureLoader(contentFetcher);
+      loader.loadFeatures(featureFiles, this);
     }
   }
 
@@ -105,7 +74,9 @@ public class GadgetFeatureRegistry {
    *
    * Names are freeform, but it is strongly suggested that they are
    * namespaced, optionally (yet often usefully) in Java package-notation ie.
-   * 'com.google.gadgets.skins'.
+   * 'org.example.FooFeature'
+   *
+   * May never be invoked after calling getIncludedFeatures.
    *
    * @param name Name of the feature to register, ideally using the conventions
    *     described
@@ -116,26 +87,33 @@ public class GadgetFeatureRegistry {
    */
   public Entry register(String name, List<String> deps,
                         GadgetFeatureFactory feature) {
+    if (graphComplete) {
+      throw new IllegalStateException("registerFeatures should never be " +
+          "invoked after calling getIncludedFeatures");
+    }
     logger.info("Registering feature: " + name + " with deps " + deps);
     Entry entry = new Entry(name, deps, feature, this);
-    if (coreDone) {
+    if (isCore(entry)) {
+      core.put(name, entry);
+      for (Entry e : features.values()) {
+        e.deps.add(name);
+      }
+    } else {
       entry.deps.addAll(core.keySet());
     }
     features.put(name, entry);
-    validateFeatureGraph();
     return entry;
   }
 
   /**
-   * Traverses the graph traversed by the registered features, validating
-   * that it comprises a directed acyclic graph in which all features'
-   * dependencies are provided.
-   *
-   * If the graph is not acyclic, it cannot be used to create a workflow. If
-   * any dependencies are missing, {@code Gadget} rendering may be incomplete.
+   * @param entry
+   * @return True if the entry is "core" (a dependency of all other features)
    */
-  private static void validateFeatureGraph() {
-    // TODO: ensure that features form a DAG and that all deps are provided
+  private boolean isCore(Entry entry) {
+    if (entry.name.startsWith("core") || entry.name.equals("core")) {
+      return true;
+    }
+    return false;
   }
 
   /**
@@ -158,6 +136,7 @@ public class GadgetFeatureRegistry {
   public boolean getIncludedFeatures(Set<String> needed,
                                      Set<Entry> resultsFound,
                                      Set<String> resultsMissing) {
+    graphComplete = true;
     if (needed.size() == 0) {
       // Shortcut for gadgets that don't have any explicit dependencies.
       resultsFound.addAll(core.values());

@@ -20,7 +20,7 @@ package org.apache.shindig.gadgets;
 
 /**
  * An abstract representation of a signing token.
- * Use in conjunction with @code GadgetSigner.
+ * Use in conjunction with @code GadgetTokenDecoder.
  */
 public interface GadgetToken {
 

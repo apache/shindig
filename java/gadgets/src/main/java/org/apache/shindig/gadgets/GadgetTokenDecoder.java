@@ -16,18 +16,19 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
 package org.apache.shindig.gadgets;
 
-import com.google.inject.BindingAnnotation;
+/**
+ *  Handles verification of gadget security tokens.
+ */
+public interface GadgetTokenDecoder {
 
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
-
-@Retention(RetentionPolicy.RUNTIME)
-@Target({ElementType.FIELD, ElementType.PARAMETER})
-@BindingAnnotation
-public @interface MessageBundleFetcher {
+  /**
+   * Decrypts and verifies a gadget security token to return a gadget token.
+   * 
+   * @param tokenString String representation of the token to be created.
+   * @return The token representation of the input data.
+   * @throws GadgetException If tokenString is not a valid token
+   */
+  public GadgetToken createToken(String tokenString) throws GadgetException;
 }

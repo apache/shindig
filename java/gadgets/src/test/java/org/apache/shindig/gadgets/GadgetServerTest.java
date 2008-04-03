@@ -21,7 +21,6 @@ import static org.easymock.EasyMock.eq;
 import static org.easymock.EasyMock.expect;
 
 import org.apache.shindig.gadgets.spec.GadgetSpec;
-import org.apache.shindig.gadgets.spec.MessageBundle;
 
 import java.net.URI;
 import java.util.HashMap;
@@ -30,7 +29,11 @@ import java.util.Map;
 public class GadgetServerTest extends GadgetTestFixture {
 
   private final static URI SPEC_URL = URI.create("http://example.org/g.xml");
+  private final static RemoteContentRequest SPEC_REQUEST
+      = new RemoteContentRequest(SPEC_URL);
   private final static URI BUNDLE_URL = URI.create("http://example.org/m.xml");
+  private final static RemoteContentRequest BUNDLE_REQUEST
+      = new RemoteContentRequest(BUNDLE_URL);
   private final static GadgetContext BASIC_CONTEXT = new GadgetContext() {
     @Override
     public URI getUrl() {
@@ -49,14 +52,16 @@ public class GadgetServerTest extends GadgetTestFixture {
        "</messagebundle>";
 
   public void testGadgetSpecLookup() throws Exception {
-    GadgetSpec spec = new GadgetSpec(SPEC_URL, BASIC_SPEC_XML);
     RemoteContentRequest req = new RemoteContentRequest(SPEC_URL);
+    RemoteContent resp = new RemoteContent(BASIC_SPEC_XML);
 
-    expect(specFetcher.fetch(eq(SPEC_URL), eq(false))).andReturn(spec);
+    expect(fetcher.fetch(req)).andReturn(resp);
     replay();
 
     Gadget gadget = gadgetServer.processGadget(BASIC_CONTEXT);
     verify();
+    assertEquals("GadgetServerTest",
+        gadget.getSpec().getModulePrefs().getTitle());
   }
 
   public void testSubstitutionsDone() throws Exception {
@@ -83,11 +88,11 @@ public class GadgetServerTest extends GadgetTestFixture {
       }
     };
 
-    GadgetSpec spec = new GadgetSpec(SPEC_URL, gadgetXml);
-    MessageBundle bundle = new MessageBundle(BASIC_BUNDLE_XML);
+    RemoteContent spec = new RemoteContent(gadgetXml);
+    RemoteContent bundle = new RemoteContent(BASIC_BUNDLE_XML);
 
-    expect(specFetcher.fetch(eq(SPEC_URL), eq(false))).andReturn(spec);
-    expect(bundleFetcher.fetch(eq(BUNDLE_URL), eq(false))).andReturn(bundle);
+    expect(fetcher.fetch(SPEC_REQUEST)).andReturn(spec);
+    expect(fetcher.fetch(BUNDLE_REQUEST)).andReturn(bundle);
     replay();
 
     Gadget gadget = gadgetServer.processGadget(context);
@@ -98,6 +103,31 @@ public class GadgetServerTest extends GadgetTestFixture {
     assertEquals("TITLE", gadget.getSpec().getModulePrefs().getTitle());
     assertEquals("BODY",
         gadget.getSpec().getView(GadgetSpec.DEFAULT_VIEW).getContent());
+  }
+
+  public void testPreloadsFetched() throws Exception {
+    String preloadUrl = "http://example.org/preload.txt";
+    String preloadData = "Preload Data";
+    RemoteContentRequest preloadRequest
+        = new RemoteContentRequest(URI.create(preloadUrl));
+
+    String gadgetXml
+        = "<Module>" +
+          "  <ModulePrefs title=\"foo\">" +
+          "    <Preload href=\"" + preloadUrl + "\"/>" +
+          "  </ModulePrefs>" +
+          "  <Content type=\"html\">dummy</Content>" +
+          "</Module>";
+    expect(fetcher.fetch(SPEC_REQUEST))
+         .andReturn(new RemoteContent(gadgetXml));
+    expect(fetcher.fetch(preloadRequest))
+        .andReturn(new RemoteContent(preloadData));
+    replay();
+
+    Gadget gadget = gadgetServer.processGadget(BASIC_CONTEXT);
+
+    assertEquals(preloadData, gadget.getPreloadMap().values().iterator().next()
+                                    .get().getResponseAsString());
   }
 
   public void testBlacklistedGadget() throws Exception {

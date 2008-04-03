@@ -195,6 +195,6 @@ public class JsonRpcGadgetContext extends GadgetContext {
     ignoreCache = context.optBoolean("ignoreCache");
     syndicator = context.optString("syndicator");
     debug = context.optBoolean("debug");
-    renderingContext = RenderingContext.CONTAINER;
+    renderingContext = RenderingContext.METADATA;
   }
 }

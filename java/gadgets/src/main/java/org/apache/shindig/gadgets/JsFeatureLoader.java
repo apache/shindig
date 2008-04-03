@@ -26,7 +26,11 @@ import org.w3c.dom.NodeList;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.*;
+import java.util.EnumMap;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
 import java.util.logging.Logger;
 
 /**
@@ -59,18 +63,18 @@ public class JsFeatureLoader {
    *    in the text file. If path is prefixed with res://, the file
    *    is treated as a resource, and all references are assumed to be
    *    resources as well.
-   * @return A list of the newly loaded features.
    * @throws GadgetException
    */
-  public Set<GadgetFeatureRegistry.Entry> loadFeatures(String path,
-      GadgetFeatureRegistry registry) throws GadgetException {
+  public void loadFeatures(String path, GadgetFeatureRegistry registry)
+      throws GadgetException {
     List<ParsedFeature> features = new LinkedList<ParsedFeature>();
     try {
       if (path.startsWith("res://")) {
         path = path.substring(6);
         logger.info("Loading resources from: " + path);
         if (path.endsWith(".txt")) {
-          loadResources(ResourceLoader.getContent(path).split("[\r\n]+"), features);
+          loadResources(ResourceLoader.getContent(path).split("[\r\n]+"),
+              features);
         } else {
           loadResources(new String[]{path}, features);
         }
@@ -83,14 +87,11 @@ public class JsFeatureLoader {
       throw new GadgetException(GadgetException.Code.INVALID_PATH, e);
     }
 
-    Set<GadgetFeatureRegistry.Entry> entries
-        = new HashSet<GadgetFeatureRegistry.Entry>();
     for (ParsedFeature feature : features) {
       JsLibraryFeatureFactory factory
           = new JsLibraryFeatureFactory(feature.libraries);
-      entries.add(registry.register(feature.name, feature.deps, factory));
+      registry.register(feature.name, feature.deps, factory);
     }
-    return entries;
   }
 
   /**
@@ -213,7 +214,8 @@ public class JsFeatureLoader {
 
     NodeList gadgets = doc.getElementsByTagName("gadget");
     for (int i = 0, j = gadgets.getLength(); i < j; ++i) {
-      processContext(feature, (Element)gadgets.item(i), RenderingContext.GADGET);
+      processContext(feature, (Element)gadgets.item(i),
+          RenderingContext.GADGET);
     }
 
     NodeList containers = doc.getElementsByTagName("container");
@@ -236,9 +238,11 @@ public class JsFeatureLoader {
    * @param feature
    * @param context
    * @param renderingContext
+   * @throws GadgetException
    */
   private void processContext(ParsedFeature feature, Element context,
-                              RenderingContext renderingContext) {
+                              RenderingContext renderingContext)
+      throws GadgetException {
     String syndicator = XmlUtil.getAttribute(context, "synd",
         SyndicatorConfig.DEFAULT_SYNDICATOR);
     NodeList libraries = context.getElementsByTagName("script");
@@ -298,7 +302,8 @@ class ParsedFeature {
   final List<String> deps;
 
   public ParsedFeature() {
-    libraries = new EnumMap<RenderingContext, Map<String, List<JsLibrary>>>(RenderingContext.class);
+    libraries = new EnumMap<RenderingContext, Map<String, List<JsLibrary>>>(
+        RenderingContext.class);
     deps = new LinkedList<String>();
   }
 

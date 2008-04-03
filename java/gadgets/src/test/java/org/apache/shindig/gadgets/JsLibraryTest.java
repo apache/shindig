@@ -34,7 +34,7 @@ public class JsLibraryTest extends EasyMockTestCase {
         "};";
   private final static String URL_JS = "while(true){alert('hello');}";
 
-  public void testInline() {
+  public void testInline() throws GadgetException {
     JsLibrary lib
         = JsLibrary.create(JsLibrary.Type.INLINE, INLINE_JS, null, null);
     assertEquals(JsLibrary.Type.INLINE, lib.getType());

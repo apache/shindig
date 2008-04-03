@@ -21,6 +21,9 @@ package org.apache.shindig.gadgets;
 
 import org.apache.shindig.util.ResourceLoader;
 
+import com.google.inject.Inject;
+import com.google.inject.name.Named;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -45,7 +48,6 @@ import java.util.logging.Logger;
  * your config that you actually want to change.
  */
 public class SyndicatorConfig {
-  public static final SyndicatorConfig EMPTY = new SyndicatorConfig();
   private final Map<String, JSONObject> config;
   public static final String DEFAULT_SYNDICATOR = "default";
   public static final String SYNDICATOR_KEY = "gadgets.syndicator";
@@ -168,6 +170,7 @@ public class SyndicatorConfig {
   private void loadResources(String[] files)  throws GadgetException {
     try {
       for (String entry : files) {
+        logger.info("Reading syndicator config: " + entry);
         String content = ResourceLoader.getContent(entry);
         loadFromString(content);
       }
@@ -212,8 +215,9 @@ public class SyndicatorConfig {
     for (String field : fields) {
       Object existing = clone.opt(field);
       Object update = merge.get(field);
-      if (existing == null) {
-        // It's new custom config, not referenced in the prototype.
+      if (existing == null || update == null) {
+        // It's new custom config, not referenced in the prototype, or
+        // it's removing a pre-configured value.
         clone.put(field, update);
       } else {
         // Merge if object type is JSONObject.
@@ -290,20 +294,13 @@ public class SyndicatorConfig {
 
   /**
    * Creates a new, empty configuration.
-   *
-   * @param defaultSyndicator The default syndicators to load.
    */
-  public SyndicatorConfig(String defaultSyndicator) throws GadgetException {
+  @Inject
+  public SyndicatorConfig(@Named("syndicators.default") String syndicators)
+      throws GadgetException {
     config = new HashMap<String, JSONObject>();
-    if (defaultSyndicator != null) {
-      loadSyndicators(defaultSyndicator);
+    if (syndicators != null) {
+      loadSyndicators(syndicators);
     }
-  }
-
-  /**
-   * Creates an unmodifiable configuration.
-   */
-  private SyndicatorConfig() {
-    config = Collections.emptyMap();
   }
 }

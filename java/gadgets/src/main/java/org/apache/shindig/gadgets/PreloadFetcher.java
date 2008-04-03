@@ -16,34 +16,18 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+
 package org.apache.shindig.gadgets;
 
-import org.apache.shindig.util.BlobCrypterException;
+import com.google.inject.BindingAnnotation;
 
-/**
- * A GadgetSigner implementation that just provides dummy data to satisfy
- * tests and API calls. Do not use this for any security applications.
- */
-public class BasicGadgetSigner implements GadgetSigner {
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
-  /**
-   * {@inheritDoc}
-   *
-   * Returns a token with some faked out values.
-   */
-  public GadgetToken createToken(String stringToken) throws GadgetException {
-    try {
-      String[] tokens = stringToken.split(":");
-      return new BasicGadgetToken(tokens[0], tokens[1], tokens[2],
-          tokens[3]);
-    } catch (BlobCrypterException e) {
-      throw new GadgetException(GadgetException.Code.INVALID_GADGET_TOKEN, e);
-    }
-  }
-
-  /**
-   * Creates a signer with 24 hour token expiry
-   */
-  public BasicGadgetSigner() {
-  }
+@Retention(RetentionPolicy.RUNTIME)
+@Target({ElementType.FIELD, ElementType.PARAMETER})
+@BindingAnnotation
+public @interface PreloadFetcher {
 }

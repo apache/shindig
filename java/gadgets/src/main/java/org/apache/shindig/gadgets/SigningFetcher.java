@@ -14,6 +14,9 @@
 
 package org.apache.shindig.gadgets;
 
+import org.apache.shindig.util.Crypto;
+import org.apache.shindig.util.TimeSource;
+
 import net.oauth.OAuth;
 import net.oauth.OAuthAccessor;
 import net.oauth.OAuthConsumer;
@@ -21,10 +24,8 @@ import net.oauth.OAuthMessage;
 import net.oauth.OAuth.Parameter;
 import net.oauth.signature.RSA_SHA1;
 
-import org.apache.shindig.util.Crypto;
-import org.apache.shindig.util.TimeSource;
-
-import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.security.PrivateKey;
 import java.util.ArrayList;
@@ -35,23 +36,23 @@ import java.util.regex.Pattern;
 
 /**
  * Implements signed fetch based on the OAuth request signing algorithm.
- * 
+ *
  * Subclasses can override signMessage to use their own crypto if they don't
  * like the oauth.net code for some reason.
- * 
+ *
  * Instances of this class are only accessed by a single thread at a time,
  * but instances may be created by multiple threads.
  */
-public class SignedFetchRequestSigner implements RequestSigner {
+public class SigningFetcher extends RemoteContentFetcher {
 
   protected static final String OPENSOCIAL_OWNERID = "opensocial_owner_id";
 
   protected static final String OPENSOCIAL_VIEWERID = "opensocial_viewer_id";
 
   protected static final String OPENSOCIAL_APPID = "opensocial_app_id";
-  
-  protected static final String XOAUTH_PUBLIC_KEY =
-    "xoauth_signature_publickey";
+
+  protected static final String XOAUTH_PUBLIC_KEY
+      = "xoauth_signature_publickey";
 
   protected static final Pattern ALLOWED_PARAM_NAME = Pattern
       .compile("[\\w_\\-]+");
@@ -61,109 +62,104 @@ public class SignedFetchRequestSigner implements RequestSigner {
   /**
    * Authentication token for the user and gadget making the request.
    */
-  protected GadgetToken authToken;
+  protected final GadgetToken authToken;
 
   /**
-   * Private key we pass to the OAuth RSA_SHA1 algorithm.  This can be a 
+   * Private key we pass to the OAuth RSA_SHA1 algorithm.  This can be a
    * PrivateKey object, or a PEM formatted private key, or a DER encoded byte
    * array for the private key.  (No, really, they accept any of them.)
    */
-  protected Object privateKeyObject;
+  protected final Object privateKeyObject;
 
   /**
    * The name of the key, included in the fetch to help with key rotation.
    */
-  protected String keyName;
+  protected final String keyName;
 
   /**
    * Constructor for subclasses that don't want this code to use their
    * keys.
    */
-  protected SignedFetchRequestSigner(GadgetToken authToken) {
-    init(authToken, null, null);
+  protected SigningFetcher(RemoteContentFetcher next, GadgetToken authToken) {
+    this(next, authToken, null, null);
   }
 
   /**
    * Constructor based on signing with the given PrivateKey object.
-   * 
+   *
    * @param authToken verified gadget security token
    * @param keyName name of the key to include in the request
    * @param privateKey the key to use for the signing
    */
-  public SignedFetchRequestSigner(GadgetToken authToken, String keyName,
-      PrivateKey privateKey) {
-    init(authToken, keyName, privateKey);
+  public static SigningFetcher makeFromPrivateKey(RemoteContentFetcher next,
+      GadgetToken authToken, String keyName, PrivateKey privateKey) {
+    return new SigningFetcher(next, authToken, keyName, privateKey);
   }
-  
+
   /**
    * Constructor based on signing with the given PrivateKey object.
-   * 
+   *
    * @param authToken verified gadget security token
    * @param keyName name of the key to include in the request
    * @param privateKey base64 encoded private key
    */
-  public SignedFetchRequestSigner(GadgetToken authToken, String keyName,
-      String privateKey) {
-    init(authToken, keyName, privateKey);
+  public static SigningFetcher makeFromB64PrivateKey(RemoteContentFetcher next,
+      GadgetToken authToken, String keyName, String privateKey) {
+    return new SigningFetcher(next, authToken, keyName, privateKey);
   }
- 
+
   /**
    * Constructor based on signing with the given PrivateKey object.
-   * 
+   *
    * @param authToken verified gadget security token
    * @param keyName name of the key to include in the request
    * @param privateKey DER encoded private key
    */
-  public SignedFetchRequestSigner(GadgetToken authToken, String keyName, 
+  public static SigningFetcher makeFromPrivateKeyBytes(
+      RemoteContentFetcher next, GadgetToken authToken, String keyName,
       byte[] privateKey) {
-    init(authToken, keyName, privateKey);
+    return new SigningFetcher(next, authToken, keyName, privateKey);
   }
-  
-  protected void init(GadgetToken authToken, String keyName,
-      Object privateKeyObject) {
+
+  protected SigningFetcher(RemoteContentFetcher next, GadgetToken authToken,
+      String keyName, Object privateKeyObject) {
+    super(next);
     this.authToken = authToken;
     this.keyName = keyName;
     this.privateKeyObject = privateKeyObject;
   }
 
-  /**
-   * Signed fetch doesn't require approvals, always returns null.
-   */
-  public String getApprovalUrl() {
-    return null;
+  @Override
+  public RemoteContent fetch(RemoteContentRequest request)
+      throws GadgetException {
+    RemoteContentRequest signed = signRequest(request);
+    return nextFetcher.fetch(signed);
   }
 
-  /**
-   * Signed fetch doesn't require approvals, always returns Status.OK
-   */
-  public Status getSigningStatus() {
-    return Status.OK;
-  }
-
-  public URL signRequest(String method, URL resource, String postBody)
-  throws GadgetException {
+  private RemoteContentRequest signRequest(RemoteContentRequest req)
+      throws GadgetException {
     try {
       // Parse the request into parameters for OAuth signing, stripping out
       // any OAuth or OpenSocial parameters injected by the client
-      String query = resource.getQuery();
+      URI resource = req.getUri();
+      String query = resource.getRawQuery();
       resource = removeQuery(resource);
       List<OAuth.Parameter> queryParams = sanitize(OAuth.decodeForm(query));
-      List<OAuth.Parameter> postParams = sanitize(OAuth.decodeForm(postBody));
+      String postStr = req.getPostBodyAsString();
+      List<OAuth.Parameter> postParams = sanitize(OAuth.decodeForm(postStr));
       List<OAuth.Parameter> msgParams = new ArrayList<OAuth.Parameter>();
       msgParams.addAll(queryParams);
       msgParams.addAll(postParams);
 
-      // Add the OpenSocial parameters
       addOpenSocialParams(msgParams);
-      
-      // Add the OAuth parameters
+
       addOAuthParams(msgParams);
 
       // Build and sign the OAuthMessage; note that the resource here has
       // no query string, the parameters are all in msgParams
-      OAuthMessage message = new OAuthMessage(method, resource.toString(),
-          msgParams);
-      
+      OAuthMessage message
+          = new OAuthMessage(req.getMethod(), resource.toString(), msgParams);
+
       // Sign the message, this may jump into a subclass
       signMessage(message);
 
@@ -182,27 +178,40 @@ public class SignedFetchRequestSigner implements RequestSigner {
           newQuery.add(param);
         }
       }
+      // Careful here; the OAuth form encoding scheme is slightly different than
+      // the normal form encoding scheme, so we have to use the OAuth library
+      // formEncode method.  The java.net.URI code makes it difficult to insert
+      // a pre-encoded query string, so we use URL instead.
       String finalQuery = OAuth.formEncode(newQuery);
-      return new URL(resource.getProtocol(), resource.getHost(),
-          resource.getPort(), resource.getPath() + '?' + finalQuery);
+      URL url = new URL(
+          resource.getScheme(),
+          resource.getHost(),
+          resource.getPort(),
+          resource.getRawPath() + "?" + finalQuery);
+      return new RemoteContentRequest(url.toURI(), req);
     } catch (Exception e) {
-      throw new GadgetException(GadgetException.Code.INTERNAL_SERVER_ERROR,
-          e);
+      throw new GadgetException(GadgetException.Code.INTERNAL_SERVER_ERROR, e);
     }
   }
 
-  private URL removeQuery(URL resource) throws MalformedURLException {
-    return new URL(resource.getProtocol(), resource.getHost(),
-        resource.getPort(), resource.getPath());
+  private URI removeQuery(URI resource) throws URISyntaxException {
+    return new URI(
+        resource.getScheme(),
+        null, // user info
+        resource.getHost(),
+        resource.getPort(),
+        resource.getRawPath(),
+        null, // query
+        null); // fragment
   }
-  
+
 
   private void addOpenSocialParams(List<Parameter> msgParams) {
     String owner = authToken.getOwnerId();
     if (owner != null) {
       msgParams.add(new OAuth.Parameter(OPENSOCIAL_OWNERID, owner));
     }
-    
+
     String viewer = authToken.getViewerId();
     if (viewer != null) {
       msgParams.add(new OAuth.Parameter(OPENSOCIAL_VIEWERID, viewer));
@@ -214,22 +223,22 @@ public class SignedFetchRequestSigner implements RequestSigner {
     }
 
   }
-  
+
   private void addOAuthParams(List<Parameter> msgParams) {
     msgParams.add(new OAuth.Parameter(OAuth.OAUTH_TOKEN, ""));
-    
+
     String domain = authToken.getDomain();
     if (domain != null) {
       msgParams.add(new OAuth.Parameter(OAuth.OAUTH_CONSUMER_KEY, domain));
     }
-    
+
     if (keyName != null) {
       msgParams.add(new OAuth.Parameter(XOAUTH_PUBLIC_KEY, keyName));
     }
 
     String nonce = Long.toHexString(Crypto.rand.nextLong());
     msgParams.add(new OAuth.Parameter(OAuth.OAUTH_NONCE, nonce));
-    
+
     String timestamp = Long.toString(clock.currentTimeMillis()/1000L);
     msgParams.add(new OAuth.Parameter(OAuth.OAUTH_TIMESTAMP, timestamp));
 
@@ -240,9 +249,9 @@ public class SignedFetchRequestSigner implements RequestSigner {
   /**
    * Sign a message and append the oauth signature parameter to the message
    * object.
-   * 
+   *
    * @param message the message to sign
-   * 
+   *
    * @throws Exception because the OAuth libraries require it.
    */
   protected void signMessage(OAuthMessage message) throws Exception {
@@ -251,7 +260,7 @@ public class SignedFetchRequestSigner implements RequestSigner {
     OAuthAccessor accessor = new OAuthAccessor(consumer);
     message.sign(accessor);
   }
-  
+
   /**
    * Strip out any owner or viewer id passed by the client.
    */
@@ -272,6 +281,4 @@ public class SignedFetchRequestSigner implements RequestSigner {
         canonParamName.startsWith("opensocial")) &&
         ALLOWED_PARAM_NAME.matcher(canonParamName).matches());
   }
-
-
 }

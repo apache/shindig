@@ -1,10 +1,10 @@
 package org.apache.shindig.gadgets.spec;
 
 import org.apache.shindig.util.XmlUtil;
+
 import org.w3c.dom.Element;
 
 import java.net.URI;
-import java.util.Map;
 
 /**
  * Represents an addressable piece of content that can be preloaded by the server
@@ -41,7 +41,4 @@ public class Preload {
       throw new SpecParserException("Preload@href is required.");
     }
   }
-
-
-
 }

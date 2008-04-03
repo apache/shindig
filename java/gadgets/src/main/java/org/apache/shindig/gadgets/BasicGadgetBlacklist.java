@@ -17,6 +17,9 @@
  */
 package org.apache.shindig.gadgets;
 
+import com.google.inject.Inject;
+import com.google.inject.name.Named;
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
@@ -71,7 +74,15 @@ public class BasicGadgetBlacklist implements GadgetBlacklist {
   public BasicGadgetBlacklist(File blacklistFile) throws IOException {
     exactMatches = new HashSet<String>();
     regexpMatches = new ArrayList<Pattern>();
-    parseBlacklist(blacklistFile);
+    if (blacklistFile.exists()) {
+      parseBlacklist(blacklistFile);
+    }
+  }
+
+  @Inject
+  public BasicGadgetBlacklist(@Named("blacklist.file") String file)
+      throws IOException {
+    this(new File(file));
   }
 
   private void parseBlacklist(File blacklistFile) throws IOException {

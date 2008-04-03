@@ -22,7 +22,8 @@ import org.apache.shindig.gadgets.spec.GadgetSpec;
 import org.apache.shindig.gadgets.spec.LocaleSpec;
 import org.apache.shindig.gadgets.spec.MessageBundle;
 import org.apache.shindig.gadgets.spec.Preload;
-import org.apache.shindig.util.Check;
+
+import com.google.inject.Inject;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -32,39 +33,42 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CompletionService;
+import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorCompletionService;
 import java.util.concurrent.Future;
 
+/**
+ * Primary gadget processing facility. Converts an input Context into an output
+ * Gadget
+ */
 public class GadgetServer {
-  private final GadgetServerConfigReader config;
+  private final Executor executor;
+  private final GadgetFeatureRegistry registry;
+  private final GadgetBlacklist blacklist;
+  private final RemoteContentFetcher preloadFetcher;
+  private final RemoteContentFetcher gadgetSpecFetcher;
+  private final RemoteContentFetcher messageBundleFetcher;
 
   /**
-   * Creates a GadgetServer using the provided configuration.
-   *
-   * @param configuration
-   * @throws IllegalArgumentException When missing required fields aren't set.
+   * @param executor
+   * @param registry
+   * @param blacklist
+   * @param gadgetSpecFetcher
+   * @param messageBundleFetcher
    */
-  public GadgetServer(GadgetServerConfigReader configuration) {
-    Check.notNull(configuration.getExecutor(), "Executor is required.");
-    Check.notNull(configuration.getFeatureRegistry(),
-        "FeatureRegistry is required.");
-    Check.notNull(configuration.getGadgetSpecFetcher(),
-        "GadgetSpecFetcher is required");
-    Check.notNull(configuration.getMessageBundleFetcher(),
-        "MessageBundleFetcher is required.");
-    Check.notNull(configuration.getContentFetcher(),
-        "ContentFetcher is required.");
-    Check.notNull(configuration.getSyndicatorConfig(),
-        "SyndicatorConfig is required");
-    config = new GadgetServerConfigReader();
-    config.copyFrom(configuration);
-  }
-
-  /**
-   * @return A read-only view of the server's configuration.
-   */
-  public GadgetServerConfigReader getConfig() {
-    return config;
+  @Inject
+  public GadgetServer(Executor executor,
+      GadgetFeatureRegistry registry,
+      GadgetBlacklist blacklist,
+      @PreloadFetcher RemoteContentFetcher preloadFetcher,
+      @GadgetSpecFetcher RemoteContentFetcher gadgetSpecFetcher,
+      @MessageBundleFetcher RemoteContentFetcher messageBundleFetcher) {
+    this.executor = executor;
+    this.registry = registry;
+    this.blacklist = blacklist;
+    this.preloadFetcher = preloadFetcher;
+    this.gadgetSpecFetcher = gadgetSpecFetcher;
+    this.messageBundleFetcher = messageBundleFetcher;
   }
 
   /**
@@ -75,13 +79,15 @@ public class GadgetServer {
    * @throws GadgetException
    */
   public Gadget processGadget(GadgetContext context) throws GadgetException {
-    if (config.getGadgetBlacklist() != null) {
-      if (config.getGadgetBlacklist().isBlacklisted(context.getUrl())) {
-        throw new GadgetException(GadgetException.Code.BLACKLISTED_GADGET);
-      }
+    if (blacklist.isBlacklisted(context.getUrl())) {
+      throw new GadgetException(GadgetException.Code.BLACKLISTED_GADGET);
     }
-    GadgetSpec spec = config.getGadgetSpecFetcher().fetch(context.getUrl(),
-        context.getIgnoreCache());
+
+    RemoteContentRequest request = RemoteContentRequest.getRequest(
+        context.getUrl(), context.getIgnoreCache());
+    RemoteContent response = gadgetSpecFetcher.fetch(request);
+    GadgetSpec spec
+        = new GadgetSpec(context.getUrl(), response.getResponseAsString());
     return createGadgetFromSpec(spec, context);
   }
 
@@ -94,9 +100,10 @@ public class GadgetServer {
    */
   private MessageBundle getBundle(LocaleSpec localeSpec, GadgetContext context)
       throws GadgetException {
-    MessageBundle bundle;
-    bundle = config.getMessageBundleFetcher().fetch(
+    RemoteContentRequest request = RemoteContentRequest.getRequest(
         localeSpec.getMessages(), context.getIgnoreCache());
+    RemoteContent response = messageBundleFetcher.fetch(request);
+    MessageBundle bundle = new MessageBundle(response.getResponseAsString());
     return bundle;
   }
 
@@ -178,17 +185,22 @@ public class GadgetServer {
       Map<GadgetFeatureRegistry.Entry, GadgetFeature> tasks)
       throws GadgetException {
 
-    // Immediately enqueue all the preloads
-    CompletionService<RemoteContent> preloadProcessor
-        = new ExecutorCompletionService<RemoteContent>(config.getExecutor());
-    for (Preload preload : gadget.getSpec().getModulePrefs().getPreloads()) {
-      gadget.getPreloadMap().put(preload,
-          preloadProcessor.submit(
-              new PreloadTask(preload, getConfig().getContentFetcher())));
+    // Immediately enqueue all the preloads. We don't block on preloads because
+    // we want them to run in parallel
+    RenderingContext renderContext = gadget.getContext().getRenderingContext();
+    if (RenderingContext.GADGET.equals(renderContext)) {
+      CompletionService<RemoteContent> preloadProcessor
+          = new ExecutorCompletionService<RemoteContent>(executor);
+      for (Preload preload : gadget.getSpec().getModulePrefs().getPreloads()) {
+        PreloadTask task = new PreloadTask(preload, preloadFetcher);
+        Future<RemoteContent> future = preloadProcessor.submit(task);
+        gadget.getPreloadMap().put(preload, future);
+      }
     }
 
+    // TODO: This seems pointless if nothing is actually using it.
     CompletionService<GadgetException> featureProcessor
-        = new ExecutorCompletionService<GadgetException>(config.getExecutor());
+        = new ExecutorCompletionService<GadgetException>(executor);
     // FeatureTask is OK has a hash key because we want actual instances, not
     // names.
     GadgetContext context = gadget.getContext();
@@ -251,8 +263,7 @@ public class GadgetServer {
     Set<GadgetFeatureRegistry.Entry> dependencies
         = new HashSet<GadgetFeatureRegistry.Entry>(features.size());
     Set<String> unsupported = new HashSet<String>();
-    config.getFeatureRegistry().getIncludedFeatures(features.keySet(),
-        dependencies, unsupported);
+    registry.getIncludedFeatures(features.keySet(), dependencies, unsupported);
 
     for (String missing : unsupported) {
       Feature feature = features.get(missing);
@@ -319,7 +330,11 @@ class PreloadTask implements Callable<RemoteContent> {
 
   public RemoteContent call() {
     RemoteContentRequest request = new RemoteContentRequest(preload.getHref());
-    return fetcher.fetch(request);
+    try {
+      return fetcher.fetch(request);
+    } catch (GadgetException e) {
+      return RemoteContent.ERROR;
+    }
   }
 
   public PreloadTask(Preload preload, RemoteContentFetcher fetcher) {

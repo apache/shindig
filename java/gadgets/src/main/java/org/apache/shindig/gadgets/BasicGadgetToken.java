@@ -27,24 +27,24 @@ import java.util.Map;
 /**
  * Primitive token implementation that uses stings as tokens.
  */
-class BasicGadgetToken implements GadgetToken {
+public class BasicGadgetToken implements GadgetToken {
   /** serialized form of the token */
   private final String token;
-  
+
   /** data from the token */
   private final Map<String, String> tokenData;
-  
+
   /** tool to use for signing and encrypting the token */
   private BlobCrypter crypter = new BlobCrypter(INSECURE_KEY);
-  
+
   private static final byte[] INSECURE_KEY =
     { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
-  
+
   private static final String OWNER_KEY = "o";
   private static final String APP_KEY = "a";
   private static final String VIEWER_KEY = "v";
   private static final String DOMAIN_KEY = "d";
-  
+
   /**
    * {@inheritDoc}
    */
@@ -56,14 +56,14 @@ class BasicGadgetToken implements GadgetToken {
    * Generates a token from an input string
    * @param token String form of token
    * @param maxAge max age of the token (in seconds)
-   * @throws BlobCrypterException 
+   * @throws BlobCrypterException
    */
   public BasicGadgetToken(String token, int maxAge)
-  throws BlobCrypterException {
+      throws BlobCrypterException {
     this.token = token;
     this.tokenData = crypter.unwrap(token, maxAge);
   }
-  
+
   public BasicGadgetToken(String owner, String viewer, String app,
       String domain) throws BlobCrypterException {
     tokenData = new HashMap<String, String>(5,1);

@@ -19,62 +19,15 @@
 
 package org.apache.shindig.gadgets;
 
-import org.apache.shindig.gadgets.spec.GadgetSpec;
+import com.google.inject.BindingAnnotation;
 
-import java.net.URI;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.logging.Logger;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
-/**
- * Spec retrieval implementation that retrieves specs by the following:
- *
- * - Consulting the in-memory cache (just a Map)
- * - If not found, making a RemoteContentRequest for the spec
- * - Parsing spec
- * - Storing to the cache
- */
-public class GadgetSpecFetcher implements DataFetcher<GadgetSpec> {
-  private final RemoteContentFetcher fetcher;
-  private final Map<URI, GadgetSpec> cache;
-
-  private final static Logger logger
-      = Logger.getLogger("org.apache.shindig.gadgets");
-
-  /** {@inheritDoc} */
-  public void invalidate(URI url) {
-    synchronized (cache) {
-      cache.remove(url);
-    }
-  }
-
-  /** {@inheritDoc} */
-  public GadgetSpec fetch(URI url, boolean forceReload) throws GadgetException {
-    GadgetSpec spec = null;
-    if (!forceReload) {
-      spec = cache.get(url);
-    }
-    if (spec == null) {
-      RemoteContentRequest request = new RemoteContentRequest(url);
-      RemoteContent response = fetcher.fetch(request);
-
-      if (response.getHttpStatusCode() == RemoteContent.SC_OK) {
-        spec = new GadgetSpec(url, response.getResponseAsString());
-        cache.put(url, spec);
-      } else {
-        String error = "Unable to get content from " + url.toString();
-        throw new GadgetException(
-            GadgetException.Code.FAILED_TO_RETRIEVE_CONTENT, error);
-      }
-    }
-    return spec;
-  }
-
-  /**
-   * @param fetcher The fetcher to use for remote resource retrieval.
-   */
-  public GadgetSpecFetcher(RemoteContentFetcher fetcher) {
-    this.fetcher = fetcher;
-    cache = new HashMap<URI, GadgetSpec>();
-  }
+@Retention(RetentionPolicy.RUNTIME)
+@Target({ElementType.FIELD, ElementType.PARAMETER})
+@BindingAnnotation
+public @interface GadgetSpecFetcher {
 }

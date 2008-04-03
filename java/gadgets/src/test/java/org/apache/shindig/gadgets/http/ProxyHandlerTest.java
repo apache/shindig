@@ -19,35 +19,63 @@
 
 package org.apache.shindig.gadgets.http;
 
+import static org.easymock.EasyMock.eq;
 import static org.easymock.EasyMock.expect;
+import static org.easymock.EasyMock.isA;
+
+import org.apache.shindig.gadgets.GadgetException;
+import org.apache.shindig.gadgets.GadgetToken;
+import org.apache.shindig.gadgets.RemoteContent;
+import org.apache.shindig.gadgets.RemoteContentFetcher;
+import org.apache.shindig.gadgets.RemoteContentRequest;
+
+import org.json.JSONObject;
 
 import java.io.ByteArrayOutputStream;
 import java.io.PrintWriter;
 import java.net.URI;
 
-import org.apache.shindig.gadgets.GadgetTestFixture;
-import org.apache.shindig.gadgets.RemoteContent;
-import org.apache.shindig.gadgets.RemoteContentRequest;
-import org.easymock.EasyMock;
-import org.easymock.IArgumentMatcher;
-import org.json.JSONObject;
-
-public class ProxyHandlerTest extends GadgetTestFixture {
+public class ProxyHandlerTest extends HttpTestFixture {
 
   private final static String URL_ONE = "http://www.example.com/test.html";
   private final static String DATA_ONE = "hello world";
 
+  private static final GadgetToken DUMMY_TOKEN = new GadgetToken() {
+    public String getOwnerId() {
+      return "owner";
+    }
+
+    public String getViewerId() {
+      return "viewer";
+    }
+
+    public String getAppId() {
+      return "app";
+    }
+
+    public String getDomain() {
+      return "domain";
+    }
+
+    public String toSerialForm() {
+      return "";
+    }
+  };
+
   final ByteArrayOutputStream baos = new ByteArrayOutputStream();
   final PrintWriter writer = new PrintWriter(baos);
 
-  private void expectGetAndReturnData(String url, byte[] data) throws Exception {
+
+  private void expectGetAndReturnData(String url, byte[] data)
+      throws Exception {
     RemoteContentRequest req = new RemoteContentRequest(
         "GET", new URI(url), null, null, new RemoteContentRequest.Options());
     RemoteContent resp = new RemoteContent(200, data, null);
     expect(fetcher.fetch(req)).andReturn(resp);
   }
 
-  private void expectPostAndReturnData(String url, byte[] body, byte[] data) throws Exception {
+  private void expectPostAndReturnData(String url, byte[] body, byte[] data)
+      throws Exception {
     RemoteContentRequest req = new RemoteContentRequest(
         "POST", new URI(url), null, body, new RemoteContentRequest.Options());
     RemoteContent resp = new RemoteContent(200, data, null);
@@ -63,7 +91,8 @@ public class ProxyHandlerTest extends GadgetTestFixture {
     setupGenericRequestMock("GET", url);
   }
 
-  private void setupGenericRequestMock(String method, String url) throws Exception {
+  private void setupGenericRequestMock(String method, String url)
+      throws Exception {
     expect(request.getMethod()).andReturn("POST").atLeastOnce();
     expect(request.getParameter("httpMethod")).andReturn(method).atLeastOnce();
     expect(request.getParameter("url")).andReturn(url).atLeastOnce();
@@ -71,7 +100,8 @@ public class ProxyHandlerTest extends GadgetTestFixture {
   }
 
   private JSONObject readJSONResponse(String body) throws Exception {
-    String json = body.substring("throw 1; < don't be evil' >".length(), body.length());
+    String json
+        = body.substring("throw 1; < don't be evil' >".length(), body.length());
     return new JSONObject(json);
   }
 
@@ -79,7 +109,7 @@ public class ProxyHandlerTest extends GadgetTestFixture {
     setupGetRequestMock(URL_ONE);
     expectGetAndReturnData(URL_ONE, DATA_ONE.getBytes());
     replay();
-    proxyHandler.fetchJson(request, response, state);
+    proxyHandler.fetchJson(request, response);
     verify();
     writer.close();
     JSONObject json = readJSONResponse(baos.toString());
@@ -94,7 +124,7 @@ public class ProxyHandlerTest extends GadgetTestFixture {
     setupGetRequestMock(origUrl);
     expectGetAndReturnData(cleanedUrl, DATA_ONE.getBytes());
     replay();
-    proxyHandler.fetchJson(request, response, state);
+    proxyHandler.fetchJson(request, response);
     verify();
     writer.close();
     JSONObject json = readJSONResponse(baos.toString());
@@ -107,7 +137,7 @@ public class ProxyHandlerTest extends GadgetTestFixture {
     setupGetRequestMock(URL_ONE);
     expectGetAndReturnData(URL_ONE, "".getBytes());
     replay();
-    proxyHandler.fetchJson(request, response, state);
+    proxyHandler.fetchJson(request, response);
     verify();
     writer.close();
     JSONObject json = readJSONResponse(baos.toString());
@@ -121,7 +151,7 @@ public class ProxyHandlerTest extends GadgetTestFixture {
     setupPostRequestMock(URL_ONE, body);
     expectPostAndReturnData(URL_ONE, body.getBytes(), DATA_ONE.getBytes());
     replay();
-    proxyHandler.fetchJson(request, response, state);
+    proxyHandler.fetchJson(request, response);
     verify();
     writer.close();
     JSONObject json = readJSONResponse(baos.toString());
@@ -131,44 +161,122 @@ public class ProxyHandlerTest extends GadgetTestFixture {
   }
 
   public void testSignedGetRequest() throws Exception {
+    // Doesn't actually sign since it returns the standard fetcher.
+    // Signing tests are in SigningFetcherTest
     setupGetRequestMock(URL_ONE);
-    expect(request.getParameter("st")).andReturn("fake-token").atLeastOnce();
-    expect(request.getParameter("authz")).andReturn("signed").atLeastOnce();
+    expect(gadgetTokenDecoder.createToken("fake-token")).andReturn(DUMMY_TOKEN);
+    expect(request.getParameter(ProxyHandler.SECURITY_TOKEN_PARAM))
+        .andReturn("fake-token").atLeastOnce();
+    expect(request.getParameter(ProxyHandler.AUTHZ_PARAM))
+        .andReturn(ProxyHandler.AUTHZ_SIGNED).atLeastOnce();
     RemoteContent resp = new RemoteContent(200, DATA_ONE.getBytes(), null);
-    expect(fetcher.fetch(looksLikeSignedFetch(URL_ONE))).andReturn(resp);
+    expect(signingFetcherFactory.getSigningFetcher(
+        isA(RemoteContentFetcher.class), eq(DUMMY_TOKEN))).andReturn(fetcher);
+    expect(fetcher.fetch(isA(RemoteContentRequest.class))).andReturn(resp);
     replay();
-    proxyHandler.fetchJson(request, response, state);
+    proxyHandler.fetchJson(request, response);
     verify();
     writer.close();
   }
 
-  private RemoteContentRequest looksLikeSignedFetch(String url) {
-    EasyMock.reportMatcher(new SignedFetchArgumentMatcher(url));
-    return null;
+  public void testSignedPostRequest() throws Exception {
+    // Doesn't actually sign since it returns the standard fetcher.
+    // Signing tests are in SigningFetcherTest
+    String postBody = "foo=bar%20baz";
+    setupPostRequestMock(URL_ONE, postBody);
+    expect(gadgetTokenDecoder.createToken("fake-token")).andReturn(DUMMY_TOKEN);
+    expect(request.getParameter(ProxyHandler.SECURITY_TOKEN_PARAM))
+        .andReturn("fake-token").atLeastOnce();
+    expect(request.getParameter(ProxyHandler.AUTHZ_PARAM))
+        .andReturn(ProxyHandler.AUTHZ_SIGNED).atLeastOnce();
+    RemoteContent resp = new RemoteContent(200, DATA_ONE.getBytes(), null);
+    expect(signingFetcherFactory.getSigningFetcher(
+        isA(RemoteContentFetcher.class), eq(DUMMY_TOKEN))).andReturn(fetcher);
+    expect(fetcher.fetch(isA(RemoteContentRequest.class))).andReturn(resp);
+    replay();
+    proxyHandler.fetchJson(request, response);
+    verify();
+    writer.close();
   }
 
-  private class SignedFetchArgumentMatcher implements IArgumentMatcher {
-
-    private String expectedUrl;
-
-    public SignedFetchArgumentMatcher(String expectedUrl) {
-      this.expectedUrl = expectedUrl;
+  public void testInvalidSigningType() throws Exception {
+    setupGetRequestMock(URL_ONE);
+    expect(request.getParameter(ProxyHandler.SECURITY_TOKEN_PARAM))
+        .andReturn("fake-token").atLeastOnce();
+    expect(request.getParameter(ProxyHandler.AUTHZ_PARAM))
+        .andReturn("garbage").atLeastOnce();
+    replay();
+    try {
+      proxyHandler.fetchJson(request, response);
+      fail("proxyHandler accepted invalid authz type");
+    } catch (GadgetException e) {
+      assertEquals(GadgetException.Code.UNSUPPORTED_FEATURE, e.getCode());
     }
+  }
 
-    public void appendTo(StringBuffer sb) {
-      sb.append("SignedFetchArgumentMatcher(");
-      sb.append(expectedUrl);
-      sb.append(')');
-    }
+  public void testValidateUrlNoPath() throws Exception {
+    URI url = proxyHandler.validateUrl("http://www.example.com");
+    assertEquals("http", url.getScheme());
+    assertEquals("www.example.com", url.getHost());
+    assertEquals(-1, url.getPort());
+    assertEquals("/", url.getPath());
+    assertNull(url.getQuery());
+    assertNull(url.getFragment());
+  }
 
-    public boolean matches(Object arg0) {
-      RemoteContentRequest request = (RemoteContentRequest)arg0;
-      String url = request.getUri().toASCIIString();
-      return (url.startsWith(expectedUrl) &&
-          url.contains("opensocial_owner_id") &&
-          url.contains("opensocial_viewer_id") &&
-          url.contains("opensocial_app_id"));
-    }
+  public void testValidateUrlWithPath() throws Exception {
+    URI url = proxyHandler.validateUrl("http://www.example.com/foo");
+    assertEquals("http", url.getScheme());
+    assertEquals("www.example.com", url.getHost());
+    assertEquals(-1, url.getPort());
+    assertEquals("/foo", url.getPath());
+    assertNull(url.getQuery());
+    assertNull(url.getFragment());
+  }
 
+  public void testValidateUrlWithPort() throws Exception {
+    URI url = proxyHandler.validateUrl("http://www.example.com:8080/foo");
+    assertEquals("http", url.getScheme());
+    assertEquals("www.example.com", url.getHost());
+    assertEquals(8080, url.getPort());
+    assertEquals("/foo", url.getPath());
+    assertNull(url.getQuery());
+    assertNull(url.getFragment());
+  }
+
+  public void testValidateUrlWithEncodedPath() throws Exception {
+    URI url
+        = proxyHandler.validateUrl("http://www.example.com:8080/foo%20bar");
+    assertEquals("http", url.getScheme());
+    assertEquals("www.example.com", url.getHost());
+    assertEquals(8080, url.getPort());
+    assertEquals("/foo%20bar", url.getRawPath());
+    assertEquals("/foo bar", url.getPath());
+    assertNull(url.getQuery());
+    assertNull(url.getFragment());
+  }
+
+  public void testValidateUrlWithEncodedQuery() throws Exception {
+    URI url= proxyHandler.validateUrl(
+        "http://www.example.com:8080/foo?q=with%20space");
+    assertEquals("http", url.getScheme());
+    assertEquals("www.example.com", url.getHost());
+    assertEquals(8080, url.getPort());
+    assertEquals("/foo", url.getPath());
+    assertEquals("q=with%20space", url.getRawQuery());
+    assertEquals("q=with space", url.getQuery());
+    assertNull(url.getFragment());
+  }
+
+  public void testValidateUrlWithNoPathAndEncodedQuery() throws Exception {
+    URI url
+        = proxyHandler.validateUrl("http://www.example.com?q=with%20space");
+    assertEquals("http", url.getScheme());
+    assertEquals("www.example.com", url.getHost());
+    assertEquals(-1, url.getPort());
+    assertEquals("/", url.getPath());
+    assertEquals("q=with%20space", url.getRawQuery());
+    assertEquals("q=with space", url.getQuery());
+    assertNull(url.getFragment());
   }
 }
