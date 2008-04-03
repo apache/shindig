@@ -146,6 +146,57 @@ under the License.
           </excludes>
         </configuration>
       </plugin>
+      <plugin>
+        <groupId>de.berlios.jsunit</groupId>
+        <artifactId>jsunit-maven2-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>test</id>
+            <configuration>
+              <sourceDirectory>../../</sourceDirectory>
+              <sources>
+                <source>features/opensocial-reference/opensocial.js</source>
+                <source>features/opensocial-reference/activity.js</source>
+                <source>features/opensocial-reference/address.js</source>
+                <source>features/opensocial-reference/bodytype.js</source>
+                <source>features/opensocial-reference/collection.js</source>
+                <source>features/opensocial-reference/container.js</source>
+                <source>features/opensocial-reference/datarequest.js</source>
+                <source>features/opensocial-reference/dataresponse.js</source>
+                <source>features/opensocial-reference/email.js</source>
+                <source>features/opensocial-reference/enum.js</source>
+                <source>features/opensocial-reference/environment.js</source>
+                <source>features/opensocial-reference/message.js</source>
+                <source>features/opensocial-reference/name.js</source>
+                <source>features/opensocial-reference/organization.js</source>
+                <source>features/opensocial-reference/person.js</source>
+                <source>features/opensocial-reference/phone.js</source>
+                <source>features/opensocial-reference/responseitem.js</source>
+                <source>features/opensocial-reference/url.js</source>
+                <source>features/opensocial-0.7/batchrequest.js</source>
+                <source>features/opensocial-0.7/jsonactivity.js</source>
+                <source>features/opensocial-0.7/jsonperson.js</source>
+                <source>features/opensocial-0.7/jsoncontainer.js</source>
+              </sources>
+              <testSourceDirectory>../../</testSourceDirectory>
+              <reportsDirectory>${project.build.directory}/surefire-reports</reportsDirectory>
+              <testSuites>
+                <testSuite>
+                  <name>OpenSocialJsTests</name>
+                  <type>TESTCASES</type>
+                  <includes>
+                    <include>features/opensocial-reference/*test.js</include>
+                    <include>features/opensocial-0.7/*test.js</include>
+                  </includes>
+                </testSuite>
+              </testSuites>
+            </configuration>
+            <goals>
+              <goal>jsunit-test</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
     </plugins>
     <resources>
       <resource>
