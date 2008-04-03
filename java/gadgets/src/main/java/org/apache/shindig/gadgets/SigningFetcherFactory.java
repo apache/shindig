@@ -48,6 +48,15 @@ public class SigningFetcherFactory {
   }
 
   /**
+   * Dummy ctor for implementations that produce custom fetchers.
+   *
+   */
+  protected SigningFetcherFactory() {
+    this.keyName = null;
+    this.privateKey = null;
+  }
+
+  /**
    * @param keyName The key name (may be null) used in the signature.
    * @param keyFile The file containing your private key for signing requests.
    */
