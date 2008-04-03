@@ -17,34 +17,26 @@
  */
 package org.apache.shindig.social.opensocial;
 
+import org.apache.shindig.social.GadgetDataHandler;
+import org.apache.shindig.social.RequestItem;
+import org.apache.shindig.social.ResponseError;
+import org.apache.shindig.social.ResponseItem;
+import org.apache.shindig.social.opensocial.model.Activity;
+import org.apache.shindig.social.opensocial.model.IdSpec;
+import org.apache.shindig.social.samplecontainer.BasicActivitiesService;
+import org.apache.shindig.social.samplecontainer.BasicDataService;
+import org.apache.shindig.social.samplecontainer.BasicPeopleService;
+
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.json.JSONArray;
 
-import org.apache.shindig.gadgets.GadgetToken;
-
-import org.apache.shindig.social.samplecontainer.BasicPeopleService;
-import org.apache.shindig.social.samplecontainer.BasicDataService;
-import org.apache.shindig.social.samplecontainer.BasicActivitiesService;
-import org.apache.shindig.social.opensocial.PeopleService;
-import org.apache.shindig.social.opensocial.DataService;
-import org.apache.shindig.social.opensocial.model.IdSpec;
-import org.apache.shindig.social.opensocial.model.Activity;
-import org.apache.shindig.social.ResponseError;
-import org.apache.shindig.social.RequestItem;
-import org.apache.shindig.social.GadgetDataHandler;
-import org.apache.shindig.social.ResponseItem;
-
-import java.util.logging.Logger;
-import java.util.logging.Level;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.ArrayList;
-
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Servlet for serving the data required for opensocial.

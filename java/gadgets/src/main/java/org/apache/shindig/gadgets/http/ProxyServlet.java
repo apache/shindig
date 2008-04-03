@@ -19,32 +19,27 @@
 package org.apache.shindig.gadgets.http;
 
 import org.apache.shindig.gadgets.GadgetException;
-import org.apache.shindig.gadgets.GadgetServerConfigReader;
+
+import com.google.inject.Inject;
 
 import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
-import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-public class ProxyServlet extends HttpServlet {
+public class ProxyServlet extends InjectedServlet {
 
   private static final Logger logger
       = Logger.getLogger("org.apache.shindig.gadgets");
 
-  private CrossServletState servletState;
   private ProxyHandler proxyHandler;
 
-  @Override
-  public void init(ServletConfig config) throws ServletException {
-    servletState = CrossServletState.get(config);
-    GadgetServerConfigReader serverConfig
-        = servletState.getGadgetServer().getConfig();
-    proxyHandler = new ProxyHandler(serverConfig.getContentFetcher());
+  @Inject
+  public void setProxyHandler(ProxyHandler proxyHandler) {
+    this.proxyHandler = proxyHandler;
   }
 
   @Override
@@ -53,9 +48,9 @@ public class ProxyServlet extends HttpServlet {
     String output = request.getParameter("output");
     try {
       if ("js".equals(output)) {
-        proxyHandler.fetchJson(request, response, servletState);
+        proxyHandler.fetchJson(request, response);
       } else {
-        proxyHandler.fetch(request, response, servletState);
+        proxyHandler.fetch(request, response);
       }
     } catch (GadgetException ge) {
       outputError(ge, response);

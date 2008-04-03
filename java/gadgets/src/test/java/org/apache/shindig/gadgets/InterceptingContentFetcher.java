@@ -14,25 +14,21 @@
 
 package org.apache.shindig.gadgets;
 
-import java.net.URL;
-
 /**
- * Request signer interface that does nothing, for convenience of writing
- * code that may or may not need to sign requests.
+ * Test utility to intercept remote content requests for inspection.
  */
-public class NullRequestSigner implements RequestSigner {
+public class InterceptingContentFetcher extends RemoteContentFetcher {
 
-  public String getApprovalUrl() {
+  protected InterceptingContentFetcher() {
+    super(null);
+  }
+
+  public RemoteContentRequest interceptedRequest;
+
+  @Override
+  public RemoteContent fetch(RemoteContentRequest request) {
+    interceptedRequest = request;
     return null;
-  }
-
-  public Status getSigningStatus() {
-    return Status.OK;
-  }
-
-  @SuppressWarnings("unused")
-  public URL signRequest(String method, URL resource, String postBody) throws GadgetException {
-    return resource;
   }
 
 }

@@ -21,6 +21,9 @@ package org.apache.shindig.gadgets.http;
 
 import org.apache.shindig.util.InputStreamConsumer;
 
+import com.google.inject.Inject;
+
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
@@ -28,21 +31,24 @@ import java.io.UnsupportedEncodingException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import javax.servlet.ServletConfig;
-import javax.servlet.ServletException;
 import javax.servlet.ServletInputStream;
-import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 /**
  * Handles RPC metadata requests.
  */
-public class RpcServlet extends HttpServlet {
-  private CrossServletState state;
+public class RpcServlet extends InjectedServlet {
   private static final int MAX_REQUEST_SIZE = 1024 * 128;
   private static final Logger logger
       = Logger.getLogger("org.apache.shindig.gadgets");
+
+  private JsonRpcHandler jsonHandler;
+  @Inject
+  public void setJsonRpcHandler(JsonRpcHandler jsonHandler) {
+    this.jsonHandler = jsonHandler;
+  }
+
 
   @Override
   protected void doPost(HttpServletRequest request,
@@ -72,26 +78,24 @@ public class RpcServlet extends HttpServlet {
       if (encoding == null) {
         encoding = "UTF-8";
       }
-      String postBody = new String(body, encoding);
-      JsonRpcRequest req = new JsonRpcRequest(postBody);
-      JSONObject out = req.process(state);
+      JSONObject req = new JSONObject(new String(body, encoding));
+
+      JSONObject resp = jsonHandler.process(req);
       response.setStatus(HttpServletResponse.SC_OK);
       response.setContentType("application/json; charset=utf-8");
       response.setHeader("Content-Disposition", "attachment;filename=rpc.txt");
-      response.getWriter().write(out.toString());
+      response.getWriter().write(resp.toString());
     } catch (UnsupportedEncodingException e) {
       response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
       response.getWriter().write("Unsupported input character set");
       logger.log(Level.INFO, e.getMessage(), e);
+    } catch (JSONException e) {
+      response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+      response.getWriter().write("Malformed JSON request.");
     } catch (RpcException e) {
       response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
       response.getWriter().write(e.getMessage());
       logger.log(Level.INFO, e.getMessage(), e);
     }
-  }
-
-  @Override
-  public void init(ServletConfig config) throws ServletException {
-    state = CrossServletState.get(config);
   }
 }

@@ -34,14 +34,6 @@ import java.util.concurrent.Future;
  * and is modified in parallel by a number of {@code GadgetFeature}
  * processors, in an order defined by their dependencies, in
  * {@code GadgetServer}.
- *
- * Upon completion of processing, a {@code Gadget} is serialized as appropriate
- * to whatever output format is appropriate (eg. as gadget content in an
- * IFRAME), potentially with post-processing such as HTML whitespace
- * compression or HTML+JS (Caja) rewriting applied.
- *
- * "Hangman" variable substitutions (eg. __MSG_foo__) are performed as needed
- * and transparently for fields that support this functionality.
  */
 public class Gadget {
   private final GadgetContext context;

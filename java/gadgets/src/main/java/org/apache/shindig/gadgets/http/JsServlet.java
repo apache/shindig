@@ -23,14 +23,13 @@ import org.apache.shindig.gadgets.GadgetFeatureFactory;
 import org.apache.shindig.gadgets.GadgetFeatureRegistry;
 import org.apache.shindig.gadgets.JsLibrary;
 
+import com.google.inject.Inject;
+
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
-import javax.servlet.ServletConfig;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -38,12 +37,12 @@ import javax.servlet.http.HttpServletResponse;
  * Simple servlet serving up JavaScript files by their registered aliases.
  * Used by type=URL gadgets in loading JavaScript resources.
  */
-public class JsServlet extends HttpServlet {
-  private CrossServletState servletState;
+public class JsServlet extends InjectedServlet {
 
-  @Override
-  public void init(ServletConfig config) throws ServletException {
-    servletState = CrossServletState.get(config);
+  private GadgetFeatureRegistry registry;
+  @Inject
+  public void setRegistry(GadgetFeatureRegistry registry) {
+    this.registry = registry;
   }
 
   @Override
@@ -78,54 +77,49 @@ public class JsServlet extends HttpServlet {
 
     Set<GadgetFeatureRegistry.Entry> found
         = new HashSet<GadgetFeatureRegistry.Entry>();
-    Set<String> missing = new HashSet<String>();
+    Set<String> dummy = new HashSet<String>();
 
-    GadgetFeatureRegistry registry
-        = servletState.getGadgetServer().getConfig().getFeatureRegistry();
-    if (registry.getIncludedFeatures(needed, found, missing)) {
-      StringBuilder jsData = new StringBuilder();
+    registry.getIncludedFeatures(needed, found, dummy);
+    StringBuilder jsData = new StringBuilder();
 
-      // Probably incorrect to be using a context here...
-      GadgetContext context = new HttpGadgetContext(req);
-      Set<String> features = new HashSet<String>(found.size());
-      do {
-        for (GadgetFeatureRegistry.Entry entry : found) {
-          if (!features.contains(entry.getName()) &&
-              features.containsAll(entry.getDependencies())) {
-            features.add(entry.getName());
-            GadgetFeatureFactory factory = entry.getFeature();
-            GadgetFeature feature = factory.create();
-            for (JsLibrary lib : feature.getJsLibraries(context)) {
-              if (!lib.getType().equals(JsLibrary.Type.URL)) {
-                if (context.getDebug()) {
-                  jsData.append(lib.getDebugContent());
-                } else {
-                  jsData.append(lib.getContent());
-                }
-                jsData.append(";\n");
+    // Probably incorrect to be using a context here...
+    GadgetContext context = new HttpGadgetContext(req);
+    Set<String> features = new HashSet<String>(found.size());
+    do {
+      for (GadgetFeatureRegistry.Entry entry : found) {
+        if (!features.contains(entry.getName()) &&
+            features.containsAll(entry.getDependencies())) {
+          features.add(entry.getName());
+          GadgetFeatureFactory factory = entry.getFeature();
+          GadgetFeature feature = factory.create();
+          for (JsLibrary lib : feature.getJsLibraries(context)) {
+            if (!lib.getType().equals(JsLibrary.Type.URL)) {
+              if (context.getDebug()) {
+                jsData.append(lib.getDebugContent());
+              } else {
+                jsData.append(lib.getContent());
               }
+              jsData.append(";\n");
             }
           }
         }
-      } while (features.size() != found.size());
-
-      if (jsData.length() == 0) {
-        resp.setStatus(HttpServletResponse.SC_NOT_FOUND);
-        return;
       }
+    } while (features.size() != found.size());
 
-      if (req.getParameter("v") != null) {
-        // Versioned files get cached indefinitely
-        HttpUtil.setCachingHeaders(resp);
-      } else {
-        // Unversioned files get cached for 1 hour.
-        HttpUtil.setCachingHeaders(resp, 60 * 60);
-      }
-      resp.setContentType("text/javascript; charset=utf-8");
-      resp.setContentLength(jsData.length());
-      resp.getOutputStream().write(jsData.toString().getBytes());
-    } else {
+    if (jsData.length() == 0) {
       resp.setStatus(HttpServletResponse.SC_NOT_FOUND);
+      return;
     }
+
+    if (req.getParameter("v") != null) {
+      // Versioned files get cached indefinitely
+      HttpUtil.setCachingHeaders(resp);
+    } else {
+      // Unversioned files get cached for 1 hour.
+      HttpUtil.setCachingHeaders(resp, 60 * 60);
+    }
+    resp.setContentType("text/javascript; charset=utf-8");
+    resp.setContentLength(jsData.length());
+    resp.getOutputStream().write(jsData.toString().getBytes());
   }
 }

@@ -18,6 +18,15 @@
 package org.apache.shindig.gadgets;
 
 public enum RenderingContext {
+  // Used when rendering gadgets (iframes or inline).
+  // TODO: rename this to "RENDER_GADGET"?
   GADGET,
-  CONTAINER
+
+  // Used when rendering container data (not a gadget render)
+  CONTAINER,
+
+  // Used when retrieving metadata about a gadget. Processing is generally
+  // identical to processing under GADGET, but some operations may be safely
+  // skipped, such as preload processing.
+  METADATA
 }

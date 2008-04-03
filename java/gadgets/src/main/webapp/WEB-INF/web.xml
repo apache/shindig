@@ -23,18 +23,15 @@
 
 <web-app>
   <!-- configuration -->
+  <!-- If you have your own Guice module(s), put them here as a colon-separated list. -->
   <context-param>
-    <param-name>features</param-name>
-    <param-value>res://features/features.txt</param-value>
+    <param-name>guice-modules</param-name>
+    <param-value>org.apache.shindig.gadgets.http.HttpGuiceModule</param-value>
   </context-param>
-  <context-param>
-    <param-name>syndicators</param-name>
-    <param-value>res://syndicators/default/syndicator.js</param-value>
-  </context-param>
-  <context-param>
-    <param-name>servlet-data-class</param-name>
-    <param-value>org.apache.shindig.gadgets.http.DefaultCrossServletState</param-value>
-  </context-param>
+
+  <listener>
+    <listener-class>org.apache.shindig.gadgets.http.GuiceServletContextListener</listener-class>
+  </listener>
 
   <!-- Render a Gadget -->
   <servlet>

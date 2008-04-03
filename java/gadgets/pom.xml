@@ -153,13 +153,6 @@ under the License.
         <directory>../../features</directory>
       </resource>
       <resource>
-        <targetPath>syndicators/default</targetPath>
-        <directory>../../config</directory>
-        <includes>
-          <include>syndicator.js</include>
-        </includes>
-      </resource>
-      <resource>
         <!-- duplicated here for the jar build. -->
         <!-- TODO: Eliminate duplicate copies in WAR output -->
         <!-- this is relative to the pom.xml directory -->
@@ -168,6 +161,16 @@ under the License.
         <includes>
           <include>**/*.*</include>
         </includes>
+      </resource>
+      <resource>
+        <targetPath>syndicators/default</targetPath>
+        <directory>../../config</directory>
+        <includes>
+          <include>syndicator.js</include>
+        </includes>
+      </resource>
+      <resource>
+        <directory>conf</directory>
       </resource>
     </resources>
   </build>
@@ -229,7 +232,12 @@ under the License.
       <version>20080229</version>
       <scope>compile</scope>
     </dependency>
-		<dependency>
+  <dependency>
+      <groupId>com.google.code.guice</groupId>
+      <artifactId>guice</artifactId>
+      <version>1.0</version>
+    </dependency>
+    <dependency>
       <groupId>commons-lang</groupId>
       <artifactId>commons-lang</artifactId>
       <version>2.3</version>

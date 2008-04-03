@@ -18,17 +18,31 @@
  */
 package org.apache.shindig.gadgets;
 
+import org.apache.shindig.util.BlobCrypterException;
+
 /**
- *  Handles verification of gadget security tokens.
+ * A GadgetTokenDecoder implementation that just provides dummy data to satisfy
+ * tests and API calls. Do not use this for any security applications.
  */
-public interface GadgetSigner {
+public class BasicGadgetTokenDecoder implements GadgetTokenDecoder {
 
   /**
-   * Decrypts and verifies a gadget security token to return a gadget token.
-   * 
-   * @param tokenString String representation of the token to be created.
-   * @return The token representation of the input data.
-   * @throws GadgetException If tokenString is not a valid token
+   * {@inheritDoc}
+   *
+   * Returns a token with some faked out values.
    */
-  public GadgetToken createToken(String tokenString) throws GadgetException;
+  public GadgetToken createToken(String stringToken) throws GadgetException {
+    try {
+      String[] tokens = stringToken.split(":");
+      return new BasicGadgetToken(tokens[0], tokens[1], tokens[2], tokens[3]);
+    } catch (BlobCrypterException e) {
+      throw new GadgetException(GadgetException.Code.INVALID_GADGET_TOKEN, e);
+    }
+  }
+
+  /**
+   * Creates a signer with 24 hour token expiry
+   */
+  public BasicGadgetTokenDecoder() {
+  }
 }

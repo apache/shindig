@@ -193,10 +193,10 @@ gadgets.io = function() {
    *         false otherwise
    */
   function respondWithPreload(postData, params, callback) {
-    if (gadgets.io.preloaded && gadgets.io.preloaded[postData.url]) {
-      var preload = gadgets.io.preloaded[postData.url];
+    if (gadgets.io.preloaded_ && gadgets.io.preloaded_[postData.url]) {
+      var preload = gadgets.io.preloaded_[postData.url];
       if (postData.httpMethod == "GET" && postData.authz == "none") {
-        delete gadgets.io.preloaded[postData.url];
+        delete gadgets.io.preloaded_[postData.url];
         if (preload.rc !== 200) {
           callback({errors : ["Error " + preload.rc]});
         } else {

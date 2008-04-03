@@ -1,15 +1,17 @@
 package org.apache.shindig.social.samplecontainer;
 
 import org.apache.shindig.gadgets.BasicRemoteContentFetcher;
+import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.RemoteContent;
 import org.apache.shindig.gadgets.RemoteContentFetcher;
 import org.apache.shindig.gadgets.RemoteContentRequest;
 import org.apache.shindig.social.opensocial.model.Activity;
+import org.apache.shindig.social.opensocial.model.Enum;
 import org.apache.shindig.social.opensocial.model.MediaItem;
 import org.apache.shindig.social.opensocial.model.Name;
 import org.apache.shindig.social.opensocial.model.Person;
 import org.apache.shindig.social.opensocial.model.Phone;
-import org.apache.shindig.social.opensocial.model.Enum;
+
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NamedNodeMap;
@@ -18,8 +20,6 @@ import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
 import java.io.IOException;
 import java.io.StringReader;
 import java.net.URI;
@@ -28,6 +28,9 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
 
 /**
  * @author Cassandra Doll <doll@google.com>
@@ -102,7 +105,12 @@ public class XmlStateFileFetcher {
     // TODO: Eventually get the fetcher and processing options from a
     // config file, just like the GadgetServer
     RemoteContentFetcher fetcher = new BasicRemoteContentFetcher(1024 * 1024);
-    RemoteContent xml = fetcher.fetch(new RemoteContentRequest(stateFile));
+    RemoteContent xml = null;
+    try {
+      xml = fetcher.fetch(new RemoteContentRequest(stateFile));
+    } catch (GadgetException e) {
+      throw new RuntimeException(e);
+    }
 
     InputSource is = new InputSource(new StringReader(
         xml.getResponseAsString()));

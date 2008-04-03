@@ -89,6 +89,16 @@ public class RemoteContent {
   }
 
   /**
+   * Simple constructor for setting a basic response from a string. Mostly used
+   * for testing.
+   *
+   * @param body
+   */
+  public RemoteContent(String body) {
+    this(SC_OK, body.getBytes(), null);
+  }
+
+  /**
    * Attempts to determine the encoding of the body. If it can't be determined,
    * we use DEFAULT_ENCODING instead.
    * @return The detected encoding or DEFAULT_ENCODING.

@@ -17,23 +17,22 @@
  */
 package org.apache.shindig.gadgets.http;
 
+import com.google.inject.Inject;
+
 import java.io.IOException;
 
-import javax.servlet.ServletConfig;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 /**
  * Servlet for rendering Gadgets, typically in an IFRAME.
  */
-public class GadgetRenderingServlet extends HttpServlet {
-  private CrossServletState state;
+public class GadgetRenderingServlet extends InjectedServlet {
 
-  @Override
-  public void init(ServletConfig config) throws ServletException {
-    state = CrossServletState.get(config);
+  private GadgetRenderer renderer;
+  @Inject
+  public void setGadgetRenderer(GadgetRenderer renderer) {
+    this.renderer = renderer;
   }
 
   @Override
@@ -48,7 +47,6 @@ public class GadgetRenderingServlet extends HttpServlet {
       resp.setStatus(HttpServletResponse.SC_NOT_MODIFIED);
       return;
     }
-    GadgetRenderer renderer = new GadgetRenderer(req, resp, state);
-    renderer.process();
+    renderer.render(req, resp);
   }
 }

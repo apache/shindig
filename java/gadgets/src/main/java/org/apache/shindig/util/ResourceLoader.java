@@ -31,21 +31,45 @@ import java.io.InputStream;
 public class ResourceLoader {
 
   /**
+   * Opens a given path as either a resource or a file, depending on the path
+   * name.
+   *
+   * If path starts with res://, we interpret it as a resource.
+   * Otherwise we attempt to load it as a file.
+   * @param path
+   * @return The opened input stream
+   */
+  public static InputStream open(String path) throws IOException {
+    if (path.startsWith("res://")) {
+      return openResource(path.substring(6));
+    }
+    File file = new File(path);
+    return new FileInputStream(file);
+  }
+
+  /**
+   * @param resource
+   * @return An input stream for the given named resource
+   * @throws FileNotFoundException
+   */
+  public static InputStream openResource(String resource) throws IOException {
+    ClassLoader cl = ResourceLoader.class.getClassLoader();
+    InputStream is = cl.getResourceAsStream(resource.trim());
+    if (is == null) {
+      throw new FileNotFoundException("Can not locate resource: " + resource);
+    }
+    return is;
+  }
+
+  /**
    * Reads the contents of a resource as a string.
    *
    * @param resource
    * @return Contents of the resource.
    * @throws IOException
    */
-  public static String getContent(String resource)
-      throws IOException, FileNotFoundException {
-    ClassLoader cl = ResourceLoader.class.getClassLoader();
-    InputStream is = cl.getResourceAsStream(resource.trim());
-    if (is == null) {
-      throw new FileNotFoundException("Can not locate resource: " + resource);
-    }
-
-    return InputStreamConsumer.readToString(is);
+  public static String getContent(String resource) throws IOException {
+    return InputStreamConsumer.readToString(openResource(resource));
   }
 
   /**

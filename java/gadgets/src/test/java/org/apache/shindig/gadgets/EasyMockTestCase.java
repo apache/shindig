@@ -17,7 +17,7 @@
  */
 package org.apache.shindig.gadgets;
 
-import org.easymock.EasyMock;
+import org.easymock.classextension.EasyMock;
 
 import junit.framework.TestCase;
 
@@ -52,11 +52,11 @@ public abstract class EasyMockTestCase extends TestCase {
    * list of all mocks, and returns it.
    *
    * @param clazz Class to be mocked.
-   * @param nice whether or not to make a nice mock (non-strict).
+   * @param strict whether or not to make a strict mock
    * @return A mock instance of the given type.
    **/
-  protected <T> T mock(Class<T> clazz, boolean nice) {
-    T m = nice ? EasyMock.createNiceMock(clazz) : EasyMock.createMock(clazz);
+  protected <T> T mock(Class<T> clazz, boolean strict) {
+    T m = strict ? EasyMock.createMock(clazz) : EasyMock.createNiceMock(clazz);
     mocks.add(m);
     return m;
   }

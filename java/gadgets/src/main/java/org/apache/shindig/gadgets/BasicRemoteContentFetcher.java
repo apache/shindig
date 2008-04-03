@@ -19,19 +19,28 @@ package org.apache.shindig.gadgets;
 
 import org.apache.shindig.util.InputStreamConsumer;
 
+import com.google.inject.Singleton;
+
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URLConnection;
 import java.util.List;
 import java.util.Map;
+import java.util.zip.GZIPInputStream;
+import java.util.zip.Inflater;
+import java.util.zip.InflaterInputStream;
 
 /**
  * Implementation of a {@code RemoteObjectFetcher} using standard java.net
- * classes.
+ * classes. Only one instance of this should be present at any time, so we
+ * annotate it as a Singleton to resolve Guice injection limitations.
  */
-public class BasicRemoteContentFetcher implements RemoteContentFetcher {
+@Singleton
+public class BasicRemoteContentFetcher extends RemoteContentFetcher {
   private static final int CONNECT_TIMEOUT_MS = 5000;
+  private static final int DEFAULT_MAX_OBJECT_SIZE = 1024 * 1024;
 
   private final int maxObjSize;
 
@@ -41,7 +50,15 @@ public class BasicRemoteContentFetcher implements RemoteContentFetcher {
    * @param maxObjSize Maximum size, in bytes, of object to fetch
    */
   public BasicRemoteContentFetcher(int maxObjSize) {
+    super(null);
     this.maxObjSize = maxObjSize;
+  }
+
+  /**
+   * Creates a new fetcher using the default maximum object size.
+   */
+  public BasicRemoteContentFetcher() {
+    this(DEFAULT_MAX_OBJECT_SIZE);
   }
 
   /**
@@ -56,6 +73,7 @@ public class BasicRemoteContentFetcher implements RemoteContentFetcher {
     URLConnection fetcher;
     fetcher = request.getUri().toURL().openConnection();
     fetcher.setConnectTimeout(CONNECT_TIMEOUT_MS);
+    fetcher.setRequestProperty("Accept-Encoding", "gzip, deflate");
     if (fetcher instanceof HttpURLConnection) {
       ((HttpURLConnection)fetcher).setInstanceFollowRedirects(true);
       Map<String, List<String>> reqHeaders = request.getAllHeaders();
@@ -96,12 +114,25 @@ public class BasicRemoteContentFetcher implements RemoteContentFetcher {
     } else {
       responseCode = RemoteContent.SC_OK;
     }
-    byte[] body = InputStreamConsumer.readToByteArray(
-        fetcher.getInputStream(), maxObjSize);
+
+    String encoding = fetcher.getContentEncoding();
+    InputStream is = null;
+    // Create the appropriate stream wrapper based on the encoding type.
+    if (encoding == null) {
+      is =  fetcher.getInputStream();
+    } else if (encoding.equalsIgnoreCase("gzip")) {
+      is = new GZIPInputStream(fetcher.getInputStream());
+    } else if (encoding.equalsIgnoreCase("deflate")) {
+      Inflater inflater = new Inflater(true);
+      is = new InflaterInputStream(fetcher.getInputStream(), inflater);
+    }
+
+    byte[] body = InputStreamConsumer.readToByteArray(is, maxObjSize);
     return new RemoteContent(responseCode, body, headers);
   }
 
   /** {@inheritDoc} */
+  @Override
   public RemoteContent fetch(RemoteContentRequest request) {
     try {
       URLConnection fetcher = getConnection(request);

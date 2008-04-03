@@ -17,7 +17,7 @@
  * under the License.
  */
 
-package org.apache.shindig.gadgets;
+package org.apache.shindig.gadgets.http;
 
 import com.google.inject.BindingAnnotation;
 
@@ -29,5 +29,5 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.FIELD, ElementType.PARAMETER})
 @BindingAnnotation
-public @interface MessageBundleFetcher {
+public @interface ProxiedContentFetcher {
 }

@@ -21,6 +21,7 @@ package org.apache.shindig.gadgets;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -33,9 +34,6 @@ import java.util.Map;
  * Holds request data for passing to a RemoteContentFetcher.
  * Instances of this object are immutable.
  *
- * TODO: We should probably just stick the method in here. Having separate
- * calls for POST vs. get seems unnecessary.
- *
  * TODO: This naming seems really ridiculous now. Why don't we just call it
  * what it is -- an HTTP request?
  */
@@ -47,6 +45,19 @@ public class RemoteContentRequest {
    */
   public InputStream getPostBody() {
     return new ByteArrayInputStream(postBody);
+  }
+
+  /**
+   * @return The post body as a string, assuming UTF-8 encoding.
+   * TODO: We should probably tolerate other encodings, based on the
+   *     Content-Type header.
+   */
+  public String getPostBodyAsString() {
+    try {
+      return new String(postBody, "UTF-8");
+    } catch (UnsupportedEncodingException e) {
+      return "";
+    }
   }
 
   /**
@@ -121,6 +132,18 @@ public class RemoteContentRequest {
   }
 
   /**
+   * Creates a simple GET request
+   *
+   * @param uri
+   * @param ignoreCache
+   */
+  public static RemoteContentRequest getRequest(URI uri, boolean ignoreCache) {
+    Options options = new Options();
+    options.ignoreCache = ignoreCache;
+    return new RemoteContentRequest(uri, options);
+  }
+
+  /**
    *
    * @param method
    * @param uri
@@ -162,6 +185,22 @@ public class RemoteContentRequest {
     } else {
       contentType = type;
     }
+  }
+
+  /**
+   * Creates a new request to a different URL using all request data from
+   * an existing request.
+   *
+   * @param uri
+   * @param base The base request to copy data from.
+   */
+  public RemoteContentRequest(URI uri, RemoteContentRequest base) {
+    this.uri = uri;
+    this.method = base.method;
+    this.options = base.options;
+    this.headers = base.headers;
+    this.contentType = base.contentType;
+    this.postBody = base.postBody;
   }
 
   /**
@@ -285,6 +324,10 @@ public class RemoteContentRequest {
   }
 
   public static final Options DEFAULT_OPTIONS = new Options();
+  public static final Options IGNORE_CACHE_OPTIONS = new Options();
+  static {
+    IGNORE_CACHE_OPTIONS.ignoreCache = true;
+  }
 
   /**
    * Bag of options for making a request.
