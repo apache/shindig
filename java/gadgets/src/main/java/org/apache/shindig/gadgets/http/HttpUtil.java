@@ -103,7 +103,7 @@ public class HttpUtil {
    *
    * @param gadget
    * @param config
-   * @return
+   * @return The most appropriate view for this request.
    */
   public static View getView(Gadget gadget, SyndicatorConfig config) {
     GadgetContext context = gadget.getContext();
