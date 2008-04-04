@@ -54,8 +54,8 @@ public class SigningFetcher extends RemoteContentFetcher {
   protected static final String XOAUTH_PUBLIC_KEY
       = "xoauth_signature_publickey";
 
-  protected static final Pattern ALLOWED_PARAM_NAME = Pattern
-      .compile("[\\w_\\-]+");
+  protected static final Pattern ALLOWED_PARAM_NAME
+      = Pattern.compile("[-:\\w]+");
 
   protected final TimeSource clock = new TimeSource();
 

@@ -70,7 +70,8 @@ public class MessageBundle {
 
 
     NodeList nodes = doc.getElementsByTagName("msg");
-    Map<String, String> messages = new HashMap<String, String>(nodes.getLength(), 1);
+    Map<String, String> messages
+        = new HashMap<String, String>(nodes.getLength(), 1);
 
     for (int i = 0, j = nodes.getLength(); i < j; ++i) {
       Element msg = (Element)nodes.item(i);
@@ -79,7 +80,7 @@ public class MessageBundle {
         throw new SpecParserException(
             "All message bundle entries must have a name attribute.");
       }
-      messages.put(name, msg.getTextContent());
+      messages.put(name, msg.getTextContent().trim());
     }
     this.messages = Collections.unmodifiableMap(messages);
   }
