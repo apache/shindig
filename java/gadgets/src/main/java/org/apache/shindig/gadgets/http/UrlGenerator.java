@@ -105,7 +105,7 @@ public class UrlGenerator {
       if (view == null) {
         type = View.ContentType.HTML;
       } else {
-        type = null;
+        type = view.getType();
       }
       switch (type) {
         case URL:
