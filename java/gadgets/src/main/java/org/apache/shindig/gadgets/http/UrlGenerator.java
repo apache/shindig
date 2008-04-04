@@ -125,10 +125,10 @@ public class UrlGenerator {
              .append("&");
           break;
       }
+      buf.append("synd=").append(context.getSyndicator());
       if (context.getModuleId() != 0) {
-        buf.append("mid=").append(context.getModuleId());
+        buf.append("&mid=").append(context.getModuleId());
       }
-      buf.append("&synd=").append(context.getSyndicator());
       if (context.getIgnoreCache()) {
         buf.append("&nocache=1");
       } else {
