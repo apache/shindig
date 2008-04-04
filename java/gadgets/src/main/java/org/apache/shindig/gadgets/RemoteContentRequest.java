@@ -163,11 +163,21 @@ public class RemoteContentRequest {
     if (headers == null) {
       this.headers = Collections.emptyMap();
     } else {
+      boolean setPragmaHeader = false;
       Map<String, List<String>> tmpHeaders
           = new HashMap<String, List<String>>();
       for (Map.Entry<String, List<String>> entry : headers.entrySet()) {
         List<String> newList = new ArrayList<String>(entry.getValue());
+        // Proxies should be bypassed with the Pragma: no-cache check.
+        if (entry.getKey().equals("Pragma") && options.ignoreCache) {
+          newList.add("no-cache");
+          setPragmaHeader = true;
+        }
         tmpHeaders.put(entry.getKey(), Collections.unmodifiableList(newList));
+      }
+      // Bypass caching in proxies as well.
+      if (!setPragmaHeader && options.ignoreCache) {
+        tmpHeaders.put("Pragma", Arrays.asList("no-cache"));
       }
       this.headers = Collections.unmodifiableMap(tmpHeaders);
     }
