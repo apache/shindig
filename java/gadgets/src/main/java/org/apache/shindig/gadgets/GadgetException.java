@@ -63,7 +63,11 @@ public class GadgetException extends Exception {
     UNKNOWN_VIEW_SPECIFIED,
 
     // Blacklisting
-    BLACKLISTED_GADGET
+    BLACKLISTED_GADGET,
+    
+    // OAuth
+    OAUTH_STORAGE_ERROR,
+    OAUTH_APPROVAL_NEEDED,
   }
 
   private final Code code;
@@ -74,6 +78,11 @@ public class GadgetException extends Exception {
 
   public GadgetException(Code code, Throwable cause) {
     super(cause);
+    this.code = code;
+  }
+  
+  public GadgetException(Code code, String msg, Throwable cause) {
+    super(msg, cause);
     this.code = code;
   }
 

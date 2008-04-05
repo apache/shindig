@@ -20,11 +20,21 @@ package org.apache.shindig.gadgets;
 
 import org.apache.shindig.util.BlobCrypterException;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
+
 /**
  * A GadgetTokenDecoder implementation that just provides dummy data to satisfy
  * tests and API calls. Do not use this for any security applications.
  */
 public class BasicGadgetTokenDecoder implements GadgetTokenDecoder {
+
+  private static final int OWNER_INDEX = 0;
+  private static final int VIEWER_INDEX = 1;
+  private static final int APP_ID_INDEX = 2;
+  private static final int SYNDICATOR_INDEX = 3;
+  private static final int APP_URL_INDEX = 4;
+  private static final int MODULE_ID_INDEX = 5;
 
   /**
    * {@inheritDoc}
@@ -34,8 +44,16 @@ public class BasicGadgetTokenDecoder implements GadgetTokenDecoder {
   public GadgetToken createToken(String stringToken) throws GadgetException {
     try {
       String[] tokens = stringToken.split(":");
-      return new BasicGadgetToken(tokens[0], tokens[1], tokens[2], tokens[3]);
+      return new BasicGadgetToken(
+          URLDecoder.decode(tokens[OWNER_INDEX], "UTF-8"),
+          URLDecoder.decode(tokens[VIEWER_INDEX], "UTF-8"),
+          URLDecoder.decode(tokens[APP_ID_INDEX], "UTF-8"),
+          URLDecoder.decode(tokens[SYNDICATOR_INDEX], "UTF-8"),
+          URLDecoder.decode(tokens[APP_URL_INDEX], "UTF-8"),
+          URLDecoder.decode(tokens[MODULE_ID_INDEX], "UTF-8"));
     } catch (BlobCrypterException e) {
+      throw new GadgetException(GadgetException.Code.INVALID_GADGET_TOKEN, e);
+    } catch (UnsupportedEncodingException e) {
       throw new GadgetException(GadgetException.Code.INVALID_GADGET_TOKEN, e);
     }
   }

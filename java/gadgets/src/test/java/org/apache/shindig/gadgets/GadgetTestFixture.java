@@ -24,7 +24,7 @@ import java.util.concurrent.Executor;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-public class GadgetTestFixture extends EasyMockTestCase {
+public abstract class GadgetTestFixture extends EasyMockTestCase {
   public final HttpServletRequest request = mock(HttpServletRequest.class);
   public final HttpServletResponse response = mock(HttpServletResponse.class);
   public final GadgetServer gadgetServer;

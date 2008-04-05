@@ -18,6 +18,7 @@
  */
 package org.apache.shindig.gadgets;
 
+import org.apache.shindig.gadgets.oauth.OAuthFetcherFactory;
 import org.apache.shindig.util.ResourceLoader;
 
 import com.google.inject.AbstractModule;
@@ -54,15 +55,10 @@ public class DefaultGuiceModule extends AbstractModule {
         .annotatedWith(MessageBundleFetcher.class)
         .to(CachedContentFetcher.class);
 
-    // This is redundant because Guice doesn't handle generic fall through
-    // for non-annotated types.
-    bind(RemoteContentFetcher.class)
-        .annotatedWith(PreloadFetcher.class)
-        .to(BasicRemoteContentFetcher.class);
-
     bind(GadgetBlacklist.class).to(BasicGadgetBlacklist.class);
     bind(GadgetTokenDecoder.class).to(BasicGadgetTokenDecoder.class);
     bind(SigningFetcherFactory.class);
+    bind(OAuthFetcherFactory.class);
     bind(Executor.class).toInstance(Executors.newCachedThreadPool());
 
     bind(SyndicatorConfig.class).in(Scopes.SINGLETON);

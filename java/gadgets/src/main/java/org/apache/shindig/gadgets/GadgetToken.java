@@ -52,4 +52,14 @@ public interface GadgetToken {
    * @return the domain from the token, or null if there is none.
    */
   public String getDomain();
+
+  /**
+   * @return the URL of the application
+   */
+  public String getAppUrl();
+
+  /**
+   * @return the module ID of the application
+   */
+  public long getModuleId();
 }

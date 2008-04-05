@@ -23,6 +23,7 @@ import static org.easymock.EasyMock.eq;
 import static org.easymock.EasyMock.expect;
 import static org.easymock.EasyMock.isA;
 
+import org.apache.shindig.gadgets.FakeGadgetToken;
 import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.GadgetToken;
 import org.apache.shindig.gadgets.RemoteContent;
@@ -40,27 +41,7 @@ public class ProxyHandlerTest extends HttpTestFixture {
   private final static String URL_ONE = "http://www.example.com/test.html";
   private final static String DATA_ONE = "hello world";
 
-  private static final GadgetToken DUMMY_TOKEN = new GadgetToken() {
-    public String getOwnerId() {
-      return "owner";
-    }
-
-    public String getViewerId() {
-      return "viewer";
-    }
-
-    public String getAppId() {
-      return "app";
-    }
-
-    public String getDomain() {
-      return "domain";
-    }
-
-    public String toSerialForm() {
-      return "";
-    }
-  };
+  private static final GadgetToken DUMMY_TOKEN = new FakeGadgetToken();
 
   final ByteArrayOutputStream baos = new ByteArrayOutputStream();
   final PrintWriter writer = new PrintWriter(baos);

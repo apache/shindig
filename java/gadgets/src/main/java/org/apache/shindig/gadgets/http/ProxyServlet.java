@@ -44,7 +44,7 @@ public class ProxyServlet extends InjectedServlet {
 
   @Override
   protected void doGet(HttpServletRequest request, HttpServletResponse response)
-      throws ServletException, IOException {
+      throws IOException {
     String output = request.getParameter("output");
     try {
       if ("js".equals(output)) {

@@ -45,24 +45,33 @@ public class GadgetServer {
   private final Executor executor;
   private final GadgetFeatureRegistry registry;
   private final GadgetBlacklist blacklist;
-  private final RemoteContentFetcher preloadFetcher;
-  private final RemoteContentFetcher gadgetSpecFetcher;
-  private final RemoteContentFetcher messageBundleFetcher;
 
-  /**
-   * @param executor
-   * @param registry
-   * @param blacklist
-   * @param gadgetSpecFetcher
-   * @param messageBundleFetcher
-   */
+  private RemoteContentFetcher preloadFetcher;
+  @Inject(optional=true)
+  public void setPreloadFetcher(@PreloadFetcher RemoteContentFetcher fetcher) {
+    preloadFetcher = fetcher;
+  }
+
+  private RemoteContentFetcher gadgetSpecFetcher;
+  @Inject(optional=true)
+  public void setSpecFetcher(@GadgetSpecFetcher RemoteContentFetcher fetcher) {
+    gadgetSpecFetcher = fetcher;
+  }
+
+  private RemoteContentFetcher messageBundleFetcher;
+  @Inject(optional=true)
+  public void setBundleFetcher(
+      @GadgetSpecFetcher RemoteContentFetcher fetcher) {
+    messageBundleFetcher = fetcher;
+  }
+
   @Inject
   public GadgetServer(Executor executor,
-      GadgetFeatureRegistry registry,
-      GadgetBlacklist blacklist,
-      @PreloadFetcher RemoteContentFetcher preloadFetcher,
-      @GadgetSpecFetcher RemoteContentFetcher gadgetSpecFetcher,
-      @MessageBundleFetcher RemoteContentFetcher messageBundleFetcher) {
+                      GadgetFeatureRegistry registry,
+                      GadgetBlacklist blacklist,
+                      RemoteContentFetcher preloadFetcher,
+                      RemoteContentFetcher gadgetSpecFetcher,
+                      RemoteContentFetcher messageBundleFetcher) {
     this.executor = executor;
     this.registry = registry;
     this.blacklist = blacklist;
