@@ -31,10 +31,10 @@ public class CryptoTest {
     return new JUnit4TestAdapter(CryptoTest.class);
   }
 
-  private BlobCrypter crypter;
+  private BasicBlobCrypter crypter;
   
   public CryptoTest() {
-    crypter = new BlobCrypter("0123456789abcdef".getBytes());
+    crypter = new BasicBlobCrypter("0123456789abcdef".getBytes());
     crypter.timeSource = new FakeTimeSource();
   }
   

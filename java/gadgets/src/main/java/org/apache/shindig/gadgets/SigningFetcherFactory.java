@@ -40,9 +40,12 @@ public class SigningFetcherFactory {
    * @param networkFetcher The fetcher that will be doing actual work.
    * @param token The gadget token used for extracting signing parameters.
    * @return The signing fetcher.
+   * @throws GadgetException
    */
+  @SuppressWarnings("unused")
   public RemoteContentFetcher getSigningFetcher(
-      RemoteContentFetcher networkFetcher, GadgetToken token) {
+      RemoteContentFetcher networkFetcher, GadgetToken token)
+  throws GadgetException {
     return SigningFetcher.makeFromB64PrivateKey(
         networkFetcher, token, keyName, privateKey);
   }

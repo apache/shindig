@@ -70,7 +70,7 @@ public class SigningFetcherTest extends TestCase {
   @Override
   public void setUp() throws Exception {
     interceptor = new InterceptingContentFetcher();
-    authToken = new BasicGadgetToken("o", "v", "a", "d");
+    authToken = new BasicGadgetToken("o", "v", "a", "d", "u", "m");
     signer = SigningFetcher.makeFromB64PrivateKey(
         interceptor, authToken, "foo", PRIVATE_KEY_TEXT);
     OAuthConsumer consumer = new OAuthConsumer(null, null, null, null);

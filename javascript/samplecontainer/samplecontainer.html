@@ -85,7 +85,7 @@ function initGadget() {
   // Viewer and Owner
   document.getElementById("viewerId").value = viewerId;
   document.getElementById("ownerId").value = ownerId;
-  gadget.secureToken = generateSecureToken();
+  gadget.secureToken = escape(generateSecureToken());
 
   gadgets.container.addGadget(gadget);
   gadgets.container.layoutManager.setGadgetChromeIds(['gadget-chrome']);
@@ -107,7 +107,7 @@ function changeGadgetUrl() {
 
   viewerId = document.getElementById("viewerId").value;
   ownerId = document.getElementById("ownerId").value;
-  gadget.secureToken = generateSecureToken();
+  gadget.secureToken = escape(generateSecureToken());
 
   gadgetUrl = document.getElementById("gadgetUrl").value;
   gadget.specUrl = gadgetUrl;
@@ -117,8 +117,17 @@ function changeGadgetUrl() {
 };
 
 function generateSecureToken() {
-  // TODO: Use a real app id
-  return [ownerId, viewerId, "samplecontainerapp", "shindig"].join(":");
+  // TODO: Use a less silly mechanism of mapping a gadget URL to an appid
+  var appId = 0;
+  for (var i=0; i < gadgetUrl.length; i++) {
+    appId += gadgetUrl.charCodeAt(i);
+  }
+  var fields = [ownerId, viewerId, appId, "shindig", gadgetUrl, "0"];
+  for (var i=0; i < fields.length; i++) {
+    // escape each field individually, for metachars in URL
+    fields[i] = escape(fields[i]);
+  }
+  return fields.join(":");
 }
 
 SampleContainerGadget = function(opt_params) {

@@ -17,6 +17,8 @@
  */
 package org.apache.shindig.gadgets;
 
+import java.util.Map;
+
 
 /**
  * Fetches data over HTTP.
@@ -44,4 +46,19 @@ public abstract class RemoteContentFetcher {
    */
   public abstract RemoteContent fetch(RemoteContentRequest request)
       throws GadgetException;
+  
+  /**
+   * @return the next fetcher in the chain
+   */
+  public RemoteContentFetcher getNextFetcher() {
+    return nextFetcher;
+  }
+  
+  /**
+   * @return additional data to embed in responses sent from the JSON proxy.
+   */
+  public Map<String, String> getResponseMetadata() {
+    return null;
+  }
+  
 }

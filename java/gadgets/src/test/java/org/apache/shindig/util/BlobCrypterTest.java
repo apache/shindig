@@ -33,11 +33,11 @@ public class BlobCrypterTest {
     return new JUnit4TestAdapter(BlobCrypterTest.class);
   }
 
-  private BlobCrypter crypter;
+  private BasicBlobCrypter crypter;
   private FakeTimeSource timeSource;
   
   public BlobCrypterTest() {
-    crypter = new BlobCrypter("0123456789abcdef".getBytes());
+    crypter = new BasicBlobCrypter("0123456789abcdef".getBytes());
     timeSource = new FakeTimeSource();
     crypter.timeSource = timeSource;
   }
@@ -148,7 +148,7 @@ public class BlobCrypterTest {
   
   @Test
   public void testFixedKey() throws Exception {
-    BlobCrypter alt = new BlobCrypter("0123456789abcdef".getBytes());
+    BlobCrypter alt = new BasicBlobCrypter("0123456789abcdef".getBytes());
     Map<String, String> in = new HashMap<String, String>();
     in.put("a", "b");
     String blob = crypter.wrap(in);
@@ -158,12 +158,12 @@ public class BlobCrypterTest {
   
   @Test
   public void testBadKey() throws Exception {
-    BlobCrypter alt = new BlobCrypter("1123456789abcdef".getBytes());
+    BlobCrypter alt = new BasicBlobCrypter("1123456789abcdef".getBytes());
     Map<String, String> in = new HashMap<String, String>();
     in.put("a", "b");
     String blob = crypter.wrap(in);
     try {
-      Map<String, String> out = alt.unwrap(blob, 30);
+      alt.unwrap(blob, 30);
       fail("Decryption should have failed");
     } catch (BlobCrypterException e) {
       // Good.
@@ -173,7 +173,7 @@ public class BlobCrypterTest {
   @Test
   public void testShortKeyFails() throws Exception {
     try {
-      new BlobCrypter("0123456789abcde".getBytes());
+      new BasicBlobCrypter("0123456789abcde".getBytes());
       fail("Short key should fail");
     } catch (IllegalArgumentException e) {
       // good.

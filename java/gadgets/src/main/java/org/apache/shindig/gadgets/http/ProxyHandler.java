@@ -25,6 +25,9 @@ import org.apache.shindig.gadgets.RemoteContent;
 import org.apache.shindig.gadgets.RemoteContentFetcher;
 import org.apache.shindig.gadgets.RemoteContentRequest;
 import org.apache.shindig.gadgets.SigningFetcherFactory;
+import org.apache.shindig.gadgets.oauth.OAuthFetcher;
+import org.apache.shindig.gadgets.oauth.OAuthFetcherFactory;
+import org.apache.shindig.gadgets.oauth.OAuthRequestParams;
 import org.apache.shindig.util.InputStreamConsumer;
 
 import com.google.inject.Inject;
@@ -60,13 +63,12 @@ public class ProxyHandler {
   public static final String AUTHZ_PARAM = "authz";
   public static final String AUTHZ_NONE = "none";
   public static final String AUTHZ_SIGNED = "signed";
+  // Spec really should say 'OAUTH' rather than 'AUTHENTICATED'
+  public static final String AUTHZ_OAUTH = "authenticated";
 
-  // Not used yet.
-  // private static final String AUTHZ_AUTHORIZED = "authorized";
-
-  private final RemoteContentFetcher fetcher;
   private final GadgetTokenDecoder gadgetTokenDecoder;
   private final SigningFetcherFactory signingFetcherFactory;
+  private OAuthFetcherFactory oauthFetcherFactory;
 
   private final static Set<String> DISALLOWED_RESPONSE_HEADERS
       = new HashSet<String>();
@@ -80,13 +82,25 @@ public class ProxyHandler {
     DISALLOWED_RESPONSE_HEADERS.add("vary");
   }
 
+  // This isn't a final field because we want to support optional injection.
+  // This is a limitation of Guice, but this workaround...works.
+  private RemoteContentFetcher contentFetcher;
+
+  @Inject(optional=true)
+  public void setContentFetcher(
+      @ProxiedContentFetcher RemoteContentFetcher contentFetcher) {
+    this.contentFetcher = contentFetcher;
+  }
+
   @Inject
-  public ProxyHandler(@ProxiedContentFetcher RemoteContentFetcher fetcher,
+  public ProxyHandler(RemoteContentFetcher contentFetcher,
                       GadgetTokenDecoder gadgetTokenDecoder,
-                      SigningFetcherFactory signingFetcherFactory) {
-    this.fetcher = fetcher;
+                      SigningFetcherFactory signingFetcherFactory,
+                      OAuthFetcherFactory oauthFetcherFactory) {
+    this.contentFetcher = contentFetcher;
     this.gadgetTokenDecoder = gadgetTokenDecoder;
     this.signingFetcherFactory = signingFetcherFactory;
+    this.oauthFetcherFactory = oauthFetcherFactory;
   }
 
   /**
@@ -100,21 +114,20 @@ public class ProxyHandler {
   public void fetchJson(HttpServletRequest request,
                         HttpServletResponse response)
       throws IOException, GadgetException {
-    // Fetch the content and convert it into JSON.
-    RemoteContent results = fetchContent(request);
+
+    // Build up the request to make
+    RemoteContentRequest rcr = buildRemoteContentRequest(request);
+
+    // Build the chain of fetchers that will handle the request
+    RemoteContentFetcher fetcher = buildFetcherChain(request, response);
+
+    // Do the fetch
+    RemoteContent results = fetcher.fetch(rcr);
+
+    // Serialize the response
+    String output = serializeJsonResponse(request, fetcher, results);
+
     response.setStatus(HttpServletResponse.SC_OK);
-    String output;
-    try {
-      // Use raw param as key as URL may have to be decoded
-      JSONObject resp = new JSONObject()
-          .put("body", results.getResponseAsString())
-          .put("rc", results.getHttpStatusCode());
-      String url = request.getParameter(URL_PARAM);
-      JSONObject json = new JSONObject().put(url, resp);
-      output = UNPARSEABLE_CRUFT + json.toString();
-    } catch (JSONException e) {
-      output = "";
-    }
     response.setContentType("application/json; charset=utf-8");
     response.setHeader("Pragma", "no-cache");
     response.setHeader("Content-Disposition", "attachment;filename=p.txt");
@@ -122,59 +135,19 @@ public class ProxyHandler {
   }
 
   /**
-   * Normal proxy fetch
-   * @param request
-   * @param response
-   * @throws IOException
+   * Generate a remote content request based on the parameters
+   * sent from the client.
    * @throws GadgetException
    */
-  public void fetch(HttpServletRequest request,
-                    HttpServletResponse response)
-      throws IOException, GadgetException {
-    if (request.getHeader("If-Modified-Since") != null) {
-      response.setStatus(HttpServletResponse.SC_NOT_MODIFIED);
-      return;
-    }
-
-    RemoteContent results = fetchContent(request);
-
-    int status = results.getHttpStatusCode();
-    response.setStatus(status);
-    if (status == HttpServletResponse.SC_OK) {
-      Map<String, List<String>> headers = results.getAllHeaders();
-      if (headers.get("Cache-Control") == null) {
-        // Cache for 1 hour by default for images.
-        HttpUtil.setCachingHeaders(response, 60 * 60);
-      }
-      for (Map.Entry<String, List<String>> entry : headers.entrySet()) {
-        String name = entry.getKey();
-        List<String> values = entry.getValue();
-        if (name != null && values != null
-            && !DISALLOWED_RESPONSE_HEADERS.contains(name.toLowerCase())) {
-          for (String value : values) {
-            response.addHeader(name, value);
-          }
-        }
-      }
-      response.getOutputStream().write(
-          InputStreamConsumer.readToByteArray(results.getResponse()));
-    }
-  }
-
-  /**
-   * Fetch the content for a request
-   *
-   * @param request
-   */
   @SuppressWarnings("unchecked")
-  private RemoteContent fetchContent(HttpServletRequest request)
-      throws GadgetException {
-    String encoding = request.getCharacterEncoding();
-    if (encoding == null) {
-      encoding = "UTF-8";
-    }
-
+  private RemoteContentRequest buildRemoteContentRequest(
+      HttpServletRequest request) throws GadgetException {
     try {
+      String encoding = request.getCharacterEncoding();
+      if (encoding == null) {
+        encoding = "UTF-8";
+      }
+
       URI url = validateUrl(request.getParameter(URL_PARAM));
       String method = request.getMethod();
       Map<String, List<String>> headers = null;
@@ -195,8 +168,9 @@ public class ProxyHandler {
           for (String header : headerList) {
             String[] parts = header.split("=");
             if (parts.length != 2) {
-              // Malformed headers
-              return RemoteContent.ERROR;
+              throw new GadgetException(
+                  GadgetException.Code.INTERNAL_SERVER_ERROR,
+              "malformed header specified");
             }
             headers.put(URLDecoder.decode(parts[0], encoding),
                 Arrays.asList(URLDecoder.decode(parts[1], encoding)));
@@ -204,8 +178,8 @@ public class ProxyHandler {
         }
       } else {
         postBody = null;
-        headers
-            = new TreeMap<String, List<String>>(String.CASE_INSENSITIVE_ORDER);
+        headers = new TreeMap<String, List<String>>(
+            String.CASE_INSENSITIVE_ORDER);
         Enumeration<String> headerNames = request.getHeaderNames();
         while (headerNames.hasMoreElements()) {
           String header = headerNames.nextElement();
@@ -215,26 +189,117 @@ public class ProxyHandler {
 
       removeUnsafeHeaders(headers);
 
-      RemoteContentRequest.Options options
-          = new RemoteContentRequest.Options();
+      RemoteContentRequest.Options options =
+        new RemoteContentRequest.Options();
       options.ignoreCache = "1".equals(request.getParameter(NOCACHE_PARAM));
-      RemoteContentRequest req = new RemoteContentRequest(
+      return new RemoteContentRequest(
           method, url, headers, postBody, options);
-
-      RemoteContentFetcher realFetcher;
-      String authzType = getParameter(request, AUTHZ_PARAM, AUTHZ_NONE);
-      if (AUTHZ_SIGNED.equals(authzType)) {
-        GadgetToken token = extractAndValidateToken(request);
-        realFetcher = signingFetcherFactory.getSigningFetcher(fetcher, token);
-      } else if (AUTHZ_NONE.equals(authzType)) {
-        realFetcher = fetcher;
-      } else {
-        throw new GadgetException(GadgetException.Code.UNSUPPORTED_FEATURE,
-            "Unsupported authorization type requested.");
-      }
-      return realFetcher.fetch(req);
     } catch (UnsupportedEncodingException e) {
       throw new GadgetException(GadgetException.Code.INTERNAL_SERVER_ERROR, e);
+    }
+  }
+
+  /**
+   * At the moment our fetcher chain is short.  In the future we might add
+   * additional layers for things like caching or throttling.
+   *
+   * Whatever we do needs to return a reference to the OAuthFetcher, if it is
+   * present, so we can pull data out as needed.
+   */
+  private RemoteContentFetcher buildFetcherChain(HttpServletRequest request,
+      HttpServletResponse response) throws GadgetException {
+
+    String authzType = getParameter(request, AUTHZ_PARAM, "");
+    if (authzType.equals("") || authzType.equals(AUTHZ_NONE)) {
+      return contentFetcher;
+    }
+    GadgetToken token = extractAndValidateToken(request);
+    if (authzType.equals(AUTHZ_SIGNED)) {
+      return signingFetcherFactory.getSigningFetcher(contentFetcher, token);
+    } else if (authzType.equals(AUTHZ_OAUTH)) {
+      OAuthRequestParams params = new OAuthRequestParams(request);
+      OAuthFetcher oauthFetcher = oauthFetcherFactory.getOAuthFetcher(
+          contentFetcher, token, params);
+      return oauthFetcher;
+    }
+    throw new GadgetException(GadgetException.Code.UNSUPPORTED_FEATURE,
+        String.format("Unsupported auth type %s", authzType));
+  }
+
+  /**
+   * Format a response as JSON, including additional JSON inserted by
+   * chained content fetchers.
+   */
+  private String serializeJsonResponse(HttpServletRequest request,
+      RemoteContentFetcher fetcher, RemoteContent results) {
+    try {
+      JSONObject resp = new JSONObject();
+      if (results != null) {
+        resp.put("body", results.getResponseAsString());
+        resp.put("rc", results.getHttpStatusCode());
+      }
+      // Merge in additional response data returned by the content fetchers
+      // in the chain
+      RemoteContentFetcher curFetcher = fetcher;
+      while (curFetcher != null) {
+        Map<String, String> extra = curFetcher.getResponseMetadata();
+        if (extra != null) {
+          for (Map.Entry<String, String> entry: extra.entrySet()) {
+            resp.put(entry.getKey(), entry.getValue());
+          }
+        }
+        curFetcher = curFetcher.getNextFetcher();
+      }
+      // Use raw param as key as URL may have to be decoded
+      String originalUrl = request.getParameter(URL_PARAM);
+      JSONObject json = new JSONObject().put(originalUrl, resp);
+      return UNPARSEABLE_CRUFT + json.toString();
+    } catch (JSONException e) {
+      return "";
+    }
+  }
+
+  /**
+   * This is called for embedding images inline in gadgets, e.g. via img src
+   * links created with IG_Embed
+   *
+   * @param request
+   * @param response
+   * @throws IOException
+   * @throws GadgetException
+   */
+  public void fetch(HttpServletRequest request,
+                    HttpServletResponse response)
+      throws IOException, GadgetException {
+
+    if (request.getHeader("If-Modified-Since") != null) {
+      response.setStatus(HttpServletResponse.SC_NOT_MODIFIED);
+      return;
+    }
+
+    RemoteContentRequest rcr = buildRemoteContentRequest(request);
+    RemoteContent results = contentFetcher.fetch(rcr);
+
+    int status = results.getHttpStatusCode();
+    response.setStatus(status);
+    if (status == HttpServletResponse.SC_OK) {
+      Map<String, List<String>> headers = results.getAllHeaders();
+      if (headers.get("Cache-Control") == null) {
+        // Cache for 1 hour by default for static files.
+        HttpUtil.setCachingHeaders(response, 60 * 60);
+      }
+      for (Map.Entry<String, List<String>> entry : headers.entrySet()) {
+        String name = entry.getKey();
+        List<String> values = entry.getValue();
+        if (name != null && values != null
+            && !DISALLOWED_RESPONSE_HEADERS.contains(name.toLowerCase())) {
+          for (String value : values) {
+            response.addHeader(name, value);
+          }
+        }
+      }
+      response.getOutputStream().write(
+          InputStreamConsumer.readToByteArray(results.getResponse()));
     }
   }
 
@@ -268,9 +333,10 @@ public class ProxyHandler {
     }
     try {
       URI url = new URI(urlToValidate);
-      if (!"http".equals(url.getScheme())) {
+      if (!"http".equals(url.getScheme()) && !"https".equals(url.getScheme())) {
         throw new GadgetException(GadgetException.Code.INVALID_PARAMETER,
-            "Invalid request url scheme; only \"http\" supported.");
+            "Invalid request url scheme; only " +
+            "\"http\" and \"https\" supported.");
       }
       if (url.getPath() == null || url.getPath().length() == 0) {
         // Forcibly set the path to "/" if it is empty

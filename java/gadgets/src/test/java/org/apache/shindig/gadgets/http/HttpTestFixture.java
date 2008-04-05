@@ -23,7 +23,7 @@ import org.apache.shindig.gadgets.GadgetTokenDecoder;
 import org.apache.shindig.gadgets.SigningFetcherFactory;
 
 
-public class HttpTestFixture extends GadgetTestFixture {
+public abstract class HttpTestFixture extends GadgetTestFixture {
   public final ProxyHandler proxyHandler;
   public final GadgetRenderer gadgetRenderer;
   public final JsonRpcHandler jsonRpcHandler;
@@ -35,8 +35,11 @@ public class HttpTestFixture extends GadgetTestFixture {
 
   public HttpTestFixture() {
     super();
-    proxyHandler
-        = new ProxyHandler(fetcher, gadgetTokenDecoder, signingFetcherFactory);
+    proxyHandler = new ProxyHandler(
+        fetcher,
+        gadgetTokenDecoder,
+        signingFetcherFactory,
+        null);
     gadgetRenderer = new GadgetRenderer(
           gadgetServer, registry, syndicatorConfig, urlGenerator);
     jsonRpcHandler = new JsonRpcHandler(executor, gadgetServer, urlGenerator);

@@ -16,34 +16,37 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.shindig.gadgets.http;
-
-import org.apache.shindig.gadgets.DefaultGuiceModule;
-
-import com.google.inject.Scopes;
-
-import java.util.Properties;
+package org.apache.shindig.gadgets;
 
 /**
- * Provides http component injection on top of existing components.
+ * A fake GadgetToken implementation to help testing.
  */
-public class HttpGuiceModule extends DefaultGuiceModule {
-
-  /** {@inheritDoc} */
-  @Override
-  protected void configure() {
-    super.configure();
-    bind(ProxyHandler.class).in(Scopes.SINGLETON);
-    bind(GadgetRenderer.class).in(Scopes.SINGLETON);
-    bind(JsonRpcHandler.class).in(Scopes.SINGLETON);
-    bind(UrlGenerator.class).in(Scopes.SINGLETON);
+public class FakeGadgetToken implements GadgetToken {
+  public String getOwnerId() {
+    return "owner";
   }
 
-  public HttpGuiceModule(Properties properties) {
-    super(properties);
+  public String getViewerId() {
+    return "viewer";
   }
 
-  public HttpGuiceModule() {
-    super();
+  public String getAppId() {
+    return "app1234";
+  }
+
+  public String getDomain() {
+    return "domain";
+  }
+
+  public String toSerialForm() {
+    return "";
+  }
+
+  public String getAppUrl() {
+    return "http://www.example.com/app.xml";
+  }
+
+  public long getModuleId() {
+    return 0;
   }
 }

@@ -35,6 +35,11 @@ gadgets.io = function() {
    * Holds configuration-related data such as proxy urls.
    */
   var config = {};
+  
+  /**
+   * Holds state for OAuth.
+   */
+  var oauthState;
 
   /**
    * Internal facility to create an xhr request.
@@ -83,7 +88,10 @@ gadgets.io = function() {
     if (hadError(xobj, callback)) {
       return;
     }
-    callback(transformResponseData(params, xobj.responseText));
+    var data = {
+      body: xobj.responseText
+    };
+    callback(transformResponseData(params, data));
   }
 
   var UNPARSEABLE_CRUFT = "throw 1; < don't be evil' >";
@@ -110,13 +118,17 @@ gadgets.io = function() {
     // trusted source, and json parsing is slow in IE.
     var data = eval("(" + txt + ")");
     data = data[url];
-
-    callback(transformResponseData(params, data.body));
+    // Save off any transient OAuth state the server wants back later.
+    if (data.oauthState) {
+      oauthState = data.oauthState;
+    }
+    callback(transformResponseData(params, data));
   }
 
-  function transformResponseData(params, serverResponse) {
+  function transformResponseData(params, data) {
     var resp = {
-     text: serverResponse,
+     text: data.body,
+     approvalUrl: data.approvalUrl,
      errors: []
     };
     switch (params.CONTENT_TYPE) {
@@ -200,7 +212,7 @@ gadgets.io = function() {
         if (preload.rc !== 200) {
           callback({errors : ["Error " + preload.rc]});
         } else {
-          callback(transformResponseData(params, preload.body));
+          callback(transformResponseData(params, { body: preload.body }));
         }
         return true;
       }
@@ -251,9 +263,15 @@ gadgets.io = function() {
 
       // Check if authorization is requested
       var auth, st;
+      var reqState, oauthService, oauthToken;
       if (params.AUTHORIZATION && params.AUTHORIZATION !== "NONE") {
         auth = params.AUTHORIZATION.toLowerCase();
         st = gadgets.util.getUrlParameters().st;
+        if (params.AUTHORIZATION === "AUTHENTICATED") {
+          reqState = oauthState;
+          oauthService = params.OAUTH_SERVICE;
+          oauthToken = params.OAUTH_TOKEN;
+        }
       }
 
       var headers = params.HEADERS || {};
@@ -266,8 +284,11 @@ gadgets.io = function() {
         httpMethod : params.METHOD || "GET",
         headers: gadgets.io.encodeValues(headers, false),
         postData : params.POST_DATA || "",
-        authz : auth || "none",
-        st : st || ""
+        authz : auth || "",
+        st : st || "",
+        oauthState : reqState || "",
+        oauthService : oauthService || "",
+        oauthToken : oauthToken || ""
       };
 
       if (!respondWithPreload(postData, params, callback, processResponse)) {
@@ -335,7 +356,9 @@ gadgets.io.RequestParameters = gadgets.util.makeEnum([
   "HEADERS",
   "AUTHORIZATION",
   "NUM_ENTRIES",
-  "GET_SUMMARIES"
+  "GET_SUMMARIES",
+  "OAUTH_SERVICE",
+  "OAUTH_TOKEN"
 ]);
 
 // PUT, DELETE, and HEAD not supported currently.

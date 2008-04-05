@@ -141,6 +141,8 @@ under the License.
             <exclude>**/*.png</exclude>
             <!-- Syndicator files are JSON, not javascript -->
             <exclude>**/*syndicator*.js</exclude>
+            <!-- same for oauth config -->
+            <exclude>**/oauth.js</exclude>
             <!-- Caja has some bugs too -->
             <exclude>**/caja/*.js</exclude>
           </excludes>
@@ -218,6 +220,13 @@ under the License.
         <directory>../../config</directory>
         <includes>
           <include>syndicator.js</include>
+        </includes>
+      </resource>
+      <resource>
+        <targetPath>config</targetPath>
+        <directory>../../config</directory>
+        <includes>
+          <include>oauth.json</include>
         </includes>
       </resource>
       <resource>
