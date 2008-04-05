@@ -171,7 +171,7 @@ gadgets.io = function() {
   }
 
   /**
-   * Sends an XHR post request
+   * Sends an XHR post or get request
    *
    * @param realUrl The url to fetch data from that was requested by the gadget
    * @param proxyUrl The url to proxy through
@@ -181,17 +181,25 @@ gadgets.io = function() {
    * @param processResponseFunction The function that should process the
    *     response from the sever before calling the callback
    */
-  function makePostRequest(realUrl, proxyUrl, callback, postData, params,
+  function makeXhrRequest(realUrl, proxyUrl, callback, paramData, params,
       processResponseFunction) {
     var xhr = makeXhr();
-    xhr.open("POST", proxyUrl, true);
+    var method = (paramData != null) ? "POST" : "GET";
+
+    xhr.open(method, proxyUrl, true);
     if (callback) {
       xhr.onreadystatechange = gadgets.util.makeClosure(
           null, processResponseFunction, realUrl, callback, params, xhr);
     }
-    xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
-    xhr.send(postData);
+    if (paramData != null) {
+        xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+        xhr.send(paramData);
+    } else {
+        xhr.send(null);
+    }
   }
+
+
 
   /**
    * Satisfy a request with data that is prefetched as per the gadget Preload
@@ -272,6 +280,11 @@ gadgets.io = function() {
           oauthService = params.OAUTH_SERVICE;
           oauthToken = params.OAUTH_TOKEN;
         }
+      } else {
+        // Non auth'd & non post'd requests are cachable
+        if (!params.REFRESH_INTERVAL && !params.POST_DATA) {
+          params.REFRESH_INTERVAL = 3600;
+         }
       }
 
       var headers = params.HEADERS || {};
@@ -279,7 +292,7 @@ gadgets.io = function() {
         headers["Content-Type"] = "application/x-www-form-urlencoded";
       }
 
-      var postData = {
+      var paramData = {
         url: url,
         httpMethod : params.METHOD || "GET",
         headers: gadgets.io.encodeValues(headers, false),
@@ -291,9 +304,21 @@ gadgets.io = function() {
         oauthToken : oauthToken || ""
       };
 
-      if (!respondWithPreload(postData, params, callback, processResponse)) {
-        makePostRequest(url, config.jsonProxyUrl, callback,
-            gadgets.io.encodeValues(postData), params, processResponse);
+      if (!respondWithPreload(paramData, params, callback, processResponse)) {
+
+        var refreshInterval = params.REFRESH_INTERVAL || 0;
+  
+        if (refreshInterval > 0) {
+          // this content should be cached
+          // Add paramData to the URL
+          var extraparams = "&refresh=" + refreshInterval + '&' + gadgets.io.encodeValues(paramData);
+
+          makeXhrRequest(url, config.jsonProxyUrl + extraparams, callback, null, params, processResponse);
+
+        } else {
+          makeXhrRequest(url, config.jsonProxyUrl, callback,
+              gadgets.io.encodeValues(paramData), params, processResponse);
+        }
       }
     },
 
@@ -302,7 +327,7 @@ gadgets.io = function() {
      */
     makeNonProxiedRequest : function (relativeUrl, callback, opt_params) {
       var params = opt_params || {};
-      makePostRequest(relativeUrl, relativeUrl, callback, params.POST_DATA,
+      makeXhrRequest(relativeUrl, relativeUrl, callback, params.POST_DATA,
           params, processNonProxiedResponse);
     },
 
@@ -357,6 +382,7 @@ gadgets.io.RequestParameters = gadgets.util.makeEnum([
   "AUTHORIZATION",
   "NUM_ENTRIES",
   "GET_SUMMARIES",
+  "REFRESH_INTERVAL",
   "OAUTH_SERVICE",
   "OAUTH_TOKEN"
 ]);

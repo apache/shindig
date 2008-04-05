@@ -34,12 +34,24 @@ function _IG_Fetch_wrapper(callback, obj) {
 
 function _IG_FetchContent(url, callback, opt_params) {
   var params = opt_params || {};
+  // this is really the only legacy parameter documented
+  // at http://code.google.com/apis/gadgets/docs/remote-content.html#Params
+  if (params.refreshInterval) {
+    params['REFRESH_INTERVAL'] = params.refreshInterval;
+  } else {
+    params['REFRESH_INTERVAL'] = 3600;
+  }
   var cb = gadgets.util.makeClosure(null, _IG_Fetch_wrapper, callback);
   gadgets.io.makeRequest(url, cb, params);
 }
 
 function _IG_FetchXmlContent(url, callback, opt_params) {
   var params = opt_params || {};
+  if (params.refreshInterval) {
+    params['REFRESH_INTERVAL'] = params.refreshInterval;
+  } else {
+    params['REFRESH_INTERVAL'] = 3600;
+  }
   params.CONTENT_TYPE = "DOM";
   var cb = gadgets.util.makeClosure(null, _IG_Fetch_wrapper, callback);
   gadgets.io.makeRequest(url, cb, params);

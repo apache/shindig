@@ -65,6 +65,8 @@ public class ProxyHandler {
   public static final String AUTHZ_SIGNED = "signed";
   // Spec really should say 'OAUTH' rather than 'AUTHENTICATED'
   public static final String AUTHZ_OAUTH = "authenticated";
+  private static final String REFRESH_PARAM = "refresh";
+
 
   private final GadgetTokenDecoder gadgetTokenDecoder;
   private final SigningFetcherFactory signingFetcherFactory;
@@ -127,9 +129,17 @@ public class ProxyHandler {
     // Serialize the response
     String output = serializeJsonResponse(request, fetcher, results);
 
+
+    // Find and set the refresh interval
+    int refreshInterval = 0;
+
+    if (request.getParameter(REFRESH_PARAM) != null) {
+      refreshInterval =  Integer.valueOf(request.getParameter(REFRESH_PARAM));
+    }
+    HttpUtil.setCachingHeaders(response, refreshInterval);
+
     response.setStatus(HttpServletResponse.SC_OK);
     response.setContentType("application/json; charset=utf-8");
-    response.setHeader("Pragma", "no-cache");
     response.setHeader("Content-Disposition", "attachment;filename=p.txt");
     response.getWriter().write(output);
   }
