@@ -40,7 +40,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
- * Represents per-syndicator configuration for the contianer.
+ * Represents per-syndicator configuration for the container.
  *
  * See config/default-syndicator.js for an example configuration.
  *
