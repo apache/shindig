@@ -18,18 +18,31 @@
  */
 package org.apache.shindig.gadgets;
 
-import org.apache.shindig.gadgets.oauth.OAuthFetcherFactory;
-import org.apache.shindig.util.ResourceLoader;
-
 import com.google.inject.AbstractModule;
 import com.google.inject.CreationException;
+import com.google.inject.Inject;
+import com.google.inject.Provider;
 import com.google.inject.Scopes;
+import com.google.inject.TypeLiteral;
 import com.google.inject.name.Names;
 import com.google.inject.spi.Message;
+import org.apache.shindig.gadgets.oauth.OAuthFetcherFactory;
+import org.apache.shindig.social.GadgetDataHandler;
+import org.apache.shindig.social.opensocial.ActivitiesService;
+import org.apache.shindig.social.opensocial.DataService;
+import org.apache.shindig.social.opensocial.OpenSocialDataHandler;
+import org.apache.shindig.social.opensocial.PeopleService;
+import org.apache.shindig.social.samplecontainer.BasicActivitiesService;
+import org.apache.shindig.social.samplecontainer.BasicDataService;
+import org.apache.shindig.social.samplecontainer.BasicPeopleService;
+import org.apache.shindig.social.samplecontainer.StateFileDataHandler;
+import org.apache.shindig.util.ResourceLoader;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Properties;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
@@ -64,6 +77,15 @@ public class DefaultGuiceModule extends AbstractModule {
     bind(SyndicatorConfig.class).in(Scopes.SINGLETON);
     bind(GadgetFeatureRegistry.class).in(Scopes.SINGLETON);
     bind(GadgetServer.class).in(Scopes.SINGLETON);
+
+    // Social guice
+    bind(PeopleService.class).to(BasicPeopleService.class);
+    bind(DataService.class).to(BasicDataService.class);
+    bind(ActivitiesService.class).to(BasicActivitiesService.class);
+
+    bind(new TypeLiteral<List<GadgetDataHandler>>() {})
+        .toProvider(GadgetDataHandlersProvider.class);
+
   }
 
   public DefaultGuiceModule(Properties properties) {
@@ -84,5 +106,22 @@ public class DefaultGuiceModule extends AbstractModule {
           new Message("Unable to load properties: " + DEFAULT_PROPERTIES)));
     }
     this.properties = properties;
+  }
+
+  public static class GadgetDataHandlersProvider
+      implements Provider<List<GadgetDataHandler>> {
+    List<GadgetDataHandler> handlers;
+
+    @Inject
+    public GadgetDataHandlersProvider(OpenSocialDataHandler
+        openSocialDataHandler, StateFileDataHandler stateFileHandler) {
+      handlers = new ArrayList<GadgetDataHandler>();
+      handlers.add(openSocialDataHandler);
+      handlers.add(stateFileHandler);
+    }
+
+    public List<GadgetDataHandler> get() {
+      return handlers;
+    }
   }
 }

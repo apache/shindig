@@ -38,6 +38,8 @@ import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import com.google.inject.Inject;
+
 /**
  * Servlet for serving the data required for opensocial.
  * This will expand to be more sophisticated as time goes on.
@@ -46,11 +48,17 @@ public class OpenSocialDataHandler implements GadgetDataHandler {
   private static final Logger logger
       = Logger.getLogger("org.apache.shindig.social");
 
-  // TODO: get through injection
-  private static PeopleService peopleHandler = new BasicPeopleService();
-  private static DataService dataHandler = new BasicDataService();
-  private static ActivitiesService activitiesHandler
-      = new BasicActivitiesService();
+  private PeopleService peopleHandler;
+  private DataService dataHandler;
+  private ActivitiesService activitiesHandler;
+
+  @Inject
+  public OpenSocialDataHandler(PeopleService peopleHandler,
+      DataService dataHandler, ActivitiesService activitiesHandler) {
+    this.peopleHandler = peopleHandler;
+    this.dataHandler = dataHandler;
+    this.activitiesHandler = activitiesHandler;
+  }
 
   public enum OpenSocialDataType {
     FETCH_PEOPLE,

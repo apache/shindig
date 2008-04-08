@@ -17,29 +17,22 @@
  */
 package org.apache.shindig.social;
 
+import com.google.inject.Inject;
 import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.GadgetToken;
 import org.apache.shindig.gadgets.GadgetTokenDecoder;
 import org.apache.shindig.gadgets.http.InjectedServlet;
-import org.apache.shindig.social.opensocial.OpenSocialDataHandler;
-import org.apache.shindig.social.samplecontainer.StateFileDataHandler;
-
-import com.google.inject.Inject;
-
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
-
-import javax.servlet.ServletConfig;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 
 /**
  * Servlet for handling gadget requests for data. The request accepts one json
@@ -61,37 +54,17 @@ public class GadgetDataServlet extends InjectedServlet {
   private static final Logger logger
       = Logger.getLogger("org.apache.shindig.social");
 
-  // TODO: get through injection
-  private static final List<GadgetDataHandler> handlers
-      = new ArrayList<GadgetDataHandler>();
-
-
+  private List<GadgetDataHandler> handlers;
   private GadgetTokenDecoder gadgetTokenDecoder;
 
   @Inject
-  public void setGadgetTokenDecoder(GadgetTokenDecoder gadgetTokenDecoder) {
-   this.gadgetTokenDecoder = gadgetTokenDecoder;
+  public void setGadgetDataHandlers(List<GadgetDataHandler> handlers) {
+    this.handlers = handlers;
   }
 
-  @Override
-  public void init(ServletConfig config) throws ServletException {
-    super.init(config);
-
-    String handlerNames = config.getInitParameter("handlers");
-    if (handlerNames == null) {
-      handlers.add(new OpenSocialDataHandler());
-      handlers.add(new StateFileDataHandler());
-    } else {
-      for (String handlerName : handlerNames.split(",")) {
-        try {
-          GadgetDataHandler handler
-              = (GadgetDataHandler) (Class.forName(handlerName)).newInstance();
-          handlers.add(handler);
-        } catch (Exception ex) {
-          throw new ServletException(ex);
-        }
-      }
-    }
+  @Inject
+  public void setGadgetTokenDecoder(GadgetTokenDecoder gadgetTokenDecoder) {
+    this.gadgetTokenDecoder = gadgetTokenDecoder;
   }
 
   @Override
