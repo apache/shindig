@@ -39,6 +39,9 @@ public class CachedContentFetcher extends RemoteContentFetcher {
   @Override
   public RemoteContent fetch(RemoteContentRequest request)
       throws GadgetException {
+    if (request.getOptions().ignoreCache) {
+      return nextFetcher.fetch(request);
+    }
     RemoteContent result = cache.get(request.getUri());
     if (result == null) {
       result = nextFetcher.fetch(request);
