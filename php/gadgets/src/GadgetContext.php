@@ -54,7 +54,7 @@ class GadgetContext {
 		$this->setModuleId($this->getModuleIdParam());
 		$this->setView($this->getViewParam());
 		$this->setSyndicator($this->getSyndicatorParam());
-		//NOTE All classes are inititialized when called (aka lazy loading) because we don't 
+		//NOTE All classes are initialized when called (aka lazy loading) because we don't 
 		//need all of them in every situation
 	}
 	
