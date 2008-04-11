@@ -62,6 +62,15 @@
                 <module>java/gadgets</module>
             </modules>
         </profile>
+
+        <!-- profile to build java/rest-api -->
+        <profile>
+            <id>java/social-api</id>
+            <modules>
+                <module>java/social-api</module>
+            </modules>
+        </profile>
+
     </profiles>
 
     <scm>
