@@ -380,6 +380,11 @@ gadgets.Gadget = function(params) {
       this[name] = params[name];
     }
   }
+  if (!this.secureToken) {
+    // Assume that the default security token implementation is
+    // in use on the server.
+    this.secureToken = 'john.doe:john.doe:appid:synd:url:0';
+  }
 };
 
 gadgets.Gadget.prototype.getUserPrefs = function() {
