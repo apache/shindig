@@ -38,9 +38,18 @@ Using Shindig Gadget Container JavaScript
         var gadget = gadgets.container.createGadget(
             {specUrl: "http://foo.com/spec.xml"});
 
+	 Check "gadgets.js" for other options to be set in createGadget. If you are
+	debugging your own gadgets you can consider to use specVersion to get a more
+	optimal use of the cache. Alternatively, gadgets.container.setNoCache(1) 
+
       ii) Add it to the container. Example:
 
         gadgets.container.addGadget(gadget);
+
+	  If your setup is too complicated, you can need to tell each Gadget
+	where its server is. Example
+
+	gadget.setServerBase("http://yourserver:yourport/gadgets/");
 
       iii) Ensure the Gadget's chrome ID is defined. This is the ID of the
         elements in which the Gadget is rendered. The way these are specified
@@ -70,6 +79,9 @@ Using Shindig Gadget Container JavaScript
 
    C) See the sample container help document for more details on how it works:
      http://yourserver:yourport/gadgets/files/samplecontainer/getting-started.html
+
+   D) Get, and try to run, coderunner.xml and compliancetest.xml from the project
+     http://opensocial-resources.googlecode.com/
 
 
 For more information, see http://incubator.apache.org/projects/shindig.html

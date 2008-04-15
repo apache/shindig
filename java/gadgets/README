@@ -7,13 +7,32 @@ Installing and Running Shindig Gadget Server
    JDK/JRE, and that the maven executable is in your PATH.
 
 3) From java/gadgets/...
-   * mvn package - Builds Gadget Server and runs tests.
+   * mvn package - Builds Gadget Server and runs tests. Useful also when you need first to obtain and
+     export sources-jar, e.g. for remote debugging with Eclipse.
    * mvn jetty:run - Builds Gadget Server (no tests), installs Servlet at localhost:8080.
      - To run on a different port, use: mvn -Djetty.port=<port> jetty:run
    * mvn jetty:run-war - If you want to use the sample container or use any of
-     the sample files you need to run in this mode.
+     the sample files you need to run in this mode. Also, mvn jetty:run-exploded can work. 
 
 4) Hit server at http://localhost:<port>/gadgets/ifr?url=<gadget-url>
    Example: http://localhost:<port>/gadgets/ifr?url=http://www.labpixies.com/campaigns/todo/todo.xml
+
+
+Running your own data in the OpenSocial Servlet
+===============================================
+
+1) By default the opensocial samplecontainer is run, reading initial data from the sample files.
+
+2) Get some debugging. As a minumum, Eclipse with the usual instructions for external debugging with
+   maven will do. Get also some way to type javascript inside a gadget. For instance you
+   can try the gadget coderunner.xml from http://opensocial-resources.googlecode.com/
+
+3) Learn how to inject separate services por People, Activities and Data. The injection is done
+   via Guice. Check the file DefaultGuiceModule.java in the src/ hierarchy. Check the code 
+   in the social/samplecontainer/ and social/opensocial/. Try to write a BasicPeopleService
+   or a BasicActivitiesService.
+
+4) Inject your services by importing them into the GuiceModule.   
+
 
 For more information, see http://incubator.apache.org/projects/shindig.html
