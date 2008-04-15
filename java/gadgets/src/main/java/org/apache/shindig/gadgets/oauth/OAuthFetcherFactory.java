@@ -28,6 +28,9 @@ import org.apache.shindig.util.Crypto;
 
 import com.google.inject.Inject;
 
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 /**
  * Produces OAuth content fetchers for input tokens.
  */
@@ -39,20 +42,28 @@ public class OAuthFetcherFactory {
   /** persistent storage for OAuth tokens */
   protected GadgetOAuthTokenStore tokenStore;
 
+  private static final Logger logger
+      = Logger.getLogger(OAuthFetcherFactory.class.getName());
+
   /**
    * Initialize the OAuth factory with a default implementation of
    * BlobCrypter and consumer keys/secrets read from oauth.js
    */
   @Inject
-  public OAuthFetcherFactory(@GadgetSpecFetcher RemoteContentFetcher fetcher)
-  throws GadgetException {
-    this.oauthCrypter = new BasicBlobCrypter(
-        Crypto.getRandomBytes(BasicBlobCrypter.MASTER_KEY_MIN_LEN));
+  public OAuthFetcherFactory(@GadgetSpecFetcher RemoteContentFetcher fetcher) {
+    try {
+      this.oauthCrypter = new BasicBlobCrypter(
+          Crypto.getRandomBytes(BasicBlobCrypter.MASTER_KEY_MIN_LEN));
 
-    BasicGadgetOAuthTokenStore basicStore =
-      new BasicGadgetOAuthTokenStore(new BasicOAuthStore());
-    basicStore.initFromConfigFile(fetcher);
-    tokenStore = basicStore;
+      BasicGadgetOAuthTokenStore basicStore =
+          new BasicGadgetOAuthTokenStore(new BasicOAuthStore());
+      basicStore.initFromConfigFile(fetcher);
+      tokenStore = basicStore;
+    } catch (Throwable t) {
+      // Since this happens at startup, we don't want to kill the server just
+      // because we can't initialize the OAuth config.
+      logger.log(Level.WARNING, "Failed to initialize OAuth", t);
+    }
   }
 
   /**

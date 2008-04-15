@@ -76,6 +76,15 @@ public class GadgetOAuthTokenStore {
   // name of the Param that identifies the user authorization URL
   public static final String AUTHORIZE_URL = "authorize_url";
 
+  // name of the Param that identifies the location of OAuth parameters
+  public static final String OAUTH_PARAM_LOCATION = "param_location";
+
+  public static final String AUTH_HEADER = "auth_header";
+  public static final String POST_BODY   = "post_body";
+  public static final String URI_QUERY = "uri_query";
+
+  public static final String DEFAULT_OAUTH_PARAM_LOCATION = AUTH_HEADER;
+
   // we use POST if no HTTP method is specified for access and request URLs
   // (user authorization always uses GET)
   private static final String DEFAULT_HTTP_METHOD = "POST";
@@ -279,8 +288,44 @@ public class GadgetOAuthTokenStore {
                                 message);
     }
 
+    String paramLocationStr = getOAuthParameter(oauthParams,
+                                                OAUTH_PARAM_LOCATION,
+                                                true);
+    if (paramLocationStr == null) {
+      paramLocationStr = DEFAULT_OAUTH_PARAM_LOCATION;
+    }
+
+    OAuthStore.OAuthParamLocation paramLocation;
+    if (paramLocationStr.equalsIgnoreCase(POST_BODY)) {
+      paramLocation = OAuthStore.OAuthParamLocation.POST_BODY;
+    } else if (paramLocationStr.equalsIgnoreCase(AUTH_HEADER)) {
+      paramLocation = OAuthStore.OAuthParamLocation.AUTH_HEADER;
+    } else if (paramLocationStr.equalsIgnoreCase(URI_QUERY)) {
+      paramLocation = OAuthStore.OAuthParamLocation.URI_QUERY;
+    } else {
+      String message = new StringBuilder()
+          .append("unknown OAuth param location in gadget spec: ")
+          .append(paramLocationStr)
+          .toString();
+      log.warning(message);
+      throw new GadgetException(GadgetException.Code.INVALID_PARAMETER,
+                                message);
+    }
+
+    if (httpMethod == OAuthStore.HttpMethod.GET &&
+        paramLocation == OAuthStore.OAuthParamLocation.POST_BODY) {
+      String message = new StringBuilder()
+          .append("found incompatible param_location requirement of ")
+          .append("POST_BODY and http method GET.")
+          .toString();
+      log.warning(message);
+      throw new GadgetException(GadgetException.Code.INVALID_PARAMETER,
+                                message);
+    }
+
     OAuthStore.ProviderInfo provInfo = new OAuthStore.ProviderInfo();
     provInfo.setHttpMethod(httpMethod);
+    provInfo.setParamLocation(paramLocation);
 
     // TODO: for now, we'll just set the signature type to HMAC_SHA1
     // as this will be ignored later on when retrieving consumer information.

@@ -25,6 +25,7 @@ import org.apache.shindig.gadgets.GadgetToken;
 import org.apache.shindig.gadgets.RemoteContent;
 import org.apache.shindig.gadgets.RemoteContentFetcher;
 import org.apache.shindig.gadgets.RemoteContentRequest;
+import org.apache.shindig.gadgets.RemoteContentRequest.Options;
 import org.apache.shindig.util.BlobCrypter;
 import org.apache.shindig.util.BlobCrypterException;
 
@@ -55,7 +56,7 @@ public class OAuthFetcher extends RemoteContentFetcher {
   private static final String ACCESS_TOKEN_KEY = "a";
   private static final String ACCESS_TOKEN_SECRET_KEY = "as";
   private static final String OWNER_KEY = "o";
-  
+
   // names for the JSON values we return to the client
   public static final String CLIENT_STATE = "oauthState";
   public static final String APPROVAL_URL = "approvalUrl";
@@ -229,7 +230,7 @@ public class OAuthFetcher extends RemoteContentFetcher {
     return (accessorInfo.getAccessor().requestToken == null
             && accessorInfo.getAccessor().accessToken == null);
   }
-  
+
   /**
    * Make sure the user is authorized to approve access tokens.  At the moment
    * we restrict this to page owner's viewing their own pages.
@@ -309,22 +310,94 @@ public class OAuthFetcher extends RemoteContentFetcher {
     return newRequestMessage(method, url, params);
   }
 
+  private String getAuthorizationHeader(
+      List<Map.Entry<String, String>> oauthParams) {
+    StringBuilder result = new StringBuilder("OAuth ");
+
+    boolean first = true;
+    for (Map.Entry<String, String> parameter : oauthParams) {
+      if (!first) {
+        result.append(", ");
+      } else {
+        first = false;
+      }
+      result.append(OAuth.percentEncode(parameter.getKey()))
+            .append("=\"")
+            .append(OAuth.percentEncode(parameter.getValue()))
+            .append('"');
+    }
+    return result.toString();
+  }
+
+  private RemoteContentRequest createRemoteContentRequest(
+      List<Map.Entry<String, String>> oauthParams, String method,
+      String url, Map<String, List<String>> headers, String contentType,
+      String postBody, Options options)
+          throws IOException, URISyntaxException, GadgetException {
+
+    OAuthStore.OAuthParamLocation paramLocation =
+        accessorInfo.getParamLocation();
+
+    HashMap<String, List<String>> newHeaders =
+      new HashMap<String, List<String>>();
+
+    // paramLocation could be overriden by a run-time parameter to fetchRequest
+
+    switch (paramLocation) {
+      case AUTH_HEADER:
+        if (headers != null) {
+          newHeaders.putAll(headers);
+        }
+        List<String> authHeader = new ArrayList<String>();
+        authHeader.add(getAuthorizationHeader(oauthParams));
+        newHeaders.put("Authorization", authHeader);
+        break;
+
+      case POST_BODY:
+        if (!OAuth.isFormEncoded(contentType)) {
+          throw new GadgetException(GadgetException.Code.INVALID_PARAMETER,
+              "OAuth param location can only be post_body if post body if of " +
+              "type x-www-form-urlencoded");
+        }
+        if (postBody == null || postBody.length() == 0) {
+          postBody = OAuth.formEncode(oauthParams);
+        } else {
+          postBody = new StringBuilder()
+              .append(postBody)
+              .append("&")
+              .append(OAuth.formEncode(oauthParams))
+              .toString();
+        }
+        break;
+
+      case URI_QUERY:
+        url = OAuth.addParameters(url, oauthParams);
+        break;
+    }
+
+    byte[] postBodyBytes = (postBody == null)
+                           ? null
+                           : postBody.getBytes("UTF-8");
+
+    return new RemoteContentRequest(method, new URI(url), newHeaders,
+                                    postBodyBytes, options);
+  }
+
   /**
    * Sends OAuth request token and access token messages.
    */
   private OAuthMessage sendOAuthMessage(OAuthMessage request)
       throws IOException, URISyntaxException, GadgetException {
-    String params = "";
-    String url = request.URL;
-    if (accessorInfo.getHttpMethod() == OAuthStore.HttpMethod.GET) {
-      url = OAuth.addParameters(url, request.getParameters());
-    } else {
-      params = OAuth.formEncode(request.getParameters());
-    }
 
     RemoteContentRequest rcr =
-        new RemoteContentRequest(request.method, new URI(url), null,
-            params.getBytes(), RemoteContentRequest.DEFAULT_OPTIONS);
+      createRemoteContentRequest(filterOAuthParams(request),
+                                 request.method,
+                                 request.URL,
+                                 null,
+                                 RemoteContentRequest.DEFAULT_CONTENT_TYPE,
+                                 null,
+                                 RemoteContentRequest.DEFAULT_OPTIONS);
+
     RemoteContent content = nextFetcher.fetch(rcr);
     OAuthMessage reply = new OAuthMessage(null, null, null);
     reply.addParameters(OAuth.decodeForm(content.getResponseAsString()));
@@ -431,7 +504,9 @@ public class OAuthFetcher extends RemoteContentFetcher {
   private RemoteContent fetchData() throws GadgetException {
     try {
       List<OAuth.Parameter> msgParams =
-          OAuth.decodeForm(realRequest.getPostBodyAsString());
+        OAuth.isFormEncoded(realRequest.getContentType())
+        ? OAuth.decodeForm(realRequest.getPostBodyAsString())
+        : new ArrayList<OAuth.Parameter>();
 
       String method = realRequest.getMethod();
 
@@ -439,22 +514,16 @@ public class OAuthFetcher extends RemoteContentFetcher {
       OAuthMessage oauthRequest = newRequestMessage(
           method, realRequest.getUri().toASCIIString(), msgParams);
 
-      // Convert the signed message to a RemoteContentRequest
-      String url = oauthRequest.URL;
-      byte postBytes[] = null;
-      if (method.equals("POST")) {
-        postBytes = OAuth.formEncode(oauthRequest.getParameters()).getBytes();
-      } else {
-        url = OAuth.addParameters(url, oauthRequest.getParameters());
-      }
+      return nextFetcher.fetch(
+          createRemoteContentRequest(
+              filterOAuthParams(oauthRequest),
+              realRequest.getMethod(),
+              realRequest.getUri().toASCIIString(),
+              realRequest.getAllHeaders(),
+              realRequest.getContentType(),
+              realRequest.getPostBodyAsString(),
+              realRequest.getOptions()));
 
-      RemoteContentRequest rcr = new RemoteContentRequest(
-          realRequest.getMethod(),
-          new URI(url),
-          realRequest.getAllHeaders(),
-          postBytes,
-          realRequest.getOptions());
-      return nextFetcher.fetch(rcr);
     } catch (UnsupportedEncodingException e) {
       throw new GadgetException(GadgetException.Code.INTERNAL_SERVER_ERROR, e);
     } catch (IOException e) {
@@ -465,7 +534,37 @@ public class OAuthFetcher extends RemoteContentFetcher {
       throw new GadgetException(GadgetException.Code.INTERNAL_SERVER_ERROR, e);
     }
   }
-  
+
+  /**
+   * Extracts only those parameters from an OAuthMessage that are OAuth-related.
+   * An OAuthMessage may hold a whole bunch of non-OAuth-related parameters
+   * because they were all needed for signing. But when constructing a request
+   * we need to be able to extract just the OAuth-related parameters because
+   * they, and only they, may have to be put into an Authorization: header or
+   * some such thing.
+   *
+   * @param message the OAuthMessage object, which holds non-OAuth parameters
+   * such as foo=bar (which may have been in the original URI query part, or
+   * perhaps in the POST body), as well as OAuth-related parameters (such as
+   * oauth_timestamp or oauth_signature).
+   *
+   * @return a list that contains only the oauth_related parameters.
+   *
+   * @throws IOException
+   */
+  private List<Map.Entry<String, String>>
+      filterOAuthParams(OAuthMessage message) throws IOException {
+    List<Map.Entry<String, String>> result =
+        new ArrayList<Map.Entry<String, String>>();
+    for (Map.Entry<String, String> param : message.getParameters()) {
+      if (param.getKey().toLowerCase().startsWith("oauth")
+          || param.getKey().toLowerCase().startsWith("xoauth")) {
+        result.add(param);
+      }
+    }
+    return result;
+  }
+
   @Override
   public Map<String, String> getResponseMetadata() {
     Map<String, String> extra = new HashMap<String, String>();
