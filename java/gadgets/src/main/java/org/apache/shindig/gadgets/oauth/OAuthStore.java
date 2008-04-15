@@ -151,11 +151,24 @@ public interface OAuthStore {
   public static enum HttpMethod { GET, POST }
   public static enum SignatureType {HMAC_SHA1, RSA_SHA1, PLAINTEXT}
   public static enum KeyType { HMAC_SYMMETRIC, RSA_PRIVATE }
+  public static enum OAuthParamLocation {
+    AUTH_HEADER,
+    POST_BODY,
+    URI_QUERY
+  }
 
   public static class AccessorInfo {
     OAuthAccessor accessor;
     HttpMethod httpMethod;
     SignatureType signatureType;
+    OAuthParamLocation paramLocation;
+
+    public OAuthParamLocation getParamLocation() {
+      return paramLocation;
+    }
+    public void setParamLocation(OAuthParamLocation paramLocation) {
+      this.paramLocation = paramLocation;
+    }
     public OAuthAccessor getAccessor() {
       return accessor;
     }
@@ -245,12 +258,19 @@ public interface OAuthStore {
     private OAuthServiceProvider provider;
     private HttpMethod httpMethod;
     private SignatureType signatureType;
+    private OAuthParamLocation paramLocation;
 
     // this can be null if we have not negotiated a consumer key and secret
     // yet with the provider, or if we decided that we want to use a global
     // public key
     private ConsumerKeyAndSecret keyAndSecret;
 
+    public OAuthParamLocation getParamLocation() {
+      return paramLocation;
+    }
+    public void setParamLocation(OAuthParamLocation paramLocation) {
+      this.paramLocation = paramLocation;
+    }
     public ConsumerKeyAndSecret getKeyAndSecret() {
       return keyAndSecret;
     }

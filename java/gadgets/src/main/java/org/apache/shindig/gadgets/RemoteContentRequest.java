@@ -70,7 +70,7 @@ public class RemoteContentRequest {
   }
 
   private final String contentType;
-  private final static String DEFAULT_CONTENT_TYPE
+  public final static String DEFAULT_CONTENT_TYPE
       = "application/x-www-form-urlencoded; charset=utf-8";
 
   /**

@@ -63,12 +63,12 @@ under the License.
           </webResources>
          </configuration>
          <executions>
-		   <execution>
-		     <phase>package</phase>
-		     <goals>
-		       <goal>war</goal>
-		     </goals>
-		   </execution>
+       <execution>
+         <phase>package</phase>
+         <goals>
+           <goal>war</goal>
+         </goals>
+       </execution>
         </executions>
       </plugin>
       <plugin>
@@ -297,7 +297,7 @@ under the License.
     <dependency>
       <groupId>net.oauth</groupId>
       <artifactId>core</artifactId>
-      <version>20080229</version>
+      <version>20080328</version>
       <scope>compile</scope>
     </dependency>
   <dependency>

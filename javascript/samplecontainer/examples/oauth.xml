@@ -2,7 +2,7 @@
 <Module>
   <ModulePrefs title="Pankow Gadget">
 
-  <Optional feature="oauth">
+  <Require feature="oauth">
     <Param name="service_name">
       demo
     </Param>
@@ -23,7 +23,7 @@
     <Param name="authorize_url">
       http://localhost:9090/oauth-provider/authorize
     </Param>
-  </Optional>
+  </Require>
 
   </ModulePrefs>
   <Content type="html">

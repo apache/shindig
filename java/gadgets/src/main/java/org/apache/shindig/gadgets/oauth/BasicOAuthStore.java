@@ -128,6 +128,7 @@ public class BasicOAuthStore implements OAuthStore {
 
     AccessorInfo result = new AccessorInfo();
     result.setHttpMethod(provInfo.getHttpMethod());
+    result.setParamLocation(provInfo.getParamLocation());
 
     ConsumerKeyAndSecret consumerKeyAndSecret = provInfo.getKeyAndSecret();
 

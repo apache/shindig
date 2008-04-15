@@ -60,6 +60,10 @@ public class GadgetTokenStoreTest extends TestCase {
       "        GET\n" +
       "      </Param>\n" +
       "      \n" +
+      "      <Param name=\"param_location\">\n" +
+      "        uri_query\n" +
+      "      </Param>\n" +
+      "      \n" +
       "      <Param name=\"authorize_url\">\n" +
       "        http://www.netflix.com.notreally/authorize\n" +
       "      </Param>\n" +
@@ -97,6 +101,8 @@ public class GadgetTokenStoreTest extends TestCase {
       sb.append(expectedInfo.getProvider().userAuthorizationURL);
       sb.append(", http_method: ");
       sb.append(expectedInfo.getHttpMethod());
+      sb.append(", param_location: ");
+      sb.append(expectedInfo.getParamLocation());
       sb.append(", signature_type: ");
       sb.append(expectedInfo.getSignatureType());
       sb.append(')');
@@ -110,6 +116,8 @@ public class GadgetTokenStoreTest extends TestCase {
       OAuthStore.ProviderInfo actualInfo = (OAuthStore.ProviderInfo)actual;
 
       return (actualInfo.getHttpMethod() == expectedInfo.getHttpMethod())
+             && (actualInfo.getParamLocation()
+                 == expectedInfo.getParamLocation())
              && (actualInfo.getSignatureType()
                  == expectedInfo.getSignatureType())
              && actualInfo.getProvider().accessTokenURL.equals(
@@ -250,6 +258,8 @@ public class GadgetTokenStoreTest extends TestCase {
     assertEquals(OAuthStore.HttpMethod.GET, provInfo.getHttpMethod());
     assertEquals(OAuthStore.SignatureType.HMAC_SHA1,
                  provInfo.getSignatureType());
+    assertEquals(OAuthStore.OAuthParamLocation.URI_QUERY,
+                 provInfo.getParamLocation());
 
     // now, let's change the spec a bit
 

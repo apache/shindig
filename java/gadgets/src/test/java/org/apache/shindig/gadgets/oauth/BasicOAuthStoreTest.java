@@ -86,6 +86,7 @@ public class BasicOAuthStoreTest extends TestCase {
     info.setHttpMethod(OAuthStore.HttpMethod.GET);
     info.setSignatureType(OAuthStore.SignatureType.HMAC_SHA1);
     info.setProvider(provider);
+    info.setParamLocation(OAuthStore.OAuthParamLocation.AUTH_HEADER);
 
     ////////////////////////////////////////////////////////////////////////////
     // first, the case where we don't have a consumer key/secret
@@ -103,6 +104,10 @@ public class BasicOAuthStoreTest extends TestCase {
     control.verify();
 
     OAuthAccessor accessor = accessorInfo.getAccessor();
+
+    assertSame(info.getHttpMethod(), accessorInfo.getHttpMethod());
+    assertSame(OAuthStore.OAuthParamLocation.AUTH_HEADER,
+               accessorInfo.getParamLocation());
 
     assertEquals("accesstoken", accessor.accessToken);
     assertEquals("tokensecret", accessor.tokenSecret);
@@ -141,6 +146,7 @@ public class BasicOAuthStoreTest extends TestCase {
                                             "negotiatedsecret",
                                             OAuthStore.KeyType.HMAC_SYMMETRIC);
     info.setKeyAndSecret(kas);
+    info.setParamLocation(OAuthStore.OAuthParamLocation.POST_BODY);
 
     control.reset();
     control.checkOrder(false);
@@ -153,6 +159,9 @@ public class BasicOAuthStoreTest extends TestCase {
     accessorInfo = noDefaultStore.getOAuthAccessor(tokenKey);
 
     control.verify();
+
+    assertSame(OAuthStore.OAuthParamLocation.POST_BODY,
+               accessorInfo.getParamLocation());
 
     accessor = accessorInfo.getAccessor();
 
