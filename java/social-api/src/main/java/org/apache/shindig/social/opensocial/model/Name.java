@@ -25,6 +25,27 @@ import org.apache.shindig.social.AbstractGadgetData;
  *
  */
 public class Name extends AbstractGadgetData {
+
+  public static enum Field {
+    ADDITIONAL_NAME("additionalName"),
+    FAMILY_NAME("familyName"),
+    GIVEN_NAME("givenName"),
+    HONORIFIC_PREFIX("honorificPrefix"),
+    HONORIFIC_SUFFIX("honorificSuffix"),
+    UNSTRUCTURED("unstructured");
+
+    private final String jsonString;
+
+    private Field(String jsonString) {
+      this.jsonString = jsonString;
+    }
+
+    @Override
+    public String toString() {
+      return this.jsonString;
+    }
+  }
+
   private String additionalName;
   private String familyName;
   private String givenName;

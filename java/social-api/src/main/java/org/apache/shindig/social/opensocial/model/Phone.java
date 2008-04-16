@@ -26,6 +26,23 @@ import org.apache.shindig.social.AbstractGadgetData;
  *
  */
 public class Phone extends AbstractGadgetData {
+
+  public static enum Field {
+    NUMBER("number"),
+    TYPE("type");
+
+    private final String jsonString;
+
+    private Field(String jsonString) {
+      this.jsonString = jsonString;
+    }
+
+    @Override
+    public String toString() {
+      return this.jsonString;
+    }
+  }
+
   @Mandatory private String number;
   private String type;
 

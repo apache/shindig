@@ -20,14 +20,32 @@ package org.apache.shindig.social.opensocial.model;
 import org.apache.shindig.social.AbstractGadgetData;
 
 /**
- * 
+ *
  * Base interface for all message objects.
- * 
+ *
  * see
  * http://code.google.com/apis/opensocial/docs/0.7/reference/opensocial.Message.html
  *
  */
 public final class Message extends AbstractGadgetData {
+
+  public static enum Field {
+    BODY("body"),
+    TITLE("title"),
+    TYPE("type");
+
+    private final String jsonString;
+
+    private Field(String jsonString) {
+      this.jsonString = jsonString;
+    }
+
+    @Override
+    public String toString() {
+      return this.jsonString;
+    }
+  }
+
   private String body;
   private String title;
   private Type type;
@@ -119,5 +137,5 @@ public final class Message extends AbstractGadgetData {
    */
   public String sanitizeHTML(String htmlStr) {
     return htmlStr;
-  }	  
+  }
 }

@@ -25,14 +25,32 @@ import org.apache.shindig.social.AbstractGadgetData;
  *
  */
 public class MediaItem extends AbstractGadgetData {
+
+  public static enum Field {
+    MIME_TYPE("mimeType"),
+    TYPE("type"),
+    URL("url");
+
+    private final String jsonString;
+
+    private Field(String jsonString) {
+      this.jsonString = jsonString;
+    }
+
+    @Override
+    public String toString() {
+      return this.jsonString;
+    }
+  }
+
   private String mimeType;
   private Type type;
   private String url;
 
   public enum Type {
-    AUDIO("AUDIO"),
-    VIDEO("VIDEO"),
-    IMAGE("IMAGE");
+    AUDIO("audio"),
+    IMAGE("image"),
+    VIDEO("video");
 
     private final String jsonString;
 

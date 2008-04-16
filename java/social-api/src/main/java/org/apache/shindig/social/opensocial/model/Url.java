@@ -24,6 +24,24 @@ import org.apache.shindig.social.AbstractGadgetData;
  * http://code.google.com/apis/opensocial/docs/0.7/reference/opensocial.Url.Field.html
  */
 public class Url extends AbstractGadgetData {
+
+  public static enum Field {
+    ADDRESS("address"),
+    LINK_TEXT("linkText"),
+    TYPE("type");
+
+    private final String jsonString;
+
+    private Field(String jsonString) {
+      this.jsonString = jsonString;
+    }
+
+    @Override
+    public String toString() {
+      return this.jsonString;
+    }
+  }
+
   private String address;
   private String linkText;
   private String type;

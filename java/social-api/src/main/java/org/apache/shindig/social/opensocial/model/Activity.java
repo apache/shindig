@@ -24,6 +24,38 @@ import java.util.Map;
 import java.util.List;
 
 public class Activity extends AbstractGadgetData {
+
+  public static enum Field {
+    APP_ID("appId"),
+    BODY("body"),
+    BODY_ID("bodyId"),
+    EXTERNAL_ID("externalId"),
+    ID("id"),
+    MEDIA_ITEMS("mediaItems"),
+    POSTED_TIME("postedTime"),
+    PRIORITY("priority"),
+    STREAM_FAVICON_URL("streamFaviconUrl"),
+    STREAM_SOURCE_URL("streamSourceUrl"),
+    STREAM_TITLE("streamTitle"),
+    STREAM_URL("streamUrl"),
+    TEMPLATE_PARAMS("templateParams"),
+    TITLE("title"),
+    TITLE_ID("titleId"),
+    URL("url"),
+    USER_ID("userId");
+
+    private final String jsonString;
+
+    private Field(String jsonString) {
+      this.jsonString = jsonString;
+    }
+
+    @Override
+    public String toString() {
+      return this.jsonString;
+    }
+  }
+
   private String appId;
   private String body;
   private String bodyId;
