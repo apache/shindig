@@ -25,6 +25,23 @@ import org.apache.shindig.social.AbstractGadgetData;
  *
  */
 public class Email extends AbstractGadgetData {
+
+  public static enum Field {
+    ADDRESS("address"),
+    TYPE("type");
+
+    private final String jsonString;
+
+    private Field(String jsonString) {
+      this.jsonString = jsonString;
+    }
+
+    @Override
+    public String toString() {
+      return this.jsonString;
+    }
+  }
+
   private String address;
   private String type;
 

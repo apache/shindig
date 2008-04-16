@@ -29,6 +29,74 @@ import java.util.List;
  *
  */
 public class Person extends AbstractGadgetData {
+
+  public static enum Field {
+    ABOUT_ME("aboutMe"),
+    ACTIVITIES("activities"),
+    ADDRESSES("addresses"),
+    AGE("age"),
+    BODY_TYPE("bodyType"),
+    BOOKS("books"),
+    CARS("cars"),
+    CHILDREN("children"),
+    CURRENT_LOCATION("currentLocation"),
+    DATE_OF_BIRTH("dateOfBirth"),
+    DRINKER("drinker"),
+    EMAILS("emails"),
+    ETHNICITY("ethnicity"),
+    FASHION("fashion"),
+    FOOD("food"),
+    GENDER("gender"),
+    HAPPIEST_WHEN("happiestWhen"),
+    HEROES("heroes"),
+    HUMOR("humor"),
+    ID("id"),
+    INTERESTS("interests"),
+    JOB_INTERESTS("jobInterests"),
+    JOBS("jobs"),
+    LANGUAGES_SPOKEN("languagesSpoken"),
+    LIVING_ARRANGEMENT("livingArrangement"),
+    LOOKING_FOR("lookingFor"),
+    MOVIES("movies"),
+    MUSIC("music"),
+    NAME("name"),
+    NICKNAME("nickname"),
+    PETS("pets"),
+    PHONE_NUMBERS("phoneNumbers"),
+    POLITICAL_VIEWS("politicalViews"),
+    PROFILE_SONG("profileSong"),
+    PROFILE_URL("profileUrl"),
+    PROFILE_VIDEO("profileVideo"),
+    QUOTES("quotes"),
+    RELATIONSHIP_STATUS("relationshipStatus"),
+    RELIGION("religion"),
+    ROMANCE("romance"),
+    SCARED_OF("scaredOf"),
+    SCHOOLS("schools"),
+    SEXUAL_ORIENTATION("sexualOrientation"),
+    SMOKER("smoker"),
+    SPORTS("sports"),
+    STATUS("status"),
+    TAGS("tags"),
+    THUMBNAIL_URL("thumbnailUrl"),
+    TIME_ZONE("timeZone"),
+    TURN_OFFS("turnOffs"),
+    TURN_ONS("turnOns"),
+    TV_SHOWS("tvShows"),
+    URLS("urls");
+
+    private final String jsonString;
+
+    private Field(String jsonString) {
+      this.jsonString = jsonString;
+    }
+
+    @Override
+    public String toString() {
+      return this.jsonString;
+    }
+  }
+
   private String aboutMe;
   private List<String> activities;
   private List<Address> addresses;

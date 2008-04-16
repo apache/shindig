@@ -25,6 +25,32 @@ import org.apache.shindig.social.AbstractGadgetData;
  *
  */
 public class Address extends AbstractGadgetData {
+
+  public static enum Field {
+    COUNTRY("country"),
+    EXTENDED_ADDRESS("extendedAddress"),
+    LATITUDE("latitude"),
+    LOCALITY("locality"),
+    LONGITUDE("longitude"),
+    PO_BOX("poBox"),
+    POSTAL_CODE("postalCode"),
+    REGION("region"),
+    STREET_ADDRESS("streetAddress"),
+    TYPE("type"),
+    UNSTRUCTURED_ADDRESS("unstructuredAddress");
+
+    private final String jsonString;
+
+    private Field(String jsonString) {
+      this.jsonString = jsonString;
+    }
+
+    @Override
+    public String toString() {
+      return this.jsonString;
+    }
+  }
+
   private String country;
   private String extendedAddress;
   private Float latitude;

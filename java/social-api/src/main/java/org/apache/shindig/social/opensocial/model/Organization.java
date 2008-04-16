@@ -27,6 +27,31 @@ import java.util.Date;
  *
  */
 public class Organization extends AbstractGadgetData {
+
+  public static enum Field {
+    ADDRESS("address"),
+    DESCRIPTION("description"),
+    END_DATE("endDate"),
+    FIELD("field"),
+    NAME("name"),
+    SALARY("salary"),
+    START_DATE("startDate"),
+    SUB_FIELD("subField"),
+    TITLE("title"),
+    WEBPAGE("webpage");
+
+    private final String jsonString;
+
+    private Field(String jsonString) {
+      this.jsonString = jsonString;
+    }
+
+    @Override
+    public String toString() {
+      return this.jsonString;
+    }
+  }
+
   private Address address;
   private String description;
   private Date endDate;

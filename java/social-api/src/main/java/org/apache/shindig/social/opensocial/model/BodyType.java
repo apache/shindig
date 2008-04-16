@@ -25,6 +25,26 @@ import org.apache.shindig.social.AbstractGadgetData;
  *
  */
 public class BodyType extends AbstractGadgetData {
+
+  public static enum Field {
+    BUILD("build"),
+    EYE_COLOR("height"),
+    HAIR_COLOR("weight"),
+    HEIGHT("eyeColor"),
+    WEIGHT("hairColor");
+
+    private final String jsonString;
+
+    private Field(String jsonString) {
+      this.jsonString = jsonString;
+    }
+
+    @Override
+    public String toString() {
+      return this.jsonString;
+    }
+  }
+
   private String build;
   private String eyeColor;
   private String hairColor;
