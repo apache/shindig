@@ -40,24 +40,24 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
- * Represents per-syndicator configuration for the container.
+ * Represents a container configuration.
  *
- * See config/default-syndicator.js for an example configuration.
+ * See config/container.js for an example configuration.
  *
  * We use a cascading model, so you only have to specify attributes in
  * your config that you actually want to change.
  */
-public class SyndicatorConfig {
+public class ContainerConfig {
   private final Map<String, JSONObject> config;
-  public static final String DEFAULT_SYNDICATOR = "default";
-  public static final String SYNDICATOR_KEY = "gadgets.syndicator";
+  public static final String DEFAULT_CONTAINER = "default";
+  public static final String CONTAINER_KEY = "gadgets.container";
   private static final Logger logger
       = Logger.getLogger("org.apache.shindig.gadgets");
 
   /**
-   * @return The set of all syndicators that are currently registered.
+   * @return The set of all containers that are currently registered.
    */
-  public Set<String> getSyndicators() {
+  public Set<String> getContainers() {
     return Collections.unmodifiableSet(config.keySet());
   }
 
@@ -66,14 +66,14 @@ public class SyndicatorConfig {
    * number, ensuring that it can be safely passed to javascript without any
    * additional filtering.
    *
-   * @param syndicator
+   * @param container
    * @param parameter The value to fetch. May be specified as an x-path like
    *     object reference such as "gadgets/features/views".
    * @return A configuration parameter as a JSON object or null if not set or
    *     can't be interpreted as JSON.
    */
-  public Object getJson(String syndicator, String parameter) {
-    JSONObject data = config.get(syndicator);
+  public Object getJson(String container, String parameter) {
+    JSONObject data = config.get(container);
     if (data == null) {
       return null;
     }
@@ -98,26 +98,26 @@ public class SyndicatorConfig {
   }
 
   /**
-   * Attempts to fetch a parameter for the given syndicator, or the default
-   * syndicator if the specified syndicator is not supported.
+   * Attempts to fetch a parameter for the given container, or the default
+   * container if the specified container is not supported.
    *
-   * @param syndicator
+   * @param container
    * @param parameter
    * @return A configuration parameter as a string, or null if not set.
    */
-  public String get(String syndicator, String parameter) {
-    Object data = getJson(syndicator, parameter);
+  public String get(String container, String parameter) {
+    Object data = getJson(container, parameter);
     return data == null ? null : data.toString();
   }
 
   /**
-   * @param syndicator
+   * @param container
    * @param parameter
    * @return A configuration parameter as a JSON object or null if not set or
    *     can't be interpreted as JSON.
    */
-  public JSONObject getJsonObject(String syndicator, String parameter) {
-    Object data = getJson(syndicator, parameter);
+  public JSONObject getJsonObject(String container, String parameter) {
+    Object data = getJson(container, parameter);
     if (data instanceof JSONObject) {
       return (JSONObject)data;
     }
@@ -125,13 +125,13 @@ public class SyndicatorConfig {
   }
 
   /**
-   * @param syndicator
+   * @param container
    * @param parameter
    * @return A configuration parameter as a JSON object or null if not set or
    *     can't be interpreted as JSON.
    */
-  public JSONArray getJsonArray(String syndicator, String parameter) {
-    Object data = getJson(syndicator, parameter);
+  public JSONArray getJsonArray(String container, String parameter) {
+    Object data = getJson(container, parameter);
     if (data instanceof JSONArray) {
       return (JSONArray)data;
     }
@@ -139,7 +139,7 @@ public class SyndicatorConfig {
   }
 
   /**
-   * Loads syndicators from directories recursively.
+   * Loads containers from directories recursively.
    *
    * Only files with a .js or .json extension will be loaded.
    *
@@ -149,7 +149,7 @@ public class SyndicatorConfig {
   private void loadFiles(File[] files) throws GadgetException {
     try {
       for (File file : files) {
-        logger.info("Reading syndicator config: " + file.getName());
+        logger.info("Reading container config: " + file.getName());
         if (file.isDirectory()) {
           loadFiles(file.listFiles());
         } else if (file.getName().endsWith(".js") ||
@@ -164,13 +164,13 @@ public class SyndicatorConfig {
  
   /**
    * Loads resources recursively.
-   * @param files The base paths to look for syndicator.xml
+   * @param files The base paths to look for container.xml
    * @throws GadgetException
    */
   private void loadResources(String[] files)  throws GadgetException {
     try {
       for (String entry : files) {
-        logger.info("Reading syndicator config: " + entry);
+        logger.info("Reading container config: " + entry);
         String content = ResourceLoader.getContent(entry);
         loadFromString(content);
       }
@@ -235,28 +235,28 @@ public class SyndicatorConfig {
   }
 
   /**
-   * Processes a syndicator file.
+   * Processes a container file.
    * @param json
    */
   public void loadFromString(String json) throws GadgetException {
     try {
       JSONObject contents = new JSONObject(json);
-      JSONArray syndicators = contents.getJSONArray(SYNDICATOR_KEY);
-      JSONObject defaultSynd = config.get(DEFAULT_SYNDICATOR);
-      if (defaultSynd == null) {
-        if (DEFAULT_SYNDICATOR.equals(syndicators.get(0))) {
-          defaultSynd = contents;
-          config.put(DEFAULT_SYNDICATOR, contents);
+      JSONArray containers = contents.getJSONArray(CONTAINER_KEY);
+      JSONObject defaultContainer = config.get(DEFAULT_CONTAINER);
+      if (defaultContainer == null) {
+        if (DEFAULT_CONTAINER.equals(containers.get(0))) {
+          defaultContainer = contents;
+          config.put(DEFAULT_CONTAINER, contents);
         } else {
           throw new GadgetException(GadgetException.Code.INVALID_CONFIG,
                                     "No default config registered");
         }
       }
-      for (int i = 0, j = syndicators.length(); i < j; ++i) {
+      for (int i = 0, j = containers.length(); i < j; ++i) {
         // Copy the default object and produce a new one.
-        String syndicator = syndicators.getString(i);
-        if (!DEFAULT_SYNDICATOR.equals(syndicator)) {
-          config.put(syndicator, mergeObjects(defaultSynd, contents));
+        String container = containers.getString(i);
+        if (!DEFAULT_CONTAINER.equals(container)) {
+          config.put(container, mergeObjects(defaultContainer, contents));
         }
       }
     } catch (JSONException e) {
@@ -265,14 +265,14 @@ public class SyndicatorConfig {
   }
 
   /**
-   * Loads syndicators from the specified resource. Follows the same rules
+   * Loads containers from the specified resource. Follows the same rules
    * as {@code JsFeatureLoader.loadFeatures} for locating resources.
-   * This call is not thread safe, so you should only call loadSyndicators()
+   * This call is not thread safe, so you should only call loadContainers()
    * from within the GadgetServerConfig.
    *
    * @param path
    */
-  public void loadSyndicators(String path) throws GadgetException {
+  public void loadContainers(String path) throws GadgetException {
     try {
       if (path.startsWith("res://")) {
         path = path.substring(6);
@@ -296,11 +296,11 @@ public class SyndicatorConfig {
    * Creates a new, empty configuration.
    */
   @Inject
-  public SyndicatorConfig(@Named("syndicators.default") String syndicators)
+  public ContainerConfig(@Named("containers.default") String containers)
       throws GadgetException {
     config = new HashMap<String, JSONObject>();
-    if (syndicators != null) {
-      loadSyndicators(syndicators);
+    if (containers != null) {
+      loadContainers(containers);
     }
   }
 }

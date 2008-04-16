@@ -31,7 +31,7 @@ public abstract class GadgetTestFixture extends EasyMockTestCase {
   public final RemoteContentFetcher fetcher = mock(RemoteContentFetcher.class);
   public final GadgetBlacklist blacklist = mock(GadgetBlacklist.class);
   public GadgetFeatureRegistry registry;
-  public SyndicatorConfig syndicatorConfig;
+  public ContainerConfig containerConfig;
   public final Executor executor = new Executor() {
     public void execute(Runnable r) {
       r.run();
@@ -48,10 +48,10 @@ public abstract class GadgetTestFixture extends EasyMockTestCase {
     }
 
     try {
-      syndicatorConfig = new SyndicatorConfig(null);
+      containerConfig = new ContainerConfig(null);
     } catch (Exception e) {
       e.printStackTrace();
-      fail("Failed to create syndicator config");
+      fail("Failed to create container config");
     }
 
     gadgetServer = new GadgetServer(executor, registry, blacklist, fetcher,

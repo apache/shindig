@@ -94,7 +94,7 @@ class GadgetRenderingServlet extends HttpServlet {
 	/**
 	 * Outputs a html content type gadget.
 	 * It creates a html page, with the javascripts from the features inline into the page, plus
-	 * calls to 'gadgets.config.init' with the syndicator configuration (config/syndicator.js) and
+	 * calls to 'gadgets.config.init' with the container configuration (config/container.js) and
 	 * 'gadgets.Prefs.setMessages_' with all the substitutions. For external javascripts it adds
 	 * a <script> tag.
 	 *
@@ -275,10 +275,10 @@ class GadgetRenderingServlet extends HttpServlet {
 	
 	private function appendJsConfig($context, $gadget)
 	{
-		$syndicator = $context->getSyndicator();
-		$syndicatorConfig = $context->getSyndicatorConfig();
+		$container = $context->getContainer();
+		$containerConfig = $context->getContainerConfig();
 		$gadgetConfig = array();
-		$featureConfig = $syndicatorConfig->getConfig($syndicator, 'gadgets.features');
+		$featureConfig = $containerConfig->getConfig($container, 'gadgets.features');
 		foreach ($gadget->getJsLibraries() as $library) {
 			$feature = $library->getFeatureName();
 			if (!isset($gadgetConfig[$feature]) && !empty($featureConfig[$feature])) {

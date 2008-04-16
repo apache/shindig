@@ -41,7 +41,7 @@ public abstract class HttpTestFixture extends GadgetTestFixture {
         signingFetcherFactory,
         null);
     gadgetRenderer = new GadgetRenderer(
-          gadgetServer, registry, syndicatorConfig, urlGenerator);
+          gadgetServer, registry, containerConfig, urlGenerator);
     jsonRpcHandler = new JsonRpcHandler(executor, gadgetServer, urlGenerator);
   }
 }

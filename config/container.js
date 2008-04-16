@@ -17,8 +17,8 @@
  * under the License.
  */
 
-// Default syndicator configuration. Rather than replacing this
-// file, you should create your own syndicator.js file and
+// Default container configuration. Rather than replacing this
+// file, you should create your own container.js file and
 // load it directly by modifying the value of web.xml.
 // All configurations will automatically inherit values from this
 // config, so you only need to provide configuration for items
@@ -31,12 +31,12 @@
 // NOTE: Please _don't_ leave trailing commas because the php json parser
 // errors out on this.
 
-// Syndicator must be an array; this allows multiple syndicators
+// Container must be an array; this allows multiple containers
 // to share configuration.
-{"gadgets.syndicator" : ["default"],
+{"gadgets.container" : ["default"],
 
 // Set of regular expressions to validate the parent parameter. This is
-// necessary to support situations where you want a single syndicator to support
+// necessary to support situations where you want a single container to support
 // multiple possible host names (such as for localized domains, such as
 // <language>.example.org. If left as null, the parent parameter will be
 // ignored; otherwise, any requests that do not include a parent

@@ -39,8 +39,8 @@ class GadgetContext {
 	private $blacklist = null;
 	private $ignoreCache = null;
 	private $forcedJsLibs = null;
-	private $syndicatorConfig = null; 
-	private $syndicator = null;
+	private $containerConfig = null; 
+	private $container = null;
 
 	public function __construct($renderingContext)
 	{
@@ -53,20 +53,26 @@ class GadgetContext {
 		$this->setUrl($this->getUrlParam());
 		$this->setModuleId($this->getModuleIdParam());
 		$this->setView($this->getViewParam());
-		$this->setSyndicator($this->getSyndicatorParam());
+		$this->setContainer($this->getContainerParam());
 		//NOTE All classes are initialized when called (aka lazy loading) because we don't 
 		//need all of them in every situation
 	}
 	
-	private function getSyndicatorParam()
+	private function getContainerParam()
 	{
-		$synd = 'default';
-		if (!empty($_GET['synd'])) {
-			$synd = $_GET['synd'];
+		$container = 'default';
+		if (!empty($_GET['container'])) {
+			$container = $_GET['container'];
+		} elseif (!empty($_GET['synd'])) {
+      // The parameter used to be called 'synd' FIXME: schedule removal
+			$container = $_GET['synd'];
+		} elseif (!empty($_POST['container'])) {
+			$container = $_POST['container'];
 		} elseif (!empty($_POST['synd'])) {
-			$synd = $_POST['synd'];
+      // The parameter used to be called 'synd' FIXME: schedule removal
+			$container = $_POST['synd'];
 		}
-		return $synd;
+		return $container;
 	}
 
 	private function getIgnoreCacheParam()
@@ -175,23 +181,23 @@ class GadgetContext {
 		return new Locale($language, $country);
 	}
 	
-	private function instanceSyndicatorConfig()
+	private function instanceContainerConfig()
 	{
 		global $config;
-		return new SyndicatorConfig($config['syndicator_path']);
+		return new ContainerConfig($config['container_path']);
 	}
 	
-	public function getSyndicator()
+	public function getContainer()
 	{
-		return $this->syndicator;
+		return $this->container;
 	}
 	
-	public function getSyndicatorConfig()
+	public function getContainerConfig()
 	{
-		if ($this->syndicatorConfig == null) {
-			$this->syndicatorConfig = $this->instanceSyndicatorConfig();
+		if ($this->containerConfig == null) {
+			$this->containerConfig = $this->instanceContainerConfig();
 		}
-		return $this->syndicatorConfig;
+		return $this->containerConfig;
 	}
 
 	public function getCache()
@@ -241,14 +247,14 @@ class GadgetContext {
 		return $this->view;
 	}
 	
-	public function setSyndicator($syndicator)
+	public function setContainer($container)
 	{
-		$this->syndicator = $syndicator;
+		$this->container = $container;
 	}
 	
-	public function setSyndicatorConfig($syndicatorConfig)
+	public function setContainerConfig($containerConfig)
 	{
-		$this->syndicatorConfig = $syndicatorConfig;
+		$this->containerConfig = $containerConfig;
 	}
 
 	public function setBlacklist($blacklist)

@@ -74,7 +74,7 @@ public class DefaultGuiceModule extends AbstractModule {
     bind(OAuthFetcherFactory.class);
     bind(Executor.class).toInstance(Executors.newCachedThreadPool());
 
-    bind(SyndicatorConfig.class).in(Scopes.SINGLETON);
+    bind(ContainerConfig.class).in(Scopes.SINGLETON);
     bind(GadgetFeatureRegistry.class).in(Scopes.SINGLETON);
     bind(GadgetServer.class).in(Scopes.SINGLETON);
 

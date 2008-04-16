@@ -63,10 +63,10 @@ public class GadgetContext {
   }
 
   /**
-   * @return The syndicator of the current request.
+   * @return The container of the current request.
    */
-  public String getSyndicator() {
-    return SyndicatorConfig.DEFAULT_SYNDICATOR;
+  public String getContainer() {
+    return ContainerConfig.DEFAULT_CONTAINER;
   }
 
   /**

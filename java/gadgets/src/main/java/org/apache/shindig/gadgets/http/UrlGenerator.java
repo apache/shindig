@@ -24,7 +24,7 @@ import org.apache.shindig.gadgets.GadgetFeature;
 import org.apache.shindig.gadgets.GadgetFeatureFactory;
 import org.apache.shindig.gadgets.GadgetFeatureRegistry;
 import org.apache.shindig.gadgets.JsLibrary;
-import org.apache.shindig.gadgets.SyndicatorConfig;
+import org.apache.shindig.gadgets.ContainerConfig;
 import org.apache.shindig.gadgets.UserPrefs;
 import org.apache.shindig.gadgets.spec.GadgetSpec;
 import org.apache.shindig.gadgets.spec.UserPref;
@@ -48,7 +48,7 @@ public class UrlGenerator {
   private final String jsPrefix;
   private final String iframePrefix;
   private final String jsChecksum;
-  private final SyndicatorConfig syndicatorConfig;
+  private final ContainerConfig containerConfig;
   private final static Pattern ALLOWED_FEATURE_NAME
       = Pattern.compile("[0-9a-zA-Z\\.\\-]+");
 
@@ -82,7 +82,7 @@ public class UrlGenerator {
       }
     }
     buf.append(".js?v=").append(jsChecksum)
-       .append("&synd=").append(context.getSyndicator())
+       .append("&container=").append(context.getContainer())
        .append("&debug=").append(context.getDebug() ? "1" : "0");
     return buf.toString();
   }
@@ -100,7 +100,7 @@ public class UrlGenerator {
     GadgetSpec spec = gadget.getSpec();
     try {
       String url = context.getUrl().toString();
-      View view = HttpUtil.getView(gadget, syndicatorConfig);
+      View view = HttpUtil.getView(gadget, containerConfig);
       View.ContentType type;
       if (view == null) {
         type = View.ContentType.HTML;
@@ -125,7 +125,7 @@ public class UrlGenerator {
              .append("&");
           break;
       }
-      buf.append("synd=").append(context.getSyndicator());
+      buf.append("container=").append(context.getContainer());
       if (context.getModuleId() != 0) {
         buf.append("&mid=").append(context.getModuleId());
       }
@@ -158,10 +158,10 @@ public class UrlGenerator {
   public UrlGenerator(@Named("urls.iframe.prefix") String iframePrefix,
                       @Named("urls.js.prefix") String jsPrefix,
                       GadgetFeatureRegistry registry,
-                      SyndicatorConfig syndicatorConfig) {
+                      ContainerConfig containerConfig) {
     this.iframePrefix = iframePrefix;
     this.jsPrefix = jsPrefix;
-    this.syndicatorConfig = syndicatorConfig;
+    this.containerConfig = containerConfig;
 
     StringBuilder jsBuf = new StringBuilder();
     for (Map.Entry<String, GadgetFeatureRegistry.Entry> entry :
