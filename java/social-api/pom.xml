@@ -22,7 +22,7 @@ under the License.
     <groupId>org.apache.shindig</groupId>
     <artifactId>shindig-parent</artifactId>
     <version>1-SNAPSHOT</version>
-    <relativePath>../../pom/parent/pom.xml</relativePath>
+    <relativePath>../pom.xml</relativePath>
   </parent>
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.apache.shindig</groupId>
@@ -80,10 +80,6 @@ under the License.
         </configuration>
       </plugin>
       <plugin>
-        <groupId>org.mortbay.jetty</groupId>
-        <artifactId>maven-jetty-plugin</artifactId>
-      </plugin>
-      <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-jar-plugin</artifactId>
         <executions>
@@ -97,7 +93,7 @@ under the License.
       </plugin>
     </plugins>
   </build>
-  
+
   <repositories>
    <!-- For Abdera -->
     <repository>
@@ -135,9 +131,19 @@ under the License.
       <scope>test</scope>
     </dependency>
     <dependency>
+      <groupId>com.google.code.guice</groupId>
+      <artifactId>guice</artifactId>
+      <version>1.0</version>
+    </dependency>
+    <dependency>
       <version>0.4.0-incubating-SNAPSHOT</version>
       <groupId>org.apache.abdera</groupId>
       <artifactId>abdera-server</artifactId>
+    </dependency>
+    <dependency>
+      <version>1-SNAPSHOT</version>
+      <groupId>${pom.groupId}</groupId>
+      <artifactId>gadgets</artifactId>
     </dependency>
   </dependencies>
 </project>
