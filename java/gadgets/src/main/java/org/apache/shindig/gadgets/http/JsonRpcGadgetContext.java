@@ -96,13 +96,13 @@ public class JsonRpcGadgetContext extends GadgetContext {
     return ignoreCache;
   }
 
-  private final String syndicator;
+  private final String container;
   @Override
-  public String getSyndicator() {
-    if (syndicator == null) {
-      return super.getSyndicator();
+  public String getContainer() {
+    if (container == null) {
+      return super.getContainer();
     }
-    return syndicator;
+    return container;
   }
 
   private final Boolean debug;
@@ -193,7 +193,7 @@ public class JsonRpcGadgetContext extends GadgetContext {
     locale = getLocale(context);
     view = context.optString("view");
     ignoreCache = context.optBoolean("ignoreCache");
-    syndicator = context.optString("syndicator");
+    container = context.optString("container");
     debug = context.optBoolean("debug");
     renderingContext = RenderingContext.METADATA;
   }

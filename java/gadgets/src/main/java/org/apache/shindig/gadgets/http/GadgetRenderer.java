@@ -21,7 +21,7 @@ package org.apache.shindig.gadgets.http;
 
 import org.apache.shindig.gadgets.GadgetFeatureRegistry;
 import org.apache.shindig.gadgets.GadgetServer;
-import org.apache.shindig.gadgets.SyndicatorConfig;
+import org.apache.shindig.gadgets.ContainerConfig;
 
 import com.google.inject.Inject;
 
@@ -36,7 +36,7 @@ import javax.servlet.http.HttpServletResponse;
 public class GadgetRenderer {
   private final GadgetServer server;
   private final GadgetFeatureRegistry registry;
-  private final SyndicatorConfig syndicatorConfig;
+  private final ContainerConfig containerConfig;
   private final UrlGenerator urlGenerator;
 
   /**
@@ -49,18 +49,18 @@ public class GadgetRenderer {
   public void render(HttpServletRequest request, HttpServletResponse response)
       throws IOException {
     GadgetRenderingTask task = new GadgetRenderingTask(
-          request, response, server, registry, syndicatorConfig, urlGenerator);
+          request, response, server, registry, containerConfig, urlGenerator);
     task.process();
   }
 
   @Inject
   public GadgetRenderer(GadgetServer server,
                         GadgetFeatureRegistry registry,
-                        SyndicatorConfig syndicatorConfig,
+                        ContainerConfig containerConfig,
                         UrlGenerator urlGenerator) {
     this.server = server;
     this.registry = registry;
-    this.syndicatorConfig = syndicatorConfig;
+    this.containerConfig = containerConfig;
     this.urlGenerator = urlGenerator;
   }
 }

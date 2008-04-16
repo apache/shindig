@@ -19,8 +19,8 @@
 
 package org.apache.shindig.gadgets;
 
-import static org.apache.shindig.gadgets.SyndicatorConfig.DEFAULT_SYNDICATOR;
-import static org.apache.shindig.gadgets.SyndicatorConfig.SYNDICATOR_KEY;
+import static org.apache.shindig.gadgets.ContainerConfig.DEFAULT_CONTAINER;
+import static org.apache.shindig.gadgets.ContainerConfig.CONTAINER_KEY;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -30,8 +30,8 @@ import junit.framework.TestCase;
 /**
  *
  */
-public class SyndicatorConfigTest extends TestCase {
-  private SyndicatorConfig config;
+public class ContainerConfigTest extends TestCase {
+  private ContainerConfig config;
 
   private static final String TOP_LEVEL_NAME = "Top level name";
   private static final String TOP_LEVEL_VALUE = "Top level value";
@@ -41,7 +41,7 @@ public class SyndicatorConfigTest extends TestCase {
   private static final String NESTED_VALUE = "Nested value";
   private static final String NESTED_ALT_VALUE = "Nested value alt";
 
-  private static final String CHILD_SYNDICATOR = "child";
+  private static final String CHILD_CONTAINER = "child";
 
   private static final String ARRAY_NAME = "array value";
   private static final String[] ARRAY_VALUE = new String[]{"Hello", "World"};
@@ -49,10 +49,10 @@ public class SyndicatorConfigTest extends TestCase {
 
   @Override
   public void setUp() throws Exception {
-    config = new SyndicatorConfig(null);
+    config = new ContainerConfig(null);
     // We use a JSON Object here to guarantee that we're well formed up front.
     JSONObject json = new JSONObject();
-    json.put(SYNDICATOR_KEY, new String[]{DEFAULT_SYNDICATOR});
+    json.put(CONTAINER_KEY, new String[]{DEFAULT_CONTAINER});
     json.put(TOP_LEVEL_NAME, TOP_LEVEL_VALUE);
     json.put(ARRAY_NAME, ARRAY_VALUE);
 
@@ -67,15 +67,15 @@ public class SyndicatorConfigTest extends TestCase {
 
   public void testBasic() throws Exception {
     // check to make sure that the default config was processed correctly.
-    assertEquals(1, config.getSyndicators().size());
-    for (String synd : config.getSyndicators()) {
-      assertEquals(DEFAULT_SYNDICATOR, synd);
+    assertEquals(1, config.getContainers().size());
+    for (String container : config.getContainers()) {
+      assertEquals(DEFAULT_CONTAINER, container);
     }
 
-    String value = config.get(DEFAULT_SYNDICATOR, TOP_LEVEL_NAME);
+    String value = config.get(DEFAULT_CONTAINER, TOP_LEVEL_NAME);
     assertEquals(TOP_LEVEL_VALUE, value);
 
-    JSONObject nested = config.getJsonObject(DEFAULT_SYNDICATOR, NESTED_KEY);
+    JSONObject nested = config.getJsonObject(DEFAULT_CONTAINER, NESTED_KEY);
 
     String nestedValue = nested.getString(NESTED_NAME);
 
@@ -84,7 +84,7 @@ public class SyndicatorConfigTest extends TestCase {
 
   public void testCascade() throws Exception {
     JSONObject json = new JSONObject();
-    json.put(SYNDICATOR_KEY, new String[]{CHILD_SYNDICATOR});
+    json.put(CONTAINER_KEY, new String[]{CHILD_CONTAINER});
     json.put(ARRAY_NAME, ARRAY_ALT_VALUE);
 
     // small nested data.
@@ -95,19 +95,19 @@ public class SyndicatorConfigTest extends TestCase {
 
     config.loadFromString(json.toString());
 
-    String value = config.get(CHILD_SYNDICATOR, TOP_LEVEL_NAME);
+    String value = config.get(CHILD_CONTAINER, TOP_LEVEL_NAME);
     assertEquals(TOP_LEVEL_VALUE, value);
 
-    JSONObject nestedObj = config.getJsonObject(CHILD_SYNDICATOR, NESTED_KEY);
+    JSONObject nestedObj = config.getJsonObject(CHILD_CONTAINER, NESTED_KEY);
     String nestedValue = nestedObj.getString(NESTED_NAME);
     assertEquals(NESTED_ALT_VALUE, nestedValue);
 
-    String arrayValue = config.get(CHILD_SYNDICATOR, ARRAY_NAME);
+    String arrayValue = config.get(CHILD_CONTAINER, ARRAY_NAME);
     assertEquals(ARRAY_ALT_VALUE, arrayValue);
 
     // Verify that the parent value wasn't overwritten as well.
 
-    JSONArray defaultArrayTest = config.getJsonArray(DEFAULT_SYNDICATOR,
+    JSONArray defaultArrayTest = config.getJsonArray(DEFAULT_CONTAINER,
                                                       ARRAY_NAME);
     JSONArray defaultArray = new JSONArray(ARRAY_VALUE);
     assertEquals(defaultArrayTest.toString(), defaultArray.toString());
@@ -115,7 +115,7 @@ public class SyndicatorConfigTest extends TestCase {
 
   public void testPathQuery() throws Exception {
     String path = NESTED_KEY + "/" + NESTED_NAME;
-    String data = config.get(DEFAULT_SYNDICATOR, path);
+    String data = config.get(DEFAULT_CONTAINER, path);
     assertEquals(NESTED_VALUE, data);
   }
 }

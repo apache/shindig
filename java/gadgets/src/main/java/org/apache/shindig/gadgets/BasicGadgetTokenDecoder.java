@@ -32,7 +32,7 @@ public class BasicGadgetTokenDecoder implements GadgetTokenDecoder {
   private static final int OWNER_INDEX = 0;
   private static final int VIEWER_INDEX = 1;
   private static final int APP_ID_INDEX = 2;
-  private static final int SYNDICATOR_INDEX = 3;
+  private static final int CONTAINER_INDEX = 3;
   private static final int APP_URL_INDEX = 4;
   private static final int MODULE_ID_INDEX = 5;
 
@@ -48,7 +48,7 @@ public class BasicGadgetTokenDecoder implements GadgetTokenDecoder {
           URLDecoder.decode(tokens[OWNER_INDEX], "UTF-8"),
           URLDecoder.decode(tokens[VIEWER_INDEX], "UTF-8"),
           URLDecoder.decode(tokens[APP_ID_INDEX], "UTF-8"),
-          URLDecoder.decode(tokens[SYNDICATOR_INDEX], "UTF-8"),
+          URLDecoder.decode(tokens[CONTAINER_INDEX], "UTF-8"),
           URLDecoder.decode(tokens[APP_URL_INDEX], "UTF-8"),
           URLDecoder.decode(tokens[MODULE_ID_INDEX], "UTF-8"));
     } catch (BlobCrypterException e) {

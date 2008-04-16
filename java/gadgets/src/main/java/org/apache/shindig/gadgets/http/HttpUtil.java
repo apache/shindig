@@ -21,7 +21,7 @@ package org.apache.shindig.gadgets.http;
 
 import org.apache.shindig.gadgets.Gadget;
 import org.apache.shindig.gadgets.GadgetContext;
-import org.apache.shindig.gadgets.SyndicatorConfig;
+import org.apache.shindig.gadgets.ContainerConfig;
 import org.apache.shindig.gadgets.spec.GadgetSpec;
 import org.apache.shindig.gadgets.spec.View;
 
@@ -77,19 +77,19 @@ public class HttpUtil {
   }
 
   /**
-   * Fetches js configuration for the given feature set & syndicator
+   * Fetches js configuration for the given feature set & container
    * @param config
    * @param context
    * @param features
    */
-  public static JSONObject getJsConfig(SyndicatorConfig config,
+  public static JSONObject getJsConfig(ContainerConfig config,
       GadgetContext context, Set<String> features) {
-    JSONObject syndFeatures = config.getJsonObject(context.getSyndicator(),
+    JSONObject containerFeatures = config.getJsonObject(context.getContainer(),
                                                    "gadgets.features");
-    if (syndFeatures != null) {
+    if (containerFeatures != null) {
       String[] featArray = features.toArray(new String[features.size()]);
       try {
-        return new JSONObject(syndFeatures, featArray);
+        return new JSONObject(containerFeatures, featArray);
       } catch (JSONException e) {
         return null;
       }
@@ -98,20 +98,20 @@ public class HttpUtil {
   }
 
   /**
-   * Fetches the most appropriate view for the given gadget and syndicator
+   * Fetches the most appropriate view for the given gadget and container
    * configuration.
    *
    * @param gadget
    * @param config
    * @return The most appropriate view for this request.
    */
-  public static View getView(Gadget gadget, SyndicatorConfig config) {
+  public static View getView(Gadget gadget, ContainerConfig config) {
     GadgetContext context = gadget.getContext();
     String viewName = context.getView();
     GadgetSpec spec = gadget.getSpec();
     View view = spec.getView(viewName);
     if (view == null) {
-      JSONArray aliases = config.getJsonArray(context.getSyndicator(),
+      JSONArray aliases = config.getJsonArray(context.getContainer(),
           "gadgets.features/views/" + viewName + "/aliases");
       if (aliases != null) {
         try {

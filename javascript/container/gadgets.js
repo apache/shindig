@@ -469,7 +469,7 @@ gadgets.IfrGadget.inherits(gadgets.Gadget);
 
 gadgets.IfrGadget.prototype.GADGET_IFRAME_PREFIX_ = 'remote_iframe_';
 
-gadgets.IfrGadget.prototype.SYND = 'default';
+gadgets.IfrGadget.prototype.CONTAINER = 'default';
 
 gadgets.IfrGadget.prototype.cssClassGadget = 'gadgets-gadget';
 gadgets.IfrGadget.prototype.cssClassTitleBar = 'gadgets-gadget-title-bar';
@@ -535,7 +535,7 @@ gadgets.IfrGadget.prototype.getUserPrefsDialogId = function() {
 gadgets.IfrGadget.prototype.getIframeUrl = function() {
   return this.serverBase_ + 'ifr?' +
       'url=' + encodeURIComponent(this.specUrl) +
-      '&synd=' + this.SYND +
+      '&container=' + this.CONTAINER +
       '&mid=' +  this.id +
       '&nocache=' + gadgets.container.nocache_ +
       '&country=' + gadgets.container.country_ +

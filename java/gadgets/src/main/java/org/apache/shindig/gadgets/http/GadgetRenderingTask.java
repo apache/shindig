@@ -27,7 +27,7 @@ import org.apache.shindig.gadgets.GadgetFeatureRegistry;
 import org.apache.shindig.gadgets.GadgetServer;
 import org.apache.shindig.gadgets.JsLibrary;
 import org.apache.shindig.gadgets.RemoteContent;
-import org.apache.shindig.gadgets.SyndicatorConfig;
+import org.apache.shindig.gadgets.ContainerConfig;
 import org.apache.shindig.gadgets.spec.Feature;
 import org.apache.shindig.gadgets.spec.LocaleSpec;
 import org.apache.shindig.gadgets.spec.MessageBundle;
@@ -71,7 +71,7 @@ public class GadgetRenderingTask {
   private final HttpServletResponse response;
   private final GadgetServer server;
   private final GadgetFeatureRegistry registry;
-  private final SyndicatorConfig syndicatorConfig;
+  private final ContainerConfig containerConfig;
   private final UrlGenerator urlGenerator;
   private final GadgetContext context;
   private final List<GadgetContentFilter> filters;
@@ -98,7 +98,7 @@ public class GadgetRenderingTask {
 
     if (!validateParent()) {
       response.sendError(HttpServletResponse.SC_BAD_REQUEST,
-          "Unsupported parent parameter. Check your syndicator code.");
+          "Unsupported parent parameter. Check your container code.");
       return;
     }
 
@@ -128,7 +128,7 @@ public class GadgetRenderingTask {
    */
   private void outputGadget(Gadget gadget) throws IOException, GadgetException {
     String viewName = context.getView();
-    View view = HttpUtil.getView(gadget, syndicatorConfig);
+    View view = HttpUtil.getView(gadget, containerConfig);
     if (view == null) {
         throw new GadgetException(GadgetException.Code.UNKNOWN_VIEW_SPECIFIED,
             "No appropriate view could be found for this gadget");
@@ -362,7 +362,7 @@ public class GadgetRenderingTask {
    */
   private void appendJsConfig(Gadget gadget, Set<String> reqs,
       StringBuilder js) {
-    JSONObject json = HttpUtil.getJsConfig(syndicatorConfig, context, reqs);
+    JSONObject json = HttpUtil.getJsConfig(containerConfig, context, reqs);
     // Add gadgets.util support. This is calculated dynamically based on
     // request inputs.
     ModulePrefs prefs = gadget.getSpec().getModulePrefs();
@@ -419,12 +419,16 @@ public class GadgetRenderingTask {
    * Validates that the parent parameter was acceptable.
    *
    * @return True if the parent parameter is valid for the current
-   *     syndicator.
+   *     container.
    */
   private boolean validateParent() {
-    String syndicator = request.getParameter("synd");
-    if (syndicator == null) {
-      syndicator = SyndicatorConfig.DEFAULT_SYNDICATOR;
+    String container = request.getParameter("container");
+    if (container == null) {
+      // The parameter used to be called 'synd' FIXME: schedule removal
+      container = request.getParameter("synd");
+      if (container == null) {
+        container = ContainerConfig.DEFAULT_CONTAINER;
+      }
     }
 
     String parent = request.getParameter("parent");
@@ -437,7 +441,7 @@ public class GadgetRenderingTask {
 
     try {
       JSONArray parents
-          = syndicatorConfig.getJsonArray(syndicator, "gadgets.parent");
+          = containerConfig.getJsonArray(container, "gadgets.parent");
 
       if (parents == null) {
         return true;
@@ -461,13 +465,13 @@ public class GadgetRenderingTask {
                              HttpServletResponse response,
                              GadgetServer server,
                              GadgetFeatureRegistry registry,
-                             SyndicatorConfig syndicatorConfig,
+                             ContainerConfig containerConfig,
                              UrlGenerator urlGenerator) {
     this.request = request;
     this.response = response;
     this.server = server;
     this.registry = registry;
-    this.syndicatorConfig = syndicatorConfig;
+    this.containerConfig = containerConfig;
     this.urlGenerator = urlGenerator;
     context = new HttpGadgetContext(request);
     filters = new LinkedList<GadgetContentFilter>();

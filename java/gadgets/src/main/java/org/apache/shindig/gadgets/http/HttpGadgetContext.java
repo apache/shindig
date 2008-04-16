@@ -157,21 +157,26 @@ public class HttpGadgetContext extends GadgetContext {
     return Boolean.TRUE;
   }
 
-  private final String syndicator;
+  private final String container;
   @Override
-  public String getSyndicator() {
-    if (syndicator == null) {
-      return super.getSyndicator();
+  public String getContainer() {
+    if (container == null) {
+      return super.getContainer();
     }
-    return syndicator;
+    return container;
   }
 
   /**
    * @param req
-   * @return The syndicator, if set, or null.
+   * @return The container, if set, or null.
    */
-  private static String getSyndicator(HttpServletRequest req) {
-    return req.getParameter("synd");
+  private static String getContainer(HttpServletRequest req) {
+    String container = req.getParameter("container");
+    if (container == null) {
+      // The parameter used to be called 'synd' FIXME: schedule removal
+      container = req.getParameter("synd");
+    }
+    return container;
   }
 
   private final Boolean debug;
@@ -251,7 +256,7 @@ public class HttpGadgetContext extends GadgetContext {
     locale = getLocale(request);
     renderingContext = getRenderingContext(request);
     ignoreCache = getIgnoreCache(request);
-    syndicator = getSyndicator(request);
+    container = getContainer(request);
     debug = getDebug(request);
     view = getView(request);
     userPrefs = getUserPrefs(request);

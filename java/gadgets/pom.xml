@@ -143,8 +143,8 @@ under the License.
             <exclude>**/*.gif</exclude>
             <exclude>**/*.jpeg</exclude>
             <exclude>**/*.png</exclude>
-            <!-- Syndicator files are JSON, not javascript -->
-            <exclude>**/*syndicator*.js</exclude>
+            <!-- Container files are JSON, not javascript -->
+            <exclude>**/*container*.js</exclude>
             <!-- same for oauth config -->
             <exclude>**/oauth.js</exclude>
             <!-- Caja has some bugs too -->
@@ -220,10 +220,10 @@ under the License.
         </includes>
       </resource>
       <resource>
-        <targetPath>syndicators/default</targetPath>
+        <targetPath>containers/default</targetPath>
         <directory>../../config</directory>
         <includes>
-          <include>syndicator.js</include>
+          <include>container.js</include>
         </includes>
       </resource>
       <resource>

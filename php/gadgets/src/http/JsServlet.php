@@ -78,9 +78,9 @@ class JsServlet extends HttpServlet {
 				die();
 			}
 			if (! isset($_GET['c']) || $_GET['c'] != 1) {
-				$contents = preg_replace('/\/\/.*$/m', '', preg_replace('@/\\*(?:.|[\\n\\r])*?\\*/@', '', file_get_contents($config['syndicator_config'])));
-				$syndData = json_decode($contents, true);
-				$jsData .= "\ngadgets.config.init(" . json_encode($syndData['gadgets.features']) . ");\n";
+				$contents = preg_replace('/\/\/.*$/m', '', preg_replace('@/\\*(?:.|[\\n\\r])*?\\*/@', '', file_get_contents($config['container_config'])));
+				$containerData = json_decode($contents, true);
+				$jsData .= "\ngadgets.config.init(" . json_encode($containerData['gadgets.features']) . ");\n";
 			}
 			$this->setCachingHeaders();
 			header('Content-Length: ' . strlen($jsData));

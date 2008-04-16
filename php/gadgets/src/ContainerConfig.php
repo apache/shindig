@@ -1,29 +1,29 @@
 <?
 
-class SyndicatorConfig {
-	public $default_syndicator = 'default';
-	public $syndicator_key = 'gadgets.syndicator';
+class ContainerConfig {
+	public $default_container = 'default';
+	public $container_key = 'gadgets.container';
 	private $config = array();
 
-	public function __construct($defaultSyndicator)
+	public function __construct($defaultContainer)
 	{
-		if (! empty($defaultSyndicator)) {
-			$this->loadSyndicators($defaultSyndicator);
+		if (! empty($defaultContainer)) {
+			$this->loadContainers($defaultContainer);
 		}
 	}
 
-	private function loadSyndicators($syndicators)
+	private function loadContainers($containers)
 	{
-		if (! file_exists($syndicators) || ! is_dir($syndicators)) {
-			throw new Exception("Invalid syndicator path");
+		if (! file_exists($containers) || ! is_dir($containers)) {
+			throw new Exception("Invalid container path");
 		}
-		foreach (glob("$syndicators/*") as $file) {
+		foreach (glob("$containers/*") as $file) {
 			if (! is_readable($file)) {
-				throw new Exception("Could not read syndicator config: $file");
+				throw new Exception("Could not read container config: $file");
 			}
 			if (is_dir($file)) {
 				// support recursive loading of sub directories
-				$this->loadSyndicators($file);
+				$this->loadContainers($file);
 			} else {
 				$this->loadFromFile($file);
 			}
@@ -37,24 +37,24 @@ class SyndicatorConfig {
 		// note: the json parser also crashes on trailing ,'s in records so please don't use them
 		$contents = preg_replace('/\/\/.*$/m', '', preg_replace('@/\\*(?:.|[\\n\\r])*?\\*/@', '', $contents));
 		$config = json_decode($contents, true);
-		if (! isset($config[$this->syndicator_key][0])) {
-			throw new Exception("No gadgets.syndicator value set");
+		if (! isset($config[$this->container_key][0])) {
+			throw new Exception("No gadgets.container value set");
 		}
-		$syndicator = $config[$this->syndicator_key][0];
-		$this->config[$syndicator] = array();
+		$container = $config[$this->container_key][0];
+		$this->config[$container] = array();
 		foreach ($config as $key => $val) {
-			$this->config[$syndicator][$key] = $val;
+			$this->config[$container][$key] = $val;
 		}
 	}
 
-	public function getConfig($syndicator, $name)
+	public function getConfig($container, $name)
 	{
 		$config = array();
-		if (isset($this->config[$syndicator]) && isset($this->config[$syndicator][$name])) {
-			$config = $this->config[$syndicator][$name];
+		if (isset($this->config[$container]) && isset($this->config[$container][$name])) {
+			$config = $this->config[$container][$name];
 		}
-		if ($syndicator != $this->default_syndicator && isset($this->config[$syndicator][$name])) {
-			$config = $this->mergeConfig($this->config[$syndicator][$name], $config);
+		if ($container != $this->default_container && isset($this->config[$container][$name])) {
+			$config = $this->mergeConfig($this->config[$container][$name], $config);
 		}
 		return $config;
 	}
