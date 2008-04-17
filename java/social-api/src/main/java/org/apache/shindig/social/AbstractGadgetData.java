@@ -29,9 +29,6 @@ import java.util.Map;
 /**
  * Autoconvert a pojo in a JSONObject If a value is set to null will not be
  * added in the JsonObject expect if the annotation {@link Mandatory} has been
- *
- * @author Vincent Demay
- *
  */
 // TODO: Move from an inheritance model to a class that can translate any java
 // object based on its getters
