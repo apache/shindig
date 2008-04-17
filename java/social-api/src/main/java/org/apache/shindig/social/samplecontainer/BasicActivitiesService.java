@@ -29,9 +29,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Date;
 
-/**
- * @author Cassandra Doll <doll@google.com>
- */
 public class BasicActivitiesService implements ActivitiesService {
   public ResponseItem<List<Activity>> getActivities(List<String> ids, 
       GadgetToken token) {

@@ -30,9 +30,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-/**
- * @author Cassandra Doll <doll@google.com>
- */
 public class XmlStateFileFetcher {
   private static final String DEFAULT_STATE_URL
       = "http://localhost:8080/gadgets/files/samplecontainer/"
