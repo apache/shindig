@@ -244,12 +244,12 @@ using:</p>
 
   </li><li> Search for new features to install
   </li><li> Create a new remote update site for the Maven 2 plugin
-  <ul><li> Name: Maven2 - Codehaus
-  </li><li> URL: <code>http://m2eclipse.codehaus.org/update/</code>
+  <ul><li> Name: Maven2 - Sonatype
+  </li><li> URL: <code>http://m2eclipse.sonatype.org/update/</code>
 
   </li></ul>
   </li><li> Select the site and click "Finish"
-  </li><li> Select only the Maven Integration plug-in (mylyn and subclipse integration have other dependencies.)
+  </li><li> There are optional dependencies on mylyn and subclipse. If you don't have these plugins, you can get them <a href="http://m2eclipse.sonatype.org/update/" title="Maven Integration for Eclipse updates">here</a>. Otherwise, select only the Maven Integration plug-in.
   </li><li> Complete the installation
 
   </li></ol>
@@ -276,6 +276,11 @@ using:</p>
 
   </li><li> Right-click the project, select <code>Maven : Enable Dependency Management</code>
   </li><li> Right-click the project, select <code>Maven : Update Source Folders</code>
+  </li><li> Optionally, if you would like to be able to browse or step into the code of your dependent 
+  	jars when debugging, you need the source jars. Right-click the project, select 
+  	<code>Maven : Download Sources</code> and Eclipse will automatically know about 
+  	these sources when debugging. You can browse them under <code>Maven Dependencies</code> in your project.
+  </li>
   </li></ol>
   </li></ul>
   <p>
