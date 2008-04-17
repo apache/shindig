@@ -100,5 +100,6 @@ find . -path '*/.svn' -prune -o  -name "DISCLAIMER*" -print0 | xargs -0  -r  svn
 
 svn propset svn:ignore -F etc/svn-ignores .
 svn propset svn:ignore -F etc/svn-ignores java
+svn propset svn:ignore -F etc/svn-ignores java/common
 svn propset svn:ignore -F etc/svn-ignores java/gadgets
 svn propset svn:ignore -F etc/svn-ignores java/social-api
