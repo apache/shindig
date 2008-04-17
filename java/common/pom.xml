@@ -17,7 +17,8 @@ KIND, either express or implied.  See the License for the
 specific language governing permissions and limitations
 under the License.
 -->
-<project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+<project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
   <parent>
     <groupId>org.apache.shindig</groupId>
     <artifactId>shindig-parent</artifactId>
@@ -26,18 +27,18 @@ under the License.
   </parent>
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.apache.shindig</groupId>
-  <artifactId>social-api</artifactId>
+  <artifactId>shindig-common</artifactId>
   <version>1-SNAPSHOT</version>
   <packaging>jar</packaging>
-  <name>Apache Shindig Java REST API Server</name>
+  <name>Apache Shindig Java Common Code</name>
   <description>
-    Server part of Shindig for hosting OpenSocial Data APIs.
+    Common java code for Shindig
   </description>
 
   <scm>
-    <connection>scm:svn:http://svn.apache.org/repos/asf/incubator/shindig/trunk/java/social-api</connection>
-    <developerConnection>scm:svn:https://svn.apache.org/repos/asf/incubator/shindig/trunk/java/social-api</developerConnection>
-    <url>http://svn.apache.org/viewvc/incubator/shindig/trunk/java/social-api</url>
+    <connection>scm:svn:http://svn.apache.org/repos/asf/incubator/shindig/trunk/java/common</connection>
+    <developerConnection>scm:svn:https://svn.apache.org/repos/asf/incubator/shindig/trunk/java/common</developerConnection>
+    <url>http://svn.apache.org/viewvc/incubator/shindig/trunk/java/common</url>
   </scm>
 
   <build>
@@ -45,7 +46,7 @@ under the License.
     <testSourceDirectory>${basedir}/src/test/java</testSourceDirectory>
     <outputDirectory>${basedir}/target/classes</outputDirectory>
     <testOutputDirectory>${basedir}/target/test-classes</testOutputDirectory>
-    <finalName>social-api</finalName>
+    <finalName>shindig-common</finalName>
     <plugins>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
@@ -94,23 +95,12 @@ under the License.
     </plugins>
   </build>
 
-  <repositories>
-   <!-- For Abdera -->
-    <repository>
-      <id>apache-incubating</id>
-      <name>Apache Incubating Snapshot Repository</name>
-      <url>http://people.apache.org/repo/m2-snapshot-repository</url>
-      <snapshots>
-         <enabled>true</enabled>
-      </snapshots>
-    </repository>
-  </repositories>
-
   <dependencies>
     <dependency>
-      <groupId>org.json</groupId>
-      <artifactId>json</artifactId>
-      <version>20070829</version>
+      <groupId>javax.servlet</groupId>
+      <artifactId>servlet-api</artifactId>
+      <version>2.4</version>
+      <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>junit</groupId>
@@ -136,19 +126,9 @@ under the License.
       <version>1.0</version>
     </dependency>
     <dependency>
-      <version>0.4.0-incubating-SNAPSHOT</version>
-      <groupId>org.apache.abdera</groupId>
-      <artifactId>abdera-server</artifactId>
-    </dependency>
-    <dependency>
-      <version>1-SNAPSHOT</version>
-      <groupId>${pom.groupId}</groupId>
-      <artifactId>gadgets</artifactId>
-    </dependency>
-    <dependency>
-      <version>1-SNAPSHOT</version>
-      <groupId>${pom.groupId}</groupId>
-      <artifactId>shindig-common</artifactId>
+      <groupId>commons-codec</groupId>
+      <artifactId>commons-codec</artifactId>
+      <version>1.3</version>
     </dependency>
   </dependencies>
 </project>

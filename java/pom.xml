@@ -39,6 +39,7 @@ under the License.
   <inceptionYear>2007</inceptionYear>
 
   <modules>
+    <module>common</module>
     <module>gadgets</module>
     <module>social-api</module>
   </modules>
