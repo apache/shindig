@@ -23,33 +23,25 @@ import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.TypeLiteral;
 import org.apache.shindig.social.opensocial.ActivitiesService;
-import org.apache.shindig.social.opensocial.PeopleService;
 import org.apache.shindig.social.opensocial.DataService;
 import org.apache.shindig.social.opensocial.OpenSocialDataHandler;
+import org.apache.shindig.social.opensocial.PeopleService;
 import org.apache.shindig.social.samplecontainer.BasicActivitiesService;
-import org.apache.shindig.social.samplecontainer.BasicPeopleService;
 import org.apache.shindig.social.samplecontainer.BasicDataService;
+import org.apache.shindig.social.samplecontainer.BasicPeopleService;
 import org.apache.shindig.social.samplecontainer.StateFileDataHandler;
-import org.apache.shindig.gadgets.RemoteContentFetcher;
-import org.apache.shindig.gadgets.BasicRemoteContentFetcher;
-import org.apache.shindig.gadgets.GadgetTokenDecoder;
-import org.apache.shindig.gadgets.BasicGadgetTokenDecoder;
 
-import java.util.Properties;
-import java.util.List;
 import java.util.ArrayList;
+import java.util.List;
 
 /**
- * Provides http component injection on top of existing components.
+ * Provides social api component injection
  */
 public class SocialApiGuiceModule extends AbstractModule {
 
   /** {@inheritDoc} */
   @Override
   protected void configure() {
-    bind(RemoteContentFetcher.class).to(BasicRemoteContentFetcher.class);
-    bind(GadgetTokenDecoder.class).to(BasicGadgetTokenDecoder.class);
-
     bind(PeopleService.class).to(BasicPeopleService.class);
     bind(DataService.class).to(BasicDataService.class);
     bind(ActivitiesService.class).to(BasicActivitiesService.class);

@@ -20,7 +20,6 @@ package org.apache.shindig.gadgets;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.CreationException;
-import com.google.inject.Inject;
 import com.google.inject.Scopes;
 import com.google.inject.name.Names;
 import com.google.inject.spi.Message;
@@ -46,8 +45,6 @@ public class DefaultGuiceModule extends AbstractModule {
   protected void configure() {
     Names.bindProperties(this.binder(), properties);
 
-    bind(RemoteContentFetcher.class).to(BasicRemoteContentFetcher.class);
-
     bind(RemoteContentFetcher.class)
         .annotatedWith(GadgetSpecFetcher.class)
         .to(CachedContentFetcher.class);
@@ -56,7 +53,6 @@ public class DefaultGuiceModule extends AbstractModule {
         .to(CachedContentFetcher.class);
 
     bind(GadgetBlacklist.class).to(BasicGadgetBlacklist.class);
-    bind(GadgetTokenDecoder.class).to(BasicGadgetTokenDecoder.class);
     bind(SigningFetcherFactory.class);
     bind(OAuthFetcherFactory.class);
     bind(Executor.class).toInstance(Executors.newCachedThreadPool());
