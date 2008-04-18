@@ -90,7 +90,7 @@
   "opensocial-0.7" : {
     // Path to fetch opensocial data from
     // Must be on the same domain as the gadget rendering server
-    "path" : "/gadgets/socialdata",
+    "path" : "/social/data",
     "domain" : "shindig",
     "enableCaja" : true,
     "supportedFields" : {

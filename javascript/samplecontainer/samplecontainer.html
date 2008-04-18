@@ -43,7 +43,7 @@ var baseUrl = parentUrl.substring(0, parentUrl.indexOf('samplecontainer.html'))
 
 // TODO: This is gross, it needs to use the config just like the gadget js does
 var socialDataPath = document.location.protocol + "//" + document.location.host
-    + "/gadgets/socialdata";
+    + "/social/data";
 
 var gadgetUrl = baseUrl + 'examples/SocialHelloWorld.xml';
 var gadgetUrlCookie = 'sampleContainerGadgetUrl';
@@ -119,11 +119,11 @@ function changeGadgetUrl() {
 function generateSecureToken() {
   // TODO: Use a less silly mechanism of mapping a gadget URL to an appid
   var appId = 0;
-  for (var i=0; i < gadgetUrl.length; i++) {
+  for (var i = 0; i < gadgetUrl.length; i++) {
     appId += gadgetUrl.charCodeAt(i);
   }
   var fields = [ownerId, viewerId, appId, "shindig", gadgetUrl, "0"];
-  for (var i=0; i < fields.length; i++) {
+  for (var i = 0; i < fields.length; i++) {
     // escape each field individually, for metachars in URL
     fields[i] = escape(fields[i]);
   }
