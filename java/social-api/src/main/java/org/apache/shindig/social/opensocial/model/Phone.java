@@ -17,8 +17,8 @@
  */
 package org.apache.shindig.social.opensocial.model;
 
-import org.apache.shindig.social.Mandatory;
 import org.apache.shindig.social.AbstractGadgetData;
+import org.apache.shindig.social.Mandatory;
 
 /**
  * see
@@ -43,7 +43,7 @@ public class Phone extends AbstractGadgetData {
     }
   }
 
-  @Mandatory private String number;
+  private String number;
   private String type;
 
   public Phone(String number, String type) {
@@ -52,6 +52,7 @@ public class Phone extends AbstractGadgetData {
     this.type = type;
   }
 
+  @Mandatory
   public String getNumber() {
     return number;
   }

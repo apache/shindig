@@ -21,10 +21,12 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Pattern;
+import java.util.regex.Matcher;
 
 /**
  * Autoconvert a pojo in a JSONObject If a value is set to null will not be
@@ -34,8 +36,9 @@ import java.util.Map;
 // object based on its getters
 public abstract class AbstractGadgetData {
 
-  private static final Class[] EMPTY_PARAM = {};
   private static final Object[] EMPTY_OBJECT = {};
+  private static final String EXCLUDED_GETTER = "class";
+  private static final Pattern GETTER = Pattern.compile("^get([a-zA-Z]+)$");
 
   /**
    * Convert this object to {@link JSONObject} reading Pojo properties
@@ -44,19 +47,17 @@ public abstract class AbstractGadgetData {
    */
   public JSONObject toJson() {
     JSONObject toReturn = new JSONObject();
-    Field[] fields = this.getClass().getDeclaredFields();
-    for (Field field : fields) {
-      String errorMessage = "Could not encode the " + field + " field.";
+    Method[] methods = this.getClass().getMethods();
+    for (Method method : methods) {
+      String errorMessage = "Could not encode the " + method + " method.";
       try {
-        putAttribute(toReturn, field,
-            field.getAnnotation(Mandatory.class) != null);
+        putAttribute(toReturn, method,
+            method.getAnnotation(Mandatory.class) != null);
       } catch (JSONException e) {
         throw new RuntimeException(errorMessage, e);
       } catch (IllegalAccessException e) {
         throw new RuntimeException(errorMessage, e);
       } catch (InvocationTargetException e) {
-        throw new RuntimeException(errorMessage, e);
-      } catch (NoSuchMethodException e) {
         throw new RuntimeException(errorMessage, e);
       }
     }
@@ -64,34 +65,35 @@ public abstract class AbstractGadgetData {
   }
 
   /**
-   * Convert java declared attritiue and its value to an entry in the given
+   * Convert java declared method and its value to an entry in the given
    * {@link JSONObject}
    *
    * @param object the json object to put the field value in
-   * @param field the field to encode
+   * @param method the method to encode
    * @param mandatory true if the field is mandatory
-   * @throws IllegalArgumentException
    * @throws JSONException
    * @throws IllegalAccessException
-   * @throws NoSuchMethodException
    * @throws InvocationTargetException
-   * @throws SecurityException
    */
-  private void putAttribute(JSONObject object, Field field, boolean mandatory)
-      throws IllegalArgumentException, JSONException, IllegalAccessException,
-      SecurityException, InvocationTargetException, NoSuchMethodException {
-    String getterName = field.getName();
-    getterName = "get" + getterName.substring(0, 1).toUpperCase()
-        + getterName.substring(1, getterName.length());
+  private void putAttribute(JSONObject object, Method method, boolean mandatory)
+      throws JSONException, IllegalAccessException, InvocationTargetException {
+    Matcher matcher = GETTER.matcher(method.getName());
+    if (!matcher.matches()) {
+      return;
+    }
 
-    Object val = this.getClass().getMethod(getterName, EMPTY_PARAM).invoke(
-        this, EMPTY_OBJECT);
-    String name = field.getName();
+    String name = matcher.group();
+    String fieldName = name.substring(3, 4).toLowerCase() + name.substring(4);
+    if (fieldName.equalsIgnoreCase(EXCLUDED_GETTER)) {
+      return;
+    }
+
+    Object val = method.invoke(this, EMPTY_OBJECT);
     if (val != null) {
-      object.put(name, translateObjectToJson(val));
+      object.put(fieldName, translateObjectToJson(val));
     } else {
       if (mandatory) {
-        throw new RuntimeException(name
+        throw new RuntimeException(fieldName
             + " is a mandory value, it should not be null");
       }
     }

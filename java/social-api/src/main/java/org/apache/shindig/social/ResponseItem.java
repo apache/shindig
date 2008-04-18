@@ -27,7 +27,7 @@ public class ResponseItem<T> extends AbstractGadgetData {
 
   // Must be compatible with AbstractSocialData.toJson. This means it should be
   // an AbstractSocialData or a collection of AbstractSocialData
-  @Mandatory private T response;
+  private T response;
 
   public ResponseItem(ResponseError error, String errorMessage, T response) {
     this.error = error;
@@ -55,6 +55,7 @@ public class ResponseItem<T> extends AbstractGadgetData {
     this.errorMessage = errorMessage;
   }
 
+  @Mandatory
   public T getResponse() {
     return response;
   }

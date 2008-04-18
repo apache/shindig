@@ -30,10 +30,11 @@ import org.apache.shindig.social.Mandatory;
  *
  */
 public final class Enum<E extends Enum.EnumKey> extends AbstractGadgetData {
-  @Mandatory private String displayValue;
+  private String displayValue;
   private E key = null;
 
   public interface EnumKey {
+    @Mandatory
     String getDisplayValue();
   }
 
