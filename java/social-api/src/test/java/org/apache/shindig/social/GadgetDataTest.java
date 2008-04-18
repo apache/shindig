@@ -57,6 +57,27 @@ public class GadgetDataTest extends TestCase {
     activity.setMediaItems(mediaItems);
   }
 
+  public static class SpecialPerson extends Person {
+    private String newfield;
+
+    public SpecialPerson(String id, String name, String newfield) {
+      super(id, new Name(name));
+      this.newfield = newfield;
+    }
+
+    public String getNewfield() {
+      return newfield;
+    }
+  }
+
+  public void testToJsonOnInheritedClass() throws Exception {
+    SpecialPerson cassie = new SpecialPerson("5", "robot", "nonsense");
+
+    JSONObject result = cassie.toJson();
+    assertEquals(cassie.getId(), result.getString("id"));
+    assertEquals(cassie.getNewfield(), result.getString("newfield"));
+  }
+
   public void testPersonToJson() throws Exception {
     JSONObject result = johnDoe.toJson();
 
@@ -127,6 +148,18 @@ public class GadgetDataTest extends TestCase {
     JSONObject jsonMap = result.getJSONObject("response");
     assertEquals("1", jsonMap.getJSONObject("item1").getString("value"));
     assertEquals("2", jsonMap.getJSONObject("item2").getString("value"));
+  }
+
+  public void testMandatoryFields() throws Exception {
+    Person noIdMan = new Person(null, new Name("noIdMan"));
+    try {
+      noIdMan.toJson();
+      fail("Expected a person without an id to throw an exception");
+    } catch (Exception e) {
+      // The exception should be thrown
+      assertEquals("id is a mandory value, it should not be null",
+          e.getMessage());
+    }
   }
 
 }

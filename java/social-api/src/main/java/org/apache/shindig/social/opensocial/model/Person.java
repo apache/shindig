@@ -117,7 +117,7 @@ public class Person extends AbstractGadgetData {
   private String happiestWhen;
   private List<String> heroes;
   private String humor;
-  @Mandatory private String id;
+  private String id;
   private List<String> interests;
   private String jobInterests;
   private List<Organization> jobs;
@@ -127,7 +127,7 @@ public class Person extends AbstractGadgetData {
   private String lookingFor;
   private List<String> movies;
   private List<String> music;
-  @Mandatory private Name name;
+  private Name name;
   private String nickname;
   private String pets;
   private List<Phone> phoneNumbers;
@@ -314,6 +314,7 @@ public class Person extends AbstractGadgetData {
     this.humor = humor;
   }
 
+  @Mandatory
   public String getId() {
     return id;
   }
@@ -394,6 +395,7 @@ public class Person extends AbstractGadgetData {
     this.music = music;
   }
 
+  @Mandatory
   public Name getName() {
     return name;
   }

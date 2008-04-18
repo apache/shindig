@@ -62,7 +62,7 @@ public class Activity extends AbstractGadgetData {
   private String body;
   private String bodyId;
   private String externalId;
-  @Mandatory private String id;
+  private String id;
   private Date updated;
   private List<MediaItem> mediaItems;
   private Long postedTime;
@@ -75,7 +75,7 @@ public class Activity extends AbstractGadgetData {
   private String title;
   private String titleId;
   private String url;
-  @Mandatory private String userId;
+  private String userId;
 
   public Activity(String id, String userId) {
     this.id = id;
@@ -114,6 +114,7 @@ public class Activity extends AbstractGadgetData {
     this.externalId = externalId;
   }
 
+  @Mandatory
   public String getId() {
     return id;
   }
@@ -218,6 +219,7 @@ public class Activity extends AbstractGadgetData {
     this.url = url;
   }
 
+  @Mandatory
   public String getUserId() {
     return userId;
   }
