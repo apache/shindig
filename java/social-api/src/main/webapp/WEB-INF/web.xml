@@ -45,6 +45,6 @@
 
   <servlet-mapping>
     <servlet-name>socialdata</servlet-name>
-    <url-pattern>/socialdata</url-pattern>
+    <url-pattern>/data</url-pattern>
   </servlet-mapping>
 </web-app>
