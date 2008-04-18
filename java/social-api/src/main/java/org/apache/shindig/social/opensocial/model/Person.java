@@ -55,6 +55,7 @@ public class Person extends AbstractGadgetData {
     JOB_INTERESTS("jobInterests"),
     JOBS("jobs"),
     LANGUAGES_SPOKEN("languagesSpoken"),
+    LAST_UPDATED("updated"),
     LIVING_ARRANGEMENT("livingArrangement"),
     LOOKING_FOR("lookingFor"),
     MOVIES("movies"),
@@ -121,6 +122,7 @@ public class Person extends AbstractGadgetData {
   private String jobInterests;
   private List<Organization> jobs;
   private List<String> languagesSpoken;
+  private Date updated;
   private String livingArrangement;
   private String lookingFor;
   private List<String> movies;
@@ -350,6 +352,14 @@ public class Person extends AbstractGadgetData {
 
   public void setLanguagesSpoken(List<String> languagesSpoken) {
     this.languagesSpoken = languagesSpoken;
+  }
+
+  public Date getUpdated() {
+    return updated;
+  }
+
+  public void setUpdated(Date updated) {
+    this.updated = updated;
   }
 
   public String getLivingArrangement() {

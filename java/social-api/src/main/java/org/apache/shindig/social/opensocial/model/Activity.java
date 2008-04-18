@@ -22,6 +22,7 @@ import org.apache.shindig.social.AbstractGadgetData;
 
 import java.util.Map;
 import java.util.List;
+import java.util.Date;
 
 public class Activity extends AbstractGadgetData {
 
@@ -31,6 +32,7 @@ public class Activity extends AbstractGadgetData {
     BODY_ID("bodyId"),
     EXTERNAL_ID("externalId"),
     ID("id"),
+    LAST_UPDATED("updated"),
     MEDIA_ITEMS("mediaItems"),
     POSTED_TIME("postedTime"),
     PRIORITY("priority"),
@@ -61,6 +63,7 @@ public class Activity extends AbstractGadgetData {
   private String bodyId;
   private String externalId;
   @Mandatory private String id;
+  private Date updated;
   private List<MediaItem> mediaItems;
   private Long postedTime;
   private Float priority;
@@ -117,6 +120,14 @@ public class Activity extends AbstractGadgetData {
 
   public void setId(String id) {
     this.id = id;
+  }
+
+  public Date getUpdated() {
+    return updated;
+  }
+
+  public void setUpdated(Date updated) {
+    this.updated = updated;
   }
 
   public List<MediaItem> getMediaItems() {
