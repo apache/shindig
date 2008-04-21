@@ -2,7 +2,7 @@ Using Shindig Gadget Container JavaScript
 =========================================
 
 1) Try out the samples.
-   A) Set up your own Shindig Gadget Server. See its README for details.
+   A) Set up your own Shindig Gadget Server. See java/README for details.
 
    B) Assuming your server is running on http://yourserver:yourport/gadgets/...
       you can hit these html files in your favorite browser to see your local
@@ -71,7 +71,7 @@ Using Shindig Gadget Container JavaScript
       and supporting UserPrefs storage.
 
 4) Run the opensocial sample container
-   A) Set up your own Shindig Gadget Server. See its README for details. (If you
+   A) Set up your own Shindig Gadget Server. See java/README for details. (If you
      are using the java based server make sure you run with mvn jetty:run-war)
 
    B) Hit the sample container at
@@ -80,7 +80,7 @@ Using Shindig Gadget Container JavaScript
    C) See the sample container help document for more details on how it works:
      http://yourserver:yourport/gadgets/files/samplecontainer/getting-started.html
 
-   D) Get, and try to run, coderunner.xml and compliancetest.xml from the project
+   D) Get, and try to run, coderunner.xml and compliancetests.xml from the project
      http://opensocial-resources.googlecode.com/
 
 

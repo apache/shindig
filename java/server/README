@@ -1,0 +1,24 @@
+Installing and running both servers
+============================================
+
+In order to use the samplecontainer you will need to have both the gadget 
+rendering server and the social data server running under the same url path. 
+The easiest way to do this is to build the java/server package:
+
+1) Install Maven 2.0 (see http://maven.apache.org)
+
+2) Make sure the JAVA_HOME environment variable is set to the location of your
+   JDK/JRE, and that the maven executable is in your PATH.
+
+3) From java/...
+  * mvn package - Builds all of the java classes and runs tests. Useful also when you 
+    need first to obtain an export sources-jar, e.g. for remote debugging with Eclipse.
+  
+3) From java/server/...
+   * mvn jetty:run-war - Builds both servers and installs servlet at localhost:8080.
+     - To run on a different port, use: mvn -Djetty.port=<port> jetty:run-war
+
+4) Hit server at http://localhost:<port>/gadgets/files/samplecontainer/samplecontainer.html
+
+
+For more information, see http://incubator.apache.org/projects/shindig.html
