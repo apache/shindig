@@ -42,6 +42,7 @@ under the License.
     <module>common</module>
     <module>gadgets</module>
     <module>social-api</module>
+    <module>server</module>
   </modules>
 
   <mailingLists>
