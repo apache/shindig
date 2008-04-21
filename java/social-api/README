@@ -1,5 +1,32 @@
-Using the GadgetDataServlet and integrating with Shindig's OpenSocial code
+Installing and running the server
+============================================
+
+1) Install Maven 2.0 (see http://maven.apache.org)
+
+2) Make sure the JAVA_HOME environment variable is set to the location of your
+   JDK/JRE, and that the maven executable is in your PATH.
+
+3) From java/...
+  * mvn package - Builds all of the java classes including the social data server and runs 
+    tests. Useful also when you need first to obtain an export sources-jar, 
+    e.g. for remote debugging with Eclipse.
+  
+3) From java/social-api/...
+   * mvn jetty:run - Builds social data server (no tests), installs servlet at localhost:8080.
+     - To run on a different port, use: mvn -Djetty.port=<port> jetty:run
+
+4) Once running, this url http://localhost:<port>/social/data will accept POST requests 
+   to update or fetch data. In order to see this code in action follow the README in java/server.
+
+
+For more information, see http://incubator.apache.org/projects/shindig.html
+
+
+
+Explanation of the current setup of the OpenSocial server code
 ===========================================================================
+
+From within java/social-api/src/main/java/org/apache/shindig/social/...
 
 === Directories:
   *.java - classes necessary for handling all json data requests made from
@@ -7,7 +34,7 @@ Using the GadgetDataServlet and integrating with Shindig's OpenSocial code
       (handled by the opensocial directory) or any custom calls that the
       javascript needs the server to handle (see the
       samplecontainer/StateFileDataHandler for an example)
-  opensocial/* - provides the OpenSocialDataHandler and all dependant OpenSocial
+  opensocial/* - provides the OpenSocialDataHandler and all dependent OpenSocial
       related classes
   samplecontainer/* - provides the SampleContainer implementation that Shindig
       uses by default. If you are creating your own container it is best to
@@ -19,7 +46,7 @@ Using the GadgetDataServlet and integrating with Shindig's OpenSocial code
 
 === Main servlet: GadgetDataServlet
 
-This servlet handles all requests to the socialdata url. These
+This servlet handles all requests to the social/data url. These
 requests are expected to post two items of information, "st" which should map to
 a gadget token and "request" which should be stringified json.
 
@@ -54,7 +81,7 @@ types:
 
 json details:
 
--------- Note: This is all subject to change! More information below. --------
+-------- Note: This will eventually switch to the RESTful apis. More information below. --------
 
 FETCH_PEOPLE
   incoming json:
@@ -111,9 +138,11 @@ json format will always match the server exactly. This wire format is always
 subject to change as it is solely for the purpose of communicating between the
 Shindig javascript and the Shindig java classes. Shindig will always be
 compatible with itself and will not commit to staying constant for outside
-dependencies.
+dependencies. Note: soon, all of this code will change to only support the 
+RESTful api wire format. Both the javascript and the java code will be updated 
+when that happens.
 
-If you wish to use Shindig to support OpenSocial it is highly reccomended that
+If you wish to use Shindig to support OpenSocial it is highly recommended that
 you implement the Service interfaces. This will isolate you from json wire
 format changes.
 
@@ -131,4 +160,6 @@ services: ActivitiesService, DataService, and PeopleService in the
 samplecontainer/Basic*Service files.
 
 You should provide your own implementations of these files to fetch data from a
-database or an existing service, or some other storage mechanism.
+database or an existing service, or some other storage mechanism. You can hook in 
+your own implementations of these interfaces by providing your own Guice module 
+in the web.xml file.

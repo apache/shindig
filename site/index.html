@@ -144,7 +144,7 @@ the container to expose via the container JavaScript.
     </li><li><b>OpenSocial Container JavaScript</b> -- JavaScript environment that sits on top of the Gadget Container JavaScript and provides OpenSocial
 specific functionality (profiles, friends, activities, datastore).</li>
 
-    <li><b>OpenSocial Gateway Server</b> (does not yet exist in the repository) -- an implementation of the server interface to container-specific
+    <li><b>OpenSocial Data Server</b> -- an implementation of the server interface to container-specific
 information, including the OpenSocial REST APIs, with clear extension points so others can connect it to their own backends.</li> </ul> <p></p>
 
 </div>
@@ -206,17 +206,18 @@ In the meantime, please visit the Building Shindig tab for instructions on using
 
   <ol>
     <li> Make sure you have the <a href="#preReqs">prerequisites</a> installed first.</li>
-    <li> <code>cd ~/src/shindig/java/\gadgets</code></li>
+    <li> <code>cd ~/src/shindig/java/</code></li>
     <li> <code>mvn package</code></li>
 
     <li>
 Once the build successfully completes, you can install the built WAR
-file (gadgets.war) located in the /target subdirectory onto your JEE
+files located in the /target subdirectory onto your JEE
 server.</li>
   </ol>
 
-  <p>To build the code (with no tests) and start a Jetty server that will run on at localhost:8080: </p>
+  <p>To run the code and start a Jetty server that will run on at localhost:8080: </p>
   <p></p><ul>
+     <li><code>cd server</code></li>
      <li><code>mvn jetty:run-war</code></li>
     </ul><p></p>
 
@@ -268,7 +269,7 @@ using:</p>
 
   </li><li> File -&gt; New -&gt; Java Project
   <ol><li> Select 'Create project from existing source' and navigate to:<br>
-  ~/src/shindig/java/gadgets
+  ~/src/shindig/java
   </li><li> Click Finish
   </li><li> If you see a dialog for "Open Associated Perspective", click Ok.
   Don't worry about the errors after loading as they will be fixed in the next step.
@@ -290,7 +291,7 @@ using:</p>
 </p><h4><font size="3"><a name="Running_inside_Eclipse"> Running inside Eclipse </a></font></h4>
 
   <p>
-  To debug the server in Eclipse, follow the last two steps <a href="http://www.google.com/url?sa=D&amp;q=http%3A%2F%2Fcwiki.apache.org%2FWICKET%2Fmaven-jetty-plugin.html" target="_top">here</a> (takes a few
+  To debug the server in Eclipse, follow the last two steps <a href="http://cwiki.apache.org/WICKET/maven-jetty-plugin.html" target="_top">here</a> (takes a few
 minutes to set up):
   </p><p>
   </p><ul><li> "Using eclipse external tools"
@@ -314,10 +315,11 @@ projects. For more information on Caja, see: <a href="http://code.google.com/p/g
   </li></ol>
   <p>To see the cajoled code (Firefox only), right-click inside the iframe and do "This Frame -&gt; View Frame Source"</p>
 
-  <h3><a name="Additonal_reading"> Additonal reading </a></h3>
-  Read <a href="http://svn.apache.org/repos/asf/incubator/shindig/trunk/java/gadgets/README">java/gadgets/README</a> for original instructions on
-how to start up your own Shindig Gadget Server.
+  <h3><a name="Additonal_reading"> Additional reading </a></h3>
+  Read <a href="http://svn.apache.org/repos/asf/incubator/shindig/trunk/java/README">java/README</a> for original instructions on how to start up any of the java shindig servers.
   <p>
+  Read <a href="http://svn.apache.org/repos/asf/incubator/shindig/trunk/php/README">php/README</a> for original instructions on how to start up the php shindig server.
+    <p>
   Read <a href="http://svn.apache.org/repos/asf/incubator/shindig/trunk/javascript/README">javascript/README</a> for instructions for using the
 Shindig Gadget
   Container JavaScript to enable your page to render Gadgets using
