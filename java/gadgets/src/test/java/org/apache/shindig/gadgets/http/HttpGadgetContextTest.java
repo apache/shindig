@@ -18,10 +18,9 @@
 
 package org.apache.shindig.gadgets.http;
 
-import static org.easymock.EasyMock.expect;
-
 import org.apache.shindig.gadgets.GadgetContext;
 import org.apache.shindig.gadgets.GadgetTestFixture;
+import static org.easymock.EasyMock.expect;
 
 import java.util.Locale;
 
@@ -30,7 +29,7 @@ public class HttpGadgetContextTest extends GadgetTestFixture {
     expect(request.getParameter("nocache")).andReturn(
         Integer.toString(Integer.MAX_VALUE));
     replay();
-    GadgetContext context = new HttpGadgetContext(request);
+    GadgetContext context = new HttpGadgetContext(request, gadgetTokenDecoder);
     verify();
     assertEquals(true, context.getIgnoreCache());
   }
@@ -40,7 +39,7 @@ public class HttpGadgetContextTest extends GadgetTestFixture {
     expect(request.getParameter("country")).andReturn(
         Locale.CHINA.getCountry());
     replay();
-    GadgetContext context = new HttpGadgetContext(request);
+    GadgetContext context = new HttpGadgetContext(request, gadgetTokenDecoder);
     verify();
     assertEquals(Locale.CHINA, context.getLocale());
   }
@@ -48,7 +47,7 @@ public class HttpGadgetContextTest extends GadgetTestFixture {
   public void testDebug() {
     expect(request.getParameter("debug")).andReturn("1");
     replay();
-    GadgetContext context = new HttpGadgetContext(request);
+    GadgetContext context = new HttpGadgetContext(request, gadgetTokenDecoder);
     verify();
     assertEquals(true, context.getDebug());
   }

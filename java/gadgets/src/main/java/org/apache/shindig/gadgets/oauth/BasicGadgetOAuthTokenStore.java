@@ -18,13 +18,12 @@
  */
 package org.apache.shindig.gadgets.oauth;
 
+import org.apache.shindig.gadgets.ContentFetcher;
 import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.RemoteContent;
-import org.apache.shindig.gadgets.RemoteContentFetcher;
 import org.apache.shindig.gadgets.RemoteContentRequest;
 import org.apache.shindig.gadgets.spec.GadgetSpec;
 import org.apache.shindig.util.ResourceLoader;
-
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -46,7 +45,7 @@ public class BasicGadgetOAuthTokenStore extends GadgetOAuthTokenStore {
     super(store);
   }
 
-  public void initFromConfigFile(RemoteContentFetcher fetcher)
+  public void initFromConfigFile(ContentFetcher fetcher)
   throws GadgetException {
     // Read our consumer keys and secrets from config/oauth.js
     // This actually involves fetching gadget specs
@@ -72,7 +71,7 @@ public class BasicGadgetOAuthTokenStore extends GadgetOAuthTokenStore {
     }
   }
 
-  private void storeProviderInfos(RemoteContentFetcher fetcher, URI gadgetUri)
+  private void storeProviderInfos(ContentFetcher fetcher, URI gadgetUri)
       throws GadgetException {
     RemoteContentRequest request = RemoteContentRequest.getRequest(
         gadgetUri, false);

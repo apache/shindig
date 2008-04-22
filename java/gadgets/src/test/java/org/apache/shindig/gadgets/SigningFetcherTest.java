@@ -14,14 +14,14 @@
 
 package org.apache.shindig.gadgets;
 
+import junit.framework.TestCase;
+
 import net.oauth.OAuth;
+import net.oauth.OAuth.Parameter;
 import net.oauth.OAuthAccessor;
 import net.oauth.OAuthConsumer;
 import net.oauth.OAuthMessage;
-import net.oauth.OAuth.Parameter;
 import net.oauth.signature.RSA_SHA1;
-
-import junit.framework.TestCase;
 
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -34,7 +34,7 @@ import java.util.List;
  */
 public class SigningFetcherTest extends TestCase {
   private static final String PRIVATE_KEY_TEXT =
-    "MIICdgIBADANBgkqhkiG9w0BAQEFAASCAmAwggJcAgEAAoGBALRiMLAh9iimur8V" +
+    "MIICdgIBADANBgkqhkiG9w0BAQEFAASCAmAwggJcAgEAAoGBALRiMLAh9iimur8V" +                   
     "A7qVvdqxevEuUkW4K+2KdMXmnQbG9Aa7k7eBjK1S+0LYmVjPKlJGNXHDGuy5Fw/d" +
     "7rjVJ0BLB+ubPK8iA/Tw3hLQgXMRRGRXXCn8ikfuQfjUS1uZSatdLB81mydBETlJ" +
     "hI6GH4twrbDJCR2Bwy/XWXgqgGRzAgMBAAECgYBYWVtleUzavkbrPjy0T5FMou8H" +
@@ -63,15 +63,17 @@ public class SigningFetcherTest extends TestCase {
     "-----END CERTIFICATE-----";
 
   private InterceptingContentFetcher interceptor;
+  private ContentCache cache;
   private SigningFetcher signer;
   private BasicGadgetToken authToken;
   private OAuthAccessor accessor;
 
   @Override
   public void setUp() throws Exception {
+    cache = new BasicContentCache();
     interceptor = new InterceptingContentFetcher();
     authToken = new BasicGadgetToken("o", "v", "a", "d", "u", "m");
-    signer = SigningFetcher.makeFromB64PrivateKey(
+    signer = SigningFetcher.makeFromB64PrivateKey(cache,
         interceptor, authToken, "foo", PRIVATE_KEY_TEXT);
     OAuthConsumer consumer = new OAuthConsumer(null, null, null, null);
     consumer.setProperty(RSA_SHA1.X509_CERTIFICATE, CERTIFICATE_TEXT);

@@ -20,6 +20,9 @@
 package org.apache.shindig.gadgets.http;
 
 import org.apache.shindig.gadgets.GadgetContext;
+import org.apache.shindig.gadgets.GadgetException;
+import org.apache.shindig.gadgets.GadgetToken;
+import org.apache.shindig.gadgets.GadgetTokenDecoder;
 import org.apache.shindig.gadgets.RenderingContext;
 import org.apache.shindig.gadgets.UserPrefs;
 
@@ -250,7 +253,19 @@ public class HttpGadgetContext extends GadgetContext {
     return new UserPrefs(prefs);
   }
 
-  public HttpGadgetContext(HttpServletRequest request) {
+  private final String tokenString;
+  private final GadgetTokenDecoder tokenDecoder;
+  @Override
+  public GadgetToken getToken() throws GadgetException {
+    if (tokenString == null || tokenString.length() == 0) {
+      return super.getToken();
+    } else {
+      return tokenDecoder.createToken(tokenString);
+    }
+  }
+
+  public HttpGadgetContext(HttpServletRequest request,
+      GadgetTokenDecoder tokenDecoder) {
     url = getUrl(request);
     moduleId = getModuleId(request);
     locale = getLocale(request);
@@ -260,5 +275,7 @@ public class HttpGadgetContext extends GadgetContext {
     debug = getDebug(request);
     view = getView(request);
     userPrefs = getUserPrefs(request);
+    tokenString = request.getParameter(ProxyHandler.SECURITY_TOKEN_PARAM);
+    this.tokenDecoder = tokenDecoder;
   }
 }

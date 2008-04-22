@@ -18,6 +18,7 @@
 package org.apache.shindig.gadgets.http;
 
 import com.google.inject.Inject;
+import com.google.inject.Provider;
 
 import java.io.IOException;
 
@@ -29,10 +30,10 @@ import javax.servlet.http.HttpServletResponse;
  */
 public class GadgetRenderingServlet extends InjectedServlet {
 
-  private GadgetRenderer renderer;
+  private Provider<GadgetRenderingTask> renderProvider;
   @Inject
-  public void setGadgetRenderer(GadgetRenderer renderer) {
-    this.renderer = renderer;
+  public void setGadgetRenderer(Provider<GadgetRenderingTask> renderProvider) {
+    this.renderProvider = renderProvider;
   }
 
   @Override
@@ -47,6 +48,6 @@ public class GadgetRenderingServlet extends InjectedServlet {
       resp.setStatus(HttpServletResponse.SC_NOT_MODIFIED);
       return;
     }
-    renderer.render(req, resp);
+    renderProvider.get().process(req, resp);
   }
 }

@@ -21,6 +21,7 @@ import org.apache.shindig.gadgets.GadgetContext;
 import org.apache.shindig.gadgets.GadgetFeature;
 import org.apache.shindig.gadgets.GadgetFeatureFactory;
 import org.apache.shindig.gadgets.GadgetFeatureRegistry;
+import org.apache.shindig.gadgets.GadgetTokenDecoder;
 import org.apache.shindig.gadgets.JsLibrary;
 
 import com.google.inject.Inject;
@@ -43,6 +44,12 @@ public class JsServlet extends InjectedServlet {
   @Inject
   public void setRegistry(GadgetFeatureRegistry registry) {
     this.registry = registry;
+  }
+
+  private GadgetTokenDecoder tokenDecoder;
+  @Inject
+  public void setRegistry(GadgetTokenDecoder tokenDecoder) {
+    this.tokenDecoder = tokenDecoder;
   }
 
   @Override
@@ -83,7 +90,7 @@ public class JsServlet extends InjectedServlet {
     StringBuilder jsData = new StringBuilder();
 
     // Probably incorrect to be using a context here...
-    GadgetContext context = new HttpGadgetContext(req);
+    GadgetContext context = new HttpGadgetContext(req, tokenDecoder);
     Set<String> features = new HashSet<String>(found.size());
     do {
       for (GadgetFeatureRegistry.Entry entry : found) {

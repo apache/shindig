@@ -17,7 +17,7 @@ package org.apache.shindig.gadgets;
 /**
  * Test utility to intercept remote content requests for inspection.
  */
-public class InterceptingContentFetcher extends RemoteContentFetcher {
+public class InterceptingContentFetcher extends ChainedContentFetcher {
 
   protected InterceptingContentFetcher() {
     super(null);
@@ -25,7 +25,6 @@ public class InterceptingContentFetcher extends RemoteContentFetcher {
 
   public RemoteContentRequest interceptedRequest;
 
-  @Override
   public RemoteContent fetch(RemoteContentRequest request) {
     interceptedRequest = request;
     return null;

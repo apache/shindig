@@ -158,7 +158,11 @@ public class RemoteContentRequest {
                               Options options) {
     this.method = method;
     this.uri = uri;
-    this.options = options;
+    if (options == null) {
+      this.options = new Options();
+    } else {
+      this.options = options;
+    }
     // Copy the headers
     if (headers == null) {
       this.headers = Collections.emptyMap();

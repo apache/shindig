@@ -19,25 +19,27 @@
 
 package org.apache.shindig.gadgets.http;
 
+import org.apache.shindig.gadgets.ContainerConfig;
 import org.apache.shindig.gadgets.Gadget;
 import org.apache.shindig.gadgets.GadgetContentFilter;
 import org.apache.shindig.gadgets.GadgetContext;
 import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.GadgetFeatureRegistry;
 import org.apache.shindig.gadgets.GadgetServer;
+import org.apache.shindig.gadgets.GadgetTokenDecoder;
 import org.apache.shindig.gadgets.JsLibrary;
 import org.apache.shindig.gadgets.RemoteContent;
-import org.apache.shindig.gadgets.ContainerConfig;
 import org.apache.shindig.gadgets.spec.Feature;
 import org.apache.shindig.gadgets.spec.LocaleSpec;
 import org.apache.shindig.gadgets.spec.MessageBundle;
 import org.apache.shindig.gadgets.spec.ModulePrefs;
 import org.apache.shindig.gadgets.spec.Preload;
 import org.apache.shindig.gadgets.spec.View;
-
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import com.google.inject.Inject;
 
 import java.io.IOException;
 import java.net.URI;
@@ -67,13 +69,14 @@ public class GadgetRenderingTask {
       = Logger.getLogger("org.apache.shindig.gadgets");
   public static final String STRICT_MODE_DOCTYPE = "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01//EN\" \"http://www.w3.org/TR/html4/strict.dtd\">";
 
-  private final HttpServletRequest request;
-  private final HttpServletResponse response;
+  private HttpServletRequest request;
+  private HttpServletResponse response;
   private final GadgetServer server;
   private final GadgetFeatureRegistry registry;
   private final ContainerConfig containerConfig;
   private final UrlGenerator urlGenerator;
-  private final GadgetContext context;
+  private final GadgetTokenDecoder tokenDecoder;
+  private GadgetContext context;
   private final List<GadgetContentFilter> filters;
 
   /**
@@ -81,7 +84,12 @@ public class GadgetRenderingTask {
    *
    * @throws IOException
    */
-  public void process() throws IOException {
+  public void process(HttpServletRequest request, HttpServletResponse response)
+      throws IOException {
+    this.request = request;
+    this.response = response;
+    context = new HttpGadgetContext(request, tokenDecoder);
+
     URI url = context.getUrl();
 
     if (url == null) {
@@ -461,19 +469,18 @@ public class GadgetRenderingTask {
     return false;
   }
 
-  public GadgetRenderingTask(HttpServletRequest request,
-                             HttpServletResponse response,
-                             GadgetServer server,
+  @Inject
+  public GadgetRenderingTask(GadgetServer server,
                              GadgetFeatureRegistry registry,
                              ContainerConfig containerConfig,
-                             UrlGenerator urlGenerator) {
-    this.request = request;
-    this.response = response;
+                             UrlGenerator urlGenerator,
+                             GadgetTokenDecoder tokenDecoder) {
+
     this.server = server;
     this.registry = registry;
     this.containerConfig = containerConfig;
     this.urlGenerator = urlGenerator;
-    context = new HttpGadgetContext(request);
+    this.tokenDecoder = tokenDecoder;
     filters = new LinkedList<GadgetContentFilter>();
   }
 }

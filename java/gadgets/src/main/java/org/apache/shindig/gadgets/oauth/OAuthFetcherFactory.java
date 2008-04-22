@@ -18,16 +18,20 @@
  */
 package org.apache.shindig.gadgets.oauth;
 
+import org.apache.shindig.gadgets.ContentFetcher;
 import org.apache.shindig.gadgets.GadgetException;
-import org.apache.shindig.gadgets.GadgetSpecFetcher;
 import org.apache.shindig.gadgets.GadgetToken;
-import org.apache.shindig.gadgets.RemoteContentFetcher;
 import org.apache.shindig.util.BasicBlobCrypter;
 import org.apache.shindig.util.BlobCrypter;
 import org.apache.shindig.util.Crypto;
 
+import com.google.inject.BindingAnnotation;
 import com.google.inject.Inject;
 
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -50,7 +54,7 @@ public class OAuthFetcherFactory {
    * BlobCrypter and consumer keys/secrets read from oauth.js
    */
   @Inject
-  public OAuthFetcherFactory(@GadgetSpecFetcher RemoteContentFetcher fetcher) {
+  public OAuthFetcherFactory(@OAuthConfigFetcher ContentFetcher fetcher) {
     try {
       this.oauthCrypter = new BasicBlobCrypter(
           Crypto.getRandomBytes(BasicBlobCrypter.MASTER_KEY_MIN_LEN));
@@ -90,12 +94,18 @@ public class OAuthFetcherFactory {
    * @throws GadgetException
    */
   public OAuthFetcher getOAuthFetcher(
-      RemoteContentFetcher nextFetcher,
+      ContentFetcher nextFetcher,
       GadgetToken token,
       OAuthRequestParams params) throws GadgetException {
     OAuthFetcher fetcher = new OAuthFetcher(
         tokenStore, oauthCrypter, nextFetcher, token, params);
     fetcher.init();
     return fetcher;
+  }
+
+  @Retention(RetentionPolicy.RUNTIME)
+  @Target({ElementType.FIELD, ElementType.PARAMETER})
+  @BindingAnnotation
+  public @interface OAuthConfigFetcher {
   }
 }

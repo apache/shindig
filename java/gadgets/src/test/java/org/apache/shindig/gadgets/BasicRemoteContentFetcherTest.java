@@ -25,8 +25,9 @@ import java.io.FileWriter;
 import java.net.URI;
 
 public class BasicRemoteContentFetcherTest extends TestCase {
-  private RemoteContentFetcher fetcher
-      = new BasicRemoteContentFetcher(Integer.MAX_VALUE);
+  private ContentCache cache = new BasicContentCache();
+  private ContentFetcher fetcher
+      = new BasicRemoteContentFetcher(cache, Integer.MAX_VALUE);
 
   public void testFetch() throws Exception {
     String content = "Hello, world!";

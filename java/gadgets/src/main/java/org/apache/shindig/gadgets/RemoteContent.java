@@ -47,6 +47,7 @@ public class RemoteContent {
   private String responseString = null;
   private final byte[] responseBytes;
   private final Map<String, List<String>> headers;
+  private final Map<String, String> metadata;
 
   /**
    * Create a dummy empty map. Access via RemoteContent.ERROR
@@ -56,6 +57,7 @@ public class RemoteContent {
     this.responseBytes = new byte[0];
     this.encoding = DEFAULT_ENCODING;
     this.headers = Collections.emptyMap();
+    this.metadata = new HashMap<String, String>();
   }
 
   /**
@@ -83,8 +85,9 @@ public class RemoteContent {
         List<String> newList = new ArrayList<String>(entry.getValue());
         tmpHeaders.put(entry.getKey(), Collections.unmodifiableList(newList));
       }
-      this.headers = Collections.unmodifiableMap(tmpHeaders);
+      this.headers = tmpHeaders;
     }
+    this.metadata = new HashMap<String, String>();
     this.encoding = detectEncoding();
   }
 
@@ -191,5 +194,12 @@ public class RemoteContent {
     } else {
       return headerList.get(0);
     }
+  }
+
+  /**
+   * @return additional data to embed in responses sent from the JSON proxy.
+   */
+  public Map<String, String> getMetadata() {
+    return this.metadata;
   }
 }
