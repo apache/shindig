@@ -50,7 +50,7 @@ under the License.
           <webResources>
             <resource>
               <!-- this is relative to the pom.xml directory -->
-              <directory>../../javascript/</directory>
+              <directory>${basedir}/../../javascript/</directory>
               <targetPath>/gadgets/files</targetPath>
               <includes>
                 <include>**/*.*</include>
@@ -79,13 +79,13 @@ under the License.
     <resources>
       <resource>
         <targetPath>features</targetPath>
-        <directory>../../features</directory>
+        <directory>${basedir}/../../features</directory>
       </resource>
       <resource>
         <!-- duplicated here for the jar build. -->
         <!-- TODO: Eliminate duplicate copies in WAR output -->
         <!-- this is relative to the pom.xml directory -->
-        <directory>../../javascript/</directory>
+        <directory>${basedir}/../../javascript/</directory>
         <targetPath>/gadgets/files</targetPath>
         <includes>
           <include>**/*.*</include>
@@ -93,14 +93,14 @@ under the License.
       </resource>
       <resource>
         <targetPath>containers/default</targetPath>
-        <directory>../../config</directory>
+        <directory>${basedir}/../../config</directory>
         <includes>
           <include>container.js</include>
         </includes>
       </resource>
       <resource>
         <targetPath>config</targetPath>
-        <directory>../../config</directory>
+        <directory>${basedir}/../../config</directory>
         <includes>
           <include>oauth.json</include>
         </includes>

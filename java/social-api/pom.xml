@@ -54,7 +54,7 @@ under the License.
           <webResources>
             <resource>
               <!-- this is relative to the pom.xml directory -->
-              <directory>../../javascript/</directory>
+              <directory>${basedir}/../../javascript/</directory>
               <targetPath>files</targetPath>
               <includes>
                 <include>**/*.*</include>

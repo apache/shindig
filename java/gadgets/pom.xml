@@ -54,7 +54,7 @@ under the License.
           <webResources>
             <resource>
               <!-- this is relative to the pom.xml directory -->
-              <directory>../../javascript/</directory>
+              <directory>${basedir}/../../javascript/</directory>
               <targetPath>files</targetPath>
               <includes>
                 <include>**/*.*</include>
@@ -159,7 +159,7 @@ under the License.
           <execution>
             <id>test</id>
             <configuration>
-              <sourceDirectory>../../</sourceDirectory>
+              <sourceDirectory>${basedir}/../../</sourceDirectory>
               <sources>
                 <source>features/opensocial-reference/opensocial.js</source>
                 <source>features/opensocial-reference/activity.js</source>
@@ -184,7 +184,7 @@ under the License.
                 <source>features/opensocial-0.7/jsonperson.js</source>
                 <source>features/opensocial-0.7/jsoncontainer.js</source>
               </sources>
-              <testSourceDirectory>../../</testSourceDirectory>
+              <testSourceDirectory>${basedir}/../../</testSourceDirectory>
               <reportsDirectory>${project.build.directory}/surefire-reports</reportsDirectory>
               <testSuites>
                 <testSuite>
@@ -207,13 +207,13 @@ under the License.
     <resources>
       <resource>
         <targetPath>features</targetPath>
-        <directory>../../features</directory>
+        <directory>${basedir}/../../features</directory>
       </resource>
       <resource>
         <!-- duplicated here for the jar build. -->
         <!-- TODO: Eliminate duplicate copies in WAR output -->
         <!-- this is relative to the pom.xml directory -->
-        <directory>../../javascript/</directory>
+        <directory>${basedir}/../../javascript/</directory>
         <targetPath>files</targetPath>
         <includes>
           <include>**/*.*</include>
@@ -221,14 +221,14 @@ under the License.
       </resource>
       <resource>
         <targetPath>containers/default</targetPath>
-        <directory>../../config</directory>
+        <directory>${basedir}/../../config</directory>
         <includes>
           <include>container.js</include>
         </includes>
       </resource>
       <resource>
         <targetPath>config</targetPath>
-        <directory>../../config</directory>
+        <directory>${basedir}/../../config</directory>
         <includes>
           <include>oauth.json</include>
         </includes>
