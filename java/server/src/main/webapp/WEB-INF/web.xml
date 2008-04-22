@@ -39,7 +39,6 @@
     <servlet-class>
       org.apache.shindig.gadgets.http.GadgetRenderingServlet
     </servlet-class>
-    <load-on-startup>1</load-on-startup>
   </servlet>
 
   <!-- Proxy -->
@@ -48,7 +47,6 @@
     <servlet-class>
       org.apache.shindig.gadgets.http.ProxyServlet
     </servlet-class>
-    <load-on-startup>1</load-on-startup>
   </servlet>
 
   <!-- Metadata RPC -->
@@ -57,7 +55,6 @@
     <servlet-class>
       org.apache.shindig.gadgets.http.RpcServlet
     </servlet-class>
-    <load-on-startup>1</load-on-startup>
   </servlet>
 
   <!-- Serve social data -->
@@ -66,14 +63,12 @@
     <servlet-class>
       org.apache.shindig.social.GadgetDataServlet
     </servlet-class>
-    <load-on-startup>1</load-on-startup>
   </servlet>
 
   <!-- javascript serving -->
   <servlet>
     <servlet-name>js</servlet-name>
     <servlet-class>org.apache.shindig.gadgets.http.JsServlet</servlet-class>
-    <load-on-startup>1</load-on-startup>
   </servlet>
 
   <servlet-mapping>
