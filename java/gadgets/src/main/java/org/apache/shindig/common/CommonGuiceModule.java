@@ -1,7 +1,9 @@
 package org.apache.shindig.common;
 
+import org.apache.shindig.gadgets.BasicContentCache;
 import org.apache.shindig.gadgets.BasicGadgetTokenDecoder;
 import org.apache.shindig.gadgets.BasicRemoteContentFetcher;
+import org.apache.shindig.gadgets.ContentCache;
 import org.apache.shindig.gadgets.ContentFetcher;
 import org.apache.shindig.gadgets.GadgetTokenDecoder;
 
@@ -20,5 +22,6 @@ public class CommonGuiceModule extends AbstractModule {
     // java/common.
     bind(ContentFetcher.class).to(BasicRemoteContentFetcher.class);
     bind(GadgetTokenDecoder.class).to(BasicGadgetTokenDecoder.class);
+    bind(ContentCache.class).to(BasicContentCache.class);
   }
 }

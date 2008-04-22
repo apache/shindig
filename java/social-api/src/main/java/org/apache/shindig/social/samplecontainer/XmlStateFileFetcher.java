@@ -1,9 +1,8 @@
 package org.apache.shindig.social.samplecontainer;
 
-import org.apache.shindig.gadgets.BasicRemoteContentFetcher;
+import org.apache.shindig.gadgets.ContentFetcher;
 import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.RemoteContent;
-import org.apache.shindig.gadgets.RemoteContentFetcher;
 import org.apache.shindig.gadgets.RemoteContentRequest;
 import org.apache.shindig.social.opensocial.model.Activity;
 import org.apache.shindig.social.opensocial.model.Enum;
@@ -11,6 +10,9 @@ import org.apache.shindig.social.opensocial.model.MediaItem;
 import org.apache.shindig.social.opensocial.model.Name;
 import org.apache.shindig.social.opensocial.model.Person;
 import org.apache.shindig.social.opensocial.model.Phone;
+
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NamedNodeMap;
@@ -30,6 +32,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+@Singleton
 public class XmlStateFileFetcher {
   private static final String DEFAULT_STATE_URL
       = "http://localhost:8080/gadgets/files/samplecontainer/"
@@ -48,17 +51,7 @@ public class XmlStateFileFetcher {
 
   private static final String SCRIPT_SUFFIX = "</div>";
 
-
-  // TODO: Should use guice here This static fetcher is very gross.
-  private static XmlStateFileFetcher fetcher;
-
-  public static XmlStateFileFetcher get() {
-    if (fetcher == null) {
-      fetcher = new XmlStateFileFetcher();
-    }
-    return fetcher;
-  }
-
+  private ContentFetcher fetcher;
   private URI stateFile;
   private Document document;
   private boolean doEvil = false;
@@ -70,7 +63,9 @@ public class XmlStateFileFetcher {
   private Map<String, Person> allPeople;
   private Map<String, List<Activity>> allActivities;
 
-  private XmlStateFileFetcher() {
+  @Inject
+  public XmlStateFileFetcher(ContentFetcher fetcher) {
+   this.fetcher = fetcher;
    try {
       stateFile = new URI(DEFAULT_STATE_URL);
     } catch (URISyntaxException e) {
@@ -97,9 +92,6 @@ public class XmlStateFileFetcher {
       return document;
     }
 
-    // TODO: Eventually get the fetcher and processing options from a
-    // config file, just like the GadgetServer
-    RemoteContentFetcher fetcher = new BasicRemoteContentFetcher(1024 * 1024);
     RemoteContent xml = null;
     try {
       xml = fetcher.fetch(new RemoteContentRequest(stateFile));

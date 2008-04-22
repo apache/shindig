@@ -25,6 +25,8 @@ import org.apache.shindig.social.opensocial.model.ApiCollection;
 import org.apache.shindig.gadgets.GadgetToken;
 import org.json.JSONException;
 
+import com.google.inject.Inject;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -42,10 +44,17 @@ public class BasicPeopleService implements PeopleService {
     }
   };
 
+  private XmlStateFileFetcher fetcher;
+
+  @Inject
+  public BasicPeopleService(XmlStateFileFetcher fetcher) {
+    this.fetcher = fetcher;
+  }
+
   public ResponseItem<ApiCollection<Person>> getPeople(List<String> ids,
-      SortOrder sortOrder, FilterType filter, int first, int max, 
+      SortOrder sortOrder, FilterType filter, int first, int max,
       Set<String> profileDetails, GadgetToken token) {
-    Map<String, Person> allPeople = XmlStateFileFetcher.get().getAllPeople();
+    Map<String, Person> allPeople = fetcher.getAllPeople();
 
     List<Person> people = new ArrayList<Person>();
     for (String id : ids) {
@@ -80,8 +89,7 @@ public class BasicPeopleService implements PeopleService {
 
   public List<String> getIds(IdSpec idSpec, GadgetToken token)
       throws JSONException {
-    Map<String, List<String>> friendIds
-        = XmlStateFileFetcher.get().getFriendIds();
+    Map<String, List<String>> friendIds = fetcher.getFriendIds();
 
     List<String> ids = new ArrayList<String>();
     switch(idSpec.getType()) {

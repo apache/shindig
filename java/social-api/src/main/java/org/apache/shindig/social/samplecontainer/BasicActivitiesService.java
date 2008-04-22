@@ -24,16 +24,24 @@ import org.apache.shindig.social.opensocial.ActivitiesService;
 import org.apache.shindig.social.opensocial.model.Activity;
 import org.json.JSONObject;
 
+import com.google.inject.Inject;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Date;
 
 public class BasicActivitiesService implements ActivitiesService {
-  public ResponseItem<List<Activity>> getActivities(List<String> ids, 
+  private XmlStateFileFetcher fetcher;
+
+  @Inject
+  public BasicActivitiesService(XmlStateFileFetcher fetcher) {
+    this.fetcher = fetcher;
+  }
+
+  public ResponseItem<List<Activity>> getActivities(List<String> ids,
       GadgetToken token) {
-    Map<String, List<Activity>> allActivities =
-        XmlStateFileFetcher.get().getActivities();
+    Map<String, List<Activity>> allActivities = fetcher.getActivities();
 
     List<Activity> activities = new ArrayList<Activity>();
 
@@ -48,13 +56,13 @@ public class BasicActivitiesService implements ActivitiesService {
     return new ResponseItem<List<Activity>>(activities);
   }
 
-  public ResponseItem createActivity(String personId, Activity activity, 
-        GadgetToken token) {
+  public ResponseItem createActivity(String personId, Activity activity,
+      GadgetToken token) {
     // TODO: Validate the activity and do any template expanding
     activity.setUserId(personId);
     activity.setPostedTime(new Date().getTime());
 
-    XmlStateFileFetcher.get().createActivity(personId, activity);
+    fetcher.createActivity(personId, activity);
     return new ResponseItem<JSONObject>(new JSONObject());
   }
 }

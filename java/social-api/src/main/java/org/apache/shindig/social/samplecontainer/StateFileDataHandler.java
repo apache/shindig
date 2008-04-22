@@ -17,17 +17,19 @@
  */
 package org.apache.shindig.social.samplecontainer;
 
-import org.json.JSONException;
-import org.json.JSONObject;
-import org.apache.shindig.social.ResponseItem;
-import org.apache.shindig.social.ResponseError;
 import org.apache.shindig.social.GadgetDataHandler;
 import org.apache.shindig.social.RequestItem;
+import org.apache.shindig.social.ResponseError;
+import org.apache.shindig.social.ResponseItem;
+
+import com.google.inject.Inject;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.Map;
 import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Servlet for serving the data required for opensocial.
@@ -35,12 +37,19 @@ import java.util.HashMap;
  */
 public class StateFileDataHandler implements GadgetDataHandler {
 
-  public enum RequestType {
+  public static enum RequestType {
     DUMP_STATE, SET_STATE, SET_EVILNESS
   }
 
+  private XmlStateFileFetcher fetcher;
+
+  @Inject
+  public StateFileDataHandler(XmlStateFileFetcher fetcher) {
+    this.fetcher = fetcher;
+  }
+
   public boolean shouldHandle(String requestType) {
-     try {
+    try {
       // There should be a cleaner way to do this...
       RequestType.valueOf(requestType);
       return true;
@@ -52,8 +61,6 @@ public class StateFileDataHandler implements GadgetDataHandler {
   public ResponseItem handleRequest(RequestItem request) {
     RequestType type = RequestType.valueOf(request.getType());
     ResponseItem response = null;
-
-    XmlStateFileFetcher fetcher = XmlStateFileFetcher.get();
 
     switch (type) {
       case DUMP_STATE:
