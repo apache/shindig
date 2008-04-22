@@ -23,17 +23,25 @@ import org.apache.shindig.social.ResponseItem;
 import org.apache.shindig.social.opensocial.DataService;
 import org.json.JSONObject;
 
+import com.google.inject.Inject;
+
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 public class BasicDataService implements DataService {
 
-  public ResponseItem<Map<String, Map<String, String>>> getPersonData(
-        List<String> ids, List<String> keys, GadgetToken token) {
+  private XmlStateFileFetcher fetcher;
 
-    Map<String, Map<String, String>> allData
-        = XmlStateFileFetcher.get().getAppData();
+  @Inject
+  public BasicDataService(XmlStateFileFetcher fetcher) {
+    this.fetcher = fetcher;
+  }
+
+  public ResponseItem<Map<String, Map<String, String>>> getPersonData(
+      List<String> ids, List<String> keys, GadgetToken token) {
+
+    Map<String, Map<String, String>> allData = fetcher.getAppData();
 
     // TODO: Use the opensource Collections library
     Map<String, Map<String, String>> data =
@@ -64,7 +72,7 @@ public class BasicDataService implements DataService {
           new JSONObject());
     }
 
-    XmlStateFileFetcher.get().setAppData(id, key, value);
+    fetcher.setAppData(id, key, value);
     return new ResponseItem<JSONObject>(new JSONObject());
   }
 

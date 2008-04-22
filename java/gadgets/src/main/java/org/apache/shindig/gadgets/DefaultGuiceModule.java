@@ -45,7 +45,6 @@ public class DefaultGuiceModule extends AbstractModule {
   @Override
   protected void configure() {
     Names.bindProperties(this.binder(), properties);
-    bind(ContentCache.class).to(BasicContentCache.class);
 
     bind(RemoteContentFetcherFactory.class);
     bind(SigningFetcherFactory.class);
