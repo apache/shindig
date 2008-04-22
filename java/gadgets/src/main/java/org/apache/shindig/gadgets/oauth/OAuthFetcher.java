@@ -16,18 +16,19 @@
  */
 package org.apache.shindig.gadgets.oauth;
 
-import net.oauth.OAuth;
-import net.oauth.OAuthAccessor;
-import net.oauth.OAuthMessage;
-
+import org.apache.shindig.gadgets.ChainedContentFetcher;
+import org.apache.shindig.gadgets.ContentFetcher;
 import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.GadgetToken;
 import org.apache.shindig.gadgets.RemoteContent;
-import org.apache.shindig.gadgets.RemoteContentFetcher;
 import org.apache.shindig.gadgets.RemoteContentRequest;
 import org.apache.shindig.gadgets.RemoteContentRequest.Options;
 import org.apache.shindig.util.BlobCrypter;
 import org.apache.shindig.util.BlobCrypterException;
+
+import net.oauth.OAuth;
+import net.oauth.OAuthAccessor;
+import net.oauth.OAuthMessage;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
@@ -47,7 +48,7 @@ import java.util.Map;
  * This class is not thread-safe; create a new one for each request that
  * requires OAuth signing.
  */
-public class OAuthFetcher extends RemoteContentFetcher {
+public class OAuthFetcher extends ChainedContentFetcher {
 
   // We store some blobs of data on the client for later reuse; the blobs
   // contain key/value pairs, and these are the key names.
@@ -133,7 +134,7 @@ public class OAuthFetcher extends RemoteContentFetcher {
   public OAuthFetcher(
       GadgetOAuthTokenStore tokenStore,
       BlobCrypter oauthCrypter,
-      RemoteContentFetcher nextFetcher,
+      ContentFetcher nextFetcher,
       GadgetToken authToken,
       OAuthRequestParams params) {
     super(nextFetcher);
@@ -199,7 +200,6 @@ public class OAuthFetcher extends RemoteContentFetcher {
     return tokenKey;
   }
 
-  @Override
   public RemoteContent fetch(RemoteContentRequest request)
       throws GadgetException {
     this.realRequest = request;
@@ -514,7 +514,7 @@ public class OAuthFetcher extends RemoteContentFetcher {
       OAuthMessage oauthRequest = newRequestMessage(
           method, realRequest.getUri().toASCIIString(), msgParams);
 
-      return nextFetcher.fetch(
+      RemoteContent content =  nextFetcher.fetch(
           createRemoteContentRequest(
               filterOAuthParams(oauthRequest),
               realRequest.getMethod(),
@@ -524,6 +524,14 @@ public class OAuthFetcher extends RemoteContentFetcher {
               realRequest.getPostBodyAsString(),
               realRequest.getOptions()));
 
+      // Track metadata on the response
+      if (newClientState != null) {
+        content.getMetadata().put(CLIENT_STATE, newClientState);
+      }
+      if (aznUrl != null) {
+        content.getMetadata().put(APPROVAL_URL, aznUrl);
+      }
+      return content;
     } catch (UnsupportedEncodingException e) {
       throw new GadgetException(GadgetException.Code.INTERNAL_SERVER_ERROR, e);
     } catch (IOException e) {
@@ -563,17 +571,5 @@ public class OAuthFetcher extends RemoteContentFetcher {
       }
     }
     return result;
-  }
-
-  @Override
-  public Map<String, String> getResponseMetadata() {
-    Map<String, String> extra = new HashMap<String, String>();
-    if (newClientState != null) {
-      extra.put(CLIENT_STATE, newClientState);
-    }
-    if (aznUrl != null) {
-      extra.put(APPROVAL_URL, aznUrl);
-    }
-    return extra;
   }
 }

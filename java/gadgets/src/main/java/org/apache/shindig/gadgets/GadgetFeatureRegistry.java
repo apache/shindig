@@ -58,7 +58,7 @@ public class GadgetFeatureRegistry {
    */
   @Inject
   public GadgetFeatureRegistry(@Named("features.default") String featureFiles,
-      RemoteContentFetcher contentFetcher) throws GadgetException {
+      ContentFetcher contentFetcher) throws GadgetException {
     features = new HashMap<String, Entry>();
     core = new HashMap<String, Entry>();
     if (featureFiles != null) {

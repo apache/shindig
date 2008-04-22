@@ -78,7 +78,7 @@ public class JsLibraryTest extends EasyMockTestCase {
   }
 
   public void testUrl() throws Exception {
-    RemoteContentFetcher mockFetcher = mock(RemoteContentFetcher.class);
+    ContentFetcher mockFetcher = mock(ContentFetcher.class);
     URI location = new URI("http://example.org/file.js");
     RemoteContentRequest request = new RemoteContentRequest(location);
     RemoteContent content

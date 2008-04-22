@@ -46,36 +46,21 @@ public class GadgetServer {
   private final GadgetFeatureRegistry registry;
   private final GadgetBlacklist blacklist;
 
-  private RemoteContentFetcher preloadFetcher;
-  @Inject(optional=true)
-  public void setPreloadFetcher(@PreloadFetcher RemoteContentFetcher fetcher) {
-    preloadFetcher = fetcher;
-  }
-
-  private RemoteContentFetcher gadgetSpecFetcher;
-  @Inject(optional=true)
-  public void setSpecFetcher(@GadgetSpecFetcher RemoteContentFetcher fetcher) {
-    gadgetSpecFetcher = fetcher;
-  }
-
-  private RemoteContentFetcher messageBundleFetcher;
-  @Inject(optional=true)
-  public void setBundleFetcher(
-      @GadgetSpecFetcher RemoteContentFetcher fetcher) {
-    messageBundleFetcher = fetcher;
-  }
+  private ContentFetcherFactory preloadFetcherFactory;
+  private ContentFetcher gadgetSpecFetcher;
+  private ContentFetcher messageBundleFetcher;
 
   @Inject
   public GadgetServer(Executor executor,
-                      GadgetFeatureRegistry registry,
-                      GadgetBlacklist blacklist,
-                      RemoteContentFetcher preloadFetcher,
-                      RemoteContentFetcher gadgetSpecFetcher,
-                      RemoteContentFetcher messageBundleFetcher) {
+      GadgetFeatureRegistry registry,
+      GadgetBlacklist blacklist,
+      ContentFetcherFactory preloadFetcherFactory,
+      @GadgetSpecFetcher ContentFetcher gadgetSpecFetcher,
+      @MessageBundleFetcher ContentFetcher messageBundleFetcher) {
     this.executor = executor;
     this.registry = registry;
     this.blacklist = blacklist;
-    this.preloadFetcher = preloadFetcher;
+    this.preloadFetcherFactory = preloadFetcherFactory;
     this.gadgetSpecFetcher = gadgetSpecFetcher;
     this.messageBundleFetcher = messageBundleFetcher;
   }
@@ -201,7 +186,8 @@ public class GadgetServer {
       CompletionService<RemoteContent> preloadProcessor
           = new ExecutorCompletionService<RemoteContent>(executor);
       for (Preload preload : gadget.getSpec().getModulePrefs().getPreloads()) {
-        PreloadTask task = new PreloadTask(preload, preloadFetcher);
+        PreloadTask task = new PreloadTask(gadget.getContext(), preload,
+            preloadFetcherFactory);
         Future<RemoteContent> future = preloadProcessor.submit(task);
         gadget.getPreloadMap().put(preload, future);
       }
@@ -335,19 +321,30 @@ class FeatureTask implements Callable<GadgetException> {
  */
 class PreloadTask implements Callable<RemoteContent> {
   private final Preload preload;
-  private final RemoteContentFetcher fetcher;
+  private final ContentFetcherFactory preloadFetcherFactory;
+  private final GadgetContext context;
 
   public RemoteContent call() {
     RemoteContentRequest request = new RemoteContentRequest(preload.getHref());
     try {
-      return fetcher.fetch(request);
+      switch (preload.getAuth()) {
+        case NONE:
+          return preloadFetcherFactory.get().fetch(request);
+        case SIGNED:
+          return preloadFetcherFactory.getSigningFetcher(context.getToken())
+              .fetch(request);
+        default:
+          return RemoteContent.ERROR;
+      }
     } catch (GadgetException e) {
       return RemoteContent.ERROR;
     }
   }
 
-  public PreloadTask(Preload preload, RemoteContentFetcher fetcher) {
+  public PreloadTask(GadgetContext context, Preload preload,
+      ContentFetcherFactory preloadFetcherFactory) {
     this.preload = preload;
-    this.fetcher = fetcher;
+    this.preloadFetcherFactory = preloadFetcherFactory;
+    this.context = context;
   }
 }

@@ -16,18 +16,15 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
 package org.apache.shindig.gadgets.http;
 
-import static org.easymock.EasyMock.expect;
-import static org.easymock.EasyMock.isA;
-
+import org.apache.shindig.gadgets.ContainerConfig;
 import org.apache.shindig.gadgets.GadgetContext;
 import org.apache.shindig.gadgets.RemoteContent;
 import org.apache.shindig.gadgets.RemoteContentRequest;
-import org.apache.shindig.gadgets.ContainerConfig;
 import org.apache.shindig.gadgets.spec.GadgetSpec;
-
+import static org.easymock.EasyMock.expect;
+import static org.easymock.EasyMock.isA;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -81,7 +78,7 @@ public class GadgetRenderingTaskTest extends HttpTestFixture {
     expect(fetcher.fetch(SPEC_REQUEST)).andReturn(new RemoteContent(SPEC_XML));
     expect(response.getWriter()).andReturn(writer);
     replay();
-    gadgetRenderer.render(request, response);
+    gadgetRenderer.process(request, response);
     verify();
     writer.close();
     return new String(baos.toByteArray(), "UTF-8");

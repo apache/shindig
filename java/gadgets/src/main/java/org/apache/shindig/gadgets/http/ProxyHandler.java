@@ -18,22 +18,21 @@
  */
 package org.apache.shindig.gadgets.http;
 
+import org.apache.shindig.gadgets.ContentFetcher;
+import org.apache.shindig.gadgets.ContentFetcherFactory;
 import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.GadgetToken;
 import org.apache.shindig.gadgets.GadgetTokenDecoder;
 import org.apache.shindig.gadgets.RemoteContent;
-import org.apache.shindig.gadgets.RemoteContentFetcher;
 import org.apache.shindig.gadgets.RemoteContentRequest;
-import org.apache.shindig.gadgets.SigningFetcherFactory;
-import org.apache.shindig.gadgets.oauth.OAuthFetcher;
-import org.apache.shindig.gadgets.oauth.OAuthFetcherFactory;
 import org.apache.shindig.gadgets.oauth.OAuthRequestParams;
+import org.apache.shindig.gadgets.spec.Auth;
+import org.apache.shindig.gadgets.spec.Preload;
 import org.apache.shindig.util.InputStreamConsumer;
-
-import com.google.inject.Inject;
-
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import com.google.inject.Inject;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
@@ -60,17 +59,10 @@ public class ProxyHandler {
   public static final String HEADERS_PARAM = "headers";
   public static final String NOCACHE_PARAM = "nocache";
   public static final String URL_PARAM = "url";
-  public static final String AUTHZ_PARAM = "authz";
-  public static final String AUTHZ_NONE = "none";
-  public static final String AUTHZ_SIGNED = "signed";
-  // Spec really should say 'OAUTH' rather than 'AUTHENTICATED'
-  public static final String AUTHZ_OAUTH = "authenticated";
   private static final String REFRESH_PARAM = "refresh";
 
 
   private final GadgetTokenDecoder gadgetTokenDecoder;
-  private final SigningFetcherFactory signingFetcherFactory;
-  private OAuthFetcherFactory oauthFetcherFactory;
 
   private final static Set<String> DISALLOWED_RESPONSE_HEADERS
       = new HashSet<String>();
@@ -86,23 +78,18 @@ public class ProxyHandler {
 
   // This isn't a final field because we want to support optional injection.
   // This is a limitation of Guice, but this workaround...works.
-  private RemoteContentFetcher contentFetcher;
+  private ContentFetcherFactory contentFetcherFactory;
 
-  @Inject(optional=true)
-  public void setContentFetcher(
-      @ProxiedContentFetcher RemoteContentFetcher contentFetcher) {
-    this.contentFetcher = contentFetcher;
+  @Inject
+  public void setContentFetcher(ContentFetcherFactory contentFetcherFactory) {
+    this.contentFetcherFactory = contentFetcherFactory;
   }
 
   @Inject
-  public ProxyHandler(RemoteContentFetcher contentFetcher,
-                      GadgetTokenDecoder gadgetTokenDecoder,
-                      SigningFetcherFactory signingFetcherFactory,
-                      OAuthFetcherFactory oauthFetcherFactory) {
-    this.contentFetcher = contentFetcher;
+  public ProxyHandler(ContentFetcherFactory contentFetcherFactory,
+                      GadgetTokenDecoder gadgetTokenDecoder) {
+    this.contentFetcherFactory = contentFetcherFactory;
     this.gadgetTokenDecoder = gadgetTokenDecoder;
-    this.signingFetcherFactory = signingFetcherFactory;
-    this.oauthFetcherFactory = oauthFetcherFactory;
   }
 
   /**
@@ -121,14 +108,13 @@ public class ProxyHandler {
     RemoteContentRequest rcr = buildRemoteContentRequest(request);
 
     // Build the chain of fetchers that will handle the request
-    RemoteContentFetcher fetcher = buildFetcherChain(request, response);
+    ContentFetcher fetcher = getContentFetcher(request, response);
 
     // Do the fetch
     RemoteContent results = fetcher.fetch(rcr);
 
     // Serialize the response
-    String output = serializeJsonResponse(request, fetcher, results);
-
+    String output = serializeJsonResponse(request, results);
 
     // Find and set the refresh interval
     int refreshInterval = 0;
@@ -216,24 +202,23 @@ public class ProxyHandler {
    * Whatever we do needs to return a reference to the OAuthFetcher, if it is
    * present, so we can pull data out as needed.
    */
-  private RemoteContentFetcher buildFetcherChain(HttpServletRequest request,
+  private ContentFetcher getContentFetcher(HttpServletRequest request,
       HttpServletResponse response) throws GadgetException {
 
-    String authzType = getParameter(request, AUTHZ_PARAM, "");
-    if (authzType.equals("") || authzType.equals(AUTHZ_NONE)) {
-      return contentFetcher;
+    String authzType = getParameter(request, Preload.AUTHZ_ATTR, "");
+    Auth auth = Auth.parse(authzType);
+    switch (auth) {
+      case NONE:
+        return contentFetcherFactory.get();
+      case SIGNED:
+        return contentFetcherFactory
+            .getSigningFetcher(extractAndValidateToken(request));
+      case AUTHENTICATED:
+        return contentFetcherFactory.getOAuthFetcher(
+            extractAndValidateToken(request), new OAuthRequestParams(request));
+      default:
+        return contentFetcherFactory.get();
     }
-    GadgetToken token = extractAndValidateToken(request);
-    if (authzType.equals(AUTHZ_SIGNED)) {
-      return signingFetcherFactory.getSigningFetcher(contentFetcher, token);
-    } else if (authzType.equals(AUTHZ_OAUTH)) {
-      OAuthRequestParams params = new OAuthRequestParams(request);
-      OAuthFetcher oauthFetcher = oauthFetcherFactory.getOAuthFetcher(
-          contentFetcher, token, params);
-      return oauthFetcher;
-    }
-    throw new GadgetException(GadgetException.Code.UNSUPPORTED_FEATURE,
-        String.format("Unsupported auth type %s", authzType));
   }
 
   /**
@@ -241,24 +226,17 @@ public class ProxyHandler {
    * chained content fetchers.
    */
   private String serializeJsonResponse(HttpServletRequest request,
-      RemoteContentFetcher fetcher, RemoteContent results) {
+      RemoteContent results) {
     try {
       JSONObject resp = new JSONObject();
       if (results != null) {
         resp.put("body", results.getResponseAsString());
         resp.put("rc", results.getHttpStatusCode());
       }
-      // Merge in additional response data returned by the content fetchers
-      // in the chain
-      RemoteContentFetcher curFetcher = fetcher;
-      while (curFetcher != null) {
-        Map<String, String> extra = curFetcher.getResponseMetadata();
-        if (extra != null) {
-          for (Map.Entry<String, String> entry: extra.entrySet()) {
-            resp.put(entry.getKey(), entry.getValue());
-          }
-        }
-        curFetcher = curFetcher.getNextFetcher();
+
+      // Merge in additional response data
+      for (Map.Entry<String, String> entry : results.getMetadata().entrySet()) {
+        resp.put(entry.getKey(), entry.getValue());
       }
       // Use raw param as key as URL may have to be decoded
       String originalUrl = request.getParameter(URL_PARAM);
@@ -288,7 +266,7 @@ public class ProxyHandler {
     }
 
     RemoteContentRequest rcr = buildRemoteContentRequest(request);
-    RemoteContent results = contentFetcher.fetch(rcr);
+    RemoteContent results = contentFetcherFactory.get().fetch(rcr);
 
     int status = results.getHttpStatusCode();
     response.setStatus(status);

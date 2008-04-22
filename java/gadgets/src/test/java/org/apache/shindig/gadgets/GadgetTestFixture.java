@@ -27,8 +27,12 @@ import javax.servlet.http.HttpServletResponse;
 public abstract class GadgetTestFixture extends EasyMockTestCase {
   public final HttpServletRequest request = mock(HttpServletRequest.class);
   public final HttpServletResponse response = mock(HttpServletResponse.class);
+  public final GadgetTokenDecoder gadgetTokenDecoder
+      = mock(GadgetTokenDecoder.class);
   public final GadgetServer gadgetServer;
-  public final RemoteContentFetcher fetcher = mock(RemoteContentFetcher.class);
+  public final ContentFetcherFactory fetcherFactory
+      = mock(ContentFetcherFactory.class);
+  public final ContentFetcher fetcher = mock(ContentFetcher.class);
   public final GadgetBlacklist blacklist = mock(GadgetBlacklist.class);
   public GadgetFeatureRegistry registry;
   public ContainerConfig containerConfig;
@@ -54,7 +58,7 @@ public abstract class GadgetTestFixture extends EasyMockTestCase {
       fail("Failed to create container config");
     }
 
-    gadgetServer = new GadgetServer(executor, registry, blacklist, fetcher,
-        fetcher, fetcher);
+    gadgetServer = new GadgetServer(executor, registry, blacklist,
+        fetcherFactory, fetcher, fetcher);
   }
 }

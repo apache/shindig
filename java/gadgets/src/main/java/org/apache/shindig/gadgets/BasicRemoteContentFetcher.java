@@ -19,6 +19,7 @@ package org.apache.shindig.gadgets;
 
 import org.apache.shindig.util.InputStreamConsumer;
 
+import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
 import java.io.FileNotFoundException;
@@ -38,27 +39,29 @@ import java.util.zip.InflaterInputStream;
  * annotate it as a Singleton to resolve Guice injection limitations.
  */
 @Singleton
-public class BasicRemoteContentFetcher extends RemoteContentFetcher {
+public class BasicRemoteContentFetcher implements ContentFetcher {
   private static final int CONNECT_TIMEOUT_MS = 5000;
   private static final int DEFAULT_MAX_OBJECT_SIZE = 1024 * 1024;
 
   private final int maxObjSize;
+  private final ContentCache cache;
 
   /**
    * Creates a new fetcher capable of retrieving objects {@code maxObjSize}
    * bytes or smaller in size.
    * @param maxObjSize Maximum size, in bytes, of object to fetch
    */
-  public BasicRemoteContentFetcher(int maxObjSize) {
-    super(null);
+  public BasicRemoteContentFetcher(ContentCache cache, int maxObjSize) {
     this.maxObjSize = maxObjSize;
+    this.cache = cache;
   }
 
   /**
    * Creates a new fetcher using the default maximum object size.
    */
-  public BasicRemoteContentFetcher() {
-    this(DEFAULT_MAX_OBJECT_SIZE);
+  @Inject
+  public BasicRemoteContentFetcher(ContentCache cache) {
+    this(cache, DEFAULT_MAX_OBJECT_SIZE);
   }
 
   /**
@@ -132,8 +135,9 @@ public class BasicRemoteContentFetcher extends RemoteContentFetcher {
   }
 
   /** {@inheritDoc} */
-  @Override
   public RemoteContent fetch(RemoteContentRequest request) {
+    RemoteContent content = cache.getContent(request);
+    if (content != null) return content;
     try {
       URLConnection fetcher = getConnection(request);
       if ("POST".equals(request.getMethod()) &&
@@ -147,7 +151,9 @@ public class BasicRemoteContentFetcher extends RemoteContentFetcher {
         InputStreamConsumer.pipe(request.getPostBody(),
                                  fetcher.getOutputStream());
       }
-      return makeResponse(fetcher);
+      content = makeResponse(fetcher);
+      cache.addContent(request, content);
+      return content;
     } catch (IOException e) {
       if (e instanceof FileNotFoundException) {
         return RemoteContent.NOT_FOUND;

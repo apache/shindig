@@ -17,48 +17,20 @@
  */
 package org.apache.shindig.gadgets;
 
-import java.util.Map;
-
-
 /**
- * Fetches data over HTTP.
+ * Fetches RemoteContent
  *
  * Subclasses can use a chain-of-responsibility pattern to add functionality
  * to the fetching process.  For example, a SigningFetcher can talk to a
  * CachingFetcher can talk to a ThrottlingFetcher that talks to a
  * RemoteFetcher that gets the actual data.
  */
-public abstract class RemoteContentFetcher {
+public abstract class ChainedContentFetcher implements ContentFetcher {
 
   /** next fetcher in the chain, may be null */
-  protected RemoteContentFetcher nextFetcher;
+  protected ContentFetcher nextFetcher;
 
-  protected RemoteContentFetcher(RemoteContentFetcher nextFetcher) {
+  protected ChainedContentFetcher(ContentFetcher nextFetcher) {
     this.nextFetcher = nextFetcher;
   }
-
-  /**
-   * Fetch HTTP content.
-   *
-   * @param request The request to fetch.
-   * @return RemoteContent
-   * @throws GadgetException
-   */
-  public abstract RemoteContent fetch(RemoteContentRequest request)
-      throws GadgetException;
-  
-  /**
-   * @return the next fetcher in the chain
-   */
-  public RemoteContentFetcher getNextFetcher() {
-    return nextFetcher;
-  }
-  
-  /**
-   * @return additional data to embed in responses sent from the JSON proxy.
-   */
-  public Map<String, String> getResponseMetadata() {
-    return null;
-  }
-  
 }

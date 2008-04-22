@@ -116,7 +116,7 @@ public final class JsLibrary {
    * @throws GadgetException 
    */
   public static JsLibrary create(Type type, String content, String feature,
-      RemoteContentFetcher fetcher) throws GadgetException {
+      ContentFetcher fetcher) throws GadgetException {
     String optimizedContent = null;
     String debugContent;
     switch (type) {
@@ -172,7 +172,7 @@ public final class JsLibrary {
    * @throws GadgetException 
    */
   private static String loadDataFromUrl(String url,
-      RemoteContentFetcher fetcher) throws GadgetException {
+      ContentFetcher fetcher) throws GadgetException {
     try {
       logger.info("Attempting to load js from: " + url);
       URI uri = new URI(url);

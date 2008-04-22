@@ -18,13 +18,14 @@
  */
 package org.apache.shindig.gadgets;
 
+import org.apache.shindig.gadgets.oauth.OAuthFetcherFactory;
+import org.apache.shindig.util.ResourceLoader;
+
 import com.google.inject.AbstractModule;
 import com.google.inject.CreationException;
 import com.google.inject.Scopes;
 import com.google.inject.name.Names;
 import com.google.inject.spi.Message;
-import org.apache.shindig.gadgets.oauth.OAuthFetcherFactory;
-import org.apache.shindig.util.ResourceLoader;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -44,17 +45,25 @@ public class DefaultGuiceModule extends AbstractModule {
   @Override
   protected void configure() {
     Names.bindProperties(this.binder(), properties);
+    bind(ContentCache.class).to(BasicContentCache.class);
 
-    bind(RemoteContentFetcher.class)
+    bind(RemoteContentFetcherFactory.class);
+    bind(SigningFetcherFactory.class);
+    // Needed becuase OAuth fetcher factory fetches its config
+    bind(ContentFetcher.class)
+        .annotatedWith(OAuthFetcherFactory.OAuthConfigFetcher.class)
+        .to(BasicRemoteContentFetcher.class);
+    bind(OAuthFetcherFactory.class);
+    bind(ContentFetcherFactory.class);
+
+    bind(ContentFetcher.class)
         .annotatedWith(GadgetSpecFetcher.class)
-        .to(CachedContentFetcher.class);
-    bind(RemoteContentFetcher.class)
+        .toProvider(ContentFetcherFactory.class);
+    bind(ContentFetcher.class)
         .annotatedWith(MessageBundleFetcher.class)
-        .to(CachedContentFetcher.class);
+        .toProvider(ContentFetcherFactory.class);
 
     bind(GadgetBlacklist.class).to(BasicGadgetBlacklist.class);
-    bind(SigningFetcherFactory.class);
-    bind(OAuthFetcherFactory.class);
     bind(Executor.class).toInstance(Executors.newCachedThreadPool());
 
     bind(ContainerConfig.class).in(Scopes.SINGLETON);

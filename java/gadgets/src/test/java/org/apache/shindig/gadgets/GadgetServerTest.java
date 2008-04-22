@@ -17,10 +17,9 @@
  */
 package org.apache.shindig.gadgets;
 
+import org.apache.shindig.gadgets.spec.GadgetSpec;
 import static org.easymock.EasyMock.eq;
 import static org.easymock.EasyMock.expect;
-
-import org.apache.shindig.gadgets.spec.GadgetSpec;
 
 import java.net.URI;
 import java.util.HashMap;
@@ -118,6 +117,7 @@ public class GadgetServerTest extends GadgetTestFixture {
           "  </ModulePrefs>" +
           "  <Content type=\"html\">dummy</Content>" +
           "</Module>";
+    expect(fetcherFactory.get()).andReturn(fetcher);
     expect(fetcher.fetch(SPEC_REQUEST))
          .andReturn(new RemoteContent(gadgetXml));
     expect(fetcher.fetch(preloadRequest))

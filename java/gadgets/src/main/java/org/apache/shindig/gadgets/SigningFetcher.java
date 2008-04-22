@@ -18,12 +18,13 @@ import org.apache.shindig.util.Crypto;
 import org.apache.shindig.util.TimeSource;
 
 import net.oauth.OAuth;
+import net.oauth.OAuth.Parameter;
 import net.oauth.OAuthAccessor;
 import net.oauth.OAuthConsumer;
 import net.oauth.OAuthMessage;
-import net.oauth.OAuth.Parameter;
 import net.oauth.signature.RSA_SHA1;
 
+import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
@@ -43,7 +44,7 @@ import java.util.regex.Pattern;
  * Instances of this class are only accessed by a single thread at a time,
  * but instances may be created by multiple threads.
  */
-public class SigningFetcher extends RemoteContentFetcher {
+public class SigningFetcher extends ChainedContentFetcher {
 
   protected static final String OPENSOCIAL_OWNERID = "opensocial_owner_id";
 
@@ -77,11 +78,17 @@ public class SigningFetcher extends RemoteContentFetcher {
   protected final String keyName;
 
   /**
+   *  The cache to fetch results in. 
+   */
+  protected final ContentCache cache;
+
+  /**
    * Constructor for subclasses that don't want this code to use their
    * keys.
    */
-  protected SigningFetcher(RemoteContentFetcher next, GadgetToken authToken) {
-    this(next, authToken, null, null);
+  protected SigningFetcher(ContentCache cache,
+      ContentFetcher next, GadgetToken authToken) {
+    this(cache, next, authToken, null, null);
   }
 
   /**
@@ -91,9 +98,10 @@ public class SigningFetcher extends RemoteContentFetcher {
    * @param keyName name of the key to include in the request
    * @param privateKey the key to use for the signing
    */
-  public static SigningFetcher makeFromPrivateKey(RemoteContentFetcher next,
-      GadgetToken authToken, String keyName, PrivateKey privateKey) {
-    return new SigningFetcher(next, authToken, keyName, privateKey);
+  public static SigningFetcher makeFromPrivateKey(ContentCache cache,
+      ContentFetcher next, GadgetToken authToken,
+      String keyName, PrivateKey privateKey) {
+    return new SigningFetcher(cache, next, authToken, keyName, privateKey);
   }
 
   /**
@@ -103,9 +111,10 @@ public class SigningFetcher extends RemoteContentFetcher {
    * @param keyName name of the key to include in the request
    * @param privateKey base64 encoded private key
    */
-  public static SigningFetcher makeFromB64PrivateKey(RemoteContentFetcher next,
+  public static SigningFetcher makeFromB64PrivateKey(ContentCache cache,
+      ContentFetcher next,
       GadgetToken authToken, String keyName, String privateKey) {
-    return new SigningFetcher(next, authToken, keyName, privateKey);
+    return new SigningFetcher(cache, next, authToken, keyName, privateKey);
   }
 
   /**
@@ -116,24 +125,64 @@ public class SigningFetcher extends RemoteContentFetcher {
    * @param privateKey DER encoded private key
    */
   public static SigningFetcher makeFromPrivateKeyBytes(
-      RemoteContentFetcher next, GadgetToken authToken, String keyName,
+      ContentCache cache, ContentFetcher next,
+      GadgetToken authToken, String keyName,
       byte[] privateKey) {
-    return new SigningFetcher(next, authToken, keyName, privateKey);
+    return new SigningFetcher(cache, next, authToken, keyName, privateKey);
   }
 
-  protected SigningFetcher(RemoteContentFetcher next, GadgetToken authToken,
-      String keyName, Object privateKeyObject) {
+  protected SigningFetcher(ContentCache cache, ContentFetcher next,
+      GadgetToken authToken, String keyName, Object privateKeyObject) {
     super(next);
+    this.cache = cache;
     this.authToken = authToken;
     this.keyName = keyName;
     this.privateKeyObject = privateKeyObject;
   }
 
-  @Override
   public RemoteContent fetch(RemoteContentRequest request)
       throws GadgetException {
-    RemoteContentRequest signed = signRequest(request);
-    return nextFetcher.fetch(signed);
+
+    try {
+      RemoteContentRequest cacheableRequest = makeCacheableRequest(request);
+      RemoteContent result = cache.getContent(cacheableRequest);
+      if (result != null) {
+        return result;
+      }
+
+      RemoteContentRequest signedRequest = signRequest(request);
+      // Signed requests are not externally cacehable
+      signedRequest.getOptions().ignoreCache = true;
+      result = nextFetcher.fetch(signedRequest);
+
+      // Try and cache the response
+      cache.addContent(cacheableRequest, result);
+
+      return result;
+    } catch (Exception e) {
+      throw new GadgetException(GadgetException.Code.INTERNAL_SERVER_ERROR, e);
+    }
+  }
+
+  private RemoteContentRequest makeCacheableRequest(
+      RemoteContentRequest request)
+      throws IOException, URISyntaxException {
+    // Create a request without the OAuth params which includes the
+    // OpenSocial ones and see if we can find it in the cache
+    URI resource = request.getUri();
+    String query = resource.getRawQuery();
+    List<Parameter> cacheableParams = sanitize(OAuth.decodeForm(query));
+    addOpenSocialParams(cacheableParams);
+    addOAuthNonTemporalParams(cacheableParams);
+    String cacheableQuery = OAuth.formEncode(cacheableParams);
+    URL url = new URL(
+          resource.getScheme(),
+          resource.getHost(),
+          resource.getPort(),
+          resource.getRawPath() + "?" + cacheableQuery);
+    RemoteContentRequest cacheableRequest =
+        new RemoteContentRequest(url.toURI(), request);
+    return cacheableRequest;
   }
 
   private RemoteContentRequest signRequest(RemoteContentRequest req)
@@ -225,8 +274,21 @@ public class SigningFetcher extends RemoteContentFetcher {
   }
 
   private void addOAuthParams(List<Parameter> msgParams) {
+    addOAuthNonTemporalParams(msgParams);
+
+    String nonce = Long.toHexString(Crypto.rand.nextLong());
+    msgParams.add(new OAuth.Parameter(OAuth.OAUTH_NONCE, nonce));
+
+    String timestamp = Long.toString(clock.currentTimeMillis()/1000L);
+    msgParams.add(new OAuth.Parameter(OAuth.OAUTH_TIMESTAMP, timestamp));
+  }
+
+  private void addOAuthNonTemporalParams(List<Parameter> msgParams) {
+    // Add the params which are not used for nonce, timestamp or anything
+    // else which varies quickly over time
     msgParams.add(new OAuth.Parameter(OAuth.OAUTH_TOKEN, ""));
 
+    // Add the OAuth params which are not
     String domain = authToken.getDomain();
     if (domain != null) {
       msgParams.add(new OAuth.Parameter(OAuth.OAUTH_CONSUMER_KEY, domain));
@@ -235,12 +297,6 @@ public class SigningFetcher extends RemoteContentFetcher {
     if (keyName != null) {
       msgParams.add(new OAuth.Parameter(XOAUTH_PUBLIC_KEY, keyName));
     }
-
-    String nonce = Long.toHexString(Crypto.rand.nextLong());
-    msgParams.add(new OAuth.Parameter(OAuth.OAUTH_NONCE, nonce));
-
-    String timestamp = Long.toString(clock.currentTimeMillis()/1000L);
-    msgParams.add(new OAuth.Parameter(OAuth.OAUTH_TIMESTAMP, timestamp));
 
     msgParams.add(new OAuth.Parameter(OAuth.OAUTH_SIGNATURE_METHOD,
         OAuth.RSA_SHA1));

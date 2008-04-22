@@ -45,7 +45,7 @@ public class ModulePrefsTest extends TestCase {
                  " category2=\"category2\">" +
                  "  <Require feature=\"require\"/>" +
                  "  <Optional feature=\"optional\"/>" +
-                 "  <Preload href=\"http://example.org\"/>" +
+                 "  <Preload href=\"http://example.org\" authz=\"signed\"/>" +
                  "  <Icon/>" +
                  "  <Locale/>" +
                  "</ModulePrefs>";

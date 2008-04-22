@@ -34,8 +34,8 @@ public class HttpGuiceModule extends DefaultGuiceModule {
   protected void configure() {
     super.configure();
     bind(ProxyHandler.class).in(Scopes.SINGLETON);
-    bind(GadgetRenderer.class).in(Scopes.SINGLETON);
     bind(JsonRpcHandler.class).in(Scopes.SINGLETON);
+    bind(GadgetRenderingTask.class);
     bind(UrlGenerator.class).in(Scopes.SINGLETON);
   }
 

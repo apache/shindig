@@ -30,6 +30,7 @@ import java.io.IOException;
  * Produces Signing content fetchers for input tokens.
  */
 public class SigningFetcherFactory {
+  private final ContentCache cache;
   private final String keyName;
   private final String privateKey;
 
@@ -43,10 +44,10 @@ public class SigningFetcherFactory {
    * @throws GadgetException
    */
   @SuppressWarnings("unused")
-  public RemoteContentFetcher getSigningFetcher(
-      RemoteContentFetcher networkFetcher, GadgetToken token)
+  public ContentFetcher getSigningFetcher(
+      ContentFetcher networkFetcher, GadgetToken token)
   throws GadgetException {
-    return SigningFetcher.makeFromB64PrivateKey(
+    return SigningFetcher.makeFromB64PrivateKey(cache,
         networkFetcher, token, keyName, privateKey);
   }
 
@@ -54,7 +55,8 @@ public class SigningFetcherFactory {
    * Dummy ctor for implementations that produce custom fetchers.
    *
    */
-  protected SigningFetcherFactory() {
+  protected SigningFetcherFactory(ContentCache cache) {
+    this.cache = cache;
     this.keyName = null;
     this.privateKey = null;
   }
@@ -64,8 +66,10 @@ public class SigningFetcherFactory {
    * @param keyFile The file containing your private key for signing requests.
    */
   @Inject
-  public SigningFetcherFactory(@Named("signing.key-name") String keyName,
+  public SigningFetcherFactory(ContentCache cache,
+                               @Named("signing.key-name") String keyName,
                                @Named("signing.key-file") String keyFile) {
+    this.cache = cache;
     if (keyName == null || keyName.length() == 0) {
       this.keyName = null;
     } else {

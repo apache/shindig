@@ -89,4 +89,11 @@ public class GadgetContext {
   public UserPrefs getUserPrefs() {
     return UserPrefs.EMPTY;
   }
+
+  /**
+   * @return The token associated with this request
+   */
+  public GadgetToken getToken() throws GadgetException {
+    return null;
+  }
 }

@@ -18,17 +18,17 @@
  */
 package org.apache.shindig.gadgets.http;
 
+import org.apache.shindig.gadgets.ContentFetcherFactory;
 import org.apache.shindig.gadgets.GadgetTestFixture;
 import org.apache.shindig.gadgets.GadgetTokenDecoder;
-import org.apache.shindig.gadgets.SigningFetcherFactory;
 
 
 public abstract class HttpTestFixture extends GadgetTestFixture {
   public final ProxyHandler proxyHandler;
-  public final GadgetRenderer gadgetRenderer;
+  public final GadgetRenderingTask gadgetRenderer;
   public final JsonRpcHandler jsonRpcHandler;
-  public final SigningFetcherFactory signingFetcherFactory
-      = mock(SigningFetcherFactory.class);
+  public final ContentFetcherFactory contentFetcherFactory
+      = mock(ContentFetcherFactory.class);
   public final UrlGenerator urlGenerator = mock(UrlGenerator.class);
   public final GadgetTokenDecoder gadgetTokenDecoder
       = mock(GadgetTokenDecoder.class);
@@ -36,12 +36,10 @@ public abstract class HttpTestFixture extends GadgetTestFixture {
   public HttpTestFixture() {
     super();
     proxyHandler = new ProxyHandler(
-        fetcher,
-        gadgetTokenDecoder,
-        signingFetcherFactory,
-        null);
-    gadgetRenderer = new GadgetRenderer(
-          gadgetServer, registry, containerConfig, urlGenerator);
+        contentFetcherFactory,
+        gadgetTokenDecoder);
+    gadgetRenderer = new GadgetRenderingTask(gadgetServer, registry,
+        containerConfig, urlGenerator, gadgetTokenDecoder);
     jsonRpcHandler = new JsonRpcHandler(executor, gadgetServer, urlGenerator);
   }
 }
