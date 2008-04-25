@@ -35,7 +35,7 @@ gadgets.io = function() {
    * Holds configuration-related data such as proxy urls.
    */
   var config = {};
-  
+
   /**
    * Holds state for OAuth.
    */
@@ -184,10 +184,9 @@ gadgets.io = function() {
    * @param processResponseFunction The function that should process the
    *     response from the sever before calling the callback
    */
-  function makeXhrRequest(realUrl, proxyUrl, callback, paramData, params,
-      processResponseFunction) {
+  function makeXhrRequest(realUrl, proxyUrl, callback, paramData, method,
+      params, processResponseFunction) {
     var xhr = makeXhr();
-    var method = (paramData != null) ? "POST" : "GET";
 
     xhr.open(method, proxyUrl, true);
     if (callback) {
@@ -308,19 +307,21 @@ gadgets.io = function() {
       };
 
       if (!respondWithPreload(paramData, params, callback, processResponse)) {
-
         var refreshInterval = params.REFRESH_INTERVAL || 0;
-  
+
         if (refreshInterval > 0) {
           // this content should be cached
           // Add paramData to the URL
-          var extraparams = "&refresh=" + refreshInterval + '&' + gadgets.io.encodeValues(paramData);
+          var extraparams = "&refresh=" + refreshInterval + '&'
+              + gadgets.io.encodeValues(paramData);
 
-          makeXhrRequest(url, config.jsonProxyUrl + extraparams, callback, null, params, processResponse);
+          makeXhrRequest(url, config.jsonProxyUrl + extraparams, callback,
+              null, "GET", params, processResponse);
 
         } else {
           makeXhrRequest(url, config.jsonProxyUrl, callback,
-              gadgets.io.encodeValues(paramData), params, processResponse);
+              gadgets.io.encodeValues(paramData), "POST", params,
+              processResponse);
         }
       }
     },
@@ -331,7 +332,7 @@ gadgets.io = function() {
     makeNonProxiedRequest : function (relativeUrl, callback, opt_params) {
       var params = opt_params || {};
       makeXhrRequest(relativeUrl, relativeUrl, callback, params.POST_DATA,
-          params, processNonProxiedResponse);
+          params.METHOD, params, processNonProxiedResponse);
     },
 
     /**
