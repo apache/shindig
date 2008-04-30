@@ -19,6 +19,7 @@ package org.apache.shindig.social.abdera;
 
 import org.apache.shindig.social.opensocial.PeopleService;
 import org.apache.shindig.social.opensocial.model.Person;
+import org.apache.shindig.gadgets.GadgetToken;
 
 import com.google.inject.Guice;
 import com.google.inject.Injector;
@@ -63,13 +64,45 @@ public class PeopleServiceAdapter extends RestServerCollectionAdapter {
     String[] paramNames = request.getTarget().getParameterNames();
     String uid = request.getTarget().getParameter(paramNames[0]);
     // TODO(doll): Fix the service apis to add a concept of arbitrary friends
-    // Consider whether @all really makes sense... 
+    // Consider whether @all really makes sense...
     List<Person> listOfObj = null;
     return returnFeed(request, TITLE, AUTHOR, (List)listOfObj);
   }
 
   @Override
   public ResponseContext getEntry(RequestContext request) {
+
+      // TODO: Replace this with the real thing
+    GadgetToken dummyToken = new GadgetToken() {
+      public String toSerialForm() {
+        return "";
+      }
+
+      public String getOwnerId() {
+        return "";
+      }
+
+      public String getViewerId() {
+        return "";
+      }
+
+      public String getAppId() {
+        return "";
+      }
+
+      public String getDomain() {
+        return "";
+      }
+
+      public String getAppUrl() {
+        return "";
+      }
+
+      public long getModuleId() {
+        return 0;
+      }
+    };
+
     // get the params from the request
     String[] paramNames = request.getTarget().getParameterNames();
 
@@ -80,8 +113,7 @@ public class PeopleServiceAdapter extends RestServerCollectionAdapter {
     switch (paramNames.length) {
       case 1:
         String uid = request.getTarget().getParameter(paramNames[0]);
-        // TODO: Pass in the gadget token
-        person = handler.getPerson(uid, null).getResponse();
+        person = handler.getPerson(uid, dummyToken).getResponse();
         break;
       case 2:
         uid = request.getTarget().getParameter(paramNames[0]);
@@ -89,7 +121,7 @@ public class PeopleServiceAdapter extends RestServerCollectionAdapter {
         // TODO: pass in the gadget token with the uid parameter set. We don't
         // have different views of people from an aribtrary ids point of view.
         // Rather, the token is how permissions are done.
-        person = handler.getPerson(pid, null).getResponse();
+        person = handler.getPerson(pid, dummyToken).getResponse();
         break;
       default:
         return ProviderHelper.notsupported(request, "more than 2 params?");
