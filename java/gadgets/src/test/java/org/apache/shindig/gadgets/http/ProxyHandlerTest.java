@@ -26,14 +26,19 @@ import org.apache.shindig.gadgets.RemoteContent;
 import org.apache.shindig.gadgets.RemoteContentRequest;
 import org.apache.shindig.gadgets.spec.Auth;
 import org.apache.shindig.gadgets.spec.Preload;
+
 import static org.easymock.EasyMock.eq;
 import static org.easymock.EasyMock.expect;
 import static org.easymock.EasyMock.isA;
 import org.json.JSONObject;
 
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.URI;
+import java.util.Enumeration;
+
+import javax.servlet.ServletOutputStream;
 
 public class ProxyHandlerTest extends HttpTestFixture {
 
@@ -44,7 +49,22 @@ public class ProxyHandlerTest extends HttpTestFixture {
 
   final ByteArrayOutputStream baos = new ByteArrayOutputStream();
   final PrintWriter writer = new PrintWriter(baos);
-
+  
+  final ServletOutputStream responseStream = new ServletOutputStream() {
+    @Override
+    public void write(int b) throws IOException {
+      baos.write(b); 
+    }
+  };
+  
+  final static Enumeration<String> EMPTY_LIST = new Enumeration<String>() {
+    public boolean hasMoreElements() {
+      return false;
+    }
+    public String nextElement() {
+      return null;
+    }
+  };
 
   private void expectGetAndReturnData(String url, byte[] data)
       throws Exception {
@@ -80,6 +100,19 @@ public class ProxyHandlerTest extends HttpTestFixture {
     expect(request.getParameter("url")).andReturn(url).atLeastOnce();
     expect(response.getWriter()).andReturn(writer).atLeastOnce();
   }
+  
+  private void setupProxyRequestMock(String host, String url) throws Exception {
+    expect(request.getMethod()).andReturn("GET").atLeastOnce();
+    expect(request.getHeader("Host")).andReturn(host);
+    expect(request.getParameter("url")).andReturn(url).atLeastOnce();
+    expect(request.getHeaderNames()).andReturn(EMPTY_LIST);
+    expect(response.getOutputStream()).andReturn(responseStream).atLeastOnce();
+  }
+  
+  private void setupFailedProxyRequestMock(String host, String url)
+      throws Exception {
+    expect(request.getHeader("Host")).andReturn(host);    
+  }
 
   private JSONObject readJSONResponse(String body) throws Exception {
     String json
@@ -98,6 +131,33 @@ public class ProxyHandlerTest extends HttpTestFixture {
     JSONObject info = json.getJSONObject(URL_ONE);
     assertEquals(200, info.getInt("rc"));
     assertEquals(DATA_ONE, info.get("body"));
+  }
+  
+  public void testLockedDomainEmbed() throws Exception {
+    setupProxyRequestMock("www.example.com", URL_ONE);
+    expect(lockedDomainService.embedCanRender("www.example.com"))
+        .andReturn(true);
+    expectGetAndReturnData(URL_ONE, DATA_ONE.getBytes());
+    replay();
+    proxyHandler.fetch(request, response);
+    verify();
+    responseStream.close();
+    assertEquals(DATA_ONE, new String(baos.toByteArray()));
+  }
+  
+  public void testLockedDomainFailedEmbed() throws Exception {
+    setupFailedProxyRequestMock("www.example.com", URL_ONE);
+    expect(lockedDomainService.embedCanRender("www.example.com"))
+        .andReturn(false);
+    replay();
+    try {
+      proxyHandler.fetch(request, response);
+      fail("should have thrown");
+    } catch (GadgetException e) {
+      assertTrue(
+          e.getMessage().indexOf("made to wrong domain www.example.com") != -1);
+    }
+    verify();
   }
 
   public void testFetchDecodedUrl() throws Exception {

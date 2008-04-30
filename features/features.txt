@@ -4,6 +4,7 @@ features/core.io/feature.xml
 features/core/feature.xml
 features/dynamic-height/feature.xml
 features/flash/feature.xml
+features/locked-domain/feature.xml
 features/minimessage/feature.xml
 features/opensocial-0.6/feature.xml
 features/opensocial-0.7/feature.xml

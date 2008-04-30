@@ -20,7 +20,7 @@ package org.apache.shindig.gadgets.http;
 
 import org.apache.shindig.gadgets.ContentFetcherFactory;
 import org.apache.shindig.gadgets.GadgetTestFixture;
-import org.apache.shindig.gadgets.GadgetTokenDecoder;
+import org.apache.shindig.gadgets.LockedDomainService;
 
 
 public abstract class HttpTestFixture extends GadgetTestFixture {
@@ -30,16 +30,17 @@ public abstract class HttpTestFixture extends GadgetTestFixture {
   public final ContentFetcherFactory contentFetcherFactory
       = mock(ContentFetcherFactory.class);
   public final UrlGenerator urlGenerator = mock(UrlGenerator.class);
-  public final GadgetTokenDecoder gadgetTokenDecoder
-      = mock(GadgetTokenDecoder.class);
+  public final LockedDomainService lockedDomainService =
+    mock(LockedDomainService.class);
 
   public HttpTestFixture() {
     super();
     proxyHandler = new ProxyHandler(
         contentFetcherFactory,
-        gadgetTokenDecoder);
+        gadgetTokenDecoder,
+        lockedDomainService);
     gadgetRenderer = new GadgetRenderingTask(gadgetServer, registry,
-        containerConfig, urlGenerator, gadgetTokenDecoder);
+        containerConfig, urlGenerator, gadgetTokenDecoder, lockedDomainService);
     jsonRpcHandler = new JsonRpcHandler(executor, gadgetServer, urlGenerator);
   }
 }

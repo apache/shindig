@@ -43,6 +43,12 @@
 // value matching this set will return a 404 error.
 "gadgets.parent" : null,
 
+// Should all gadgets be forced on to a locked domain?
+"gadgets.lockedDomainRequired" : false,
+
+// DNS domain on which gadgets should render.
+"gadgets.lockedDomainSuffix" : "-a.example.com:8080",
+
 // This config data will be passed down to javascript. Please
 // configure your object using the feature name rather than
 // the javascript name.
