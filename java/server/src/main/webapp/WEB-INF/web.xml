@@ -80,7 +80,7 @@
     <init-param>
       <param-name>org.apache.abdera.protocol.server.Provider</param-name>
       <param-value>org.apache.shindig.social.SocialApiProvider</param-value>
-    </init-param> 
+    </init-param>
   </servlet>
 
 
@@ -111,6 +111,6 @@
 
   <servlet-mapping>
     <servlet-name>restapiServlet</servlet-name>
-    <url-pattern>/rest/*</url-pattern>
+    <url-pattern>/social/rest/*</url-pattern>
   </servlet-mapping>
 </web-app>
