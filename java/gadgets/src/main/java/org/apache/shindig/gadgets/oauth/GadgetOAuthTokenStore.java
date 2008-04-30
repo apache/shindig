@@ -112,8 +112,8 @@ public class GadgetOAuthTokenStore {
    *
    * @param gadgetUrl the URL of the gadget
    * @param spec the parsed GadgetSpec of the gadget.
-   * @throws OAuthStoreAccessException if there is a problem talking to the
-   *                                   backend store.
+   * @throws OAuthStoreException if there is a problem talking to the
+   *                             backend store.
    * @throws GadgetException if the gadget spec doesn't require oauth, or if
    *                         there are other problems processing the gadget
    *                         spec.
@@ -140,8 +140,8 @@ public class GadgetOAuthTokenStore {
    * @param gadgetUrl the URL of the gadget
    * @param serviceName the service provider with whom we have negotiated a
    *                    consumer key and secret.
-   * @throws OAuthStoreAccessException if there is a problem talking to the
-   *                                   backend store.
+   * @throws OAuthStoreException if there is a problem talking to the
+   *                             backend store.
    * @throws OAuthNoDataException if there is no data about this service
    *                              provider stored for this gadget.
    */
@@ -193,8 +193,8 @@ public class GadgetOAuthTokenStore {
    *         passed to an OAuthMessage.sign method), as well as httpMethod and
    *         signatureType fields.
    * @throws OAuthNoDataException if the token couldn't be found
-   * @throws OAuthStoreAccessException if an error occurred accessing the data
-   *                                   store.
+   * @throws OAuthStoreException if an error occurred accessing the data
+   *                             store.
    */
   public OAuthStore.AccessorInfo getOAuthAccessor(OAuthStore.TokenKey tokenKey)
       throws OAuthNoDataException, OAuthStoreException {

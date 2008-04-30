@@ -46,8 +46,9 @@ public enum Auth {
 
   /**
    * Use lowercase as toString form
-   * @return
+   * @return string value of Auth type
    */
+  @Override
   public String toString() {
     return super.toString().toLowerCase();
   }

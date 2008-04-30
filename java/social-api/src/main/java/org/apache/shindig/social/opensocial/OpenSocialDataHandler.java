@@ -23,9 +23,6 @@ import org.apache.shindig.social.ResponseError;
 import org.apache.shindig.social.ResponseItem;
 import org.apache.shindig.social.opensocial.model.Activity;
 import org.apache.shindig.social.opensocial.model.IdSpec;
-import org.apache.shindig.social.samplecontainer.BasicActivitiesService;
-import org.apache.shindig.social.samplecontainer.BasicDataService;
-import org.apache.shindig.social.samplecontainer.BasicPeopleService;
 
 import org.json.JSONArray;
 import org.json.JSONException;

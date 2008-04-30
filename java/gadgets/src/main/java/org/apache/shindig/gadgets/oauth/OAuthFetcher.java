@@ -126,9 +126,7 @@ public class OAuthFetcher extends ChainedContentFetcher {
    *        client.
    * @param nextFetcher fetcher to use for actually making requests
    * @param authToken user's gadget security token
-   * @param serviceName gadget's nickname for the service being accessed
-   * @param tokenName gadget's nickname for the token to be used
-   * @param origClientState state sent in from the client
+   * @param params OAuth fetch parameters sent from makeRequest
    * @param tokenStore storage for long lived tokens.
    */
   public OAuthFetcher(

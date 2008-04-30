@@ -93,6 +93,7 @@ public class GadgetContext {
   /**
    * @return The token associated with this request
    */
+  @SuppressWarnings("unused")
   public GadgetToken getToken() throws GadgetException {
     return null;
   }
