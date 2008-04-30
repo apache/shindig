@@ -64,6 +64,7 @@ public class DefaultGuiceModule extends AbstractModule {
 
     bind(GadgetBlacklist.class).to(BasicGadgetBlacklist.class);
     bind(Executor.class).toInstance(Executors.newCachedThreadPool());
+    bind(LockedDomainService.class).to(HashLockedDomainService.class);
 
     bind(ContainerConfig.class).in(Scopes.SINGLETON);
     bind(GadgetFeatureRegistry.class).in(Scopes.SINGLETON);

@@ -18,22 +18,6 @@
  */
 package org.apache.shindig.gadgets.http;
 
-import org.apache.shindig.gadgets.ContentFetcher;
-import org.apache.shindig.gadgets.ContentFetcherFactory;
-import org.apache.shindig.gadgets.GadgetException;
-import org.apache.shindig.gadgets.GadgetToken;
-import org.apache.shindig.gadgets.GadgetTokenDecoder;
-import org.apache.shindig.gadgets.RemoteContent;
-import org.apache.shindig.gadgets.RemoteContentRequest;
-import org.apache.shindig.gadgets.oauth.OAuthRequestParams;
-import org.apache.shindig.gadgets.spec.Auth;
-import org.apache.shindig.gadgets.spec.Preload;
-import org.apache.shindig.util.InputStreamConsumer;
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import com.google.inject.Inject;
-
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
@@ -47,9 +31,27 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
+import java.util.logging.Logger;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
+import org.apache.shindig.gadgets.ContentFetcher;
+import org.apache.shindig.gadgets.ContentFetcherFactory;
+import org.apache.shindig.gadgets.GadgetException;
+import org.apache.shindig.gadgets.GadgetToken;
+import org.apache.shindig.gadgets.GadgetTokenDecoder;
+import org.apache.shindig.gadgets.LockedDomainService;
+import org.apache.shindig.gadgets.RemoteContent;
+import org.apache.shindig.gadgets.RemoteContentRequest;
+import org.apache.shindig.gadgets.oauth.OAuthRequestParams;
+import org.apache.shindig.gadgets.spec.Auth;
+import org.apache.shindig.gadgets.spec.Preload;
+import org.apache.shindig.util.InputStreamConsumer;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import com.google.inject.Inject;
 
 public class ProxyHandler {
   public static final String UNPARSEABLE_CRUFT = "throw 1; < don't be evil' >";
@@ -60,6 +62,9 @@ public class ProxyHandler {
   public static final String NOCACHE_PARAM = "nocache";
   public static final String URL_PARAM = "url";
   private static final String REFRESH_PARAM = "refresh";
+  
+  private static final Logger logger = 
+      Logger.getLogger(ProxyHandler.class.getPackage().getName());
 
 
   private final GadgetTokenDecoder gadgetTokenDecoder;
@@ -79,6 +84,7 @@ public class ProxyHandler {
   // This isn't a final field because we want to support optional injection.
   // This is a limitation of Guice, but this workaround...works.
   private ContentFetcherFactory contentFetcherFactory;
+  private final LockedDomainService domainLocker;
 
   @Inject
   public void setContentFetcher(ContentFetcherFactory contentFetcherFactory) {
@@ -87,9 +93,11 @@ public class ProxyHandler {
 
   @Inject
   public ProxyHandler(ContentFetcherFactory contentFetcherFactory,
-                      GadgetTokenDecoder gadgetTokenDecoder) {
+                      GadgetTokenDecoder gadgetTokenDecoder,
+                      LockedDomainService lockedDomainService) {
     this.contentFetcherFactory = contentFetcherFactory;
     this.gadgetTokenDecoder = gadgetTokenDecoder;
+    this.domainLocker = lockedDomainService;
   }
 
   /**
@@ -260,6 +268,17 @@ public class ProxyHandler {
                     HttpServletResponse response)
       throws IOException, GadgetException {
 
+    String host = request.getHeader("Host");
+    if (!domainLocker.embedCanRender(host)) {
+      // Force embedded images and the like to their own domain to avoid XSS
+      // in gadget domains.
+      String msg = "Embed request for url " +
+          getParameter(request, URL_PARAM, "") +
+          " made to wrong domain " + host;
+      logger.info(msg);
+      throw new GadgetException(GadgetException.Code.INVALID_PARAMETER, msg);
+    }
+    
     if (request.getHeader("If-Modified-Since") != null) {
       response.setStatus(HttpServletResponse.SC_NOT_MODIFIED);
       return;

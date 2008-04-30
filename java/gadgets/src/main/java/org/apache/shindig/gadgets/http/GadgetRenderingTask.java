@@ -28,6 +28,7 @@ import org.apache.shindig.gadgets.GadgetFeatureRegistry;
 import org.apache.shindig.gadgets.GadgetServer;
 import org.apache.shindig.gadgets.GadgetTokenDecoder;
 import org.apache.shindig.gadgets.JsLibrary;
+import org.apache.shindig.gadgets.LockedDomainService;
 import org.apache.shindig.gadgets.RemoteContent;
 import org.apache.shindig.gadgets.spec.Feature;
 import org.apache.shindig.gadgets.spec.LocaleSpec;
@@ -78,6 +79,8 @@ public class GadgetRenderingTask {
   private final GadgetTokenDecoder tokenDecoder;
   private GadgetContext context;
   private final List<GadgetContentFilter> filters;
+  private final LockedDomainService domainLocker;
+  private String container = null;
 
   /**
    * Processes a single rendering request and produces output html or errors.
@@ -151,6 +154,39 @@ public class GadgetRenderingTask {
     }
   }
 
+  /** 
+   * Redirect a type=html gadget to a locked domain if necessary.
+   * 
+   * @param gadget
+   * @return true if the request was handled, false if the request can proceed
+   * @throws IOException
+   * @throws GadgetException 
+   */
+  private boolean mustRedirectToLockedDomain(Gadget gadget)
+      throws IOException, GadgetException {
+    
+    String host = request.getHeader("Host");    
+    String container = context.getContainer();
+    if (domainLocker.gadgetCanRender(host, gadget, container)) {
+      return false;
+    }
+    
+    // Gadget tried to render on wrong domain.
+    String gadgetUrl = context.getUrl().toString();
+    String required = domainLocker.getLockedDomainForGadget(
+        gadgetUrl, container);
+    String redir =
+        request.getScheme() + "://" +
+        required +
+        request.getServletPath() + "?" + 
+        request.getQueryString();
+    logger.info("Redirecting gadget " + context.getUrl() + " from domain " + 
+        host + " to domain " + redir);
+    response.sendRedirect(redir);
+
+    return true;
+  }
+
   /**
    * Handles type=html gadget output.
    *
@@ -161,6 +197,10 @@ public class GadgetRenderingTask {
    */
   private void outputHtmlGadget(Gadget gadget, View view)
       throws IOException, GadgetException {
+    if (mustRedirectToLockedDomain(gadget)) {
+      return;
+    }
+    
     response.setContentType("text/html; charset=UTF-8");
     StringBuilder markup = new StringBuilder();
 
@@ -423,14 +463,12 @@ public class GadgetRenderingTask {
             .append(";\n");
   }
 
-  /**
-   * Validates that the parent parameter was acceptable.
-   *
-   * @return True if the parent parameter is valid for the current
-   *     container.
-   */
-  private boolean validateParent() {
-    String container = request.getParameter("container");
+  /** Gets the container for the current request. */
+  private String getContainerForRequest() {
+    if (container != null) {
+      return container;
+    }
+    container = request.getParameter("container");
     if (container == null) {
       // The parameter used to be called 'synd' FIXME: schedule removal
       container = request.getParameter("synd");
@@ -438,6 +476,17 @@ public class GadgetRenderingTask {
         container = ContainerConfig.DEFAULT_CONTAINER;
       }
     }
+    return container;
+  }
+  
+  /**
+   * Validates that the parent parameter was acceptable.
+   *
+   * @return True if the parent parameter is valid for the current
+   *     container.
+   */
+  private boolean validateParent() {
+    String container = getContainerForRequest();
 
     String parent = request.getParameter("parent");
 
@@ -474,13 +523,15 @@ public class GadgetRenderingTask {
                              GadgetFeatureRegistry registry,
                              ContainerConfig containerConfig,
                              UrlGenerator urlGenerator,
-                             GadgetTokenDecoder tokenDecoder) {
+                             GadgetTokenDecoder tokenDecoder,
+                             LockedDomainService lockedDomainService) {
 
     this.server = server;
     this.registry = registry;
     this.containerConfig = containerConfig;
     this.urlGenerator = urlGenerator;
     this.tokenDecoder = tokenDecoder;
+    this.domainLocker = lockedDomainService;
     filters = new LinkedList<GadgetContentFilter>();
   }
 }
