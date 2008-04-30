@@ -57,6 +57,7 @@ public class ProxyServlet extends InjectedServlet {
     }
   }
 
+  @SuppressWarnings("unused")
   @Override
   protected void doPost(HttpServletRequest request,
       HttpServletResponse response) throws ServletException, IOException {

@@ -52,6 +52,7 @@ public abstract class GadgetFeature {
    * @param context
    * @throws GadgetException
    */
+  @SuppressWarnings("unused")
   public void process(Gadget gadget, GadgetContext context)
       throws GadgetException {
     // By default we do nothing.

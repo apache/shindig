@@ -169,7 +169,7 @@ public class BasicContentCache implements ContentCache {
   /**
    * Default TTL for an entry in the cache that does not have any
    * cache controlling headers
-   * @return
+   * @return default TTL for cache entries
    */
   protected long getDefaultTTL() {
     // 5 mins

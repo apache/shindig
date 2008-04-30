@@ -45,6 +45,7 @@ public class BasicContentCacheTest extends TestCase {
      cache = new BasicContentCache();
   }
 
+  @Override
   protected void tearDown() throws Exception {
     cache = null;
   }
