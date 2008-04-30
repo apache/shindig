@@ -51,9 +51,7 @@ public class BasicPeopleService implements PeopleService {
     this.fetcher = fetcher;
   }
 
-  public ResponseItem<ApiCollection<Person>> getPeople(List<String> ids,
-      SortOrder sortOrder, FilterType filter, int first, int max,
-      Set<String> profileDetails, GadgetToken token) {
+  private List<Person> getPeople(List<String> ids, GadgetToken token) {
     Map<String, Person> allPeople = fetcher.getAllPeople();
 
     List<Person> people = new ArrayList<Person>();
@@ -69,6 +67,13 @@ public class BasicPeopleService implements PeopleService {
         people.add(person);
       }
     }
+    return people;
+  }
+
+  public ResponseItem<ApiCollection<Person>> getPeople(List<String> ids,
+      SortOrder sortOrder, FilterType filter, int first, int max,
+      Set<String> profileDetails, GadgetToken token) {
+    List<Person> people = getPeople(ids, token);
 
     // We can pretend that by default the people are in top friends order
     if (sortOrder.equals(SortOrder.name)) {
@@ -85,6 +90,12 @@ public class BasicPeopleService implements PeopleService {
     ApiCollection<Person> collection = new ApiCollection<Person>(people, first,
         totalSize);
     return new ResponseItem<ApiCollection<Person>>(collection);
+  }
+
+  public ResponseItem<Person> getPerson(String id, GadgetToken token) {
+    List<String> ids = new ArrayList<String>();
+    ids.add(id);
+    return new ResponseItem<Person>(getPeople(ids, token).get(0));
   }
 
   public List<String> getIds(IdSpec idSpec, GadgetToken token)
@@ -111,4 +122,5 @@ public class BasicPeopleService implements PeopleService {
     }
     return ids;
   }
+
 }

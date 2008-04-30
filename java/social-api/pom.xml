@@ -76,14 +76,6 @@ under the License.
           <artifactId>maven-eclipse-plugin</artifactId>
       </plugin>
       <plugin>
-        <artifactId>maven-compiler-plugin</artifactId>
-        <configuration>
-          <source>1.5</source>
-          <target>1.5</target>
-          <fork>true</fork>
-        </configuration>
-      </plugin>
-      <plugin>
         <artifactId>maven-source-plugin</artifactId>
         <executions>
           <execution>
@@ -176,6 +168,11 @@ under the License.
       <version>1-SNAPSHOT</version>
       <groupId>${pom.groupId}</groupId>
       <artifactId>shindig-common</artifactId>
+    </dependency>
+    <dependency>
+      <artifactId>commons-betwixt</artifactId>
+      <version>0.8</version>
+      <groupId>commons-betwixt</groupId>
     </dependency>
   </dependencies>
 </project>
