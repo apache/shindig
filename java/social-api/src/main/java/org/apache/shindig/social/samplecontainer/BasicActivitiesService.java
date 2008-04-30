@@ -61,8 +61,8 @@ public class BasicActivitiesService implements ActivitiesService {
       GadgetToken token) {
     List<String> ids = new ArrayList<String>();
     ids.add(id);
-    
-    List<Activity> allActivities = getActivities(ids, null).getResponse();
+
+    List<Activity> allActivities = getActivities(ids, token).getResponse();
     for (Activity activity : allActivities) {
       if (activity.getId().equals(activityId)) {
         return new ResponseItem<Activity>(activity);
