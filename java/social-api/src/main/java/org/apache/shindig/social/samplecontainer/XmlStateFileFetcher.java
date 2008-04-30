@@ -31,6 +31,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Date;
 
 @Singleton
 public class XmlStateFileFetcher {
@@ -217,6 +218,7 @@ public class XmlStateFileFetcher {
       String name = attributes.getNamedItem("name").getNodeValue();
       String id = attributes.getNamedItem("id").getNodeValue();
       Person person = new Person(id, new Name(turnEvil(name)));
+      person.setUpdated(new Date());
 
       Node phoneItem = attributes.getNamedItem("phone");
       if (phoneItem != null) {
@@ -304,6 +306,7 @@ public class XmlStateFileFetcher {
         activity.setTitle(turnEvil(title));
         activity.setBody(turnEvil(body));
         activity.setMediaItems(getMediaItems(activityItem));
+        activity.setUpdated(new Date());
 
         createActivity(userId, activity);
       }

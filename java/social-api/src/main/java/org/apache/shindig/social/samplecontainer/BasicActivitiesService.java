@@ -20,6 +20,7 @@ package org.apache.shindig.social.samplecontainer;
 import org.apache.shindig.gadgets.GadgetToken;
 
 import org.apache.shindig.social.ResponseItem;
+import org.apache.shindig.social.ResponseError;
 import org.apache.shindig.social.opensocial.ActivitiesService;
 import org.apache.shindig.social.opensocial.model.Activity;
 import org.json.JSONObject;
@@ -56,6 +57,21 @@ public class BasicActivitiesService implements ActivitiesService {
     return new ResponseItem<List<Activity>>(activities);
   }
 
+  public ResponseItem<Activity> getActivity(String id, String activityId,
+      GadgetToken token) {
+    List<String> ids = new ArrayList<String>();
+    ids.add(id);
+    
+    List<Activity> allActivities = getActivities(ids, null).getResponse();
+    for (Activity activity : allActivities) {
+      if (activity.getId().equals(activityId)) {
+        return new ResponseItem<Activity>(activity);
+      }
+    }
+    return new ResponseItem<Activity>(ResponseError.BAD_REQUEST,
+        "Activity not found", null);
+  }
+
   public ResponseItem createActivity(String personId, Activity activity,
       GadgetToken token) {
     // TODO: Validate the activity and do any template expanding
@@ -65,4 +81,5 @@ public class BasicActivitiesService implements ActivitiesService {
     fetcher.createActivity(personId, activity);
     return new ResponseItem<JSONObject>(new JSONObject());
   }
+
 }
