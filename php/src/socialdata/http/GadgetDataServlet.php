@@ -11,12 +11,13 @@ class GadgetDataServlet extends HttpServlet {
 	
 	public function __construct()
 	{
-		global $config;
-		if (empty($config['handlers'])) {
+		parent::__construct();
+		$handlers = Config::get('handlers');
+		if (empty($handlers)) {
 			$this->handlers[] = new OpenSocialDataHandler();
 			$this->handlers[] = new StateFileDataHandler();
 		} else {
-			$handlers = explode(',', $config['handlers']);
+			$handlers = explode(',', $handlers);
 			foreach ( $handlers as $handler ) {
 				$this->handlers[] = new $handler();
 			}
@@ -27,6 +28,10 @@ class GadgetDataServlet extends HttpServlet {
 	{
 		$requestParam = isset($_POST['request']) ? $_POST['request'] : '';
 		$token = isset($_POST['st']) ? $_POST['st'] : '';
+		// detect if magic quotes are on, and if so strip them from the request
+		if (get_magic_quotes_gpc()) {
+			$requestParam = stripslashes($requestParam);
+		}
 		$request = json_decode($requestParam, true);
 		if ($request == $requestParam) {
 			// oddly enough if the json_decode function can't parse the code,
@@ -73,8 +78,7 @@ class GadgetDataServlet extends HttpServlet {
 	
 	public function doGet()
 	{
-		echo 
-		header("HTTP/1.0 400 Bad Request", true, 400);
+		echo header("HTTP/1.0 400 Bad Request", true, 400);
 		die("<h1>Bad Request</h1>");
 	}
 }

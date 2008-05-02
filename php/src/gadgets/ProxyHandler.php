@@ -45,7 +45,12 @@ class ProxyHandler {
 	 */
 	public function fetchJson($url, $signer, $method)
 	{
-		$token = $this->extractAndValidateToken($signer);
+		try {
+			$token = $this->extractAndValidateToken($signer);
+		} catch (Exception $e) {
+			$token = '';
+			// no token given, safe to ignore
+		}
 		$originalUrl = $this->validateUrl($url);
 		$signedUrl = $this->signUrl($originalUrl, $token);
 		// Fetch the content and convert it into JSON.

@@ -28,7 +28,7 @@ class BasicDataService extends DataService {
 				$allPersonData = $allData[$id];
 				$personData = array();
 				foreach ( array_keys($allPersonData) as $key ) {
-					if (in_array($key, $keys)) {
+					if (in_array($key, $keys) || $keys[0] == "*") {
 						$personData[$key] = $allPersonData[$key];
 					}
 				}

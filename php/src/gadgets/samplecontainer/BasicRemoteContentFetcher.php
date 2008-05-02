@@ -61,8 +61,7 @@ class BasicRemoteContentFetcher extends RemoteContentFetcher {
 		// on redirects and such we get multiple headers back from curl it seems, we really only want the last one
 		while ( substr($content, 0, strlen('HTTP')) == 'HTTP' && strpos($content, "\r\n\r\n") !== false ) {
 			$header = substr($content, 0, strpos($content, "\r\n\r\n"));
-			$body = substr($content, strlen($header) + 4);
-			$content = substr($content, strlen($header) + 4);
+			$content = $body = substr($content, strlen($header) + 4);
 		}
 		$httpCode = curl_getinfo($request->handle, CURLINFO_HTTP_CODE);
 		$contentType = curl_getinfo($request->handle, CURLINFO_CONTENT_TYPE);
