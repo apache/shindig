@@ -30,8 +30,6 @@ class BasicGadgetToken extends GadgetToken {
   
   /** tool to use for signing and encrypting the token */
   private $crypter;
-
-  private $INSECURE_KEY = "{ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}";
   
   private $OWNER_KEY = "o";
   private $APP_KEY = "a";
@@ -45,7 +43,7 @@ class BasicGadgetToken extends GadgetToken {
    */
   public function toSerialForm()
   {
-    return $this->token;
+    return urlencode($this->token);
   }
   
   /**
@@ -56,7 +54,7 @@ class BasicGadgetToken extends GadgetToken {
    */
   static public function createFromToken($token, $maxAge)
   {
-	return new BasicBlobCrypter($token, $maxAge, null, null, null, null, null, null);
+	return new BasicGadgetToken($token, $maxAge, null, null, null, null, null, null);
   }
   
   /**
@@ -71,7 +69,7 @@ class BasicGadgetToken extends GadgetToken {
    */
   static public function createFromValues($owner, $viewer, $app, $domain, $appUrl, $moduleId)
   {
-  	return new BasicBlobCrypter(null, null, $owner, $viewer, $app, $domain, $appUrl, $moduleId);
+  	return new BasicGadgetToken(null, null, $owner, $viewer, $app, $domain, $appUrl, $moduleId);
   }
   
   

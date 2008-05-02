@@ -37,7 +37,7 @@ abstract class BlobCrypter {
 	 * 
 	 * @throws BlobCrypterException
 	 */
-	abstract public function wrap($in);
+	abstract public function wrap(Array $in);
 	
 	/**
 	 * Unwraps a blob.

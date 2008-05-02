@@ -106,7 +106,10 @@ class XmlStateFileFetcher {
 			$person = (string)$data['person'];
 			$key = (string)$data['field'];
 			$value = (string)$data;
-			$this->allData[$person] = array($key => $value);
+			if (!isset($this->allData[$person])) {
+				$this->allData[$person] = array();
+			}
+			$this->allData[$person][$key] = $value;
 		}
 	}
 	

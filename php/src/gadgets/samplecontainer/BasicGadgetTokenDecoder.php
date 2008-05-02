@@ -18,10 +18,6 @@
  * under the License.
  */
 
-/**
- * A GadgetTokenDecoder implementation that just provides dummy data to satisfy
- * tests and API calls. Do not use this for any security applications.
- */
 class BasicGadgetTokenDecoder extends GadgetTokenDecoder {
 	private $OWNER_INDEX = 0;
 	private $VIEWER_INDEX = 1;
@@ -38,22 +34,24 @@ class BasicGadgetTokenDecoder extends GadgetTokenDecoder {
 	public function createToken($stringToken)
 	{
 		if (empty($stringToken)) {
-			//FIXME an empty token should generate an exception instead of
-			// being ignored, however currently a proxy request always has
-			// an empty token (bug presumably), so without this hack it doesn't work
-			// reinstate the throw new GadgetException('INVALID_GADGET_TOKEN'); once thats fixed
-			return;
+			throw new GadgetException('INVALID_GADGET_TOKEN');
 		}
 		try {
-			$tokens = explode(":", $stringToken);
-			return new BasicGadgetToken(null,null,
-				urldecode($tokens[$this->OWNER_INDEX]),
-				urldecode($tokens[$this->VIEWER_INDEX]),
-				urldecode($tokens[$this->APP_ID_INDEX]),
-				urldecode($tokens[$this->CONTAINER_INDEX]),
-				urldecode($tokens[$this->APP_URL_INDEX]),
-				urldecode($tokens[$this->MODULE_ID_INDEX])
-			);
+			//TODO remove this once we have a better way to generate a fake token
+			// in the example files
+			if (Config::get('allow_plaintext_token') && count(explode(':', $stringToken)) == 6) {
+				$tokens = explode(":", $stringToken);
+				return new BasicGadgetToken(null,null,
+					urldecode($tokens[$this->OWNER_INDEX]),
+					urldecode($tokens[$this->VIEWER_INDEX]),
+					urldecode($tokens[$this->APP_ID_INDEX]),
+					urldecode($tokens[$this->CONTAINER_INDEX]),
+					urldecode($tokens[$this->APP_URL_INDEX]),
+					urldecode($tokens[$this->MODULE_ID_INDEX])
+				);
+			} else {			
+				return BasicGadgetToken::createFromToken($stringToken, Config::get('st_max_age'));
+			}
 		} catch (Exception $e) {
 			throw new GadgetException('INVALID_GADGET_TOKEN');
 		}

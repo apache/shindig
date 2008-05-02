@@ -6,12 +6,23 @@
  */
 $config = array(
 	// Show debug backtrace? Set this to false on anything that resembles a production env
-	'debug' => true,
+	'debug' => false,
 
 	// The base prefix under which the our url's live, if its the root set this to ''
 	// don't forget to update your .htaccess to reflect this, as well as your container 
 	// javascript like: gadget.setServerBase('/someBaseUrl/');
 	'web_prefix' => '',
+
+	// Max age of a security token, defaults to one hour
+	'st_max_age' => 60 * 60,
+
+	// Security token keys
+	'token_cipher_key' => 'INSECURE_DEFAULT_KEY',
+	'token_hmac_key' => 'INSECURE_DEFAULT_KEY',
+
+	// The html / javascript samples use a plain text demo token,
+	// set this to false on anything resembling a real site
+	'allow_plaintext_token' => true,
 	
 	// P3P (Platform for Privacy Preferences) header for allowing cross domain cookies.
 	// Setting this to an empty string: '' means no P3P header will be send
@@ -29,7 +40,7 @@ $config = array(
 	// seperated by a , For example:
 	// 'handlers' => 'OpenSocialDataHandler,StateFileDataHandler',
 	// if the value is empty, the defaults used in the example above will be used.
-	'handlers' => '', 
+	'handlers' => '',
 
 	'focedJsLibs' => '',
 	
