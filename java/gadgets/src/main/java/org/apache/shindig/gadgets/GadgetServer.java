@@ -80,6 +80,12 @@ public class GadgetServer {
     RemoteContentRequest request = RemoteContentRequest.getRequest(
         context.getUrl(), context.getIgnoreCache());
     RemoteContent response = gadgetSpecFetcher.fetch(request);
+    if (response.getHttpStatusCode() != RemoteContent.SC_OK) {
+      throw new GadgetException(
+          GadgetException.Code.FAILED_TO_RETRIEVE_CONTENT,
+          "Unable to retrieve gadget xml. HTTP error " +
+          response.getHttpStatusCode());
+    }
     GadgetSpec spec
         = new GadgetSpec(context.getUrl(), response.getResponseAsString());
     return createGadgetFromSpec(spec, context);
@@ -97,6 +103,12 @@ public class GadgetServer {
     RemoteContentRequest request = RemoteContentRequest.getRequest(
         localeSpec.getMessages(), context.getIgnoreCache());
     RemoteContent response = messageBundleFetcher.fetch(request);
+    if (response.getHttpStatusCode() != RemoteContent.SC_OK) {
+      throw new GadgetException(
+          GadgetException.Code.FAILED_TO_RETRIEVE_CONTENT,
+          "Unable to retrieve message bundle xml. HTTP error " +
+          response.getHttpStatusCode());
+    }
     MessageBundle bundle = new MessageBundle(response.getResponseAsString());
     return bundle;
   }
