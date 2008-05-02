@@ -23,6 +23,7 @@ import org.apache.shindig.util.XmlUtil;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 
+import java.net.URI;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -60,14 +61,14 @@ public class MessageBundle {
    * @param xml
    * @throws SpecParserException
    */
-  public MessageBundle(String xml) throws SpecParserException {
+  public MessageBundle(URI url, String xml) throws SpecParserException {
     Element doc;
     try {
       doc = XmlUtil.parse(xml);
     } catch (XmlException e) {
-      throw new SpecParserException(e);
+      throw new SpecParserException("Malformed XML in file " + url.toString()
+          + ": " + e.getMessage());
     }
-
 
     NodeList nodes = doc.getElementsByTagName("msg");
     Map<String, String> messages
