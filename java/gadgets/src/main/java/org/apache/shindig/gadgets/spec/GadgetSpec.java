@@ -149,7 +149,8 @@ public class GadgetSpec {
     try {
       doc = XmlUtil.parse(xml);
     } catch (XmlException e) {
-      throw new SpecParserException(e);
+      throw new SpecParserException("Malformed XML in file " + url.toString()
+          + ": " + e.getMessage());
     }
     this.url = url;
 

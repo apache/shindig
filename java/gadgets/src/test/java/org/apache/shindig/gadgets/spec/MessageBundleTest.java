@@ -21,10 +21,14 @@ package org.apache.shindig.gadgets.spec;
 
 import junit.framework.TestCase;
 
+import org.apache.shindig.gadgets.GadgetException;
+
+import java.net.URI;
 import java.util.HashMap;
 import java.util.Map;
 
 public class MessageBundleTest extends TestCase {
+  private static final URI BUNDLE_URL = URI.create("http://example.org/m.xml");
   public void testNormalMessageBundle() throws Exception {
     Map<String, String> messages = new HashMap<String, String>();
     messages.put("hello", "world");
@@ -36,17 +40,29 @@ public class MessageBundleTest extends TestCase {
           "</msg>";
     }
     xml += "</messagebundle>";
-    MessageBundle bundle = new MessageBundle(xml);
+    MessageBundle bundle = new MessageBundle(BUNDLE_URL, xml);
     assertEquals(messages, bundle.getMessages());
   }
 
   public void testMissingNames() {
     String xml = "<messagebundle><msg>foo</msg></messagebundle>";
     try {
-      MessageBundle bundle = new MessageBundle(xml);
+      MessageBundle bundle = new MessageBundle(BUNDLE_URL, xml);
       fail("No exception thrown when a msg has no name.");
     } catch (SpecParserException e) {
       // OK.
+    }
+  }
+
+  public void testMalformedXml() {
+    String xml = "</messagebundle>";
+    try {
+      MessageBundle bundle = new MessageBundle(BUNDLE_URL, xml);
+      fail("No exception thrown on malformed XML.");
+    } catch (SpecParserException e) {
+      // OK
+      assertEquals(GadgetException.Code.MALFORMED_XML_DOCUMENT, e.getCode());
+      assertTrue(e.getMessage().contains(BUNDLE_URL.toString()));
     }
   }
 }

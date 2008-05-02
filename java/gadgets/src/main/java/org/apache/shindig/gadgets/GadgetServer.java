@@ -25,6 +25,7 @@ import org.apache.shindig.gadgets.spec.Preload;
 
 import com.google.inject.Inject;
 
+import java.net.URI;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -100,8 +101,9 @@ public class GadgetServer {
    */
   private MessageBundle getBundle(LocaleSpec localeSpec, GadgetContext context)
       throws GadgetException {
-    RemoteContentRequest request = RemoteContentRequest.getRequest(
-        localeSpec.getMessages(), context.getIgnoreCache());
+    URI bundleUrl = localeSpec.getMessages();
+    RemoteContentRequest request
+        = RemoteContentRequest.getRequest(bundleUrl, context.getIgnoreCache());
     RemoteContent response = messageBundleFetcher.fetch(request);
     if (response.getHttpStatusCode() != RemoteContent.SC_OK) {
       throw new GadgetException(
@@ -109,7 +111,8 @@ public class GadgetServer {
           "Unable to retrieve message bundle xml. HTTP error " +
           response.getHttpStatusCode());
     }
-    MessageBundle bundle = new MessageBundle(response.getResponseAsString());
+    MessageBundle bundle
+        = new MessageBundle(bundleUrl, response.getResponseAsString());
     return bundle;
   }
 

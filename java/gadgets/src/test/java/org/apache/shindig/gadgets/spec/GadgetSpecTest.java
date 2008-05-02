@@ -19,6 +19,7 @@
 
 package org.apache.shindig.gadgets.spec;
 
+import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.Substitutions;
 import org.apache.shindig.gadgets.Substitutions.Type;
 
@@ -77,6 +78,18 @@ public class GadgetSpecTest extends TestCase {
       fail("No exception thrown when more than 1 ModulePrefs is specified.");
     } catch (SpecParserException e) {
       // OK
+    }
+  }
+
+  public void testMalformedXml() throws Exception {
+    String xml = "<Module><ModulePrefs/>";
+    try {
+      GadgetSpec spec = new GadgetSpec(SPEC_URL, xml);
+      fail("No exception thrown on malformed XML.");
+    } catch (SpecParserException e) {
+      // OK
+      assertEquals(GadgetException.Code.MALFORMED_XML_DOCUMENT, e.getCode());
+      assertTrue(e.getMessage().contains(SPEC_URL.toString()));
     }
   }
 

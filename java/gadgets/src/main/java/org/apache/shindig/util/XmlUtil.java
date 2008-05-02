@@ -23,6 +23,7 @@ import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
+import org.xml.sax.SAXParseException;
 
 import java.io.IOException;
 import java.io.StringReader;
@@ -127,6 +128,8 @@ public class XmlUtil {
       DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
       InputSource is = new InputSource(new StringReader(xml.trim()));
       return factory.newDocumentBuilder().parse(is).getDocumentElement();
+    } catch (SAXParseException e) {
+      throw new XmlException(e.getMessage()+" At: ("+e.getLineNumber()+","+e.getColumnNumber()+")", e);
     } catch (SAXException e) {
       throw new XmlException(e);
     } catch (ParserConfigurationException e) {
