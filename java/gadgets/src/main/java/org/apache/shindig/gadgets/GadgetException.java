@@ -68,6 +68,9 @@ public class GadgetException extends Exception {
     // OAuth
     OAUTH_STORAGE_ERROR,
     OAUTH_APPROVAL_NEEDED,
+    
+    // Signed fetch
+    REQUEST_SIGNING_FAILURE,
   }
 
   private final Code code;

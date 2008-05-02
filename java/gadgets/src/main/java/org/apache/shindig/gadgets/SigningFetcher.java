@@ -56,7 +56,7 @@ public class SigningFetcher extends ChainedContentFetcher {
       = "xoauth_signature_publickey";
 
   protected static final Pattern ALLOWED_PARAM_NAME
-      = Pattern.compile("[-:\\w]+");
+      = Pattern.compile("[-:\\w~!@$*()_\\[\\]:,./]+");
 
   protected final TimeSource clock = new TimeSource();
 
@@ -159,6 +159,8 @@ public class SigningFetcher extends ChainedContentFetcher {
       cache.addContent(cacheableRequest, result);
 
       return result;
+    } catch (GadgetException e) {
+      throw e;
     } catch (Exception e) {
       throw new GadgetException(GadgetException.Code.INTERNAL_SERVER_ERROR, e);
     }
@@ -166,7 +168,7 @@ public class SigningFetcher extends ChainedContentFetcher {
 
   private RemoteContentRequest makeCacheableRequest(
       RemoteContentRequest request)
-      throws IOException, URISyntaxException {
+      throws IOException, URISyntaxException, RequestSigningException {
     // Create a request without the OAuth params which includes the
     // OpenSocial ones and see if we can find it in the cache
     URI resource = request.getUri();
@@ -238,6 +240,8 @@ public class SigningFetcher extends ChainedContentFetcher {
           resource.getPort(),
           resource.getRawPath() + "?" + finalQuery);
       return new RemoteContentRequest(url.toURI(), req);
+    } catch (GadgetException e) {
+      throw e;
     } catch (Exception e) {
       throw new GadgetException(GadgetException.Code.INTERNAL_SERVER_ERROR, e);
     }
@@ -319,12 +323,17 @@ public class SigningFetcher extends ChainedContentFetcher {
 
   /**
    * Strip out any owner or viewer id passed by the client.
+ * @throws RequestSigningException 
    */
-  private List<Parameter> sanitize(List<Parameter> params) {
+  private List<Parameter> sanitize(List<Parameter> params)
+      throws RequestSigningException {
     ArrayList<Parameter> list = new ArrayList<Parameter>();
     for (Parameter p : params) {
-      if (allowParam(p.getKey())) {
+      String name = p.getKey();
+      if (allowParam(name)) {
         list.add(p);
+      } else {
+    	  throw new RequestSigningException("invalid parameter name " + name);
       }
     }
     return list;
