@@ -57,7 +57,7 @@
 // See individual feature.xml files for configuration details.
 "gadgets.features" : {
   "core.io" : {
-  	// Note: /proxy is an open proxy. Be careful how you explose this!
+    // Note: /proxy is an open proxy. Be careful how you explose this!
     "proxyUrl" : "proxy?url=%url%",
     "jsonProxyUrl" : "proxy?output=js"
   },
@@ -72,8 +72,8 @@
     }
   },
   "rpc" : {
-  	// Path to the relay file. Automatically appended to the parent
-  	// parameter if it passes input validation and is not null.
+    // Path to the relay file. Automatically appended to the parent
+    /// parameter if it passes input validation and is not null.
     // This should never be on the same host in a production environment!
     // Only use this for TESTING!
     "parentRelayUrl" : "/gadgets/files/container/rpc_relay.html",
@@ -85,12 +85,12 @@
   // Skin defaults
   "skins" : {
     "properties" : {
-         "BG_COLOR": "",
-         "BG_IMAGE": "",
-         "BG_POSITION": "",
-         "BG_REPEAT": "",
-         "FONT_COLOR": "",
-         "ANCHOR_COLOR": ""
+      "BG_COLOR": "",
+      "BG_IMAGE": "",
+      "BG_POSITION": "",
+      "BG_REPEAT": "",
+      "FONT_COLOR": "",
+      "ANCHOR_COLOR": ""
     }
   },
   "opensocial-0.7" : {

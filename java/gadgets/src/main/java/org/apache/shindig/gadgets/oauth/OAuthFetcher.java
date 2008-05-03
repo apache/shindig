@@ -210,7 +210,7 @@ public class OAuthFetcher extends ChainedContentFetcher {
       buildAznUrl();
       // break out of the content fetching chain, we need permission from
       // the user to do this
-      return null;
+      return buildOAuthApprovalResponse();
     } else if (needAccessToken()) {
       // This is section 6.3 of the OAuth spec
       checkCanApprove();
@@ -438,6 +438,21 @@ public class OAuthFetcher extends ChainedContentFetcher {
     aznUrl = azn.toString();
   }
 
+  private RemoteContent buildOAuthApprovalResponse() {
+    RemoteContent content = new RemoteContent(0, null, null);
+    addResponseMetadata(content);
+    return content;
+  }
+  
+  private void addResponseMetadata(RemoteContent content) {
+    if (newClientState != null) {
+      content.getMetadata().put(CLIENT_STATE, newClientState);
+    }
+    if (aznUrl != null) {
+      content.getMetadata().put(APPROVAL_URL, aznUrl);
+    }
+  }
+
   /**
    * Do we need to exchange a request token for an access token?
    */
@@ -523,12 +538,7 @@ public class OAuthFetcher extends ChainedContentFetcher {
               realRequest.getOptions()));
 
       // Track metadata on the response
-      if (newClientState != null) {
-        content.getMetadata().put(CLIENT_STATE, newClientState);
-      }
-      if (aznUrl != null) {
-        content.getMetadata().put(APPROVAL_URL, aznUrl);
-      }
+      addResponseMetadata(content);
       return content;
     } catch (UnsupportedEncodingException e) {
       throw new GadgetException(GadgetException.Code.INTERNAL_SERVER_ERROR, e);

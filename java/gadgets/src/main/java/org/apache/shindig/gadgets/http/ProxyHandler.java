@@ -237,10 +237,9 @@ public class ProxyHandler {
       RemoteContent results) {
     try {
       JSONObject resp = new JSONObject();
-      if (results != null) {
-        resp.put("body", results.getResponseAsString());
-        resp.put("rc", results.getHttpStatusCode());
-      }
+      
+      resp.put("body", results.getResponseAsString());
+      resp.put("rc", results.getHttpStatusCode());
 
       // Merge in additional response data
       for (Map.Entry<String, String> entry : results.getMetadata().entrySet()) {
