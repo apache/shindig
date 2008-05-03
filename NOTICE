@@ -39,5 +39,5 @@ software:
     HMAC-SHA1 standards.
 
     Apache Shindig interfaces with the OAuth library
-    <http://http://code.google.com/p/oauth/> to provide digital signing
+    <http://code.google.com/p/oauth/> to provide digital signing
     of messages according to the OAuth standard.
