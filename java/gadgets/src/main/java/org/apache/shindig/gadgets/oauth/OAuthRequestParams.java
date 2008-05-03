@@ -28,14 +28,22 @@ public class OAuthRequestParams {
   public static final String TOKEN_PARAM = "oauthToken";
   public static final String CLIENT_STATE_PARAM = "oauthState";
 
-  private final String serviceName;
-  private final String tokenName;
-  private final String origClientState;
+  protected final String serviceName;
+  protected final String tokenName;
+  protected final String origClientState;
 
   public OAuthRequestParams(HttpServletRequest request) {
     serviceName = request.getParameter(SERVICE_PARAM);
     tokenName = request.getParameter(TOKEN_PARAM);
     origClientState = request.getParameter(CLIENT_STATE_PARAM);
+  }
+  
+  // Really only use this for testing, please
+  public OAuthRequestParams(String serviceName, String tokenName,
+      String origClientState) {
+    this.serviceName = serviceName;
+    this.tokenName = tokenName;
+    this.origClientState = origClientState;
   }
   
   public String getServiceName() {
