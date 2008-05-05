@@ -206,8 +206,8 @@ In the meantime, please visit the Building Shindig tab for instructions on using
 
   <ol>
     <li> Make sure you have the <a href="#preReqs">prerequisites</a> installed first.</li>
-    <li> <code>cd ~/src/shindig/java/</code></li>
-    <li> <code>mvn package</code></li>
+    <li> <code>cd ~/src/shindig/</code></li>
+    <li> <code>mvn</code></li>
 
     <li>
 Once the build successfully completes, you can install the built WAR
@@ -217,13 +217,14 @@ server.</li>
 
   <p>To run the code and start a Jetty server that will run on at localhost:8080: </p>
   <p></p><ul>
-     <li><code>cd server</code></li>
-     <li><code>mvn jetty:run-war</code></li>
+     <li><code>mvn -Prun</code></li>
     </ul><p></p>
 
   <p> To run the Jetty server on a different port, use:</p>
-  <p></p><ul><li><code>mvn -Djetty.port=&lt;port&gt; jetty:run</code></li></ul><p></p>
-
+  <ul>
+    <li><code>cd java/server</code></li>
+    <li><code>mvn clean install jetty:run -DrunType=&lt;full|gadgets|social&gt; -Djetty.port=&lt;port&gt;</code></li>
+  </ul>
   <p>
 Once you've either installed the WAR file on your JEE server, or are
 running locally using the Jetty server, you can test the Gadget server
@@ -277,9 +278,9 @@ using:</p>
 
   </li><li> Right-click the project, select <code>Maven : Enable Dependency Management</code>
   </li><li> Right-click the project, select <code>Maven : Update Source Folders</code>
-  </li><li> Optionally, if you would like to be able to browse or step into the code of your dependent 
-  	jars when debugging, you need the source jars. Right-click the project, select 
-  	<code>Maven : Download Sources</code> and Eclipse will automatically know about 
+  </li><li> Optionally, if you would like to be able to browse or step into the code of your dependent
+  	jars when debugging, you need the source jars. Right-click the project, select
+  	<code>Maven : Download Sources</code> and Eclipse will automatically know about
   	these sources when debugging. You can browse them under <code>Maven Dependencies</code> in your project.
   </li>
   </li></ol>
@@ -422,7 +423,7 @@ tree)
   <p>
 </p><ul>
 <li>To subscribe to the Shindig mailing list, send a blank email to <a href="mailto:shindig-dev-subscribe@incubator.apache.org">shindig-dev-subscribe@incubator.apache.org</a></li>
-<li>The email archives are located at: 
+<li>The email archives are located at:
   <ul>
     <li><a href="http://mail-archives.apache.org/mod_mbox/incubator-shindig-dev/">http://mail-archives.apache.org/mod_mbox/incubator-shindig-dev/</a></li>
     <li><a href="http://shindig-dev.markmail.org/">http://shindig-dev.markmail.org/</a></li>

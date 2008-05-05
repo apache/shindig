@@ -1,10 +1,9 @@
 Installing and running the server
 ============================================
 
+Please see BUILD-JAVA in the base project directory for information.
 
-Please see BUILD-JAVA in the base source directory.
-
-Once running, this url http://localhost:<port>/social/data will accept POST requests 
+Once running, this url http://localhost:<port>/social/data will accept POST requests
    to update or fetch data. In order to see this code in action follow the README in java/server.
 
 
@@ -127,8 +126,8 @@ json format will always match the server exactly. This wire format is always
 subject to change as it is solely for the purpose of communicating between the
 Shindig javascript and the Shindig java classes. Shindig will always be
 compatible with itself and will not commit to staying constant for outside
-dependencies. Note: soon, all of this code will change to only support the 
-RESTful api wire format. Both the javascript and the java code will be updated 
+dependencies. Note: soon, all of this code will change to only support the
+RESTful api wire format. Both the javascript and the java code will be updated
 when that happens.
 
 If you wish to use Shindig to support OpenSocial it is highly recommended that
@@ -149,6 +148,6 @@ services: ActivitiesService, DataService, and PeopleService in the
 samplecontainer/Basic*Service files.
 
 You should provide your own implementations of these files to fetch data from a
-database or an existing service, or some other storage mechanism. You can hook in 
-your own implementations of these interfaces by providing your own Guice module 
+database or an existing service, or some other storage mechanism. You can hook in
+your own implementations of these interfaces by providing your own Guice module
 in the web.xml file.
