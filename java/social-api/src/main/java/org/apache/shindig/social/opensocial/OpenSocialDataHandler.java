@@ -24,6 +24,7 @@ import org.apache.shindig.social.ResponseItem;
 import org.apache.shindig.social.opensocial.model.Activity;
 import org.apache.shindig.social.opensocial.model.IdSpec;
 
+import com.google.inject.Inject;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -34,8 +35,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
-import com.google.inject.Inject;
 
 /**
  * Servlet for serving the data required for opensocial.
@@ -150,10 +149,6 @@ public class OpenSocialDataHandler implements GadgetDataHandler {
       }
 
     } catch (JSONException e) {
-      logger.log(Level.INFO, e.getMessage());
-      response = new ResponseItem<Object>(ResponseError.BAD_REQUEST,
-          "The json request had a bad format", new JSONObject());
-    } catch (IllegalArgumentException e) {
       logger.log(Level.INFO, e.getMessage());
       response = new ResponseItem<Object>(ResponseError.BAD_REQUEST,
           "The json request had a bad idSpec", new JSONObject());

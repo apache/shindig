@@ -37,10 +37,11 @@ public class IdSpec {
   }
 
 
-  public static IdSpec fromJson(String jsonIdSpec)
-      throws IllegalArgumentException {
-    Type idSpecEnum = Type.valueOf(jsonIdSpec);
-    if (idSpecEnum == null) {
+  public static IdSpec fromJson(String jsonIdSpec) {
+    Type idSpecEnum;
+    try {
+      idSpecEnum = Type.valueOf(jsonIdSpec);
+    } catch (IllegalArgumentException e) {
       idSpecEnum = Type.USER_IDS;
     }
 
