@@ -17,9 +17,7 @@
 */
 package org.apache.shindig.social.abdera;
 
-import org.apache.shindig.social.opensocial.model.Activity;
-import org.apache.shindig.social.opensocial.model.Person;
-import org.apache.shindig.social.opensocial.util.BeanXmlConverter;
+import com.google.inject.Inject;
 
 import org.apache.abdera.model.Entry;
 import org.apache.abdera.model.Feed;
@@ -28,6 +26,9 @@ import org.apache.abdera.protocol.server.RequestContext;
 import org.apache.abdera.protocol.server.ResponseContext;
 import org.apache.abdera.protocol.server.context.ResponseContextException;
 import org.apache.abdera.protocol.server.impl.AbstractCollectionAdapter;
+import org.apache.shindig.social.opensocial.model.Activity;
+import org.apache.shindig.social.opensocial.model.Person;
+import org.apache.shindig.social.opensocial.util.BeanXmlConverter;
 
 import java.util.Date;
 import java.util.List;
@@ -36,15 +37,15 @@ import java.util.logging.Logger;
 /**
  * handles logic to create feeds, entries etc.
  *
- * @author vnori@google.com (Vasu Nori)
- *
  */
 @SuppressWarnings("unchecked")
-public class RestServerCollectionAdapter extends AbstractCollectionAdapter {
+public abstract class RestServerCollectionAdapter 
+    extends AbstractCollectionAdapter {
   private static Logger logger =
     Logger.getLogger(RestServerCollectionAdapter.class.getName());
+  @Inject BeanXmlConverter beanXmlConverter;
 
-  protected ResponseContext returnFeed(RequestContext request, String title,
+  protected ResponseContext returnFeed(RequestContext request, String title, 
       String author, List<Object> listOfObj) {
     Feed feed;
     try {
@@ -54,13 +55,13 @@ public class RestServerCollectionAdapter extends AbstractCollectionAdapter {
       return null;
     }
     feed.setBaseUri(request.getUri());
-    // TODO set these some other way?
+    //TODO set these some other way?
     feed.addAuthor(author);
     feed.setTitle(title);
     // TODO updated should be set to the MAX(updated) of all entries
     feed.setUpdated(new Date());
     feed.setId(request.getUri().toString());
-
+    
     if (listOfObj != null) {
       // make Entries out of the list  of objects returned above
       for (Object obj : listOfObj) {
@@ -83,38 +84,38 @@ public class RestServerCollectionAdapter extends AbstractCollectionAdapter {
           .setEntityTag(ProviderHelper.calculateEntityTag(feed));
   }
 
-  private Entry fillEntry(RequestContext request, Object obj,
+  private Entry fillEntry(RequestContext request, Object obj, 
       String id, Date updated) {
     // create entry
     Entry entry = request.getAbdera().newEntry();
     entry.setId(id);
-    entry.setContent(BeanXmlConverter.convertToXml(obj), "text/xml");
+    entry.setContent(beanXmlConverter.convertToXml(obj), "text/xml");
     entry.setUpdated(updated);
     // TODO what should this be?
     entry.addAuthor("Author TODO");
     // TODO what should this be?
     if (obj instanceof Person) {
-      entry.setTitle((((Person)obj).getName().getUnstructured() != null) ?
+      entry.setTitle((((Person)obj).getName().getUnstructured() != null) ? 
           ((Person)obj).getName().getUnstructured() : "title TODO");
     } else if (obj instanceof Activity) {
       entry.setTitle(((Activity)obj).getTitle());
     } else {
       entry.setTitle("title TODO");
-    }
+    } 
 
     // TODO what is this
     //entry.setSource(feed.getAsSource());
     return entry;
   }
-
-  protected ResponseContext returnEntry(RequestContext request, Object obj,
+  
+  protected ResponseContext returnEntry(RequestContext request, Object obj, 
       String entryId, Date updated) {
     if (null == obj) {
       return ProviderHelper.notfound(request);
     }
-
+    
     Entry entry = fillEntry(request, obj, entryId, updated);
-    return ProviderHelper.returnBase(entry.getDocument(), 200,
+    return ProviderHelper.returnBase(entry.getDocument(), 200, 
         entry.getEdited())
         .setEntityTag(ProviderHelper.calculateEntityTag(entry));
   }

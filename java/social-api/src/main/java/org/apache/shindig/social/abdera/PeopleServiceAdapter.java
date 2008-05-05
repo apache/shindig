@@ -21,9 +21,8 @@ import org.apache.shindig.social.opensocial.PeopleService;
 import org.apache.shindig.social.opensocial.model.Person;
 import org.apache.shindig.gadgets.GadgetToken;
 
-import com.google.inject.Guice;
-import com.google.inject.Injector;
-import org.apache.abdera.protocol.server.ProviderHelper;
+import com.google.inject.Inject;
+
 import org.apache.abdera.protocol.server.RequestContext;
 import org.apache.abdera.protocol.server.ResponseContext;
 
@@ -34,41 +33,45 @@ import java.util.logging.Logger;
 /**
  * All "people" requests are processed here.
  *
- * @author vnori@google.com (Vasu Nori)
- *
  */
 @SuppressWarnings("unchecked")
 public class PeopleServiceAdapter extends RestServerCollectionAdapter {
   private static Logger logger =
     Logger.getLogger(PeopleServiceAdapter.class.getName());
   private PeopleService handler;
-
+  
   // TODO get these from the config files like in feedserver
   private static final String TITLE = "People Collection title";
   private static final String AUTHOR = "TODO";
-
-  public PeopleServiceAdapter() {
-    // TODO needs cleanup once injection from AbderaServlet works..
-    Injector injector = null;
-    try {
-       injector = Guice.createInjector(new RestGuiceModule());
-    } catch (Exception e) {
-      logger.severe("injector exception: " + e.getMessage());
-    }
-    handler = injector.getInstance(PeopleService.class);
+  
+  @Inject
+  public PeopleServiceAdapter(PeopleService handler) {
+    this.handler = handler;
   }
-
+  
+  /**
+   * Handles the following URLs
+   *       /people/{uid}/@all
+   */
   @Override
   public ResponseContext getFeed(RequestContext request) {
     // get the params from the request
     String[] paramNames = request.getTarget().getParameterNames();
     String uid = request.getTarget().getParameter(paramNames[0]);
+
     // TODO(doll): Fix the service apis to add a concept of arbitrary friends
     // Consider whether @all really makes sense...
     List<Person> listOfObj = null;
+
     return returnFeed(request, TITLE, AUTHOR, (List)listOfObj);
   }
 
+  
+  /**
+   * Handles the following URLs
+   *       /people/{uid}/@all/{pid}
+   *       /people/{uid}/@self
+   */
   @Override
   public ResponseContext getEntry(RequestContext request) {
 
@@ -105,31 +108,24 @@ public class PeopleServiceAdapter extends RestServerCollectionAdapter {
 
     // get the params from the request
     String[] paramNames = request.getTarget().getParameterNames();
+    
+    /* figure out which URL is passed in
+     *     /people/{uid}/@all/{pid}
+     *     /people/{uid}/@self
+     *  To do that, see if we have both uid, pid params passed in
+     *  OR just uid param.
+     *  TODO better way is to have different methods to be called by abdera
+     */
+    String uid = request.getTarget().getParameter("uid");
+    String pid = request.getTarget().getParameter("pid");
+    Person person = (null == pid)
+        ? handler.getPerson(uid, dummyToken).getResponse()
+        : handler.getPerson(pid, dummyToken).getResponse();
 
-    //   this method is called with 2 params for /people/{uid}/@all/{pid}
-    // and with 1 param for /people/{uid}/@self
-    // TODO have 2 different Abdera Handlers for the 2 different urls.
-    Person person;
-    switch (paramNames.length) {
-      case 1:
-        String uid = request.getTarget().getParameter(paramNames[0]);
-        person = handler.getPerson(uid, dummyToken).getResponse();
-        break;
-      case 2:
-        uid = request.getTarget().getParameter(paramNames[0]);
-        String pid = request.getTarget().getParameter(paramNames[1]);
-        // TODO: pass in the gadget token with the uid parameter set. We don't
-        // have different views of people from an aribtrary ids point of view.
-        // Rather, the token is how permissions are done.
-        person = handler.getPerson(pid, dummyToken).getResponse();
-        break;
-      default:
-        return ProviderHelper.notsupported(request, "more than 2 params?");
-    }
     // TODO: how is entry id determined. check.
     String entryId = request.getUri().toString();
     Date updated = (person != null) ? person.getUpdated() : null;
-    logger.info("updated = " + updated);
+    logger.fine("updated = " + updated);
     return returnEntry(request, person, entryId, updated);
   }
 }

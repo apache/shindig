@@ -25,10 +25,10 @@ import org.apache.commons.betwixt.io.BeanWriter;
 import org.xml.sax.SAXException;
 
 public class BeanXmlConverter {
-  public static Logger logger =
+  private static Logger logger =
       Logger.getLogger(BeanXmlConverter.class.getName());
 
-  public static String convertToXml(Object obj) {
+  public String convertToXml(Object obj) {
     StringWriter outputWriter = new StringWriter();
     BeanWriter writer = new BeanWriter(outputWriter);
     writer.getXMLIntrospector()
