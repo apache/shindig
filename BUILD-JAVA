@@ -1,4 +1,4 @@
-Installing and running the  java server
+Installing and running the various java servers
 ============================================
 
 1) Install Maven 2.0 (see http://maven.apache.org)
@@ -7,16 +7,18 @@ Installing and running the  java server
    JDK/JRE, and that the maven executable is in your PATH.
 
 3) From the base source directory ( eg cd .. )
-  * mvn - Cleans the source tree and then builds all the java classes, packages them into jars
-    and installs them in your local repository also adds source jars ( by default ~/.m2/repository on Unix/OSX) 
+  * mvn - Cleans the source tree and then builds all the java classes, packages
+    them into jars and installs them in your local repository also adds source
+    jars ( by default ~/.m2/repository on Unix/OSX)
   * mvn install - does the above but does not clean first
   * mvn -Psocial - builds only the social parts
   * mvn -Pgadgets - builds only the gadget parts
- 
-  You must perform at least a "mvn" to place build all the artifacts and place them in you local
-  maven repository.
-  
-4) To Run, using a embedded Jetty Webapp container, in the base project directory (eg cd .. )
+
+  You must perform at least a "mvn" to place build all the artifacts and place
+  them in you local maven repository.
+
+4) To Run, using a embedded Jetty Webapp container, in the base project
+       directory (eg cd .. )
    * First do a full build as in step 3
    * mvn -Prun - to run Jetty with both social and gadgets
    * mvn -Prun -DrunType=gadgets - to run Jetty with only the gadgets server
@@ -26,8 +28,11 @@ Installing and running the  java server
    * cd java/server
    * mvn clean install jetty:run -DrunType=<full|gadgets|social> -Djetty.port=<port>
 
-6) Once running, this url http://localhost:<port>/social/data will accept POST requests 
-   to update or fetch data. In order to see this code in action follow the README in java/server.
+6) Once running, you can test the gadget rendering server by hitting this url:
+  http://localhost:8080/gadgets/ifr?url=http://www.labpixies.com/campaigns/todo/todo.xml
+
+  Or you can take a look at the sample container here:
+  http://localhost:8080/gadgets/files/samplecontainer/samplecontainer.html
 
 
 ---------------------------------------------
@@ -36,36 +41,34 @@ To use with eclipse
 
 1) Start Eclipse to create a workspace
 
-2) Set the M2_REPO environment variable 
-   either
+2) Set the M2_REPO environment variable. You can either run a command
 
-      mvn -Declipse.workspace=<path-to-eclipse-workspace> eclipse:add-maven-repo
+     mvn -Declipse.workspace=<path-to-eclipse-workspace> eclipse:add-maven-repo
 
-   or
- 
-     In Eclipse edit the Preferences->Java->Build->Classpath Variables and point create M2_REPO to
-     point to ~/.m2/repository (Unix) or whereever you local maven repositroy is
+   or edit the preference directly
 
-3) In the project base directory
-   
-   mvn eclipse:eclipse
+     In Eclipse edit the Preferences->Java->Build->Classpath Variables and
+     create or change M2_REPO to point to the ~/.m2/repository (Unix) or
+     wherever your local maven repositroy is.
 
-  if you want all the Source files for all the dependencies do
+3) In the project base directory run
 
-  mvn eclipse:eclipse -DdownloadSources=true
+     mvn eclipse:eclipse
+
+   Or, if you want the source files for all of the dependencies you can also add
+   the downloadSources flag
+
+     mvn eclipse:eclipse -DdownloadSources=true
+
+4) In Eclipse import the new project in the File->Import->Existing Project menu.
 
 
-4) In Eclipse
+Note: At the moment, you will have to edit the source dependencies to remove
+nested folders. On each project, edit properties, Build Path, Source and remove
+missing Source folders.
 
-    Import new project with File->Import->Existing Project
+There is a maven-eclipse-plugin bug tracking this issue in MECLIPSE-444.
 
-NB. 
-At the moment, you will have to edit the source dependencies to remove nested folders.
-On each project, edit properties, Build Path, Source and remove missing Source folders.
-
-There is a BUG report MECLIPSE-444 reporting this to maven-eclipse-plugin.
-
-   
 
 For more information, see http://incubator.apache.org/projects/shindig.html
 
