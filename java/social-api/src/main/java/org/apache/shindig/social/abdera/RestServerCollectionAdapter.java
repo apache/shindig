@@ -17,8 +17,12 @@
 */
 package org.apache.shindig.social.abdera;
 
-import com.google.inject.Inject;
+import org.apache.shindig.social.AbstractGadgetData;
+import org.apache.shindig.social.opensocial.model.Activity;
+import org.apache.shindig.social.opensocial.model.Person;
+import org.apache.shindig.social.opensocial.util.BeanXmlConverter;
 
+import com.google.inject.Inject;
 import org.apache.abdera.model.Entry;
 import org.apache.abdera.model.Feed;
 import org.apache.abdera.protocol.server.ProviderHelper;
@@ -26,9 +30,6 @@ import org.apache.abdera.protocol.server.RequestContext;
 import org.apache.abdera.protocol.server.ResponseContext;
 import org.apache.abdera.protocol.server.context.ResponseContextException;
 import org.apache.abdera.protocol.server.impl.AbstractCollectionAdapter;
-import org.apache.shindig.social.opensocial.model.Activity;
-import org.apache.shindig.social.opensocial.model.Person;
-import org.apache.shindig.social.opensocial.util.BeanXmlConverter;
 
 import java.util.Date;
 import java.util.List;
@@ -39,14 +40,36 @@ import java.util.logging.Logger;
  *
  */
 @SuppressWarnings("unchecked")
-public abstract class RestServerCollectionAdapter 
+public abstract class RestServerCollectionAdapter
     extends AbstractCollectionAdapter {
   private static Logger logger =
     Logger.getLogger(RestServerCollectionAdapter.class.getName());
   @Inject BeanXmlConverter beanXmlConverter;
+  private static final String INVALID_FORMAT =
+    "Invalid format. only atom/json-c are supported";
 
-  protected ResponseContext returnFeed(RequestContext request, String title, 
+  private enum Format {
+    JSON("json-c"),
+    ATOM("atom");
+
+    private final String displayValue;
+
+    private Format(String displayValue) {
+      this.displayValue = displayValue;
+    }
+
+    public String getDisplayValue() {
+      return displayValue;
+    }
+  }
+
+  protected ResponseContext returnFeed(RequestContext request, String title,
       String author, List<Object> listOfObj) {
+    Format format = getFormatTypeFromRequest(request);
+    if (format == null) {
+      return ProviderHelper.badrequest(request, INVALID_FORMAT);
+    }
+
     Feed feed;
     try {
       feed = createFeedBase(request);
@@ -61,7 +84,7 @@ public abstract class RestServerCollectionAdapter
     // TODO updated should be set to the MAX(updated) of all entries
     feed.setUpdated(new Date());
     feed.setId(request.getUri().toString());
-    
+
     if (listOfObj != null) {
       // make Entries out of the list  of objects returned above
       for (Object obj : listOfObj) {
@@ -75,7 +98,7 @@ public abstract class RestServerCollectionAdapter
           entryId = request.getUri().toString() + "/" + ((Activity)obj).getId();
           updated = ((Activity)obj).getUpdated();
         }
-        Entry entry = fillEntry(request, obj, entryId, updated);
+        Entry entry = fillEntry(request, obj, entryId, updated, format);
         feed.insertEntry(entry);
       }
     }
@@ -84,40 +107,76 @@ public abstract class RestServerCollectionAdapter
           .setEntityTag(ProviderHelper.calculateEntityTag(feed));
   }
 
-  private Entry fillEntry(RequestContext request, Object obj, 
-      String id, Date updated) {
+  private Entry fillEntry(RequestContext request, Object obj,
+      String id, Date updated, Format format) {
     // create entry
     Entry entry = request.getAbdera().newEntry();
     entry.setId(id);
-    entry.setContent(beanXmlConverter.convertToXml(obj), "text/xml");
     entry.setUpdated(updated);
     // TODO what should this be?
     entry.addAuthor("Author TODO");
     // TODO what should this be?
     if (obj instanceof Person) {
-      entry.setTitle((((Person)obj).getName().getUnstructured() != null) ? 
+      entry.setTitle((((Person)obj).getName().getUnstructured() != null) ?
           ((Person)obj).getName().getUnstructured() : "title TODO");
     } else if (obj instanceof Activity) {
       entry.setTitle(((Activity)obj).getTitle());
     } else {
       entry.setTitle("title TODO");
-    } 
+    }
+
+    switch (format) {
+      case ATOM:
+        entry.setContent(beanXmlConverter.convertToXml(obj),
+            "application/xml");
+        break;
+      case JSON:
+        entry.setContent(((AbstractGadgetData)obj).toJson().toString(),
+            "application/json");
+        break;
+    }
 
     // TODO what is this
     //entry.setSource(feed.getAsSource());
     return entry;
   }
-  
-  protected ResponseContext returnEntry(RequestContext request, Object obj, 
+
+  protected ResponseContext returnEntry(RequestContext request, Object obj,
       String entryId, Date updated) {
-    if (null == obj) {
+    if (obj == null) {
       return ProviderHelper.notfound(request);
     }
-    
-    Entry entry = fillEntry(request, obj, entryId, updated);
-    return ProviderHelper.returnBase(entry.getDocument(), 200, 
+
+    Format format = getFormatTypeFromRequest(request);
+    if (format == null) {
+      return ProviderHelper.badrequest(request, INVALID_FORMAT);
+    }
+
+    Entry entry = fillEntry(request, obj, entryId, updated, format);
+    return ProviderHelper.returnBase(entry.getDocument(), 200,
         entry.getEdited())
         .setEntityTag(ProviderHelper.calculateEntityTag(entry));
+  }
+
+  /**
+   * returns the format (jsoc-c or atom) from the RequestContext obj
+   * created by Abdera from the URL request.
+   *
+   * @param request the RequestContext obj from Abdera
+   * @return the format
+   */
+  private Format getFormatTypeFromRequest(RequestContext request) {
+    String format = request.getTarget().getParameter("format");
+    logger.fine("format = " + format);
+
+    if (format == null ||
+        format.equals(Format.JSON.getDisplayValue())) {
+      return Format.JSON;
+    } else if (format.equals(Format.ATOM.getDisplayValue())) {
+      return Format.ATOM;
+    } else {
+      return null;
+    }
   }
 
   @Override
@@ -137,7 +196,6 @@ public abstract class RestServerCollectionAdapter
     return null;
   }
 
-
   public ResponseContext postEntry(RequestContext arg0) {
     //  Auto-generated method stub
     return null;
@@ -153,13 +211,4 @@ public abstract class RestServerCollectionAdapter
     return null;
   }
 
-  public ResponseContext getEntry(RequestContext request) {
-    // Auto-generated method stub
-    return null;
-  }
-
-  public ResponseContext getFeed(RequestContext request) {
-    // Auto-generated method stub
-    return null;
-  }
 }
