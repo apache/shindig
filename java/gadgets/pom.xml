@@ -17,24 +17,21 @@ KIND, either express or implied.  See the License for the
 specific language governing permissions and limitations
 under the License.
 -->
-<project xmlns="http://maven.apache.org/POM/4.0.0" 
-    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
-  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
   <parent>
     <groupId>org.apache.shindig</groupId>
     <artifactId>shindig-parent</artifactId>
     <version>1-SNAPSHOT</version>
     <relativePath>../pom.xml</relativePath>
   </parent>
-  <modelVersion>4.0.0</modelVersion>
-  <groupId>org.apache.shindig</groupId>
-  <artifactId>gadgets</artifactId>
-  <version>1-SNAPSHOT</version>
+
+  <artifactId>shindig-gadgets</artifactId>
   <packaging>jar</packaging>
-  <name>Apache Shindig Java Gadget Server</name>
-  <description>
-    Server part of Shindig for hosting OpenSocial applications.
-  </description>
+
+  <name>Apache Shindig Gadget Server</name>
+  <description>Server part of Shindig for hosting OpenSocial applications.</description>
 
   <scm>
     <connection>scm:svn:http://svn.apache.org/repos/asf/incubator/shindig/trunk/java/gadgets</connection>
@@ -63,8 +60,8 @@ under the License.
         </executions>
       </plugin>
       <plugin>
-          <groupId>org.apache.maven.plugins </groupId>
-          <artifactId>maven-eclipse-plugin</artifactId>
+        <groupId>org.apache.maven.plugins </groupId>
+        <artifactId>maven-eclipse-plugin</artifactId>
       </plugin>
       <plugin>
         <artifactId>maven-compiler-plugin</artifactId>
@@ -200,14 +197,11 @@ under the License.
   </build>
 
   <dependencies>
-    
     <!-- project dependencies -->
     <dependency>
       <groupId>org.apache.shindig</groupId>
       <artifactId>shindig-common</artifactId>
-      <version>1-SNAPSHOT</version>
     </dependency>
-    
     
     <!-- 
       external dependencies
@@ -247,6 +241,4 @@ under the License.
       <artifactId>commons-codec</artifactId>
     </dependency>
   </dependencies>
-  
-  
 </project>

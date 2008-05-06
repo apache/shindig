@@ -17,23 +17,21 @@ KIND, either express or implied.  See the License for the
 specific language governing permissions and limitations
 under the License.
 -->
-<project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd"
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+<project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <modelVersion>4.0.0</modelVersion>
+
   <parent>
     <groupId>org.apache.shindig</groupId>
     <artifactId>shindig-parent</artifactId>
     <version>1-SNAPSHOT</version>
     <relativePath>../pom.xml</relativePath>
   </parent>
-  <modelVersion>4.0.0</modelVersion>
-  <groupId>org.apache.shindig</groupId>
+
   <artifactId>shindig-common</artifactId>
-  <version>1-SNAPSHOT</version>
   <packaging>jar</packaging>
-  <name>Apache Shindig Java Common Code</name>
-  <description>
-    Common java code for Shindig
-  </description>
+
+  <name>Apache Shindig Common Code</name>
+  <description>Common java code for Shindig</description>
 
   <scm>
     <connection>scm:svn:http://svn.apache.org/repos/asf/incubator/shindig/trunk/java/common</connection>
@@ -41,17 +39,8 @@ under the License.
     <url>http://svn.apache.org/viewvc/incubator/shindig/trunk/java/common</url>
   </scm>
 
-  <build>
-    <sourceDirectory>${basedir}/src/main/java</sourceDirectory>
-    <testSourceDirectory>${basedir}/src/test/java</testSourceDirectory>
-    <outputDirectory>${basedir}/target/classes</outputDirectory>
-    <testOutputDirectory>${basedir}/target/test-classes</testOutputDirectory>
-    <finalName>shindig-common</finalName>
-    <plugins>
-    </plugins>
-  </build>
-
   <dependencies>
+    <!-- external dependencies -->
     <dependency>
       <groupId>com.google.code.guice</groupId>
       <artifactId>guice</artifactId>
