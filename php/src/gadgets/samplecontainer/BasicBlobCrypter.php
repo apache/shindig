@@ -4,8 +4,7 @@
  * 
  */
 
-class BlobExpiredException extends Exception {
-}
+class BlobExpiredException extends Exception {}
 
 //FIXME make this compatible with the java's blobcrypter
 class BasicBlobCrypter extends BlobCrypter {
@@ -49,7 +48,7 @@ class BasicBlobCrypter extends BlobCrypter {
 	private function serializeAndTimestamp(Array $in)
 	{
 		$encoded = "";
-		foreach ( $in as $key => $val ) {
+		foreach ($in as $key => $val) {
 			$encoded .= urlencode($key) . "=" . urlencode($val) . "&";
 		}
 		$encoded .= $this->TIMESTAMP_KEY . "=" . time();

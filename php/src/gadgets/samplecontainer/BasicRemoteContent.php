@@ -22,8 +22,8 @@ class BasicRemoteContent extends RemoteContent {
 	
 	public function fetch($request, $context)
 	{
-		global $config;
-		$cache = new $config['data_cache']();
+		$cache = Config::get('data_cache');
+		$cache = new $cache();
 		$remoteContentFetcher = new BasicRemoteContentFetcher();
 		if (! ($request instanceof RemoteContentRequest)) {
 			throw new RemoteContentException("Invalid request type in remoteContent");

@@ -3,7 +3,7 @@
 /**
  * Locale class doesn't exist in php, so to allow the code base to be closer to the java and it's spec
  * interpretation one, we created our own
- */ 
+ */
 class Locale {
 	public $language;
 	public $country;

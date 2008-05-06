@@ -66,7 +66,7 @@ class JsLibraryFeature extends GadgetFeature {
 	{
 		$libraries = array();
 		$libraries = $context->getRenderingContext() == 'GADGET' ? $this->gadgetLibraries : $this->containerLibraries;
-		foreach ( $libraries as $library ) {
+		foreach ($libraries as $library) {
 			$gadget->addJsLibrary($library);
 		}
 	}

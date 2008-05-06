@@ -18,8 +18,7 @@
  * under the License.
  */
 
-class GeneralSecurityException extends Exception {
-}
+class GeneralSecurityException extends Exception {}
 
 final class Crypto {
 	

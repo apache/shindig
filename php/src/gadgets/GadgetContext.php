@@ -55,17 +55,17 @@ class GadgetContext {
 		$this->setView($this->getViewParam());
 		$this->setContainer($this->getContainerParam());
 		//NOTE All classes are initialized when called (aka lazy loading) because we don't 
-		//need all of them in every situation
+	//need all of them in every situation
 	}
 	
 	private function getContainerParam()
 	{
 		$container = 'default';
-		if (!empty($_GET['container'])) {
+		if (! empty($_GET['container'])) {
 			$container = $_GET['container'];
 		} elseif (! empty($_POST['container'])) {
 			$container = $_POST['container'];
-		//FIXME The paramater used to be called 'synd' & is scheduled for removal
+			//FIXME The paramater used to be called 'synd' & is scheduled for removal
 		} elseif (! empty($_GET['synd'])) {
 			$container = $_GET['synd'];
 		} elseif (! empty($_POST['synd'])) {
@@ -119,7 +119,7 @@ class GadgetContext {
 	{
 		$prefs = array();
 		$userPrefParamPrefix = Config::get('userpref_param_prefix');
-		foreach ( $_GET as $key => $val ) {
+		foreach ($_GET as $key => $val) {
 			if (substr($key, 0, strlen($userPrefParamPrefix)) == $userPrefParamPrefix) {
 				$name = substr($key, strlen($userPrefParamPrefix));
 				$prefs[$name] = $val;

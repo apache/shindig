@@ -33,7 +33,7 @@ class BasicPeopleService extends PeopleService {
 	{
 		$allPeople = XmlStateFileFetcher::get()->getAllPeople();
 		$people = array();
-		foreach ( $ids as $id ) {
+		foreach ($ids as $id) {
 			$person = null;
 			if (isset($allPeople[$id])) {
 				$person = $allPeople[$id];
@@ -53,7 +53,7 @@ class BasicPeopleService extends PeopleService {
 					$newPerson['isOwner'] = $person->isOwner;
 					$newPerson['isViewer'] = $person->isViewer;
 					$newPerson['name'] = $person->name;
-					foreach ( $profileDetails as $field ) {
+					foreach ($profileDetails as $field) {
 						if (isset($person->$field) && ! isset($newPerson[$field])) {
 							$newPerson[$field] = $person->$field;
 						}
@@ -82,20 +82,20 @@ class BasicPeopleService extends PeopleService {
 	{
 		$friendIds = XmlStateFileFetcher::get()->getFriendIds();
 		$ids = array();
-		switch ( $idSpec->getType()) {
-			case 'OWNER' :
+		switch ($idSpec->getType()) {
+			case 'OWNER':
 				$ids[] = $token->getOwnerId();
 				break;
-			case 'VIEWER' :
+			case 'VIEWER':
 				$ids[] = $token->getViewerId();
 				break;
-			case 'OWNER_FRIENDS' :
+			case 'OWNER_FRIENDS':
 				$ids = $friendIds[$token->getOwnerId()];
 				break;
-			case 'VIEWER_FRIENDS' :
+			case 'VIEWER_FRIENDS':
 				$ids = $friendIds[$token->getViewerId()];
 				break;
-			case 'USER_IDS' :
+			case 'USER_IDS':
 				$ids = $idSpec->fetchUserIds();
 				break;
 		}

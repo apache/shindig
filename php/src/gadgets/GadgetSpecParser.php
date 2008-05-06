@@ -18,12 +18,10 @@
  * 
  */
 
-class SpecParserException extends Exception {
-}
+class SpecParserException extends Exception {}
 
 class GadgetSpecParser {
 	
-	//public function parse(GadgetId $id, String $xml)
 	public function parse($xml, $context)
 	{
 		if (empty($xml)) {
@@ -40,20 +38,19 @@ class GadgetSpecParser {
 		// process ModulePref attributes
 		$this->processModulePrefs($gadget, $doc->ModulePrefs);
 		// process UserPrefs, if any
-		foreach ( $doc->UserPref as $pref ) {
+		foreach ($doc->UserPref as $pref) {
 			$this->processUserPref($gadget, $pref);
 		}
-		foreach ( $doc->Content as $content ) {
+		foreach ($doc->Content as $content) {
 			$this->processContent($gadget, $content);
 		}
-		//FIXME : should we add an else { throw new SpecParserException("Missing <Content> block"); } here ? Java version doesn't but it seems like we should ?
-		foreach ( $doc->ModulePrefs->Require as $feature ) {
+		foreach ($doc->ModulePrefs->Require as $feature) {
 			$this->processFeature($gadget, $feature, true);
 		}
-		foreach ( $doc->ModulePrefs->Optional as $feature ) {
+		foreach ($doc->ModulePrefs->Optional as $feature) {
 			$this->processFeature($gadget, $feature, false);
 		}
-		//TODO java version has a todo here for parsing icons
+		//TODO Parse icons
 		return $gadget;
 	}
 	
@@ -63,9 +60,9 @@ class GadgetSpecParser {
 		if (empty($attributes['title'])) {
 			throw new SpecParserException("Missing or empty \"title\" attribute.");
 		}
-		// Get ModulePrefs attributes
-		// (trim is used here since it not only cleans up the text, but also auto-casts the SimpleXMLElement to a string)
+		// Get ModulePrefs base and extended attributes
 		// See http://code.google.com/apis/gadgets/docs/gadgets-extended-xsd.html 
+		// (trim is used here since it not only cleans up the text, but also auto-casts the SimpleXMLElement to a string)
 		$gadget->title = trim($attributes['title']);
 		$gadget->author = isset($attributes['author']) ? trim($attributes['author']) : '';
 		$gadget->authorEmail = isset($attributes['author_email']) ? trim($attributes['author_email']) : '';
@@ -92,7 +89,7 @@ class GadgetSpecParser {
 		$gadget->renderInline = isset($attributes['render_inline']) ? trim($attributes['render_inline']) : '';
 		$gadget->scaling = isset($attributes['scaling']) ? trim($attributes['scaling']) : '';
 		$gadget->scrolling = isset($attributes['scrolling']) ? trim($attributes['scrolling']) : '';
-		foreach ( $ModulePrefs->Locale as $locale ) {
+		foreach ($ModulePrefs->Locale as $locale) {
 			$gadget->localeSpecs[] = $this->processLocale($locale);
 		}
 	}
@@ -126,7 +123,7 @@ class GadgetSpecParser {
 		$preference->dataType = isset($attributes['datatype']) && in_array(strtoupper($attributes['datatype']), $preference->DataTypes) ? strtoupper($attributes['datatype']) : 'STRING';
 		$preference->defaultValue = isset($attributes['default_value']) ? trim($attributes['default_value']) : '';
 		if (isset($pref->EnumValue)) {
-			foreach ( $pref->EnumValue as $enum ) {
+			foreach ($pref->EnumValue as $enum) {
 				$attr = $enum->attributes();
 				// java based shindig doesn't throw an exception here, but it -is- invalid and should trigger a parse error
 				if (empty($attr['value'])) {
@@ -146,21 +143,22 @@ class GadgetSpecParser {
 		if (empty($attributes['type'])) {
 			throw new SpecParserException("No content type specified!");
 		}
-		$type = trim($attributes['type']);
-		if ($type == 'url') {
-			if (empty($attributes['href'])) {
-				throw new SpecParserException("Malformed <Content> href value");
+		$view = isset($attributes['view']) ? trim($attributes['view']) : '';
+		$views = explode(',', $view);
+		$html = (string)$content; // no trim here since empty lines can have structural meaning, so typecast to string instead
+		foreach ($views as $view) {
+			if (empty($view)) {
+				$view = DEFAULT_VIEW;
 			}
-			$url = trim($attributes['href']);
-			$gadget->contentType = 'URL';
-			$gadget->contentHref = $url;
-		} else {
-			$gadget->contentType = 'HTML';
-			$html = (string)$content; // no trim here since empty lines can have structural meaning, so typecast to string instead
-			$view = isset($attributes['view']) ? trim($attributes['view']) : '';
-			$views = explode(',', $view);
-			foreach ( $views as $view ) {
-				$gadget->addContent($view, $html);
+			$viewSpec = new ViewSpec($view, $content);
+			if (! isset($gadget->views[$view])) {
+				$viewSpec->content = $html;
+				$gadget->views[$view] = $viewSpec;
+			} else {
+				if ($gadget->views[$view]->getName() == $viewSpec->getName() && $viewSpec->getType() != $gadget->views[$view]->getType()) {
+					throw new SpecParserException("You may not mix content " . " types in the same view.");
+				}				
+				$gadget->views[$view]->addContent($html);
 			}
 		}
 	}
@@ -170,11 +168,11 @@ class GadgetSpecParser {
 		$featureSpec = new FeatureSpec();
 		$attributes = $feature->attributes();
 		if (empty($attributes['feature'])) {
-			throw new SpecParserException("Feature not specified in <" . (required ? "Required" : "Optional") . "> tag");
+			throw new SpecParserException("Feature not specified in <" . ($required ? "Required" : "Optional") . "> tag");
 		}
 		$featureSpec->name = trim($attributes['feature']);
 		$featureSpec->optional = ! $required;
-		foreach ( $feature->Param as $param ) {
+		foreach ($feature->Param as $param) {
 			$attr = $param->attributes();
 			if (empty($attr['name'])) {
 				throw new SpecParserException("Missing name attribute in <Param>.");

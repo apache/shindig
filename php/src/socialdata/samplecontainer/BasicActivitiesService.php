@@ -23,7 +23,7 @@ class BasicActivitiesService {
 	{
 		$allActivities = XmlStateFileFetcher::get()->getActivities();
 		$activities = array();
-		foreach ( $ids as $id ) {
+		foreach ($ids as $id) {
 			if (isset($allActivities[$id])) {
 				$activities[] = $allActivities[$id];
 			}

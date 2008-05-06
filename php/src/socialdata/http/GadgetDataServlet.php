@@ -18,7 +18,7 @@ class GadgetDataServlet extends HttpServlet {
 			$this->handlers[] = new StateFileDataHandler();
 		} else {
 			$handlers = explode(',', $handlers);
-			foreach ( $handlers as $handler ) {
+			foreach ($handlers as $handler) {
 				$this->handlers[] = new $handler();
 			}
 		}
@@ -41,7 +41,7 @@ class GadgetDataServlet extends HttpServlet {
 		
 		try {
 			$response = new DataResponse($this->createResponse($requestParam, $token));
-		} catch ( Exception $e ) {
+		} catch (Exception $e) {
 			$response = new DataResponse(false, BAD_REQUEST);
 		}
 		echo json_encode($response);
@@ -49,11 +49,11 @@ class GadgetDataServlet extends HttpServlet {
 	
 	private function createResponse($requestParam, $token)
 	{
-		global $config;
 		if (empty($token)) {
 			throw new Exception("INVALID_GADGET_TOKEN");
 		}
-		$gadgetSigner = new $config['gadget_signer']();
+		$gadgetSigner = Config::get('gadget_signer');
+		$gadgetSigner = new $gadgetSigner();
 		//FIXME currently don't have a propper token, impliment and re-enable this asap
 		$securityToken = $gadgetSigner->createToken($token);
 		$responseItems = array();
@@ -63,10 +63,10 @@ class GadgetDataServlet extends HttpServlet {
 			// it just returns the original string
 			throw new Exception("Invalid request JSON");
 		}
-		foreach ( $requests as $request ) {
+		foreach ($requests as $request) {
 			$requestItem = new RequestItem($request['type'], $request, $securityToken);
 			$response = new ResponseItem(NOT_IMPLEMENTED, $request['type'] . " has not been implemented yet.", array());
-			foreach ( $this->handlers as $handler ) {
+			foreach ($this->handlers as $handler) {
 				if ($handler->shouldHandle($request['type'])) {
 					$response = $handler->handleRequest($requestItem);
 				}

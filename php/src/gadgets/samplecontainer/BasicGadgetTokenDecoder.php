@@ -25,12 +25,12 @@ class BasicGadgetTokenDecoder extends GadgetTokenDecoder {
 	private $CONTAINER_INDEX = 3;
 	private $APP_URL_INDEX = 4;
 	private $MODULE_ID_INDEX = 5;
-
+	
 	/**
- 	* {@inheritDoc}
-	*
- 	* Returns a token with some faked out values.
- 	*/
+	 * {@inheritDoc}
+	 *
+	 * Returns a token with some faked out values.
+	 */
 	public function createToken($stringToken)
 	{
 		if (empty($stringToken)) {
@@ -41,15 +41,8 @@ class BasicGadgetTokenDecoder extends GadgetTokenDecoder {
 			// in the example files
 			if (Config::get('allow_plaintext_token') && count(explode(':', $stringToken)) == 6) {
 				$tokens = explode(":", $stringToken);
-				return new BasicGadgetToken(null,null,
-					urldecode($tokens[$this->OWNER_INDEX]),
-					urldecode($tokens[$this->VIEWER_INDEX]),
-					urldecode($tokens[$this->APP_ID_INDEX]),
-					urldecode($tokens[$this->CONTAINER_INDEX]),
-					urldecode($tokens[$this->APP_URL_INDEX]),
-					urldecode($tokens[$this->MODULE_ID_INDEX])
-				);
-			} else {			
+				return new BasicGadgetToken(null, null, urldecode($tokens[$this->OWNER_INDEX]), urldecode($tokens[$this->VIEWER_INDEX]), urldecode($tokens[$this->APP_ID_INDEX]), urldecode($tokens[$this->CONTAINER_INDEX]), urldecode($tokens[$this->APP_URL_INDEX]), urldecode($tokens[$this->MODULE_ID_INDEX]));
+			} else {
 				return BasicGadgetToken::createFromToken($stringToken, Config::get('st_max_age'));
 			}
 		} catch (Exception $e) {

@@ -23,11 +23,11 @@ class BasicDataService extends DataService {
 	{
 		$allData = XmlStateFileFetcher::get()->getAppData();
 		$data = array();
-		foreach ( $ids as $id ) {
+		foreach ($ids as $id) {
 			if (isset($allData[$id])) {
 				$allPersonData = $allData[$id];
 				$personData = array();
-				foreach ( array_keys($allPersonData) as $key ) {
+				foreach (array_keys($allPersonData) as $key) {
 					if (in_array($key, $keys) || $keys[0] == "*") {
 						$personData[$key] = $allPersonData[$key];
 					}
@@ -59,7 +59,7 @@ class BasicDataService extends DataService {
 		if (empty($key)) {
 			return false;
 		}
-		for($i = 0; $i < strlen($key); ++ $i) {
+		for ($i = 0; $i < strlen($key); ++ $i) {
 			$c = substr($key, $i, 1);
 			if (($c >= 'a' && $c <= 'z') || ($c >= 'A' && $c <= 'Z') || ($c >= '0' && $c <= '9') || ($c == '-') || ($c == '_') || ($c == '.')) {
 				continue;

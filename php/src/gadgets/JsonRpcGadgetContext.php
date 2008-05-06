@@ -5,7 +5,7 @@ class JsonRpcGadgetContext extends GadgetContext {
 	private $view = null;
 	private $url = null;
 	private $container = null;
-
+	
 	public function __construct($jsonContext, $url)
 	{
 		parent::__construct('GADGET');

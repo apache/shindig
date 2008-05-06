@@ -4,7 +4,7 @@
  * But since PHP lacks a propper way to set application configurations, and any other method 
  * would be horribly slow (db, xml, ini files etc), so ... here's our config.php
  */
-$config = array(
+$shindigConfig = array(
 	// Show debug backtrace? Set this to false on anything that resembles a production env
 	'debug' => false,
 
@@ -35,10 +35,11 @@ $config = array(
 	'features_path' => realpath(dirname(__FILE__)) . '/../features/',
 	'container_path' => realpath(dirname(__FILE__)) . '/../config/',
 	'javascript_path' => realpath(dirname(__FILE__)) . '/../javascript/', 
+	'container_config' => realpath(dirname(__FILE__)) . '/../config/container.js',
 
 	// The data handlers for the social data, this is a list of class names
 	// seperated by a , For example:
-	// 'handlers' => 'OpenSocialDataHandler,StateFileDataHandler',
+	// 'handlers' => 'PartuzaHandler',
 	// if the value is empty, the defaults used in the example above will be used.
 	'handlers' => '',
 
@@ -51,7 +52,7 @@ $config = array(
 	// as the output file. Leave empty if you don't want this functionality.
 	//
 	// Config example for using the yuicompressor:
-	//'compress_command' => "java -jar " . realpath(dirname(__FILE__)) . "/../../yuicompressor-2.3.5.jar -o %2\$s %1\$s",
+	//'compress_command' => "java -jar " . realpath(dirname(__FILE__)) . "/yuicompressor-2.3.5.jar -o %2\$s %1\$s",
 	'compress_command' => '',
 	
 	// Configurable classes to use, this way we provide extensibility for what 
@@ -81,15 +82,21 @@ $config = array(
 	'base_path' => realpath(dirname(__FILE__))
 );
 
+class ConfigException extends Exception {}
+
 /**
  * Abstracts how to retrieve configuration values so we can replace the
  * not so pretty $config array some day.
  *
- */class Config {
+ */
+class Config {
 	static function get($key)
 	{
-		global $config;
-		return $config[$key];
+		global $shindigConfig;
+		if (isset($shindigConfig[$key])) {
+			return $shindigConfig[$key];
+		} else {
+			throw new ConfigException("Invalid Config Key");
+		}
 	}
-	
 }
