@@ -30,17 +30,18 @@ class HttpUtil {
 			$containerConfig = $context->getContainerConfig();
 			$config = $containerConfig->getConfig('default', 'gadgets.features');
 			$configViews = $config['views'];
-			$views = $configViews[$context->getView()];
-			if (!empty($views)) {
-				$aliasesViews = $views['aliases'];
-				for ($i = 0; $i < count($aliasesViews); $i++) {
-					$view = $gadget->getView($aliasesViews[$i]);
-					if (!empty($view)) {
-						break;
+			if (isset($configViews[$context->getView()])) {
+				$views = $configViews[$context->getView()];
+				if (!empty($views)) {
+					$aliasesViews = $views['aliases'];
+					for ($i = 0; $i < count($aliasesViews); $i++) {
+						$view = $gadget->getView($aliasesViews[$i]);
+						if (!empty($view)) {
+							break;
+						}
 					}
 				}
-			}
-			if (empty($view)) {
+			} else {
 				$view = $gadget->getView(DEFAULT_VIEW);
 			}
 		}
