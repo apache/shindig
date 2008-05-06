@@ -17,39 +17,33 @@ KIND, either express or implied.  See the License for the
 specific language governing permissions and limitations
 under the License.
 -->
-<project xmlns="http://maven.apache.org/POM/4.0.0" 
-  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
-  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
-  
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+    
   <parent>
     <groupId>org.apache.shindig</groupId>
     <artifactId>shindig-parent</artifactId>
     <version>1-SNAPSHOT</version>
     <relativePath>../pom.xml</relativePath>
   </parent>
-  <modelVersion>4.0.0</modelVersion>
-  <groupId>org.apache.shindig</groupId>
+
   <artifactId>shindig-server</artifactId>
-  <version>1-SNAPSHOT</version>
   <packaging>war</packaging>
-  <name>Apache Shindig Java Gadget Server</name>
-  <description>
-    Default server war containing both the Gadget Server and the Social-Api server.
-  </description>
-  
-  
+
+  <name>Apache Shindig Gadget Server</name>
+  <description>Default server war containing both the Gadget Server and the Social-Api server.</description>
   
   <scm>
     <connection> scm:svn:http://svn.apache.org/repos/asf/incubator/shindig/trunk/java/server</connection>
     <developerConnection>scm:svn:https://svn.apache.org/repos/asf/incubator/shindig/trunk/java/server</developerConnection>
     <url>http://svn.apache.org/viewvc/incubator/shindig/trunk/java/server</url>
   </scm>
+
   <properties>
     <runType>full</runType>
   </properties>
   
   <build>
-    
     <plugins>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
@@ -108,23 +102,18 @@ under the License.
       </resource>
     </resources>
   </build>
+
   <dependencies>
-    
     <!-- project dependencies -->
     <dependency>
       <groupId>org.apache.shindig</groupId>
-      <artifactId>gadgets</artifactId>
-      <version>1-SNAPSHOT</version>
+      <artifactId>shindig-gadgets</artifactId>
     </dependency>
-    
     <dependency>
       <groupId>org.apache.shindig</groupId>
-      <artifactId>social-api</artifactId>
-      <version>1-SNAPSHOT</version>
+      <artifactId>shindig-social-api</artifactId>
     </dependency>
 
-    
     <!-- external dependencies -->
-    
   </dependencies>
 </project>

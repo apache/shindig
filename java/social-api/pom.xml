@@ -18,21 +18,20 @@ specific language governing permissions and limitations
 under the License.
 -->
 <project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <modelVersion>4.0.0</modelVersion>
+
   <parent>
     <groupId>org.apache.shindig</groupId>
     <artifactId>shindig-parent</artifactId>
     <version>1-SNAPSHOT</version>
     <relativePath>../pom.xml</relativePath>
   </parent>
-  <modelVersion>4.0.0</modelVersion>
-  <groupId>org.apache.shindig</groupId>
-  <artifactId>social-api</artifactId>
-  <version>1-SNAPSHOT</version>
+
+  <artifactId>shindig-social-api</artifactId>
   <packaging>jar</packaging>
-  <name>Apache Shindig Java REST API Server</name>
-  <description>
-    Server part of Shindig for hosting OpenSocial Data APIs.
-  </description>
+
+  <name>Apache Shindig REST API Server</name>
+  <description>Server part of Shindig for hosting OpenSocial Data APIs.</description>
 
   <scm>
     <connection>scm:svn:http://svn.apache.org/repos/asf/incubator/shindig/trunk/java/social-api</connection>
@@ -48,22 +47,16 @@ under the License.
     </resources>    
   </build>
 
-  <repositories>
-  </repositories>
-
   <dependencies>
     <dependency>
       <!-- project dependencies -->
       <groupId>org.apache.shindig</groupId>
       <artifactId>shindig-common</artifactId>
-      <version>1-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>org.apache.shindig</groupId>
-      <artifactId>gadgets</artifactId>
-      <version>1-SNAPSHOT</version>
+      <artifactId>shindig-gadgets</artifactId>
     </dependency>
-    
 
     <!-- external depenencies -->
     <dependency>
@@ -88,6 +81,4 @@ under the License.
       <groupId>commons-betwixt</groupId>
     </dependency>
   </dependencies>
-  
-  
 </project>
