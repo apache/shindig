@@ -26,12 +26,14 @@
     <script src="jsonactivity.js"></script>
     <script src="jsoncontainer.js"></script>
     <script src="batchrequest.js"></script>
+    <script src="restfulcontainer.js"></script>
     <script>
       var requiredConfig = {
         "path": gadgets.config.NonEmptyStringValidator,
         "domain": gadgets.config.NonEmptyStringValidator,
         "enableCaja": gadgets.config.BooleanValidator,
-        "supportedFields": gadgets.config.ExistsValidator
+        "supportedFields": gadgets.config.ExistsValidator,
+        "useRestful": gadgets.config.BooleanValidator
       };
 
       gadgets.config.register("opensocial-0.7", requiredConfig,
@@ -44,12 +46,23 @@
           };
           ShindigContainer.inherits(JsonContainer);
 
-          opensocial.Container.setContainer(new ShindigContainer());
+          RestfulShindigContainer = function() {
+            RestfulContainer.call(this, configParams.path,
+                configParams.domain, configParams.supportedFields);
+          };
+          RestfulShindigContainer.inherits(RestfulContainer);
+
+          if (configParams.useRestful) {
+            opensocial.Container.setContainer(new RestfulShindigContainer());
+          } else {
+            opensocial.Container.setContainer(new ShindigContainer());
+          }
 
           if (configParams.enableCaja) {
             opensocial.Container.get().enableCaja();
           }
       });
+
     </script>
   </gadget>
 </feature>

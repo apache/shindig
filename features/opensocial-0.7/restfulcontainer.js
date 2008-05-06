@@ -76,19 +76,24 @@ RestfulContainer.prototype.requestData = function(dataRequest, callback) {
   var globalError = false;
   var responsesReceived = 0;
 
-  // may need multiple urls for one response but lets ignore that for now
-  for (var i = 0; i < totalRequests; i++) {
-    var requestObject = requestObjects[i];
+  var checkIfFinished = function() {
+    responsesReceived++;
+    if (responsesReceived == totalRequests) {
+      var dataResponse = new opensocial.DataResponse(responseMap, globalError);
+      callback(dataResponse);
+    }
+  }
 
+  var makeProxiedRequest = function(requestObject, baseUrl, st) {
     var makeRequestParams = {
-      "CONTENT_TYPE" : "JSON",
+      "CONTENT_TYPE" : "DOM",
       "METHOD" : requestObject.request.method
       // TODO: Handle post data
     };
 
     // TODO: Use batching instead of doing this one by one
     gadgets.io.makeNonProxiedRequest(
-        requestObject.request.url + "st=" + this.securityToken,
+        baseUrl + requestObject.request.url + "&st=" + st,
         function(result) {
           result = result.data;
 
@@ -98,30 +103,24 @@ RestfulContainer.prototype.requestData = function(dataRequest, callback) {
           globalError = globalError || processedData.hadError();
           responseMap[requestObject.key] = processedData;
 
-          responsesReceived++;
-          if (responsesReceived == totalRequests) {
-            var dataResponse = new opensocial.DataResponse(responseMap,
-                globalError);
-            callback(dataResponse);
-          }
+          checkIfFinished();
         },
         makeRequestParams);
   }
 
-};
+  // may need multiple urls for one response but lets ignore that for now
+  for (var i = 0; i < totalRequests; i++) {
+    makeProxiedRequest(requestObjects[i], this.baseUrl_, this.securityToken_);
+  }
 
-RestfulContainer.prototype.newFetchPersonRequest = function(id, opt_params) {
-  var peopleRequest = this.newFetchPeopleRequest(id, opt_params);
-
-  var me = this;
-  return new RequestItem(peopleRequest.url, peopleRequest.method, null,
-      function(rawJson) {
-        return me.createPersonFromJson(rawJson['items'][0]);
-      });
 };
 
 RestfulContainer.prototype.translateIdSpec = function(idSpec) {
   // This will get cleaner in 0.8 because idSpec will be an object
+
+  // TODO: Some of these rest urls return "feeds" and some return "entries"..
+  // this is going to get complicated unless we can get them all in the same
+  // format
   if (idSpec == "VIEWER") {
     return this.viewerId_ + "/@self";
   } else if (idSpec == "VIEWER_FRIENDS") {
@@ -130,7 +129,7 @@ RestfulContainer.prototype.translateIdSpec = function(idSpec) {
     return this.ownerId_ + "/@self";
   } else if (idSpec == "OWNER_FRIENDS") {
     return this.ownerId_ + "/@friends";
-  } else if (this.isArray(idSpec)) {
+  } else if (opensocial.Container.isArray(idSpec)) {
     for (var i = 0; i < idSpec.length; i++) {
       // TODO: We will need multiple urls here....don't want to think about
       // that yet
@@ -138,6 +137,16 @@ RestfulContainer.prototype.translateIdSpec = function(idSpec) {
   } else {
     return idSpec + "/@self";
   }
+};
+
+RestfulContainer.prototype.newFetchPersonRequest = function(id, opt_params) {
+  var peopleRequest = this.newFetchPeopleRequest(id, opt_params);
+
+  var me = this;
+  return new RestfulRequestItem(peopleRequest.url, peopleRequest.method, null,
+      function(rawJson) {
+        return me.createPersonFromJson(rawJson);
+      });
 };
 
 RestfulContainer.prototype.newFetchPeopleRequest = function(idSpec,
@@ -148,12 +157,12 @@ RestfulContainer.prototype.newFetchPeopleRequest = function(idSpec,
   //    'sortOrder': opt_params['sortOrder'] || 'topFriends',
   //    'filter': opt_params['filter'] || 'all',
 
-  url += "fields=" + (opt_params['profileDetail'].join(','));
-  url += "startPage=" + (opt_params['first'] || 0);
-  url += "count=" + (opt_params['max'] || 20);
+  url += "?fields=" + (opt_params['profileDetail'].join(','));
+  url += "&startPage=" + (opt_params['first'] || 0);
+  url += "&count=" + (opt_params['max'] || 20);
 
   var me = this;
-  return new RequestItem(url, "GET", null,
+  return new RestfulRequestItem(url, "GET", null,
       function(rawJson) {
         var jsonPeople = rawJson['items'];
         var people = [];
@@ -173,7 +182,7 @@ RestfulContainer.prototype.newFetchPersonAppDataRequest = function(idSpec,
     keys) {
    var url = "/appdata/" + this.translateIdSpec(idSpec) + "/" + this.appId_
        + "?fields=" + keys.join(',');
-  return new RequestItem(url, "GET", null,
+  return new RestfulRequestItem(url, "GET", null,
       function (appData) {
         return gadgets.util.escape(appData, true);
       });
@@ -184,14 +193,14 @@ RestfulContainer.prototype.newUpdatePersonAppDataRequest = function(id, key,
   var url = "/appdata/" + this.translateIdSpec(idSpec) + "/" + this.appId_
        + "?fields=" + key;
   // TODO: Or should we use POST?
-  return new RequestItem(url, "PUT", {key: value});
+  return new RestfulRequestItem(url, "PUT", {key: value});
 };
 
 RestfulContainer.prototype.newFetchActivitiesRequest = function(idSpec,
     opt_params) {
   var url = "/activities/" + this.translateIdSpec(idSpec)
       + "?app=" + this.appId_;
-  return new RequestItem(url, "GET", null,
+  return new RestfulRequestItem(url, "GET", null,
       function(rawJson) {
         var activities = [];
         for (var i = 0; i < rawJson.length; i++) {
@@ -204,10 +213,10 @@ RestfulContainer.prototype.newFetchActivitiesRequest = function(idSpec,
 RestfulContainer.prototype.newCreateActivityRequest = function(idSpec,
     activity) {
    // TODO: no idea how to do this yet
-  return new RequestItem("TODO", "POST", {});
+  return new RestfulRequestItem("TODO", "POST", {});
 };
 
-RequestItem = function(url, method, postData, processData) {
+RestfulRequestItem = function(url, method, postData, processData) {
   this.url = url;
   this.method = method;
   this.postData = postData;
@@ -216,8 +225,19 @@ RequestItem = function(url, method, postData, processData) {
       return rawJson;
     };
 
-  this.processResponse = function(originalDataRequest, rawJson, error,
+  this.processResponse = function(originalDataRequest, rawXml, error,
       errorMessage) {
+
+    var rawJson;
+    if (!error) {
+      var contentNode = rawXml.getElementsByTagName("content")[0];
+      if (contentNode) {
+        rawJson = gadgets.json.parse(contentNode.childNodes[0].nodeValue);
+      } else {
+        error = true;
+      }
+    }
+
     return new opensocial.ResponseItem(originalDataRequest,
         error ? null : this.processData(rawJson), error, errorMessage);
   }

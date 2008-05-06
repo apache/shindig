@@ -102,7 +102,12 @@
     "supportedFields" : {
        "person" : ["id", "name", "thumbnailUrl", "profileUrl"],
        "activity" : ["id", "title"]
-    }
+    },
+    // If true, the restful wire format will be used.
+    // Otherwise, uses the json wire format.
+    // If you are using the default Shindig setup and want to use rest, don't
+    // forget to change the "path" config to /social/rest
+    "useRestful" : false
   }
 
 }}
