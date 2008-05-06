@@ -18,8 +18,7 @@
  * 
  */
 
-class CacheException extends Exception {
-}
+class CacheException extends Exception {}
 
 abstract class Cache {
 	

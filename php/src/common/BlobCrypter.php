@@ -18,8 +18,7 @@
  * under the License.
  */
 
-class BlobCrypterException extends Exception {
-}
+class BlobCrypterException extends Exception {}
 
 /**
  * Utility interface for managing signed, encrypted, and time stamped blobs.

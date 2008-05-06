@@ -84,7 +84,12 @@ class ProxyHandler {
 	 */
 	public function fetch($url, $signer, $method)
 	{
-		$token = $this->extractAndValidateToken($signer);
+		try {
+			$token = $this->extractAndValidateToken($signer);
+		} catch (Exception $e) {
+			$token = '';
+			// no token given, safe to ignore
+		}
 		$originalUrl = $this->validateUrl($url);
 		$signedUrl = $this->signUrl($originalUrl, $token);
 		//TODO: Fetcher needs to handle variety of HTTP methods.

@@ -39,7 +39,7 @@ class BasicRemoteContentFetcher extends RemoteContentFetcher {
 		if ($request->hasHeaders()) {
 			$headers = explode("\n", $request->getHeaders());
 			$outHeaders = array();
-			foreach ( $headers as $header ) {
+			foreach ($headers as $header) {
 				if (strpos($header, ':')) {
 					$key = trim(substr($header, 0, strpos($header, ':')));
 					$val = trim(substr($header, strpos($header, ':') + 1));
@@ -59,7 +59,7 @@ class BasicRemoteContentFetcher extends RemoteContentFetcher {
 		$header = '';
 		$body = '';
 		// on redirects and such we get multiple headers back from curl it seems, we really only want the last one
-		while ( substr($content, 0, strlen('HTTP')) == 'HTTP' && strpos($content, "\r\n\r\n") !== false ) {
+		while (substr($content, 0, strlen('HTTP')) == 'HTTP' && strpos($content, "\r\n\r\n") !== false) {
 			$header = substr($content, 0, strpos($content, "\r\n\r\n"));
 			$content = $body = substr($content, strlen($header) + 4);
 		}

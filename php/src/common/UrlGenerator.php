@@ -18,17 +18,12 @@
  * 
  */
 
-/*
- * remoteContent* classes, we departed from the shindig java base style a bit here
- * We want to use curl_multi for our content fetching because we don't have any fancy 
- * worker queue's where the java variant does. 
- * So a different methodlogy which calls for a different working unfortunatly, however
- * it's kept in the spirit of the java variant as much as possible
- */
-
-class RemoteContentException extends Exception {}
-
-abstract class RemoteContent {
-	
-	abstract public function fetch($request, $context);
+class UrlGenerator {
+	static function getIframeURL($gadget)
+	{
+		//TODO this
+		// returns fake demo value to make the basic JsonRpc service work
+		// note: put the URL last, else some browsers seem to get confused (reported by hi5)
+		return "/gadgets/ifr?container=default&mid=1&v=db18c863f15d5d1e758a91f2a44881b4&lang=en&country=US&url=http%3A%2F%2Fwww.google.com%2Fig%2Fmodules%2Fhello.xml";
+	}
 }

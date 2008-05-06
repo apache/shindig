@@ -25,7 +25,7 @@ class Substitutions {
 	
 	public function __construct()
 	{
-		foreach ( $this->types as $type ) {
+		foreach ($this->types as $type) {
 			$this->substitutions[$type] = array();
 		}
 	}
@@ -37,14 +37,14 @@ class Substitutions {
 	
 	public function addSubstitutions($type, $array)
 	{
-		foreach ( $array as $key => $value ) {
+		foreach ($array as $key => $value) {
 			$this->addSubstitution($type, $key, $value);
 		}
 	}
 	
 	public function substitute($input)
 	{
-		foreach ( $this->types as $type ) {
+		foreach ($this->types as $type) {
 			$input = $this->substituteType($type, $input);
 		}
 		return $input;

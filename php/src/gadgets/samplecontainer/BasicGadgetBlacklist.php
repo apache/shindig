@@ -23,8 +23,7 @@ class BasicGadgetBlacklist {
 	
 	public function __construct()
 	{
-		global $config;
-		$file = $config['base_path'] . '/blacklist.txt';
+		$file = Config::get('base_path') . '/blacklist.txt';
 		//TODO make this a configurable location
 		if (file_exists($file) && is_readable($file)) {
 			$this->rules = explode("\n", file_get_contents($file));
@@ -33,7 +32,7 @@ class BasicGadgetBlacklist {
 	
 	function isBlacklisted($url)
 	{
-		foreach ( $this->rules as $rule ) {
+		foreach ($this->rules as $rule) {
 			if (preg_match($rule, $url)) {
 				return true;
 			}

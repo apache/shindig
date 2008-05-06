@@ -1,4 +1,22 @@
-<?
+<?php
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements. See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership. The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License. You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations under the License.
+ * 
+ */
 
 class ContainerConfig {
 	public $default_container = 'default';
@@ -17,7 +35,7 @@ class ContainerConfig {
 		if (! file_exists($containers) || ! is_dir($containers)) {
 			throw new Exception("Invalid container path");
 		}
-		foreach ( glob("$containers/*.js") as $file ) {
+		foreach (glob("$containers/*.js") as $file) {
 			if (! is_readable($file)) {
 				throw new Exception("Could not read container config: $file");
 			}
@@ -42,7 +60,7 @@ class ContainerConfig {
 		}
 		$container = $config[$this->container_key][0];
 		$this->config[$container] = array();
-		foreach ( $config as $key => $val ) {
+		foreach ($config as $key => $val) {
 			$this->config[$container][$key] = $val;
 		}
 	}
@@ -56,6 +74,7 @@ class ContainerConfig {
 		if ($container != $this->default_container && isset($this->config[$container][$name])) {
 			$config = $this->mergeConfig($this->config[$container][$name], $config);
 		}
+		
 		return $config;
 	}
 	
@@ -66,15 +85,15 @@ class ContainerConfig {
 	{
 		$arrays = func_get_args();
 		$narrays = count($arrays);
-		for($i = 0; $i < $narrays; $i ++) {
+		for ($i = 0; $i < $narrays; $i ++) {
 			if (! is_array($arrays[$i])) {
 				trigger_error('Argument #' . ($i + 1) . ' is not an array - trying to merge array with scalar! Returning null!', E_USER_WARNING);
 				return null;
 			}
 		}
 		$ret = $arrays[0];
-		for($i = 1; $i < $narrays; $i ++) {
-			foreach ( $arrays[$i] as $key => $value ) {
+		for ($i = 1; $i < $narrays; $i ++) {
+			foreach ($arrays[$i] as $key => $value) {
 				if (((string)$key) === ((string)intval($key))) { // integer or string as integer key - append
 					$ret[] = $value;
 				} else {

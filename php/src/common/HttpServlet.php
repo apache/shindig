@@ -71,7 +71,7 @@ class HttpServlet {
 			} else {
 				// attempt at some propper header handling from php
 				// this departs a little from the shindig code but it should give is valid http protocol handling
-				header('Cache-Control: public,max-age=' . Config::get('cache_time') . ',must-revalidate');
+				header('Cache-Control: public,max-age=' . Config::get('cache_time'));
 				header("Expires: " . gmdate("D, d M Y H:i:s", time() + Config::get('cache_time')) . " GMT");
 				// Obey browsers (or proxy's) request to send a fresh copy if we recieve a no-cache pragma or cache-control request
 				if (! isset($_SERVER['HTTP_PRAGMA']) || ! strstr(strtolower($_SERVER['HTTP_PRAGMA']), 'no-cache') && (! isset($_SERVER['HTTP_CACHE_CONTROL']) || ! strstr(strtolower($_SERVER['HTTP_CACHE_CONTROL']), 'no-cache'))) {

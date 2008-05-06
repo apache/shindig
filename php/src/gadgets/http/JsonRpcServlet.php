@@ -39,7 +39,7 @@ class JsonRpcServlet extends HttpServlet {
 			header("HTTP/1.0 500 Internal Server Error", true, 500);
 			echo "<html><body><h1>Internal Server Error</h1><br />";
 			if (Config::get('debug')) {
-				echo $e->getMessage()."<br /><pre>";
+				echo $e->getMessage() . "<br /><pre>";
 				print_r(debug_backtrace());
 				echo "</pre>";
 			}

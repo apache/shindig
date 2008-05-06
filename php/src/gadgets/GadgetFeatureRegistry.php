@@ -39,14 +39,14 @@ class GadgetFeatureRegistry {
 		$loader = new JsFeatureLoader($this->debug);
 		$jsFeatures = $loader->loadFeatures($featurePath, $this);
 		if (! $this->coreDone) {
-			foreach ( $jsFeatures as $entry ) {
+			foreach ($jsFeatures as $entry) {
 				if (strtolower(substr($entry->name, 0, strlen('core'))) == 'core') {
 					$coreDeps[] = $entry->name;
 					$this->core[$entry->name] = $entry->name;
 				}
 			}
 			// Make sure non-core features depend on core.
-			foreach ( $jsFeatures as $entry ) {
+			foreach ($jsFeatures as $entry) {
 				if (strtolower(substr($entry->name, 0, strlen('core'))) != 'core') {
 					$entry->deps = array_merge($entry->deps, $this->core);
 				}
@@ -89,7 +89,7 @@ class GadgetFeatureRegistry {
 			$resultsFound = $this->core;
 			return true;
 		}
-		foreach ( $needed as $featureName ) {
+		foreach ($needed as $featureName) {
 			$entry = isset($this->features[$featureName]) ? $this->features[$featureName] : null;
 			if ($entry == null) {
 				$resultsMissing[] = $featureName;
@@ -102,7 +102,7 @@ class GadgetFeatureRegistry {
 	
 	private function addEntryToSet(&$results, $entry)
 	{
-		foreach ( $entry->deps as $dep ) {
+		foreach ($entry->deps as $dep) {
 			$this->addEntryToSet($results, $this->features[$dep]);
 		}
 		$results[$entry->name] = $entry->name;
@@ -124,7 +124,7 @@ class GadgetFeatureRegistryEntry {
 	{
 		$this->name = $name;
 		if ($deps != null) {
-			foreach ( $deps as $dep ) {
+			foreach ($deps as $dep) {
 				$entry = $registry->getEntry($dep);
 				$this->deps[$entry->name] = $entry->name;
 			}

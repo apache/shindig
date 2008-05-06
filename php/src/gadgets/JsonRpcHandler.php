@@ -5,7 +5,7 @@ class JsonRpcHandler {
 	public function process($requests)
 	{
 		$response = array();
-		foreach ( $requests->gadgets as $gadget ) {
+		foreach ($requests->gadgets as $gadget) {
 			try {
 				$gadgetUrl = $gadget->url;
 				$gadgetModuleId = $gadget->moduleId;
@@ -13,7 +13,7 @@ class JsonRpcHandler {
 				$gadgetServer = new GadgetServer();
 				$gadget = $gadgetServer->processGadget($context);
 				$response[] = $this->makeResponse($gadget, $gadgetModuleId, $gadgetUrl);
-			} catch ( Exception $e ) {
+			} catch (Exception $e) {
 				$response[] = array('errors' => array($e->getMessage()), 'moduleId' => $gadgetModuleId, 'url' => $gadgetUrl);
 			}
 		}
@@ -25,12 +25,7 @@ class JsonRpcHandler {
 		$response = array();
 		$prefs = array();
 		foreach ($gadget->getUserPrefs() as $pref) {
-			$prefs[$pref->getName()] = array(
-				'displayName' => $pref->getDisplayName(),
-				'type' => $pref->getDataType(),
-				'default' => $pref->getDefaultValue(),
-				'enumValues' => $pref->getEnumValues()
-			);
+			$prefs[$pref->getName()] = array('displayName' => $pref->getDisplayName(), 'type' => $pref->getDataType(), 'default' => $pref->getDefaultValue(), 'enumValues' => $pref->getEnumValues());
 		}
 		$features = array();
 		foreach ($gadget->getRequires() as $feature) {
@@ -45,8 +40,8 @@ class JsonRpcHandler {
 		$response['title'] = $gadget->getTitle();
 		$response['singleton'] = $gadget->getSingleton();
 		$response['categories'] = Array($gadget->getCategory(), $gadget->getCategory2());
-        $response['views'] ='';
-        /*stdClass Object
+		$response['views'] = '';
+		/*stdClass Object
                        (
                             $response['default'] = stdClass Object
                                 (
@@ -55,7 +50,7 @@ class JsonRpcHandler {
                                 )
 
                         )*/
-       	$response['description'] = $gadget->getDescription();
+		$response['description'] = $gadget->getDescription();
 		$response['screenshot'] = $gadget->getScreenShot();
 		$response['thumbnail'] = $gadget->getThumbnail();
 		$response['height'] = $gadget->getHeight();
@@ -69,7 +64,7 @@ class JsonRpcHandler {
 		$response['titleUrl'] = $gadget->getTitleUrl();
 		$response['directoryTitle'] = $gadget->getDirectoryTitle();
 		$response['author'] = $gadget->getAuthor();
-		$response['iframeUrl'] = "/gadgets/ifr?url=http%3A%2F%2Fwww.google.com%2Fig%2Fmodules%2Fhello.xml&container=default&mid=1&v=db18c863f15d5d1e758a91f2a44881b4&lang=en&country=US";
+		$response['iframeUrl'] = UrlGenerator::getIframeURL($gadget);	
 		$response['userPrefs'] = $prefs;
 		return $response;
 	}

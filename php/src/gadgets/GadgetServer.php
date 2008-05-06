@@ -65,7 +65,7 @@ class GadgetServer {
 	private function localeSpec($gadget, $locale)
 	{
 		$localeSpecs = $gadget->getLocaleSpecs();
-		foreach ( $localeSpecs as $locSpec ) {
+		foreach ($localeSpecs as $locSpec) {
 			//fix me
 			if ($locSpec->getLocale()->equals($locale)) {
 				return $locSpec;
@@ -125,7 +125,7 @@ class GadgetServer {
 		
 		// userPref's
 		$upValues = $gadget->getUserPrefValues();
-		foreach ( $gadget->getUserPrefs() as $pref ) {
+		foreach ($gadget->getUserPrefs() as $pref) {
 			$name = $pref->getName();
 			$value = $upValues->getPref($name);
 			if ($value == null) {
@@ -141,7 +141,7 @@ class GadgetServer {
 		$requires = $gadget->getRequires();
 		$needed = array();
 		$optionalNames = array();
-		foreach ( $requires as $key => $entry ) {
+		foreach ($requires as $key => $entry) {
 			$needed[] = $key;
 			if ($entry->isOptional()) {
 				$optionalNames[] = $key;
@@ -152,7 +152,7 @@ class GadgetServer {
 		$missingOptional = array();
 		$missingRequired = array();
 		$context->getRegistry()->getIncludedFeatures($needed, $resultsFound, $resultsMissing);
-		foreach ( $resultsMissing as $missingResult ) {
+		foreach ($resultsMissing as $missingResult) {
 			if (in_array($missingResult, $optionalNames)) {
 				$missingOptional[$missingResult] = $missingResult;
 			} else {
@@ -164,16 +164,16 @@ class GadgetServer {
 		}
 		// create features
 		$features = array();
-		foreach ( $resultsFound as $entry ) {
+		foreach ($resultsFound as $entry) {
 			$features[$entry] = $context->getRegistry()->getEntry($entry)->getFeature()->create();
 		}
 		// prepare them
-		foreach ( $features as $key => $feature ) {
+		foreach ($features as $key => $feature) {
 			$params = $gadget->getFeatureParams($gadget, $context->getRegistry()->getEntry($key));
 			$feature->prepare($gadget, $context, $params);
 		}
 		// and process them
-		foreach ( $features as $key => $feature ) {
+		foreach ($features as $key => $feature) {
 			$params = $gadget->getFeatureParams($gadget, $context->getRegistry()->getEntry($key));
 			$feature->process($gadget, $context, $params);
 		}

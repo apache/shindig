@@ -36,8 +36,6 @@ class Gadget {
 	public $authorEmail;
 	public $description;
 	public $directoryTitle;
-	public $contentType;
-	public $contentHref;
 	public $contentData = array();
 	public $localeSpecs = array();
 	public $preloads = array();
@@ -64,7 +62,8 @@ class Gadget {
 	public $renderInline;
 	public $scaling;
 	public $scrolling;
-
+	public $views = array();
+	
 	public function __construct($id = false, $context)
 	{
 		if ($id) {
@@ -95,27 +94,6 @@ class Gadget {
 	public function getAuthorEmail()
 	{
 		return $this->substitutions->substitute($this->authorEmail);
-	}
-	
-	public function getContentData($view = false)
-	{
-		if (empty($view) || ! $view) {
-			$view = DEFAULT_VIEW;
-		}
-		if ($this->contentType != 'HTML') {
-			throw new SpecParserException("getContentData() requires contentType HTML");
-		}
-		if (!isset($this->contentData[$view]) && isset($this->contentData['default'])) {
-			$view = 'default';
-		} elseif (!isset($this->contentData[$view]) && isset($this->contentData['*'])) {
-			$view = '*';
-		}
-		return $this->substitutions->substitute(isset($this->contentData[$view]) ? trim($this->contentData[$view]) : '');
-	}
-	
-	public function getContentHref()
-	{
-		return $this->substitutions->substitute($this->getContentType() == 'URL' ? $this->contentHref : null);
 	}
 	
 	public function getMessageBundle()
@@ -168,7 +146,7 @@ class Gadget {
 	public function getPreloads()
 	{
 		$ret = array();
-		foreach ( $this->preloads as $preload ) {
+		foreach ($this->preloads as $preload) {
 			$ret[] = $this->substitutions->substitute($preload);
 		}
 		return $ret;
@@ -198,7 +176,7 @@ class Gadget {
 	{
 		return $this->substitutions->substitute($this->title);
 	}
-		
+	
 	public function getTitleUrl()
 	{
 		$ret = null;
@@ -285,12 +263,12 @@ class Gadget {
 	
 	public function getScaling()
 	{
-		return $this->scaling;	
+		return $this->scaling;
 	}
 	
 	public function getScrolling()
 	{
-		return $this->scrolling;		
+		return $this->scrolling;
 	}
 	
 	public function getUserPrefs()
@@ -308,21 +286,14 @@ class Gadget {
 		$this->messageBundle = $messageBundle;
 	}
 	
-	/* gadget Spec functions */
-	public function addContent($view, $data)
+	public function getViews()
 	{
-		if (empty($view)) {
-			$view = DEFAULT_VIEW;
-		}
-		if (! isset($this->contentData[$view])) {
-			$this->contentData[$view] = '';
-		}
-		$this->contentData[$view] .= $data;
+		return $this->views;
 	}
 	
-	public function getContentType()
+	public function getView($viewName)
 	{
-		return $this->contentType;
+		return $this->views[$viewName];
 	}
 }
 

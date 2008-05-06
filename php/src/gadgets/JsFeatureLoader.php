@@ -33,7 +33,7 @@ class JsFeatureLoader {
 		$deps = array();
 		$deps = $this->loadFiles($path, $deps);
 		// This ensures that we register everything in the right order.
-		foreach ( $deps as $entry ) {
+		foreach ($deps as $entry) {
 			$feature = $entry;
 			$feat = $this->register($registry, $feature, $registered, $deps);
 			if ($feat != null) {
@@ -46,7 +46,7 @@ class JsFeatureLoader {
 	private function loadFiles($path, &$features)
 	{
 		if (is_dir($path)) {
-			foreach ( glob("$path/*") as $file ) {
+			foreach (glob("$path/*") as $file) {
 				// prevents us from looping over '.', '..' and 'hidden files', this last bit IS 
 				// different from the java version but it's the unix standard really..
 				if (substr(basename($file), 0, 1) != '.') {
@@ -80,7 +80,7 @@ class JsFeatureLoader {
 		if (isset($registered[$feature->name])) {
 			return null;
 		}
-		foreach ( $feature->deps as $dep ) {
+		foreach ($feature->deps as $dep) {
 			if (isset($all[$dep]) && ! in_array($dep, $registered)) {
 				$this->register($registry, $all[$dep], $registered, $all);
 			}
@@ -100,13 +100,13 @@ class JsFeatureLoader {
 		}
 		$feature->name = trim($doc->name);
 		
-		foreach ( $doc->gadget as $gadget ) {
+		foreach ($doc->gadget as $gadget) {
 			$feature = $this->processContext($feature, $gadget, false);
 		}
-		foreach ( $doc->container as $container ) {
+		foreach ($doc->container as $container) {
 			$feature = $this->processContext($feature, $container, true);
 		}
-		foreach ( $doc->dependency as $dependency ) {
+		foreach ($doc->dependency as $dependency) {
 			$feature->deps[] = trim($dependency);
 		}
 		return $feature;
@@ -114,7 +114,7 @@ class JsFeatureLoader {
 	
 	private function processContext(&$feature, $context, $isContainer)
 	{
-		foreach ( $context->script as $script ) {
+		foreach ($context->script as $script) {
 			$attributes = $script->attributes();
 			if (! isset($attributes['src'])) {
 				// inline content

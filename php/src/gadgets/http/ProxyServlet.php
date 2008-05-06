@@ -22,7 +22,6 @@ class ProxyServlet extends HttpServlet {
 	
 	public function doGet()
 	{
-		global $config;
 		$this->noHeaders = true;
 		$context = new GadgetContext('GADGET');
 		// those should be doable in one statement, but php seems to still evauluate the second ? and : pair,
@@ -40,7 +39,8 @@ class ProxyServlet extends HttpServlet {
 			header("HTTP/1.0 400 Bad Request", true);
 			echo "<html><body><h1>400 - Missing url parameter</h1></body></html>";
 		}
-		$gadgetSigner = new $config['gadget_signer']();
+		$gadgetSigner = Config::get('gadget_signer');
+		$gadgetSigner = new $gadgetSigner();
 		$proxyHandler = new ProxyHandler($context);
 		if (! empty($_GET['output']) && $_GET['output'] == 'js') {
 			$proxyHandler->fetchJson($url, $gadgetSigner, $method);

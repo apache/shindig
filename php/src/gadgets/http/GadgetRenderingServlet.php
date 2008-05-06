@@ -77,14 +77,15 @@ class GadgetRenderingServlet extends HttpServlet {
 	 * @param Gadget $gadget gadget to render
 	 * @param string $view the view to render (only valid with a html content type)
 	 */
-	private function outputGadget($gadget, $view)
+	private function outputGadget($gadget, $context)
 	{
-		switch ( $gadget->getContentType()) {
+		$view = HttpUtil::getView($gadget, $context);
+		switch ($view->getType()) {
 			case 'HTML' :
-				$this->outputHtmlGadget($gadget, $view);
+				$this->outputHtmlGadget($gadget, $context, $view);
 				break;
 			case 'URL' :
-				$this->outputUrlGadget($gadget);
+				$this->outputUrlGadget($gadget, $context, $view);
 				break;
 		}
 	}
@@ -99,10 +100,13 @@ class GadgetRenderingServlet extends HttpServlet {
 	 * @param Gadget $gadget
 	 * @param GadgetContext $context
 	 */
-	private function outputHtmlGadget($gadget, $context)
+	private function outputHtmlGadget($gadget, $context, $view)
 	{
 		$this->setContentType("text/html; charset=UTF-8");
 		$output = '';
+		if (!$view->getQuirks()) {
+			$output .= "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01//EN\" \"http://www.w3.org/TR/html4/strict.dtd\">";
+		}
 		$output .= "<html>\n<head>\n";
 		// TODO: This is so wrong. (todo copied from java shindig, but i would agree with it :))
 		$output .= "<style type=\"text/css\">body,td,div,span,p{font-family:arial,sans-serif;} a {color:#0000cc;}a:visited {color:#551a8b;}a:active {color:#ff0000;}body{margin: 0px;padding: 0px;background-color:white;}</style>\n";
@@ -138,16 +142,14 @@ class GadgetRenderingServlet extends HttpServlet {
 		if (strlen($externJs) > 0) {
 			$output .= $externJs;
 		}
-		
 		$output .= "<script><!--\n";
 		$output .= $this->appendJsConfig($context, $gadget);
 		$output .= $this->appendMessages($gadget);
 		$output .= "-->\n</script>\n";
-		
 		$gadgetExceptions = array();
-		$content = $gadget->getContentData($context->getView());
+		$content = $gadget->getSubstitutions()->substitute($view->getContent());
 		if (empty($content)) {
-			// unknown view
+			// Unknown view
 			$gadgetExceptions[] = "View: '" . $context->getView() . "' invalid for gadget: " . $gadget->getId()->getKey();
 		}
 		if (count($gadgetExceptions)) {
@@ -168,10 +170,10 @@ class GadgetRenderingServlet extends HttpServlet {
 	 *
 	 * @param Gadget $gadget
 	 */
-	private function outputUrlGadget($gadget)
+	private function outputUrlGadget($gadget, $context, $view)
 	{
 		// Preserve existing query string parameters.
-		$redirURI = $gadget->getContentHref();
+		$redirURI = $view->getHref();
 		$queryStr = strpos($redirURI, '?') !== false ? substr($redirURI, strpos($redirURI, '?')) : '';
 		$query = $queryStr;
 		// TODO: userprefs on the fragment rather than query string

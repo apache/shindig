@@ -1,5 +1,4 @@
 <?php
 
-class GadgetException extends Exception {
-}
+class GadgetException extends Exception {}
 

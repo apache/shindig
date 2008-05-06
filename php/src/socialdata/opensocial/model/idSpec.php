@@ -53,7 +53,7 @@ class IdSpec {
 			$userIdArray = array($userIdArray);
 		}
 		$userIds = array();
-		foreach ( $userIdArray as $id ) {
+		foreach ($userIdArray as $id) {
 			$userIds[] = (string)$id;
 		}
 		return $userIds;

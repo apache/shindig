@@ -32,8 +32,10 @@ class MessageBundleParser {
 	{
 		$doc = simplexml_load_string($xml);
 		$messages = array();
-		foreach ( $doc->msg as $msg ) {
-			$this->processMessage($messages, $msg);
+		if (isset($doc->msg)) {
+			foreach ($doc->msg as $msg) {
+				$this->processMessage($messages, $msg);
+			}
 		}
 		return new MessageBundle($messages);
 	}

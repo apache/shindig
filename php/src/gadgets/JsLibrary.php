@@ -82,7 +82,6 @@ class JsLibrary {
 	
 	static private function loadFile($fileName, $debug)
 	{
-		global $config;
 		if (empty($fileName)) {
 			return '';
 		}
@@ -95,15 +94,16 @@ class JsLibrary {
 		if (! is_readable($fileName)) {
 			throw new Exception("JsLibrary file not readable: $fileName");
 		}
-		if ($debug || empty($config['compress_command'])) {
+		$compressCommand = Config::get('compress_command');
+		if ($debug || empty($compressCommand)) {
 			if (! ($content = @file_get_contents($fileName))) {
 				throw new Exception("JsLibrary error reading file: $fileName");
 			}
 		} else {
 			// attempt to compress the feature javascript file
 			$input_file = escapeshellarg($fileName);
-			$output_file = tempnam($config['cache_root'], 'js-comp');
-			$cmd = sprintf($config['compress_command'], $input_file, $output_file);
+			$output_file = tempnam(Config::get('cache_root'), 'js-comp');
+			$cmd = sprintf($compressCommand, $input_file, $output_file);
 			$null = $status = 0;
 			exec($cmd, $null, $status);
 			if ($status === 0) {

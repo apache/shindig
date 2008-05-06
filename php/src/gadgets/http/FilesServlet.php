@@ -61,7 +61,6 @@ class FilesServlet extends HttpServlet {
 				$this->setContentType('text/css');
 			}
 		}
-		$this->setNoCache(true);
 		$this->setLastModified(filemtime($file));
 		readfile($file);
 	}
