@@ -26,9 +26,10 @@
 JsonPerson = function(opt_params) {
   opt_params = opt_params || {};
 
-  // TODO: doesn't handle dateOfBirth, drinker, smoker, or gender yet
+  // TODO: doesn't handle drinker, smoker, or gender yet
   JsonPerson.constructObject(opt_params, "bodyType", opensocial.BodyType);
   JsonPerson.constructObject(opt_params, "currentLocation", opensocial.Address);
+  JsonPerson.constructObject(opt_params, "dateOfBirth", Date);
   JsonPerson.constructObject(opt_params, "name", opensocial.Name);
   JsonPerson.constructObject(opt_params, "profileSong", opensocial.Url);
   JsonPerson.constructObject(opt_params, "profileVideo", opensocial.Url);
