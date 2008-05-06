@@ -39,25 +39,22 @@ public class PeopleServiceAdapter extends RestServerCollectionAdapter {
   private static Logger logger =
     Logger.getLogger(PeopleServiceAdapter.class.getName());
   private PeopleService handler;
-  
+
   // TODO get these from the config files like in feedserver
   private static final String TITLE = "People Collection title";
   private static final String AUTHOR = "TODO";
-  
+
   @Inject
   public PeopleServiceAdapter(PeopleService handler) {
     this.handler = handler;
   }
-  
+
   /**
    * Handles the following URLs
    *       /people/{uid}/@all
    */
-  @Override
   public ResponseContext getFeed(RequestContext request) {
-    // get the params from the request
-    String[] paramNames = request.getTarget().getParameterNames();
-    String uid = request.getTarget().getParameter(paramNames[0]);
+    String uid = request.getTarget().getParameter("uid");
 
     // TODO(doll): Fix the service apis to add a concept of arbitrary friends
     // Consider whether @all really makes sense...
@@ -66,13 +63,12 @@ public class PeopleServiceAdapter extends RestServerCollectionAdapter {
     return returnFeed(request, TITLE, AUTHOR, (List)listOfObj);
   }
 
-  
+
   /**
    * Handles the following URLs
    *       /people/{uid}/@all/{pid}
    *       /people/{uid}/@self
    */
-  @Override
   public ResponseContext getEntry(RequestContext request) {
 
       // TODO: Replace this with the real thing
@@ -106,9 +102,6 @@ public class PeopleServiceAdapter extends RestServerCollectionAdapter {
       }
     };
 
-    // get the params from the request
-    String[] paramNames = request.getTarget().getParameterNames();
-    
     /* figure out which URL is passed in
      *     /people/{uid}/@all/{pid}
      *     /people/{uid}/@self

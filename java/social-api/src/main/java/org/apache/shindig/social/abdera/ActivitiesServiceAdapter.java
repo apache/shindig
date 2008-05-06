@@ -17,12 +17,12 @@
 */
 package org.apache.shindig.social.abdera;
 
-import com.google.inject.Inject;
-
-import org.apache.abdera.protocol.server.RequestContext;
-import org.apache.abdera.protocol.server.ResponseContext;
 import org.apache.shindig.social.opensocial.ActivitiesService;
 import org.apache.shindig.social.opensocial.model.Activity;
+
+import com.google.inject.Inject;
+import org.apache.abdera.protocol.server.RequestContext;
+import org.apache.abdera.protocol.server.ResponseContext;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -35,25 +35,22 @@ import java.util.List;
 @SuppressWarnings("unchecked")
 public class ActivitiesServiceAdapter extends RestServerCollectionAdapter {
   private ActivitiesService handler;
-  
+
   // TODO get these from the config files like in feedserver
   private static final String TITLE = "Acitivity Collection title";
   private static final String AUTHOR = "TODO";
-  
+
   @Inject
   public ActivitiesServiceAdapter(ActivitiesService handler) {
     this.handler = handler;
   }
-  
+
   /**
    * Handles the following URL
    *    /activities/{uid}/@self
    */
-  @Override
   public ResponseContext getFeed(RequestContext request) {
-    // get the params from the request
-    String[] paramNames = request.getTarget().getParameterNames();
-    String uid = request.getTarget().getParameter(paramNames[0]);
+    String uid = request.getTarget().getParameter("uid");
 
     List<String> ids = new ArrayList<String>();
     ids.add(uid);
@@ -66,12 +63,10 @@ public class ActivitiesServiceAdapter extends RestServerCollectionAdapter {
    *  Handles the following URL
    *    /activities/{uid}/@self/{activityId}
    */
-  @Override
   public ResponseContext getEntry(RequestContext request) {
-    // get the params from the request
-    String[] paramNames = request.getTarget().getParameterNames();
-    String uid = request.getTarget().getParameter(paramNames[0]);
-    String aid = request.getTarget().getParameter(paramNames[1]);
+    String uid = request.getTarget().getParameter("uid");
+    String aid = request.getTarget().getParameter("aid");
+
     // TODO: Use a real gadget token
     Activity obj = handler.getActivity(uid, aid, null).getResponse();
 
