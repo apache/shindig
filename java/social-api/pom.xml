@@ -79,6 +79,10 @@ under the License.
       <artifactId>abdera-server</artifactId>
     </dependency>
     <dependency>
+      <groupId>org.apache.abdera</groupId>
+      <artifactId>abdera-client</artifactId>
+    </dependency>
+    <dependency>
       <artifactId>commons-betwixt</artifactId>
       <version>0.8</version>
       <groupId>commons-betwixt</groupId>
