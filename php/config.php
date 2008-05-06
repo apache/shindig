@@ -39,7 +39,7 @@ $shindigConfig = array(
 
 	// The data handlers for the social data, this is a list of class names
 	// seperated by a , For example:
-	// 'handlers' => 'PartuzaHandler',
+	//'handlers' => 'PartuzaHandler',
 	// if the value is empty, the defaults used in the example above will be used.
 	'handlers' => '',
 
@@ -66,8 +66,10 @@ $shindigConfig = array(
 	// gadget server specific settings
 	'userpref_param_prefix' => 'up_',
 	'libs_param_name' => 'libs',
-	'default_js_prefix' => '/js/',
-	'default_iframe_prefix' => 'ifr?', 
+	// location  of the javascript handler (include the full path), default this is /gadgets/js
+	'default_js_prefix' => '/gadgets/js/',
+	// location of the gadget iframe renderer, default this is /gadgets/ifr?
+	'default_iframe_prefix' => '/gadgets/ifr?', 
 	
 	// if your using memcached, these values are used for locating the server
 	// if your not using memcached, ignore these values

@@ -134,7 +134,7 @@ class GadgetRenderingServlet extends HttpServlet {
 		// Forced libs first.
 		if (! empty($forcedLibs)) {
 			$libs = explode(':', $forcedLibs);
-			$output .= sprintf($externFmt, $this->getJsUrl($libs)) . "\n";
+			$output .= sprintf($externFmt, Config::get('default_js_prefix').$this->getJsUrl($libs, $gadget)) . "\n";
 		}
 		if (strlen($inlineJs) > 0) {
 			$output .= "<script><!--\n" . $inlineJs . "\n-->\n</script>\n";
@@ -158,6 +158,17 @@ class GadgetRenderingServlet extends HttpServlet {
 		$output .= $content . "\n";
 		$output .= "<script>gadgets.util.runOnLoadHandlers();</script>\n";
 		$output .= "</body>\n</html>";
+		if ($context->getIgnoreCache()) {
+			// no cache was requested, set non-caching-headers
+			$this->setNoCache(true);
+		} elseif (isset($_GET['v'])) {
+			// version was given, cache for a long long time (a year)
+			$this->setCacheTime(365 * 24 * 60 * 60);
+		} else {
+			// no version was given, cache for 5 minutes
+			$this->setCacheTime(5 * 60);
+		}
+		// Was a privacy policy header configured? if so set it
 		if (Config::get('P3P') != '') {
 			header("P3P: ".Config::get('P3P'));
 		}
@@ -269,7 +280,7 @@ class GadgetRenderingServlet extends HttpServlet {
 				$inlineJs .= $library->getContent() . "\n";
 			}
 		}
-		$buf .= ".js?v=" . sha1($inlineJs);
+		$buf .= ".js?v=" . md5($inlineJs);
 		return $buf;
 	}
 	
