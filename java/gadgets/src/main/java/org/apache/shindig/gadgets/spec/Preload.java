@@ -22,6 +22,8 @@ import org.apache.shindig.util.XmlUtil;
 import org.w3c.dom.Element;
 
 import java.net.URI;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * Represents an addressable piece of content that can be preloaded by the server
@@ -48,6 +50,30 @@ public class Preload {
   }
 
   /**
+   * Preload@sign_viewer
+   */
+  private final boolean signViewer;
+  public boolean isSignViewer() {
+    return signViewer;
+  }
+
+  /**
+   * Preload@sign_owner
+   */
+  private final boolean signOwner;
+  public boolean isSignOwner() {
+    return signOwner;
+  }
+
+  /**
+   * Prelaod@views
+   */
+  private final Set<String> views = new HashSet<String>();
+  public Set<String> getViews() {
+    return views;
+  }
+
+  /**
    * Produces an xml representation of the Preload.
    */
   @Override
@@ -64,9 +90,20 @@ public class Preload {
    * @throws SpecParserException When the href is not specified
    */
   public Preload(Element preload) throws SpecParserException {
+    signOwner = XmlUtil.getBoolAttribute(preload, "sign_owner", true);
+    signViewer = XmlUtil.getBoolAttribute(preload, "sign_viewer", true);
     href = XmlUtil.getUriAttribute(preload, "href");
     if (href == null) {
       throw new SpecParserException("Preload@href is required.");
+    }
+
+    // Record all the associated views
+    String viewNames = XmlUtil.getAttribute(preload, "views", "");
+    for (String s: viewNames.split(",")) {
+      s = s.trim();
+      if (s.length() > 0) {
+        views.add(s.trim());
+      }
     }
 
     String authAttr = XmlUtil.getAttribute(preload, AUTHZ_ATTR);
@@ -76,5 +113,4 @@ public class Preload {
       throw new SpecParserException("Preload@" + ge.getMessage());
     }
   }
-
 }

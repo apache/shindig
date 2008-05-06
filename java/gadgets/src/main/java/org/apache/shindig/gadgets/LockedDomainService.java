@@ -28,6 +28,12 @@ package org.apache.shindig.gadgets;
 public interface LockedDomainService {
 
   /**
+   * Is locked domain enabled
+   * @return true is locked domain is enabled
+   */
+  public boolean isEnabled();
+
+  /**
    * Check whether embedded content (img src, for example) can render on
    * a particular host.
    * 

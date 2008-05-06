@@ -205,13 +205,15 @@ public class RemoteContentRequest {
    * Creates a new request to a different URL using all request data from
    * an existing request.
    *
+   * TODO - Need to copy by value
+   *
    * @param uri
    * @param base The base request to copy data from.
    */
   public RemoteContentRequest(URI uri, RemoteContentRequest base) {
     this.uri = uri;
     this.method = base.method;
-    this.options = base.options;
+    this.options = new Options(base.options);
     this.headers = base.headers;
     this.contentType = base.contentType;
     this.postBody = base.postBody;
@@ -351,5 +353,18 @@ public class RemoteContentRequest {
    */
   public static class Options {
     public boolean ignoreCache = false;
+    public boolean ownerSigned = true;
+    public boolean viewerSigned = true;
+
+    public Options() {};
+
+    /**
+     * Copy constructor
+     */
+    public Options(Options copyFrom) {
+      this.ignoreCache = copyFrom.ignoreCache;
+      this.ownerSigned = copyFrom.ownerSigned;
+      this.viewerSigned = copyFrom.viewerSigned;
+    }
   }
 }

@@ -114,6 +114,28 @@ public class SigningFetcherTest extends TestCase {
     assertTrue(contains(queryParams, "xoauth_signature_publickey", "foo"));
   }
 
+  public void testNoSignViewer() throws Exception {
+    RemoteContentRequest unsigned
+        = makeContentRequest("GET", "http://test", null);
+    unsigned.getOptions().viewerSigned = false;
+    RemoteContentRequest out = signAndInspect(unsigned);
+    List<OAuth.Parameter> queryParams
+        = OAuth.decodeForm(out.getUri().getRawQuery());
+    assertTrue(contains(queryParams, "opensocial_owner_id", "o"));
+    assertFalse(contains(queryParams, "opensocial_viewer_id", "v"));
+  }
+
+  public void testNoSignOwner() throws Exception {
+    RemoteContentRequest unsigned
+        = makeContentRequest("GET", "http://test", null);
+    unsigned.getOptions().ownerSigned = false;
+    RemoteContentRequest out = signAndInspect(unsigned);
+    List<OAuth.Parameter> queryParams
+        = OAuth.decodeForm(out.getUri().getRawQuery());
+    assertFalse(contains(queryParams, "opensocial_owner_id", "o"));
+    assertTrue(contains(queryParams, "opensocial_viewer_id", "v"));
+  }
+
   public void testTrickyParametersInQuery() throws Exception {
     String tricky = "%6fpensocial_owner_id=gotcha";
     RemoteContentRequest unsigned

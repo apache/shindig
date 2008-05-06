@@ -18,6 +18,23 @@
  */
 package org.apache.shindig.gadgets.http;
 
+import org.apache.shindig.gadgets.ContentFetcher;
+import org.apache.shindig.gadgets.ContentFetcherFactory;
+import org.apache.shindig.gadgets.GadgetException;
+import org.apache.shindig.gadgets.GadgetToken;
+import org.apache.shindig.gadgets.GadgetTokenDecoder;
+import org.apache.shindig.gadgets.LockedDomainService;
+import org.apache.shindig.gadgets.RemoteContent;
+import org.apache.shindig.gadgets.RemoteContentRequest;
+import org.apache.shindig.gadgets.oauth.OAuthRequestParams;
+import org.apache.shindig.gadgets.spec.Auth;
+import org.apache.shindig.gadgets.spec.Preload;
+import org.apache.shindig.util.InputStreamConsumer;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import com.google.inject.Inject;
+
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
@@ -36,23 +53,6 @@ import java.util.logging.Logger;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.shindig.gadgets.ContentFetcher;
-import org.apache.shindig.gadgets.ContentFetcherFactory;
-import org.apache.shindig.gadgets.GadgetException;
-import org.apache.shindig.gadgets.GadgetToken;
-import org.apache.shindig.gadgets.GadgetTokenDecoder;
-import org.apache.shindig.gadgets.LockedDomainService;
-import org.apache.shindig.gadgets.RemoteContent;
-import org.apache.shindig.gadgets.RemoteContentRequest;
-import org.apache.shindig.gadgets.oauth.OAuthRequestParams;
-import org.apache.shindig.gadgets.spec.Auth;
-import org.apache.shindig.gadgets.spec.Preload;
-import org.apache.shindig.util.InputStreamConsumer;
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import com.google.inject.Inject;
-
 public class ProxyHandler {
   public static final String UNPARSEABLE_CRUFT = "throw 1; < don't be evil' >";
   public static final String POST_DATA_PARAM = "postData";
@@ -60,9 +60,11 @@ public class ProxyHandler {
   public static final String SECURITY_TOKEN_PARAM = "st";
   public static final String HEADERS_PARAM = "headers";
   public static final String NOCACHE_PARAM = "nocache";
+  public static final String SIGN_VIEWER = "signViewer";
+  public static final String SIGN_OWNER = "signOwner";
   public static final String URL_PARAM = "url";
   private static final String REFRESH_PARAM = "refresh";
-  
+
   private static final Logger logger = 
       Logger.getLogger(ProxyHandler.class.getPackage().getName());
 
@@ -196,6 +198,15 @@ public class ProxyHandler {
       RemoteContentRequest.Options options =
         new RemoteContentRequest.Options();
       options.ignoreCache = "1".equals(request.getParameter(NOCACHE_PARAM));
+      if (request.getParameter(SIGN_VIEWER) != null) {
+        options.viewerSigned = Boolean
+            .parseBoolean(request.getParameter(SIGN_VIEWER));
+      }
+      if (request.getParameter(SIGN_OWNER) != null) {
+        options.ownerSigned = Boolean
+            .parseBoolean(request.getParameter(SIGN_OWNER));
+      }
+
       return new RemoteContentRequest(
           method, url, headers, postBody, options);
     } catch (UnsupportedEncodingException e) {
@@ -286,14 +297,17 @@ public class ProxyHandler {
     RemoteContentRequest rcr = buildRemoteContentRequest(request);
     RemoteContent results = contentFetcherFactory.get().fetch(rcr);
 
+    // Default interval of 1 hour
+    int refreshInterval = 60 * 60;
+    if (request.getParameter(REFRESH_PARAM) != null) {
+      refreshInterval =  Integer.valueOf(request.getParameter(REFRESH_PARAM));
+    }
+
     int status = results.getHttpStatusCode();
     response.setStatus(status);
     if (status == HttpServletResponse.SC_OK) {
-      Map<String, List<String>> headers = results.getAllHeaders();
-      if (headers.get("Cache-Control") == null) {
-        // Cache for 1 hour by default for static files.
-        HttpUtil.setCachingHeaders(response, 60 * 60);
-      }
+      Map<String, List<String>> headers = HttpUtil.enforceCachePolicy(
+          results.getAllHeaders(), refreshInterval * 1000L, false);
       for (Map.Entry<String, List<String>> entry : headers.entrySet()) {
         String name = entry.getKey();
         List<String> values = entry.getValue();

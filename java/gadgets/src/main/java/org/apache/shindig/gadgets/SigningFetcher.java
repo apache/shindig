@@ -174,7 +174,7 @@ public class SigningFetcher extends ChainedContentFetcher {
     URI resource = request.getUri();
     String query = resource.getRawQuery();
     List<Parameter> cacheableParams = sanitize(OAuth.decodeForm(query));
-    addOpenSocialParams(cacheableParams);
+    addOpenSocialParams(request.getOptions(), cacheableParams);
     addOAuthNonTemporalParams(cacheableParams);
     String cacheableQuery = OAuth.formEncode(cacheableParams);
     URL url = new URL(
@@ -202,7 +202,7 @@ public class SigningFetcher extends ChainedContentFetcher {
       msgParams.addAll(queryParams);
       msgParams.addAll(postParams);
 
-      addOpenSocialParams(msgParams);
+      addOpenSocialParams(req.getOptions(), msgParams);
 
       addOAuthParams(msgParams);
 
@@ -259,14 +259,15 @@ public class SigningFetcher extends ChainedContentFetcher {
   }
 
 
-  private void addOpenSocialParams(List<Parameter> msgParams) {
+  private void addOpenSocialParams(RemoteContentRequest.Options options,
+      List<Parameter> msgParams) {
     String owner = authToken.getOwnerId();
-    if (owner != null) {
+    if (owner != null && options.ownerSigned) {
       msgParams.add(new OAuth.Parameter(OPENSOCIAL_OWNERID, owner));
     }
 
     String viewer = authToken.getViewerId();
-    if (viewer != null) {
+    if (viewer != null && options.viewerSigned) {
       msgParams.add(new OAuth.Parameter(OPENSOCIAL_VIEWERID, viewer));
     }
 

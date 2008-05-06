@@ -18,6 +18,7 @@
 package org.apache.shindig.gadgets;
 
 import org.apache.shindig.gadgets.spec.GadgetSpec;
+import org.apache.shindig.util.BlobCrypterException;
 import static org.easymock.EasyMock.eq;
 import static org.easymock.EasyMock.expect;
 
@@ -37,6 +38,21 @@ public class GadgetServerTest extends GadgetTestFixture {
     @Override
     public URI getUrl() {
       return SPEC_URL;
+    }
+
+    @Override
+    @SuppressWarnings("unused")
+    public GadgetToken getToken() throws GadgetException {
+      try {
+        return new BasicGadgetToken("o", "v", "a", "d", "u", "m");
+      } catch (BlobCrypterException bce) {
+        throw new RuntimeException(bce);
+      }
+    }
+
+    @Override
+    public String getView() {
+      return "v2";
     }
   };
   private final static String BASIC_SPEC_XML
@@ -129,6 +145,133 @@ public class GadgetServerTest extends GadgetTestFixture {
     assertEquals(preloadData, gadget.getPreloadMap().values().iterator().next()
                                     .get().getResponseAsString());
   }
+
+  public void testPreloadViewMatch() throws Exception {
+    String preloadUrl = "http://example.org/preload.txt";
+    String preloadData = "Preload Data";
+    RemoteContentRequest preloadRequest
+        = new RemoteContentRequest(URI.create(preloadUrl));
+
+    String gadgetXml
+        = "<Module>" +
+          "  <ModulePrefs title=\"foo\">" +
+          "    <Preload href=\"" + preloadUrl + "\" views=\"v1\"/>" +
+          "  </ModulePrefs>" +
+          "  <Content type=\"html\" view=\"v1,v2\">dummy</Content>" +
+          "</Module>";
+    expect(fetcherFactory.get()).andReturn(fetcher);
+    expect(fetcher.fetch(SPEC_REQUEST))
+         .andReturn(new RemoteContent(gadgetXml));
+    expect(fetcher.fetch(preloadRequest))
+        .andReturn(new RemoteContent(preloadData));
+    replay();
+
+    GadgetContext context = new GadgetContext() {
+      @Override
+      public URI getUrl() {
+        return SPEC_URL;
+      }
+
+      @Override
+      public String getView() {
+        return "v1";
+      }
+    };
+
+    Gadget gadget = gadgetServer.processGadget(context);
+
+    assertTrue(gadget.getPreloadMap().size() == 1);
+  }
+
+  public void testPreloadAntiMatch() throws Exception {
+    String preloadUrl = "http://example.org/preload.txt";
+    String preloadData = "Preload Data";
+    RemoteContentRequest preloadRequest
+        = new RemoteContentRequest(URI.create(preloadUrl));
+
+    String gadgetXml
+        = "<Module>" +
+        "  <ModulePrefs title=\"foo\">" +
+        "    <Preload href=\"" + preloadUrl + "\" views=\"v1,v3\"/>" +
+        "  </ModulePrefs>" +
+        "  <Content type=\"html\" view=\"v1,v2\">dummy</Content>" +
+        "</Module>";
+    expect(fetcherFactory.get()).andReturn(fetcher);
+    expect(fetcher.fetch(SPEC_REQUEST))
+        .andReturn(new RemoteContent(gadgetXml));
+    expect(fetcher.fetch(preloadRequest))
+        .andReturn(new RemoteContent(preloadData));
+    replay();
+
+    GadgetContext context = new GadgetContext() {
+      @Override
+      public URI getUrl() {
+        return SPEC_URL;
+      }
+
+      @Override
+      public String getView() {
+        return "v2";
+      }
+    };
+
+    Gadget gadget = gadgetServer.processGadget(context);
+    assertTrue(gadget.getPreloadMap().size() == 0);
+  }
+
+  public void testNoSignedPreloadWithoutToken() throws Exception {
+    String preloadUrl = "http://example.org/preload.txt";
+    String preloadData = "Preload Data";
+    RemoteContentRequest preloadRequest
+        = new RemoteContentRequest(URI.create(preloadUrl));
+
+    String gadgetXml
+        = "<Module>" +
+        "  <ModulePrefs title=\"foo\">" +
+        "    <Preload href=\"" + preloadUrl + "\" authz=\"signed\"/>" +
+        "  </ModulePrefs>" +
+        "  <Content type=\"html\" view=\"v1,v2\">dummy</Content>" +
+        "</Module>";
+    expect(fetcher.fetch(SPEC_REQUEST))
+        .andReturn(new RemoteContent(gadgetXml));
+    replay();
+
+    GadgetContext context = new GadgetContext() {
+      @Override
+      public URI getUrl() {
+        return SPEC_URL;
+      }
+    };
+
+    Gadget gadget = gadgetServer.processGadget(context);
+    assertTrue(gadget.getPreloadMap().size() == 0);
+  }
+
+  public void testSignedPreloadWithToken() throws Exception {
+    String preloadUrl = "http://example.org/preload.txt";
+    String preloadData = "Preload Data";
+    RemoteContentRequest preloadRequest
+        = new RemoteContentRequest(URI.create(preloadUrl));
+
+    String gadgetXml
+        = "<Module>" +
+        "  <ModulePrefs title=\"foo\">" +
+        "    <Preload href=\"" + preloadUrl + "\" authz=\"signed\"/>" +
+        "  </ModulePrefs>" +
+        "  <Content type=\"html\" view=\"v1,v2\">dummy</Content>" +
+        "</Module>";
+    expect(fetcher.fetch(SPEC_REQUEST))
+        .andReturn(new RemoteContent(gadgetXml));
+    expect(fetcherFactory.getSigningFetcher(BASIC_CONTEXT.getToken()))
+        .andReturn(fetcher);
+    expect(fetcher.fetch(preloadRequest))
+        .andReturn(new RemoteContent(preloadData));
+    replay();
+
+    Gadget gadget = gadgetServer.processGadget(BASIC_CONTEXT);
+    assertTrue(gadget.getPreloadMap().size() == 1);
+  }
+
 
   public void testBlacklistedGadget() throws Exception {
     expect(blacklist.isBlacklisted(eq(SPEC_URL))).andReturn(true);

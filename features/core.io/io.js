@@ -217,7 +217,7 @@ gadgets.io = function() {
   function respondWithPreload(postData, params, callback) {
     if (gadgets.io.preloaded_ && gadgets.io.preloaded_[postData.url]) {
       var preload = gadgets.io.preloaded_[postData.url];
-      if (postData.httpMethod == "GET" && postData.authz == "none") {
+      if (postData.httpMethod == "GET") {
         delete gadgets.io.preloaded_[postData.url];
         if (preload.rc !== 200) {
           callback({errors : ["Error " + preload.rc]});
@@ -288,6 +288,8 @@ gadgets.io = function() {
           params.REFRESH_INTERVAL = 3600;
          }
       }
+      var signOwner = params.OWNER_SIGNED;
+      var signViewer = params.VIEWER_SIGNED;
 
       var headers = params.HEADERS || {};
       if (params.METHOD === "POST" && !headers["Content-Type"]) {
@@ -303,7 +305,9 @@ gadgets.io = function() {
         st : st || "",
         oauthState : reqState || "",
         oauthService : oauthService || "",
-        oauthToken : oauthToken || ""
+        oauthToken : oauthToken || "",
+        signOwner : signOwner || "true",
+        signViewer : signViewer || "true"
       };
 
       if (!respondWithPreload(paramData, params, callback, processResponse)) {
