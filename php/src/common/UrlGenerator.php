@@ -19,11 +19,40 @@
  */
 
 class UrlGenerator {
-	static function getIframeURL($gadget)
+	static function getIframeURL($gadget, $context)	
 	{
-		//TODO this
-		// returns fake demo value to make the basic JsonRpc service work
+		$inlineJs = '';
+		foreach ( $gadget->getJsLibraries() as $library ) {
+			$type = $library->getType();
+			if ($type != 'URL') {
+				$inlineJs .= $library->getContent() . "\n";
+			}
+		}
+		$v = md5($inlineJs);
+		
+		$view = HttpUtil::getView($gadget, $context);
+		
+		$up = '';
+		$prefs = $context->getUserPrefs();
+		foreach ($gadget->getUserPrefs() as $pref) {
+			$name = $pref->getName();
+			$value = $prefs->getPref($name);
+			if ($value == null) {
+				$value = $pref->getDefaultValue();
+			}
+			$up .= '&up_'.urlencode($name).'='.urlencode($value);
+		}
+		
 		// note: put the URL last, else some browsers seem to get confused (reported by hi5)
-		return "/gadgets/ifr?container=default&mid=1&v=db18c863f15d5d1e758a91f2a44881b4&lang=en&country=US&url=http%3A%2F%2Fwww.google.com%2Fig%2Fmodules%2Fhello.xml";
+		return
+			Config::get('default_iframe_prefix').
+			'container='.$context->getContainer().
+			($context->getIgnoreCache() ? 'nocache=1' : '&v='.$v).
+			($context->getModuleId() != 0 ? '&mid='.$context->getModuleId() : '').
+			'&lang='.$context->getLocale()->getLanguage().
+			'&country='.$context->getLocale()->getCountry().			
+			'&view='.$view->getName().
+			$up.
+			'&url='.urlencode($context->getUrl());		
 	}
 }

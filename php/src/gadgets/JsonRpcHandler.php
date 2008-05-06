@@ -12,7 +12,7 @@ class JsonRpcHandler {
 				$context = new JsonRpcGadgetContext($requests->context, $gadgetUrl);
 				$gadgetServer = new GadgetServer();
 				$gadget = $gadgetServer->processGadget($context);
-				$response[] = $this->makeResponse($gadget, $gadgetModuleId, $gadgetUrl);
+				$response[] = $this->makeResponse($gadget, $gadgetModuleId, $gadgetUrl, $context);
 			} catch (Exception $e) {
 				$response[] = array('errors' => array($e->getMessage()), 'moduleId' => $gadgetModuleId, 'url' => $gadgetUrl);
 			}
@@ -20,7 +20,7 @@ class JsonRpcHandler {
 		return $response;
 	}
 	
-	private function makeResponse($gadget, $gadgetModuleId, $gadgetUrl)
+	private function makeResponse($gadget, $gadgetModuleId, $gadgetUrl, $context)
 	{
 		$response = array();
 		$prefs = array();
@@ -64,7 +64,7 @@ class JsonRpcHandler {
 		$response['titleUrl'] = $gadget->getTitleUrl();
 		$response['directoryTitle'] = $gadget->getDirectoryTitle();
 		$response['author'] = $gadget->getAuthor();
-		$response['iframeUrl'] = UrlGenerator::getIframeURL($gadget);	
+		$response['iframeUrl'] = UrlGenerator::getIframeURL($gadget, $context);	
 		$response['userPrefs'] = $prefs;
 		return $response;
 	}

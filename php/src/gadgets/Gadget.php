@@ -293,7 +293,7 @@ class Gadget {
 	
 	public function getView($viewName)
 	{
-		return isset($this->views[$viewName]) ? $this->views[$viewName] : false;
+		return isset($this->views[$viewName]) ? $this->views[$viewName] : $this->views[DEFAULT_VIEW];
 	}
 }
 

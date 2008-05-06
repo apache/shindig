@@ -27,31 +27,24 @@ class HttpServlet {
 	private $lastModified = false;
 	private $contentType = 'text/html';
 	private $charset = 'UTF-8';
-	public $noHeaders = false;
 	private $noCache = false;
+	private $cacheTime;
+	public $noHeaders = false;
 	
-	/**
-	 * Enables output buffering so we can do correct header handling in the destructor
-	 *
-	 */
 	/**
 	 * Enables output buffering so we can do correct header handling in the destructor
 	 *
 	 */
 	public function __construct()
 	{
+		// set our default cache time (config cache time defaults to 24 hours aka 1 day)
+		$this->cacheTime = Config::get('cache_time');
 		// to do our header magic, we need output buffering on
 		ob_start();
 	}
 	
 	/**
-	 * Enter description here...
-	 * If noHeaders is false, it adds all the correct http/1.1 headers to the request
-	 * and deals with modified/expires/e-tags/etc. This makes the server behave more like
-	 * a real http server.
-	 */
-	/**
-	 * Enter description here...
+	 * Code ran after the event handler, adds headers etc to the request
 	 * If noHeaders is false, it adds all the correct http/1.1 headers to the request
 	 * and deals with modified/expires/e-tags/etc. This makes the server behave more like
 	 * a real http server.
@@ -71,8 +64,8 @@ class HttpServlet {
 			} else {
 				// attempt at some propper header handling from php
 				// this departs a little from the shindig code but it should give is valid http protocol handling
-				header('Cache-Control: public,max-age=' . Config::get('cache_time'));
-				header("Expires: " . gmdate("D, d M Y H:i:s", time() + Config::get('cache_time')) . " GMT");
+				header('Cache-Control: public,max-age=' . $this->cacheTime);
+				header("Expires: " . gmdate("D, d M Y H:i:s", time() + $this->cacheTime) . " GMT");
 				// Obey browsers (or proxy's) request to send a fresh copy if we recieve a no-cache pragma or cache-control request
 				if (! isset($_SERVER['HTTP_PRAGMA']) || ! strstr(strtolower($_SERVER['HTTP_PRAGMA']), 'no-cache') && (! isset($_SERVER['HTTP_CACHE_CONTROL']) || ! strstr(strtolower($_SERVER['HTTP_CACHE_CONTROL']), 'no-cache'))) {
 					// If the browser send us a E-TAG check if it matches (sha1 sum of content), if so send a not modified header instead of content
@@ -98,9 +91,7 @@ class HttpServlet {
 							die();
 						}
 					}
-					if ($this->lastModified) {
-						header('Last-Modified: ' . gmdate('D, d M Y H:i:s', $this->lastModified));
-					}
+					header('Last-Modified: ' . gmdate('D, d M Y H:i:s', ($this->lastModified ? $this->lastModified : time())));
 				}
 			}
 			echo $content;
@@ -108,10 +99,26 @@ class HttpServlet {
 	}
 	
 	/**
-	 * Sets the content type of this request (forinstance: text/html or text/javascript, etc) 
+	 * Sets the time in seconds that the browser's cache should be 
+	 * considered out of date (through the Expires header) 
 	 *
-	 * @param string $type content type header to use
+	 * @param int $time time in seconds
 	 */
+	public function setCacheTime($time)
+	{
+		$this->cacheTime = $time;
+	}
+	
+	/**
+	 * Returns the time in seconds that the browser is allowed to cache the content
+	 *
+	 * @return int $time
+	 */
+	public function getCacheTime()
+	{
+		return $this->cacheTime;
+	}
+	
 	/**
 	 * Sets the content type of this request (forinstance: text/html or text/javascript, etc) 
 	 *
@@ -127,11 +134,6 @@ class HttpServlet {
 	 *
 	 * @return string content type string
 	 */
-	/**
-	 * Returns the current content type 
-	 *
-	 * @return string content type string
-	 */
 	public function getContentType()
 	{
 		return $this->contentType;
@@ -142,22 +144,11 @@ class HttpServlet {
 	 *
 	 * @return int timestamp
 	 */
-	/**
-	 * returns the current last modified time stamp
-	 *
-	 * @return int timestamp
-	 */
 	public function getLastModified()
 	{
 		return $this->lastModified;
 	}
 	
-	/**
-	 * Sets the last modified timestamp. It automaticly checks if this timestamp
-	 * is larger then its current timestamp, and if not ignores the call
-	 *
-	 * @param int $modified timestamp
-	 */
 	/**
 	 * Sets the last modified timestamp. It automaticly checks if this timestamp
 	 * is larger then its current timestamp, and if not ignores the call
@@ -175,22 +166,11 @@ class HttpServlet {
 	 *
 	 * @param boolean $cache send no-cache headers?
 	 */
-	/**
-	 * Sets the noCache boolean. If its set to true, no-caching headers will be send
-	 * (pragma no cache, expiration in the past)
-	 *
-	 * @param boolean $cache send no-cache headers?
-	 */
 	public function setNoCache($cache = false)
 	{
 		$this->noCache = $cache;
 	}
 	
-	/**
-	 * returns the noCache boolean
-	 *
-	 * @return boolean
-	 */
 	/**
 	 * returns the noCache boolean
 	 *
