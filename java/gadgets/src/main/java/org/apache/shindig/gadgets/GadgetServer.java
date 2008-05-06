@@ -17,6 +17,7 @@
  */
 package org.apache.shindig.gadgets;
 
+import org.apache.shindig.gadgets.spec.Auth;
 import org.apache.shindig.gadgets.spec.Feature;
 import org.apache.shindig.gadgets.spec.GadgetSpec;
 import org.apache.shindig.gadgets.spec.LocaleSpec;
@@ -201,10 +202,16 @@ public class GadgetServer {
       CompletionService<RemoteContent> preloadProcessor
           = new ExecutorCompletionService<RemoteContent>(executor);
       for (Preload preload : gadget.getSpec().getModulePrefs().getPreloads()) {
-        PreloadTask task = new PreloadTask(gadget.getContext(), preload,
-            preloadFetcherFactory);
-        Future<RemoteContent> future = preloadProcessor.submit(task);
-        gadget.getPreloadMap().put(preload, future);
+        // Cant execute signed/oauth preloads without the token
+        if ((preload.getAuth() == Auth.NONE ||
+            gadget.getContext().getToken() != null) &&
+            (preload.getViews().size() == 0 ||
+            preload.getViews().contains(gadget.getContext().getView()))) {
+          PreloadTask task = new PreloadTask(gadget.getContext(), preload,
+              preloadFetcherFactory);
+          Future<RemoteContent> future = preloadProcessor.submit(task);
+          gadget.getPreloadMap().put(preload, future);
+        }
       }
     }
 
@@ -341,6 +348,8 @@ class PreloadTask implements Callable<RemoteContent> {
 
   public RemoteContent call() {
     RemoteContentRequest request = new RemoteContentRequest(preload.getHref());
+    request.getOptions().ownerSigned = preload.isSignOwner();
+    request.getOptions().viewerSigned = preload.isSignViewer();
     try {
       switch (preload.getAuth()) {
         case NONE:

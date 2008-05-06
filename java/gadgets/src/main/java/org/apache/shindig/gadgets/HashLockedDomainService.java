@@ -17,16 +17,16 @@
  */
 package org.apache.shindig.gadgets;
 
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.shindig.gadgets.spec.Feature;
 import org.apache.shindig.util.Base32;
 
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
+
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * Locked domain implementation based on sha1.
@@ -79,12 +79,16 @@ public class HashLockedDomainService implements LockedDomainService {
     }
   }
 
+  public boolean isEnabled() {
+    return enabled;
+  }
+
   public String getEmbedHost() {
     return embedHost;
   }
 
   public boolean embedCanRender(String host) {
-    return (!enabled || host.equals(embedHost));
+    return (!enabled || host.endsWith(embedHost));
   }
 
   public boolean gadgetCanRender(String host, Gadget gadget, String container) {
