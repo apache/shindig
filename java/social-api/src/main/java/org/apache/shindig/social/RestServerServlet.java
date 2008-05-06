@@ -18,41 +18,40 @@
  */
 package org.apache.shindig.social;
 
-import com.google.inject.Injector;
-
-import org.apache.abdera.protocol.server.Provider;
-import org.apache.abdera.protocol.server.servlet.AbderaServlet;
 import org.apache.shindig.gadgets.http.GuiceServletContextListener;
 
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.util.logging.Logger;
+import com.google.inject.Injector;
+import org.apache.abdera.protocol.server.Provider;
+import org.apache.abdera.protocol.server.servlet.AbderaServlet;
 
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.UnavailableException;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.util.logging.Logger;
 
 /**
  * Superclass for all servlets related to processing of REST api.
  * The reason for its existence is to init Guice Injection.
- * Since this has AbderaServlet to extend Abdera Servlet, 
- * it cannot extend InjectedServlet like GadgetDataServlet does. 
- * 
+ * Since this has AbderaServlet to extend Abdera Servlet,
+ * it cannot extend InjectedServlet like GadgetDataServlet does.
+ *
  * Injection is also a little different because of Abdera is in the middle.
- * instead of injecting (this) as the GadgetServlet does, 
+ * instead of injecting (this) as the GadgetServlet does,
  * here the Provider is injected.
  */
 public class RestServerServlet extends AbderaServlet {
-  private static Logger logger = 
+  private static Logger logger =
       Logger.getLogger(RestServerServlet.class.getName());
-  
+
   @Override public void init() {
     // Abdera provider stuff
     manager = createServiceManager();
     provider = createProvider();
   }
-  
+
   @Override
   protected Provider createProvider() {
     Provider provider = manager.newProvider(getProperties(getServletConfig()));
@@ -65,8 +64,8 @@ public class RestServerServlet extends AbderaServlet {
     }
     return provider;
   }
-  
-  protected void initGuice(ServletConfig config, Provider provider) 
+
+  protected void initGuice(ServletConfig config, Provider provider)
       throws ServletException {
     ServletContext context = config.getServletContext();
     Injector injector = (Injector)

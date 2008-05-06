@@ -79,10 +79,9 @@
     </servlet-class>
     <init-param>
       <param-name>org.apache.abdera.protocol.server.Provider</param-name>
-      <param-value>org.apache.shindig.social.SocialApiProvider</param-value>
+      <param-value>org.apache.shindig.social.abdera.SocialApiProvider</param-value>
     </init-param>
   </servlet>
-
 
   <servlet-mapping>
     <servlet-name>js</servlet-name>
