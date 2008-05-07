@@ -60,7 +60,93 @@ class ProxyHandler {
 		//header("HTTP/1.1 $status", true);
 		if ($status == 200) {
 			$output = '';
-			$json = array($url => array('body' => $result->getResponseContent(), 'rc' => $status));
+			if ($_GET['contentType'] == 'FEED') {
+				// We are including this library manually because the autoload doesnt work with 
+				// this, its filename doesnt match with the class name.
+				require 'src/common/Zend/Feed.php';
+				$numEntries = $_GET['numEntries'];
+				$getSummaries = $_GET['getSummaries'];
+				$channel = array();
+				//TODO fix the hack below by updating content fetcher..
+				// we cheat a litle here, we want a different caching time for feed's
+				// but atm the content fetcher doesn't allow this to be configured
+				$originalCacheTime = Config::get('cache_time');
+				$newTime = isset($_GET['refresh']) ? $_GET['refresh'] : 5 * 60;
+				Config::set('cache_time', $newTime);
+				$request = new RemoteContentRequest($url);
+				$request = $this->context->getHttpFetcher()->fetch($request, $this->context);
+				// Restore original caching time
+				Config::set('cache_time', $originalCacheTime);
+				if ((int)$result->getHttpCode() == 200) {
+					$content = $result->getResponseContent();
+					try {
+						$feed = Zend_Feed::importString($content);
+						if ($feed instanceof Zend_Feed_Rss) {
+							$channel = array(
+							    'title'       	=> $feed->title(),
+							    'link'        	=> $feed->link(),
+							    'description' 	=> $feed->description(),
+							 	'pubDate' 		=> $feed->pubDate(),
+							 	'language' 		=> $feed->language(),
+							 	'category' 		=> $feed->category(),
+							    'items'       	=> array()
+							);
+							// Loop over each channel item and store relevant data
+							$counter = 0;
+							foreach ($feed as $item) {
+								if ($counter >= $numEntries) {
+									break;
+								}
+								$counter++;
+							    $channel['items'][] = array(
+							        'title'			=> $item->title(),
+							        'link'			=> $item->link(),
+							    	'author'		=> $item->author(),
+							    	'description'	=> $getSummaries ? $item->description() : '',
+							    	'category'		=> $item->category(),
+							    	'comments'		=> $item->comments(),
+							    	'pubDate'		=> $item->pubDate()
+							    );
+							}
+						} elseif ($feed instanceof Zend_Feed_Atom) {
+							$channel = array(
+								'title'			=> $feed->title(),
+								'link'        	=> $feed->link(),
+								'id'        	=> $feed->id(),
+							    'subtitle' 		=> $feed->subtitle(),
+								'items'       	=> array()
+							);
+							$counter = 0;
+							foreach ($feed as $entry) {
+								if ($counter >= $numEntries) {
+									break;
+								}
+								$channel['items'][] = array(
+									'id' 		=> $entry->id(),
+									'title' 	=> $entry->title(),
+									'link' 		=> $entry->link(),
+									'summary' 	=> $entry->summary(),
+									'content' 	=> $entry->content(),
+									'author' 	=> $entry->author(),
+									'published' => $entry->published(),
+									'updated' 	=> $entry->updated()
+								);
+							}
+						} else {
+							throw new Exception('Invalid feed type');
+						}
+						$resp = json_encode($channel);
+					} catch (Zend_Feed_Exception $e) {
+						$resp = 'Error parsing feed: '.$e->getMessage();
+					}
+				} else {
+				    // feed import failed
+				    $resp = "Error fetching feed, response code: ".$result->getHttpCode();
+				}
+			} else {
+				$resp = $result->getResponseContent();
+			}
+			$json = array($url => array('body' => $resp, 'rc' => $status));
 			$json = json_encode($json);
 			$output = UNPARSEABLE_CRUFT . $json;
 			$this->setCachingHeaders();
@@ -73,7 +159,7 @@ class ProxyHandler {
 		}
 		die();
 	}
-	
+
 	/**
 	 * Fetches the content and returns it as-is using the headers as returned
 	 * by the remote host.
@@ -131,7 +217,6 @@ class ProxyHandler {
 	private function fetchContent($signedUrl, $method)
 	{
 		//TODO get actual character encoding from the request
-		
 
 		// Extract the request headers from the $_SERVER super-global (this -does- unfortunatly mean that any header that php doesn't understand won't be proxied thru though)
 		// if this turns out to be a problem we could add support for HTTP_RAW_HEADERS, but this depends on a php.ini setting, so i'd rather prevent that from being required

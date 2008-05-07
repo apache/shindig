@@ -38,40 +38,20 @@ include_once ('config.php');
 
 function __autoload($className)
 {
-	//FIXME this started out like a good idea when we just knew gadgets
-	// and it was just 1 directory, now its pretty nuts and probably needs
-	// replacing since it's getting dog slow this way
-	
+	$locations = array('src/common', 'src/gadgets', 'src/gadgets/samplecontainer', 'src/gadgets/http', 'src/socialdata', 'src/socialdata/opensocial', 'src/socialdata/opensocial/model', 'src/socialdata/http');
 	// Check for the presense of this class in our all our directories.
 	$fileName = $className.'.php';
-	if (file_exists("src/common/$fileName")) {
-		    require "src/common/$fileName";
-		    
-	} elseif (file_exists("src/gadgets/$fileName")) {
-		          require "src/gadgets/$fileName";
-		          
-	} elseif (file_exists("src/gadgets/samplecontainer/$fileName")) {
-		          require "src/gadgets/samplecontainer/$fileName";
-		          
-	} elseif (file_exists("src/gadgets/http/$fileName")) {
-		          require "src/gadgets/http/$fileName";
-		          
-	} elseif (file_exists("src/socialdata/$fileName")) {
-		          require "src/socialdata/$fileName";
-		          
-	} elseif (file_exists("src/socialdata/samplecontainer/$fileName")) {
-		          require "src/socialdata/samplecontainer/$fileName";
-		           
-	} elseif (file_exists("src/socialdata/opensocial/$fileName")) {
-		          require "src/socialdata/opensocial/$fileName";
-		          
-	} elseif (file_exists("src/socialdata/opensocial/model/$fileName")) {
-		          require "src/socialdata/opensocial/model/$fileName";
-		          
-	} elseif (file_exists("src/socialdata/http/$fileName")) {
-		          require "src/socialdata/http/$fileName";
+	foreach ($locations as $path) {
+		if (file_exists("{$path}/$fileName")) {
+			require "{$path}/$fileName";
+			break;
+		}
 	}
 }
+
+// prefix our Zend framework dir to the include path so it picks it up before any other 
+// system libs to avoid conflicts
+ini_set('include_path', realpath(dirname(__FILE__))."/src/common:".ini_get('include_path'));
 
 $servletMap = array(
 	Config::get('web_prefix') . '/gadgets/files'    => 'FilesServlet',
@@ -90,7 +70,7 @@ foreach ($servletMap as $url => $class) {
 		break;
 	}
 }
-if ($servlet) {	
+if ($servlet) {
 	$class = new $class();
 	if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 		$class->doPost();
