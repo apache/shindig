@@ -131,43 +131,50 @@ gadgets.io = function() {
      approvalUrl: data.approvalUrl,
      errors: []
     };
-
-    if (resp.text) {
-      switch (params.CONTENT_TYPE) {
-        case "JSON":
-        case "FEED":
-          resp.data = gadgets.json.parse(resp.text);
-          if (!resp.data) {
-            resp.errors.push("failed to parse JSON");
-            resp.data = null;
-          }
-          break;
-        case "DOM":
-          var dom;
-          if (window.ActiveXObject) {
-            dom = new ActiveXObject("Microsoft.XMLDOM");
-            dom.async = false;
-            dom.validateOnParse = false;
-            dom.resolveExternals = false;
-            if (!dom.loadXML(resp.text)) {
-              resp.errors.push("failed to parse XML");
-            } else {
-              resp.data = dom;
-            }
+    switch (params.CONTENT_TYPE) {
+      case "JSON":
+        // Same as before, but specific to JSON (not FEED)
+        resp.data = gadgets.json.parse(resp.text);
+        if (!resp.data) {
+          resp.errors.push("failed to parse JSON");
+          resp.data = null;
+        }
+        break;
+      case "FEED":
+        if (!data.body) {
+          resp.errors.push("failed to parse JSON");
+          resp.data = null;
+        }
+        else {
+          // Straight into the Feed object - override usual resp structure
+          resp = data.body;
+        }
+        break;
+      case "DOM":
+        var dom;
+        if (window.ActiveXObject) {
+          dom = new ActiveXObject("Microsoft.XMLDOM");
+          dom.async = false;
+          dom.validateOnParse = false;
+          dom.resolveExternals = false;
+          if (!dom.loadXML(resp.text)) {
+            resp.errors.push("failed to parse XML");
           } else {
-            var parser = new DOMParser();
-            dom = parser.parseFromString(resp.text, "text/xml");
-            if ("parsererror" === dom.documentElement.nodeName) {
-              resp.errors.push("failed to parse XML");
-            } else {
-              resp.data = dom;
-            }
+            resp.data = dom;
           }
-          break;
-        default:
-          resp.data = resp.text;
-          break;
-      }
+        } else {
+          var parser = new DOMParser();
+          dom = parser.parseFromString(resp.text, "text/xml");
+          if ("parsererror" === dom.documentElement.nodeName) {
+            resp.errors.push("failed to parse XML");
+          } else {
+            resp.data = dom;
+          }
+        }
+        break;
+      default:
+        resp.data = resp.text;
+        break;
     }
 
     return resp;
@@ -306,6 +313,9 @@ gadgets.io = function() {
         oauthState : reqState || "",
         oauthService : oauthService || "",
         oauthToken : oauthToken || "",
+        contentType : params.CONTENT_TYPE || "TEXT",
+        numEntries : params.NUM_ENTRIES || "3",
+        getSummaries : !!params.GET_SUMMARIES,
         signOwner : signOwner || "true",
         signViewer : signViewer || "true"
       };
