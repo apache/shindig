@@ -18,7 +18,7 @@
  */
 
 class BasicActivitiesService {
-	
+
 	public function getActivities($ids, $token)
 	{
 		$allActivities = XmlStateFileFetcher::get()->getActivities();
@@ -31,7 +31,7 @@ class BasicActivitiesService {
 		// TODO: Sort them
 		return new ResponseItem(null, null, $activities);
 	}
-	
+
 	public function createActivity($personId, $activity, $token)
 	{
 		// TODO: Validate the activity and do any template expanding

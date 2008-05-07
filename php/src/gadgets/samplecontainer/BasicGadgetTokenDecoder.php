@@ -25,7 +25,7 @@ class BasicGadgetTokenDecoder extends GadgetTokenDecoder {
 	private $CONTAINER_INDEX = 3;
 	private $APP_URL_INDEX = 4;
 	private $MODULE_ID_INDEX = 5;
-	
+
 	/**
 	 * {@inheritDoc}
 	 *

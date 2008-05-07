@@ -18,7 +18,7 @@
  */
 
 class BasicPeopleService extends PeopleService {
-	
+
 	private function comparator($person, $person1)
 	{
 		$name = $person['name']->getUnstructured();
@@ -28,7 +28,7 @@ class BasicPeopleService extends PeopleService {
 		}
 		return ($name < $name1) ? - 1 : 1;
 	}
-	
+
 	public function getPeople($ids, $sortOrder, $filter, $first, $max, $profileDetails, $token)
 	{
 		$allPeople = XmlStateFileFetcher::get()->getAllPeople();
@@ -77,7 +77,7 @@ class BasicPeopleService extends PeopleService {
 		$collection = new ApiCollection($people, $first, $totalSize);
 		return new ResponseItem(null, null, $collection);
 	}
-	
+
 	public function getIds($idSpec, $token)
 	{
 		$friendIds = XmlStateFileFetcher::get()->getFriendIds();

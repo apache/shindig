@@ -19,10 +19,11 @@
  */
 
 class UrlGenerator {
-	static function getIframeURL($gadget, $context)	
+
+	static function getIframeURL($gadget, $context)
 	{
 		$inlineJs = '';
-		foreach ( $gadget->getJsLibraries() as $library ) {
+		foreach ($gadget->getJsLibraries() as $library) {
 			$type = $library->getType();
 			if ($type != 'URL') {
 				$inlineJs .= $library->getContent() . "\n";
@@ -40,19 +41,10 @@ class UrlGenerator {
 			if ($value == null) {
 				$value = $pref->getDefaultValue();
 			}
-			$up .= '&up_'.urlencode($name).'='.urlencode($value);
+			$up .= '&up_' . urlencode($name) . '=' . urlencode($value);
 		}
 		
 		// note: put the URL last, else some browsers seem to get confused (reported by hi5)
-		return
-			Config::get('default_iframe_prefix').
-			'container='.$context->getContainer().
-			($context->getIgnoreCache() ? 'nocache=1' : '&v='.$v).
-			($context->getModuleId() != 0 ? '&mid='.$context->getModuleId() : '').
-			'&lang='.$context->getLocale()->getLanguage().
-			'&country='.$context->getLocale()->getCountry().			
-			'&view='.$view->getName().
-			$up.
-			'&url='.urlencode($context->getUrl());		
+		return Config::get('default_iframe_prefix') . 'container=' . $context->getContainer() . ($context->getIgnoreCache() ? 'nocache=1' : '&v=' . $v) . ($context->getModuleId() != 0 ? '&mid=' . $context->getModuleId() : '') . '&lang=' . $context->getLocale()->getLanguage() . '&country=' . $context->getLocale()->getCountry() . '&view=' . $view->getName() . $up . '&url=' . urlencode($context->getUrl());
 	}
 }

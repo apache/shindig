@@ -22,17 +22,17 @@ class LocaleSpec {
 	public $url;
 	public $locale;
 	public $rightToLeft;
-	
+
 	public function getURI()
 	{
 		return $this->url;
 	}
-	
+
 	public function getLocale()
 	{
 		return $this->locale;
 	}
-	
+
 	public function isRightToLeft()
 	{
 		return $this->rightToLeft;

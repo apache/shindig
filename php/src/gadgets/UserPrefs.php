@@ -20,17 +20,17 @@
 
 class UserPrefs {
 	private $prefs = array();
-	
+
 	public function __construct($prefs)
 	{
 		$this->prefs = $prefs;
 	}
-	
+
 	public function getPrefs()
 	{
 		return $this->prefs;
 	}
-	
+
 	public function getPref($name)
 	{
 		return isset($this->prefs[$name]) ? $this->prefs[$name] : null;

@@ -18,7 +18,7 @@
  */
 
 abstract class GadgetDataHandler {
-	
+
 	/**
 	 * Determines whether this handler should be used to process the request
 	 *
@@ -27,7 +27,7 @@ abstract class GadgetDataHandler {
 	 *     this json request
 	 */
 	abstract function shouldHandle($requestType);
-	
+
 	/**
 	 * Constructs a ResponseItem based on the parameters in the RequestItem
 	 *

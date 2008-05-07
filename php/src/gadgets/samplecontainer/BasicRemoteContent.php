@@ -19,7 +19,7 @@
  */
 
 class BasicRemoteContent extends RemoteContent {
-	
+
 	public function fetch($request, $context)
 	{
 		$cache = Config::get('data_cache');

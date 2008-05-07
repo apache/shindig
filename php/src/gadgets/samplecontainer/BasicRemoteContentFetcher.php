@@ -24,7 +24,7 @@
 
 class BasicRemoteContentFetcher extends RemoteContentFetcher {
 	private $requests = array();
-	
+
 	public function fetchRequest($request)
 	{
 		$request->handle = curl_init();

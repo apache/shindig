@@ -27,7 +27,7 @@ class BlobCrypterException extends Exception {}
  * 
  */
 abstract class BlobCrypter {
-	
+
 	/**
 	 * Time stamps, encrypts, and signs a blob.
 	 * 
@@ -37,7 +37,7 @@ abstract class BlobCrypter {
 	 * @throws BlobCrypterException
 	 */
 	abstract public function wrap(Array $in);
-	
+
 	/**
 	 * Unwraps a blob.
 	 * 

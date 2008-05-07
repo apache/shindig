@@ -18,7 +18,7 @@
  */
 
 abstract class ActivitiesService {
-	
+
 	/**
 	 * Returns a list of activities that correspond to the passed in person ids.
 	 * @param ids The ids of the people to fetch activities for.
@@ -26,7 +26,7 @@ abstract class ActivitiesService {
 	 * @return a response item with the list of activities.
 	 */
 	abstract public function getActivities($ids, $token);
-	
+
 	/**
 	 * Creates the passed in activity for the given user. Once createActivity is
 	 * called, getActivities will be able to return the Activity.

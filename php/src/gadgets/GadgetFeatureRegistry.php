@@ -23,13 +23,13 @@ class GadgetFeatureRegistry {
 	private $core = array();
 	private $coreDone = false;
 	private $debug;
-	
+
 	public function __construct($featurePath, $debug = false)
 	{
 		$this->debug = $debug;
 		$this->registerFeatures($featurePath);
 	}
-	
+
 	public function registerFeatures($featurePath)
 	{
 		if (empty($featurePath) || $featurePath == null) {
@@ -54,7 +54,7 @@ class GadgetFeatureRegistry {
 			$this->coreDone = true;
 		}
 	}
-	
+
 	public function register($name, $deps, $feature)
 	{
 		// Core entries must come first.
@@ -69,17 +69,17 @@ class GadgetFeatureRegistry {
 		}
 		return $entry;
 	}
-	
+
 	private function validateFeatureGraph()
 	{
 		// TODO: ensure that features form a DAG and that all deps are provided
 	}
-	
+
 	public function getAllFeatures()
 	{
 		return $this->features;
 	}
-	
+
 	public function getIncludedFeatures($needed, &$resultsFound, &$resultsMissing)
 	{
 		$resultsFound = array();
@@ -99,7 +99,7 @@ class GadgetFeatureRegistry {
 		}
 		return count($resultsMissing) == 0;
 	}
-	
+
 	private function addEntryToSet(&$results, $entry)
 	{
 		foreach ($entry->deps as $dep) {
@@ -107,7 +107,7 @@ class GadgetFeatureRegistry {
 		}
 		$results[$entry->name] = $entry->name;
 	}
-	
+
 	public function getEntry($name)
 	{
 		return $this->features[$name];
@@ -119,7 +119,7 @@ class GadgetFeatureRegistryEntry {
 	public $name;
 	public $deps = array();
 	public $feature;
-	
+
 	public function __construct($name, $deps, $feature, $registry)
 	{
 		$this->name = $name;
@@ -131,17 +131,17 @@ class GadgetFeatureRegistryEntry {
 		}
 		$this->feature = $feature;
 	}
-	
+
 	public function getName()
 	{
 		return $this->name;
 	}
-	
+
 	public function getDependencies()
 	{
 		return $this->deps;
 	}
-	
+
 	public function getFeature()
 	{
 		return $this->feature;

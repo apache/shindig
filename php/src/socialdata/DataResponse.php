@@ -21,28 +21,28 @@ class DataResponse {
 	
 	public $responses;
 	public $error;
-	
+
 	public function __construct($responses = array(), $error = null)
 	{
 		$this->error = $error;
 		$this->responses = $responses;
 	}
-	
+
 	public function getResponses()
 	{
 		return $this->responses;
 	}
-	
+
 	public function setResponses($responses)
 	{
 		$this->responses = $responses;
 	}
-	
+
 	public function getError()
 	{
 		return $this->error;
 	}
-	
+
 	public function setError($error)
 	{
 		$this->error = $error;

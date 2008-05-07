@@ -22,17 +22,17 @@ class FeatureSpec {
 	public $name;
 	public $params = array();
 	public $optional;
-	
+
 	public function getName()
 	{
 		return $this->name;
 	}
-	
+
 	public function getParams()
 	{
 		return $this->params;
 	}
-	
+
 	public function isOptional()
 	{
 		return $this->optional;

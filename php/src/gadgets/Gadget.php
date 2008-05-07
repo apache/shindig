@@ -63,7 +63,7 @@ class Gadget {
 	public $scaling;
 	public $scrolling;
 	public $views = array();
-	
+
 	public function __construct($id = false, $context)
 	{
 		if ($id) {
@@ -75,62 +75,62 @@ class Gadget {
 		$this->substitutions = new Substitutions();
 		$this->jsLibraries = array();
 	}
-	
+
 	public function setId($id)
 	{
 		$this->id = $id;
 	}
-	
+
 	public function setPrefs($prefs)
 	{
 		$this->userPrefValues = $prefs;
 	}
-	
+
 	public function getAuthor()
 	{
 		return $this->substitutions->substitute($this->author);
 	}
-	
+
 	public function getAuthorEmail()
 	{
 		return $this->substitutions->substitute($this->authorEmail);
 	}
-	
+
 	public function getMessageBundle()
 	{
 		return $this->messageBundle;
 	}
-	
+
 	public function getDescription()
 	{
 		return $this->substitutions->substitute($this->description);
 	}
-	
+
 	public function getDirectoryTitle()
 	{
 		return $this->substitutions->substitute($this->directoryTitle);
 	}
-	
+
 	public function getId()
 	{
 		return $this->id;
 	}
-	
+
 	public function getJsLibraries()
 	{
 		return $this->jsLibraries;
 	}
-	
+
 	public function addJsLibrary($library)
 	{
 		$this->jsLibraries[] = $library;
 	}
-	
+
 	public function getLocaleSpecs()
 	{
 		return $this->localeSpecs;
 	}
-	
+
 	public function getFeatureParams($gadget, $feature)
 	{
 		//FIXME not working atm
@@ -142,7 +142,7 @@ class Gadget {
 			return $spec->getParams();
 		}
 	}
-	
+
 	public function getPreloads()
 	{
 		$ret = array();
@@ -151,32 +151,32 @@ class Gadget {
 		}
 		return $ret;
 	}
-	
+
 	public function getRequires()
 	{
 		return $this->requires;
 	}
-	
+
 	public function getScreenshot()
 	{
 		return $this->substitutions->substitute($this->screenshot);
 	}
-	
+
 	public function getSubstitutions()
 	{
 		return $this->substitutions;
 	}
-	
+
 	public function getThumbnail()
 	{
 		return $this->substitutions->substitute($this->thumbnail);
 	}
-	
+
 	public function getTitle()
 	{
 		return $this->substitutions->substitute($this->title);
 	}
-	
+
 	public function getTitleUrl()
 	{
 		$ret = null;
@@ -185,112 +185,112 @@ class Gadget {
 		}
 		return $ret;
 	}
-	
+
 	public function getAuthorAffiliation()
 	{
 		$this->substitutions->substitute($this->authorAffiliation);
 	}
-	
+
 	public function getAuthorLocation()
 	{
 		$this->substitutions->substitute($this->authorLocation);
 	}
-	
+
 	public function getAuthorPhoto()
 	{
 		$this->substitutions->substitute($this->authorPhoto);
 	}
-	
+
 	public function getAuthorAboutme()
 	{
 		$this->substitutions->substitute($this->authorAboutMe);
 	}
-	
+
 	public function getAuthorQuote()
 	{
 		$this->substitutions->substitute($this->authorQuote);
 	}
-	
+
 	public function getAuthorLink()
 	{
 		$this->substitutions->substitute($this->authorLink);
 	}
-	
+
 	public function getShowStats()
 	{
 		return $this->showStats;
 	}
-	
+
 	public function getShowInDirectory()
 	{
 		return $this->showInDirectory;
 	}
-	
+
 	public function getString()
 	{
 		$this->substitutions->substitute($this->string);
 	}
-	
+
 	public function getWidth()
 	{
 		return $this->width;
 	}
-	
+
 	public function getHeight()
 	{
 		return $this->height;
 	}
-	
+
 	public function getCategory()
 	{
 		return $this->category;
 	}
-	
+
 	public function getCategory2()
 	{
 		return $this->category2;
 	}
-	
+
 	public function getSingleton()
 	{
 		return $this->singleton;
 	}
-	
+
 	public function getRenderInline()
 	{
 		return $this->renderInline;
 	}
-	
+
 	public function getScaling()
 	{
 		return $this->scaling;
 	}
-	
+
 	public function getScrolling()
 	{
 		return $this->scrolling;
 	}
-	
+
 	public function getUserPrefs()
 	{
 		return $this->userPrefs;
 	}
-	
+
 	public function getUserPrefValues()
 	{
 		return $this->userPrefValues;
 	}
-	
+
 	public function setMessageBundle($messageBundle)
 	{
 		$this->messageBundle = $messageBundle;
 	}
-	
+
 	public function getViews()
 	{
 		return $this->views;
 	}
-	
+
 	public function getView($viewName)
 	{
 		return isset($this->views[$viewName]) ? $this->views[$viewName] : $this->views[DEFAULT_VIEW];

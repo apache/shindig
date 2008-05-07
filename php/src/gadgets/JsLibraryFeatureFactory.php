@@ -20,18 +20,18 @@
 
 class JsLibraryFeatureFactory extends GadgetFeatureFactory {
 	private $JsLibraryFeature;
-	
+
 	public function __construct($gadgetLibraries, $containerLibraries)
 	{
 		// since we don't do strict type checking, this is one constructor for both a class, or a array of classes
 		$this->JsLibraryFeature = new JsLibraryFeature($gadgetLibraries, $containerLibraries);
 	}
-	
+
 	public function create()
 	{
 		return $this->JsLibraryFeature;
 	}
-	
+
 	public function getLibraries($context)
 	{
 		return $context == 'GADGET' ? $this->JsLibraryFeature->gadgetLibraries : $this->JsLibraryFeature->containerLibraries;
@@ -41,7 +41,7 @@ class JsLibraryFeatureFactory extends GadgetFeatureFactory {
 class JsLibraryFeature extends GadgetFeature {
 	public $containerLibraries = array();
 	public $gadgetLibraries = array();
-	
+
 	public function __construct($gadgetLibraries, $containerLibraries)
 	{
 		// we have a single constructor for both a single and multiple libraries, so handle it in code instead
@@ -56,12 +56,12 @@ class JsLibraryFeature extends GadgetFeature {
 			$this->containerLibraries[] = $containerLibraries;
 		}
 	}
-	
+
 	public function prepare($gadget, $context, $params)
 	{
 		// do nothing
 	}
-	
+
 	public function process($gadget, $context, $params)
 	{
 		$libraries = array();

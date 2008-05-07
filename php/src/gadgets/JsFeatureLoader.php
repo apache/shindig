@@ -20,12 +20,12 @@
 
 class JsFeatureLoader {
 	private $debug;
-	
+
 	public function __construct($debug)
 	{
 		$this->debug = $debug;
 	}
-	
+
 	public function loadFeatures($path, $registry)
 	{
 		$registered = array();
@@ -42,7 +42,7 @@ class JsFeatureLoader {
 		}
 		return $entries;
 	}
-	
+
 	private function loadFiles($path, &$features)
 	{
 		if (is_dir($path)) {
@@ -63,7 +63,7 @@ class JsFeatureLoader {
 		}
 		return $features;
 	}
-	
+
 	private function processFile($file)
 	{
 		$feature = null;
@@ -74,7 +74,7 @@ class JsFeatureLoader {
 		}
 		return $feature;
 	}
-	
+
 	private function register(&$registry, $feature, $registered, $all)
 	{
 		if (isset($registered[$feature->name])) {
@@ -89,7 +89,7 @@ class JsFeatureLoader {
 		$registered[] = $feature->name;
 		return $registry->register($feature->name, $feature->deps, $factory);
 	}
-	
+
 	private function parse($content, $path)
 	{
 		$doc = simplexml_load_string($content);
@@ -111,7 +111,7 @@ class JsFeatureLoader {
 		}
 		return $feature;
 	}
-	
+
 	private function processContext(&$feature, $context, $isContainer)
 	{
 		foreach ($context->script as $script) {

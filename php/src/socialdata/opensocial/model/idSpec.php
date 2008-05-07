@@ -22,13 +22,13 @@ class IdSpec {
 	
 	public $jsonSpec;
 	public $type;
-	
+
 	public function __construct($jsonSpec, $type)
 	{
 		$this->jsonSpec = $jsonSpec;
 		$this->type = $type;
 	}
-	
+
 	static public function fromJson($jsonIdSpec)
 	{
 		if (! empty($jsonIdSpec) && in_array((string)$jsonIdSpec, idSpec::$types)) {
@@ -40,7 +40,7 @@ class IdSpec {
 		}
 		return new IdSpec($jsonIdSpec, $idSpecEnum);
 	}
-	
+
 	/**
 	 * Only valid for IdSpecs of type USER_IDS
 	 * @return A list of the user ids in the id spec
@@ -58,7 +58,7 @@ class IdSpec {
 		}
 		return $userIds;
 	}
-	
+
 	public function getType()
 	{
 		return $this->type;

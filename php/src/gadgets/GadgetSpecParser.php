@@ -21,7 +21,7 @@
 class SpecParserException extends Exception {}
 
 class GadgetSpecParser {
-	
+
 	public function parse($xml, $context)
 	{
 		if (empty($xml)) {
@@ -53,7 +53,7 @@ class GadgetSpecParser {
 		//TODO Parse icons
 		return $gadget;
 	}
-	
+
 	private function processModulePrefs(&$gadget, $ModulePrefs)
 	{
 		$attributes = $ModulePrefs->attributes();
@@ -93,7 +93,7 @@ class GadgetSpecParser {
 			$gadget->localeSpecs[] = $this->processLocale($locale);
 		}
 	}
-	
+
 	private function processLocale($locale)
 	{
 		$attributes = $locale->attributes();
@@ -109,7 +109,7 @@ class GadgetSpecParser {
 		$locale->locale = new Locale($languageAttr, $countryAttr);
 		return $locale;
 	}
-	
+
 	private function processUserPref(&$gadget, $pref)
 	{
 		$attributes = $pref->attributes();
@@ -136,7 +136,7 @@ class GadgetSpecParser {
 		}
 		$gadget->userPrefs[] = $preference;
 	}
-	
+
 	private function processContent(&$gadget, $content)
 	{
 		$attributes = $content->attributes();
@@ -157,12 +157,12 @@ class GadgetSpecParser {
 			} else {
 				if ($gadget->views[$view]->getName() == $viewSpec->getName() && $viewSpec->getType() != $gadget->views[$view]->getType()) {
 					throw new SpecParserException("You may not mix content " . " types in the same view.");
-				}				
+				}
 				$gadget->views[$view]->addContent($html);
 			}
 		}
 	}
-	
+
 	private function processFeature(&$gadget, $feature, $required)
 	{
 		$featureSpec = new FeatureSpec();
