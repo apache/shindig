@@ -17,12 +17,14 @@
  */
 package org.apache.shindig.social.opensocial.util;
 
+import org.apache.commons.betwixt.io.BeanWriter;
+import org.xml.sax.SAXException;
+
 import java.beans.IntrospectionException;
 import java.io.IOException;
 import java.io.StringWriter;
+import java.util.logging.Level;
 import java.util.logging.Logger;
-import org.apache.commons.betwixt.io.BeanWriter;
-import org.xml.sax.SAXException;
 
 public class BeanXmlConverter {
   private static Logger logger =
@@ -49,21 +51,21 @@ public class BeanXmlConverter {
       writer.write(className, obj);
       toReturn = outputWriter.toString();
       logger.finest("XML is: " + toReturn + "\n **** \n\n");
-    } catch(SAXException e) {
-      System.err.println(e);
-    } catch(IOException e) {
-      System.err.println(e);
-    } catch(IntrospectionException e) {
-      System.err.println(e);
+
+    } catch (SAXException e) {
+      logger.log(Level.SEVERE, e.getMessage(), e);
+    } catch (IOException e) {
+      logger.log(Level.SEVERE, e.getMessage(), e);
+    } catch (IntrospectionException e) {
+      logger.log(Level.SEVERE, e.getMessage(), e);
+    } finally {
+      try {
+        writer.close();
+      } catch(IOException e) {
+        // ignore this exception. it won't matter
+      }
     }
 
-    try {
-      if (writer != null) {
-        writer.close();
-      }
-    } catch(IOException e) {
-      // ignore this exception. it won't matter
-    }
     return toReturn;
   }
 }

@@ -55,7 +55,16 @@ public class IdSpec {
    * @throws JSONException If the id spec isn't a valid json String array
    */
   public List<String> fetchUserIds() throws JSONException {
-    JSONArray userIdArray = new JSONArray(jsonSpec);
+    JSONArray userIdArray;
+    try {
+      userIdArray = new JSONArray(jsonSpec);
+    } catch (JSONException e) {
+      // If it isn't an array, treat it as a simple string
+      // TODO: This will go away with rest so we can remove this hack
+      List<String> list = new ArrayList<String>();
+      list.add(jsonSpec);
+      return list;
+    }
     List<String> userIds = new ArrayList<String>(userIdArray.length());
 
     for (int i = 0; i < userIdArray.length(); i++) {

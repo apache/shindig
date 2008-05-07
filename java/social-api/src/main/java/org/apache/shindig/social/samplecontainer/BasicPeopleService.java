@@ -111,10 +111,16 @@ public class BasicPeopleService implements PeopleService {
         ids.add(token.getViewerId());
         break;
       case OWNER_FRIENDS:
-        ids.addAll(friendIds.get(token.getOwnerId()));
+        List<String> ownerFriends = friendIds.get(token.getOwnerId());
+        if (ownerFriends != null) {
+          ids.addAll(ownerFriends);
+        }
         break;
       case VIEWER_FRIENDS:
-        ids.addAll(friendIds.get(token.getViewerId()));
+        List<String> viewerFriends = friendIds.get(token.getViewerId());
+        if (viewerFriends != null) {
+          ids.addAll(viewerFriends);
+        }
         break;
       case USER_IDS:
         ids.addAll(idSpec.fetchUserIds());
