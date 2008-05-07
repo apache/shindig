@@ -35,178 +35,178 @@ class Activity {
 	public $titleId;
 	public $url;
 	public $userId;
-	
+
 	public function __construct($id, $userId)
 	{
 		$this->id = $id;
 		$this->userId = $userId;
 	}
-	
+
 	public function getAppId()
 	{
 		return $this->appId;
 	}
-	
+
 	public function setAppId($appId)
 	{
 		$this->appId = $appId;
 	}
-	
+
 	public function getBody()
 	{
 		return $this->body;
 	}
-	
+
 	public function setBody($body)
 	{
 		$this->body = $body;
 	}
-	
+
 	public function getBodyId()
 	{
 		return $this->bodyId;
 	}
-	
+
 	public function setBodyId($bodyId)
 	{
 		$this->bodyId = $bodyId;
 	}
-	
+
 	public function getExternalId()
 	{
 		return $this->externalId;
 	}
-	
+
 	public function setExternalId($externalId)
 	{
 		$this->externalId = $externalId;
 	}
-	
+
 	public function getId()
 	{
 		return $this->id;
 	}
-	
+
 	public function setId($id)
 	{
 		$this->id = $id;
 	}
-	
+
 	public function getMediaItems()
 	{
 		return $this->mediaItems;
 	}
-	
+
 	public function setMediaItems($mediaItems)
 	{
 		$this->mediaItems = $mediaItems;
 	}
-	
+
 	public function getPostedTime()
 	{
 		return $this->postedTime;
 	}
-	
+
 	public function setPostedTime($postedTime)
 	{
 		$this->postedTime = $postedTime;
 	}
-	
+
 	public function getPriority()
 	{
 		return $this->priority;
 	}
-	
+
 	public function setPriority($priority)
 	{
 		$this->priority = $priority;
 	}
-	
+
 	public function getStreamFaviconUrl()
 	{
 		return $this->streamFaviconUrl;
 	}
-	
+
 	public function setStreamFaviconUrl($streamFaviconUrl)
 	{
 		$this->streamFaviconUrl = $streamFaviconUrl;
 	}
-	
+
 	public function getStreamSourceUrl()
 	{
 		return $this->streamSourceUrl;
 	}
-	
+
 	public function setStreamSourceUrl($streamSourceUrl)
 	{
 		$this->streamSourceUrl = $streamSourceUrl;
 	}
-	
+
 	public function getStreamTitle()
 	{
 		return $this->streamTitle;
 	}
-	
+
 	public function setStreamTitle($streamTitle)
 	{
 		$this->streamTitle = $streamTitle;
 	}
-	
+
 	public function getStreamUrl()
 	{
 		return $this->streamUrl;
 	}
-	
+
 	public function setStreamUrl($streamUrl)
 	{
 		$this->streamUrl = $streamUrl;
 	}
-	
+
 	public function getTemplateParams()
 	{
 		return $this->templateParams;
 	}
-	
+
 	public function setTemplateParams($templateParams)
 	{
 		$this->templateParams = $templateParams;
 	}
-	
+
 	public function getTitle()
 	{
 		return $this->title;
 	}
-	
+
 	public function setTitle($title)
 	{
 		$this->title = $title;
 	}
-	
+
 	public function getTitleId()
 	{
 		return $this->titleId;
 	}
-	
+
 	public function setTitleId($titleId)
 	{
 		$this->titleId = $titleId;
 	}
-	
+
 	public function getUrl()
 	{
 		return $this->url;
 	}
-	
+
 	public function setUrl($url)
 	{
 		$this->url = $url;
 	}
-	
+
 	public function getUserId()
 	{
 		return $this->userId;
 	}
-	
+
 	public function setUserId($userId)
 	{
 		$this->userId = $userId;

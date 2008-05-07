@@ -19,6 +19,6 @@
  */
 
 abstract class GadgetFeatureFactory {
-	
+
 	abstract public function create();
 }

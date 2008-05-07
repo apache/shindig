@@ -24,14 +24,14 @@
  */
 
 class GadgetServer {
-	
+
 	public function processGadget($context)
 	{
 		$gadget = $this->specLoad($context);
 		$this->featuresLoad($gadget, $context);
 		return $gadget;
 	}
-	
+
 	private function specLoad($context)
 	{
 		if ($context->getBlacklist() != null && $context->getBlacklist()->isBlacklisted($context->getUrl())) {
@@ -46,7 +46,7 @@ class GadgetServer {
 		$gadget = $specParser->parse($xml->getResponseContent(), $context);
 		return $gadget;
 	}
-	
+
 	private function getBundle($localeSpec, $context)
 	{
 		if ($localeSpec != null) {
@@ -61,7 +61,7 @@ class GadgetServer {
 		}
 		return null;
 	}
-	
+
 	private function localeSpec($gadget, $locale)
 	{
 		$localeSpecs = $gadget->getLocaleSpecs();
@@ -73,7 +73,7 @@ class GadgetServer {
 		}
 		return null;
 	}
-	
+
 	private function getLocaleSpec($gadget, $context)
 	{
 		$locale = $context->getLocale();
@@ -89,7 +89,7 @@ class GadgetServer {
 		}
 		return $localeSpec;
 	}
-	
+
 	private function featuresLoad($gadget, $context)
 	{
 		//NOTE i've been a bit liberal here with folding code into this function, while it did get a bit long, the many include()'s are slowing us down

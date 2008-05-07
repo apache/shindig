@@ -18,7 +18,7 @@
  */
 
 abstract class DataService {
-	
+
 	/**
 	 * Fetch data for a list of ids.
 	 * @param ids The list of ids
@@ -28,7 +28,7 @@ abstract class DataService {
 	 *     there was a problem
 	 */
 	abstract public function getPersonData($ids, $keys, $token);
-	
+
 	/**
 	 * Updates the data key for the given person with the new value.
 	 *

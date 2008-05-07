@@ -18,7 +18,7 @@
  */
 
 class BasicDataService extends DataService {
-	
+
 	public function getPersonData($ids, $keys, $token)
 	{
 		$allData = XmlStateFileFetcher::get()->getAppData();
@@ -37,7 +37,7 @@ class BasicDataService extends DataService {
 		}
 		return new ResponseItem(null, null, $data);
 	}
-	
+
 	public function updatePersonData($id, $key, $value, $token)
 	{
 		if (! BasicDataService::isValidKey($key)) {
@@ -46,7 +46,7 @@ class BasicDataService extends DataService {
 		XmlStateFileFetcher::get()->setAppData($id, $key, $value);
 		return new ResponseItem(null, null, array());
 	}
-	
+
 	/**
 	 * Determines whether the input is a valid key. Valid keys match the regular
 	 * expression [\w\-\.]+.

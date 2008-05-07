@@ -22,26 +22,26 @@ class Substitutions {
 	private $types = array('MESSAGE' => 'MSG', 'BIDI' => 'BIDI', 'USER_PREF' => 'UP', 'MODULE' => 'MODULE');
 	
 	private $substitutions = array();
-	
+
 	public function __construct()
 	{
 		foreach ($this->types as $type) {
 			$this->substitutions[$type] = array();
 		}
 	}
-	
+
 	public function addSubstitution($type, $key, $value)
 	{
 		$this->substitutions[$type]["__{$type}_{$key}__"] = $value;
 	}
-	
+
 	public function addSubstitutions($type, $array)
 	{
 		foreach ($array as $key => $value) {
 			$this->addSubstitution($type, $key, $value);
 		}
 	}
-	
+
 	public function substitute($input)
 	{
 		foreach ($this->types as $type) {
@@ -49,7 +49,7 @@ class Substitutions {
 		}
 		return $input;
 	}
-	
+
 	public function substituteType($type, $input)
 	{
 		return str_replace(array_keys($this->substitutions[$type]), array_values($this->substitutions[$type]), $input);

@@ -23,30 +23,30 @@ class JsLibrary {
 	private $type;
 	private $content;
 	private $featureName; // used to track what feature this belongs to
-	
 
+	
 	public function __construct($type, $content, $featureName = '')
 	{
 		$this->featureName = $featureName;
 		$this->type = $type;
 		$this->content = $content;
 	}
-	
+
 	public function getType()
 	{
 		return $this->type;
 	}
-	
+
 	public function getContent()
 	{
 		return $this->content;
 	}
-	
+
 	public function getFeatureName()
 	{
 		return $this->featureName;
 	}
-	
+
 	public function toString()
 	{
 		if ($this->type == 'URL') {
@@ -55,7 +55,7 @@ class JsLibrary {
 			return "<script><!--\n" . $this->content . "\n--></script>";
 		}
 	}
-	
+
 	static function create($type, $content, $debug)
 	{
 		$feature = '';
@@ -70,7 +70,7 @@ class JsLibrary {
 		}
 		return new JsLibrary($type, $content, $feature);
 	}
-	
+
 	static private function loadData($name, $type, $debug)
 	{
 		// we don't really do 'resources', so limiting this to files only
@@ -79,7 +79,7 @@ class JsLibrary {
 		}
 		return null;
 	}
-	
+
 	static private function loadFile($fileName, $debug)
 	{
 		if (empty($fileName)) {

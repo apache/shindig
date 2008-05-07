@@ -33,7 +33,7 @@
 
 
 class CacheFile extends Cache {
-	
+
 	function get($key)
 	{
 		$cacheFile = $this->getCacheFile($key);
@@ -48,7 +48,7 @@ class CacheFile extends Cache {
 		}
 		return false;
 	}
-	
+
 	function set($key, $value)
 	{
 		// use the first 2 characters of the hash as a directory prefix
@@ -68,7 +68,7 @@ class CacheFile extends Cache {
 			throw new CacheException("Could not store data in cache file");
 		}
 	}
-	
+
 	function delete($key)
 	{
 		$file = $this->getCacheFile($key);
@@ -76,12 +76,12 @@ class CacheFile extends Cache {
 			throw new CacheException("Cache file could not be deleted");
 		}
 	}
-	
+
 	private function getCacheDir($hash)
 	{
 		return Config::get('cache_root') . '/' . substr($hash, 0, 2);
 	}
-	
+
 	private function getCacheFile($hash)
 	{
 		return $this->getCacheDir($hash) . '/' . $hash;

@@ -19,6 +19,6 @@
  */
 
 abstract class RemoteContentFetcher {
-	
+
 	abstract public function fetchRequest($request);
 }

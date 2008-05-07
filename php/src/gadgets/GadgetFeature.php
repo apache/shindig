@@ -19,8 +19,8 @@
  */
 
 abstract class GadgetFeature {
-	
+
 	abstract public function prepare($gadget, $context, $params);
-	
+
 	abstract public function process($gadget, $context, $params);
 }

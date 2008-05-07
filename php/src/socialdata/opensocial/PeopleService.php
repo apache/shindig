@@ -20,7 +20,7 @@
 abstract class PeopleService {
 	public $sortOrder = array('topFriends', 'name');
 	public $filterType = array('all', 'hasApp');
-	
+
 	/**
 	 * Returns a list of people ids that the other handlers (currently data
 	 * and activities) can use to fetch their own objects
@@ -30,7 +30,7 @@ abstract class PeopleService {
 	 * @throws JSONException If the idSpec is malformed
 	 */
 	abstract public function getIds($idSpec, $token);
-	
+
 	/**
 	 * Returns a list of people that correspond to the passed in person ids.
 	 * @param ids The ids of the people to fetch.

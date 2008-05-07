@@ -51,11 +51,11 @@ final class Crypto {
 	 * Length of HMAC SHA1 output
 	 */
 	public static $HMAC_SHA1_LEN = 20;
-	
+
 	private function __construct()
 	{
 	}
-	
+
 	public static function hmacSha1Verify($key, $in, $expected)
 	{
 		$hmac = Crypto::hmacSha1($key, $in);
@@ -63,16 +63,16 @@ final class Crypto {
 			throw new GeneralSecurityException("HMAC verification failure");
 		}
 	}
-	
+
 	public static function aes128cbcEncrypt($key, $text)
 	{
 		/* Open the cipher */
 		$td = mcrypt_module_open(MCRYPT_RIJNDAEL_128, '', MCRYPT_MODE_CBC, '');
-		if (!$td) {
+		if (! $td) {
 			throw new GeneralSecurityException('Invalid mcrypt cipher, check your libmcrypt library and php-mcrypt extention');
 		}
 		// replaced MCRYPT_DEV_RANDOM with MCRYPT_RAND since windows doesn't have /dev/rand :)
-		srand((double) microtime() * 1000000);
+		srand((double)microtime() * 1000000);
 		$iv = mcrypt_create_iv(mcrypt_enc_get_iv_size($td), MCRYPT_RAND);
 		/* Intialize encryption */
 		mcrypt_generic_init($td, $key, $iv);
@@ -86,7 +86,7 @@ final class Crypto {
 		 */
 		return $iv . $encrypted;
 	}
-	
+
 	public static function aes128cbcDecrypt($key, $encrypted_text)
 	{
 		/* Open the cipher */
@@ -103,7 +103,7 @@ final class Crypto {
 		/* Show string */
 		return trim($decrypted);
 	}
-	
+
 	public static function hmacSha1($key, $data)
 	{
 		$blocksize = 64;

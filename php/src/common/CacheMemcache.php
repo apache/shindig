@@ -25,7 +25,7 @@
  */
 class CacheMemcache extends Cache {
 	private $connection = false;
-	
+
 	public function __construct()
 	{
 		if (! function_exists('memcache_connect')) {
@@ -37,7 +37,7 @@ class CacheMemcache extends Cache {
 		$this->host = Config::get('cache_host');
 		$this->port = Config::get('cache_port');
 	}
-	
+
 	public function __destruct()
 	{
 		// if we were connected, close the connection again
@@ -45,7 +45,7 @@ class CacheMemcache extends Cache {
 			memcache_close($this->connection);
 		}
 	}
-	
+
 	// I prefer lazy initalization since the cache isn't used every request
 	// so this potentially saves a lot of overhead
 	private function connect()
@@ -54,14 +54,14 @@ class CacheMemcache extends Cache {
 			throw new CacheException("Couldn't connect to memcache server");
 		}
 	}
-	
+
 	private function check()
 	{
 		if (! $this->connection) {
 			$this->connect();
 		}
 	}
-	
+
 	// using memcache_add behavior for cache stampeding prevention
 	private function add($key, $var, $timeout)
 	{
@@ -70,7 +70,7 @@ class CacheMemcache extends Cache {
 			throw new CacheException("Couldn't add to cache");
 		}
 	}
-	
+
 	public function get($key)
 	{
 		$this->check();
@@ -79,7 +79,7 @@ class CacheMemcache extends Cache {
 		}
 		return $ret;
 	}
-	
+
 	public function set($key, $value)
 	{
 		$this->check();
@@ -87,7 +87,7 @@ class CacheMemcache extends Cache {
 			throw new CacheException("Couldn't store data in cache");
 		}
 	}
-	
+
 	function delete($key)
 	{
 	

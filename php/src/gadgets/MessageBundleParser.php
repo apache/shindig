@@ -19,7 +19,7 @@
  */
 
 class MessageBundleParser {
-	
+
 	private function processMessage(&$messages, $msg)
 	{
 		$attr = $msg->attributes();
@@ -27,7 +27,7 @@ class MessageBundleParser {
 			$messages[trim($attr['name'])] = trim($msg);
 		}
 	}
-	
+
 	public function parse($xml)
 	{
 		$doc = simplexml_load_string($xml);

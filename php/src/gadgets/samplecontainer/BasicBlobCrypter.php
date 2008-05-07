@@ -1,4 +1,5 @@
 <?php
+
 /**
  * This class provides basic binary blob encryption and decryption, for use with the security token
  * 
@@ -26,13 +27,13 @@ class BasicBlobCrypter extends BlobCrypter {
 	
 	private $cipherKey;
 	private $hmacKey;
-	
+
 	public function __construct()
 	{
 		$this->cipherKey = Config::get('token_cipher_key');
 		$this->hmacKey = Config::get('token_hmac_key');
 	}
-	
+
 	/**
 	 * {@inheritDoc}
 	 */
@@ -44,7 +45,7 @@ class BasicBlobCrypter extends BlobCrypter {
 		$b64 = base64_encode($cipherText . $hmac);
 		return $b64;
 	}
-	
+
 	private function serializeAndTimestamp(Array $in)
 	{
 		$encoded = "";
@@ -54,7 +55,7 @@ class BasicBlobCrypter extends BlobCrypter {
 		$encoded .= $this->TIMESTAMP_KEY . "=" . time();
 		return $encoded;
 	}
-	
+
 	/**
 	 * {@inheritDoc}
 	 */
@@ -83,7 +84,7 @@ class BasicBlobCrypter extends BlobCrypter {
 		}
 		return $out;
 	}
-	
+
 	private function deserialize($plain)
 	{
 		$map = array();
@@ -100,7 +101,7 @@ class BasicBlobCrypter extends BlobCrypter {
 		}
 		return $map;
 	}
-	
+
 	private function checkTimestamp(Array $out, $maxAge)
 	{
 		$minTime = (int)$out[$this->TIMESTAMP_KEY] - $this->CLOCK_SKEW_ALLOWANCE;

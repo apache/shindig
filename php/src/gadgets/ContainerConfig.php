@@ -22,14 +22,14 @@ class ContainerConfig {
 	public $default_container = 'default';
 	public $container_key = 'gadgets.container';
 	private $config = array();
-	
+
 	public function __construct($defaultContainer)
 	{
 		if (! empty($defaultContainer)) {
 			$this->loadContainers($defaultContainer);
 		}
 	}
-	
+
 	private function loadContainers($containers)
 	{
 		if (! file_exists($containers) || ! is_dir($containers)) {
@@ -47,7 +47,7 @@ class ContainerConfig {
 			}
 		}
 	}
-	
+
 	private function loadFromFile($file)
 	{
 		$contents = file_get_contents($file);
@@ -64,7 +64,7 @@ class ContainerConfig {
 			$this->config[$container][$key] = $val;
 		}
 	}
-	
+
 	public function getConfig($container, $name)
 	{
 		$config = array();
@@ -77,7 +77,7 @@ class ContainerConfig {
 		
 		return $config;
 	}
-	
+
 	// Code sniplet borrowed from: http://nl.php.net/manual/en/function.array-merge-recursive.php#81409
 	// default array merge recursive doesn't overwrite values, but creates multiple elementents for that key,
 	// which is not what we want here, we want array_merge like behavior

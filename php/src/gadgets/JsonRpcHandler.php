@@ -1,7 +1,7 @@
 <?php
 
 class JsonRpcHandler {
-	
+
 	public function process($requests)
 	{
 		$response = array();
@@ -19,7 +19,7 @@ class JsonRpcHandler {
 		}
 		return $response;
 	}
-	
+
 	private function makeResponse($gadget, $gadgetModuleId, $gadgetUrl, $context)
 	{
 		$response = array();
@@ -64,7 +64,7 @@ class JsonRpcHandler {
 		$response['titleUrl'] = $gadget->getTitleUrl();
 		$response['directoryTitle'] = $gadget->getDirectoryTitle();
 		$response['author'] = $gadget->getAuthor();
-		$response['iframeUrl'] = UrlGenerator::getIframeURL($gadget, $context);	
+		$response['iframeUrl'] = UrlGenerator::getIframeURL($gadget, $context);
 		$response['userPrefs'] = $prefs;
 		return $response;
 	}

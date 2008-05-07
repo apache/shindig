@@ -19,6 +19,7 @@
  */
 
 class JsonRpcServlet extends HttpServlet {
+
 	public function doPost()
 	{
 		try {
@@ -46,7 +47,7 @@ class JsonRpcServlet extends HttpServlet {
 			echo "</body></html>";
 		}
 	}
-	
+
 	public function doGet()
 	{
 		header("HTTP/1.0 400 Bad Request", true, 400);
