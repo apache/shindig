@@ -31,28 +31,29 @@ COPYING* = svn:eol-style=native;svn:mime-type=text/plain
 DISCLAIMER* = svn:eol-style=native;svn:mime-type=text/plain
 Makefile = svn:eol-style=native;svn:mime-type=text/plain
 ChangeLog = svn:eol-style=native;svn:mime-type=text/plain
-*.c = svn:eol-style=native;svn:keywords=Rev Date
-*.cpp = svn:eol-style=native;svn:keywords=Rev Date
-*.h = svn:eol-style=native;svn:keywords=Rev Date
+*.c = svn:eol-style=native
+*.cpp = svn:eol-style=native
+*.h = svn:eol-style=native
 *.dsp = svn:eol-style=CRLF
 *.dsw = svn:eol-style=CRLF
 *.sh = svn:eol-style=native;svn:executable
 *.png = svn:mime-type=image/png
 *.jpg = svn:mime-type=image/jpeg
 *.gif = svn:mime-type=image/gif
-*.java = svn:eol-style=native;svn:keywords=Rev Date
-*.xml = svn:mime-type=text/xml;svn:eol-style=native;svn:keywords=Rev Date
-*.xsl = svn:mime-type=text/xml;svn:eol-style=native;svn:keywords=Rev Date
-*.xsd = svn:mime-type=text/xml;svn:eol-style=native;svn:keywords=Rev Date
-*.wsdl = svn:mime-type=text/xml;svn:eol-style=native;svn:keywords=Rev Date
-*.properties = svn:mime-type=text/plain;svn:eol-style=native;svn:keywords=Rev Date
+*.java = svn:eol-style=native
+*.php = svn:eol-style=native
+*.xml = svn:mime-type=text/xml;svn:eol-style=native
+*.xsl = svn:mime-type=text/xml;svn:eol-style=native
+*.xsd = svn:mime-type=text/xml;svn:eol-style=native
+*.wsdl = svn:mime-type=text/xml;svn:eol-style=native
+*.properties = svn:mime-type=text/plain;svn:eol-style=native
 *.txt = svn:eol-style=native;svn:mime-type=text/plain
-*.htm* = svn:eol-style=native;svn:mime-type=text/html;svn:keywords=Rev Date
+*.htm* = svn:eol-style=native;svn:mime-type=text/html
 *.bat = svn:eol-style=native
 *.pl = svn:eol-style=native
 *.py = svn:eol-style=native
 *.cmd = svn:eol-style=native
 *.css = svn:eol-style=native
 *.js = svn:eol-style=native
-*.wsdd = svn:mime-type=text/xml;svn:eol-style=native;svn:keywords=Rev Date
+*.wsdd = svn:mime-type=text/xml;svn:eol-style=native
 *.fragment = svn:eol-style=native
