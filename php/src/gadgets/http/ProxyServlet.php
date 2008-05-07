@@ -19,7 +19,7 @@
  */
 
 class ProxyServlet extends HttpServlet {
-	
+
 	public function doGet()
 	{
 		$this->noHeaders = true;
@@ -48,7 +48,7 @@ class ProxyServlet extends HttpServlet {
 			$proxyHandler->fetch($url, $gadgetSigner, $method);
 		}
 	}
-	
+
 	public function doPost()
 	{
 		$this->doGet();
