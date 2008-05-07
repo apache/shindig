@@ -2,7 +2,7 @@
 # this script will set the proper svn properties on all the files in the tree
 # It pretty much requires a gnu compatible xargs (for the -r flag).  Running
 # on Linux is probably the best option
-# Note: use the folling line if you want to remove svn:keywords
+# Note: use the following line if you want to remove svn:keywords
 for ext in java php xml xsl xsd wsdl properties txt htm* css js ; do find . -path '*/.svn' -prune -o  -name "*.$ext" -print0 | xargs -0  -r  svn propdel  svn:keywords ; done
 
 
