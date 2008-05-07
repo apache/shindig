@@ -44,7 +44,7 @@ under the License.
       <resource>
         <directory>conf</directory>
       </resource>
-    </resources>    
+    </resources>
   </build>
 
   <dependencies>

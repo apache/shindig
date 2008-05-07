@@ -202,11 +202,11 @@ under the License.
       <groupId>org.apache.shindig</groupId>
       <artifactId>shindig-common</artifactId>
     </dependency>
-    
-    <!-- 
+
+    <!--
       external dependencies
       where the depedency version is defined in dependency Management,
-      there is no need for the version, and it should not be put in 
+      there is no need for the version, and it should not be put in
       so we have a single place to change the version
     -->
     <dependency>
