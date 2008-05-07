@@ -48,7 +48,7 @@
     </div>
 
     <div id="waiting" style="display: none">
-      Please click 
+      Please click
       <a onclick="javascript:fetchData()">I've approved access</a>
       once you've approved access to your data.
     </div>

@@ -51,7 +51,7 @@ public interface ActivitiesService {
    *
    * @param id The id of the user to activity belongs to
    * @param activityId The id of the activity
-   * @param token A valid GadgetToken 
+   * @param token A valid GadgetToken
    * @return a reponse item with the matching activity
    */
   public ResponseItem<Activity> getActivity(String id, String activityId,

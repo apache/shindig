@@ -144,24 +144,24 @@ gadgets.rpc = function() {
     for (var i = iframePool.length - 1; i >=0; --i) {
       var ifr = iframePool[i];
       try {
-	      if (ifr && (ifr.recyclable || ifr.readyState === 'complete')) {
-	        ifr.parentNode.removeChild(ifr);
-	        if (window.ActiveXObject) {
-	          // For MSIE, delete any iframes that are no longer being used. MSIE
-	          // cannot reuse the IFRAME because a navigational click sound will
-	          // be triggered when we set the SRC attribute.
-	          // Other browsers scan the pool for a free iframe to reuse.
-	          iframePool[i] = ifr = null;
-	          iframePool.splice(i, 1);
-	        } else {
-	          ifr.recyclable = false;
-	          iframe = ifr;
-	          break;
-	        }
-	      }
+        if (ifr && (ifr.recyclable || ifr.readyState === 'complete')) {
+          ifr.parentNode.removeChild(ifr);
+          if (window.ActiveXObject) {
+            // For MSIE, delete any iframes that are no longer being used. MSIE
+            // cannot reuse the IFRAME because a navigational click sound will
+            // be triggered when we set the SRC attribute.
+            // Other browsers scan the pool for a free iframe to reuse.
+            iframePool[i] = ifr = null;
+            iframePool.splice(i, 1);
+          } else {
+            ifr.recyclable = false;
+            iframe = ifr;
+            break;
+          }
+        }
       } catch (e) {
-      	// Ignore; IE7 throws an exception when trying to read readyState and
-      	// readyState isn't set.
+        // Ignore; IE7 throws an exception when trying to read readyState and
+        // readyState isn't set.
       }
     }
     // Create IFrame if necessary

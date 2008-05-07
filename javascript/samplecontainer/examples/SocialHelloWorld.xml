@@ -73,7 +73,7 @@
          if (count == 0) {
            //continue;
          }
-         
+
          html += '<div class="person">';
          html += '<div class="bubble c' + count % numberOfStyles + '">' + hellos[count % hellos.length];
          html += '<div class="name">' + allPeople[i].getDisplayName() + ' (' + count + ') ' + allPeople[i].getField(opensocial.Person.Field.GENDER).getDisplayValue();
@@ -107,11 +107,11 @@
      var opts = {};
      opts[opensocial.DataRequest.PeopleRequestFields.FIRST] =  0;
      opts[opensocial.DataRequest.PeopleRequestFields.MAX] = 40;
-     opts[opensocial.DataRequest.PeopleRequestFields.PROFILE_DETAILS] = 
-                     [opensocial.Person.Field.AGE, 
-                     opensocial.Person.Field.NAME, 
-                     opensocial.Person.Field.GENDER, 
-                     opensocial.Person.Field.PROFILE_URL, 
+     opts[opensocial.DataRequest.PeopleRequestFields.PROFILE_DETAILS] =
+                     [opensocial.Person.Field.AGE,
+                     opensocial.Person.Field.NAME,
+                     opensocial.Person.Field.GENDER,
+                     opensocial.Person.Field.PROFILE_URL,
                      opensocial.Person.Field.THUMBNAIL_URL,
                      opensocial.Person.Field.STATUS];
      opts[opensocial.DataRequest.PeopleRequestFields.SORT_ORDER] = opensocial.DataRequest.SortOrder.NAME;

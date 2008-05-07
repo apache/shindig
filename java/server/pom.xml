@@ -19,7 +19,7 @@ under the License.
 -->
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
-    
+
   <parent>
     <groupId>org.apache.shindig</groupId>
     <artifactId>shindig-parent</artifactId>
@@ -32,7 +32,7 @@ under the License.
 
   <name>Apache Shindig Gadget Server</name>
   <description>Default server war containing both the Gadget Server and the Social-Api server.</description>
-  
+
   <scm>
     <connection> scm:svn:http://svn.apache.org/repos/asf/incubator/shindig/trunk/java/server</connection>
     <developerConnection>scm:svn:https://svn.apache.org/repos/asf/incubator/shindig/trunk/java/server</developerConnection>
@@ -42,7 +42,7 @@ under the License.
   <properties>
     <runType>full</runType>
   </properties>
-  
+
   <build>
     <plugins>
       <plugin>
