@@ -18,11 +18,6 @@
  */
 package org.apache.shindig.social;
 
-import com.google.inject.AbstractModule;
-import com.google.inject.Inject;
-import com.google.inject.Provider;
-import com.google.inject.TypeLiteral;
-
 import org.apache.shindig.social.abdera.ActivitiesServiceAdapter;
 import org.apache.shindig.social.abdera.PeopleServiceAdapter;
 import org.apache.shindig.social.opensocial.ActivitiesService;
@@ -34,6 +29,11 @@ import org.apache.shindig.social.samplecontainer.BasicActivitiesService;
 import org.apache.shindig.social.samplecontainer.BasicDataService;
 import org.apache.shindig.social.samplecontainer.BasicPeopleService;
 import org.apache.shindig.social.samplecontainer.StateFileDataHandler;
+
+import com.google.inject.AbstractModule;
+import com.google.inject.Inject;
+import com.google.inject.Provider;
+import com.google.inject.TypeLiteral;
 
 import java.util.ArrayList;
 import java.util.List;
