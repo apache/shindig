@@ -53,7 +53,8 @@ public class GadgetDataTest extends TestCase {
     activity = new Activity("activityId", johnDoe.getId());
 
     List<MediaItem> mediaItems = new ArrayList<MediaItem>();
-    mediaItems.add(new MediaItem("image/jpg", MediaItem.Type.IMAGE, "http://foo.bar"));
+    mediaItems.add(new MediaItem("image/jpg", MediaItem.Type.IMAGE,
+        "http://foo.bar"));
     activity.setMediaItems(mediaItems);
   }
 

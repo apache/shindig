@@ -77,8 +77,12 @@ under the License.
     </dependency>
     <dependency>
       <artifactId>commons-betwixt</artifactId>
-      <version>0.8</version>
       <groupId>commons-betwixt</groupId>
+    </dependency>
+    <dependency>
+      <groupId>org.mortbay.jetty</groupId>
+      <artifactId>jetty</artifactId>
+      <scope>test</scope>
     </dependency>
   </dependencies>
 </project>
