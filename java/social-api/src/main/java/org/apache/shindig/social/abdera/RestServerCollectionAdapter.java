@@ -21,6 +21,7 @@ import org.apache.shindig.social.AbstractGadgetData;
 import org.apache.shindig.social.opensocial.model.Activity;
 import org.apache.shindig.social.opensocial.model.Person;
 import org.apache.shindig.social.opensocial.util.BeanXmlConverter;
+import org.apache.shindig.gadgets.GadgetToken;
 
 import com.google.inject.Inject;
 import org.apache.abdera.model.Entry;
@@ -183,6 +184,40 @@ public abstract class RestServerCollectionAdapter
     } else {
       return null;
     }
+  }
+
+  protected GadgetToken getGadgetToken(RequestContext request,
+      final String viewerId) {
+    // TODO: Replace this with the real thing
+    return new GadgetToken() {
+      public String toSerialForm() {
+        return "";
+      }
+
+      public String getOwnerId() {
+        return "";
+      }
+
+      public String getViewerId() {
+        return viewerId;
+      }
+
+      public String getAppId() {
+        return "";
+      }
+
+      public String getDomain() {
+        return "";
+      }
+
+      public String getAppUrl() {
+        return "";
+      }
+
+      public long getModuleId() {
+        return 0;
+      }
+    };
   }
 
   @Override

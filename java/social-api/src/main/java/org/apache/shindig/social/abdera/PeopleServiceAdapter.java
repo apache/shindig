@@ -17,17 +17,15 @@
 */
 package org.apache.shindig.social.abdera;
 
+import org.apache.shindig.gadgets.GadgetToken;
 import org.apache.shindig.social.opensocial.PeopleService;
 import org.apache.shindig.social.opensocial.model.Person;
-import org.apache.shindig.gadgets.GadgetToken;
 
 import com.google.inject.Inject;
-
 import org.apache.abdera.protocol.server.RequestContext;
 import org.apache.abdera.protocol.server.ResponseContext;
 
 import java.util.Date;
-import java.util.List;
 import java.util.logging.Logger;
 
 /**
@@ -40,80 +38,26 @@ public class PeopleServiceAdapter extends RestServerCollectionAdapter {
     Logger.getLogger(PeopleServiceAdapter.class.getName());
   private PeopleService handler;
 
-  // TODO get these from the config files like in feedserver
-  private static final String TITLE = "People Collection title";
-  private static final String AUTHOR = "TODO";
-
   @Inject
   public PeopleServiceAdapter(PeopleService handler) {
     this.handler = handler;
   }
 
   /**
-   * Handles the following URLs
-   *       /people/{uid}/@all
+   * Does not handle any urls.
    */
   public ResponseContext getFeed(RequestContext request) {
-    String uid = request.getTarget().getParameter("uid");
-
-    // TODO(doll): Fix the service apis to add a concept of arbitrary friends
-    // Consider whether @all really makes sense...
-    List<Person> listOfObj = null;
-
-    return returnFeed(request, TITLE, AUTHOR, (List)listOfObj);
+    throw new UnsupportedOperationException();
   }
 
-
   /**
-   * Handles the following URLs
-   *       /people/{uid}/@all/{pid}
+   * Handles the following URLs:
    *       /people/{uid}/@self
    */
   public ResponseContext getEntry(RequestContext request) {
-
-      // TODO: Replace this with the real thing
-    GadgetToken dummyToken = new GadgetToken() {
-      public String toSerialForm() {
-        return "";
-      }
-
-      public String getOwnerId() {
-        return "";
-      }
-
-      public String getViewerId() {
-        return "";
-      }
-
-      public String getAppId() {
-        return "";
-      }
-
-      public String getDomain() {
-        return "";
-      }
-
-      public String getAppUrl() {
-        return "";
-      }
-
-      public long getModuleId() {
-        return 0;
-      }
-    };
-
-    /* figure out which URL is passed in
-     *     /people/{uid}/@all/{pid}
-     *     /people/{uid}/@self
-     *  To do that, see if we have both uid, pid params passed in
-     *  OR just uid param.
-     *  TODO better way is to have different methods to be called by abdera
-     */
     String uid = request.getTarget().getParameter("uid");
-    String pid = request.getTarget().getParameter("pid");
-    Person person = (null == pid)
-        ? handler.getPerson(uid, dummyToken).getResponse()
-        : handler.getPerson(pid, dummyToken).getResponse();
+    GadgetToken token = getGadgetToken(request, uid);
+    Person person = handler.getPerson(uid, token).getResponse();
 
     // TODO: how is entry id determined. check.
     String entryId = request.getUri().toString();

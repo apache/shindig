@@ -34,6 +34,8 @@ public class SocialApiProviderTestFixture extends EasyMockTestCase {
     mock(Provider.class);
   public final Provider<PeopleServiceAdapter> peopleProvider =
     mock(Provider.class);
+  public final Provider<FriendsServiceAdapter> friendsProvider =
+    mock(Provider.class);
   public final SocialApiProvider provider = new SocialApiProvider();
 
   public SocialApiProviderTestFixture() {
@@ -41,8 +43,11 @@ public class SocialApiProviderTestFixture extends EasyMockTestCase {
     expect(activitiesProvider.get()).andReturn(null);
     provider.setPeopleAdapter(peopleProvider);
     expect(peopleProvider.get()).andReturn(null);
+    provider.setFriendsAdapter(friendsProvider);
+    expect(friendsProvider.get()).andReturn(null);
     org.easymock.EasyMock.replay(activitiesProvider);
     org.easymock.EasyMock.replay(peopleProvider);
+    org.easymock.EasyMock.replay(friendsProvider);
     provider.initialize();
   }
 }

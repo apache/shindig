@@ -145,7 +145,7 @@ RestfulContainer.prototype.newFetchPersonRequest = function(id, opt_params) {
   var me = this;
   return new RestfulRequestItem(peopleRequest.url, peopleRequest.method, null,
       function(rawJson) {
-        return me.createPersonFromJson(rawJson);
+        return me.createPersonFromJson(rawJson[0]);
       });
 };
 
@@ -164,13 +164,14 @@ RestfulContainer.prototype.newFetchPeopleRequest = function(idSpec,
   var me = this;
   return new RestfulRequestItem(url, "GET", null,
       function(rawJson) {
-        var jsonPeople = rawJson['items'];
+        var jsonPeople = rawJson;
         var people = [];
         for (var i = 0; i < jsonPeople.length; i++) {
           people.push(me.createPersonFromJson(jsonPeople[i]));
         }
-        return new opensocial.Collection(people, rawJson['offset'],
-            rawJson['totalSize']);
+        return new opensocial.Collection(people);
+        // TODO: Bring this back once the restful url supports it
+        // rawJson['offset'],rawJson['totalSize']);
       });
 };
 
@@ -190,7 +191,7 @@ RestfulContainer.prototype.newFetchPersonAppDataRequest = function(idSpec,
 
 RestfulContainer.prototype.newUpdatePersonAppDataRequest = function(id, key,
     value) {
-  var url = "/appdata/" + this.translateIdSpec(idSpec) + "/" + this.appId_
+  var url = "/appdata/" + this.translateIdSpec(id) + "/" + this.appId_
        + "?fields=" + key;
   // TODO: Or should we use POST?
   return new RestfulRequestItem(url, "PUT", {key: value});
@@ -228,11 +229,19 @@ RestfulRequestItem = function(url, method, postData, processData) {
   this.processResponse = function(originalDataRequest, rawXml, error,
       errorMessage) {
 
-    var rawJson;
+    if (!rawXml) {
+      error = true;
+      errorMessage = "Invalid request url";
+    }
+
+    var rawJson = [];
     if (!error) {
-      var contentNode = rawXml.getElementsByTagName("content")[0];
-      if (contentNode) {
-        rawJson = gadgets.json.parse(contentNode.childNodes[0].nodeValue);
+      var contentNodes = rawXml.getElementsByTagName("content");
+      if (contentNodes) {
+        for (var i = 0; i < contentNodes.length; i++) {
+          var xmlValue = contentNodes[i].childNodes[0].nodeValue;
+          rawJson.push(gadgets.json.parse(xmlValue));
+        }
       } else {
         error = true;
       }
