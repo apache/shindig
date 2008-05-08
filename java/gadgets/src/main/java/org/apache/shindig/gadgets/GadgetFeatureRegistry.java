@@ -110,11 +110,8 @@ public class GadgetFeatureRegistry {
    * @return True if the entry is "core" (a dependency of all other features)
    */
   private boolean isCore(Entry entry) {
-    if (entry.name.startsWith("core") || entry.name.equals("core")) {
-      return true;
+    return entry.name.startsWith("core");
     }
-    return false;
-  }
 
   /**
    * @return All registered features.
