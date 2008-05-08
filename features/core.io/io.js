@@ -144,10 +144,8 @@ gadgets.io = function() {
         if (!data.body) {
           resp.errors.push("failed to parse JSON");
           resp.data = null;
-        }
-        else {
-          // Straight into the Feed object - override usual resp structure
-          resp = data.body;
+        } else {
+          resp.data = data.body;
         }
         break;
       case "DOM":
