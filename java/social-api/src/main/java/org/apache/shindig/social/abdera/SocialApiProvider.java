@@ -29,6 +29,7 @@ public class SocialApiProvider extends DefaultProvider {
 
   private Provider<PeopleServiceAdapter> peopleAdapterProvider;
   private Provider<ActivitiesServiceAdapter> activitiesAdapterProvider;
+  private Provider<FriendsServiceAdapter> friendsAdapterProvider;
 
   /**
    * The CollectionAdapter enum standardizes the names and descriptions of the
@@ -78,6 +79,12 @@ public class SocialApiProvider extends DefaultProvider {
   }
 
   @Inject
+  public void setFriendsAdapter(Provider<FriendsServiceAdapter>
+      friendsAdapterProvider) {
+    this.friendsAdapterProvider = friendsAdapterProvider;
+  }
+
+  @Inject
   public void setActivitiesAdapter(Provider<ActivitiesServiceAdapter>
       activitiesAdapterProvider) {
     this.activitiesAdapterProvider = activitiesAdapterProvider;
@@ -102,6 +109,7 @@ public class SocialApiProvider extends DefaultProvider {
    */
   public void initialize() {
     PeopleServiceAdapter peopleAdapter = peopleAdapterProvider.get();
+    FriendsServiceAdapter friendsAdapter = friendsAdapterProvider.get();
     ActivitiesServiceAdapter activitiesAdapter
         = activitiesAdapterProvider.get();
 
@@ -112,26 +120,28 @@ public class SocialApiProvider extends DefaultProvider {
 
         // Collection of all people connected to user {uid}
         // /people/{uid}/@all
+        // Currently, Shindig only has friends, so @all == @friends
         .addRoute(CollectionAdapter.CONNECTIONS_OF_USER.toString(),
             BASE + "people/:uid/@all",
-            TargetType.TYPE_COLLECTION, peopleAdapter)
+            TargetType.TYPE_COLLECTION, friendsAdapter)
 
-        // Collection of all friends of user {uid}; subset of all
+        // Collection of all friends of user {uid}; equal to @all
         // /people/{uid}/@friends
         .addRoute(CollectionAdapter.PROFILES_OF_FRIENDS_OF_USER.toString(),
             BASE + "people/:uid/@friends",
-            TargetType.TYPE_COLLECTION, peopleAdapter)
+            TargetType.TYPE_COLLECTION, friendsAdapter)
 
         // Collection of all people connected to user {uid} in group {groupid}
         // /people/{uid}/{groupid}
+        // TODO: Shindig does not support groups yet
         .addRoute(CollectionAdapter.PROFILES_OF_CONNECTIONS_OF_USER.toString(),
             BASE + "people/:uid/:groupid",
-            TargetType.TYPE_COLLECTION, peopleAdapter)
+            TargetType.TYPE_COLLECTION, null)
 
         // Individual person record. /people/{uid}/@all/{pid}
         .addRoute(CollectionAdapter.PROFILE_OF_CONNECTION_OF_USER.toString(),
             BASE + "people/:uid/@all/:pid",
-            TargetType.TYPE_ENTRY, peopleAdapter)
+            TargetType.TYPE_ENTRY, friendsAdapter)
 
         // Self Profile record for user {uid} /people/{uid}/@self
         .addRoute(CollectionAdapter.PROFILE_OF_USER.toString(),
