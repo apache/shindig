@@ -44,7 +44,9 @@ public abstract class RestServerCollectionAdapter
     extends AbstractCollectionAdapter {
   private static Logger logger =
     Logger.getLogger(RestServerCollectionAdapter.class.getName());
-  @Inject BeanXmlConverter beanXmlConverter;
+
+  private  BeanXmlConverter beanXmlConverter;
+
   private static final String INVALID_FORMAT =
     "Invalid format. only atom/json-c are supported";
 
@@ -61,6 +63,10 @@ public abstract class RestServerCollectionAdapter
     public String getDisplayValue() {
       return displayValue;
     }
+  }
+
+  @Inject public void setBeanXmlConverter(final BeanXmlConverter beanXmlConverter) {
+    this.beanXmlConverter = beanXmlConverter;
   }
 
   protected ResponseContext returnFeed(RequestContext request, String title,
