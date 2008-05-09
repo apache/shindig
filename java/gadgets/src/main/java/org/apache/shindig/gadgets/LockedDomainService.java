@@ -66,7 +66,7 @@ public interface LockedDomainService {
    * @param host host name for the content
    * @param gadget URL of the gadget
    * @param container container
-   * @return
+   * @return true if the gadget can render
    */
   public boolean gadgetCanRender(String host, Gadget gadget, String container);
 }

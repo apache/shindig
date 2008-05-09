@@ -29,14 +29,17 @@ public class BasicContentCache extends AbstractContentCache {
   private final Map<URI, RemoteContent> cache
       = new WeakHashMap<URI, RemoteContent>();
 
+  @Override
   protected RemoteContent getContentImpl(URI uri) {
     return cache.get(uri);
   }
 
+  @Override
   protected void addContentImpl(URI uri, RemoteContent content) {
     cache.put(uri, content);
   }
 
+  @Override
   protected RemoteContent removeContentImpl(URI uri) {
     return cache.remove(uri);
   }

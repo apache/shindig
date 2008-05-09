@@ -32,7 +32,6 @@ import org.apache.shindig.gadgets.oauth.OAuthStore.OAuthParamLocation;
 import org.apache.shindig.gadgets.oauth.OAuthStore.SignatureType;
 import org.apache.shindig.util.BasicBlobCrypter;
 import org.apache.shindig.util.BlobCrypter;
-import org.apache.shindig.util.BlobCrypterException;
 
 import java.net.URI;
 
