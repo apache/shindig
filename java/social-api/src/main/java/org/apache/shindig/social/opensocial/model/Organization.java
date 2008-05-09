@@ -17,8 +17,6 @@
  */
 package org.apache.shindig.social.opensocial.model;
 
-import org.apache.shindig.social.AbstractGadgetData;
-
 import java.util.Date;
 
 /**
@@ -26,7 +24,7 @@ import java.util.Date;
  * http://code.google.com/apis/opensocial/docs/0.7/reference/opensocial.Organization.Field.html
  *
  */
-public class Organization extends AbstractGadgetData {
+public class Organization {
 
   public static enum Field {
     ADDRESS("address"),

@@ -17,15 +17,13 @@
  */
 package org.apache.shindig.social.opensocial.model;
 
-import org.apache.shindig.social.AbstractGadgetData;
-
 import java.util.List;
 
 /**
  * see
  * http://code.google.com/apis/opensocial/docs/0.7/reference/opensocial.Collection.html
  */
-public class ApiCollection<T> extends AbstractGadgetData {
+public class ApiCollection<T> {
   private List<T> items;
   private int offset;
   private int totalSize;

@@ -17,11 +17,11 @@
 */
 package org.apache.shindig.social.abdera;
 
-import org.apache.shindig.social.AbstractGadgetData;
+import org.apache.shindig.gadgets.GadgetToken;
 import org.apache.shindig.social.opensocial.model.Activity;
 import org.apache.shindig.social.opensocial.model.Person;
+import org.apache.shindig.social.opensocial.util.BeanJsonConverter;
 import org.apache.shindig.social.opensocial.util.BeanXmlConverter;
-import org.apache.shindig.gadgets.GadgetToken;
 
 import com.google.inject.Inject;
 import org.apache.abdera.model.Entry;
@@ -38,7 +38,6 @@ import java.util.logging.Logger;
 
 /**
  * handles logic to create feeds, entries etc.
- *
  */
 @SuppressWarnings("unchecked")
 public abstract class RestServerCollectionAdapter
@@ -46,7 +45,8 @@ public abstract class RestServerCollectionAdapter
   private static Logger logger =
     Logger.getLogger(RestServerCollectionAdapter.class.getName());
 
-  private  BeanXmlConverter beanXmlConverter;
+  private BeanXmlConverter beanXmlConverter;
+  private BeanJsonConverter beanJsonConverter;
 
   private static final String INVALID_FORMAT =
     "Invalid format. only atom/json-c are supported";
@@ -66,8 +66,11 @@ public abstract class RestServerCollectionAdapter
     }
   }
 
-  @Inject public void setBeanXmlConverter(final BeanXmlConverter beanXmlConverter) {
+  @Inject
+  public void setConverters(BeanXmlConverter beanXmlConverter,
+      BeanJsonConverter beanJsonConverter) {
     this.beanXmlConverter = beanXmlConverter;
+    this.beanJsonConverter = beanJsonConverter;
   }
 
   protected ResponseContext returnFeed(RequestContext request, String title,
@@ -99,11 +102,11 @@ public abstract class RestServerCollectionAdapter
         String entryId = null;
         Date updated = null;
         if (obj instanceof Person) {
-          entryId = request.getUri().toString() + "/" + ((Person)obj).getId();
-          updated = ((Person)obj).getUpdated();
+          entryId = request.getUri().toString() + "/" + ((Person) obj).getId();
+          updated = ((Person) obj).getUpdated();
         } else if (obj instanceof Activity) {
-          entryId = request.getUri().toString() + "/" + ((Activity)obj).getId();
-          updated = ((Activity)obj).getUpdated();
+          entryId = request.getUri().toString() + "/" + ((Activity) obj).getId();
+          updated = ((Activity) obj).getUpdated();
         }
         Entry entry = fillEntry(request, obj, entryId, updated, format);
         feed.insertEntry(entry);
@@ -124,10 +127,10 @@ public abstract class RestServerCollectionAdapter
     entry.addAuthor("Author TODO");
     // TODO what should this be?
     if (obj instanceof Person) {
-      entry.setTitle((((Person)obj).getName().getUnstructured() != null) ?
-          ((Person)obj).getName().getUnstructured() : "title TODO");
+      entry.setTitle((((Person) obj).getName().getUnstructured() != null) ?
+          ((Person) obj).getName().getUnstructured() : "title TODO");
     } else if (obj instanceof Activity) {
-      entry.setTitle(((Activity)obj).getTitle());
+      entry.setTitle(((Activity) obj).getTitle());
     } else {
       entry.setTitle("title TODO");
     }
@@ -138,7 +141,7 @@ public abstract class RestServerCollectionAdapter
             "application/xml");
         break;
       case JSON:
-        entry.setContent(((AbstractGadgetData)obj).toJson().toString(),
+        entry.setContent(beanJsonConverter.convertToJson(obj).toString(),
             "application/json");
         break;
     }

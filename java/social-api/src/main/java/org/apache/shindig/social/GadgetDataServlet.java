@@ -17,11 +17,13 @@
  */
 package org.apache.shindig.social;
 
-import com.google.inject.Inject;
 import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.GadgetToken;
 import org.apache.shindig.gadgets.GadgetTokenDecoder;
 import org.apache.shindig.gadgets.http.InjectedServlet;
+import org.apache.shindig.social.opensocial.util.BeanJsonConverter;
+
+import com.google.inject.Inject;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -56,6 +58,7 @@ public class GadgetDataServlet extends InjectedServlet {
 
   private List<GadgetDataHandler> handlers;
   private GadgetTokenDecoder gadgetTokenDecoder;
+  private BeanJsonConverter beanJsonConverter;
 
   @Inject
   public void setGadgetDataHandlers(List<GadgetDataHandler> handlers) {
@@ -65,6 +68,11 @@ public class GadgetDataServlet extends InjectedServlet {
   @Inject
   public void setGadgetTokenDecoder(GadgetTokenDecoder gadgetTokenDecoder) {
     this.gadgetTokenDecoder = gadgetTokenDecoder;
+  }
+
+  @Inject
+  public void setBeanJsonConverter(BeanJsonConverter beanJsonConverter) {
+    this.beanJsonConverter = beanJsonConverter;
   }
 
   @Override
@@ -86,7 +94,7 @@ public class GadgetDataServlet extends InjectedServlet {
     }
     resp.setContentType("application/json; charset=utf-8");
     PrintWriter writer = resp.getWriter();
-    writer.write(response.toJson().toString());
+    writer.write(beanJsonConverter.convertToJson(response).toString());
   }
 
   private List<ResponseItem> createResponse(String requestParam, String token)

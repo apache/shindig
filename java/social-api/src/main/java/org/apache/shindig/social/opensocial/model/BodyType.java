@@ -17,14 +17,12 @@
  */
 package org.apache.shindig.social.opensocial.model;
 
-import org.apache.shindig.social.AbstractGadgetData;
-
 /**
  * see
  * http://code.google.com/apis/opensocial/docs/0.7/reference/opensocial.BodyType.Field.html
  *
  */
-public class BodyType extends AbstractGadgetData {
+public class BodyType {
 
   public static enum Field {
     BUILD("build"),

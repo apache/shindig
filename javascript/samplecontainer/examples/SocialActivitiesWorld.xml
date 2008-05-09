@@ -153,7 +153,7 @@ function handleActivities(dataResponse) {
     var mediaItems = activities[i].getField('mediaItems');
     if (mediaItems) {
       for (var j = 0; j < mediaItems.length; j++) {
-        if (mediaItems[j].getField('type') == 'IMAGE') {
+        if (mediaItems[j].getField('type') == 'image') {
           html += '<img height="150px" style="padding-right:.5em;" src="' + mediaItems[j].getField('url') + '"/>';
         }
       }
