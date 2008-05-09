@@ -44,8 +44,8 @@ public class RouteManagerTest extends SocialApiProviderTestFixture {
     mockAndResolve("activities/x/y");
     mockAndResolve("activities/x/@self/y");
 
-    mockAndResolve("appdata/x/friends/y");
-    mockAndResolve("appdata/x/self/y");
+    mockAndResolve("appdata/x/@friends/y");
+    mockAndResolve("appdata/x/@self/y");
   }
 
   private void mockAndResolve(String path){

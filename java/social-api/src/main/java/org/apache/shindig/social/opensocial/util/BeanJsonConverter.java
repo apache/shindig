@@ -40,57 +40,16 @@ public class BeanJsonConverter {
   private static final Pattern GETTER = Pattern.compile("^get([a-zA-Z]+)$");
 
   /**
-   * Convert the object to {@link JSONObject} reading Pojo properties
+   * Convert the passed in object to a json object
    *
    * @param pojo The object to convert
-   * @return A JSONObject representing this pojo
+   * @return An object whos toString method will return json
    */
-  public JSONObject convertToJson(Object pojo) {
-    JSONObject toReturn = new JSONObject();
-    Method[] methods = pojo.getClass().getMethods();
-    for (Method method : methods) {
-      String errorMessage = "Could not encode the " + method + " method.";
-      try {
-        putAttribute(pojo, toReturn, method);
-      } catch (JSONException e) {
-        throw new RuntimeException(errorMessage, e);
-      } catch (IllegalAccessException e) {
-        throw new RuntimeException(errorMessage, e);
-      } catch (InvocationTargetException e) {
-        throw new RuntimeException(errorMessage, e);
-      }
-    }
-    return toReturn;
-  }
-
-  /**
-   * Convert java declared method and its value to an entry in the given
-   * {@link JSONObject}
-   *
-   * @param pojo The pojo being translated
-   * @param object the json object to put the field value in
-   * @param method the method to encode
-   * @throws JSONException thrown exception
-   * @throws IllegalAccessException thrown exception
-   * @throws InvocationTargetException thrown exception
-   */
-  private void putAttribute(Object pojo, JSONObject object,
-      Method method) throws JSONException, IllegalAccessException,
-      InvocationTargetException {
-    Matcher matcher = GETTER.matcher(method.getName());
-    if (!matcher.matches()) {
-      return;
-    }
-
-    String name = matcher.group();
-    String fieldName = name.substring(3, 4).toLowerCase() + name.substring(4);
-    if (fieldName.equalsIgnoreCase(EXCLUDED_GETTER)) {
-      return;
-    }
-
-    Object val = method.invoke(pojo, EMPTY_OBJECT);
-    if (val != null) {
-      object.put(fieldName, translateObjectToJson(val));
+  public Object convertToJson(Object pojo) {
+    try {
+      return translateObjectToJson(pojo);
+    } catch (JSONException e) {
+      throw new RuntimeException("Could not translate " + pojo + " to json", e);
     }
   }
 
@@ -130,6 +89,61 @@ public class BeanJsonConverter {
       return val;
     }
 
-    return convertToJson(val);
+    return convertMethodsToJson(val);
+  }
+
+  /**
+   * Convert the object to {@link JSONObject} reading Pojo properties
+   *
+   * @param pojo The object to convert
+   * @return A JSONObject representing this pojo
+   */
+  private JSONObject convertMethodsToJson(Object pojo) {
+    JSONObject toReturn = new JSONObject();
+    Method[] methods = pojo.getClass().getMethods();
+    for (Method method : methods) {
+      String errorMessage = "Could not encode the " + method + " method.";
+      try {
+        addMethodValue(pojo, toReturn, method);
+      } catch (JSONException e) {
+        throw new RuntimeException(errorMessage, e);
+      } catch (IllegalAccessException e) {
+        throw new RuntimeException(errorMessage, e);
+      } catch (InvocationTargetException e) {
+        throw new RuntimeException(errorMessage, e);
+      }
+    }
+    return toReturn;
+  }
+
+  /**
+   * Convert java declared method and its value to an entry in the given
+   * {@link JSONObject}
+   *
+   * @param pojo The pojo being translated
+   * @param object the json object to put the field value in
+   * @param method the method to encode
+   * @throws JSONException thrown exception
+   * @throws IllegalAccessException thrown exception
+   * @throws InvocationTargetException thrown exception
+   */
+  private void addMethodValue(Object pojo, JSONObject object,
+      Method method) throws JSONException, IllegalAccessException,
+      InvocationTargetException {
+    Matcher matcher = GETTER.matcher(method.getName());
+    if (!matcher.matches()) {
+      return;
+    }
+
+    String name = matcher.group();
+    String fieldName = name.substring(3, 4).toLowerCase() + name.substring(4);
+    if (fieldName.equalsIgnoreCase(EXCLUDED_GETTER)) {
+      return;
+    }
+
+    Object val = method.invoke(pojo, EMPTY_OBJECT);
+    if (val != null) {
+      object.put(fieldName, translateObjectToJson(val));
+    }
   }
 }
