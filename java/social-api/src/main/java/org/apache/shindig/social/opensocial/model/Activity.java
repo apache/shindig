@@ -215,7 +215,6 @@ public class Activity {
     this.url = url;
   }
 
-  @Mandatory
   public String getUserId() {
     return userId;
   }
