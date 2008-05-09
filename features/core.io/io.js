@@ -133,19 +133,11 @@ gadgets.io = function() {
     };
     switch (params.CONTENT_TYPE) {
       case "JSON":
-        // Same as before, but specific to JSON (not FEED)
+      case "FEED":
         resp.data = gadgets.json.parse(resp.text);
         if (!resp.data) {
           resp.errors.push("failed to parse JSON");
           resp.data = null;
-        }
-        break;
-      case "FEED":
-        if (!data.body) {
-          resp.errors.push("failed to parse JSON");
-          resp.data = null;
-        } else {
-          resp.data = data.body;
         }
         break;
       case "DOM":
