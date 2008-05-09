@@ -16,6 +16,29 @@
  * KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
+require 'src/common/HttpServlet.php';
+require 'src/socialdata/DataResponse.php';
+require 'src/socialdata/GadgetDataHandler.php';
+require 'src/gadgets/GadgetTokenDecoder.php';
+require 'src/gadgets/GadgetToken.php';
+require 'src/common/BlobCrypter.php';
+require 'src/common/Crypto.php';
+require 'src/socialdata/RequestItem.php';
+require 'src/socialdata/ResponseItem.php';
+require 'src/socialdata/opensocial/model/Activity.php';
+require 'src/socialdata/opensocial/model/Address.php';
+require 'src/socialdata/opensocial/model/ApiCollection.php';
+require 'src/socialdata/opensocial/model/BodyType.php';
+require 'src/socialdata/opensocial/model/Email.php';
+require 'src/socialdata/opensocial/model/Enum.php';
+require 'src/socialdata/opensocial/model/idSpec.php';
+require 'src/socialdata/opensocial/model/MediaItem.php';
+require 'src/socialdata/opensocial/model/Message.php';
+require 'src/socialdata/opensocial/model/Name.php';
+require 'src/socialdata/opensocial/model/Organization.php';
+require 'src/socialdata/opensocial/model/Person.php';
+require 'src/socialdata/opensocial/model/Phone.php';
+require 'src/socialdata/opensocial/model/Url.php';
 
 // Response item error codes
 define('NOT_IMPLEMENTED', "notImplemented");

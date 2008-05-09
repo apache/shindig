@@ -17,6 +17,13 @@
  * specific language governing permissions and limitations under the License.
  * 
  */
+require 'src/common/HttpServlet.php';
+require 'src/gadgets/GadgetFeatureRegistry.php';
+require 'src/gadgets/JsFeatureLoader.php';
+require 'src/gadgets/JsLibrary.php';
+require 'src/gadgets/GadgetFeatureFactory.php';
+require 'src/gadgets/GadgetFeature.php';
+require 'src/gadgets/JsLibraryFeatureFactory.php';
 
 /**
  * This event handler deals with the /js/core:caja:etc.js request which content type=url gadgets can use

@@ -17,6 +17,7 @@
  * specific language governing permissions and limitations under the License.
  * 
  */
+require 'src/common/HttpServlet.php';
 
 /**
  * This class serves files from the shindig_root/javascript directory, it was created
