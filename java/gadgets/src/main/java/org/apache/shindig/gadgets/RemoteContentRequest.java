@@ -356,7 +356,7 @@ public class RemoteContentRequest {
     public boolean ownerSigned = true;
     public boolean viewerSigned = true;
 
-    public Options() {};
+    public Options() {}
 
     /**
      * Copy constructor

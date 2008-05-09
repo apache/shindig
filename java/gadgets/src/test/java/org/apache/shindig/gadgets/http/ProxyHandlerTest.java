@@ -51,6 +51,7 @@ public class ProxyHandlerTest extends HttpTestFixture {
   final PrintWriter writer = new PrintWriter(baos);
   
   final ServletOutputStream responseStream = new ServletOutputStream() {
+    @SuppressWarnings("unused")
     @Override
     public void write(int b) throws IOException {
       baos.write(b); 

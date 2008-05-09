@@ -160,10 +160,9 @@ public class GadgetRenderingTask {
    * @param gadget
    * @return true if the request was handled, false if the request can proceed
    * @throws IOException
-   * @throws GadgetException 
    */
   private boolean mustRedirectToLockedDomain(Gadget gadget)
-      throws IOException, GadgetException {
+      throws IOException {
     
     String host = request.getHeader("Host");    
     String container = context.getContainer();
