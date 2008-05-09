@@ -49,6 +49,7 @@ public class BasicOAuthStoreTest extends TestCase {
   @Override
   @SuppressWarnings("unchecked")
   protected void setUp() throws Exception {
+    super.setUp();
     control = EasyMock.createStrictControl();
     mockProviders = control.createMock(
         new HashMap<OAuthStore.ProviderKey,

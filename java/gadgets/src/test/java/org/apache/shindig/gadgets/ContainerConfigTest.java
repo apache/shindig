@@ -49,6 +49,7 @@ public class ContainerConfigTest extends TestCase {
 
   @Override
   public void setUp() throws Exception {
+    super.setUp();
     config = new ContainerConfig(null);
     // We use a JSON Object here to guarantee that we're well formed up front.
     JSONObject json = new JSONObject();

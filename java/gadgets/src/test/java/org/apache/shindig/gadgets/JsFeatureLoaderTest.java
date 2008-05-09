@@ -38,6 +38,7 @@ public class JsFeatureLoaderTest extends GadgetTestFixture {
 
   @Override
   public void setUp() throws Exception {
+    super.setUp();
     loader = new JsFeatureLoader(fetcher);
   }
 

@@ -73,6 +73,7 @@ public class SigningFetcherTest extends TestCase {
 
   @Override
   public void setUp() throws Exception {
+    super.setUp();
     cache = new BasicContentCache();
     interceptor = new InterceptingContentFetcher();
     authToken = new BasicGadgetToken("o", "v", "a", "d", "u", "m");

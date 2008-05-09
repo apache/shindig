@@ -74,11 +74,6 @@ public class HashLockedDomainServiceTest extends EasyMockTestCase {
     gadget = mock(Gadget.class);
   }
 
-  @Override
-  protected void tearDown() throws Exception {
-    super.tearDown();
-  }
-  
   public void testDisabledGlobally() {
     domainLocker = new HashLockedDomainService(
         containerRequiredConfig, "embed.com", false);

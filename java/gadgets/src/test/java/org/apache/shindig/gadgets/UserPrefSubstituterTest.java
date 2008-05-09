@@ -53,6 +53,7 @@ public class UserPrefSubstituterTest extends TestCase {
 
   @Override
   public void setUp() throws Exception {
+    super.setUp();
     spec = new GadgetSpec(URI.create(""), DEFAULT_XML);
   }
 

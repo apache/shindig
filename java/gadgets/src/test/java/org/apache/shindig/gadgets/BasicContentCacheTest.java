@@ -42,12 +42,14 @@ public class BasicContentCacheTest extends TestCase {
 
   @Override
   public void setUp() throws Exception {
-     cache = new BasicContentCache();
+    super.setUp();
+    cache = new BasicContentCache();
   }
 
   @Override
   protected void tearDown() throws Exception {
     cache = null;
+    super.tearDown();
   }
 
   private RemoteContentRequest createRequest(String method) {

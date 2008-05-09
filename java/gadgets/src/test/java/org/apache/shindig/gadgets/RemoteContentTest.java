@@ -32,7 +32,8 @@ public class RemoteContentTest extends TestCase {
   private Map<String, List<String>> headers;
 
   @Override
-  public void setUp() {
+  public void setUp() throws Exception {
+    super.setUp();
     headers = new HashMap<String, List<String>>();
   }
 

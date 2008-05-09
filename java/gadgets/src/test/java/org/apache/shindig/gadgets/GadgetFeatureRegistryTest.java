@@ -42,12 +42,13 @@ public class GadgetFeatureRegistryTest extends TestCase {
     "feature0", "feature1", "feature2", "feature3"
   };
   private static final String UNREGISTERED_FEATURE = "unregistered";
+
   @Override
   public void setUp() throws Exception {
     // TODO: Add a mock fetcher here and add tests for retrieving remote files
+    super.setUp();
     registry = new GadgetFeatureRegistry(null, null);
   }
-
 
   public void testDependencyChain() throws Exception {
     registry.register(FEATURE_NAME, Arrays.asList(DEP_NAME), DUMMY_FEATURE);
