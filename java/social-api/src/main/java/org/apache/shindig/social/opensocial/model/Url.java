@@ -17,13 +17,11 @@
  */
 package org.apache.shindig.social.opensocial.model;
 
-import org.apache.shindig.social.AbstractGadgetData;
-
 /**
  * see
  * http://code.google.com/apis/opensocial/docs/0.7/reference/opensocial.Url.Field.html
  */
-public class Url extends AbstractGadgetData {
+public class Url {
 
   public static enum Field {
     ADDRESS("address"),

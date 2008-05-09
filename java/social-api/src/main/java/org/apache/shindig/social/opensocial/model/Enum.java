@@ -17,10 +17,6 @@
  */
 package org.apache.shindig.social.opensocial.model;
 
-import org.apache.shindig.social.AbstractGadgetData;
-import org.apache.shindig.social.Mandatory;
-
-
 /**
  * see
  * http://code.google.com/apis/opensocial/docs/0.7/reference/opensocial.Enum.html
@@ -29,12 +25,11 @@ import org.apache.shindig.social.Mandatory;
  * for fields that have a common set of values.
  *
  */
-public final class Enum<E extends Enum.EnumKey> extends AbstractGadgetData {
+public final class Enum<E extends Enum.EnumKey> {
   private String displayValue;
   private E key = null;
 
   public interface EnumKey {
-    @Mandatory
     String getDisplayValue();
   }
 

@@ -17,14 +17,12 @@
  */
 package org.apache.shindig.social.opensocial.model;
 
-import org.apache.shindig.social.AbstractGadgetData;
-
 /**
  * see
  * http://code.google.com/apis/opensocial/docs/0.7/reference/opensocial.Activity.MediaItem.Field.html
  *
  */
-public class MediaItem extends AbstractGadgetData {
+public class MediaItem {
 
   public static enum Field {
     MIME_TYPE("mimeType"),

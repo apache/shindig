@@ -17,14 +17,12 @@
  */
 package org.apache.shindig.social.opensocial.model;
 
-import org.apache.shindig.social.AbstractGadgetData;
-
 /**
  * see
  * http://code.google.com/apis/opensocial/docs/0.7/reference/opensocial.Name.Field.html
  *
  */
-public class Name extends AbstractGadgetData {
+public class Name {
 
   public static enum Field {
     ADDITIONAL_NAME("additionalName"),

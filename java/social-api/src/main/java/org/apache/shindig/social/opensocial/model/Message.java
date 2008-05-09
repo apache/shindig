@@ -17,8 +17,6 @@
  */
 package org.apache.shindig.social.opensocial.model;
 
-import org.apache.shindig.social.AbstractGadgetData;
-
 /**
  *
  * Base interface for all message objects.
@@ -27,7 +25,7 @@ import org.apache.shindig.social.AbstractGadgetData;
  * http://code.google.com/apis/opensocial/docs/0.7/reference/opensocial.Message.html
  *
  */
-public final class Message extends AbstractGadgetData {
+public final class Message {
 
   public static enum Field {
     BODY("body"),

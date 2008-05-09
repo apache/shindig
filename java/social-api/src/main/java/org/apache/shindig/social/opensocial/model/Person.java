@@ -17,9 +17,6 @@
  */
 package org.apache.shindig.social.opensocial.model;
 
-import org.apache.shindig.social.AbstractGadgetData;
-import org.apache.shindig.social.Mandatory;
-
 import java.util.Date;
 import java.util.List;
 
@@ -28,7 +25,7 @@ import java.util.List;
  * http://code.google.com/apis/opensocial/docs/0.7/reference/opensocial.Person.Field.html
  *
  */
-public class Person extends AbstractGadgetData {
+public class Person {
 
   public static enum Field {
     ABOUT_ME("aboutMe"),
@@ -314,7 +311,6 @@ public class Person extends AbstractGadgetData {
     this.humor = humor;
   }
 
-  @Mandatory
   public String getId() {
     return id;
   }
@@ -395,7 +391,6 @@ public class Person extends AbstractGadgetData {
     this.music = music;
   }
 
-  @Mandatory
   public Name getName() {
     return name;
   }

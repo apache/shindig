@@ -164,16 +164,4 @@ public class BeanJsonConverterTest extends TestCase {
     assertEquals("2", jsonMap.getJSONObject("item2").getString("value"));
   }
 
-  public void testMandatoryFields() throws Exception {
-    Person noIdMan = new Person(null, new Name("noIdMan"));
-    try {
-      noIdMan.toJson();
-      fail("Expected a person without an id to throw an exception");
-    } catch (Exception e) {
-      // The exception should be thrown
-      assertEquals("id is a mandory value, it should not be null",
-          e.getMessage());
-    }
-  }
-
 }

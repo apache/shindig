@@ -17,14 +17,11 @@
  */
 package org.apache.shindig.social.opensocial.model;
 
-import org.apache.shindig.social.Mandatory;
-import org.apache.shindig.social.AbstractGadgetData;
-
-import java.util.Map;
-import java.util.List;
 import java.util.Date;
+import java.util.List;
+import java.util.Map;
 
-public class Activity extends AbstractGadgetData {
+public class Activity {
 
   public static enum Field {
     APP_ID("appId"),
@@ -114,7 +111,6 @@ public class Activity extends AbstractGadgetData {
     this.externalId = externalId;
   }
 
-  @Mandatory
   public String getId() {
     return id;
   }

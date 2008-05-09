@@ -21,7 +21,7 @@ package org.apache.shindig.social;
  * Represents the response items that get handed back as json within the
  * DataResponse
  */
-public class ResponseItem<T> extends AbstractGadgetData {
+public class ResponseItem<T> {
   private ResponseError error;
   private String errorMessage;
 
@@ -55,7 +55,6 @@ public class ResponseItem<T> extends AbstractGadgetData {
     this.errorMessage = errorMessage;
   }
 
-  @Mandatory
   public T getResponse() {
     return response;
   }

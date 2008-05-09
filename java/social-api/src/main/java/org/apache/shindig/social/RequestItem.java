@@ -17,14 +17,15 @@
  */
 package org.apache.shindig.social;
 
-import org.json.JSONObject;
 import org.apache.shindig.gadgets.GadgetToken;
+
+import org.json.JSONObject;
 
 /**
  * Represents the request items that come from the json. Each RequestItem should
  * map to one ResponseItem.
  */
-public class RequestItem extends AbstractGadgetData {
+public class RequestItem {
   private String type;
   private JSONObject params;
   private GadgetToken token;

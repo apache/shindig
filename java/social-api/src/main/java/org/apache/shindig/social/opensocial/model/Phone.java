@@ -17,15 +17,12 @@
  */
 package org.apache.shindig.social.opensocial.model;
 
-import org.apache.shindig.social.AbstractGadgetData;
-import org.apache.shindig.social.Mandatory;
-
 /**
  * see
  * http://code.google.com/apis/opensocial/docs/0.7/reference/opensocial.Phone.Field.html
  *
  */
-public class Phone extends AbstractGadgetData {
+public class Phone {
 
   public static enum Field {
     NUMBER("number"),
@@ -52,7 +49,6 @@ public class Phone extends AbstractGadgetData {
     this.type = type;
   }
 
-  @Mandatory
   public String getNumber() {
     return number;
   }
