@@ -82,8 +82,10 @@
   <!-- ====================================================================== -->
   <!-- P E O P L E                                                            -->
   <!-- ====================================================================== -->
-  <!-- Developers listed by PMC Chair, PMC, Committers, Contributers, all alphabetical-->
+  <!-- Developers listed by PMC Chair, PMC, Mentors, Committers, Contributers, all alphabetical-->
   <developers>
+    <!-- PMC Chair -->
+    <!-- PMC -->
     <developer>
       <id>brianm</id>
       <name>Brian McCallister</name>
@@ -94,36 +96,18 @@
       </roles>
     </developer>
     <developer>
-      <id>bstoler</id>
-      <name>Brian Stoler</name>
-      <email>bstoler@apache.org</email>
+      <id>chabotc</id>
+      <name>Chris Chabot</name>
+      <email>chabotc@apache.org</email>
       <organization>ASF</organization>
       <roles>
         <role>PMC Member</role>
       </roles>
     </developer>
     <developer>
-      <id>dcoker</id>
-      <name>Doug Coker</name>
-      <email>dcoker@apache.org</email>
-      <organization>ASF</organization>
-      <roles>
-        <role>PMC Member</role>
-      </roles>
-    </developer>
-    <developer>
-      <id>dglazer</id>
-      <name>David Glazer</name>
-      <email>dglazer@apache.org</email>
-      <organization>ASF</organization>
-      <roles>
-        <role>PMC Member</role>
-      </roles>
-    </developer>
-    <developer>
-      <id>dharkness</id>
-      <name>David Harkness</name>
-      <email>dharkness@apache.org</email>
+      <id>dbentley</id>
+      <name>Daniel Bentley</name>
+      <email>dbentley@apache.org</email>
       <organization>ASF</organization>
       <roles>
         <role>PMC Member</role>
@@ -157,36 +141,9 @@
       </roles>
     </developer>
     <developer>
-      <id>gfs</id>
-      <name>Graham Spencer</name>
-      <email>gfs@apache.org</email>
-      <organization>ASF</organization>
-      <roles>
-        <role>PMC Member</role>
-      </roles>
-    </developer>
-    <developer>
       <id>johnh</id>
       <name>John Hjelmstad</name>
       <email>johnh@apache.org</email>
-      <organization>ASF</organization>
-      <roles>
-        <role>PMC Member</role>
-      </roles>
-    </developer>
-    <developer>
-      <id>jpanzer</id>
-      <name>John Panzer</name>
-      <email>jpanzer@apache.org</email>
-      <organization>ASF</organization>
-      <roles>
-        <role>PMC Member</role>
-      </roles>
-    </developer>
-    <developer>
-      <id>jregan</id>
-      <name>Jeff Regan</name>
-      <email>jregan@apache.org</email>
       <organization>ASF</organization>
       <roles>
         <role>PMC Member</role>
@@ -229,12 +186,49 @@
       </roles>
     </developer>
     <developer>
-      <id>ramani</id>
-      <name>Ramkumar Ramani</name>
-      <email>ramani@apache.org</email>
+      <id>zhen</id>
+      <name>Zhen Wang</name>
+      <email>zhen@apache.org</email>
       <organization>ASF</organization>
       <roles>
         <role>PMC Member</role>
+      </roles>
+    </developer>
+    <!-- Mentors -->
+    <developer>
+      <id>fitz</id>
+      <name>Brian Fitzpatrick</name>
+      <email>fitz@apache.org</email>
+      <organization>ASF</organization>
+      <roles>
+        <role>Mentor</role>
+      </roles>
+    </developer>
+    <developer>
+      <id>gstein</id>
+      <name>Greg Stein</name>
+      <email>gstein@apache.org</email>
+      <organization>ASF</organization>
+      <roles>
+        <role>Mentor</role>
+      </roles>
+    </developer>
+    <developer>
+      <id>sgala</id>
+      <name>Santiago Gala</name>
+      <email>sgala@hisitech.com</email>
+      <organization>ASF</organization>
+      <roles>
+        <role>Mentor</role>
+      </roles>
+    </developer>
+    <developer>
+      <id>sylvain</id>
+      <name>Sylvain Wallez</name>
+      <email>sylvain@apache.org</email>
+      <organization>ASF</organization>
+      <roles>
+        <role>Mentor</role>
       </roles>
     </developer>
     <developer>
@@ -243,11 +237,28 @@
       <email>tomdz@apache.org</email>
       <organization>ASF</organization>
       <roles>
-        <role>PMC Member</role>
+        <role>Mentor</role>
+      </roles>
+    </developer>
+    <developer>
+      <id>upayavira</id>
+      <name>Upayavira</name>
+      <email>upayavira@apache.org</email>
+      <organization>ASF</organization>
+      <roles>
+        <role>Mentor</role>
+      </roles>
+    </developer>
+    <developer>
+      <id>dharkness</id>
+      <name>David Harkness</name>
+      <email>dharkness@apache.org</email>
+      <organization>ASF</organization>
+      <roles>
+        <role>Emeritus</role>
       </roles>
     </developer>
     <!--Committers-->
-    <!--End Committers-->
   </developers>
 
   <!-- ====================================================================== -->
@@ -407,6 +418,35 @@
                 <id>attach-javadocs</id>
                 <goals>
                   <goal>jar</goal>
+                </goals>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+
+    <profile>
+      <id>to-committers</id>
+      <build>
+        <defaultGoal>xslt:transform</defaultGoal>
+        <plugins>
+          <plugin>
+            <groupId>org.codehaus.mojo</groupId>
+            <artifactId>xslt-maven-plugin</artifactId>
+            <version>1.0</version>
+            <configuration>
+                <xslFile>${basedir}/etc/to-committers.xsl</xslFile>
+                <srcIncludes>pom.xml</srcIncludes>
+                <srcDir>${basedir}</srcDir>
+                <destDir>${build.directory}</destDir>
+                <fileNameRegex>pom.xml</fileNameRegex>
+                <fileNameReplacement>COMMITTERS</fileNameReplacement>
+            </configuration>
+            <executions>
+              <execution>
+                <goals>
+                  <goal>transform</goal>
                 </goals>
               </execution>
             </executions>

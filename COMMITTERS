@@ -1,0 +1,30 @@
+The following people have commit access to the Shindig sources.
+Note that this is not a full list of Shindig's authors, however --
+for that, you'd need to look over the log messages to see all the
+patch contributors.
+
+If you have a question or comment, it's probably best to mail
+shindig-dev@incubator.apache.org, rather than mailing any of these
+people directly.
+
+Blanket commit access:
+
+	    brianm	Brian McCallister   brianm@apache.org        PMC Member
+	   chabotc	Chris Chabot        chabotc@apache.org       PMC Member
+	  dbentley	Daniel Bentley      dbentley@apache.org      PMC Member
+	      doll	Cassie Doll         doll@apache.org          PMC Member
+	      etnu	Kevin Brown         etnu@apache.org          PMC Member
+	      evan	Evan Gilbert        evan@apache.org          PMC Member
+	     johnh	John Hjelmstad      johnh@apache.org         PMC Member
+	     jyang	Jun Yang            jyang@apache.org         PMC Member
+	   lindner	Paul Lindner        lindner@apache.org       PMC Member
+	     lryan	Louis Ryan          lryan@apache.org         PMC Member
+	   martint	Martin Traverso     martint@apache.org       PMC Member
+	      zhen	Zhen Wang           zhen@apache.org          PMC Member
+	      fitz	Brian Fitzpatrick   fitz@apache.org          Mentor    
+	    gstein	Greg Stein          gstein@apache.org        Mentor    
+	     sgala	Santiago Gala       sgala@hisitech.com       Mentor    
+	   sylvain	Sylvain Wallez      sylvain@apache.org       Mentor    
+	     tomdz	Thomas Dudziak      tomdz@apache.org         Mentor    
+	 upayavira	Upayavira           upayavira@apache.org     Mentor    
+	 dharkness	David Harkness      dharkness@apache.org     Emeritus  
