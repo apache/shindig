@@ -30,6 +30,7 @@ public class SocialApiProvider extends DefaultProvider {
   private Provider<PeopleServiceAdapter> peopleAdapterProvider;
   private Provider<ActivitiesServiceAdapter> activitiesAdapterProvider;
   private Provider<FriendsServiceAdapter> friendsAdapterProvider;
+  private Provider<DataServiceAdapter> dataAdapterProvider;
 
   /**
    * The CollectionAdapter enum standardizes the names and descriptions of the
@@ -73,21 +74,15 @@ public class SocialApiProvider extends DefaultProvider {
   }
 
   @Inject
-  public void setPeopleAdapter(Provider<PeopleServiceAdapter>
-      peopleAdapterProvider) {
+  public void setAdapters(
+      Provider<PeopleServiceAdapter> peopleAdapterProvider,
+      Provider<FriendsServiceAdapter> friendsAdapterProvider,
+      Provider<ActivitiesServiceAdapter> activitiesAdapterProvider,
+      Provider<DataServiceAdapter> dataAdapterProvider) {
     this.peopleAdapterProvider = peopleAdapterProvider;
-  }
-
-  @Inject
-  public void setFriendsAdapter(Provider<FriendsServiceAdapter>
-      friendsAdapterProvider) {
     this.friendsAdapterProvider = friendsAdapterProvider;
-  }
-
-  @Inject
-  public void setActivitiesAdapter(Provider<ActivitiesServiceAdapter>
-      activitiesAdapterProvider) {
     this.activitiesAdapterProvider = activitiesAdapterProvider;
+    this.dataAdapterProvider = dataAdapterProvider;
   }
 
   /**
@@ -112,6 +107,7 @@ public class SocialApiProvider extends DefaultProvider {
     FriendsServiceAdapter friendsAdapter = friendsAdapterProvider.get();
     ActivitiesServiceAdapter activitiesAdapter
         = activitiesAdapterProvider.get();
+    DataServiceAdapter dataAdapter = dataAdapterProvider.get();
 
     // Add the RouteManager that parses incoming and builds outgoing URLs
     // {uid} is assumed to be a deterministic GUID for the service
@@ -179,16 +175,16 @@ public class SocialApiProvider extends DefaultProvider {
         // AppData
 
         // Individual App Data record for a given user+app, consisting primarily
-        // of a bag of key/value pairs. -- /appdata/{uid}/self/{aid}
+        // of a bag of key/value pairs. -- /appdata/{uid}/@self/{aid}
         .addRoute(CollectionAdapter.APPDATA_OF_APP_OF_USER.toString(),
-            BASE + "appdata/:uid/self/:aid",
-            TargetType.TYPE_ENTRY, null)
+            BASE + "appdata/:uid/@self/:aid",
+            TargetType.TYPE_ENTRY, dataAdapter)
 
         // Collection of App Data records for friends of {uid}
-        // /appdata/{uid}/friends/{aid}
+        // /appdata/{uid}/@friends/{aid}
         .addRoute(CollectionAdapter.APPDATA_OF_FRIENDS_OF_USER.toString(),
-            BASE + "appdata/:uid/friends/:aid",
-            TargetType.TYPE_COLLECTION, null)
+            BASE + "appdata/:uid/@friends/:aid",
+            TargetType.TYPE_COLLECTION, dataAdapter)
 
         ;
 

@@ -150,8 +150,8 @@ public abstract class RestServerCollectionAdapter
             "application/xml");
         break;
       case JSON:
-        entry.setContent(beanJsonConverter.convertToJson(obj).toString(),
-            "application/json");
+        Object json = beanJsonConverter.convertToJson(obj);
+        entry.setContent(json.toString(), "application/json");
         break;
     }
 

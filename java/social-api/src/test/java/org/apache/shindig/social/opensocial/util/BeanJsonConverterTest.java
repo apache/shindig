@@ -86,13 +86,13 @@ public class BeanJsonConverterTest extends TestCase {
   public void testToJsonOnInheritedClass() throws Exception {
     SpecialPerson cassie = new SpecialPerson("5", "robot", "nonsense");
 
-    JSONObject result = beanJsonConverter.convertToJson(cassie);
+    JSONObject result = (JSONObject) beanJsonConverter.convertToJson(cassie);
     assertEquals(cassie.getId(), result.getString("id"));
     assertEquals(cassie.getNewfield(), result.getString("newfield"));
   }
 
   public void testPersonToJson() throws Exception {
-    JSONObject result = beanJsonConverter.convertToJson(johnDoe);
+    JSONObject result = (JSONObject) beanJsonConverter.convertToJson(johnDoe);
 
     assertEquals(johnDoe.getId(), result.getString("id"));
 
@@ -126,7 +126,7 @@ public class BeanJsonConverterTest extends TestCase {
   }
 
   public void testActivityToJson() throws Exception {
-    JSONObject result = beanJsonConverter.convertToJson(activity);
+    JSONObject result = (JSONObject) beanJsonConverter.convertToJson(activity);
 
     assertEquals(activity.getUserId(), result.getString("userId"));
     assertEquals(activity.getId(), result.getString("id"));
@@ -155,13 +155,27 @@ public class BeanJsonConverterTest extends TestCase {
     item2Map.put("value", "2");
     map.put("item2", item2Map);
 
-    ResponseItem response
-        = new ResponseItem<Map<String, Map<String, String>>>(map);
-    JSONObject result = beanJsonConverter.convertToJson(response);
+    JSONObject jsonMap = (JSONObject) beanJsonConverter.convertToJson(map);
 
-    JSONObject jsonMap = result.getJSONObject("response");
     assertEquals("1", jsonMap.getJSONObject("item1").getString("value"));
     assertEquals("2", jsonMap.getJSONObject("item2").getString("value"));
+  }
+
+  public void testListsToJson() throws Exception {
+    List<Map<String, String>> list = new ArrayList<Map<String, String>>();
+
+    Map<String, String> item1Map = new HashMap<String, String>();
+    item1Map.put("value", "1");
+    list.add(item1Map);
+
+    Map<String, String> item2Map = new HashMap<String, String>();
+    item2Map.put("value", "2");
+    list.add(item2Map);
+
+    JSONArray jsonArray = (JSONArray) beanJsonConverter.convertToJson(list);
+
+    assertEquals("1", ((JSONObject) jsonArray.get(0)).getString("value"));
+    assertEquals("2", ((JSONObject) jsonArray.get(1)).getString("value"));
   }
 
 }

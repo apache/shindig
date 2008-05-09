@@ -94,7 +94,8 @@ public class GadgetDataServlet extends InjectedServlet {
     }
     resp.setContentType("application/json; charset=utf-8");
     PrintWriter writer = resp.getWriter();
-    writer.write(beanJsonConverter.convertToJson(response).toString());
+    Object json = beanJsonConverter.convertToJson(response);
+    writer.write(json.toString());
   }
 
   private List<ResponseItem> createResponse(String requestParam, String token)
