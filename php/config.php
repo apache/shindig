@@ -39,7 +39,7 @@ $shindigConfig = array(
 
 	// The data handlers for the social data, this is a list of class names
 	// seperated by a , For example:
-	//'handlers' => 'PartuzaHandler',
+	// 'handlers' => 'PartuzaHandler',
 	// if the value is empty, the defaults used in the example above will be used.
 	'handlers' => '',
 
@@ -97,6 +97,16 @@ class Config {
 		global $shindigConfig;
 		if (isset($shindigConfig[$key])) {
 			return $shindigConfig[$key];
+		} else {
+			throw new ConfigException("Invalid Config Key");
+		}
+	}
+
+	static function set($key, $val)
+	{
+		global $shindigConfig;
+			if (isset($shindigConfig[$key])) {
+			$shindigConfig[$key] = $val;
 		} else {
 			throw new ConfigException("Invalid Config Key");
 		}

@@ -60,10 +60,10 @@ class ProxyHandler {
 		//header("HTTP/1.1 $status", true);
 		if ($status == 200) {
 			$output = '';
-			if ($_GET['contentType'] == 'FEED') {
+			if (isset($_GET['contentType']) && $_GET['contentType'] == 'FEED') {
 				// We are including this library manually because the autoload doesnt work with 
 				// this, its filename doesnt match with the class name.
-				require 'src/common/Zend/Feed.php';
+				require 'Zend/Feed.php';
 				$numEntries = $_GET['numEntries'];
 				$getSummaries = $_GET['getSummaries'];
 				$channel = array();
