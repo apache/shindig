@@ -18,10 +18,8 @@
 package org.apache.shindig.social.abdera;
 
 import org.apache.shindig.gadgets.GadgetToken;
-import org.apache.shindig.social.opensocial.PeopleService;
 import org.apache.shindig.social.opensocial.model.Person;
 
-import com.google.inject.Inject;
 import org.apache.abdera.protocol.server.RequestContext;
 import org.apache.abdera.protocol.server.ResponseContext;
 
@@ -36,12 +34,6 @@ import java.util.logging.Logger;
 public class PeopleServiceAdapter extends RestServerCollectionAdapter {
   private static Logger logger =
     Logger.getLogger(PeopleServiceAdapter.class.getName());
-  private PeopleService handler;
-
-  @Inject
-  public PeopleServiceAdapter(PeopleService handler) {
-    this.handler = handler;
-  }
 
   /**
    * Does not handle any urls.
@@ -57,7 +49,7 @@ public class PeopleServiceAdapter extends RestServerCollectionAdapter {
   public ResponseContext getEntry(RequestContext request) {
     String uid = request.getTarget().getParameter("uid");
     GadgetToken token = getGadgetToken(request, uid);
-    Person person = handler.getPerson(uid, token).getResponse();
+    Person person = peopleService.getPerson(uid, token).getResponse();
 
     // TODO: how is entry id determined. check.
     String entryId = request.getUri().toString();
