@@ -17,6 +17,15 @@
  * specific language governing permissions and limitations under the License.
  * 
  */
+require 'src/common/HttpServlet.php';
+require 'src/gadgets/GadgetContext.php';
+require 'src/gadgets/GadgetTokenDecoder.php';
+require 'src/gadgets/ProxyHandler.php';
+require 'src/gadgets/GadgetException.php';
+require 'src/common/RemoteContentRequest.php';
+require 'src/common/RemoteContent.php';
+require 'src/common/Cache.php';
+require 'src/common/RemoteContentFetcher.php';
 
 class ProxyServlet extends HttpServlet {
 

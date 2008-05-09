@@ -90,10 +90,10 @@ class BasicPeopleService extends PeopleService {
 				$ids[] = $token->getViewerId();
 				break;
 			case 'OWNER_FRIENDS':
-				$ids = $friendIds[$token->getOwnerId()];
+				$ids = isset($friendIds[$token->getOwnerId()]) ? $friendIds[$token->getOwnerId()] : false;
 				break;
 			case 'VIEWER_FRIENDS':
-				$ids = $friendIds[$token->getViewerId()];
+				$ids = isset($friendIds[$token->getViewerId()]) ? $friendIds[$token->getViewerId()] : false;
 				break;
 			case 'USER_IDS':
 				$ids = $idSpec->fetchUserIds();

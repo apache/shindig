@@ -47,47 +47,51 @@ class OpenSocialDataHandler extends GadgetDataHandler {
 			$response = new ResponseItem(NOT_IMPLEMENTED, $type . " has not been implemented yet.", array());
 			$idSpec = idSpec::fromJson($params['idSpec']);
 			$peopleIds = $this->peopleHandler->getIds($idSpec, $request->getToken());
-			switch ( $type) {
-				
-				case 'FETCH_PEOPLE' :
-					$profileDetail = $params["profileDetail"];
-					$profileDetailFields = Array();
-					foreach ( $profileDetail as $detail ) {
-						$profileDetailFields[] = $detail;
-					}
-					$sortOrder = ! empty($params["sortOrder"]) ? $params["sortOrder"] : 'topFriends';
-					$filter = ! empty($params["filter"]) ? $params["filter"] : 'all';
-					$first = intval($params["first"]);
-					$max = intval($params["max"]);
-					// TODO: Should we put this in the requestitem and pass the whole
-					// thing along?
-					$response = $this->peopleHandler->getPeople($peopleIds, $sortOrder, $filter, $first, $max, $profileDetailFields, $request->getToken());
-					break;
-				
-				case 'FETCH_PERSON_APP_DATA' :
-					$jsonKeys = $params["keys"];
-					$keys = array();
-					foreach ( $jsonKeys as $key ) {
-						$keys[] = $key;
-					}
-					$response = $this->dataHandler->getPersonData($peopleIds, $keys, $request->getToken());
-					break;
-				
-				case 'UPDATE_PERSON_APP_DATA' :
-					// this is either viewer or owner right? lets hack in propper support shall we?
-					// We only support updating one person right now
-					$id = $peopleIds[0];
-					$key = $params["key"];
-					$value = ! empty($params["value"]) ? $params["value"] : '';
-					$response = $this->dataHandler->updatePersonData($id, $key, $value, $request->getToken());
-					break;
-				
-				case 'FETCH_ACTIVITIES' :
-					$response = $this->activitiesHandler->getActivities($peopleIds, $request->getToken());
-					break;
-				
-				case 'CREATE_ACTIVITY' :
-					break;
+			if ($peopleIds !== false) {
+				switch ( $type) {
+					
+					case 'FETCH_PEOPLE' :
+						$profileDetail = $params["profileDetail"];
+						$profileDetailFields = Array();
+						foreach ( $profileDetail as $detail ) {
+							$profileDetailFields[] = $detail;
+						}
+						$sortOrder = ! empty($params["sortOrder"]) ? $params["sortOrder"] : 'topFriends';
+						$filter = ! empty($params["filter"]) ? $params["filter"] : 'all';
+						$first = intval($params["first"]);
+						$max = intval($params["max"]);
+						// TODO: Should we put this in the requestitem and pass the whole
+						// thing along?
+						$response = $this->peopleHandler->getPeople($peopleIds, $sortOrder, $filter, $first, $max, $profileDetailFields, $request->getToken());
+						break;
+					
+					case 'FETCH_PERSON_APP_DATA' :
+						$jsonKeys = $params["keys"];
+						$keys = array();
+						foreach ( $jsonKeys as $key ) {
+							$keys[] = $key;
+						}
+						$response = $this->dataHandler->getPersonData($peopleIds, $keys, $request->getToken());
+						break;
+					
+					case 'UPDATE_PERSON_APP_DATA' :
+						// this is either viewer or owner right? lets hack in propper support shall we?
+						// We only support updating one person right now
+						$id = $peopleIds[0];
+						$key = $params["key"];
+						$value = ! empty($params["value"]) ? $params["value"] : '';
+						$response = $this->dataHandler->updatePersonData($id, $key, $value, $request->getToken());
+						break;
+					
+					case 'FETCH_ACTIVITIES' :
+						$response = $this->activitiesHandler->getActivities($peopleIds, $request->getToken());
+						break;
+					
+					case 'CREATE_ACTIVITY' :
+						break;
+				}
+			} else {
+				$response = new ResponseItem(BAD_REQUEST, "Invalid people id's");
 			}
 		} catch ( Exception $e ) {
 			$response = new ResponseItem(BAD_REQUEST, $e->getMessage());

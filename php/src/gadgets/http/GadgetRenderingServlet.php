@@ -17,6 +17,32 @@
  * specific language governing permissions and limitations under the License.
  * 
  */
+require 'src/common/HttpServlet.php';
+require 'src/gadgets/GadgetContext.php';
+require 'src/gadgets/GadgetServer.php';
+require 'src/common/RemoteContentRequest.php';
+require 'src/common/RemoteContent.php';
+require 'src/common/Cache.php';
+require 'src/common/RemoteContentFetcher.php';
+require 'src/gadgets/GadgetSpecParser.php';
+require 'src/gadgets/Gadget.php';
+require 'src/gadgets/GadgetId.php';
+require 'src/gadgets/UserPrefs.php';
+require 'src/gadgets/Substitutions.php';
+require 'src/gadgets/LocaleSpec.php';
+require 'src/common/Locale.php';
+require 'src/gadgets/UserPref.php';
+require 'src/gadgets/ViewSpec.php';
+require 'src/gadgets/FeatureSpec.php';
+require 'src/gadgets/MessageBundleParser.php';
+require 'src/gadgets/MessageBundle.php';
+require 'src/gadgets/GadgetFeatureRegistry.php';
+require 'src/gadgets/GadgetFeatureFactory.php';
+require 'src/gadgets/GadgetFeature.php';
+require 'src/gadgets/JsLibraryFeatureFactory.php';
+require 'src/gadgets/JsLibrary.php';
+require 'src/gadgets/http/HttpUtil.php';
+require 'src/gadgets/ContainerConfig.php';
 
 /**
  * This class deals with the gadget rendering requests (in default config this

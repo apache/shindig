@@ -36,6 +36,8 @@
 
 include_once ('config.php');
 
+// All configurable classes are autoloaded
+// To load these, we scan our entire directory structure
 function __autoload($className)
 {
 	$locations = array('src/common', 'src/gadgets', 'src/gadgets/samplecontainer', 'src/gadgets/http', 'src/socialdata', 'src/socialdata/opensocial', 'src/socialdata/opensocial/model', 'src/socialdata/http', 'src/socialdata/samplecontainer');
@@ -71,6 +73,12 @@ foreach ($servletMap as $url => $class) {
 	}
 }
 if ($servlet) {
+	if ($class == 'GadgetDataServlet') {
+		$path = 'src/socialdata/http';
+	} else {
+		$path = 'src/gadgets/http';
+	}
+	require "{$path}/{$class}.php";
 	$class = new $class();
 	if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 		$class->doPost();
