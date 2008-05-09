@@ -38,7 +38,7 @@ include_once ('config.php');
 
 function __autoload($className)
 {
-	$locations = array('src/common', 'src/gadgets', 'src/gadgets/samplecontainer', 'src/gadgets/http', 'src/socialdata', 'src/socialdata/opensocial', 'src/socialdata/opensocial/model', 'src/socialdata/http');
+	$locations = array('src/common', 'src/gadgets', 'src/gadgets/samplecontainer', 'src/gadgets/http', 'src/socialdata', 'src/socialdata/opensocial', 'src/socialdata/opensocial/model', 'src/socialdata/http', 'src/socialdata/samplecontainer');
 	// Check for the presense of this class in our all our directories.
 	$fileName = $className.'.php';
 	foreach ($locations as $path) {
