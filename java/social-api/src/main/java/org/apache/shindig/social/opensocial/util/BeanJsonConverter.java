@@ -31,6 +31,7 @@ import java.util.regex.Pattern;
 
 /**
  * Converts pojos to json objects
+ * TODO: Replace with standard library
  */
 public class BeanJsonConverter {
 
@@ -123,7 +124,9 @@ public class BeanJsonConverter {
         || val instanceof Date
         || val instanceof Long
         || val instanceof Enum
-        || val instanceof Float) {
+        || val instanceof Float
+        || val instanceof JSONObject
+        || val instanceof JSONArray) {
       return val;
     }
 
