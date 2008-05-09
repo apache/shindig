@@ -18,7 +18,9 @@
 package org.apache.shindig.social.abdera;
 
 import org.apache.shindig.gadgets.GadgetToken;
+import org.apache.shindig.social.opensocial.PeopleService;
 import org.apache.shindig.social.opensocial.model.Activity;
+import org.apache.shindig.social.opensocial.model.IdSpec;
 import org.apache.shindig.social.opensocial.model.Person;
 import org.apache.shindig.social.opensocial.util.BeanJsonConverter;
 import org.apache.shindig.social.opensocial.util.BeanXmlConverter;
@@ -31,6 +33,7 @@ import org.apache.abdera.protocol.server.RequestContext;
 import org.apache.abdera.protocol.server.ResponseContext;
 import org.apache.abdera.protocol.server.context.ResponseContextException;
 import org.apache.abdera.protocol.server.impl.AbstractCollectionAdapter;
+import org.json.JSONException;
 
 import java.util.Date;
 import java.util.List;
@@ -47,12 +50,13 @@ public abstract class RestServerCollectionAdapter
 
   private BeanXmlConverter beanXmlConverter;
   private BeanJsonConverter beanJsonConverter;
+  protected PeopleService peopleService;
 
   private static final String INVALID_FORMAT =
-    "Invalid format. only atom/json-c are supported";
+    "Invalid format. only atom/json are supported";
 
   private enum Format {
-    JSON("json-c"),
+    JSON("json"),
     ATOM("atom");
 
     private final String displayValue;
@@ -71,6 +75,11 @@ public abstract class RestServerCollectionAdapter
       BeanJsonConverter beanJsonConverter) {
     this.beanXmlConverter = beanXmlConverter;
     this.beanJsonConverter = beanJsonConverter;
+  }
+
+  @Inject
+  public void setPeopleService(PeopleService peopleService) {
+    this.peopleService = peopleService;
   }
 
   protected ResponseContext returnFeed(RequestContext request, String title,
@@ -221,6 +230,19 @@ public abstract class RestServerCollectionAdapter
         return 0;
       }
     };
+  }
+
+  protected List<String> getFriendIds(RequestContext request, String uid) {
+    GadgetToken token = getGadgetToken(request, uid);
+    IdSpec idSpec = new IdSpec(null, IdSpec.Type.VIEWER_FRIENDS);
+    try {
+      return peopleService.getIds(idSpec, token);
+    } catch (JSONException e) {
+      // TODO: Ignoring this for now. Eventually we can make the service apis
+      // fit the restful model better. For now, it is worth some hackiness to
+      // keep the interfaces stable.
+      return null;
+    }
   }
 
   @Override

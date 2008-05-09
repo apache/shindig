@@ -34,28 +34,38 @@ import java.util.List;
  */
 @SuppressWarnings("unchecked")
 public class ActivitiesServiceAdapter extends RestServerCollectionAdapter {
-  private ActivitiesService handler;
+  private ActivitiesService activitiesService;
 
   // TODO get these from the config files like in feedserver
   private static final String TITLE = "Acitivity Collection title";
   private static final String AUTHOR = "TODO";
+  private static final String FRIENDS_INDICATOR = "@friends";
 
   @Inject
-  public ActivitiesServiceAdapter(ActivitiesService handler) {
-    this.handler = handler;
+  public ActivitiesServiceAdapter(ActivitiesService activitiesService) {
+    this.activitiesService = activitiesService;
   }
 
   /**
    * Handles the following URL
    *    /activities/{uid}/@self
+   *    /activities/{uid}/@friends
    */
   public ResponseContext getFeed(RequestContext request) {
     String uid = request.getTarget().getParameter("uid");
 
-    List<String> ids = new ArrayList<String>();
-    ids.add(uid);
-    // TODO: Use a real gadget token
-    List<Activity> listOfObj = handler.getActivities(ids, null).getResponse();
+    List<String> ids;
+    // TODO: Should we query the path like this, or should we use two handlers
+    // like we do for people?
+    if (request.getTargetPath().contains(FRIENDS_INDICATOR)) {
+      ids = getFriendIds(request, uid);
+    } else {
+      ids = new ArrayList<String>();
+      ids.add(uid);
+    }
+
+    List<Activity> listOfObj = activitiesService.getActivities(ids,
+        getGadgetToken(request, uid)).getResponse();
     return returnFeed(request, TITLE, AUTHOR, (List)listOfObj);
   }
 
@@ -67,8 +77,8 @@ public class ActivitiesServiceAdapter extends RestServerCollectionAdapter {
     String uid = request.getTarget().getParameter("uid");
     String aid = request.getTarget().getParameter("aid");
 
-    // TODO: Use a real gadget token
-    Activity obj = handler.getActivity(uid, aid, null).getResponse();
+    Activity obj = activitiesService.getActivity(uid, aid,
+        getGadgetToken(request, uid)).getResponse();
 
     // TODO: how is entry id determined. check.
     String entryId = request.getUri().toString();

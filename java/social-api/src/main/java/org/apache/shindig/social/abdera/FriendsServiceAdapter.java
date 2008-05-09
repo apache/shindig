@@ -17,17 +17,13 @@
 */
 package org.apache.shindig.social.abdera;
 
-import org.apache.shindig.gadgets.GadgetToken;
-import org.apache.shindig.social.opensocial.PeopleService;
-import org.apache.shindig.social.opensocial.model.Person;
-import org.apache.shindig.social.opensocial.model.IdSpec;
-import org.apache.shindig.social.opensocial.model.ApiCollection;
 import org.apache.shindig.social.ResponseItem;
+import org.apache.shindig.social.opensocial.PeopleService;
+import org.apache.shindig.social.opensocial.model.ApiCollection;
+import org.apache.shindig.social.opensocial.model.Person;
 
-import com.google.inject.Inject;
 import org.apache.abdera.protocol.server.RequestContext;
 import org.apache.abdera.protocol.server.ResponseContext;
-import org.json.JSONException;
 
 import java.util.Date;
 import java.util.List;
@@ -40,16 +36,10 @@ import java.util.logging.Logger;
 public class FriendsServiceAdapter extends RestServerCollectionAdapter {
   private static Logger logger =
       Logger.getLogger(FriendsServiceAdapter.class.getName());
-  private PeopleService handler;
 
   // TODO get these from the config files like in feedserver
   private static final String TITLE = "People Collection title";
   private static final String AUTHOR = "TODO";
-
-  @Inject
-  public FriendsServiceAdapter(PeopleService handler) {
-    this.handler = handler;
-  }
 
   /**
    * Handles the following URLs
@@ -93,20 +83,10 @@ public class FriendsServiceAdapter extends RestServerCollectionAdapter {
 
   private ResponseItem<ApiCollection<Person>> getFriends(RequestContext request,
       String uid) {
-    GadgetToken token = getGadgetToken(request, uid);
-
-    IdSpec idSpec = new IdSpec(null, IdSpec.Type.VIEWER_FRIENDS);
-    List<String> viewerFriendIds = null;
-    try {
-      viewerFriendIds = handler.getIds(idSpec, token);
-    } catch (JSONException e) {
-      // TODO: Ignoring this for now. Eventually we can make the service apis
-      // fit the restful model better. For now, it is worth some hackiness to
-      // keep the interfaces stable.
-    }
-
     // TODO: Should have a real concept of first, max sort etc with defaults
-    return handler.getPeople(viewerFriendIds, PeopleService.SortOrder.name,
-        null, 0, 100, null, token);
+    return peopleService.getPeople(getFriendIds(request, uid),
+        PeopleService.SortOrder.name, null, 0, 100, null,
+        getGadgetToken(request, uid));
   }
+
 }

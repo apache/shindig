@@ -164,9 +164,10 @@ public class SocialApiProvider extends DefaultProvider {
 
         // Collection of activities for people in group {groupid}
         // belonging to given user {uid} -- /activities/{uid}/{groupid}
+        // TODO: Shindig does not support groups yet
         .addRoute(CollectionAdapter.ACTIVITIES_OF_GROUP_OF_USER.toString(),
             BASE + "activities/:uid/:groupid",
-            TargetType.TYPE_COLLECTION, activitiesAdapter)
+            TargetType.TYPE_COLLECTION, null)
 
         // Individual activity resource; usually discovered from collection
         // /activities/{uid}/@self/{aid}
