@@ -44,6 +44,7 @@ public class BeanJsonConverterTest extends TestCase {
 
   @Override
   public void setUp() throws Exception {
+    super.setUp();
     johnDoe = new Person("johnDoeId", new Name("John Doe"));
     List<Phone> phones = new ArrayList<Phone>();
     phones.add(new Phone("+33H000000000", "home"));
