@@ -20,6 +20,7 @@ package org.apache.shindig.gadgets.http;
 
 import org.apache.shindig.common.SecurityToken;
 import org.apache.shindig.common.SecurityTokenDecoder;
+import org.apache.shindig.common.SecurityTokenException;
 import org.apache.shindig.gadgets.ContentFetcher;
 import org.apache.shindig.gadgets.ContentFetcherFactory;
 import org.apache.shindig.gadgets.GadgetException;
@@ -30,10 +31,11 @@ import org.apache.shindig.gadgets.oauth.OAuthRequestParams;
 import org.apache.shindig.gadgets.spec.Auth;
 import org.apache.shindig.gadgets.spec.Preload;
 import org.apache.shindig.util.InputStreamConsumer;
-import org.json.JSONException;
-import org.json.JSONObject;
 
 import com.google.inject.Inject;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
@@ -65,7 +67,7 @@ public class ProxyHandler {
   public static final String URL_PARAM = "url";
   private static final String REFRESH_PARAM = "refresh";
 
-  private static final Logger logger = 
+  private static final Logger logger =
       Logger.getLogger(ProxyHandler.class.getPackage().getName());
 
 
@@ -226,17 +228,21 @@ public class ProxyHandler {
 
     String authzType = getParameter(request, Preload.AUTHZ_ATTR, "");
     Auth auth = Auth.parse(authzType);
-    switch (auth) {
-      case NONE:
-        return contentFetcherFactory.get();
-      case SIGNED:
-        return contentFetcherFactory
-            .getSigningFetcher(extractAndValidateToken(request));
-      case AUTHENTICATED:
-        return contentFetcherFactory.getOAuthFetcher(
-            extractAndValidateToken(request), new OAuthRequestParams(request));
-      default:
-        return contentFetcherFactory.get();
+    try {
+      switch (auth) {
+        case NONE:
+          return contentFetcherFactory.get();
+        case SIGNED:
+          return contentFetcherFactory
+              .getSigningFetcher(extractAndValidateToken(request));
+        case AUTHENTICATED:
+          return contentFetcherFactory.getOAuthFetcher(
+              extractAndValidateToken(request), new OAuthRequestParams(request));
+        default:
+          return contentFetcherFactory.get();
+      }
+    } catch (SecurityTokenException e) {
+      throw new GadgetException(GadgetException.Code.INVALID_SECURITY_TOKEN, e);
     }
   }
 
@@ -248,7 +254,7 @@ public class ProxyHandler {
       RemoteContent results) {
     try {
       JSONObject resp = new JSONObject();
-      
+
       resp.put("body", results.getResponseAsString());
       resp.put("rc", results.getHttpStatusCode());
 
@@ -288,7 +294,7 @@ public class ProxyHandler {
       logger.info(msg);
       throw new GadgetException(GadgetException.Code.INVALID_PARAMETER, msg);
     }
-    
+
     if (request.getHeader("If-Modified-Since") != null) {
       response.setStatus(HttpServletResponse.SC_NOT_MODIFIED);
       return;
@@ -380,7 +386,7 @@ public class ProxyHandler {
    * @throws GadgetException
    */
   private SecurityToken extractAndValidateToken(HttpServletRequest request)
-      throws GadgetException {
+      throws SecurityTokenException {
     String token = getParameter(request, SECURITY_TOKEN_PARAM, "");
     return securityTokenDecoder.createToken(token);
   }

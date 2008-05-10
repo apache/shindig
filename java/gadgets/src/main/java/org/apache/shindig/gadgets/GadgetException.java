@@ -33,7 +33,7 @@ public class GadgetException extends Exception {
 
     // User-data related errors.
     INVALID_USER_DATA,
-    INVALID_GADGET_TOKEN,
+    INVALID_SECURITY_TOKEN,
 
     // General xml
     EMPTY_XML_DOCUMENT,
@@ -64,11 +64,11 @@ public class GadgetException extends Exception {
 
     // Blacklisting
     BLACKLISTED_GADGET,
-    
+
     // OAuth
     OAUTH_STORAGE_ERROR,
     OAUTH_APPROVAL_NEEDED,
-    
+
     // Signed fetch
     REQUEST_SIGNING_FAILURE,
   }
@@ -83,7 +83,7 @@ public class GadgetException extends Exception {
     super(cause);
     this.code = code;
   }
-  
+
   public GadgetException(Code code, String msg, Throwable cause) {
     super(msg, cause);
     this.code = code;

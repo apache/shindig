@@ -21,6 +21,7 @@ package org.apache.shindig.gadgets.http;
 
 import org.apache.shindig.common.SecurityToken;
 import org.apache.shindig.common.SecurityTokenDecoder;
+import org.apache.shindig.common.SecurityTokenException;
 import org.apache.shindig.gadgets.GadgetContext;
 import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.RenderingContext;
@@ -260,7 +261,12 @@ public class HttpGadgetContext extends GadgetContext {
     if (tokenString == null || tokenString.length() == 0) {
       return super.getToken();
     } else {
-      return tokenDecoder.createToken(tokenString);
+      try {
+        return tokenDecoder.createToken(tokenString);
+      } catch (SecurityTokenException e) {
+        throw new GadgetException(
+            GadgetException.Code.INVALID_SECURITY_TOKEN, e);
+      }
     }
   }
 
