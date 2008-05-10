@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.shindig.gadgets.http;
+package org.apache.shindig.common.servlet;
 
 import com.google.inject.Guice;
 import com.google.inject.Module;

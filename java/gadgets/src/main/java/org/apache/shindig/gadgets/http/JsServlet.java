@@ -18,6 +18,7 @@
 package org.apache.shindig.gadgets.http;
 
 import org.apache.shindig.common.SecurityTokenDecoder;
+import org.apache.shindig.common.servlet.InjectedServlet;
 import org.apache.shindig.gadgets.GadgetContext;
 import org.apache.shindig.gadgets.GadgetFeature;
 import org.apache.shindig.gadgets.GadgetFeatureFactory;

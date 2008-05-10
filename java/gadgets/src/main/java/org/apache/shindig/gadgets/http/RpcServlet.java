@@ -19,6 +19,7 @@
 
 package org.apache.shindig.gadgets.http;
 
+import org.apache.shindig.common.servlet.InjectedServlet;
 import org.apache.shindig.util.InputStreamConsumer;
 
 import com.google.inject.Inject;
