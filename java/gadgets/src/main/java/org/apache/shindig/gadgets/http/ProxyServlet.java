@@ -18,6 +18,7 @@
  */
 package org.apache.shindig.gadgets.http;
 
+import org.apache.shindig.common.servlet.InjectedServlet;
 import org.apache.shindig.gadgets.GadgetException;
 
 import com.google.inject.Inject;

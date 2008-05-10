@@ -18,7 +18,7 @@
  */
 package org.apache.shindig.social;
 
-import org.apache.shindig.gadgets.http.GuiceServletContextListener;
+import org.apache.shindig.common.servlet.GuiceServletContextListener;
 import org.apache.shindig.social.abdera.json.JSONWriter;
 
 import com.google.inject.Injector;

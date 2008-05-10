@@ -17,7 +17,7 @@
  */
 package org.apache.shindig.social;
 
-import org.apache.shindig.gadgets.http.GuiceServletContextListener;
+import org.apache.shindig.common.servlet.GuiceServletContextListener;
 
 import org.apache.abdera.protocol.server.Provider;
 import org.apache.abdera.protocol.server.ServiceManager;

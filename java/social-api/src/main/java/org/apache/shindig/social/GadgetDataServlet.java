@@ -20,7 +20,7 @@ package org.apache.shindig.social;
 import org.apache.shindig.common.SecurityToken;
 import org.apache.shindig.common.SecurityTokenDecoder;
 import org.apache.shindig.common.SecurityTokenException;
-import org.apache.shindig.gadgets.http.InjectedServlet;
+import org.apache.shindig.common.servlet.InjectedServlet;
 import org.apache.shindig.social.opensocial.util.BeanJsonConverter;
 
 import com.google.inject.Inject;
