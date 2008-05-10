@@ -19,7 +19,7 @@ package org.apache.shindig.social;
 
 import org.apache.shindig.common.SecurityToken;
 import org.apache.shindig.common.SecurityTokenDecoder;
-import org.apache.shindig.gadgets.GadgetException;
+import org.apache.shindig.common.SecurityTokenException;
 import org.apache.shindig.gadgets.http.InjectedServlet;
 import org.apache.shindig.social.opensocial.util.BeanJsonConverter;
 
@@ -90,7 +90,7 @@ public class GadgetDataServlet extends InjectedServlet {
       response = new DataResponse(createResponse(requestParam, token));
     } catch (JSONException e) {
       response = new DataResponse(ResponseError.BAD_REQUEST);
-    } catch (GadgetException e) {
+    } catch (SecurityTokenException e) {
       logger.info("Request was made with invalid security token: " + token);
       response = new DataResponse(ResponseError.BAD_REQUEST);
     }
@@ -101,9 +101,9 @@ public class GadgetDataServlet extends InjectedServlet {
   }
 
   private List<ResponseItem> createResponse(String requestParam, String token)
-      throws JSONException, GadgetException {
+      throws JSONException, SecurityTokenException {
     if (token == null || token.trim().length() == 0) {
-      throw new GadgetException(GadgetException.Code.INVALID_GADGET_TOKEN);
+      throw new SecurityTokenException("Missing security token");
     }
     SecurityToken securityToken = securityTokenDecoder.createToken(token);
 

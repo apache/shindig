@@ -18,8 +18,6 @@
  */
 package org.apache.shindig.common;
 
-import org.apache.shindig.gadgets.GadgetException;
-import org.apache.shindig.gadgets.GadgetException.Code;
 import org.apache.shindig.util.BlobCrypterException;
 
 import java.io.UnsupportedEncodingException;
@@ -43,7 +41,8 @@ public class BasicSecurityTokenDecoder implements SecurityTokenDecoder {
    *
    * Returns a token with some faked out values.
    */
-  public SecurityToken createToken(String stringToken) throws GadgetException {
+  public SecurityToken createToken(String stringToken)
+      throws SecurityTokenException {
     try {
       String[] tokens = stringToken.split(":");
       return new BasicSecurityToken(
@@ -54,9 +53,9 @@ public class BasicSecurityTokenDecoder implements SecurityTokenDecoder {
           URLDecoder.decode(tokens[APP_URL_INDEX], "UTF-8"),
           URLDecoder.decode(tokens[MODULE_ID_INDEX], "UTF-8"));
     } catch (BlobCrypterException e) {
-      throw new GadgetException(GadgetException.Code.INVALID_GADGET_TOKEN, e);
+      throw new SecurityTokenException(e);
     } catch (UnsupportedEncodingException e) {
-      throw new GadgetException(GadgetException.Code.INVALID_GADGET_TOKEN, e);
+      throw new SecurityTokenException(e);
     }
   }
 

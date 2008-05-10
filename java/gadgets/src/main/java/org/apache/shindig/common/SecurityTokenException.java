@@ -16,20 +16,20 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+
 package org.apache.shindig.common;
 
 /**
- *  Handles verification of gadget security tokens.
+ * Exceptions thrown by SecurityTokenDecoder implementations.
  */
-public interface SecurityTokenDecoder {
-
-  /**
-   * Decrypts and verifies a gadget security token to return a gadget token.
-   *
-   * @param tokenString String representation of the token to be created.
-   * @return The token representation of the input data.
-   * @throws SecurityTokenException If tokenString is not a valid token
-   */
-  public SecurityToken createToken(String tokenString)
-      throws SecurityTokenException;
+public class SecurityTokenException extends Exception {
+  public SecurityTokenException(String message) {
+    super(message);
+  }
+  public SecurityTokenException(Exception cause) {
+    super(cause);
+  }
+  public SecurityTokenException(String message, Exception cause) {
+    super(message, cause);
+  }
 }
