@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.shindig.gadgets;
+package org.apache.shindig.common;
 
 /**
  * An abstract representation of a signing token.

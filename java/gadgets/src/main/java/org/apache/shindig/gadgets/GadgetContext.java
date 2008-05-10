@@ -17,6 +17,7 @@
  */
 package org.apache.shindig.gadgets;
 
+import org.apache.shindig.common.GadgetToken;
 import org.apache.shindig.gadgets.spec.GadgetSpec;
 
 import java.net.URI;

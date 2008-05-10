@@ -18,6 +18,8 @@
  */
 package org.apache.shindig.gadgets;
 
+import org.apache.shindig.common.GadgetToken;
+
 /**
  * A fake GadgetToken implementation to help testing.
  */

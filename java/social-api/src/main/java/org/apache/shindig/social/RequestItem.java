@@ -17,7 +17,7 @@
  */
 package org.apache.shindig.social;
 
-import org.apache.shindig.gadgets.GadgetToken;
+import org.apache.shindig.common.GadgetToken;
 
 import org.json.JSONObject;
 

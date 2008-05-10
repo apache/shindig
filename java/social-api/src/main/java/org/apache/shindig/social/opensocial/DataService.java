@@ -17,8 +17,8 @@
  */
 package org.apache.shindig.social.opensocial;
 
+import org.apache.shindig.common.GadgetToken;
 import org.apache.shindig.social.ResponseItem;
-import org.apache.shindig.gadgets.GadgetToken;
 
 import java.util.List;
 import java.util.Map;

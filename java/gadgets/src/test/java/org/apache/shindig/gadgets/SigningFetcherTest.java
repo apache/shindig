@@ -16,6 +16,8 @@ package org.apache.shindig.gadgets;
 
 import junit.framework.TestCase;
 
+import org.apache.shindig.common.BasicGadgetToken;
+
 import net.oauth.OAuth;
 import net.oauth.OAuth.Parameter;
 import net.oauth.OAuthAccessor;

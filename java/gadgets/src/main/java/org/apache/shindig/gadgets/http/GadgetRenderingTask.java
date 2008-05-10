@@ -19,6 +19,7 @@
 
 package org.apache.shindig.gadgets.http;
 
+import org.apache.shindig.common.GadgetTokenDecoder;
 import org.apache.shindig.gadgets.ContainerConfig;
 import org.apache.shindig.gadgets.Gadget;
 import org.apache.shindig.gadgets.GadgetContentFilter;
@@ -26,7 +27,6 @@ import org.apache.shindig.gadgets.GadgetContext;
 import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.GadgetFeatureRegistry;
 import org.apache.shindig.gadgets.GadgetServer;
-import org.apache.shindig.gadgets.GadgetTokenDecoder;
 import org.apache.shindig.gadgets.JsLibrary;
 import org.apache.shindig.gadgets.LockedDomainService;
 import org.apache.shindig.gadgets.RemoteContent;

@@ -14,6 +14,7 @@
 
 package org.apache.shindig.gadgets;
 
+import org.apache.shindig.common.GadgetToken;
 import org.apache.shindig.util.Crypto;
 import org.apache.shindig.util.TimeSource;
 

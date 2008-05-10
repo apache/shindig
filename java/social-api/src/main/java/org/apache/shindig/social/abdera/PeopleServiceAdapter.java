@@ -17,7 +17,7 @@
 */
 package org.apache.shindig.social.abdera;
 
-import org.apache.shindig.gadgets.GadgetToken;
+import org.apache.shindig.common.GadgetToken;
 import org.apache.shindig.social.opensocial.model.Person;
 
 import org.apache.abdera.protocol.server.RequestContext;

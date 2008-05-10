@@ -18,6 +18,7 @@
  */
 package org.apache.shindig.gadgets;
 
+import org.apache.shindig.common.GadgetToken;
 import org.apache.shindig.util.InputStreamConsumer;
 import org.apache.shindig.util.ResourceLoader;
 
