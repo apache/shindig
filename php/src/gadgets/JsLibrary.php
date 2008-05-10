@@ -23,7 +23,7 @@ class JsLibrary {
 	private $type;
 	private $content;
 	private $featureName; // used to track what feature this belongs to
-
+	private $loaded = false;
 	
 	public function __construct($type, $content, $featureName = '')
 	{
@@ -36,9 +36,25 @@ class JsLibrary {
 	{
 		return $this->type;
 	}
+	
+	public function readfile()
+	{
+		// hack to bypass having the script in memory and dump it directly to stdout
+		if (!$this->loaded && $this->type == 'FILE') {
+			readfile($this->content);
+			echo "\n";
+		} else {
+			// a call to getContent was already made so we have it in memory, just echo it then
+			echo $this->content;
+		}
+	}
 
 	public function getContent()
 	{
+		if (!$this->loaded && $this->type == 'FILE') {
+			$this->content = JsLibrary::loadData($this->content, $this->type);
+			$this->loaded = true;
+		}
 		return $this->content;
 	}
 
@@ -50,13 +66,13 @@ class JsLibrary {
 	public function toString()
 	{
 		if ($this->type == 'URL') {
-			return "<script src=\"" . $this->content . "\"></script>";
+			return "<script src=\"" . $this->getContent() . "\"></script>";
 		} else {
-			return "<script><!--\n" . $this->content . "\n--></script>";
+			return "<script><!--\n" . $this->getContent() . "\n--></script>";
 		}
 	}
 
-	static function create($type, $content, $debug)
+	static function create($type, $content)
 	{
 		$feature = '';
 		if ($type == 'FILE') {
@@ -66,21 +82,20 @@ class JsLibrary {
 				$feature = substr($feature, 0, strlen($feature) - 1);
 			}
 			$feature = substr($feature, strrpos($feature, '/') + 1);
-			$content = JsLibrary::loadData($content, $type, $debug);
 		}
 		return new JsLibrary($type, $content, $feature);
 	}
 
-	static private function loadData($name, $type, $debug)
+	static private function loadData($name, $type)
 	{
 		// we don't really do 'resources', so limiting this to files only
 		if ($type == 'FILE') {
-			return JsLibrary::loadFile($name, $debug);
+			return JsLibrary::loadFile($name);
 		}
 		return null;
 	}
 
-	static private function loadFile($fileName, $debug)
+	static private function loadFile($fileName)
 	{
 		if (empty($fileName)) {
 			return '';
@@ -94,25 +109,8 @@ class JsLibrary {
 		if (! is_readable($fileName)) {
 			throw new Exception("JsLibrary file not readable: $fileName");
 		}
-		$compressCommand = Config::get('compress_command');
-		if ($debug || empty($compressCommand)) {
-			if (! ($content = @file_get_contents($fileName))) {
-				throw new Exception("JsLibrary error reading file: $fileName");
-			}
-		} else {
-			// attempt to compress the feature javascript file
-			$input_file = escapeshellarg($fileName);
-			$output_file = tempnam(Config::get('cache_root'), 'js-comp');
-			$cmd = sprintf($compressCommand, $input_file, $output_file);
-			$null = $status = 0;
-			exec($cmd, $null, $status);
-			if ($status === 0) {
-				// successfully compressed.
-				$content = file_get_contents($output_file);
-			} else {
-				// if the compress_command isn't functioning, just return the plain uncompressed content
-				$content = @file_get_contents($fileName);
-			}
+		if (! ($content = @file_get_contents($fileName))) {
+			throw new Exception("JsLibrary error reading file: $fileName");
 		}
 		return $content;
 	}

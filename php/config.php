@@ -45,16 +45,6 @@ $shindigConfig = array(
 
 	'focedJsLibs' => '',
 	
-	// The PHP gadget server can compress feature javascript libraries on the fly,
-	// set this command to the javascript compressor you want to to use, we advice
-	// using yuicompressor (http://developer.yahoo.com/yui/compressor/) but many others
-	// will work too. When building your command, use %1 as the input file, and %2 
-	// as the output file. Leave empty if you don't want this functionality.
-	//
-	// Config example for using the yuicompressor:
-	//'compress_command' => "java -jar " . realpath(dirname(__FILE__)) . "/yuicompressor-2.3.5.jar -o %2\$s %1\$s",
-	'compress_command' => '',
-	
 	// Configurable classes to use, this way we provide extensibility for what 
 	// backends the gadget server uses for its logic functionality. 
 	'blacklist_class' => 'BasicGadgetBlacklist',

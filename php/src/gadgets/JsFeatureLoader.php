@@ -132,7 +132,7 @@ class JsFeatureLoader {
 					$content = $feature->basePath . '/' . $content;
 				}
 			}
-			$library = JsLibrary::create($type, $content, $this->debug);
+			$library = JsLibrary::create($type, $content);
 			if ($library != null) {
 				if ($isContainer) {
 					$feature->containerJs[] = $library;
