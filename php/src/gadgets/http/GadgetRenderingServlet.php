@@ -128,62 +128,10 @@ class GadgetRenderingServlet extends HttpServlet {
 	 */
 	private function outputHtmlGadget($gadget, $context, $view)
 	{
-		$this->setContentType("text/html; charset=UTF-8");
-		$output = '';
-		if (!$view->getQuirks()) {
-			$output .= "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01//EN\" \"http://www.w3.org/TR/html4/strict.dtd\">";
-		}
-		$output .= "<html>\n<head>\n";
-		// TODO: This is so wrong. (todo copied from java shindig, but i would agree with it :))
-		$output .= "<style type=\"text/css\">body,td,div,span,p{font-family:arial,sans-serif;} a {color:#0000cc;}a:visited {color:#551a8b;}a:active {color:#ff0000;}body{margin: 0px;padding: 0px;background-color:white;}</style>\n";
-		$output .= "</head>\n<body>\n";
 		$externJs = "";
-		$inlineJs = "";
 		$externFmt = "<script src=\"%s\"></script>";
 		$forcedLibs = $context->getForcedJsLibs();
-		foreach ( $gadget->getJsLibraries() as $library ) {
-			$type = $library->getType();
-			if ($type == 'URL') {
-				// TODO: This case needs to be handled more gracefully by the js
-				// servlet. We should probably inline external JS as well.
-				$externJs .= sprintf($externFmt, $library->getContent()) . "\n";
-			} else if ($type == 'INLINE') {
-				$inlineJs .= $library->getContent() . "\n";
-			} else {
-				// FILE or RESOURCE
-				if ($forcedLibs == null) {
-					$inlineJs .= $library->getContent() . "\n";
-				}
-				// otherwise it was already included by config.forceJsLibs.
-			}
-		}
-		// Forced libs first.
-		if (! empty($forcedLibs)) {
-			$libs = explode(':', $forcedLibs);
-			$output .= sprintf($externFmt, Config::get('default_js_prefix').$this->getJsUrl($libs, $gadget)) . "\n";
-		}
-		if (strlen($inlineJs) > 0) {
-			$output .= "<script><!--\n" . $inlineJs . "\n-->\n</script>\n";
-		}
-		if (strlen($externJs) > 0) {
-			$output .= $externJs;
-		}
-		$output .= "<script><!--\n";
-		$output .= $this->appendJsConfig($context, $gadget);
-		$output .= $this->appendMessages($gadget);
-		$output .= "-->\n</script>\n";
-		$gadgetExceptions = array();
-		$content = $gadget->getSubstitutions()->substitute($view->getContent());
-		if (empty($content)) {
-			// Unknown view
-			$gadgetExceptions[] = "View: '" . $context->getView() . "' invalid for gadget: " . $gadget->getId()->getKey();
-		}
-		if (count($gadgetExceptions)) {
-			throw new GadgetException(print_r($gadgetExceptions, true));
-		}
-		$output .= $content . "\n";
-		$output .= "<script>gadgets.util.runOnLoadHandlers();</script>\n";
-		$output .= "</body>\n</html>";
+		$this->setContentType("text/html; charset=UTF-8");
 		if ($context->getIgnoreCache()) {
 			// no cache was requested, set non-caching-headers
 			$this->setNoCache(true);
@@ -198,7 +146,55 @@ class GadgetRenderingServlet extends HttpServlet {
 		if (Config::get('P3P') != '') {
 			header("P3P: ".Config::get('P3P'));
 		}
-		echo $output;
+		if (!$view->getQuirks()) {
+			echo "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01//EN\" \"http://www.w3.org/TR/html4/strict.dtd\">\n";
+		}
+		echo "<html>\n<head>".
+		     "<style type=\"text/css\">body,td,div,span,p{font-family:arial,sans-serif;} a {color:#0000cc;}a:visited {color:#551a8b;}a:active {color:#ff0000;}body{margin: 0px;padding: 0px;background-color:white;}</style>".
+		     "</head><body>".
+		     "<script><!--\n";
+		foreach ( $gadget->getJsLibraries() as $library ) {
+			$type = $library->getType();
+			if ($type == 'URL') {
+				// TODO: This case needs to be handled more gracefully by the js
+				// servlet. We should probably inline external JS as well.
+				$externJs .= sprintf($externFmt, $library->getContent()) . "\n";
+			} else if ($type == 'INLINE') {
+				$library->readfile();
+			} else {
+				// FILE or RESOURCE
+				if ($forcedLibs == null) {
+					$library->readfile();
+				}
+				// otherwise it was already included by config.forceJsLibs.
+			}
+		}
+		echo "\n-->\n</script>\n";
+		// Forced libs first.
+		if (! empty($forcedLibs)) {
+			$libs = explode(':', $forcedLibs);
+			echo sprintf($externFmt, Config::get('default_js_prefix').$this->getJsUrl($libs, $gadget)) . "\n";
+		}
+		if (strlen($externJs) > 0) {
+			echo $externJs;
+		}
+		echo "<script><!--\n".
+		     $this->appendJsConfig($context, $gadget).
+		     $this->appendMessages($gadget).
+		     "-->\n</script>\n";
+		
+		$gadgetExceptions = array();
+		$content = $gadget->getSubstitutions()->substitute($view->getContent());
+		if (empty($content)) {
+			// Unknown view
+			$gadgetExceptions[] = "View: '" . $context->getView() . "' invalid for gadget: " . $gadget->getId()->getKey();
+		}
+		if (count($gadgetExceptions)) {
+			throw new GadgetException(print_r($gadgetExceptions, true));
+		}
+		echo $content . "\n".
+		     "<script>gadgets.util.runOnLoadHandlers();</script>\n".
+		     "</body>\n</html>";
 	}
 	
 	/**

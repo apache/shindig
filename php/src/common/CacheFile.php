@@ -64,7 +64,7 @@ class CacheFile extends Cache {
 		// we serialize the whole request object, since we don't only want the
 		// responseContent but also the postBody used, headers, size, etc
 		$data = serialize($value);
-		if (! file_put_contents($cacheFile, $data)) {
+		if (! @file_put_contents($cacheFile, $data)) {
 			throw new CacheException("Could not store data in cache file");
 		}
 	}
