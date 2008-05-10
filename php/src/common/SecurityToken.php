@@ -20,9 +20,9 @@
 
 /**
  * An abstract representation of a signing token.
- * Use in conjunction with @code GadgetTokenDecoder.
+ * Use in conjunction with @code SecurityTokenDecoder.
  */
-abstract class GadgetToken {
+abstract class SecurityToken {
 
   //FIXME Hmm seems php is refusing to let me make abstract static functions? odd
   static public function createFromToken($token, $maxage) {}

@@ -19,7 +19,7 @@
  */
 require 'src/common/HttpServlet.php';
 require 'src/gadgets/GadgetContext.php';
-require 'src/gadgets/GadgetTokenDecoder.php';
+require 'src/common/SecurityTokenDecoder.php';
 require 'src/gadgets/ProxyHandler.php';
 require 'src/gadgets/GadgetException.php';
 require 'src/common/RemoteContentRequest.php';
@@ -48,7 +48,7 @@ class ProxyServlet extends HttpServlet {
 			header("HTTP/1.0 400 Bad Request", true);
 			echo "<html><body><h1>400 - Missing url parameter</h1></body></html>";
 		}
-		$gadgetSigner = Config::get('gadget_signer');
+		$gadgetSigner = Config::get('security_token_signer');
 		$gadgetSigner = new $gadgetSigner();
 		$proxyHandler = new ProxyHandler($context);
 		if (! empty($_GET['output']) && $_GET['output'] == 'js') {

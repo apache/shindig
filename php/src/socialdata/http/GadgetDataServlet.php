@@ -19,8 +19,8 @@
 require 'src/common/HttpServlet.php';
 require 'src/socialdata/DataResponse.php';
 require 'src/socialdata/GadgetDataHandler.php';
-require 'src/gadgets/GadgetTokenDecoder.php';
-require 'src/gadgets/GadgetToken.php';
+require 'src/common/SecurityTokenDecoder.php';
+require 'src/common/SecurityToken.php';
 require 'src/common/BlobCrypter.php';
 require 'src/common/Crypto.php';
 require 'src/socialdata/RequestItem.php';
@@ -93,7 +93,7 @@ class GadgetDataServlet extends HttpServlet {
 		if (empty($token)) {
 			throw new Exception("INVALID_GADGET_TOKEN");
 		}
-		$gadgetSigner = Config::get('gadget_signer');
+		$gadgetSigner = Config::get('security_token_signer');
 		$gadgetSigner = new $gadgetSigner();
 		//FIXME currently don't have a propper token, impliment and re-enable this asap
 		$securityToken = $gadgetSigner->createToken($token);

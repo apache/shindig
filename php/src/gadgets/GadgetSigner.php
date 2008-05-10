@@ -31,11 +31,11 @@ abstract class GadgetSigner {
 	 * 
 	 * Or generates a token from an input string. This call must produce a token that
 	 * will validate against a token produced directly from a gadget so that the
-	 * following function will always returns a valid GadgetToken:
+	 * following function will always returns a valid SecurityToken:
 	 *
 	 * <code>
-	 * GadgetToken testToken(Gadget gadget, GadgetSigner signer) {
-	 *   GadgetToken token = signer.createToken(gadget);
+	 * SecurityToken testToken(Gadget gadget, GadgetSigner signer) {
+	 *   SecurityToken token = signer.createToken(gadget);
 	 *   return signer.createToken(token.toSerialForm());
 	 * }
 	 * </code>
