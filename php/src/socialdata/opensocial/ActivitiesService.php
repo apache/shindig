@@ -22,7 +22,7 @@ abstract class ActivitiesService {
 	/**
 	 * Returns a list of activities that correspond to the passed in person ids.
 	 * @param ids The ids of the people to fetch activities for.
-	 * @param token A valid GadgetToken
+	 * @param token A valid SecurityToken
 	 * @return a response item with the list of activities.
 	 */
 	abstract public function getActivities($ids, $token);
@@ -32,7 +32,7 @@ abstract class ActivitiesService {
 	 * called, getActivities will be able to return the Activity.
 	 * @param personId The id of the person to create the activity for.
 	 * @param activity The activity to create.
-	 * @param token A valid GadgetToken
+	 * @param token A valid SecurityToken
 	 * @return a response item containing any errors
 	 */
 	abstract public function createActivity($personId, $activity, $token);

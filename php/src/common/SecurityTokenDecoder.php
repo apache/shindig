@@ -21,7 +21,7 @@
 /**
  *  Handles verification of gadget security tokens.
  */
-abstract class GadgetTokenDecoder {
+abstract class SecurityTokenDecoder {
 
   /**
    * Decrypts and verifies a gadget security token to return a gadget token.

@@ -49,8 +49,8 @@ $shindigConfig = array(
 	// backends the gadget server uses for its logic functionality. 
 	'blacklist_class' => 'BasicGadgetBlacklist',
 	'remote_content' => 'BasicRemoteContent',
-	'gadget_signer' => 'BasicGadgetTokenDecoder',
-	'gadget_token' => 'BasicGadgetToken',
+	'security_token_signer' => 'BasicSecurityTokenDecoder',
+	'security_token' => 'BasicSecurityToken',
 	'data_cache' => 'CacheFile', 
 	
 	// gadget server specific settings

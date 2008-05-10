@@ -23,7 +23,7 @@ abstract class DataService {
 	 * Fetch data for a list of ids.
 	 * @param ids The list of ids
 	 * @param keys The list of keys to fetch
-	 * @param token The GadgetToken for this request
+	 * @param token The SecurityToken for this request
 	 * @return ResponseItem a response item with the error code set if
 	 *     there was a problem
 	 */
@@ -35,7 +35,7 @@ abstract class DataService {
 	 * @param id The person the data is for.
 	 * @param key The key of the data.
 	 * @param value The new value of the data.
-	 * @param token The GadgetToken for this request
+	 * @param token The SecurityToken for this request
 	 * @return ResponseItem a response item with the error code set if
 	 *     there was a problem
 	 */

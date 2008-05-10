@@ -307,10 +307,10 @@ class ProxyHandler {
 	}
 	
 	/**
-	 * Signs a url with the GadgetToken
+	 * Signs a url with the SecurityToken
 	 *
 	 * @param string $originalUrl
-	 * @param GadgetToken $token
+	 * @param SecurityToken $token
 	 * @return unknown
 	 */
 	private function signUrl($originalUrl, $token)

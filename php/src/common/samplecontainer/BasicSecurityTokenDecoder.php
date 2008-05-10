@@ -18,7 +18,7 @@
  * under the License.
  */
 
-class BasicGadgetTokenDecoder extends GadgetTokenDecoder {
+class BasicSecurityTokenDecoder extends SecurityTokenDecoder {
 	private $OWNER_INDEX = 0;
 	private $VIEWER_INDEX = 1;
 	private $APP_ID_INDEX = 2;
@@ -41,9 +41,9 @@ class BasicGadgetTokenDecoder extends GadgetTokenDecoder {
 			// in the example files
 			if (Config::get('allow_plaintext_token') && count(explode(':', $stringToken)) == 6) {
 				$tokens = explode(":", $stringToken);
-				return new BasicGadgetToken(null, null, urldecode($tokens[$this->OWNER_INDEX]), urldecode($tokens[$this->VIEWER_INDEX]), urldecode($tokens[$this->APP_ID_INDEX]), urldecode($tokens[$this->CONTAINER_INDEX]), urldecode($tokens[$this->APP_URL_INDEX]), urldecode($tokens[$this->MODULE_ID_INDEX]));
+				return new BasicSecurityToken(null, null, urldecode($tokens[$this->OWNER_INDEX]), urldecode($tokens[$this->VIEWER_INDEX]), urldecode($tokens[$this->APP_ID_INDEX]), urldecode($tokens[$this->CONTAINER_INDEX]), urldecode($tokens[$this->APP_URL_INDEX]), urldecode($tokens[$this->MODULE_ID_INDEX]));
 			} else {
-				return BasicGadgetToken::createFromToken($stringToken, Config::get('st_max_age'));
+				return BasicSecurityToken::createFromToken($stringToken, Config::get('st_max_age'));
 			}
 		} catch (Exception $e) {
 			throw new GadgetException('INVALID_GADGET_TOKEN');
