@@ -80,6 +80,14 @@ under the License.
       <groupId>commons-betwixt</groupId>
     </dependency>
     <dependency>
+      <groupId>org.apache.abdera</groupId>
+      <artifactId>abdera-extensions-main</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.abdera</groupId>
+      <artifactId>abdera-extensions-html</artifactId>
+    </dependency>
+    <dependency>
       <groupId>org.mortbay.jetty</groupId>
       <artifactId>jetty</artifactId>
       <scope>test</scope>
