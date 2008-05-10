@@ -745,6 +745,16 @@
         <artifactId>jetty</artifactId>
         <version>6.1.9</version>
       </dependency>
+      <dependency>
+        <groupId>org.apache.abdera</groupId>
+        <artifactId>abdera-extensions-main</artifactId>
+        <version>0.5.0-incubating-SNAPSHOT</version>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.abdera</groupId>
+        <artifactId>abdera-extensions-html</artifactId>
+        <version>0.5.0-incubating-SNAPSHOT</version>
+      </dependency>
     </dependencies>
   </dependencyManagement>
 </project>

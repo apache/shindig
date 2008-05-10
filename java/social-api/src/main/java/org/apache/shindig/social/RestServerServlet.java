@@ -19,10 +19,14 @@
 package org.apache.shindig.social;
 
 import org.apache.shindig.gadgets.http.GuiceServletContextListener;
+import org.apache.shindig.social.abdera.json.JSONWriter;
 
 import com.google.inject.Injector;
 import org.apache.abdera.protocol.server.Provider;
 import org.apache.abdera.protocol.server.servlet.AbderaServlet;
+import org.apache.abdera.util.AbderaConfiguration;
+import org.apache.abdera.util.Configuration;
+import org.apache.abdera.writer.NamedWriter;
 
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletContext;
@@ -30,6 +34,7 @@ import javax.servlet.ServletException;
 import javax.servlet.UnavailableException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.Map;
 import java.util.logging.Logger;
 
 /**
@@ -61,6 +66,33 @@ public class RestServerServlet extends AbderaServlet {
       logger.severe(e.getMessage());
       e.printStackTrace();
       return null;
+    }
+    
+    // init Writers
+    // setup my NamedWriter for "json"
+    // TODO why not inject here. because I am not ready to change code
+    // copied from abdera yet. but go to do it..everything gets guiced.
+    JSONWriter jsonWriter = new JSONWriter();
+    Configuration config = getAbdera().getConfiguration();
+    if (config instanceof AbderaConfiguration) {
+      ((AbderaConfiguration)config).addNamedWriter(jsonWriter);
+    } else {
+      logger.severe("Invalid Abdera configuration");
+      return null;
+    }
+    
+    // print all the writers available
+    Map<String, NamedWriter> writersMap = 
+        ((AbderaConfiguration)config).getNamedWriters();
+    for (NamedWriter writer : writersMap.values()) {
+      StringBuilder sbuf = new StringBuilder();
+      for (String s : writer.getOutputFormats()) {
+        sbuf.append(s + ", ");
+      }
+      logger.info("NamedWriter: " + writer.getClass().getName() +
+          " is for writing '" + writer.getName() + "'" +
+          ". Handles the following formats: " + sbuf.toString());
+      
     }
     return provider;
   }
