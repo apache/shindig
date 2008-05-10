@@ -28,7 +28,6 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Date;
@@ -48,8 +47,23 @@ public class HttpUtil {
   // 1 year.
   private static final int DEFAULT_TTL = 60 * 60 * 24 * 365;
 
-   public static final DateFormat DATE_HEADER_FORMAT = new SimpleDateFormat(
-      "EEE, dd MMM yyyy HH:mm:ss zzz", Locale.US);
+  /**
+   * Format to use for date headers (see section 3.3.1 of RFC 2616).
+   * 
+   * Note that the SimpleDateFormat parsing rules are generous and can read
+   * all three of the formats specified by RFC 2616.
+   */
+  public static final String HTTP_DATE_HEADER_FORMAT =
+      "EEE, dd MMM yyyy HH:mm:ss zzz";
+  
+  // SimpleDateFormat: slow to init, but not thread-safe.
+  private static ThreadLocal<SimpleDateFormat> httpDateFormatter = 
+      new ThreadLocal<SimpleDateFormat>() {
+        @Override
+        protected SimpleDateFormat initialValue() {
+          return new SimpleDateFormat(HTTP_DATE_HEADER_FORMAT, Locale.US);
+        }
+      };
 
   /**
    * Sets default caching Headers (Expires, Cache-Control, Last-Modified)
@@ -84,6 +98,33 @@ public class HttpUtil {
     // Firefox requires this for certain cases.
     response.setDateHeader("Last-Modified", START_TIME);
   }
+  
+  /**
+   * Parses an HTTP date.  Returns null if the date fails to parse for any
+   * reason.
+   * 
+   * @param dateStr
+   * @return the date
+   */
+  public static Date parseDate(String dateStr) {
+    try {
+      return httpDateFormatter.get().parse(dateStr);
+    } catch (Exception e) {
+      // Don't care.
+      return null;
+    }
+  }
+  
+  /**
+   * Formats a date for use in HTTP headers.
+   * 
+   * @param date
+   * @return HTTP date string.
+   */
+  public static String formatDate(Date date) {
+    return httpDateFormatter.get().format(date);
+  }
+
 
   /**
    * Takes a set of recevied HTTP headers and adjusts them to enforce
@@ -99,12 +140,9 @@ public class HttpUtil {
 
     long originalAge = 0L;
     if (newHeaders.containsKey("Expires")) {
-      try {
-        Date date = DATE_HEADER_FORMAT
-            .parse(originalHeaders.get("Expires").get(0));
+      Date date = parseDate(originalHeaders.get("Expires").get(0));
+      if (date != null) {
         originalAge = date.getTime() - System.currentTimeMillis();
-      } catch (Exception e) {
-        // Dont care
       }
     }
 
@@ -145,7 +183,7 @@ public class HttpUtil {
 
     // Replace with new consistent headers
     newHeaders.put("Expires", Arrays.asList(
-        DATE_HEADER_FORMAT.format(new Date(age + System.currentTimeMillis()))));
+        formatDate(new Date(age + System.currentTimeMillis()))));
 
     newHeaders.put("Cache-Control",
         Arrays.asList("public, max-age=" + (age / 1000L)));

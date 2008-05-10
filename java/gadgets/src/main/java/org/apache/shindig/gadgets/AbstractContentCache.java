@@ -17,10 +17,9 @@
  */
 package org.apache.shindig.gadgets;
 
+import org.apache.shindig.gadgets.http.HttpUtil;
+
 import java.net.URI;
-import java.text.DateFormat;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
@@ -32,12 +31,6 @@ import java.util.List;
  * TODO: Move cache checking code into HttpUtil
  */
 public abstract class AbstractContentCache implements ContentCache {
-
-  /**
-   * Used to parse Expires: header.
-   */
-  private final static DateFormat dateFormat
-      = new SimpleDateFormat("EEE, d MMM yyyy HH:mm:ss Z");
 
   public final RemoteContent getContent(RemoteContentRequest request) {
     if (canCacheRequest(request)) {
@@ -109,15 +102,15 @@ public abstract class AbstractContentCache implements ContentCache {
 
     String expires = content.getHeader("Expires");
     if (expires != null) {
-      try {
-        Date expiresDate = dateFormat.parse(expires);
-        long expiresMs = expiresDate.getTime();
-        if (expiresMs > now) {
-          return content;
-        } else {
-          return null;
-        }
-      } catch (ParseException e) {
+      Date expiresDate = HttpUtil.parseDate(expires);
+      if (expiresDate == null) {
+        // parse problem
+        return null;
+      }
+      long expiresMs = expiresDate.getTime();
+      if (expiresMs > now) {
+        return content;
+      } else {
         return null;
       }
     }
@@ -142,7 +135,7 @@ public abstract class AbstractContentCache implements ContentCache {
               long maxAgeMs = Long.parseLong(parts[1]) * 1000;
               Date newExpiry = new Date(now + maxAgeMs);
               content.getAllHeaders()
-                  .put("Expires", Arrays.asList(dateFormat.format(newExpiry)));
+                  .put("Expires", Arrays.asList(HttpUtil.formatDate(newExpiry)));
               return content;
             } catch (NumberFormatException e) {
               return null;
@@ -166,7 +159,7 @@ public abstract class AbstractContentCache implements ContentCache {
     // if no other directives exist
     Date newExpiry = new Date(now + getDefaultTTL());
     content.getAllHeaders()
-        .put("Expires", Arrays.asList(dateFormat.format(newExpiry)));
+        .put("Expires", Arrays.asList(HttpUtil.formatDate(newExpiry)));
     return content;
   }
 
