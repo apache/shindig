@@ -1,9 +1,5 @@
 package org.apache.shindig.social.samplecontainer;
 
-import org.apache.shindig.gadgets.ContentFetcher;
-import org.apache.shindig.gadgets.GadgetException;
-import org.apache.shindig.gadgets.RemoteContent;
-import org.apache.shindig.gadgets.RemoteContentRequest;
 import org.apache.shindig.social.opensocial.model.Activity;
 import org.apache.shindig.social.opensocial.model.Enum;
 import org.apache.shindig.social.opensocial.model.MediaItem;
@@ -13,25 +9,28 @@ import org.apache.shindig.social.opensocial.model.Phone;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+
+import org.apache.commons.httpclient.HttpClient;
+import org.apache.commons.httpclient.HttpMethod;
+import org.apache.commons.httpclient.methods.GetMethod;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
-import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
 import java.io.IOException;
-import java.io.StringReader;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Date;
+
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
 
 @Singleton
 public class XmlStateFileFetcher {
@@ -52,7 +51,7 @@ public class XmlStateFileFetcher {
 
   private static final String SCRIPT_SUFFIX = "</div>";
 
-  private ContentFetcher fetcher;
+  private final HttpClient client;
   private URI stateFile;
   private Document document;
   private boolean doEvil = false;
@@ -65,8 +64,8 @@ public class XmlStateFileFetcher {
   private Map<String, List<Activity>> allActivities;
 
   @Inject
-  public XmlStateFileFetcher(ContentFetcher fetcher) {
-   this.fetcher = fetcher;
+  public XmlStateFileFetcher() {
+   client = new HttpClient();
    try {
       stateFile = new URI(DEFAULT_STATE_URL);
     } catch (URISyntaxException e) {
@@ -93,21 +92,18 @@ public class XmlStateFileFetcher {
       return document;
     }
 
-    RemoteContent xml = null;
-    try {
-      xml = fetcher.fetch(new RemoteContentRequest(stateFile));
-    } catch (GadgetException e) {
-      throw new RuntimeException(e);
-    }
-
-    InputSource is = new InputSource(new StringReader(
-        xml.getResponseAsString()));
-
-    DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
     String errorMessage = "The state file " + stateFile
         + " could not be fetched and parsed.";
+
+    DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
     try {
-      document = factory.newDocumentBuilder().parse(is);
+      HttpMethod xml = new GetMethod(stateFile.toString());
+      client.executeMethod(xml);
+
+      if (xml.getStatusCode() != 200) {
+        throw new RuntimeException(errorMessage);
+      }
+      document= factory.newDocumentBuilder().parse(xml.getResponseBodyAsStream());
       return document;
     } catch (SAXException e) {
       throw new RuntimeException(errorMessage, e);
