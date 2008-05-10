@@ -17,10 +17,10 @@
  */
 package org.apache.shindig.gadgets.spec;
 
+import org.apache.shindig.common.util.HashUtil;
+import org.apache.shindig.common.xml.XmlException;
+import org.apache.shindig.common.xml.XmlUtil;
 import org.apache.shindig.gadgets.Substitutions;
-import org.apache.shindig.util.HashUtil;
-import org.apache.shindig.util.XmlException;
-import org.apache.shindig.util.XmlUtil;
 
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;

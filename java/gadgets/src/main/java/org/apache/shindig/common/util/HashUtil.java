@@ -17,7 +17,7 @@
  * under the License.
  */
 
-package org.apache.shindig.util;
+package org.apache.shindig.common.util;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;

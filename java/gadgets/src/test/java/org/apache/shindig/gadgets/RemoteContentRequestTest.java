@@ -19,7 +19,7 @@
 
 package org.apache.shindig.gadgets;
 
-import org.apache.shindig.util.InputStreamConsumer;
+import org.apache.shindig.common.util.InputStreamConsumer;
 
 import junit.framework.TestCase;
 

@@ -17,7 +17,7 @@
  */
 package org.apache.shindig.gadgets;
 
-import org.apache.shindig.util.InputStreamConsumer;
+import org.apache.shindig.common.util.InputStreamConsumer;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;

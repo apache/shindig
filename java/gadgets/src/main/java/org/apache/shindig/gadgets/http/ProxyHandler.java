@@ -21,6 +21,7 @@ package org.apache.shindig.gadgets.http;
 import org.apache.shindig.common.SecurityToken;
 import org.apache.shindig.common.SecurityTokenDecoder;
 import org.apache.shindig.common.SecurityTokenException;
+import org.apache.shindig.common.util.InputStreamConsumer;
 import org.apache.shindig.gadgets.ContentFetcher;
 import org.apache.shindig.gadgets.ContentFetcherFactory;
 import org.apache.shindig.gadgets.GadgetException;
@@ -30,7 +31,6 @@ import org.apache.shindig.gadgets.RemoteContentRequest;
 import org.apache.shindig.gadgets.oauth.OAuthRequestParams;
 import org.apache.shindig.gadgets.spec.Auth;
 import org.apache.shindig.gadgets.spec.Preload;
-import org.apache.shindig.util.InputStreamConsumer;
 
 import com.google.inject.Inject;
 

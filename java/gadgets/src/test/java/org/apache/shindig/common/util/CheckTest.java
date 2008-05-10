@@ -16,7 +16,9 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.shindig.util;
+package org.apache.shindig.common.util;
+
+import org.apache.shindig.common.util.Check;
 
 import junit.framework.JUnit4TestAdapter;
 import static org.hamcrest.Matchers.equalTo;

@@ -18,9 +18,9 @@
  */
 package org.apache.shindig.common;
 
-import org.apache.shindig.util.BasicBlobCrypter;
-import org.apache.shindig.util.BlobCrypter;
-import org.apache.shindig.util.BlobCrypterException;
+import org.apache.shindig.common.crypto.BasicBlobCrypter;
+import org.apache.shindig.common.crypto.BlobCrypter;
+import org.apache.shindig.common.crypto.BlobCrypterException;
 
 import java.util.HashMap;
 import java.util.Map;

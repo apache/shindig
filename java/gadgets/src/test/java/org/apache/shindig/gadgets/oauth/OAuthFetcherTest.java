@@ -23,6 +23,8 @@ import net.oauth.OAuthServiceProvider;
 
 import org.apache.shindig.common.BasicSecurityToken;
 import org.apache.shindig.common.SecurityToken;
+import org.apache.shindig.common.crypto.BasicBlobCrypter;
+import org.apache.shindig.common.crypto.BlobCrypter;
 import org.apache.shindig.gadgets.ContentFetcher;
 import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.RemoteContent;
@@ -30,8 +32,6 @@ import org.apache.shindig.gadgets.RemoteContentRequest;
 import org.apache.shindig.gadgets.oauth.OAuthStore.HttpMethod;
 import org.apache.shindig.gadgets.oauth.OAuthStore.OAuthParamLocation;
 import org.apache.shindig.gadgets.oauth.OAuthStore.SignatureType;
-import org.apache.shindig.util.BasicBlobCrypter;
-import org.apache.shindig.util.BlobCrypter;
 
 import java.net.URI;
 

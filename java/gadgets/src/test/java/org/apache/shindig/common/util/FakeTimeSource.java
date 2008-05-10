@@ -16,21 +16,35 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.shindig.util;
+package org.apache.shindig.common.util;
+
+import org.apache.shindig.common.util.TimeSource;
 
 /**
- * For all exceptions thrown by BlobCrypter
+ * Fake time source for dependency injection.
  */
-public class BlobCrypterException extends Exception {
-  public BlobCrypterException(Throwable cause) {
-    super(cause);
+public class FakeTimeSource extends TimeSource {
+
+  public long now;
+
+  public FakeTimeSource() {
+    this(System.currentTimeMillis());
   }
   
-  public BlobCrypterException(String msg, Throwable cause) {
-    super(msg, cause);
+  public FakeTimeSource(long now) {
+    this.now = now;
   }
   
-  protected BlobCrypterException(String msg) {
-    super(msg);
+  @Override
+  public long currentTimeMillis() {
+    return now;
+  }
+  
+  public void setCurrentTimeMillis(long now) {
+    this.now = now;
+  }
+  
+  public void incrementSeconds(int seconds) {
+    now += seconds*1000;
   }
 }

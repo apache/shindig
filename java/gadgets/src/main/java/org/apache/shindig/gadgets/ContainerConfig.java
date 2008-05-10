@@ -19,7 +19,7 @@
 
 package org.apache.shindig.gadgets;
 
-import org.apache.shindig.util.ResourceLoader;
+import org.apache.shindig.common.util.ResourceLoader;
 
 import com.google.inject.Inject;
 import com.google.inject.name.Named;

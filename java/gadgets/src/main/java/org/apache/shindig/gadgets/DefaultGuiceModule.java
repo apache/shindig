@@ -18,8 +18,8 @@
  */
 package org.apache.shindig.gadgets;
 
+import org.apache.shindig.common.util.ResourceLoader;
 import org.apache.shindig.gadgets.oauth.OAuthFetcherFactory;
-import org.apache.shindig.util.ResourceLoader;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.CreationException;

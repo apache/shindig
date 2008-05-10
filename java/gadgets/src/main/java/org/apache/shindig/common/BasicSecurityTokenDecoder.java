@@ -18,7 +18,7 @@
  */
 package org.apache.shindig.common;
 
-import org.apache.shindig.util.BlobCrypterException;
+import org.apache.shindig.common.crypto.BlobCrypterException;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;

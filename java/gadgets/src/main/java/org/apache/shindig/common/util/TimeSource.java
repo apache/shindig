@@ -16,33 +16,14 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.shindig.util;
+package org.apache.shindig.common.util;
 
 /**
- * Fake time source for dependency injection.
+ * Simple source of current time to use for dependency injection.
  */
-public class FakeTimeSource extends TimeSource {
-
-  public long now;
-
-  public FakeTimeSource() {
-    this(System.currentTimeMillis());
-  }
+public class TimeSource {
   
-  public FakeTimeSource(long now) {
-    this.now = now;
-  }
-  
-  @Override
   public long currentTimeMillis() {
-    return now;
-  }
-  
-  public void setCurrentTimeMillis(long now) {
-    this.now = now;
-  }
-  
-  public void incrementSeconds(int seconds) {
-    now += seconds*1000;
+    return System.currentTimeMillis();
   }
 }

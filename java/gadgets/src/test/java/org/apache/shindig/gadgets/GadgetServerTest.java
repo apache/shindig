@@ -19,8 +19,8 @@ package org.apache.shindig.gadgets;
 
 import org.apache.shindig.common.BasicSecurityToken;
 import org.apache.shindig.common.SecurityToken;
+import org.apache.shindig.common.crypto.BlobCrypterException;
 import org.apache.shindig.gadgets.spec.GadgetSpec;
-import org.apache.shindig.util.BlobCrypterException;
 import static org.easymock.EasyMock.eq;
 import static org.easymock.EasyMock.expect;
 
