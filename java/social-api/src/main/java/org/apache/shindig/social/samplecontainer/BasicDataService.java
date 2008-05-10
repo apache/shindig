@@ -17,13 +17,14 @@
  */
 package org.apache.shindig.social.samplecontainer;
 
-import org.apache.shindig.gadgets.GadgetToken;
+import org.apache.shindig.common.GadgetToken;
 import org.apache.shindig.social.ResponseError;
 import org.apache.shindig.social.ResponseItem;
 import org.apache.shindig.social.opensocial.DataService;
-import org.json.JSONObject;
 
 import com.google.inject.Inject;
+
+import org.json.JSONObject;
 
 import java.util.HashMap;
 import java.util.List;

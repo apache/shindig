@@ -17,22 +17,23 @@
  */
 package org.apache.shindig.social.samplecontainer;
 
+import org.apache.shindig.common.GadgetToken;
 import org.apache.shindig.social.ResponseItem;
 import org.apache.shindig.social.opensocial.PeopleService;
+import org.apache.shindig.social.opensocial.model.ApiCollection;
 import org.apache.shindig.social.opensocial.model.IdSpec;
 import org.apache.shindig.social.opensocial.model.Person;
-import org.apache.shindig.social.opensocial.model.ApiCollection;
-import org.apache.shindig.gadgets.GadgetToken;
-import org.json.JSONException;
 
 import com.google.inject.Inject;
 
+import org.json.JSONException;
+
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.Collections;
-import java.util.Comparator;
 
 public class BasicPeopleService implements PeopleService {
   private static final Comparator<Person> NAME_COMPARATOR

@@ -19,6 +19,8 @@
 
 package org.apache.shindig.gadgets;
 
+import org.apache.shindig.common.GadgetTokenDecoder;
+
 import java.util.concurrent.Executor;
 
 import javax.servlet.http.HttpServletRequest;

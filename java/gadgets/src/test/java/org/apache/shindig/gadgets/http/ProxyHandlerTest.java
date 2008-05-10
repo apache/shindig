@@ -19,9 +19,9 @@
 
 package org.apache.shindig.gadgets.http;
 
+import org.apache.shindig.common.GadgetToken;
 import org.apache.shindig.gadgets.FakeGadgetToken;
 import org.apache.shindig.gadgets.GadgetException;
-import org.apache.shindig.gadgets.GadgetToken;
 import org.apache.shindig.gadgets.RemoteContent;
 import org.apache.shindig.gadgets.RemoteContentRequest;
 import org.apache.shindig.gadgets.spec.Auth;

@@ -16,8 +16,10 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.shindig.gadgets;
+package org.apache.shindig.common;
 
+import org.apache.shindig.gadgets.GadgetException;
+import org.apache.shindig.gadgets.GadgetException.Code;
 import org.apache.shindig.util.BlobCrypterException;
 
 import java.io.UnsupportedEncodingException;

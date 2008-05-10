@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.shindig.gadgets;
+package org.apache.shindig.common;
 
 import org.apache.shindig.util.BasicBlobCrypter;
 import org.apache.shindig.util.BlobCrypter;

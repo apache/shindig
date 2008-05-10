@@ -17,20 +17,20 @@
  */
 package org.apache.shindig.social.samplecontainer;
 
-import org.apache.shindig.gadgets.GadgetToken;
-
-import org.apache.shindig.social.ResponseItem;
+import org.apache.shindig.common.GadgetToken;
 import org.apache.shindig.social.ResponseError;
+import org.apache.shindig.social.ResponseItem;
 import org.apache.shindig.social.opensocial.ActivitiesService;
 import org.apache.shindig.social.opensocial.model.Activity;
-import org.json.JSONObject;
 
 import com.google.inject.Inject;
 
+import org.json.JSONObject;
+
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
-import java.util.Date;
 
 public class BasicActivitiesService implements ActivitiesService {
   private XmlStateFileFetcher fetcher;

@@ -17,11 +17,11 @@
  */
 package org.apache.shindig.gadgets.http;
 
+import org.apache.shindig.common.GadgetTokenDecoder;
 import org.apache.shindig.gadgets.GadgetContext;
 import org.apache.shindig.gadgets.GadgetFeature;
 import org.apache.shindig.gadgets.GadgetFeatureFactory;
 import org.apache.shindig.gadgets.GadgetFeatureRegistry;
-import org.apache.shindig.gadgets.GadgetTokenDecoder;
 import org.apache.shindig.gadgets.JsLibrary;
 
 import com.google.inject.Inject;

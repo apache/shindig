@@ -18,11 +18,11 @@
  */
 package org.apache.shindig.gadgets.http;
 
+import org.apache.shindig.common.GadgetToken;
+import org.apache.shindig.common.GadgetTokenDecoder;
 import org.apache.shindig.gadgets.ContentFetcher;
 import org.apache.shindig.gadgets.ContentFetcherFactory;
 import org.apache.shindig.gadgets.GadgetException;
-import org.apache.shindig.gadgets.GadgetToken;
-import org.apache.shindig.gadgets.GadgetTokenDecoder;
 import org.apache.shindig.gadgets.LockedDomainService;
 import org.apache.shindig.gadgets.RemoteContent;
 import org.apache.shindig.gadgets.RemoteContentRequest;

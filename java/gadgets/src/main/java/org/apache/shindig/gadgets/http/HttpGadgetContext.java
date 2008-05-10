@@ -19,10 +19,10 @@
 
 package org.apache.shindig.gadgets.http;
 
+import org.apache.shindig.common.GadgetToken;
+import org.apache.shindig.common.GadgetTokenDecoder;
 import org.apache.shindig.gadgets.GadgetContext;
 import org.apache.shindig.gadgets.GadgetException;
-import org.apache.shindig.gadgets.GadgetToken;
-import org.apache.shindig.gadgets.GadgetTokenDecoder;
 import org.apache.shindig.gadgets.RenderingContext;
 import org.apache.shindig.gadgets.UserPrefs;
 
