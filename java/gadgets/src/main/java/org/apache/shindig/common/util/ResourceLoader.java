@@ -17,7 +17,7 @@
  * under the License.
  */
 
-package org.apache.shindig.util;
+package org.apache.shindig.common.util;
 
 import java.io.File;
 import java.io.FileInputStream;

@@ -19,7 +19,7 @@
 
 package org.apache.shindig.gadgets.spec;
 
-import org.apache.shindig.util.XmlUtil;
+import org.apache.shindig.common.xml.XmlUtil;
 
 import junit.framework.TestCase;
 

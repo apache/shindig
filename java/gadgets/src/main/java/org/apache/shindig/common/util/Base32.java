@@ -5,16 +5,16 @@
  * licenses this file to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
  * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.apache.shindig.util;
+package org.apache.shindig.common.util;
 
 import org.apache.commons.codec.BinaryDecoder;
 import org.apache.commons.codec.BinaryEncoder;
@@ -22,7 +22,11 @@ import org.apache.commons.codec.DecoderException;
 import org.apache.commons.codec.EncoderException;
 
 /**
- * Implements Base32 encoding.
+ * Implements Base32 encoding using 0-9a-v, with no padding for partial bytes.
+ *
+ * This is suitable for base32 encoding any binary data that needs to be passed
+ * in a web-safe context, but it differs from base32 implementations used in
+ * other contexts.
  */
 public class Base32 implements BinaryDecoder, BinaryEncoder {
 
@@ -30,13 +34,13 @@ public class Base32 implements BinaryDecoder, BinaryEncoder {
       new StringEncoding("0123456789abcdefghijklmnopqrstuv".toCharArray());
 
   public static byte[] encodeBase32(byte[] arg0) {
-    return ENCODER.encode(arg0).getBytes(); 
+    return ENCODER.encode(arg0).getBytes();
   }
-  
+
   public static byte[] decodeBase32(byte[] arg0) {
-    return ENCODER.decode(new String(arg0)); 
+    return ENCODER.decode(new String(arg0));
   }
-  
+
   @SuppressWarnings("unused")
   public byte[] decode(byte[] arg0) throws DecoderException {
     return decodeBase32(arg0);
@@ -58,7 +62,7 @@ public class Base32 implements BinaryDecoder, BinaryEncoder {
   public Object encode(Object object) throws EncoderException {
     if (!(object instanceof byte[])) {
       throw new EncoderException(
-          "Parameter supplied to Base64 encode is not a byte[]");
+          "Parameter supplied to Base32 encode is not a byte[]");
     }
     return encodeBase32((byte[]) object);
   }

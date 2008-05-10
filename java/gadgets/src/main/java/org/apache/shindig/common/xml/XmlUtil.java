@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations under the License.
  */
 
-package org.apache.shindig.util;
+package org.apache.shindig.common.xml;
 
 import org.w3c.dom.Element;
 import org.w3c.dom.NamedNodeMap;

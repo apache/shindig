@@ -17,9 +17,10 @@
  */
 package org.apache.shindig.gadgets;
 
-import org.apache.shindig.util.ResourceLoader;
-import org.apache.shindig.util.XmlException;
-import org.apache.shindig.util.XmlUtil;
+import org.apache.shindig.common.util.ResourceLoader;
+import org.apache.shindig.common.xml.XmlException;
+import org.apache.shindig.common.xml.XmlUtil;
+
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 

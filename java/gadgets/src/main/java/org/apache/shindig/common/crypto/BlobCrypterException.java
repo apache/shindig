@@ -16,29 +16,21 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.shindig.util;
-
-import java.util.Date;
+package org.apache.shindig.common.crypto;
 
 /**
- * Thrown when a blob has expired.
+ * For all exceptions thrown by BlobCrypter
  */
-public class BlobExpiredException extends BlobCrypterException {
-
-  public final Date minDate;
-  public final Date used;
-  public final Date maxDate;
-
-  public BlobExpiredException(long minTime, long now, long maxTime) {
-    this(new Date(minTime*1000), new Date(now*1000), new Date(maxTime*1000));
+public class BlobCrypterException extends Exception {
+  public BlobCrypterException(Throwable cause) {
+    super(cause);
   }
-
-  public BlobExpiredException(Date minTime, Date now, Date maxTime) {
-    super("Blob expired, was valid from " + minTime + " to " + maxTime
-        + ", attempted use at " + now);
-    this.minDate = minTime;
-    this.used = now;
-    this.maxDate = maxTime;
+  
+  public BlobCrypterException(String msg, Throwable cause) {
+    super(msg, cause);
   }
-
+  
+  protected BlobCrypterException(String msg) {
+    super(msg);
+  }
 }

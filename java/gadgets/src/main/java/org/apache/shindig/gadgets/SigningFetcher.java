@@ -15,8 +15,8 @@
 package org.apache.shindig.gadgets;
 
 import org.apache.shindig.common.SecurityToken;
-import org.apache.shindig.util.Crypto;
-import org.apache.shindig.util.TimeSource;
+import org.apache.shindig.common.crypto.Crypto;
+import org.apache.shindig.common.util.TimeSource;
 
 import net.oauth.OAuth;
 import net.oauth.OAuth.Parameter;

@@ -16,7 +16,14 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.shindig.util;
+package org.apache.shindig.common.crypto;
+
+import org.apache.shindig.common.crypto.BasicBlobCrypter;
+import org.apache.shindig.common.crypto.BlobCrypter;
+import org.apache.shindig.common.crypto.BlobCrypterException;
+import org.apache.shindig.common.crypto.BlobExpiredException;
+import org.apache.shindig.common.crypto.Crypto;
+import org.apache.shindig.common.util.FakeTimeSource;
 
 import junit.framework.JUnit4TestAdapter;
 

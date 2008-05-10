@@ -17,7 +17,7 @@
  */
 package org.apache.shindig.gadgets;
 
-import org.apache.shindig.util.ResourceLoader;
+import org.apache.shindig.common.util.ResourceLoader;
 
 import java.io.File;
 import java.io.IOException;

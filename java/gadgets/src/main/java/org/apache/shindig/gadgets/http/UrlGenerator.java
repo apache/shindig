@@ -18,6 +18,7 @@
  */
 package org.apache.shindig.gadgets.http;
 
+import org.apache.shindig.common.util.HashUtil;
 import org.apache.shindig.gadgets.Gadget;
 import org.apache.shindig.gadgets.GadgetContext;
 import org.apache.shindig.gadgets.GadgetFeature;
@@ -29,7 +30,6 @@ import org.apache.shindig.gadgets.UserPrefs;
 import org.apache.shindig.gadgets.spec.GadgetSpec;
 import org.apache.shindig.gadgets.spec.UserPref;
 import org.apache.shindig.gadgets.spec.View;
-import org.apache.shindig.util.HashUtil;
 
 import com.google.inject.Inject;
 import com.google.inject.name.Named;

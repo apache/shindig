@@ -16,14 +16,29 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.shindig.util;
+package org.apache.shindig.common.crypto;
+
+import java.util.Date;
 
 /**
- * Simple source of current time to use for dependency injection.
+ * Thrown when a blob has expired.
  */
-public class TimeSource {
-  
-  public long currentTimeMillis() {
-    return System.currentTimeMillis();
+public class BlobExpiredException extends BlobCrypterException {
+
+  public final Date minDate;
+  public final Date used;
+  public final Date maxDate;
+
+  public BlobExpiredException(long minTime, long now, long maxTime) {
+    this(new Date(minTime*1000), new Date(now*1000), new Date(maxTime*1000));
   }
+
+  public BlobExpiredException(Date minTime, Date now, Date maxTime) {
+    super("Blob expired, was valid from " + minTime + " to " + maxTime
+        + ", attempted use at " + now);
+    this.minDate = minTime;
+    this.used = now;
+    this.maxDate = maxTime;
+  }
+
 }

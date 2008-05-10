@@ -18,8 +18,9 @@
 package org.apache.shindig.gadgets;
 
 import org.apache.commons.codec.digest.DigestUtils;
+
+import org.apache.shindig.common.util.Base32;
 import org.apache.shindig.gadgets.spec.Feature;
-import org.apache.shindig.util.Base32;
 
 import com.google.inject.Inject;
 import com.google.inject.name.Named;

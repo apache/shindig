@@ -17,8 +17,8 @@
  */
 package org.apache.shindig.gadgets.spec;
 
+import org.apache.shindig.common.xml.XmlException;
 import org.apache.shindig.gadgets.GadgetException;
-import org.apache.shindig.util.XmlException;
 
 /**
  * Exceptions for Gadget Spec parsing.

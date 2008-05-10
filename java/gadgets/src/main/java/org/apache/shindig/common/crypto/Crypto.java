@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.shindig.util;
+package org.apache.shindig.common.crypto;
 
 import org.apache.commons.codec.binary.Hex;
 

@@ -20,7 +20,7 @@ package org.apache.shindig.gadgets;
 
 import junit.framework.TestCase;
 
-import org.apache.shindig.util.InputStreamConsumer;
+import org.apache.shindig.common.util.InputStreamConsumer;
 
 import java.util.Arrays;
 import java.util.HashMap;

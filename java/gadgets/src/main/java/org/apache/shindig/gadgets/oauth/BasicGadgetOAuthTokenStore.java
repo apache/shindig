@@ -18,12 +18,12 @@
  */
 package org.apache.shindig.gadgets.oauth;
 
+import org.apache.shindig.common.util.ResourceLoader;
 import org.apache.shindig.gadgets.ContentFetcher;
 import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.RemoteContent;
 import org.apache.shindig.gadgets.RemoteContentRequest;
 import org.apache.shindig.gadgets.spec.GadgetSpec;
-import org.apache.shindig.util.ResourceLoader;
 import org.json.JSONException;
 import org.json.JSONObject;
 

@@ -22,7 +22,6 @@ import org.apache.shindig.common.servlet.GuiceServletContextListener;
 import org.apache.abdera.protocol.server.Provider;
 import org.apache.abdera.protocol.server.ServiceManager;
 import org.apache.abdera.protocol.server.servlet.AbderaServlet;
-
 import org.mortbay.jetty.Server;
 import org.mortbay.jetty.servlet.Context;
 import org.mortbay.jetty.servlet.ServletHolder;
