@@ -18,7 +18,7 @@
  */
 package org.apache.shindig.gadgets.oauth;
 
-import org.apache.shindig.common.GadgetToken;
+import org.apache.shindig.common.SecurityToken;
 import org.apache.shindig.gadgets.ContentFetcher;
 import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.util.BasicBlobCrypter;
@@ -95,7 +95,7 @@ public class OAuthFetcherFactory {
    */
   public OAuthFetcher getOAuthFetcher(
       ContentFetcher nextFetcher,
-      GadgetToken token,
+      SecurityToken token,
       OAuthRequestParams params) throws GadgetException {
     OAuthFetcher fetcher = new OAuthFetcher(
         tokenStore, oauthCrypter, nextFetcher, token, params);

@@ -17,7 +17,7 @@
  */
 package org.apache.shindig.gadgets;
 
-import org.apache.shindig.common.GadgetToken;
+import org.apache.shindig.common.SecurityToken;
 import org.apache.shindig.gadgets.spec.GadgetSpec;
 
 import java.net.URI;
@@ -95,7 +95,7 @@ public class GadgetContext {
    * @return The token associated with this request
    */
   @SuppressWarnings("unused")
-  public GadgetToken getToken() throws GadgetException {
+  public SecurityToken getToken() throws GadgetException {
     return null;
   }
 }

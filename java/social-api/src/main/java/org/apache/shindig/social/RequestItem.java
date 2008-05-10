@@ -17,7 +17,7 @@
  */
 package org.apache.shindig.social;
 
-import org.apache.shindig.common.GadgetToken;
+import org.apache.shindig.common.SecurityToken;
 
 import org.json.JSONObject;
 
@@ -28,9 +28,9 @@ import org.json.JSONObject;
 public class RequestItem {
   private String type;
   private JSONObject params;
-  private GadgetToken token;
+  private SecurityToken token;
 
-  public RequestItem(String type, JSONObject params, GadgetToken token) {
+  public RequestItem(String type, JSONObject params, SecurityToken token) {
     this.type = type;
     this.params = params;
     this.token = token;
@@ -52,11 +52,11 @@ public class RequestItem {
     this.params = params;
   }
 
-  public GadgetToken getToken() {
+  public SecurityToken getToken() {
     return token;
   }
 
-  public void setToken(GadgetToken token) {
+  public void setToken(SecurityToken token) {
     this.token = token;
   }
 }

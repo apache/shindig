@@ -86,7 +86,7 @@ public class FriendsServiceAdapter extends RestServerCollectionAdapter {
     // TODO: Should have a real concept of first, max sort etc with defaults
     return peopleService.getPeople(getFriendIds(request, uid),
         PeopleService.SortOrder.name, null, 0, 100, null,
-        getGadgetToken(request, uid));
+        getSecurityToken(request, uid));
   }
 
 }

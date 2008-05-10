@@ -18,7 +18,7 @@
  */
 package org.apache.shindig.gadgets;
 
-import org.apache.shindig.common.GadgetToken;
+import org.apache.shindig.common.SecurityToken;
 import org.apache.shindig.util.InputStreamConsumer;
 import org.apache.shindig.util.ResourceLoader;
 
@@ -46,7 +46,7 @@ public class SigningFetcherFactory {
    */
   @SuppressWarnings("unused")
   public ContentFetcher getSigningFetcher(
-      ContentFetcher networkFetcher, GadgetToken token)
+      ContentFetcher networkFetcher, SecurityToken token)
   throws GadgetException {
     return SigningFetcher.makeFromB64PrivateKey(cache,
         networkFetcher, token, keyName, privateKey);

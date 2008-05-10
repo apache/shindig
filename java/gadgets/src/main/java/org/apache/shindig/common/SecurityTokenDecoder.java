@@ -23,7 +23,7 @@ import org.apache.shindig.gadgets.GadgetException;
 /**
  *  Handles verification of gadget security tokens.
  */
-public interface GadgetTokenDecoder {
+public interface SecurityTokenDecoder {
 
   /**
    * Decrypts and verifies a gadget security token to return a gadget token.
@@ -32,5 +32,5 @@ public interface GadgetTokenDecoder {
    * @return The token representation of the input data.
    * @throws GadgetException If tokenString is not a valid token
    */
-  public GadgetToken createToken(String tokenString) throws GadgetException;
+  public SecurityToken createToken(String tokenString) throws GadgetException;
 }

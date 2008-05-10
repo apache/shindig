@@ -17,7 +17,7 @@
  */
 package org.apache.shindig.social.samplecontainer;
 
-import org.apache.shindig.common.GadgetToken;
+import org.apache.shindig.common.SecurityToken;
 import org.apache.shindig.social.ResponseError;
 import org.apache.shindig.social.ResponseItem;
 import org.apache.shindig.social.opensocial.ActivitiesService;
@@ -41,7 +41,7 @@ public class BasicActivitiesService implements ActivitiesService {
   }
 
   public ResponseItem<List<Activity>> getActivities(List<String> ids,
-      GadgetToken token) {
+      SecurityToken token) {
     Map<String, List<Activity>> allActivities = fetcher.getActivities();
 
     List<Activity> activities = new ArrayList<Activity>();
@@ -58,7 +58,7 @@ public class BasicActivitiesService implements ActivitiesService {
   }
 
   public ResponseItem<Activity> getActivity(String id, String activityId,
-      GadgetToken token) {
+      SecurityToken token) {
     List<String> ids = new ArrayList<String>();
     ids.add(id);
 
@@ -73,7 +73,7 @@ public class BasicActivitiesService implements ActivitiesService {
   }
 
   public ResponseItem createActivity(String personId, Activity activity,
-      GadgetToken token) {
+      SecurityToken token) {
     // TODO: Validate the activity and do any template expanding
     activity.setUserId(personId);
     activity.setPostedTime(new Date().getTime());

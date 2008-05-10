@@ -16,7 +16,7 @@ package org.apache.shindig.gadgets;
 
 import junit.framework.TestCase;
 
-import org.apache.shindig.common.BasicGadgetToken;
+import org.apache.shindig.common.BasicSecurityToken;
 
 import net.oauth.OAuth;
 import net.oauth.OAuth.Parameter;
@@ -69,7 +69,7 @@ public class SigningFetcherTest extends TestCase {
   private InterceptingContentFetcher interceptor;
   private ContentCache cache;
   private SigningFetcher signer;
-  private BasicGadgetToken authToken;
+  private BasicSecurityToken authToken;
   private OAuthAccessor accessor;
   private OAuthValidator messageValidator;
 
@@ -78,7 +78,7 @@ public class SigningFetcherTest extends TestCase {
     super.setUp();
     cache = new BasicContentCache();
     interceptor = new InterceptingContentFetcher();
-    authToken = new BasicGadgetToken("o", "v", "a", "d", "u", "m");
+    authToken = new BasicSecurityToken("o", "v", "a", "d", "u", "m");
     signer = SigningFetcher.makeFromB64PrivateKey(cache,
         interceptor, authToken, "foo", PRIVATE_KEY_TEXT);
     OAuthConsumer consumer = new OAuthConsumer(null, null, null, null);

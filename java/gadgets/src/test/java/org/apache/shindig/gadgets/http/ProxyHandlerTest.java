@@ -19,7 +19,7 @@
 
 package org.apache.shindig.gadgets.http;
 
-import org.apache.shindig.common.GadgetToken;
+import org.apache.shindig.common.SecurityToken;
 import org.apache.shindig.gadgets.FakeGadgetToken;
 import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.RemoteContent;
@@ -45,7 +45,7 @@ public class ProxyHandlerTest extends HttpTestFixture {
   private final static String URL_ONE = "http://www.example.com/test.html";
   private final static String DATA_ONE = "hello world";
 
-  private static final GadgetToken DUMMY_TOKEN = new FakeGadgetToken();
+  private static final SecurityToken DUMMY_TOKEN = new FakeGadgetToken();
 
   final ByteArrayOutputStream baos = new ByteArrayOutputStream();
   final PrintWriter writer = new PrintWriter(baos);
@@ -207,7 +207,7 @@ public class ProxyHandlerTest extends HttpTestFixture {
     // Doesn't actually sign since it returns the standard fetcher.
     // Signing tests are in SigningFetcherTest
     setupGetRequestMock(URL_ONE);
-    expect(gadgetTokenDecoder.createToken("fake-token")).andReturn(DUMMY_TOKEN);
+    expect(securityTokenDecoder.createToken("fake-token")).andReturn(DUMMY_TOKEN);
     expect(request.getParameter(ProxyHandler.SECURITY_TOKEN_PARAM))
         .andReturn("fake-token").atLeastOnce();
     expect(request.getParameter(Preload.AUTHZ_ATTR))
@@ -227,7 +227,7 @@ public class ProxyHandlerTest extends HttpTestFixture {
     // Signing tests are in SigningFetcherTest
     String postBody = "foo=bar%20baz";
     setupPostRequestMock(URL_ONE, postBody);
-    expect(gadgetTokenDecoder.createToken("fake-token")).andReturn(DUMMY_TOKEN);
+    expect(securityTokenDecoder.createToken("fake-token")).andReturn(DUMMY_TOKEN);
     expect(request.getParameter(ProxyHandler.SECURITY_TOKEN_PARAM))
         .andReturn("fake-token").atLeastOnce();
     expect(request.getParameter(Preload.AUTHZ_ATTR))

@@ -17,7 +17,7 @@
 */
 package org.apache.shindig.social.abdera;
 
-import org.apache.shindig.common.GadgetToken;
+import org.apache.shindig.common.SecurityToken;
 import org.apache.shindig.social.opensocial.model.Person;
 
 import org.apache.abdera.protocol.server.RequestContext;
@@ -48,7 +48,7 @@ public class PeopleServiceAdapter extends RestServerCollectionAdapter {
    */
   public ResponseContext getEntry(RequestContext request) {
     String uid = request.getTarget().getParameter("uid");
-    GadgetToken token = getGadgetToken(request, uid);
+    SecurityToken token = getSecurityToken(request, uid);
     Person person = peopleService.getPerson(uid, token).getResponse();
 
     // TODO: how is entry id determined. check.

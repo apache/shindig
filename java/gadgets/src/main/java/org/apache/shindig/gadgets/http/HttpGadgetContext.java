@@ -19,8 +19,8 @@
 
 package org.apache.shindig.gadgets.http;
 
-import org.apache.shindig.common.GadgetToken;
-import org.apache.shindig.common.GadgetTokenDecoder;
+import org.apache.shindig.common.SecurityToken;
+import org.apache.shindig.common.SecurityTokenDecoder;
 import org.apache.shindig.gadgets.GadgetContext;
 import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.RenderingContext;
@@ -254,9 +254,9 @@ public class HttpGadgetContext extends GadgetContext {
   }
 
   private final String tokenString;
-  private final GadgetTokenDecoder tokenDecoder;
+  private final SecurityTokenDecoder tokenDecoder;
   @Override
-  public GadgetToken getToken() throws GadgetException {
+  public SecurityToken getToken() throws GadgetException {
     if (tokenString == null || tokenString.length() == 0) {
       return super.getToken();
     } else {
@@ -265,7 +265,7 @@ public class HttpGadgetContext extends GadgetContext {
   }
 
   public HttpGadgetContext(HttpServletRequest request,
-      GadgetTokenDecoder tokenDecoder) {
+      SecurityTokenDecoder tokenDecoder) {
     url = getUrl(request);
     moduleId = getModuleId(request);
     locale = getLocale(request);

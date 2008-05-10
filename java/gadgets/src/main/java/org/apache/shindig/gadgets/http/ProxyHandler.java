@@ -18,8 +18,8 @@
  */
 package org.apache.shindig.gadgets.http;
 
-import org.apache.shindig.common.GadgetToken;
-import org.apache.shindig.common.GadgetTokenDecoder;
+import org.apache.shindig.common.SecurityToken;
+import org.apache.shindig.common.SecurityTokenDecoder;
 import org.apache.shindig.gadgets.ContentFetcher;
 import org.apache.shindig.gadgets.ContentFetcherFactory;
 import org.apache.shindig.gadgets.GadgetException;
@@ -69,7 +69,7 @@ public class ProxyHandler {
       Logger.getLogger(ProxyHandler.class.getPackage().getName());
 
 
-  private final GadgetTokenDecoder gadgetTokenDecoder;
+  private final SecurityTokenDecoder securityTokenDecoder;
 
   private final static Set<String> DISALLOWED_RESPONSE_HEADERS
       = new HashSet<String>();
@@ -95,10 +95,10 @@ public class ProxyHandler {
 
   @Inject
   public ProxyHandler(ContentFetcherFactory contentFetcherFactory,
-                      GadgetTokenDecoder gadgetTokenDecoder,
+                      SecurityTokenDecoder securityTokenDecoder,
                       LockedDomainService lockedDomainService) {
     this.contentFetcherFactory = contentFetcherFactory;
-    this.gadgetTokenDecoder = gadgetTokenDecoder;
+    this.securityTokenDecoder = securityTokenDecoder;
     this.domainLocker = lockedDomainService;
   }
 
@@ -379,10 +379,10 @@ public class ProxyHandler {
    * @return A valid token for the given input.
    * @throws GadgetException
    */
-  private GadgetToken extractAndValidateToken(HttpServletRequest request)
+  private SecurityToken extractAndValidateToken(HttpServletRequest request)
       throws GadgetException {
     String token = getParameter(request, SECURITY_TOKEN_PARAM, "");
-    return gadgetTokenDecoder.createToken(token);
+    return securityTokenDecoder.createToken(token);
   }
 
   /**

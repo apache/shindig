@@ -17,7 +17,7 @@
  */
 package org.apache.shindig.social.opensocial;
 
-import org.apache.shindig.common.GadgetToken;
+import org.apache.shindig.common.SecurityToken;
 import org.apache.shindig.social.ResponseItem;
 import org.apache.shindig.social.opensocial.model.Activity;
 
@@ -27,22 +27,22 @@ public interface ActivitiesService {
   /**
    * Returns a list of activities that correspond to the passed in person ids.
    * @param ids The ids of the people to fetch activities for.
-   * @param token A valid GadgetToken
+   * @param token A valid SecurityToken
    * @return a response item with the list of activities.
    */
   public ResponseItem<List<Activity>> getActivities(List<String> ids,
-      GadgetToken token);
+      SecurityToken token);
 
   /**
    * Creates the passed in activity for the given user. Once createActivity is
    * called, getActivities will be able to return the Activity.
    * @param personId The id of the person to create the activity for.
    * @param activity The activity to create.
-   * @param token A valid GadgetToken
+   * @param token A valid SecurityToken
    * @return a response item containing any errors
    */
   public ResponseItem createActivity(String personId, Activity activity,
-      GadgetToken token);
+      SecurityToken token);
 
   /**
    * Returns an activity for the gived user id that matches the passes in
@@ -50,9 +50,9 @@ public interface ActivitiesService {
    *
    * @param id The id of the user to activity belongs to
    * @param activityId The id of the activity
-   * @param token A valid GadgetToken
+   * @param token A valid SecurityToken
    * @return a reponse item with the matching activity
    */
   public ResponseItem<Activity> getActivity(String id, String activityId,
-      GadgetToken token);
+      SecurityToken token);
 }

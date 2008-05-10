@@ -18,12 +18,12 @@
  */
 package org.apache.shindig.gadgets;
 
-import org.apache.shindig.common.GadgetToken;
+import org.apache.shindig.common.SecurityToken;
 
 /**
- * A fake GadgetToken implementation to help testing.
+ * A fake SecurityToken implementation to help testing.
  */
-public class FakeGadgetToken implements GadgetToken {
+public class FakeGadgetToken implements SecurityToken {
   public String getOwnerId() {
     return "owner";
   }
