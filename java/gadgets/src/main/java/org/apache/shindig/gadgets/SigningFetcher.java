@@ -14,7 +14,7 @@
 
 package org.apache.shindig.gadgets;
 
-import org.apache.shindig.common.GadgetToken;
+import org.apache.shindig.common.SecurityToken;
 import org.apache.shindig.util.Crypto;
 import org.apache.shindig.util.TimeSource;
 
@@ -64,7 +64,7 @@ public class SigningFetcher extends ChainedContentFetcher {
   /**
    * Authentication token for the user and gadget making the request.
    */
-  protected final GadgetToken authToken;
+  protected final SecurityToken authToken;
 
   /**
    * Private key we pass to the OAuth RSA_SHA1 algorithm.  This can be a
@@ -88,7 +88,7 @@ public class SigningFetcher extends ChainedContentFetcher {
    * keys.
    */
   protected SigningFetcher(ContentCache cache,
-      ContentFetcher next, GadgetToken authToken) {
+      ContentFetcher next, SecurityToken authToken) {
     this(cache, next, authToken, null, null);
   }
 
@@ -100,7 +100,7 @@ public class SigningFetcher extends ChainedContentFetcher {
    * @param privateKey the key to use for the signing
    */
   public static SigningFetcher makeFromPrivateKey(ContentCache cache,
-      ContentFetcher next, GadgetToken authToken,
+      ContentFetcher next, SecurityToken authToken,
       String keyName, PrivateKey privateKey) {
     return new SigningFetcher(cache, next, authToken, keyName, privateKey);
   }
@@ -114,7 +114,7 @@ public class SigningFetcher extends ChainedContentFetcher {
    */
   public static SigningFetcher makeFromB64PrivateKey(ContentCache cache,
       ContentFetcher next,
-      GadgetToken authToken, String keyName, String privateKey) {
+      SecurityToken authToken, String keyName, String privateKey) {
     return new SigningFetcher(cache, next, authToken, keyName, privateKey);
   }
 
@@ -127,13 +127,13 @@ public class SigningFetcher extends ChainedContentFetcher {
    */
   public static SigningFetcher makeFromPrivateKeyBytes(
       ContentCache cache, ContentFetcher next,
-      GadgetToken authToken, String keyName,
+      SecurityToken authToken, String keyName,
       byte[] privateKey) {
     return new SigningFetcher(cache, next, authToken, keyName, privateKey);
   }
 
   protected SigningFetcher(ContentCache cache, ContentFetcher next,
-      GadgetToken authToken, String keyName, Object privateKeyObject) {
+      SecurityToken authToken, String keyName, Object privateKeyObject) {
     super(next);
     this.cache = cache;
     this.authToken = authToken;

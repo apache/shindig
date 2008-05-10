@@ -17,7 +17,7 @@
  */
 package org.apache.shindig.gadgets;
 
-import org.apache.shindig.common.GadgetToken;
+import org.apache.shindig.common.SecurityToken;
 import org.apache.shindig.gadgets.oauth.OAuthFetcherFactory;
 import org.apache.shindig.gadgets.oauth.OAuthRequestParams;
 
@@ -47,7 +47,7 @@ public class ContentFetcherFactory implements Provider<ContentFetcher> {
    * @return A signing content fetcher
    * @throws GadgetException
    */
-  public ContentFetcher getSigningFetcher(GadgetToken token)
+  public ContentFetcher getSigningFetcher(SecurityToken token)
       throws GadgetException {
     return signingFetcherFactory.getSigningFetcher(
             remoteContentFetcherFactory.get(), token);
@@ -60,7 +60,7 @@ public class ContentFetcherFactory implements Provider<ContentFetcher> {
    * @throws GadgetException
    */
   public ContentFetcher getOAuthFetcher(
-      GadgetToken token,
+      SecurityToken token,
       OAuthRequestParams params)
       throws GadgetException {
     return oauthFetcherFactory.getOAuthFetcher(

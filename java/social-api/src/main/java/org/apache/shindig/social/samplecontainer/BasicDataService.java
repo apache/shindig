@@ -17,7 +17,7 @@
  */
 package org.apache.shindig.social.samplecontainer;
 
-import org.apache.shindig.common.GadgetToken;
+import org.apache.shindig.common.SecurityToken;
 import org.apache.shindig.social.ResponseError;
 import org.apache.shindig.social.ResponseItem;
 import org.apache.shindig.social.opensocial.DataService;
@@ -40,7 +40,7 @@ public class BasicDataService implements DataService {
   }
 
   public ResponseItem<Map<String, Map<String, String>>> getPersonData(
-      List<String> ids, List<String> keys, GadgetToken token) {
+      List<String> ids, List<String> keys, SecurityToken token) {
 
     Map<String, Map<String, String>> allData = fetcher.getAppData();
 
@@ -66,7 +66,7 @@ public class BasicDataService implements DataService {
   }
 
   public ResponseItem updatePersonData(String id, String key, String value,
-      GadgetToken token) {
+      SecurityToken token) {
     if (!isValidKey(key)) {
       return new ResponseItem<Object>(ResponseError.BAD_REQUEST,
           "The person data key had invalid characters",

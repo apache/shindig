@@ -17,7 +17,7 @@
  */
 package org.apache.shindig.gadgets.http;
 
-import org.apache.shindig.common.GadgetTokenDecoder;
+import org.apache.shindig.common.SecurityTokenDecoder;
 import org.apache.shindig.gadgets.GadgetContext;
 import org.apache.shindig.gadgets.GadgetFeature;
 import org.apache.shindig.gadgets.GadgetFeatureFactory;
@@ -46,9 +46,9 @@ public class JsServlet extends InjectedServlet {
     this.registry = registry;
   }
 
-  private GadgetTokenDecoder tokenDecoder;
+  private SecurityTokenDecoder tokenDecoder;
   @Inject
-  public void setRegistry(GadgetTokenDecoder tokenDecoder) {
+  public void setRegistry(SecurityTokenDecoder tokenDecoder) {
     this.tokenDecoder = tokenDecoder;
   }
 

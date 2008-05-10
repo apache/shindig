@@ -17,7 +17,7 @@
  */
 package org.apache.shindig.social.opensocial;
 
-import org.apache.shindig.common.GadgetToken;
+import org.apache.shindig.common.SecurityToken;
 import org.apache.shindig.social.ResponseItem;
 
 import java.util.List;
@@ -29,12 +29,12 @@ public interface DataService {
    * Fetch data for a list of ids.
    * @param ids The list of ids
    * @param keys The list of keys to fetch
-   * @param token The GadgetToken for this request
+   * @param token The SecurityToken for this request
    * @return ResponseItem a response item with the error code set if
    *     there was a problem
    */
   public ResponseItem<Map<String, Map<String, String>>> getPersonData(
-      List<String> ids, List<String> keys, GadgetToken token);
+      List<String> ids, List<String> keys, SecurityToken token);
 
   /**
    * Updates the data key for the given person with the new value.
@@ -42,10 +42,10 @@ public interface DataService {
    * @param id The person the data is for.
    * @param key The key of the data.
    * @param value The new value of the data.
-   * @param token The GadgetToken for this request
+   * @param token The SecurityToken for this request
    * @return ResponseItem a response item with the error code set if
    *     there was a problem
    */
   public ResponseItem updatePersonData(String id, String key,
-      String value, GadgetToken token);
+      String value, SecurityToken token);
 }

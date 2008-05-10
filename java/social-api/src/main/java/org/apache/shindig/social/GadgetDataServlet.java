@@ -17,8 +17,8 @@
  */
 package org.apache.shindig.social;
 
-import org.apache.shindig.common.GadgetToken;
-import org.apache.shindig.common.GadgetTokenDecoder;
+import org.apache.shindig.common.SecurityToken;
+import org.apache.shindig.common.SecurityTokenDecoder;
 import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.http.InjectedServlet;
 import org.apache.shindig.social.opensocial.util.BeanJsonConverter;
@@ -59,7 +59,7 @@ public class GadgetDataServlet extends InjectedServlet {
       = Logger.getLogger("org.apache.shindig.social");
 
   private List<GadgetDataHandler> handlers;
-  private GadgetTokenDecoder gadgetTokenDecoder;
+  private SecurityTokenDecoder securityTokenDecoder;
   private BeanJsonConverter beanJsonConverter;
 
   @Inject
@@ -68,8 +68,8 @@ public class GadgetDataServlet extends InjectedServlet {
   }
 
   @Inject
-  public void setGadgetTokenDecoder(GadgetTokenDecoder gadgetTokenDecoder) {
-    this.gadgetTokenDecoder = gadgetTokenDecoder;
+  public void setSecurityTokenDecoder(SecurityTokenDecoder securityTokenDecoder) {
+    this.securityTokenDecoder = securityTokenDecoder;
   }
 
   @Inject
@@ -105,7 +105,7 @@ public class GadgetDataServlet extends InjectedServlet {
     if (token == null || token.trim().length() == 0) {
       throw new GadgetException(GadgetException.Code.INVALID_GADGET_TOKEN);
     }
-    GadgetToken securityToken = gadgetTokenDecoder.createToken(token);
+    SecurityToken securityToken = securityTokenDecoder.createToken(token);
 
     // TODO: Improve json input handling. The json request should get auto
     // translated into objects

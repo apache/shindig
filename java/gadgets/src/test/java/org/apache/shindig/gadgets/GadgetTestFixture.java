@@ -19,7 +19,7 @@
 
 package org.apache.shindig.gadgets;
 
-import org.apache.shindig.common.GadgetTokenDecoder;
+import org.apache.shindig.common.SecurityTokenDecoder;
 
 import java.util.concurrent.Executor;
 
@@ -29,8 +29,8 @@ import javax.servlet.http.HttpServletResponse;
 public abstract class GadgetTestFixture extends EasyMockTestCase {
   public final HttpServletRequest request = mock(HttpServletRequest.class);
   public final HttpServletResponse response = mock(HttpServletResponse.class);
-  public final GadgetTokenDecoder gadgetTokenDecoder
-      = mock(GadgetTokenDecoder.class);
+  public final SecurityTokenDecoder securityTokenDecoder
+      = mock(SecurityTokenDecoder.class);
   public final GadgetServer gadgetServer;
   public final ContentFetcherFactory fetcherFactory
       = mock(ContentFetcherFactory.class);

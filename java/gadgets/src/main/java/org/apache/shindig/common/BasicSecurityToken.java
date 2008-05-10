@@ -28,7 +28,7 @@ import java.util.Map;
 /**
  * Primitive token implementation that uses stings as tokens.
  */
-public class BasicGadgetToken implements GadgetToken {
+public class BasicSecurityToken implements SecurityToken {
   /** serialized form of the token */
   private final String token;
   
@@ -61,13 +61,13 @@ public class BasicGadgetToken implements GadgetToken {
    * @param maxAge max age of the token (in seconds)
    * @throws BlobCrypterException 
    */
-  public BasicGadgetToken(String token, int maxAge)
+  public BasicSecurityToken(String token, int maxAge)
   throws BlobCrypterException {
     this.token = token;
     this.tokenData = crypter.unwrap(token, maxAge);
   }
   
-  public BasicGadgetToken(String owner, String viewer, String app,
+  public BasicSecurityToken(String owner, String viewer, String app,
       String domain, String appUrl, String moduleId) throws BlobCrypterException {
     tokenData = new HashMap<String, String>(5,1);
     tokenData.put(OWNER_KEY, owner);

@@ -21,8 +21,8 @@ import junit.framework.TestCase;
 
 import net.oauth.OAuthServiceProvider;
 
-import org.apache.shindig.common.BasicGadgetToken;
-import org.apache.shindig.common.GadgetToken;
+import org.apache.shindig.common.BasicSecurityToken;
+import org.apache.shindig.common.SecurityToken;
 import org.apache.shindig.gadgets.ContentFetcher;
 import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.RemoteContent;
@@ -90,9 +90,9 @@ public class OAuthFetcherTest extends TestCase {
   /**
    * Builds a nicely populated gadget token.
    */
-  public static GadgetToken getGadgetToken(String owner, String viewer)
+  public static SecurityToken getSecurityToken(String owner, String viewer)
       throws Exception {
-    return new BasicGadgetToken(owner, viewer, "app", "container.com",
+    return new BasicSecurityToken(owner, viewer, "app", "container.com",
         GADGET_URL, "0");
   }
 
@@ -102,7 +102,7 @@ public class OAuthFetcherTest extends TestCase {
   }
   
   public ContentFetcher getFetcher(
-      GadgetToken authToken, OAuthRequestParams params) throws GadgetException {
+      SecurityToken authToken, OAuthRequestParams params) throws GadgetException {
     OAuthFetcher fetcher = new OAuthFetcher(
         tokenStore, blobCrypter, serviceProvider, authToken, params);
     fetcher.init();
@@ -116,7 +116,7 @@ public class OAuthFetcherTest extends TestCase {
     RemoteContent response;
     
     fetcher = getFetcher(
-        getGadgetToken("owner", "owner"),
+        getSecurityToken("owner", "owner"),
         new OAuthRequestParams(SERVICE_NAME, null, null));
     request = new RemoteContentRequest(
         new URI(FakeOAuthServiceProvider.RESOURCE_URL));
@@ -129,7 +129,7 @@ public class OAuthFetcherTest extends TestCase {
     serviceProvider.browserVisit(approvalUrl + "&user_data=hello-oauth");
     
     fetcher = getFetcher(
-        getGadgetToken("owner", "owner"),
+        getSecurityToken("owner", "owner"),
         new OAuthRequestParams(SERVICE_NAME, null, clientState));
     request = new RemoteContentRequest(
         new URI(FakeOAuthServiceProvider.RESOURCE_URL));
@@ -137,7 +137,7 @@ public class OAuthFetcherTest extends TestCase {
     assertEquals("User data is hello-oauth", response.getResponseAsString());
     
     fetcher = getFetcher(
-        getGadgetToken("owner", "somebody else"),
+        getSecurityToken("owner", "somebody else"),
         new OAuthRequestParams(SERVICE_NAME, null, null));
     request = new RemoteContentRequest(
         new URI(FakeOAuthServiceProvider.RESOURCE_URL));
@@ -145,7 +145,7 @@ public class OAuthFetcherTest extends TestCase {
     assertEquals("User data is hello-oauth", response.getResponseAsString());
     
     fetcher = getFetcher(
-        getGadgetToken("somebody else", "somebody else"),
+        getSecurityToken("somebody else", "somebody else"),
         new OAuthRequestParams(SERVICE_NAME, null, null));
     request = new RemoteContentRequest(
         new URI(FakeOAuthServiceProvider.RESOURCE_URL));
@@ -158,7 +158,7 @@ public class OAuthFetcherTest extends TestCase {
     serviceProvider.browserVisit(approvalUrl + "&user_data=somebody%20else");
     
     fetcher = getFetcher(
-        getGadgetToken("somebody else", "somebody else"),
+        getSecurityToken("somebody else", "somebody else"),
         new OAuthRequestParams(SERVICE_NAME, null, clientState));
     request = new RemoteContentRequest(
         new URI(FakeOAuthServiceProvider.RESOURCE_URL));

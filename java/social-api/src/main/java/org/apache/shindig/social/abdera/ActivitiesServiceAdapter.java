@@ -65,7 +65,7 @@ public class ActivitiesServiceAdapter extends RestServerCollectionAdapter {
     }
 
     List<Activity> listOfObj = activitiesService.getActivities(ids,
-        getGadgetToken(request, uid)).getResponse();
+        getSecurityToken(request, uid)).getResponse();
     return returnFeed(request, TITLE, AUTHOR, (List)listOfObj);
   }
 
@@ -78,7 +78,7 @@ public class ActivitiesServiceAdapter extends RestServerCollectionAdapter {
     String aid = request.getTarget().getParameter("aid");
 
     Activity obj = activitiesService.getActivity(uid, aid,
-        getGadgetToken(request, uid)).getResponse();
+        getSecurityToken(request, uid)).getResponse();
 
     // TODO: how is entry id determined. check.
     String entryId = request.getUri().toString();

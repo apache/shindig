@@ -17,7 +17,7 @@
 */
 package org.apache.shindig.social.abdera;
 
-import org.apache.shindig.common.GadgetToken;
+import org.apache.shindig.common.SecurityToken;
 import org.apache.shindig.social.opensocial.PeopleService;
 import org.apache.shindig.social.opensocial.model.Activity;
 import org.apache.shindig.social.opensocial.model.IdSpec;
@@ -200,10 +200,10 @@ public abstract class RestServerCollectionAdapter
     }
   }
 
-  protected GadgetToken getGadgetToken(RequestContext request,
+  protected SecurityToken getSecurityToken(RequestContext request,
       final String viewerId) {
     // TODO: Replace this with the real thing
-    return new GadgetToken() {
+    return new SecurityToken() {
       public String toSerialForm() {
         return "";
       }
@@ -235,7 +235,7 @@ public abstract class RestServerCollectionAdapter
   }
 
   protected List<String> getFriendIds(RequestContext request, String uid) {
-    GadgetToken token = getGadgetToken(request, uid);
+    SecurityToken token = getSecurityToken(request, uid);
     IdSpec idSpec = new IdSpec(null, IdSpec.Type.VIEWER_FRIENDS);
     try {
       return peopleService.getIds(idSpec, token);

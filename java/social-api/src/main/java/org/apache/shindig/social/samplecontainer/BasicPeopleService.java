@@ -17,7 +17,7 @@
  */
 package org.apache.shindig.social.samplecontainer;
 
-import org.apache.shindig.common.GadgetToken;
+import org.apache.shindig.common.SecurityToken;
 import org.apache.shindig.social.ResponseItem;
 import org.apache.shindig.social.opensocial.PeopleService;
 import org.apache.shindig.social.opensocial.model.ApiCollection;
@@ -52,7 +52,7 @@ public class BasicPeopleService implements PeopleService {
     this.fetcher = fetcher;
   }
 
-  private List<Person> getPeople(List<String> ids, GadgetToken token) {
+  private List<Person> getPeople(List<String> ids, SecurityToken token) {
     Map<String, Person> allPeople = fetcher.getAllPeople();
 
     List<Person> people = new ArrayList<Person>();
@@ -73,7 +73,7 @@ public class BasicPeopleService implements PeopleService {
 
   public ResponseItem<ApiCollection<Person>> getPeople(List<String> ids,
       SortOrder sortOrder, FilterType filter, int first, int max,
-      Set<String> profileDetails, GadgetToken token) {
+      Set<String> profileDetails, SecurityToken token) {
     List<Person> people = getPeople(ids, token);
 
     // We can pretend that by default the people are in top friends order
@@ -93,13 +93,13 @@ public class BasicPeopleService implements PeopleService {
     return new ResponseItem<ApiCollection<Person>>(collection);
   }
 
-  public ResponseItem<Person> getPerson(String id, GadgetToken token) {
+  public ResponseItem<Person> getPerson(String id, SecurityToken token) {
     List<String> ids = new ArrayList<String>();
     ids.add(id);
     return new ResponseItem<Person>(getPeople(ids, token).get(0));
   }
 
-  public List<String> getIds(IdSpec idSpec, GadgetToken token)
+  public List<String> getIds(IdSpec idSpec, SecurityToken token)
       throws JSONException {
     Map<String, List<String>> friendIds = fetcher.getFriendIds();
 

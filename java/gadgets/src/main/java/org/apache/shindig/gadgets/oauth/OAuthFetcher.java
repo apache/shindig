@@ -16,7 +16,7 @@
  */
 package org.apache.shindig.gadgets.oauth;
 
-import org.apache.shindig.common.GadgetToken;
+import org.apache.shindig.common.SecurityToken;
 import org.apache.shindig.gadgets.ChainedContentFetcher;
 import org.apache.shindig.gadgets.ContentFetcher;
 import org.apache.shindig.gadgets.GadgetException;
@@ -71,7 +71,7 @@ public class OAuthFetcher extends ChainedContentFetcher {
   /**
    * The gadget security token, with info about owner/viewer/gadget.
    */
-  protected final GadgetToken authToken;
+  protected final SecurityToken authToken;
 
   /**
    * The gadget's nickname for the service provider.
@@ -133,7 +133,7 @@ public class OAuthFetcher extends ChainedContentFetcher {
       GadgetOAuthTokenStore tokenStore,
       BlobCrypter oauthCrypter,
       ContentFetcher nextFetcher,
-      GadgetToken authToken,
+      SecurityToken authToken,
       OAuthRequestParams params) {
     super(nextFetcher);
     this.oauthCrypter = oauthCrypter;

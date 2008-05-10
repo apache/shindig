@@ -19,7 +19,7 @@
 
 package org.apache.shindig.gadgets.http;
 
-import org.apache.shindig.common.GadgetTokenDecoder;
+import org.apache.shindig.common.SecurityTokenDecoder;
 import org.apache.shindig.gadgets.ContainerConfig;
 import org.apache.shindig.gadgets.Gadget;
 import org.apache.shindig.gadgets.GadgetContentFilter;
@@ -76,7 +76,7 @@ public class GadgetRenderingTask {
   private final GadgetFeatureRegistry registry;
   private final ContainerConfig containerConfig;
   private final UrlGenerator urlGenerator;
-  private final GadgetTokenDecoder tokenDecoder;
+  private final SecurityTokenDecoder tokenDecoder;
   private GadgetContext context;
   private final List<GadgetContentFilter> filters;
   private final LockedDomainService domainLocker;
@@ -522,7 +522,7 @@ public class GadgetRenderingTask {
                              GadgetFeatureRegistry registry,
                              ContainerConfig containerConfig,
                              UrlGenerator urlGenerator,
-                             GadgetTokenDecoder tokenDecoder,
+                             SecurityTokenDecoder tokenDecoder,
                              LockedDomainService lockedDomainService) {
 
     this.server = server;

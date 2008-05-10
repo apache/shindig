@@ -36,7 +36,7 @@ public class CommonGuiceModule extends AbstractModule {
     // Once that happens then this common guice module can also move to
     // java/common.
     bind(ContentFetcher.class).to(BasicRemoteContentFetcher.class);
-    bind(GadgetTokenDecoder.class).to(BasicGadgetTokenDecoder.class);
+    bind(SecurityTokenDecoder.class).to(BasicSecurityTokenDecoder.class);
     bind(ContentCache.class).to(BasicContentCache.class);
   }
 }

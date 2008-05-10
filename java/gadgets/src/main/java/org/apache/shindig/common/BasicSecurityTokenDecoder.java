@@ -26,10 +26,10 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 
 /**
- * A GadgetTokenDecoder implementation that just provides dummy data to satisfy
+ * A SecurityTokenDecoder implementation that just provides dummy data to satisfy
  * tests and API calls. Do not use this for any security applications.
  */
-public class BasicGadgetTokenDecoder implements GadgetTokenDecoder {
+public class BasicSecurityTokenDecoder implements SecurityTokenDecoder {
 
   private static final int OWNER_INDEX = 0;
   private static final int VIEWER_INDEX = 1;
@@ -43,10 +43,10 @@ public class BasicGadgetTokenDecoder implements GadgetTokenDecoder {
    *
    * Returns a token with some faked out values.
    */
-  public GadgetToken createToken(String stringToken) throws GadgetException {
+  public SecurityToken createToken(String stringToken) throws GadgetException {
     try {
       String[] tokens = stringToken.split(":");
-      return new BasicGadgetToken(
+      return new BasicSecurityToken(
           URLDecoder.decode(tokens[OWNER_INDEX], "UTF-8"),
           URLDecoder.decode(tokens[VIEWER_INDEX], "UTF-8"),
           URLDecoder.decode(tokens[APP_ID_INDEX], "UTF-8"),
@@ -63,6 +63,6 @@ public class BasicGadgetTokenDecoder implements GadgetTokenDecoder {
   /**
    * Creates a signer with 24 hour token expiry
    */
-  public BasicGadgetTokenDecoder() {
+  public BasicSecurityTokenDecoder() {
   }
 }

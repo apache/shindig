@@ -57,7 +57,7 @@ public class DataServiceAdapter extends RestServerCollectionAdapter {
     List<String> ids = getFriendIds(request, uid);
 
     Map<String, Map<String, String>> dataMap = dataService.getPersonData(ids,
-        getKeys(request), getGadgetToken(request, uid)).getResponse();
+        getKeys(request), getSecurityToken(request, uid)).getResponse();
 
     // TODO: This return type is not quite right. We should fix this to
     // match the spec once we have a full json format in place.
@@ -79,7 +79,7 @@ public class DataServiceAdapter extends RestServerCollectionAdapter {
     ids.add(uid);
 
     Map<String, String> data = dataService.getPersonData(ids,
-        getKeys(request), getGadgetToken(request, uid)).getResponse().get(uid);
+        getKeys(request), getSecurityToken(request, uid)).getResponse().get(uid);
 
     // TODO: how is entry id determined. check.
     String entryId = request.getUri().toString();

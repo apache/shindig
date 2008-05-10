@@ -17,8 +17,8 @@
  */
 package org.apache.shindig.gadgets;
 
-import org.apache.shindig.common.BasicGadgetToken;
-import org.apache.shindig.common.GadgetToken;
+import org.apache.shindig.common.BasicSecurityToken;
+import org.apache.shindig.common.SecurityToken;
 import org.apache.shindig.gadgets.spec.GadgetSpec;
 import org.apache.shindig.util.BlobCrypterException;
 import static org.easymock.EasyMock.eq;
@@ -44,9 +44,9 @@ public class GadgetServerTest extends GadgetTestFixture {
 
     @Override
     @SuppressWarnings("unused")
-    public GadgetToken getToken() throws GadgetException {
+    public SecurityToken getToken() throws GadgetException {
       try {
-        return new BasicGadgetToken("o", "v", "a", "d", "u", "m");
+        return new BasicSecurityToken("o", "v", "a", "d", "u", "m");
       } catch (BlobCrypterException bce) {
         throw new RuntimeException(bce);
       }

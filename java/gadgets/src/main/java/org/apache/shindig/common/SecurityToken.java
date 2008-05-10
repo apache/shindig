@@ -20,9 +20,9 @@ package org.apache.shindig.common;
 
 /**
  * An abstract representation of a signing token.
- * Use in conjunction with @code GadgetTokenDecoder.
+ * Use in conjunction with @code SecurityTokenDecoder.
  */
-public interface GadgetToken {
+public interface SecurityToken {
 
   /**
    * Serializes the token into a string. This can be the exact same as

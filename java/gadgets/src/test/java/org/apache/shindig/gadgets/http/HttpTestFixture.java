@@ -37,10 +37,10 @@ public abstract class HttpTestFixture extends GadgetTestFixture {
     super();
     proxyHandler = new ProxyHandler(
         contentFetcherFactory,
-        gadgetTokenDecoder,
+        securityTokenDecoder,
         lockedDomainService);
     gadgetRenderer = new GadgetRenderingTask(gadgetServer, registry,
-        containerConfig, urlGenerator, gadgetTokenDecoder, lockedDomainService);
+        containerConfig, urlGenerator, securityTokenDecoder, lockedDomainService);
     jsonRpcHandler = new JsonRpcHandler(executor, gadgetServer, urlGenerator);
   }
 }
