@@ -36,7 +36,15 @@
 
 include_once ('config.php');
 
-// All configurable classes are autoloaded
+// basic sanity check if we have all required modules
+$modules = array('json', 'mcrypt', 'SimpleXML', 'libxml', 'curl');
+foreach ($modules as $module) {
+	if (!extension_loaded($module)) {
+		die("Shindig requires the {$module} extention, see <a href='http://www.php.net/{$module}'>http://www.php.net/{$module}</a> for more info");
+	}
+}
+
+// All configurable classes are autoloaded (see config.php for the configurable classes)
 // To load these, we scan our entire directory structure
 function __autoload($className)
 {
@@ -51,10 +59,6 @@ function __autoload($className)
 	}
 }
 
-// prefix our Zend framework dir to the include path so it picks it up before any other 
-// system libs to avoid conflicts
-ini_set('include_path', realpath(dirname(__FILE__))."/src/common:".ini_get('include_path'));
-
 $servletMap = array(
 	Config::get('web_prefix') . '/gadgets/files'    => 'FilesServlet',
 	Config::get('web_prefix') . '/gadgets/js'       => 'JsServlet',
@@ -64,6 +68,7 @@ $servletMap = array(
 	Config::get('web_prefix') . '/social/data'      => 'GadgetDataServlet'
 );
 
+// Try to match the request url to our servlet mapping
 $servlet = false;
 $uri = $_SERVER["REQUEST_URI"];
 foreach ($servletMap as $url => $class) {
@@ -72,13 +77,8 @@ foreach ($servletMap as $url => $class) {
 		break;
 	}
 }
+// If we found a correlating servlet, instance and call it. Otherwise give a 404 error
 if ($servlet) {
-	if ($class == 'GadgetDataServlet') {
-		$path = 'src/socialdata/http';
-	} else {
-		$path = 'src/gadgets/http';
-	}
-	require "{$path}/{$class}.php";
 	$class = new $class();
 	if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 		$class->doPost();

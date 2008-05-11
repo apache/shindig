@@ -24,13 +24,13 @@
 /**
  * @see Zend_Validate_Abstract
  */
-require_once 'Zend/Validate/Abstract.php';
+require_once 'src/common/Zend/Validate/Abstract.php';
 
 
 /**
  * @see Zend_Validate_Hostname
  */
-require_once 'Zend/Validate/Hostname.php';
+require_once 'src/common/Zend/Validate/Hostname.php';
 
 
 /**
@@ -202,7 +202,7 @@ class Zend_Validate_EmailAddress extends Zend_Validate_Abstract
                  * MX checks are not supported by this system
                  * @see Zend_Validate_Exception
                  */
-                require_once 'Zend/Validate/Exception.php';
+                require_once 'src/common/Zend/Validate/Exception.php';
                 throw new Zend_Validate_Exception('Internal error: MX checking not available on this system');
             }
         }

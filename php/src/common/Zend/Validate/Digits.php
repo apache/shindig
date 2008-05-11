@@ -24,7 +24,7 @@
 /**
  * @see Zend_Validate_Abstract
  */
-require_once 'Zend/Validate/Abstract.php';
+require_once 'src/common/Zend/Validate/Abstract.php';
 
 
 /**
@@ -85,7 +85,7 @@ class Zend_Validate_Digits extends Zend_Validate_Abstract
             /**
              * @see Zend_Filter_Digits
              */
-            require_once 'Zend/Filter/Digits.php';
+            require_once 'src/common/Zend/Filter/Digits.php';
             self::$_filter = new Zend_Filter_Digits();
         }
 

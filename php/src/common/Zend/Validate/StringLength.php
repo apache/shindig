@@ -24,7 +24,7 @@
 /**
  * @see Zend_Validate_Abstract
  */
-require_once 'Zend/Validate/Abstract.php';
+require_once 'src/common/Zend/Validate/Abstract.php';
 
 
 /**
@@ -107,7 +107,7 @@ class Zend_Validate_StringLength extends Zend_Validate_Abstract
             /**
              * @see Zend_Validate_Exception
              */
-            require_once 'Zend/Validate/Exception.php';
+            require_once 'src/common/Zend/Validate/Exception.php';
             throw new Zend_Validate_Exception("The minimum must be less than or equal to the maximum length, but $min >"
                                             . " $this->_max");
         }
@@ -140,7 +140,7 @@ class Zend_Validate_StringLength extends Zend_Validate_Abstract
             /**
              * @see Zend_Validate_Exception
              */
-            require_once 'Zend/Validate/Exception.php';
+            require_once 'src/common/Zend/Validate/Exception.php';
             throw new Zend_Validate_Exception("The maximum must be greater than or equal to the minimum length, but "
                                             . "$max < $this->_min");
         } else {

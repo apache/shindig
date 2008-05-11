@@ -24,7 +24,7 @@
 /**
  * @see Zend_Validate_Abstract
  */
-require_once 'Zend/Validate/Abstract.php';
+require_once 'src/common/Zend/Validate/Abstract.php';
 
 
 /**
@@ -107,9 +107,9 @@ class Zend_Validate_Date extends Zend_Validate_Abstract
     public function setLocale($locale = null)
     {
         if ($locale !== null) {
-            require_once 'Zend/Locale.php';
+            require_once 'src/common/Zend/Locale.php';
             if (!Zend_Locale::isLocale($locale)) {
-                require_once 'Zend/Validate/Exception.php';
+                require_once 'src/common/Zend/Validate/Exception.php';
                 throw new Zend_Validate_Exception("The locale '$locale' is no known locale");
             }
         }
@@ -156,7 +156,7 @@ class Zend_Validate_Date extends Zend_Validate_Abstract
         $this->_setValue($valueString);
 
         if (($this->_format !== null) or ($this->_locale !== null)) {
-            require_once 'Zend/Date.php';
+            require_once 'src/common/Zend/Date.php';
             if (!Zend_Date::isDate($value, $this->_format, $this->_locale)) {
                 $this->_error(self::FALSEFORMAT);
                 return false;

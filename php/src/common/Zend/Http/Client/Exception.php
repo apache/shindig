@@ -20,7 +20,7 @@
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  */
 
-require_once 'Zend/Http/Exception.php';
+require_once 'src/common/Zend/Http/Exception.php';
 
 /**
  * @category   Zend

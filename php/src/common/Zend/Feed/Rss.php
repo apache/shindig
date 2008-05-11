@@ -24,12 +24,12 @@
 /**
  * @see Zend_Feed_Abstract
  */
-require_once 'Zend/Feed/Abstract.php';
+require_once 'src/common/Zend/Feed/Abstract.php';
 
 /**
  * @see Zend_Feed_Entry_Rss
  */
-require_once 'Zend/Feed/Entry/Rss.php';
+require_once 'src/common/Zend/Feed/Entry/Rss.php';
 
 
 /**
@@ -85,7 +85,7 @@ class Zend_Feed_Rss extends Zend_Feed_Abstract
             /** 
              * @see Zend_Feed_Exception
              */
-            require_once 'Zend/Feed/Exception.php';
+            require_once 'src/common/Zend/Feed/Exception.php';
             throw new Zend_Feed_Exception('No root <channel> element found, cannot parse channel.');
         }
 
@@ -492,7 +492,7 @@ class Zend_Feed_Rss extends Zend_Feed_Abstract
             /** 
              * @see Zend_Feed_Exception
              */
-            require_once 'Zend/Feed/Exception.php';
+            require_once 'src/common/Zend/Feed/Exception.php';
             throw new Zend_Feed_Exception('Cannot send RSS because headers have already been sent.');
         }
 
