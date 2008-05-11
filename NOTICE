@@ -34,14 +34,9 @@ code and source code.
 The following provides more details on the included cryptographic
 software:
 
-    Apache Shindig interfaces with the Java JCE APIs to provide digital
-    signing and encryption of messages using the AES, SHA1, and
-    HMAC-SHA1 standards.
+    Apache Shindig interfaces with the Java JCE APIs to provide
+    encryption of messages using the AES standard.
 
-    Apache Shindig interfaces with the OAuth library
-    <http://code.google.com/p/oauth/> to provide digital signing
-    of messages according to the OAuth standard.
-
-    Apache Shindig PHP interfaces with the mcrypt API to provide
-    digital signing and encryption to messages using AES, SHA1
-    and HMAC-SHA1 standards.
+    Apache Shindig PHP interfaces with the mcrypt API
+    <http://mcrypt.sourceforge.net/> to provide encryption
+    of messages using the AES standard.
