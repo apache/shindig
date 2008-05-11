@@ -24,7 +24,7 @@
 /**
  * @see Zend_Validate_Abstract
  */
-require_once 'Zend/Validate/Abstract.php';
+require_once 'src/common/Zend/Validate/Abstract.php';
 
 
 /**
@@ -112,7 +112,7 @@ class Zend_Validate_Regex extends Zend_Validate_Abstract
             /**
              * @see Zend_Validate_Exception
              */
-            require_once 'Zend/Validate/Exception.php';
+            require_once 'src/common/Zend/Validate/Exception.php';
             throw new Zend_Validate_Exception("Internal error matching pattern '$this->_pattern' against value '$valueString'");
         }
         if (!$status) {

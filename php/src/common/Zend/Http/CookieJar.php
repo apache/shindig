@@ -114,7 +114,7 @@ class Zend_Http_CookieJar
             if (! isset($this->cookies[$domain][$path])) $this->cookies[$domain][$path] = array();
             $this->cookies[$domain][$path][$cookie->getName()] = $cookie;
         } else {
-            require_once 'Zend/Http/Exception.php';
+            require_once 'src/common/Zend/Http/Exception.php';
             throw new Zend_Http_Exception('Supplient argument is not a valid cookie string or object');
         }
     }
@@ -129,7 +129,7 @@ class Zend_Http_CookieJar
     public function addCookiesFromResponse($response, $ref_uri)
     {
         if (! $response instanceof Zend_Http_Response) {
-            require_once 'Zend/Http/Exception.php';        
+            require_once 'src/common/Zend/Http/Exception.php';        
             throw new Zend_Http_Exception('$response is expected to be a Response object, ' .
                 gettype($response) . ' was passed');
         }
@@ -173,7 +173,7 @@ class Zend_Http_CookieJar
     {
         if (is_string($uri)) $uri = Zend_Uri::factory($uri);
         if (! $uri instanceof Zend_Uri_Http) {
-            require_once 'Zend/Http/Exception.php';    
+            require_once 'src/common/Zend/Http/Exception.php';    
             throw new Zend_Http_Exception("Invalid URI string or object passed");
         }
 
@@ -214,7 +214,7 @@ class Zend_Http_CookieJar
         }
 
         if (! $uri instanceof Zend_Uri_Http) {
-            require_once 'Zend/Http/Exception.php';
+            require_once 'src/common/Zend/Http/Exception.php';
             throw new Zend_Http_Exception('Invalid URI specified');
         }
 
@@ -237,7 +237,7 @@ class Zend_Http_CookieJar
                     break;
 
                 default:
-                    require_once 'Zend/Http/Exception.php';
+                    require_once 'src/common/Zend/Http/Exception.php';
                     throw new Zend_Http_Exception("Invalid value passed for \$ret_as: {$ret_as}");
                     break;
             }

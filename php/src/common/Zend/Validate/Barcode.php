@@ -24,7 +24,7 @@
 /**
  * @see Zend_Validate_Abstract
  */
-require_once 'Zend/Validate/Abstract.php';
+require_once 'src/common/Zend/Validate/Abstract.php';
 
 
 /**
@@ -73,12 +73,12 @@ class Zend_Validate_Barcode extends Zend_Validate_Abstract
                 $className = 'Ean13';
                 break;
             default:
-                require_once 'Zend/Validate/Exception.php';
+                require_once 'src/common/Zend/Validate/Exception.php';
                 throw new Zend_Validate_Exception("Barcode type '$barcodeType' is not supported'");
                 break;
         }
 
-        require_once 'Zend/Validate/Barcode/' . $className . '.php';
+        require_once 'src/common/Zend/Validate/Barcode/' . $className . '.php';
 
         $class = 'Zend_Validate_Barcode_' . $className;
         $this->_barcodeValidator = new $class;

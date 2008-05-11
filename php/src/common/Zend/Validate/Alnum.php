@@ -24,7 +24,7 @@
 /**
  * @see Zend_Validate_Abstract
  */
-require_once 'Zend/Validate/Abstract.php';
+require_once 'src/common/Zend/Validate/Abstract.php';
 
 
 /**
@@ -103,7 +103,7 @@ class Zend_Validate_Alnum extends Zend_Validate_Abstract
             /**
              * @see Zend_Filter_Alnum
              */
-            require_once 'Zend/Filter/Alnum.php';
+            require_once 'src/common/Zend/Filter/Alnum.php';
             self::$_filter = new Zend_Filter_Alnum();
         }
 

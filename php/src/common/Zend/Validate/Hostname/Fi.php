@@ -24,7 +24,7 @@
 /**
  * @see Zend_Validate_Hostname_Interface
  */
-require_once 'Zend/Validate/Hostname/Interface.php';
+require_once 'src/common/Zend/Validate/Hostname/Interface.php';
 
 
 /**
