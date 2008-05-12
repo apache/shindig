@@ -26,6 +26,7 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 /**
@@ -36,7 +37,7 @@ public class BasicContentCacheTest extends TestCase {
    * Used to parse Expires: header.
    */
   private final static DateFormat dateFormat
-      = new SimpleDateFormat("EEE, d MMM yyyy HH:mm:ss Z");
+      = new SimpleDateFormat("EEE, d MMM yyyy HH:mm:ss Z", Locale.US);
 
   private ContentCache cache;
 
