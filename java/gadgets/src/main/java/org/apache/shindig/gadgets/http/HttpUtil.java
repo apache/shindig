@@ -24,11 +24,13 @@ import org.apache.shindig.gadgets.Gadget;
 import org.apache.shindig.gadgets.GadgetContext;
 import org.apache.shindig.gadgets.spec.GadgetSpec;
 import org.apache.shindig.gadgets.spec.View;
+import org.joda.time.DateTimeZone;
+import org.joda.time.format.DateTimeFormat;
+import org.joda.time.format.DateTimeFormatter;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
@@ -46,24 +48,11 @@ public class HttpUtil {
   public static final long START_TIME = System.currentTimeMillis();
   // 1 year.
   private static final int DEFAULT_TTL = 60 * 60 * 24 * 365;
-
-  /**
-   * Format to use for date headers (see section 3.3.1 of RFC 2616).
-   * 
-   * Note that the SimpleDateFormat parsing rules are generous and can read
-   * all three of the formats specified by RFC 2616.
-   */
-  public static final String HTTP_DATE_HEADER_FORMAT =
-      "EEE, dd MMM yyyy HH:mm:ss zzz";
   
-  // SimpleDateFormat: slow to init, but not thread-safe.
-  private static ThreadLocal<SimpleDateFormat> httpDateFormatter = 
-      new ThreadLocal<SimpleDateFormat>() {
-        @Override
-        protected SimpleDateFormat initialValue() {
-          return new SimpleDateFormat(HTTP_DATE_HEADER_FORMAT, Locale.US);
-        }
-      };
+  private static DateTimeFormatter httpDateFormatter = DateTimeFormat
+      .forPattern("EEE, dd MMM yyyy HH:mm:ss 'GMT'")
+      .withLocale(Locale.US)
+      .withZone(DateTimeZone.UTC);
 
   /**
    * Sets default caching Headers (Expires, Cache-Control, Last-Modified)
@@ -108,7 +97,7 @@ public class HttpUtil {
    */
   public static Date parseDate(String dateStr) {
     try {
-      return httpDateFormatter.get().parse(dateStr);
+      return httpDateFormatter.parseDateTime(dateStr).toDate();
     } catch (Exception e) {
       // Don't care.
       return null;
@@ -122,7 +111,7 @@ public class HttpUtil {
    * @return HTTP date string.
    */
   public static String formatDate(Date date) {
-    return httpDateFormatter.get().format(date);
+    return httpDateFormatter.print(date.getTime());
   }
 
 

@@ -755,6 +755,11 @@
         <artifactId>abdera-extensions-html</artifactId>
         <version>0.5.0-incubating-SNAPSHOT</version>
       </dependency>
+      <dependency>
+        <groupId>joda-time</groupId>
+        <artifactId>joda-time</artifactId>
+        <version>1.5.2</version>
+      </dependency>
     </dependencies>
   </dependencyManagement>
 </project>
