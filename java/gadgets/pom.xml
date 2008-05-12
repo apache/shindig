@@ -214,10 +214,6 @@ under the License.
       <artifactId>json</artifactId>
     </dependency>
     <dependency>
-      <groupId>org.hamcrest</groupId>
-      <artifactId>hamcrest-all</artifactId>
-    </dependency>
-    <dependency>
       <groupId>caja</groupId>
       <artifactId>caja</artifactId>
       <scope>compile</scope>
