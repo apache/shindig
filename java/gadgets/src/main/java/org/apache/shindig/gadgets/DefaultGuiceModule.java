@@ -46,6 +46,9 @@ public class DefaultGuiceModule extends AbstractModule {
   protected void configure() {
     Names.bindProperties(this.binder(), properties);
 
+    bind(ContentFetcher.class).to(BasicRemoteContentFetcher.class);
+    bind(ContentCache.class).to(BasicContentCache.class);
+
     bind(RemoteContentFetcherFactory.class);
     bind(SigningFetcherFactory.class);
     // Needed becuase OAuth fetcher factory fetches its config

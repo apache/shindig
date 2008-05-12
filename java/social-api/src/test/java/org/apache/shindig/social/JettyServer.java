@@ -38,7 +38,6 @@ public class JettyServer {
       "org.apache.shindig.social.abdera.SocialApiProvider";
   public static final String GUICE_MODULES =
       "org.apache.shindig.common.CommonGuiceModule:" +
-      "org.apache.shindig.gadgets.http.HttpGuiceModule:" +
       "org.apache.shindig.social.SocialApiGuiceModule";
 
   private final int port;
