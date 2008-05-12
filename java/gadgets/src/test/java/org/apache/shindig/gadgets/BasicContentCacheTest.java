@@ -28,6 +28,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.TimeZone;
 
 /**
  * Tests for basic content cache
@@ -37,7 +38,10 @@ public class BasicContentCacheTest extends TestCase {
    * Used to parse Expires: header.
    */
   private final static DateFormat dateFormat
-      = new SimpleDateFormat("EEE, d MMM yyyy HH:mm:ss Z", Locale.US);
+      = new SimpleDateFormat("EEE, d MMM yyyy HH:mm:ss z", Locale.US);
+  static {
+    dateFormat.setTimeZone(TimeZone.getTimeZone("GMT"));
+  }
 
   private ContentCache cache;
 
