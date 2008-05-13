@@ -30,49 +30,49 @@ import java.util.List;
  *
  * TODO: Move cache checking code into HttpUtil
  */
-public abstract class AbstractContentCache implements ContentCache {
+public abstract class AbstractHttpCache implements HttpCache {
 
-  public final RemoteContent getContent(RemoteContentRequest request) {
+  public final HttpResponse getResponse(HttpRequest request) {
     if (canCacheRequest(request)) {
-      return getContent(request.getUri());
+      return getResponse(request.getUri());
     }
     return null;
   }
 
-  public final RemoteContent getContent(URI uri) {
+  public final HttpResponse getResponse(URI uri) {
     if (uri == null) return null;
-    return checkContent(getContentImpl(uri));
+    return checkResponse(getResponseImpl(uri));
   }
 
-  protected abstract RemoteContent getContentImpl(URI uri);
+  protected abstract HttpResponse getResponseImpl(URI uri);
 
-  public void addContent(RemoteContentRequest request, RemoteContent content) {
+  public void addResponse(HttpRequest request, HttpResponse response) {
     if (canCacheRequest(request)) {
-      addContent(request.getUri(), content);
+      addResponse(request.getUri(), response);
     }
   }
 
-  public void addContent(URI uri, RemoteContent content) {
-    content = checkContent(content);
-    if (uri == null || content == null) return;
+  public void addResponse(URI uri, HttpResponse response) {
+    response = checkResponse(response);
+    if (uri == null || response == null) return;
     // Clone the URI to prevent outside references from preventing collection
-    addContentImpl(URI.create(uri.toString()), content);
+    addResponseImpl(URI.create(uri.toString()), response);
   }
 
-  protected abstract void addContentImpl(URI uri, RemoteContent content);
+  protected abstract void addResponseImpl(URI uri, HttpResponse response);
 
-  public RemoteContent removeContent(RemoteContentRequest request) {
-    return removeContent(request.getUri());
+  public HttpResponse removeResponse(HttpRequest request) {
+    return removeResponse(request.getUri());
   }
 
-  public RemoteContent removeContent(URI uri) {
+  public HttpResponse removeResponse(URI uri) {
     if (uri == null) return null;
-    RemoteContent content = getContentImpl(uri);
-    removeContentImpl(uri);
-    return checkContent(content);
+    HttpResponse response = getResponseImpl(uri);
+    removeResponseImpl(uri);
+    return checkResponse(response);
   }
 
-  protected abstract RemoteContent removeContentImpl(URI uri);
+  protected abstract HttpResponse removeResponseImpl(URI uri);
 
   /**
    * Utility function to verify that an entry is cacheable and not expired
@@ -81,7 +81,7 @@ public abstract class AbstractContentCache implements ContentCache {
    * @param request
    * @return content or null
    */
-  protected boolean canCacheRequest(RemoteContentRequest request) {
+  protected boolean canCacheRequest(HttpRequest request) {
     return ("GET".equals(request.getMethod()) &&
         !request.getOptions().ignoreCache);
   }
@@ -90,17 +90,17 @@ public abstract class AbstractContentCache implements ContentCache {
    * Utility function to verify that an entry is cacheable and not expired
    * Returns null if the content is no longer cacheable.
    *
-   * @param content
+   * @param response
    * @return content or null
    */
-  protected RemoteContent checkContent(RemoteContent content) {
-    if (content == null) return null;
+  protected HttpResponse checkResponse(HttpResponse response) {
+    if (response == null) return null;
 
-    if (content.getHttpStatusCode() != 200) return null;
+    if (response.getHttpStatusCode() != 200) return null;
 
     long now = System.currentTimeMillis();
 
-    String expires = content.getHeader("Expires");
+    String expires = response.getHeader("Expires");
     if (expires != null) {
       Date expiresDate = HttpUtil.parseDate(expires);
       if (expiresDate == null) {
@@ -109,7 +109,7 @@ public abstract class AbstractContentCache implements ContentCache {
       }
       long expiresMs = expiresDate.getTime();
       if (expiresMs > now) {
-        return content;
+        return response;
       } else {
         return null;
       }
@@ -117,7 +117,7 @@ public abstract class AbstractContentCache implements ContentCache {
 
     // Cache-Control headers may be an explicit max-age, or no-cache, which
     // means we use a default expiration time.
-    String cacheControl = content.getHeader("Cache-Control");
+    String cacheControl = response.getHeader("Cache-Control");
     if (cacheControl != null) {
       String[] directives = cacheControl.split(",");
       for (String directive : directives) {
@@ -134,9 +134,9 @@ public abstract class AbstractContentCache implements ContentCache {
               // absolute expiration
               long maxAgeMs = Long.parseLong(parts[1]) * 1000;
               Date newExpiry = new Date(now + maxAgeMs);
-              content.getAllHeaders()
+              response.getAllHeaders()
                   .put("Expires", Arrays.asList(HttpUtil.formatDate(newExpiry)));
-              return content;
+              return response;
             } catch (NumberFormatException e) {
               return null;
             }
@@ -146,7 +146,7 @@ public abstract class AbstractContentCache implements ContentCache {
     }
 
     // Look for Pragma: no-cache. If present, return null.
-    List<String> pragmas = content.getHeaders("Pragma");
+    List<String> pragmas = response.getHeaders("Pragma");
     if (pragmas != null) {
       for (String pragma : pragmas) {
         if ("no-cache".equals(pragma)) {
@@ -158,9 +158,9 @@ public abstract class AbstractContentCache implements ContentCache {
     // Assume the content is cacheable for the default TTL
     // if no other directives exist
     Date newExpiry = new Date(now + getDefaultTTL());
-    content.getAllHeaders()
+    response.getAllHeaders()
         .put("Expires", Arrays.asList(HttpUtil.formatDate(newExpiry)));
-    return content;
+    return response;
   }
 
   /**

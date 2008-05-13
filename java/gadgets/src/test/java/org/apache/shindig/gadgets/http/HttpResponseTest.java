@@ -27,7 +27,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-public class RemoteContentTest extends TestCase {
+public class HttpResponseTest extends TestCase {
   private Map<String, List<String>> headers;
 
   @Override
@@ -47,8 +47,8 @@ public class RemoteContentTest extends TestCase {
 
   public void testGetEncoding() throws Exception {
     addHeader("Content-Type", "text/plain; charset=TEST-CHARACTER-SET");
-    RemoteContent content = new RemoteContent(200, new byte[0], headers);
-    assertEquals("TEST-CHARACTER-SET", content.getEncoding());
+    HttpResponse response = new HttpResponse(200, new byte[0], headers);
+    assertEquals("TEST-CHARACTER-SET", response.getEncoding());
   }
 
   public void testEncodingDetectionUtf8WithBom() throws Exception {
@@ -57,8 +57,8 @@ public class RemoteContentTest extends TestCase {
       (byte)0xEF, (byte)0xBB, (byte)0xBF, 'h', 'e', 'l', 'l', 'o'
     };
     addHeader("Content-Type", "text/plain; charset=UTF-8");
-    RemoteContent content = new RemoteContent(200, data, headers);
-    assertEquals("hello", content.getResponseAsString());
+    HttpResponse response = new HttpResponse(200, data, headers);
+    assertEquals("hello", response.getResponseAsString());
   }
 
   public void testEncodingDetectionLatin1() throws Exception {
@@ -67,8 +67,8 @@ public class RemoteContentTest extends TestCase {
       'h', (byte)0xE9, 'l', 'l', 'o'
     };
     addHeader("Content-Type", "text/plain; charset=iso-8859-1");
-    RemoteContent content = new RemoteContent(200, data, headers);
-    assertEquals("h\u00E9llo", content.getResponseAsString());
+    HttpResponse response = new HttpResponse(200, data, headers);
+    assertEquals("h\u00E9llo", response.getResponseAsString());
   }
 
   public void testEncodingDetectionBig5() throws Exception {
@@ -76,9 +76,9 @@ public class RemoteContentTest extends TestCase {
       (byte)0xa7, (byte)0x41, (byte)0xa6, (byte)0x6e
     };
     addHeader("Content-Type", "text/plain; charset=BIG5");
-    RemoteContent content = new RemoteContent(200, data, headers);
-    String resp = content.getResponseAsString();
-    assertEquals("\u4F60\u597D", content.getResponseAsString());
+    HttpResponse response = new HttpResponse(200, data, headers);
+    String resp = response.getResponseAsString();
+    assertEquals("\u4F60\u597D", response.getResponseAsString());
   }
 
   public void testPreserveBinaryData() throws Exception {
@@ -86,8 +86,8 @@ public class RemoteContentTest extends TestCase {
         (byte)0x00, (byte)0xDE, (byte)0xEA, (byte)0xDB, (byte)0xEE, (byte)0xF0
     };
     addHeader("Content-Type", "application/octet-stream");
-    RemoteContent content = new RemoteContent(200, data, headers);
-    byte[] out = InputStreamConsumer.readToByteArray(content.getResponse());
+    HttpResponse response = new HttpResponse(200, data, headers);
+    byte[] out = InputStreamConsumer.readToByteArray(response.getResponse());
     assertTrue(Arrays.equals(data, out));
   }
 }

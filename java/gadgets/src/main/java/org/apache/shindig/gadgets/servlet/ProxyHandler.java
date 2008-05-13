@@ -24,10 +24,10 @@ import org.apache.shindig.common.SecurityTokenException;
 import org.apache.shindig.common.util.InputStreamConsumer;
 import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.LockedDomainService;
-import org.apache.shindig.gadgets.http.ContentFetcher;
+import org.apache.shindig.gadgets.http.HttpFetcher;
 import org.apache.shindig.gadgets.http.ContentFetcherFactory;
-import org.apache.shindig.gadgets.http.RemoteContent;
-import org.apache.shindig.gadgets.http.RemoteContentRequest;
+import org.apache.shindig.gadgets.http.HttpResponse;
+import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.oauth.OAuthRequestParams;
 import org.apache.shindig.gadgets.spec.Auth;
 import org.apache.shindig.gadgets.spec.Preload;
@@ -117,13 +117,13 @@ public class ProxyHandler {
       throws IOException, GadgetException {
 
     // Build up the request to make
-    RemoteContentRequest rcr = buildRemoteContentRequest(request);
+    HttpRequest rcr = buildHttpRequest(request);
 
     // Build the chain of fetchers that will handle the request
-    ContentFetcher fetcher = getContentFetcher(request, response);
+    HttpFetcher fetcher = getHttpFetcher(request, response);
 
     // Do the fetch
-    RemoteContent results = fetcher.fetch(rcr);
+    HttpResponse results = fetcher.fetch(rcr);
 
     // Serialize the response
     String output = serializeJsonResponse(request, results);
@@ -148,7 +148,7 @@ public class ProxyHandler {
    * @throws GadgetException
    */
   @SuppressWarnings("unchecked")
-  private RemoteContentRequest buildRemoteContentRequest(
+  private HttpRequest buildHttpRequest(
       HttpServletRequest request) throws GadgetException {
     try {
       String encoding = request.getCharacterEncoding();
@@ -197,8 +197,8 @@ public class ProxyHandler {
 
       removeUnsafeHeaders(headers);
 
-      RemoteContentRequest.Options options =
-        new RemoteContentRequest.Options();
+      HttpRequest.Options options =
+        new HttpRequest.Options();
       options.ignoreCache = "1".equals(request.getParameter(NOCACHE_PARAM));
       if (request.getParameter(SIGN_VIEWER) != null) {
         options.viewerSigned = Boolean
@@ -209,7 +209,7 @@ public class ProxyHandler {
             .parseBoolean(request.getParameter(SIGN_OWNER));
       }
 
-      return new RemoteContentRequest(
+      return new HttpRequest(
           method, url, headers, postBody, options);
     } catch (UnsupportedEncodingException e) {
       throw new GadgetException(GadgetException.Code.INTERNAL_SERVER_ERROR, e);
@@ -223,7 +223,7 @@ public class ProxyHandler {
    * Whatever we do needs to return a reference to the OAuthFetcher, if it is
    * present, so we can pull data out as needed.
    */
-  private ContentFetcher getContentFetcher(HttpServletRequest request,
+  private HttpFetcher getHttpFetcher(HttpServletRequest request,
       HttpServletResponse response) throws GadgetException {
 
     String authzType = getParameter(request, Preload.AUTHZ_ATTR, "");
@@ -251,7 +251,7 @@ public class ProxyHandler {
    * chained content fetchers.
    */
   private String serializeJsonResponse(HttpServletRequest request,
-      RemoteContent results) {
+      HttpResponse results) {
     try {
       JSONObject resp = new JSONObject();
 
@@ -300,8 +300,8 @@ public class ProxyHandler {
       return;
     }
 
-    RemoteContentRequest rcr = buildRemoteContentRequest(request);
-    RemoteContent results = contentFetcherFactory.get().fetch(rcr);
+    HttpRequest rcr = buildHttpRequest(request);
+    HttpResponse results = contentFetcherFactory.get().fetch(rcr);
 
     // Default interval of 1 hour
     int refreshInterval = 60 * 60;

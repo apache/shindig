@@ -17,7 +17,7 @@
  */
 package org.apache.shindig.gadgets;
 
-import org.apache.shindig.gadgets.http.ContentFetcher;
+import org.apache.shindig.gadgets.http.HttpFetcher;
 
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
@@ -54,17 +54,17 @@ public class GadgetFeatureRegistry {
   /**
    * Creates a new feature registry and loads the specified features.
    *
-   * @param contentFetcher
+   * @param httpFetcher
    * @param featureFiles
    * @throws GadgetException
    */
   @Inject
   public GadgetFeatureRegistry(@Named("features.default") String featureFiles,
-      ContentFetcher contentFetcher) throws GadgetException {
+      HttpFetcher httpFetcher) throws GadgetException {
     features = new HashMap<String, Entry>();
     core = new HashMap<String, Entry>();
     if (featureFiles != null) {
-      JsFeatureLoader loader = new JsFeatureLoader(contentFetcher);
+      JsFeatureLoader loader = new JsFeatureLoader(httpFetcher);
       loader.loadFeatures(featureFiles, this);
     }
   }

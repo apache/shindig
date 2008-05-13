@@ -17,10 +17,10 @@
  */
 package org.apache.shindig.gadgets;
 
-import org.apache.shindig.gadgets.http.ContentFetcher;
+import org.apache.shindig.gadgets.http.HttpFetcher;
 import org.apache.shindig.gadgets.http.ContentFetcherFactory;
-import org.apache.shindig.gadgets.http.RemoteContent;
-import org.apache.shindig.gadgets.http.RemoteContentRequest;
+import org.apache.shindig.gadgets.http.HttpResponse;
+import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.spec.Auth;
 import org.apache.shindig.gadgets.spec.Feature;
 import org.apache.shindig.gadgets.spec.GadgetSpec;
@@ -53,16 +53,16 @@ public class GadgetServer {
   private final GadgetBlacklist blacklist;
 
   private ContentFetcherFactory preloadFetcherFactory;
-  private ContentFetcher gadgetSpecFetcher;
-  private ContentFetcher messageBundleFetcher;
+  private HttpFetcher gadgetSpecFetcher;
+  private HttpFetcher messageBundleFetcher;
 
   @Inject
   public GadgetServer(Executor executor,
       GadgetFeatureRegistry registry,
       GadgetBlacklist blacklist,
       ContentFetcherFactory preloadFetcherFactory,
-      @GadgetSpecFetcher ContentFetcher gadgetSpecFetcher,
-      @MessageBundleFetcher ContentFetcher messageBundleFetcher) {
+      @GadgetSpecFetcher HttpFetcher gadgetSpecFetcher,
+      @MessageBundleFetcher HttpFetcher messageBundleFetcher) {
     this.executor = executor;
     this.registry = registry;
     this.blacklist = blacklist;
@@ -83,10 +83,10 @@ public class GadgetServer {
       throw new GadgetException(GadgetException.Code.BLACKLISTED_GADGET);
     }
 
-    RemoteContentRequest request = RemoteContentRequest.getRequest(
+    HttpRequest request = HttpRequest.getRequest(
         context.getUrl(), context.getIgnoreCache());
-    RemoteContent response = gadgetSpecFetcher.fetch(request);
-    if (response.getHttpStatusCode() != RemoteContent.SC_OK) {
+    HttpResponse response = gadgetSpecFetcher.fetch(request);
+    if (response.getHttpStatusCode() != HttpResponse.SC_OK) {
       throw new GadgetException(
           GadgetException.Code.FAILED_TO_RETRIEVE_CONTENT,
           "Unable to retrieve gadget xml. HTTP error " +
@@ -107,10 +107,10 @@ public class GadgetServer {
   private MessageBundle getBundle(LocaleSpec localeSpec, GadgetContext context)
       throws GadgetException {
     URI bundleUrl = localeSpec.getMessages();
-    RemoteContentRequest request
-        = RemoteContentRequest.getRequest(bundleUrl, context.getIgnoreCache());
-    RemoteContent response = messageBundleFetcher.fetch(request);
-    if (response.getHttpStatusCode() != RemoteContent.SC_OK) {
+    HttpRequest request
+        = HttpRequest.getRequest(bundleUrl, context.getIgnoreCache());
+    HttpResponse response = messageBundleFetcher.fetch(request);
+    if (response.getHttpStatusCode() != HttpResponse.SC_OK) {
       throw new GadgetException(
           GadgetException.Code.FAILED_TO_RETRIEVE_CONTENT,
           "Unable to retrieve message bundle xml. HTTP error " +
@@ -203,8 +203,8 @@ public class GadgetServer {
     // we want them to run in parallel
     RenderingContext renderContext = gadget.getContext().getRenderingContext();
     if (RenderingContext.GADGET.equals(renderContext)) {
-      CompletionService<RemoteContent> preloadProcessor
-          = new ExecutorCompletionService<RemoteContent>(executor);
+      CompletionService<HttpResponse> preloadProcessor
+          = new ExecutorCompletionService<HttpResponse>(executor);
       for (Preload preload : gadget.getSpec().getModulePrefs().getPreloads()) {
         // Cant execute signed/oauth preloads without the token
         if ((preload.getAuth() == Auth.NONE ||
@@ -213,7 +213,7 @@ public class GadgetServer {
             preload.getViews().contains(gadget.getContext().getView()))) {
           PreloadTask task = new PreloadTask(gadget.getContext(), preload,
               preloadFetcherFactory);
-          Future<RemoteContent> future = preloadProcessor.submit(task);
+          Future<HttpResponse> future = preloadProcessor.submit(task);
           gadget.getPreloadMap().put(preload, future);
         }
       }
@@ -345,13 +345,13 @@ class FeatureTask implements Callable<GadgetException> {
 /**
  * Provides a task for preloading data into the gadget content
  */
-class PreloadTask implements Callable<RemoteContent> {
+class PreloadTask implements Callable<HttpResponse> {
   private final Preload preload;
   private final ContentFetcherFactory preloadFetcherFactory;
   private final GadgetContext context;
 
-  public RemoteContent call() {
-    RemoteContentRequest request = new RemoteContentRequest(preload.getHref());
+  public HttpResponse call() {
+    HttpRequest request = new HttpRequest(preload.getHref());
     request.getOptions().ownerSigned = preload.isSignOwner();
     request.getOptions().viewerSigned = preload.isSignViewer();
     try {
@@ -362,10 +362,10 @@ class PreloadTask implements Callable<RemoteContent> {
           return preloadFetcherFactory.getSigningFetcher(context.getToken())
               .fetch(request);
         default:
-          return RemoteContent.ERROR;
+          return HttpResponse.ERROR;
       }
     } catch (GadgetException e) {
-      return RemoteContent.ERROR;
+      return HttpResponse.ERROR;
     }
   }
 

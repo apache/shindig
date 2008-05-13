@@ -24,8 +24,8 @@ import static org.easymock.EasyMock.isA;
 import org.apache.shindig.gadgets.ContainerConfig;
 import org.apache.shindig.gadgets.Gadget;
 import org.apache.shindig.gadgets.GadgetContext;
-import org.apache.shindig.gadgets.http.RemoteContent;
-import org.apache.shindig.gadgets.http.RemoteContentRequest;
+import org.apache.shindig.gadgets.http.HttpResponse;
+import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.spec.GadgetSpec;
 
 import org.easymock.EasyMock;
@@ -55,8 +55,8 @@ public class GadgetRenderingTaskTest extends HttpTestFixture {
   final PrintWriter writer = new PrintWriter(baos);
 
   final static URI SPEC_URL = URI.create("http://example.org/gadget.xml");
-  final static RemoteContentRequest SPEC_REQUEST
-      = new RemoteContentRequest(SPEC_URL);
+  final static HttpRequest SPEC_REQUEST
+      = new HttpRequest(SPEC_URL);
   final static String CONTENT = "Hello, world!";
   final static String ALT_CONTENT = "Goodbye, city.";
   final static String SPEC_XML
@@ -101,7 +101,7 @@ public class GadgetRenderingTaskTest extends HttpTestFixture {
   }
 
   private void expectFetchGadget() throws Exception {
-    expect(fetcher.fetch(SPEC_REQUEST)).andReturn(new RemoteContent(SPEC_XML));
+    expect(fetcher.fetch(SPEC_REQUEST)).andReturn(new HttpResponse(SPEC_XML));
   }
 
   private void expectWriteResponse() throws Exception {

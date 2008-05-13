@@ -37,7 +37,7 @@ import java.util.Map;
  * TODO: This naming seems really ridiculous now. Why don't we just call it
  * what it is -- an HTTP request?
  */
-public class RemoteContentRequest {
+public class HttpRequest {
   private final byte[] postBody;
 
   /**
@@ -137,10 +137,10 @@ public class RemoteContentRequest {
    * @param uri
    * @param ignoreCache
    */
-  public static RemoteContentRequest getRequest(URI uri, boolean ignoreCache) {
+  public static HttpRequest getRequest(URI uri, boolean ignoreCache) {
     Options options = new Options();
     options.ignoreCache = ignoreCache;
-    return new RemoteContentRequest(uri, options);
+    return new HttpRequest(uri, options);
   }
 
   /**
@@ -151,7 +151,7 @@ public class RemoteContentRequest {
    * @param postBody
    * @param options
    */
-  public RemoteContentRequest(String method,
+  public HttpRequest(String method,
                               URI uri,
                               Map<String, List<String>> headers,
                               byte[] postBody,
@@ -210,7 +210,7 @@ public class RemoteContentRequest {
    * @param uri
    * @param base The base request to copy data from.
    */
-  public RemoteContentRequest(URI uri, RemoteContentRequest base) {
+  public HttpRequest(URI uri, HttpRequest base) {
     this.uri = uri;
     this.method = base.method;
     this.options = new Options(base.options);
@@ -224,7 +224,7 @@ public class RemoteContentRequest {
    *
    * @param uri
    */
-  public RemoteContentRequest(URI uri) {
+  public HttpRequest(URI uri) {
     this("GET", uri, null, null, DEFAULT_OPTIONS);
   }
 
@@ -234,7 +234,7 @@ public class RemoteContentRequest {
    * @param uri
    * @param options
    */
-  public RemoteContentRequest(URI uri, Options options) {
+  public HttpRequest(URI uri, Options options) {
     this("GET", uri, null, null, options);
   }
 
@@ -243,7 +243,7 @@ public class RemoteContentRequest {
    * @param uri
    * @param headers
    */
-  public RemoteContentRequest(URI uri, Map<String, List<String>> headers) {
+  public HttpRequest(URI uri, Map<String, List<String>> headers) {
     this("GET", uri, headers, null, DEFAULT_OPTIONS);
   }
 
@@ -253,7 +253,7 @@ public class RemoteContentRequest {
    * @param headers
    * @param options
    */
-  public RemoteContentRequest(URI uri, Map<String, List<String>> headers,
+  public HttpRequest(URI uri, Map<String, List<String>> headers,
       Options options) {
     this("GET", uri, headers, null, options);
   }
@@ -263,7 +263,7 @@ public class RemoteContentRequest {
    * @param uri
    * @param postBody
    */
-  public RemoteContentRequest(URI uri, byte[] postBody) {
+  public HttpRequest(URI uri, byte[] postBody) {
     this("POST", uri, null, postBody, DEFAULT_OPTIONS);
   }
 
@@ -273,7 +273,7 @@ public class RemoteContentRequest {
    * @param postBody
    * @param options
    */
-  public RemoteContentRequest(URI uri, byte[] postBody, Options options) {
+  public HttpRequest(URI uri, byte[] postBody, Options options) {
     this("POST", uri, null, postBody, options);
   }
 
@@ -283,7 +283,7 @@ public class RemoteContentRequest {
    * @param headers
    * @param postBody
    */
-  public RemoteContentRequest(URI uri, Map<String, List<String>> headers,
+  public HttpRequest(URI uri, Map<String, List<String>> headers,
       byte[] postBody) {
     this("POST", uri, headers, postBody, DEFAULT_OPTIONS);
   }
@@ -295,7 +295,7 @@ public class RemoteContentRequest {
    * @param postBody
    * @param options
    */
-  public RemoteContentRequest(URI uri, Map<String, List<String>> headers,
+  public HttpRequest(URI uri, Map<String, List<String>> headers,
       byte[] postBody, Options options) {
     this("POST", uri, headers, postBody, options);
   }
@@ -329,8 +329,8 @@ public class RemoteContentRequest {
   @Override
   public boolean equals(Object rhs) {
     if (rhs == this) {return true;}
-    if (rhs instanceof RemoteContentRequest) {
-      RemoteContentRequest req = (RemoteContentRequest)rhs;
+    if (rhs instanceof HttpRequest) {
+      HttpRequest req = (HttpRequest)rhs;
       return method.equals(req.method) &&
              uri.equals(req.uri) &&
              Arrays.equals(postBody, req.postBody) &&
@@ -349,7 +349,7 @@ public class RemoteContentRequest {
    * Bag of options for making a request.
    *
    * This object is mutable to keep us sane. Don't mess with it once you've
-   * sent it to RemoteContentRequest or bad things might happen.
+   * sent it to HttpRequest or bad things might happen.
    */
   public static class Options {
     public boolean ignoreCache = false;

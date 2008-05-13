@@ -21,19 +21,21 @@ import com.google.inject.Inject;
 import com.google.inject.Provider;
 
 /**
- * Factory for ContentFetcher's that retrieve remote content 
+ * Factory for HttpFetcher's that retrieve remote content
+ *
+ * TODO: Remove this.
  */
-public class RemoteContentFetcherFactory implements Provider<ContentFetcher> {
+public class RemoteContentFetcherFactory implements Provider<HttpFetcher> {
 
-  private ContentCache cache;
+  private HttpCache cache;
 
   @Inject
-  public RemoteContentFetcherFactory(ContentCache cache) {
+  public RemoteContentFetcherFactory(HttpCache cache) {
     this.cache = cache;
   }
 
-  public ContentFetcher get() {
-    return new BasicRemoteContentFetcher(cache);
+  public HttpFetcher get() {
+    return new BasicHttpFetcher(cache);
   }
 }
 

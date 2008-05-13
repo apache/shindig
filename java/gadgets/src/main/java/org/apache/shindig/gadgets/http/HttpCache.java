@@ -1,4 +1,4 @@
-/*
+/**
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements. See the NOTICE file
  * distributed with this work for additional information
@@ -7,7 +7,7 @@
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
@@ -17,20 +17,22 @@
  */
 package org.apache.shindig.gadgets.http;
 
-import org.apache.shindig.gadgets.GadgetException;
+import java.net.URI;
 
 /**
- *  Provide RemoteContent for a RemoteContentRequest
+ * Cache of HttpResponse keyed by URI/HttpRequest
  */
-public interface ContentFetcher {
+public interface HttpCache {
 
-  /**
-   * Fetch HTTP content.
-   *
-   * @param request The request to fetch.
-   * @return RemoteContent
-   * @throws org.apache.shindig.gadgets.GadgetException
-   */
-  RemoteContent fetch(RemoteContentRequest request)
-      throws GadgetException;
+  public HttpResponse getResponse(URI uri);
+
+  public HttpResponse getResponse(HttpRequest request);
+
+  public void addResponse(URI uri, HttpResponse response);
+
+  public void addResponse(HttpRequest request, HttpResponse response);
+
+  public HttpResponse removeResponse(URI uri);
+
+  public HttpResponse removeResponse(HttpRequest request);
 }

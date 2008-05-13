@@ -20,7 +20,7 @@
 package org.apache.shindig.gadgets;
 
 import org.apache.shindig.common.SecurityTokenDecoder;
-import org.apache.shindig.gadgets.http.ContentFetcher;
+import org.apache.shindig.gadgets.http.HttpFetcher;
 import org.apache.shindig.gadgets.http.ContentFetcherFactory;
 
 import java.util.concurrent.Executor;
@@ -36,7 +36,7 @@ public abstract class GadgetTestFixture extends EasyMockTestCase {
   public final GadgetServer gadgetServer;
   public final ContentFetcherFactory fetcherFactory
       = mock(ContentFetcherFactory.class);
-  public final ContentFetcher fetcher = mock(ContentFetcher.class);
+  public final HttpFetcher fetcher = mock(HttpFetcher.class);
   public final GadgetBlacklist blacklist = mock(GadgetBlacklist.class);
   public GadgetFeatureRegistry registry;
   public ContainerConfig containerConfig;

@@ -33,7 +33,7 @@ import java.util.TimeZone;
 /**
  * Tests for basic content cache
  */
-public class BasicContentCacheTest extends TestCase {
+public class BasicHttpCacheTest extends TestCase {
   /**
    * Used to parse Expires: header.
    */
@@ -43,12 +43,12 @@ public class BasicContentCacheTest extends TestCase {
     dateFormat.setTimeZone(TimeZone.getTimeZone("GMT"));
   }
 
-  private ContentCache cache;
+  private HttpCache cache;
 
   @Override
   public void setUp() throws Exception {
     super.setUp();
-    cache = new BasicContentCache();
+    cache = new BasicHttpCache();
   }
 
   @Override
@@ -57,101 +57,101 @@ public class BasicContentCacheTest extends TestCase {
     super.tearDown();
   }
 
-  private RemoteContentRequest createRequest(String method) {
-    RemoteContentRequest req = new RemoteContentRequest(method,
+  private HttpRequest createRequest(String method) {
+    HttpRequest req = new HttpRequest(method,
         URI.create("http://www.here.com"), new HashMap<String, List<String>>(),
-        new byte[0], new RemoteContentRequest.Options());
+        new byte[0], new HttpRequest.Options());
     return req;
   }
 
-  private RemoteContent createResponse(int statusCode, String header,
+  private HttpResponse createResponse(int statusCode, String header,
       String headerValue) {
     Map<String, List<String>> headers = new HashMap<String, List<String>>();
     if (header != null) {
       headers.put(header, Arrays.asList(headerValue));
     }
-    RemoteContent resp = new RemoteContent(statusCode, new byte[0], headers);
+    HttpResponse resp = new HttpResponse(statusCode, new byte[0], headers);
     return resp;
   }
 
-  private RemoteContent createExpiresResponse(int statusCode, long expiration) {
+  private HttpResponse createExpiresResponse(int statusCode, long expiration) {
     Date newExpiry = new Date(expiration);
     return createResponse(statusCode, "Expires", dateFormat.format(newExpiry));
   }
 
-  private RemoteContent createMaxAgeResponse(int statusCode, long age) {
+  private HttpResponse createMaxAgeResponse(int statusCode, long age) {
     return createResponse(statusCode, "Cache-Control", "max-age=" + age);
   }
 
   public void testEmptyCache() {
-    assertNull(cache.getContent(createRequest("GET")));
+    assertNull(cache.getResponse(createRequest("GET")));
   }
 
   public void testCacheable() {
-    RemoteContentRequest req = createRequest("GET");
-    RemoteContent resp = createResponse(200, null, null);
-    cache.addContent(req, resp);
-    assertEquals(cache.getContent(req), resp);
+    HttpRequest req = createRequest("GET");
+    HttpResponse resp = createResponse(200, null, null);
+    cache.addResponse(req, resp);
+    assertEquals(cache.getResponse(req), resp);
   }
 
   public void testNotCacheableForPost() {
-    RemoteContentRequest req = createRequest("POST");
-    RemoteContent resp = createResponse(200, null, null);
-    cache.addContent(req, resp);
-    assertNull(cache.getContent(req));
+    HttpRequest req = createRequest("POST");
+    HttpResponse resp = createResponse(200, null, null);
+    cache.addResponse(req, resp);
+    assertNull(cache.getResponse(req));
   }
 
   public void testNotCacheableForErr() {
-    RemoteContentRequest req = createRequest("GET");
-    RemoteContent resp = createResponse(500, null, null);
-    cache.addContent(req, resp);
-    assertNull(cache.getContent(req));
+    HttpRequest req = createRequest("GET");
+    HttpResponse resp = createResponse(500, null, null);
+    cache.addResponse(req, resp);
+    assertNull(cache.getResponse(req));
   }
 
   public void testCacheableForFutureExpires() {
-    RemoteContentRequest req = createRequest("GET");
-    RemoteContent resp = createExpiresResponse(200,
+    HttpRequest req = createRequest("GET");
+    HttpResponse resp = createExpiresResponse(200,
         System.currentTimeMillis() + 10000L);
-    cache.addContent(req, resp);
-    assertEquals(cache.getContent(req), resp);
+    cache.addResponse(req, resp);
+    assertEquals(cache.getResponse(req), resp);
   }
 
   public void testNotCacheableForPastExpires() {
-    RemoteContentRequest req = createRequest("GET");
-    RemoteContent resp = createExpiresResponse(200,
+    HttpRequest req = createRequest("GET");
+    HttpResponse resp = createExpiresResponse(200,
         System.currentTimeMillis() - 10000L);
-    cache.addContent(req, resp);
-    assertNull(cache.getContent(req));
+    cache.addResponse(req, resp);
+    assertNull(cache.getResponse(req));
   }
 
   public void testNotCacheableForFutureExpiresWithError() {
-    RemoteContentRequest req = createRequest("GET");
-    RemoteContent resp = createExpiresResponse(500,
+    HttpRequest req = createRequest("GET");
+    HttpResponse resp = createExpiresResponse(500,
         System.currentTimeMillis() - 10000L);
-    cache.addContent(req, resp);
-    assertNull(cache.getContent(req));
+    cache.addResponse(req, resp);
+    assertNull(cache.getResponse(req));
   }
 
   public void testCacheableForFutureMaxAge() {
-    RemoteContentRequest req = createRequest("GET");
-    RemoteContent resp = createMaxAgeResponse(200,
+    HttpRequest req = createRequest("GET");
+    HttpResponse resp = createMaxAgeResponse(200,
         10000L);
-    cache.addContent(req, resp);
-    assertEquals(cache.getContent(req), resp);
+    cache.addResponse(req, resp);
+    assertEquals(cache.getResponse(req), resp);
   }
 
   public void testNotCacheableForNoCache() {
-    RemoteContentRequest req = createRequest("GET");
-    RemoteContent resp = createResponse(200, "Cache-Control", "no-cache");
-    cache.addContent(req, resp);
-    assertNull(cache.getContent(req));
+    HttpRequest req = createRequest("GET");
+    HttpResponse resp = createResponse(200, "Cache-Control", "no-cache");
+    cache.addResponse(req, resp);
+    assertNull(cache.getResponse(req));
   }
 
   public void testCacheableForExpiresWithWait() {
-    RemoteContentRequest req = createRequest("GET");
-    RemoteContent resp = createExpiresResponse(200,
+    HttpRequest req = createRequest("GET");
+    HttpResponse resp = createExpiresResponse(200,
         System.currentTimeMillis() + 5000L);
-    cache.addContent(req, resp);
+    cache.addResponse(req, resp);
     try {
       synchronized (cache) {
         cache.wait(500L);
@@ -159,15 +159,15 @@ public class BasicContentCacheTest extends TestCase {
     } catch (InterruptedException ie) {
       fail("Failed to wait for cache");
     }
-    assertEquals(cache.getContent(req), resp);
+    assertEquals(cache.getResponse(req), resp);
   }
 
 
   public void testNotCacheableForExpiresWithWait() {
-    RemoteContentRequest req = createRequest("GET");
-    RemoteContent resp = createExpiresResponse(200,
+    HttpRequest req = createRequest("GET");
+    HttpResponse resp = createExpiresResponse(200,
         System.currentTimeMillis() + 1000L);
-    cache.addContent(req, resp);
+    cache.addResponse(req, resp);
     try {
       synchronized (cache) {
         cache.wait(1001L);
@@ -175,7 +175,7 @@ public class BasicContentCacheTest extends TestCase {
     } catch (InterruptedException ie) {
       fail("Failed to wait for cache");
     }
-    assertNull(cache.getContent(req));
+    assertNull(cache.getResponse(req));
   }
 
 }

@@ -25,8 +25,8 @@ import static org.easymock.EasyMock.isA;
 import org.apache.shindig.common.SecurityToken;
 import org.apache.shindig.gadgets.FakeGadgetToken;
 import org.apache.shindig.gadgets.GadgetException;
-import org.apache.shindig.gadgets.http.RemoteContent;
-import org.apache.shindig.gadgets.http.RemoteContentRequest;
+import org.apache.shindig.gadgets.http.HttpResponse;
+import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.spec.Auth;
 import org.apache.shindig.gadgets.spec.Preload;
 
@@ -69,18 +69,18 @@ public class ProxyHandlerTest extends HttpTestFixture {
 
   private void expectGetAndReturnData(String url, byte[] data)
       throws Exception {
-    RemoteContentRequest req = new RemoteContentRequest(
-        "GET", new URI(url), null, null, new RemoteContentRequest.Options());
-    RemoteContent resp = new RemoteContent(200, data, null);
+    HttpRequest req = new HttpRequest(
+        "GET", new URI(url), null, null, new HttpRequest.Options());
+    HttpResponse resp = new HttpResponse(200, data, null);
     expect(contentFetcherFactory.get()).andReturn(fetcher);
     expect(fetcher.fetch(req)).andReturn(resp);
   }
 
   private void expectPostAndReturnData(String url, byte[] body, byte[] data)
       throws Exception {
-    RemoteContentRequest req = new RemoteContentRequest(
-        "POST", new URI(url), null, body, new RemoteContentRequest.Options());
-    RemoteContent resp = new RemoteContent(200, data, null);
+    HttpRequest req = new HttpRequest(
+        "POST", new URI(url), null, body, new HttpRequest.Options());
+    HttpResponse resp = new HttpResponse(200, data, null);
     expect(contentFetcherFactory.get()).andReturn(fetcher);
     expect(fetcher.fetch(req)).andReturn(resp);
   }
@@ -212,10 +212,10 @@ public class ProxyHandlerTest extends HttpTestFixture {
         .andReturn("fake-token").atLeastOnce();
     expect(request.getParameter(Preload.AUTHZ_ATTR))
         .andReturn(Auth.SIGNED.toString()).atLeastOnce();
-    RemoteContent resp = new RemoteContent(200, DATA_ONE.getBytes(), null);
+    HttpResponse resp = new HttpResponse(200, DATA_ONE.getBytes(), null);
     expect(contentFetcherFactory.getSigningFetcher(eq(DUMMY_TOKEN)))
         .andReturn(fetcher);
-    expect(fetcher.fetch(isA(RemoteContentRequest.class))).andReturn(resp);
+    expect(fetcher.fetch(isA(HttpRequest.class))).andReturn(resp);
     replay();
     proxyHandler.fetchJson(request, response);
     verify();
@@ -232,10 +232,10 @@ public class ProxyHandlerTest extends HttpTestFixture {
         .andReturn("fake-token").atLeastOnce();
     expect(request.getParameter(Preload.AUTHZ_ATTR))
         .andReturn(Auth.SIGNED.toString()).atLeastOnce();
-    RemoteContent resp = new RemoteContent(200, DATA_ONE.getBytes(), null);
+    HttpResponse resp = new HttpResponse(200, DATA_ONE.getBytes(), null);
     expect(contentFetcherFactory.getSigningFetcher(eq(DUMMY_TOKEN)))
         .andReturn(fetcher);
-    expect(fetcher.fetch(isA(RemoteContentRequest.class))).andReturn(resp);
+    expect(fetcher.fetch(isA(HttpRequest.class))).andReturn(resp);
     replay();
     proxyHandler.fetchJson(request, response);
     verify();

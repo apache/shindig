@@ -17,10 +17,10 @@ package org.apache.shindig.gadgets;
 import org.apache.shindig.common.SecurityToken;
 import org.apache.shindig.common.crypto.Crypto;
 import org.apache.shindig.common.util.TimeSource;
-import org.apache.shindig.gadgets.http.ContentCache;
-import org.apache.shindig.gadgets.http.ContentFetcher;
-import org.apache.shindig.gadgets.http.RemoteContent;
-import org.apache.shindig.gadgets.http.RemoteContentRequest;
+import org.apache.shindig.gadgets.http.HttpCache;
+import org.apache.shindig.gadgets.http.HttpFetcher;
+import org.apache.shindig.gadgets.http.HttpResponse;
+import org.apache.shindig.gadgets.http.HttpRequest;
 
 import net.oauth.OAuth;
 import net.oauth.OAuth.Parameter;
@@ -85,14 +85,14 @@ public class SigningFetcher extends ChainedContentFetcher {
   /**
    *  The cache to fetch results in. 
    */
-  protected final ContentCache cache;
+  protected final HttpCache cache;
 
   /**
    * Constructor for subclasses that don't want this code to use their
    * keys.
    */
-  protected SigningFetcher(ContentCache cache,
-      ContentFetcher next, SecurityToken authToken) {
+  protected SigningFetcher(HttpCache cache,
+      HttpFetcher next, SecurityToken authToken) {
     this(cache, next, authToken, null, null);
   }
 
@@ -103,8 +103,8 @@ public class SigningFetcher extends ChainedContentFetcher {
    * @param keyName name of the key to include in the request
    * @param privateKey the key to use for the signing
    */
-  public static SigningFetcher makeFromPrivateKey(ContentCache cache,
-      ContentFetcher next, SecurityToken authToken,
+  public static SigningFetcher makeFromPrivateKey(HttpCache cache,
+      HttpFetcher next, SecurityToken authToken,
       String keyName, PrivateKey privateKey) {
     return new SigningFetcher(cache, next, authToken, keyName, privateKey);
   }
@@ -116,8 +116,8 @@ public class SigningFetcher extends ChainedContentFetcher {
    * @param keyName name of the key to include in the request
    * @param privateKey base64 encoded private key
    */
-  public static SigningFetcher makeFromB64PrivateKey(ContentCache cache,
-      ContentFetcher next,
+  public static SigningFetcher makeFromB64PrivateKey(HttpCache cache,
+      HttpFetcher next,
       SecurityToken authToken, String keyName, String privateKey) {
     return new SigningFetcher(cache, next, authToken, keyName, privateKey);
   }
@@ -130,13 +130,13 @@ public class SigningFetcher extends ChainedContentFetcher {
    * @param privateKey DER encoded private key
    */
   public static SigningFetcher makeFromPrivateKeyBytes(
-      ContentCache cache, ContentFetcher next,
+      HttpCache cache, HttpFetcher next,
       SecurityToken authToken, String keyName,
       byte[] privateKey) {
     return new SigningFetcher(cache, next, authToken, keyName, privateKey);
   }
 
-  protected SigningFetcher(ContentCache cache, ContentFetcher next,
+  protected SigningFetcher(HttpCache cache, HttpFetcher next,
       SecurityToken authToken, String keyName, Object privateKeyObject) {
     super(next);
     this.cache = cache;
@@ -145,23 +145,23 @@ public class SigningFetcher extends ChainedContentFetcher {
     this.privateKeyObject = privateKeyObject;
   }
 
-  public RemoteContent fetch(RemoteContentRequest request)
+  public HttpResponse fetch(HttpRequest request)
       throws GadgetException {
 
     try {
-      RemoteContentRequest cacheableRequest = makeCacheableRequest(request);
-      RemoteContent result = cache.getContent(cacheableRequest);
+      HttpRequest cacheableRequest = makeCacheableRequest(request);
+      HttpResponse result = cache.getResponse(cacheableRequest);
       if (result != null) {
         return result;
       }
 
-      RemoteContentRequest signedRequest = signRequest(request);
+      HttpRequest signedRequest = signRequest(request);
       // Signed requests are not externally cacehable
       signedRequest.getOptions().ignoreCache = true;
       result = nextFetcher.fetch(signedRequest);
 
       // Try and cache the response
-      cache.addContent(cacheableRequest, result);
+      cache.addResponse(cacheableRequest, result);
 
       return result;
     } catch (GadgetException e) {
@@ -171,8 +171,8 @@ public class SigningFetcher extends ChainedContentFetcher {
     }
   }
 
-  private RemoteContentRequest makeCacheableRequest(
-      RemoteContentRequest request)
+  private HttpRequest makeCacheableRequest(
+      HttpRequest request)
       throws IOException, URISyntaxException, RequestSigningException {
     // Create a request without the OAuth params which includes the
     // OpenSocial ones and see if we can find it in the cache
@@ -187,12 +187,12 @@ public class SigningFetcher extends ChainedContentFetcher {
           resource.getHost(),
           resource.getPort(),
           resource.getRawPath() + "?" + cacheableQuery);
-    RemoteContentRequest cacheableRequest =
-        new RemoteContentRequest(url.toURI(), request);
+    HttpRequest cacheableRequest =
+        new HttpRequest(url.toURI(), request);
     return cacheableRequest;
   }
 
-  private RemoteContentRequest signRequest(RemoteContentRequest req)
+  private HttpRequest signRequest(HttpRequest req)
       throws GadgetException {
     try {
       // Parse the request into parameters for OAuth signing, stripping out
@@ -244,7 +244,7 @@ public class SigningFetcher extends ChainedContentFetcher {
           resource.getHost(),
           resource.getPort(),
           resource.getRawPath() + "?" + finalQuery);
-      return new RemoteContentRequest(url.toURI(), req);
+      return new HttpRequest(url.toURI(), req);
     } catch (GadgetException e) {
       throw e;
     } catch (Exception e) {
@@ -264,7 +264,7 @@ public class SigningFetcher extends ChainedContentFetcher {
   }
 
 
-  private void addOpenSocialParams(RemoteContentRequest.Options options,
+  private void addOpenSocialParams(HttpRequest.Options options,
       List<Parameter> msgParams) {
     String owner = authToken.getOwnerId();
     if (owner != null && options.ownerSigned) {

@@ -22,8 +22,8 @@ import static org.easymock.EasyMock.expect;
 import static org.easymock.EasyMock.isA;
 
 import org.apache.shindig.gadgets.Gadget;
-import org.apache.shindig.gadgets.http.RemoteContent;
-import org.apache.shindig.gadgets.http.RemoteContentRequest;
+import org.apache.shindig.gadgets.http.HttpResponse;
+import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.spec.GadgetSpec;
 
 import org.json.JSONArray;
@@ -36,11 +36,11 @@ import java.util.Map;
 
 public class JsonRpcHandlerTest extends HttpTestFixture {
   private static final URI SPEC_URL = URI.create("http://example.org/g.xml");
-  private static final RemoteContentRequest SPEC_REQUEST
-      = new RemoteContentRequest(SPEC_URL);
+  private static final HttpRequest SPEC_REQUEST
+      = new HttpRequest(SPEC_URL);
   private static final URI SPEC_URL2 = URI.create("http://example.org/g2.xml");
-  private static final RemoteContentRequest SPEC_REQUEST2
-      = new RemoteContentRequest(SPEC_URL2);
+  private static final HttpRequest SPEC_REQUEST2
+      = new HttpRequest(SPEC_URL2);
   private static final String SPEC_TITLE = "JSON-TEST";
   private static final String SPEC_TITLE2 = "JSON-TEST2";
   private static final String SPEC_XML
@@ -76,7 +76,7 @@ public class JsonRpcHandlerTest extends HttpTestFixture {
 
     GadgetSpec spec = new GadgetSpec(SPEC_URL, SPEC_XML);
 
-    expect(fetcher.fetch(SPEC_REQUEST)).andReturn(new RemoteContent(SPEC_XML));
+    expect(fetcher.fetch(SPEC_REQUEST)).andReturn(new HttpResponse(SPEC_XML));
     expect(urlGenerator.getIframeUrl(isA(Gadget.class)))
         .andReturn(SPEC_URL.toString());
 
@@ -103,9 +103,9 @@ public class JsonRpcHandlerTest extends HttpTestFixture {
     GadgetSpec spec2 = new GadgetSpec(SPEC_URL2, SPEC_XML2);
 
     expect(fetcher.fetch(SPEC_REQUEST))
-        .andReturn(new RemoteContent(SPEC_XML));
+        .andReturn(new HttpResponse(SPEC_XML));
     expect(fetcher.fetch(SPEC_REQUEST2))
-        .andReturn(new RemoteContent(SPEC_XML2));
+        .andReturn(new HttpResponse(SPEC_XML2));
 
     replay();
     JSONObject response = jsonRpcHandler.process(input);

@@ -17,9 +17,9 @@ package org.apache.shindig.gadgets;
 import junit.framework.TestCase;
 
 import org.apache.shindig.common.BasicSecurityToken;
-import org.apache.shindig.gadgets.http.BasicContentCache;
-import org.apache.shindig.gadgets.http.ContentCache;
-import org.apache.shindig.gadgets.http.RemoteContentRequest;
+import org.apache.shindig.gadgets.http.BasicHttpCache;
+import org.apache.shindig.gadgets.http.HttpCache;
+import org.apache.shindig.gadgets.http.HttpRequest;
 
 import net.oauth.OAuth;
 import net.oauth.OAuth.Parameter;
@@ -70,7 +70,7 @@ public class SigningFetcherTest extends TestCase {
     "-----END CERTIFICATE-----";
 
   private InterceptingContentFetcher interceptor;
-  private ContentCache cache;
+  private HttpCache cache;
   private SigningFetcher signer;
   private BasicSecurityToken authToken;
   private OAuthAccessor accessor;
@@ -79,7 +79,7 @@ public class SigningFetcherTest extends TestCase {
   @Override
   public void setUp() throws Exception {
     super.setUp();
-    cache = new BasicContentCache();
+    cache = new BasicHttpCache();
     interceptor = new InterceptingContentFetcher();
     authToken = new BasicSecurityToken("o", "v", "a", "d", "u", "m");
     signer = SigningFetcher.makeFromB64PrivateKey(cache,
@@ -90,17 +90,17 @@ public class SigningFetcherTest extends TestCase {
     messageValidator = new SimpleOAuthValidator();
   }
 
-  private RemoteContentRequest makeContentRequest(String method, String url)
+  private HttpRequest makeHttpRequest(String method, String url)
       throws URISyntaxException {
-    return makeContentRequest(method, url, null);
+    return makeHttpRequest(method, url, null);
   }
 
-  private RemoteContentRequest makeContentRequest(String method, String url,
+  private HttpRequest makeHttpRequest(String method, String url,
       byte[] body) throws URISyntaxException {
-    return new RemoteContentRequest(method, new URI(url), null, body, null);
+    return new HttpRequest(method, new URI(url), null, body, null);
   }
 
-  private RemoteContentRequest signAndInspect(RemoteContentRequest orig)
+  private HttpRequest signAndInspect(HttpRequest orig)
       throws Exception {
     signer.fetch(orig);
     assertSignatureOK(interceptor.interceptedRequest);
@@ -108,9 +108,9 @@ public class SigningFetcherTest extends TestCase {
   }
 
   public void testParametersSet() throws Exception {
-    RemoteContentRequest unsigned
-        = makeContentRequest("GET", "http://test", null);
-    RemoteContentRequest out = signAndInspect(unsigned);
+    HttpRequest unsigned
+        = makeHttpRequest("GET", "http://test", null);
+    HttpRequest out = signAndInspect(unsigned);
     List<OAuth.Parameter> queryParams
         = OAuth.decodeForm(out.getUri().getRawQuery());
     assertTrue(contains(queryParams, "opensocial_owner_id", "o"));
@@ -121,10 +121,10 @@ public class SigningFetcherTest extends TestCase {
   }
 
   public void testNoSignViewer() throws Exception {
-    RemoteContentRequest unsigned
-        = makeContentRequest("GET", "http://test", null);
+    HttpRequest unsigned
+        = makeHttpRequest("GET", "http://test", null);
     unsigned.getOptions().viewerSigned = false;
-    RemoteContentRequest out = signAndInspect(unsigned);
+    HttpRequest out = signAndInspect(unsigned);
     List<OAuth.Parameter> queryParams
         = OAuth.decodeForm(out.getUri().getRawQuery());
     assertTrue(contains(queryParams, "opensocial_owner_id", "o"));
@@ -132,10 +132,10 @@ public class SigningFetcherTest extends TestCase {
   }
 
   public void testNoSignOwner() throws Exception {
-    RemoteContentRequest unsigned
-        = makeContentRequest("GET", "http://test", null);
+    HttpRequest unsigned
+        = makeHttpRequest("GET", "http://test", null);
     unsigned.getOptions().ownerSigned = false;
-    RemoteContentRequest out = signAndInspect(unsigned);
+    HttpRequest out = signAndInspect(unsigned);
     List<OAuth.Parameter> queryParams
         = OAuth.decodeForm(out.getUri().getRawQuery());
     assertFalse(contains(queryParams, "opensocial_owner_id", "o"));
@@ -144,10 +144,10 @@ public class SigningFetcherTest extends TestCase {
 
   public void testTrickyParametersInQuery() throws Exception {
     String tricky = "%6fpensocial_owner_id=gotcha";
-    RemoteContentRequest unsigned
-        = makeContentRequest("GET", "http://test?" + tricky, null);
+    HttpRequest unsigned
+        = makeHttpRequest("GET", "http://test?" + tricky, null);
     try {
-    	RemoteContentRequest out = signAndInspect(unsigned);
+    	HttpRequest out = signAndInspect(unsigned);
     	fail("Should have thrown");
     } catch (RequestSigningException e) {
     	// good.
@@ -156,10 +156,10 @@ public class SigningFetcherTest extends TestCase {
 
   public void testTrickyParametersInBody() throws Exception {
     String tricky = "%6fpensocial_owner_id=gotcha";
-    RemoteContentRequest unsigned
-        = makeContentRequest("POST", "http://test", tricky.getBytes());
+    HttpRequest unsigned
+        = makeHttpRequest("POST", "http://test", tricky.getBytes());
     try {
-    	RemoteContentRequest out = signAndInspect(unsigned);
+    	HttpRequest out = signAndInspect(unsigned);
     	fail("Should have thrown");
     } catch (RequestSigningException e) {
     	// good.
@@ -167,24 +167,24 @@ public class SigningFetcherTest extends TestCase {
   }
 
   public void testGetNoQuery() throws Exception {
-    RemoteContentRequest unsigned
-        = makeContentRequest("GET", "http://test", null);
-    RemoteContentRequest out = signAndInspect(unsigned);
+    HttpRequest unsigned
+        = makeHttpRequest("GET", "http://test", null);
+    HttpRequest out = signAndInspect(unsigned);
   }
 
   public void testGetWithQuery() throws Exception {
-    RemoteContentRequest unsigned
-        = makeContentRequest("GET", "http://test?a=b", null);
-    RemoteContentRequest out = signAndInspect(unsigned);
+    HttpRequest unsigned
+        = makeHttpRequest("GET", "http://test?a=b", null);
+    HttpRequest out = signAndInspect(unsigned);
     List<OAuth.Parameter> queryParams
         = OAuth.decodeForm(out.getUri().getRawQuery());
     assertTrue(contains(queryParams, "a", "b"));
   }
 
   public void testGetWithQueryMultiParam() throws Exception {
-    RemoteContentRequest unsigned
-        = makeContentRequest("GET", "http://test?a=b&a=c");
-    RemoteContentRequest out = signAndInspect(unsigned);
+    HttpRequest unsigned
+        = makeHttpRequest("GET", "http://test?a=b&a=c");
+    HttpRequest out = signAndInspect(unsigned);
     List<OAuth.Parameter> queryParams
         = OAuth.decodeForm(out.getUri().getRawQuery());
     assertTrue(contains(queryParams, "a", "b"));
@@ -193,51 +193,51 @@ public class SigningFetcherTest extends TestCase {
   
   public void testValidParameterCharacters() throws Exception {
     String weird = "~!@$*()-_[]:,./";
-    RemoteContentRequest unsigned
-        = makeContentRequest("GET", "http://test?" + weird + "=foo");
-    RemoteContentRequest out = signAndInspect(unsigned);
+    HttpRequest unsigned
+        = makeHttpRequest("GET", "http://test?" + weird + "=foo");
+    HttpRequest out = signAndInspect(unsigned);
     List<OAuth.Parameter> queryParams
         = OAuth.decodeForm(out.getUri().getRawQuery());
     assertTrue(contains(queryParams, weird, "foo"));
   }
 
   public void testPostNoQueryNoData() throws Exception {
-    RemoteContentRequest unsigned = makeContentRequest("GET", "http://test");
-    RemoteContentRequest out = signAndInspect(unsigned);
+    HttpRequest unsigned = makeHttpRequest("GET", "http://test");
+    HttpRequest out = signAndInspect(unsigned);
   }
 
   public void testPostWithQueryNoData() throws Exception {
-    RemoteContentRequest unsigned
-        = makeContentRequest("GET", "http://test?name=value");
-    RemoteContentRequest out = signAndInspect(unsigned);
+    HttpRequest unsigned
+        = makeHttpRequest("GET", "http://test?name=value");
+    HttpRequest out = signAndInspect(unsigned);
     List<OAuth.Parameter> queryParams
         = OAuth.decodeForm(out.getUri().getRawQuery());
     assertTrue(contains(queryParams, "name", "value"));
   }
 
   public void testPostNoQueryWithData() throws Exception {
-    RemoteContentRequest unsigned = makeContentRequest(
+    HttpRequest unsigned = makeHttpRequest(
         "POST", "http://test", "name=value".getBytes());
-    RemoteContentRequest out = signAndInspect(unsigned);
+    HttpRequest out = signAndInspect(unsigned);
     List<OAuth.Parameter> queryParams
         = OAuth.decodeForm(out.getUri().getRawQuery());
     assertFalse(contains(queryParams, "name", "value"));
   }
 
   public void testPostWithQueryWithData() throws Exception {
-    RemoteContentRequest unsigned = makeContentRequest(
+    HttpRequest unsigned = makeHttpRequest(
         "POST", "http://test?queryName=queryValue", "name=value".getBytes());
-    RemoteContentRequest out = signAndInspect(unsigned);
+    HttpRequest out = signAndInspect(unsigned);
     List<OAuth.Parameter> queryParams
         = OAuth.decodeForm(out.getUri().getRawQuery());
     assertTrue(contains(queryParams, "queryName", "queryValue"));
   }
 
   public void testStripOpenSocialParamsFromQuery() throws Exception {
-    RemoteContentRequest unsigned = makeContentRequest(
+    HttpRequest unsigned = makeHttpRequest(
         "POST", "http://test?opensocial_foo=bar");
     try {
-      RemoteContentRequest out = signAndInspect(unsigned);
+      HttpRequest out = signAndInspect(unsigned);
       fail("Should have thrown");
     } catch (RequestSigningException e) {
       // good
@@ -245,10 +245,10 @@ public class SigningFetcherTest extends TestCase {
   }
 
   public void testStripOAuthParamsFromQuery() throws Exception {
-    RemoteContentRequest unsigned = makeContentRequest(
+    HttpRequest unsigned = makeHttpRequest(
         "POST", "http://test?oauth_foo=bar", "name=value".getBytes());
     try {
-      RemoteContentRequest out = signAndInspect(unsigned);
+      HttpRequest out = signAndInspect(unsigned);
       fail("Should have thrown");
     } catch (RequestSigningException e) {
       // good
@@ -256,10 +256,10 @@ public class SigningFetcherTest extends TestCase {
   }
 
   public void testStripOpenSocialParamsFromBody() throws Exception {
-    RemoteContentRequest unsigned = makeContentRequest(
+    HttpRequest unsigned = makeHttpRequest(
         "POST", "http://test", "opensocial_foo=bar".getBytes());
     try {
-    	RemoteContentRequest out = signAndInspect(unsigned);
+    	HttpRequest out = signAndInspect(unsigned);
     	fail("Should have thrown");
     } catch (RequestSigningException e) {
     	// good.
@@ -267,17 +267,17 @@ public class SigningFetcherTest extends TestCase {
   }
 
   public void testStripOAuthParamsFromBody() throws Exception {
-    RemoteContentRequest unsigned = makeContentRequest(
+    HttpRequest unsigned = makeHttpRequest(
         "POST", "http://test", "oauth_foo=bar".getBytes());
     try {
-    	RemoteContentRequest out = signAndInspect(unsigned);
+    	HttpRequest out = signAndInspect(unsigned);
     	fail("Should have thrown");
     } catch (RequestSigningException e) {
     	// good.
     }
   }
 
-  private void assertSignatureOK(RemoteContentRequest req)
+  private void assertSignatureOK(HttpRequest req)
   throws Exception {
     URL url = req.getUri().toURL();
     URL noQuery = new URL(url.getProtocol(), url.getHost(), url.getPort(),

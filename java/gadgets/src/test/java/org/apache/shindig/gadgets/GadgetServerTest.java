@@ -20,8 +20,8 @@ package org.apache.shindig.gadgets;
 import org.apache.shindig.common.BasicSecurityToken;
 import org.apache.shindig.common.SecurityToken;
 import org.apache.shindig.common.crypto.BlobCrypterException;
-import org.apache.shindig.gadgets.http.RemoteContent;
-import org.apache.shindig.gadgets.http.RemoteContentRequest;
+import org.apache.shindig.gadgets.http.HttpResponse;
+import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.spec.GadgetSpec;
 import static org.easymock.EasyMock.eq;
 import static org.easymock.EasyMock.expect;
@@ -33,11 +33,11 @@ import java.util.Map;
 public class GadgetServerTest extends GadgetTestFixture {
 
   private final static URI SPEC_URL = URI.create("http://example.org/g.xml");
-  private final static RemoteContentRequest SPEC_REQUEST
-      = new RemoteContentRequest(SPEC_URL);
+  private final static HttpRequest SPEC_REQUEST
+      = new HttpRequest(SPEC_URL);
   private final static URI BUNDLE_URL = URI.create("http://example.org/m.xml");
-  private final static RemoteContentRequest BUNDLE_REQUEST
-      = new RemoteContentRequest(BUNDLE_URL);
+  private final static HttpRequest BUNDLE_REQUEST
+      = new HttpRequest(BUNDLE_URL);
   private final static GadgetContext BASIC_CONTEXT = new GadgetContext() {
     @Override
     public URI getUrl() {
@@ -71,8 +71,8 @@ public class GadgetServerTest extends GadgetTestFixture {
        "</messagebundle>";
 
   public void testGadgetSpecLookup() throws Exception {
-    RemoteContentRequest req = new RemoteContentRequest(SPEC_URL);
-    RemoteContent resp = new RemoteContent(BASIC_SPEC_XML);
+    HttpRequest req = new HttpRequest(SPEC_URL);
+    HttpResponse resp = new HttpResponse(BASIC_SPEC_XML);
 
     expect(fetcher.fetch(req)).andReturn(resp);
     replay();
@@ -107,8 +107,8 @@ public class GadgetServerTest extends GadgetTestFixture {
       }
     };
 
-    RemoteContent spec = new RemoteContent(gadgetXml);
-    RemoteContent bundle = new RemoteContent(BASIC_BUNDLE_XML);
+    HttpResponse spec = new HttpResponse(gadgetXml);
+    HttpResponse bundle = new HttpResponse(BASIC_BUNDLE_XML);
 
     expect(fetcher.fetch(SPEC_REQUEST)).andReturn(spec);
     expect(fetcher.fetch(BUNDLE_REQUEST)).andReturn(bundle);
@@ -127,8 +127,8 @@ public class GadgetServerTest extends GadgetTestFixture {
   public void testPreloadsFetched() throws Exception {
     String preloadUrl = "http://example.org/preload.txt";
     String preloadData = "Preload Data";
-    RemoteContentRequest preloadRequest
-        = new RemoteContentRequest(URI.create(preloadUrl));
+    HttpRequest preloadRequest
+        = new HttpRequest(URI.create(preloadUrl));
 
     String gadgetXml
         = "<Module>" +
@@ -139,9 +139,9 @@ public class GadgetServerTest extends GadgetTestFixture {
           "</Module>";
     expect(fetcherFactory.get()).andReturn(fetcher);
     expect(fetcher.fetch(SPEC_REQUEST))
-         .andReturn(new RemoteContent(gadgetXml));
+         .andReturn(new HttpResponse(gadgetXml));
     expect(fetcher.fetch(preloadRequest))
-        .andReturn(new RemoteContent(preloadData));
+        .andReturn(new HttpResponse(preloadData));
     replay();
 
     Gadget gadget = gadgetServer.processGadget(BASIC_CONTEXT);
@@ -153,8 +153,8 @@ public class GadgetServerTest extends GadgetTestFixture {
   public void testPreloadViewMatch() throws Exception {
     String preloadUrl = "http://example.org/preload.txt";
     String preloadData = "Preload Data";
-    RemoteContentRequest preloadRequest
-        = new RemoteContentRequest(URI.create(preloadUrl));
+    HttpRequest preloadRequest
+        = new HttpRequest(URI.create(preloadUrl));
 
     String gadgetXml
         = "<Module>" +
@@ -165,9 +165,9 @@ public class GadgetServerTest extends GadgetTestFixture {
           "</Module>";
     expect(fetcherFactory.get()).andReturn(fetcher);
     expect(fetcher.fetch(SPEC_REQUEST))
-         .andReturn(new RemoteContent(gadgetXml));
+         .andReturn(new HttpResponse(gadgetXml));
     expect(fetcher.fetch(preloadRequest))
-        .andReturn(new RemoteContent(preloadData));
+        .andReturn(new HttpResponse(preloadData));
     replay();
 
     GadgetContext context = new GadgetContext() {
@@ -190,8 +190,8 @@ public class GadgetServerTest extends GadgetTestFixture {
   public void testPreloadAntiMatch() throws Exception {
     String preloadUrl = "http://example.org/preload.txt";
     String preloadData = "Preload Data";
-    RemoteContentRequest preloadRequest
-        = new RemoteContentRequest(URI.create(preloadUrl));
+    HttpRequest preloadRequest
+        = new HttpRequest(URI.create(preloadUrl));
 
     String gadgetXml
         = "<Module>" +
@@ -202,9 +202,9 @@ public class GadgetServerTest extends GadgetTestFixture {
         "</Module>";
     expect(fetcherFactory.get()).andReturn(fetcher);
     expect(fetcher.fetch(SPEC_REQUEST))
-        .andReturn(new RemoteContent(gadgetXml));
+        .andReturn(new HttpResponse(gadgetXml));
     expect(fetcher.fetch(preloadRequest))
-        .andReturn(new RemoteContent(preloadData));
+        .andReturn(new HttpResponse(preloadData));
     replay();
 
     GadgetContext context = new GadgetContext() {
@@ -226,8 +226,8 @@ public class GadgetServerTest extends GadgetTestFixture {
   public void testNoSignedPreloadWithoutToken() throws Exception {
     String preloadUrl = "http://example.org/preload.txt";
     String preloadData = "Preload Data";
-    RemoteContentRequest preloadRequest
-        = new RemoteContentRequest(URI.create(preloadUrl));
+    HttpRequest preloadRequest
+        = new HttpRequest(URI.create(preloadUrl));
 
     String gadgetXml
         = "<Module>" +
@@ -237,7 +237,7 @@ public class GadgetServerTest extends GadgetTestFixture {
         "  <Content type=\"html\" view=\"v1,v2\">dummy</Content>" +
         "</Module>";
     expect(fetcher.fetch(SPEC_REQUEST))
-        .andReturn(new RemoteContent(gadgetXml));
+        .andReturn(new HttpResponse(gadgetXml));
     replay();
 
     GadgetContext context = new GadgetContext() {
@@ -254,8 +254,8 @@ public class GadgetServerTest extends GadgetTestFixture {
   public void testSignedPreloadWithToken() throws Exception {
     String preloadUrl = "http://example.org/preload.txt";
     String preloadData = "Preload Data";
-    RemoteContentRequest preloadRequest
-        = new RemoteContentRequest(URI.create(preloadUrl));
+    HttpRequest preloadRequest
+        = new HttpRequest(URI.create(preloadUrl));
 
     String gadgetXml
         = "<Module>" +
@@ -265,11 +265,11 @@ public class GadgetServerTest extends GadgetTestFixture {
         "  <Content type=\"html\" view=\"v1,v2\">dummy</Content>" +
         "</Module>";
     expect(fetcher.fetch(SPEC_REQUEST))
-        .andReturn(new RemoteContent(gadgetXml));
+        .andReturn(new HttpResponse(gadgetXml));
     expect(fetcherFactory.getSigningFetcher(BASIC_CONTEXT.getToken()))
         .andReturn(fetcher);
     expect(fetcher.fetch(preloadRequest))
-        .andReturn(new RemoteContent(preloadData));
+        .andReturn(new HttpResponse(preloadData));
     replay();
 
     Gadget gadget = gadgetServer.processGadget(BASIC_CONTEXT);

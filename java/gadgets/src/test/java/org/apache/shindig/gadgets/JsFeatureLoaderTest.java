@@ -20,8 +20,8 @@ package org.apache.shindig.gadgets;
 import static org.easymock.EasyMock.eq;
 import static org.easymock.EasyMock.expect;
 
-import org.apache.shindig.gadgets.http.RemoteContent;
-import org.apache.shindig.gadgets.http.RemoteContentRequest;
+import org.apache.shindig.gadgets.http.HttpResponse;
+import org.apache.shindig.gadgets.http.HttpRequest;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -107,9 +107,9 @@ public class JsFeatureLoaderTest extends GadgetTestFixture {
                  "    <script src=\"" + JS_URL + "\"/>" +
                  "  </gadget>" +
                  "</feature>";
-    RemoteContentRequest request = new RemoteContentRequest(JS_URL);
-    RemoteContent response
-        = new RemoteContent(200, ALT_JS_CONTENT.getBytes(), null);
+    HttpRequest request = new HttpRequest(JS_URL);
+    HttpResponse response
+        = new HttpResponse(200, ALT_JS_CONTENT.getBytes(), null);
     expect(fetcher.fetch(eq(request))).andReturn(response);
     replay();
     GadgetFeatureRegistry.Entry entry = loader.loadFeature(registry, xml);

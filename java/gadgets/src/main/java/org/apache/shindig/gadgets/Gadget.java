@@ -17,7 +17,7 @@
  */
 package org.apache.shindig.gadgets;
 
-import org.apache.shindig.gadgets.http.RemoteContent;
+import org.apache.shindig.gadgets.http.HttpResponse;
 import org.apache.shindig.gadgets.spec.GadgetSpec;
 import org.apache.shindig.gadgets.spec.MessageBundle;
 import org.apache.shindig.gadgets.spec.Preload;
@@ -57,9 +57,9 @@ public class Gadget {
     return jsLibraries;
   }
 
-  private final Map<Preload, Future<RemoteContent>> preloads
-      = new HashMap<Preload, Future<RemoteContent>>();
-  public Map<Preload, Future<RemoteContent>> getPreloadMap() {
+  private final Map<Preload, Future<HttpResponse>> preloads
+      = new HashMap<Preload, Future<HttpResponse>>();
+  public Map<Preload, Future<HttpResponse>> getPreloadMap() {
     return preloads;
   }
 

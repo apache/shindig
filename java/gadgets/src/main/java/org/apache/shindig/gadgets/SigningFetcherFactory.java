@@ -21,8 +21,8 @@ package org.apache.shindig.gadgets;
 import org.apache.shindig.common.SecurityToken;
 import org.apache.shindig.common.util.InputStreamConsumer;
 import org.apache.shindig.common.util.ResourceLoader;
-import org.apache.shindig.gadgets.http.ContentCache;
-import org.apache.shindig.gadgets.http.ContentFetcher;
+import org.apache.shindig.gadgets.http.HttpCache;
+import org.apache.shindig.gadgets.http.HttpFetcher;
 
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
@@ -33,7 +33,7 @@ import java.io.IOException;
  * Produces Signing content fetchers for input tokens.
  */
 public class SigningFetcherFactory {
-  private final ContentCache cache;
+  private final HttpCache cache;
   private final String keyName;
   private final String privateKey;
 
@@ -47,8 +47,8 @@ public class SigningFetcherFactory {
    * @throws GadgetException
    */
   @SuppressWarnings("unused")
-  public ContentFetcher getSigningFetcher(
-      ContentFetcher networkFetcher, SecurityToken token)
+  public HttpFetcher getSigningFetcher(
+      HttpFetcher networkFetcher, SecurityToken token)
   throws GadgetException {
     return SigningFetcher.makeFromB64PrivateKey(cache,
         networkFetcher, token, keyName, privateKey);
@@ -58,7 +58,7 @@ public class SigningFetcherFactory {
    * Dummy ctor for implementations that produce custom fetchers.
    *
    */
-  protected SigningFetcherFactory(ContentCache cache) {
+  protected SigningFetcherFactory(HttpCache cache) {
     this.cache = cache;
     this.keyName = null;
     this.privateKey = null;
@@ -69,7 +69,7 @@ public class SigningFetcherFactory {
    * @param keyFile The file containing your private key for signing requests.
    */
   @Inject
-  public SigningFetcherFactory(ContentCache cache,
+  public SigningFetcherFactory(HttpCache cache,
                                @Named("signing.key-name") String keyName,
                                @Named("signing.key-file") String keyFile) {
     this.cache = cache;
