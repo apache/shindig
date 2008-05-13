@@ -21,9 +21,9 @@ package org.apache.shindig.gadgets;
 import org.apache.shindig.common.util.ResourceLoader;
 import org.apache.shindig.gadgets.http.BasicHttpCache;
 import org.apache.shindig.gadgets.http.BasicHttpFetcher;
+import org.apache.shindig.gadgets.http.ContentFetcherFactory;
 import org.apache.shindig.gadgets.http.HttpCache;
 import org.apache.shindig.gadgets.http.HttpFetcher;
-import org.apache.shindig.gadgets.http.ContentFetcherFactory;
 import org.apache.shindig.gadgets.http.RemoteContentFetcherFactory;
 import org.apache.shindig.gadgets.oauth.OAuthFetcherFactory;
 
@@ -57,19 +57,20 @@ public class DefaultGuiceModule extends AbstractModule {
 
     bind(RemoteContentFetcherFactory.class);
     bind(SigningFetcherFactory.class);
-    // Needed becuase OAuth fetcher factory fetches its config
-    bind(HttpFetcher.class)
-        .annotatedWith(OAuthFetcherFactory.OAuthConfigFetcher.class)
-        .to(BasicHttpFetcher.class);
     bind(OAuthFetcherFactory.class);
     bind(ContentFetcherFactory.class);
 
     bind(HttpFetcher.class)
         .annotatedWith(GadgetSpecFetcher.class)
         .toProvider(ContentFetcherFactory.class);
+    bind(GadgetSpecFactory.class)
+        .to(BasicGadgetSpecFactory.class);
+
     bind(HttpFetcher.class)
         .annotatedWith(MessageBundleFetcher.class)
         .toProvider(ContentFetcherFactory.class);
+    bind(MessageBundleFactory.class)
+        .to(BasicMessageBundleFactory.class);
 
     bind(GadgetBlacklist.class).to(BasicGadgetBlacklist.class);
     bind(Executor.class).toInstance(Executors.newCachedThreadPool());

@@ -23,15 +23,11 @@ import org.apache.shindig.common.crypto.BasicBlobCrypter;
 import org.apache.shindig.common.crypto.BlobCrypter;
 import org.apache.shindig.common.crypto.Crypto;
 import org.apache.shindig.gadgets.GadgetException;
+import org.apache.shindig.gadgets.GadgetSpecFactory;
 import org.apache.shindig.gadgets.http.HttpFetcher;
 
-import com.google.inject.BindingAnnotation;
 import com.google.inject.Inject;
 
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -54,14 +50,14 @@ public class OAuthFetcherFactory {
    * BlobCrypter and consumer keys/secrets read from oauth.js
    */
   @Inject
-  public OAuthFetcherFactory(@OAuthConfigFetcher HttpFetcher fetcher) {
+  public OAuthFetcherFactory(GadgetSpecFactory specFactory) {
     try {
       this.oauthCrypter = new BasicBlobCrypter(
           Crypto.getRandomBytes(BasicBlobCrypter.MASTER_KEY_MIN_LEN));
 
       BasicGadgetOAuthTokenStore basicStore =
           new BasicGadgetOAuthTokenStore(new BasicOAuthStore());
-      basicStore.initFromConfigFile(fetcher);
+      basicStore.initFromConfigFile(specFactory);
       tokenStore = basicStore;
     } catch (Throwable t) {
       // Since this happens at startup, we don't want to kill the server just
@@ -101,11 +97,5 @@ public class OAuthFetcherFactory {
         tokenStore, oauthCrypter, nextFetcher, token, params);
     fetcher.init();
     return fetcher;
-  }
-
-  @Retention(RetentionPolicy.RUNTIME)
-  @Target({ElementType.FIELD, ElementType.PARAMETER})
-  @BindingAnnotation
-  public @interface OAuthConfigFetcher {
   }
 }
