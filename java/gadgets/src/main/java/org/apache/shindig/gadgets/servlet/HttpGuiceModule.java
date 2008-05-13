@@ -16,43 +16,34 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+package org.apache.shindig.gadgets.servlet;
 
-package org.apache.shindig.gadgets.http;
+import org.apache.shindig.gadgets.DefaultGuiceModule;
 
-import org.apache.shindig.gadgets.GadgetContext;
+import com.google.inject.Scopes;
+
+import java.util.Properties;
 
 /**
- * Contains RPC-specific exceptions.
+ * Provides http component injection on top of existing components.
  */
-public class RpcException extends Exception {
-  private final GadgetContext context;
+public class HttpGuiceModule extends DefaultGuiceModule {
 
-  public GadgetContext getContext() {
-    return context;
+  /** {@inheritDoc} */
+  @Override
+  protected void configure() {
+    super.configure();
+    bind(ProxyHandler.class).in(Scopes.SINGLETON);
+    bind(JsonRpcHandler.class).in(Scopes.SINGLETON);
+    bind(GadgetRenderingTask.class);
+    bind(UrlGenerator.class).in(Scopes.SINGLETON);
   }
 
-  public RpcException(String message) {
-    super(message);
-    context = null;
+  public HttpGuiceModule(Properties properties) {
+    super(properties);
   }
 
-  public RpcException(String message, Throwable cause) {
-    super(message, cause);
-    context = null;
-  }
-
-  public RpcException(GadgetContext context, Throwable cause) {
-    super(cause);
-    this.context = context;
-  }
-
-  public RpcException(GadgetContext context, String message) {
-    super(message);
-    this.context = context;
-  }
-
-  public RpcException(GadgetContext context, String message, Throwable cause) {
-    super(message, cause);
-    this.context = context;
+  public HttpGuiceModule() {
+    super();
   }
 }

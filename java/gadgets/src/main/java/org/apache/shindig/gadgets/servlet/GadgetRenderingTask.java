@@ -17,7 +17,7 @@
  * under the License.
  */
 
-package org.apache.shindig.gadgets.http;
+package org.apache.shindig.gadgets.servlet;
 
 import org.apache.shindig.common.SecurityTokenDecoder;
 import org.apache.shindig.gadgets.ContainerConfig;
@@ -36,11 +36,12 @@ import org.apache.shindig.gadgets.spec.MessageBundle;
 import org.apache.shindig.gadgets.spec.ModulePrefs;
 import org.apache.shindig.gadgets.spec.Preload;
 import org.apache.shindig.gadgets.spec.View;
+
+import com.google.inject.Inject;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-
-import com.google.inject.Inject;
 
 import java.io.IOException;
 import java.net.URI;
@@ -154,22 +155,22 @@ public class GadgetRenderingTask {
     }
   }
 
-  /** 
+  /**
    * Redirect a type=html gadget to a locked domain if necessary.
-   * 
+   *
    * @param gadget
    * @return true if the request was handled, false if the request can proceed
    * @throws IOException
    */
   private boolean mustRedirectToLockedDomain(Gadget gadget)
       throws IOException {
-    
-    String host = request.getHeader("Host");    
+
+    String host = request.getHeader("Host");
     String container = context.getContainer();
     if (domainLocker.gadgetCanRender(host, gadget, container)) {
       return false;
     }
-    
+
     // Gadget tried to render on wrong domain.
     String gadgetUrl = context.getUrl().toString();
     String required = domainLocker.getLockedDomainForGadget(
@@ -177,9 +178,9 @@ public class GadgetRenderingTask {
     String redir =
         request.getScheme() + "://" +
         required +
-        request.getServletPath() + "?" + 
+        request.getServletPath() + "?" +
         request.getQueryString();
-    logger.info("Redirecting gadget " + context.getUrl() + " from domain " + 
+    logger.info("Redirecting gadget " + context.getUrl() + " from domain " +
         host + " to domain " + redir);
     response.sendRedirect(redir);
 
@@ -199,7 +200,7 @@ public class GadgetRenderingTask {
     if (mustRedirectToLockedDomain(gadget)) {
       return;
     }
-    
+
     response.setContentType("text/html; charset=UTF-8");
     StringBuilder markup = new StringBuilder();
 
@@ -477,7 +478,7 @@ public class GadgetRenderingTask {
     }
     return container;
   }
-  
+
   /**
    * Validates that the parent parameter was acceptable.
    *

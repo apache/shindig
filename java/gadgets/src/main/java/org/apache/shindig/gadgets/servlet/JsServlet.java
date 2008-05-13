@@ -15,7 +15,7 @@
  * KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-package org.apache.shindig.gadgets.http;
+package org.apache.shindig.gadgets.servlet;
 
 import org.apache.shindig.common.SecurityTokenDecoder;
 import org.apache.shindig.common.servlet.InjectedServlet;

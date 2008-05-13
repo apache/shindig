@@ -16,14 +16,14 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
-package org.apache.shindig.gadgets.http;
+package org.apache.shindig.gadgets.servlet;
 
 import org.apache.shindig.gadgets.ContainerConfig;
 import org.apache.shindig.gadgets.Gadget;
 import org.apache.shindig.gadgets.GadgetContext;
 import org.apache.shindig.gadgets.spec.GadgetSpec;
 import org.apache.shindig.gadgets.spec.View;
+
 import org.joda.time.DateTimeZone;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
@@ -48,7 +48,7 @@ public class HttpUtil {
   public static final long START_TIME = System.currentTimeMillis();
   // 1 year.
   private static final int DEFAULT_TTL = 60 * 60 * 24 * 365;
-  
+
   private static DateTimeFormatter httpDateFormatter = DateTimeFormat
       .forPattern("EEE, dd MMM yyyy HH:mm:ss 'GMT'")
       .withLocale(Locale.US)
@@ -87,11 +87,11 @@ public class HttpUtil {
     // Firefox requires this for certain cases.
     response.setDateHeader("Last-Modified", START_TIME);
   }
-  
+
   /**
    * Parses an HTTP date.  Returns null if the date fails to parse for any
    * reason.
-   * 
+   *
    * @param dateStr
    * @return the date
    */
@@ -103,10 +103,10 @@ public class HttpUtil {
       return null;
     }
   }
-  
+
   /**
    * Formats a date for use in HTTP headers.
-   * 
+   *
    * @param date
    * @return HTTP date string.
    */
@@ -176,7 +176,7 @@ public class HttpUtil {
 
     newHeaders.put("Cache-Control",
         Arrays.asList("public, max-age=" + (age / 1000L)));
-    
+
     return newHeaders;
   }
 

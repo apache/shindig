@@ -15,12 +15,12 @@
  * KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
+package org.apache.shindig.gadgets.servlet;
 
-package org.apache.shindig.gadgets.http;
+import static org.easymock.EasyMock.expect;
 
 import org.apache.shindig.gadgets.GadgetContext;
 import org.apache.shindig.gadgets.GadgetTestFixture;
-import static org.easymock.EasyMock.expect;
 
 import java.util.Locale;
 

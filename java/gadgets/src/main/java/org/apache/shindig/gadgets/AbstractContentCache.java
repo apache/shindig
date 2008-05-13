@@ -17,7 +17,7 @@
  */
 package org.apache.shindig.gadgets;
 
-import org.apache.shindig.gadgets.http.HttpUtil;
+import org.apache.shindig.gadgets.servlet.HttpUtil;
 
 import java.net.URI;
 import java.util.Arrays;
