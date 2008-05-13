@@ -22,16 +22,25 @@ package org.apache.shindig.gadgets;
  * Useful for generating internationalized layouts using CSS.
  */
 public class BidiSubstituter {
+  public static final String START_EDGE = "START_EDGE";
+  public static final String END_EDGE = "END_EDGE";
+  public static final String DIR = "DIR";
+  public static final String REVERSE_DIR = "REVERSE_DIR";
+
+  public static final String RIGHT = "right";
+  public static final String LEFT = "left";
+  public static final String RTL = "rtl";
+  public static final String LTR = "ltr";
 
   public static void addSubstitutions(Substitutions substituter, String dir) {
-    boolean rtl = "rtl".equals(dir);
-    substituter.addSubstitution(Substitutions.Type.BIDI, "START_EDGE",
-                          rtl ? "right" : "left");
-    substituter.addSubstitution(Substitutions.Type.BIDI, "END_EDGE",
-                          rtl ? "left" : "right");
-    substituter.addSubstitution(Substitutions.Type.BIDI, "DIR",
-                          rtl ? "rtl" : "ltr");
-    substituter.addSubstitution(Substitutions.Type.BIDI, "REVERSE_DIR",
-                          rtl ? "ltr" : "rtl");
+    boolean rtl = RTL.equals(dir);
+    substituter.addSubstitution(Substitutions.Type.BIDI, START_EDGE,
+        rtl ? RIGHT : LEFT);
+    substituter.addSubstitution(Substitutions.Type.BIDI, END_EDGE,
+        rtl ? LEFT : RIGHT);
+    substituter.addSubstitution(Substitutions.Type.BIDI, DIR,
+        rtl ? RTL : LTR);
+    substituter.addSubstitution(Substitutions.Type.BIDI, REVERSE_DIR,
+        rtl ? LTR : RTL);
   }
 }
