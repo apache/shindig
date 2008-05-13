@@ -15,9 +15,11 @@
  * KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-package org.apache.shindig.gadgets;
+package org.apache.shindig.gadgets.http;
 
 import org.apache.shindig.common.SecurityToken;
+import org.apache.shindig.gadgets.GadgetException;
+import org.apache.shindig.gadgets.SigningFetcherFactory;
 import org.apache.shindig.gadgets.oauth.OAuthFetcherFactory;
 import org.apache.shindig.gadgets.oauth.OAuthRequestParams;
 

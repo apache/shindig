@@ -22,8 +22,8 @@ import org.apache.shindig.common.SecurityToken;
 import org.apache.shindig.common.crypto.BasicBlobCrypter;
 import org.apache.shindig.common.crypto.BlobCrypter;
 import org.apache.shindig.common.crypto.Crypto;
-import org.apache.shindig.gadgets.ContentFetcher;
 import org.apache.shindig.gadgets.GadgetException;
+import org.apache.shindig.gadgets.http.ContentFetcher;
 
 import com.google.inject.BindingAnnotation;
 import com.google.inject.Inject;

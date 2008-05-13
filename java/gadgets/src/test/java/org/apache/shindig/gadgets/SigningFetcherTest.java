@@ -17,6 +17,9 @@ package org.apache.shindig.gadgets;
 import junit.framework.TestCase;
 
 import org.apache.shindig.common.BasicSecurityToken;
+import org.apache.shindig.gadgets.http.BasicContentCache;
+import org.apache.shindig.gadgets.http.ContentCache;
+import org.apache.shindig.gadgets.http.RemoteContentRequest;
 
 import net.oauth.OAuth;
 import net.oauth.OAuth.Parameter;

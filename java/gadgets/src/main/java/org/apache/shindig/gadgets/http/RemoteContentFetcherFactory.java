@@ -15,32 +15,25 @@
  * KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-package org.apache.shindig.gadgets;
+package org.apache.shindig.gadgets.http;
 
-import java.net.URI;
-import java.util.Map;
-import java.util.WeakHashMap;
+import com.google.inject.Inject;
+import com.google.inject.Provider;
 
 /**
- * Simple cache of RemoteContent. Uses WeakHashMap for memory management
+ * Factory for ContentFetcher's that retrieve remote content 
  */
-public class BasicContentCache extends AbstractContentCache {
+public class RemoteContentFetcherFactory implements Provider<ContentFetcher> {
 
-  private final Map<URI, RemoteContent> cache
-      = new WeakHashMap<URI, RemoteContent>();
+  private ContentCache cache;
 
-  @Override
-  protected RemoteContent getContentImpl(URI uri) {
-    return cache.get(uri);
+  @Inject
+  public RemoteContentFetcherFactory(ContentCache cache) {
+    this.cache = cache;
   }
 
-  @Override
-  protected void addContentImpl(URI uri, RemoteContent content) {
-    cache.put(uri, content);
-  }
-
-  @Override
-  protected RemoteContent removeContentImpl(URI uri) {
-    return cache.remove(uri);
+  public ContentFetcher get() {
+    return new BasicRemoteContentFetcher(cache);
   }
 }
+

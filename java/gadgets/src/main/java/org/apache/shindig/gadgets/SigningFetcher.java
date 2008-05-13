@@ -17,6 +17,10 @@ package org.apache.shindig.gadgets;
 import org.apache.shindig.common.SecurityToken;
 import org.apache.shindig.common.crypto.Crypto;
 import org.apache.shindig.common.util.TimeSource;
+import org.apache.shindig.gadgets.http.ContentCache;
+import org.apache.shindig.gadgets.http.ContentFetcher;
+import org.apache.shindig.gadgets.http.RemoteContent;
+import org.apache.shindig.gadgets.http.RemoteContentRequest;
 
 import net.oauth.OAuth;
 import net.oauth.OAuth.Parameter;

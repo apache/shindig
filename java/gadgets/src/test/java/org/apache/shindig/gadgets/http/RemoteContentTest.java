@@ -15,12 +15,11 @@
  * KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-
-package org.apache.shindig.gadgets;
-
-import junit.framework.TestCase;
+package org.apache.shindig.gadgets.http;
 
 import org.apache.shindig.common.util.InputStreamConsumer;
+
+import junit.framework.TestCase;
 
 import java.util.Arrays;
 import java.util.HashMap;

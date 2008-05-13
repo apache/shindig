@@ -18,6 +18,9 @@
 package org.apache.shindig.gadgets;
 
 import org.apache.shindig.common.util.ResourceLoader;
+import org.apache.shindig.gadgets.http.ContentFetcher;
+import org.apache.shindig.gadgets.http.RemoteContent;
+import org.apache.shindig.gadgets.http.RemoteContentRequest;
 
 import java.io.File;
 import java.io.IOException;

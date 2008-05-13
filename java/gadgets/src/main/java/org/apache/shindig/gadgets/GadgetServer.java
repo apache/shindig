@@ -17,6 +17,10 @@
  */
 package org.apache.shindig.gadgets;
 
+import org.apache.shindig.gadgets.http.ContentFetcher;
+import org.apache.shindig.gadgets.http.ContentFetcherFactory;
+import org.apache.shindig.gadgets.http.RemoteContent;
+import org.apache.shindig.gadgets.http.RemoteContentRequest;
 import org.apache.shindig.gadgets.spec.Auth;
 import org.apache.shindig.gadgets.spec.Feature;
 import org.apache.shindig.gadgets.spec.GadgetSpec;

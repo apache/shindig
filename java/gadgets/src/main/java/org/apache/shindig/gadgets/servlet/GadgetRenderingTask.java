@@ -29,7 +29,7 @@ import org.apache.shindig.gadgets.GadgetFeatureRegistry;
 import org.apache.shindig.gadgets.GadgetServer;
 import org.apache.shindig.gadgets.JsLibrary;
 import org.apache.shindig.gadgets.LockedDomainService;
-import org.apache.shindig.gadgets.RemoteContent;
+import org.apache.shindig.gadgets.http.RemoteContent;
 import org.apache.shindig.gadgets.spec.Feature;
 import org.apache.shindig.gadgets.spec.LocaleSpec;
 import org.apache.shindig.gadgets.spec.MessageBundle;

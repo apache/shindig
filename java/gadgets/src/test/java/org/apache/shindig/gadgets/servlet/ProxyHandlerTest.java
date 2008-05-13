@@ -25,8 +25,8 @@ import static org.easymock.EasyMock.isA;
 import org.apache.shindig.common.SecurityToken;
 import org.apache.shindig.gadgets.FakeGadgetToken;
 import org.apache.shindig.gadgets.GadgetException;
-import org.apache.shindig.gadgets.RemoteContent;
-import org.apache.shindig.gadgets.RemoteContentRequest;
+import org.apache.shindig.gadgets.http.RemoteContent;
+import org.apache.shindig.gadgets.http.RemoteContentRequest;
 import org.apache.shindig.gadgets.spec.Auth;
 import org.apache.shindig.gadgets.spec.Preload;
 

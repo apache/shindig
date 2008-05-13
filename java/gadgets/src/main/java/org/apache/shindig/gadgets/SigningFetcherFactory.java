@@ -21,6 +21,8 @@ package org.apache.shindig.gadgets;
 import org.apache.shindig.common.SecurityToken;
 import org.apache.shindig.common.util.InputStreamConsumer;
 import org.apache.shindig.common.util.ResourceLoader;
+import org.apache.shindig.gadgets.http.ContentCache;
+import org.apache.shindig.gadgets.http.ContentFetcher;
 
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
