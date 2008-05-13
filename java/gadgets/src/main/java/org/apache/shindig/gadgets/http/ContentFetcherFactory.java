@@ -27,9 +27,11 @@ import com.google.inject.Inject;
 import com.google.inject.Provider;
 
 /**
- * A factory of the supported ContentFetcher types.
+ * A factory of the supported HttpFetcher types.
+ *
+ * TODO: Remove this.
  */
-public class ContentFetcherFactory implements Provider<ContentFetcher> {
+public class ContentFetcherFactory implements Provider<HttpFetcher> {
 
   private final RemoteContentFetcherFactory remoteContentFetcherFactory;
   private final SigningFetcherFactory signingFetcherFactory;
@@ -49,7 +51,7 @@ public class ContentFetcherFactory implements Provider<ContentFetcher> {
    * @return A signing content fetcher
    * @throws GadgetException
    */
-  public ContentFetcher getSigningFetcher(SecurityToken token)
+  public HttpFetcher getSigningFetcher(SecurityToken token)
       throws GadgetException {
     return signingFetcherFactory.getSigningFetcher(
             remoteContentFetcherFactory.get(), token);
@@ -61,7 +63,7 @@ public class ContentFetcherFactory implements Provider<ContentFetcher> {
    * @return an OAuth fetcher
    * @throws GadgetException
    */
-  public ContentFetcher getOAuthFetcher(
+  public HttpFetcher getOAuthFetcher(
       SecurityToken token,
       OAuthRequestParams params)
       throws GadgetException {
@@ -72,7 +74,7 @@ public class ContentFetcherFactory implements Provider<ContentFetcher> {
   /**
    * @return a standard fetcher
    */
-  public ContentFetcher get() {
+  public HttpFetcher get() {
     return remoteContentFetcherFactory.get();
   }
 }

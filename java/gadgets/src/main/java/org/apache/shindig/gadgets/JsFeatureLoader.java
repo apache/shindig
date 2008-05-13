@@ -20,7 +20,7 @@ package org.apache.shindig.gadgets;
 import org.apache.shindig.common.util.ResourceLoader;
 import org.apache.shindig.common.xml.XmlException;
 import org.apache.shindig.common.xml.XmlUtil;
-import org.apache.shindig.gadgets.http.ContentFetcher;
+import org.apache.shindig.gadgets.http.HttpFetcher;
 
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
@@ -48,7 +48,7 @@ import java.util.logging.Logger;
  */
 public class JsFeatureLoader {
 
-  private final ContentFetcher fetcher;
+  private final HttpFetcher fetcher;
 
   private static final Logger logger
       = Logger.getLogger("org.apache.shindig.gadgets");
@@ -287,7 +287,7 @@ public class JsFeatureLoader {
   /**
    * @param fetcher
    */
-  public JsFeatureLoader(ContentFetcher fetcher) {
+  public JsFeatureLoader(HttpFetcher fetcher) {
     this.fetcher = fetcher;
   }
 }

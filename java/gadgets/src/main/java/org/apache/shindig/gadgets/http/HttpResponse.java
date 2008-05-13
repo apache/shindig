@@ -29,7 +29,7 @@ import java.util.Map;
 /**
  * Represents the results of an HTTP content retrieval operation.
  */
-public class RemoteContent {
+public class HttpResponse {
   // Replicate HTTP status codes here.
   public final static int SC_OK = 200;
   public final static int SC_NOT_FOUND = 404;
@@ -39,9 +39,9 @@ public class RemoteContent {
   private static final String DEFAULT_ENCODING = "UTF-8";
   private final String encoding;
 
-  public static final RemoteContent ERROR
-      = new RemoteContent(SC_INTERNAL_SERVER_ERROR);
-  public static final RemoteContent NOT_FOUND = new RemoteContent(SC_NOT_FOUND);
+  public static final HttpResponse ERROR
+      = new HttpResponse(SC_INTERNAL_SERVER_ERROR);
+  public static final HttpResponse NOT_FOUND = new HttpResponse(SC_NOT_FOUND);
 
   // Used to lazily convert to a string representation of the input.
   private String responseString = null;
@@ -50,9 +50,9 @@ public class RemoteContent {
   private final Map<String, String> metadata;
 
   /**
-   * Create a dummy empty map. Access via RemoteContent.ERROR
+   * Create a dummy empty map. Access via HttpResponse.ERROR
    */
-  private RemoteContent(int statusCode) {
+  private HttpResponse(int statusCode) {
     this.httpStatusCode = statusCode;
     this.responseBytes = new byte[0];
     this.encoding = DEFAULT_ENCODING;
@@ -65,7 +65,7 @@ public class RemoteContent {
    * @param responseBytes
    * @param headers May be null.
    */
-  public RemoteContent(int httpStatusCode, byte[] responseBytes,
+  public HttpResponse(int httpStatusCode, byte[] responseBytes,
                        Map<String, List<String>> headers) {
     this.httpStatusCode = httpStatusCode;
     if (responseBytes == null) {
@@ -97,7 +97,7 @@ public class RemoteContent {
    *
    * @param body
    */
-  public RemoteContent(String body) {
+  public HttpResponse(String body) {
     this(SC_OK, body.getBytes(), null);
   }
 

@@ -17,22 +17,22 @@
  */
 package org.apache.shindig.gadgets;
 
-import org.apache.shindig.gadgets.http.ContentFetcher;
+import org.apache.shindig.gadgets.http.HttpFetcher;
 
 /**
- * Fetches RemoteContent
+ * Fetches HttpResponse
  *
  * Subclasses can use a chain-of-responsibility pattern to add functionality
  * to the fetching process.  For example, a SigningFetcher can talk to a
  * CachingFetcher can talk to a ThrottlingFetcher that talks to a
  * RemoteFetcher that gets the actual data.
  */
-public abstract class ChainedContentFetcher implements ContentFetcher {
+public abstract class ChainedContentFetcher implements HttpFetcher {
 
   /** next fetcher in the chain, may be null */
-  protected ContentFetcher nextFetcher;
+  protected HttpFetcher nextFetcher;
 
-  protected ChainedContentFetcher(ContentFetcher nextFetcher) {
+  protected ChainedContentFetcher(HttpFetcher nextFetcher) {
     this.nextFetcher = nextFetcher;
   }
 }

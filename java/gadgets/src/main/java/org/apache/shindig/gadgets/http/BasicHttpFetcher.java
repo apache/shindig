@@ -39,19 +39,19 @@ import java.util.zip.InflaterInputStream;
  * annotate it as a Singleton to resolve Guice injection limitations.
  */
 @Singleton
-public class BasicRemoteContentFetcher implements ContentFetcher {
+public class BasicHttpFetcher implements HttpFetcher {
   private static final int CONNECT_TIMEOUT_MS = 5000;
   private static final int DEFAULT_MAX_OBJECT_SIZE = 1024 * 1024;
 
   private final int maxObjSize;
-  private final ContentCache cache;
+  private final HttpCache cache;
 
   /**
    * Creates a new fetcher capable of retrieving objects {@code maxObjSize}
    * bytes or smaller in size.
    * @param maxObjSize Maximum size, in bytes, of object to fetch
    */
-  public BasicRemoteContentFetcher(ContentCache cache, int maxObjSize) {
+  public BasicHttpFetcher(HttpCache cache, int maxObjSize) {
     this.maxObjSize = maxObjSize;
     this.cache = cache;
   }
@@ -60,7 +60,7 @@ public class BasicRemoteContentFetcher implements ContentFetcher {
    * Creates a new fetcher using the default maximum object size.
    */
   @Inject
-  public BasicRemoteContentFetcher(ContentCache cache) {
+  public BasicHttpFetcher(HttpCache cache) {
     this(cache, DEFAULT_MAX_OBJECT_SIZE);
   }
 
@@ -71,7 +71,7 @@ public class BasicRemoteContentFetcher implements ContentFetcher {
    * @return The opened connection
    * @throws IOException
    */
-  private URLConnection getConnection(RemoteContentRequest request)
+  private URLConnection getConnection(HttpRequest request)
       throws IOException {
     URLConnection fetcher;
     fetcher = request.getUri().toURL().openConnection();
@@ -105,17 +105,17 @@ public class BasicRemoteContentFetcher implements ContentFetcher {
 
   /**
    * @param fetcher
-   * @return A RemoteContent object made by consuming the response of the
+   * @return A HttpResponse object made by consuming the response of the
    *     given HttpURLConnection.
    */
-  private RemoteContent makeResponse(URLConnection fetcher)
+  private HttpResponse makeResponse(URLConnection fetcher)
       throws IOException {
     Map<String, List<String>> headers = fetcher.getHeaderFields();
     int responseCode;
     if (fetcher instanceof HttpURLConnection) {
       responseCode = ((HttpURLConnection)fetcher).getResponseCode();
     } else {
-      responseCode = RemoteContent.SC_OK;
+      responseCode = HttpResponse.SC_OK;
     }
 
     String encoding = fetcher.getContentEncoding();
@@ -131,13 +131,13 @@ public class BasicRemoteContentFetcher implements ContentFetcher {
     }
 
     byte[] body = InputStreamConsumer.readToByteArray(is, maxObjSize);
-    return new RemoteContent(responseCode, body, headers);
+    return new HttpResponse(responseCode, body, headers);
   }
 
   /** {@inheritDoc} */
-  public RemoteContent fetch(RemoteContentRequest request) {
-    RemoteContent content = cache.getContent(request);
-    if (content != null) return content;
+  public HttpResponse fetch(HttpRequest request) {
+    HttpResponse response = cache.getResponse(request);
+    if (response != null) return response;
     try {
       URLConnection fetcher = getConnection(request);
       if ("POST".equals(request.getMethod()) &&
@@ -151,14 +151,14 @@ public class BasicRemoteContentFetcher implements ContentFetcher {
         InputStreamConsumer.pipe(request.getPostBody(),
                                  fetcher.getOutputStream());
       }
-      content = makeResponse(fetcher);
-      cache.addContent(request, content);
-      return content;
+      response = makeResponse(fetcher);
+      cache.addResponse(request, response);
+      return response;
     } catch (IOException e) {
       if (e instanceof FileNotFoundException) {
-        return RemoteContent.NOT_FOUND;
+        return HttpResponse.NOT_FOUND;
       }
-      return RemoteContent.ERROR;
+      return HttpResponse.ERROR;
     }
   }
 }

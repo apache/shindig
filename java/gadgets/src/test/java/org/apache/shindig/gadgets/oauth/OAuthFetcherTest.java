@@ -26,9 +26,9 @@ import org.apache.shindig.common.SecurityToken;
 import org.apache.shindig.common.crypto.BasicBlobCrypter;
 import org.apache.shindig.common.crypto.BlobCrypter;
 import org.apache.shindig.gadgets.GadgetException;
-import org.apache.shindig.gadgets.http.ContentFetcher;
-import org.apache.shindig.gadgets.http.RemoteContent;
-import org.apache.shindig.gadgets.http.RemoteContentRequest;
+import org.apache.shindig.gadgets.http.HttpFetcher;
+import org.apache.shindig.gadgets.http.HttpResponse;
+import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.oauth.OAuthStore.HttpMethod;
 import org.apache.shindig.gadgets.oauth.OAuthStore.OAuthParamLocation;
 import org.apache.shindig.gadgets.oauth.OAuthStore.SignatureType;
@@ -101,7 +101,7 @@ public class OAuthFetcherTest extends TestCase {
     super.tearDown();
   }
   
-  public ContentFetcher getFetcher(
+  public HttpFetcher getFetcher(
       SecurityToken authToken, OAuthRequestParams params) throws GadgetException {
     OAuthFetcher fetcher = new OAuthFetcher(
         tokenStore, blobCrypter, serviceProvider, authToken, params);
@@ -111,14 +111,14 @@ public class OAuthFetcherTest extends TestCase {
 
   
   public void testOAuthFlow() throws Exception {
-    ContentFetcher fetcher;
-    RemoteContentRequest request;
-    RemoteContent response;
+    HttpFetcher fetcher;
+    HttpRequest request;
+    HttpResponse response;
     
     fetcher = getFetcher(
         getSecurityToken("owner", "owner"),
         new OAuthRequestParams(SERVICE_NAME, null, null));
-    request = new RemoteContentRequest(
+    request = new HttpRequest(
         new URI(FakeOAuthServiceProvider.RESOURCE_URL));
     response = fetcher.fetch(request);
     String clientState = response.getMetadata().get("oauthState");
@@ -131,7 +131,7 @@ public class OAuthFetcherTest extends TestCase {
     fetcher = getFetcher(
         getSecurityToken("owner", "owner"),
         new OAuthRequestParams(SERVICE_NAME, null, clientState));
-    request = new RemoteContentRequest(
+    request = new HttpRequest(
         new URI(FakeOAuthServiceProvider.RESOURCE_URL));
     response = fetcher.fetch(request);
     assertEquals("User data is hello-oauth", response.getResponseAsString());
@@ -139,7 +139,7 @@ public class OAuthFetcherTest extends TestCase {
     fetcher = getFetcher(
         getSecurityToken("owner", "somebody else"),
         new OAuthRequestParams(SERVICE_NAME, null, null));
-    request = new RemoteContentRequest(
+    request = new HttpRequest(
         new URI(FakeOAuthServiceProvider.RESOURCE_URL));
     response = fetcher.fetch(request);
     assertEquals("User data is hello-oauth", response.getResponseAsString());
@@ -147,7 +147,7 @@ public class OAuthFetcherTest extends TestCase {
     fetcher = getFetcher(
         getSecurityToken("somebody else", "somebody else"),
         new OAuthRequestParams(SERVICE_NAME, null, null));
-    request = new RemoteContentRequest(
+    request = new HttpRequest(
         new URI(FakeOAuthServiceProvider.RESOURCE_URL));
     response = fetcher.fetch(request);
     clientState = response.getMetadata().get("oauthState");
@@ -160,7 +160,7 @@ public class OAuthFetcherTest extends TestCase {
     fetcher = getFetcher(
         getSecurityToken("somebody else", "somebody else"),
         new OAuthRequestParams(SERVICE_NAME, null, clientState));
-    request = new RemoteContentRequest(
+    request = new HttpRequest(
         new URI(FakeOAuthServiceProvider.RESOURCE_URL));
     response = fetcher.fetch(request);
     assertEquals("User data is somebody else", response.getResponseAsString());

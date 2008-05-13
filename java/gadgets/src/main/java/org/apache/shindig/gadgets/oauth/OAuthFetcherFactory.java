@@ -23,7 +23,7 @@ import org.apache.shindig.common.crypto.BasicBlobCrypter;
 import org.apache.shindig.common.crypto.BlobCrypter;
 import org.apache.shindig.common.crypto.Crypto;
 import org.apache.shindig.gadgets.GadgetException;
-import org.apache.shindig.gadgets.http.ContentFetcher;
+import org.apache.shindig.gadgets.http.HttpFetcher;
 
 import com.google.inject.BindingAnnotation;
 import com.google.inject.Inject;
@@ -54,7 +54,7 @@ public class OAuthFetcherFactory {
    * BlobCrypter and consumer keys/secrets read from oauth.js
    */
   @Inject
-  public OAuthFetcherFactory(@OAuthConfigFetcher ContentFetcher fetcher) {
+  public OAuthFetcherFactory(@OAuthConfigFetcher HttpFetcher fetcher) {
     try {
       this.oauthCrypter = new BasicBlobCrypter(
           Crypto.getRandomBytes(BasicBlobCrypter.MASTER_KEY_MIN_LEN));
@@ -94,7 +94,7 @@ public class OAuthFetcherFactory {
    * @throws GadgetException
    */
   public OAuthFetcher getOAuthFetcher(
-      ContentFetcher nextFetcher,
+      HttpFetcher nextFetcher,
       SecurityToken token,
       OAuthRequestParams params) throws GadgetException {
     OAuthFetcher fetcher = new OAuthFetcher(

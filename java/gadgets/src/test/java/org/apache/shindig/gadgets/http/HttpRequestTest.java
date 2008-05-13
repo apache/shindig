@@ -28,7 +28,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class RemoteContentRequestTest extends TestCase {
+public class HttpRequestTest extends TestCase {
   private static final String POST_BODY = "Hello, world!";
   private static final String CONTENT_TYPE = "text/plain";
   private static final String TEST_HEADER_KEY = "X-Test-Header";
@@ -36,8 +36,8 @@ public class RemoteContentRequestTest extends TestCase {
   private static final URI DEFAULT_URI = URI.create("http://example.org/");
 
   public void testPostBodyCopied() throws Exception {
-    RemoteContentRequest request
-        = new RemoteContentRequest(DEFAULT_URI, POST_BODY.getBytes());
+    HttpRequest request
+        = new HttpRequest(DEFAULT_URI, POST_BODY.getBytes());
     assertEquals(POST_BODY.length(), request.getPostBodyLength());
     assertEquals(POST_BODY,
         InputStreamConsumer.readToString(request.getPostBody()));
@@ -46,16 +46,16 @@ public class RemoteContentRequestTest extends TestCase {
   public void testContentTypeExtraction() throws Exception {
     Map<String, List<String>> headers = new HashMap<String, List<String>>();
     headers.put("Content-Type", Arrays.asList(CONTENT_TYPE));
-    RemoteContentRequest request
-        = new RemoteContentRequest(DEFAULT_URI, headers);
+    HttpRequest request
+        = new HttpRequest(DEFAULT_URI, headers);
     assertEquals(CONTENT_TYPE, request.getContentType());
   }
 
   public void testGetHeader() throws Exception {
     Map<String, List<String>> headers = new HashMap<String, List<String>>();
     headers.put(TEST_HEADER_KEY, Arrays.asList(TEST_HEADER_VALUE));
-    RemoteContentRequest request
-        = new RemoteContentRequest(DEFAULT_URI, headers);
+    HttpRequest request
+        = new HttpRequest(DEFAULT_URI, headers);
     assertEquals(TEST_HEADER_VALUE, request.getHeader(TEST_HEADER_KEY));
   }
 }

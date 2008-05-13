@@ -18,9 +18,9 @@
 package org.apache.shindig.gadgets;
 
 import org.apache.shindig.common.util.ResourceLoader;
-import org.apache.shindig.gadgets.http.ContentFetcher;
-import org.apache.shindig.gadgets.http.RemoteContent;
-import org.apache.shindig.gadgets.http.RemoteContentRequest;
+import org.apache.shindig.gadgets.http.HttpFetcher;
+import org.apache.shindig.gadgets.http.HttpResponse;
+import org.apache.shindig.gadgets.http.HttpRequest;
 
 import java.io.File;
 import java.io.IOException;
@@ -119,7 +119,7 @@ public final class JsLibrary {
    * @throws GadgetException 
    */
   public static JsLibrary create(Type type, String content, String feature,
-      ContentFetcher fetcher) throws GadgetException {
+      HttpFetcher fetcher) throws GadgetException {
     String optimizedContent = null;
     String debugContent;
     switch (type) {
@@ -175,13 +175,13 @@ public final class JsLibrary {
    * @throws GadgetException 
    */
   private static String loadDataFromUrl(String url,
-      ContentFetcher fetcher) throws GadgetException {
+      HttpFetcher fetcher) throws GadgetException {
     try {
       logger.info("Attempting to load js from: " + url);
       URI uri = new URI(url);
-      RemoteContentRequest request = new RemoteContentRequest(uri);
-      RemoteContent response = fetcher.fetch(request);
-      if (response.getHttpStatusCode() == RemoteContent.SC_OK) {
+      HttpRequest request = new HttpRequest(uri);
+      HttpResponse response = fetcher.fetch(request);
+      if (response.getHttpStatusCode() == HttpResponse.SC_OK) {
         return response.getResponseAsString();
       } else {
         logger.warning("Unable to retrieve remote library from " + url);

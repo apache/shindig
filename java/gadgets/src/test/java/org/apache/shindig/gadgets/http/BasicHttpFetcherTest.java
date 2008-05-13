@@ -24,10 +24,10 @@ import java.io.File;
 import java.io.FileWriter;
 import java.net.URI;
 
-public class BasicRemoteContentFetcherTest extends TestCase {
-  private ContentCache cache = new BasicContentCache();
-  private ContentFetcher fetcher
-      = new BasicRemoteContentFetcher(cache, Integer.MAX_VALUE);
+public class BasicHttpFetcherTest extends TestCase {
+  private HttpCache cache = new BasicHttpCache();
+  private HttpFetcher fetcher
+      = new BasicHttpFetcher(cache, Integer.MAX_VALUE);
 
   public void testFetch() throws Exception {
     String content = "Hello, world!";
@@ -36,17 +36,17 @@ public class BasicRemoteContentFetcherTest extends TestCase {
     BufferedWriter out = new BufferedWriter(new FileWriter(temp));
     out.write(content);
     out.close();
-    RemoteContentRequest request = new RemoteContentRequest(temp.toURI());
-    RemoteContent response = fetcher.fetch(request);
-    assertEquals(RemoteContent.SC_OK, response.getHttpStatusCode());
+    HttpRequest request = new HttpRequest(temp.toURI());
+    HttpResponse response = fetcher.fetch(request);
+    assertEquals(HttpResponse.SC_OK, response.getHttpStatusCode());
     assertEquals(content, response.getResponseAsString());
   }
 
   public void testNotExists() throws Exception {
-    RemoteContentRequest request
-        = new RemoteContentRequest(new URI("file:///does/not/exist"));
-    RemoteContent response = fetcher.fetch(request);
-    assertEquals(RemoteContent.SC_NOT_FOUND, response.getHttpStatusCode());
+    HttpRequest request
+        = new HttpRequest(new URI("file:///does/not/exist"));
+    HttpResponse response = fetcher.fetch(request);
+    assertEquals(HttpResponse.SC_NOT_FOUND, response.getHttpStatusCode());
   }
 
   // TODO simulate fake POST requests, headers, options, etc.

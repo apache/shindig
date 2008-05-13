@@ -1,4 +1,4 @@
-/**
+/*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements. See the NOTICE file
  * distributed with this work for additional information
@@ -7,7 +7,7 @@
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
@@ -18,21 +18,29 @@
 package org.apache.shindig.gadgets.http;
 
 import java.net.URI;
+import java.util.Map;
+import java.util.WeakHashMap;
 
 /**
- * Cache of RemoteContent keyed by URI/RemoteContentRequest
+ * Simple cache of HttpResponse. Uses WeakHashMap for memory management
  */
-public interface ContentCache {
+public class BasicHttpCache extends AbstractHttpCache {
 
-  public RemoteContent getContent(URI uri);
+  private final Map<URI, HttpResponse> cache
+      = new WeakHashMap<URI, HttpResponse>();
 
-  public RemoteContent getContent(RemoteContentRequest request);
+  @Override
+  protected HttpResponse getResponseImpl(URI uri) {
+    return cache.get(uri);
+  }
 
-  public void addContent(URI uri, RemoteContent content);
+  @Override
+  protected void addResponseImpl(URI uri, HttpResponse response) {
+    cache.put(uri, response);
+  }
 
-  public void addContent(RemoteContentRequest request, RemoteContent content);
-
-  public RemoteContent removeContent(URI uri);
-
-  public RemoteContent removeContent(RemoteContentRequest request);
+  @Override
+  protected HttpResponse removeResponseImpl(URI uri) {
+    return cache.remove(uri);
+  }
 }

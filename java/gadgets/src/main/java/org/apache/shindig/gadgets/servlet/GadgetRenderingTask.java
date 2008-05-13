@@ -29,7 +29,7 @@ import org.apache.shindig.gadgets.GadgetFeatureRegistry;
 import org.apache.shindig.gadgets.GadgetServer;
 import org.apache.shindig.gadgets.JsLibrary;
 import org.apache.shindig.gadgets.LockedDomainService;
-import org.apache.shindig.gadgets.http.RemoteContent;
+import org.apache.shindig.gadgets.http.HttpResponse;
 import org.apache.shindig.gadgets.spec.Feature;
 import org.apache.shindig.gadgets.spec.LocaleSpec;
 import org.apache.shindig.gadgets.spec.MessageBundle;
@@ -438,11 +438,11 @@ public class GadgetRenderingTask {
     // Output preloads. We will allow the gadget render to continue
     // even if a preload fails
     JSONObject resp = new JSONObject();
-    for (Map.Entry<Preload, Future<RemoteContent>> entry
+    for (Map.Entry<Preload, Future<HttpResponse>> entry
         : gadget.getPreloadMap().entrySet()) {
       Preload preload = entry.getKey();
       try {
-        RemoteContent response = entry.getValue().get();
+        HttpResponse response = entry.getValue().get();
         // Use raw param as key as URL may have to be decoded
         JSONObject jsonEntry = new JSONObject();
         jsonEntry.put("body", response.getResponseAsString())

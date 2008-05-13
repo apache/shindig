@@ -14,8 +14,8 @@
 
 package org.apache.shindig.gadgets;
 
-import org.apache.shindig.gadgets.http.RemoteContent;
-import org.apache.shindig.gadgets.http.RemoteContentRequest;
+import org.apache.shindig.gadgets.http.HttpResponse;
+import org.apache.shindig.gadgets.http.HttpRequest;
 
 /**
  * Test utility to intercept remote content requests for inspection.
@@ -26,9 +26,9 @@ public class InterceptingContentFetcher extends ChainedContentFetcher {
     super(null);
   }
 
-  public RemoteContentRequest interceptedRequest;
+  public HttpRequest interceptedRequest;
 
-  public RemoteContent fetch(RemoteContentRequest request) {
+  public HttpResponse fetch(HttpRequest request) {
     interceptedRequest = request;
     return null;
   }

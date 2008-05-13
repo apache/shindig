@@ -20,9 +20,9 @@ package org.apache.shindig.gadgets;
 import static org.easymock.EasyMock.eq;
 import static org.easymock.EasyMock.expect;
 
-import org.apache.shindig.gadgets.http.ContentFetcher;
-import org.apache.shindig.gadgets.http.RemoteContent;
-import org.apache.shindig.gadgets.http.RemoteContentRequest;
+import org.apache.shindig.gadgets.http.HttpFetcher;
+import org.apache.shindig.gadgets.http.HttpResponse;
+import org.apache.shindig.gadgets.http.HttpRequest;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -82,12 +82,12 @@ public class JsLibraryTest extends EasyMockTestCase {
   }
 
   public void testUrl() throws Exception {
-    ContentFetcher mockFetcher = mock(ContentFetcher.class);
+    HttpFetcher mockFetcher = mock(HttpFetcher.class);
     URI location = new URI("http://example.org/file.js");
-    RemoteContentRequest request = new RemoteContentRequest(location);
-    RemoteContent content
-        = new RemoteContent(RemoteContent.SC_OK, URL_JS.getBytes(), null);
-    expect(mockFetcher.fetch(eq(request))).andReturn(content);
+    HttpRequest request = new HttpRequest(location);
+    HttpResponse response
+        = new HttpResponse(HttpResponse.SC_OK, URL_JS.getBytes(), null);
+    expect(mockFetcher.fetch(eq(request))).andReturn(response);
     replay();
     JsLibrary lib = JsLibrary.create(
         JsLibrary.Type.URL, location.toString(), null, mockFetcher);

@@ -17,30 +17,20 @@
  */
 package org.apache.shindig.gadgets.http;
 
-import java.net.URI;
-import java.util.Map;
-import java.util.WeakHashMap;
+import org.apache.shindig.gadgets.GadgetException;
 
 /**
- * Simple cache of RemoteContent. Uses WeakHashMap for memory management
+ *  Provide HttpResponse for a HttpRequest
  */
-public class BasicContentCache extends AbstractContentCache {
+public interface HttpFetcher {
 
-  private final Map<URI, RemoteContent> cache
-      = new WeakHashMap<URI, RemoteContent>();
-
-  @Override
-  protected RemoteContent getContentImpl(URI uri) {
-    return cache.get(uri);
-  }
-
-  @Override
-  protected void addContentImpl(URI uri, RemoteContent content) {
-    cache.put(uri, content);
-  }
-
-  @Override
-  protected RemoteContent removeContentImpl(URI uri) {
-    return cache.remove(uri);
-  }
+  /**
+   * Fetch HTTP content.
+   *
+   * @param request The request to fetch.
+   * @return HttpResponse
+   * @throws org.apache.shindig.gadgets.GadgetException
+   */
+  HttpResponse fetch(HttpRequest request)
+      throws GadgetException;
 }

@@ -21,10 +21,10 @@ import org.apache.shindig.common.crypto.BlobCrypter;
 import org.apache.shindig.common.crypto.BlobCrypterException;
 import org.apache.shindig.gadgets.ChainedContentFetcher;
 import org.apache.shindig.gadgets.GadgetException;
-import org.apache.shindig.gadgets.http.ContentFetcher;
-import org.apache.shindig.gadgets.http.RemoteContent;
-import org.apache.shindig.gadgets.http.RemoteContentRequest;
-import org.apache.shindig.gadgets.http.RemoteContentRequest.Options;
+import org.apache.shindig.gadgets.http.HttpFetcher;
+import org.apache.shindig.gadgets.http.HttpResponse;
+import org.apache.shindig.gadgets.http.HttpRequest;
+import org.apache.shindig.gadgets.http.HttpRequest.Options;
 
 import net.oauth.OAuth;
 import net.oauth.OAuthAccessor;
@@ -108,7 +108,7 @@ public class OAuthFetcher extends ChainedContentFetcher {
   /**
    * The request the client really wants to make.
    */
-  private RemoteContentRequest realRequest;
+  private HttpRequest realRequest;
 
   /**
    * State to cache on the client.
@@ -132,7 +132,7 @@ public class OAuthFetcher extends ChainedContentFetcher {
   public OAuthFetcher(
       GadgetOAuthTokenStore tokenStore,
       BlobCrypter oauthCrypter,
-      ContentFetcher nextFetcher,
+      HttpFetcher nextFetcher,
       SecurityToken authToken,
       OAuthRequestParams params) {
     super(nextFetcher);
@@ -198,7 +198,7 @@ public class OAuthFetcher extends ChainedContentFetcher {
     return tokenKey;
   }
 
-  public RemoteContent fetch(RemoteContentRequest request)
+  public HttpResponse fetch(HttpRequest request)
       throws GadgetException {
     this.realRequest = request;
     if (needApproval()) {
@@ -327,7 +327,7 @@ public class OAuthFetcher extends ChainedContentFetcher {
     return result.toString();
   }
 
-  private RemoteContentRequest createRemoteContentRequest(
+  private HttpRequest createHttpRequest(
       List<Map.Entry<String, String>> oauthParams, String method,
       String url, Map<String, List<String>> headers, String contentType,
       String postBody, Options options)
@@ -377,7 +377,7 @@ public class OAuthFetcher extends ChainedContentFetcher {
                            ? null
                            : postBody.getBytes("UTF-8");
 
-    return new RemoteContentRequest(method, new URI(url), newHeaders,
+    return new HttpRequest(method, new URI(url), newHeaders,
                                     postBodyBytes, options);
   }
 
@@ -387,18 +387,18 @@ public class OAuthFetcher extends ChainedContentFetcher {
   private OAuthMessage sendOAuthMessage(OAuthMessage request)
       throws IOException, URISyntaxException, GadgetException {
 
-    RemoteContentRequest rcr =
-      createRemoteContentRequest(filterOAuthParams(request),
+    HttpRequest rcr =
+      createHttpRequest(filterOAuthParams(request),
                                  request.method,
                                  request.URL,
                                  null,
-                                 RemoteContentRequest.DEFAULT_CONTENT_TYPE,
+                                 HttpRequest.DEFAULT_CONTENT_TYPE,
                                  null,
-                                 RemoteContentRequest.DEFAULT_OPTIONS);
+                                 HttpRequest.DEFAULT_OPTIONS);
 
-    RemoteContent content = nextFetcher.fetch(rcr);
+    HttpResponse response = nextFetcher.fetch(rcr);
     OAuthMessage reply = new OAuthMessage(null, null, null);
-    reply.addParameters(OAuth.decodeForm(content.getResponseAsString()));
+    reply.addParameters(OAuth.decodeForm(response.getResponseAsString()));
     return reply;
   }
 
@@ -438,18 +438,18 @@ public class OAuthFetcher extends ChainedContentFetcher {
     aznUrl = azn.toString();
   }
 
-  private RemoteContent buildOAuthApprovalResponse() {
-    RemoteContent content = new RemoteContent(0, null, null);
-    addResponseMetadata(content);
-    return content;
+  private HttpResponse buildOAuthApprovalResponse() {
+    HttpResponse response = new HttpResponse(0, null, null);
+    addResponseMetadata(response);
+    return response;
   }
   
-  private void addResponseMetadata(RemoteContent content) {
+  private void addResponseMetadata(HttpResponse response) {
     if (newClientState != null) {
-      content.getMetadata().put(CLIENT_STATE, newClientState);
+      response.getMetadata().put(CLIENT_STATE, newClientState);
     }
     if (aznUrl != null) {
-      content.getMetadata().put(APPROVAL_URL, aznUrl);
+      response.getMetadata().put(APPROVAL_URL, aznUrl);
     }
   }
 
@@ -514,7 +514,7 @@ public class OAuthFetcher extends ChainedContentFetcher {
   /**
    * Get honest-to-goodness user data.
    */
-  private RemoteContent fetchData() throws GadgetException {
+  private HttpResponse fetchData() throws GadgetException {
     try {
       List<OAuth.Parameter> msgParams =
         OAuth.isFormEncoded(realRequest.getContentType())
@@ -527,8 +527,8 @@ public class OAuthFetcher extends ChainedContentFetcher {
       OAuthMessage oauthRequest = newRequestMessage(
           method, realRequest.getUri().toASCIIString(), msgParams);
 
-      RemoteContent content =  nextFetcher.fetch(
-          createRemoteContentRequest(
+      HttpResponse response =  nextFetcher.fetch(
+          createHttpRequest(
               filterOAuthParams(oauthRequest),
               realRequest.getMethod(),
               realRequest.getUri().toASCIIString(),
@@ -538,8 +538,8 @@ public class OAuthFetcher extends ChainedContentFetcher {
               realRequest.getOptions()));
 
       // Track metadata on the response
-      addResponseMetadata(content);
-      return content;
+      addResponseMetadata(response);
+      return response;
     } catch (UnsupportedEncodingException e) {
       throw new GadgetException(GadgetException.Code.INTERNAL_SERVER_ERROR, e);
     } catch (IOException e) {

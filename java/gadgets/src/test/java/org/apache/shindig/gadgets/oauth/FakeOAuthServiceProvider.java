@@ -27,15 +27,15 @@ import net.oauth.SimpleOAuthValidator;
 
 import org.apache.shindig.common.crypto.Crypto;
 import org.apache.shindig.gadgets.GadgetException;
-import org.apache.shindig.gadgets.http.ContentFetcher;
-import org.apache.shindig.gadgets.http.RemoteContent;
-import org.apache.shindig.gadgets.http.RemoteContentRequest;
+import org.apache.shindig.gadgets.http.HttpFetcher;
+import org.apache.shindig.gadgets.http.HttpResponse;
+import org.apache.shindig.gadgets.http.HttpRequest;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-public class FakeOAuthServiceProvider implements ContentFetcher {
+public class FakeOAuthServiceProvider implements HttpFetcher {
 
   public final static String SP_HOST = "http://www.example.com";
   
@@ -113,7 +113,7 @@ public class FakeOAuthServiceProvider implements ContentFetcher {
     validator = new SimpleOAuthValidator();
   }
   
-  public RemoteContent fetch(RemoteContentRequest request)
+  public HttpResponse fetch(HttpRequest request)
       throws GadgetException {
     String url = request.getUri().toASCIIString();
     try {
@@ -132,7 +132,7 @@ public class FakeOAuthServiceProvider implements ContentFetcher {
         "Unexpected request for " + url);
   }
 
-  private RemoteContent handleRequestTokenUrl(RemoteContentRequest request)
+  private HttpResponse handleRequestTokenUrl(HttpRequest request)
       throws Exception {
     OAuthMessage message = parseMessage(request);
     OAuthAccessor accessor = new OAuthAccessor(consumer);
@@ -144,12 +144,12 @@ public class FakeOAuthServiceProvider implements ContentFetcher {
     String resp = OAuth.formEncode(OAuth.newList(
         "oauth_token", requestToken,
         "oauth_token_secret", requestToken));
-    return new RemoteContent(resp);
+    return new HttpResponse(resp);
   }
 
   // Loosely based off net.oauth.OAuthServlet, and even more loosely related
   // to the OAuth specification
-  private OAuthMessage parseMessage(RemoteContentRequest request) {
+  private OAuthMessage parseMessage(HttpRequest request) {
     String method = request.getMethod();
     if (!method.equals("GET")) {
       throw new RuntimeException("Only GET supported for now");
@@ -229,7 +229,7 @@ public class FakeOAuthServiceProvider implements ContentFetcher {
     state.setUserData(parsed.getQueryParam("user_data"));
   }
 
-  private RemoteContent handleAccessTokenUrl(RemoteContentRequest request)
+  private HttpResponse handleAccessTokenUrl(HttpRequest request)
       throws Exception {
     OAuthMessage message = parseMessage(request);
     String requestToken = message.getParameter("oauth_token");
@@ -249,10 +249,10 @@ public class FakeOAuthServiceProvider implements ContentFetcher {
     String resp = OAuth.formEncode(OAuth.newList(
         "oauth_token", accessToken,
         "oauth_token_secret", accessTokenSecret));
-    return new RemoteContent(resp);
+    return new HttpResponse(resp);
   }
 
-  private RemoteContent handleResourceUrl(RemoteContentRequest request)
+  private HttpResponse handleResourceUrl(HttpRequest request)
       throws Exception {
     OAuthMessage message = parseMessage(request);
     String accessToken = message.getParameter("oauth_token");
@@ -264,7 +264,7 @@ public class FakeOAuthServiceProvider implements ContentFetcher {
     accessor.accessToken = accessToken;
     accessor.tokenSecret = state.getSecret();
     message.validateMessage(accessor, validator);
-    return new RemoteContent("User data is " + state.getUserData());
+    return new HttpResponse("User data is " + state.getUserData());
   }
 
 }
