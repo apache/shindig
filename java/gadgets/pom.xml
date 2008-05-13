@@ -30,8 +30,8 @@ under the License.
   <artifactId>shindig-gadgets</artifactId>
   <packaging>jar</packaging>
 
-  <name>Apache Shindig Gadget Server</name>
-  <description>Server part of Shindig for hosting OpenSocial applications.</description>
+  <name>Apache Shindig Gadget Renderer</name>
+  <description>OpenSocial gadget rendering component.</description>
 
   <scm>
     <connection>scm:svn:http://svn.apache.org/repos/asf/incubator/shindig/trunk/java/gadgets</connection>
