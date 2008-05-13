@@ -17,10 +17,9 @@
  */
 package org.apache.shindig.gadgets;
 
-import org.apache.shindig.gadgets.http.HttpFetcher;
 import org.apache.shindig.gadgets.http.ContentFetcherFactory;
-import org.apache.shindig.gadgets.http.HttpResponse;
 import org.apache.shindig.gadgets.http.HttpRequest;
+import org.apache.shindig.gadgets.http.HttpResponse;
 import org.apache.shindig.gadgets.spec.Auth;
 import org.apache.shindig.gadgets.spec.Feature;
 import org.apache.shindig.gadgets.spec.GadgetSpec;
@@ -30,7 +29,6 @@ import org.apache.shindig.gadgets.spec.Preload;
 
 import com.google.inject.Inject;
 
-import java.net.URI;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -53,22 +51,23 @@ public class GadgetServer {
   private final GadgetBlacklist blacklist;
 
   private ContentFetcherFactory preloadFetcherFactory;
-  private HttpFetcher gadgetSpecFetcher;
-  private HttpFetcher messageBundleFetcher;
+  private GadgetSpecFactory specFactory;
+  private MessageBundleFactory bundleFactory;
+
 
   @Inject
   public GadgetServer(Executor executor,
       GadgetFeatureRegistry registry,
       GadgetBlacklist blacklist,
       ContentFetcherFactory preloadFetcherFactory,
-      @GadgetSpecFetcher HttpFetcher gadgetSpecFetcher,
-      @MessageBundleFetcher HttpFetcher messageBundleFetcher) {
+      GadgetSpecFactory specFactory,
+      MessageBundleFactory bundleFactory) {
     this.executor = executor;
     this.registry = registry;
     this.blacklist = blacklist;
     this.preloadFetcherFactory = preloadFetcherFactory;
-    this.gadgetSpecFetcher = gadgetSpecFetcher;
-    this.messageBundleFetcher = messageBundleFetcher;
+    this.specFactory = specFactory;
+    this.bundleFactory = bundleFactory;
   }
 
   /**
@@ -82,19 +81,7 @@ public class GadgetServer {
     if (blacklist.isBlacklisted(context.getUrl())) {
       throw new GadgetException(GadgetException.Code.BLACKLISTED_GADGET);
     }
-
-    HttpRequest request = HttpRequest.getRequest(
-        context.getUrl(), context.getIgnoreCache());
-    HttpResponse response = gadgetSpecFetcher.fetch(request);
-    if (response.getHttpStatusCode() != HttpResponse.SC_OK) {
-      throw new GadgetException(
-          GadgetException.Code.FAILED_TO_RETRIEVE_CONTENT,
-          "Unable to retrieve gadget xml. HTTP error " +
-          response.getHttpStatusCode());
-    }
-    GadgetSpec spec
-        = new GadgetSpec(context.getUrl(), response.getResponseAsString());
-    return createGadgetFromSpec(spec, context);
+    return createGadgetFromSpec(specFactory.getGadgetSpec(context), context);
   }
 
   /**
@@ -106,19 +93,7 @@ public class GadgetServer {
    */
   private MessageBundle getBundle(LocaleSpec localeSpec, GadgetContext context)
       throws GadgetException {
-    URI bundleUrl = localeSpec.getMessages();
-    HttpRequest request
-        = HttpRequest.getRequest(bundleUrl, context.getIgnoreCache());
-    HttpResponse response = messageBundleFetcher.fetch(request);
-    if (response.getHttpStatusCode() != HttpResponse.SC_OK) {
-      throw new GadgetException(
-          GadgetException.Code.FAILED_TO_RETRIEVE_CONTENT,
-          "Unable to retrieve message bundle xml. HTTP error " +
-          response.getHttpStatusCode());
-    }
-    MessageBundle bundle
-        = new MessageBundle(bundleUrl, response.getResponseAsString());
-    return bundle;
+    return bundleFactory.getBundle(localeSpec, context);
   }
 
   /**
