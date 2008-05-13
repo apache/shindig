@@ -15,7 +15,7 @@
  * KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-package org.apache.shindig.gadgets;
+package org.apache.shindig.gadgets.http;
 
 import junit.framework.TestCase;
 
@@ -86,7 +86,7 @@ public class BasicContentCacheTest extends TestCase {
   public void testEmptyCache() {
     assertNull(cache.getContent(createRequest("GET")));
   }
-  
+
   public void testCacheable() {
     RemoteContentRequest req = createRequest("GET");
     RemoteContent resp = createResponse(200, null, null);
@@ -161,7 +161,7 @@ public class BasicContentCacheTest extends TestCase {
     }
     assertEquals(cache.getContent(req), resp);
   }
-                                                 
+
 
   public void testNotCacheableForExpiresWithWait() {
     RemoteContentRequest req = createRequest("GET");

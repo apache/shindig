@@ -14,6 +14,9 @@
 
 package org.apache.shindig.gadgets;
 
+import org.apache.shindig.gadgets.http.RemoteContent;
+import org.apache.shindig.gadgets.http.RemoteContentRequest;
+
 /**
  * Test utility to intercept remote content requests for inspection.
  */

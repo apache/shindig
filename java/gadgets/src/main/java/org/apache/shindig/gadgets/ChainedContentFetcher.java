@@ -17,6 +17,8 @@
  */
 package org.apache.shindig.gadgets;
 
+import org.apache.shindig.gadgets.http.ContentFetcher;
+
 /**
  * Fetches RemoteContent
  *

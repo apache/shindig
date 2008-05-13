@@ -18,9 +18,9 @@
  */
 package org.apache.shindig.gadgets.servlet;
 
-import org.apache.shindig.gadgets.ContentFetcherFactory;
 import org.apache.shindig.gadgets.GadgetTestFixture;
 import org.apache.shindig.gadgets.LockedDomainService;
+import org.apache.shindig.gadgets.http.ContentFetcherFactory;
 
 public abstract class HttpTestFixture extends GadgetTestFixture {
   public final ProxyHandler proxyHandler;

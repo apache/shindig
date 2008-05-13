@@ -26,10 +26,10 @@ import net.oauth.OAuthValidator;
 import net.oauth.SimpleOAuthValidator;
 
 import org.apache.shindig.common.crypto.Crypto;
-import org.apache.shindig.gadgets.ContentFetcher;
 import org.apache.shindig.gadgets.GadgetException;
-import org.apache.shindig.gadgets.RemoteContent;
-import org.apache.shindig.gadgets.RemoteContentRequest;
+import org.apache.shindig.gadgets.http.ContentFetcher;
+import org.apache.shindig.gadgets.http.RemoteContent;
+import org.apache.shindig.gadgets.http.RemoteContentRequest;
 
 import java.util.ArrayList;
 import java.util.HashMap;

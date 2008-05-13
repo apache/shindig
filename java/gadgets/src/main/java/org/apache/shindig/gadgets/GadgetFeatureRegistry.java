@@ -17,6 +17,8 @@
  */
 package org.apache.shindig.gadgets;
 
+import org.apache.shindig.gadgets.http.ContentFetcher;
+
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
 

@@ -16,8 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
-package org.apache.shindig.gadgets;
+package org.apache.shindig.gadgets.http;
 
 import org.apache.shindig.common.util.InputStreamConsumer;
 

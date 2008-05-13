@@ -20,6 +20,8 @@
 package org.apache.shindig.gadgets;
 
 import org.apache.shindig.common.SecurityTokenDecoder;
+import org.apache.shindig.gadgets.http.ContentFetcher;
+import org.apache.shindig.gadgets.http.ContentFetcherFactory;
 
 import java.util.concurrent.Executor;
 

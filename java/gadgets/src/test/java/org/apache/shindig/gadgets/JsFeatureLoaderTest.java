@@ -20,6 +20,9 @@ package org.apache.shindig.gadgets;
 import static org.easymock.EasyMock.eq;
 import static org.easymock.EasyMock.expect;
 
+import org.apache.shindig.gadgets.http.RemoteContent;
+import org.apache.shindig.gadgets.http.RemoteContentRequest;
+
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;

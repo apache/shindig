@@ -19,6 +19,12 @@
 package org.apache.shindig.gadgets;
 
 import org.apache.shindig.common.util.ResourceLoader;
+import org.apache.shindig.gadgets.http.BasicContentCache;
+import org.apache.shindig.gadgets.http.BasicRemoteContentFetcher;
+import org.apache.shindig.gadgets.http.ContentCache;
+import org.apache.shindig.gadgets.http.ContentFetcher;
+import org.apache.shindig.gadgets.http.ContentFetcherFactory;
+import org.apache.shindig.gadgets.http.RemoteContentFetcherFactory;
 import org.apache.shindig.gadgets.oauth.OAuthFetcherFactory;
 
 import com.google.inject.AbstractModule;

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-package org.apache.shindig.gadgets;
+package org.apache.shindig.gadgets.http;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
