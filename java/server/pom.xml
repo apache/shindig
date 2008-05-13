@@ -30,8 +30,8 @@ under the License.
   <artifactId>shindig-server</artifactId>
   <packaging>war</packaging>
 
-  <name>Apache Shindig Gadget Server</name>
-  <description>Default server war containing both the Gadget Server and the Social-Api server.</description>
+  <name>Apache Shindig Server</name>
+  <description>Default server war containing both the Gadget Rendering and the Social API servers.</description>
 
   <scm>
     <connection> scm:svn:http://svn.apache.org/repos/asf/incubator/shindig/trunk/java/server</connection>
