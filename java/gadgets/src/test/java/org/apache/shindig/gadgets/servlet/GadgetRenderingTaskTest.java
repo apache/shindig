@@ -16,7 +16,10 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.shindig.gadgets.http;
+package org.apache.shindig.gadgets.servlet;
+
+import static org.easymock.EasyMock.expect;
+import static org.easymock.EasyMock.isA;
 
 import org.apache.shindig.gadgets.ContainerConfig;
 import org.apache.shindig.gadgets.Gadget;
@@ -24,10 +27,8 @@ import org.apache.shindig.gadgets.GadgetContext;
 import org.apache.shindig.gadgets.RemoteContent;
 import org.apache.shindig.gadgets.RemoteContentRequest;
 import org.apache.shindig.gadgets.spec.GadgetSpec;
-import org.easymock.EasyMock;
 
-import static org.easymock.EasyMock.expect;
-import static org.easymock.EasyMock.isA;
+import org.easymock.EasyMock;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -83,31 +84,31 @@ public class GadgetRenderingTaskTest extends HttpTestFixture {
     writer.close();
     return new String(baos.toByteArray(), "UTF-8");
   }
-  
+
   private void expectParseRequestParams(String view) throws Exception {
     expect(request.getParameter("url")).andReturn(SPEC_URL.toString());
     expect(request.getParameter("view")).andReturn(view);
     expect(request.getParameterNames()).andReturn(EMPTY_PARAMS);
     expect(request.getParameter("container")).andReturn(null);
-    expect(request.getHeader("Host")).andReturn("www.example.com");    
+    expect(request.getHeader("Host")).andReturn("www.example.com");
   }
-  
+
   private void expectLockedDomainCheck() throws Exception {
     expect(lockedDomainService.gadgetCanRender(
         EasyMock.eq("www.example.com"),
         (Gadget)EasyMock.anyObject(),
-        EasyMock.eq("default"))).andReturn(true);    
+        EasyMock.eq("default"))).andReturn(true);
   }
-  
+
   private void expectFetchGadget() throws Exception {
     expect(fetcher.fetch(SPEC_REQUEST)).andReturn(new RemoteContent(SPEC_XML));
   }
-  
+
   private void expectWriteResponse() throws Exception {
     expect(request.getParameter("libs")).andReturn(LIBS);
-    expect(response.getWriter()).andReturn(writer);    
+    expect(response.getWriter()).andReturn(writer);
   }
-  
+
   public void testStandardsMode() throws Exception {
     String content = parseBasicGadget(GadgetSpec.DEFAULT_VIEW);
     assertTrue(-1 != content.indexOf(GadgetRenderingTask.STRICT_MODE_DOCTYPE));
@@ -149,7 +150,7 @@ public class GadgetRenderingTaskTest extends HttpTestFixture {
 
     assertTrue(-1 != content.indexOf(ALT_CONTENT));
   }
-  
+
   public void testLockedDomainFailure() throws Exception {
     expectParseRequestParams(GadgetSpec.DEFAULT_VIEW);
     expectFetchGadget();
@@ -172,7 +173,7 @@ public class GadgetRenderingTaskTest extends HttpTestFixture {
     expect(lockedDomainService.getLockedDomainForGadget(
         SPEC_URL.toString(), "default")).andReturn("locked.example.com");
   }
-  
+
   private void expectSendRedirect() throws Exception {
     response.sendRedirect(
         "http://locked.example.com/gadgets/ifr?stuff=foo%20bar");

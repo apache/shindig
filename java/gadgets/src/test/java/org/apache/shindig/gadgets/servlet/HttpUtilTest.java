@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.shindig.gadgets.http;
+package org.apache.shindig.gadgets.servlet;
 
 import junit.framework.TestCase;
 
@@ -24,7 +24,7 @@ import java.util.Date;
 import java.util.Locale;
 
 public class HttpUtilTest extends TestCase {
-  
+
   public void testFormatInWrongLocale() {
     Locale orig = Locale.getDefault();
     try {
@@ -34,12 +34,12 @@ public class HttpUtilTest extends TestCase {
       Locale.setDefault(orig);
     }
   }
-  
+
   public void testParseDate_rfc1123() {
     String expires = "Sun, 06 Nov 1994 08:49:37 GMT";
     Date date = HttpUtil.parseDate(expires);
     assertEquals(784111777000L, date.getTime());
-    
+
     date = HttpUtil.parseDate("Mon, 12 May 2008 17:00:18 GMT");
     assertEquals(1210611618000L, date.getTime());
   }
@@ -48,13 +48,13 @@ public class HttpUtilTest extends TestCase {
     String expires = "Mon, 12 May 2008 09:23:29 PDT";
     assertNull(HttpUtil.parseDate(expires));
   }
-  
+
   public void testParseDate_rfc1036() {
     // We don't support this, though RFC 2616 suggests we should
     String expires = "Sunday, 06-Nov-94 08:49:37 GMT";
     assertNull(HttpUtil.parseDate(expires));
   }
-  
+
   public void testParseDate_asctime() {
     // We don't support this, though RFC 2616 suggests we should
     String expires = "Sun Nov  6 08:49:37 1994";
@@ -64,7 +64,7 @@ public class HttpUtilTest extends TestCase {
   public void testFormatDate() {
     Date date = new Date(784111777000L);
     assertEquals("Sun, 06 Nov 1994 08:49:37 GMT", HttpUtil.formatDate(date));
-    
+
     date = new Date(1210611618000L);
     assertEquals("Mon, 12 May 2008 17:00:18 GMT", HttpUtil.formatDate(date));
   }
