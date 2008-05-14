@@ -89,7 +89,7 @@ public class RestServerServlet extends AbderaServlet {
       for (String s : writer.getOutputFormats()) {
         sbuf.append(s + ", ");
       }
-      logger.info("NamedWriter: " + writer.getClass().getName() +
+      logger.fine("NamedWriter: " + writer.getClass().getName() +
           " is for writing '" + writer.getName() + "'" +
           ". Handles the following formats: " + sbuf.toString());
       

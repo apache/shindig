@@ -15,14 +15,10 @@
 * copyright in this work, please see the NOTICE file in the top level
 * directory of this distribution.
 */
-/**
- * THIS IS COPIED from org.apache.abdera.ext.json package. 
- */
 package org.apache.shindig.social.abdera.json;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.IOException;
 import java.io.OutputStream;
 
 import org.apache.abdera.Abdera;
@@ -37,47 +33,51 @@ import org.apache.abdera.protocol.server.context.ResponseContextWrapper;
 import org.apache.abdera.writer.Writer;
 
 /**
+ * TODO: This file is copied and modified from Abdera code as we needed 
+ * functionality different from the Abdera Json writer code base.
+ * This file definitely needs cleanup and heavy refactoring
+ *
  * Filter implementation that will convert an Atom document returned by
  * the server into a JSON document if the request specifies a higher
  * preference value for JSON or explicitly requests JSON by including
  * a format=json querystring parameter
  */
-public class JSONFilter 
+public class JSONFilter
   implements Filter {
-  
+
   public ResponseContext filter(
-    RequestContext request, 
+    RequestContext request,
     FilterChain chain) {
       ResponseContext resp = chain.next(request);
       String format = request.getParameter("format");
       if (format != null && format.equalsIgnoreCase("atom")) {
         return resp;
       }
-      // if there is no content, it could be either due to some error such as 
+      // if there is no content, it could be either due to some error such as
       // 404 or, there is no content to be translated into json. return
       // TODO verify this claim
       if (resp.getContentType() == null) {
         return resp;
       }
-      
+
       return jsonPreferred(request,resp.getContentType().toString()) ||
         format == null || format.equalsIgnoreCase("json") ?
         new JsonResponseContext(resp,request.getAbdera()) :
         resp;
   }
-  
+
   private boolean jsonPreferred(RequestContext request, String type) {
     return ProviderHelper.isPreferred(
       request,
       "application/json",
       type);
   }
-  
-  private class JsonResponseContext 
+
+  private class JsonResponseContext
     extends ResponseContextWrapper {
 
     private final Abdera abdera;
-    
+
     public JsonResponseContext(
       ResponseContext response,
       Abdera abdera) {
@@ -85,11 +85,11 @@ public class JSONFilter
         setContentType("application/json");
         this.abdera = abdera;
     }
-    
+
+    @Override
     public void writeTo(
-      OutputStream out, 
-      Writer writer)
-        throws IOException {
+      OutputStream out,
+      Writer writer) {
       try {
         toJson(out,writer);
       } catch (Exception se) {
@@ -98,10 +98,10 @@ public class JSONFilter
         throw new RuntimeException(se);
       }
     }
-    
+
+    @Override
     public void writeTo(
-      OutputStream out) 
-        throws IOException {
+      OutputStream out) {
       try {
         toJson(out,null);
       } catch (Exception se) {
@@ -110,14 +110,14 @@ public class JSONFilter
         throw new RuntimeException(se);
       }
     }
-    
+
     private void toJson(OutputStream aout,Writer writer) throws Exception {
       Document<Element> doc = null;
       try {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         if (writer == null)
           super.writeTo(out);
-        else 
+        else
           super.writeTo(out,writer);
         ByteArrayInputStream in = new ByteArrayInputStream(out.toByteArray());
         doc = abdera.getParser().parse(in);
