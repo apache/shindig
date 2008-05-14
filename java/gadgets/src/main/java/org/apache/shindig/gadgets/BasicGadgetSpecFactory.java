@@ -56,8 +56,7 @@ public class BasicGadgetSpecFactory implements GadgetSpecFactory {
   }
 
   @Inject
-  public BasicGadgetSpecFactory(
-      @GadgetSpecFetcher HttpFetcher specFetcher) {
+  public BasicGadgetSpecFactory(HttpFetcher specFetcher) {
     this.specFetcher = specFetcher;
   }
 }

@@ -57,8 +57,7 @@ public class BasicMessageBundleFactory implements MessageBundleFactory {
   }
 
   @Inject
-  public BasicMessageBundleFactory(
-      @MessageBundleFetcher HttpFetcher bundleFetcher) {
+  public BasicMessageBundleFactory(HttpFetcher bundleFetcher) {
     this.bundleFetcher = bundleFetcher;
   }
 }
