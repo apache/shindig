@@ -31,7 +31,7 @@ under the License.
   <packaging>jar</packaging>
 
   <name>Apache Shindig Gadget Renderer</name>
-  <description>OpenSocial gadget rendering component.</description>
+  <description>Renders gadgets and serves both gadgets and opensocial javascript files.</description>
 
   <scm>
     <connection>scm:svn:http://svn.apache.org/repos/asf/incubator/shindig/trunk/java/gadgets</connection>
