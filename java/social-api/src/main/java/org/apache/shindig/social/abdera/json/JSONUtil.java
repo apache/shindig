@@ -15,9 +15,6 @@
  * copyright in this work, please see the NOTICE file in the top level
  * directory of this distribution.
  */
-/**
- * THIS IS COPIED from org.apache.abdera.ext.json package.
- */
 package org.apache.shindig.social.abdera.json;
 
 import java.io.IOException;
@@ -53,6 +50,11 @@ import org.apache.abdera.model.Text;
 import org.apache.abdera.model.TextValue;
 import org.apache.abdera.xpath.XPath;
 
+/*
+ * TODO: This file is copied and modified from Abdera code as we needed
+ * functionality different from the Abdera Json writer code base.
+ * This file definitely needs cleanup and heavy refactoring
+ */
 @SuppressWarnings("unchecked")
 public class JSONUtil {
 

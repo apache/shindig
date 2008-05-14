@@ -15,10 +15,6 @@
  * copyright in this work, please see the NOTICE file in the top level
  * directory of this distribution.
  */
-
-/**
- * THIS IS COPIED from org.apache.abdera.ext.json package. 
- */
 package org.apache.shindig.social.abdera.json;
 
 import java.io.ByteArrayOutputStream;
@@ -32,6 +28,11 @@ import org.apache.abdera.util.AbstractWriterOptions;
 import org.apache.abdera.writer.NamedWriter;
 import org.apache.abdera.writer.WriterOptions;
 
+/*
+ * TODO: This file is copied and modified from Abdera code as we needed
+ * functionality different from the Abdera Json writer code base.
+ * This file definitely needs cleanup and heavy refactoring
+ */
 public class JSONWriter
   extends AbstractNamedWriter
   implements NamedWriter {
@@ -41,16 +42,17 @@ public class JSONWriter
   public static final String[] FORMATS = {
     "application/json",
   };
-  
+
   public JSONWriter() {
     super(NAME,FORMATS);
   }
 
-  @Override 
+  @Override
   protected WriterOptions initDefaultWriterOptions() {
     return new AbstractWriterOptions() {};
   }
-  
+
+  @Override
   public String getName() {
     return NAME;
   }
@@ -62,7 +64,7 @@ public class JSONWriter
       return new String(out.toByteArray(),options.getCharset());
     } catch (IOException i) {
       throw i;
-    } catch (Exception e) { 
+    } catch (Exception e) {
       throw new IOException(e.getMessage());
     }
   }
