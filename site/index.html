@@ -293,8 +293,8 @@ body {
           </li>
           <li>File -&gt; New -&gt; Java Project
           <ol>
-            <li>Select 'Create project from existing source' and navigate to:<br>
-            ~/src/shindig/java</li>
+            <li>Name the project. The instructions below will assume "SHINDIG".</li>
+            <li>Select 'Create project from existing source' and navigate to <code>.../src/shindig/java</code>
             <li>Click Finish</li>
             <li>If you see a dialog for "Open Associated Perspective", click Ok. Don't worry about the errors after
             loading as they will be fixed in the next step.</li>
@@ -307,7 +307,24 @@ body {
           debugging, you need the source jars. Right-click the project, select <code>Maven : Download Sources</code> and
           Eclipse will automatically know about these sources when debugging. You can browse them under <code>Maven
           Dependencies</code> in your project.</li>
+	  <li>If you'll be using AllTests to run tests or generate code coverage stats, adjust the project's output folders.
+	    <ol>
+	      <li>Project -&gt; Properties -&gt; Java Build Path -&gt; Source</li>
+	      <li>Locate and open <code>SHINDIG/gadgets/src/test/java</code></li>
+	      <li>Select <code>Output Folder: (Default Output Folder)</code> and click Edit...</li>
+	      <li>Select <code>Specific Output Folder</code></li>
+	      <li>Enter <code>target/test-classes</code> and click OK.</li>
+	      <li>Repeat for <code>SHINDIG/social-api/src/test/java</code></li>
+	    </ol>
+	  </li>
         </ol>
+      </ul>
+
+      <h4><font size="3"><a name="Code_coverage_in_Eclipse"> Generating Code Coverage in Eclipse </a></font></h4>
+      <p>To generate code coverage statistics inside of Eclipse, install the <a href="http://www.eclema.org">EclEmma</a> plugin. Then</p>
+      <ul>
+        <li>Open <code>org.apache.shindig.gadgets.AllTests</code></li>
+        <li>Right-click in the class, and select <code>Coverage as -&gt; JUnit Test</code></li>
       </ul>
 
       <h4><font size="3"><a name="Running_inside_Eclipse"> Running inside Eclipse </a></font></h4>
