@@ -60,15 +60,9 @@ public class DefaultGuiceModule extends AbstractModule {
     bind(OAuthFetcherFactory.class);
     bind(ContentFetcherFactory.class);
 
-    bind(HttpFetcher.class)
-        .annotatedWith(GadgetSpecFetcher.class)
-        .toProvider(ContentFetcherFactory.class);
     bind(GadgetSpecFactory.class)
         .to(BasicGadgetSpecFactory.class);
 
-    bind(HttpFetcher.class)
-        .annotatedWith(MessageBundleFetcher.class)
-        .toProvider(ContentFetcherFactory.class);
     bind(MessageBundleFactory.class)
         .to(BasicMessageBundleFactory.class);
 
