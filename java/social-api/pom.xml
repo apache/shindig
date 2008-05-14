@@ -30,8 +30,8 @@ under the License.
   <artifactId>shindig-social-api</artifactId>
   <packaging>jar</packaging>
 
-  <name>Apache Shindig REST API Server</name>
-  <description>Server part of Shindig for hosting OpenSocial Data APIs.</description>
+  <name>Apache Shindig Social API</name>
+  <description>Serves OpenSocial Data and the RESTful APIs.</description>
 
   <scm>
     <connection>scm:svn:http://svn.apache.org/repos/asf/incubator/shindig/trunk/java/social-api</connection>
