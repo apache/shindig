@@ -19,9 +19,10 @@ package org.apache.shindig.gadgets.http;
 
 import junit.framework.TestCase;
 
+import org.apache.shindig.gadgets.servlet.HttpUtil;
+
 import java.net.URI;
 import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
@@ -34,14 +35,6 @@ import java.util.TimeZone;
  * Tests for basic content cache
  */
 public class BasicHttpCacheTest extends TestCase {
-  /**
-   * Used to parse Expires: header.
-   */
-  private final static DateFormat dateFormat
-      = new SimpleDateFormat("EEE, d MMM yyyy HH:mm:ss z", Locale.US);
-  static {
-    dateFormat.setTimeZone(TimeZone.getTimeZone("GMT"));
-  }
 
   private HttpCache cache;
 
@@ -76,7 +69,7 @@ public class BasicHttpCacheTest extends TestCase {
 
   private HttpResponse createExpiresResponse(int statusCode, long expiration) {
     Date newExpiry = new Date(expiration);
-    return createResponse(statusCode, "Expires", dateFormat.format(newExpiry));
+    return createResponse(statusCode, "Expires", HttpUtil.formatDate(newExpiry));
   }
 
   private HttpResponse createMaxAgeResponse(int statusCode, long age) {
