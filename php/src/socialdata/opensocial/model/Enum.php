@@ -28,17 +28,18 @@
 
 abstract class Enum {
   public $displayValue;
-  private $jsonString;
+  public $key;
   public $values = array();
   
-  public function __construct($jsonString, $displayValue)
+  public function __construct($key, $displayValue = '')
   {
   	//FIXME should add enum restriction checking to this
-  	if (!isset($this->values[$jsonString])) {
+  	if (!isset($this->values[$key])) {
   		throw new Exception("Invalid Enum key");
   	}
-  	$this->jsonString = $jsonString;
-  	$this->displayValue = $displayValue;
+  	$this->key = $key;
+  	$this->displayValue = !empty($displayValue) ? $displayValue : $this->values[$key];
+  	unset($this->values);
   }
   
   public function getDisplayValue()

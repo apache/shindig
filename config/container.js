@@ -100,7 +100,7 @@
     "domain" : "shindig",
     "enableCaja" : true,
     "supportedFields" : {
-       "person" : ["id", "name", "thumbnailUrl", "profileUrl"],
+       "person" : ["id", "name", "thumbnailUrl", "profileUrl", "gender", "aboutMe", "drinker", "smoker", "relationshipStatus"],
        "activity" : ["id", "title"]
     },
     // If true, the restful wire format will be used.

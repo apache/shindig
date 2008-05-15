@@ -239,7 +239,7 @@ class Person {
 	
 	public function getGender()
 	{
-		return $this->$this->gender;
+		return $this->gender;
 	}
 	
 	public function setGender($newGender)
@@ -519,7 +519,7 @@ class Person {
 	
 	public function getSmoker()
 	{
-		return $this->$this->smoker;
+		return $this->smoker;
 	}
 	
 	public function setSmoker($newSmoker)
