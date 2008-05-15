@@ -32,7 +32,8 @@ public class SocialApiProvider extends DefaultProvider {
   private Provider<ActivitiesServiceAdapter> activitiesAdapterProvider;
   private Provider<FriendsServiceAdapter> friendsAdapterProvider;
   private Provider<DataServiceAdapter> dataAdapterProvider;
-
+  private Provider<ActivityAdapter> activityAdapterProvider;
+  
   /**
    * The CollectionAdapter enum standardizes the names and descriptions of the
    * URL templates as defined in the RESTful API spec. Each unique template has
@@ -79,12 +80,14 @@ public class SocialApiProvider extends DefaultProvider {
       Provider<PeopleServiceAdapter> peopleAdapterProvider,
       Provider<FriendsServiceAdapter> friendsAdapterProvider,
       Provider<ActivitiesServiceAdapter> activitiesAdapterProvider,
-      Provider<DataServiceAdapter> dataAdapterProvider) {
+      Provider<DataServiceAdapter> dataAdapterProvider,
+      Provider<ActivityAdapter> activityAdapterProvider) {
     this.peopleAdapterProvider = peopleAdapterProvider;
     this.friendsAdapterProvider = friendsAdapterProvider;
     this.activitiesAdapterProvider = activitiesAdapterProvider;
     this.dataAdapterProvider = dataAdapterProvider;
-  }
+    this.activityAdapterProvider = activityAdapterProvider;
+    }
 
   /**
    * CollectionAdapters are provided via Guice and the RouteManager wires
@@ -109,6 +112,7 @@ public class SocialApiProvider extends DefaultProvider {
     ActivitiesServiceAdapter activitiesAdapter
         = activitiesAdapterProvider.get();
     DataServiceAdapter dataAdapter = dataAdapterProvider.get();
+    ActivityAdapter activityAdapter = activityAdapterProvider.get();
 
     // Add the RouteManager that parses incoming and builds outgoing URLs
     // {uid} is assumed to be a deterministic GUID for the service
@@ -170,7 +174,7 @@ public class SocialApiProvider extends DefaultProvider {
         // /activities/{uid}/@self/{aid}
         .addRoute(CollectionAdapter.ACTIVITY_OF_USER.toString(),
             BASE + "activities/:uid/@self/:aid",
-            TargetType.TYPE_ENTRY, activitiesAdapter)
+            TargetType.TYPE_ENTRY, activityAdapter)
 
 
         // AppData
