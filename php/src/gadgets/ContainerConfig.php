@@ -98,7 +98,7 @@ class ContainerConfig {
 					$ret[] = $value;
 				} else {
 					if (is_array($value) && isset($ret[$key])) {
-						$ret[$key] = array_merge_recursive2($ret[$key], $value);
+						$ret[$key] = $this->mergeConfig($ret[$key], $value);
 					} else {
 						$ret[$key] = $value;
 					}
