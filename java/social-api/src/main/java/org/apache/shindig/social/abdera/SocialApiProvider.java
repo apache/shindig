@@ -17,12 +17,12 @@
  */
 package org.apache.shindig.social.abdera;
 
+import org.apache.shindig.social.abdera.json.JSONFilter;
+
 import com.google.inject.Inject;
 import com.google.inject.Provider;
-import org.apache.shindig.social.abdera.json.JSONFilter;
 import org.apache.abdera.protocol.server.TargetType;
 import org.apache.abdera.protocol.server.impl.DefaultProvider;
-import org.apache.abdera.protocol.server.impl.RouteManager;
 
 public class SocialApiProvider extends DefaultProvider {
   //TODO why is this hardcoded here. can't this be from servletContext?
@@ -33,47 +33,6 @@ public class SocialApiProvider extends DefaultProvider {
   private Provider<FriendsServiceAdapter> friendsAdapterProvider;
   private Provider<DataServiceAdapter> dataAdapterProvider;
   private Provider<ActivityAdapter> activityAdapterProvider;
-  
-  /**
-   * The CollectionAdapter enum standardizes the names and descriptions of the
-   * URL templates as defined in the RESTful API spec. Each unique template has
-   * a corresponding CollectionAdapter. For example, "/people/{uid}/@all" is
-   * roughly translated in English to read "Profiles of Connections of User" and
-   * is the referred to in the code as PROFILES_OF_CONNECTIONS_OF_USER. The
-   * descriptions can be customized by an implementer and used as the titles for
-   * feeds.
-   * TODO: Add ResourceBundle functions.
-   */
-  public enum CollectionAdapter {
-    //People
-    PROFILES_OF_CONNECTIONS_OF_USER("Profiles of Connections of User"),
-    PROFILES_OF_FRIENDS_OF_USER("Profiles of Friends of User"),
-    CONNECTIONS_OF_USER("Connections of User"),
-    PROFILE_OF_CONNECTION_OF_USER("Profile of Connection of User"),
-    PROFILE_OF_USER("Profile of User"),
-    //Activities
-    ACTIVITIES_OF_USER("Activities of User"),
-    ACTIVITIES_OF_FRIENDS_OF_USER("Activities of Friends of User"),
-    ACTIVITIES_OF_GROUP_OF_USER("Activities of Group of User"),
-    ACTIVITY_OF_USER("Activity of User"),
-    //AppData
-    APPDATA_OF_APP_OF_USER("AppData of App of User"),
-    APPDATA_OF_FRIENDS_OF_USER("AppData of Friends of User");
-
-    private String description;
-
-    private CollectionAdapter(String description) {
-      this.description = description;
-    }
-
-    public String toString() {
-      return description;
-    }
-
-    public static CollectionAdapter getValue(String value) {
-      return valueOf(value.replaceAll(" ", "_").toUpperCase());
-    }
-  }
 
   @Inject
   public void setAdapters(
@@ -87,7 +46,7 @@ public class SocialApiProvider extends DefaultProvider {
     this.activitiesAdapterProvider = activitiesAdapterProvider;
     this.dataAdapterProvider = dataAdapterProvider;
     this.activityAdapterProvider = activityAdapterProvider;
-    }
+  }
 
   /**
    * CollectionAdapters are provided via Guice and the RouteManager wires
@@ -97,14 +56,7 @@ public class SocialApiProvider extends DefaultProvider {
    * People and Activities Adapters that allows them to be multi-purpose, but
    * this will need to change.
    *
-   * TODO: Fully implement all routes in the 0.8 RESTful API spec.
-   * They are specified here, but only some produce output from the server.
-   * Currently implemented:
-   * /people/{uid}/@all
-   * /people/{uid}/@all/{pid}
-   * /people/{uid}/@self
-   * /activities/{uid}/@self/{aid}
-   * /activities/{uid}/@self
+   * TODO: Implement the group urls.
    */
   public void initialize() {
     PeopleServiceAdapter peopleAdapter = peopleAdapterProvider.get();
@@ -116,81 +68,34 @@ public class SocialApiProvider extends DefaultProvider {
 
     // Add the RouteManager that parses incoming and builds outgoing URLs
     // {uid} is assumed to be a deterministic GUID for the service
-    routeManager = new RouteManager()
+    routeManager = new SocialRouteManager(BASE)
         // People
-
-        // Collection of all people connected to user {uid}
-        // /people/{uid}/@all
-        // Currently, Shindig only has friends, so @all == @friends
-        .addRoute(CollectionAdapter.CONNECTIONS_OF_USER.toString(),
-            BASE + "people/:uid/@all",
+        .addRoute(RequestUrlTemplate.CONNECTIONS_OF_USER,
             TargetType.TYPE_COLLECTION, friendsAdapter)
-
-        // Collection of all friends of user {uid}; equal to @all
-        // /people/{uid}/@friends
-        .addRoute(CollectionAdapter.PROFILES_OF_FRIENDS_OF_USER.toString(),
-            BASE + "people/:uid/@friends",
+        .addRoute(RequestUrlTemplate.PROFILES_OF_FRIENDS_OF_USER,
             TargetType.TYPE_COLLECTION, friendsAdapter)
-
-        // Collection of all people connected to user {uid} in group {groupid}
-        // /people/{uid}/{groupid}
-        // TODO: Shindig does not support groups yet
-        .addRoute(CollectionAdapter.PROFILES_OF_CONNECTIONS_OF_USER.toString(),
-            BASE + "people/:uid/:groupid",
+        .addRoute(RequestUrlTemplate.PROFILES_OF_CONNECTIONS_OF_USER,
             TargetType.TYPE_COLLECTION, null)
-
-        // Individual person record. /people/{uid}/@all/{pid}
-        .addRoute(CollectionAdapter.PROFILE_OF_CONNECTION_OF_USER.toString(),
-            BASE + "people/:uid/@all/:pid",
+        .addRoute(RequestUrlTemplate.PROFILE_OF_CONNECTION_OF_USER,
             TargetType.TYPE_ENTRY, friendsAdapter)
-
-        // Self Profile record for user {uid} /people/{uid}/@self
-        .addRoute(CollectionAdapter.PROFILE_OF_USER.toString(),
-            BASE + "people/:uid/@self",
+        .addRoute(RequestUrlTemplate.PROFILE_OF_USER,
             TargetType.TYPE_ENTRY, peopleAdapter)
 
-
-        // Activities
-
-        // Collection of activities for given user /activities/{uid}/@self
-        .addRoute(CollectionAdapter.ACTIVITIES_OF_USER.toString(),
-            BASE + "activities/:uid/@self",
+         // Activities
+        .addRoute(RequestUrlTemplate.ACTIVITIES_OF_USER,
             TargetType.TYPE_COLLECTION, activitiesAdapter)
-
-        // Collection of activities for friends of the given user {uid}
-        // /activities/{uid}/@friends
-        .addRoute(CollectionAdapter.ACTIVITIES_OF_FRIENDS_OF_USER.toString(),
-            BASE + "activities/:uid/@friends",
+        .addRoute(RequestUrlTemplate.ACTIVITIES_OF_FRIENDS_OF_USER,
             TargetType.TYPE_COLLECTION, activitiesAdapter)
-
-        // Collection of activities for people in group {groupid}
-        // belonging to given user {uid} -- /activities/{uid}/{groupid}
-        // TODO: Shindig does not support groups yet
-        .addRoute(CollectionAdapter.ACTIVITIES_OF_GROUP_OF_USER.toString(),
-            BASE + "activities/:uid/:groupid",
+        .addRoute(RequestUrlTemplate.ACTIVITIES_OF_GROUP_OF_USER,
             TargetType.TYPE_COLLECTION, null)
-
-        // Individual activity resource; usually discovered from collection
-        // /activities/{uid}/@self/{aid}
-        .addRoute(CollectionAdapter.ACTIVITY_OF_USER.toString(),
-            BASE + "activities/:uid/@self/:aid",
+        .addRoute(RequestUrlTemplate.ACTIVITY_OF_USER,
             TargetType.TYPE_ENTRY, activityAdapter)
 
-
-        // AppData
-
-        // Individual App Data record for a given user+app, consisting primarily
-        // of a bag of key/value pairs. -- /appdata/{uid}/@self/{aid}
-        .addRoute(CollectionAdapter.APPDATA_OF_APP_OF_USER.toString(),
-            BASE + "appdata/:uid/@self/:aid",
+         // AppData
+        .addRoute(RequestUrlTemplate.APPDATA_OF_APP_OF_USER,
             TargetType.TYPE_ENTRY, dataAdapter)
-
-        // Collection of App Data records for friends of {uid}
-        // /appdata/{uid}/@friends/{aid}
-        .addRoute(CollectionAdapter.APPDATA_OF_FRIENDS_OF_USER.toString(),
-            BASE + "appdata/:uid/@friends/:aid",
+        .addRoute(RequestUrlTemplate.APPDATA_OF_FRIENDS_OF_USER,
             TargetType.TYPE_COLLECTION, dataAdapter)
-
         ;
 
     addFilter(new JSONFilter());
