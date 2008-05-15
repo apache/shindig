@@ -19,12 +19,6 @@
  */
 
 class JsFeatureLoader {
-	private $debug;
-
-	public function __construct($debug)
-	{
-		$this->debug = $debug;
-	}
 
 	public function loadFeatures($path, $registry)
 	{

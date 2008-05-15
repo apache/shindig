@@ -1,5 +1,24 @@
 <?
 /*
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements. See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership. The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License. You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations under the License.
+ * 
+ */
+
+/*
  * I really detest such config files to be honest, why put configuration in a web document! 
  * But since PHP lacks a propper way to set application configurations, and any other method 
  * would be horribly slow (db, xml, ini files etc), so ... here's our config.php
@@ -20,10 +39,14 @@ $shindigConfig = array(
 	'token_cipher_key' => 'INSECURE_DEFAULT_KEY',
 	'token_hmac_key' => 'INSECURE_DEFAULT_KEY',
 
+	// Compresses features javascript? can save upto 50% page size
+	'compress_javascript' => true,
+
 	// Configurable CSS rules that are injected to the gadget page, 
 	// be careful when adjusting these not to break most gadget's layouts :)
 	'gadget_css' => 'body,td,div,span,p{font-family:arial,sans-serif;} a {color:#0000cc;}a:visited {color:#551a8b;}a:active {color:#ff0000;}body{margin: 0px;padding: 0px;background-color:white;}',
-
+	// 'gadget_css' => 'body,td,div,span,p{font-family:arial,sans-serif;} body {background-color:#ffffff; font-family: arial, sans-serif; padding: 0px; margin: 0px;  font-size: 12px; color: #000000;}a, a:visited {color: #3366CC;text-decoration: none; }a:hover {color: #3366CC; text-decoration: underline;} input, select { border: 1px solid #bdc7d8;font-size: 11px;padding: 3px;}',
+	
 	// The html / javascript samples use a plain text demo token,
 	// set this to false on anything resembling a real site
 	'allow_plaintext_token' => true,
@@ -43,7 +66,7 @@ $shindigConfig = array(
 
 	// The data handlers for the social data, this is a list of class names
 	// seperated by a , For example:
-	// 'handlers' => 'PartuzaHandler',
+	//'handlers' => 'PartuzaHandler',
 	// if the value is empty, the defaults used in the example above will be used.
 	'handlers' => '',
 
@@ -82,8 +105,7 @@ class ConfigException extends Exception {}
 
 /**
  * Abstracts how to retrieve configuration values so we can replace the
- * not so pretty $config array some day.
- *
+ * not so pretty $shindigConfig array some day.
  */
 class Config {
 	static function get($key)

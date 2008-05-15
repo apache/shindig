@@ -160,11 +160,11 @@ class GadgetRenderingServlet extends HttpServlet {
 				// servlet. We should probably inline external JS as well.
 				$externJs .= sprintf($externFmt, $library->getContent()) . "\n";
 			} else if ($type == 'INLINE') {
-				$library->readfile();
+				echo $library->getContent();
 			} else {
 				// FILE or RESOURCE
 				if ($forcedLibs == null) {
-					$library->readfile();
+					echo $library->getContent();
 				}
 				// otherwise it was already included by config.forceJsLibs.
 			}

@@ -22,11 +22,9 @@ class GadgetFeatureRegistry {
 	private $features = array();
 	private $core = array();
 	private $coreDone = false;
-	private $debug;
 
-	public function __construct($featurePath, $debug = false)
+	public function __construct($featurePath)
 	{
-		$this->debug = $debug;
 		$this->registerFeatures($featurePath);
 	}
 
@@ -36,7 +34,7 @@ class GadgetFeatureRegistry {
 			return;
 		}
 		$coreDeps = array();
-		$loader = new JsFeatureLoader($this->debug);
+		$loader = new JsFeatureLoader();
 		$jsFeatures = $loader->loadFeatures($featurePath, $this);
 		if (! $this->coreDone) {
 			foreach ($jsFeatures as $entry) {
