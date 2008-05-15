@@ -149,9 +149,9 @@ class GadgetContext {
 	{
 		// Profiling showed 40% of the processing time was spend in the feature registry
 		// So by caching this and making it a one time initialization, we almost double the performance  
-		if (! ($registry = $this->getCache()->get(sha1(Config::get('features_path'))))) {
+		if (! ($registry = $this->getCache()->get(md5(Config::get('features_path'))))) {
 			$registry = new GadgetFeatureRegistry(Config::get('features_path'));
-			$this->getCache()->set(sha1(Config::get('features_path')), $registry);
+			$this->getCache()->set(md5(Config::get('features_path')), $registry);
 		}
 		return $registry;
 	}

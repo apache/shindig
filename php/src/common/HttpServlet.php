@@ -68,8 +68,8 @@ class HttpServlet {
 				header("Expires: " . gmdate("D, d M Y H:i:s", time() + $this->cacheTime) . " GMT");
 				// Obey browsers (or proxy's) request to send a fresh copy if we recieve a no-cache pragma or cache-control request
 				if (! isset($_SERVER['HTTP_PRAGMA']) || ! strstr(strtolower($_SERVER['HTTP_PRAGMA']), 'no-cache') && (! isset($_SERVER['HTTP_CACHE_CONTROL']) || ! strstr(strtolower($_SERVER['HTTP_CACHE_CONTROL']), 'no-cache'))) {
-					// If the browser send us a E-TAG check if it matches (sha1 sum of content), if so send a not modified header instead of content
-					$etag = sha1($content);
+					// If the browser send us a E-TAG check if it matches (md5 sum of content), if so send a not modified header instead of content
+					$etag = md5($content);
 					if (isset($_SERVER['HTTP_IF_NONE_MATCH']) && $_SERVER['HTTP_IF_NONE_MATCH'] == $etag) {
 						header("ETag: \"$etag\"");
 						if ($this->lastModified) {

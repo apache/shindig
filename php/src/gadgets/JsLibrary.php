@@ -36,23 +36,23 @@ class JsLibrary {
 	{
 		return $this->type;
 	}
-	
-	public function readfile()
-	{
-		// hack to bypass having the script in memory and dump it directly to stdout
-		if (!$this->loaded && $this->type == 'FILE') {
-			readfile($this->content);
-			echo "\n";
-		} else {
-			// a call to getContent was already made so we have it in memory, just echo it then
-			echo $this->content;
-		}
-	}
 
 	public function getContent()
 	{
 		if (!$this->loaded && $this->type == 'FILE') {
-			$this->content = JsLibrary::loadData($this->content, $this->type);
+			if (Config::get('compress_javascript')) {
+				$dataCache = Config::get('data_cache');
+				$dataCache = new $dataCache();
+				if (!($content = $dataCache->get(md5($this->content)))) {
+					$content = JSMin::minify(JsLibrary::loadData($this->content, $this->type));
+					$dataCache->set(md5($this->content), $content);
+					$this->content = $content;
+				} else {
+					$this->content = $content;
+				}
+			} else {
+				$this->content = JsLibrary::loadData($this->content, $this->type);
+			}
 			$this->loaded = true;
 		}
 		return $this->content;

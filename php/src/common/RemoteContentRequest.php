@@ -39,10 +39,10 @@ class RemoteContentRequest {
 	}
 
 	// returns a hash code which identifies this request, used for caching
-	// takes url and postbody into account for constructing the sha1 checksum
+	// takes url and postbody into account for constructing the md5 checksum
 	public function toHash()
 	{
-		return sha1($this->url . $this->postBody);
+		return md5($this->url . $this->postBody);
 	}
 
 	public function getContentType()
