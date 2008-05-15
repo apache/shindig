@@ -20,6 +20,10 @@ $shindigConfig = array(
 	'token_cipher_key' => 'INSECURE_DEFAULT_KEY',
 	'token_hmac_key' => 'INSECURE_DEFAULT_KEY',
 
+	// Configurable CSS rules that are injected to the gadget page, 
+	// be careful when adjusting these not to break most gadget's layouts :)
+	'gadget_css' => 'body,td,div,span,p{font-family:arial,sans-serif;} a {color:#0000cc;}a:visited {color:#551a8b;}a:active {color:#ff0000;}body{margin: 0px;padding: 0px;background-color:white;}',
+
 	// The html / javascript samples use a plain text demo token,
 	// set this to false on anything resembling a real site
 	'allow_plaintext_token' => true,

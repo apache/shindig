@@ -18,7 +18,7 @@
  * 
  */
 
-define('DEFAULT_VIEW', 'default');
+define('DEFAULT_VIEW', 'profile');
 
 /*
  * GadgetContext contains all contextual variables and classes that are relevant for this request,

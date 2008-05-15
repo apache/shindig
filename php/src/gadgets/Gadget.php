@@ -293,7 +293,12 @@ class Gadget {
 
 	public function getView($viewName)
 	{
-		return isset($this->views[$viewName]) ? $this->views[$viewName] : $this->views[DEFAULT_VIEW];
+		if (isset($this->views[$viewName])) {
+			return $this->views[$viewName];
+		} elseif (isset($this->views[DEFAULT_VIEW])) {
+			return $this->views[DEFAULT_VIEW];
+		}
+		throw new GadgetException("Invalid view specified for this gadget");
 	}
 }
 

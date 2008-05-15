@@ -150,7 +150,7 @@ class GadgetRenderingServlet extends HttpServlet {
 			echo "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01//EN\" \"http://www.w3.org/TR/html4/strict.dtd\">\n";
 		}
 		echo "<html>\n<head>".
-		     "<style type=\"text/css\">body,td,div,span,p{font-family:arial,sans-serif;} a {color:#0000cc;}a:visited {color:#551a8b;}a:active {color:#ff0000;}body{margin: 0px;padding: 0px;background-color:white;}</style>".
+		     "<style type=\"text/css\">".Config::get('gadget_css')."</style>".
 		     "</head><body>".
 		     "<script><!--\n";
 		foreach ( $gadget->getJsLibraries() as $library ) {

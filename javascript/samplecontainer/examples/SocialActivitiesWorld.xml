@@ -128,6 +128,7 @@ function handleActivities(dataResponse) {
     viewer = dataResponse.get('viewer').getData();
   }
   activities = dataResponse.get('viewerActivities').getData()['activities'].asArray();
+  console.log(dataResponse.get('activities').getData());
   activities = activities.concat(dataResponse.get('activities').getData()['activities'].asArray());
   document.getElementById('stream').style.display = 'block';
 

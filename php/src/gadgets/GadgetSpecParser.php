@@ -125,10 +125,10 @@ class GadgetSpecParser {
 		if (isset($pref->EnumValue)) {
 			foreach ($pref->EnumValue as $enum) {
 				$attr = $enum->attributes();
-				// java based shindig doesn't throw an exception here, but it -is- invalid and should trigger a parse error
-				if (empty($attr['value'])) {
+				// java based shindig doesn't throw an exception here, but it -is- invalid and should trigger a parse error?
+				/*if (empty($attr['value'])) {
 					throw new SpecParserException("EnumValue must have a value field.");
-				}
+				}*/
 				$valueText = trim($attr['value']);
 				$displayText = ! empty($attr['display_value']) ? trim($attr['display_value']) : $valueText;
 				$preference->enumValues[$valueText] = $displayText;
