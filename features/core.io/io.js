@@ -372,12 +372,21 @@ gadgets.io = function() {
      * Gets the proxy version of the passed-in URL.
      *
      * @param {String} url The URL to get the proxy URL for
+     * @param {Object} opt_params Optional Parameter Object.
+     *     The following properties are supported:
+     *       .REFRESH_INTERVAL The number of seconds that this
+     *           content should be cached.  Defaults to 3600.
+     *
      * @return {String} The proxied version of the URL
      *
      * @member gadgets.io
      */
-    getProxyUrl : function (url) {
-      return config.proxyUrl.replace("%url%", encodeURIComponent(url));
+    getProxyUrl : function (url, opt_params) {
+      var params = opt_params || {};
+      var refresh = params['REFRESH_INTERVAL'] || '3600';
+
+      return config.proxyUrl.replace("%url%", encodeURIComponent(url)).
+          replace("%refresh%", encodeURIComponent(refresh));
     }
   };
 }();
