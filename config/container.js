@@ -57,7 +57,7 @@
 // See individual feature.xml files for configuration details.
 "gadgets.features" : {
   "core.io" : {
-    // Note: /proxy is an open proxy. Be careful how you explose this!
+    // Note: /proxy is an open proxy. Be careful how you expose this!
     "proxyUrl" : "proxy?refresh=%refresh%&url=%url%",
     "jsonProxyUrl" : "proxy?output=js"
   },
