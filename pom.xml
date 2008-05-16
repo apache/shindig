@@ -276,6 +276,14 @@
       </modules>
     </profile>
 
+    <!-- profile to build features jar -->
+    <profile>
+      <id>features</id>
+      <modules>
+        <module>features</module>
+      </modules>
+    </profile>
+
     <!-- profile to build java/gadgets -->
     <profile>
       <id>gadgets</id>
@@ -680,6 +688,11 @@
   <dependencyManagement>
     <dependencies>
       <!-- project dependencies -->
+      <dependency>
+        <groupId>org.apache.shindig</groupId>
+        <artifactId>shindig-features</artifactId>
+        <version>1-SNAPSHOT</version>
+      </dependency>
       <dependency>
         <groupId>org.apache.shindig</groupId>
         <artifactId>shindig-common</artifactId>

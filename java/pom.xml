@@ -37,6 +37,7 @@ under the License.
     <module>gadgets</module>
     <module>social-api</module>
     <module>server</module>
+    <module>../features</module>
   </modules>
 
   <scm>
