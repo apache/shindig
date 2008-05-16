@@ -49,7 +49,7 @@ public class JsServlet extends InjectedServlet {
 
   private SecurityTokenDecoder tokenDecoder;
   @Inject
-  public void setRegistry(SecurityTokenDecoder tokenDecoder) {
+  public void setTokenDecoder(final SecurityTokenDecoder tokenDecoder) {
     this.tokenDecoder = tokenDecoder;
   }
 
