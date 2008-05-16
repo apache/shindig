@@ -300,7 +300,7 @@ public class ProxyHandlerTest extends HttpTestFixture {
   }
 
   public void testValidateUrlWithEncodedQuery() throws Exception {
-    URI url= proxyHandler.validateUrl(
+    URI url = proxyHandler.validateUrl(
         "http://www.example.com:8080/foo?q=with%20space");
     assertEquals("http", url.getScheme());
     assertEquals("www.example.com", url.getHost());
