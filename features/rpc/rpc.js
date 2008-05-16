@@ -287,6 +287,10 @@ gadgets.rpc = function() {
         t: authToken[targetId]
       });
 
+      if (useLegacyProtocol[targetId]) {
+        relayChannel = 'ifpc';
+      }
+
       switch (relayChannel) {
       case 'dpm': // use document.postMessage
         var targetDoc = targetId === '..' ? parent.document :
@@ -298,27 +302,7 @@ gadgets.rpc = function() {
         targetWin.postMessage(rpcData);
         break;
       default: // use 'ifpc' as a fallback mechanism
-        // Try the frameElement channel if available
-        try {
-          if (from === '..') {
-            // Container-to-gadget
-            var iframe = document.getElementById(targetId);
-            if (typeof iframe.__g2c_rpc.__c2g_rpc === 'function') {
-              iframe.__g2c_rpc.__c2g_rpc(rpcData);
-              return;
-            }
-          } else {
-            // Gadget-to-container
-            if (typeof window.frameElement.__g2c_rpc === 'function') {
-              window.frameElement.__g2c_rpc(rpcData);
-              return;
-            }
-          }
-        } catch (e) {
-        }
-
         var relay = gadgets.rpc.getRelayUrl(targetId);
-
         // TODO split message if too long
         var src;
         if (useLegacyProtocol[targetId]) {
@@ -327,6 +311,24 @@ gadgets.rpc = function() {
                  encodeLegacyData([from, serviceName, '', '', from].concat(
                  Array.prototype.slice.call(arguments, 3)))])].join('');
         } else {
+          // Try the frameElement channel if available
+          try {
+            if (from === '..') {
+              // Container-to-gadget
+              var iframe = document.getElementById(targetId);
+              if (typeof iframe.__g2c_rpc.__c2g_rpc === 'function') {
+                iframe.__g2c_rpc.__c2g_rpc(rpcData);
+                return;
+              }
+            } else {
+              // Gadget-to-container
+              if (typeof window.frameElement.__g2c_rpc === 'function') {
+                window.frameElement.__g2c_rpc(rpcData);
+                return;
+              }
+            }
+          } catch (e) {
+          }
           // # targetId & sourceId@callId & packetNum & packetId & packetData
           src = [relay, '#', targetId, '&', from, '@', callId,
                  '&1&0&', encodeURIComponent(rpcData)].join('');
