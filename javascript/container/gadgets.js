@@ -534,8 +534,7 @@ gadgets.IfrGadget.prototype.getUserPrefsDialogId = function() {
 
 gadgets.IfrGadget.prototype.getIframeUrl = function() {
   return this.serverBase_ + 'ifr?' +
-      'url=' + encodeURIComponent(this.specUrl) +
-      '&container=' + this.CONTAINER +
+      'container=' + this.CONTAINER +
       '&mid=' +  this.id +
       '&nocache=' + gadgets.container.nocache_ +
       '&country=' + gadgets.container.country_ +
@@ -546,6 +545,7 @@ gadgets.IfrGadget.prototype.getIframeUrl = function() {
       (this.debug ? '&debug=1' : '') +
       this.getAdditionalParams() +
       this.getUserPrefsParams() +
+      '&url=' + encodeURIComponent(this.specUrl) + 
       '#rpctoken=' + this.rpcToken +
       (this.secureToken ? '&st=' + this.secureToken : '') +
       (this.viewParams ?
@@ -587,8 +587,8 @@ gadgets.IfrGadget.prototype.handleOpenUserPrefsDialog = function() {
     };
 
     var script = document.createElement('script');
-    script.src = 'http://gmodules.com/ig/gadgetsettings?url=' + this.specUrl +
-        '&mid=' + this.id + '&output=js' + this.getUserPrefsParams();
+    script.src = 'http://gmodules.com/ig/gadgetsettings?mid=' + this.id +
+        '&output=js' + this.getUserPrefsParams() +  '&url=' + this.specUrl;
     document.body.appendChild(script);
   }
 };

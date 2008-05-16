@@ -119,10 +119,7 @@ public class UrlGenerator {
           break;
         case HTML:
         default:
-          buf.append(iframePrefix)
-             .append("url=")
-             .append(URLEncoder.encode(url, "UTF-8"))
-             .append("&");
+          buf.append(iframePrefix);
           break;
       }
       buf.append("container=").append(context.getContainer());
@@ -148,6 +145,11 @@ public class UrlGenerator {
         buf.append("&up_").append(URLEncoder.encode(pref.getName(), "UTF-8"))
            .append("=").append(URLEncoder.encode(value, "UTF-8"));
       }
+      // add url last to work around browser bugs
+      if(!type.equals(View.ContentType.URL)) {
+          buf.append("&url=")
+             .append(URLEncoder.encode(url, "UTF-8"));
+        }
     } catch (UnsupportedEncodingException e) {
       throw new RuntimeException("UTF-8 Not supported!", e);
     }
