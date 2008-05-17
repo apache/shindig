@@ -24,8 +24,6 @@ import org.apache.shindig.social.abdera.json.JSONWriter;
 import com.google.inject.Injector;
 import org.apache.abdera.protocol.server.Provider;
 import org.apache.abdera.protocol.server.servlet.AbderaServlet;
-import org.apache.abdera.util.AbderaConfiguration;
-import org.apache.abdera.util.Configuration;
 import org.apache.abdera.writer.NamedWriter;
 
 import javax.servlet.ServletConfig;
@@ -68,22 +66,12 @@ public class RestServerServlet extends AbderaServlet {
       return null;
     }
     
-    // init Writers
-    // setup my NamedWriter for "json"
-    // TODO why not inject here. because I am not ready to change code
-    // copied from abdera yet. but go to do it..everything gets guiced.
-    JSONWriter jsonWriter = new JSONWriter();
-    Configuration config = getAbdera().getConfiguration();
-    if (config instanceof AbderaConfiguration) {
-      ((AbderaConfiguration)config).addNamedWriter(jsonWriter);
-    } else {
-      logger.severe("Invalid Abdera configuration");
-      return null;
-    }
+    //setup my NamedWriter for "json"
+    getAbdera().getConfiguration().addNamedWriter(new JSONWriter());
     
     // print all the writers available
     Map<String, NamedWriter> writersMap = 
-        ((AbderaConfiguration)config).getNamedWriters();
+        getAbdera().getConfiguration().getNamedWriters();
     for (NamedWriter writer : writersMap.values()) {
       StringBuilder sbuf = new StringBuilder();
       for (String s : writer.getOutputFormats()) {
@@ -92,7 +80,6 @@ public class RestServerServlet extends AbderaServlet {
       logger.fine("NamedWriter: " + writer.getClass().getName() +
           " is for writing '" + writer.getName() + "'" +
           ". Handles the following formats: " + sbuf.toString());
-      
     }
     return provider;
   }
