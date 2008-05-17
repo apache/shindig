@@ -45,7 +45,7 @@ gadgets.rpc = function() {
                      typeof window.postMessage === 'function' ? 'wpm' :
                      'ifpc';
   if (relayChannel === 'dpm' || relayChannel === 'wpm') {
-    document.addEventListener('message', function(packet) {
+    window.addEventListener('message', function(packet) {
       // TODO validate packet.domain for security reasons
       process(gadgets.json.parse(packet.data));
     }, false);
@@ -299,7 +299,7 @@ gadgets.rpc = function() {
         break;
       case 'wpm': // use window.postMessage
         var targetWin = targetId === '..' ? parent : frames[targetId];
-        targetWin.postMessage(rpcData);
+        targetWin.postMessage(rpcData, "*");
         break;
       default: // use 'ifpc' as a fallback mechanism
         var relay = gadgets.rpc.getRelayUrl(targetId);
