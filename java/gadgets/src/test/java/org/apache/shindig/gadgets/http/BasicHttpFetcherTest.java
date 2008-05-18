@@ -25,7 +25,7 @@ import java.io.FileWriter;
 import java.net.URI;
 
 public class BasicHttpFetcherTest extends TestCase {
-  private HttpCache cache = new BasicHttpCache();
+  private HttpCache cache = new BasicHttpCache(10);
   private HttpFetcher fetcher
       = new BasicHttpFetcher(cache, Integer.MAX_VALUE);
 
