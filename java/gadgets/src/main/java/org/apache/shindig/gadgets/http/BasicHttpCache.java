@@ -17,30 +17,38 @@
  */
 package org.apache.shindig.gadgets.http;
 
+import org.apache.shindig.common.cache.Cache;
+import org.apache.shindig.common.cache.LruCache;
+
+import com.google.inject.Inject;
+import com.google.inject.name.Named;
+
 import java.net.URI;
-import java.util.Map;
-import java.util.WeakHashMap;
 
 /**
  * Simple cache of HttpResponse. Uses WeakHashMap for memory management
  */
 public class BasicHttpCache extends AbstractHttpCache {
 
-  private final Map<URI, HttpResponse> cache
-      = new WeakHashMap<URI, HttpResponse>();
+  private final Cache<URI, HttpResponse> cache;
 
   @Override
   protected HttpResponse getResponseImpl(URI uri) {
-    return cache.get(uri);
+    return cache.getElement(uri);
   }
 
   @Override
   protected void addResponseImpl(URI uri, HttpResponse response) {
-    cache.put(uri, response);
+    cache.addElement(uri, response);
   }
 
   @Override
   protected HttpResponse removeResponseImpl(URI uri) {
-    return cache.remove(uri);
+    return cache.removeElement(uri);
+  }
+
+  @Inject
+  public BasicHttpCache(@Named("cache.capacity") int capacity) {
+    cache = LruCache.create(capacity);
   }
 }

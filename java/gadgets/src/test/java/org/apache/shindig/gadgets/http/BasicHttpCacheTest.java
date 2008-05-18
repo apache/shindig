@@ -17,19 +17,16 @@
  */
 package org.apache.shindig.gadgets.http;
 
-import junit.framework.TestCase;
-
 import org.apache.shindig.gadgets.servlet.HttpUtil;
 
+import junit.framework.TestCase;
+
 import java.net.URI;
-import java.text.DateFormat;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
-import java.util.TimeZone;
 
 /**
  * Tests for basic content cache
@@ -41,7 +38,7 @@ public class BasicHttpCacheTest extends TestCase {
   @Override
   public void setUp() throws Exception {
     super.setUp();
-    cache = new BasicHttpCache();
+    cache = new BasicHttpCache(10);
   }
 
   @Override
