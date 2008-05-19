@@ -30,6 +30,7 @@ import org.apache.commons.lang.StringUtils;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.TreeMap;
 import java.util.List;
 import java.util.Map;
 
@@ -111,7 +112,7 @@ public class BeanXmlConverterTest extends TestCase {
   public void testMapsToXml() throws Exception {
     // This is the structure our app data currently takes
     Map<String, Map<String, String>> map =
-        new HashMap<String, Map<String, String>>();
+        new TreeMap<String, Map<String, String>>();
 
     Map<String, String> item1Map = new HashMap<String, String>();
     item1Map.put("value", "1");
@@ -126,7 +127,7 @@ public class BeanXmlConverterTest extends TestCase {
     // TODO: I don't believe this is the output we are looking for for app
     // data... we will probably have to tweak this.
     String expectedXml =
-        "<hashmap>" +
+        "<treemap>" +
         "<empty>false</empty>" +
         "<entry>" +
           "<key>item1</key>" +
@@ -148,8 +149,7 @@ public class BeanXmlConverterTest extends TestCase {
             "</entry>" +
           "</value>" +
         "</entry>" +
-        "</hashmap>";
-
+        "</treemap>";
     assertEquals(expectedXml, StringUtils.deleteWhitespace(xml));
   }
 
