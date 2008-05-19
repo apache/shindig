@@ -17,10 +17,10 @@
  */
 package org.apache.shindig.gadgets.http;
 
-import org.apache.shindig.common.util.InputStreamConsumer;
-
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+
+import org.apache.shindig.common.util.InputStreamConsumer;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -137,7 +137,14 @@ public class BasicHttpFetcher implements HttpFetcher {
   /** {@inheritDoc} */
   public HttpResponse fetch(HttpRequest request) {
     HttpResponse response = cache.getResponse(request);
-    if (response != null) return response;
+    // TODO - Make this sensitive to custom rewriting rules
+    if (response != null) {
+      if (request.getOptions().rewriter != null &&
+          response.getRewritten() != null) {
+        return response.getRewritten();
+      }
+      return response;
+    }
     try {
       URLConnection fetcher = getConnection(request);
       if ("POST".equals(request.getMethod()) &&
@@ -152,6 +159,11 @@ public class BasicHttpFetcher implements HttpFetcher {
                                  fetcher.getOutputStream());
       }
       response = makeResponse(fetcher);
+      if (request.getOptions().rewriter != null) {
+        // TODO - Make this sensitive to different rewriting rules
+        response.setRewritten(
+            request.getOptions().rewriter.rewrite(request.getUri(), response));
+      }
       cache.addResponse(request, response);
       return response;
     } catch (IOException e) {

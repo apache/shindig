@@ -19,11 +19,11 @@
 
 package org.apache.shindig.gadgets.spec;
 
+import junit.framework.TestCase;
+
 import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.Substitutions;
 import org.apache.shindig.gadgets.Substitutions.Type;
-
-import junit.framework.TestCase;
 
 import java.net.URI;
 
@@ -104,7 +104,7 @@ public class GadgetSpecTest extends TestCase {
     substituter.addSubstitution(Type.USER_PREF, "title", title);
     substituter.addSubstitution(Type.MESSAGE, "content", content);
 
-    GadgetSpec spec = new GadgetSpec(SPEC_URL, xml).substitute(substituter);
+    GadgetSpec spec = new GadgetSpec(SPEC_URL, xml).substitute(substituter, false);
     assertEquals(title, spec.getModulePrefs().getTitle());
     assertEquals(content, spec.getView(GadgetSpec.DEFAULT_VIEW).getContent());
   }

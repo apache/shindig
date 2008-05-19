@@ -19,6 +19,8 @@
 
 package org.apache.shindig.gadgets.http;
 
+import org.apache.shindig.gadgets.rewrite.ContentRewriter;
+
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
@@ -355,6 +357,7 @@ public class HttpRequest {
     public boolean ignoreCache = false;
     public boolean ownerSigned = true;
     public boolean viewerSigned = true;
+    public ContentRewriter rewriter = null;
 
     public Options() {}
 
@@ -365,6 +368,7 @@ public class HttpRequest {
       this.ignoreCache = copyFrom.ignoreCache;
       this.ownerSigned = copyFrom.ownerSigned;
       this.viewerSigned = copyFrom.viewerSigned;
+      this.rewriter = copyFrom.rewriter;
     }
   }
 }

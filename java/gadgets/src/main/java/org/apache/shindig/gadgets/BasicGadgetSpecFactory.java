@@ -18,12 +18,16 @@
  */
 package org.apache.shindig.gadgets;
 
+import com.google.inject.Inject;
+import com.google.inject.name.Named;
+
 import org.apache.shindig.gadgets.http.HttpFetcher;
 import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.http.HttpResponse;
+import org.apache.shindig.gadgets.rewrite.ContentRewriter;
+import org.apache.shindig.gadgets.rewrite.ContentRewriterFeature;
 import org.apache.shindig.gadgets.spec.GadgetSpec;
-
-import com.google.inject.Inject;
+import org.apache.shindig.gadgets.spec.View;
 
 import java.net.URI;
 
@@ -32,7 +36,9 @@ import java.net.URI;
  */
 public class BasicGadgetSpecFactory implements GadgetSpecFactory {
 
-  private HttpFetcher specFetcher;
+  private final HttpFetcher specFetcher;
+  private final ContentRewriter rewriter;
+  private final boolean enableRewrite;
 
   public GadgetSpec getGadgetSpec(GadgetContext context)
       throws GadgetException {
@@ -52,11 +58,23 @@ public class BasicGadgetSpecFactory implements GadgetSpecFactory {
     }
     GadgetSpec spec
         = new GadgetSpec(gadgetUri, response.getResponseAsString());
+    if (new ContentRewriterFeature(spec, enableRewrite).isRewriteEnabled()) {
+      for (View v : spec.getViews().values()) {
+        if (v.getType() == View.ContentType.HTML && rewriter != null) {
+          v.setRewrittenContent(
+              rewriter.rewrite(gadgetUri, v.getContent(), "text/html"));
+        }
+      }
+    }
     return spec;
   }
 
   @Inject
-  public BasicGadgetSpecFactory(HttpFetcher specFetcher) {
+  public BasicGadgetSpecFactory(HttpFetcher specFetcher,
+      ContentRewriter rewriter,
+      @Named("content-rewrite.enabled") String defaultEnableRewrite) {
     this.specFetcher = specFetcher;
+    this.rewriter = rewriter;
+    this.enableRewrite = Boolean.parseBoolean(defaultEnableRewrite);
   }
 }
