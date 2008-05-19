@@ -34,6 +34,7 @@ public class HttpResponse {
   public final static int SC_OK = 200;
   public final static int SC_NOT_FOUND = 404;
   public final static int SC_INTERNAL_SERVER_ERROR = 500;
+  public final static int SC_TIMEOUT = 504;
 
   private final int httpStatusCode;
   private static final String DEFAULT_ENCODING = "UTF-8";
@@ -41,6 +42,7 @@ public class HttpResponse {
 
   public static final HttpResponse ERROR
       = new HttpResponse(SC_INTERNAL_SERVER_ERROR);
+  public static final HttpResponse TIMEOUT = new HttpResponse(SC_TIMEOUT);
   public static final HttpResponse NOT_FOUND = new HttpResponse(SC_NOT_FOUND);
 
   // Used to lazily convert to a string representation of the input.
@@ -113,7 +115,7 @@ public class HttpResponse {
       if (parts.length == 2) {
         int offset = parts[1].indexOf("charset=");
         if (offset != -1) {
-          return parts[1].substring(offset + 8);
+          return parts[1].substring(offset + 8).toUpperCase();
         }
       }
     }
