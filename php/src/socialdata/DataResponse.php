@@ -26,6 +26,10 @@ class DataResponse {
 	{
 		$this->error = $error;
 		$this->responses = $responses;
+		if ($this->error === null) {
+			// trim NULL values here too
+			unset($this->error);
+		}
 	}
 
 	public function getResponses()
