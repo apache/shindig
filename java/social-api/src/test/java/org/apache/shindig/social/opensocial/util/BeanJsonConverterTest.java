@@ -17,24 +17,22 @@
  */
 package org.apache.shindig.social.opensocial.util;
 
-import org.apache.shindig.social.opensocial.model.Person;
 import org.apache.shindig.social.opensocial.model.Activity;
-import org.apache.shindig.social.opensocial.model.Name;
-import org.apache.shindig.social.opensocial.model.Phone;
 import org.apache.shindig.social.opensocial.model.Address;
 import org.apache.shindig.social.opensocial.model.Email;
 import org.apache.shindig.social.opensocial.model.MediaItem;
-import org.apache.shindig.social.ResponseItem;
-
-import org.json.JSONObject;
-import org.json.JSONArray;
+import org.apache.shindig.social.opensocial.model.Name;
+import org.apache.shindig.social.opensocial.model.Person;
+import org.apache.shindig.social.opensocial.model.Phone;
 
 import junit.framework.TestCase;
+import org.json.JSONArray;
+import org.json.JSONObject;
 
-import java.util.List;
 import java.util.ArrayList;
-import java.util.Map;
 import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class BeanJsonConverterTest extends TestCase {
   private Person johnDoe;
@@ -177,6 +175,14 @@ public class BeanJsonConverterTest extends TestCase {
 
     assertEquals("1", ((JSONObject) jsonArray.get(0)).getString("value"));
     assertEquals("2", ((JSONObject) jsonArray.get(1)).getString("value"));
+  }
+
+  public void testArrayToJson() throws Exception {
+    String[] colors = {"blue", "green", "aquamarine"};
+    JSONArray jsonArray = (JSONArray) beanJsonConverter.convertToJson(colors);
+
+    assertEquals(colors.length, jsonArray.length());
+    assertEquals(colors[0], jsonArray.get(0));
   }
 
 }

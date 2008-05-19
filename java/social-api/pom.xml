@@ -72,6 +72,10 @@ under the License.
       <artifactId>abdera-client</artifactId>
     </dependency>
     <dependency>
+      <artifactId>commons-lang</artifactId>
+      <groupId>commons-lang</groupId>
+    </dependency>
+    <dependency>
       <artifactId>commons-betwixt</artifactId>
       <groupId>commons-betwixt</groupId>
     </dependency>
