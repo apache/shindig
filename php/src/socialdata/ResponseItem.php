@@ -30,7 +30,42 @@ class ResponseItem {
 	{
 		$this->error = $error;
 		$this->errorMessage = $errorMessage;
-		$this->response = $response;
+		$this->response = $this->trimResponse($response);
+		if ($this->error === null && $this->errorMessage === null) {
+			// trim null values of self too
+			unset($this->error);
+			unset($this->errorMessage);
+		}
+	}
+	
+	/**
+	 * the json_encode function does not trim null values,
+	 * so we do this manually
+	 *
+	 * @param mixed $object
+	 */
+	private function trimResponse(&$object)
+	{
+		if (is_array($object)) {
+			foreach ($object as $key => $val) {
+				// binary compare, otherwise false == 0 == null too
+				if ($val === null) {
+					unset($object[$key]);
+				} elseif (is_array($val) || is_object($val)) {
+					$object[$key] = $this->trimResponse($val);
+				}
+			}
+		} elseif (is_object($object)) {
+			$vars = get_object_vars($object);
+			foreach ($vars as $key => $val) {
+				if ($val === null) {
+					unset($object->$key);
+				} elseif (is_array($val) || is_object($val)) {
+					$object->$key = $this->trimResponse($val);
+				}
+			}
+		}
+		return $object;
 	}
 	
 	public function getError()
