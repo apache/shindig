@@ -18,6 +18,12 @@
  */
 package org.apache.shindig.gadgets;
 
+import com.google.inject.AbstractModule;
+import com.google.inject.CreationException;
+import com.google.inject.Scopes;
+import com.google.inject.name.Names;
+import com.google.inject.spi.Message;
+
 import org.apache.shindig.common.util.ResourceLoader;
 import org.apache.shindig.gadgets.http.BasicHttpCache;
 import org.apache.shindig.gadgets.http.BasicHttpFetcher;
@@ -26,12 +32,8 @@ import org.apache.shindig.gadgets.http.HttpCache;
 import org.apache.shindig.gadgets.http.HttpFetcher;
 import org.apache.shindig.gadgets.http.RemoteContentFetcherFactory;
 import org.apache.shindig.gadgets.oauth.OAuthFetcherFactory;
-
-import com.google.inject.AbstractModule;
-import com.google.inject.CreationException;
-import com.google.inject.Scopes;
-import com.google.inject.name.Names;
-import com.google.inject.spi.Message;
+import org.apache.shindig.gadgets.rewrite.ContentRewriter;
+import org.apache.shindig.gadgets.rewrite.DefaultContentRewriter;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -51,6 +53,8 @@ public class DefaultGuiceModule extends AbstractModule {
   @Override
   protected void configure() {
     Names.bindProperties(this.binder(), properties);
+
+    bind(ContentRewriter.class).to(DefaultContentRewriter.class);
 
     bind(HttpFetcher.class).to(BasicHttpFetcher.class);
     bind(HttpCache.class).to(BasicHttpCache.class);

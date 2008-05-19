@@ -17,6 +17,8 @@
  */
 package org.apache.shindig.gadgets;
 
+import com.google.inject.Inject;
+
 import org.apache.shindig.gadgets.http.ContentFetcherFactory;
 import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.http.HttpResponse;
@@ -26,8 +28,6 @@ import org.apache.shindig.gadgets.spec.GadgetSpec;
 import org.apache.shindig.gadgets.spec.LocaleSpec;
 import org.apache.shindig.gadgets.spec.MessageBundle;
 import org.apache.shindig.gadgets.spec.Preload;
-
-import com.google.inject.Inject;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -132,7 +132,7 @@ public class GadgetServer {
         Integer.toString(context.getModuleId()));
     UserPrefSubstituter.addSubstitutions(
         substituter, spec, context.getUserPrefs());
-    spec = spec.substitute(substituter);
+    spec = spec.substitute(substituter, !context.getIgnoreCache());
 
     Set<GadgetFeatureRegistry.Entry> features = getFeatures(spec);
 

@@ -21,7 +21,6 @@ import org.apache.shindig.common.util.HashUtil;
 import org.apache.shindig.common.xml.XmlException;
 import org.apache.shindig.common.xml.XmlUtil;
 import org.apache.shindig.gadgets.Substitutions;
-
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
@@ -101,7 +100,7 @@ public class GadgetSpec {
    * @param substituter
    * @return The substituted spec.
    */
-  public GadgetSpec substitute(Substitutions substituter) {
+  public GadgetSpec substitute(Substitutions substituter, boolean rewrite) {
     GadgetSpec spec = new GadgetSpec(this);
     spec.modulePrefs = modulePrefs.substitute(substituter);
     if (userPrefs.size() == 0) {
@@ -115,7 +114,7 @@ public class GadgetSpec {
     }
     Map<String, View> viewMap = new HashMap<String, View>(views.size());
     for (View view : views.values()) {
-     viewMap.put(view.getName(), view.substitute(substituter));
+     viewMap.put(view.getName(), view.substitute(substituter, rewrite));
     }
     spec.views = Collections.unmodifiableMap(viewMap);
 

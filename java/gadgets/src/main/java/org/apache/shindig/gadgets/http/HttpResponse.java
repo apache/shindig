@@ -51,6 +51,8 @@ public class HttpResponse {
   private final Map<String, List<String>> headers;
   private final Map<String, String> metadata;
 
+  private HttpResponse rewritten;
+
   /**
    * Create a dummy empty map. Access via HttpResponse.ERROR
    */
@@ -134,6 +136,13 @@ public class HttpResponse {
   }
 
   /**
+   * @reutrn the content length
+   */
+  public int getContentLength() {
+    return responseBytes.length;
+  }
+
+  /**
    * @return An input stream suitable for reading the entirety of the response.
    */
   public InputStream getResponse() {
@@ -203,5 +212,21 @@ public class HttpResponse {
    */
   public Map<String, String> getMetadata() {
     return this.metadata;
+  }
+
+  /**
+   * Get the rewritten version of this content
+   * @return A rewritten HttpResponse
+   */
+  public HttpResponse getRewritten() {
+    return rewritten;
+  }
+
+  /**
+   * Set the rewritten version of this content
+   * @param rewritten
+   */
+  public void setRewritten(HttpResponse rewritten) {
+    this.rewritten = rewritten;
   }
 }

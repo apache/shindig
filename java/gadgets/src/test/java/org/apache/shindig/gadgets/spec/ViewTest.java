@@ -19,11 +19,11 @@
 
 package org.apache.shindig.gadgets.spec;
 
+import junit.framework.TestCase;
+
 import org.apache.shindig.common.xml.XmlUtil;
 import org.apache.shindig.gadgets.Substitutions;
 import org.apache.shindig.gadgets.Substitutions.Type;
-
-import junit.framework.TestCase;
 
 import java.util.Arrays;
 
@@ -122,7 +122,7 @@ public class ViewTest extends TestCase {
     substituter.addSubstitution(Type.MODULE, "ID", "3");
 
     View view = new View("test",
-        Arrays.asList(XmlUtil.parse(xml))).substitute(substituter);
+        Arrays.asList(XmlUtil.parse(xml))).substitute(substituter, false);
     assertEquals("Hello, foo Earthright 3", view.getContent());
   }
 
@@ -138,7 +138,7 @@ public class ViewTest extends TestCase {
     substituter.addSubstitution(Type.MODULE, "ID", "123");
 
     View view = new View("test",
-        Arrays.asList(XmlUtil.parse(xml))).substitute(substituter);
+        Arrays.asList(XmlUtil.parse(xml))).substitute(substituter, false);
     assertEquals("http://up.example.org/123?dir=rtl",
                  view.getHref().toString());
   }

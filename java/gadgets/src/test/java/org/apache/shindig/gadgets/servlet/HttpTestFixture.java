@@ -21,6 +21,8 @@ package org.apache.shindig.gadgets.servlet;
 import org.apache.shindig.gadgets.GadgetTestFixture;
 import org.apache.shindig.gadgets.LockedDomainService;
 import org.apache.shindig.gadgets.http.ContentFetcherFactory;
+import org.apache.shindig.gadgets.rewrite.ContentRewriter;
+import org.apache.shindig.gadgets.rewrite.NoOpContentRewriter;
 
 public abstract class HttpTestFixture extends GadgetTestFixture {
   public final ProxyHandler proxyHandler;
@@ -31,13 +33,15 @@ public abstract class HttpTestFixture extends GadgetTestFixture {
   public final UrlGenerator urlGenerator = mock(UrlGenerator.class);
   public final LockedDomainService lockedDomainService =
     mock(LockedDomainService.class);
+  public final ContentRewriter rewriter = new NoOpContentRewriter();
 
   public HttpTestFixture() {
     super();
     proxyHandler = new ProxyHandler(
         contentFetcherFactory,
         securityTokenDecoder,
-        lockedDomainService);
+        lockedDomainService,
+        rewriter);
     gadgetRenderer = new GadgetRenderingTask(gadgetServer, registry,
         containerConfig, urlGenerator, securityTokenDecoder, lockedDomainService);
     jsonRpcHandler = new JsonRpcHandler(executor, gadgetServer, urlGenerator);

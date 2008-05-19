@@ -18,22 +18,22 @@
  */
 package org.apache.shindig.gadgets.servlet;
 
+import com.google.inject.Inject;
+
 import org.apache.shindig.common.SecurityToken;
 import org.apache.shindig.common.SecurityTokenDecoder;
 import org.apache.shindig.common.SecurityTokenException;
 import org.apache.shindig.common.util.InputStreamConsumer;
 import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.LockedDomainService;
-import org.apache.shindig.gadgets.http.HttpFetcher;
 import org.apache.shindig.gadgets.http.ContentFetcherFactory;
-import org.apache.shindig.gadgets.http.HttpResponse;
+import org.apache.shindig.gadgets.http.HttpFetcher;
 import org.apache.shindig.gadgets.http.HttpRequest;
+import org.apache.shindig.gadgets.http.HttpResponse;
 import org.apache.shindig.gadgets.oauth.OAuthRequestParams;
+import org.apache.shindig.gadgets.rewrite.ContentRewriter;
 import org.apache.shindig.gadgets.spec.Auth;
 import org.apache.shindig.gadgets.spec.Preload;
-
-import com.google.inject.Inject;
-
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -89,6 +89,7 @@ public class ProxyHandler {
   // This is a limitation of Guice, but this workaround...works.
   private ContentFetcherFactory contentFetcherFactory;
   private final LockedDomainService domainLocker;
+  private final ContentRewriter rewriter;
 
   @Inject
   public void setContentFetcher(ContentFetcherFactory contentFetcherFactory) {
@@ -98,10 +99,12 @@ public class ProxyHandler {
   @Inject
   public ProxyHandler(ContentFetcherFactory contentFetcherFactory,
                       SecurityTokenDecoder securityTokenDecoder,
-                      LockedDomainService lockedDomainService) {
+                      LockedDomainService lockedDomainService,
+                      ContentRewriter rewriter) {
     this.contentFetcherFactory = contentFetcherFactory;
     this.securityTokenDecoder = securityTokenDecoder;
     this.domainLocker = lockedDomainService;
+    this.rewriter = rewriter;
   }
 
   /**
@@ -208,6 +211,7 @@ public class ProxyHandler {
         options.ownerSigned = Boolean
             .parseBoolean(request.getParameter(SIGN_OWNER));
       }
+      options.rewriter = rewriter;
 
       return new HttpRequest(
           method, url, headers, postBody, options);

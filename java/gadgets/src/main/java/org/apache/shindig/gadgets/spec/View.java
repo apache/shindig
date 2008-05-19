@@ -16,9 +16,9 @@
  * specific language governing permissions and limitations under the License.
  */
 package org.apache.shindig.gadgets.spec;
+
 import org.apache.shindig.common.xml.XmlUtil;
 import org.apache.shindig.gadgets.Substitutions;
-
 import org.w3c.dom.Element;
 
 import java.net.URI;
@@ -89,9 +89,13 @@ public class View {
    * @param substituter
    * @return The substituted view.
    */
-  public View substitute(Substitutions substituter) {
+  public View substitute(Substitutions substituter, boolean rewrite) {
     View view = new View(this);
-    view.content = substituter.substituteString(null, content);
+    if (rewrite && rewrittenContent != null) {
+      view.content = substituter.substituteString(null, rewrittenContent);
+    } else {
+      view.content = substituter.substituteString(null, content);
+    }
     view.href = substituter.substituteUri(null, href);
     return view;
   }
@@ -179,5 +183,18 @@ public class View {
     public static ContentType parse(String value) {
       return "url".equals(value) ? URL : HTML;
     }
+  }
+
+  //
+  // Decorations
+  //
+  private String rewrittenContent;
+
+  public String getRewrittenContent() {
+    return rewrittenContent;
+  }
+
+  public void setRewrittenContent(String rewrittenContent) {
+    this.rewrittenContent = rewrittenContent;
   }
 }

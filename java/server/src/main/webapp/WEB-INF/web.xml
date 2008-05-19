@@ -49,6 +49,14 @@
     </servlet-class>
   </servlet>
 
+  <!-- Concat -->
+  <servlet>
+    <servlet-name>concat</servlet-name>
+    <servlet-class>
+      org.apache.shindig.gadgets.servlet.ConcatProxyServlet
+    </servlet-class>
+  </servlet>
+
   <!-- Metadata RPC -->
   <servlet>
     <servlet-name>metadata</servlet-name>
@@ -91,6 +99,11 @@
   <servlet-mapping>
     <servlet-name>proxy</servlet-name>
     <url-pattern>/gadgets/proxy</url-pattern>
+  </servlet-mapping>
+
+  <servlet-mapping>
+    <servlet-name>concat</servlet-name>
+    <url-pattern>/gadgets/concat</url-pattern>
   </servlet-mapping>
 
   <servlet-mapping>
