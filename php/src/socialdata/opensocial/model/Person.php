@@ -76,6 +76,7 @@ class Person {
 	public $turnOns;
 	public $tvShows;
 	public $urls;
+        public $networkPresence;
 	
 	// Note: Not in the opensocial js person object directly
 	public $isOwner = false;
@@ -615,6 +616,16 @@ class Person {
 	public function setUrls($urls)
 	{
 		$this->urls = $urls;
+	}
+	
+	public function getNetworkPresence()
+	{
+		return $this->networkPresence;
+	}
+	
+	public function setNetworkPresence($networkPresence)
+	{
+		$this->networkPresence = $networkPresence;
 	}
 	
 	public function getIsOwner()
