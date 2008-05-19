@@ -18,10 +18,9 @@
 package org.apache.shindig.social;
 
 import org.apache.shindig.common.servlet.GuiceServletContextListener;
+import org.apache.shindig.social.abdera.SocialApiProvider;
 
-import org.apache.abdera.protocol.server.Provider;
 import org.apache.abdera.protocol.server.ServiceManager;
-import org.apache.abdera.protocol.server.servlet.AbderaServlet;
 import org.mortbay.jetty.Server;
 import org.mortbay.jetty.servlet.Context;
 import org.mortbay.jetty.servlet.ServletHolder;
@@ -29,57 +28,27 @@ import org.mortbay.jetty.servlet.ServletHolder;
 import java.util.HashMap;
 import java.util.Map;
 
-import javax.servlet.Servlet;
-
 public class JettyServer {
-  //TODO such a hack. why have to specify the provider when using the Servlet?
-  public static final int DEFAULT_PORT = 9002;
-  public static final String PROVIDER_NAME =
-      "org.apache.shindig.social.abdera.SocialApiProvider";
-  public static final String GUICE_MODULES =
-      "org.apache.shindig.common.CommonGuiceModule:" +
-      "org.apache.shindig.social.SocialApiGuiceModule";
+  private Server server = null;
 
-  private final int port;
-  private Server server;
-
-  public JettyServer() {
-    this(DEFAULT_PORT);
-  }
-
-  public JettyServer(int port) {
-    this.port = port;
-  }
-
-  public void start(Class<? extends Provider> _class, String mapBase)
-      throws Exception {
+  public void start(int port, String mapBase) throws Exception {
     server = new Server(port);
-    if (mapBase == null) {
-      mapBase = "/*";
-    }
-    Context context = new Context(server, "/", Context.SESSIONS);
-    ServletHolder servletHolder = new ServletHolder(new AbderaServlet());
-    servletHolder.setInitParameter(ServiceManager.PROVIDER, _class.getName());
-    context.addServlet(servletHolder, mapBase);
-    server.start();
-  }
-
-  public void start(Servlet servlet, String mapBase) throws Exception {
-    server = new Server(port);
-    if (mapBase == null) {
-      mapBase = "/*";
-    }
     Context context = new Context(server, "/", Context.SESSIONS);
     context.addEventListener(new GuiceServletContextListener());
+
     Map<String, String> initParams = new HashMap<String, String>();
     initParams.put(GuiceServletContextListener.MODULES_ATTRIBUTE,
-        GUICE_MODULES);
+        SocialApiTestsGuiceModule.class.getName());
     context.setInitParams(initParams);
-    ServletHolder servletHolder = new ServletHolder(servlet);
-    servletHolder.setInitParameter(ServiceManager.PROVIDER, PROVIDER_NAME);
+
+    ServletHolder servletHolder = new ServletHolder(new RestServerServlet());
+    servletHolder.setInitParameter(ServiceManager.PROVIDER,
+        SocialApiProvider.class.getName());
     context.addServlet(servletHolder, mapBase);
+
     server.start();
   }
+
   public void stop() throws Exception {
     server.stop();
   }

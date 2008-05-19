@@ -17,14 +17,17 @@
  */
 package org.apache.shindig.social.abdera;
 
-import junit.framework.Assert;
-
 import org.apache.shindig.social.JettyServer;
-import org.apache.shindig.social.RestServerServlet;
+import org.apache.shindig.social.ResponseItem;
+import org.apache.shindig.social.SocialApiTestsGuiceModule;
+import org.apache.shindig.social.opensocial.model.ApiCollection;
+import org.apache.shindig.social.opensocial.model.Person;
 
+import junit.framework.Assert;
 import org.apache.abdera.Abdera;
 import org.apache.abdera.model.Base;
 import org.apache.abdera.model.Document;
+import org.apache.abdera.model.Entry;
 import org.apache.abdera.model.Feed;
 import org.apache.abdera.protocol.Response.ResponseType;
 import org.apache.abdera.protocol.client.AbderaClient;
@@ -33,64 +36,96 @@ import org.apache.abdera.util.Constants;
 import org.apache.abdera.util.MimeTypeHelper;
 import org.apache.abdera.writer.Writer;
 import org.apache.abdera.writer.WriterFactory;
-
+import org.junit.After;
 import org.junit.AfterClass;
+import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.logging.Logger;
 
 
 public class SocialApiProviderLargeTest extends Assert {
+  private static Logger logger =
+      Logger.getLogger(SocialApiProviderLargeTest.class.getName());
 
   private static JettyServer server;
   private static Abdera abdera = Abdera.getInstance();
   private static AbderaClient client = new AbderaClient();
 
-  private static String BASE = "http://localhost:9002/social/rest/";
+  private static int JETTY_PORT = 9002;
+  private static String BASE = "/social/rest";
+  private static String BASEURL = "http://localhost:" + JETTY_PORT + BASE;
+
+  private List<Person> people;
+  private ClientResponse resp;
 
   @BeforeClass
-  public static void setUp() throws Exception {
+  public static void setUpOnce() throws Exception {
     try {
       server = new JettyServer();
-      server.start(new RestServerServlet(), "/social/rest/*");
+      server.start(JETTY_PORT, BASE + "/*");
     } catch (Exception e) {
       e.printStackTrace();
     }
   }
 
   @AfterClass
-  public static void tearDown() throws Exception {
+  public static void tearDownOnce() throws Exception {
     server.stop();
   }
 
-// TODO this test cannot pass without the state file resource.
-//      the XmlStateFileFetcher needs to be mocked out
-//
-  @Test
-  public void testGetConnectionsForJohnDoe() throws IOException {
-//    ClientResponse resp = client.get(BASE + "people");
-//    checkForGoodAtomResponse(resp);
-//    Document<Feed> doc = resp.getDocument();
-//    Feed feed = doc.getRoot();
-//    assertEquals(feed.getTitle(), "People Collection title");
-//    //prettyPrint(doc);
-//    resp.release();
+  @Before
+  public void setUp() throws Exception {
+    people = new ArrayList<Person>();
+    people.add(SocialApiTestsGuiceModule.MockPeopleService.janeDoe);
+    people.add(SocialApiTestsGuiceModule.MockPeopleService.simpleDoe);
+
+    SocialApiTestsGuiceModule.MockPeopleService.setPeople(
+        new ResponseItem<ApiCollection<Person>>(
+            new ApiCollection<Person>(people)));
   }
 
-// TODO this test cannot pass without the state file resource.
-//      the XmlStateFileFetcher needs to be mocked out
-//
-//  @Test
-//  public void testGetJaneDoeProfileForJohnDoe() throws IOException {
-//    ClientResponse resp = client.get(BASE + "people/john.doe/@all/jane.doe");
-//    checkForGoodAtomResponse(resp);
-//    Document<Entry> doc = resp.getDocument();
-//    Entry entry = doc.getRoot();
-//    assertEquals(entry.getTitle(), "Jane Doe");
-//    prettyPrint(doc);
-//    resp.release();
-//  }
+  @After
+  public void tearDown() throws Exception {
+    SocialApiTestsGuiceModule.MockPeopleService.setPeople(null);
+    resp.release();
+  }
+
+  @Test
+  public void testGetConnectionsForJohnDoe() throws IOException {
+    resp = client.get(BASEURL + "/people/john.doe/@all?format=atom");
+    checkForGoodAtomResponse(resp);
+
+    Document<Feed> doc = resp.getDocument();
+    prettyPrint(doc);
+    Feed feed = doc.getRoot();
+    assertEquals(2, feed.getEntries().size());
+  }
+
+  @Test
+  public void testGetJaneDoeProfileForJohnDoe() throws IOException {
+    resp = client.get(BASEURL + "/people/john.doe/@all/jane.doe?format=atom");
+    checkForGoodAtomResponse(resp);
+
+    Document<Entry> doc = resp.getDocument();
+    Entry entry = doc.getRoot();
+    prettyPrint(entry);
+
+    Person expectedJaneDoe = people.get(0);
+    assertEquals(expectedJaneDoe.getName().getUnstructured(), entry.getTitle());
+  }
+
+  @Test
+  public void testGetInvalidProfileForJohnDoe() throws IOException {
+    resp = client.get(BASEURL + "/people/john.doe/@all/nobody?format=atom");
+    checkForBadAtomResponse(resp);
+  }
 
   protected void checkForGoodAtomResponse(ClientResponse response){
     assertNotNull(response);
@@ -99,11 +134,17 @@ public class SocialApiProviderLargeTest extends Assert {
         Constants.ATOM_MEDIA_TYPE));
   }
 
+  protected void checkForBadAtomResponse(ClientResponse response){
+    assertNotNull(response);
+    assertEquals(ResponseType.CLIENT_ERROR, response.getType());
+  }
+
   protected void prettyPrint(Base doc) throws IOException {
     WriterFactory writerFactory = abdera.getWriterFactory();
     Writer writer = writerFactory.getWriter("prettyxml");
-    writer.writeTo(doc, System.out);
-    System.out.println();
+    ByteArrayOutputStream os = new ByteArrayOutputStream();
+    writer.writeTo(doc, os);
+    logger.fine(os.toString("utf8"));
   }
 
 }
