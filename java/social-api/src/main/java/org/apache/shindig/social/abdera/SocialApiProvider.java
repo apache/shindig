@@ -51,15 +51,9 @@ public class SocialApiProvider extends DefaultProvider {
    * CollectionAdapters are provided via Guice and the RouteManager wires
    * together the Routes, their TargetTypes and CollectionAdapters.
    *
-   * TODO: Create one CollectionAdapter per URL. There is currently logic in the
-   * People and Activities Adapters that allows them to be multi-purpose, but
-   * this will need to change.
-   *
    * TODO: Implement the group urls.
    */
   public void initialize() {
-    // Add the RouteManager that parses incoming and builds outgoing URLs
-    // {uid} is assumed to be a deterministic GUID for the service
     routeManager = new SocialRouteManager(BASE)
         // People
         .addRoute(RequestUrlTemplate.CONNECTIONS_OF_USER,
