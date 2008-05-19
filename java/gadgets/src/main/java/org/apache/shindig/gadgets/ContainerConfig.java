@@ -92,7 +92,7 @@ public class ContainerConfig {
       }
       return data;
     } catch (JSONException e) {
-      logger.log(Level.WARNING, "Failed to get JSON config", e);
+      logger.log(Level.WARNING, "Failed to get JSON config for " + parameter, e);
       return null;
     }
   }
