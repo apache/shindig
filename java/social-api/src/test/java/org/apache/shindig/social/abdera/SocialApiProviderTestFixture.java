@@ -30,30 +30,9 @@ public class SocialApiProviderTestFixture extends EasyMockTestCase {
 
   public final String base = "/social/rest/";
   public final RequestContext request = mock(RequestContext.class);
-  public final Provider<ActivitiesServiceAdapter> activitiesProvider =
-    mock(Provider.class);
-  public final Provider<PeopleServiceAdapter> peopleProvider =
-    mock(Provider.class);
-  public final Provider<FriendsServiceAdapter> friendsProvider =
-    mock(Provider.class);
-  public final Provider<DataServiceAdapter> dataProvider =
-    mock(Provider.class);
   public final SocialApiProvider provider = new SocialApiProvider();
-  public final Provider<ActivityAdapter> activityProvider =
-    mock(Provider.class);
-  
+
   public SocialApiProviderTestFixture() {
-    provider.setAdapters(peopleProvider, friendsProvider, activitiesProvider,
-        dataProvider, activityProvider);
-    expect(activitiesProvider.get()).andReturn(null);
-    expect(peopleProvider.get()).andReturn(null);
-    expect(friendsProvider.get()).andReturn(null);
-    expect(dataProvider.get()).andReturn(null);
-    expect(activityProvider.get()).andReturn(null);
-    org.easymock.EasyMock.replay(activitiesProvider);
-    org.easymock.EasyMock.replay(peopleProvider);
-    org.easymock.EasyMock.replay(friendsProvider);
-    org.easymock.EasyMock.replay(dataProvider);
     provider.initialize();
   }
 }

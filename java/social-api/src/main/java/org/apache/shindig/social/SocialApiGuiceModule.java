@@ -18,13 +18,10 @@
  */
 package org.apache.shindig.social;
 
-import org.apache.shindig.social.abdera.ActivitiesServiceAdapter;
-import org.apache.shindig.social.abdera.PeopleServiceAdapter;
 import org.apache.shindig.social.opensocial.ActivitiesService;
 import org.apache.shindig.social.opensocial.DataService;
 import org.apache.shindig.social.opensocial.OpenSocialDataHandler;
 import org.apache.shindig.social.opensocial.PeopleService;
-import org.apache.shindig.social.opensocial.util.BeanXmlConverter;
 import org.apache.shindig.social.samplecontainer.BasicActivitiesService;
 import org.apache.shindig.social.samplecontainer.BasicDataService;
 import org.apache.shindig.social.samplecontainer.BasicPeopleService;
@@ -52,10 +49,6 @@ public class SocialApiGuiceModule extends AbstractModule {
 
     bind(new TypeLiteral<List<GadgetDataHandler>>() {})
         .toProvider(GadgetDataHandlersProvider.class);
-
-    bind(BeanXmlConverter.class);
-    bind(PeopleServiceAdapter.class);
-    bind(ActivitiesServiceAdapter.class);
   }
 
   public static class GadgetDataHandlersProvider

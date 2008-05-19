@@ -20,7 +20,6 @@ package org.apache.shindig.social.abdera;
 import org.apache.shindig.social.abdera.json.JSONFilter;
 
 import com.google.inject.Inject;
-import com.google.inject.Provider;
 import org.apache.abdera.protocol.server.TargetType;
 import org.apache.abdera.protocol.server.impl.DefaultProvider;
 
@@ -28,24 +27,24 @@ public class SocialApiProvider extends DefaultProvider {
   //TODO why is this hardcoded here. can't this be from servletContext?
   private static final String BASE = "/social/rest/";
 
-  private Provider<PeopleServiceAdapter> peopleAdapterProvider;
-  private Provider<ActivitiesServiceAdapter> activitiesAdapterProvider;
-  private Provider<FriendsServiceAdapter> friendsAdapterProvider;
-  private Provider<DataServiceAdapter> dataAdapterProvider;
-  private Provider<ActivityAdapter> activityAdapterProvider;
+  private PeopleServiceAdapter peopleAdapter;
+  private FriendsServiceAdapter friendsAdapter;
+  private ActivitiesServiceAdapter activitiesAdapter;
+  private DataServiceAdapter dataAdapter;
+  private ActivityAdapter activityAdapter;
 
   @Inject
   public void setAdapters(
-      Provider<PeopleServiceAdapter> peopleAdapterProvider,
-      Provider<FriendsServiceAdapter> friendsAdapterProvider,
-      Provider<ActivitiesServiceAdapter> activitiesAdapterProvider,
-      Provider<DataServiceAdapter> dataAdapterProvider,
-      Provider<ActivityAdapter> activityAdapterProvider) {
-    this.peopleAdapterProvider = peopleAdapterProvider;
-    this.friendsAdapterProvider = friendsAdapterProvider;
-    this.activitiesAdapterProvider = activitiesAdapterProvider;
-    this.dataAdapterProvider = dataAdapterProvider;
-    this.activityAdapterProvider = activityAdapterProvider;
+      PeopleServiceAdapter peopleAdapter,
+      FriendsServiceAdapter friendsAdapter,
+      ActivitiesServiceAdapter activitiesAdapter,
+      DataServiceAdapter dataAdapter,
+      ActivityAdapter activityAdapter) {
+    this.peopleAdapter = peopleAdapter;
+    this.friendsAdapter = friendsAdapter;
+    this.activitiesAdapter = activitiesAdapter;
+    this.dataAdapter = dataAdapter;
+    this.activityAdapter = activityAdapter;
   }
 
   /**
@@ -59,13 +58,6 @@ public class SocialApiProvider extends DefaultProvider {
    * TODO: Implement the group urls.
    */
   public void initialize() {
-    PeopleServiceAdapter peopleAdapter = peopleAdapterProvider.get();
-    FriendsServiceAdapter friendsAdapter = friendsAdapterProvider.get();
-    ActivitiesServiceAdapter activitiesAdapter
-        = activitiesAdapterProvider.get();
-    DataServiceAdapter dataAdapter = dataAdapterProvider.get();
-    ActivityAdapter activityAdapter = activityAdapterProvider.get();
-
     // Add the RouteManager that parses incoming and builds outgoing URLs
     // {uid} is assumed to be a deterministic GUID for the service
     routeManager = new SocialRouteManager(BASE)
