@@ -143,7 +143,7 @@ public class GadgetRenderingTask {
     View view = HttpUtil.getView(gadget, containerConfig);
     if (view == null) {
         throw new GadgetException(GadgetException.Code.UNKNOWN_VIEW_SPECIFIED,
-            "No appropriate view could be found for this gadget");
+            "No appropriate view could be found for gadget: " + gadget.getSpec().getUrl());
     }
     switch(view.getType()) {
       case HTML:
