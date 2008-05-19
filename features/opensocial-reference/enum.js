@@ -174,3 +174,30 @@ opensocial.Enum.Gender = {
   /** @member opensocial.Enum.Gender */
   FEMALE : 'FEMALE'
 };
+
+/**
+ * @static
+ * @class
+ * The enum keys used by the networkPresence field.
+ * <p><b>See also:</b>
+ * <a href="opensocial.Person.Field.html">
+ * opensocial.Person.Field.NetworkPresence</a>
+ * </p>
+ *
+ * @name opensocial.Enum.NetworkPresence
+ */
+opensocial.Enum.NetworkPresence = {
+  /** @member opensocial.Enum.NetworkPresence */
+  AWAY : 'AWAY',
+  /** @member opensocial.Enum.NetworkPresence */
+  CHAT : 'CHAT',
+  /** @member opensocial.Enum.NetworkPresence */
+  DND : 'DND',
+  /** @member opensocial.Enum.NetworkPresence */
+  OFFLINE : 'OFFLINE',
+  /** @member opensocial.Enum.NetworkPresence */
+  ONLINE : 'ONLINE',
+  /** @member opensocial.Enum.NetworkPresence */
+  XA : 'XA'
+};
+

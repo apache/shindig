@@ -45,6 +45,7 @@ JsonPerson = function(opt_params) {
   JsonPerson.constructEnum(opt_params, "gender");
   JsonPerson.constructEnum(opt_params, "smoker");
   JsonPerson.constructEnum(opt_params, "drinker");
+  JsonPerson.constructEnum(opt_params, "networkPresence");
 
   opensocial.Person.call(this, opt_params, opt_params['isOwner'],
       opt_params['isViewer']);

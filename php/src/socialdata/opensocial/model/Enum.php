@@ -100,3 +100,17 @@ class EnumSmoker extends Enum {
 	'YES' => "Yes"
 	);
 }
+
+/**
+ * public Enum for opensocial.Enum.Smoker
+ */
+class EnumNetworkPresence extends Enum {
+	public $values = array(
+    'AWAY' => "Away",
+    'CHAT' => "Chat",
+    'DND' => "Do Not Disturb",
+    'OFFLINE' => "Offline",
+    'ONLINE' => "Online",
+    'XA' => "Extended Away"
+    );
+}
