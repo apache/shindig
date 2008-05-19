@@ -357,7 +357,10 @@ public class GadgetRenderingTask {
   }
 
   /**
-   * Displays errors.
+   * Displays errors for failed GadgetRendering.
+   * Also sets the caching headers to insure that our server
+   * is not hurt by failing backends when nocache is not set.
+   *
    * @param error
    * @throws IOException
    */
@@ -369,6 +372,13 @@ public class GadgetRenderingTask {
     if (message == null || message.length() == 0) {
       message = "Failed to render gadget: " + error.getCode().toString();
     }
+
+    // cache this for 1 minute
+    // TODO: make this a container specific configuration option
+    if (!"1".equals(request.getParameter("nocache"))) {
+      HttpUtil.setCachingHeaders(response, 60);
+    }
+
     response.getWriter().print(message);
   }
 

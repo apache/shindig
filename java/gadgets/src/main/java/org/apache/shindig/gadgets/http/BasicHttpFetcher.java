@@ -157,6 +157,9 @@ public class BasicHttpFetcher implements HttpFetcher {
     } catch (IOException e) {
       if (e instanceof FileNotFoundException) {
         return HttpResponse.NOT_FOUND;
+      } else if (e instanceof java.net.SocketTimeoutException ||
+                 e instanceof java.net.SocketException) {
+        return HttpResponse.TIMEOUT;
       }
       return HttpResponse.ERROR;
     }
