@@ -121,6 +121,35 @@ public final class Enum<E extends Enum.EnumKey> {
   }
 
   /**
+   * public java.lang.Enum for opensocial.Enum.NetworkPresence
+   */
+  public enum NetworkPresence implements EnumKey {
+    ONLINE("ONLINE", "Online"),
+    OFFLINE("OFFLINE", "Offline"),
+    AWAY("AWAY", "Away"),
+    CHAT("CHAT", "Chat"),
+    DND("DND", "Do Not Disturb"),
+    XA("XA", "Extended Away");
+
+    private final String jsonString;
+    private final String displayValue;
+
+    private NetworkPresence(String jsonString, String displayValue) {
+      this.jsonString = jsonString;
+      this.displayValue = displayValue;
+    }
+
+    @Override
+    public String toString() {
+      return this.jsonString;
+    }
+
+    public String getDisplayValue() {
+      return displayValue;
+    }
+  }
+
+  /**
    * Constructs a Enum object.
    * @param key EnumKey The key to use
    * @param displayValue String The display value

@@ -81,7 +81,8 @@ public class Person {
     TURN_OFFS("turnOffs"),
     TURN_ONS("turnOns"),
     TV_SHOWS("tvShows"),
-    URLS("urls");
+    URLS("urls"),
+    NETWORKPRESENCE("networkPresence");
 
     private final String jsonString;
 
@@ -149,6 +150,7 @@ public class Person {
   private List<String> turnOns;
   private List<String> tvShows;
   private List<Url> urls;
+  private Enum<Enum.NetworkPresence> networkPresence;
 
   // Note: Not in the opensocial js person object directly
   private boolean isOwner = false;
@@ -589,6 +591,14 @@ public class Person {
 
   public void setUrls(List<Url> urls) {
     this.urls = urls;
+  }
+
+  public Enum<Enum.NetworkPresence> getNetworkPresence() {
+    return networkPresence;
+  }
+
+  public void setNetworkPresence(Enum<Enum.NetworkPresence> networkPresence) {
+    this.networkPresence = networkPresence;
   }
 
   public boolean getIsOwner() {

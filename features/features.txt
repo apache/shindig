@@ -8,6 +8,7 @@ features/locked-domain/feature.xml
 features/minimessage/feature.xml
 features/opensocial-0.6/feature.xml
 features/opensocial-0.7/feature.xml
+features/opensocial-current/feature.xml
 features/opensocial-reference/feature.xml
 features/rpc/feature.xml
 features/setprefs/feature.xml

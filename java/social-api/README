@@ -121,7 +121,7 @@ CREATE_ACTIVITY
 
 
 The default Shindig setup receives its requests from
-features/opensocial-0.7/jsoncontainer. If you use this javascript class your
+features/opensocial-0.8/jsoncontainer. If you use this javascript class your
 json format will always match the server exactly. This wire format is always
 subject to change as it is solely for the purpose of communicating between the
 Shindig javascript and the Shindig java classes. Shindig will always be

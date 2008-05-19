@@ -19,50 +19,8 @@
 -->
 <feature>
   <name>opensocial-0.7</name>
-  <dependency>opensocial-reference</dependency>
-  <dependency>caja</dependency>
+  <dependency>opensocial-0.8</dependency>
   <gadget>
-    <script src="jsonperson.js"></script>
-    <script src="jsonactivity.js"></script>
-    <script src="jsoncontainer.js"></script>
-    <script src="batchrequest.js"></script>
-    <script src="restfulcontainer.js"></script>
-    <script>
-      var requiredConfig = {
-        "path": gadgets.config.NonEmptyStringValidator,
-        "domain": gadgets.config.NonEmptyStringValidator,
-        "enableCaja": gadgets.config.BooleanValidator,
-        "supportedFields": gadgets.config.ExistsValidator,
-        "useRestful": gadgets.config.BooleanValidator
-      };
-
-      gadgets.config.register("opensocial-0.7", requiredConfig,
-        function(config) {
-          var configParams = config["opensocial-0.7"];
-
-          ShindigContainer = function() {
-            JsonContainer.call(this, configParams.path,
-                configParams.domain, configParams.supportedFields);
-          };
-          ShindigContainer.inherits(JsonContainer);
-
-          RestfulShindigContainer = function() {
-            RestfulContainer.call(this, configParams.path,
-                configParams.domain, configParams.supportedFields);
-          };
-          RestfulShindigContainer.inherits(RestfulContainer);
-
-          if (configParams.useRestful) {
-            opensocial.Container.setContainer(new RestfulShindigContainer());
-          } else {
-            opensocial.Container.setContainer(new ShindigContainer());
-          }
-
-          if (configParams.enableCaja) {
-            opensocial.Container.get().enableCaja();
-          }
-      });
-
-    </script>
+    <script src="opensocial7to8.js"/>
   </gadget>
 </feature>

@@ -105,10 +105,10 @@ under the License.
                 <source>opensocial-reference/phone.js</source>
                 <source>opensocial-reference/responseitem.js</source>
                 <source>opensocial-reference/url.js</source>
-                <source>opensocial-0.7/batchrequest.js</source>
-                <source>opensocial-0.7/jsonactivity.js</source>
-                <source>opensocial-0.7/jsonperson.js</source>
-                <source>opensocial-0.7/jsoncontainer.js</source>
+                <source>opensocial-current/batchrequest.js</source>
+                <source>opensocial-current/jsonactivity.js</source>
+                <source>opensocial-current/jsonperson.js</source>
+                <source>opensocial-current/jsoncontainer.js</source>
               </sources>
               <testSourceDirectory>${basedir}</testSourceDirectory>
               <testSuites>
@@ -117,7 +117,7 @@ under the License.
                   <type>TESTCASES</type>
                   <includes>
                     <include>opensocial-reference/*test.js</include>
-                    <include>opensocial-0.7/*test.js</include>
+                    <include>opensocial-current/*test.js</include>
                   </includes>
                 </testSuite>
               </testSuites>
