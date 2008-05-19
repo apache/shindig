@@ -91,6 +91,7 @@ find . -path '*/.svn' -prune -o  -name "DISCLAIMER*" -print0 | xargs -0  -r  svn
 find . -path '*/.svn' -prune -o  -name "DISCLAIMER*" -print0 | xargs -0  -r  svn propset svn:mime-type text/plain
 
 svn propset svn:ignore -F etc/svn-ignores .
+svn propset svn:ignore -F etc/svn-ignores features
 svn propset svn:ignore -F etc/svn-ignores java
 svn propset svn:ignore -F etc/svn-ignores java/common
 svn propset svn:ignore -F etc/svn-ignores java/gadgets
