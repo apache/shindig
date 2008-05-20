@@ -35,6 +35,8 @@ import java.util.List;
  */
 public class JavascriptTagMerger implements HtmlTagTransformer {
 
+  @SuppressWarnings("unchecked")
+  // Scripts has to hold both URIs and tokens.
   private final List scripts = new ArrayList();
 
   private final String concatBase;
@@ -53,6 +55,7 @@ public class JavascriptTagMerger implements HtmlTagTransformer {
     this.relativeUrlBase = relativeUrlBase;
   }
 
+  @SuppressWarnings("unchecked")
   public void accept(Token<HtmlTokenType> token,
       Token<HtmlTokenType> lastToken) {
     try {
@@ -81,6 +84,7 @@ public class JavascriptTagMerger implements HtmlTagTransformer {
     return false;
   }
 
+  @SuppressWarnings("unchecked")
   public String close() {
     List<URI> concat = new ArrayList<URI>();
     StringBuilder builder = new StringBuilder(100);

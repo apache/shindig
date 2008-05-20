@@ -18,8 +18,6 @@
  */
 package org.apache.shindig.gadgets.servlet;
 
-import com.google.inject.Inject;
-
 import org.apache.shindig.common.SecurityToken;
 import org.apache.shindig.common.SecurityTokenDecoder;
 import org.apache.shindig.common.SecurityTokenException;
@@ -34,6 +32,9 @@ import org.apache.shindig.gadgets.oauth.OAuthRequestParams;
 import org.apache.shindig.gadgets.rewrite.ContentRewriter;
 import org.apache.shindig.gadgets.spec.Auth;
 import org.apache.shindig.gadgets.spec.Preload;
+
+import com.google.inject.Inject;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -387,7 +388,6 @@ public class ProxyHandler {
   /**
    * @param request
    * @return A valid token for the given input.
-   * @throws GadgetException
    */
   private SecurityToken extractAndValidateToken(HttpServletRequest request)
       throws SecurityTokenException {
