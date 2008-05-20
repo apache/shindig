@@ -61,7 +61,7 @@ public abstract class AbstractSocialEntityCollectionAdapter<T> extends
     factory = new Abdera().getFactory();
   }
 
-  private enum Format {
+  public enum Format {
     JSON("json"), ATOM("atom");
 
     private final String displayValue;

@@ -112,6 +112,7 @@ public abstract class AbstractLargeRestfulTests {
       line = reader.readLine();
     }
 
+    logger.fine(json.toString());
     return new JSONObject(json.toString());
   }
 
