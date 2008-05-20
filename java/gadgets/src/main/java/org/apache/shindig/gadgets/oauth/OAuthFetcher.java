@@ -62,6 +62,9 @@ public class OAuthFetcher extends ChainedContentFetcher {
   public static final String CLIENT_STATE = "oauthState";
   public static final String APPROVAL_URL = "approvalUrl";
 
+  // names of additional OAuth parameters we include in outgoing requests
+  public static final String XOAUTH_APP_URL = "xoauth_app_url";
+
   /**
    * Maximum age for our client state; if this is exceeded we start over. One
    * hour is a fairly arbitrary time limit here.
@@ -253,7 +256,9 @@ public class OAuthFetcher extends ChainedContentFetcher {
     try {
       OAuthAccessor accessor = accessorInfo.getAccessor();
       String url = accessor.consumer.serviceProvider.requestTokenURL;
-      OAuthMessage request = newRequestMessage(url);
+      List<OAuth.Parameter> msgParams = new ArrayList<OAuth.Parameter>();
+      msgParams.add(new OAuth.Parameter(XOAUTH_APP_URL, authToken.getAppUrl()));
+      OAuthMessage request = newRequestMessage(url, msgParams);
       OAuthMessage reply = sendOAuthMessage(request);
       reply.requireParameters(OAuth.OAUTH_TOKEN, OAuth.OAUTH_TOKEN_SECRET);
       accessor.requestToken = reply.getParameter(OAuth.OAUTH_TOKEN);
@@ -292,11 +297,6 @@ public class OAuthFetcher extends ChainedContentFetcher {
     OAuthAccessor accessor = accessorInfo.getAccessor();
 
     return accessor.newRequestMessage(method, url, params);
-  }
-
-  private OAuthMessage newRequestMessage(String url) throws Exception {
-    ArrayList<OAuth.Parameter> params = new ArrayList<OAuth.Parameter>();
-    return newRequestMessage(url, params);
   }
 
   private OAuthMessage newRequestMessage(String url,
@@ -469,6 +469,7 @@ public class OAuthFetcher extends ChainedContentFetcher {
       OAuthAccessor accessor = accessorInfo.getAccessor();
       String url = accessor.consumer.serviceProvider.accessTokenURL;
       List<OAuth.Parameter> msgParams = new ArrayList<OAuth.Parameter>();
+      msgParams.add(new OAuth.Parameter(XOAUTH_APP_URL, authToken.getAppUrl()));
       msgParams.add(
           new OAuth.Parameter(OAuth.OAUTH_TOKEN, accessor.requestToken));
       OAuthMessage request = newRequestMessage(url, msgParams);
@@ -522,6 +523,8 @@ public class OAuthFetcher extends ChainedContentFetcher {
         : new ArrayList<OAuth.Parameter>();
 
       String method = realRequest.getMethod();
+
+      msgParams.add(new OAuth.Parameter(XOAUTH_APP_URL, authToken.getAppUrl()));
 
       // Build and sign the message.
       OAuthMessage oauthRequest = newRequestMessage(
