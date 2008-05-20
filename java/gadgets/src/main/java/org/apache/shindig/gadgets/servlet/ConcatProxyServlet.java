@@ -27,9 +27,11 @@ import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletRequestWrapper;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpServletResponseWrapper;
 
 /**
  * Servlet which concatenates the content of several proxied HTTP responses
@@ -51,25 +53,35 @@ public class ConcatProxyServlet extends InjectedServlet {
   @Override
   protected void doGet(HttpServletRequest request, HttpServletResponse response)
       throws IOException {
+    ResponseWrapper wrapper = new ResponseWrapper(response);
     for (int i = 1; i < Integer.MAX_VALUE; i++) {
       String url = request.getParameter(Integer.toString(i));
       if (url == null) {
         break;
       }
       try {
-        proxyHandler.fetch(new RequestWrapper(request, url), response);
+        wrapper.getOutputStream().println("/* ---- Start " + url + " ---- */");
+        proxyHandler.fetch(new RequestWrapper(request, url), wrapper);
+        wrapper.getOutputStream().println("/* ---- End " + url + " ---- */");
       } catch (GadgetException ge) {
-        outputError(ge, response);
+        if (ge.getCode() != GadgetException.Code.FAILED_TO_RETRIEVE_CONTENT) {
+          outputError(ge, url, response);
+          return;
+        } else {
+          wrapper.getOutputStream().println("/* ---- End " + url + " 404 ---- */");
+        }
       }
     }
+    response.setStatus(200);
   }
 
-
-  private void outputError(GadgetException excep, HttpServletResponse resp)
+  private void outputError(GadgetException excep, String url, HttpServletResponse resp)
       throws IOException {
     StringBuilder err = new StringBuilder();
     err.append(excep.getCode().toString());
-    err.append(' ');
+    err.append(" concat(");
+    err.append(url);
+    err.append(") ");
     err.append(excep.getMessage());
 
     // Log the errors here for now. We might want different severity levels
@@ -94,6 +106,30 @@ public class ConcatProxyServlet extends InjectedServlet {
         return url;
       }
       return super.getParameter(paramName);
+    }
+  }
+
+  /**
+   * Wrap the response to prevent writing through of the status code and
+   * to hold a reference to the stream across multiple proxied parts
+   */
+  private class ResponseWrapper extends HttpServletResponseWrapper {
+
+    private ServletOutputStream outputStream;
+
+    private ResponseWrapper(HttpServletResponse httpServletResponse) {
+      super(httpServletResponse);
+    }
+
+    @Override
+    public ServletOutputStream getOutputStream() throws IOException {
+      if (outputStream == null) {
+        outputStream = super.getOutputStream();
+      }
+      return outputStream;
+    }
+
+    public void setStatus(int i) {
     }
   }
 }

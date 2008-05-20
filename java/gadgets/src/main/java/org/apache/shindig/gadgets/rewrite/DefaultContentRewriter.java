@@ -17,6 +17,7 @@
  */
 package org.apache.shindig.gadgets.rewrite;
 
+import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.http.HttpResponse;
 
 import java.io.ByteArrayOutputStream;
@@ -39,15 +40,19 @@ public class DefaultContentRewriter implements ContentRewriter {
   public DefaultContentRewriter() {
   }
 
-  public HttpResponse rewrite(URI source, HttpResponse original) {
+  public HttpResponse rewrite(HttpRequest request, HttpResponse original) {
     try {
       ByteArrayOutputStream baos = new ByteArrayOutputStream(
           (original.getContentLength() * 110) / 100);
       OutputStreamWriter output = new OutputStreamWriter(baos,
           original.getEncoding());
-      if (rewrite(source,
+      String mimeType = original.getHeader("Content-Type");
+      if (request.getOptions() != null && request.getOptions().rewriteMimeType != null) {
+        mimeType = request.getOptions().rewriteMimeType;
+      }
+      if (rewrite(request.getUri(),
           new InputStreamReader(original.getResponse(), original.getEncoding()),
-          original.getHeader("Content-Type"),
+          mimeType,
           output)) {
         return new HttpResponse(original.getHttpStatusCode(),
             baos.toByteArray(),

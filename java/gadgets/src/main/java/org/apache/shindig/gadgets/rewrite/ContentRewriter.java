@@ -17,6 +17,7 @@
  */
 package org.apache.shindig.gadgets.rewrite;
 
+import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.http.HttpResponse;
 
 import java.io.Reader;
@@ -30,11 +31,11 @@ public interface ContentRewriter {
 
   /**
    * Rewrite the original content located at source
-   * @param source   Location of the original content
+   * @param request   Originating request
    * @param original Original content
    * @return A rewritten copy of the original or null if no rewriting occurred
    */
-  public HttpResponse rewrite(URI source, HttpResponse original);
+  public HttpResponse rewrite(HttpRequest request, HttpResponse original);
 
   /**
    * Rewrite the original content located at source

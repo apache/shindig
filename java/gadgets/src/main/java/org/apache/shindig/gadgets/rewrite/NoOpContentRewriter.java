@@ -18,6 +18,7 @@
  */
 package org.apache.shindig.gadgets.rewrite;
 
+import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.http.HttpResponse;
 
 import java.io.Reader;
@@ -32,7 +33,7 @@ public class NoOpContentRewriter implements ContentRewriter {
   public NoOpContentRewriter() {
   }
 
-  public HttpResponse rewrite(URI source, HttpResponse original) {
+  public HttpResponse rewrite(HttpRequest request, HttpResponse original) {
     return null;
   }
 

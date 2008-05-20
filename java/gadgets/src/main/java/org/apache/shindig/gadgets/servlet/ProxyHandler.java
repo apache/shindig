@@ -18,6 +18,8 @@
  */
 package org.apache.shindig.gadgets.servlet;
 
+import com.google.inject.Inject;
+
 import org.apache.shindig.common.SecurityToken;
 import org.apache.shindig.common.SecurityTokenDecoder;
 import org.apache.shindig.common.SecurityTokenException;
@@ -32,9 +34,6 @@ import org.apache.shindig.gadgets.oauth.OAuthRequestParams;
 import org.apache.shindig.gadgets.rewrite.ContentRewriter;
 import org.apache.shindig.gadgets.spec.Auth;
 import org.apache.shindig.gadgets.spec.Preload;
-
-import com.google.inject.Inject;
-
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -63,6 +62,7 @@ public class ProxyHandler {
   public static final String SECURITY_TOKEN_PARAM = "st";
   public static final String HEADERS_PARAM = "headers";
   public static final String NOCACHE_PARAM = "nocache";
+  public static final String REWRITE_MIME_TYPE_PARAM = "rewriteMime";
   public static final String SIGN_VIEWER = "signViewer";
   public static final String SIGN_OWNER = "signOwner";
   public static final String URL_PARAM = "url";
@@ -213,6 +213,11 @@ public class ProxyHandler {
             .parseBoolean(request.getParameter(SIGN_OWNER));
       }
       options.rewriter = rewriter;
+
+      // Allow the rewriter to use an externally forced mime type. This is needed
+      // allows proper rewriting of <script src="x"/> where x is returned with
+      // a content type like text/html which unfortunately happens all too often
+      options.rewriteMimeType = request.getParameter(REWRITE_MIME_TYPE_PARAM);
 
       return new HttpRequest(
           method, url, headers, postBody, options);

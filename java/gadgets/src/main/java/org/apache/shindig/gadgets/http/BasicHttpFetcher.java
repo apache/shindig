@@ -140,7 +140,8 @@ public class BasicHttpFetcher implements HttpFetcher {
     // TODO - Make this sensitive to custom rewriting rules
     if (response != null) {
       if (request.getOptions().rewriter != null &&
-          response.getRewritten() != null) {
+          response.getRewritten() != null &&
+          response.getRewritten().getResponseAsBytes().length > 0) {
         return response.getRewritten();
       }
       return response;
@@ -162,7 +163,7 @@ public class BasicHttpFetcher implements HttpFetcher {
       if (request.getOptions().rewriter != null) {
         // TODO - Make this sensitive to different rewriting rules
         response.setRewritten(
-            request.getOptions().rewriter.rewrite(request.getUri(), response));
+            request.getOptions().rewriter.rewrite(request, response));
       }
       cache.addResponse(request, response);
       return response;

@@ -19,19 +19,14 @@ package org.apache.shindig.gadgets.http;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
-import java.io.UnsupportedEncodingException;
+import java.nio.ByteBuffer;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
 import java.util.concurrent.ConcurrentHashMap;
-import java.nio.CharBuffer;
-import java.nio.ByteBuffer;
-import java.nio.charset.Charset;
-import java.nio.charset.CodingErrorAction;
-import java.nio.charset.CharsetEncoder;
 
 /**
  * Represents the results of an HTTP content retrieval operation.
@@ -146,7 +141,7 @@ public class HttpResponse {
   }
 
   /**
-   * @reutrn the content length
+   * @return the content length
    */
   public int getContentLength() {
     return responseBytes.length;
@@ -181,6 +176,13 @@ public class HttpResponse {
       } 
     }
     return responseString;
+  }
+
+  /**
+   * @return The response as a byte array
+   */
+  public byte[] getResponseAsBytes() {
+    return responseBytes;
   }
 
   /**
