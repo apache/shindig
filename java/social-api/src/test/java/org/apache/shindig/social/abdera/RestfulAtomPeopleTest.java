@@ -29,13 +29,14 @@ import org.apache.abdera.protocol.client.ClientResponse;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import static org.junit.Assert.*;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
 
-public class RestfulAtomPeopleTests extends AbstractLargeRestfulTests {
+public class RestfulAtomPeopleTest extends AbstractLargeRestfulTests {
   private List<Person> people;
   private ClientResponse resp;
 

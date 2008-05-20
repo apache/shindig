@@ -44,7 +44,7 @@ import java.util.logging.Logger;
 
 public abstract class AbstractLargeRestfulTests {
   private static Logger logger =
-      Logger.getLogger(RestfulJsonPeopleTests.class.getName());
+      Logger.getLogger(RestfulJsonPeopleTest.class.getName());
 
   private static JettyServer server;
   private static Abdera abdera = Abdera.getInstance();

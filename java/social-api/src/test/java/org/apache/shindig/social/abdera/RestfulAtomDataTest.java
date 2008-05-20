@@ -22,7 +22,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 
-public class RestfulAtomActivityTests extends AbstractLargeRestfulTests {
+public class RestfulAtomDataTest extends AbstractLargeRestfulTests {
 
   @Before
   public void setUp() throws Exception {
@@ -35,9 +35,8 @@ public class RestfulAtomActivityTests extends AbstractLargeRestfulTests {
   }
 
   @Test
-  public void testGetActivityAtom() throws Exception {
-    resp = client.get(BASEURL + "/activities/john.doe/@all?format=atom");
-    checkForGoodAtomResponse(resp);
+  public void testGetDataAtom() throws Exception {
+    resp = client.get(BASEURL + "/appdata/john.doe/@all?format=atom");
+    // checkForGoodAtomResponse(resp);
   }
-
 }
