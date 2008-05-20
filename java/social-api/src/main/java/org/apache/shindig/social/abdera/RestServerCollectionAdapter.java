@@ -54,6 +54,7 @@ public abstract class RestServerCollectionAdapter
 
   private static final String INVALID_FORMAT =
     "Invalid format. only atom/json are supported";
+  protected static final String FRIENDS_INDICATOR = "@friends";
 
   private enum Format {
     JSON("json"),

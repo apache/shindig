@@ -25,10 +25,8 @@ import org.apache.abdera.protocol.server.ResponseContext;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Date;
 
 /**
  * All "data" requests are processed here.
@@ -50,11 +48,21 @@ public class DataServiceAdapter extends RestServerCollectionAdapter {
   /**
    * Handles the following URL
    *    /appdata/{uid}/@friends/{aid}
+   *    /appdata/{uid}/@self/{aid}
    */
   public ResponseContext getFeed(RequestContext request) {
     String uid = request.getTarget().getParameter("uid");
     String aid = request.getTarget().getParameter("aid");
-    List<String> ids = getFriendIds(request, uid);
+
+    List<String> ids;
+    // TODO: Should we query the path like this, or should we use two handlers
+    // like we do for people?
+    if (request.getTargetPath().contains(FRIENDS_INDICATOR)) {
+      ids = getFriendIds(request, uid);
+    } else {
+      ids = new ArrayList<String>();
+      ids.add(uid);
+    }
 
     Map<String, Map<String, String>> dataMap = dataService.getPersonData(ids,
         getKeys(request), getSecurityToken(request, uid)).getResponse();
@@ -68,24 +76,10 @@ public class DataServiceAdapter extends RestServerCollectionAdapter {
   }
 
   /**
-   *  Handles the following URL
-   *    /appdata/{uid}/@self/{aid}
-   *  TODO: This is wrong. Getting data for @self is a collection too.
+   * Does not currently handle any urls.
    */
   public ResponseContext getEntry(RequestContext request) {
-    String uid = request.getTarget().getParameter("uid");
-    String appId = request.getTarget().getParameter("aid");
-
-    List<String> ids = new ArrayList<String>();
-    ids.add(uid);
-
-    Map<String, String> data = dataService.getPersonData(ids,
-        getKeys(request), getSecurityToken(request, uid)).getResponse().get(uid);
-
-    // TODO: how is entry id determined. check.
-    String entryId = request.getUri().toString();
-    return returnEntry(request, data == null ? new HashMap() : data,
-        entryId, new Date());
+    throw new UnsupportedOperationException();
   }
 
   private List<String> getKeys(RequestContext request) {
