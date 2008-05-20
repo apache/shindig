@@ -162,7 +162,7 @@ body {
         <li><b>Gadget Container JavaScript </b>-- core JavaScript foundation for general gadget functionality. This
         JavaScript manages security, communication, UI layout, and feature extensions, such as the OpenSocial API.</li>
 
-        <li><b>Gadget Server</b> -- an open source version of Google's gmodules.com, which is used to render the gadget
+        <li><b>Gadget Server</b> -- used to render the gadget
         XML into JavaScript and HTML for the container to expose via the container JavaScript.</li>
         <li><b>OpenSocial Container JavaScript</b> -- JavaScript environment that sits on top of the Gadget Container
         JavaScript and provides OpenSocial specific functionality (profiles, friends, activities, datastore).</li>
@@ -181,16 +181,28 @@ body {
     </div>
 
     <div class="content" id="buildingDiv" style="display: none;">
-      <h3>Building and running Shindig</h3>
-      <p>The following steps provide useful information on how to build and run Shindig.</p>
+      <h3>Building and running Shindig </h3>
+      <p>There are both Java and PHP versions available, the following steps provide useful information on how to build and run Shindig.</p>
+      <h2>Java</h2>
       <ul>
+        <li><a href="#java">Building and running Shindig (Java)</a></li>
         <li><a href="#preReqs">Prequisites</a></li>
         <li><a href="#getTheCode">Get the code</a></li>
         <li><a href="#buildTheCode">Build and run the code (with Maven)</a></li>
         <li><a href="#eclipseProject">Setting up an Eclipse project</a></li>
         <li><a href="#caja">Running with Caja</a></li>
       </ul>
-
+      
+      <h2>PHP</h2>
+ 	  <ul>
+	    <li><a href="#php">Building and running Shindig (PHP)</a></li>
+	    <li><a href="#phppreReqs">Prequisites</a></li>
+	    <li><a href="#phpgetTheCode">Get the code</a></li>
+	    <li><a href="#phpbuildTheCode">Running Shindig</a></li>
+	    <li><a href="#phpAdditonal_reading">Additonal reading</a></li>
+	  </ul>
+ 
+	  <h3><a name="java">Building and running Shindig (Java)</a></h3>
       <h4><a name="preReqs">Prequisites before building Shindig</a></h4>
       <p>In order to build Shindig, you must have the following:</p>
       <ul>
@@ -357,12 +369,71 @@ body {
       <h3><a name="Additonal_reading"> Additional reading </a></h3>
       Read <a href="http://svn.apache.org/repos/asf/incubator/shindig/trunk/java/README">java/README</a> for original
       instructions on how to start up any of the java shindig servers.
-      <p>Read <a href="http://svn.apache.org/repos/asf/incubator/shindig/trunk/php/gadgets/README">php/gadgets/README</a>
+      <p>Read <a href="http://svn.apache.org/repos/asf/incubator/shindig/trunk/javascript/README">javascript/README</a>
+      for instructions for using the Shindig Gadget Container JavaScript to enable your page to render Gadgets using
+      gmodules.com or a server started up as described above.</p>
+         
+	  <h3><a name="php">Building and running Shindig PHP server</a></h3>
+		
+	  <h4><a name="phppreReqs">Prequisites before building Shindig for PHP</a></h4>
+	  <p> In order to build and run Shindig for PHP, you must have the following: </p>
+	  <ul>
+	    <li>A Subversion client installed in order to checkout the code.</li>
+	     <ul><li>Instructions for downloading and installing Subversion can be found here: <a href="http://subversion.tigris.org/"></a>http://subversion.tigris.org/</li></ul>
+	
+	    <li>Apache with mod_rewrite enabled.</li>
+	    <li>PHP 5.2.x with the <a href="http://www.php.net/json">json</a>, <a href="http://www.php.net/simplexml">simplexml</a>, <a href="http://www.php.net/mcrypt">mcrypt</a> and <a href="http://www.php.net/curl">curl</a> extentions enabled.</li>
+	  </ul>
+	
+	  <h4><a name="phpgetTheCode">Getting the code</a></h4>
+	  <p> Create a subdirectory in your web document root, e.g. /var/www/html  
+	  and checkout the Shindig code from its Subversion repository</p>
+	
+	  <ol>
+	    <li> <code>mkdir /var/www/html/shindig</code> </li>
+	    <li> <code>cd /var/www/html/shindig</code></li>
+	    <li> <code>svn co http://svn.apache.org/repos/asf/incubator/shindig/trunk/ .</code> </li>
+	  </ol>
+	
+	  <h4><a name="phpbuildTheCode">Running Shindig</a></h4>
+	  <p>With PHP There is no need to build anything - the source code is already built.</p>
+	
+	  <p>To run the code, you have several options:</p>
+	  
+	  <h5>a. Create a new virtual host</h5>
+	  
+	  <p>Point your apache to the php dir with a virtual host like:</p>
+	
+	  <pre>
+		&lt;VirtualHost your_ip:your_port&gt;
+	
+		       ServerName your.host
+		       DocumentRoot /var/www/html/shindig/php
+		       ... other normal settings in vhosts...
+		&lt;/VirtualHost&gt;
+	  </pre>
+	
+	  <p>Restart apache, and point your browser to:</p> 
+	  <p>http://your.host/gadgets/ifr?url=http://www.labpixies.com/campaigns/todo/todo.xml</p>
+	
+	  <p>you should see something like 
+	  <a href='http://shindig.chabotc.com/gadgets/ifr?url=http://www.labpixies.com/campaigns/todo/todo.xml'>this</a>.
+	  </p>
+	
+	  <h5>b. Run with an existing host</h5>
+	
+	  <p>If you cannot/don't want to create a virtual host, you can edit the file php/config.php and change the web_prefix setting to '/shindig/php'.
+	
+	  <p>Then you can run the gadget by pointing your browser to:
+	  <p>http://your.host/shindig/php/gadgets/ifr?url=http://www.labpixies.com/campaigns/todo/todo.xml</p>
+
+      <h3><a name="phpAdditonal_reading"> Additional reading </a></h3>
+      <p>Read <a href="http://svn.apache.org/repos/asf/incubator/shindig/trunk/php/README">php/README</a>
       for original instructions on how to start up the php shindig server.
       <p>Read <a href="http://svn.apache.org/repos/asf/incubator/shindig/trunk/javascript/README">javascript/README</a>
       for instructions for using the Shindig Gadget Container JavaScript to enable your page to render Gadgets using
       gmodules.com or a server started up as described above.</p>
-    </div>
+	</div>
 
     <div class="content" id="contributeDiv" style="display: none;">
       <h3>How to contribute to Shindig</h3>
