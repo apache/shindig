@@ -17,20 +17,27 @@
  */
 package org.apache.shindig.social.abdera;
 
-import static org.easymock.EasyMock.expect;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 
-import org.apache.shindig.social.EasyMockTestCase;
 
-import org.apache.abdera.protocol.server.RequestContext;
+public class RestfulAtomActivityTests extends AbstractLargeRestfulTests {
 
-@SuppressWarnings("unchecked")
-public class SocialApiProviderTestFixture extends EasyMockTestCase {
-
-  public final String base = "/social/rest/";
-  public final RequestContext request = mock(RequestContext.class);
-  public final SocialApiProvider provider = new SocialApiProvider();
-
-  public SocialApiProviderTestFixture() {
-    provider.initialize();
+  @Before
+  public void setUp() throws Exception {
+    super.setUp();
   }
+
+  @After
+  public void tearDown() throws Exception {
+    super.tearDown();
+  }
+
+  @Test
+  public void testGetActivityAtom() throws Exception {
+    resp = client.get(BASEURL + "/activities/john.doe/@all?format=atom");
+    checkForGoodAtomResponse(resp);
+  }
+
 }
