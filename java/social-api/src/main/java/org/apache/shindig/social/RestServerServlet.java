@@ -19,12 +19,10 @@
 package org.apache.shindig.social;
 
 import org.apache.shindig.common.servlet.GuiceServletContextListener;
-import org.apache.shindig.social.abdera.json.JSONWriter;
 
 import com.google.inject.Injector;
 import org.apache.abdera.protocol.server.Provider;
 import org.apache.abdera.protocol.server.servlet.AbderaServlet;
-import org.apache.abdera.writer.NamedWriter;
 
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletContext;
@@ -32,7 +30,6 @@ import javax.servlet.ServletException;
 import javax.servlet.UnavailableException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.Map;
 import java.util.logging.Logger;
 
 /**
@@ -49,7 +46,8 @@ public class RestServerServlet extends AbderaServlet {
   private static Logger logger =
       Logger.getLogger(RestServerServlet.class.getName());
 
-  @Override public void init() {
+  @Override
+  public void init() {
     // Abdera provider stuff
     manager = createServiceManager();
     provider = createProvider();
@@ -65,22 +63,6 @@ public class RestServerServlet extends AbderaServlet {
       e.printStackTrace();
       return null;
     }
-
-    //setup my NamedWriter for "json"
-    getAbdera().getConfiguration().addNamedWriter(new JSONWriter());
-
-    // print all the writers available
-    Map<String, NamedWriter> writersMap =
-        getAbdera().getConfiguration().getNamedWriters();
-    for (NamedWriter writer : writersMap.values()) {
-      StringBuilder sbuf = new StringBuilder();
-      for (String s : writer.getOutputFormats()) {
-        sbuf.append(s).append(", ");
-      }
-      logger.fine("NamedWriter: " + writer.getClass().getName() +
-          " is for writing '" + writer.getName() + "'" +
-          ". Handles the following formats: " + sbuf.toString());
-    }
     return provider;
   }
 
@@ -92,7 +74,7 @@ public class RestServerServlet extends AbderaServlet {
     if (injector == null) {
       throw new UnavailableException(
           "Guice Injector not found! Make sure you registered " +
-          GuiceServletContextListener.class.getName() + " as a listener");
+              GuiceServletContextListener.class.getName() + " as a listener");
     }
     injector.injectMembers(provider);
     // all providers should implement initialize() so injection could happen
@@ -100,14 +82,14 @@ public class RestServerServlet extends AbderaServlet {
       Method m = provider.getClass().getMethod("initialize", new Class<?>[0]);
       m.invoke(provider);
     } catch (IllegalArgumentException e) {
-        logger.severe(e.getMessage());
-        e.printStackTrace();
+      logger.severe(e.getMessage());
+      e.printStackTrace();
     } catch (IllegalAccessException e) {
-        logger.severe(e.getMessage());
-        e.printStackTrace();
+      logger.severe(e.getMessage());
+      e.printStackTrace();
     } catch (InvocationTargetException e) {
-        logger.severe(e.getMessage());
-        e.printStackTrace();
+      logger.severe(e.getMessage());
+      e.printStackTrace();
     } catch (SecurityException e) {
       logger.severe(e.getMessage());
       e.printStackTrace();
