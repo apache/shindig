@@ -87,20 +87,6 @@ public class SocialApiTestsGuiceModule extends AbstractModule {
 
       // setup Jane Doe
       janeDoe = new Person("jane.doe", new Name("Jane Doe"));
-      List<Phone> phones1 = new ArrayList<Phone>();
-      phones1.add(new Phone("+33H000000000", "home"));
-      phones1.add(new Phone("+33M000000000", "mobile"));
-      phones1.add(new Phone("+33W000000000", "work"));
-      janeDoe.setPhoneNumbers(phones1);
-
-      List<Address> addresses1 = new ArrayList<Address>();
-      addresses.add(new Address("My home address"));
-      janeDoe.setAddresses(addresses1);
-
-      List<Email> emails1 = new ArrayList<Email>();
-      emails1.add(new Email("jane.doe@work.bar", "work"));
-      emails1.add(new Email("jane.doe@home.bar", "home"));
-      janeDoe.setEmails(emails1);
       janeDoe.setUpdated(new Date());
 
       // setup Simple Doe
@@ -156,6 +142,14 @@ public class SocialApiTestsGuiceModule extends AbstractModule {
   public static class MockActivitiesService implements ActivitiesService {
     public static ResponseItem<List<Activity>> activities;
     public static ResponseItem<Activity> activity;
+
+    public static Activity basicActivity;
+
+    static {
+      basicActivity = new Activity("1", "john.doe");
+      basicActivity.setTitle("yellow");
+      basicActivity.setBody("what a color!");
+    }
 
     public static void setActivity(ResponseItem<Activity> activityVal) {
       activity = activityVal;
