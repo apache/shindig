@@ -17,21 +17,47 @@
  */
 package org.apache.shindig.social.abdera;
 
+import org.apache.shindig.social.SocialApiTestsGuiceModule;
+import org.apache.shindig.social.ResponseItem;
+
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.util.HashMap;
+import java.util.Map;
+
 
 public class RestfulJsonDataTest extends AbstractLargeRestfulTests {
+  private Map<String, Map<String, String>> data;
+  private Map<String, String> janeData;
+  private Map<String, String> simpleData;
+  private Map<String, String> johnData;
 
   @Before
   public void setUp() throws Exception {
     super.setUp();
+
+    data = new HashMap<String, Map<String, String>>();
+    janeData = new HashMap<String, String>();
+    janeData.put("count", "5");
+
+    simpleData = new HashMap<String, String>();
+    simpleData.put("count", "7");
+
+    johnData = new HashMap<String, String>();
+    johnData.put("count", "0");
   }
 
   @After
   public void tearDown() throws Exception {
+    SocialApiTestsGuiceModule.MockDataService.setPersonData(null);
     super.tearDown();
+  }
+
+  private void updateAppData() {
+    SocialApiTestsGuiceModule.MockDataService.setPersonData(
+        new ResponseItem<Map<String, Map<String, String>>>(data));
   }
 
   /**
@@ -39,8 +65,8 @@ public class RestfulJsonDataTest extends AbstractLargeRestfulTests {
    *
    * {
    *  "entry" : {
-   *    "jane.doe" : {"count" : 5},
-   *    "simple.doe" : {"count" : 7},
+   *    "jane.doe" : {"count" : "5"},
+   *    "simple.doe" : {"count" : "7"},
    *  }
    * }
    *
@@ -48,8 +74,12 @@ public class RestfulJsonDataTest extends AbstractLargeRestfulTests {
    */
   @Test
   public void testGetFriendsAppDataJson() throws Exception {
+    data.put("jane.doe", janeData);
+    data.put("simple.doe", simpleData);
+    updateAppData();
+
     // app id is mocked out
-    resp = client.get(BASEURL + "/appdata/john.doe/@friends/appId");
+    resp = client.get(BASEURL + "/appdata/john.doe/@friends/app?fields=count");
     // checkForGoodJsonResponse(resp);
     // JSONObject result = getJson(resp);
   }
@@ -59,22 +89,70 @@ public class RestfulJsonDataTest extends AbstractLargeRestfulTests {
    *
    * {
    *  "entry" : {
-   *    "john.doe" : {"count" : 0},
+   *    "john.doe" : {"count" : "0"},
+   *  }
+   * }
+   *
+   * @throws Exception if test encounters an error
+   */
+   // TODO: Shindig currently throws an exception when no keys are specified
+   // @Test
+  public void testGetSelfAppDataJson() throws Exception {
+    data.put("john.doe", johnData);
+    updateAppData();
+
+    // app id is mocked out
+    resp = client.get(BASEURL + "/appdata/john.doe/@self/app");
+    // checkForGoodJsonResponse(resp);
+    // JSONObject result = getJson(resp);
+  }
+
+  /**
+   * Expected response for app data in json:
+   *
+   * {
+   *  "entry" : {
+   *    "john.doe" : {"count" : "0"},
    *  }
    * }
    *
    * @throws Exception if test encounters an error
    */
   @Test
-  public void testGetSelfAppDataJson() throws Exception {
+  public void testGetSelfAppDataJsonWithKey() throws Exception {
+    data.put("john.doe", johnData);
+    updateAppData();
+
     // app id is mocked out
-    resp = client.get(BASEURL + "/appdata/john.doe/@self/appId");
+    resp = client.get(BASEURL + "/appdata/john.doe/@self/app?fields=count");
+    // checkForGoodJsonResponse(resp);
+    // JSONObject result = getJson(resp);
+  }
+
+  /**
+   * Expected response for app data in json with non-existant key:
+   * TODO: Double check this output with the spec
+   *
+   * {
+   *  "entry" : {
+   *    "john.doe" : {},
+   *  }
+   * }
+   *
+   * @throws Exception if test encounters an error
+   */
+  @Test
+  public void testGetSelfAppDataJsonWithoutKeys() throws Exception {
+    data.put("john.doe", johnData);
+    updateAppData();
+
+    // app id is mocked out
+    resp = client.get(BASEURL + "/appdata/john.doe/@self/app?fields=peabody");
     // checkForGoodJsonResponse(resp);
     // JSONObject result = getJson(resp);
   }
 
   // TODO: support for indexBy??
-  // TODO: support for fields parameter
   // TODO: support for post and delete
 
 }
