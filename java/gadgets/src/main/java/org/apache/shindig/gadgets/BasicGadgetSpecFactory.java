@@ -18,9 +18,6 @@
  */
 package org.apache.shindig.gadgets;
 
-import com.google.inject.Inject;
-import com.google.inject.name.Named;
-
 import org.apache.shindig.gadgets.http.HttpFetcher;
 import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.http.HttpResponse;
@@ -29,11 +26,16 @@ import org.apache.shindig.gadgets.rewrite.ContentRewriterFeature;
 import org.apache.shindig.gadgets.spec.GadgetSpec;
 import org.apache.shindig.gadgets.spec.View;
 
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
+import com.google.inject.name.Named;
+
 import java.net.URI;
 
 /**
  * Basic implementation of a gadget spec factory
  */
+@Singleton
 public class BasicGadgetSpecFactory implements GadgetSpecFactory {
 
   private final HttpFetcher specFetcher;
@@ -72,9 +74,9 @@ public class BasicGadgetSpecFactory implements GadgetSpecFactory {
   @Inject
   public BasicGadgetSpecFactory(HttpFetcher specFetcher,
       ContentRewriter rewriter,
-      @Named("content-rewrite.enabled") String defaultEnableRewrite) {
+      @Named("content-rewrite.enabled") boolean defaultEnableRewrite) {
     this.specFetcher = specFetcher;
     this.rewriter = rewriter;
-    this.enableRewrite = Boolean.parseBoolean(defaultEnableRewrite);
+    this.enableRewrite = defaultEnableRewrite;
   }
 }
