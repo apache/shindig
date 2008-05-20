@@ -38,7 +38,6 @@ public class ActivitiesServiceAdapter extends RestServerCollectionAdapter {
   // TODO get these from the config files like in feedserver
   private static final String TITLE = "Acitivity Collection title";
   private static final String AUTHOR = "TODO";
-  private static final String FRIENDS_INDICATOR = "@friends";
 
   @Inject
   public ActivitiesServiceAdapter(ActivitiesService activitiesService) {

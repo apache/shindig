@@ -98,7 +98,7 @@ public abstract class AbstractSocialEntityCollectionAdapter<T> extends
   }
 
   /**
-   * returns the format (jsoc or atom) from the RequestContext obj created by
+   * returns the format (json or atom) from the RequestContext obj created by
    * Abdera from the URL request.
    *
    * @param request the RequestContext obj from Abdera

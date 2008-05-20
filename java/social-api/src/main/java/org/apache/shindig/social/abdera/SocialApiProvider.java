@@ -79,7 +79,7 @@ public class SocialApiProvider extends DefaultProvider {
 
          // AppData
         .addRoute(RequestUrlTemplate.APPDATA_OF_APP_OF_USER,
-            TargetType.TYPE_ENTRY, dataAdapter)
+            TargetType.TYPE_COLLECTION, dataAdapter)
         .addRoute(RequestUrlTemplate.APPDATA_OF_FRIENDS_OF_USER,
             TargetType.TYPE_COLLECTION, dataAdapter)
         ;
