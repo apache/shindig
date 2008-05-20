@@ -65,17 +65,17 @@ public class RestServerServlet extends AbderaServlet {
       e.printStackTrace();
       return null;
     }
-    
+
     //setup my NamedWriter for "json"
     getAbdera().getConfiguration().addNamedWriter(new JSONWriter());
-    
+
     // print all the writers available
-    Map<String, NamedWriter> writersMap = 
+    Map<String, NamedWriter> writersMap =
         getAbdera().getConfiguration().getNamedWriters();
     for (NamedWriter writer : writersMap.values()) {
       StringBuilder sbuf = new StringBuilder();
       for (String s : writer.getOutputFormats()) {
-        sbuf.append(s + ", ");
+        sbuf.append(s).append(", ");
       }
       logger.fine("NamedWriter: " + writer.getClass().getName() +
           " is for writing '" + writer.getName() + "'" +
@@ -98,7 +98,7 @@ public class RestServerServlet extends AbderaServlet {
     // all providers should implement initialize() so injection could happen
     try {
       Method m = provider.getClass().getMethod("initialize", new Class<?>[0]);
-      m.invoke(provider, new Object[0]);
+      m.invoke(provider);
     } catch (IllegalArgumentException e) {
         logger.severe(e.getMessage());
         e.printStackTrace();

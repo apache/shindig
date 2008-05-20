@@ -17,10 +17,6 @@
 */
 package org.apache.shindig.social.abdera.json;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.OutputStream;
-
 import org.apache.abdera.Abdera;
 import org.apache.abdera.model.Document;
 import org.apache.abdera.model.Element;
@@ -32,8 +28,12 @@ import org.apache.abdera.protocol.server.ResponseContext;
 import org.apache.abdera.protocol.server.context.ResponseContextWrapper;
 import org.apache.abdera.writer.Writer;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.OutputStream;
+
 /**
- * TODO: This file is copied and modified from Abdera code as we needed 
+ * TODO: This file is copied and modified from Abdera code as we needed
  * functionality different from the Abdera Json writer code base.
  * This file definitely needs cleanup and heavy refactoring
  *

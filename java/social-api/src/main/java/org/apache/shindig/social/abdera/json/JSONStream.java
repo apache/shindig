@@ -17,16 +17,15 @@
 */
 package org.apache.shindig.social.abdera.json;
 
+import org.apache.abdera.i18n.iri.IRI;
+import org.apache.abdera.model.AtomDate;
+import org.apache.abdera.util.EntityTag;
+
+import javax.activation.MimeType;
 import java.io.IOException;
 import java.io.Writer;
 import java.util.Date;
 import java.util.Stack;
-
-import javax.activation.MimeType;
-
-import org.apache.abdera.i18n.iri.IRI;
-import org.apache.abdera.model.AtomDate;
-import org.apache.abdera.util.EntityTag;
 
 /*
  * TODO: This file is copied and modified from Abdera code as we needed
@@ -241,7 +240,7 @@ public class JSONStream {
         default:
           if (c < ' ' || c > 127) {
             t = "000" + Integer.toHexString(c);
-            buf.append("\\u" + t.substring(t.length() - 4));
+            buf.append("\\u").append(t.substring(t.length() - 4));
           } else {
             buf.append(c);
           }
