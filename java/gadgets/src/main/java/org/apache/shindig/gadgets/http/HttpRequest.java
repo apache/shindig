@@ -358,6 +358,7 @@ public class HttpRequest {
     public boolean ownerSigned = true;
     public boolean viewerSigned = true;
     public ContentRewriter rewriter = null;
+    public String rewriteMimeType = null;
 
     public Options() {}
 

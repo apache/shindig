@@ -21,6 +21,8 @@ package org.apache.shindig.gadgets.rewrite;
 import com.google.caja.lexer.HtmlTokenType;
 import com.google.caja.lexer.Token;
 
+import org.apache.shindig.gadgets.servlet.ProxyHandler;
+
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -36,8 +38,8 @@ import java.util.List;
  */
 public class JavascriptTagMerger implements HtmlTagTransformer {
 
-  @SuppressWarnings("unchecked")
-  // Scripts has to hold both URIs and tokens.
+  private final static int MAX_URL_LENGTH = 1500;
+
   private final List scripts = new ArrayList();
 
   private final String concatBase;
@@ -52,7 +54,11 @@ public class JavascriptTagMerger implements HtmlTagTransformer {
    * @param relativeUrlBase to resolve relative urls
    */
   public JavascriptTagMerger(String concatBase, URI relativeUrlBase) {
-    this.concatBase = concatBase;
+    // Force the mime-type to mimic browser expectation so rewriters
+    // can function properly
+    this.concatBase = concatBase
+        + ProxyHandler.REWRITE_MIME_TYPE_PARAM
+        + "=text/javascript&";
     this.relativeUrlBase = relativeUrlBase;
   }
 
@@ -109,22 +115,32 @@ public class JavascriptTagMerger implements HtmlTagTransformer {
       return;
     }
     builder.append("<script src=\"").append(concatBase);
+    int urlStart = builder.length();
+    int paramIndex = 1;
     try {
       for (int i = 0; i < concat.size(); i++) {
         URI srcUrl = concat.get(i);
         if (!srcUrl.isAbsolute()) {
           srcUrl = relativeUrlBase.resolve(srcUrl);
         }
-        builder.append(i + 1).append("=")
+        builder.append(paramIndex).append("=")
             .append(URLEncoder.encode(srcUrl.toString(), "UTF-8"));
         if (i < concat.size() - 1) {
-          builder.append("&");
+          if (builder.length() - urlStart > MAX_URL_LENGTH) {
+            paramIndex = 1;
+            builder.append("\" type=\"text/javascript\"></script>\n");
+            builder.append("<script src=\"").append(concatBase);
+            urlStart = builder.length();
+          } else {
+            builder.append("&");
+            paramIndex++;
+          }
         }
       }
       builder.append("\" type=\"text/javascript\"></script>");
       concat.clear();
-    } catch (UnsupportedEncodingException e) {
-      throw new RuntimeException(e);
+    } catch (UnsupportedEncodingException uee) {
+      throw new RuntimeException(uee);
     }
   }
 
