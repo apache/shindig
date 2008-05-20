@@ -25,7 +25,6 @@ import org.apache.abdera.protocol.server.RequestContext;
 import org.apache.abdera.protocol.server.ResponseContext;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 /**
@@ -70,19 +69,9 @@ public class ActivitiesServiceAdapter extends RestServerCollectionAdapter {
   }
 
   /**
-   *  Handles the following URL
-   *    /activities/{uid}/@self/{activityId}
+   * This method is not used. It is currently handled by the ActivityAdapter.
    */
   public ResponseContext getEntry(RequestContext request) {
-    String uid = request.getTarget().getParameter("uid");
-    String aid = request.getTarget().getParameter("aid");
-
-    Activity obj = activitiesService.getActivity(uid, aid,
-        getSecurityToken(request, uid)).getResponse();
-
-    // TODO: how is entry id determined. check.
-    String entryId = request.getUri().toString();
-    Date updated = (obj != null) ? obj.getUpdated() : null;
-    return returnEntry(request, obj, entryId, updated);
+    throw new UnsupportedOperationException();
   }
 }
