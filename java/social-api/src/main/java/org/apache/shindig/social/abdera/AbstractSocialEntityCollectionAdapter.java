@@ -105,7 +105,6 @@ public abstract class AbstractSocialEntityCollectionAdapter<T> extends
    * @return the format and default to Format.JSON
    */
   private Format getFormatTypeFromRequest(RequestContext request) {
-    // TODO should gracefully handle introspection if format param is missing.
     String format = request.getTarget().getParameter("format");
 
     if (format != null && format.equals(Format.ATOM.getDisplayValue())) {
