@@ -1,18 +1,56 @@
 Installing and Running The PHP Shindig Gadget Server
 ============================================
 
-1) Make sure you have PHP 5.x installed and have the simplexml and json extentions enabled; It also
-   requires apache with .htaccess and mod_rewrite support
+Prequisites before building Shindig for PHP
+============================================
+In order to build and run Shindig for PHP, you must have the following:
 
-2) Copy the files to your web root, and edit the config.php web_prefix and debug settings
-   to your liking. Make sure that the features and javascript directories are also copied
-   or edit your config.php to reflect their location. If you change the web_prefix also
-   update the container/container.js file too point to the correct locations
+- A Subversion client installed in order to checkout the code.
+  Instructions for downloading and installing Subversion can be found here: 
+  http://subversion.tigris.org/
+- Apache with mod_rewrite enabled.
+- PHP 5.2.x with the json, simplexml, mcrypt and curl extentions enabled.
 
-3) Hit server at http://<yourhost>/gadgets/ifr?url=<gadget-url>
-   Example: http://<yourhost>/gadgets/ifr?url=http://www.labpixies.com/campaigns/todo/todo.xml
-   Or hit the sample container at http://<yourhost>/gadgets/files/samplecontainer/samplecontainer.html
 
-The PHP source of the gadget server resides in the gadgets, socialdata and common directories.
+Getting the code
+============================================
+Create a subdirectory in your web document root, e.g. /var/www/html and 
+checkout the Shindig code from its Subversion repository
 
-For more information, see http://incubator.apache.org/projects/shindig.html
+mkdir /var/www/html/shindig
+cd /var/www/html/shindig
+svn co http://svn.apache.org/repos/asf/incubator/shindig/trunk/ .
+
+
+Running Shindig
+============================================
+With PHP There is no need to build anything - the source code 
+is already built.
+
+To run the code, you have several options:
+
+a. Create a new virtual host
+
+Point your apache to the php dir with a virtual host like:
+
+	<VirtualHost your_ip:your_port>
+	       ServerName your.host
+	       DocumentRoot /var/www/html/shindig/php
+	       ... other normal settings in vhosts...
+	</VirtualHost>
+Restart apache, and point your browser to:
+
+http://<your.host>/gadgets/ifr?url=http://www.labpixies.com/campaigns/todo/todo.xml
+
+you should see something like this:
+http://shindig.chabotc.com/gadgets/ifr?url=http://www.labpixies.com/campaigns/todo/todo.xml
+
+b. Run with an existing host
+
+If you cannot/don't want to create a virtual host, you can edit the file php/config.php and
+change the web_prefix setting to '/shindig/php'.
+
+Then you can run the gadget by pointing your browser to:
+
+http://<your.host>/shindig/php/gadgets/ifr?url=http://www.labpixies.com/campaigns/todo/todo.xml
+
