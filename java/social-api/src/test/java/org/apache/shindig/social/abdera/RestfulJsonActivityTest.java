@@ -17,21 +17,40 @@
  */
 package org.apache.shindig.social.abdera;
 
-import org.json.JSONObject;
+import org.apache.shindig.social.ResponseItem;
+import org.apache.shindig.social.SocialApiTestsGuiceModule;
+import org.apache.shindig.social.opensocial.model.Activity;
+
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.util.ArrayList;
+import java.util.List;
+
 
 public class RestfulJsonActivityTest extends AbstractLargeRestfulTests {
+  private Activity activity;
 
   @Before
   public void setUp() throws Exception {
     super.setUp();
+
+    activity = SocialApiTestsGuiceModule.MockActivitiesService.basicActivity;
+    List<Activity> activities = new ArrayList<Activity>();
+    activities.add(activity);
+
+    SocialApiTestsGuiceModule.MockActivitiesService.setActivities(
+        new ResponseItem<List<Activity>>(activities));
+    SocialApiTestsGuiceModule.MockActivitiesService.setActivity(
+        new ResponseItem<Activity>(activity));
   }
 
   @After
   public void tearDown() throws Exception {
+    SocialApiTestsGuiceModule.MockActivitiesService.setActivities(null);
+    SocialApiTestsGuiceModule.MockActivitiesService.setActivity(null);
+
     super.tearDown();
   }
 
@@ -51,6 +70,7 @@ public class RestfulJsonActivityTest extends AbstractLargeRestfulTests {
     resp = client.get(BASEURL + "/activities/john.doe/@self/1");
     // checkForGoodJsonResponse(resp);
     // JSONObject result = getJson(resp);
+    // assertActivitiesEqual(activity, result);
   }
 
   /**
@@ -75,5 +95,11 @@ public class RestfulJsonActivityTest extends AbstractLargeRestfulTests {
     resp = client.get(BASEURL + "/activities/john.doe/@self");
     // checkForGoodJsonResponse(resp);
     // JSONObject result = getJson(resp);
+    // assertActivitiesEqual(activity,
+    //     result.getJSONArray("entry").getJSONObject(0));
   }
+
+  // TODO: Add tests for the fields= parameter
+  // TODO: Add tests for post
+  // TODO: Add tests for @friends
 }

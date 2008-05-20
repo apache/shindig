@@ -70,6 +70,7 @@ public class DataServiceAdapter extends RestServerCollectionAdapter {
   /**
    *  Handles the following URL
    *    /appdata/{uid}/@self/{aid}
+   *  TODO: This is wrong. Getting data for @self is a collection too.
    */
   public ResponseContext getEntry(RequestContext request) {
     String uid = request.getTarget().getParameter("uid");

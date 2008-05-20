@@ -86,6 +86,7 @@ public class RestfulJsonPeopleTest extends AbstractLargeRestfulTests {
    */
   @Test
   public void testGetPersonJson() throws Exception {
+    // Currently, for Shindig {pid}/@all/{uid} == {uid}/@self
     resp = client.get(BASEURL + "/people/john.doe/@self");
     checkForGoodJsonResponse(resp);
     JSONObject result = getJson(resp);
@@ -142,6 +143,7 @@ public class RestfulJsonPeopleTest extends AbstractLargeRestfulTests {
    */
   @Test
   public void testGetPeopleJson() throws Exception {
+    // Currently, for Shindig @all == @friends
     resp = client.get(BASEURL + "/people/john.doe/@friends");
     checkForGoodJsonResponse(resp);
     // TODO: This json doesn't parse right now
@@ -159,5 +161,9 @@ public class RestfulJsonPeopleTest extends AbstractLargeRestfulTests {
     // JSONObject simpleDoe = people.getJSONObject(1);
     // assertEquals("simple.doe", simpleDoe.getString("id"));
   }
+
+  // TODO: Add tests for paging, sorting
+  // TODO: Add tests for fields parameter
+  // TODO: Add tests for networkDistance
 
 }

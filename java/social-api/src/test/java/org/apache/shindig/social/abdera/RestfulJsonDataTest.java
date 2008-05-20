@@ -17,7 +17,6 @@
  */
 package org.apache.shindig.social.abdera;
 
-import org.json.JSONObject;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -48,11 +47,34 @@ public class RestfulJsonDataTest extends AbstractLargeRestfulTests {
    * @throws Exception if test encounters an error
    */
   @Test
-  public void testGetAppDataJson() throws Exception {
+  public void testGetFriendsAppDataJson() throws Exception {
     // app id is mocked out
     resp = client.get(BASEURL + "/appdata/john.doe/@friends/appId");
     // checkForGoodJsonResponse(resp);
     // JSONObject result = getJson(resp);
   }
+
+  /**
+   * Expected response for app data in json:
+   *
+   * {
+   *  "entry" : {
+   *    "john.doe" : {"count" : 0},
+   *  }
+   * }
+   *
+   * @throws Exception if test encounters an error
+   */
+  @Test
+  public void testGetSelfAppDataJson() throws Exception {
+    // app id is mocked out
+    resp = client.get(BASEURL + "/appdata/john.doe/@self/appId");
+    // checkForGoodJsonResponse(resp);
+    // JSONObject result = getJson(resp);
+  }
+
+  // TODO: support for indexBy??
+  // TODO: support for fields parameter
+  // TODO: support for post and delete
 
 }
