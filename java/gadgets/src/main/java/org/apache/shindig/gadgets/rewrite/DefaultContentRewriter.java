@@ -20,7 +20,6 @@ package org.apache.shindig.gadgets.rewrite;
 import org.apache.shindig.gadgets.http.HttpResponse;
 
 import java.io.ByteArrayOutputStream;
-import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.Reader;
@@ -39,7 +38,7 @@ public class DefaultContentRewriter implements ContentRewriter {
 
   public DefaultContentRewriter() {
   }
-  
+
   public HttpResponse rewrite(URI source, HttpResponse original) {
     try {
       ByteArrayOutputStream baos = new ByteArrayOutputStream(
@@ -107,16 +106,6 @@ public class DefaultContentRewriter implements ContentRewriter {
 
   private boolean isCSS(String mime) {
     return (mime.toLowerCase().indexOf("css") != -1);
-  }
-
-  private void copyContents(Reader r, Writer w) {
-    try {
-      for (int val = r.read(); val != -1; val = r.read()) {
-        w.write(val);
-      }
-    } catch (IOException ioe) {
-      throw new RuntimeException(ioe);
-    }
   }
 
   protected String getProxyUrl() {

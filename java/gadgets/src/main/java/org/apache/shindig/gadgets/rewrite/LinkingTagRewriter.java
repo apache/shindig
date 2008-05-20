@@ -43,9 +43,9 @@ public class LinkingTagRewriter implements HtmlTagTransformer {
 
   public static Map<String, Set<String>> getDefaultTargets() {
     Map<String, Set<String>> targets  = new HashMap<String, Set<String>>();
-    targets.put("img", new HashSet(Arrays.asList("src")));
-    targets.put("embed", new HashSet(Arrays.asList("src")));
-    targets.put("link", new HashSet(Arrays.asList("href")));
+    targets.put("img", new HashSet<String>(Arrays.asList("src")));
+    targets.put("embed", new HashSet<String>(Arrays.asList("src")));
+    targets.put("link", new HashSet<String>(Arrays.asList("href")));
     return targets;
   }
 

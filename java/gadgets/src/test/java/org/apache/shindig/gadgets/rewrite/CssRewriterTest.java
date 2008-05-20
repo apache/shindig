@@ -20,7 +20,6 @@ package org.apache.shindig.gadgets.rewrite;
 import org.apache.shindig.gadgets.EasyMockTestCase;
 
 import java.net.URI;
-import java.util.Map;
 
 /**
  * test CSS link rewriting
@@ -28,8 +27,6 @@ import java.util.Map;
 public class CssRewriterTest  extends EasyMockTestCase {
 
   private URI dummyUri;
-
-  private Map<String, HtmlTagTransformer> defaultTransformerMap;
 
   private LinkRewriter defaultRewriter = new ProxyingLinkRewriter(
       "http://www.test.com/proxy?url=");
