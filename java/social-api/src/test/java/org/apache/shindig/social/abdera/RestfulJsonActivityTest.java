@@ -21,9 +21,12 @@ import org.apache.shindig.social.ResponseItem;
 import org.apache.shindig.social.SocialApiTestsGuiceModule;
 import org.apache.shindig.social.opensocial.model.Activity;
 
+import org.json.JSONObject;
+import org.json.JSONException;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import static org.junit.Assert.assertEquals;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -68,9 +71,9 @@ public class RestfulJsonActivityTest extends AbstractLargeRestfulTests {
   @Test
   public void testGetActivityJson() throws Exception {
     resp = client.get(BASEURL + "/activities/john.doe/@self/1");
-    // checkForGoodJsonResponse(resp);
-    // JSONObject result = getJson(resp);
-    // assertActivitiesEqual(activity, result);
+    checkForGoodJsonResponse(resp);
+    JSONObject result = getJson(resp);
+    assertActivitiesEqual(activity, result);
   }
 
   /**
@@ -82,7 +85,7 @@ public class RestfulJsonActivityTest extends AbstractLargeRestfulTests {
    *  "link" : {"rel" : "next", "href" : "<???>"},
    *  "totalResults" : 1,
    *  "startIndex" : 0
-   *  "itemsPerPage" : 10
+   *  "itemsPerPage" : 10 // Note: the js doesn't support paging. Should rest?
    *  "entry" : [
    *     {<activity>} // layed out like above
    *  ]
@@ -93,10 +96,21 @@ public class RestfulJsonActivityTest extends AbstractLargeRestfulTests {
   @Test
   public void testGetActivitiesJson() throws Exception {
     resp = client.get(BASEURL + "/activities/john.doe/@self");
-    // checkForGoodJsonResponse(resp);
-    // JSONObject result = getJson(resp);
-    // assertActivitiesEqual(activity,
-    //     result.getJSONArray("entry").getJSONObject(0));
+    checkForGoodJsonResponse(resp);
+    JSONObject result = getJson(resp);
+
+    assertEquals(1, result.getInt("totalResults"));
+    assertEquals(0, result.getInt("startIndex"));
+    assertActivitiesEqual(activity,
+        result.getJSONArray("entry").getJSONObject(0));
+  }
+
+  private void assertActivitiesEqual(Activity activity, JSONObject result)
+      throws JSONException {
+    assertEquals(activity.getId(), result.getString("id"));
+    assertEquals(activity.getUserId(), result.getString("userId"));
+    assertEquals(activity.getTitle(), result.getString("title"));
+    assertEquals(activity.getBody(), result.getString("body"));
   }
 
   // TODO: Add tests for the fields= parameter

@@ -91,6 +91,7 @@ public class SocialApiTestsGuiceModule extends AbstractModule {
 
       // setup Simple Doe
       simpleDoe = new Person("simple.doe", new Name("Simple Doe"));
+      simpleDoe.setUpdated(new Date());
     }
 
     public static void setPeople(ResponseItem<ApiCollection<Person>>
@@ -149,6 +150,7 @@ public class SocialApiTestsGuiceModule extends AbstractModule {
       basicActivity = new Activity("1", "john.doe");
       basicActivity.setTitle("yellow");
       basicActivity.setBody("what a color!");
+      basicActivity.setUpdated(new Date());
     }
 
     public static void setActivity(ResponseItem<Activity> activityVal) {

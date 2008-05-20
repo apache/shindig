@@ -146,24 +146,31 @@ public class RestfulJsonPeopleTest extends AbstractLargeRestfulTests {
     // Currently, for Shindig @all == @friends
     resp = client.get(BASEURL + "/people/john.doe/@friends");
     checkForGoodJsonResponse(resp);
-    // TODO: This json doesn't parse right now
-    // JSONObject result = getJson(resp);
+    JSONObject result = getJson(resp);
 
-    // assertEquals(2, result.getInt("totalResults"));
-    // assertEquals(0, result.getInt("startIndex"));
+    assertEquals(2, result.getInt("totalResults"));
+    assertEquals(0, result.getInt("startIndex"));
+    // TODO: Paging not handled yet
     // assertEquals(10, result.getInt("itemsPerPage"));
 
-    // JSONArray people = result.getJSONArray("entry");
+    JSONArray people = result.getJSONArray("entry");
 
-    // JSONObject janeDoe = people.getJSONObject(0);
-    // assertEquals("jane.doe", janeDoe.getString("id"));
-
-    // JSONObject simpleDoe = people.getJSONObject(1);
-    // assertEquals("simple.doe", simpleDoe.getString("id"));
+    for (int i = 0; i < people.length(); i++) {
+      JSONObject person = people.getJSONObject(i);
+      String id = person.getString("id");
+      String name = person.getJSONObject("name").getString("unstructured");
+      
+      // TODO: Clean this after we support sorting
+      if (id.equals("jane.doe")) {
+        assertEquals("Jane Doe", name);
+      } else {
+        assertEquals("simple.doe", id);
+        assertEquals("Simple Doe", name);
+      }
+    }
   }
 
   // TODO: Add tests for paging, sorting
   // TODO: Add tests for fields parameter
   // TODO: Add tests for networkDistance
-
 }
