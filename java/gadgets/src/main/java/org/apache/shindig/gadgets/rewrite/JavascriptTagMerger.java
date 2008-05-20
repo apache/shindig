@@ -21,6 +21,7 @@ package org.apache.shindig.gadgets.rewrite;
 import com.google.caja.lexer.HtmlTokenType;
 import com.google.caja.lexer.Token;
 
+import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URLEncoder;
@@ -108,19 +109,23 @@ public class JavascriptTagMerger implements HtmlTagTransformer {
       return;
     }
     builder.append("<script src=\"").append(concatBase);
-    for (int i = 0; i < concat.size(); i++) {
-      URI srcUrl = concat.get(i);
-      if (!srcUrl.isAbsolute()) {
-        srcUrl = relativeUrlBase.resolve(srcUrl);
+    try {
+      for (int i = 0; i < concat.size(); i++) {
+        URI srcUrl = concat.get(i);
+        if (!srcUrl.isAbsolute()) {
+          srcUrl = relativeUrlBase.resolve(srcUrl);
+        }
+        builder.append(i + 1).append("=")
+            .append(URLEncoder.encode(srcUrl.toString(), "UTF-8"));
+        if (i < concat.size() - 1) {
+          builder.append("&");
+        }
       }
-      builder.append(i + 1).append("=")
-          .append(URLEncoder.encode(srcUrl.toString()));
-      if (i < concat.size() - 1) {
-        builder.append("&");
-      }
+      builder.append("\" type=\"text/javascript\"></script>");
+      concat.clear();
+    } catch (UnsupportedEncodingException e) {
+      throw new RuntimeException(e);
     }
-    builder.append("\" type=\"text/javascript\"></script>");
-    concat.clear();
   }
 
   private String stripQuotes(String s) {
