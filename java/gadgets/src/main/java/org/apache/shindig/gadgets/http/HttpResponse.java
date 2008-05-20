@@ -26,6 +26,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import java.util.concurrent.ConcurrentHashMap;
+import java.nio.CharBuffer;
+import java.nio.ByteBuffer;
+import java.nio.charset.Charset;
+import java.nio.charset.CodingErrorAction;
+import java.nio.charset.CharsetEncoder;
+
 /**
  * Represents the results of an HTTP content retrieval operation.
  */
@@ -52,6 +59,9 @@ public class HttpResponse {
   private final Map<String, String> metadata;
 
   private HttpResponse rewritten;
+
+  // Holds character sets for fast conversion
+  private static ConcurrentHashMap<String,Charset> encodingToCharset= new ConcurrentHashMap<String,Charset>();
 
   /**
    * Create a dummy empty map. Access via HttpResponse.ERROR
@@ -158,17 +168,17 @@ public class HttpResponse {
    */
   public String getResponseAsString() {
     if (responseString == null) {
-      try {
-        String response = new String(responseBytes, encoding);
-        // Strip BOM.
-        if (response.length() > 0 && response.codePointAt(0) == 0xFEFF) {
-          responseString = response.substring(1);
-        } else {
-          responseString = response;
-        }
-      } catch (UnsupportedEncodingException e) {
-        responseString = "Unable to convert from encoding: " + encoding;
+      Charset charset = encodingToCharset.get(encoding);
+      if (charset == null) {
+        charset = Charset.forName(encoding);
+        encodingToCharset.put(encoding,charset);
       }
+      responseString = charset.decode(ByteBuffer.wrap(responseBytes)).toString();
+
+      // Strip BOM if present
+      if (responseString.length() > 0 && responseString.codePointAt(0) == 0xFEFF) {
+        responseString = responseString.substring(1);
+      } 
     }
     return responseString;
   }
