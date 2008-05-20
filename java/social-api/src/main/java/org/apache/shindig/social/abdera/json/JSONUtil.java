@@ -17,12 +17,6 @@
  */
 package org.apache.shindig.social.abdera.json;
 
-import java.io.IOException;
-import java.io.Writer;
-import java.util.List;
-
-import javax.xml.namespace.QName;
-
 import org.apache.abdera.Abdera;
 import org.apache.abdera.ext.bidi.BidiHelper;
 import org.apache.abdera.ext.html.HtmlHelper;
@@ -50,6 +44,11 @@ import org.apache.abdera.model.Text;
 import org.apache.abdera.model.TextValue;
 import org.apache.abdera.xpath.XPath;
 
+import javax.xml.namespace.QName;
+import java.io.IOException;
+import java.io.Writer;
+import java.util.List;
+
 /*
  * TODO: This file is copied and modified from Abdera code as we needed
  * functionality different from the Abdera Json writer code base.
@@ -76,7 +75,7 @@ public class JSONUtil {
       IRI parentbase = null;
       if (element.getParentElement() != null) {
         parentbase = element instanceof Document ?
-          ((Document)element).getBaseUri() :
+          element.getBaseUri() :
           element.getResolvedBaseUri();
       }
       IRI base = element.getResolvedBaseUri();
@@ -354,7 +353,6 @@ public class JSONUtil {
       jstream.writeField("type",irt.getMimeType());
       jstream.writeField("source",irt.getResolvedSource());
       jstream.endObject();
-      return;
     }
   }
 

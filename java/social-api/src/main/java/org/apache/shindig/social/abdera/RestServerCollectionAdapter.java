@@ -26,7 +26,6 @@ import org.apache.shindig.social.opensocial.util.BeanJsonConverter;
 import org.apache.shindig.social.opensocial.util.BeanXmlConverter;
 
 import com.google.inject.Inject;
-
 import org.apache.abdera.model.Entry;
 import org.apache.abdera.model.Feed;
 import org.apache.abdera.protocol.server.ProviderHelper;
@@ -36,7 +35,6 @@ import org.apache.abdera.protocol.server.context.ResponseContextException;
 import org.apache.abdera.protocol.server.impl.AbstractCollectionAdapter;
 import org.json.JSONException;
 
-import java.text.Format;
 import java.util.Date;
 import java.util.List;
 import java.util.logging.Logger;

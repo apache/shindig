@@ -24,19 +24,17 @@ import org.apache.shindig.common.servlet.InjectedServlet;
 import org.apache.shindig.social.opensocial.util.BeanJsonConverter;
 
 import com.google.inject.Inject;
-
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 
 /**
  * Servlet for handling gadget requests for data. The request accepts one json

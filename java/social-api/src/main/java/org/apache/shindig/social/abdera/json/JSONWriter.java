@@ -17,16 +17,16 @@
  */
 package org.apache.shindig.social.abdera.json;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.io.OutputStreamWriter;
-
 import org.apache.abdera.model.Base;
 import org.apache.abdera.util.AbstractNamedWriter;
 import org.apache.abdera.util.AbstractWriterOptions;
 import org.apache.abdera.writer.NamedWriter;
 import org.apache.abdera.writer.WriterOptions;
+
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 
 /*
  * TODO: This file is copied and modified from Abdera code as we needed
