@@ -33,7 +33,7 @@ class BasicSecurityTokenDecoder extends SecurityTokenDecoder {
 	 */
 	public function createToken($stringToken)
 	{
-		if (empty($stringToken)) {
+		if (empty($stringToken) && !empty($_GET['authz'])) {
 			throw new GadgetException('INVALID_GADGET_TOKEN');
 		}
 		try {
