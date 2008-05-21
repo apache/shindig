@@ -32,13 +32,22 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.After;
 import org.junit.AfterClass;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import org.junit.Before;
 import org.junit.BeforeClass;
-import static org.junit.Assert.*;
 
+import javax.xml.stream.XMLInputFactory;
+import javax.xml.stream.XMLStreamConstants;
+import javax.xml.stream.XMLStreamException;
+import javax.xml.stream.XMLStreamReader;
 import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.logging.Logger;
 
 
@@ -122,6 +131,40 @@ public abstract class AbstractLargeRestfulTests {
     ByteArrayOutputStream os = new ByteArrayOutputStream();
     writer.writeTo(doc, os);
     logger.fine(os.toString("utf8"));
+  }
+
+  protected String getIdFromXmlContent(String str) throws XMLStreamException {
+    return parseXmlContent(str).get("id");
+  }
+
+  /**
+   * parse entry.content xml into a Map<> struct
+   * @param str input content string
+   * @return the map<> of <name, value> pairs from the content xml
+   * @throws XMLStreamException If the str is not valid xml
+   */
+  protected Map<String, String> parseXmlContent(String str)
+      throws XMLStreamException {
+    ByteArrayInputStream inStr = new ByteArrayInputStream(str.getBytes());
+    XMLInputFactory factory = XMLInputFactory.newInstance();
+    XMLStreamReader parser = factory.createXMLStreamReader(inStr);
+    Map<String, String> columns = new HashMap<String, String>();
+
+    while (true) {
+      int event = parser.next();
+      if (event == XMLStreamConstants.END_DOCUMENT) {
+         parser.close();
+         break;
+      } else if (event == XMLStreamConstants.START_ELEMENT) {
+        String name = parser.getLocalName();
+        int eventType =  parser.next();
+        if (eventType == XMLStreamConstants.CHARACTERS) {
+          String value = parser.getText();
+          columns.put(name, value);
+        }
+      }
+    }
+    return columns;
   }
 
 }
