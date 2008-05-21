@@ -52,7 +52,7 @@ require 'src/gadgets/ContainerConfig.php';
  */
 class GadgetRenderingServlet extends HttpServlet {
 	private $context;
-	
+
 	/**
 	 * Creates the gadget using the GadgetServer class and calls outputGadget
 	 *
@@ -71,11 +71,11 @@ class GadgetRenderingServlet extends HttpServlet {
 			$gadgetServer = new GadgetServer();
 			$gadget = $gadgetServer->processGadget($this->context);
 			$this->outputGadget($gadget, $this->context);
-		} catch ( Exception $e ) {
+		} catch (Exception $e) {
 			$this->outputError($e);
 		}
 	}
-	
+
 	/**
 	 * If an error occured (Exception) this function echo's the Exception's message
 	 * and if the config['debug'] is true, shows the debug backtrace in a div
@@ -95,7 +95,7 @@ class GadgetRenderingServlet extends HttpServlet {
 		}
 		echo "</body></html>";
 	}
-	
+
 	/**
 	 * Takes the gadget to output, and depending on its content type calls either outputHtml-
 	 * or outputUrlGadget
@@ -107,15 +107,15 @@ class GadgetRenderingServlet extends HttpServlet {
 	{
 		$view = HttpUtil::getView($gadget, $context);
 		switch ($view->getType()) {
-			case 'HTML' :
+			case 'HTML':
 				$this->outputHtmlGadget($gadget, $context, $view);
 				break;
-			case 'URL' :
+			case 'URL':
 				$this->outputUrlGadget($gadget, $context, $view);
 				break;
 		}
 	}
-	
+
 	/**
 	 * Outputs a html content type gadget.
 	 * It creates a html page, with the javascripts from the features inline into the page, plus
@@ -144,16 +144,13 @@ class GadgetRenderingServlet extends HttpServlet {
 		}
 		// Was a privacy policy header configured? if so set it
 		if (Config::get('P3P') != '') {
-			header("P3P: ".Config::get('P3P'));
+			header("P3P: " . Config::get('P3P'));
 		}
-		if (!$view->getQuirks()) {
+		if (! $view->getQuirks()) {
 			echo "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01//EN\" \"http://www.w3.org/TR/html4/strict.dtd\">\n";
 		}
-		echo "<html>\n<head>".
-		     "<style type=\"text/css\">".Config::get('gadget_css')."</style>".
-		     "</head><body>".
-		     "<script><!--\n";
-		foreach ( $gadget->getJsLibraries() as $library ) {
+		echo "<html>\n<head>" . "<style type=\"text/css\">" . Config::get('gadget_css') . "</style>" . "</head><body>" . "<script><!--\n";
+		foreach ($gadget->getJsLibraries() as $library) {
 			$type = $library->getType();
 			if ($type == 'URL') {
 				// TODO: This case needs to be handled more gracefully by the js
@@ -173,15 +170,12 @@ class GadgetRenderingServlet extends HttpServlet {
 		// Forced libs first.
 		if (! empty($forcedLibs)) {
 			$libs = explode(':', $forcedLibs);
-			echo sprintf($externFmt, Config::get('default_js_prefix').$this->getJsUrl($libs, $gadget)) . "\n";
+			echo sprintf($externFmt, Config::get('default_js_prefix') . $this->getJsUrl($libs, $gadget)) . "\n";
 		}
 		if (strlen($externJs) > 0) {
 			echo $externJs;
 		}
-		echo "<script><!--\n".
-		     $this->appendJsConfig($context, $gadget).
-		     $this->appendMessages($gadget).
-		     "-->\n</script>\n";
+		echo "<script><!--\n" . $this->appendJsConfig($context, $gadget) . $this->appendMessages($gadget) . "-->\n</script>\n";
 		
 		$gadgetExceptions = array();
 		$content = $gadget->getSubstitutions()->substitute($view->getContent());
@@ -192,11 +186,9 @@ class GadgetRenderingServlet extends HttpServlet {
 		if (count($gadgetExceptions)) {
 			throw new GadgetException(print_r($gadgetExceptions, true));
 		}
-		echo $content . "\n".
-		     "<script>gadgets.util.runOnLoadHandlers();</script>\n".
-		     "</body>\n</html>";
+		echo $content . "\n" . "<script>gadgets.util.runOnLoadHandlers();</script>\n" . "</body>\n</html>";
 	}
-	
+
 	/**
 	 * Output's a URL content type gadget, it adds libs=<list:of:js:libraries>.js and user preferences
 	 * to the href url, and redirects the browser to it
@@ -215,7 +207,7 @@ class GadgetRenderingServlet extends HttpServlet {
 		$forcedLibs = Config::get('focedJsLibs');
 		if ($forcedLibs == null) {
 			$reqs = $gadget->getRequires();
-			foreach ( $reqs as $key => $val ) {
+			foreach ($reqs as $key => $val) {
 				$libs[] = $key;
 			}
 		} else {
@@ -231,7 +223,7 @@ class GadgetRenderingServlet extends HttpServlet {
 		header('Location: ' . $redirURI);
 		die();
 	}
-	
+
 	/**
 	 * Returns the requested libs (from getjsUrl) with the libs_param_name prepended
 	 * ie: in libs=core:caja:etc.js format
@@ -248,7 +240,7 @@ class GadgetRenderingServlet extends HttpServlet {
 		$ret .= $this->getJsUrl($libs, $gadget);
 		return $ret;
 	}
-	
+
 	/**
 	 * Returns the user preferences in &up_<name>=<val> format
 	 *
@@ -259,7 +251,7 @@ class GadgetRenderingServlet extends HttpServlet {
 	private function getPrefsQueryString($prefVals)
 	{
 		$ret = '';
-		foreach ( $prefVals->getPrefs() as $key => $val ) {
+		foreach ($prefVals->getPrefs() as $key => $val) {
 			$ret .= '&';
 			$ret .= Config::get('userpref_param_prefix');
 			$ret .= urlencode($key);
@@ -268,10 +260,10 @@ class GadgetRenderingServlet extends HttpServlet {
 		}
 		return $ret;
 	}
-	
+
 	/**
 	 * generates the library string (core:caja:etc.js) including a checksum of all the
-	 * javascript content (?v=<sha1 of js) for cache busting
+	 * javascript content (?v=<md5 of js>) for cache busting
 	 *
 	 * @param string $libs
 	 * @param Gadget $gadget
@@ -284,7 +276,7 @@ class GadgetRenderingServlet extends HttpServlet {
 			$buf = 'core';
 		} else {
 			$firstDone = false;
-			foreach ( $libs as $lib ) {
+			foreach ($libs as $lib) {
 				if ($firstDone) {
 					$buf .= ':';
 				} else {
@@ -296,7 +288,7 @@ class GadgetRenderingServlet extends HttpServlet {
 		// Build a version string from the sha1() checksum of all included javascript
 		// to ensure the client always has the right version
 		$inlineJs = '';
-		foreach ( $gadget->getJsLibraries() as $library ) {
+		foreach ($gadget->getJsLibraries() as $library) {
 			$type = $library->getType();
 			if ($type != 'URL') {
 				$inlineJs .= $library->getContent() . "\n";
@@ -305,14 +297,14 @@ class GadgetRenderingServlet extends HttpServlet {
 		$buf .= ".js?v=" . md5($inlineJs);
 		return $buf;
 	}
-	
+
 	private function appendJsConfig($context, $gadget)
 	{
 		$container = $context->getContainer();
 		$containerConfig = $context->getContainerConfig();
 		$gadgetConfig = array();
 		$featureConfig = $containerConfig->getConfig($container, 'gadgets.features');
-		foreach ( $gadget->getJsLibraries() as $library ) {
+		foreach ($gadget->getJsLibraries() as $library) {
 			$feature = $library->getFeatureName();
 			if (! isset($gadgetConfig[$feature]) && ! empty($featureConfig[$feature])) {
 				$gadgetConfig[$feature] = $featureConfig[$feature];
@@ -320,7 +312,7 @@ class GadgetRenderingServlet extends HttpServlet {
 		}
 		return "gadgets.config.init(" . json_encode($gadgetConfig) . ");\n";
 	}
-	
+
 	private function appendMessages($gadget)
 	{
 		$msgs = '';

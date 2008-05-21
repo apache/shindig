@@ -1,4 +1,4 @@
-<?
+<?php
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements. See the NOTICE file
@@ -48,7 +48,7 @@ foreach ($modules as $module) {
 // To load these, we scan our entire directory structure
 function __autoload($className)
 {
-	$locations = array('src/common', 'src/common/samplecontainer', 'src/gadgets', 'src/gadgets/samplecontainer', 'src/gadgets/http', 'src/socialdata', 'src/socialdata/opensocial', 'src/socialdata/opensocial/model', 'src/socialdata/http', 'src/socialdata/samplecontainer');
+	$locations = array('src/common', 'src/common/samplecontainer', 'src/gadgets', 'src/gadgets/samplecontainer', 'src/gadgets/http', 'src/socialdata', 'src/socialdata/opensocial', 'src/socialdata/opensocial/model', 'src/socialdata/http', 'src/socialdata/samplecontainer', 'src/gadgets/oauth');
 	// Check for the presense of this class in our all our directories.
 	$fileName = $className.'.php';
 	foreach ($locations as $path) {
@@ -65,7 +65,8 @@ $servletMap = array(
 	Config::get('web_prefix') . '/gadgets/proxy'    => 'ProxyServlet',
 	Config::get('web_prefix') . '/gadgets/ifr'      => 'GadgetRenderingServlet',
 	Config::get('web_prefix') . '/gadgets/metadata' => 'JsonRpcServlet',
-	Config::get('web_prefix') . '/social/data'      => 'GadgetDataServlet'
+	Config::get('web_prefix') . '/social/data'      => 'GadgetDataServlet',
+	Config::get('web_prefix') . '/public.crt'       => 'CertServlet'
 );
 
 // Try to match the request url to our servlet mapping

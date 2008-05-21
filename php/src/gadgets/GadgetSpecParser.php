@@ -36,7 +36,7 @@ class GadgetSpecParser {
 		}
 		$gadget = new Gadget($context->getGadgetId(), $context);
 		// process ModulePref attributes
-		$this->processModulePrefs($gadget, $doc->ModulePrefs);
+		$this->processModulePrefs($gadget, $doc->ModulePrefs, $context);
 		// process UserPrefs, if any
 		foreach ($doc->UserPref as $pref) {
 			$this->processUserPref($gadget, $pref);
@@ -54,7 +54,7 @@ class GadgetSpecParser {
 		return $gadget;
 	}
 
-	private function processModulePrefs(&$gadget, $ModulePrefs)
+	private function processModulePrefs(&$gadget, $ModulePrefs, $context)
 	{
 		$attributes = $ModulePrefs->attributes();
 		if (empty($attributes['title'])) {
@@ -90,11 +90,11 @@ class GadgetSpecParser {
 		$gadget->scaling = isset($attributes['scaling']) ? trim($attributes['scaling']) : '';
 		$gadget->scrolling = isset($attributes['scrolling']) ? trim($attributes['scrolling']) : '';
 		foreach ($ModulePrefs->Locale as $locale) {
-			$gadget->localeSpecs[] = $this->processLocale($locale);
+			$gadget->localeSpecs[] = $this->processLocale($locale, $context);
 		}
 	}
 
-	private function processLocale($locale)
+	private function processLocale($locale, $context)
 	{
 		$attributes = $locale->attributes();
 		$messageAttr = isset($attributes['messages']) ? trim($attributes['messages']) : '';

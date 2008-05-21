@@ -1,4 +1,4 @@
-<?
+<?php
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements. See the NOTICE file
@@ -45,7 +45,7 @@ $shindigConfig = array(
 	// Configurable CSS rules that are injected to the gadget page, 
 	// be careful when adjusting these not to break most gadget's layouts :)
 	'gadget_css' => 'body,td,div,span,p{font-family:arial,sans-serif;} a {color:#0000cc;}a:visited {color:#551a8b;}a:active {color:#ff0000;}body{margin: 0px;padding: 0px;background-color:white;}',
-	// 'gadget_css' => 'body,td,div,span,p{font-family:arial,sans-serif;} body {background-color:#ffffff; font-family: arial, sans-serif; padding: 0px; margin: 0px;  font-size: 12px; color: #000000;}a, a:visited {color: #3366CC;text-decoration: none; }a:hover {color: #3366CC; text-decoration: underline;} input, select { border: 1px solid #bdc7d8;font-size: 11px;padding: 3px;}',
+	//'gadget_css' => 'body,td,div,span,p{font-family:arial,sans-serif;} body {background-color:#ffffff; font-family: arial, sans-serif; padding: 0px; margin: 0px;  font-size: 12px; color: #000000;}a, a:visited {color: #3366CC;text-decoration: none; }a:hover {color: #3366CC; text-decoration: underline;} input, select { border: 1px solid #bdc7d8;font-size: 11px;padding: 3px;}',
 	
 	// The html / javascript samples use a plain text demo token,
 	// set this to false on anything resembling a real site
@@ -96,6 +96,13 @@ $shindigConfig = array(
 	// global cache age policy and location
 	'cache_time' => 24 * 60 * 60,
 	'cache_root' => '/tmp/shindig', 
+
+	// OAuth private key Path
+	'private_key_file' => realpath(dirname(__FILE__)) . '/certs/private.key',
+	// file path to public RSA cert
+	'public_key_file' => realpath(dirname(__FILE__)) . '/certs/public.crt',
+	// Phrase to decrypt private key. Leave empty if unencrypted
+	'private_key_phrase' => 'partuza',
 	
 	// In some cases we need to know the site root (for features forinstance)
 	'base_path' => realpath(dirname(__FILE__))

@@ -25,7 +25,7 @@ require 'src/common/HttpServlet.php';
  * the php version too
  */
 class FilesServlet extends HttpServlet {
-	
+
 	/**
 	 * Handles the get file request, if the file exists and is in the correct
 	 * location it's echo'd to the browser (with a basic content type guessing
@@ -46,14 +46,14 @@ class FilesServlet extends HttpServlet {
 			die();
 		}
 		// if the file doesn't exist or can't be read, give a 404 error
-		if (!file_exists($file) || !is_readable($file) || !is_file($file)) {
+		if (! file_exists($file) || ! is_readable($file) || ! is_file($file)) {
 			header("HTTP/1.0 404 Not Found", true);
 			echo "<html><body><h1>404 - Not Found</h1></body></html>";
 			die();
 		}
 		$dot = strrpos($file, '.');
 		if ($dot) {
-			$ext = strtolower(substr($file, $dot+1));
+			$ext = strtolower(substr($file, $dot + 1));
 			if ($ext == 'html' || $ext == 'htm') {
 				$this->setContentType('text/html');
 			} elseif ($ext == 'js') {

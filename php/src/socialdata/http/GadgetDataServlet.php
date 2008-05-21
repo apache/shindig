@@ -49,7 +49,7 @@ define('INTERNAL_ERROR', "internalError");
 
 class GadgetDataServlet extends HttpServlet {
 	private $handlers = array();
-	
+
 	public function __construct()
 	{
 		parent::__construct();
@@ -64,7 +64,7 @@ class GadgetDataServlet extends HttpServlet {
 			}
 		}
 	}
-	
+
 	public function doPost()
 	{
 		$requestParam = isset($_POST['request']) ? $_POST['request'] : '';
@@ -87,7 +87,7 @@ class GadgetDataServlet extends HttpServlet {
 		}
 		echo json_encode($response);
 	}
-	
+
 	private function createResponse($requestParam, $token)
 	{
 		if (empty($token)) {
@@ -116,7 +116,7 @@ class GadgetDataServlet extends HttpServlet {
 		}
 		return $responseItems;
 	}
-	
+
 	public function doGet()
 	{
 		echo header("HTTP/1.0 400 Bad Request", true, 400);

@@ -1,15 +1,15 @@
 <?php
 
+class BlobExpiredException extends Exception {}
+
 /**
  * This class provides basic binary blob encryption and decryption, for use with the security token
  * 
  */
-
-class BlobExpiredException extends Exception {}
-
-//FIXME make this compatible with the java's blobcrypter
 class BasicBlobCrypter extends BlobCrypter {
+	//FIXME make this compatible with the java's blobcrypter
 	
+
 	// Labels for key derivation
 	private $CIPHER_KEY_LABEL = 0;
 	private $HMAC_KEY_LABEL = 1;
@@ -89,11 +89,14 @@ class BasicBlobCrypter extends BlobCrypter {
 	{
 		$map = array();
 		$items = split("[&=]", $plain);
+		/*
+		//TODO: See if this can work or isn't necessary.
 		if ((count($items) / 2) != 7) {
 			// A valid token should decrypt to 14 items, aka 7 pairs.
 			// If not, this wasn't valid & untampered data and we abort
 			throw new BlobExpiredException("Invalid security token");
 		}
+		*/
 		for ($i = 0; $i < count($items); ) {
 			$key = urldecode($items[$i ++]);
 			$value = urldecode($items[$i ++]);

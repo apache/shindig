@@ -15,13 +15,14 @@
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
  * KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
- * 
+ *
  */
 
 class RemoteContentRequest {
 	// these are used for making the request
-	private $url = '';
-	private $headers = false;
+	private $uri = '';
+	private $method = '';
+	private $headers = array();
 	private $postBody = false;
 	// these fields are filled in once the request has completed
 	private $responseContent = false;
@@ -29,20 +30,179 @@ class RemoteContentRequest {
 	private $responseHeaders = false;
 	private $httpCode = false;
 	private $contentType = null;
+	private $options;
 	public $handle = false;
+	public static $DEFAULT_CONTENT_TYPE = "application/x-www-form-urlencoded; charset=utf-8";
+	public static $DEFAULT_OPTIONS = array();
 
-	public function __construct($url, $headers = false, $postBody = false)
+	public function __construct($uri, $headers = false, $postBody = false)
 	{
-		$this->url = $url;
+		$this->uri = $uri;
 		$this->headers = $headers;
 		$this->postBody = $postBody;
 	}
 
+	public function createRemoteContentRequest($method, $uri, $headers, $postBody, $options)
+	{
+		$this->method = $method;
+		$this->uri = $uri;
+		$this->options = $options;
+		// Copy the headers
+		if (! isset($headers)) {
+			$this->headers = '';
+		} else {
+			$setPragmaHeader = false;
+			$tmpHeaders = '';
+			foreach ($headers as $key => $value) {
+				// Proxies should be bypassed with the Pragma: no-cache check.
+				//TODO double check array is good for options
+				if ($key == "Pragma" && @$options['ignoreCache']) {
+					$value = "no-cache";
+					$setPragmaHeader = true;
+				}
+				$tmpHeaders .= $key . ":" . $value . "\n";
+			}
+			// Bypass caching in proxies as well.
+			//TODO double check array is good for options
+			if (! $setPragmaHeader && @$options['ignoreCache']) {
+				$tmpHeaders .= "Pragma:no-cache\n";
+			}
+			$this->headers = $tmpHeaders;
+		}		
+		if (! isset($postBody)) {
+			$this->postBody = '';
+		} else {
+			$this->postBody = array_merge($postBody, $this->postBody);
+		}
+		$type = $this->getHeader("Content-Type");
+		if (! isset($type)) {
+			$this->contentType = RemoteContentRequest::$DEFAULT_CONTENT_TYPE;
+		} else {
+			$this->contentType = $type;
+		}
+	}
+
+	/**
+	 * Creates a new request to a different URL using all request data from
+	 * an existing request.
+	 *
+	 * @param uri
+	 * @param base The base request to copy data from.
+	 */
+	public static function createRemoteContentRequestWithUriBase($uri, $base)
+	{
+		$this->uri = $uri;
+		$this->method = $base->method;
+		$this->options = $base->options;
+		$this->headers = $base->headers;
+		$this->contentType = $base->contentType;
+		$this->postBody = $base->postBody;
+	}
+
+	/**
+	 * Basic GET request.
+	 *
+	 * @param uri
+	 */
+	public function createRemoteContentRequestWithUri($uri)
+	{
+		$this->createRemoteContentRequest("GET", $uri, null, null, RemoteContentRequest::$DEFAULT_OPTIONS);
+	}
+
+	/**
+	 * GET with options
+	 *
+	 * @param uri
+	 * @param options
+	 */
+	public function createRemoteContentRequestWithUriOptions($uri, $options)
+	{
+		$this->createRemoteContentRequest("GET", $uri, null, null, $options);
+	}
+
+	/**
+	 * GET request with custom headers and default options
+	 * @param uri
+	 * @param headers
+	 */
+	public function RemoteContentRequestWithUriHeaders($uri, $headers)
+	{
+		$this->createRemoteContentRequest("GET", $uri, $headers, null, RemoteContentRequest::$DEFAULT_OPTIONS);
+	}
+
+	/**
+	 * GET request with custom headers + options
+	 * @param uri
+	 * @param headers
+	 * @param options
+	 */
+	public function createRemoteContentRequestWithUriHeadersOptions($uri, $headers, $options)
+	{
+		$this->createRemoteContentRequest("GET", $uri, $headers, null, $options);
+	}
+
+	/**
+	 * Basic POST request
+	 * @param uri
+	 * @param postBody
+	 */
+	public function RemoteContentRequestWithUriPostBody($uri, $postBody)
+	{
+		$this->createRemoteContentRequest("POST", $uri, null, $postBody, RemoteContentRequest::$DEFAULT_OPTIONS);
+	}
+
+	/**
+	 * POST request with options
+	 * @param uri
+	 * @param postBody
+	 * @param options
+	 */
+	public function createRemoteContentRequestWithUriPostBodyOptions($uri, $postBody, $options)
+	{
+		$this->createRemoteContentRequest("POST", $uri, null, $postBody, $options);
+	}
+
+	/**
+	 * POST request with headers
+	 * @param uri
+	 * @param headers
+	 * @param postBody
+	 */
+	public function createRemoteContentRequestWithUriHeadersPostBody($uri, $headers, $postBody)
+	{
+		$this->createRemoteContentRequest("POST", $uri, $headers, $postBody, RemoteContentRequest::$DEFAULT_OPTIONS);
+	}
+
+	/**
+	 * POST request with options + headers
+	 * @param uri
+	 * @param headers
+	 * @param postBody
+	 * @param options
+	 */
+	public function createRemoteContentRequestWithUriHeadersPostBodyOptions($uri, $headers, $postBody, $options)
+	{
+		$this->createRemoteContentRequest("POST", $uri, $headers, $postBody, $options);
+	}
+
+	/**
+	 * Creates a simple GET request
+	 *
+	 * @param uri
+	 * @param ignoreCache
+	 */
+	public function getRequest($uri, $ignoreCache)
+	{
+		$options = new Options();
+		$options->ignoreCache = $ignoreCache;
+		return $this->createRemoteContentRequestWithUriOptions($uri, $options);
+	}
+
 	// returns a hash code which identifies this request, used for caching
-	// takes url and postbody into account for constructing the md5 checksum
+	// takes url and postbody into account for constructing the sha1 checksum
 	public function toHash()
 	{
-		return md5($this->url . $this->postBody);
+		return md5($this->uri . $this->postBody);
 	}
 
 	public function getContentType()
@@ -92,7 +252,17 @@ class RemoteContentRequest {
 
 	public function getUrl()
 	{
-		return $this->url;
+		return $this->uri;
+	}
+
+	public function getMethod()
+	{
+		return $this->method;
+	}
+
+	public function getOptions()
+	{
+		return $this->options;
 	}
 
 	public function setContentType($type)
@@ -125,14 +295,37 @@ class RemoteContentRequest {
 		$this->headers = $headers;
 	}
 
+	//FIXME: Find a better way to do this
+	// The headers can be an array of elements.
+	public function getHeader($headerName)
+	{
+		$headers = explode("\n", $this->headers);
+		foreach ($headers as $header) {
+			$key = explode(":", $header);
+			if ($key[0] == $headerName)
+				return $key[1];
+		}
+		return null;
+	}
+
 	public function setPostBody($postBody)
 	{
 		$this->postBody = $postBody;
 	}
 
-	public function setUrl($url)
+	public function setUri($uri)
 	{
-		$this->url = $url;
+		$this->uri = $uri;
 	}
 
+}
+
+/**
+ * Bag of options for making a request.
+ *
+ * This object is mutable to keep us sane. Don't mess with it once you've
+ * sent it to RemoteContentRequest or bad things might happen.
+ */
+class Options {
+	public $ignoreCache = false;
 }
