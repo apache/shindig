@@ -17,9 +17,13 @@
  */
 package org.apache.shindig.social.abdera;
 
+import org.apache.shindig.common.BasicSecurityToken;
 import org.apache.shindig.common.SecurityToken;
 import org.apache.shindig.common.SecurityTokenDecoder;
 import org.apache.shindig.common.SecurityTokenException;
+import org.apache.shindig.common.crypto.BlobCrypterException;
+import org.apache.shindig.social.opensocial.PeopleService;
+import org.apache.shindig.social.opensocial.model.IdSpec;
 import org.apache.shindig.social.opensocial.util.BeanJsonConverter;
 import org.apache.shindig.social.opensocial.util.BeanXmlConverter;
 
@@ -30,26 +34,37 @@ import org.apache.abdera.i18n.iri.IRI;
 import org.apache.abdera.i18n.templates.Route;
 import org.apache.abdera.model.Content;
 import org.apache.abdera.model.Entry;
+import org.apache.abdera.model.Feed;
 import org.apache.abdera.model.Person;
 import org.apache.abdera.protocol.server.RequestContext;
 import org.apache.abdera.protocol.server.ResponseContext;
 import org.apache.abdera.protocol.server.context.ResponseContextException;
 import org.apache.abdera.protocol.server.impl.AbstractEntityCollectionAdapter;
 
+import org.json.JSONException;
+
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Logger;
 
 /**
  * By extending this class it becomes easy to build Collections which are backed
  * by a set of Social entities - such as a person or activity.
+ *
+ * This base class also has the data connection to the People service and some
+ * helper methods for getting social graph information.
  *
  * @param <T> The entity that this is backed by.
  */
 
 public abstract class AbstractSocialEntityCollectionAdapter<T> extends
     AbstractEntityCollectionAdapter<T> {
+  private static Logger logger = Logger
+      .getLogger(AbstractEntityCollectionAdapter.class.getName());
 
+  protected PeopleService peopleService;
   protected String ID_PREFIX;
   protected Factory factory;
   private BeanXmlConverter beanXmlConverter;
@@ -75,6 +90,18 @@ public abstract class AbstractSocialEntityCollectionAdapter<T> extends
     }
   }
 
+  /**
+   * All the adapters need access to the PeopleService, which has the basic
+   * social graph information. Each service adapter will also add an instance
+   * of their respective data service.
+   * TODO: Also include groups service in base?
+   * @param peopleService The people service
+   */
+  @Inject
+  public void setPeopleService(PeopleService peopleService) {
+    this.peopleService = peopleService;
+  }
+
   @Inject
   public void setConverters(BeanXmlConverter beanXmlConverter,
       BeanJsonConverter beanJsonConverter) {
@@ -88,6 +115,12 @@ public abstract class AbstractSocialEntityCollectionAdapter<T> extends
     this.securityTokenDecoder = securityTokenDecoder;
   }
 
+  /**
+   * Get the token from the "st" url parameter or throw an exception.
+   * @param request Abdera's RequestContext
+   * @return SecurityToken
+   * @throws SecurityTokenException If the token is invalid
+   */
   protected SecurityToken getSecurityToken(RequestContext request)
       throws SecurityTokenException {
     String token = request.getParameter("st");
@@ -98,13 +131,56 @@ public abstract class AbstractSocialEntityCollectionAdapter<T> extends
   }
 
   /**
-   * returns the format (json or atom) from the RequestContext obj created by
-   * Abdera from the URL request.
+   * This alternate version of getSecurityToken adds the ability to generate a
+   * new security token based on some viewerid supplied.
    *
-   * @param request the RequestContext obj from Abdera
-   * @return the format and default to Format.JSON
+   * @param request Abdera's RequestContext
+   * @param viewerId The viewer ID to fake.
+   * @return A call to the parent getSecurityToken which returns a SecurityToken
+   */
+  protected SecurityToken getSecurityToken(RequestContext request,
+      final String viewerId) {
+    try {
+      return getSecurityToken(request);
+    } catch (SecurityTokenException se) {
+      // For now, if there's no st param, we'll mock one up.
+      try {
+        return new BasicSecurityToken("o", viewerId, "a", "d", "u", "m");
+      } catch (BlobCrypterException be) {
+        be.printStackTrace();
+        return null;
+      }
+    }
+  }
+
+  /**
+   * Gets the IDs of friends for the given user.
+   *
+   * @param request Abdera's RequestContext
+   * @param uid The User ID to get friends for.
+   * @return A list of ID strings.
+   */
+  protected List<String> getFriendIds(RequestContext request, String uid) {
+    SecurityToken token = getSecurityToken(request, uid);
+    IdSpec idSpec = new IdSpec(null, IdSpec.Type.VIEWER_FRIENDS);
+    try {
+      return peopleService.getIds(idSpec, token);
+    } catch (JSONException e) {
+      // TODO: Ignoring this for now. Eventually we can make the service apis
+      // fit the restful model better. For now, it is worth some hackiness to
+      // keep the interfaces stable.
+      return null;
+    }
+  }
+
+  /**
+   * Returns the format (jsoc or atom) from the RequestContext's URL parameters.
+   *
+   * @param request Abdera's RequestContext
+   * @return The format and default to Format.JSON.
    */
   private Format getFormatTypeFromRequest(RequestContext request) {
+    // TODO: should gracefully handle introspection if format param is missing.
     String format = request.getTarget().getParameter("format");
 
     if (format != null && format.equals(Format.ATOM.getDisplayValue())) {
@@ -125,6 +201,9 @@ public abstract class AbstractSocialEntityCollectionAdapter<T> extends
   public String getFeedIriForEntry(RequestContext request,
       String resourceRouteVariable) {
     Map<String, Object> params = new HashMap<String, Object>();
+    // TODO: currently a bug in Abdera adds this param to the url when there are
+    // other parameters in the original request.
+    // fix is coming in https://issues.apache.org/jira/browse/ABDERA-162
     params.put(resourceRouteVariable, null);
     String uri = request.urlFor(getRoute(request).getName(), params);
     return request.getResolvedUri().resolve(uri).toString();
@@ -135,7 +214,7 @@ public abstract class AbstractSocialEntityCollectionAdapter<T> extends
    * object. If it does not, it throws a NPE for now. It could also deal with a
    * Regex resolver
    *
-   * @param request the request
+   * @param request Abdera's RequestContext
    * @return The Route object that matched the request.
    */
   public Route getRoute(RequestContext request) {
@@ -171,28 +250,78 @@ public abstract class AbstractSocialEntityCollectionAdapter<T> extends
   /**
    * Add the details to an entry.
    *
-   * @param request The request context
-   * @param e The entry
-   * @param feedIri The feed IRI
+   * @param request Abdera's RequestContext.
+   * @param entry The entry FOM object.
+   * @param feedIri The feed IRI that the entry came from.
    * @param entity The object that the entry is based on.
    */
   @Override
-  protected String addEntryDetails(RequestContext request, Entry e,
+  protected String addEntryDetails(RequestContext request, Entry entry,
       IRI feedIri, T entity) throws ResponseContextException {
-    String link = getLink(entity, feedIri, request);
+    addRequiredEntryDetails(request, entry, feedIri, entity);
+    addOptionalEntryDetails(request, entry, feedIri, entity);
+    return getLink(entity, feedIri, request);
+  }
 
-    e.addLink(link, "self", "application/atom+xml", null, null, 0);
-    e.setId(getId(entity));
-    e.setTitle(getTitle(entity));
-    e.setUpdated(getUpdated(entity));
-    e.setSummary(getSummary(entity));
+  /**
+   * This very similar to the superclass's addEntryDetails but modified to do a
+   * minimum of required fields.
+   *
+   * @param request Abdera's RequestContext.
+   * @param entry The entry FOM object.
+   * @param feedIri The feed IRI that the entry came from.
+   * @param entity The object that the entry is based on.
+   * @throws ResponseContextException If the authors can not be fetched
+   */
+  protected void addRequiredEntryDetails(RequestContext request, Entry entry,
+      IRI feedIri, T entity) throws ResponseContextException {
+    entry.setId(getId(entity));
+    entry.setTitle(getTitle(entity));
+    entry.setUpdated(getUpdated(entity));
+    entry.setSummary(getSummary(entity));
     List<Person> authors = getAuthors(entity, request);
     if (authors != null) {
       for (Person a : authors) {
-        e.addAuthor(a);
+        entry.addAuthor(a);
       }
     }
-    return link;
+  }
+
+  /**
+   * This is a good place for the subclass to do any special processing of the
+   * entry element to customize it beyond the basic atom fields like title and
+   * author.
+   *
+   * @param request Abdera's RequestContext.
+   * @param entry The entry FOM object.
+   * @param feedIri The feed IRI that the entry came from.
+   * @param entity The object that the entry is based on.
+   * @throws ResponseContextException If some entry data can not be fetched
+   */
+  protected void addOptionalEntryDetails(RequestContext request, Entry entry,
+      IRI feedIri, T entity) throws ResponseContextException {
+  }
+
+  /**
+   * Create the base feed for the requested collection.
+   *
+   * TODO: This method needs to be refactored to deal with hoisting and json.
+   *
+   * @param request Abdera's RequestContext
+   */
+  @Override
+  protected Feed createFeedBase(RequestContext request)
+      throws ResponseContextException {
+    Factory factory = request.getAbdera().getFactory();
+    Feed feed = factory.newFeed();
+    String link = getHref(request);
+    // TODO: this should create links that are aware of the request format.
+    feed.addLink(link, "self", "application/atom+xml", null, null, 0);
+    feed.setId(getId(request));
+    feed.setTitle(getTitle(request));
+    feed.addAuthor(getAuthor(request));
+    feed.setUpdated(new Date());
+    return feed;
   }
 
   /**
@@ -214,8 +343,4 @@ public abstract class AbstractSocialEntityCollectionAdapter<T> extends
     return null;
   }
 
-  @Override
-  public ResponseContext getFeed(RequestContext request) {
-    return null;
-  }
 }
