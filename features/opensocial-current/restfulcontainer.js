@@ -86,7 +86,7 @@ RestfulContainer.prototype.requestData = function(dataRequest, callback) {
 
   var makeProxiedRequest = function(requestObject, baseUrl, st) {
     var makeRequestParams = {
-      "CONTENT_TYPE" : "DOM",
+      "CONTENT_TYPE" : "JSON",
       "METHOD" : requestObject.request.method
       // TODO: Handle post data
     };
@@ -145,7 +145,7 @@ RestfulContainer.prototype.newFetchPersonRequest = function(id, opt_params) {
   var me = this;
   return new RestfulRequestItem(peopleRequest.url, peopleRequest.method, null,
       function(rawJson) {
-        return me.createPersonFromJson(rawJson[0]);
+        return me.createPersonFromJson(rawJson);
       });
 };
 
@@ -164,14 +164,13 @@ RestfulContainer.prototype.newFetchPeopleRequest = function(idSpec,
   var me = this;
   return new RestfulRequestItem(url, "GET", null,
       function(rawJson) {
-        var jsonPeople = rawJson;
+        var jsonPeople = rawJson['entry'];
         var people = [];
         for (var i = 0; i < jsonPeople.length; i++) {
           people.push(me.createPersonFromJson(jsonPeople[i]));
         }
-        return new opensocial.Collection(people);
-        // TODO: Bring this back once the restful url supports it
-        // rawJson['offset'],rawJson['totalSize']);
+        return new opensocial.Collection(people,
+            rawJson['startIndex'], rawJson['totalResults']);
       });
 };
 
@@ -203,6 +202,7 @@ RestfulContainer.prototype.newFetchActivitiesRequest = function(idSpec,
       + "?app=" + this.appId_;
   return new RestfulRequestItem(url, "GET", null,
       function(rawJson) {
+        rawJson = rawJson['entry'];
         var activities = [];
         for (var i = 0; i < rawJson.length; i++) {
           activities.push(new JsonActivity(rawJson[i]));
@@ -226,26 +226,8 @@ RestfulRequestItem = function(url, method, postData, processData) {
       return rawJson;
     };
 
-  this.processResponse = function(originalDataRequest, rawXml, error,
+  this.processResponse = function(originalDataRequest, rawJson, error,
       errorMessage) {
-
-    if (!rawXml) {
-      error = true;
-      errorMessage = "Invalid request url";
-    }
-
-    var rawJson = [];
-    if (!error) {
-      var contentNodes = rawXml.getElementsByTagName("content");
-      if (contentNodes) {
-        for (var i = 0; i < contentNodes.length; i++) {
-          var xmlValue = contentNodes[i].childNodes[0].nodeValue;
-          rawJson.push(gadgets.json.parse(xmlValue));
-        }
-      } else {
-        error = true;
-      }
-    }
 
     return new opensocial.ResponseItem(originalDataRequest,
         error ? null : this.processData(rawJson), error, errorMessage);
