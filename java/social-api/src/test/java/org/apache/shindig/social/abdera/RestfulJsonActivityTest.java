@@ -105,6 +105,37 @@ public class RestfulJsonActivityTest extends AbstractLargeRestfulTests {
         result.getJSONArray("entry").getJSONObject(0));
   }
 
+  /**
+   * Expected response for a list of activities in json:
+   * TODO: Fix the question marks...
+   *
+   * {
+   *  "author" : "<???>",
+   *  "link" : {"rel" : "next", "href" : "<???>"},
+   *  "totalResults" : 1,
+   *  "startIndex" : 0
+   *  "itemsPerPage" : 10 // Note: the js doesn't support paging. Should rest?
+   *  "entry" : [
+   *     {<activity>} // layed out like above
+   *  ]
+   * }
+   *
+   * @throws Exception if test encounters an error
+   */
+  @Test
+  public void testGetFriendsActivitiesJson() throws Exception {
+    // TODO: test that the ids passed into the activities service are correct
+    // TODO: change this test to use different people
+    resp = client.get(BASEURL + "/activities/john.doe/@friends");
+    checkForGoodJsonResponse(resp);
+    JSONObject result = getJson(resp);
+
+    assertEquals(1, result.getInt("totalResults"));
+    assertEquals(0, result.getInt("startIndex"));
+    assertActivitiesEqual(activity,
+        result.getJSONArray("entry").getJSONObject(0));
+  }
+
   private void assertActivitiesEqual(Activity activity, JSONObject result)
       throws JSONException {
     assertEquals(activity.getId(), result.getString("id"));
@@ -115,5 +146,4 @@ public class RestfulJsonActivityTest extends AbstractLargeRestfulTests {
 
   // TODO: Add tests for the fields= parameter
   // TODO: Add tests for post
-  // TODO: Add tests for @friends
 }
