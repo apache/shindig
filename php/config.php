@@ -44,8 +44,8 @@ $shindigConfig = array(
 
 	// Configurable CSS rules that are injected to the gadget page, 
 	// be careful when adjusting these not to break most gadget's layouts :)
-	'gadget_css' => 'body,td,div,span,p{font-family:arial,sans-serif;} a {color:#0000cc;}a:visited {color:#551a8b;}a:active {color:#ff0000;}body{margin: 0px;padding: 0px;background-color:white;}',
-	//'gadget_css' => 'body,td,div,span,p{font-family:arial,sans-serif;} body {background-color:#ffffff; font-family: arial, sans-serif; padding: 0px; margin: 0px;  font-size: 12px; color: #000000;}a, a:visited {color: #3366CC;text-decoration: none; }a:hover {color: #3366CC; text-decoration: underline;} input, select { border: 1px solid #bdc7d8;font-size: 11px;padding: 3px;}',
+	//'gadget_css' => 'body,td,div,span,p{font-family:arial,sans-serif;} a {color:#0000cc;}a:visited {color:#551a8b;}a:active {color:#ff0000;}body{margin: 0px;padding: 0px;background-color:white;}',
+	'gadget_css' => 'body,td,div,span,p{font-family:arial,sans-serif;} body {background-color:#ffffff; font-family: arial, sans-serif; padding: 0px; margin: 0px;  font-size: 12px; color: #000000;}a, a:visited {color: #3366CC;text-decoration: none; }a:hover {color: #3366CC; text-decoration: underline;} input, select { border: 1px solid #bdc7d8;font-size: 11px;padding: 3px;}',
 	
 	// The html / javascript samples use a plain text demo token,
 	// set this to false on anything resembling a real site
@@ -66,9 +66,9 @@ $shindigConfig = array(
 
 	// The data handlers for the social data, this is a list of class names
 	// seperated by a , For example:
-	//'handlers' => 'PartuzaHandler',
+	'handlers' => 'PartuzaHandler',
 	// if the value is empty, the defaults used in the example above will be used.
-	'handlers' => '',
+	//'handlers' => '',
 
 	'focedJsLibs' => '',
 	
