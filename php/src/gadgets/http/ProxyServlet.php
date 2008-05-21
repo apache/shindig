@@ -26,6 +26,8 @@ require 'src/common/RemoteContentRequest.php';
 require 'src/common/RemoteContent.php';
 require 'src/common/Cache.php';
 require 'src/common/RemoteContentFetcher.php';
+require 'src/gadgets/oauth/OAuth.php';
+require 'src/gadgets/oauth/OAuthStore.php';
 
 class ProxyServlet extends HttpServlet {
 
@@ -39,6 +41,7 @@ class ProxyServlet extends HttpServlet {
 		if (! $url) {
 			$url = isset($_POST['url']) ? $_POST['url'] : false;
 		}
+		$url = urldecode($url);
 		$method = isset($_GET['httpMethod']) ? $_GET['httpMethod'] : false;
 		if (! $method) {
 			$method = isset($_POST['httpMethod']) ? $_POST['httpMethod'] : 'GET';
@@ -49,7 +52,8 @@ class ProxyServlet extends HttpServlet {
 		}
 		$gadgetSigner = Config::get('security_token_signer');
 		$gadgetSigner = new $gadgetSigner();
-		$proxyHandler = new ProxyHandler($context);
+		$signingFetcherFactory = new SigningFetcherFactory(Config::get("private_key_file"));
+		$proxyHandler = new ProxyHandler($context, $signingFetcherFactory);
 		if (! empty($_GET['output']) && $_GET['output'] == 'js') {
 			$proxyHandler->fetchJson($url, $gadgetSigner, $method);
 		} else {

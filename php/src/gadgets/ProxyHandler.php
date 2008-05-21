@@ -30,10 +30,14 @@ define('UNPARSEABLE_CRUFT', "throw 1; < don't be evil' >");
  */
 class ProxyHandler {
 	private $context;
+	private $signingFetcher;
+	private $oauthFetcher;
 	
-	public function __construct($context)
+	public function __construct($context, $signingFetcher = null, $oauthFetcher = null)
 	{
 		$this->context = $context;
+		$this->signingFetcher = $signingFetcher;
+		$this->oauthFetcher = $oauthFetcher;
 	}
 	
 	/**
@@ -51,11 +55,21 @@ class ProxyHandler {
 			$token = '';
 			// no token given, safe to ignore
 		}
-		$originalUrl = $this->validateUrl($url);
-		$signedUrl = $this->signUrl($originalUrl, $token);
+		$url = $this->validateUrl($url);
 		// Fetch the content and convert it into JSON.
 		// TODO: Fetcher needs to handle variety of HTTP methods.
-		$result = $this->fetchContent($signedUrl, $method);
+		$result = $this->fetchContentDivert($url, $method, $signer);
+		if (!isset($result)) {
+			//OAuthFetcher only
+			$metadata = $this->oauthFetcher->getResponseMetadata();
+			$json = array($url => $metadata);
+			$json = json_encode($json);
+			$output = UNPARSEABLE_CRUFT . $json;
+			$this->setCachingHeaders();
+			header("Content-Type: application/json; charset=utf-8", true);
+			echo $output;
+			die();	
+		}
 		$status = (int)$result->getHttpCode();
 		//header("HTTP/1.1 $status", true);
 		if ($status == 200) {
@@ -174,10 +188,9 @@ class ProxyHandler {
 			$token = '';
 			// no token given, safe to ignore
 		}
-		$originalUrl = $this->validateUrl($url);
-		$signedUrl = $this->signUrl($originalUrl, $token);
+		$url = $this->validateUrl($url);
 		//TODO: Fetcher needs to handle variety of HTTP methods.
-		$result = $this->fetchContent($signedUrl, $method);
+		$result = $this->fetchContent($url, $method);
 		// TODO: Fetcher needs to handle variety of HTTP methods.
 		$status = (int)$result->getHttpCode();
 		if ($status == 200) {
@@ -208,11 +221,11 @@ class ProxyHandler {
 	/**
 	 * Both fetch and fetchJson call this function to retrieve the actual content
 	 *
-	 * @param string $signedUrl the signed url to fetch
+	 * @param string $url the url to fetch
 	 * @param string $method either get or post
 	 * @return the filled in request (RemoteContentRequest)
 	 */
-	private function fetchContent($signedUrl, $method)
+	private function fetchContent($url, $method)
 	{
 		//TODO get actual character encoding from the request
 
@@ -250,13 +263,40 @@ class ProxyHandler {
 			}
 			// even if postData is an empty string, it will still post (since RemoteContentRquest checks if its false)
 			// so the request to POST is still honored
-			$request = new RemoteContentRequest($signedUrl, $headers, $postData);
+			$request = new RemoteContentRequest($url, $headers, $postData);
 			$request = $this->context->getHttpFetcher()->fetch($request, $context);
 		} else {
-			$request = new RemoteContentRequest($signedUrl, $headers);
+			$request = new RemoteContentRequest($url, $headers);
 			$request = $this->context->getHttpFetcher()->fetch($request, $context);
 		}
 		return $request;
+	}
+
+	private function fetchContentDivert($url, $method, $signer)
+	{
+		$authz = isset($_GET['authz']) ? $_GET['authz'] : (isset($_POST['authz']) ? $_POST['authz'] : '');
+		$token = $this->extractAndValidateToken($signer);
+		switch (strtoupper($authz)) {
+			case 'SIGNED':
+				$fetcher = $this->signingFetcher->getSigningFetcher(new BasicRemoteContentFetcher(), $token);
+				return $fetcher->fetch($url, $method);
+			case 'AUTHENTICATED':
+				$params = new OAuthRequestParams();
+				$fetcher = $this->signingFetcher->getSigningFetcher(new BasicRemoteContentFetcher(), $token);
+				$oAuthFetcherFactory = new OAuthFetcherFactory($fetcher);
+				$this->oauthFetcher = $oAuthFetcherFactory->getOAuthFetcher($fetcher, $token, $params);
+				$request = new RemoteContentRequest($url);
+				$request->createRemoteContentRequestWithUri($url);
+				return $this->oauthFetcher->fetchRequest($request);
+			case 'NONE':
+			default:
+				return $this->fetchContent($url, $method);
+		}
+	}
+	
+	public function setContentFetcher($contentFetcherFactory)
+	{
+		$this->contentFetcherFactory = $contentFetcherFactory;
 	}
 	
 	/**
@@ -282,6 +322,7 @@ class ProxyHandler {
 	private function validateUrl($url)
 	{
 		//TODO should really make a PHP version of the URI class and validate in all the locations the java version does
+		// why not use Zend::Uri:
 		return $url;
 	}
 	
@@ -297,36 +338,13 @@ class ProxyHandler {
 		if ($signer == null) {
 			return null;
 		}
-		$token = isset($_GET["st"]) ? $_GET["st"] : false;
-		if ($token) {
+		$token = isset($_GET["st"]) ? $_GET["st"] : '';
+		if (!isset($token) || $token == '') {
 			$token = isset($_POST['st']) ? $_POST['st'] : '';
 		}
 		return $signer->createToken($token);
 	}
-	
-	/**
-	 * Signs a url with the SecurityToken
-	 *
-	 * @param string $originalUrl
-	 * @param SecurityToken $token
-	 * @return unknown
-	 */
-	private function signUrl($originalUrl, $token)
-	{
-		$authz = isset($_GET['authz']) ? $_GET['authz'] : false;
-		if (! $authz) {
-			$authz = isset($_POST['authz']) ? $_POST['authz'] : '';
-		}
-		if ($token == null || $authz != 'signed') {
-			return $originalUrl;
-		}
-		$method = isset($_GET['httpMethod']) ? $_GET['httpMethod'] : false;
-		if ($method) {
-			$method = isset($_POST['httpMethod']) ? $_POST['httpMethod'] : 'GET';
-		}
-		return $token->signUrl($originalUrl, $method);
-	}
-	
+		
 	private function request_headers()
 	{
 		// Try to use apache's request headers if available

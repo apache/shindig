@@ -24,7 +24,7 @@ class JsLibrary {
 	private $content;
 	private $featureName; // used to track what feature this belongs to
 	private $loaded = false;
-	
+
 	public function __construct($type, $content, $featureName = '')
 	{
 		$this->featureName = $featureName;
@@ -39,11 +39,11 @@ class JsLibrary {
 
 	public function getContent()
 	{
-		if (!$this->loaded && $this->type == 'FILE') {
+		if (! $this->loaded && $this->type == 'FILE') {
 			if (Config::get('compress_javascript')) {
 				$dataCache = Config::get('data_cache');
 				$dataCache = new $dataCache();
-				if (!($content = $dataCache->get(md5($this->content)))) {
+				if (! ($content = $dataCache->get(md5($this->content)))) {
 					$content = JsMin::minify(JsLibrary::loadData($this->content, $this->type));
 					$dataCache->set(md5($this->content), $content);
 					$this->content = $content;

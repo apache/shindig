@@ -26,21 +26,21 @@ define('DEFAULT_VIEW', 'profile');
  * Server wide variables are stored in config.php
  */
 class GadgetContext {
-	private $httpFetcher = null;
-	private $locale = null;
-	private $renderingContext = null;
-	private $registry = null;
-	private $userPrefs = null;
-	private $gadgetId = null;
-	private $view = null;
-	private $moduleId = null;
-	private $url = null;
-	private $cache = null;
-	private $blacklist = null;
-	private $ignoreCache = null;
-	private $forcedJsLibs = null;
-	private $containerConfig = null;
-	private $container = null;
+	protected $httpFetcher = null;
+	protected $locale = null;
+	protected $renderingContext = null;
+	protected $registry = null;
+	protected $userPrefs = null;
+	protected $gadgetId = null;
+	protected $view = null;
+	protected $moduleId = null;
+	protected $url = null;
+	protected $cache = null;
+	protected $blacklist = null;
+	protected $ignoreCache = null;
+	protected $forcedJsLibs = null;
+	protected $containerConfig = null;
+	protected $container = null;
 
 	public function __construct($renderingContext)
 	{

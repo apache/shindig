@@ -30,7 +30,7 @@ require 'src/gadgets/JsLibraryFeatureFactory.php';
  * to retrieve our features javascript code
  */
 class JsServlet extends HttpServlet {
-	
+
 	public function doGet()
 	{
 		$this->noHeaders = true;

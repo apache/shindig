@@ -80,7 +80,7 @@ class Zend_Loader
             self::loadFile($file, $dirs, true);
         } else {
             self::_securityCheck($file);
-            include_once $file;
+            include_once 'src/common/'.$file;
         }
 
         if (!class_exists($class, false) && !interface_exists($class, false)) {

@@ -17,20 +17,26 @@
  * specific language governing permissions and limitations under the License.
  * 
  */
+require 'src/common/HttpServlet.php';
 
-abstract class RemoteContentFetcher {
-	
-	protected $fetcher;
+/**
+ * This class serves the public certificate, quick and dirty hack to make the certificate publicly accessible
+ * this combined with the hard coded location in SigningFetcherFactory.php : http://{host}/{prefix}/public.crt
+ * for the oauth pub key location makes a working whole
+ */
+class CertServlet extends HttpServlet {
 
-	protected function setNextFetcher($fetcher = null)
+	/**
+	 * Handles the get file request, only called on url = /public.crt
+	 * so this function has no logic other then to output the cert
+	 */
+	public function doGet()
 	{
-		$this->fetcher = $fetcher;
-	}
-
-	abstract public function fetchRequest($request);
-
-	public function getNextFetcher()
-	{
-		return $this->fetcher;
+		$file = Config::get('public_key_file');
+		if (!file_exists($file) || !is_readable($file)) {
+			throw new Exception("Invalid public key location ($file), check config and file permissions");
+		}
+		$this->setLastModified(filemtime($file));
+		readfile($file);
 	}
 }
