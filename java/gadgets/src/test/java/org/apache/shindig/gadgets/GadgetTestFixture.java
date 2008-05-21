@@ -40,9 +40,9 @@ public abstract class GadgetTestFixture extends EasyMockTestCase {
   public final HttpFetcher fetcher = mock(HttpFetcher.class);
   public final GadgetBlacklist blacklist = mock(GadgetBlacklist.class);
   public final GadgetSpecFactory specFactory =
-      new BasicGadgetSpecFactory(fetcher, new NoOpContentRewriter(), true);
+      new BasicGadgetSpecFactory(fetcher, new NoOpContentRewriter(), true, 0);
   public final MessageBundleFactory bundleFactory =
-      new BasicMessageBundleFactory(fetcher);
+      new BasicMessageBundleFactory(fetcher, 0);
   public GadgetFeatureRegistry registry;
   public ContainerConfig containerConfig;
   public final Executor executor = new Executor() {

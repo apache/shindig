@@ -14,20 +14,20 @@
 
 package org.apache.shindig.gadgets;
 
-import org.apache.shindig.common.SecurityToken;
-import org.apache.shindig.common.crypto.Crypto;
-import org.apache.shindig.common.util.TimeSource;
-import org.apache.shindig.gadgets.http.HttpCache;
-import org.apache.shindig.gadgets.http.HttpFetcher;
-import org.apache.shindig.gadgets.http.HttpResponse;
-import org.apache.shindig.gadgets.http.HttpRequest;
-
 import net.oauth.OAuth;
 import net.oauth.OAuth.Parameter;
 import net.oauth.OAuthAccessor;
 import net.oauth.OAuthConsumer;
 import net.oauth.OAuthMessage;
 import net.oauth.signature.RSA_SHA1;
+
+import org.apache.shindig.common.SecurityToken;
+import org.apache.shindig.common.crypto.Crypto;
+import org.apache.shindig.common.util.TimeSource;
+import org.apache.shindig.gadgets.http.HttpCache;
+import org.apache.shindig.gadgets.http.HttpFetcher;
+import org.apache.shindig.gadgets.http.HttpRequest;
+import org.apache.shindig.gadgets.http.HttpResponse;
 
 import java.io.IOException;
 import java.net.URI;
@@ -161,9 +161,7 @@ public class SigningFetcher extends ChainedContentFetcher {
       result = nextFetcher.fetch(signedRequest);
 
       // Try and cache the response
-      cache.addResponse(cacheableRequest, result);
-
-      return result;
+      return cache.addResponse(cacheableRequest, result);
     } catch (GadgetException e) {
       throw e;
     } catch (Exception e) {

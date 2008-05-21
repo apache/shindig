@@ -28,9 +28,9 @@ public interface HttpCache {
 
   public HttpResponse getResponse(HttpRequest request);
 
-  public void addResponse(URI uri, HttpResponse response);
+  public HttpResponse addResponse(URI uri, HttpResponse response);
 
-  public void addResponse(HttpRequest request, HttpResponse response);
+  public HttpResponse addResponse(HttpRequest request, HttpResponse response);
 
   public HttpResponse removeResponse(URI uri);
 
