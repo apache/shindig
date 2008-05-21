@@ -17,12 +17,15 @@
  */
 package org.apache.shindig.gadgets.http;
 
+import org.apache.shindig.gadgets.servlet.HttpUtil;
+
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -240,5 +243,84 @@ public class HttpResponse {
    */
   public void setRewritten(HttpResponse rewritten) {
     this.rewritten = rewritten;
+  }
+
+  /**
+   * @return consolidated cache expiration time or -1
+   */
+  public long getCacheExpiration() {
+    if (isStrictNoCache()) return -1;
+    long maxAgeExpiration = getCacheControlMaxAge() + System.currentTimeMillis();
+    long expiration = getExpiration();
+    if (expiration == -1) {
+      return maxAgeExpiration;
+    }
+    return expiration;
+  }
+
+  /**
+   * @return the expiration time from the Expires header or -1 if not set
+   */
+  public long getExpiration() {
+    String expires = getHeader("Expires");
+    if (expires != null) {
+      Date expiresDate = HttpUtil.parseDate(expires);
+      if (expiresDate != null) {
+        return expiresDate.getTime();
+      }
+    }
+    return -1;
+  }
+
+  /**
+   * @return max-age value or -1 if invalid or not set
+   */
+  public long getCacheControlMaxAge() {
+    String cacheControl = getHeader("Cache-Control");
+    if (cacheControl != null) {
+      String[] directives = cacheControl.split(",");
+      for (String directive : directives) {
+        directive = directive.trim();
+        if (directive.startsWith("max-age")) {
+          String[] parts = directive.split("=");
+          if (parts.length == 2) {
+            try {
+              return Long.parseLong(parts[1]) * 1000;
+            } catch (NumberFormatException e) {
+              return -1;
+            }
+          }
+        }
+      }
+    }
+    return -1;
+  }
+
+  /**
+   * @return true if a strict no-cache header is set in Cache-Control or Pragma
+   */
+  public boolean isStrictNoCache() {
+    String cacheControl = getHeader("Cache-Control");
+    if (cacheControl != null) {
+      String[] directives = cacheControl.split(",");
+      for (String directive : directives) {
+        directive = directive.trim();
+        if (directive.equalsIgnoreCase("no-cache")
+            || directive.equalsIgnoreCase("no-store")
+            || directive.equalsIgnoreCase("private")) {
+          return true;
+        }
+      }
+    }
+
+    List<String> pragmas = getHeaders("Pragma");
+    if (pragmas != null) {
+      for (String pragma : pragmas) {
+        if ("no-cache".equalsIgnoreCase(pragma)) {
+          return true;
+        }
+      }
+    }
+    return false;
   }
 }
