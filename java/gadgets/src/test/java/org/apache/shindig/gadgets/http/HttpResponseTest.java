@@ -17,9 +17,9 @@
  */
 package org.apache.shindig.gadgets.http;
 
-import org.apache.shindig.common.util.InputStreamConsumer;
-
 import junit.framework.TestCase;
+
+import org.apache.shindig.common.util.InputStreamConsumer;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -90,4 +90,32 @@ public class HttpResponseTest extends TestCase {
     byte[] out = InputStreamConsumer.readToByteArray(response.getResponse());
     assertTrue(Arrays.equals(data, out));
   }
+
+  public void testStrictCacheControlNoCache() throws Exception {
+    addHeader("Cache-Control", "no-cache");
+    HttpResponse response = new HttpResponse(200, new byte[0], headers);
+    assertTrue(response.isStrictNoCache());
+  }
+
+  public void testStrictPragmaNoCache() throws Exception {
+    addHeader("Pragma", "no-cache");
+    HttpResponse response = new HttpResponse(200, new byte[0], headers);
+    assertTrue(response.isStrictNoCache());
+  }
+
+  public void testStrictPragmaJunk() throws Exception {
+    addHeader("Pragma", "junk");
+    HttpResponse response = new HttpResponse(200, new byte[0], headers);
+    assertFalse(response.isStrictNoCache());
+  }
+
+  /*
+   There seems to be some issue with the date parsing in joda?
+  public void testExpires() throws Exception {
+    long time = System.currentTimeMillis() + 10000L;
+    addHeader("Expires", HttpUtil.formatDate(new Date(time)));
+    HttpResponse response = new HttpResponse(200, new byte[0], headers);
+    assertEquals(response.getExpiration(), time);
+  }
+  */
 }

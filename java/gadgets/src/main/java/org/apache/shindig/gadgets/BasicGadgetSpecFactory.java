@@ -51,7 +51,10 @@ public class BasicGadgetSpecFactory implements GadgetSpecFactory {
 
   private final boolean enableRewrite;
 
-  private final Cache<URI, GadgetSpec> inMemorySpecCache;
+  private final long specMinTTL;
+
+  // A cache of GadgetSpecs with expirations
+  private final Cache<URI, SpecTimeoutPair> inMemorySpecCache;
 
   public GadgetSpec getGadgetSpec(GadgetContext context)
       throws GadgetException {
@@ -60,11 +63,16 @@ public class BasicGadgetSpecFactory implements GadgetSpecFactory {
 
   public GadgetSpec getGadgetSpec(URI gadgetUri, boolean ignoreCache)
       throws GadgetException {
-    GadgetSpec spec;
+    GadgetSpec spec = null;
+    long expiration = -1;
     synchronized (inMemorySpecCache) {
-      spec = inMemorySpecCache.getElement(gadgetUri);
+      SpecTimeoutPair gadgetSpecEntry = inMemorySpecCache.getElement(gadgetUri);
+      if (gadgetSpecEntry != null) {
+        spec = gadgetSpecEntry.spec;
+        expiration = gadgetSpecEntry.timeout;
+      }
     }
-    if (ignoreCache || spec == null) {
+    if (ignoreCache || spec == null || expiration < System.currentTimeMillis()) {
       try {
         HttpRequest request = HttpRequest.getRequest(
             gadgetUri, ignoreCache);
@@ -84,9 +92,11 @@ public class BasicGadgetSpecFactory implements GadgetSpecFactory {
               }
             }
           }
-          // Add the updated spec back to the cache
+          // Add the updated spec back to the cache and force the min TTL
+          expiration = Math
+              .max(response.getCacheExpiration(), System.currentTimeMillis() + specMinTTL);
           synchronized (inMemorySpecCache) {
-            inMemorySpecCache.addElement(gadgetUri, spec);
+            inMemorySpecCache.addElement(gadgetUri, new SpecTimeoutPair(spec, expiration));
           }
         }
       } catch (GadgetException ge) {
@@ -105,10 +115,23 @@ public class BasicGadgetSpecFactory implements GadgetSpecFactory {
   public BasicGadgetSpecFactory(HttpFetcher specFetcher,
       ContentRewriter rewriter,
       @Named("content-rewrite.enabled")boolean defaultEnableRewrite,
-      @Named("gadget-spec.cache.capacity")int gadgetSpecCacheCapacity) {
+      @Named("gadget-spec.cache.capacity")int gadgetSpecCacheCapacity,
+      @Named("gadget-spec.cache.minTTL")long minTTL) {
     this.specFetcher = specFetcher;
     this.rewriter = rewriter;
     this.enableRewrite = defaultEnableRewrite;
-    inMemorySpecCache = new LruCache<URI, GadgetSpec>(gadgetSpecCacheCapacity);
+    this.inMemorySpecCache = new LruCache<URI, SpecTimeoutPair>(
+        gadgetSpecCacheCapacity);
+    this.specMinTTL = minTTL;
+  }
+
+  private static class SpecTimeoutPair {
+    private GadgetSpec spec;
+    private long timeout;
+
+    private SpecTimeoutPair(GadgetSpec spec, long timeout) {
+      this.spec = spec;
+      this.timeout = timeout;
+    }
   }
 }

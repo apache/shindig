@@ -43,7 +43,9 @@ public class BasicMessageBundleFactory implements MessageBundleFactory {
 
   private final HttpFetcher bundleFetcher;
 
-  private final Cache<URI, MessageBundle> inMemoryBundleCache;
+  private final Cache<URI, BundleTimeoutPair> inMemoryBundleCache;
+
+  private final long bundleMinTTL;
 
   public MessageBundle getBundle(LocaleSpec localeSpec, GadgetContext context)
       throws GadgetException {
@@ -52,11 +54,16 @@ public class BasicMessageBundleFactory implements MessageBundleFactory {
 
   public MessageBundle getBundle(URI bundleUrl, boolean ignoreCache)
       throws GadgetException {
-    MessageBundle bundle;
+    MessageBundle bundle = null;
+    long expiration = -1;
     synchronized (inMemoryBundleCache) {
-      bundle = inMemoryBundleCache.getElement(bundleUrl);
+      BundleTimeoutPair entry = inMemoryBundleCache.getElement(bundleUrl);
+      if (entry != null) {
+        bundle = entry.bundle;
+        expiration = entry.timeout;
+      }
     }
-    if (ignoreCache || bundle == null) {
+    if (ignoreCache || bundle == null || expiration < System.currentTimeMillis()) {
       try {
         HttpRequest request
             = HttpRequest.getRequest(bundleUrl, ignoreCache);
@@ -68,8 +75,12 @@ public class BasicMessageBundleFactory implements MessageBundleFactory {
                   response.getHttpStatusCode());
         }
         bundle = new MessageBundle(bundleUrl, response.getResponseAsString());
+
+        // Add the updated bundle back to the cache and force the min TTL
+        expiration = Math
+            .max(response.getCacheExpiration(), System.currentTimeMillis() + bundleMinTTL);
         synchronized (inMemoryBundleCache) {
-          inMemoryBundleCache.addElement(bundleUrl, bundle);
+          inMemoryBundleCache.addElement(bundleUrl, new BundleTimeoutPair(bundle, expiration));
         }
       } catch (GadgetException ge) {
         if (bundle == null) {
@@ -85,8 +96,21 @@ public class BasicMessageBundleFactory implements MessageBundleFactory {
 
   @Inject
   public BasicMessageBundleFactory(HttpFetcher bundleFetcher,
-      @Named("message-bundle.cache.capacity")int messageBundleCacheCapacity) {
+      @Named("message-bundle.cache.capacity")int messageBundleCacheCapacity,
+      @Named("message-bundle.cache.minTTL")long minTTL) {
     this.bundleFetcher = bundleFetcher;
-    this.inMemoryBundleCache = new LruCache<URI, MessageBundle>(messageBundleCacheCapacity);
+    this.inMemoryBundleCache =
+        new LruCache<URI, BundleTimeoutPair>(messageBundleCacheCapacity);
+    this.bundleMinTTL = minTTL;
+  }
+
+  private static class BundleTimeoutPair {
+    private MessageBundle bundle;
+    private long timeout;
+
+    private BundleTimeoutPair(MessageBundle bundle, long timeout) {
+      this.bundle = bundle;
+      this.timeout = timeout;
+    }
   }
 }
