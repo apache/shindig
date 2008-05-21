@@ -143,7 +143,7 @@ public class UrlGenerator {
           value = pref.getDefaultValue();
         }
         buf.append("&up_").append(URLEncoder.encode(pref.getName(), "UTF-8"))
-           .append("=").append(URLEncoder.encode(value, "UTF-8"));
+           .append('=').append(URLEncoder.encode(value, "UTF-8"));
       }
       // add url last to work around browser bugs
       if(!type.equals(View.ContentType.URL)) {

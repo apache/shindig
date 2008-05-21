@@ -112,10 +112,10 @@ public abstract class RestServerCollectionAdapter
         String entryId = null;
         Date updated = null;
         if (obj instanceof Person) {
-          entryId = request.getUri().toString() + "/" + ((Person) obj).getId();
+          entryId = request.getUri().toString() + '/' + ((Person) obj).getId();
           updated = ((Person) obj).getUpdated();
         } else if (obj instanceof Activity) {
-          entryId = request.getUri().toString() + "/" + ((Activity) obj).getId();
+          entryId = request.getUri().toString() + '/' + ((Activity) obj).getId();
           updated = ((Activity) obj).getUpdated();
         }
         Entry entry = fillEntry(request, obj, entryId, updated, format);

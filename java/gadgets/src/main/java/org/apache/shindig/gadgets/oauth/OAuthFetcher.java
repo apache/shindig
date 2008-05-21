@@ -362,7 +362,7 @@ public class OAuthFetcher extends ChainedContentFetcher {
         } else {
           postBody = new StringBuilder()
               .append(postBody)
-              .append("&")
+              .append('&')
               .append(OAuth.formEncode(oauthParams))
               .toString();
         }
@@ -425,15 +425,15 @@ public class OAuthFetcher extends ChainedContentFetcher {
     // At some point we can be clever and use a callback URL to improve
     // the user experience, but that's too complex for now.
     OAuthAccessor accessor = accessorInfo.getAccessor();
-    StringBuffer azn = new StringBuffer(
+    StringBuilder azn = new StringBuilder(
         accessor.consumer.serviceProvider.userAuthorizationURL);
     if (azn.indexOf("?") == -1) {
-      azn.append("?");
+      azn.append('?');
     } else {
-      azn.append("&");
+      azn.append('&');
     }
     azn.append(OAuth.OAUTH_TOKEN);
-    azn.append("=");
+    azn.append('=');
     azn.append(OAuth.percentEncode(accessor.requestToken));
     aznUrl = azn.toString();
   }

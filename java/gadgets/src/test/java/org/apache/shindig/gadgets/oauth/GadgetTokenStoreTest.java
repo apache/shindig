@@ -152,7 +152,7 @@ public class GadgetTokenStoreTest extends TestCase {
     GadgetInfo gadgetInfo = GadgetOAuthTokenStore.getGadgetOAuthInfo(spec);
 
     OAuthStore.ProviderKey providerKey = new OAuthStore.ProviderKey();
-    providerKey.setGadgetUri(gadgetUrl.toString());
+    providerKey.setGadgetUri(gadgetUrl);
     providerKey.setServiceName(gadgetInfo.getServiceName());
 
     mockStoreImpl.setOAuthServiceProviderInfo(

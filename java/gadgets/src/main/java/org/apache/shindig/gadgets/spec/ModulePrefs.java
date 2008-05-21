@@ -293,7 +293,7 @@ public class ModulePrefs {
    * @return The locale spec, if there is a matching one, or null.
    */
   public LocaleSpec getLocale(Locale locale) {
-    if (locales.size() == 0) {
+    if (locales.isEmpty()) {
       return null;
     }
     LocaleSpec localeSpec = locales.get(locale);
@@ -319,7 +319,7 @@ public class ModulePrefs {
     ModulePrefs prefs = new ModulePrefs(this);
 
     // Icons, if any
-    if (icons.size() == 0) {
+    if (icons.isEmpty()) {
       prefs.icons = Collections.emptyList();
     } else {
       List<Icon> iconList = new ArrayList<Icon>(icons.size());
@@ -390,7 +390,7 @@ public class ModulePrefs {
        .append(" scrolling=\"").append(scrolling).append('\"')
        .append(">\n");
     for (Preload preload : preloads) {
-      buf.append(preload).append("\n");
+      buf.append(preload).append('\n');
     }
     for (Feature feature : features.values()) {
       buf.append(feature).append('\n');

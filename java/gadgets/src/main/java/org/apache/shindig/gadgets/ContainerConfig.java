@@ -185,6 +185,7 @@ public class ContainerConfig {
    *
    * @param obj
    * @return An array of all keys in the object.
+   * @throws org.json.JSONException
    */
   private static String[] getNames(JSONObject obj) throws JSONException {
     JSONArray arr = obj.names();
@@ -237,6 +238,7 @@ public class ContainerConfig {
   /**
    * Processes a container file.
    * @param json
+   * @throws GadgetException
    */
   public void loadFromString(String json) throws GadgetException {
     try {
@@ -271,6 +273,7 @@ public class ContainerConfig {
    * from within the GadgetServerConfig.
    *
    * @param path
+   * @throws GadgetException
    */
   public void loadContainers(String path) throws GadgetException {
     try {
@@ -294,6 +297,8 @@ public class ContainerConfig {
 
   /**
    * Creates a new, empty configuration.
+   * @param containers
+   * @throws GadgetException
    */
   @Inject
   public ContainerConfig(@Named("containers.default") String containers)

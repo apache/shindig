@@ -129,7 +129,7 @@ public class XmlUtil {
       InputSource is = new InputSource(new StringReader(xml.trim()));
       return factory.newDocumentBuilder().parse(is).getDocumentElement();
     } catch (SAXParseException e) {
-      throw new XmlException(e.getMessage()+" At: ("+e.getLineNumber()+","+e.getColumnNumber()+")", e);
+      throw new XmlException(e.getMessage()+" At: ("+e.getLineNumber()+ ',' +e.getColumnNumber()+ ')', e);
     } catch (SAXException e) {
       throw new XmlException(e);
     } catch (ParserConfigurationException e) {

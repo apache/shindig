@@ -106,11 +106,11 @@ public class DefaultContentRewriter implements ContentRewriter {
   }
 
   private boolean isHTML(String mime) {
-    return (mime.toLowerCase().indexOf("html") != -1);
+    return (mime.toLowerCase().contains("html"));
   }
 
   private boolean isCSS(String mime) {
-    return (mime.toLowerCase().indexOf("css") != -1);
+    return (mime.toLowerCase().contains("css"));
   }
 
   protected String getProxyUrl() {

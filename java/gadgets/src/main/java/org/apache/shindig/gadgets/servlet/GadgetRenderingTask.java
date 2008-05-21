@@ -178,7 +178,7 @@ public class GadgetRenderingTask {
     String redir =
         request.getScheme() + "://" +
         required +
-        request.getServletPath() + "?" +
+        request.getServletPath() + '?' +
         request.getQueryString();
     logger.info("Redirecting gadget " + context.getUrl() + " from domain " +
         host + " to domain " + redir);
@@ -241,7 +241,7 @@ public class GadgetRenderingTask {
     }
 
     // Forced libs are always done first.
-    if (libs.size() > 0) {
+    if (!libs.isEmpty()) {
       String jsUrl = urlGenerator.getBundledJsUrl(libs, context);
       markup.append(String.format(externFmt, jsUrl));
 

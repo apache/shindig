@@ -137,7 +137,7 @@ public class Substitutions {
       return input;
     }
 
-    if (substitutions.get(type).size() == 0 || !input.contains(type.prefix)) {
+    if (substitutions.get(type).isEmpty() || !input.contains(type.prefix)) {
       return input;
     }
 

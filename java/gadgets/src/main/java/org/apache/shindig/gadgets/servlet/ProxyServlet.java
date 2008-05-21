@@ -66,7 +66,7 @@ public class ProxyServlet extends InjectedServlet {
     doGet(request, response);
   }
 
-  private void outputError(GadgetException excep, HttpServletResponse resp)
+  private static void outputError(GadgetException excep, HttpServletResponse resp)
       throws IOException {
     StringBuilder err = new StringBuilder();
     err.append(excep.getCode().toString());
