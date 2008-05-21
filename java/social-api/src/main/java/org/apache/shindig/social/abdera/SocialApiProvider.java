@@ -29,7 +29,6 @@ public class SocialApiProvider extends DefaultProvider {
 
   private PeopleServiceAdapter peopleAdapter;
   private FriendsServiceAdapter friendsAdapter;
-  private ActivitiesServiceAdapter activitiesAdapter;
   private DataServiceAdapter dataAdapter;
   private ActivityAdapter activityAdapter;
 
@@ -37,12 +36,10 @@ public class SocialApiProvider extends DefaultProvider {
   public void setAdapters(
       PeopleServiceAdapter peopleAdapter,
       FriendsServiceAdapter friendsAdapter,
-      ActivitiesServiceAdapter activitiesAdapter,
       DataServiceAdapter dataAdapter,
       ActivityAdapter activityAdapter) {
     this.peopleAdapter = peopleAdapter;
     this.friendsAdapter = friendsAdapter;
-    this.activitiesAdapter = activitiesAdapter;
     this.dataAdapter = dataAdapter;
     this.activityAdapter = activityAdapter;
   }
