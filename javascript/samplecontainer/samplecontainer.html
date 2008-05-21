@@ -102,7 +102,6 @@ function changeGadgetUrl() {
   setEvilBit();
 
   stateFileUrl = document.getElementById("stateFileUrl").value;
-  reloadStateFile();
   goog.net.cookies.set(stateFileUrlCookie, encodeURIComponent(stateFileUrl));
 
   viewerId = document.getElementById("viewerId").value;
@@ -113,7 +112,9 @@ function changeGadgetUrl() {
   gadget.specUrl = gadgetUrl;
   goog.net.cookies.set(gadgetUrlCookie, encodeURIComponent(gadgetUrl));
 
-  gadgets.container.renderGadgets();
+  reloadStateFile(function() {
+    gadgets.container.renderGadgets();
+  });
 };
 
 function generateSecureToken() {
@@ -153,8 +154,9 @@ function setEvilBit() {
   sendRequestToServer([{"type" : "SET_EVILNESS", "doEvil" : doEvil}]);
 };
 
-function reloadStateFile() {
-  sendRequestToServer([{"type" : "SET_STATE", "fileUrl" : stateFileUrl}]);
+function reloadStateFile(opt_callback) {
+  sendRequestToServer([{"type" : "SET_STATE", "fileUrl" : stateFileUrl}],
+      opt_callback);
 };
 
 function dumpStateFile() {

@@ -7,7 +7,6 @@ import org.apache.shindig.social.opensocial.model.Name;
 import org.apache.shindig.social.opensocial.model.Person;
 import org.apache.shindig.social.opensocial.model.Phone;
 
-import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpMethod;
@@ -23,7 +22,6 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import java.io.IOException;
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -32,10 +30,6 @@ import java.util.Map;
 
 @Singleton
 public class XmlStateFileFetcher {
-  private static final String DEFAULT_STATE_URL
-      = "http://localhost:8080/gadgets/files/samplecontainer/"
-      + "state-basicfriendlist.xml";
-
   // Evil javascript strings
   private static final String REDEFINE_NEW_DATA_REQUEST
       = "opensocial.newDataRequest = "
@@ -61,47 +55,74 @@ public class XmlStateFileFetcher {
   private Map<String, Person> allPeople;
   private Map<String, List<Activity>> allActivities;
 
-  @Inject
   public XmlStateFileFetcher() {
-   client = new HttpClient();
-   try {
-      stateFile = new URI(DEFAULT_STATE_URL);
-    } catch (URISyntaxException e) {
-      throw new RuntimeException(
-          "The default state file could not be fetched. ", e);
-    }
+    client = new HttpClient();
   }
 
+  /**
+   * When the state file is set all data will be fetched and reparsed
+   * immediately. This function must be called before an attempt is made to set
+   * or get data.
+   *
+   * @param stateFile The file to set
+   */
   public void resetStateFile(URI stateFile) {
     this.stateFile = stateFile;
-    document = null;
-    allData = null;
-    friendIdMap = null;
-    allPeople = null;
-    allActivities = null;
+    document = fetchStateDocument();
+    setupAppData();
+    setupActivities();
+    setupPeopleData();
   }
 
   public void setEvilness(boolean doEvil) {
     this.doEvil = doEvil;
   }
 
-  private Document fetchStateDocument() {
-    if (document != null) {
-      return document;
-    }
+  public Map<String, Map<String, String>> getAppData() {
+    return allData;
+  }
 
+  public Map<String, List<String>> getFriendIds() {
+    return friendIdMap;
+  }
+
+  public Map<String, Person> getAllPeople() {
+    return allPeople;
+  }
+
+  public Map<String, List<Activity>> getActivities() {
+    return allActivities;
+  }
+
+  public void setAppData(String id, String key, String value) {
+    if (allData.get(id) == null) {
+      allData.put(id, new HashMap<String, String>());
+    }
+    allData.get(id).put(key, value);
+  }
+
+  public void createActivity(String userId, Activity activity) {
+    if (allActivities.get(userId) == null) {
+      allActivities.put(userId, new ArrayList<Activity>());
+    }
+    allActivities.get(userId).add(activity);
+  }
+
+  private Document fetchStateDocument() {
     String errorMessage = "The state file " + stateFile
         + " could not be fetched and parsed.";
 
     DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+    HttpMethod xml = null;
     try {
-      HttpMethod xml = new GetMethod(stateFile.toString());
+      xml = new GetMethod(stateFile.toString());
       client.executeMethod(xml);
 
       if (xml.getStatusCode() != 200) {
         throw new RuntimeException(errorMessage);
       }
-      document= factory.newDocumentBuilder().parse(xml.getResponseBodyAsStream());
+      document = factory.newDocumentBuilder().parse(
+          xml.getResponseBodyAsStream());
       return document;
     } catch (SAXException e) {
       throw new RuntimeException(errorMessage, e);
@@ -109,22 +130,19 @@ public class XmlStateFileFetcher {
       throw new RuntimeException(errorMessage, e);
     } catch (ParserConfigurationException e) {
       throw new RuntimeException(errorMessage, e);
+    } finally {
+      if (xml != null) {
+        xml.releaseConnection();
+      }
     }
   }
 
   private String turnEvil(String originalString) {
     if (doEvil) {
-     return SCRIPT_PREFIX + originalString + SCRIPT_SUFFIX;
+      return SCRIPT_PREFIX + originalString + SCRIPT_SUFFIX;
     } else {
       return originalString;
     }
-  }
-
-  public Map<String, Map<String, String>> getAppData() {
-    if (allData == null) {
-      setupAppData();
-    }
-    return allData;
   }
 
   private void setupAppData() {
@@ -153,34 +171,6 @@ public class XmlStateFileFetcher {
       }
       currentData.put(field, turnEvil(value));
     }
-  }
-
-  public void setAppData(String id, String key, String value) {
-    if (allData == null) {
-      setupAppData();
-    }
-
-    Map<String, String> personData = allData.get(id);
-    if (personData == null) {
-      personData = new HashMap<String, String>();
-      allData.put(id, personData);
-    }
-
-    personData.put(key, value);
-  }
-
-  public Map<String, List<String>> getFriendIds() {
-    if (friendIdMap == null) {
-      setupPeopleData();
-    }
-    return friendIdMap;
-  }
-
-  public Map<String, Person> getAllPeople() {
-    if (allPeople == null) {
-      setupPeopleData();
-    }
-    return allPeople;
   }
 
   private void setupPeopleData() {
@@ -247,14 +237,6 @@ public class XmlStateFileFetcher {
       }
     }
     return friends;
-  }
-
-  public Map<String, List<Activity>> getActivities() {
-    if (allActivities == null) {
-      setupActivities();
-    }
-
-    return allActivities;
   }
 
   private void setupActivities() {
@@ -326,16 +308,5 @@ public class XmlStateFileFetcher {
     }
 
     return media;
-  }
-
-  public void createActivity(String userId, Activity activity) {
-    if (allActivities == null) {
-      setupActivities();
-    }
-
-    if (allActivities.get(userId) == null) {
-      allActivities.put(userId, new ArrayList<Activity>());
-    }
-    allActivities.get(userId).add(activity);
   }
 }
