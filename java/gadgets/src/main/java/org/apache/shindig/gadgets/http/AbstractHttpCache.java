@@ -26,7 +26,8 @@ import java.util.List;
 
 /**
  * Base class for content caches. Defines cache expiration rules and
- * and restrictions on allowed content.
+ * and restrictions on allowed content. Also enforces rewriting
+ * on cacheable content.
  *
  * TODO: Move cache checking code into HttpUtil
  */
@@ -34,7 +35,8 @@ public abstract class AbstractHttpCache implements HttpCache {
 
   public final HttpResponse getResponse(HttpRequest request) {
     if (canCacheRequest(request)) {
-      return getResponse(request.getUri());
+      HttpResponse response = getResponse(request.getUri());
+      return checkRewrite(request, response);
     }
     return null;
   }
@@ -46,17 +48,23 @@ public abstract class AbstractHttpCache implements HttpCache {
 
   protected abstract HttpResponse getResponseImpl(URI uri);
 
-  public void addResponse(HttpRequest request, HttpResponse response) {
+  public HttpResponse addResponse(HttpRequest request, HttpResponse response) {
     if (canCacheRequest(request)) {
+      // !!! Note that we only rewrite cacheable content. Move this call above the if
+      // to rewrite all content that passes through the cache regardless of cacheability
+      rewrite(request, response);
       addResponse(request.getUri(), response);
+      return checkRewrite(request, response);
     }
+    return response;
   }
 
-  public void addResponse(URI uri, HttpResponse response) {
+  public HttpResponse addResponse(URI uri, HttpResponse response) {
+    if (uri == null || response == null) return response;
     response = checkResponse(response);
-    if (uri == null || response == null) return;
     // Clone the URI to prevent outside references from preventing collection
     addResponseImpl(URI.create(uri.toString()), response);
+    return response;
   }
 
   protected abstract void addResponseImpl(URI uri, HttpResponse response);
@@ -161,6 +169,49 @@ public abstract class AbstractHttpCache implements HttpCache {
     response.getAllHeaders()
         .put("Expires", Arrays.asList(HttpUtil.formatDate(newExpiry)));
     return response;
+  }
+
+  /**
+   * Add rewritten content to the response if its not there and
+   * we can add it. Re-cache if we created rewritten content.
+   * Return the appropriately re-written version if requested
+   */
+  protected HttpResponse checkRewrite(HttpRequest request, HttpResponse response) {
+    if (response == null) return null;
+
+    // Perform a rewrite and store the content back to the cache if the
+    // content is actually rewritten
+    if (rewrite(request, response)) {
+      addResponseImpl(request.getUri(), response);
+    }
+
+    // Return the rewritten version if requested
+    if (request.getOptions() != null &&
+        !request.getOptions().ignoreCache &&
+        request.getOptions().rewriter != null &&
+        response.getRewritten() != null &&
+        response.getRewritten().getResponseAsBytes().length > 0) {
+      return response.getRewritten();
+    }
+    return response;
+  }
+
+  /**
+   * Rewrite the content
+   * @return true if rewritten content was generated
+   */
+  protected boolean rewrite(HttpRequest request, HttpResponse response) {
+    if (response == null) return false;
+    // TODO - Make this sensitive to custom rewriting rules
+    if (response.getRewritten() == null &&
+        request.getOptions() != null &&
+        request.getOptions().rewriter != null) {
+      response.setRewritten(request.getOptions().rewriter.rewrite(request, response));
+      if (response.getRewritten() != null) {
+        return true;
+      }
+    }
+    return false;
   }
 
   /**

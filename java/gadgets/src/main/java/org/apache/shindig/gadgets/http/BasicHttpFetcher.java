@@ -137,13 +137,7 @@ public class BasicHttpFetcher implements HttpFetcher {
   /** {@inheritDoc} */
   public HttpResponse fetch(HttpRequest request) {
     HttpResponse response = cache.getResponse(request);
-    // TODO - Make this sensitive to custom rewriting rules
     if (response != null) {
-      if (request.getOptions().rewriter != null &&
-          response.getRewritten() != null &&
-          response.getRewritten().getResponseAsBytes().length > 0) {
-        return response.getRewritten();
-      }
       return response;
     }
     try {
@@ -160,13 +154,7 @@ public class BasicHttpFetcher implements HttpFetcher {
                                  fetcher.getOutputStream());
       }
       response = makeResponse(fetcher);
-      if (request.getOptions().rewriter != null) {
-        // TODO - Make this sensitive to different rewriting rules
-        response.setRewritten(
-            request.getOptions().rewriter.rewrite(request, response));
-      }
-      cache.addResponse(request, response);
-      return response;
+      return cache.addResponse(request, response);
     } catch (IOException e) {
       if (e instanceof FileNotFoundException) {
         return HttpResponse.NOT_FOUND;

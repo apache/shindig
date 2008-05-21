@@ -18,22 +18,32 @@
  */
 package org.apache.shindig.gadgets;
 
+import com.google.inject.Inject;
+import com.google.inject.name.Named;
+
+import org.apache.shindig.common.cache.Cache;
+import org.apache.shindig.common.cache.LruCache;
 import org.apache.shindig.gadgets.http.HttpFetcher;
 import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.http.HttpResponse;
 import org.apache.shindig.gadgets.spec.LocaleSpec;
 import org.apache.shindig.gadgets.spec.MessageBundle;
 
-import com.google.inject.Inject;
-
 import java.net.URI;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Basic implementation of a message bundle factory
  */
 public class BasicMessageBundleFactory implements MessageBundleFactory {
 
-  private HttpFetcher bundleFetcher;
+  private static final Logger logger
+      = Logger.getLogger(BasicMessageBundleFactory.class.getName());
+
+  private final HttpFetcher bundleFetcher;
+
+  private final Cache<URI, MessageBundle> inMemoryBundleCache;
 
   public MessageBundle getBundle(LocaleSpec localeSpec, GadgetContext context)
       throws GadgetException {
@@ -42,22 +52,41 @@ public class BasicMessageBundleFactory implements MessageBundleFactory {
 
   public MessageBundle getBundle(URI bundleUrl, boolean ignoreCache)
       throws GadgetException {
-    HttpRequest request
-        = HttpRequest.getRequest(bundleUrl, ignoreCache);
-    HttpResponse response = bundleFetcher.fetch(request);
-    if (response.getHttpStatusCode() != HttpResponse.SC_OK) {
-      throw new GadgetException(
-          GadgetException.Code.FAILED_TO_RETRIEVE_CONTENT,
-          "Unable to retrieve message bundle xml. HTTP error " +
-          response.getHttpStatusCode());
+    MessageBundle bundle;
+    synchronized (inMemoryBundleCache) {
+      bundle = inMemoryBundleCache.getElement(bundleUrl);
     }
-    MessageBundle bundle
-        = new MessageBundle(bundleUrl, response.getResponseAsString());
+    if (ignoreCache || bundle == null) {
+      try {
+        HttpRequest request
+            = HttpRequest.getRequest(bundleUrl, ignoreCache);
+        HttpResponse response = bundleFetcher.fetch(request);
+        if (response.getHttpStatusCode() != HttpResponse.SC_OK) {
+          throw new GadgetException(
+              GadgetException.Code.FAILED_TO_RETRIEVE_CONTENT,
+              "Unable to retrieve message bundle xml. HTTP error " +
+                  response.getHttpStatusCode());
+        }
+        bundle = new MessageBundle(bundleUrl, response.getResponseAsString());
+        synchronized (inMemoryBundleCache) {
+          inMemoryBundleCache.addElement(bundleUrl, bundle);
+        }
+      } catch (GadgetException ge) {
+        if (bundle == null) {
+          throw ge;
+        } else {
+          logger.log(Level.WARNING,
+              "Msg bundle fetch failed for " + bundleUrl + " -  using cached ", ge);
+        }
+      }
+    }
     return bundle;
   }
 
   @Inject
-  public BasicMessageBundleFactory(HttpFetcher bundleFetcher) {
+  public BasicMessageBundleFactory(HttpFetcher bundleFetcher,
+      @Named("message-bundle.cache.capacity")int messageBundleCacheCapacity) {
     this.bundleFetcher = bundleFetcher;
+    this.inMemoryBundleCache = new LruCache<URI, MessageBundle>(messageBundleCacheCapacity);
   }
 }

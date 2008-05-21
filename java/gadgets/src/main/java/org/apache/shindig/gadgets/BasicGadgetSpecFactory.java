@@ -18,6 +18,12 @@
  */
 package org.apache.shindig.gadgets;
 
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
+import com.google.inject.name.Named;
+
+import org.apache.shindig.common.cache.Cache;
+import org.apache.shindig.common.cache.LruCache;
 import org.apache.shindig.gadgets.http.HttpFetcher;
 import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.http.HttpResponse;
@@ -26,11 +32,9 @@ import org.apache.shindig.gadgets.rewrite.ContentRewriterFeature;
 import org.apache.shindig.gadgets.spec.GadgetSpec;
 import org.apache.shindig.gadgets.spec.View;
 
-import com.google.inject.Inject;
-import com.google.inject.Singleton;
-import com.google.inject.name.Named;
-
 import java.net.URI;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Basic implementation of a gadget spec factory
@@ -38,9 +42,16 @@ import java.net.URI;
 @Singleton
 public class BasicGadgetSpecFactory implements GadgetSpecFactory {
 
+  private static final Logger logger
+      = Logger.getLogger(BasicGadgetSpecFactory.class.getName());
+
   private final HttpFetcher specFetcher;
+
   private final ContentRewriter rewriter;
+
   private final boolean enableRewrite;
+
+  private final Cache<URI, GadgetSpec> inMemorySpecCache;
 
   public GadgetSpec getGadgetSpec(GadgetContext context)
       throws GadgetException {
@@ -49,22 +60,41 @@ public class BasicGadgetSpecFactory implements GadgetSpecFactory {
 
   public GadgetSpec getGadgetSpec(URI gadgetUri, boolean ignoreCache)
       throws GadgetException {
-    HttpRequest request = HttpRequest.getRequest(
-        gadgetUri, ignoreCache);
-    HttpResponse response = specFetcher.fetch(request);
-    if (response.getHttpStatusCode() != HttpResponse.SC_OK) {
-      throw new GadgetException(
-          GadgetException.Code.FAILED_TO_RETRIEVE_CONTENT,
-          "Unable to retrieve gadget xml. HTTP error " +
-              response.getHttpStatusCode());
+    GadgetSpec spec;
+    synchronized (inMemorySpecCache) {
+      spec = inMemorySpecCache.getElement(gadgetUri);
     }
-    GadgetSpec spec
-        = new GadgetSpec(gadgetUri, response.getResponseAsString());
-    if (new ContentRewriterFeature(spec, enableRewrite).isRewriteEnabled()) {
-      for (View v : spec.getViews().values()) {
-        if (v.getType() == View.ContentType.HTML && rewriter != null) {
-          v.setRewrittenContent(
-              rewriter.rewrite(gadgetUri, v.getContent(), "text/html"));
+    if (ignoreCache || spec == null) {
+      try {
+        HttpRequest request = HttpRequest.getRequest(
+            gadgetUri, ignoreCache);
+        HttpResponse response = specFetcher.fetch(request);
+        if (response.getHttpStatusCode() != HttpResponse.SC_OK) {
+          throw new GadgetException(
+              GadgetException.Code.FAILED_TO_RETRIEVE_CONTENT,
+              "Unable to retrieve gadget xml. HTTP error " +
+                  response.getHttpStatusCode());
+        } else {
+          spec = new GadgetSpec(gadgetUri, response.getResponseAsString());
+          if (new ContentRewriterFeature(spec, enableRewrite).isRewriteEnabled()) {
+            for (View v : spec.getViews().values()) {
+              if (v.getType() == View.ContentType.HTML && rewriter != null) {
+                v.setRewrittenContent(
+                    rewriter.rewrite(gadgetUri, v.getContent(), "text/html"));
+              }
+            }
+          }
+          // Add the updated spec back to the cache
+          synchronized (inMemorySpecCache) {
+            inMemorySpecCache.addElement(gadgetUri, spec);
+          }
+        }
+      } catch (GadgetException ge) {
+        if (spec == null) {
+          throw ge;
+        } else {
+          logger.log(Level.WARNING,
+              "Gadget spec fetch failed for " + gadgetUri + " -  using cached ", ge);
         }
       }
     }
@@ -74,9 +104,11 @@ public class BasicGadgetSpecFactory implements GadgetSpecFactory {
   @Inject
   public BasicGadgetSpecFactory(HttpFetcher specFetcher,
       ContentRewriter rewriter,
-      @Named("content-rewrite.enabled") boolean defaultEnableRewrite) {
+      @Named("content-rewrite.enabled")boolean defaultEnableRewrite,
+      @Named("gadget-spec.cache.capacity")int gadgetSpecCacheCapacity) {
     this.specFetcher = specFetcher;
     this.rewriter = rewriter;
     this.enableRewrite = defaultEnableRewrite;
+    inMemorySpecCache = new LruCache<URI, GadgetSpec>(gadgetSpecCacheCapacity);
   }
 }
