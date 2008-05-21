@@ -127,7 +127,8 @@ public class JsServlet extends InjectedServlet {
       HttpUtil.setCachingHeaders(resp, 60 * 60);
     }
     resp.setContentType("text/javascript; charset=utf-8");
-    resp.setContentLength(jsData.length());
-    resp.getOutputStream().write(jsData.toString().getBytes());
+    byte[] response = jsData.toString().getBytes("UTF-8");
+    resp.setContentLength(response.length);
+    resp.getOutputStream().write(response);
   }
 }
