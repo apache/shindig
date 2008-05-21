@@ -135,15 +135,6 @@ public abstract class RestServerCollectionAdapter
     entry.setUpdated(updated);
     // TODO what should this be?
     entry.addAuthor("Author TODO");
-    // TODO what should this be?
-    if (obj instanceof Person) {
-      entry.setTitle((((Person) obj).getName().getUnstructured() != null) ?
-          ((Person) obj).getName().getUnstructured() : "title TODO");
-    } else if (obj instanceof Activity) {
-      entry.setTitle(((Activity) obj).getTitle());
-    } else {
-      entry.setTitle("title TODO");
-    }
 
     switch (format) {
       case ATOM:
