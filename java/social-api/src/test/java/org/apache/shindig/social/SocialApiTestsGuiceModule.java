@@ -18,6 +18,8 @@
  */
 package org.apache.shindig.social;
 
+import com.google.inject.AbstractModule;
+
 import org.apache.shindig.common.BasicSecurityTokenDecoder;
 import org.apache.shindig.common.SecurityToken;
 import org.apache.shindig.common.SecurityTokenDecoder;
@@ -33,7 +35,6 @@ import org.apache.shindig.social.opensocial.model.Name;
 import org.apache.shindig.social.opensocial.model.Person;
 import org.apache.shindig.social.opensocial.model.Phone;
 
-import com.google.inject.AbstractModule;
 import org.json.JSONException;
 
 import java.util.ArrayList;
@@ -41,11 +42,14 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.logging.Logger;
 
 /**
  * Provides social api component injection for all large tests
  */
 public class SocialApiTestsGuiceModule extends AbstractModule {
+  private static Logger logger =
+    Logger.getLogger(SocialApiTestsGuiceModule.class.getName());
 
   @Override
   protected void configure() {

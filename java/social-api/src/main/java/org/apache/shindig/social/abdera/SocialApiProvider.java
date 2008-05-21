@@ -69,9 +69,9 @@ public class SocialApiProvider extends DefaultProvider {
 
          // Activities
         .addRoute(RequestUrlTemplate.ACTIVITIES_OF_USER,
-            TargetType.TYPE_COLLECTION, activitiesAdapter)
+            TargetType.TYPE_COLLECTION, activityAdapter)
         .addRoute(RequestUrlTemplate.ACTIVITIES_OF_FRIENDS_OF_USER,
-            TargetType.TYPE_COLLECTION, activitiesAdapter)
+            TargetType.TYPE_COLLECTION, activityAdapter)
         .addRoute(RequestUrlTemplate.ACTIVITIES_OF_GROUP_OF_USER,
             TargetType.TYPE_COLLECTION, null)
         .addRoute(RequestUrlTemplate.ACTIVITY_OF_USER,
