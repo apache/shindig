@@ -31,7 +31,6 @@ import org.junit.Before;
 import org.junit.Test;
 import static org.junit.Assert.*;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -64,18 +63,23 @@ public class RestfulAtomPeopleTest extends AbstractLargeRestfulTests {
   }
 
   @Test
-  public void testGetPeopleAtom() throws IOException {
+  public void testGetPeople() throws Exception {
     resp = client.get(BASEURL + "/people/john.doe/@all?format=atom");
     checkForGoodAtomResponse(resp);
 
     Document<Feed> doc = resp.getDocument();
     prettyPrint(doc);
-    Feed feed = doc.getRoot();
-    assertEquals(2, feed.getEntries().size());
+
+    List<Entry> entries = doc.getRoot().getEntries();
+    assertEquals(2, entries.size());
+    assertEquals(people.get(1).getId(), getIdFromXmlContent(entries.get(0)
+        .getContentElement().getValue()));
+    assertEquals(people.get(0).getId(), getIdFromXmlContent(entries.get(1)
+        .getContentElement().getValue()));
   }
 
   @Test
-  public void testGetIndirectPersonAtom() throws IOException {
+  public void testGetIndirectPerson() throws Exception {
     resp = client.get(BASEURL + "/people/john.doe/@all/jane.doe?format=atom");
     checkForGoodAtomResponse(resp);
 
@@ -84,11 +88,12 @@ public class RestfulAtomPeopleTest extends AbstractLargeRestfulTests {
     prettyPrint(entry);
 
     Person expectedJaneDoe = people.get(0);
-    assertEquals(expectedJaneDoe.getName().getUnstructured(), entry.getTitle());
+    assertEquals(expectedJaneDoe.getId(),
+        getIdFromXmlContent(entry.getContentElement().getValue()));
   }
 
   @Test
-  public void testGetInvalidPersonAtom() throws IOException {
+  public void testGetInvalidPerson() throws Exception {
     resp = client.get(BASEURL + "/people/john.doe/@all/nobody?format=atom");
     checkForBadResponse(resp);
   }
