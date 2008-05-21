@@ -96,7 +96,7 @@ public class UserPref {
     Substitutions.Type type = Substitutions.Type.MESSAGE;
     pref.displayName = substituter.substituteString(type, displayName);
     pref.defaultValue = substituter.substituteString(type, defaultValue);
-    if (enumValues.size() == 0) {
+    if (enumValues.isEmpty()) {
       pref.enumValues = Collections.emptyMap();
     } else {
       Map<String, String> values
@@ -124,7 +124,7 @@ public class UserPref {
        .append("\" datatype=\"")
        .append(dataType.toString().toLowerCase())
        .append('\"');
-    if (enumValues.size() == 0) {
+    if (enumValues.isEmpty()) {
       buf.append("/>");
     } else {
       buf.append('\n');

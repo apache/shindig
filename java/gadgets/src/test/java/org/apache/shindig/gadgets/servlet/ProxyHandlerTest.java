@@ -156,7 +156,7 @@ public class ProxyHandlerTest extends HttpTestFixture {
       fail("should have thrown");
     } catch (GadgetException e) {
       assertTrue(
-          e.getMessage().indexOf("made to wrong domain www.example.com") != -1);
+              e.getMessage().contains("made to wrong domain www.example.com"));
     }
     verify();
   }

@@ -144,7 +144,7 @@ public class View {
       content.append(element.getTextContent());
     }
     this.content = content.toString();
-    this.needsUserPrefSubstitution = this.content.indexOf("__UP_") != -1;
+    this.needsUserPrefSubstitution = this.content.contains("__UP_");
     this.quirks = quirks;
     this.href = href;
     this.type = type;

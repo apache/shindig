@@ -111,7 +111,7 @@ public class HttpRequest {
    */
   public String getHeader(String name) {
     List<String> headerList = getHeaders(name);
-    if (headerList.size() == 0) {
+    if (headerList.isEmpty()) {
       return null;
     } else {
       return headerList.get(0);
@@ -175,14 +175,14 @@ public class HttpRequest {
       for (Map.Entry<String, List<String>> entry : headers.entrySet()) {
         List<String> newList = new ArrayList<String>(entry.getValue());
         // Proxies should be bypassed with the Pragma: no-cache check.
-        if (entry.getKey().equals("Pragma") && options.ignoreCache) {
+        if (entry.getKey().equals("Pragma") && options != null && options.ignoreCache) {
           newList.add("no-cache");
           setPragmaHeader = true;
         }
         tmpHeaders.put(entry.getKey(), Collections.unmodifiableList(newList));
       }
       // Bypass caching in proxies as well.
-      if (!setPragmaHeader && options.ignoreCache) {
+      if (!setPragmaHeader && options != null && options.ignoreCache) {
         tmpHeaders.put("Pragma", Arrays.asList("no-cache"));
       }
       this.headers = Collections.unmodifiableMap(tmpHeaders);

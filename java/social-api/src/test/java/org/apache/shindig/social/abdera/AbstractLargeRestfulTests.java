@@ -105,7 +105,7 @@ public abstract class AbstractLargeRestfulTests {
       JSONException {
     BufferedReader reader = new BufferedReader(resp.getReader());
 
-    StringBuffer json = new StringBuffer();
+    StringBuilder json = new StringBuilder();
     String line = reader.readLine();
     while (line != null) {
       json.append(line);

@@ -79,7 +79,7 @@ public class LinkingTagRewriter implements HtmlTagTransformer {
       String link = stripQuotes(token.text);
       builder.append("=\"");
       builder.append(linkRewriter.rewrite(link, relativeBase));
-      builder.append("\"");
+      builder.append('\"');
       return;
     }
     builder.append(HtmlRewriter.producePreTokenSeparator(token, lastToken));

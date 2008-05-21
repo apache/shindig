@@ -136,7 +136,7 @@ public class GadgetFeatureRegistry {
                                      Set<Entry> resultsFound,
                                      Set<String> resultsMissing) {
     graphComplete = true;
-    if (needed.size() == 0) {
+    if (needed.isEmpty()) {
       // Shortcut for gadgets that don't have any explicit dependencies.
       resultsFound.addAll(core.values());
       return true;
@@ -158,7 +158,7 @@ public class GadgetFeatureRegistry {
         }
       }
 
-      if (resultsMissing.size() == 0) {
+      if (resultsMissing.isEmpty()) {
         // Store to cache
         transitiveDeps.put(
             Collections.unmodifiableSet(new HashSet<String>(needed)),

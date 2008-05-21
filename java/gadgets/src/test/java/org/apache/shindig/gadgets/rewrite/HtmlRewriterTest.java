@@ -81,7 +81,7 @@ public class HtmlRewriterTest extends EasyMockTestCase {
             + "<h2>DRAFT - HTML4 Test Suite: Test 7_5_5-BF-01 Headings: The H1, H2,  H3, H4, H5, H6 elements</h2>\n"
             + "<hr>[<a href=\"sec7_5_4-BF-02.html\">Previous</a>] [<a href=\"section8.html\">Next</a>] [<a href=\"section7.html\">Section</a>]"
             + " [<a href=\"index.html\">Contents</a>] [<a href=\"http://www.w3.org/TR/html401/struct/global.html#h-7.5.5\">Specification</a>]<BR>\n"
-            + "\n"
+            + '\n'
             + "</div>\n"
             + "<object height=\"100%\" width=\"100%\" border=\"0\" type=\"text/html\" data=\"7_5_5-BF-01.html\">\n"
             + "<a class=\"navigation\" href=\"7_5_5-BF-01.html\" target=\"testwindow\">Test</a></object>\n"

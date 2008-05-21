@@ -123,7 +123,7 @@ public class JavascriptTagMerger implements HtmlTagTransformer {
         if (!srcUrl.isAbsolute()) {
           srcUrl = relativeUrlBase.resolve(srcUrl);
         }
-        builder.append(paramIndex).append("=")
+        builder.append(paramIndex).append('=')
             .append(URLEncoder.encode(srcUrl.toString(), "UTF-8"));
         if (i < concat.size() - 1) {
           if (builder.length() - urlStart > MAX_URL_LENGTH) {
@@ -132,7 +132,7 @@ public class JavascriptTagMerger implements HtmlTagTransformer {
             builder.append("<script src=\"").append(concatBase);
             urlStart = builder.length();
           } else {
-            builder.append("&");
+            builder.append('&');
             paramIndex++;
           }
         }

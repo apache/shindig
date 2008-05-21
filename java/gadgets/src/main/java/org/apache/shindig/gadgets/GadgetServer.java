@@ -184,7 +184,7 @@ public class GadgetServer {
         // Cant execute signed/oauth preloads without the token
         if ((preload.getAuth() == Auth.NONE ||
             gadget.getContext().getToken() != null) &&
-            (preload.getViews().size() == 0 ||
+            (preload.getViews().isEmpty() ||
             preload.getViews().contains(gadget.getContext().getView()))) {
           PreloadTask task = new PreloadTask(gadget.getContext(), preload,
               preloadFetcherFactory);
@@ -219,7 +219,7 @@ public class GadgetServer {
         }
       }
 
-      if (running.size() > 0) {
+      if (!running.isEmpty()) {
         try {
           Future<GadgetException> future;
           while ((future = featureProcessor.take()) != null) {
@@ -240,7 +240,7 @@ public class GadgetServer {
           running.remove(task);
         }
       }
-    } while (pending.size() > 0 || running.size() > 0);
+    } while (!pending.isEmpty() || !running.isEmpty());
   }
 
   /**

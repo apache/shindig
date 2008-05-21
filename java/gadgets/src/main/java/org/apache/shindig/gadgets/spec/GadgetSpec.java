@@ -103,7 +103,7 @@ public class GadgetSpec {
   public GadgetSpec substitute(Substitutions substituter, boolean rewrite) {
     GadgetSpec spec = new GadgetSpec(this);
     spec.modulePrefs = modulePrefs.substitute(substituter);
-    if (userPrefs.size() == 0) {
+    if (userPrefs.isEmpty()) {
       spec.userPrefs = Collections.emptyList();
     } else {
       List<UserPref> prefs = new ArrayList<UserPref>(userPrefs.size());
@@ -202,7 +202,7 @@ public class GadgetSpec {
       this.modulePrefs = modulePrefs;
     }
 
-    if (views.size() == 0) {
+    if (views.isEmpty()) {
       throw new SpecParserException("At least 1 Content is required.");
     } else {
       Map<String, View> tmpViews = new HashMap<String, View>();
@@ -213,7 +213,7 @@ public class GadgetSpec {
       this.views = Collections.unmodifiableMap(tmpViews);
     }
 
-    if (userPrefs.size() > 0) {
+    if (!userPrefs.isEmpty()) {
       this.userPrefs = Collections.unmodifiableList(userPrefs);
     } else {
       this.userPrefs = Collections.emptyList();

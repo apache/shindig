@@ -220,7 +220,7 @@ public class GadgetServerTest extends GadgetTestFixture {
     };
 
     Gadget gadget = gadgetServer.processGadget(context);
-    assertTrue(gadget.getPreloadMap().size() == 0);
+    assertTrue(gadget.getPreloadMap().isEmpty());
   }
 
   public void testNoSignedPreloadWithoutToken() throws Exception {
@@ -248,7 +248,7 @@ public class GadgetServerTest extends GadgetTestFixture {
     };
 
     Gadget gadget = gadgetServer.processGadget(context);
-    assertTrue(gadget.getPreloadMap().size() == 0);
+    assertTrue(gadget.getPreloadMap().isEmpty());
   }
 
   public void testSignedPreloadWithToken() throws Exception {

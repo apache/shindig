@@ -115,7 +115,7 @@ public class ContainerConfigTest extends TestCase {
   }
 
   public void testPathQuery() throws Exception {
-    String path = NESTED_KEY + "/" + NESTED_NAME;
+    String path = NESTED_KEY + '/' + NESTED_NAME;
     String data = config.get(DEFAULT_CONTAINER, path);
     assertEquals(NESTED_VALUE, data);
   }

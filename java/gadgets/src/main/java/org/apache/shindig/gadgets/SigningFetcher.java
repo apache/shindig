@@ -186,7 +186,7 @@ public class SigningFetcher extends ChainedContentFetcher {
           resource.getScheme(),
           resource.getHost(),
           resource.getPort(),
-          resource.getRawPath() + "?" + cacheableQuery);
+          resource.getRawPath() + '?' + cacheableQuery);
     HttpRequest cacheableRequest =
         new HttpRequest(url.toURI(), request);
     return cacheableRequest;
@@ -243,7 +243,7 @@ public class SigningFetcher extends ChainedContentFetcher {
           resource.getScheme(),
           resource.getHost(),
           resource.getPort(),
-          resource.getRawPath() + "?" + finalQuery);
+          resource.getRawPath() + '?' + finalQuery);
       return new HttpRequest(url.toURI(), req);
     } catch (GadgetException e) {
       throw e;

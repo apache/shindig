@@ -212,7 +212,7 @@ public class HttpResponse {
    */
   public String getHeader(String name) {
     List<String> headerList = getHeaders(name);
-    if (headerList.size() == 0) {
+    if (headerList.isEmpty()) {
       return null;
     } else {
       return headerList.get(0);

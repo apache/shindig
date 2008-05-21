@@ -111,18 +111,18 @@ public class GadgetRenderingTaskTest extends HttpTestFixture {
 
   public void testStandardsMode() throws Exception {
     String content = parseBasicGadget(GadgetSpec.DEFAULT_VIEW);
-    assertTrue(-1 != content.indexOf(GadgetRenderingTask.STRICT_MODE_DOCTYPE));
+    assertTrue(content.contains(GadgetRenderingTask.STRICT_MODE_DOCTYPE));
   }
 
   public void testQuirksMode() throws Exception {
     String content = parseBasicGadget("quirks");
-    assertTrue(-1 == content.indexOf(GadgetRenderingTask.STRICT_MODE_DOCTYPE));
+    assertTrue(!content.contains(GadgetRenderingTask.STRICT_MODE_DOCTYPE));
   }
 
 
   public void testContentRendered() throws Exception {
     String content = parseBasicGadget(GadgetSpec.DEFAULT_VIEW);
-    assertTrue(-1 != content.indexOf(CONTENT));
+    assertTrue(content.contains(CONTENT));
   }
 
   @SuppressWarnings("unchecked")
@@ -132,7 +132,7 @@ public class GadgetRenderingTaskTest extends HttpTestFixture {
     expect(urlGenerator.getBundledJsUrl(isA(Collection.class),
         isA(GadgetContext.class))).andReturn(jsLibs);
     String content = parseBasicGadget(GadgetSpec.DEFAULT_VIEW);
-    assertTrue(-1 != content.indexOf("<script src=\"" + jsLibs + "\">"));
+    assertTrue(content.contains("<script src=\"" + jsLibs + "\">"));
   }
 
   public void testViewAliases() throws Exception {
@@ -148,7 +148,7 @@ public class GadgetRenderingTaskTest extends HttpTestFixture {
 
     String content = parseBasicGadget("dummy");
 
-    assertTrue(-1 != content.indexOf(ALT_CONTENT));
+    assertTrue(content.contains(ALT_CONTENT));
   }
 
   public void testLockedDomainFailure() throws Exception {
