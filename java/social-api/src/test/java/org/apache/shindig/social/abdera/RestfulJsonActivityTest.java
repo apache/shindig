@@ -17,46 +17,17 @@
  */
 package org.apache.shindig.social.abdera;
 
-import org.apache.shindig.social.ResponseItem;
 import org.apache.shindig.social.SocialApiTestsGuiceModule;
 import org.apache.shindig.social.opensocial.model.Activity;
 
-import org.json.JSONObject;
 import org.json.JSONException;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.json.JSONObject;
 import static org.junit.Assert.assertEquals;
-
-import java.util.ArrayList;
-import java.util.List;
+import org.junit.Test;
 
 
 public class RestfulJsonActivityTest extends AbstractLargeRestfulTests {
-  private Activity activity;
-
-  @Before
-  public void setUp() throws Exception {
-    super.setUp();
-
-    activity = SocialApiTestsGuiceModule.MockActivitiesService.basicActivity;
-    List<Activity> activities = new ArrayList<Activity>();
-    activities.add(activity);
-
-    SocialApiTestsGuiceModule.MockActivitiesService.setActivities(
-        new ResponseItem<List<Activity>>(activities));
-    SocialApiTestsGuiceModule.MockActivitiesService.setActivity(
-        new ResponseItem<Activity>(activity));
-  }
-
-  @After
-  public void tearDown() throws Exception {
-    SocialApiTestsGuiceModule.MockActivitiesService.setActivities(null);
-    SocialApiTestsGuiceModule.MockActivitiesService.setActivity(null);
-
-    super.tearDown();
-  }
-
+  
   /**
    * Expected response for an activity in json:
    * {
@@ -73,7 +44,9 @@ public class RestfulJsonActivityTest extends AbstractLargeRestfulTests {
     resp = client.get(BASEURL + "/activities/john.doe/@self/1");
     checkForGoodJsonResponse(resp);
     JSONObject result = getJson(resp);
-    assertActivitiesEqual(activity, result);
+    assertActivitiesEqual(
+        SocialApiTestsGuiceModule.MockActivitiesService.johnActivity,
+        result);
   }
 
   /**
@@ -101,7 +74,8 @@ public class RestfulJsonActivityTest extends AbstractLargeRestfulTests {
 
     assertEquals(1, result.getInt("totalResults"));
     assertEquals(0, result.getInt("startIndex"));
-    assertActivitiesEqual(activity,
+    assertActivitiesEqual(
+        SocialApiTestsGuiceModule.MockActivitiesService.johnActivity,
         result.getJSONArray("entry").getJSONObject(0));
   }
 
@@ -132,7 +106,8 @@ public class RestfulJsonActivityTest extends AbstractLargeRestfulTests {
 
     assertEquals(1, result.getInt("totalResults"));
     assertEquals(0, result.getInt("startIndex"));
-    assertActivitiesEqual(activity,
+    assertActivitiesEqual(
+        SocialApiTestsGuiceModule.MockActivitiesService.janeActivity,
         result.getJSONArray("entry").getJSONObject(0));
   }
 

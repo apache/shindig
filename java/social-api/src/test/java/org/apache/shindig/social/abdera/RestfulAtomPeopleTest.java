@@ -17,51 +17,19 @@
  */
 package org.apache.shindig.social.abdera;
 
-import org.apache.shindig.social.ResponseItem;
 import org.apache.shindig.social.SocialApiTestsGuiceModule;
-import org.apache.shindig.social.opensocial.model.ApiCollection;
 import org.apache.shindig.social.opensocial.model.Person;
 
 import org.apache.abdera.model.Document;
 import org.apache.abdera.model.Entry;
 import org.apache.abdera.model.Feed;
-import org.apache.abdera.protocol.client.ClientResponse;
-import org.junit.After;
-import org.junit.Before;
+import static org.junit.Assert.assertEquals;
 import org.junit.Test;
-import static org.junit.Assert.*;
 
-import java.util.ArrayList;
 import java.util.List;
 
 
 public class RestfulAtomPeopleTest extends AbstractLargeRestfulTests {
-  private List<Person> people;
-  private ClientResponse resp;
-
-  @Before
-  public void setUp() throws Exception {
-    super.setUp();
-    people = new ArrayList<Person>();
-    people.add(SocialApiTestsGuiceModule.MockPeopleService.janeDoe);
-    people.add(SocialApiTestsGuiceModule.MockPeopleService.simpleDoe);
-
-    SocialApiTestsGuiceModule.MockPeopleService.setPeople(
-        new ResponseItem<ApiCollection<Person>>(
-            new ApiCollection<Person>(people)));
-
-    SocialApiTestsGuiceModule.MockPeopleService.setPerson(
-        new ResponseItem<Person>(SocialApiTestsGuiceModule
-            .MockPeopleService.johnDoe));
-  }
-
-  @After
-  public void tearDown() throws Exception {
-    SocialApiTestsGuiceModule.MockPeopleService.setPeople(null);
-    SocialApiTestsGuiceModule.MockPeopleService.setPerson(null);
-    resp.release();
-  }
-
   @Test
   public void testGetPeople() throws Exception {
     resp = client.get(BASEURL + "/people/john.doe/@all?format=atom");
@@ -72,10 +40,20 @@ public class RestfulAtomPeopleTest extends AbstractLargeRestfulTests {
 
     List<Entry> entries = doc.getRoot().getEntries();
     assertEquals(2, entries.size());
-    assertEquals(people.get(1).getId(), getIdFromXmlContent(entries.get(0)
-        .getContentElement().getValue()));
-    assertEquals(people.get(0).getId(), getIdFromXmlContent(entries.get(1)
-        .getContentElement().getValue()));
+    String id1 = getIdFromXmlContent(entries.get(0)
+        .getContentElement().getValue());
+    String id2 = getIdFromXmlContent(entries.get(1)
+        .getContentElement().getValue());
+
+    Person janeDoe = SocialApiTestsGuiceModule.MockPeopleService.janeDoe;
+    Person simpleDoe = SocialApiTestsGuiceModule.MockPeopleService.simpleDoe;
+    // TODO: Simplify after we have implement sorting
+    if (id1.equals(janeDoe.getId())) {
+      assertEquals(simpleDoe.getId(), id2);
+    } else {
+      assertEquals(janeDoe.getId(), id2);
+      assertEquals(simpleDoe.getId(), id1);
+    }
   }
 
   @Test
@@ -87,7 +65,8 @@ public class RestfulAtomPeopleTest extends AbstractLargeRestfulTests {
     Entry entry = doc.getRoot();
     prettyPrint(entry);
 
-    Person expectedJaneDoe = people.get(0);
+    Person expectedJaneDoe = SocialApiTestsGuiceModule
+        .MockPeopleService.janeDoe;
     assertEquals(expectedJaneDoe.getId(),
         getIdFromXmlContent(entry.getContentElement().getValue()));
   }

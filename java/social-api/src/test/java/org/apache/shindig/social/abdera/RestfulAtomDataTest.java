@@ -17,22 +17,10 @@
  */
 package org.apache.shindig.social.abdera;
 
-import org.junit.After;
-import org.junit.Before;
 import org.junit.Test;
 
 
 public class RestfulAtomDataTest extends AbstractLargeRestfulTests {
-
-  @Before
-  public void setUp() throws Exception {
-    super.setUp();
-  }
-
-  @After
-  public void tearDown() throws Exception {
-    super.tearDown();
-  }
 
   @Test
   public void testGetDataAtom() throws Exception {

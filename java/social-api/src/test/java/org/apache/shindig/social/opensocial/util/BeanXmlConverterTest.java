@@ -105,12 +105,19 @@ public class BeanXmlConverterTest extends TestCase {
   public void testPersonToXml() throws Exception {
     String xml = beanXmlConverter.convertToXml(johnDoe);
     // TODO: Make the person xml stop returning empty elements!
-    // This test is too messy with them
+    // TODO: Flush out the test to check all the sub fields
+    Element element = XmlUtil.parse(xml);
+    Node id = element.getElementsByTagName("id").item(0);
+    assertEquals(johnDoe.getId(), id.getTextContent());
   }
 
   public void testActivityToXml() throws Exception {
     String xml = beanXmlConverter.convertToXml(activity);
     // TODO: Make the activity xml stop returning empty elements!
+    // TODO: Flush out the test to check all the sub fields
+    Element element = XmlUtil.parse(xml);
+    Node id = element.getElementsByTagName("id").item(0);
+    assertEquals(activity.getId(), id.getTextContent());
   }
 
   public void xxxtestMapsToXml() throws Exception {

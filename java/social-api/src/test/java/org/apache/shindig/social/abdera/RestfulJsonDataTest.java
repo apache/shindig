@@ -17,48 +17,10 @@
  */
 package org.apache.shindig.social.abdera;
 
-import org.apache.shindig.social.SocialApiTestsGuiceModule;
-import org.apache.shindig.social.ResponseItem;
-
-import org.junit.After;
-import org.junit.Before;
 import org.junit.Test;
-
-import java.util.HashMap;
-import java.util.Map;
 
 
 public class RestfulJsonDataTest extends AbstractLargeRestfulTests {
-  private Map<String, Map<String, String>> data;
-  private Map<String, String> janeData;
-  private Map<String, String> simpleData;
-  private Map<String, String> johnData;
-
-  @Before
-  public void setUp() throws Exception {
-    super.setUp();
-
-    data = new HashMap<String, Map<String, String>>();
-    janeData = new HashMap<String, String>();
-    janeData.put("count", "5");
-
-    simpleData = new HashMap<String, String>();
-    simpleData.put("count", "7");
-
-    johnData = new HashMap<String, String>();
-    johnData.put("count", "0");
-  }
-
-  @After
-  public void tearDown() throws Exception {
-    SocialApiTestsGuiceModule.MockDataService.setPersonData(null);
-    super.tearDown();
-  }
-
-  private void updateAppData() {
-    SocialApiTestsGuiceModule.MockDataService.setPersonData(
-        new ResponseItem<Map<String, Map<String, String>>>(data));
-  }
 
   /**
    * Expected response for app data in json:
@@ -74,10 +36,6 @@ public class RestfulJsonDataTest extends AbstractLargeRestfulTests {
    */
   @Test
   public void testGetFriendsAppDataJson() throws Exception {
-    data.put("jane.doe", janeData);
-    data.put("simple.doe", simpleData);
-    updateAppData();
-
     // app id is mocked out
     resp = client.get(BASEURL + "/appdata/john.doe/@friends/app?fields=count");
     // checkForGoodJsonResponse(resp);
@@ -98,9 +56,6 @@ public class RestfulJsonDataTest extends AbstractLargeRestfulTests {
    // TODO: Shindig currently throws an exception when no keys are specified
    // @Test
   public void testGetSelfAppDataJson() throws Exception {
-    data.put("john.doe", johnData);
-    updateAppData();
-
     // app id is mocked out
     resp = client.get(BASEURL + "/appdata/john.doe/@self/app");
     // checkForGoodJsonResponse(resp);
@@ -120,9 +75,6 @@ public class RestfulJsonDataTest extends AbstractLargeRestfulTests {
    */
   @Test
   public void testGetSelfAppDataJsonWithKey() throws Exception {
-    data.put("john.doe", johnData);
-    updateAppData();
-
     // app id is mocked out
     resp = client.get(BASEURL + "/appdata/john.doe/@self/app?fields=count");
     // checkForGoodJsonResponse(resp);
@@ -143,9 +95,6 @@ public class RestfulJsonDataTest extends AbstractLargeRestfulTests {
    */
   @Test
   public void testGetSelfAppDataJsonWithoutKeys() throws Exception {
-    data.put("john.doe", johnData);
-    updateAppData();
-
     // app id is mocked out
     resp = client.get(BASEURL + "/appdata/john.doe/@self/app?fields=peabody");
     // checkForGoodJsonResponse(resp);
