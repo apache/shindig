@@ -369,11 +369,9 @@ class OAuthRequest {
 	{
 		$tmp = $this->parameters;
 		$parts = parse_url($this->http_url);
-		$params = parse_str(@$parts['query']);
-		if (count($params) > 1) {
-			for ($i = 0; $i < count($params); $i += 2) {
-				$this->parameters[$params[$i]] = urldecode($params[$i + 1]);
-			}
+		parse_str(@$parts['query'], $params);
+		foreach ($params as $key => $value) {
+			$this->parameters[$key] = $value;
 		}
 		$parts = array($this->get_normalized_http_method(), $this->get_normalized_http_url(), $this->get_signable_parameters());
 		$parts = array_map(array('OAuthUtil', 'urlencodeRFC3986'), $parts);
