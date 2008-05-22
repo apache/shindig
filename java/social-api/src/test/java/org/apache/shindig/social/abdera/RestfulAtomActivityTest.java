@@ -17,48 +17,17 @@
  */
 package org.apache.shindig.social.abdera;
 
-import static org.junit.Assert.assertEquals;
-
-import org.apache.shindig.social.ResponseItem;
 import org.apache.shindig.social.SocialApiTestsGuiceModule;
 import org.apache.shindig.social.opensocial.model.Activity;
 
 import org.apache.abdera.model.Document;
 import org.apache.abdera.model.Entry;
-
-import org.junit.After;
-import org.junit.Before;
+import static org.junit.Assert.assertEquals;
 import org.junit.Test;
 
-import java.util.ArrayList;
-import java.util.List;
-
 public class RestfulAtomActivityTest extends AbstractLargeRestfulTests {
-  private Activity activity;
-
-  @Override
-  @Before
-  public void setUp() throws Exception {
-    super.setUp();
-
-    activity = SocialApiTestsGuiceModule.MockActivitiesService.basicActivity;
-    List<Activity> activities = new ArrayList<Activity>();
-    activities.add(activity);
-
-    SocialApiTestsGuiceModule.MockActivitiesService
-        .setActivities(new ResponseItem<List<Activity>>(activities));
-    SocialApiTestsGuiceModule.MockActivitiesService
-        .setActivity(new ResponseItem<Activity>(activity));
-  }
-
-  @Override
-  @After
-  public void tearDown() throws Exception {
-    SocialApiTestsGuiceModule.MockActivitiesService.setActivities(null);
-    SocialApiTestsGuiceModule.MockActivitiesService.setActivity(null);
-
-    super.tearDown();
-  }
+  private Activity activity = SocialApiTestsGuiceModule
+      .MockActivitiesService.johnActivity;
 
   @Test
   public void testGetActivityOfUser() throws Exception {

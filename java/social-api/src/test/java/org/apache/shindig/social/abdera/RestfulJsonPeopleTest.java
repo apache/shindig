@@ -17,50 +17,20 @@
  */
 package org.apache.shindig.social.abdera;
 
-import org.apache.shindig.social.ResponseItem;
 import org.apache.shindig.social.SocialApiTestsGuiceModule;
-import org.apache.shindig.social.opensocial.model.ApiCollection;
-import org.apache.shindig.social.opensocial.model.Email;
-import org.apache.shindig.social.opensocial.model.Person;
-import org.apache.shindig.social.opensocial.model.Phone;
+import org.apache.shindig.social.opensocial.model.*;
+import org.apache.shindig.social.opensocial.model.Enum;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
-import org.junit.After;
-import org.junit.Before;
+import org.json.JSONException;
+import static org.junit.Assert.assertEquals;
 import org.junit.Test;
-import static org.junit.Assert.*;
 
-import java.util.ArrayList;
 import java.util.List;
 
 
 public class RestfulJsonPeopleTest extends AbstractLargeRestfulTests {
-
-  @Before
-  public void setUp() throws Exception {
-    super.setUp();
-
-    List<Person> people = new ArrayList<Person>();
-    people.add(SocialApiTestsGuiceModule.MockPeopleService.janeDoe);
-    people.add(SocialApiTestsGuiceModule.MockPeopleService.simpleDoe);
-
-    SocialApiTestsGuiceModule.MockPeopleService.setPeople(
-        new ResponseItem<ApiCollection<Person>>(
-            new ApiCollection<Person>(people)));
-
-    SocialApiTestsGuiceModule.MockPeopleService.setPerson(
-        new ResponseItem<Person>(SocialApiTestsGuiceModule
-            .MockPeopleService.johnDoe));
-  }
-
-  @After
-  public void tearDown() throws Exception {
-    SocialApiTestsGuiceModule.MockPeopleService.setPeople(null);
-    SocialApiTestsGuiceModule.MockPeopleService.setPerson(null);
-
-    super.tearDown();
-  }
 
   /**
    * Expected response for john.doe's json:
@@ -70,17 +40,18 @@ public class RestfulJsonPeopleTest extends AbstractLargeRestfulTests {
    *   'name' : {'unstructured' : 'John Doe'},
    *   'phoneNumbers' : [
    *     { 'number' : '+33H000000000', 'type' : 'home'},
-   *     { 'number' : '+33M000000000', 'type' : 'mobile'},
-   *     { 'number' : '+33W000000000', 'type' : 'work'}
    *   ],
    *   'addresses' : [
    *     {'unstructuredAddress' : 'My home address'}
    *   ],
    *   'emails' : [
    *     { 'address' : 'john.doe@work.bar', 'type' : 'work'},
-   *     { 'address' : 'john.doe@home.bar', 'type' : 'home'}
    *   ]
+   *
+   *  ... etc, etc for all fields in the person object
+   *
    * }
+   * TODO: Finish up this test and make refactor so that it is easier to read
    *
    * @throws Exception if test encounters an error
    */
@@ -92,35 +63,124 @@ public class RestfulJsonPeopleTest extends AbstractLargeRestfulTests {
     JSONObject result = getJson(resp);
 
     Person johnDoe = SocialApiTestsGuiceModule.MockPeopleService.johnDoe;
-    assertEquals(johnDoe.getId(), result.getString("id"));
-
-    assertEquals(johnDoe.getName().getUnstructured(),
-        result.getJSONObject("name").getString("unstructured"));
+    assertStringField(result, johnDoe.getAboutMe(), Person.Field.ABOUT_ME);
+    assertStringListField(result, johnDoe.getActivities(),
+        Person.Field.ACTIVITIES);
 
     assertEquals(johnDoe.getAddresses().get(0).getUnstructuredAddress(),
-        result.getJSONArray("addresses").getJSONObject(0)
-            .getString("unstructuredAddress"));
+        result.getJSONArray(Person.Field.ADDRESSES.toString()).getJSONObject(0)
+            .getString(Address.Field.UNSTRUCTURED_ADDRESS.toString()));
 
-    JSONArray phoneArray = result.getJSONArray("phoneNumbers");
-    assertEquals(3, phoneArray.length());
+    assertEquals(johnDoe.getAge().intValue(), result.getInt(
+        Person.Field.AGE.toString()));
+    // TODO: body type
+    assertStringListField(result, johnDoe.getBooks(), Person.Field.BOOKS);
+    assertStringListField(result, johnDoe.getCars(), Person.Field.CARS);
+    assertStringField(result, johnDoe.getChildren(), Person.Field.CHILDREN);
+    // TODO: current location
+    assertStringField(result, johnDoe.getDateOfBirth().toString(),
+        Person.Field.DATE_OF_BIRTH);
+    assertEnumField(result, johnDoe.getDrinker(), Person.Field.DRINKER);
 
-    for (int i = 0; i < johnDoe.getPhoneNumbers().size(); i++) {
-      Phone expectedPhone = johnDoe.getPhoneNumbers().get(i);
-      JSONObject actualPhone = phoneArray.getJSONObject(i);
-      assertEquals(expectedPhone.getType(), actualPhone.getString("type"));
-      assertEquals(expectedPhone.getNumber(), actualPhone.getString("number"));
-    }
-
-    JSONArray emailArray = result.getJSONArray("emails");
-    assertEquals(2, emailArray.length());
+    JSONArray emailArray = result.getJSONArray(Person.Field.EMAILS.toString());
+    assertEquals(1, emailArray.length());
 
     for (int i = 0; i < johnDoe.getEmails().size(); i++) {
       Email expectedEmail = johnDoe.getEmails().get(i);
       JSONObject actualEmail = emailArray.getJSONObject(i);
-      assertEquals(expectedEmail.getType(), actualEmail.getString("type"));
+      assertEquals(expectedEmail.getType(),
+          actualEmail.getString(Email.Field.TYPE.toString()));
       assertEquals(expectedEmail.getAddress(),
-          actualEmail.getString("address"));
+          actualEmail.getString(Email.Field.ADDRESS.toString()));
     }
+
+    assertStringField(result, johnDoe.getEthnicity(), Person.Field.ETHNICITY);
+    assertStringField(result, johnDoe.getFashion(), Person.Field.FASHION);
+    assertStringListField(result, johnDoe.getFood(), Person.Field.FOOD);
+    assertEnumField(result, johnDoe.getGender(), Person.Field.GENDER);
+    assertStringField(result, johnDoe.getHappiestWhen(),
+        Person.Field.HAPPIEST_WHEN);
+    assertStringListField(result, johnDoe.getHeroes(), Person.Field.HEROES);
+    assertStringField(result, johnDoe.getHumor(), Person.Field.HUMOR);
+    assertStringField(result, johnDoe.getId(), Person.Field.ID);
+    assertStringListField(result, johnDoe.getInterests(),
+        Person.Field.INTERESTS);
+    assertStringField(result, johnDoe.getJobInterests(),
+        Person.Field.JOB_INTERESTS);
+    // TODO: jobs
+    assertStringListField(result, johnDoe.getLanguagesSpoken(),
+        Person.Field.LANGUAGES_SPOKEN);
+    // TODO: last updated
+    assertStringField(result, johnDoe.getLivingArrangement(),
+        Person.Field.LIVING_ARRANGEMENT);
+    assertStringField(result, johnDoe.getLookingFor(),
+        Person.Field.LOOKING_FOR);
+    assertStringListField(result, johnDoe.getMovies(), Person.Field.MOVIES);
+    assertStringListField(result, johnDoe.getMusic(), Person.Field.MUSIC);
+
+    assertEquals(johnDoe.getName().getUnstructured(),
+        result.getJSONObject(Person.Field.NAME.toString()).getString(
+            Name.Field.UNSTRUCTURED.toString()));
+
+    assertStringField(result, johnDoe.getNickname(), Person.Field.NICKNAME);
+    assertStringField(result, johnDoe.getPets(), Person.Field.PETS);
+
+    JSONArray phoneArray = result.getJSONArray(
+        Person.Field.PHONE_NUMBERS.toString());
+    assertEquals(1, phoneArray.length());
+
+    for (int i = 0; i < johnDoe.getPhoneNumbers().size(); i++) {
+      Phone expectedPhone = johnDoe.getPhoneNumbers().get(i);
+      JSONObject actualPhone = phoneArray.getJSONObject(i);
+      assertEquals(expectedPhone.getType(), actualPhone.getString(
+          Phone.Field.TYPE.toString()));
+      assertEquals(expectedPhone.getNumber(), actualPhone.getString(
+          Phone.Field.NUMBER.toString()));
+    }
+
+    assertStringField(result, johnDoe.getPoliticalViews(),
+        Person.Field.POLITICAL_VIEWS);
+    // TODO: profileSong, url, video
+    assertStringListField(result, johnDoe.getQuotes(), Person.Field.QUOTES);
+    assertStringField(result, johnDoe.getRelationshipStatus(),
+        Person.Field.RELATIONSHIP_STATUS);
+    assertStringField(result, johnDoe.getReligion(), Person.Field.RELIGION);
+    assertStringField(result, johnDoe.getRomance(), Person.Field.ROMANCE);
+    assertStringField(result, johnDoe.getScaredOf(), Person.Field.SCARED_OF);
+    // TODO: Schools
+    assertStringField(result, johnDoe.getSexualOrientation(),
+        Person.Field.SEXUAL_ORIENTATION);
+    assertEnumField(result, johnDoe.getSmoker(), Person.Field.SMOKER);
+    assertStringListField(result, johnDoe.getSports(), Person.Field.SPORTS);
+    assertStringField(result, johnDoe.getStatus(), Person.Field.STATUS);
+    assertStringListField(result, johnDoe.getTags(), Person.Field.TAGS);
+    assertStringField(result, johnDoe.getThumbnailUrl(),
+        Person.Field.THUMBNAIL_URL);
+    // TODO: time zone
+    assertStringListField(result, johnDoe.getTurnOffs(),
+        Person.Field.TURN_OFFS);
+    assertStringListField(result, johnDoe.getTurnOns(), Person.Field.TURN_ONS);
+    assertStringListField(result, johnDoe.getTvShows(), Person.Field.TV_SHOWS);
+    assertEnumField(result, johnDoe.getNetworkPresence(),
+        Person.Field.NETWORKPRESENCE);
+  }
+
+  private void assertStringField(JSONObject result, String expected,
+      Person.Field field) throws JSONException {
+    assertEquals(expected, result.getString(field.toString()));
+  }
+
+  private void assertStringListField(JSONObject result, List<String> list,
+      Person.Field field) throws JSONException {
+    JSONArray actual = result.getJSONArray(field.toString());
+    assertEquals(list.get(0), actual.getString(0));
+  }
+
+  private void assertEnumField(JSONObject result, Enum expected,
+      Person.Field field) throws JSONException {
+    JSONObject actual = result.getJSONObject(field.toString());
+    assertEquals(expected.getDisplayValue(), actual.getString("displayValue"));
+    assertEquals(expected.getKey().toString(), actual.getString("key"));
   }
 
   /**
@@ -159,7 +219,7 @@ public class RestfulJsonPeopleTest extends AbstractLargeRestfulTests {
       JSONObject person = people.getJSONObject(i);
       String id = person.getString("id");
       String name = person.getJSONObject("name").getString("unstructured");
-      
+
       // TODO: Clean this after we support sorting
       if (id.equals("jane.doe")) {
         assertEquals("Jane Doe", name);
