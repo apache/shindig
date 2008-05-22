@@ -39,11 +39,13 @@ class JsFeatureLoader {
 
 	private function loadFiles($path, &$features)
 	{
-		foreach (glob("$path/*/feature.xml") as $file) {
-			$file = realpath($file);
-			$feature = $this->processFile($file);
-			if ($feature != null) {
-				$features[$feature->name] = $feature;
+		foreach (glob("$path/*") as $file) {
+			$file = realpath($file.'/feature.xml');
+			if (file_exists($file) && is_readable($file)) {
+				$feature = $this->processFile($file);
+				if ($feature != null) {
+					$features[$feature->name] = $feature;
+				}
 			}
 		}
 		return $features;
