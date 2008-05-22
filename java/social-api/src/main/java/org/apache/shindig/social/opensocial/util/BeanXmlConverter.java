@@ -41,14 +41,7 @@ public class BeanXmlConverter {
     writer.setWriteEmptyElements(false);
     String toReturn = null;
     try {
-      // get class name in lower letters (w/o package name)
-      String className = obj.getClass().getName();
-      int lastDotIndex = className.lastIndexOf('.');
-      if (lastDotIndex >= 0) {
-        className = className.substring(lastDotIndex + 1);
-      }
-      className = className.toLowerCase();
-      writer.write(className, obj);
+      writer.write(obj.getClass().getSimpleName().toLowerCase(), obj);
       toReturn = outputWriter.toString();
       logger.finest("XML is: " + toReturn + "\n **** \n\n");
 
