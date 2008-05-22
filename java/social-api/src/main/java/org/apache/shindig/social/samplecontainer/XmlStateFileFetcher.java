@@ -22,6 +22,7 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import java.io.IOException;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -30,6 +31,10 @@ import java.util.Map;
 
 @Singleton
 public class XmlStateFileFetcher {
+  private static final String DEFAULT_STATE_URL
+    = "http://localhost:8080/gadgets/files/samplecontainer/"
+    + "state-basicfriendlist.xml";
+
   // Evil javascript strings
   private static final String REDEFINE_NEW_DATA_REQUEST
       = "opensocial.newDataRequest = "
@@ -72,6 +77,21 @@ public class XmlStateFileFetcher {
     setupAppData();
     setupActivities();
     setupPeopleData();
+  }
+
+  /**
+   * If this StateFileFetcher has not had any document loaded so far,
+   * load the default state url.
+   */
+  public void loadDefaultStateFileIfNoneLoaded() {
+    try {
+      if (document == null) {
+        resetStateFile(new URI(DEFAULT_STATE_URL));
+      }
+    } catch (URISyntaxException e) {
+      throw new RuntimeException(
+          "The default state file could not be fetched. ", e);
+    }
   }
 
   public void setEvilness(boolean doEvil) {
