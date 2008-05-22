@@ -52,7 +52,7 @@ class ProxyServlet extends HttpServlet {
 				echo "<html><body><h1>400 - Missing url parameter</h1></body></html>";
 			}
 			$signingFetcherFactory = $gadgetSigner = false;
-			if (!empty($_GET['authz'])) {
+			if (!empty($_GET['authz']) || !empty($_POST['authz'])) {
 				$gadgetSigner = Config::get('security_token_signer');
 				$gadgetSigner = new $gadgetSigner();
 				$signingFetcherFactory = new SigningFetcherFactory(Config::get("private_key_file"));			
