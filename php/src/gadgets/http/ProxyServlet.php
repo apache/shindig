@@ -42,7 +42,7 @@ class ProxyServlet extends HttpServlet {
 			if (! $url) {
 				$url = isset($_POST['url']) ? $_POST['url'] : false;
 			}
-			$url = urldecode($url);
+			// $url = urldecode($url);
 			$method = isset($_GET['httpMethod']) ? $_GET['httpMethod'] : false;
 			if (! $method) {
 				$method = isset($_POST['httpMethod']) ? $_POST['httpMethod'] : 'GET';
