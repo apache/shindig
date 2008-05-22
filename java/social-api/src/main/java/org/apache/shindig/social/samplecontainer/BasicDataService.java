@@ -37,6 +37,7 @@ public class BasicDataService implements DataService {
   @Inject
   public BasicDataService(XmlStateFileFetcher fetcher) {
     this.fetcher = fetcher;
+    fetcher.loadDefaultStateFileIfNoneLoaded();
   }
 
   public ResponseItem<Map<String, Map<String, String>>> getPersonData(

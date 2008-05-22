@@ -38,6 +38,7 @@ public class BasicActivitiesService implements ActivitiesService {
   @Inject
   public BasicActivitiesService(XmlStateFileFetcher fetcher) {
     this.fetcher = fetcher;
+    fetcher.loadDefaultStateFileIfNoneLoaded();
   }
 
   public ResponseItem<List<Activity>> getActivities(List<String> ids,

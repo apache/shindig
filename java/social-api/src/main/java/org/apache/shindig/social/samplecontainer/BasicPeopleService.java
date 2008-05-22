@@ -50,6 +50,7 @@ public class BasicPeopleService implements PeopleService {
   @Inject
   public BasicPeopleService(XmlStateFileFetcher fetcher) {
     this.fetcher = fetcher;
+    fetcher.loadDefaultStateFileIfNoneLoaded();
   }
 
   private List<Person> getPeople(List<String> ids, SecurityToken token) {
