@@ -39,20 +39,11 @@ class JsFeatureLoader {
 
 	private function loadFiles($path, &$features)
 	{
-		if (is_dir($path)) {
-			foreach (glob("$path/*") as $file) {
-				// prevents us from looping over '.', '..' and 'hidden files', this last bit IS 
-				// different from the java version but it's the unix standard really..
-				if (substr(basename($file), 0, 1) != '.') {
-					$features = $this->loadFiles($file, $features);
-				}
-			}
-		} else {
-			if (basename($path) == 'feature.xml') {
-				$feature = $this->processFile($path);
-				if ($feature != null) {
-					$features[$feature->name] = $feature;
-				}
+		foreach (glob("$path/*/feature.xml") as $file) {
+			$file = realpath($file);
+			$feature = $this->processFile($file);
+			if ($feature != null) {
+				$features[$feature->name] = $feature;
 			}
 		}
 		return $features;

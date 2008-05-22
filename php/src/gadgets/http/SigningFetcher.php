@@ -110,9 +110,8 @@ class SigningFetcher extends RemoteContentFetcher {
 			// Parse the request into parameters for OAuth signing, stripping out
 			// any OAuth or OpenSocial parameters injected by the client
 			///////////////////////////////////////////////
-			require 'src/common/Zend/Uri.php';
-			$uri = Zend_Uri::factory($url);
-			$resource = $uri->getUri();
+			$parsedUri = parse_url($url);
+			$resource = $url;
 			$queryParams = $this->sanitize($_GET);
 			$postParams = $this->sanitize($_POST);
 			$msgParams = array();
@@ -144,18 +143,23 @@ class SigningFetcher extends RemoteContentFetcher {
 			foreach ($postParams as $key => $param) {
 				$forPost[$key] = $param;
 			}
-			$newQuery = array();
+			$newQuery = '';
 			foreach ($req_req->get_parameters() as $key => $param) {
 				if (! isset($forPost[$key])) {
-					$newQuery[$key] = $param;
+					$newQuery .= urlencode($key).'='.urlencode($param).'&';
 				}
 			}
-			
+			// and stick on the original query params too
+			$oldQuery = array();
+			parse_str($parsedUri['query'], $oldQuery);
+			foreach ($oldQuery as $key => $val) {
+				$newQuery .= urlencode($key).'='.urlencode($val).'&';
+			}			
 			// Careful here; the OAuth form encoding scheme is slightly different than
 			// the normal form encoding scheme, so we have to use the OAuth library
 			// formEncode method.
-			$uri->setQuery($newQuery);
-			return new RemoteContentRequest($uri->getUri());
+			$url = $parsedUri['scheme'].'://'.$parsedUri['host'].$parsedUri['path'].'?'.$newQuery;
+			return new RemoteContentRequest($url);
 		} catch (Exception $e) {
 			throw new GadgetException($e);
 		}
