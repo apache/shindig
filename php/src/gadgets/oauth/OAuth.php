@@ -261,8 +261,12 @@ class OAuthRequest {
 	 */
 	public static function from_consumer_and_token($consumer, $token, $http_method, $http_url, $parameters = NULL)
 	{
-		@$parameters or $parameters = array();
-		$defaults = array("oauth_nonce" => OAuthRequest::generate_nonce(), "oauth_timestamp" => OAuthRequest::generate_timestamp(), "oauth_consumer_key" => $consumer->key);
+		$parameters = is_array($parameters) ? $parameters : array();
+		$defaults = array("oauth_nonce" => OAuthRequest::generate_nonce(), "oauth_timestamp" => OAuthRequest::generate_timestamp(), "oauth_consumer_key" => $consumer->key,
+		// quick hack to make this demo'able
+		'synd' => 'partuza',
+		'container' => 'partuza'
+		);
 		$parameters = array_merge($defaults, $parameters);
 		if (isset($token)) {
 			$parameters['oauth_token'] = $token;
@@ -365,7 +369,7 @@ class OAuthRequest {
 	{
 		$tmp = $this->parameters;
 		$parts = parse_url($this->http_url);
-		$params = split('[&=]', @$parts['query']);
+		$params = parse_str(@$parts['query']);
 		if (count($params) > 1) {
 			for ($i = 0; $i < count($params); $i += 2) {
 				$this->parameters[$params[$i]] = urldecode($params[$i + 1]);
