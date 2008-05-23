@@ -55,7 +55,9 @@ class JsLibrary {
 			}
 			$this->loaded = true;
 		}
-		return $this->content;
+		//FIXME purely for debugging, remove this asap!
+		// puts a //LIB: <name of feature> above the JS of the feature
+		return "\n\n//LIB: ".$this->featureName."\n".$this->content;
 	}
 
 	public function getFeatureName()
