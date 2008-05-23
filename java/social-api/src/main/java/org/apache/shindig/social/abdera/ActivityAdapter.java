@@ -170,9 +170,8 @@ public class ActivityAdapter extends
   public Iterable<Activity> getEntries(RequestContext request)
       throws ResponseContextException {
     String uid = request.getTarget().getParameter("uid");
-    String routeName = getRoute(request).getName();
     List<String> ids = new ArrayList<String>();
-    switch (RequestUrlTemplate.getValue(routeName)) {
+    switch (getUrlTemplate(request)) {
       case ACTIVITIES_OF_USER :
         ids.add(uid);
         break;

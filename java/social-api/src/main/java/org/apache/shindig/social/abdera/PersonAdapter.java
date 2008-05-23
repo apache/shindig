@@ -27,7 +27,6 @@ import org.apache.abdera.model.Entry;
 import org.apache.abdera.protocol.server.RequestContext;
 import org.apache.abdera.protocol.server.context.ResponseContextException;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
@@ -68,8 +67,7 @@ public class PersonAdapter extends
    */
   @Override
   protected String getResourceName(RequestContext request) {
-    String routeName = getRoute(request).getName();
-    switch (RequestUrlTemplate.getValue(routeName)) {
+    switch (getUrlTemplate(request)) {
       case PROFILE_OF_CONNECTION_OF_USER:
         // TODO: Improve the service apis so we can get rid of relational code.
         for (String cid : getConnectionIds(request, request.getTarget()
@@ -185,9 +183,8 @@ public class PersonAdapter extends
   public Iterable<Person> getEntries(RequestContext request)
       throws ResponseContextException {
     String uid = request.getTarget().getParameter("uid");
-    String routeName = getRoute(request).getName();
-    List<String> ids = new ArrayList<String>();
-    switch (RequestUrlTemplate.getValue(routeName)) {
+    List<String> ids;
+    switch (getUrlTemplate(request)) {
       case PROFILES_OF_CONNECTIONS_OF_USER :
         ids = getConnectionIds(request, uid);
         break;

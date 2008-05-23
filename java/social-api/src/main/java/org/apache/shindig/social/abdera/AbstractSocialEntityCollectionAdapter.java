@@ -200,13 +200,19 @@ public abstract class AbstractSocialEntityCollectionAdapter<T> extends
    * @param request Abdera's RequestContext
    * @return The Route object that matched the request.
    */
-  public Route getRoute(RequestContext request) {
+  public static Route getRoute(RequestContext request) {
     Object matcher = request.getTarget().getMatcher();
     if (matcher instanceof Route) {
       return (Route) matcher;
     } else {
       throw new NullPointerException();
     }
+  }
+
+  // TODO: We should probably move the static methods here into a helper class
+  public static RequestUrlTemplate getUrlTemplate(RequestContext request) {
+    String routeName = getRoute(request).getName();
+    return RequestUrlTemplate.getValue(routeName);
   }
 
   @Override
