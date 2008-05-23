@@ -17,13 +17,15 @@
  */
 package org.apache.shindig.social.abdera;
 
+import static org.junit.Assert.assertEquals;
+
 import org.apache.shindig.social.SocialApiTestsGuiceModule;
 import org.apache.shindig.social.opensocial.model.Person;
 
 import org.apache.abdera.model.Document;
 import org.apache.abdera.model.Entry;
 import org.apache.abdera.model.Feed;
-import static org.junit.Assert.assertEquals;
+
 import org.junit.Test;
 
 import java.util.List;
@@ -31,7 +33,7 @@ import java.util.List;
 
 public class RestfulAtomPeopleTest extends AbstractLargeRestfulTests {
   @Test
-  public void testGetPeople() throws Exception {
+  public void testGetProfilesOfConnectionsOfUserAtom() throws Exception {
     resp = client.get(BASEURL + "/people/john.doe/@all?format=atom");
     checkForGoodAtomResponse(resp);
 
@@ -55,22 +57,40 @@ public class RestfulAtomPeopleTest extends AbstractLargeRestfulTests {
       assertEquals(simpleDoe.getId(), id1);
     }
   }
+  
+  @Test
+  public void testGetProfilesOfFriendsOfUserAtom() throws Exception {
+    resp = client.get(BASEURL + "/people/john.doe/@friends?format=atom");
+    checkForGoodAtomResponse(resp);
+
+    Document<Feed> doc = resp.getDocument();
+    prettyPrint(doc);
+    Feed feed = doc.getRoot();
+    assertEquals(2, feed.getEntries().size());
+  }
 
   @Test
-  public void testGetIndirectPerson() throws Exception {
-    resp = client.get(BASEURL + "/people/john.doe/@all/jane.doe?format=atom");
+  public void testGetProfileOfConnectionOfUserAtom() throws Exception {
+    resp = client.get(BASEURL + "/people/jane.doe/@all/john.doe?format=atom");
     checkForGoodAtomResponse(resp);
 
     Document<Entry> doc = resp.getDocument();
     Entry entry = doc.getRoot();
     prettyPrint(entry);
 
-    Person expectedJaneDoe = SocialApiTestsGuiceModule
-        .MockPeopleService.janeDoe;
-    assertEquals(expectedJaneDoe.getId(),
+    Person expectedJohnDoe = SocialApiTestsGuiceModule
+        .MockPeopleService.johnDoe;
+    assertEquals(expectedJohnDoe.getId(), 
         getIdFromXmlContent(entry.getContentElement().getValue()));
   }
 
+  @Test
+  public void testGetProfileOfNotConnectionOfUserAtom() throws Exception {
+    // jane is friends with john but not simple
+    resp = client.get(BASEURL + "/people/jane.doe/@all/simple.doe?format=atom");
+    checkForBadResponse(resp);
+  }
+  
   @Test
   public void testGetInvalidPerson() throws Exception {
     resp = client.get(BASEURL + "/people/john.doe/@all/nobody?format=atom");
