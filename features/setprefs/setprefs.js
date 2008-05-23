@@ -58,10 +58,6 @@ gadgets.Prefs.prototype.set = function(key, value) {
  * @private This feature is documented in prefs.js
  */
 gadgets.Prefs.prototype.setArray = function(key, val) {
-  if (!val.length || !val.join) {
-    throw new Error("Value is not an array.");
-  }
-
   // We must escape pipe (|) characters to ensure that decoding in
   // getArray actually works properly.
   for (var i = 0, j = val.length; i < j; ++i) {
