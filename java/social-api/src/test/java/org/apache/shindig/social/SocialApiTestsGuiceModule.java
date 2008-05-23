@@ -149,11 +149,15 @@ public class SocialApiTestsGuiceModule extends AbstractModule {
       allPeople.put(simpleDoe.getId(), simpleDoe);
 
       // Jane and Simple are John's friends.
-      // Nobody else has friends
       List<String> johnsFriends = new ArrayList<String>();
       johnsFriends.add(janeDoe.getId());
       johnsFriends.add(simpleDoe.getId());
       friendIds.put(johnDoe.getId(), johnsFriends);
+
+      // John is Jane's friend.      
+      List<String> janesFriends = new ArrayList<String>();
+      janesFriends.add(johnDoe.getId());
+      friendIds.put(janeDoe.getId(), janesFriends);
     }
 
     public List<String> getIds(IdSpec idSpec, SecurityToken token)

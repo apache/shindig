@@ -172,6 +172,18 @@ public abstract class AbstractSocialEntityCollectionAdapter<T> extends
       return null;
     }
   }
+  
+  /**
+   * Gets the IDs of connections of the given user.
+   *
+   * @param request Abdera's RequestContext
+   * @param uid The User ID to get connections for.
+   * @return A list of ID strings.
+   */
+  protected List<String> getConnectionIds(RequestContext request, String uid) {
+    // TODO: Implement connections. For now, just return friends
+    return getFriendIds(request, uid);
+   }
 
   /**
    * Returns the format (jsoc or atom) from the RequestContext's URL parameters.

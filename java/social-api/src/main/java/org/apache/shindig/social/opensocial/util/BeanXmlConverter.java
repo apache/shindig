@@ -37,7 +37,8 @@ public class BeanXmlConverter {
         .getConfiguration()
         .setAttributesForPrimitives(false);
     writer.getBindingConfiguration().setMapIDs(false);
-    writer.enablePrettyPrint();
+    // Print no line endings to match Abdera.
+    writer.setEndOfLine("");
     writer.setWriteEmptyElements(false);
     String toReturn = null;
     try {

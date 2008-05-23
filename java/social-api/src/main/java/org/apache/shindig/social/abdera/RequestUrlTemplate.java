@@ -32,15 +32,17 @@ package org.apache.shindig.social.abdera;
 public enum RequestUrlTemplate {
   // People
   PROFILES_OF_CONNECTIONS_OF_USER("Profiles of Connections of User",
-      "people/:uid/:groupid", "/people/{uid}/{groupid}"),
+      "people/:uid/@all", "/people/{guid}/@all"),
   PROFILES_OF_FRIENDS_OF_USER("Profiles of Friends of User",
-      "people/:uid/@friends", "/people/{uid}/@friends"),
-  CONNECTIONS_OF_USER("Connections of User",
-      "people/:uid/@all", "/people/{uid}/@all"),
+      "people/:uid/@friends", "/people/{guid}/@friends"),
+  PROFILES_IN_GROUP_OF_USER("Profiles in Group of User",
+      "people/:uid/:gid", "/people/{guid}/{groupid}"),
   PROFILE_OF_CONNECTION_OF_USER("Profile of Connection of User",
-      "people/:uid/@all/:pid", "/people/{uid}/@all/{pid}"),
+      "people/:uid/@all/:pid", "/people/{guid}/@all/{pid}"),
   PROFILE_OF_USER("Profile of User",
-      "people/:uid/@self", "/people/{uid}/@self"),
+      "people/:uid/@self", "/people/{guid}/@self"),
+  PROFILE_OF_REQUESTER("Profile of Requester",
+          "people/@me/@self", "/people/@me/@self"),
   // Activities
   ACTIVITIES_OF_USER("Activities of User",
       "activities/:uid/@self", "/activities/{uid}/@self"),

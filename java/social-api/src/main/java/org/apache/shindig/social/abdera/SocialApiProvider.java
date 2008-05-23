@@ -27,19 +27,16 @@ public class SocialApiProvider extends DefaultProvider {
   //TODO why is this hardcoded here. can't this be from servletContext?
   private static final String BASE = "/social/rest/";
 
-  private PeopleServiceAdapter peopleAdapter;
-  private FriendsServiceAdapter friendsAdapter;
+  private PersonAdapter personAdapter;
   private DataServiceAdapter dataAdapter;
   private ActivityAdapter activityAdapter;
 
   @Inject
   public void setAdapters(
-      PeopleServiceAdapter peopleAdapter,
-      FriendsServiceAdapter friendsAdapter,
+      PersonAdapter personAdapter,
       DataServiceAdapter dataAdapter,
       ActivityAdapter activityAdapter) {
-    this.peopleAdapter = peopleAdapter;
-    this.friendsAdapter = friendsAdapter;
+    this.personAdapter = personAdapter;
     this.dataAdapter = dataAdapter;
     this.activityAdapter = activityAdapter;
   }
@@ -53,16 +50,16 @@ public class SocialApiProvider extends DefaultProvider {
   public void initialize() {
     routeManager = new SocialRouteManager(BASE)
         // People
-        .addRoute(RequestUrlTemplate.CONNECTIONS_OF_USER,
-            TargetType.TYPE_COLLECTION, friendsAdapter)
-        .addRoute(RequestUrlTemplate.PROFILES_OF_FRIENDS_OF_USER,
-            TargetType.TYPE_COLLECTION, friendsAdapter)
         .addRoute(RequestUrlTemplate.PROFILES_OF_CONNECTIONS_OF_USER,
-            TargetType.TYPE_COLLECTION, null)
+            TargetType.TYPE_COLLECTION, personAdapter)
+        .addRoute(RequestUrlTemplate.PROFILES_OF_FRIENDS_OF_USER,
+            TargetType.TYPE_COLLECTION, personAdapter)
+        .addRoute(RequestUrlTemplate.PROFILES_IN_GROUP_OF_USER,
+            TargetType.TYPE_COLLECTION, personAdapter)
         .addRoute(RequestUrlTemplate.PROFILE_OF_CONNECTION_OF_USER,
-            TargetType.TYPE_ENTRY, friendsAdapter)
+            TargetType.TYPE_ENTRY, personAdapter)
         .addRoute(RequestUrlTemplate.PROFILE_OF_USER,
-            TargetType.TYPE_ENTRY, peopleAdapter)
+            TargetType.TYPE_ENTRY, personAdapter)
 
          // Activities
         .addRoute(RequestUrlTemplate.ACTIVITIES_OF_USER,
