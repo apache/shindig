@@ -26,6 +26,8 @@ import org.apache.shindig.social.opensocial.PeopleService;
 import org.apache.shindig.social.opensocial.model.IdSpec;
 import org.apache.shindig.social.opensocial.util.BeanJsonConverter;
 import org.apache.shindig.social.opensocial.util.BeanXmlConverter;
+import org.apache.shindig.social.abdera.util.ValidRequestFilter.Format;
+import org.apache.shindig.social.abdera.util.ValidRequestFilter;
 
 import com.google.inject.Inject;
 import org.apache.abdera.Abdera;
@@ -74,20 +76,6 @@ public abstract class AbstractSocialEntityCollectionAdapter<T> extends
   public AbstractSocialEntityCollectionAdapter() {
     ID_PREFIX = "urn:guid:";
     factory = new Abdera().getFactory();
-  }
-
-  public enum Format {
-    JSON("json"), ATOM("atom");
-
-    private final String displayValue;
-
-    private Format(String displayValue) {
-      this.displayValue = displayValue;
-    }
-
-    public String getDisplayValue() {
-      return displayValue;
-    }
   }
 
   /**
@@ -172,7 +160,7 @@ public abstract class AbstractSocialEntityCollectionAdapter<T> extends
       return null;
     }
   }
-  
+
   /**
    * Gets the IDs of connections of the given user.
    *
@@ -184,23 +172,6 @@ public abstract class AbstractSocialEntityCollectionAdapter<T> extends
     // TODO: Implement connections. For now, just return friends
     return getFriendIds(request, uid);
    }
-
-  /**
-   * Returns the format (jsoc or atom) from the RequestContext's URL parameters.
-   *
-   * @param request Abdera's RequestContext
-   * @return The format and default to Format.JSON.
-   */
-  private Format getFormatTypeFromRequest(RequestContext request) {
-    // TODO: should gracefully handle introspection if format param is missing.
-    String format = request.getTarget().getParameter("format");
-
-    if (format != null && format.equals(Format.ATOM.getDisplayValue())) {
-      return Format.ATOM;
-    } else {
-      return Format.JSON;
-    }
-  }
 
   /**
    * @param request RequestContext
@@ -241,7 +212,7 @@ public abstract class AbstractSocialEntityCollectionAdapter<T> extends
   @Override
   public Object getContent(T entity, RequestContext request)
       throws ResponseContextException {
-    Format format = getFormatTypeFromRequest(request);
+    Format format = ValidRequestFilter.getFormatTypeFromRequest(request);
     Content content = factory.newContent();
 
     switch (format) {

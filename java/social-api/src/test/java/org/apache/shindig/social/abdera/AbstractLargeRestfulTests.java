@@ -97,15 +97,15 @@ public abstract class AbstractLargeRestfulTests {
         mimeType));
   }
 
-  protected void checkForGoodJsonResponse(ClientResponse response){
+  protected void checkForGoodJsonResponse(ClientResponse response) {
     checkForGoodResponse(response, "application/json");
   }
 
-  protected void checkForGoodAtomResponse(ClientResponse response){
+  protected void checkForGoodAtomResponse(ClientResponse response) {
     checkForGoodResponse(response, Constants.ATOM_MEDIA_TYPE);
   }
 
-  protected void checkForBadResponse(ClientResponse response){
+  protected void checkForBadResponse(ClientResponse response) {
     assertNotNull(response);
     assertEquals(Response.ResponseType.CLIENT_ERROR, response.getType());
   }

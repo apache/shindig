@@ -18,6 +18,7 @@
 package org.apache.shindig.social.abdera;
 
 import org.apache.shindig.social.abdera.json.JSONFilter;
+import org.apache.shindig.social.abdera.util.ValidRequestFilter;
 
 import com.google.inject.Inject;
 import org.apache.abdera.protocol.server.TargetType;
@@ -79,6 +80,7 @@ public class SocialApiProvider extends DefaultProvider {
         ;
 
     addFilter(new JSONFilter());
+    addFilter(new ValidRequestFilter());
     targetBuilder = routeManager;
     targetResolver = routeManager;
   }
