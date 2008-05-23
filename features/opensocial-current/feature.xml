@@ -20,7 +20,6 @@
 <feature>
   <name>opensocial-0.8</name>
   <dependency>opensocial-reference</dependency>
-  <dependency>caja</dependency>
   <gadget>
     <script src="jsonperson.js"></script>
     <script src="jsonactivity.js"></script>

@@ -98,7 +98,7 @@
     // Must be on the same domain as the gadget rendering server
     "path" : "/social/data",
     "domain" : "shindig",
-    "enableCaja" : true,
+    "enableCaja" : false,
     "supportedFields" : {
        "person" : ["id", "name", "thumbnailUrl", "profileUrl"],
        "activity" : ["id", "title"]
