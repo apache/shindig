@@ -51,7 +51,7 @@ class SigningFetcherFactory {
 				// check if the converted from PKCS8 key is in cache, if not, convert it
 				$cache = Config::get('data_cache');
 				$cache = new $cache();
-				if (0 && $cachedKey = $cache->get(md5("RSA_PRIVATE_KEY_" . $this->keyName)) !== false) {
+				if (($cachedKey = $cache->get(md5("RSA_PRIVATE_KEY_" . $this->keyName))) !== false) {
 					$rsa_private_key = $cachedKey;
 				} else {
 					if (! $rsa_private_key = @file_get_contents($keyFile)) {

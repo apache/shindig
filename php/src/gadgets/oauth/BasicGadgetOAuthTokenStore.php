@@ -54,19 +54,16 @@ class BasicGadgetOAuthTokenStore extends GadgetOAuthTokenStore {
 	private function storeProviderInfos($fetcher, $gadgetUri)
 	{
 		$cache = Config::get('data_cache');
-		$cache = new $cache();
-		
+		$cache = new $cache();		
 		// determine which requests we can load from cache, and which we have to actually fetch
-		if (($cachedRequest = $cache->get(md5($gadgetUri))) !== false) {
-			$gadget = $cachedRequest;
-		} else {
+		if (($gadget = $cache->get(md5('storeProviderInfos'.$gadgetUri))) === false) {
 			$remoteContentRequest = new RemoteContentRequest($gadgetUri);
 			$remoteContentRequest->getRequest($gadgetUri, false);
 			$response = $fetcher->fetchRequest($remoteContentRequest);
 			$context = new ProxyGadgetContext($gadgetUri);
 			$spec = new GadgetSpecParser();
 			$gadget = $spec->parse($response->getResponseContent(), $context);
-			$cache->set(md5($gadgetUri), $gadget);
+			$cache->set(md5('storeProviderInfos'.$gadgetUri), $gadget);
 		}
 		parent::storeServiceInfoFromGadgetSpec($gadgetUri, $gadget);
 	}
