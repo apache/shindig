@@ -22,6 +22,8 @@ import org.apache.shindig.social.opensocial.model.Activity;
 
 import org.apache.abdera.model.Document;
 import org.apache.abdera.model.Entry;
+import org.apache.abdera.model.Feed;
+
 import static org.junit.Assert.assertEquals;
 import org.junit.Test;
 
@@ -34,30 +36,47 @@ public class RestfulAtomActivityTest extends AbstractLargeRestfulTests {
     resp = client.get(BASEURL + "/activities/john.doe/@self/1?format=atom");
     checkForGoodAtomResponse(resp);
     Document<Entry> doc = resp.getDocument();
-    Entry entry = doc.getRoot();
-    assertEquals("urn:guid:" + activity.getId(), entry.getId().toString());
-    assertEquals("urn:guid:" + activity.getUserId(), entry.getAuthor().getUri()
-        .toString());
-    assertEquals(activity.getTitle(), entry.getTitle());
-    assertEquals(activity.getBody(), entry.getSummary());
+    validateActivityAtomEntryElements(doc.getRoot());
     // TODO Test the content element and more top level elements.
-    resp.release();
   }
 
   @Test
   public void testGetActivitiesOfUser() throws Exception {
     resp = client.get(BASEURL + "/activities/john.doe/@self?format=atom");
     checkForGoodAtomResponse(resp);
+    Document<Feed> doc = resp.getDocument();
+    String feedId = BASEURL + "/activities/john.doe/%40self?aid=";
+    String title = RequestUrlTemplate.ACTIVITIES_OF_USER.toString();
+    validateActivityAtomFeedElements(doc.getRoot(), title, feedId);
     // TODO Test all elements.
-    resp.release();
   }
 
   @Test
   public void testGetActivitiesOfFriendsOfUser() throws Exception {
     resp = client.get(BASEURL + "/activities/john.doe/@friends?format=atom");
     checkForGoodAtomResponse(resp);
+    Document<Feed> doc = resp.getDocument();
+    prettyPrint(doc);
+    String feedId = BASEURL + "/activities/john.doe/%40friends?aid=";
+    String title = RequestUrlTemplate.ACTIVITIES_OF_FRIENDS_OF_USER.toString();
+    validateActivityAtomFeedElements(doc.getRoot(), title, feedId);
     // TODO Social graph seems to make everyone friends at this point.
     // TODO Test all elements.
-    resp.release();
+  }
+
+  private void validateActivityAtomEntryElements(Entry entry) {
+    assertEquals("urn:guid:" + activity.getId(), entry.getId().toString());
+    assertEquals("urn:guid:" + activity.getUserId(), entry.getAuthor().getUri()
+        .toString());
+    assertEquals(activity.getTitle(), entry.getTitle());
+    assertEquals(activity.getBody(), entry.getSummary());
+  }
+
+  private void validateActivityAtomFeedElements(Feed feed, String title,
+      String feedId) {
+    assertEquals(feedId, feed.getId().toString());
+    assertEquals(feedId, feed.getLink("self").getHref().toString());
+    assertEquals(activity.getUserId(), feed.getAuthor().getName().toString());
+    assertEquals(title, feed.getTitle());
   }
 }
