@@ -17,7 +17,8 @@
 */
 package org.apache.shindig.social.abdera.json;
 
-import org.apache.shindig.social.abdera.AbstractSocialEntityCollectionAdapter;
+import org.apache.shindig.social.abdera.util.ValidRequestFilter.Format;
+import org.apache.shindig.social.abdera.util.ValidRequestFilter;
 
 import org.apache.abdera.Abdera;
 import org.apache.abdera.model.Document;
@@ -50,14 +51,11 @@ import java.util.List;
  * pojo to atom and pojo to json. Need to fix abdera!
  */
 public class JSONFilter implements Filter {
-  private final String FORMAT_FIELD = "format";
-  private final String ATOM = AbstractSocialEntityCollectionAdapter.Format
-      .ATOM.getDisplayValue();
 
   public ResponseContext filter(RequestContext request, FilterChain chain) {
     ResponseContext resp = chain.next(request);
-    String format = request.getParameter(FORMAT_FIELD);
-    if (format != null && format.equalsIgnoreCase(ATOM)) {
+    Format format = ValidRequestFilter.getFormatTypeFromRequest(request);
+    if (format == Format.ATOM) {
       return resp;
     }
     // If there is no content, it could be either due to some error such as
