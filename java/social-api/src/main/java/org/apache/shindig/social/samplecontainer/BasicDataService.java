@@ -52,14 +52,19 @@ public class BasicDataService implements DataService {
     for (String id : ids) {
       Map<String, String> allPersonData = allData.get(id);
       if (allPersonData != null) {
-        Map<String, String> personData = new HashMap<String, String>();
-        for (String key : allPersonData.keySet()) {
-          if (keys.contains(key)) {
-            personData.put(key, allPersonData.get(key));
+        if (keys == null || keys.isEmpty()) {
+          data.put(id, allPersonData);
+        } else {
+          Map<String, String> personData = new HashMap<String, String>();
+          for (String key : keys) {
+            String value = allPersonData.get(key);
+            if (value != null) {
+              personData.put(key, value);
+            }
           }
+          data.put(id, personData);
         }
 
-        data.put(id, personData);
       }
     }
 
