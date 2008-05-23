@@ -150,11 +150,13 @@ class SigningFetcher extends RemoteContentFetcher {
 				}
 			}
 			// and stick on the original query params too
-			$oldQuery = array();
-			parse_str($parsedUri['query'], $oldQuery);
-			foreach ($oldQuery as $key => $val) {
-				$newQuery .= urlencode($key).'='.urlencode($val).'&';
-			}			
+			if (isset($parsedUri['query']) && !empty($parsedUri['query'])) {
+				$oldQuery = array();
+				parse_str($parsedUri['query'], $oldQuery);
+				foreach ($oldQuery as $key => $val) {
+					$newQuery .= urlencode($key).'='.urlencode($val).'&';
+				}
+			}
 			// Careful here; the OAuth form encoding scheme is slightly different than
 			// the normal form encoding scheme, so we have to use the OAuth library
 			// formEncode method.
