@@ -154,7 +154,7 @@ public class SocialApiTestsGuiceModule extends AbstractModule {
       johnsFriends.add(simpleDoe.getId());
       friendIds.put(johnDoe.getId(), johnsFriends);
 
-      // John is Jane's friend.      
+      // John is Jane's friend.
       List<String> janesFriends = new ArrayList<String>();
       janesFriends.add(johnDoe.getId());
       friendIds.put(janeDoe.getId(), janesFriends);
@@ -229,12 +229,17 @@ public class SocialApiTestsGuiceModule extends AbstractModule {
 
         // Filter by keys
         Map<String, String> personDataToReturn = new HashMap<String, String>();
-        if (keys != null) {
-          for (String key : keys) {
-            personDataToReturn.put(key, allPersonData.get(key));
-          }
-        } else {
+
+        if (keys == null || keys.isEmpty()) {
           personDataToReturn = allPersonData;
+        } else {
+          for (String key : keys) {
+            String value = allPersonData.get(key);
+            if (value != null) {
+              personDataToReturn.put(key, value);
+            }
+          }
+
         }
 
         dataToReturn.put(id, personDataToReturn);
