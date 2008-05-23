@@ -17,8 +17,10 @@
 */
 package org.apache.shindig.social.abdera.json;
 
-import org.apache.shindig.social.abdera.util.ValidRequestFilter.Format;
+import org.apache.shindig.social.abdera.AbstractSocialEntityCollectionAdapter;
+import org.apache.shindig.social.abdera.RequestUrlTemplate;
 import org.apache.shindig.social.abdera.util.ValidRequestFilter;
+import org.apache.shindig.social.abdera.util.ValidRequestFilter.Format;
 
 import org.apache.abdera.Abdera;
 import org.apache.abdera.model.Document;
@@ -65,14 +67,17 @@ public class JSONFilter implements Filter {
       return resp;
     }
 
-    return new JsonResponseContext(resp, request.getAbdera());
+    return new JsonResponseContext(resp, request.getAbdera(), request);
   }
 
   private class JsonResponseContext extends ResponseContextWrapper {
     private final Abdera abdera;
+    private final RequestContext request;
 
-    public JsonResponseContext(ResponseContext response, Abdera abdera) {
+    public JsonResponseContext(ResponseContext response, Abdera abdera,
+        RequestContext request) {
       super(response);
+      this.request = request;
       setContentType("application/json");
       this.abdera = abdera;
     }
@@ -121,18 +126,20 @@ public class JSONFilter implements Filter {
         JSONObject json = new JSONObject();
 
         try {
-          // TODO: Add the top level items for real
-          json.put("startIndex", 0);
-          json.put("totalResults", entries.size());
+          RequestUrlTemplate url = AbstractSocialEntityCollectionAdapter
+              .getUrlTemplate(request);
 
-          JSONArray jsonArray = new JSONArray();
-          for (Entry entry : feed.getEntries()) {
-            String contentValue = entry.getContentElement().getValue();
-            JSONObject jsonItem = new JSONObject(contentValue);
-            jsonArray.put(jsonItem);
+          // If the type of object is Data, then we want to create a JSONObject
+          // instead of a JSONArray
+          // TODO: This is another messy thing to clean up...
+          switch (url) {
+            case APPDATA_OF_APP_OF_USER :
+            case APPDATA_OF_FRIENDS_OF_USER :
+              createDataMapping(json, feed.getEntries());
+              break;
+            default :
+              createJsonArray(json, entries);
           }
-          json.put("entry", jsonArray);
-
         } catch (JSONException e) {
           throw new RuntimeException(
               "The atom Document could not be converted to JSON", e);
@@ -143,6 +150,34 @@ public class JSONFilter implements Filter {
 
       throw new UnsupportedOperationException("Converting a non-Entry "
           + "non-Feed abdera Document to JSON is not supported");
+    }
+
+    private void createDataMapping(JSONObject json, List<Entry> entries)
+        throws JSONException {
+      JSONObject jsonObject = new JSONObject();
+      for (Entry entry : entries) {
+        String contentValue = entry.getContentElement().getValue();
+        JSONObject jsonItem = new JSONObject(contentValue);
+
+        jsonObject.put(jsonItem.getString("personId"),
+            jsonItem.getJSONObject("appdata"));
+      }
+      json.put("entry", jsonObject);
+    }
+
+    private void createJsonArray(JSONObject json, List<Entry> entries)
+        throws JSONException {
+      // TODO: Add the top level items for real
+      json.put("startIndex", 0);
+      json.put("totalResults", entries.size());
+
+      JSONArray jsonArray = new JSONArray();
+      for (Entry entry : entries) {
+        String contentValue = entry.getContentElement().getValue();
+        JSONObject jsonItem = new JSONObject(contentValue);
+        jsonArray.put(jsonItem);
+      }
+      json.put("entry", jsonArray);
     }
   }
 }

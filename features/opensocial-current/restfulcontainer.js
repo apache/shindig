@@ -184,7 +184,7 @@ RestfulContainer.prototype.newFetchPersonAppDataRequest = function(idSpec,
        + "?fields=" + keys.join(',');
   return new RestfulRequestItem(url, "GET", null,
       function (appData) {
-        return gadgets.util.escape(appData[0], true);
+        return gadgets.util.escape(appData['entry'], true);
       });
 };
 

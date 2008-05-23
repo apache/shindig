@@ -29,13 +29,13 @@ public class SocialApiProvider extends DefaultProvider {
   private static final String BASE = "/social/rest/";
 
   private PersonAdapter personAdapter;
-  private DataServiceAdapter dataAdapter;
+  private DataAdapter dataAdapter;
   private ActivityAdapter activityAdapter;
 
   @Inject
   public void setAdapters(
       PersonAdapter personAdapter,
-      DataServiceAdapter dataAdapter,
+      DataAdapter dataAdapter,
       ActivityAdapter activityAdapter) {
     this.personAdapter = personAdapter;
     this.dataAdapter = dataAdapter;
@@ -79,8 +79,9 @@ public class SocialApiProvider extends DefaultProvider {
             TargetType.TYPE_COLLECTION, dataAdapter)
         ;
 
-    addFilter(new JSONFilter());
     addFilter(new ValidRequestFilter());
+    // JsonFilter should always be the last class in the chain of filters
+    addFilter(new JSONFilter());
     targetBuilder = routeManager;
     targetResolver = routeManager;
   }
