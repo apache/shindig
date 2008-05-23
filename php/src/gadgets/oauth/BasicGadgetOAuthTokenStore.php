@@ -57,7 +57,7 @@ class BasicGadgetOAuthTokenStore extends GadgetOAuthTokenStore {
 		$cache = new $cache();
 		
 		// determine which requests we can load from cache, and which we have to actually fetch
-		if ($cachedRequest = $cache->get(md5($gadgetUri)) !== false) {
+		if (($cachedRequest = $cache->get(md5($gadgetUri))) !== false) {
 			$gadget = $cachedRequest;
 		} else {
 			$remoteContentRequest = new RemoteContentRequest($gadgetUri);
