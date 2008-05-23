@@ -37,13 +37,27 @@ class JsFeatureLoader {
 		return $entries;
 	}
 
+	private function sortFeaturesFiles($feature1, $feature2)
+	{
+		$feature1 = basename(str_replace('/feature.xml','', $feature1));
+		$feature2 = basename(str_replace('/feature.xml','', $feature2));
+	    if ($feature1 == $feature2) {
+	        return 0;
+    	}
+    	return ($feature1 < $feature2) ? -1 : 1;
+	}
+	
 	private function loadFiles($path, &$features)
 	{
-		foreach (glob("$path/*") as $file) {
-			$file = realpath($file.'/feature.xml');
-			if (file_exists($file) && is_readable($file)) {
-				$feature = $this->processFile($file);
-				if ($feature != null) {
+		$featuresFile = $path.'/features.txt';
+		if (file_exists($featuresFile) && is_readable($featuresFile)) {
+			$files = explode("\n", file_get_contents($featuresFile));
+			// custom sort, else core.io seems to bubble up before core, which breaks the dep chain order
+			usort($files, array($this,'sortFeaturesFiles'));
+			foreach ($files as $file) {
+				if (!empty($file) && strpos($file, 'feature.xml') !== false && substr($file, 0, 1) != '#' && substr($file, 0, 2) != '//') {
+					$file = realpath($path.'/../'.$file);
+					$feature = $this->processFile($file);
 					$features[$feature->name] = $feature;
 				}
 			}
@@ -56,7 +70,7 @@ class JsFeatureLoader {
 		$feature = null;
 		if (file_exists($file) && is_file($file) && is_readable($file)) {
 			if (($content = @file_get_contents($file))) {
-				$feature = $this->parse($content, dirname($file) . '/');
+				$feature = $this->parse($content, dirname($file));
 			}
 		}
 		return $feature;
