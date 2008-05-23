@@ -17,6 +17,10 @@
  */
 package org.apache.shindig.social.abdera;
 
+import org.apache.shindig.social.SocialApiTestsGuiceModule.MockPeopleService;
+
+import static junit.framework.Assert.assertEquals;
+import org.json.JSONObject;
 import org.junit.Test;
 
 
@@ -38,8 +42,20 @@ public class RestfulJsonDataTest extends AbstractLargeRestfulTests {
   public void testGetFriendsAppDataJson() throws Exception {
     // app id is mocked out
     resp = client.get(BASEURL + "/appdata/john.doe/@friends/app?fields=count");
-    // checkForGoodJsonResponse(resp);
-    // JSONObject result = getJson(resp);
+    checkForGoodJsonResponse(resp);
+
+    JSONObject data = getJson(resp).getJSONObject("entry");
+    assertEquals(2, data.length());
+
+    JSONObject janesEntries = data.getJSONObject(
+        MockPeopleService.janeDoe.getId());
+    assertEquals(1, janesEntries.length());
+    assertEquals("5", janesEntries.getString("count"));
+
+    JSONObject simplesEntries = data.getJSONObject(
+        MockPeopleService.simpleDoe.getId());
+    assertEquals(1, simplesEntries.length());
+    assertEquals("7", simplesEntries.getString("count"));
   }
 
   /**
@@ -53,13 +69,18 @@ public class RestfulJsonDataTest extends AbstractLargeRestfulTests {
    *
    * @throws Exception if test encounters an error
    */
-   // TODO: Shindig currently throws an exception when no keys are specified
-   // @Test
+  @Test
   public void testGetSelfAppDataJson() throws Exception {
     // app id is mocked out
     resp = client.get(BASEURL + "/appdata/john.doe/@self/app");
-    // checkForGoodJsonResponse(resp);
-    // JSONObject result = getJson(resp);
+    checkForGoodJsonResponse(resp);
+    JSONObject data = getJson(resp).getJSONObject("entry");
+    assertEquals(1, data.length());
+
+    JSONObject johnsEntries = data.getJSONObject(
+        MockPeopleService.johnDoe.getId());
+    assertEquals(1, johnsEntries.length());
+    assertEquals("0", johnsEntries.getString("count"));
   }
 
   /**
@@ -77,8 +98,15 @@ public class RestfulJsonDataTest extends AbstractLargeRestfulTests {
   public void testGetSelfAppDataJsonWithKey() throws Exception {
     // app id is mocked out
     resp = client.get(BASEURL + "/appdata/john.doe/@self/app?fields=count");
-    // checkForGoodJsonResponse(resp);
-    // JSONObject result = getJson(resp);
+    checkForGoodJsonResponse(resp);
+
+    JSONObject data = getJson(resp).getJSONObject("entry");
+    assertEquals(1, data.length());
+
+    JSONObject johnsEntries = data.getJSONObject(
+        MockPeopleService.johnDoe.getId());
+    assertEquals(1, johnsEntries.length());
+    assertEquals("0", johnsEntries.getString("count"));
   }
 
   /**
@@ -94,11 +122,17 @@ public class RestfulJsonDataTest extends AbstractLargeRestfulTests {
    * @throws Exception if test encounters an error
    */
   @Test
-  public void testGetSelfAppDataJsonWithoutKeys() throws Exception {
+  public void testGetSelfAppDataJsonWithInvalidKeys() throws Exception {
     // app id is mocked out
     resp = client.get(BASEURL + "/appdata/john.doe/@self/app?fields=peabody");
-    // checkForGoodJsonResponse(resp);
-    // JSONObject result = getJson(resp);
+    checkForGoodJsonResponse(resp);
+
+    JSONObject data = getJson(resp).getJSONObject("entry");
+    assertEquals(1, data.length());
+
+    JSONObject johnsEntries = data.getJSONObject(
+        MockPeopleService.johnDoe.getId());
+    assertEquals(0, johnsEntries.length());
   }
 
   // TODO: support for indexBy??
