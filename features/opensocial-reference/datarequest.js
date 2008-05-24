@@ -211,7 +211,13 @@ opensocial.DataRequest.FilterType = {
    *
    * @member opensocial.DataRequest.FilterType
    */
-  HAS_APP : 'hasApp'
+  HAS_APP : 'hasApp',
+  /**
+   * Retrieves only the user's top friends.
+   *
+   * @member opensocial.DataRequest.FilterType
+   */
+  TOP_FRIENDS : 'topFriends'
 };
 
 
