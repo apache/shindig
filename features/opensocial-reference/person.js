@@ -466,7 +466,24 @@ opensocial.Person.Field = {
    *
    * @member opensocial.Person.Field
    */
-  POLITICAL_VIEWS : 'politicalViews'
+  POLITICAL_VIEWS : 'politicalViews',
+
+  /**
+   * A boolean indicating whether the person has used the current app.
+   *
+   * @member opensocial.Person.Field
+   */
+  HAS_APP : 'hasApp',
+
+  /**
+   * Person's current network status. Specified as an Enum with the enum's
+   * key referencing opensocial.Enum.Presence.
+   * Not supported by all containers.
+   *
+   * @member opensocial.Person.Field
+   */
+  NETWORK_PRESENCE : 'networkPresence'
+
 };
 
 

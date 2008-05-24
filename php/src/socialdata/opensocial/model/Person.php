@@ -40,6 +40,7 @@ class Person {
 	public $food;
 	public $gender;
 	public $happiestWhen;
+        public $hasApp;
 	public $heroes;
 	public $humor;
 	public $id;
@@ -52,6 +53,7 @@ class Person {
 	public $movies;
 	public $music;
 	public $name;
+        public $networkPresence;
 	public $nickname;
 	public $pets;
 	public $phoneNumbers;
@@ -76,7 +78,6 @@ class Person {
 	public $turnOns;
 	public $tvShows;
 	public $urls;
-        public $networkPresence;
 	
 	// Note: Not in the opensocial js person object directly
 	public $isOwner = false;
@@ -268,6 +269,16 @@ class Person {
 		$this->heroes = $heroes;
 	}
 	
+	public function getHasApp()
+	{
+		return $this->hasApp;
+	}
+	
+	public function setHasApp($hasApp)
+	{
+		$this->hasApp = $hasApp;
+	}
+
 	public function getHumor()
 	{
 		return $this->humor;
@@ -378,6 +389,16 @@ class Person {
 		$this->name = $name;
 	}
 	
+	public function getNetworkPresence()
+	{
+		return $this->networkPresence;
+	}
+	
+	public function setNetworkPresence($networkPresence)
+	{
+		$this->networkPresence = $networkPresence;
+	}
+
 	public function getNickname()
 	{
 		return $this->nickname;
@@ -618,15 +639,6 @@ class Person {
 		$this->urls = $urls;
 	}
 	
-	public function getNetworkPresence()
-	{
-		return $this->networkPresence;
-	}
-	
-	public function setNetworkPresence($networkPresence)
-	{
-		$this->networkPresence = $networkPresence;
-	}
 	
 	public function getIsOwner()
 	{

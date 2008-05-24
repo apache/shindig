@@ -102,9 +102,9 @@ class EnumSmoker extends Enum {
 }
 
 /**
- * public Enum for opensocial.Enum.Smoker
+ * public Enum for opensocial.Enum.Presence
  */
-class EnumNetworkPresence extends Enum {
+class EnumPresence extends Enum {
 	public $values = array(
     'AWAY' => "Away",
     'CHAT' => "Chat",

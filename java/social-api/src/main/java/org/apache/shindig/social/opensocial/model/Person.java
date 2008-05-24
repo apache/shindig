@@ -45,6 +45,7 @@ public class Person {
     FOOD("food"),
     GENDER("gender"),
     HAPPIEST_WHEN("happiestWhen"),
+    HAS_APP("hasApp"),
     HEROES("heroes"),
     HUMOR("humor"),
     ID("id"),
@@ -58,6 +59,7 @@ public class Person {
     MOVIES("movies"),
     MUSIC("music"),
     NAME("name"),
+    NETWORKPRESENCE("networkPresence"),
     NICKNAME("nickname"),
     PETS("pets"),
     PHONE_NUMBERS("phoneNumbers"),
@@ -81,8 +83,7 @@ public class Person {
     TURN_OFFS("turnOffs"),
     TURN_ONS("turnOns"),
     TV_SHOWS("tvShows"),
-    URLS("urls"),
-    NETWORKPRESENCE("networkPresence");
+    URLS("urls");
 
     private final String jsonString;
 
@@ -113,6 +114,7 @@ public class Person {
   private List<String> food;
   private Enum<Enum.Gender> gender;
   private String happiestWhen;
+  private Boolean hasApp;
   private List<String> heroes;
   private String humor;
   private String id;
@@ -126,6 +128,7 @@ public class Person {
   private List<String> movies;
   private List<String> music;
   private Name name;
+  private Enum<Enum.NetworkPresence> networkPresence;
   private String nickname;
   private String pets;
   private List<Phone> phoneNumbers;
@@ -150,7 +153,6 @@ public class Person {
   private List<String> turnOns;
   private List<String> tvShows;
   private List<Url> urls;
-  private Enum<Enum.NetworkPresence> networkPresence;
 
   // Note: Not in the opensocial js person object directly
   private boolean isOwner = false;
@@ -297,6 +299,14 @@ public class Person {
     this.happiestWhen = happiestWhen;
   }
 
+  public Boolean getHasApp() {
+    return hasApp;
+  }
+
+  public void setHasApp(Boolean hasApp) {
+    this.hasApp = hasApp;
+  }
+
   public List<String> getHeroes() {
     return heroes;
   }
@@ -399,6 +409,14 @@ public class Person {
 
   public void setName(Name name) {
     this.name = name;
+  }
+
+  public Enum<Enum.NetworkPresence> getNetworkPresence() {
+    return networkPresence;
+  }
+
+  public void setNetworkPresence(Enum<Enum.NetworkPresence> networkPresence) {
+    this.networkPresence = networkPresence;
   }
 
   public String getNickname() {
@@ -591,14 +609,6 @@ public class Person {
 
   public void setUrls(List<Url> urls) {
     this.urls = urls;
-  }
-
-  public Enum<Enum.NetworkPresence> getNetworkPresence() {
-    return networkPresence;
-  }
-
-  public void setNetworkPresence(Enum<Enum.NetworkPresence> networkPresence) {
-    this.networkPresence = networkPresence;
   }
 
   public boolean getIsOwner() {
