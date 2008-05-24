@@ -106,10 +106,12 @@ public class DefaultContentRewriter implements ContentRewriter {
   }
 
   private boolean isHTML(String mime) {
+    if (mime == null) return false;
     return (mime.toLowerCase().contains("html"));
   }
 
   private boolean isCSS(String mime) {
+    if (mime == null) return false;
     return (mime.toLowerCase().contains("css"));
   }
 
