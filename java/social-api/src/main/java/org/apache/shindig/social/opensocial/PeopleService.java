@@ -46,7 +46,7 @@ public interface PeopleService {
   }
 
   public enum FilterType {
-    all, hasApp
+    all, hasApp, topFriends
   }
 
   /**

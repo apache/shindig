@@ -19,7 +19,7 @@
 
 abstract class PeopleService {
 	public $sortOrder = array('topFriends', 'name');
-	public $filterType = array('all', 'hasApp');
+	public $filterType = array('all', 'hasApp', 'topFriends');
 
 	/**
 	 * Returns a list of people ids that the other handlers (currently data
