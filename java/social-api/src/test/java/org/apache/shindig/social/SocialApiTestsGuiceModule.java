@@ -84,6 +84,7 @@ public class SocialApiTestsGuiceModule extends AbstractModule {
       johnDoe.setFood(newList("gruel"));
       johnDoe.setGender(new Enum<Enum.Gender>(Enum.Gender.MALE));
       johnDoe.setHappiestWhen("puppies");
+      johnDoe.setHasApp(true);
       johnDoe.setHeroes(newList("the moon"));
       johnDoe.setHumor("not so good");
       johnDoe.setInterests(newList("kites"));
@@ -95,6 +96,8 @@ public class SocialApiTestsGuiceModule extends AbstractModule {
       johnDoe.setLookingFor("jane doe");
       johnDoe.setMovies(newList("movies"));
       johnDoe.setMusic(newList("music"));
+      johnDoe.setNetworkPresence(new Enum<Enum.NetworkPresence>(
+          Enum.NetworkPresence.DND));
       johnDoe.setNickname("johnny boy");
       johnDoe.setPets("simple doe");
       johnDoe.setPhoneNumbers(newList(new Phone("+33H000000000", "home")));
@@ -119,8 +122,6 @@ public class SocialApiTestsGuiceModule extends AbstractModule {
       johnDoe.setTurnOns(newList("on"));
       johnDoe.setTvShows(newList("no tv"));
       johnDoe.setUrls(newList(new Url("where", "are", "you")));
-      johnDoe.setNetworkPresence(new Enum<Enum.NetworkPresence>(
-          Enum.NetworkPresence.DND));
 
 
       // setup Jane Doe

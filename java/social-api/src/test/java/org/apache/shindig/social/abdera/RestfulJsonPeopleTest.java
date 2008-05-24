@@ -100,6 +100,7 @@ public class RestfulJsonPeopleTest extends AbstractLargeRestfulTests {
     assertEnumField(result, johnDoe.getGender(), Person.Field.GENDER);
     assertStringField(result, johnDoe.getHappiestWhen(),
         Person.Field.HAPPIEST_WHEN);
+    assertBooleanField(result, johnDoe.getHasApp(), Person.Field.HAS_APP);
     assertStringListField(result, johnDoe.getHeroes(), Person.Field.HEROES);
     assertStringField(result, johnDoe.getHumor(), Person.Field.HUMOR);
     assertStringField(result, johnDoe.getId(), Person.Field.ID);
@@ -122,6 +123,8 @@ public class RestfulJsonPeopleTest extends AbstractLargeRestfulTests {
         result.getJSONObject(Person.Field.NAME.toString()).getString(
             Name.Field.UNSTRUCTURED.toString()));
 
+    assertEnumField(result, johnDoe.getNetworkPresence(),
+        Person.Field.NETWORKPRESENCE);
     assertStringField(result, johnDoe.getNickname(), Person.Field.NICKNAME);
     assertStringField(result, johnDoe.getPets(), Person.Field.PETS);
 
@@ -161,8 +164,11 @@ public class RestfulJsonPeopleTest extends AbstractLargeRestfulTests {
         Person.Field.TURN_OFFS);
     assertStringListField(result, johnDoe.getTurnOns(), Person.Field.TURN_ONS);
     assertStringListField(result, johnDoe.getTvShows(), Person.Field.TV_SHOWS);
-    assertEnumField(result, johnDoe.getNetworkPresence(),
-        Person.Field.NETWORKPRESENCE);
+  }
+
+  private void assertBooleanField(JSONObject result, Boolean expected,
+      Person.Field field) throws JSONException {
+    assertEquals(expected, result.getBoolean(field.toString()));
   }
 
   private void assertStringField(JSONObject result, String expected,
