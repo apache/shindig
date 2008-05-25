@@ -28,6 +28,9 @@ import java.io.OutputStream;
  * Used to consume entire input streams and transform them into data buffers.
  * These are all blocking routines and should never be called from a thread
  * that will cause deadlock.
+ *
+ * @deprecated Use org.apache.commons.io.IOUtils instead.
+ *   This will be removed some time before the Shindig 1.0 release.
  */
 @Deprecated
 public class InputStreamConsumer {

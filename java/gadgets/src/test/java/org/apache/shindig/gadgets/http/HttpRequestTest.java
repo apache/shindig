@@ -18,7 +18,7 @@
  */
 package org.apache.shindig.gadgets.http;
 
-import org.apache.shindig.common.util.InputStreamConsumer;
+import org.apache.commons.io.IOUtils;
 
 import junit.framework.TestCase;
 
@@ -39,8 +39,7 @@ public class HttpRequestTest extends TestCase {
     HttpRequest request
         = new HttpRequest(DEFAULT_URI, POST_BODY.getBytes());
     assertEquals(POST_BODY.length(), request.getPostBodyLength());
-    assertEquals(POST_BODY,
-        InputStreamConsumer.readToString(request.getPostBody()));
+    assertEquals(POST_BODY, IOUtils.toString(request.getPostBody(), "UTF-8"));
   }
 
   public void testContentTypeExtraction() throws Exception {

@@ -19,10 +19,10 @@
 package org.apache.shindig.gadgets.servlet;
 
 import org.apache.shindig.common.servlet.InjectedServlet;
-import org.apache.shindig.common.util.InputStreamConsumer;
 
 import com.google.inject.Inject;
 
+import org.apache.commons.io.IOUtils;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -66,7 +66,7 @@ public class RpcServlet extends InjectedServlet {
     }
 
     ServletInputStream is = request.getInputStream();
-    byte[] body = InputStreamConsumer.readToByteArray(is, length);
+    byte[] body = IOUtils.toByteArray(is);
     if (body.length != length) {
       logger.info("Wrong size. Length: " + length + " real: " + body.length);
       response.setStatus(HttpServletResponse.SC_BAD_REQUEST);

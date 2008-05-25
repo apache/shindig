@@ -19,13 +19,14 @@
 package org.apache.shindig.gadgets;
 
 import org.apache.shindig.common.SecurityToken;
-import org.apache.shindig.common.util.InputStreamConsumer;
 import org.apache.shindig.common.util.ResourceLoader;
 import org.apache.shindig.gadgets.http.HttpCache;
 import org.apache.shindig.gadgets.http.HttpFetcher;
 
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
+
+import org.apache.commons.io.IOUtils;
 
 import java.io.IOException;
 
@@ -80,8 +81,7 @@ public class SigningFetcherFactory {
     }
     String privateKey = null;
     try {
-      privateKey
-          = InputStreamConsumer.readToString(ResourceLoader.open(keyFile));
+      privateKey = IOUtils.toString(ResourceLoader.open(keyFile), "UTF-8");
     } catch (IOException e) {
       privateKey = "";
     }

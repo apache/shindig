@@ -20,7 +20,7 @@ package org.apache.shindig.gadgets.http;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
-import org.apache.shindig.common.util.InputStreamConsumer;
+import org.apache.commons.io.IOUtils;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -130,7 +130,7 @@ public class BasicHttpFetcher implements HttpFetcher {
       is = new InflaterInputStream(fetcher.getInputStream(), inflater);
     }
 
-    byte[] body = InputStreamConsumer.readToByteArray(is, maxObjSize);
+    byte[] body = IOUtils.toByteArray(is);
     return new HttpResponse(responseCode, body, headers);
   }
 
@@ -150,8 +150,7 @@ public class BasicHttpFetcher implements HttpFetcher {
         fetcher.setUseCaches(false);
         fetcher.setDoInput(true);
         fetcher.setDoOutput(true);
-        InputStreamConsumer.pipe(request.getPostBody(),
-                                 fetcher.getOutputStream());
+        IOUtils.copy(request.getPostBody(), fetcher.getOutputStream());
       }
       response = makeResponse(fetcher);
       return cache.addResponse(request, response);

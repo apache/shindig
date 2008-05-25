@@ -19,6 +19,8 @@
 
 package org.apache.shindig.common.util;
 
+import org.apache.commons.io.IOUtils;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -69,7 +71,7 @@ public class ResourceLoader {
    * @throws IOException
    */
   public static String getContent(String resource) throws IOException {
-    return InputStreamConsumer.readToString(openResource(resource));
+    return IOUtils.toString(openResource(resource), "UTF-8");
   }
 
   /**
@@ -78,6 +80,6 @@ public class ResourceLoader {
    * @throws IOException
    */
   public static String getContent(File file) throws IOException {
-    return InputStreamConsumer.readToString(new FileInputStream(file));
+    return IOUtils.toString(new FileInputStream(file), "UTF-8");
   }
 }

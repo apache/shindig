@@ -17,9 +17,9 @@
  */
 package org.apache.shindig.gadgets.http;
 
-import junit.framework.TestCase;
+import org.apache.commons.io.IOUtils;
 
-import org.apache.shindig.common.util.InputStreamConsumer;
+import junit.framework.TestCase;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -87,7 +87,7 @@ public class HttpResponseTest extends TestCase {
     };
     addHeader("Content-Type", "application/octet-stream");
     HttpResponse response = new HttpResponse(200, data, headers);
-    byte[] out = InputStreamConsumer.readToByteArray(response.getResponse());
+    byte[] out = IOUtils.toByteArray(response.getResponse());
     assertTrue(Arrays.equals(data, out));
   }
 
