@@ -44,7 +44,7 @@ public abstract class GadgetTestFixture extends EasyMockTestCase {
   public final MessageBundleFactory bundleFactory =
       new BasicMessageBundleFactory(fetcher, 0, 0L);
   public GadgetFeatureRegistry registry;
-  public ContainerConfig containerConfig;
+  public ContainerConfig containerConfig = mock(ContainerConfig.class);
   public final Executor executor = new Executor() {
     public void execute(Runnable r) {
       r.run();
@@ -58,13 +58,6 @@ public abstract class GadgetTestFixture extends EasyMockTestCase {
     } catch (Exception e) {
       e.printStackTrace();
       fail("Failed to create feature registry");
-    }
-
-    try {
-      containerConfig = new ContainerConfig(null);
-    } catch (Exception e) {
-      e.printStackTrace();
-      fail("Failed to create container config");
     }
 
     gadgetServer = new GadgetServer(executor, registry, blacklist,

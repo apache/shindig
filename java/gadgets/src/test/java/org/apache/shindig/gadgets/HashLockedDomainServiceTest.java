@@ -18,9 +18,15 @@
  */
 package org.apache.shindig.gadgets;
 
-import org.json.JSONArray;
-import org.json.JSONObject;
+import static org.apache.shindig.gadgets.HashLockedDomainService.LOCKED_DOMAIN_REQUIRED_KEY;
+import static org.apache.shindig.gadgets.HashLockedDomainService.LOCKED_DOMAIN_SUFFIX_KEY;
+import static org.easymock.EasyMock.eq;
+import static org.easymock.EasyMock.expect;
+import static org.easymock.EasyMock.isA;
+
 import org.apache.shindig.gadgets.HashLockedDomainService.GadgetReader;
+
+import java.util.Arrays;
 
 public class HashLockedDomainServiceTest extends EasyMockTestCase {
 
@@ -32,7 +38,7 @@ public class HashLockedDomainServiceTest extends EasyMockTestCase {
       false, "http://somehost.com/somegadget.xml");
   ContainerConfig containerEnabledConfig;
   ContainerConfig containerRequiredConfig;
-  
+
   /**
    * Mocked out spec reader, rather than mocking the whole
    * Gadget object.
@@ -40,55 +46,63 @@ public class HashLockedDomainServiceTest extends EasyMockTestCase {
   public static class FakeSpecReader extends GadgetReader {
     private boolean wantsLockedDomain;
     private String gadgetUrl;
-    
+
     public FakeSpecReader(boolean wantsLockedDomain, String gadgetUrl) {
       this.wantsLockedDomain = wantsLockedDomain;
       this.gadgetUrl = gadgetUrl;
     }
-    
+
     @Override
     protected boolean gadgetWantsLockedDomain(Gadget gadget) {
       return wantsLockedDomain;
     }
-    
+
     @Override
     protected String getGadgetUrl(Gadget gadget) {
       return gadgetUrl;
     }
   }
-  
+
   @Override
   protected void setUp() throws Exception {
     super.setUp();
-    JSONObject json = new JSONObject();
-    json.put("gadgets.container",
-             new JSONArray().put(ContainerConfig.DEFAULT_CONTAINER));
-    json.put("gadgets.lockedDomainRequired", true);
-    json.put("gadgets.lockedDomainSuffix", "-a.example.com:8080");
-    containerRequiredConfig  = new ContainerConfig(null);
-    containerRequiredConfig.loadFromString(json.toString());
-    
-    json.put("gadgets.lockedDomainRequired", false);
-    containerEnabledConfig = new ContainerConfig(null);
-    containerEnabledConfig.loadFromString(json.toString());
-    gadget = mock(Gadget.class);
+    containerRequiredConfig  = mock(ContainerConfig.class);
+    expect(containerRequiredConfig.get(ContainerConfig.DEFAULT_CONTAINER,
+        LOCKED_DOMAIN_REQUIRED_KEY)).andReturn("true").anyTimes();
+    expect(containerRequiredConfig.get(ContainerConfig.DEFAULT_CONTAINER,
+        LOCKED_DOMAIN_SUFFIX_KEY)).andReturn("-a.example.com:8080").anyTimes();
+    expect(containerRequiredConfig.getContainers())
+        .andReturn(Arrays.asList(ContainerConfig.DEFAULT_CONTAINER)).anyTimes();
+
+    containerEnabledConfig = mock(ContainerConfig.class);
+    expect(containerEnabledConfig.get(ContainerConfig.DEFAULT_CONTAINER,
+        LOCKED_DOMAIN_REQUIRED_KEY)).andReturn("false").anyTimes();
+    expect(containerEnabledConfig.get(ContainerConfig.DEFAULT_CONTAINER,
+        LOCKED_DOMAIN_SUFFIX_KEY)).andReturn("-a.example.com:8080").anyTimes();
+    expect(containerEnabledConfig.getContainers())
+        .andReturn(Arrays.asList(ContainerConfig.DEFAULT_CONTAINER)).anyTimes();
   }
 
+
   public void testDisabledGlobally() {
+    replay();
+
     domainLocker = new HashLockedDomainService(
         containerRequiredConfig, "embed.com", false);
     assertTrue(domainLocker.embedCanRender("anywhere.com"));
     assertTrue(domainLocker.embedCanRender("embed.com"));
     assertTrue(domainLocker.gadgetCanRender("embed.com", gadget, "default"));
-    
+
     domainLocker = new HashLockedDomainService(
         containerEnabledConfig, "embed.com", false);
     assertTrue(domainLocker.embedCanRender("anywhere.com"));
     assertTrue(domainLocker.embedCanRender("embed.com"));
-    assertTrue(domainLocker.gadgetCanRender("embed.com", gadget, "default"));    
+    assertTrue(domainLocker.gadgetCanRender("embed.com", gadget, "default"));
   }
-  
+
   public void testEnabledForGadget() {
+    replay();
+
     domainLocker = new HashLockedDomainService(
         containerEnabledConfig, "embed.com", true);
     assertFalse(domainLocker.embedCanRender("anywhere.com"));
@@ -106,8 +120,10 @@ public class HashLockedDomainServiceTest extends EasyMockTestCase {
         "8uhr00296d2o3sfhqilj387krjmgjv3v-a.example.com:8080",
         target);
   }
-  
+
   public void testNotEnabledForGadget() {
+    replay();
+
     domainLocker = new HashLockedDomainService(
         containerEnabledConfig, "embed.com", true);
     domainLocker.setSpecReader(noLocked);
@@ -129,10 +145,12 @@ public class HashLockedDomainServiceTest extends EasyMockTestCase {
         wantsLocked.getGadgetUrl(gadget), "default");
     assertEquals(
         "8uhr00296d2o3sfhqilj387krjmgjv3v-a.example.com:8080",
-        target);    
+        target);
   }
-  
+
   public void testRequiredForContainer() {
+    replay();
+
     domainLocker = new HashLockedDomainService(
         containerRequiredConfig, "embed.com", true);
     domainLocker.setSpecReader(noLocked);
@@ -148,30 +166,30 @@ public class HashLockedDomainServiceTest extends EasyMockTestCase {
         "8uhr00296d2o3sfhqilj387krjmgjv3v-a.example.com:8080",
         target);
   }
-  
+
   public void testMissingConfig() throws Exception {
-    JSONObject json = new JSONObject();
-    json.put("gadgets.container",
-             new JSONArray().put(ContainerConfig.DEFAULT_CONTAINER));
-    ContainerConfig containerMissingConfig  = new ContainerConfig(null);
-    containerMissingConfig.loadFromString(json.toString());
+    ContainerConfig containerMissingConfig = mock(ContainerConfig.class);
+    expect(containerMissingConfig.getContainers())
+      .andReturn(Arrays.asList(ContainerConfig.DEFAULT_CONTAINER));
+    replay();
+
     domainLocker = new HashLockedDomainService(
         containerMissingConfig, "embed.com", false);
     domainLocker.setSpecReader(wantsLocked);
     assertTrue(domainLocker.gadgetCanRender(
         "www.example.com", gadget, "default"));
   }
-  
+
   public void testMultiContainer() throws Exception {
-    JSONObject json = new JSONObject();
-    json.put("gadgets.container",
-             new JSONArray()
-             .put(ContainerConfig.DEFAULT_CONTAINER)
-             .put("other"));
-    json.put("gadgets.lockedDomainRequired", true);
-    json.put("gadgets.lockedDomainSuffix", "-a.example.com:8080");
-    ContainerConfig inheritsConfig  = new ContainerConfig(null);
-    inheritsConfig.loadFromString(json.toString());
+    ContainerConfig inheritsConfig  = mock(ContainerConfig.class);
+    expect(inheritsConfig.getContainers())
+        .andReturn(Arrays.asList(ContainerConfig.DEFAULT_CONTAINER, "other"));
+    expect(inheritsConfig.get(isA(String.class), eq(LOCKED_DOMAIN_REQUIRED_KEY)))
+        .andReturn("true").anyTimes();
+    expect(inheritsConfig.get(isA(String.class), eq(LOCKED_DOMAIN_SUFFIX_KEY)))
+        .andReturn("-a.example.com:8080").anyTimes();
+    replay();
+
     domainLocker = new HashLockedDomainService(
         inheritsConfig, "embed.com", true);
     domainLocker.setSpecReader(wantsLocked);

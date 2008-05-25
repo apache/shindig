@@ -19,19 +19,20 @@
 
 package org.apache.shindig.gadgets;
 
-import static org.apache.shindig.gadgets.ContainerConfig.DEFAULT_CONTAINER;
 import static org.apache.shindig.gadgets.ContainerConfig.CONTAINER_KEY;
+import static org.apache.shindig.gadgets.ContainerConfig.DEFAULT_CONTAINER;
+import static org.apache.shindig.gadgets.ContainerConfig.PARENT_KEY;
+import static org.junit.Assert.assertEquals;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.junit.Test;
 
-import junit.framework.TestCase;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
 
-/**
- *
- */
-public class ContainerConfigTest extends TestCase {
-  private ContainerConfig config;
+public class ContainerConfigTest {
 
   private static final String TOP_LEVEL_NAME = "Top level name";
   private static final String TOP_LEVEL_VALUE = "Top level value";
@@ -47,10 +48,17 @@ public class ContainerConfigTest extends TestCase {
   private static final String[] ARRAY_VALUE = new String[]{"Hello", "World"};
   private static final String ARRAY_ALT_VALUE = "Not an array";
 
-  @Override
-  public void setUp() throws Exception {
-    super.setUp();
-    config = new ContainerConfig(null);
+  private File createContainer(JSONObject json) throws Exception {
+    File file = File.createTempFile(getClass().getName(), ".json");
+    file.deleteOnExit();
+    BufferedWriter out = new BufferedWriter(new FileWriter(file));
+    out.write(json.toString());
+    out.close();
+    return file;
+  }
+
+  private File createDefaultContainer() throws Exception {
+
     // We use a JSON Object here to guarantee that we're well formed up front.
     JSONObject json = new JSONObject();
     json.put(CONTAINER_KEY, new String[]{DEFAULT_CONTAINER});
@@ -62,12 +70,14 @@ public class ContainerConfigTest extends TestCase {
     nested.put(NESTED_NAME, NESTED_VALUE);
 
     json.put(NESTED_KEY, nested);
-
-    config.loadFromString(json.toString());
+    return createContainer(json);
   }
 
-  public void testBasic() throws Exception {
-    // check to make sure that the default config was processed correctly.
+  @Test
+  public void parseBasicConfig() throws Exception {
+    ContainerConfig config
+        = new ContainerConfig(createDefaultContainer().getAbsolutePath());
+
     assertEquals(1, config.getContainers().size());
     for (String container : config.getContainers()) {
       assertEquals(DEFAULT_CONTAINER, container);
@@ -83,9 +93,11 @@ public class ContainerConfigTest extends TestCase {
     assertEquals(NESTED_VALUE, nestedValue);
   }
 
-  public void testCascade() throws Exception {
+  @Test
+  public void parseWithDefaultInheritance() throws Exception {
     JSONObject json = new JSONObject();
     json.put(CONTAINER_KEY, new String[]{CHILD_CONTAINER});
+    json.put(PARENT_KEY, DEFAULT_CONTAINER);
     json.put(ARRAY_NAME, ARRAY_ALT_VALUE);
 
     // small nested data.
@@ -94,7 +106,10 @@ public class ContainerConfigTest extends TestCase {
 
     json.put(NESTED_KEY, nested);
 
-    config.loadFromString(json.toString());
+    File childFile = createContainer(json);
+    File parentFile = createDefaultContainer();
+    ContainerConfig config = new ContainerConfig(childFile.getAbsolutePath() +
+        ContainerConfig.FILE_SEPARATOR + parentFile.getAbsolutePath());
 
     String value = config.get(CHILD_CONTAINER, TOP_LEVEL_NAME);
     assertEquals(TOP_LEVEL_VALUE, value);
@@ -109,12 +124,25 @@ public class ContainerConfigTest extends TestCase {
     // Verify that the parent value wasn't overwritten as well.
 
     JSONArray defaultArrayTest = config.getJsonArray(DEFAULT_CONTAINER,
-                                                      ARRAY_NAME);
+                                                     ARRAY_NAME);
     JSONArray defaultArray = new JSONArray(ARRAY_VALUE);
     assertEquals(defaultArrayTest.toString(), defaultArray.toString());
   }
 
+  @Test(expected = GadgetException.class)
+  public void badConfigThrows() throws Exception {
+    JSONObject json = new JSONObject();
+    json.put(CONTAINER_KEY, new String[]{CHILD_CONTAINER});
+    json.put(PARENT_KEY, "bad bad bad parent!");
+    json.put(ARRAY_NAME, ARRAY_ALT_VALUE);
+
+    ContainerConfig config
+        = new ContainerConfig(createContainer(json).getAbsolutePath());
+  }
+
   public void testPathQuery() throws Exception {
+    ContainerConfig config
+        = new ContainerConfig(createDefaultContainer().getAbsolutePath());
     String path = NESTED_KEY + '/' + NESTED_NAME;
     String data = config.get(DEFAULT_CONTAINER, path);
     assertEquals(NESTED_VALUE, data);
