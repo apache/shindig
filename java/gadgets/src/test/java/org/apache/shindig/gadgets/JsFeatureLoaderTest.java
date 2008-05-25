@@ -20,19 +20,21 @@ package org.apache.shindig.gadgets;
 import static org.easymock.EasyMock.eq;
 import static org.easymock.EasyMock.expect;
 
-import org.apache.shindig.gadgets.http.HttpResponse;
 import org.apache.shindig.gadgets.http.HttpRequest;
+import org.apache.shindig.gadgets.http.HttpResponse;
 
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.net.URI;
 import java.util.List;
+import java.util.Map;
 
 public class JsFeatureLoaderTest extends GadgetTestFixture {
   JsFeatureLoader loader;
 
   private static final String FEATURE_NAME = "test";
+  private static final String ALT_FEATURE_NAME = "test2";
   private static final String DEF_JS_CONTENT = "var hello = 'world';";
   private static final String ALT_JS_CONTENT = "function test(){while(true);}";
   private static final String CONT_A = "test";
@@ -43,6 +45,11 @@ public class JsFeatureLoaderTest extends GadgetTestFixture {
   public void setUp() throws Exception {
     super.setUp();
     loader = new JsFeatureLoader(fetcher);
+  }
+
+  private JsLibrary getJsLib(GadgetFeatureRegistry.Entry entry) {
+    GadgetFeature feature = entry.getFeature().create();
+    return feature.getJsLibraries(new GadgetContext()).get(0);
   }
 
   public void testBasicLoading() throws Exception {
@@ -119,6 +126,39 @@ public class JsFeatureLoaderTest extends GadgetTestFixture {
     assertEquals(1, libs.size());
     assertEquals(ALT_JS_CONTENT, libs.get(0).getContent());
     assertEquals(FEATURE_NAME, libs.get(0).getFeature());
+  }
+
+  private File makeFeatureFile(String name, String content) throws Exception {
+    String xml = "<feature>" +
+                 "  <name>" + name + "</name>" +
+                 "  <gadget>" +
+                 "    <script>" + content + "</script>" +
+                 "  </gadget>" +
+                 "</feature>";
+    File file = File.createTempFile(getName(), name + ".xml");
+    file.deleteOnExit();
+    BufferedWriter out = new BufferedWriter(new FileWriter(file));
+    out.write(xml);
+    out.close();
+    return file;
+  }
+
+  public void testMultiplePaths() throws Exception {
+    File file1 = makeFeatureFile(FEATURE_NAME, DEF_JS_CONTENT);
+    File file2 = makeFeatureFile(ALT_FEATURE_NAME, ALT_JS_CONTENT);
+
+    loader.loadFeatures(file1.getAbsolutePath() +
+                        JsFeatureLoader.FILE_SEPARATOR +
+                        file2.getAbsolutePath(), registry);
+    // TODO: This is too fragile. GadgetFeatureRegistry needs to be fixed.
+    Map<String, GadgetFeatureRegistry.Entry> entries
+        = registry.getAllFeatures();
+
+    JsLibrary lib1 = getJsLib(entries.get(FEATURE_NAME));
+    assertEquals(DEF_JS_CONTENT, lib1.getContent());
+
+    JsLibrary lib2 = getJsLib(entries.get(ALT_FEATURE_NAME));
+    assertEquals(ALT_JS_CONTENT, lib2.getContent());
   }
 }
 

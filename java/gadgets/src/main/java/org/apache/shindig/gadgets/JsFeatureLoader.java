@@ -22,6 +22,7 @@ import org.apache.shindig.common.xml.XmlException;
 import org.apache.shindig.common.xml.XmlUtil;
 import org.apache.shindig.gadgets.http.HttpFetcher;
 
+import org.apache.commons.lang.StringUtils;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 
@@ -48,6 +49,8 @@ import java.util.logging.Logger;
  */
 public class JsFeatureLoader {
 
+  public final static char FILE_SEPARATOR = ',';
+
   private final HttpFetcher fetcher;
 
   private static final Logger logger
@@ -63,26 +66,28 @@ public class JsFeatureLoader {
    *    be loaded. If res://*.txt is passed, we will look for named resources
    *    in the text file. If path is prefixed with res://, the file
    *    is treated as a resource, and all references are assumed to be
-   *    resources as well.
-   * @throws GadgetException
+   *    resources as well. Multiple locations may be specified by separating them with a comma.
+   * @throws GadgetException If any of the files can't be read.
    */
   public void loadFeatures(String path, GadgetFeatureRegistry registry)
       throws GadgetException {
     List<ParsedFeature> features = new LinkedList<ParsedFeature>();
     try {
-      if (path.startsWith("res://")) {
-        path = path.substring(6);
-        logger.info("Loading resources from: " + path);
-        if (path.endsWith(".txt")) {
-          loadResources(ResourceLoader.getContent(path).split("[\r\n]+"),
-              features);
+      for (String location : StringUtils.split(path, FILE_SEPARATOR)) {
+        if (location.startsWith("res://")) {
+          location = location.substring(6);
+          logger.info("Loading resources from: " + location);
+          if (location.endsWith(".txt")) {
+            loadResources(ResourceLoader.getContent(location).split("[\r\n]+"),
+                features);
+          } else {
+            loadResources(new String[]{location}, features);
+          }
         } else {
-          loadResources(new String[]{path}, features);
+          logger.info("Loading files from: " + location);
+          File file = new File(location);
+          loadFiles(new File[]{file}, features);
         }
-      } else {
-        logger.info("Loading files from: " + path);
-        File file = new File(path);
-        loadFiles(new File[]{file}, features);
       }
     } catch (IOException e) {
       throw new GadgetException(GadgetException.Code.INVALID_PATH, e);
