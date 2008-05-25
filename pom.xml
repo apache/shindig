@@ -753,6 +753,12 @@
         <version>2.3</version>
         <scope>compile</scope>
       </dependency>
+			<dependency>
+        <groupId>commons-io</groupId>
+        <artifactId>commons-io</artifactId>
+        <version>1.4</version>
+        <scope>compile</scope>
+      </dependency>
       <dependency>
         <groupId>org.apache.abdera</groupId>
         <artifactId>abdera-server</artifactId>

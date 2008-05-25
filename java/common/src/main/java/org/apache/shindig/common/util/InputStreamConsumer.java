@@ -18,17 +18,18 @@
  */
 package org.apache.shindig.common.util;
 
-import java.io.ByteArrayOutputStream;
+import org.apache.commons.io.IOUtils;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.io.UnsupportedEncodingException;
 
 /**
  * Used to consume entire input streams and transform them into data buffers.
  * These are all blocking routines and should never be called from a thread
  * that will cause deadlock.
  */
+@Deprecated
 public class InputStreamConsumer {
 
   /**
@@ -39,7 +40,7 @@ public class InputStreamConsumer {
    * @throws IOException on stream reading error.
    */
   public static byte[] readToByteArray(InputStream is) throws IOException {
-    return readToByteArray(is, Integer.MAX_VALUE);
+    return IOUtils.toByteArray(is);
   }
 
   /**
@@ -51,13 +52,7 @@ public class InputStreamConsumer {
    */
   public static byte[] readToByteArray(InputStream is, int maxBytes)
       throws IOException {
-    ByteArrayOutputStream out = new ByteArrayOutputStream();
-    byte[] chunk = new byte[8192];
-    int chunkSize;
-    while (out.size() < maxBytes && (chunkSize = is.read(chunk)) != -1) {
-      out.write(chunk, 0, chunkSize);
-    }
-    return out.toByteArray();
+    return IOUtils.toByteArray(is);
   }
 
   /**
@@ -70,7 +65,7 @@ public class InputStreamConsumer {
    * @throws IOException on stream reading error.
    */
   public static String readToString(InputStream is) throws IOException {
-    return readToString(is, Integer.MAX_VALUE);
+    return IOUtils.toString(is, "UTF-8");
   }
 
   /**
@@ -82,12 +77,7 @@ public class InputStreamConsumer {
    */
   public static String readToString(InputStream is, int maxBytes)
       throws IOException {
-    try {
-      return new String(readToByteArray(is, maxBytes), "UTF-8");
-    } catch (UnsupportedEncodingException e) {
-      // UTF-8 is required by the Java spec.
-      throw new RuntimeException("UTF-8 not supported!", e);
-    }
+    return IOUtils.toString(is, "UTF-8");
   }
 
   /**
@@ -102,6 +92,6 @@ public class InputStreamConsumer {
    * @throws IOException
    */
   public static void pipe(InputStream is, OutputStream os) throws IOException {
-    os.write(readToByteArray(is));
+    IOUtils.copy(is, os);
   }
 }
