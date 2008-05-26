@@ -1,0 +1,59 @@
+Installing and running the server
+============================================
+Please see BUILD-JAVA in the base project directory for information.
+
+Once running, this url http://localhost:<port>/social/rest will accept POST requests
+   that match the OpenSocial RESTFUL apis. In order to see this code in action
+   follow the README in java/server.
+
+
+For more information, see http://incubator.apache.org/projects/shindig.html
+
+
+A walkthrough of dispatching requests in Shindig's OpenSocial RESTful spec impl
+============================================================================
+
+If you want to debug this process, a good place to put a breakpoint is in
+AbderaServlet.service. 
+
+AbderaServlet.service starts everything off when ServletRequestContext object
+is built and all Abdera-specific processing starts. Before this we're just
+doing servlet-related tasks and dependency injection.
+
+As part of ServletRequestContext being built, one of the last things done is
+initTarget, which is really provider.resolveTarget. Since our provider
+specifies we're using the RouteManager as our TargetResolver, this is the
+RouteManager's resolve method. 
+
+When the server is started, the routes are initialized.  The RouteManager of
+SocialApiProvider is acutally a SocialRouteManager. This subclass just wrapps
+RouteManager.addRoute for convinience. Route patterns and names are defined in
+the enum RequestUrlTemplate. In the provider, a bunch of routes are mapped to
+their corresponding targetTypes and corresponding CollectionAdapters. 
+
+RouteManager.resolve, when called, looks up the request path and matches it in
+the targets that have been specified in the RouteManager. If it matches, it
+puts a Target object in the request object. It also looks up the
+CollectionAdapter that we're going to use to service the request in the
+route2ca map and puts it in the COLLECTION_ADAPTER_ATTRIBUTE of the request
+object.
+
+Now the request object is created and AbderaServlet.service goes on to process
+the request in AbsractProvider.process:
+- gets the already resolved target from the request object
+- gets the HTTP method and targetType, usually COLLECTION or ENTRY
+- gets CollectionAdapter from the WorkspaceManager via getCollectionAdapter
+  - the WorkspaceManager looks up the CollectionAdapter in the request object's
+    COLLECTION_ADAPTER_ATTRIBUTE
+
+At this point the AbsractProvider.process method looks at the target type and
+and calls the appropriate process* method. This is the meat of the server's
+dispatch logic. processCollection is called for TargetType.TYPE_COLLECTION.
+Inside of processCollection, if it's a GET, then getFeed is called for the
+specified CollectionAdapter. processCollection also uses the MimeType of the
+request to determine if it needs to do Media handling.
+
+If the method is PUT and targetType is ENTRY, postEntry is called in the
+CollectionAdapter. This is where the code of the CollectionAdapters takes over.
+It should have all the info necessary to get the data for the response, build
+the response document and hand it off.
