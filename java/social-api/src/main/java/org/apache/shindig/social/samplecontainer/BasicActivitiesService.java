@@ -23,11 +23,10 @@ import org.apache.shindig.social.ResponseItem;
 import org.apache.shindig.social.opensocial.ActivitiesService;
 import org.apache.shindig.social.opensocial.model.Activity;
 
+import com.google.common.collect.Lists;
 import com.google.inject.Inject;
-
 import org.json.JSONObject;
 
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -45,7 +44,7 @@ public class BasicActivitiesService implements ActivitiesService {
       SecurityToken token) {
     Map<String, List<Activity>> allActivities = fetcher.getActivities();
 
-    List<Activity> activities = new ArrayList<Activity>();
+    List<Activity> activities = Lists.newArrayList();
 
     for (String id : ids) {
       List<Activity> personActivities = allActivities.get(id);
@@ -60,10 +59,9 @@ public class BasicActivitiesService implements ActivitiesService {
 
   public ResponseItem<Activity> getActivity(String id, String activityId,
       SecurityToken token) {
-    List<String> ids = new ArrayList<String>();
-    ids.add(id);
+    List<Activity> allActivities = getActivities(
+        Lists.newArrayList(id), token).getResponse();
 
-    List<Activity> allActivities = getActivities(ids, token).getResponse();
     for (Activity activity : allActivities) {
       if (activity.getId().equals(activityId)) {
         return new ResponseItem<Activity>(activity);

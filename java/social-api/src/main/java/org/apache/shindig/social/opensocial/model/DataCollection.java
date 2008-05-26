@@ -1,17 +1,18 @@
 package org.apache.shindig.social.opensocial.model;
 
+import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
+
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
-import java.util.HashMap;
-import java.util.HashSet;
 
 public class DataCollection implements Iterable<DataCollection.Data> {
   Set<Data> data;
 
   // Legacy constructor. Remove once we fix the DataService api
   public DataCollection(Map<String, Map<String, String>> data) {
-    this.data = new HashSet<Data>();
+    this.data = Sets.newHashSet();
     for (Map.Entry<String, Map<String, String>> entry : data.entrySet()) {
       this.data.add(new Data(entry.getKey(), entry.getValue()));
     }
@@ -30,8 +31,7 @@ public class DataCollection implements Iterable<DataCollection.Data> {
   }
 
   public Map<String, Map<String, String>> dataMap() {
-    Map<String, Map<String, String>> dataMap = new HashMap<String,
-        Map<String, String>>();
+    Map<String, Map<String, String>> dataMap = Maps.newHashMap();
     for (Data entry : data) {
       dataMap.put(entry.getPersonId(), entry.getAppdata());
     }

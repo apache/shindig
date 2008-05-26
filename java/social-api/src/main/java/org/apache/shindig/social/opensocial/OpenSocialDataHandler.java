@@ -24,12 +24,12 @@ import org.apache.shindig.social.ResponseItem;
 import org.apache.shindig.social.opensocial.model.Activity;
 import org.apache.shindig.social.opensocial.model.IdSpec;
 
+import com.google.common.collect.Lists;
 import com.google.inject.Inject;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -110,7 +110,8 @@ public class OpenSocialDataHandler implements GadgetDataHandler {
 
         case FETCH_PERSON_APP_DATA :
           JSONArray jsonKeys = params.getJSONArray("keys");
-          List<String> keys = new ArrayList<String>(jsonKeys.length());
+          List<String> keys = Lists.newArrayListWithExpectedSize(
+              jsonKeys.length());
           for (int i = 0; i < jsonKeys.length(); i++) {
             keys.add(jsonKeys.getString(i));
           }

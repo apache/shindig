@@ -22,11 +22,10 @@ import org.apache.shindig.social.ResponseError;
 import org.apache.shindig.social.ResponseItem;
 import org.apache.shindig.social.opensocial.DataService;
 
+import com.google.common.collect.Maps;
 import com.google.inject.Inject;
-
 import org.json.JSONObject;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -45,9 +44,8 @@ public class BasicDataService implements DataService {
 
     Map<String, Map<String, String>> allData = fetcher.getAppData();
 
-    // TODO: Use the opensource Collections library
-    Map<String, Map<String, String>> data =
-        new HashMap<String, Map<String, String>>(ids.size(), 1);
+    Map<String, Map<String, String>> data
+        = Maps.newHashMapWithExpectedSize(ids.size());
 
     for (String id : ids) {
       Map<String, String> allPersonData = allData.get(id);
@@ -55,7 +53,7 @@ public class BasicDataService implements DataService {
         if (keys == null || keys.isEmpty()) {
           data.put(id, allPersonData);
         } else {
-          Map<String, String> personData = new HashMap<String, String>();
+          Map<String, String> personData = Maps.newHashMap();
           for (String key : keys) {
             String value = allPersonData.get(key);
             if (value != null) {

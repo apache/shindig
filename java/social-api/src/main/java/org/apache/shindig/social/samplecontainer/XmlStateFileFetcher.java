@@ -7,6 +7,8 @@ import org.apache.shindig.social.opensocial.model.Name;
 import org.apache.shindig.social.opensocial.model.Person;
 import org.apache.shindig.social.opensocial.model.Phone;
 
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import com.google.inject.Singleton;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpMethod;
@@ -166,7 +168,7 @@ public class XmlStateFileFetcher {
   }
 
   private void setupAppData() {
-    allData = new HashMap<String, Map<String, String>>();
+    allData = Maps.newHashMap();
 
     Element root = fetchStateDocument().getDocumentElement();
 
@@ -186,7 +188,7 @@ public class XmlStateFileFetcher {
 
       Map<String, String> currentData = allData.get(id);
       if (currentData == null) {
-        currentData = new HashMap<String, String>();
+        currentData = Maps.newHashMap();
         allData.put(id, currentData);
       }
       currentData.put(field, turnEvil(value));
@@ -196,15 +198,14 @@ public class XmlStateFileFetcher {
   private void setupPeopleData() {
     Element root = fetchStateDocument().getDocumentElement();
 
-    allPeople = new HashMap<String, Person>();
-    friendIdMap = new HashMap<String, List<String>>();
+    allPeople = Maps.newHashMap();
+    friendIdMap = Maps.newHashMap();
     setupPeopleInXmlTag(root, "people");
   }
 
   // Adds all people in the xml tag to the allPeople map.
   // Also puts friends ids into the friendIdMap
   private void setupPeopleInXmlTag(Element root, String tagName) {
-    // TODO: Use the opensource Collections library
     NodeList elements = root.getElementsByTagName(tagName);
     if (elements == null || elements.item(0) == null) {
       return;
@@ -227,9 +228,8 @@ public class XmlStateFileFetcher {
       Node phoneItem = attributes.getNamedItem("phone");
       if (phoneItem != null) {
         String phone = phoneItem.getNodeValue();
-        List<Phone> phones = new ArrayList<Phone>();
-        phones.add(new Phone(turnEvil(phone), null));
-        person.setPhoneNumbers(phones);
+        person.setPhoneNumbers(Lists.newArrayList(
+            new Phone(turnEvil(phone), null)));
       }
 
       Node genderItem = attributes.getNamedItem("gender");
@@ -248,7 +248,7 @@ public class XmlStateFileFetcher {
   }
 
   private List<String> getFriends(Node personNode) {
-    List<String> friends = new ArrayList<String>();
+    List<String> friends = Lists.newArrayList();
     NodeList friendNodes = personNode.getChildNodes();
     for (int j = 0; j < friendNodes.getLength(); j++) {
       String friendId = friendNodes.item(j).getTextContent();
@@ -260,7 +260,7 @@ public class XmlStateFileFetcher {
   }
 
   private void setupActivities() {
-    allActivities = new HashMap<String, List<Activity>>();
+    allActivities = Maps.newHashMap();
 
     Element root = fetchStateDocument().getDocumentElement();
     NodeList activitiesElements = root.getElementsByTagName("activities");
@@ -310,7 +310,7 @@ public class XmlStateFileFetcher {
   }
 
   private List<MediaItem> getMediaItems(Node activityItem) {
-    List<MediaItem> media = new ArrayList<MediaItem>();
+    List<MediaItem> media = Lists.newArrayList();
 
     NodeList mediaItems = activityItem.getChildNodes();
     if (mediaItems != null) {

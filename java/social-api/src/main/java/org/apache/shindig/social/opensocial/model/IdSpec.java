@@ -17,11 +17,11 @@
  */
 package org.apache.shindig.social.opensocial.model;
 
-import org.json.JSONException;
+import com.google.common.collect.Lists;
 import org.json.JSONArray;
+import org.json.JSONException;
 
 import java.util.List;
-import java.util.ArrayList;
 
 public class IdSpec {
   public enum Type {
@@ -61,11 +61,9 @@ public class IdSpec {
     } catch (JSONException e) {
       // If it isn't an array, treat it as a simple string
       // TODO: This will go away with rest so we can remove this hack
-      List<String> list = new ArrayList<String>();
-      list.add(jsonSpec);
-      return list;
+      return Lists.newArrayList(jsonSpec);
     }
-    List<String> userIds = new ArrayList<String>(userIdArray.length());
+    List<String> userIds = Lists.newArrayListWithCapacity(userIdArray.length());
 
     for (int i = 0; i < userIdArray.length(); i++) {
       userIds.add(userIdArray.getString(i));
