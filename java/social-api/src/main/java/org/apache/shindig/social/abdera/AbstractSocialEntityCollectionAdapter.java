@@ -22,13 +22,14 @@ import org.apache.shindig.common.SecurityToken;
 import org.apache.shindig.common.SecurityTokenDecoder;
 import org.apache.shindig.common.SecurityTokenException;
 import org.apache.shindig.common.crypto.BlobCrypterException;
+import org.apache.shindig.social.abdera.util.ValidRequestFilter;
+import org.apache.shindig.social.abdera.util.ValidRequestFilter.Format;
 import org.apache.shindig.social.opensocial.PeopleService;
 import org.apache.shindig.social.opensocial.model.IdSpec;
 import org.apache.shindig.social.opensocial.util.BeanJsonConverter;
 import org.apache.shindig.social.opensocial.util.BeanXmlConverter;
-import org.apache.shindig.social.abdera.util.ValidRequestFilter.Format;
-import org.apache.shindig.social.abdera.util.ValidRequestFilter;
 
+import com.google.common.collect.Maps;
 import com.google.inject.Inject;
 import org.apache.abdera.Abdera;
 import org.apache.abdera.factory.Factory;
@@ -42,11 +43,9 @@ import org.apache.abdera.protocol.server.RequestContext;
 import org.apache.abdera.protocol.server.ResponseContext;
 import org.apache.abdera.protocol.server.context.ResponseContextException;
 import org.apache.abdera.protocol.server.impl.AbstractEntityCollectionAdapter;
-
 import org.json.JSONException;
 
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
@@ -183,7 +182,7 @@ public abstract class AbstractSocialEntityCollectionAdapter<T> extends
    */
   public String getFeedIriForEntry(RequestContext request,
       String resourceRouteVariable) {
-    Map<String, Object> params = new HashMap<String, Object>();
+    Map<String, Object> params = Maps.newHashMap();
     // TODO: currently a bug in Abdera adds this param to the url when there are
     // other parameters in the original request.
     // fix is coming in https://issues.apache.org/jira/browse/ABDERA-162

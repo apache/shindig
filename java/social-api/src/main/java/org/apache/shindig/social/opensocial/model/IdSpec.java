@@ -63,7 +63,8 @@ public class IdSpec {
       // TODO: This will go away with rest so we can remove this hack
       return Lists.newArrayList(jsonSpec);
     }
-    List<String> userIds = Lists.newArrayListWithCapacity(userIdArray.length());
+    List<String> userIds = Lists.newArrayListWithExpectedSize(
+        userIdArray.length());
 
     for (int i = 0; i < userIdArray.length(); i++) {
       userIds.add(userIdArray.getString(i));

@@ -17,8 +17,9 @@
  */
 package org.apache.shindig.social;
 
+import com.google.common.collect.Lists;
+
 import java.util.List;
-import java.util.ArrayList;
 
 
 /**
@@ -30,7 +31,7 @@ public class DataResponse {
 
   public DataResponse(ResponseError error) {
     this.error = error;
-    this.responses = new ArrayList<ResponseItem>();
+    this.responses = Lists.newArrayList();
   }
 
   public DataResponse(List<ResponseItem> responses) {

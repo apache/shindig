@@ -28,6 +28,8 @@ import org.mortbay.jetty.servlet.ServletHolder;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.google.common.collect.Maps;
+
 public class JettyServer {
   private Server server = null;
 
@@ -36,7 +38,7 @@ public class JettyServer {
     Context context = new Context(server, "/", Context.SESSIONS);
     context.addEventListener(new GuiceServletContextListener());
 
-    Map<String, String> initParams = new HashMap<String, String>();
+    Map<String, String> initParams = Maps.newHashMap();
     initParams.put(GuiceServletContextListener.MODULES_ATTRIBUTE,
         SocialApiTestsGuiceModule.class.getName());
     context.setInitParams(initParams);

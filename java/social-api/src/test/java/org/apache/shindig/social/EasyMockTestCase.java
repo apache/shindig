@@ -24,9 +24,11 @@ import org.easymock.classextension.EasyMock;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.google.common.collect.Lists;
+
 public abstract class EasyMockTestCase extends TestCase {
   /** Tracks all EasyMock objects created for a test. */
-  private final List<Object> mocks = new ArrayList<Object>();
+  private final List<Object> mocks = Lists.newArrayList();
 
   public EasyMockTestCase() {
     super();
