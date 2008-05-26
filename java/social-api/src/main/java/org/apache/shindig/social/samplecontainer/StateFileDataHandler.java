@@ -22,13 +22,13 @@ import org.apache.shindig.social.RequestItem;
 import org.apache.shindig.social.ResponseError;
 import org.apache.shindig.social.ResponseItem;
 
+import com.google.common.collect.Maps;
 import com.google.inject.Inject;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -64,7 +64,7 @@ public class StateFileDataHandler implements GadgetDataHandler {
 
     switch (type) {
       case DUMP_STATE:
-        Map<String, Object> state = new HashMap<String, Object>();
+        Map<String, Object> state = Maps.newHashMap();
         state.put("people", fetcher.getAllPeople());
         state.put("friendIds", fetcher.getFriendIds());
         state.put("data", fetcher.getAppData());

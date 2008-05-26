@@ -24,11 +24,10 @@ import org.apache.shindig.social.opensocial.model.ApiCollection;
 import org.apache.shindig.social.opensocial.model.IdSpec;
 import org.apache.shindig.social.opensocial.model.Person;
 
+import com.google.common.collect.Lists;
 import com.google.inject.Inject;
-
 import org.json.JSONException;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -56,7 +55,7 @@ public class BasicPeopleService implements PeopleService {
   private List<Person> getPeople(List<String> ids, SecurityToken token) {
     Map<String, Person> allPeople = fetcher.getAllPeople();
 
-    List<Person> people = new ArrayList<Person>();
+    List<Person> people = Lists.newArrayList();
     for (String id : ids) {
       Person person = allPeople.get(id);
       if (person != null) {
@@ -95,16 +94,15 @@ public class BasicPeopleService implements PeopleService {
   }
 
   public ResponseItem<Person> getPerson(String id, SecurityToken token) {
-    List<String> ids = new ArrayList<String>();
-    ids.add(id);
-    return new ResponseItem<Person>(getPeople(ids, token).get(0));
+    return new ResponseItem<Person>(getPeople(Lists.newArrayList(id),
+        token).get(0));
   }
 
   public List<String> getIds(IdSpec idSpec, SecurityToken token)
       throws JSONException {
     Map<String, List<String>> friendIds = fetcher.getFriendIds();
 
-    List<String> ids = new ArrayList<String>();
+    List<String> ids = Lists.newArrayList();
     switch(idSpec.getType()) {
       case OWNER:
         ids.add(token.getOwnerId());
