@@ -139,7 +139,6 @@ public class GadgetRenderingTask {
    * @throws GadgetException
    */
   private void outputGadget(Gadget gadget) throws IOException, GadgetException {
-    String viewName = context.getView();
     View view = HttpUtil.getView(gadget, containerConfig);
     if (view == null) {
         throw new GadgetException(GadgetException.Code.UNKNOWN_VIEW_SPECIFIED,
@@ -296,8 +295,6 @@ public class GadgetRenderingTask {
     if (externJs.length() > 0) {
       markup.append(externJs);
     }
-
-    List<GadgetException> gadgetExceptions = new LinkedList<GadgetException>();
 
     String content = view.getContent();
     for (GadgetContentFilter filter : filters) {
