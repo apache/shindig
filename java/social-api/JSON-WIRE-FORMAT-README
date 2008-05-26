@@ -11,7 +11,7 @@ For more information, see http://incubator.apache.org/projects/shindig.html
 
 
 
-Explanation of the current setup of the OpenSocial server code
+Explanation of the current setup of the json wire format java code
 ===========================================================================
 
 From within java/social-api/src/main/java/org/apache/shindig/social/...

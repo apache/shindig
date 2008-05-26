@@ -1,0 +1,130 @@
+Installing and running the server
+============================================
+Please see BUILD-JAVA in the base project directory for information.
+
+Once running, this url http://localhost:<port>/social/rest will accept POST requests
+   that match the OpenSocial RESTFUL apis. In order to see this code in action 
+   follow the README in java/server.
+
+
+For more information, see http://incubator.apache.org/projects/shindig.html
+
+
+
+A walkthrough of request processing in the Shindig's OpenSocial RESTful spec impl
+===========================================================================
+
+The following is a simple walkthrough of the handling of GET requests for the
+AbstractSocialEntityCollectionAdapter. This continues request processing from
+the dispatching walkthrough.
+
+AbstractEntityCollectionAdapter, the superclass, is the fullest implementation
+of the server framework available but heavily biases toward ATOM content. By
+extending this class it becomes easy to build Collections which are backed by a
+set of entities - such as a database row, domain objects, or files. It has two
+content management systems, one for working with data that can be put into an
+XML document and one for media. Most of the XML processing is used when dealing
+with Media entries, only switching to special media handling routines when
+populating the content element of Entries.
+
+This walkthrough assumes the use of the abstract base class
+AbstractSocialEntityCollectionAdapter and a CollectionAdapter extending it. 
+
+AbstractCollectionAdapter
+    AbstractEntityCollectionAdapter
+        AbstractSocialEntityCollectionAdapter
+            ActivityAdapter | PersonAdapter | GroupAdapter | AppdataAdapter
+
+
+The CollectionAdapter can be very thin and deal only with interaction with the
+data model and some metadata. The CollectionAdapter also handles one or more
+valid URL patterns in the spec. So /people/{uid}/@all is a Collection of all
+people connected to user {uid} and the PersonAdapter adapts this person entity.
+Each URL pattern will only deal with one fundamental resource type in Shindig
+so this mapping should suffice.
+
+
+****
+
+The dispatch system in AbstractProvider hands off the request to the
+appropriate CollectionAdapter and calls the getEntry or getFeed method based on
+whether the targetType is COLLECTION or ENTRY.
+
+The primary difference between getFeed and getEntry is that getFeed builds a
+Feed Document and then depending on the contents of the underlying collection,
+it builds a series of Entry objects that are added to the Feed before it is
+returned as a response. The mechanisms for building the Entry objects are the
+same whether they are called purely for getEntry or if they are called as part
+of a chain of getEntry calls when generating a feed.
+
+****
+
+getFeed
+
+The first thing that getFeed does is call createFeedBase, which creates a new
+FOM* Feed object and sets it's properties such as Id, Title, Updated and
+Author. Next, addFeedDetails is called to add the selected entries to the Feed
+document. It does this by calling getEntries. getEntries is abstract and must
+by implemented by the concrete adapter. It gets the listing of entries
+requested. These are the native pojos (like a person or activity object) that
+will be represented in the feed. It's probably best to describe these as
+"entities" rather than the rather ATOMish "entry" and this is how they're
+referenced in variables where possible.  AbstractSocialEntityCollectionAdapter
+tries to use argumetns that are named "entity" when dealing with a native data
+source so as to disabmiguate from the Entry FOM objects that are passed around
+in similar method calls.
+
+As the list of entry objects (our underlying set of entities as returned from
+our model) is iterated over, addFeedDetails continues to build the FOM Feed
+object by appending an Entry FOM object. It populates that FOM object by adding
+the IRI of the entry with getFeedIriForEntry and addEntryDetails.
+getFeedIriForEntry is really a call through to the subclassed
+CollectionAdapter's getHref method.
+
+addEntryDetails does something similar to createFeedBase: it sets the ID, Title
+and Updated, etc for the Entry FOM object. Once back in addFeedDetails, there
+is a switch on whether we're dealing with a media item or not, and if so it
+calls addMediaContent, otherwise it calls the XML addContent method.
+
+addContent simply takes the Entry FOM object and the actual pojo entity and
+adds the results of getContent on the entity to the content element. getContent
+is abstract and must be implemented in the subclassed CollectionAdapter. This
+is the place where the datamodel access happens.
+
+At this point, the FOM object is ready for output (or there's a problem and
+it's ready to puke). buildGetFeedResponse creates the ResponseContext for a GET
+feed request.  By default, a BaseResponseContext is returned.  The Etag header
+will be set and the HTTP server takes over from here to do the writing to
+output. At this point, the request can be serialized as XML, or a the shindig
+version of JSON. 
+
+****
+
+getEntry
+
+getEntry first calls getEntryFromCollectionProvider, which tries to get the ID
+for the entity we're getting by calling getResourceName. This method, by
+default, simply pulls the last segment of the path but could be customized to
+be less brittle and deal with something like /people/{uid}/@self by simply
+getting the "uid" parameter from the current Route object. With this ID,
+another getEntry is called, this time to an abstract method that must be
+implemented in the CollectionAdapter. This getEntry is really a getEntity, as I
+mentioned before, since this is doing the data access to your model and isn't
+an ATOM method per-se.
+
+Once this Entry object (or entity) is returned another
+getEntryFromCollectionProvider is called, this time with the pojo and the Feed
+IRI. This time it actually creates a FOM Entry object and in turn calls
+buildEntry. (We've got a lot of indirection here....). buildEntry builds the
+entry from the entity pojo by calling addEntryDetails as above in the feed
+processing flow. And, similarly to the feed flow, the last step is
+buildGetEntryResponse, which is similar to buildGetFeedResponse, but it does
+one extra step, which is it finds the parent collection of the entry with
+createFeedBase and calls setSource to add a source element containing the
+minimal feed doc that the entry came from.
+
+Output is the same as above for feeds.
+
+
+
+**FOM stands for Feed Object Model and is a ATOM RFC compliant Java Object.
