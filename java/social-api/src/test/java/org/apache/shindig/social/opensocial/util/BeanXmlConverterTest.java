@@ -26,14 +26,13 @@ import org.apache.shindig.social.opensocial.model.Name;
 import org.apache.shindig.social.opensocial.model.Person;
 import org.apache.shindig.social.opensocial.model.Phone;
 
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import junit.framework.TestCase;
 import org.apache.commons.lang.StringUtils;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
@@ -47,27 +46,21 @@ public class BeanXmlConverterTest extends TestCase {
   public void setUp() throws Exception {
     super.setUp();
     johnDoe = new Person("johnDoeId", new Name("John Doe"));
-    List<Phone> phones = new ArrayList<Phone>();
-    phones.add(new Phone("+33H000000000", "home"));
-    phones.add(new Phone("+33M000000000", "mobile"));
-    phones.add(new Phone("+33W000000000", "work"));
-    johnDoe.setPhoneNumbers(phones);
+    johnDoe.setPhoneNumbers(Lists.newArrayList(
+        new Phone("+33H000000000", "home"),
+        new Phone("+33M000000000", "mobile"),
+        new Phone("+33W000000000", "work")));
 
-    List<Address> addresses = new ArrayList<Address>();
-    addresses.add(new Address("My home address"));
-    johnDoe.setAddresses(addresses);
+    johnDoe.setAddresses(Lists.newArrayList(new Address("My home address")));
 
-    List<Email> emails = new ArrayList<Email>();
-    emails.add(new Email("john.doe@work.bar", "work"));
-    emails.add(new Email("john.doe@home.bar", "home"));
-    johnDoe.setEmails(emails);
+    johnDoe.setEmails(Lists.newArrayList(
+        new Email("john.doe@work.bar", "work"),
+        new Email("john.doe@home.bar", "home")));
 
     activity = new Activity("activityId", johnDoe.getId());
 
-    List<MediaItem> mediaItems = new ArrayList<MediaItem>();
-    mediaItems.add(new MediaItem("image/jpg", MediaItem.Type.IMAGE,
-        "http://foo.bar"));
-    activity.setMediaItems(mediaItems);
+    activity.setMediaItems(Lists.newArrayList(
+        new MediaItem("image/jpg", MediaItem.Type.IMAGE, "http://foo.bar")));
 
     beanXmlConverter = new BeanXmlConverter();
   }
@@ -125,11 +118,11 @@ public class BeanXmlConverterTest extends TestCase {
     Map<String, Map<String, String>> map =
         new TreeMap<String, Map<String, String>>();
 
-    Map<String, String> item1Map = new HashMap<String, String>();
+    Map<String, String> item1Map = Maps.newHashMap();
     item1Map.put("value", "1");
     map.put("item1", item1Map);
 
-    Map<String, String> item2Map = new HashMap<String, String>();
+    Map<String, String> item2Map = Maps.newHashMap();
     item2Map.put("value", "2");
     map.put("item2", item2Map);
 

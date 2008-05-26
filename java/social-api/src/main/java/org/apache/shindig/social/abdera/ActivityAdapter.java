@@ -21,6 +21,7 @@ import org.apache.shindig.common.SecurityToken;
 import org.apache.shindig.social.opensocial.ActivitiesService;
 import org.apache.shindig.social.opensocial.model.Activity;
 
+import com.google.common.collect.Lists;
 import com.google.inject.Inject;
 import org.apache.abdera.i18n.iri.IRI;
 import org.apache.abdera.model.Content;
@@ -29,7 +30,6 @@ import org.apache.abdera.model.Person;
 import org.apache.abdera.protocol.server.RequestContext;
 import org.apache.abdera.protocol.server.context.ResponseContextException;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
@@ -170,7 +170,7 @@ public class ActivityAdapter extends
   public Iterable<Activity> getEntries(RequestContext request)
       throws ResponseContextException {
     String uid = request.getTarget().getParameter("uid");
-    List<String> ids = new ArrayList<String>();
+    List<String> ids = Lists.newArrayList();
     switch (getUrlTemplate(request)) {
       case ACTIVITIES_OF_USER :
         ids.add(uid);

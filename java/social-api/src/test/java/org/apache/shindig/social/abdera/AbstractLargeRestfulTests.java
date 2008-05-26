@@ -19,6 +19,7 @@ package org.apache.shindig.social.abdera;
 
 import org.apache.shindig.social.JettyServer;
 
+import com.google.common.collect.Maps;
 import org.apache.abdera.Abdera;
 import org.apache.abdera.model.Base;
 import org.apache.abdera.protocol.Response;
@@ -46,7 +47,6 @@ import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Logger;
 
@@ -148,7 +148,7 @@ public abstract class AbstractLargeRestfulTests {
     ByteArrayInputStream inStr = new ByteArrayInputStream(str.getBytes());
     XMLInputFactory factory = XMLInputFactory.newInstance();
     XMLStreamReader parser = factory.createXMLStreamReader(inStr);
-    Map<String, String> columns = new HashMap<String, String>();
+    Map<String, String> columns = Maps.newHashMap();
 
     while (true) {
       int event = parser.next();

@@ -24,6 +24,7 @@ import org.apache.shindig.common.servlet.InjectedServlet;
 import org.apache.shindig.social.opensocial.util.BeanJsonConverter;
 
 import com.google.inject.Inject;
+import com.google.common.collect.Lists;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -107,7 +108,7 @@ public class GadgetDataServlet extends InjectedServlet {
 
     // TODO: Improve json input handling. The json request should get auto
     // translated into objects
-    List<ResponseItem> responseItems = new ArrayList<ResponseItem>();
+    List<ResponseItem> responseItems = Lists.newArrayList();
 
     JSONArray requestItems = new JSONArray(requestParam);
     int length = requestItems.length();
