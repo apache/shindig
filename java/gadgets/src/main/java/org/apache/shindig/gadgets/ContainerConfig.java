@@ -235,11 +235,7 @@ public class ContainerConfig {
       return;
     }
 
-    String parent = base.optString(PARENT_KEY);
-    if (parent == null) {
-      parent = DEFAULT_CONTAINER;
-    }
-
+    String parent = base.optString(PARENT_KEY, DEFAULT_CONTAINER);
     JSONObject parentData = config.get(parent);
     if (parentData == null) {
       throw new GadgetException(GadgetException.Code.INVALID_CONFIG,
