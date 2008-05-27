@@ -144,13 +144,5 @@ under the License.
       <artifactId>commons-lang</artifactId>
       <scope>compile</scope>
     </dependency>
-    <dependency>
-      <groupId>commons-codec</groupId>
-      <artifactId>commons-codec</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>joda-time</groupId>
-      <artifactId>joda-time</artifactId>
-    </dependency>
   </dependencies>
 </project>

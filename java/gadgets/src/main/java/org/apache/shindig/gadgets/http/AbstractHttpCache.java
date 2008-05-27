@@ -17,7 +17,7 @@
  */
 package org.apache.shindig.gadgets.http;
 
-import org.apache.shindig.gadgets.servlet.HttpUtil;
+import org.apache.shindig.common.util.DateUtil;
 
 import java.net.URI;
 import java.util.Arrays;
@@ -110,7 +110,7 @@ public abstract class AbstractHttpCache implements HttpCache {
 
     String expires = response.getHeader("Expires");
     if (expires != null) {
-      Date expiresDate = HttpUtil.parseDate(expires);
+      Date expiresDate = DateUtil.parseDate(expires);
       if (expiresDate == null) {
         // parse problem
         return null;
@@ -143,7 +143,7 @@ public abstract class AbstractHttpCache implements HttpCache {
               long maxAgeMs = Long.parseLong(parts[1]) * 1000;
               Date newExpiry = new Date(now + maxAgeMs);
               response.getAllHeaders()
-                  .put("Expires", Arrays.asList(HttpUtil.formatDate(newExpiry)));
+                  .put("Expires", Arrays.asList(DateUtil.formatDate(newExpiry)));
               return response;
             } catch (NumberFormatException e) {
               return null;
@@ -167,7 +167,7 @@ public abstract class AbstractHttpCache implements HttpCache {
     // if no other directives exist
     Date newExpiry = new Date(now + getDefaultTTL());
     response.getAllHeaders()
-        .put("Expires", Arrays.asList(HttpUtil.formatDate(newExpiry)));
+        .put("Expires", Arrays.asList(DateUtil.formatDate(newExpiry)));
     return response;
   }
 

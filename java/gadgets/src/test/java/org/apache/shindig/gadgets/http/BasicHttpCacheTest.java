@@ -17,7 +17,7 @@
  */
 package org.apache.shindig.gadgets.http;
 
-import org.apache.shindig.gadgets.servlet.HttpUtil;
+import org.apache.shindig.common.util.DateUtil;
 
 import junit.framework.TestCase;
 
@@ -66,7 +66,7 @@ public class BasicHttpCacheTest extends TestCase {
 
   private HttpResponse createExpiresResponse(int statusCode, long expiration) {
     Date newExpiry = new Date(expiration);
-    return createResponse(statusCode, "Expires", HttpUtil.formatDate(newExpiry));
+    return createResponse(statusCode, "Expires", DateUtil.formatDate(newExpiry));
   }
 
   private HttpResponse createMaxAgeResponse(int statusCode, long age) {

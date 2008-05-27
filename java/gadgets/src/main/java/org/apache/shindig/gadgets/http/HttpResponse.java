@@ -17,7 +17,7 @@
  */
 package org.apache.shindig.gadgets.http;
 
-import org.apache.shindig.gadgets.servlet.HttpUtil;
+import org.apache.shindig.common.util.DateUtil;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
@@ -176,7 +176,7 @@ public class HttpResponse {
       // Strip BOM if present
       if (responseString.length() > 0 && responseString.codePointAt(0) == 0xFEFF) {
         responseString = responseString.substring(1);
-      } 
+      }
     }
     return responseString;
   }
@@ -264,7 +264,7 @@ public class HttpResponse {
   public long getExpiration() {
     String expires = getHeader("Expires");
     if (expires != null) {
-      Date expiresDate = HttpUtil.parseDate(expires);
+      Date expiresDate = DateUtil.parseDate(expires);
       if (expiresDate != null) {
         return expiresDate.getTime();
       }
