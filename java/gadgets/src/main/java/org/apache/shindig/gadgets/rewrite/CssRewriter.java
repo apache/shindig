@@ -64,6 +64,7 @@ public class CssRewriter {
         }
         writer.write(token.text);
       }
+      writer.flush();
     } catch (ParseException pe) {
       pe.printStackTrace();
     } catch (IOException ioe) {

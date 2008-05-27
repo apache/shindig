@@ -96,6 +96,7 @@ public class HtmlRewriter {
       if (currentTransformer != null) {
         writer.write(currentTransformer.close());
       }
+      writer.flush();
     } catch (ParseException pe) {
       pe.printStackTrace();
     } catch (IOException ioe) {
