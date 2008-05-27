@@ -18,55 +18,78 @@
  */
 package org.apache.shindig.gadgets.servlet;
 
-import junit.framework.TestCase;
+import static org.easymock.EasyMock.anyLong;
+import static org.easymock.EasyMock.eq;
+import static org.easymock.EasyMock.expect;
+import static org.easymock.classextension.EasyMock.createNiceMock;
+import static org.easymock.classextension.EasyMock.replay;
+import static org.easymock.classextension.EasyMock.verify;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 
-import java.util.Date;
-import java.util.Locale;
+import org.apache.shindig.gadgets.ContainerConfig;
+import org.apache.shindig.gadgets.GadgetContext;
 
-public class HttpUtilTest extends TestCase {
+import org.json.JSONException;
+import org.json.JSONObject;
+import org.junit.Test;
 
-  public void testFormatInWrongLocale() {
-    Locale orig = Locale.getDefault();
-    try {
-      Locale.setDefault(Locale.ITALY);
-      testFormatDate();
-    } finally {
-      Locale.setDefault(orig);
+import java.util.HashSet;
+import java.util.Set;
+
+import javax.servlet.http.HttpServletResponse;
+
+public class HttpUtilTest {
+
+  @Test
+  public void setCachingHeaders() {
+    HttpServletResponse response = createNiceMock(HttpServletResponse.class);
+    int ttl = 10;
+    response.setDateHeader(eq("Expires"), anyLong());
+    response.setHeader("Cache-Control", "public,max-age=" + ttl);
+    response.setDateHeader(eq("Last-Modified"), anyLong());
+    replay(response);
+    HttpUtil.setCachingHeaders(response, ttl);
+    verify(response);
+  }
+
+  private void assertJsonEquals(JSONObject lhs, JSONObject rhs) throws JSONException {
+    for (String key : JSONObject.getNames(lhs)) {
+      Object obj = lhs.get(key);
+      if (obj instanceof String) {
+        assertEquals(obj, rhs.get(key));
+      } else if (obj instanceof JSONObject) {
+        assertJsonEquals((JSONObject)obj, rhs.getJSONObject(key));
+      } else {
+        fail("Unsupported type: " + obj.getClass());
+      }
     }
   }
 
-  public void testParseDate_rfc1123() {
-    String expires = "Sun, 06 Nov 1994 08:49:37 GMT";
-    Date date = HttpUtil.parseDate(expires);
-    assertEquals(784111777000L, date.getTime());
+  @Test
+  public void getJsConfig() throws JSONException {
+    String feature0 = "featureZero";
+    String feature1 = "featureOne";
 
-    date = HttpUtil.parseDate("Mon, 12 May 2008 17:00:18 GMT");
-    assertEquals(1210611618000L, date.getTime());
+    JSONObject features = new JSONObject()
+        .put(feature0, "config")
+        .put(feature1, "other config");
+
+    String container = "container";
+
+    ContainerConfig config = createNiceMock(ContainerConfig.class);
+    GadgetContext context = createNiceMock(GadgetContext.class);
+    Set<String> needed = new HashSet<String>();
+    needed.add(feature0);
+    needed.add(feature1);
+
+    expect(context.getContainer()).andReturn(container);
+    expect(config.getJsonObject(container, "gadgets.features"))
+        .andReturn(features);
+
+    replay(context);
+    replay(config);
+
+    assertJsonEquals(features, HttpUtil.getJsConfig(config, context, needed));
   }
-
-  public void testParseDate_wrongTimeZone() {
-    String expires = "Mon, 12 May 2008 09:23:29 PDT";
-    assertNull(HttpUtil.parseDate(expires));
-  }
-
-  public void testParseDate_rfc1036() {
-    // We don't support this, though RFC 2616 suggests we should
-    String expires = "Sunday, 06-Nov-94 08:49:37 GMT";
-    assertNull(HttpUtil.parseDate(expires));
-  }
-
-  public void testParseDate_asctime() {
-    // We don't support this, though RFC 2616 suggests we should
-    String expires = "Sun Nov  6 08:49:37 1994";
-    assertNull(HttpUtil.parseDate(expires));
-  }
-
-  public void testFormatDate() {
-    Date date = new Date(784111777000L);
-    assertEquals("Sun, 06 Nov 1994 08:49:37 GMT", HttpUtil.formatDate(date));
-
-    date = new Date(1210611618000L);
-    assertEquals("Mon, 12 May 2008 17:00:18 GMT", HttpUtil.formatDate(date));
-  }
-
 }

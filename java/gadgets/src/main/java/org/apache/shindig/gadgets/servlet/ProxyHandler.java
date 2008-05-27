@@ -314,30 +314,14 @@ public class ProxyHandler {
     HttpRequest rcr = buildHttpRequest(request);
     HttpResponse results = contentFetcherFactory.get().fetch(rcr);
 
-    // Default interval of 1 hour
-    int refreshInterval = 60 * 60;
+    // Caching headers
+    int refreshInterval = 0;
     if (request.getParameter(REFRESH_PARAM) != null) {
       refreshInterval =  Integer.valueOf(request.getParameter(REFRESH_PARAM));
     }
+    HttpUtil.setCachingHeaders(response, refreshInterval);
 
-    int status = results.getHttpStatusCode();
-    response.setStatus(status);
-    if (status == HttpServletResponse.SC_OK) {
-      Map<String, List<String>> headers = HttpUtil.enforceCachePolicy(
-          results.getAllHeaders(), refreshInterval * 1000L, false);
-      for (Map.Entry<String, List<String>> entry : headers.entrySet()) {
-        String name = entry.getKey();
-        List<String> values = entry.getValue();
-        if (name != null && values != null
-            && !DISALLOWED_RESPONSE_HEADERS.contains(name.toLowerCase())) {
-          for (String value : values) {
-            response.addHeader(name, value);
-          }
-        }
-      }
-      response.getOutputStream().write(
-          IOUtils.toByteArray(results.getResponse()));
-    }
+    response.getOutputStream().write(IOUtils.toByteArray(results.getResponse()));
   }
 
   /**

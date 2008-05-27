@@ -23,19 +23,11 @@ import org.apache.shindig.gadgets.Gadget;
 import org.apache.shindig.gadgets.GadgetContext;
 import org.apache.shindig.gadgets.spec.GadgetSpec;
 import org.apache.shindig.gadgets.spec.View;
-import org.joda.time.DateTimeZone;
-import org.joda.time.format.DateTimeFormat;
-import org.joda.time.format.DateTimeFormatter;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.util.Arrays;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
 import java.util.Set;
 
 import javax.servlet.http.HttpServletResponse;
@@ -47,11 +39,6 @@ public class HttpUtil {
   public static final long START_TIME = System.currentTimeMillis();
   // 1 year.
   private static final int DEFAULT_TTL = 60 * 60 * 24 * 365;
-
-  private static DateTimeFormatter httpDateFormatter = DateTimeFormat
-      .forPattern("EEE, dd MMM yyyy HH:mm:ss 'GMT'")
-      .withLocale(Locale.US)
-      .withZone(DateTimeZone.UTC);
 
   /**
    * Sets default caching Headers (Expires, Cache-Control, Last-Modified)
@@ -85,98 +72,6 @@ public class HttpUtil {
     }
     // Firefox requires this for certain cases.
     response.setDateHeader("Last-Modified", START_TIME);
-  }
-
-  /**
-   * Parses an HTTP date.  Returns null if the date fails to parse for any
-   * reason.
-   *
-   * @param dateStr
-   * @return the date
-   */
-  public static Date parseDate(String dateStr) {
-    try {
-      return httpDateFormatter.parseDateTime(dateStr).toDate();
-    } catch (Exception e) {
-      // Don't care.
-      return null;
-    }
-  }
-
-  /**
-   * Formats a date for use in HTTP headers.
-   *
-   * @param date
-   * @return HTTP date string.
-   */
-  public static String formatDate(Date date) {
-    return httpDateFormatter.print(date.getTime());
-  }
-
-
-  /**
-   * Takes a set of recevied HTTP headers and adjusts them to enforce
-   * a desired cache lifetime
-   */
-  public static Map<String, List<String>> enforceCachePolicy(
-      Map<String, List<String>> originalHeaders,
-      long age,
-      boolean ignoreOriginalCacheControl) {
-
-    Map<String, List<String>> newHeaders = new HashMap<String, List<String>>(
-        originalHeaders);
-
-    long originalAge = 0L;
-    if (newHeaders.containsKey("Expires")) {
-      Date date = parseDate(originalHeaders.get("Expires").get(0));
-      if (date != null) {
-        originalAge = date.getTime() - System.currentTimeMillis();
-      }
-    }
-
-    if (newHeaders.containsKey("Cache-Control")) {
-      try {
-        String cacheControl = originalHeaders.get("Cache-Control").get(0);
-        if (cacheControl != null) {
-          String[] directives = cacheControl.split(",");
-          for (String directive : directives) {
-            directive = directive.trim();
-            // boolean params
-            if (directive.equals("no-cache") || directive.equals("no-store")) {
-              // Always respect no-cache or no-store no matter what
-              return newHeaders;
-            }
-            if (directive.startsWith("max-age")) {
-              String[] parts = directive.split("=");
-              if (parts.length == 2) {
-                // Record the max-age and store it in the content as an
-                // absolute expiration
-                originalAge = Long.parseLong(parts[1]) * 1000;
-              }
-            }
-          }
-        }
-      } catch (Exception e) {
-        // Dont care
-      }
-    }
-
-    if (!ignoreOriginalCacheControl && age < originalAge) {
-      age = originalAge;
-    }
-
-    // Strip the original
-    newHeaders.remove("Expires");
-    newHeaders.remove("Cache-Control");
-
-    // Replace with new consistent headers
-    newHeaders.put("Expires", Arrays.asList(
-        formatDate(new Date(age + System.currentTimeMillis()))));
-
-    newHeaders.put("Cache-Control",
-        Arrays.asList("public, max-age=" + (age / 1000L)));
-
-    return newHeaders;
   }
 
   /**
