@@ -17,9 +17,9 @@
  */
 package org.apache.shindig.social.abdera;
 
-import org.apache.shindig.social.SocialApiTestsGuiceModule.MockPeopleService;
+import org.apache.shindig.social.SocialApiTestsGuiceModule.MockXmlStateFileFetcher;
 
-import static junit.framework.Assert.assertEquals;
+import static junit.framework.Assert.*;
 import org.json.JSONObject;
 import org.junit.Test;
 
@@ -48,12 +48,12 @@ public class RestfulJsonDataTest extends AbstractLargeRestfulTests {
     assertEquals(2, data.length());
 
     JSONObject janesEntries = data.getJSONObject(
-        MockPeopleService.janeDoe.getId());
+        MockXmlStateFileFetcher.janeDoe.getId());
     assertEquals(1, janesEntries.length());
     assertEquals("5", janesEntries.getString("count"));
 
     JSONObject simplesEntries = data.getJSONObject(
-        MockPeopleService.simpleDoe.getId());
+        MockXmlStateFileFetcher.simpleDoe.getId());
     assertEquals(1, simplesEntries.length());
     assertEquals("7", simplesEntries.getString("count"));
   }
@@ -78,7 +78,7 @@ public class RestfulJsonDataTest extends AbstractLargeRestfulTests {
     assertEquals(1, data.length());
 
     JSONObject johnsEntries = data.getJSONObject(
-        MockPeopleService.johnDoe.getId());
+        MockXmlStateFileFetcher.johnDoe.getId());
     assertEquals(1, johnsEntries.length());
     assertEquals("0", johnsEntries.getString("count"));
   }
@@ -104,7 +104,7 @@ public class RestfulJsonDataTest extends AbstractLargeRestfulTests {
     assertEquals(1, data.length());
 
     JSONObject johnsEntries = data.getJSONObject(
-        MockPeopleService.johnDoe.getId());
+        MockXmlStateFileFetcher.johnDoe.getId());
     assertEquals(1, johnsEntries.length());
     assertEquals("0", johnsEntries.getString("count"));
   }
@@ -131,7 +131,7 @@ public class RestfulJsonDataTest extends AbstractLargeRestfulTests {
     assertEquals(1, data.length());
 
     JSONObject johnsEntries = data.getJSONObject(
-        MockPeopleService.johnDoe.getId());
+        MockXmlStateFileFetcher.johnDoe.getId());
     assertEquals(0, johnsEntries.length());
   }
 
