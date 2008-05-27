@@ -74,18 +74,9 @@ class JsLibrary {
 		}
 	}
 
-	static function create($type, $content)
+	static function create($type, $content, $name)
 	{
-		$feature = '';
-		if ($type == 'FILE') {
-			$feature = dirname($content);
-			if (substr($feature, strlen($feature) - 1, 1) == '/') {
-				// strip tailing /, if any, so that the following strrpos works in any situation
-				$feature = substr($feature, 0, strlen($feature) - 1);
-			}
-			$feature = substr($feature, strrpos($feature, '/') + 1);
-		}
-		return new JsLibrary($type, $content, $feature);
+		return new JsLibrary($type, $content, $name);
 	}
 
 	static private function loadData($name, $type)

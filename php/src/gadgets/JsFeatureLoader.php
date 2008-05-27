@@ -99,8 +99,7 @@ class JsFeatureLoader {
 		if (! isset($doc->name)) {
 			throw new GadgetException('Invalid name in feature: ' . $path);
 		}
-		$feature->name = trim($doc->name);
-		
+		$feature->name = trim($doc->name);		
 		foreach ($doc->gadget as $gadget) {
 			$feature = $this->processContext($feature, $gadget, false);
 		}
@@ -133,7 +132,7 @@ class JsFeatureLoader {
 					$content = $feature->basePath . '/' . $content;
 				}
 			}
-			$library = JsLibrary::create($type, $content);
+			$library = JsLibrary::create($type, $content, $feature->name);
 			if ($library != null) {
 				if ($isContainer) {
 					$feature->containerJs[] = $library;
