@@ -259,7 +259,7 @@ public class ContainerConfig {
    * @param json
    * @throws GadgetException
    */
-  private void loadFromString(String json) throws GadgetException {
+  protected void loadFromString(String json) throws GadgetException {
     try {
       JSONObject contents = new JSONObject(json);
       JSONArray containers = contents.getJSONArray(CONTAINER_KEY);
