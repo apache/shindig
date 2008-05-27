@@ -27,7 +27,7 @@ import org.junit.Test;
 
 
 public class RestfulJsonActivityTest extends AbstractLargeRestfulTests {
-  
+
   /**
    * Expected response for an activity in json:
    * {
@@ -45,7 +45,7 @@ public class RestfulJsonActivityTest extends AbstractLargeRestfulTests {
     checkForGoodJsonResponse(resp);
     JSONObject result = getJson(resp);
     assertActivitiesEqual(
-        SocialApiTestsGuiceModule.MockActivitiesService.johnActivity,
+        SocialApiTestsGuiceModule.MockXmlStateFileFetcher.johnActivity,
         result);
   }
 
@@ -75,7 +75,7 @@ public class RestfulJsonActivityTest extends AbstractLargeRestfulTests {
     assertEquals(1, result.getInt("totalResults"));
     assertEquals(0, result.getInt("startIndex"));
     assertActivitiesEqual(
-        SocialApiTestsGuiceModule.MockActivitiesService.johnActivity,
+        SocialApiTestsGuiceModule.MockXmlStateFileFetcher.johnActivity,
         result.getJSONArray("entry").getJSONObject(0));
   }
 
@@ -107,7 +107,7 @@ public class RestfulJsonActivityTest extends AbstractLargeRestfulTests {
     assertEquals(1, result.getInt("totalResults"));
     assertEquals(0, result.getInt("startIndex"));
     assertActivitiesEqual(
-        SocialApiTestsGuiceModule.MockActivitiesService.janeActivity,
+        SocialApiTestsGuiceModule.MockXmlStateFileFetcher.janeActivity,
         result.getJSONArray("entry").getJSONObject(0));
   }
 

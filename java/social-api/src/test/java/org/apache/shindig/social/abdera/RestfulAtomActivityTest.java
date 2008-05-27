@@ -29,7 +29,7 @@ import org.junit.Test;
 
 public class RestfulAtomActivityTest extends AbstractLargeRestfulTests {
   private Activity activity = SocialApiTestsGuiceModule
-      .MockActivitiesService.johnActivity;
+      .MockXmlStateFileFetcher.johnActivity;
 
   @Test
   public void testGetActivityOfUser() throws Exception {

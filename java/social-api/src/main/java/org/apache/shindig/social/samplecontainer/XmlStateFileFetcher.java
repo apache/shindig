@@ -57,10 +57,10 @@ public class XmlStateFileFetcher {
 
   // TODO: This obviously won't work on multiple servers
   // If we care then we should do something about it
-  private Map<String, Map<String, String>> allData;
-  private Map<String, List<String>> friendIdMap;
-  private Map<String, Person> allPeople;
-  private Map<String, List<Activity>> allActivities;
+  protected Map<String, Map<String, String>> allData;
+  protected Map<String, List<String>> friendIdMap;
+  protected Map<String, Person> allPeople;
+  protected Map<String, List<Activity>> allActivities;
 
   public XmlStateFileFetcher() {
     client = new HttpClient();

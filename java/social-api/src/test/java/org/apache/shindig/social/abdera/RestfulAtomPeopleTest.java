@@ -17,15 +17,13 @@
  */
 package org.apache.shindig.social.abdera;
 
-import static org.junit.Assert.assertEquals;
-
 import org.apache.shindig.social.SocialApiTestsGuiceModule;
 import org.apache.shindig.social.opensocial.model.Person;
 
 import org.apache.abdera.model.Document;
 import org.apache.abdera.model.Entry;
 import org.apache.abdera.model.Feed;
-
+import static org.junit.Assert.assertEquals;
 import org.junit.Test;
 
 import java.util.List;
@@ -47,8 +45,8 @@ public class RestfulAtomPeopleTest extends AbstractLargeRestfulTests {
     String id2 = getIdFromXmlContent(entries.get(1)
         .getContentElement().getValue());
 
-    Person janeDoe = SocialApiTestsGuiceModule.MockPeopleService.janeDoe;
-    Person simpleDoe = SocialApiTestsGuiceModule.MockPeopleService.simpleDoe;
+    Person janeDoe = SocialApiTestsGuiceModule.MockXmlStateFileFetcher.janeDoe;
+    Person simpleDoe = SocialApiTestsGuiceModule.MockXmlStateFileFetcher.simpleDoe;
     // TODO: Simplify after we have implement sorting
     if (id1.equals(janeDoe.getId())) {
       assertEquals(simpleDoe.getId(), id2);
@@ -57,7 +55,7 @@ public class RestfulAtomPeopleTest extends AbstractLargeRestfulTests {
       assertEquals(simpleDoe.getId(), id1);
     }
   }
-  
+
   @Test
   public void testGetProfilesOfFriendsOfUserAtom() throws Exception {
     resp = client.get(BASEURL + "/people/john.doe/@friends?format=atom");
@@ -79,8 +77,8 @@ public class RestfulAtomPeopleTest extends AbstractLargeRestfulTests {
     prettyPrint(entry);
 
     Person expectedJohnDoe = SocialApiTestsGuiceModule
-        .MockPeopleService.johnDoe;
-    assertEquals(expectedJohnDoe.getId(), 
+        .MockXmlStateFileFetcher.johnDoe;
+    assertEquals(expectedJohnDoe.getId(),
         getIdFromXmlContent(entry.getContentElement().getValue()));
   }
 
@@ -90,7 +88,7 @@ public class RestfulAtomPeopleTest extends AbstractLargeRestfulTests {
     resp = client.get(BASEURL + "/people/jane.doe/@all/simple.doe?format=atom");
     checkForBadResponse(resp);
   }
-  
+
   @Test
   public void testGetInvalidPerson() throws Exception {
     resp = client.get(BASEURL + "/people/john.doe/@all/nobody?format=atom");

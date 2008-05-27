@@ -62,7 +62,7 @@ public class RestfulJsonPeopleTest extends AbstractLargeRestfulTests {
     checkForGoodJsonResponse(resp);
     JSONObject result = getJson(resp);
 
-    Person johnDoe = SocialApiTestsGuiceModule.MockPeopleService.johnDoe;
+    Person johnDoe = SocialApiTestsGuiceModule.MockXmlStateFileFetcher.johnDoe;
     assertStringField(result, johnDoe.getAboutMe(), Person.Field.ABOUT_ME);
     assertStringListField(result, johnDoe.getActivities(),
         Person.Field.ACTIVITIES);

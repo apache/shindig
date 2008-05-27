@@ -19,6 +19,7 @@ package org.apache.shindig.social.samplecontainer;
 
 import org.apache.shindig.common.SecurityToken;
 import org.apache.shindig.social.ResponseItem;
+import org.apache.shindig.social.ResponseError;
 import org.apache.shindig.social.opensocial.PeopleService;
 import org.apache.shindig.social.opensocial.model.ApiCollection;
 import org.apache.shindig.social.opensocial.model.IdSpec;
@@ -94,8 +95,13 @@ public class BasicPeopleService implements PeopleService {
   }
 
   public ResponseItem<Person> getPerson(String id, SecurityToken token) {
-    return new ResponseItem<Person>(getPeople(Lists.newArrayList(id),
-        token).get(0));
+    List<Person> people = getPeople(Lists.newArrayList(id), token);
+    if (people.size() == 1) {
+      return new ResponseItem<Person>(people.get(0));
+    } else {
+      return new ResponseItem<Person>(ResponseError.BAD_REQUEST,
+          "Person " + id + " not found", null);
+    }
   }
 
   public List<String> getIds(IdSpec idSpec, SecurityToken token)
