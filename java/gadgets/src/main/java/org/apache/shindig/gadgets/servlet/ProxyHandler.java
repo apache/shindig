@@ -18,6 +18,8 @@
  */
 package org.apache.shindig.gadgets.servlet;
 
+import com.google.inject.Inject;
+
 import org.apache.shindig.common.SecurityToken;
 import org.apache.shindig.common.SecurityTokenDecoder;
 import org.apache.shindig.common.SecurityTokenException;
@@ -31,10 +33,6 @@ import org.apache.shindig.gadgets.oauth.OAuthRequestParams;
 import org.apache.shindig.gadgets.rewrite.ContentRewriter;
 import org.apache.shindig.gadgets.spec.Auth;
 import org.apache.shindig.gadgets.spec.Preload;
-
-import com.google.inject.Inject;
-
-import org.apache.commons.io.IOUtils;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -334,7 +332,11 @@ public class ProxyHandler {
       }
     }
 
-    response.getOutputStream().write(IOUtils.toByteArray(results.getResponse()));
+    if (rcr.getOptions().rewriteMimeType != null) {
+      response.setContentType(rcr.getOptions().rewriteMimeType);
+    }
+
+    response.getOutputStream().write(results.getResponseAsBytes());
   }
 
   /**
