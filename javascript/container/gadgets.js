@@ -483,7 +483,7 @@ gadgets.IfrGadget.prototype.cssClassGadgetUserPrefsDialogActionBar =
 gadgets.IfrGadget.prototype.cssClassTitleButton = 'gadgets-gadget-title-button';
 gadgets.IfrGadget.prototype.cssClassGadgetContent = 'gadgets-gadget-content';
 gadgets.IfrGadget.prototype.rpcToken = (0x7FFFFFFF * Math.random()) | 0;
-gadgets.IfrGadget.prototype.rpcRelay = 'files/rpc_relay.html';
+gadgets.IfrGadget.prototype.rpcRelay = 'files/container/rpc_relay.html';
 
 gadgets.IfrGadget.prototype.getTitleBarContent = function(continuation) {
   continuation('<div id="' + this.cssClassTitleBar + '-' + this.id +
@@ -545,7 +545,7 @@ gadgets.IfrGadget.prototype.getIframeUrl = function() {
       (this.debug ? '&debug=1' : '') +
       this.getAdditionalParams() +
       this.getUserPrefsParams() +
-      '&url=' + encodeURIComponent(this.specUrl) + 
+      '&url=' + encodeURIComponent(this.specUrl) +
       '#rpctoken=' + this.rpcToken +
       (this.secureToken ? '&st=' + this.secureToken : '') +
       (this.viewParams ?
