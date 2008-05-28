@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Sample: PubSub</title>
+<!-- default container look and feel -->
+<link rel="stylesheet" href="gadgets.css">
+<script type="text/javascript" src="http://localhost:8080/gadgets/js/pubsub.js?c=1&debug=1"></script>
+<script type="text/javascript" src="util.js"></script>
+<script type="text/javascript" src="gadgets.js"></script>
+<script type="text/javascript">
+var my = {};
+
+my.gadgetSpecUrls = [
+  'http://localhost:8080/gadgets/files/container/sample-pubsub-publisher.xml',
+  'http://localhost:8080/gadgets/files/container/sample-pubsub-subscriber.xml',
+  'http://localhost:8080/gadgets/files/container/sample-pubsub-subscriber.xml'
+];
+
+my.LayoutManager = function() {
+  gadgets.LayoutManager.call(this);
+};
+
+my.LayoutManager.inherits(gadgets.LayoutManager);
+
+my.LayoutManager.prototype.getGadgetChrome = function(gadget) {
+  var chromeId = 'gadget-chrome-' + gadget.id;
+  return chromeId ? document.getElementById(chromeId) : null;
+};
+
+my.init = function() {
+  gadgets.pubsubrouter.init(function(id) {
+    return my.gadgetSpecUrls[parseInt(id[id.length - 1])];
+  }, {
+    onSubscribe: function(sender, channel) {
+      log(sender + " subscribes to channel '" + channel + "'");
+      // return true to reject the request.
+    },
+    onUnsubscribe: function(sender, channel) {
+      log(sender + " unsubscribes from channel '" + channel + "'");
+      // return true to reject the request.
+    },
+    onPublish: function(sender, channel, message) {
+      log(sender + " publishes '" + message + "' to channel '" + channel + "'");
+      // return true to reject the request.
+    }
+  });
+  gadgets.container.layoutManager = new my.LayoutManager();
+};
+
+my.renderGadgets = function() {
+  for (var i = 0; i < my.gadgetSpecUrls.length; ++i) {
+    var gadget = gadgets.container.createGadget(
+        {specUrl: my.gadgetSpecUrls[i], title: (i ? "Subscriber" : "Publisher")});
+    gadgets.container.addGadget(gadget);
+    gadgets.container.renderGadget(gadget);
+  }
+};
+
+function log(message) {
+  document.getElementById("output").innerHTML += gadgets.util.escapeString(message) + "<br/>";
+}
+</script>
+</head>
+<body onLoad="my.init();my.renderGadgets()">
+  <h2>Sample: PubSub</h2>
+  <div id="gadget-chrome-0" class="gadgets-gadget-chrome"></div>
+  <div id="gadget-chrome-1" class="gadgets-gadget-chrome"></div>
+  <div id="gadget-chrome-2" class="gadgets-gadget-chrome"></div>
+  <div id="output" style="clear: left;">
+  </div>
+</body>
+</html>
