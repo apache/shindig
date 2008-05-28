@@ -53,6 +53,10 @@ public class ConcatProxyServlet extends InjectedServlet {
   @Override
   protected void doGet(HttpServletRequest request, HttpServletResponse response)
       throws IOException {
+    if (request.getHeader("If-Modified-Since") != null) {
+      response.setStatus(HttpServletResponse.SC_NOT_MODIFIED);
+      return;
+    }
     ResponseWrapper wrapper = new ResponseWrapper(response);
     for (int i = 1; i < Integer.MAX_VALUE; i++) {
       String url = request.getParameter(Integer.toString(i));
