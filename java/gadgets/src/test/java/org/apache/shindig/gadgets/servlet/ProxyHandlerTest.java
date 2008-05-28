@@ -25,8 +25,8 @@ import static org.easymock.EasyMock.isA;
 import org.apache.shindig.common.SecurityToken;
 import org.apache.shindig.gadgets.FakeGadgetToken;
 import org.apache.shindig.gadgets.GadgetException;
-import org.apache.shindig.gadgets.http.HttpResponse;
 import org.apache.shindig.gadgets.http.HttpRequest;
+import org.apache.shindig.gadgets.http.HttpResponse;
 import org.apache.shindig.gadgets.spec.Auth;
 import org.apache.shindig.gadgets.spec.Preload;
 
@@ -36,7 +36,11 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.URI;
+import java.util.Arrays;
 import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import javax.servlet.ServletOutputStream;
 
@@ -72,6 +76,15 @@ public class ProxyHandlerTest extends HttpTestFixture {
     HttpRequest req = new HttpRequest(
         "GET", new URI(url), null, null, new HttpRequest.Options());
     HttpResponse resp = new HttpResponse(200, data, null);
+    expect(contentFetcherFactory.get()).andReturn(fetcher);
+    expect(fetcher.fetch(req)).andReturn(resp);
+  }
+
+  private void expectGetAndReturnHeaders(String url,
+      Map<String, List<String>> headers) throws Exception {
+    HttpRequest req = new HttpRequest(
+      "GET", new URI(url), null, null, new HttpRequest.Options());
+    HttpResponse resp = new HttpResponse(200, null, headers);
     expect(contentFetcherFactory.get()).andReturn(fetcher);
     expect(fetcher.fetch(req)).andReturn(resp);
   }
@@ -321,5 +334,27 @@ public class ProxyHandlerTest extends HttpTestFixture {
     assertEquals("q=with%20space", url.getRawQuery());
     assertEquals("q=with space", url.getQuery());
     assertNull(url.getFragment());
+  }
+
+  public void testHeadersPreserved() throws Exception {
+    // Some headers may be blacklisted. These are ok.
+    String url = "http://example.org/file.evil";
+    String domain = "example.org";
+    String contentType = "text/evil; charset=utf-8";
+    String magicGarbage = "fadfdfdfd";
+    Map<String, List<String>> headers = new HashMap<String, List<String>>();
+    headers.put("Content-Type", Arrays.asList(contentType));
+    headers.put("X-Magic-Garbage", Arrays.asList(magicGarbage));
+
+    expect(lockedDomainService.embedCanRender(domain))
+        .andReturn(true).atLeastOnce();
+    setupProxyRequestMock(domain, url);
+    expectGetAndReturnHeaders(url, headers);
+    response.addHeader("Content-Type", contentType);
+    response.addHeader("X-Magic-Garbage", magicGarbage);
+
+    replay();
+    proxyHandler.fetch(request, response);
+    verify();
   }
 }
