@@ -65,7 +65,7 @@ public class ProxyHandler {
   public static final String SIGN_VIEWER = "signViewer";
   public static final String SIGN_OWNER = "signOwner";
   public static final String URL_PARAM = "url";
-  private static final String REFRESH_PARAM = "refresh";
+  public static final String REFRESH_PARAM = "refresh";
 
   private static final Logger logger =
       Logger.getLogger(ProxyHandler.class.getPackage().getName());
@@ -112,6 +112,22 @@ public class ProxyHandler {
   }
 
   /**
+   * Sets cache control headers for the response.
+   */
+  private void setCachingHeaders(HttpServletRequest request,
+      HttpServletResponse response, HttpResponse results) {
+    int refreshInterval = 0;
+    if (results.isStrictNoCache()) {
+      refreshInterval = 0;
+    } else  if (request.getParameter(REFRESH_PARAM) != null) {
+      refreshInterval =  Integer.valueOf(request.getParameter(REFRESH_PARAM));
+    } else {
+      refreshInterval = Math.max(60 * 60, (int)(results.getExpiration() / 1000));
+    }
+    HttpUtil.setCachingHeaders(response, refreshInterval);
+  }
+
+  /**
    * Retrieves a file and returns it as a json response.
    *
    * @param request
@@ -136,12 +152,7 @@ public class ProxyHandler {
     String output = serializeJsonResponse(request, results);
 
     // Find and set the refresh interval
-    int refreshInterval = 0;
-
-    if (request.getParameter(REFRESH_PARAM) != null) {
-      refreshInterval =  Integer.valueOf(request.getParameter(REFRESH_PARAM));
-    }
-    HttpUtil.setCachingHeaders(response, refreshInterval);
+    setCachingHeaders(request, response, results);
 
     response.setStatus(HttpServletResponse.SC_OK);
     response.setContentType("application/json; charset=utf-8");
@@ -316,12 +327,7 @@ public class ProxyHandler {
     HttpRequest rcr = buildHttpRequest(request);
     HttpResponse results = contentFetcherFactory.get().fetch(rcr);
 
-    // Caching headers
-    int refreshInterval = 0;
-    if (request.getParameter(REFRESH_PARAM) != null) {
-      refreshInterval =  Integer.valueOf(request.getParameter(REFRESH_PARAM));
-    }
-    HttpUtil.setCachingHeaders(response, refreshInterval);
+    setCachingHeaders(request, response, results);
 
     for (Map.Entry<String, List<String>> entry : results.getAllHeaders().entrySet()) {
       String name = entry.getKey();
