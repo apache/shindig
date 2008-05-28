@@ -176,18 +176,21 @@ public abstract class AbstractSocialEntityCollectionAdapter<T> extends
    * @param request RequestContext
    * @param resourceRouteVariable The route variable for the entry. So, for a
    *     route pattern of /:collection/:id, with "id" resourceRouteVariable this
-   *     would null out "id" in the generated URL.
+   *     would remove "id" in the generated URL.
    * @return The absolute request URI (includes server name, port, etc) URL for
    *     the collection of the entry.
    */
   public String getFeedIriForEntry(RequestContext request,
       String resourceRouteVariable) {
     Map<String, Object> params = Maps.newHashMap();
-    // TODO: currently a bug in Abdera adds this param to the url when there are
-    // other parameters in the original request.
-    // fix is coming in https://issues.apache.org/jira/browse/ABDERA-162
-    params.put(resourceRouteVariable, null);
-    String uri = request.urlFor(getRoute(request).getName(), params);
+    Route theRoute = getRoute(request);
+    for (String var: theRoute.getVariables()){
+      Object value = request.getTarget().getParameter(var);
+      if (!params.containsKey(var) && var != resourceRouteVariable) {
+        params.put(var, value);
+      }
+    }
+    String uri = request.urlFor(theRoute.getName(), params);
     return request.getResolvedUri().resolve(uri).toString();
   }
 

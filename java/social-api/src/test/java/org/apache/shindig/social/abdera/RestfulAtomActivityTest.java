@@ -45,7 +45,7 @@ public class RestfulAtomActivityTest extends AbstractLargeRestfulTests {
     resp = client.get(BASEURL + "/activities/john.doe/@self?format=atom");
     checkForGoodAtomResponse(resp);
     Document<Feed> doc = resp.getDocument();
-    String feedId = BASEURL + "/activities/john.doe/%40self?aid=";
+    String feedId = BASEURL + "/activities/john.doe/%40self";
     String title = RequestUrlTemplate.ACTIVITIES_OF_USER.toString();
     validateActivityAtomFeedElements(doc.getRoot(), title, feedId);
     // TODO Test all elements.
@@ -57,7 +57,7 @@ public class RestfulAtomActivityTest extends AbstractLargeRestfulTests {
     checkForGoodAtomResponse(resp);
     Document<Feed> doc = resp.getDocument();
     prettyPrint(doc);
-    String feedId = BASEURL + "/activities/john.doe/%40friends?aid=";
+    String feedId = BASEURL + "/activities/john.doe/%40friends";
     String title = RequestUrlTemplate.ACTIVITIES_OF_FRIENDS_OF_USER.toString();
     validateActivityAtomFeedElements(doc.getRoot(), title, feedId);
     // TODO Social graph seems to make everyone friends at this point.
