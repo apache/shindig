@@ -85,6 +85,10 @@ public class ProxyHandler {
     DISALLOWED_RESPONSE_HEADERS.add("last-modified");
     DISALLOWED_RESPONSE_HEADERS.add("accept-ranges");
     DISALLOWED_RESPONSE_HEADERS.add("vary");
+    DISALLOWED_RESPONSE_HEADERS.add("expires");
+    DISALLOWED_RESPONSE_HEADERS.add("date");
+    DISALLOWED_RESPONSE_HEADERS.add("pragma");
+    DISALLOWED_RESPONSE_HEADERS.add("cache-control");
   }
 
   // This isn't a final field because we want to support optional injection.
@@ -320,6 +324,15 @@ public class ProxyHandler {
       refreshInterval =  Integer.valueOf(request.getParameter(REFRESH_PARAM));
     }
     HttpUtil.setCachingHeaders(response, refreshInterval);
+
+    for (Map.Entry<String, List<String>> entry : results.getAllHeaders().entrySet()) {
+      String name = entry.getKey();
+      if (!DISALLOWED_RESPONSE_HEADERS.contains(name.toLowerCase())) {
+        for (String value : entry.getValue()) {
+          response.addHeader(name, value);
+        }
+      }
+    }
 
     response.getOutputStream().write(IOUtils.toByteArray(results.getResponse()));
   }
