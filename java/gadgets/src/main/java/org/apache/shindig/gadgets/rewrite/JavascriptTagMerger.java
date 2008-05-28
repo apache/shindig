@@ -18,10 +18,10 @@
  */
 package org.apache.shindig.gadgets.rewrite;
 
+import org.apache.shindig.gadgets.servlet.ProxyHandler;
+
 import com.google.caja.lexer.HtmlTokenType;
 import com.google.caja.lexer.Token;
-
-import org.apache.shindig.gadgets.servlet.ProxyHandler;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
