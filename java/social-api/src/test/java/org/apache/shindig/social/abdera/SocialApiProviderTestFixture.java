@@ -17,20 +17,16 @@
  */
 package org.apache.shindig.social.abdera;
 
-import static org.easymock.EasyMock.expect;
-
 import org.apache.shindig.social.EasyMockTestCase;
 
 import org.apache.abdera.protocol.server.RequestContext;
 
-@SuppressWarnings("unchecked")
 public class SocialApiProviderTestFixture extends EasyMockTestCase {
-
   public final String base = "/social/rest/";
   public final RequestContext request = mock(RequestContext.class);
   public final SocialApiProvider provider = new SocialApiProvider();
 
   public SocialApiProviderTestFixture() {
-    provider.initialize();
+    provider.setSocialRouteManager(new SocialRouteManager());
   }
 }

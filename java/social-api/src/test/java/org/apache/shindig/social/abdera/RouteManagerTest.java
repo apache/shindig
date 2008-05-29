@@ -24,11 +24,10 @@ import org.apache.abdera.protocol.server.impl.RouteManager;
 import org.junit.Test;
 
 public class RouteManagerTest extends SocialApiProviderTestFixture {
-
   private RouteManager rm;
 
   @Override
-  public void setUp(){
+  public void setUp() {
     rm = provider.getRouteManager();
   }
 
@@ -48,7 +47,7 @@ public class RouteManagerTest extends SocialApiProviderTestFixture {
     mockAndResolve("appdata/x/@self/y");
   }
 
-  private void mockAndResolve(String path){
+  private void mockAndResolve(String path) {
     expect(request.getTargetPath()).andReturn(base + path);
     org.easymock.EasyMock.replay(request);
     assertNotNull("path = " + path, rm.resolve(request));

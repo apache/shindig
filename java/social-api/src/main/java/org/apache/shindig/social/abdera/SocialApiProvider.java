@@ -21,68 +21,20 @@ import org.apache.shindig.social.abdera.json.JSONFilter;
 import org.apache.shindig.social.abdera.util.ValidRequestFilter;
 
 import com.google.inject.Inject;
-import org.apache.abdera.protocol.server.TargetType;
 import org.apache.abdera.protocol.server.impl.DefaultProvider;
 
 public class SocialApiProvider extends DefaultProvider {
-  //TODO why is this hardcoded here. can't this be from servletContext?
-  private static final String BASE = "/social/rest/";
-
-  private PersonAdapter personAdapter;
-  private DataAdapter dataAdapter;
-  private ActivityAdapter activityAdapter;
-
-  @Inject
-  public void setAdapters(
-      PersonAdapter personAdapter,
-      DataAdapter dataAdapter,
-      ActivityAdapter activityAdapter) {
-    this.personAdapter = personAdapter;
-    this.dataAdapter = dataAdapter;
-    this.activityAdapter = activityAdapter;
-  }
-
-  /**
-   * CollectionAdapters are provided via Guice and the RouteManager wires
-   * together the Routes, their TargetTypes and CollectionAdapters.
-   *
-   * TODO: Implement the group urls.
-   */
-  public void initialize() {
-    routeManager = new SocialRouteManager(BASE)
-        // People
-        .addRoute(RequestUrlTemplate.PROFILES_OF_CONNECTIONS_OF_USER,
-            TargetType.TYPE_COLLECTION, personAdapter)
-        .addRoute(RequestUrlTemplate.PROFILES_OF_FRIENDS_OF_USER,
-            TargetType.TYPE_COLLECTION, personAdapter)
-        .addRoute(RequestUrlTemplate.PROFILES_IN_GROUP_OF_USER,
-            TargetType.TYPE_COLLECTION, personAdapter)
-        .addRoute(RequestUrlTemplate.PROFILE_OF_CONNECTION_OF_USER,
-            TargetType.TYPE_ENTRY, personAdapter)
-        .addRoute(RequestUrlTemplate.PROFILE_OF_USER,
-            TargetType.TYPE_ENTRY, personAdapter)
-
-         // Activities
-        .addRoute(RequestUrlTemplate.ACTIVITIES_OF_USER,
-            TargetType.TYPE_COLLECTION, activityAdapter)
-        .addRoute(RequestUrlTemplate.ACTIVITIES_OF_FRIENDS_OF_USER,
-            TargetType.TYPE_COLLECTION, activityAdapter)
-        .addRoute(RequestUrlTemplate.ACTIVITIES_OF_GROUP_OF_USER,
-            TargetType.TYPE_COLLECTION, null)
-        .addRoute(RequestUrlTemplate.ACTIVITY_OF_USER,
-            TargetType.TYPE_ENTRY, activityAdapter)
-
-         // AppData
-        .addRoute(RequestUrlTemplate.APPDATA_OF_APP_OF_USER,
-            TargetType.TYPE_COLLECTION, dataAdapter)
-        .addRoute(RequestUrlTemplate.APPDATA_OF_FRIENDS_OF_USER,
-            TargetType.TYPE_COLLECTION, dataAdapter)
-        ;
-
+  public SocialApiProvider() {
     addFilter(new ValidRequestFilter());
     // JsonFilter should always be the last class in the chain of filters
     addFilter(new JSONFilter());
-    targetBuilder = routeManager;
-    targetResolver = routeManager;
+  }
+
+  @Inject
+  public void setSocialRouteManager(SocialRouteManager socialRouteManager) {
+    routeManager = socialRouteManager;
+    socialRouteManager.setRoutes();
+    setTargetBuilder(socialRouteManager);
+    setTargetResolver(socialRouteManager);
   }
 }
