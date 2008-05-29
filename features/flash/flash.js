@@ -177,18 +177,18 @@ gadgets.flash.embedFlash = function(swfUrl, swfContainer, swfVersion,
 gadgets.flash.embedCachedFlash = function() {
   var args = Array.prototype.slice.call(arguments);
   args[0] = gadgets.io.getProxyUrl(args[0]);
-  gadgets.flash.embedFlash.apply(this, args);
+  return gadgets.flash.embedFlash.apply(this, args);
 };
 
 // Aliases for legacy code
 var _IG_GetFlashMajorVersion = gadgets.flash.getMajorVersion;
 var _IG_EmbedFlash = function(swfUrl, swfContainer, opt_params) {
-  gadgets.flash.embedFlash(swfUrl, swfContainer, opt_params.swf_version,
+  return gadgets.flash.embedFlash(swfUrl, swfContainer, opt_params.swf_version,
       opt_params);
 };
 
 var _IG_EmbedCachedFlash = function(swfUrl, swfContainer, opt_params) {
-  gadgets.flash.embedCachedFlash(swfUrl, swfContainer, opt_params.swf_version,
+  return gadgets.flash.embedCachedFlash(swfUrl, swfContainer, opt_params.swf_version,
       opt_params);
 };
 
