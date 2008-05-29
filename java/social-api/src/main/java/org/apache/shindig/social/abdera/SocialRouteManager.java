@@ -17,8 +17,6 @@
  */
 package org.apache.shindig.social.abdera;
 
-import com.google.inject.Inject;
-
 import org.apache.abdera.protocol.server.CollectionAdapter;
 import org.apache.abdera.protocol.server.TargetType;
 import org.apache.abdera.protocol.server.impl.RouteManager;
@@ -28,10 +26,14 @@ public class SocialRouteManager extends RouteManager {
   private DataAdapter dataAdapter;
   private ActivityAdapter activityAdapter;
   private static final String BASE = "/social/rest/";
-  private String base;
+  protected String base;
 
-  public SocialRouteManager() {
+  public SocialRouteManager(PersonAdapter personAdapter, DataAdapter dataAdapter,
+      ActivityAdapter activityAdapter) {
     this.base = BASE;
+    this.personAdapter = personAdapter;
+    this.dataAdapter = dataAdapter;
+    this.activityAdapter = activityAdapter;
   }
 
   public void setRoutes() {
@@ -63,14 +65,6 @@ public class SocialRouteManager extends RouteManager {
         .addRoute(RequestUrlTemplate.APPDATA_OF_FRIENDS_OF_USER,
             TargetType.TYPE_COLLECTION, dataAdapter)
         ;
-  }
-
-  @Inject
-  public void setAdapters(PersonAdapter personAdapter, DataAdapter dataAdapter,
-      ActivityAdapter activityAdapter) {
-    this.personAdapter = personAdapter;
-    this.dataAdapter = dataAdapter;
-    this.activityAdapter = activityAdapter;
   }
 
   /**

@@ -27,6 +27,9 @@ public class SocialApiProviderTestFixture extends EasyMockTestCase {
   public final SocialApiProvider provider = new SocialApiProvider();
 
   public SocialApiProviderTestFixture() {
-    provider.setSocialRouteManager(new SocialRouteManager());
+    provider.setSocialRouteManager(new SocialRouteManager(
+        mock(PersonAdapter.class),
+        mock(DataAdapter.class),
+        mock(ActivityAdapter.class)));
   }
 }
