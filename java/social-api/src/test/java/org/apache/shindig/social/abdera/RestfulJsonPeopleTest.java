@@ -28,6 +28,7 @@ import static org.junit.Assert.assertEquals;
 import org.junit.Test;
 
 import java.util.List;
+import java.util.Date;
 
 
 public class RestfulJsonPeopleTest extends AbstractLargeRestfulTests {
@@ -67,17 +68,31 @@ public class RestfulJsonPeopleTest extends AbstractLargeRestfulTests {
     assertStringListField(result, johnDoe.getActivities(),
         Person.Field.ACTIVITIES);
 
-    assertEquals(johnDoe.getAddresses().get(0).getUnstructuredAddress(),
-        result.getJSONArray(Person.Field.ADDRESSES.toString()).getJSONObject(0)
-            .getString(Address.Field.UNSTRUCTURED_ADDRESS.toString()));
+    JSONObject jsonAddress = result.getJSONArray(
+        Person.Field.ADDRESSES.toString()).getJSONObject(0);
+    assertAddressField(johnDoe.getAddresses().get(0), jsonAddress);
 
     assertEquals(johnDoe.getAge().intValue(), result.getInt(
         Person.Field.AGE.toString()));
-    // TODO: body type
+
+    JSONObject jsonBody = result.getJSONObject(
+        Person.Field.BODY_TYPE.toString());
+    BodyType body = johnDoe.getBodyType();
+    assertStringField(jsonBody, body.getBuild(), BodyType.Field.BUILD);
+    assertStringField(jsonBody, body.getEyeColor(), BodyType.Field.EYE_COLOR);
+    assertStringField(jsonBody, body.getHairColor(), BodyType.Field.HAIR_COLOR);
+    assertStringField(jsonBody, body.getHeight(), BodyType.Field.HEIGHT);
+    assertStringField(jsonBody, body.getWeight(), BodyType.Field.WEIGHT);
+
     assertStringListField(result, johnDoe.getBooks(), Person.Field.BOOKS);
     assertStringListField(result, johnDoe.getCars(), Person.Field.CARS);
     assertStringField(result, johnDoe.getChildren(), Person.Field.CHILDREN);
-    // TODO: current location
+
+    assertStringField(result.getJSONObject(
+        Person.Field.CURRENT_LOCATION.toString()),
+        johnDoe.getCurrentLocation().getUnstructuredAddress(),
+        Address.Field.UNSTRUCTURED_ADDRESS);
+
     assertStringField(result, johnDoe.getDateOfBirth().toString(),
         Person.Field.DATE_OF_BIRTH);
     assertEnumField(result, johnDoe.getDrinker(), Person.Field.DRINKER);
@@ -108,10 +123,13 @@ public class RestfulJsonPeopleTest extends AbstractLargeRestfulTests {
         Person.Field.INTERESTS);
     assertStringField(result, johnDoe.getJobInterests(),
         Person.Field.JOB_INTERESTS);
-    // TODO: jobs
+
+    assertOrganizationField(johnDoe.getJobs().get(0),
+        result.getJSONArray(Person.Field.JOBS.toString()).getJSONObject(0));
+
     assertStringListField(result, johnDoe.getLanguagesSpoken(),
         Person.Field.LANGUAGES_SPOKEN);
-    // TODO: last updated
+    assertDateField(result, johnDoe.getUpdated(), Person.Field.LAST_UPDATED);
     assertStringField(result, johnDoe.getLivingArrangement(),
         Person.Field.LIVING_ARRANGEMENT);
     assertStringField(result, johnDoe.getLookingFor(),
@@ -143,14 +161,24 @@ public class RestfulJsonPeopleTest extends AbstractLargeRestfulTests {
 
     assertStringField(result, johnDoe.getPoliticalViews(),
         Person.Field.POLITICAL_VIEWS);
-    // TODO: profileSong, url, video
+
+    assertUrlField(johnDoe.getProfileSong(), result.getJSONObject(
+        Person.Field.PROFILE_SONG.toString()));
+    assertStringField(result, johnDoe.getProfileUrl(),
+        Person.Field.PROFILE_URL);
+    assertUrlField(johnDoe.getProfileVideo(), result.getJSONObject(
+        Person.Field.PROFILE_VIDEO.toString()));
+
     assertStringListField(result, johnDoe.getQuotes(), Person.Field.QUOTES);
     assertStringField(result, johnDoe.getRelationshipStatus(),
         Person.Field.RELATIONSHIP_STATUS);
     assertStringField(result, johnDoe.getReligion(), Person.Field.RELIGION);
     assertStringField(result, johnDoe.getRomance(), Person.Field.ROMANCE);
     assertStringField(result, johnDoe.getScaredOf(), Person.Field.SCARED_OF);
-    // TODO: Schools
+
+    assertOrganizationField(johnDoe.getJobs().get(0),
+        result.getJSONArray(Person.Field.JOBS.toString()).getJSONObject(0));
+
     assertStringField(result, johnDoe.getSexualOrientation(),
         Person.Field.SEXUAL_ORIENTATION);
     assertEnumField(result, johnDoe.getSmoker(), Person.Field.SMOKER);
@@ -166,13 +194,69 @@ public class RestfulJsonPeopleTest extends AbstractLargeRestfulTests {
     assertStringListField(result, johnDoe.getTvShows(), Person.Field.TV_SHOWS);
   }
 
+  private void assertAddressField(Address expected, JSONObject actual)
+      throws JSONException {
+    assertStringField(actual, expected.getCountry(),
+        Address.Field.COUNTRY);
+    assertStringField(actual, expected.getExtendedAddress(),
+        Address.Field.EXTENDED_ADDRESS);
+    assertFloatField(actual, expected.getLatitude(), Address.Field.LATITUDE);
+    assertStringField(actual, expected.getLocality(), Address.Field.LOCALITY);
+    assertFloatField(actual, expected.getLongitude(), Address.Field.LONGITUDE);
+    assertStringField(actual, expected.getPoBox(), Address.Field.PO_BOX);
+    assertStringField(actual, expected.getPostalCode(),
+        Address.Field.POSTAL_CODE);
+    assertStringField(actual, expected.getRegion(), Address.Field.REGION);
+    assertStringField(actual, expected.getStreetAddress(),
+        Address.Field.STREET_ADDRESS);
+    assertStringField(actual, expected.getType(), Address.Field.TYPE);
+    assertStringField(actual, expected.getUnstructuredAddress(),
+        Address.Field.UNSTRUCTURED_ADDRESS);
+  }
+
+  private void assertUrlField(Url expected, JSONObject actual)
+      throws JSONException {
+    assertStringField(actual, expected.getAddress(), Url.Field.ADDRESS);
+    assertStringField(actual, expected.getLinkText(), Url.Field.LINK_TEXT);
+    assertStringField(actual, expected.getType(), Url.Field.TYPE);
+  }
+
+  private void assertOrganizationField(Organization expected, JSONObject actual)
+      throws JSONException {
+    assertAddressField(expected.getAddress(), actual.getJSONObject(
+        Organization.Field.ADDRESS.toString()));
+    assertStringField(actual, expected.getDescription(),
+        Organization.Field.DESCRIPTION);
+    assertDateField(actual, expected.getEndDate(), Organization.Field.END_DATE);
+    assertStringField(actual, expected.getField(), Organization.Field.FIELD);
+    assertStringField(actual, expected.getName(), Organization.Field.NAME);
+    assertStringField(actual, expected.getSalary(), Organization.Field.SALARY);
+    assertDateField(actual, expected.getStartDate(),
+        Organization.Field.START_DATE);
+    assertStringField(actual, expected.getSubField(),
+        Organization.Field.SUB_FIELD);
+    assertStringField(actual, expected.getTitle(), Organization.Field.TITLE);
+    assertStringField(actual, expected.getWebpage(),
+        Organization.Field.WEBPAGE);
+  }
+
   private void assertBooleanField(JSONObject result, Boolean expected,
-      Person.Field field) throws JSONException {
+      Object field) throws JSONException {
     assertEquals(expected, result.getBoolean(field.toString()));
   }
 
+  private void assertFloatField(JSONObject result, Float expected,
+      Object field) throws JSONException {
+    assertEquals(expected.intValue(), result.getInt(field.toString()));
+  }
+
+  private void assertDateField(JSONObject result, Date expected,
+      Object field) throws JSONException {
+    assertEquals(expected.toString(), result.getString(field.toString()));
+  }
+
   private void assertStringField(JSONObject result, String expected,
-      Person.Field field) throws JSONException {
+      Object field) throws JSONException {
     assertEquals(expected, result.getString(field.toString()));
   }
 
