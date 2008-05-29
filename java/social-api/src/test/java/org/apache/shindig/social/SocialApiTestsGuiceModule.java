@@ -86,9 +86,31 @@ public class SocialApiTestsGuiceModule extends AbstractModule {
       // John should have every field filled in
       johnDoe.setAboutMe("about me");
       johnDoe.setActivities(Lists.newArrayList("activity"));
-      johnDoe.setAddresses(Lists.newArrayList(new Address("My home address")));
+
+      Address homeAddress = new Address("My home address");
+      homeAddress.setCountry("super");
+      homeAddress.setExtendedAddress("cali");
+      homeAddress.setLatitude(new Float(1.0));
+      homeAddress.setLocality("fragi");
+      homeAddress.setLongitude(new Float(1.0));
+      homeAddress.setPoBox("listic");
+      homeAddress.setPostalCode("559");
+      homeAddress.setRegion("expi");
+      homeAddress.setStreetAddress("ali");
+      homeAddress.setType("docious");
+      homeAddress.setUnstructuredAddress("supercalifragilisticexpialidocious");
+      johnDoe.setAddresses(Lists.newArrayList(homeAddress));
+
       johnDoe.setAge(5);
-      johnDoe.setBodyType(new BodyType()); //TODO
+
+      BodyType bodyType = new BodyType();
+      bodyType.setBuild("flying purple people eater");
+      bodyType.setEyeColor("one eyed");
+      bodyType.setHairColor("one horned");
+      bodyType.setHeight("8675309");
+      bodyType.setWeight("90210");
+      johnDoe.setBodyType(bodyType);
+
       johnDoe.setBooks(Lists.newArrayList("books"));
       johnDoe.setCars(Lists.newArrayList("cars"));
       johnDoe.setChildren("children");
@@ -107,7 +129,21 @@ public class SocialApiTestsGuiceModule extends AbstractModule {
       johnDoe.setHumor("not so good");
       johnDoe.setInterests(Lists.newArrayList("kites"));
       johnDoe.setJobInterests("penguins");
-      johnDoe.setJobs(Lists.newArrayList(new Organization()));
+
+      Organization job = new Organization();
+      job.setAddress(homeAddress);
+      job.setDescription("um");
+      job.setEndDate(new Date());
+      job.setField("diddle");
+      job.setName("diddle");
+      job.setSalary("um");
+      job.setStartDate(new Date());
+      job.setSubField("diddleye");
+      job.setTitle("Suoicodilaipxecitsiligarfilacrepus!");
+      job.setWebpage("http://en.wikipedia.org/wiki/" +
+          "Supercalifragilisticexpialidocious");
+      johnDoe.setJobs(Lists.newArrayList(job));
+
       johnDoe.setLanguagesSpoken(Lists.newArrayList("alligator"));
       johnDoe.setUpdated(new Date());
       johnDoe.setLivingArrangement("hammock");
@@ -129,7 +165,21 @@ public class SocialApiTestsGuiceModule extends AbstractModule {
       johnDoe.setReligion("religion");
       johnDoe.setRomance("romance");
       johnDoe.setScaredOf("scared of what");
-      johnDoe.setSchools(Lists.newArrayList(new Organization()));
+
+      Organization school = new Organization();
+      school.setAddress(homeAddress);
+      school.setDescription("gummy");
+      school.setEndDate(new Date());
+      school.setField("bears");
+      school.setName("bouncing");
+      school.setSalary("here");
+      school.setStartDate(new Date());
+      school.setSubField("and there");
+      school.setTitle("and everywhere");
+      school.setWebpage("http://en.wikipedia.org/wiki/" +
+          "Disney's_Adventures_of_the_Gummi_Bears");
+      johnDoe.setSchools(Lists.newArrayList(school));
+
       johnDoe.setSexualOrientation("sexy");
       johnDoe.setSmoker(new Enum<Enum.Smoker>(Enum.Smoker.REGULARLY));
       johnDoe.setSports(Lists.newArrayList("ping pong"));

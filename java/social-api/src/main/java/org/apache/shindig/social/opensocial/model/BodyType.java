@@ -26,10 +26,10 @@ public class BodyType {
 
   public static enum Field {
     BUILD("build"),
-    EYE_COLOR("height"),
-    HAIR_COLOR("weight"),
-    HEIGHT("eyeColor"),
-    WEIGHT("hairColor");
+    EYE_COLOR("eyeColor"),
+    HAIR_COLOR("hairColor"),
+    HEIGHT("height"),
+    WEIGHT("weight");
 
     private final String jsonString;
 
