@@ -18,6 +18,7 @@
  */
 package org.apache.shindig.social;
 
+import org.apache.shindig.social.abdera.SocialRouteManager;
 import org.apache.shindig.social.opensocial.ActivitiesService;
 import org.apache.shindig.social.opensocial.DataService;
 import org.apache.shindig.social.opensocial.OpenSocialDataHandler;
@@ -25,14 +26,15 @@ import org.apache.shindig.social.opensocial.PeopleService;
 import org.apache.shindig.social.samplecontainer.BasicActivitiesService;
 import org.apache.shindig.social.samplecontainer.BasicDataService;
 import org.apache.shindig.social.samplecontainer.BasicPeopleService;
+import org.apache.shindig.social.samplecontainer.SampleContainerRouteManager;
 import org.apache.shindig.social.samplecontainer.StateFileDataHandler;
 
+import com.google.common.collect.Lists;
 import com.google.inject.AbstractModule;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.TypeLiteral;
 
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -49,6 +51,8 @@ public class SocialApiGuiceModule extends AbstractModule {
 
     bind(new TypeLiteral<List<GadgetDataHandler>>() {})
         .toProvider(GadgetDataHandlersProvider.class);
+
+    bind(SocialRouteManager.class).to(SampleContainerRouteManager.class);
   }
 
   public static class GadgetDataHandlersProvider
@@ -58,13 +62,12 @@ public class SocialApiGuiceModule extends AbstractModule {
     @Inject
     public GadgetDataHandlersProvider(OpenSocialDataHandler
         openSocialDataHandler, StateFileDataHandler stateFileHandler) {
-      handlers = new ArrayList<GadgetDataHandler>();
-      handlers.add(openSocialDataHandler);
-      handlers.add(stateFileHandler);
+      handlers = Lists.newArrayList(openSocialDataHandler, stateFileHandler);
     }
 
     public List<GadgetDataHandler> get() {
       return handlers;
     }
   }
+
 }

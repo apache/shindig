@@ -37,6 +37,8 @@ import org.apache.shindig.social.samplecontainer.BasicActivitiesService;
 import org.apache.shindig.social.samplecontainer.BasicDataService;
 import org.apache.shindig.social.samplecontainer.BasicPeopleService;
 import org.apache.shindig.social.samplecontainer.XmlStateFileFetcher;
+import org.apache.shindig.social.samplecontainer.SampleContainerRouteManager;
+import org.apache.shindig.social.abdera.SocialRouteManager;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
@@ -64,6 +66,7 @@ public class SocialApiTestsGuiceModule extends AbstractModule {
     bind(ActivitiesService.class).to(BasicActivitiesService.class);
 
     bind(XmlStateFileFetcher.class).to(MockXmlStateFileFetcher.class);
+    bind(SocialRouteManager.class).to(SampleContainerRouteManager.class);
 
     bind(SecurityTokenDecoder.class).to(BasicSecurityTokenDecoder.class);
   }
@@ -204,7 +207,7 @@ public class SocialApiTestsGuiceModule extends AbstractModule {
     }
 
     public void setEvilness(boolean doEvil) {
-      throw new UnsupportedOperationException();
+      // Ignore
     }
 
   }
