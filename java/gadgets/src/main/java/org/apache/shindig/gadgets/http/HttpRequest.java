@@ -29,6 +29,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.TreeMap;
 import java.util.List;
 import java.util.Map;
 
@@ -171,7 +172,7 @@ public class HttpRequest {
     } else {
       boolean setPragmaHeader = false;
       Map<String, List<String>> tmpHeaders
-          = new HashMap<String, List<String>>();
+          = new TreeMap<String, List<String>>(String.CASE_INSENSITIVE_ORDER);
       for (Map.Entry<String, List<String>> entry : headers.entrySet()) {
         List<String> newList = new ArrayList<String>(entry.getValue());
         // Proxies should be bypassed with the Pragma: no-cache check.
