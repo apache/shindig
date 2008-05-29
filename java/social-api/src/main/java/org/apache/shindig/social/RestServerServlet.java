@@ -18,19 +18,19 @@
  */
 package org.apache.shindig.social;
 
+import com.google.inject.Injector;
+
 import org.apache.shindig.common.servlet.GuiceServletContextListener;
 
-import com.google.inject.Injector;
 import org.apache.abdera.protocol.server.Provider;
 import org.apache.abdera.protocol.server.servlet.AbderaServlet;
+
+import java.util.logging.Logger;
 
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.UnavailableException;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.util.logging.Logger;
 
 /**
  * Superclass for all servlets related to processing of REST api.
@@ -42,6 +42,7 @@ import java.util.logging.Logger;
  * instead of injecting (this) as the GadgetServlet does,
  * here the Provider is injected.
  */
+@SuppressWarnings("serial")
 public class RestServerServlet extends AbderaServlet {
   private static Logger logger =
       Logger.getLogger(RestServerServlet.class.getName());
@@ -77,25 +78,5 @@ public class RestServerServlet extends AbderaServlet {
               GuiceServletContextListener.class.getName() + " as a listener");
     }
     injector.injectMembers(provider);
-    // all providers should implement initialize() so injection could happen
-    try {
-      Method m = provider.getClass().getMethod("initialize", new Class<?>[0]);
-      m.invoke(provider);
-    } catch (IllegalArgumentException e) {
-      logger.severe(e.getMessage());
-      e.printStackTrace();
-    } catch (IllegalAccessException e) {
-      logger.severe(e.getMessage());
-      e.printStackTrace();
-    } catch (InvocationTargetException e) {
-      logger.severe(e.getMessage());
-      e.printStackTrace();
-    } catch (SecurityException e) {
-      logger.severe(e.getMessage());
-      e.printStackTrace();
-    } catch (NoSuchMethodException e) {
-      logger.severe(e.getMessage());
-      e.printStackTrace();
-    }
   }
 }

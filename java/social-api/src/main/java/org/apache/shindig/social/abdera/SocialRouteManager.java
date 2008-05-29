@@ -17,19 +17,60 @@
  */
 package org.apache.shindig.social.abdera;
 
+import com.google.inject.Inject;
+
 import org.apache.abdera.protocol.server.CollectionAdapter;
 import org.apache.abdera.protocol.server.TargetType;
 import org.apache.abdera.protocol.server.impl.RouteManager;
 
-
 public class SocialRouteManager extends RouteManager {
+  private PersonAdapter personAdapter;
+  private DataAdapter dataAdapter;
+  private ActivityAdapter activityAdapter;
+  private static final String BASE = "/social/rest/";
   private String base;
 
-  /**
-   * @param base Should be the same as RequestContext.getContextPath()
-   */
-  public SocialRouteManager(String base) {
-    this.base = base;
+  public SocialRouteManager() {
+    this.base = BASE;
+  }
+
+  public void setRoutes() {
+        // People
+    this.addRoute(RequestUrlTemplate.PROFILES_OF_CONNECTIONS_OF_USER,
+            TargetType.TYPE_COLLECTION, personAdapter)
+        .addRoute(RequestUrlTemplate.PROFILES_OF_FRIENDS_OF_USER,
+            TargetType.TYPE_COLLECTION, personAdapter)
+        .addRoute(RequestUrlTemplate.PROFILES_IN_GROUP_OF_USER,
+            TargetType.TYPE_COLLECTION, personAdapter)
+        .addRoute(RequestUrlTemplate.PROFILE_OF_CONNECTION_OF_USER,
+            TargetType.TYPE_ENTRY, personAdapter)
+        .addRoute(RequestUrlTemplate.PROFILE_OF_USER,
+            TargetType.TYPE_ENTRY, personAdapter)
+
+        // Activities
+        .addRoute(RequestUrlTemplate.ACTIVITIES_OF_USER,
+            TargetType.TYPE_COLLECTION, activityAdapter)
+        .addRoute(RequestUrlTemplate.ACTIVITIES_OF_FRIENDS_OF_USER,
+            TargetType.TYPE_COLLECTION, activityAdapter)
+        .addRoute(RequestUrlTemplate.ACTIVITIES_OF_GROUP_OF_USER,
+            TargetType.TYPE_COLLECTION, null)
+        .addRoute(RequestUrlTemplate.ACTIVITY_OF_USER,
+            TargetType.TYPE_ENTRY, activityAdapter)
+
+        // AppData
+        .addRoute(RequestUrlTemplate.APPDATA_OF_APP_OF_USER,
+            TargetType.TYPE_COLLECTION, dataAdapter)
+        .addRoute(RequestUrlTemplate.APPDATA_OF_FRIENDS_OF_USER,
+            TargetType.TYPE_COLLECTION, dataAdapter)
+        ;
+  }
+
+  @Inject
+  public void setAdapters(PersonAdapter personAdapter, DataAdapter dataAdapter,
+      ActivityAdapter activityAdapter) {
+    this.personAdapter = personAdapter;
+    this.dataAdapter = dataAdapter;
+    this.activityAdapter = activityAdapter;
   }
 
   /**
