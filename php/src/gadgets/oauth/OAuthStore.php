@@ -336,7 +336,7 @@ class TokenInfo {
 	private $accessToken;
 	private $tokenSecret;
 
-	public function __constructor($token, $secret)
+	public function __construct($token, $secret)
 	{
 		$this->accessToken = $token;
 		$this->tokenSecret = $secret;
