@@ -101,7 +101,12 @@ class GadgetFeatureRegistry {
 	private function addEntryToSet(&$results, $entry)
 	{
 		foreach ($entry->deps as $dep) {
-			$this->addEntryToSet($results, $this->features[$dep]);
+			/*
+			 * TODO: Temporal fix, double check where empty dependencies are being added
+			 */
+			if(!empty($dep)) {
+				$this->addEntryToSet($results, $this->features[$dep]);
+			}
 		}
 		$results[$entry->name] = $entry->name;
 	}
