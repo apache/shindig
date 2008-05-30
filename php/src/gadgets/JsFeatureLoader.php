@@ -56,7 +56,7 @@ class JsFeatureLoader {
 			usort($files, array($this,'sortFeaturesFiles'));
 			foreach ($files as $file) {
 				if (!empty($file) && strpos($file, 'feature.xml') !== false && substr($file, 0, 1) != '#' && substr($file, 0, 2) != '//') {
-					$file = realpath($path.'/../'.$file);
+					$file = realpath($path.'/../'.trim($file));
 					$feature = $this->processFile($file);
 					$features[$feature->name] = $feature;
 				}
