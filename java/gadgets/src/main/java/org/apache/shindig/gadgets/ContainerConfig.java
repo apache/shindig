@@ -50,7 +50,6 @@ public class ContainerConfig {
   public static final char FILE_SEPARATOR = ',';
   public static final String DEFAULT_CONTAINER = "default";
   public static final String PARENT_KEY = "parent";
-  public static final String FINAL_KEY = "final";
   // TODO: Rename this to simply "container", gadgets.container is unnecessary.
   public static final String CONTAINER_KEY = "gadgets.container";
   private static final Logger logger
@@ -220,37 +219,26 @@ public class ContainerConfig {
 
   /**
    * Recursively merge values from parent objects in the prototype chain.
-   * This will modify the value currently stored for the specified container.
    *
-   * @param base The base configuration of the container being merged into.
+   * @return The object merged with all parents.
    *
    * @throws GadgetException If there is an invalid parent parameter
    *    in the prototype chain.
    */
-  private void mergeParents(String container, JSONObject base)
+  private JSONObject mergeParents(String container)
       throws GadgetException, JSONException {
-    //String container = base.getString(CONTAINER_KEY);
-    if (base.optBoolean(FINAL_KEY) || DEFAULT_CONTAINER.equals(container)) {
-      // No inheritance (or already done).
-      return;
+    JSONObject base = config.get(container);
+    if (DEFAULT_CONTAINER.equals(container)) {
+      return base;
     }
 
     String parent = base.optString(PARENT_KEY, DEFAULT_CONTAINER);
-    JSONObject parentData = config.get(parent);
-    if (parentData == null) {
+    if (!config.containsKey(parent)) {
       throw new GadgetException(GadgetException.Code.INVALID_CONFIG,
-          "Unable to locate parent " + parent + " required by "
+          "Unable to locate parent '" + parent + "' required by "
           + base.getString(CONTAINER_KEY));
     }
-    mergeParents(parent, parentData);
-    JSONObject newBase = mergeObjects(parentData, base);
-    config.put(container, newBase);
-    // Copy values back to base.
-    //for (String key : JSONObject.getNames(newBase)) {
-    //  base.put(key, newBase.get(key));
-    //}
-
-    base.put(FINAL_KEY, true);
+    return mergeObjects(mergeParents(parent), base);
   }
 
   /**
@@ -301,9 +289,12 @@ public class ContainerConfig {
 
       // Now that all containers are loaded, we go back through them and merge
       // recursively. This is done at startup to simplify lookups.
-      for (Map.Entry<String,JSONObject> container : config.entrySet()) {
-        mergeParents(container.getKey(), container.getValue());
+      Map<String, JSONObject> merged
+          = new HashMap<String, JSONObject>(config.size());
+      for (String container : config.keySet()) {
+        merged.put(container, mergeParents(container));
       }
+      config.putAll(merged);
     } catch (IOException e) {
       throw new GadgetException(GadgetException.Code.INVALID_PATH, e);
     } catch (JSONException e) {
