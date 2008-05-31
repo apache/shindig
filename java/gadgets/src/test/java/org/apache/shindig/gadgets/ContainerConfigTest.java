@@ -43,6 +43,8 @@ public class ContainerConfigTest {
   private static final String NESTED_ALT_VALUE = "Nested value alt";
 
   private static final String CHILD_CONTAINER = "child";
+  private static final String CONTAINER_A = "container-a";
+  private static final String CONTAINER_B = "container-b";
 
   private static final String ARRAY_NAME = "array value";
   private static final String[] ARRAY_VALUE = new String[]{"Hello", "World"};
@@ -91,6 +93,22 @@ public class ContainerConfigTest {
     String nestedValue = nested.getString(NESTED_NAME);
 
     assertEquals(NESTED_VALUE, nestedValue);
+  }
+
+  @Test
+  public void aliasesArePopulated() throws Exception {
+    JSONObject json = new JSONObject()
+        .put(CONTAINER_KEY, new String[]{CONTAINER_A, CONTAINER_B})
+        .put(NESTED_KEY, NESTED_VALUE);
+
+    File parentFile = createDefaultContainer();
+    File childFile = createContainer(json);
+
+    ContainerConfig config = new ContainerConfig(childFile.getAbsolutePath() +
+        ContainerConfig.FILE_SEPARATOR + parentFile.getAbsolutePath());
+
+    assertEquals(NESTED_VALUE, config.get(CONTAINER_A, NESTED_KEY));
+    assertEquals(NESTED_VALUE, config.get(CONTAINER_B, NESTED_KEY));
   }
 
   @Test
