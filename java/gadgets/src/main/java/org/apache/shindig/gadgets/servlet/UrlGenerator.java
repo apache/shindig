@@ -23,7 +23,6 @@ import org.apache.shindig.gadgets.ContainerConfig;
 import org.apache.shindig.gadgets.Gadget;
 import org.apache.shindig.gadgets.GadgetContext;
 import org.apache.shindig.gadgets.GadgetFeature;
-import org.apache.shindig.gadgets.GadgetFeatureFactory;
 import org.apache.shindig.gadgets.GadgetFeatureRegistry;
 import org.apache.shindig.gadgets.JsLibrary;
 import org.apache.shindig.gadgets.UserPrefs;
@@ -37,7 +36,6 @@ import com.google.inject.name.Named;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.Collection;
-import java.util.Map;
 import java.util.regex.Pattern;
 
 /**
@@ -166,11 +164,8 @@ public class UrlGenerator {
     this.containerConfig = containerConfig;
 
     StringBuilder jsBuf = new StringBuilder();
-    for (Map.Entry<String, GadgetFeatureRegistry.Entry> entry :
-        registry.getAllFeatures().entrySet()) {
-      GadgetFeatureFactory factory = entry.getValue().getFeature();
-      GadgetFeature feature = factory.create();
-      for (JsLibrary library : feature.getJsLibraries(null)) {
+    for (GadgetFeature feature : registry.getAllFeatures()) {
+      for (JsLibrary library : feature.getJsLibraries(null, null)) {
         jsBuf.append(library.getContent());
       }
     }

@@ -19,8 +19,8 @@ package org.apache.shindig.gadgets;
 
 import org.apache.shindig.common.util.ResourceLoader;
 import org.apache.shindig.gadgets.http.HttpFetcher;
-import org.apache.shindig.gadgets.http.HttpResponse;
 import org.apache.shindig.gadgets.http.HttpRequest;
+import org.apache.shindig.gadgets.http.HttpResponse;
 
 import java.io.File;
 import java.io.IOException;
@@ -32,8 +32,6 @@ import java.util.logging.Logger;
 /**
  * Represents a javascript library, either as an external resource (url)
  * or as an inline script.
- * TODO: pull in url type libraries and treat them the same as file, resource,
- * or inline scripts.
  */
 public final class JsLibrary {
   private final Type type;
@@ -116,7 +114,7 @@ public final class JsLibrary {
    *     kept as a url reference, otherwise the file will be fetched and treated
    *     as a FILE type.
    * @return The newly created library.
-   * @throws GadgetException 
+   * @throws GadgetException
    */
   public static JsLibrary create(Type type, String content, String feature,
       HttpFetcher fetcher) throws GadgetException {
@@ -172,7 +170,7 @@ public final class JsLibrary {
    * @param url
    * @param fetcher
    * @return The contents of the JS file, or null if it can't be fetched.
-   * @throws GadgetException 
+   * @throws GadgetException
    */
   private static String loadDataFromUrl(String url,
       HttpFetcher fetcher) throws GadgetException {
@@ -239,6 +237,23 @@ public final class JsLibrary {
        logger.warning("Could not find resource: " + name);
        return null;
      }
+  }
+
+  @Override
+  public int hashCode() {
+    return content.hashCode() + type.hashCode();
+  }
+
+  @Override
+  public boolean equals(Object rhs) {
+    if (rhs == this) {
+      return true;
+    }
+    if (rhs instanceof JsLibrary) {
+      JsLibrary lib = (JsLibrary)rhs;
+      return content.equals(lib.content) && type.equals(lib.type);
+    }
+    return false;
   }
 
   /**

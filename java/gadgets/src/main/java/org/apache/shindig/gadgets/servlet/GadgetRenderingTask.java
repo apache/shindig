@@ -25,6 +25,7 @@ import org.apache.shindig.gadgets.Gadget;
 import org.apache.shindig.gadgets.GadgetContentFilter;
 import org.apache.shindig.gadgets.GadgetContext;
 import org.apache.shindig.gadgets.GadgetException;
+import org.apache.shindig.gadgets.GadgetFeature;
 import org.apache.shindig.gadgets.GadgetFeatureRegistry;
 import org.apache.shindig.gadgets.GadgetServer;
 import org.apache.shindig.gadgets.JsLibrary;
@@ -47,6 +48,7 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -246,11 +248,8 @@ public class GadgetRenderingTask {
 
       // Transitive dependencies must be added. This will always include core
       // so is therefore always "safe".
-      Set<GadgetFeatureRegistry.Entry> deps
-          = new HashSet<GadgetFeatureRegistry.Entry>();
-      Set<String> dummy = new HashSet<String>();
-      registry.getIncludedFeatures(libs, deps, dummy);
-      for (GadgetFeatureRegistry.Entry dep : deps) {
+      Collection<GadgetFeature> features = registry.getFeatures(libs);
+      for (GadgetFeature dep : features) {
         libs.add(dep.getName());
       }
     }

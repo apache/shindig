@@ -17,18 +17,18 @@
  */
 package org.apache.shindig.gadgets.servlet;
 
-import org.apache.shindig.common.SecurityTokenDecoder;
 import org.apache.shindig.common.servlet.InjectedServlet;
-import org.apache.shindig.gadgets.GadgetContext;
+import org.apache.shindig.gadgets.ContainerConfig;
 import org.apache.shindig.gadgets.GadgetFeature;
-import org.apache.shindig.gadgets.GadgetFeatureFactory;
 import org.apache.shindig.gadgets.GadgetFeatureRegistry;
 import org.apache.shindig.gadgets.JsLibrary;
+import org.apache.shindig.gadgets.RenderingContext;
 
 import com.google.inject.Inject;
 
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -45,12 +45,6 @@ public class JsServlet extends InjectedServlet {
   @Inject
   public void setRegistry(GadgetFeatureRegistry registry) {
     this.registry = registry;
-  }
-
-  private SecurityTokenDecoder tokenDecoder;
-  @Inject
-  public void setTokenDecoder(final SecurityTokenDecoder tokenDecoder) {
-    this.tokenDecoder = tokenDecoder;
   }
 
   @Override
@@ -83,36 +77,32 @@ public class JsServlet extends InjectedServlet {
       needed.add(resourceName);
     }
 
-    Set<GadgetFeatureRegistry.Entry> found
-        = new HashSet<GadgetFeatureRegistry.Entry>();
-    Set<String> dummy = new HashSet<String>();
+    String debugStr = req.getParameter("debug");
+    String container = req.getParameter("container");
+    String containerStr = req.getParameter("c");
 
-    registry.getIncludedFeatures(needed, found, dummy);
+    boolean debug = "1".equals(debugStr);
+    if (container == null) {
+      container = ContainerConfig.DEFAULT_CONTAINER;
+    }
+    RenderingContext context = "1".equals(containerStr) ?
+        RenderingContext.CONTAINER : RenderingContext.GADGET;
+
+    Collection<GadgetFeature> features = registry.getFeatures(needed);
     StringBuilder jsData = new StringBuilder();
-
-    // Probably incorrect to be using a context here...
-    GadgetContext context = new HttpGadgetContext(req, tokenDecoder);
-    Set<String> features = new HashSet<String>(found.size());
-    do {
-      for (GadgetFeatureRegistry.Entry entry : found) {
-        if (!features.contains(entry.getName()) &&
-            features.containsAll(entry.getDependencies())) {
-          features.add(entry.getName());
-          GadgetFeatureFactory factory = entry.getFeature();
-          GadgetFeature feature = factory.create();
-          for (JsLibrary lib : feature.getJsLibraries(context)) {
-            if (!lib.getType().equals(JsLibrary.Type.URL)) {
-              if (context.getDebug()) {
-                jsData.append(lib.getDebugContent());
-              } else {
-                jsData.append(lib.getContent());
-              }
-              jsData.append(";\n");
-            }
+    for (GadgetFeature feature : features) {
+      for (JsLibrary lib : feature.getJsLibraries(context, container)) {
+        if (!lib.getType().equals(JsLibrary.Type.URL)) {
+          if (debug) {
+            jsData.append(lib.getDebugContent());
+          } else {
+            jsData.append(lib.getContent());
           }
+          jsData.append(";\n");
         }
       }
-    } while (features.size() != found.size());
+    }
+
 
     if (jsData.length() == 0) {
       resp.setStatus(HttpServletResponse.SC_NOT_FOUND);

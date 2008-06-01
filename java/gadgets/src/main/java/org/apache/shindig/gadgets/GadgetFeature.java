@@ -17,65 +17,119 @@
  */
 package org.apache.shindig.gadgets;
 
+import com.google.common.collect.Maps;
+
+import java.util.Collection;
 import java.util.Collections;
+import java.util.LinkedList;
 import java.util.List;
-
+import java.util.Map;
 /**
- * Base interface providing Gadget Server's primary extensibility mechanism.
+ * Represents a feature available to gadget authors.
  *
- * During processing of a {@code Gadget}, a tree of {@code GadgetFeature}
- * objects is constructed based on the &lt;Require&gt; and &lt;Optional&gt;
- * tags declared in its {@code GadgetSpec}, and the dependencies registered
- * for these in {@code GadgetFeatureRegistry}.
+ * Features are registered declaratively in feature.xml files and loaded at
+ * server startup time.
  *
- * Each {@code GadgetFeature}'s process method is called - potentially
- * in parallel with many others whose dependencies have also been satisfied.
- *
- * To extend the Gadget Server's feature set, simply implement this interface
- * and register your class with {@code GadgetFeatureRegistry}, indicating
- * which other {@code GadgetFeature} features are needed before yours can
- * operate successfully.
- *
- * Each feature <i>must</i> be instantiable by a no-argument constructor,
- * and will <i>always</i> be instantiated this way. As such, it is recommended
- * not to define a constructor for a feature at all.
+ * Some features may require server-side functionality. These features are
+ * triggered at different points throughout the code.
  */
-public abstract class GadgetFeature {
+public class GadgetFeature {
+
+  private final String name;
+  private final Map<RenderingContext, Map<String, List<JsLibrary>>> libraries;
+  private final Collection<String> dependencies;
 
   /**
-   * Performs processing required to handle this feature.
-   * By default this does nothing.
-   *
-   * Only invoked if isJsOnly is false.
-   *
-   * @param gadget
-   * @param context
-   * @throws GadgetException
+   * @return The name of this feature.
    */
-  @SuppressWarnings("unused")
-  public void process(Gadget gadget, GadgetContext context)
-      throws GadgetException {
-    // By default we do nothing.
+  public String getName() {
+    return name;
   }
 
   /**
-   * This is used by various consumers to retrieve all javascript libraries
-   * that this feature uses without necessarily processing them.
-   * This is primarily used by features that simply pass-through libraries.
-   *
-   * @param context
-   * @return A list of all libraries needed by this feature for the request.
+   * @return All dependencies of this feature.
    */
-  public List<JsLibrary> getJsLibraries(GadgetContext context) {
-    return Collections.emptyList();
+  public Collection<String> getDependencies() {
+    return dependencies;
   }
 
   /**
-   * @return True if this feature only exists to satisfy javascript dependencies
-   *     if this is true, there is no need to run prepare or process, and it
-   *     can be run serially.
+   * Adds a new dependency to the graph.
    */
-  public boolean isJsOnly() {
-    return false;
+  public void addDependency(String dependency) {
+    synchronized (dependencies) {
+      dependencies.add(dependency);
+    }
+  }
+
+  /**
+   * Adds multiple new dependencies to the graph.
+   */
+  public void addDependencies(Collection<String> dependencies) {
+    synchronized (this.dependencies) {
+      this.dependencies.addAll(dependencies);
+    }
+  }
+
+  /**
+   * Provides javavscript libraries needed to satisfy the requirements for this
+   * feature.
+   *
+   * @param context The context in which the gadget is being used.
+   * @param container The container to get libraries for.
+   * @return The collection of libraries needed for the provided context.
+   */
+  public List<JsLibrary> getJsLibraries(RenderingContext context, String container) {
+    List<JsLibrary> libs = null;
+
+    if (context == null) {
+      // For this special case we return all JS libraries in a single list.
+      // This is usually only used for debugging or at startup, so it's ok
+      // that we're creating new objects every time.
+      libs = new LinkedList<JsLibrary>();
+      for (Map<String, List<JsLibrary>> ctx : libraries.values()) {
+        for (List<JsLibrary> lib : ctx.values()) {
+          libs.addAll(lib);
+        }
+      }
+    } else {
+      Map<String, List<JsLibrary>> contextLibs = libraries.get(context);
+      if (contextLibs != null) {
+        libs = contextLibs.get(container);
+        if (libs == null) {
+          // Try default.
+          libs = contextLibs.get(ContainerConfig.DEFAULT_CONTAINER);
+        }
+      }
+    }
+
+    if (libs == null) {
+      return Collections.emptyList();
+    }
+    return libs;
+  }
+
+  /**
+   * Simplified ctor that registers a set of libraries for all contexts and
+   * the default container. Used for testing.
+   */
+  GadgetFeature(String name, List<JsLibrary> libraries,
+      Collection<String> dependencies) {
+    this.name = name;
+    this.libraries = Maps.newEnumMap(RenderingContext.class);
+    for (RenderingContext context : RenderingContext.values()) {
+      Map<String, List<JsLibrary>> container = Maps.newHashMap();
+      container.put(ContainerConfig.DEFAULT_CONTAINER, libraries);
+      this.libraries.put(context, container);
+    }
+    this.dependencies = dependencies;
+  }
+
+  public GadgetFeature(String name,
+      Map<RenderingContext, Map<String, List<JsLibrary>>> libraries,
+      Collection<String> dependencies) {
+    this.name = name;
+    this.libraries = libraries;
+    this.dependencies = dependencies;
   }
 }

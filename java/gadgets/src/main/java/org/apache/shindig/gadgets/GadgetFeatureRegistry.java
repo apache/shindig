@@ -19,15 +19,16 @@ package org.apache.shindig.gadgets;
 
 import org.apache.shindig.gadgets.http.HttpFetcher;
 
+import com.google.common.collect.Maps;
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
 
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.logging.Logger;
 
 /**
@@ -39,12 +40,12 @@ import java.util.logging.Logger;
  * registry.register("my-feature", null, new MyFeatureFactory());
  */
 public class GadgetFeatureRegistry {
-  private final Map<String, Entry> features;
-  private final Map<String, Entry> core;
+  private final Map<String, GadgetFeature> features;
+  private final Map<String, GadgetFeature> core;
 
   // Caches the transitive dependencies to enable faster lookups.
-  private final Map<Set<String>, Set<Entry>> transitiveDeps
-      = new HashMap<Set<String>, Set<Entry>>();
+  private final Map<Collection<String>, Collection<GadgetFeature>> cache
+      = Maps.newHashMap();
 
   private boolean graphComplete = false;
 
@@ -61,8 +62,8 @@ public class GadgetFeatureRegistry {
   @Inject
   public GadgetFeatureRegistry(@Named("features.default") String featureFiles,
       HttpFetcher httpFetcher) throws GadgetException {
-    features = new HashMap<String, Entry>();
-    core = new HashMap<String, Entry>();
+    features = new HashMap<String, GadgetFeature>();
+    core = new HashMap<String, GadgetFeature>();
     if (featureFiles != null) {
       JsFeatureLoader loader = new JsFeatureLoader(httpFetcher);
       loader.loadFeatures(featureFiles, this);
@@ -70,185 +71,96 @@ public class GadgetFeatureRegistry {
   }
 
   /**
-   * Register a {@code GadgetFeature} identified by {@code name} which
-   * depends on other {@code GadgetFeature}s listed in {@code deps}
-   * completing before this one does.
+   * Register a {@code GadgetFeature}.
    *
-   * Names are freeform, but it is strongly suggested that they are
-   * namespaced, optionally (yet often usefully) in Java package-notation ie.
-   * 'org.example.FooFeature'
-   *
-   * May never be invoked after calling getIncludedFeatures.
-   *
-   * @param name Name of the feature to register, ideally using the conventions
-   *     described
-   * @param deps List of strings indicating features on which {@code feature}
-   *     depends to operate correctly, which need to process the {@code Gadget}
-   *     before it does
-   * @param feature Class implementing the feature
+   * @param feature Class implementing the feature.
    */
-  public Entry register(String name, List<String> deps,
-                        GadgetFeatureFactory feature) {
+  public void register(GadgetFeature feature) {
     if (graphComplete) {
-      throw new IllegalStateException("registerFeatures should never be " +
-          "invoked after calling getIncludedFeatures");
+      throw new IllegalStateException("register should never be " +
+          "invoked after calling getLibraries");
     }
-    logger.info("Registering feature: " + name + " with deps " + deps);
-    Entry entry = new Entry(name, deps, feature, this);
-    if (isCore(entry)) {
-      core.put(name, entry);
-      for (Entry e : features.values()) {
-        e.deps.add(name);
+    logger.info("Registering feature: " + feature.getName());
+    if (isCore(feature)) {
+      core.put(feature.getName(), feature);
+      for (GadgetFeature feat : features.values()) {
+        feat.addDependency(feature.getName());
       }
     } else {
-      entry.deps.addAll(core.keySet());
+      feature.addDependencies(core.keySet());
     }
-    features.put(name, entry);
-    return entry;
+    features.put(feature.getName(), feature);
   }
 
   /**
-   * @param entry
    * @return True if the entry is "core" (a dependency of all other features)
    */
-  private boolean isCore(Entry entry) {
-    return entry.name.startsWith("core");
-    }
+  private boolean isCore(GadgetFeature feature) {
+    return feature.getName().startsWith("core");
+  }
 
   /**
    * @return All registered features.
    */
-  public Map<String, Entry> getAllFeatures() {
-    return Collections.unmodifiableMap(features);
+  public Collection<GadgetFeature> getAllFeatures() {
+    return Collections.unmodifiableCollection(features.values());
   }
 
   /**
-   * Attempts to retrieve all the {@code GadgetFeature} classes specified
-   * in the {@code needed} list. Those that are found are returned in
-   * {@code resultsFound}, while the names of those that are missing are
-   * populated in {@code resultsMissing}.
-   * @param needed Set of names identifying features to retrieve
-   * @param resultsFound Set of feature entries found
-   * @param resultsMissing Set of feature identifiers that could not be found
-   * @return True if all features were retrieved
+   * @return All {@code GadgetFeature} objects necessary for {@code needed} in
+   *     graph-dependent order.
    */
-  public boolean getIncludedFeatures(Set<String> needed,
-                                     Set<Entry> resultsFound,
-                                     Set<String> resultsMissing) {
+  public Collection<GadgetFeature> getFeatures(Collection<String> needed) {
+    return getFeatures(needed, null);
+  }
+
+  /**
+   * @param needed All features requested by the gadget.
+   * @param unsupported Populated with any unsupported features.
+   * @return All {@code GadgetFeature} objects necessary for {@code needed} in
+   *     graph-dependent order.
+   */
+  public Collection<GadgetFeature> getFeatures(Collection<String> needed,
+                                               Collection<String> unsupported) {
     graphComplete = true;
     if (needed.isEmpty()) {
-      // Shortcut for gadgets that don't have any explicit dependencies.
-      resultsFound.addAll(core.values());
-      return true;
+      needed = core.keySet();
     }
     // We use the cache only for situations where all needed are available.
     // if any are missing, the result won't be cached.
-    Set<Entry> cache = transitiveDeps.get(needed);
-    if (cache != null) {
-      resultsFound.addAll(cache);
-      return true;
-    } else {
-      resultsFound.addAll(core.values());
-      for (String featureName : needed) {
-        Entry entry = features.get(featureName);
-        if (entry == null) {
-          resultsMissing.add(featureName);
-        } else {
-          addEntryToSet(resultsFound, entry);
+    Collection<GadgetFeature> libCache = cache.get(needed);
+    if (libCache != null) {
+      return libCache;
+    }
+    List<GadgetFeature> ret = new LinkedList<GadgetFeature>();
+    populateDependencies(needed, ret);
+    // Fill in anything that was optional but missing. These won't be cached.
+    if (unsupported != null) {
+      for (String feature : needed) {
+        if (!features.containsKey(feature)) {
+          unsupported.add(feature);
         }
       }
-
-      if (resultsMissing.isEmpty()) {
-        // Store to cache
-        transitiveDeps.put(
-            Collections.unmodifiableSet(new HashSet<String>(needed)),
-            Collections.unmodifiableSet(new HashSet<Entry>(resultsFound)));
-        return true;
-      }
     }
-    return false;
+    if (unsupported == null || unsupported.size() == 0) {
+      cache.put(needed, Collections.unmodifiableList(ret));
+    }
+    return ret;
   }
 
   /**
-   * Recursively add all dependencies.
-   * @param results
-   * @param entry
+   * Recursively populates {@code libraries} with libraries from dependent
+   * features. This ensures that features will always be loaded in the order
+   * that they are declared.
    */
-  private void addEntryToSet(Set<Entry> results, Entry entry) {
-    for (String dep : entry.deps) {
-      addEntryToSet(results, features.get(dep));
-    }
-    results.add(entry);
-  }
-
-  /**
-   * Fetches an entry by name.
-   * @param name
-   * @return The entry, or null if it does not exist.
-   */
-  Entry getEntry(String name) {
-    return features.get(name);
-  }
-
-  /**
-   * Ties together a {@code GadgetFeature} with its name and dependencies.
-   */
-  public static class Entry {
-    private final String name;
-    private final Set<String> deps;
-    private final Set<String> readDeps;
-    private final GadgetFeatureFactory feature;
-
-    private Entry(String name,
-                  List<String> deps,
-                  GadgetFeatureFactory feature,
-                  GadgetFeatureRegistry registry)
-        throws IllegalStateException {
-      this.name = name;
-      this.deps = new HashSet<String>();
-      this.readDeps = Collections.unmodifiableSet(this.deps);
-      if (deps != null) {
-        this.deps.addAll(deps);
+  private void populateDependencies(Collection<String> needed,
+      List<GadgetFeature> deps) {
+    for (String feature : needed) {
+      GadgetFeature feat = features.get(feature);
+      if (feat != null && !deps.contains(feat)) {
+        populateDependencies(feat.getDependencies(), deps);
+        deps.add(feat);
       }
-      this.feature = feature;
-    }
-
-    /**
-     * @return Name identifier
-     */
-    public String getName() {
-      return name;
-    }
-
-    /**
-     * @return List of identifiers on which feature depends
-     */
-    public Set<String> getDependencies() {
-      return readDeps;
-    }
-
-    @Override
-    public boolean equals(Object rhs) {
-      if (rhs == this) {
-        return true;
-      }
-      if (rhs instanceof Entry) {
-        Entry entry = (Entry)rhs;
-        return name.equals(entry.name);
-      }
-      return false;
-    }
-
-    @Override
-    public int hashCode() {
-      return name.hashCode();
-    }
-
-    /**
-     * @return Class implementing the feature
-     */
-    public GadgetFeatureFactory getFeature() {
-      return feature;
     }
   }
 }

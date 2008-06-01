@@ -66,7 +66,8 @@ public class JsFeatureLoader {
    *    be loaded. If res://*.txt is passed, we will look for named resources
    *    in the text file. If path is prefixed with res://, the file
    *    is treated as a resource, and all references are assumed to be
-   *    resources as well. Multiple locations may be specified by separating them with a comma.
+   *    resources as well. Multiple locations may be specified by separating
+   *    them with a comma.
    * @throws GadgetException If any of the files can't be read.
    */
   public void loadFeatures(String path, GadgetFeatureRegistry registry)
@@ -94,9 +95,9 @@ public class JsFeatureLoader {
     }
 
     for (ParsedFeature feature : features) {
-      JsLibraryFeatureFactory factory
-          = new JsLibraryFeatureFactory(feature.libraries);
-      registry.register(feature.name, feature.deps, factory);
+      GadgetFeature gadgetFeature
+          = new GadgetFeature(feature.name, feature.libraries, feature.deps);
+      registry.register(gadgetFeature);
     }
   }
 
@@ -107,13 +108,13 @@ public class JsFeatureLoader {
    * @param xml
    * @return The parsed feature.
    */
-  public GadgetFeatureRegistry.Entry loadFeature(
-      GadgetFeatureRegistry registry, String xml) throws GadgetException {
-    ParsedFeature feature = parse(xml, "", false);
-
-    JsLibraryFeatureFactory factory
-        = new JsLibraryFeatureFactory(feature.libraries);
-    return registry.register(feature.name, null, factory);
+  public GadgetFeature loadFeature(GadgetFeatureRegistry registry, String xml)
+      throws GadgetException {
+    ParsedFeature parsed = parse(xml, "", false);
+    GadgetFeature feature
+        = new GadgetFeature(parsed.name, parsed.libraries, parsed.deps);
+    registry.register(feature);
+    return feature;
   }
 
   /**

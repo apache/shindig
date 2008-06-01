@@ -22,8 +22,8 @@ import org.apache.shindig.gadgets.spec.GadgetSpec;
 import org.apache.shindig.gadgets.spec.MessageBundle;
 import org.apache.shindig.gadgets.spec.Preload;
 
+import java.util.Collection;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Future;
 
@@ -52,8 +52,8 @@ public class Gadget {
     return messageBundle;
   }
 
-  private final List<JsLibrary> jsLibraries;
-  public List<JsLibrary> getJsLibraries() {
+  private final Collection<JsLibrary> jsLibraries;
+  public Collection<JsLibrary> getJsLibraries() {
     return jsLibraries;
   }
 
@@ -63,14 +63,8 @@ public class Gadget {
     return preloads;
   }
 
-  /**
-   * @param context
-   * @param spec
-   * @param messageBundle
-   * @param jsLibraries
-   */
   public Gadget(GadgetContext context, GadgetSpec spec,
-      MessageBundle messageBundle, List<JsLibrary> jsLibraries) {
+      MessageBundle messageBundle, Collection<JsLibrary> jsLibraries) {
     this.context = context;
     this.spec = spec;
     this.messageBundle = messageBundle;
