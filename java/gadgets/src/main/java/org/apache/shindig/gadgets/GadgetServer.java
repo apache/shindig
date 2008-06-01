@@ -17,8 +17,6 @@
  */
 package org.apache.shindig.gadgets;
 
-import com.google.inject.Inject;
-
 import org.apache.shindig.gadgets.http.ContentFetcherFactory;
 import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.http.HttpResponse;
@@ -29,10 +27,11 @@ import org.apache.shindig.gadgets.spec.LocaleSpec;
 import org.apache.shindig.gadgets.spec.MessageBundle;
 import org.apache.shindig.gadgets.spec.Preload;
 
-import java.util.HashMap;
+import com.google.inject.Inject;
+
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.LinkedList;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Callable;
@@ -134,48 +133,18 @@ public class GadgetServer {
         substituter, spec, context.getUserPrefs());
     spec = spec.substitute(substituter, !context.getIgnoreCache());
 
-    Set<GadgetFeatureRegistry.Entry> features = getFeatures(spec);
-
-    List<JsLibrary> jsLibraries = new LinkedList<JsLibrary>();
-    Set<String> done = new HashSet<String>(features.size());
-
-    Map<GadgetFeatureRegistry.Entry, GadgetFeature> tasks
-        = new HashMap<GadgetFeatureRegistry.Entry, GadgetFeature>();
-
-    do {
-      for (GadgetFeatureRegistry.Entry entry : features) {
-        if (!done.contains(entry.getName())
-            && done.containsAll(entry.getDependencies())) {
-          GadgetFeature feature = entry.getFeature().create();
-          jsLibraries.addAll(feature.getJsLibraries(context));
-          if (!feature.isJsOnly()) {
-            tasks.put(entry, feature);
-          }
-          done.add(entry.getName());
-        }
-      }
-    } while (done.size() != features.size());
-
+    Collection<JsLibrary> jsLibraries = getLibraries(spec, context);
     Gadget gadget = new Gadget(context, spec, bundle, jsLibraries);
-
-    runTasks(gadget, tasks);
+    startPreloads(gadget);
     return gadget;
   }
 
   /**
-   * Processes tasks required for this gadget. Attempts to run as many tasks
-   * in parallel as possible.
+   * Begins processing of preloaded data.
    *
-   * @param gadget
-   * @param tasks
-   * @throws GadgetException
+   * Preloads are processed in parallel.
    */
-  private void runTasks(Gadget gadget,
-      Map<GadgetFeatureRegistry.Entry, GadgetFeature> tasks)
-      throws GadgetException {
-
-    // Immediately enqueue all the preloads. We don't block on preloads because
-    // we want them to run in parallel
+  private void startPreloads(Gadget gadget) throws GadgetException {
     RenderingContext renderContext = gadget.getContext().getRenderingContext();
     if (RenderingContext.GADGET.equals(renderContext)) {
       CompletionService<HttpResponse> preloadProcessor
@@ -193,127 +162,31 @@ public class GadgetServer {
         }
       }
     }
-
-    // TODO: This seems pointless if nothing is actually using it.
-    CompletionService<GadgetException> featureProcessor
-        = new ExecutorCompletionService<GadgetException>(executor);
-    // FeatureTask is OK has a hash key because we want actual instances, not
-    // names.
-    GadgetContext context = gadget.getContext();
-    Set<FeatureTask> pending = new HashSet<FeatureTask>();
-    for (Map.Entry<GadgetFeatureRegistry.Entry, GadgetFeature> entry
-        : tasks.entrySet()) {
-      FeatureTask task = new FeatureTask(entry.getKey().getName(),
-          entry.getValue(), gadget, context, entry.getKey().getDependencies());
-      pending.add(task);
-    }
-
-    Set<FeatureTask> running = new HashSet<FeatureTask>();
-    Set<String> done = new HashSet<String>();
-    do {
-      for (FeatureTask task : pending) {
-        if (task.depsDone(done)) {
-          pending.remove(task);
-          running.add(task);
-          featureProcessor.submit(task);
-        }
-      }
-
-      if (!running.isEmpty()) {
-        try {
-          Future<GadgetException> future;
-          while ((future = featureProcessor.take()) != null) {
-            GadgetException e = future.get();
-            if (future.get() != null) {
-              throw future.get();
-            }
-          }
-        } catch (Exception e) {
-          throw new GadgetException(
-              GadgetException.Code.INTERNAL_SERVER_ERROR, e);
-        }
-      }
-
-      for (FeatureTask task : running) {
-        if (task.isDone()) {
-          done.add(task.getName());
-          running.remove(task);
-        }
-      }
-    } while (!pending.isEmpty() || !running.isEmpty());
   }
 
   /**
    * Constructs a set of dependencies from the given spec.
-   *
-   * @return The dependencies that are requested in the spec and are also
-   *     supported by this server.
-   * @throws GadgetException If the spec requires a feature that is not
-   *     supported by this server.
    */
-  private Set<GadgetFeatureRegistry.Entry> getFeatures(GadgetSpec spec)
-      throws GadgetException {
+  private Collection<JsLibrary> getLibraries(GadgetSpec spec,
+      GadgetContext context) throws GadgetException {
     // Check all required features for the gadget.
     Map<String, Feature> features = spec.getModulePrefs().getFeatures();
-
-    Set<GadgetFeatureRegistry.Entry> dependencies
-        = new HashSet<GadgetFeatureRegistry.Entry>(features.size());
+    Set<String> needed = features.keySet();
     Set<String> unsupported = new HashSet<String>();
-    registry.getIncludedFeatures(features.keySet(), dependencies, unsupported);
-
-    for (String missing : unsupported) {
-      Feature feature = features.get(missing);
-      if (feature.getRequired()) {
-        throw new GadgetException(GadgetException.Code.UNSUPPORTED_FEATURE,
-            missing);
+    Collection<GadgetFeature> feats = registry.getFeatures(needed, unsupported);
+    if (unsupported.size() > 0) {
+      for (String missing : unsupported) {
+        if (features.get(missing).getRequired()) {
+          throw new UnsupportedFeatureException(missing);
+        }
       }
     }
-
-    return dependencies;
-  }
-}
-
-/**
- * Provides a task for processing non-trival features (anything that is not
- * js only)
- */
-class FeatureTask implements Callable<GadgetException> {
-  private final Set<String> dependencies;
-  public boolean depsDone(Set<String> deps) {
-    return deps.containsAll(dependencies);
-  }
-  private final String name;
-  public String getName() {
-    return name;
-  }
-  private final GadgetFeature feature;
-  private final Gadget gadget;
-  private final GadgetContext context;
-
-  private boolean done = false;
-  public boolean isDone() {
-    return done;
-  }
-
-  public GadgetException call() {
-    try {
-      feature.process(gadget, context);
-      done = true;
-      return null;
-    } catch (GadgetException e) {
-      return e;
-    } catch (Exception e) {
-      return new GadgetException(GadgetException.Code.INTERNAL_SERVER_ERROR, e);
+    Collection<JsLibrary> libraries = new LinkedList<JsLibrary>();
+    for (GadgetFeature feature : feats) {
+      libraries.addAll(feature.getJsLibraries(
+          context.getRenderingContext(), context.getContainer()));
     }
-  }
-
-  public FeatureTask(String name, GadgetFeature feature, Gadget gadget,
-      GadgetContext context, Set<String> dependencies) {
-    this.name = name;
-    this.feature = feature;
-    this.gadget = gadget;
-    this.context = context;
-    this.dependencies = dependencies;
+    return libraries;
   }
 }
 

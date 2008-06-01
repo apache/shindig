@@ -27,6 +27,8 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.net.URI;
+import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -47,9 +49,9 @@ public class JsFeatureLoaderTest extends GadgetTestFixture {
     loader = new JsFeatureLoader(fetcher);
   }
 
-  private JsLibrary getJsLib(GadgetFeatureRegistry.Entry entry) {
-    GadgetFeature feature = entry.getFeature().create();
-    return feature.getJsLibraries(new GadgetContext()).get(0);
+  private JsLibrary getJsLib(GadgetFeature feature) {
+    return feature.getJsLibraries(
+        RenderingContext.GADGET, ContainerConfig.DEFAULT_CONTAINER).get(0);
   }
 
   public void testBasicLoading() throws Exception {
@@ -59,14 +61,12 @@ public class JsFeatureLoaderTest extends GadgetTestFixture {
                  "    <script>" + DEF_JS_CONTENT + "</script>" +
                  "  </gadget>" +
                  "</feature>";
-    GadgetFeatureRegistry.Entry entry = loader.loadFeature(registry, xml);
+    GadgetFeature feature = loader.loadFeature(registry, xml);
 
-    assertEquals(FEATURE_NAME, entry.getName());
-    GadgetFeature feature = entry.getFeature().create();
-    List<JsLibrary> libs = feature.getJsLibraries(new GadgetContext());
-    assertEquals(1, libs.size());
-    assertEquals(JsLibrary.Type.INLINE, libs.get(0).getType());
-    assertEquals(DEF_JS_CONTENT, libs.get(0).getContent());
+    assertEquals(FEATURE_NAME, feature.getName());
+    JsLibrary lib = getJsLib(feature);
+    assertEquals(JsLibrary.Type.INLINE, lib.getType());
+    assertEquals(DEF_JS_CONTENT, lib.getContent());
   }
 
   public void testMultiContainers() throws Exception {
@@ -79,12 +79,11 @@ public class JsFeatureLoaderTest extends GadgetTestFixture {
                  "    <script>" + ALT_JS_CONTENT + "</script>" +
                  "  </gadget>" +
                  "</feature>";
-    GadgetFeatureRegistry.Entry entry = loader.loadFeature(registry, xml);
-    GadgetFeature feature = entry.getFeature().create();
+    GadgetFeature feature = loader.loadFeature(registry, xml);
     List<JsLibrary> libs;
-    libs = feature.getJsLibraries(new ContainerContext(CONT_A));
+    libs = feature.getJsLibraries(RenderingContext.GADGET, CONT_A);
     assertEquals(DEF_JS_CONTENT, libs.get(0).getContent());
-    libs = feature.getJsLibraries(new ContainerContext(CONT_B));
+    libs = feature.getJsLibraries(RenderingContext.GADGET, CONT_B);
     assertEquals(ALT_JS_CONTENT, libs.get(0).getContent());
   }
 
@@ -99,12 +98,10 @@ public class JsFeatureLoaderTest extends GadgetTestFixture {
                  "    <script src=\"" + temp.getPath() + "\"/>" +
                  "  </gadget>" +
                  "</feature>";
-    GadgetFeatureRegistry.Entry entry = loader.loadFeature(registry, xml);
-    GadgetFeature feature = entry.getFeature().create();
-    List<JsLibrary> libs = feature.getJsLibraries(new GadgetContext());
-    assertEquals(1, libs.size());
-    assertEquals(DEF_JS_CONTENT, libs.get(0).getContent());
-    assertEquals(FEATURE_NAME, libs.get(0).getFeature());
+    GadgetFeature feature = loader.loadFeature(registry, xml);
+    JsLibrary lib = getJsLib(feature);
+    assertEquals(DEF_JS_CONTENT, lib.getContent());
+    assertEquals(FEATURE_NAME, lib.getFeature());
   }
 
   public void testUrlReferences() throws Exception {
@@ -119,13 +116,12 @@ public class JsFeatureLoaderTest extends GadgetTestFixture {
         = new HttpResponse(200, ALT_JS_CONTENT.getBytes(), null);
     expect(fetcher.fetch(eq(request))).andReturn(response);
     replay();
-    GadgetFeatureRegistry.Entry entry = loader.loadFeature(registry, xml);
+    GadgetFeature feature = loader.loadFeature(registry, xml);
     verify();
-    GadgetFeature feature = entry.getFeature().create();
-    List<JsLibrary> libs = feature.getJsLibraries(new GadgetContext());
-    assertEquals(1, libs.size());
-    assertEquals(ALT_JS_CONTENT, libs.get(0).getContent());
-    assertEquals(FEATURE_NAME, libs.get(0).getFeature());
+
+    JsLibrary lib = getJsLib(feature);
+    assertEquals(ALT_JS_CONTENT, lib.getContent());
+    assertEquals(FEATURE_NAME, lib.getFeature());
   }
 
   private File makeFeatureFile(String name, String content) throws Exception {
@@ -150,25 +146,17 @@ public class JsFeatureLoaderTest extends GadgetTestFixture {
     loader.loadFeatures(file1.getAbsolutePath() +
                         JsFeatureLoader.FILE_SEPARATOR +
                         file2.getAbsolutePath(), registry);
-    // TODO: This is too fragile. GadgetFeatureRegistry needs to be fixed.
-    Map<String, GadgetFeatureRegistry.Entry> entries
-        = registry.getAllFeatures();
+    Collection<GadgetFeature> features = registry.getAllFeatures();
 
-    JsLibrary lib1 = getJsLib(entries.get(FEATURE_NAME));
+    Map<String, GadgetFeature> map = new HashMap<String, GadgetFeature>();
+    for (GadgetFeature feature : features) {
+      map.put(feature.getName(), feature);
+    }
+
+    JsLibrary lib1 = getJsLib(map.get(FEATURE_NAME));
     assertEquals(DEF_JS_CONTENT, lib1.getContent());
 
-    JsLibrary lib2 = getJsLib(entries.get(ALT_FEATURE_NAME));
+    JsLibrary lib2 = getJsLib(map.get(ALT_FEATURE_NAME));
     assertEquals(ALT_JS_CONTENT, lib2.getContent());
-  }
-}
-
-class ContainerContext extends GadgetContext {
-  private final String container;
-  @Override
-  public String getContainer() {
-    return container;
-  }
-  public ContainerContext(String container) {
-    this.container = container;
   }
 }

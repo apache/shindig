@@ -135,6 +135,10 @@ under the License.
       <artifactId>core</artifactId>
       <scope>compile</scope>
     </dependency>
+		<dependency>
+      <groupId>com.google.code.google-collections</groupId>
+      <artifactId>google-collect</artifactId>
+    </dependency>
     <dependency>
       <groupId>com.google.code.guice</groupId>
       <artifactId>guice</artifactId>

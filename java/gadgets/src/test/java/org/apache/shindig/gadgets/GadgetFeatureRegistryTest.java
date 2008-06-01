@@ -19,106 +19,88 @@
 
 package org.apache.shindig.gadgets;
 
-import junit.framework.TestCase;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
+import org.junit.Before;
+import org.junit.Test;
+
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashSet;
-import java.util.Map;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Set;
 
-public class GadgetFeatureRegistryTest extends TestCase {
+public class GadgetFeatureRegistryTest {
   private GadgetFeatureRegistry registry;
-  private static final GadgetFeatureFactory DUMMY_FEATURE
-      = new GadgetFeatureFactory() {
-          // Dummy feature.
-          public GadgetFeature create() {
-            return new GadgetFeature() {};
-          }
-        };
-
   private static final String FEATURE_NAME = "feature";
   private static final String DEP_NAME = "dependency";
+  private static final String CORE_NAME = "core.feature";
+  private static final String CONTENT = "var foo = 'bar'";
+  private static final String CORE_CONTENT = "var core = 'dependency'";
+  private static final String DEP_CONTENT = "var bar ='foo'";
   private static final String[] FEATURE_LIST = new String[] {
     "feature0", "feature1", "feature2", "feature3"
   };
-  private static final String UNREGISTERED_FEATURE = "unregistered";
 
-  @Override
+
+  @Before
   public void setUp() throws Exception {
     // TODO: Add a mock fetcher here and add tests for retrieving remote files
-    super.setUp();
     registry = new GadgetFeatureRegistry(null, null);
+    registry.register(makeFeature(CORE_NAME, CORE_CONTENT, null));
   }
 
-  public void testDependencyChain() throws Exception {
-    registry.register(FEATURE_NAME, Arrays.asList(DEP_NAME), DUMMY_FEATURE);
-    registry.register(DEP_NAME, null, DUMMY_FEATURE);
-
-    GadgetFeatureRegistry.Entry entry = registry.getEntry(FEATURE_NAME);
-    // Object comparison is OK here.
-    assertEquals(DUMMY_FEATURE, entry.getFeature());
-    assertEquals(DEP_NAME, entry.getDependencies().iterator().next());
+  private GadgetFeature makeFeature(String name, String content, String dep)
+      throws GadgetException {
+    JsLibrary lib = JsLibrary.create(JsLibrary.Type.INLINE, content, name, null);
+    List<String> deps = new LinkedList<String>();
+    if (deps != null) {
+      deps.add(dep);
+    }
+    return new GadgetFeature(name, Arrays.asList(lib), deps);
   }
 
-  public void testGetAllFeatures() throws Exception {
-    for (String feature : FEATURE_LIST) {
-      registry.register(feature, Arrays.asList(DEP_NAME), DUMMY_FEATURE);
-    }
+  @Test
+  public void getLibraries() throws Exception {
+    registry.register(makeFeature(DEP_NAME, DEP_CONTENT, null));
+    registry.register(makeFeature(FEATURE_NAME, CONTENT, DEP_NAME));
 
-    Map<String, GadgetFeatureRegistry.Entry> entries
-        = registry.getAllFeatures();
+    Collection<GadgetFeature> features
+        = registry.getFeatures(Arrays.asList(FEATURE_NAME));
 
-    for (String feature : FEATURE_LIST) {
-      GadgetFeatureRegistry.Entry entry = entries.get(feature);
-      assertNotNull(entry);
-      assertEquals(feature, entry.getName());
-      assertEquals(DEP_NAME, entry.getDependencies().iterator().next());
-    }
+    assertEquals(3, features.size());
+    // Order must be preserved.
+    Iterator<GadgetFeature> i = features.iterator();
+    assertEquals(CORE_NAME, i.next().getName());
+    assertEquals(DEP_NAME, i.next().getName());
+    assertEquals(FEATURE_NAME, i.next().getName());
   }
 
-  public void testGetIncluded() throws Exception {
-    Set<String> requested = new HashSet<String>();
+  @Test
+  public void getUnknownLibraries() throws GadgetException {
+    registry.register(makeFeature(FEATURE_NAME, CONTENT, DEP_NAME));
+    List<String> unsupported = new ArrayList<String>();
+    registry.getFeatures(Arrays.asList(FEATURE_NAME, "FAKE FAKE FAKE"),
+                         unsupported);
+    assertEquals("FAKE FAKE FAKE", unsupported.get(0));
+  }
+
+  @Test
+  public void getAllFeatures() throws Exception {
     for (String feature : FEATURE_LIST) {
-      registry.register(feature, Arrays.asList(DEP_NAME), DUMMY_FEATURE);
-      requested.add(feature);
+      registry.register(makeFeature(feature, CONTENT, DEP_NAME));
     }
 
-    registry.register(DEP_NAME, null, DUMMY_FEATURE);
-
-    requested.add(UNREGISTERED_FEATURE);
-
-    Set<GadgetFeatureRegistry.Entry> found
-        = new HashSet<GadgetFeatureRegistry.Entry>();
-    Set<String> missing = new HashSet<String>();
-    registry.getIncludedFeatures(requested, found, missing);
-
-    assertEquals(1, missing.size());
-    assertEquals(UNREGISTERED_FEATURE, missing.iterator().next());
-
+    Set<String> found = new HashSet<String>();
+    for (GadgetFeature feature : registry.getAllFeatures()) {
+      found.add(feature.getName());
+    }
     for (String feature : FEATURE_LIST) {
-      boolean contains = false;
-      for (GadgetFeatureRegistry.Entry entry : found) {
-        if (entry.getName().equals(feature)) {
-          contains = true;
-        }
-      }
-      if (!contains) {
-        fail("Feature " + feature + " not included in needed set.");
-      }
+      assertTrue(feature + " not returned.", found.contains(feature));
     }
-
-    boolean contains = false;
-    for (GadgetFeatureRegistry.Entry entry : found) {
-      if (entry.getName().equals(DEP_NAME)) {
-        contains = true;
-      } else if (entry.getName().equals(UNREGISTERED_FEATURE)) {
-        fail("Unregistered dependency included in needed set.");
-      }
-    }
-    if (!contains) {
-      fail("Transitive dependency " + DEP_NAME + " not included in needed set");
-    }
-
-    assertEquals(UNREGISTERED_FEATURE, missing.iterator().next());
   }
 }
