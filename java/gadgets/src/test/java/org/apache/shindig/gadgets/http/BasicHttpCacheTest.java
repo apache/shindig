@@ -91,11 +91,11 @@ public class BasicHttpCacheTest extends TestCase {
     assertNull(cache.getResponse(req));
   }
 
-  public void testNotCacheableForErr() {
+  public void testCacheableForErr() {
     HttpRequest req = createRequest("GET");
     HttpResponse resp = createResponse(500, null, null);
     cache.addResponse(req, resp);
-    assertNull(cache.getResponse(req));
+    assertEquals(resp, cache.getResponse(req));
   }
 
   public void testCacheableForFutureExpires() {
@@ -109,14 +109,6 @@ public class BasicHttpCacheTest extends TestCase {
   public void testNotCacheableForPastExpires() {
     HttpRequest req = createRequest("GET");
     HttpResponse resp = createExpiresResponse(200,
-        System.currentTimeMillis() - 10000L);
-    cache.addResponse(req, resp);
-    assertNull(cache.getResponse(req));
-  }
-
-  public void testNotCacheableForFutureExpiresWithError() {
-    HttpRequest req = createRequest("GET");
-    HttpResponse resp = createExpiresResponse(500,
         System.currentTimeMillis() - 10000L);
     cache.addResponse(req, resp);
     assertNull(cache.getResponse(req));
