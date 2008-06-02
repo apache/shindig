@@ -210,10 +210,10 @@ class PreloadTask implements Callable<HttpResponse> {
           return preloadFetcherFactory.getSigningFetcher(context.getToken())
               .fetch(request);
         default:
-          return HttpResponse.ERROR;
+          return HttpResponse.error();
       }
     } catch (GadgetException e) {
-      return HttpResponse.ERROR;
+      return HttpResponse.error();
     }
   }
 
