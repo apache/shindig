@@ -17,6 +17,8 @@
  */
 package org.apache.shindig.gadgets.http;
 
+import org.apache.shindig.common.util.DateUtil;
+
 import org.apache.commons.io.IOUtils;
 
 import junit.framework.TestCase;
@@ -109,13 +111,21 @@ public class HttpResponseTest extends TestCase {
     assertFalse(response.isStrictNoCache());
   }
 
-  /*
-   There seems to be some issue with the date parsing in joda?
   public void testExpires() throws Exception {
-    long time = System.currentTimeMillis() + 10000L;
-    addHeader("Expires", HttpUtil.formatDate(new Date(time)));
+    // We use a timestamp here so that we can verify that the underlying parser
+    // is robust. The /1000 * 1000 bit is just rounding to seconds.
+    long time = ((System.currentTimeMillis() / 1000) * 1000) + 10000L;
+    addHeader("Expires", DateUtil.formatDate(time));
     HttpResponse response = new HttpResponse(200, new byte[0], headers);
-    assertEquals(response.getExpiration(), time);
+    assertEquals(time, response.getExpiration());
   }
-  */
+
+  public void testNegativeCaching() {
+    assertTrue("Bad HTTP responses must be cacheable!",
+        HttpResponse.error().getCacheExpiration() > System.currentTimeMillis());
+    assertTrue("Bad HTTP responses must be cacheable!",
+        HttpResponse.notFound().getCacheExpiration() > System.currentTimeMillis());
+    assertTrue("Bad HTTP responses must be cacheable!",
+        HttpResponse.timeout().getCacheExpiration() > System.currentTimeMillis());
+  }
 }

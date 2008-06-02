@@ -17,19 +17,12 @@
  */
 package org.apache.shindig.gadgets.http;
 
-import org.apache.shindig.common.util.DateUtil;
-
 import java.net.URI;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.List;
 
 /**
  * Base class for content caches. Defines cache expiration rules and
  * and restrictions on allowed content. Also enforces rewriting
  * on cacheable content.
- *
- * TODO: Move cache checking code into HttpUtil
  */
 public abstract class AbstractHttpCache implements HttpCache {
 
@@ -102,72 +95,12 @@ public abstract class AbstractHttpCache implements HttpCache {
    * @return content or null
    */
   protected HttpResponse checkResponse(HttpResponse response) {
-    if (response == null) return null;
-
-    if (response.getHttpStatusCode() != 200) return null;
-
-    long now = System.currentTimeMillis();
-
-    String expires = response.getHeader("Expires");
-    if (expires != null) {
-      Date expiresDate = DateUtil.parseDate(expires);
-      if (expiresDate == null) {
-        // parse problem
-        return null;
-      }
-      long expiresMs = expiresDate.getTime();
-      if (expiresMs > now) {
-        return response;
-      } else {
-        return null;
-      }
+    if (response == null) {
+      return null;
     }
-
-    // Cache-Control headers may be an explicit max-age, or no-cache, which
-    // means we use a default expiration time.
-    String cacheControl = response.getHeader("Cache-Control");
-    if (cacheControl != null) {
-      String[] directives = cacheControl.split(",");
-      for (String directive : directives) {
-        directive = directive.trim();
-        // boolean params
-        if (directive.equals("no-cache")) {
-          return null;
-        }
-        if (directive.startsWith("max-age")) {
-          String[] parts = directive.split("=");
-          if (parts.length == 2) {
-            try {
-              // Record the max-age and store it in the content as an
-              // absolute expiration
-              long maxAgeMs = Long.parseLong(parts[1]) * 1000;
-              Date newExpiry = new Date(now + maxAgeMs);
-              response.getAllHeaders()
-                  .put("Expires", Arrays.asList(DateUtil.formatDate(newExpiry)));
-              return response;
-            } catch (NumberFormatException e) {
-              return null;
-            }
-          }
-        }
-      }
+    if (response.getCacheExpiration() < System.currentTimeMillis()) {
+      return null;
     }
-
-    // Look for Pragma: no-cache. If present, return null.
-    List<String> pragmas = response.getHeaders("Pragma");
-    if (pragmas != null) {
-      for (String pragma : pragmas) {
-        if ("no-cache".equals(pragma)) {
-          return null;
-        }
-      }
-    }
-
-    // Assume the content is cacheable for the default TTL
-    // if no other directives exist
-    Date newExpiry = new Date(now + getDefaultTTL());
-    response.getAllHeaders()
-        .put("Expires", Arrays.asList(DateUtil.formatDate(newExpiry)));
     return response;
   }
 
@@ -212,15 +145,5 @@ public abstract class AbstractHttpCache implements HttpCache {
       }
     }
     return false;
-  }
-
-  /**
-   * Default TTL for an entry in the cache that does not have any
-   * cache controlling headers
-   * @return default TTL for cache entries
-   */
-  protected long getDefaultTTL() {
-    // 5 mins
-    return 5L * 60L * 1000L;
   }
 }

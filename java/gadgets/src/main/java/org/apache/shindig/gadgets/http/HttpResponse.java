@@ -24,6 +24,7 @@ import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
@@ -45,10 +46,15 @@ public class HttpResponse {
   private static final String DEFAULT_ENCODING = "UTF-8";
   private final String encoding;
 
-  public static final HttpResponse ERROR
-      = new HttpResponse(SC_INTERNAL_SERVER_ERROR);
-  public static final HttpResponse TIMEOUT = new HttpResponse(SC_TIMEOUT);
-  public static final HttpResponse NOT_FOUND = new HttpResponse(SC_NOT_FOUND);
+  // TTL to use when an error response is fetched. This should be non-zero to
+  // avoid high rates of requests to bad urls in high-traffic situations.
+  private final static long NEGATIVE_CACHE_TTL = 30 * 1000;
+
+  /**
+   * Default TTL for an entry in the cache that does not have any
+   * cache controlling headers.
+   */
+  private static final long DEFAULT_TTL = 5L * 60L * 1000L;
 
   // Used to lazily convert to a string representation of the input.
   private String responseString = null;
@@ -59,17 +65,14 @@ public class HttpResponse {
   private HttpResponse rewritten;
 
   // Holds character sets for fast conversion
-  private static ConcurrentHashMap<String,Charset> encodingToCharset= new ConcurrentHashMap<String,Charset>();
+  private static ConcurrentHashMap<String,Charset> encodingToCharset
+      = new ConcurrentHashMap<String,Charset>();
 
   /**
    * Create a dummy empty map. Access via HttpResponse.ERROR
    */
-  private HttpResponse(int statusCode) {
-    this.httpStatusCode = statusCode;
-    this.responseBytes = new byte[0];
-    this.encoding = DEFAULT_ENCODING;
-    this.headers = Collections.emptyMap();
-    this.metadata = new HashMap<String, String>();
+  public HttpResponse(int statusCode) {
+    this(statusCode, new byte[0], null);
   }
 
   /**
@@ -88,17 +91,18 @@ public class HttpResponse {
           responseBytes, 0, this.responseBytes, 0, responseBytes.length);
     }
 
-    if (headers == null) {
-      this.headers = Collections.emptyMap();
-    } else {
-      Map<String, List<String>> tmpHeaders
-          = new HashMap<String, List<String>>();
+    Map<String, List<String>> tmpHeaders = new HashMap<String, List<String>>();
+    if (headers != null) {
       for (Map.Entry<String, List<String>> entry : headers.entrySet()) {
         List<String> newList = new ArrayList<String>(entry.getValue());
         tmpHeaders.put(entry.getKey(), Collections.unmodifiableList(newList));
       }
-      this.headers = tmpHeaders;
     }
+    // Force Date header.
+    tmpHeaders.put("Date",
+        Arrays.asList(DateUtil.formatDate(System.currentTimeMillis())));
+    this.headers = tmpHeaders;
+
     this.metadata = new HashMap<String, String>();
     this.encoding = detectEncoding();
   }
@@ -111,6 +115,18 @@ public class HttpResponse {
    */
   public HttpResponse(String body) {
     this(SC_OK, body.getBytes(), null);
+  }
+
+  public static HttpResponse error() {
+    return new HttpResponse(SC_INTERNAL_SERVER_ERROR);
+  }
+
+  public static HttpResponse timeout() {
+    return new HttpResponse(SC_TIMEOUT);
+  }
+
+  public static HttpResponse notFound() {
+    return new HttpResponse(SC_NOT_FOUND);
   }
 
   /**
@@ -249,13 +265,32 @@ public class HttpResponse {
    * @return consolidated cache expiration time or -1
    */
   public long getCacheExpiration() {
-    if (isStrictNoCache()) return -1;
-    long maxAgeExpiration = getCacheControlMaxAge() + System.currentTimeMillis();
-    long expiration = getExpiration();
-    if (expiration == -1) {
-      return maxAgeExpiration;
+    if (httpStatusCode != SC_OK) {
+      return getDate() + NEGATIVE_CACHE_TTL;
     }
-    return expiration;
+    if (isStrictNoCache()) {
+      return -1;
+    }
+    long maxAge = getCacheControlMaxAge();
+    if (maxAge != -1) {
+      return maxAge + System.currentTimeMillis();
+    }
+    long expiration = getExpiration();
+    if (expiration != -1) {
+      return expiration;
+    }
+    return getDate() + DEFAULT_TTL;
+  }
+
+  /**
+   * @return The value of the HTTP Date header.
+   */
+  public long getDate() {
+    String date = getHeader("Date");
+    if (date == null) {
+      return -1;
+    }
+    return DateUtil.parseDate(date).getTime();
   }
 
   /**
