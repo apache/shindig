@@ -128,4 +128,10 @@ public class HttpResponseTest extends TestCase {
     assertTrue("Bad HTTP responses must be cacheable!",
         HttpResponse.timeout().getCacheExpiration() > System.currentTimeMillis());
   }
+
+  public void testNullHeaderNamesStripped() {
+    addHeader(null, "dummy");
+    HttpResponse response = new HttpResponse(200, new byte[0], headers);
+    assertFalse("Null header not removed.", response.getAllHeaders().containsKey(null));
+  }
 }

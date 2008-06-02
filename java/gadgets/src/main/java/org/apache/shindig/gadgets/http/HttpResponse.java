@@ -94,8 +94,10 @@ public class HttpResponse {
     Map<String, List<String>> tmpHeaders = new HashMap<String, List<String>>();
     if (headers != null) {
       for (Map.Entry<String, List<String>> entry : headers.entrySet()) {
-        List<String> newList = new ArrayList<String>(entry.getValue());
-        tmpHeaders.put(entry.getKey(), Collections.unmodifiableList(newList));
+        if (entry.getKey() != null && entry.getValue() != null) {
+          List<String> newList = new ArrayList<String>(entry.getValue());
+          tmpHeaders.put(entry.getKey(), Collections.unmodifiableList(newList));
+        }
       }
     }
     // Force Date header.
