@@ -24,7 +24,7 @@
     <groupId>org.apache</groupId>
     <artifactId>apache</artifactId>
     <version>4</version>
-   </parent>
+  </parent>
 
   <groupId>org.apache.shindig</groupId>
   <artifactId>shindig-project</artifactId>
@@ -55,13 +55,10 @@
     <url>http://issues.apache.org/jira/browse/SHINDIG</url>
   </issueManagement>
 
-  <distributionManagement>
-    <site>
-      <id>apache.website</id>
-      <url>scp://people.apache.org/www/incubator.apache.org/shindig</url>
-    </site>
-  </distributionManagement>
-
+  <ciManagement>
+    <system>CruiseControl</system>
+    <url>http://shindig-ci.bigr2.info:8080/dashboard/tab/dashboard</url>
+  </ciManagement>
 
   <!-- ====================================================================== -->
   <!-- M A I L I N G   L I S T S                                              -->
@@ -390,8 +387,37 @@
             <groupId>org.codehaus.mojo</groupId>
             <artifactId>cobertura-maven-plugin</artifactId>
           </plugin>
+          <plugin>
+            <groupId>org.codehaus.mojo</groupId>
+            <artifactId>taglist-maven-plugin</artifactId>
+            <configuration>
+              <tags>
+                <tag>TODO</tag>
+              </tags>
+            </configuration>
+          </plugin>
         </plugins>
       </reporting>
+      <properties>
+        <!-- You can override the site.html.dir property in your ~/.m2/settings.xml file -->
+        <!-- <settings> -->
+        <!--   <profiles> -->
+        <!--     <profile> -->
+        <!--       <id>reporting</id> -->
+        <!--       <properties> -->
+        <!--         <site.html.dir> NEW VALUE </site.html.dir> -->
+        <!--       </properties> -->
+        <!--     </profile> -->
+        <!--   </profiles> -->
+        <!-- </settings> -->
+        <site.html.dir>scp://people.apache.org/www/incubator.apache.org/shindig</site.html.dir>
+      </properties>
+      <distributionManagement>
+        <site>
+          <id>local</id>
+          <url>${site.html.dir}</url>
+        </site>
+      </distributionManagement>
     </profile>
     <profile>
       <id>release</id>
@@ -448,12 +474,12 @@
             <artifactId>xslt-maven-plugin</artifactId>
             <version>1.0</version>
             <configuration>
-                <xslFile>${basedir}/etc/to-committers.xsl</xslFile>
-                <srcIncludes>pom.xml</srcIncludes>
-                <srcDir>${basedir}</srcDir>
-                <destDir>${build.directory}</destDir>
-                <fileNameRegex>pom.xml</fileNameRegex>
-                <fileNameReplacement>COMMITTERS</fileNameReplacement>
+              <xslFile>${basedir}/etc/to-committers.xsl</xslFile>
+              <srcIncludes>pom.xml</srcIncludes>
+              <srcDir>${basedir}</srcDir>
+              <destDir>${build.directory}</destDir>
+              <fileNameRegex>pom.xml</fileNameRegex>
+              <fileNameReplacement>COMMITTERS</fileNameReplacement>
             </configuration>
             <executions>
               <execution>
@@ -483,11 +509,11 @@
         <groupId>org.apache.maven.plugins </groupId>
         <artifactId>maven-eclipse-plugin</artifactId>
         <version>2.5.1</version>
-<!--
-        <configuration>
-          <projectNameTemplate>${project.groupId}-${project.artifactId}</projectNameTemplate>
-        </configuration>
--->
+        <!--
+                <configuration>
+                  <projectNameTemplate>${project.groupId}-${project.artifactId}</projectNameTemplate>
+                </configuration>
+        -->
       </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
@@ -540,7 +566,7 @@
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-remote-resources-plugin</artifactId>
           <executions>
-          <execution>
+            <execution>
               <goals>
                 <goal>process</goal>
               </goals>
