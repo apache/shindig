@@ -54,16 +54,16 @@ class BasicGadgetOAuthTokenStore extends GadgetOAuthTokenStore {
 	private function storeProviderInfos($fetcher, $gadgetUri)
 	{
 		$cache = Config::get('data_cache');
-		$cache = new $cache();		
+		$cache = new $cache();
 		// determine which requests we can load from cache, and which we have to actually fetch
-		if (($gadget = $cache->get(md5('storeProviderInfos'.$gadgetUri))) === false) {
+		if (($gadget = $cache->get(md5('storeProviderInfos' . $gadgetUri))) === false) {
 			$remoteContentRequest = new RemoteContentRequest($gadgetUri);
 			$remoteContentRequest->getRequest($gadgetUri, false);
 			$response = $fetcher->fetchRequest($remoteContentRequest);
 			$context = new ProxyGadgetContext($gadgetUri);
 			$spec = new GadgetSpecParser();
 			$gadget = $spec->parse($response->getResponseContent(), $context);
-			$cache->set(md5('storeProviderInfos'.$gadgetUri), $gadget);
+			$cache->set(md5('storeProviderInfos' . $gadgetUri), $gadget);
 		}
 		parent::storeServiceInfoFromGadgetSpec($gadgetUri, $gadget);
 	}
@@ -86,18 +86,17 @@ class BasicGadgetOAuthTokenStore extends GadgetOAuthTokenStore {
 		
 		if ($keyTypeStr == "RSA_PRIVATE") {
 			$keyType = 'RSA_PRIVATE';
-			// check if the converted from PKCS8 key is in cache, if not, convert it
 			$cache = Config::get('data_cache');
 			$cache = new $cache();
-			
 			if (($cachedRequest = $cache->get(md5("RSA_KEY_" . $serviceName))) !== false) {
 				$consumerSecret = $cachedRequest;
 			} else {
-				$in = tempnam(sys_get_temp_dir(), "RSA_KEY");
-				file_put_contents($in, base64_decode($consumerInfo[$this->CONSUMER_SECRET_KEY]));
-				$out = tempnam(sys_get_temp_dir(), "RSA_KEY");
-				exec("openssl pkcs8 -inform DER -outform PEM -out " . $out . " -nocrypt -in " . $in);
-				$consumerSecret = file_get_contents($out);
+				$consumerSecret = "-----BEGIN PRIVATE KEY-----\n";
+				$chunks = str_split($consumerInfo[$this->CONSUMER_SECRET_KEY], 64);
+				foreach ($chunks as $chunk) {
+					$consumerSecret .= $chunk . "\n";
+				}
+				$consumerSecret .= "-----END PRIVATE KEY-----";
 				$cache->set(md5("RSA_KEY_" . $serviceName), $consumerSecret);
 			}
 		}
