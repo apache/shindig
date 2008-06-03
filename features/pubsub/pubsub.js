@@ -27,7 +27,7 @@ var gadgets = gadgets || {};
  * @class Provides operations for making rpc calls.
  * @name gadgets.pubsub
  */
-gadgets.pubsub = function() {
+gadgets.pubsub = (function() {
   var listeners = {};
 
   function router(channel, sender, message) {
@@ -74,5 +74,5 @@ gadgets.pubsub = function() {
     }
 
   };
-}();
+})();
 

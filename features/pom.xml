@@ -81,12 +81,11 @@ under the License.
       <plugin>
         <groupId>de.berlios.jsunit</groupId>
         <artifactId>jsunit-maven2-plugin</artifactId>
-        <executions>
-          <execution>
-            <id>test</id>
             <configuration>
               <sourceDirectory>${basedir}</sourceDirectory>
               <sources>
+                <source>mockenv.js</source>
+                <source>core/util.js</source>
                 <source>opensocial-reference/opensocial.js</source>
                 <source>opensocial-reference/activity.js</source>
                 <source>opensocial-reference/address.js</source>
@@ -112,7 +111,14 @@ under the License.
               </sources>
               <testSourceDirectory>${basedir}</testSourceDirectory>
               <testSuites>
-                <testSuite>
+                 <testSuite>
+                  <name>GadgetsJSAPITests</name>
+                  <type>TESTCASES</type>
+                  <includes>
+                    <include>core/*test.js</include>
+                  </includes>
+                </testSuite>
+               <testSuite>
                   <name>OpenSocialJsTests</name>
                   <type>TESTCASES</type>
                   <includes>
@@ -125,8 +131,6 @@ under the License.
             <goals>
               <goal>jsunit-test</goal>
             </goals>
-          </execution>
-        </executions>
       </plugin>
     </plugins>
     <resources>
