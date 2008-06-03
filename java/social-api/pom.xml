@@ -65,7 +65,7 @@ under the License.
     </dependency>
     <dependency>
       <groupId>com.google.code.google-collections</groupId>
-      <artifactId>google-collect</artifactId>     
+      <artifactId>google-collect</artifactId>
     </dependency>
     <dependency>
       <groupId>org.apache.abdera</groupId>
@@ -82,6 +82,10 @@ under the License.
     <dependency>
       <artifactId>commons-betwixt</artifactId>
       <groupId>commons-betwixt</groupId>
+    </dependency>
+    <dependency>
+      <artifactId>commons-collections</artifactId>
+      <groupId>commons-collections</groupId>
     </dependency>
     <dependency>
       <groupId>org.apache.abdera</groupId>
