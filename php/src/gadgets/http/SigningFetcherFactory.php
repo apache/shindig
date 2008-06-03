@@ -58,16 +58,20 @@ class SigningFetcherFactory {
 						throw new Exception("Could not read keyfile ($keyFile), check the file name and permission");
 					}
 					$phrase = Config::get('private_key_phrase') != '' ? (Config::get('private_key_phrase')) : null;
-					$privateKey .= "-----BEGIN PRIVATE KEY-----\n";
-					$chunks = str_split($rsa_private_key, 64);
-					foreach ($chunks as $chunk) {
-						$privateKey .= $chunk . "\n";
+					if (strpos($rsa_private_key, "-----BEGIN") === false) {
+						$privateKey .= "-----BEGIN PRIVATE KEY-----\n";
+						$chunks = str_split($rsa_private_key, 64);
+						foreach ($chunks as $chunk) {
+							$privateKey .= $chunk . "\n";
+						}
+						$privateKey .= "-----END PRIVATE KEY-----";
+					} else {
+						$privateKey = $rsa_private_key;
 					}
-					$privateKey .= "-----END PRIVATE KEY-----";
+					$cache->set(md5("RSA_PRIVATE_KEY_" . $this->keyName), $rsa_private_key);
 					if (! $rsa_private_key = @openssl_pkey_get_private($privateKey, $phrase)) {
 						throw new Exception("Could not create the key");
 					}
-					$cache->set(md5("RSA_PRIVATE_KEY_" . $this->keyName), $rsa_private_key);
 				}
 			} catch (Exception $e) {
 				throw new Exception("Error loading private key: " . $e);

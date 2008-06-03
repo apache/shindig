@@ -91,16 +91,26 @@ class BasicGadgetOAuthTokenStore extends GadgetOAuthTokenStore {
 			if (($cachedRequest = $cache->get(md5("RSA_KEY_" . $serviceName))) !== false) {
 				$consumerSecret = $cachedRequest;
 			} else {
-				$consumerSecret = "-----BEGIN PRIVATE KEY-----\n";
-				$chunks = str_split($consumerInfo[$this->CONSUMER_SECRET_KEY], 64);
-				foreach ($chunks as $chunk) {
-					$consumerSecret .= $chunk . "\n";
+				$key = $consumerInfo[$this->CONSUMER_SECRET_KEY];
+				if (empty($key)) {
+					throw new Exception("Invalid key");
 				}
-				$consumerSecret .= "-----END PRIVATE KEY-----";
+				if (strpos($key, "-----BEGIN") === false) {
+					$strip_this = array(" ", "\n", "\r");
+					//removes breaklines and trim.
+					$rsa_private_key = trim(str_replace($strip_this, "", $key));
+					$consumerSecret = OAuth::$BEGIN_PRIVATE_KEY . "\n";
+					$chunks = str_split($rsa_private_key, 64);
+					foreach ($chunks as $chunk) {
+						$consumerSecret .= $chunk . "\n";
+					}
+					$consumerSecret .= OAuth::$END_PRIVATE_KEY;
+				} else {
+					$consumerSecret = $key;
+				}
 				$cache->set(md5("RSA_KEY_" . $serviceName), $consumerSecret);
 			}
 		}
-		
 		$kas = new ConsumerKeyAndSecret($consumerKey, $consumerSecret, $keyType);
 		$this->storeConsumerKeyAndSecret($gadgetUri, $serviceName, $kas);
 	}

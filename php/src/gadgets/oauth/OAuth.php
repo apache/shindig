@@ -32,6 +32,8 @@ class OAuth {
 	public static $OAUTH_VERSION = "oauth_version";
 	public static $HMAC_SHA1 = "HMAC_SHA1";
 	public static $RSA_SHA1 = "RSA_SHA1";
+	public static $BEGIN_PRIVATE_KEY = "-----BEGIN PRIVATE KEY-----";
+	public static $END_PRIVATE_KEY = "-----END PRIVATE KEY-----";
 }
 
 /* Generic exception class
@@ -282,7 +284,7 @@ class OAuthRequest {
 	{
 		$parameters = is_array($parameters) ? $parameters : array();
 		$defaults = array("oauth_nonce" => OAuthRequest::generate_nonce(), "oauth_timestamp" => OAuthRequest::generate_timestamp(), "oauth_consumer_key" => $consumer->key, // quick hack to make this demo'able
-		'synd' => 'partuza', 'container' => 'partuza');
+'synd' => 'partuza', 'container' => 'partuza');
 		$parameters = array_merge($defaults, $parameters);
 		if (isset($token)) {
 			$parameters['oauth_token'] = $token;
