@@ -38,6 +38,8 @@ class OAuthFetcher extends RemoteContentFetcher {
 	// names for the JSON values we return to the client
 	public static $CLIENT_STATE = "oauthState";
 	public static $APPROVAL_URL = "approvalUrl";
+	// names of additional OAuth parameters we include in outgoing requests
+	public static $XOAUTH_APP_URL = "xoauth_app_url";
 
 	/**
 	 * Maximum age for our client state; if this is exceeded we start over. One
@@ -228,7 +230,9 @@ class OAuthFetcher extends RemoteContentFetcher {
 			$accessor = $this->accessorInfo->getAccessor();
 			//TODO The implementations of oauth differs from the one in JAVA. Fix the type OAuthMessage
 			$url = $accessor->consumer->callback_url->requestTokenURL;
-			$request = $this->newRequestMessage($url);
+			$msgParams = array();
+			$msgParams[OAuthFetcher::$XOAUTH_APP_URL] = $this->authToken->getAppUrl();
+			$request = $this->newRequestMessageParams($url, $msgParams);
 			$reply = $this->sendOAuthMessage($request);
 			$reply->requireParameters(array(OAuth::$OAUTH_TOKEN, OAuth::$OAUTH_TOKEN_SECRET));
 			$accessor->requestToken = $reply->get_parameter(OAuth::$OAUTH_TOKEN);
@@ -244,7 +248,7 @@ class OAuthFetcher extends RemoteContentFetcher {
 		if (! isset($params)) {
 			throw new Exception("params was null in " + "newRequestMessage " + "Use newRequesMessage if you don't have a params to pass");
 		}
-		
+
 		switch ($this->accessorInfo->getSignatureType()) {
 			case OAuth::$RSA_SHA1:
 				$params[OAuth::$OAUTH_SIGNATURE_METHOD] = OAuth::$RSA_SHA1;
@@ -259,6 +263,10 @@ class OAuthFetcher extends RemoteContentFetcher {
 		return $accessor->newRequestMessage($method, $url, $params);
 	}
 
+	/*
+	 * @deprecated (All outgoing messages must send additional params
+	 * like XOAUTH_APP_URL, so use newRequestMessageParams instead)
+	 */
 	private function newRequestMessageUrlOnly($url)
 	{
 		$params = array();
@@ -304,7 +312,6 @@ class OAuthFetcher extends RemoteContentFetcher {
 	{
 		$paramLocation = $this->accessorInfo->getParamLocation();
 		$newHeaders = array();
-		
 		// paramLocation could be overriden by a run-time parameter to fetchRequest
 		switch ($paramLocation) {
 			case OAuthStoreVars::$OAuthParamLocation['AUTH_HEADER']:
@@ -315,24 +322,23 @@ class OAuthFetcher extends RemoteContentFetcher {
 				$authHeader = $this->getAuthorizationHeader($oauthParams);
 				$newHeaders["Authorization"] = $authHeader;
 				break;
-			
+					
 			case OAuthStoreVars::$OAuthParamLocation['POST_BODY']:
 				if (! OAuthUtil::isFormEncoded($contentType)) {
 					throw new GadgetException("Invalid param: OAuth param location can only " . "be post_body if post body if of type x-www-form-urlencoded");
 				}
 				if (! isset($postBody) || count($postBody) == 0) {
-					$postBody = OAuthUtil::urlencodeRFC3986($oauthParams);
+					$postBody = OAuthUtil::getPostBodyString($oauthParams);
 				} else {
-					$postBody = $postBody . "&" . OAuthUtil::urlencodeRFC3986($oauthParams);
+					$postBody = $postBody . "&" . OAuthUtil::getPostBodyString($oauthParams);
 				}
 				break;
-			
+					
 			case OAuthStoreVars::$OAuthParamLocation['URI_QUERY']:
 				$url = OAuthUtil::addParameters($url, $oauthParams);
 				break;
 		}
-		
-		$postBodyBytes = ($postBody == null) ? null : $postBody->getBytes("UTF-8");
+		$postBodyBytes = ($postBody == null) ? null : null ;//$postBody->getBytes("UTF-8"); //See what can we do with this?
 		$rcr = new RemoteContentRequest($url);
 		$rcr->createRemoteContentRequest($method, $url, $newHeaders, $postBodyBytes, $options);
 		return $rcr;
@@ -343,7 +349,6 @@ class OAuthFetcher extends RemoteContentFetcher {
 	 */
 	private function sendOAuthMessage(OAuthRequest $request)
 	{
-		
 		$rcr = $this->createRemoteContentRequest($this->filterOAuthParams($request), $request->get_normalized_http_method(), $request->get_url(), null, RemoteContentRequest::$DEFAULT_CONTENT_TYPE, null, RemoteContentRequest::$DEFAULT_OPTIONS);
 		$content = $this->getNextFetcher()->fetchRequest($rcr);
 		$reply = OAuthRequest::from_request();
@@ -406,6 +411,7 @@ class OAuthFetcher extends RemoteContentFetcher {
 			$accessor = $this->accessorInfo->getAccessor();
 			$url = $accessor->consumer->callback_url->accessTokenURL;
 			$msgParams = array();
+			$msgParams[OAuthFetcher::$XOAUTH_APP_URL] = $this->authToken->getAppUrl();
 			$msgParams[OAuth::$OAUTH_TOKEN] = $accessor->requestToken;
 			$request = $this->newRequestMessageParams($url, $msgParams);
 			$reply = $this->sendOAuthMessage($request);
@@ -456,6 +462,7 @@ class OAuthFetcher extends RemoteContentFetcher {
 		try {
 			$msgParams = OAuthUtil::isFormEncoded($this->realRequest->getContentType()) ? OAuthUtil::urldecodeRFC3986($this->realRequest->getPostBody()) : array();
 			$method = $this->realRequest->getMethod();
+			$msgParams[OAuthFetcher::$XOAUTH_APP_URL] = $this->authToken->getAppUrl();
 			// Build and sign the message.
 			$oauthRequest = $this->newRequestMessageMethod($method, $this->realRequest->getUrl(), $msgParams);
 			$rcr = $this->createRemoteContentRequest($this->filterOAuthParams($oauthRequest), $this->realRequest->getMethod(), $this->realRequest->getUrl(), $this->realRequest->getHeaders(), $this->realRequest->getContentType(), $this->realRequest->getPostBody(), $this->realRequest->getOptions());
