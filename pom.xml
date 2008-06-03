@@ -808,6 +808,11 @@
         <version>0.8</version>
       </dependency>
       <dependency>
+        <artifactId>commons-collections</artifactId>
+        <groupId>commons-collections</groupId>
+        <version>3.2.1</version>
+      </dependency>
+      <dependency>
         <groupId>org.mortbay.jetty</groupId>
         <artifactId>jetty</artifactId>
         <version>6.1.9</version>

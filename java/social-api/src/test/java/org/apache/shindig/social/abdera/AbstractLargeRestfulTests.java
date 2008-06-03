@@ -22,6 +22,7 @@ import org.apache.shindig.social.JettyServer;
 import com.google.common.collect.Maps;
 import org.apache.abdera.Abdera;
 import org.apache.abdera.model.Base;
+import org.apache.abdera.model.Entry;
 import org.apache.abdera.protocol.Response;
 import org.apache.abdera.protocol.client.AbderaClient;
 import org.apache.abdera.protocol.client.ClientResponse;
@@ -165,6 +166,10 @@ public abstract class AbstractLargeRestfulTests {
       }
     }
     return columns;
+  }
+
+  protected Entry getNewEntry() {
+    return abdera.getFactory().newEntry();
   }
 
 }

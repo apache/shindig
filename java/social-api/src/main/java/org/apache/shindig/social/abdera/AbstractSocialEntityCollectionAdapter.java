@@ -38,6 +38,7 @@ import org.apache.abdera.i18n.templates.Route;
 import org.apache.abdera.model.Content;
 import org.apache.abdera.model.Entry;
 import org.apache.abdera.model.Feed;
+import org.apache.abdera.model.Link;
 import org.apache.abdera.model.Person;
 import org.apache.abdera.protocol.server.RequestContext;
 import org.apache.abdera.protocol.server.ResponseContext;
@@ -315,17 +316,41 @@ public abstract class AbstractSocialEntityCollectionAdapter<T> extends
     return feed;
   }
 
+  protected void addEditLinkToEntry(Entry entry) throws Exception {
+    if (getEditUriFromEntry(entry) == null) {
+      entry.addLink(entry.getId().toString(), "edit");
+    }
+  }
+
+  protected String getEditUriFromEntry(Entry entry) throws Exception {
+    String editUri = null;
+    List<Link> editLinks = entry.getLinks("edit");
+    if (editLinks != null) {
+      for (Link link : editLinks) {
+        // if there is more than one edit link, we should not automatically
+        // assume that it's always going to point to an Atom document
+        // representation.
+        if (link.getMimeType() != null) {
+          if (link.getMimeType().match("application/atom+xml")) {
+            editUri = link.getResolvedHref().toString();
+            break;
+          }
+        } else {
+          // edit link with no type attribute is the right one to use
+          editUri = link.getResolvedHref().toString();
+          break;
+        }
+      }
+    }
+   return editUri;
+  }
+   
   /**
    * Unimplemented HTTP methods
    */
 
   @Override
   public ResponseContext deleteEntry(RequestContext request) {
-    return null;
-  }
-
-  @Override
-  public ResponseContext postEntry(RequestContext request) {
     return null;
   }
 

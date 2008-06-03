@@ -51,7 +51,7 @@ public class Activity {
 
     @Override
     public String toString() {
-      return this.jsonString;
+      return jsonString;
     }
   }
 
@@ -73,6 +73,9 @@ public class Activity {
   private String titleId;
   private String url;
   private String userId;
+
+  public Activity() {
+  }
 
   public Activity(String id, String userId) {
     this.id = id;
@@ -222,4 +225,5 @@ public class Activity {
   public void setUserId(String userId) {
     this.userId = userId;
   }
+
 }

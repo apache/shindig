@@ -20,7 +20,6 @@ package org.apache.shindig.social.abdera;
 import org.apache.shindig.common.SecurityToken;
 import org.apache.shindig.social.opensocial.ActivitiesService;
 import org.apache.shindig.social.opensocial.model.Activity;
-
 import com.google.common.collect.Lists;
 import com.google.inject.Inject;
 import org.apache.abdera.i18n.iri.IRI;
@@ -30,20 +29,23 @@ import org.apache.abdera.model.Person;
 import org.apache.abdera.protocol.server.RequestContext;
 import org.apache.abdera.protocol.server.context.ResponseContextException;
 
+import org.apache.commons.betwixt.io.BeanReader;
+import org.xml.sax.SAXException;
+
+import java.beans.IntrospectionException;
+import java.io.IOException;
+import java.io.StringReader;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
-import java.util.logging.Logger;
 
 /**
  * This Collection is backed by a set of Activity entities
  */
 public class ActivityAdapter extends
     AbstractSocialEntityCollectionAdapter<Activity> {
-  private static Logger logger = Logger
-      .getLogger(ActivityAdapter.class.getName());
 
-  private ActivitiesService activitiesService;
+  private final ActivitiesService activitiesService;
 
   /**
    * The Adapter needs Activities, People and Groups.
@@ -135,6 +137,7 @@ public class ActivityAdapter extends
    * @param activityObj The object that the entry is based on.
    * @throws ResponseContextException
    */
+  @Override
   protected void addOptionalEntryDetails(RequestContext request, Entry entry,
       IRI feedIri, Activity activityObj) throws ResponseContextException {
     String link = getLink(activityObj, feedIri, request);
@@ -193,12 +196,75 @@ public class ActivityAdapter extends
     return activitiesService.getActivities(ids, authToken).getResponse();
   }
 
+  /**
+   * When an entry is POSTed to a collection, purpose is to add that entry
+   * to the collection.
+   * 
+   * Currently, the following method only handles POST to the following
+   * collection
+   *           /activities/:uid/@self
+   */
   @Override
   public Activity postEntry(String title, IRI id, String summary, Date updated,
       List<Person> authors, Content content, RequestContext request)
       throws ResponseContextException {
-    // TODO: Implement
-    return null;
+
+    // handle Atom/XML. TODO handle Json
+
+    /* 
+     * To extract Activity obj from the posted Entry, content element is 
+     * used. To make this work, content element should contain everything
+     * we need to create the Activity object correctly. If there are 
+     * some fields in other atom: elements, copy them into the content element.
+     * i.e., implement "reverse hoisting" logic here
+     */ 
+    // TODO is userId field in content element (correspodns to Activity.userId)
+    // supposed to be filled in by the caller
+    // OR is it to be picked up from the ":uid" param on URL
+    // assuming that it is already filled by the caller.
+    
+    String contentXml = content.getValue();
+    BeanReader reader = new BeanReader();
+    Activity postedActivity = null;
+    try {
+      reader.registerBeanClass("activity", Activity.class);
+      StringReader rd = new StringReader(contentXml);
+      postedActivity = (Activity)reader.parse(rd);
+    } catch (IntrospectionException e) {
+      throw new ResponseContextException(null, e);
+    } catch (IOException e) {
+      throw new ResponseContextException(null, e);
+    } catch (SAXException e) {
+      throw new ResponseContextException(null, e);
+    }
+
+    /*
+     * in Atom/Xml, the posted entry is returned to the original caller
+     * with the following fields being "potentially" different from
+     * what the caller sent:
+     *   1. atom:id  server can optionally assign a new id to the entry
+     *               and return it to the caller. This may not be reqd
+     *   2. editUri link should be added to the entry if required.
+     *           refer to atom spec on all you need to know about this field.
+     *      included the following methods in baseclass to help with this
+     *       . addEditLinkToEntry(Entry entry)
+     *       . getEditUriFromEntry(Entry entry)
+     *       
+     *    TODO figure out WHERE the postedEntry doc is being constructed in
+     *    Abdera. thats where the logic to add editUri should be included.
+     *      
+     */ 
+    
+    // add this to list of activities of the user
+    String uid = request.getTarget().getParameter("uid");
+    SecurityToken authToken = getSecurityToken(request, uid);
+    
+    // the following modifies postedActivity - which is then returned to 
+    // the caller. 
+    // TODO the following method should be modified (or new method needed) 
+    // to return the postedActivity 
+    activitiesService.createActivity(uid, postedActivity, authToken);
+    return postedActivity;
   }
 
   @Override

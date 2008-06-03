@@ -62,6 +62,9 @@ public class MediaItem {
     }
   }
 
+  public MediaItem() {
+  }
+
   public MediaItem(String mimeType, Type type, String url) {
     this.mimeType = mimeType;
     this.type = type;
