@@ -90,6 +90,7 @@
       <organization>ASF</organization>
       <roles>
         <role>PMC Member</role>
+        <role>Mentor</role>
       </roles>
     </developer>
     <developer>
@@ -165,6 +166,16 @@
       </roles>
     </developer>
     <developer>
+      <id>sgala</id>
+      <name>Santiago Gala</name>
+      <email>sgala@hisitech.com</email>
+      <organization>ASF</organization>
+      <roles>
+       <role>PMC Member</role>
+       <role>Mentor</role>
+      </roles>
+    </developer>
+    <developer>
       <id>lryan</id>
       <name>Louis Ryan</name>
       <email>lryan@apache.org</email>
@@ -205,15 +216,6 @@
       <id>gstein</id>
       <name>Greg Stein</name>
       <email>gstein@apache.org</email>
-      <organization>ASF</organization>
-      <roles>
-        <role>Mentor</role>
-      </roles>
-    </developer>
-    <developer>
-      <id>sgala</id>
-      <name>Santiago Gala</name>
-      <email>sgala@hisitech.com</email>
       <organization>ASF</organization>
       <roles>
         <role>Mentor</role>
