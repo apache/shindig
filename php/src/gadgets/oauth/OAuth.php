@@ -38,6 +38,8 @@ class OAuth {
  */
 class OAuthException extends Exception {}
 
+class OAuthProblemException extends Exception {}
+
 class OAuthConsumer {
 	public $key;
 	public $secret;
@@ -118,6 +120,13 @@ class OAuthSignatureMethod_HMAC_SHA1 extends OAuthSignatureMethod {
 		$key = implode('&', $key_parts);
 		return base64_encode(hash_hmac('sha1', $base_string, $key, true));
 	}
+
+	//TODO: Double check this!
+	public function check_signature(&$request, $consumer, $token, $signature)
+	{
+		$sign = $this->build_signature($request, $consumer, $token);
+		return $sign == $signature;
+	}
 }
 
 class OAuthSignatureMethod_PLAINTEXT extends OAuthSignatureMethod {
@@ -139,6 +148,16 @@ class OAuthSignatureMethod_PLAINTEXT extends OAuthSignatureMethod {
 		// for debug purposes
 		$request->base_string = $raw;
 		return OAuthUtil::urlencodeRFC3986($raw);
+	}
+
+	//TODO: Double check this!
+	public function check_signature(&$request, $consumer, $token, $signature)
+	{
+		$raw = OAuthUtil::urldecodeRFC3986($request->base_string);
+		$sig = explode("&", $raw);
+		array_pop($sig);
+		$secret = array(OAuthUtil::urldecodeRFC3986($consumer->secret));
+		return $sig == $secret;
 	}
 }
 
@@ -174,19 +193,19 @@ class OAuthSignatureMethod_RSA_SHA1 extends OAuthSignatureMethod {
 	{
 		$base_string = $request->get_signature_base_string();
 		// Fetch the private key cert based on the request
-		$cert = $consumer->getProperty("RSA-SHA1.PrivateKey");
+		$cert = $consumer->getProperty(OAuthSignatureMethod_RSA_SHA1::$PRIVATE_KEY);
 		// Pull the private key ID from the certificate
 		//FIXME this function seems to be called both for a oauth.json action where
 		// there is no phrase required, but for signed requests too, which do require it
 		// this is a dirty hack to make it work .. kinda
-		if (!$privatekeyid = @openssl_pkey_get_private($cert)) {
-			if (!$privatekeyid = @openssl_pkey_get_private($cert, Config::get('private_key_phrase') != '' ? (Config::get('private_key_phrase')) : null)) {
+		if (! $privatekeyid = @openssl_pkey_get_private($cert)) {
+			if (! $privatekeyid = @openssl_pkey_get_private($cert, Config::get('private_key_phrase') != '' ? (Config::get('private_key_phrase')) : null)) {
 				throw new Exception("Could not load private key");
 			}
 		}
 		// Sign using the key
 		$ok = openssl_sign($base_string, $signature, $privatekeyid);
-		// Release the key resource		
+		// Release the key resource
 		openssl_free_key($privatekeyid);
 		return base64_encode($signature);
 	}
@@ -262,11 +281,8 @@ class OAuthRequest {
 	public static function from_consumer_and_token($consumer, $token, $http_method, $http_url, $parameters = NULL)
 	{
 		$parameters = is_array($parameters) ? $parameters : array();
-		$defaults = array("oauth_nonce" => OAuthRequest::generate_nonce(), "oauth_timestamp" => OAuthRequest::generate_timestamp(), "oauth_consumer_key" => $consumer->key,
-		// quick hack to make this demo'able
-		'synd' => 'partuza',
-		'container' => 'partuza'
-		);
+		$defaults = array("oauth_nonce" => OAuthRequest::generate_nonce(), "oauth_timestamp" => OAuthRequest::generate_timestamp(), "oauth_consumer_key" => $consumer->key, // quick hack to make this demo'able
+		'synd' => 'partuza', 'container' => 'partuza');
 		$parameters = array_merge($defaults, $parameters);
 		if (isset($token)) {
 			$parameters['oauth_token'] = $token;
@@ -291,12 +307,7 @@ class OAuthRequest {
 
 	public function set_parameters($params)
 	{
-		$arrParams = array();
-		foreach ($params as $param) {
-			$keyValuePair = explode('=', $param);
-			$arrParams[$keyValuePair[0]] = @$keyValuePair[1];
-		}
-		return $this->parameters = $arrParams;
+		return $this->parameters = $params;
 	}
 
 	//TODO double check if hash can be used
@@ -316,14 +327,14 @@ class OAuthRequest {
 
 	/**
 	 * Returns the normalized parameters of the request
-	 * 
+	 *
 	 * This will be all (except oauth_signature) parameters,
 	 * sorted first by key, and if duplicate keys, then by
 	 * value.
 	 *
 	 * The returned string will be all the key=value pairs
 	 * concated by &.
-	 * 
+	 *
 	 * @return string
 	 */
 	public function get_signable_parameters()
@@ -344,7 +355,7 @@ class OAuthRequest {
 		$pairs = array();
 		foreach ($params as $key => $value) {
 			if (is_array($value)) {
-				// If the value is an array, it's because there are multiple 
+				// If the value is an array, it's because there are multiple
 				// with the same key, sort them, then add all the pairs
 				natsort($value);
 				foreach ($value as $v2) {
@@ -797,6 +808,21 @@ class SimpleOAuthDataStore extends OAuthDataStore {
 
 class OAuthUtil {
 
+	public static function getPostBodyString(Array $params)
+	{
+		$result = '';
+		$first = true;
+		foreach ($params as $key => $val) {
+			if ($first) {
+				$first = false;
+			} else {
+				$result .= '&';
+			}
+			$result .= OAuthUtil::urlencodeRFC3986($key) . "=" . OAuthUtil::urlencodeRFC3986($val);
+		}
+		return $result;
+	}
+
 	public static function urlencodeRFC3986($string)
 	{
 		return str_replace('%7E', '~', rawurlencode($string));
@@ -813,14 +839,13 @@ class OAuthUtil {
 		if (! isset($contentType)) {
 			return false;
 		}
-		$semi = strstr($contentType, ";");
+		$semi = strpos($contentType, ";");
 		if ($semi >= 0) {
 			$contentType = substr($contentType, 0, $semi);
 		}
 		return strtolower(OAuth::$FORM_ENCODED) == strtolower(trim($contentType));
 	}
 
-	//TODO review foreach, use array_map
 	public static function addParameters($url, $oauthParams)
 	{
 		$url .= strchr($url, '?') === false ? '?' : '&';
@@ -832,13 +857,48 @@ class OAuthUtil {
 
 	public static function decodeForm($form)
 	{
+		$parameters = array();
 		$explodedForm = explode("&", $form);
-		
-		foreach ($explodedForm as $value) {
-			$value = OAuthUtil::urlencodeRFC3986($value);
+		foreach ($explodedForm as $params) {
+			$value = explode("=", $params);
+			$parameters[OAuthUtil::urldecodeRFC3986($value[0])] = OAuthUtil::urldecodeRFC3986($value[1]);
 		}
-		
-		return $explodedForm;
+		return $parameters;
 	}
+
+	/**
+	 * Parse the parameters from an OAuth Authorization or WWW-Authenticate
+	 * header. The realm is included as a parameter. If the given header doesn't
+	 * start with "OAuth ", return an empty list.
+	 */
+	public static function decodeAuthorization($authorization)
+	{
+		$into = array();
+		if ($authorization != null) {
+			$m = ereg(OAuthUtil::$AUTHORIZATION, $authorization);
+			if ($m == 1) {
+				if (strpos($authorization, OAuthUtil::$AUTH_SCHEME) == 0) {
+					$authorization = str_replace("OAuth ", "", $authorization);
+					$authParams = explode(", ", $authorization);
+					foreach ($authParams as $params) {
+						$m = ereg(OAuthUtil::$NVP, $params);
+						if ($m == 1) {
+							$keyValue = explode("=", $params);
+							$name = OAuthUtil::urlencodeRFC3986($keyValue[0]);
+							$value = OAuthUtil::urlencodeRFC3986(str_replace("\"", "", $keyValue[1]));
+							$into[$name] = $value;
+						}
+					}
+				}
+			}
+		}
+		return $into;
+	}
+	
+	public static $AUTH_SCHEME = "OAuth";
+	
+	static $AUTHORIZATION = "\\s*(\\w*)\\s+(.*)";
+	
+	static $NVP = "(\\S*)\\s*\\=\\s*\"([^\"]*)\"";
 
 }
