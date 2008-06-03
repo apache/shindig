@@ -57,23 +57,15 @@ class SigningFetcherFactory {
 					if (! $rsa_private_key = @file_get_contents($keyFile)) {
 						throw new Exception("Could not read keyfile ($keyFile), check the file name and permission");
 					}
-					// TODO: sending NULL as a second param to openssl_pkey_get_private works?
 					$phrase = Config::get('private_key_phrase') != '' ? (Config::get('private_key_phrase')) : null;
-					if (($privateKey = @openssl_pkey_get_private($rsa_private_key, $phrase)) == false) {
-						//TODO: double check if can input keyfile -inform PEM
-						if (! $in = @tempnam(sys_get_temp_dir(), "RSA_PRIVATE_KEY_")) {
-							throw new Exception("Could not create temporary file");
-						}
-						if (! @file_put_contents($in, base64_decode($rsa_private_key))) {
-							throw new Exception("Could not write to temporary file");
-						}
-						if (! $out = @tempnam(sys_get_temp_dir(), "RSA_PRIVATE_KEY_")) {
-							throw new Exception("Could not create temporary file");
-						}
-						exec("openssl pkcs8 -inform DER -outform PEM -out " . $out . " -nocrypt -in " . $in);
-						if (! $rsa_private_key = @file_get_contents($out)) {
-							throw new Exception("Could not read temporary file");
-						}
+					$privateKey .= "-----BEGIN PRIVATE KEY-----\n";
+					$chunks = str_split($rsa_private_key, 64);
+					foreach ($chunks as $chunk) {
+						$privateKey .= $chunk . "\n";
+					}
+					$privateKey .= "-----END PRIVATE KEY-----";
+					if (! $rsa_private_key = @openssl_pkey_get_private($privateKey, $phrase)) {
+						throw new Exception("Could not create the key");
 					}
 					$cache->set(md5("RSA_PRIVATE_KEY_" . $this->keyName), $rsa_private_key);
 				}
