@@ -16,14 +16,14 @@
  * specific language governing permissions and limitations under the License.
  */
 package org.apache.shindig.gadgets.spec;
-import org.apache.shindig.common.xml.XmlUtil;
 import org.apache.shindig.gadgets.Substitutions;
-
 import org.w3c.dom.Element;
+import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -40,6 +40,35 @@ import java.util.Map;
  * Content and UserPref nodes.
  */
 public class ModulePrefs {
+
+  private static final String ATTR_TITLE = "title";
+  private static final String ATTR_TITLE_URL = "title_url";
+  private static final String ATTR_DESCRIPTION = "description";
+  private static final String ATTR_AUTHOR = "author";
+  private static final String ATTR_AUTHOR_EMAIL = "author_email";
+  private static final String ATTR_SCREENSHOT = "screenshot";
+  private static final String ATTR_THUMBNAIL = "thumbnail";
+  private static final String ATTR_DIRECTORY_TITLE = "directory_title";
+  private static final String ATTR_AUTHOR_AFFILIATION = "author_affiliation";
+  private static final String ATTR_AUTHOR_LOCATION = "author_location";
+  private static final String ATTR_AUTHOR_PHOTO = "author_photo";
+  private static final String ATTR_AUTHOR_ABOUTME = "author_aboutme";
+  private static final String ATTR_AUTHOR_QUOTE = "author_quote";
+  private static final String ATTR_AUTHOR_LINK = "author_link";
+  private static final String ATTR_SHOW_STATS = "show_stats";
+  private static final String ATTR_SHOW_IN_DIRECTORY = "show_in_directory";
+  private static final String ATTR_SINGLETON = "singleton";
+  private static final String ATTR_SCALING = "scaling";
+  private static final String ATTR_SCROLLING = "scrolling";
+  private static final String ATTR_WIDTH = "width";
+  private static final String ATTR_HEIGHT = "height";
+  private static final String ATTR_CATEGORY = "category";
+  private static final String ATTR_CATEGORY2 = "category2";
+
+  private static final URI EMPTY_URI = URI.create("");
+
+  Map<String, String> attributes;
+
   // Canonical spec items first.
 
   /**
@@ -47,9 +76,8 @@ public class ModulePrefs {
    *
    * User Pref + Message Bundle + Bidi
    */
-  private String title;
   public String getTitle() {
-    return title;
+    return getAttribute(ATTR_TITLE);
   }
 
   /**
@@ -57,9 +85,8 @@ public class ModulePrefs {
    *
    * User Pref + Message Bundle + Bidi
    */
-  private URI titleUrl;
   public URI getTitleUrl() {
-    return titleUrl;
+    return getUriAttribute(ATTR_TITLE_URL);
   }
 
   /**
@@ -67,9 +94,8 @@ public class ModulePrefs {
    *
    * Message Bundles
    */
-  private String description;
   public String getDescription() {
-    return description;
+    return getAttribute(ATTR_DESCRIPTION);
   }
 
   /**
@@ -77,9 +103,8 @@ public class ModulePrefs {
    *
    * Message Bundles
    */
-  private String author;
   public String getAuthor() {
-    return author;
+    return getAttribute(ATTR_AUTHOR);
   }
 
   /**
@@ -87,9 +112,8 @@ public class ModulePrefs {
    *
    * Message Bundles
    */
-  private String authorEmail;
   public String getAuthorEmail() {
-    return authorEmail;
+    return getAttribute(ATTR_AUTHOR_EMAIL);
   }
 
   /**
@@ -97,9 +121,8 @@ public class ModulePrefs {
    *
    * Message Bundles
    */
-  private URI screenshot;
   public URI getScreenshot() {
-    return screenshot;
+    return getUriAttribute(ATTR_SCREENSHOT);
   }
 
   /**
@@ -107,9 +130,8 @@ public class ModulePrefs {
    *
    * Message Bundles
    */
-  private URI thumbnail;
   public URI getThumbnail() {
-    return thumbnail;
+    return getUriAttribute(ATTR_THUMBNAIL);
   }
 
   // Extended data (typically used by directories)
@@ -119,9 +141,8 @@ public class ModulePrefs {
    *
    * Message Bundles
    */
-  private String directoryTitle;
   public String getDirectoryTitle() {
-    return directoryTitle;
+    return getAttribute(ATTR_DIRECTORY_TITLE);
   }
 
   /**
@@ -129,9 +150,8 @@ public class ModulePrefs {
    *
    * Message Bundles
    */
-  private String authorAffiliation;
   public String getAuthorAffiliation() {
-    return authorAffiliation;
+    return getAttribute(ATTR_AUTHOR_AFFILIATION);
   }
 
   /**
@@ -139,9 +159,8 @@ public class ModulePrefs {
    *
    * Message Bundles
    */
-  private String authorLocation;
   public String getAuthorLocation() {
-    return authorLocation;
+    return getAttribute(ATTR_AUTHOR_LOCATION);
   }
 
   /**
@@ -149,9 +168,8 @@ public class ModulePrefs {
    *
    * Message Bundles
    */
-  private String authorPhoto;
   public String getAuthorPhoto() {
-    return authorPhoto;
+    return getAttribute(ATTR_AUTHOR_PHOTO);
   }
 
   /**
@@ -159,9 +177,8 @@ public class ModulePrefs {
    *
    * Message Bundles
    */
-  private String authorAboutme;
   public String getAuthorAboutme() {
-    return authorAboutme;
+    return getAttribute(ATTR_AUTHOR_ABOUTME);
   }
 
   /**
@@ -169,9 +186,8 @@ public class ModulePrefs {
    *
    * Message Bundles
    */
-  private String authorQuote;
   public String getAuthorQuote() {
-    return authorQuote;
+    return getAttribute(ATTR_AUTHOR_QUOTE);
   }
 
   /**
@@ -179,65 +195,117 @@ public class ModulePrefs {
    *
    * Message Bundles
    */
-  private String authorLink;
   public String getAuthorLink() {
-    return authorLink;
+    return getAttribute(ATTR_AUTHOR_LINK);
   }
 
   /**
    * ModulePrefs@show_stats
    */
-  private boolean showStats;
   public boolean getShowStats() {
-    return showStats;
+    return getBoolAttribute(ATTR_SHOW_STATS);
   }
 
   /**
    * ModulePrefs@show_in_directory
    */
-  private boolean showInDirectory;
   public boolean getShowInDirectory() {
-    return showInDirectory;
+    return getBoolAttribute(ATTR_SHOW_IN_DIRECTORY);
   }
 
   /**
    * ModulePrefs@singleton
    */
-  private boolean singleton;
   public boolean getSingleton() {
-    return singleton;
+    return getBoolAttribute(ATTR_SINGLETON);
   }
 
   /**
    * ModulePrefs@scaling
    */
-  private boolean scaling;
   public boolean getScaling() {
-    return scaling;
+    return getBoolAttribute(ATTR_SCALING);
   }
 
   /**
    * ModulePrefs@scrolling
    */
-  private boolean scrolling;
   public boolean getScrolling() {
-    return scrolling;
+    return getBoolAttribute(ATTR_SCROLLING);
   }
 
   /**
    * ModuleSpec@width
    */
-  private final int width;
   public int getWidth() {
-    return width;
+    return getIntAttribute(ATTR_WIDTH);
   }
 
   /**
-   * ModuleSpec@width
+   * ModuleSpec@height
    */
-  private final int height;
   public int getHeight() {
-    return height;
+    return getIntAttribute(ATTR_HEIGHT);
+  }
+
+  /**
+   * @return the value of an ModulePrefs attribute by name, or null if the
+   *     attribute doesn't exist
+   */
+  public String getAttribute(String name) {
+    return attributes.get(name);
+  }
+
+  /**
+   * @return the value of an ModulePrefs attribute by name, or the default
+   *     value if the attribute doesn't exist
+   */
+  public String getAttribute(String name, String defaultValue) {
+    String value = getAttribute(name);
+    if (value == null) {
+      return defaultValue;
+    } else {
+      return value;
+    }
+  }
+
+  /**
+   * @return the attribute by name converted to an URI, or the empty URI if the
+   *    attribute couldn't be converted
+   */
+  public URI getUriAttribute(String name) {
+    String uri = getAttribute(name);
+    if (uri != null) {
+      try {
+        return new URI(uri);
+      } catch (URISyntaxException e) {
+        return EMPTY_URI;
+      }
+    }
+    return EMPTY_URI;
+  }
+
+  /**
+   * @return the attribute by name converted to a boolean (false if the
+   *     attribute doesn't exist)
+   */
+  public boolean getBoolAttribute(String name) {
+    String value = getAttribute(name);
+    return !(value == null || "false".equals(value));
+  }
+
+  /**
+   * @return the attribute by name converted to an interger, or 0 if the
+   *     attribute doesn't exist
+   */
+  public int getIntAttribute(String name) {
+    String value = getAttribute(name);
+    if (value == null) {
+      return 0;
+    } else {
+      // TODO might want to handle parse exception here
+      return Integer.parseInt(value);
+    }
   }
 
   /**
@@ -329,18 +397,10 @@ public class ModulePrefs {
       prefs.icons = Collections.unmodifiableList(iconList);
     }
 
-    Substitutions.Type type = Substitutions.Type.MESSAGE;
-    // Most attributes only get strings.
-    prefs.author = substituter.substituteString(type, author);
-    prefs.authorEmail = substituter.substituteString(type, authorEmail);
-    prefs.description = substituter.substituteString(type, description);
-    prefs.directoryTitle = substituter.substituteString(type, directoryTitle);
-    prefs.screenshot = substituter.substituteUri(type, screenshot);
-    prefs.thumbnail = substituter.substituteUri(type, thumbnail);
-
-    // All types.
-    prefs.title = substituter.substituteString(null, title);
-    prefs.titleUrl = substituter.substituteUri(null, titleUrl);
+    for (Map.Entry<String, String> attr : attributes.entrySet()) {
+      String substituted = substituter.substituteString(null, attr.getValue());
+      prefs.attributes.put(attr.getKey(), substituted);
+    }
     return prefs;
   }
 
@@ -365,30 +425,14 @@ public class ModulePrefs {
   @Override
   public String toString() {
     StringBuilder buf = new StringBuilder();
-    buf.append("<ModulePrefs")
-       .append(" title=\"").append(title).append('\"')
-       .append(" author=\"").append(author).append('\"')
-       .append(" author_email=\"").append(authorEmail).append('\"')
-       .append(" author_affiliation=\"").append(authorAffiliation).append('\"')
-       .append(" author_location=\"").append(authorLocation).append('\"')
-       .append(" author_photo=\"").append(authorPhoto).append('\"')
-       .append(" author_aboutme=\"").append(authorAboutme).append('\"')
-       .append(" author_quote=\"").append(authorQuote).append('\"')
-       .append(" author_link=\"").append(authorLink).append('\"')
-       .append(" description=\"").append(description).append('\"')
-       .append(" directory_title=\"").append(directoryTitle).append('\"')
-       .append(" screenshot=\"").append(screenshot).append('\"')
-       .append(" thumbnail=\"").append(thumbnail).append('\"')
-       .append(" height=\"").append(height).append('\"')
-       .append(" width=\"").append(width).append('\"')
-       .append(" category=\"").append(categories.get(0)).append('\"')
-       .append(" category2=\"").append(categories.get(1)).append('\"')
-       .append(" show_stats=\"").append(showStats).append('\"')
-       .append(" show_in_directory=\"").append(showInDirectory).append('\"')
-       .append(" singleton=\"").append(singleton).append('\"')
-       .append(" scaling=\"").append(scaling).append('\"')
-       .append(" scrolling=\"").append(scrolling).append('\"')
-       .append(">\n");
+    buf.append("<ModulePrefs");
+
+    for (Map.Entry<String, String> attr : attributes.entrySet()) {
+      buf.append(" ").append(attr.getKey()).append("=\"")
+         .append(attr.getValue()).append('\"');
+    }
+    buf.append(">\n");
+
     for (Preload preload : preloads) {
       buf.append(preload).append('\n');
     }
@@ -410,45 +454,19 @@ public class ModulePrefs {
    * @param specUrl
    */
   public ModulePrefs(Element element, URI specUrl) throws SpecParserException {
-    title = XmlUtil.getAttribute(element, "title");
-    if (title == null) {
+    attributes = new HashMap<String, String>();
+    NamedNodeMap attributeNodes = element.getAttributes();
+    for (int i = 0; i < attributeNodes.getLength(); i++) {
+      Node node = attributeNodes.item(i);
+      attributes.put(node.getNodeName(), node.getNodeValue());
+    }
+
+    if (getTitle() == null) {
       throw new SpecParserException("ModulePrefs@title is required.");
     }
-    URI emptyUri = URI.create("");
-    titleUrl = XmlUtil.getUriAttribute(element, "title_url", emptyUri);
-    author = XmlUtil.getAttribute(element, "author", "");
-    authorEmail = XmlUtil.getAttribute(element, "author_email", "");
-    authorAffiliation = XmlUtil.getAttribute(element, "author_affiliation", "");
-    authorLocation = XmlUtil.getAttribute(element, "author_location", "");
-    authorPhoto = XmlUtil.getAttribute(element, "author_photo", "");
-    authorAboutme = XmlUtil.getAttribute(element, "author_aboutme", "");
-    authorQuote = XmlUtil.getAttribute(element, "author_quote", "");
-    authorLink = XmlUtil.getAttribute(element, "author_link", "");
-    description = XmlUtil.getAttribute(element, "description", "");
-    directoryTitle = XmlUtil.getAttribute(element, "directory_title", "");
-    screenshot = XmlUtil.getUriAttribute(element, "screenshot", emptyUri);
-    thumbnail = XmlUtil.getUriAttribute(element, "thumbnail", emptyUri);
-    showStats = XmlUtil.getBoolAttribute(element, "show_stats");
-    showInDirectory = XmlUtil.getBoolAttribute(element, "show_in_directory");
-    singleton = XmlUtil.getBoolAttribute(element, "singleton");
-    scaling = XmlUtil.getBoolAttribute(element, "scaling");
-    scrolling = XmlUtil.getBoolAttribute(element, "scrolling");
 
-    String height = XmlUtil.getAttribute(element, "height");
-    if (height == null) {
-      this.height = 0;
-    } else {
-      this.height = Integer.parseInt(height);
-    }
-    String width = XmlUtil.getAttribute(element, "width");
-    if (width == null) {
-      this.width = 0;
-    } else {
-      this.width = Integer.parseInt(width);
-    }
     categories = Arrays.asList(
-        XmlUtil.getAttribute(element, "category", ""),
-        XmlUtil.getAttribute(element, "category2", ""));
+        getAttribute(ATTR_CATEGORY, ""), getAttribute(ATTR_CATEGORY2, ""));
 
     // Child elements
     PreloadVisitor preloadVisitor = new PreloadVisitor();
@@ -472,12 +490,11 @@ public class ModulePrefs {
    * Creates an empty module prefs for substitute() to use.
    */
   private ModulePrefs(ModulePrefs prefs) {
+    attributes = new HashMap<String, String>();
     categories = prefs.getCategories();
     preloads = prefs.getPreloads();
     features = prefs.getFeatures();
     locales = prefs.getLocales();
-    height = prefs.getHeight();
-    width = prefs.getWidth();
   }
 }
 

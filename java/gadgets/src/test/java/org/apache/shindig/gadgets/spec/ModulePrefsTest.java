@@ -41,6 +41,7 @@ public class ModulePrefsTest extends TestCase {
                  " directory_title=\"directory_title\"" +
                  " width=\"1\"" +
                  " height=\"2\"" +
+                 " scrolling=\"true\"" +
                  " category=\"category\"" +
                  " category2=\"category2\">" +
                  "  <Require feature=\"require\"/>" +
@@ -60,6 +61,8 @@ public class ModulePrefsTest extends TestCase {
     assertEquals("directory_title", prefs.getDirectoryTitle());
     assertEquals(1, prefs.getWidth());
     assertEquals(2, prefs.getHeight());
+    assertTrue(prefs.getScrolling());
+    assertFalse(prefs.getScaling());
     assertEquals("category", prefs.getCategories().get(0));
     assertEquals("category2", prefs.getCategories().get(1));
     assertEquals(true, prefs.getFeatures().get("require").getRequired());
@@ -68,6 +71,16 @@ public class ModulePrefsTest extends TestCase {
         prefs.getPreloads().get(0).getHref().toString());
     assertEquals(1, prefs.getIcons().size());
     assertEquals(1, prefs.getLocales().size());
+  }
+
+  public void testGetAttribute() throws Exception {
+    String xml = "<ModulePrefs title=\"title\" some_attribute=\"attribute\" " +
+        "empty_attribute=\"\"/>";
+    ModulePrefs prefs = new ModulePrefs(XmlUtil.parse(xml), SPEC_URL);
+    assertEquals("title", prefs.getAttribute("title"));
+    assertEquals("attribute", prefs.getAttribute("some_attribute"));
+    assertEquals("", prefs.getAttribute("empty_attribute"));
+    assertNull(prefs.getAttribute("gobbledygook"));
   }
 
   public void testGetLocale() throws Exception {
@@ -81,12 +94,16 @@ public class ModulePrefsTest extends TestCase {
 
     spec = prefs.getLocale(new Locale("foo", "bar"));
     assertEquals("rtl", spec.getLanguageDirection());
-
   }
 
-  public void testSubstitutions() {
+  public void testSubstitutions() throws Exception {
+    String xml = "<ModulePrefs title=\"__MSG_title__\"/>";
+    String title = "blah";
     Substitutions substitutions = new Substitutions();
-    // TODO
+    substitutions.addSubstitution(Substitutions.Type.MESSAGE, "title", title);
+    ModulePrefs prefs = new ModulePrefs(XmlUtil.parse(xml), SPEC_URL);
+    prefs = prefs.substitute(substitutions);
+    assertEquals(title, prefs.getTitle());
   }
 
   public void testTitleRequired() throws Exception {
