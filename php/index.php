@@ -37,7 +37,10 @@
 include_once ('config.php');
 
 // basic sanity check if we have all required modules
-$modules = array('json', 'mcrypt', 'SimpleXML', 'libxml', 'curl');
+$modules = array('json', 'SimpleXML', 'libxml', 'curl');
+if (!Config::get('allow_plaintext_token')) {
+	$modules[] = 'mcrypt';
+}
 foreach ($modules as $module) {
 	if (!extension_loaded($module)) {
 		die("Shindig requires the {$module} extention, see <a href='http://www.php.net/{$module}'>http://www.php.net/{$module}</a> for more info");
