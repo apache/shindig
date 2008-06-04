@@ -40,12 +40,16 @@ class BasicBlobCrypter extends BlobCrypter {
 	public function wrap(Array $in)
 	{
 		$encoded = $this->serializeAndTimestamp($in);
-		$cipherText = Crypto::aes128cbcEncrypt($this->cipherKey, $encoded);
+		if (!function_exists('mcrypt_module_open') && Config::get('allow_plaintext_token')) {
+			$cipherText = base64_encode($encoded);
+		} else {
+			$cipherText = Crypto::aes128cbcEncrypt($this->cipherKey, $encoded);
+		}
 		$hmac = Crypto::hmacSha1($this->hmacKey, $cipherText);
 		$b64 = base64_encode($cipherText . $hmac);
 		return $b64;
 	}
-
+	
 	private function serializeAndTimestamp(Array $in)
 	{
 		$encoded = "";
@@ -78,7 +82,11 @@ class BasicBlobCrypter extends BlobCrypter {
 			$cipherText = substr($bin, 0, strlen($bin) - Crypto::$HMAC_SHA1_LEN);
 			$hmac = substr($bin, strlen($cipherText));
 			Crypto::hmacSha1Verify($this->hmacKey, $cipherText, $hmac);
-			$plain = Crypto::aes128cbcDecrypt($this->cipherKey, $cipherText);
+			if (!function_exists('mcrypt_module_open') && Config::get('allow_plaintext_token')) {
+				$plain = base64_decode($cipherText);
+			} else {
+				$plain = Crypto::aes128cbcDecrypt($this->cipherKey, $cipherText);
+			}
 			$out = $this->deserialize($plain);
 			$this->checkTimestamp($out, $maxAgeSec);
 		}
