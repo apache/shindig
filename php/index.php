@@ -36,10 +36,15 @@
 
 include_once ('config.php');
 
-// basic sanity check if we have all required modules
+// Basic sanity check if we have all required modules
 $modules = array('json', 'SimpleXML', 'libxml', 'curl');
+// if plain text tokens are disallowed we require mcrypt
 if (!Config::get('allow_plaintext_token')) {
 	$modules[] = 'mcrypt';
+}
+// if you selected the memcache caching backend, you need the memcache extention too :)
+if (Config::get('data_cache') == 'CacheMemcache') {
+	$modules[] = 'memcache';
 }
 foreach ($modules as $module) {
 	if (!extension_loaded($module)) {
