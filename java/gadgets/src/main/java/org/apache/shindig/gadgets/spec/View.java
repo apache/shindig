@@ -47,6 +47,14 @@ public class View {
   }
 
   /**
+   * Content@type - the raw, possibly non-standard string
+   */
+  private final String rawType;
+  public String getRawType() {
+    return rawType;
+  }
+
+  /**
    * Content@href
    *
    * All substitutions
@@ -104,7 +112,7 @@ public class View {
   public String toString() {
     StringBuilder buf = new StringBuilder();
     buf.append("<Content type=\"")
-       .append(type.toString().toLowerCase())
+       .append(rawType)
        .append("\" href=\"")
        .append(href)
        .append("\" view=\"")
@@ -126,10 +134,11 @@ public class View {
 
     boolean quirks = true;
     URI href = null;
+    String contentType = null;
     ContentType type = null;
     StringBuilder content = new StringBuilder();
     for (Element element : elements) {
-      String contentType = XmlUtil.getAttribute(element, "type");
+      contentType = XmlUtil.getAttribute(element, "type");
       if (contentType != null) {
         ContentType newType = ContentType.parse(contentType);
         if (type != null && newType != type) {
@@ -147,6 +156,7 @@ public class View {
     this.needsUserPrefSubstitution = this.content.contains("__UP_");
     this.quirks = quirks;
     this.href = href;
+    this.rawType = contentType;
     this.type = type;
     if (type == ContentType.URL && this.href == null) {
       throw new SpecParserException(
@@ -166,6 +176,7 @@ public class View {
   private View(View view) {
     needsUserPrefSubstitution = view.needsUserPrefSubstitution;
     name = view.name;
+    rawType = view.rawType;
     type = view.type;
     quirks = view.quirks;
   }
