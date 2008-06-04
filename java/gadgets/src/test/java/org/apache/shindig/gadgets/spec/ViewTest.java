@@ -45,6 +45,7 @@ public class ViewTest extends TestCase {
     assertEquals(viewName, view.getName());
     assertEquals(false, view.getQuirks());
     assertEquals(View.ContentType.HTML, view.getType());
+    assertEquals("html", view.getRawType());
     assertEquals(content, view.getContent());
   }
 
@@ -56,6 +57,17 @@ public class ViewTest extends TestCase {
    View view = new View("test", Arrays.asList(XmlUtil.parse(content1),
                                               XmlUtil.parse(content2)));
    assertEquals(body1 + body2, view.getContent());
+  }
+
+  public void testNonStandardContentType() throws Exception {
+    String contentType = "html-inline";
+    String xml = "<Content" +
+                 " type=\"" + contentType + "\"" +
+                 " quirks=\"false\"><![CDATA[blah]]></Content>";
+    View view = new View("default", Arrays.asList(XmlUtil.parse(xml)));
+
+    assertEquals(View.ContentType.HTML, view.getType());
+    assertEquals(contentType, view.getRawType());
   }
 
   public void testContentTypeConflict() throws Exception {
