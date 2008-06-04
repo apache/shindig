@@ -74,20 +74,20 @@ class GadgetDataServlet extends HttpServlet {
 			if (get_magic_quotes_gpc()) {
 				$requestParam = stripslashes($requestParam);
 			}
-			$request = json_decode($requestParam, true);
-			if ($request == $requestParam) {
+			$requests = json_decode($requestParam, true);
+			if ($requests == $requestParam) {
 				// oddly enough if the json_decode function can't parse the code,
 				// it just returns the original string (instead of something usefull like 'null' or false :))
 				throw new Exception("Invalid request JSON");
 			}
-			$response = new DataResponse($this->createResponse($requestParam, $token));
+			$response = new DataResponse($this->createResponse($requests, $token));
 		} catch (Exception $e) {
 			$response = new DataResponse(false, BAD_REQUEST);
 		}
 		echo json_encode($response);
 	}
 
-	private function createResponse($requestParam, $token)
+	private function createResponse($requests, $token)
 	{
 		if (empty($token)) {
 			throw new Exception("INVALID_GADGET_TOKEN");
@@ -97,12 +97,6 @@ class GadgetDataServlet extends HttpServlet {
 		//FIXME currently don't have a propper token, impliment and re-enable this asap
 		$securityToken = $gadgetSigner->createToken($token);
 		$responseItems = array();
-		$requests = json_decode($requestParam, true);
-		if ($requests == $requestParam) {
-			// oddly enough if the json_decode function can't parse the code,
-			// it just returns the original string
-			throw new Exception("Invalid request JSON");
-		}
 		foreach ($requests as $request) {
 			$requestItem = new RequestItem($request['type'], $request, $securityToken);
 			$response = new ResponseItem(NOT_IMPLEMENTED, $request['type'] . " has not been implemented yet.", array());
