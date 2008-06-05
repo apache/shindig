@@ -33,7 +33,7 @@ class CertServlet extends HttpServlet {
 	public function doGet()
 	{
 		$file = Config::get('public_key_file');
-		if (!file_exists($file) || !is_readable($file)) {
+		if (! file_exists($file) || ! is_readable($file)) {
 			throw new Exception("Invalid public key location ($file), check config and file permissions");
 		}
 		$this->setLastModified(filemtime($file));

@@ -39,24 +39,24 @@ class JsFeatureLoader {
 
 	private function sortFeaturesFiles($feature1, $feature2)
 	{
-		$feature1 = basename(str_replace('/feature.xml','', $feature1));
-		$feature2 = basename(str_replace('/feature.xml','', $feature2));
-	    if ($feature1 == $feature2) {
-	        return 0;
-    	}
-    	return ($feature1 < $feature2) ? -1 : 1;
+		$feature1 = basename(str_replace('/feature.xml', '', $feature1));
+		$feature2 = basename(str_replace('/feature.xml', '', $feature2));
+		if ($feature1 == $feature2) {
+			return 0;
+		}
+		return ($feature1 < $feature2) ? - 1 : 1;
 	}
-	
+
 	private function loadFiles($path, &$features)
 	{
-		$featuresFile = $path.'/features.txt';
+		$featuresFile = $path . '/features.txt';
 		if (file_exists($featuresFile) && is_readable($featuresFile)) {
 			$files = explode("\n", file_get_contents($featuresFile));
 			// custom sort, else core.io seems to bubble up before core, which breaks the dep chain order
-			usort($files, array($this,'sortFeaturesFiles'));
+			usort($files, array($this, 'sortFeaturesFiles'));
 			foreach ($files as $file) {
-				if (!empty($file) && strpos($file, 'feature.xml') !== false && substr($file, 0, 1) != '#' && substr($file, 0, 2) != '//') {
-					$file = realpath($path.'/../'.trim($file));
+				if (! empty($file) && strpos($file, 'feature.xml') !== false && substr($file, 0, 1) != '#' && substr($file, 0, 2) != '//') {
+					$file = realpath($path . '/../' . trim($file));
 					$feature = $this->processFile($file);
 					$features[$feature->name] = $feature;
 				}
@@ -99,7 +99,7 @@ class JsFeatureLoader {
 		if (! isset($doc->name)) {
 			throw new GadgetException('Invalid name in feature: ' . $path);
 		}
-		$feature->name = trim($doc->name);		
+		$feature->name = trim($doc->name);
 		foreach ($doc->gadget as $gadget) {
 			$feature = $this->processContext($feature, $gadget, false);
 		}

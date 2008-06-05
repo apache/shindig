@@ -68,7 +68,7 @@ class RemoteContentRequest {
 				$tmpHeaders .= "Pragma:no-cache\n";
 			}
 			$this->headers = $tmpHeaders;
-		}		
+		}
 		if (! isset($postBody)) {
 			$this->postBody = '';
 		} else {

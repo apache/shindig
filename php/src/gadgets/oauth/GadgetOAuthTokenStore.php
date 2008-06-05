@@ -48,13 +48,14 @@ class GadgetOAuthTokenStore {
 	// name of the Param that identifies the location of OAuth parameters
 	public static $OAUTH_PARAM_LOCATION = "param_location";
 	public static $AUTH_HEADER = "auth_header";
-	public static $POST_BODY   = "post_body";
+	public static $POST_BODY = "post_body";
 	public static $URI_QUERY = "uri_query";
 	
 	//public static $DEFAULT_OAUTH_PARAM_LOCATION = AUTH_HEADER;
 	public static $DEFAULT_OAUTH_PARAM_LOCATION = "auth_header"; //It has to be like the line above this.
 	//TODO: Check why java use AUTH_HEADER
 	
+
 	// we use POST if no HTTP method is specified for access and request URLs
 	// (user authorization always uses GET)
 	public static $DEFAULT_HTTP_METHOD = "POST";
@@ -249,7 +250,7 @@ class GadgetOAuthTokenStore {
 	static function getOAuthParameter($params, $paramName, $isOptional)
 	{
 		$param = @$params[$paramName];
-		if ($param == null && !$isOptional) {
+		if ($param == null && ! $isOptional) {
 			$message = "parameter '" . $paramName . "' missing in oauth feature section of gadget spec";
 			throw new GadgetException($message);
 		}
@@ -265,19 +266,19 @@ class GadgetInfo {
 	{
 		return $this->serviceName;
 	}
-	
+
 	public function setServiceName($serviceName)
 	{
 		$this->serviceName = $serviceName;
 	}
-	
+
 	public function getProviderInfo()
 	{
 		return $this->providerInfo;
 	}
 
-	 public function setProviderInfo($providerInfo)
-	 {
+	public function setProviderInfo($providerInfo)
+	{
 		$this->providerInfo = $providerInfo;
 	}
 }
