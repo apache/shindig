@@ -15,7 +15,7 @@
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
  * KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
- * 
+ *
  */
 
 /*
@@ -47,7 +47,7 @@ class GadgetServer {
 		return $gadget;
 	}
 
-	private function getBundle($localeSpec, $context)
+	private function getBundle(LocaleSpec $localeSpec=null, $context)
 	{
 		if ($localeSpec != null) {
 			$uri = $localeSpec->getURI();
@@ -57,6 +57,12 @@ class GadgetServer {
 				$parser = new MessageBundleParser();
 				$bundle = $parser->parse($response->getResponseContent());
 				return $bundle;
+			} else {
+				$messages = array();
+				foreach ($localeSpec->getLocaleMessageBundles() as $messageBundle) {
+					$messages[$messageBundle->getName()] = $messageBundle->getDesc();
+				}
+				return new MessageBundle($messages);
 			}
 		}
 		return null;
@@ -95,24 +101,24 @@ class GadgetServer {
 		//NOTE i've been a bit liberal here with folding code into this function, while it did get a bit long, the many include()'s are slowing us down
 		// Should really clean this up a bit in the future though
 		$localeSpec = $this->getLocaleSpec($gadget, $context);
-		
+
 		// get the message bundle for this gadget
 		$bundle = $this->getBundle($localeSpec, $context);
-		
+
 		//FIXME this is a half-assed solution between following the refactoring and maintaining some of the old code, fixing this up later
 		$gadget->setMessageBundle($bundle);
-		
+
 		// perform substitutions
 		$substitutor = $gadget->getSubstitutions();
-		
+
 		// Module ID
 		$substitutor->addSubstitution('MODULE', "ID", $gadget->getId()->getModuleId());
-		
+
 		// Messages (multi-language)
 		if ($bundle) {
 			$gadget->getSubstitutions()->addSubstitutions('MSG', $bundle->getMessages());
 		}
-		
+
 		// Bidi support
 		$rtl = false;
 		if ($localeSpec != null) {
@@ -122,7 +128,7 @@ class GadgetServer {
 		$substitutor->addSubstitution('BIDI', "END_EDGE", $rtl ? "left" : "right");
 		$substitutor->addSubstitution('BIDI', "DIR", $rtl ? "rtl" : "ltr");
 		$substitutor->addSubstitution('BIDI', "REVERSE_DIR", $rtl ? "ltr" : "rtl");
-		
+
 		// userPref's
 		$upValues = $gadget->getUserPrefValues();
 		foreach ($gadget->getUserPrefs() as $pref) {
@@ -136,7 +142,7 @@ class GadgetServer {
 			}
 			$substitutor->addSubstitution('USER_PREF', $name, $value);
 		}
-		
+
 		// Process required / desired features
 		$requires = $gadget->getRequires();
 		$needed = array();

@@ -15,7 +15,7 @@
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
  * KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
- * 
+ *
  */
 require 'src/common/HttpServlet.php';
 require 'src/gadgets/GadgetContext.php';
@@ -30,6 +30,7 @@ require 'src/gadgets/GadgetId.php';
 require 'src/gadgets/UserPrefs.php';
 require 'src/gadgets/Substitutions.php';
 require 'src/gadgets/LocaleSpec.php';
+require 'src/gadgets/LocaleMessageBundle.php';
 require 'src/common/Locale.php';
 require 'src/gadgets/UserPref.php';
 require 'src/gadgets/ViewSpec.php';
@@ -48,7 +49,7 @@ require 'src/gadgets/ContainerConfig.php';
  * This class deals with the gadget rendering requests (in default config this
  * would be /gadgets/ifr?url=<some gadget's url>). It uses the gadget server and
  * gadget context to render the xml to a valid html file, and outputs it.
- * 
+ *
  */
 class GadgetRenderingServlet extends HttpServlet {
 	private $context;
@@ -63,11 +64,11 @@ class GadgetRenderingServlet extends HttpServlet {
 			if (empty($_GET['url'])) {
 				throw new GadgetException("Missing required parameter: url");
 			}
-			// GadgetContext builds up all the contextual variables (based on the url or post) 
+			// GadgetContext builds up all the contextual variables (based on the url or post)
 			// plus instances all required classes (feature registry, fetcher, blacklist, etc)
 			$this->context = new GadgetContext('GADGET');
 			// Unfortunatly we can't do caja content filtering here, hoping we'll have a RPC service
-			// or command line caja to use for this at some point 
+			// or command line caja to use for this at some point
 			$gadgetServer = new GadgetServer();
 			$gadget = $gadgetServer->processGadget($this->context);
 			$this->outputGadget($gadget, $this->context);
@@ -176,7 +177,7 @@ class GadgetRenderingServlet extends HttpServlet {
 			echo $externJs;
 		}
 		echo "<script><!--\n" . $this->appendJsConfig($context, $gadget) . $this->appendMessages($gadget) . "-->\n</script>\n";
-		
+
 		$gadgetExceptions = array();
 		$content = $gadget->getSubstitutions()->substitute($view->getContent());
 		if (empty($content)) {
