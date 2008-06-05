@@ -22,8 +22,8 @@ import static org.easymock.EasyMock.expect;
 import static org.easymock.EasyMock.isA;
 
 import org.apache.shindig.gadgets.Gadget;
-import org.apache.shindig.gadgets.http.HttpResponse;
 import org.apache.shindig.gadgets.http.HttpRequest;
+import org.apache.shindig.gadgets.http.HttpResponse;
 import org.apache.shindig.gadgets.spec.GadgetSpec;
 
 import org.json.JSONArray;
@@ -36,17 +36,20 @@ import java.util.Map;
 
 public class JsonRpcHandlerTest extends HttpTestFixture {
   private static final URI SPEC_URL = URI.create("http://example.org/g.xml");
-  private static final HttpRequest SPEC_REQUEST
-      = new HttpRequest(SPEC_URL);
+  private static final HttpRequest SPEC_REQUEST = new HttpRequest(SPEC_URL);
   private static final URI SPEC_URL2 = URI.create("http://example.org/g2.xml");
-  private static final HttpRequest SPEC_REQUEST2
-      = new HttpRequest(SPEC_URL2);
+  private static final HttpRequest SPEC_REQUEST2 = new HttpRequest(SPEC_URL2);
   private static final String SPEC_TITLE = "JSON-TEST";
   private static final String SPEC_TITLE2 = "JSON-TEST2";
+  private static final int PREFERRED_HEIGHT = 100;
+  private static final int PREFERRED_WIDTH = 242;
   private static final String SPEC_XML
       = "<Module>" +
         "<ModulePrefs title=\"" + SPEC_TITLE + "\"/>" +
-        "<Content type=\"html\">Hello, world</Content>" +
+        "<Content type=\"html\"" +
+        " preferred_height = \"" + PREFERRED_HEIGHT + "\"" +
+        " preferred_width = \"" + PREFERRED_WIDTH + "\"" +
+        ">Hello, world</Content>" +
         "</Module>";
   private static final String SPEC_XML2
       = "<Module>" +
@@ -89,6 +92,10 @@ public class JsonRpcHandlerTest extends HttpTestFixture {
     assertEquals(SPEC_URL.toString(), gadget.getString("iframeUrl"));
     assertEquals(SPEC_TITLE, gadget.getString("title"));
     assertEquals(0, gadget.getInt("moduleId"));
+    JSONObject view = gadget.getJSONObject("views")
+        .getJSONObject(GadgetSpec.DEFAULT_VIEW);
+    assertEquals(PREFERRED_HEIGHT, view.getInt("preferredHeight"));
+    assertEquals(PREFERRED_WIDTH, view.getInt("preferredWidth"));
   }
 
   public void testMultipleGadgets() throws Exception {

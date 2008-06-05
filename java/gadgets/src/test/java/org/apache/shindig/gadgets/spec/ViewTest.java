@@ -19,11 +19,11 @@
 
 package org.apache.shindig.gadgets.spec;
 
-import junit.framework.TestCase;
-
 import org.apache.shindig.common.xml.XmlUtil;
 import org.apache.shindig.gadgets.Substitutions;
 import org.apache.shindig.gadgets.Substitutions.Type;
+
+import junit.framework.TestCase;
 
 import java.util.Arrays;
 
@@ -120,6 +120,22 @@ public class ViewTest extends TestCase {
     View view = new View("test", Arrays.asList(XmlUtil.parse(content1),
                                                XmlUtil.parse(content2)));
     assertEquals(true, view.getQuirks());
+  }
+
+  public void testPreferredHeight() throws Exception {
+    String content1 = "<Content type=\"html\" preferred_height=\"100\"/>";
+    String content2 = "<Content type=\"html\" preferred_height=\"300\"/>";
+    View view = new View("test", Arrays.asList(XmlUtil.parse(content1),
+                                               XmlUtil.parse(content2)));
+    assertEquals(300, view.getPreferredHeight());
+  }
+
+  public void testPreferredWidth() throws Exception {
+    String content1 = "<Content type=\"html\" preferred_width=\"300\"/>";
+    String content2 = "<Content type=\"html\" preferred_width=\"172\"/>";
+    View view = new View("test", Arrays.asList(XmlUtil.parse(content1),
+                                               XmlUtil.parse(content2)));
+    assertEquals(172, view.getPreferredWidth());
   }
 
   public void testContentSubstitution() throws Exception {
