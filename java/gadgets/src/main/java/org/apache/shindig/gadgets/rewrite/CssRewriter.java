@@ -76,7 +76,7 @@ public class CssRewriter {
       URI base, LinkRewriter rewriter) {
     Matcher matcher = urlMatcher.matcher(token.text);
     if (!matcher.find()) return token.text;
-    return "url(\"" + rewriter.rewrite(matcher.group(2), base) + "\")";
+    return "url(\"" + rewriter.rewrite(matcher.group(2).trim(), base) + "\")";
   }
 }
 

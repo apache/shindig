@@ -27,7 +27,7 @@ import java.util.Map;
 /**
  * Test the HTML rewriter foundation for basic operation
  */
-public class HtmlRewriterTest extends EasyMockTestCase {
+public class HtmlRewriterTest extends BaseRewriterTestCase {
 
   private URI dummyUri;
 

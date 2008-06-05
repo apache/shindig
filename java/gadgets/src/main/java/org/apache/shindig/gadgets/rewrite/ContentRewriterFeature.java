@@ -20,26 +20,134 @@ package org.apache.shindig.gadgets.rewrite;
 import org.apache.shindig.gadgets.spec.Feature;
 import org.apache.shindig.gadgets.spec.GadgetSpec;
 
+import java.util.Set;
+import java.util.TreeSet;
+import java.util.regex.Pattern;
+
 /**
- * Parser for the "proxy-rewrite" feature
+ * Parser for the "content-rewrite" feature. The supported params are
+ * include-urls,exclude-urls,include-tags. Default values are container specific
  */
 public class ContentRewriterFeature {
 
-  private boolean isEnabled;
+  private static final String INCLUDE_URLS = "include-urls";
+  private static final String EXCLUDE_URLS = "exclude-urls";
+  private static final String INCLUDE_TAGS = "include-tags";
 
-  public ContentRewriterFeature(GadgetSpec spec, boolean containerDefault) {
+  // Use tree set to maintain order for fingerprint
+  private TreeSet<String> includeTags;
+
+  private boolean includeAll;
+  private boolean includeNone;
+
+  private Pattern include;
+  private Pattern exclude;
+
+  private Integer fingerprint;
+
+  /**
+   * Constructor which takes a gadget spec and the default container settings
+   *
+   * @param spec
+   * @param defaultInclude As a regex
+   * @param defaultExclude As a regex
+   * @param defaultTags    Set of default tags that can be rewritten
+   */
+  public ContentRewriterFeature(GadgetSpec spec, String defaultInclude,
+                                String defaultExclude, Set<String> defaultTags) {
     Feature f = spec.getModulePrefs().getFeatures().get("content-rewrite");
-    isEnabled = containerDefault;
+    String includeRegex = normalizeParam(defaultInclude, null);
+    String excludeRegex = normalizeParam(defaultExclude, null);
+    this.includeTags = new TreeSet<String>(defaultTags);
+
     if (f != null) {
-      if ("NONE".equalsIgnoreCase(f.getParams().get("include"))) {
-        isEnabled = false;
-      } else if ("ALL".equalsIgnoreCase(f.getParams().get("include"))) {
-        isEnabled = true;
+      if (f.getParams().containsKey(INCLUDE_URLS)) {
+        includeRegex = normalizeParam(f.getParams().get(INCLUDE_URLS), includeRegex);
       }
+
+      // Note use of default for exclude as null here to allow clearing value in the
+      // presence of a container default.
+      if (f.getParams().containsKey(EXCLUDE_URLS)) {
+        excludeRegex = normalizeParam(f.getParams().get(EXCLUDE_URLS), null);
+      }
+      String includeTagList = f.getParams().get(INCLUDE_TAGS);
+      if (includeTagList != null) {
+        TreeSet<String> tags = new TreeSet<String>();
+        for (String tag : includeTagList.split(",")) {
+          if (tag != null) {
+            tags.add(tag.trim().toLowerCase());
+          }
+        }
+        includeTags = tags;
+      }
+    }
+
+    if (".*".equals(includeRegex) && excludeRegex == null) {
+      includeAll = true;
+    }
+
+    if (".*".equals(excludeRegex) || includeRegex == null) {
+      includeNone = true;
+    }
+
+    if (includeRegex != null) {
+      include = Pattern.compile(includeRegex);
+    }
+    if (excludeRegex != null) {
+      exclude = Pattern.compile(excludeRegex);
     }
   }
 
+  private String normalizeParam(String paramValue, String defaultVal) {
+    if (paramValue == null) {
+      return defaultVal;
+    }
+    paramValue = paramValue.trim();
+    if (paramValue.length() == 0) {
+      return defaultVal;
+    }
+    return paramValue;
+  }
+
   public boolean isRewriteEnabled() {
-    return isEnabled;
+    return !includeNone;
+  }
+
+  public boolean shouldRewriteURL(String url) {
+    if (includeNone) {
+      return false;
+    } else if (includeAll) {
+      return true;
+    } else if (include.matcher(url).find()) {
+      return !(exclude != null && exclude.matcher(url).find());
+    }
+    return false;
+  }
+
+  public boolean shouldRewriteTag(String tag) {
+    if (tag != null) {
+      return this.includeTags.contains(tag.toLowerCase());
+    }
+    return false;
+  }
+
+  public Set<String> getIncludedTags() {
+    return includeTags;
+  }
+
+  /**
+   * @return fingerprint of rewriting rule for cache-busting
+   */
+  public int getFingerprint() {
+    if (fingerprint == null) {
+      int result;
+      result = (include != null ? include.pattern().hashCode() : 0);
+      result = 31 * result + (exclude != null ? exclude.pattern().hashCode() : 0);
+      for (String s : includeTags) {
+        result = 31 * result + s.hashCode();
+      }
+      fingerprint =  result;
+    }
+    return fingerprint;
   }
 }

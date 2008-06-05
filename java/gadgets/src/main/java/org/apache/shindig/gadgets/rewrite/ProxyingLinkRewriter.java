@@ -23,20 +23,38 @@ import org.apache.shindig.common.util.Utf8UrlCoder;
 import java.net.URI;
 
 /**
- * Simple link rewriter that expect to rewrite a link to the form
- * http://www.host.com/proxy/url=<url encoded link>
+ * Simple link rewriter that will rewrite a link to the form
+ * http://www.host.com/proxy/url=<url encoded link>&gadget=<gadget spec url>&fp=<fingeprint of rewriting rule>
  */
 public class ProxyingLinkRewriter implements LinkRewriter {
 
   private final String prefix;
+  private final ContentRewriterFeature rewriterFeature;
+  private final URI gadgetUri;
 
-  public ProxyingLinkRewriter(String prefix) {
+  public ProxyingLinkRewriter(URI gadgetUri, ContentRewriterFeature rewriterFeature, String prefix) {
     this.prefix = prefix;
+    this.rewriterFeature = rewriterFeature;
+    this.gadgetUri = gadgetUri;
   }
 
   public String rewrite(String link, URI context) {
+    link = link.trim();
+    // We shouldnt bother proxying empty URLs
+    if (link.length() == 0) {
+      return link;
+    }
     URI uri = context.resolve(link);
-    return prefix + Utf8UrlCoder.encode(uri.toString());
+    if (rewriterFeature.shouldRewriteURL(uri.toString())) {
+      return prefix
+          + Utf8UrlCoder.encode(uri.toString())
+          + "&gadget="
+          + Utf8UrlCoder.encode(gadgetUri.toString())
+          + "&fp="
+          + rewriterFeature.getFingerprint();
+    } else {
+      return uri.toString();
+    }
   }
 
 }

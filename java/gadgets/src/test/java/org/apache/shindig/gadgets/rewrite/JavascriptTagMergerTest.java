@@ -27,10 +27,9 @@ import java.util.Map;
 /**
  * Test for Javascript tag merge functionality
  */
-public class JavascriptTagMergerTest extends EasyMockTestCase {
+public class JavascriptTagMergerTest extends BaseRewriterTestCase {
 
   private URI dummyUri;
-  private URI relativeBase;
 
   private Map<String, HtmlTagTransformer> defaultTransformerMap;
 
@@ -38,11 +37,11 @@ public class JavascriptTagMergerTest extends EasyMockTestCase {
   protected void setUp() throws Exception {
     super.setUp();
     dummyUri = new URI("http://www.w3c.org");
-    relativeBase = new URI("http://a.b.com/");
+    URI relativeBase = new URI("http://a.b.com/");
     defaultTransformerMap = new HashMap<String, HtmlTagTransformer>();
     defaultTransformerMap
-        .put("script", new JavascriptTagMerger("http://www.test.com/concat?",
-            relativeBase));
+        .put("script", new JavascriptTagMerger(getSpecWithoutRewrite(), contentRewriterFeature,
+            "http://www.test.com/concat?", relativeBase));
   }
 
   private void validateRewritten(String content, URI base,
@@ -78,7 +77,7 @@ public class JavascriptTagMergerTest extends EasyMockTestCase {
   public void testSingleScriptReWrite() {
     String original = "<script src=\"http://a.b.com/1.js\"></script>";
     String rewritten
-        = "<script src=\"http://www.test.com/concat?rewriteMime=text/javascript&1=http%3A%2F%2Fa.b.com%2F1.js\" type=\"text/javascript\"></script>";
+        = "<script src=\"http://www.test.com/concat?rewriteMime=text/javascript&gadget=http%3A%2F%2Fexample.org%2Fg.xml&fp=-840722081&1=http%3A%2F%2Fa.b.com%2F1.js\" type=\"text/javascript\"></script>";
     validateRewritten(original, rewritten);
   }
 
@@ -86,7 +85,7 @@ public class JavascriptTagMergerTest extends EasyMockTestCase {
     String original = "<script src=\"http://a.b.com/1.js\"></script>\n"
         + "<script src=\"http://a.b.com/2.js\"></script>";
     String rewritten
-        = "<script src=\"http://www.test.com/concat?rewriteMime=text/javascript&1=http%3A%2F%2Fa.b.com%2F1.js&2=http%3A%2F%2Fa.b.com%2F2.js\" type=\"text/javascript\"></script>";
+        = "<script src=\"http://www.test.com/concat?rewriteMime=text/javascript&gadget=http%3A%2F%2Fexample.org%2Fg.xml&fp=-840722081&1=http%3A%2F%2Fa.b.com%2F1.js&2=http%3A%2F%2Fa.b.com%2F2.js\" type=\"text/javascript\"></script>";
     validateRewritten(original, rewritten);
   }
 
@@ -102,7 +101,7 @@ public class JavascriptTagMergerTest extends EasyMockTestCase {
     String rewritten = "<script type=\"text/javascript\">\n"
         + "doSomething\n"
         + "</script>"
-        + "<script src=\"http://www.test.com/concat?rewriteMime=text/javascript&1=http%3A%2F%2Fa.b.com%2F1.js&2=http%3A%2F%2Fa.b.com%2F2.js\" type=\"text/javascript\"></script>"
+        + "<script src=\"http://www.test.com/concat?rewriteMime=text/javascript&gadget=http%3A%2F%2Fexample.org%2Fg.xml&fp=-840722081&1=http%3A%2F%2Fa.b.com%2F1.js&2=http%3A%2F%2Fa.b.com%2F2.js\" type=\"text/javascript\"></script>"
         + "<script type=\"text/javascript\">\n"
         + "doSomething\n"
         + "</script>";
@@ -116,23 +115,23 @@ public class JavascriptTagMergerTest extends EasyMockTestCase {
         + "<script src=\"http://a.b.com/3.js\"></script>\n"
         + "<script src=\"http://a.b.com/4.js\"></script>";
     String rewritten =
-        "<script src=\"http://www.test.com/concat?rewriteMime=text/javascript&1=http%3A%2F%2Fa.b.com%2F1.js&2=http%3A%2F%2Fa.b.com%2F2.js\" type=\"text/javascript\"></script>"
+        "<script src=\"http://www.test.com/concat?rewriteMime=text/javascript&gadget=http%3A%2F%2Fexample.org%2Fg.xml&fp=-840722081&1=http%3A%2F%2Fa.b.com%2F1.js&2=http%3A%2F%2Fa.b.com%2F2.js\" type=\"text/javascript\"></script>"
             + "<script type=\"text/javascript\"><!-- doSomething --></script>"
-            + "<script src=\"http://www.test.com/concat?rewriteMime=text/javascript&1=http%3A%2F%2Fa.b.com%2F3.js&2=http%3A%2F%2Fa.b.com%2F4.js\" type=\"text/javascript\"></script>";
+            + "<script src=\"http://www.test.com/concat?rewriteMime=text/javascript&gadget=http%3A%2F%2Fexample.org%2Fg.xml&fp=-840722081&1=http%3A%2F%2Fa.b.com%2F3.js&2=http%3A%2F%2Fa.b.com%2F4.js\" type=\"text/javascript\"></script>";
     validateRewritten(original, rewritten);
   }
 
   public void testDerelativizeHostRelative() {
     String original = "<script src=\"/1.js\"></script>";
     String rewritten
-        = "<script src=\"http://www.test.com/concat?rewriteMime=text/javascript&1=http%3A%2F%2Fa.b.com%2F1.js\" type=\"text/javascript\"></script>";
+        = "<script src=\"http://www.test.com/concat?rewriteMime=text/javascript&gadget=http%3A%2F%2Fexample.org%2Fg.xml&fp=-840722081&1=http%3A%2F%2Fa.b.com%2F1.js\" type=\"text/javascript\"></script>";
     validateRewritten(original, rewritten);
   }
 
   public void testDerelativizePathRelative() {
     String original = "<script src=\"1.js\"></script>";
     String rewritten
-        = "<script src=\"http://www.test.com/concat?rewriteMime=text/javascript&1=http%3A%2F%2Fa.b.com%2F1.js\" type=\"text/javascript\"></script>";
+        = "<script src=\"http://www.test.com/concat?rewriteMime=text/javascript&gadget=http%3A%2F%2Fexample.org%2Fg.xml&fp=-840722081&1=http%3A%2F%2Fa.b.com%2F1.js\" type=\"text/javascript\"></script>";
     validateRewritten(original, rewritten);
   }
 

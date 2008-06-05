@@ -66,6 +66,7 @@ public class ProxyHandler {
   public static final String SIGN_OWNER = "signOwner";
   public static final String URL_PARAM = "url";
   public static final String REFRESH_PARAM = "refresh";
+  public static final String GADGET_PARAM = "gadget";
 
   private static final Logger logger =
       Logger.getLogger(ProxyHandler.class.getPackage().getName());
@@ -225,6 +226,9 @@ public class ProxyHandler {
       if (request.getParameter(SIGN_OWNER) != null) {
         options.ownerSigned = Boolean
             .parseBoolean(request.getParameter(SIGN_OWNER));
+      }
+      if (request.getParameter(GADGET_PARAM) != null) {
+        options.gadgetUri = URI.create(request.getParameter(GADGET_PARAM));
       }
       options.rewriter = rewriter;
 

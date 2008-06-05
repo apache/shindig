@@ -20,10 +20,7 @@ package org.apache.shindig.gadgets.rewrite;
 
 import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.http.HttpResponse;
-
-import java.io.Reader;
-import java.io.Writer;
-import java.net.URI;
+import org.apache.shindig.gadgets.spec.GadgetSpec;
 
 /**
  *  A no-op content rewriter
@@ -37,12 +34,7 @@ public class NoOpContentRewriter implements ContentRewriter {
     return null;
   }
 
-  public String rewrite(URI source, String original, String mimeType) {
+  public String rewriteGadgetView(GadgetSpec spec, String original, String mimeType) {
     return null;
-  }
-
-  public boolean rewrite(URI source, Reader original, String mimeType,
-      Writer rewritten) {
-    return false;
   }
 }

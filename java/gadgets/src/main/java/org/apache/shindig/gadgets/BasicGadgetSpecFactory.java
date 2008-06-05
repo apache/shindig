@@ -28,7 +28,6 @@ import org.apache.shindig.gadgets.http.HttpFetcher;
 import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.http.HttpResponse;
 import org.apache.shindig.gadgets.rewrite.ContentRewriter;
-import org.apache.shindig.gadgets.rewrite.ContentRewriterFeature;
 import org.apache.shindig.gadgets.spec.GadgetSpec;
 import org.apache.shindig.gadgets.spec.View;
 
@@ -48,8 +47,6 @@ public class BasicGadgetSpecFactory implements GadgetSpecFactory {
   private final HttpFetcher specFetcher;
 
   private final ContentRewriter rewriter;
-
-  private final boolean enableRewrite;
 
   private final long specMinTTL;
 
@@ -84,12 +81,10 @@ public class BasicGadgetSpecFactory implements GadgetSpecFactory {
                   response.getHttpStatusCode());
         } else {
           spec = new GadgetSpec(gadgetUri, response.getResponseAsString());
-          if (new ContentRewriterFeature(spec, enableRewrite).isRewriteEnabled()) {
-            for (View v : spec.getViews().values()) {
-              if (v.getType() == View.ContentType.HTML && rewriter != null) {
-                v.setRewrittenContent(
-                    rewriter.rewrite(gadgetUri, v.getContent(), "text/html"));
-              }
+          for (View v : spec.getViews().values()) {
+            if (v.getType() == View.ContentType.HTML && rewriter != null) {
+              v.setRewrittenContent(
+                  rewriter.rewriteGadgetView(spec, v.getContent(), "text/html"));
             }
           }
           // Add the updated spec back to the cache and force the min TTL
@@ -114,20 +109,18 @@ public class BasicGadgetSpecFactory implements GadgetSpecFactory {
   @Inject
   public BasicGadgetSpecFactory(HttpFetcher specFetcher,
       ContentRewriter rewriter,
-      @Named("content-rewrite.enabled")boolean defaultEnableRewrite,
       @Named("gadget-spec.cache.capacity")int gadgetSpecCacheCapacity,
       @Named("gadget-spec.cache.minTTL")long minTTL) {
     this.specFetcher = specFetcher;
     this.rewriter = rewriter;
-    this.enableRewrite = defaultEnableRewrite;
     this.inMemorySpecCache = new LruCache<URI, SpecTimeoutPair>(
         gadgetSpecCacheCapacity);
     this.specMinTTL = minTTL;
   }
 
   private static class SpecTimeoutPair {
-    private GadgetSpec spec;
-    private long timeout;
+    private final GadgetSpec spec;
+    private final long timeout;
 
     private SpecTimeoutPair(GadgetSpec spec, long timeout) {
       this.spec = spec;
