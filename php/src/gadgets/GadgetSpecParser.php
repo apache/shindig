@@ -15,7 +15,7 @@
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
  * KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
- * 
+ *
  */
 
 class SpecParserException extends Exception {}
@@ -61,7 +61,7 @@ class GadgetSpecParser {
 			throw new SpecParserException("Missing or empty \"title\" attribute.");
 		}
 		// Get ModulePrefs base and extended attributes
-		// See http://code.google.com/apis/gadgets/docs/gadgets-extended-xsd.html 
+		// See http://code.google.com/apis/gadgets/docs/gadgets-extended-xsd.html
 		// (trim is used here since it not only cleans up the text, but also auto-casts the SimpleXMLElement to a string)
 		$gadget->title = trim($attributes['title']);
 		$gadget->author = isset($attributes['author']) ? trim($attributes['author']) : '';
@@ -102,10 +102,25 @@ class GadgetSpecParser {
 		$countryAttr = isset($attributes['country']) ? trim($attributes['country']) : 'all';
 		$rtlAttr = isset($attributes['language_direction']) ? trim($attributes['language_direction']) : '';
 		$rightToLeft = $rtlAttr == 'rtl';
+		$localeMessageBundles = array();
+		if ($messageAttr == '') {
+			$messageBundle = $locale->messagebundle;
+			if (!empty($messageBundle)) {
+				$messageName = $messageBundle->msg;
+				if (!empty($messageName)) {
+					foreach ($messageName as $name) {
+						$attrs = $name->attributes();
+						$localeMessageBundle = new LocalMessageBundle((string)$attrs['name'], (string)$name);
+						$localeMessageBundles[] = $localeMessageBundle;
+					}
+				}
+			}
+		}
 		$locale = new LocaleSpec();
 		$locale->rightToLeft = $rightToLeft;
 		//FIXME java seems to use a baseurl here, probably for the http:// part but i'm not sure yet. Should verify behavior later to see if i got it right
 		$locale->url = $messageAttr;
+		$locale->localeMessageBundles = $localeMessageBundles;
 		$locale->locale = new Locale($languageAttr, $countryAttr);
 		return $locale;
 	}
@@ -127,7 +142,7 @@ class GadgetSpecParser {
 				$attr = $enum->attributes();
 				// java based shindig doesn't throw an exception here, but it -is- invalid and should trigger a parse error?
 				/*if (empty($attr['value'])) {
-					throw new SpecParserException("EnumValue must have a value field.");
+				throw new SpecParserException("EnumValue must have a value field.");
 				}*/
 				$valueText = trim($attr['value']);
 				$displayText = ! empty($attr['display_value']) ? trim($attr['display_value']) : $valueText;

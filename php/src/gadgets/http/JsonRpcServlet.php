@@ -15,7 +15,7 @@
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
  * KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
- * 
+ *
  */
 require 'src/common/HttpServlet.php';
 require 'src/gadgets/JsonRpcHandler.php';
@@ -41,6 +41,7 @@ require 'src/gadgets/JsLibrary.php';
 require 'src/common/UrlGenerator.php';
 require 'src/gadgets/http/HttpUtil.php';
 require 'src/gadgets/LocaleSpec.php';
+require 'src/gadgets/LocaleMessageBundle.php';
 require 'src/gadgets/UserPref.php';
 require 'src/gadgets/FeatureSpec.php';
 require 'src/gadgets/MessageBundleParser.php';
