@@ -17,6 +17,7 @@
  */
 package org.apache.shindig.gadgets.spec;
 import org.apache.shindig.gadgets.Substitutions;
+
 import org.w3c.dom.Element;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
@@ -67,7 +68,7 @@ public class ModulePrefs {
 
   private static final URI EMPTY_URI = URI.create("");
 
-  Map<String, String> attributes;
+  private final Map<String, String> attributes;
 
   // Canonical spec items first.
 

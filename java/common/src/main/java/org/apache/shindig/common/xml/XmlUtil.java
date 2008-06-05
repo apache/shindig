@@ -35,6 +35,8 @@ import javax.xml.parsers.ParserConfigurationException;
 
 public class XmlUtil {
 
+  private XmlUtil() {}
+
   /**
    * Extracts an attribute from a node.
    *
@@ -104,7 +106,7 @@ public class XmlUtil {
     if (value == null) {
       return def;
     }
-    return !"false".equals(value);
+    return Boolean.parseBoolean(value);
   }
 
   /**
@@ -115,6 +117,28 @@ public class XmlUtil {
    */
   public static boolean getBoolAttribute(Node node, String attr) {
     return getBoolAttribute(node, attr, false);
+  }
+
+  /**
+   * @return An attribute coerced to an integer.
+   */
+  public static int getIntAttribute(Node node, String attr, int def) {
+    String value = getAttribute(node, attr);
+    if (value == null) {
+      return def;
+    }
+    try {
+      return Integer.parseInt(value);
+    } catch (NumberFormatException e) {
+      return def;
+    }
+  }
+
+  /**
+   * @return An attribute coerced to an integer.
+   */
+  public static int getIntAttribute(Node node, String attr) {
+    return getIntAttribute(node, attr, 0);
   }
 
   /**

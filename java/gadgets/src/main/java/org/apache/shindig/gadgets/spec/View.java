@@ -19,6 +19,7 @@ package org.apache.shindig.gadgets.spec;
 
 import org.apache.shindig.common.xml.XmlUtil;
 import org.apache.shindig.gadgets.Substitutions;
+
 import org.w3c.dom.Element;
 
 import java.net.URI;
@@ -73,6 +74,22 @@ public class View {
   }
 
   /**
+   * Content@preferred_height
+   */
+  private final int preferredHeight;
+  public int getPreferredHeight() {
+    return preferredHeight;
+  }
+
+  /**
+   * Content@preferred_width
+   */
+  private final int preferredWidth;
+  public int getPreferredWidth() {
+    return preferredWidth;
+  }
+
+  /**
    * Content#CDATA
    *
    * All substitutions
@@ -117,6 +134,12 @@ public class View {
        .append(href)
        .append("\" view=\"")
        .append(name)
+       .append("\" quirks=\"")
+       .append(quirks)
+       .append("\" preferredHeight=\"")
+       .append(preferredHeight)
+       .append("\" preferredWidth=\"")
+       .append(preferredWidth)
        .append("\">")
        .append(content)
        .append("</Content>");
@@ -136,6 +159,8 @@ public class View {
     URI href = null;
     String contentType = null;
     ContentType type = null;
+    int preferredHeight = 0;
+    int preferredWidth = 0;
     StringBuilder content = new StringBuilder();
     for (Element element : elements) {
       contentType = XmlUtil.getAttribute(element, "type");
@@ -150,6 +175,8 @@ public class View {
       }
       href = XmlUtil.getUriAttribute(element, "href", href);
       quirks = XmlUtil.getBoolAttribute(element, "quirks", quirks);
+      preferredHeight = XmlUtil.getIntAttribute(element, "preferred_height");
+      preferredWidth = XmlUtil.getIntAttribute(element, "preferred_width");
       content.append(element.getTextContent());
     }
     this.content = content.toString();
@@ -158,6 +185,8 @@ public class View {
     this.href = href;
     this.rawType = contentType;
     this.type = type;
+    this.preferredHeight = preferredHeight;
+    this.preferredWidth = preferredWidth;
     if (type == ContentType.URL && this.href == null) {
       throw new SpecParserException(
           "Content@href must be set when Content@type is \"url\".");
@@ -179,6 +208,8 @@ public class View {
     rawType = view.rawType;
     type = view.type;
     quirks = view.quirks;
+    preferredHeight = view.preferredHeight;
+    preferredWidth = view.preferredWidth;
   }
 
   /**

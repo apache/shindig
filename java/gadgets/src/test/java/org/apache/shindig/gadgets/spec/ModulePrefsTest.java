@@ -29,6 +29,7 @@ import java.util.Locale;
 
 public class ModulePrefsTest extends TestCase {
   private static final URI SPEC_URL = URI.create("http://example.org/g.xml");
+
   public void testBasic() throws Exception {
     String xml = "<ModulePrefs" +
                  " title=\"title\"" +
@@ -51,6 +52,7 @@ public class ModulePrefsTest extends TestCase {
                  "  <Locale/>" +
                  "</ModulePrefs>";
     ModulePrefs prefs = new ModulePrefs(XmlUtil.parse(xml), SPEC_URL);
+
     assertEquals("title", prefs.getTitle());
     assertEquals("title_url", prefs.getTitleUrl().toString());
     assertEquals("description", prefs.getDescription());

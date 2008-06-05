@@ -143,7 +143,9 @@ public class JsonRpcHandler {
           views.put(view.getName(), new JSONObject()
                // .put("content", view.getContent())
                .put("type", view.getType().toString().toLowerCase())
-               .put("quirks", view.getQuirks()));
+               .put("quirks", view.getQuirks())
+               .put("preferredHeight", view.getPreferredHeight())
+               .put("preferredWidth", view.getPreferredWidth()));
         }
 
         // Features.
@@ -162,6 +164,9 @@ public class JsonRpcHandler {
           userPrefs.put(pref.getName(), up);
         }
 
+        // TODO: This should probably just copy all data from
+        // ModulePrefs.getAttributes(), but names have to be converted to
+        // camel case.
         gadgetJson.put("iframeUrl", urlGenerator.getIframeUrl(gadget))
                   .put("url", gadget.getContext().getUrl().toString())
                   .put("moduleId", gadget.getContext().getModuleId())
@@ -170,6 +175,7 @@ public class JsonRpcHandler {
                   .put("views", views)
                   .put("features", features)
                   .put("userPrefs", userPrefs)
+
                   // extended meta data
                   .put("directoryTitle", prefs.getDirectoryTitle())
                   .put("thumbnail", prefs.getThumbnail().toString())
