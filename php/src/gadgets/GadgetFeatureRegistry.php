@@ -104,7 +104,7 @@ class GadgetFeatureRegistry {
 			/*
 			 * TODO: Temporal fix, double check where empty dependencies are being added
 			 */
-			if(!empty($dep)) {
+			if (! empty($dep)) {
 				$this->addEntryToSet($results, $this->features[$dep]);
 			}
 		}
