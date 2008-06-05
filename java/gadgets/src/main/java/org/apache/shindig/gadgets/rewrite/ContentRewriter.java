@@ -19,6 +19,7 @@ package org.apache.shindig.gadgets.rewrite;
 
 import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.http.HttpResponse;
+import org.apache.shindig.gadgets.spec.GadgetSpec;
 
 import java.io.Reader;
 import java.io.Writer;
@@ -31,35 +32,20 @@ public interface ContentRewriter {
 
   /**
    * Rewrite the original content located at source
-   * @param request   Originating request
+   * @param request  Originating request
    * @param original Original content
    * @return A rewritten copy of the original or null if no rewriting occurred
    */
   public HttpResponse rewrite(HttpRequest request, HttpResponse original);
 
   /**
-   * Rewrite the original content located at source
-   * @param source   Location of the original content
+   * Rewrite the original gadget content located at source
+   * @param spec     GadgetSpec to use for rewriting rules. May be null
    * @param original Original content
    * @param mimeType A string containing the mime type of the content, may
    *                 contain other content as allowed in the HTTP Content-Type
    *                 header
    * @return A rewritten copy of the original or null if no rewriting occurred
    */
-  public String rewrite(URI source, String original, String mimeType);
-
-  /**
-   * Rewrite the content in the original response located at source
-   * @param source   Location of the original content
-   * @param original Original content
-   * @param mimeType A string containing the mime type of the content, may
-   *                 contain other content as allowed in the HTTP Content-Type
-   *                 header
-   * @param rewritten Target of rewritten content, not written to if no
-   *                rewriting is done.
-   * @return true if rewrite occurred, false otherwise
-   */
-  public boolean rewrite(URI source, Reader original, String mimeType,
-      Writer rewritten);
-  
+  public String rewriteGadgetView(GadgetSpec spec, String original, String mimeType);
 }

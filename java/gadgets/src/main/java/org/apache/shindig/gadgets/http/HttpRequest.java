@@ -360,6 +360,7 @@ public class HttpRequest {
     public boolean viewerSigned = true;
     public ContentRewriter rewriter = null;
     public String rewriteMimeType = null;
+    public URI gadgetUri;
 
     public Options() {}
 
@@ -371,6 +372,9 @@ public class HttpRequest {
       this.ownerSigned = copyFrom.ownerSigned;
       this.viewerSigned = copyFrom.viewerSigned;
       this.rewriter = copyFrom.rewriter;
+      if (copyFrom.gadgetUri != null) {
+        this.gadgetUri = URI.create(copyFrom.gadgetUri.toString());
+      }
     }
   }
 }

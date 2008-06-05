@@ -19,6 +19,8 @@
 package org.apache.shindig.gadgets.rewrite;
 
 import org.apache.shindig.gadgets.servlet.ProxyHandler;
+import org.apache.shindig.gadgets.spec.GadgetSpec;
+import org.apache.shindig.common.util.Utf8UrlCoder;
 
 import com.google.caja.lexer.HtmlTokenType;
 import com.google.caja.lexer.Token;
@@ -53,12 +55,19 @@ public class JavascriptTagMerger implements HtmlTagTransformer {
    *                   form www.host.com/concat?
    * @param relativeUrlBase to resolve relative urls
    */
-  public JavascriptTagMerger(String concatBase, URI relativeUrlBase) {
+  public JavascriptTagMerger(GadgetSpec spec, ContentRewriterFeature rewriterFeature,
+                             String concatBase, URI relativeUrlBase) {
     // Force the mime-type to mimic browser expectation so rewriters
     // can function properly
     this.concatBase = concatBase
         + ProxyHandler.REWRITE_MIME_TYPE_PARAM
-        + "=text/javascript&";
+        + "=text/javascript&"
+        + "gadget="
+        + Utf8UrlCoder.encode(spec.getUrl().toString())
+        + "&fp="
+        + rewriterFeature.getFingerprint()
+        + "&";
+
     this.relativeUrlBase = relativeUrlBase;
   }
 

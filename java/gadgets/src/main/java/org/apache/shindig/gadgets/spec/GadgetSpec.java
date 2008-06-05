@@ -94,6 +94,20 @@ public class GadgetSpec {
   }
 
   /**
+   * A map of attributes associated with the instance of the spec
+   * Used by handler classes to use specs to carry context.
+   * Not defined by the specification
+   */
+  private final Map<String, Object> attributes = new HashMap<String, Object>();
+  public Object getAttribute(String key) {
+    return attributes.get(key);
+  }
+  
+  public void setAttribute(String key, Object o) {
+    attributes.put(key, o);
+  }
+
+  /**
    * Performs substitutions on the spec. See individual elements for
    * details on what gets substituted.
    *

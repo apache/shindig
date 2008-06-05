@@ -17,8 +17,13 @@
  */
 package org.apache.shindig.gadgets.rewrite;
 
+import com.google.inject.Inject;
+import com.google.inject.name.Named;
+import org.apache.shindig.gadgets.GadgetException;
+import org.apache.shindig.gadgets.GadgetSpecFactory;
 import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.http.HttpResponse;
+import org.apache.shindig.gadgets.spec.GadgetSpec;
 
 import java.io.ByteArrayOutputStream;
 import java.io.InputStreamReader;
@@ -30,14 +35,35 @@ import java.io.UnsupportedEncodingException;
 import java.io.Writer;
 import java.net.URI;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Default implementation of content rewriting.
  */
 public class DefaultContentRewriter implements ContentRewriter {
 
-  public DefaultContentRewriter() {
+  private final GadgetSpecFactory specFactory;
+  private final String includeUrls;
+  private final String excludeUrls;
+  private final Set<String> includeTags;
+
+  @Inject
+  public DefaultContentRewriter(
+      GadgetSpecFactory specFactory,
+      @Named("content-rewrite.include-urls")String includeUrls,
+      @Named("content-rewrite.exclude-urls")String excludeUrls,
+      @Named("content-rewrite.include-tags")String includeTags) {
+    this.specFactory = specFactory;
+    this.includeUrls = includeUrls;
+    this.excludeUrls = excludeUrls;
+    this.includeTags = new HashSet<String>();
+    for (String s : includeTags.split(",")) {
+      if (s != null && s.trim().length() > 0) {
+        this.includeTags.add(s.trim().toLowerCase());
+      }
+    }
   }
 
   public HttpResponse rewrite(HttpRequest request, HttpResponse original) {
@@ -50,7 +76,11 @@ public class DefaultContentRewriter implements ContentRewriter {
       if (request.getOptions() != null && request.getOptions().rewriteMimeType != null) {
         mimeType = request.getOptions().rewriteMimeType;
       }
-      if (rewrite(request.getUri(),
+      GadgetSpec spec = null;
+      if (request.getOptions() != null && request.getOptions().gadgetUri != null) {
+        spec = specFactory.getGadgetSpec(request.getOptions().gadgetUri, false);
+      }
+      if (rewrite(spec, request.getUri(),
           new InputStreamReader(original.getResponse(), original.getEncoding()),
           mimeType,
           output)) {
@@ -61,42 +91,63 @@ public class DefaultContentRewriter implements ContentRewriter {
       return null;
     } catch (UnsupportedEncodingException uee) {
       throw new RuntimeException(uee);
+    } catch (GadgetException ge) {
+      return null;
     }
   }
 
-  public String rewrite(URI source, String original, String mimeType) {
+  public String rewriteGadgetView(GadgetSpec spec, String view, String mimeType) {
     StringWriter sw = new StringWriter();
-    if (rewrite(source, new StringReader(original), mimeType, sw)) {
+    if (rewrite(spec, spec.getUrl(), new StringReader(view), mimeType, sw)) {
       return sw.toString();
     } else {
       return null;
     }
   }
 
-  public boolean rewrite(URI source, Reader r, String mimeType, Writer w) {
+  private boolean rewrite(GadgetSpec spec, URI source, Reader r, String mimeType, Writer w) {
+    // Dont rewrite content if the spec is unavailable
+    if (spec == null) {
+      return false;
+    }
+
+    // Store the feature in the spec so we dont keep parsing it
+    ContentRewriterFeature rewriterFeature = (ContentRewriterFeature)spec.getAttribute("content-rewrite");
+    if (rewriterFeature == null) {
+      rewriterFeature = new ContentRewriterFeature(spec, includeUrls, excludeUrls, includeTags);
+      spec.setAttribute("content-rewrite", rewriterFeature);
+    }
+
+    if (!rewriterFeature.isRewriteEnabled()) {
+      return false;
+    }
     if (isHTML(mimeType)) {
       Map<String, HtmlTagTransformer> transformerMap
           = new HashMap<String, HtmlTagTransformer>();
 
       if (getProxyUrl() != null) {
-        LinkRewriter linkRewriter = createLinkRewriter();
+        LinkRewriter linkRewriter = createLinkRewriter(spec, rewriterFeature);
         LinkingTagRewriter rewriter = new LinkingTagRewriter(
             linkRewriter,
             source);
-        for (String tag : rewriter.getSupportedTags()) {
+        Set<String> toProcess = new HashSet<String>(rewriter.getSupportedTags());
+        toProcess.retainAll(rewriterFeature.getIncludedTags());
+        for (String tag : toProcess) {
           transformerMap.put(tag, rewriter);
         }
-        transformerMap.put("style", new StyleTagRewriter(source, linkRewriter));
+        if (rewriterFeature.getIncludedTags().contains("style")) {
+          transformerMap.put("style", new StyleTagRewriter(source, linkRewriter));
+        }
       }
-      if (getConcatUrl() != null) {
+      if (getConcatUrl() != null && rewriterFeature.getIncludedTags().contains("script")) {
         transformerMap
-            .put("script", new JavascriptTagMerger(getConcatUrl(), source));
+            .put("script", new JavascriptTagMerger(spec, rewriterFeature, getConcatUrl(), source));
       }
       HtmlRewriter.rewrite(r, source, transformerMap, w);
       return true;
     } else if (isCSS(mimeType)) {
       if (getProxyUrl() != null) {
-        CssRewriter.rewrite(r, source, createLinkRewriter(), w);
+        CssRewriter.rewrite(r, source, createLinkRewriter(spec, rewriterFeature), w);
         return true;
       } else {
         return false;
@@ -123,7 +174,7 @@ public class DefaultContentRewriter implements ContentRewriter {
     return "/gadgets/concat?";
   }
 
-  protected LinkRewriter createLinkRewriter() {
-    return new ProxyingLinkRewriter(getProxyUrl());
+  protected LinkRewriter createLinkRewriter(GadgetSpec spec, ContentRewriterFeature rewriterFeature) {
+    return new ProxyingLinkRewriter(spec.getUrl(), rewriterFeature, getProxyUrl());
   }
 }

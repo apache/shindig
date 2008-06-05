@@ -24,18 +24,14 @@ import java.net.URI;
 /**
  * test CSS link rewriting
  */
-public class CssRewriterTest  extends EasyMockTestCase {
+public class CssRewriterTest extends BaseRewriterTestCase {
 
   private URI dummyUri;
-
-  private LinkRewriter defaultRewriter = new ProxyingLinkRewriter(
-      "http://www.test.com/proxy?url=");
 
   @Override
   protected void setUp() throws Exception {
     super.setUp();
     dummyUri = new URI("http://www.w3c.org");
-    defaultRewriter = new ProxyingLinkRewriter("http://www.test.com/proxy?url=");
   }
 
   private void validateRewritten(String content, URI base,
@@ -52,8 +48,8 @@ public class CssRewriterTest  extends EasyMockTestCase {
         "div {list-style-image:url('http://a.b.com/bullet.gif');list-style-position:outside;margin:5px;padding:0}\n" +
          ".someid {background-image:url(http://a.b.com/bigimg.png);float:right;width:165px;height:23px;margin-top:4px;margin-left:5px}";
     String rewritten =
-        "div {list-style-image:url(\"http://www.test.com/proxy?url=http%3A%2F%2Fa.b.com%2Fbullet.gif\");list-style-position:outside;margin:5px;padding:0}\n" +
-         ".someid {background-image:url(\"http://www.test.com/proxy?url=http%3A%2F%2Fa.b.com%2Fbigimg.png\");float:right;width:165px;height:23px;margin-top:4px;margin-left:5px}";
+        "div {list-style-image:url(\"http://www.test.com/proxy?url=http%3A%2F%2Fa.b.com%2Fbullet.gif&gadget=http%3A%2F%2Fexample.org%2Fg.xml&fp=-840722081\");list-style-position:outside;margin:5px;padding:0}\n" +
+         ".someid {background-image:url(\"http://www.test.com/proxy?url=http%3A%2F%2Fa.b.com%2Fbigimg.png&gadget=http%3A%2F%2Fexample.org%2Fg.xml&fp=-840722081\");float:right;width:165px;height:23px;margin-top:4px;margin-left:5px}";
     validateRewritten(original, rewritten);
   }
 

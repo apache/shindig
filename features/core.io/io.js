@@ -308,7 +308,8 @@ gadgets.io = function() {
         numEntries : params.NUM_ENTRIES || "3",
         getSummaries : !!params.GET_SUMMARIES,
         signOwner : signOwner || "true",
-        signViewer : signViewer || "true"
+        signViewer : signViewer || "true",
+        gadget : gadget.util.getUrlParameters()["url"]
       };
 
       if (!respondWithPreload(paramData, params, callback, processResponse)) {
