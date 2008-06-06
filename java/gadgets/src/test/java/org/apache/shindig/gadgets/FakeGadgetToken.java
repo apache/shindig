@@ -24,6 +24,23 @@ import org.apache.shindig.common.SecurityToken;
  * A fake SecurityToken implementation to help testing.
  */
 public class FakeGadgetToken implements SecurityToken {
+  
+  private String updatedToken;
+  private String trustedJson;
+
+  public FakeGadgetToken() {
+    this(null, null);
+  }
+  
+  public FakeGadgetToken(String updatedToken) {
+    this(updatedToken, null);
+  }
+  
+  public FakeGadgetToken(String updatedToken, String trustedJson) {
+    this.updatedToken = updatedToken;
+    this.trustedJson = trustedJson;
+  }
+  
   public String getOwnerId() {
     return "owner";
   }
@@ -50,5 +67,13 @@ public class FakeGadgetToken implements SecurityToken {
 
   public long getModuleId() {
     return 0;
+  }
+
+  public String getUpdatedToken() {
+    return updatedToken;
+  }
+
+  public String getTrustedJson() {
+    return trustedJson;
   }
 }

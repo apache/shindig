@@ -37,8 +37,6 @@ JsonContainer = function(baseUrl, domain, supportedFieldsArray) {
 
   this.environment_ = new opensocial.Environment(domain, supportedFieldsMap);
   this.baseUrl_ = baseUrl;
-
-  this.securityToken_ = gadgets.util.getUrlParameters().st;
 };
 JsonContainer.inherits(opensocial.Container);
 
@@ -106,7 +104,7 @@ JsonContainer.prototype.requestData = function(dataRequest, callback) {
   };
 
   new BatchRequest(this.baseUrl_, jsonText, sendResponse,
-      {'st' : this.securityToken_}).send();
+      {'st' : shindig.auth.getSecurityToken()}).send();
 };
 
 JsonContainer.prototype.newFetchPersonRequest = function(id, opt_params) {

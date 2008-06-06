@@ -253,6 +253,30 @@ public class ProxyHandlerTest extends HttpTestFixture {
     proxyHandler.fetchJson(request, response);
     verify();
     writer.close();
+    JSONObject json = readJSONResponse(baos.toString());
+    assertFalse(json.getJSONObject(URL_ONE).has("st"));
+  }
+  
+  public void testChangeSecurityToken() throws Exception {
+    // Doesn't actually sign since it returns the standard fetcher.
+    // Signing tests are in SigningFetcherTest
+    FakeGadgetToken authToken = new FakeGadgetToken("updated");
+    setupGetRequestMock(URL_ONE);
+    expect(securityTokenDecoder.createToken("fake-token")).andReturn(authToken);
+    expect(request.getParameter(ProxyHandler.SECURITY_TOKEN_PARAM))
+    .andReturn("fake-token").atLeastOnce();
+    expect(request.getParameter(Preload.AUTHZ_ATTR))
+    .andReturn(Auth.SIGNED.toString()).atLeastOnce();
+    HttpResponse resp = new HttpResponse(200, DATA_ONE.getBytes(), null);
+    expect(contentFetcherFactory.getSigningFetcher(eq(authToken)))
+    .andReturn(fetcher);
+    expect(fetcher.fetch(isA(HttpRequest.class))).andReturn(resp);
+    replay();
+    proxyHandler.fetchJson(request, response);
+    verify();
+    writer.close();
+    JSONObject json = readJSONResponse(baos.toString());
+    assertEquals("updated", json.getJSONObject(URL_ONE).getString("st"));
   }
 
   public void testInvalidSigningType() throws Exception {

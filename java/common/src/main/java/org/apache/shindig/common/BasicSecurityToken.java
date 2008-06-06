@@ -26,7 +26,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Primitive token implementation that uses stings as tokens.
+ * Primitive token implementation that uses strings as tokens.
  */
 public class BasicSecurityToken implements SecurityToken {
   /** serialized form of the token */
@@ -119,5 +119,19 @@ public class BasicSecurityToken implements SecurityToken {
    */
   public long getModuleId() {
     return Long.parseLong(tokenData.get(MODULE_KEY));
+  }
+  
+  /**
+   * {@inheritDoc}
+   */
+  public String getUpdatedToken() {
+    return null;
+  }
+  
+  /**
+   * {@inheritDoc}
+   */
+  public String getTrustedJson() {
+    return null;
   }
 }

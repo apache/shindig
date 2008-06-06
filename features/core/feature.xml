@@ -22,6 +22,8 @@
     <script src="core.js"/>
     <script src="config.js"/>
     <script src="util.js"/>
+    <script src="auth.js"/>
+    <script src="auth-init.js"/>
     <script src="prefs.js"/>
     <script src="json.js"/>
     <script src="legacy.js"/>
