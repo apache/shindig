@@ -77,7 +77,7 @@
 
   <servlet-mapping>
     <servlet-name>proxy</servlet-name>
-    <url-pattern>/gadgets/proxy</url-pattern>
+    <url-pattern>/gadgets/proxy/*</url-pattern>
   </servlet-mapping>
 
   <servlet-mapping>

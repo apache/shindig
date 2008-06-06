@@ -20,6 +20,7 @@ package org.apache.shindig.gadgets.servlet;
 
 import org.apache.shindig.common.servlet.InjectedServlet;
 import org.apache.shindig.gadgets.GadgetException;
+import org.apache.shindig.gadgets.servlet.ProxyServletRequest;
 
 import com.google.inject.Inject;
 
@@ -46,12 +47,15 @@ public class ProxyServlet extends InjectedServlet {
   @Override
   protected void doGet(HttpServletRequest request, HttpServletResponse response)
       throws IOException {
-    String output = request.getParameter("output");
+    ProxyServletRequest proxyRequest = new ProxyServletRequest(request);    
+    logger.log(Level.INFO, "isUsingChainedSyntax " + (proxyRequest.isUsingChainedSyntax()? "YES": "NO"));
+    logger.log(Level.INFO, "url = " + proxyRequest.getParameter("url"));
+    String output = proxyRequest.getParameter("output");
     try {
       if ("js".equals(output)) {
-        proxyHandler.fetchJson(request, response);
+        proxyHandler.fetchJson(proxyRequest, response);
       } else {
-        proxyHandler.fetch(request, response);
+        proxyHandler.fetch(proxyRequest, response);
       }
     } catch (GadgetException ge) {
       outputError(ge, response);
