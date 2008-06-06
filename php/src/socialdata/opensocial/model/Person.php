@@ -40,7 +40,7 @@ class Person {
 	public $food;
 	public $gender;
 	public $happiestWhen;
-        public $hasApp;
+	public $hasApp;
 	public $heroes;
 	public $humor;
 	public $id;
@@ -53,7 +53,7 @@ class Person {
 	public $movies;
 	public $music;
 	public $name;
-        public $networkPresence;
+	public $networkPresence;
 	public $nickname;
 	public $pets;
 	public $phoneNumbers;
