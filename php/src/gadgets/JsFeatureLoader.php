@@ -22,19 +22,19 @@ class JsFeatureLoader {
 
 	public function loadFeatures($path, $registry)
 	{
-		$registered = array();
-		$entries = array();
-		$deps = array();
-		$deps = $this->loadFiles($path, $deps);
+		$alreadyRegistered = array();
+		$registeredFeatures = array();
+		$installedFeatures = array();
+		$this->loadFiles($path, $installedFeatures);
+		
 		// This ensures that we register everything in the right order.
-		foreach ($deps as $entry) {
-			$feature = $entry;
-			$feat = $this->register($registry, $feature, $registered, $deps);
-			if ($feat != null) {
-				$entries[] = $feat;
+		foreach ($installedFeatures as $feature) {
+			$registeredFeature = $this->register($registry, $feature, $alreadyRegistered, $installedFeatures, $registeredFeatures);
+			if ($registeredFeature != null) {
+				$registeredFeatures[] = $registeredFeature;
 			}
 		}
-		return $entries;
+		return $registeredFeatures;
 	}
 
 	private function sortFeaturesFiles($feature1, $feature2)
@@ -62,7 +62,6 @@ class JsFeatureLoader {
 				}
 			}
 		}
-		return $features;
 	}
 
 	private function processFile($file)
@@ -76,18 +75,23 @@ class JsFeatureLoader {
 		return $feature;
 	}
 
-	private function register(&$registry, $feature, $registered, $all)
+	private function register(&$registry, $feature, &$alreadyRegistered, $installedFeatures, &$registeredFeatures)
 	{
-		if (isset($registered[$feature->name])) {
+		if (in_array($feature->name, $alreadyRegistered)) {
 			return null;
 		}
 		foreach ($feature->deps as $dep) {
-			if (isset($all[$dep]) && ! in_array($dep, $registered)) {
-				$this->register($registry, $all[$dep], $registered, $all);
+			if (isset($installedFeatures[$dep]) && ! in_array($dep, $alreadyRegistered)) {
+				$registeredFeature = $this->register($registry, $installedFeatures[$dep], $alreadyRegistered, $installedFeatures, $registeredFeatures);
+				if ($registeredFeature != null) {
+					// add dependency to list of loaded features
+					$registeredFeatures[] = $registeredFeature;
+				}
 			}
+			// Note: if a depency is missing, it is simply not loaded. There is no check for that here
 		}
 		$factory = new JsLibraryFeatureFactory($feature->gadgetJs, $feature->containerJs);
-		$registered[] = $feature->name;
+		$alreadyRegistered[] = $feature->name;
 		return $registry->register($feature->name, $feature->deps, $factory);
 	}
 
