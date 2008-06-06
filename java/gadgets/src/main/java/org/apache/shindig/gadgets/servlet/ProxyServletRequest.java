@@ -18,12 +18,13 @@
  */
 package org.apache.shindig.gadgets.servlet;
 
-import java.io.UnsupportedEncodingException;
-import java.net.URLDecoder;
+import org.apache.shindig.common.util.Utf8UrlCoder;
+
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.regex.Pattern;
 import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletRequestWrapper;
@@ -33,32 +34,38 @@ import javax.servlet.http.HttpServletRequestWrapper;
  * "http://shindig/proxy/additional=parameters/http://remotehost/file").
  */
 public class ProxyServletRequest extends HttpServletRequestWrapper {
-  protected static Pattern chainedSyntaxPattern = Pattern.compile("^[^?]+/proxy/([^?/]*)/(.*)$");
-  protected static Pattern parameterPairPattern = Pattern.compile("([^&=]+)=([^&=]*)");
+  protected static final Pattern CHAINED_SYNTAX_PATTERN
+      = Pattern.compile("^[^?]+/proxy/([^?/]*)/(.*)$");
+  protected static final Pattern PARAMETER_PAIR_PATTERN
+      = Pattern.compile("([^&=]+)=([^&=]*)");
 
-  protected boolean usingChainedSyntax;
-  protected Map<String, String> extractedParameters;
+  protected final boolean usingChainedSyntax;
+  protected final Map<String, String> extractedParameters;
 
   public ProxyServletRequest(HttpServletRequest request) {
     super(request);
-    Matcher chainedSyntaxMatcher = chainedSyntaxPattern.matcher(request.getRequestURI());
-    usingChainedSyntax = chainedSyntaxMatcher.matches();
+    Matcher chainedMatcher
+        = CHAINED_SYNTAX_PATTERN.matcher(request.getRequestURI());
+    usingChainedSyntax = chainedMatcher.matches();
     if (usingChainedSyntax) {
       extractedParameters = new HashMap<String, String>();
 
-      Matcher parameterPairMatcher = parameterPairPattern.matcher(chainedSyntaxMatcher.group(1));
-      while (parameterPairMatcher.find()) {
-        try {
-          extractedParameters.put(URLDecoder.decode(parameterPairMatcher.group(1), "UTF-8"),
-                                  URLDecoder.decode(parameterPairMatcher.group(2), "UTF-8"));
-        } catch (UnsupportedEncodingException e) {
-        }
+      Matcher paramMatcher
+          = PARAMETER_PAIR_PATTERN.matcher(chainedMatcher.group(1));
+      while (paramMatcher.find()) {
+        extractedParameters.put(Utf8UrlCoder.decode(paramMatcher.group(1)),
+                                Utf8UrlCoder.decode(paramMatcher.group(2)));
       }
 
-      extractedParameters.put(ProxyHandler.URL_PARAM, chainedSyntaxMatcher.group(2));
+      extractedParameters.put(ProxyHandler.URL_PARAM, chainedMatcher.group(2));
+    } else {
+      extractedParameters = Collections.emptyMap();
     }
   }
 
+  /**
+   * @return True if the request is using the chained syntax form.
+   */
   public boolean isUsingChainedSyntax() {
     return usingChainedSyntax;
   }
