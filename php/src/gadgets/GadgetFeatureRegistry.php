@@ -33,13 +33,11 @@ class GadgetFeatureRegistry {
 		if (empty($featurePath) || $featurePath == null) {
 			return;
 		}
-		$coreDeps = array();
 		$loader = new JsFeatureLoader();
 		$jsFeatures = $loader->loadFeatures($featurePath, $this);
 		if (! $this->coreDone) {
 			foreach ($jsFeatures as $entry) {
 				if (strtolower(substr($entry->name, 0, strlen('core'))) == 'core') {
-					$coreDeps[] = $entry->name;
 					$this->core[$entry->name] = $entry->name;
 				}
 			}
