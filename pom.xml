@@ -832,6 +832,11 @@
         <artifactId>joda-time</artifactId>
         <version>1.5.2</version>
       </dependency>
+			<dependency>
+        <groupId>rome</groupId>
+        <artifactId>rome</artifactId>
+        <version>0.9</version>
+		  </dependency>
     </dependencies>
   </dependencyManagement>
 </project>

@@ -18,11 +18,10 @@
  */
 package org.apache.shindig.gadgets.servlet;
 
-import com.google.inject.Inject;
-
 import org.apache.shindig.common.SecurityToken;
 import org.apache.shindig.common.SecurityTokenDecoder;
 import org.apache.shindig.common.SecurityTokenException;
+import org.apache.shindig.gadgets.FeedProcessor;
 import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.LockedDomainService;
 import org.apache.shindig.gadgets.http.ContentFetcherFactory;
@@ -33,6 +32,9 @@ import org.apache.shindig.gadgets.oauth.OAuthRequestParams;
 import org.apache.shindig.gadgets.rewrite.ContentRewriter;
 import org.apache.shindig.gadgets.spec.Auth;
 import org.apache.shindig.gadgets.spec.Preload;
+
+import com.google.inject.Inject;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -67,6 +69,10 @@ public class ProxyHandler {
   public static final String URL_PARAM = "url";
   public static final String REFRESH_PARAM = "refresh";
   public static final String GADGET_PARAM = "gadget";
+  public static final String CONTENT_TYPE_PARAM = "contentType";
+  public static final String NUM_ENTRIES_PARAM = "numEntries";
+  public static final String DEFAULT_NUM_ENTRIES = "3";
+  public static final String GET_SUMMARIES_PARAM = "getSummaries";
 
   private static final Logger logger =
       Logger.getLogger(ProxyHandler.class.getPackage().getName());
@@ -279,11 +285,16 @@ public class ProxyHandler {
    * chained content fetchers.
    */
   private String serializeJsonResponse(SecurityToken authToken,
-      HttpServletRequest request, HttpResponse results) {
+      HttpServletRequest request, HttpResponse results) throws GadgetException {
     try {
       JSONObject resp = new JSONObject();
-
-      resp.put("body", results.getResponseAsString());
+      String originalUrl = request.getParameter(URL_PARAM);
+      String body = results.getResponseAsString();
+      if ("FEED".equals(request.getParameter(CONTENT_TYPE_PARAM))) {
+        resp.put("body", processFeed(originalUrl, request, body));
+      } else {
+        resp.put("body", body);
+      }
       resp.put("rc", results.getHttpStatusCode());
 
       if (authToken != null) {
@@ -298,7 +309,6 @@ public class ProxyHandler {
         resp.put(entry.getKey(), entry.getValue());
       }
       // Use raw param as key as URL may have to be decoded
-      String originalUrl = request.getParameter(URL_PARAM);
       JSONObject json = new JSONObject().put(originalUrl, resp);
       return UNPARSEABLE_CRUFT + json.toString();
     } catch (JSONException e) {
@@ -419,6 +429,18 @@ public class ProxyHandler {
     } catch (SecurityTokenException e) {
       throw new GadgetException(GadgetException.Code.INVALID_SECURITY_TOKEN, e);
     }
+  }
+
+  /**
+   * Processes a feed (RSS or Atom) using FeedProcessor.
+   */
+  private String processFeed(String url, HttpServletRequest req, String xml)
+      throws GadgetException {
+    boolean getSummaries = Boolean.parseBoolean(
+        getParameter(req, GET_SUMMARIES_PARAM, "false"));
+    int numEntries = Integer.parseInt(
+        getParameter(req, NUM_ENTRIES_PARAM, DEFAULT_NUM_ENTRIES));
+    return new FeedProcessor().process(url, xml, getSummaries, numEntries).toString();
   }
 
   /**
