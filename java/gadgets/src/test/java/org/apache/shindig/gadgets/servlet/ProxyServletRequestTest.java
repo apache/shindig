@@ -25,29 +25,33 @@ import org.apache.shindig.gadgets.EasyMockTestCase;
 import javax.servlet.http.HttpServletRequest;
 
 public class ProxyServletRequestTest extends EasyMockTestCase {
-  public final HttpServletRequest request = mock(HttpServletRequest.class);
+  private final static String URL = "http://proxy/url";
+
+  private final HttpServletRequest request = mock(HttpServletRequest.class);
 
   public ProxyServletRequest setupMockRequest(String url) {
     expect(request.getRequestURI()).andReturn(url).atLeastOnce();
+    expect(request.getParameter("url")).andReturn(URL).anyTimes();
     replay();
     return new ProxyServletRequest(request);
   }
 
   public void testOldRequestSyntax() throws Exception {
     ProxyServletRequest req = setupMockRequest(
-      "http://localhost/gadgets/proxy?url=http://proxy/url"
+      "http://localhost/gadgets/proxy?url=" + URL
     );
     assertFalse(req.isUsingChainedSyntax());
+    assertEquals(URL, req.getParameter("url"));
     verify();
   }
 
   public void testChainedSyntaxWithNoParameters() throws Exception {
     ProxyServletRequest req = setupMockRequest(
-      "http://localhost/gadgets/proxy//http://remote/proxy?query"
+      "http://localhost/gadgets/proxy//http://remote/proxy?query=foo"
     );
     assertTrue(req.isUsingChainedSyntax());
-    assertEquals("http://remote/proxy?query", req.getParameter("url"));
-    assertNull(req.getParameter("nocache"));
+    assertEquals("http://remote/proxy?query=foo", req.getParameter("url"));
+    assertNull(req.getParameter("query"));
     verify();
   }
 
