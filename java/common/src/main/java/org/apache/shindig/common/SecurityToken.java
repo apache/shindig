@@ -62,4 +62,16 @@ public interface SecurityToken {
    * @return the module ID of the application
    */
   public long getModuleId();
+  
+  /**
+   * @return an updated version of the token to return to the gadget, or null
+   * if there is no need to update the token.
+   */
+  public String getUpdatedToken();
+
+  /**
+   * @return a string formatted JSON object from the container, or null if there
+   * is no JSON from the container.
+   */
+  public String getTrustedJson();
 }

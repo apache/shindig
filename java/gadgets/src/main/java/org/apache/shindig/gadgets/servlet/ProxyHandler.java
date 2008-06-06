@@ -143,14 +143,21 @@ public class ProxyHandler {
     // Build up the request to make
     HttpRequest rcr = buildHttpRequest(request);
 
+    // Figure out whether authentication is required
+    Auth auth = Auth.parse(getParameter(request, Preload.AUTHZ_ATTR, ""));
+    SecurityToken authToken = null;
+    if (auth != Auth.NONE) {
+      authToken = extractAndValidateToken(request);
+    }
+
     // Build the chain of fetchers that will handle the request
-    HttpFetcher fetcher = getHttpFetcher(request, response);
+    HttpFetcher fetcher = getHttpFetcher(auth, authToken, request, response);
 
     // Do the fetch
     HttpResponse results = fetcher.fetch(rcr);
 
     // Serialize the response
-    String output = serializeJsonResponse(request, results);
+    String output = serializeJsonResponse(authToken, request, results);
 
     // Find and set the refresh interval
     setCachingHeaders(request, response, results);
@@ -251,26 +258,19 @@ public class ProxyHandler {
    * Whatever we do needs to return a reference to the OAuthFetcher, if it is
    * present, so we can pull data out as needed.
    */
-  private HttpFetcher getHttpFetcher(HttpServletRequest request,
-      HttpServletResponse response) throws GadgetException {
-
-    String authzType = getParameter(request, Preload.AUTHZ_ATTR, "");
-    Auth auth = Auth.parse(authzType);
-    try {
-      switch (auth) {
-        case NONE:
-          return contentFetcherFactory.get();
-        case SIGNED:
-          return contentFetcherFactory
-              .getSigningFetcher(extractAndValidateToken(request));
-        case AUTHENTICATED:
-          return contentFetcherFactory.getOAuthFetcher(
-              extractAndValidateToken(request), new OAuthRequestParams(request));
-        default:
-          return contentFetcherFactory.get();
-      }
-    } catch (SecurityTokenException e) {
-      throw new GadgetException(GadgetException.Code.INVALID_SECURITY_TOKEN, e);
+  private HttpFetcher getHttpFetcher(Auth auth, SecurityToken authToken,
+      HttpServletRequest request, HttpServletResponse response)
+      throws GadgetException {
+    switch (auth) {
+      case NONE:
+        return contentFetcherFactory.get();
+      case SIGNED:
+        return contentFetcherFactory.getSigningFetcher(authToken);
+      case AUTHENTICATED:
+        return contentFetcherFactory.getOAuthFetcher(
+            authToken, new OAuthRequestParams(request));
+      default:
+        return contentFetcherFactory.get();
     }
   }
 
@@ -278,13 +278,20 @@ public class ProxyHandler {
    * Format a response as JSON, including additional JSON inserted by
    * chained content fetchers.
    */
-  private String serializeJsonResponse(HttpServletRequest request,
-      HttpResponse results) {
+  private String serializeJsonResponse(SecurityToken authToken,
+      HttpServletRequest request, HttpResponse results) {
     try {
       JSONObject resp = new JSONObject();
 
       resp.put("body", results.getResponseAsString());
       resp.put("rc", results.getHttpStatusCode());
+
+      if (authToken != null) {
+        String updatedAuthToken = authToken.getUpdatedToken();
+        if (updatedAuthToken != null) {
+          resp.put("st", updatedAuthToken);
+        }
+      }
 
       // Merge in additional response data
       for (Map.Entry<String, String> entry : results.getMetadata().entrySet()) {
@@ -405,9 +412,13 @@ public class ProxyHandler {
    * @return A valid token for the given input.
    */
   private SecurityToken extractAndValidateToken(HttpServletRequest request)
-      throws SecurityTokenException {
+      throws GadgetException {
     String token = getParameter(request, SECURITY_TOKEN_PARAM, "");
-    return securityTokenDecoder.createToken(token);
+    try {
+      return securityTokenDecoder.createToken(token);
+    } catch (SecurityTokenException e) {
+      throw new GadgetException(GadgetException.Code.INVALID_SECURITY_TOKEN, e);
+    }
   }
 
   /**

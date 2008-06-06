@@ -7,7 +7,7 @@
  * "License"); you may not use this file except in compliance
  * with the License.  You may obtain a copy of the License at
  *
- *   http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
@@ -16,20 +16,13 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.shindig.common;
 
 /**
- *  Handles verification of gadget security tokens.
+ * @fileoverview
+ *
+ * Bootstraps auth.js.
  */
-public interface SecurityTokenDecoder {
 
-  /**
-   * Decrypts and verifies a gadget security token to return a gadget token.
-   *
-   * @param tokenString token in wire format (probably encrypted.)
-   * @return the decrypted and verified token.
-   * @throws SecurityTokenException If tokenString is not a valid token
-   */
-  public SecurityToken createToken(String tokenString)
-      throws SecurityTokenException;
-}
+var shindig = shindig || {};
+
+shindig.auth = new shindig.Auth();

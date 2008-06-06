@@ -37,13 +37,14 @@ RestfulContainer = function(baseUrl, domain, supportedFieldsArray) {
   this.environment_ = new opensocial.Environment(domain, supportedFieldsMap);
   this.baseUrl_ = baseUrl;
 
-  this.securityToken_ = gadgets.util.getUrlParameters().st;
+  this.securityToken_ = shindig.auth.getSecurityToken();
   this.parseSecurityToken();
 };
 RestfulContainer.inherits(opensocial.Container);
 
 // Hopefully we can get rid of these with special @viewer and @owner tokens
-// in the restful spec.
+// in the restful spec, because this code is never going to work in the
+// real world.
 RestfulContainer.prototype.parseSecurityToken = function() {
   var parts = this.securityToken_.split(":");
   this.ownerId_ = parts[0];

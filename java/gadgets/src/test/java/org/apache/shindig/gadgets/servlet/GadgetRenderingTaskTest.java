@@ -22,6 +22,7 @@ import static org.easymock.EasyMock.expect;
 import static org.easymock.EasyMock.isA;
 
 import org.apache.shindig.gadgets.ContainerConfig;
+import org.apache.shindig.gadgets.FakeGadgetToken;
 import org.apache.shindig.gadgets.Gadget;
 import org.apache.shindig.gadgets.GadgetContext;
 import org.apache.shindig.gadgets.http.HttpRequest;
@@ -30,6 +31,7 @@ import org.apache.shindig.gadgets.spec.GadgetSpec;
 
 import org.easymock.EasyMock;
 import org.json.JSONArray;
+import org.json.JSONObject;
 
 import java.io.ByteArrayOutputStream;
 import java.io.PrintWriter;
@@ -171,6 +173,71 @@ public class GadgetRenderingTaskTest extends HttpTestFixture {
     response.sendRedirect(
         "http://locked.example.com/gadgets/ifr?stuff=foo%20bar");
     EasyMock.expectLastCall().once();
+  }
+
+  /**
+   * Picks out the shindig.auth configuration object by looking for balanced
+   * curly brackets.
+   */
+  private JSONObject parseShindigAuthConfig(String content) throws Exception {
+    String startStr = "\"shindig.auth\":";
+    int start = content.indexOf(startStr);
+    if (start == -1) {
+      return null;
+    }
+    start += startStr.length();
+    char[] text = content.toCharArray();
+    int bracketCount = 0;
+    for (int i=start; i < text.length; ++i) {
+      if (text[i] == '{') {
+        ++bracketCount;
+      } else if (text[i] == '}') {
+        --bracketCount;
+      }
+      if (bracketCount == 0) {
+        return new JSONObject(content.substring(start, i+1));
+      }
+    }
+    return null;
+  }
+  
+  public void testAuthTokenInjection_allparams() throws Exception {
+    expect(request.getParameter("st")).andReturn("fake-token");
+    expect(securityTokenDecoder.createToken("fake-token")).andReturn(
+        new FakeGadgetToken("updated-token", "{ 'foo' : 'bar' }"));
+    String content = parseBasicGadget(GadgetSpec.DEFAULT_VIEW);
+    JSONObject auth = parseShindigAuthConfig(content);
+    assertEquals("updated-token", auth.getString("authToken"));
+    assertEquals("{ 'foo' : 'bar' }", auth.getString("trustedJson"));
+  }
+  
+  public void testAuthTokenInjection_none() throws Exception {
+    expect(request.getParameter("st")).andReturn("fake-token");
+    expect(securityTokenDecoder.createToken("fake-token")).andReturn(
+        new FakeGadgetToken());
+    String content = parseBasicGadget(GadgetSpec.DEFAULT_VIEW);
+    JSONObject auth = parseShindigAuthConfig(content);
+    assertEquals(0, auth.length());
+  }
+  
+  public void testAuthTokenInjection_trustedJson() throws Exception {
+    expect(request.getParameter("st")).andReturn("fake-token");
+    expect(securityTokenDecoder.createToken("fake-token")).andReturn(
+        new FakeGadgetToken(null, "trusted"));
+    String content = parseBasicGadget(GadgetSpec.DEFAULT_VIEW);
+    JSONObject auth = parseShindigAuthConfig(content);
+    assertEquals(1, auth.length());
+    assertEquals("trusted", auth.getString("trustedJson"));
+  }
+  
+  public void testAuthTokenInjection_updatedToken() throws Exception {
+    expect(request.getParameter("st")).andReturn("fake-token");
+    expect(securityTokenDecoder.createToken("fake-token")).andReturn(
+        new FakeGadgetToken("updated-token", null));
+    String content = parseBasicGadget(GadgetSpec.DEFAULT_VIEW);
+    JSONObject auth = parseShindigAuthConfig(content);
+    assertEquals(1, auth.length());
+    assertEquals("updated-token", auth.getString("authToken")); 
   }
 
   // TODO: Lots of ugly tests on html content.

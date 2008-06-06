@@ -19,6 +19,7 @@
 
 package org.apache.shindig.gadgets.servlet;
 
+import org.apache.shindig.common.SecurityToken;
 import org.apache.shindig.common.SecurityTokenDecoder;
 import org.apache.shindig.gadgets.ContainerConfig;
 import org.apache.shindig.gadgets.Gadget;
@@ -413,9 +414,10 @@ public class GadgetRenderingTask {
    * @param gadget
    * @param reqs The features you require.
    * @param js Existing js, to which the configuration will be appended.
+   * @throws GadgetException if there is a problem with the gadget auth token
    */
   private void appendJsConfig(Gadget gadget, Set<String> reqs,
-      StringBuilder js) {
+      StringBuilder js) throws GadgetException {
     JSONObject json = HttpUtil.getJsConfig(containerConfig, context, reqs);
     // Add gadgets.util support. This is calculated dynamically based on
     // request inputs.
@@ -426,10 +428,26 @@ public class GadgetRenderingTask {
         featureMap.put(feature.getName(), feature.getParams());
       }
       json.put("core.util", featureMap);
+
+      // Add authentication token config
+      SecurityToken authToken = context.getToken();
+      if (authToken != null) {
+        JSONObject authConfig = new JSONObject();
+        String updatedToken = authToken.getUpdatedToken();
+        if (updatedToken != null) {
+          authConfig.put("authToken", updatedToken);
+        }
+        String trustedJson = authToken.getTrustedJson();
+        if (trustedJson != null) {
+          authConfig.put("trustedJson", trustedJson);
+        }
+        json.put("shindig.auth", authConfig);
+      }
     } catch (JSONException e) {
       // Shouldn't be possible.
       throw new RuntimeException(e);
     }
+    
     js.append("gadgets.config.init(").append(json.toString()).append(");\n");
   }
 

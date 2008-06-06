@@ -122,6 +122,10 @@ gadgets.io = function() {
     if (data.oauthState) {
       oauthState = data.oauthState;
     }
+    // Update the security token if the server sent us a new one
+    if (data.st) {
+      shindig.auth.updateSecurityToken(data.st);
+    }
     callback(transformResponseData(params, data));
   }
 
@@ -274,7 +278,7 @@ gadgets.io = function() {
       var reqState, oauthService, oauthToken;
       if (params.AUTHORIZATION && params.AUTHORIZATION !== "NONE") {
         auth = params.AUTHORIZATION.toLowerCase();
-        st = gadgets.util.getUrlParameters().st;
+        st = shindig.auth.getSecurityToken();
         if (params.AUTHORIZATION === "AUTHENTICATED") {
           reqState = oauthState;
           oauthService = params.OAUTH_SERVICE;
