@@ -64,7 +64,19 @@ function _IG_FetchFeedAsJSON(url, callback, numItems, getDescriptions,
   params.CONTENT_TYPE = "FEED";
   params.NUM_ENTRIES = numItems;
   params.GET_SUMMARIES = getDescriptions;
-  gadgets.io.makeRequest(url, callback, params);
+  gadgets.io.makeRequest(url,
+      function(resp) {
+        // special case error reporting for back-compatibility
+        // see http://code.google.com/apis/gadgets/docs/remote-content.html#Fetch_JSON
+        if (resp.errors) {
+          resp.data = resp.data || {};
+          if (resp.errors && resp.errors.length > 0) {
+            resp.data.ErrorMsg = resp.errors[0];
+          }
+        }
+        // for Gadgets back-compatibility, return the feed obj directly
+        callback(resp.data);
+      }, params);
 }
 
 function _IG_GetCachedUrl(url) {

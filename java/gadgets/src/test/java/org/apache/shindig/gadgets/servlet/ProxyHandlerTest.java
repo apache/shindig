@@ -30,6 +30,7 @@ import org.apache.shindig.gadgets.http.HttpResponse;
 import org.apache.shindig.gadgets.spec.Auth;
 import org.apache.shindig.gadgets.spec.Preload;
 
+import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.io.ByteArrayOutputStream;
@@ -46,7 +47,7 @@ import javax.servlet.ServletOutputStream;
 
 public class ProxyHandlerTest extends HttpTestFixture {
 
-  private final static String URL_ONE = "http://www.example.com/test.html";
+  private final static String URL_ONE = "http://www.example.org/test.html";
   private final static String DATA_ONE = "hello world";
 
   private static final SecurityToken DUMMY_TOKEN = new FakeGadgetToken();
@@ -145,6 +146,86 @@ public class ProxyHandlerTest extends HttpTestFixture {
     JSONObject info = json.getJSONObject(URL_ONE);
     assertEquals(200, info.getInt("rc"));
     assertEquals(DATA_ONE, info.get("body"));
+  }
+
+  public void testFetchFeed() throws Exception {
+    String entryTitle = "Feed title";
+    String entryLink = "http://example.org/entry/0/1";
+    String entrySummary = "This is the summary";
+    String rss = "<?xml version=\"1.0\" encoding=\"utf-8\"?>" +
+                 "<rss version=\"2.0\"><channel>" +
+                 "<title>dummy</title>" +
+                 "<link>http://example.org/</link>" +
+                 "<item>" +
+                 "<title>" + entryTitle + "</title>" +
+                 "<link>" + entryLink + "</link>" +
+                 "<description>" + entrySummary + "</description>" +
+                 "</item>" +
+                 "</channel></rss>";
+    setupGetRequestMock(URL_ONE);
+    expect(request.getParameter(ProxyHandler.CONTENT_TYPE_PARAM)).andReturn("FEED");
+    expectGetAndReturnData(URL_ONE, rss.getBytes());
+    replay();
+
+    proxyHandler.fetchJson(request, response);
+
+    writer.close();
+    JSONObject json = readJSONResponse(baos.toString());
+    JSONObject info = json.getJSONObject(URL_ONE);
+    JSONObject feed = new JSONObject(info.getString("body"));
+    JSONObject entry = feed.getJSONArray("Entry").getJSONObject(0);
+
+    assertEquals(entryTitle, entry.getString("Title"));
+    assertEquals(entryLink, entry.getString("Link"));
+    assertNull("getSummaries has the wrong default value (should be false).",
+        entry.optString("Summary", null));
+  }
+
+  public void testParameters() throws Exception {
+    String entryTitle = "Feed title";
+    String entryLink = "http://example.org/entry/0/1";
+    String entrySummary = "This is the summary";
+    String rss = "<?xml version=\"1.0\" encoding=\"utf-8\"?>" +
+                 "<rss version=\"2.0\"><channel>" +
+                 "<title>dummy</title>" +
+                 "<link>http://example.org/</link>" +
+                 "<item>" +
+                 "<title>" + entryTitle + "</title>" +
+                 "<link>" + entryLink + "</link>" +
+                 "<description>" + entrySummary + "</description>" +
+                 "</item>" +
+                 "<item>" +
+                 "<title>" + entryTitle + "</title>" +
+                 "<link>" + entryLink + "</link>" +
+                 "<description>" + entrySummary + "</description>" +
+                 "</item>" +
+                 "<item>" +
+                 "<title>" + entryTitle + "</title>" +
+                 "<link>" + entryLink + "</link>" +
+                 "<description>" + entrySummary + "</description>" +
+                 "</item>" +
+                 "</channel></rss>";
+    setupGetRequestMock(URL_ONE);
+    expect(request.getParameter(ProxyHandler.CONTENT_TYPE_PARAM)).andReturn("FEED");
+    expect(request.getParameter(ProxyHandler.GET_SUMMARIES_PARAM)).andReturn("true");
+    expect(request.getParameter(ProxyHandler.NUM_ENTRIES_PARAM)).andReturn("2");
+    expectGetAndReturnData(URL_ONE, rss.getBytes());
+    replay();
+
+    proxyHandler.fetchJson(request, response);
+
+    writer.close();
+    JSONObject json = readJSONResponse(baos.toString());
+    JSONObject info = json.getJSONObject(URL_ONE);
+    JSONObject feed = new JSONObject(info.getString("body"));
+    JSONArray feeds = feed.getJSONArray("Entry");
+
+    assertEquals("numEntries not parsed correctly!", 2, feeds.length());
+
+    JSONObject entry = feeds.getJSONObject(1);
+    assertEquals(entryTitle, entry.getString("Title"));
+    assertEquals(entryLink, entry.getString("Link"));
+    assertEquals(entrySummary, entry.getString("Summary"));
   }
 
   public void testLockedDomainEmbed() throws Exception {
