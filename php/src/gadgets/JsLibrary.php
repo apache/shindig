@@ -65,10 +65,12 @@ class JsLibrary {
 
 	public function toString()
 	{
+		//FIXME purely for debugging, remove this asap!
+		// puts a //LIB: <name of feature> above the JS of the feature
 		if ($this->type == 'URL') {
-			return "<script src=\"" . $this->getContent() . "\"></script>";
+			return "<!-- \n\n//LIB: ".$this->featureName."\n -->" . "<script src=\"" . $this->getContent() . "\"></script>";
 		} else {
-			return "<script><!--\n" . $this->getContent() . "\n--></script>";
+			return "\n\n//LIB: ".$this->featureName."\n"."<script><!--\n" . $this->getContent() . "\n--></script>";
 		}
 	}
 
