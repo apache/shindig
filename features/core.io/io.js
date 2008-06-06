@@ -237,7 +237,7 @@ gadgets.io = function() {
   }
 
   var requiredConfig = {
-    proxyUrl: new gadgets.config.RegExValidator(/.*%url%.*/),
+    proxyUrl: new gadgets.config.RegExValidator(/.*%(raw)?url%.*/),
     jsonProxyUrl: gadgets.config.NonEmptyStringValidator
   };
   gadgets.config.register("core.io", requiredConfig, init);
@@ -388,6 +388,7 @@ gadgets.io = function() {
       var refresh = params['REFRESH_INTERVAL'] || '3600';
 
       return config.proxyUrl.replace("%url%", encodeURIComponent(url)).
+          replace("%rawurl%", url).
           replace("%refresh%", encodeURIComponent(refresh));
     }
   };
