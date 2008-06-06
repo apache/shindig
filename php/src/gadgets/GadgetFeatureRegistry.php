@@ -86,27 +86,30 @@ class GadgetFeatureRegistry {
 			return true;
 		}
 		foreach ($needed as $featureName) {
-			$entry = isset($this->features[$featureName]) ? $this->features[$featureName] : null;
-			if ($entry == null) {
+			$feature = isset($this->features[$featureName]) ? $this->features[$featureName] : null;
+			if ($feature == null) {
 				$resultsMissing[] = $featureName;
 			} else {
-				$this->addEntryToSet($resultsFound, $entry);
+				$this->addFeatureToResults($resultsFound, $feature);
 			}
 		}
 		return count($resultsMissing) == 0;
 	}
 
-	private function addEntryToSet(&$results, $entry)
+	private function addFeatureToResults(&$results, $feature)
 	{
-		foreach ($entry->deps as $dep) {
+		if (in_array($feature->name, $results)) {
+			return;
+		}
+		foreach ($feature->deps as $dep) {
 			/*
 			 * TODO: Temporal fix, double check where empty dependencies are being added
 			 */
 			if (! empty($dep)) {
-				$this->addEntryToSet($results, $this->features[$dep]);
+				$this->addFeatureToResults($results, $this->features[$dep]);
 			}
 		}
-		$results[$entry->name] = $entry->name;
+		$results[$feature->name] = $feature->name;
 	}
 
 	public function getEntry($name)
