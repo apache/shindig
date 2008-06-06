@@ -162,7 +162,7 @@ class GadgetRenderingServlet extends HttpServlet {
 			} else {
 				// FILE or RESOURCE
 				if ($forcedLibs == null) {
-					echo $library->getContent();
+					echo $library->getContent() . "\n";
 				}
 				// otherwise it was already included by config.forceJsLibs.
 			}
@@ -177,7 +177,7 @@ class GadgetRenderingServlet extends HttpServlet {
 			echo $externJs;
 		}
 		echo "<script><!--\n" . $this->appendJsConfig($context, $gadget) . $this->appendMessages($gadget) . "-->\n</script>\n";
-
+		
 		$gadgetExceptions = array();
 		$content = $gadget->getSubstitutions()->substitute($view->getContent());
 		if (empty($content)) {
