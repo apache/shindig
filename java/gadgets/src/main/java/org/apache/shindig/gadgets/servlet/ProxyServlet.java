@@ -48,8 +48,6 @@ public class ProxyServlet extends InjectedServlet {
   protected void doGet(HttpServletRequest request, HttpServletResponse response)
       throws IOException {
     ProxyServletRequest proxyRequest = new ProxyServletRequest(request);    
-    logger.log(Level.INFO, "isUsingChainedSyntax " + (proxyRequest.isUsingChainedSyntax()? "YES": "NO"));
-    logger.log(Level.INFO, "url = " + proxyRequest.getParameter("url"));
     String output = proxyRequest.getParameter("output");
     try {
       if ("js".equals(output)) {
