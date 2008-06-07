@@ -124,6 +124,16 @@ public interface OAuthStore {
   public void setTokenAndSecret(TokenKey tokenKey, TokenInfo tokenInfo)
       throws OAuthStoreException;
 
+
+  /**
+   * Removes an access token
+   * @param tokenKey the identifier for the access token
+   * @throws OAuthStoreException if an error occurs talking to the data store.
+   * @throws OAuthNoDataException if no existing access token is found.
+   */
+  public void removeToken(TokenKey tokenKey)
+      throws OAuthStoreException, OAuthNoDataException;
+  
   /**
    * Retrieve an OAuthAccessor that is ready to sign OAuthMessages for
    * resource access.

@@ -31,9 +31,13 @@ import org.apache.shindig.gadgets.http.HttpFetcher;
 import org.apache.shindig.gadgets.http.HttpResponse;
 import org.apache.shindig.gadgets.http.HttpRequest;
 
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 public class FakeOAuthServiceProvider implements HttpFetcher {
 
@@ -60,6 +64,7 @@ public class FakeOAuthServiceProvider implements HttpFetcher {
     enum State {
       PENDING,
       APPROVED,
+      REVOKED,
     } 
     
     public TokenState(String tokenSecret, OAuthConsumer consumer) {
@@ -103,6 +108,14 @@ public class FakeOAuthServiceProvider implements HttpFetcher {
   private final HashMap<String, TokenState> tokenState;
   private final OAuthValidator validator;
   private final OAuthConsumer consumer;
+
+  private boolean throttled;
+  
+  private int requestTokenCount = 0;
+  
+  private int accessTokenCount = 0;
+  
+  private int resourceAccessCount = 0;
   
   public FakeOAuthServiceProvider() {
     OAuthServiceProvider provider = new OAuthServiceProvider(
@@ -113,38 +126,66 @@ public class FakeOAuthServiceProvider implements HttpFetcher {
     validator = new SimpleOAuthValidator();
   }
   
+  @SuppressWarnings("unused")
   public HttpResponse fetch(HttpRequest request)
       throws GadgetException {
+    return realFetch(request);
+  }
+  
+  private HttpResponse realFetch(HttpRequest request) {
     String url = request.getUri().toASCIIString();
     try {
       if (url.startsWith(REQUEST_TOKEN_URL)) {
+        ++requestTokenCount;
         return handleRequestTokenUrl(request);
       } else if (url.startsWith(ACCESS_TOKEN_URL)) {
+        ++accessTokenCount;
         return handleAccessTokenUrl(request);
       } else if (url.startsWith(RESOURCE_URL)){
+        ++resourceAccessCount;
         return handleResourceUrl(request);
       }
     } catch (Exception e) {
-      throw new GadgetException(GadgetException.Code.INTERNAL_SERVER_ERROR,
-          "Problem with request for URL " + url, e);
+      throw new RuntimeException("Problem with request for URL " + url, e);
     }
-    throw new GadgetException(GadgetException.Code.INTERNAL_SERVER_ERROR,
-        "Unexpected request for " + url);
+    throw new RuntimeException("Unexpected request for " + url);
   }
 
   private HttpResponse handleRequestTokenUrl(HttpRequest request)
       throws Exception {
     OAuthMessage message = parseMessage(request);
+    String requestConsumer = message.getParameter(OAuth.OAUTH_CONSUMER_KEY);
+    if (!CONSUMER_KEY.equals(requestConsumer)) {
+      return makeOAuthProblemReport(
+          "consumer_key_unknown", "invalid consumer: " + requestConsumer);
+    }
+    if (throttled) {
+      return makeOAuthProblemReport(
+          "consumer_key_refused", "exceeded quota exhausted");
+    }
     OAuthAccessor accessor = new OAuthAccessor(consumer);
     message.validateMessage(accessor, validator);
     String requestToken = Crypto.getRandomString(16);
     String requestTokenSecret = Crypto.getRandomString(16);
     tokenState.put(
-        requestToken, new TokenState(requestToken, accessor.consumer));
+        requestToken, new TokenState(requestTokenSecret, accessor.consumer));
     String resp = OAuth.formEncode(OAuth.newList(
         "oauth_token", requestToken,
-        "oauth_token_secret", requestToken));
+        "oauth_token_secret", requestTokenSecret));
     return new HttpResponse(resp);
+  }
+
+  private HttpResponse makeOAuthProblemReport(String code, String text)
+      throws IOException {
+    OAuthMessage msg = new OAuthMessage(null, null, null);
+    msg.addParameter("oauth_problem", code);
+    msg.addParameter("oauth_problem_advice", text);
+    Map<String, List<String>> headers = new HashMap<String, List<String>>();
+    headers.put(
+        "WWW-Authenticate",
+        Arrays.asList(new String[] { msg.getAuthorizationHeader("realm") }));
+    HttpResponse response = new HttpResponse(403, null, headers);
+    return response;   
   }
 
   // Loosely based off net.oauth.OAuthServlet, and even more loosely related
@@ -228,12 +269,29 @@ public class FakeOAuthServiceProvider implements HttpFetcher {
     // Not part of the OAuth spec, just a handy thing for testing.
     state.setUserData(parsed.getQueryParam("user_data"));
   }
+  
+  /**
+   * Used to revoke all access tokens issued by this service provider.
+   * 
+   * @throws Exception
+   */
+  public void revokeAllAccessTokens() throws Exception {
+    Iterator<TokenState> it = tokenState.values().iterator();
+    while (it.hasNext()) {
+      TokenState state = it.next();
+      state.setState(TokenState.State.REVOKED);
+    }
+  }
 
   private HttpResponse handleAccessTokenUrl(HttpRequest request)
       throws Exception {
     OAuthMessage message = parseMessage(request);
     String requestToken = message.getParameter("oauth_token");
     TokenState state = tokenState.get(requestToken);
+    if (throttled) {
+      return makeOAuthProblemReport(
+          "consumer_key_refused", "exceeded quota");
+    }
     if (state.getState() != TokenState.State.APPROVED) {
       throw new Exception("Token not approved");
     }
@@ -257,8 +315,17 @@ public class FakeOAuthServiceProvider implements HttpFetcher {
     OAuthMessage message = parseMessage(request);
     String accessToken = message.getParameter("oauth_token");
     TokenState state = tokenState.get(accessToken);
+    if (throttled) {
+      return makeOAuthProblemReport(
+          "consumer_key_refused", "exceeded quota");
+    }
+    if (state == null) {
+      return makeOAuthProblemReport(
+          "token_rejected", "Access token unknown");     
+    }
     if (state.getState() != TokenState.State.APPROVED) {
-      throw new Exception("Token not approved");
+      return makeOAuthProblemReport(
+          "token_revoked", "User revoked permissions");
     }
     OAuthAccessor accessor = new OAuthAccessor(consumer);
     accessor.accessToken = accessToken;
@@ -267,4 +334,28 @@ public class FakeOAuthServiceProvider implements HttpFetcher {
     return new HttpResponse("User data is " + state.getUserData());
   }
 
+  public void setConsumersThrottled(boolean throttled) {
+    this.throttled = throttled;
+  }
+
+  /**
+   * @return number of hits to request token URL.
+   */
+  public int getRequestTokenCount() {
+    return requestTokenCount;
+  }
+
+  /**
+   * @return number of hits to access token URL.
+   */
+  public int getAccessTokenCount() {
+    return accessTokenCount;
+  }
+
+  /**
+   * @return number of hits to resource access URL.
+   */
+  public int getResourceAccessCount() {
+    return resourceAccessCount;
+  }
 }
