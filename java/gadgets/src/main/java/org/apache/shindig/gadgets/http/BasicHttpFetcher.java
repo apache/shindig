@@ -22,6 +22,7 @@ import com.google.inject.Singleton;
 
 import org.apache.commons.io.IOUtils;
 
+import java.io.ByteArrayInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
@@ -118,16 +119,33 @@ public class BasicHttpFetcher implements HttpFetcher {
       responseCode = HttpResponse.SC_OK;
     }
 
+    // Find the response stream - the error stream may be valid in cases
+    // where the input stream is not.
+    InputStream baseIs = null;
+    try {
+      baseIs = fetcher.getInputStream();
+    } catch (IOException e) {
+      // normal for 401, 403 and 404 responses, for example...
+    }
+    if (baseIs == null && fetcher instanceof HttpURLConnection) {
+      // Try for an error input stream
+      baseIs = ((HttpURLConnection)fetcher).getErrorStream();
+    }
+    if (baseIs == null) {
+      // Fall back to zero length response.
+      baseIs = new ByteArrayInputStream(new byte[0]);
+    }
+    
     String encoding = fetcher.getContentEncoding();
-    InputStream is = null;
     // Create the appropriate stream wrapper based on the encoding type.
+    InputStream is = null;
     if (encoding == null) {
-      is =  fetcher.getInputStream();
+      is = baseIs;
     } else if (encoding.equalsIgnoreCase("gzip")) {
-      is = new GZIPInputStream(fetcher.getInputStream());
+      is = new GZIPInputStream(baseIs);
     } else if (encoding.equalsIgnoreCase("deflate")) {
       Inflater inflater = new Inflater(true);
-      is = new InflaterInputStream(fetcher.getInputStream(), inflater);
+      is = new InflaterInputStream(baseIs, inflater);
     }
 
     byte[] body = IOUtils.toByteArray(is);
