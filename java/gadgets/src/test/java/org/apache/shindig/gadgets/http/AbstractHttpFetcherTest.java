@@ -4,6 +4,12 @@ import static org.junit.Assert.assertEquals;
 
 import java.net.URI;
 import java.net.URLEncoder;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import junitx.framework.ArrayAssert;
 
 import org.apache.shindig.gadgets.http.EchoServer;
 import org.junit.AfterClass;
@@ -13,8 +19,6 @@ import org.junit.Test;
 /**
  * Holds test cases that all HttpFetcher implementations should pass.  This
  * starts up an HTTP server and runs tests against it.
- * 
- * TODO simulate fake POST requests, headers, options, etc.
  */
 public class AbstractHttpFetcherTest {
   private static final int ECHO_PORT = 9003;
@@ -88,5 +92,70 @@ public class AbstractHttpFetcherTest {
     assertEquals(401, response.getHttpStatusCode());
     assertEquals(content, response.getResponseAsString());
     assertEquals("some auth data", response.getHeader("WWW-Authenticate"));    
+  }
+  
+  @Test public void testDelete() throws Exception {
+    HttpRequest request = new HttpRequest("DELETE", new URI(BASE_URL),
+        null, null, null);
+    HttpResponse response = fetcher.fetch(request);
+    assertEquals("DELETE", response.getHeader("x-method"));
+  }
+  
+  @Test public void testPost_noBody() throws Exception {
+    HttpRequest request = new HttpRequest("POST", new URI(BASE_URL),
+        null, null, null);
+    HttpResponse response = fetcher.fetch(request);
+    assertEquals("POST", response.getHeader("x-method"));
+    assertEquals("", response.getResponseAsString());
+  }
+  
+  @Test public void testPost_withBody() throws Exception {
+    byte[] body = new byte[5000];
+    for (int i=0; i < body.length; ++i) {
+      body[i] = (byte)(i % 255);
+    }
+    Map<String, List<String>> headers = new HashMap<String, List<String>>();
+    headers.put("content-type", Arrays.asList("application/octet-stream"));
+    HttpRequest request = new HttpRequest("POST", new URI(BASE_URL),
+        headers, body, null);
+    HttpResponse response = fetcher.fetch(request);
+    assertEquals("POST", response.getHeader("x-method"));
+    ArrayAssert.assertEquals(body, response.getResponseAsBytes());
+  }
+  
+  @Test public void testPut_noBody() throws Exception {
+    HttpRequest request = new HttpRequest("PUT", new URI(BASE_URL),
+        null, null, null);
+    HttpResponse response = fetcher.fetch(request);
+    assertEquals("PUT", response.getHeader("x-method"));
+    assertEquals("", response.getResponseAsString());
+  }
+  
+  @Test public void testPut_withBody() throws Exception {
+    byte[] body = new byte[5000];
+    for (int i=0; i < body.length; ++i) {
+      body[i] = (byte)i;
+    }
+    Map<String, List<String>> headers = new HashMap<String, List<String>>();
+    headers.put("content-type", Arrays.asList("application/octet-stream"));
+    HttpRequest request = new HttpRequest("PUT", new URI(BASE_URL),
+        headers, body, null);
+    HttpResponse response = fetcher.fetch(request);
+    assertEquals("PUT", response.getHeader("x-method"));
+    ArrayAssert.assertEquals(body, response.getResponseAsBytes());
+  }
+  
+  @Test public void testHugeBody() throws Exception {
+    byte[] body = new byte[1024*1024]; // 1 MB
+    for (int i=0; i < body.length; ++i) {
+      body[i] = (byte)i;
+    }
+    Map<String, List<String>> headers = new HashMap<String, List<String>>();
+    headers.put("content-type", Arrays.asList("application/octet-stream"));
+    HttpRequest request = new HttpRequest("POST", new URI(BASE_URL),
+        headers, body, null);
+    HttpResponse response = fetcher.fetch(request);
+    assertEquals("POST", response.getHeader("x-method"));
+    ArrayAssert.assertEquals(body, response.getResponseAsBytes());
   }
 }

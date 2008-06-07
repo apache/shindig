@@ -25,6 +25,7 @@ import junit.framework.TestCase;
 
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -132,6 +133,8 @@ public class HttpResponseTest extends TestCase {
   public void testNullHeaderNamesStripped() {
     addHeader(null, "dummy");
     HttpResponse response = new HttpResponse(200, new byte[0], headers);
-    assertFalse("Null header not removed.", response.getAllHeaders().containsKey(null));
+    for (String key : response.getAllHeaders().keySet()) {
+      assertNotNull("Null header not removed.", key);
+    }
   }
 }

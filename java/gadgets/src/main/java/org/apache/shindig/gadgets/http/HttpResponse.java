@@ -30,6 +30,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeMap;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -91,7 +92,8 @@ public class HttpResponse {
           responseBytes, 0, this.responseBytes, 0, responseBytes.length);
     }
 
-    Map<String, List<String>> tmpHeaders = new HashMap<String, List<String>>();
+    Map<String, List<String>> tmpHeaders =
+        new TreeMap<String, List<String>>(String.CASE_INSENSITIVE_ORDER);
     if (headers != null) {
       for (Map.Entry<String, List<String>> entry : headers.entrySet()) {
         if (entry.getKey() != null && entry.getValue() != null) {

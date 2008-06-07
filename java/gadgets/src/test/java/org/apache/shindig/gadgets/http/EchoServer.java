@@ -18,7 +18,11 @@
  */
 package org.apache.shindig.gadgets.http;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -61,13 +65,32 @@ public class EchoServer extends FakeHttpServer {
         }
       }
       
+      resp.setHeader("X-Method", req.getMethod());
+      
       String body = req.getParameter(BODY_PARAM);
-      if (body == null) {
-        body = "";
+      if (body != null) {
+        resp.getWriter().print(body);
+      } else {
+        resp.setHeader("Content-Type", "application/octet-stream");
+        
+        // Read the input stream into memory
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        InputStream is = req.getInputStream();
+        byte[] buf = new byte[1024];
+        int len;
+        while ((len = is.read(buf)) > 0) {
+          baos.write(buf, 0, len);
+        }
+        
+        // Echo the bytes back to the output stream
+        OutputStream os = resp.getOutputStream();
+        ByteArrayInputStream bais = new ByteArrayInputStream(
+            baos.toByteArray());
+        while ((len = bais.read(buf)) > 0) {
+          os.write(buf, 0, len);
+        }
       }
-      resp.getWriter().print(body);
-    }
-    
-  };
+    } 
+  }
 
 }
