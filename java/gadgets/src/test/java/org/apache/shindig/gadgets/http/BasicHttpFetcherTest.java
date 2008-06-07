@@ -17,37 +17,13 @@
  */
 package org.apache.shindig.gadgets.http;
 
-import junit.framework.TestCase;
+import org.junit.Before;
 
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileWriter;
-import java.net.URI;
+public class BasicHttpFetcherTest extends AbstractHttpFetcherTest {
 
-public class BasicHttpFetcherTest extends TestCase {
-  private HttpCache cache = new BasicHttpCache(10);
-  private HttpFetcher fetcher
-      = new BasicHttpFetcher(cache, Integer.MAX_VALUE);
-
-  public void testFetch() throws Exception {
-    String content = "Hello, world!";
-    File temp = File.createTempFile(this.getName(), ".txt");
-    temp.deleteOnExit();
-    BufferedWriter out = new BufferedWriter(new FileWriter(temp));
-    out.write(content);
-    out.close();
-    HttpRequest request = new HttpRequest(temp.toURI());
-    HttpResponse response = fetcher.fetch(request);
-    assertEquals(HttpResponse.SC_OK, response.getHttpStatusCode());
-    assertEquals(content, response.getResponseAsString());
+  @Before
+  public void setUp() {
+    HttpCache cache = new BasicHttpCache(10);
+    fetcher = new BasicHttpFetcher(cache, Integer.MAX_VALUE);
   }
-
-  public void testNotExists() throws Exception {
-    HttpRequest request
-        = new HttpRequest(new URI("file:///does/not/exist"));
-    HttpResponse response = fetcher.fetch(request);
-    assertEquals(HttpResponse.SC_NOT_FOUND, response.getHttpStatusCode());
-  }
-
-  // TODO simulate fake POST requests, headers, options, etc.
 }
