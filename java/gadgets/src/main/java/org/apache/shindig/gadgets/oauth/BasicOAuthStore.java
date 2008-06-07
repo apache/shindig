@@ -224,4 +224,16 @@ public class BasicOAuthStore implements OAuthStore {
   public void setTokenAndSecret(TokenKey tokenKey, TokenInfo tokenInfo) {
     tokens.put(tokenKey, tokenInfo);
   }
+
+  /**
+   * {@inheritDoc}
+   */
+  public void removeToken(TokenKey tokenKey) throws OAuthStoreException,
+      OAuthNoDataException {
+    if (tokens.containsKey(tokenKey)) {
+      tokens.remove(tokenKey);
+    } else {
+      throw new OAuthNoDataException("Could not find access token");
+    }
+  }
 }

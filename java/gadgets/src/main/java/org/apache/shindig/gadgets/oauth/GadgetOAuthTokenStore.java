@@ -183,6 +183,22 @@ public class GadgetOAuthTokenStore {
 
     store.setTokenAndSecret(tokenKey, tokenInfo);
   }
+  
+  /**
+   * Removes an access token from the OAuth data store.
+   * 
+   * @return true if the token is removed, false if the token was not found.
+   * @throws OAuthStoreException if we can't communicate with the token store.
+   */
+  public boolean removeToken(OAuthStore.TokenKey tokenKey)
+      throws OAuthStoreException {
+    try {
+      store.removeToken(tokenKey);
+      return true;
+    } catch (OAuthNoDataException e) {
+      return false;
+    }
+  }
 
   /**
    * Retrieve an OAuthAccessor that is ready to sign OAuthMessages.

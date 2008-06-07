@@ -28,7 +28,9 @@ import org.apache.shindig.gadgets.http.HttpRequest.Options;
 
 import net.oauth.OAuth;
 import net.oauth.OAuthAccessor;
+import net.oauth.OAuthException;
 import net.oauth.OAuthMessage;
+import net.oauth.OAuthProblemException;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
@@ -58,6 +60,9 @@ public class OAuthFetcher extends ChainedContentFetcher {
   private static final String ACCESS_TOKEN_SECRET_KEY = "as";
   private static final String OWNER_KEY = "o";
 
+  // Maximum number of attempts at the protocol before giving up.
+  private static final int MAX_ATTEMPTS = 2;
+  
   // names for the JSON values we return to the client
   public static final String CLIENT_STATE = "oauthState";
   public static final String APPROVAL_URL = "approvalUrl";
@@ -201,9 +206,52 @@ public class OAuthFetcher extends ChainedContentFetcher {
     return tokenKey;
   }
 
-  public HttpResponse fetch(HttpRequest request)
-      throws GadgetException {
+  public HttpResponse fetch(HttpRequest request) throws GadgetException {
     this.realRequest = request;
+    // Work around for busted HttpCache interface that can't
+    // properly handle authenticated content.
+    this.realRequest.getOptions().ignoreCache = true;
+
+    HttpResponse response = null;
+    int attempts = 0;
+    boolean retry;
+    do {
+      retry = false;
+      ++attempts;
+      try {
+        response = attemptFetch();
+      } catch (OAuthProtocolException pe) {
+        retry = handleProtocolException(pe, attempts);
+        if (!retry) {
+          response = pe.getResponseForGadget();
+        }
+      }
+    } while (retry);
+    
+    if (response == null) {
+      throw new GadgetException(
+          GadgetException.Code.INTERNAL_SERVER_ERROR,
+          "No response for OAuth fetch to " + realRequest.getUri());
+    }
+    return response;
+  }
+  
+  // TODO(beaton) test case
+  private boolean handleProtocolException(
+      OAuthProtocolException pe, int attempts) throws OAuthStoreException {
+    if (pe.startFromScratch()) {
+      OAuthStore.TokenKey tokenKey = buildTokenKey();
+      tokenStore.removeToken(tokenKey);
+      
+      accessorInfo.accessor.accessToken = null;
+      accessorInfo.accessor.requestToken = null;
+      accessorInfo.accessor.tokenSecret = null;
+    }
+    return (attempts < MAX_ATTEMPTS && pe.canRetry());
+  }
+  
+  private HttpResponse attemptFetch()
+      throws GadgetException, OAuthProtocolException {
     if (needApproval()) {
       // This is section 6.1 of the OAuth spec.
       checkCanApprove();
@@ -252,7 +300,8 @@ public class OAuthFetcher extends ChainedContentFetcher {
     }
   }
 
-  private void fetchRequestToken() throws GadgetException {
+  private void fetchRequestToken()
+      throws GadgetException, OAuthProtocolException {
     try {
       OAuthAccessor accessor = accessorInfo.getAccessor();
       String url = accessor.consumer.serviceProvider.requestTokenURL;
@@ -263,14 +312,18 @@ public class OAuthFetcher extends ChainedContentFetcher {
       reply.requireParameters(OAuth.OAUTH_TOKEN, OAuth.OAUTH_TOKEN_SECRET);
       accessor.requestToken = reply.getParameter(OAuth.OAUTH_TOKEN);
       accessor.tokenSecret = reply.getParameter(OAuth.OAUTH_TOKEN_SECRET);
-    } catch (Exception e) {
-      // It's unfortunate the OAuth libraries throw a generic Exception.
+    } catch (OAuthException e) {
+      throw new GadgetException(GadgetException.Code.INTERNAL_SERVER_ERROR, e);
+    } catch (IOException e) {
+      throw new GadgetException(GadgetException.Code.INTERNAL_SERVER_ERROR, e);
+    } catch (URISyntaxException e) {
       throw new GadgetException(GadgetException.Code.INTERNAL_SERVER_ERROR, e);
     }
   }
 
   private OAuthMessage newRequestMessage(String method,
-      String url, List<OAuth.Parameter> params) throws Exception {
+      String url, List<OAuth.Parameter> params)
+      throws OAuthException, IOException, URISyntaxException {
 
     if (params == null) {
       throw new IllegalArgumentException("params was null in " +
@@ -300,7 +353,8 @@ public class OAuthFetcher extends ChainedContentFetcher {
   }
 
   private OAuthMessage newRequestMessage(String url,
-      List<OAuth.Parameter> params) throws Exception {
+      List<OAuth.Parameter> params)
+      throws OAuthException, IOException, URISyntaxException {
     String method = "POST";
     if (accessorInfo.getHttpMethod() == OAuthStore.HttpMethod.GET) {
       method = "GET";
@@ -385,9 +439,9 @@ public class OAuthFetcher extends ChainedContentFetcher {
    * Sends OAuth request token and access token messages.
    */
   private OAuthMessage sendOAuthMessage(OAuthMessage request)
-      throws IOException, URISyntaxException, GadgetException {
+      throws IOException, URISyntaxException, OAuthProtocolException, GadgetException {
 
-    HttpRequest rcr =
+    HttpRequest oauthRequest =
       createHttpRequest(filterOAuthParams(request),
                                  request.method,
                                  request.URL,
@@ -396,10 +450,36 @@ public class OAuthFetcher extends ChainedContentFetcher {
                                  null,
                                  HttpRequest.DEFAULT_OPTIONS);
 
-    HttpResponse response = nextFetcher.fetch(rcr);
+    HttpResponse response = nextFetcher.fetch(oauthRequest);
     OAuthMessage reply = new OAuthMessage(null, null, null);
+    
     reply.addParameters(OAuth.decodeForm(response.getResponseAsString()));
+    reply = parseAuthHeader(reply, response);
+    if (reply.getParameter(OAuthProblemException.OAUTH_PROBLEM) != null) {
+      throw new OAuthProtocolException(reply);
+    }
     return reply;
+  }
+
+  /**
+   * Parse OAuth WWW-Authenticate header and either add them to an existing
+   * message or create a new message.
+   * 
+   * @param msg
+   * @param resp
+   * @return the updated message.
+   */
+  private OAuthMessage parseAuthHeader(OAuthMessage msg, HttpResponse resp) {
+    if (msg == null) {
+      msg = new OAuthMessage(null, null, null);
+    }
+    List<String> authHeaders = resp.getHeaders("WWW-Authenticate");
+    if (authHeaders != null) {
+      for (String auth : authHeaders) {
+        msg.addParameters(OAuthMessage.decodeAuthorization(auth));
+      }
+    }
+    return msg;
   }
 
   /**
@@ -463,8 +543,10 @@ public class OAuthFetcher extends ChainedContentFetcher {
 
   /**
    * Implements section 6.3 of the OAuth spec.
+   * @throws OAuthProtocolException 
    */
-  private void exchangeRequestToken() throws GadgetException {
+  private void exchangeRequestToken()
+      throws GadgetException, OAuthProtocolException {
     try {
       OAuthAccessor accessor = accessorInfo.getAccessor();
       String url = accessor.consumer.serviceProvider.accessTokenURL;
@@ -477,8 +559,11 @@ public class OAuthFetcher extends ChainedContentFetcher {
       reply.requireParameters(OAuth.OAUTH_TOKEN, OAuth.OAUTH_TOKEN_SECRET);
       accessor.accessToken = reply.getParameter(OAuth.OAUTH_TOKEN);
       accessor.tokenSecret = reply.getParameter(OAuth.OAUTH_TOKEN_SECRET);
-    } catch (Exception e) {
-      // It's unfortunate the OAuth libraries throw a generic Exception.
+    } catch (OAuthException e) {
+      throw new GadgetException(GadgetException.Code.INTERNAL_SERVER_ERROR, e);
+    } catch (IOException e) {
+      throw new GadgetException(GadgetException.Code.INTERNAL_SERVER_ERROR, e);
+    } catch (URISyntaxException e) {
       throw new GadgetException(GadgetException.Code.INTERNAL_SERVER_ERROR, e);
     }
   }
@@ -514,8 +599,12 @@ public class OAuthFetcher extends ChainedContentFetcher {
 
   /**
    * Get honest-to-goodness user data.
+   * 
+   * @throws OAuthProtocolException if the service provider returns an OAuth
+   * related error instead of user data.
    */
-  private HttpResponse fetchData() throws GadgetException {
+  private HttpResponse fetchData()
+      throws GadgetException, OAuthProtocolException {
     try {
       List<OAuth.Parameter> msgParams =
         OAuth.isFormEncoded(realRequest.getContentType())
@@ -530,16 +619,26 @@ public class OAuthFetcher extends ChainedContentFetcher {
       OAuthMessage oauthRequest = newRequestMessage(
           method, realRequest.getUri().toASCIIString(), msgParams);
 
-      HttpResponse response =  nextFetcher.fetch(
-          createHttpRequest(
-              filterOAuthParams(oauthRequest),
-              realRequest.getMethod(),
-              realRequest.getUri().toASCIIString(),
-              realRequest.getAllHeaders(),
-              realRequest.getContentType(),
-              realRequest.getPostBodyAsString(),
-              realRequest.getOptions()));
+      HttpRequest oauthHttpRequest = createHttpRequest(
+          filterOAuthParams(oauthRequest),
+          realRequest.getMethod(),
+          realRequest.getUri().toASCIIString(),
+          realRequest.getAllHeaders(),
+          realRequest.getContentType(),
+          realRequest.getPostBodyAsString(),
+          realRequest.getOptions());
 
+      HttpResponse response = nextFetcher.fetch(oauthHttpRequest);
+      
+      // TODO is there a better way to detect an SP error?
+      int statusCode = response.getHttpStatusCode();
+      if (statusCode >= 400 && statusCode < 500) {
+        OAuthMessage message = parseAuthHeader(null, response);
+        if (message.getParameter(OAuthProblemException.OAUTH_PROBLEM) != null) {
+          throw new OAuthProtocolException(message);
+        }
+      }
+  
       // Track metadata on the response
       addResponseMetadata(response);
       return response;
@@ -549,7 +648,7 @@ public class OAuthFetcher extends ChainedContentFetcher {
       throw new GadgetException(GadgetException.Code.INTERNAL_SERVER_ERROR, e);
     } catch (URISyntaxException e) {
       throw new GadgetException(GadgetException.Code.INTERNAL_SERVER_ERROR, e);
-    } catch (Exception e) {
+    } catch (OAuthException e) {
       throw new GadgetException(GadgetException.Code.INTERNAL_SERVER_ERROR, e);
     }
   }
