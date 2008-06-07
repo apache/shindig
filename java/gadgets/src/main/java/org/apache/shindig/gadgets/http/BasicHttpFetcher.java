@@ -23,11 +23,9 @@ import com.google.inject.Singleton;
 import org.apache.commons.io.IOUtils;
 
 import java.io.ByteArrayInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
-import java.net.URLConnection;
 import java.util.List;
 import java.util.Map;
 import java.util.zip.GZIPInputStream;
@@ -72,32 +70,30 @@ public class BasicHttpFetcher implements HttpFetcher {
    * @return The opened connection
    * @throws IOException
    */
-  private URLConnection getConnection(HttpRequest request)
+  private HttpURLConnection getConnection(HttpRequest request)
       throws IOException {
-    URLConnection fetcher;
-    fetcher = request.getUri().toURL().openConnection();
+    HttpURLConnection fetcher =
+        (HttpURLConnection)request.getUri().toURL().openConnection();
     fetcher.setConnectTimeout(CONNECT_TIMEOUT_MS);
     fetcher.setRequestProperty("Accept-Encoding", "gzip, deflate");
-    if (fetcher instanceof HttpURLConnection) {
-      ((HttpURLConnection)fetcher).setInstanceFollowRedirects(true);
-      Map<String, List<String>> reqHeaders = request.getAllHeaders();
-      for (Map.Entry<String, List<String>> entry : reqHeaders.entrySet()) {
-        List<String> value = entry.getValue();
-        if (value.size() == 1) {
-          fetcher.setRequestProperty(entry.getKey(), value.get(0));
-        } else {
-          StringBuilder headerList = new StringBuilder();
-          boolean first = false;
-          for (String val : value) {
-            if (!first) {
-              first = true;
-            } else {
-              headerList.append(',');
-            }
-            headerList.append(val);
+    fetcher.setInstanceFollowRedirects(true);
+    Map<String, List<String>> reqHeaders = request.getAllHeaders();
+    for (Map.Entry<String, List<String>> entry : reqHeaders.entrySet()) {
+      List<String> value = entry.getValue();
+      if (value.size() == 1) {
+        fetcher.setRequestProperty(entry.getKey(), value.get(0));
+      } else {
+        StringBuilder headerList = new StringBuilder();
+        boolean first = false;
+        for (String val : value) {
+          if (!first) {
+            first = true;
+          } else {
+            headerList.append(',');
           }
-          fetcher.setRequestProperty(entry.getKey(), headerList.toString());
+          headerList.append(val);
         }
+        fetcher.setRequestProperty(entry.getKey(), headerList.toString());
       }
     }
     fetcher.setDefaultUseCaches(!request.getOptions().ignoreCache);
@@ -109,16 +105,10 @@ public class BasicHttpFetcher implements HttpFetcher {
    * @return A HttpResponse object made by consuming the response of the
    *     given HttpURLConnection.
    */
-  private HttpResponse makeResponse(URLConnection fetcher)
+  private HttpResponse makeResponse(HttpURLConnection fetcher)
       throws IOException {
     Map<String, List<String>> headers = fetcher.getHeaderFields();
-    int responseCode;
-    if (fetcher instanceof HttpURLConnection) {
-      responseCode = ((HttpURLConnection)fetcher).getResponseCode();
-    } else {
-      responseCode = HttpResponse.SC_OK;
-    }
-
+    int responseCode = fetcher.getResponseCode();
     // Find the response stream - the error stream may be valid in cases
     // where the input stream is not.
     InputStream baseIs = null;
@@ -127,9 +117,9 @@ public class BasicHttpFetcher implements HttpFetcher {
     } catch (IOException e) {
       // normal for 401, 403 and 404 responses, for example...
     }
-    if (baseIs == null && fetcher instanceof HttpURLConnection) {
+    if (baseIs == null) {
       // Try for an error input stream
-      baseIs = ((HttpURLConnection)fetcher).getErrorStream();
+      baseIs = fetcher.getErrorStream();
     }
     if (baseIs == null) {
       // Fall back to zero length response.
@@ -159,24 +149,22 @@ public class BasicHttpFetcher implements HttpFetcher {
       return response;
     }
     try {
-      URLConnection fetcher = getConnection(request);
-      if ("POST".equals(request.getMethod()) &&
-          fetcher instanceof HttpURLConnection) {
-        ((HttpURLConnection)fetcher).setRequestMethod("POST");
-        fetcher.setRequestProperty("Content-Length",
-                                   String.valueOf(request.getPostBodyLength()));
+      HttpURLConnection fetcher = getConnection(request);
+      fetcher.setRequestMethod(request.getMethod());
+      if (!"GET".equals(request.getMethod())) {
         fetcher.setUseCaches(false);
-        fetcher.setDoInput(true);
+      }
+      if (request.getPostBodyLength() > 0) {
         fetcher.setDoOutput(true);
+        fetcher.setRequestProperty("Content-Length",
+            String.valueOf(request.getPostBodyLength()));
         IOUtils.copy(request.getPostBody(), fetcher.getOutputStream());
       }
       response = makeResponse(fetcher);
       return cache.addResponse(request, response);
     } catch (IOException e) {
-      if (e instanceof FileNotFoundException) {
-        return HttpResponse.notFound();
-      } else if (e instanceof java.net.SocketTimeoutException ||
-                 e instanceof java.net.SocketException) {
+      if (e instanceof java.net.SocketTimeoutException ||
+          e instanceof java.net.SocketException) {
         return HttpResponse.timeout();
       }
       return HttpResponse.error();
