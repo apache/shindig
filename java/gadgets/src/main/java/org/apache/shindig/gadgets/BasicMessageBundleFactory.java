@@ -18,9 +18,6 @@
  */
 package org.apache.shindig.gadgets;
 
-import com.google.inject.Inject;
-import com.google.inject.name.Named;
-
 import org.apache.shindig.common.cache.Cache;
 import org.apache.shindig.common.cache.LruCache;
 import org.apache.shindig.gadgets.http.HttpFetcher;
@@ -28,6 +25,9 @@ import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.http.HttpResponse;
 import org.apache.shindig.gadgets.spec.LocaleSpec;
 import org.apache.shindig.gadgets.spec.MessageBundle;
+
+import com.google.inject.Inject;
+import com.google.inject.name.Named;
 
 import java.net.URI;
 import java.util.logging.Level;
@@ -49,11 +49,19 @@ public class BasicMessageBundleFactory implements MessageBundleFactory {
 
   public MessageBundle getBundle(LocaleSpec localeSpec, GadgetContext context)
       throws GadgetException {
-    return getBundle(localeSpec.getMessages(), context.getIgnoreCache());
+    URI messages = localeSpec.getMessages();
+    if (messages == null || messages.toString().length() == 0) {
+      return localeSpec.getMessageBundle();
+    }
+    return getBundle(messages, context.getIgnoreCache());
   }
 
   public MessageBundle getBundle(URI bundleUrl, boolean ignoreCache)
       throws GadgetException {
+    if (ignoreCache) {
+      return fetchBundleFromWeb(bundleUrl, true);
+    }
+
     MessageBundle bundle = null;
     long expiration = -1;
     synchronized (inMemoryBundleCache) {
@@ -63,25 +71,9 @@ public class BasicMessageBundleFactory implements MessageBundleFactory {
         expiration = entry.timeout;
       }
     }
-    if (ignoreCache || bundle == null || expiration < System.currentTimeMillis()) {
+    if (bundle == null || expiration < System.currentTimeMillis()) {
       try {
-        HttpRequest request
-            = HttpRequest.getRequest(bundleUrl, ignoreCache);
-        HttpResponse response = bundleFetcher.fetch(request);
-        if (response.getHttpStatusCode() != HttpResponse.SC_OK) {
-          throw new GadgetException(
-              GadgetException.Code.FAILED_TO_RETRIEVE_CONTENT,
-              "Unable to retrieve message bundle xml. HTTP error " +
-                  response.getHttpStatusCode());
-        }
-        bundle = new MessageBundle(bundleUrl, response.getResponseAsString());
-
-        // Add the updated bundle back to the cache and force the min TTL
-        expiration = Math
-            .max(response.getCacheExpiration(), System.currentTimeMillis() + bundleMinTTL);
-        synchronized (inMemoryBundleCache) {
-          inMemoryBundleCache.addElement(bundleUrl, new BundleTimeoutPair(bundle, expiration));
-        }
+        return fetchBundleFromWeb(bundleUrl, false);
       } catch (GadgetException ge) {
         if (bundle == null) {
           throw ge;
@@ -90,6 +82,27 @@ public class BasicMessageBundleFactory implements MessageBundleFactory {
               "Msg bundle fetch failed for " + bundleUrl + " -  using cached ", ge);
         }
       }
+    }
+    return bundle;
+  }
+
+  private MessageBundle fetchBundleFromWeb(URI bundleUrl, boolean ignoreCache)
+      throws GadgetException {
+    HttpRequest request = HttpRequest.getRequest(bundleUrl, ignoreCache);
+    HttpResponse response = bundleFetcher.fetch(request);
+    if (response.getHttpStatusCode() != HttpResponse.SC_OK) {
+      throw new GadgetException(GadgetException.Code.FAILED_TO_RETRIEVE_CONTENT,
+          "Unable to retrieve message bundle xml. HTTP error " +
+          response.getHttpStatusCode());
+    }
+    MessageBundle bundle
+        = new MessageBundle(bundleUrl, response.getResponseAsString());
+
+    synchronized (inMemoryBundleCache) {
+      long expiration = Math.max(response.getCacheExpiration(),
+          System.currentTimeMillis() + bundleMinTTL);
+      inMemoryBundleCache.addElement(bundleUrl,
+          new BundleTimeoutPair(bundle, expiration));
     }
     return bundle;
   }

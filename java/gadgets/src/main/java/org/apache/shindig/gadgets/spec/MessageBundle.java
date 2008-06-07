@@ -36,11 +36,33 @@ public class MessageBundle {
   public static final MessageBundle EMPTY = new MessageBundle();
 
   private final Map<String, String> messages;
+
   /**
    * @return A read-only view of the message bundle.
    */
   public Map<String, String> getMessages() {
     return messages;
+  }
+
+  /**
+   * Extracts messages from an element.
+   */
+  private Map<String, String> parseMessages(Element element)
+      throws SpecParserException {
+    NodeList nodes = element.getElementsByTagName("msg");
+    Map<String, String> messages
+        = new HashMap<String, String>(nodes.getLength(), 1);
+
+    for (int i = 0, j = nodes.getLength(); i < j; ++i) {
+      Element msg = (Element)nodes.item(i);
+      String name = XmlUtil.getAttribute(msg, "name");
+      if (name == null) {
+        throw new SpecParserException(
+            "All message bundle entries must have a name attribute.");
+      }
+      messages.put(name, msg.getTextContent().trim());
+    }
+    return Collections.unmodifiableMap(messages);
   }
 
   @Override
@@ -69,21 +91,14 @@ public class MessageBundle {
       throw new SpecParserException("Malformed XML in file " + url.toString()
           + ": " + e.getMessage());
     }
+    messages = parseMessages(doc);
+  }
 
-    NodeList nodes = doc.getElementsByTagName("msg");
-    Map<String, String> messages
-        = new HashMap<String, String>(nodes.getLength(), 1);
-
-    for (int i = 0, j = nodes.getLength(); i < j; ++i) {
-      Element msg = (Element)nodes.item(i);
-      String name = XmlUtil.getAttribute(msg, "name");
-      if (name == null) {
-        throw new SpecParserException(
-            "All message bundle entries must have a name attribute.");
-      }
-      messages.put(name, msg.getTextContent().trim());
-    }
-    this.messages = Collections.unmodifiableMap(messages);
+  /**
+   * Constructs a message bundle from an existing element.
+   */
+  public MessageBundle(Element element) throws SpecParserException {
+    messages = parseMessages(element);
   }
 
   private MessageBundle() {
