@@ -19,50 +19,72 @@
 
 package org.apache.shindig.gadgets.spec;
 
-import junit.framework.TestCase;
+import static org.junit.Assert.assertEquals;
 
-import org.apache.shindig.gadgets.GadgetException;
+import org.apache.shindig.common.xml.XmlUtil;
+
+import com.google.common.collect.Maps;
+
+import org.junit.Test;
+import org.w3c.dom.Element;
 
 import java.net.URI;
-import java.util.HashMap;
 import java.util.Map;
 
-public class MessageBundleTest extends TestCase {
+public class MessageBundleTest {
   private static final URI BUNDLE_URL = URI.create("http://example.org/m.xml");
-  public void testNormalMessageBundle() throws Exception {
-    Map<String, String> messages = new HashMap<String, String>();
-    messages.put("hello", "world");
-    messages.put("foo", "bar");
-
-    String xml = "<messagebundle>";
-    for (Map.Entry<String, String> entry : messages.entrySet()) {
-      xml += "<msg name=\"" + entry.getKey() + "\">" + entry.getValue() +
-          "</msg>";
+  private static final Map<String, String> MESSAGES = Maps.newHashMap();
+  private static final String XML;
+  static {
+    MESSAGES.put("hello", "world");
+    MESSAGES.put("foo", "bar");
+    StringBuilder buf = new StringBuilder();
+    buf.append("<messagebundle>");
+    for (Map.Entry<String, String> entry : MESSAGES.entrySet()) {
+      buf.append("<msg name='").append(entry.getKey()).append("'>")
+         .append(entry.getValue())
+         .append("</msg>");
     }
-    xml += "</messagebundle>";
-    MessageBundle bundle = new MessageBundle(BUNDLE_URL, xml);
-    assertEquals(messages, bundle.getMessages());
+    buf.append("</messagebundle>");
+    XML = buf.toString();
   }
 
-  public void testMissingNames() {
+  @Test
+  public void normalMessageBundleParsesOk() throws Exception {
+    MessageBundle bundle = new MessageBundle(BUNDLE_URL, XML);
+    assertEquals(MESSAGES, bundle.getMessages());
+  }
+
+  @Test(expected = SpecParserException.class)
+  public void missingNameThrows() throws SpecParserException {
     String xml = "<messagebundle><msg>foo</msg></messagebundle>";
-    try {
-      MessageBundle bundle = new MessageBundle(BUNDLE_URL, xml);
-      fail("No exception thrown when a msg has no name.");
-    } catch (SpecParserException e) {
-      // OK.
-    }
+    MessageBundle bundle = new MessageBundle(BUNDLE_URL, xml);
   }
 
-  public void testMalformedXml() {
+  @Test(expected = SpecParserException.class)
+  public void malformedXmlThrows() throws SpecParserException {
     String xml = "</messagebundle>";
-    try {
-      MessageBundle bundle = new MessageBundle(BUNDLE_URL, xml);
-      fail("No exception thrown on malformed XML.");
-    } catch (SpecParserException e) {
-      // OK
-      assertEquals(GadgetException.Code.MALFORMED_XML_DOCUMENT, e.getCode());
-      assertTrue(e.getMessage().contains(BUNDLE_URL.toString()));
-    }
+    MessageBundle bundle = new MessageBundle(BUNDLE_URL, xml);
+  }
+
+  @Test
+  public void extractFromElement() throws Exception {
+    Element element = XmlUtil.parse(XML);
+    MessageBundle bundle = new MessageBundle(element);
+    assertEquals(MESSAGES, bundle.getMessages());
+  }
+
+  @Test(expected = SpecParserException.class)
+  public void extractFromElementsWithNoName() throws Exception {
+    String xml = "<messagebundle><msg>foo</msg></messagebundle>";
+    Element element = XmlUtil.parse(xml);
+    MessageBundle bundle = new MessageBundle(element);
+  }
+
+  @Test
+  public void toStringIsSane() throws Exception {
+    MessageBundle b0 = new MessageBundle(BUNDLE_URL, XML);
+    MessageBundle b1 = new MessageBundle(BUNDLE_URL, b0.toString());
+    assertEquals(b0.getMessages(), b1.getMessages());
   }
 }

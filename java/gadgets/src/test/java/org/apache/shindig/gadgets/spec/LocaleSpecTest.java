@@ -19,16 +19,19 @@
 
 package org.apache.shindig.gadgets.spec;
 
+import static org.junit.Assert.assertEquals;
+
 import org.apache.shindig.common.xml.XmlUtil;
 
-import junit.framework.TestCase;
+import org.junit.Test;
 
 import java.net.URI;
 
-public class LocaleSpecTest extends TestCase {
+public class LocaleSpecTest {
   private static final URI SPEC_URL = URI.create("http://example.org/foo.xml");
 
-  public void testNormalLocale() throws Exception {
+  @Test
+  public void normalLocale() throws Exception {
     String xml = "<Locale" +
                  " lang=\"en\"" +
                  " country=\"US\"" +
@@ -43,37 +46,59 @@ public class LocaleSpecTest extends TestCase {
         locale.getMessages().toString());
   }
 
-  public void testRelativeLocale() throws Exception {
+  @Test
+  public void relativeLocale() throws Exception {
     String xml = "<Locale messages=\"/test/msgs.xml\"/>";
     LocaleSpec locale = new LocaleSpec(XmlUtil.parse(xml), SPEC_URL);
     assertEquals("http://example.org/test/msgs.xml",
         locale.getMessages().toString());
   }
 
-  public void testDefaultLanguageAndCountry() throws Exception {
+  @Test
+  public void defaultLanguageAndCountry() throws Exception {
     String xml = "<Locale/>";
     LocaleSpec locale = new LocaleSpec(XmlUtil.parse(xml), SPEC_URL);
     assertEquals("all", locale.getLanguage());
     assertEquals("ALL", locale.getCountry());
   }
 
-  public void testInvalidLanguageDirection() throws Exception {
+  @Test(expected = SpecParserException.class)
+  public void invalidLanguageDirection() throws Exception {
     String xml = "<Locale language_direction=\"invalid\"/>";
-    try {
-      LocaleSpec locale = new LocaleSpec(XmlUtil.parse(xml), SPEC_URL);
-      fail("No exception thrown when invalid language_direction is specified.");
-    } catch (SpecParserException e) {
-      // OK.
-    }
+    LocaleSpec locale = new LocaleSpec(XmlUtil.parse(xml), SPEC_URL);
   }
 
-  public void testInvalidMessagesUrl() throws Exception {
+  @Test(expected = SpecParserException.class)
+  public void invalidMessagesUrl() throws Exception {
     String xml = "<Locale messages=\"fobad@$%!fdf\"/>";
-    try {
-      LocaleSpec locale = new LocaleSpec(XmlUtil.parse(xml), SPEC_URL);
-      fail("No exception thrown when invalid messages url is specified.");
-    } catch (SpecParserException e) {
-      // OK.
-    }
+    LocaleSpec locale = new LocaleSpec(XmlUtil.parse(xml), SPEC_URL);
+  }
+
+  @Test
+  public void nestedMessages() throws Exception {
+    String msgName = "message name";
+    String msgValue = "message value";
+    String xml = "<Locale>" +
+                 "<msg name=\"" + msgName + "\">" + msgValue + "</msg>" +
+                 "</Locale>";
+    LocaleSpec locale = new LocaleSpec(XmlUtil.parse(xml), SPEC_URL);
+    assertEquals(msgValue, locale.getMessageBundle().getMessages().get(msgName));
+  }
+
+  @Test
+  public void toStringIsSane() throws Exception {
+    String xml = "<Locale lang='en' country='US' language_direction='rtl'" +
+                 " messages='foo'>" +
+                 "  <msg name='hello'>World</msg>" +
+                 "  <msg name='foo'>Bar</msg>" +
+                 "</Locale>";
+    LocaleSpec loc = new LocaleSpec(XmlUtil.parse(xml), SPEC_URL);
+    LocaleSpec loc2 = new LocaleSpec(XmlUtil.parse(loc.toString()), SPEC_URL);
+    assertEquals(loc.getLanguage(), loc2.getLanguage());
+    assertEquals(loc.getCountry(), loc2.getCountry());
+    assertEquals(loc.getLanguageDirection(), loc2.getLanguageDirection());
+    assertEquals(loc.getMessages(), loc2.getMessages());
+    assertEquals(loc.getMessageBundle().getMessages(),
+                 loc2.getMessageBundle().getMessages());
   }
 }

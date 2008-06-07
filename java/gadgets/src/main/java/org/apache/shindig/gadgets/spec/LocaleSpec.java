@@ -24,6 +24,7 @@ import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.util.Map;
 
 /**
  * Represents a Locale tag.
@@ -68,18 +69,28 @@ public class LocaleSpec {
     return messages;
   }
 
+  /**
+   * Locale/msg
+   */
+  private final MessageBundle messageBundle;
+  public MessageBundle getMessageBundle() {
+    return messageBundle;
+  }
+
   @Override
   public String toString() {
     StringBuilder buf = new StringBuilder();
-    buf.append("<Locale lang=\"")
-       .append(language)
-       .append("\" country=\"")
-       .append(country)
-       .append("\" language_direction=\"")
-       .append(languageDirection)
-       .append("\" messages=\"")
-       .append(messages)
-       .append("\"/>");
+    buf.append("<Locale")
+       .append(" lang='").append(language).append("'")
+       .append(" country='").append(country).append("'")
+       .append(" language_direction='").append(languageDirection).append("'")
+       .append(" messages='").append(messages).append("'>\n");
+    for (Map.Entry<String, String> entry : messageBundle.getMessages().entrySet()) {
+      buf.append("<msg name='").append(entry.getKey()).append("'>")
+         .append(entry.getValue())
+         .append("</msg>\n");
+    }
+    buf.append("</Locale>");
     return buf.toString();
   }
 
@@ -111,5 +122,6 @@ public class LocaleSpec {
         throw new SpecParserException("Locale@messages url is invalid.");
       }
     }
+    messageBundle = new MessageBundle(element);
   }
 }
