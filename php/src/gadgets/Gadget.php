@@ -243,12 +243,12 @@ class Gadget {
 
 	public function getCategory()
 	{
-		return $this->category;
+		return $this->substitutions->substitute($this->category);
 	}
 
 	public function getCategory2()
 	{
-		return $this->category2;
+		return $this->substitutions->substitute($this->category2);
 	}
 
 	public function getSingleton()
