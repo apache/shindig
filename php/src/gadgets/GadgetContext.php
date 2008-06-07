@@ -158,24 +158,9 @@ class GadgetContext {
 
 	private function instanceLocale()
 	{
-		$language = 'all';
-		$country = 'all';
-		if (! empty($_SERVER['HTTP_ACCEPT_LANGUAGE'])) {
-			$acceptLanguage = explode(';', $_SERVER['HTTP_ACCEPT_LANGUAGE']);
-			$acceptLanguage = $acceptLanguage[0];
-			if (strpos($acceptLanguage, '-') !== false) {
-				$lang = explode('-', $acceptLanguage);
-				$language = $lang[0];
-				$country = $lang[1];
-				if (strpos($country, ',') !== false) {
-					$country = explode(',', $country);
-					$country = $country[0];
-				}
-			} else {
-				$language = $acceptLanguage;
-			}
-		
-		}
+		// Get language and country params, try the GET params first, if their not set try the POST, else use 'all' as default 
+		$language = !empty($_GET['lang']) ? $_GET['lang'] : (!empty($_POST['lang']) ? $_POST['lang'] : 'all');
+		$country = !empty($_GET['country']) ? $_GET['country'] : (!empty($_POST['country']) ? $_POST['country'] : 'all');
 		return new Locale($language, $country);
 	}
 
