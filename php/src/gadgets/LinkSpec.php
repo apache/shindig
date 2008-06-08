@@ -18,29 +18,23 @@
  *
  */
 
-class LocaleSpec {
-	public $url;
-	public $locale;
-	public $rightToLeft;
-	public $localeMessageBundles = array();
+class LinkSpec {
+	public $rel;
+	public $href;
 
-	public function getLocaleMessageBundles()
+	public function __construct($rel, $href)
 	{
-		return $this->localeMessageBundles;
+		$this->rel = $rel;
+		$this->href = $href;
 	}
 
-	public function getURI()
+	public function getRel()
 	{
-		return $this->url;
+		return $this->rel;
 	}
-
-	public function getLocale()
+	
+	public function getHref()
 	{
-		return $this->locale;
-	}
-
-	public function isRightToLeft()
-	{
-		return $this->rightToLeft;
+		return $this->href;
 	}
 }
