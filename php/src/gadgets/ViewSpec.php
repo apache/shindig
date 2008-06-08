@@ -30,6 +30,8 @@ class ViewSpec {
 	public $quirks;
 	public $content;
 	public $view;
+	public $preferedHeight;
+	public $preferedWidth;
 	
 	public function __construct($name, $gadgetContent)
 	{
@@ -37,6 +39,8 @@ class ViewSpec {
 		$this->name = $name;
 		$this->view = isset($attributes['view']) ? trim($attributes['view']) : '';
 		$this->quirks = trim($attributes['quirks']);
+		$this->preferedHeight = isset($attributes['preferedHeight']) ? trim($attributes['preferedHeight']) : '';
+		$this->preferedWidth = isset($attributes['preferedWidth']) ? trim($attributes['preferedWidth']) : '';
 		if (empty($this->quirks)) {
 			$this->quirks = true;
 		} else {
