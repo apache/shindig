@@ -92,10 +92,12 @@ gadgets.views = function() {
      * @param {gadgets.views.View} view The view to navigate to
      * @param {Map.&lt;String, String&gt;} opt_params Parameters to pass to the
      *     gadget after it has been navigated to on the surface
+     * @param {string} opt_ownerId The ID of the owner of the page to navigate to;
+     *                 defaults to the current owner.
      */
-    requestNavigateTo : function(view, opt_params) {
+    requestNavigateTo : function(view, opt_params, opt_ownerId) {
       gadgets.rpc.call(
-          null, "requestNavigateTo", null, view.getName(), opt_params);
+          null, "requestNavigateTo", null, view.getName(), opt_params, opt_ownerId);
     },
 
     /**
