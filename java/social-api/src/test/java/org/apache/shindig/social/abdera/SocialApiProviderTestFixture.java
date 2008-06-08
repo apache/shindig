@@ -21,7 +21,7 @@ import org.apache.shindig.social.EasyMockTestCase;
 
 import org.apache.abdera.protocol.server.RequestContext;
 
-public class SocialApiProviderTestFixture extends EasyMockTestCase {
+public abstract class SocialApiProviderTestFixture extends EasyMockTestCase {
   public final String base = "/social/rest/";
   public final RequestContext request = mock(RequestContext.class);
   public final SocialApiProvider provider = new SocialApiProvider();
