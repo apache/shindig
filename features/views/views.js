@@ -151,5 +151,7 @@ gadgets.views.View.prototype.isOnlyVisibleGadget = function() {
 };
 
 gadgets.views.ViewType = gadgets.util.makeEnum([
+  "CANVAS", "HOME", "PREVIEW", "PROFILE",
+  // TODO Deprecate the following ViewTypes.
   "FULL_PAGE", "DASHBOARD", "POPUP"
 ]);
