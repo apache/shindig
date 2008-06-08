@@ -17,14 +17,15 @@
  */
 package org.apache.shindig.gadgets;
 
+import static org.easymock.EasyMock.eq;
+import static org.easymock.EasyMock.expect;
+
 import org.apache.shindig.common.BasicSecurityToken;
 import org.apache.shindig.common.SecurityToken;
 import org.apache.shindig.common.crypto.BlobCrypterException;
-import org.apache.shindig.gadgets.http.HttpResponse;
 import org.apache.shindig.gadgets.http.HttpRequest;
+import org.apache.shindig.gadgets.http.HttpResponse;
 import org.apache.shindig.gadgets.spec.GadgetSpec;
-import static org.easymock.EasyMock.eq;
-import static org.easymock.EasyMock.expect;
 
 import java.net.URI;
 import java.util.HashMap;
@@ -57,6 +58,13 @@ public class GadgetServerTest extends GadgetTestFixture {
     @Override
     public String getView() {
       return "v2";
+    }
+
+    @Override
+    public UserPrefs getUserPrefs() {
+      Map<String, String> map = new HashMap<String, String>();
+      map.put("body", "BODY");
+      return new UserPrefs(map);
     }
   };
   private final static String BASIC_SPEC_XML
@@ -93,20 +101,6 @@ public class GadgetServerTest extends GadgetTestFixture {
           "  <Content type=\"html\">__UP_body__</Content>" +
           "</Module>";
 
-    GadgetContext context = new GadgetContext() {
-      @Override
-      public URI getUrl() {
-        return SPEC_URL;
-      }
-
-      @Override
-      public UserPrefs getUserPrefs() {
-        Map<String, String> map = new HashMap<String, String>();
-        map.put("body", "BODY");
-        return new UserPrefs(map);
-      }
-    };
-
     HttpResponse spec = new HttpResponse(gadgetXml);
     HttpResponse bundle = new HttpResponse(BASIC_BUNDLE_XML);
 
@@ -114,7 +108,42 @@ public class GadgetServerTest extends GadgetTestFixture {
     expect(fetcher.fetch(BUNDLE_REQUEST)).andReturn(bundle);
     replay();
 
-    Gadget gadget = gadgetServer.processGadget(context);
+    Gadget gadget = gadgetServer.processGadget(BASIC_CONTEXT);
+
+    // No verification because the cache store ops happen on separate threads
+    // and easy mock doesn't handle that properly.
+
+    assertEquals("TITLE", gadget.getSpec().getModulePrefs().getTitle());
+    assertEquals("BODY",
+        gadget.getSpec().getView(GadgetSpec.DEFAULT_VIEW).getContent());
+  }
+
+  public void testBundledSubstitutionsDone() throws Exception {
+    String gadgetXml
+        = "<Module>" +
+          "  <ModulePrefs title=\"__MSG_title__\">" +
+          "    <Locale>" +
+          "      <msg name='title'>TITLE</msg>" +
+          "      <msg name='body'>BODY</msg>" +
+          "    </Locale>" +
+          "  </ModulePrefs>" +
+          "  <UserPref name=\"body\" datatype=\"string\"/>" +
+          "  <Content type=\"html\">__MSG_body__</Content>" +
+          "</Module>";
+
+    HttpResponse spec = new HttpResponse(gadgetXml);
+
+    GadgetContext context = new GadgetContext() {
+      @Override
+      public URI getUrl() {
+        return SPEC_URL;
+      }
+    };
+
+    expect(fetcher.fetch(SPEC_REQUEST)).andReturn(spec);
+    replay();
+
+    Gadget gadget = gadgetServer.processGadget(BASIC_CONTEXT);
 
     // No verification because the cache store ops happen on separate threads
     // and easy mock doesn't handle that properly.
