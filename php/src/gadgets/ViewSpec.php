@@ -39,8 +39,8 @@ class ViewSpec {
 		$this->name = $name;
 		$this->view = isset($attributes['view']) ? trim($attributes['view']) : '';
 		$this->quirks = trim($attributes['quirks']);
-		$this->preferedHeight = isset($attributes['preferedHeight']) ? trim($attributes['preferedHeight']) : '';
-		$this->preferedWidth = isset($attributes['preferedWidth']) ? trim($attributes['preferedWidth']) : '';
+		$this->preferedHeight = isset($attributes['prefered_height']) ? trim($attributes['prefered_height']) : '';
+		$this->preferedWidth = isset($attributes['prefered_width']) ? trim($attributes['prefered_width']) : '';
 		if (empty($this->quirks)) {
 			$this->quirks = true;
 		} else {
