@@ -43,9 +43,13 @@ public class JsonRpcHandlerTest extends HttpTestFixture {
   private static final String SPEC_TITLE2 = "JSON-TEST2";
   private static final int PREFERRED_HEIGHT = 100;
   private static final int PREFERRED_WIDTH = 242;
+  private static final String LINK_REL = "rel";
+  private static final String LINK_HREF = "http://example.org/foo";
   private static final String SPEC_XML
       = "<Module>" +
-        "<ModulePrefs title=\"" + SPEC_TITLE + "\"/>" +
+        "<ModulePrefs title=\"" + SPEC_TITLE + "\">" +
+        "  <Link rel='" + LINK_REL + "' href='" + LINK_HREF + "'/>" +
+        "</ModulePrefs>" +
         "<Content type=\"html\"" +
         " preferred_height = \"" + PREFERRED_HEIGHT + "\"" +
         " preferred_width = \"" + PREFERRED_WIDTH + "\"" +
@@ -96,7 +100,10 @@ public class JsonRpcHandlerTest extends HttpTestFixture {
         .getJSONObject(GadgetSpec.DEFAULT_VIEW);
     assertEquals(PREFERRED_HEIGHT, view.getInt("preferredHeight"));
     assertEquals(PREFERRED_WIDTH, view.getInt("preferredWidth"));
+    assertEquals(LINK_HREF, gadget.getJSONObject("links").getString(LINK_REL));
   }
+
+  // TODO: Verify that user pref specs are returned correctly.
 
   public void testMultipleGadgets() throws Exception {
     JSONArray gadgets = new JSONArray()
@@ -119,13 +126,23 @@ public class JsonRpcHandlerTest extends HttpTestFixture {
     verify();
 
     JSONArray outGadgets = response.getJSONArray("gadgets");
-    JSONObject gadget = outGadgets.getJSONObject(0);
-    if (gadget.getString("url").equals(SPEC_URL.toString())) {
-      assertEquals(SPEC_TITLE, gadget.getString("title"));
-      assertEquals(0, gadget.getInt("moduleId"));
-    } else {
-      assertEquals(SPEC_TITLE2, gadget.getString("title"));
-      assertEquals(1, gadget.getInt("moduleId"));
+
+    boolean first = false;
+    boolean second = false;
+    for (int i = 0, j = outGadgets.length(); i < j; ++i) {
+      JSONObject gadget = outGadgets.getJSONObject(i);
+      if (gadget.getString("url").equals(SPEC_URL.toString())) {
+        assertEquals(SPEC_TITLE, gadget.getString("title"));
+        assertEquals(0, gadget.getInt("moduleId"));
+        first = true;
+      } else {
+        assertEquals(SPEC_TITLE2, gadget.getString("title"));
+        assertEquals(1, gadget.getInt("moduleId"));
+        second = true;
+      }
     }
+
+    assertTrue("First gadget not returned!", first);
+    assertTrue("Second gadget not returned!", second);
   }
 }

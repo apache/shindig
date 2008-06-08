@@ -320,8 +320,8 @@ public class ModulePrefs {
   }
 
   /**
-   * ModuleSpec.Require
-   * ModuleSpec.Optional
+   * ModuleSpec/Require
+   * ModuleSpec/Optional
    */
   private final Map<String, Feature> features;
   public Map<String, Feature> getFeatures() {
@@ -329,7 +329,7 @@ public class ModulePrefs {
   }
 
   /**
-   * ModuleSpec.Preload
+   * ModuleSpec/Preload
    */
   private final List<Preload> preloads;
   public List<Preload> getPreloads() {
@@ -337,19 +337,27 @@ public class ModulePrefs {
   }
 
   /**
-   * ModuleSpec.Icon
+   * ModuleSpec/Icon
    */
-  private List<Icon> icons;
+  private final List<Icon> icons;
   public List<Icon> getIcons() {
     return icons;
   }
 
   /**
-   * ModuleSpec.Locale
+   * ModuleSpec/Locale
    */
   private final Map<Locale, LocaleSpec> locales;
   public Map<Locale, LocaleSpec> getLocales() {
     return locales;
+  }
+
+  /**
+   * ModuleSpec/Link
+   */
+  private final Map<String, LinkSpec> links;
+  public Map<String, LinkSpec> getLinks() {
+    return links;
   }
 
   /**
@@ -385,24 +393,7 @@ public class ModulePrefs {
    * @param substituter
    */
   public ModulePrefs substitute(Substitutions substituter) {
-    ModulePrefs prefs = new ModulePrefs(this);
-
-    // Icons, if any
-    if (icons.isEmpty()) {
-      prefs.icons = Collections.emptyList();
-    } else {
-      List<Icon> iconList = new ArrayList<Icon>(icons.size());
-      for (Icon icon : icons) {
-        iconList.add(icon.substitute(substituter));
-      }
-      prefs.icons = Collections.unmodifiableList(iconList);
-    }
-
-    for (Map.Entry<String, String> attr : attributes.entrySet()) {
-      String substituted = substituter.substituteString(null, attr.getValue());
-      prefs.attributes.put(attr.getKey(), substituted);
-    }
-    return prefs;
+    return new ModulePrefs(this, substituter);
   }
 
 
@@ -446,6 +437,9 @@ public class ModulePrefs {
     for (LocaleSpec locale : locales.values()) {
       buf.append(locale).append('\n');
     }
+    for (LinkSpec link : links.values()) {
+      buf.append(link).append('\n');
+    }
     buf.append("</ModulePrefs>");
     return buf.toString();
   }
@@ -474,28 +468,57 @@ public class ModulePrefs {
     FeatureVisitor featureVisitor = new FeatureVisitor();
     IconVisitor iconVisitor = new IconVisitor();
     LocaleVisitor localeVisitor = new LocaleVisitor(specUrl);
-    Map<String, ElementVisitor> visitors = new HashMap<String, ElementVisitor>(5,1);
+    LinkVisitor linkVisitor = new LinkVisitor();
+
+    Map<String, ElementVisitor> visitors
+        = new HashMap<String, ElementVisitor>(6, 1);
     visitors.put("Preload", preloadVisitor);
     visitors.put("Optional", featureVisitor);
     visitors.put("Require", featureVisitor);
     visitors.put("Icon", iconVisitor);
     visitors.put("Locale", localeVisitor);
+    visitors.put("Link", linkVisitor);
+
     walk(element, visitors);
+
     preloads = Collections.unmodifiableList(preloadVisitor.preloads);
     features = Collections.unmodifiableMap(featureVisitor.features);
     icons = Collections.unmodifiableList(iconVisitor.icons);
     locales = Collections.unmodifiableMap(localeVisitor.locales);
+    links = Collections.unmodifiableMap(linkVisitor.links);
   }
 
   /**
-   * Creates an empty module prefs for substitute() to use.
+   * Produces a new, substituted ModulePrefs
    */
-  private ModulePrefs(ModulePrefs prefs) {
-    attributes = new HashMap<String, String>();
+  private ModulePrefs(ModulePrefs prefs, Substitutions substituter) {
     categories = prefs.getCategories();
-    preloads = prefs.getPreloads();
     features = prefs.getFeatures();
     locales = prefs.getLocales();
+
+    // TODO: Preload should have substitutions performed as well.
+    preloads = prefs.getPreloads();
+
+    List<Icon> icons = new ArrayList<Icon>(prefs.icons.size());
+    for (Icon icon : prefs.icons) {
+      icons.add(icon.substitute(substituter));
+    }
+    this.icons = Collections.unmodifiableList(icons);
+
+    Map<String, LinkSpec> links = new HashMap<String, LinkSpec>(prefs.links.size());
+    for (LinkSpec link : prefs.links.values()) {
+      LinkSpec sub = link.substitute(substituter);
+      links.put(sub.getRel(), sub);
+    }
+    this.links = Collections.unmodifiableMap(links);
+
+    Map<String, String> attributes
+        = new HashMap<String, String>(prefs.attributes.size());
+    for (Map.Entry<String, String> attr : prefs.attributes.entrySet()) {
+      String substituted = substituter.substituteString(null, attr.getValue());
+      attributes.put(attr.getKey(), substituted);
+    }
+    this.attributes = Collections.unmodifiableMap(attributes);
   }
 }
 
@@ -504,7 +527,7 @@ interface ElementVisitor {
 }
 
 /**
- * Processes ModulePrefs.Preload into a list.
+ * Processes ModulePrefs/Preload into a list.
  */
 class PreloadVisitor implements ElementVisitor {
   final List<Preload> preloads = new LinkedList<Preload>();
@@ -515,7 +538,7 @@ class PreloadVisitor implements ElementVisitor {
 }
 
 /**
- * Processes ModulePrefs.Require and ModulePrefs.Optional
+ * Processes ModulePrefs/Require and ModulePrefs/Optional
  */
 class FeatureVisitor implements ElementVisitor {
   final Map<String, Feature> features = new HashMap<String, Feature>();
@@ -526,7 +549,7 @@ class FeatureVisitor implements ElementVisitor {
 }
 
 /**
- * Processes ModulePrefs.Icon
+ * Processes ModulePrefs/Icon
  */
 class IconVisitor implements ElementVisitor {
   final List<Icon> icons = new LinkedList<Icon>();
@@ -536,7 +559,7 @@ class IconVisitor implements ElementVisitor {
 }
 
 /**
- * Process ModulePrefs.Locale
+ * Process ModulePrefs/Locale
  */
 class LocaleVisitor implements ElementVisitor {
   final URI base;
@@ -548,5 +571,17 @@ class LocaleVisitor implements ElementVisitor {
   }
   public LocaleVisitor(URI base) {
     this.base = base;
+  }
+}
+
+/**
+ * Process ModulePrefs/Link
+ */
+class LinkVisitor implements ElementVisitor {
+  final Map<String, LinkSpec> links = new HashMap<String, LinkSpec>();
+
+  public void visit(Element element) throws SpecParserException {
+    LinkSpec link = new LinkSpec(element);
+    links.put(link.getRel(), link);
   }
 }
