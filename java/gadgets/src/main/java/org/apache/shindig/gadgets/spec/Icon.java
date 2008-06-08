@@ -73,11 +73,11 @@ public class Icon {
   @Override
   public String toString() {
     StringBuilder buf = new StringBuilder();
-    buf.append("<Icon type=\"")
-       .append(type)
-       .append("\" mode=\"")
-       .append(mode)
-       .append("\">")
+    buf.append("<Icon type='").append(type).append('\'');
+    if (mode != null) {
+      buf.append(" mode='").append(mode).append('\'');
+    }
+    buf.append('>')
        .append(content)
        .append("</Icon>");
     return buf.toString();

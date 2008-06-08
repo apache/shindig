@@ -23,6 +23,7 @@ import org.apache.shindig.gadgets.GadgetContext;
 import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.GadgetServer;
 import org.apache.shindig.gadgets.spec.GadgetSpec;
+import org.apache.shindig.gadgets.spec.LinkSpec;
 import org.apache.shindig.gadgets.spec.ModulePrefs;
 import org.apache.shindig.gadgets.spec.UserPref;
 import org.apache.shindig.gadgets.spec.View;
@@ -49,8 +50,8 @@ import java.util.concurrent.ExecutorCompletionService;
 public class JsonRpcHandler {
 
   private final Executor executor;
-  private GadgetServer server;
-  private UrlGenerator urlGenerator;
+  private final GadgetServer server;
+  private final UrlGenerator urlGenerator;
 
   /**
    * Processes a JSON request.
@@ -152,6 +153,12 @@ public class JsonRpcHandler {
         Set<String> feats = prefs.getFeatures().keySet();
         String[] features = feats.toArray(new String[feats.size()]);
 
+        // Links
+        JSONObject links = new JSONObject();
+        for (LinkSpec link : prefs.getLinks().values()) {
+          links.put(link.getRel(), link.getHref());
+        }
+
         JSONObject userPrefs = new JSONObject();
 
         // User pref specs
@@ -175,6 +182,7 @@ public class JsonRpcHandler {
                   .put("views", views)
                   .put("features", features)
                   .put("userPrefs", userPrefs)
+                  .put("links", links)
 
                   // extended meta data
                   .put("directoryTitle", prefs.getDirectoryTitle())
