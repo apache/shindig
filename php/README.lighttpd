@@ -1,0 +1,86 @@
+Installing and Running The PHP Shindig Gadget Server with lighttpd
+============================================
+
+Prequisites before building Shindig for PHP
+============================================
+In order to build and run Shindig for PHP, you must have the following:
+
+- A Subversion client installed in order to checkout the code.
+ Instructions for downloading and installing Subversion can be found here:
+ http://subversion.tigris.org/
+- lighttpd with mod_rewrite enabled.
+- PHP 5.2.x(cgi/fastcgi) with the json, simplexml, mcrypt and curl
+ extentions enabled.
+
+Getting the code
+============================================
+Create a directory, e.g. /var/www/html/shindig and checkout the Shindig
+code from its Subversion repository
+
+mkdir /var/www/html/shindig
+cd /var/www/html/shindig
+svn co http://svn.apache.org/repos/asf/incubator/shindig/trunk/ .
+
+
+Running Shindig
+============================================
+
+To run the code, you have several options:
+
+a. Create a new virtual host (recommended)
+
+Shindig relies on all requests being redirected to the index.php
+script. In order to do that with lighttpd you need to use the
+"url.rewrite-once" directive in the configuration files.
+
+Point your lighttpd at the code by adding this to your lighttpd.conf:
+
+$HTTP["host"] == "shindig" {
+
+   ... other normal settings for virtual hosts...
+	
+   server.document-root = "$YOURPATHHERE/shindig/php/"
+   server.name = "shindig"
+	
+	url.rewrite-once = (
+		"^[^?]*(\??)(.*)$" => "index.php$1$2"
+	)
+	
+}
+
+(Replace "shindig" and "$YOURPATHHERE" as required)
+
+Restart lighttpd and make sure that you can resolve the new sub-host
+(e.g. by adding it to your local hosts file).
+
+Point your browser at:
+
+http://shindig/gadgets/ifr?url=http://www.labpixies.com/campaigns/todo/todo.xml
+
+(replace shindig with the name of your virtual host)
+
+you should see something like this:
+http://shindig.chabotc.com/gadgets/ifr?url=http://www.labpixies.com/campaigns/todo/todo.xml
+
+b. Run with an existing host
+
+If you cannot/don't want to create a virtual host, check out the Shindig
+code into a subdirectory of your document root and add this to your lighttpd
+configuration file:
+
+url.rewrite-once = (
+	"^shindig/[^?]*(\??)(.*)$" => "shindig/php/index.php$1$2"
+)
+
+Restart lighttpd to apply the changes. You also need to edit the file
+php/config.php and change the web_prefix setting to '/shindig'.
+
+Point your browser at:
+
+http://localhost/shindig/gadgets/ifr?url=http://www.labpixies.com/campaigns/todo/todo.xml
+
+(replace localhost with the name of your host)
+
+you should see something like this:
+http://shindig.chabotc.com/gadgets/ifr?url=http://www.labpixies.com/campaigns/todo/todo.xml
+
