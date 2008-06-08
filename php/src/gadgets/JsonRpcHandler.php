@@ -33,23 +33,25 @@ class JsonRpcHandler {
 		}
 		
 		$views = array();
+		foreach ($gadget->getViews() as $view) {
+			// we want to include all information, except for the content
+			unset($view->content);
+			$views[$view->getName()] = $view;
+		}
+		
+		$links = array();
+		foreach ($gadget->links as $link) {
+			$links[] = $link;
+		}
 		
 		//TODO add views and actual iframe url
 		$response['showInDirectory'] = $gadget->getShowInDirectory();
+		$response['links'] = $links;
 		$response['width'] = $gadget->getWidth();
 		$response['title'] = $gadget->getTitle();
 		$response['singleton'] = $gadget->getSingleton();
 		$response['categories'] = Array($gadget->getCategory(), $gadget->getCategory2());
-		$response['views'] = '';
-		/*stdClass Object
-                       (
-                            $response['default'] = stdClass Object
-                                (
-                                    $response['type'] = html
-                                    $response['quirks'] = 1
-                                )
-
-                        )*/
+		$response['views'] = $views;
 		$response['description'] = $gadget->getDescription();
 		$response['screenshot'] = $gadget->getScreenShot();
 		$response['thumbnail'] = $gadget->getThumbnail();

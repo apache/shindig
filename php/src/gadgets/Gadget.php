@@ -63,6 +63,7 @@ class Gadget {
 	public $scaling;
 	public $scrolling;
 	public $views = array();
+	public $links = array();
 
 	public function __construct($id = false, $context)
 	{
@@ -286,6 +287,21 @@ class Gadget {
 		$this->messageBundle = $messageBundle;
 	}
 
+	public function getLinks()
+	{
+		return $this->links;
+	}
+	
+	public function getLink($rel)
+	{
+		foreach ($this->links as $link) {
+			if ($link->getRel() == $rel) {
+				return $link;
+			}
+		}
+		return false;
+	}
+	
 	public function getViews()
 	{
 		return $this->views;

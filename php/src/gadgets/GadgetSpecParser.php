@@ -89,9 +89,21 @@ class GadgetSpecParser {
 		$gadget->renderInline = isset($attributes['render_inline']) ? trim($attributes['render_inline']) : '';
 		$gadget->scaling = isset($attributes['scaling']) ? trim($attributes['scaling']) : '';
 		$gadget->scrolling = isset($attributes['scrolling']) ? trim($attributes['scrolling']) : '';
+		foreach ($ModulePrefs->Link as $link) {
+			$gadget->links[] = $this->processLink($link);
+		}
 		foreach ($ModulePrefs->Locale as $locale) {
 			$gadget->localeSpecs[] = $this->processLocale($locale, $context);
 		}
+	}
+	
+	private function processLink($link)
+	{
+		$attributes = $link->attributes();
+		$rel = isset($attributes['rel']) ? trim($attributes['rel']) : '';
+		$href = isset($attributes['href']) ? trim($attributes['href']) : '';
+		$link = new LinkSpec($rel, $href);
+		return $link;
 	}
 
 	private function processLocale($locale, $context)
