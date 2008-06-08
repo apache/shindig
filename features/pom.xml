@@ -89,6 +89,7 @@ under the License.
                   <source>mockenv.js</source>
                   <source>core/auth.js</source>
                   <source>core/util.js</source>
+                  <source>core/prefs.js</source>
                   <source>opensocial-reference/opensocial.js</source>
                   <source>opensocial-reference/activity.js</source>
                   <source>opensocial-reference/address.js</source>
