@@ -145,19 +145,15 @@ class GadgetSpecParser {
 			throw new SpecParserException("All UserPrefs must have name attributes.");
 		}
 		$preference->name = trim($attributes['name']);
-		$preference->displayName = isset($attributes['display_name']) ? trim($attributes['display_name']) : '';
+		$preference->displayName = isset($attributes['display_name']) ? $gadget->getSubstitutions()->substitute(trim($attributes['display_name'])) : '';
 		// if its set -and- in our valid 'enum' of types, use it, otherwise assume STRING, to try and emulate java's enum behavior
 		$preference->dataType = isset($attributes['datatype']) && in_array(strtoupper($attributes['datatype']), $preference->DataTypes) ? strtoupper($attributes['datatype']) : 'STRING';
-		$preference->defaultValue = isset($attributes['default_value']) ? trim($attributes['default_value']) : '';
+		$preference->defaultValue = isset($attributes['default_value']) ? $gadget->getSubstitutions()->substitute(trim($attributes['default_value'])) : '';
 		if (isset($pref->EnumValue)) {
 			foreach ($pref->EnumValue as $enum) {
 				$attr = $enum->attributes();
-				// java based shindig doesn't throw an exception here, but it -is- invalid and should trigger a parse error?
-				/*if (empty($attr['value'])) {
-				throw new SpecParserException("EnumValue must have a value field.");
-				}*/
 				$valueText = trim($attr['value']);
-				$displayText = ! empty($attr['display_value']) ? trim($attr['display_value']) : $valueText;
+				$displayText = ! empty($attr['display_value']) ? $gadget->getSubstitutions()->substitute(trim($attr['display_value'])) : $valueText;
 				$preference->enumValues[$valueText] = $displayText;
 			}
 		}
