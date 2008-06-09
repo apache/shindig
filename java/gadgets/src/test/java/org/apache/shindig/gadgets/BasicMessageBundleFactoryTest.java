@@ -140,4 +140,10 @@ public class BasicMessageBundleFactoryTest {
 
     assertEquals(MSG_0_VALUE, bundle2.getMessages().get(MSG_0_NAME));
   }
+
+  @Test
+  public void badLocaleGetsEmptyBundle() throws Exception {
+    assertEquals(0,
+        bundleFactory.getBundle(null, NO_CACHE_CONTEXT).getMessages().size());
+  }
 }
