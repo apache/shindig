@@ -18,7 +18,6 @@
  */
 package org.apache.shindig.gadgets.spec;
 
-import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -29,12 +28,17 @@ import org.apache.shindig.gadgets.Substitutions;
 import org.apache.commons.lang.StringUtils;
 import org.junit.Test;
 
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
+
 /**
  * Tests for Preload
  */
 public class PreloadTest {
   private final static String HREF = "http://example.org/preload.xml";
-  private final static String[] VIEWS = new String[] {"view0", "view1"};
+  private final static Set<String> VIEWS
+      = new HashSet<String>(Arrays.asList("view0", "view1"));
 
   @Test
   public void basicPreload() throws Exception {
@@ -84,7 +88,7 @@ public class PreloadTest {
 
     Preload preload = new Preload(XmlUtil.parse(xml));
 
-    assertArrayEquals(VIEWS, preload.getViews().toArray());
+    assertEquals(VIEWS, preload.getViews());
   }
 
   @Test
@@ -129,7 +133,7 @@ public class PreloadTest {
 
     assertTrue(preload2.isSignViewer());
     assertFalse(preload2.isSignOwner());
-    assertArrayEquals(VIEWS, preload2.getViews().toArray());
+    assertEquals(VIEWS, preload2.getViews());
     assertEquals(HREF, preload2.getHref().toString());
   }
 
