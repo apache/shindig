@@ -55,6 +55,16 @@ JsonContainer.prototype.requestCreateActivity = function(activity,
   });
 };
 
+JsonContainer.prototype.requestSendMessage = function(recipients, message, opt_callback) {
+  opt_callback = opt_callback || {};
+
+  var req = opensocial.newDataRequest();
+  req.add(this.newRequestSendMessageRequest(recipients, message), 'key');
+  req.send(function(response) {
+    opt_callback(response.get('key'));
+  });
+};
+
 JsonContainer.prototype.createJson = function(requestObjects) {
   var jsonObjects = [];
   for (var i = 0; i < requestObjects.length; i++) {
@@ -172,6 +182,12 @@ JsonContainer.prototype.newCreateActivityRequest = function(idSpec,
     activity) {
   return new RequestItem({'type' : 'CREATE_ACTIVITY', 'idSpec' : idSpec,
     'activity' : activity});
+};
+
+JsonContainer.prototype.newRequestSendMessageRequest = function(idSpec,
+    message) {
+  return new RequestItem({'type' : 'SEND_MESSAGE', 'idSpec' : idSpec,
+    'message' : message});
 };
 
 RequestItem = function(jsonParams, processData) {

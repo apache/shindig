@@ -84,7 +84,21 @@ opensocial.Message.Field = {
    * sanitized by the container.
    * @member opensocial.Message.Field
    */
-  BODY : 'body'
+  BODY : 'body',
+
+  /**
+   * The title of the message as a message template. Specifies the
+   * message ID to use in the gadget xml.
+   * @member opensocial.Message.Field
+   */
+  TITLE_ID : 'titleId',
+
+  /**
+   * The main text of the message as a message template. Specifies the
+   * message ID to use in the gadget xml.
+   * @member opensocial.Message.Field
+   */
+  BODY_ID : 'bodyId'
 };
 
 
@@ -131,10 +145,14 @@ opensocial.Message.Type = {
  * @param {String} key The key to get data for;
  *   see the <a href="opensocial.Message.Field.html">Field</a> class
  * for possible values
+ * @param {Map.&lt;opensocial.DataRequest.DataRequestFields, Object&gt;}
+ *  opt_params Additional
+ *    <a href="opensocial.DataRequest.DataRequestFields.html">params</a>
+ *    to pass to the request.
  * @return {String} The data
  * @member opensocial.Message
  */
-opensocial.Message.prototype.getField = function(key) {
+opensocial.Message.prototype.getField = function(key, opt_params) {
   return gadgets.util.escape(this.fields_[key]);
 };
 

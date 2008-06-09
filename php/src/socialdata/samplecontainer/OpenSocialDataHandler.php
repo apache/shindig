@@ -22,16 +22,18 @@
  * This will expand to be more sophisticated as time goes on.
  */
 class OpenSocialDataHandler extends GadgetDataHandler {
-	private $handles = array('FETCH_PEOPLE', 'FETCH_PERSON_APP_DATA', 'UPDATE_PERSON_APP_DATA', 'FETCH_ACTIVITIES', 'CREATE_ACTIVITY');
+	private $handles = array('FETCH_PEOPLE', 'FETCH_PERSON_APP_DATA', 'UPDATE_PERSON_APP_DATA', 'FETCH_ACTIVITIES', 'CREATE_ACTIVITY', 'SEND_MESSAGE');
 	private $peopleHandler;
 	private $dataHandler;
 	private $activitiesHandler;
+	private $messagesHandler;
 	
 	public function __construct()
 	{
 		$this->peopleHandler = new BasicPeopleService();
 		$this->dataHandler = new BasicDataService();
 		$this->activitiesHandler = new BasicActivitiesService();
+		$this->messagesHandler = new BasicMessagesService();
 	}
 	
 	public function shouldHandle($requestType)
@@ -88,6 +90,11 @@ class OpenSocialDataHandler extends GadgetDataHandler {
 						break;
 					
 					case 'CREATE_ACTIVITY' :
+						break;
+						
+					case 'SEND_MESSAGE' :
+						$message = $params["message"];
+						$response = $this->messagesHandler->sendMessage($peopleIds, $message, $request->getToken());
 						break;
 				}
 			} else {
