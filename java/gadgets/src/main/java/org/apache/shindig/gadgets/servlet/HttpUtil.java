@@ -19,12 +19,8 @@
 package org.apache.shindig.gadgets.servlet;
 
 import org.apache.shindig.gadgets.ContainerConfig;
-import org.apache.shindig.gadgets.Gadget;
 import org.apache.shindig.gadgets.GadgetContext;
-import org.apache.shindig.gadgets.spec.GadgetSpec;
-import org.apache.shindig.gadgets.spec.View;
 
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -93,42 +89,5 @@ public class HttpUtil {
       }
     }
     return new JSONObject();
-  }
-
-  /**
-   * Fetches the most appropriate view for the given gadget and container
-   * configuration.
-   *
-   * @param gadget
-   * @param config
-   * @return The most appropriate view for this request.
-   */
-  public static View getView(Gadget gadget, ContainerConfig config) {
-    GadgetContext context = gadget.getContext();
-    String viewName = context.getView();
-    GadgetSpec spec = gadget.getSpec();
-    View view = spec.getView(viewName);
-    if (view == null) {
-      JSONArray aliases = config.getJsonArray(context.getContainer(),
-          "gadgets.features/views/" + viewName + "/aliases");
-      if (aliases != null) {
-        try {
-          for (int i = 0, j = aliases.length(); i < j; ++i) {
-            viewName = aliases.getString(i);
-            view = spec.getView(viewName);
-            if (view != null) {
-              break;
-            }
-          }
-        } catch (JSONException e) {
-          view = null;
-        }
-      }
-
-      if (view == null) {
-        view = gadget.getSpec().getView(GadgetSpec.DEFAULT_VIEW);
-      }
-    }
-    return view;
   }
 }

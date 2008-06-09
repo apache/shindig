@@ -19,8 +19,12 @@ package org.apache.shindig.gadgets;
 
 import org.apache.shindig.gadgets.http.HttpResponse;
 import org.apache.shindig.gadgets.spec.GadgetSpec;
-import org.apache.shindig.gadgets.spec.MessageBundle;
+import org.apache.shindig.gadgets.spec.LocaleSpec;
 import org.apache.shindig.gadgets.spec.Preload;
+import org.apache.shindig.gadgets.spec.View;
+
+import org.json.JSONArray;
+import org.json.JSONException;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -30,11 +34,6 @@ import java.util.concurrent.Future;
 /**
  * Intermediary representation of all state associated with processing
  * of a single gadget request.
- *
- * This class is constructed by an immutable base {@code GadgetSpec},
- * and is modified in parallel by a number of {@code GadgetFeature}
- * processors, in an order defined by their dependencies, in
- * {@code GadgetServer}.
  */
 public class Gadget {
   private final GadgetContext context;
@@ -45,11 +44,6 @@ public class Gadget {
   private final GadgetSpec spec;
   public GadgetSpec getSpec() {
     return spec;
-  }
-
-  private final MessageBundle messageBundle;
-  public MessageBundle getMessageBundle() {
-    return messageBundle;
   }
 
   private final Collection<JsLibrary> jsLibraries;
@@ -63,11 +57,54 @@ public class Gadget {
     return preloads;
   }
 
+  /**
+   * Convenience function for getting the locale spec for the current context.
+   *
+   * Identical to:
+   * Locale locale = gadget.getContext().getLocale();
+   * gadget.getSpec().getModulePrefs().getLocale(locale);
+   */
+  public LocaleSpec getLocale() {
+    return spec.getModulePrefs().getLocale(context.getLocale());
+  }
+
+  /**
+   * Attempts to extract the "current" view for this gadget.
+   *
+   * @param config The container configuration; used to look for any view name
+   *        aliases for the container specified in the context.
+   */
+  public View getView(ContainerConfig config) {
+    String viewName = context.getView();
+    View view = spec.getView(viewName);
+    if (view == null) {
+      JSONArray aliases = config.getJsonArray(context.getContainer(),
+          "gadgets.features/views/" + viewName + "/aliases");
+      if (aliases != null) {
+        try {
+          for (int i = 0, j = aliases.length(); i < j; ++i) {
+            viewName = aliases.getString(i);
+            view = spec.getView(viewName);
+            if (view != null) {
+              break;
+            }
+          }
+        } catch (JSONException e) {
+          view = null;
+        }
+      }
+
+      if (view == null) {
+        view = spec.getView(GadgetSpec.DEFAULT_VIEW);
+      }
+    }
+    return view;
+  }
+
   public Gadget(GadgetContext context, GadgetSpec spec,
-      MessageBundle messageBundle, Collection<JsLibrary> jsLibraries) {
+      Collection<JsLibrary> jsLibraries) {
     this.context = context;
     this.spec = spec;
-    this.messageBundle = messageBundle;
     this.jsLibraries = jsLibraries;
   }
 }

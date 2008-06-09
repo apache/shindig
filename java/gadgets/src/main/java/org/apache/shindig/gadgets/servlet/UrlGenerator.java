@@ -98,7 +98,7 @@ public class UrlGenerator {
     GadgetSpec spec = gadget.getSpec();
     try {
       String url = context.getUrl().toString();
-      View view = HttpUtil.getView(gadget, containerConfig);
+      View view = gadget.getView(containerConfig);
       View.ContentType type;
       if (view == null) {
         type = View.ContentType.HTML;

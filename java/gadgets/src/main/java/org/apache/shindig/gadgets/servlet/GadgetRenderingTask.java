@@ -31,6 +31,7 @@ import org.apache.shindig.gadgets.GadgetFeatureRegistry;
 import org.apache.shindig.gadgets.GadgetServer;
 import org.apache.shindig.gadgets.JsLibrary;
 import org.apache.shindig.gadgets.LockedDomainService;
+import org.apache.shindig.gadgets.MessageBundleFactory;
 import org.apache.shindig.gadgets.http.HttpResponse;
 import org.apache.shindig.gadgets.spec.Feature;
 import org.apache.shindig.gadgets.spec.LocaleSpec;
@@ -77,6 +78,7 @@ public class GadgetRenderingTask {
   private HttpServletRequest request;
   private HttpServletResponse response;
   private final GadgetServer server;
+  private final MessageBundleFactory messageBundleFactory;
   private final GadgetFeatureRegistry registry;
   private final ContainerConfig containerConfig;
   private final UrlGenerator urlGenerator;
@@ -142,7 +144,7 @@ public class GadgetRenderingTask {
    * @throws GadgetException
    */
   private void outputGadget(Gadget gadget) throws IOException, GadgetException {
-    View view = HttpUtil.getView(gadget, containerConfig);
+    View view = gadget.getView(containerConfig);
     if (view == null) {
         throw new GadgetException(GadgetException.Code.UNKNOWN_VIEW_SPECIFIED,
             "No appropriate view could be found for gadget: " + gadget.getSpec().getUrl());
@@ -280,7 +282,8 @@ public class GadgetRenderingTask {
     appendJsConfig(gadget, libs, inlineJs);
 
     // message bundles for prefs object.
-    MessageBundle bundle = gadget.getMessageBundle();
+    MessageBundle bundle
+        = messageBundleFactory.getBundle(gadget.getLocale(), gadget.getContext());
 
     String msgs = new JSONObject(bundle.getMessages()).toString();
     inlineJs.append("gadgets.Prefs.setMessages_(").append(msgs).append(");");
@@ -447,7 +450,7 @@ public class GadgetRenderingTask {
       // Shouldn't be possible.
       throw new RuntimeException(e);
     }
-    
+
     js.append("gadgets.config.init(").append(json.toString()).append(");\n");
   }
 
@@ -544,13 +547,14 @@ public class GadgetRenderingTask {
 
   @Inject
   public GadgetRenderingTask(GadgetServer server,
+                             MessageBundleFactory messageBundleFactory,
                              GadgetFeatureRegistry registry,
                              ContainerConfig containerConfig,
                              UrlGenerator urlGenerator,
                              SecurityTokenDecoder tokenDecoder,
                              LockedDomainService lockedDomainService) {
-
     this.server = server;
+    this.messageBundleFactory = messageBundleFactory;
     this.registry = registry;
     this.containerConfig = containerConfig;
     this.urlGenerator = urlGenerator;
