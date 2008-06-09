@@ -175,13 +175,41 @@ opensocial.Enum.Gender = {
   FEMALE : 'FEMALE'
 };
 
+
 /**
  * @static
  * @class
- * The enum keys used by the NetworkPresence field.
+ * The enum keys used by the lookingFor field.
  * <p><b>See also:</b>
  * <a href="opensocial.Person.Field.html">
- * opensocial.Person.Field.Presence</a>
+ * opensocial.Person.Field.LookingFor</a>
+ * </p>
+ *
+ * @name opensocial.Enum.LookingFor
+ */
+opensocial.Enum.LookingFor = {
+  /** @member opensocial.Enum.LookingFor */
+  DATING : 'DATING',
+  /** @member opensocial.Enum.LookingFor */
+  FRIENDS : 'FRIENDS',
+  /** @member opensocial.Enum.LookingFor */
+  RELATIONSHIP : 'RELATIONSHIP',
+  /** @member opensocial.Enum.LookingFor */
+  NETWORKING : 'NETWORKING',
+  /** @member opensocial.Enum.LookingFor */
+  ACTIVITY_PARTNERS : 'ACTIVITY_PARTNERS',
+  /** @member opensocial.Enum.LookingFor */
+  RANDOM : 'RANDOM'
+};
+
+
+/**
+ * @static
+ * @class
+ * The enum keys used by the networkPresence field.
+ * <p><b>See also:</b>
+ * <a href="opensocial.Person.Field.html">
+ * opensocial.Person.Field.NetworkPresence</a>
  * </p>
  *
  * @name opensocial.Enum.Presence

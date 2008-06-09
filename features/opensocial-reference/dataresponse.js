@@ -51,9 +51,11 @@
  * @private
  * @constructor
  */
-opensocial.DataResponse = function(responseItems, opt_globalError) {
+opensocial.DataResponse = function(responseItems, opt_globalError,
+    opt_errorMessage) {
   this.responseItems_ = responseItems;
   this.globalError_ = opt_globalError;
+  this.errorMessage_ = opt_errorMessage;
 };
 
 
@@ -65,6 +67,16 @@ opensocial.DataResponse = function(responseItems, opt_globalError) {
  */
 opensocial.DataResponse.prototype.hadError = function() {
   return !!this.globalError_;
+};
+
+
+/**
+ * If the entire request had a batch level error, returns the error message.
+ *
+ * @return {String} A human-readable description of the error that occurred.
+ */
+opensocial.DataResponse.prototype.getErrorMessage = function() {
+  return this.errorMessage_;
 };
 
 

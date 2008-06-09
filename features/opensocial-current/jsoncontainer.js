@@ -49,13 +49,15 @@ JsonContainer.prototype.requestCreateActivity = function(activity,
   opt_callback = opt_callback || {};
 
   var req = opensocial.newDataRequest();
-  req.add(this.newCreateActivityRequest('VIEWER', activity), 'key');
+  var viewer = new opensocial.IdSpec({'userId' : 'VIEWER'});
+  req.add(this.newCreateActivityRequest(viewer, activity), 'key');
   req.send(function(response) {
     opt_callback(response.get('key'));
   });
 };
 
-JsonContainer.prototype.requestSendMessage = function(recipients, message, opt_callback) {
+JsonContainer.prototype.requestSendMessage = function(recipients, message,
+    opt_callback) {
   opt_callback = opt_callback || {};
 
   var req = opensocial.newDataRequest();
@@ -118,7 +120,8 @@ JsonContainer.prototype.requestData = function(dataRequest, callback) {
 };
 
 JsonContainer.prototype.newFetchPersonRequest = function(id, opt_params) {
-  var peopleRequest = this.newFetchPeopleRequest(id, opt_params);
+  var peopleRequest = this.newFetchPeopleRequest(
+      new opensocial.IdSpec({'userId' : id}), opt_params);
 
   var me = this;
   return new RequestItem(peopleRequest.jsonParams,
@@ -129,9 +132,10 @@ JsonContainer.prototype.newFetchPersonRequest = function(id, opt_params) {
 
 JsonContainer.prototype.newFetchPeopleRequest = function(idSpec, opt_params) {
   var me = this;
+  // TODO: Handle filterOptions
   return new RequestItem(
       {'type' : 'FETCH_PEOPLE',
-        'idSpec' : idSpec,
+        'idSpec' : JsonContainer.translateIdSpec(idSpec),
         'profileDetail': opt_params['profileDetail'],
         'sortOrder': opt_params['sortOrder'] || 'topFriends',
         'filter': opt_params['filter'] || 'all',
@@ -152,11 +156,13 @@ JsonContainer.prototype.createPersonFromJson = function(serverJson) {
   return new JsonPerson(serverJson);
 }
 
-JsonContainer.prototype.newFetchPersonAppDataRequest = function(idSpec, keys) {
-  return new RequestItem({'type' : 'FETCH_PERSON_APP_DATA', 'idSpec' : idSpec,
+JsonContainer.prototype.newFetchPersonAppDataRequest = function(idSpec, keys,
+    opt_params) {
+  return new RequestItem({'type' : 'FETCH_PERSON_APP_DATA',
+      'idSpec' : JsonContainer.translateIdSpec(idSpec),
       'keys' : keys},
       function (appData) {
-        return gadgets.util.escape(appData, true);
+        return opensocial.Container.escape(appData, opt_params, true);
       });
 };
 
@@ -166,28 +172,60 @@ JsonContainer.prototype.newUpdatePersonAppDataRequest = function(id, key,
     'key' : key, 'value' : value});
 };
 
+JsonContainer.prototype.newRemovePersonAppDataRequest = function(id, keys) {
+  // TODO: This isn't supported on the server yet
+  return new RequestItem({'type' : 'REMOVE_PERSON_APP_DATA', 'idSpec' : id,
+    'keys' : keys});
+};
+
 JsonContainer.prototype.newFetchActivitiesRequest = function(idSpec,
     opt_params) {
-  return new RequestItem({'type' : 'FETCH_ACTIVITIES', 'idSpec' : idSpec},
+  return new RequestItem({'type' : 'FETCH_ACTIVITIES',
+      'idSpec' : JsonContainer.translateIdSpec(idSpec)},
       function(rawJson) {
         var activities = [];
         for (var i = 0; i < rawJson.length; i++) {
           activities.push(new JsonActivity(rawJson[i]));
         }
-        return {'activities' : new opensocial.Collection(activities)};
+        return new opensocial.Collection(activities);
       });
 };
 
 JsonContainer.prototype.newCreateActivityRequest = function(idSpec,
     activity) {
-  return new RequestItem({'type' : 'CREATE_ACTIVITY', 'idSpec' : idSpec,
+  return new RequestItem({'type' : 'CREATE_ACTIVITY',
+    'idSpec' : JsonContainer.translateIdSpec(idSpec),
     'activity' : activity});
 };
 
 JsonContainer.prototype.newRequestSendMessageRequest = function(idSpec,
     message) {
-  return new RequestItem({'type' : 'SEND_MESSAGE', 'idSpec' : idSpec,
+  return new RequestItem({'type' : 'SEND_MESSAGE',
+    'idSpec' : JsonContainer.translateIdSpec(idSpec),
     'message' : message});
+};
+
+JsonContainer.translateIdSpec = function(newIdSpec) {
+  var oldIdSpec;
+  var userId = newIdSpec.getField('userId');
+  var groupId = newIdSpec.getField('groupId');
+
+  if (groupId == 'FRIENDS') {
+    if (userId == 'OWNER') {
+      oldIdSpec = 'OWNER_FRIENDS';
+    } else if (userId == 'VIEWER') {
+      oldIdSpec = 'VIEWER_FRIENDS';
+    } else {
+      // TODO: We don't really support getting friends of an arbitrary user
+      // with this old wire format
+    }
+  } else if (!groupId) {
+    oldIdSpec = userId;
+  } else {
+    // TODO: Old wire format doesn't support groups
+  }
+
+  return oldIdSpec;
 };
 
 RequestItem = function(jsonParams, processData) {

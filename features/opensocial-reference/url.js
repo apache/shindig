@@ -80,8 +80,12 @@ opensocial.Url.Field = {
  * @param {String} key The key to get data for;
  *    keys are defined in <a href="opensocial.Url.Field.html"><code>
  *    Url.Field</code></a>
+ * @param {Map.&lt;opensocial.DataRequest.DataRequestFields, Object&gt;}
+ *  opt_params Additional
+ *    <a href="opensocial.DataRequest.DataRequestFields.html">params</a>
+ *    to pass to the request.
  * @return {String} The data
  */
-opensocial.Url.prototype.getField = function(key) {
-  return gadgets.util.escape(this.fields_[key]);
+opensocial.Url.prototype.getField = function(key, opt_params) {
+  return opensocial.Container.getField(this.fields_, key, opt_params);
 };

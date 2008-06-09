@@ -40,38 +40,65 @@ var opensocial = function() {};
 
 
 /**
- * Requests the container to send a specific message to the specified users. If
- * the container does not support this method the callback will be called with a
- * opensocial.ResponseItem. The response item will have its error code set to
- * NOT_IMPLEMENTED.
+ * Requests the container to send a specific message to the specified users.
  *
- * @param {Array.&lt;String&gt; | String} recipients An ID, array of IDs, or a
- *     group reference; the supported keys are VIEWER, OWNER, VIEWER_FRIENDS,
- *    OWNER_FRIENDS, or a single ID within one of those groups
- * @param {opensocial.Message} message The message to send to the specified
- *     users.
- * @param {Function} opt_callback The function to call once the request has been
- *    processed; either this callback will be called or the gadget will be
- *    reloaded from scratch. This function will be passed one parameter, an
+ * <p>
+ * The callback function is passed one parameter, an
  *    opensocial.ResponseItem. The error code will be set to reflect whether
  *    there were any problems with the request. If there was no error, the
  *    message was sent. If there was an error, you can use the response item's
  *    getErrorCode method to determine how to proceed. The data on the response
  *    item will not be set.
+ * </p>
+ *
+ * <p>
+ * If the container does not support this method
+ * the callback will be called with an
+ * opensocial.ResponseItem that has an error code of
+ * NOT_IMPLEMENTED.
+ * </p>
+ *
+ * @param {Array.&lt;String&gt; | String} recipients An ID, array of IDs, or a
+ *     group reference; the supported keys are VIEWER, OWNER, VIEWER_FRIENDS,
+ *    OWNER_FRIENDS, or a single ID within one of those groups
+ * @param {opensocial.Message} message The message to send to the specified
+ *     users
+ * @param {Function} opt_callback The function to call once the request has been
+ *    processed; either this callback will be called or the gadget will be
+ *    reloaded from scratch
+ * @param {opensocial.NavigationParameters} opt_params The optional parameters
+ *     indicating where to send a user when a request is made, or when a request is
+ *     accepted; options are of type
+ *     <a href="opensocial.NavigationParameters.DestinationType.html">
+ *     NavigationParameters.DestinationType</a>
  *
  * @member opensocial
  */
-opensocial.requestSendMessage = function(recipients, message, opt_callback) {
+opensocial.requestSendMessage = function(recipients, message, opt_callback,
+    opt_params) {
   opensocial.Container.get().requestSendMessage(recipients, message,
-      opt_callback);
+      opt_callback, opt_params);
 };
 
 
 /**
- * Requests the container to share this gadget with the specified users. If the
+ * Requests the container to share this gadget with the specified users.
+ *
+ * <p>
+ * The callback function is passed one parameter, an
+ *    opensocial.ResponseItem. The error code will be set to reflect whether
+ *    there were any problems with the request. If there was no error, the
+ *    sharing request was sent. If there was an error, you can use the response
+ *    item's getErrorCode method to determine how to proceed. The data on the
+ *    response item will not be set.
+ * </p>
+ *
+ * <p>
+ * If the
  * container does not support this method the callback will be called with a
  * opensocial.ResponseItem. The response item will have its error code set to
  * NOT_IMPLEMENTED.
+ * </p>
  *
  * @param {Array.&lt;String&gt; | String} recipients An ID, array of IDs, or a
  *     group reference; the supported keys are VIEWER, OWNER, VIEWER_FRIENDS,
@@ -81,17 +108,19 @@ opensocial.requestSendMessage = function(recipients, message, opt_callback) {
  *     user for permission to share the app. It may also be ignored.
  * @param {Function} opt_callback The function to call once the request has been
  *    processed; either this callback will be called or the gadget will be
- *    reloaded from scratch. This function will be passed one parameter, an
- *    opensocial.ResponseItem. The error code will be set to reflect whether
- *    there were any problems with the request. If there was no error, the
- *    sharing request was sent. If there was an error, you can use the response
- *    item's getErrorCode method to determine how to proceed. The data on the
- *    response item will not be set.
+ *    reloaded from scratch
+ * @param {opensocial.NavigationParameters} opt_params The optional parameters
+ *     indicating where to send a user when a request is made, or when a request is
+ *     accepted; options are of type
+ *     <a href="opensocial.NavigationParameters.DestinationType.html">
+ *     NavigationParameters.DestinationType</a>
  *
  * @member opensocial
  */
-opensocial.requestShareApp = function(recipients, reason, opt_callback) {
-   opensocial.Container.get().requestShareApp(recipients, reason, opt_callback);
+opensocial.requestShareApp = function(recipients, reason, opt_callback,
+    opt_params) {
+  opensocial.Container.get().requestShareApp(recipients, reason, opt_callback,
+      opt_params);
 };
 
 
@@ -110,9 +139,21 @@ opensocial.requestShareApp = function(recipients, reason, opt_callback) {
  * the request is marked as HIGH priority then this call may open a user flow
  * and navigate away from your gadget.
  *
+ * <p>
+ * This callback will either be called or the gadget will be
+ *    reloaded from scratch. This function will be passed one parameter, an
+ *    opensocial.ResponseItem. The error code will be set to reflect whether
+ *    there were any problems with the request. If there was no error, the
+ *    activity was created. If there was an error, you can use the response
+ *    item's getErrorCode method to determine how to proceed. The data on the
+ *    response item will not be set.
+ * </p>
+ *
+ * <p>
  * If the container does not support this method the callback will be called
  * with a opensocial.ResponseItem. The response item will have its error code
  * set to NOT_IMPLEMENTED.
+ * </p>
  *
  * @param {opensocial.Activity} activity The <a href="opensocial.Activity.html">
  *    activity</a> to create
@@ -120,13 +161,7 @@ opensocial.requestShareApp = function(recipients, reason, opt_callback) {
  *    <a href="opensocial.CreateActivityPriority.html">priority</a> for this
  *    request
  * @param {Function} opt_callback The function to call once the request has been
- *    processed. This callback will either be called or the gadget will be
- *    reloaded from scratch. This function will be passed one parameter, an
- *    opensocial.ResponseItem. The error code will be set to reflect whether
- *    there were any problems with the request. If there was no error, the
- *    activity was created. If there was an error, you can use the response
- *    item's getErrorCode method to determine how to proceed. The data on the
- *    response item will not be set.
+ *    processed.
  *
  * @member opensocial
  */
@@ -312,27 +347,26 @@ opensocial.newActivity = function(params) {
 
 
 /**
- * Creates a media item associated with an activity.
+ * Creates a media item.
  * Represents images, movies, and audio.
  * Used when creating activities on the server.
  *
  * @param {String} mimeType
- *    <a href="opensocial.Activity.MediaItem.Type.html">MIME type</a> of the
+ *    <a href="opensocial.MediaItem.Type.html">MIME type</a> of the
  *    media
  * @param {String} url Where the media can be found
- * @param {Map.&lt;opensocial.Activity.MediaItem.Field, Object&gt;} opt_params
+ * @param {Map.&lt;opensocial.MediaItem.Field, Object&gt;} opt_params
  *    Any other fields that should be set on the media item object;
  *    all of the defined
- *    <a href="opensocial.Activity.MediaItem.Field.html">Field</a>s
+ *    <a href="opensocial.MediaItem.Field.html">Field</a>s
  *    are supported
  *
- * @return {opensocial.Activity.MediaItem} The new
- *    <a href="opensocial.Activity.MediaItem.html">media item</a> object
+ * @return {opensocial.MediaItem} The new
+ *    <a href="opensocial.MediaItem.html">media item</a> object
  * @member opensocial
  */
-opensocial.newActivityMediaItem = function(mimeType, url, opt_params) {
-  return opensocial.Container.get().newActivityMediaItem(mimeType,
-      url, opt_params);
+opensocial.newMediaItem = function(mimeType, url, opt_params) {
+  return opensocial.Container.get().newMediaItem(mimeType, url, opt_params);
 };
 
 
@@ -357,11 +391,68 @@ opensocial.newMessage = function(body, opt_params) {
 };
 
 
+/**
+ * @static
+ * @class
+ * The types of escaping that can be applied to person data or fields.
+ *
+ * @name opensocial.EscapeType
+ */
+opensocial.EscapeType = {
+  /**
+   * When used will HTML-escape the data.
+   * @member opensocial.EscapeType
+   */
+  HTML_ESCAPE : 'htmlEscape',
+  /**
+   * When used will not escape the data.
+   *
+   * @member opensocial.EscapeType
+   */
+  NONE : 'none'
+};
+
+
+/**
+ * Creates an IdSpec object.
+ *
+ * @param {Map.&lt;opensocial.IdSpec.Field, Object&gt;} parameters
+ *    Parameters defining the id spec.
+ * @return {opensocial.IdSpec} The new
+ *     <a href="opensocial.IdSpec.html">IdSpec</a> object
+ * @member opensocial
+ */
+opensocial.newIdSpec = function(params) {
+  return opensocial.Container.get().newIdSpec(params);
+};
+
+
+/**
+ * Creates a NavigationParameters object.
+ * <p>
+ * <b>See also:</b>
+ * <a href="#requestShareApp">requestShareApp()</a>
+ * </p>
+ *
+ *
+ * @param {Map.&lt;opensocial.NavigationParameters.Field, Object&gt;} parameters
+ *     Parameters defining the navigation
+ * @return {opensocial.NavigationParameters} The new
+ *     <a href="opensocial.NavigationParameters.html">NavigationParameters</a>
+ *     object
+ * @member opensocial
+ */
+opensocial.newNavigationParameters = function(params) {
+  return opensocial.Container.get().newNavigationParameters(params);
+};
+
+
 // TODO(doll): Util function - pull up the gadgets inherits in shindig so that
 // opensocial and gadgets use the same one
 /** @private */
 Function.prototype.inherits = function(parentCtor) {
   function tempCtor() {};
+
   tempCtor.prototype = parentCtor.prototype;
   this.superClass_ = parentCtor.prototype;
   this.prototype = new tempCtor();

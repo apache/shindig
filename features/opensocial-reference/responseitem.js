@@ -104,7 +104,16 @@ opensocial.ResponseItem.Error = {
    *
    * @member opensocial.ResponseItem.Error
    */
-  INTERNAL_ERROR : 'internalError'
+  INTERNAL_ERROR : 'internalError',
+
+  /**
+   * The gadget exceeded a quota on the request. Example quotas include a
+   * max number of calls per day, calls per user per day, calls within a
+   * certain time period and so forth.
+   *
+   * @member opensocial.ResponseItem.Error
+   */
+  LIMIT_EXCEEDED : 'limitExceeded'
 };
 
 

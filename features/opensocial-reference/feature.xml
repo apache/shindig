@@ -31,8 +31,11 @@
     <script src="email.js"/>
     <script src="enum.js"/>
     <script src="environment.js"/>
+    <script src="idspec.js"/>
+    <script src="mediaitem.js"/>
     <script src="message.js"/>
     <script src="name.js"/>
+    <script src="navigationparameters.js"/>
     <script src="organization.js"/>
     <script src="person.js"/>
     <script src="phone.js"/>
