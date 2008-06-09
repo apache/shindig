@@ -154,27 +154,30 @@ public class ModulePrefsTest {
   @Test
   public void doSubstitution() throws Exception {
     String xml = "<ModulePrefs title='__MSG_title__'>" +
-                 "  <Preload href='http://example.org' authz='signed'/>" +
                  "  <Icon>__MSG_icon__</Icon>" +
-                 "  <Link rel='__MSG_rel__' href='__MSG_href__'/>" +
+                 "  <Link rel='__MSG_rel__' href='__MSG_link_href__'/>" +
+                 "  <Preload href='__MSG_pre_href__'/>" +
                  "</ModulePrefs>";
     String title = "blah";
     String icon = "http://example.org/icon.gif";
     String rel = "foo-bar";
-    String href = "http://example.org/link.html";
+    String linkHref = "http://example.org/link.html";
+    String preHref = "http://example.org/preload.html";
 
     ModulePrefs prefs = new ModulePrefs(XmlUtil.parse(xml), SPEC_URL);
-    Substitutions substitutions = new Substitutions();
-    substitutions.addSubstitution(Substitutions.Type.MESSAGE, "title", title);
-    substitutions.addSubstitution(Substitutions.Type.MESSAGE, "icon", icon);
-    substitutions.addSubstitution(Substitutions.Type.MESSAGE, "rel", rel);
-    substitutions.addSubstitution(Substitutions.Type.MESSAGE, "href", href);
-    prefs = prefs.substitute(substitutions);
+    Substitutions subst = new Substitutions();
+    subst.addSubstitution(Substitutions.Type.MESSAGE, "title", title);
+    subst.addSubstitution(Substitutions.Type.MESSAGE, "icon", icon);
+    subst.addSubstitution(Substitutions.Type.MESSAGE, "rel", rel);
+    subst.addSubstitution(Substitutions.Type.MESSAGE, "link_href", linkHref);
+    subst.addSubstitution(Substitutions.Type.MESSAGE, "pre_href", preHref);
+    prefs = prefs.substitute(subst);
 
     assertEquals(title, prefs.getTitle());
     assertEquals(icon, prefs.getIcons().get(0).getContent());
     assertEquals(rel, prefs.getLinks().get(rel).getRel());
-    assertEquals(href, prefs.getLinks().get(rel).getHref().toString());
+    assertEquals(linkHref, prefs.getLinks().get(rel).getHref().toString());
+    assertEquals(preHref, prefs.getPreloads().get(0).getHref().toString());
   }
 
   @Test(expected = SpecParserException.class)

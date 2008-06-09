@@ -17,7 +17,6 @@
  */
 package org.apache.shindig.gadgets.spec;
 
-import org.apache.shindig.gadgets.GadgetException;
 
 /**
    * The supported auth modes for Preload
@@ -29,15 +28,14 @@ public enum Auth {
    * @param value
    * @return The parsed value (defaults to NONE)
    */
-  public static Auth parse(String value) throws GadgetException {
+  public static Auth parse(String value) {
     if (value != null) {
       value = value.trim();
       if (value.length() == 0) return Auth.NONE;
       try {
         return Auth.valueOf(value.toUpperCase());
       } catch (IllegalArgumentException iae) {
-        throw new GadgetException(GadgetException.Code.UNSUPPORTED_FEATURE,
-            Preload.AUTHZ_ATTR + "=\"" + value + "\" is not supported");
+        return Auth.NONE;
       }
     } else {
       return Auth.NONE;

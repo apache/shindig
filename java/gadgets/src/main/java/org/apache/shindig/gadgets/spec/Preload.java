@@ -18,10 +18,13 @@
 package org.apache.shindig.gadgets.spec;
 
 import org.apache.shindig.common.xml.XmlUtil;
-import org.apache.shindig.gadgets.GadgetException;
+import org.apache.shindig.gadgets.Substitutions;
+
+import org.apache.commons.lang.StringUtils;
 import org.w3c.dom.Element;
 
 import java.net.URI;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -68,9 +71,13 @@ public class Preload {
   /**
    * Prelaod@views
    */
-  private final Set<String> views = new HashSet<String>();
+  private final Set<String> views;
   public Set<String> getViews() {
     return views;
+  }
+
+  public Preload substitute(Substitutions substituter) {
+    return new Preload(this, substituter);
   }
 
   /**
@@ -79,8 +86,11 @@ public class Preload {
   @Override
   public String toString() {
     StringBuilder buf = new StringBuilder();
-    buf.append("<Preload href=\"").append(href).append("\" authz=\"")
-        .append(auth.toString().toLowerCase()).append("\"/>");
+    buf.append("<Preload href='").append(href).append("'")
+       .append(" authz='").append(auth.toString().toLowerCase()).append("'")
+       .append(" sign_owner='").append(signOwner).append("'")
+       .append(" sign_viewer='").append(signViewer).append("'")
+       .append(" views='").append(StringUtils.join(views, ',')).append("'/>");
     return buf.toString();
   }
   /**
@@ -94,23 +104,28 @@ public class Preload {
     signViewer = XmlUtil.getBoolAttribute(preload, "sign_viewer", true);
     href = XmlUtil.getUriAttribute(preload, "href");
     if (href == null) {
-      throw new SpecParserException("Preload@href is required.");
+      throw new SpecParserException("Preload/@href is missing or invalid.");
     }
 
     // Record all the associated views
     String viewNames = XmlUtil.getAttribute(preload, "views", "");
+    Set<String> views = new HashSet<String>();
     for (String s: viewNames.split(",")) {
       s = s.trim();
       if (s.length() > 0) {
         views.add(s.trim());
       }
     }
+    this.views = Collections.unmodifiableSet(views);
 
-    String authAttr = XmlUtil.getAttribute(preload, AUTHZ_ATTR);
-    try {
-      auth = Auth.parse(authAttr);
-    } catch (GadgetException ge) {
-      throw new SpecParserException("Preload@" + ge.getMessage());
-    }
+    auth = Auth.parse(XmlUtil.getAttribute(preload, AUTHZ_ATTR));
+  }
+
+  private Preload(Preload preload, Substitutions substituter) {
+    signOwner = preload.signOwner;
+    signViewer = preload.signViewer;
+    views = preload.views;
+    auth = preload.auth;
+    href = substituter.substituteUri(null, preload.href);
   }
 }

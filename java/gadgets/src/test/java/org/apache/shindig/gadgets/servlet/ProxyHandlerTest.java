@@ -181,7 +181,7 @@ public class ProxyHandlerTest extends HttpTestFixture {
         entry.optString("Summary", null));
   }
 
-  public void testParameters() throws Exception {
+  public void testFetchFeedParameters() throws Exception {
     String entryTitle = "Feed title";
     String entryLink = "http://example.org/entry/0/1";
     String entrySummary = "This is the summary";
@@ -337,7 +337,7 @@ public class ProxyHandlerTest extends HttpTestFixture {
     JSONObject json = readJSONResponse(baos.toString());
     assertFalse(json.getJSONObject(URL_ONE).has("st"));
   }
-  
+
   public void testChangeSecurityToken() throws Exception {
     // Doesn't actually sign since it returns the standard fetcher.
     // Signing tests are in SigningFetcherTest
@@ -360,19 +360,21 @@ public class ProxyHandlerTest extends HttpTestFixture {
     assertEquals("updated", json.getJSONObject(URL_ONE).getString("st"));
   }
 
-  public void testInvalidSigningType() throws Exception {
-    setupGetRequestMock(URL_ONE);
-    expect(request.getParameter(ProxyHandler.SECURITY_TOKEN_PARAM))
-        .andReturn("fake-token").atLeastOnce();
+  public void testInvalidSigningTypeTreatedAsNone() throws Exception {
+    setupGenericRequestMock("GET", URL_ONE);
+    expectGetAndReturnData(URL_ONE, DATA_ONE.getBytes());
     expect(request.getParameter(Preload.AUTHZ_ATTR))
         .andReturn("garbage").atLeastOnce();
     replay();
-    try {
-      proxyHandler.fetchJson(request, response);
-      fail("proxyHandler accepted invalid authz type");
-    } catch (GadgetException e) {
-      assertEquals(GadgetException.Code.UNSUPPORTED_FEATURE, e.getCode());
-    }
+
+    proxyHandler.fetchJson(request, response);
+    verify();
+    writer.close();
+
+    JSONObject json = readJSONResponse(baos.toString());
+    JSONObject info = json.getJSONObject(URL_ONE);
+    assertEquals(200, info.getInt("rc"));
+    assertEquals(DATA_ONE, info.get("body"));
   }
 
   public void testValidateUrlNoPath() throws Exception {

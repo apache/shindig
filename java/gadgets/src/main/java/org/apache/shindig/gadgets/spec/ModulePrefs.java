@@ -496,8 +496,11 @@ public class ModulePrefs {
     features = prefs.getFeatures();
     locales = prefs.getLocales();
 
-    // TODO: Preload should have substitutions performed as well.
-    preloads = prefs.getPreloads();
+    List<Preload> preloads = new ArrayList<Preload>(prefs.preloads.size());
+    for (Preload preload : prefs.preloads) {
+      preloads.add(preload.substitute(substituter));
+    }
+    this.preloads = Collections.unmodifiableList(preloads);
 
     List<Icon> icons = new ArrayList<Icon>(prefs.icons.size());
     for (Icon icon : prefs.icons) {
