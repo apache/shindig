@@ -42,8 +42,8 @@ public abstract class HttpTestFixture extends GadgetTestFixture {
         securityTokenDecoder,
         lockedDomainService,
         rewriter);
-    gadgetRenderer = new GadgetRenderingTask(gadgetServer, registry,
-        containerConfig, urlGenerator, securityTokenDecoder, lockedDomainService);
+    gadgetRenderer = new GadgetRenderingTask(gadgetServer, bundleFactory,
+        registry, containerConfig, urlGenerator, securityTokenDecoder, lockedDomainService);
     jsonRpcHandler = new JsonRpcHandler(executor, gadgetServer, urlGenerator);
   }
 }

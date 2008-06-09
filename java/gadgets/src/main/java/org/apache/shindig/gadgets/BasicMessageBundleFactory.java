@@ -49,6 +49,9 @@ public class BasicMessageBundleFactory implements MessageBundleFactory {
 
   public MessageBundle getBundle(LocaleSpec localeSpec, GadgetContext context)
       throws GadgetException {
+    if (localeSpec == null) {
+      return MessageBundle.EMPTY;
+    }
     URI messages = localeSpec.getMessages();
     if (messages == null || messages.toString().length() == 0) {
       return localeSpec.getMessageBundle();

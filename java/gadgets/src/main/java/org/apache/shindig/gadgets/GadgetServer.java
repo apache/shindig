@@ -129,7 +129,7 @@ public class GadgetServer {
     spec = spec.substitute(substituter, !context.getIgnoreCache());
 
     Collection<JsLibrary> jsLibraries = getLibraries(spec, context);
-    Gadget gadget = new Gadget(context, spec, bundle, jsLibraries);
+    Gadget gadget = new Gadget(context, spec, jsLibraries);
     startPreloads(gadget);
     return gadget;
   }
