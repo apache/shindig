@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Module>
  <ModulePrefs title="Social Hello World">
-   <Require feature="opensocial-0.8"></Require>
+   <Require feature="opensocial-0.7"></Require>
    <Require feature="dynamic-height"></Require>
  </ModulePrefs>
  <Content type="html">

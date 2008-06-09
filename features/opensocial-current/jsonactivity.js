@@ -31,11 +31,12 @@ JsonActivity = function(opt_params) {
 };
 JsonActivity.inherits(opensocial.Activity);
 
+// TODO: Split into separate class
 JsonMediaItem = function(opt_params) {
-  opensocial.Activity.MediaItem.call(this, opt_params['mimeType'],
+  opensocial.MediaItem.call(this, opt_params['mimeType'],
       opt_params['url'], opt_params);
 }
-JsonMediaItem.inherits(opensocial.Activity.MediaItem);
+JsonMediaItem.inherits(opensocial.MediaItem);
 
 // TODO: Pull this method into a common class, it is from jsonperson.js
 JsonActivity.constructArrayObject = function(map, fieldName, className) {

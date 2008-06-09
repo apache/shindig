@@ -101,8 +101,11 @@ under the License.
                   <source>opensocial-reference/email.js</source>
                   <source>opensocial-reference/enum.js</source>
                   <source>opensocial-reference/environment.js</source>
+                  <source>opensocial-reference/idspec.js</source>
+                  <source>opensocial-reference/mediaitem.js</source>
                   <source>opensocial-reference/message.js</source>
                   <source>opensocial-reference/name.js</source>
+                  <source>opensocial-reference/navigationparameters.js</source>
                   <source>opensocial-reference/organization.js</source>
                   <source>opensocial-reference/person.js</source>
                   <source>opensocial-reference/phone.js</source>

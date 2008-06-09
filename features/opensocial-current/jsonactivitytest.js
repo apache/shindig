@@ -26,16 +26,15 @@ JsonActivityTest.inherits(TestCase);
 
 JsonActivityTest.prototype.setUp = function() {
   // Prepare for mocks
-  gadgets.util = gadgets.util || {};
-  this.oldEscape = gadgets.util.escape;
-  gadgets.util.escape = function(param) {
-    return param;
+  this.oldGetField = opensocial.Container.getField;
+  opensocial.Container.getField = function(fields, key, opt_params) {
+    return fields[key];
   };
 };
 
 JsonActivityTest.prototype.tearDown = function() {
   // Remove mocks
-  gadgets.util.escape = this.oldEscape;
+  opensocial.Container.getField = this.oldGetField;
 };
 
 JsonActivityTest.prototype.testConstructArrayObject = function() {
@@ -66,17 +65,17 @@ JsonActivityTest.prototype.testJsonActivityConstructor = function() {
   this.assertTrue(mediaItems instanceof Array);
   this.assertTrue(mediaItems[0] instanceof JsonMediaItem);
 
-  var mediaItemFields = opensocial.Activity.MediaItem.Field;
+  var mediaItemFields = opensocial.MediaItem.Field;
   this.assertEquals('black', mediaItems[0].getField(mediaItemFields.MIME_TYPE));
   this.assertEquals('white', mediaItems[0].getField(mediaItemFields.URL));
   this.assertEquals('orange', mediaItems[0].getField(mediaItemFields.TYPE));
 };
 
-JsonActivityTest.prototype.testJsonActivityMediaItemConstructor = function() {
+JsonActivityTest.prototype.testJsonMediaItemConstructor = function() {
   var mediaItem = new JsonMediaItem({'mimeType' : 'black', 'url' : 'white',
       'type' : 'orange'});
 
-  var fields = opensocial.Activity.MediaItem.Field;
+  var fields = opensocial.MediaItem.Field;
   this.assertEquals('black', mediaItem.getField(fields.MIME_TYPE));
   this.assertEquals('white', mediaItem.getField(fields.URL));
   this.assertEquals('orange', mediaItem.getField(fields.TYPE));

@@ -236,7 +236,7 @@ opensocial.Activity.Field = {
    * Any photos, videos, or images that should be associated
    * with the activity. Higher priority ones are higher in the list.
    * The data has type <code>Array&lt;
-   * <a href="opensocial.Activity.MediaItem.html">MediaItem</a>&gt;</code>.
+   * <a href="opensocial.MediaItem.html">MediaItem</a>&gt;</code>.
    * @member opensocial.Activity.Field
    */
   MEDIA_ITEMS : 'mediaItems',
@@ -350,11 +350,15 @@ opensocial.Activity.prototype.getId = function() {
  * @param {String} key The key to get data for;
  *   see the <a href="opensocial.Activity.Field.html">Field</a> class
  * for possible values
+ * @param {Map.&lt;opensocial.DataRequest.DataRequestFields, Object&gt;}
+ *  opt_params Additional
+ *    <a href="opensocial.DataRequest.DataRequestFields.html">params</a>
+ *    to pass to the request.
  * @return {String} The data
  * @member opensocial.Activity
  */
-opensocial.Activity.prototype.getField = function(key) {
-  return gadgets.util.escape(this.fields_[key]);
+opensocial.Activity.prototype.getField = function(key, opt_params) {
+  return opensocial.Container.getField(this.fields_, key, opt_params);
 };
 
 
@@ -365,118 +369,5 @@ opensocial.Activity.prototype.getField = function(key) {
  * @param {String} data The data to set
  */
 opensocial.Activity.prototype.setField = function(key, data) {
-  return this.fields_[key] = data;
-};
-
-
-/**
- * @class
- * A media item associated with an activity.
- * Represents images, movies, and audio.
- * Create a <code>MediaItem</code> object using the
- * <a href="opensocial.html#newActivityMediaItem">
- * opensocial.newActivityMediaItem()</a> method.
- *
- * @name opensocial.Activity.MediaItem
- */
-
-/**
- * A media item associated with an activity. Represents images, movies, and
- * audio.
- *
- * @param {String} mimeType The media's type
- * @param {String} url The media's location
- * @param {Map.<opensocial.Activity.MediaItem.Field, Object>} opt_params
- *    Any other fields that should be set on the media item object.
- *    All of the defined Fields are supported.
- * @constructor
- * @private
- */
-opensocial.Activity.MediaItem = function(mimeType, url, opt_params) {
-  this.fields_ = opt_params || {};
-  this.fields_[opensocial.Activity.MediaItem.Field.MIME_TYPE] = mimeType;
-  this.fields_[opensocial.Activity.MediaItem.Field.URL] = url;
-};
-
-
-/**
- * @static
- * @class
- * The possible types of media items.
- *
- * <p>
- * <b>See also:</b>
- * <a href="opensocial.Activity.MediaItem.Field.html">
- * opensocial.Activity.MediaItem.Field</a>
- * </p>
- *
- * @name opensocial.Activity.MediaItem.Type = {
- */
-opensocial.Activity.MediaItem.Type = {
-  /** @member opensocial.Activity.MediaItem.Type */
-  IMAGE : 'image',
-  /** @member opensocial.Activity.MediaItem.Type */
-  VIDEO : 'video',
-  /** @member opensocial.Activity.MediaItem.Type */
-  AUDIO : 'audio'
-}
-
-
-/**
- * @static
- * @class
- * All of the fields that media items have.
- *
- * <p>
- * <b>See also:</b>
- * <a href="opensocial.Activity.MediaItem.html#getField">
- * opensocial.Activity.MediaItem.getField()</a>
- * </p>
- *
- * @name opensocial.Activity.MediaItem.Field
- */
-opensocial.Activity.MediaItem.Field = {
-  /**
-   * The type of media, specified as a
-   * <a href="opensocial.Activity.MediaItem.Type.html">
-   * <code>MediaItem.Type</code></a> object.
-   * @member opensocial.Activity.MediaItem.Field
-   */
-  TYPE : 'type',
-
-  /**
-   * The MIME type of media, specified as a String.
-   * @member opensocial.Activity.MediaItem.Field
-   */
-  MIME_TYPE : 'mimeType',
-
-  /**
-   * A string specifying the URL where the media can be found.
-   * @member opensocial.Activity.MediaItem.Field
-   */
-  URL : 'url'
-};
-
-
-/**
- * Gets the media item data that's associated with the specified key.
- *
- * @param {String} key The key to get data for; see the
- *   <a href="opensocial.Activity.MediaItem.Field.html">Field</a> class
- *   for possible values
- * @return {String} The data
- */
-opensocial.Activity.MediaItem.prototype.getField = function(key) {
-  return gadgets.util.escape(this.fields_[key]);
-};
-
-
-/**
- * Sets data for this media item associated with the given key.
- *
- * @param {String} key The key to set data for
- * @param {String} data The data to set
- */
-opensocial.Activity.MediaItem.prototype.setField = function(key, data) {
   return this.fields_[key] = data;
 };
