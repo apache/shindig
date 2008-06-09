@@ -57,8 +57,8 @@ class BasicPeopleService extends PeopleService {
 						if (isset($person->$field) && ! isset($newPerson[$field])) {
 							$newPerson[$field] = $person->$field;
 						}
-						$person = $newPerson;
 					}
+					$person = $newPerson;
 					// return only the requested profile detail fields
 				}
 				$people[] = $person;
