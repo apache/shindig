@@ -68,13 +68,14 @@ function __autoload($className)
 }
 
 $servletMap = array(
-	Config::get('web_prefix') . '/gadgets/files'    => 'FilesServlet',
-	Config::get('web_prefix') . '/gadgets/js'       => 'JsServlet',
-	Config::get('web_prefix') . '/gadgets/proxy'    => 'ProxyServlet',
-	Config::get('web_prefix') . '/gadgets/ifr'      => 'GadgetRenderingServlet',
-	Config::get('web_prefix') . '/gadgets/metadata' => 'JsonRpcServlet',
-	Config::get('web_prefix') . '/social/data'      => 'GadgetDataServlet',
-	Config::get('web_prefix') . '/public.crt'       => 'CertServlet'
+	Config::get('web_prefix') . '/gadgets/files'    	=> 'FilesServlet',
+	Config::get('web_prefix') . '/gadgets/js'       	=> 'JsServlet',
+	Config::get('web_prefix') . '/gadgets/proxy'    	=> 'ProxyServlet',
+	Config::get('web_prefix') . '/gadgets/makeRequest'	=> 'ProxyServlet',
+	Config::get('web_prefix') . '/gadgets/ifr'      	=> 'GadgetRenderingServlet',
+	Config::get('web_prefix') . '/gadgets/metadata' 	=> 'JsonRpcServlet',
+	Config::get('web_prefix') . '/social/data'      	=> 'GadgetDataServlet',
+	Config::get('web_prefix') . '/public.crt'       	=> 'CertServlet'
 );
 
 // Try to match the request url to our servlet mapping
@@ -82,6 +83,11 @@ $servlet = false;
 $uri = $_SERVER["REQUEST_URI"];
 foreach ($servletMap as $url => $class) {
 	if (substr($uri, 0, strlen($url)) == $url) {
+		//FIXME temporary hack to support both /proxy and /makeRequest with the same event handler
+		// /makeRequest == /proxy?output=js
+		if ($url == Config::get('web_prefix') . '/gadgets/makeRequest') {
+			$_GET['output'] = 'js'; 
+		}
 		$servlet = $class;
 		break;
 	}
