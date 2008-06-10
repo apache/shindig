@@ -31,11 +31,15 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 /**
- * Handles open proxy requests (used in rewriting and for urls returned by
- * gadgets.io.getProxyUrl).
+ * Handles calls to gadgets.io.makeRequest.
+ *
+ * GET and POST are supported so as to facilitate improved browser caching.
+ *
+ * Currently this just delegates to ProxyHandler, which deals with both
+ * makeRequest and open proxy calls.
  */
-public class ProxyServlet extends InjectedServlet {
-  private final static Logger LOG = Logger.getLogger(ProxyServlet.class.getName());
+public class MakeRequestServlet extends InjectedServlet {
+  private final static Logger LOG = Logger.getLogger(MakeRequestServlet.class.getName());
 
   private ProxyHandler proxyHandler;
 
@@ -48,10 +52,17 @@ public class ProxyServlet extends InjectedServlet {
   protected void doGet(HttpServletRequest request, HttpServletResponse response)
       throws IOException {
     try {
-      proxyHandler.fetch(new ProxyServletRequest(request), response);
+      proxyHandler.fetchJson(request, response);
     } catch (GadgetException e) {
+      // TODO: Move this logic into ProxyHandler / MakeRequestHandler.
       outputError(e, response);
     }
+  }
+
+  @Override
+  protected void doPost(HttpServletRequest request,  HttpServletResponse response)
+      throws IOException {
+    doGet(request, response);
   }
 
   /**

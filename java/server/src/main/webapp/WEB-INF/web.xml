@@ -49,6 +49,14 @@
     </servlet-class>
   </servlet>
 
+  <!-- makeRequest -->
+  <servlet>
+    <servlet-name>makeRequest</servlet-name>
+    <servlet-class>
+      org.apache.shindig.gadgets.MakeRequestServlet
+    </servlet-class>
+  </servlet>
+
   <!-- Concat -->
   <servlet>
     <servlet-name>concat</servlet-name>
@@ -99,6 +107,11 @@
   <servlet-mapping>
     <servlet-name>proxy</servlet-name>
     <url-pattern>/gadgets/proxy/*</url-pattern>
+  </servlet-mapping>
+
+  <servlet-mapping>
+    <servlet-name>makeRequest</servlet-name>
+    <url-pattern>/gadgets/makeRequest</url-pattern>
   </servlet-mapping>
 
   <servlet-mapping>
