@@ -191,11 +191,22 @@ JsonContainer.prototype.newFetchActivitiesRequest = function(idSpec,
       });
 };
 
+JsonContainer.prototype.newActivity = function(opt_params) {
+  return new JsonActivity(opt_params, true);
+};
+
+JsonContainer.prototype.newMediaItem = function(mimeType, url, opt_params) {
+  opt_params = opt_params || {};
+  opt_params['mimeType'] = mimeType;
+  opt_params['url'] = url;
+  return new JsonMediaItem(opt_params);
+};
+
 JsonContainer.prototype.newCreateActivityRequest = function(idSpec,
     activity) {
   return new RequestItem({'type' : 'CREATE_ACTIVITY',
     'idSpec' : JsonContainer.translateIdSpec(idSpec),
-    'activity' : activity});
+    'activity' : activity.toJsonObject()});
 };
 
 JsonContainer.prototype.newRequestSendMessageRequest = function(idSpec,

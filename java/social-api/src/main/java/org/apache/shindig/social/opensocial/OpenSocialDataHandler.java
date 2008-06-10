@@ -23,6 +23,7 @@ import org.apache.shindig.social.ResponseError;
 import org.apache.shindig.social.ResponseItem;
 import org.apache.shindig.social.opensocial.model.Activity;
 import org.apache.shindig.social.opensocial.model.IdSpec;
+import org.apache.shindig.social.opensocial.util.BeanJsonConverter;
 
 import com.google.common.collect.Lists;
 import com.google.inject.Inject;
@@ -47,13 +48,16 @@ public class OpenSocialDataHandler implements GadgetDataHandler {
   private PeopleService peopleHandler;
   private DataService dataHandler;
   private ActivitiesService activitiesHandler;
+  private final BeanJsonConverter beanJsonConverter;
 
   @Inject
   public OpenSocialDataHandler(PeopleService peopleHandler,
-      DataService dataHandler, ActivitiesService activitiesHandler) {
+      DataService dataHandler, ActivitiesService activitiesHandler,
+      BeanJsonConverter beanJsonConverter) {
     this.peopleHandler = peopleHandler;
     this.dataHandler = dataHandler;
     this.activitiesHandler = activitiesHandler;
+    this.beanJsonConverter = beanJsonConverter;
   }
 
   public enum OpenSocialDataType {
@@ -140,10 +144,8 @@ public class OpenSocialDataHandler implements GadgetDataHandler {
           // We only support creating an activity for one person right now
           String personId = peopleIds.get(0);
 
-          // TODO: We need to get the other fields from the json..
-          // so json -> pojo
-          Activity activity = new Activity("5", personId);
-          activity.setTitle("Temporary title - we don't read json right now");
+          Activity activity = beanJsonConverter.convertToObject(
+              params.getString("activity"), Activity.class);
           response = activitiesHandler.createActivity(personId, activity,
               request.getToken());
           break;

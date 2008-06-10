@@ -24,6 +24,7 @@ import org.apache.shindig.social.opensocial.model.MediaItem;
 import org.apache.shindig.social.opensocial.model.Name;
 import org.apache.shindig.social.opensocial.model.Person;
 import org.apache.shindig.social.opensocial.model.Phone;
+import org.apache.shindig.social.opensocial.model.DataCollection;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
@@ -172,6 +173,46 @@ public class BeanJsonConverterTest extends TestCase {
 
     assertEquals(colors.length, jsonArray.length());
     assertEquals(colors[0], jsonArray.get(0));
+  }
+
+  public void testJsonToActivity() throws Exception {
+    String jsonActivity = "{userId : 5, id : 6, mediaItems : [" +
+        "{url : 'hello', mimeType : 'mimey', type : 'VIDEO'}" +
+        "]}";
+    // TODO: rename the enums to be lowercase
+    Activity result = beanJsonConverter.convertToObject(jsonActivity,
+        Activity.class);
+
+    assertEquals("5", result.getUserId());
+    assertEquals("6", result.getId());
+
+    assertEquals(1, result.getMediaItems().size());
+
+    MediaItem actualItem = result.getMediaItems().get(0);
+
+    assertEquals("hello", actualItem.getUrl());
+    assertEquals("mimey", actualItem.getMimeType());
+    assertEquals("video", actualItem.getType().toString());
+  }
+
+  public void testJsonToMap() throws Exception {
+    String jsonActivity = "{personId : 'john.doe', " +
+        "appdata : {count : 0, favoriteColor : 'yellow'}}";
+    DataCollection.Data result = beanJsonConverter.convertToObject(jsonActivity,
+        DataCollection.Data.class);
+
+    assertEquals("john.doe", result.getPersonId());
+    Map<String, String> data = result.getAppdata();
+    assertEquals(2, data.size());
+
+    for (String key : data.keySet()) {
+      String value = data.get(key);
+      if (key.equals("count")) {
+        assertEquals("0", value);
+      } else if (key.equals("favoriteColor")) {
+        assertEquals("yellow", value);
+      }
+    }
   }
 
 }
