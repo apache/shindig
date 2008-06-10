@@ -363,6 +363,10 @@ public class ProxyHandler {
       response.setContentType(rcr.getOptions().rewriteMimeType);
     }
 
+    if (results.getHttpStatusCode() != HttpResponse.SC_OK) {
+      response.sendError(results.getHttpStatusCode());
+    }
+
     response.getOutputStream().write(results.getResponseAsBytes());
   }
 
