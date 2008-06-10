@@ -322,7 +322,7 @@ gadgets.io = function() {
         if (refreshInterval > 0) {
           // this content should be cached
           // Add paramData to the URL
-          var extraparams = "&refresh=" + refreshInterval + '&'
+          var extraparams = "?refresh=" + refreshInterval + '&'
               + gadgets.io.encodeValues(paramData);
 
           makeXhrRequest(url, config.jsonProxyUrl + extraparams, callback,
