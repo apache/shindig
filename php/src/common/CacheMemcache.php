@@ -38,11 +38,44 @@ class CacheMemcache extends Cache {
 		$this->port = Config::get('cache_port');
 	}
 
-	public function __destruct()
+	private function isLocked($key)
 	{
-		// if we were connected, close the connection again
-		if (is_resource($this->connection)) {
-			memcache_close($this->connection);
+		$this->check();
+		if ((@memcache_get($this->connection, $key . '.lock')) === false) {
+			return false;
+		}
+		return true;
+	}
+
+	private function createLock($key)
+	{
+		$this->check();
+		// the interesting thing is that this could fail if the lock was created in the meantime..
+		// but we'll ignore that out of convenience
+		@memcache_add($this->connection, $key . '.lock', '', 0, 5);
+	}
+
+	private function removeLock($key)
+	{
+		$this->check();
+		// suppress all warnings, if some other process removed it that's ok too
+		@memcache_delete($key . '.lock');
+	}
+
+	private function waitForLock($key)
+	{
+		$this->check();
+		// 20 x 250 = 5 seconds
+		$tries = 20;
+		$cnt = 0;
+		do {
+			// 250 ms is a long time to sleep, but it does stop the server from burning all resources on polling locks..
+			usleep(250);
+			$cnt ++;
+		} while ($cnt <= $tries && $this->isLocked());
+		if ($this->isLocked()) {
+			// 5 seconds passed, assume the owning process died off and remove it
+			$this->removeLock($key);
 		}
 	}
 
@@ -50,7 +83,7 @@ class CacheMemcache extends Cache {
 	// so this potentially saves a lot of overhead
 	private function connect()
 	{
-		if (! $this->connection = memcache_connect($this->host, $this->port)) {
+		if (! $this->connection = @memcache_pconnect($this->host, $this->port)) {
 			throw new CacheException("Couldn't connect to memcache server");
 		}
 	}
@@ -62,34 +95,34 @@ class CacheMemcache extends Cache {
 		}
 	}
 
-	// using memcache_add behavior for cache stampeding prevention
-	private function add($key, $var, $timeout)
+	public function get($key, $expiration = false)
 	{
 		$this->check();
-		if (! memcache_add($this->connection, $key, $var, 0, $timeout)) {
-			throw new CacheException("Couldn't add to cache");
+		if (!$expiration) {
+			// default to global cache time
+			$expiration = Config::Get('cache_time');
 		}
-	}
-
-	public function get($key)
-	{
-		$this->check();
-		if (($ret = memcache_get($this->connection, $key)) === false) {
+		if (($ret = @memcache_get($this->connection, $key)) === false) {
 			return false;
 		}
-		return $ret;
+		if (time() - $ret['time'] > $expiration) {
+			return false;
+		}
+		return $ret['data'];
 	}
 
 	public function set($key, $value)
 	{
 		$this->check();
-		if (memcache_set($this->connection, $key, $value, 0, Config::Get('cache_time')) === false) {
+		// we store it with the cache_time default expiration so objects will atleast get cleaned eventually.
+		if (memcache_set($this->connection, $key, array('time' => time(), 'data' => $value), 0, Config::Get('cache_time')) === false) {
 			throw new CacheException("Couldn't store data in cache");
 		}
 	}
 
-	function delete($key)
+	public function delete($key)
 	{
-	
+		$this->check();
+		@memcache_delete($key);
 	}
 }
