@@ -51,7 +51,7 @@ opensocial.ResponseItem.prototype.getData = function() {
   return oldData;
 };
 
-opensocial.Environment.ObjectType.ACTIVITY.MEDIA_ITEM
+opensocial.Environment.ObjectType.ACTIVITY_MEDIA_ITEM
     = opensocial.Environment.ObjectType.MEDIA_ITEM;
 
 
