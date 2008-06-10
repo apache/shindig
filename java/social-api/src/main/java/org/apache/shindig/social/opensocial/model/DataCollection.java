@@ -42,6 +42,8 @@ public class DataCollection implements Iterable<DataCollection.Data> {
     String personId;
     Map<String, String> appdata;
 
+    public Data() {}
+
     public Data(String personId, Map<String, String> appdata) {
       this.personId = personId;
       this.appdata = appdata;
@@ -53,6 +55,14 @@ public class DataCollection implements Iterable<DataCollection.Data> {
 
     public Map<String, String> getAppdata() {
       return appdata;
+    }
+
+    public void setPersonId(String personId) {
+      this.personId = personId;
+    }
+
+    public void setAppdata(Map<String, String> appdata) {
+      this.appdata = appdata;
     }
   }
 }

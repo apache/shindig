@@ -17,17 +17,25 @@
  */
 package org.apache.shindig.social.opensocial.util;
 
+import org.apache.shindig.social.opensocial.model.MediaItem;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.lang.reflect.Type;
+import java.lang.reflect.ParameterizedType;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.Iterator;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 
 /**
  * Converts pojos to json objects
@@ -36,8 +44,9 @@ import java.util.regex.Pattern;
 public class BeanJsonConverter {
 
   private static final Object[] EMPTY_OBJECT = {};
-  private static final String EXCLUDED_GETTER = "class";
+  private static final String EXCLUDED_FIELDS = "class";
   private static final Pattern GETTER = Pattern.compile("^get([a-zA-Z]+)$");
+  private static final Pattern SETTER = Pattern.compile("^set([a-zA-Z]+)$");
 
   /**
    * Convert the passed in object to a json object
@@ -99,51 +108,172 @@ public class BeanJsonConverter {
    * @return A JSONObject representing this pojo
    */
   private JSONObject convertMethodsToJson(Object pojo) {
+    List<MethodPair> availableGetters = getMatchingMethods(pojo, GETTER);
+
     JSONObject toReturn = new JSONObject();
-    Method[] methods = pojo.getClass().getMethods();
-    for (Method method : methods) {
-      String errorMessage = "Could not encode the " + method + " method.";
+    for (MethodPair getter : availableGetters) {
+      String errorMessage = "Could not encode the " + getter.method + " method.";
       try {
-        addMethodValue(pojo, toReturn, method);
-      } catch (JSONException e) {
+        Object val = getter.method.invoke(pojo, EMPTY_OBJECT);
+        if (val != null) {
+          toReturn.put(getter.fieldName, translateObjectToJson(val));
+        }
+      } catch(JSONException e) {
         throw new RuntimeException(errorMessage, e);
-      } catch (IllegalAccessException e) {
+      } catch(IllegalAccessException e) {
         throw new RuntimeException(errorMessage, e);
-      } catch (InvocationTargetException e) {
+      } catch(InvocationTargetException e) {
         throw new RuntimeException(errorMessage, e);
       }
     }
     return toReturn;
   }
 
-  /**
-   * Convert java declared method and its value to an entry in the given
-   * {@link JSONObject}
-   *
-   * @param pojo The pojo being translated
-   * @param object the json object to put the field value in
-   * @param method the method to encode
-   * @throws JSONException thrown exception
-   * @throws IllegalAccessException thrown exception
-   * @throws InvocationTargetException thrown exception
-   */
-  private void addMethodValue(Object pojo, JSONObject object,
-      Method method) throws JSONException, IllegalAccessException,
-      InvocationTargetException {
-    Matcher matcher = GETTER.matcher(method.getName());
-    if (!matcher.matches()) {
-      return;
+  private static class MethodPair {
+    public Method method;
+    public String fieldName;
+
+    private MethodPair(Method method, String fieldName) {
+      this.method = method;
+      this.fieldName = fieldName;
+    }
+  }
+
+  private List<MethodPair> getMatchingMethods(Object pojo, Pattern pattern) {
+    List<MethodPair> availableGetters = Lists.newArrayList();
+
+    Method[] methods = pojo.getClass().getMethods();
+    for (Method method : methods) {
+      Matcher matcher = pattern.matcher(method.getName());
+      if (!matcher.matches()) {
+        continue;
+      }
+
+      String name = matcher.group();
+      String fieldName = name.substring(3, 4).toLowerCase() + name.substring(4);
+      if (fieldName.equalsIgnoreCase(EXCLUDED_FIELDS)) {
+        continue;
+      }
+      availableGetters.add(new MethodPair(method, fieldName));
+    }
+    return availableGetters;
+  }
+
+  public <T> T convertToObject(String json, Class<T> className) {
+    String errorMessage = "Could not convert " + json + " to " + className;
+
+    T pojo;
+    try {
+      pojo = className.newInstance();
+    } catch (InstantiationException e) {
+      throw new RuntimeException(errorMessage);
+    } catch (IllegalAccessException e) {
+      throw new RuntimeException(errorMessage);
     }
 
-    String name = matcher.group();
-    String fieldName = name.substring(3, 4).toLowerCase() + name.substring(4);
-    if (fieldName.equalsIgnoreCase(EXCLUDED_GETTER)) {
-      return;
+    if (pojo instanceof String) {
+      return (T) json; // This is a weird cast...
+
+    } else if (pojo instanceof List) {
+      // TODO: process as a JSONArray
+      throw new UnsupportedOperationException("We don't support lists as a " +
+          "base json type yet.");
+
+    } else {
+      JSONObject jsonObject;
+      try {
+        jsonObject = new JSONObject(json);
+        return convertToObject(jsonObject, className);
+      } catch (JSONException e) {
+        throw new RuntimeException(errorMessage);
+      } catch (InvocationTargetException e) {
+        throw new RuntimeException(errorMessage);
+      } catch (IllegalAccessException e) {
+        throw new RuntimeException(errorMessage);
+      } catch (InstantiationException e) {
+        throw new RuntimeException(errorMessage);
+
+      }
+    }
+  }
+
+  public <T> T convertToObject(JSONObject jsonObject, Class<T> className)
+      throws JSONException, InvocationTargetException, IllegalAccessException,
+      InstantiationException {
+    T pojo = className.newInstance();
+
+    List<MethodPair> methods = getMatchingMethods(pojo, SETTER);
+    for (MethodPair setter : methods) {
+      if (jsonObject.has(setter.fieldName)) {
+        callSetterWithValue(pojo, setter.method, jsonObject, setter.fieldName);
+      }
     }
 
-    Object val = method.invoke(pojo, EMPTY_OBJECT);
-    if (val != null) {
-      object.put(fieldName, translateObjectToJson(val));
+    return pojo;
+  }
+
+  private <T> void callSetterWithValue(T pojo, Method method,
+      JSONObject jsonObject, String fieldName)
+      throws IllegalAccessException, InvocationTargetException, JSONException {
+
+    Class<?> expectedType = method.getParameterTypes()[0];
+    Object value = null;
+
+    if (expectedType.equals(List.class)) {
+      ParameterizedType genericListType
+          = (ParameterizedType) method.getGenericParameterTypes()[0];
+      Class<?> listElementClass
+          = (Class) genericListType.getActualTypeArguments()[0];
+
+      List list = Lists.newArrayList();
+      JSONArray jsonArray = jsonObject.getJSONArray(fieldName);
+      for (int i = 0; i < jsonArray.length(); i++) {
+        list.add(convertToObject(jsonArray.getString(i), listElementClass));
+      }
+
+      value = list;
+
+    } else if (expectedType.equals(Map.class)) {
+      ParameterizedType genericListType
+          = (ParameterizedType) method.getGenericParameterTypes()[0];
+      Type[] types = genericListType.getActualTypeArguments();
+      Class<?> valueClass = (Class) types[1];
+
+      // We only support keys being typed as Strings.
+      // Nothing else really makes sense in json.
+      Map<String, Object> map = Maps.newHashMap();
+      JSONObject jsonMap = jsonObject.getJSONObject(fieldName);
+
+      Iterator keys = jsonMap.keys();
+      while (keys.hasNext()) {
+        String keyName = (String) keys.next();
+        map.put(keyName, convertToObject(jsonMap.getString(keyName),
+            valueClass));
+      }
+
+      value = map;
+
+    } else if (expectedType.getSuperclass().equals(Enum.class)) {
+      String enumString = jsonObject.getString(fieldName);
+      value = Enum.valueOf((Class<? extends Enum>) expectedType, enumString);
+
+    } else if (expectedType.equals(String.class)) {
+      value = jsonObject.getString(fieldName);
+
+    } else if (expectedType.equals(Date.class)) {
+      Long time = jsonObject.getLong(fieldName);
+      value = new Date(time);
+
+    } else if (expectedType.equals(Long.class)) {
+      value = jsonObject.getLong(fieldName);
+
+    } else if (expectedType.equals(Float.class)) {
+      String stringFloat = jsonObject.getString(fieldName);
+      value = new Float(stringFloat);
+    }
+
+    if (value != null) {
+      method.invoke(pojo, value);
     }
   }
 }

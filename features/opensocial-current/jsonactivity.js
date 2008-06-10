@@ -23,13 +23,28 @@
  * @private
  * @constructor
  */
-JsonActivity = function(opt_params) {
+JsonActivity = function(opt_params, opt_skipConversions) {
   opt_params = opt_params || {};
-
-  JsonActivity.constructArrayObject(opt_params, "mediaItems", JsonMediaItem);
+  if (!opt_skipConversions) {
+    JsonActivity.constructArrayObject(opt_params, "mediaItems", JsonMediaItem);
+  }
   opensocial.Activity.call(this, opt_params);
 };
 JsonActivity.inherits(opensocial.Activity);
+
+JsonActivity.prototype.toJsonObject = function() {
+  var jsonObject = JsonActivity.copyFields(this.fields_);
+
+  var oldMediaItems = jsonObject['mediaItems'];
+  var newMediaItems = [];
+  for (var i = 0; i < oldMediaItems.length; i++) {
+    newMediaItems[i] = oldMediaItems[i].toJsonObject();
+  }
+  jsonObject['mediaItems'] = newMediaItems;
+
+  return jsonObject;
+}
+
 
 // TODO: Split into separate class
 JsonMediaItem = function(opt_params) {
@@ -37,6 +52,11 @@ JsonMediaItem = function(opt_params) {
       opt_params['url'], opt_params);
 }
 JsonMediaItem.inherits(opensocial.MediaItem);
+
+JsonMediaItem.prototype.toJsonObject = function() {
+  return JsonActivity.copyFields(this.fields_);
+}
+
 
 // TODO: Pull this method into a common class, it is from jsonperson.js
 JsonActivity.constructArrayObject = function(map, fieldName, className) {
@@ -46,4 +66,13 @@ JsonActivity.constructArrayObject = function(map, fieldName, className) {
       fieldValue[i] = new className(fieldValue[i]);
     }
   }
+}
+
+// TODO: Pull into common class as well
+JsonActivity.copyFields = function(oldObject) {
+  var newObject = {};
+  for (var field in oldObject) {
+    newObject[field] = oldObject[field];
+  }
+  return newObject;
 }
