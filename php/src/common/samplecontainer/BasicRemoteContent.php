@@ -29,7 +29,7 @@ class BasicRemoteContent extends RemoteContent {
 			throw new RemoteContentException("Invalid request type in remoteContent");
 		}
 		// determine which requests we can load from cache, and which we have to actually fetch
-		if (! $context->getIgnoreCache() && ! $request->isPost() && ($cachedRequest = $cache->get($request->toHash())) !== false) {
+		if (! $context->getIgnoreCache() && ! $request->isPost() && ($cachedRequest = $cache->get($request->toHash(), $context->getRefreshInterval())) !== false) {
 			$ret = $cachedRequest;
 		} else {
 			$ret = $remoteContentFetcher->fetchRequest($request);
