@@ -41,6 +41,7 @@ class GadgetContext {
 	protected $forcedJsLibs = null;
 	protected $containerConfig = null;
 	protected $container = null;
+	protected $refreshInterval;
 
 	public function __construct($renderingContext)
 	{
@@ -54,8 +55,13 @@ class GadgetContext {
 		$this->setModuleId($this->getModuleIdParam());
 		$this->setView($this->getViewParam());
 		$this->setContainer($this->getContainerParam());
-		//NOTE All classes are initialized when called (aka lazy loading) because we don't 
-	//need all of them in every situation
+		$this->setRefreshInterval($this->getRefreshIntervalParam());
+		//NOTE All classes are initialized when called (aka lazy loading) because we don't need all of them in every situation
+	}
+
+	private function getRefreshIntervalParam()
+	{
+		$this->refreshInterval = isset($_GET['refresh']) ? $_GET['refresh'] : Config::get('cache_time');
 	}
 
 	private function getContainerParam()
@@ -159,8 +165,8 @@ class GadgetContext {
 	private function instanceLocale()
 	{
 		// Get language and country params, try the GET params first, if their not set try the POST, else use 'all' as default 
-		$language = !empty($_GET['lang']) ? $_GET['lang'] : (!empty($_POST['lang']) ? $_POST['lang'] : 'all');
-		$country = !empty($_GET['country']) ? $_GET['country'] : (!empty($_POST['country']) ? $_POST['country'] : 'all');
+		$language = ! empty($_GET['lang']) ? $_GET['lang'] : (! empty($_POST['lang']) ? $_POST['lang'] : 'all');
+		$country = ! empty($_GET['country']) ? $_GET['country'] : (! empty($_POST['country']) ? $_POST['country'] : 'all');
 		return new Locale($language, $country);
 	}
 
@@ -227,6 +233,11 @@ class GadgetContext {
 	public function getView()
 	{
 		return $this->view;
+	}
+
+	public function setRefreshInterval($interval)
+	{
+		$this->refreshInterval = $interval;
 	}
 
 	public function setContainer($container)
@@ -302,6 +313,11 @@ class GadgetContext {
 	public function setForcedJsLibs($forcedJsLibs)
 	{
 		$this->forcedJsLibs = $forcedJsLibs;
+	}
+
+	public function getRefreshInterval()
+	{
+		return $this->refreshInterval;
 	}
 
 	public function getIgnoreCache()

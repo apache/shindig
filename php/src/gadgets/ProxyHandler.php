@@ -79,16 +79,8 @@ class ProxyHandler {
 				$numEntries = $_GET['numEntries'];
 				$getSummaries = $_GET['getSummaries'];
 				$channel = array();
-				//TODO fix the hack below by updating content fetcher..
-				// we cheat a litle here, we want a different caching time for feed's
-				// but atm the content fetcher doesn't allow this to be configured
-				$originalCacheTime = Config::get('cache_time');
-				$newTime = isset($_GET['refresh']) ? $_GET['refresh'] : 5 * 60;
-				Config::set('cache_time', $newTime);
 				$request = new RemoteContentRequest($url);
 				$request = $this->context->getHttpFetcher()->fetch($request, $this->context);
-				// Restore original caching time
-				Config::set('cache_time', $originalCacheTime);
 				if ((int)$result->getHttpCode() == 200) {
 					$content = $result->getResponseContent();
 					try {
