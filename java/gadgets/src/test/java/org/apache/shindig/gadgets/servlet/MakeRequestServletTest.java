@@ -42,7 +42,7 @@ import javax.servlet.http.HttpServletResponse;
 /**
  * Tests for MakeRequestServlet.
  *
- * Tests are trivial; real tests are in ProxyHandlerTest.
+ * Tests are trivial; real tests are in MakeRequestHandlerTest.
  */
 public class MakeRequestServletTest {
   private static final String REQUEST_URL = "http://example.org/file";
@@ -53,6 +53,8 @@ public class MakeRequestServletTest {
 
   private final ServletTestFixture fixture = new ServletTestFixture();
   private final MakeRequestServlet servlet = new MakeRequestServlet();
+  private final MakeRequestHandler handler = new MakeRequestHandler(fixture.contentFetcherFactory,
+      fixture.securityTokenDecoder, fixture.rewriter);
   private final HttpServletResponseRecorder recorder
       = new HttpServletResponseRecorder(fixture.response);
   private final HttpRequest request = HttpRequest.getRequest(URI.create(REQUEST_URL), false);
@@ -60,11 +62,11 @@ public class MakeRequestServletTest {
 
   @Before
   public void setUp() {
-    servlet.setProxyHandler(fixture.proxyHandler);
+    servlet.setMakeRequestHandler(handler);
     expect(fixture.request.getHeaderNames()).andReturn(EMPTY_ENUM).anyTimes();
-    expect(fixture.request.getParameter(ProxyHandler.METHOD_PARAM))
+    expect(fixture.request.getParameter(MakeRequestHandler.METHOD_PARAM))
         .andReturn("GET").anyTimes();
-    expect(fixture.request.getParameter(ProxyHandler.URL_PARAM)).andReturn(REQUEST_URL).anyTimes();
+    expect(fixture.request.getParameter(ProxyBase.URL_PARAM)).andReturn(REQUEST_URL).anyTimes();
   }
 
   private void setupGet() {
@@ -78,8 +80,8 @@ public class MakeRequestServletTest {
   private void assertResponseOk(int expectedStatus, String expectedBody) throws JSONException {
     if (recorder.getHttpStatusCode() == HttpServletResponse.SC_OK) {
       String body = recorder.getResponseAsString();
-      assertStartsWith(ProxyHandler.UNPARSEABLE_CRUFT, body);
-      body = body.substring(ProxyHandler.UNPARSEABLE_CRUFT.length());
+      assertStartsWith(MakeRequestHandler.UNPARSEABLE_CRUFT, body);
+      body = body.substring(MakeRequestHandler.UNPARSEABLE_CRUFT.length());
       JSONObject object = new JSONObject(body);
       object = object.getJSONObject(REQUEST_URL);
       assertEquals(expectedStatus, object.getInt("rc"));

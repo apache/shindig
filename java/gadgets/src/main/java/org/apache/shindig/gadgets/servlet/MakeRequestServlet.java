@@ -41,18 +41,18 @@ import javax.servlet.http.HttpServletResponse;
 public class MakeRequestServlet extends InjectedServlet {
   private final static Logger LOG = Logger.getLogger(MakeRequestServlet.class.getName());
 
-  private ProxyHandler proxyHandler;
+  private MakeRequestHandler makeRequestHandler;
 
   @Inject
-  public void setProxyHandler(ProxyHandler proxyHandler) {
-    this.proxyHandler = proxyHandler;
+  public void setMakeRequestHandler(MakeRequestHandler makeRequestHandler) {
+    this.makeRequestHandler = makeRequestHandler;
   }
 
   @Override
   protected void doGet(HttpServletRequest request, HttpServletResponse response)
       throws IOException {
     try {
-      proxyHandler.fetchJson(request, response);
+      makeRequestHandler.fetch(request, response);
     } catch (GadgetException e) {
       // TODO: Move this logic into ProxyHandler / MakeRequestHandler.
       outputError(e, response);

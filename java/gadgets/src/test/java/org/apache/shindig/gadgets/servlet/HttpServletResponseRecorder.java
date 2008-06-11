@@ -18,9 +18,14 @@
  */
 package org.apache.shindig.gadgets.servlet;
 
+import org.apache.shindig.common.util.DateUtil;
+
+import com.google.common.collect.Maps;
+
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.Map;
 
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
@@ -32,6 +37,7 @@ import javax.servlet.http.HttpServletResponseWrapper;
 public class HttpServletResponseRecorder extends HttpServletResponseWrapper {
   private final ByteArrayOutputStream baos = new ByteArrayOutputStream();
   private final PrintWriter writer = new PrintWriter(baos);
+  private final Map<String, String> headers = Maps.newTreeMap(String.CASE_INSENSITIVE_ORDER);
   private int httpStatusCode = 200;
 
   public HttpServletResponseRecorder(HttpServletResponse response) {
@@ -55,6 +61,10 @@ public class HttpServletResponseRecorder extends HttpServletResponseWrapper {
     return httpStatusCode;
   }
 
+  public String getHeader(String name) {
+    return headers.get(name);
+  }
+
   @Override
   public PrintWriter getWriter() {
     return writer;
@@ -68,6 +78,26 @@ public class HttpServletResponseRecorder extends HttpServletResponseWrapper {
         baos.write(b);
       }
     };
+  }
+
+  @Override
+  public void addHeader(String name, String value) {
+    headers.put(name, value);
+  }
+
+  @Override
+  public void setHeader(String name, String value) {
+    addHeader(name, value);
+  }
+
+  @Override
+  public void addDateHeader(String name, long date) {
+    headers.put(name, DateUtil.formatDate(date));
+  }
+
+  @Override
+  public void setDateHeader(String name, long date) {
+    addDateHeader(name, date);
   }
 
   @Override

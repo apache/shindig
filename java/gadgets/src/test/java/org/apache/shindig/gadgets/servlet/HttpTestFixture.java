@@ -25,7 +25,6 @@ import org.apache.shindig.gadgets.rewrite.ContentRewriter;
 import org.apache.shindig.gadgets.rewrite.NoOpContentRewriter;
 
 public abstract class HttpTestFixture extends GadgetTestFixture {
-  public final ProxyHandler proxyHandler;
   public final GadgetRenderingTask gadgetRenderer;
   public final JsonRpcHandler jsonRpcHandler;
   public final ContentFetcherFactory contentFetcherFactory
@@ -37,11 +36,6 @@ public abstract class HttpTestFixture extends GadgetTestFixture {
 
   public HttpTestFixture() {
     super();
-    proxyHandler = new ProxyHandler(
-        contentFetcherFactory,
-        securityTokenDecoder,
-        lockedDomainService,
-        rewriter);
     gadgetRenderer = new GadgetRenderingTask(gadgetServer, bundleFactory,
         registry, containerConfig, urlGenerator, securityTokenDecoder, lockedDomainService);
     jsonRpcHandler = new JsonRpcHandler(executor, gadgetServer, urlGenerator);

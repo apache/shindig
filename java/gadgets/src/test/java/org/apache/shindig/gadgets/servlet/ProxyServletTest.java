@@ -30,8 +30,6 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.net.URI;
-import java.util.Collections;
-import java.util.Enumeration;
 
 import javax.servlet.http.HttpServletResponse;
 
@@ -49,10 +47,10 @@ public class ProxyServletTest {
       = "http://opensocial.org/proxy/foo=bar/" + REQUEST_URL;
   private static final String RESPONSE_BODY = "Hello, world!";
   private static final String ERROR_MESSAGE = "Broken!";
-  private static final Enumeration<String> EMPTY_ENUM
-      = Collections.enumeration(Collections.<String>emptyList());
 
   private final ServletTestFixture fixture = new ServletTestFixture();
+  private final ProxyHandler proxyHandler
+      = new ProxyHandler(fixture.httpFetcher, fixture.lockedDomainService, fixture.rewriter);
   private final ProxyServlet servlet = new ProxyServlet();
   private final HttpServletResponseRecorder recorder
       = new HttpServletResponseRecorder(fixture.response);
@@ -61,13 +59,9 @@ public class ProxyServletTest {
 
   @Before
   public void setUp() {
-    servlet.setProxyHandler(fixture.proxyHandler);
-    expect(fixture.request.getHeaderNames()).andReturn(EMPTY_ENUM).anyTimes();
-    expect(fixture.request.getParameter(ProxyHandler.METHOD_PARAM))
-        .andReturn("GET").anyTimes();
-    expect(fixture.request.getParameter(ProxyHandler.URL_PARAM))
+    servlet.setProxyHandler(proxyHandler);
+    expect(fixture.request.getParameter(ProxyBase.URL_PARAM))
         .andReturn(REQUEST_URL).anyTimes();
-    expect(fixture.request.getMethod()).andReturn("GET").anyTimes();
     expect(fixture.request.getHeader("Host")).andReturn(REQUEST_DOMAIN).anyTimes();
     expect(fixture.lockedDomainService.embedCanRender(REQUEST_DOMAIN))
         .andReturn(true).anyTimes();

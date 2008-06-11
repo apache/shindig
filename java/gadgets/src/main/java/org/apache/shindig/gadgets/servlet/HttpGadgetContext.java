@@ -281,7 +281,8 @@ public class HttpGadgetContext extends GadgetContext {
     debug = getDebug(request);
     view = getView(request);
     userPrefs = getUserPrefs(request);
-    tokenString = request.getParameter(ProxyHandler.SECURITY_TOKEN_PARAM);
+    // TODO: This shouldn't be depending on MakeRequest at all.
+    tokenString = request.getParameter(MakeRequestHandler.SECURITY_TOKEN_PARAM);
     this.tokenDecoder = tokenDecoder;
   }
 }
