@@ -64,10 +64,12 @@
   "views" : {
     "profile" : {
       "isOnlyVisible" : false,
+      "urlTemplate" : "http://localhost/gadgets/profile?{var}",
       "aliases": ["DASHBOARD", "default"]
     },
     "canvas" : {
       "isOnlyVisible" : true,
+      "urlTemplate" : "http://localhost/gadgets/canvas?{var}",
       "aliases" : ["FULL_PAGE"]
     }
   },
