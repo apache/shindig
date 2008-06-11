@@ -53,10 +53,13 @@ class ContainerConfig {
 		$contents = file_get_contents($file);
 		// remove all comments (both /* */ and // style) because this confuses the json parser
 		// note: the json parser also crashes on trailing ,'s in records so please don't use them
-		$contents = preg_replace('/\/\/.*$/m', '', preg_replace('@/\\*(?:.|[\\n\\r])*?\\*/@', '', $contents));
+		$contents = preg_replace('/[^http:\/\/|^https:\/\/]\/\/.*$/m', '', preg_replace('@/\\*(?:.|[\\n\\r])*?\\*/@', '', $contents));
 		$config = json_decode($contents, true);
+		if ($config == $contents) {
+			throw new Exception("Failed to json_decode the container configuration");
+		}
 		if (! isset($config[$this->container_key][0])) {
-			throw new Exception("No gadgets.container value set for ");
+			throw new Exception("No gadgets.container value set for current container");
 		}
 		$container = $config[$this->container_key][0];
 		$this->config[$container] = array();
