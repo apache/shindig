@@ -37,38 +37,46 @@ Installing and running the various java servers
 
 ---------------------------------------------
 
-To use with eclipse
+Three steps to Use with Eclipse:
 
-1) Start Eclipse to create a workspace
+  * Install the Maven Eclipse plugin
+  * Create and import the Eclipse Project files
+  * Clean up some Build Path errors.
 
-2) Set the M2_REPO environment variable. You can either run a command
+1 - Install the Maven Eclipse plugin from
+    http://m2eclipse.sonatype.org/update/
 
-     mvn -Declipse.workspace=<path-to-eclipse-workspace> eclipse:add-maven-repo
+2 - Creating and Importing the Eclipse Projects
 
-   or edit the preference directly
+  * In the project base directory (same level as this file) run
 
-     In Eclipse edit the Preferences->Java->Build->Classpath Variables and
-     create or change M2_REPO to point to the ~/.m2/repository (Unix) or
-     wherever your local maven repositroy is.
+     mvn eclipse:m2eclipse
 
-3) In the project base directory run
+  * In Eclipse, import the new projects in the File->Import->Existing Project
+    menu.
+  
+    Choose "Select Root Directory" and select the project base directory that this
+    file is in. This should find five Eclipse projects (common, features, gadgets,
+    server and social-api). Click "Finish".
 
-     mvn eclipse:eclipse
+  * In each project, you will have a section called "Maven Dependencies", where
+    you can find all your jars and sources. Use options in the plugin for
+    downloading or source jars and updating dependencies.
 
-   Or, if you want the source files for all of the dependencies you can also add
-   the downloadSources flag
+3 - A Necessary Clean-up Step
 
-     mvn eclipse:eclipse -DdownloadSources=true
+    You should have 6 errors when you start Eclipse until you clean up:
 
-4) In Eclipse import the new project in the File->Import->Existing Project menu.
+    At the moment, you will have to edit the source dependencies to remove
+    nested folders. On each project, edit properties > Build Path > Source and
+    remove missing Source folders of "config", and "javascript". Do this for
+    each of "gadgets", and "server" projects.
 
+    There is a maven-eclipse-plugin bug tracking this issue in MECLIPSE-444.
 
-Note: At the moment, you will have to edit the source dependencies to remove
-nested folders. On each project, edit properties, Build Path, Source and remove
-missing Source folders.
+To remove all eclipse-related metatdata from your shindig source tree, run:
 
-There is a maven-eclipse-plugin bug tracking this issue in MECLIPSE-444.
-
-
+     mvn eclipse:clean
+   
 For more information, see http://incubator.apache.org/projects/shindig.html
 
