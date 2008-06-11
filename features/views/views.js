@@ -102,36 +102,69 @@ gadgets.views = function() {
                environment[varName] : defaultVal;
       }
 
-      // TODO Validate environment
-      // TODO Validate urlTemplate
+      if (typeof urlTemplate != 'string') {
+        throw new Error('Invalid urlTemplate');
+      }
 
-      var varRE = /^([a-zA-Z0-9][a-zA-Z0-9_.-]*)$/,
-          expansionRE = /\{([^}]*)\}/g,
+      if (typeof environment != 'object') {
+        throw new Error('Invalid environment');
+      }
+
+      var varRE = /^([a-zA-Z0-9][a-zA-Z0-9_\.\-]*)(=([a-zA-Z0-9\-\._~]|(%[0-9a-fA-F]{2}))*)?$/,
+          expansionRE = new RegExp('\\{([^}]*)\\}','g'),
+          opRE = /^-([a-zA-Z]+)\|([^|]*)\|(.+)$/,
           result = [],
           textStart = 0,
           group,
           match,
-          varName;
+          varName,
+          defaultValue,
+          op,
+          arg,
+          vars,
+          opPrefix;
 
       while (group = expansionRE.exec(urlTemplate)) {
         result.push(urlTemplate.substring(textStart, group.index));
         textStart = expansionRE.lastIndex;
         if (match = group[1].match(varRE)) {
-          // TODO Add support for "var=default_value" syntax
           varName = match[1];
-          result.push(getVar(varName, ''));
+          defaultValue = match[2] ? match[2].substr(1) : '';
+          result.push(getVar(varName, defaultValue));
         } else {
-          // TODO Add support for "-op|arg|vars" syntax
-          // TODO Parse the "-opt" operator
-          // TODO Parse the "-neg" operator
-          // TODO Parse the "-prefix" operator
-          // TODO Parse the "-suffix" operator
-          // TODO Parse the "-join" operator
-          // TODO Parse the "-list" operator
-          throw new Error('Invalid syntax : ' + group[0]);
+          if (match = group[1].match(opRE)) {
+            op = match[1];
+            arg = match[2];
+            vars = match[3];
+            opPrefix = false;
+            switch (op) {
+            case 'prefix':
+              opPrefix = true;
+            case 'suffix':
+              if (match = vars.match(varRE)) {
+                value = getVar(match[1], match[2] && match[2].substr(1));
+                if (typeof value === 'string') {
+                  result.push(opPrefix ? arg + value : value + arg);
+                } else if (typeof value === 'object' && typeof value.join === 'function') {
+                  result.push(opPrefix ? arg + value.join(arg) : value.join(arg) + arg);
+                }
+              } else {
+                throw new Error('Invalid variable : ' + vars);
+              }
+              break;
+            // TODO Parse the "-opt" operator
+            // TODO Parse the "-neg" operator
+            // TODO Parse the "-join" operator
+            // TODO Parse the "-list" operator
+            default:
+              throw new Error('Invalid operator : ' + op);
+            }
+          } else {
+            throw new Error('Invalid syntax : ' + group[0]);
+          }
         }
       }
-      // TODO Throw an exception if no variable is defined at all.
+
       result.push(urlTemplate.substr(textStart));
 
       return result.join('');

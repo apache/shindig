@@ -60,6 +60,14 @@ UrlTemplateTest.prototype.batchTest = function(testcases) {
 UrlTemplateTest.prototype.testVariableSubstitution = function() {
   this.batchTest([
     [
+      'http://host/path/{A=65}{66=B}',
+      {
+        'A': 'a'
+      },
+      'http://host/path/aB'
+    ],
+
+    [
       'http://host/path/{open}{social}{0.8}{d-_-b}',
       {
         'open': 'O',
@@ -87,13 +95,73 @@ UrlTemplateTest.prototype.testVariableSubstitution = function() {
     ],
 
     [
+      null,
+      null,
+      new Error('Invalid urlTemplate')
+    ],
+
+    [
+      'http://host/path/{var}',
+      'string',
+      new Error('Invalid environment')
+    ],
+
+    [
       'http://host/path/{invalid definition!!!}',
       {
         'value': 'defined'
       },
       new Error('Invalid syntax : {invalid definition!!!}')
+    ],
+
+    [
+      'http://host/path/{} is also invalid',
+      {
+        'value': 'defined'
+      },
+      new Error('Invalid syntax : {}')
     ]
 
+  ]);
+};
+
+UrlTemplateTest.prototype.testPrefixOperator = function() {
+  this.batchTest([
+    [
+      'http://host/path/{-prefix|/|foo}{-prefix|/|bar}{-prefix|-|baz}',
+      {
+        'foo': 'bar',
+        'baz': ['b', 'a', 'z']
+      },
+      'http://host/path//bar-b-a-z'
+    ],
+
+    [
+      'http://host/path/{-prefix|/|foo=bar}',
+      {
+      },
+      'http://host/path//bar'
+    ]
+  ]);
+};
+
+UrlTemplateTest.prototype.testSuffixOperator = function() {
+  this.batchTest([
+    [
+      'http://host/path/{-suffix|/|foo}{-suffix|/|bar}{-suffix|-|baz}',
+      {
+        'foo': 'bar',
+        'baz': ['b', 'a', 'z']
+      },
+      'http://host/path/bar/b-a-z-'
+    ],
+
+    [
+      'http://host/path/{-suffix|/|foo=bar}',
+      {
+      },
+      'http://host/path/bar/'
+    ]
   ]);
 };
 
