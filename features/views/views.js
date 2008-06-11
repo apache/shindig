@@ -84,6 +84,59 @@ gadgets.views = function() {
   gadgets.config.register("views", null, init);
 
   return {
+
+    /**
+     * Binds a URL template with variables in the passed environment
+     * to produce a URL string.
+     *
+     * The URL template conforms to the IETF draft spec:
+     * http://bitworking.org/projects/URI-Templates/spec/draft-gregorio-uritemplate-03.html
+     *
+     * @param {string} urlTemplate A URL template for a container view.
+     * @param {Map&lt;string, string&gt;} environment A set of named variables.
+     * @return {string} A URL string with substituted variables.
+     */
+    bind : function(urlTemplate, environment) {
+      function getVar(varName, defaultVal) {
+        return environment.hasOwnProperty(varName) ?
+               environment[varName] : defaultVal;
+      }
+
+      // TODO Validate environment
+      // TODO Validate urlTemplate
+
+      var varRE = /^([a-zA-Z0-9][a-zA-Z0-9_.-]*)$/,
+          expansionRE = /\{([^}]*)\}/g,
+          result = [],
+          textStart = 0,
+          group,
+          match,
+          varName;
+
+      while (group = expansionRE.exec(urlTemplate)) {
+        result.push(urlTemplate.substring(textStart, group.index));
+        textStart = expansionRE.lastIndex;
+        if (match = group[1].match(varRE)) {
+          // TODO Add support for "var=default_value" syntax
+          varName = match[1];
+          result.push(getVar(varName, ''));
+        } else {
+          // TODO Add support for "-op|arg|vars" syntax
+          // TODO Parse the "-opt" operator
+          // TODO Parse the "-neg" operator
+          // TODO Parse the "-prefix" operator
+          // TODO Parse the "-suffix" operator
+          // TODO Parse the "-join" operator
+          // TODO Parse the "-list" operator
+          throw new Error('Invalid syntax : ' + group[0]);
+        }
+      }
+      // TODO Throw an exception if no variable is defined at all.
+      result.push(urlTemplate.substr(textStart));
+
+      return result.join('');
+    },
+
     /**
      * Attempts to navigate to this gadget in a different view. If the container
      * supports parameters will pass the optional parameters along to the gadget
@@ -143,6 +196,29 @@ gadgets.views.View = function(name, opt_isOnlyVisible) {
  */
 gadgets.views.View.prototype.getName = function() {
   return this.name_;
+};
+
+/**
+ * Returns the associated URL template of the view.
+ * The URL template conforms to the IETF draft spec:
+ * http://bitworking.org/projects/URI-Templates/spec/draft-gregorio-uritemplate-03.html
+ * @return {string} A URL template.
+ */
+gadgets.views.View.prototype.getUrlTemplate = function() {
+  return gadgets.config &&
+         gadgets.config.views &&
+         gadgets.config.views[this.name_] &&
+         gadgets.config.views[this.name_].urlTemplate;
+};
+
+/**
+ * Binds the view's URL template with variables in the passed environment
+ * to produce a URL string.
+ * @param {Map&lt;string, string&gt;} environment A set of named variables.
+ * @return {string} A URL string with substituted variables.
+ */
+gadgets.views.View.prototype.bind = function(environment) {
+  return gadgets.views.bind(this.getUrlTemplate(), environment);
 };
 
 /**

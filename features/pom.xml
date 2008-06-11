@@ -87,9 +87,11 @@ under the License.
                 <sourceDirectory>${basedir}</sourceDirectory>
                 <sources>
                   <source>mockenv.js</source>
+                  <source>core/config.js</source>
                   <source>core/auth.js</source>
                   <source>core/util.js</source>
                   <source>core/prefs.js</source>
+                  <source>views/views.js</source>
                   <source>opensocial-reference/opensocial.js</source>
                   <source>opensocial-reference/activity.js</source>
                   <source>opensocial-reference/address.js</source>
@@ -123,6 +125,7 @@ under the License.
                     <type>TESTCASES</type>
                     <includes>
                       <include>core/*test.js</include>
+                      <include>views/*test.js</include>
                     </includes>
                   </testSuite>
                  <testSuite>
