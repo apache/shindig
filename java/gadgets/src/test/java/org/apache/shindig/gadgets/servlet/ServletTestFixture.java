@@ -19,11 +19,17 @@
 package org.apache.shindig.gadgets.servlet;
 
 import static org.easymock.EasyMock.expect;
+import static org.easymock.EasyMock.isA;
 
+import org.apache.shindig.common.SecurityToken;
 import org.apache.shindig.common.SecurityTokenDecoder;
+import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.LockedDomainService;
+import org.apache.shindig.gadgets.SigningFetcher;
 import org.apache.shindig.gadgets.http.ContentFetcherFactory;
 import org.apache.shindig.gadgets.http.HttpFetcher;
+import org.apache.shindig.gadgets.oauth.OAuthFetcher;
+import org.apache.shindig.gadgets.oauth.OAuthRequestParams;
 import org.apache.shindig.gadgets.rewrite.ContentRewriter;
 import org.apache.shindig.gadgets.rewrite.NoOpContentRewriter;
 
@@ -45,20 +51,24 @@ public class ServletTestFixture {
   public final HttpServletResponse response = mock(HttpServletResponse.class);
   public final SecurityTokenDecoder securityTokenDecoder = mock(SecurityTokenDecoder.class);
   public final HttpFetcher httpFetcher = mock(HttpFetcher.class);
+  public final SigningFetcher signingFetcher = mock(SigningFetcher.class);
+  public final OAuthFetcher oauthFetcher = mock(OAuthFetcher.class);
+  public final ContentFetcherFactory contentFetcherFactory = mock(ContentFetcherFactory.class);
   public final LockedDomainService lockedDomainService = mock(LockedDomainService.class);
   public final ContentRewriter rewriter = new NoOpContentRewriter();
-  public final ProxyHandler proxyHandler;
 
   public ServletTestFixture() {
-    // TODO: This is horrible. It needs to be fixed.
-    ContentFetcherFactory contentFetcherFactory = mock(ContentFetcherFactory.class);
-    expect(contentFetcherFactory.get()).andReturn(httpFetcher).anyTimes();
-
-    proxyHandler = new ProxyHandler(
-        contentFetcherFactory,
-        securityTokenDecoder,
-        lockedDomainService,
-        rewriter);
+    try {
+      // TODO: This is horrible. It needs to be fixed.
+      expect(contentFetcherFactory.get()).andReturn(httpFetcher).anyTimes();
+      expect(contentFetcherFactory.getSigningFetcher(isA(SecurityToken.class)))
+          .andReturn(signingFetcher).anyTimes();
+      expect(contentFetcherFactory.getOAuthFetcher(
+          isA(SecurityToken.class), isA(OAuthRequestParams.class)))
+          .andReturn(oauthFetcher).anyTimes();
+    } catch (GadgetException e) {
+      // Blah
+    }
   }
 
   /**
@@ -100,5 +110,9 @@ public class ServletTestFixture {
    */
   protected void verify() {
     EasyMock.verify(mocks.toArray());
+  }
+
+  protected void reset() {
+    EasyMock.reset(mocks.toArray());
   }
 }
