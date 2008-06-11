@@ -57,11 +57,16 @@ JsonContainer.prototype.requestCreateActivity = function(activity,
 };
 
 JsonContainer.prototype.requestSendMessage = function(recipients, message,
-    opt_callback) {
+    opt_callback, opt_params) {
   opt_callback = opt_callback || {};
-
+  opt_params = opt_params || {};
+/*
+ * TODO: Supporting just one IdSpec, but spec says Array.<String>, String 
+ * recipients Not sure how to implement it
+ */
+  var id = new opensocial.IdSpec({'userId' : recipients});
   var req = opensocial.newDataRequest();
-  req.add(this.newRequestSendMessageRequest(recipients, message), 'key');
+  req.add(this.newRequestSendMessageRequest(id, message), 'key');
   req.send(function(response) {
     opt_callback(response.get('key'));
   });
