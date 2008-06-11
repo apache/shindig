@@ -56,18 +56,19 @@ import javax.servlet.http.HttpServletResponse;
  * Unlike ProxyHandler, this may perform operations such as OAuth or signed fetch.
  */
 public class MakeRequestHandler extends ProxyBase{
-  protected static final String UNPARSEABLE_CRUFT = "throw 1; < don't be evil' >";
-  protected static final String POST_DATA_PARAM = "postData";
-  protected static final String METHOD_PARAM = "httpMethod";
-  protected static final String SECURITY_TOKEN_PARAM = "st";
-  protected static final String HEADERS_PARAM = "headers";
-  protected static final String NOCACHE_PARAM = "nocache";
-  protected static final String SIGN_VIEWER = "signViewer";
-  protected static final String SIGN_OWNER = "signOwner";
-  protected static final String CONTENT_TYPE_PARAM = "contentType";
-  protected static final String NUM_ENTRIES_PARAM = "numEntries";
-  protected static final String DEFAULT_NUM_ENTRIES = "3";
-  protected static final String GET_SUMMARIES_PARAM = "getSummaries";
+  // Relaxed visibility for ease of integration. Try to avoid relying on these.
+  public static final String UNPARSEABLE_CRUFT = "throw 1; < don't be evil' >";
+  public static final String POST_DATA_PARAM = "postData";
+  public static final String METHOD_PARAM = "httpMethod";
+  public static final String SECURITY_TOKEN_PARAM = "st";
+  public static final String HEADERS_PARAM = "headers";
+  public static final String NOCACHE_PARAM = "nocache";
+  public static final String SIGN_VIEWER = "signViewer";
+  public static final String SIGN_OWNER = "signOwner";
+  public static final String CONTENT_TYPE_PARAM = "contentType";
+  public static final String NUM_ENTRIES_PARAM = "numEntries";
+  public static final String DEFAULT_NUM_ENTRIES = "3";
+  public static final String GET_SUMMARIES_PARAM = "getSummaries";
 
   private final SecurityTokenDecoder securityTokenDecoder;
   private final ContentFetcherFactory contentFetcherFactory;

@@ -32,9 +32,9 @@ import javax.servlet.http.HttpServletResponse;
  * Base class for proxy-based handlers.
  */
 public abstract class ProxyBase {
-  protected static final String URL_PARAM = "url";
-  protected static final String REFRESH_PARAM = "refresh";
-  protected static final String GADGET_PARAM = "gadget";
+  public static final String URL_PARAM = "url";
+  public static final String REFRESH_PARAM = "refresh";
+  public static final String GADGET_PARAM = "gadget";
 
   // Public because of rewriter. Rewriter should be cleaned up.
   public static final String REWRITE_MIME_TYPE_PARAM = "rewriteMime";
