@@ -30,6 +30,8 @@ import java.io.IOException;
 import java.util.Map;
 import java.util.logging.Logger;
 
+import org.apache.commons.lang.StringUtils;
+
 public class DataServiceServlet extends InjectedServlet {
 
   public static enum GroupId {
@@ -105,7 +107,7 @@ public class DataServiceServlet extends InjectedServlet {
     String route = getRouteFromParameter(servletRequest.getPathInfo());
     DataRequestHandler handler = handlers.get(route);
     if (handler == null) {
-      throw new RuntimeException("No handler for route: "+route);
+      throw new RuntimeException("No handler for route: " + route);
     }
 
     String method = getHttpMethodFromParameter(servletRequest.getMethod(),
@@ -123,7 +125,7 @@ public class DataServiceServlet extends InjectedServlet {
 
   /*package-protected*/ String getHttpMethodFromParameter(String method,
       String overrideParameter) {
-    if (overrideParameter != null && overrideParameter.length() != 0) {
+    if (!StringUtils.isBlank(overrideParameter)) {
       return overrideParameter;
     } else {
       return method;

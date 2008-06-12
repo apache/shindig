@@ -30,6 +30,8 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.List;
 
+import org.apache.commons.lang.StringUtils;
+
 public abstract class DataRequestHandler {
   protected BeanJsonConverter converter;
 
@@ -41,7 +43,7 @@ public abstract class DataRequestHandler {
   public void handleMethod(String httpMethod, HttpServletRequest servletRequest,
       HttpServletResponse servletResponse, SecurityToken token)
       throws IOException {
-    if (httpMethod == null || httpMethod.length() == 0) {
+    if (StringUtils.isBlank(httpMethod)) {
       throw new IllegalArgumentException("Unserviced Http method type");
     }
     ResponseItem responseItem;
@@ -53,22 +55,15 @@ public abstract class DataRequestHandler {
       responseItem = handlePut(servletRequest, token);
     } else if (httpMethod.equals("DELETE")) {
       responseItem = handleDelete(servletRequest, token);
-    } else if (httpMethod.equals("HEAD")) {
-      responseItem = handleHead(servletRequest);
     } else {
       throw new IllegalArgumentException("Unserviced Http method type");
     }
     if (responseItem.getError() == null) {
       PrintWriter writer = servletResponse.getWriter();
-      writer.write(converter.convertToJson(
-          responseItem.getResponse()).toString());
+      writer.write(converter.convertToJson(responseItem.getResponse()).toString());
     } else {
       // throw an error
     }
-  }
-
-  ResponseItem handleHead(HttpServletRequest servletRequest) {
-    throw new RuntimeException("Not Implemented");
   }
 
   abstract ResponseItem handleDelete(HttpServletRequest servletRequest,
@@ -87,7 +82,7 @@ public abstract class DataRequestHandler {
     return getQueryPath(servletRequest).split("/");
   }
 
-  private String getQueryPath(HttpServletRequest servletRequest) {
+  /*package-protected*/ String getQueryPath(HttpServletRequest servletRequest) {
     String pathInfo = servletRequest.getPathInfo();
     int index = pathInfo.indexOf('/', 1);
     return pathInfo.substring(index + 1);
