@@ -196,7 +196,7 @@ class Person {
 	
 	public function setDrinker($newDrinker)
 	{
-		$this->drinker = $newDrinker;
+		$this->drinker = new EnumDrinker($newDrinker);
 	}
 	
 	public function getEmails()
@@ -246,7 +246,7 @@ class Person {
 	
 	public function setGender($newGender)
 	{
-		$this->gender = $newGender;
+		$this->gender = new EnumGender($newGender);
 	}
 	
 	public function getHappiestWhen()
@@ -396,7 +396,7 @@ class Person {
 	
 	public function setNetworkPresence($networkPresence)
 	{
-		$this->networkPresence = $networkPresence;
+		$this->networkPresence = new EnumPresence($networkPresence);
 	}
 
 	public function getNickname()
@@ -546,7 +546,7 @@ class Person {
 	
 	public function setSmoker($newSmoker)
 	{
-		$this->smoker = $newSmoker;
+		$this->smoker = new EnumSmoker($newSmoker);
 	}
 	
 	public function getSports()
