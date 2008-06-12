@@ -22,7 +22,7 @@ import static org.easymock.EasyMock.expect;
 import static org.easymock.EasyMock.isA;
 
 import org.apache.shindig.gadgets.ContainerConfig;
-import org.apache.shindig.gadgets.FakeGadgetToken;
+import org.apache.shindig.common.testing.FakeGadgetToken;
 import org.apache.shindig.gadgets.Gadget;
 import org.apache.shindig.gadgets.GadgetContext;
 import org.apache.shindig.gadgets.http.HttpRequest;
@@ -200,7 +200,7 @@ public class GadgetRenderingTaskTest extends HttpTestFixture {
     }
     return null;
   }
-  
+
   public void testAuthTokenInjection_allparams() throws Exception {
     expect(request.getParameter("st")).andReturn("fake-token");
     expect(securityTokenDecoder.createToken("fake-token")).andReturn(
@@ -210,7 +210,7 @@ public class GadgetRenderingTaskTest extends HttpTestFixture {
     assertEquals("updated-token", auth.getString("authToken"));
     assertEquals("{ 'foo' : 'bar' }", auth.getString("trustedJson"));
   }
-  
+
   public void testAuthTokenInjection_none() throws Exception {
     expect(request.getParameter("st")).andReturn("fake-token");
     expect(securityTokenDecoder.createToken("fake-token")).andReturn(
@@ -219,7 +219,7 @@ public class GadgetRenderingTaskTest extends HttpTestFixture {
     JSONObject auth = parseShindigAuthConfig(content);
     assertEquals(0, auth.length());
   }
-  
+
   public void testAuthTokenInjection_trustedJson() throws Exception {
     expect(request.getParameter("st")).andReturn("fake-token");
     expect(securityTokenDecoder.createToken("fake-token")).andReturn(
@@ -229,7 +229,7 @@ public class GadgetRenderingTaskTest extends HttpTestFixture {
     assertEquals(1, auth.length());
     assertEquals("trusted", auth.getString("trustedJson"));
   }
-  
+
   public void testAuthTokenInjection_updatedToken() throws Exception {
     expect(request.getParameter("st")).andReturn("fake-token");
     expect(securityTokenDecoder.createToken("fake-token")).andReturn(
@@ -237,7 +237,7 @@ public class GadgetRenderingTaskTest extends HttpTestFixture {
     String content = parseBasicGadget(GadgetSpec.DEFAULT_VIEW);
     JSONObject auth = parseShindigAuthConfig(content);
     assertEquals(1, auth.length());
-    assertEquals("updated-token", auth.getString("authToken")); 
+    assertEquals("updated-token", auth.getString("authToken"));
   }
 
   // TODO: Lots of ugly tests on html content.
