@@ -44,6 +44,10 @@ public class DataServiceServlet extends InjectedServlet {
       this.jsonString = jsonString;
     }
 
+    public String getJsonString() {
+      return jsonString;
+    }
+
     public static GroupId fromJson(String s) {
       return valueOf(s.substring(1).toUpperCase());
     }

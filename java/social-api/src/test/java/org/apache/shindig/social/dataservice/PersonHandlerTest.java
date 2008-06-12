@@ -18,6 +18,7 @@
 package org.apache.shindig.social.dataservice;
 
 import org.apache.shindig.social.ResponseItem;
+import org.apache.shindig.social.ResponseError;
 import org.apache.shindig.social.opensocial.model.Person;
 import org.apache.shindig.social.opensocial.util.BeanJsonConverter;
 import org.apache.shindig.common.testing.FakeGadgetToken;
@@ -33,9 +34,11 @@ public class PersonHandlerTest extends TestCase {
   private HttpServletRequest servletRequest;
   private PersonService personService;
   private PersonHandler handler;
+  private FakeGadgetToken token;
 
   @Override
   protected void setUp() throws Exception {
+    token = new FakeGadgetToken();
     converter = EasyMock.createMock(BeanJsonConverter.class);
     servletRequest = EasyMock.createMock(HttpServletRequest.class);
     personService = EasyMock.createMock(PersonService.class);
@@ -55,8 +58,13 @@ public class PersonHandlerTest extends TestCase {
     EasyMock.verify(personService);
   }
 
+  // TODO: Make super class and pull this up
+  private void setPath(String path) {
+    EasyMock.expect(servletRequest.getPathInfo()).andReturn(path);
+  }
+
   public void testHandleGetAllNoParams() throws Exception {
-    EasyMock.expect(servletRequest.getPathInfo()).andReturn("/people/john.doe/@all");
+    setPath("/people/john.doe/@all");
 
     EasyMock.expect(servletRequest.getParameter("orderBy")).andReturn(null);
     EasyMock.expect(servletRequest.getParameter("filterBy")).andReturn(null);
@@ -64,7 +72,6 @@ public class PersonHandlerTest extends TestCase {
     EasyMock.expect(servletRequest.getParameter("count")).andReturn(null);
     EasyMock.expect(servletRequest.getParameter("fields")).andReturn(null);
 
-    FakeGadgetToken token = new FakeGadgetToken();
     ResponseItem<RestfulCollection<Person>> data
         = new ResponseItem<RestfulCollection<Person>>(null);
     EasyMock.expect(personService.getPeople("john.doe",
@@ -81,7 +88,7 @@ public class PersonHandlerTest extends TestCase {
   }
 
   public void testHandleGetFriendsNoParams() throws Exception {
-    EasyMock.expect(servletRequest.getPathInfo()).andReturn("/people/john.doe/@friends");
+    setPath("/people/john.doe/@friends");
 
     EasyMock.expect(servletRequest.getParameter("orderBy")).andReturn(null);
     EasyMock.expect(servletRequest.getParameter("filterBy")).andReturn(null);
@@ -89,7 +96,6 @@ public class PersonHandlerTest extends TestCase {
     EasyMock.expect(servletRequest.getParameter("count")).andReturn(null);
     EasyMock.expect(servletRequest.getParameter("fields")).andReturn(null);
 
-    FakeGadgetToken token = new FakeGadgetToken();
     ResponseItem<RestfulCollection<Person>> data
         = new ResponseItem<RestfulCollection<Person>>(null);
     EasyMock.expect(personService.getPeople("john.doe",
@@ -106,7 +112,7 @@ public class PersonHandlerTest extends TestCase {
   }
 
   public void testHandleGetFriendsWithParams() throws Exception {
-    EasyMock.expect(servletRequest.getPathInfo()).andReturn("/people/john.doe/@friends");
+    setPath("/people/john.doe/@friends");
 
     PersonService.SortOrder order = PersonService.SortOrder.name;
     PersonService.FilterType filter = PersonService.FilterType.topFriends;
@@ -117,7 +123,6 @@ public class PersonHandlerTest extends TestCase {
     EasyMock.expect(servletRequest.getParameter("count")).andReturn("10");
     EasyMock.expect(servletRequest.getParameter("fields")).andReturn("money,fame,fortune");
 
-    FakeGadgetToken token = new FakeGadgetToken();
     ResponseItem<RestfulCollection<Person>> data
         = new ResponseItem<RestfulCollection<Person>>(null);
     EasyMock.expect(personService.getPeople("john.doe", DataServiceServlet.GroupId.FRIENDS, order,
@@ -129,9 +134,8 @@ public class PersonHandlerTest extends TestCase {
   }
 
   public void testHandleGetFriendById() throws Exception {
-    EasyMock.expect(servletRequest.getPathInfo()).andReturn("/people/john.doe/@friends/jane.doe");
+    setPath("/people/john.doe/@friends/jane.doe");
 
-    FakeGadgetToken token = new FakeGadgetToken();
     ResponseItem<Person> data = new ResponseItem<Person>(null);
     // TODO: This isn't right! We should be passing both john.doe and jane.doe to the service
     // We probably need to either change the getPerson parameters or add a new method to
@@ -144,14 +148,34 @@ public class PersonHandlerTest extends TestCase {
   }
 
   public void testHandleGetSelf() throws Exception {
-    EasyMock.expect(servletRequest.getPathInfo()).andReturn("/people/john.doe/@self");
+    setPath("/people/john.doe/@self");
 
-    FakeGadgetToken token = new FakeGadgetToken();
     ResponseItem<Person> data = new ResponseItem<Person>(null);
     EasyMock.expect(personService.getPerson("john.doe", token)).andReturn(data);
 
     replay();
     assertEquals(data, handler.handleGet(servletRequest, token));
+    verify();
+  }
+
+  public void testHandleDelete() throws Exception {
+    replay();
+    assertEquals(ResponseError.BAD_REQUEST,
+        handler.handleDelete(servletRequest, token).getError());
+    verify();
+  }
+
+  public void testHandlePut() throws Exception {
+    replay();
+    assertEquals(ResponseError.NOT_IMPLEMENTED,
+        handler.handlePut(servletRequest, token).getError());
+    verify();
+  }
+
+  public void testHandlePost() throws Exception {
+    replay();
+    assertEquals(ResponseError.NOT_IMPLEMENTED,
+        handler.handlePost(servletRequest, token).getError());
     verify();
   }
 }

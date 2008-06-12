@@ -24,14 +24,10 @@ import org.apache.shindig.social.opensocial.util.BeanJsonConverter;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.inject.Inject;
-import com.google.inject.TypeLiteral;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 import java.util.Map;
-
-import org.json.JSONObject;
-import org.json.JSONException;
 
 public class AppDataHandler extends DataRequestHandler {
   private AppDataService service;
@@ -113,7 +109,7 @@ public class AppDataHandler extends DataRequestHandler {
 
     String jsonAppData = servletRequest.getParameter("entry");
     Map<String, String> values = Maps.newHashMap();
-    values = converter.convertToObject(jsonAppData.toString(),
+    values = converter.convertToObject(jsonAppData,
         (Class<Map<String, String>>) values.getClass());
 
     return service.updatePersonData(userId, groupId, fields, values,
