@@ -96,7 +96,7 @@ class GadgetSpecParser {
 			$gadget->localeSpecs[] = $this->processLocale($locale, $context);
 		}
 	}
-	
+
 	private function processLink($link)
 	{
 		$attributes = $link->attributes();
@@ -117,9 +117,9 @@ class GadgetSpecParser {
 		$localeMessageBundles = array();
 		if ($messageAttr == '') {
 			$messageBundle = $locale->messagebundle;
-			if (!empty($messageBundle)) {
+			if (! empty($messageBundle)) {
 				$messageName = $messageBundle->msg;
-				if (!empty($messageName)) {
+				if (! empty($messageName)) {
 					foreach ($messageName as $name) {
 						$attrs = $name->attributes();
 						$localeMessageBundle = new LocalMessageBundle((string)$attrs['name'], (string)$name);

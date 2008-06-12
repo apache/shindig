@@ -14,7 +14,8 @@ class JsonRpcHandler {
 				$gadget = $gadgetServer->processGadget($context);
 				$response[] = $this->makeResponse($gadget, $gadgetModuleId, $gadgetUrl, $context);
 			} catch (Exception $e) {
-				$response[] = array('errors' => array($e->getMessage()), 'moduleId' => $gadgetModuleId, 'url' => $gadgetUrl);
+				$response[] = array('errors' => array($e->getMessage()), 
+						'moduleId' => $gadgetModuleId, 'url' => $gadgetUrl);
 			}
 		}
 		return $response;
@@ -25,7 +26,9 @@ class JsonRpcHandler {
 		$response = array();
 		$prefs = array();
 		foreach ($gadget->getUserPrefs() as $pref) {
-			$prefs[$pref->getName()] = array('displayName' => $pref->getDisplayName(), 'type' => $pref->getDataType(), 'default' => $pref->getDefaultValue(), 'enumValues' => $pref->getEnumValues());
+			$prefs[$pref->getName()] = array('displayName' => $pref->getDisplayName(), 
+					'type' => $pref->getDataType(), 'default' => $pref->getDefaultValue(), 
+					'enumValues' => $pref->getEnumValues());
 		}
 		$features = array();
 		foreach ($gadget->getRequires() as $feature) {
