@@ -35,7 +35,7 @@ JsonActivity.inherits(opensocial.Activity);
 JsonActivity.prototype.toJsonObject = function() {
   var jsonObject = JsonActivity.copyFields(this.fields_);
 
-  var oldMediaItems = jsonObject['mediaItems'];
+  var oldMediaItems = jsonObject['mediaItems'] || [];
   var newMediaItems = [];
   for (var i = 0; i < oldMediaItems.length; i++) {
     newMediaItems[i] = oldMediaItems[i].toJsonObject();
