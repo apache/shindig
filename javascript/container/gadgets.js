@@ -56,7 +56,7 @@ gadgets.callAsyncAndJoin = function(functions, continuation, opt_this) {
   var pending = functions.length;
   var results = [];
   for (var i = 0; i < functions.length; i++) {
-    // we need a wrapper here because i changes and we need once index
+    // we need a wrapper here because i changes and we need one index
     // variable per closure
     var wrapper = function(index) {
       functions[index].call(opt_this, function(result) {
