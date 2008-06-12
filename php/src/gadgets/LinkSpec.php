@@ -32,7 +32,7 @@ class LinkSpec {
 	{
 		return $this->rel;
 	}
-	
+
 	public function getHref()
 	{
 		return $this->href;

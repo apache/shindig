@@ -19,19 +19,27 @@
  */
 
 interface OAuthStore {
+
 	public function setOAuthServiceProviderInfo($providerKey, $providerInfo);
+
 	public function getOAuthServiceProviderInfo($providerKey);
+
 	public function setOAuthConsumerKeyAndSecret($providerKey, $keyAndSecret);
+
 	public function setTokenAndSecret($tokenKey, $tokenInfo);
+
 	public function getOAuthAccessorTokenKey(TokenKey $tokenKey);
 
 }
 
 class OAuthStoreVars {
 	public static $HttpMethod = array('GET' => 'GET', 'POST' => 'POST');
-	public static $SignatureType = array('HMAC_SHA1' => 'HMAC_SHA1', 'RSA_SHA1' => 'RSA_SHA1', 'PLAINTEXT' => 'PLAINTEXT');
-	public static $KeyType = array('HMAC_SYMMETRIC' => 'HMAC_SYMMETRIC', 'RSA_PRIVATE' => 'RSA_PRIVATE');
-	public static $OAuthParamLocation = array('AUTH_HEADER' => 'auth_header', 'POST_BODY' => 'post_body', 'URI_QUERY' => 'uri_query');
+	public static $SignatureType = array('HMAC_SHA1' => 'HMAC_SHA1', 'RSA_SHA1' => 'RSA_SHA1', 
+			'PLAINTEXT' => 'PLAINTEXT');
+	public static $KeyType = array('HMAC_SYMMETRIC' => 'HMAC_SYMMETRIC', 
+			'RSA_PRIVATE' => 'RSA_PRIVATE');
+	public static $OAuthParamLocation = array('AUTH_HEADER' => 'auth_header', 
+			'POST_BODY' => 'post_body', 'URI_QUERY' => 'uri_query');
 }
 
 class AccesorInfo {

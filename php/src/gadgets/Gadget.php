@@ -291,7 +291,7 @@ class Gadget {
 	{
 		return $this->links;
 	}
-	
+
 	public function getLink($rel)
 	{
 		foreach ($this->links as $link) {
@@ -301,7 +301,7 @@ class Gadget {
 		}
 		return false;
 	}
-	
+
 	public function getViews()
 	{
 		return $this->views;

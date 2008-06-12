@@ -19,7 +19,8 @@
  */
 
 class Substitutions {
-	private $types = array('MESSAGE' => 'MSG', 'BIDI' => 'BIDI', 'USER_PREF' => 'UP', 'MODULE' => 'MODULE');
+	private $types = array('MESSAGE' => 'MSG', 'BIDI' => 'BIDI', 'USER_PREF' => 'UP', 
+			'MODULE' => 'MODULE');
 	
 	private $substitutions = array();
 
