@@ -88,6 +88,7 @@ public class BasicActivitiesService implements ActivitiesService,
         if (friendIds != null) {
           ids.addAll(friendIds);
         }
+        break;
       case SELF:
         ids.add(userId);
     }

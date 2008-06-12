@@ -79,6 +79,11 @@ public class PersonHandler extends DataRequestHandler {
       optionalPersonId = segments[2];
     }
 
+    if (optionalPersonId != null
+        || groupId == DataServiceServlet.GroupId.SELF) {
+      return personService.getPerson(userId, token);
+    }
+
     PersonService.SortOrder sort = getEnumParam(servletRequest, "orderBy",
         PersonService.SortOrder.topFriends, PersonService.SortOrder.class);
     PersonService.FilterType filter = getEnumParam(servletRequest, "filterBy",
@@ -93,10 +98,6 @@ public class PersonHandler extends DataRequestHandler {
                 Person.Field.NAME.toString(),
                 Person.Field.THUMBNAIL_URL.toString())));
 
-    if (optionalPersonId != null
-        || groupId == DataServiceServlet.GroupId.SELF) {
-      return personService.getPerson(userId, token);
-    }
     return personService.getPeople(userId, groupId, sort, filter, first, max,
         profileDetails, token);
   }
