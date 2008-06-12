@@ -28,6 +28,7 @@ import org.apache.shindig.social.opensocial.model.DataCollection;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.google.inject.TypeLiteral;
 import junit.framework.TestCase;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -195,7 +196,7 @@ public class BeanJsonConverterTest extends TestCase {
     assertEquals("video", actualItem.getType().toString());
   }
 
-  public void testJsonToMap() throws Exception {
+  public void testJsonToData() throws Exception {
     String jsonActivity = "{personId : 'john.doe', " +
         "appdata : {count : 0, favoriteColor : 'yellow'}}";
     DataCollection.Data result = beanJsonConverter.convertToObject(jsonActivity,
@@ -203,6 +204,24 @@ public class BeanJsonConverterTest extends TestCase {
 
     assertEquals("john.doe", result.getPersonId());
     Map<String, String> data = result.getAppdata();
+    assertEquals(2, data.size());
+
+    for (String key : data.keySet()) {
+      String value = data.get(key);
+      if (key.equals("count")) {
+        assertEquals("0", value);
+      } else if (key.equals("favoriteColor")) {
+        assertEquals("yellow", value);
+      }
+    }
+  }
+
+  public void testJsonToMap() throws Exception {
+    String jsonActivity = "{count : 0, favoriteColor : 'yellow'}";
+    Map<String, String> data = Maps.newHashMap();
+    data = beanJsonConverter.convertToObject(jsonActivity,
+        (Class<Map<String, String>>) data.getClass());
+
     assertEquals(2, data.size());
 
     for (String key : data.keySet()) {

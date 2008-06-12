@@ -17,25 +17,22 @@
  */
 package org.apache.shindig.social.opensocial.util;
 
-import org.apache.shindig.social.opensocial.model.MediaItem;
-
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.lang.reflect.Type;
 import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
 import java.util.Date;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Iterator;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
 
 /**
  * Converts pojos to json objects
@@ -162,53 +159,55 @@ public class BeanJsonConverter {
   public <T> T convertToObject(String json, Class<T> className) {
     String errorMessage = "Could not convert " + json + " to " + className;
 
-    T pojo;
     try {
-      pojo = className.newInstance();
-    } catch (InstantiationException e) {
-      throw new RuntimeException(errorMessage);
+      T pojo = className.newInstance();
+      return convertToObjectPrivate(json, pojo);
+    } catch (JSONException e) {
+      throw new RuntimeException(errorMessage, e);
+    } catch (InvocationTargetException e) {
+      throw new RuntimeException(errorMessage, e);
     } catch (IllegalAccessException e) {
-      throw new RuntimeException(errorMessage);
+      throw new RuntimeException(errorMessage, e);
+    } catch (InstantiationException e) {
+      throw new RuntimeException(errorMessage, e);
     }
+  }
+
+  private <T> T convertToObjectPrivate(String json, T pojo)
+      throws JSONException, InvocationTargetException, IllegalAccessException,
+      InstantiationException {
 
     if (pojo instanceof String) {
-      return (T) json; // This is a weird cast...
+      pojo = (T) json; // This is a weird cast...
+
+    } else if (pojo instanceof Map) {
+      Type[] types = pojo.getClass().getTypeParameters();
+      // TODO: Figure out how to get the actual generic type for the
+      // second Map parameter. Right now we are hardcoding to String
+      Class<?> mapValueClass = String.class;
+
+      JSONObject jsonObject = new JSONObject(json);
+      Iterator iterator = jsonObject.keys();
+      while (iterator.hasNext()) {
+        String key = (String) iterator.next();
+        Object value = convertToObject(jsonObject.getString(key), mapValueClass);
+        ((Map<String, Object>) pojo).put(key, value);
+      }
 
     } else if (pojo instanceof List) {
       // TODO: process as a JSONArray
       throw new UnsupportedOperationException("We don't support lists as a " +
-          "base json type yet.");
+          "base json type yet. You can put it inside a pojo for now.");
 
     } else {
-      JSONObject jsonObject;
-      try {
-        jsonObject = new JSONObject(json);
-        return convertToObject(jsonObject, className);
-      } catch (JSONException e) {
-        throw new RuntimeException(errorMessage);
-      } catch (InvocationTargetException e) {
-        throw new RuntimeException(errorMessage);
-      } catch (IllegalAccessException e) {
-        throw new RuntimeException(errorMessage);
-      } catch (InstantiationException e) {
-        throw new RuntimeException(errorMessage);
-
+      JSONObject jsonObject = new JSONObject(json);
+      List<MethodPair> methods = getMatchingMethods(pojo, SETTER);
+      for (MethodPair setter : methods) {
+        if (jsonObject.has(setter.fieldName)) {
+          callSetterWithValue(pojo, setter.method, jsonObject, setter.fieldName);
+        }
       }
     }
-  }
-
-  public <T> T convertToObject(JSONObject jsonObject, Class<T> className)
-      throws JSONException, InvocationTargetException, IllegalAccessException,
-      InstantiationException {
-    T pojo = className.newInstance();
-
-    List<MethodPair> methods = getMatchingMethods(pojo, SETTER);
-    for (MethodPair setter : methods) {
-      if (jsonObject.has(setter.fieldName)) {
-        callSetterWithValue(pojo, setter.method, jsonObject, setter.fieldName);
-      }
-    }
-
     return pojo;
   }
 
@@ -225,7 +224,7 @@ public class BeanJsonConverter {
       Class<?> listElementClass
           = (Class) genericListType.getActualTypeArguments()[0];
 
-      List list = Lists.newArrayList();
+      List<Object> list = Lists.newArrayList();
       JSONArray jsonArray = jsonObject.getJSONArray(fieldName);
       for (int i = 0; i < jsonArray.length(); i++) {
         list.add(convertToObject(jsonArray.getString(i), listElementClass));
