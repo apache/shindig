@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.shindig.gadgets;
+package org.apache.shindig.common.testing;
 
 import org.apache.shindig.common.SecurityToken;
 
@@ -24,23 +24,23 @@ import org.apache.shindig.common.SecurityToken;
  * A fake SecurityToken implementation to help testing.
  */
 public class FakeGadgetToken implements SecurityToken {
-  
+
   private String updatedToken;
   private String trustedJson;
 
   public FakeGadgetToken() {
     this(null, null);
   }
-  
+
   public FakeGadgetToken(String updatedToken) {
     this(updatedToken, null);
   }
-  
+
   public FakeGadgetToken(String updatedToken, String trustedJson) {
     this.updatedToken = updatedToken;
     this.trustedJson = trustedJson;
   }
-  
+
   public String getOwnerId() {
     return "owner";
   }

@@ -28,7 +28,7 @@ import static org.junit.Assert.assertTrue;
 
 import org.apache.shindig.common.SecurityToken;
 import org.apache.shindig.common.SecurityTokenException;
-import org.apache.shindig.gadgets.FakeGadgetToken;
+import org.apache.shindig.common.testing.FakeGadgetToken;
 import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.http.HttpFetcher;
 import org.apache.shindig.gadgets.http.HttpRequest;
