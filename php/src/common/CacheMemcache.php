@@ -106,6 +106,7 @@ class CacheMemcache extends Cache {
 			return false;
 		}
 		if (time() - $ret['time'] > $expiration) {
+			$this->delete($key);
 			return false;
 		}
 		return $ret['data'];
