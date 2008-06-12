@@ -53,7 +53,7 @@
   <servlet>
     <servlet-name>makeRequest</servlet-name>
     <servlet-class>
-      org.apache.shindig.gadgets.MakeRequestServlet
+      org.apache.shindig.gadgets.servlet.MakeRequestServlet
     </servlet-class>
   </servlet>
 
@@ -78,6 +78,14 @@
     <servlet-name>socialdata</servlet-name>
     <servlet-class>
       org.apache.shindig.social.GadgetDataServlet
+    </servlet-class>
+  </servlet>
+
+  <!-- Serve the new rest code -->
+  <servlet>
+    <servlet-name>jsonrest</servlet-name>
+    <servlet-class>
+      org.apache.shindig.social.dataservice.DataServiceServlet
     </servlet-class>
   </servlet>
 
@@ -132,6 +140,11 @@
   <servlet-mapping>
     <servlet-name>socialdata</servlet-name>
     <url-pattern>/social/data</url-pattern>
+  </servlet-mapping>
+
+  <servlet-mapping>
+    <servlet-name>jsonrest</servlet-name>
+    <url-pattern>/social/jsonrest/*</url-pattern>
   </servlet-mapping>
 
   <servlet-mapping>
