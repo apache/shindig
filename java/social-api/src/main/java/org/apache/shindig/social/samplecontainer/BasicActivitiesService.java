@@ -20,8 +20,12 @@ package org.apache.shindig.social.samplecontainer;
 import org.apache.shindig.common.SecurityToken;
 import org.apache.shindig.social.ResponseError;
 import org.apache.shindig.social.ResponseItem;
+import org.apache.shindig.social.dataservice.ActivityService;
+import org.apache.shindig.social.dataservice.DataServiceServlet;
+import org.apache.shindig.social.dataservice.RestfulCollection;
 import org.apache.shindig.social.opensocial.ActivitiesService;
 import org.apache.shindig.social.opensocial.model.Activity;
+import org.apache.shindig.social.opensocial.model.ApiCollection;
 
 import com.google.common.collect.Lists;
 import com.google.inject.Inject;
@@ -31,7 +35,8 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
-public class BasicActivitiesService implements ActivitiesService {
+public class BasicActivitiesService implements ActivitiesService,
+    ActivityService {
   private XmlStateFileFetcher fetcher;
 
   @Inject
@@ -63,6 +68,51 @@ public class BasicActivitiesService implements ActivitiesService {
         Lists.newArrayList(id), token).getResponse();
 
     for (Activity activity : allActivities) {
+      if (activity.getId().equals(activityId)) {
+        return new ResponseItem<Activity>(activity);
+      }
+    }
+    return new ResponseItem<Activity>(ResponseError.BAD_REQUEST,
+        "Activity not found", null);
+  }
+
+  // New interface methods
+
+  public ResponseItem<RestfulCollection<Activity>> getActivities(String userId,
+      DataServiceServlet.GroupId groupId, SecurityToken token) {
+    List<String> ids = Lists.newArrayList();
+    switch (groupId) {
+      case ALL:
+      case FRIENDS:
+        List<String> friendIds = fetcher.getFriendIds().get(userId);
+        if (friendIds != null) {
+          ids.addAll(friendIds);
+        }
+      case SELF:
+        ids.add(userId);
+    }
+
+    Map<String, List<Activity>> allActivities = fetcher.getActivities();
+    List<Activity> activities = Lists.newArrayList();
+
+    for (String id : ids) {
+      List<Activity> personActivities = allActivities.get(id);
+      if (personActivities != null) {
+        activities.addAll(personActivities);
+      }
+    }
+
+    // TODO: Sort them
+    return new ResponseItem<RestfulCollection<Activity>>(
+        new RestfulCollection<Activity>(activities));
+  }
+
+  public ResponseItem<Activity> getActivity(String userId,
+      DataServiceServlet.GroupId groupId, String activityId,
+      SecurityToken token) {
+    RestfulCollection<Activity> allActivities = getActivities(userId, groupId,
+        token).getResponse();
+    for (Activity activity : allActivities.getEntry()) {
       if (activity.getId().equals(activityId)) {
         return new ResponseItem<Activity>(activity);
       }
