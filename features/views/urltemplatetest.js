@@ -165,3 +165,56 @@ UrlTemplateTest.prototype.testSuffixOperator = function() {
   ]);
 };
 
+UrlTemplateTest.prototype.testListOperator = function() {
+  this.batchTest([
+    [
+      'http://host/path/{-list|/|foo}{-list|-|bar}{-list|-|baz}{-list|*|BAZ}',
+      {
+        'foo': ['f', 'o', 'o'],
+        'bar': [],
+        'BAZ': ['baz']
+      },
+      'http://host/path/f/o/obaz'
+    ]
+  ]);
+};
+
+UrlTemplateTest.prototype.testJoinOperator = function() {
+  this.batchTest([
+    [
+      'http://host/path/{-join|*|spam}/{-join|&|foo,bar,baz}{-join|-|b}',
+      {
+        'spam': 'eggs',
+        'foo': 'FOO',
+        'baz': 'BAZ'
+      },
+      'http://host/path/spam=eggs/foo=FOO&baz=BAZ'
+    ]
+  ]);
+};
+
+UrlTemplateTest.prototype.testOptOperator = function() {
+  this.batchTest([
+    [
+      'http://host/path/{-opt|spam|foo}/{-opt|eggs|foo,bar}/{-opt|ham|foo,bar,baz}',
+      {
+        'bar': [],
+        'baz': 'BAZ'
+      },
+      'http://host/path///ham'
+    ]
+  ]);
+};
+
+UrlTemplateTest.prototype.testNegOperator = function() {
+  this.batchTest([
+    [
+      'http://host/path/{-neg|spam|foo}/{-neg|eggs|foo,bar}/{-neg|ham|foo,bar,baz}',
+      {
+        'bar': [],
+        'baz': 'BAZ'
+      },
+      'http://host/path/spam/eggs/'
+    ]
+  ]);
+};

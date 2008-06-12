@@ -97,11 +97,6 @@ gadgets.views = function() {
      * @return {string} A URL string with substituted variables.
      */
     bind : function(urlTemplate, environment) {
-      function getVar(varName, defaultVal) {
-        return environment.hasOwnProperty(varName) ?
-               environment[varName] : defaultVal;
-      }
-
       if (typeof urlTemplate != 'string') {
         throw new Error('Invalid urlTemplate');
       }
@@ -122,7 +117,29 @@ gadgets.views = function() {
           op,
           arg,
           vars,
-          opPrefix;
+          flag;
+
+      function getVar(varName, defaultVal) {
+        return environment.hasOwnProperty(varName) ?
+               environment[varName] : defaultVal;
+      }
+
+      function matchVar(v) {
+        if (!(match = v.match(varRE))) {
+          throw new Error('Invalid variable : ' + v);
+        }
+      }
+
+      function matchVars(vs, j, map) {
+        var i, va = vs.split(',');
+        for (i = 0; i < va.length; ++i) {
+          matchVar(va[i]);
+          if (map(j, getVar(match[1]), match[1])) {
+            break;
+          }
+        }
+        return j;
+      }
 
       while (group = expansionRE.exec(urlTemplate)) {
         result.push(urlTemplate.substring(textStart, group.index));
@@ -136,26 +153,45 @@ gadgets.views = function() {
             op = match[1];
             arg = match[2];
             vars = match[3];
-            opPrefix = false;
+            flag = 0;
             switch (op) {
-            case 'prefix':
-              opPrefix = true;
-            case 'suffix':
-              if (match = vars.match(varRE)) {
-                value = getVar(match[1], match[2] && match[2].substr(1));
-                if (typeof value === 'string') {
-                  result.push(opPrefix ? arg + value : value + arg);
-                } else if (typeof value === 'object' && typeof value.join === 'function') {
-                  result.push(opPrefix ? arg + value.join(arg) : value.join(arg) + arg);
-                }
-              } else {
-                throw new Error('Invalid variable : ' + vars);
+            case 'neg':
+              flag = 1;
+            case 'opt':
+              if (matchVars(vars, {flag: flag}, function(j, v) {
+                    if (typeof v != 'undefined' && (typeof v != 'object' || v.length)) {
+                      j.flag = !j.flag;
+                      return 1;
+                    }
+                  }).flag) {
+                result.push(arg);
               }
               break;
-            // TODO Parse the "-opt" operator
-            // TODO Parse the "-neg" operator
-            // TODO Parse the "-join" operator
-            // TODO Parse the "-list" operator
+            case 'join':
+              result.push(matchVars(vars, [], function(j, v, k) {
+                if (typeof v === 'string') {
+                  j.push(k + '=' + v);
+                }
+              }).join(arg));
+              break;
+            case 'list':
+              matchVar(vars);
+              value = getVar(match[1]);
+              if (typeof value === 'object' && typeof value.join === 'function') {
+                result.push(value.join(arg));
+              }
+              break;
+            case 'prefix':
+              flag = 1;
+            case 'suffix':
+              matchVar(vars);
+              value = getVar(match[1], match[2] && match[2].substr(1));
+              if (typeof value === 'string') {
+                result.push(flag ? arg + value : value + arg);
+              } else if (typeof value === 'object' && typeof value.join === 'function') {
+                result.push(flag ? arg + value.join(arg) : value.join(arg) + arg);
+              }
+              break;
             default:
               throw new Error('Invalid operator : ' + op);
             }
