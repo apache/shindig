@@ -20,6 +20,9 @@ package org.apache.shindig.social.samplecontainer;
 import org.apache.shindig.common.SecurityToken;
 import org.apache.shindig.social.ResponseItem;
 import org.apache.shindig.social.ResponseError;
+import org.apache.shindig.social.dataservice.PersonService;
+import org.apache.shindig.social.dataservice.DataServiceServlet;
+import org.apache.shindig.social.dataservice.RestfulCollection;
 import org.apache.shindig.social.opensocial.PeopleService;
 import org.apache.shindig.social.opensocial.model.ApiCollection;
 import org.apache.shindig.social.opensocial.model.IdSpec;
@@ -35,7 +38,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-public class BasicPeopleService implements PeopleService {
+public class BasicPeopleService implements PeopleService, PersonService {
   private static final Comparator<Person> NAME_COMPARATOR
       = new Comparator<Person>() {
     public int compare(Person person, Person person1) {
@@ -73,12 +76,13 @@ public class BasicPeopleService implements PeopleService {
   }
 
   public ResponseItem<ApiCollection<Person>> getPeople(List<String> ids,
-      SortOrder sortOrder, FilterType filter, int first, int max,
+      PeopleService.SortOrder sortOrder, PeopleService.FilterType filter,
+      int first, int max,
       Set<String> profileDetails, SecurityToken token) {
     List<Person> people = getPeople(ids, token);
 
     // We can pretend that by default the people are in top friends order
-    if (sortOrder.equals(SortOrder.name)) {
+    if (sortOrder.equals(PeopleService.SortOrder.name)) {
       Collections.sort(people, NAME_COMPARATOR);
     }
 
@@ -133,6 +137,45 @@ public class BasicPeopleService implements PeopleService {
         break;
     }
     return ids;
+  }
+
+
+  // New interface methods
+
+  public ResponseItem<RestfulCollection<Person>> getPeople(String userId,
+      DataServiceServlet.GroupId groupId, PersonService.SortOrder sortOrder,
+      PersonService.FilterType filter, int first, int max,
+      Set<String> profileDetails, SecurityToken token) {
+    List<String> ids = Lists.newArrayList();
+    switch (groupId) {
+      case ALL:
+      case FRIENDS:
+        List<String> friendIds = fetcher.getFriendIds().get(userId);
+        if (friendIds != null) {
+          ids.addAll(friendIds);
+        }
+        break;
+      case SELF:
+        ids.add(userId);
+    }
+
+    List<Person> people = getPeople(ids, token);
+
+    // We can pretend that by default the people are in top friends order
+    if (sortOrder.equals(PersonService.SortOrder.name)) {
+      Collections.sort(people, NAME_COMPARATOR);
+    }
+
+    // TODO: The samplecontainer doesn't really have the concept of HAS_APP so
+    // we can't support any filters yet. We should fix this.
+
+    int totalSize = people.size();
+    int last = first + max;
+    people = people.subList(first, Math.min(last, totalSize));
+
+    RestfulCollection<Person> collection = new RestfulCollection<Person>(people,
+        first, totalSize);
+    return new ResponseItem<RestfulCollection<Person>>(collection);
   }
 
 }

@@ -20,16 +20,20 @@ package org.apache.shindig.social.samplecontainer;
 import org.apache.shindig.common.SecurityToken;
 import org.apache.shindig.social.ResponseError;
 import org.apache.shindig.social.ResponseItem;
+import org.apache.shindig.social.dataservice.AppDataService;
+import org.apache.shindig.social.dataservice.DataServiceServlet;
+import org.apache.shindig.social.dataservice.DataCollection;
 import org.apache.shindig.social.opensocial.DataService;
 
 import com.google.common.collect.Maps;
+import com.google.common.collect.Lists;
 import com.google.inject.Inject;
 import org.json.JSONObject;
 
 import java.util.List;
 import java.util.Map;
 
-public class BasicDataService implements DataService {
+public class BasicDataService implements DataService, AppDataService {
 
   private XmlStateFileFetcher fetcher;
 
@@ -108,4 +112,73 @@ public class BasicDataService implements DataService {
     return true;
   }
 
+
+  // New interface methods
+
+  public ResponseItem<DataCollection> getPersonData(
+      String userId, DataServiceServlet.GroupId groupId, List<String> fields,
+      String appId, SecurityToken token) {
+    List<String> ids = Lists.newArrayList();
+    switch (groupId) {
+      case ALL:
+      case FRIENDS:
+        List<String> friendIds = fetcher.getFriendIds().get(userId);
+        if (friendIds != null) {
+          ids.addAll(friendIds);
+        }
+        break;
+      case SELF:
+        ids.add(userId);
+    }
+
+    // TODO: Respect appId
+    Map<String, Map<String, String>> data
+        = getPersonData(ids, fields, token).getResponse();
+    return new ResponseItem<DataCollection>(new DataCollection(data));
+  }
+
+  public ResponseItem updatePersonData(String userId,
+      DataServiceServlet.GroupId groupId, List<String> fields,
+      Map<String, String> values, String appId, SecurityToken token) {
+    for (String field : fields) {
+      if (!isValidKey(field)) {
+        return new ResponseItem<Object>(ResponseError.BAD_REQUEST,
+            "The person data key had invalid characters",
+            new JSONObject());
+      }
+    }
+
+    switch(groupId) {
+      case SELF:
+        for (String field : fields) {
+          String value = values.get(field);
+          // TODO: Respect appId
+          fetcher.setAppData(userId, field, value);
+        }
+        break;
+      default:
+        return new ResponseItem<Object>(ResponseError.NOT_IMPLEMENTED,
+            "We don't support updating data in batches yet", new Object());
+    }
+
+    return new ResponseItem<JSONObject>(new JSONObject());
+  }
+
+  public ResponseItem deletePersonData(String userId,
+      DataServiceServlet.GroupId groupId, List<String> fields, String appId,
+      SecurityToken token) {
+    switch(groupId) {
+      case SELF:
+        for (String field : fields) {
+          // TODO: Respect appId
+          fetcher.setAppData(userId, field, null);
+        }
+        break;
+      default:
+        return new ResponseItem<Object>(ResponseError.NOT_IMPLEMENTED,
+            "We don't support deleting data in batches yet", new Object());
+    }
+
+    return new ResponseItem<JSONObject>(new JSONObject());
+  }
 }
