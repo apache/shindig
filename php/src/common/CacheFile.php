@@ -64,8 +64,8 @@ class CacheFile extends Cache {
 			// 250 ms is a long time to sleep, but it does stop the server from burning all resources on polling locks..
 			usleep(250);
 			$cnt ++;
-		} while ($cnt <= $tries && $this->isLocked());
-		if ($this->isLocked()) {
+		} while ($cnt <= $tries && $this->isLocked($cacheFile));
+		if ($this->isLocked($cacheFile)) {
 			// 5 seconds passed, assume the owning process died off and remove it
 			$this->removeLock($cacheFile);
 		}
