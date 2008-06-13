@@ -38,12 +38,22 @@ import java.util.regex.Pattern;
  * Converts pojos to json objects
  * TODO: Replace with standard library
  */
-public class BeanJsonConverter {
+public class BeanJsonConverter implements BeanConverter {
 
   private static final Object[] EMPTY_OBJECT = {};
   private static final String EXCLUDED_FIELDS = "class";
   private static final Pattern GETTER = Pattern.compile("^get([a-zA-Z]+)$");
   private static final Pattern SETTER = Pattern.compile("^set([a-zA-Z]+)$");
+
+  /**
+   * Convert the passed in object to a string
+   *
+   * @param pojo The object to convert
+   * @return An object whos toString method will return json
+   */
+  public String convertToString(Object pojo) {
+    return convertToJson(pojo).toString();
+  }
 
   /**
    * Convert the passed in object to a json object
@@ -161,7 +171,7 @@ public class BeanJsonConverter {
 
     try {
       T pojo = className.newInstance();
-      return convertToObjectPrivate(json, pojo);
+      return convertToObject(json, pojo);
     } catch (JSONException e) {
       throw new RuntimeException(errorMessage, e);
     } catch (InvocationTargetException e) {
@@ -173,7 +183,7 @@ public class BeanJsonConverter {
     }
   }
 
-  private <T> T convertToObjectPrivate(String json, T pojo)
+  private <T> T convertToObject(String json, T pojo)
       throws JSONException, InvocationTargetException, IllegalAccessException,
       InstantiationException {
 
