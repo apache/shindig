@@ -32,14 +32,14 @@ class ProxyHandler {
 	private $context;
 	private $signingFetcher;
 	private $oauthFetcher;
-	
+
 	public function __construct($context, $signingFetcher = null, $oauthFetcher = null)
 	{
 		$this->context = $context;
 		$this->signingFetcher = $signingFetcher;
 		$this->oauthFetcher = $oauthFetcher;
 	}
-	
+
 	/**
 	 * Fetches content and returns it in JSON format
 	 *
@@ -50,7 +50,7 @@ class ProxyHandler {
 	public function fetchJson($url, $signer, $method)
 	{
 		try {
-			$token = $this->extractAndValidateToken($signer);
+			$token = $this->context->extractAndValidateToken($signer);
 		} catch (Exception $e) {
 			$token = '';
 			// no token given, safe to ignore
@@ -59,7 +59,7 @@ class ProxyHandler {
 		// Fetch the content and convert it into JSON.
 		// TODO: Fetcher needs to handle variety of HTTP methods.
 		$result = $this->fetchContentDivert($url, $method, $signer);
-		if (!isset($result)) {
+		if (! isset($result)) {
 			//OAuthFetcher only
 			$metadata = $this->oauthFetcher->getResponseMetadata();
 			$json = array($url => $metadata);
@@ -68,7 +68,7 @@ class ProxyHandler {
 			$this->setCachingHeaders();
 			header("Content-Type: application/json; charset=utf-8", true);
 			echo $output;
-			die();	
+			die();
 		}
 		$status = (int)$result->getHttpCode();
 		//header("HTTP/1.1 $status", true);
@@ -86,66 +86,55 @@ class ProxyHandler {
 					try {
 						$feed = Zend_Feed::importString($content);
 						if ($feed instanceof Zend_Feed_Rss) {
-							$channel = array(
-							    'title'       	=> $feed->title(),
-							    'link'        	=> $feed->link(),
-							    'description' 	=> $feed->description(),
-							 	'pubDate' 		=> $feed->pubDate(),
-							 	'language' 		=> $feed->language(),
-							 	'category' 		=> $feed->category(),
-							    'items'       	=> array()
-							);
+							$channel = array('title' => $feed->title(), 
+									'link' => $feed->link(), 
+									'description' => $feed->description(), 
+									'pubDate' => $feed->pubDate(), 
+									'language' => $feed->language(), 
+									'category' => $feed->category(), 'items' => array());
 							// Loop over each channel item and store relevant data
 							$counter = 0;
 							foreach ($feed as $item) {
 								if ($counter >= $numEntries) {
 									break;
 								}
-								$counter++;
-							    $channel['items'][] = array(
-							        'title'			=> $item->title(),
-							        'link'			=> $item->link(),
-							    	'author'		=> $item->author(),
-							    	'description'	=> $getSummaries ? $item->description() : '',
-							    	'category'		=> $item->category(),
-							    	'comments'		=> $item->comments(),
-							    	'pubDate'		=> $item->pubDate()
-							    );
+								$counter ++;
+								$channel['items'][] = array('title' => $item->title(), 
+										'link' => $item->link(), 
+										'author' => $item->author(), 
+										'description' => $getSummaries ? $item->description() : '', 
+										'category' => $item->category(), 
+										'comments' => $item->comments(), 
+										'pubDate' => $item->pubDate());
 							}
 						} elseif ($feed instanceof Zend_Feed_Atom) {
-							$channel = array(
-								'title'			=> $feed->title(),
-								'link'        	=> $feed->link(),
-								'id'        	=> $feed->id(),
-							    'subtitle' 		=> $feed->subtitle(),
-								'items'       	=> array()
-							);
+							$channel = array('title' => $feed->title(), 
+									'link' => $feed->link(), 'id' => $feed->id(), 
+									'subtitle' => $feed->subtitle(), 'items' => array());
 							$counter = 0;
 							foreach ($feed as $entry) {
 								if ($counter >= $numEntries) {
 									break;
 								}
-								$channel['items'][] = array(
-									'id' 		=> $entry->id(),
-									'title' 	=> $entry->title(),
-									'link' 		=> $entry->link(),
-									'summary' 	=> $entry->summary(),
-									'content' 	=> $entry->content(),
-									'author' 	=> $entry->author(),
-									'published' => $entry->published(),
-									'updated' 	=> $entry->updated()
-								);
+								$channel['items'][] = array('id' => $entry->id(), 
+										'title' => $entry->title(), 
+										'link' => $entry->link(), 
+										'summary' => $entry->summary(), 
+										'content' => $entry->content(), 
+										'author' => $entry->author(), 
+										'published' => $entry->published(), 
+										'updated' => $entry->updated());
 							}
 						} else {
 							throw new Exception('Invalid feed type');
 						}
 						$resp = json_encode($channel);
 					} catch (Zend_Feed_Exception $e) {
-						$resp = 'Error parsing feed: '.$e->getMessage();
+						$resp = 'Error parsing feed: ' . $e->getMessage();
 					}
 				} else {
-				    // feed import failed
-				    $resp = "Error fetching feed, response code: ".$result->getHttpCode();
+					// feed import failed
+					$resp = "Error fetching feed, response code: " . $result->getHttpCode();
 				}
 			} else {
 				$resp = $result->getResponseContent();
@@ -175,7 +164,7 @@ class ProxyHandler {
 	public function fetch($url, $signer, $method)
 	{
 		try {
-			$token = $this->extractAndValidateToken($signer);
+			$token = $this->context->extractAndValidateToken($signer);
 		} catch (Exception $e) {
 			$token = '';
 			// no token given, safe to ignore
@@ -187,7 +176,7 @@ class ProxyHandler {
 		$status = (int)$result->getHttpCode();
 		if ($status == 200) {
 			$headers = explode("\n", $result->getResponseHeaders());
-			foreach ( $headers as $header ) {
+			foreach ($headers as $header) {
 				if (strpos($header, ':')) {
 					$key = trim(substr($header, 0, strpos($header, ':')));
 					$val = trim(substr($header, strpos($header, ':') + 1));
@@ -209,7 +198,7 @@ class ProxyHandler {
 		// make sure the HttpServlet destructor doesn't override ours
 		die();
 	}
-	
+
 	/**
 	 * Both fetch and fetchJson call this function to retrieve the actual content
 	 *
@@ -220,13 +209,14 @@ class ProxyHandler {
 	private function fetchContent($url, $method)
 	{
 		//TODO get actual character encoding from the request
+		
 
 		// Extract the request headers from the $_SERVER super-global (this -does- unfortunatly mean that any header that php doesn't understand won't be proxied thru though)
 		// if this turns out to be a problem we could add support for HTTP_RAW_HEADERS, but this depends on a php.ini setting, so i'd rather prevent that from being required
 		$headers = '';
 		$context = new GadgetContext('GADGET');
 		$requestHeaders = $this->request_headers();
-		foreach ( $requestHeaders as $key => $val ) {
+		foreach ($requestHeaders as $key => $val) {
 			if ($key != 'Keep-alive' && $key != 'Connection' && $key != 'Host' && $key != 'Accept' && $key != 'Accept-Encoding') {
 				// propper curl header format according to http://www.php.net/manual/en/function.curl-setopt.php#80099
 				$headers .= "$key: $val\n";
@@ -241,7 +231,7 @@ class ProxyHandler {
 			if ($data) {
 				$data = urldecode($data);
 				$entries = explode('&', $data);
-				foreach ( $entries as $entry ) {
+				foreach ($entries as $entry) {
 					$parts = explode('=', $entry);
 					// Process only if its a valid value=something pair
 					if (count($parts) == 2) {
@@ -267,7 +257,7 @@ class ProxyHandler {
 	private function fetchContentDivert($url, $method, $signer)
 	{
 		$authz = isset($_GET['authz']) ? $_GET['authz'] : (isset($_POST['authz']) ? $_POST['authz'] : '');
-		$token = $this->extractAndValidateToken($signer);
+		$token = $this->context->extractAndValidateToken($signer);
 		switch (strtoupper($authz)) {
 			case 'SIGNED':
 				$fetcher = $this->signingFetcher->getSigningFetcher(new BasicRemoteContentFetcher(), $token);
@@ -285,12 +275,12 @@ class ProxyHandler {
 				return $this->fetchContent($url, $method);
 		}
 	}
-	
+
 	public function setContentFetcher($contentFetcherFactory)
 	{
 		$this->contentFetcherFactory = $contentFetcherFactory;
 	}
-	
+
 	/**
 	 * Sets the caching headers (overwriting anything the remote host set) to force
 	 * the browser not to cache this. 
@@ -302,7 +292,7 @@ class ProxyHandler {
 		header("Cache-Control: private; max-age=0", true);
 		header("Expires: " . gmdate("D, d M Y H:i:s", time() - 3000) . " GMT", true);
 	}
-	
+
 	/**
 	 * Empty function, should make something practical here some day.
 	 * it's function should be to validate the given url if its in
@@ -317,26 +307,7 @@ class ProxyHandler {
 		// why not use Zend::Uri:
 		return $url;
 	}
-	
-	/**
-	 * Extracts the 'st' token from the GET or POST params and calls the
-	 * signer to validate the token
-	 *
-	 * @param GadgetSigner $signer the signer to use (configured in config.php)
-	 * @return string the token to use in the signed url
-	 */
-	private function extractAndValidateToken($signer)
-	{
-		if ($signer == null) {
-			return null;
-		}
-		$token = isset($_GET["st"]) ? $_GET["st"] : '';
-		if (!isset($token) || $token == '') {
-			$token = isset($_POST['st']) ? $_POST['st'] : '';
-		}
-		return $signer->createToken($token);
-	}
-		
+
 	private function request_headers()
 	{
 		// Try to use apache's request headers if available
@@ -347,7 +318,7 @@ class ProxyHandler {
 		}
 		// if that failed, try to create them from the _SERVER superglobal
 		$headers = array();
-		foreach ( array_keys($_SERVER) as $skey ) {
+		foreach (array_keys($_SERVER) as $skey) {
 			if (substr($skey, 0, 5) == "HTTP_") {
 				$headername = str_replace(" ", "-", ucwords(strtolower(str_replace("_", " ", substr($skey, 0, 5)))));
 				$headers[$headername] = $_SERVER[$skey];

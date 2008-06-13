@@ -1,4 +1,5 @@
 <?php
+
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements. See the NOTICE file
@@ -96,7 +97,7 @@ class GadgetServer {
 		return $localeSpec;
 	}
 
-	private function featuresLoad($gadget, $context)
+	private function featuresLoad(Gadget $gadget, $context)
 	{
 		//NOTE i've been a bit liberal here with folding code into this function, while it did get a bit long, the many include()'s are slowing us down
 		// Should really clean this up a bit in the future though
@@ -128,6 +129,8 @@ class GadgetServer {
 		$substitutor->addSubstitution('BIDI', "END_EDGE", $rtl ? "left" : "right");
 		$substitutor->addSubstitution('BIDI', "DIR", $rtl ? "rtl" : "ltr");
 		$substitutor->addSubstitution('BIDI', "REVERSE_DIR", $rtl ? "ltr" : "rtl");
+		
+		$this->substitutePreloads($gadget, $substitutor);
 		
 		// userPref's
 		$upValues = $gadget->getUserPrefValues();
@@ -183,6 +186,15 @@ class GadgetServer {
 			$params = $gadget->getFeatureParams($gadget, $context->getRegistry()->getEntry($key));
 			$feature->process($gadget, $context, $params);
 		}
+	}
+
+	private function substitutePreloads(Gadget $gadget, $substituter)
+	{
+		$preloads = array();
+		foreach ($gadget->preloads as $preload) {
+			$preloads[] = $preload->substitute($substituter);
+		}
+		$gadget->preloads = $preloads;
 	}
 }
 

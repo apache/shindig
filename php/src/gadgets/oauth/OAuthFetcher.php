@@ -1,4 +1,5 @@
 <?php
+
 /*
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements. See the NOTICE file distributed with this
@@ -26,7 +27,7 @@
  * requires OAuth signing.
  */
 class OAuthFetcher extends RemoteContentFetcher {
-
+	
 	// We store some blobs of data on the client for later reuse; the blobs
 	// contain key/value pairs, and these are the key names.
 	private static $REQ_TOKEN_KEY = "r";
@@ -34,66 +35,66 @@ class OAuthFetcher extends RemoteContentFetcher {
 	private static $ACCESS_TOKEN_KEY = "a";
 	private static $ACCESS_TOKEN_SECRET_KEY = "as";
 	private static $OWNER_KEY = "o";
-
+	
 	// names for the JSON values we return to the client
 	public static $CLIENT_STATE = "oauthState";
 	public static $APPROVAL_URL = "approvalUrl";
 	// names of additional OAuth parameters we include in outgoing requests
 	public static $XOAUTH_APP_URL = "xoauth_app_url";
-
+	
 	/**
 	 * Maximum age for our client state; if this is exceeded we start over. One
 	 * hour is a fairly arbitrary time limit here.
 	 */
 	private static $CLIENT_STATE_MAX_AGE_SECS = 3600;
-
+	
 	/**
 	 * The gadget security token, with info about owner/viewer/gadget.
 	 */
 	protected $authToken;
-
+	
 	/**
 	 * The gadget's nickname for the service provider.
 	 */
 	protected $serviceName;
-
+	
 	/**
 	 * The gadget's nickname for the token.
 	 */
 	protected $tokenName;
-
+	
 	/**
 	 * Reference to our persistent store for OAuth metadata.
 	 */
 	protected $tokenStore;
-
+	
 	/**
 	 * The accessor we use for signing messages. This also holds metadata about
 	 * the service provider, such as their URLs and the keys we use to access
 	 * those URLs.
 	 */
 	private $accessorInfo;
-
+	
 	/**
 	 * We use this to encrypt and sign the state we cache on the client.
 	 */
 	private $oauthCrypter;
-
+	
 	/**
 	 * State the client sent with their request.
 	 */
 	private $origClientState = array();
-
+	
 	/**
 	 * The request the client really wants to make.
 	 */
 	private $realRequest;
-
+	
 	/**
 	 * State to cache on the client.
 	 */
 	private $newClientState;
-
+	
 	/**
 	 * Authorization URL for the client
 	 */
@@ -120,8 +121,8 @@ class OAuthFetcher extends RemoteContentFetcher {
 		if ($origClientState != null && strlen($origClientState) > 0) {
 			try {
 				$this->origClientState = $this->oauthCrypter->unwrap($origClientState, OAuthFetcher::$CLIENT_STATE_MAX_AGE_SECS);
-			} catch (BlobCrypterException $e) {	// Probably too old, pretend we never saw it at all.
-			}
+			} catch (BlobCrypterException $e) {// Probably too old, pretend we never saw it at all.
+}
 		}
 		if ($this->origClientState == null) {
 			$this->origClientState = array();
@@ -149,10 +150,11 @@ class OAuthFetcher extends RemoteContentFetcher {
 		if (isset($this->origClientState[OAuthFetcher::$REQ_TOKEN_KEY])) {
 			$accessor->requestToken = $this->origClientState[OAuthFetcher::$REQ_TOKEN_KEY];
 			$accessor->tokenSecret = $this->origClientState[OAuthFetcher::$REQ_TOKEN_SECRET_KEY];
-		} else if (isset($this->origClientState[OAuthFetcher::$ACCESS_TOKEN_KEY])) {
-			$accessor->accessToken = $this->origClientState[OAuthFetcher::$ACCESS_TOKEN_KEY];
-			$accessor->tokenSecret = $this->origClientState[OAuthFetcher::$ACCESS_TOKEN_SECRET_KEY];
-		}
+		} else 
+			if (isset($this->origClientState[OAuthFetcher::$ACCESS_TOKEN_KEY])) {
+				$accessor->accessToken = $this->origClientState[OAuthFetcher::$ACCESS_TOKEN_KEY];
+				$accessor->tokenSecret = $this->origClientState[OAuthFetcher::$ACCESS_TOKEN_SECRET_KEY];
+			}
 	}
 
 	private function buildTokenKey()
@@ -248,7 +250,7 @@ class OAuthFetcher extends RemoteContentFetcher {
 		if (! isset($params)) {
 			throw new Exception("params was null in " + "newRequestMessage " + "Use newRequesMessage if you don't have a params to pass");
 		}
-
+		
 		switch ($this->accessorInfo->getSignatureType()) {
 			case OAuth::$RSA_SHA1:
 				$params[OAuth::$OAUTH_SIGNATURE_METHOD] = OAuth::$RSA_SHA1;
@@ -286,11 +288,13 @@ class OAuthFetcher extends RemoteContentFetcher {
 	{
 		if (isset($method) && isset($url) && isset($params)) {
 			return $this->newRequestMessageMethod($method, $url, $params);
-		} else if (isset($url) && isset($params)) {
-			return $this->newRequestMessageParams($url, $params);
-		} else if (isset($url)) {
-			return $this->newRequestMessageUrlOnly($url);
-		}
+		} else 
+			if (isset($url) && isset($params)) {
+				return $this->newRequestMessageParams($url, $params);
+			} else 
+				if (isset($url)) {
+					return $this->newRequestMessageUrlOnly($url);
+				}
 	}
 
 	private function getAuthorizationHeader($oauthParams)
@@ -322,7 +326,7 @@ class OAuthFetcher extends RemoteContentFetcher {
 				$authHeader = $this->getAuthorizationHeader($oauthParams);
 				$newHeaders["Authorization"] = $authHeader;
 				break;
-					
+			
 			case OAuthStoreVars::$OAuthParamLocation['POST_BODY']:
 				if (! OAuthUtil::isFormEncoded($contentType)) {
 					throw new GadgetException("Invalid param: OAuth param location can only " . "be post_body if post body if of type x-www-form-urlencoded");
@@ -333,12 +337,12 @@ class OAuthFetcher extends RemoteContentFetcher {
 					$postBody = $postBody . "&" . OAuthUtil::getPostBodyString($oauthParams);
 				}
 				break;
-					
+			
 			case OAuthStoreVars::$OAuthParamLocation['URI_QUERY']:
 				$url = OAuthUtil::addParameters($url, $oauthParams);
 				break;
 		}
-		$postBodyBytes = ($postBody == null) ? null : null ;//$postBody->getBytes("UTF-8"); //See what can we do with this?
+		$postBodyBytes = ($postBody == null) ? null : null; //$postBody->getBytes("UTF-8"); //See what can we do with this?
 		$rcr = new RemoteContentRequest($url);
 		$rcr->createRemoteContentRequest($method, $url, $newHeaders, $postBodyBytes, $options);
 		return $rcr;
@@ -349,7 +353,7 @@ class OAuthFetcher extends RemoteContentFetcher {
 	 */
 	private function sendOAuthMessage(OAuthRequest $request)
 	{
-		$rcr = $this->createRemoteContentRequest($this->filterOAuthParams($request), $request->get_normalized_http_method(), $request->get_url(), null, RemoteContentRequest::$DEFAULT_CONTENT_TYPE, null, RemoteContentRequest::$DEFAULT_OPTIONS);
+		$rcr = $this->createRemoteContentRequest($this->filterOAuthParams($request), $request->get_normalized_http_method(), $request->get_url(), null, RemoteContentRequest::$DEFAULT_CONTENT_TYPE, null, RemoteContentRequest::getDefaultOptions());
 		$content = $this->getNextFetcher()->fetchRequest($rcr);
 		$reply = OAuthRequest::from_request();
 		$params = OAuthUtil::decodeForm($content->getResponseContent());

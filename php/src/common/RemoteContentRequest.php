@@ -1,4 +1,5 @@
 <?php
+
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements. See the NOTICE file
@@ -33,7 +34,6 @@ class RemoteContentRequest {
 	private $options;
 	public $handle = false;
 	public static $DEFAULT_CONTENT_TYPE = "application/x-www-form-urlencoded; charset=utf-8";
-	public static $DEFAULT_OPTIONS = array();
 
 	public function __construct($uri, $headers = false, $postBody = false)
 	{
@@ -55,16 +55,14 @@ class RemoteContentRequest {
 			$tmpHeaders = '';
 			foreach ($headers as $key => $value) {
 				// Proxies should be bypassed with the Pragma: no-cache check.
-				//TODO double check array is good for options
-				if ($key == "Pragma" && @$options['ignoreCache']) {
+				if ($key == "Pragma" && $options->ignoreCache) {
 					$value = "no-cache";
 					$setPragmaHeader = true;
 				}
 				$tmpHeaders .= $key . ":" . $value . "\n";
 			}
 			// Bypass caching in proxies as well.
-			//TODO double check array is good for options
-			if (! $setPragmaHeader && @$options['ignoreCache']) {
+			if (! $setPragmaHeader && $options->ignoreCache) {
 				$tmpHeaders .= "Pragma:no-cache\n";
 			}
 			$this->headers = $tmpHeaders;
@@ -106,7 +104,7 @@ class RemoteContentRequest {
 	 */
 	public function createRemoteContentRequestWithUri($uri)
 	{
-		$this->createRemoteContentRequest("GET", $uri, null, null, RemoteContentRequest::$DEFAULT_OPTIONS);
+		$this->createRemoteContentRequest("GET", $uri, null, null, RemoteContentRequest::getDefaultOptions());
 	}
 
 	/**
@@ -127,7 +125,7 @@ class RemoteContentRequest {
 	 */
 	public function RemoteContentRequestWithUriHeaders($uri, $headers)
 	{
-		$this->createRemoteContentRequest("GET", $uri, $headers, null, RemoteContentRequest::$DEFAULT_OPTIONS);
+		$this->createRemoteContentRequest("GET", $uri, $headers, null, RemoteContentRequest::getDefaultOptions());
 	}
 
 	/**
@@ -148,7 +146,7 @@ class RemoteContentRequest {
 	 */
 	public function RemoteContentRequestWithUriPostBody($uri, $postBody)
 	{
-		$this->createRemoteContentRequest("POST", $uri, null, $postBody, RemoteContentRequest::$DEFAULT_OPTIONS);
+		$this->createRemoteContentRequest("POST", $uri, null, $postBody, RemoteContentRequest::getDefaultOptions());
 	}
 
 	/**
@@ -170,7 +168,7 @@ class RemoteContentRequest {
 	 */
 	public function createRemoteContentRequestWithUriHeadersPostBody($uri, $headers, $postBody)
 	{
-		$this->createRemoteContentRequest("POST", $uri, $headers, $postBody, RemoteContentRequest::$DEFAULT_OPTIONS);
+		$this->createRemoteContentRequest("POST", $uri, $headers, $postBody, RemoteContentRequest::getDefaultOptions());
 	}
 
 	/**
@@ -203,6 +201,11 @@ class RemoteContentRequest {
 	public function toHash()
 	{
 		return md5($this->uri . $this->postBody);
+	}
+
+	public static function getDefaultOptions()
+	{
+		return new Options();
 	}
 
 	public function getContentType()
@@ -262,6 +265,9 @@ class RemoteContentRequest {
 
 	public function getOptions()
 	{
+		if (empty($this->options)) {
+			return new Options();
+		}
 		return $this->options;
 	}
 
@@ -328,4 +334,21 @@ class RemoteContentRequest {
  */
 class Options {
 	public $ignoreCache = false;
+	public $ownerSigned = true;
+	public $viewerSigned = true;
+
+	public function __construct()
+	{
+	}
+
+	/**
+	 * Copy constructor
+	 */
+	public function copyOptions(Options $copyFrom)
+	{
+		$this->ignoreCache = $copyFrom->ignoreCache;
+		$this->ownerSigned = $copyFrom->ownerSigned;
+		$this->viewerSigned = $copyFrom->viewerSigned;
+	}
+
 }

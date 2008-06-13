@@ -1,4 +1,5 @@
 <?php
+
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements. See the NOTICE file
@@ -43,6 +44,9 @@ class GadgetSpecParser {
 		}
 		foreach ($doc->Content as $content) {
 			$this->processContent($gadget, $content);
+		}
+		foreach ($doc->ModulePrefs->Preload as $feature) {
+			$gadget->preloads[] = new Preload($feature);
 		}
 		foreach ($doc->ModulePrefs->Require as $feature) {
 			$this->processFeature($gadget, $feature, true);
@@ -206,4 +210,5 @@ class GadgetSpecParser {
 		}
 		$gadget->requires[$featureSpec->name] = $featureSpec;
 	}
+
 }
