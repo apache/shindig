@@ -31,11 +31,12 @@ import javax.servlet.http.HttpServlet;
  * the servlet spec requires configuration being done in init().
  */
 public abstract class InjectedServlet extends HttpServlet {
+  protected Injector injector;
 
- @Override public void init(ServletConfig config) throws ServletException {
+  @Override public void init(ServletConfig config) throws ServletException {
    super.init(config);
    ServletContext context = config.getServletContext();
-   Injector injector = (Injector)
+    injector = (Injector)
        context.getAttribute(GuiceServletContextListener.INJECTOR_ATTRIBUTE);
    if (injector == null) {
      throw new UnavailableException(
