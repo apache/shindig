@@ -189,32 +189,32 @@ class Gadget {
 
 	public function getAuthorAffiliation()
 	{
-		$this->substitutions->substitute($this->authorAffiliation);
+		return $this->substitutions->substitute($this->authorAffiliation);
 	}
 
 	public function getAuthorLocation()
 	{
-		$this->substitutions->substitute($this->authorLocation);
+		return $this->substitutions->substitute($this->authorLocation);
 	}
 
 	public function getAuthorPhoto()
 	{
-		$this->substitutions->substitute($this->authorPhoto);
+		return $this->substitutions->substitute($this->authorPhoto);
 	}
 
 	public function getAuthorAboutme()
 	{
-		$this->substitutions->substitute($this->authorAboutMe);
+		return $this->substitutions->substitute($this->authorAboutMe);
 	}
 
 	public function getAuthorQuote()
 	{
-		$this->substitutions->substitute($this->authorQuote);
+		return $this->substitutions->substitute($this->authorQuote);
 	}
 
 	public function getAuthorLink()
 	{
-		$this->substitutions->substitute($this->authorLink);
+		return $this->substitutions->substitute($this->authorLink);
 	}
 
 	public function getShowStats()
@@ -229,7 +229,7 @@ class Gadget {
 
 	public function getString()
 	{
-		$this->substitutions->substitute($this->string);
+		return $this->substitutions->substitute($this->string);
 	}
 
 	public function getWidth()
