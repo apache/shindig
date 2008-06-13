@@ -23,6 +23,7 @@ import org.apache.shindig.social.ResponseItem;
 import org.apache.shindig.social.ResponseError;
 import org.apache.shindig.social.opensocial.util.BeanJsonConverter;
 import org.apache.shindig.common.SecurityToken;
+import org.apache.shindig.common.testing.FakeGadgetToken;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -36,36 +37,14 @@ public class DataRequestHandlerTest extends TestCase {
   private DataRequestHandler drh;
   private HttpServletRequest req;
   private HttpServletResponse resp;
+  private BeanJsonConverter converter;
 
   @Override
   protected void setUp() throws Exception {
     req = EasyMock.createMock(HttpServletRequest.class);
     resp = EasyMock.createMock(HttpServletResponse.class);
-    drh = new DataRequestHandler(null) {
-      ResponseItem handleDelete(HttpServletRequest servletRequest,
-          SecurityToken token) {
-        return null;
-      }
+    converter = EasyMock.createMock(BeanJsonConverter.class);
 
-      ResponseItem handlePut(HttpServletRequest servletRequest,
-          SecurityToken token) {
-        return null;
-      }
-
-      ResponseItem handlePost(HttpServletRequest servletRequest,
-          SecurityToken token) {
-        return null;
-      }
-
-      ResponseItem handleGet(HttpServletRequest servletRequest,
-          SecurityToken token) {
-        return null;
-      }
-    };
-  }
-
-  public void testHandleMethodSuccess() throws Exception {
-    BeanJsonConverter converter = EasyMock.createMock(BeanJsonConverter.class);
     drh = new DataRequestHandler(converter) {
       ResponseItem handleDelete(HttpServletRequest servletRequest,
           SecurityToken token) {
@@ -87,7 +66,9 @@ public class DataRequestHandlerTest extends TestCase {
         return new ResponseItem<String>("GET");
       }
     };
+  }
 
+  public void testHandleMethodSuccess() throws Exception {
     verifyDispatchMethodCalled("DELETE", converter);
     verifyDispatchMethodCalled("PUT", converter);
     verifyDispatchMethodCalled("POST", converter);
@@ -113,6 +94,16 @@ public class DataRequestHandlerTest extends TestCase {
     verifyExceptionThrown(null);
     verifyExceptionThrown("  ");
     verifyExceptionThrown("HEAD");
+  }
+
+  private void verifyExceptionThrown(String methodName) throws IOException {
+    try {
+      drh.handleMethod(methodName, req, resp, null);
+      fail("The invalid method " + methodName + " should throw an exception.");
+    } catch (IllegalArgumentException e) {
+      // Yea! We like exeptions
+      assertEquals("Unserviced Http method type", e.getMessage());
+    }
   }
 
   public void testHandleMethodFailure() throws Exception {
@@ -144,21 +135,11 @@ public class DataRequestHandlerTest extends TestCase {
     EasyMock.verify(req, resp);
   }
 
-  private void verifyExceptionThrown(String methodName) throws IOException {
-    try {
-      drh.handleMethod(methodName, req, resp, null);
-      fail("The invalid method " + methodName + " should throw an exception.");
-    } catch (IllegalArgumentException e) {
-      // Yea! We like exeptions
-      assertEquals("Unserviced Http method type", e.getMessage());
-    }
-  }
-
   public void testGetParamsFromRequest() throws Exception {
     EasyMock.expect(req.getPathInfo()).andReturn("/people/5/@self");
 
     EasyMock.replay(req);
-    String[] params = drh.getParamsFromRequest(req);
+    String[] params = DataRequestHandler.getParamsFromRequest(req);
     assertEquals("5", params[0]);
     assertEquals("@self", params[1]);
     EasyMock.verify(req);
@@ -168,7 +149,7 @@ public class DataRequestHandlerTest extends TestCase {
     EasyMock.expect(req.getPathInfo()).andReturn("/people/5/@self");
 
     EasyMock.replay(req);
-    assertEquals("5/@self", drh.getQueryPath(req));
+    assertEquals("5/@self", DataRequestHandler.getQueryPath(req));
     EasyMock.verify(req);
   }
 
@@ -176,7 +157,7 @@ public class DataRequestHandlerTest extends TestCase {
     EasyMock.expect(req.getParameter("field")).andReturn("name");
 
     EasyMock.replay(req);
-    assertEquals(PersonService.SortOrder.name, drh.getEnumParam(req, "field",
+    assertEquals(PersonService.SortOrder.name, DataRequestHandler.getEnumParam(req, "field",
         PersonService.SortOrder.topFriends, PersonService.SortOrder.class));
     EasyMock.verify(req);
 
@@ -186,7 +167,7 @@ public class DataRequestHandlerTest extends TestCase {
     EasyMock.expect(req.getParameter("field")).andReturn(null);
 
     EasyMock.replay(req);
-    assertEquals(PersonService.SortOrder.topFriends, drh.getEnumParam(req, "field",
+    assertEquals(PersonService.SortOrder.topFriends, DataRequestHandler.getEnumParam(req, "field",
         PersonService.SortOrder.topFriends, PersonService.SortOrder.class));
     EasyMock.verify(req);
   }
@@ -195,7 +176,7 @@ public class DataRequestHandlerTest extends TestCase {
     EasyMock.expect(req.getParameter("field")).andReturn("5");
 
     EasyMock.replay(req);
-    assertEquals(5, drh.getIntegerParam(req, "field", 100));
+    assertEquals(5, DataRequestHandler.getIntegerParam(req, "field", 100));
     EasyMock.verify(req);
 
     EasyMock.reset(req);
@@ -204,7 +185,7 @@ public class DataRequestHandlerTest extends TestCase {
     EasyMock.expect(req.getParameter("field")).andReturn(null);
 
     EasyMock.replay(req);
-    assertEquals(100, drh.getIntegerParam(req, "field", 100));
+    assertEquals(100, DataRequestHandler.getIntegerParam(req, "field", 100));
     EasyMock.verify(req);
   }
 
@@ -213,7 +194,7 @@ public class DataRequestHandlerTest extends TestCase {
 
     EasyMock.replay(req);
     assertEquals(Lists.newArrayList("happy", "sad", "grumpy"),
-        drh.getListParam(req, "field", Lists.newArrayList("alpha")));
+        DataRequestHandler.getListParam(req, "field", Lists.newArrayList("alpha")));
     EasyMock.verify(req);
 
     EasyMock.reset(req);
@@ -223,7 +204,15 @@ public class DataRequestHandlerTest extends TestCase {
 
     EasyMock.replay(req);
     assertEquals(Lists.newArrayList("alpha"),
-        drh.getListParam(req, "field", Lists.newArrayList("alpha")));
+        DataRequestHandler.getListParam(req, "field", Lists.newArrayList("alpha")));
     EasyMock.verify(req);
+  }
+
+  public void testGetAppId() throws Exception {
+    FakeGadgetToken token = new FakeGadgetToken();
+    assertEquals(token.getAppId(), DataRequestHandler.getAppId(
+        DataRequestHandler.APP_SUBSTITUTION_TOKEN, token));
+
+    assertEquals("676", DataRequestHandler.getAppId("676", token));
   }
 }

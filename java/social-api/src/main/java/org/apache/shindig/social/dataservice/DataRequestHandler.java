@@ -34,6 +34,7 @@ import org.apache.commons.lang.StringUtils;
 
 public abstract class DataRequestHandler {
   protected BeanJsonConverter converter;
+  protected static final String APP_SUBSTITUTION_TOKEN = "@app";
 
   @Inject
   DataRequestHandler(BeanJsonConverter converter) {
@@ -78,17 +79,17 @@ public abstract class DataRequestHandler {
   abstract ResponseItem handleGet(HttpServletRequest servletRequest,
       SecurityToken token);
 
-  protected String[] getParamsFromRequest(HttpServletRequest servletRequest) {
+  protected static String[] getParamsFromRequest(HttpServletRequest servletRequest) {
     return getQueryPath(servletRequest).split("/");
   }
 
-  /*package-protected*/ String getQueryPath(HttpServletRequest servletRequest) {
+  /*package-protected*/ static String getQueryPath(HttpServletRequest servletRequest) {
     String pathInfo = servletRequest.getPathInfo();
     int index = pathInfo.indexOf('/', 1);
     return pathInfo.substring(index + 1);
   }
 
-  protected <T extends Enum<T>> T getEnumParam(
+  protected static <T extends Enum<T>> T getEnumParam(
       HttpServletRequest servletRequest, String paramName, T defaultValue,
       Class<T> enumClass) {
     String paramValue = servletRequest.getParameter(paramName);
@@ -98,7 +99,7 @@ public abstract class DataRequestHandler {
     return defaultValue;
   }
 
-  protected int getIntegerParam(HttpServletRequest servletRequest,
+  protected static int getIntegerParam(HttpServletRequest servletRequest,
       String paramName, int defaultValue) {
     String paramValue = servletRequest.getParameter(paramName);
     if (paramValue != null) {
@@ -107,12 +108,20 @@ public abstract class DataRequestHandler {
     return defaultValue;
   }
 
-  protected List<String> getListParam(HttpServletRequest servletRequest,
+  protected static List<String> getListParam(HttpServletRequest servletRequest,
       String paramName, List<String> defaultValue) {
     String paramValue = servletRequest.getParameter(paramName);
     if (paramValue != null) {
       return Lists.newArrayList(paramValue.split(","));
     }
     return defaultValue;
+  }
+
+  protected static String getAppId(String appId, SecurityToken token) {
+    if (appId.equals(APP_SUBSTITUTION_TOKEN)) {
+      return token.getAppId();
+    } else {
+      return appId;
+    }
   }
 }

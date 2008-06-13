@@ -38,19 +38,8 @@ RestfulContainer = function(baseUrl, domain, supportedFieldsArray) {
   this.baseUrl_ = baseUrl;
 
   this.securityToken_ = shindig.auth.getSecurityToken();
-  this.parseSecurityToken();
 };
 RestfulContainer.inherits(opensocial.Container);
-
-// Hopefully we can get rid of these with special @viewer and @owner tokens
-// in the restful spec, because this code is never going to work in the
-// real world.
-RestfulContainer.prototype.parseSecurityToken = function() {
-  var parts = this.securityToken_.split(":");
-  this.ownerId_ = parts[0];
-  this.viewerId_ = parts[1];
-  this.appId_ = parts[2];
-};
 
 RestfulContainer.prototype.getEnvironment = function() {
   return this.environment_;
@@ -138,9 +127,9 @@ RestfulContainer.prototype.translateIdSpec = function(newIdSpec) {
   var groupId = newIdSpec.getField('groupId');
 
   if (userId == 'OWNER') {
-    userId = this.ownerId_;
+    userId = '@owner';
   } else if (userId == 'VIEWER') {
-    userId = this.viewerId_;
+    userId = '@viewer';
   } else if (opensocial.Container.isArray(idSpec)) {
     for (var i = 0; i < idSpec.length; i++) {
       // TODO: We will need multiple urls here....don't want to think about
@@ -208,7 +197,7 @@ RestfulContainer.prototype.getFieldsList = function(keys) {
 
 RestfulContainer.prototype.newFetchPersonAppDataRequest = function(idSpec,
     keys) {
-  var url = "/appdata/" + this.translateIdSpec(idSpec) + "/" + this.appId_
+  var url = "/appdata/" + this.translateIdSpec(idSpec) + "/@app"
       + "?fields=" + this.getFieldsList(keys);
   return new RestfulRequestItem(url, "GET", null,
       function (appData) {
@@ -219,7 +208,7 @@ RestfulContainer.prototype.newFetchPersonAppDataRequest = function(idSpec,
 RestfulContainer.prototype.newUpdatePersonAppDataRequest = function(id, key,
     value) {
   var url = "/appdata/" + this.translateIdSpec(this.makeIdSpec(id))
-      + "/" + this.appId_ + "?fields=" + key;
+      + "/@app?fields=" + key;
   var data = {};
   data[key] = value;
   var postData = {};
@@ -229,14 +218,14 @@ RestfulContainer.prototype.newUpdatePersonAppDataRequest = function(id, key,
 
 RestfulContainer.prototype.newRemovePersonAppDataRequest = function(id, keys) {
   var url = "/appdata/" + this.translateIdSpec(this.makeIdSpec(id))
-      + "/" + this.appId_ + "?fields=" + this.getFieldsList(keys);
+      + "/@app?fields=" + this.getFieldsList(keys);
   return new RestfulRequestItem(url, "DELETE");
 };
 
 RestfulContainer.prototype.newFetchActivitiesRequest = function(idSpec,
     opt_params) {
   var url = "/activities/" + this.translateIdSpec(idSpec)
-      + "?app=" + this.appId_;
+      + "?app=@app"; // TODO: Handle appId correctly
   return new RestfulRequestItem(url, "GET", null,
       function(rawJson) {
         rawJson = rawJson['entry'];
@@ -262,7 +251,7 @@ RestfulContainer.prototype.newMediaItem = function(mimeType, url, opt_params) {
 RestfulContainer.prototype.newCreateActivityRequest = function(idSpec,
     activity) {
   var url = "/activities/" + this.translateIdSpec(idSpec)
-      + "/" + this.appId_;
+      + "/@app"; // TODO: Handle appId correctly
   var postData = {};
   postData['entry'] = gadgets.json.stringify(activity.toJsonObject());
   return new RestfulRequestItem(url, "POST", postData);

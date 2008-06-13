@@ -70,9 +70,8 @@ public class PersonHandler extends DataRequestHandler {
       SecurityToken token) {
     String[] segments = getParamsFromRequest(servletRequest);
 
-    String userId = segments[0];
-    DataServiceServlet.GroupId groupId
-        = DataServiceServlet.GroupId.fromJson(segments[1]);
+    UserId userId = UserId.fromJson(segments[0]);
+    GroupId groupId = GroupId.fromJson(segments[1]);
 
     String optionalPersonId = null;
     if (segments.length > 2) {
@@ -80,7 +79,7 @@ public class PersonHandler extends DataRequestHandler {
     }
 
     if (optionalPersonId != null
-        || groupId == DataServiceServlet.GroupId.SELF) {
+        || groupId.getType() == GroupId.Type.self) {
       return personService.getPerson(userId, token);
     }
 

@@ -64,9 +64,8 @@ public class ActivityHandler extends DataRequestHandler {
       SecurityToken token) {
     String[] segments = getParamsFromRequest(servletRequest);
 
-    String userId = segments[0];
-    DataServiceServlet.GroupId groupId
-        = DataServiceServlet.GroupId.fromJson(segments[1]);
+    UserId userId = UserId.fromJson(segments[0]);
+    GroupId groupId = GroupId.fromJson(segments[1]);
     // TODO: Should we pass the groupId through to the service?
 
     String jsonActivity = servletRequest.getParameter("entry");
@@ -87,9 +86,8 @@ public class ActivityHandler extends DataRequestHandler {
       SecurityToken token) {
     String[] segments = getParamsFromRequest(servletRequest);
 
-    String userId = segments[0];
-    DataServiceServlet.GroupId groupId
-        = DataServiceServlet.GroupId.fromJson(segments[1]);
+    UserId userId = UserId.fromJson(segments[0]);
+    GroupId groupId = GroupId.fromJson(segments[1]);
     String optionalActivityId = null;
     if (segments.length > 2) {
       optionalActivityId = segments[2];

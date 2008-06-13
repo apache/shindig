@@ -19,7 +19,6 @@ package org.apache.shindig.social.dataservice;
 
 import org.apache.shindig.social.ResponseItem;
 import org.apache.shindig.social.ResponseError;
-import org.apache.shindig.social.opensocial.model.Person;
 import org.apache.shindig.social.opensocial.model.Activity;
 import org.apache.shindig.social.opensocial.util.BeanJsonConverter;
 import org.apache.shindig.common.testing.FakeGadgetToken;
@@ -63,13 +62,13 @@ public class ActivityHandlerTest extends TestCase {
     EasyMock.expect(servletRequest.getPathInfo()).andReturn(path);
   }
 
-  private void assertHandleGetForGroup(DataServiceServlet.GroupId group) {
-    setPath("/activities/john.doe/" + group.getJsonString());
+  private void assertHandleGetForGroup(GroupId.Type group) {
+    setPath("/activities/john.doe/@" + group.toString());
 
     ResponseItem<RestfulCollection<Activity>> data
         = new ResponseItem<RestfulCollection<Activity>>(null);
-    EasyMock.expect(activityService.getActivities("john.doe",
-        group, token)).andReturn(data);
+    EasyMock.expect(activityService.getActivities(new UserId(UserId.Type.userId, "john.doe"),
+        new GroupId(group, null), token)).andReturn(data);
 
     replay();
     assertEquals(data, handler.handleGet(servletRequest, token));
@@ -77,22 +76,23 @@ public class ActivityHandlerTest extends TestCase {
   }
 
   public void testHandleGetAll() throws Exception {
-    assertHandleGetForGroup(DataServiceServlet.GroupId.ALL);
+    assertHandleGetForGroup(GroupId.Type.all);
   }
 
   public void testHandleGetFriends() throws Exception {
-    assertHandleGetForGroup(DataServiceServlet.GroupId.FRIENDS);
+    assertHandleGetForGroup(GroupId.Type.friends);
   }
 
   public void testHandleGetSelf() throws Exception {
-    assertHandleGetForGroup(DataServiceServlet.GroupId.SELF);
+    assertHandleGetForGroup(GroupId.Type.self);
   }
 
   public void testHandleGetActivityById() throws Exception {
     setPath("/people/john.doe/@friends/jane.doe");
 
     ResponseItem<Activity> data = new ResponseItem<Activity>(null);
-    EasyMock.expect(activityService.getActivity("john.doe", DataServiceServlet.GroupId.FRIENDS,
+    EasyMock.expect(activityService.getActivity(new UserId(UserId.Type.userId, "john.doe"),
+        new GroupId(GroupId.Type.friends, null),
         "jane.doe", token)).andReturn(data);
 
     replay();
@@ -109,7 +109,8 @@ public class ActivityHandlerTest extends TestCase {
     EasyMock.expect(converter.convertToObject(jsonActivity, Activity.class)).andReturn(activity);
 
     ResponseItem data = new ResponseItem<Object>(null);
-    EasyMock.expect(activityService.createActivity("john.doe", activity, token)).andReturn(data);
+    EasyMock.expect(activityService.createActivity(new UserId(UserId.Type.userId, "john.doe"),
+        activity, token)).andReturn(data);
     replay();
     return data;
   }

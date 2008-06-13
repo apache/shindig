@@ -21,8 +21,9 @@ import org.apache.shindig.common.SecurityToken;
 import org.apache.shindig.social.ResponseError;
 import org.apache.shindig.social.ResponseItem;
 import org.apache.shindig.social.dataservice.AppDataService;
-import org.apache.shindig.social.dataservice.DataServiceServlet;
 import org.apache.shindig.social.dataservice.DataCollection;
+import org.apache.shindig.social.dataservice.GroupId;
+import org.apache.shindig.social.dataservice.UserId;
 import org.apache.shindig.social.opensocial.DataService;
 
 import com.google.common.collect.Maps;
@@ -116,19 +117,19 @@ public class BasicDataService implements DataService, AppDataService {
   // New interface methods
 
   public ResponseItem<DataCollection> getPersonData(
-      String userId, DataServiceServlet.GroupId groupId, List<String> fields,
+      UserId userId, GroupId groupId, List<String> fields,
       String appId, SecurityToken token) {
     List<String> ids = Lists.newArrayList();
-    switch (groupId) {
-      case ALL:
-      case FRIENDS:
-        List<String> friendIds = fetcher.getFriendIds().get(userId);
+    switch (groupId.getType()) {
+      case all:
+      case friends:
+        List<String> friendIds = fetcher.getFriendIds().get(userId.getUserId(token));
         if (friendIds != null) {
           ids.addAll(friendIds);
         }
         break;
-      case SELF:
-        ids.add(userId);
+      case self:
+        ids.add(userId.getUserId(token));
     }
 
     // TODO: Respect appId
@@ -137,8 +138,8 @@ public class BasicDataService implements DataService, AppDataService {
     return new ResponseItem<DataCollection>(new DataCollection(data));
   }
 
-  public ResponseItem updatePersonData(String userId,
-      DataServiceServlet.GroupId groupId, List<String> fields,
+  public ResponseItem updatePersonData(UserId userId,
+      GroupId groupId, List<String> fields,
       Map<String, String> values, String appId, SecurityToken token) {
     for (String field : fields) {
       if (!isValidKey(field)) {
@@ -148,12 +149,12 @@ public class BasicDataService implements DataService, AppDataService {
       }
     }
 
-    switch(groupId) {
-      case SELF:
+    switch(groupId.getType()) {
+      case self:
         for (String field : fields) {
           String value = values.get(field);
           // TODO: Respect appId
-          fetcher.setAppData(userId, field, value);
+          fetcher.setAppData(userId.getUserId(token), field, value);
         }
         break;
       default:
@@ -164,14 +165,14 @@ public class BasicDataService implements DataService, AppDataService {
     return new ResponseItem<JSONObject>(new JSONObject());
   }
 
-  public ResponseItem deletePersonData(String userId,
-      DataServiceServlet.GroupId groupId, List<String> fields, String appId,
+  public ResponseItem deletePersonData(UserId userId,
+      GroupId groupId, List<String> fields, String appId,
       SecurityToken token) {
-    switch(groupId) {
-      case SELF:
+    switch(groupId.getType()) {
+      case self:
         for (String field : fields) {
           // TODO: Respect appId
-          fetcher.setAppData(userId, field, null);
+          fetcher.setAppData(userId.getUserId(token), field, null);
         }
         break;
       default:

@@ -35,11 +35,11 @@ public interface AppDataService {
    * @return The data fetched
    */
   public ResponseItem<DataCollection> getPersonData(
-      String userId, DataServiceServlet.GroupId groupId,
+      UserId userId, GroupId groupId,
       List<String> fields, String appId, SecurityToken token);
 
   /**
-   * Updates app data for the specified user and group with the new values. 
+   * Updates app data for the specified user and group with the new values.
    *
    * @param userId The user
    * @param groupId The group
@@ -49,8 +49,8 @@ public interface AppDataService {
    * @param token The security token
    * @return an error if one occurs
    */
-  public ResponseItem updatePersonData(String userId,
-      DataServiceServlet.GroupId groupId, List<String> fields,
+  public ResponseItem updatePersonData(UserId userId,
+      GroupId groupId, List<String> fields,
       Map<String, String> values, String appId, SecurityToken token);
 
   /**
@@ -63,8 +63,8 @@ public interface AppDataService {
    * @param token The security token
    * @return an error if one occurs
    */
-  public ResponseItem deletePersonData(String userId,
-      DataServiceServlet.GroupId groupId, List<String> fields, String appId,
+  public ResponseItem deletePersonData(UserId userId,
+      GroupId groupId, List<String> fields, String appId,
       SecurityToken token);
 }
 
