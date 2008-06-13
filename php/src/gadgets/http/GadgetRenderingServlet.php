@@ -157,15 +157,16 @@ class GadgetRenderingServlet extends HttpServlet {
 				// TODO: This case needs to be handled more gracefully by the js
 				// servlet. We should probably inline external JS as well.
 				$externJs .= sprintf($externFmt, $library->getContent()) . "\n";
-			} else if ($type == 'INLINE') {
-				echo $library->getContent();
-			} else {
-				// FILE or RESOURCE
-				if ($forcedLibs == null) {
-					echo $library->getContent() . "\n";
+			} else 
+				if ($type == 'INLINE') {
+					echo $library->getContent();
+				} else {
+					// FILE or RESOURCE
+					if ($forcedLibs == null) {
+						echo $library->getContent() . "\n";
+					}
+					// otherwise it was already included by config.forceJsLibs.
 				}
-				// otherwise it was already included by config.forceJsLibs.
-			}
 		}
 		echo "\n-->\n</script>\n";
 		// Forced libs first.
@@ -176,8 +177,7 @@ class GadgetRenderingServlet extends HttpServlet {
 		if (strlen($externJs) > 0) {
 			echo $externJs;
 		}
-		echo "<script><!--\n" . $this->appendJsConfig($context, $gadget) . $this->appendMessages($gadget) . "-->\n</script>\n";
-		
+		echo "<script><!--\n" . $this->appendJsConfig($context, $gadget) . $this->appendMessages($gadget) . $this->appendPreloads($gadget, $context) . "-->\n</script>\n";
 		$gadgetExceptions = array();
 		$content = $gadget->getSubstitutions()->substitute($view->getContent());
 		if (empty($content)) {
@@ -323,4 +323,60 @@ class GadgetRenderingServlet extends HttpServlet {
 		}
 		return "gadgets.Prefs.setMessages_($msgs);\n";
 	}
+
+	/**
+	 * Appends data from <Preload> elements to make them available to
+	 * gadgets.io.
+	 *
+	 * @param gadget
+	 */
+	private function appendPreloads(Gadget $gadget, GadgetContext $context)
+	{
+		$resp = '';
+		$gadgetSigner = Config::get('security_token_signer');
+		$gadgetSigner = new $gadgetSigner();
+		$token = '';
+		try {
+			$token = $context->extractAndValidateToken($gadgetSigner);
+		} catch (Exception $e) {
+			$token = '';
+			// no token given, safe to ignore
+		}
+		foreach ($gadget->getPreloads() as $preload) {
+			try {
+				if (($preload->getAuth() == Auth::$NONE || $token != null) && (count($preload->getViews()) == 0 || in_array($context->getView(), $preload->getViews()))) {
+					$request = new RemoteContentRequest($preload->getHref());
+					$request->createRemoteContentRequestWithUri($preload->getHref());
+					$request->getOptions()->ownerSigned = $preload->isSignOwner();
+					$request->getOptions()->viewerSigned = $preload->isSignViewer();
+					switch (strtoupper(trim($preload->getAuth()))) {
+						case "NONE":
+							$brc = new BasicRemoteContent();
+							$response = $brc->fetch($request, $context);
+							break;
+						case "SIGNED":
+							$signingFetcherFactory = new SigningFetcherFactory(Config::get("private_key_file"));
+							$fetcher = $signingFetcherFactory->getSigningFetcher(new BasicRemoteContentFetcher(), $token);
+							$response = $fetcher->fetch($preload->getHref(), $request->getMethod());
+							break;
+						default:
+							@ob_end_clean();
+							header("HTTP/1.0 500 Internal Server Error", true);
+							echo "<html><body><h1>" . "500 - Internal Server Error" . "</h1></body></html>";
+							die();
+					}
+					$json = array(
+							$preload->getHref() => array(
+									'body' => $response->getResponseContent(), 
+									'rc' => $response->getHttpCode()));
+					$resp .= json_encode($json);
+				}
+			} catch (Exception $e) {
+				throw new Exception($e);
+			}
+		}
+		$resp = $resp == '' ? "{}" : $resp;
+		return "gadgets.io.preloaded_ = " . $resp . ";\n";
+	}
+
 }

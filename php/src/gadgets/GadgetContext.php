@@ -15,7 +15,7 @@
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
  * KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
- * 
+ *
  */
 
 define('DEFAULT_VIEW', 'profile');
@@ -154,7 +154,7 @@ class GadgetContext {
 	private function instanceRegistry()
 	{
 		// Profiling showed 40% of the processing time was spend in the feature registry
-		// So by caching this and making it a one time initialization, we almost double the performance  
+		// So by caching this and making it a one time initialization, we almost double the performance
 		if (! ($registry = $this->getCache()->get(md5(Config::get('features_path'))))) {
 			$registry = new GadgetFeatureRegistry(Config::get('features_path'));
 			$this->getCache()->set(md5(Config::get('features_path')), $registry);
@@ -164,7 +164,7 @@ class GadgetContext {
 
 	private function instanceLocale()
 	{
-		// Get language and country params, try the GET params first, if their not set try the POST, else use 'all' as default 
+		// Get language and country params, try the GET params first, if their not set try the POST, else use 'all' as default
 		$language = ! empty($_GET['lang']) ? $_GET['lang'] : (! empty($_POST['lang']) ? $_POST['lang'] : 'all');
 		$country = ! empty($_GET['country']) ? $_GET['country'] : (! empty($_POST['country']) ? $_POST['country'] : 'all');
 		return new Locale($language, $country);
@@ -363,4 +363,24 @@ class GadgetContext {
 	{
 		return $this->registry;
 	}
+
+	/**
+	 * Extracts the 'st' token from the GET or POST params and calls the
+	 * signer to validate the token
+	 *
+	 * @param GadgetSigner $signer the signer to use (configured in config.php)
+	 * @return string the token to use in the signed url
+	 */
+	public function extractAndValidateToken($signer)
+	{
+		if ($signer == null) {
+			return null;
+		}
+		$token = isset($_GET["st"]) ? $_GET["st"] : '';
+		if (! isset($token) || $token == '') {
+			$token = isset($_POST['st']) ? $_POST['st'] : '';
+		}
+		return $signer->createToken($token);
+	}
+
 }

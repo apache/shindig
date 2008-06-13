@@ -1,4 +1,5 @@
 <?php
+
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -264,9 +265,10 @@ class OAuthRequest {
 			$header_parameters = OAuthRequest::split_header($request_headers['Authorization']);
 			if ($http_method == "GET") {
 				$req_parameters = $_GET;
-			} else if ($http_method = "POST") {
-				$req_parameters = $_POST;
-			}
+			} else 
+				if ($http_method = "POST") {
+					$req_parameters = $_POST;
+				}
 			$parameters = array_merge($header_parameters, $req_parameters);
 			$req = new OAuthRequest($http_method, $http_url, $parameters);
 		} elseif ($http_method == "GET") {
@@ -285,8 +287,7 @@ class OAuthRequest {
 		$parameters = is_array($parameters) ? $parameters : array();
 		$defaults = array("oauth_nonce" => OAuthRequest::generate_nonce(), 
 				"oauth_timestamp" => OAuthRequest::generate_timestamp(), 
-				"oauth_consumer_key" => $consumer->key, // quick hack to make this demo'able
-'synd' => 'partuza', 
+				"oauth_consumer_key" => $consumer->key, 'synd' => 'partuza', 
 				'container' => 'partuza');
 		$parameters = array_merge($defaults, $parameters);
 		if (isset($token)) {
@@ -867,7 +868,9 @@ class OAuthUtil {
 		$explodedForm = explode("&", $form);
 		foreach ($explodedForm as $params) {
 			$value = explode("=", $params);
-			$parameters[OAuthUtil::urldecodeRFC3986($value[0])] = OAuthUtil::urldecodeRFC3986($value[1]);
+			if (! empty($value[0]) && ! empty($value[1])) {
+				$parameters[OAuthUtil::urldecodeRFC3986($value[0])] = OAuthUtil::urldecodeRFC3986($value[1]);
+			}
 		}
 		return $parameters;
 	}

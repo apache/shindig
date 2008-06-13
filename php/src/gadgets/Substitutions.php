@@ -15,13 +15,13 @@
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
  * KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
- * 
+ *
  */
 
 class Substitutions {
 	private $types = array('MESSAGE' => 'MSG', 'BIDI' => 'BIDI', 'USER_PREF' => 'UP', 
 			'MODULE' => 'MODULE');
-	
+
 	private $substitutions = array();
 
 	public function __construct()
@@ -53,6 +53,26 @@ class Substitutions {
 
 	public function substituteType($type, $input)
 	{
+		if (empty($this->substitutions[$type])) {
+			return $input;
+		}
 		return str_replace(array_keys($this->substitutions[$type]), array_values($this->substitutions[$type]), $input);
+	}
+
+	/**
+	 * Substitutes a uri
+	 * @param type The type to substitute, or null for all types.
+	 * @param uri
+	 * @return The substituted uri, or a dummy value if the result is invalid.
+	 */
+	public function substituteUri($type, $uri) {
+		if (empty($uri)) {
+			return null;
+		}
+		try {
+			return $this->substituteType($type, $uri);
+		} catch (Exception $e) {
+			return "";
+		}
 	}
 }
