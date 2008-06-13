@@ -17,18 +17,24 @@
  */
 package org.apache.shindig.social.opensocial.util;
 
+import org.apache.commons.betwixt.io.BeanReader;
 import org.apache.commons.betwixt.io.BeanWriter;
 import org.xml.sax.SAXException;
 
 import java.beans.IntrospectionException;
 import java.io.IOException;
+import java.io.StringReader;
 import java.io.StringWriter;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-public class BeanXmlConverter {
+public class BeanXmlConverter implements BeanConverter {
   private static Logger logger =
       Logger.getLogger(BeanXmlConverter.class.getName());
+
+  public String convertToString(Object pojo) {
+    return convertToXml(pojo);
+  }
 
   public String convertToXml(Object obj) {
     StringWriter outputWriter = new StringWriter();
@@ -61,5 +67,22 @@ public class BeanXmlConverter {
     }
 
     return toReturn;
+  }
+
+  public <T> T convertToObject(String xml, Class<T> className) {
+    String errorMessage = "Could not convert " + xml + " to " + className;
+
+    BeanReader reader = new BeanReader();
+    try {
+      reader.registerBeanClass("activity", className);
+      StringReader rd = new StringReader(xml);
+      return (T) reader.parse(rd);
+    } catch (IntrospectionException e) {
+      throw new RuntimeException(errorMessage, e);
+    } catch (IOException e) {
+      throw new RuntimeException(errorMessage, e);
+    } catch (SAXException e) {
+      throw new RuntimeException(errorMessage, e);
+    }
   }
 }
