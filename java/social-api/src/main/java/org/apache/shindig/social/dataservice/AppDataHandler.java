@@ -54,10 +54,9 @@ public class AppDataHandler extends DataRequestHandler {
       SecurityToken token) {
     String[] segments = getParamsFromRequest(servletRequest);
 
-    String userId = segments[0];
-    DataServiceServlet.GroupId groupId
-        = DataServiceServlet.GroupId.fromJson(segments[1]);
-    String appId = segments[2];
+    UserId userId = UserId.fromJson(segments[0]);
+    GroupId groupId = GroupId.fromJson(segments[1]);
+    String appId = getAppId(segments[2], token);
 
     List<String> fields = getListParam(servletRequest, "fields",
         Lists.<String>newArrayList());
@@ -99,10 +98,9 @@ public class AppDataHandler extends DataRequestHandler {
       SecurityToken token) {
     String[] segments = getParamsFromRequest(servletRequest);
 
-    String userId = segments[0];
-    DataServiceServlet.GroupId groupId
-        = DataServiceServlet.GroupId.fromJson(segments[1]);
-    String appId = segments[2];
+    UserId userId = UserId.fromJson(segments[0]);
+    GroupId groupId = GroupId.fromJson(segments[1]);
+    String appId = getAppId(segments[2], token);
 
     List<String> fields = getListParam(servletRequest, "fields",
         Lists.<String>newArrayList());
@@ -128,10 +126,9 @@ public class AppDataHandler extends DataRequestHandler {
       SecurityToken token) {
     String[] segments = getParamsFromRequest(servletRequest);
 
-    String userId = segments[0];
-    DataServiceServlet.GroupId groupId
-        = DataServiceServlet.GroupId.fromJson(segments[1]);
-    String appId = segments[2];
+    UserId userId = UserId.fromJson(segments[0]);
+    GroupId groupId = GroupId.fromJson(segments[1]);
+    String appId = getAppId(segments[2], token);
 
     List<String> fields = getListParam(servletRequest, "fields",
         Lists.<String>newArrayList());

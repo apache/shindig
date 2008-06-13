@@ -46,8 +46,7 @@ public interface PersonService {
    * @param token The gadget token
    * @return a list of people.
    */
-  public ResponseItem<RestfulCollection<Person>> getPeople(String userId,
-      DataServiceServlet.GroupId groupId,
+  public ResponseItem<RestfulCollection<Person>> getPeople(UserId userId, GroupId groupId,
       SortOrder sortOrder, FilterType filter, int first, int max,
       Set<String> profileDetails, SecurityToken token);
 
@@ -58,5 +57,5 @@ public interface PersonService {
    * @param token The gadget token
    * @return a list of people.
    */
-  public ResponseItem<Person> getPerson(String id, SecurityToken token);
+  public ResponseItem<Person> getPerson(UserId id, SecurityToken token);
 }

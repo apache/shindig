@@ -21,8 +21,9 @@ import org.apache.shindig.common.SecurityToken;
 import org.apache.shindig.social.ResponseItem;
 import org.apache.shindig.social.ResponseError;
 import org.apache.shindig.social.dataservice.PersonService;
-import org.apache.shindig.social.dataservice.DataServiceServlet;
 import org.apache.shindig.social.dataservice.RestfulCollection;
+import org.apache.shindig.social.dataservice.GroupId;
+import org.apache.shindig.social.dataservice.UserId;
 import org.apache.shindig.social.opensocial.PeopleService;
 import org.apache.shindig.social.opensocial.model.ApiCollection;
 import org.apache.shindig.social.opensocial.model.IdSpec;
@@ -142,21 +143,21 @@ public class BasicPeopleService implements PeopleService, PersonService {
 
   // New interface methods
 
-  public ResponseItem<RestfulCollection<Person>> getPeople(String userId,
-      DataServiceServlet.GroupId groupId, PersonService.SortOrder sortOrder,
+  public ResponseItem<RestfulCollection<Person>> getPeople(UserId userId,
+      GroupId groupId, PersonService.SortOrder sortOrder,
       PersonService.FilterType filter, int first, int max,
       Set<String> profileDetails, SecurityToken token) {
     List<String> ids = Lists.newArrayList();
-    switch (groupId) {
-      case ALL:
-      case FRIENDS:
-        List<String> friendIds = fetcher.getFriendIds().get(userId);
+    switch (groupId.getType()) {
+      case all:
+      case friends:
+        List<String> friendIds = fetcher.getFriendIds().get(userId.getUserId(token));
         if (friendIds != null) {
           ids.addAll(friendIds);
         }
         break;
-      case SELF:
-        ids.add(userId);
+      case self:
+        ids.add(userId.getUserId(token));
     }
 
     List<Person> people = getPeople(ids, token);
@@ -176,6 +177,16 @@ public class BasicPeopleService implements PeopleService, PersonService {
     RestfulCollection<Person> collection = new RestfulCollection<Person>(people,
         first, totalSize);
     return new ResponseItem<RestfulCollection<Person>>(collection);
+  }
+
+  public ResponseItem<Person> getPerson(UserId id, SecurityToken token) {
+    List<Person> people = getPeople(Lists.newArrayList(id.getUserId(token)), token);
+    if (people.size() == 1) {
+      return new ResponseItem<Person>(people.get(0));
+    } else {
+      return new ResponseItem<Person>(ResponseError.BAD_REQUEST,
+          "Person " + id.getUserId(token) + " not found", null);
+    }
   }
 
 }

@@ -28,7 +28,6 @@ import org.easymock.classextension.EasyMock;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.HashMap;
-import java.util.Map;
 
 public class AppDataHandlerTest extends TestCase {
   private BeanJsonConverter converter;
@@ -64,12 +63,13 @@ public class AppDataHandlerTest extends TestCase {
     EasyMock.expect(servletRequest.getPathInfo()).andReturn(path);
   }
 
-  private void assertHandleGetForGroup(DataServiceServlet.GroupId group) {
-    setPath("/activities/john.doe/" + group.getJsonString() + "/appId");
+  private void assertHandleGetForGroup(GroupId.Type group) {
+    setPath("/activities/john.doe/@" + group.toString() + "/appId");
     EasyMock.expect(servletRequest.getParameter("fields")).andReturn(null);
 
     ResponseItem<DataCollection> data = new ResponseItem<DataCollection>(null);
-    EasyMock.expect(appDataService.getPersonData("john.doe", group,
+    EasyMock.expect(appDataService.getPersonData(new UserId(UserId.Type.userId, "john.doe"),
+        new GroupId(group, null),
         Lists.<String>newArrayList(), "appId", token)).andReturn(data);
 
     replay();
@@ -78,15 +78,15 @@ public class AppDataHandlerTest extends TestCase {
   }
 
   public void testHandleGetAll() throws Exception {
-    assertHandleGetForGroup(DataServiceServlet.GroupId.ALL);
+    assertHandleGetForGroup(GroupId.Type.all);
   }
 
   public void testHandleGetFriends() throws Exception {
-    assertHandleGetForGroup(DataServiceServlet.GroupId.FRIENDS);
+    assertHandleGetForGroup(GroupId.Type.friends);
   }
 
   public void testHandleGetSelf() throws Exception {
-    assertHandleGetForGroup(DataServiceServlet.GroupId.SELF);
+    assertHandleGetForGroup(GroupId.Type.self);
   }
 
   public void testHandleGetWithoutFields() throws Exception {
@@ -94,7 +94,8 @@ public class AppDataHandlerTest extends TestCase {
     EasyMock.expect(servletRequest.getParameter("fields")).andReturn("pandas");
 
     ResponseItem<DataCollection> data = new ResponseItem<DataCollection>(null);
-    EasyMock.expect(appDataService.getPersonData("john.doe", DataServiceServlet.GroupId.FRIENDS,
+    EasyMock.expect(appDataService.getPersonData(new UserId(UserId.Type.userId, "john.doe"),
+        new GroupId(GroupId.Type.friends, null),
         Lists.newArrayList("pandas"), "appId", token)).andReturn(data);
 
     replay();
@@ -112,7 +113,8 @@ public class AppDataHandlerTest extends TestCase {
     EasyMock.expect(converter.convertToObject(jsonAppData, HashMap.class)).andReturn(values);
 
     ResponseItem data = new ResponseItem<Object>(null);
-    EasyMock.expect(appDataService.updatePersonData("john.doe", DataServiceServlet.GroupId.SELF,
+    EasyMock.expect(appDataService.updatePersonData(new UserId(UserId.Type.userId, "john.doe"),
+        new GroupId(GroupId.Type.self, null),
         Lists.newArrayList("pandas"), values, "appId", token)).andReturn(data);
     replay();
     return data;
@@ -135,7 +137,8 @@ public class AppDataHandlerTest extends TestCase {
     EasyMock.expect(servletRequest.getParameter("fields")).andReturn("pandas");
 
     ResponseItem data = new ResponseItem<Object>(null);
-    EasyMock.expect(appDataService.deletePersonData("john.doe", DataServiceServlet.GroupId.SELF,
+    EasyMock.expect(appDataService.deletePersonData(new UserId(UserId.Type.userId, "john.doe"),
+        new GroupId(GroupId.Type.self, null),
         Lists.newArrayList("pandas"), "appId", token)).andReturn(data);
 
     replay();

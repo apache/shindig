@@ -18,6 +18,7 @@
 package org.apache.shindig.social.dataservice;
 
 import com.google.inject.Inject;
+
 import org.apache.shindig.common.SecurityTokenDecoder;
 import org.apache.shindig.common.SecurityToken;
 import org.apache.shindig.common.SecurityTokenException;
@@ -33,27 +34,6 @@ import java.util.logging.Logger;
 import org.apache.commons.lang.StringUtils;
 
 public class DataServiceServlet extends InjectedServlet {
-
-  public static enum GroupId {
-    ALL("@all"),
-    FRIENDS("@friends"),
-    SELF("@self"),
-    GROUP("not supported yet");
-
-    private final String jsonString;
-
-    GroupId(String jsonString) {
-      this.jsonString = jsonString;
-    }
-
-    public String getJsonString() {
-      return jsonString;
-    }
-
-    public static GroupId fromJson(String s) {
-      return valueOf(s.substring(1).toUpperCase());
-    }
-  }
 
   protected static final String X_HTTP_METHOD_OVERRIDE
       = "X-HTTP-Method-Override";

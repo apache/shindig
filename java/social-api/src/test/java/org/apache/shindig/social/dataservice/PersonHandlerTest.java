@@ -74,8 +74,10 @@ public class PersonHandlerTest extends TestCase {
 
     ResponseItem<RestfulCollection<Person>> data
         = new ResponseItem<RestfulCollection<Person>>(null);
-    EasyMock.expect(personService.getPeople("john.doe",
-        DataServiceServlet.GroupId.ALL, PersonService.SortOrder.topFriends,
+    EasyMock.expect(personService.getPeople(
+        new UserId(UserId.Type.userId, "john.doe"),
+        new GroupId(GroupId.Type.all, null),
+        PersonService.SortOrder.topFriends,
         PersonService.FilterType.all, 0, 20,
         Sets.newHashSet(Person.Field.ID.toString(),
             Person.Field.NAME.toString(),
@@ -98,8 +100,10 @@ public class PersonHandlerTest extends TestCase {
 
     ResponseItem<RestfulCollection<Person>> data
         = new ResponseItem<RestfulCollection<Person>>(null);
-    EasyMock.expect(personService.getPeople("john.doe",
-        DataServiceServlet.GroupId.FRIENDS, PersonService.SortOrder.topFriends,
+    EasyMock.expect(personService.getPeople(
+        new UserId(UserId.Type.userId, "john.doe"),
+        new GroupId(GroupId.Type.friends, null),
+        PersonService.SortOrder.topFriends,
         PersonService.FilterType.all, 0, 20,
         Sets.newHashSet(Person.Field.ID.toString(),
             Person.Field.NAME.toString(),
@@ -125,7 +129,9 @@ public class PersonHandlerTest extends TestCase {
 
     ResponseItem<RestfulCollection<Person>> data
         = new ResponseItem<RestfulCollection<Person>>(null);
-    EasyMock.expect(personService.getPeople("john.doe", DataServiceServlet.GroupId.FRIENDS, order,
+    EasyMock.expect(personService.getPeople(
+        new UserId(UserId.Type.userId, "john.doe"),
+        new GroupId(GroupId.Type.friends, null), order,
         filter, 5, 10, Sets.newHashSet("money", "fame", "fortune"), token)).andReturn(data);
 
     replay();
@@ -140,7 +146,9 @@ public class PersonHandlerTest extends TestCase {
     // TODO: This isn't right! We should be passing both john.doe and jane.doe to the service
     // We probably need to either change the getPerson parameters or add a new method to
     // the interface
-    EasyMock.expect(personService.getPerson("john.doe", token)).andReturn(data);
+    EasyMock.expect(personService.getPerson(
+        new UserId(UserId.Type.userId, "john.doe"),
+        token)).andReturn(data);
 
     replay();
     assertEquals(data, handler.handleGet(servletRequest, token));
@@ -151,7 +159,9 @@ public class PersonHandlerTest extends TestCase {
     setPath("/people/john.doe/@self");
 
     ResponseItem<Person> data = new ResponseItem<Person>(null);
-    EasyMock.expect(personService.getPerson("john.doe", token)).andReturn(data);
+    EasyMock.expect(personService.getPerson(
+        new UserId(UserId.Type.userId, "john.doe"),
+        token)).andReturn(data);
 
     replay();
     assertEquals(data, handler.handleGet(servletRequest, token));

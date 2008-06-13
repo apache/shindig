@@ -21,11 +21,11 @@ import org.apache.shindig.common.SecurityToken;
 import org.apache.shindig.social.ResponseError;
 import org.apache.shindig.social.ResponseItem;
 import org.apache.shindig.social.dataservice.ActivityService;
-import org.apache.shindig.social.dataservice.DataServiceServlet;
 import org.apache.shindig.social.dataservice.RestfulCollection;
+import org.apache.shindig.social.dataservice.GroupId;
+import org.apache.shindig.social.dataservice.UserId;
 import org.apache.shindig.social.opensocial.ActivitiesService;
 import org.apache.shindig.social.opensocial.model.Activity;
-import org.apache.shindig.social.opensocial.model.ApiCollection;
 
 import com.google.common.collect.Lists;
 import com.google.inject.Inject;
@@ -76,21 +76,31 @@ public class BasicActivitiesService implements ActivitiesService,
         "Activity not found", null);
   }
 
+  public ResponseItem createActivity(String personId, Activity activity,
+      SecurityToken token) {
+    // TODO: Validate the activity and do any template expanding
+    activity.setUserId(personId);
+    activity.setPostedTime(new Date().getTime());
+
+    fetcher.createActivity(personId, activity);
+    return new ResponseItem<JSONObject>(new JSONObject());
+  }
+
   // New interface methods
 
-  public ResponseItem<RestfulCollection<Activity>> getActivities(String userId,
-      DataServiceServlet.GroupId groupId, SecurityToken token) {
+  public ResponseItem<RestfulCollection<Activity>> getActivities(UserId userId,
+      GroupId groupId, SecurityToken token) {
     List<String> ids = Lists.newArrayList();
-    switch (groupId) {
-      case ALL:
-      case FRIENDS:
-        List<String> friendIds = fetcher.getFriendIds().get(userId);
+    switch (groupId.getType()) {
+      case all:
+      case friends:
+        List<String> friendIds = fetcher.getFriendIds().get(userId.getUserId(token));
         if (friendIds != null) {
           ids.addAll(friendIds);
         }
         break;
-      case SELF:
-        ids.add(userId);
+      case self:
+        ids.add(userId.getUserId(token));
     }
 
     Map<String, List<Activity>> allActivities = fetcher.getActivities();
@@ -108,8 +118,8 @@ public class BasicActivitiesService implements ActivitiesService,
         new RestfulCollection<Activity>(activities));
   }
 
-  public ResponseItem<Activity> getActivity(String userId,
-      DataServiceServlet.GroupId groupId, String activityId,
+  public ResponseItem<Activity> getActivity(UserId userId,
+      GroupId groupId, String activityId,
       SecurityToken token) {
     RestfulCollection<Activity> allActivities = getActivities(userId, groupId,
         token).getResponse();
@@ -122,13 +132,13 @@ public class BasicActivitiesService implements ActivitiesService,
         "Activity not found", null);
   }
 
-  public ResponseItem createActivity(String personId, Activity activity,
+  public ResponseItem createActivity(UserId personId, Activity activity,
       SecurityToken token) {
     // TODO: Validate the activity and do any template expanding
-    activity.setUserId(personId);
+    activity.setUserId(personId.getUserId(token));
     activity.setPostedTime(new Date().getTime());
 
-    fetcher.createActivity(personId, activity);
+    fetcher.createActivity(personId.getUserId(token), activity);
     return new ResponseItem<JSONObject>(new JSONObject());
   }
 

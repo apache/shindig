@@ -31,8 +31,8 @@ public interface ActivityService {
    * @param token A valid SecurityToken
    * @return a response item with the list of activities.
    */
-  public ResponseItem<RestfulCollection<Activity>> getActivities(String userId,
-      DataServiceServlet.GroupId groupId, SecurityToken token);
+  public ResponseItem<RestfulCollection<Activity>> getActivities(UserId userId,
+      GroupId groupId, SecurityToken token);
 
   /**
    * Returns the activity for the passed in user and group that corresponds to
@@ -44,8 +44,8 @@ public interface ActivityService {
    * @param token A valid SecurityToken
    * @return a response item with the list of activities.
    */
-  public ResponseItem<Activity> getActivity(String userId,
-      DataServiceServlet.GroupId groupId, String activityId,
+  public ResponseItem<Activity> getActivity(UserId userId,
+      GroupId groupId, String activityId,
       SecurityToken token);
 
   /**
@@ -57,7 +57,7 @@ public interface ActivityService {
    * @param token A valid SecurityToken
    * @return a response item containing any errors
    */
-  public ResponseItem createActivity(String personId, Activity activity,
+  public ResponseItem createActivity(UserId personId, Activity activity,
       SecurityToken token);
 
 }
