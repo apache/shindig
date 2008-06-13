@@ -19,10 +19,10 @@ package org.apache.shindig.social.dataservice;
 
 import org.apache.shindig.common.SecurityToken;
 import org.apache.shindig.social.ResponseItem;
-import org.apache.shindig.social.opensocial.util.BeanJsonConverter;
+import org.apache.shindig.social.opensocial.util.BeanConverter;
 
-import com.google.inject.Inject;
 import com.google.common.collect.Lists;
+import org.apache.commons.lang.StringUtils;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -30,14 +30,11 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.List;
 
-import org.apache.commons.lang.StringUtils;
-
 public abstract class DataRequestHandler {
-  protected BeanJsonConverter converter;
+  protected BeanConverter converter;
   protected static final String APP_SUBSTITUTION_TOKEN = "@app";
 
-  @Inject
-  DataRequestHandler(BeanJsonConverter converter) {
+  public void setConverter(BeanConverter converter) {
     this.converter = converter;
   }
 
@@ -61,7 +58,7 @@ public abstract class DataRequestHandler {
     }
     if (responseItem.getError() == null) {
       PrintWriter writer = servletResponse.getWriter();
-      writer.write(converter.convertToJson(responseItem.getResponse()).toString());
+      writer.write(converter.convertToString(responseItem.getResponse()));
     } else {
       // throw an error
     }

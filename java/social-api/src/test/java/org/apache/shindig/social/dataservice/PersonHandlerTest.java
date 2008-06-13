@@ -43,7 +43,8 @@ public class PersonHandlerTest extends TestCase {
     servletRequest = EasyMock.createMock(HttpServletRequest.class);
     personService = EasyMock.createMock(PersonService.class);
 
-    handler = new PersonHandler(personService, converter);
+    handler = new PersonHandler(personService);
+    handler.setConverter(converter);
   }
 
   private void replay() {

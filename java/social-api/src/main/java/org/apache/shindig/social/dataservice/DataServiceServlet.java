@@ -18,11 +18,15 @@
 package org.apache.shindig.social.dataservice;
 
 import com.google.inject.Inject;
+import com.google.inject.Injector;
 
 import org.apache.shindig.common.SecurityTokenDecoder;
 import org.apache.shindig.common.SecurityToken;
 import org.apache.shindig.common.SecurityTokenException;
 import org.apache.shindig.common.servlet.InjectedServlet;
+import org.apache.shindig.social.opensocial.util.BeanConverter;
+import org.apache.shindig.social.opensocial.util.BeanJsonConverter;
+import org.apache.shindig.social.opensocial.util.BeanXmlConverter;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -35,10 +39,11 @@ import org.apache.commons.lang.StringUtils;
 
 public class DataServiceServlet extends InjectedServlet {
 
-  protected static final String X_HTTP_METHOD_OVERRIDE
-      = "X-HTTP-Method-Override";
+  protected static final String X_HTTP_METHOD_OVERRIDE = "X-HTTP-Method-Override";
   protected static final String SECURITY_TOKEN_PARAM = "st";
   protected static final String REQUEST_PARAMETER = "request";
+  protected static final String FORMAT_PARAM = "format";
+  protected static final String ATOM_FORMAT = "atom";
 
   public static final String PEOPLE_ROUTE = "people";
   public static final String ACTIVITY_ROUTE = "activities";
@@ -48,17 +53,30 @@ public class DataServiceServlet extends InjectedServlet {
       "org.apache.shindig.social.dataservice");
 
   private SecurityTokenDecoder securityTokenDecoder;
-  private Map<String, DataRequestHandler> handlers;
+  private Map<String, Class<? extends DataRequestHandler>> handlers;
+  private BeanJsonConverter jsonConverter;
+  private BeanXmlConverter xmlConverter;
 
   @Inject
-  public void setHandlers(Map<String, DataRequestHandler> handlers) {
-    this.handlers = handlers;
+  public void setHandlers(HandlerProvider handlers) {
+    this.handlers = handlers.get();
   }
 
   @Inject
   public void setSecurityTokenDecoder(SecurityTokenDecoder
       securityTokenDecoder) {
     this.securityTokenDecoder = securityTokenDecoder;
+  }
+
+  @Inject
+  public void setBeanConverters(BeanJsonConverter jsonConverter, BeanXmlConverter xmlConverter) {
+    this.jsonConverter = jsonConverter;
+    this.xmlConverter = xmlConverter;
+  }
+
+  // Only for testing use. Do not override the injector.
+  void setInjector(Injector injector) {
+    this.injector = injector;
   }
 
   protected void doGet(HttpServletRequest servletRequest,
@@ -82,13 +100,20 @@ public class DataServiceServlet extends InjectedServlet {
   protected void doPost(HttpServletRequest servletRequest,
       HttpServletResponse servletResponse)
       throws ServletException, IOException {
+    String path = servletRequest.getPathInfo();
+    logger.finest("Handling restful request for " + path);
+
     servletRequest.setCharacterEncoding("UTF-8");
 
-    String route = getRouteFromParameter(servletRequest.getPathInfo());
-    DataRequestHandler handler = handlers.get(route);
-    if (handler == null) {
+    String route = getRouteFromParameter(path);
+    Class<? extends DataRequestHandler> handlerClass = handlers.get(route);
+
+    if (handlerClass == null) {
       throw new RuntimeException("No handler for route: " + route);
     }
+
+    DataRequestHandler handler = injector.getInstance(handlerClass);
+    handler.setConverter(getConverterForRequest(servletRequest));
 
     String method = getHttpMethodFromParameter(servletRequest.getMethod(),
         servletRequest.getParameter(X_HTTP_METHOD_OVERRIDE));
@@ -100,7 +125,14 @@ public class DataServiceServlet extends InjectedServlet {
       throw new RuntimeException(
           "Implement error return for bad security token.");
     }
+  }
 
+  /*package-protected*/ BeanConverter getConverterForRequest(HttpServletRequest servletRequest) {
+    String formatString = servletRequest.getParameter(FORMAT_PARAM);
+    if (!StringUtils.isBlank(formatString) && formatString.equals(ATOM_FORMAT)) {
+      return xmlConverter;
+    }
+    return jsonConverter;
   }
 
   /*package-protected*/ String getHttpMethodFromParameter(String method,

@@ -35,9 +35,7 @@ public class PersonHandler extends DataRequestHandler {
   private PersonService personService;
 
   @Inject
-  public PersonHandler(PersonService personService,
-      BeanJsonConverter converter) {
-    super(converter);
+  public PersonHandler(PersonService personService) {
     this.personService = personService;
   }
 

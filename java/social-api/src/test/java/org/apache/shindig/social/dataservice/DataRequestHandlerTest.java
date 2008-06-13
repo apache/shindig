@@ -45,7 +45,7 @@ public class DataRequestHandlerTest extends TestCase {
     resp = EasyMock.createMock(HttpServletResponse.class);
     converter = EasyMock.createMock(BeanJsonConverter.class);
 
-    drh = new DataRequestHandler(converter) {
+    drh = new DataRequestHandler() {
       ResponseItem handleDelete(HttpServletRequest servletRequest,
           SecurityToken token) {
         return new ResponseItem<String>("DELETE");
@@ -66,6 +66,8 @@ public class DataRequestHandlerTest extends TestCase {
         return new ResponseItem<String>("GET");
       }
     };
+
+    drh.setConverter(converter);
   }
 
   public void testHandleMethodSuccess() throws Exception {
@@ -78,7 +80,7 @@ public class DataRequestHandlerTest extends TestCase {
   private void verifyDispatchMethodCalled(String methodName, BeanJsonConverter converter)
       throws IOException {
     String jsonObject = "my lovely json";
-    EasyMock.expect(converter.convertToJson(methodName)).andReturn(jsonObject);
+    EasyMock.expect(converter.convertToString(methodName)).andReturn(jsonObject);
 
     PrintWriter writerMock = EasyMock.createMock(PrintWriter.class);
     EasyMock.expect(resp.getWriter()).andReturn(writerMock);
@@ -107,7 +109,7 @@ public class DataRequestHandlerTest extends TestCase {
   }
 
   public void testHandleMethodFailure() throws Exception {
-    drh = new DataRequestHandler(null) {
+    drh = new DataRequestHandler() {
       ResponseItem handleDelete(HttpServletRequest servletRequest,
           SecurityToken token) {
         return null;

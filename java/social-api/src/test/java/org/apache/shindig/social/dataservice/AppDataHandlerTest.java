@@ -44,7 +44,8 @@ public class AppDataHandlerTest extends TestCase {
     servletRequest = EasyMock.createMock(HttpServletRequest.class);
     appDataService = EasyMock.createMock(AppDataService.class);
 
-    handler = new AppDataHandler(appDataService, converter);
+    handler = new AppDataHandler(appDataService);
+    handler.setConverter(converter);
   }
 
   private void replay() {
