@@ -64,6 +64,9 @@ public class View {
   public URI getHref() {
     return href;
   }
+  public void setHref(URI href) {
+    this.href = href;
+  }
 
   /**
    * Content@quirks
@@ -97,6 +100,9 @@ public class View {
   private String content;
   public String getContent() {
     return content;
+  }
+  public void setContent(String content) {
+    this.content = content;
   }
 
   /**
@@ -190,9 +196,6 @@ public class View {
     if (type == ContentType.URL && this.href == null) {
       throw new SpecParserException(
           "Content@href must be set when Content@type is \"url\".");
-    } else if (type == ContentType.HTML && this.href != null) {
-      throw new SpecParserException(
-          "Content@href must not be set when Content@type is not \"url\".");
     }
   }
 

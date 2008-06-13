@@ -91,6 +91,22 @@ public class GadgetServerTest extends GadgetTestFixture {
         gadget.getSpec().getModulePrefs().getTitle());
   }
 
+  public void testGadgetSpecLookupWithFetcherFailure() throws Exception {
+    HttpResponse resp = new HttpResponse(HttpResponse.SC_NOT_FOUND);
+
+    expect(fetcher.fetch(SPEC_REQUEST)).andReturn(resp);
+    replay();
+
+    try {
+      Gadget gadget = gadgetServer.processGadget(BASIC_CONTEXT);
+      fail("Expected a GadgetException for a failed http fetch.");
+    } catch (GadgetException e) {
+      // Expected for a bad gadget spec URI.
+    }
+
+    verify();
+  }
+
   public void testSubstitutionsDone() throws Exception {
     String gadgetXml
         = "<Module>" +
@@ -316,6 +332,61 @@ public class GadgetServerTest extends GadgetTestFixture {
     } catch (GadgetException e) {
       assertEquals(GadgetException.Code.BLACKLISTED_GADGET, e.getCode());
     }
+    verify();
+  }
+
+  public void testViewContentFetching() throws Exception {
+    URI viewUri = URI.create("http://example.org/content.htm");
+    String gadgetXml
+        = "<Module>" +
+          "  <ModulePrefs title=\"foo\">" +
+          "  </ModulePrefs>" +
+          "  <Content type=\"html\" href=\"" + viewUri +"\" view=\"bar\" />" +
+          "</Module>";
+    String content ="<h2>foo</h2>";
+
+    HttpResponse spec = new HttpResponse(gadgetXml);
+    expect(fetcher.fetch(SPEC_REQUEST)).andReturn(spec);
+
+    HttpRequest viewContentRequest = new HttpRequest(viewUri);
+    HttpResponse viewContentResponse = new HttpResponse(content);
+    expect(fetcher.fetch(viewContentRequest)).andReturn(viewContentResponse);
+
+    replay();
+
+    Gadget gadget = gadgetServer.processGadget(BASIC_CONTEXT);
+
+    verify();
+
+    assertNull(gadget.getSpec().getView("bar").getHref());
+    assertEquals(content, gadget.getSpec().getView("bar").getContent());
+  }
+
+  public void testViewContentFetchingWithBadHref() throws Exception {
+    URI viewUri = URI.create("http://example.org/nonexistantcontent.htm");
+    String gadgetXml
+        = "<Module>" +
+          "  <ModulePrefs title=\"foo\">" +
+          "  </ModulePrefs>" +
+          "  <Content type=\"html\" href=\"" + viewUri +"\" view=\"bar\" />" +
+          "</Module>";
+
+    HttpResponse spec = new HttpResponse(gadgetXml);
+    expect(fetcher.fetch(SPEC_REQUEST)).andReturn(spec);
+
+    HttpRequest viewContentRequest = new HttpRequest(viewUri);
+    HttpResponse viewContentResponse = new HttpResponse(HttpResponse.SC_NOT_FOUND);
+    expect(fetcher.fetch(viewContentRequest)).andReturn(viewContentResponse);
+
+    replay();
+
+    try {
+      Gadget gadget = gadgetServer.processGadget(BASIC_CONTEXT);
+      fail("Expected a GadgetException for a failed http fetch of remote gadget content.");
+    } catch (GadgetException e) {
+      // Expected for a bad content href URI.
+    }
+
     verify();
   }
 }

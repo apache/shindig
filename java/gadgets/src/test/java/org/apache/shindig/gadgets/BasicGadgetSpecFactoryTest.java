@@ -1,0 +1,237 @@
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+package org.apache.shindig.gadgets;
+import static org.easymock.EasyMock.expect;
+import static org.easymock.classextension.EasyMock.replay;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+
+import org.apache.shindig.gadgets.http.HttpFetcher;
+import org.apache.shindig.gadgets.http.HttpRequest;
+import org.apache.shindig.gadgets.http.HttpResponse;
+import org.apache.shindig.gadgets.rewrite.ContentRewriter;
+import org.apache.shindig.gadgets.spec.GadgetSpec;
+
+import com.google.common.collect.Maps;
+
+import org.easymock.EasyMock;
+import org.junit.Test;
+
+import java.net.URI;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.Executor;
+
+/**
+ * Tests for BasicGadgetSpecFactory
+ */
+public class BasicGadgetSpecFactoryTest {
+  private final static URI SPEC_URL = URI.create("http://example.org/gadget.xml");
+  private final static URI REMOTE_URL = URI.create("http://example.org/remote.html");
+  private final static String LOCAL_CONTENT = "Hello, local content!";
+  private final static String ALT_LOCAL_CONTENT = "Hello, local content!";
+  private final static String REMOTE_CONTENT = "Hello, remote content!";
+  private final static String LOCAL_SPEC_XML
+      = "<Module>" +
+        "  <ModulePrefs title='GadgetSpecFactoryTest'/>" +
+        "  <Content type='html'>" + LOCAL_CONTENT + "</Content>" +
+        "</Module>";
+  private final static String ALT_LOCAL_SPEC_XML
+      = "<Module>" +
+        "  <ModulePrefs title='GadgetSpecFactoryTest'/>" +
+        "  <Content type='html'>" + ALT_LOCAL_CONTENT + "</Content>" +
+        "</Module>";
+  private final static String REMOTE_SPEC_XML
+      = "<Module>" +
+        "  <ModulePrefs title='GadgetSpecFactoryTest'/>" +
+        "  <Content type='html' href='" + REMOTE_URL + "'/>" +
+        "</Module>";
+  private final static String URL_SPEC_XML
+      = "<Module>" +
+        "  <ModulePrefs title='GadgetSpecFactoryTest'/>" +
+        "  <Content type='url' href='" + REMOTE_URL + "'/>" +
+        "</Module>";
+
+  private final static GadgetContext NO_CACHE_CONTEXT = new GadgetContext() {
+    @Override
+    public boolean getIgnoreCache() {
+      return true;
+    }
+    @Override
+    public URI getUrl() {
+      return SPEC_URL;
+    }
+  };
+  private final static Executor FAKE_EXECUTOR = new Executor() {
+    public void execute(Runnable runnable) {
+      runnable.run();
+    }
+  };
+
+  private final HttpFetcher fetcher = EasyMock.createNiceMock(HttpFetcher.class);
+  private final CaptureRewriter rewriter = new CaptureRewriter();
+
+  private final BasicGadgetSpecFactory specFactory
+      = new BasicGadgetSpecFactory(fetcher, rewriter, FAKE_EXECUTOR, 5, -1000);
+
+  @Test
+  public void specFetched() throws Exception {
+    HttpRequest request = HttpRequest.getRequest(SPEC_URL, true);
+    HttpResponse response = new HttpResponse(LOCAL_SPEC_XML);
+    expect(fetcher.fetch(request)).andReturn(response);
+    replay(fetcher);
+
+    GadgetSpec spec = specFactory.getGadgetSpec(SPEC_URL, true);
+
+    assertEquals(LOCAL_CONTENT, spec.getView(GadgetSpec.DEFAULT_VIEW).getContent());
+    assertEquals(LOCAL_CONTENT, spec.getView(GadgetSpec.DEFAULT_VIEW).getRewrittenContent());
+    assertTrue("Content not rewritten.", rewriter.rewroteView);
+  }
+
+  @Test
+  public void specFetchedWithContext() throws Exception {
+    HttpRequest request = HttpRequest.getRequest(SPEC_URL, true);
+    HttpResponse response = new HttpResponse(LOCAL_SPEC_XML);
+    expect(fetcher.fetch(request)).andReturn(response);
+    replay(fetcher);
+
+    GadgetSpec spec = specFactory.getGadgetSpec(NO_CACHE_CONTEXT);
+
+    assertEquals(LOCAL_CONTENT, spec.getView(GadgetSpec.DEFAULT_VIEW).getContent());
+    assertEquals(LOCAL_CONTENT, spec.getView(GadgetSpec.DEFAULT_VIEW).getRewrittenContent());
+    assertTrue("Content not rewritten.", rewriter.rewroteView);
+  }
+
+  @Test
+  public void staleSpecIsRefetched() throws Exception {
+    HttpRequest request = HttpRequest.getRequest(SPEC_URL, true);
+    Map<String, List<String>> headers = Maps.newHashMap();
+    headers.put("Pragma", Arrays.asList("no-cache"));
+    HttpResponse expiredResponse = new HttpResponse(
+        HttpResponse.SC_OK, LOCAL_SPEC_XML.getBytes("UTF-8"), headers);
+    HttpResponse updatedResponse = new HttpResponse(ALT_LOCAL_SPEC_XML);
+    expect(fetcher.fetch(request)).andReturn(expiredResponse).once();
+    expect(fetcher.fetch(request)).andReturn(updatedResponse).once();
+    replay(fetcher);
+
+    specFactory.getGadgetSpec(SPEC_URL, true);
+    GadgetSpec spec = specFactory.getGadgetSpec(SPEC_URL, false);
+
+    assertEquals(ALT_LOCAL_CONTENT, spec.getView(GadgetSpec.DEFAULT_VIEW).getContent());
+    assertEquals(ALT_LOCAL_CONTENT, spec.getView(GadgetSpec.DEFAULT_VIEW).getRewrittenContent());
+    assertTrue("Content not rewritten.", rewriter.rewroteView);
+  }
+
+  @Test
+  public void staleSpecReturnedFromCacheOnError() throws Exception {
+    HttpRequest request = HttpRequest.getRequest(SPEC_URL, true);
+    Map<String, List<String>> headers = Maps.newHashMap();
+    headers.put("Pragma", Arrays.asList("no-cache"));
+    HttpResponse expiredResponse = new HttpResponse(
+        HttpResponse.SC_OK, LOCAL_SPEC_XML.getBytes("UTF-8"), headers);
+    expect(fetcher.fetch(request)).andReturn(expiredResponse);
+    expect(fetcher.fetch(request)).andReturn(HttpResponse.notFound()).once();
+    replay(fetcher);
+
+    specFactory.getGadgetSpec(SPEC_URL, true);
+    GadgetSpec spec = specFactory.getGadgetSpec(SPEC_URL, false);
+
+    assertEquals(ALT_LOCAL_CONTENT, spec.getView(GadgetSpec.DEFAULT_VIEW).getContent());
+    assertEquals(ALT_LOCAL_CONTENT, spec.getView(GadgetSpec.DEFAULT_VIEW).getRewrittenContent());
+    assertTrue("Content not rewritten.", rewriter.rewroteView);
+  }
+
+  @Test
+  public void externalContentFetched() throws Exception {
+    HttpRequest request = HttpRequest.getRequest(SPEC_URL, true);
+    HttpResponse response = new HttpResponse(REMOTE_SPEC_XML);
+    HttpRequest viewRequest = HttpRequest.getRequest(REMOTE_URL, true);
+    HttpResponse viewResponse = new HttpResponse(REMOTE_CONTENT);
+    expect(fetcher.fetch(request)).andReturn(response);
+    expect(fetcher.fetch(viewRequest)).andReturn(viewResponse);
+    replay(fetcher);
+
+    GadgetSpec spec = specFactory.getGadgetSpec(SPEC_URL, true);
+
+    assertEquals(REMOTE_CONTENT, spec.getView(GadgetSpec.DEFAULT_VIEW).getContent());
+    assertEquals(REMOTE_CONTENT, spec.getView(GadgetSpec.DEFAULT_VIEW).getRewrittenContent());
+    assertTrue("Content not rewritten.", rewriter.rewroteView);
+  }
+
+  @Test
+  public void typeUrlNotFetchedRemote() throws Exception {
+    HttpRequest request = HttpRequest.getRequest(SPEC_URL, true);
+    HttpResponse response = new HttpResponse(URL_SPEC_XML);
+    expect(fetcher.fetch(request)).andReturn(response);
+    replay(fetcher);
+
+    GadgetSpec spec = specFactory.getGadgetSpec(SPEC_URL, true);
+
+    assertEquals(REMOTE_URL, spec.getView(GadgetSpec.DEFAULT_VIEW).getHref());
+    assertEquals("", spec.getView(GadgetSpec.DEFAULT_VIEW).getContent());
+    assertEquals(null, spec.getView(GadgetSpec.DEFAULT_VIEW).getRewrittenContent());
+    assertFalse("Content was rewritten for type=url.", rewriter.rewroteView);
+  }
+
+  @Test(expected = GadgetException.class)
+  public void badFetchThrows() throws Exception {
+    HttpRequest request = HttpRequest.getRequest(SPEC_URL, true);
+    expect(fetcher.fetch(request)).andReturn(HttpResponse.error());
+    replay(fetcher);
+
+    GadgetSpec spec = specFactory.getGadgetSpec(SPEC_URL, true);
+  }
+
+  @Test(expected = GadgetException.class)
+  public void badRemoteContentThrows() throws Exception {
+    HttpRequest request = HttpRequest.getRequest(SPEC_URL, true);
+    HttpResponse response = new HttpResponse(REMOTE_SPEC_XML);
+    HttpRequest viewRequest = HttpRequest.getRequest(REMOTE_URL, true);
+    expect(fetcher.fetch(request)).andReturn(response);
+    expect(fetcher.fetch(viewRequest)).andReturn(HttpResponse.error());
+    replay(fetcher);
+
+    GadgetSpec spec = specFactory.getGadgetSpec(SPEC_URL, true);
+  }
+
+  @Test(expected = GadgetException.class)
+  public void throwingFetcherRethrows() throws Exception {
+    HttpRequest request = HttpRequest.getRequest(SPEC_URL, true);
+    expect(fetcher.fetch(request)).andThrow(
+        new GadgetException(GadgetException.Code.FAILED_TO_RETRIEVE_CONTENT));
+    replay(fetcher);
+
+    GadgetSpec spec = specFactory.getGadgetSpec(SPEC_URL, true);
+  }
+
+  private static class CaptureRewriter implements ContentRewriter {
+    private boolean rewroteView = false;
+
+    public HttpResponse rewrite(HttpRequest request, HttpResponse original) {
+      return original;
+    }
+
+    public String rewriteGadgetView(GadgetSpec spec, String original, String mimeType) {
+      rewroteView = true;
+      return original;
+    }
+  }
+}
