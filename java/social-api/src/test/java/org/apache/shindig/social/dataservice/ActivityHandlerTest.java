@@ -43,7 +43,8 @@ public class ActivityHandlerTest extends TestCase {
     servletRequest = EasyMock.createMock(HttpServletRequest.class);
     activityService = EasyMock.createMock(ActivityService.class);
 
-    handler = new ActivityHandler(activityService, converter);
+    handler = new ActivityHandler(activityService);
+    handler.setConverter(converter);
   }
 
   private void replay() {

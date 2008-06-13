@@ -30,8 +30,7 @@ public class ActivityHandler extends DataRequestHandler {
   private ActivityService service;
 
   @Inject
-  public ActivityHandler(ActivityService service, BeanJsonConverter converter) {
-    super(converter);
+  public ActivityHandler(ActivityService service) {
     this.service = service;
   }
 

@@ -19,6 +19,9 @@
 package org.apache.shindig.social;
 
 import org.apache.shindig.social.abdera.SocialRouteManager;
+import org.apache.shindig.social.dataservice.ActivityService;
+import org.apache.shindig.social.dataservice.AppDataService;
+import org.apache.shindig.social.dataservice.PersonService;
 import org.apache.shindig.social.opensocial.ActivitiesService;
 import org.apache.shindig.social.opensocial.DataService;
 import org.apache.shindig.social.opensocial.OpenSocialDataHandler;
@@ -28,17 +31,14 @@ import org.apache.shindig.social.samplecontainer.BasicDataService;
 import org.apache.shindig.social.samplecontainer.BasicPeopleService;
 import org.apache.shindig.social.samplecontainer.SampleContainerRouteManager;
 import org.apache.shindig.social.samplecontainer.StateFileDataHandler;
-import org.apache.shindig.social.dataservice.*;
 
 import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
 import com.google.inject.AbstractModule;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.TypeLiteral;
 
 import java.util.List;
-import java.util.Map;
 
 /**
  * Provides social api component injection
@@ -54,8 +54,7 @@ public class SocialApiGuiceModule extends AbstractModule {
 
     bind(new TypeLiteral<List<GadgetDataHandler>>() {})
         .toProvider(GadgetDataHandlersProvider.class);
-    bind(new TypeLiteral<Map<String, DataRequestHandler>>() {})
-        .toProvider(DataRequestHandlersProvider.class);
+
     bind(PersonService.class).to(BasicPeopleService.class);
     bind(ActivityService.class).to(BasicActivitiesService.class);
     bind(AppDataService.class).to(BasicDataService.class);
@@ -74,23 +73,6 @@ public class SocialApiGuiceModule extends AbstractModule {
     }
 
     public List<GadgetDataHandler> get() {
-      return handlers;
-    }
-  }
-
-  public static class DataRequestHandlersProvider
-      implements Provider<Map<String, DataRequestHandler>> {
-    Map<String, DataRequestHandler> handlers;
-
-    @Inject
-    public DataRequestHandlersProvider(PersonHandler peopleHandler, ActivityHandler activityHandler, AppDataHandler appDataHandler) {
-      handlers = Maps.newHashMap();
-      handlers.put(DataServiceServlet.PEOPLE_ROUTE, peopleHandler);
-      handlers.put(DataServiceServlet.ACTIVITY_ROUTE, activityHandler);
-      handlers.put(DataServiceServlet.APPDATA_ROUTE, appDataHandler);
-    }
-
-    public Map<String, DataRequestHandler> get() {
       return handlers;
     }
   }

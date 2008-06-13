@@ -33,8 +33,7 @@ public class AppDataHandler extends DataRequestHandler {
   private AppDataService service;
 
   @Inject
-  public AppDataHandler(AppDataService service, BeanJsonConverter converter) {
-    super(converter);
+  public AppDataHandler(AppDataService service) {
     this.service = service;
   }
 
