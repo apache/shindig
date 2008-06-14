@@ -109,10 +109,7 @@ gadgets.io = function() {
       return;
     }
     var txt = xobj.responseText;
-    // remove unparseable cruft.
-    // TODO: really remove this by eliminating it. It's not any real security
-    //    to begin with, and we can solve this problem by using post requests
-    //    and / or passing the url in the http headers.
+    // remove unparseable cruft used to prevent cross-site script inclusion
     txt = txt.substr(UNPARSEABLE_CRUFT.length);
     // We are using eval directly here because the outer response comes from a
     // trusted source, and json parsing is slow in IE.
@@ -414,7 +411,6 @@ gadgets.io.RequestParameters = gadgets.util.makeEnum([
   "OAUTH_TOKEN"
 ]);
 
-// PUT, DELETE, and HEAD not supported currently.
 gadgets.io.MethodType = gadgets.util.makeEnum([
   "GET", "POST", "PUT", "DELETE", "HEAD"
 ]);
