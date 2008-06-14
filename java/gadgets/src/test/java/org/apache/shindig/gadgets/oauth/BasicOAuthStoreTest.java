@@ -20,7 +20,6 @@ package org.apache.shindig.gadgets.oauth;
 
 import static org.easymock.EasyMock.eq;
 import static org.easymock.EasyMock.expect;
-import static org.easymock.EasyMock.same;
 
 import junit.framework.TestCase;
 
@@ -37,8 +36,8 @@ import java.util.Map;
 public class BasicOAuthStoreTest extends TestCase {
 
   private IMocksControl control;
-  private Map<OAuthStore.ProviderKey, BasicOAuthStore.ProviderInfo>
-      mockProviders;
+  private Map<OAuthStore.ProviderKey, OAuthStore.ConsumerKeyAndSecret>
+      mockConsumerInfos;
   private Map<OAuthStore.TokenKey, OAuthStore.TokenInfo> mockTokens;
   private BasicOAuthStore noDefaultStore;
   private BasicOAuthStore withDefaultStore;
@@ -51,17 +50,17 @@ public class BasicOAuthStoreTest extends TestCase {
   protected void setUp() throws Exception {
     super.setUp();
     control = EasyMock.createStrictControl();
-    mockProviders = control.createMock(
+    mockConsumerInfos = control.createMock(
         new HashMap<OAuthStore.ProviderKey,
-                    BasicOAuthStore.ProviderInfo>().getClass());
+                    OAuthStore.ConsumerKeyAndSecret>().getClass());
     mockTokens = control.createMock(
         new HashMap<OAuthStore.TokenKey, OAuthStore.TokenInfo>().getClass());
 
     noDefaultStore = new BasicOAuthStore();
-    noDefaultStore.setHashMapsForTesting(mockProviders, mockTokens);
+    noDefaultStore.setHashMapsForTesting(mockConsumerInfos, mockTokens);
 
     withDefaultStore = new BasicOAuthStore(defaultKey, defaultSecret);
-    withDefaultStore.setHashMapsForTesting(mockProviders, mockTokens);
+    withDefaultStore.setHashMapsForTesting(mockConsumerInfos, mockTokens);
   }
 
   public void testGetOAuthAccessor() throws Exception {
@@ -82,7 +81,7 @@ public class BasicOAuthStoreTest extends TestCase {
     OAuthServiceProvider provider = new OAuthServiceProvider(
         "request", "authorize", "access");
 
-    BasicOAuthStore.ProviderInfo info = new BasicOAuthStore.ProviderInfo();
+    OAuthStore.ProviderInfo info = new BasicOAuthStore.ProviderInfo();
 
     info.setHttpMethod(OAuthStore.HttpMethod.GET);
     info.setSignatureType(OAuthStore.SignatureType.HMAC_SHA1);
@@ -94,13 +93,13 @@ public class BasicOAuthStoreTest extends TestCase {
 
     control.checkOrder(false);
 
-    expect(mockProviders.get(eq(provKey))).andReturn(info).once();
+    expect(mockConsumerInfos.get(eq(provKey))).andReturn(null).once();
     expect(mockTokens.get(tokenKey)).andReturn(tokenInfo);
 
     control.replay();
 
     OAuthStore.AccessorInfo accessorInfo =
-        withDefaultStore.getOAuthAccessor(tokenKey);
+        withDefaultStore.getOAuthAccessor(tokenKey, info);
 
     control.verify();
 
@@ -125,13 +124,13 @@ public class BasicOAuthStoreTest extends TestCase {
     control.reset();
     control.checkOrder(false);
 
-    expect(mockProviders.get(eq(provKey))).andReturn(info).once();
+    expect(mockConsumerInfos.get(eq(provKey))).andReturn(null).once();
     expect(mockTokens.get(tokenKey)).andStubReturn(tokenInfo);
 
     control.replay();
 
     try {
-      accessorInfo = noDefaultStore.getOAuthAccessor(tokenKey);
+      accessorInfo = noDefaultStore.getOAuthAccessor(tokenKey, info);
       fail("expected exception, but didn't get it");
     } catch (OAuthNoDataException e) {
       // this is expected
@@ -146,18 +145,18 @@ public class BasicOAuthStoreTest extends TestCase {
         new OAuthStore.ConsumerKeyAndSecret("negotiatedkey",
                                             "negotiatedsecret",
                                             OAuthStore.KeyType.HMAC_SYMMETRIC);
-    info.setKeyAndSecret(kas);
+
     info.setParamLocation(OAuthStore.OAuthParamLocation.POST_BODY);
 
     control.reset();
     control.checkOrder(false);
 
-    expect(mockProviders.get(eq(provKey))).andReturn(info).once();
+    expect(mockConsumerInfos.get(eq(provKey))).andReturn(kas).once();
     expect(mockTokens.get(tokenKey)).andReturn(tokenInfo);
 
     control.replay();
 
-    accessorInfo = noDefaultStore.getOAuthAccessor(tokenKey);
+    accessorInfo = noDefaultStore.getOAuthAccessor(tokenKey, info);
 
     control.verify();
 
@@ -180,12 +179,12 @@ public class BasicOAuthStoreTest extends TestCase {
     control.reset();
     control.checkOrder(false);
 
-    expect(mockProviders.get(eq(provKey))).andReturn(info).once();
+    expect(mockConsumerInfos.get(eq(provKey))).andReturn(kas).once();
     expect(mockTokens.get(tokenKey)).andReturn(tokenInfo);
 
     control.replay();
 
-    accessorInfo = withDefaultStore.getOAuthAccessor(tokenKey);
+    accessorInfo = withDefaultStore.getOAuthAccessor(tokenKey, info);
 
     control.verify();
 
@@ -206,17 +205,16 @@ public class BasicOAuthStoreTest extends TestCase {
     kas = new OAuthStore.ConsumerKeyAndSecret("negotiatedkey",
                                               "negotiatedsecret",
                                               OAuthStore.KeyType.RSA_PRIVATE);
-    info.setKeyAndSecret(kas);
 
     control.reset();
     control.checkOrder(false);
 
-    expect(mockProviders.get(eq(provKey))).andReturn(info).once();
+    expect(mockConsumerInfos.get(eq(provKey))).andReturn(kas).once();
     expect(mockTokens.get(tokenKey)).andReturn(tokenInfo);
 
     control.replay();
 
-    accessorInfo = noDefaultStore.getOAuthAccessor(tokenKey);
+    accessorInfo = noDefaultStore.getOAuthAccessor(tokenKey, info);
 
     control.verify();
 
@@ -238,12 +236,12 @@ public class BasicOAuthStoreTest extends TestCase {
     control.reset();
     control.checkOrder(false);
 
-    expect(mockProviders.get(eq(provKey))).andReturn(info).once();
+    expect(mockConsumerInfos.get(eq(provKey))).andReturn(kas).once();
     expect(mockTokens.get(tokenKey)).andReturn(tokenInfo);
 
     control.replay();
 
-    accessorInfo = noDefaultStore.getOAuthAccessor(tokenKey);
+    accessorInfo = noDefaultStore.getOAuthAccessor(tokenKey, info);
 
     control.verify();
 
@@ -261,56 +259,17 @@ public class BasicOAuthStoreTest extends TestCase {
                  accessor.consumer.serviceProvider.userAuthorizationURL);
 
     ////////////////////////////////////////////////////////////////////////////
-    // now, test some error conditions. Fist, that no such service exists...
+    // now, test some error conditions: no token found
 
     control.reset();
     control.checkOrder(false);
 
-    expect(mockProviders.get(eq(provKey))).andReturn(null);
-    expect(mockTokens.get(tokenKey)).andStubReturn(tokenInfo);
-
-    control.replay();
-
-    try {
-      accessorInfo = noDefaultStore.getOAuthAccessor(tokenKey);
-      fail("expected OAuthNoDataException, but didn't get it");
-    } catch (OAuthNoDataException e) {
-      // this is expected
-    }
-
-    control.verify();
-
-    // same with the store with fallback keys
-
-    control.reset();
-    control.checkOrder(false);
-
-    expect(mockProviders.get(eq(provKey))).andReturn(null);
-    expect(mockTokens.get(tokenKey)).andStubReturn(tokenInfo);
-
-    control.replay();
-
-    try {
-      accessorInfo = noDefaultStore.getOAuthAccessor(tokenKey);
-      fail("expected OAuthNoDataException, but didn't get it");
-    } catch (OAuthNoDataException e) {
-      // this is expected
-    }
-
-    control.verify();
-
-    ////////////////////////////////////////////////////////////////////////////
-    // service info is there, but no token:
-
-    control.reset();
-    control.checkOrder(false);
-
-    expect(mockProviders.get(eq(provKey))).andStubReturn(info);
+    expect(mockConsumerInfos.get(eq(provKey))).andStubReturn(kas);
     expect(mockTokens.get(tokenKey)).andReturn(null);
 
     control.replay();
 
-    accessorInfo = noDefaultStore.getOAuthAccessor(tokenKey);
+    accessorInfo = noDefaultStore.getOAuthAccessor(tokenKey, info);
 
     control.verify();
 
@@ -322,12 +281,12 @@ public class BasicOAuthStoreTest extends TestCase {
     control.reset();
     control.checkOrder(false);
 
-    expect(mockProviders.get(eq(provKey))).andStubReturn(info);
+    expect(mockConsumerInfos.get(eq(provKey))).andStubReturn(kas);
     expect(mockTokens.get(tokenKey)).andReturn(null);
 
     control.replay();
 
-    accessorInfo = withDefaultStore.getOAuthAccessor(tokenKey);
+    accessorInfo = withDefaultStore.getOAuthAccessor(tokenKey, info);
     assertNull(accessorInfo.getAccessor().accessToken);
     assertNull(accessorInfo.getAccessor().requestToken);
 
@@ -353,7 +312,7 @@ public class BasicOAuthStoreTest extends TestCase {
     info.setSignatureType(OAuthStore.SignatureType.HMAC_SHA1);
     info.setProvider(provider);
 
-    expect(mockProviders.get(provKey)).andReturn(info);
+    expect(mockConsumerInfos.put(provKey, kas)).andReturn(kas).once();
 
     control.replay();
 
@@ -361,56 +320,6 @@ public class BasicOAuthStoreTest extends TestCase {
 
     control.verify();
 
-    // make sure that consumer key and secret got attached
-    assertSame(info.getKeyAndSecret(), kas);
-
-    ////////////////////////////////////////////////////////////////////////////
-    // now, test some error conditions
-
-    control.reset();
-
-    expect(mockProviders.get(provKey)).andReturn(null);
-
-    control.replay();
-
-    try {
-      noDefaultStore.setOAuthConsumerKeyAndSecret(provKey, kas);
-      fail("expected OAuthNoDataException, but didn't get it");
-    } catch (OAuthNoDataException ex) {
-      // this is expected
-    }
-
-    control.verify();
-  }
-
-  public void testSetOAuthServiceProviderInfo() throws Exception {
-
-    OAuthStore.ProviderKey provKey = new OAuthStore.ProviderKey();
-    provKey.setGadgetUri("http://foo.bar.com/gadget.xml");
-    provKey.setServiceName("testservice");
-
-    OAuthStore.ConsumerKeyAndSecret kas =
-        new OAuthStore.ConsumerKeyAndSecret("consumerkey",
-                                            "consumersecret",
-                                            OAuthStore.KeyType.HMAC_SYMMETRIC);
-
-    OAuthServiceProvider provider = new OAuthServiceProvider(
-        "request", "authorize", "access");
-
-    BasicOAuthStore.ProviderInfo info = new BasicOAuthStore.ProviderInfo();
-
-    info.setHttpMethod(OAuthStore.HttpMethod.GET);
-    info.setSignatureType(OAuthStore.SignatureType.HMAC_SHA1);
-    info.setProvider(provider);
-    info.setKeyAndSecret(kas);
-
-    expect(mockProviders.put(same(provKey), same(info))).andReturn(null);
-
-    control.replay();
-
-    noDefaultStore.setOAuthServiceProviderInfo(provKey, info);
-
-    control.verify();
   }
 
   public void testSetTokenAndSecret() throws Exception {

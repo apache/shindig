@@ -313,7 +313,10 @@ gadgets.io = function() {
         getSummaries : !!params.GET_SUMMARIES,
         signOwner : signOwner || "true",
         signViewer : signViewer || "true",
-        gadget : gadgets.util.getUrlParameters()["url"]
+        gadget : gadgets.util.getUrlParameters()["url"],
+
+        // should we bypass gadget spec cache (e.g. to read OAuth provider URLs)
+        bypassSpecCache : gadgets.util.getUrlParameters().nocache || ""
       };
 
       if (!respondWithPreload(paramData, params, callback, processResponse)) {

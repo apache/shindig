@@ -38,8 +38,8 @@ public class BasicOAuthStore implements OAuthStore {
    * nickname of a service provider and the gadget that uses that nickname) to
    * {@link OAuthStore.ProviderInfo}s.
    */
-  private Map<ProviderKey, ProviderInfo> providers =
-      new HashMap<ProviderKey, ProviderInfo>();
+  private Map<ProviderKey, ConsumerKeyAndSecret> consumerInfos =
+      new HashMap<ProviderKey, ConsumerKeyAndSecret>();
 
   /**
    * HashMap of token information. Maps TokenKeys (i.e. gadget id, token
@@ -89,23 +89,23 @@ public class BasicOAuthStore implements OAuthStore {
   }
 
   void setHashMapsForTesting(
-      Map<ProviderKey, ProviderInfo> providers,
+      Map<ProviderKey, ConsumerKeyAndSecret> consumers,
       Map<TokenKey, TokenInfo> tokens) {
-    this.providers = providers;
+    this.consumerInfos = consumers;
     this.tokens = tokens;
   }
 
   /**
    * {@inheritDoc}
    */
-  public AccessorInfo getOAuthAccessor(TokenKey tokenKey)
+  public AccessorInfo getOAuthAccessor(TokenKey tokenKey, ProviderInfo provInfo)
       throws OAuthNoDataException {
 
     ProviderKey provKey = new ProviderKey();
     provKey.setGadgetUri(tokenKey.getGadgetUri());
     provKey.setServiceName(tokenKey.getServiceName());
 
-    AccessorInfo result = getOAuthAccessor(provKey);
+    AccessorInfo result = getOAuthAccessor(provKey, provInfo);
 
     TokenInfo accessToken = tokens.get(tokenKey);
 
@@ -117,20 +117,20 @@ public class BasicOAuthStore implements OAuthStore {
     return result;
   }
 
-  private AccessorInfo getOAuthAccessor(ProviderKey providerKey)
+  private AccessorInfo getOAuthAccessor(ProviderKey providerKey,
+      ProviderInfo provInfo)
       throws OAuthNoDataException {
 
-    ProviderInfo provInfo = providers.get(providerKey);
-
     if (provInfo == null) {
-      throw new OAuthNoDataException("provider info was null in oauth store");
+      throw new OAuthNoDataException("must pass non-null provider info to" +
+          " getOAuthAccessor");
     }
 
     AccessorInfo result = new AccessorInfo();
     result.setHttpMethod(provInfo.getHttpMethod());
     result.setParamLocation(provInfo.getParamLocation());
 
-    ConsumerKeyAndSecret consumerKeyAndSecret = provInfo.getKeyAndSecret();
+    ConsumerKeyAndSecret consumerKeyAndSecret = consumerInfos.get(providerKey);
 
     if (consumerKeyAndSecret == null) {
       if (defaultConsumerKey == null || defaultConsumerSecret == null) {
@@ -150,7 +150,7 @@ public class BasicOAuthStore implements OAuthStore {
 
     if (oauthProvider == null) {
       throw new OAuthNoDataException("OAuthService provider " +
-      "was null in oauth store");
+      "was null in provider info");
     }
 
     boolean usePublicKeyCrypto =
@@ -179,43 +179,12 @@ public class BasicOAuthStore implements OAuthStore {
     return result;
   }
 
-
-  /**
-   * {@inheritDoc}
-   */
-  public ProviderInfo getOAuthServiceProviderInfo(ProviderKey providerKey)
-      throws OAuthNoDataException {
-    ProviderInfo provInfo = providers.get(providerKey);
-
-    if (provInfo == null) {
-      throw new OAuthNoDataException("provider info was null in oauth store");
-    }
-
-    return provInfo;
-  }
-
   /**
    * {@inheritDoc}
    */
   public void setOAuthConsumerKeyAndSecret(ProviderKey providerKey,
-                                           ConsumerKeyAndSecret keyAndSecret)
-      throws OAuthNoDataException {
-
-    ProviderInfo provData = providers.get(providerKey);
-
-    if (provData == null) {
-      throw new OAuthNoDataException("could not find provider data for token");
-    }
-
-    provData.setKeyAndSecret(keyAndSecret);
-  }
-
-  /**
-   * {@inheritDoc}
-   */
-  public void setOAuthServiceProviderInfo(ProviderKey providerKey,
-                                          ProviderInfo providerInfo) {
-      providers.put(providerKey, providerInfo);
+                                           ConsumerKeyAndSecret keyAndSecret) {
+    consumerInfos.put(providerKey, keyAndSecret);
   }
 
   /**

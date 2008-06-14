@@ -129,6 +129,12 @@ public class OAuthFetcher extends ChainedContentFetcher {
   private String aznUrl;
 
   /**
+   * Whether or not we're supposed to ignore the spec cache when referring
+   * to the gadget spec for information (e.g. OAuth URLs).
+   */
+  private final boolean bypassSpecCache;
+
+  /**
    *
    * @param oauthCrypter used to encrypt transient information we store on the
    *        client.
@@ -148,6 +154,7 @@ public class OAuthFetcher extends ChainedContentFetcher {
     this.authToken = authToken;
     this.serviceName = params.getServiceName();
     this.tokenName = params.getTokenName();
+    this.bypassSpecCache = params.getBypassSpecCache();
     this.newClientState = null;
     this.aznUrl = null;
     String origClientState = params.getOrigClientState();
@@ -179,7 +186,7 @@ public class OAuthFetcher extends ChainedContentFetcher {
    */
   protected void lookupOAuthMetadata() throws GadgetException {
     OAuthStore.TokenKey tokenKey = buildTokenKey();
-    accessorInfo = tokenStore.getOAuthAccessor(tokenKey);
+    accessorInfo = tokenStore.getOAuthAccessor(tokenKey, bypassSpecCache);
 
     // The persistent data store may be out of sync with reality; we trust
     // the state we stored on the client to be accurate.
@@ -523,7 +530,7 @@ public class OAuthFetcher extends ChainedContentFetcher {
     addResponseMetadata(response);
     return response;
   }
-  
+
   private void addResponseMetadata(HttpResponse response) {
     if (newClientState != null) {
       response.getMetadata().put(CLIENT_STATE, newClientState);

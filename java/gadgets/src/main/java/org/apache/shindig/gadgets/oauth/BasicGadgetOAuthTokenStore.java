@@ -38,8 +38,10 @@ public class BasicGadgetOAuthTokenStore extends GadgetOAuthTokenStore {
   private static final String CONSUMER_KEY_KEY = "consumer_key";
   private static final String KEY_TYPE_KEY = "key_type";
 
-  public BasicGadgetOAuthTokenStore(OAuthStore store) {
-    super(store);
+  public BasicGadgetOAuthTokenStore(OAuthStore store,
+      GadgetSpecFactory specFactory) throws GadgetException {
+    super(store, specFactory);
+    initFromConfigFile(specFactory);
   }
 
   public void initFromConfigFile(GadgetSpecFactory specFactory)
@@ -54,8 +56,6 @@ public class BasicGadgetOAuthTokenStore extends GadgetOAuthTokenStore {
       for (Iterator<?> i = oauthConfigs.keys(); i.hasNext();) {
         String url = (String) i.next();
         URI gadgetUri = new URI(url);
-        storeProviderInfos(specFactory, gadgetUri);
-
         JSONObject oauthConfig = oauthConfigs.getJSONObject(url);
         storeConsumerInfos(gadgetUri, oauthConfig);
       }
@@ -66,12 +66,6 @@ public class BasicGadgetOAuthTokenStore extends GadgetOAuthTokenStore {
     } catch (URISyntaxException e) {
       throw new GadgetException(GadgetException.Code.OAUTH_STORAGE_ERROR, e);
     }
-  }
-
-  private void storeProviderInfos(GadgetSpecFactory specFactory, URI gadgetUri)
-      throws GadgetException {
-    storeServiceInfoFromGadgetSpec(gadgetUri,
-        specFactory.getGadgetSpec(gadgetUri, false));
   }
 
   private void storeConsumerInfos(URI gadgetUri, JSONObject oauthConfig)
