@@ -20,10 +20,12 @@ package org.apache.shindig.gadgets.oauth;
 import net.oauth.OAuthServiceProvider;
 
 import org.apache.shindig.gadgets.GadgetException;
+import org.apache.shindig.gadgets.GadgetSpecFactory;
 import org.apache.shindig.gadgets.spec.Feature;
 import org.apache.shindig.gadgets.spec.GadgetSpec;
 
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.Map;
 import java.util.logging.Logger;
 
@@ -92,7 +94,9 @@ public class GadgetOAuthTokenStore {
   private static final Logger log =
       Logger.getLogger(GadgetOAuthTokenStore.class.getName());
 
-  private OAuthStore store;
+  private final OAuthStore store;
+
+  private final GadgetSpecFactory specFactory;
 
   /**
    * Public constructor.
@@ -100,35 +104,10 @@ public class GadgetOAuthTokenStore {
    * @param store an {@link OAuthStore} that can store and retrieve OAuth
    *              tokens, as well as information about service providers.
    */
-  public GadgetOAuthTokenStore(OAuthStore store) {
+  public GadgetOAuthTokenStore(OAuthStore store,
+      GadgetSpecFactory specFactory) {
     this.store = store;
-  }
-
-  /**
-   * Parses a gadget spec and stores the service provider information found
-   * in the spec into the OAuth store. The spec passed in <b>must</b> require
-   * "oauth" as a feature. It is an error to pass in a spec that does not
-   * require oauth.
-   *
-   * @param gadgetUrl the URL of the gadget
-   * @param spec the parsed GadgetSpec of the gadget.
-   * @throws OAuthStoreException if there is a problem talking to the
-   *                             backend store.
-   * @throws GadgetException if the gadget spec doesn't require oauth, or if
-   *                         there are other problems processing the gadget
-   *                         spec.
-   */
-  public void storeServiceInfoFromGadgetSpec(URI gadgetUrl,
-                                             GadgetSpec spec)
-      throws GadgetException {
-    GadgetInfo gadgetInfo = getGadgetOAuthInfo(spec);
-
-    OAuthStore.ProviderKey providerKey = new OAuthStore.ProviderKey();
-    providerKey.setGadgetUri(gadgetUrl.toString());
-    providerKey.setServiceName(gadgetInfo.getServiceName());
-
-    store.setOAuthServiceProviderInfo(providerKey,
-                                      gadgetInfo.getProviderInfo());
+    this.specFactory = specFactory;
   }
 
   /**
@@ -174,7 +153,7 @@ public class GadgetOAuthTokenStore {
 
     if (isEmpty(tokenKey.getServiceName())) {
       throw new IllegalArgumentException("found empty service " +
-      		                             "name in TokenKey");
+                                       "name in TokenKey");
     }
 
     if (isEmpty(tokenKey.getUserId())) {
@@ -183,10 +162,10 @@ public class GadgetOAuthTokenStore {
 
     store.setTokenAndSecret(tokenKey, tokenInfo);
   }
-  
+
   /**
    * Removes an access token from the OAuth data store.
-   * 
+   *
    * @return true if the token is removed, false if the token was not found.
    * @throws OAuthStoreException if we can't communicate with the token store.
    */
@@ -205,14 +184,15 @@ public class GadgetOAuthTokenStore {
    *
    * @param tokenKey information about the gadget retrieving the accessor.
    *
-   * @return an OAuthAccessorInfo containing an OAuthAccessor (whic can be
+   * @return an OAuthAccessorInfo containing an OAuthAccessor (which can be
    *         passed to an OAuthMessage.sign method), as well as httpMethod and
    *         signatureType fields.
    * @throws OAuthNoDataException if the token couldn't be found
    * @throws OAuthStoreException if an error occurred accessing the data
    *                             store.
    */
-  public OAuthStore.AccessorInfo getOAuthAccessor(OAuthStore.TokenKey tokenKey)
+  public OAuthStore.AccessorInfo getOAuthAccessor(OAuthStore.TokenKey tokenKey,
+      boolean bypassSpecCache)
       throws OAuthNoDataException, OAuthStoreException {
 
     if (isEmpty(tokenKey.getGadgetUri())) {
@@ -228,7 +208,26 @@ public class GadgetOAuthTokenStore {
       throw new IllegalArgumentException("found empty userId in TokenKey");
     }
 
-    return store.getOAuthAccessor(tokenKey);
+    GadgetSpec spec;
+    try {
+      spec = specFactory.getGadgetSpec(
+          new URI(tokenKey.getGadgetUri()),
+          bypassSpecCache);
+    } catch (GadgetException e) {
+      throw new OAuthStoreException("could not get gadget spec", e);
+    } catch (URISyntaxException e) {
+      throw new OAuthStoreException("could not fetch gadget spec, gadget URI " +
+          "invalid", e);
+    }
+
+    OAuthStore.ProviderInfo provInfo;
+    try {
+      provInfo = getProviderInfo(spec, tokenKey.getServiceName());
+    } catch (GadgetException e) {
+      throw new OAuthStoreException("could not parse gadget spec", e);
+    }
+
+    return store.getOAuthAccessor(tokenKey, provInfo);
   }
 
   /**
@@ -238,7 +237,9 @@ public class GadgetOAuthTokenStore {
    * @throws GadgetException if some information is missing, or something else
    *                         is wrong with the spec.
    */
-  static GadgetInfo getGadgetOAuthInfo(GadgetSpec spec) throws GadgetException {
+  public static OAuthStore.ProviderInfo getProviderInfo(
+      GadgetSpec spec, String service) throws GadgetException {
+
     Feature oauthFeature =
         spec.getModulePrefs().getFeatures().get(OAUTH_FEATURE);
 
@@ -253,6 +254,18 @@ public class GadgetOAuthTokenStore {
 
     String serviceName = getOAuthParameter(oauthParams, SERVICE_NAME, false);
 
+    if (!serviceName.equalsIgnoreCase(service)) {
+      String message = new StringBuilder()
+          .append("looking for OAuth service ")
+          .append(service)
+          .append(", but only service defined in gadget spec is ")
+          .append(serviceName)
+          .toString();
+      log.warning(message);
+      throw new GadgetException(GadgetException.Code.INVALID_PARAMETER,
+          message);
+    }
+
     String requestUrl = getOAuthParameter(oauthParams, REQUEST_URL, false);
     String requestMethod = getOAuthParameter(oauthParams,
                                              REQUEST_HTTP_METHOD,
@@ -263,7 +276,7 @@ public class GadgetOAuthTokenStore {
 
     String accessUrl = getOAuthParameter(oauthParams, ACCESS_URL, false);
     String accessMethod = getOAuthParameter(
-        oauthParams, 
+        oauthParams,
         ACCESS_HTTP_METHOD,
         true);
     if (accessMethod == null) {
@@ -351,11 +364,7 @@ public class GadgetOAuthTokenStore {
     provInfo.setSignatureType(OAuthStore.SignatureType.HMAC_SHA1);
     provInfo.setProvider(provider);
 
-    GadgetInfo gadgetInfo = new GadgetInfo();
-    gadgetInfo.setProviderInfo(provInfo);
-    gadgetInfo.setServiceName(serviceName);
-
-    return gadgetInfo;
+    return provInfo;
   }
 
   /**

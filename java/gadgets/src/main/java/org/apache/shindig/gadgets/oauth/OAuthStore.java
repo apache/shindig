@@ -44,46 +44,6 @@ import net.oauth.OAuthServiceProvider;
 public interface OAuthStore {
 
   /**
-   * Set information about a service provider, as it is known to a certain
-   * gadget.
-   *
-   * @param providerKey the gadget that wants to use the service provider, and
-   *                    a nickName under which the gadget will refer to this
-   *                    service provider in the future.
-   * @param providerInfo the three URLs that define this provider. Also
-   *                     contains the httpMethod used to access the service
-   *                     provider. (Technically, OAuth allows different methods
-   *                     for the different URLs, but the Java OAuth library
-   *                     doesn't support that. So we're also just storing one
-   *                     preference here.) Also contains the signature type
-   *                     (RSA, HMAC, or PLAINTEXT) to be
-   *                     used for this service provider. (Again, OAuth allows
-   *                     different signature types for each of the three
-   *                     URLs, but we just assume they're all the same, and
-   *                     provide just one parameter to specify signature type.)
-   * @throws OAuthStoreException if there was a problem accessing the
-   *                                    store.
-   */
-  public void setOAuthServiceProviderInfo(ProviderKey providerKey,
-                                          ProviderInfo providerInfo)
-      throws OAuthStoreException;
-
-  /**
-   * Gets information about a service provider (access, request, and authorize
-   * URLs with access methods and signature types), given a gadget description
-   * and a service name.
-   *
-   * @param providerKey the gadget that wants to use the service provider, and
-   *                    a nickName under which the gadget refers to this
-   *                    service provider.
-   * @return the provider information.
-   * @throws OAuthStoreException
-   * @throws OAuthNoDataException
-   */
-  public ProviderInfo getOAuthServiceProviderInfo(ProviderKey providerKey)
-      throws OAuthStoreException, OAuthNoDataException;
-
-  /**
    * If we or a gadget negotiate a separate consumer key and secret with a
    * service provider, use this method to store it. The "secret" can either
    * be a consumer secret in the strict OAuth sense, or it can be a
@@ -144,13 +104,22 @@ public interface OAuthStore {
    *                 might hold for the same service provider) and a serviceName
    *                 (which is the same as the service name in the ProviderKey
    *                 structure).
+   * @param provInfo provider information. The store combines information stored
+   *                 in the store (consumer key/secret, token, token secret,
+   *                 etc.) with the provider information (access URL, request
+   *                 URL etc.) passed in here to create an AccessorInfo object.
+   *                 If no information can be found in the
+   *                 store, it may use default keys that identify the container,
+   *                 as opposed to consumer keys and secrets that are specific
+   *                 to this gadget.
    * @return an OAuthAccessor object than can be passed to an OAuthMessage.sign
    *         method.
    * @throws OAuthNoDataException if the token couldn't be found
    * @throws OAuthStoreException if an error occurred accessing the data
    *                                   store.
    */
-  public AccessorInfo getOAuthAccessor(TokenKey tokenKey)
+  public AccessorInfo getOAuthAccessor(TokenKey tokenKey,
+      ProviderInfo provInfo)
       throws OAuthNoDataException, OAuthStoreException;
 
 
@@ -270,22 +239,11 @@ public interface OAuthStore {
     private SignatureType signatureType;
     private OAuthParamLocation paramLocation;
 
-    // this can be null if we have not negotiated a consumer key and secret
-    // yet with the provider, or if we decided that we want to use a global
-    // public key
-    private ConsumerKeyAndSecret keyAndSecret;
-
     public OAuthParamLocation getParamLocation() {
       return paramLocation;
     }
     public void setParamLocation(OAuthParamLocation paramLocation) {
       this.paramLocation = paramLocation;
-    }
-    public ConsumerKeyAndSecret getKeyAndSecret() {
-      return keyAndSecret;
-    }
-    public void setKeyAndSecret(ConsumerKeyAndSecret keyAndSecret) {
-      this.keyAndSecret = keyAndSecret;
     }
     public OAuthServiceProvider getProvider() {
       return provider;
