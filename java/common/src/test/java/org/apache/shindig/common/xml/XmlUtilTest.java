@@ -43,6 +43,10 @@ public class XmlUtilTest {
   private final static URI URI_VALUE = URI.create("http://example.org/file");
   private final static String URI_MALFORMED_ATTR = "uri-malformed";
   private final static String FAKE_ATTR = "fake";
+  private final static String HTTPS_URI_ATTR = "httpsuri";
+  private final static URI HTTPS_URI_VALUE = URI.create("https://example.org");
+  private final static String FTP_URI_ATTR = "ftpuri";
+  private final static URI FTP_URI_VALUE = URI.create("ftp://ftp.example.org");
 
   private final static String XML
       = "<Element " +
@@ -51,7 +55,9 @@ public class XmlUtilTest {
       BOOL_TRUE_ATTR + "='true' " +
       BOOL_FALSE_ATTR + "='false' " +
       URI_ATTR + "='" + URI_VALUE + "' " +
-      URI_MALFORMED_ATTR + "='$#%$^$^$^$%$%!! '" +
+      URI_MALFORMED_ATTR + "='$#%$^$^$^$%$%!! ' " +
+      HTTPS_URI_ATTR + "='" + HTTPS_URI_VALUE + "' " +
+      FTP_URI_ATTR + "='" + FTP_URI_VALUE + "' " +
       "/>";
 
   private Element node;
@@ -95,6 +101,14 @@ public class XmlUtilTest {
     assertEquals(URI_VALUE, XmlUtil.getUriAttribute(node, URI_MALFORMED_ATTR, URI_VALUE));
     assertNull("getUriAttribute must return null for undefined attributes.",
         XmlUtil.getUriAttribute(node, FAKE_ATTR));
+    assertEquals(FTP_URI_VALUE, XmlUtil.getUriAttribute(node, FTP_URI_ATTR));
+  }
+  
+  @Test
+  public void testHttpUriAttribute() {
+    assertEquals(HTTPS_URI_VALUE, XmlUtil.getHttpUriAttribute(node, HTTPS_URI_ATTR));
+    assertNull(XmlUtil.getHttpUriAttribute(node, FTP_URI_ATTR));
+    assertEquals(HTTPS_URI_VALUE, XmlUtil.getHttpUriAttribute(node, FTP_URI_ATTR, HTTPS_URI_VALUE));
   }
 
   @Test(expected=XmlException.class)

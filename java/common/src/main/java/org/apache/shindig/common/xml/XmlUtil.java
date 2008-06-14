@@ -91,6 +91,38 @@ public class XmlUtil {
   public static URI getUriAttribute(Node node, String attr) {
     return getUriAttribute(node, attr, null);
   }
+  
+  /**
+   * Retrieves an attribute as a URI, and verifies that the URI is an http
+   * or https URI.
+   * @param node
+   * @param attr
+   * @param def
+   * @return the parsed uri, or def if the attribute is not a valid http or
+   * https URI.
+   */
+  public static URI getHttpUriAttribute(Node node, String attr, URI def) {
+    URI uri = getUriAttribute(node, attr, def);
+    if (uri == null) {
+      return def;
+    }
+    if (!"http".equals(uri.getScheme()) && !"https".equals(uri.getScheme())) {
+      return def;
+    }
+    return uri;
+  }
+  
+  /**
+   * Retrieves an attribute as a URI, and verifies that the URI is an http
+   * or https URI.
+   * @param node
+   * @param attr
+   * @return the parsed uri, or null if the attribute is not a valid http or
+   * https URI.
+   */
+  public static URI getHttpUriAttribute(Node node, String attr) {
+    return getHttpUriAttribute(node, attr, null);
+  }
 
   /**
    * Retrieves an attribute as a boolean.
