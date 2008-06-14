@@ -22,7 +22,8 @@ package org.apache.shindig.gadgets.spec;
    * The supported auth modes for Preload
  */
 public enum Auth {
-  NONE, SIGNED, AUTHENTICATED;
+  // TODO(beaton) remove AUTHENTICATED once we've renamed everything to OAuth
+  NONE, SIGNED, AUTHENTICATED, OAUTH;
 
   /**
    * @param value
@@ -31,7 +32,9 @@ public enum Auth {
   public static Auth parse(String value) {
     if (value != null) {
       value = value.trim();
-      if (value.length() == 0) return Auth.NONE;
+      if (value.length() == 0) {
+        return Auth.NONE;
+      }
       try {
         return Auth.valueOf(value.toUpperCase());
       } catch (IllegalArgumentException iae) {

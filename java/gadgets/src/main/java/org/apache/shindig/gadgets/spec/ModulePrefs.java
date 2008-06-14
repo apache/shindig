@@ -359,6 +359,14 @@ public class ModulePrefs {
   public Map<String, LinkSpec> getLinks() {
     return links;
   }
+  
+  /**
+   * ModuleSpec/OAuthSpec
+   */
+  private final OAuthSpec oauth;
+  public OAuthSpec getOAuthSpec() {
+    return oauth;
+  }
 
   /**
    * Attempts to retrieve a valid LocaleSpec for the given Locale.
@@ -440,6 +448,9 @@ public class ModulePrefs {
     for (LinkSpec link : links.values()) {
       buf.append(link).append('\n');
     }
+    if (oauth != null) {
+      buf.append(oauth).append('\n');
+    }
     buf.append("</ModulePrefs>");
     return buf.toString();
   }
@@ -466,6 +477,7 @@ public class ModulePrefs {
     // Child elements
     PreloadVisitor preloadVisitor = new PreloadVisitor();
     FeatureVisitor featureVisitor = new FeatureVisitor();
+    OAuthVisitor oauthVisitor = new OAuthVisitor();
     IconVisitor iconVisitor = new IconVisitor();
     LocaleVisitor localeVisitor = new LocaleVisitor(specUrl);
     LinkVisitor linkVisitor = new LinkVisitor();
@@ -475,6 +487,7 @@ public class ModulePrefs {
     visitors.put("Preload", preloadVisitor);
     visitors.put("Optional", featureVisitor);
     visitors.put("Require", featureVisitor);
+    visitors.put("OAuth", oauthVisitor);
     visitors.put("Icon", iconVisitor);
     visitors.put("Locale", localeVisitor);
     visitors.put("Link", linkVisitor);
@@ -486,6 +499,7 @@ public class ModulePrefs {
     icons = Collections.unmodifiableList(iconVisitor.icons);
     locales = Collections.unmodifiableMap(localeVisitor.locales);
     links = Collections.unmodifiableMap(linkVisitor.links);
+    oauth = oauthVisitor.oauth;
   }
 
   /**
@@ -495,6 +509,7 @@ public class ModulePrefs {
     categories = prefs.getCategories();
     features = prefs.getFeatures();
     locales = prefs.getLocales();
+    oauth = prefs.oauth;
 
     List<Preload> preloads = new ArrayList<Preload>(prefs.preloads.size());
     for (Preload preload : prefs.preloads) {
@@ -537,6 +552,22 @@ class PreloadVisitor implements ElementVisitor {
   public void visit(Element element) throws SpecParserException {
     Preload preload = new Preload(element);
     preloads.add(preload);
+  }
+}
+
+/**
+ * Process ModulePrefs/OAuth
+ */
+class OAuthVisitor implements ElementVisitor {
+  OAuthSpec oauth;
+  public void visit(Element element) throws SpecParserException {
+    if (oauth != null) {
+      throw new SpecParserException("ModulePrefs/OAuth may only occur once.");
+    }
+    oauth = new OAuthSpec(element);
+  }
+  public OAuthVisitor() {
+    this.oauth = null;
   }
 }
 
