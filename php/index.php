@@ -17,29 +17,12 @@
  * specific language governing permissions and limitations under the License.
  */
 
-/*
- * Written by Chris Chabot <chabotc@xs4all.nl> - http://www.chabotc.com
- * 
- * "It is not the strongest of the species that survives, nor the most intelligent that survives. 
- * It is the one that is the most adaptable to change" - Darwin
- * 
- * So in this php version of shindig we make like java and act like a servlet setup, and using
- * it's structures as our reference.
- * 
- * The .htaccess file redirects all requests that are neither an existing file or directory
- * to this index.php, and the $servletMap checks which class is associated with it, if a mapping
- * doesn't exist it display's a 404 error.
- * 
- * See config.php for the global settings and backend class selections.
- * 
- */
-
 include_once ('config.php');
 
 // Basic sanity check if we have all required modules
 $modules = array('json', 'SimpleXML', 'libxml', 'curl');
 // if plain text tokens are disallowed we require mcrypt
-if (!Config::get('allow_plaintext_token')) {
+if (! Config::get('allow_plaintext_token')) {
 	$modules[] = 'mcrypt';
 }
 // if you selected the memcache caching backend, you need the memcache extention too :)
@@ -47,7 +30,7 @@ if (Config::get('data_cache') == 'CacheMemcache') {
 	$modules[] = 'memcache';
 }
 foreach ($modules as $module) {
-	if (!extension_loaded($module)) {
+	if (! extension_loaded($module)) {
 		die("Shindig requires the {$module} extention, see <a href='http://www.php.net/{$module}'>http://www.php.net/{$module}</a> for more info");
 	}
 }
@@ -56,9 +39,31 @@ foreach ($modules as $module) {
 // To load these, we scan our entire directory structure
 function __autoload($className)
 {
-	$locations = array('src/common', 'src/common/samplecontainer', 'src/gadgets', 'src/gadgets/samplecontainer', 'src/gadgets/http', 'src/socialdata', 'src/socialdata/opensocial', 'src/socialdata/opensocial/model', 'src/socialdata/http', 'src/socialdata/samplecontainer', 'src/gadgets/oauth');
+	$locations = array(
+					'src/common',
+					'src/common/samplecontainer',
+					'src/gadgets', 
+					'src/gadgets/http',
+					'src/gadgets/oauth',
+					'src/gadgets/samplecontainer',
+					'src/socialdata/opensocial/model' 
+				);
+	//FIXME the sample container implementations differ between the rest and json wire formats
+	//	this way containers that use the original SPI don't break on update
+	//	remove this hack once we completely switched over
+	if (strpos($_SERVER["REQUEST_URI"], '/social/rest') !== false) {
+		$locations[] = 'src/socialrest';
+		$locations[] = 'src/socialrest/http';
+		$locations[] = 'src/socialrest/opensocial';
+		$locations[] = 'src/socialrest/samplecontainer';
+	} elseif (strpos($_SERVER["REQUEST_URI"], '/social/data') !== false) {
+		$locations[] = 'src/socialdata';
+		$locations[] = 'src/socialdata/http';
+		$locations[] = 'src/socialdata/opensocial';
+		$locations[] = 'src/socialdata/samplecontainer';
+	}
 	// Check for the presense of this class in our all our directories.
-	$fileName = $className.'.php';
+	$fileName = $className . '.php';
 	foreach ($locations as $path) {
 		if (file_exists("{$path}/$fileName")) {
 			require "{$path}/$fileName";
@@ -68,15 +73,16 @@ function __autoload($className)
 }
 
 $servletMap = array(
-	Config::get('web_prefix') . '/gadgets/files'    	=> 'FilesServlet',
-	Config::get('web_prefix') . '/gadgets/js'       	=> 'JsServlet',
-	Config::get('web_prefix') . '/gadgets/proxy'    	=> 'ProxyServlet',
-	Config::get('web_prefix') . '/gadgets/makeRequest'	=> 'ProxyServlet',
-	Config::get('web_prefix') . '/gadgets/ifr'      	=> 'GadgetRenderingServlet',
-	Config::get('web_prefix') . '/gadgets/metadata' 	=> 'JsonRpcServlet',
-	Config::get('web_prefix') . '/social/data'      	=> 'GadgetDataServlet',
-	Config::get('web_prefix') . '/public.crt'       	=> 'CertServlet'
-);
+		Config::get('web_prefix') . '/gadgets/files' => 'FilesServlet', 
+		Config::get('web_prefix') . '/gadgets/js' => 'JsServlet', 
+		Config::get('web_prefix') . '/gadgets/proxy' => 'ProxyServlet', 
+		Config::get('web_prefix') . '/gadgets/makeRequest' => 'ProxyServlet', 
+		Config::get('web_prefix') . '/gadgets/ifr' => 'GadgetRenderingServlet', 
+		Config::get('web_prefix') . '/gadgets/metadata' => 'JsonRpcServlet', 
+		Config::get('web_prefix') . '/social/data' => 'GadgetDataServlet', 
+		Config::get('web_prefix') . '/social/rest' => 'RestServlet', 
+		Config::get('web_prefix') . '/public.crt' => 'CertServlet'
+		);
 
 // Try to match the request url to our servlet mapping
 $servlet = false;
@@ -86,19 +92,27 @@ foreach ($servletMap as $url => $class) {
 		//FIXME temporary hack to support both /proxy and /makeRequest with the same event handler
 		// /makeRequest == /proxy?output=js
 		if ($url == Config::get('web_prefix') . '/gadgets/makeRequest') {
-			$_GET['output'] = 'js'; 
+			$_GET['output'] = 'js';
 		}
 		$servlet = $class;
 		break;
 	}
 }
+
 // If we found a correlating servlet, instance and call it. Otherwise give a 404 error
 if ($servlet) {
 	$class = new $class();
-	if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-		$class->doPost();
+	$method = $_SERVER['REQUEST_METHOD'];
+	// Not all clients support the PUT, HEAD & DELETE http methods, they depend on the X-HTTP-Method-Override instead 
+	if ($method == 'POST' && isset($_SERVER['HTTP_X_HTTP_METHOD_OVERRIDE'])) {
+		$method = $_SERVER['HTTP_X_HTTP_METHOD_OVERRIDE'];
+	}
+	$method = 'do' . ucfirst(strtolower($method));
+	if (is_callable(array($class, $method))) {
+		$class->$method();
 	} else {
-		$class->doGet();
+		header("HTTP/1.0 405 Method Not Allowed");
+		echo "<html><body><h1>405 Method Not Allowed</h1></body></html>";
 	}
 } else {
 	// Unhandled event, display simple 404 error
