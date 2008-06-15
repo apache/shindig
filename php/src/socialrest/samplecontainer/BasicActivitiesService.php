@@ -31,7 +31,7 @@ class BasicActivitiesService extends ActivitiesService {
 				}
 			}
 		}
-		return new ResponseItem(BAD_REQUEST, "Activity not found", null);
+		return new ResponseItem(NOT_FOUND, "Activity not found", null);
 	}
 	
 	public function getActivities(UserId $userId, GroupId $groupId, SecurityToken $token)
