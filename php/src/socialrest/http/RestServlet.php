@@ -49,6 +49,7 @@ require 'src/socialdata/opensocial/model/Url.php';
 /*
  * Internal error code representations, these get translated into http codes in the outputError() function
  */
+define('NOT_FOUND', "notFound");
 define('NOT_IMPLEMENTED', "notImplemented");
 define('UNAUTHORIZED', "unauthorized");
 define('FORBIDDEN', "forbidden");
@@ -123,8 +124,8 @@ class RestServlet extends HttpServlet {
 	{
 		$errorMessage = $response->getErrorMessage();
 		switch ($response->getError()) {
-			case NOT_IMPLEMENTED:
-				$code = '501 Not Implemented';
+			case BAD_REQUEST:
+				$code = '400 Bad Request';
 				break;
 			case UNAUTHORIZED:
 				$code = '401 Unauthorized';
@@ -132,8 +133,11 @@ class RestServlet extends HttpServlet {
 			case FORBIDDEN:
 				$code = '403 Forbidden';
 				break;
-			case BAD_REQUEST:
-				$code = '400 Bad Request';
+			case FORBIDDEN:
+				$code = '404 Not Found';
+				break;
+			case NOT_IMPLEMENTED:
+				$code = '501 Not Implemented';
 				break;
 			case INTERNAL_ERROR:
 			default:
@@ -141,8 +145,8 @@ class RestServlet extends HttpServlet {
 				break;
 				
 		}
-		header("HTTP/1.0 $code");
-		echo "<html><body><h1>$code</h1></p>$errorMessage</p></body></html>";
+		header("HTTP/1.0 $code", true);
+		echo "$code - $errorMessage";
 		die();
 	}
 

@@ -37,7 +37,7 @@ class BasicPeopleService extends PeopleService {
 		if (is_array($person) && count($person) == 1) {
 			return new ResponseItem(null, null, $person[0]);
 		}
-		return $person->getResponse();
+		return new ResponseItem(NOT_FOUND, "Person not found", null);
 	}
 
 	public function getPeople($userId, $groupId, $sortOrder, $filter, $first, $max, $profileDetails, $token)
