@@ -18,12 +18,6 @@
  */
 package org.apache.shindig.gadgets;
 
-import com.google.inject.AbstractModule;
-import com.google.inject.CreationException;
-import com.google.inject.Scopes;
-import com.google.inject.name.Names;
-import com.google.inject.spi.Message;
-
 import org.apache.shindig.common.util.ResourceLoader;
 import org.apache.shindig.gadgets.http.BasicHttpCache;
 import org.apache.shindig.gadgets.http.BasicHttpFetcher;
@@ -34,6 +28,11 @@ import org.apache.shindig.gadgets.http.RemoteContentFetcherFactory;
 import org.apache.shindig.gadgets.oauth.OAuthFetcherFactory;
 import org.apache.shindig.gadgets.rewrite.ContentRewriter;
 import org.apache.shindig.gadgets.rewrite.DefaultContentRewriter;
+
+import com.google.inject.AbstractModule;
+import com.google.inject.CreationException;
+import com.google.inject.name.Names;
+import com.google.inject.spi.Message;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -74,9 +73,9 @@ public class DefaultGuiceModule extends AbstractModule {
     bind(Executor.class).toInstance(Executors.newCachedThreadPool());
     bind(LockedDomainService.class).to(HashLockedDomainService.class);
 
-    bind(ContainerConfig.class).in(Scopes.SINGLETON);
-    bind(GadgetFeatureRegistry.class).in(Scopes.SINGLETON);
-    bind(GadgetServer.class).in(Scopes.SINGLETON);
+    bind(ContainerConfig.class);
+    bind(GadgetFeatureRegistry.class);
+    bind(GadgetServer.class);
   }
 
   public DefaultGuiceModule(Properties properties) {

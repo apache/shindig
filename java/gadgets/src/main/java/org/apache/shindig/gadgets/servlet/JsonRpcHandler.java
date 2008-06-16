@@ -29,6 +29,7 @@ import org.apache.shindig.gadgets.spec.UserPref;
 import org.apache.shindig.gadgets.spec.View;
 
 import com.google.inject.Inject;
+import com.google.inject.Singleton;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -47,6 +48,7 @@ import java.util.concurrent.ExecutorCompletionService;
  * Processes JSON-RPC requests by retrieving all necessary meta data in parallel
  * and coalescing into a single output JSON construct.
  */
+@Singleton
 public class JsonRpcHandler {
 
   private final Executor executor;

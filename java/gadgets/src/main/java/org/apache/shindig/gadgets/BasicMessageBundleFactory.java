@@ -27,6 +27,7 @@ import org.apache.shindig.gadgets.spec.LocaleSpec;
 import org.apache.shindig.gadgets.spec.MessageBundle;
 
 import com.google.inject.Inject;
+import com.google.inject.Singleton;
 import com.google.inject.name.Named;
 
 import java.net.URI;
@@ -36,6 +37,7 @@ import java.util.logging.Logger;
 /**
  * Basic implementation of a message bundle factory
  */
+@Singleton
 public class BasicMessageBundleFactory implements MessageBundleFactory {
 
   private static final Logger logger

@@ -20,6 +20,8 @@ package org.apache.shindig.common;
 
 import org.apache.shindig.common.crypto.BlobCrypterException;
 
+import com.google.inject.Singleton;
+
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 
@@ -27,6 +29,7 @@ import java.net.URLDecoder;
  * A SecurityTokenDecoder implementation that just provides dummy data to satisfy
  * tests and API calls. Do not use this for any security applications.
  */
+@Singleton
 public class BasicSecurityTokenDecoder implements SecurityTokenDecoder {
 
   private static final int OWNER_INDEX = 0;
