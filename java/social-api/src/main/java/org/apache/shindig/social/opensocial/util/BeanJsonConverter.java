@@ -101,7 +101,8 @@ public class BeanJsonConverter implements BeanConverter {
         || val instanceof Enum
         || val instanceof Float
         || val instanceof JSONObject
-        || val instanceof JSONArray) {
+        || val instanceof JSONArray
+        || val == null) {
       return val;
     }
 

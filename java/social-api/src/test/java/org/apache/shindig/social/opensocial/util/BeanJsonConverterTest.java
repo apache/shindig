@@ -142,6 +142,9 @@ public class BeanJsonConverterTest extends TestCase {
 
     Map<String, String> item1Map = Maps.newHashMap();
     item1Map.put("value", "1");
+    
+    // Null values shouldn't cause exceptions
+    item1Map.put("value2", null);
     map.put("item1", item1Map);
 
     Map<String, String> item2Map = Maps.newHashMap();
