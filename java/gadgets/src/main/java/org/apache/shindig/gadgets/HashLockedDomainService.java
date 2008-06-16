@@ -21,6 +21,7 @@ import org.apache.shindig.common.util.Base32;
 import org.apache.shindig.gadgets.spec.Feature;
 
 import com.google.inject.Inject;
+import com.google.inject.Singleton;
 import com.google.inject.name.Named;
 
 import org.apache.commons.codec.digest.DigestUtils;
@@ -39,6 +40,7 @@ import java.util.Set;
  *
  * Other domain locking schemes are possible as well.
  */
+@Singleton
 public class HashLockedDomainService implements LockedDomainService {
 
   private final ContainerConfig config;

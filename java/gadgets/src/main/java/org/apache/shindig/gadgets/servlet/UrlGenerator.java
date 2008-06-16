@@ -31,6 +31,7 @@ import org.apache.shindig.gadgets.spec.UserPref;
 import org.apache.shindig.gadgets.spec.View;
 
 import com.google.inject.Inject;
+import com.google.inject.Singleton;
 import com.google.inject.name.Named;
 
 import java.io.UnsupportedEncodingException;
@@ -41,6 +42,7 @@ import java.util.regex.Pattern;
 /**
  * Generates urls for various public entrypoints
  */
+@Singleton
 public class UrlGenerator {
 
   private final String jsPrefix;

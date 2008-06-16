@@ -34,6 +34,7 @@ import org.apache.shindig.gadgets.spec.Preload;
 
 import com.google.common.collect.Maps;
 import com.google.inject.Inject;
+import com.google.inject.Singleton;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -55,6 +56,7 @@ import javax.servlet.http.HttpServletResponse;
  *
  * Unlike ProxyHandler, this may perform operations such as OAuth or signed fetch.
  */
+@Singleton
 public class MakeRequestHandler extends ProxyBase{
   // Relaxed visibility for ease of integration. Try to avoid relying on these.
   public static final String UNPARSEABLE_CRUFT = "throw 1; < don't be evil' >";

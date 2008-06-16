@@ -14,13 +14,6 @@
 
 package org.apache.shindig.gadgets;
 
-import net.oauth.OAuth;
-import net.oauth.OAuth.Parameter;
-import net.oauth.OAuthAccessor;
-import net.oauth.OAuthConsumer;
-import net.oauth.OAuthMessage;
-import net.oauth.signature.RSA_SHA1;
-
 import org.apache.shindig.common.SecurityToken;
 import org.apache.shindig.common.crypto.Crypto;
 import org.apache.shindig.common.util.TimeSource;
@@ -28,6 +21,13 @@ import org.apache.shindig.gadgets.http.HttpCache;
 import org.apache.shindig.gadgets.http.HttpFetcher;
 import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.http.HttpResponse;
+
+import net.oauth.OAuth;
+import net.oauth.OAuthAccessor;
+import net.oauth.OAuthConsumer;
+import net.oauth.OAuthMessage;
+import net.oauth.OAuth.Parameter;
+import net.oauth.signature.RSA_SHA1;
 
 import java.io.IOException;
 import java.net.URI;
@@ -83,7 +83,7 @@ public class SigningFetcher extends ChainedContentFetcher {
   protected final String keyName;
 
   /**
-   *  The cache to fetch results in. 
+   *  The cache to fetch results in.
    */
   protected final HttpCache cache;
 
@@ -327,7 +327,7 @@ public class SigningFetcher extends ChainedContentFetcher {
 
   /**
    * Strip out any owner or viewer id passed by the client.
- * @throws RequestSigningException 
+ * @throws RequestSigningException
    */
   private List<Parameter> sanitize(List<Parameter> params)
       throws RequestSigningException {

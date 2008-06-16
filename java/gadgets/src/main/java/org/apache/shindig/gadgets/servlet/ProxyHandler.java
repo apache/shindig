@@ -26,6 +26,7 @@ import org.apache.shindig.gadgets.http.HttpResponse;
 import org.apache.shindig.gadgets.rewrite.ContentRewriter;
 
 import com.google.inject.Inject;
+import com.google.inject.Singleton;
 
 import java.io.IOException;
 import java.net.URI;
@@ -38,6 +39,10 @@ import java.util.logging.Logger;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+/**
+ * Handles open proxy requests.
+ */
+@Singleton
 public class ProxyHandler extends ProxyBase {
   private static final Logger logger =
       Logger.getLogger(ProxyHandler.class.getPackage().getName());

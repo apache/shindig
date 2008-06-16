@@ -24,6 +24,7 @@ import org.apache.shindig.gadgets.http.HttpCache;
 import org.apache.shindig.gadgets.http.HttpFetcher;
 
 import com.google.inject.Inject;
+import com.google.inject.Singleton;
 import com.google.inject.name.Named;
 
 import org.apache.commons.io.IOUtils;
@@ -33,6 +34,7 @@ import java.io.IOException;
 /**
  * Produces Signing content fetchers for input tokens.
  */
+@Singleton
 public class SigningFetcherFactory {
   private final HttpCache cache;
   private final String keyName;

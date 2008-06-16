@@ -22,6 +22,7 @@ package org.apache.shindig.gadgets;
 import org.apache.shindig.common.util.ResourceLoader;
 
 import com.google.inject.Inject;
+import com.google.inject.Singleton;
 import com.google.inject.name.Named;
 
 import org.apache.commons.lang.StringUtils;
@@ -45,6 +46,7 @@ import java.util.logging.Logger;
  * We use a cascading model, so you only have to specify attributes in
  * your config that you actually want to change.
  */
+@Singleton
 public class ContainerConfig {
   private final Map<String, JSONObject> config;
   public static final char FILE_SEPARATOR = ',';

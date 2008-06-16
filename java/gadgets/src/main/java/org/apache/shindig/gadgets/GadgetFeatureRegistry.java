@@ -21,6 +21,7 @@ import org.apache.shindig.gadgets.http.HttpFetcher;
 
 import com.google.common.collect.Maps;
 import com.google.inject.Inject;
+import com.google.inject.Singleton;
 import com.google.inject.name.Named;
 
 import java.util.Collection;
@@ -39,6 +40,7 @@ import java.util.logging.Logger;
  * GadgetFeatureRegistry registry = // get your global registry
  * registry.register("my-feature", null, new MyFeatureFactory());
  */
+@Singleton
 public class GadgetFeatureRegistry {
   private final Map<String, GadgetFeature> features;
   private final Map<String, GadgetFeature> core;

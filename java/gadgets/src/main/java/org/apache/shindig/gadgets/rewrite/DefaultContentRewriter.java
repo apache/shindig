@@ -17,13 +17,15 @@
  */
 package org.apache.shindig.gadgets.rewrite;
 
-import com.google.inject.Inject;
-import com.google.inject.name.Named;
 import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.GadgetSpecFactory;
 import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.http.HttpResponse;
 import org.apache.shindig.gadgets.spec.GadgetSpec;
+
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
+import com.google.inject.name.Named;
 
 import java.io.ByteArrayOutputStream;
 import java.io.InputStreamReader;
@@ -42,6 +44,7 @@ import java.util.Set;
 /**
  * Default implementation of content rewriting.
  */
+@Singleton
 public class DefaultContentRewriter implements ContentRewriter {
 
   private final GadgetSpecFactory specFactory;

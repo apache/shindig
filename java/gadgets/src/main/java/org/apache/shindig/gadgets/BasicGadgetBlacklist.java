@@ -18,6 +18,7 @@
 package org.apache.shindig.gadgets;
 
 import com.google.inject.Inject;
+import com.google.inject.Singleton;
 import com.google.inject.name.Named;
 
 import java.io.BufferedReader;
@@ -55,6 +56,7 @@ import java.util.regex.PatternSyntaxException;
  *   REGEXP http://[^/]*baz.com/.*
  *
  */
+@Singleton
 public class BasicGadgetBlacklist implements GadgetBlacklist {
 
   private static final char COMMENT_MARKER = '#';

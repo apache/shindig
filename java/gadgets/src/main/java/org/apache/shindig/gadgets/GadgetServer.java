@@ -28,6 +28,7 @@ import org.apache.shindig.gadgets.spec.MessageBundle;
 import org.apache.shindig.gadgets.spec.Preload;
 
 import com.google.inject.Inject;
+import com.google.inject.Singleton;
 
 import java.util.Collection;
 import java.util.HashSet;
@@ -44,6 +45,7 @@ import java.util.concurrent.Future;
  * Primary gadget processing facility. Converts an input Context into an output
  * Gadget
  */
+@Singleton
 public class GadgetServer {
   private final Executor executor;
   private final GadgetFeatureRegistry registry;
