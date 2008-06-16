@@ -18,8 +18,8 @@
  */
 
 abstract class PeopleService {
-	public $sortOrder = array('topFriends', 'name');
-	public $filterType = array('all', 'hasApp', 'topFriends');
+	static public $sortOrder = array('topFriends', 'name');
+	static public $filterType = array('all', 'hasApp', 'topFriends');
 
 	/**
 	 * Returns a Person object for person with $id or false on not found
