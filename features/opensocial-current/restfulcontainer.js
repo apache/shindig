@@ -98,11 +98,14 @@ RestfulContainer.prototype.requestData = function(dataRequest, callback) {
     gadgets.io.makeNonProxiedRequest(
         baseUrl + url + separator + "st=" + st,
         function(result) {
-          result = result.data;
+          var error;
+          if (result.errors) {
+            error = RestfulContainer.translateHttpError(result.errors[0]);
+          }
 
-          // TODO: handle errors
+          // TODO: get error messages
           var processedData = requestObject.request.processResponse(
-              requestObject.request, result, null, null);
+              requestObject.request, result.data, error, null);
           globalError = globalError || processedData.hadError();
           responseMap[requestObject.key] = processedData;
 
@@ -117,6 +120,25 @@ RestfulContainer.prototype.requestData = function(dataRequest, callback) {
   }
 
 };
+
+RestfulContainer.translateHttpError = function(httpError) {
+  if (httpError == "Error 501") {
+    return opensocial.ResponseItem.Error.NOT_IMPLEMENTED;
+  } else if (httpError == "Error 401") {
+    return opensocial.ResponseItem.Error.UNAUTHORIZED;
+  } else if (httpError == "Error 403") {
+    return opensocial.ResponseItem.Error.FORBIDDEN;
+  } else if (httpError == "Error 400") {
+    return opensocial.ResponseItem.Error.BAD_REQUEST;
+  } else if (httpError == "Error 500") {
+    return opensocial.ResponseItem.Error.INTERNAL_ERROR;
+  } else if (httpError == "Error 404") {
+    return opensocial.ResponseItem.Error.BAD_REQUEST;
+  // TODO: Which one should the limit exceeded error be?
+  // } else if (httpError == "Error ???") {
+  //   return opensocial.ResponseItem.Error.LIMIT_EXCEEDED;
+  }
+}
 
 RestfulContainer.prototype.makeIdSpec = function(id) {
   return new opensocial.IdSpec({'userId' : id});
