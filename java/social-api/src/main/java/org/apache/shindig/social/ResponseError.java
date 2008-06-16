@@ -17,21 +17,29 @@
  */
 package org.apache.shindig.social;
 
+import javax.servlet.http.HttpServletResponse;
+
 public enum ResponseError {
-  NOT_IMPLEMENTED("notImplemented"),
-  UNAUTHORIZED("unauthorized"),
-  FORBIDDEN("forbidden"),
-  BAD_REQUEST("badRequest"),
-  INTERNAL_ERROR("internalError");
+  NOT_IMPLEMENTED("notImplemented", HttpServletResponse.SC_NOT_IMPLEMENTED),
+  UNAUTHORIZED("unauthorized", HttpServletResponse.SC_UNAUTHORIZED),
+  FORBIDDEN("forbidden", HttpServletResponse.SC_FORBIDDEN),
+  BAD_REQUEST("badRequest", HttpServletResponse.SC_BAD_REQUEST),
+  INTERNAL_ERROR("internalError", HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 
   private final String jsonValue;
+  private int httpErrorCode;
 
-  ResponseError(String jsonValue) {
+  ResponseError(String jsonValue, int httpErrorCode) {
     this.jsonValue = jsonValue;
+    this.httpErrorCode = httpErrorCode;
   }
 
   @Override
   public String toString() {
     return jsonValue;
+  }
+
+  public int getHttpErrorCode() {
+    return httpErrorCode;
   }
 }

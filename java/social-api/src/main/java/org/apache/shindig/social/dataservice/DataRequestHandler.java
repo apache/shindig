@@ -19,6 +19,7 @@ package org.apache.shindig.social.dataservice;
 
 import org.apache.shindig.common.SecurityToken;
 import org.apache.shindig.social.ResponseItem;
+import org.apache.shindig.social.ResponseError;
 import org.apache.shindig.social.opensocial.util.BeanConverter;
 
 import com.google.common.collect.Lists;
@@ -60,7 +61,8 @@ public abstract class DataRequestHandler {
       PrintWriter writer = servletResponse.getWriter();
       writer.write(converter.convertToString(responseItem.getResponse()));
     } else {
-      // throw an error
+      servletResponse.sendError(responseItem.getError().getHttpErrorCode(),
+          responseItem.getErrorMessage());
     }
   }
 

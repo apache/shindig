@@ -109,6 +109,12 @@ public class DataRequestHandlerTest extends TestCase {
   }
 
   public void testHandleMethodFailure() throws Exception {
+    for (ResponseError error : ResponseError.values()) {
+      assertMethodFailure(error);
+    }
+  }
+
+  private void assertMethodFailure(final ResponseError error) throws IOException {
     drh = new DataRequestHandler() {
       ResponseItem handleDelete(HttpServletRequest servletRequest,
           SecurityToken token) {
@@ -127,14 +133,15 @@ public class DataRequestHandlerTest extends TestCase {
 
       ResponseItem handleGet(HttpServletRequest servletRequest,
           SecurityToken token) {
-        return new ResponseItem<String>(ResponseError.INTERNAL_ERROR, "", "");
+        return new ResponseItem<String>(error, "", "");
       }
     };
 
+    resp.sendError(error.getHttpErrorCode(), "");
     EasyMock.replay(req, resp);
     drh.handleMethod("GET", req, resp, null);
-    // TODO: Assert the right actions occur based on the error type
     EasyMock.verify(req, resp);
+    EasyMock.reset(req, resp);
   }
 
   public void testGetParamsFromRequest() throws Exception {
