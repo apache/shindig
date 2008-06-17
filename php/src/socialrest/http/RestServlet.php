@@ -35,6 +35,10 @@ require 'src/socialdata/opensocial/model/Organization.php';
 require 'src/socialdata/opensocial/model/Person.php';
 require 'src/socialdata/opensocial/model/Phone.php';
 require 'src/socialdata/opensocial/model/Url.php';
+require 'src/socialrest/GroupId.php';
+require 'src/socialrest/UserId.php';
+require 'src/socialrest/ResponseItem.php';
+require 'src/socialrest/RestfulCollection.php';
 
 /*
  * See:
@@ -45,6 +49,8 @@ require 'src/socialdata/opensocial/model/Url.php';
  * 
  * Error status is returned by HTTP error code, with the error message in the html's body
  */
+
+//NOTE TO SELF: delete should respond with a 204 No Content to indicate success?
 
 /*
  * Internal error code representations, these get translated into http codes in the outputError() function
@@ -62,6 +68,8 @@ class RestServlet extends HttpServlet {
 
 	public function doPost($method = 'POST')
 	{
+		$this->setNoCache(true);
+		$this->noHeaders = true;
 		try {
 			// use security token, for now this is required
 			// (later oauth should also be a way to specify this info)
@@ -155,6 +163,9 @@ class RestServlet extends HttpServlet {
 		$token = isset($_GET['st']) ? $_GET['st'] : '';
 		if (empty($token)) {
 			throw new RestException("Missing security token");
+		}
+		if (count(explode(':', $token)) != 6) {
+			$token = urldecode(base64_decode($token));
 		}
 		$gadgetSigner = Config::get('security_token_signer');
 		$gadgetSigner = new $gadgetSigner();

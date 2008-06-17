@@ -70,6 +70,9 @@ class GadgetDataServlet extends HttpServlet {
 		try {
 			$requestParam = isset($_POST['request']) ? $_POST['request'] : '';
 			$token = isset($_POST['st']) ? $_POST['st'] : '';
+			if (count(explode(':', $token)) != 6) {
+				$token = urldecode(base64_decode($token));
+			}
 			// detect if magic quotes are on, and if so strip them from the request
 			if (get_magic_quotes_gpc()) {
 				$requestParam = stripslashes($requestParam);

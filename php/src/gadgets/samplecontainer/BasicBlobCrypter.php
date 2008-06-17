@@ -65,8 +65,7 @@ class BasicBlobCrypter extends BlobCrypter {
 	 */
 	public function unwrap($in, $maxAgeSec)
 	{
-		//TODO remove this once we have a better way to generate a fake token
-		// in the example files
+		//TODO remove this once we have a better way to generate a fake token in the example files
 		if (Config::get('allow_plaintext_token') && count(explode(':', $in)) == 6) {
 			$data = explode(":", $in);
 			$out = array();
@@ -77,7 +76,6 @@ class BasicBlobCrypter extends BlobCrypter {
 			$out['u'] = $data[4];
 			$out['m'] = $data[5];
 		} else {
-			//TODO Exception handling like JAVA
 			$bin = base64_decode($in);
 			$cipherText = substr($bin, 0, strlen($bin) - Crypto::$HMAC_SHA1_LEN);
 			$hmac = substr($bin, strlen($cipherText));
@@ -97,14 +95,6 @@ class BasicBlobCrypter extends BlobCrypter {
 	{
 		$map = array();
 		$items = split("[&=]", $plain);
-		/*
-		//TODO: See if this can work or isn't necessary.
-		if ((count($items) / 2) != 7) {
-			// A valid token should decrypt to 14 items, aka 7 pairs.
-			// If not, this wasn't valid & untampered data and we abort
-			throw new BlobExpiredException("Invalid security token");
-		}
-		*/
 		for ($i = 0; $i < count($items); ) {
 			$key = urldecode($items[$i ++]);
 			$value = urldecode($items[$i ++]);
