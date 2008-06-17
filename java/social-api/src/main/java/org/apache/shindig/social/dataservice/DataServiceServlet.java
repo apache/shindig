@@ -75,7 +75,7 @@ public class DataServiceServlet extends InjectedServlet {
   }
 
   // Only for testing use. Do not override the injector.
-  void setInjector(Injector injector) {
+  public void setInjector(Injector injector) {
     this.injector = injector;
   }
 
