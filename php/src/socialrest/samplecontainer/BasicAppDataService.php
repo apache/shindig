@@ -44,16 +44,33 @@ class BasicAppDataService extends AppDataService {
 	{
 		$allData = XmlStateFileFetcher::get()->getAppData();
 		$data = array();
-		$id = $userId->getUserId($token);
-		if (isset($allData[$id])) {
-			$allPersonData = $allData[$id];
-			$personData = array();
-			foreach (array_keys($allPersonData) as $key) {
-				if (in_array($key, $fields) || $fields[0] == "*") {
-					$personData[$key] = $allPersonData[$key];
+		$ids = array();
+		switch($groupId->getType()) {
+			case 'self':
+				$ids[] = $userId->getUserId($token);
+				break;
+			case 'all':
+			case 'friends':
+				$friendIds = XmlStateFileFetcher::get()->getFriendIds();
+				if (is_array($friendIds) && count($friendIds) && isset($friendIds[$userId->getUserId($token)])) {
+					$ids = $friendIds[$userId->getUserId($token)];
 				}
+				break;
+			default:
+				return new ResponseItem(NOT_IMPLEMENTED, "We don't support fetching data in batches yet", null);		
+				break;
+		}
+		foreach ($ids as $id) {
+			if (isset($allData[$id])) {
+				$allPersonData = $allData[$id];
+				$personData = array();
+				foreach (array_keys($allPersonData) as $key) {
+					if (in_array($key, $fields) || $fields[0] == "*") {
+						$personData[$key] = $allPersonData[$key];
+					}
+				}
+				$data[$id] = $personData;
 			}
-			$data[$id] = $personData;
 		}
 		return new ResponseItem(null, null, RestFulCollection::createFromEntry($data));
 	}
