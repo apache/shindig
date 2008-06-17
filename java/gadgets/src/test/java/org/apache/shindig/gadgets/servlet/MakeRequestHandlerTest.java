@@ -61,8 +61,6 @@ public class MakeRequestHandlerTest {
   private final ServletTestFixture fixture = new ServletTestFixture();
   private final MakeRequestHandler handler = new MakeRequestHandler(fixture.contentFetcherFactory,
       fixture.securityTokenDecoder, fixture.rewriter);
-  private final HttpServletResponseRecorder recorder
-      = new HttpServletResponseRecorder(fixture.response);
 
   private void expectGetAndReturnBody(String response) throws Exception {
     expectGetAndReturnBody(fixture.httpFetcher, response);
@@ -87,7 +85,7 @@ public class MakeRequestHandlerTest {
   }
 
   private JSONObject extractJsonFromResponse() throws JSONException {
-    String body = recorder.getResponseAsString();
+    String body = fixture.recorder.getResponseAsString();
     assertStartsWith(MakeRequestHandler.UNPARSEABLE_CRUFT, body);
     body = body.substring(MakeRequestHandler.UNPARSEABLE_CRUFT.length());
     return new JSONObject(body).getJSONObject(REQUEST_URL);
@@ -105,7 +103,7 @@ public class MakeRequestHandlerTest {
     expectGetAndReturnBody(RESPONSE_BODY);
     fixture.replay();
 
-    handler.fetch(fixture.request, recorder);
+    handler.fetch(fixture.request, fixture.recorder);
 
     JSONObject results = extractJsonFromResponse();
     assertEquals(HttpResponse.SC_OK, results.getInt("rc"));
@@ -130,7 +128,7 @@ public class MakeRequestHandlerTest {
     expect(fixture.request.getParameter(MakeRequestHandler.HEADERS_PARAM)).andReturn(headerString);
     fixture.replay();
 
-    handler.fetch(fixture.request, recorder);
+    handler.fetch(fixture.request, fixture.recorder);
     fixture.verify();
 
     assertEquals("bar", requests.get(0).getHeader("X-Foo"));
@@ -147,7 +145,7 @@ public class MakeRequestHandlerTest {
     expect(fixture.request.getParameter(MakeRequestHandler.METHOD_PARAM)).andReturn("POST");
     fixture.replay();
 
-    handler.fetch(fixture.request, recorder);
+    handler.fetch(fixture.request, fixture.recorder);
     JSONObject results = extractJsonFromResponse();
 
     assertEquals(HttpResponse.SC_OK, results.getInt("rc"));
@@ -174,7 +172,7 @@ public class MakeRequestHandlerTest {
     expect(fixture.request.getParameter(MakeRequestHandler.CONTENT_TYPE_PARAM)).andReturn("FEED");
     fixture.replay();
 
-    handler.fetch(fixture.request, recorder);
+    handler.fetch(fixture.request, fixture.recorder);
     JSONObject results = extractJsonFromResponse();
 
     JSONObject feed = new JSONObject(results.getString("body"));
@@ -218,7 +216,7 @@ public class MakeRequestHandlerTest {
     expect(fixture.request.getParameter(MakeRequestHandler.CONTENT_TYPE_PARAM)).andReturn("FEED");
     fixture.replay();
 
-    handler.fetch(fixture.request, recorder);
+    handler.fetch(fixture.request, fixture.recorder);
     JSONObject results = extractJsonFromResponse();
 
     JSONObject feed = new JSONObject(results.getString("body"));
@@ -238,7 +236,7 @@ public class MakeRequestHandlerTest {
     expectGetAndReturnBody("");
     fixture.replay();
 
-    handler.fetch(fixture.request, recorder);
+    handler.fetch(fixture.request, fixture.recorder);
     JSONObject results = extractJsonFromResponse();
 
     assertEquals(HttpResponse.SC_OK, results.getInt("rc"));
@@ -258,7 +256,7 @@ public class MakeRequestHandlerTest {
         .andReturn(new HttpResponse(RESPONSE_BODY));
     fixture.replay();
 
-    handler.fetch(fixture.request, recorder);
+    handler.fetch(fixture.request, fixture.recorder);
     JSONObject results = extractJsonFromResponse();
 
     assertEquals(RESPONSE_BODY, results.get("body"));
@@ -276,7 +274,7 @@ public class MakeRequestHandlerTest {
         .andReturn(Auth.SIGNED.toString()).atLeastOnce();
     fixture.replay();
 
-    handler.fetch(fixture.request, recorder);
+    handler.fetch(fixture.request, fixture.recorder);
     JSONObject results = extractJsonFromResponse();
 
     assertEquals(RESPONSE_BODY, results.get("body"));
@@ -297,7 +295,7 @@ public class MakeRequestHandlerTest {
         .andReturn(Auth.SIGNED.toString()).atLeastOnce();
     fixture.replay();
 
-    handler.fetch(fixture.request, recorder);
+    handler.fetch(fixture.request, fixture.recorder);
     JSONObject results = extractJsonFromResponse();
 
     assertEquals(RESPONSE_BODY, results.get("body"));
@@ -317,7 +315,7 @@ public class MakeRequestHandlerTest {
         .andReturn(Auth.AUTHENTICATED.toString()).atLeastOnce();
     fixture.replay();
 
-    handler.fetch(fixture.request, recorder);
+    handler.fetch(fixture.request, fixture.recorder);
     JSONObject results = extractJsonFromResponse();
 
     assertEquals(HttpResponse.SC_OK, results.getInt("rc"));
@@ -330,7 +328,7 @@ public class MakeRequestHandlerTest {
     expect(fixture.request.getParameter(Preload.AUTHZ_ATTR)).andReturn("garbage");
     fixture.replay();
 
-    handler.fetch(fixture.request, recorder);
+    handler.fetch(fixture.request, fixture.recorder);
     JSONObject results = extractJsonFromResponse();
 
     assertEquals(HttpResponse.SC_OK, results.getInt("rc"));
@@ -343,7 +341,7 @@ public class MakeRequestHandlerTest {
     expect(fixture.httpFetcher.fetch(request)).andReturn(HttpResponse.error());
     fixture.replay();
 
-    handler.fetch(fixture.request, recorder);
+    handler.fetch(fixture.request, fixture.recorder);
     JSONObject results = extractJsonFromResponse();
 
     assertEquals(HttpResponse.SC_INTERNAL_SERVER_ERROR, results.getInt("rc"));
@@ -359,10 +357,10 @@ public class MakeRequestHandlerTest {
         .andThrow(new SecurityTokenException("No!"));
     fixture.replay();
 
-    handler.fetch(fixture.request, recorder);
+    handler.fetch(fixture.request, fixture.recorder);
 
     assertTrue("Response for bad tokens should not be SC_OK",
-        HttpServletResponse.SC_OK != recorder.getHttpStatusCode());
+        HttpServletResponse.SC_OK != fixture.recorder.getHttpStatusCode());
   }
 
   @Test
@@ -373,7 +371,7 @@ public class MakeRequestHandlerTest {
     expect(fixture.httpFetcher.fetch(request)).andReturn(response);
     fixture.replay();
 
-    handler.fetch(fixture.request, recorder);
+    handler.fetch(fixture.request, fixture.recorder);
     JSONObject results = extractJsonFromResponse();
 
     assertEquals(RESPONSE_BODY, results.getString("foo"));

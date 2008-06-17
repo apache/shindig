@@ -21,8 +21,8 @@ package org.apache.shindig.gadgets.servlet;
 import static org.easymock.EasyMock.expect;
 import static org.easymock.EasyMock.isA;
 
-import org.apache.shindig.gadgets.ContainerConfig;
 import org.apache.shindig.common.testing.FakeGadgetToken;
+import org.apache.shindig.gadgets.ContainerConfig;
 import org.apache.shindig.gadgets.Gadget;
 import org.apache.shindig.gadgets.GadgetContext;
 import org.apache.shindig.gadgets.http.HttpRequest;
@@ -33,14 +33,13 @@ import org.easymock.EasyMock;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
-import java.io.ByteArrayOutputStream;
-import java.io.PrintWriter;
 import java.net.URI;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Enumeration;
 import java.util.List;
 
+// TODO: Migrate this to new Servlet testing setup.
 public class GadgetRenderingTaskTest extends HttpTestFixture {
 
   final static Enumeration<String> EMPTY_PARAMS = new Enumeration<String>() {
@@ -52,12 +51,10 @@ public class GadgetRenderingTaskTest extends HttpTestFixture {
     }
   };
 
-  final ByteArrayOutputStream baos = new ByteArrayOutputStream();
-  final PrintWriter writer = new PrintWriter(baos);
+  final ServletTestFixture fixture = new ServletTestFixture();
 
   final static URI SPEC_URL = URI.create("http://example.org/gadget.xml");
-  final static HttpRequest SPEC_REQUEST
-      = new HttpRequest(SPEC_URL);
+  final static HttpRequest SPEC_REQUEST = new HttpRequest(SPEC_URL);
   final static String CONTENT = "Hello, world!";
   final static String ALT_CONTENT = "Goodbye, city.";
   final static String SPEC_XML
@@ -80,24 +77,25 @@ public class GadgetRenderingTaskTest extends HttpTestFixture {
     expectLockedDomainCheck();
     expectWriteResponse();
     replay();
-    gadgetRenderer.process(request, response);
+    fixture.replay();
+    gadgetRenderer.process(fixture.request, fixture.recorder);
     verify();
-    writer.close();
-    return new String(baos.toByteArray(), "UTF-8");
+    fixture.verify();
+    return fixture.recorder.getResponseAsString();
   }
 
   private void expectParseRequestParams(String view) throws Exception {
-    expect(request.getParameter("url")).andReturn(SPEC_URL.toString());
-    expect(request.getParameter("view")).andReturn(view);
-    expect(request.getParameterNames()).andReturn(EMPTY_PARAMS);
-    expect(request.getParameter("container")).andReturn(null);
-    expect(request.getHeader("Host")).andReturn("www.example.com");
+    expect(fixture.request.getParameter("url")).andReturn(SPEC_URL.toString());
+    expect(fixture.request.getParameter("view")).andReturn(view);
+    expect(fixture.request.getParameterNames()).andReturn(EMPTY_PARAMS);
+    expect(fixture.request.getParameter("container")).andReturn(null);
+    expect(fixture.request.getHeader("Host")).andReturn("www.example.com");
   }
 
   private void expectLockedDomainCheck() throws Exception {
     expect(lockedDomainService.gadgetCanRender(
         EasyMock.eq("www.example.com"),
-        (Gadget)EasyMock.anyObject(),
+        isA(Gadget.class),
         EasyMock.eq("default"))).andReturn(true);
   }
 
@@ -106,8 +104,7 @@ public class GadgetRenderingTaskTest extends HttpTestFixture {
   }
 
   private void expectWriteResponse() throws Exception {
-    expect(request.getParameter("libs")).andReturn(LIBS);
-    expect(response.getWriter()).andReturn(writer);
+    expect(fixture.request.getParameter("libs")).andReturn(LIBS);
   }
 
   public void testStandardsMode() throws Exception {
@@ -152,26 +149,26 @@ public class GadgetRenderingTaskTest extends HttpTestFixture {
     expectLockedDomainFailure();
     expectSendRedirect();
     replay();
-    gadgetRenderer.process(request, response);
+    fixture.replay();
+    gadgetRenderer.process(fixture.request, response);
     verify();
-    writer.close();
+    fixture.verify();
   }
 
   private void expectLockedDomainFailure() {
     expect(lockedDomainService.gadgetCanRender(
         EasyMock.eq("www.example.com"),
-        (Gadget)EasyMock.anyObject(),
+        isA(Gadget.class),
         EasyMock.eq("default"))).andReturn(false);
-    expect(request.getScheme()).andReturn("http");
-    expect(request.getServletPath()).andReturn("/gadgets/ifr");
-    expect(request.getQueryString()).andReturn("stuff=foo%20bar");
+    expect(fixture.request.getScheme()).andReturn("http");
+    expect(fixture.request.getServletPath()).andReturn("/gadgets/ifr");
+    expect(fixture.request.getQueryString()).andReturn("stuff=foo%20bar");
     expect(lockedDomainService.getLockedDomainForGadget(
         SPEC_URL.toString(), "default")).andReturn("locked.example.com");
   }
 
   private void expectSendRedirect() throws Exception {
-    response.sendRedirect(
-        "http://locked.example.com/gadgets/ifr?stuff=foo%20bar");
+    response.sendRedirect("http://locked.example.com/gadgets/ifr?stuff=foo%20bar");
     EasyMock.expectLastCall().once();
   }
 
@@ -202,7 +199,7 @@ public class GadgetRenderingTaskTest extends HttpTestFixture {
   }
 
   public void testAuthTokenInjection_allparams() throws Exception {
-    expect(request.getParameter("st")).andReturn("fake-token");
+    expect(fixture.request.getParameter("st")).andReturn("fake-token");
     expect(securityTokenDecoder.createToken("fake-token")).andReturn(
         new FakeGadgetToken("updated-token", "{ 'foo' : 'bar' }"));
     String content = parseBasicGadget(GadgetSpec.DEFAULT_VIEW);
@@ -212,7 +209,7 @@ public class GadgetRenderingTaskTest extends HttpTestFixture {
   }
 
   public void testAuthTokenInjection_none() throws Exception {
-    expect(request.getParameter("st")).andReturn("fake-token");
+    expect(fixture.request.getParameter("st")).andReturn("fake-token");
     expect(securityTokenDecoder.createToken("fake-token")).andReturn(
         new FakeGadgetToken());
     String content = parseBasicGadget(GadgetSpec.DEFAULT_VIEW);
@@ -221,7 +218,7 @@ public class GadgetRenderingTaskTest extends HttpTestFixture {
   }
 
   public void testAuthTokenInjection_trustedJson() throws Exception {
-    expect(request.getParameter("st")).andReturn("fake-token");
+    expect(fixture.request.getParameter("st")).andReturn("fake-token");
     expect(securityTokenDecoder.createToken("fake-token")).andReturn(
         new FakeGadgetToken(null, "trusted"));
     String content = parseBasicGadget(GadgetSpec.DEFAULT_VIEW);
@@ -231,13 +228,30 @@ public class GadgetRenderingTaskTest extends HttpTestFixture {
   }
 
   public void testAuthTokenInjection_updatedToken() throws Exception {
-    expect(request.getParameter("st")).andReturn("fake-token");
+    expect(fixture.request.getParameter("st")).andReturn("fake-token");
     expect(securityTokenDecoder.createToken("fake-token")).andReturn(
         new FakeGadgetToken("updated-token", null));
     String content = parseBasicGadget(GadgetSpec.DEFAULT_VIEW);
     JSONObject auth = parseShindigAuthConfig(content);
     assertEquals(1, auth.length());
     assertEquals("updated-token", auth.getString("authToken"));
+  }
+
+  public void testRenderSetsProperCacheControlHeaders() throws Exception {
+    String content = parseBasicGadget(GadgetSpec.DEFAULT_VIEW);
+    fixture.checkCacheControlHeaders(GadgetRenderingTask.DEFAULT_CACHE_TTL, true);
+  }
+
+  public void testRenderSetsLongLivedCacheControlHeadersWhenVParamIsSet() throws Exception {
+    expect(fixture.request.getParameter("v")).andReturn("some value");
+    String content = parseBasicGadget(GadgetSpec.DEFAULT_VIEW);
+    fixture.checkCacheControlHeaders(HttpUtil.DEFAULT_TTL, true);
+  }
+
+  public void testRenderSetsNoCacheHeadersWhenNoCacheParamIsSet() throws Exception {
+    expect(fixture.request.getParameter("nocache")).andReturn("1");
+    String content = parseBasicGadget(GadgetSpec.DEFAULT_VIEW);
+    fixture.checkCacheControlHeaders(0, true);
   }
 
   // TODO: Lots of ugly tests on html content.

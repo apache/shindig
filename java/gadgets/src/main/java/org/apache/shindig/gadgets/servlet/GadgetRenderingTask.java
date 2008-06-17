@@ -69,11 +69,12 @@ import javax.servlet.http.HttpServletResponse;
  * Represents a single rendering task
  */
 public class GadgetRenderingTask {
-  private static final String CAJA_PARAM = "caja";
-  private static final String LIBS_PARAM_NAME = "libs";
-  private static final Logger logger
+  protected static final int DEFAULT_CACHE_TTL = 60 * 5;
+  protected static final String CAJA_PARAM = "caja";
+  protected static final String LIBS_PARAM_NAME = "libs";
+  protected static final Logger logger
       = Logger.getLogger("org.apache.shindig.gadgets");
-  public static final String STRICT_MODE_DOCTYPE = "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01//EN\" \"http://www.w3.org/TR/html4/strict.dtd\">";
+  protected static final String STRICT_MODE_DOCTYPE = "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01//EN\" \"http://www.w3.org/TR/html4/strict.dtd\">";
 
   private HttpServletRequest request;
   private HttpServletResponse response;
@@ -311,11 +312,11 @@ public class GadgetRenderingTask {
       HttpUtil.setCachingHeaders(response, 0);
     } else if (request.getParameter("v") != null) {
       // Versioned files get cached indefinitely
-      HttpUtil.setCachingHeaders(response);
+      HttpUtil.setCachingHeaders(response, true);
     } else {
       // Unversioned files get cached for 5 minutes.
       // TODO: This should be configurable
-      HttpUtil.setCachingHeaders(response, 60 * 5);
+      HttpUtil.setCachingHeaders(response, DEFAULT_CACHE_TTL, true);
     }
     response.getWriter().print(markup.toString());
   }

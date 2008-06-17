@@ -18,11 +18,16 @@
  */
 package org.apache.shindig.gadgets.servlet;
 
+import static junitx.framework.ComparableAssert.assertEquals;
+import static junitx.framework.ComparableAssert.assertGreater;
+import static junitx.framework.ComparableAssert.assertLesser;
 import static org.easymock.EasyMock.expect;
 import static org.easymock.EasyMock.isA;
+import static org.junit.Assert.assertTrue;
 
 import org.apache.shindig.common.SecurityToken;
 import org.apache.shindig.common.SecurityTokenDecoder;
+import org.apache.shindig.common.util.DateUtil;
 import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.LockedDomainService;
 import org.apache.shindig.gadgets.SigningFetcher;
@@ -33,9 +38,11 @@ import org.apache.shindig.gadgets.oauth.OAuthRequestParams;
 import org.apache.shindig.gadgets.rewrite.ContentRewriter;
 import org.apache.shindig.gadgets.rewrite.NoOpContentRewriter;
 
+import org.apache.commons.lang.StringUtils;
 import org.easymock.classextension.EasyMock;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
@@ -49,6 +56,7 @@ public class ServletTestFixture {
 
   public final HttpServletRequest request = mock(HttpServletRequest.class);
   public final HttpServletResponse response = mock(HttpServletResponse.class);
+  public final HttpServletResponseRecorder recorder = new HttpServletResponseRecorder(response);
   public final SecurityTokenDecoder securityTokenDecoder = mock(SecurityTokenDecoder.class);
   public final HttpFetcher httpFetcher = mock(HttpFetcher.class);
   public final SigningFetcher signingFetcher = mock(SigningFetcher.class);
@@ -68,6 +76,42 @@ public class ServletTestFixture {
           .andReturn(oauthFetcher).anyTimes();
     } catch (GadgetException e) {
       // Blah
+    }
+  }
+
+  private final long testStartTime = System.currentTimeMillis();
+
+  public void checkCacheControlHeaders(int ttl, boolean noProxy) {
+
+    long expires = DateUtil.parseDate(recorder.getHeader("Expires")).getTime();
+
+    // TODO: A better solution here would be an injectable clock. For now a 1 second fudge is used.
+    long lowerBound = testStartTime + (1000L * (ttl - 1));
+    long upperBound = lowerBound + 6000L;
+
+    assertGreater("Expires should be at least " + ttl + " seconds more than start time.",
+        lowerBound, expires);
+
+    assertLesser("Expires should be within 5 seconds of the requested value.",
+        upperBound, expires);
+
+    if (ttl == 0) {
+      assertEquals("no-cache", recorder.getHeader("Pragma"));
+      assertEquals("no-cache", recorder.getHeader("Cache-Control"));
+    } else {
+      List<String> directives
+          = Arrays.asList(StringUtils.split(recorder.getHeader("Cache-Control"), ','));
+
+      assertTrue("Incorrect max-age set.", directives.contains("max-age=" + ttl));
+      if (noProxy) {
+        assertTrue("No private Cache-Control directive was set.", directives.contains("private"));
+      } else {
+        assertTrue("No public Cache-Control directive was set.", directives.contains("public"));
+      }
+
+      long lastModified = DateUtil.parseDate(recorder.getHeader("Last-Modified")).getTime();
+
+      assertGreater("Invalid Last-Modified header set.", 0L, lastModified);
     }
   }
 

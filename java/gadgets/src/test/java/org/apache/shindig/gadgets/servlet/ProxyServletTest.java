@@ -52,8 +52,6 @@ public class ProxyServletTest {
   private final ProxyHandler proxyHandler
       = new ProxyHandler(fixture.httpFetcher, fixture.lockedDomainService, fixture.rewriter);
   private final ProxyServlet servlet = new ProxyServlet();
-  private final HttpServletResponseRecorder recorder
-      = new HttpServletResponseRecorder(fixture.response);
   private final HttpRequest request = HttpRequest.getRequest(URI.create(REQUEST_URL), false);
   private final HttpResponse response = new HttpResponse(RESPONSE_BODY);
 
@@ -76,8 +74,8 @@ public class ProxyServletTest {
   }
 
   private void assertResponseOk(int expectedStatus, String expectedBody) {
-      assertEquals(expectedStatus, recorder.getHttpStatusCode());
-      assertEquals(expectedBody, recorder.getResponseAsString());
+      assertEquals(expectedStatus, fixture.recorder.getHttpStatusCode());
+      assertEquals(expectedBody, fixture.recorder.getResponseAsString());
   }
 
   @Test
@@ -86,7 +84,7 @@ public class ProxyServletTest {
     expect(fixture.httpFetcher.fetch(request)).andReturn(response);
     fixture.replay();
 
-    servlet.doGet(fixture.request, recorder);
+    servlet.doGet(fixture.request, fixture.recorder);
 
     assertResponseOk(HttpResponse.SC_OK, RESPONSE_BODY);
   }
@@ -97,7 +95,7 @@ public class ProxyServletTest {
     expect(fixture.httpFetcher.fetch(request)).andReturn(HttpResponse.notFound());
     fixture.replay();
 
-    servlet.doGet(fixture.request, recorder);
+    servlet.doGet(fixture.request, fixture.recorder);
 
     assertResponseOk(HttpResponse.SC_NOT_FOUND, "");
   }
@@ -109,10 +107,10 @@ public class ProxyServletTest {
         new GadgetException(GadgetException.Code.FAILED_TO_RETRIEVE_CONTENT, ERROR_MESSAGE));
     fixture.replay();
 
-    servlet.doGet(fixture.request, recorder);
+    servlet.doGet(fixture.request, fixture.recorder);
 
-    assertEquals(HttpServletResponse.SC_BAD_REQUEST, recorder.getHttpStatusCode());
-    assertContains(ERROR_MESSAGE, recorder.getResponseAsString());
+    assertEquals(HttpServletResponse.SC_BAD_REQUEST, fixture.recorder.getHttpStatusCode());
+    assertContains(ERROR_MESSAGE, fixture.recorder.getResponseAsString());
   }
 
   @Test
@@ -122,7 +120,7 @@ public class ProxyServletTest {
     expect(fixture.httpFetcher.fetch(request)).andReturn(response);
     fixture.replay();
 
-    servlet.doGet(fixture.request, recorder);
+    servlet.doGet(fixture.request, fixture.recorder);
 
     assertResponseOk(HttpResponse.SC_OK, RESPONSE_BODY);
   }
