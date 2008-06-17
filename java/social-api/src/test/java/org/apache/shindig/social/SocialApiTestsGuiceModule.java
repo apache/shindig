@@ -39,6 +39,9 @@ import org.apache.shindig.social.samplecontainer.BasicPeopleService;
 import org.apache.shindig.social.samplecontainer.XmlStateFileFetcher;
 import org.apache.shindig.social.samplecontainer.SampleContainerRouteManager;
 import org.apache.shindig.social.abdera.SocialRouteManager;
+import org.apache.shindig.social.dataservice.PersonService;
+import org.apache.shindig.social.dataservice.ActivityService;
+import org.apache.shindig.social.dataservice.AppDataService;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
@@ -64,6 +67,10 @@ public class SocialApiTestsGuiceModule extends AbstractModule {
     bind(PeopleService.class).to(BasicPeopleService.class);
     bind(DataService.class).to(BasicDataService.class);
     bind(ActivitiesService.class).to(BasicActivitiesService.class);
+
+    bind(PersonService.class).to(BasicPeopleService.class);
+    bind(ActivityService.class).to(BasicActivitiesService.class);
+    bind(AppDataService.class).to(BasicDataService.class);
 
     bind(XmlStateFileFetcher.class).to(MockXmlStateFileFetcher.class);
     bind(SocialRouteManager.class).to(SampleContainerRouteManager.class);

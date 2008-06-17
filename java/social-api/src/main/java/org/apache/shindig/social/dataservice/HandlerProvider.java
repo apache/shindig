@@ -28,6 +28,11 @@ import java.util.Map;
 public class HandlerProvider {
   Map<String, Class<? extends DataRequestHandler>> handlers;
 
+  // Used by tests
+  public HandlerProvider(Map<String, Class<? extends DataRequestHandler>> handlers) {
+    this.handlers = handlers;
+  }
+
   @Inject
   public HandlerProvider(PersonHandler peopleHandler, ActivityHandler activityHandler,
       AppDataHandler appDataHandler) {
