@@ -380,6 +380,9 @@ class GadgetContext {
 		if (! isset($token) || $token == '') {
 			$token = isset($_POST['st']) ? $_POST['st'] : '';
 		}
+		if (count(explode(':', $token)) != 6) {
+			$token = urldecode(base64_decode($token));
+		}
 		return $signer->createToken($token);
 	}
 
