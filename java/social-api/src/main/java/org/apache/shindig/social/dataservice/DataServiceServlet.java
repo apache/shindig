@@ -27,11 +27,13 @@ import org.apache.shindig.common.servlet.InjectedServlet;
 import org.apache.shindig.social.opensocial.util.BeanConverter;
 import org.apache.shindig.social.opensocial.util.BeanJsonConverter;
 import org.apache.shindig.social.opensocial.util.BeanXmlConverter;
+import org.apache.shindig.social.ResponseItem;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.Map;
 import java.util.logging.Logger;
 
@@ -113,17 +115,30 @@ public class DataServiceServlet extends InjectedServlet {
     }
 
     DataRequestHandler handler = injector.getInstance(handlerClass);
-    handler.setConverter(getConverterForRequest(servletRequest));
+    BeanConverter converter = getConverterForRequest(servletRequest);
+    // TODO: Move all conversions out of the handler up into the servlet layer
+    handler.setConverter(converter);
 
     String method = getHttpMethodFromParameter(servletRequest.getMethod(),
         servletRequest.getParameter(X_HTTP_METHOD_OVERRIDE));
+
+    SecurityToken token;
     try {
-      SecurityToken token = securityTokenDecoder.createToken(
-          servletRequest.getParameter(SECURITY_TOKEN_PARAM));
-      handler.handleMethod(method, servletRequest, servletResponse, token);
+      token = securityTokenDecoder.createToken(servletRequest.getParameter(SECURITY_TOKEN_PARAM));
     } catch (SecurityTokenException e) {
       throw new RuntimeException(
           "Implement error return for bad security token.");
+    }
+
+    ResponseItem responseItem = handler.handleMethod(
+        new RequestItem(servletRequest, token, method));
+
+    if (responseItem.getError() == null) {
+      PrintWriter writer = servletResponse.getWriter();
+      writer.write(converter.convertToString(responseItem.getResponse()));
+    } else {
+      servletResponse.sendError(responseItem.getError().getHttpErrorCode(),
+          responseItem.getErrorMessage());
     }
   }
 

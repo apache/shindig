@@ -19,16 +19,11 @@ package org.apache.shindig.social.dataservice;
 
 import org.apache.shindig.common.SecurityToken;
 import org.apache.shindig.social.ResponseItem;
-import org.apache.shindig.social.ResponseError;
 import org.apache.shindig.social.opensocial.util.BeanConverter;
 
 import com.google.common.collect.Lists;
 import org.apache.commons.lang.StringUtils;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
-import java.io.PrintWriter;
 import java.util.List;
 
 public abstract class DataRequestHandler {
@@ -39,77 +34,65 @@ public abstract class DataRequestHandler {
     this.converter = converter;
   }
 
-  public void handleMethod(String httpMethod, HttpServletRequest servletRequest,
-      HttpServletResponse servletResponse, SecurityToken token)
-      throws IOException {
+  public ResponseItem handleMethod(RequestItem request) {
+    String httpMethod = request.getMethod();
     if (StringUtils.isBlank(httpMethod)) {
       throw new IllegalArgumentException("Unserviced Http method type");
     }
     ResponseItem responseItem;
+
     if (httpMethod.equals("GET")) {
-      responseItem = handleGet(servletRequest, token);
+      responseItem = handleGet(request);
     } else if (httpMethod.equals("POST")) {
-      responseItem = handlePost(servletRequest, token);
+      responseItem = handlePost(request);
     } else if (httpMethod.equals("PUT")) {
-      responseItem = handlePut(servletRequest, token);
+      responseItem = handlePut(request);
     } else if (httpMethod.equals("DELETE")) {
-      responseItem = handleDelete(servletRequest, token);
+      responseItem = handleDelete(request);
     } else {
       throw new IllegalArgumentException("Unserviced Http method type");
     }
-    if (responseItem.getError() == null) {
-      PrintWriter writer = servletResponse.getWriter();
-      writer.write(converter.convertToString(responseItem.getResponse()));
-    } else {
-      servletResponse.sendError(responseItem.getError().getHttpErrorCode(),
-          responseItem.getErrorMessage());
-    }
+    return responseItem;
   }
 
-  abstract ResponseItem handleDelete(HttpServletRequest servletRequest,
-      SecurityToken token);
+  abstract ResponseItem handleDelete(RequestItem request);
 
-  abstract ResponseItem handlePut(HttpServletRequest servletRequest,
-      SecurityToken token);
+  abstract ResponseItem handlePut(RequestItem request);
 
-  abstract ResponseItem handlePost(HttpServletRequest servletRequest,
-      SecurityToken token);
+  abstract ResponseItem handlePost(RequestItem request);
 
-  abstract ResponseItem handleGet(HttpServletRequest servletRequest,
-      SecurityToken token);
+  abstract ResponseItem handleGet(RequestItem request);
 
-  protected static String[] getParamsFromRequest(HttpServletRequest servletRequest) {
-    return getQueryPath(servletRequest).split("/");
+  protected static String[] getParamsFromRequest(RequestItem request) {
+    return getQueryPath(request).split("/");
   }
 
-  /*package-protected*/ static String getQueryPath(HttpServletRequest servletRequest) {
-    String pathInfo = servletRequest.getPathInfo();
+  /*package-protected*/ static String getQueryPath(RequestItem request) {
+    String pathInfo = request.getUrl();
     int index = pathInfo.indexOf('/', 1);
     return pathInfo.substring(index + 1);
   }
 
-  protected static <T extends Enum<T>> T getEnumParam(
-      HttpServletRequest servletRequest, String paramName, T defaultValue,
-      Class<T> enumClass) {
-    String paramValue = servletRequest.getParameter(paramName);
+  protected static <T extends Enum<T>> T getEnumParam(RequestItem request, String paramName,
+      T defaultValue, Class<T> enumClass) {
+    String paramValue = request.getParameters().get(paramName);
     if (paramValue != null) {
       return Enum.valueOf(enumClass, paramValue);
     }
     return defaultValue;
   }
 
-  protected static int getIntegerParam(HttpServletRequest servletRequest,
-      String paramName, int defaultValue) {
-    String paramValue = servletRequest.getParameter(paramName);
+  protected static int getIntegerParam(RequestItem request, String paramName, int defaultValue) {
+    String paramValue = request.getParameters().get(paramName);
     if (paramValue != null) {
       return new Integer(paramValue);
     }
     return defaultValue;
   }
 
-  protected static List<String> getListParam(HttpServletRequest servletRequest,
-      String paramName, List<String> defaultValue) {
-    String paramValue = servletRequest.getParameter(paramName);
+  protected static List<String> getListParam(RequestItem request, String paramName,
+      List<String> defaultValue) {
+    String paramValue = request.getParameters().get(paramName);
     if (paramValue != null) {
       return Lists.newArrayList(paramValue.split(","));
     }

@@ -17,15 +17,12 @@
  */
 package org.apache.shindig.social.dataservice;
 
-import org.apache.shindig.common.SecurityToken;
 import org.apache.shindig.social.ResponseItem;
-import org.apache.shindig.social.opensocial.util.BeanJsonConverter;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.inject.Inject;
 
-import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 import java.util.Map;
 
@@ -48,20 +45,17 @@ public class AppDataHandler extends DataRequestHandler {
    * The post data should be a regular json object. All of the fields vars will
    * be pulled from the values and set on the person object. If there are no
    * fields vars then all of the data will be overridden.
+   * @param request
    */
-  ResponseItem handleDelete(HttpServletRequest servletRequest,
-      SecurityToken token) {
-    String[] segments = getParamsFromRequest(servletRequest);
+  ResponseItem handleDelete(RequestItem request) {
+    String[] segments = getParamsFromRequest(request);
 
     UserId userId = UserId.fromJson(segments[0]);
     GroupId groupId = GroupId.fromJson(segments[1]);
-    String appId = getAppId(segments[2], token);
+    String appId = getAppId(segments[2], request.getToken());
 
-    List<String> fields = getListParam(servletRequest, "fields",
-        Lists.<String>newArrayList());
-
-    return service.deletePersonData(userId, groupId, fields,
-        appId, token);
+    List<String> fields = getListParam(request, "fields", Lists.<String>newArrayList());
+    return service.deletePersonData(userId, groupId, fields, appId, request.getToken());
   }
 
   /**
@@ -76,9 +70,8 @@ public class AppDataHandler extends DataRequestHandler {
    * be pulled from the values and set on the person object. If there are no
    * fields vars then all of the data will be overridden.
    */
-  ResponseItem handlePut(HttpServletRequest servletRequest,
-      SecurityToken token) {
-    return handlePost(servletRequest, token);
+  ResponseItem handlePut(RequestItem request) {
+    return handlePost(request);
   }
 
   /**
@@ -93,24 +86,23 @@ public class AppDataHandler extends DataRequestHandler {
    * be pulled from the values and set on the person object. If there are no
    * fields vars then all of the data will be overridden.
    */
-  ResponseItem handlePost(HttpServletRequest servletRequest,
-      SecurityToken token) {
-    String[] segments = getParamsFromRequest(servletRequest);
+  ResponseItem handlePost(RequestItem request) {
+    String[] segments = getParamsFromRequest(request);
 
     UserId userId = UserId.fromJson(segments[0]);
     GroupId groupId = GroupId.fromJson(segments[1]);
-    String appId = getAppId(segments[2], token);
+    String appId = getAppId(segments[2], request.getToken());
 
-    List<String> fields = getListParam(servletRequest, "fields",
+    List<String> fields = getListParam(request, "fields",
         Lists.<String>newArrayList());
 
-    String jsonAppData = servletRequest.getParameter("entry");
+    String jsonAppData = request.getParameters().get("entry");
     Map<String, String> values = Maps.newHashMap();
     values = converter.convertToObject(jsonAppData,
         (Class<Map<String, String>>) values.getClass());
 
     return service.updatePersonData(userId, groupId, fields, values,
-        appId, token);
+        appId, request.getToken());
   }
 
   /**
@@ -121,18 +113,17 @@ public class AppDataHandler extends DataRequestHandler {
    * /appdata/john.doe/@friends/app?fields=count
    * /appdata/john.doe/@self/app
    */
-  ResponseItem handleGet(HttpServletRequest servletRequest,
-      SecurityToken token) {
-    String[] segments = getParamsFromRequest(servletRequest);
+  ResponseItem handleGet(RequestItem request) {
+    String[] segments = getParamsFromRequest(request);
 
     UserId userId = UserId.fromJson(segments[0]);
     GroupId groupId = GroupId.fromJson(segments[1]);
-    String appId = getAppId(segments[2], token);
+    String appId = getAppId(segments[2], request.getToken());
 
-    List<String> fields = getListParam(servletRequest, "fields",
+    List<String> fields = getListParam(request, "fields",
         Lists.<String>newArrayList());
 
-    return service.getPersonData(userId, groupId, fields, appId, token);
+    return service.getPersonData(userId, groupId, fields, appId, request.getToken());
   }
 
 }

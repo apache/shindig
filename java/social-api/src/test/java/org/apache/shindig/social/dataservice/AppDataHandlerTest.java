@@ -28,20 +28,20 @@ import org.easymock.classextension.EasyMock;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.HashMap;
+import java.util.Map;
 
 public class AppDataHandlerTest extends TestCase {
   private BeanJsonConverter converter;
-  private HttpServletRequest servletRequest;
   private AppDataService appDataService;
   private AppDataHandler handler;
   private FakeGadgetToken token;
+  private RequestItem request;
 
 
   @Override
   protected void setUp() throws Exception {
     token = new FakeGadgetToken();
     converter = EasyMock.createMock(BeanJsonConverter.class);
-    servletRequest = EasyMock.createMock(HttpServletRequest.class);
     appDataService = EasyMock.createMock(AppDataService.class);
 
     handler = new AppDataHandler(appDataService);
@@ -50,23 +50,26 @@ public class AppDataHandlerTest extends TestCase {
 
   private void replay() {
     EasyMock.replay(converter);
-    EasyMock.replay(servletRequest);
     EasyMock.replay(appDataService);
   }
 
   private void verify() {
     EasyMock.verify(converter);
-    EasyMock.verify(servletRequest);
     EasyMock.verify(appDataService);
   }
 
   private void setPath(String path) {
-    EasyMock.expect(servletRequest.getPathInfo()).andReturn(path);
+    Map<String, String> params = Maps.newHashMap();
+    params.put("fields", null);
+    this.setPathAndParams(path, params);
+  }
+
+  private void setPathAndParams(String path, Map<String, String> params) {
+    request = new RequestItem(path, params, token, null);
   }
 
   private void assertHandleGetForGroup(GroupId.Type group) {
     setPath("/activities/john.doe/@" + group.toString() + "/appId");
-    EasyMock.expect(servletRequest.getParameter("fields")).andReturn(null);
 
     ResponseItem<DataCollection> data = new ResponseItem<DataCollection>(null);
     EasyMock.expect(appDataService.getPersonData(new UserId(UserId.Type.userId, "john.doe"),
@@ -74,7 +77,7 @@ public class AppDataHandlerTest extends TestCase {
         Lists.<String>newArrayList(), "appId", token)).andReturn(data);
 
     replay();
-    assertEquals(data, handler.handleGet(servletRequest, token));
+    assertEquals(data, handler.handleGet(request));
     verify();
   }
 
@@ -91,8 +94,9 @@ public class AppDataHandlerTest extends TestCase {
   }
 
   public void testHandleGetWithoutFields() throws Exception {
-    setPath("/appData/john.doe/@friends/appId");
-    EasyMock.expect(servletRequest.getParameter("fields")).andReturn("pandas");
+    Map<String, String> params = Maps.newHashMap();
+    params.put("fields", "pandas");
+    setPathAndParams("/appData/john.doe/@friends/appId", params);
 
     ResponseItem<DataCollection> data = new ResponseItem<DataCollection>(null);
     EasyMock.expect(appDataService.getPersonData(new UserId(UserId.Type.userId, "john.doe"),
@@ -100,17 +104,19 @@ public class AppDataHandlerTest extends TestCase {
         Lists.newArrayList("pandas"), "appId", token)).andReturn(data);
 
     replay();
-    assertEquals(data, handler.handleGet(servletRequest, token));
+    assertEquals(data, handler.handleGet(request));
     verify();
   }
 
   private ResponseItem setupPostData() {
-    setPath("/appData/john.doe/@self/appId");
-    EasyMock.expect(servletRequest.getParameter("fields")).andReturn("pandas");
-
     String jsonAppData = "{pandas: 'are fuzzy'}";
+
+    Map<String, String> params = Maps.newHashMap();
+    params.put("fields", "pandas");
+    params.put("entry", jsonAppData);
+    setPathAndParams("/appData/john.doe/@self/appId", params);
+
     HashMap<String, String> values = Maps.newHashMap();
-    EasyMock.expect(servletRequest.getParameter("entry")).andReturn(jsonAppData);
     EasyMock.expect(converter.convertToObject(jsonAppData, HashMap.class)).andReturn(values);
 
     ResponseItem data = new ResponseItem<Object>(null);
@@ -123,19 +129,20 @@ public class AppDataHandlerTest extends TestCase {
 
   public void testHandlePost() throws Exception {
     ResponseItem data = setupPostData();
-    assertEquals(data, handler.handlePost(servletRequest, token));
+    assertEquals(data, handler.handlePost(request));
     verify();
   }
 
   public void testHandlePut() throws Exception {
     ResponseItem data = setupPostData();
-    assertEquals(data, handler.handlePut(servletRequest, token));
+    assertEquals(data, handler.handlePut(request));
     verify();
   }
 
   public void testHandleDelete() throws Exception {
-    setPath("/appData/john.doe/@self/appId");
-    EasyMock.expect(servletRequest.getParameter("fields")).andReturn("pandas");
+    Map<String, String> params = Maps.newHashMap();
+    params.put("fields", "pandas");
+    setPathAndParams("/appData/john.doe/@self/appId", params);
 
     ResponseItem data = new ResponseItem<Object>(null);
     EasyMock.expect(appDataService.deletePersonData(new UserId(UserId.Type.userId, "john.doe"),
@@ -143,7 +150,7 @@ public class AppDataHandlerTest extends TestCase {
         Lists.newArrayList("pandas"), "appId", token)).andReturn(data);
 
     replay();
-    assertEquals(data, handler.handleDelete(servletRequest, token));
+    assertEquals(data, handler.handleDelete(request));
     verify();
   }
 }
