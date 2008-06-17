@@ -30,6 +30,7 @@ import org.apache.shindig.social.opensocial.util.BeanXmlConverter;
 
 import com.google.common.collect.Maps;
 import com.google.inject.Guice;
+import junit.framework.TestCase;
 import org.easymock.classextension.EasyMock;
 import org.json.JSONObject;
 
@@ -43,8 +44,7 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.PrintWriter;
 import java.util.Map;
-
-import junit.framework.TestCase;
+import java.util.Vector;
 
 public abstract class AbstractLargeRestfulTests extends TestCase {
   private HttpServletRequest req;
@@ -82,6 +82,9 @@ public abstract class AbstractLargeRestfulTests extends TestCase {
     EasyMock.expect(req.getParameter("X-HTTP-Method-Override")).andStubReturn(method);
     EasyMock.expect(req.getParameter("st")).andStubReturn(
         "john.doe:john.doe:app:container.com:foo:bar");
+
+    Vector<String> vector = new Vector<String>(extraParams.keySet());
+    EasyMock.expect(req.getParameterNames()).andStubReturn(vector.elements());
 
     for (Map.Entry<String, String> entry : extraParams.entrySet()) {
       EasyMock.expect(req.getParameter(entry.getKey())).andStubReturn(entry.getValue());

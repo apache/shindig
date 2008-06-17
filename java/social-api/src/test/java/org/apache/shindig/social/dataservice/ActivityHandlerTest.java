@@ -26,21 +26,22 @@ import org.apache.shindig.common.testing.FakeGadgetToken;
 import junit.framework.TestCase;
 import org.easymock.classextension.EasyMock;
 
-import javax.servlet.http.HttpServletRequest;
+import java.util.Map;
+
+import com.google.common.collect.Maps;
 
 public class ActivityHandlerTest extends TestCase {
   private BeanJsonConverter converter;
-  private HttpServletRequest servletRequest;
   private ActivityService activityService;
   private ActivityHandler handler;
   private FakeGadgetToken token;
+  private RequestItem request;
 
 
   @Override
   protected void setUp() throws Exception {
     token = new FakeGadgetToken();
     converter = EasyMock.createMock(BeanJsonConverter.class);
-    servletRequest = EasyMock.createMock(HttpServletRequest.class);
     activityService = EasyMock.createMock(ActivityService.class);
 
     handler = new ActivityHandler(activityService);
@@ -49,18 +50,20 @@ public class ActivityHandlerTest extends TestCase {
 
   private void replay() {
     EasyMock.replay(converter);
-    EasyMock.replay(servletRequest);
     EasyMock.replay(activityService);
   }
 
   private void verify() {
     EasyMock.verify(converter);
-    EasyMock.verify(servletRequest);
     EasyMock.verify(activityService);
   }
 
   private void setPath(String path) {
-    EasyMock.expect(servletRequest.getPathInfo()).andReturn(path);
+    this.setPathAndParams(path, null);
+  }
+
+  private void setPathAndParams(String path, Map<String, String> params) {
+    request = new RequestItem(path, params, token, null);
   }
 
   private void assertHandleGetForGroup(GroupId.Type group) {
@@ -72,7 +75,7 @@ public class ActivityHandlerTest extends TestCase {
         new GroupId(group, null), token)).andReturn(data);
 
     replay();
-    assertEquals(data, handler.handleGet(servletRequest, token));
+    assertEquals(data, handler.handleGet(request));
     verify();
   }
 
@@ -97,16 +100,18 @@ public class ActivityHandlerTest extends TestCase {
         "jane.doe", token)).andReturn(data);
 
     replay();
-    assertEquals(data, handler.handleGet(servletRequest, token));
+    assertEquals(data, handler.handleGet(request));
     verify();
   }
 
   private ResponseItem setupPostData() {
-    setPath("/people/john.doe/@self");
-
     String jsonActivity = "{title: hi mom!, etc etc}";
+
+    Map<String, String> params = Maps.newHashMap();
+    params.put("entry", jsonActivity);
+    setPathAndParams("/people/john.doe/@self", params);
+
     Activity activity = new Activity();
-    EasyMock.expect(servletRequest.getParameter("entry")).andReturn(jsonActivity);
     EasyMock.expect(converter.convertToObject(jsonActivity, Activity.class)).andReturn(activity);
 
     ResponseItem data = new ResponseItem<Object>(null);
@@ -118,19 +123,19 @@ public class ActivityHandlerTest extends TestCase {
 
   public void testHandlePost() throws Exception {
     ResponseItem data = setupPostData();
-    assertEquals(data, handler.handlePost(servletRequest, token));
+    assertEquals(data, handler.handlePost(request));
     verify();
   }
 
   public void testHandlePut() throws Exception {
     ResponseItem data = setupPostData();
-    assertEquals(data, handler.handlePut(servletRequest, token));
+    assertEquals(data, handler.handlePut(request));
     verify();
   }
 
   public void testHandleDelete() throws Exception {
     replay();
-    assertEquals(ResponseError.BAD_REQUEST, handler.handleDelete(servletRequest, token).getError());
+    assertEquals(ResponseError.BAD_REQUEST, handler.handleDelete(request).getError());
     verify();
   }
 }

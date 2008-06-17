@@ -17,61 +17,56 @@
  */
 package org.apache.shindig.social.dataservice;
 
-import org.apache.shindig.social.ResponseItem;
-import org.apache.shindig.social.ResponseError;
-import org.apache.shindig.social.opensocial.model.Person;
-import org.apache.shindig.social.opensocial.util.BeanJsonConverter;
 import org.apache.shindig.common.testing.FakeGadgetToken;
+import org.apache.shindig.social.ResponseError;
+import org.apache.shindig.social.ResponseItem;
+import org.apache.shindig.social.opensocial.model.Person;
 
+import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import junit.framework.TestCase;
 import org.easymock.classextension.EasyMock;
 
-import javax.servlet.http.HttpServletRequest;
+import java.util.Map;
 
 public class PersonHandlerTest extends TestCase {
-  private BeanJsonConverter converter;
-  private HttpServletRequest servletRequest;
   private PersonService personService;
   private PersonHandler handler;
   private FakeGadgetToken token;
+  private RequestItem request;
 
   @Override
   protected void setUp() throws Exception {
     token = new FakeGadgetToken();
-    converter = EasyMock.createMock(BeanJsonConverter.class);
-    servletRequest = EasyMock.createMock(HttpServletRequest.class);
     personService = EasyMock.createMock(PersonService.class);
 
     handler = new PersonHandler(personService);
-    handler.setConverter(converter);
   }
 
   private void replay() {
-    EasyMock.replay(converter);
-    EasyMock.replay(servletRequest);
     EasyMock.replay(personService);
   }
 
   private void verify() {
-    EasyMock.verify(converter);
-    EasyMock.verify(servletRequest);
     EasyMock.verify(personService);
   }
 
-  // TODO: Make super class and pull this up
   private void setPath(String path) {
-    EasyMock.expect(servletRequest.getPathInfo()).andReturn(path);
+    Map<String, String> params = Maps.newHashMap();
+    params.put("orderBy", null);
+    params.put("filterBy", null);
+    params.put("startIndex", null);
+    params.put("count", null);
+    params.put("fields", null);
+    this.setPathAndParams(path, params);
+  }
+
+  private void setPathAndParams(String path, Map<String, String> params) {
+    request = new RequestItem(path, params, token, null);
   }
 
   public void testHandleGetAllNoParams() throws Exception {
     setPath("/people/john.doe/@all");
-
-    EasyMock.expect(servletRequest.getParameter("orderBy")).andReturn(null);
-    EasyMock.expect(servletRequest.getParameter("filterBy")).andReturn(null);
-    EasyMock.expect(servletRequest.getParameter("startIndex")).andReturn(null);
-    EasyMock.expect(servletRequest.getParameter("count")).andReturn(null);
-    EasyMock.expect(servletRequest.getParameter("fields")).andReturn(null);
 
     ResponseItem<RestfulCollection<Person>> data
         = new ResponseItem<RestfulCollection<Person>>(null);
@@ -86,18 +81,12 @@ public class PersonHandlerTest extends TestCase {
         token)).andReturn(data);
 
     replay();
-    assertEquals(data, handler.handleGet(servletRequest, token));
+    assertEquals(data, handler.handleGet(request));
     verify();
   }
 
   public void testHandleGetFriendsNoParams() throws Exception {
     setPath("/people/john.doe/@friends");
-
-    EasyMock.expect(servletRequest.getParameter("orderBy")).andReturn(null);
-    EasyMock.expect(servletRequest.getParameter("filterBy")).andReturn(null);
-    EasyMock.expect(servletRequest.getParameter("startIndex")).andReturn(null);
-    EasyMock.expect(servletRequest.getParameter("count")).andReturn(null);
-    EasyMock.expect(servletRequest.getParameter("fields")).andReturn(null);
 
     ResponseItem<RestfulCollection<Person>> data
         = new ResponseItem<RestfulCollection<Person>>(null);
@@ -112,21 +101,22 @@ public class PersonHandlerTest extends TestCase {
         token)).andReturn(data);
 
     replay();
-    assertEquals(data, handler.handleGet(servletRequest, token));
+    assertEquals(data, handler.handleGet(request));
     verify();
   }
 
   public void testHandleGetFriendsWithParams() throws Exception {
-    setPath("/people/john.doe/@friends");
-
     PersonService.SortOrder order = PersonService.SortOrder.name;
     PersonService.FilterType filter = PersonService.FilterType.topFriends;
 
-    EasyMock.expect(servletRequest.getParameter("orderBy")).andReturn(order.toString());
-    EasyMock.expect(servletRequest.getParameter("filterBy")).andReturn(filter.toString());
-    EasyMock.expect(servletRequest.getParameter("startIndex")).andReturn("5");
-    EasyMock.expect(servletRequest.getParameter("count")).andReturn("10");
-    EasyMock.expect(servletRequest.getParameter("fields")).andReturn("money,fame,fortune");
+    Map<String, String> params = Maps.newHashMap();
+    params.put("orderBy", order.toString());
+    params.put("filterBy", filter.toString());
+    params.put("startIndex", "5");
+    params.put("count", "10");
+    params.put("fields", "money,fame,fortune");
+
+    setPathAndParams("/people/john.doe/@friends", params);
 
     ResponseItem<RestfulCollection<Person>> data
         = new ResponseItem<RestfulCollection<Person>>(null);
@@ -136,7 +126,7 @@ public class PersonHandlerTest extends TestCase {
         filter, 5, 10, Sets.newHashSet("money", "fame", "fortune"), token)).andReturn(data);
 
     replay();
-    assertEquals(data, handler.handleGet(servletRequest, token));
+    assertEquals(data, handler.handleGet(request));
     verify();
   }
 
@@ -152,7 +142,7 @@ public class PersonHandlerTest extends TestCase {
         token)).andReturn(data);
 
     replay();
-    assertEquals(data, handler.handleGet(servletRequest, token));
+    assertEquals(data, handler.handleGet(request));
     verify();
   }
 
@@ -165,28 +155,25 @@ public class PersonHandlerTest extends TestCase {
         token)).andReturn(data);
 
     replay();
-    assertEquals(data, handler.handleGet(servletRequest, token));
+    assertEquals(data, handler.handleGet(request));
     verify();
   }
 
   public void testHandleDelete() throws Exception {
     replay();
-    assertEquals(ResponseError.BAD_REQUEST,
-        handler.handleDelete(servletRequest, token).getError());
+    assertEquals(ResponseError.BAD_REQUEST, handler.handleDelete(request).getError());
     verify();
   }
 
   public void testHandlePut() throws Exception {
     replay();
-    assertEquals(ResponseError.NOT_IMPLEMENTED,
-        handler.handlePut(servletRequest, token).getError());
+    assertEquals(ResponseError.NOT_IMPLEMENTED, handler.handlePut(request).getError());
     verify();
   }
 
   public void testHandlePost() throws Exception {
     replay();
-    assertEquals(ResponseError.NOT_IMPLEMENTED,
-        handler.handlePost(servletRequest, token).getError());
+    assertEquals(ResponseError.NOT_IMPLEMENTED, handler.handlePost(request).getError());
     verify();
   }
 }

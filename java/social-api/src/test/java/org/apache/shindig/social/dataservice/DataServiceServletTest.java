@@ -23,15 +23,18 @@ import org.apache.shindig.common.testing.FakeGadgetToken;
 import org.apache.shindig.social.opensocial.util.BeanJsonConverter;
 import org.apache.shindig.social.opensocial.util.BeanXmlConverter;
 import org.apache.shindig.social.opensocial.util.BeanConverter;
+import org.apache.shindig.social.ResponseItem;
 
-import com.google.common.collect.Maps;
 import com.google.inject.Injector;
+import com.google.common.collect.Maps;
 import junit.framework.TestCase;
 import org.easymock.classextension.EasyMock;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.util.Map;
+import java.io.PrintWriter;
+import java.util.Enumeration;
+import java.util.StringTokenizer;
 
 public class DataServiceServletTest extends TestCase {
   private HttpServletRequest req;
@@ -41,12 +44,16 @@ public class DataServiceServletTest extends TestCase {
   private ActivityHandler activityHandler;
   private AppDataHandler appDataHandler;
   private BasicSecurityTokenDecoder tokenDecoder;
-  protected Injector injector;
+  private Injector injector;
+  private BeanJsonConverter jsonConverter;
+  private BeanXmlConverter xmlConverter;
 
   protected void setUp() throws Exception {
     servlet = new DataServiceServlet();
     req = EasyMock.createMock(HttpServletRequest.class);
     res = EasyMock.createMock(HttpServletResponse.class);
+    jsonConverter = EasyMock.createMock(BeanJsonConverter.class);
+    xmlConverter = EasyMock.createMock(BeanXmlConverter.class);
 
     peopleHandler = EasyMock.createMock(PersonHandler.class);
     activityHandler = EasyMock.createMock(ActivityHandler.class);
@@ -57,6 +64,8 @@ public class DataServiceServletTest extends TestCase {
 
     servlet.setHandlers(new HandlerProvider(new PersonHandler(null), new ActivityHandler(null),
         new AppDataHandler(null)));
+
+    servlet.setBeanConverters(jsonConverter, xmlConverter);
 
     tokenDecoder = EasyMock.createMock(BasicSecurityTokenDecoder.class);
     servlet.setSecurityTokenDecoder(tokenDecoder);
@@ -104,27 +113,37 @@ public class DataServiceServletTest extends TestCase {
       String actualMethod, String overrideMethod, String expectedMethod) throws Exception {
     req.setCharacterEncoding("UTF-8");
 
-    EasyMock.expect(req.getPathInfo()).andReturn(pathInfo);
-    EasyMock.expect(req.getMethod()).andReturn(actualMethod);
-    EasyMock.expect(req.getMethod()).andReturn(actualMethod);
+    EasyMock.expect(req.getPathInfo()).andStubReturn(pathInfo);
+    EasyMock.expect(req.getMethod()).andStubReturn(actualMethod);
+    EasyMock.expect(req.getParameterNames()).andStubReturn((Enumeration) new StringTokenizer(""));
     EasyMock.expect(req.getParameter(DataServiceServlet.X_HTTP_METHOD_OVERRIDE)).andReturn(
         overrideMethod);
     EasyMock.expect(req.getParameter(DataServiceServlet.FORMAT_PARAM)).andReturn(null);
 
     String tokenString = "owner:viewer:app:container.com:foo:bar";
-    FakeGadgetToken token = new FakeGadgetToken();
     EasyMock.expect(req.getParameter(DataServiceServlet.SECURITY_TOKEN_PARAM))
         .andReturn(tokenString);
+
+    FakeGadgetToken token = new FakeGadgetToken();
     EasyMock.expect(tokenDecoder.createToken(tokenString)).andReturn(token);
 
     setupInjector();
-    handler.setConverter(null);
-    handler.handleMethod(expectedMethod, req, res, token);
 
-    EasyMock.replay(req, res, handler, tokenDecoder, injector);
+    String jsonObject = "my lovely json";
+    EasyMock.expect(handler.handleMethod(EasyMock.isA(RequestItem.class)))
+        .andReturn(new ResponseItem<String>(jsonObject));
+
+    EasyMock.expect(jsonConverter.convertToString(jsonObject)).andReturn(jsonObject);
+    handler.setConverter(jsonConverter);
+
+    PrintWriter writerMock = EasyMock.createMock(PrintWriter.class);
+    EasyMock.expect(res.getWriter()).andReturn(writerMock);
+    writerMock.write(jsonObject);
+
+    EasyMock.replay(req, res, handler, tokenDecoder, injector, jsonConverter);
     servlet.service(req, res);
-    EasyMock.verify(req, res, handler, tokenDecoder, injector);
-    EasyMock.reset(req, res, handler, tokenDecoder, injector);
+    EasyMock.verify(req, res, handler, tokenDecoder, injector, jsonConverter);
+    EasyMock.reset(req, res, handler, tokenDecoder, injector, jsonConverter);
   }
 
   public void testInvalidRoute() throws Exception {
