@@ -120,7 +120,7 @@
 
      function initData() {
        var req = opensocial.newDataRequest();
-       req.add(req.newFetchPersonRequest('VIEWER'), 'viewer');
+       req.add(req.newFetchPersonRequest('VIEWER', opts), 'viewer');
        req.add(req.newFetchPeopleRequest('VIEWER_FRIENDS', opts), 'viewerFriends');
        req.add(req.newFetchPersonAppDataRequest('VIEWER', 'count'), 'viewerData');
        req.add(req.newFetchPersonAppDataRequest('VIEWER_FRIENDS', 'count'), 'viewerFriendData');
