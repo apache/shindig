@@ -65,9 +65,7 @@ class BasicActivitiesService extends ActivitiesService {
 	public function createActivity(UserId $userId, $activity, SecurityToken $token)
 	{
 		// TODO: Validate the activity and do any template expanding
-		$activity->setUserId($userId->getUserId($token));
-		$activity->setPostedTime(time());
-		XmlStateFileFetcher::get()->createActivity($userId->getUserId($token), $activity);
+		XmlStateFileFetcher::get()->createActivity($userId->getUserId($token), $activity, $token->getAppId());
 		return new ResponseItem(null, null, array());
 	}
 }
