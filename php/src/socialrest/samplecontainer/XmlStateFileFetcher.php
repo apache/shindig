@@ -247,7 +247,7 @@ class XmlStateFileFetcher {
 			$activity->setTitle($this->turnEvil($title));
 			$activity->setBody($this->turnEvil($body));
 			$activity->setMediaItems($this->getMediaItems($activityItem));
-			$this->createActivity($userId, $activity);
+			$this->createActivity($userId, $activity, 0);
 		}
 	}
 	
@@ -263,9 +263,8 @@ class XmlStateFileFetcher {
 		return $media;
 	}
 	
-	public function createActivity($userId, $activity)
+	public function createActivity($userId, $activity, $appId)
 	{
-		
 		if ($this->allActivities == null && !is_array($this->allActivities)) {
 			$this->setupActivities();
 		}
