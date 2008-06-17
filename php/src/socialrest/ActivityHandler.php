@@ -68,6 +68,9 @@ class ActivityHandler extends DataRequestHandler {
 		$groupId = GroupId::fromJson($params[2]);
 		// TODO: Should we pass the groupId through to the service?
 		$jsonActivity = isset($_POST['entry']) ? $_POST['entry'] : (isset($_GET['entry']) ? $_GET['entry'] : null);
+		if (get_magic_quotes_gpc()) {
+			$jsonActivity = stripslashes($jsonActivity);
+		}
 		$activity = $this->convertToObject($jsonActivity);
     	return $this->service->createActivity($userId, $activity, $token);
 	}
