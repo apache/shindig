@@ -83,6 +83,9 @@ class AppDataHandler extends DataRequestHandler {
 		$appId = $this->getAppId($params[3], $token);
 		$fields = isset($_GET['fields']) ? explode(',', $_GET['fields']) : null;
 		$jsonActivity = isset($_POST['entry']) ? $_POST['entry'] : (isset($_GET['entry']) ? $_GET['entry'] : null);
+		if (get_magic_quotes_gpc()) {
+			$jsonActivity = stripslashes($jsonActivity);
+		}
 		$values = $this->convertToObject($jsonActivity);
 		return $this->service->updatePersonData($userId, $groupId, $fields, $values, $appId, $token);
 	}
