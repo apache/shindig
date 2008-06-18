@@ -51,8 +51,6 @@ public class GadgetRenderingTaskTest extends HttpTestFixture {
     }
   };
 
-  final ServletTestFixture fixture = new ServletTestFixture();
-
   final static URI SPEC_URL = URI.create("http://example.org/gadget.xml");
   final static HttpRequest SPEC_REQUEST = new HttpRequest(SPEC_URL);
   final static String CONTENT = "Hello, world!";
@@ -65,6 +63,15 @@ public class GadgetRenderingTaskTest extends HttpTestFixture {
         "<Content type=\"html\" view=\"ALIAS\">" + ALT_CONTENT + "</Content>" +
         "</Module>";
   final static String LIBS = "dummy:blah";
+
+  private ServletTestFixture fixture;
+
+  @Override
+  public void setUp() throws Exception {
+    super.setUp();
+    fixture = new ServletTestFixture();
+  }
+
 
   /**
    * Performs boilerplate operations to get basic gadgets rendered
