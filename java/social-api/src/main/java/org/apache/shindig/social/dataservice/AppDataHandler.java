@@ -47,7 +47,7 @@ public class AppDataHandler extends DataRequestHandler {
    * fields vars then all of the data will be overridden.
    * @param request
    */
-  ResponseItem handleDelete(RequestItem request) {
+  protected ResponseItem handleDelete(RequestItem request) {
     String[] segments = getParamsFromRequest(request);
 
     UserId userId = UserId.fromJson(segments[0]);
@@ -70,7 +70,7 @@ public class AppDataHandler extends DataRequestHandler {
    * be pulled from the values and set on the person object. If there are no
    * fields vars then all of the data will be overridden.
    */
-  ResponseItem handlePut(RequestItem request) {
+  protected ResponseItem handlePut(RequestItem request) {
     return handlePost(request);
   }
 
@@ -86,7 +86,7 @@ public class AppDataHandler extends DataRequestHandler {
    * be pulled from the values and set on the person object. If there are no
    * fields vars then all of the data will be overridden.
    */
-  ResponseItem handlePost(RequestItem request) {
+  protected ResponseItem handlePost(RequestItem request) {
     String[] segments = getParamsFromRequest(request);
 
     UserId userId = UserId.fromJson(segments[0]);
@@ -113,7 +113,7 @@ public class AppDataHandler extends DataRequestHandler {
    * /appdata/john.doe/@friends/app?fields=count
    * /appdata/john.doe/@self/app
    */
-  ResponseItem handleGet(RequestItem request) {
+  protected ResponseItem handleGet(RequestItem request) {
     String[] segments = getParamsFromRequest(request);
 
     UserId userId = UserId.fromJson(segments[0]);

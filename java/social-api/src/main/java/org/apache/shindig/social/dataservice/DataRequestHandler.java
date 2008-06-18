@@ -55,13 +55,13 @@ public abstract class DataRequestHandler {
     return responseItem;
   }
 
-  abstract ResponseItem handleDelete(RequestItem request);
+  protected abstract ResponseItem handleDelete(RequestItem request);
 
-  abstract ResponseItem handlePut(RequestItem request);
+  protected abstract ResponseItem handlePut(RequestItem request);
 
-  abstract ResponseItem handlePost(RequestItem request);
+  protected abstract ResponseItem handlePost(RequestItem request);
 
-  abstract ResponseItem handleGet(RequestItem request);
+  protected abstract ResponseItem handleGet(RequestItem request);
 
   protected static String[] getParamsFromRequest(RequestItem request) {
     return getQueryPath(request).split("/");

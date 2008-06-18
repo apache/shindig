@@ -31,7 +31,7 @@ public class ActivityHandler extends DataRequestHandler {
     this.service = service;
   }
 
-  ResponseItem handleDelete(RequestItem request) {
+  protected ResponseItem handleDelete(RequestItem request) {
     return new ResponseItem<Object>(ResponseError.BAD_REQUEST,
         "You can't delete activities. ", null);
   }
@@ -43,7 +43,7 @@ public class ActivityHandler extends DataRequestHandler {
    * /activities/john.doe/@self
    * - postBody is an activity object
    */
-  ResponseItem handlePut(RequestItem request) {
+  protected ResponseItem handlePut(RequestItem request) {
     return handlePost(request);
   }
 
@@ -54,7 +54,7 @@ public class ActivityHandler extends DataRequestHandler {
    * /activities/john.doe/@self
    * - postBody is an activity object
    */
-  ResponseItem handlePost(RequestItem request) {
+  protected ResponseItem handlePost(RequestItem request) {
     String[] segments = getParamsFromRequest(request);
 
     UserId userId = UserId.fromJson(segments[0]);
@@ -75,7 +75,7 @@ public class ActivityHandler extends DataRequestHandler {
    * /activities/john.doe/@self
    * /activities/john.doe/@friends
    */
-  ResponseItem handleGet(RequestItem request) {
+  protected ResponseItem handleGet(RequestItem request) {
     String[] segments = getParamsFromRequest(request);
 
     UserId userId = UserId.fromJson(segments[0]);
