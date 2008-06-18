@@ -87,12 +87,12 @@ public class ServletTestFixture {
 
     // TODO: A better solution here would be an injectable clock. For now a 1 second fudge is used.
     long lowerBound = testStartTime + (1000L * (ttl - 1));
-    long upperBound = lowerBound + 6000L;
+    long upperBound = lowerBound + 2000L;
 
     assertGreater("Expires should be at least " + ttl + " seconds more than start time.",
         lowerBound, expires);
 
-    assertLesser("Expires should be within 5 seconds of the requested value.",
+    assertLesser("Expires should be within 2 seconds of the requested value.",
         upperBound, expires);
 
     if (ttl == 0) {
