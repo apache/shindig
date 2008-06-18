@@ -19,6 +19,9 @@ package org.apache.shindig.gadgets.http;
 
 import org.apache.shindig.common.util.DateUtil;
 
+import com.ibm.icu.text.CharsetDetector;
+import com.ibm.icu.text.CharsetMatch;
+
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
@@ -28,8 +31,10 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.TreeMap;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -42,6 +47,9 @@ public class HttpResponse {
   public final static int SC_NOT_FOUND = 404;
   public final static int SC_INTERNAL_SERVER_ERROR = 500;
   public final static int SC_TIMEOUT = 504;
+  private final static Set<String> BINARY_CONTENT_TYPES = new HashSet<String>(Arrays.asList(
+    "image/jpeg", "image/png", "image/gif", "image/jpg", "application/x-shockwave-flash"
+  ));
 
   private final int httpStatusCode;
   private static final String DEFAULT_ENCODING = "UTF-8";
@@ -142,6 +150,9 @@ public class HttpResponse {
     String contentType = getHeader("Content-Type");
     if (contentType != null) {
       String[] parts = contentType.split(";");
+      if (BINARY_CONTENT_TYPES.contains(parts[0])) {
+        return DEFAULT_ENCODING;
+      }
       if (parts.length == 2) {
         int offset = parts[1].indexOf("charset=");
         if (offset != -1) {
@@ -149,7 +160,12 @@ public class HttpResponse {
         }
       }
     }
-    return DEFAULT_ENCODING;
+
+    // If the header doesn't specify the charset, try to determine it by examining the content.
+    CharsetDetector detector = new CharsetDetector();
+    detector.setText(responseBytes);
+    CharsetMatch match = detector.detect();
+    return match.getName().toUpperCase();
   }
 
   public int getHttpStatusCode() {

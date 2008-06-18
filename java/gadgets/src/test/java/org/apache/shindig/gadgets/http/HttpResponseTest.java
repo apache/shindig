@@ -25,12 +25,30 @@ import junit.framework.TestCase;
 
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
 public class HttpResponseTest extends TestCase {
+  private final static byte[] UTF8_DATA = new byte[] {
+    (byte)0xEF, (byte)0xBB, (byte)0xBF, 'h', 'e', 'l', 'l', 'o'
+  };
+  private final static String UTF8_STRING = "hello";
+
+  // A large string is needed for accurate charset detection.
+  private final static byte[] LATIN1_DATA = new byte[] {
+    'G', 'a', 'm', 'e', 's', ',', ' ', 'H', 'Q', ',', ' ', 'M', 'a', 'n', 'g', (byte)0xE1, ',', ' ',
+    'A', 'n', 'i', 'm', 'e', ' ', 'e', ' ', 't', 'u', 'd', 'o', ' ', 'q', 'u', 'e', ' ', 'u', 'm',
+    ' ', 'b', 'o', 'm', ' ', 'n', 'e', 'r', 'd', ' ', 'a', 'm', 'a'
+  };
+  private final static String LATIN1_STRING
+      = "Games, HQ, Mang\u00E1, Anime e tudo que um bom nerd ama";
+
+  private final static byte[] BIG5_DATA = new byte[] {
+    (byte)0xa7, (byte)0x41, (byte)0xa6, (byte)0x6e
+  };
+  private final static String BIG5_STRING = "\u4F60\u597D";
+
   private Map<String, List<String>> headers;
 
   @Override
@@ -56,32 +74,60 @@ public class HttpResponseTest extends TestCase {
 
   public void testEncodingDetectionUtf8WithBom() throws Exception {
     // Input is UTF-8 with BOM.
-    byte[] data = new byte[] {
-      (byte)0xEF, (byte)0xBB, (byte)0xBF, 'h', 'e', 'l', 'l', 'o'
-    };
     addHeader("Content-Type", "text/plain; charset=UTF-8");
-    HttpResponse response = new HttpResponse(200, data, headers);
-    assertEquals("hello", response.getResponseAsString());
+    HttpResponse response = new HttpResponse(200, UTF8_DATA, headers);
+    assertEquals(UTF8_STRING, response.getResponseAsString());
   }
 
   public void testEncodingDetectionLatin1() throws Exception {
     // Input is a basic latin-1 string with 1 non-UTF8 compatible char.
-    byte[] data = new byte[] {
-      'h', (byte)0xE9, 'l', 'l', 'o'
-    };
     addHeader("Content-Type", "text/plain; charset=iso-8859-1");
-    HttpResponse response = new HttpResponse(200, data, headers);
-    assertEquals("h\u00E9llo", response.getResponseAsString());
+    HttpResponse response = new HttpResponse(200, LATIN1_DATA, headers);
+    assertEquals(LATIN1_STRING, response.getResponseAsString());
   }
 
   public void testEncodingDetectionBig5() throws Exception {
-    byte[] data = new byte[] {
-      (byte)0xa7, (byte)0x41, (byte)0xa6, (byte)0x6e
-    };
     addHeader("Content-Type", "text/plain; charset=BIG5");
-    HttpResponse response = new HttpResponse(200, data, headers);
-    String resp = response.getResponseAsString();
-    assertEquals("\u4F60\u597D", response.getResponseAsString());
+    HttpResponse response = new HttpResponse(200, BIG5_DATA, headers);
+    assertEquals(BIG5_STRING, response.getResponseAsString());
+  }
+
+  public void testEncodingDetectionUtf8WithBomNoCharsetSpecified() throws Exception {
+    addHeader("Content-Type", "text/plain");
+    HttpResponse response = new HttpResponse(200, UTF8_DATA, headers);
+    assertEquals("UTF-8", response.getEncoding().toUpperCase());
+    assertEquals(UTF8_STRING, response.getResponseAsString());
+  }
+
+  public void testEncodingDetectionLatin1NoCharsetSpecified() throws Exception {
+    addHeader("Content-Type", "text/plain;");
+    HttpResponse response = new HttpResponse(200, LATIN1_DATA, headers);
+    assertEquals("ISO-8859-1", response.getEncoding().toUpperCase());
+    assertEquals(LATIN1_STRING, response.getResponseAsString());
+  }
+
+  public void testEncodingDetectionUtf8WithBomNoContentHeader() throws Exception {
+    HttpResponse response = new HttpResponse(200, UTF8_DATA, headers);
+    assertEquals("UTF-8", response.getEncoding().toUpperCase());
+    assertEquals(UTF8_STRING, response.getResponseAsString());
+  }
+
+  public void testEncodingDetectionLatin1NoContentHeader() throws Exception {
+    HttpResponse response = new HttpResponse(200, LATIN1_DATA, headers);
+    assertEquals("ISO-8859-1", response.getEncoding().toUpperCase());
+    assertEquals(LATIN1_STRING, response.getResponseAsString());
+  }
+
+  public void testGetEncodingForImageContentType() throws Exception {
+    addHeader("Content-Type", "image/png; charset=iso-8859-1");
+    HttpResponse response = new HttpResponse(200, LATIN1_DATA, headers);
+    assertEquals("UTF-8", response.getEncoding().toUpperCase());
+  }
+
+  public void testGetEncodingForFlashContentType() throws Exception {
+    addHeader("Content-Type", "application/x-shockwave-flash; charset=iso-8859-1");
+    HttpResponse response = new HttpResponse(200, LATIN1_DATA, headers);
+    assertEquals("UTF-8", response.getEncoding().toUpperCase());
   }
 
   public void testPreserveBinaryData() throws Exception {
@@ -98,12 +144,14 @@ public class HttpResponseTest extends TestCase {
     addHeader("Cache-Control", "no-cache");
     HttpResponse response = new HttpResponse(200, new byte[0], headers);
     assertTrue(response.isStrictNoCache());
+    assertEquals(-1, response.getCacheExpiration());
   }
 
   public void testStrictPragmaNoCache() throws Exception {
     addHeader("Pragma", "no-cache");
     HttpResponse response = new HttpResponse(200, new byte[0], headers);
     assertTrue(response.isStrictNoCache());
+    assertEquals(-1, response.getCacheExpiration());
   }
 
   public void testStrictPragmaJunk() throws Exception {
@@ -118,7 +166,17 @@ public class HttpResponseTest extends TestCase {
     long time = ((System.currentTimeMillis() / 1000) * 1000) + 10000L;
     addHeader("Expires", DateUtil.formatDate(time));
     HttpResponse response = new HttpResponse(200, new byte[0], headers);
-    assertEquals(time, response.getExpiration());
+    assertEquals(time, response.getCacheExpiration());
+  }
+
+  public void testMaxAge() throws Exception {
+    int maxAge = 10;
+    long expected = ((System.currentTimeMillis() / 1000) * 1000) + (maxAge * 1000);
+    addHeader("Cache-Control", "public, max-age=" + maxAge);
+    HttpResponse response = new HttpResponse(200, new byte[0], headers);
+    long expiration = response.getCacheExpiration();
+    assertTrue("getExpiration is less than start time + maxAge", expiration >= expected);
+    assertTrue("getExpiration is too high.", expiration <= expected + 1000);
   }
 
   public void testNegativeCaching() {

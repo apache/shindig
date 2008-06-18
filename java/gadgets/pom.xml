@@ -135,7 +135,7 @@ under the License.
       <artifactId>core</artifactId>
       <scope>compile</scope>
     </dependency>
-		<dependency>
+    <dependency>
       <groupId>com.google.code.google-collections</groupId>
       <artifactId>google-collect</artifactId>
     </dependency>
@@ -153,9 +153,14 @@ under the License.
       <artifactId>jetty</artifactId>
       <scope>test</scope>
     </dependency>
-		<dependency>
+    <dependency>
       <groupId>rome</groupId>
       <artifactId>rome</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.ibm.icu</groupId>
+      <artifactId>icu4j</artifactId>
+      <scope>compile</scope>
     </dependency>
   </dependencies>
 </project>
