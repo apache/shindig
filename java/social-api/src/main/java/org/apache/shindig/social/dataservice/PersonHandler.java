@@ -36,16 +36,16 @@ public class PersonHandler extends DataRequestHandler {
     this.personService = personService;
   }
 
-  ResponseItem handleDelete(RequestItem request) {
+  protected ResponseItem handleDelete(RequestItem request) {
     return new ResponseItem<Object>(ResponseError.BAD_REQUEST,
         "You can't delete people. ", null);
   }
 
-  ResponseItem handlePut(RequestItem request) {
+  protected ResponseItem handlePut(RequestItem request) {
     return new ResponseItem<Object>(ResponseError.NOT_IMPLEMENTED,
         "You can't add people right now. ", null);  }
 
-  ResponseItem handlePost(RequestItem request) {
+  protected ResponseItem handlePost(RequestItem request) {
     return new ResponseItem<Object>(ResponseError.NOT_IMPLEMENTED,
         "You can't add people right now. ", null);
   }
@@ -58,7 +58,7 @@ public class PersonHandler extends DataRequestHandler {
    * /people/john.doe/@friends
    * /people/john.doe/@self
    */
-  ResponseItem handleGet(RequestItem request) {
+  protected ResponseItem handleGet(RequestItem request) {
     String[] segments = getParamsFromRequest(request);
 
     UserId userId = UserId.fromJson(segments[0]);

@@ -33,19 +33,19 @@ public class DataRequestHandlerTest extends TestCase {
   @Override
   protected void setUp() throws Exception {
     drh = new DataRequestHandler() {
-      ResponseItem handleDelete(RequestItem request) {
+      protected ResponseItem handleDelete(RequestItem request) {
         return new ResponseItem<String>("DELETE");
       }
 
-      ResponseItem handlePut(RequestItem request) {
+      protected ResponseItem handlePut(RequestItem request) {
         return new ResponseItem<String>("PUT");
       }
 
-      ResponseItem handlePost(RequestItem request) {
+      protected ResponseItem handlePost(RequestItem request) {
         return new ResponseItem<String>("POST");
       }
 
-      ResponseItem handleGet(RequestItem request) {
+      protected ResponseItem handleGet(RequestItem request) {
         return new ResponseItem<String>("GET");
       }
     };
