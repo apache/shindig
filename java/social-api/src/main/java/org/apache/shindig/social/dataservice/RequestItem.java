@@ -34,6 +34,8 @@ public class RequestItem {
   private Map<String, String> parameters;
   private SecurityToken token;
 
+  public RequestItem() { }
+
   public RequestItem(String url, Map<String, String> parameters, SecurityToken token,
       String method) {
     this.url = url;
@@ -50,12 +52,36 @@ public class RequestItem {
     Map<String, String> parameters = Maps.newHashMap();
 
     Enumeration names = servletRequest.getParameterNames();
-    while(names.hasMoreElements()) {
+    while (names.hasMoreElements()) {
       String name = (String) names.nextElement();
       parameters.put(name, servletRequest.getParameter(name));
     }
 
     return parameters;
+  }
+
+  /*
+   * Takes any url params out of the url and puts them into the param map.
+   * Usually the servlet request code does this for us but the batch request calls have to do it
+   * by hand.
+   */
+  public void parseUrlParamsIntoParameters() {
+    if (this.parameters == null) {
+      this.parameters = Maps.newHashMap();
+    }
+
+    String fullUrl = this.url;
+    int queryParamIndex = fullUrl.indexOf("?");
+
+    if (queryParamIndex != -1) {
+      this.url = fullUrl.substring(0, queryParamIndex);
+
+      String queryParams = fullUrl.substring(queryParamIndex + 1);
+      for (String param : queryParams.split("&")) {
+        String[] paramPieces = param.split("=", 2);
+        this.parameters.put(paramPieces[0], paramPieces.length == 2 ? paramPieces[1] : "");
+      }
+    }
   }
 
   public String getUrl() {

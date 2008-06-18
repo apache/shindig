@@ -29,7 +29,6 @@ import org.apache.shindig.social.opensocial.model.Phone;
 import org.apache.shindig.social.opensocial.model.Url;
 
 import com.google.common.collect.Maps;
-import org.easymock.classextension.EasyMock;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
