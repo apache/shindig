@@ -147,37 +147,24 @@ public class DataServiceServletTest extends TestCase {
   }
 
   public void testInvalidRoute() throws Exception {
-    req.setCharacterEncoding("UTF-8");
-    EasyMock.expect(req.getPathInfo()).andReturn("/ahhh!");
-
-    EasyMock.replay(req);
     try {
-      servlet.doPost(req, res);
+      servlet.getResponseItem(null, new RequestItem("/ahhh!", null, null, null));
       fail("The route should not have found a valid handler.");
     } catch (RuntimeException e) {
       // Yea!
       assertEquals("No handler for route: ahhh!", e.getMessage());
     }
-    EasyMock.verify(req);
   }
 
   public void testSecurityTokenException() throws Exception {
-    req.setCharacterEncoding("UTF-8");
-    EasyMock.expect(req.getPathInfo()).andReturn("/" + DataServiceServlet.APPDATA_ROUTE);
-    EasyMock.expect(req.getMethod()).andReturn("POST");
-    EasyMock.expect(req.getParameter(DataServiceServlet.X_HTTP_METHOD_OVERRIDE)).andReturn("POST");
-    EasyMock.expect(req.getParameter(DataServiceServlet.FORMAT_PARAM)).andReturn(null);
-
     String tokenString = "owner:viewer:app:container.com:foo:bar";
     EasyMock.expect(req.getParameter(DataServiceServlet.SECURITY_TOKEN_PARAM))
         .andReturn(tokenString);
     EasyMock.expect(tokenDecoder.createToken(tokenString)).andThrow(new SecurityTokenException(""));
 
-    setupInjector();
-
-    EasyMock.replay(req, tokenDecoder, injector);
+    EasyMock.replay(req, tokenDecoder);
     try {
-      servlet.doPost(req, res);
+      servlet.getSecurityToken(req);
       fail("The route should have thrown an exception due to the invalid security token.");
     } catch (RuntimeException e) {
       // Yea!
@@ -185,7 +172,7 @@ public class DataServiceServletTest extends TestCase {
       // instead of just throwing an exception.
       assertEquals("Implement error return for bad security token.", e.getMessage());
     }
-    EasyMock.verify(req, tokenDecoder, injector);
+    EasyMock.verify(req, tokenDecoder);
   }
 
   public void testGetHttpMethodFromParameter() throws Exception {
@@ -200,6 +187,20 @@ public class DataServiceServletTest extends TestCase {
     assertEquals("path", servlet.getRouteFromParameter("/path"));
     assertEquals("path", servlet.getRouteFromParameter("/path/fun"));
     assertEquals("path", servlet.getRouteFromParameter("/path/fun/yes"));
+  }
+
+  public void testIsBatchUrl() throws Exception {
+    assertBatchUrl("/jsonBatch", true);
+    assertBatchUrl("/path/to/the/jsonBatch", true);
+    assertBatchUrl("/people/normalpath", false);
+  }
+
+  private void assertBatchUrl(String url, boolean isBatch) {
+    EasyMock.expect(req.getPathInfo()).andReturn(url);
+    EasyMock.replay(req);
+    assertEquals(isBatch, servlet.isBatchUrl(req));
+    EasyMock.verify(req);
+    EasyMock.reset(req);
   }
 
   public void testGetConverterForRequest() throws Exception {

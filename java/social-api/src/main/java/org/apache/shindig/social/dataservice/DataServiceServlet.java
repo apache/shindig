@@ -17,27 +17,30 @@
  */
 package org.apache.shindig.social.dataservice;
 
-import com.google.inject.Inject;
-import com.google.inject.Injector;
-
-import org.apache.shindig.common.SecurityTokenDecoder;
 import org.apache.shindig.common.SecurityToken;
+import org.apache.shindig.common.SecurityTokenDecoder;
 import org.apache.shindig.common.SecurityTokenException;
 import org.apache.shindig.common.servlet.InjectedServlet;
+import org.apache.shindig.social.ResponseItem;
 import org.apache.shindig.social.opensocial.util.BeanConverter;
 import org.apache.shindig.social.opensocial.util.BeanJsonConverter;
 import org.apache.shindig.social.opensocial.util.BeanXmlConverter;
-import org.apache.shindig.social.ResponseItem;
+
+import com.google.common.collect.Maps;
+import com.google.inject.Inject;
+import com.google.inject.Injector;
+import org.apache.commons.lang.StringUtils;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.logging.Logger;
-
-import org.apache.commons.lang.StringUtils;
 
 public class DataServiceServlet extends InjectedServlet {
 
@@ -58,6 +61,7 @@ public class DataServiceServlet extends InjectedServlet {
   private Map<String, Class<? extends DataRequestHandler>> handlers;
   private BeanJsonConverter jsonConverter;
   private BeanXmlConverter xmlConverter;
+  private static final String JSON_BATCH_ROUTE = "jsonBatch";
 
   @Inject
   public void setHandlers(HandlerProvider handlers) {
@@ -65,8 +69,7 @@ public class DataServiceServlet extends InjectedServlet {
   }
 
   @Inject
-  public void setSecurityTokenDecoder(SecurityTokenDecoder
-      securityTokenDecoder) {
+  public void setSecurityTokenDecoder(SecurityTokenDecoder securityTokenDecoder) {
     this.securityTokenDecoder = securityTokenDecoder;
   }
 
@@ -102,36 +105,31 @@ public class DataServiceServlet extends InjectedServlet {
   protected void doPost(HttpServletRequest servletRequest,
       HttpServletResponse servletResponse)
       throws ServletException, IOException {
-    String path = servletRequest.getPathInfo();
-    logger.finest("Handling restful request for " + path);
+    logger.finest("Handling restful request for " + servletRequest.getPathInfo());
 
     servletRequest.setCharacterEncoding("UTF-8");
-
-    String route = getRouteFromParameter(path);
-    Class<? extends DataRequestHandler> handlerClass = handlers.get(route);
-
-    if (handlerClass == null) {
-      throw new RuntimeException("No handler for route: " + route);
-    }
-
-    DataRequestHandler handler = injector.getInstance(handlerClass);
+    SecurityToken token = getSecurityToken(servletRequest);
     BeanConverter converter = getConverterForRequest(servletRequest);
-    // TODO: Move all conversions out of the handler up into the servlet layer
-    handler.setConverter(converter);
 
+    if (isBatchUrl(servletRequest)) {
+      try {
+        handleBatchRequest(servletRequest, servletResponse, token, converter);
+      } catch (JSONException e) {
+        throw new RuntimeException("Bad batch format", e);
+      }
+    } else {
+      handleSingleRequest(servletRequest, servletResponse, token, converter);
+    }
+  }
+
+  private void handleSingleRequest(HttpServletRequest servletRequest,
+      HttpServletResponse servletResponse, SecurityToken token,
+      BeanConverter converter) throws IOException {
     String method = getHttpMethodFromParameter(servletRequest.getMethod(),
         servletRequest.getParameter(X_HTTP_METHOD_OVERRIDE));
 
-    SecurityToken token;
-    try {
-      token = securityTokenDecoder.createToken(servletRequest.getParameter(SECURITY_TOKEN_PARAM));
-    } catch (SecurityTokenException e) {
-      throw new RuntimeException(
-          "Implement error return for bad security token.");
-    }
-
-    ResponseItem responseItem = handler.handleMethod(
-        new RequestItem(servletRequest, token, method));
+    RequestItem requestItem = new RequestItem(servletRequest, token, method);
+    ResponseItem responseItem = getResponseItem(converter, requestItem);
 
     if (responseItem.getError() == null) {
       PrintWriter writer = servletResponse.getWriter();
@@ -142,7 +140,56 @@ public class DataServiceServlet extends InjectedServlet {
     }
   }
 
-  /*package-protected*/ BeanConverter getConverterForRequest(HttpServletRequest servletRequest) {
+  private void handleBatchRequest(HttpServletRequest servletRequest,
+      HttpServletResponse servletResponse, SecurityToken token,
+      BeanConverter converter) throws IOException, JSONException {
+
+    JSONObject requests = new JSONObject(servletRequest.getParameter("request"));
+    Map<String, ResponseItem> responses = Maps.newHashMap();
+
+    Iterator keys = requests.keys();
+    while (keys.hasNext()) {
+      String key = (String) keys.next();
+      String request = requests.getString(key);
+
+      RequestItem requestItem = converter.convertToObject(request, RequestItem.class);
+      requestItem.parseUrlParamsIntoParameters();
+      requestItem.setToken(token);
+
+      responses.put(key, getResponseItem(converter, requestItem));
+    }
+
+    PrintWriter writer = servletResponse.getWriter();
+    writer.write(converter.convertToString(
+        Maps.immutableMap("error", false, "responses", responses)));
+  }
+
+  ResponseItem getResponseItem(BeanConverter converter, RequestItem requestItem) {
+    String route = getRouteFromParameter(requestItem.getUrl());
+    Class<? extends DataRequestHandler> handlerClass = handlers.get(route);
+
+    if (handlerClass == null) {
+      throw new RuntimeException("No handler for route: " + route);
+    }
+
+    DataRequestHandler handler = injector.getInstance(handlerClass);
+    handler.setConverter(converter);
+
+    return handler.handleMethod(requestItem);
+  }
+
+  SecurityToken getSecurityToken(HttpServletRequest servletRequest) {
+    SecurityToken token;
+    try {
+      token = securityTokenDecoder.createToken(servletRequest.getParameter(SECURITY_TOKEN_PARAM));
+    } catch (SecurityTokenException e) {
+      throw new RuntimeException(
+          "Implement error return for bad security token.");
+    }
+    return token;
+  }
+
+  BeanConverter getConverterForRequest(HttpServletRequest servletRequest) {
     String formatString = servletRequest.getParameter(FORMAT_PARAM);
     if (!StringUtils.isBlank(formatString) && formatString.equals(ATOM_FORMAT)) {
       return xmlConverter;
@@ -150,8 +197,7 @@ public class DataServiceServlet extends InjectedServlet {
     return jsonConverter;
   }
 
-  /*package-protected*/ String getHttpMethodFromParameter(String method,
-      String overrideParameter) {
+  String getHttpMethodFromParameter(String method, String overrideParameter) {
     if (!StringUtils.isBlank(overrideParameter)) {
       return overrideParameter;
     } else {
@@ -159,11 +205,15 @@ public class DataServiceServlet extends InjectedServlet {
     }
   }
 
-  /*package-protected*/ String getRouteFromParameter(String pathInfo) {
+  String getRouteFromParameter(String pathInfo) {
     pathInfo = pathInfo.substring(1);
     int indexOfNextPathSeparator = pathInfo.indexOf("/");
     return indexOfNextPathSeparator != -1 ?
         pathInfo.substring(0, indexOfNextPathSeparator) :
         pathInfo;
+  }
+
+  boolean isBatchUrl(HttpServletRequest servletRequest) {
+    return servletRequest.getPathInfo().endsWith(JSON_BATCH_ROUTE);
   }
 }
