@@ -18,11 +18,14 @@
 package org.apache.shindig.social.dataservice;
 
 import com.google.inject.Inject;
+import com.google.common.collect.Sets;
 
 import org.apache.shindig.social.ResponseError;
 import org.apache.shindig.social.ResponseItem;
-import org.apache.shindig.social.opensocial.model.ActivityImpl;
 import org.apache.shindig.social.opensocial.model.Activity;
+
+import java.util.Set;
+import java.util.List;
 
 public class ActivityHandler extends DataRequestHandler {
   private ActivityService service;
@@ -32,9 +35,23 @@ public class ActivityHandler extends DataRequestHandler {
     this.service = service;
   }
 
+  /**
+   * /activities/{userId}/@self/{actvityId}
+   *
+   * examples:
+   * /activities/john.doe/@self/1
+   */
   protected ResponseItem handleDelete(RequestItem request) {
-    return new ResponseItem<Object>(ResponseError.BAD_REQUEST,
-        "You can't delete activities. ", null);
+    String[] segments = getParamsFromRequest(request);
+
+    UserId userId = UserId.fromJson(segments[0]);
+    GroupId groupId = GroupId.fromJson(segments[1]);
+    String activityId = segments[2];
+
+    // TODO: The appId should come from the url. The spec needs to be fixed.
+    String appId = "appId";
+
+    return service.deleteActivity(userId, groupId, appId, activityId, request.getToken());
   }
 
   /**
@@ -60,12 +77,20 @@ public class ActivityHandler extends DataRequestHandler {
 
     UserId userId = UserId.fromJson(segments[0]);
     GroupId groupId = GroupId.fromJson(segments[1]);
-    // TODO: Should we pass the groupId through to the service?
 
     String jsonActivity = request.getParameters().get("entry");
     Activity activity = converter.convertToObject(jsonActivity, Activity.class);
 
-    return service.createActivity(userId, activity, request.getToken());
+    // TODO: The appId should come from the url. The spec needs to be fixed.
+    String appId = "appId";
+
+    Set<String> fields = Sets.newHashSet();
+    List<String> urlFields = getListParam(request, "fields", null);
+    if (urlFields != null) {
+      fields = Sets.newHashSet(urlFields);
+    }
+
+    return service.createActivity(userId, groupId, appId, fields, activity, request.getToken());
   }
 
   /**
@@ -86,12 +111,21 @@ public class ActivityHandler extends DataRequestHandler {
       optionalActivityId = segments[2];
     }
 
-    // TODO: Filter by fields
-    // TODO: do we need to add pagination and sorting support?
-    if (optionalActivityId != null) {
-      return service.getActivity(userId, groupId, optionalActivityId, request.getToken());
+    // TODO: The appId should come from the url. The spec needs to be fixed.
+    String appId = "appId";
+
+    Set<String> fields = Sets.newHashSet();
+    List<String> urlFields = getListParam(request, "fields", null);
+    if (urlFields != null) {
+      fields = Sets.newHashSet(urlFields);
     }
-    return service.getActivities(userId, groupId, request.getToken());
+
+    // TODO: add pagination and sorting support
+    if (optionalActivityId != null) {
+      return service.getActivity(userId, groupId, appId, fields, optionalActivityId,
+          request.getToken());
+    }
+    return service.getActivities(userId, groupId, appId, fields, request.getToken());
   }
 
 }

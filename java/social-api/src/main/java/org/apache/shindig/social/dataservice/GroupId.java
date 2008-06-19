@@ -64,6 +64,7 @@ public class GroupId {
 
   @Override
   public int hashCode() {
-    return this.type.hashCode() + this.groupId.hashCode();
+    int groupHashCode = this.groupId == null ? 0 : this.groupId.hashCode();
+    return this.type.hashCode() + groupHashCode;
   }
 }

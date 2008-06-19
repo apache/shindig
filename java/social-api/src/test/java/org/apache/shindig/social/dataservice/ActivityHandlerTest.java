@@ -30,6 +30,7 @@ import org.easymock.classextension.EasyMock;
 import java.util.Map;
 
 import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 
 public class ActivityHandlerTest extends TestCase {
   private BeanJsonConverter converter;
@@ -60,7 +61,9 @@ public class ActivityHandlerTest extends TestCase {
   }
 
   private void setPath(String path) {
-    this.setPathAndParams(path, null);
+    Map<String, String> params = Maps.newHashMap();
+    params.put("fields", null);
+    this.setPathAndParams(path, params);
   }
 
   private void setPathAndParams(String path, Map<String, String> params) {
@@ -73,7 +76,7 @@ public class ActivityHandlerTest extends TestCase {
     ResponseItem<RestfulCollection<Activity>> data
         = new ResponseItem<RestfulCollection<Activity>>(null);
     EasyMock.expect(activityService.getActivities(new UserId(UserId.Type.userId, "john.doe"),
-        new GroupId(group, null), token)).andReturn(data);
+        new GroupId(group, null), "appId", Sets.<String>newHashSet(), token)).andReturn(data);
 
     replay();
     assertEquals(data, handler.handleGet(request));
@@ -98,7 +101,7 @@ public class ActivityHandlerTest extends TestCase {
     ResponseItem<Activity> data = new ResponseItem<Activity>(null);
     EasyMock.expect(activityService.getActivity(new UserId(UserId.Type.userId, "john.doe"),
         new GroupId(GroupId.Type.friends, null),
-        "jane.doe", token)).andReturn(data);
+        "appId", Sets.<String>newHashSet(), "jane.doe", token)).andReturn(data);
 
     replay();
     assertEquals(data, handler.handleGet(request));
@@ -110,6 +113,7 @@ public class ActivityHandlerTest extends TestCase {
 
     Map<String, String> params = Maps.newHashMap();
     params.put("entry", jsonActivity);
+    params.put("fields", null);
     setPathAndParams("/people/john.doe/@self", params);
 
     Activity activity = new ActivityImpl();
@@ -117,6 +121,7 @@ public class ActivityHandlerTest extends TestCase {
 
     ResponseItem data = new ResponseItem<Object>(null);
     EasyMock.expect(activityService.createActivity(new UserId(UserId.Type.userId, "john.doe"),
+        new GroupId(GroupId.Type.self, null), "appId", Sets.<String>newHashSet(),
         activity, token)).andReturn(data);
     replay();
     return data;
@@ -135,8 +140,14 @@ public class ActivityHandlerTest extends TestCase {
   }
 
   public void testHandleDelete() throws Exception {
+    setPath("/people/john.doe/@self/1");
+
+    ResponseItem data = new ResponseItem<Object>(null);
+    EasyMock.expect(activityService.deleteActivity(new UserId(UserId.Type.userId, "john.doe"),
+        new GroupId(GroupId.Type.self, null), "appId", "1", token)).andReturn(data);
+
     replay();
-    assertEquals(ResponseError.BAD_REQUEST, handler.handleDelete(request).getError());
+    assertEquals(data, handler.handleDelete(request));
     verify();
   }
 }
