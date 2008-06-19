@@ -143,7 +143,51 @@ public class RestfulJsonDataTest extends AbstractLargeRestfulTests {
     assertEquals(0, johnsEntries.length());
   }
 
+  @Test
+  public void testDeleteAppData() throws Exception {
+    assertCount("0");
+
+    // With the wrong field
+    Map<String, String> extraParams = Maps.newHashMap();
+    extraParams.put("fields", "peabody");
+    getJsonResponse("/appdata/john.doe/@self/app", "DELETE", extraParams);
+
+    assertCount("0");
+
+    extraParams.put("fields", "count");
+    getJsonResponse("/appdata/john.doe/@self/app", "DELETE", extraParams);
+
+    assertCount(null);
+  }
+
+  @Test
+  public void testUpdateAppData() throws Exception {
+    assertCount("0");
+
+    Map<String, String> extraParams = Maps.newHashMap();
+    extraParams.put("fields", "count");
+    extraParams.put("entry", "{count : 5}");
+    getJsonResponse("/appdata/john.doe/@self/app", "POST", extraParams);
+
+    assertCount("5");
+  }
+
+  private void assertCount(String expectedCount) throws Exception {
+    String resp = getJsonResponse("/appdata/john.doe/@self/app", "GET");
+    JSONObject data = getJson(resp).getJSONObject("entry");
+    assertEquals(1, data.length());
+
+    JSONObject johnsEntries = data.getJSONObject(
+        MockXmlStateFileFetcher.johnDoe.getId());
+
+    if (expectedCount != null) {
+      assertEquals(1, johnsEntries.length());
+      assertEquals(expectedCount, johnsEntries.getString("count"));
+    } else {
+      assertEquals(0, johnsEntries.length());
+    }
+  }
+
   // TODO: support for indexBy??
-  // TODO: support for post and delete
 
 }

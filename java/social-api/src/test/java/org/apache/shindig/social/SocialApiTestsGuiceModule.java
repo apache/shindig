@@ -46,6 +46,7 @@ import org.apache.shindig.social.dataservice.AppDataService;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.inject.AbstractModule;
+import com.google.inject.Singleton;
 
 import java.net.URI;
 import java.util.ArrayList;
@@ -78,6 +79,7 @@ public class SocialApiTestsGuiceModule extends AbstractModule {
     bind(SecurityTokenDecoder.class).to(BasicSecurityTokenDecoder.class);
   }
 
+  @Singleton
   public static class MockXmlStateFileFetcher extends XmlStateFileFetcher {
     public static final Person johnDoe;
     public static final Person janeDoe;
