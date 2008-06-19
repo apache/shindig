@@ -68,6 +68,18 @@ JsonContainer.prototype.requestSendMessage = function(recipients, message,
   });
 };
 
+JsonContainer.prototype.requestShareApp = function(recipients, reason,
+    opt_callback, opt_params) {
+  opt_callback = opt_callback || {};
+  opt_params = opt_params || {};
+  var id = new opensocial.IdSpec({'userId' : recipients});
+  var req = opensocial.newDataRequest();
+  req.add(this.newRequestShareAppRequest(id, reason), 'key');
+  req.send(function(response) {
+    opt_callback(response.get('key'));
+  });
+};
+
 JsonContainer.prototype.createJson = function(requestObjects) {
   var jsonObjects = [];
   for (var i = 0; i < requestObjects.length; i++) {
@@ -215,6 +227,13 @@ JsonContainer.prototype.newRequestSendMessageRequest = function(idSpec,
   return new RequestItem({'type' : 'SEND_MESSAGE',
     'idSpec' : JsonContainer.translateIdSpec(idSpec),
     'message' : message});
+};
+
+JsonContainer.prototype.newRequestShareAppRequest = function(idSpec,
+    reason) {
+  return new RequestItem({'type' : 'SHARE_APP',
+    'idSpec' : JsonContainer.translateIdSpec(idSpec),
+    'reason' : reason});
 };
 
 JsonContainer.translateIdSpec = function(newIdSpec) {

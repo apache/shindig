@@ -22,7 +22,7 @@
  * This will expand to be more sophisticated as time goes on.
  */
 class OpenSocialDataHandler extends GadgetDataHandler {
-	private $handles = array('FETCH_PEOPLE', 'FETCH_PERSON_APP_DATA', 'UPDATE_PERSON_APP_DATA', 'FETCH_ACTIVITIES', 'CREATE_ACTIVITY', 'SEND_MESSAGE');
+	private $handles = array('FETCH_PEOPLE', 'FETCH_PERSON_APP_DATA', 'UPDATE_PERSON_APP_DATA', 'FETCH_ACTIVITIES', 'CREATE_ACTIVITY', 'SEND_MESSAGE', 'SHARE_APP');
 	private $peopleHandler;
 	private $dataHandler;
 	private $activitiesHandler;
@@ -95,6 +95,17 @@ class OpenSocialDataHandler extends GadgetDataHandler {
 					case 'SEND_MESSAGE' :
 						$message = $params["message"];
 						$response = $this->messagesHandler->sendMessage($peopleIds, $message, $request->getToken());
+						break;
+
+					case 'SHARE_APP' :
+					/*
+					 * Here you have to implement the stuff to send the invites
+					 * Also apply policies and filters in the $peopleIds
+					 */
+						$response = new ResponseItem(NOT_IMPLEMENTED, "Share app not Implemented");
+						break;
+					default:
+						$response = new ResponseItem(BAD_REQUEST, "Invalid request type");
 						break;
 				}
 			} else {
