@@ -20,36 +20,38 @@ package org.apache.shindig.social;
 
 import org.apache.shindig.common.BasicSecurityTokenDecoder;
 import org.apache.shindig.common.SecurityTokenDecoder;
+import org.apache.shindig.social.abdera.SocialRouteManager;
+import org.apache.shindig.social.dataservice.ActivityService;
+import org.apache.shindig.social.dataservice.AppDataService;
+import org.apache.shindig.social.dataservice.PersonService;
 import org.apache.shindig.social.opensocial.ActivitiesService;
 import org.apache.shindig.social.opensocial.DataService;
 import org.apache.shindig.social.opensocial.PeopleService;
-import org.apache.shindig.social.opensocial.model.BodyType;
+import org.apache.shindig.social.opensocial.model.Activity;
 import org.apache.shindig.social.opensocial.model.ActivityImpl;
+import org.apache.shindig.social.opensocial.model.Address;
 import org.apache.shindig.social.opensocial.model.AddressImpl;
+import org.apache.shindig.social.opensocial.model.BodyType;
 import org.apache.shindig.social.opensocial.model.BodyTypeImpl;
+import org.apache.shindig.social.opensocial.model.Email;
 import org.apache.shindig.social.opensocial.model.EmailImpl;
 import org.apache.shindig.social.opensocial.model.Enum;
 import org.apache.shindig.social.opensocial.model.EnumImpl;
+import org.apache.shindig.social.opensocial.model.MediaItem;
+import org.apache.shindig.social.opensocial.model.MediaItemImpl;
 import org.apache.shindig.social.opensocial.model.NameImpl;
+import org.apache.shindig.social.opensocial.model.Organization;
 import org.apache.shindig.social.opensocial.model.OrganizationImpl;
 import org.apache.shindig.social.opensocial.model.PersonImpl;
-import org.apache.shindig.social.opensocial.model.PhoneImpl;
-import org.apache.shindig.social.opensocial.model.UrlImpl;
-import org.apache.shindig.social.opensocial.model.Address;
-import org.apache.shindig.social.opensocial.model.Email;
-import org.apache.shindig.social.opensocial.model.Organization;
 import org.apache.shindig.social.opensocial.model.Phone;
+import org.apache.shindig.social.opensocial.model.PhoneImpl;
 import org.apache.shindig.social.opensocial.model.Url;
-import org.apache.shindig.social.opensocial.model.Activity;
+import org.apache.shindig.social.opensocial.model.UrlImpl;
 import org.apache.shindig.social.samplecontainer.BasicActivitiesService;
 import org.apache.shindig.social.samplecontainer.BasicDataService;
 import org.apache.shindig.social.samplecontainer.BasicPeopleService;
-import org.apache.shindig.social.samplecontainer.XmlStateFileFetcher;
 import org.apache.shindig.social.samplecontainer.SampleContainerRouteManager;
-import org.apache.shindig.social.abdera.SocialRouteManager;
-import org.apache.shindig.social.dataservice.PersonService;
-import org.apache.shindig.social.dataservice.ActivityService;
-import org.apache.shindig.social.dataservice.AppDataService;
+import org.apache.shindig.social.samplecontainer.XmlStateFileFetcher;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
@@ -57,7 +59,6 @@ import com.google.inject.AbstractModule;
 import com.google.inject.Singleton;
 
 import java.net.URI;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -85,6 +86,9 @@ public class SocialApiTestsGuiceModule extends AbstractModule {
     bind(SocialRouteManager.class).to(SampleContainerRouteManager.class);
 
     bind(SecurityTokenDecoder.class).to(BasicSecurityTokenDecoder.class);
+
+    bind(Activity.class).to(ActivityImpl.class);
+    bind(MediaItem.class).to(MediaItemImpl.class);
   }
 
   @Singleton

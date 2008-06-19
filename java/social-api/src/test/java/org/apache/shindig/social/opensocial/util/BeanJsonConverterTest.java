@@ -31,9 +31,11 @@ import org.apache.shindig.social.opensocial.model.NameImpl;
 import org.apache.shindig.social.opensocial.model.PersonImpl;
 import org.apache.shindig.social.opensocial.model.PhoneImpl;
 import org.apache.shindig.social.opensocial.model.Address;
+import org.apache.shindig.social.SocialApiTestsGuiceModule;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.google.inject.Guice;
 import junit.framework.TestCase;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -63,10 +65,11 @@ public class BeanJsonConverterTest extends TestCase {
 
     activity = new ActivityImpl("activityId", johnDoe.getId());
 
-    activity.setMediaItems(Lists.newArrayList(
-        new MediaItemImpl("image/jpg", MediaItemImpl.Type.IMAGE, "http://foo.bar")));
+    activity.setMediaItems(Lists.<MediaItem>newArrayList(
+        new MediaItemImpl("image/jpg", MediaItem.Type.IMAGE, "http://foo.bar")));
 
-    beanJsonConverter = new BeanJsonConverter();
+    beanJsonConverter = new BeanJsonConverter(
+        Guice.createInjector(new SocialApiTestsGuiceModule()));
   }
 
   public static class SpecialPerson extends PersonImpl {
@@ -190,7 +193,7 @@ public class BeanJsonConverterTest extends TestCase {
         "]}";
     // TODO: rename the enums to be lowercase
     Activity result = beanJsonConverter.convertToObject(jsonActivity,
-        ActivityImpl.class);
+        Activity.class);
 
     assertEquals("5", result.getUserId());
     assertEquals("6", result.getId());

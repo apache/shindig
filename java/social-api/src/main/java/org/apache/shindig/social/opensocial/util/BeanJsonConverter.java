@@ -19,6 +19,8 @@ package org.apache.shindig.social.opensocial.util;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.google.inject.Injector;
+import com.google.inject.Inject;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -44,6 +46,12 @@ public class BeanJsonConverter implements BeanConverter {
   private static final String EXCLUDED_FIELDS = "class";
   private static final Pattern GETTER = Pattern.compile("^get([a-zA-Z]+)$");
   private static final Pattern SETTER = Pattern.compile("^set([a-zA-Z]+)$");
+  private Injector injector;
+
+  @Inject
+  public BeanJsonConverter(Injector injector) {
+    this.injector = injector;
+  }
 
   /**
    * Convert the passed in object to a string
@@ -171,7 +179,7 @@ public class BeanJsonConverter implements BeanConverter {
     String errorMessage = "Could not convert " + json + " to " + className;
 
     try {
-      T pojo = className.newInstance();
+      T pojo = injector.getInstance(className);
       return convertToObject(json, pojo);
     } catch (JSONException e) {
       throw new RuntimeException(errorMessage, e);

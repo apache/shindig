@@ -24,8 +24,10 @@ import org.apache.shindig.social.opensocial.util.BeanJsonConverter;
 import org.apache.shindig.social.opensocial.util.BeanXmlConverter;
 import org.apache.shindig.social.opensocial.util.BeanConverter;
 import org.apache.shindig.social.ResponseItem;
+import org.apache.shindig.social.SocialApiTestsGuiceModule;
 
 import com.google.inject.Injector;
+import com.google.inject.Guice;
 import com.google.common.collect.Maps;
 import junit.framework.TestCase;
 import org.easymock.classextension.EasyMock;
@@ -204,7 +206,8 @@ public class DataServiceServletTest extends TestCase {
   }
 
   public void testGetConverterForRequest() throws Exception {
-    BeanJsonConverter json = new BeanJsonConverter();
+    BeanJsonConverter json = new BeanJsonConverter(
+        Guice.createInjector(new SocialApiTestsGuiceModule()));
     BeanXmlConverter xml = new BeanXmlConverter();
     servlet.setBeanConverters(json, xml);
 

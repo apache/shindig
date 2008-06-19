@@ -29,7 +29,7 @@ public class ActivityImpl implements Activity {
   private String externalId;
   private String id;
   private Date updated;
-  private List<MediaItemImpl> mediaItems;
+  private List<MediaItem> mediaItems;
   private Long postedTime;
   private Float priority;
   private String streamFaviconUrl;
@@ -98,11 +98,11 @@ public class ActivityImpl implements Activity {
     this.updated = updated;
   }
 
-  public List<? extends MediaItem> getMediaItems() {
+  public List<MediaItem> getMediaItems() {
     return mediaItems;
   }
 
-  public void setMediaItems(List<MediaItemImpl> mediaItems) {
+  public void setMediaItems(List<MediaItem> mediaItems) {
     this.mediaItems = mediaItems;
   }
 

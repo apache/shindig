@@ -79,10 +79,9 @@ public interface Activity {
 
   void setUpdated(Date updated);
 
-  List<? extends MediaItem> getMediaItems();
+  List<MediaItem> getMediaItems();
 
-  // TODO: Change this to use the interface. This is only in place for the BeanJsonConverter
-  void setMediaItems(List<MediaItemImpl> mediaItems);
+  void setMediaItems(List<MediaItem> mediaItems);
 
   Long getPostedTime();
 

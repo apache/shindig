@@ -61,7 +61,8 @@ public abstract class AbstractLargeRestfulTests extends TestCase {
     servlet = new DataServiceServlet();
     servlet.setHandlers(new HandlerProvider(handlers));
     servlet.setInjector(Guice.createInjector(new SocialApiTestsGuiceModule()));
-    servlet.setBeanConverters(new BeanJsonConverter(), new BeanXmlConverter());
+    servlet.setBeanConverters(new BeanJsonConverter(
+        Guice.createInjector(new SocialApiTestsGuiceModule())), new BeanXmlConverter());
     servlet.setSecurityTokenDecoder(new BasicSecurityTokenDecoder());
 
     req = EasyMock.createMock(HttpServletRequest.class);

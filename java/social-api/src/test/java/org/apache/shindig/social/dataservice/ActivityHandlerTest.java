@@ -112,8 +112,8 @@ public class ActivityHandlerTest extends TestCase {
     params.put("entry", jsonActivity);
     setPathAndParams("/people/john.doe/@self", params);
 
-    ActivityImpl activity = new ActivityImpl();
-    EasyMock.expect(converter.convertToObject(jsonActivity, ActivityImpl.class)).andReturn(activity);
+    Activity activity = new ActivityImpl();
+    EasyMock.expect(converter.convertToObject(jsonActivity, Activity.class)).andReturn(activity);
 
     ResponseItem data = new ResponseItem<Object>(null);
     EasyMock.expect(activityService.createActivity(new UserId(UserId.Type.userId, "john.doe"),
