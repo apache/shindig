@@ -70,6 +70,7 @@ public class UserId {
 
   @Override
   public int hashCode() {
-    return this.type.hashCode() + this.userId.hashCode();
+    int userHashCode = this.userId == null ? 0 : this.userId.hashCode();
+    return this.type.hashCode() + userHashCode;
   }
 }

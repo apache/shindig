@@ -34,6 +34,7 @@ import org.json.JSONObject;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 public class BasicActivitiesService implements ActivitiesService,
     ActivityService {
@@ -89,7 +90,7 @@ public class BasicActivitiesService implements ActivitiesService,
   // New interface methods
 
   public ResponseItem<RestfulCollection<Activity>> getActivities(UserId userId,
-      GroupId groupId, SecurityToken token) {
+      GroupId groupId, String appId, Set<String> fields, SecurityToken token) {
     List<String> ids = Lists.newArrayList();
     switch (groupId.getType()) {
       case all:
@@ -113,16 +114,16 @@ public class BasicActivitiesService implements ActivitiesService,
       }
     }
 
-    // TODO: Sort them
+    // TODO: Sort them, respect the fields param etc
     return new ResponseItem<RestfulCollection<Activity>>(
         new RestfulCollection<Activity>(activities));
   }
 
-  public ResponseItem<Activity> getActivity(UserId userId,
-      GroupId groupId, String activityId,
-      SecurityToken token) {
+  public ResponseItem<Activity> getActivity(UserId userId, GroupId groupId, String appId,
+      Set<String> fields, String activityId, SecurityToken token) {
+
     RestfulCollection<Activity> allActivities = getActivities(userId, groupId,
-        token).getResponse();
+        appId, fields, token).getResponse();
     for (Activity activity : allActivities.getEntry()) {
       if (activity.getId().equals(activityId)) {
         return new ResponseItem<Activity>(activity);
@@ -132,14 +133,21 @@ public class BasicActivitiesService implements ActivitiesService,
         "Activity not found", null);
   }
 
-  public ResponseItem createActivity(UserId personId, Activity activity,
-      SecurityToken token) {
-    // TODO: Validate the activity and do any template expanding
-    activity.setUserId(personId.getUserId(token));
+  public ResponseItem deleteActivity(UserId userId, GroupId groupId, String appId,
+      String activityId, SecurityToken token) {
+    fetcher.deleteActivity(userId.getUserId(token), activityId);
+    return new ResponseItem<Object>(new Object());
+  }
+
+  public ResponseItem createActivity(UserId userId, GroupId groupId, String appId,
+      Set<String> fields, Activity activity, SecurityToken token) {
+
+    // TODO: Validate the activity, respect the fields param, and do any template expanding
+    activity.setUserId(userId.getUserId(token));
     activity.setPostedTime(new Date().getTime());
 
-    fetcher.createActivity(personId.getUserId(token), activity);
-    return new ResponseItem<JSONObject>(new JSONObject());
+    fetcher.createActivity(userId.getUserId(token), activity);
+    return new ResponseItem<Object>(new Object());
   }
 
 }

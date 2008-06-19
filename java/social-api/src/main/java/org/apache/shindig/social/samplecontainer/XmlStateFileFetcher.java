@@ -130,9 +130,27 @@ public class XmlStateFileFetcher {
 
   public void createActivity(String userId, Activity activity) {
     if (allActivities.get(userId) == null) {
-      allActivities.put(userId, new ArrayList<Activity>());
+      allActivities.put(userId, Lists.<Activity>newArrayList());
     }
     allActivities.get(userId).add(activity);
+  }
+
+  public void deleteActivity(String userId, String activityId) {
+    if (allActivities.get(userId) == null) {
+      allActivities.put(userId, Lists.<Activity>newArrayList());
+    }
+    List<Activity> allActivities = this.allActivities.get(userId);
+    Activity activityToRemove = null;
+    for (Activity activity : allActivities) {
+      if (activity.getId().equals(activityId)) {
+        activityToRemove = activity;
+        break;
+      }
+    }
+
+    if (activityToRemove != null) {
+      allActivities.remove(activityToRemove);
+    }
   }
 
   private Document fetchStateDocument() {
