@@ -42,20 +42,21 @@ public interface PersonService {
    * @param filter How the people should be filtered.
    * @param first The index of the first person to fetch.
    * @param max The max number of people to fetch.
-   * @param profileDetails The profile details to fetch
+   * @param fields The profile details to fetch
    * @param token The gadget token
    * @return a list of people.
    */
   public ResponseItem<RestfulCollection<Person>> getPeople(UserId userId, GroupId groupId,
       SortOrder sortOrder, FilterType filter, int first, int max,
-      Set<String> profileDetails, SecurityToken token);
+      Set<String> fields, SecurityToken token);
 
   /**
    * Returns a person that corresponds to the passed in person id.
    *
    * @param id The id of the person to fetch.
+   * @param fields The fields to fetch.
    * @param token The gadget token
    * @return a list of people.
    */
-  public ResponseItem<Person> getPerson(UserId id, SecurityToken token);
+  public ResponseItem<Person> getPerson(UserId id, Set<String> fields, SecurityToken token);
 }

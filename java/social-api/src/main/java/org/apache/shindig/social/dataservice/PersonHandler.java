@@ -69,9 +69,18 @@ public class PersonHandler extends DataRequestHandler {
       optionalPersonId = segments[2];
     }
 
-    if (optionalPersonId != null
-        || groupId.getType() == GroupId.Type.self) {
-      return personService.getPerson(userId, request.getToken());
+    Set<String> fields = Sets.newHashSet(
+        getListParam(request, "fields",
+            Lists.newArrayList(Person.Field.ID.toString(),
+                Person.Field.NAME.toString(),
+                Person.Field.THUMBNAIL_URL.toString())));
+
+    if (groupId.getType() == GroupId.Type.self) {
+      return personService.getPerson(userId, fields, request.getToken());
+    } else if (optionalPersonId != null) {
+      // TODO: Add some crazy concept to handle the userId? 
+      return personService.getPerson(new UserId(UserId.Type.userId, optionalPersonId),
+          fields, request.getToken());
     }
 
     PersonService.SortOrder sort = getEnumParam(request, "orderBy",
@@ -82,14 +91,8 @@ public class PersonHandler extends DataRequestHandler {
     int first = getIntegerParam(request, "startIndex", 0);
     int max = getIntegerParam(request, "count", 20);
 
-    Set<String>  profileDetails = Sets.newHashSet(
-        getListParam(request, "fields",
-            Lists.newArrayList(Person.Field.ID.toString(),
-                Person.Field.NAME.toString(),
-                Person.Field.THUMBNAIL_URL.toString())));
-
     return personService.getPeople(userId, groupId, sort, filter, first, max,
-        profileDetails, request.getToken());
+        fields, request.getToken());
   }
 
 }
