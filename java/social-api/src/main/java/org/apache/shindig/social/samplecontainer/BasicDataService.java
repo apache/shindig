@@ -33,6 +33,7 @@ import org.json.JSONObject;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 public class BasicDataService implements DataService, AppDataService {
 
@@ -117,8 +118,8 @@ public class BasicDataService implements DataService, AppDataService {
   // New interface methods
 
   public ResponseItem<DataCollection> getPersonData(
-      UserId userId, GroupId groupId, List<String> fields,
-      String appId, SecurityToken token) {
+      UserId userId, GroupId groupId, String appId, Set<String> fields,
+      SecurityToken token) {
     List<String> ids = Lists.newArrayList();
     switch (groupId.getType()) {
       case all:
@@ -134,13 +135,13 @@ public class BasicDataService implements DataService, AppDataService {
 
     // TODO: Respect appId
     Map<String, Map<String, String>> data
-        = getPersonData(ids, fields, token).getResponse();
+        = getPersonData(ids, Lists.newArrayList(fields), token).getResponse();
     return new ResponseItem<DataCollection>(new DataCollection(data));
   }
 
   public ResponseItem updatePersonData(UserId userId,
-      GroupId groupId, List<String> fields,
-      Map<String, String> values, String appId, SecurityToken token) {
+      GroupId groupId, String appId, Set<String> fields,
+      Map<String, String> values, SecurityToken token) {
     for (String field : fields) {
       if (!isValidKey(field)) {
         return new ResponseItem<Object>(ResponseError.BAD_REQUEST,
@@ -166,7 +167,7 @@ public class BasicDataService implements DataService, AppDataService {
   }
 
   public ResponseItem deletePersonData(UserId userId,
-      GroupId groupId, List<String> fields, String appId,
+      GroupId groupId, String appId, Set<String> fields,
       SecurityToken token) {
     switch(groupId.getType()) {
       case self:

@@ -23,10 +23,10 @@ import org.apache.shindig.social.opensocial.util.BeanJsonConverter;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 import junit.framework.TestCase;
 import org.easymock.classextension.EasyMock;
 
-import javax.servlet.http.HttpServletRequest;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -74,7 +74,7 @@ public class AppDataHandlerTest extends TestCase {
     ResponseItem<DataCollection> data = new ResponseItem<DataCollection>(null);
     EasyMock.expect(appDataService.getPersonData(new UserId(UserId.Type.userId, "john.doe"),
         new GroupId(group, null),
-        Lists.<String>newArrayList(), "appId", token)).andReturn(data);
+        "appId", Sets.<String>newHashSet(), token)).andReturn(data);
 
     replay();
     assertEquals(data, handler.handleGet(request));
@@ -101,7 +101,7 @@ public class AppDataHandlerTest extends TestCase {
     ResponseItem<DataCollection> data = new ResponseItem<DataCollection>(null);
     EasyMock.expect(appDataService.getPersonData(new UserId(UserId.Type.userId, "john.doe"),
         new GroupId(GroupId.Type.friends, null),
-        Lists.newArrayList("pandas"), "appId", token)).andReturn(data);
+        "appId", Sets.newHashSet("pandas"), token)).andReturn(data);
 
     replay();
     assertEquals(data, handler.handleGet(request));
@@ -122,7 +122,7 @@ public class AppDataHandlerTest extends TestCase {
     ResponseItem data = new ResponseItem<Object>(null);
     EasyMock.expect(appDataService.updatePersonData(new UserId(UserId.Type.userId, "john.doe"),
         new GroupId(GroupId.Type.self, null),
-        Lists.newArrayList("pandas"), values, "appId", token)).andReturn(data);
+        "appId", Sets.newHashSet("pandas"), values, token)).andReturn(data);
     replay();
     return data;
   }
@@ -147,7 +147,7 @@ public class AppDataHandlerTest extends TestCase {
     ResponseItem data = new ResponseItem<Object>(null);
     EasyMock.expect(appDataService.deletePersonData(new UserId(UserId.Type.userId, "john.doe"),
         new GroupId(GroupId.Type.self, null),
-        Lists.newArrayList("pandas"), "appId", token)).andReturn(data);
+        "appId", Sets.newHashSet("pandas"), token)).andReturn(data);
 
     replay();
     assertEquals(data, handler.handleDelete(request));
