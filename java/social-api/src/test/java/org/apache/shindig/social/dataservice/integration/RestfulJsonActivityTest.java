@@ -22,7 +22,12 @@ import org.apache.shindig.social.opensocial.model.Activity;
 
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.json.JSONArray;
 import org.junit.Test;
+
+import java.util.Map;
+
+import com.google.common.collect.Maps;
 
 public class RestfulJsonActivityTest extends AbstractLargeRestfulTests {
 
@@ -113,6 +118,28 @@ public class RestfulJsonActivityTest extends AbstractLargeRestfulTests {
     assertEquals(activity.getBody(), result.getString("body"));
   }
 
+  @Test
+  public void testCreateActivity() throws Exception {
+    Map<String, String> extraParams = Maps.newHashMap();
+    extraParams.put("entry", "{title : 'hi mom!', body : 'and dad.'}");
+    getJsonResponse("/activities/john.doe/@self", "POST", extraParams);
+
+     String resp = getJsonResponse("/activities/john.doe/@self", "GET");
+    JSONObject result = getJson(resp);
+
+    assertEquals(2, result.getInt("totalResults"));
+    assertEquals(0, result.getInt("startIndex"));
+
+    JSONArray activities = result.getJSONArray("entry");
+    int newActivityIndex = 0;
+    if (activities.getJSONObject(0).has("id")) {
+      newActivityIndex = 1;
+    }
+
+    JSONObject jsonActivity = activities.getJSONObject(newActivityIndex);
+    assertEquals("hi mom!", jsonActivity.getString("title"));
+    assertEquals("and dad.", jsonActivity.getString("body"));
+  }
+
   // TODO: Add tests for the fields= parameter
-  // TODO: Add tests for post
 }

@@ -281,14 +281,10 @@ public class RestfulJsonPeopleTest extends AbstractLargeRestfulTests {
 
   /**
    * Expected response for a list of people in json:
-   * TODO: Fix the question marks...
    *
    * {
-   *  "author" : "<???>",
-   *  "link" : {"rel" : "next", "href" : "<???>"},
    *  "totalResults" : 2,
    *  "startIndex" : 0
-   *  "itemsPerPage" : 10
    *  "entry" : [
    *     {<jane doe>}, // layed out like above
    *     {<simple doe>},
@@ -298,12 +294,12 @@ public class RestfulJsonPeopleTest extends AbstractLargeRestfulTests {
    * @throws Exception if test encounters an error
    */
   @Test
-  public void testGetPeopleJson() throws Exception {
+  public void testGetPeople() throws Exception {
     Map<String, String> extraParams = Maps.newHashMap();
-    extraParams.put("orderBy", null);
+    extraParams.put("orderBy", "name");
     extraParams.put("filterBy", null);
     extraParams.put("startIndex", null);
-    extraParams.put("count", null);
+    extraParams.put("count", "20");
     extraParams.put("fields", null);
 
     // Currently, for Shindig @all == @friends
@@ -312,27 +308,50 @@ public class RestfulJsonPeopleTest extends AbstractLargeRestfulTests {
 
     assertEquals(2, result.getInt("totalResults"));
     assertEquals(0, result.getInt("startIndex"));
-    // TODO: Paging not handled yet
-    // assertEquals(10, result.getInt("itemsPerPage"));
 
     JSONArray people = result.getJSONArray("entry");
 
-    for (int i = 0; i < people.length(); i++) {
-      JSONObject person = people.getJSONObject(i);
-      String id = person.getString("id");
-      String name = person.getJSONObject("name").getString("unstructured");
-
-      // TODO: Clean this after we support sorting
-      if (id.equals("jane.doe")) {
-        assertEquals("Jane Doe", name);
-      } else {
-        assertEquals("simple.doe", id);
-        assertEquals("Simple Doe", name);
-      }
-    }
+    // The users should be in alphabetical order
+    assertPerson(people.getJSONObject(0), "jane.doe", "Jane Doe");
+    assertPerson(people.getJSONObject(1), "simple.doe", "Simple Doe");
   }
 
-  // TODO: Add tests for paging, sorting
+  @Test
+  public void testGetPeoplePagination() throws Exception {
+    Map<String, String> extraParams = Maps.newHashMap();
+    extraParams.put("orderBy", "name");
+    extraParams.put("filterBy", null);
+    extraParams.put("startIndex", "0");
+    extraParams.put("count", "1");
+    extraParams.put("fields", null);
+
+    String resp = getJsonResponse("/people/john.doe/@friends", "GET", extraParams);
+    JSONObject result = getJson(resp);
+
+    assertEquals(2, result.getInt("totalResults"));
+    assertEquals(0, result.getInt("startIndex"));
+
+    JSONArray people = result.getJSONArray("entry");
+    assertPerson(people.getJSONObject(0), "jane.doe", "Jane Doe");
+
+    // Get the second page
+    extraParams.put("startIndex", "1");
+    resp = getJsonResponse("/people/john.doe/@friends", "GET", extraParams);
+    result = getJson(resp);
+
+    assertEquals(2, result.getInt("totalResults"));
+    assertEquals(1, result.getInt("startIndex"));
+
+    people = result.getJSONArray("entry");
+    assertPerson(people.getJSONObject(0), "simple.doe", "Simple Doe");
+  }
+
+  private void assertPerson(JSONObject person, String expectedId, String expectedName)
+      throws Exception {
+    assertEquals(expectedId, person.getString("id"));
+    assertEquals(expectedName, person.getJSONObject("name").getString("unstructured"));
+  }
+
   // TODO: Add tests for fields parameter
   // TODO: Add tests for networkDistance
 }

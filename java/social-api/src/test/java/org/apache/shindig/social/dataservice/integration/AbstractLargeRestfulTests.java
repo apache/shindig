@@ -97,6 +97,7 @@ public abstract class AbstractLargeRestfulTests extends TestCase {
     EasyMock.replay(req, res);
     servlet.service(req, res);
     EasyMock.verify(req, res);
+    EasyMock.reset(req, res);
 
     writer.flush();
     return outputStream.toString();
