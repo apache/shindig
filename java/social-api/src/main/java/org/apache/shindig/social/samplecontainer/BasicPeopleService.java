@@ -180,7 +180,7 @@ public class BasicPeopleService implements PeopleService, PersonService {
     return new ResponseItem<RestfulCollection<Person>>(collection);
   }
 
-  public ResponseItem<Person> getPerson(UserId id, SecurityToken token) {
+  public ResponseItem<Person> getPerson(UserId id, Set<String> fields, SecurityToken token) {
     List<Person> people = getPeople(Lists.newArrayList(id.getUserId(token)), token);
     if (people.size() == 1) {
       return new ResponseItem<Person>(people.get(0));

@@ -28,12 +28,16 @@ import junit.framework.TestCase;
 import org.easymock.classextension.EasyMock;
 
 import java.util.Map;
+import java.util.Set;
 
 public class PersonHandlerTest extends TestCase {
   private PersonService personService;
   private PersonHandler handler;
   private FakeGadgetToken token;
   private RequestItem request;
+  private static final Set<String> DEFAULT_FIELDS = Sets.newHashSet(Person.Field.ID.toString(),
+            Person.Field.NAME.toString(),
+            Person.Field.THUMBNAIL_URL.toString());
 
   @Override
   protected void setUp() throws Exception {
@@ -75,9 +79,7 @@ public class PersonHandlerTest extends TestCase {
         new GroupId(GroupId.Type.all, null),
         PersonService.SortOrder.topFriends,
         PersonService.FilterType.all, 0, 20,
-        Sets.newHashSet(Person.Field.ID.toString(),
-            Person.Field.NAME.toString(),
-            Person.Field.THUMBNAIL_URL.toString()),
+        DEFAULT_FIELDS,
         token)).andReturn(data);
 
     replay();
@@ -95,9 +97,7 @@ public class PersonHandlerTest extends TestCase {
         new GroupId(GroupId.Type.friends, null),
         PersonService.SortOrder.topFriends,
         PersonService.FilterType.all, 0, 20,
-        Sets.newHashSet(Person.Field.ID.toString(),
-            Person.Field.NAME.toString(),
-            Person.Field.THUMBNAIL_URL.toString()),
+        DEFAULT_FIELDS,
         token)).andReturn(data);
 
     replay();
@@ -134,12 +134,9 @@ public class PersonHandlerTest extends TestCase {
     setPath("/people/john.doe/@friends/jane.doe");
 
     ResponseItem<Person> data = new ResponseItem<Person>(null);
-    // TODO: This isn't right! We should be passing both john.doe and jane.doe to the service
-    // We probably need to either change the getPerson parameters or add a new method to
-    // the interface
-    EasyMock.expect(personService.getPerson(
-        new UserId(UserId.Type.userId, "john.doe"),
-        token)).andReturn(data);
+    // TODO: We aren't passing john.doe to the service yet.
+    EasyMock.expect(personService.getPerson(new UserId(UserId.Type.userId, "jane.doe"),
+        DEFAULT_FIELDS, token)).andReturn(data);
 
     replay();
     assertEquals(data, handler.handleGet(request));
@@ -150,9 +147,8 @@ public class PersonHandlerTest extends TestCase {
     setPath("/people/john.doe/@self");
 
     ResponseItem<Person> data = new ResponseItem<Person>(null);
-    EasyMock.expect(personService.getPerson(
-        new UserId(UserId.Type.userId, "john.doe"),
-        token)).andReturn(data);
+    EasyMock.expect(personService.getPerson(new UserId(UserId.Type.userId, "john.doe"),
+        DEFAULT_FIELDS, token)).andReturn(data);
 
     replay();
     assertEquals(data, handler.handleGet(request));
