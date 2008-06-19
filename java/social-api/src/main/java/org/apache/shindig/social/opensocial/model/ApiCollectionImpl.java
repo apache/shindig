@@ -17,52 +17,44 @@
  */
 package org.apache.shindig.social.opensocial.model;
 
-public interface MediaItem {
+import java.util.List;
 
-  public static enum Field {
-    MIME_TYPE("mimeType"),
-    TYPE("type"),
-    URL("url");
+public class ApiCollectionImpl<T> implements ApiCollection<T> {
+  private List<T> items;
+  private int offset;
+  private int totalSize;
 
-    private final String jsonString;
-
-    private Field(String jsonString) {
-      this.jsonString = jsonString;
-    }
-
-    @Override
-    public String toString() {
-      return this.jsonString;
-    }
+  public ApiCollectionImpl(List<T> items) {
+    this(items, 0, items.size());
   }
 
-  public enum Type {
-    AUDIO("audio"),
-    IMAGE("image"),
-    VIDEO("video");
-
-    private final String jsonString;
-
-    private Type(String jsonString) {
-      this.jsonString = jsonString;
-    }
-
-    @Override
-    public String toString() {
-      return this.jsonString;
-    }
+  public ApiCollectionImpl(List<T> items, int offset, int totalSize) {
+    this.items = items;
+    this.offset = offset;
+    this.totalSize = totalSize;
   }
 
-  String getMimeType();
+  public List<T> getItems() {
+    return items;
+  }
 
-  void setMimeType(String mimeType);
+  public void setItems(List<T> items) {
+    this.items = items;
+  }
 
-  Type getType();
+  public int getOffset() {
+    return offset;
+  }
 
-  void setType(Type type);
+  public void setOffset(int offset) {
+    this.offset = offset;
+  }
 
-  String getUrl();
+  public int getTotalSize() {
+    return totalSize;
+  }
 
-  void setUrl(String url);
-
+  public void setTotalSize(int totalSize) {
+    this.totalSize = totalSize;
+  }
 }

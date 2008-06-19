@@ -17,52 +17,43 @@
  */
 package org.apache.shindig.social.opensocial.model;
 
-public interface MediaItem {
+public final class EnumImpl<E extends EnumImpl.EnumKey> implements Enum<E> {
+  private String displayValue;
+  private E key = null;
 
-  public static enum Field {
-    MIME_TYPE("mimeType"),
-    TYPE("type"),
-    URL("url");
-
-    private final String jsonString;
-
-    private Field(String jsonString) {
-      this.jsonString = jsonString;
-    }
-
-    @Override
-    public String toString() {
-      return this.jsonString;
-    }
+  /**
+   * Constructs a Enum object.
+   * @param key EnumKey The key to use
+   * @param displayValue String The display value
+   */
+  public EnumImpl(E key, String displayValue) {
+    this.key = key;
+    this.displayValue = displayValue;
   }
 
-  public enum Type {
-    AUDIO("audio"),
-    IMAGE("image"),
-    VIDEO("video");
-
-    private final String jsonString;
-
-    private Type(String jsonString) {
-      this.jsonString = jsonString;
-    }
-
-    @Override
-    public String toString() {
-      return this.jsonString;
-    }
+  /**
+   * Constructs a Enum object.
+   * @param key The key to use. Will use the value from getDisplayValue() as
+   *     the display value.
+   */
+  public EnumImpl(E key) {
+    this(key, key.getDisplayValue());
   }
 
-  String getMimeType();
+  public String getDisplayValue() {
+    return this.displayValue;
+  }
 
-  void setMimeType(String mimeType);
+  public void setDisplayValue(String displayValue) {
+    this.displayValue = displayValue;
+  }
 
-  Type getType();
+  public E getKey() {
+    return this.key;
+  }
 
-  void setType(Type type);
-
-  String getUrl();
-
-  void setUrl(String url);
+  public void setKey(E key) {
+    this.key = key;
+  }
 
 }

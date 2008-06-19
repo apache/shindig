@@ -19,6 +19,7 @@ package org.apache.shindig.social.dataservice;
 
 import org.apache.shindig.social.ResponseItem;
 import org.apache.shindig.social.ResponseError;
+import org.apache.shindig.social.opensocial.model.ActivityImpl;
 import org.apache.shindig.social.opensocial.model.Activity;
 import org.apache.shindig.social.opensocial.util.BeanJsonConverter;
 import org.apache.shindig.common.testing.FakeGadgetToken;
@@ -111,8 +112,8 @@ public class ActivityHandlerTest extends TestCase {
     params.put("entry", jsonActivity);
     setPathAndParams("/people/john.doe/@self", params);
 
-    Activity activity = new Activity();
-    EasyMock.expect(converter.convertToObject(jsonActivity, Activity.class)).andReturn(activity);
+    ActivityImpl activity = new ActivityImpl();
+    EasyMock.expect(converter.convertToObject(jsonActivity, ActivityImpl.class)).andReturn(activity);
 
     ResponseItem data = new ResponseItem<Object>(null);
     EasyMock.expect(activityService.createActivity(new UserId(UserId.Type.userId, "john.doe"),

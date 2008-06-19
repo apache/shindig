@@ -24,8 +24,8 @@ import java.util.Date;
  * http://code.google.com/apis/opensocial/docs/0.7/reference/opensocial.Organization.Field.html
  *
  */
-public class Organization {
-
+public interface Organization {
+  
   public static enum Field {
     ADDRESS("address"),
     DESCRIPTION("description"),
@@ -50,95 +50,44 @@ public class Organization {
     }
   }
 
-  private Address address;
-  private String description;
-  private Date endDate;
-  private String field;
-  private String name;
-  private String salary;
-  private Date startDate;
-  private String subField;
-  private String title;
-  private String webpage;
+  Address getAddress();
 
-  public Address getAddress() {
-    return address;
-  }
+  void setAddress(Address address);
 
-  public void setAddress(Address address) {
-    this.address = address;
-  }
+  String getDescription();
 
-  public String getDescription() {
-    return description;
-  }
+  void setDescription(String description);
 
-  public void setDescription(String description) {
-    this.description = description;
-  }
+  Date getEndDate();
 
-  public Date getEndDate() {
-    return endDate;
-  }
+  void setEndDate(Date endDate);
 
-  public void setEndDate(Date endDate) {
-    this.endDate = endDate;
-  }
+  String getField();
 
-  public String getField() {
-    return field;
-  }
+  void setField(String field);
 
-  public void setField(String field) {
-    this.field = field;
-  }
+  String getName();
 
-  public String getName() {
-    return name;
-  }
+  void setName(String name);
 
-  public void setName(String name) {
-    this.name = name;
-  }
+  String getSalary();
 
-  public String getSalary() {
-    return salary;
-  }
+  void setSalary(String salary);
 
-  public void setSalary(String salary) {
-    this.salary = salary;
-  }
+  Date getStartDate();
 
-  public Date getStartDate() {
-    return startDate;
-  }
+  void setStartDate(Date startDate);
 
-  public void setStartDate(Date startDate) {
-    this.startDate = startDate;
-  }
+  String getSubField();
 
-  public String getSubField() {
-    return subField;
-  }
+  void setSubField(String subField);
 
-  public void setSubField(String subField) {
-    this.subField = subField;
-  }
+  String getTitle();
 
-  public String getTitle() {
-    return title;
-  }
+  void setTitle(String title);
 
-  public void setTitle(String title) {
-    this.title = title;
-  }
+  String getWebpage();
 
-  public String getWebpage() {
-    return webpage;
-  }
-
-  public void setWebpage(String webpage) {
-    this.webpage = webpage;
-  }
+  void setWebpage(String webpage);
 
 }

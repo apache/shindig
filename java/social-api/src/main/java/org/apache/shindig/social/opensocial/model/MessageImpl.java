@@ -17,52 +17,43 @@
  */
 package org.apache.shindig.social.opensocial.model;
 
-public interface MediaItem {
+public final class MessageImpl implements Message {
 
-  public static enum Field {
-    MIME_TYPE("mimeType"),
-    TYPE("type"),
-    URL("url");
+  private String body;
+  private String title;
+  private Type type;
 
-    private final String jsonString;
-
-    private Field(String jsonString) {
-      this.jsonString = jsonString;
-    }
-
-    @Override
-    public String toString() {
-      return this.jsonString;
-    }
+  public MessageImpl(String initBody, String initTitle, Type initType) {
+    this.body = initBody;
+    this.title = initTitle;
+    this.type = initType;
   }
 
-  public enum Type {
-    AUDIO("audio"),
-    IMAGE("image"),
-    VIDEO("video");
-
-    private final String jsonString;
-
-    private Type(String jsonString) {
-      this.jsonString = jsonString;
-    }
-
-    @Override
-    public String toString() {
-      return this.jsonString;
-    }
+  public String getBody() {
+    return this.body;
   }
 
-  String getMimeType();
+  public void setBody(String newBody) {
+    this.body = newBody;
+  }
 
-  void setMimeType(String mimeType);
+  public String getTitle() {
+    return this.title;
+  }
 
-  Type getType();
+  public void setTitle(String newTitle) {
+    this.title = newTitle;
+  }
 
-  void setType(Type type);
+  public Type getType() {
+    return type;
+  }
 
-  String getUrl();
+  public void setType(Type newType) {
+    this.type = newType;
+  }
 
-  void setUrl(String url);
-
+  public String sanitizeHTML(String htmlStr) {
+    return htmlStr;
+  }
 }

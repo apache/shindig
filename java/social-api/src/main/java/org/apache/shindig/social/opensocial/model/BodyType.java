@@ -17,12 +17,7 @@
  */
 package org.apache.shindig.social.opensocial.model;
 
-/**
- * see
- * http://code.google.com/apis/opensocial/docs/0.7/reference/opensocial.BodyType.Field.html
- *
- */
-public class BodyType {
+public interface BodyType {
 
   public static enum Field {
     BUILD("build"),
@@ -42,50 +37,24 @@ public class BodyType {
       return this.jsonString;
     }
   }
+  
+  String getBuild();
 
-  private String build;
-  private String eyeColor;
-  private String hairColor;
-  private String height;
-  private String weight;
+  void setBuild(String build);
 
-  public String getBuild() {
-    return build;
-  }
+  String getEyeColor();
 
-  public void setBuild(String build) {
-    this.build = build;
-  }
+  void setEyeColor(String eyeColor);
 
-  public String getEyeColor() {
-    return eyeColor;
-  }
+  String getHairColor();
 
-  public void setEyeColor(String eyeColor) {
-    this.eyeColor = eyeColor;
-  }
+  void setHairColor(String hairColor);
 
-  public String getHairColor() {
-    return hairColor;
-  }
+  String getHeight();
 
-  public void setHairColor(String hairColor) {
-    this.hairColor = hairColor;
-  }
+  void setHeight(String height);
 
-  public String getHeight() {
-    return height;
-  }
+  String getWeight();
 
-  public void setHeight(String height) {
-    this.height = height;
-  }
-
-  public String getWeight() {
-    return weight;
-  }
-
-  public void setWeight(String weight) {
-    this.weight = weight;
-  }
+  void setWeight(String weight);
 }

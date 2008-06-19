@@ -17,52 +17,44 @@
  */
 package org.apache.shindig.social.opensocial.model;
 
-public interface MediaItem {
+/**
+ * see
+ * http://code.google.com/apis/opensocial/docs/0.7/reference/opensocial.Url.Field.html
+ */
+public class UrlImpl implements Url {
 
-  public static enum Field {
-    MIME_TYPE("mimeType"),
-    TYPE("type"),
-    URL("url");
+  private String address;
+  private String linkText;
+  private String type;
 
-    private final String jsonString;
-
-    private Field(String jsonString) {
-      this.jsonString = jsonString;
-    }
-
-    @Override
-    public String toString() {
-      return this.jsonString;
-    }
+  public UrlImpl(String address, String linkText, String type) {
+    this.address = address;
+    this.linkText = linkText;
+    this.type = type;
   }
 
-  public enum Type {
-    AUDIO("audio"),
-    IMAGE("image"),
-    VIDEO("video");
-
-    private final String jsonString;
-
-    private Type(String jsonString) {
-      this.jsonString = jsonString;
-    }
-
-    @Override
-    public String toString() {
-      return this.jsonString;
-    }
+  public String getAddress() {
+    return address;
   }
 
-  String getMimeType();
+  public void setAddress(String address) {
+    this.address = address;
+  }
 
-  void setMimeType(String mimeType);
+  public String getLinkText() {
+    return linkText;
+  }
 
-  Type getType();
+  public void setLinkText(String linkText) {
+    this.linkText = linkText;
+  }
 
-  void setType(Type type);
+  public String getType() {
+    return type;
+  }
 
-  String getUrl();
-
-  void setUrl(String url);
+  public void setType(String type) {
+    this.type = type;
+  }
 
 }

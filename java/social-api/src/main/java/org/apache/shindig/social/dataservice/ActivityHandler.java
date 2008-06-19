@@ -21,6 +21,7 @@ import com.google.inject.Inject;
 
 import org.apache.shindig.social.ResponseError;
 import org.apache.shindig.social.ResponseItem;
+import org.apache.shindig.social.opensocial.model.ActivityImpl;
 import org.apache.shindig.social.opensocial.model.Activity;
 
 public class ActivityHandler extends DataRequestHandler {
@@ -62,7 +63,8 @@ public class ActivityHandler extends DataRequestHandler {
     // TODO: Should we pass the groupId through to the service?
 
     String jsonActivity = request.getParameters().get("entry");
-    Activity activity = converter.convertToObject(jsonActivity, Activity.class);
+    // TODO: Change this so that somehow we don't need to know the impl class.
+    Activity activity = converter.convertToObject(jsonActivity, ActivityImpl.class);
 
     return service.createActivity(userId, activity, request.getToken());
   }

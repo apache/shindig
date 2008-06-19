@@ -18,17 +18,22 @@
 package org.apache.shindig.social.opensocial.util;
 
 import org.apache.shindig.social.opensocial.model.Activity;
-import org.apache.shindig.social.opensocial.model.Address;
 import org.apache.shindig.social.opensocial.model.Email;
 import org.apache.shindig.social.opensocial.model.MediaItem;
-import org.apache.shindig.social.opensocial.model.Name;
 import org.apache.shindig.social.opensocial.model.Person;
 import org.apache.shindig.social.opensocial.model.Phone;
 import org.apache.shindig.social.opensocial.model.DataCollection;
+import org.apache.shindig.social.opensocial.model.ActivityImpl;
+import org.apache.shindig.social.opensocial.model.AddressImpl;
+import org.apache.shindig.social.opensocial.model.EmailImpl;
+import org.apache.shindig.social.opensocial.model.MediaItemImpl;
+import org.apache.shindig.social.opensocial.model.NameImpl;
+import org.apache.shindig.social.opensocial.model.PersonImpl;
+import org.apache.shindig.social.opensocial.model.PhoneImpl;
+import org.apache.shindig.social.opensocial.model.Address;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import com.google.inject.TypeLiteral;
 import junit.framework.TestCase;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -44,31 +49,31 @@ public class BeanJsonConverterTest extends TestCase {
   @Override
   public void setUp() throws Exception {
     super.setUp();
-    johnDoe = new Person("johnDoeId", new Name("John Doe"));
-    johnDoe.setPhoneNumbers(Lists.newArrayList(
-        new Phone("+33H000000000", "home"),
-        new Phone("+33M000000000", "mobile"),
-        new Phone("+33W000000000", "work")));
+    johnDoe = new PersonImpl("johnDoeId", new NameImpl("John Doe"));
+    johnDoe.setPhoneNumbers(Lists.<Phone>newArrayList(
+        new PhoneImpl("+33H000000000", "home"),
+        new PhoneImpl("+33M000000000", "mobile"),
+        new PhoneImpl("+33W000000000", "work")));
 
-    johnDoe.setAddresses(Lists.newArrayList(new Address("My home address")));
+    johnDoe.setAddresses(Lists.<Address>newArrayList(new AddressImpl("My home address")));
 
-    johnDoe.setEmails(Lists.newArrayList(
-        new Email("john.doe@work.bar", "work"),
-        new Email("john.doe@home.bar", "home")));
+    johnDoe.setEmails(Lists.<Email>newArrayList(
+        new EmailImpl("john.doe@work.bar", "work"),
+        new EmailImpl("john.doe@home.bar", "home")));
 
-    activity = new Activity("activityId", johnDoe.getId());
+    activity = new ActivityImpl("activityId", johnDoe.getId());
 
     activity.setMediaItems(Lists.newArrayList(
-        new MediaItem("image/jpg", MediaItem.Type.IMAGE, "http://foo.bar")));
+        new MediaItemImpl("image/jpg", MediaItemImpl.Type.IMAGE, "http://foo.bar")));
 
     beanJsonConverter = new BeanJsonConverter();
   }
 
-  public static class SpecialPerson extends Person {
+  public static class SpecialPerson extends PersonImpl {
     private String newfield;
 
     public SpecialPerson(String id, String name, String newfield) {
-      super(id, new Name(name));
+      super(id, new NameImpl(name));
       this.newfield = newfield;
     }
 
@@ -142,7 +147,7 @@ public class BeanJsonConverterTest extends TestCase {
 
     Map<String, String> item1Map = Maps.newHashMap();
     item1Map.put("value", "1");
-    
+
     // Null values shouldn't cause exceptions
     item1Map.put("value2", null);
     map.put("item1", item1Map);
@@ -185,7 +190,7 @@ public class BeanJsonConverterTest extends TestCase {
         "]}";
     // TODO: rename the enums to be lowercase
     Activity result = beanJsonConverter.convertToObject(jsonActivity,
-        Activity.class);
+        ActivityImpl.class);
 
     assertEquals("5", result.getUserId());
     assertEquals("6", result.getId());

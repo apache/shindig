@@ -17,15 +17,15 @@
  */
 package org.apache.shindig.social.opensocial.model;
 
-import java.util.Date;
 import java.util.List;
+import java.util.Date;
 
 /**
  * see
  * http://code.google.com/apis/opensocial/docs/0.7/reference/opensocial.Person.Field.html
  *
  */
-public class Person {
+public interface Person {
 
   public static enum Field {
     ABOUT_ME("aboutMe"),
@@ -96,534 +96,237 @@ public class Person {
       return this.jsonString;
     }
   }
+  
+  String getAboutMe();
 
-  private String aboutMe;
-  private List<String> activities;
-  private List<Address> addresses;
-  private Integer age;
-  private BodyType bodyType;
-  private List<String> books;
-  private List<String> cars;
-  private String children;
-  private Address currentLocation;
-  private Date dateOfBirth;
-  private Enum<Enum.Drinker> drinker;
-  private List<Email> emails;
-  private String ethnicity;
-  private String fashion;
-  private List<String> food;
-  private Enum<Enum.Gender> gender;
-  private String happiestWhen;
-  private Boolean hasApp;
-  private List<String> heroes;
-  private String humor;
-  private String id;
-  private List<String> interests;
-  private String jobInterests;
-  private List<Organization> jobs;
-  private List<String> languagesSpoken;
-  private Date updated;
-  private String livingArrangement;
-  private String lookingFor;
-  private List<String> movies;
-  private List<String> music;
-  private Name name;
-  private Enum<Enum.NetworkPresence> networkPresence;
-  private String nickname;
-  private String pets;
-  private List<Phone> phoneNumbers;
-  private String politicalViews;
-  private Url profileSong;
-  private String profileUrl;
-  private Url profileVideo;
-  private List<String> quotes;
-  private String relationshipStatus;
-  private String religion;
-  private String romance;
-  private String scaredOf;
-  private List<Organization> schools;
-  private String sexualOrientation;
-  private Enum<Enum.Smoker> smoker;
-  private List<String> sports;
-  private String status;
-  private List<String> tags;
-  private String thumbnailUrl;
-  private Long timeZone;
-  private List<String> turnOffs;
-  private List<String> turnOns;
-  private List<String> tvShows;
-  private List<Url> urls;
-
-  // Note: Not in the opensocial js person object directly
-  private boolean isOwner = false;
-  private boolean isViewer = false;
-
-  public Person(String id, Name name) {
-    this.id = id;
-    this.name = name;
-  }
-
-  public String getAboutMe() {
-    return aboutMe;
-  }
-
-  public void setAboutMe(String aboutMe) {
-    this.aboutMe = aboutMe;
-  }
-
-  public List<String> getActivities() {
-    return activities;
-  }
-
-  public void setActivities(List<String> activities) {
-    this.activities = activities;
-  }
-
-  public List<Address> getAddresses() {
-    return addresses;
-  }
-
-  public void setAddresses(List<Address> addresses) {
-    this.addresses = addresses;
-  }
-
-  public Integer getAge() {
-    return age;
-  }
-
-  public void setAge(Integer age) {
-    this.age = age;
-  }
-
-  public BodyType getBodyType() {
-    return bodyType;
-  }
-
-  public void setBodyType(BodyType bodyType) {
-    this.bodyType = bodyType;
-  }
-
-  public List<String> getBooks() {
-    return books;
-  }
-
-  public void setBooks(List<String> books) {
-    this.books = books;
-  }
-
-  public List<String> getCars() {
-    return cars;
-  }
-
-  public void setCars(List<String> cars) {
-    this.cars = cars;
-  }
-
-  public String getChildren() {
-    return children;
-  }
-
-  public void setChildren(String children) {
-    this.children = children;
-  }
-
-  public Address getCurrentLocation() {
-    return currentLocation;
-  }
-
-  public void setCurrentLocation(Address currentLocation) {
-    this.currentLocation = currentLocation;
-  }
-
-  public Date getDateOfBirth() {
-    return dateOfBirth;
-  }
-
-  public void setDateOfBirth(Date dateOfBirth) {
-    this.dateOfBirth = dateOfBirth;
-  }
-
-  public Enum<Enum.Drinker> getDrinker() {
-    return this.drinker;
-  }
-
-  public void setDrinker(Enum<Enum.Drinker> newDrinker) {
-    this.drinker = newDrinker;
-  }
-
-  public List<Email> getEmails() {
-    return emails;
-  }
-
-  public void setEmails(List<Email> emails) {
-    this.emails = emails;
-  }
-
-  public String getEthnicity() {
-    return ethnicity;
-  }
-
-  public void setEthnicity(String ethnicity) {
-    this.ethnicity = ethnicity;
-  }
-
-  public String getFashion() {
-    return fashion;
-  }
-
-  public void setFashion(String fashion) {
-    this.fashion = fashion;
-  }
-
-  public List<String> getFood() {
-    return food;
-  }
-
-  public void setFood(List<String> food) {
-    this.food = food;
-  }
-
-  public Enum<Enum.Gender> getGender() {
-    return this.gender;
-  }
-
-  public void setGender(Enum<Enum.Gender> newGender) {
-    this.gender = newGender;
-  }
-
-  public String getHappiestWhen() {
-    return happiestWhen;
-  }
-
-  public void setHappiestWhen(String happiestWhen) {
-    this.happiestWhen = happiestWhen;
-  }
-
-  public Boolean getHasApp() {
-    return hasApp;
-  }
-
-  public void setHasApp(Boolean hasApp) {
-    this.hasApp = hasApp;
-  }
-
-  public List<String> getHeroes() {
-    return heroes;
-  }
-
-  public void setHeroes(List<String> heroes) {
-    this.heroes = heroes;
-  }
-
-  public String getHumor() {
-    return humor;
-  }
-
-  public void setHumor(String humor) {
-    this.humor = humor;
-  }
-
-  public String getId() {
-    return id;
-  }
-
-  public void setId(String id) {
-    this.id = id;
-  }
-
-  public List<String> getInterests() {
-    return interests;
-  }
-
-  public void setInterests(List<String> interests) {
-    this.interests = interests;
-  }
-
-  public String getJobInterests() {
-    return jobInterests;
-  }
-
-  public void setJobInterests(String jobInterests) {
-    this.jobInterests = jobInterests;
-  }
-
-  public List<Organization> getJobs() {
-    return jobs;
-  }
-
-  public void setJobs(List<Organization> jobs) {
-    this.jobs = jobs;
-  }
-
-  public List<String> getLanguagesSpoken() {
-    return languagesSpoken;
-  }
-
-  public void setLanguagesSpoken(List<String> languagesSpoken) {
-    this.languagesSpoken = languagesSpoken;
-  }
-
-  public Date getUpdated() {
-    return updated;
-  }
-
-  public void setUpdated(Date updated) {
-    this.updated = updated;
-  }
-
-  public String getLivingArrangement() {
-    return livingArrangement;
-  }
-
-  public void setLivingArrangement(String livingArrangement) {
-    this.livingArrangement = livingArrangement;
-  }
-
-  public String getLookingFor() {
-    return lookingFor;
-  }
-
-  public void setLookingFor(String lookingFor) {
-    this.lookingFor = lookingFor;
-  }
-
-  public List<String> getMovies() {
-    return movies;
-  }
-
-  public void setMovies(List<String> movies) {
-    this.movies = movies;
-  }
-
-  public List<String> getMusic() {
-    return music;
-  }
-
-  public void setMusic(List<String> music) {
-    this.music = music;
-  }
-
-  public Name getName() {
-    return name;
-  }
-
-  public void setName(Name name) {
-    this.name = name;
-  }
-
-  public Enum<Enum.NetworkPresence> getNetworkPresence() {
-    return networkPresence;
-  }
-
-  public void setNetworkPresence(Enum<Enum.NetworkPresence> networkPresence) {
-    this.networkPresence = networkPresence;
-  }
-
-  public String getNickname() {
-    return nickname;
-  }
-
-  public void setNickname(String nickname) {
-    this.nickname = nickname;
-  }
-
-  public String getPets() {
-    return pets;
-  }
-
-  public void setPets(String pets) {
-    this.pets = pets;
-  }
-
-  public List<Phone> getPhoneNumbers() {
-    return phoneNumbers;
-  }
-
-  public void setPhoneNumbers(List<Phone> phoneNumbers) {
-    this.phoneNumbers = phoneNumbers;
-  }
-
-  public String getPoliticalViews() {
-    return politicalViews;
-  }
-
-  public void setPoliticalViews(String politicalViews) {
-    this.politicalViews = politicalViews;
-  }
-
-  public Url getProfileSong() {
-    return profileSong;
-  }
-
-  public void setProfileSong(Url profileSong) {
-    this.profileSong = profileSong;
-  }
-
-  public String getProfileUrl() {
-    return profileUrl;
-  }
-
-  public void setProfileUrl(String profileUrl) {
-    this.profileUrl = profileUrl;
-  }
-
-  public Url getProfileVideo() {
-    return profileVideo;
-  }
-
-  public void setProfileVideo(Url profileVideo) {
-    this.profileVideo = profileVideo;
-  }
-
-  public List<String> getQuotes() {
-    return quotes;
-  }
-
-  public void setQuotes(List<String> quotes) {
-    this.quotes = quotes;
-  }
-
-  public String getRelationshipStatus() {
-    return relationshipStatus;
-  }
-
-  public void setRelationshipStatus(String relationshipStatus) {
-    this.relationshipStatus = relationshipStatus;
-  }
-
-  public String getReligion() {
-    return religion;
-  }
-
-  public void setReligion(String religion) {
-    this.religion = religion;
-  }
-
-  public String getRomance() {
-    return romance;
-  }
-
-  public void setRomance(String romance) {
-    this.romance = romance;
-  }
-
-  public String getScaredOf() {
-    return scaredOf;
-  }
-
-  public void setScaredOf(String scaredOf) {
-    this.scaredOf = scaredOf;
-  }
-
-  public List<Organization> getSchools() {
-    return schools;
-  }
-
-  public void setSchools(List<Organization> schools) {
-    this.schools = schools;
-  }
-
-  public String getSexualOrientation() {
-    return sexualOrientation;
-  }
-
-  public void setSexualOrientation(String sexualOrientation) {
-    this.sexualOrientation = sexualOrientation;
-  }
-
-  public Enum<Enum.Smoker> getSmoker() {
-    return this.smoker;
-  }
-
-  public void setSmoker(Enum<Enum.Smoker> newSmoker) {
-    this.smoker = newSmoker;
-  }
-
-  public List<String> getSports() {
-    return sports;
-  }
-
-  public void setSports(List<String> sports) {
-    this.sports = sports;
-  }
-
-  public String getStatus() {
-    return status;
-  }
-
-  public void setStatus(String status) {
-    this.status = status;
-  }
-
-  public List<String> getTags() {
-    return tags;
-  }
-
-  public void setTags(List<String> tags) {
-    this.tags = tags;
-  }
-
-  public String getThumbnailUrl() {
-    return thumbnailUrl;
-  }
-
-  public void setThumbnailUrl(String thumbnailUrl) {
-    this.thumbnailUrl = thumbnailUrl;
-  }
-
-  public Long getTimeZone() {
-    return timeZone;
-  }
-
-  public void setTimeZone(Long timeZone) {
-    this.timeZone = timeZone;
-  }
-
-  public List<String> getTurnOffs() {
-    return turnOffs;
-  }
-
-  public void setTurnOffs(List<String> turnOffs) {
-    this.turnOffs = turnOffs;
-  }
-
-  public List<String> getTurnOns() {
-    return turnOns;
-  }
-
-  public void setTurnOns(List<String> turnOns) {
-    this.turnOns = turnOns;
-  }
-
-  public List<String> getTvShows() {
-    return tvShows;
-  }
-
-  public void setTvShows(List<String> tvShows) {
-    this.tvShows = tvShows;
-  }
-
-  public List<Url> getUrls() {
-    return urls;
-  }
-
-  public void setUrls(List<Url> urls) {
-    this.urls = urls;
-  }
-
-  public boolean getIsOwner() {
-    return isOwner;
-  }
-
-  public void setIsOwner(boolean isOwner) {
-    this.isOwner = isOwner;
-  }
-
-  public boolean getIsViewer() {
-    return isViewer;
-  }
-
-  public void setIsViewer(boolean isViewer) {
-    this.isViewer = isViewer;
-  }
+  void setAboutMe(String aboutMe);
+
+  List<String> getActivities();
+
+  void setActivities(List<String> activities);
+
+  List<Address> getAddresses();
+
+  void setAddresses(List<Address> addresses);
+
+  Integer getAge();
+
+  void setAge(Integer age);
+
+  BodyType getBodyType();
+
+  void setBodyType(BodyType bodyType);
+
+  List<String> getBooks();
+
+  void setBooks(List<String> books);
+
+  List<String> getCars();
+
+  void setCars(List<String> cars);
+
+  String getChildren();
+
+  void setChildren(String children);
+
+  Address getCurrentLocation();
+
+  void setCurrentLocation(Address currentLocation);
+
+  Date getDateOfBirth();
+
+  void setDateOfBirth(Date dateOfBirth);
+
+  Enum<Enum.Drinker> getDrinker();
+
+  void setDrinker(Enum<Enum.Drinker> newDrinker);
+
+  List<Email> getEmails();
+
+  void setEmails(List<Email> emails);
+
+  String getEthnicity();
+
+  void setEthnicity(String ethnicity);
+
+  String getFashion();
+
+  void setFashion(String fashion);
+
+  List<String> getFood();
+
+  void setFood(List<String> food);
+
+  Enum<Enum.Gender> getGender();
+
+  void setGender(Enum<Enum.Gender> newGender);
+
+  String getHappiestWhen();
+
+  void setHappiestWhen(String happiestWhen);
+
+  Boolean getHasApp();
+
+  void setHasApp(Boolean hasApp);
+
+  List<String> getHeroes();
+
+  void setHeroes(List<String> heroes);
+
+  String getHumor();
+
+  void setHumor(String humor);
+
+  String getId();
+
+  void setId(String id);
+
+  List<String> getInterests();
+
+  void setInterests(List<String> interests);
+
+  String getJobInterests();
+
+  void setJobInterests(String jobInterests);
+
+  List<Organization> getJobs();
+
+  void setJobs(List<Organization> jobs);
+
+  List<String> getLanguagesSpoken();
+
+  void setLanguagesSpoken(List<String> languagesSpoken);
+
+  Date getUpdated();
+
+  void setUpdated(Date updated);
+
+  String getLivingArrangement();
+
+  void setLivingArrangement(String livingArrangement);
+
+  String getLookingFor();
+
+  void setLookingFor(String lookingFor);
+
+  List<String> getMovies();
+
+  void setMovies(List<String> movies);
+
+  List<String> getMusic();
+
+  void setMusic(List<String> music);
+
+  Name getName();
+
+  void setName(Name name);
+
+  Enum<Enum.NetworkPresence> getNetworkPresence();
+
+  void setNetworkPresence(Enum<Enum.NetworkPresence> networkPresence);
+
+  String getNickname();
+
+  void setNickname(String nickname);
+
+  String getPets();
+
+  void setPets(String pets);
+
+  List<Phone> getPhoneNumbers();
+
+  void setPhoneNumbers(List<Phone> phoneNumbers);
+
+  String getPoliticalViews();
+
+  void setPoliticalViews(String politicalViews);
+
+  Url getProfileSong();
+
+  void setProfileSong(Url profileSong);
+
+  String getProfileUrl();
+
+  void setProfileUrl(String profileUrl);
+
+  Url getProfileVideo();
+
+  void setProfileVideo(Url profileVideo);
+
+  List<String> getQuotes();
+
+  void setQuotes(List<String> quotes);
+
+  String getRelationshipStatus();
+
+  void setRelationshipStatus(String relationshipStatus);
+
+  String getReligion();
+
+  void setReligion(String religion);
+
+  String getRomance();
+
+  void setRomance(String romance);
+
+  String getScaredOf();
+
+  void setScaredOf(String scaredOf);
+
+  List<Organization> getSchools();
+
+  void setSchools(List<Organization> schools);
+
+  String getSexualOrientation();
+
+  void setSexualOrientation(String sexualOrientation);
+
+  Enum<Enum.Smoker> getSmoker();
+
+  void setSmoker(Enum<Enum.Smoker> newSmoker);
+
+  List<String> getSports();
+
+  void setSports(List<String> sports);
+
+  String getStatus();
+
+  void setStatus(String status);
+
+  List<String> getTags();
+
+  void setTags(List<String> tags);
+
+  String getThumbnailUrl();
+
+  void setThumbnailUrl(String thumbnailUrl);
+
+  Long getTimeZone();
+
+  void setTimeZone(Long timeZone);
+
+  List<String> getTurnOffs();
+
+  void setTurnOffs(List<String> turnOffs);
+
+  List<String> getTurnOns();
+
+  void setTurnOns(List<String> turnOns);
+
+  List<String> getTvShows();
+
+  void setTvShows(List<String> tvShows);
+
+  List<Url> getUrls();
+
+  void setUrls(List<Url> urls);
+
+  boolean getIsOwner();
+
+  void setIsOwner(boolean isOwner);
+
+  boolean getIsViewer();
+
+  void setIsViewer(boolean isViewer);
+
 }
