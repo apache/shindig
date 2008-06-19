@@ -146,7 +146,7 @@ public class OpenSocialDataHandler implements GadgetDataHandler {
           String personId = peopleIds.get(0);
 
           Activity activity = beanJsonConverter.convertToObject(
-              params.getString("activity"), ActivityImpl.class);
+              params.getString("activity"), Activity.class);
           response = activitiesHandler.createActivity(personId, activity,
               request.getToken());
           break;

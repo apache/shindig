@@ -65,8 +65,8 @@ public class BeanXmlConverterTest extends TestCase {
 
     activity = new ActivityImpl("activityId", johnDoe.getId());
 
-    activity.setMediaItems(Lists.newArrayList(
-        new MediaItemImpl("image/jpg", MediaItemImpl.Type.IMAGE, "http://foo.bar")));
+    activity.setMediaItems(Lists.<MediaItem>newArrayList(
+        new MediaItemImpl("image/jpg", MediaItem.Type.IMAGE, "http://foo.bar")));
 
     beanXmlConverter = new BeanXmlConverter();
   }

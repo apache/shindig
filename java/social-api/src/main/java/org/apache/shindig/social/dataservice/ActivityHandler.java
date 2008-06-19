@@ -63,8 +63,7 @@ public class ActivityHandler extends DataRequestHandler {
     // TODO: Should we pass the groupId through to the service?
 
     String jsonActivity = request.getParameters().get("entry");
-    // TODO: Change this so that somehow we don't need to know the impl class.
-    Activity activity = converter.convertToObject(jsonActivity, ActivityImpl.class);
+    Activity activity = converter.convertToObject(jsonActivity, Activity.class);
 
     return service.createActivity(userId, activity, request.getToken());
   }

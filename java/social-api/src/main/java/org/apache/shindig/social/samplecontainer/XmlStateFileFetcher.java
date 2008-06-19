@@ -314,8 +314,8 @@ public class XmlStateFileFetcher {
     }
   }
 
-  private List<MediaItemImpl> getMediaItems(Node activityItem) {
-    List<MediaItemImpl> media = Lists.newArrayList();
+  private List<MediaItem> getMediaItems(Node activityItem) {
+    List<MediaItem> media = Lists.newArrayList();
 
     NodeList mediaItems = activityItem.getChildNodes();
     if (mediaItems != null) {

@@ -26,6 +26,10 @@ import org.apache.shindig.social.opensocial.ActivitiesService;
 import org.apache.shindig.social.opensocial.DataService;
 import org.apache.shindig.social.opensocial.OpenSocialDataHandler;
 import org.apache.shindig.social.opensocial.PeopleService;
+import org.apache.shindig.social.opensocial.model.Activity;
+import org.apache.shindig.social.opensocial.model.ActivityImpl;
+import org.apache.shindig.social.opensocial.model.MediaItem;
+import org.apache.shindig.social.opensocial.model.MediaItemImpl;
 import org.apache.shindig.social.samplecontainer.BasicActivitiesService;
 import org.apache.shindig.social.samplecontainer.BasicDataService;
 import org.apache.shindig.social.samplecontainer.BasicPeopleService;
@@ -60,6 +64,9 @@ public class SocialApiGuiceModule extends AbstractModule {
     bind(AppDataService.class).to(BasicDataService.class);
 
     bind(SocialRouteManager.class).to(SampleContainerRouteManager.class);
+
+    bind(Activity.class).to(ActivityImpl.class);
+    bind(MediaItem.class).to(MediaItemImpl.class);
   }
 
   public static class GadgetDataHandlersProvider
