@@ -21,8 +21,9 @@ import org.apache.shindig.social.GadgetDataHandler;
 import org.apache.shindig.social.RequestItem;
 import org.apache.shindig.social.ResponseError;
 import org.apache.shindig.social.ResponseItem;
-import org.apache.shindig.social.opensocial.model.Activity;
 import org.apache.shindig.social.opensocial.model.IdSpec;
+import org.apache.shindig.social.opensocial.model.ActivityImpl;
+import org.apache.shindig.social.opensocial.model.Activity;
 import org.apache.shindig.social.opensocial.util.BeanJsonConverter;
 
 import com.google.common.collect.Lists;
@@ -145,7 +146,7 @@ public class OpenSocialDataHandler implements GadgetDataHandler {
           String personId = peopleIds.get(0);
 
           Activity activity = beanJsonConverter.convertToObject(
-              params.getString("activity"), Activity.class);
+              params.getString("activity"), ActivityImpl.class);
           response = activitiesHandler.createActivity(personId, activity,
               request.getToken());
           break;

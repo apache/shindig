@@ -23,42 +23,16 @@ import java.util.List;
  * see
  * http://code.google.com/apis/opensocial/docs/0.7/reference/opensocial.Collection.html
  */
-public class ApiCollection<T> {
-  private List<T> items;
-  private int offset;
-  private int totalSize;
+public interface ApiCollection<T> {
+  List<T> getItems();
 
-  public ApiCollection(List<T> items) {
-    this(items, 0, items.size());
-  }
+  void setItems(List<T> items);
 
-  public ApiCollection(List<T> items, int offset, int totalSize) {
-    this.items = items;
-    this.offset = offset;
-    this.totalSize = totalSize;
-  }
+  int getOffset();
 
-  public List<T> getItems() {
-    return items;
-  }
+  void setOffset(int offset);
 
-  public void setItems(List<T> items) {
-    this.items = items;
-  }
+  int getTotalSize();
 
-  public int getOffset() {
-    return offset;
-  }
-
-  public void setOffset(int offset) {
-    this.offset = offset;
-  }
-
-  public int getTotalSize() {
-    return totalSize;
-  }
-
-  public void setTotalSize(int totalSize) {
-    this.totalSize = totalSize;
-  }
+  void setTotalSize(int totalSize);
 }

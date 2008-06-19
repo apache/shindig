@@ -22,7 +22,7 @@ package org.apache.shindig.social.opensocial.model;
  * http://code.google.com/apis/opensocial/docs/0.7/reference/opensocial.Email.Field.html
  *
  */
-public class Email {
+public interface Email {
 
   public static enum Field {
     ADDRESS("address"),
@@ -40,27 +40,11 @@ public class Email {
     }
   }
 
-  private String address;
-  private String type;
+  String getAddress();
 
-  public Email(String address, String type) {
-    this.address = address;
-    this.type = type;
-  }
+  void setAddress(String address);
 
-  public String getAddress() {
-    return address;
-  }
+  String getType();
 
-  public void setAddress(String address) {
-    this.address = address;
-  }
-
-  public String getType() {
-    return type;
-  }
-
-  public void setType(String type) {
-    this.type = type;
-  }
+  void setType(String type);
 }

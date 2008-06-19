@@ -17,11 +17,7 @@
  */
 package org.apache.shindig.social.opensocial.model;
 
-/**
- * see
- * http://code.google.com/apis/opensocial/docs/0.7/reference/opensocial.Url.Field.html
- */
-public class Url {
+public interface Url {
 
   public static enum Field {
     ADDRESS("address"),
@@ -40,38 +36,15 @@ public class Url {
     }
   }
 
-  private String address;
-  private String linkText;
-  private String type;
+  String getAddress();
 
-  public Url(String address, String linkText, String type) {
-    this.address = address;
-    this.linkText = linkText;
-    this.type = type;
-  }
+  void setAddress(String address);
 
-  public String getAddress() {
-    return address;
-  }
+  String getLinkText();
 
-  public void setAddress(String address) {
-    this.address = address;
-  }
+  void setLinkText(String linkText);
 
-  public String getLinkText() {
-    return linkText;
-  }
+  String getType();
 
-  public void setLinkText(String linkText) {
-    this.linkText = linkText;
-  }
-
-  public String getType() {
-    return type;
-  }
-
-  public void setType(String type) {
-    this.type = type;
-  }
-
+  void setType(String type);
 }

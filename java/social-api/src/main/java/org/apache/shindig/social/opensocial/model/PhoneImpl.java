@@ -17,52 +17,30 @@
  */
 package org.apache.shindig.social.opensocial.model;
 
-public interface MediaItem {
+public class PhoneImpl implements Phone {
 
-  public static enum Field {
-    MIME_TYPE("mimeType"),
-    TYPE("type"),
-    URL("url");
+  private String number;
+  private String type;
 
-    private final String jsonString;
-
-    private Field(String jsonString) {
-      this.jsonString = jsonString;
-    }
-
-    @Override
-    public String toString() {
-      return this.jsonString;
-    }
+  public PhoneImpl(String number, String type) {
+    super();
+    this.number = number;
+    this.type = type;
   }
 
-  public enum Type {
-    AUDIO("audio"),
-    IMAGE("image"),
-    VIDEO("video");
-
-    private final String jsonString;
-
-    private Type(String jsonString) {
-      this.jsonString = jsonString;
-    }
-
-    @Override
-    public String toString() {
-      return this.jsonString;
-    }
+  public String getNumber() {
+    return number;
   }
 
-  String getMimeType();
+  public void setNumber(String number) {
+    this.number = number;
+  }
 
-  void setMimeType(String mimeType);
+  public String getType() {
+    return type;
+  }
 
-  Type getType();
-
-  void setType(Type type);
-
-  String getUrl();
-
-  void setUrl(String url);
-
+  public void setType(String type) {
+    this.type = type;
+  }
 }

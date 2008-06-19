@@ -25,7 +25,7 @@ package org.apache.shindig.social.opensocial.model;
  * http://code.google.com/apis/opensocial/docs/0.7/reference/opensocial.Message.html
  *
  */
-public final class Message {
+public interface Message {
 
   public static enum Field {
     BODY("body"),
@@ -43,10 +43,6 @@ public final class Message {
       return this.jsonString;
     }
   }
-
-  private String body;
-  private String title;
-  private Type type;
 
   public enum Type {
     /* An email */
@@ -70,61 +66,43 @@ public final class Message {
     }
   }
 
-  public Message(String initBody, String initTitle, Type initType) {
-    this.body = initBody;
-    this.title = initTitle;
-    this.type = initType;
-  }
-
   /**
    * Gets the main text of the message.
    * @return the main text of the message
    */
-  public String getBody() {
-    return this.body;
-  }
+  String getBody();
 
   /**
    * Sets the main text of the message.
    * HTML attributes are allowed and are sanitized by the container
    * @param newBody the main text of the message
    */
-  public void setBody(String newBody) {
-    this.body = newBody;
-  }
+  void setBody(String newBody);
 
   /**
    * Gets the title of the message
    * @return the title of the message
    */
-  public String getTitle() {
-    return this.title;
-  }
+  String getTitle();
 
   /**
    * Sets the title of the message
    * HTML attributes are allowed and are sanitized by the container.
    * @param newTitle the title of the message
    */
-  public void setTitle(String newTitle) {
-    this.title = newTitle;
-  }
+  void setTitle(String newTitle);
 
   /**
    * Gets the type of the message, as specified by opensocial.Message.Type
    * @return the type of message (enum Message.Type)
    */
-  public Type getType() {
-    return type;
-  }
+  Type getType();
 
   /**
    * Sets the type of the message, as specified by opensocial.Message.Type
    * @param newType the type of message (enum Message.Type)
    */
-  public void setType(Type newType) {
-    this.type = newType;
-  }
+  void setType(Type newType);
 
   /**
    * TODO implement either a standard 'sanitizing' facility or
@@ -133,7 +111,5 @@ public final class Message {
    * @param htmlStr String to be sanitized.
    * @return the sanitized HTML String
    */
-  public String sanitizeHTML(String htmlStr) {
-    return htmlStr;
-  }
+  String sanitizeHTML(String htmlStr);
 }

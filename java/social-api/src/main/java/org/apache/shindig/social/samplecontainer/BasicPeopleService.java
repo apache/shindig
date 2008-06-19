@@ -18,14 +18,15 @@
 package org.apache.shindig.social.samplecontainer;
 
 import org.apache.shindig.common.SecurityToken;
-import org.apache.shindig.social.ResponseItem;
 import org.apache.shindig.social.ResponseError;
+import org.apache.shindig.social.ResponseItem;
+import org.apache.shindig.social.dataservice.GroupId;
 import org.apache.shindig.social.dataservice.PersonService;
 import org.apache.shindig.social.dataservice.RestfulCollection;
-import org.apache.shindig.social.dataservice.GroupId;
 import org.apache.shindig.social.dataservice.UserId;
 import org.apache.shindig.social.opensocial.PeopleService;
 import org.apache.shindig.social.opensocial.model.ApiCollection;
+import org.apache.shindig.social.opensocial.model.ApiCollectionImpl;
 import org.apache.shindig.social.opensocial.model.IdSpec;
 import org.apache.shindig.social.opensocial.model.Person;
 
@@ -94,7 +95,7 @@ public class BasicPeopleService implements PeopleService, PersonService {
     int last = first + max;
     people = people.subList(first, Math.min(last, totalSize));
 
-    ApiCollection<Person> collection = new ApiCollection<Person>(people, first,
+    ApiCollection<Person> collection = new ApiCollectionImpl<Person>(people, first,
         totalSize);
     return new ResponseItem<ApiCollection<Person>>(collection);
   }

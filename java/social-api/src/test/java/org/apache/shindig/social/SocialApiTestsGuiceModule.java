@@ -23,16 +23,24 @@ import org.apache.shindig.common.SecurityTokenDecoder;
 import org.apache.shindig.social.opensocial.ActivitiesService;
 import org.apache.shindig.social.opensocial.DataService;
 import org.apache.shindig.social.opensocial.PeopleService;
-import org.apache.shindig.social.opensocial.model.Activity;
-import org.apache.shindig.social.opensocial.model.Address;
 import org.apache.shindig.social.opensocial.model.BodyType;
-import org.apache.shindig.social.opensocial.model.Email;
+import org.apache.shindig.social.opensocial.model.ActivityImpl;
+import org.apache.shindig.social.opensocial.model.AddressImpl;
+import org.apache.shindig.social.opensocial.model.BodyTypeImpl;
+import org.apache.shindig.social.opensocial.model.EmailImpl;
 import org.apache.shindig.social.opensocial.model.Enum;
-import org.apache.shindig.social.opensocial.model.Name;
+import org.apache.shindig.social.opensocial.model.EnumImpl;
+import org.apache.shindig.social.opensocial.model.NameImpl;
+import org.apache.shindig.social.opensocial.model.OrganizationImpl;
+import org.apache.shindig.social.opensocial.model.PersonImpl;
+import org.apache.shindig.social.opensocial.model.PhoneImpl;
+import org.apache.shindig.social.opensocial.model.UrlImpl;
+import org.apache.shindig.social.opensocial.model.Address;
+import org.apache.shindig.social.opensocial.model.Email;
 import org.apache.shindig.social.opensocial.model.Organization;
-import org.apache.shindig.social.opensocial.model.Person;
 import org.apache.shindig.social.opensocial.model.Phone;
 import org.apache.shindig.social.opensocial.model.Url;
+import org.apache.shindig.social.opensocial.model.Activity;
 import org.apache.shindig.social.samplecontainer.BasicActivitiesService;
 import org.apache.shindig.social.samplecontainer.BasicDataService;
 import org.apache.shindig.social.samplecontainer.BasicPeopleService;
@@ -81,22 +89,22 @@ public class SocialApiTestsGuiceModule extends AbstractModule {
 
   @Singleton
   public static class MockXmlStateFileFetcher extends XmlStateFileFetcher {
-    public static final Person johnDoe;
-    public static final Person janeDoe;
-    public static final Person simpleDoe;
+    public static final PersonImpl johnDoe;
+    public static final PersonImpl janeDoe;
+    public static final PersonImpl simpleDoe;
 
-    public static Activity johnActivity;
-    public static Activity janeActivity;
+    public static ActivityImpl johnActivity;
+    public static ActivityImpl janeActivity;
 
     static {
       // setup John Doe
-      johnDoe = new Person("john.doe", new Name("John Doe"));
+      johnDoe = new PersonImpl("john.doe", new NameImpl("John Doe"));
 
       // John should have every field filled in
       johnDoe.setAboutMe("about me");
       johnDoe.setActivities(Lists.newArrayList("activity"));
 
-      Address homeAddress = new Address("My home address");
+      AddressImpl homeAddress = new AddressImpl("My home address");
       homeAddress.setCountry("super");
       homeAddress.setExtendedAddress("cali");
       homeAddress.setLatitude(new Float(1.0));
@@ -108,11 +116,11 @@ public class SocialApiTestsGuiceModule extends AbstractModule {
       homeAddress.setStreetAddress("ali");
       homeAddress.setType("docious");
       homeAddress.setUnstructuredAddress("supercalifragilisticexpialidocious");
-      johnDoe.setAddresses(Lists.newArrayList(homeAddress));
+      johnDoe.setAddresses(Lists.<Address>newArrayList(homeAddress));
 
       johnDoe.setAge(5);
 
-      BodyType bodyType = new BodyType();
+      BodyType bodyType = new BodyTypeImpl();
       bodyType.setBuild("flying purple people eater");
       bodyType.setEyeColor("one eyed");
       bodyType.setHairColor("one horned");
@@ -123,15 +131,15 @@ public class SocialApiTestsGuiceModule extends AbstractModule {
       johnDoe.setBooks(Lists.newArrayList("books"));
       johnDoe.setCars(Lists.newArrayList("cars"));
       johnDoe.setChildren("children");
-      johnDoe.setCurrentLocation(new Address("my location"));
+      johnDoe.setCurrentLocation(new AddressImpl("my location"));
       johnDoe.setDateOfBirth(new Date());
-      johnDoe.setDrinker(new Enum<Enum.Drinker>(Enum.Drinker.HEAVILY));
-      johnDoe.setEmails(Lists.newArrayList(
-          new Email("john.doe@work.bar", "work")));
+      johnDoe.setDrinker(new EnumImpl<Enum.Drinker>(Enum.Drinker.HEAVILY));
+      johnDoe.setEmails(Lists.<Email>newArrayList(
+          new EmailImpl("john.doe@work.bar", "work")));
       johnDoe.setEthnicity("purple");
       johnDoe.setFashion("so fashionable");
       johnDoe.setFood(Lists.newArrayList("gruel"));
-      johnDoe.setGender(new Enum<Enum.Gender>(Enum.Gender.MALE));
+      johnDoe.setGender(new EnumImpl<Enum.Gender>(Enum.Gender.MALE));
       johnDoe.setHappiestWhen("puppies");
       johnDoe.setHasApp(true);
       johnDoe.setHeroes(Lists.newArrayList("the moon"));
@@ -139,7 +147,7 @@ public class SocialApiTestsGuiceModule extends AbstractModule {
       johnDoe.setInterests(Lists.newArrayList("kites"));
       johnDoe.setJobInterests("penguins");
 
-      Organization job = new Organization();
+      OrganizationImpl job = new OrganizationImpl();
       job.setAddress(homeAddress);
       job.setDescription("um");
       job.setEndDate(new Date());
@@ -151,7 +159,7 @@ public class SocialApiTestsGuiceModule extends AbstractModule {
       job.setTitle("Suoicodilaipxecitsiligarfilacrepus!");
       job.setWebpage("http://en.wikipedia.org/wiki/" +
           "Supercalifragilisticexpialidocious");
-      johnDoe.setJobs(Lists.newArrayList(job));
+      johnDoe.setJobs(Lists.<Organization>newArrayList(job));
 
       johnDoe.setLanguagesSpoken(Lists.newArrayList("alligator"));
       johnDoe.setUpdated(new Date());
@@ -159,23 +167,23 @@ public class SocialApiTestsGuiceModule extends AbstractModule {
       johnDoe.setLookingFor("jane doe");
       johnDoe.setMovies(Lists.newArrayList("movies"));
       johnDoe.setMusic(Lists.newArrayList("music"));
-      johnDoe.setNetworkPresence(new Enum<Enum.NetworkPresence>(
+      johnDoe.setNetworkPresence(new EnumImpl<Enum.NetworkPresence>(
           Enum.NetworkPresence.DND));
       johnDoe.setNickname("johnny boy");
       johnDoe.setPets("simple doe");
-      johnDoe.setPhoneNumbers(Lists.newArrayList(
-          new Phone("+33H000000000", "home")));
+      johnDoe.setPhoneNumbers(Lists.<Phone>newArrayList(
+          new PhoneImpl("+33H000000000", "home")));
       johnDoe.setPoliticalViews("none");
-      johnDoe.setProfileSong(new Url("here", "i", "am"));
+      johnDoe.setProfileSong(new UrlImpl("here", "i", "am"));
       johnDoe.setProfileUrl("http://niceness");
-      johnDoe.setProfileVideo(new Url("here", "i", "am"));
+      johnDoe.setProfileVideo(new UrlImpl("here", "i", "am"));
       johnDoe.setQuotes(Lists.newArrayList("quotes"));
       johnDoe.setRelationshipStatus("relationships");
       johnDoe.setReligion("religion");
       johnDoe.setRomance("romance");
       johnDoe.setScaredOf("scared of what");
 
-      Organization school = new Organization();
+      OrganizationImpl school = new OrganizationImpl();
       school.setAddress(homeAddress);
       school.setDescription("gummy");
       school.setEndDate(new Date());
@@ -187,10 +195,10 @@ public class SocialApiTestsGuiceModule extends AbstractModule {
       school.setTitle("and everywhere");
       school.setWebpage("http://en.wikipedia.org/wiki/" +
           "Disney's_Adventures_of_the_Gummi_Bears");
-      johnDoe.setSchools(Lists.newArrayList(school));
+      johnDoe.setSchools(Lists.<Organization>newArrayList(school));
 
       johnDoe.setSexualOrientation("sexy");
-      johnDoe.setSmoker(new Enum<Enum.Smoker>(Enum.Smoker.REGULARLY));
+      johnDoe.setSmoker(new EnumImpl<Enum.Smoker>(Enum.Smoker.REGULARLY));
       johnDoe.setSports(Lists.newArrayList("ping pong"));
       johnDoe.setStatus("away");
       johnDoe.setTags(Lists.newArrayList("tags"));
@@ -199,23 +207,23 @@ public class SocialApiTestsGuiceModule extends AbstractModule {
       johnDoe.setTurnOffs(Lists.newArrayList("off"));
       johnDoe.setTurnOns(Lists.newArrayList("on"));
       johnDoe.setTvShows(Lists.newArrayList("no tv"));
-      johnDoe.setUrls(Lists.newArrayList(new Url("where", "are", "you")));
+      johnDoe.setUrls(Lists.<Url>newArrayList(new UrlImpl("where", "are", "you")));
 
       // setup Jane Doe
-      janeDoe = new Person("jane.doe", new Name("Jane Doe"));
+      janeDoe = new PersonImpl("jane.doe", new NameImpl("Jane Doe"));
       janeDoe.setUpdated(new Date());
 
       // setup Simple Doe
-      simpleDoe = new Person("simple.doe", new Name("Simple Doe"));
+      simpleDoe = new PersonImpl("simple.doe", new NameImpl("Simple Doe"));
       simpleDoe.setUpdated(new Date());
 
       // setup activities
-      johnActivity = new Activity("1", johnDoe.getId());
+      johnActivity = new ActivityImpl("1", johnDoe.getId());
       johnActivity.setTitle("yellow");
       johnActivity.setBody("what a color!");
       johnActivity.setUpdated(new Date());
 
-      janeActivity = new Activity("2", janeDoe.getId());
+      janeActivity = new ActivityImpl("2", janeDoe.getId());
       janeActivity.setTitle("green");
       janeActivity.setBody("a better color!");
       janeActivity.setUpdated(new Date());
@@ -249,11 +257,11 @@ public class SocialApiTestsGuiceModule extends AbstractModule {
       allData.put(janeDoe.getId(), janeData);
       allData.put(simpleDoe.getId(), simpleData);
 
-      List<Activity> simplesActivities = new ArrayList<Activity>();
+      List<Activity> simplesActivities = Lists.newArrayList();
 
       allActivities = Maps.newHashMap();
-      allActivities.put(johnDoe.getId(), Lists.newArrayList(johnActivity));
-      allActivities.put(janeDoe.getId(), Lists.newArrayList(janeActivity));
+      allActivities.put(johnDoe.getId(), Lists.<Activity>newArrayList(johnActivity));
+      allActivities.put(janeDoe.getId(), Lists.<Activity>newArrayList(janeActivity));
       allActivities.put(simpleDoe.getId(), simplesActivities);
     }
 

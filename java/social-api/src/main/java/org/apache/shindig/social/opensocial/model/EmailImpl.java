@@ -17,52 +17,29 @@
  */
 package org.apache.shindig.social.opensocial.model;
 
-public interface MediaItem {
+public class EmailImpl implements Email {
 
-  public static enum Field {
-    MIME_TYPE("mimeType"),
-    TYPE("type"),
-    URL("url");
+  private String address;
+  private String type;
 
-    private final String jsonString;
-
-    private Field(String jsonString) {
-      this.jsonString = jsonString;
-    }
-
-    @Override
-    public String toString() {
-      return this.jsonString;
-    }
+  public EmailImpl(String address, String type) {
+    this.address = address;
+    this.type = type;
   }
 
-  public enum Type {
-    AUDIO("audio"),
-    IMAGE("image"),
-    VIDEO("video");
-
-    private final String jsonString;
-
-    private Type(String jsonString) {
-      this.jsonString = jsonString;
-    }
-
-    @Override
-    public String toString() {
-      return this.jsonString;
-    }
+  public String getAddress() {
+    return address;
   }
 
-  String getMimeType();
+  public void setAddress(String address) {
+    this.address = address;
+  }
 
-  void setMimeType(String mimeType);
+  public String getType() {
+    return type;
+  }
 
-  Type getType();
-
-  void setType(Type type);
-
-  String getUrl();
-
-  void setUrl(String url);
-
+  public void setType(String type) {
+    this.type = type;
+  }
 }

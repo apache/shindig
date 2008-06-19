@@ -25,9 +25,7 @@ package org.apache.shindig.social.opensocial.model;
  * for fields that have a common set of values.
  *
  */
-public final class Enum<E extends Enum.EnumKey> {
-  private String displayValue;
-  private E key = null;
+public interface Enum<E extends Enum.EnumKey> {
 
   public interface EnumKey {
     String getDisplayValue();
@@ -150,58 +148,30 @@ public final class Enum<E extends Enum.EnumKey> {
   }
 
   /**
-   * Constructs a Enum object.
-   * @param key EnumKey The key to use
-   * @param displayValue String The display value
-   */
-  public Enum(E key, String displayValue) {
-    this.key = key;
-    this.displayValue = displayValue;
-  }
-
-  /**
-   * Constructs a Enum object.
-   * @param key The key to use. Will use the value from getDisplayValue() as
-   *     the display value.
-   */
-  public Enum(E key) {
-    this(key, key.getDisplayValue());
-  }
-
-  /**
    * Gets the value of this Enum. This is the string displayed to the user.
    * If the container supports localization, the string should be localized.
    * @return the Enum's user visible value
    */
-  public String getDisplayValue() {
-    return this.displayValue;
-  }
+  String getDisplayValue();
 
   /**
    * Sets the value of this Enum. This is the string displayed to the user.
    * If the container supports localization, the string should be localized.
    * @param displayValue The value to set.
    */
-  public void setDisplayValue(String displayValue) {
-    this.displayValue = displayValue;
-  }
+  void setDisplayValue(String displayValue);
 
   /**
    * Gets the key for this Enum.
    * Use this for logic within your gadget.
    * @return java.lang.Enum key object for this Enum.
    */
-  public E getKey() {
-    return this.key;
-  }
+  E getKey();
 
   /**
    * Sets the key for this Enum.
    * Use this for logic within your gadget.
    * @param key The value to set.
    */
-  public void setKey(E key) {
-    this.key = key;
-  }
-
+  void setKey(E key);
 }

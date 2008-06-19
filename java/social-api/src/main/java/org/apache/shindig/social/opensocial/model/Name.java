@@ -22,7 +22,7 @@ package org.apache.shindig.social.opensocial.model;
  * http://code.google.com/apis/opensocial/docs/0.7/reference/opensocial.Name.Field.html
  *
  */
-public class Name {
+public interface Name {
 
   public static enum Field {
     ADDITIONAL_NAME("additionalName"),
@@ -44,62 +44,27 @@ public class Name {
     }
   }
 
-  private String additionalName;
-  private String familyName;
-  private String givenName;
-  private String honorificPrefix;
-  private String honorificSuffix;
-  private String unstructured;
+  String getUnstructured();
 
-  public Name(String unstructured) {
-    this.unstructured = unstructured;
-  }
+  void setUnstructured(String unstructured);
 
-  public String getUnstructured() {
-    return unstructured;
-  }
+  String getAdditionalName();
 
-  public void setUnstructured(String unstructured) {
-    this.unstructured = unstructured;
-  }
+  void setAdditionalName(String additionalName);
 
-  public String getAdditionalName() {
-    return additionalName;
-  }
+  String getFamilyName();
 
-  public void setAdditionalName(String additionalName) {
-    this.additionalName = additionalName;
-  }
+  void setFamilyName(String familyName);
 
-  public String getFamilyName() {
-    return familyName;
-  }
+  String getGivenName();
 
-  public void setFamilyName(String familyName) {
-    this.familyName = familyName;
-  }
+  void setGivenName(String givenName);
 
-  public String getGivenName() {
-    return givenName;
-  }
+  String getHonorificPrefix();
 
-  public void setGivenName(String givenName) {
-    this.givenName = givenName;
-  }
+  void setHonorificPrefix(String honorificPrefix);
 
-  public String getHonorificPrefix() {
-    return honorificPrefix;
-  }
+  String getHonorificSuffix();
 
-  public void setHonorificPrefix(String honorificPrefix) {
-    this.honorificPrefix = honorificPrefix;
-  }
-
-  public String getHonorificSuffix() {
-    return honorificSuffix;
-  }
-
-  public void setHonorificSuffix(String honorificSuffix) {
-    this.honorificSuffix = honorificSuffix;
-  }
+  void setHonorificSuffix(String honorificSuffix);
 }

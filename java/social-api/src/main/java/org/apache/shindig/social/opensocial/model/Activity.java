@@ -21,7 +21,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
-public class Activity {
+public interface Activity {
 
   public static enum Field {
     APP_ID("appId"),
@@ -55,175 +55,76 @@ public class Activity {
     }
   }
 
-  private String appId;
-  private String body;
-  private String bodyId;
-  private String externalId;
-  private String id;
-  private Date updated;
-  private List<MediaItem> mediaItems;
-  private Long postedTime;
-  private Float priority;
-  private String streamFaviconUrl;
-  private String streamSourceUrl;
-  private String streamTitle;
-  private String streamUrl;
-  private Map<String, String> templateParams;
-  private String title;
-  private String titleId;
-  private String url;
-  private String userId;
+  String getAppId();
 
-  public Activity() {
-  }
+  void setAppId(String appId);
 
-  public Activity(String id, String userId) {
-    this.id = id;
-    this.userId = userId;
-  }
+  String getBody();
 
-  public String getAppId() {
-    return appId;
-  }
+  void setBody(String body);
 
-  public void setAppId(String appId) {
-    this.appId = appId;
-  }
+  String getBodyId();
 
-  public String getBody() {
-    return body;
-  }
+  void setBodyId(String bodyId);
 
-  public void setBody(String body) {
-    this.body = body;
-  }
+  String getExternalId();
 
-  public String getBodyId() {
-    return bodyId;
-  }
+  void setExternalId(String externalId);
 
-  public void setBodyId(String bodyId) {
-    this.bodyId = bodyId;
-  }
+  String getId();
 
-  public String getExternalId() {
-    return externalId;
-  }
+  void setId(String id);
 
-  public void setExternalId(String externalId) {
-    this.externalId = externalId;
-  }
+  Date getUpdated();
 
-  public String getId() {
-    return id;
-  }
+  void setUpdated(Date updated);
 
-  public void setId(String id) {
-    this.id = id;
-  }
+  List<? extends MediaItem> getMediaItems();
 
-  public Date getUpdated() {
-    return updated;
-  }
+  // TODO: Change this to use the interface. This is only in place for the BeanJsonConverter
+  void setMediaItems(List<MediaItemImpl> mediaItems);
 
-  public void setUpdated(Date updated) {
-    this.updated = updated;
-  }
+  Long getPostedTime();
 
-  public List<MediaItem> getMediaItems() {
-    return mediaItems;
-  }
+  void setPostedTime(Long postedTime);
 
-  public void setMediaItems(List<MediaItem> mediaItems) {
-    this.mediaItems = mediaItems;
-  }
+  Float getPriority();
 
-  public Long getPostedTime() {
-    return postedTime;
-  }
+  void setPriority(Float priority);
 
-  public void setPostedTime(Long postedTime) {
-    this.postedTime = postedTime;
-  }
+  String getStreamFaviconUrl();
 
-  public Float getPriority() {
-    return priority;
-  }
+  void setStreamFaviconUrl(String streamFaviconUrl);
 
-  public void setPriority(Float priority) {
-    this.priority = priority;
-  }
+  String getStreamSourceUrl();
 
-  public String getStreamFaviconUrl() {
-    return streamFaviconUrl;
-  }
+  void setStreamSourceUrl(String streamSourceUrl);
 
-  public void setStreamFaviconUrl(String streamFaviconUrl) {
-    this.streamFaviconUrl = streamFaviconUrl;
-  }
+  String getStreamTitle();
 
-  public String getStreamSourceUrl() {
-    return streamSourceUrl;
-  }
+  void setStreamTitle(String streamTitle);
 
-  public void setStreamSourceUrl(String streamSourceUrl) {
-    this.streamSourceUrl = streamSourceUrl;
-  }
+  String getStreamUrl();
 
-  public String getStreamTitle() {
-    return streamTitle;
-  }
+  void setStreamUrl(String streamUrl);
 
-  public void setStreamTitle(String streamTitle) {
-    this.streamTitle = streamTitle;
-  }
+  Map<String, String> getTemplateParams();
 
-  public String getStreamUrl() {
-    return streamUrl;
-  }
+  void setTemplateParams(Map<String, String> templateParams);
 
-  public void setStreamUrl(String streamUrl) {
-    this.streamUrl = streamUrl;
-  }
+  String getTitle();
 
-  public Map<String, String> getTemplateParams() {
-    return templateParams;
-  }
+  void setTitle(String title);
 
-  public void setTemplateParams(Map<String, String> templateParams) {
-    this.templateParams = templateParams;
-  }
+  String getTitleId();
 
-  public String getTitle() {
-    return title;
-  }
+  void setTitleId(String titleId);
 
-  public void setTitle(String title) {
-    this.title = title;
-  }
+  String getUrl();
 
-  public String getTitleId() {
-    return titleId;
-  }
+  void setUrl(String url);
 
-  public void setTitleId(String titleId) {
-    this.titleId = titleId;
-  }
+  String getUserId();
 
-  public String getUrl() {
-    return url;
-  }
-
-  public void setUrl(String url) {
-    this.url = url;
-  }
-
-  public String getUserId() {
-    return userId;
-  }
-
-  public void setUserId(String userId) {
-    this.userId = userId;
-  }
-
+  void setUserId(String userId);
 }

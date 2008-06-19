@@ -22,7 +22,7 @@ package org.apache.shindig.social.opensocial.model;
  * http://code.google.com/apis/opensocial/docs/0.7/reference/opensocial.Address.Field.html
  *
  */
-public class Address {
+public interface Address {
 
   public static enum Field {
     COUNTRY("country"),
@@ -48,109 +48,48 @@ public class Address {
       return this.jsonString;
     }
   }
+  
+  String getCountry();
 
-  private String country;
-  private String extendedAddress;
-  private Float latitude;
-  private Float longitude;
-  private String locality;
-  private String poBox;
-  private String postalCode;
-  private String region;
-  private String streetAddress;
-  private String type;
-  private String unstructuredAddress;
+  void setCountry(String country);
 
-  public Address(String unstructuredAddress) {
-    this.unstructuredAddress = unstructuredAddress;
-  }
+  String getExtendedAddress();
 
-  public String getCountry() {
-    return country;
-  }
+  void setExtendedAddress(String extendedAddress);
 
-  public void setCountry(String country) {
-    this.country = country;
-  }
+  Float getLatitude();
 
-  public String getExtendedAddress() {
-    return extendedAddress;
-  }
+  void setLatitude(Float latitude);
 
-  public void setExtendedAddress(String extendedAddress) {
-    this.extendedAddress = extendedAddress;
-  }
+  String getLocality();
 
-  public Float getLatitude() {
-    return latitude;
-  }
+  void setLocality(String locality);
 
-  public void setLatitude(Float latitude) {
-    this.latitude = latitude;
-  }
+  Float getLongitude();
 
-  public String getLocality() {
-    return locality;
-  }
+  void setLongitude(Float longitude);
 
-  public void setLocality(String locality) {
-    this.locality = locality;
-  }
+  String getPoBox();
 
-  public Float getLongitude() {
-    return longitude;
-  }
+  void setPoBox(String poBox);
 
-  public void setLongitude(Float longitude) {
-    this.longitude = longitude;
-  }
+  String getPostalCode();
 
-  public String getPoBox() {
-    return poBox;
-  }
+  void setPostalCode(String postalCode);
 
-  public void setPoBox(String poBox) {
-    this.poBox = poBox;
-  }
+  String getRegion();
 
-  public String getPostalCode() {
-    return postalCode;
-  }
+  void setRegion(String region);
 
-  public void setPostalCode(String postalCode) {
-    this.postalCode = postalCode;
-  }
+  String getStreetAddress();
 
-  public String getRegion() {
-    return region;
-  }
+  void setStreetAddress(String streetAddress);
 
-  public void setRegion(String region) {
-    this.region = region;
-  }
+  String getType();
 
-  public String getStreetAddress() {
-    return streetAddress;
-  }
+  void setType(String type);
 
-  public void setStreetAddress(String streetAddress) {
-    this.streetAddress = streetAddress;
-  }
+  String getUnstructuredAddress();
 
-  public String getType() {
-    return type;
-  }
-
-  public void setType(String type) {
-    this.type = type;
-  }
-
-  public String getUnstructuredAddress() {
-    return unstructuredAddress;
-  }
-
-  public void setUnstructuredAddress(String unstructuredAddress) {
-    this.unstructuredAddress = unstructuredAddress;
-  }
-
+  void setUnstructuredAddress(String unstructuredAddress);
 }

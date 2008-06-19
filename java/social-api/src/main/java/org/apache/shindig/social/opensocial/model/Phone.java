@@ -22,7 +22,7 @@ package org.apache.shindig.social.opensocial.model;
  * http://code.google.com/apis/opensocial/docs/0.7/reference/opensocial.Phone.Field.html
  *
  */
-public class Phone {
+public interface Phone {
 
   public static enum Field {
     NUMBER("number"),
@@ -39,29 +39,12 @@ public class Phone {
       return this.jsonString;
     }
   }
+  
+  String getNumber();
 
-  private String number;
-  private String type;
+  void setNumber(String number);
 
-  public Phone(String number, String type) {
-    super();
-    this.number = number;
-    this.type = type;
-  }
+  String getType();
 
-  public String getNumber() {
-    return number;
-  }
-
-  public void setNumber(String number) {
-    this.number = number;
-  }
-
-  public String getType() {
-    return type;
-  }
-
-  public void setType(String type) {
-    this.type = type;
-  }
+  void setType(String type);
 }

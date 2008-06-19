@@ -1,10 +1,15 @@
 package org.apache.shindig.social.samplecontainer;
 
+import org.apache.shindig.social.opensocial.model.ActivityImpl;
+import org.apache.shindig.social.opensocial.model.EnumImpl;
+import org.apache.shindig.social.opensocial.model.MediaItemImpl;
+import org.apache.shindig.social.opensocial.model.NameImpl;
+import org.apache.shindig.social.opensocial.model.PersonImpl;
+import org.apache.shindig.social.opensocial.model.PhoneImpl;
+import org.apache.shindig.social.opensocial.model.Person;
 import org.apache.shindig.social.opensocial.model.Activity;
 import org.apache.shindig.social.opensocial.model.Enum;
 import org.apache.shindig.social.opensocial.model.MediaItem;
-import org.apache.shindig.social.opensocial.model.Name;
-import org.apache.shindig.social.opensocial.model.Person;
 import org.apache.shindig.social.opensocial.model.Phone;
 
 import com.google.common.collect.Lists;
@@ -222,23 +227,23 @@ public class XmlStateFileFetcher {
 
       String name = attributes.getNamedItem("name").getNodeValue();
       String id = attributes.getNamedItem("id").getNodeValue();
-      Person person = new Person(id, new Name(turnEvil(name)));
+      Person person = new PersonImpl(id, new NameImpl(turnEvil(name)));
       person.setUpdated(new Date());
 
       Node phoneItem = attributes.getNamedItem("phone");
       if (phoneItem != null) {
         String phone = phoneItem.getNodeValue();
-        person.setPhoneNumbers(Lists.newArrayList(
-            new Phone(turnEvil(phone), null)));
+        person.setPhoneNumbers(Lists.<Phone>newArrayList(
+            new PhoneImpl(turnEvil(phone), null)));
       }
 
       Node genderItem = attributes.getNamedItem("gender");
       if (genderItem != null) {
         String gender = genderItem.getNodeValue();
         if ("F".equals(gender)) {
-          person.setGender(new Enum<Enum.Gender>(Enum.Gender.FEMALE));
+          person.setGender(new EnumImpl<Enum.Gender>(Enum.Gender.FEMALE));
         } else if ("M".equals(gender)) {
-          person.setGender(new Enum<Enum.Gender>(Enum.Gender.MALE));
+          person.setGender(new EnumImpl<Enum.Gender>(Enum.Gender.MALE));
         }
       }
 
@@ -297,7 +302,7 @@ public class XmlStateFileFetcher {
         String body = activityParams.getNamedItem("body").getNodeValue();
         String id = activityParams.getNamedItem("id").getNodeValue();
 
-        Activity activity = new Activity(id, userId);
+        Activity activity = new ActivityImpl(id, userId);
         activity.setStreamTitle(turnEvil(streamTitle));
         activity.setTitle(turnEvil(title));
         activity.setBody(turnEvil(body));
@@ -309,8 +314,8 @@ public class XmlStateFileFetcher {
     }
   }
 
-  private List<MediaItem> getMediaItems(Node activityItem) {
-    List<MediaItem> media = Lists.newArrayList();
+  private List<MediaItemImpl> getMediaItems(Node activityItem) {
+    List<MediaItemImpl> media = Lists.newArrayList();
 
     NodeList mediaItems = activityItem.getChildNodes();
     if (mediaItems != null) {
@@ -321,7 +326,7 @@ public class XmlStateFileFetcher {
           String mimeType = mediaParams.getNamedItem("mimeType").getNodeValue();
           String url = mediaParams.getNamedItem("url").getNodeValue();
 
-          media.add(new MediaItem(mimeType,
+          media.add(new MediaItemImpl(mimeType,
               MediaItem.Type.valueOf(typeString), url));
         }
       }
