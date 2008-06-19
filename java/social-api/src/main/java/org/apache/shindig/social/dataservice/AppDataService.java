@@ -20,8 +20,8 @@ package org.apache.shindig.social.dataservice;
 import org.apache.shindig.common.SecurityToken;
 import org.apache.shindig.social.ResponseItem;
 
-import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 public interface AppDataService {
 
@@ -29,43 +29,40 @@ public interface AppDataService {
    * Retrives app data for the specified user and group.
    * @param userId The user
    * @param groupId The group
-   * @param fields The fields to filter the data by.
    * @param appId The app
+   * @param fields The fields to filter the data by.
    * @param token The security token
    * @return The data fetched
    */
-  public ResponseItem<DataCollection> getPersonData(
-      UserId userId, GroupId groupId,
-      List<String> fields, String appId, SecurityToken token);
-
-  /**
-   * Updates app data for the specified user and group with the new values.
-   *
-   * @param userId The user
-   * @param groupId The group
-   * @param fields The fields to filter the data by.
-   * @param values The values to set
-   * @param appId The app
-   * @param token The security token
-   * @return an error if one occurs
-   */
-  public ResponseItem updatePersonData(UserId userId,
-      GroupId groupId, List<String> fields,
-      Map<String, String> values, String appId, SecurityToken token);
+  public ResponseItem<DataCollection> getPersonData(UserId userId, GroupId groupId, String appId,
+      Set<String> fields, SecurityToken token);
 
   /**
    * Deletes data for the specified user and group.
    *
    * @param userId The user
    * @param groupId The group
-   * @param fields The fields to delete.
    * @param appId The app
+   * @param fields The fields to delete.
    * @param token The security token
    * @return an error if one occurs
    */
-  public ResponseItem deletePersonData(UserId userId,
-      GroupId groupId, List<String> fields, String appId,
-      SecurityToken token);
+  public ResponseItem deletePersonData(UserId userId, GroupId groupId, String appId,
+      Set<String> fields, SecurityToken token);
+
+  /**
+   * Updates app data for the specified user and group with the new values.
+   *
+   * @param userId The user
+   * @param groupId The group
+   * @param appId The app
+   * @param fields The fields to filter the data by.
+   * @param values The values to set
+   * @param token The security token
+   * @return an error if one occurs
+   */
+  public ResponseItem updatePersonData(UserId userId, GroupId groupId, String appId,
+      Set<String> fields, Map<String, String> values, SecurityToken token);
 }
 
 

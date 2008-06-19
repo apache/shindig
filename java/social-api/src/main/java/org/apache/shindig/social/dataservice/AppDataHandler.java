@@ -21,6 +21,7 @@ import org.apache.shindig.social.ResponseItem;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 import com.google.inject.Inject;
 
 import java.util.List;
@@ -55,7 +56,8 @@ public class AppDataHandler extends DataRequestHandler {
     String appId = getAppId(segments[2], request.getToken());
 
     List<String> fields = getListParam(request, "fields", Lists.<String>newArrayList());
-    return service.deletePersonData(userId, groupId, fields, appId, request.getToken());
+    return service.deletePersonData(userId, groupId, appId, Sets.newHashSet(fields),
+        request.getToken());
   }
 
   /**
@@ -101,8 +103,8 @@ public class AppDataHandler extends DataRequestHandler {
     values = converter.convertToObject(jsonAppData,
         (Class<Map<String, String>>) values.getClass());
 
-    return service.updatePersonData(userId, groupId, fields, values,
-        appId, request.getToken());
+    return service.updatePersonData(userId, groupId, appId, Sets.newHashSet(fields), values,
+        request.getToken());
   }
 
   /**
@@ -120,10 +122,13 @@ public class AppDataHandler extends DataRequestHandler {
     GroupId groupId = GroupId.fromJson(segments[1]);
     String appId = getAppId(segments[2], request.getToken());
 
+    // TODO: Make this field fetching common code and have the Set be the native type so
+    // we don't keep translating back and forth
     List<String> fields = getListParam(request, "fields",
         Lists.<String>newArrayList());
 
-    return service.getPersonData(userId, groupId, fields, appId, request.getToken());
+    return service.getPersonData(userId, groupId, appId, Sets.newHashSet(fields),
+        request.getToken());
   }
 
 }
