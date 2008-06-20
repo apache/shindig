@@ -70,7 +70,7 @@ public class BasicMessageBundleFactoryTest {
   private final MessageBundleFactory bundleFactory;
 
   public BasicMessageBundleFactoryTest() {
-    bundleFactory = new BasicMessageBundleFactory(fetcher, 5, -1000);
+    bundleFactory = new BasicMessageBundleFactory(fetcher, 5, -1000, 1000);
   }
 
   @Test
