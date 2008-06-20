@@ -106,7 +106,8 @@ class GadgetSpecParser {
 		$attributes = $link->attributes();
 		$rel = isset($attributes['rel']) ? trim($attributes['rel']) : '';
 		$href = isset($attributes['href']) ? trim($attributes['href']) : '';
-		$link = new LinkSpec($rel, $href);
+		$method = isset($attributes['method']) ? trim($attributes['method']) : 'GET';
+		$link = new LinkSpec($rel, $href, $method);
 		return $link;
 	}
 
