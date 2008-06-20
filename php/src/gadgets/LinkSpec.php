@@ -21,20 +21,27 @@
 class LinkSpec {
 	public $rel;
 	public $href;
+	public $method;
 
-	public function __construct($rel, $href)
+	public function __construct($rel, $href, $method='GET')
 	{
 		$this->rel = $rel;
 		$this->href = $href;
+		$this->method = $method;
 	}
 
 	public function getRel()
 	{
 		return $this->rel;
 	}
-
+	
 	public function getHref()
 	{
 		return $this->href;
+	}
+
+	public function getMethod()
+	{
+		return $this->method;
 	}
 }
