@@ -90,7 +90,7 @@ public class BasicGadgetSpecFactoryTest {
   private final CaptureRewriter rewriter = new CaptureRewriter();
 
   private final BasicGadgetSpecFactory specFactory
-      = new BasicGadgetSpecFactory(fetcher, rewriter, FAKE_EXECUTOR, 5, -1000);
+      = new BasicGadgetSpecFactory(fetcher, rewriter, FAKE_EXECUTOR, 5, -1000, 1000);
 
   @Test
   public void specFetched() throws Exception {
