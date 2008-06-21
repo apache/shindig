@@ -67,7 +67,10 @@ class ActivityHandler extends DataRequestHandler {
 		$userId = UserId::fromJson($params[1]);
 		$groupId = GroupId::fromJson($params[2]);
 		// TODO: Should we pass the groupId through to the service?
-		$jsonActivity = isset($_POST['entry']) ? $_POST['entry'] : (isset($_GET['entry']) ? $_GET['entry'] : null);
+		if (!isset($GLOBALS['HTTP_RAW_POST_DATA'])) {
+			throw new Exception("Empty raw post data");
+		}
+		$jsonActivity = $GLOBALS['HTTP_RAW_POST_DATA'];
 		if (get_magic_quotes_gpc()) {
 			$jsonActivity = stripslashes($jsonActivity);
 		}

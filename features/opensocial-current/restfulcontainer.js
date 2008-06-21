@@ -38,11 +38,6 @@ RestfulContainer = function(baseUrl, domain, supportedFieldsArray) {
   this.baseUrl_ = baseUrl;
 
   this.securityToken_ = shindig.auth.getSecurityToken();
-
-  // TODO: Php guys delete this once you handle the new post format! ie there is no longer an
-  // "entry" field. Whatever was in the "entry" field just gets posted directly.
-  this.useLegacy_ = true;
-
   this.useBatching_ = false;
 };
 RestfulContainer.inherits(opensocial.Container);
@@ -93,12 +88,7 @@ RestfulContainer.prototype.requestData = function(dataRequest, callback) {
     };
 
     if (requestObject.request.postData) {
-      if (this.useLegacy_) {
-        makeRequestParams["POST_DATA"] = gadgets.io.encodeValues(
-            {'entry' : gadgets.json.stringify(requestObject.request.postData)});
-      } else {
-        makeRequestParams["POST_DATA"] = gadgets.json.stringify(requestObject.request.postData);
-      }
+      makeRequestParams["POST_DATA"] = gadgets.json.stringify(requestObject.request.postData);
     }
 
     var url = requestObject.request.url;
@@ -121,7 +111,7 @@ RestfulContainer.prototype.requestData = function(dataRequest, callback) {
           checkIfFinished();
         },
         makeRequestParams,
-        this.useLegacy_ ? "application/x-www-form-urlencoded" : "application/json");
+        "application/json");
   }
 
   // may need multiple urls for one response but lets ignore that for now
