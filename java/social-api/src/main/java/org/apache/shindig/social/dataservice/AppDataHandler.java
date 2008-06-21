@@ -19,16 +19,13 @@ package org.apache.shindig.social.dataservice;
 
 import org.apache.shindig.social.ResponseItem;
 
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
-import com.google.common.collect.Sets;
 import com.google.inject.Inject;
 
-import java.util.List;
-import java.util.Map;
+import java.util.HashMap;
 
 public class AppDataHandler extends DataRequestHandler {
   private AppDataService service;
+  private static final String APP_DATA_PATH = "/people/{userId}/{groupId}/{appId}";
 
   @Inject
   public AppDataHandler(AppDataService service) {
@@ -49,19 +46,14 @@ public class AppDataHandler extends DataRequestHandler {
    * @param request
    */
   protected ResponseItem handleDelete(RequestItem request) {
-    String[] segments = getParamsFromRequest(request);
+    request.parseUrlWithTemplate(APP_DATA_PATH);
 
-    UserId userId = UserId.fromJson(segments[0]);
-    GroupId groupId = GroupId.fromJson(segments[1]);
-    String appId = getAppId(segments[2], request.getToken());
-
-    List<String> fields = getListParam(request, "fields", Lists.<String>newArrayList());
-    return service.deletePersonData(userId, groupId, appId, Sets.newHashSet(fields),
-        request.getToken());
+    return service.deletePersonData(request.getUser(), request.getGroup(),
+        request.getAppId(), request.getFields(), request.getToken());
   }
 
   /**
-   * /people/{userId}/{groupId}/{appId}
+   * /appdata/{userId}/{groupId}/{appId}
    * - fields={field1, field2}
    *
    * examples:
@@ -77,7 +69,7 @@ public class AppDataHandler extends DataRequestHandler {
   }
 
   /**
-   * /people/{userId}/{groupId}/{appId}
+   * /appdata/{userId}/{groupId}/{appId}
    * - fields={field1, field2}
    *
    * examples:
@@ -85,25 +77,14 @@ public class AppDataHandler extends DataRequestHandler {
    * /appdata/john.doe/@self/app
    *
    * The post data should be a regular json object. All of the fields vars will
-   * be pulled from the values and set on the person object. If there are no
+   * be pulled from the values and set. If there are no
    * fields vars then all of the data will be overridden.
    */
   protected ResponseItem handlePost(RequestItem request) {
-    String[] segments = getParamsFromRequest(request);
+    request.parseUrlWithTemplate(APP_DATA_PATH);
 
-    UserId userId = UserId.fromJson(segments[0]);
-    GroupId groupId = GroupId.fromJson(segments[1]);
-    String appId = getAppId(segments[2], request.getToken());
-
-    List<String> fields = getListParam(request, "fields",
-        Lists.<String>newArrayList());
-
-    String jsonAppData = request.getParameters().get("entry");
-    Map<String, String> values = Maps.newHashMap();
-    values = converter.convertToObject(jsonAppData,
-        (Class<Map<String, String>>) values.getClass());
-
-    return service.updatePersonData(userId, groupId, appId, Sets.newHashSet(fields), values,
+    return service.updatePersonData(request.getUser(), request.getGroup(),
+        request.getAppId(), request.getFields(), request.getPostData(HashMap.class),
         request.getToken());
   }
 
@@ -116,19 +97,10 @@ public class AppDataHandler extends DataRequestHandler {
    * /appdata/john.doe/@self/app
    */
   protected ResponseItem handleGet(RequestItem request) {
-    String[] segments = getParamsFromRequest(request);
+    request.parseUrlWithTemplate(APP_DATA_PATH);
 
-    UserId userId = UserId.fromJson(segments[0]);
-    GroupId groupId = GroupId.fromJson(segments[1]);
-    String appId = getAppId(segments[2], request.getToken());
-
-    // TODO: Make this field fetching common code and have the Set be the native type so
-    // we don't keep translating back and forth
-    List<String> fields = getListParam(request, "fields",
-        Lists.<String>newArrayList());
-
-    return service.getPersonData(userId, groupId, appId, Sets.newHashSet(fields),
-        request.getToken());
+    return service.getPersonData(request.getUser(), request.getGroup(),
+        request.getAppId(), request.getFields(), request.getToken());
   }
 
 }

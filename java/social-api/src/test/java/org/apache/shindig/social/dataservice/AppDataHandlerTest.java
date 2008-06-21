@@ -21,7 +21,6 @@ import org.apache.shindig.common.testing.FakeGadgetToken;
 import org.apache.shindig.social.ResponseItem;
 import org.apache.shindig.social.opensocial.util.BeanJsonConverter;
 
-import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import junit.framework.TestCase;
@@ -45,7 +44,6 @@ public class AppDataHandlerTest extends TestCase {
     appDataService = EasyMock.createMock(AppDataService.class);
 
     handler = new AppDataHandler(appDataService);
-    handler.setConverter(converter);
   }
 
   private void replay() {
@@ -65,7 +63,16 @@ public class AppDataHandlerTest extends TestCase {
   }
 
   private void setPathAndParams(String path, Map<String, String> params) {
-    request = new RequestItem(path, params, token, null);
+    setPathAndParams(path, params, null);
+  }
+
+  private void setPathAndParams(String path, Map<String, String> params, String postData) {
+    request = new RequestItem();
+    request.setUrl(path);
+    request.setParameters(params);
+    request.setToken(token);
+    request.setConverter(converter);
+    request.setPostData(postData);
   }
 
   private void assertHandleGetForGroup(GroupId.Type group) {
@@ -113,8 +120,7 @@ public class AppDataHandlerTest extends TestCase {
 
     Map<String, String> params = Maps.newHashMap();
     params.put("fields", "pandas");
-    params.put("entry", jsonAppData);
-    setPathAndParams("/appData/john.doe/@self/appId", params);
+    setPathAndParams("/appData/john.doe/@self/appId", params, jsonAppData);
 
     HashMap<String, String> values = Maps.newHashMap();
     EasyMock.expect(converter.convertToObject(jsonAppData, HashMap.class)).andReturn(values);

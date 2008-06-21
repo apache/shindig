@@ -17,18 +17,17 @@
  */
 package org.apache.shindig.social.dataservice;
 
-import com.google.inject.Inject;
-import com.google.common.collect.Sets;
-
-import org.apache.shindig.social.ResponseError;
 import org.apache.shindig.social.ResponseItem;
 import org.apache.shindig.social.opensocial.model.Activity;
 
-import java.util.Set;
-import java.util.List;
+import com.google.inject.Inject;
 
 public class ActivityHandler extends DataRequestHandler {
   private ActivityService service;
+
+  // TODO: The appId should come from the url. The spec needs to be fixed!
+  private static final String ACTIVITY_ID_PATH = "/activities/{userId}/{groupId}/{activityId}";
+  private static final String GROUP_PATH = "/activities/{userId}/{groupId}/{appId}"; // Note: not what the spec says
 
   @Inject
   public ActivityHandler(ActivityService service) {
@@ -42,16 +41,10 @@ public class ActivityHandler extends DataRequestHandler {
    * /activities/john.doe/@self/1
    */
   protected ResponseItem handleDelete(RequestItem request) {
-    String[] segments = getParamsFromRequest(request);
+    request.parseUrlWithTemplate(ACTIVITY_ID_PATH);
 
-    UserId userId = UserId.fromJson(segments[0]);
-    GroupId groupId = GroupId.fromJson(segments[1]);
-    String activityId = segments[2];
-
-    // TODO: The appId should come from the url. The spec needs to be fixed.
-    String appId = "appId";
-
-    return service.deleteActivity(userId, groupId, appId, activityId, request.getToken());
+    return service.deleteActivity(request.getUser(), request.getGroup(),
+        request.getAppId(), request.getParameters().get("activityId"), request.getToken());
   }
 
   /**
@@ -73,24 +66,11 @@ public class ActivityHandler extends DataRequestHandler {
    * - postBody is an activity object
    */
   protected ResponseItem handlePost(RequestItem request) {
-    String[] segments = getParamsFromRequest(request);
+    request.parseUrlWithTemplate(GROUP_PATH);
 
-    UserId userId = UserId.fromJson(segments[0]);
-    GroupId groupId = GroupId.fromJson(segments[1]);
-
-    String jsonActivity = request.getParameters().get("entry");
-    Activity activity = converter.convertToObject(jsonActivity, Activity.class);
-
-    // TODO: The appId should come from the url. The spec needs to be fixed.
-    String appId = "appId";
-
-    Set<String> fields = Sets.newHashSet();
-    List<String> urlFields = getListParam(request, "fields", null);
-    if (urlFields != null) {
-      fields = Sets.newHashSet(urlFields);
-    }
-
-    return service.createActivity(userId, groupId, appId, fields, activity, request.getToken());
+    return service.createActivity(request.getUser(), request.getGroup(),
+        request.getAppId(), request.getFields(), request.getPostData(Activity.class),
+        request.getToken());
   }
 
   /**
@@ -102,30 +82,18 @@ public class ActivityHandler extends DataRequestHandler {
    * /activities/john.doe/@friends
    */
   protected ResponseItem handleGet(RequestItem request) {
-    String[] segments = getParamsFromRequest(request);
+    request.parseUrlWithTemplate(ACTIVITY_ID_PATH);
+    String optionalActivityId = request.getParameters().get("activityId");
 
-    UserId userId = UserId.fromJson(segments[0]);
-    GroupId groupId = GroupId.fromJson(segments[1]);
-    String optionalActivityId = null;
-    if (segments.length > 2) {
-      optionalActivityId = segments[2];
-    }
-
-    // TODO: The appId should come from the url. The spec needs to be fixed.
-    String appId = "appId";
-
-    Set<String> fields = Sets.newHashSet();
-    List<String> urlFields = getListParam(request, "fields", null);
-    if (urlFields != null) {
-      fields = Sets.newHashSet(urlFields);
-    }
-
-    // TODO: add pagination and sorting support
     if (optionalActivityId != null) {
-      return service.getActivity(userId, groupId, appId, fields, optionalActivityId,
-          request.getToken());
+      return service.getActivity(request.getUser(), request.getGroup(), request.getAppId(),
+          request.getFields(), optionalActivityId, request.getToken());
     }
-    return service.getActivities(userId, groupId, appId, fields, request.getToken());
+
+    return service.getActivities(request.getUser(), request.getGroup(), request.getAppId(),
+        // TODO: add pagination and sorting support
+        // getOrderBy(params), getFilterBy(params), getStartIndex(params), getCount(params),
+        request.getFields(), request.getToken());
   }
 
 }

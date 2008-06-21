@@ -29,6 +29,7 @@ import org.apache.shindig.social.opensocial.util.BeanXmlConverter;
 import com.google.common.collect.Maps;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -128,8 +129,8 @@ public class DataServiceServlet extends InjectedServlet {
     String method = getHttpMethodFromParameter(servletRequest.getMethod(),
         servletRequest.getParameter(X_HTTP_METHOD_OVERRIDE));
 
-    RequestItem requestItem = new RequestItem(servletRequest, token, method);
-    ResponseItem responseItem = getResponseItem(converter, requestItem);
+    RequestItem requestItem = new RequestItem(servletRequest, token, method, converter);
+    ResponseItem responseItem = getResponseItem(requestItem);
 
     if (responseItem.getError() == null) {
       PrintWriter writer = servletResponse.getWriter();
@@ -144,7 +145,8 @@ public class DataServiceServlet extends InjectedServlet {
       HttpServletResponse servletResponse, SecurityToken token,
       BeanConverter converter) throws IOException, JSONException {
 
-    JSONObject requests = new JSONObject(servletRequest.getParameter("request"));
+    byte[] postedBytes = IOUtils.toByteArray(servletRequest.getInputStream());
+    JSONObject requests = new JSONObject(new String(postedBytes));
     Map<String, ResponseItem> responses = Maps.newHashMap();
 
     Iterator keys = requests.keys();
@@ -153,10 +155,10 @@ public class DataServiceServlet extends InjectedServlet {
       String request = requests.getString(key);
 
       RequestItem requestItem = converter.convertToObject(request, RequestItem.class);
-      requestItem.parseUrlParamsIntoParameters();
       requestItem.setToken(token);
+      requestItem.setConverter(converter);
 
-      responses.put(key, getResponseItem(converter, requestItem));
+      responses.put(key, getResponseItem(requestItem));
     }
 
     PrintWriter writer = servletResponse.getWriter();
@@ -164,7 +166,7 @@ public class DataServiceServlet extends InjectedServlet {
         Maps.immutableMap("error", false, "responses", responses)));
   }
 
-  ResponseItem getResponseItem(BeanConverter converter, RequestItem requestItem) {
+  ResponseItem getResponseItem(RequestItem requestItem) {
     String route = getRouteFromParameter(requestItem.getUrl());
     Class<? extends DataRequestHandler> handlerClass = handlers.get(route);
 
@@ -173,8 +175,6 @@ public class DataServiceServlet extends InjectedServlet {
     }
 
     DataRequestHandler handler = injector.getInstance(handlerClass);
-    handler.setConverter(converter);
-
     return handler.handleMethod(requestItem);
   }
 
@@ -183,8 +183,7 @@ public class DataServiceServlet extends InjectedServlet {
     try {
       token = securityTokenDecoder.createToken(servletRequest.getParameter(SECURITY_TOKEN_PARAM));
     } catch (SecurityTokenException e) {
-      throw new RuntimeException(
-          "Implement error return for bad security token.");
+      throw new RuntimeException("Implement error return for bad security token.", e);
     }
     return token;
   }

@@ -20,21 +20,22 @@ package org.apache.shindig.social.dataservice;
 import org.apache.shindig.common.BasicSecurityTokenDecoder;
 import org.apache.shindig.common.SecurityTokenException;
 import org.apache.shindig.common.testing.FakeGadgetToken;
-import org.apache.shindig.social.opensocial.util.BeanJsonConverter;
-import org.apache.shindig.social.opensocial.util.BeanXmlConverter;
-import org.apache.shindig.social.opensocial.util.BeanConverter;
 import org.apache.shindig.social.ResponseItem;
 import org.apache.shindig.social.SocialApiTestsGuiceModule;
+import org.apache.shindig.social.opensocial.util.BeanConverter;
+import org.apache.shindig.social.opensocial.util.BeanJsonConverter;
+import org.apache.shindig.social.opensocial.util.BeanXmlConverter;
 
-import com.google.inject.Injector;
 import com.google.inject.Guice;
-import com.google.common.collect.Maps;
+import com.google.inject.Injector;
 import junit.framework.TestCase;
 import org.easymock.classextension.EasyMock;
 
+import javax.servlet.ServletInputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.PrintWriter;
+import java.io.IOException;
 import java.util.Enumeration;
 import java.util.StringTokenizer;
 
@@ -49,6 +50,12 @@ public class DataServiceServletTest extends TestCase {
   private Injector injector;
   private BeanJsonConverter jsonConverter;
   private BeanXmlConverter xmlConverter;
+
+  private final ServletInputStream dummyPostData = new ServletInputStream() {
+    public int read() throws IOException {
+      return -1;
+    }
+  };
 
   protected void setUp() throws Exception {
     servlet = new DataServiceServlet();
@@ -115,6 +122,7 @@ public class DataServiceServletTest extends TestCase {
       String actualMethod, String overrideMethod, String expectedMethod) throws Exception {
     req.setCharacterEncoding("UTF-8");
 
+    EasyMock.expect(req.getInputStream()).andStubReturn(dummyPostData);
     EasyMock.expect(req.getPathInfo()).andStubReturn(pathInfo);
     EasyMock.expect(req.getMethod()).andStubReturn(actualMethod);
     EasyMock.expect(req.getParameterNames()).andStubReturn((Enumeration) new StringTokenizer(""));
@@ -136,7 +144,6 @@ public class DataServiceServletTest extends TestCase {
         .andReturn(new ResponseItem<String>(jsonObject));
 
     EasyMock.expect(jsonConverter.convertToString(jsonObject)).andReturn(jsonObject);
-    handler.setConverter(jsonConverter);
 
     PrintWriter writerMock = EasyMock.createMock(PrintWriter.class);
     EasyMock.expect(res.getWriter()).andReturn(writerMock);
@@ -149,8 +156,10 @@ public class DataServiceServletTest extends TestCase {
   }
 
   public void testInvalidRoute() throws Exception {
+    RequestItem requestItem = new RequestItem();
+    requestItem.setUrl("/ahhh!");
     try {
-      servlet.getResponseItem(null, new RequestItem("/ahhh!", null, null, null));
+      servlet.getResponseItem(requestItem);
       fail("The route should not have found a valid handler.");
     } catch (RuntimeException e) {
       // Yea!

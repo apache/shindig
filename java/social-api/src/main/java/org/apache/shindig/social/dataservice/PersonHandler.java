@@ -21,7 +21,6 @@ import org.apache.shindig.social.ResponseError;
 import org.apache.shindig.social.ResponseItem;
 import org.apache.shindig.social.opensocial.model.Person;
 
-import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.google.inject.Inject;
 
@@ -30,6 +29,12 @@ import java.util.Set;
 
 public class PersonHandler extends DataRequestHandler {
   private PersonService personService;
+
+  private static final String PEOPLE_PATH = "/people/{userId}/{groupId}/{personId}";
+  protected static final Set<String> DEFAULT_PERSON_FIELDS = Sets.newHashSet(
+      Person.Field.ID.toString(),
+      Person.Field.NAME.toString(),
+      Person.Field.THUMBNAIL_URL.toString());
 
   @Inject
   public PersonHandler(PersonService personService) {
@@ -59,39 +64,24 @@ public class PersonHandler extends DataRequestHandler {
    * /people/john.doe/@self
    */
   protected ResponseItem handleGet(RequestItem request) {
-    String[] segments = getParamsFromRequest(request);
+    request.parseUrlWithTemplate(PEOPLE_PATH);
 
-    UserId userId = UserId.fromJson(segments[0]);
-    GroupId groupId = GroupId.fromJson(segments[1]);
-
-    String optionalPersonId = null;
-    if (segments.length > 2) {
-      optionalPersonId = segments[2];
-    }
-
-    Set<String> fields = Sets.newHashSet(
-        getListParam(request, "fields",
-            Lists.newArrayList(Person.Field.ID.toString(),
-                Person.Field.NAME.toString(),
-                Person.Field.THUMBNAIL_URL.toString())));
+    UserId userId = request.getUser();
+    GroupId groupId = request.getGroup();
+    String optionalPersonId = request.getParameters().get("personId");
+    Set<String> fields = request.getFields(DEFAULT_PERSON_FIELDS);
 
     if (groupId.getType() == GroupId.Type.self) {
       return personService.getPerson(userId, fields, request.getToken());
+
     } else if (optionalPersonId != null) {
-      // TODO: Add some crazy concept to handle the userId? 
+      // TODO: Add some crazy concept to handle the userId?
       return personService.getPerson(new UserId(UserId.Type.userId, optionalPersonId),
           fields, request.getToken());
     }
 
-    PersonService.SortOrder sort = getEnumParam(request, "orderBy",
-        PersonService.SortOrder.topFriends, PersonService.SortOrder.class);
-    PersonService.FilterType filter = getEnumParam(request, "filterBy",
-        PersonService.FilterType.all, PersonService.FilterType.class);
-
-    int first = getIntegerParam(request, "startIndex", 0);
-    int max = getIntegerParam(request, "count", 20);
-
-    return personService.getPeople(userId, groupId, sort, filter, first, max,
+    return personService.getPeople(userId, groupId, request.getOrderBy(),
+        request.getFilterBy(), request.getStartIndex(), request.getCount(),
         fields, request.getToken());
   }
 

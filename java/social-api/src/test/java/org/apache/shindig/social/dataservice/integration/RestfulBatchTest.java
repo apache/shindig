@@ -17,11 +17,8 @@
  */
 package org.apache.shindig.social.dataservice.integration;
 
-import com.google.common.collect.Maps;
 import org.json.JSONObject;
 import org.junit.Test;
-
-import java.util.Map;
 
 public class RestfulBatchTest extends AbstractLargeRestfulTests {
 
@@ -50,14 +47,13 @@ public class RestfulBatchTest extends AbstractLargeRestfulTests {
    */
   @Test
   public void testGetBatchRequest() throws Exception {
-    Map<String, String> extraParams = Maps.newHashMap();
-    extraParams.put("request", "{"
+    String postData = "{"
         + "friends : {url : '/people/john.doe/@friends', method : 'GET'}, "
         + "john : {url : '/people/john.doe/@self', method : 'GET'}, "
-        + "updateData : {url : '/appdata/john.doe/@self/a', method : 'POST', parameters : {entry : {count : 1}}}"
-        + "}");
+        + "updateData : {url : '/appdata/john.doe/@self/a', method : 'POST', postData : {count : 1}}}"
+        + "}";
 
-    String resp = getJsonResponse("jsonBatch", "POST", extraParams);
+    String resp = getJsonResponse("jsonBatch", "POST", postData);
     JSONObject result = getJson(resp);
 
     assertEquals(false, result.getBoolean("error"));

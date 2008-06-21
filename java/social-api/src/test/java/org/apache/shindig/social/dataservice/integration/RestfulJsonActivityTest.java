@@ -20,14 +20,10 @@ package org.apache.shindig.social.dataservice.integration;
 import org.apache.shindig.social.SocialApiTestsGuiceModule;
 import org.apache.shindig.social.opensocial.model.Activity;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.json.JSONArray;
 import org.junit.Test;
-
-import java.util.Map;
-
-import com.google.common.collect.Maps;
 
 public class RestfulJsonActivityTest extends AbstractLargeRestfulTests {
 
@@ -120,9 +116,8 @@ public class RestfulJsonActivityTest extends AbstractLargeRestfulTests {
 
   @Test
   public void testCreateActivity() throws Exception {
-    Map<String, String> extraParams = Maps.newHashMap();
-    extraParams.put("entry", "{title : 'hi mom!', body : 'and dad.'}");
-    getJsonResponse("/activities/john.doe/@self", "POST", extraParams);
+    String postData = "{title : 'hi mom!', body : 'and dad.'}";
+    getJsonResponse("/activities/john.doe/@self", "POST", postData);
 
      String resp = getJsonResponse("/activities/john.doe/@self", "GET");
     JSONObject result = getJson(resp);

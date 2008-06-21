@@ -17,22 +17,11 @@
  */
 package org.apache.shindig.social.dataservice;
 
-import org.apache.shindig.common.SecurityToken;
 import org.apache.shindig.social.ResponseItem;
-import org.apache.shindig.social.opensocial.util.BeanConverter;
 
-import com.google.common.collect.Lists;
 import org.apache.commons.lang.StringUtils;
 
-import java.util.List;
-
 public abstract class DataRequestHandler {
-  protected BeanConverter converter;
-  protected static final String APP_SUBSTITUTION_TOKEN = "@app";
-
-  public void setConverter(BeanConverter converter) {
-    this.converter = converter;
-  }
 
   public ResponseItem handleMethod(RequestItem request) {
     String httpMethod = request.getMethod();
@@ -62,48 +51,4 @@ public abstract class DataRequestHandler {
   protected abstract ResponseItem handlePost(RequestItem request);
 
   protected abstract ResponseItem handleGet(RequestItem request);
-
-  protected static String[] getParamsFromRequest(RequestItem request) {
-    return getQueryPath(request).split("/");
-  }
-
-  /*package-protected*/ static String getQueryPath(RequestItem request) {
-    String pathInfo = request.getUrl();
-    int index = pathInfo.indexOf('/', 1);
-    return pathInfo.substring(index + 1);
-  }
-
-  protected static <T extends Enum<T>> T getEnumParam(RequestItem request, String paramName,
-      T defaultValue, Class<T> enumClass) {
-    String paramValue = request.getParameters().get(paramName);
-    if (paramValue != null) {
-      return Enum.valueOf(enumClass, paramValue);
-    }
-    return defaultValue;
-  }
-
-  protected static int getIntegerParam(RequestItem request, String paramName, int defaultValue) {
-    String paramValue = request.getParameters().get(paramName);
-    if (paramValue != null) {
-      return new Integer(paramValue);
-    }
-    return defaultValue;
-  }
-
-  protected static List<String> getListParam(RequestItem request, String paramName,
-      List<String> defaultValue) {
-    String paramValue = request.getParameters().get(paramName);
-    if (paramValue != null) {
-      return Lists.newArrayList(paramValue.split(","));
-    }
-    return defaultValue;
-  }
-
-  protected static String getAppId(String appId, SecurityToken token) {
-    if (appId.equals(APP_SUBSTITUTION_TOKEN)) {
-      return token.getAppId();
-    } else {
-      return appId;
-    }
-  }
 }

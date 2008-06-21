@@ -19,12 +19,11 @@ package org.apache.shindig.social.dataservice.integration;
 
 import org.apache.shindig.social.SocialApiTestsGuiceModule.MockXmlStateFileFetcher;
 
+import com.google.common.collect.Maps;
 import org.json.JSONObject;
 import org.junit.Test;
 
 import java.util.Map;
-
-import com.google.common.collect.Maps;
 
 
 public class RestfulJsonDataTest extends AbstractLargeRestfulTests {
@@ -166,8 +165,8 @@ public class RestfulJsonDataTest extends AbstractLargeRestfulTests {
 
     Map<String, String> extraParams = Maps.newHashMap();
     extraParams.put("fields", "count");
-    extraParams.put("entry", "{count : 5}");
-    getJsonResponse("/appdata/john.doe/@self/app", "POST", extraParams);
+    String postData = "{count : 5}";
+    getJsonResponse("/appdata/john.doe/@self/app", "POST", extraParams, postData);
 
     assertCount("5");
   }

@@ -66,7 +66,10 @@ public class PersonHandlerTest extends TestCase {
   }
 
   private void setPathAndParams(String path, Map<String, String> params) {
-    request = new RequestItem(path, params, token, null);
+    request = new RequestItem();
+    request.setUrl(path);
+    request.setParameters(params);
+    request.setToken(token);
   }
 
   public void testHandleGetAllNoParams() throws Exception {
