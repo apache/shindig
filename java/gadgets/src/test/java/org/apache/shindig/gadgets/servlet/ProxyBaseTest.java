@@ -18,7 +18,6 @@
  */
 package org.apache.shindig.gadgets.servlet;
 
-import static junitx.framework.StringAssert.assertContains;
 import static org.easymock.EasyMock.expect;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -151,15 +150,14 @@ public class ProxyBaseTest {
   @Test
   public void setResponseHeaders() {
     HttpResponse results = new HttpResponse(HttpResponse.SC_OK);
-    HttpServletResponseRecorder recorder = new HttpServletResponseRecorder(fixture.response);
     fixture.replay();
 
-    proxy.setResponseHeaders(fixture.request, recorder, results);
+    proxy.setResponseHeaders(fixture.request, fixture.recorder, results);
 
     // Just verify that they were set. Specific values are configurable.
-    assertNotNull("Expires header not set", recorder.getHeader("Expires"));
-    assertNotNull("Cache-Control header not set", recorder.getHeader("Cache-Control"));
-    assertEquals("attachment;filename=p.txt", recorder.getHeader("Content-Disposition"));
+    assertNotNull("Expires header not set", fixture.recorder.getHeader("Expires"));
+    assertNotNull("Cache-Control header not set", fixture.recorder.getHeader("Cache-Control"));
+    assertEquals("attachment;filename=p.txt", fixture.recorder.getHeader("Content-Disposition"));
   }
 
   @Test
@@ -167,31 +165,27 @@ public class ProxyBaseTest {
     Map<String, List<String>> headers = Maps.newTreeMap(String.CASE_INSENSITIVE_ORDER);
     headers.put("Pragma", Arrays.asList("no-cache"));
     HttpResponse results = new HttpResponse(HttpResponse.SC_OK, new byte[0], headers);
-    HttpServletResponseRecorder recorder = new HttpServletResponseRecorder(fixture.response);
     fixture.replay();
 
-    proxy.setResponseHeaders(fixture.request, recorder, results);
+    proxy.setResponseHeaders(fixture.request, fixture.recorder, results);
 
     // Just verify that they were set. Specific values are configurable.
-    assertNotNull("Expires header not set", recorder.getHeader("Expires"));
-    assertEquals("no-cache", recorder.getHeader("Pragma"));
-    assertEquals("no-cache", recorder.getHeader("Cache-Control"));
-    assertEquals("attachment;filename=p.txt", recorder.getHeader("Content-Disposition"));
+    assertNotNull("Expires header not set", fixture.recorder.getHeader("Expires"));
+    assertEquals("no-cache", fixture.recorder.getHeader("Pragma"));
+    assertEquals("no-cache", fixture.recorder.getHeader("Cache-Control"));
+    assertEquals("attachment;filename=p.txt", fixture.recorder.getHeader("Content-Disposition"));
   }
 
   @Test
   public void setResponseHeadersForceParam() {
     HttpResponse results = new HttpResponse(HttpResponse.SC_OK);
-    HttpServletResponseRecorder recorder = new HttpServletResponseRecorder(fixture.response);
     expect(fixture.request.getParameter(ProxyBase.REFRESH_PARAM)).andReturn("30").anyTimes();
     fixture.replay();
 
-    proxy.setResponseHeaders(fixture.request, recorder, results);
+    proxy.setResponseHeaders(fixture.request, fixture.recorder, results);
 
-    // Just verify that they were set. Specific values are configurable.
-    assertNotNull("Expires header not set", recorder.getHeader("Expires"));
-    assertContains("30", recorder.getHeader("Cache-Control"));
-    assertEquals("attachment;filename=p.txt", recorder.getHeader("Content-Disposition"));
+    fixture.checkCacheControlHeaders(30, false);
+    assertEquals("attachment;filename=p.txt", fixture.recorder.getHeader("Content-Disposition"));
   }
 
   @Test

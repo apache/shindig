@@ -66,9 +66,13 @@ public class HttpResponseTest extends TestCase {
     existing.add(value);
   }
 
+  private int roundToSeconds(long ts) {
+    return (int)(ts / 1000);
+  }
+
   public void testGetEncoding() throws Exception {
     addHeader("Content-Type", "text/plain; charset=TEST-CHARACTER-SET");
-    HttpResponse response = new HttpResponse(200, new byte[0], headers);
+    HttpResponse response = new HttpResponse(200, null, headers);
     assertEquals("TEST-CHARACTER-SET", response.getEncoding());
   }
 
@@ -136,47 +140,61 @@ public class HttpResponseTest extends TestCase {
     };
     addHeader("Content-Type", "application/octet-stream");
     HttpResponse response = new HttpResponse(200, data, headers);
+
     byte[] out = IOUtils.toByteArray(response.getResponse());
+    assertEquals(data.length, response.getContentLength());
+    assertTrue(Arrays.equals(data, out));
+
+    out = response.getResponseAsBytes();
     assertTrue(Arrays.equals(data, out));
   }
 
   public void testStrictCacheControlNoCache() throws Exception {
     addHeader("Cache-Control", "no-cache");
-    HttpResponse response = new HttpResponse(200, new byte[0], headers);
+    HttpResponse response = new HttpResponse(200, null, headers);
     assertTrue(response.isStrictNoCache());
     assertEquals(-1, response.getCacheExpiration());
+    assertEquals(-1, response.getCacheTtl());
   }
 
   public void testStrictPragmaNoCache() throws Exception {
     addHeader("Pragma", "no-cache");
-    HttpResponse response = new HttpResponse(200, new byte[0], headers);
+    HttpResponse response = new HttpResponse(200, null, headers);
     assertTrue(response.isStrictNoCache());
     assertEquals(-1, response.getCacheExpiration());
+    assertEquals(-1, response.getCacheTtl());
   }
 
   public void testStrictPragmaJunk() throws Exception {
     addHeader("Pragma", "junk");
-    HttpResponse response = new HttpResponse(200, new byte[0], headers);
+    HttpResponse response = new HttpResponse(200, null, headers);
     assertFalse(response.isStrictNoCache());
+    int expected = roundToSeconds(System.currentTimeMillis() + HttpResponse.DEFAULT_TTL);
+    int expires = roundToSeconds(response.getCacheExpiration());
+    assertEquals(expected, expires);
+    assertEquals(HttpResponse.DEFAULT_TTL, response.getCacheTtl());
   }
 
   public void testExpires() throws Exception {
     // We use a timestamp here so that we can verify that the underlying parser
     // is robust. The /1000 * 1000 bit is just rounding to seconds.
-    long time = ((System.currentTimeMillis() / 1000) * 1000) + 10000L;
-    addHeader("Expires", DateUtil.formatDate(time));
-    HttpResponse response = new HttpResponse(200, new byte[0], headers);
-    assertEquals(time, response.getCacheExpiration());
+    int ttl = 10;
+    int time = roundToSeconds(System.currentTimeMillis()) + ttl;
+    addHeader("Expires", DateUtil.formatDate(1000L * time));
+    HttpResponse response = new HttpResponse(200, null, headers);
+    assertEquals(time, roundToSeconds(response.getCacheExpiration()));
+    // 9 because of rounding.
+    assertEquals(9, roundToSeconds(response.getCacheTtl()));
   }
 
   public void testMaxAge() throws Exception {
     int maxAge = 10;
-    long expected = ((System.currentTimeMillis() / 1000) * 1000) + (maxAge * 1000);
+    int expected = roundToSeconds(System.currentTimeMillis()) + maxAge;
     addHeader("Cache-Control", "public, max-age=" + maxAge);
-    HttpResponse response = new HttpResponse(200, new byte[0], headers);
-    long expiration = response.getCacheExpiration();
-    assertTrue("getExpiration is less than start time + maxAge", expiration >= expected);
-    assertTrue("getExpiration is too high.", expiration <= expected + 1000);
+    HttpResponse response = new HttpResponse(200, null, headers);
+    int expiration = roundToSeconds(response.getCacheExpiration());
+    assertEquals(expected, expiration);
+    assertEquals(maxAge * 1000, response.getCacheTtl());
   }
 
   public void testNegativeCaching() {
@@ -186,11 +204,12 @@ public class HttpResponseTest extends TestCase {
         HttpResponse.notFound().getCacheExpiration() > System.currentTimeMillis());
     assertTrue("Bad HTTP responses must be cacheable!",
         HttpResponse.timeout().getCacheExpiration() > System.currentTimeMillis());
+    assertEquals(HttpResponse.NEGATIVE_CACHE_TTL, HttpResponse.error().getCacheTtl());
   }
 
   public void testNullHeaderNamesStripped() {
     addHeader(null, "dummy");
-    HttpResponse response = new HttpResponse(200, new byte[0], headers);
+    HttpResponse response = new HttpResponse(200, null, headers);
     for (String key : response.getAllHeaders().keySet()) {
       assertNotNull("Null header not removed.", key);
     }

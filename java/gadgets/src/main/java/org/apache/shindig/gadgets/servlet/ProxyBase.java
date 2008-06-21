@@ -97,7 +97,7 @@ public abstract class ProxyBase {
     } else  if (request.getParameter(REFRESH_PARAM) != null) {
       refreshInterval =  Integer.valueOf(request.getParameter(REFRESH_PARAM));
     } else {
-      refreshInterval = Math.max(60 * 60, (int)(results.getExpiration() / 1000));
+      refreshInterval = Math.max(60 * 60, (int)(results.getCacheTtl() / 1000L));
     }
     HttpUtil.setCachingHeaders(response, refreshInterval);
     response.setHeader("Content-Disposition", "attachment;filename=p.txt");
