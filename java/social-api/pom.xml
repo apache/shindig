@@ -100,5 +100,10 @@ under the License.
       <artifactId>jetty</artifactId>
       <scope>test</scope>
     </dependency>
+    <dependency>
+      <groupId>net.oauth</groupId>
+      <artifactId>core</artifactId>
+      <scope>compile</scope>
+    </dependency>
   </dependencies>
 </project>
