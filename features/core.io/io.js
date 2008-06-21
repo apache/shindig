@@ -168,7 +168,7 @@ gadgets.io = function() {
           resp.data = resp.text;
           break;
       }
-	}
+  }
     return resp;
   }
 
@@ -184,7 +184,7 @@ gadgets.io = function() {
    *     response from the sever before calling the callback
    */
   function makeXhrRequest(realUrl, proxyUrl, callback, paramData, method,
-      params, processResponseFunction) {
+      params, processResponseFunction, opt_contentType) {
     var xhr = makeXhr();
 
     xhr.open(method, proxyUrl, true);
@@ -193,10 +193,10 @@ gadgets.io = function() {
           null, processResponseFunction, realUrl, callback, params, xhr);
     }
     if (paramData != null) {
-        xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
-        xhr.send(paramData);
+      xhr.setRequestHeader('Content-Type', opt_contentType || 'application/x-www-form-urlencoded');
+      xhr.send(paramData);
     } else {
-        xhr.send(null);
+      xhr.send(null);
     }
   }
 
@@ -339,10 +339,10 @@ gadgets.io = function() {
     /**
      * @private
      */
-    makeNonProxiedRequest : function (relativeUrl, callback, opt_params) {
+    makeNonProxiedRequest : function (relativeUrl, callback, opt_params, opt_contentType) {
       var params = opt_params || {};
       makeXhrRequest(relativeUrl, relativeUrl, callback, params.POST_DATA,
-          params.METHOD, params, processNonProxiedResponse);
+          params.METHOD, params, processNonProxiedResponse, opt_contentType);
     },
 
     /**

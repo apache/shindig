@@ -17,14 +17,9 @@
  */
 package org.apache.shindig.social.dataservice;
 
-import org.apache.shindig.common.testing.FakeGadgetToken;
 import org.apache.shindig.social.ResponseItem;
 
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
 import junit.framework.TestCase;
-
-import java.util.Map;
 
 public class DataRequestHandlerTest extends TestCase {
   private DataRequestHandler drh;
@@ -50,7 +45,7 @@ public class DataRequestHandlerTest extends TestCase {
       }
     };
 
-    request = new RequestItem(null, null, null, null);
+    request = new RequestItem();
   }
 
   public void testHandleMethodSuccess() throws Exception {
@@ -80,76 +75,5 @@ public class DataRequestHandlerTest extends TestCase {
       // Yea! We like exeptions
       assertEquals("Unserviced Http method type", e.getMessage());
     }
-  }
-
-  public void testGetParamsFromRequest() throws Exception {
-    String[] params = DataRequestHandler.getParamsFromRequest(
-        new RequestItem("/people/5/@self", null, null, null));
-    assertEquals("5", params[0]);
-    assertEquals("@self", params[1]);
-  }
-
-  public void testGetQueryPath() throws Exception {
-    assertEquals("5/@self", DataRequestHandler.getQueryPath(
-        new RequestItem("/people/5/@self", null, null, null)));
-  }
-
-  public void testGetEnumParam() throws Exception {
-    Map<String, String> parameters = Maps.newHashMap();
-    parameters.put("field", "name");
-
-    assertEquals(PersonService.SortOrder.name, DataRequestHandler.getEnumParam(
-        new RequestItem(null, parameters, null, null), "field",
-        PersonService.SortOrder.topFriends, PersonService.SortOrder.class));
-
-    // Should return the default value if the parameter is null
-    parameters = Maps.newHashMap();
-    parameters.put("field", null);
-
-    assertEquals(PersonService.SortOrder.topFriends, DataRequestHandler.getEnumParam(
-        new RequestItem(null, parameters, null, null), "field",
-        PersonService.SortOrder.topFriends, PersonService.SortOrder.class));
-  }
-
-  public void testGetIntegerParam() throws Exception {
-    Map<String, String> parameters = Maps.newHashMap();
-    parameters.put("field", "5");
-
-    assertEquals(5, DataRequestHandler.getIntegerParam(
-        new RequestItem(null, parameters, null, null), "field", 100));
-
-    // Should return the default value if the parameter is null
-    parameters = Maps.newHashMap();
-    parameters.put("field", null);
-
-    assertEquals(100, DataRequestHandler.getIntegerParam(
-        new RequestItem(null, parameters, null, null), "field", 100));
-  }
-
-  public void testGetListParam() throws Exception {
-    Map<String, String> parameters = Maps.newHashMap();
-    parameters.put("field", "happy,sad,grumpy");
-
-    assertEquals(Lists.newArrayList("happy", "sad", "grumpy"),
-        DataRequestHandler.getListParam(
-            new RequestItem(null, parameters, null, null),
-            "field", Lists.newArrayList("alpha")));
-
-    // Should return the default value if the parameter is null
-    parameters = Maps.newHashMap();
-    parameters.put("field", null);
-
-    assertEquals(Lists.newArrayList("alpha"),
-        DataRequestHandler.getListParam(
-            new RequestItem(null, parameters, null, null),
-            "field", Lists.newArrayList("alpha")));
-  }
-
-  public void testGetAppId() throws Exception {
-    FakeGadgetToken token = new FakeGadgetToken();
-    assertEquals(token.getAppId(), DataRequestHandler.getAppId(
-        DataRequestHandler.APP_SUBSTITUTION_TOKEN, token));
-
-    assertEquals("676", DataRequestHandler.getAppId("676", token));
   }
 }

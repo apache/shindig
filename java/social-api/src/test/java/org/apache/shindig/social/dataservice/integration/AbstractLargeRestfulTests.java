@@ -34,6 +34,7 @@ import junit.framework.TestCase;
 import org.easymock.classextension.EasyMock;
 import org.json.JSONObject;
 
+import javax.servlet.ServletInputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.xml.stream.XMLInputFactory;
@@ -42,7 +43,9 @@ import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.InputStream;
 import java.io.PrintWriter;
+import java.io.IOException;
 import java.util.Map;
 import java.util.Vector;
 
@@ -70,11 +73,20 @@ public abstract class AbstractLargeRestfulTests extends TestCase {
   }
 
   protected String getJsonResponse(String path, String method) throws Exception {
-    return getJsonResponse(path, method, Maps.<String, String>newHashMap());
+    return getJsonResponse(path, method, Maps.<String, String>newHashMap(), "");
   }
 
-  protected String getJsonResponse(String path, String method, Map<String, String> extraParams)
-      throws Exception {
+  protected String getJsonResponse(String path, String method,
+      Map<String, String> extraParams) throws Exception {
+    return getJsonResponse(path, method, extraParams, "");
+  }
+
+  protected String getJsonResponse(String path, String method, String postData) throws Exception {
+    return getJsonResponse(path, method, Maps.<String, String>newHashMap(), postData);
+  }
+
+  protected String getJsonResponse(String path, String method, Map<String, String> extraParams,
+      String postData) throws Exception {
     req.setCharacterEncoding("UTF-8");
 
     EasyMock.expect(req.getPathInfo()).andStubReturn(path);
@@ -90,6 +102,18 @@ public abstract class AbstractLargeRestfulTests extends TestCase {
     for (Map.Entry<String, String> entry : extraParams.entrySet()) {
       EasyMock.expect(req.getParameter(entry.getKey())).andStubReturn(entry.getValue());
     }
+
+    if (postData == null) {
+      postData = "";
+    }
+
+    final InputStream stream = new ByteArrayInputStream(postData.getBytes());
+    ServletInputStream servletStream = new ServletInputStream () {
+      public int read() throws IOException {
+        return stream.read();
+      }
+    };
+    EasyMock.expect(req.getInputStream()).andReturn(servletStream);
 
     ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
     PrintWriter writer = new PrintWriter(outputStream);

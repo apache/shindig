@@ -39,6 +39,10 @@ RestfulContainer = function(baseUrl, domain, supportedFieldsArray) {
 
   this.securityToken_ = shindig.auth.getSecurityToken();
 
+  // TODO: Php guys delete this once you handle the new post format! ie there is no longer an
+  // "entry" field. Whatever was in the "entry" field just gets posted directly.
+  this.useLegacy_ = true;
+
   this.useBatching_ = false;
 };
 RestfulContainer.inherits(opensocial.Container);
@@ -89,8 +93,12 @@ RestfulContainer.prototype.requestData = function(dataRequest, callback) {
     };
 
     if (requestObject.request.postData) {
-      makeRequestParams["POST_DATA"]
-          = gadgets.io.encodeValues(requestObject.request.postData);
+      if (this.useLegacy_) {
+        makeRequestParams["POST_DATA"] = gadgets.io.encodeValues(
+            {'entry' : gadgets.json.stringify(requestObject.request.postData)});
+      } else {
+        makeRequestParams["POST_DATA"] = gadgets.json.stringify(requestObject.request.postData);
+      }
     }
 
     var url = requestObject.request.url;
@@ -112,7 +120,8 @@ RestfulContainer.prototype.requestData = function(dataRequest, callback) {
 
           checkIfFinished();
         },
-        makeRequestParams);
+        makeRequestParams,
+        this.useLegacy_ ? "application/x-www-form-urlencoded" : "application/json");
   }
 
   // may need multiple urls for one response but lets ignore that for now
@@ -132,7 +141,7 @@ RestfulContainer.prototype.requestData = function(dataRequest, callback) {
       jsonBatchData[requestObject.key] = {url : requestObject.request.url,
         method : requestObject.request.method};
       if (requestObject.request.postData) {
-        jsonBatchData[requestObject.key].parameters = requestObject.request.postData;
+        jsonBatchData[requestObject.key].postData = requestObject.request.postData;
       }
     }
 
@@ -169,8 +178,16 @@ RestfulContainer.prototype.requestData = function(dataRequest, callback) {
     };
 
     // TODO: get the jsonbatch url from the container config
-    new BatchRequest(this.baseUrl_ + "/jsonBatch", gadgets.json.stringify(jsonBatchData),
-        sendResponse, {'st' : shindig.auth.getSecurityToken()}).send();
+    var makeRequestParams = {
+      "CONTENT_TYPE" : "JSON",
+      "METHOD" : "POST",
+      "AUTHORIZATION" : "SIGNED",
+      "POST_DATA" : gadgets.json.stringify(jsonBatchData)
+    };
+
+  gadgets.io.makeNonProxiedRequest(
+      this.baseUrl_ + "/jsonBatch?st=" + shindig.auth.getSecurityToken(),
+      sendResponse, makeRequestParams, "application/json");
   }
 
 };
@@ -287,9 +304,7 @@ RestfulContainer.prototype.newUpdatePersonAppDataRequest = function(id, key,
       + "/@app?fields=" + key;
   var data = {};
   data[key] = value;
-  var postData = {};
-  postData['entry'] = gadgets.json.stringify(data);
-  return new RestfulRequestItem(url, "POST", postData);
+  return new RestfulRequestItem(url, "POST", data);
 };
 
 RestfulContainer.prototype.newRemovePersonAppDataRequest = function(id, keys) {
@@ -328,9 +343,7 @@ RestfulContainer.prototype.newCreateActivityRequest = function(idSpec,
     activity) {
   var url = "/activities/" + this.translateIdSpec(idSpec)
       + "/@app"; // TODO: Handle appId correctly
-  var postData = {};
-  postData['entry'] = gadgets.json.stringify(activity.toJsonObject());
-  return new RestfulRequestItem(url, "POST", postData);
+  return new RestfulRequestItem(url, "POST", activity.toJsonObject());
 };
 
 RestfulRequestItem = function(url, method, postData, processData) {

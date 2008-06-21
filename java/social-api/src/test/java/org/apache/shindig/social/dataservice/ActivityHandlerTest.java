@@ -18,7 +18,6 @@
 package org.apache.shindig.social.dataservice;
 
 import org.apache.shindig.social.ResponseItem;
-import org.apache.shindig.social.ResponseError;
 import org.apache.shindig.social.opensocial.model.ActivityImpl;
 import org.apache.shindig.social.opensocial.model.Activity;
 import org.apache.shindig.social.opensocial.util.BeanJsonConverter;
@@ -47,7 +46,6 @@ public class ActivityHandlerTest extends TestCase {
     activityService = EasyMock.createMock(ActivityService.class);
 
     handler = new ActivityHandler(activityService);
-    handler.setConverter(converter);
   }
 
   private void replay() {
@@ -61,13 +59,19 @@ public class ActivityHandlerTest extends TestCase {
   }
 
   private void setPath(String path) {
-    Map<String, String> params = Maps.newHashMap();
-    params.put("fields", null);
-    this.setPathAndParams(path, params);
+    this.setPathAndPostData(path, null);
   }
 
-  private void setPathAndParams(String path, Map<String, String> params) {
-    request = new RequestItem(path, params, token, null);
+  private void setPathAndPostData(String path, String postData) {
+    Map<String, String> params = Maps.newHashMap();
+    params.put("fields", null);
+
+    request = new RequestItem();
+    request.setUrl(path);
+    request.setParameters(params);
+    request.setToken(token);
+    request.setConverter(converter);
+    request.setPostData(postData);
   }
 
   private void assertHandleGetForGroup(GroupId.Type group) {
@@ -76,7 +80,7 @@ public class ActivityHandlerTest extends TestCase {
     ResponseItem<RestfulCollection<Activity>> data
         = new ResponseItem<RestfulCollection<Activity>>(null);
     EasyMock.expect(activityService.getActivities(new UserId(UserId.Type.userId, "john.doe"),
-        new GroupId(group, null), "appId", Sets.<String>newHashSet(), token)).andReturn(data);
+        new GroupId(group, null), null, Sets.<String>newHashSet(), token)).andReturn(data);
 
     replay();
     assertEquals(data, handler.handleGet(request));
@@ -101,7 +105,7 @@ public class ActivityHandlerTest extends TestCase {
     ResponseItem<Activity> data = new ResponseItem<Activity>(null);
     EasyMock.expect(activityService.getActivity(new UserId(UserId.Type.userId, "john.doe"),
         new GroupId(GroupId.Type.friends, null),
-        "appId", Sets.<String>newHashSet(), "jane.doe", token)).andReturn(data);
+        null, Sets.<String>newHashSet(), "jane.doe", token)).andReturn(data);
 
     replay();
     assertEquals(data, handler.handleGet(request));
@@ -111,17 +115,14 @@ public class ActivityHandlerTest extends TestCase {
   private ResponseItem setupPostData() {
     String jsonActivity = "{title: hi mom!, etc etc}";
 
-    Map<String, String> params = Maps.newHashMap();
-    params.put("entry", jsonActivity);
-    params.put("fields", null);
-    setPathAndParams("/people/john.doe/@self", params);
+    setPathAndPostData("/people/john.doe/@self", jsonActivity);
 
     Activity activity = new ActivityImpl();
     EasyMock.expect(converter.convertToObject(jsonActivity, Activity.class)).andReturn(activity);
 
     ResponseItem data = new ResponseItem<Object>(null);
     EasyMock.expect(activityService.createActivity(new UserId(UserId.Type.userId, "john.doe"),
-        new GroupId(GroupId.Type.self, null), "appId", Sets.<String>newHashSet(),
+        new GroupId(GroupId.Type.self, null), null, Sets.<String>newHashSet(),
         activity, token)).andReturn(data);
     replay();
     return data;
@@ -144,7 +145,7 @@ public class ActivityHandlerTest extends TestCase {
 
     ResponseItem data = new ResponseItem<Object>(null);
     EasyMock.expect(activityService.deleteActivity(new UserId(UserId.Type.userId, "john.doe"),
-        new GroupId(GroupId.Type.self, null), "appId", "1", token)).andReturn(data);
+        new GroupId(GroupId.Type.self, null), null, "1", token)).andReturn(data);
 
     replay();
     assertEquals(data, handler.handleDelete(request));
