@@ -82,7 +82,10 @@ class AppDataHandler extends DataRequestHandler {
 		$groupId = GroupId::fromJson($params[2]);
 		$appId = $this->getAppId($params[3], $token);
 		$fields = isset($_GET['fields']) ? explode(',', $_GET['fields']) : null;
-		$jsonActivity = isset($_POST['entry']) ? $_POST['entry'] : (isset($_GET['entry']) ? $_GET['entry'] : null);
+		if (!isset($GLOBALS['HTTP_RAW_POST_DATA'])) {
+			throw new Exception("Empty raw post data");
+		}
+		$jsonActivity = $GLOBALS['HTTP_RAW_POST_DATA'];
 		if (get_magic_quotes_gpc()) {
 			$jsonActivity = stripslashes($jsonActivity);
 		}
