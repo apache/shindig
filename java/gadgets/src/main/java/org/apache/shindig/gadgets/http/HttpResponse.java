@@ -51,19 +51,20 @@ public class HttpResponse {
     "image/jpeg", "image/png", "image/gif", "image/jpg", "application/x-shockwave-flash"
   ));
 
-  private final int httpStatusCode;
-  private static final String DEFAULT_ENCODING = "UTF-8";
-  private final String encoding;
-
   // TTL to use when an error response is fetched. This should be non-zero to
   // avoid high rates of requests to bad urls in high-traffic situations.
-  private final static long NEGATIVE_CACHE_TTL = 30 * 1000;
+  public final static long NEGATIVE_CACHE_TTL = 30 * 1000;
 
   /**
    * Default TTL for an entry in the cache that does not have any
    * cache controlling headers.
    */
-  private static final long DEFAULT_TTL = 5L * 60L * 1000L;
+  public static final long DEFAULT_TTL = 5L * 60L * 1000L;
+
+  public static final String DEFAULT_ENCODING = "UTF-8";
+
+  private final int httpStatusCode;
+  private final String encoding;
 
   // Used to lazily convert to a string representation of the input.
   private String responseString = null;
@@ -303,13 +304,31 @@ public class HttpResponse {
   }
 
   /**
+   * @return Consolidated ttl or -1.
+   */
+  public long getCacheTtl() {
+    if (httpStatusCode != SC_OK) {
+      return NEGATIVE_CACHE_TTL;
+    }
+    if (isStrictNoCache()) {
+      return -1;
+    }
+    long maxAge = getCacheControlMaxAge();
+    if (maxAge != -1) {
+      return maxAge;
+    }
+    long expiration = getExpiration();
+    if (expiration != -1) {
+      return expiration - System.currentTimeMillis();
+    }
+    return DEFAULT_TTL;
+  }
+
+  /**
    * @return The value of the HTTP Date header.
    */
   public long getDate() {
     String date = getHeader("Date");
-    if (date == null) {
-      return -1;
-    }
     return DateUtil.parseDate(date).getTime();
   }
 
