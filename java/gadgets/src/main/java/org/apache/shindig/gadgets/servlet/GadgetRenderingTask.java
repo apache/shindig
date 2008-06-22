@@ -21,6 +21,7 @@ package org.apache.shindig.gadgets.servlet;
 
 import org.apache.shindig.common.SecurityToken;
 import org.apache.shindig.common.SecurityTokenDecoder;
+import org.apache.shindig.common.util.Utf8UrlCoder;
 import org.apache.shindig.gadgets.ContainerConfig;
 import org.apache.shindig.gadgets.Gadget;
 import org.apache.shindig.gadgets.GadgetContentFilter;
@@ -335,6 +336,7 @@ public class GadgetRenderingTask {
     URI href = view.getHref();
     String queryStr = href.getQuery();
     StringBuilder query = new StringBuilder(queryStr == null ? "" : queryStr);
+    String fragment = href.getFragment();
 
     // TODO: figure out a way to make this work with forced libs.
     Set<String> libs
@@ -347,14 +349,24 @@ public class GadgetRenderingTask {
                      href.getHost(),
                      href.getPort(),
                      href.getPath(),
-                     query.toString(),
-                     href.getFragment());
+                     null,
+                     null);
     } catch (URISyntaxException e) {
       // Not really ever going to happen; input values are already OK.
       response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
                          e.getMessage());
     }
-    response.sendRedirect(href.toString());
+    // Necessary to avoid double-URL-encoding of the JavaScript bundle portion of the query.
+    StringBuilder redirectHref = new StringBuilder(href.toString());
+    if (query.toString() != null ) {
+      redirectHref.append("?");
+      redirectHref.append(query.toString());
+    }
+    if (fragment != null) {
+      redirectHref.append("#");
+      redirectHref.append(fragment);
+    }
+    response.sendRedirect(redirectHref.toString());
   }
 
   /**
@@ -392,7 +404,7 @@ public class GadgetRenderingTask {
     query.append('&')
          .append(LIBS_PARAM_NAME)
          .append('=')
-         .append(urlGenerator.getBundledJsParam(libs, context));
+         .append(Utf8UrlCoder.encode(urlGenerator.getBundledJsParam(libs, context)));
   }
 
   /**
