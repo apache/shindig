@@ -24,6 +24,10 @@ import org.apache.shindig.gadgets.http.ContentFetcherFactory;
 import org.apache.shindig.gadgets.rewrite.ContentRewriter;
 import org.apache.shindig.gadgets.rewrite.NoOpContentRewriter;
 
+/**
+ * @deprecated Migrate to ServletTestFixture as possible.
+ */
+@Deprecated
 public abstract class HttpTestFixture extends GadgetTestFixture {
   public final GadgetRenderingTask gadgetRenderer;
   public final JsonRpcHandler jsonRpcHandler;

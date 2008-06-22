@@ -19,6 +19,7 @@
 package org.apache.shindig.gadgets.servlet;
 
 import org.apache.shindig.common.util.HashUtil;
+import org.apache.shindig.common.util.Utf8UrlCoder;
 import org.apache.shindig.gadgets.ContainerConfig;
 import org.apache.shindig.gadgets.Gadget;
 import org.apache.shindig.gadgets.GadgetContext;
@@ -34,8 +35,6 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.inject.name.Named;
 
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
 import java.util.Collection;
 import java.util.regex.Pattern;
 
@@ -67,8 +66,7 @@ public class UrlGenerator {
    * @param context
    * @return The bundled js parameter for type=url gadgets.
    */
-  public String getBundledJsParam(Collection<String> features,
-      GadgetContext context) {
+  public String getBundledJsParam(Collection<String> features, GadgetContext context) {
     StringBuilder buf = new StringBuilder();
     boolean first = false;
     for (String feature : features) {
@@ -80,6 +78,9 @@ public class UrlGenerator {
         }
         buf.append(feature);
       }
+    }
+    if (!first) {
+      buf.append("core");
     }
     buf.append(".js?v=").append(jsChecksum)
        .append("&container=").append(context.getContainer())
@@ -98,61 +99,58 @@ public class UrlGenerator {
     StringBuilder buf = new StringBuilder();
     GadgetContext context = gadget.getContext();
     GadgetSpec spec = gadget.getSpec();
-    try {
-      String url = context.getUrl().toString();
-      View view = gadget.getView(containerConfig);
-      View.ContentType type;
-      if (view == null) {
-        type = View.ContentType.HTML;
-      } else {
-        type = view.getType();
-      }
-      switch (type) {
-        case URL:
-          // type = url
-          buf.append(view.getHref());
-          if (url.indexOf('?') == -1) {
-            buf.append('?');
-          } else {
-            buf.append('&');
-          }
-          break;
-        case HTML:
-        default:
-          buf.append(iframePrefix);
-          break;
-      }
-      buf.append("container=").append(context.getContainer());
-      if (context.getModuleId() != 0) {
-        buf.append("&mid=").append(context.getModuleId());
-      }
-      if (context.getIgnoreCache()) {
-        buf.append("&nocache=1");
-      } else {
-        buf.append("&v=").append(spec.getChecksum());
-      }
-
-      buf.append("&lang=").append(context.getLocale().getLanguage());
-      buf.append("&country=").append(context.getLocale().getCountry());
-
-      UserPrefs prefs = context.getUserPrefs();
-      for (UserPref pref : gadget.getSpec().getUserPrefs()) {
-        String name = pref.getName();
-        String value = prefs.getPref(name);
-        if (value == null) {
-          value = pref.getDefaultValue();
-        }
-        buf.append("&up_").append(URLEncoder.encode(pref.getName(), "UTF-8"))
-           .append('=').append(URLEncoder.encode(value, "UTF-8"));
-      }
-      // add url last to work around browser bugs
-      if(!type.equals(View.ContentType.URL)) {
-          buf.append("&url=")
-             .append(URLEncoder.encode(url, "UTF-8"));
-        }
-    } catch (UnsupportedEncodingException e) {
-      throw new RuntimeException("UTF-8 Not supported!", e);
+    String url = context.getUrl().toString();
+    View view = gadget.getView(containerConfig);
+    View.ContentType type;
+    if (view == null) {
+      type = View.ContentType.HTML;
+    } else {
+      type = view.getType();
     }
+    switch (type) {
+      case URL:
+        // type = url
+        buf.append(view.getHref());
+        if (url.indexOf('?') == -1) {
+          buf.append('?');
+        } else {
+          buf.append('&');
+        }
+        break;
+      case HTML:
+      default:
+        buf.append(iframePrefix);
+        break;
+    }
+    buf.append("container=").append(context.getContainer());
+    if (context.getModuleId() != 0) {
+      buf.append("&mid=").append(context.getModuleId());
+    }
+    if (context.getIgnoreCache()) {
+      buf.append("&nocache=1");
+    } else {
+      buf.append("&v=").append(spec.getChecksum());
+    }
+
+    buf.append("&lang=").append(context.getLocale().getLanguage());
+    buf.append("&country=").append(context.getLocale().getCountry());
+
+    UserPrefs prefs = context.getUserPrefs();
+    for (UserPref pref : gadget.getSpec().getUserPrefs()) {
+      String name = pref.getName();
+      String value = prefs.getPref(name);
+      if (value == null) {
+        value = pref.getDefaultValue();
+      }
+      buf.append("&up_").append(Utf8UrlCoder.encode(pref.getName()))
+         .append('=').append(Utf8UrlCoder.encode(value));
+    }
+    // add url last to work around browser bugs
+    if(!type.equals(View.ContentType.URL)) {
+        buf.append("&url=")
+           .append(Utf8UrlCoder.encode(url));
+      }
+
     return buf.toString();
   }
 
