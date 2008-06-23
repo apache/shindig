@@ -34,43 +34,45 @@ class JsonRpcHandler {
 		foreach ($gadget->getRequires() as $feature) {
 			$features[] = $feature->getName();
 		}
-		
 		$views = array();
 		foreach ($gadget->getViews() as $view) {
 			// we want to include all information, except for the content
 			unset($view->content);
 			$views[$view->getName()] = $view;
 		}
-		
 		$links = array();
 		foreach ($gadget->links as $link) {
 			$links[] = $link;
 		}
-		
-		//TODO add views and actual iframe url
-		$response['showInDirectory'] = $gadget->getShowInDirectory();
-		$response['links'] = $links;
-		$response['width'] = $gadget->getWidth();
-		$response['title'] = $gadget->getTitle();
-		$response['singleton'] = $gadget->getSingleton();
-		$response['categories'] = Array($gadget->getCategory(), $gadget->getCategory2());
-		$response['views'] = $views;
+		$response['author'] = $gadget->getAuthor();
+		$response['authorEmail'] = $gadget->getAuthorEmail();
 		$response['description'] = $gadget->getDescription();
+		$response['directoryTitle'] = $gadget->getDirectoryTitle();
+		$response['features'] = $features;
 		$response['screenshot'] = $gadget->getScreenShot();
 		$response['thumbnail'] = $gadget->getThumbnail();
-		$response['height'] = $gadget->getHeight();
-		$response['scaling'] = $gadget->getScaling();
-		$response['moduleId'] = $gadgetModuleId;
-		$response['features'] = $features;
-		$response['showStats'] = $gadget->getShowStats();
-		$response['scrolling'] = $gadget->getScrolling();
-		$response['url'] = $gadgetUrl;
-		$response['authorEmail'] = $gadget->getAuthorEmail();
+		$response['title'] = $gadget->getTitle();
 		$response['titleUrl'] = $gadget->getTitleUrl();
-		$response['directoryTitle'] = $gadget->getDirectoryTitle();
-		$response['author'] = $gadget->getAuthor();
+		$response['authorAffiliation'] = $gadget->getAuthorAffiliation();
+		$response['authorLocation'] = $gadget->getAuthorLocation();
+		$response['authorPhoto'] = $gadget->getAuthorPhoto();
+		$response['authorAboutme'] = $gadget->getAuthorAboutme();
+		$response['authorQuote'] = $gadget->getAuthorQuote();
+		$response['authorLink'] = $gadget->getAuthorLink();
+		$response['showInDirectory'] = $gadget->getShowInDirectory();
+		$response['showStats'] = $gadget->getShowStats();
+		$response['width'] = $gadget->getWidth();
+		$response['height'] = $gadget->getHeight();
+		$response['categories'] = Array($gadget->getCategory(), $gadget->getCategory2());
+		$response['singleton'] = $gadget->getSingleton();
+		$response['scaling'] = $gadget->getScaling();
+		$response['scrolling'] = $gadget->getScrolling();
+		$response['links'] = $links;
+		$response['views'] = $views;
+		$response['moduleId'] = $gadgetModuleId;
+		$response['url'] = $gadgetUrl;
 		$response['iframeUrl'] = UrlGenerator::getIframeURL($gadget, $context);
-		$response['userPrefs'] = $prefs;
+		$response['userPrefs'] = $prefs;		
 		return $response;
 	}
 }
