@@ -20,14 +20,40 @@
  */
 
 class Preload {
-	
 	public static $AUTHZ_ATTR = "authz";
-	
 	private $href;
 	private $auth;
 	private $signViewer;
 	private $signOwner;
 	private $views = array();
+	
+	/**
+	 * Creates a new Preload from an xml node.
+	 *
+	 * @param preload The Preload to create
+	 */
+	public function __construct(SimpleXMLElement $preload)
+	{
+		$attributes = $preload->attributes();
+		$this->signOwner = isset($attributes['sign_owner']) ? trim($attributes['sign_owner']) : true;
+		$this->signViewer = isset($attributes['sign_viewer']) ? trim($attributes['sign_viewer']) : true;
+		$this->href = isset($attributes['href']) ? trim($attributes['href']) : '';
+		if (empty($this->href)) {
+			throw new SpecParserException("Preload/@href is missing or invalid.");
+		}
+		// Record all the associated views
+		$viewNames = isset($attributes['views']) ? trim($attributes['views']) : '';
+		$views = array();
+		$arrViewNames = explode(",", $viewNames);
+		foreach ($arrViewNames as $view) {
+			$view = trim($view);
+			if (strlen($view) > 0) {
+				$views[] = $view;
+			}
+		}
+		$this->views = $views;
+		$this->auth = Auth::parse($attributes[Preload::$AUTHZ_ATTR]);
+	}
 
 	public function getHref()
 	{
@@ -57,34 +83,6 @@ class Preload {
 	public function substitute($substituter)
 	{
 		return $this->fillPreload($this, $substituter);
-	}
-
-	/**
-	 * Creates a new Preload from an xml node.
-	 *
-	 * @param preload The Preload to create
-	 */
-	public function __construct(SimpleXMLElement $preload)
-	{
-		$attributes = $preload->attributes();
-		$this->signOwner = isset($attributes['sign_owner']) ? trim($attributes['sign_owner']) : true;
-		$this->signViewer = isset($attributes['sign_viewer']) ? trim($attributes['sign_viewer']) : true;
-		$this->href = isset($attributes['href']) ? trim($attributes['href']) : '';
-		if (empty($this->href)) {
-			throw new SpecParserException("Preload/@href is missing or invalid.");
-		}
-		// Record all the associated views
-		$viewNames = isset($attributes['views']) ? trim($attributes['views']) : '';
-		$views = array();
-		$arrViewNames = explode(",", $viewNames);
-		foreach ($arrViewNames as $view) {
-			$view = trim($view);
-			if (strlen($view) > 0) {
-				$views[] = $view;
-			}
-		}
-		$this->views = $views;
-		$this->auth = Auth::parse($attributes[Preload::$AUTHZ_ATTR]);
 	}
 
 	private function fillPreload(Preload $preload, $substituter)
