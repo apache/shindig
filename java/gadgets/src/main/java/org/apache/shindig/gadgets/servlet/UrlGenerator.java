@@ -110,8 +110,9 @@ public class UrlGenerator {
     switch (type) {
       case URL:
         // type = url
-        buf.append(view.getHref());
-        if (url.indexOf('?') == -1) {
+        String href = view.getHref().toString();
+        buf.append(href);
+        if (href.indexOf('?') == -1) {
           buf.append('?');
         } else {
           buf.append('&');
