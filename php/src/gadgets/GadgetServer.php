@@ -130,8 +130,6 @@ class GadgetServer {
 		$substitutor->addSubstitution('BIDI', "DIR", $rtl ? "rtl" : "ltr");
 		$substitutor->addSubstitution('BIDI', "REVERSE_DIR", $rtl ? "ltr" : "rtl");
 		
-		$this->substitutePreloads($gadget, $substitutor);
-		
 		// userPref's
 		$upValues = $gadget->getUserPrefValues();
 		foreach ($gadget->getUserPrefs() as $pref) {
@@ -143,8 +141,10 @@ class GadgetServer {
 			if ($value == null) {
 				$value = "";
 			}
-			$substitutor->addSubstitution('USER_PREF', $name, $value);
+			$substitutor->addSubstitution('UP', $name, $value);
 		}
+		
+		$this->substitutePreloads($gadget, $substitutor);
 		
 		// Process required / desired features
 		$requires = $gadget->getRequires();
