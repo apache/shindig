@@ -32,5 +32,3 @@ var document = {
 
 var window = {};
 
-var unescape = function() {};
-
