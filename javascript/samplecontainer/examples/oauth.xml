@@ -1,30 +1,13 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <Module>
-  <ModulePrefs title="Pankow Gadget">
-
-  <Require feature="oauth">
-    <Param name="service_name">
-      demo
-    </Param>
-    <Param name="access_url">
-      http://localhost:9090/oauth-provider/access_token
-    </Param>
-    <Param name="access_method">
-      GET
-    </Param>
-
-    <Param name="request_url">
-      http://localhost:9090/oauth-provider/request_token
-    </Param>
-    <Param name="request_method">
-      GET
-    </Param>
-
-    <Param name="authorize_url">
-      http://localhost:9090/oauth-provider/authorize
-    </Param>
-  </Require>
-
+  <ModulePrefs title="Demo OAuth Gadget">
+    <OAuth>
+      <Service>
+        <Request url="http://localhost:9090/oauth-provider/request_token" />
+        <Access url="http://localhost:9090/oauth-provider/access_token" />
+        <Authorization url="http://localhost:9090/oauth-provider/authorize" />
+      </Service>
+    </OAuth>
   </ModulePrefs>
   <Content type="html">
       <![CDATA[
@@ -73,15 +56,14 @@
         params[gadgets.io.RequestParameters.CONTENT_TYPE] =
           gadgets.io.ContentType.TEXT;
         params[gadgets.io.RequestParameters.AUTHORIZATION] =
-          gadgets.io.AuthorizationType.AUTHENTICATED;
-        params[gadgets.io.RequestParameters.OAUTH_SERVICE] = "demo";
+          gadgets.io.AuthorizationType.OAUTH;
         params[gadgets.io.RequestParameters.METHOD] =
           gadgets.io.MethodType.GET;
 
         gadgets.io.makeRequest(url, function (response) {
-          if (response.approvalUrl) {
+          if (response.oauthApprovalUrl) {
             var personalize = document.getElementById('personalize');
-            personalize.href = response.approvalUrl;
+            personalize.href = response.oauthApprovalUrl;
             showOneSection('approval');
           } else if (response.data) {
             var main = document.getElementById('main');
@@ -90,7 +72,9 @@
             showOneSection('main');
           } else {
             var main = document.getElementById('main');
-            var whoops = document.createTextNode('Something went wrong');
+            var whoops = document.createTextNode(
+                'OAuth error: ' + response.oauthError + ': ' +
+                response.oauthErrorText);
             main.appendChild(whoops);
             showOneSection('main');
           }

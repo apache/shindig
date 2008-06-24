@@ -64,12 +64,12 @@ public class PreloadTest {
   }
 
   @Test
-  public void authzAuthenticated() throws Exception {
-    String xml = "<Preload href='" + HREF + "' authz='authenticated'/>";
+  public void authzOAuth() throws Exception {
+    String xml = "<Preload href='" + HREF + "' authz='oauth'/>";
 
     Preload preload = new Preload(XmlUtil.parse(xml));
 
-    assertEquals(Auth.AUTHENTICATED, preload.getAuth());
+    assertEquals(Auth.OAUTH, preload.getAuth());
   }
 
   @Test

@@ -22,8 +22,7 @@ package org.apache.shindig.gadgets.spec;
    * The supported auth modes for Preload
  */
 public enum Auth {
-  // TODO(beaton) remove AUTHENTICATED once we've renamed everything to OAuth
-  NONE, SIGNED, AUTHENTICATED, OAUTH;
+  NONE, SIGNED, OAUTH;
 
   /**
    * @param value

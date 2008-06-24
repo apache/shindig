@@ -21,12 +21,13 @@ import net.oauth.OAuthServiceProvider;
 
 import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.GadgetSpecFactory;
-import org.apache.shindig.gadgets.spec.Feature;
 import org.apache.shindig.gadgets.spec.GadgetSpec;
+import org.apache.shindig.gadgets.spec.OAuthService;
+import org.apache.shindig.gadgets.spec.OAuthSpec;
 
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.Map;
+import java.util.Iterator;
 import java.util.logging.Logger;
 
 /**
@@ -58,38 +59,6 @@ public class GadgetOAuthTokenStore {
       this.providerInfo = providerInfo;
     }
   }
-
-  // name of the OAuth feature in the gadget spec
-  public static final String OAUTH_FEATURE = "oauth";
-
-  // name of the Param that identifies the service name
-  public static final String SERVICE_NAME = "service_name";
-
-  // name of the Param that identifies the access URL
-  public static final String ACCESS_URL = "access_url";
-  // name of the optional Param that identifies the HTTP method for access URL
-  public static final String ACCESS_HTTP_METHOD = "access_method";
-
-  // name of the Param that identifies the request URL
-  public static final String REQUEST_URL = "request_url";
-  // name of the optional Param that identifies the HTTP method for request URL
-  public static final String REQUEST_HTTP_METHOD = "request_method";
-
-  // name of the Param that identifies the user authorization URL
-  public static final String AUTHORIZE_URL = "authorize_url";
-
-  // name of the Param that identifies the location of OAuth parameters
-  public static final String OAUTH_PARAM_LOCATION = "param_location";
-
-  public static final String AUTH_HEADER = "auth_header";
-  public static final String POST_BODY   = "post_body";
-  public static final String URI_QUERY = "uri_query";
-
-  public static final String DEFAULT_OAUTH_PARAM_LOCATION = AUTH_HEADER;
-
-  // we use POST if no HTTP method is specified for access and request URLs
-  // (user authorization always uses GET)
-  private static final String DEFAULT_HTTP_METHOD = "POST";
 
   private static final Logger log =
       Logger.getLogger(GadgetOAuthTokenStore.class.getName());
@@ -151,11 +120,6 @@ public class GadgetOAuthTokenStore {
       throw new IllegalArgumentException("found empty gadget URI in TokenKey");
     }
 
-    if (isEmpty(tokenKey.getServiceName())) {
-      throw new IllegalArgumentException("found empty service " +
-                                       "name in TokenKey");
-    }
-
     if (isEmpty(tokenKey.getUserId())) {
       throw new IllegalArgumentException("found empty userId in TokenKey");
     }
@@ -193,19 +157,14 @@ public class GadgetOAuthTokenStore {
    */
   public OAuthStore.AccessorInfo getOAuthAccessor(OAuthStore.TokenKey tokenKey,
       boolean bypassSpecCache)
-      throws OAuthNoDataException, OAuthStoreException {
+      throws GadgetException {
 
     if (isEmpty(tokenKey.getGadgetUri())) {
-      throw new IllegalArgumentException("found empty gadget URI in TokenKey");
-    }
-
-    if (isEmpty(tokenKey.getServiceName())) {
-      throw new IllegalArgumentException("found empty service " +
-                                         "name in TokenKey");
+      throw new OAuthStoreException("found empty gadget URI in TokenKey");
     }
 
     if (isEmpty(tokenKey.getUserId())) {
-      throw new IllegalArgumentException("found empty userId in TokenKey");
+      throw new OAuthStoreException("found empty userId in TokenKey");
     }
 
     GadgetSpec spec;
@@ -213,19 +172,13 @@ public class GadgetOAuthTokenStore {
       spec = specFactory.getGadgetSpec(
           new URI(tokenKey.getGadgetUri()),
           bypassSpecCache);
-    } catch (GadgetException e) {
-      throw new OAuthStoreException("could not get gadget spec", e);
     } catch (URISyntaxException e) {
       throw new OAuthStoreException("could not fetch gadget spec, gadget URI " +
           "invalid", e);
     }
 
     OAuthStore.ProviderInfo provInfo;
-    try {
-      provInfo = getProviderInfo(spec, tokenKey.getServiceName());
-    } catch (GadgetException e) {
-      throw new OAuthStoreException("could not parse gadget spec", e);
-    }
+    provInfo = getProviderInfo(spec, tokenKey.getServiceName());
 
     return store.getOAuthAccessor(tokenKey, provInfo);
   }
@@ -238,118 +191,65 @@ public class GadgetOAuthTokenStore {
    *                         is wrong with the spec.
    */
   public static OAuthStore.ProviderInfo getProviderInfo(
-      GadgetSpec spec, String service) throws GadgetException {
+      GadgetSpec spec, String serviceName) throws GadgetException {
 
-    Feature oauthFeature =
-        spec.getModulePrefs().getFeatures().get(OAUTH_FEATURE);
+    OAuthSpec oauthSpec = spec.getModulePrefs().getOAuthSpec();
 
-    if (oauthFeature == null) {
-      String message = "gadget spec is missing oauth feature section";
+    if (oauthSpec == null) {
+      String message = "gadget spec is missing /ModulePrefs/OAuth section";
       log.warning(message);
       throw new GadgetException(GadgetException.Code.MISSING_PARAMETER,
                                 message);
     }
-
-    Map<String, String> oauthParams = oauthFeature.getParams();
-
-    String serviceName = getOAuthParameter(oauthParams, SERVICE_NAME, false);
-
-    if (!serviceName.equalsIgnoreCase(service)) {
-      String message = new StringBuilder()
-          .append("looking for OAuth service ")
-          .append(service)
-          .append(", but only service defined in gadget spec is ")
-          .append(serviceName)
-          .toString();
-      log.warning(message);
+    
+    OAuthService service = oauthSpec.getServices().get(serviceName);
+    if (service == null) {
+      StringBuilder message = new StringBuilder();
+      message.append("Spec does not contain OAuth service '");
+      message.append(serviceName);
+      message.append("'.  Known services: ");
+      Iterator<String> known = oauthSpec.getServices().keySet().iterator();
+      while (known.hasNext()) {
+        message.append("'");
+        message.append(known.next());
+        message.append("'");
+        if (known.hasNext()) {
+          message.append(", ");
+        }
+      }
+      log.warning(message.toString());
       throw new GadgetException(GadgetException.Code.INVALID_PARAMETER,
-          message);
+          message.toString());
     }
 
-    String requestUrl = getOAuthParameter(oauthParams, REQUEST_URL, false);
-    String requestMethod = getOAuthParameter(oauthParams,
-                                             REQUEST_HTTP_METHOD,
-                                             true);
-    if (requestMethod == null) {
-      requestMethod = DEFAULT_HTTP_METHOD;
-    }
-
-    String accessUrl = getOAuthParameter(oauthParams, ACCESS_URL, false);
-    String accessMethod = getOAuthParameter(
-        oauthParams,
-        ACCESS_HTTP_METHOD,
-        true);
-    if (accessMethod == null) {
-      accessMethod = DEFAULT_HTTP_METHOD;
-    }
-
-    if (!accessMethod.equalsIgnoreCase(requestMethod)) {
-      String message = new StringBuilder()
-          .append("HTTP methods of access and request URLs have to match. ")
-          .append("access method was: ")
-          .append(accessMethod)
-          .append(". request method was: ")
-          .append(requestMethod)
-          .toString();
-      log.warning(message);
-      throw new GadgetException(GadgetException.Code.INVALID_PARAMETER,
-                                message);
-    }
-
-    String authorizeUrl = getOAuthParameter(oauthParams, AUTHORIZE_URL, false);
-
-    OAuthServiceProvider provider = new OAuthServiceProvider(requestUrl,
-                                                             authorizeUrl,
-                                                             accessUrl);
+    OAuthServiceProvider provider = new OAuthServiceProvider(
+        service.getRequestUrl().url.toASCIIString(),
+        service.getAuthorizationUrl().toASCIIString(),
+        service.getAccessUrl().url.toASCIIString());
 
     OAuthStore.HttpMethod httpMethod;
-    if (accessMethod.equalsIgnoreCase("GET")) {
-      httpMethod = OAuthStore.HttpMethod.GET;
-    } else if (accessMethod.equalsIgnoreCase("POST")) {
-      httpMethod = OAuthStore.HttpMethod.POST;
-    } else {
-      String message = new StringBuilder()
-          .append("unknown http method in gadget spec: ")
-          .append(accessMethod)
-          .toString();
-      log.warning(message);
-      throw new GadgetException(GadgetException.Code.INVALID_PARAMETER,
-                                message);
+    switch(service.getRequestUrl().method) {
+      case GET:
+        httpMethod = OAuthStore.HttpMethod.GET;
+        break;
+      case POST:
+      default:
+        httpMethod = OAuthStore.HttpMethod.POST;
+        break;
     }
-
-    String paramLocationStr = getOAuthParameter(oauthParams,
-                                                OAUTH_PARAM_LOCATION,
-                                                true);
-    if (paramLocationStr == null) {
-      paramLocationStr = DEFAULT_OAUTH_PARAM_LOCATION;
-    }
-
+ 
     OAuthStore.OAuthParamLocation paramLocation;
-    if (paramLocationStr.equalsIgnoreCase(POST_BODY)) {
-      paramLocation = OAuthStore.OAuthParamLocation.POST_BODY;
-    } else if (paramLocationStr.equalsIgnoreCase(AUTH_HEADER)) {
-      paramLocation = OAuthStore.OAuthParamLocation.AUTH_HEADER;
-    } else if (paramLocationStr.equalsIgnoreCase(URI_QUERY)) {
-      paramLocation = OAuthStore.OAuthParamLocation.URI_QUERY;
-    } else {
-      String message = new StringBuilder()
-          .append("unknown OAuth param location in gadget spec: ")
-          .append(paramLocationStr)
-          .toString();
-      log.warning(message);
-      throw new GadgetException(GadgetException.Code.INVALID_PARAMETER,
-                                message);
-    }
-
-    if (httpMethod == OAuthStore.HttpMethod.GET &&
-        paramLocation == OAuthStore.OAuthParamLocation.POST_BODY) {
-      String message = new StringBuilder()
-          .append("found incompatible param_location requirement of ")
-          .append("POST_BODY and http method GET.")
-          .toString();
-      log.warning(message);
-      throw new GadgetException(GadgetException.Code.INVALID_PARAMETER,
-                                message);
+    switch(service.getRequestUrl().location) {
+      case URL:
+        paramLocation = OAuthStore.OAuthParamLocation.URI_QUERY;
+        break;
+      case BODY:
+        paramLocation = OAuthStore.OAuthParamLocation.POST_BODY;
+        break;
+      case HEADER:
+      default:
+        paramLocation = OAuthStore.OAuthParamLocation.AUTH_HEADER;
+        break;
     }
 
     OAuthStore.ProviderInfo provInfo = new OAuthStore.ProviderInfo();
@@ -365,38 +265,6 @@ public class GadgetOAuthTokenStore {
     provInfo.setProvider(provider);
 
     return provInfo;
-  }
-
-  /**
-   * Extracts a single oauth-related parameter from a key-value map,
-   * throwing an exception if the parameter could not be found (unless the
-   * parameter is optional, in which case null is returned).
-   *
-   * @param params the key-value map from which to pull the value (parameter)
-   * @param paramName the name of the parameter (key).
-   * @param isOptional if it's optional, don't throw an exception if it's not
-   *                   found.
-   * @return the value corresponding to the key (paramName)
-   * @throws GadgetException if the parameter value couldn't be found.
-   */
-  static String getOAuthParameter(Map<String, String> params,
-                                  String paramName,
-                                  boolean isOptional)
-      throws GadgetException {
-
-    String param = params.get(paramName);
-
-    if (param == null && !isOptional) {
-      String message = new StringBuilder()
-          .append("parameter '")
-          .append(paramName)
-          .append("' missing in oauth feature section of gadget spec")
-          .toString();
-      log.warning(message);
-      throw new GadgetException(GadgetException.Code.MISSING_PARAMETER,
-                                message);
-    }
-    return (param == null) ? null : param.trim();
   }
 
   static boolean isEmpty(String string) {

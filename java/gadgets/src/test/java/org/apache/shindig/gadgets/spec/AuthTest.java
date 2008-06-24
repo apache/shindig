@@ -27,7 +27,6 @@ public class AuthTest {
   
   @Test
   public void testAuth() {
-    assertEquals(Auth.AUTHENTICATED, Auth.parse("Authenticated"));
     assertEquals(Auth.OAUTH, Auth.parse("oauth"));
     assertEquals(Auth.OAUTH, Auth.parse("   oauth   "));
     assertEquals(Auth.SIGNED, Auth.parse("SiGnEd"));
