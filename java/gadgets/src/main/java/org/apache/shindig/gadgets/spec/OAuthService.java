@@ -19,6 +19,8 @@
 package org.apache.shindig.gadgets.spec;
 
 import java.net.URI;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.apache.shindig.common.xml.XmlUtil;
 import org.w3c.dom.Element;
@@ -68,14 +70,66 @@ public class OAuthService {
    */
   public enum Method {
     GET, POST;
+    
+    private static Map<String, Method> METHODS;
+    
+    static {
+      METHODS = new HashMap<String, Method>();
+      for (Method m : Method.values()) {
+        METHODS.put(m.toString(), m);
+      }
+      // Default
+      METHODS.put("", Method.GET);
+    }
+    
+    public static Method parse(String value) throws SpecParserException {
+      value = value.trim();
+      Method result = METHODS.get(value);
+      if (result == null) {
+        throw new SpecParserException("Unknown OAuth method: " + value);
+      }
+      return result;
+    }
   }
   
   /**
    * Location for OAuth parameters in requests to an OAuth request token,
-   * access token, or resource URL.  (Lowercase to match gadget spec schema)
+   * access token, or resource URL.
    */
   public enum Location {
-    header, url, body;
+    HEADER("auth-header"),
+    URL("uri-query"),
+    BODY("post-body");
+    
+    private static Map<String, Location> LOCATIONS;
+    
+    static {
+      LOCATIONS = new HashMap<String, Location>();
+      for (Location l : Location.values()) {
+        LOCATIONS.put(l.locationString, l);
+      }
+      // Default value
+      LOCATIONS.put("", Location.HEADER);
+    }
+    
+    private String locationString;
+    private Location(String locationString) {
+      this.locationString = locationString;
+    }
+
+    @Override
+    public String toString() {
+      return locationString;
+    }
+    
+    public static Location parse(String value) throws SpecParserException {
+      value = value.trim();
+      Location result = LOCATIONS.get(value);
+      if (result == null) {
+        throw new SpecParserException("Unknown OAuth param_location: " + value);        
+      }
+      return result;
+    }
   }
   
   private static final String URL_ATTR = "url";
@@ -128,6 +182,28 @@ public class OAuthService {
         accessUrl = parseEndPoint("OAuth/Service/Access", (Element)child);
       }
     }
+    if (requestUrl == null) {
+      throw new SpecParserException("/OAuth/Service/Request is required");
+    }
+    if (accessUrl == null) {
+      throw new SpecParserException("/OAuth/Service/Access is required");
+    }
+    if (authorizationUrl == null) {
+      throw new SpecParserException("/OAuth/Service/Authorization is required");
+    }
+    if (requestUrl.location != accessUrl.location) {
+      throw new SpecParserException(
+          "Access@location must be identical to Request@location");
+    }
+    if (requestUrl.method != accessUrl.method) {
+      throw new SpecParserException(
+          "Access@method must be identical to Request@method");     
+    }
+    if (requestUrl.location == Location.BODY &&
+        requestUrl.method == Method.GET) {
+      throw new SpecParserException("Incompatible parameter location, cannot" +
+          "use post-body with GET requests");
+    }
   }
   
   /**
@@ -152,17 +228,8 @@ public class OAuthService {
       throw new SpecParserException("Not an HTTP url: " + child.getAttribute(URL_ATTR));
     }
     
-    Location location = Location.header;
-    String locationString = child.getAttribute(PARAM_LOCATION_ATTR);
-    if (!"".equals(locationString)) {
-      location = Location.valueOf(locationString);
-    }
-    
-    Method method = Method.POST;
-    String methodString = child.getAttribute(METHOD_ATTR);
-    if (!"".equals(methodString)) {
-      method = Method.valueOf(methodString);
-    }
+    Location location = Location.parse(child.getAttribute(PARAM_LOCATION_ATTR));
+    Method method = Method.parse(child.getAttribute(METHOD_ATTR));
     return new EndPoint(url, method, location);
   }
 }

@@ -33,6 +33,8 @@ import net.oauth.OAuthMessage;
 import net.oauth.OAuthProblemException;
 
 import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -65,7 +67,9 @@ public class OAuthFetcher extends ChainedContentFetcher {
   
   // names for the JSON values we return to the client
   public static final String CLIENT_STATE = "oauthState";
-  public static final String APPROVAL_URL = "approvalUrl";
+  public static final String APPROVAL_URL = "oauthApprovalUrl";
+  public static final String ERROR_CODE = "oauthError";
+  public static final String ERROR_TEXT = "oauthErrorText";
 
   // names of additional OAuth parameters we include in outgoing requests
   public static final String XOAUTH_APP_URL = "xoauth_app_url";
@@ -82,14 +86,9 @@ public class OAuthFetcher extends ChainedContentFetcher {
   protected final SecurityToken authToken;
 
   /**
-   * The gadget's nickname for the service provider.
+   * Parameters from makeRequest
    */
-  protected final String serviceName;
-
-  /**
-   * The gadget's nickname for the token.
-   */
-  protected final String tokenName;
+  protected final OAuthRequestParams requestParams;
 
   /**
    * Reference to our persistent store for OAuth metadata.
@@ -127,7 +126,17 @@ public class OAuthFetcher extends ChainedContentFetcher {
    * Authorization URL for the client
    */
   private String aznUrl;
-
+  
+  /**
+   * Error code for the client
+   */
+  private OAuthError error;
+  
+  /**
+   * Error text for the client
+   */
+  private String errorText;
+  
   /**
    * Whether or not we're supposed to ignore the spec cache when referring
    * to the gadget spec for information (e.g. OAuth URLs).
@@ -152,11 +161,12 @@ public class OAuthFetcher extends ChainedContentFetcher {
     super(nextFetcher);
     this.oauthCrypter = oauthCrypter;
     this.authToken = authToken;
-    this.serviceName = params.getServiceName();
-    this.tokenName = params.getTokenName();
+    this.requestParams = params;
     this.bypassSpecCache = params.getBypassSpecCache();
     this.newClientState = null;
     this.aznUrl = null;
+    this.error = null;
+    this.errorText = null;
     String origClientState = params.getOrigClientState();
     if (origClientState != null && origClientState.length() > 0) {
       try {
@@ -172,10 +182,6 @@ public class OAuthFetcher extends ChainedContentFetcher {
     this.tokenStore = tokenStore;
   }
 
-  public void init() throws GadgetException {
-    lookupOAuthMetadata();
-  }
-
   /**
    * Retrieves metadata from our persistent store.
    *
@@ -184,7 +190,7 @@ public class OAuthFetcher extends ChainedContentFetcher {
    *
    * @throws GadgetException
    */
-  protected void lookupOAuthMetadata() throws GadgetException {
+  private void lookupOAuthMetadata() throws GadgetException {
     OAuthStore.TokenKey tokenKey = buildTokenKey();
     accessorInfo = tokenStore.getOAuthAccessor(tokenKey, bypassSpecCache);
 
@@ -197,6 +203,12 @@ public class OAuthFetcher extends ChainedContentFetcher {
     } else if (origClientState.containsKey(ACCESS_TOKEN_KEY)) {
       accessor.accessToken = origClientState.get(ACCESS_TOKEN_KEY);
       accessor.tokenSecret = origClientState.get(ACCESS_TOKEN_SECRET_KEY);
+    } else if (accessor.accessToken == null &&
+               requestParams.getRequestToken() != null) {
+      // We don't have an access token yet, but the client sent us a 
+      // (hopefully) preapproved request token.
+      accessor.requestToken = requestParams.getRequestToken();
+      accessor.tokenSecret = requestParams.getRequestTokenSecret();
     }
   }
 
@@ -204,8 +216,8 @@ public class OAuthFetcher extends ChainedContentFetcher {
     OAuthStore.TokenKey tokenKey = new OAuthStore.TokenKey();
     tokenKey.setGadgetUri(authToken.getAppUrl());
     tokenKey.setModuleId(authToken.getModuleId());
-    tokenKey.setServiceName(serviceName);
-    tokenKey.setTokenName(tokenName);
+    tokenKey.setServiceName(requestParams.getServiceName());
+    tokenKey.setTokenName(requestParams.getTokenName());
     // At some point we might want to let gadgets specify whether to use OAuth
     // for the owner, the viewer, or someone else. For now always using the
     // owner identity seems reasonable.
@@ -214,6 +226,13 @@ public class OAuthFetcher extends ChainedContentFetcher {
   }
 
   public HttpResponse fetch(HttpRequest request) throws GadgetException {
+    try {
+      lookupOAuthMetadata();
+    } catch (GadgetException e) {
+      error = OAuthError.BAD_OAUTH_CONFIGURATION;
+      return buildErrorResponse(e);
+    }
+    
     this.realRequest = request;
     // Work around for busted HttpCache interface that can't
     // properly handle authenticated content.
@@ -243,6 +262,24 @@ public class OAuthFetcher extends ChainedContentFetcher {
     return response;
   }
   
+  private HttpResponse buildErrorResponse(GadgetException e) {
+    if (error == null) {
+      error = OAuthError.UNKNOWN_PROBLEM;
+    }
+    // Take a giant leap of faith and assume that the exception message
+    // will be useful to a gadget developer.  Also include the exception
+    // stack trace, in case the problem report makes it to someone who knows
+    // enough to do something useful with the stack.
+    StringWriter errorBuf = new StringWriter();
+    errorBuf.append(e.getMessage());
+    errorBuf.append("\n\n");
+    PrintWriter printer = new PrintWriter(errorBuf);
+    e.printStackTrace(printer);
+    printer.flush();
+    errorText = errorBuf.toString();
+    return buildNonDataResponse();
+  }
+
   // TODO(beaton) test case
   private boolean handleProtocolException(
       OAuthProtocolException pe, int attempts) throws OAuthStoreException {
@@ -526,6 +563,10 @@ public class OAuthFetcher extends ChainedContentFetcher {
   }
 
   private HttpResponse buildOAuthApprovalResponse() {
+    return buildNonDataResponse();
+  }
+  
+  private HttpResponse buildNonDataResponse() {
     HttpResponse response = new HttpResponse(0, null, null);
     addResponseMetadata(response);
     return response;
@@ -537,6 +578,12 @@ public class OAuthFetcher extends ChainedContentFetcher {
     }
     if (aznUrl != null) {
       response.getMetadata().put(APPROVAL_URL, aznUrl);
+    }
+    if (error != null) {
+      response.getMetadata().put(ERROR_CODE, error.toString());
+    }
+    if (errorText != null) {
+      response.getMetadata().put(ERROR_TEXT, errorText);
     }
   }
 

@@ -33,7 +33,8 @@ import org.easymock.classextension.EasyMock;
 import org.easymock.classextension.IMocksControl;
 
 import java.net.URI;
-import java.util.HashMap;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class GadgetTokenStoreTest extends TestCase {
 
@@ -42,33 +43,23 @@ public class GadgetTokenStoreTest extends TestCase {
       "  <Module>\n" +
       "    <ModulePrefs title=\"hello world example\">\n" +
       "   \n" +
-      "    <Require feature=\"oauth\">\n" +
-      "      <Param name=\"service_name\">\n" +
-      "       testservice\n" +
-      "      </Param>\n" +
-      "      <Param name=\"access_url\">\n" +
-      FakeOAuthServiceProvider.ACCESS_TOKEN_URL + "\n" +
-      "      </Param>\n" +
-      "      <Param name=\"access_method\">\n" +
-      "        GET\n" +
-      "      </Param>\n" +
-      "      \n" +
-      "      <Param name=\"request_url\">\n" +
-      FakeOAuthServiceProvider.REQUEST_TOKEN_URL + "\n" +
-      "      </Param>\n" +
-      "      <Param name=\"request_method\">\n" +
-      "        GET\n" +
-      "      </Param>\n" +
-      "      \n" +
-      "      <Param name=\"param_location\">\n" +
-      "        uri_query\n" +
-      "      </Param>\n" +
-      "      \n" +
-      "      <Param name=\"authorize_url\">\n" +
-      FakeOAuthServiceProvider.APPROVAL_URL + "\n" +
-      "      </Param>\n" +
-      "    </Require>\n" +
-      "    \n" +
+      "    <OAuth>\n" +
+      "      <Service name='testservice'>" +
+      "        <Access " + 
+      "          url='" + FakeOAuthServiceProvider.ACCESS_TOKEN_URL + "'" +
+      "          param_location='uri-query' " +
+      "          method='GET'" +
+      "        />" +
+      "        <Request " + 
+      "          url='" + FakeOAuthServiceProvider.REQUEST_TOKEN_URL + "'" +
+      "          param_location='uri-query' " +
+      "          method='GET'" +
+      "        />" +
+      "        <Authorization " + 
+      "          url='" + FakeOAuthServiceProvider.APPROVAL_URL + "'" +
+      "        />" +
+      "      </Service>" +
+      "    </OAuth>\n" +
       "    </ModulePrefs>\n" +
       "    <Content type=\"html\">\n" +
       "       <![CDATA[\n" +
@@ -148,7 +139,6 @@ public class GadgetTokenStoreTest extends TestCase {
   }
 
   public void testStoreConsumerKeyAndSecret() throws Exception {
-
     URI gadgetUrl = new URI("http://foo.bar.com/gadget.xml");
     String serviceName = "testservice";
 
@@ -258,19 +248,7 @@ public class GadgetTokenStoreTest extends TestCase {
     provInfo = GadgetOAuthTokenStore.getProviderInfo(spec, serviceName);
     assertEquals(OAuthStore.HttpMethod.POST, provInfo.getHttpMethod());
 
-    // if we only change one of the GETs, it's an error
-
-    newSpecStr = GADGET_SPEC.replaceFirst("GET", "POST");
-    spec = new GadgetSpec(new URI("http://foo.bar.com/gadget.xml"), newSpecStr);
-
-    try {
-      provInfo = GadgetOAuthTokenStore.getProviderInfo(spec, serviceName);
-      fail("expected exception, but didn't get it");
-    } catch (GadgetException e) {
-      // this is expected
-    }
-
-    // let's test some other error conditions
+    // Unknown service error
 
     try {
       provInfo = GadgetOAuthTokenStore.getProviderInfo(spec, "otherservice");
@@ -279,69 +257,16 @@ public class GadgetTokenStoreTest extends TestCase {
       // this is expected
     }
 
-    newSpecStr = GADGET_SPEC.replaceAll("GET", "BLAH");
-    spec = new GadgetSpec(new URI("http://foo.bar.com/gadget.xml"), newSpecStr);
-    try {
-      provInfo = GadgetOAuthTokenStore.getProviderInfo(spec, serviceName);
-      fail("expected exception, but didn't get it");
-    } catch (GadgetException e) {
-      // this is expected
-    }
-
-    newSpecStr = GADGET_SPEC.replaceFirst("request_url", "blah");
-    spec = new GadgetSpec(new URI("http://foo.bar.com/gadget.xml"), newSpecStr);
-    try {
-      provInfo = GadgetOAuthTokenStore.getProviderInfo(spec, serviceName);
-      fail("expected exception, but didn't get it");
-    } catch (GadgetException e) {
-      // this is expected
-    }
-
-    newSpecStr = GADGET_SPEC.replaceFirst("access_url", "blah");
-    spec = new GadgetSpec(new URI("http://foo.bar.com/gadget.xml"), newSpecStr);
-    try {
-      provInfo = GadgetOAuthTokenStore.getProviderInfo(spec, serviceName);
-      fail("expected exception, but didn't get it");
-    } catch (GadgetException e) {
-      // this is expected
-    }
-
-    newSpecStr = GADGET_SPEC.replaceFirst("authorize_url", "blah");
-    spec = new GadgetSpec(new URI("http://foo.bar.com/gadget.xml"), newSpecStr);
-    try {
-      provInfo = GadgetOAuthTokenStore.getProviderInfo(spec, serviceName);
-      fail("expected exception, but didn't get it");
-    } catch (GadgetException e) {
-      // this is expected
-    }
-
     // what if the gadget doesn't require oauth?
-
-    newSpecStr = GADGET_SPEC.replaceFirst("feature=\"oauth\"", "feature=\"blah\"");
+    Matcher oauth = Pattern.compile("<OAuth>.*</OAuth>", Pattern.DOTALL)
+        .matcher(GADGET_SPEC);
+    newSpecStr = oauth.replaceFirst("");
     spec = new GadgetSpec(
         new URI("http://foo.bar.com/gadget.xml"),
         newSpecStr);
     try {
       provInfo = GadgetOAuthTokenStore.getProviderInfo(spec, serviceName);
       fail("expected exception, but didn't get it");
-    } catch (GadgetException e) {
-      // this is expected
-    }
-  }
-
-  public void testGetOAuthParameter() throws Exception {
-    HashMap<String, String> params = new HashMap<String, String>();
-    params.put("foo", "bar");
-
-    assertEquals("bar",
-                 GadgetOAuthTokenStore.getOAuthParameter(params, "foo", true));
-    assertEquals("bar",
-                 GadgetOAuthTokenStore.getOAuthParameter(params, "foo", false));
-    assertNull(GadgetOAuthTokenStore.getOAuthParameter(params, "bla", true));
-
-    try {
-      GadgetOAuthTokenStore.getOAuthParameter(params, "bla", false);
-      fail("expected GadgetException, but didn't get it");
     } catch (GadgetException e) {
       // this is expected
     }

@@ -210,7 +210,7 @@ public class MakeRequestHandler extends ProxyBase{
         return contentFetcherFactory.get();
       case SIGNED:
         return contentFetcherFactory.getSigningFetcher(token);
-      case AUTHENTICATED:
+      case OAUTH:
         return contentFetcherFactory.getOAuthFetcher(token, new OAuthRequestParams(request));
       default:
         return contentFetcherFactory.get();

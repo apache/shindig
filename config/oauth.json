@@ -18,7 +18,7 @@
  */
 
 {"http://localhost:8080/gadgets/files/samplecontainer/examples/oauth.xml" : {
-  "demo" : {
+  "" : {
     "consumer_key" : "noCallbackConsumer",
     "consumer_secret" : "noCallbackSecret",
     "key_type" : "HMAC_SYMMETRIC"

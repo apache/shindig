@@ -270,6 +270,32 @@ public class FakeOAuthServiceProvider implements HttpFetcher {
     state.setUserData(parsed.getQueryParam("user_data"));
   }
   
+  public class TokenPair {
+    public final String token;
+    public final String secret;
+    
+    public TokenPair(String token, String secret) {
+      this.token = token;
+      this.secret = secret;
+    }
+  }
+  
+  /**
+   * Generate a preapproved request token for the specified user data.
+   * 
+   * @param userData
+   * @return the request token and secret
+   */
+  public TokenPair getPreapprovedToken(String userData) {
+    String requestToken = Crypto.getRandomString(16);
+    String requestTokenSecret = Crypto.getRandomString(16);
+    TokenState state = new TokenState(requestTokenSecret, consumer);
+    state.setState(TokenState.State.APPROVED);
+    state.setUserData(userData);
+    tokenState.put(requestToken, state);
+    return new TokenPair(requestToken, requestTokenSecret);
+  }
+  
   /**
    * Used to revoke all access tokens issued by this service provider.
    * 
@@ -291,6 +317,8 @@ public class FakeOAuthServiceProvider implements HttpFetcher {
     if (throttled) {
       return makeOAuthProblemReport(
           "consumer_key_refused", "exceeded quota");
+    } else if (state == null) {
+      return makeOAuthProblemReport("token_rejected", "Unknown request token");
     }
     if (state.getState() != TokenState.State.APPROVED) {
       throw new Exception("Token not approved");

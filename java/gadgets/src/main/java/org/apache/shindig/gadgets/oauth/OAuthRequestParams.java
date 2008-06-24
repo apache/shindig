@@ -24,28 +24,44 @@ import javax.servlet.http.HttpServletRequest;
  * Bundles information about a proxy request that requires OAuth
  */
 public class OAuthRequestParams {
-  public static final String SERVICE_PARAM = "oauthService";
-  public static final String TOKEN_PARAM = "oauthToken";
+  public static final String SERVICE_PARAM = "OAUTH_SERVICE_NAME";
+  public static final String TOKEN_PARAM = "OAUTH_TOKEN_NAME";
+  public static final String REQUEST_TOKEN_PARAM = "OAUTH_REQUEST_TOKEN";
+  public static final String REQUEST_TOKEN_SECRET_PARAM =
+      "OAUTH_REQUEST_TOKEN_SECRET";
   public static final String CLIENT_STATE_PARAM = "oauthState";
   public static final String BYPASS_SPEC_CACHE_PARAM = "bypassSpecCache";
 
   protected final String serviceName;
   protected final String tokenName;
+  protected final String requestToken;
+  protected final String requestTokenSecret;
   protected final String origClientState;
   protected final boolean bypassSpecCache;
 
   public OAuthRequestParams(HttpServletRequest request) {
-    serviceName = request.getParameter(SERVICE_PARAM);
-    tokenName = request.getParameter(TOKEN_PARAM);
-    origClientState = request.getParameter(CLIENT_STATE_PARAM);
+    serviceName = getParam(request, SERVICE_PARAM, "");
+    tokenName = getParam(request, TOKEN_PARAM, "");
+    requestToken = getParam(request, REQUEST_TOKEN_PARAM, null);
+    requestTokenSecret = getParam(request, REQUEST_TOKEN_SECRET_PARAM, null);
+    origClientState = getParam(request, CLIENT_STATE_PARAM, null);
     bypassSpecCache = parseBypassSpecCacheParam(request);
   }
 
-  // Really only use this for testing, please
+  // Testing only
   public OAuthRequestParams(String serviceName, String tokenName,
       String origClientState, boolean bypassSpecCache) {
+    this(serviceName, tokenName, origClientState, bypassSpecCache, null, null);
+  }
+
+  // Testing only
+  public OAuthRequestParams(String serviceName, String tokenName,
+      String origClientState, boolean bypassSpecCache, String requestToken,
+      String requestTokenSecret) {
     this.serviceName = serviceName;
     this.tokenName = tokenName;
+    this.requestToken = requestToken;
+    this.requestTokenSecret = requestTokenSecret;
     this.origClientState = origClientState;
     this.bypassSpecCache = bypassSpecCache;
   }
@@ -65,8 +81,24 @@ public class OAuthRequestParams {
   public boolean getBypassSpecCache() {
     return bypassSpecCache;
   }
+  
+  public String getRequestToken() {
+    return requestToken;
+  }
+  
+  public String getRequestTokenSecret() {
+    return requestTokenSecret;
+  }
 
   public static boolean parseBypassSpecCacheParam(HttpServletRequest request) {
     return "1".equals(request.getParameter(BYPASS_SPEC_CACHE_PARAM));
+  }
+  
+  private String getParam(HttpServletRequest request, String name, String def) {
+    String val = request.getParameter(name);
+    if (val == null) {
+      val = def;
+    }
+    return val;
   }
 }

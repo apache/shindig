@@ -103,15 +103,12 @@ IoTest.prototype.setStandardArgs = function(req, inBody) {
   this.setArg(req, inBody, "refresh", "3600");
   this.setArg(req, inBody, "st", "");
   this.setArg(req, inBody, "contentType", "TEXT");
-  this.setArg(req, inBody, "oauthService", "");
   this.setArg(req, inBody, "authz", "");
   this.setArg(req, inBody, "bypassSpecCache", "");
   this.setArg(req, inBody, "signViewer", "true");
-  this.setArg(req, inBody, "oauthToken", "");
   this.setArg(req, inBody, "signOwner", "true");
   this.setArg(req, inBody, "getSummaries", "false");
   this.setArg(req, inBody, "gadget", "http://www.gadget.com/gadget.xml");
-  this.setArg(req, inBody, "oauthState", "");
   this.setArg(req, inBody, "headers", "");
   this.setArg(req, inBody, "numEntries", "3");
   this.setArg(req, inBody, "postData", "");
@@ -255,17 +252,19 @@ IoTest.prototype.testSignedPost = function() {
 };
 
 IoTest.prototype.testOAuth = function() {
+  gadgets.io.clearOAuthState();
   var req = new fakeXhr.Expectation("POST", "http://www.example.com/json");
   this.setStandardArgs(req, true);
   req.setBodyArg("url", "http://target.example.com/somepage");
-  req.setBodyArg("authz", "authenticated");
+  req.setBodyArg("authz", "oauth");
   req.setBodyArg("st", "authtoken");
   req.setBodyArg("refresh", null);
+  req.setBodyArg("oauthState", "");
   req.setHeader("Content-Type", "application/x-www-form-urlencoded");
 
   var resp = this.makeFakeResponse(gadgets.json.stringify(
       { 'http://target.example.com/somepage' : { 
-          'approvalUrl' : 'http://sp.example.com/authz?oauth_token=foo',
+          'oauthApprovalUrl' : 'http://sp.example.com/authz?oauth_token=foo',
           'oauthState' : 'newState' 
          }
       }));
@@ -274,7 +273,7 @@ IoTest.prototype.testOAuth = function() {
 
   var resp = null;
   var params = {};
-  params["AUTHORIZATION"] = "AUTHENTICATED";
+  params["AUTHORIZATION"] = "OAUTH";
   gadgets.io.makeRequest(
       "http://target.example.com/somepage",
       function(data) {
@@ -282,12 +281,12 @@ IoTest.prototype.testOAuth = function() {
       },
       params);
   this.assertEquals("http://sp.example.com/authz?oauth_token=foo",
-      resp.approvalUrl);
+      resp.oauthApprovalUrl);
 
   var req = new fakeXhr.Expectation("POST", "http://www.example.com/json");
   this.setStandardArgs(req, true);
   req.setBodyArg("url", "http://target.example.com/somepage");
-  req.setBodyArg("authz", "authenticated");
+  req.setBodyArg("authz", "oauth");
   req.setBodyArg("st", "authtoken");
   req.setBodyArg("oauthState", "newState");
   req.setBodyArg("refresh", null);
@@ -300,13 +299,147 @@ IoTest.prototype.testOAuth = function() {
 
   var resp = null;
   var params = {};
-  params["AUTHORIZATION"] = "AUTHENTICATED";
+  params["AUTHORIZATION"] = "OAUTH";
   gadgets.io.makeRequest(
       "http://target.example.com/somepage",
       function(data) {
         resp = data;
       },
       params);
+  this.assertEquals("personal data", resp.text);
+};
+
+IoTest.prototype.testOAuth_error = function() {
+  gadgets.io.clearOAuthState();
+  var req = new fakeXhr.Expectation("POST", "http://www.example.com/json");
+  this.setStandardArgs(req, true);
+  req.setBodyArg("url", "http://target.example.com/somepage");
+  req.setBodyArg("authz", "oauth");
+  req.setBodyArg("st", "authtoken");
+  req.setBodyArg("refresh", null);
+  req.setBodyArg("oauthState", "");
+  req.setHeader("Content-Type", "application/x-www-form-urlencoded");
+
+  var resp = this.makeFakeResponse(gadgets.json.stringify(
+      { 'http://target.example.com/somepage' : { 
+          'oauthError' : 'SOME_ERROR_CODE',
+          'oauthErrorText' : 'Some helpful error message',
+          'oauthState' : 'newState' 
+         }
+      }));
+
+  this.fakeXhrs.expect(req, resp);
+
+  var resp = null;
+  var params = {};
+  params["AUTHORIZATION"] = "OAUTH";
+  gadgets.io.makeRequest(
+      "http://target.example.com/somepage",
+      function(data) {
+        resp = data;
+      },
+      params);
+  this.assertUndefined(resp.oauthApprovalUrl);
+  this.assertEquals("SOME_ERROR_CODE", resp.oauthError);
+  this.assertEquals("Some helpful error message", resp.oauthErrorText);
+};
+
+IoTest.prototype.testOAuth_serviceAndToken = function() {
+  gadgets.io.clearOAuthState();
+  var req = new fakeXhr.Expectation("POST", "http://www.example.com/json");
+  this.setStandardArgs(req, true);
+  req.setBodyArg("url", "http://target.example.com/somepage");
+  req.setBodyArg("authz", "oauth");
+  req.setBodyArg("st", "authtoken");
+  req.setBodyArg("refresh", null);
+  req.setBodyArg("oauthState", "");
+  req.setBodyArg("OAUTH_SERVICE_NAME", "some-service");
+  req.setBodyArg("OAUTH_TOKEN_NAME", "some-token");
+  req.setHeader("Content-Type", "application/x-www-form-urlencoded");
+
+  var resp = this.makeFakeResponse(gadgets.json.stringify(
+      { 'http://target.example.com/somepage' : { 
+          'oauthApprovalUrl' : 'http://sp.example.com/authz?oauth_token=foo',
+          'oauthState' : 'newState' 
+         }
+      }));
+
+  this.fakeXhrs.expect(req, resp);
+
+  var resp = null;
+  var params = {};
+  params["AUTHORIZATION"] = "OAUTH";
+  params[gadgets.io.RequestParameters.OAUTH_SERVICE_NAME] = "some-service";
+  params[gadgets.io.RequestParameters.OAUTH_TOKEN_NAME] = "some-token";
+  gadgets.io.makeRequest(
+      "http://target.example.com/somepage",
+      function(data) {
+        resp = data;
+      },
+      params);
+  this.assertEquals("http://sp.example.com/authz?oauth_token=foo",
+      resp.oauthApprovalUrl);
+
+  var req = new fakeXhr.Expectation("POST", "http://www.example.com/json");
+  this.setStandardArgs(req, true);
+  req.setBodyArg("url", "http://target.example.com/somepage");
+  req.setBodyArg("authz", "oauth");
+  req.setBodyArg("st", "authtoken");
+  req.setBodyArg("refresh", null);
+  req.setBodyArg("oauthState", "newState");
+  req.setBodyArg("OAUTH_SERVICE_NAME", "some-service");
+  req.setBodyArg("OAUTH_TOKEN_NAME", "some-token");
+  req.setHeader("Content-Type", "application/x-www-form-urlencoded");
+
+  var resp = this.makeFakeResponse(
+      "{ 'http://target.example.com/somepage' : { 'body' : 'personal data' }}");
+
+  this.fakeXhrs.expect(req, resp);
+
+  var resp = null;
+  var params = {};
+  params["AUTHORIZATION"] = "OAUTH";
+  params[gadgets.io.RequestParameters.OAUTH_SERVICE_NAME] = "some-service";
+  params[gadgets.io.RequestParameters.OAUTH_TOKEN_NAME] = "some-token";
+  gadgets.io.makeRequest(
+      "http://target.example.com/somepage",
+      function(data) {
+        resp = data;
+      },
+      params);
+  this.assertEquals("personal data", resp.text);
+};
+
+IoTest.prototype.testOAuth_preapprovedToken = function() {
+  gadgets.io.clearOAuthState();
+  var req = new fakeXhr.Expectation("POST", "http://www.example.com/json");
+  this.setStandardArgs(req, true);
+  req.setBodyArg("url", "http://target.example.com/somepage");
+  req.setBodyArg("authz", "oauth");
+  req.setBodyArg("st", "authtoken");
+  req.setBodyArg("refresh", null);
+  req.setBodyArg("oauthState", "");
+  req.setBodyArg("OAUTH_REQUEST_TOKEN", "reqtoken");
+  req.setBodyArg("OAUTH_REQUEST_TOKEN_SECRET", "abcd1234");
+  req.setHeader("Content-Type", "application/x-www-form-urlencoded");
+
+  var resp = this.makeFakeResponse(
+      "{ 'http://target.example.com/somepage' : { 'body' : 'personal data' }}");
+
+  this.fakeXhrs.expect(req, resp);
+
+  var resp = null;
+  var params = {};
+  params["AUTHORIZATION"] = "OAUTH";
+  params[gadgets.io.RequestParameters.OAUTH_REQUEST_TOKEN] = "reqtoken";
+  params[gadgets.io.RequestParameters.OAUTH_REQUEST_TOKEN_SECRET] = "abcd1234";
+  gadgets.io.makeRequest(
+      "http://target.example.com/somepage",
+      function(data) {
+        resp = data;
+      },
+      params);
+
   this.assertEquals("personal data", resp.text);
 };
 

@@ -67,10 +67,10 @@ public class ModulePrefsTest {
         "  <OAuth>" +
         "    <Service name='serviceOne'>" +
         "      <Request url='http://www.example.com/request'" + 
-        "          method='GET' param_location='header' />" +
+        "          method='GET' param_location='auth-header' />" +
         "      <Authorization url='http://www.example.com/authorize'/>" +
         "      <Access url='http://www.example.com/access' method='GET'" + 
-        "          param_location='header' />" +
+        "          param_location='auth-header' />" +
         "    </Service>" +
         "  </OAuth>" +
         "</ModulePrefs>";
@@ -116,7 +116,7 @@ public class ModulePrefsTest {
     assertEquals(URI.create("http://www.example.com/request"), oauth.getRequestUrl().url);
     assertEquals(OAuthService.Method.GET, oauth.getRequestUrl().method);
     assertEquals(OAuthService.Method.GET, oauth.getAccessUrl().method);
-    assertEquals(OAuthService.Location.header, oauth.getAccessUrl().location);
+    assertEquals(OAuthService.Location.HEADER, oauth.getAccessUrl().location);
     assertEquals(URI.create("http://www.example.com/authorize"), oauth.getAuthorizationUrl());
   }
 

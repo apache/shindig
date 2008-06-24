@@ -129,7 +129,9 @@ gadgets.io = function() {
   function transformResponseData(params, data) {
     var resp = {
      text: data.body,
-     approvalUrl: data.approvalUrl,
+     oauthApprovalUrl: data.oauthApprovalUrl,
+     oauthError: data.oauthError,
+     oauthErrorText: data.oauthErrorText,
      errors: []
     };
     if (resp.text) {
@@ -272,15 +274,9 @@ gadgets.io = function() {
 
       // Check if authorization is requested
       var auth, st;
-      var reqState, oauthService, oauthToken;
       if (params.AUTHORIZATION && params.AUTHORIZATION !== "NONE") {
         auth = params.AUTHORIZATION.toLowerCase();
         st = shindig.auth.getSecurityToken();
-        if (params.AUTHORIZATION === "AUTHENTICATED") {
-          reqState = oauthState;
-          oauthService = params.OAUTH_SERVICE;
-          oauthToken = params.OAUTH_TOKEN;
-        }
       } else {
         // Non auth'd & non post'd requests are cachable
         if (!params.REFRESH_INTERVAL && !params.POST_DATA) {
@@ -302,9 +298,6 @@ gadgets.io = function() {
         postData : params.POST_DATA || "",
         authz : auth || "",
         st : st || "",
-        oauthState : reqState || "",
-        oauthService : oauthService || "",
-        oauthToken : oauthToken || "",
         contentType : params.CONTENT_TYPE || "TEXT",
         numEntries : params.NUM_ENTRIES || "3",
         getSummaries : !!params.GET_SUMMARIES,
@@ -315,6 +308,17 @@ gadgets.io = function() {
         // should we bypass gadget spec cache (e.g. to read OAuth provider URLs)
         bypassSpecCache : gadgets.util.getUrlParameters().nocache || ""
       };
+
+      // OAuth goodies
+      if (params.AUTHORIZATION === "OAUTH") {
+        paramData.oauthState = oauthState || "";
+        // Just copy the OAuth parameters into the req to the server
+        for (opt in params) if (params.hasOwnProperty(opt)) {
+          if (opt.indexOf("OAUTH_") === 0) {
+            paramData[opt] = params[opt];
+          }
+        }
+      }
 
       if (!respondWithPreload(paramData, params, callback, processResponse)) {
         var refreshInterval = params.REFRESH_INTERVAL || 0;
@@ -343,6 +347,15 @@ gadgets.io = function() {
       var params = opt_params || {};
       makeXhrRequest(relativeUrl, relativeUrl, callback, params.POST_DATA,
           params.METHOD, params, processNonProxiedResponse, opt_contentType);
+    },
+
+    /**
+     * Used to clear out the oauthState, for testing only.
+     *
+     * @private
+     */
+    clearOAuthState : function () {
+      oauthState = undefined;
     },
 
     /**
@@ -407,8 +420,10 @@ gadgets.io.RequestParameters = gadgets.util.makeEnum([
   "NUM_ENTRIES",
   "GET_SUMMARIES",
   "REFRESH_INTERVAL",
-  "OAUTH_SERVICE",
-  "OAUTH_TOKEN"
+  "OAUTH_SERVICE_NAME",
+  "OAUTH_TOKEN_NAME",
+  "OAUTH_REQUEST_TOKEN",
+  "OAUTH_REQUEST_TOKEN_SECRET"
 ]);
 
 gadgets.io.MethodType = gadgets.util.makeEnum([
@@ -420,5 +435,5 @@ gadgets.io.ContentType = gadgets.util.makeEnum([
 ]);
 
 gadgets.io.AuthorizationType = gadgets.util.makeEnum([
-  "NONE", "SIGNED", "AUTHENTICATED"
+  "NONE", "SIGNED", "OAUTH"
 ]);

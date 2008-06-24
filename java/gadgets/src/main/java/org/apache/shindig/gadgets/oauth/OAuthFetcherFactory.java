@@ -87,13 +87,13 @@ public class OAuthFetcherFactory {
    * @return The oauth fetcher.
    * @throws GadgetException
    */
+  @SuppressWarnings("unused")
   public OAuthFetcher getOAuthFetcher(
       HttpFetcher nextFetcher,
       SecurityToken token,
       OAuthRequestParams params) throws GadgetException {
     OAuthFetcher fetcher = new OAuthFetcher(
         tokenStore, oauthCrypter, nextFetcher, token, params);
-    fetcher.init();
     return fetcher;
   }
 }

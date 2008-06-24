@@ -20,7 +20,6 @@
 package org.apache.shindig.gadgets.spec;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
 import static org.junit.Assert.fail;
 
 import java.net.URI;
@@ -80,22 +79,32 @@ public class OAuthServiceTest {
     String xml = "<Request url='http://www.example.com'/>";
     OAuthService.EndPoint ep = service.parseEndPoint("Request", XmlUtil.parse(xml));
     assertEquals("http://www.example.com", ep.url.toString());
-    assertEquals(OAuthService.Location.header, ep.location);
-    assertEquals(OAuthService.Method.POST, ep.method);
+    assertEquals(OAuthService.Location.HEADER, ep.location);
+    assertEquals(OAuthService.Method.GET, ep.method);
+  }
+  
+  @Test
+  public void testParseEndPoint_badlocation() throws Exception {
+    try {
+      String xml = "<Request url='http://www.example.com' method='GET' param_location='body'/>";
+      OAuthService.EndPoint ep = service.parseEndPoint("Request", XmlUtil.parse(xml));
+    } catch (SpecParserException e) {
+      assertEquals("Unknown OAuth param_location: body", e.getMessage());
+    }
   }
   
   @Test
   public void testParseEndPoint_nodefaults() throws Exception {
-    String xml = "<Request url='http://www.example.com' method='GET' param_location='body'/>";
+    String xml = "<Request url='http://www.example.com' method='GET' param_location='post-body'/>";
     OAuthService.EndPoint ep = service.parseEndPoint("Request", XmlUtil.parse(xml));
     assertEquals("http://www.example.com", ep.url.toString());
-    assertEquals(OAuthService.Location.body, ep.location);
+    assertEquals(OAuthService.Location.BODY, ep.location);
     assertEquals(OAuthService.Method.GET, ep.method);    
   }
   
   @Test(expected=SpecParserException.class)
   public void testParseEndPoint_nourl() throws Exception {
-    String xml = "<Request method='GET' param_location='body'/>";
+    String xml = "<Request method='GET' param_location='post-body'/>";
     service.parseEndPoint("Request", XmlUtil.parse(xml));
   }
   
@@ -108,14 +117,14 @@ public class OAuthServiceTest {
   @Test
   public void testParseService() throws Exception {
     String xml = "" +
-    		"<Service name='thename'>" +
-    		"   <Request url='http://request.example.com/foo'/>" +
-    		"   <Access url='http://access.example.com/bar'/>" +
-    		"   <Authorization url='http://azn.example.com/quux'/>" +
-    		"</Service>";
+        "<Service name='thename'>" +
+    	"   <Request url='http://request.example.com/foo'/>" +
+    	"   <Access url='http://access.example.com/bar'/>" +
+    	"   <Authorization url='http://azn.example.com/quux'/>" +
+    	"</Service>";
     OAuthService s = new OAuthService(XmlUtil.parse(xml));
     assertEquals("thename", s.getName());
-    assertEquals(OAuthService.Location.header, s.getAccessUrl().location);
+    assertEquals(OAuthService.Location.HEADER, s.getAccessUrl().location);
     assertEquals("http://azn.example.com/quux", s.getAuthorizationUrl().toString());
   }
   
@@ -129,39 +138,29 @@ public class OAuthServiceTest {
         "</Service>";
     OAuthService s = new OAuthService(XmlUtil.parse(xml));
     assertEquals("", s.getName());
-    assertEquals(OAuthService.Location.header, s.getAccessUrl().location);
+    assertEquals(OAuthService.Location.HEADER, s.getAccessUrl().location);
     assertEquals("http://azn.example.com/quux", s.getAuthorizationUrl().toString());
   }
   
   @Test
   public void testParseService_nodata() throws Exception {
     String xml = "<Service/>";
-    OAuthService s = new OAuthService(XmlUtil.parse(xml));
-    assertEquals("", s.getName());
-    assertNull(s.getAccessUrl());
-    assertNull(s.getAuthorizationUrl());
-    assertNull(s.getRequestUrl());
-  }
-
-  @Test
-  public void testParseService_nameonly() throws Exception {
-    String xml = "<Service name='foo'/>";
-    OAuthService s = new OAuthService(XmlUtil.parse(xml));
-    assertEquals("foo", s.getName());
-    assertNull(s.getAccessUrl());
-    assertNull(s.getAuthorizationUrl());
-    assertNull(s.getRequestUrl());
+    try {
+      OAuthService s = new OAuthService(XmlUtil.parse(xml));
+    } catch (SpecParserException e) {
+      assertEquals("/OAuth/Service/Request is required", e.getMessage());
+    }
   }
 
   @Test
   public void testParseService_reqonly() throws Exception {
     String xml = "<Service>" +
-    		"<Request url='http://www.example.com/request'/>" +
-    		"</Service>";
-    OAuthService s = new OAuthService(XmlUtil.parse(xml));
-    assertEquals("", s.getName());
-    assertNull(s.getAccessUrl());
-    assertNull(s.getAuthorizationUrl());
-    assertEquals("http://www.example.com/request", s.getRequestUrl().url.toString());
+        "<Request url='http://www.example.com/request'/>" +
+        "</Service>";
+    try {
+      OAuthService s = new OAuthService(XmlUtil.parse(xml));
+    } catch (SpecParserException e) {
+      assertEquals("/OAuth/Service/Access is required", e.getMessage());
+    }
   }
 }

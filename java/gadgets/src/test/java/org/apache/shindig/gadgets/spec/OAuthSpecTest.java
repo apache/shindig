@@ -18,7 +18,6 @@
 package org.apache.shindig.gadgets.spec;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
 
 import org.apache.shindig.common.xml.XmlUtil;
 import org.junit.Test;
@@ -32,6 +31,8 @@ public class OAuthSpecTest {
   public void testOAuthSpec() throws Exception {
     String xml = "<OAuth><Service>" +
       "<Request url='http://www.example.com/request'/>" +
+      "<Access url='http://www.example.com/access'/>" +
+      "<Authorization url='http://www.example.com/authorize'/>" +
       "</Service></OAuth>";
     OAuthSpec oauth = new OAuthSpec(XmlUtil.parse(xml));
     assertEquals(1, oauth.getServices().size());
@@ -43,31 +44,38 @@ public class OAuthSpecTest {
     OAuthSpec oauth = new OAuthSpec(XmlUtil.parse(xml));
     assertEquals(0, oauth.getServices().size());
   }
-  
-  
+
   @Test
   public void testOAuthSpec_threeservice() throws Exception {
     String xml = "<OAuth>" +
-    		"<Service name='one'>" +
-    		" <Request url='http://req.example.com' param_location='url' method='POST'/>" +
-    		"</Service>" +
-    		"<Service name='two'>" +
+        "<Service name='one'>" +
+        " <Request url='http://req.example.com' param_location='uri-query' method='POST'/>" +
+        " <Access url='http://acc.example.com' param_location='uri-query' method='POST'/>" +
+        " <Authorization url='http://azn.example.com'/>" +
+        "</Service>" +
+        "<Service name='two'>" +
+        " <Request url='http://two.example.com/req'/>" +
         " <Access url='http://two.example.com'/>" +
+        " <Authorization url='http://two.example.com/authorize'/>" +
         "</Service>" +
-    		"<Service name='three'>" +
-        " <Request url='http://three.example.com' param_location='url' method='POST'/>" +
+    	"<Service name='three'>" +
+        " <Request url='http://three.example.com' param_location='uri-query' method='POST'/>" +
+        " <Access url='http://three.example.com/acc' param_location='uri-query' method='POST'/>" +
+        " <Authorization url='http://three.example.com/authorize'/>" +
         "</Service>" +
-    		"</OAuth>";
+    	"</OAuth>";
     OAuthSpec oauth = new OAuthSpec(XmlUtil.parse(xml));
     assertEquals("http://req.example.com",
         oauth.getServices().get("one").getRequestUrl().url.toString());
-    assertEquals(OAuthService.Location.url,
+    assertEquals(OAuthService.Location.URL,
         oauth.getServices().get("one").getRequestUrl().location);
     assertEquals("http://two.example.com",
         oauth.getServices().get("two").getAccessUrl().url.toString());
     assertEquals(OAuthService.Method.POST,
         oauth.getServices().get("three").getRequestUrl().method);
-    assertNull(oauth.getServices().get("three").getAccessUrl());
-    assertNull(oauth.getServices().get("three").getAuthorizationUrl());
+    assertEquals("http://three.example.com/acc",
+        oauth.getServices().get("three").getAccessUrl().url.toASCIIString());
+    assertEquals("http://three.example.com/authorize",
+        oauth.getServices().get("three").getAuthorizationUrl().toASCIIString());
   }
 }

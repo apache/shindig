@@ -312,7 +312,7 @@ public class MakeRequestHandlerTest {
     expect(fixture.request.getParameter(MakeRequestHandler.SECURITY_TOKEN_PARAM))
         .andReturn("fake-token").atLeastOnce();
     expect(fixture.request.getParameter(Preload.AUTHZ_ATTR))
-        .andReturn(Auth.AUTHENTICATED.toString()).atLeastOnce();
+        .andReturn(Auth.OAUTH.toString()).atLeastOnce();
     fixture.replay();
 
     handler.fetch(fixture.request, fixture.recorder);
