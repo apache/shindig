@@ -213,6 +213,7 @@ public class DataServiceServlet extends InjectedServlet {
   }
 
   boolean isBatchUrl(HttpServletRequest servletRequest) {
-    return servletRequest.getPathInfo().endsWith(JSON_BATCH_ROUTE);
+    String[] parts = servletRequest.getPathInfo().split("/");
+    return parts[parts.length - 1].equals(JSON_BATCH_ROUTE);
   }
 }
