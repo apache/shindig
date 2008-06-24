@@ -204,6 +204,7 @@ public class DataServiceServletTest extends TestCase {
     assertBatchUrl("/jsonBatch", true);
     assertBatchUrl("/path/to/the/jsonBatch", true);
     assertBatchUrl("/people/normalpath", false);
+    assertBatchUrl("/notjsonBatch", false);
   }
 
   private void assertBatchUrl(String url, boolean isBatch) {
