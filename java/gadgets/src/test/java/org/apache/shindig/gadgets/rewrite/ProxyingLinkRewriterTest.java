@@ -50,6 +50,12 @@ public class ProxyingLinkRewriterTest extends BaseRewriterTestCase {
         rewrite(val));
   }
 
+  public void testInvalidCharRewrite() {
+    String val = "/images/opensocial/movie_trivia/76/${quiz.picture_url}";
+    assertEquals("/images/opensocial/movie_trivia/76/${quiz.picture_url}",
+        rewrite(val));
+  }
+
    public void testEmpty() {
     String val = " ";
     assertEquals("", rewrite(val));

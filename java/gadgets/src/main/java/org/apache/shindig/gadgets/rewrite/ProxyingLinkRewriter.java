@@ -21,18 +21,22 @@ package org.apache.shindig.gadgets.rewrite;
 import org.apache.shindig.common.util.Utf8UrlCoder;
 
 import java.net.URI;
+import java.net.URISyntaxException;
 
 /**
- * Simple link rewriter that will rewrite a link to the form
- * http://www.host.com/proxy/url=<url encoded link>&gadget=<gadget spec url>&fp=<fingeprint of rewriting rule>
+ * Simple link rewriter that will rewrite a link to the form http://www.host.com/proxy/url=<url
+ * encoded link>&gadget=<gadget spec url>&fp=<fingeprint of rewriting rule>
  */
 public class ProxyingLinkRewriter implements LinkRewriter {
 
   private final String prefix;
+
   private final ContentRewriterFeature rewriterFeature;
+
   private final URI gadgetUri;
 
-  public ProxyingLinkRewriter(URI gadgetUri, ContentRewriterFeature rewriterFeature, String prefix) {
+  public ProxyingLinkRewriter(URI gadgetUri, ContentRewriterFeature rewriterFeature,
+      String prefix) {
     this.prefix = prefix;
     this.rewriterFeature = rewriterFeature;
     this.gadgetUri = gadgetUri;
@@ -44,17 +48,23 @@ public class ProxyingLinkRewriter implements LinkRewriter {
     if (link.length() == 0) {
       return link;
     }
-    URI uri = context.resolve(link);
-    if (rewriterFeature.shouldRewriteURL(uri.toString())) {
-      return prefix
-          + Utf8UrlCoder.encode(uri.toString())
-          + "&gadget="
-          + Utf8UrlCoder.encode(gadgetUri.toString())
-          + "&fp="
-          + rewriterFeature.getFingerprint();
-    } else {
-      return uri.toString();
+
+    try {
+      URI linkUri = new URI(link);
+      URI uri = context.resolve(linkUri);
+      if (rewriterFeature.shouldRewriteURL(uri.toString())) {
+        return prefix
+            + Utf8UrlCoder.encode(uri.toString())
+            + "&gadget="
+            + Utf8UrlCoder.encode(gadgetUri.toString())
+            + "&fp="
+            + rewriterFeature.getFingerprint();
+      } else {
+        return uri.toString();
+      }
+    } catch (URISyntaxException use) {
+      // Unrecoverable. Just return link
+      return link;
     }
   }
-
 }
