@@ -250,8 +250,8 @@ class XmlStateFileFetcher {
 		$media = array();
 		foreach ( $activityItem->mediaItem as $mediaItem ) {
 			$type = isset($mediaItem['type']) ? (string)$mediaItem['type'] : '';
-			$mimeType = isset($mediaItem['mimeType']) ? $mediaItem['mimeType'] : '';
-			$url = isset($mediaItem['url']) ? $mediaItem['url'] : '';
+			$mimeType = isset($mediaItem['mimeType']) ? (string)$mediaItem['mimeType'] : '';
+			$url = isset($mediaItem['url']) ? (string)$mediaItem['url'] : '';
 			$media[] = new MediaItem($mimeType, $type, $url);
 		}
 		return $media;
