@@ -38,7 +38,6 @@ RestfulContainer = function(baseUrl, domain, supportedFieldsArray) {
   this.baseUrl_ = baseUrl;
 
   this.securityToken_ = shindig.auth.getSecurityToken();
-  this.useBatching_ = false;
 };
 RestfulContainer.inherits(opensocial.Container);
 
@@ -114,72 +113,61 @@ RestfulContainer.prototype.requestData = function(dataRequest, callback) {
         "application/json");
   }
 
-  // may need multiple urls for one response but lets ignore that for now
-  // TODO: Once both the php and java code decide on and implement batching
-  // the non-batching code should be deleted
-  if (!this.useBatching_) {
-    for (var i = 0; i < totalRequests; i++) {
-      makeProxiedRequest(requestObjects[i], this.baseUrl_, this.securityToken_);
+  var jsonBatchData = {};
+
+  for (var j = 0; j < totalRequests; j++) {
+    var requestObject = requestObjects[j];
+
+    jsonBatchData[requestObject.key] = {url : requestObject.request.url,
+      method : requestObject.request.method};
+    if (requestObject.request.postData) {
+      jsonBatchData[requestObject.key].postData = requestObject.request.postData;
     }
-
-  } else {
-    var jsonBatchData = {};
-
-    for (var j = 0; j < totalRequests; j++) {
-      var requestObject = requestObjects[j];
-
-      jsonBatchData[requestObject.key] = {url : requestObject.request.url,
-        method : requestObject.request.method};
-      if (requestObject.request.postData) {
-        jsonBatchData[requestObject.key].postData = requestObject.request.postData;
-      }
-    }
-
-    // This is slightly different than jsonContainer
-    var sendResponse = function(result) {
-      result = result.data;
-
-      if (!result || result['error']) {
-        callback(new opensocial.DataResponse({}, true));
-        return;
-      }
-
-      var responses = result['responses'] || [];
-      var globalError = false;
-
-      var responseMap = {};
-
-      for (var k = 0; k < requestObjects.length; k++) {
-        var request = requestObjects[k];
-        var response = responses[request.key];
-
-        var rawData = response['response'];
-        var error = response['error'];
-        var errorMessage = response['errorMessage'];
-
-        var processedData = request.request.processResponse(
-            request.request, rawData, error, errorMessage);
-        globalError = globalError || processedData.hadError();
-        responseMap[request.key] = processedData;
-      }
-
-      var dataResponse = new opensocial.DataResponse(responseMap, globalError);
-      callback(dataResponse);
-    };
-
-    // TODO: get the jsonbatch url from the container config
-    var makeRequestParams = {
-      "CONTENT_TYPE" : "JSON",
-      "METHOD" : "POST",
-      "AUTHORIZATION" : "SIGNED",
-      "POST_DATA" : gadgets.json.stringify(jsonBatchData)
-    };
-
-  gadgets.io.makeNonProxiedRequest(
-      this.baseUrl_ + "/jsonBatch?st=" + shindig.auth.getSecurityToken(),
-      sendResponse, makeRequestParams, "application/json");
   }
 
+  // This is slightly different than jsonContainer
+  var sendResponse = function(result) {
+    result = result.data;
+
+    if (!result || result['error']) {
+      callback(new opensocial.DataResponse({}, true));
+      return;
+    }
+
+    var responses = result['responses'] || [];
+    var globalError = false;
+
+    var responseMap = {};
+
+    for (var k = 0; k < requestObjects.length; k++) {
+      var request = requestObjects[k];
+      var response = responses[request.key];
+
+      var rawData = response['response'];
+      var error = response['error'];
+      var errorMessage = response['errorMessage'];
+
+      var processedData = request.request.processResponse(
+          request.request, rawData, error, errorMessage);
+      globalError = globalError || processedData.hadError();
+      responseMap[request.key] = processedData;
+    }
+
+    var dataResponse = new opensocial.DataResponse(responseMap, globalError);
+    callback(dataResponse);
+  };
+
+  // TODO: get the jsonbatch url from the container config
+  var makeRequestParams = {
+    "CONTENT_TYPE" : "JSON",
+    "METHOD" : "POST",
+    "AUTHORIZATION" : "SIGNED",
+    "POST_DATA" : gadgets.json.stringify(jsonBatchData)
+  };
+
+  gadgets.io.makeNonProxiedRequest(
+    this.baseUrl_ + "/jsonBatch?st=" + shindig.auth.getSecurityToken(),
+    sendResponse, makeRequestParams, "application/json");
 };
 
 RestfulContainer.translateHttpError = function(httpError) {
