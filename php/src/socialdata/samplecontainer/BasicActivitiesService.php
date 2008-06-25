@@ -25,7 +25,7 @@ class BasicActivitiesService {
 		$activities = array();
 		foreach ($ids as $id) {
 			if (isset($allActivities[$id])) {
-				$activities[] = $allActivities[$id];
+				$activities = array_merge($activities, $allActivities[$id]);
 			}
 		}
 		// TODO: Sort them
