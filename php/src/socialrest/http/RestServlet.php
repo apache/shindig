@@ -39,18 +39,20 @@ require 'src/socialrest/GroupId.php';
 require 'src/socialrest/UserId.php';
 require 'src/socialrest/ResponseItem.php';
 require 'src/socialrest/RestfulCollection.php';
+require 'src/socialrest/http/RestRequestItem.php';
 
 /*
  * See:
  * http://sites.google.com/a/opensocial.org/opensocial/Technical-Resources/opensocial-specification----implementation-version-08/restful-api-specification
- * OpenSocial uses standard HTTP methods: GET to retrieve, PUT to update in place, POST to create new, and DELETE to remove. 
+ * OpenSocial uses standard HTTP methods: GET to retrieve, PUT to update in place, POST to create new, and DELETE to remove.
  * POST is special; it operates on collections and creates new activities, persons, or app data within those collections,
  * and returns the base URI for the created resource in the Location: header, per AtomPub semantics.
- * 
+ *
  * Error status is returned by HTTP error code, with the error message in the html's body
  */
 
 //NOTE TO SELF: delete should respond with a 204 No Content to indicate success?
+
 
 /*
  * Internal error code representations, these get translated into http codes in the outputError() function
@@ -65,51 +67,109 @@ define('INTERNAL_ERROR', "internalError");
 class RestException extends Exception {}
 
 class RestServlet extends HttpServlet {
+	
+	private static $JSON_BATCH_ROUTE = "jsonBatch";
 
 	public function doPost($method = 'POST')
 	{
 		$this->setNoCache(true);
 		$this->noHeaders = true;
-		try {
-			// use security token, for now this is required
-			// (later oauth should also be a way to specify this info)
-			$token = $this->getSecurityToken();
-			$params = $this->getListParams();
-			switch ($params[0]) {
-				case 'people':
-					$class = 'PersonHandler';
-					break;
-				case 'activities':
-					$class = 'ActivityHandler';
-					break;
-				case 'appdata':
-					$class = 'AppDataHandler';
-					break;
-				//TODO add 'groups' here
-				default:
-					$response = new ResponseItem(NOT_IMPLEMENTED, "{$params[0]} is not implemented");
-					break;
-			}
-			if (class_exists($class, true)) {
-				$class = new $class(null);
-				$response = $class->handleMethod($method, $params, $token);
-			}
-		} catch (Exception $e) {
-			$response = new ResponseItem(INTERNAL_ERROR, $e->getMessage(), null);
-		}
-		if (!is_object($response) || $response->getError()) {
-			// error responses are the same for json and atom (ie: http error codes + message in body)
-			if (!$response instanceof ResponseItem) {
-				// just incase ..
-				$response = new ResponseItem(INTERNAL_ERROR, "Internal Server Error, return value is not a response item");
-			}
-			$this->outputError($response);
+		// use security token, for now this is required
+		// (later oauth should also be a way to specify this info)
+		$token = $this->getSecurityToken();
+		$req = null;
+		if ($this->isBatchUrl()) {
+			$req = $this->handleBatchRequest($token);
+			echo json_encode(array("responses" => $req, "error" => false));
 		} else {
-			if ($this->getOutputFormat() == 'json') {
-					echo json_encode($response->getResponse());
-			} else {	
-				// output atom format
+			$responseItem = $this->handleSingleRequest($token, $method);
+			echo json_encode($responseItem);
+		}
+	}
+
+	private function handleSingleRequest($token, $method)
+	{
+		$params = $this->getListParams();
+		$requestItem = new RestRequestItem();
+		$url = $this->getUrl();
+		$requestParam = $this->getRequestParams();
+		$requestItem->createRequestItem($url, $token, $method, $params, $requestParam);
+		$responseItem = $this->getResponseItem($requestItem);
+		return $responseItem;
+	}
+
+	private function getRouteFromParameter($pathInfo)
+	{
+		$pathInfo = substr($pathInfo, 1);
+		$indexOfNextPathSeparator = strpos($pathInfo, "/");
+		return $indexOfNextPathSeparator != - 1 ? substr($pathInfo, 0, $indexOfNextPathSeparator) : $pathInfo;
+	}
+
+	private function getResponseItem(RestRequestItem $requestItem)
+	{
+		$path = $this->getRouteFromParameter($requestItem->getUrl());
+		switch ($path) {
+			case 'people':
+				$class = 'PersonHandler';
+				break;
+			case 'activities':
+				$class = 'ActivityHandler';
+				break;
+			case 'appdata':
+				$class = 'AppDataHandler';
+				break;
+			//TODO add 'groups' here
+			default:
+				$response = new ResponseItem(NOT_IMPLEMENTED, "{$path} is not implemented");
+				break;
+		}
+		if (class_exists($class, true)) {
+			$class = new $class(null);
+			$response = $class->handleMethod($requestItem);
+		}
+		if ($this->getOutputFormat() == 'json') {
+			if ($this->isBatchUrl()) {
+				return $response;
+			} else {
+				//If the method exists, its an ResponseItem Error
+				if ($response->getError() != null) {
+					$this->outputError($response);
+				}
+				return $response->getResponse();
 			}
+		} else {	// output atom format
+		}
+	}
+
+	private function getRequestParams()
+	{
+		$post = in_array('request', $_POST) != null ? $_POST['request'] : null;
+		$requestParam = isset($GLOBALS['HTTP_RAW_POST_DATA']) ? $GLOBALS['HTTP_RAW_POST_DATA'] : $post;
+		if (get_magic_quotes_gpc()) {
+			$requestParam = stripslashes($requestParam);
+		}
+		$requests = json_decode($requestParam);
+		if ($requests == (isset($GLOBALS['HTTP_RAW_POST_DATA']) ? $GLOBALS['HTTP_RAW_POST_DATA'] : $post)) {
+			return new ResponseItem(BAD_REQUEST, "Malformed json string");
+		}
+		return $requests;
+	}
+
+	private function handleBatchRequest($token)
+	{
+		// we support both a raw http post (without application/x-www-form-urlencoded headers) like java does
+		// and a more php / curl safe version of a form post with 'request' as the post field that holds the request json data
+		if (isset($GLOBALS['HTTP_RAW_POST_DATA']) || isset($_POST['request'])) {
+			$requests = $this->getRequestParams();
+			$responses = array();
+			foreach ($requests as $key => $value) {
+				$requestItem = new RestRequestItem();
+				$requestItem->createRequestItemWithRequest($value, $token);
+				$responses[$key] = $this->getResponseItem($requestItem);
+			}
+			return $responses;
+		} else {
+			throw new Exception("No post data set");
 		}
 	}
 
@@ -127,7 +187,7 @@ class RestServlet extends HttpServlet {
 	{
 		$this->doPost('DELETE');
 	}
-	
+
 	private function outputError(ResponseItem $response)
 	{
 		$errorMessage = $response->getErrorMessage();
@@ -151,7 +211,7 @@ class RestServlet extends HttpServlet {
 			default:
 				$code = '500 Internal Server Error';
 				break;
-				
+		
 		}
 		header("HTTP/1.0 $code", true);
 		echo "$code - $errorMessage";
@@ -174,7 +234,7 @@ class RestServlet extends HttpServlet {
 
 	private function getOutputFormat()
 	{
-		return isset($_GET['format']) && $_GET['format'] == 'atom' ? 'atom' : 'json';
+		return isset($_POST['format']) && $_POST['format'] == 'atom' ? 'atom' : 'json';
 	}
 
 	private function getListParams()
@@ -186,5 +246,15 @@ class RestServlet extends HttpServlet {
 		}
 		$restParams = explode('/', $uri);
 		return $restParams;
+	}
+
+	private function getUrl()
+	{
+		return substr($_SERVER["REQUEST_URI"], strlen(Config::get('web_prefix') . '/social/rest'));
+	}
+
+	public function isBatchUrl()
+	{
+		return strrpos($_SERVER["REQUEST_URI"], RestServlet::$JSON_BATCH_ROUTE) > 0;
 	}
 }

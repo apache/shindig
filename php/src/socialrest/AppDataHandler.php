@@ -1,4 +1,5 @@
 <?php
+
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements. See the NOTICE file
@@ -18,6 +19,7 @@
  */
 
 class AppDataHandler extends DataRequestHandler {
+	private static $APP_DATA_PATH = "/people/{userId}/{groupId}/{appId}";
 	private $service;
 
 	public function __construct()
@@ -38,13 +40,10 @@ class AppDataHandler extends DataRequestHandler {
 	 * be pulled from the values and set on the person object. If there are no
 	 * fields vars then all of the data will be overridden.
 	 */
-	public function handleDelete($params, $token)
+	public function handleDelete(RestRequestItem $requestItem)
 	{
-		$userId = UserId::fromJson($params[1]);
-		$groupId = GroupId::fromJson($params[2]);
-		$appId = $this->getAppId($params[3], $token);
-		$fields = isset($_GET['fields']) ? explode(',', $_GET['fields']) : null;
-		return $this->service->deletePersonData($userId, $groupId, $fields, $appId, $token);		
+		$requestItem->parseUrlWithTemplate(self::$APP_DATA_PATH);
+		return $this->service->deletePersonData($requestItem->getUser(), $requestItem->getGroup(), $requestItem->getFields(), $requestItem->getAppId(), $requestItem->getToken());
 	}
 
 	/**
@@ -55,13 +54,10 @@ class AppDataHandler extends DataRequestHandler {
 	 * /appdata/john.doe/@friends/app?fields=count
 	 * /appdata/john.doe/@self/app
 	 */
-	public function handleGet($params, $token)
+	public function handleGet(RestRequestItem $requestItem)
 	{
-		$userId = UserId::fromJson($params[1]);
-		$groupId = GroupId::fromJson($params[2]);
-		$appId = $this->getAppId($params[3], $token);
-		$fields = isset($_GET['fields']) ? explode(',', $_GET['fields']) : null;
-		return $this->service->getPersonData($userId, $groupId, $fields, $appId, $token);
+		$requestItem->parseUrlWithTemplate(self::$APP_DATA_PATH);
+		return $this->service->getPersonData($requestItem->getUser(), $requestItem->getGroup(), $requestItem->getFields(), $requestItem->getAppId(), $requestItem->getToken());
 	}
 
 	/**
@@ -76,21 +72,10 @@ class AppDataHandler extends DataRequestHandler {
 	 * be pulled from the values and set on the person object. If there are no
 	 * fields vars then all of the data will be overridden.
 	 */
-	public function handlePost($params, $token)
+	public function handlePost(RestRequestItem $requestItem)
 	{
-		$userId = UserId::fromJson($params[1]);
-		$groupId = GroupId::fromJson($params[2]);
-		$appId = $this->getAppId($params[3], $token);
-		$fields = isset($_GET['fields']) ? explode(',', $_GET['fields']) : null;
-		if (!isset($GLOBALS['HTTP_RAW_POST_DATA'])) {
-			throw new Exception("Empty raw post data");
-		}
-		$jsonActivity = $GLOBALS['HTTP_RAW_POST_DATA'];
-		if (get_magic_quotes_gpc()) {
-			$jsonActivity = stripslashes($jsonActivity);
-		}
-		$values = $this->convertToObject($jsonActivity);
-		return $this->service->updatePersonData($userId, $groupId, $fields, $values, $appId, $token);
+		$requestItem->parseUrlWithTemplate(self::$APP_DATA_PATH);
+		return $this->service->updatePersonData($requestItem->getUser(), $requestItem->getGroup(), $requestItem->getFields(), $requestItem->getPostData(), $requestItem->getAppId(), $requestItem->getToken());
 	}
 
 	/**
@@ -105,8 +90,8 @@ class AppDataHandler extends DataRequestHandler {
 	 * be pulled from the values and set on the person object. If there are no
 	 * fields vars then all of the data will be overridden.
 	 */
-	public function handlePut($params, $token)
+	public function handlePut(RestRequestItem $requestItem)
 	{
-		return $this->handlePost($params, $token);
+		return $this->handlePost($requestItem);
 	}
 }
