@@ -19,6 +19,8 @@
 
 class PersonHandler extends DataRequestHandler {
 	private $service;
+	private static $PEOPLE_PATH = "/people/{userId}/{groupId}/{personId}";
+	protected static $DEFAULT_PERSON_FIELDS = array("id", "name", "thumbnailUrl");
 
 	public function __construct()
 	{
@@ -34,38 +36,31 @@ class PersonHandler extends DataRequestHandler {
 	 * /people/john.doe/@friends
 	 * /people/john.doe/@self
 	 */
-	public function handleGet($params, $token)
+	public function handleGet(RestRequestItem $requestItem)
 	{
-		$userId = UserId::fromJson($params[1]);
-		$groupId = GroupId::fromJson($params[2]);
-		$optionalPersonId = false;
-		if (count($params) > 3) {
-			$optionalPersonId = $params[3];
-		}
-		$fields = !empty($_GET['fields']) ? explode(',', $_GET['fields']) : null;
-		if ($optionalPersonId || $groupId->getType() == 'self') {
+		$requestItem->parseUrlWithTemplate(self::$PEOPLE_PATH);
+		$parameters = $requestItem->getParameters();
+		$optionalPersonId = in_array('personId', $parameters) ? $parameters['personId'] : null;
+		$fields = $requestItem->getFieldsWithDefaultValue(self::$DEFAULT_PERSON_FIELDS);
+		if ($optionalPersonId || $requestItem->getGroup()->getType() == 'self') {
 			//FIXME same logic as the java code here, but doesn't seem to do much with the optionalPersonId which seems odd
-			return $this->service->getPerson($userId, $groupId, $fields, $token);
+			return $this->service->getPerson($requestItem->getUser(), $requestItem->getGroup(), $fields, $requestItem->getToken());
 		}
-		$sort = !empty($_GET['orderBy']) && in_array($_GET['orderBy'], PeopleService::$sortOrder) ? $_GET['orderBy'] : '';
-		$filter = !empty($_GET['filterBy']) && in_array($_GET['filterBy'], PeopleService::$filterType) ? $_GET['filterBy'] : '';
-		$first = !empty($_GET['startIndex']) && is_numeric($_GET['startIndex']) ? $_GET['startIndex'] : 0;
-		$max = !empty($_GET['count']) && is_numeric($_GET['count']) ? $_GET['count'] : 0;
-		return $this->service->getPeople($userId, $groupId, $sort, $filter, $first, $max, $fields, $token);
+		return $this->service->getPeople($requestItem->getUser(), $requestItem->getGroup(), $requestItem->getOrderBy(), $requestItem->getFilterBy(), $requestItem->getStartIndex(), $requestItem->getCount(), $fields, $requestItem->getToken());
 	}
 
-	public function handleDelete($params, $token)
+	public function handleDelete(RestRequestItem $requestItem)
 	{
-	    return new ResponseItem(BAD_REQUEST, "You can't delete people.", null);
-	}
-	
-	public function handlePost($params, $token)
-	{
-	    return new ResponseItem(NOT_IMPLEMENTED, "You can't edit people right now.", null);
+		return new ResponseItem(BAD_REQUEST, "You can't delete people.", null);
 	}
 
-	public function handlePut($params, $token)
+	public function handlePost(RestRequestItem $requestItem)
 	{
-	    return new ResponseItem(NOT_IMPLEMENTED, "You can't add people right now.", null); 
+		return new ResponseItem(NOT_IMPLEMENTED, "You can't edit people right now.", null);
+	}
+
+	public function handlePut(RestRequestItem $requestItem)
+	{
+		return new ResponseItem(NOT_IMPLEMENTED, "You can't add people right now.", null);
 	}
 }

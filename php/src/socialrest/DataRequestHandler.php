@@ -18,32 +18,32 @@
  */
 
 abstract class DataRequestHandler {
-	
-	public function handleMethod($method, $params, $token)
+
+	public function handleMethod(RestRequestItem $requestItem)
 	{
-		if ($method == 'POST') {
-			$response = $this->handlePost($params, $token);
-		} elseif ($method == 'GET') {
-			$response = $this->handleGet($params, $token);
-		} elseif ($method == 'DELETE') {
-			$response = $this->handleDelete($params, $token);
-		} elseif ($method == 'PUT') {
-			$response = $this->handlePut($params, $token);
+		if ($requestItem->getMethod() == 'POST') {
+			$response = $this->handlePost($requestItem);
+		} elseif ($requestItem->getMethod() == 'GET') {
+			$response = $this->handleGet($requestItem);
+		} elseif ($requestItem->getMethod() == 'DELETE') {
+			$response = $this->handleDelete($requestItem);
+		} elseif ($requestItem->getMethod() == 'PUT') {
+			$response = $this->handlePut($requestItem);
 		} else {
 			$response = new ResponseItem(BAD_REQUEST, "Unserviced Http method type", null);
 		}
 		return $response;
 	}
-	
+
 	static public function getAppId($appId, SecurityToken $token)
 	{
-	    if ($appId == '@app') {
+		if ($appId == '@app') {
 			return $token->getAppId();
 		} else {
 			return $appId;
 		}
 	}
-	
+
 	static public function convertToObject($string)
 	{
 		//TODO should detect if it's atom/xml or json here really. assuming json for now
@@ -54,11 +54,8 @@ abstract class DataRequestHandler {
 		return $decoded;
 	}
 
-	abstract public function handleDelete($params, $token);
-
-	abstract public function handleGet($params, $token);
-
-	abstract public function handlePost($params, $token);
-
-	abstract public function handlePut($params, $token);
+	abstract public function handleDelete(RestRequestItem $requestItem);
+	abstract public function handleGet(RestRequestItem $requestItem);
+	abstract public function handlePost(RestRequestItem $requestItem);
+	abstract public function handlePut(RestRequestItem $requestItem);
 }

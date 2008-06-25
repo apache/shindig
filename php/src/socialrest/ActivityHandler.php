@@ -19,6 +19,8 @@
 
 class ActivityHandler extends DataRequestHandler {
 	private $service;
+	
+	private static $ACTIVITY_ID_PATH = "/activities/{userId}/{groupId}/{activityId}";
 
 	public function __construct()
 	{
@@ -26,7 +28,7 @@ class ActivityHandler extends DataRequestHandler {
 		$this->service = new $service();
 	}
 
-	public function handleDelete($params, $token)
+	public function handleDelete(RestRequestItem $requestItem)
 	{
 		return new ResponseItem(BAD_REQUEST, "You can't delete activities. ", null);
 	}
@@ -39,20 +41,17 @@ class ActivityHandler extends DataRequestHandler {
 	 * /activities/john.doe/@self
 	 * /activities/john.doe/@friends
 	 */
-	public function handleGet($params, $token)
+	public function handleGet(RestRequestItem $requestItem)
 	{
-		$userId = UserId::fromJson($params[1]);
-		$groupId = GroupId::fromJson($params[2]);
-		$optionalActivityId = null;
-		if (count($params) > 3) {
-			$optionalActivityId = $params[3];
-		}
+		$requestItem->parseUrlWithTemplate(self::$ACTIVITY_ID_PATH);
+		$parameters = $requestItem->getParameters();
+		$optionalActivityId = in_array('activityId', $parameters) ? $parameters['activityId'] : null;
 		// TODO: Filter by fields
 		// TODO: do we need to add pagination and sorting support?
 		if ($optionalActivityId != null) {
-			return $this->service->getActivity($userId, $groupId, $optionalActivityId, $token);
+			return $this->service->getActivity($requestItem->getUser(), $requestItem->getGroup(), $optionalActivityId, $requestItem->getToken());
 		}
-		return $this->service->getActivities($userId, $groupId, $token);
+		return $this->service->getActivities($requestItem->getUser(), $requestItem->getGroup(), $requestItem->getToken());
 	}
 
 	/**
@@ -62,20 +61,10 @@ class ActivityHandler extends DataRequestHandler {
 	 * /activities/john.doe/@self
 	 * - postBody is an activity object
 	 */
-	public function handlePost($params, $token)
+	public function handlePost(RestRequestItem $requestItem)
 	{
-		$userId = UserId::fromJson($params[1]);
-		$groupId = GroupId::fromJson($params[2]);
-		// TODO: Should we pass the groupId through to the service?
-		if (!isset($GLOBALS['HTTP_RAW_POST_DATA'])) {
-			throw new Exception("Empty raw post data");
-		}
-		$jsonActivity = $GLOBALS['HTTP_RAW_POST_DATA'];
-		if (get_magic_quotes_gpc()) {
-			$jsonActivity = stripslashes($jsonActivity);
-		}
-		$activity = $this->convertToObject($jsonActivity);
-    	return $this->service->createActivity($userId, $activity, $token);
+		//TODO: do we need to add groups here?
+		return $this->service->createActivity($requestItem->getUser(), $requestItem->getPostData(), $requestItem->getToken());
 	}
 
 	/**
@@ -85,8 +74,8 @@ class ActivityHandler extends DataRequestHandler {
 	 * /activities/john.doe/@self
 	 * - postBody is an activity object
 	 */
-	public function handlePut($params, $token)
+	public function handlePut(RestRequestItem $requestItem)
 	{
-		return $this->handlePost($token);
+		return $this->handlePost($requestItem);
 	}
 }
