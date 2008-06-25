@@ -260,7 +260,7 @@ public class MakeRequestHandler extends ProxyBase{
       throws GadgetException {
     String token = getParameter(request, SECURITY_TOKEN_PARAM, "");
     try {
-      return securityTokenDecoder.createToken(token);
+      return securityTokenDecoder.createToken(Collections.singletonMap(SecurityTokenDecoder.SECURITY_TOKEN_NAME, token));
     } catch (SecurityTokenException e) {
       throw new GadgetException(GadgetException.Code.INVALID_SECURITY_TOKEN, e);
     }

@@ -29,6 +29,7 @@ import org.apache.shindig.gadgets.UserPrefs;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Locale;
@@ -262,7 +263,7 @@ public class HttpGadgetContext extends GadgetContext {
       return super.getToken();
     } else {
       try {
-        return tokenDecoder.createToken(tokenString);
+        return tokenDecoder.createToken(Collections.singletonMap(SecurityTokenDecoder.SECURITY_TOKEN_NAME, tokenString));
       } catch (SecurityTokenException e) {
         throw new GadgetException(
             GadgetException.Code.INVALID_SECURITY_TOKEN, e);

@@ -18,10 +18,18 @@
  */
 package org.apache.shindig.common;
 
+import java.util.Map;
+
 /**
  *  Handles verification of gadget security tokens.
  */
 public interface SecurityTokenDecoder {
+
+  /**
+   * The security token value must be passed on a map value referenced by this key. Additional
+   * parameters can be passed as seen fit.
+   */
+  String SECURITY_TOKEN_NAME = "token";
 
   /**
    * Decrypts and verifies a gadget security token to return a gadget token.
@@ -30,6 +38,6 @@ public interface SecurityTokenDecoder {
    * @return the decrypted and verified token.
    * @throws SecurityTokenException If tokenString is not a valid token
    */
-  public SecurityToken createToken(String tokenString)
+  SecurityToken createToken(Map<String, String> tokenParameters)
       throws SecurityTokenException;
 }

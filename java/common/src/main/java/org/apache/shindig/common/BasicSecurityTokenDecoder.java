@@ -24,6 +24,7 @@ import com.google.inject.Singleton;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
+import java.util.Map;
 
 /**
  * A SecurityTokenDecoder implementation that just provides dummy data to satisfy
@@ -44,10 +45,16 @@ public class BasicSecurityTokenDecoder implements SecurityTokenDecoder {
    *
    * Returns a token with some faked out values.
    */
-  public SecurityToken createToken(String stringToken)
+  public SecurityToken createToken(Map<String, String> parameters)
       throws SecurityTokenException {
+
+    final String token = parameters.get(SecurityTokenDecoder.SECURITY_TOKEN_NAME);
+    if (token == null || token.trim().length() == 0) {
+      throw new SecurityTokenException("Missing security token");
+    }
+
     try {
-      String[] tokens = stringToken.split(":");
+      String[] tokens = token.split(":");
       return new BasicSecurityToken(
           URLDecoder.decode(tokens[OWNER_INDEX], "UTF-8"),
           URLDecoder.decode(tokens[VIEWER_INDEX], "UTF-8"),

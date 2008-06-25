@@ -18,11 +18,13 @@
 package org.apache.shindig.social.dataservice.integration;
 
 import org.apache.shindig.common.BasicSecurityTokenDecoder;
+import org.apache.shindig.social.GadgetDataServletFetcher;
 import org.apache.shindig.social.SocialApiTestsGuiceModule;
 import org.apache.shindig.social.dataservice.ActivityHandler;
 import org.apache.shindig.social.dataservice.AppDataHandler;
 import org.apache.shindig.social.dataservice.DataRequestHandler;
 import org.apache.shindig.social.dataservice.DataServiceServlet;
+import org.apache.shindig.social.dataservice.DataServiceServletFetcher;
 import org.apache.shindig.social.dataservice.HandlerProvider;
 import org.apache.shindig.social.dataservice.PersonHandler;
 import org.apache.shindig.social.opensocial.util.BeanJsonConverter;
@@ -67,6 +69,7 @@ public abstract class AbstractLargeRestfulTests extends TestCase {
     servlet.setBeanConverters(new BeanJsonConverter(
         Guice.createInjector(new SocialApiTestsGuiceModule())), new BeanXmlConverter());
     servlet.setSecurityTokenDecoder(new BasicSecurityTokenDecoder());
+    servlet.setParameterFetcher(new DataServiceServletFetcher());
 
     req = EasyMock.createMock(HttpServletRequest.class);
     res = EasyMock.createMock(HttpServletResponse.class);

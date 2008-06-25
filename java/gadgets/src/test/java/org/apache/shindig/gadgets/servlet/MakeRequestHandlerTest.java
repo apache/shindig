@@ -27,6 +27,7 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import org.apache.shindig.common.SecurityToken;
+import org.apache.shindig.common.SecurityTokenDecoder;
 import org.apache.shindig.common.SecurityTokenException;
 import org.apache.shindig.common.testing.FakeGadgetToken;
 import org.apache.shindig.gadgets.GadgetException;
@@ -45,6 +46,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.net.URI;
+import java.util.Collections;
 import java.util.List;
 
 import javax.servlet.http.HttpServletResponse;
@@ -247,7 +249,7 @@ public class MakeRequestHandlerTest {
   public void signedGetRequest() throws Exception {
     // Doesn't actually sign since it returns the standard fetcher.
     // Signing tests are in SigningFetcherTest
-    expect(fixture.securityTokenDecoder.createToken("fake-token")).andReturn(DUMMY_TOKEN);
+    expect(fixture.securityTokenDecoder.createToken(Collections.singletonMap(SecurityTokenDecoder.SECURITY_TOKEN_NAME, "fake-token"))).andReturn(DUMMY_TOKEN);
     expect(fixture.request.getParameter(MakeRequestHandler.SECURITY_TOKEN_PARAM))
         .andReturn("fake-token").atLeastOnce();
     expect(fixture.request.getParameter(Preload.AUTHZ_ATTR))
@@ -267,7 +269,7 @@ public class MakeRequestHandlerTest {
     // Doesn't actually sign since it returns the standard fetcher.
     // Signing tests are in SigningFetcherTest
     expectPostAndReturnBody(fixture.signingFetcher, REQUEST_BODY, RESPONSE_BODY);
-    expect(fixture.securityTokenDecoder.createToken("fake-token")).andReturn(DUMMY_TOKEN);
+    expect(fixture.securityTokenDecoder.createToken(Collections.singletonMap(SecurityTokenDecoder.SECURITY_TOKEN_NAME, "fake-token"))).andReturn(DUMMY_TOKEN);
     expect(fixture.request.getParameter(MakeRequestHandler.SECURITY_TOKEN_PARAM))
         .andReturn("fake-token").atLeastOnce();
     expect(fixture.request.getParameter(Preload.AUTHZ_ATTR))
@@ -288,7 +290,7 @@ public class MakeRequestHandlerTest {
     // Signing tests are in SigningFetcherTest
     expectGetAndReturnBody(fixture.signingFetcher, RESPONSE_BODY);
     FakeGadgetToken authToken = new FakeGadgetToken("updated");
-    expect(fixture.securityTokenDecoder.createToken("fake-token")).andReturn(authToken);
+    expect(fixture.securityTokenDecoder.createToken(Collections.singletonMap(SecurityTokenDecoder.SECURITY_TOKEN_NAME, "fake-token"))).andReturn(authToken);
     expect(fixture.request.getParameter(MakeRequestHandler.SECURITY_TOKEN_PARAM))
         .andReturn("fake-token").atLeastOnce();
     expect(fixture.request.getParameter(Preload.AUTHZ_ATTR))
@@ -308,7 +310,7 @@ public class MakeRequestHandlerTest {
     // OAuth tests are in OAuthFetcherTest
     expectGetAndReturnBody(fixture.oauthFetcher, RESPONSE_BODY);
     FakeGadgetToken authToken = new FakeGadgetToken("updated");
-    expect(fixture.securityTokenDecoder.createToken("fake-token")).andReturn(authToken);
+    expect(fixture.securityTokenDecoder.createToken(Collections.singletonMap(SecurityTokenDecoder.SECURITY_TOKEN_NAME, "fake-token"))).andReturn(authToken);
     expect(fixture.request.getParameter(MakeRequestHandler.SECURITY_TOKEN_PARAM))
         .andReturn("fake-token").atLeastOnce();
     expect(fixture.request.getParameter(Preload.AUTHZ_ATTR))
@@ -353,7 +355,7 @@ public class MakeRequestHandlerTest {
         .andReturn("fake-token").atLeastOnce();
     expect(fixture.request.getParameter(Preload.AUTHZ_ATTR))
         .andReturn(Auth.SIGNED.toString()).atLeastOnce();
-    expect(fixture.securityTokenDecoder.createToken("fake-token"))
+    expect(fixture.securityTokenDecoder.createToken(Collections.singletonMap(SecurityTokenDecoder.SECURITY_TOKEN_NAME, "fake-token")))
         .andThrow(new SecurityTokenException("No!"));
     fixture.replay();
 

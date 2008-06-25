@@ -21,6 +21,7 @@ import org.apache.shindig.common.SecurityToken;
 import org.apache.shindig.common.SecurityTokenDecoder;
 import org.apache.shindig.common.SecurityTokenException;
 import org.apache.shindig.common.servlet.InjectedServlet;
+import org.apache.shindig.common.servlet.ParameterFetcher;
 import org.apache.shindig.social.ResponseItem;
 import org.apache.shindig.social.opensocial.util.BeanConverter;
 import org.apache.shindig.social.opensocial.util.BeanJsonConverter;
@@ -29,6 +30,7 @@ import org.apache.shindig.social.opensocial.util.BeanXmlConverter;
 import com.google.common.collect.Maps;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
+import com.google.inject.name.Named;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import org.json.JSONException;
@@ -62,6 +64,7 @@ public class DataServiceServlet extends InjectedServlet {
   private Map<String, Class<? extends DataRequestHandler>> handlers;
   private BeanJsonConverter jsonConverter;
   private BeanXmlConverter xmlConverter;
+  private ParameterFetcher parameterFetcher;
   private static final String JSON_BATCH_ROUTE = "jsonBatch";
 
   @Inject
@@ -78,6 +81,11 @@ public class DataServiceServlet extends InjectedServlet {
   public void setBeanConverters(BeanJsonConverter jsonConverter, BeanXmlConverter xmlConverter) {
     this.jsonConverter = jsonConverter;
     this.xmlConverter = xmlConverter;
+  }
+
+  @Inject
+  public void setParameterFetcher(@Named("DataServiceServlet") ParameterFetcher parameterFetcher) {
+    this.parameterFetcher = parameterFetcher;
   }
 
   // Only for testing use. Do not override the injector.
@@ -181,7 +189,7 @@ public class DataServiceServlet extends InjectedServlet {
   SecurityToken getSecurityToken(HttpServletRequest servletRequest) {
     SecurityToken token;
     try {
-      token = securityTokenDecoder.createToken(servletRequest.getParameter(SECURITY_TOKEN_PARAM));
+      token = securityTokenDecoder.createToken(parameterFetcher.fetch(servletRequest));
     } catch (SecurityTokenException e) {
       throw new RuntimeException("Implement error return for bad security token.", e);
     }

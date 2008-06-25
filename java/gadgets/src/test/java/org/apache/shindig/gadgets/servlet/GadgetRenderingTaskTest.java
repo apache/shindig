@@ -22,6 +22,7 @@ import static org.easymock.EasyMock.expect;
 import static org.easymock.EasyMock.expectLastCall;
 import static org.easymock.EasyMock.isA;
 
+import org.apache.shindig.common.SecurityTokenDecoder;
 import org.apache.shindig.common.testing.FakeGadgetToken;
 import org.apache.shindig.common.util.Utf8UrlCoder;
 import org.apache.shindig.gadgets.ContainerConfig;
@@ -38,6 +39,7 @@ import org.json.JSONObject;
 import java.net.URI;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Enumeration;
 import java.util.List;
 
@@ -209,7 +211,7 @@ public class GadgetRenderingTaskTest extends HttpTestFixture {
 
   public void testAuthTokenInjection_allparams() throws Exception {
     expect(fixture.request.getParameter("st")).andReturn("fake-token");
-    expect(securityTokenDecoder.createToken("fake-token")).andReturn(
+    expect(securityTokenDecoder.createToken(Collections.singletonMap(SecurityTokenDecoder.SECURITY_TOKEN_NAME, "fake-token"))).andReturn(
         new FakeGadgetToken("updated-token", "{ \"foo\" : \"bar\" }"));
     String content = parseBasicGadget(GadgetSpec.DEFAULT_VIEW);
     JSONObject auth = parseShindigAuthConfig(content);
@@ -219,7 +221,7 @@ public class GadgetRenderingTaskTest extends HttpTestFixture {
 
   public void testAuthTokenInjection_none() throws Exception {
     expect(fixture.request.getParameter("st")).andReturn("fake-token");
-    expect(securityTokenDecoder.createToken("fake-token")).andReturn(
+    expect(securityTokenDecoder.createToken(Collections.singletonMap(SecurityTokenDecoder.SECURITY_TOKEN_NAME, "fake-token"))).andReturn(
         new FakeGadgetToken());
     String content = parseBasicGadget(GadgetSpec.DEFAULT_VIEW);
     JSONObject auth = parseShindigAuthConfig(content);
@@ -228,7 +230,7 @@ public class GadgetRenderingTaskTest extends HttpTestFixture {
 
   public void testAuthTokenInjection_trustedJson() throws Exception {
     expect(fixture.request.getParameter("st")).andReturn("fake-token");
-    expect(securityTokenDecoder.createToken("fake-token")).andReturn(
+    expect(securityTokenDecoder.createToken(Collections.singletonMap(SecurityTokenDecoder.SECURITY_TOKEN_NAME, "fake-token"))).andReturn(
         new FakeGadgetToken(null, "trusted"));
     String content = parseBasicGadget(GadgetSpec.DEFAULT_VIEW);
     JSONObject auth = parseShindigAuthConfig(content);
@@ -238,7 +240,7 @@ public class GadgetRenderingTaskTest extends HttpTestFixture {
 
   public void testAuthTokenInjection_updatedToken() throws Exception {
     expect(fixture.request.getParameter("st")).andReturn("fake-token");
-    expect(securityTokenDecoder.createToken("fake-token")).andReturn(
+    expect(securityTokenDecoder.createToken(Collections.singletonMap(SecurityTokenDecoder.SECURITY_TOKEN_NAME, "fake-token"))).andReturn(
         new FakeGadgetToken("updated-token", null));
     String content = parseBasicGadget(GadgetSpec.DEFAULT_VIEW);
     JSONObject auth = parseShindigAuthConfig(content);

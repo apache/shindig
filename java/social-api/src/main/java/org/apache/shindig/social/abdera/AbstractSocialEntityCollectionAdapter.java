@@ -46,6 +46,7 @@ import org.apache.abdera.protocol.server.context.ResponseContextException;
 import org.apache.abdera.protocol.server.impl.AbstractEntityCollectionAdapter;
 import org.json.JSONException;
 
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -115,7 +116,7 @@ public abstract class AbstractSocialEntityCollectionAdapter<T> extends
     if (token == null || token.trim().length() == 0) {
       throw new SecurityTokenException("Missing security token");
     }
-    return securityTokenDecoder.createToken(token);
+    return securityTokenDecoder.createToken(Collections.singletonMap(SecurityTokenDecoder.SECURITY_TOKEN_NAME, token));
   }
 
   /**

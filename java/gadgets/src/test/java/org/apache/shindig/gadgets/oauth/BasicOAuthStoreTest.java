@@ -27,6 +27,7 @@ import net.oauth.OAuthAccessor;
 import net.oauth.OAuthServiceProvider;
 import net.oauth.signature.RSA_SHA1;
 
+import org.apache.shindig.common.SecurityTokenDecoder;
 import org.easymock.classextension.EasyMock;
 import org.easymock.classextension.IMocksControl;
 
@@ -331,7 +332,7 @@ public class BasicOAuthStoreTest extends TestCase {
     tokenKey.setUserId("test user");
 
     OAuthStore.TokenInfo tokenInfo =
-        new OAuthStore.TokenInfo("token", "secret");
+        new OAuthStore.TokenInfo(SecurityTokenDecoder.SECURITY_TOKEN_NAME, "secret");
 
 
     expect(mockTokens.put(tokenKey, tokenInfo)).andReturn(null);
