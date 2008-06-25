@@ -41,7 +41,10 @@ class CacheFile extends Cache {
 		$cacheDir = dirname($cacheFile);
 		if (! is_dir($cacheDir)) {
 			if (! @mkdir($cacheDir, 0755, true)) {
-				throw new CacheException("Could not create cache directory");
+				// make sure the failure isn't because of a concurency issue
+				if (! is_dir($cacheDir)) {
+					throw new CacheException("Could not create cache directory");
+				}
 			}
 		}
 		@touch($cacheFile . '.lock');
