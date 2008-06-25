@@ -27,43 +27,43 @@ class MediaItem {
 	public $type;
 	public $url;
 	
-	public $types = array('AUDIO', 'VIDEO', 'IMAGE');
-	
+	public $types = array('AUDIO' => 'audio', 'VIDEO' => 'video', 'IMAGE' => 'image');
+
 	public function __construct($mimeType, $type, $url)
 	{
 		$this->setMimeType($mimeType);
 		$this->setType($type);
 		$this->setUrl($url);
 	}
-	
+
 	public function getMimeType()
 	{
 		return $this->mimeType;
 	}
-	
+
 	public function setMimeType($mimeType)
 	{
 		$this->mimeType = $mimeType;
 	}
-	
+
 	public function getType()
 	{
 		return $this->type;
 	}
-	
+
 	public function setType($type)
 	{
-		if (! in_array($type, $this->types)) {
+		if (! array_key_exists($type, $this->types)) {
 			throw new Exception("Invalid Media type");
 		}
-		$this->type = $type;
+		$this->type = $this->types[$type];
 	}
-	
+
 	public function getUrl()
 	{
 		return $this->url;
 	}
-	
+
 	public function setUrl($url)
 	{
 		$this->url = $url;
