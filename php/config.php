@@ -98,6 +98,12 @@ $shindigConfig = array(
 	'cache_time' => 24 * 60 * 60,
 	'cache_root' => '/tmp/shindig', 
 	
+	// Some people develop living behind a proxy server, setting this to your
+	// proxy's url (proxy.mycompany.com) will make curl use that proxy.
+	// On production systems you would not want to do this since it would mess up
+	// the refreshInterval and caching policies of shindig
+	'proxy' => '',
+
 	// See certs/README on how to generate these keys
 	// OAuth private key path
 	'private_key_file' => realpath(dirname(__FILE__)) . '/certs/private.key', 

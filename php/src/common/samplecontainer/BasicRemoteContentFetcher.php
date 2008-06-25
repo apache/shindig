@@ -37,6 +37,10 @@ class BasicRemoteContentFetcher extends RemoteContentFetcher {
 		curl_setopt($request->handle, CURLOPT_TIMEOUT, 20);
 		curl_setopt($request->handle, CURLOPT_HEADER, 1);
 		curl_setopt($request->handle, CURLOPT_SSL_VERIFYPEER, 0);
+		$proxy = Config::get('proxy');
+		if (!empty($proxy)) {
+			curl_setopt($request->handle, CURLOPT_PROXY, $proxy);
+		}
 		if ($request->hasHeaders()) {
 			$headers = explode("\n", $request->getHeaders());
 			$outHeaders = array();
