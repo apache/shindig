@@ -43,7 +43,7 @@ class BasicSecurityTokenDecoder extends SecurityTokenDecoder {
 				$tokens = explode(":", $stringToken);
 				return new BasicSecurityToken(null, null, urldecode($tokens[$this->OWNER_INDEX]), urldecode($tokens[$this->VIEWER_INDEX]), urldecode($tokens[$this->APP_ID_INDEX]), urldecode($tokens[$this->CONTAINER_INDEX]), urldecode($tokens[$this->APP_URL_INDEX]), urldecode($tokens[$this->MODULE_ID_INDEX]));
 			} else {
-				return BasicSecurityToken::createFromToken($stringToken, Config::get('st_max_age'));
+				return BasicSecurityToken::createFromToken($stringToken, Config::get('token_max_age'));
 			}
 		} catch (Exception $e) {
 			throw new GadgetException('INVALID_GADGET_TOKEN');
