@@ -21,21 +21,24 @@ import org.apache.shindig.common.SecurityToken;
 import org.apache.shindig.common.SecurityTokenDecoder;
 import org.apache.shindig.common.SecurityTokenException;
 import org.apache.shindig.common.servlet.InjectedServlet;
+import org.apache.shindig.common.servlet.ParameterFetcher;
 import org.apache.shindig.social.opensocial.util.BeanJsonConverter;
-
-import com.google.inject.Inject;
-import com.google.common.collect.Lists;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import com.google.common.collect.Lists;
+import com.google.inject.Inject;
+import com.google.inject.name.Named;
+
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.logging.Logger;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 /**
  * Servlet for handling gadget requests for data. The request accepts one json
@@ -57,9 +60,12 @@ public class GadgetDataServlet extends InjectedServlet {
   private static final Logger logger
       = Logger.getLogger("org.apache.shindig.social");
 
+  public static final String REQUEST_PARAMETER_NAME = "request";
+
   private List<GadgetDataHandler> handlers;
   private SecurityTokenDecoder securityTokenDecoder;
   private BeanJsonConverter beanJsonConverter;
+  private ParameterFetcher parameterFetcher;
 
   @Inject
   public void setGadgetDataHandlers(List<GadgetDataHandler> handlers) {
@@ -76,21 +82,24 @@ public class GadgetDataServlet extends InjectedServlet {
     this.beanJsonConverter = beanJsonConverter;
   }
 
+  @Inject
+  public void setParameterFetcher(@Named("GadgetDataServlet") ParameterFetcher parameterFetcher) {
+    this.parameterFetcher = parameterFetcher;
+  }
+
   @Override
   protected void doPost(HttpServletRequest req, HttpServletResponse resp)
       throws IOException {
 
     req.setCharacterEncoding("UTF-8");
-    String requestParam = req.getParameter("request");
-    String token = req.getParameter("st");
 
     DataResponse response;
     try {
-      response = new DataResponse(createResponse(requestParam, token));
+      response = new DataResponse(createResponse(parameterFetcher.fetch(req)));
     } catch (JSONException e) {
       response = new DataResponse(ResponseError.BAD_REQUEST);
     } catch (SecurityTokenException e) {
-      logger.info("Request was made with invalid security token: " + token);
+      logger.info("Request was made with invalid security token: " + e.getMessage());
       response = new DataResponse(ResponseError.BAD_REQUEST);
     }
     resp.setContentType("application/json; charset=utf-8");
@@ -99,12 +108,12 @@ public class GadgetDataServlet extends InjectedServlet {
     writer.write(json.toString());
   }
 
-  private List<ResponseItem> createResponse(String requestParam, String token)
+  private List<ResponseItem> createResponse(Map<String, String> parameters)
       throws JSONException, SecurityTokenException {
-    if (token == null || token.trim().length() == 0) {
-      throw new SecurityTokenException("Missing security token");
-    }
-    SecurityToken securityToken = securityTokenDecoder.createToken(token);
+
+    final SecurityToken securityToken = securityTokenDecoder.createToken(parameters);
+
+    final String requestParam = parameters.get(REQUEST_PARAMETER_NAME);
 
     // TODO: Improve json input handling. The json request should get auto
     // translated into objects

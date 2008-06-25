@@ -20,9 +20,11 @@ package org.apache.shindig.social;
 
 import org.apache.shindig.common.BasicSecurityTokenDecoder;
 import org.apache.shindig.common.SecurityTokenDecoder;
+import org.apache.shindig.common.servlet.ParameterFetcher;
 import org.apache.shindig.social.abdera.SocialRouteManager;
 import org.apache.shindig.social.dataservice.ActivityService;
 import org.apache.shindig.social.dataservice.AppDataService;
+import org.apache.shindig.social.dataservice.DataServiceServletFetcher;
 import org.apache.shindig.social.dataservice.PersonService;
 import org.apache.shindig.social.opensocial.ActivitiesService;
 import org.apache.shindig.social.opensocial.DataService;
@@ -57,6 +59,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.inject.AbstractModule;
 import com.google.inject.Singleton;
+import com.google.inject.name.Names;
 
 import java.net.URI;
 import java.util.Date;
@@ -86,6 +89,9 @@ public class SocialApiTestsGuiceModule extends AbstractModule {
     bind(SocialRouteManager.class).to(SampleContainerRouteManager.class);
 
     bind(SecurityTokenDecoder.class).to(BasicSecurityTokenDecoder.class);
+
+    bind(ParameterFetcher.class).annotatedWith(Names.named("GadgetDataServlet")).to(GadgetDataServletFetcher.class);
+    bind(ParameterFetcher.class).annotatedWith(Names.named("DataServiceServlet")).to(DataServiceServletFetcher.class);
 
     bind(Activity.class).to(ActivityImpl.class);
     bind(MediaItem.class).to(MediaItemImpl.class);

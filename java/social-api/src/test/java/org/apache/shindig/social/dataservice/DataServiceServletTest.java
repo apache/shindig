@@ -18,7 +18,9 @@
 package org.apache.shindig.social.dataservice;
 
 import org.apache.shindig.common.BasicSecurityTokenDecoder;
+import org.apache.shindig.common.SecurityTokenDecoder;
 import org.apache.shindig.common.SecurityTokenException;
+import org.apache.shindig.common.servlet.ParameterFetcher;
 import org.apache.shindig.common.testing.FakeGadgetToken;
 import org.apache.shindig.social.ResponseItem;
 import org.apache.shindig.social.SocialApiTestsGuiceModule;
@@ -36,6 +38,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.PrintWriter;
 import java.io.IOException;
+import java.util.Collections;
 import java.util.Enumeration;
 import java.util.StringTokenizer;
 
@@ -75,6 +78,8 @@ public class DataServiceServletTest extends TestCase {
         new AppDataHandler(null)));
 
     servlet.setBeanConverters(jsonConverter, xmlConverter);
+
+    servlet.setParameterFetcher(new DataServiceServletFetcher());
 
     tokenDecoder = EasyMock.createMock(BasicSecurityTokenDecoder.class);
     servlet.setSecurityTokenDecoder(tokenDecoder);
@@ -135,7 +140,7 @@ public class DataServiceServletTest extends TestCase {
         .andReturn(tokenString);
 
     FakeGadgetToken token = new FakeGadgetToken();
-    EasyMock.expect(tokenDecoder.createToken(tokenString)).andReturn(token);
+    EasyMock.expect(tokenDecoder.createToken(Collections.singletonMap(SecurityTokenDecoder.SECURITY_TOKEN_NAME, tokenString))).andReturn(token);
 
     setupInjector();
 
@@ -171,7 +176,7 @@ public class DataServiceServletTest extends TestCase {
     String tokenString = "owner:viewer:app:container.com:foo:bar";
     EasyMock.expect(req.getParameter(DataServiceServlet.SECURITY_TOKEN_PARAM))
         .andReturn(tokenString);
-    EasyMock.expect(tokenDecoder.createToken(tokenString)).andThrow(new SecurityTokenException(""));
+    EasyMock.expect(tokenDecoder.createToken(Collections.singletonMap(SecurityTokenDecoder.SECURITY_TOKEN_NAME, tokenString))).andThrow(new SecurityTokenException(""));
 
     EasyMock.replay(req, tokenDecoder);
     try {
