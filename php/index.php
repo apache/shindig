@@ -62,6 +62,10 @@ function __autoload($className)
 		$locations[] = 'src/socialdata/opensocial';
 		$locations[] = 'src/socialdata/samplecontainer';
 	}
+	$extension_class_paths = Config::get('extension_class_paths');
+	if (!empty($extension_class_paths)) {
+		$locations = array_merge(explode(',', $extension_class_paths), $locations);
+	}
 	// Check for the presense of this class in our all our directories.
 	$fileName = $className . '.php';
 	foreach ($locations as $path) {
