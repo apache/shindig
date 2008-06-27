@@ -221,8 +221,7 @@ public class GadgetRenderingTask {
           "a {color:#0000cc;}a:visited {color:#551a8b;}" +
           "a:active {color:#ff0000;}" +
           "body{margin: 0px;padding: 0px;background-color:white;}" +
-          "</style><base>" + gadget.getSpec().getUrl().toString() +
-          "</base></head>";
+          "</style></head>";
     markup.append(boilerPlate);
     LocaleSpec localeSpec = gadget.getSpec().getModulePrefs().getLocale(
         gadget.getContext().getLocale());
