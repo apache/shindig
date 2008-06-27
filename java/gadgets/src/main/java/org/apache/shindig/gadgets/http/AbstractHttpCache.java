@@ -55,8 +55,7 @@ public abstract class AbstractHttpCache implements HttpCache {
   public HttpResponse addResponse(URI uri, HttpResponse response) {
     if (uri == null || response == null) return response;
     response = checkResponse(response);
-    // Clone the URI to prevent outside references from preventing collection
-    addResponseImpl(URI.create(uri.toString()), response);
+    addResponseImpl(uri, response);
     return response;
   }
 

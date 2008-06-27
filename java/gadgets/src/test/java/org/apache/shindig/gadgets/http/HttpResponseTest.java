@@ -195,12 +195,11 @@ public class HttpResponseTest extends TestCase {
     assertEquals(maxAge * 1000, response.getCacheTtl());
   }
 
-  public void testLastModified() throws Exception {
+  public void testFixedDate() throws Exception {
     int time = roundToSeconds(System.currentTimeMillis());
-    addHeader("Last-Modified", DateUtil.formatDate(1000L * time));
+    addHeader("Date", DateUtil.formatDate(1000L * time));
     HttpResponse response = new HttpResponse(200, null, headers);
-    assertEquals(time, roundToSeconds(response.getLastModified()));
-    // 9 because of rounding.
+    assertEquals(time, roundToSeconds(response.getDate()));
     assertEquals(time + roundToSeconds(HttpResponse.DEFAULT_TTL),
         roundToSeconds(response.getCacheExpiration()));
   }

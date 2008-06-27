@@ -125,7 +125,7 @@ public class BasicHttpFetcher implements HttpFetcher {
       // Fall back to zero length response.
       baseIs = new ByteArrayInputStream(new byte[0]);
     }
-    
+
     String encoding = fetcher.getContentEncoding();
     // Create the appropriate stream wrapper based on the encoding type.
     InputStream is = null;

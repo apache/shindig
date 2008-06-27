@@ -111,7 +111,7 @@ public class BasicMessageBundleFactory implements MessageBundleFactory {
     // updates to eventually cascade back into the factory.
     long now = System.currentTimeMillis();
     long expiration = response.getCacheExpiration();
-    expiration = Math.min(now + minTtl, Math.max(now + maxTtl, expiration));
+    expiration = Math.max(now + minTtl, Math.min(now + maxTtl, expiration));
     synchronized (cache) {
       cache.addElement(url, new TimeoutPair(bundle, expiration));
     }
