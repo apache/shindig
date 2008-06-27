@@ -37,7 +37,11 @@ Point your apache to the php dir with a virtual host like:
 	       ServerName your.host
 	       DocumentRoot /var/www/html/shindig/php
 	       ... other normal settings in vhosts...
+		<Directory />
+			AllowOverride All
+		</Directory>
 	</VirtualHost>
+
 Restart apache, and point your browser to:
 
 http://<your.host>/gadgets/ifr?url=http://www.labpixies.com/campaigns/todo/todo.xml
