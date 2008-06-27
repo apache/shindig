@@ -172,12 +172,10 @@ public class HttpResponseTest extends TestCase {
     int expected = roundToSeconds(System.currentTimeMillis() + HttpResponse.DEFAULT_TTL);
     int expires = roundToSeconds(response.getCacheExpiration());
     assertEquals(expected, expires);
-    assertEquals(HttpResponse.DEFAULT_TTL, response.getCacheTtl());
+    assertTrue(response.getCacheTtl() <= HttpResponse.DEFAULT_TTL && response.getCacheTtl() > 0);
   }
 
   public void testExpires() throws Exception {
-    // We use a timestamp here so that we can verify that the underlying parser
-    // is robust. The /1000 * 1000 bit is just rounding to seconds.
     int ttl = 10;
     int time = roundToSeconds(System.currentTimeMillis()) + ttl;
     addHeader("Expires", DateUtil.formatDate(1000L * time));
@@ -197,6 +195,16 @@ public class HttpResponseTest extends TestCase {
     assertEquals(maxAge * 1000, response.getCacheTtl());
   }
 
+  public void testLastModified() throws Exception {
+    int time = roundToSeconds(System.currentTimeMillis());
+    addHeader("Last-Modified", DateUtil.formatDate(1000L * time));
+    HttpResponse response = new HttpResponse(200, null, headers);
+    assertEquals(time, roundToSeconds(response.getLastModified()));
+    // 9 because of rounding.
+    assertEquals(time + roundToSeconds(HttpResponse.DEFAULT_TTL),
+        roundToSeconds(response.getCacheExpiration()));
+  }
+
   public void testNegativeCaching() {
     assertTrue("Bad HTTP responses must be cacheable!",
         HttpResponse.error().getCacheExpiration() > System.currentTimeMillis());
@@ -204,7 +212,8 @@ public class HttpResponseTest extends TestCase {
         HttpResponse.notFound().getCacheExpiration() > System.currentTimeMillis());
     assertTrue("Bad HTTP responses must be cacheable!",
         HttpResponse.timeout().getCacheExpiration() > System.currentTimeMillis());
-    assertEquals(HttpResponse.NEGATIVE_CACHE_TTL, HttpResponse.error().getCacheTtl());
+    long ttl = HttpResponse.error().getCacheTtl();
+    assertTrue(ttl <= HttpResponse.DEFAULT_TTL && ttl > 0);
   }
 
   public void testNullHeaderNamesStripped() {
