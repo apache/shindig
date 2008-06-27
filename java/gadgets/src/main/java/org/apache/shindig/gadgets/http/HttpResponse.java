@@ -111,9 +111,11 @@ public class HttpResponse {
         }
       }
     }
-    // Force Date header.
-    tmpHeaders.put("Date",
-        Arrays.asList(DateUtil.formatDate(System.currentTimeMillis())));
+    // Force Last-Modified header -- caches should be sure to store this value.
+    if (tmpHeaders.get("Last-Modified") == null) {
+      tmpHeaders.put("Last-Modified",
+          Arrays.asList(DateUtil.formatDate(System.currentTimeMillis())));
+    }
     this.headers = tmpHeaders;
 
     this.metadata = new HashMap<String, String>();
@@ -287,7 +289,7 @@ public class HttpResponse {
    */
   public long getCacheExpiration() {
     if (httpStatusCode != SC_OK) {
-      return getDate() + NEGATIVE_CACHE_TTL;
+      return getLastModified() + NEGATIVE_CACHE_TTL;
     }
     if (isStrictNoCache()) {
       return -1;
@@ -300,72 +302,16 @@ public class HttpResponse {
     if (expiration != -1) {
       return expiration;
     }
-    return getDate() + DEFAULT_TTL;
+    return getLastModified() + DEFAULT_TTL;
   }
 
   /**
    * @return Consolidated ttl or -1.
    */
   public long getCacheTtl() {
-    if (httpStatusCode != SC_OK) {
-      return NEGATIVE_CACHE_TTL;
-    }
-    if (isStrictNoCache()) {
-      return -1;
-    }
-    long maxAge = getCacheControlMaxAge();
-    if (maxAge != -1) {
-      return maxAge;
-    }
-    long expiration = getExpiration();
+    long expiration = getCacheExpiration();
     if (expiration != -1) {
       return expiration - System.currentTimeMillis();
-    }
-    return DEFAULT_TTL;
-  }
-
-  /**
-   * @return The value of the HTTP Date header.
-   */
-  public long getDate() {
-    String date = getHeader("Date");
-    return DateUtil.parseDate(date).getTime();
-  }
-
-  /**
-   * @return the expiration time from the Expires header or -1 if not set
-   */
-  public long getExpiration() {
-    String expires = getHeader("Expires");
-    if (expires != null) {
-      Date expiresDate = DateUtil.parseDate(expires);
-      if (expiresDate != null) {
-        return expiresDate.getTime();
-      }
-    }
-    return -1;
-  }
-
-  /**
-   * @return max-age value or -1 if invalid or not set
-   */
-  public long getCacheControlMaxAge() {
-    String cacheControl = getHeader("Cache-Control");
-    if (cacheControl != null) {
-      String[] directives = cacheControl.split(",");
-      for (String directive : directives) {
-        directive = directive.trim();
-        if (directive.startsWith("max-age")) {
-          String[] parts = directive.split("=");
-          if (parts.length == 2) {
-            try {
-              return Long.parseLong(parts[1]) * 1000;
-            } catch (NumberFormatException e) {
-              return -1;
-            }
-          }
-        }
-      }
     }
     return -1;
   }
@@ -396,5 +342,51 @@ public class HttpResponse {
       }
     }
     return false;
+  }
+
+  /**
+   * @return The value of the Last-Modified header.
+   */
+  protected long getLastModified() {
+    String date = getHeader("Last-Modified");
+    return DateUtil.parseDate(date).getTime();
+  }
+
+  /**
+   * @return the expiration time from the Expires header or -1 if not set
+   */
+  protected long getExpiration() {
+    String expires = getHeader("Expires");
+    if (expires != null) {
+      Date expiresDate = DateUtil.parseDate(expires);
+      if (expiresDate != null) {
+        return expiresDate.getTime();
+      }
+    }
+    return -1;
+  }
+
+  /**
+   * @return max-age value or -1 if invalid or not set
+   */
+  protected long getCacheControlMaxAge() {
+    String cacheControl = getHeader("Cache-Control");
+    if (cacheControl != null) {
+      String[] directives = cacheControl.split(",");
+      for (String directive : directives) {
+        directive = directive.trim();
+        if (directive.startsWith("max-age")) {
+          String[] parts = directive.split("=");
+          if (parts.length == 2) {
+            try {
+              return Long.parseLong(parts[1]) * 1000;
+            } catch (NumberFormatException e) {
+              return -1;
+            }
+          }
+        }
+      }
+    }
+    return -1;
   }
 }
