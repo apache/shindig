@@ -112,9 +112,8 @@ public class HttpResponse {
       }
     }
     // Force Last-Modified header -- caches should be sure to store this value.
-    if (tmpHeaders.get("Last-Modified") == null) {
-      tmpHeaders.put("Last-Modified",
-          Arrays.asList(DateUtil.formatDate(System.currentTimeMillis())));
+    if (tmpHeaders.get("Date") == null) {
+      tmpHeaders.put("Date", Arrays.asList(DateUtil.formatDate(System.currentTimeMillis())));
     }
     this.headers = tmpHeaders;
 
@@ -289,7 +288,7 @@ public class HttpResponse {
    */
   public long getCacheExpiration() {
     if (httpStatusCode != SC_OK) {
-      return getLastModified() + NEGATIVE_CACHE_TTL;
+      return getDate() + NEGATIVE_CACHE_TTL;
     }
     if (isStrictNoCache()) {
       return -1;
@@ -302,7 +301,7 @@ public class HttpResponse {
     if (expiration != -1) {
       return expiration;
     }
-    return getLastModified() + DEFAULT_TTL;
+    return getDate() + DEFAULT_TTL;
   }
 
   /**
@@ -345,10 +344,10 @@ public class HttpResponse {
   }
 
   /**
-   * @return The value of the Last-Modified header.
+   * @return The value of the HTTP Date header.
    */
-  protected long getLastModified() {
-    String date = getHeader("Last-Modified");
+  protected long getDate() {
+    String date = getHeader("Date");
     return DateUtil.parseDate(date).getTime();
   }
 
