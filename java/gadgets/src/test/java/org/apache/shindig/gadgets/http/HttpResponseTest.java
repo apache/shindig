@@ -185,14 +185,28 @@ public class HttpResponseTest extends TestCase {
     assertEquals(9, roundToSeconds(response.getCacheTtl()));
   }
 
-  public void testMaxAge() throws Exception {
+  public void testMaxAgeNoDate() throws Exception {
     int maxAge = 10;
+    // Guess time.
     int expected = roundToSeconds(System.currentTimeMillis()) + maxAge;
     addHeader("Cache-Control", "public, max-age=" + maxAge);
     HttpResponse response = new HttpResponse(200, null, headers);
     int expiration = roundToSeconds(response.getCacheExpiration());
+
     assertEquals(expected, expiration);
-    assertEquals(maxAge * 1000, response.getCacheTtl());
+    // Second rounding makes this n-1.
+    assertEquals(maxAge - 1 , roundToSeconds(response.getCacheTtl()));
+  }
+
+  public void testMaxAgeWithDate() throws Exception {
+    int maxAge = 10;
+    int now = roundToSeconds(System.currentTimeMillis());
+    addHeader("Date", DateUtil.formatDate(1000L * now));
+    addHeader("Cache-Control", "public, max-age=" + maxAge);
+    HttpResponse response = new HttpResponse(200, null, headers);
+
+    assertEquals(now + maxAge, roundToSeconds(response.getCacheExpiration()));
+    assertEquals(maxAge - 1, roundToSeconds(response.getCacheTtl()));
   }
 
   public void testFixedDate() throws Exception {
