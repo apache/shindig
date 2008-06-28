@@ -40,7 +40,12 @@ class HttpServlet {
 		// set our default cache time (config cache time defaults to 24 hours aka 1 day)
 		$this->cacheTime = Config::get('cache_time');
 		// to do our header magic, we need output buffering on
-		ob_start();
+		$zlib_output = ini_get('zlib.output_compression');
+		if ((!$zlib_output || strtolower($zlib_output) == 'off') && function_exists('ob_gzhandler')) { 
+			ob_start('ob_gzhandler');
+		} else {
+			ob_start();
+		}
 	}
 
 	/**
@@ -53,19 +58,16 @@ class HttpServlet {
 	{
 		if (! $this->noHeaders) {
 			header("Content-Type: $this->contentType; charset={$this->charset}");
-			header('Connection: Keep-Alive');
-			header('Keep-Alive: timeout=15, max=30');
 			header('Accept-Ranges: bytes');
-			header('Content-Length: ' . ob_get_length());
-			$content = ob_get_clean();
+			$content = ob_get_contents();
 			if ($this->noCache) {
-				header("Cache-Control: no-cache, must-revalidate");
-				header("Expires: Mon, 26 Jul 1997 05:00:00 GMT");
+				header("Cache-Control: no-cache, must-revalidate", true);
+				header("Expires: Mon, 26 Jul 1997 05:00:00 GMT", true);
 			} else {
 				// attempt at some propper header handling from php
 				// this departs a little from the shindig code but it should give is valid http protocol handling
-				header('Cache-Control: public,max-age=' . $this->cacheTime);
-				header("Expires: " . gmdate("D, d M Y H:i:s", time() + $this->cacheTime) . " GMT");
+				header('Cache-Control: public,max-age=' . $this->cacheTime, true);
+				header("Expires: " . gmdate("D, d M Y H:i:s", time() + $this->cacheTime) . " GMT", true);
 				// Obey browsers (or proxy's) request to send a fresh copy if we recieve a no-cache pragma or cache-control request
 				if (! isset($_SERVER['HTTP_PRAGMA']) || ! strstr(strtolower($_SERVER['HTTP_PRAGMA']), 'no-cache') && (! isset($_SERVER['HTTP_CACHE_CONTROL']) || ! strstr(strtolower($_SERVER['HTTP_CACHE_CONTROL']), 'no-cache'))) {
 					// If the browser send us a E-TAG check if it matches (md5 sum of content), if so send a not modified header instead of content
@@ -73,10 +75,11 @@ class HttpServlet {
 					if (isset($_SERVER['HTTP_IF_NONE_MATCH']) && $_SERVER['HTTP_IF_NONE_MATCH'] == $etag) {
 						header("ETag: \"$etag\"");
 						if ($this->lastModified) {
-							header('Last-Modified: ' . gmdate('D, d M Y H:i:s', $this->lastModified));
+							header('Last-Modified: ' . gmdate('D, d M Y H:i:s', $this->lastModified), true);
 						}
-						header("HTTP/1.1 304 Not Modified");
-						header('Content-Length: 0');
+						header("HTTP/1.1 304 Not Modified", true);
+						header('Content-Length: 0', true);
+						ob_end_clean();
 						die();
 					}
 					header("ETag: \"$etag\"");
@@ -85,16 +88,16 @@ class HttpServlet {
 					if (isset($_SERVER['HTTP_IF_MODIFIED_SINCE']) && $this->lastModified && ! isset($_SERVER['HTTP_IF_NONE_MATCH'])) {
 						$if_modified_since = strtotime($_SERVER['HTTP_IF_MODIFIED_SINCE']);
 						if ($this->lastModified <= $if_modified_since) {
-							header('Last-Modified: ' . gmdate('D, d M Y H:i:s', $this->lastModified));
-							header("HTTP/1.1 304 Not Modified");
-							header('Content-Length: 0');
+							header('Last-Modified: ' . gmdate('D, d M Y H:i:s', $this->lastModified), true);
+							header("HTTP/1.1 304 Not Modified", true);
+							header('Content-Length: 0', true);
+							ob_end_clean();
 							die();
 						}
 					}
-					header('Last-Modified: ' . gmdate('D, d M Y H:i:s', ($this->lastModified ? $this->lastModified : time())));
+					header('Last-Modified: ' . gmdate('D, d M Y H:i:s', ($this->lastModified ? $this->lastModified : time())), true);
 				}
 			}
-			echo $content;
 		}
 	}
 
