@@ -27,9 +27,7 @@ import javax.servlet.http.HttpServletRequest;
  * parameters are passed on to other parts of the container. Using this Adapter allows
  * e.g. to pass multiple parameters into the secure token generation methods.
  */
-
-public interface ParameterFetcher
-{
+public interface ParameterFetcher {
     Map<String, String> fetch(HttpServletRequest req);
 }
 
