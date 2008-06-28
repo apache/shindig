@@ -83,11 +83,6 @@ class JsServlet extends HttpServlet {
 				header("HTTP/1.0 404 Not Found", true);
 				die();
 			}
-			if (! isset($_GET['c']) || $_GET['c'] != 1) {
-				$contents = preg_replace('/\/\/.*$/m', '', preg_replace('@/\\*(?:.|[\\n\\r])*?\\*/@', '', file_get_contents(Config::get('container_config'))));
-				$containerData = json_decode($contents, true);
-				$jsData .= "\ngadgets.config.init(" . json_encode($containerData['gadgets.features']) . ");\n";
-			}
 			$this->setCachingHeaders();
 			header('Content-Length: ' . strlen($jsData));
 			header("Content-Type: text/javascript");
