@@ -172,10 +172,11 @@ class GadgetRenderingServlet extends HttpServlet {
 			}
 			// otherwise it was already included by config.forceJsLibs.
 		}
+		echo "\n--></script>\n";
 		if (strlen($externJs) > 0) {
 			echo $externJs;
 		}
-		echo "\n".
+		echo "\n<script><!--\n".
 			$this->appendJsConfig($context, $gadget) . $this->appendMessages($gadget) . $this->appendPreloads($gadget, $context).
 			"\n--></script>\n<body onload='gadgets.util.runOnLoadHandlers();'>\n";
 		$gadgetExceptions = array();
