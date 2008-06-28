@@ -295,7 +295,7 @@ public class HttpResponse {
     }
     long maxAge = getCacheControlMaxAge();
     if (maxAge != -1) {
-      return maxAge + System.currentTimeMillis();
+      return getDate() + maxAge;
     }
     long expiration = getExpiration();
     if (expiration != -1) {
