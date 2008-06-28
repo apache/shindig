@@ -70,7 +70,11 @@ class Substitutions {
 			return null;
 		}
 		try {
-			return $this->substituteType($type, $uri);
+			if (!empty($type)) {
+				return $this->substituteType($type, $uri);
+			} else {
+				return $this->substitute($uri);
+			}
 		} catch (Exception $e) {
 			return "";
 		}
