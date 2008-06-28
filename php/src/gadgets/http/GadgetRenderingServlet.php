@@ -132,6 +132,10 @@ class GadgetRenderingServlet extends HttpServlet {
 		$externJs = "";
 		$externFmt = "<script src=\"%s\"></script>";
 		$forcedLibs = $context->getForcedJsLibs();
+		// allow the &libs=.. param to override our forced js libs configuration value
+		if (empty($forcedLibs)) {
+			$forcedLibs = Config::get('focedJsLibs');
+		}
 		$this->setContentType("text/html; charset=UTF-8");
 		if ($context->getIgnoreCache()) {
 			// no cache was requested, set non-caching-headers
@@ -150,34 +154,30 @@ class GadgetRenderingServlet extends HttpServlet {
 		if (! $view->getQuirks()) {
 			echo "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01//EN\" \"http://www.w3.org/TR/html4/strict.dtd\">\n";
 		}
-		echo "<html>\n<head>" . "<style type=\"text/css\">" . Config::get('gadget_css') . "</style>" . "</head><body>" . "<script><!--\n";
+		echo "<html><head><style type=\"text/css\">" . Config::get('gadget_css') . "</style></head>";
+		// Forced libs first.
+		if (! empty($forcedLibs)) {
+			$libs = explode(':', $forcedLibs);
+			echo "\n".sprintf($externFmt, Config::get('default_js_prefix') . $this->getJsUrl($libs, $gadget)) . "\n";
+		}
+		echo "<script><!--\n";
 		foreach ($gadget->getJsLibraries() as $library) {
 			$type = $library->getType();
 			if ($type == 'URL') {
 				// TODO: This case needs to be handled more gracefully by the js
 				// servlet. We should probably inline external JS as well.
 				$externJs .= sprintf($externFmt, $library->getContent()) . "\n";
-			} else 
-				if ($type == 'INLINE') {
-					echo $library->getContent();
-				} else {
-					// FILE or RESOURCE
-					if ($forcedLibs == null) {
-						echo $library->getContent() . "\n";
-					}
-					// otherwise it was already included by config.forceJsLibs.
-				}
-		}
-		echo "\n-->\n</script>\n";
-		// Forced libs first.
-		if (! empty($forcedLibs)) {
-			$libs = explode(':', $forcedLibs);
-			echo sprintf($externFmt, Config::get('default_js_prefix') . $this->getJsUrl($libs, $gadget)) . "\n";
+			} elseif (empty($forcedLibs)) {
+				echo $library->getContent();
+			}
+			// otherwise it was already included by config.forceJsLibs.
 		}
 		if (strlen($externJs) > 0) {
 			echo $externJs;
 		}
-		echo "<script><!--\n" . $this->appendJsConfig($context, $gadget) . $this->appendMessages($gadget) . $this->appendPreloads($gadget, $context) . "-->\n</script>\n";
+		echo "\n".
+			$this->appendJsConfig($context, $gadget) . $this->appendMessages($gadget) . $this->appendPreloads($gadget, $context).
+			"\n--></script>\n<body onload='gadgets.util.runOnLoadHandlers();'>\n";
 		$gadgetExceptions = array();
 		$content = $gadget->getSubstitutions()->substitute($view->getContent());
 		if (empty($content)) {
@@ -187,7 +187,7 @@ class GadgetRenderingServlet extends HttpServlet {
 		if (count($gadgetExceptions)) {
 			throw new GadgetException(print_r($gadgetExceptions, true));
 		}
-		echo $content . "\n" . "<script>gadgets.util.runOnLoadHandlers();</script>\n" . "</body>\n</html>";
+		echo $content . "\n</body>\n</html>";
 	}
 
 	/**
