@@ -27,7 +27,8 @@ require 'src/gadgets/JsLibraryFeatureFactory.php';
 
 /**
  * This event handler deals with the /js/core:caja:etc.js request which content type=url gadgets can use
- * to retrieve our features javascript code
+ * to retrieve our features javascript code, or used to make the most frequently used part of the feature
+ * library external, and hence cachable by the browser
  */
 class JsServlet extends HttpServlet {
 
@@ -37,6 +38,7 @@ class JsServlet extends HttpServlet {
 		if (isset($_SERVER['HTTP_IF_MODIFIED_SINCE'])) {
 			header("HTTP/1.1 304 Not Modified");
 			header('Content-Length: 0');
+			ob_end_clean();
 			die();
 		}
 		$uri = strtolower($_SERVER["REQUEST_URI"]);
@@ -71,7 +73,7 @@ class JsServlet extends HttpServlet {
 							$jsLib = $feature;
 							foreach ($jsLib->getLibraries($context) as $lib) {
 								if ($lib->getType() != 'URL') {
-									$jsData .= $lib->getContent();
+									$jsData .= $lib->getContent()."\n";
 								}
 							}
 						}
@@ -84,12 +86,10 @@ class JsServlet extends HttpServlet {
 				die();
 			}
 			$this->setCachingHeaders();
-			header('Content-Length: ' . strlen($jsData));
 			header("Content-Type: text/javascript");
 			echo $jsData;
 		} else {
 			header("HTTP/1.0 404 Not Found", true);
-		
 		}
 		die();
 	}

@@ -19,11 +19,6 @@
  *
  */
 
-/*
- * This isn't a multi threaded java envirioment, so we do things a bit more straightforward with context blocks and workflows,
- * which means departing from how the shinding java implementation works but it saves a lot 'dead' code here
- */
-
 class GadgetServer {
 
 	public function processGadget($context)
