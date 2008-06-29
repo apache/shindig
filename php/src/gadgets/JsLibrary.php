@@ -19,7 +19,7 @@
  */
 
 class JsLibrary {
-	private $types = array('FILE', 'RESOURCE', 'URL', 'INLINE');
+	private $types = array('FILE', 'URL', 'INLINE');
 	private $type;
 	private $content;
 	private $featureName; // used to track what feature this belongs to

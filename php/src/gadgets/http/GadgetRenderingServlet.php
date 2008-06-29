@@ -154,31 +154,40 @@ class GadgetRenderingServlet extends HttpServlet {
 		if (! $view->getQuirks()) {
 			echo "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01//EN\" \"http://www.w3.org/TR/html4/strict.dtd\">\n";
 		}
-		echo "<html><head><style type=\"text/css\">" . Config::get('gadget_css') . "</style></head>";
+		echo "<html><head><style type=\"text/css\">" . Config::get('gadget_css') . "</style></head><body>\n";
 		// Forced libs first.
 		if (! empty($forcedLibs)) {
 			$libs = explode(':', $forcedLibs);
-			echo "\n".sprintf($externFmt, Config::get('default_js_prefix') . $this->getJsUrl($libs, $gadget)) . "\n";
+			echo sprintf($externFmt, Config::get('default_js_prefix') . $this->getJsUrl($libs, $gadget)."&container=".$context->getContainer()) . "\n";
 		}
-		echo "<script><!--\n";
+		echo "<script>\n";
+		
+		if (!empty($forcedLibs)) {
+			// if some of the feature libraries are externalized (through a browser cachable <script src="/gadgets/js/opensocial-0.7:settitle.js">
+			// type url), then we don't want to include dependencies twice, so find the complete features chain, so we can skip over those
+			$forcedLibsArray = explode(':', $forcedLibs);
+			$registry = $this->context->getRegistry();
+			$missing = array();
+			$registry->getIncludedFeatures($forcedLibsArray, $forcedLibsArray, $missing);
+		}
 		foreach ($gadget->getJsLibraries() as $library) {
 			$type = $library->getType();
 			if ($type == 'URL') {
 				// TODO: This case needs to be handled more gracefully by the js
 				// servlet. We should probably inline external JS as well.
 				$externJs .= sprintf($externFmt, $library->getContent()) . "\n";
-			} elseif (empty($forcedLibs)) {
+			// else check if there are no forcedLibs, or if it wasn't included in their dep chain
+			} elseif (empty($forcedLibs) || !in_array($library->getFeatureName(), $forcedLibsArray)) {
 				echo $library->getContent();
 			}
 			// otherwise it was already included by config.forceJsLibs.
 		}
-		echo "\n--></script>\n";
+		echo $this->appendJsConfig($context, $gadget, !empty($forcedLibs)) . $this->appendMessages($gadget) . 
+			 $this->appendPreloads($gadget, $context).
+			 "</script>";
 		if (strlen($externJs) > 0) {
 			echo $externJs;
-		}
-		echo "\n<script><!--\n".
-			$this->appendJsConfig($context, $gadget) . $this->appendMessages($gadget) . $this->appendPreloads($gadget, $context).
-			"\n--></script>\n<body onload='gadgets.util.runOnLoadHandlers();'>\n";
+		}	
 		$gadgetExceptions = array();
 		$content = $gadget->getSubstitutions()->substitute($view->getContent());
 		if (empty($content)) {
@@ -188,7 +197,8 @@ class GadgetRenderingServlet extends HttpServlet {
 		if (count($gadgetExceptions)) {
 			throw new GadgetException(print_r($gadgetExceptions, true));
 		}
-		echo $content . "\n</body>\n</html>";
+		echo $content . 
+			 "\n<script>gadgets.util.runOnLoadHandlers();</script></body>\n</html>";
 	}
 
 	/**
@@ -287,29 +297,43 @@ class GadgetRenderingServlet extends HttpServlet {
 				$buf .= $lib;
 			}
 		}
-		// Build a version string from the sha1() checksum of all included javascript
-		// to ensure the client always has the right version
-		$inlineJs = '';
-		foreach ($gadget->getJsLibraries() as $library) {
-			$type = $library->getType();
-			if ($type != 'URL') {
-				$inlineJs .= $library->getContent() . "\n";
+		$cache = $this->context->getCache();
+		if (($md5 = $cache->get(md5('getJsUrlMD5'))) === false) {
+			$registry = $this->context->getRegistry();
+			$features = $registry->getAllFeatures();
+			// Build a version string from the md5() checksum of all included javascript
+			// to ensure the client always has the right version
+			$inlineJs = '';
+			foreach ($features as $feature) {
+				$library = $feature->getFeature();
+				$libs = $library->getLibraries($this->context->getRenderingContext());
+				foreach ($libs as $lib) {
+					$inlineJs .= $lib->getContent();
+				}
 			}
+			$md5 = md5($inlineJs);
+			$cache->set(md5('getJsUrlMD5'), $md5);
 		}
-		$buf .= ".js?v=" . md5($inlineJs);
+		$buf .= ".js?v=" . $md5;
 		return $buf;
 	}
 
-	private function appendJsConfig($context, $gadget)
+	private function appendJsConfig($context, $gadget, $hasForcedLibs)
 	{
 		$container = $context->getContainer();
 		$containerConfig = $context->getContainerConfig();
-		$gadgetConfig = array();
-		$featureConfig = $containerConfig->getConfig($container, 'gadgets.features');
-		foreach ($gadget->getJsLibraries() as $library) {
-			$feature = $library->getFeatureName();
-			if (! isset($gadgetConfig[$feature]) && ! empty($featureConfig[$feature])) {
-				$gadgetConfig[$feature] = $featureConfig[$feature];
+		//TODO some day we should parse the forcedLibs too, and include their config selectivly as well
+		// for now we just include everything if forced libs is set.
+		if ($hasForcedLibs) {
+			$gadgetConfig = $containerConfig->getConfig($container, 'gadgets.features');
+		} else {
+			$gadgetConfig = array();
+			$featureConfig = $containerConfig->getConfig($container, 'gadgets.features');
+			foreach ($gadget->getJsLibraries() as $library) {
+				$feature = $library->getFeatureName();
+				if (! isset($gadgetConfig[$feature]) && ! empty($featureConfig[$feature])) {
+					$gadgetConfig[$feature] = $featureConfig[$feature];
+				}
 			}
 		}
 		return "gadgets.config.init(" . json_encode($gadgetConfig) . ");\n";
@@ -366,17 +390,16 @@ class GadgetRenderingServlet extends HttpServlet {
 							echo "<html><body><h1>" . "500 - Internal Server Error" . "</h1></body></html>";
 							die();
 					}
-					$json = array(
-							$preload->getHref() => array(
-									'body' => $response->getResponseContent(), 
-									'rc' => $response->getHttpCode()));
-					$resp .= json_encode($json);
+					$resp[$preload->getHref()] = array(
+						'body' => $response->getResponseContent(), 
+						'rc' => $response->getHttpCode()
+					);
 				}
 			} catch (Exception $e) {
 				throw new Exception($e);
 			}
 		}
-		$resp = $resp == '' ? "{}" : $resp;
+		$resp = count($resp) ? json_encode($resp) : "{}";
 		return "gadgets.io.preloaded_ = " . $resp . ";\n";
 	}
 
