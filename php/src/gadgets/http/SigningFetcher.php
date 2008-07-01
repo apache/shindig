@@ -188,7 +188,7 @@ class SigningFetcher extends RemoteContentFetcher {
 		$msgParams[OAuth::$OAUTH_TOKEN] = '';
 		$domain = $this->authToken->getDomain();
 		if ($domain != null) {
-			$msgParams[OAuth::$OAUTH_CONSUMER_KEY] = 'partuza.chabotc.com'; //$domain;
+			$msgParams[OAuth::$OAUTH_CONSUMER_KEY] = $domain;
 		}
 		if ($this->keyName != null) {
 			$msgParams[SigningFetcher::$XOAUTH_PUBLIC_KEY] = $this->keyName;
