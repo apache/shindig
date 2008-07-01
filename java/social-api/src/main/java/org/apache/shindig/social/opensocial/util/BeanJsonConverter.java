@@ -19,8 +19,9 @@ package org.apache.shindig.social.opensocial.util;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import com.google.inject.Injector;
 import com.google.inject.Inject;
+import com.google.inject.Injector;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -271,7 +272,7 @@ public class BeanJsonConverter implements BeanConverter {
 
       value = map;
 
-    } else if (expectedType.getSuperclass().equals(Enum.class)) {
+    } else if (Enum.class.isAssignableFrom(expectedType)) {
       String enumString = jsonObject.getString(fieldName);
       value = Enum.valueOf((Class<? extends Enum>) expectedType, enumString);
 
@@ -288,6 +289,9 @@ public class BeanJsonConverter implements BeanConverter {
     } else if (expectedType.equals(Float.class)) {
       String stringFloat = jsonObject.getString(fieldName);
       value = new Float(stringFloat);
+    } else {
+      // Assume its an injected type
+      value = convertToObject(jsonObject.getJSONObject(fieldName).toString(), expectedType);
     }
 
     if (value != null) {
