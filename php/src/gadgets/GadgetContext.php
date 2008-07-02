@@ -61,7 +61,7 @@ class GadgetContext {
 
 	private function getRefreshIntervalParam()
 	{
-		$this->refreshInterval = isset($_GET['refresh']) ? $_GET['refresh'] : Config::get('cache_time');
+		return isset($_GET['refresh']) ? $_GET['refresh'] : Config::get('cache_time');
 	}
 
 	private function getContainerParam()

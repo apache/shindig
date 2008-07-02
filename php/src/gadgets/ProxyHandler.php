@@ -26,6 +26,7 @@ define('UNPARSEABLE_CRUFT', "throw 1; < don't be evil' >");
  * GET and POST based input, and peforms a request based on the input, headers and 
  * httpmethod params. It also deals with request signing and verification thru the
  * authz and st (security token) params. 
+ *
  */
 class ProxyHandler {
 	private $context;
@@ -162,12 +163,6 @@ class ProxyHandler {
 	 */
 	public function fetch($url, $signer, $method)
 	{
-		try {
-			$token = $this->context->extractAndValidateToken($signer);
-		} catch (Exception $e) {
-			$token = '';
-			// no token given, safe to ignore
-		}
 		$url = $this->validateUrl($url);
 		//TODO: Fetcher needs to handle variety of HTTP methods.
 		$result = $this->fetchContent($url, $method);
@@ -180,14 +175,37 @@ class ProxyHandler {
 					$key = trim(substr($header, 0, strpos($header, ':')));
 					$val = trim(substr($header, strpos($header, ':') + 1));
 					// filter out headers that would otherwise mess up our output
-					if (strcasecmp($key, "Transfer-Encoding") != 0 && strcasecmp($key, "Cache-Control") != 0 && strcasecmp($key, "Expires") != 0 && strcasecmp($key, "Content-Length") != 0) {
+					if (strcasecmp($key, "Transfer-Encoding") != 0 && strcasecmp($key, "Cache-Control") != 0 && strcasecmp($key, "Expires") != 0 && strcasecmp($key, "Content-Length") != 0 && strcasecmp($key, "ETag") != 0) {
 						header("$key: $val");
 					}
 				}
 			}
-			$this->setCachingHeaders();
-			// then echo the content
-			echo $result->getResponseContent();
+			$etag = md5($result->getResponseContent());
+			$lastModified = $result->getResponseHeader('Last-Modified') != null ? $result->getResponseHeader('Last-Modified') : gmdate('D, d M Y H:i:s', $result->getCreated().' GMT');
+			$notModified = false;
+			// If HTTP_PRAGMA | HTTP_CACHE_CONTROL == no-cache, the browser wants to do a 'forced reload' 
+			if (! isset($_SERVER['HTTP_PRAGMA']) || ! strstr(strtolower($_SERVER['HTTP_PRAGMA']), 'no-cache') && (! isset($_SERVER['HTTP_CACHE_CONTROL']) || ! strstr(strtolower($_SERVER['HTTP_CACHE_CONTROL']), 'no-cache'))) {
+				if (isset($_SERVER['HTTP_IF_NONE_MATCH']) && $_SERVER['HTTP_IF_NONE_MATCH'] == $etag) {
+					// if e-tag's match, set not modified, and no need to check the if-modified-since headers
+					$notModified = true;
+				} elseif (isset($_SERVER['HTTP_IF_MODIFIED_SINCE']) && $this->lastModified && ! isset($_SERVER['HTTP_IF_NONE_MATCH'])) {
+					$if_modified_since = strtotime($_SERVER['HTTP_IF_MODIFIED_SINCE']);
+					// Use the request's Last-Modified, otherwise fall back on our internal time keeping (the time the request was created)
+					$lastModified = strtotime($lastModified);
+					if ($lastModified <= $if_modified_since) {
+						$notModified = true;
+					}
+				}
+			}
+			$this->setCachingHeaders($etag, $this->context->getRefreshInterval(), $lastModified);
+			// If the cached file time is within the refreshInterval params value and the ETag match, return not-modified
+ 			if ($notModified) {
+ 				header('HTTP/1.0 304 Not Modified', true);
+ 				header('Content-Length: 0', true);
+ 			} else {
+				// then echo the content
+				echo $result->getResponseContent();
+ 			}
 		} else {
 			@ob_end_clean();
 			header("HTTP/1.0 404 Not Found", true);
@@ -284,11 +302,19 @@ class ProxyHandler {
 	 * the browser not to cache this. 
 	 *
 	 */
-	private function setCachingHeaders()
+	private function setCachingHeaders($etag = false, $maxAge = false, $lastModified = false)
 	{
-		// TODO: Re-implement caching behavior if appropriate.
-		header("Cache-Control: private; max-age=0", true);
-		header("Expires: " . gmdate("D, d M Y H:i:s", time() - 3000) . " GMT", true);
+		if ($etag) {
+			header("ETag: $etag");
+		}
+		if ($lastModified) {
+			header("Last-Modified: $lastModified");
+		}
+		$expires = $maxAge !== false ? time() + $maxAge : time() - 3000;
+		$public = $maxAge ? 'public' : 'private';
+		$maxAge = $maxAge === false ? '0' : $maxAge;
+		header("Cache-Control: {$public}; max-age={$maxAge}", true);
+		header("Expires: " . gmdate("D, d M Y H:i:s", $expires) . " GMT", true);
 	}
 
 	/**
