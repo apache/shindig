@@ -1,7 +1,0 @@
-This is a stripped copy of the PHPUnit: http://www.phpunit.de/
-Which is licensed under the BSD license: http://www.opensource.org/licenses/bsd-license.php
-
-To prevent having to modify the include_path, the require_once 'PHPUnit/<file>.php' statements were rewritten using:
-# find . -type f -name "*.php" | xargs grep -l "require_once 'PHPUnit" | xargs sed -i '' -e "s/require_once \'PHPUnit/require_once '..\/PHPUnit/g"
-# find . -type f -name "*.php" | xargs grep -l "require 'PHPUnit" | xargs sed -i '' -e "s/require \'PHPUnit/require '..\/PHPUnit/g"
-
