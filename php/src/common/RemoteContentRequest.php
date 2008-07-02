@@ -1,5 +1,4 @@
 <?php
-
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements. See the NOTICE file
@@ -32,6 +31,7 @@ class RemoteContentRequest {
 	private $httpCode = false;
 	private $contentType = null;
 	private $options;
+	private $created;
 	public $handle = false;
 	public static $DEFAULT_CONTENT_TYPE = "application/x-www-form-urlencoded; charset=utf-8";
 
@@ -40,6 +40,7 @@ class RemoteContentRequest {
 		$this->uri = $uri;
 		$this->headers = $headers;
 		$this->postBody = $postBody;
+		$this->created = time();
 	}
 
 	public function createRemoteContentRequest($method, $uri, $headers, $postBody, $options)
@@ -222,7 +223,7 @@ class RemoteContentRequest {
 	{
 		return $this->responseContent;
 	}
-	
+
 	public function getResponseHeaders()
 	{
 		return $this->responseHeaders;
@@ -307,25 +308,30 @@ class RemoteContentRequest {
 	{
 		$headers = explode("\n", $this->headers);
 		foreach ($headers as $header) {
-			$key = explode(":", $header);
+			$key = explode(":", $header, 2);
 			if ($key[0] == $headerName)
-				return $key[1];
+				return trim($key[1]);
 		}
 		return null;
 	}
-	
+
 	//FIXME: Find a better way to do this
 	// The headers can be an array of elements.
 	public function getResponseHeader($headerName)
 	{
 		$headers = explode("\n", $this->responseHeaders);
 		foreach ($headers as $header) {
-			$key = explode(":", $header);
+			$key = explode(":", $header, 2);
 			if ($key[0] == $headerName) {
 				return trim($key[1]);
 			}
 		}
 		return null;
+	}
+	
+	public function getCreated()
+	{
+		return $this->created;
 	}
 
 	public function setPostBody($postBody)
@@ -337,7 +343,6 @@ class RemoteContentRequest {
 	{
 		$this->uri = $uri;
 	}
-
 }
 
 /**

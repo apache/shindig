@@ -75,7 +75,7 @@ class HttpServlet {
 					if (isset($_SERVER['HTTP_IF_NONE_MATCH']) && $_SERVER['HTTP_IF_NONE_MATCH'] == $etag) {
 						header("ETag: \"$etag\"");
 						if ($this->lastModified) {
-							header('Last-Modified: ' . gmdate('D, d M Y H:i:s', $this->lastModified), true);
+							header('Last-Modified: ' . gmdate('D, d M Y H:i:s', $this->lastModified) . ' GMT', true);
 						}
 						header("HTTP/1.1 304 Not Modified", true);
 						header('Content-Length: 0', true);
@@ -88,14 +88,14 @@ class HttpServlet {
 					if (isset($_SERVER['HTTP_IF_MODIFIED_SINCE']) && $this->lastModified && ! isset($_SERVER['HTTP_IF_NONE_MATCH'])) {
 						$if_modified_since = strtotime($_SERVER['HTTP_IF_MODIFIED_SINCE']);
 						if ($this->lastModified <= $if_modified_since) {
-							header('Last-Modified: ' . gmdate('D, d M Y H:i:s', $this->lastModified), true);
+							header('Last-Modified: ' . gmdate('D, d M Y H:i:s', $this->lastModified) . ' GMT', true);
 							header("HTTP/1.1 304 Not Modified", true);
 							header('Content-Length: 0', true);
 							ob_end_clean();
 							die();
 						}
 					}
-					header('Last-Modified: ' . gmdate('D, d M Y H:i:s', ($this->lastModified ? $this->lastModified : time())), true);
+					header('Last-Modified: ' . gmdate('D, d M Y H:i:s', ($this->lastModified ? $this->lastModified : time())) . ' GMT', true);
 				}
 			}
 		}
