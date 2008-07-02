@@ -285,7 +285,7 @@ class ProxyHandler {
 				$this->oauthFetcher = $oAuthFetcherFactory->getOAuthFetcher($fetcher, $token, $params);
 				$request = new RemoteContentRequest($url);
 				$request->createRemoteContentRequestWithUri($url);
-				return $this->oauthFetcher->fetchRequest($request);
+				return $this->oauthFetcher->fetch($request);
 			case 'NONE':
 			default:
 				return $this->fetchContent($url, $method);

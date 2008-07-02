@@ -70,6 +70,8 @@ class BasicOAuthStore implements OAuthStore {
 		$consumerKeyAndSecret = null;
 		if (isset($this->consumerInfos[$key])) {
 			$consumerKeyAndSecret = $this->consumerInfos[$key];
+		} else {
+			throw new OAuthNoDataException("The Key was invalid for consumerInfos, maybe your oauth.json configuration is wrong.");
 		}
 		if ($consumerKeyAndSecret == null) {
 			if ($this->defaultConsumerKey == null || $this->defaultConsumerSecret == null) {
