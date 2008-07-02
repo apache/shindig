@@ -81,7 +81,6 @@ class OAuthFetcherFactory {
 	public function getOAuthFetcher($nextFetcher, $token, $params)
 	{
 		$fetcher = new OAuthFetcher($this->tokenStore, $this->oauthCrypter, $nextFetcher, $token, $params);
-		$fetcher->init();
 		return $fetcher;
 	}
 }

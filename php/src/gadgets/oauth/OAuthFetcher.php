@@ -147,16 +147,6 @@ class OAuthFetcher extends RemoteContentFetcher {
 		$this->tokenStore = $tokenStore;
 	}
 
-	public function init()
-	{
-		try {
-			$this->lookupOAuthMetadata();
-		} catch (Exception $e) {
-			$this->error = OAuthError::$BAD_OAUTH_CONFIGURATION;
-			return $this->buildErrorResponse($e);
-		}
-	}
-
 	private function buildErrorResponse(Exception $e)
 	{
 		if ($this->error == null) {
@@ -220,10 +210,21 @@ class OAuthFetcher extends RemoteContentFetcher {
 		$tokenKey->setUserId($this->authToken->getOwnerId());
 		return $tokenKey;
 	}
+	
+	public function fetch($request) {
+		try {
+			$this->lookupOAuthMetadata();
+		} catch (Exception $e) {
+			$this->error = OAuthError::$BAD_OAUTH_CONFIGURATION;
+			return $this->buildErrorResponse($e);
+		}
+		$this->realRequest = $request;
+		$response = $this->fetchRequest($request);
+		return $response;
+	}
 
 	public function fetchRequest($request)
 	{
-		$this->realRequest = $request;
 		if ($this->needApproval()) {
 			// This is section 6.1 of the OAuth spec.
 			$this->checkCanApprove();
