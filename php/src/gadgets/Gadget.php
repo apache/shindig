@@ -1,5 +1,4 @@
 <?php
-
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements. See the NOTICE file
@@ -19,18 +18,16 @@
  * 
  */
 
-/*
- * In Java terms this would be the Gadget, GadgetView and GadgetSpec all rolled into one
- * We combined it into one class since it makes more sense in PHP and provides a nice 
- * speedup too.
- */
-
-class Gadget {
+/**
+ * The main gadget class, this gets filled in by the GadgetSpecParser, etc
+ * and contains all the gadget information.
+ *
+ */class Gadget {
 	private $jsLibraries;
 	private $substitutions;
 	private $userPrefValues;
+	private $oAuthSpec;
 	private $messageBundle = array();
-	// As in UserPref, no enums so fake it
 	public $contentTypes = array('HTML', 'URL');
 	public $id;
 	public $author;
@@ -312,6 +309,16 @@ class Gadget {
 			return $this->views[DEFAULT_VIEW];
 		}
 		throw new GadgetException("Invalid view specified for this gadget");
+	}
+
+	public function getOAuthSpec()
+	{
+		return $this->oAuthSpec;
+	}
+
+	public function setOAuthSpec($oAuthSpec)
+	{
+		$this->oAuthSpec = $oAuthSpec;
 	}
 }
 

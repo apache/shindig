@@ -60,6 +60,8 @@ class GadgetOAuthTokenStore {
 	// (user authorization always uses GET)
 	public static $DEFAULT_HTTP_METHOD = "POST";
 	private $store;
+	private $gadgetSpec;
+	private $specFactory;
 
 	/**
 	 * Public constructor.
@@ -67,28 +69,10 @@ class GadgetOAuthTokenStore {
 	 * @param store an {@link OAuthStore} that can store and retrieve OAuth
 	 *              tokens, as well as information about service providers.
 	 */
-	public function __construct($store)
+	public function __construct($store, $specFactory)
 	{
+		$this->specFactory = $specFactory;
 		$this->store = $store;
-	}
-
-	/**
-	 * Parses a gadget spec and stores the service provider information found
-	 * in the spec into the OAuth store. The spec passed in <b>must</b> require
-	 * "oauth" as a feature. It is an error to pass in a spec that does not
-	 * require oauth.
-	 *
-	 * @param gadgetUrl the URL of the gadget
-	 * @param spec the parsed GadgetSpec of the gadget.
-	 */
-	
-	public function storeServiceInfoFromGadgetSpec($gadgetUrl, Gadget $specGadget)
-	{
-		$gadgetInfo = $this->getGadgetOAuthInfo($specGadget);
-		$providerKey = new ProviderKey();
-		$providerKey->setGadgetUri($gadgetUrl);
-		$providerKey->setServiceName($gadgetInfo->getServiceName());
-		$this->store->setOAuthServiceProviderInfo($providerKey, $gadgetInfo->getProviderInfo());
 	}
 
 	/**
@@ -120,10 +104,6 @@ class GadgetOAuthTokenStore {
 		if (empty($getGadgetUri)) {
 			throw new Exception("found empty gadget URI in TokenKey");
 		}
-		$getServiceName = $tokenKey->getServiceName();
-		if (empty($getServiceName)) {
-			throw new Exception("found empty service name in TokenKey");
-		}
 		$getUserId = $tokenKey->getUserId();
 		if (empty($getUserId)) {
 			throw new Exception("found empty userId in TokenKey");
@@ -142,97 +122,89 @@ class GadgetOAuthTokenStore {
 	 */
 	public function getOAuthAccessor(TokenKey $tokenKey)
 	{
-		$getGadgetUri = $tokenKey->getGadgetUri();
-		if (empty($getGadgetUri)) {
+		$gadgetUri = $tokenKey->getGadgetUri();
+		if (empty($gadgetUri)) {
 			throw new OAuthStoreException("found empty gadget URI in TokenKey");
-		}
-		$getServiceName = $tokenKey->getServiceName();
-		if (empty($getServiceName)) {
-			throw new OAuthStoreException("found empty service name in TokenKey");
 		}
 		$getUserId = $tokenKey->getUserId();
 		if (empty($getUserId)) {
 			throw new OAuthStoreException("found empty userId in TokenKey");
 		}
-		return $this->store->getOAuthAccessorTokenKey($tokenKey);
+		$remoteContentRequest = new RemoteContentRequest($gadgetUri);
+		$remoteContentRequest->getRequest($gadgetUri, false);
+		$spec = $this->specFactory->fetchRequest($remoteContentRequest);
+		$specParser = new GadgetSpecParser();
+		$context = new ProxyGadgetContext($gadgetUri);
+		$gadgetSpec = $specParser->parse($spec->getResponseContent(), $context);
+		$provInfo = $this->getProviderInfo($gadgetSpec, $tokenKey->getServiceName());
+		return $this->store->getOAuthAccessorTokenKey($tokenKey, $provInfo);
 	}
 
 	/**
 	 * Reads OAuth provider information out of gadget spec.
 	 * @param spec
 	 * @return a GadgetInfo
-	 * @throws GadgetException if some information is missing, or something else
-	 *                         is wrong with the spec.
 	 */
-	public function getGadgetOAuthInfo(Gadget $specGadget)
+	public static function getProviderInfo(Gadget $spec, $serviceName)
 	{
-		$requires = $specGadget->getRequires();
-		$oauthFeature = $requires[GadgetOAuthTokenStore::$OAUTH_FEATURE];
-		if ($oauthFeature == null) {
-			$message = "gadget spec is missing oauth feature section";
+		$oauthSpec = $spec->getOAuthSpec();
+		if ($oauthSpec == null) {
+			$message = "gadget spec is missing /ModulePrefs/OAuth section";
 			throw new GadgetException($message);
 		}
-		$oauthParams = $oauthFeature->getParams();
-		$serviceName = $this->getOAuthParameter($oauthParams, GadgetOAuthTokenStore::$SERVICE_NAME, false);
-		$requestUrl = $this->getOAuthParameter($oauthParams, GadgetOAuthTokenStore::$REQUEST_URL, false);
-		$requestMethod = $this->getOAuthParameter($oauthParams, GadgetOAuthTokenStore::$REQUEST_HTTP_METHOD, true);
-		if (! isset($requestMethod)) {
-			$requestMethod = GadgetOAuthTokenStore::$DEFAULT_HTTP_METHOD;
+		$services = $oauthSpec->getServices();
+		$service = null;
+		if (isset($services[$serviceName])) {
+			$service = $services[$serviceName];
 		}
-		$accessUrl = $this->getOAuthParameter($oauthParams, GadgetOAuthTokenStore::$ACCESS_URL, false);
-		$accessMethod = $this->getOAuthParameter($oauthParams, GadgetOAuthTokenStore::$ACCESS_HTTP_METHOD, true);
-		if (! isset($accessMethod)) {
-			$accessMethod = GadgetOAuthTokenStore::$DEFAULT_HTTP_METHOD;
-		}
-		if (! strtoupper($accessMethod) == strtoupper($requestMethod)) {
-			$message = "HTTP methods of access and request URLs have to match. " . "access method was: " . $accessMethod . ". request method was: " . $requestMethod;
+		if ($service == null) {
+			$message = '';
+			$message .= "Spec does not contain OAuth service '";
+			$message .= $serviceName;
+			$message .= "'.  Known services: ";
+			foreach ($services as $key => $value) {
+				$message .= "'";
+				$message .= $key;
+				$message .= "'";
+				$message .= ", ";
+			}
 			throw new GadgetException($message);
 		}
-		$authorizeUrl = $this->getOAuthParameter($oauthParams, GadgetOAuthTokenStore::$AUTHORIZE_URL, false);
-		$provider = new OAuthServiceProvider($requestUrl, $authorizeUrl, $accessUrl);
-		$httpMethod = '';
-		if (strtoupper($accessMethod) == "GET") {
-			$httpMethod = "GET";
-		} else if (strtoupper($accessMethod) == "POST") {
-			$httpMethod = "POST";
-		} else {
-			$message = "unknown http method in gadget spec: " . $accessMethod;
-			throw new GadgetException($message);
+		$provider = new OAuthServiceProvider($service->getRequestUrl(), $service->getAuthorizationUrl(), $service->getAccessUrl());
+		$httpMethod = null;
+		switch ($service->getRequestUrl()->method) {
+			case "GET":
+				$httpMethod = OAuthStoreVars::$HttpMethod['GET'];
+				break;
+			case "POST":
+			default:
+				$httpMethod = OAuthStoreVars::$HttpMethod['POST'];
+				break;
 		}
-		$paramLocationStr = $this->getOAuthParameter($oauthParams, GadgetOAuthTokenStore::$OAUTH_PARAM_LOCATION, true);
-		if (! isset($paramLocationStr)) {
-			$paramLocationStr = GadgetOAuthTokenStore::$DEFAULT_OAUTH_PARAM_LOCATION;
-		}
-		$paramLocation = '';
-		if (strtoupper($paramLocationStr) == strtoupper(GadgetOAuthTokenStore::$POST_BODY)) {
-			$paramLocation = GadgetOAuthTokenStore::$POST_BODY;
-		} else if (strtoupper($paramLocationStr) == strtoupper(GadgetOAuthTokenStore::$AUTH_HEADER)) {
-			$paramLocation = GadgetOAuthTokenStore::$AUTH_HEADER;
-		} else if (strtoupper($paramLocationStr) == strtoupper(GadgetOAuthTokenStore::$URI_QUERY)) {
-			$paramLocation = GadgetOAuthTokenStore::$URI_QUERY;
-		} else {
-			$message = "unknown OAuth param location in gadget spec: " . $paramLocationStr;
-			throw new GadgetException($message);
-		}
-		if ($httpMethod == "GET" && $paramLocation == GadgetOAuthTokenStore::$POST_BODY) {
-			$message = "found incompatible param_location requirement of POST_BODY and http method GET.";
-			throw new GadgetException($message);
+		$paramLocation = null;
+		switch ($service->getRequestUrl()->location) {
+			case "URL":
+				$paramLocation = OAuthStoreVars::$OAuthParamLocation['URI_QUERY'];
+				break;
+			case "BODY":
+				$paramLocation = OAuthStoreVars::$OAuthParamLocation['POST_BODY'];
+				break;
+			case "HEADER":
+			default:
+				$paramLocation = OAuthStoreVars::$OAuthParamLocation['AUTH_HEADER'];
+				break;
 		}
 		$provInfo = new ProviderInfo();
 		$provInfo->setHttpMethod($httpMethod);
 		$provInfo->setParamLocation($paramLocation);
-		
 		// TODO: for now, we'll just set the signature type to HMAC_SHA1
 		// as this will be ignored later on when retrieving consumer information.
 		// There, if we find a negotiated HMAC key, we will use HMAC_SHA1. If we
 		// find a negotiated RSA key, we will use RSA_SHA1. And if we find neither,
 		// we may use RSA_SHA1 with a default signing key.
-		$provInfo->setSignatureType('HMAC_SHA1');
+		$provInfo->setSignatureType(OAuthStoreVars::$SignatureType['HMAC_SHA1']);
 		$provInfo->setProvider($provider);
-		$gadgetInfo = new GadgetInfo();
-		$gadgetInfo->setProviderInfo($provInfo);
-		$gadgetInfo->setServiceName($serviceName);
-		return $gadgetInfo;
+		return $provInfo;
 	}
 
 	/**
@@ -277,7 +249,7 @@ class GadgetInfo {
 		return $this->providerInfo;
 	}
 
-	public function setProviderInfo($providerInfo)
+	public function setProviderInfo(ProviderInfo $providerInfo)
 	{
 		$this->providerInfo = $providerInfo;
 	}

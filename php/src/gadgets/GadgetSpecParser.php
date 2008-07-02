@@ -1,5 +1,4 @@
 <?php
-
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements. See the NOTICE file
@@ -38,6 +37,10 @@ class GadgetSpecParser {
 		$gadget = new Gadget($context->getGadgetId(), $context);
 		// process ModulePref attributes
 		$this->processModulePrefs($gadget, $doc->ModulePrefs, $context);
+		if (isset($doc->ModulePrefs->OAuth)) {
+			// process OAuthPref attributes
+			$this->processOAuthSpec($gadget, $doc->ModulePrefs->OAuth, $context);
+		}
 		// process UserPrefs, if any
 		foreach ($doc->UserPref as $pref) {
 			$this->processUserPref($gadget, $pref);
@@ -135,7 +138,8 @@ class GadgetSpecParser {
 		}
 		$locale = new LocaleSpec();
 		$locale->rightToLeft = $rightToLeft;
-		//FIXME java seems to use a baseurl here, probably for the http:// part but i'm not sure yet. Should verify behavior later to see if i got it right
+		//FIXME java seems to use a baseurl here, probably for the http:// part but i'm not sure yet.
+		// Should verify behavior later to see if i got it right
 		$locale->url = $messageAttr;
 		$locale->localeMessageBundles = $localeMessageBundles;
 		$locale->locale = new Locale($languageAttr, $countryAttr);
@@ -212,4 +216,9 @@ class GadgetSpecParser {
 		$gadget->requires[$featureSpec->name] = $featureSpec;
 	}
 
+	private function processOAuthSpec(Gadget &$gadget, $OAuthSpec)
+	{
+		$oauthSpec = new OAuthSpec($OAuthSpec->Service);
+		$gadget->setOAuthSpec($oauthSpec);
+	}
 }

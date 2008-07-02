@@ -21,7 +21,7 @@ class OAuthNoDataException extends Exception {}
 
 class BasicOAuthStore implements OAuthStore {
 	
-	private $providers = array();
+	private $consumerInfos = array();
 	private $tokens = array();
 	
 	private $defaultConsumerKey;
@@ -33,19 +33,19 @@ class BasicOAuthStore implements OAuthStore {
 		$this->defaultConsumerSecret = $privateKey;
 	}
 
-	public function setHashMapsForTesting($providers, $tokens)
+	public function setHashMapsForTesting($consumerInfos, $tokens)
 	{
-		$this->providers = $providers;
+		$this->consumerInfos = $consumerInfos;
 		$this->tokens = $tokens;
 	}
 
-	public function getOAuthAccessorTokenKey(TokenKey $tokenKey)
+	public function getOAuthAccessorTokenKey(TokenKey $tokenKey, ProviderInfo $provInfo)
 	{
 		$provKey = new ProviderKey();
 		$provKey->setGadgetUri($tokenKey->getGadgetUri());
 		$provKey->setServiceName($tokenKey->getServiceName());
 		//AccesorInfo
-		$result = $this->getOAuthAccessorProviderKey($provKey);
+		$result = $this->getOAuthAccessorProviderKey($provKey, $provInfo);
 		//TokenInfo
 		$accessToken = $this->getTokenInfo($tokenKey);
 		if ($accessToken != null) {
@@ -56,22 +56,21 @@ class BasicOAuthStore implements OAuthStore {
 		return $result;
 	}
 
-	private function getOAuthAccessorProviderKey(ProviderKey $providerKey)
+	public function getOAuthAccessorProviderKey(ProviderKey $providerKey, ProviderInfo $provInfo)
 	{
-		//ProviderInfo
-		$provInfo = $this->getProviderInfo($providerKey);
-		
 		if ($provInfo == null) {
-			throw new OAuthNoDataException("provider info was null in oauth store");
+			throw new OAuthNoDataException("must pass non-null provider info to getOAuthAccessor");
 		}
 		//AccesorInfo
 		$result = new AccesorInfo();
 		$result->setHttpMethod($provInfo->getHttpMethod());
 		$result->setParamLocation($provInfo->getParamLocation());
-		
 		//ConsumerKeyAndSecret
-		$consumerKeyAndSecret = $provInfo->getKeyAndSecret();
-		
+		$key = md5(serialize($providerKey));
+		$consumerKeyAndSecret = null;
+		if (isset($this->consumerInfos[$key])) {
+			$consumerKeyAndSecret = $this->consumerInfos[$key];
+		}
 		if ($consumerKeyAndSecret == null) {
 			if ($this->defaultConsumerKey == null || $this->defaultConsumerSecret == null) {
 				throw new OAuthNoDataException("ConsumerKeyAndSecret was null in oauth store");
@@ -79,20 +78,15 @@ class BasicOAuthStore implements OAuthStore {
 				$consumerKeyAndSecret = new ConsumerKeyAndSecret($this->defaultConsumerKey, $this->defaultConsumerSecret, OAuthStoreVars::$KeyType['RSA_PRIVATE']);
 			}
 		}
-		
 		//OAuthServiceProvider
 		$oauthProvider = $provInfo->getProvider();
-		
 		if (! isset($oauthProvider)) {
-			throw new OAuthNoDataException("OAuthService provider was null in oauth store");
+			throw new OAuthNoDataException("OAuthService provider was null in provider info");
 		}
-		
 		// Accesing the class
 		$usePublicKeyCrypto = ($consumerKeyAndSecret->getKeyType() == OAuthStoreVars::$KeyType['RSA_PRIVATE']);
-		
 		//OAuthConsumer
 		$consumer = ($usePublicKeyCrypto) ? new OAuthConsumer($consumerKeyAndSecret->getConsumerKey(), null, $oauthProvider) : new OAuthConsumer($consumerKeyAndSecret->getConsumerKey(), $consumerKeyAndSecret->getConsumerSecret(), $oauthProvider);
-		
 		if ($usePublicKeyCrypto) {
 			$consumer->setProperty(OAuthSignatureMethod_RSA_SHA1::$PRIVATE_KEY, $consumerKeyAndSecret->getConsumerSecret());
 			$result->setSignatureType(OAuthStoreVars::$SignatureType['RSA_SHA1']);
@@ -104,41 +98,15 @@ class BasicOAuthStore implements OAuthStore {
 		return $result;
 	}
 
-	public function getOAuthServiceProviderInfo($providerKey)
-	{
-		$provInfo = $this->providers->get($providerKey);
-		
-		if ($provInfo == null) {
-			throw new OAuthNoDataException("provider info was null in oauth store");
-		}
-		
-		return $provInfo;
-	}
-
 	public function setOAuthConsumerKeyAndSecret($providerKey, $keyAndSecret)
 	{
-		//ProviderInfo
-		$value = $this->getProviderInfo($providerKey);
-		if ($value == null) {
-			throw new OAuthNoDataException("could not find provider data for token");
-		}
-		$value->setKeyAndSecret($keyAndSecret);
-	}
-
-	public function setOAuthServiceProviderInfo($providerKey, $providerInfo)
-	{
-		$this->providers[md5(serialize($providerKey))] = $providerInfo;
+		$key = md5(serialize($providerKey));
+		$this->consumerInfos[$key] = $keyAndSecret;
 	}
 
 	public function setTokenAndSecret($tokenKey, $tokenInfo)
 	{
 		$this->tokens[md5(serialize($tokenKey))] = $tokenInfo;
-	}
-
-	private function getProviderInfo($providerKey)
-	{
-		$key = md5(serialize($providerKey));
-		return isset($this->providers[$key]) ? $this->providers[$key] : null;
 	}
 
 	private function getTokenInfo($tokenKey)

@@ -1,5 +1,4 @@
 <?php
-
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -35,6 +34,7 @@ class OAuth {
 	public static $RSA_SHA1 = "RSA_SHA1";
 	public static $BEGIN_PRIVATE_KEY = "-----BEGIN PRIVATE KEY-----";
 	public static $END_PRIVATE_KEY = "-----END PRIVATE KEY-----";
+	public static $OAUTH_PROBLEM = "oauth_problem";
 }
 
 /* Generic exception class
@@ -42,6 +42,8 @@ class OAuth {
 class OAuthException extends Exception {}
 
 class OAuthProblemException extends Exception {}
+
+class OAuthProtocolException extends Exception {}
 
 class OAuthConsumer {
 	public $key;
@@ -207,9 +209,12 @@ class OAuthSignatureMethod_RSA_SHA1 extends OAuthSignatureMethod {
 			}
 		}
 		// Sign using the key
-		$ok = openssl_sign($base_string, $signature, $privatekeyid);
+		$signature = '';
+		if (($ok = openssl_sign($base_string, $signature, $privatekeyid)) === false) {
+			throw new OAuthException("Could not create signature");
+		}
 		// Release the key resource
-		openssl_free_key($privatekeyid);
+		@openssl_free_key($privatekeyid);
 		return base64_encode($signature);
 	}
 
@@ -224,7 +229,7 @@ class OAuthSignatureMethod_RSA_SHA1 extends OAuthSignatureMethod {
 		// Check the computed signature against the one passed in the query
 		$ok = openssl_verify($base_string, $decoded_sig, $publickeyid);
 		// Release the key resource
-		openssl_free_key($publickeyid);
+		@openssl_free_key($publickeyid);
 		return $ok == 1;
 	}
 }
@@ -455,7 +460,6 @@ class OAuthRequest {
 	public function to_header()
 	{
 		$out = '"Authorization: OAuth realm="",';
-		$total = array();
 		foreach ($this->parameters as $k => $v) {
 			if (substr($k, 0, 5) != "oauth")
 				continue;
@@ -738,83 +742,13 @@ class OAuthDataStore {
 	}
 }
 
-/*  A very naive dbm-based oauth storage
- */
-class SimpleOAuthDataStore extends OAuthDataStore {
-	private $dbh;
-
-	function __construct($path = "oauth.gdbm")
-	{
-		$this->dbh = dba_popen($path, 'c', 'gdbm');
-	}
-
-	function __destruct()
-	{
-		dba_close($this->dbh);
-	}
-
-	function lookup_consumer($consumer_key)
-	{
-		$rv = dba_fetch("consumer_$consumer_key", $this->dbh);
-		if ($rv === FALSE) {
-			return NULL;
-		}
-		$obj = unserialize($rv);
-		if (! ($obj instanceof OAuthConsumer)) {
-			return NULL;
-		}
-		return $obj;
-	}
-
-	function lookup_token($consumer, $token_type, $token)
-	{
-		$rv = dba_fetch("${token_type}_${token}", $this->dbh);
-		if ($rv === FALSE) {
-			return NULL;
-		}
-		$obj = unserialize($rv);
-		if (! ($obj instanceof OAuthToken)) {
-			return NULL;
-		}
-		return $obj;
-	}
-
-	function lookup_nonce($consumer, $token, $nonce, $timestamp)
-	{
-		if (dba_exists("nonce_$nonce", $this->dbh)) {
-			return TRUE;
-		} else {
-			dba_insert("nonce_$nonce", "1", $this->dbh);
-			return FALSE;
-		}
-	}
-
-	function new_token($consumer, $type = "request")
-	{
-		$key = md5(time());
-		$secret = time() + time();
-		$token = new OAuthToken($key, md5(md5($secret)));
-		if (! dba_insert("${type}_$key", serialize($token), $this->dbh)) {
-			throw new OAuthException("doooom!");
-		}
-		return $token;
-	}
-
-	function new_request_token($consumer)
-	{
-		return $this->new_token($consumer, "request");
-	}
-
-	function new_access_token($token, $consumer)
-	{
-		$token = $this->new_token($consumer, 'access');
-		dba_delete("request_" . $token->key, $this->dbh);
-		return $token;
-	}
-}
 
 class OAuthUtil {
-
+	
+	public static $AUTH_SCHEME = "OAuth";
+	private static $AUTHORIZATION = "\ *[a-zA-Z0-9*]\ +(.*)";
+	private static $NVP = "(\\S*)\\s*\\=\\s*\"([^\"]*)\"";
+	
 	public static function getPostBodyString(Array $params)
 	{
 		$result = '';
@@ -884,8 +818,8 @@ class OAuthUtil {
 	{
 		$into = array();
 		if ($authorization != null) {
-			$m = ereg(OAuthUtil::$AUTHORIZATION, $authorization);
-			if ($m == 1) {
+			$m = ereg(self::$AUTHORIZATION, $authorization);
+			if ($m !== false) {
 				if (strpos($authorization, OAuthUtil::$AUTH_SCHEME) == 0) {
 					$authorization = str_replace("OAuth ", "", $authorization);
 					$authParams = explode(", ", $authorization);
@@ -903,11 +837,4 @@ class OAuthUtil {
 		}
 		return $into;
 	}
-	
-	public static $AUTH_SCHEME = "OAuth";
-	
-	static $AUTHORIZATION = "\\s*(\\w*)\\s+(.*)";
-	
-	static $NVP = "(\\S*)\\s*\\=\\s*\"([^\"]*)\"";
-
 }

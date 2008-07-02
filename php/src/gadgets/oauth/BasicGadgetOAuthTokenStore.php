@@ -26,9 +26,9 @@ class BasicGadgetOAuthTokenStore extends GadgetOAuthTokenStore {
 	private $CONSUMER_KEY_KEY = "consumer_key";
 	private $KEY_TYPE_KEY = "key_type";
 
-	public function __construct($store)
+	public function __construct($store, $fetcher)
 	{
-		parent::__construct($store);
+		parent::__construct($store, $fetcher);
 	}
 
 	public function initFromConfigFile($fetcher)
@@ -37,35 +37,19 @@ class BasicGadgetOAuthTokenStore extends GadgetOAuthTokenStore {
 		// This actually involves fetching gadget specs
 		try {
 			$oauthConfigStr = file_get_contents($this->OAUTH_CONFIG);
-			
 			// remove all comments because this confuses the json parser
 			// note: the json parser also crashes on trailing ,'s in records so please don't use them
 			$contents = preg_replace('@/\\*(?:.|[\\n\\r])*?\\*/@', '', $oauthConfigStr);
 			$oauthConfig = json_decode($contents, true);
+			if ($oauthConfig == $contents) {
+				throw new GadgetException("OAuth configuration json failed to parse.");
+			}
 			foreach ($oauthConfig as $gadgetUri => $value) {
-				$this->storeProviderInfos($fetcher, $gadgetUri);
 				$this->storeConsumerInfos($gadgetUri, $value);
 			}
 		} catch (Exception $e) {
 			throw new GadgetException($e);
 		}
-	}
-
-	private function storeProviderInfos($fetcher, $gadgetUri)
-	{
-		$cache = Config::get('data_cache');
-		$cache = new $cache();
-		// determine which requests we can load from cache, and which we have to actually fetch
-		if (($gadget = $cache->get(md5('storeProviderInfos' . $gadgetUri))) === false) {
-			$remoteContentRequest = new RemoteContentRequest($gadgetUri);
-			$remoteContentRequest->getRequest($gadgetUri, false);
-			$response = $fetcher->fetchRequest($remoteContentRequest);
-			$context = new ProxyGadgetContext($gadgetUri);
-			$spec = new GadgetSpecParser();
-			$gadget = $spec->parse($response->getResponseContent(), $context);
-			$cache->set(md5('storeProviderInfos' . $gadgetUri), $gadget);
-		}
-		parent::storeServiceInfoFromGadgetSpec($gadgetUri, $gadget);
 	}
 
 	private function storeConsumerInfos($gadgetUri, $oauthConfig)
@@ -83,7 +67,6 @@ class BasicGadgetOAuthTokenStore extends GadgetOAuthTokenStore {
 		$consumerKey = $consumerInfo[$this->CONSUMER_KEY_KEY];
 		$keyTypeStr = $consumerInfo[$this->KEY_TYPE_KEY];
 		$keyType = 'HMAC_SYMMETRIC';
-		
 		if ($keyTypeStr == "RSA_PRIVATE") {
 			$keyType = 'RSA_PRIVATE';
 			$cache = Config::get('data_cache');
