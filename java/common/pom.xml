@@ -46,6 +46,10 @@ under the License.
       <artifactId>guice</artifactId>
     </dependency>
     <dependency>
+      <groupId>com.google.code.google-collections</groupId>
+      <artifactId>google-collect</artifactId>
+    </dependency>
+    <dependency>
       <groupId>commons-codec</groupId>
       <artifactId>commons-codec</artifactId>
     </dependency>
