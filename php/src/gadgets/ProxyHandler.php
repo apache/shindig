@@ -26,7 +26,6 @@ define('UNPARSEABLE_CRUFT', "throw 1; < don't be evil' >");
  * GET and POST based input, and peforms a request based on the input, headers and 
  * httpmethod params. It also deals with request signing and verification thru the
  * authz and st (security token) params. 
- *
  */
 class ProxyHandler {
 	private $context;
@@ -210,7 +209,6 @@ class ProxyHandler {
 	{
 		//TODO get actual character encoding from the request
 		
-
 		// Extract the request headers from the $_SERVER super-global (this -does- unfortunatly mean that any header that php doesn't understand won't be proxied thru though)
 		// if this turns out to be a problem we could add support for HTTP_RAW_HEADERS, but this depends on a php.ini setting, so i'd rather prevent that from being required
 		$headers = '';
@@ -262,7 +260,7 @@ class ProxyHandler {
 			case 'SIGNED':
 				$fetcher = $this->signingFetcher->getSigningFetcher(new BasicRemoteContentFetcher(), $token);
 				return $fetcher->fetch($url, $method);
-			case 'AUTHENTICATED':
+			case 'OAUTH':
 				$params = new OAuthRequestParams();
 				$fetcher = $this->signingFetcher->getSigningFetcher(new BasicRemoteContentFetcher(), $token);
 				$oAuthFetcherFactory = new OAuthFetcherFactory($fetcher);

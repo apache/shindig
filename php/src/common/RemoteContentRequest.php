@@ -222,7 +222,7 @@ class RemoteContentRequest {
 	{
 		return $this->responseContent;
 	}
-
+	
 	public function getResponseHeaders()
 	{
 		return $this->responseHeaders;
@@ -310,6 +310,20 @@ class RemoteContentRequest {
 			$key = explode(":", $header);
 			if ($key[0] == $headerName)
 				return $key[1];
+		}
+		return null;
+	}
+	
+	//FIXME: Find a better way to do this
+	// The headers can be an array of elements.
+	public function getResponseHeader($headerName)
+	{
+		$headers = explode("\n", $this->responseHeaders);
+		foreach ($headers as $header) {
+			$key = explode(":", $header);
+			if ($key[0] == $headerName) {
+				return trim($key[1]);
+			}
 		}
 		return null;
 	}

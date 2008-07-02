@@ -1,5 +1,4 @@
 <?php
-
 /*
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements. See the NOTICE file distributed with this
@@ -38,7 +37,9 @@ class OAuthFetcher extends RemoteContentFetcher {
 	
 	// names for the JSON values we return to the client
 	public static $CLIENT_STATE = "oauthState";
-	public static $APPROVAL_URL = "approvalUrl";
+	public static $APPROVAL_URL = "oauthApprovalUrl";
+	public static $ERROR_CODE = "oauthError";
+	public static $ERROR_TEXT = "oauthErrorText";
 	// names of additional OAuth parameters we include in outgoing requests
 	public static $XOAUTH_APP_URL = "xoauth_app_url";
 	
@@ -54,14 +55,9 @@ class OAuthFetcher extends RemoteContentFetcher {
 	protected $authToken;
 	
 	/**
-	 * The gadget's nickname for the service provider.
+	 * Parameters from makeRequest
 	 */
-	protected $serviceName;
-	
-	/**
-	 * The gadget's nickname for the token.
-	 */
-	protected $tokenName;
+	protected $requestParams;
 	
 	/**
 	 * Reference to our persistent store for OAuth metadata.
@@ -99,6 +95,24 @@ class OAuthFetcher extends RemoteContentFetcher {
 	 * Authorization URL for the client
 	 */
 	private $aznUrl;
+	
+	/**
+	 * Error code for the client
+	 */
+	private $error;
+	
+	/**
+	 * Error text for the client
+	 */
+	private $errorText;
+	
+	/**
+	 * Whether or not we're supposed to ignore the spec cache when referring
+	 * to the gadget spec for information (e.g. OAuth URLs).
+	 */
+	private $bypassSpecCache;
+	
+	private $responseMetadata = array();
 
 	/**
 	 *
@@ -113,16 +127,19 @@ class OAuthFetcher extends RemoteContentFetcher {
 		parent::setNextFetcher($nextFetcher);
 		$this->oauthCrypter = $oauthCrypter;
 		$this->authToken = $authToken;
-		$this->serviceName = $params->getServiceName();
-		$this->tokenName = $params->getTokenName();
+		$this->bypassSpecCache = $params->getBypassSpecCache();
+		$this->requestParams = $params;
 		$this->newClientState = null;
 		$this->aznUrl = null;
+		$this->error = null;
+		$this->errorText = null;
 		$origClientState = $params->getOrigClientState();
 		if ($origClientState != null && strlen($origClientState) > 0) {
 			try {
-				$this->origClientState = $this->oauthCrypter->unwrap($origClientState, OAuthFetcher::$CLIENT_STATE_MAX_AGE_SECS);
-			} catch (BlobCrypterException $e) {// Probably too old, pretend we never saw it at all.
-}
+				$this->origClientState = $this->oauthCrypter->unwrap($origClientState, self::$CLIENT_STATE_MAX_AGE_SECS);
+			} catch (BlobCrypterException $e) {
+				// Probably too old, pretend we never saw it at all.
+			}
 		}
 		if ($this->origClientState == null) {
 			$this->origClientState = array();
@@ -132,7 +149,33 @@ class OAuthFetcher extends RemoteContentFetcher {
 
 	public function init()
 	{
-		$this->lookupOAuthMetadata();
+		try {
+			$this->lookupOAuthMetadata();
+		} catch (Exception $e) {
+			$this->error = OAuthError::$BAD_OAUTH_CONFIGURATION;
+			return $this->buildErrorResponse($e);
+		}
+	}
+
+	private function buildErrorResponse(Exception $e)
+	{
+		if ($this->error == null) {
+			$this->error = OAuthError::$UNKNOWN_PROBLEM;
+		}
+		// Take a giant leap of faith and assume that the exception message
+		// will be useful to a gadget developer.  Also include the exception
+		// stack trace, in case the problem report makes it to someone who knows
+		// enough to do something useful with the stack.
+		$errorBuf = '';
+		$errorBuf .= $e->getMessage();
+		$errorBuf .= "\n\n";
+		$this->errorText = $errorBuf;
+		return $this->buildNonDataResponse();
+	}
+
+	private function buildNonDataResponse()
+	{
+		return $this->addResponseMetadata();
 	}
 
 	/**
@@ -147,14 +190,20 @@ class OAuthFetcher extends RemoteContentFetcher {
 		// The persistent data store may be out of sync with reality; we trust
 		// the state we stored on the client to be accurate.
 		$accessor = $this->accessorInfo->getAccessor();
-		if (isset($this->origClientState[OAuthFetcher::$REQ_TOKEN_KEY])) {
-			$accessor->requestToken = $this->origClientState[OAuthFetcher::$REQ_TOKEN_KEY];
-			$accessor->tokenSecret = $this->origClientState[OAuthFetcher::$REQ_TOKEN_SECRET_KEY];
+		if (isset($this->origClientState[self::$REQ_TOKEN_KEY])) {
+			$accessor->requestToken = $this->origClientState[self::$REQ_TOKEN_KEY];
+			$accessor->tokenSecret = $this->origClientState[self::$REQ_TOKEN_SECRET_KEY];
 		} else 
-			if (isset($this->origClientState[OAuthFetcher::$ACCESS_TOKEN_KEY])) {
-				$accessor->accessToken = $this->origClientState[OAuthFetcher::$ACCESS_TOKEN_KEY];
-				$accessor->tokenSecret = $this->origClientState[OAuthFetcher::$ACCESS_TOKEN_SECRET_KEY];
-			}
+			if (isset($this->origClientState[self::$ACCESS_TOKEN_KEY])) {
+				$accessor->accessToken = $this->origClientState[self::$ACCESS_TOKEN_KEY];
+				$accessor->tokenSecret = $this->origClientState[self::$ACCESS_TOKEN_SECRET_KEY];
+			} else 
+				if ($accessor->accessToken == null && $this->requestParams->getRequestToken() != null) {
+					// We don't have an access token yet, but the client sent us a
+					// (hopefully) preapproved request token.
+					$accessor->requestToken = $requestParams->getRequestToken();
+					$accessor->tokenSecret = $requestParams->getRequestTokenSecret();
+				}
 	}
 
 	private function buildTokenKey()
@@ -163,8 +212,8 @@ class OAuthFetcher extends RemoteContentFetcher {
 		// need to URLDecode so when comparing with the ProviderKey it goes thought
 		$tokenKey->setGadgetUri(urldecode($this->authToken->getAppUrl()));
 		$tokenKey->setModuleId($this->authToken->getModuleId());
-		$tokenKey->setServiceName($this->serviceName);
-		$tokenKey->setTokenName($this->tokenName);
+		$tokenKey->setServiceName($this->requestParams->getServiceName());
+		$tokenKey->setTokenName($this->requestParams->getTokenName());
 		// At some point we might want to let gadgets specify whether to use OAuth
 		// for the owner, the viewer, or someone else. For now always using the
 		// owner identity seems reasonable.
@@ -184,7 +233,7 @@ class OAuthFetcher extends RemoteContentFetcher {
 			$this->buildAznUrl();
 			// break out of the content fetching chain, we need permission from
 			// the user to do this
-			return null;
+			return $this->buildOAuthApprovalResponse();
 		} elseif ($this->needAccessToken()) {
 			// This is section 6.3 of the OAuth spec
 			$this->checkCanApprove();
@@ -195,12 +244,21 @@ class OAuthFetcher extends RemoteContentFetcher {
 		return $this->fetchData();
 	}
 
+	private function buildOAuthApprovalResponse()
+	{
+		return $this->buildNonDataResponse();
+	}
+
 	/**
 	 * Do we need to get the user's approval to access the data?
 	 */
 	private function needApproval()
 	{
-		return ($this->accessorInfo->getAccessor()->requestToken == null && $this->accessorInfo->getAccessor()->accessToken == null);
+		if ($this->accessorInfo == NULL) {
+			return true;
+		} else {
+			return ($this->accessorInfo->getAccessor()->requestToken == null && $this->accessorInfo->getAccessor()->accessToken == null);
+		}
 	}
 
 	/**
@@ -213,7 +271,7 @@ class OAuthFetcher extends RemoteContentFetcher {
 	{
 		$pageOwner = $this->authToken->getOwnerId();
 		$pageViewer = $this->authToken->getViewerId();
-		$stateOwner = @$this->origClientState[OAuthFetcher::$OWNER_KEY];
+		$stateOwner = @$this->origClientState[self::$OWNER_KEY];
 		if (! $pageOwner == $pageViewer) {
 			throw new GadgetException("Only page owners can grant OAuth approval");
 		}
@@ -233,8 +291,8 @@ class OAuthFetcher extends RemoteContentFetcher {
 			//TODO The implementations of oauth differs from the one in JAVA. Fix the type OAuthMessage
 			$url = $accessor->consumer->callback_url->requestTokenURL;
 			$msgParams = array();
-			$msgParams[OAuthFetcher::$XOAUTH_APP_URL] = $this->authToken->getAppUrl();
-			$request = $this->newRequestMessageParams($url, $msgParams);
+			$msgParams[self::$XOAUTH_APP_URL] = $this->authToken->getAppUrl();
+			$request = $this->newRequestMessageParams($url->url, $msgParams);
 			$reply = $this->sendOAuthMessage($request);
 			$reply->requireParameters(array(OAuth::$OAUTH_TOKEN, OAuth::$OAUTH_TOKEN_SECRET));
 			$accessor->requestToken = $reply->get_parameter(OAuth::$OAUTH_TOKEN);
@@ -250,7 +308,6 @@ class OAuthFetcher extends RemoteContentFetcher {
 		if (! isset($params)) {
 			throw new Exception("params was null in " + "newRequestMessage " + "Use newRequesMessage if you don't have a params to pass");
 		}
-		
 		switch ($this->accessorInfo->getSignatureType()) {
 			case OAuth::$RSA_SHA1:
 				$params[OAuth::$OAUTH_SIGNATURE_METHOD] = OAuth::$RSA_SHA1;
@@ -369,9 +426,9 @@ class OAuthFetcher extends RemoteContentFetcher {
 		try {
 			$accessor = $this->accessorInfo->getAccessor();
 			$oauthState = array();
-			$oauthState[OAuthFetcher::$REQ_TOKEN_KEY] = $accessor->requestToken;
-			$oauthState[OAuthFetcher::$REQ_TOKEN_SECRET_KEY] = $accessor->tokenSecret;
-			$oauthState[OAuthFetcher::$OWNER_KEY] = $this->authToken->getOwnerId();
+			$oauthState[self::$REQ_TOKEN_KEY] = $accessor->requestToken;
+			$oauthState[self::$REQ_TOKEN_SECRET_KEY] = $accessor->tokenSecret;
+			$oauthState[self::$OWNER_KEY] = $this->authToken->getOwnerId();
 			$this->newClientState = $this->oauthCrypter->wrap($oauthState);
 		} catch (BlobCrypterException $e) {
 			throw new GadgetException("INTERNAL SERVER ERROR: " . $e);
@@ -387,15 +444,16 @@ class OAuthFetcher extends RemoteContentFetcher {
 		// the user experience, but that's too complex for now.
 		$accessor = $this->accessorInfo->getAccessor();
 		$azn = $accessor->consumer->callback_url->userAuthorizationURL;
-		if (strstr($azn, "?") != - 1) {
-			$azn .= "?";
+		$authUrl = $azn->url;
+		if (strstr($authUrl, "?") != - 1) {
+			$authUrl .= "?";
 		} else {
-			$azn .= "&";
+			$authUrl .= "&";
 		}
-		$azn .= OAuth::$OAUTH_TOKEN;
-		$azn .= "=";
-		$azn .= OAuthUtil::urlencodeRFC3986($accessor->requestToken);
-		$this->aznUrl = $azn;
+		$authUrl .= OAuth::$OAUTH_TOKEN;
+		$authUrl .= "=";
+		$authUrl .= OAuthUtil::urlencodeRFC3986($accessor->requestToken);
+		$this->aznUrl = $authUrl;
 	}
 
 	/**
@@ -415,9 +473,9 @@ class OAuthFetcher extends RemoteContentFetcher {
 			$accessor = $this->accessorInfo->getAccessor();
 			$url = $accessor->consumer->callback_url->accessTokenURL;
 			$msgParams = array();
-			$msgParams[OAuthFetcher::$XOAUTH_APP_URL] = $this->authToken->getAppUrl();
+			$msgParams[self::$XOAUTH_APP_URL] = $this->authToken->getAppUrl();
 			$msgParams[OAuth::$OAUTH_TOKEN] = $accessor->requestToken;
-			$request = $this->newRequestMessageParams($url, $msgParams);
+			$request = $this->newRequestMessageParams($url->url, $msgParams);
 			$reply = $this->sendOAuthMessage($request);
 			$reply->requireParameters(array(OAuth::$OAUTH_TOKEN, OAuth::$OAUTH_TOKEN_SECRET));
 			$accessor->accessToken = $reply->get_parameter(OAuth::$OAUTH_TOKEN);
@@ -449,9 +507,9 @@ class OAuthFetcher extends RemoteContentFetcher {
 		try {
 			$oauthState = array();
 			$accessor = $this->accessorInfo->getAccessor();
-			$oauthState[OAuthFetcher::$ACCESS_TOKEN_KEY] = $accessor->accessToken;
-			$oauthState[OAuthFetcher::$ACCESS_TOKEN_SECRET_KEY] = $accessor->tokenSecret;
-			$oauthState[OAuthFetcher::$OWNER_KEY] = $this->authToken->getOwnerId();
+			$oauthState[self::$ACCESS_TOKEN_KEY] = $accessor->accessToken;
+			$oauthState[self::$ACCESS_TOKEN_SECRET_KEY] = $accessor->tokenSecret;
+			$oauthState[self::$OWNER_KEY] = $this->authToken->getOwnerId();
 			$this->newClientState = $this->oauthCrypter->wrap($oauthState);
 		} catch (BlobCrypterException $e) {
 			throw new GadgetException("INTERNAL SERVER ERROR: " . $e);
@@ -466,15 +524,45 @@ class OAuthFetcher extends RemoteContentFetcher {
 		try {
 			$msgParams = OAuthUtil::isFormEncoded($this->realRequest->getContentType()) ? OAuthUtil::urldecodeRFC3986($this->realRequest->getPostBody()) : array();
 			$method = $this->realRequest->getMethod();
-			$msgParams[OAuthFetcher::$XOAUTH_APP_URL] = $this->authToken->getAppUrl();
+			$msgParams[self::$XOAUTH_APP_URL] = $this->authToken->getAppUrl();
 			// Build and sign the message.
 			$oauthRequest = $this->newRequestMessageMethod($method, $this->realRequest->getUrl(), $msgParams);
 			$rcr = $this->createRemoteContentRequest($this->filterOAuthParams($oauthRequest), $this->realRequest->getMethod(), $this->realRequest->getUrl(), $this->realRequest->getHeaders(), $this->realRequest->getContentType(), $this->realRequest->getPostBody(), $this->realRequest->getOptions());
 			$content = $this->getNextFetcher()->fetchRequest($rcr);
+			//TODO is there a better way to detect an SP error?
+			$statusCode = $content->getHttpCode();
+			if ($statusCode >= 400 && $statusCode < 500) {
+				$message = $this->parseAuthHeader(null, $content);
+				if ($message->get_parameter(OAuth::$OAUTH_PROBLEM) != null) {
+					throw new OAuthProtocolException($message);
+				}
+			}
+			// Track metadata on the response
+			$this->addResponseMetadata();
 			return $content;
 		} catch (Exception $e) {
 			throw new GadgetException("INTERNAL SERVER ERROR: " . $e);
 		}
+	}
+
+	/**
+	 * Parse OAuth WWW-Authenticate header and either add them to an existing
+	 * message or create a new message.
+	 *
+	 * @param msg
+	 * @param resp
+	 * @return the updated message.
+	 */
+	private function parseAuthHeader(OAuthRequest $msg = null, RemoteContentRequest $resp)
+	{
+		if ($msg == null) {
+			$msg = OAuthRequest::from_request();
+		}
+		$authHeaders = $resp->getResponseHeader("WWW-Authenticate");
+		if ($authHeaders != null) {
+			$msg->set_parameters(OAuthUtil::decodeAuthorization($authHeaders));
+		}
+		return $msg;
 	}
 
 	/**
@@ -507,13 +595,22 @@ class OAuthFetcher extends RemoteContentFetcher {
 
 	public function getResponseMetadata()
 	{
-		$extra = array();
+		return $this->responseMetadata;
+	}
+
+	public function addResponseMetadata()
+	{
 		if ($this->newClientState != null) {
-			$extra[OAuthFetcher::$CLIENT_STATE] = $this->newClientState;
+			$this->responseMetadata[self::$CLIENT_STATE] = $this->newClientState;
 		}
 		if ($this->aznUrl != null) {
-			$extra[OAuthFetcher::$APPROVAL_URL] = $this->aznUrl;
+			$this->responseMetadata[self::$APPROVAL_URL] = $this->aznUrl;
 		}
-		return $extra;
+		if ($this->error != null) {
+			$this->responseMetadata[self::$ERROR_CODE] = $this->error;
+		}
+		if ($this->errorText != null) {
+			$this->responseMetadata[self::$ERROR_TEXT] = $this->errorText;
+		}
 	}
 }

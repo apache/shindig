@@ -18,7 +18,6 @@
  * under the License.
  */
 
-
 /**
  * Produces OAuth content fetchers for input tokens.
  */
@@ -50,13 +49,10 @@ class OAuthFetcherFactory {
 		try {
 			$BBC = new BasicBlobCrypter();
 			$this->oauthCrypter = new BasicBlobCrypter(srand($BBC->MASTER_KEY_MIN_LEN));
-			$basicStore = new BasicGadgetOAuthTokenStore(new BasicOAuthStore());
+			$basicStore = new BasicGadgetOAuthTokenStore(new BasicOAuthStore(), $fetcher);
 			$basicStore->initFromConfigFile($fetcher);
 			$this->tokenStore = $basicStore;
-		} catch (Exeption $t) {
-			// Since this happens at startup, we don't want to kill the server just
-			// because we can't initialize the OAuth config.
-			// php variant?
+		} catch (Exeption $e) {
 		}
 	}
 

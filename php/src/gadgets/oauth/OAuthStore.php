@@ -20,15 +20,34 @@
 
 interface OAuthStore {
 
-	public function setOAuthServiceProviderInfo($providerKey, $providerInfo);
-
-	public function getOAuthServiceProviderInfo($providerKey);
-
 	public function setOAuthConsumerKeyAndSecret($providerKey, $keyAndSecret);
 
 	public function setTokenAndSecret($tokenKey, $tokenInfo);
 
-	public function getOAuthAccessorTokenKey(TokenKey $tokenKey);
+	/**
+	 * Retrieve an OAuthAccessor that is ready to sign OAuthMessages for
+	 * resource access.
+	 * @param tokenKey a structure uniquely identifying the token: a userId,
+	 *                 a gadgetId, a moduleId (in case there are more than one
+	 *                 gadget of the same type on a page), a tokenName (which
+	 *                 distinguishes this token from others that the same gadget
+	 *                 might hold for the same service provider) and a serviceName
+	 *                 (which is the same as the service name in the ProviderKey
+	 *                 structure).
+	 * @param provInfo provider information. The store combines information stored
+	 *                 in the store (consumer key/secret, token, token secret,
+	 *                 etc.) with the provider information (access URL, request
+	 *                 URL etc.) passed in here to create an AccessorInfo object.
+	 *                 If no information can be found in the
+	 *                 store, it may use default keys that identify the container,
+	 *                 as opposed to consumer keys and secrets that are specific
+	 *                 to this gadget.
+	 * @return an OAuthAccessor object than can be passed to an OAuthMessage.sign
+	 *         method.
+	 */
+	public function getOAuthAccessorTokenKey(TokenKey $tokenKey, ProviderInfo $provInfo);
+
+	public function getOAuthAccessorProviderKey(ProviderKey $providerKey, ProviderInfo $provInfo);
 
 }
 
@@ -140,37 +159,6 @@ class ProviderKey {
 	{
 		$this->serviceName = $serviceName;
 	}
-
-	public function hashCode()
-	{
-		$prime = 31;
-		$result = 1;
-		$result = $prime * $result + (($gadgetUri == null) ? 0 : $gadgetUri->hashCode());
-		$result = $prime * $result + (($serviceName == null) ? 0 : $serviceName->hashCode());
-		return $result;
-	}
-
-	public function equals($obj)
-	{
-		if ($this == $obj)
-			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj . getClass())
-			return false;
-		$other = $obj;
-		if ($gadgetUri == null) {
-			if ($other->gadgetUri != null)
-				return false;
-		} else if (! $gadgetUri->equals(other . gadgetUri))
-			return false;
-		if ($serviceName == null) {
-			if ($other->serviceName != null)
-				return false;
-		} else if (! $serviceName->equals($other->serviceName))
-			return false;
-		return true;
-	}
 }
 
 class ProviderInfo {
@@ -209,7 +197,7 @@ class ProviderInfo {
 		return $this->provider;
 	}
 
-	public function setProvider($provider)
+	public function setProvider(OAuthServiceProvider $provider)
 	{
 		$this->provider = $provider;
 	}
@@ -290,53 +278,6 @@ class TokenKey {
 	public function setServiceName($serviceName)
 	{
 		$this->serviceName = $serviceName;
-	}
-
-	public function hashCode()
-	{
-		$prime = 31;
-		$result = 1;
-		$result = $prime * $result + (($gadgetUri == null) ? 0 : $gadgetUri->hashCode());
-		$result = $prime * $result + (int)($moduleId ^ ($moduleId >> 32));
-		$result = $prime * $result + (($serviceName == null) ? 0 : $serviceName->hashCode());
-		$result = $prime * $result + (($tokenName == null) ? 0 : $tokenName->hashCode());
-		$result = $prime * $result + (($userId == null) ? 0 : $userId->hashCode());
-		return $result;
-	}
-
-	public function equals($obj)
-	{
-		if ($this == $obj)
-			return true;
-		if ($obj == null)
-			return false;
-			/*?*/		if (getClass() != $obj->getClass())
-			return false;
-		
-		$other = $obj;
-		if ($gadgetUri == null) {
-			if ($other->gadgetUri != null)
-				return false;
-		} else if (! $gadgetUri->equals($other->gadgetUri))
-			return false;
-		if ($moduleId != $other->moduleId)
-			return false;
-		if ($serviceName == null) {
-			if ($other->serviceName != null)
-				return false;
-		} else if (! $serviceName->equals($other->serviceName))
-			return false;
-		if ($tokenName == null) {
-			if ($other->tokenName != null)
-				return false;
-		} else if (! $tokenName->equals($other->tokenName))
-			return false;
-		if ($userId == null) {
-			if ($other->userId != null)
-				return false;
-		} else if (! $userId->equals($other->userId))
-			return false;
-		return true;
 	}
 }
 

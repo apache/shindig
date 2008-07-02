@@ -18,23 +18,63 @@
  * under the License.
  */
 
-
 /**
  * Bundles information about a proxy request that requires OAuth
  */
 class OAuthRequestParams {
-	public static $SERVICE_PARAM = "oauthService";
-	public static $TOKEN_PARAM = "oauthToken";
+	public static $SERVICE_PARAM = "OAUTH_SERVICE_NAME";
+	public static $TOKEN_PARAM = "OAUTH_TOKEN_NAME";
+	public static $REQUEST_TOKEN_PARAM = "OAUTH_REQUEST_TOKEN";
+	public static $REQUEST_TOKEN_SECRET_PARAM = "OAUTH_REQUEST_TOKEN_SECRET";
 	public static $CLIENT_STATE_PARAM = "oauthState";
-	private $serviceName;
-	private $tokenName;
-	private $origClientState;
+	public static $BYPASS_SPEC_CACHE_PARAM = "bypassSpecCache";
+	protected $serviceName;
+	protected $tokenName;
+	protected $requestToken;
+	protected $requestTokenSecret;
+	protected $origClientState;
+	protected $bypassSpecCache;
 
 	public function __construct()
 	{
-		$this->serviceName = $_REQUEST[OAuthRequestParams::$SERVICE_PARAM];
-		$this->tokenName = $_REQUEST[OAuthRequestParams::$TOKEN_PARAM];
-		$this->origClientState = $_REQUEST[OAuthRequestParams::$CLIENT_STATE_PARAM];
+		$this->serviceName = $this->getParam(self::$SERVICE_PARAM, "");
+		$this->tokenName = $this->getParam(self::$TOKEN_PARAM, "");
+		$this->requestToken = $this->getParam(self::$REQUEST_TOKEN_PARAM, null);
+		$this->requestTokenSecret = $this->getParam(self::$REQUEST_TOKEN_SECRET_PARAM, null);
+		$this->origClientState = $this->getParam(self::$CLIENT_STATE_PARAM, null);
+		$this->bypassSpecCache = $this->parseBypassSpecCacheParam();
+	}
+
+	private function getParam($name, $def)
+	{
+		$val = null;
+		if (isset($_REQUEST[$name])) {
+			$val = $_REQUEST[$name];
+		}
+		if ($val == null) {
+			$val = $def;
+		}
+		return $val;
+	}
+
+	public function getBypassSpecCache()
+	{
+		return $this->bypassSpecCache;
+	}
+
+	public function getRequestToken()
+	{
+		return $this->requestToken;
+	}
+
+	public function getRequestTokenSecret()
+	{
+		return $this->requestTokenSecret;
+	}
+
+	public static function parseBypassSpecCacheParam()
+	{
+		return "1" == $_REQUEST[self::$BYPASS_SPEC_CACHE_PARAM];
 	}
 
 	public function getServiceName()
