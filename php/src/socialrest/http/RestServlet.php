@@ -108,6 +108,7 @@ class RestServlet extends HttpServlet {
 	private function getResponseItem(RestRequestItem $requestItem)
 	{
 		$path = $this->getRouteFromParameter($requestItem->getUrl());
+		$class = false;
 		switch ($path) {
 			case 'people':
 				$class = 'PersonHandler';
@@ -123,7 +124,7 @@ class RestServlet extends HttpServlet {
 				$response = new ResponseItem(NOT_IMPLEMENTED, "{$path} is not implemented");
 				break;
 		}
-		if (class_exists($class, true)) {
+		if ($class && class_exists($class, true)) {
 			$class = new $class(null);
 			$response = $class->handleMethod($requestItem);
 		}

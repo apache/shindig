@@ -58,13 +58,19 @@ class ActivityHandler extends DataRequestHandler {
 	 * /activities/{userId}/@self
 	 *
 	 * examples:
+	 * /activities/@viewer/@self/@app
 	 * /activities/john.doe/@self
 	 * - postBody is an activity object
 	 */
 	public function handlePost(RestRequestItem $requestItem)
 	{
+		$requestItem->parseUrlWithTemplate(self::$ACTIVITY_ID_PATH);
 		//TODO: do we need to add groups here?
-		return $this->service->createActivity($requestItem->getUser(), $requestItem->getPostData(), $requestItem->getToken());
+		if ($this->service->createActivity($requestItem->getUser(), $requestItem->getPostData(), $requestItem->getToken())) {
+			return new ResponseItem(null, null, '');
+		} else {
+			return new ResponseItem(BAD_REQUEST, "You can't delete activities. ", null);
+		}
 	}
 
 	/**
