@@ -17,7 +17,7 @@
  */
 package org.apache.shindig.social.opensocial.model;
 
-public final class EnumImpl<E extends EnumImpl.EnumKey> implements Enum<E> {
+public final class EnumImpl<E extends Enum.EnumKey> implements Enum<E> {
   private String displayValue;
   private E key = null;
 

@@ -26,6 +26,9 @@ public class NameImpl implements Name {
   private String honorificSuffix;
   private String unstructured;
 
+  public NameImpl() {
+  }
+
   public NameImpl(String unstructured) {
     this.unstructured = unstructured;
   }

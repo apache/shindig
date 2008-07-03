@@ -82,6 +82,9 @@ public class PersonImpl implements Person {
   private boolean isOwner = false;
   private boolean isViewer = false;
 
+  public PersonImpl() {
+  }
+
   public PersonImpl(String id, Name name) {
     this.id = id;
     this.name = name;

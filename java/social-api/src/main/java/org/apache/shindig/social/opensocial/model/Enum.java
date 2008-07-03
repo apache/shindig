@@ -27,6 +27,26 @@ package org.apache.shindig.social.opensocial.model;
  */
 public interface Enum<E extends Enum.EnumKey> {
 
+  /**
+   * Set of fields associated with an Enum object
+   */
+  public static enum Field {
+    KEY("key"),
+    // TODO Shouldnt this be 'displayValue'
+    DISPLAY_VALUE("displayvalue");
+
+    private final String jsonString;
+
+    private Field(String jsonString) {
+      this.jsonString = jsonString;
+    }
+
+    @Override
+    public String toString() {
+      return this.jsonString;
+    }
+  }
+
   public interface EnumKey {
     String getDisplayValue();
   }

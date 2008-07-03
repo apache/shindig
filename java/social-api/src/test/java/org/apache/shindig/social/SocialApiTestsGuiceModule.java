@@ -18,6 +18,11 @@
  */
 package org.apache.shindig.social;
 
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
+import com.google.inject.Singleton;
+import com.google.inject.name.Names;
+
 import org.apache.shindig.common.BasicSecurityTokenDecoder;
 import org.apache.shindig.common.SecurityTokenDecoder;
 import org.apache.shindig.common.servlet.ParameterFetcher;
@@ -28,6 +33,7 @@ import org.apache.shindig.social.dataservice.DataServiceServletFetcher;
 import org.apache.shindig.social.dataservice.PersonService;
 import org.apache.shindig.social.opensocial.ActivitiesService;
 import org.apache.shindig.social.opensocial.DataService;
+import org.apache.shindig.social.opensocial.DefaultModelGuiceModule;
 import org.apache.shindig.social.opensocial.PeopleService;
 import org.apache.shindig.social.opensocial.model.Activity;
 import org.apache.shindig.social.opensocial.model.ActivityImpl;
@@ -39,8 +45,6 @@ import org.apache.shindig.social.opensocial.model.Email;
 import org.apache.shindig.social.opensocial.model.EmailImpl;
 import org.apache.shindig.social.opensocial.model.Enum;
 import org.apache.shindig.social.opensocial.model.EnumImpl;
-import org.apache.shindig.social.opensocial.model.MediaItem;
-import org.apache.shindig.social.opensocial.model.MediaItemImpl;
 import org.apache.shindig.social.opensocial.model.NameImpl;
 import org.apache.shindig.social.opensocial.model.Organization;
 import org.apache.shindig.social.opensocial.model.OrganizationImpl;
@@ -55,12 +59,6 @@ import org.apache.shindig.social.samplecontainer.BasicPeopleService;
 import org.apache.shindig.social.samplecontainer.SampleContainerRouteManager;
 import org.apache.shindig.social.samplecontainer.XmlStateFileFetcher;
 
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
-import com.google.inject.AbstractModule;
-import com.google.inject.Singleton;
-import com.google.inject.name.Names;
-
 import java.net.URI;
 import java.util.Date;
 import java.util.HashMap;
@@ -71,12 +69,13 @@ import java.util.logging.Logger;
 /**
  * Provides social api component injection for all large tests
  */
-public class SocialApiTestsGuiceModule extends AbstractModule {
+public class SocialApiTestsGuiceModule extends DefaultModelGuiceModule {
   private static Logger logger =
       Logger.getLogger(SocialApiTestsGuiceModule.class.getName());
 
   @Override
   protected void configure() {
+    super.configure();
     bind(PeopleService.class).to(BasicPeopleService.class);
     bind(DataService.class).to(BasicDataService.class);
     bind(ActivitiesService.class).to(BasicActivitiesService.class);
@@ -92,9 +91,6 @@ public class SocialApiTestsGuiceModule extends AbstractModule {
 
     bind(ParameterFetcher.class).annotatedWith(Names.named("GadgetDataServlet")).to(GadgetDataServletFetcher.class);
     bind(ParameterFetcher.class).annotatedWith(Names.named("DataServiceServlet")).to(DataServiceServletFetcher.class);
-
-    bind(Activity.class).to(ActivityImpl.class);
-    bind(MediaItem.class).to(MediaItemImpl.class);
   }
 
   @Singleton

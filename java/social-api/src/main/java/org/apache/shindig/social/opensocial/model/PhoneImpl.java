@@ -22,6 +22,9 @@ public class PhoneImpl implements Phone {
   private String number;
   private String type;
 
+  public PhoneImpl() {
+  }
+
   public PhoneImpl(String number, String type) {
     super();
     this.number = number;

@@ -23,6 +23,9 @@ public final class MessageImpl implements Message {
   private String title;
   private Type type;
 
+  public MessageImpl() {
+  }
+
   public MessageImpl(String initBody, String initTitle, Type initType) {
     this.body = initBody;
     this.title = initTitle;

@@ -31,6 +31,9 @@ public class AddressImpl implements Address {
   private String type;
   private String unstructuredAddress;
 
+  public AddressImpl() {
+  }
+
   public AddressImpl(String unstructuredAddress) {
     this.unstructuredAddress = unstructuredAddress;
   }

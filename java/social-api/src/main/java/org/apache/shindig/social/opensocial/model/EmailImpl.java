@@ -22,6 +22,9 @@ public class EmailImpl implements Email {
   private String address;
   private String type;
 
+  public EmailImpl() {
+  }
+
   public EmailImpl(String address, String type) {
     this.address = address;
     this.type = type;
