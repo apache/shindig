@@ -27,6 +27,9 @@ public class UrlImpl implements Url {
   private String linkText;
   private String type;
 
+  public UrlImpl() {
+  }
+  
   public UrlImpl(String address, String linkText, String type) {
     this.address = address;
     this.linkText = linkText;

@@ -19,9 +19,13 @@ package org.apache.shindig.social.opensocial.util;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 
+import org.apache.shindig.social.opensocial.model.Enum;
+import org.apache.shindig.social.opensocial.model.EnumImpl;
+import org.joda.time.DateTime;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -34,6 +38,7 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -44,7 +49,7 @@ import java.util.regex.Pattern;
 public class BeanJsonConverter implements BeanConverter {
 
   private static final Object[] EMPTY_OBJECT = {};
-  private static final String EXCLUDED_FIELDS = "class";
+  private static final Set<String> EXCLUDED_FIELDS = Sets.newHashSet("class", "declaringclass");
   private static final Pattern GETTER = Pattern.compile("^get([a-zA-Z]+)$");
   private static final Pattern SETTER = Pattern.compile("^set([a-zA-Z]+)$");
   private Injector injector;
@@ -102,12 +107,13 @@ public class BeanJsonConverter implements BeanConverter {
       }
       return map;
 
+    } else if (val != null && val.getClass().isEnum()) {
+      return val.toString();
     } else if (val instanceof String
         || val instanceof Boolean
         || val instanceof Integer
         || val instanceof Date
         || val instanceof Long
-        || val instanceof Enum
         || val instanceof Float
         || val instanceof JSONObject
         || val instanceof JSONArray
@@ -129,17 +135,20 @@ public class BeanJsonConverter implements BeanConverter {
 
     JSONObject toReturn = new JSONObject();
     for (MethodPair getter : availableGetters) {
-      String errorMessage = "Could not encode the " + getter.method + " method.";
+      String errorMessage = "Could not encode the " + getter.method + " method on " +
+          pojo.getClass().getName();
       try {
         Object val = getter.method.invoke(pojo, EMPTY_OBJECT);
         if (val != null) {
           toReturn.put(getter.fieldName, translateObjectToJson(val));
         }
-      } catch(JSONException e) {
+      } catch (JSONException e) {
         throw new RuntimeException(errorMessage, e);
-      } catch(IllegalAccessException e) {
+      } catch (IllegalAccessException e) {
         throw new RuntimeException(errorMessage, e);
-      } catch(InvocationTargetException e) {
+      } catch (InvocationTargetException e) {
+        throw new RuntimeException(errorMessage, e);
+      } catch (IllegalArgumentException e) {
         throw new RuntimeException(errorMessage, e);
       }
     }
@@ -168,7 +177,7 @@ public class BeanJsonConverter implements BeanConverter {
 
       String name = matcher.group();
       String fieldName = name.substring(3, 4).toLowerCase() + name.substring(4);
-      if (fieldName.equalsIgnoreCase(EXCLUDED_FIELDS)) {
+      if (EXCLUDED_FIELDS.contains(fieldName.toLowerCase())) {
         continue;
       }
       availableGetters.add(new MethodPair(method, fieldName));
@@ -190,12 +199,14 @@ public class BeanJsonConverter implements BeanConverter {
       throw new RuntimeException(errorMessage, e);
     } catch (InstantiationException e) {
       throw new RuntimeException(errorMessage, e);
+    } catch (NoSuchFieldException e) {
+      throw new RuntimeException(errorMessage, e);
     }
   }
 
   private <T> T convertToObject(String json, T pojo)
       throws JSONException, InvocationTargetException, IllegalAccessException,
-      InstantiationException {
+      InstantiationException, NoSuchFieldException {
 
     if (pojo instanceof String) {
       pojo = (T) json; // This is a weird cast...
@@ -233,7 +244,8 @@ public class BeanJsonConverter implements BeanConverter {
 
   private <T> void callSetterWithValue(T pojo, Method method,
       JSONObject jsonObject, String fieldName)
-      throws IllegalAccessException, InvocationTargetException, JSONException {
+      throws IllegalAccessException, InvocationTargetException, NoSuchFieldException,
+      JSONException {
 
     Class<?> expectedType = method.getParameterTypes()[0];
     Object value = null;
@@ -272,20 +284,50 @@ public class BeanJsonConverter implements BeanConverter {
 
       value = map;
 
-    } else if (Enum.class.isAssignableFrom(expectedType)) {
-      String enumString = jsonObject.getString(fieldName);
-      value = Enum.valueOf((Class<? extends Enum>) expectedType, enumString);
-
+    } else if (org.apache.shindig.social.opensocial.model.Enum.class
+        .isAssignableFrom(expectedType)) {
+      // TODO Need to stop using Enum as a class name :(
+      Class enumType = (Class) ((ParameterizedType) method.getGenericParameterTypes()[0])
+          .getActualTypeArguments()[0];
+      // TODO This isnt injector friendly but perhaps implementors dont need it. If they do a
+      // refactoring of the Enum handling in general is needed.
+      if (jsonObject.has(fieldName)) {
+        JSONObject jsonEnum = jsonObject.getJSONObject(fieldName);
+        if (jsonEnum.has(Enum.Field.KEY.toString())) {
+          Enum.EnumKey enumKey = (Enum.EnumKey) enumType
+              .getField(jsonEnum.getString(Enum.Field.KEY.toString())).get(null);
+          value = new EnumImpl<Enum.EnumKey>(enumKey,
+              jsonEnum.getString(Enum.Field.DISPLAY_VALUE.toString()));
+        } else {
+          value = new EnumImpl<Enum.EnumKey>(null,
+              jsonEnum.getString(Enum.Field.DISPLAY_VALUE.toString()));
+        }
+      }
+    } else if (expectedType.isEnum()) {
+      if (jsonObject.has(fieldName)) {
+        for (Object v : expectedType.getEnumConstants()) {
+          if (v.toString().equals(jsonObject.getString(fieldName))) {
+            value = v;
+            break;
+          }
+        }
+        if (value == null) {
+          throw new IllegalArgumentException(
+              "No enum value  '" + jsonObject.getString(fieldName) +
+                  "' in " + expectedType.getName());
+        }
+      }
     } else if (expectedType.equals(String.class)) {
       value = jsonObject.getString(fieldName);
-
     } else if (expectedType.equals(Date.class)) {
-      Long time = jsonObject.getLong(fieldName);
-      value = new Date(time);
-
+      // Use JODA ISO parsing for the conversion
+      value = new DateTime(jsonObject.getString(fieldName)).toDate();
     } else if (expectedType.equals(Long.class)) {
       value = jsonObject.getLong(fieldName);
-
+    } else if (expectedType.equals(Integer.class)) {
+      value = jsonObject.getInt(fieldName);
+    } else if (expectedType.equals(Boolean.class)) {
+      value = jsonObject.getBoolean(fieldName);
     } else if (expectedType.equals(Float.class)) {
       String stringFloat = jsonObject.getString(fieldName);
       value = new Float(stringFloat);

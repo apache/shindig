@@ -17,26 +17,27 @@
  */
 package org.apache.shindig.social.opensocial.util;
 
-import org.apache.shindig.social.opensocial.model.Activity;
-import org.apache.shindig.social.opensocial.model.Email;
-import org.apache.shindig.social.opensocial.model.MediaItem;
-import org.apache.shindig.social.opensocial.model.Person;
-import org.apache.shindig.social.opensocial.model.Phone;
-import org.apache.shindig.social.opensocial.model.DataCollection;
-import org.apache.shindig.social.opensocial.model.ActivityImpl;
-import org.apache.shindig.social.opensocial.model.AddressImpl;
-import org.apache.shindig.social.opensocial.model.EmailImpl;
-import org.apache.shindig.social.opensocial.model.MediaItemImpl;
-import org.apache.shindig.social.opensocial.model.NameImpl;
-import org.apache.shindig.social.opensocial.model.PersonImpl;
-import org.apache.shindig.social.opensocial.model.PhoneImpl;
-import org.apache.shindig.social.opensocial.model.Address;
-import org.apache.shindig.social.SocialApiTestsGuiceModule;
-
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.inject.Guice;
+
 import junit.framework.TestCase;
+
+import org.apache.shindig.social.SocialApiTestsGuiceModule;
+import org.apache.shindig.social.opensocial.model.Activity;
+import org.apache.shindig.social.opensocial.model.ActivityImpl;
+import org.apache.shindig.social.opensocial.model.Address;
+import org.apache.shindig.social.opensocial.model.AddressImpl;
+import org.apache.shindig.social.opensocial.model.DataCollection;
+import org.apache.shindig.social.opensocial.model.Email;
+import org.apache.shindig.social.opensocial.model.EmailImpl;
+import org.apache.shindig.social.opensocial.model.MediaItem;
+import org.apache.shindig.social.opensocial.model.MediaItemImpl;
+import org.apache.shindig.social.opensocial.model.NameImpl;
+import org.apache.shindig.social.opensocial.model.Person;
+import org.apache.shindig.social.opensocial.model.PersonImpl;
+import org.apache.shindig.social.opensocial.model.Phone;
+import org.apache.shindig.social.opensocial.model.PhoneImpl;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -189,7 +190,7 @@ public class BeanJsonConverterTest extends TestCase {
 
   public void testJsonToActivity() throws Exception {
     String jsonActivity = "{userId : 5, id : 6, mediaItems : [" +
-        "{url : 'hello', mimeType : 'mimey', type : 'VIDEO'}" +
+        "{url : 'hello', mimeType : 'mimey', type : 'video'}" +
         "]}";
     // TODO: rename the enums to be lowercase
     Activity result = beanJsonConverter.convertToObject(jsonActivity,

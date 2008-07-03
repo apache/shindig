@@ -18,6 +18,12 @@
  */
 package org.apache.shindig.social;
 
+import com.google.common.collect.Lists;
+import com.google.inject.Inject;
+import com.google.inject.Provider;
+import com.google.inject.TypeLiteral;
+import com.google.inject.name.Names;
+
 import org.apache.shindig.common.servlet.ParameterFetcher;
 import org.apache.shindig.social.abdera.SocialRouteManager;
 import org.apache.shindig.social.dataservice.ActivityService;
@@ -26,31 +32,21 @@ import org.apache.shindig.social.dataservice.DataServiceServletFetcher;
 import org.apache.shindig.social.dataservice.PersonService;
 import org.apache.shindig.social.opensocial.ActivitiesService;
 import org.apache.shindig.social.opensocial.DataService;
+import org.apache.shindig.social.opensocial.DefaultModelGuiceModule;
 import org.apache.shindig.social.opensocial.OpenSocialDataHandler;
 import org.apache.shindig.social.opensocial.PeopleService;
-import org.apache.shindig.social.opensocial.model.Activity;
-import org.apache.shindig.social.opensocial.model.ActivityImpl;
-import org.apache.shindig.social.opensocial.model.MediaItem;
-import org.apache.shindig.social.opensocial.model.MediaItemImpl;
 import org.apache.shindig.social.samplecontainer.BasicActivitiesService;
 import org.apache.shindig.social.samplecontainer.BasicDataService;
 import org.apache.shindig.social.samplecontainer.BasicPeopleService;
 import org.apache.shindig.social.samplecontainer.SampleContainerRouteManager;
 import org.apache.shindig.social.samplecontainer.StateFileDataHandler;
 
-import com.google.common.collect.Lists;
-import com.google.inject.AbstractModule;
-import com.google.inject.Inject;
-import com.google.inject.Provider;
-import com.google.inject.TypeLiteral;
-import com.google.inject.name.Names;
-
 import java.util.List;
 
 /**
  * Provides social api component injection
  */
-public class SocialApiGuiceModule extends AbstractModule {
+public class SocialApiGuiceModule extends DefaultModelGuiceModule {
 
   /** {@inheritDoc} */
   @Override
@@ -70,9 +66,6 @@ public class SocialApiGuiceModule extends AbstractModule {
 
     bind(ParameterFetcher.class).annotatedWith(Names.named("GadgetDataServlet")).to(GadgetDataServletFetcher.class);
     bind(ParameterFetcher.class).annotatedWith(Names.named("DataServiceServlet")).to(DataServiceServletFetcher.class);
-
-    bind(Activity.class).to(ActivityImpl.class);
-    bind(MediaItem.class).to(MediaItemImpl.class);
   }
 
   public static class GadgetDataHandlersProvider
