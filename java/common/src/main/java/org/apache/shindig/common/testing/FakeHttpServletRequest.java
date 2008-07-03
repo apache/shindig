@@ -71,38 +71,38 @@ public class FakeHttpServletRequest implements HttpServletRequest {
   private static final String HOST_HEADER = "Host";
   private static final String DATE_FORMAT = "EEE, dd MMM yyyy HH:mm:ss zzz";
 
-  protected String scheme_ = "http";
-  protected String host_;
-  protected int port_;
-  protected boolean secure_ = false;
-  protected String method_ = "GET";
-  protected String protocol_ = "HTTP/1.0";
-  protected String contextPath_;
-  protected String servletPath_;
-  protected String pathInfo_ = null;
-  protected String queryString_;
-  protected String ip_ = "127.0.0.1";
-  protected String contentType_;
+  protected String scheme = "http";
+  protected String host;
+  protected int port;
+  protected boolean secure = false;
+  protected String method = "GET";
+  protected String protocol = "HTTP/1.0";
+  protected String contextPath;
+  protected String servletPath;
+  protected String pathInfo = null;
+  protected String queryString;
+  protected String ip = "127.0.0.1";
+  protected String contentType;
 
-  protected Hashtable<String, String> headers_ =
+  protected Hashtable<String, String> headers =
       new Hashtable<String, String>();
 
   // Use a LinkedHashMap so we can generate a query string that is in the same
   // order that we set the parameters
-  protected Map<String, String[]> parameters_ =
+  protected Map<String, String[]> parameters =
       new LinkedHashMap<String, String[]>();
 
-  protected Set<String> postParameters_ = new HashSet<String>();
+  protected Set<String> postParameters = new HashSet<String>();
 
-  protected Map<String, Cookie> cookies_ = new Hashtable<String, Cookie>();
+  protected Map<String, Cookie> cookies = new Hashtable<String, Cookie>();
 
 
   // Use a Map rather than a table since the specified behavior of
   // setAttribute() allows null values.
-  protected Map<String, Object> attributes_ = Maps.newHashMap();
+  protected Map<String, Object> attributes = Maps.newHashMap();
 
-  protected Locale locale_ = Locale.US;
-  protected List<Locale> locales_ = null;
+  protected Locale locale = Locale.US;
+  protected List<Locale> locales = null;
 
   // used by POST methods
   protected byte[] postData;
@@ -166,9 +166,9 @@ public class FakeHttpServletRequest implements HttpServletRequest {
     }
 
     // Set the scheme
-    scheme_ = url.getProtocol();
-    if (scheme_.equalsIgnoreCase("https")) {
-      secure_ = true;
+    scheme = url.getProtocol();
+    if (scheme.equalsIgnoreCase("https")) {
+      secure = true;
     }
 
     int port = url.getPort();
@@ -179,22 +179,22 @@ public class FakeHttpServletRequest implements HttpServletRequest {
   }
 
   public FakeHttpServletRequest setLocale(Locale locale) {
-    locale_ = locale;
+    this.locale = locale;
     return this;
   }
 
   public FakeHttpServletRequest setLocales(List<Locale> locales) {
-    locales_ = locales;
+    this.locales = locales;
     return this;
   }
 
   public FakeHttpServletRequest setProtocol(String prot) {
-    protocol_ = prot;
+    this.protocol = prot;
     return this;
   }
 
   public FakeHttpServletRequest setSecure(boolean secure) {
-    secure_ = secure;
+    this.secure = secure;
     return this;
   }
 
@@ -227,13 +227,13 @@ public class FakeHttpServletRequest implements HttpServletRequest {
     addToHeaderMap(name, value);
 
     if (name.equals(HOST_HEADER)) {
-      host_ = value;
+      host = value;
     }
     return this;
   }
 
   private void addToHeaderMap(String name, String value) {
-    headers_.put(name.toLowerCase(), value);
+    headers.put(name.toLowerCase(), value);
   }
 
   /**
@@ -262,7 +262,7 @@ public class FakeHttpServletRequest implements HttpServletRequest {
   }
 
   private void addToCookieMap(Cookie c) {
-    cookies_.put(c.getName(), c);
+    cookies.put(c.getName(), c);
   }
 
   /**
@@ -271,7 +271,7 @@ public class FakeHttpServletRequest implements HttpServletRequest {
   private void setCookieHeader() {
     StringBuilder sb = new StringBuilder();
     boolean isFirst = true;
-    for (Cookie c : cookies_.values()) {
+    for (Cookie c : cookies.values()) {
       if (!isFirst) {
         sb.append("; ");
       }
@@ -294,12 +294,12 @@ public class FakeHttpServletRequest implements HttpServletRequest {
    */
   public FakeHttpServletRequest setParameter(String name, boolean isPost, String... values) {
     if (isPost) {
-      postParameters_.add(name);
+      postParameters.add(name);
     }
-    parameters_.put(name, values);
+    parameters.put(name, values);
     // Old query string no longer matches up, so set it to null so it can be
     // regenerated on the next call of getQueryString()
-    queryString_ = null;
+    queryString = null;
     return this;
   }
 
@@ -317,7 +317,7 @@ public class FakeHttpServletRequest implements HttpServletRequest {
 
   /** Set the path info field. */
   public FakeHttpServletRequest setPathInfo(String path) {
-    pathInfo_ = path;
+    pathInfo = path;
     return this;
   }
 
@@ -346,7 +346,7 @@ public class FakeHttpServletRequest implements HttpServletRequest {
   public FakeHttpServletRequest setPostData(byte[] data) {
     postData = data;
     characterEncoding = null;
-    method_ = METHOD_POST;
+    method = METHOD_POST;
     return this;
   }
 
@@ -357,9 +357,9 @@ public class FakeHttpServletRequest implements HttpServletRequest {
    * @param queryString representing the new value. i.e.: "bug=1&id=23"
    */
   public FakeHttpServletRequest setQueryString(String queryString) {
-    queryString_ = queryString;
-    parameters_.clear();
-    decodeQueryString(queryString, parameters_);
+    this.queryString = queryString;
+    parameters.clear();
+    decodeQueryString(queryString, parameters);
     return this;
   }
 
@@ -379,7 +379,7 @@ public class FakeHttpServletRequest implements HttpServletRequest {
    * @param contentType of the request.
    */
   public FakeHttpServletRequest setContentType(String contentType) {
-    this.contentType_ = contentType;
+    this.contentType = contentType;
     return this;
   }
 
@@ -392,15 +392,15 @@ public class FakeHttpServletRequest implements HttpServletRequest {
   }
 
   public java.lang.String getContextPath() {
-    return contextPath_;
+    return contextPath;
   }
 
   public Cookie[] getCookies() {
-    if (cookies_.isEmpty()) {
+    if (cookies.isEmpty()) {
       // API promises null return if no cookies
       return null;
     }
-    return cookies_.values().toArray(new Cookie[0]);
+    return cookies.values().toArray(new Cookie[0]);
   }
 
   public long getDateHeader(String name) {
@@ -425,16 +425,16 @@ public class FakeHttpServletRequest implements HttpServletRequest {
   }
 
   public String getHeader(String name) {
-    return headers_.get(name.toLowerCase());
+    return headers.get(name.toLowerCase());
   }
 
   public Enumeration<String> getHeaderNames() {
-    return headers_.keys();
+    return headers.keys();
   }
 
   public Enumeration<?> getHeaders(String name) {
     List<String> values = new ArrayList<String>();
-    for (Map.Entry<String, String> entry : headers_.entrySet()) {
+    for (Map.Entry<String, String> entry : headers.entrySet()) {
       if (name.equalsIgnoreCase(entry.getKey())) {
         values.add(entry.getValue());
       }
@@ -447,16 +447,16 @@ public class FakeHttpServletRequest implements HttpServletRequest {
   }
 
   public String getMethod() {
-    return method_;
+    return method;
   }
 
   public FakeHttpServletRequest setMethod(String method) {
-    method_ = method;
+    this.method = method;
     return this;
   }
 
   public String getPathInfo() {
-    return pathInfo_;
+    return pathInfo;
   }
 
   public String getPathTranslated() {
@@ -465,21 +465,21 @@ public class FakeHttpServletRequest implements HttpServletRequest {
 
   public String getQueryString() {
     try {
-      if (queryString_ == null && !parameters_.isEmpty()) {
+      if (queryString == null && !parameters.isEmpty()) {
         boolean hasPrevious = false;
         StringBuilder queryString = new StringBuilder();
-        for (Iterator<String> it = parameters_.keySet().iterator(); it.hasNext();) {
+        for (Iterator<String> it = parameters.keySet().iterator(); it.hasNext();) {
           String key = it.next();
   
           // We're not interested in blank keys
-          if (key == null || key.equals("") || postParameters_.contains(key)) {
+          if (key == null || key.equals("") || postParameters.contains(key)) {
             continue;
           }
           if (hasPrevious) {
             queryString.append("&");
           }
   
-          String[] values = parameters_.get(key);
+          String[] values = parameters.get(key);
           // Append the parameters to the query string
           if (values.length == 0) {
             queryString.append(URLEncoder.encode(key, "UTF-8"));
@@ -495,9 +495,9 @@ public class FakeHttpServletRequest implements HttpServletRequest {
           hasPrevious = true;
   
         }
-        queryString_ = queryString.toString();
+        this.queryString = queryString.toString();
       }
-      return queryString_;
+      return queryString;
     } catch (UnsupportedEncodingException e) {
       throw new RuntimeException("Should always support UTF-8", e);
     }
@@ -513,12 +513,12 @@ public class FakeHttpServletRequest implements HttpServletRequest {
 
   public String getRequestURI() {
     StringBuffer buf = new StringBuffer();
-    if (!contextPath_.equals("")) {
-      buf.append(contextPath_);
+    if (!contextPath.equals("")) {
+      buf.append(contextPath);
     }
 
-    if (servletPath_ != null && !"".equals(servletPath_)) {
-      buf.append(servletPath_);
+    if (servletPath != null && !"".equals(servletPath)) {
+      buf.append(servletPath);
     }
 
     if (buf.length() == 0) {
@@ -530,22 +530,22 @@ public class FakeHttpServletRequest implements HttpServletRequest {
 
   public StringBuffer getRequestURL() {
     StringBuffer buf =
-        secure_ ? new StringBuffer("https://") : new StringBuffer("http://");
-    buf.append(host_);
-    if (port_ >= 0) {
+        secure ? new StringBuffer("https://") : new StringBuffer("http://");
+    buf.append(host);
+    if (port >= 0) {
       buf.append(':');
-      buf.append(port_);
+      buf.append(port);
     }
     buf.append(getRequestURI()); // always begins with '/'
     return buf;
   }
 
   public String getServletPath() {
-    return servletPath_;
+    return servletPath;
   }
 
   public FakeHttpServletRequest setServletPath(String servletPath) {
-    this.servletPath_ = servletPath;
+    this.servletPath = servletPath;
     return this;
   }
 
@@ -586,11 +586,11 @@ public class FakeHttpServletRequest implements HttpServletRequest {
   // Implements methods from ServletRequest ///////////////////////////////////
 
   public Object getAttribute(String name) {
-    return attributes_.get(name);
+    return attributes.get(name);
   }
 
   public Enumeration<?> getAttributeNames() {
-    return Collections.enumeration(attributes_.keySet());
+    return Collections.enumeration(attributes.keySet());
   }
 
   public String getCharacterEncoding() {
@@ -602,7 +602,7 @@ public class FakeHttpServletRequest implements HttpServletRequest {
   }
 
   public String getContentType() {
-    return contentType_;
+    return contentType;
   }
 
   /**
@@ -627,11 +627,11 @@ public class FakeHttpServletRequest implements HttpServletRequest {
   }
 
   public Locale getLocale() {
-    return locale_;
+    return locale;
   }
 
   public Enumeration<?> getLocales() {
-    return Collections.enumeration(locales_);
+    return Collections.enumeration(locales);
   }
 
   public String getParameter(String name) {
@@ -644,19 +644,19 @@ public class FakeHttpServletRequest implements HttpServletRequest {
   }
 
   public Map<String, String[]> getParameterMap() {
-    return parameters_;
+    return parameters;
   }
 
   public Enumeration<String> getParameterNames() {
-    return Collections.enumeration(parameters_.keySet());
+    return Collections.enumeration(parameters.keySet());
   }
 
   public String[] getParameterValues(String name) {
-    return parameters_.get(name);
+    return parameters.get(name);
   }
 
   public String getProtocol() {
-    return protocol_;
+    return protocol;
   }
 
   public BufferedReader getReader() throws IOException {
@@ -684,7 +684,7 @@ public class FakeHttpServletRequest implements HttpServletRequest {
   }
 
   public String getRemoteAddr() {
-    return ip_;
+    return ip;
   }
 
   /**
@@ -694,7 +694,7 @@ public class FakeHttpServletRequest implements HttpServletRequest {
    * @return this {@code FakeHttpServletRequest} object
    */
   public FakeHttpServletRequest setRemoteAddr(String ip) {
-    ip_ = ip;
+    this.ip = ip;
     return this;
   }
 
@@ -753,27 +753,27 @@ public class FakeHttpServletRequest implements HttpServletRequest {
   }
 
   public String getScheme() {
-    return scheme_;
+    return scheme;
   }
 
   public String getServerName() {
-    return host_;
+    return host;
   }
 
   public int getServerPort() {
-    return (port_ < 0) ? DEFAULT_PORT : port_;
+    return (port < 0) ? DEFAULT_PORT : port;
   }
 
   public boolean isSecure() {
-    return secure_;
+    return secure;
   }
 
   public void removeAttribute(String name) {
-    attributes_.remove(name);
+    attributes.remove(name);
   }
 
   public void setAttribute(String name, Object value) {
-    attributes_.put(name, value);
+    attributes.put(name, value);
   }
 
   /**
@@ -786,7 +786,7 @@ public class FakeHttpServletRequest implements HttpServletRequest {
    * they're interpreted anyway.
    */
   public void setCharacterEncoding(String env) {
-    if (method_.equals(METHOD_POST)) {
+    if (method.equals(METHOD_POST)) {
       characterEncoding = env;
     }
   }
@@ -808,12 +808,12 @@ public class FakeHttpServletRequest implements HttpServletRequest {
   protected void constructor(String host, int port, String contextPath,
       String servletPath, String queryString) {
     setHeader(HOST_HEADER, host);
-    port_ = port;
-    contextPath_ = contextPath;
-    servletPath_ = servletPath;
-    queryString_ = queryString;
+    this.port = port;
+    this.contextPath = contextPath;
+    this.servletPath = servletPath;
+    this.queryString = queryString;
     if (queryString != null) {
-      decodeQueryString(queryString, parameters_);
+      decodeQueryString(queryString, parameters);
     }
   }
 
