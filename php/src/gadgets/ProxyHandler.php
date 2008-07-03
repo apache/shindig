@@ -188,7 +188,7 @@ class ProxyHandler {
 				if (isset($_SERVER['HTTP_IF_NONE_MATCH']) && $_SERVER['HTTP_IF_NONE_MATCH'] == $etag) {
 					// if e-tag's match, set not modified, and no need to check the if-modified-since headers
 					$notModified = true;
-				} elseif (isset($_SERVER['HTTP_IF_MODIFIED_SINCE']) && $this->lastModified && ! isset($_SERVER['HTTP_IF_NONE_MATCH'])) {
+				} elseif (isset($_SERVER['HTTP_IF_MODIFIED_SINCE']) && $lastModified && ! isset($_SERVER['HTTP_IF_NONE_MATCH'])) {
 					$if_modified_since = strtotime($_SERVER['HTTP_IF_MODIFIED_SINCE']);
 					// Use the request's Last-Modified, otherwise fall back on our internal time keeping (the time the request was created)
 					$lastModified = strtotime($lastModified);
