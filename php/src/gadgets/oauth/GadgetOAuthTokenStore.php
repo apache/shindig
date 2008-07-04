@@ -120,7 +120,7 @@ class GadgetOAuthTokenStore {
 	 *         passed to an OAuthMessage.sign method), as well as httpMethod and
 	 *         signatureType fields.
 	 */
-	public function getOAuthAccessor(TokenKey $tokenKey)
+	public function getOAuthAccessor(TokenKey $tokenKey, $ignoreCache)
 	{
 		$gadgetUri = $tokenKey->getGadgetUri();
 		if (empty($gadgetUri)) {
@@ -130,12 +130,7 @@ class GadgetOAuthTokenStore {
 		if (empty($getUserId)) {
 			throw new OAuthStoreException("found empty userId in TokenKey");
 		}
-		$remoteContentRequest = new RemoteContentRequest($gadgetUri);
-		$remoteContentRequest->getRequest($gadgetUri, false);
-		$spec = $this->specFactory->fetchRequest($remoteContentRequest);
-		$specParser = new GadgetSpecParser();
-		$context = new ProxyGadgetContext($gadgetUri);
-		$gadgetSpec = $specParser->parse($spec->getResponseContent(), $context);
+		$gadgetSpec = $this->specFactory->getGadgetSpecUri($gadgetUri, $ignoreCache);
 		$provInfo = $this->getProviderInfo($gadgetSpec, $tokenKey->getServiceName());
 		return $this->store->getOAuthAccessorTokenKey($tokenKey, $provInfo);
 	}
