@@ -26,7 +26,7 @@ class Email {
 	public $address;
 	public $type;
 	
-	public function __constructor($address, $type)
+	public function __construct($address, $type)
 	{
 		$this->address = $address;
 		$this->type = $type;

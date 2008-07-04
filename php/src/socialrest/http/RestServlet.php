@@ -16,6 +16,7 @@
  * KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
+
 require 'src/common/HttpServlet.php';
 require 'src/common/SecurityTokenDecoder.php';
 require 'src/common/SecurityToken.php';
