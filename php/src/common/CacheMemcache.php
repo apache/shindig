@@ -116,8 +116,7 @@ class CacheMemcache extends Cache {
 	{
 		$this->check();
 		// we store it with the cache_time default expiration so objects will atleast get cleaned eventually.
-		if (memcache_set($this->connection, $key, array('time' => time(), 
-				'data' => $value), 0, Config::Get('cache_time')) === false) {
+		if (@memcache_set($this->connection, $key, array('time' => time(), 'data' => $value), false, Config::Get('cache_time')) == false) {
 			throw new CacheException("Couldn't store data in cache");
 		}
 	}
@@ -125,6 +124,6 @@ class CacheMemcache extends Cache {
 	public function delete($key)
 	{
 		$this->check();
-		@memcache_delete($key);
+		@memcache_delete($this->connection, $key);
 	}
 }
