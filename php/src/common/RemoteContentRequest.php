@@ -32,6 +32,7 @@ class RemoteContentRequest {
 	private $contentType = null;
 	private $options;
 	private $created;
+	private static $SC_OK = 200; //Please, use only for testing!
 	public $handle = false;
 	public static $DEFAULT_CONTENT_TYPE = "application/x-www-form-urlencoded; charset=utf-8";
 
@@ -195,6 +196,23 @@ class RemoteContentRequest {
 		$options = new Options();
 		$options->ignoreCache = $ignoreCache;
 		return $this->createRemoteContentRequestWithUriOptions($uri, $options);
+	}
+	
+	/**
+	 * Simple constructor for setting a basic response from a string. Mostly used
+	 * for testing.
+	 *
+	 * @param body
+	 */
+	public function getHttpFalseResponseBody($body) {
+		return $this->createFalseResponse(RemoteContentRequest::$SC_OK, $body, null);
+	}
+	
+	private function createFalseResponse($httpCode, $body, $headers) {
+		$this->httpCode = $httpCode;
+		$this->responseContent = $body;
+		$this->headers = $headers;
+		return $this;
 	}
 
 	// returns a hash code which identifies this request, used for caching
