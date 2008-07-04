@@ -176,7 +176,7 @@ class OAuthFetcher extends RemoteContentFetcher {
 	protected function lookupOAuthMetadata()
 	{
 		$tokenKey = $this->buildTokenKey();
-		$this->accessorInfo = $this->tokenStore->getOAuthAccessor($tokenKey);
+		$this->accessorInfo = $this->tokenStore->getOAuthAccessor($tokenKey, $this->bypassSpecCache);
 		// The persistent data store may be out of sync with reality; we trust
 		// the state we stored on the client to be accurate.
 		$accessor = $this->accessorInfo->getAccessor();
@@ -307,7 +307,7 @@ class OAuthFetcher extends RemoteContentFetcher {
 	private function newRequestMessageMethod($method, $url, $params)
 	{
 		if (! isset($params)) {
-			throw new Exception("params was null in " + "newRequestMessage " + "Use newRequesMessage if you don't have a params to pass");
+			throw new Exception("params was null in " . "newRequestMessage " . "Use newRequesMessage if you don't have a params to pass");
 		}
 		switch ($this->accessorInfo->getSignatureType()) {
 			case OAuth::$RSA_SHA1:

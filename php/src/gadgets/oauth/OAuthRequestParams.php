@@ -74,7 +74,10 @@ class OAuthRequestParams {
 
 	public static function parseBypassSpecCacheParam()
 	{
-		return "1" == $_REQUEST[self::$BYPASS_SPEC_CACHE_PARAM];
+		if (isset($_REQUEST[self::$BYPASS_SPEC_CACHE_PARAM])) {
+			return "1" == $_REQUEST[self::$BYPASS_SPEC_CACHE_PARAM];
+		}
+		return false;
 	}
 
 	public function getServiceName()
