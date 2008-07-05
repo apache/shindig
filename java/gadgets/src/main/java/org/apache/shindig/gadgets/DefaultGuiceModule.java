@@ -24,6 +24,7 @@ import org.apache.shindig.gadgets.http.BasicHttpFetcher;
 import org.apache.shindig.gadgets.http.ContentFetcherFactory;
 import org.apache.shindig.gadgets.http.HttpCache;
 import org.apache.shindig.gadgets.http.HttpFetcher;
+import org.apache.shindig.gadgets.http.HttpResponse;
 import org.apache.shindig.gadgets.http.RemoteContentFetcherFactory;
 import org.apache.shindig.gadgets.oauth.OAuthFetcherFactory;
 import org.apache.shindig.gadgets.rewrite.ContentRewriter;
@@ -51,6 +52,7 @@ public class DefaultGuiceModule extends AbstractModule {
   /** {@inheritDoc} */
   @Override
   protected void configure() {
+    System.out.println("Created default injector: " + this);
     Names.bindProperties(this.binder(), properties);
 
     bind(ContentRewriter.class).to(DefaultContentRewriter.class);
@@ -76,6 +78,9 @@ public class DefaultGuiceModule extends AbstractModule {
     bind(ContainerConfig.class);
     bind(GadgetFeatureRegistry.class);
     bind(GadgetServer.class);
+
+    // We perform static injection on HttpResponse for cache TTLs.
+    requestStaticInjection(HttpResponse.class);
   }
 
   public DefaultGuiceModule(Properties properties) {
