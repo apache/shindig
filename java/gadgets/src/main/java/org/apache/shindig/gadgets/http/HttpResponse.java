@@ -100,7 +100,6 @@ public class HttpResponse {
    */
   public HttpResponse(int httpStatusCode, byte[] responseBytes,
                        Map<String, List<String>> headers) {
-    System.out.println("Default TTL: " + defaultTtl);
     this.httpStatusCode = httpStatusCode;
     if (responseBytes == null) {
       this.responseBytes = new byte[0];
