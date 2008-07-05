@@ -169,6 +169,34 @@ IoTest.prototype.testNoMethod_disableRefresh = function() {
   this.assertEquals('some data', resp.text);
 };
 
+// Make sure we don't accidentally include any cache-busting parameters
+// in our GET requests
+IoTest.prototype.testRepeatGet = function() {
+  var req = new fakeXhr.Expectation("GET", "http://www.example.com/json");
+  this.setStandardArgs(req, false);
+  req.setQueryArg("url", "http://target.example.com/somepage");
+
+  var resp = this.makeFakeResponse(
+      "{ 'http://target.example.com/somepage' : { 'body' : 'some data' }}");
+
+  this.fakeXhrs.expect(req, resp);
+  this.fakeXhrs.expect(req, resp);
+
+  var resp = null;
+  gadgets.io.makeRequest("http://target.example.com/somepage",
+      function(data) {
+        resp = data;
+      });
+  this.assertEquals('some data', resp.text);
+
+  resp = null;
+  gadgets.io.makeRequest("http://target.example.com/somepage",
+      function(data) {
+        resp = data;
+      });
+  this.assertEquals('some data', resp.text);
+};
+
 IoTest.prototype.testPost = function() {
   var req = new fakeXhr.Expectation("POST", "http://www.example.com/json");
   this.setStandardArgs(req, true);
