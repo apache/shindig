@@ -272,28 +272,31 @@ gadgets.io = function() {
 
       var params = opt_params || {};
 
+      var httpMethod = params.METHOD || "GET";
+      var refreshInterval = params.REFRESH_INTERVAL;
+
       // Check if authorization is requested
       var auth, st;
       if (params.AUTHORIZATION && params.AUTHORIZATION !== "NONE") {
         auth = params.AUTHORIZATION.toLowerCase();
         st = shindig.auth.getSecurityToken();
       } else {
-        // Non auth'd & non post'd requests are cachable
-        if (!params.REFRESH_INTERVAL && !params.POST_DATA) {
-          params.REFRESH_INTERVAL = 3600;
-         }
+        // Unauthenticated GET requests are cacheable
+        if (httpMethod === "GET" && refreshInterval === undefined) {
+          refreshInterval = 3600;
+        }
       }
       var signOwner = params.OWNER_SIGNED;
       var signViewer = params.VIEWER_SIGNED;
 
       var headers = params.HEADERS || {};
-      if (params.METHOD === "POST" && !headers["Content-Type"]) {
+      if (httpMethod === "POST" && !headers["Content-Type"]) {
         headers["Content-Type"] = "application/x-www-form-urlencoded";
       }
 
       var paramData = {
         url: url,
-        httpMethod : params.METHOD || "GET",
+        httpMethod : httpMethod,
         headers: gadgets.io.encodeValues(headers, false),
         postData : params.POST_DATA || "",
         authz : auth || "",
@@ -303,7 +306,7 @@ gadgets.io = function() {
         getSummaries : !!params.GET_SUMMARIES,
         signOwner : signOwner || "true",
         signViewer : signViewer || "true",
-        gadget : gadgets.util.getUrlParameters()["url"],
+        gadget : gadgets.util.getUrlParameters().url,
 
         // should we bypass gadget spec cache (e.g. to read OAuth provider URLs)
         bypassSpecCache : gadgets.util.getUrlParameters().nocache || ""
@@ -321,9 +324,7 @@ gadgets.io = function() {
       }
 
       if (!respondWithPreload(paramData, params, callback, processResponse)) {
-        var refreshInterval = params.REFRESH_INTERVAL || 0;
-
-        if (refreshInterval > 0) {
+        if (httpMethod === "GET" && refreshInterval > 0) {
           // this content should be cached
           // Add paramData to the URL
           var extraparams = "?refresh=" + refreshInterval + '&'
@@ -402,7 +403,10 @@ gadgets.io = function() {
      */
     getProxyUrl : function (url, opt_params) {
       var params = opt_params || {};
-      var refresh = params['REFRESH_INTERVAL'] || '3600';
+      var refresh = params.REFRESH_INTERVAL;
+      if (refresh === undefined) {
+        refresh = "3600";
+      }
 
       return config.proxyUrl.replace("%url%", encodeURIComponent(url)).
           replace("%rawurl%", url).

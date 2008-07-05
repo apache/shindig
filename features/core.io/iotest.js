@@ -39,20 +39,12 @@ IoTest.prototype.setUp = function() {
   gadgets.config.init({ "core.io" : {
       "proxyUrl" : "http://www.example.com/proxy?url=%url%&refresh=%refresh%",
       "jsonProxyUrl" : "http://www.example.com/json" }}); 
+  gadgets.io.preloaded_ = {};
 };
 
 IoTest.prototype.tearDown = function() {
   gadgets.util.getUrlParameters = this.oldGetUrlParameters;
   window.XMLHttpRequest = this.oldXMLHTTPRequest;
-};
-
-IoTest.prototype.testEncodeDecode = function() {
-  // BEE: remove this, just testing workaround for
-  // https://bugzilla.mozilla.org/show_bug.cgi?id=217257
-  var s = "http://www.example.com/somepage";
-  var enc = encodeURIComponent(s);
-  var dec = unescape(enc);
-  this.assertEquals(s, dec);
 };
 
 IoTest.prototype.testGetProxyUrl = function() {
@@ -72,10 +64,6 @@ IoTest.prototype.testGetProxyUrl_nondefaultRefresh = function() {
       proxied);
 };
 
-// Disabling this test for now, because it uncovered a bug ingadgets.io.js, but
-// I don't want to make functional changes at the same time as I refactor
-// it for testing.
-/*
 IoTest.prototype.testGetProxyUrl_disableCache = function() {
   var proxied = gadgets.io.getProxyUrl("http://target.example.com/image.gif",
       { 'REFRESH_INTERVAL' : 0 });
@@ -84,7 +72,6 @@ IoTest.prototype.testGetProxyUrl_disableCache = function() {
           "image.gif&refresh=0",
       proxied);
 };
-*/
 
 IoTest.prototype.testEncodeValues = function() {
   var x = gadgets.io.encodeValues({ 'foo' : 'bar' });
@@ -137,6 +124,51 @@ IoTest.prototype.testNoMethod = function() {
   this.assertEquals('some data', resp.text);
 };
 
+IoTest.prototype.testNoMethod_nonDefaultRefresh = function() {
+  var req = new fakeXhr.Expectation("GET", "http://www.example.com/json");
+  this.setStandardArgs(req, false);
+  req.setQueryArg("url", "http://target.example.com/somepage");
+  req.setQueryArg("refresh", "1800");
+
+  var resp = this.makeFakeResponse(
+      "{ 'http://target.example.com/somepage' : { 'body' : 'some data' }}");
+
+  this.fakeXhrs.expect(req, resp);
+
+  var resp = null;
+  gadgets.io.makeRequest("http://target.example.com/somepage",
+      function(data) {
+        resp = data;
+      },
+      {
+        "REFRESH_INTERVAL" : 1800,
+      });
+  this.assertEquals('some data', resp.text);
+};
+
+IoTest.prototype.testNoMethod_disableRefresh = function() {
+  var req = new fakeXhr.Expectation("POST", "http://www.example.com/json");
+  this.setStandardArgs(req, true);
+  req.setBodyArg("url", "http://target.example.com/somepage");
+  req.setBodyArg("refresh", null);
+  req.setHeader("Content-Type", "application/x-www-form-urlencoded");
+
+  var resp = this.makeFakeResponse(
+      "{ 'http://target.example.com/somepage' : { 'body' : 'some data' }}");
+
+  this.fakeXhrs.expect(req, resp);
+
+  var resp = null;
+  gadgets.io.makeRequest("http://target.example.com/somepage",
+      function(data) {
+        resp = data;
+      },
+      {
+        "REFRESH_INTERVAL" : 0,
+      });
+  this.assertEquals('some data', resp.text);
+};
+
 IoTest.prototype.testPost = function() {
   var req = new fakeXhr.Expectation("POST", "http://www.example.com/json");
   this.setStandardArgs(req, true);
@@ -165,6 +197,61 @@ IoTest.prototype.testPost = function() {
   this.assertEquals('some data', resp.text);
 };
 
+IoTest.prototype.testPost_noBody = function() {
+  var req = new fakeXhr.Expectation("POST", "http://www.example.com/json");
+  this.setStandardArgs(req, true);
+  req.setBodyArg("httpMethod", "POST");
+  req.setBodyArg("postData", "");
+  req.setBodyArg("url", "http://target.example.com/somepage");
+  req.setBodyArg("refresh", null);
+  req.setBodyArg("headers", "Content-Type=application%2fx-www-form-urlencoded");
+  req.setHeader("Content-Type", "application/x-www-form-urlencoded");
+
+  var resp = this.makeFakeResponse(
+      "{ 'http://target.example.com/somepage' : { 'body' : 'some data' }}");
+
+  this.fakeXhrs.expect(req, resp);
+
+  var resp = null;
+  var params = {};
+  params[gadgets.io.RequestParameters.METHOD] = "POST";
+  gadgets.io.makeRequest(
+      "http://target.example.com/somepage",
+      function(data) {
+        resp = data;
+      },
+      params);
+  this.assertEquals('some data', resp.text);
+};
+
+IoTest.prototype.testPost_emptyBody = function() {
+  var req = new fakeXhr.Expectation("POST", "http://www.example.com/json");
+  this.setStandardArgs(req, true);
+  req.setBodyArg("httpMethod", "POST");
+  req.setBodyArg("postData", "");
+  req.setBodyArg("url", "http://target.example.com/somepage");
+  req.setBodyArg("refresh", null);
+  req.setBodyArg("headers", "Content-Type=application%2fx-www-form-urlencoded");
+  req.setHeader("Content-Type", "application/x-www-form-urlencoded");
+
+  var resp = this.makeFakeResponse(
+      "{ 'http://target.example.com/somepage' : { 'body' : 'some data' }}");
+
+  this.fakeXhrs.expect(req, resp);
+
+  var resp = null;
+  var params = {};
+  params[gadgets.io.RequestParameters.METHOD] = "POST";
+  params[gadgets.io.RequestParameters.POST_DATA] = "";
+  gadgets.io.makeRequest(
+      "http://target.example.com/somepage",
+      function(data) {
+        resp = data;
+      },
+      params);
+  this.assertEquals('some data', resp.text);
+};
+
 IoTest.prototype.testPut = function() {
   var req = new fakeXhr.Expectation("POST", "http://www.example.com/json");
   this.setStandardArgs(req, true);
@@ -183,6 +270,32 @@ IoTest.prototype.testPut = function() {
   var params = {};
   params[gadgets.io.RequestParameters.METHOD] = "PUT";
   params[gadgets.io.RequestParameters.POST_DATA] = "abcd";
+  gadgets.io.makeRequest(
+      "http://target.example.com/somepage",
+      function(data) {
+        resp = data;
+      },
+      params);
+  this.assertEquals('some data', resp.text);
+};
+
+IoTest.prototype.testPut_noBody = function() {
+  var req = new fakeXhr.Expectation("POST", "http://www.example.com/json");
+  this.setStandardArgs(req, true);
+  req.setBodyArg("httpMethod", "PUT");
+  req.setBodyArg("postData", "");
+  req.setBodyArg("url", "http://target.example.com/somepage");
+  req.setBodyArg("refresh", null);
+  req.setHeader("Content-Type", "application/x-www-form-urlencoded");
+
+  var resp = this.makeFakeResponse(
+      "{ 'http://target.example.com/somepage' : { 'body' : 'some data' }}");
+
+  this.fakeXhrs.expect(req, resp);
+
+  var resp = null;
+  var params = {};
+  params[gadgets.io.RequestParameters.METHOD] = "PUT";
   gadgets.io.makeRequest(
       "http://target.example.com/somepage",
       function(data) {
