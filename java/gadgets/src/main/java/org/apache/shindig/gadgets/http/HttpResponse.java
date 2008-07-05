@@ -19,6 +19,8 @@ package org.apache.shindig.gadgets.http;
 
 import org.apache.shindig.common.util.DateUtil;
 
+import com.google.inject.Inject;
+import com.google.inject.name.Named;
 import com.ibm.icu.text.CharsetDetector;
 import com.ibm.icu.text.CharsetMatch;
 
@@ -53,13 +55,13 @@ public class HttpResponse {
 
   // TTL to use when an error response is fetched. This should be non-zero to
   // avoid high rates of requests to bad urls in high-traffic situations.
-  public final static long NEGATIVE_CACHE_TTL = 30 * 1000;
+  protected final static long NEGATIVE_CACHE_TTL = 30 * 1000;
 
   /**
    * Default TTL for an entry in the cache that does not have any
    * cache controlling headers.
    */
-  public static final long DEFAULT_TTL = 5L * 60L * 1000L;
+  protected static final long DEFAULT_TTL = 5L * 60L * 1000L;
 
   public static final String DEFAULT_ENCODING = "UTF-8";
 
@@ -73,6 +75,12 @@ public class HttpResponse {
   private final Map<String, String> metadata;
 
   private HttpResponse rewritten;
+
+  @Inject @Named("http.cache.negativeCacheTtl")
+  private static long negativeCacheTtl = NEGATIVE_CACHE_TTL;
+
+  @Inject @Named("http.cache.defaultTtl")
+  private static long defaultTtl = DEFAULT_TTL;
 
   // Holds character sets for fast conversion
   private static ConcurrentHashMap<String,Charset> encodingToCharset
@@ -92,6 +100,7 @@ public class HttpResponse {
    */
   public HttpResponse(int httpStatusCode, byte[] responseBytes,
                        Map<String, List<String>> headers) {
+    System.out.println("Default TTL: " + defaultTtl);
     this.httpStatusCode = httpStatusCode;
     if (responseBytes == null) {
       this.responseBytes = new byte[0];
@@ -288,7 +297,7 @@ public class HttpResponse {
    */
   public long getCacheExpiration() {
     if (httpStatusCode != SC_OK) {
-      return getDate() + NEGATIVE_CACHE_TTL;
+      return getDate() + negativeCacheTtl;
     }
     if (isStrictNoCache()) {
       return -1;
@@ -301,7 +310,7 @@ public class HttpResponse {
     if (expiration != -1) {
       return expiration;
     }
-    return getDate() + DEFAULT_TTL;
+    return getDate() + defaultTtl;
   }
 
   /**
