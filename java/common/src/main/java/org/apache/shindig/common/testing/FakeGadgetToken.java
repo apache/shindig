@@ -18,43 +18,82 @@
  */
 package org.apache.shindig.common.testing;
 
+import com.google.common.collect.Maps;
+
 import org.apache.shindig.common.SecurityToken;
+import org.apache.shindig.common.SecurityTokenDecoder;
+
+import java.util.Map;
 
 /**
  * A fake SecurityToken implementation to help testing.
  */
 public class FakeGadgetToken implements SecurityToken {
 
-  private String updatedToken;
-  private String trustedJson;
+  private String updatedToken = null;
+  private String trustedJson = null;
+  
+  private String ownerId = null;
+  private String viewerId = null;
+  private String appId = null;
+  private String domain = null;
+  private String appUrl = null;
+  private int moduleId = 0;
 
-  public FakeGadgetToken() {
-    this(null, null);
-  }
-
-  public FakeGadgetToken(String updatedToken) {
-    this(updatedToken, null);
-  }
-
-  public FakeGadgetToken(String updatedToken, String trustedJson) {
+  public FakeGadgetToken setUpdatedToken(String updatedToken) {
     this.updatedToken = updatedToken;
+    return this;
+  }
+
+  public FakeGadgetToken setTrustedJson(String trustedJson) {
     this.trustedJson = trustedJson;
+    return this;
+  }
+
+  public FakeGadgetToken setOwnerId(String ownerId) {
+    this.ownerId = ownerId;
+    return this;
+  }
+
+  public FakeGadgetToken setViewerId(String viewerId) {
+    this.viewerId = viewerId;
+    return this;
+  }
+
+  public FakeGadgetToken setAppId(String appId) {
+    this.appId = appId;
+    return this;
+  }
+
+  public FakeGadgetToken setDomain(String domain) {
+    this.domain = domain;
+    return this;
+  }
+
+  public FakeGadgetToken setAppUrl(String appUrl) {
+    this.appUrl = appUrl;
+    return this;
+  }
+
+  public FakeGadgetToken setModuleId(int moduleId) {
+    this.moduleId = moduleId;
+    return this;
   }
 
   public String getOwnerId() {
-    return "owner";
+    return ownerId;
   }
 
   public String getViewerId() {
-    return "viewer";
+    return viewerId;
   }
 
   public String getAppId() {
-    return "app1234";
+    return appId;
   }
 
   public String getDomain() {
-    return "domain";
+    return domain;
   }
 
   public String toSerialForm() {
@@ -62,11 +101,11 @@ public class FakeGadgetToken implements SecurityToken {
   }
 
   public String getAppUrl() {
-    return "http://www.example.com/app.xml";
+    return appUrl;
   }
 
   public long getModuleId() {
-    return 0;
+    return moduleId;
   }
 
   public String getUpdatedToken() {
@@ -76,4 +115,65 @@ public class FakeGadgetToken implements SecurityToken {
   public String getTrustedJson() {
     return trustedJson;
   }
+  
+  /**
+   * Create a fake security token parameter string, allows passing around a 
+   * security token of format key=value&key2=value2, where key is one of:
+   * ownerId, viewerId, domain, appUrl, appId, trustedJson, module.
+   * 
+   * Useful for creating tokens that can be decoded with FakeGadgetToken.Decoder
+   * 
+   * @param tokenString the parameter string
+   * @return The fake token
+   */
+  public static SecurityToken createToken(String tokenString)  {
+    String keyValuePairs[] = tokenString.split("&");
+    Map<String, String> paramMap = Maps.newHashMap();
+    
+    for (String keyValuePair : keyValuePairs) {
+      String[] keyAndValue = keyValuePair.split("=");
+      if (keyAndValue.length == 2) {
+        paramMap.put(keyAndValue[0], keyAndValue[1]);
+      }
+    }
+    
+    return createToken(paramMap);
+  }
+  
+  /**
+   * Create a fake security token from a map of parameter strings, keys are one of:
+   * ownerId, viewerId, domain, appUrl, appId, trustedJson, module
+   * 
+   * @param paramMap
+   * @return The fake token
+   */
+  public static SecurityToken createToken(Map<String, String> paramMap) {
+    FakeGadgetToken fakeToken = new FakeGadgetToken();
+    
+    fakeToken.setAppId(paramMap.get("appId"));
+    fakeToken.setAppUrl(paramMap.get("appUrl"));
+    fakeToken.setDomain(paramMap.get("domain"));
+    fakeToken.setOwnerId(paramMap.get("ownerId"));
+    fakeToken.setTrustedJson(paramMap.get("trustedJson"));
+    fakeToken.setViewerId(paramMap.get("viewerId"));
+    
+    String moduleIdStr = paramMap.get("module");
+    if (moduleIdStr != null) {
+      fakeToken.setModuleId(Integer.parseInt(moduleIdStr));
+    }
+    
+    return fakeToken;
+  }
+  
+  /**
+   * SecurityTokenDecoder for testing - this allows passing around a 
+   * security token of format key=value&key2=value2, where key is one of:
+   * ownerId, viewerId, domain, appUrl, appId, trustedJson, module
+   */
+  public static class Decoder implements SecurityTokenDecoder {
+    public SecurityToken createToken(Map<String, String> tokenParameters)  {
+      return FakeGadgetToken.createToken(tokenParameters);
+    }
+  }
+  
 }

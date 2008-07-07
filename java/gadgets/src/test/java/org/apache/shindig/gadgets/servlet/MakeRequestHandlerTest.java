@@ -289,7 +289,7 @@ public class MakeRequestHandlerTest {
     // Doesn't actually sign since it returns the standard fetcher.
     // Signing tests are in SigningFetcherTest
     expectGetAndReturnBody(fixture.signingFetcher, RESPONSE_BODY);
-    FakeGadgetToken authToken = new FakeGadgetToken("updated");
+    FakeGadgetToken authToken = new FakeGadgetToken().setUpdatedToken("updated");
     expect(fixture.securityTokenDecoder.createToken(Collections.singletonMap(SecurityTokenDecoder.SECURITY_TOKEN_NAME, "fake-token"))).andReturn(authToken);
     expect(fixture.request.getParameter(MakeRequestHandler.SECURITY_TOKEN_PARAM))
         .andReturn("fake-token").atLeastOnce();
@@ -309,7 +309,7 @@ public class MakeRequestHandlerTest {
     // Doesn't actually do oauth dance since it returns the standard fetcher.
     // OAuth tests are in OAuthFetcherTest
     expectGetAndReturnBody(fixture.oauthFetcher, RESPONSE_BODY);
-    FakeGadgetToken authToken = new FakeGadgetToken("updated");
+    FakeGadgetToken authToken = new FakeGadgetToken().setUpdatedToken("updated");
     expect(fixture.securityTokenDecoder.createToken(Collections.singletonMap(SecurityTokenDecoder.SECURITY_TOKEN_NAME, "fake-token"))).andReturn(authToken);
     expect(fixture.request.getParameter(MakeRequestHandler.SECURITY_TOKEN_PARAM))
         .andReturn("fake-token").atLeastOnce();

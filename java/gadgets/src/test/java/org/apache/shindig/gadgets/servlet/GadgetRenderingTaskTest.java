@@ -212,7 +212,8 @@ public class GadgetRenderingTaskTest extends HttpTestFixture {
   public void testAuthTokenInjection_allparams() throws Exception {
     expect(fixture.request.getParameter("st")).andReturn("fake-token");
     expect(securityTokenDecoder.createToken(Collections.singletonMap(SecurityTokenDecoder.SECURITY_TOKEN_NAME, "fake-token"))).andReturn(
-        new FakeGadgetToken("updated-token", "{ \"foo\" : \"bar\" }"));
+        new FakeGadgetToken().setUpdatedToken("updated-token")
+        .setTrustedJson("{ \"foo\" : \"bar\" }"));
     String content = parseBasicGadget(GadgetSpec.DEFAULT_VIEW);
     JSONObject auth = parseShindigAuthConfig(content);
     assertEquals("updated-token", auth.getString("authToken"));
@@ -231,7 +232,7 @@ public class GadgetRenderingTaskTest extends HttpTestFixture {
   public void testAuthTokenInjection_trustedJson() throws Exception {
     expect(fixture.request.getParameter("st")).andReturn("fake-token");
     expect(securityTokenDecoder.createToken(Collections.singletonMap(SecurityTokenDecoder.SECURITY_TOKEN_NAME, "fake-token"))).andReturn(
-        new FakeGadgetToken(null, "trusted"));
+        new FakeGadgetToken().setTrustedJson("trusted"));
     String content = parseBasicGadget(GadgetSpec.DEFAULT_VIEW);
     JSONObject auth = parseShindigAuthConfig(content);
     assertEquals(1, auth.length());
@@ -241,7 +242,7 @@ public class GadgetRenderingTaskTest extends HttpTestFixture {
   public void testAuthTokenInjection_updatedToken() throws Exception {
     expect(fixture.request.getParameter("st")).andReturn("fake-token");
     expect(securityTokenDecoder.createToken(Collections.singletonMap(SecurityTokenDecoder.SECURITY_TOKEN_NAME, "fake-token"))).andReturn(
-        new FakeGadgetToken("updated-token", null));
+        new FakeGadgetToken().setUpdatedToken("updated-token"));
     String content = parseBasicGadget(GadgetSpec.DEFAULT_VIEW);
     JSONObject auth = parseShindigAuthConfig(content);
     assertEquals(1, auth.length());
