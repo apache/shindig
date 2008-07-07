@@ -25,10 +25,10 @@ public class UserIdTest extends TestCase {
 
   public void testGetUserId() throws Exception {
     UserId owner = new UserId(UserId.Type.owner, "hello");
-    assertEquals("owner", owner.getUserId(new FakeGadgetToken()));
+    assertEquals("owner", owner.getUserId(new FakeGadgetToken().setOwnerId("owner")));
 
     UserId viewer = new UserId(UserId.Type.viewer, "hello");
-    assertEquals("viewer", viewer.getUserId(new FakeGadgetToken()));
+    assertEquals("viewer", viewer.getUserId(new FakeGadgetToken().setViewerId("viewer")));
 
     UserId user = new UserId(UserId.Type.userId, "hello");
     assertEquals("hello", user.getUserId(new FakeGadgetToken()));
