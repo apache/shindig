@@ -15,9 +15,10 @@
  * copyright in this work, please see the NOTICE file in the top level
  * directory of this distribution.
  */
-package org.apache.shindig.social.abdera;
+package org.apache.shindig.social.abdera.json;
 
 import org.apache.shindig.social.SocialApiTestsGuiceModule;
+import org.apache.shindig.social.abdera.AbstractLargeRestfulTests;
 import org.apache.shindig.social.opensocial.model.*;
 import org.apache.shindig.social.opensocial.model.Enum;
 
@@ -29,10 +30,20 @@ import org.junit.Test;
 
 import java.util.List;
 import java.util.Date;
+import java.util.logging.Logger;
 
 
 public class RestfulJsonPeopleTest extends AbstractLargeRestfulTests {
 
+  private static final String token = "?st=john.doe:john.doe:app:container.com:foo:bar";
+
+  @Test
+  public void testDumpPersonJson() throws Exception {
+    // Currently, for Shindig {pid}/@all/{uid} == {uid}/@self
+    resp = client.get(BASEURL + "/people/john.doe/@self" + token);
+    JSONObject result = getJson(resp);
+  }
+  
   /**
    * Expected response for john.doe's json:
    *
@@ -59,8 +70,8 @@ public class RestfulJsonPeopleTest extends AbstractLargeRestfulTests {
   @Test
   public void testGetPersonJson() throws Exception {
     // Currently, for Shindig {pid}/@all/{uid} == {uid}/@self
-    resp = client.get(BASEURL + "/people/john.doe/@self");
-    checkForGoodJsonResponse(resp);
+    resp = client.get(BASEURL + "/people/john.doe/@self" + token);
+    //checkForGoodJsonResponse(resp);
     JSONObject result = getJson(resp);
 
     Person johnDoe = SocialApiTestsGuiceModule.MockXmlStateFileFetcher.johnDoe;
@@ -294,7 +305,7 @@ public class RestfulJsonPeopleTest extends AbstractLargeRestfulTests {
   @Test
   public void testGetPeopleJson() throws Exception {
     // Currently, for Shindig @all == @friends
-    resp = client.get(BASEURL + "/people/john.doe/@friends");
+    resp = client.get(BASEURL + "/people/john.doe/@friends" + token);
     checkForGoodJsonResponse(resp);
     JSONObject result = getJson(resp);
 

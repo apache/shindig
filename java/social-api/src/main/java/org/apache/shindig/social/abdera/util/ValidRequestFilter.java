@@ -60,7 +60,7 @@ public class ValidRequestFilter implements Filter {
    */
   public static Format getFormatTypeFromRequest(RequestContext request) {
     // TODO: should gracefully handle introspection if format param is missing.
-    String format = request.getTarget().getParameter(FORMAT_FIELD);
+    String format = request.getParameter(FORMAT_FIELD);
 
     if (format == null || format.equals(Format.JSON.getDisplayValue())) {
       return Format.JSON;

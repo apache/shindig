@@ -18,7 +18,6 @@
 package org.apache.shindig.social.abdera;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
 
 import org.junit.Test;
 
@@ -31,5 +30,10 @@ public class ValidRequestTest extends AbstractLargeRestfulTests {
     checkForBadResponse(resp);
     assertEquals(400, resp.getStatus());
   }
-
+  @Test
+  public void testGetActivityOfUserEmptyFormat() throws Exception {
+    resp = client.get(BASEURL + "/people/john.doe/@self?format=");
+    checkForBadResponse(resp);
+    assertEquals(400, resp.getStatus());
+  }
 }

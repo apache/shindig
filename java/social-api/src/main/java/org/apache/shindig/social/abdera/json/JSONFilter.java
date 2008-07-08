@@ -17,8 +17,9 @@
 */
 package org.apache.shindig.social.abdera.json;
 
-import org.apache.shindig.social.abdera.AbstractSocialEntityCollectionAdapter;
+import org.apache.shindig.social.abdera.RawResponseContext;
 import org.apache.shindig.social.abdera.RequestUrlTemplate;
+import org.apache.shindig.social.abdera.SocialRouteManager;
 import org.apache.shindig.social.abdera.util.ValidRequestFilter;
 import org.apache.shindig.social.abdera.util.ValidRequestFilter.Format;
 
@@ -56,6 +57,10 @@ public class JSONFilter implements Filter {
 
   public ResponseContext filter(RequestContext request, FilterChain chain) {
     ResponseContext resp = chain.next(request);
+    // Bypass the filter for RawResponseContext responses.
+    if (resp.getClass().equals(RawResponseContext.class)){
+      return resp;
+    }
     Format format = ValidRequestFilter.getFormatTypeFromRequest(request);
     if (format == Format.ATOM) {
       return resp;
@@ -126,7 +131,7 @@ public class JSONFilter implements Filter {
         JSONObject json = new JSONObject();
 
         try {
-          RequestUrlTemplate url = AbstractSocialEntityCollectionAdapter
+          RequestUrlTemplate url = SocialRouteManager
               .getUrlTemplate(request);
 
           // If the type of object is Data, then we want to create a JSONObject

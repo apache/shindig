@@ -15,9 +15,10 @@
  * copyright in this work, please see the NOTICE file in the top level
  * directory of this distribution.
  */
-package org.apache.shindig.social.abdera;
+package org.apache.shindig.social.abdera.json;
 
 import org.apache.shindig.social.SocialApiTestsGuiceModule;
+import org.apache.shindig.social.abdera.AbstractLargeRestfulTests;
 import org.apache.shindig.social.opensocial.model.Activity;
 
 import org.json.JSONException;
