@@ -135,6 +135,7 @@ public class UrlGenerator {
 
     buf.append("&lang=").append(context.getLocale().getLanguage());
     buf.append("&country=").append(context.getLocale().getCountry());
+    buf.append("&view=").append(context.getView());
 
     UserPrefs prefs = context.getUserPrefs();
     for (UserPref pref : gadget.getSpec().getUserPrefs()) {

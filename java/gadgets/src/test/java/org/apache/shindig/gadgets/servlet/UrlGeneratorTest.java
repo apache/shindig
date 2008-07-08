@@ -61,6 +61,7 @@ public class UrlGeneratorTest {
   private final static String UP_NAME = "user-pref-name";
   private final static String UP_VALUE = "user-pref-value";
   private final static String CONTAINER = "shindig";
+  private final static String VIEW = "canvas";
   private final static int MODULE_ID = 3435;
 
   private final ServletTestFixture fixture = new ServletTestFixture();
@@ -84,6 +85,7 @@ public class UrlGeneratorTest {
     expect(context.getUserPrefs()).andReturn(prefs).anyTimes();
     expect(context.getLocale()).andReturn(Locale.getDefault()).anyTimes();
     expect(context.getModuleId()).andReturn(MODULE_ID).anyTimes();
+    expect(context.getView()).andReturn(VIEW).anyTimes();
   }
 
   @Test
@@ -154,6 +156,7 @@ public class UrlGeneratorTest {
     StringAssert.assertContains("container=" + CONTAINER, iframeUrl.getQuery());
     StringAssert.assertContains("up_" + UP_NAME + "=" + UP_VALUE, iframeUrl.getQuery());
     StringAssert.assertContains("mid=" + MODULE_ID, iframeUrl.getQuery());
+    StringAssert.assertContains("view=" + VIEW, iframeUrl.getQuery());
   }
 
   @Test
