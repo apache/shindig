@@ -17,8 +17,11 @@
  */
 package org.apache.shindig.social.opensocial.model;
 
-import java.util.List;
+import org.apache.shindig.social.opensocial.util.EnumUtil;
+
 import java.util.Date;
+import java.util.List;
+import java.util.Set;
 
 /**
  * see
@@ -86,6 +89,12 @@ public interface Person {
     URLS("urls");
 
     private final String jsonString;
+
+    public static final Set<String> DEFAULT_FIELDS =
+        EnumUtil.getEnumStrings(ID, NAME, THUMBNAIL_URL);
+
+    public static final Set<String> ALL_FIELDS =
+        EnumUtil.getEnumStrings(Field.values());
 
     private Field(String jsonString) {
       this.jsonString = jsonString;

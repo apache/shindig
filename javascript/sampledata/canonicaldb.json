@@ -10,8 +10,8 @@
 //
 //  Notes:
 //   - The structure of Person, Activity MUST! match those in the RESTful spec
-//   - Data for "canonical" user should exercise every field in the spec. And is relied on for unit-testing
-//     so change at your peril
+//   - Data for "canonical" user should exercise every field in the spec. And is relied on
+//     for unit-testing so change at your peril
 //   - Consider adding a structure for Map<Person.Id, Array<appId>> to represent installed gadgets
 //
 //  TODO:
@@ -175,7 +175,10 @@
   },
   {
     "id" : "john.doe",
-    "gender" : "M",
+    "gender" : {
+      "key" : "MALE",
+      "displayvalue" : "Male"
+    },
     "hasApp" : true,
     "name" : {
       "familyName" : "Doe",
@@ -185,7 +188,10 @@
   },
   {
     "id" : "jane.doe",
-    "gender" : "F",
+    "gender" : {
+      "key" : "FEMALE",
+      "displayvalue" : "Female"
+    },
     "hasApp" : true,
     "name" : {
       "familyName" : "Doe",
@@ -195,7 +201,10 @@
   },
   {
     "id" : "george.doe",
-    "gender" : "M",
+    "gender" : {
+      "key" : "MALE",
+      "displayvalue" : "Female"
+    },
     "hasApp" : true,
     "name" : {
       "familyName" : "Doe",
@@ -205,7 +214,10 @@
   },
   {
     "id" : "mario.rossi",
-    "gender" : "M",
+    "gender" : {
+      "key" : "MALE",
+      "displayvalue" : "Male"
+    },
     "hasApp" : true,
     "name" : {
       "familyName" : "Rossi",
@@ -215,7 +227,10 @@
   },
   {
     "id" : "maija.m",
-    "gender" : "F",
+    "gender" : {
+      "key" : "FEMALE",
+      "displayvalue" : "Female"
+    },
     "hasApp" : true,
     "name" : {
       "familyName" : "Meikäläinen",
@@ -324,6 +339,7 @@
   // ----------------------------- Data ---------------------------------------
   //
   "friendLinks" : {
+    "canonical" : ["john.doe", "jane.doe", "george.doe", "maija.m"], 
     "john.doe" : ["jane.doe", "george.doe", "maija.m"],
     "jane.doe" : ["john.doe"],
     "george.doe" : ["john.doe"],
