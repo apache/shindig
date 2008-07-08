@@ -18,6 +18,7 @@
 package org.apache.shindig.social.samplecontainer;
 
 import org.apache.shindig.common.SecurityToken;
+import org.apache.shindig.common.util.ImmediateFuture;
 import org.apache.shindig.social.ResponseError;
 import org.apache.shindig.social.ResponseItem;
 import org.apache.shindig.social.dataservice.GroupId;
@@ -39,6 +40,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.Future;
 
 public class BasicPeopleService implements PeopleService, PersonService {
   private static final Comparator<Person> NAME_COMPARATOR
@@ -144,7 +146,7 @@ public class BasicPeopleService implements PeopleService, PersonService {
 
   // New interface methods
 
-  public ResponseItem<RestfulCollection<Person>> getPeople(UserId userId,
+  public Future<ResponseItem<RestfulCollection<Person>>> getPeople(UserId userId,
       GroupId groupId, PersonService.SortOrder sortOrder,
       PersonService.FilterType filter, int first, int max,
       Set<String> profileDetails, SecurityToken token) {
@@ -177,16 +179,17 @@ public class BasicPeopleService implements PeopleService, PersonService {
 
     RestfulCollection<Person> collection = new RestfulCollection<Person>(people,
         first, totalSize);
-    return new ResponseItem<RestfulCollection<Person>>(collection);
+    return ImmediateFuture.newInstance(new ResponseItem<RestfulCollection<Person>>(collection));
   }
 
-  public ResponseItem<Person> getPerson(UserId id, Set<String> fields, SecurityToken token) {
+  public Future<ResponseItem<Person>> getPerson(UserId id, Set<String> fields,
+      SecurityToken token) {
     List<Person> people = getPeople(Lists.newArrayList(id.getUserId(token)), token);
     if (people.size() == 1) {
-      return new ResponseItem<Person>(people.get(0));
+      return ImmediateFuture.newInstance(new ResponseItem<Person>(people.get(0)));
     } else {
-      return new ResponseItem<Person>(ResponseError.BAD_REQUEST,
-          "Person " + id.getUserId(token) + " not found", null);
+      return ImmediateFuture.newInstance(new ResponseItem<Person>(ResponseError.BAD_REQUEST,
+          "Person " + id.getUserId(token) + " not found", null));
     }
   }
 

@@ -20,11 +20,13 @@ package org.apache.shindig.social.dataservice;
 import org.apache.shindig.social.ResponseError;
 import org.apache.shindig.social.ResponseItem;
 import org.apache.shindig.social.opensocial.model.Person;
+import org.apache.shindig.common.util.ImmediateFuture;
 
 import com.google.common.collect.Sets;
 import com.google.inject.Inject;
 
 import java.util.Set;
+import java.util.concurrent.Future;
 
 
 public class PersonHandler extends DataRequestHandler {
@@ -41,18 +43,19 @@ public class PersonHandler extends DataRequestHandler {
     this.personService = personService;
   }
 
-  protected ResponseItem handleDelete(RequestItem request) {
-    return new ResponseItem<Object>(ResponseError.BAD_REQUEST,
-        "You can't delete people. ", null);
+  protected Future<? extends ResponseItem> handleDelete(RequestItem request) {
+    return ImmediateFuture.newInstance(new ResponseItem<Object>(ResponseError.BAD_REQUEST,
+        "You can't delete people. ", null));
   }
 
-  protected ResponseItem handlePut(RequestItem request) {
-    return new ResponseItem<Object>(ResponseError.NOT_IMPLEMENTED,
-        "You can't add people right now. ", null);  }
+  protected Future<? extends ResponseItem> handlePut(RequestItem request) {
+    return ImmediateFuture.newInstance(new ResponseItem<Object>(ResponseError.NOT_IMPLEMENTED,
+        "You can't add people right now. ", null));
+  }
 
-  protected ResponseItem handlePost(RequestItem request) {
-    return new ResponseItem<Object>(ResponseError.NOT_IMPLEMENTED,
-        "You can't add people right now. ", null);
+  protected Future<? extends ResponseItem> handlePost(RequestItem request) {
+    return ImmediateFuture.newInstance(new ResponseItem<Object>(ResponseError.NOT_IMPLEMENTED,
+        "You can't add people right now. ", null));
   }
 
   /**
@@ -63,7 +66,7 @@ public class PersonHandler extends DataRequestHandler {
    * /people/john.doe/@friends
    * /people/john.doe/@self
    */
-  protected ResponseItem handleGet(RequestItem request) {
+  protected Future<? extends ResponseItem> handleGet(RequestItem request) {
     request.parseUrlWithTemplate(PEOPLE_PATH);
 
     UserId userId = request.getUser();

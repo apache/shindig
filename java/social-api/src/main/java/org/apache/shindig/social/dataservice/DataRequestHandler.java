@@ -19,24 +19,21 @@ package org.apache.shindig.social.dataservice;
 
 import org.apache.shindig.social.ResponseItem;
 
-import org.apache.commons.lang.StringUtils;
+import java.util.concurrent.Future;
 
 public abstract class DataRequestHandler {
 
-  public ResponseItem handleMethod(RequestItem request) {
+  public Future<? extends ResponseItem> handleItem(RequestItem request) {
     String httpMethod = request.getMethod();
-    if (StringUtils.isBlank(httpMethod)) {
-      throw new IllegalArgumentException("Unserviced Http method type");
-    }
-    ResponseItem responseItem;
+    Future<? extends ResponseItem> responseItem;
 
-    if (httpMethod.equals("GET")) {
+    if ("GET".equals(httpMethod)) {
       responseItem = handleGet(request);
-    } else if (httpMethod.equals("POST")) {
+    } else if ("POST".equals(httpMethod)) {
       responseItem = handlePost(request);
-    } else if (httpMethod.equals("PUT")) {
+    } else if ("PUT".equals(httpMethod)) {
       responseItem = handlePut(request);
-    } else if (httpMethod.equals("DELETE")) {
+    } else if ("DELETE".equals(httpMethod)) {
       responseItem = handleDelete(request);
     } else {
       throw new IllegalArgumentException("Unserviced Http method type");
@@ -44,11 +41,11 @@ public abstract class DataRequestHandler {
     return responseItem;
   }
 
-  protected abstract ResponseItem handleDelete(RequestItem request);
+  protected abstract Future<? extends ResponseItem> handleDelete(RequestItem request);
 
-  protected abstract ResponseItem handlePut(RequestItem request);
+  protected abstract Future<? extends ResponseItem> handlePut(RequestItem request);
 
-  protected abstract ResponseItem handlePost(RequestItem request);
+  protected abstract Future<? extends ResponseItem> handlePost(RequestItem request);
 
-  protected abstract ResponseItem handleGet(RequestItem request);
+  protected abstract Future<? extends ResponseItem> handleGet(RequestItem request);
 }

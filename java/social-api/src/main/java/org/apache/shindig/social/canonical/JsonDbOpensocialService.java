@@ -18,14 +18,8 @@
  */
 package org.apache.shindig.social.canonical;
 
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
-import com.google.common.collect.Sets;
-import com.google.inject.Inject;
-import com.google.inject.name.Named;
-
-import org.apache.commons.io.IOUtils;
 import org.apache.shindig.common.SecurityToken;
+import org.apache.shindig.common.util.ImmediateFuture;
 import org.apache.shindig.common.util.ResourceLoader;
 import org.apache.shindig.social.ResponseError;
 import org.apache.shindig.social.ResponseItem;
@@ -39,6 +33,13 @@ import org.apache.shindig.social.dataservice.UserId;
 import org.apache.shindig.social.opensocial.model.Activity;
 import org.apache.shindig.social.opensocial.model.Person;
 import org.apache.shindig.social.opensocial.util.BeanConverter;
+
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
+import com.google.inject.Inject;
+import com.google.inject.name.Named;
+import org.apache.commons.io.IOUtils;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -47,6 +48,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.Future;
 
 /**
  * Implementation of supported services backed by a JSON DB
@@ -91,8 +93,8 @@ public class JsonDbOpensocialService implements ActivityService, PersonService, 
     this.converter = converter;
   }
 
-  public ResponseItem<RestfulCollection<Activity>> getActivities(UserId userId, GroupId groupId,
-      String appId, Set<String> fields, SecurityToken token) {
+  public Future<ResponseItem<RestfulCollection<Activity>>> getActivities(UserId userId,
+      GroupId groupId, String appId, Set<String> fields, SecurityToken token) {
     List<Activity> result = Lists.newArrayList();
     try {
       // TODO Is it really valid to read activities across multiple users in one rpc?
@@ -108,38 +110,42 @@ public class JsonDbOpensocialService implements ActivityService, PersonService, 
           }
         }
       }
-      return new ResponseItem<RestfulCollection<Activity>>(new RestfulCollection<Activity>(result));
+      return ImmediateFuture.newInstance(new ResponseItem<RestfulCollection<Activity>>(
+          new RestfulCollection<Activity>(result)));
     } catch (JSONException je) {
-      return new ResponseItem<RestfulCollection<Activity>>(ResponseError.INTERNAL_ERROR,
-          je.getMessage(), null);
+      return ImmediateFuture.newInstance(new ResponseItem<RestfulCollection<Activity>>(
+          ResponseError.INTERNAL_ERROR, je.getMessage(), null));
     }
   }
 
-  public ResponseItem<Activity> getActivity(UserId userId, GroupId groupId, String appId,
+  public Future<ResponseItem<Activity>> getActivity(UserId userId, GroupId groupId, String appId,
       Set<String> fields, String activityId, SecurityToken token) {
     try {
-      if (db.getJSONObject(ACTIVITIES_TABLE).has(userId.getUserId(token))) {
-        JSONArray activities = db.getJSONObject(ACTIVITIES_TABLE).getJSONArray(userId.getUserId(token));
+      String user = userId.getUserId(token);
+      if (db.getJSONObject(ACTIVITIES_TABLE).has(user)) {
+        JSONArray activities = db.getJSONObject(ACTIVITIES_TABLE).getJSONArray(user);
         for (int i = 0; i < activities.length(); i++) {
           JSONObject activity = activities.getJSONObject(i);
-          if (userId != null && activity.get(Activity.Field.USER_ID.toString())
-              .equals(userId.getUserId(token)) &&
+          if (activity.get(Activity.Field.USER_ID.toString()).equals(user) &&
               activity.get(Activity.Field.ID.toString()).equals(activityId)) {
-            return new ResponseItem<Activity>(convertToActivity(activity, fields));
+            return ImmediateFuture.newInstance(new ResponseItem<Activity>(
+                convertToActivity(activity, fields)));
           }
         }
       }
-      return null;
+      return ImmediateFuture.newInstance(null);
     } catch (JSONException je) {
-      return new ResponseItem<Activity>(ResponseError.INTERNAL_ERROR, je.getMessage(), null);
+      return ImmediateFuture.newInstance(new ResponseItem<Activity>(
+          ResponseError.INTERNAL_ERROR, je.getMessage(), null));
     }
   }
 
-  public ResponseItem deleteActivity(UserId userId, GroupId groupId, String appId,
+  public Future<ResponseItem<Object>> deleteActivity(UserId userId, GroupId groupId, String appId,
       String activityId, SecurityToken token) {
     try {
-      if (db.getJSONObject(ACTIVITIES_TABLE).has(userId.getUserId(token))) {
-        JSONArray activities = db.getJSONObject(ACTIVITIES_TABLE).getJSONArray(userId.getUserId(token));
+      String user = userId.getUserId(token);
+      if (db.getJSONObject(ACTIVITIES_TABLE).has(user)) {
+        JSONArray activities = db.getJSONObject(ACTIVITIES_TABLE).getJSONArray(user);
         if (activities != null) {
           JSONArray newList = new JSONArray();
           for (int i = 0; i < activities.length(); i++) {
@@ -148,7 +154,7 @@ public class JsonDbOpensocialService implements ActivityService, PersonService, 
               newList.put(activity);
             }
           }
-          db.getJSONObject(ACTIVITIES_TABLE).put(userId.getUserId(token), newList);
+          db.getJSONObject(ACTIVITIES_TABLE).put(user, newList);
           // TODO. This seems very odd that we return no useful response in this case
           // There is no way to represent not-found
           // if (found) { ??
@@ -156,13 +162,14 @@ public class JsonDbOpensocialService implements ActivityService, PersonService, 
         }
       }
       // What is the appropriate response here??
-      return new ResponseItem<Object>(null);
+      return ImmediateFuture.newInstance(new ResponseItem<Object>(null));
     } catch (JSONException je) {
-      return new ResponseItem<Object>(ResponseError.INTERNAL_ERROR, je.getMessage(), null);
+      return ImmediateFuture.newInstance(new ResponseItem<Object>(
+          ResponseError.INTERNAL_ERROR, je.getMessage(), null));
     }
   }
 
-  public ResponseItem createActivity(UserId userId, GroupId groupId, String appId,
+  public Future<ResponseItem<Object>> createActivity(UserId userId, GroupId groupId, String appId,
       Set<String> fields, Activity activity, SecurityToken token) {
     // Are fields really needed here?
     try {
@@ -179,11 +186,12 @@ public class JsonDbOpensocialService implements ActivityService, PersonService, 
       // TODO ??
       return null;
     } catch (JSONException je) {
-      return new ResponseItem<Object>(ResponseError.INTERNAL_ERROR, je.getMessage(), null);
+      return ImmediateFuture.newInstance(new ResponseItem<Object>(
+          ResponseError.INTERNAL_ERROR, je.getMessage(), null));
     }
   }
 
-  public ResponseItem<RestfulCollection<Person>> getPeople(UserId userId, GroupId groupId,
+  public Future<ResponseItem<RestfulCollection<Person>>> getPeople(UserId userId, GroupId groupId,
       SortOrder sortOrder, FilterType filter, int first, int max,
       Set<String> fields, SecurityToken token) {
     List<Person> result = Lists.newArrayList();
@@ -200,14 +208,15 @@ public class JsonDbOpensocialService implements ActivityService, PersonService, 
         // Add group support later
         result.add(convertToPerson(person, fields));
       }
-      return new ResponseItem<RestfulCollection<Person>>(new RestfulCollection<Person>(result));
+      return ImmediateFuture.newInstance(new ResponseItem<RestfulCollection<Person>>(
+          new RestfulCollection<Person>(result)));
     } catch (JSONException je) {
-      return new ResponseItem<RestfulCollection<Person>>(ResponseError.INTERNAL_ERROR,
-          je.getMessage(), null);
+      return ImmediateFuture.newInstance(new ResponseItem<RestfulCollection<Person>>(
+          ResponseError.INTERNAL_ERROR, je.getMessage(), null));
     }
   }
 
-  public ResponseItem<Person> getPerson(UserId id, Set<String> fields, SecurityToken token) {
+  public Future<ResponseItem<Person>> getPerson(UserId id, Set<String> fields, SecurityToken token) {
     try {
       JSONArray people = db.getJSONArray(PEOPLE_TABLE);
 
@@ -215,17 +224,19 @@ public class JsonDbOpensocialService implements ActivityService, PersonService, 
         JSONObject person = people.getJSONObject(i);
         if (id != null && person.get(Person.Field.ID.toString())
             .equals(id.getUserId(token))) {
-          return new ResponseItem<Person>(convertToPerson(person, fields));
+          return ImmediateFuture.newInstance(new ResponseItem<Person>(
+              convertToPerson(person, fields)));
         }
       }
       // TODO What does this mean?
       return null;
     } catch (JSONException je) {
-      return new ResponseItem<Person>(ResponseError.INTERNAL_ERROR, je.getMessage(), null);
+      return ImmediateFuture.newInstance(new ResponseItem<Person>(
+          ResponseError.INTERNAL_ERROR, je.getMessage(), null));
     }
   }
 
-  public ResponseItem<DataCollection> getPersonData(UserId userId, GroupId groupId, String appId,
+  public Future<ResponseItem<DataCollection>> getPersonData(UserId userId, GroupId groupId, String appId,
       Set<String> fields, SecurityToken token) {
     // TODO. Does fields==null imply all?
     try {
@@ -253,20 +264,23 @@ public class JsonDbOpensocialService implements ActivityService, PersonService, 
         }
         idToData.put(id, data);
       }
-      return new ResponseItem<DataCollection>(new DataCollection(idToData));
+      return ImmediateFuture.newInstance(new ResponseItem<DataCollection>(
+          new DataCollection(idToData)));
     } catch (JSONException je) {
-      return new ResponseItem<DataCollection>(ResponseError.INTERNAL_ERROR, je.getMessage(), null);
+      return ImmediateFuture.newInstance(new ResponseItem<DataCollection>(
+          ResponseError.INTERNAL_ERROR, je.getMessage(), null));
     }
   }
 
-  public ResponseItem deletePersonData(UserId userId, GroupId groupId, String appId,
+  public Future<ResponseItem<Object>> deletePersonData(UserId userId, GroupId groupId, String appId,
       Set<String> fields, SecurityToken token) {
     try {
-      if (!db.getJSONObject(DATA_TABLE).has(userId.getUserId(token))) {
+      String user = userId.getUserId(token);
+      if (!db.getJSONObject(DATA_TABLE).has(user)) {
         return null;
       }
       JSONObject newPersonData = new JSONObject();
-      JSONObject oldPersonData = db.getJSONObject(DATA_TABLE).getJSONObject(userId.getUserId(token));
+      JSONObject oldPersonData = db.getJSONObject(DATA_TABLE).getJSONObject(user);
       Iterator keys = oldPersonData.keys();
       while (keys.hasNext()) {
         String key = (String) keys.next();
@@ -274,15 +288,16 @@ public class JsonDbOpensocialService implements ActivityService, PersonService, 
           newPersonData.put(key, oldPersonData.getString(key));
         }
       }
-      db.getJSONObject(DATA_TABLE).put(userId.getUserId(token), newPersonData);
+      db.getJSONObject(DATA_TABLE).put(user, newPersonData);
       // TODO what is the appropriate return value
       return null;
     } catch (JSONException je) {
-      return new ResponseItem<Object>(ResponseError.INTERNAL_ERROR, je.getMessage(), null);
+      return ImmediateFuture.newInstance(new ResponseItem<Object>(
+          ResponseError.INTERNAL_ERROR, je.getMessage(), null));
     }
   }
 
-  public ResponseItem updatePersonData(UserId userId, GroupId groupId, String appId,
+  public Future<ResponseItem<Object>> updatePersonData(UserId userId, GroupId groupId, String appId,
       Set<String> fields, Map<String, String> values, SecurityToken token) {
     // TODO this seems redundant. No need to pass both fields and a map of field->value
     try {
@@ -298,7 +313,8 @@ public class JsonDbOpensocialService implements ActivityService, PersonService, 
       // TODO what is the appropriate return value
       return null;
     } catch (JSONException je) {
-      return new ResponseItem<Object>(ResponseError.INTERNAL_ERROR, je.getMessage(), null);
+      return ImmediateFuture.newInstance(new ResponseItem<Object>(
+          ResponseError.INTERNAL_ERROR, je.getMessage(), null));
     }
   }
 

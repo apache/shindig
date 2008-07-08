@@ -18,6 +18,7 @@
 package org.apache.shindig.social.dataservice;
 
 import org.apache.shindig.common.testing.FakeGadgetToken;
+import org.apache.shindig.common.util.ImmediateFuture;
 import org.apache.shindig.social.ResponseItem;
 import org.apache.shindig.social.opensocial.util.BeanJsonConverter;
 
@@ -75,16 +76,16 @@ public class AppDataHandlerTest extends TestCase {
     request.setPostData(postData);
   }
 
-  private void assertHandleGetForGroup(GroupId.Type group) {
+  private void assertHandleGetForGroup(GroupId.Type group) throws Exception {
     setPath("/activities/john.doe/@" + group.toString() + "/appId");
 
     ResponseItem<DataCollection> data = new ResponseItem<DataCollection>(null);
     EasyMock.expect(appDataService.getPersonData(new UserId(UserId.Type.userId, "john.doe"),
         new GroupId(group, null),
-        "appId", Sets.<String>newHashSet(), token)).andReturn(data);
+        "appId", Sets.<String>newHashSet(), token)).andReturn(ImmediateFuture.newInstance(data));
 
     replay();
-    assertEquals(data, handler.handleGet(request));
+    assertEquals(data, handler.handleGet(request).get());
     verify();
   }
 
@@ -108,14 +109,14 @@ public class AppDataHandlerTest extends TestCase {
     ResponseItem<DataCollection> data = new ResponseItem<DataCollection>(null);
     EasyMock.expect(appDataService.getPersonData(new UserId(UserId.Type.userId, "john.doe"),
         new GroupId(GroupId.Type.friends, null),
-        "appId", Sets.newHashSet("pandas"), token)).andReturn(data);
+        "appId", Sets.newHashSet("pandas"), token)).andReturn(ImmediateFuture.newInstance(data));
 
     replay();
-    assertEquals(data, handler.handleGet(request));
+    assertEquals(data, handler.handleGet(request).get());
     verify();
   }
 
-  private ResponseItem setupPostData() {
+  private ResponseItem<Object> setupPostData() {
     String jsonAppData = "{pandas: 'are fuzzy'}";
 
     Map<String, String> params = Maps.newHashMap();
@@ -125,23 +126,24 @@ public class AppDataHandlerTest extends TestCase {
     HashMap<String, String> values = Maps.newHashMap();
     EasyMock.expect(converter.convertToObject(jsonAppData, HashMap.class)).andReturn(values);
 
-    ResponseItem data = new ResponseItem<Object>(null);
+    ResponseItem<Object> data = new ResponseItem<Object>(null);
     EasyMock.expect(appDataService.updatePersonData(new UserId(UserId.Type.userId, "john.doe"),
         new GroupId(GroupId.Type.self, null),
-        "appId", Sets.newHashSet("pandas"), values, token)).andReturn(data);
+        "appId", Sets.newHashSet("pandas"), values, token))
+        .andReturn(ImmediateFuture.newInstance(data));
     replay();
     return data;
   }
 
   public void testHandlePost() throws Exception {
     ResponseItem data = setupPostData();
-    assertEquals(data, handler.handlePost(request));
+    assertEquals(data, handler.handlePost(request).get());
     verify();
   }
 
   public void testHandlePut() throws Exception {
     ResponseItem data = setupPostData();
-    assertEquals(data, handler.handlePut(request));
+    assertEquals(data, handler.handlePut(request).get());
     verify();
   }
 
@@ -150,13 +152,14 @@ public class AppDataHandlerTest extends TestCase {
     params.put("fields", "pandas");
     setPathAndParams("/appData/john.doe/@self/appId", params);
 
-    ResponseItem data = new ResponseItem<Object>(null);
+    ResponseItem<Object> data = new ResponseItem<Object>(null);
     EasyMock.expect(appDataService.deletePersonData(new UserId(UserId.Type.userId, "john.doe"),
         new GroupId(GroupId.Type.self, null),
-        "appId", Sets.newHashSet("pandas"), token)).andReturn(data);
+        "appId", Sets.newHashSet("pandas"), token))
+        .andReturn(ImmediateFuture.newInstance(data));
 
     replay();
-    assertEquals(data, handler.handleDelete(request));
+    assertEquals(data, handler.handleDelete(request).get());
     verify();
   }
 }

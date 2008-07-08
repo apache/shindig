@@ -22,6 +22,7 @@ import org.apache.shindig.social.ResponseItem;
 import org.apache.shindig.social.opensocial.model.Activity;
 
 import java.util.Set;
+import java.util.concurrent.Future;
 
 public interface ActivityService {
 
@@ -35,7 +36,7 @@ public interface ActivityService {
    * @param token A valid SecurityToken
    * @return a response item with the list of activities.
    */
-  public ResponseItem<RestfulCollection<Activity>> getActivities(UserId userId,
+  public Future<ResponseItem<RestfulCollection<Activity>>> getActivities(UserId userId,
       GroupId groupId, String appId, Set<String> fields, SecurityToken token);
 
   /**
@@ -50,7 +51,7 @@ public interface ActivityService {
    * @param token A valid SecurityToken
    * @return a response item with the list of activities.
    */
-  public ResponseItem<Activity> getActivity(UserId userId, GroupId groupId, String appId,
+  public Future<ResponseItem<Activity>> getActivity(UserId userId, GroupId groupId, String appId,
       Set<String> fields, String activityId, SecurityToken token);
 
   /**
@@ -64,7 +65,7 @@ public interface ActivityService {
    * @param token A valid SecurityToken.
    * @return a response item containing any errors
    */
-  public ResponseItem deleteActivity(UserId userId, GroupId groupId, String appId,
+  public Future<ResponseItem<Object>> deleteActivity(UserId userId, GroupId groupId, String appId,
       String activityId, SecurityToken token);
 
   /**
@@ -79,6 +80,6 @@ public interface ActivityService {
    * @param token A valid SecurityToken
    * @return a response item containing any errors
    */
-  public ResponseItem createActivity(UserId userId, GroupId groupId, String appId,
+  public Future<ResponseItem<Object>> createActivity(UserId userId, GroupId groupId, String appId,
       Set<String> fields, Activity activity, SecurityToken token);
 }

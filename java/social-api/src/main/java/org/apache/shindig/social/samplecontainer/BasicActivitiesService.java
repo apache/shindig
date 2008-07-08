@@ -18,6 +18,7 @@
 package org.apache.shindig.social.samplecontainer;
 
 import org.apache.shindig.common.SecurityToken;
+import org.apache.shindig.common.util.ImmediateFuture;
 import org.apache.shindig.social.ResponseError;
 import org.apache.shindig.social.ResponseItem;
 import org.apache.shindig.social.dataservice.ActivityService;
@@ -35,6 +36,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.Future;
 
 public class BasicActivitiesService implements ActivitiesService,
     ActivityService {
@@ -89,8 +91,13 @@ public class BasicActivitiesService implements ActivitiesService,
 
   // New interface methods
 
-  public ResponseItem<RestfulCollection<Activity>> getActivities(UserId userId,
+  public Future<ResponseItem<RestfulCollection<Activity>>> getActivities(UserId userId,
       GroupId groupId, String appId, Set<String> fields, SecurityToken token) {
+    return ImmediateFuture.newInstance(getActivitiesInternal(userId, groupId, token));
+  }
+
+  private ResponseItem<RestfulCollection<Activity>> getActivitiesInternal(UserId userId,
+      GroupId groupId, SecurityToken token) {
     List<String> ids = Lists.newArrayList();
     switch (groupId.getType()) {
       case all:
@@ -119,27 +126,27 @@ public class BasicActivitiesService implements ActivitiesService,
         new RestfulCollection<Activity>(activities));
   }
 
-  public ResponseItem<Activity> getActivity(UserId userId, GroupId groupId, String appId,
+  public Future<ResponseItem<Activity>> getActivity(UserId userId, GroupId groupId, String appId,
       Set<String> fields, String activityId, SecurityToken token) {
 
-    RestfulCollection<Activity> allActivities = getActivities(userId, groupId,
-        appId, fields, token).getResponse();
+    RestfulCollection<Activity> allActivities = getActivitiesInternal(userId, groupId, token)
+        .getResponse();
     for (Activity activity : allActivities.getEntry()) {
       if (activity.getId().equals(activityId)) {
-        return new ResponseItem<Activity>(activity);
+        return ImmediateFuture.newInstance(new ResponseItem<Activity>(activity));
       }
     }
-    return new ResponseItem<Activity>(ResponseError.BAD_REQUEST,
-        "Activity not found", null);
+    return ImmediateFuture.newInstance(new ResponseItem<Activity>(ResponseError.BAD_REQUEST,
+        "Activity not found", null));
   }
 
-  public ResponseItem deleteActivity(UserId userId, GroupId groupId, String appId,
+  public Future<ResponseItem<Object>> deleteActivity(UserId userId, GroupId groupId, String appId,
       String activityId, SecurityToken token) {
     fetcher.deleteActivity(userId.getUserId(token), activityId);
-    return new ResponseItem<Object>(new Object());
+    return ImmediateFuture.newInstance(new ResponseItem<Object>(new Object()));
   }
 
-  public ResponseItem createActivity(UserId userId, GroupId groupId, String appId,
+  public Future<ResponseItem<Object>> createActivity(UserId userId, GroupId groupId, String appId,
       Set<String> fields, Activity activity, SecurityToken token) {
 
     // TODO: Validate the activity, respect the fields param, and do any template expanding
@@ -147,7 +154,7 @@ public class BasicActivitiesService implements ActivitiesService,
     activity.setPostedTime(new Date().getTime());
 
     fetcher.createActivity(userId.getUserId(token), activity);
-    return new ResponseItem<Object>(new Object());
+    return ImmediateFuture.newInstance(new ResponseItem<Object>(new Object()));
   }
 
 }

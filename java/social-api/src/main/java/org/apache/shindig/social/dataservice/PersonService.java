@@ -22,6 +22,7 @@ import org.apache.shindig.social.ResponseItem;
 import org.apache.shindig.social.opensocial.model.Person;
 
 import java.util.Set;
+import java.util.concurrent.Future;
 
 public interface PersonService {
 
@@ -46,7 +47,7 @@ public interface PersonService {
    * @param token The gadget token
    * @return a list of people.
    */
-  public ResponseItem<RestfulCollection<Person>> getPeople(UserId userId, GroupId groupId,
+  public Future<ResponseItem<RestfulCollection<Person>>> getPeople(UserId userId, GroupId groupId,
       SortOrder sortOrder, FilterType filter, int first, int max,
       Set<String> fields, SecurityToken token);
 
@@ -58,5 +59,5 @@ public interface PersonService {
    * @param token The gadget token
    * @return a list of people.
    */
-  public ResponseItem<Person> getPerson(UserId id, Set<String> fields, SecurityToken token);
+  public Future<ResponseItem<Person>> getPerson(UserId id, Set<String> fields, SecurityToken token);
 }

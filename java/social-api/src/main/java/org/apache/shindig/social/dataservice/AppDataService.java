@@ -22,6 +22,7 @@ import org.apache.shindig.social.ResponseItem;
 
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.Future;
 
 public interface AppDataService {
 
@@ -34,8 +35,8 @@ public interface AppDataService {
    * @param token The security token
    * @return The data fetched
    */
-  public ResponseItem<DataCollection> getPersonData(UserId userId, GroupId groupId, String appId,
-      Set<String> fields, SecurityToken token);
+  public Future<ResponseItem<DataCollection>> getPersonData(UserId userId, GroupId groupId,
+      String appId, Set<String> fields, SecurityToken token);
 
   /**
    * Deletes data for the specified user and group.
@@ -47,7 +48,7 @@ public interface AppDataService {
    * @param token The security token
    * @return an error if one occurs
    */
-  public ResponseItem deletePersonData(UserId userId, GroupId groupId, String appId,
+  public Future<ResponseItem<Object>> deletePersonData(UserId userId, GroupId groupId, String appId,
       Set<String> fields, SecurityToken token);
 
   /**
@@ -61,7 +62,7 @@ public interface AppDataService {
    * @param token The security token
    * @return an error if one occurs
    */
-  public ResponseItem updatePersonData(UserId userId, GroupId groupId, String appId,
+  public Future<ResponseItem<Object>> updatePersonData(UserId userId, GroupId groupId, String appId,
       Set<String> fields, Map<String, String> values, SecurityToken token);
 }
 
