@@ -26,6 +26,7 @@ import com.google.inject.name.Named;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.shindig.common.SecurityToken;
+import org.apache.shindig.common.util.ResourceLoader;
 import org.apache.shindig.social.ResponseError;
 import org.apache.shindig.social.ResponseItem;
 import org.apache.shindig.social.dataservice.ActivityService;
@@ -50,7 +51,7 @@ import java.util.Set;
 /**
  * Implementation of supported services backed by a JSON DB
  */
-public class JSONOpensocialService implements ActivityService, PersonService, AppDataService {
+public class JsonOpensocialService implements ActivityService, PersonService, AppDataService {
 
   /**
    * The DB
@@ -83,9 +84,9 @@ public class JSONOpensocialService implements ActivityService, PersonService, Ap
   private static final String FRIEND_LINK_TABLE = "friendLinks";
 
   @Inject
-  public JSONOpensocialService(@Named("canonical.json.db")String jsonLocation,
+  public JsonOpensocialService(@Named("canonical.json.db")String jsonLocation,
       BeanConverter converter) throws Exception {
-    String content = IOUtils.toString(new java.net.URL(jsonLocation).openStream(), "UTF-8");
+    String content = IOUtils.toString(ResourceLoader.openResource(jsonLocation), "UTF-8");
     this.db = new JSONObject(content);
     this.converter = converter;
   }

@@ -44,6 +44,13 @@ under the License.
       <resource>
         <directory>conf</directory>
       </resource>
+      <resource>
+        <directory>${basedir}/../../javascript/sampledata/</directory>
+        <targetPath>sampledata</targetPath>
+        <includes>
+          <include>**/*.*</include>
+        </includes>
+      </resource>
     </resources>
   </build>
 
