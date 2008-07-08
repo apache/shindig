@@ -17,6 +17,12 @@
  */
 package org.apache.shindig.social.abdera;
 
+import org.apache.shindig.social.abdera.util.ValidRequestFilter;
+
+import java.util.EnumSet;
+import java.util.HashMap;
+import java.util.Map;
+
 /**
  * The RequestUrlTemplate enum standardizes the names and descriptions of the
  * URL templates as defined in the RESTful API spec.
@@ -31,46 +37,68 @@ package org.apache.shindig.social.abdera;
 
 public enum RequestUrlTemplate {
   // People
-  PROFILES_OF_CONNECTIONS_OF_USER("Profiles of Connections of User",
-      "people/:uid/@all", "/people/{guid}/@all"),
-  PROFILES_OF_FRIENDS_OF_USER("Profiles of Friends of User",
-      "people/:uid/@friends", "/people/{guid}/@friends"),
-  PROFILES_IN_GROUP_OF_USER("Profiles in Group of User",
-      "people/:uid/:gid", "/people/{guid}/{groupid}"),
-  PROFILE_OF_CONNECTION_OF_USER("Profile of Connection of User",
-      "people/:uid/@all/:pid", "/people/{guid}/@all/{pid}"),
-  PROFILE_OF_USER("Profile of User",
-      "people/:uid/@self", "/people/{guid}/@self"),
-  PROFILE_OF_REQUESTER("Profile of Requester",
-          "people/@me/@self", "/people/@me/@self"),
+  JSON_PROFILES_OF_CONNECTIONS_OF_USER("Profiles of Connections of User in JSON format",
+      "people/:uid/@all", ValidRequestFilter.Format.JSON),
+  ATOM_PROFILES_OF_CONNECTIONS_OF_USER("Profiles of Connections of User in ATOM format",
+      "people/:uid/@all", ValidRequestFilter.Format.ATOM),
+
+  JSON_PROFILES_OF_FRIENDS_OF_USER("Profiles of Friends of User in JSON format",
+      "people/:uid/@friends", ValidRequestFilter.Format.JSON),
+  ATOM_PROFILES_OF_FRIENDS_OF_USER("Profiles of Friends of User in ATOM format",
+      "people/:uid/@friends", ValidRequestFilter.Format.ATOM),
+
+  JSON_PROFILES_IN_GROUP_OF_USER("Profiles in Group of User in JSON format",
+      "people/:uid/:gid", ValidRequestFilter.Format.JSON),
+  ATOM_PROFILES_IN_GROUP_OF_USER("Profiles in Group of User in ATOM format",
+      "people/:uid/:gid", ValidRequestFilter.Format.ATOM),
+
+  JSON_PROFILE_OF_CONNECTION_OF_USER("Profile of Connection of User in the JSON format",
+      "people/:uid/@all/:pid", ValidRequestFilter.Format.JSON),
+  ATOM_PROFILE_OF_CONNECTION_OF_USER("Profile of Connection of User in the ATOM format",
+      "people/:uid/@all/:pid", ValidRequestFilter.Format.ATOM),
+
+  JSON_PROFILE_OF_USER("Profile of User in JSON format",
+      "people/:uid/@self", ValidRequestFilter.Format.JSON),
+  ATOM_PROFILE_OF_USER("Profile of User in ATOM format",
+      "people/:uid/@self", ValidRequestFilter.Format.ATOM),
+
+  JSON_PROFILE_OF_REQUESTER("Profile of Requester in JSON format",
+      "people/@me/@self", ValidRequestFilter.Format.JSON),
+  ATOM_PROFILE_OF_REQUESTER("Profile of Requester in ATOM format",
+      "people/@me/@self", ValidRequestFilter.Format.ATOM),
+
   // Activities
   ACTIVITIES_OF_USER("Activities of User",
-      "activities/:uid/@self", "/activities/{uid}/@self"),
+      "activities/:uid/@self", null),
   ACTIVITIES_OF_FRIENDS_OF_USER("Activities of Friends of User",
-      "activities/:uid/@friends", "/activities/{uid}/@friends"),
+      "activities/:uid/@friends", null),
   ACTIVITIES_OF_GROUP_OF_USER("Activities of Group of User",
-      "activities/:uid/:gid", "/activities/{uid}/{gid}"),
+      "activities/:uid/:gid", null),
   ACTIVITY_OF_USER("Activity of User",
-      "activities/:uid/@self/:aid", "/activities/{uid}/@self/{aid}"),
+      "activities/:uid/@self/:aid", null),
   // AppData
   APPDATA_OF_APP_OF_USER("AppData of App of User",
-      "appdata/:uid/@self/:aid", "/appdata/{uid}/@self/{aid}"),
+      "appdata/:uid/@self/:aid", null),
   APPDATA_OF_FRIENDS_OF_USER("AppData of Friends of User",
-      "appdata/:uid/@friends/:aid", "/appdata/{uid}/@friends/{aid}");
+      "appdata/:uid/@friends/:aid", null);
 
-  private String description;
-  private String routePattern;
-  private String urlTemplate;
+  private final String description;
+  private final String routePattern;
+  private final ValidRequestFilter.Format formatRestriction;
 
   private RequestUrlTemplate(String description, String routePattern,
-      String urlTemplate) {
+      ValidRequestFilter.Format format) {
     this.description = description;
     this.routePattern = routePattern;
-    this.urlTemplate = urlTemplate;
+    this.formatRestriction = format;
   }
 
   @Override
   public String toString() {
+    return getDescription();
+  }
+  
+  public String getDescription() {
     return description;
   }
 
@@ -78,11 +106,35 @@ public enum RequestUrlTemplate {
     return routePattern;
   }
 
-  public String getUrlTemplate() {
-    return urlTemplate;
+  public ValidRequestFilter.Format getFormatRestriction() {
+    return formatRestriction;
   }
 
-  public static RequestUrlTemplate getValue(String value) {
-    return valueOf(value.replaceAll(" ", "_").toUpperCase());
+  //Reverse Lookup for the description Field
+  private static final Map<String, RequestUrlTemplate> lookupByDescription = 
+    new HashMap<String, RequestUrlTemplate>();
+
+  static {
+    for (RequestUrlTemplate t : EnumSet.allOf(RequestUrlTemplate.class)) {
+      lookupByDescription.put(t.getDescription(), t);
+    }
   }
+
+  public static RequestUrlTemplate getByDescription(String description) {
+    return lookupByDescription.get(description);
+  }
+
+  //Reverse Lookup for the routePattern Field
+  private static final Map<String, RequestUrlTemplate> lookupByRoutePattern = 
+    new HashMap<String, RequestUrlTemplate>();
+
+  static {
+    for (RequestUrlTemplate t : EnumSet.allOf(RequestUrlTemplate.class))
+      lookupByRoutePattern.put(t.getRoutePattern(), t);
+  }
+
+  public static RequestUrlTemplate getByRoutePattern(String pattern) {
+    return lookupByRoutePattern.get(pattern);
+  }
+
 }

@@ -15,9 +15,11 @@
  * copyright in this work, please see the NOTICE file in the top level
  * directory of this distribution.
  */
-package org.apache.shindig.social.abdera;
+package org.apache.shindig.social.abdera.atom;
 
 import org.apache.shindig.social.SocialApiTestsGuiceModule;
+import org.apache.shindig.social.abdera.AbstractLargeRestfulTests;
+import org.apache.shindig.social.abdera.RequestUrlTemplate;
 import org.apache.shindig.social.opensocial.model.Activity;
 
 import org.apache.abdera.model.Document;
@@ -82,7 +84,7 @@ public class RestfulAtomActivityTest extends AbstractLargeRestfulTests {
       String feedId) {
     assertEquals(feedId, feed.getId().toString());
     assertEquals(feedId, feed.getLink("self").getHref().toString());
-    assertEquals(activity.getUserId(), feed.getAuthor().getName().toString());
+    assertEquals(activity.getUserId(), feed.getAuthor().getName());
     assertEquals(title, feed.getTitle());
   }
 

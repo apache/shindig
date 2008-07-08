@@ -15,9 +15,10 @@
  * copyright in this work, please see the NOTICE file in the top level
  * directory of this distribution.
  */
-package org.apache.shindig.social.abdera;
+package org.apache.shindig.social.abdera.atom;
 
 import org.apache.shindig.social.SocialApiTestsGuiceModule;
+import org.apache.shindig.social.abdera.AbstractLargeRestfulTests;
 import org.apache.shindig.social.opensocial.model.Person;
 
 import org.apache.abdera.model.Document;
@@ -82,6 +83,21 @@ public class RestfulAtomPeopleTest extends AbstractLargeRestfulTests {
         getIdFromXmlContent(entry.getContentElement().getValue()));
   }
 
+  @Test
+  public void testGetProfileOfUserAtom() throws Exception {
+    resp = client.get(BASEURL + "/people/john.doe/@self?format=atom");
+    checkForGoodAtomResponse(resp);
+
+    Document<Entry> doc = resp.getDocument();
+    Entry entry = doc.getRoot();
+    prettyPrint(entry);
+
+    Person expectedJohnDoe = SocialApiTestsGuiceModule
+        .MockXmlStateFileFetcher.johnDoe;
+    assertEquals(expectedJohnDoe.getId(),
+        getIdFromXmlContent(entry.getContentElement().getValue()));
+  }
+  
   @Test
   public void testGetProfileOfNotConnectionOfUserAtom() throws Exception {
     // jane is friends with john but not simple

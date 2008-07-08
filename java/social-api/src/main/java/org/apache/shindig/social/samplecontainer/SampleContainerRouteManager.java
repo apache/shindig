@@ -17,23 +17,29 @@
  */
 package org.apache.shindig.social.samplecontainer;
 
-import org.apache.shindig.social.abdera.ActivityAdapter;
-import org.apache.shindig.social.abdera.DataAdapter;
-import org.apache.shindig.social.abdera.PersonAdapter;
-import org.apache.shindig.social.abdera.SimpleJsonAdapter;
-import org.apache.shindig.social.abdera.SocialRouteManager;
-import org.apache.shindig.social.opensocial.util.BeanJsonConverter;
-
 import com.google.common.collect.Maps;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+
+import org.apache.shindig.common.SecurityToken;
+import org.apache.shindig.common.util.ImmediateFuture;
+import org.apache.shindig.social.ResponseItem;
+import org.apache.shindig.social.abdera.atom.ActivityAdapter;
+import org.apache.shindig.social.abdera.atom.DataAdapter;
+import org.apache.shindig.social.abdera.atom.PersonAdapter;
+import org.apache.shindig.social.abdera.json.PersonJsonAdapter;
+import org.apache.shindig.social.abdera.json.SimpleJsonAdapter;
+import org.apache.shindig.social.abdera.SocialRequestContext;
+import org.apache.shindig.social.abdera.SocialRouteManager;
+import org.apache.shindig.social.opensocial.util.BeanJsonConverter;
+
 import org.apache.abdera.protocol.server.CollectionAdapter;
-import org.apache.abdera.protocol.server.RequestContext;
 import org.apache.abdera.protocol.server.TargetType;
 
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Map;
+import java.util.concurrent.Future;
 
 @Singleton
 public class SampleContainerRouteManager extends SocialRouteManager {
@@ -62,8 +68,8 @@ public class SampleContainerRouteManager extends SocialRouteManager {
      */
     SET_STATE("samplecontainer/setstate", TargetType.TYPE_ENTRY);
 
-    private String routePattern;
-    private TargetType targetType;
+    private final String routePattern;
+    private final TargetType targetType;
 
     private SampleContainerUrls(String routePattern, TargetType targetType) {
       this.targetType = targetType;
@@ -84,12 +90,12 @@ public class SampleContainerRouteManager extends SocialRouteManager {
   }
 
   @Inject
-  public SampleContainerRouteManager(PersonAdapter personAdapter,
-      DataAdapter dataAdapter, ActivityAdapter activityAdapter,
+  public SampleContainerRouteManager(PersonJsonAdapter personJsonAdapter,
+      PersonAdapter personAtomAdapter, DataAdapter dataAdapter, ActivityAdapter activityAdapter,
       SampleContainerRouteManager.DumpStateAdapter dumpStateAdapter,
       SampleContainerRouteManager.SetStateAdapter setStateAdapter,
       SampleContainerRouteManager.SetEvilnessAdapter setEvilnessAdapter) {
-    super(personAdapter, dataAdapter, activityAdapter);
+    super(personJsonAdapter, personAtomAdapter, dataAdapter, activityAdapter);
     this.dumpStateAdapter = dumpStateAdapter;
     this.setStateAdapter = setStateAdapter;
     this.setEvilnessAdapter = setEvilnessAdapter;
@@ -111,7 +117,7 @@ public class SampleContainerRouteManager extends SocialRouteManager {
   // Simple adapters for the sample container
 
   public static class DumpStateAdapter extends SimpleJsonAdapter {
-    private XmlStateFileFetcher fetcher;
+    private final XmlStateFileFetcher fetcher;
 
     @Inject
     public DumpStateAdapter(XmlStateFileFetcher fetcher,
@@ -120,18 +126,23 @@ public class SampleContainerRouteManager extends SocialRouteManager {
       this.fetcher = fetcher;
     }
 
-    protected Object getResponse(RequestContext request) {
+    protected Future<ResponseItem<Object>> getEntity(SocialRequestContext request, SecurityToken token) {
       Map<String, Object> state = Maps.newHashMap();
       state.put("people", fetcher.getAllPeople());
       state.put("friendIds", fetcher.getFriendIds());
       state.put("data", fetcher.getAppData());
       state.put("activities", fetcher.getActivities());
-      return state;
+      return ImmediateFuture.newInstance(new ResponseItem<Object>(state));
+    }
+
+    @Override
+    protected Future<ResponseItem> getEntities(SocialRequestContext request, SecurityToken token) {
+      return null;
     }
   }
 
   public static class SetStateAdapter extends SimpleJsonAdapter {
-    private XmlStateFileFetcher fetcher;
+    private final XmlStateFileFetcher fetcher;
 
     @Inject
     public SetStateAdapter(XmlStateFileFetcher fetcher,
@@ -140,19 +151,25 @@ public class SampleContainerRouteManager extends SocialRouteManager {
       this.fetcher = fetcher;
     }
 
-    protected Object getResponse(RequestContext request) {
+    protected Future<ResponseItem<Object>> getEntity(SocialRequestContext request, SecurityToken token) {
       try {
         String stateFile = getParameter(request, "fileurl");
         fetcher.resetStateFile(new URI(stateFile));
       } catch (URISyntaxException e) {
         sendError(request, "The state file was not a valid url");
       }
+      return ImmediateFuture.newInstance(new ResponseItem<Object>(""));
+    }
+
+    @Override
+    protected Future<ResponseItem> getEntities(SocialRequestContext request, SecurityToken token) {
+      // TODO Auto-generated method stub
       return null;
     }
   }
 
   public static class SetEvilnessAdapter extends SimpleJsonAdapter {
-    private XmlStateFileFetcher fetcher;
+    private final XmlStateFileFetcher fetcher;
 
     @Inject
     public SetEvilnessAdapter(XmlStateFileFetcher fetcher,
@@ -161,9 +178,15 @@ public class SampleContainerRouteManager extends SocialRouteManager {
       this.fetcher = fetcher;
     }
 
-    protected Object getResponse(RequestContext request) {
+    protected Future<ResponseItem<Object>> getEntity(SocialRequestContext request, SecurityToken token) {
       String doEvil = getParameter(request, "doevil");
       fetcher.setEvilness(Boolean.valueOf(doEvil));
+      return ImmediateFuture.newInstance(new ResponseItem<Object>(""));
+    }
+
+    @Override
+    protected Future<ResponseItem> getEntities(SocialRequestContext request, SecurityToken token) {
+      // TODO Auto-generated method stub
       return null;
     }
   }

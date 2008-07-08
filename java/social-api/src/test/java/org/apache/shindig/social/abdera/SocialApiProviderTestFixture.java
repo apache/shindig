@@ -18,6 +18,10 @@
 package org.apache.shindig.social.abdera;
 
 import org.apache.shindig.social.EasyMockTestCase;
+import org.apache.shindig.social.abdera.atom.ActivityAdapter;
+import org.apache.shindig.social.abdera.atom.DataAdapter;
+import org.apache.shindig.social.abdera.atom.PersonAdapter;
+import org.apache.shindig.social.abdera.json.PersonJsonAdapter;
 
 import org.apache.abdera.protocol.server.RequestContext;
 
@@ -28,6 +32,7 @@ public abstract class SocialApiProviderTestFixture extends EasyMockTestCase {
 
   public SocialApiProviderTestFixture() {
     provider.setSocialRouteManager(new SocialRouteManager(
+        mock(PersonJsonAdapter.class),
         mock(PersonAdapter.class),
         mock(DataAdapter.class),
         mock(ActivityAdapter.class)));

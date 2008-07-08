@@ -15,13 +15,14 @@
  * copyright in this work, please see the NOTICE file in the top level
  * directory of this distribution.
  */
-package org.apache.shindig.social.abdera;
+package org.apache.shindig.social.abdera.atom;
 
 import org.apache.shindig.common.BasicSecurityToken;
 import org.apache.shindig.common.SecurityToken;
 import org.apache.shindig.common.SecurityTokenDecoder;
 import org.apache.shindig.common.SecurityTokenException;
 import org.apache.shindig.common.crypto.BlobCrypterException;
+import org.apache.shindig.social.abdera.RequestUrlTemplate;
 import org.apache.shindig.social.abdera.util.ValidRequestFilter;
 import org.apache.shindig.social.abdera.util.ValidRequestFilter.Format;
 import org.apache.shindig.social.opensocial.PeopleService;
@@ -52,6 +53,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
 
+import javax.servlet.http.HttpServletRequest;
+
 /**
  * By extending this class it becomes easy to build Collections which are backed
  * by a set of Social entities - such as a person or activity.
@@ -64,15 +67,18 @@ import java.util.logging.Logger;
 
 public abstract class AbstractSocialEntityCollectionAdapter<T> extends
     AbstractEntityCollectionAdapter<T> {
-  private static Logger logger = Logger
+  private static final Logger logger = Logger
       .getLogger(AbstractEntityCollectionAdapter.class.getName());
 
+  // the name of the URI query parameter that is the gadget security token
+  protected static final String SECURITY_TOKEN_PARAM = "st";
+  
   protected PeopleService peopleService;
-  protected String ID_PREFIX;
-  protected Factory factory;
+  protected final String ID_PREFIX;
+  protected final Factory factory;
   private BeanXmlConverter beanXmlConverter;
   private BeanJsonConverter beanJsonConverter;
-  private SecurityTokenDecoder securityTokenDecoder;
+  protected SecurityTokenDecoder securityTokenDecoder;
 
   public AbstractSocialEntityCollectionAdapter() {
     ID_PREFIX = "urn:guid:";
@@ -110,13 +116,31 @@ public abstract class AbstractSocialEntityCollectionAdapter<T> extends
    * @return SecurityToken
    * @throws SecurityTokenException If the token is invalid
    */
-  protected SecurityToken getSecurityToken(RequestContext request)
-      throws SecurityTokenException {
-    String token = request.getParameter("st");
+  /**
+   * Reads the gadget security token out of an {@link HttpServletRequest},
+   * making sure to return null if there are problems.
+   */
+  protected SecurityToken getSecurityToken(RequestContext request) {
+    String token = request.getParameter(SECURITY_TOKEN_PARAM);
+
     if (token == null || token.trim().length() == 0) {
-      throw new SecurityTokenException("Missing security token");
+      return null;
     }
-    return securityTokenDecoder.createToken(Collections.singletonMap(SecurityTokenDecoder.SECURITY_TOKEN_NAME, token));
+
+    try {
+      Map<String, String> params = 
+          Collections.singletonMap(SecurityTokenDecoder.SECURITY_TOKEN_NAME, 
+              token);
+      return securityTokenDecoder.createToken(params);
+    } catch (SecurityTokenException e) {
+      String message = new StringBuilder()
+          .append("found security token, but couldn't decode it ")
+          .append("(treating it as not present). token is: ")
+          .append(token)
+          .toString();
+      logger.warning(message);
+      return null;
+    }
   }
 
   /**
@@ -129,50 +153,18 @@ public abstract class AbstractSocialEntityCollectionAdapter<T> extends
    */
   protected SecurityToken getSecurityToken(RequestContext request,
       final String viewerId) {
-    try {
-      return getSecurityToken(request);
-    } catch (SecurityTokenException se) {
-      // For now, if there's no st param, we'll mock one up.
+    SecurityToken token = getSecurityToken(request); 
+
+    if (token == null) {
       try {
         return new BasicSecurityToken("o", viewerId, "a", "d", "u", "m");
       } catch (BlobCrypterException be) {
         be.printStackTrace();
         return null;
       }
-    }
+    } 
+     return token;
   }
-
-  /**
-   * Gets the IDs of friends for the given user.
-   *
-   * @param request Abdera's RequestContext
-   * @param uid The User ID to get friends for.
-   * @return A list of ID strings.
-   */
-  protected List<String> getFriendIds(RequestContext request, String uid) {
-    SecurityToken token = getSecurityToken(request, uid);
-    IdSpec idSpec = new IdSpec(null, IdSpec.Type.VIEWER_FRIENDS);
-    try {
-      return peopleService.getIds(idSpec, token);
-    } catch (JSONException e) {
-      // TODO: Ignoring this for now. Eventually we can make the service apis
-      // fit the restful model better. For now, it is worth some hackiness to
-      // keep the interfaces stable.
-      return null;
-    }
-  }
-
-  /**
-   * Gets the IDs of connections of the given user.
-   *
-   * @param request Abdera's RequestContext
-   * @param uid The User ID to get connections for.
-   * @return A list of ID strings.
-   */
-  protected List<String> getConnectionIds(RequestContext request, String uid) {
-    // TODO: Implement connections. For now, just return friends
-    return getFriendIds(request, uid);
-   }
 
   /**
    * @param request RequestContext
@@ -188,7 +180,7 @@ public abstract class AbstractSocialEntityCollectionAdapter<T> extends
     Route theRoute = getRoute(request);
     for (String var: theRoute.getVariables()){
       Object value = request.getTarget().getParameter(var);
-      if (!params.containsKey(var) && var != resourceRouteVariable) {
+      if (!params.containsKey(var) && !var.equals(resourceRouteVariable)) {
         params.put(var, value);
       }
     }
@@ -216,7 +208,7 @@ public abstract class AbstractSocialEntityCollectionAdapter<T> extends
   // TODO: We should probably move the static methods here into a helper class
   public static RequestUrlTemplate getUrlTemplate(RequestContext request) {
     String routeName = getRoute(request).getName();
-    return RequestUrlTemplate.getValue(routeName);
+    return RequestUrlTemplate.valueOf(routeName);
   }
 
   @Override
@@ -359,5 +351,39 @@ public abstract class AbstractSocialEntityCollectionAdapter<T> extends
   public ResponseContext putEntry(RequestContext request) {
     return null;
   }
+  
+  /**
+   * Gets the IDs of friends for the given user.
+   * 
+   * @param request Abdera's RequestContext
+   * @param uid The User ID to get friends for.
+   * @return A list of ID strings.
+   */
+  public List<String> getFriendIds(RequestContext request, String uid) {
+    SecurityToken token = getSecurityToken(request, uid);
+    IdSpec idSpec = new IdSpec(null, IdSpec.Type.VIEWER_FRIENDS);
+    try {
+      return peopleService.getIds(idSpec, token);
+    } catch (JSONException e) {
+      // TODO: Ignoring this for now. Eventually we can make the service apis
+      // fit the restful model better. For now, it is worth some hackiness to
+      // keep the interfaces stable.
+      return null;
+    }
+  }
+
+  /**
+   * Gets the IDs of connections of the given user.
+   * 
+   * @param request Abdera's RequestContext
+   * @param uid The User ID to get connections for.
+   * @return A list of ID strings.
+   */
+  public List<String> getConnectionIds(RequestContext request, String uid,
+      SecurityTokenDecoder securityTokenDecoder, PeopleService peopleService) {
+    // TODO: Implement connections. For now, just return friends
+    return getFriendIds(request, uid);
+  }
+  
 
 }

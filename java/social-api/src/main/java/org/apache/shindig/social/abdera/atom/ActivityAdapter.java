@@ -15,13 +15,17 @@
  * copyright in this work, please see the NOTICE file in the top level
  * directory of this distribution.
  */
-package org.apache.shindig.social.abdera;
+package org.apache.shindig.social.abdera.atom;
 
-import org.apache.shindig.common.SecurityToken;
-import org.apache.shindig.social.opensocial.ActivitiesService;
-import org.apache.shindig.social.opensocial.model.Activity;
 import com.google.common.collect.Lists;
 import com.google.inject.Inject;
+
+import org.apache.shindig.common.SecurityToken;
+import org.apache.shindig.social.abdera.RequestUrlTemplate;
+import org.apache.shindig.social.abdera.SocialRouteManager;
+import org.apache.shindig.social.opensocial.ActivitiesService;
+import org.apache.shindig.social.opensocial.model.Activity;
+
 import org.apache.abdera.i18n.iri.IRI;
 import org.apache.abdera.model.Content;
 import org.apache.abdera.model.Entry;
@@ -174,7 +178,7 @@ public class ActivityAdapter extends
       throws ResponseContextException {
     String uid = request.getTarget().getParameter("uid");
     List<String> ids = Lists.newArrayList();
-    switch (getUrlTemplate(request)) {
+    switch (SocialRouteManager.getUrlTemplate(request)) {
       case ACTIVITIES_OF_USER :
         ids.add(uid);
         break;
@@ -302,7 +306,8 @@ public class ActivityAdapter extends
   // hoisting rule: atom:entry/atom:source/atom:title aliases "stream_title"
   // TODO: stream_title can't be accessed right here....
   public String getTitle(RequestContext request) {
-    return getRoute(request).getName();
+    String routename = SocialRouteManager.getRoute(request).getName();
+    return RequestUrlTemplate.valueOf(routename).getDescription();
   }
 
   // hoisting rule: atom:entry/atom:author/atom:uri aliases "user_id"

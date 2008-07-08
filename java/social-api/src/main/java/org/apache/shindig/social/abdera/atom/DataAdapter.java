@@ -1,11 +1,14 @@
-package org.apache.shindig.social.abdera;
+package org.apache.shindig.social.abdera.atom;
 
+import com.google.common.collect.Lists;
+import com.google.inject.Inject;
+
+import org.apache.shindig.social.abdera.RequestUrlTemplate;
+import org.apache.shindig.social.abdera.SocialRouteManager;
 import org.apache.shindig.social.opensocial.DataService;
 import org.apache.shindig.social.opensocial.model.DataCollection;
 import org.apache.shindig.social.opensocial.model.DataCollection.Data;
 
-import com.google.common.collect.Lists;
-import com.google.inject.Inject;
 import org.apache.abdera.i18n.iri.IRI;
 import org.apache.abdera.model.Content;
 import org.apache.abdera.protocol.server.RequestContext;
@@ -25,7 +28,7 @@ public class DataAdapter extends AbstractSocialEntityCollectionAdapter<Data> {
   private static Logger logger = Logger
       .getLogger(DataAdapter.class.getName());
 
-  private DataService dataService;
+  private final DataService dataService;
 
   @Inject
   public DataAdapter(DataService dataService) {
@@ -82,7 +85,7 @@ public class DataAdapter extends AbstractSocialEntityCollectionAdapter<Data> {
       throws ResponseContextException {
     String uid = request.getTarget().getParameter("uid");
     List<String> ids = Lists.newArrayList();
-    switch (getUrlTemplate(request)) {
+    switch (SocialRouteManager.getUrlTemplate(request)) {
       case APPDATA_OF_APP_OF_USER :
         ids.add(uid);
         break;
@@ -150,7 +153,8 @@ public class DataAdapter extends AbstractSocialEntityCollectionAdapter<Data> {
   }
 
   public String getTitle(RequestContext request) {
-    return getRoute(request).getName();
+    String routename = SocialRouteManager.getRoute(request).getName();
+    return RequestUrlTemplate.valueOf(routename).getDescription();
   }
 
   // hoisting rule: atom:entry/atom:author/atom:uri aliases ?

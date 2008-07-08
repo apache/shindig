@@ -38,7 +38,7 @@ public interface PeopleService {
    * @return a list of person ids
    * @throws JSONException If the idSpec is malformed
    */
-  List<String> getIds(IdSpec idSpec, SecurityToken token)
+  public List<String> getIds(IdSpec idSpec, SecurityToken token)
       throws JSONException;
 
   public enum SortOrder {
@@ -52,7 +52,7 @@ public interface PeopleService {
   /**
    * Returns a list of people that correspond to the passed in person ids.
    * @param ids The ids of the people to fetch.
-   * @param sortOrder How to sort the people
+   * @param sort How to sort the people
    * @param filter How the people should be filtered.
    * @param first The index of the first person to fetch.
    * @param max The max number of people to fetch.
@@ -60,8 +60,8 @@ public interface PeopleService {
    * @param token The gadget token
    * @return a list of people.
    */
-  ResponseItem<ApiCollection<Person>> getPeople(List<String> ids,
-      SortOrder sortOrder, FilterType filter, int first, int max,
+  public ResponseItem<ApiCollection<Person>> getPeople(List<String> ids,
+      SortOrder sort, FilterType filter, int first, int max,
       Set<String> profileDetails, SecurityToken token);
 
   /**
@@ -71,5 +71,5 @@ public interface PeopleService {
    * @param token The gadget token
    * @return a list of people.
    */
-  ResponseItem<Person> getPerson(String id, SecurityToken token);
+  public ResponseItem<Person> getPerson(String id, SecurityToken token);
 }

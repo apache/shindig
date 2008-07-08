@@ -15,9 +15,11 @@
  * copyright in this work, please see the NOTICE file in the top level
  * directory of this distribution.
  */
-package org.apache.shindig.social.abdera;
+package org.apache.shindig.social.abdera.atom;
 
 import org.apache.shindig.common.SecurityToken;
+import org.apache.shindig.social.abdera.RequestUrlTemplate;
+import org.apache.shindig.social.abdera.SocialRouteManager;
 import org.apache.shindig.social.opensocial.PeopleService;
 import org.apache.shindig.social.opensocial.model.Person;
 
@@ -42,6 +44,7 @@ public class PersonAdapter extends
   private static Logger logger = Logger
       .getLogger(PersonAdapter.class.getName());
 
+  
   /**
    * Query the underlying model for an Person object.
    *
@@ -67,17 +70,18 @@ public class PersonAdapter extends
    */
   @Override
   protected String getResourceName(RequestContext request) {
-    switch (getUrlTemplate(request)) {
-      case PROFILE_OF_CONNECTION_OF_USER:
+    switch (SocialRouteManager.getUrlTemplate(request)) {
+      case ATOM_PROFILE_OF_CONNECTION_OF_USER:
+        List<String> cids = getConnectionIds(request, request.getTarget()
+            .getParameter("uid"), securityTokenDecoder, peopleService);
         // TODO: Improve the service apis so we can get rid of relational code.
-        for (String cid : getConnectionIds(request, request.getTarget()
-            .getParameter("uid"))) {
+        for (String cid : cids) {
           if (cid.equals(request.getTarget().getParameter("pid"))) {
             return cid;
           }
         }
         return null;
-      case PROFILE_OF_USER:
+      case ATOM_PROFILE_OF_USER:
         return request.getTarget().getParameter("uid");
       default:
         // TODO: Clean this code up so we don't need this check
@@ -184,15 +188,15 @@ public class PersonAdapter extends
       throws ResponseContextException {
     String uid = request.getTarget().getParameter("uid");
     List<String> ids;
-    switch (getUrlTemplate(request)) {
-      case PROFILES_OF_CONNECTIONS_OF_USER :
-        ids = getConnectionIds(request, uid);
+    switch (SocialRouteManager.getUrlTemplate(request)) {
+      case ATOM_PROFILES_OF_CONNECTIONS_OF_USER :
+        ids = getConnectionIds(request, uid, securityTokenDecoder, peopleService);
         break;
-      case PROFILES_OF_FRIENDS_OF_USER :
+      case ATOM_PROFILES_OF_FRIENDS_OF_USER :
         // TODO: Change activities service to handle the friend lookup itself
         ids = getFriendIds(request, uid);
         break;
-      case PROFILES_IN_GROUP_OF_USER :
+      case ATOM_PROFILES_IN_GROUP_OF_USER :
         // TODO: add something like ids = getGroupIds(request, gid);
         // For now, this just returns the friends.
         ids = getFriendIds(request, uid);
@@ -246,7 +250,8 @@ public class PersonAdapter extends
   }
 
   public String getTitle(RequestContext request) {
-    return getRoute(request).getName();
+    String routename = SocialRouteManager.getRoute(request).getName();
+    return RequestUrlTemplate.valueOf(routename).getDescription();
   }
 
   // hoisting rule: atom:entry/atom:author/atom:uri aliases ?

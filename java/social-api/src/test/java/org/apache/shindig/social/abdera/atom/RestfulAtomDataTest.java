@@ -15,7 +15,9 @@
  * copyright in this work, please see the NOTICE file in the top level
  * directory of this distribution.
  */
-package org.apache.shindig.social.abdera;
+package org.apache.shindig.social.abdera.atom;
+
+import org.apache.shindig.social.abdera.AbstractLargeRestfulTests;
 
 import org.junit.Test;
 
