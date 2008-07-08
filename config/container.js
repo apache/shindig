@@ -109,7 +109,7 @@
     // Otherwise, uses the json wire format.
     // If you are using the default Shindig setup and want to use rest, don't
     // forget to change the "path" config to /social/rest
-    "useRestful" : true
+    "useRestful" : false
   }
 
 }}
