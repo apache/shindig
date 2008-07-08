@@ -22,6 +22,8 @@ import org.apache.shindig.social.opensocial.model.Activity;
 
 import com.google.inject.Inject;
 
+import java.util.concurrent.Future;
+
 public class ActivityHandler extends DataRequestHandler {
   private ActivityService service;
 
@@ -40,7 +42,7 @@ public class ActivityHandler extends DataRequestHandler {
    * examples:
    * /activities/john.doe/@self/1
    */
-  protected ResponseItem handleDelete(RequestItem request) {
+  protected Future<? extends ResponseItem> handleDelete(RequestItem request) {
     request.parseUrlWithTemplate(ACTIVITY_ID_PATH);
 
     return service.deleteActivity(request.getUser(), request.getGroup(),
@@ -54,7 +56,7 @@ public class ActivityHandler extends DataRequestHandler {
    * /activities/john.doe/@self
    * - postBody is an activity object
    */
-  protected ResponseItem handlePut(RequestItem request) {
+  protected Future<? extends ResponseItem> handlePut(RequestItem request) {
     return handlePost(request);
   }
 
@@ -65,7 +67,7 @@ public class ActivityHandler extends DataRequestHandler {
    * /activities/john.doe/@self
    * - postBody is an activity object
    */
-  protected ResponseItem handlePost(RequestItem request) {
+  protected Future<? extends ResponseItem> handlePost(RequestItem request) {
     request.parseUrlWithTemplate(GROUP_PATH);
 
     return service.createActivity(request.getUser(), request.getGroup(),
@@ -81,12 +83,12 @@ public class ActivityHandler extends DataRequestHandler {
    * /activities/john.doe/@self
    * /activities/john.doe/@friends
    */
-  protected ResponseItem handleGet(RequestItem request) {
+  protected Future<? extends ResponseItem> handleGet(RequestItem request) {
     request.parseUrlWithTemplate(ACTIVITY_ID_PATH);
     String optionalActivityId = request.getParameters().get("activityId");
 
     if (optionalActivityId != null) {
-      return service.getActivity(request.getUser(), request.getGroup(), request.getAppId(),
+      return service.getActivity(request.getUser(), request.getGroup(),request.getAppId(),
           request.getFields(), optionalActivityId, request.getToken());
     }
 

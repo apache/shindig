@@ -18,8 +18,11 @@
 package org.apache.shindig.social.dataservice;
 
 import org.apache.shindig.social.ResponseItem;
+import org.apache.shindig.common.util.ImmediateFuture;
 
 import junit.framework.TestCase;
+
+import java.util.concurrent.Future;
 
 public class DataRequestHandlerTest extends TestCase {
   private DataRequestHandler drh;
@@ -28,24 +31,36 @@ public class DataRequestHandlerTest extends TestCase {
   @Override
   protected void setUp() throws Exception {
     drh = new DataRequestHandler() {
-      protected ResponseItem handleDelete(RequestItem request) {
-        return new ResponseItem<String>("DELETE");
+      protected Future<? extends ResponseItem> handleDelete(RequestItem request) {
+        return ImmediateFuture.newInstance(new ResponseItem<String>("DELETE"));
       }
 
-      protected ResponseItem handlePut(RequestItem request) {
-        return new ResponseItem<String>("PUT");
+      protected Future<? extends ResponseItem> handlePut(RequestItem request) {
+        return ImmediateFuture.newInstance(new ResponseItem<String>("PUT"));
       }
 
-      protected ResponseItem handlePost(RequestItem request) {
-        return new ResponseItem<String>("POST");
+      protected Future<? extends ResponseItem> handlePost(RequestItem request) {
+        return ImmediateFuture.newInstance(new ResponseItem<String>("POST"));
       }
 
-      protected ResponseItem handleGet(RequestItem request) {
-        return new ResponseItem<String>("GET");
+      protected Future<? extends ResponseItem> handleGet(RequestItem request) {
+        return ImmediateFuture.newInstance(new ResponseItem<String>("GET"));
       }
     };
 
     request = new RequestItem();
+  }
+
+  public void testHandleItemSuccess() throws Exception {
+    verifyItemDispatchMethodCalled("DELETE");
+    verifyItemDispatchMethodCalled("PUT");
+    verifyItemDispatchMethodCalled("POST");
+    verifyItemDispatchMethodCalled("GET");
+  }
+
+  private void verifyItemDispatchMethodCalled(String methodName) throws Exception{
+    request.setMethod(methodName);
+    assertEquals(methodName, drh.handleItem(request).get().getResponse());
   }
 
   public void testHandleMethodSuccess() throws Exception {
@@ -57,7 +72,7 @@ public class DataRequestHandlerTest extends TestCase {
 
   private void verifyDispatchMethodCalled(String methodName) throws Exception {
     request.setMethod(methodName);
-    assertEquals(methodName, drh.handleMethod(request).getResponse());
+    assertEquals(methodName, drh.handleItem(request).get().getResponse());
   }
 
   public void testHandleMethodWithInvalidMethod() throws Exception {
@@ -69,7 +84,7 @@ public class DataRequestHandlerTest extends TestCase {
   private void verifyExceptionThrown(String methodName) throws Exception {
     request.setMethod(methodName);
     try {
-      drh.handleMethod(request);
+      drh.handleItem(request);
       fail("The invalid method " + methodName + " should throw an exception.");
     } catch (IllegalArgumentException e) {
       // Yea! We like exeptions

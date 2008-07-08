@@ -22,6 +22,7 @@ import org.apache.shindig.social.opensocial.model.ActivityImpl;
 import org.apache.shindig.social.opensocial.model.Activity;
 import org.apache.shindig.social.opensocial.util.BeanJsonConverter;
 import org.apache.shindig.common.testing.FakeGadgetToken;
+import org.apache.shindig.common.util.ImmediateFuture;
 
 import junit.framework.TestCase;
 import org.easymock.classextension.EasyMock;
@@ -74,16 +75,17 @@ public class ActivityHandlerTest extends TestCase {
     request.setPostData(postData);
   }
 
-  private void assertHandleGetForGroup(GroupId.Type group) {
+  private void assertHandleGetForGroup(GroupId.Type group) throws Exception {
     setPath("/activities/john.doe/@" + group.toString());
 
     ResponseItem<RestfulCollection<Activity>> data
         = new ResponseItem<RestfulCollection<Activity>>(null);
     EasyMock.expect(activityService.getActivities(new UserId(UserId.Type.userId, "john.doe"),
-        new GroupId(group, null), null, Sets.<String>newHashSet(), token)).andReturn(data);
+        new GroupId(group, null), null, Sets.<String>newHashSet(), token)).andReturn(
+        ImmediateFuture.newInstance(data));
 
     replay();
-    assertEquals(data, handler.handleGet(request));
+    assertEquals(data, handler.handleGet(request).get());
     verify();
   }
 
@@ -105,14 +107,15 @@ public class ActivityHandlerTest extends TestCase {
     ResponseItem<Activity> data = new ResponseItem<Activity>(null);
     EasyMock.expect(activityService.getActivity(new UserId(UserId.Type.userId, "john.doe"),
         new GroupId(GroupId.Type.friends, null),
-        null, Sets.<String>newHashSet(), "jane.doe", token)).andReturn(data);
+        null, Sets.<String>newHashSet(), "jane.doe", token)).andReturn(
+        ImmediateFuture.newInstance(data));
 
     replay();
-    assertEquals(data, handler.handleGet(request));
+    assertEquals(data, handler.handleGet(request).get());
     verify();
   }
 
-  private ResponseItem setupPostData() {
+  private ResponseItem<Object> setupPostData() {
     String jsonActivity = "{title: hi mom!, etc etc}";
 
     setPathAndPostData("/people/john.doe/@self", jsonActivity);
@@ -120,35 +123,36 @@ public class ActivityHandlerTest extends TestCase {
     Activity activity = new ActivityImpl();
     EasyMock.expect(converter.convertToObject(jsonActivity, Activity.class)).andReturn(activity);
 
-    ResponseItem data = new ResponseItem<Object>(null);
+    ResponseItem<Object> data = new ResponseItem<Object>(null);
     EasyMock.expect(activityService.createActivity(new UserId(UserId.Type.userId, "john.doe"),
         new GroupId(GroupId.Type.self, null), null, Sets.<String>newHashSet(),
-        activity, token)).andReturn(data);
+        activity, token)).andReturn(ImmediateFuture.newInstance(data));
     replay();
     return data;
   }
 
   public void testHandlePost() throws Exception {
     ResponseItem data = setupPostData();
-    assertEquals(data, handler.handlePost(request));
+    assertEquals(data, handler.handlePost(request).get());
     verify();
   }
 
   public void testHandlePut() throws Exception {
     ResponseItem data = setupPostData();
-    assertEquals(data, handler.handlePut(request));
+    assertEquals(data, handler.handlePut(request).get());
     verify();
   }
 
   public void testHandleDelete() throws Exception {
     setPath("/people/john.doe/@self/1");
 
-    ResponseItem data = new ResponseItem<Object>(null);
+    ResponseItem<Object> data = new ResponseItem<Object>(null);
     EasyMock.expect(activityService.deleteActivity(new UserId(UserId.Type.userId, "john.doe"),
-        new GroupId(GroupId.Type.self, null), null, "1", token)).andReturn(data);
+        new GroupId(GroupId.Type.self, null), null, "1", token)).andReturn(
+        ImmediateFuture.newInstance(data));
 
     replay();
-    assertEquals(data, handler.handleDelete(request));
+    assertEquals(data, handler.handleDelete(request).get());
     verify();
   }
 }

@@ -22,6 +22,7 @@ import org.apache.shindig.social.ResponseItem;
 import com.google.inject.Inject;
 
 import java.util.HashMap;
+import java.util.concurrent.Future;
 
 public class AppDataHandler extends DataRequestHandler {
   private AppDataService service;
@@ -45,7 +46,7 @@ public class AppDataHandler extends DataRequestHandler {
    * fields vars then all of the data will be overridden.
    * @param request
    */
-  protected ResponseItem handleDelete(RequestItem request) {
+  protected Future<? extends ResponseItem> handleDelete(RequestItem request) {
     request.parseUrlWithTemplate(APP_DATA_PATH);
 
     return service.deletePersonData(request.getUser(), request.getGroup(),
@@ -64,7 +65,7 @@ public class AppDataHandler extends DataRequestHandler {
    * be pulled from the values and set on the person object. If there are no
    * fields vars then all of the data will be overridden.
    */
-  protected ResponseItem handlePut(RequestItem request) {
+  protected Future<? extends ResponseItem> handlePut(RequestItem request) {
     return handlePost(request);
   }
 
@@ -80,7 +81,7 @@ public class AppDataHandler extends DataRequestHandler {
    * be pulled from the values and set. If there are no
    * fields vars then all of the data will be overridden.
    */
-  protected ResponseItem handlePost(RequestItem request) {
+  protected Future<? extends ResponseItem> handlePost(RequestItem request) {
     request.parseUrlWithTemplate(APP_DATA_PATH);
 
     return service.updatePersonData(request.getUser(), request.getGroup(),
@@ -96,7 +97,7 @@ public class AppDataHandler extends DataRequestHandler {
    * /appdata/john.doe/@friends/app?fields=count
    * /appdata/john.doe/@self/app
    */
-  protected ResponseItem handleGet(RequestItem request) {
+  protected Future<? extends ResponseItem> handleGet(RequestItem request) {
     request.parseUrlWithTemplate(APP_DATA_PATH);
 
     return service.getPersonData(request.getUser(), request.getGroup(),

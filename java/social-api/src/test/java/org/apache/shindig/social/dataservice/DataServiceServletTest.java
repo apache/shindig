@@ -20,7 +20,7 @@ package org.apache.shindig.social.dataservice;
 import org.apache.shindig.common.BasicSecurityTokenDecoder;
 import org.apache.shindig.common.SecurityTokenDecoder;
 import org.apache.shindig.common.SecurityTokenException;
-import org.apache.shindig.common.servlet.ParameterFetcher;
+import org.apache.shindig.common.util.ImmediateFuture;
 import org.apache.shindig.common.testing.FakeGadgetToken;
 import org.apache.shindig.social.ResponseItem;
 import org.apache.shindig.social.SocialApiTestsGuiceModule;
@@ -41,6 +41,10 @@ import java.io.IOException;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.StringTokenizer;
+import java.util.concurrent.Future;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 public class DataServiceServletTest extends TestCase {
   private HttpServletRequest req;
@@ -117,6 +121,24 @@ public class DataServiceServletTest extends TestCase {
     verifyHandlerWasFoundForPathInfo(route, appDataHandler, "PUT", null, "PUT");
   }
 
+  /** Tests a data handler that returns a failed Future */
+  public void testFailedRequest() throws Exception {
+    String route = "/" + DataServiceServlet.APPDATA_ROUTE;
+    setupRequest(route, "GET", null);
+    EasyMock.expect(injector.getInstance(AppDataHandler.class)).andStubReturn(appDataHandler);    
+    setupInjector();
+
+    EasyMock.expect(appDataHandler.handleItem(EasyMock.isA(RequestItem.class)));
+    EasyMock.expectLastCall().andReturn(new FailingFuture());
+
+    res.sendError(500, "FAILED");
+
+    EasyMock.replay(req, res, appDataHandler, tokenDecoder, injector, jsonConverter);
+    servlet.service(req, res);
+    EasyMock.verify(req, res, appDataHandler, tokenDecoder, injector, jsonConverter);
+    EasyMock.reset(req, res, appDataHandler, tokenDecoder, injector, jsonConverter);
+  }
+
   private void verifyHandlerWasFoundForPathInfo(String peoplePathInfo, DataRequestHandler handler)
       throws Exception {
     String post = "POST";
@@ -125,28 +147,14 @@ public class DataServiceServletTest extends TestCase {
 
   private void verifyHandlerWasFoundForPathInfo(String pathInfo, DataRequestHandler handler,
       String actualMethod, String overrideMethod, String expectedMethod) throws Exception {
-    req.setCharacterEncoding("UTF-8");
-
-    EasyMock.expect(req.getInputStream()).andStubReturn(dummyPostData);
-    EasyMock.expect(req.getPathInfo()).andStubReturn(pathInfo);
-    EasyMock.expect(req.getMethod()).andStubReturn(actualMethod);
-    EasyMock.expect(req.getParameterNames()).andStubReturn((Enumeration) new StringTokenizer(""));
-    EasyMock.expect(req.getParameter(DataServiceServlet.X_HTTP_METHOD_OVERRIDE)).andReturn(
-        overrideMethod);
-    EasyMock.expect(req.getParameter(DataServiceServlet.FORMAT_PARAM)).andReturn(null);
-
-    String tokenString = "owner:viewer:app:container.com:foo:bar";
-    EasyMock.expect(req.getParameter(DataServiceServlet.SECURITY_TOKEN_PARAM))
-        .andReturn(tokenString);
-
-    FakeGadgetToken token = new FakeGadgetToken();
-    EasyMock.expect(tokenDecoder.createToken(Collections.singletonMap(SecurityTokenDecoder.SECURITY_TOKEN_NAME, tokenString))).andReturn(token);
-
+    setupRequest(pathInfo, actualMethod, overrideMethod);
     setupInjector();
 
     String jsonObject = "my lovely json";
-    EasyMock.expect(handler.handleMethod(EasyMock.isA(RequestItem.class)))
-        .andReturn(new ResponseItem<String>(jsonObject));
+    ResponseItem<String> response = new ResponseItem<String>(jsonObject);
+    
+    EasyMock.expect(handler.handleItem(EasyMock.isA(RequestItem.class)));
+    EasyMock.expectLastCall().andReturn(ImmediateFuture.newInstance(response));
 
     EasyMock.expect(jsonConverter.convertToString(jsonObject)).andReturn(jsonObject);
 
@@ -160,11 +168,31 @@ public class DataServiceServletTest extends TestCase {
     EasyMock.reset(req, res, handler, tokenDecoder, injector, jsonConverter);
   }
 
+  private void setupRequest(String pathInfo, String actualMethod, String overrideMethod)
+      throws IOException, SecurityTokenException {
+    req.setCharacterEncoding("UTF-8");
+
+    EasyMock.expect(req.getInputStream()).andStubReturn(dummyPostData);
+    EasyMock.expect(req.getPathInfo()).andStubReturn(pathInfo);
+    EasyMock.expect(req.getMethod()).andStubReturn(actualMethod);
+    EasyMock.expect(req.getParameterNames()).andStubReturn(new StringTokenizer(""));
+    EasyMock.expect(req.getParameter(DataServiceServlet.X_HTTP_METHOD_OVERRIDE)).andReturn(
+        overrideMethod);
+    EasyMock.expect(req.getParameter(DataServiceServlet.FORMAT_PARAM)).andReturn(null);
+
+    String tokenString = "owner:viewer:app:container.com:foo:bar";
+    EasyMock.expect(req.getParameter(DataServiceServlet.SECURITY_TOKEN_PARAM))
+        .andReturn(tokenString);
+
+    FakeGadgetToken token = new FakeGadgetToken();
+    EasyMock.expect(tokenDecoder.createToken(Collections.singletonMap(SecurityTokenDecoder.SECURITY_TOKEN_NAME, tokenString))).andReturn(token);
+  }
+
   public void testInvalidRoute() throws Exception {
     RequestItem requestItem = new RequestItem();
     requestItem.setUrl("/ahhh!");
     try {
-      servlet.getResponseItem(requestItem);
+      servlet.handleRequestItem(requestItem);
       fail("The route should not have found a valid handler.");
     } catch (RuntimeException e) {
       // Yea!
@@ -176,7 +204,9 @@ public class DataServiceServletTest extends TestCase {
     String tokenString = "owner:viewer:app:container.com:foo:bar";
     EasyMock.expect(req.getParameter(DataServiceServlet.SECURITY_TOKEN_PARAM))
         .andReturn(tokenString);
-    EasyMock.expect(tokenDecoder.createToken(Collections.singletonMap(SecurityTokenDecoder.SECURITY_TOKEN_NAME, tokenString))).andThrow(new SecurityTokenException(""));
+    EasyMock.expect(tokenDecoder.createToken(
+        Collections.singletonMap(SecurityTokenDecoder.SECURITY_TOKEN_NAME, tokenString)))
+        .andThrow(new SecurityTokenException(""));
 
     EasyMock.replay(req, tokenDecoder);
     try {
@@ -240,4 +270,29 @@ public class DataServiceServletTest extends TestCase {
     EasyMock.reset(req);
   }
 
+  /**
+   * Future implementation that fails with an exception.
+   */
+  private static class FailingFuture implements Future<ResponseItem> {
+    public boolean cancel(boolean mayInterruptIfRunning) {
+      return false;
+    }
+
+    public boolean isCancelled() {
+      return false;
+    }
+
+    public boolean isDone() {
+      return true;
+    }
+
+    public ResponseItem get() throws InterruptedException, ExecutionException {
+      throw new ExecutionException(new RuntimeException("FAILED"));
+    }
+
+    public ResponseItem get(long timeout, TimeUnit unit)
+        throws InterruptedException, ExecutionException, TimeoutException {
+      return null;  //To change body of implemented methods use File | Settings | File Templates.
+    }
+  }
 }

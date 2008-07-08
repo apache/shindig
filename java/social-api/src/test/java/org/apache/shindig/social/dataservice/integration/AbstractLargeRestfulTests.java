@@ -18,7 +18,6 @@
 package org.apache.shindig.social.dataservice.integration;
 
 import org.apache.shindig.common.BasicSecurityTokenDecoder;
-import org.apache.shindig.social.GadgetDataServletFetcher;
 import org.apache.shindig.social.SocialApiTestsGuiceModule;
 import org.apache.shindig.social.dataservice.ActivityHandler;
 import org.apache.shindig.social.dataservice.AppDataHandler;

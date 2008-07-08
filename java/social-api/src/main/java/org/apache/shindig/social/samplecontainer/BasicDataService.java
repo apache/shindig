@@ -18,6 +18,7 @@
 package org.apache.shindig.social.samplecontainer;
 
 import org.apache.shindig.common.SecurityToken;
+import org.apache.shindig.common.util.ImmediateFuture;
 import org.apache.shindig.social.ResponseError;
 import org.apache.shindig.social.ResponseItem;
 import org.apache.shindig.social.dataservice.AppDataService;
@@ -34,6 +35,7 @@ import org.json.JSONObject;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.Future;
 
 public class BasicDataService implements DataService, AppDataService {
 
@@ -80,7 +82,7 @@ public class BasicDataService implements DataService, AppDataService {
     if (!isValidKey(key)) {
       return new ResponseItem<Object>(ResponseError.BAD_REQUEST,
           "The person data key had invalid characters",
-          new JSONObject());
+          null);
     }
 
     fetcher.setAppData(id, key, value);
@@ -117,7 +119,7 @@ public class BasicDataService implements DataService, AppDataService {
 
   // New interface methods
 
-  public ResponseItem<DataCollection> getPersonData(
+  public Future<ResponseItem<DataCollection>> getPersonData(
       UserId userId, GroupId groupId, String appId, Set<String> fields,
       SecurityToken token) {
     List<String> ids = Lists.newArrayList();
@@ -136,17 +138,17 @@ public class BasicDataService implements DataService, AppDataService {
     // TODO: Respect appId
     Map<String, Map<String, String>> data
         = getPersonData(ids, Lists.newArrayList(fields), token).getResponse();
-    return new ResponseItem<DataCollection>(new DataCollection(data));
+    return ImmediateFuture.newInstance(new ResponseItem<DataCollection>(new DataCollection(data)));
   }
 
-  public ResponseItem updatePersonData(UserId userId,
+  public Future<ResponseItem<Object>> updatePersonData(UserId userId,
       GroupId groupId, String appId, Set<String> fields,
       Map<String, String> values, SecurityToken token) {
     for (String field : fields) {
       if (!isValidKey(field)) {
-        return new ResponseItem<Object>(ResponseError.BAD_REQUEST,
+        return ImmediateFuture.newInstance(new ResponseItem<Object>(ResponseError.BAD_REQUEST,
             "The person data key had invalid characters",
-            new JSONObject());
+            null));
       }
     }
 
@@ -159,14 +161,14 @@ public class BasicDataService implements DataService, AppDataService {
         }
         break;
       default:
-        return new ResponseItem<Object>(ResponseError.NOT_IMPLEMENTED,
-            "We don't support updating data in batches yet", new Object());
+        return ImmediateFuture.newInstance(new ResponseItem<Object>(ResponseError.NOT_IMPLEMENTED,
+            "We don't support updating data in batches yet", null));
     }
 
-    return new ResponseItem<JSONObject>(new JSONObject());
+    return ImmediateFuture.newInstance(new ResponseItem<Object>(new Object()));
   }
 
-  public ResponseItem deletePersonData(UserId userId,
+  public Future<ResponseItem<Object>> deletePersonData(UserId userId,
       GroupId groupId, String appId, Set<String> fields,
       SecurityToken token) {
     switch(groupId.getType()) {
@@ -177,10 +179,10 @@ public class BasicDataService implements DataService, AppDataService {
         }
         break;
       default:
-        return new ResponseItem<Object>(ResponseError.NOT_IMPLEMENTED,
-            "We don't support deleting data in batches yet", new Object());
+        return ImmediateFuture.newInstance(new ResponseItem<Object>(ResponseError.NOT_IMPLEMENTED,
+            "We don't support deleting data in batches yet", null));
     }
 
-    return new ResponseItem<JSONObject>(new JSONObject());
+    return ImmediateFuture.newInstance(new ResponseItem<Object>(new Object()));
   }
 }

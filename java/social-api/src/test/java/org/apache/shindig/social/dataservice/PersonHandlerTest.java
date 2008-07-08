@@ -18,6 +18,7 @@
 package org.apache.shindig.social.dataservice;
 
 import org.apache.shindig.common.testing.FakeGadgetToken;
+import org.apache.shindig.common.util.ImmediateFuture;
 import org.apache.shindig.social.ResponseError;
 import org.apache.shindig.social.ResponseItem;
 import org.apache.shindig.social.opensocial.model.Person;
@@ -83,10 +84,11 @@ public class PersonHandlerTest extends TestCase {
         PersonService.SortOrder.topFriends,
         PersonService.FilterType.all, 0, 20,
         DEFAULT_FIELDS,
-        token)).andReturn(data);
+        token))
+        .andReturn(ImmediateFuture.newInstance(data));
 
     replay();
-    assertEquals(data, handler.handleGet(request));
+    assertEquals(data, handler.handleGet(request).get());
     verify();
   }
 
@@ -101,10 +103,11 @@ public class PersonHandlerTest extends TestCase {
         PersonService.SortOrder.topFriends,
         PersonService.FilterType.all, 0, 20,
         DEFAULT_FIELDS,
-        token)).andReturn(data);
+        token))
+        .andReturn(ImmediateFuture.newInstance(data));
 
     replay();
-    assertEquals(data, handler.handleGet(request));
+    assertEquals(data, handler.handleGet(request).get());
     verify();
   }
 
@@ -126,10 +129,11 @@ public class PersonHandlerTest extends TestCase {
     EasyMock.expect(personService.getPeople(
         new UserId(UserId.Type.userId, "john.doe"),
         new GroupId(GroupId.Type.friends, null), order,
-        filter, 5, 10, Sets.newHashSet("money", "fame", "fortune"), token)).andReturn(data);
+        filter, 5, 10, Sets.newHashSet("money", "fame", "fortune"), token))
+        .andReturn(ImmediateFuture.newInstance(data));
 
     replay();
-    assertEquals(data, handler.handleGet(request));
+    assertEquals(data, handler.handleGet(request).get());
     verify();
   }
 
@@ -139,10 +143,10 @@ public class PersonHandlerTest extends TestCase {
     ResponseItem<Person> data = new ResponseItem<Person>(null);
     // TODO: We aren't passing john.doe to the service yet.
     EasyMock.expect(personService.getPerson(new UserId(UserId.Type.userId, "jane.doe"),
-        DEFAULT_FIELDS, token)).andReturn(data);
+        DEFAULT_FIELDS, token)).andReturn(ImmediateFuture.newInstance(data));
 
     replay();
-    assertEquals(data, handler.handleGet(request));
+    assertEquals(data, handler.handleGet(request).get());
     verify();
   }
 
@@ -151,28 +155,28 @@ public class PersonHandlerTest extends TestCase {
 
     ResponseItem<Person> data = new ResponseItem<Person>(null);
     EasyMock.expect(personService.getPerson(new UserId(UserId.Type.userId, "john.doe"),
-        DEFAULT_FIELDS, token)).andReturn(data);
+        DEFAULT_FIELDS, token)).andReturn(ImmediateFuture.newInstance(data));
 
     replay();
-    assertEquals(data, handler.handleGet(request));
+    assertEquals(data, handler.handleGet(request).get());
     verify();
   }
 
   public void testHandleDelete() throws Exception {
     replay();
-    assertEquals(ResponseError.BAD_REQUEST, handler.handleDelete(request).getError());
+    assertEquals(ResponseError.BAD_REQUEST, handler.handleDelete(request).get().getError());
     verify();
   }
 
   public void testHandlePut() throws Exception {
     replay();
-    assertEquals(ResponseError.NOT_IMPLEMENTED, handler.handlePut(request).getError());
+    assertEquals(ResponseError.NOT_IMPLEMENTED, handler.handlePut(request).get().getError());
     verify();
   }
 
   public void testHandlePost() throws Exception {
     replay();
-    assertEquals(ResponseError.NOT_IMPLEMENTED, handler.handlePost(request).getError());
+    assertEquals(ResponseError.NOT_IMPLEMENTED, handler.handlePost(request).get().getError());
     verify();
   }
 }

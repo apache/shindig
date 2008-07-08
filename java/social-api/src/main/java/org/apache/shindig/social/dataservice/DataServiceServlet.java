@@ -23,6 +23,7 @@ import org.apache.shindig.common.SecurityTokenException;
 import org.apache.shindig.common.servlet.InjectedServlet;
 import org.apache.shindig.common.servlet.ParameterFetcher;
 import org.apache.shindig.social.ResponseItem;
+import org.apache.shindig.social.ResponseError;
 import org.apache.shindig.social.opensocial.util.BeanConverter;
 import org.apache.shindig.social.opensocial.util.BeanJsonConverter;
 import org.apache.shindig.social.opensocial.util.BeanXmlConverter;
@@ -43,6 +44,8 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
 import java.util.logging.Logger;
 
 public class DataServiceServlet extends InjectedServlet {
@@ -131,6 +134,7 @@ public class DataServiceServlet extends InjectedServlet {
     }
   }
 
+  /** Handler for non-batch requests */
   private void handleSingleRequest(HttpServletRequest servletRequest,
       HttpServletResponse servletResponse, SecurityToken token,
       BeanConverter converter) throws IOException {
@@ -138,7 +142,7 @@ public class DataServiceServlet extends InjectedServlet {
         servletRequest.getParameter(X_HTTP_METHOD_OVERRIDE));
 
     RequestItem requestItem = new RequestItem(servletRequest, token, method, converter);
-    ResponseItem responseItem = getResponseItem(requestItem);
+    ResponseItem responseItem = getResponseItem(handleRequestItem(requestItem));
 
     if (responseItem.getError() == null) {
       PrintWriter writer = servletResponse.getWriter();
@@ -155,8 +159,12 @@ public class DataServiceServlet extends InjectedServlet {
 
     byte[] postedBytes = IOUtils.toByteArray(servletRequest.getInputStream());
     JSONObject requests = new JSONObject(new String(postedBytes));
-    Map<String, ResponseItem> responses = Maps.newHashMap();
+    Map<String, Future<? extends ResponseItem>> responses = Maps.newHashMap();
 
+    // Gather all Futures.  We do this up front so that
+    // the first call to get() comes after all futures are created,
+    // which allows for implementations that batch multiple Futures
+    // into single requests.
     Iterator keys = requests.keys();
     while (keys.hasNext()) {
       String key = (String) keys.next();
@@ -166,15 +174,41 @@ public class DataServiceServlet extends InjectedServlet {
       requestItem.setToken(token);
       requestItem.setConverter(converter);
 
-      responses.put(key, getResponseItem(requestItem));
+      responses.put(key, handleRequestItem(requestItem));
+    }
+
+    // Resolve each Future into a response.
+    // TODO: should use shared deadline across each request
+    Map<String, ResponseItem> resolvedResponses = Maps.newHashMap();
+    for (Map.Entry<String, Future<? extends ResponseItem>> responseEntry : responses.entrySet()) {
+      ResponseItem response = getResponseItem(responseEntry.getValue());
+      resolvedResponses.put(responseEntry.getKey(), response);
     }
 
     PrintWriter writer = servletResponse.getWriter();
     writer.write(converter.convertToString(
-        Maps.immutableMap("error", false, "responses", responses)));
+        Maps.immutableMap("error", false, "responses", resolvedResponses)));
   }
 
-  ResponseItem getResponseItem(RequestItem requestItem) {
+  private ResponseItem getResponseItem(Future<? extends ResponseItem> future) {
+    ResponseItem response;
+    try {
+      // TODO: use timeout methods?
+      response = future.get();
+    } catch (InterruptedException ie) {
+      response = responseItemFromException(ie);
+    } catch (ExecutionException ee) {
+      response = responseItemFromException(ee.getCause());
+    }
+    return response;
+  }
+
+  /**
+   * Delivers a request item to the appropriate DataRequestHandler.
+   * 
+   * @return the resulting ResponseItem
+   */
+  Future<? extends ResponseItem> handleRequestItem(RequestItem requestItem) {
     String route = getRouteFromParameter(requestItem.getUrl());
     Class<? extends DataRequestHandler> handlerClass = handlers.get(route);
 
@@ -183,7 +217,11 @@ public class DataServiceServlet extends InjectedServlet {
     }
 
     DataRequestHandler handler = injector.getInstance(handlerClass);
-    return handler.handleMethod(requestItem);
+    return handler.handleItem(requestItem);
+  }
+
+  private ResponseItem<?> responseItemFromException(Throwable t) {
+    return new ResponseItem<Void>(ResponseError.INTERNAL_ERROR, t.getMessage(), null);
   }
 
   SecurityToken getSecurityToken(HttpServletRequest servletRequest) {
@@ -198,7 +236,7 @@ public class DataServiceServlet extends InjectedServlet {
 
   BeanConverter getConverterForRequest(HttpServletRequest servletRequest) {
     String formatString = servletRequest.getParameter(FORMAT_PARAM);
-    if (!StringUtils.isBlank(formatString) && formatString.equals(ATOM_FORMAT)) {
+    if (ATOM_FORMAT.equals(formatString)) {
       return xmlConverter;
     }
     return jsonConverter;
