@@ -21,7 +21,7 @@
  */
 
 
-JsonContainer = function(baseUrl, domain, supportedFieldsArray) {
+var JsonContainer = function(baseUrl, domain, supportedFieldsArray) {
   opensocial.Container.call(this);
 
   var supportedFieldsMap = {};
@@ -259,7 +259,7 @@ JsonContainer.translateIdSpec = function(newIdSpec) {
   return oldIdSpec;
 };
 
-RequestItem = function(jsonParams, processData) {
+var RequestItem = function(jsonParams, processData) {
   this.jsonParams = jsonParams;
   this.processData = processData ||
     function (rawJson) {

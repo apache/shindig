@@ -20,7 +20,7 @@
  * @fileoverview RESTful based opensocial container.
  */
 
-RestfulContainer = function(baseUrl, domain, supportedFieldsArray) {
+var RestfulContainer = function(baseUrl, domain, supportedFieldsArray) {
   opensocial.Container.call(this);
 
   var supportedFieldsMap = {};
@@ -324,11 +324,11 @@ RestfulContainer.prototype.newCreateActivityRequest = function(idSpec,
   return new RestfulRequestItem(url, "POST", activity.toJsonObject());
 };
 
-RestfulRequestItem = function(url, method, postData, processData) {
+var RestfulRequestItem = function(url, method, opt_postData, opt_processData) {
   this.url = url;
   this.method = method;
-  this.postData = postData;
-  this.processData = processData ||
+  this.postData = opt_postData;
+  this.processData = opt_processData ||
     function (rawJson) {
       return rawJson;
     };

@@ -23,7 +23,7 @@
  * @private
  * @constructor
  */
-JsonActivity = function(opt_params, opt_skipConversions) {
+var JsonActivity = function(opt_params, opt_skipConversions) {
   opt_params = opt_params || {};
   if (!opt_skipConversions) {
     JsonActivity.constructArrayObject(opt_params, "mediaItems", JsonMediaItem);
@@ -47,7 +47,7 @@ JsonActivity.prototype.toJsonObject = function() {
 
 
 // TODO: Split into separate class
-JsonMediaItem = function(opt_params) {
+var JsonMediaItem = function(opt_params) {
   opensocial.MediaItem.call(this, opt_params['mimeType'],
       opt_params['url'], opt_params);
 }

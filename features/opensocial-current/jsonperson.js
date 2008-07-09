@@ -23,7 +23,7 @@
  * @private
  * @constructor
  */
-JsonPerson = function(opt_params) {
+var JsonPerson = function(opt_params) {
   opt_params = opt_params || {};
 
   // TODO: doesn't handle drinker, smoker, or gender yet

@@ -26,7 +26,7 @@
  *   Will be called with the JSON data as the only parameter.
  * @constructor
  */
-BatchRequest = function(path, jsonText, opt_callback, opt_params) {
+var BatchRequest = function(path, jsonText, opt_callback, opt_params) {
   this.params_ = opt_params || {};
   this.params_['request'] = jsonText;
 
