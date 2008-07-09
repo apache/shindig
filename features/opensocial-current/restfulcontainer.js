@@ -201,8 +201,8 @@ RestfulContainer.prototype.translateIdSpec = function(newIdSpec) {
     userId = '@owner';
   } else if (userId == 'VIEWER') {
     userId = '@viewer';
-  } else if (opensocial.Container.isArray(idSpec)) {
-    for (var i = 0; i < idSpec.length; i++) {
+  } else if (opensocial.Container.isArray(newIdSpec)) {
+    for (var i = 0; i < newIdSpec.length; i++) {
       // TODO: We will need multiple urls here....don't want to think about
       // that yet
     }
