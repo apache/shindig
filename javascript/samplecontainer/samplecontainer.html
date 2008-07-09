@@ -107,9 +107,9 @@ function changeGadgetUrl() {
 
   viewerId = document.getElementById("viewerId").value;
   ownerId = document.getElementById("ownerId").value;
-  gadget.secureToken = escape(generateSecureToken());
-
   gadgetUrl = document.getElementById("gadgetUrl").value;
+
+  gadget.secureToken = escape(generateSecureToken());  
   gadget.specUrl = gadgetUrl;
   goog.net.cookies.set(gadgetUrlCookie, encodeURIComponent(gadgetUrl));
 
