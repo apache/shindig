@@ -39,6 +39,7 @@ public class BasicSecurityTokenDecoder implements SecurityTokenDecoder {
   private static final int CONTAINER_INDEX = 3;
   private static final int APP_URL_INDEX = 4;
   private static final int MODULE_ID_INDEX = 5;
+  private static final int TOKEN_COUNT = MODULE_ID_INDEX + 1;
 
   /**
    * {@inheritDoc}
@@ -55,6 +56,10 @@ public class BasicSecurityTokenDecoder implements SecurityTokenDecoder {
 
     try {
       String[] tokens = token.split(":");
+      if (tokens.length != TOKEN_COUNT) {
+        throw new SecurityTokenException("Malformed security token");
+      }
+      
       return new BasicSecurityToken(
           URLDecoder.decode(tokens[OWNER_INDEX], "UTF-8"),
           URLDecoder.decode(tokens[VIEWER_INDEX], "UTF-8"),
