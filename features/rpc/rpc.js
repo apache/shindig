@@ -18,7 +18,9 @@
 
 /**
  * @fileoverview Remote procedure call library for gadget-to-container,
- * container-to-gadget, and gadget-to-gadget communication.
+ * container-to-gadget, and gadget-to-gadget (thru container) communication.
+ *
+ *
  */
 
 var gadgets = gadgets || {};
@@ -29,6 +31,14 @@ var gadgets = gadgets || {};
  * @name gadgets.rpc
  */
 gadgets.rpc = function() {
+  // General constants.
+  var CALLBACK_NAME = '__cb';
+  var DEFAULT_NAME = '';
+
+  // Consts for FrameElement.
+  var FE_G2C_CHANNEL = '__g2c_rpc';
+  var FE_C2G_CHANNEL = '__c2g_rpc';
+ 
   var services = {};
   var iframePool = [];
   var relayUrl = {};
@@ -36,34 +46,148 @@ gadgets.rpc = function() {
   var authToken = {};
   var callId = 0;
   var callbacks = {};
+  var setup = {};
 
-  var params = gadgets.util.getUrlParameters();
-  authToken['..'] = params.rpctoken || params.ifpctok || 0;
+  var params = {};
 
-  // Pick the most efficient RPC relay mechanism
-  var relayChannel = typeof document.postMessage === 'function' ? 'dpm' :
-                     typeof window.postMessage === 'function' ? 'wpm' :
-                     'ifpc';
-  if (relayChannel === 'dpm' || relayChannel === 'wpm') {
-    window.addEventListener('message', function(packet) {
-      // TODO validate packet.domain for security reasons
-      process(gadgets.json.parse(packet.data));
-    }, false);
+  // Load the authentication token for speaking to the container
+  // from the gadget's parameters, or default to '0' if not found.
+  if (gadgets.util) {
+    params = gadgets.util.getUrlParameters();
   }
 
-  // Default RPC handler
-  services[''] = function() {
+  authToken['..'] = params.rpctoken || params.ifpctok || 0;
+
+  /*
+   * Return a short code representing the best available cross-domain
+   * message transport available to the browser.
+   *
+   * + For those browsers that support native messaging (various implementations
+   *   of the HTML5 postMessage method), use that. Officially defined at
+   *   http://www.whatwg.org/specs/web-apps/current-work/multipage/comms.html.
+   *   
+   *   postMessage is a native implementation of XDC. A page registers that
+   *   it would like to receive messages by listening the the "message" event
+   *   on the window (document in DPM) object. In turn, another page can
+   *   raise that event by calling window.postMessage (document.postMessage
+   *   in DPM) with a string representing the message and a string
+   *   indicating on which domain the receiving page must be to receive
+   *   the message. The target page will then have its "message" event raised
+   *   if the domain matches and can, in turn, check the origin of the message
+   *   and process the data contained within.
+   *  
+   *     wpm: postMessage on the window object.
+   *        - Internet Explorer 8+
+   *        - Safari (latest nightlies as of 26/6/2008)
+   *        - Firefox 3+
+   *        - Opera 9+
+   *
+   *     dpm: postMessage on the document object.
+   *        - Opera 8+
+   *
+   * + For Gecko-based browsers, the security model allows a child to call a
+   *   function on the frameElement of the iframe, even if the child is in
+   *   a different domain. This method is dubbed "frameElement" (fe).
+   *
+   *   The ability to add and call such functions on the frameElement allows
+   *   a bidirectional channel to be setup via the adding of simple function
+   *   references on the frameElement object itself. In this implementation,
+   *   when the container sets up the authentication information for that gadget
+   *   (by calling setAuth(...)) it as well adds a special function on the
+   *   gadget's iframe. This function can then be used by the gadget to send
+   *   messages to the container. In turn, when the gadget tries to send a
+   *   message, it checks to see if this function has its own function stored
+   *   that can be used by the container to call the gadget. If not, the
+   *   function is created and subsequently used by the container.
+   *   Note that as a result, FE can only be used by a container to call a
+   *   particular gadget *after* that gadget has called the container at
+   *   least once via FE.
+   *
+   *     fe: Gecko-specific frameElement trick.
+   *        - Firefox 1+
+   *
+   * + For all others, we have a fallback mechanism known as "ifpc". IFPC
+   *   exploits the fact that while same-origin policy prohibits a frame from
+   *   accessing members on a window not in the same domain, that frame can,
+   *   however, navigate the window heirarchy (via parent). This is exploited by
+   *   having a page on domain A that wants to talk to domain B create an iframe
+   *   on domain B pointing to a special relay file and with a message encoded
+   *   after the hash (#). This relay, in turn, finds the page on domain B, and
+   *   can call a receipt function with the message given to it. The relay URL
+   *   used by each caller is set via the gadgets.rpc.setRelayUrl(..) and
+   *   *must* be called before the call method is used.
+   *
+   *     ifpc: Iframe-based method, utilizing a relay page, to send a message.
+   */
+  function getRelayChannel() {
+    return typeof window.postMessage === 'function' ? 'wpm' :
+           typeof document.postMessage === 'function' ? 'dpm' :
+           navigator.product === 'Gecko' ? 'fe' :
+           'ifpc';
+  }
+
+  /**
+   * Conducts any initial global work necessary to setup the
+   * channel type chosen.
+   */
+  function setupChannel() {
+    // If the channel type is one of the native
+    // postMessage based ones, setup the handler to receive
+    // messages.
+    if (relayChannel === 'dpm' || relayChannel === 'wpm') {
+      window.addEventListener('message', function(packet) {
+        // TODO validate packet.domain for security reasons
+        process(gadgets.json.parse(packet.data));
+      }, false);
+    }
+  }
+
+  // Pick the most efficient RPC relay mechanism
+  var relayChannel = getRelayChannel();
+
+  // Conduct any setup necessary for the chosen channel.
+  setupChannel();
+
+  // Create the Default RPC handler.
+  services[DEFAULT_NAME] = function() {
     throw new Error('Unknown RPC service: ' + this.s);
   };
 
-  // Special RPC handler for callbacks
-  services['__cb'] = function(callbackId, result) {
+  // Create a Special RPC handler for callbacks.
+  services[CALLBACK_NAME] = function(callbackId, result) {
     var callback = callbacks[callbackId];
     if (callback) {
       delete callbacks[callbackId];
       callback(result);
     }
   };
+
+  /**
+   * Conducts any frame-specific work necessary to setup
+   * the channel type chosen. This method is called when
+   * the container page first registers the gadget in the
+   * RPC mechanism. Gadgets, in turn, will complete the setup
+   * of the channel once they send their first messages.
+   */
+  function setupFrame(frameId) {
+    if (setup[frameId]) {
+      return;
+    }
+
+    if (relayChannel === 'fe') {
+      try {
+        var frame = document.getElementById(frameId);
+        frame[FE_G2C_CHANNEL] = function(args) {
+          process(gadgets.json.parse(args));
+        };
+      } catch (e) {
+        // Something went wrong. System will fallback to
+        // IFPC.
+      }
+    }
+
+    setup[frameId] = true;
+  }
 
   /**
    * Encodes arguments for the legacy IFPC wire format.
@@ -86,8 +210,17 @@ gadgets.rpc = function() {
    * @private
    */
   function process(rpc) {
+    //
+    // RPC object contents:
+    //   s: Service Name
+    //   f: From
+    //   c: The callback ID or 0 if none.
+    //   a: The arguments for this RPC call.
+    //   t: The authentication token.
+    //
     if (rpc && typeof rpc.s === 'string' && typeof rpc.f === 'string' &&
         rpc.a instanceof Array) {
+
       // Validate auth token.
       if (authToken[rpc.f]) {
         // We allow type coercion here because all the url params are strings.
@@ -96,42 +229,103 @@ gadgets.rpc = function() {
         }
       }
 
-      // The Gecko engine used by FireFox etc. allows an IFrame to directly call
-      // methods on the frameElement property added by the container page even
-      // if their domains don't match.
-      // Here we try to set up a relay channel using the frameElement technique
-      // to greatly reduce the latency of cross-domain calls if the postMessage
-      // method is not supported.
-      if (relayChannel === 'ifpc') {
-        if (rpc.f === '..') {
-          // Container-to-gadget call
-          try {
-            var fel = window.frameElement;
-            if (typeof fel.__g2c_rpc === 'function' &&
-                typeof fel.__g2c_rpc.__c2g_rpc != 'function') {
-              fel.__g2c_rpc.__c2g_rpc = function(args) {
-                process(gadgets.json.parse(args));
-              };
-            }
-          } catch (e) {
-          }
-        } else {
-          // Gadget-to-container call
-          var iframe = document.getElementById(rpc.f);
-          if (iframe && typeof iframe.__g2c_rpc != 'function') {
-            iframe.__g2c_rpc = function(args) {
-              process(gadgets.json.parse(args));
-            };
-          }
-        }
-      }
+      // Call the requested RPC service.
+      var result = (services[rpc.s] ||
+                    services[DEFAULT_NAME]).apply(rpc, rpc.a);
 
-      var result = (services[rpc.s] || services['']).apply(rpc, rpc.a);
+      // If there is a callback for this service, initiate it as well.
       if (rpc.c) {
-        gadgets.rpc.call(rpc.f, '__cb', null, rpc.c, result);
+        gadgets.rpc.call(rpc.f, CALLBACK_NAME, null, rpc.c, result);
       }
     }
   }
+
+  /**
+   * Attempts to conduct an RPC call to the specified
+   * target with the specified data via the FrameElement
+   * method. If this method fails, the system attempts again
+   * using the known default of IFPC.
+   *
+   * @param {String} targetId Module Id of the RPC service provider.
+   * @param {String} from Module Id of the calling provider.
+   * @param {Object} rpcData The RPC data for this call.
+   */
+  function callFrameElement(targetId, from, rpcData) {
+    try {
+      if (from != '..') {
+        // Call from gadget to the container.
+        var fe = window.frameElement;
+      
+        if (typeof fe[FE_G2C_CHANNEL] === 'function') {
+          // Complete the setup of the FE channel if need be.
+          if (typeof fe[FE_G2C_CHANNEL][FE_C2G_CHANNEL] !== 'function') {
+            fe[FE_G2C_CHANNEL][FE_C2G_CHANNEL] = function(args) {
+              process(gadgets.json.parse(args));
+            };
+          }
+
+          // Conduct the RPC call.
+          fe[FE_G2C_CHANNEL](rpcData);
+          return;
+        }
+      } else {
+        // Call from container to gadget[targetId].
+        var frame = document.getElementById(targetId);
+
+        if (typeof frame[FE_G2C_CHANNEL] === 'function' &&
+            typeof frame[FE_G2C_CHANNEL][FE_C2G_CHANNEL] === 'function') {
+
+          // Conduct the RPC call.
+          frame[FE_G2C_CHANNEL][FE_C2G_CHANNEL](rpcData);
+          return;
+        }
+      }
+    } catch (e) {
+    }
+
+    // If we have reached this point, something has failed
+    // with the FrameElement method, so we default to using
+    // IFPC for this call.
+    callIfpc(targetId, from, rpcData);
+  }
+
+  /**
+   * Conducts an RPC call to the specified
+   * target with the specified data via the IFPC
+   * method.
+   *
+   * @param {String} targetId Module Id of the RPC service provider.
+   * @param {String} from Module Id of the calling provider.
+   * @param {Object} rpcData The RPC data for this call.
+   */
+  function callIfpc(targetId, from, rpcData) {
+    // Retrieve the relay file used by IFPC. Note that
+    // this must be set before the call, and so we conduct
+    // an extra check to ensure it is not blank.
+    var relay = gadgets.rpc.getRelayUrl(targetId);
+
+    if (!relay) {
+      throw new Error('No relay file assigned for IFPC');
+    }
+
+    // The RPC mechanism supports two formats for IFPC (legacy and current).
+    var src = null;
+    if (useLegacyProtocol[targetId]) {
+      // Format: #iframe_id&callId&num_packets&packet_num&block_of_data
+      src = [relay, '#', encodeLegacyData([from, callId, 1, 0,
+             encodeLegacyData([from, serviceName, '', '', from].concat(
+               Array.prototype.slice.call(arguments, 3)))])].join('');
+    } else {
+      // Format: #targetId & sourceId@callId & packetNum & packetId & packetData
+      src = [relay, '#', targetId, '&', from, '@', callId,
+             '&1&0&', encodeURIComponent(rpcData)].join('');
+    }
+
+    // Conduct the IFPC call by creating the Iframe with
+    // the relay URL and appended message.
+    emitInvisibleIframe(src);
+  }
+
 
   /**
    * Helper function to emit an invisible IFrame.
@@ -221,6 +415,15 @@ gadgets.rpc = function() {
      * @member gadgets.rpc
      */
     register: function(serviceName, handler) {
+      if (serviceName == CALLBACK_NAME) {
+        throw new Error("Cannot overwrite callback service");
+      }
+
+      if (serviceName == DEFAULT_NAME) {
+        throw new Error("Cannot overwrite default service:" 
+                        + " use registerDefault");
+      }
+
       services[serviceName] = handler;
     },
 
@@ -231,6 +434,15 @@ gadgets.rpc = function() {
      * @member gadgets.rpc
      */
     unregister: function(serviceName) {
+      if (serviceName == CALLBACK_NAME) {
+        throw new Error("Cannot delete callback service");
+      }
+
+      if (serviceName == DEFAULT_NAME) {
+        throw new Error("Cannot delete default service:" 
+                        + " use unregisterDefault");
+      }
+
       delete services[serviceName];
     },
 
@@ -272,12 +484,14 @@ gadgets.rpc = function() {
       if (callback) {
         callbacks[callId] = callback;
       }
-      var from;
+
+      // Default to the container calling.
+      var from = '..';
+
       if (targetId === '..') {
         from = window.name;
-      } else {
-        from = '..';
       }
+
       // Not used by legacy, create it anyway...
       var rpcData = gadgets.json.stringify({
         s: serviceName,
@@ -287,53 +501,33 @@ gadgets.rpc = function() {
         t: authToken[targetId]
       });
 
+      var channelType = relayChannel;
+
+      // If we are told to use the legacy format, then we must
+      // default to IFPC.
       if (useLegacyProtocol[targetId]) {
-        relayChannel = 'ifpc';
+        channelType = 'ifpc';
       }
 
-      switch (relayChannel) {
-      case 'dpm': // use document.postMessage
-        var targetDoc = targetId === '..' ? parent.document :
-                                            frames[targetId].document;
-        targetDoc.postMessage(rpcData);
-        break;
-      case 'wpm': // use window.postMessage
-        var targetWin = targetId === '..' ? parent : frames[targetId];
-        targetWin.postMessage(rpcData, "*");
-        break;
-      default: // use 'ifpc' as a fallback mechanism
-        var relay = gadgets.rpc.getRelayUrl(targetId);
-        // TODO split message if too long
-        var src;
-        if (useLegacyProtocol[targetId]) {
-          // #iframe_id&callId&num_packets&packet_num&block_of_data
-          src = [relay, '#', encodeLegacyData([from, callId, 1, 0,
-                 encodeLegacyData([from, serviceName, '', '', from].concat(
-                 Array.prototype.slice.call(arguments, 3)))])].join('');
-        } else {
-          // Try the frameElement channel if available
-          try {
-            if (from === '..') {
-              // Container-to-gadget
-              var iframe = document.getElementById(targetId);
-              if (typeof iframe.__g2c_rpc.__c2g_rpc === 'function') {
-                iframe.__g2c_rpc.__c2g_rpc(rpcData);
-                return;
-              }
-            } else {
-              // Gadget-to-container
-              if (typeof window.frameElement.__g2c_rpc === 'function') {
-                window.frameElement.__g2c_rpc(rpcData);
-                return;
-              }
-            }
-          } catch (e) {
-          }
-          // # targetId & sourceId@callId & packetNum & packetId & packetData
-          src = [relay, '#', targetId, '&', from, '@', callId,
-                 '&1&0&', encodeURIComponent(rpcData)].join('');
-        }
-        emitInvisibleIframe(src);
+      switch (channelType) {
+        case 'dpm': // use document.postMessage.
+          var targetDoc = targetId === '..' ? parent.document :
+                                              frames[targetId].document;
+          targetDoc.postMessage(rpcData);
+          break;
+
+        case 'wpm': // use window.postMessage.
+          var targetWin = targetId === '..' ? parent : frames[targetId];
+          targetWin.postMessage(rpcData, "*");
+          break;
+
+        case 'fe': // use FrameElement.
+          callFrameElement(targetId, from, rpcData);
+          break;
+
+        default: // use 'ifpc' as a fallback mechanism.
+          callIfpc(targetId, from, rpcData);
+          break;
       }
     },
 
@@ -372,15 +566,13 @@ gadgets.rpc = function() {
      */
     setAuthToken: function(targetId, token) {
       authToken[targetId] = token;
+      setupFrame(targetId);
     },
 
     /**
      * Gets the RPC relay mechanism.
-     * @return {String} RPC relay mechanism. Supported types:
-     *                  'wpm' - Use window.postMessage (defined by HTML5)
-     *                  'dpm' - Use document.postMessage (defined by an early
-     *                          draft of HTML5 and implemented by Opera)
-     *                  'ifpc' - Use invisible IFrames
+     * @return {String} RPC relay mechanism. See above for
+     *   a list of supported types.
      *
      * @member gadgets.rpc
      */
