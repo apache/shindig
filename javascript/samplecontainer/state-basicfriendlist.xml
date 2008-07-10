@@ -36,5 +36,12 @@
       </activity>
     </stream>
   </activities>
+  
+  <applications>
+  	<application id="6729">
+		<user>john.doe</user>
+		<user>jane.doe</user>
+	</application>
+  </applications>
 
 </container>

@@ -33,19 +33,21 @@ class XmlStateFileFetcher {
 	private $allPeople = null;
 	private $allActivities = null;
 	private $friendIdMap = null;
+	private $peopleWithApp = null;
 	
 	// Singleton
 	private static $fetcher;
+
 	private function __construct()
 	{
 		$this->stateFile = DEFAULT_STATE_FILE;
 	}
-	
+
 	private function __clone()
 	{
 		// private, don't allow cloning of a singleton
 	}
-	
+
 	static function get()
 	{
 		// This object is a singleton
@@ -54,7 +56,7 @@ class XmlStateFileFetcher {
 		}
 		return XmlStateFileFetcher::$fetcher;
 	}
-	
+
 	public function resetStateFile($stateFile)
 	{
 		$this->stateFile = $stateFile;
@@ -64,12 +66,12 @@ class XmlStateFileFetcher {
 		$this->allPeople = null;
 		$this->allActivities = null;
 	}
-	
+
 	public function setEvilness($doEvil)
 	{
 		$this->doEvil = $doEvil;
 	}
-	
+
 	private function fetchStateDocument()
 	{
 		if ($this->document != null) {
@@ -85,12 +87,12 @@ class XmlStateFileFetcher {
 		$this->document = $xml;
 		return $this->document;
 	}
-	
+
 	private function turnEvil($originalString)
 	{
 		return $this->doEvil ? SCRIPT_PREFIX . $originalString . SCRIPT_SUFFIX : $originalString;
 	}
-	
+
 	public function getAppData()
 	{
 		if ($this->allData == null) {
@@ -98,22 +100,22 @@ class XmlStateFileFetcher {
 		}
 		return $this->allData;
 	}
-	
+
 	private function setupAppData()
 	{
 		$this->allData = array();
 		$xml = $this->fetchStateDocument();
-		foreach ( $xml->personAppData->data as $data ) {
+		foreach ($xml->personAppData->data as $data) {
 			$person = (string)$data['person'];
 			$key = (string)$data['field'];
 			$value = (string)$data;
-			if (!isset($this->allData[$person])) {
+			if (! isset($this->allData[$person])) {
 				$this->allData[$person] = array();
 			}
 			$this->allData[$person][$key] = $value;
 		}
 	}
-	
+
 	public function setAppData($id, $key, $value)
 	{
 		if ($this->allData == null) {
@@ -128,10 +130,11 @@ class XmlStateFileFetcher {
 		// to be able to save data too ... since we don't have shared memory between
 		// processes as the java side does, we'll do it the hard way and store the changes
 		// in xml.. Oh ps. SimpleXML->addChild() requires PHP >= 5.1.3
+		
 
 		// loop thru the app data to see if this person/key value already exists
 		$existingNode = false;
-		foreach ( $this->document->personAppData->data as $data ) {
+		foreach ($this->document->personAppData->data as $data) {
 			if ((string)$data['person'] == $id && (string)$data['field'] == $key) {
 				$existingNode = $data;
 			}
@@ -154,12 +157,12 @@ class XmlStateFileFetcher {
 			throw new Exception("Could not write appData to state file, check the file permissions");
 		}
 	}
-	
+
 	public function deleteAppData($id, $key)
 	{
 		//TODO implement this!
 	}
-	
+
 	public function getFriendIds()
 	{
 		if ($this->friendIdMap == null) {
@@ -167,7 +170,7 @@ class XmlStateFileFetcher {
 		}
 		return $this->friendIdMap;
 	}
-	
+
 	public function getAllPeople()
 	{
 		if ($this->allPeople == null) {
@@ -175,14 +178,14 @@ class XmlStateFileFetcher {
 		}
 		return $this->allPeople;
 	}
-	
+
 	private function setupPeopleData()
 	{
 		$xml = $this->fetchStateDocument();
 		$this->allPeople = array();
 		$this->friendIdMap = array();
 		
-		foreach ( $xml->people->person as $personNode ) {
+		foreach ($xml->people->person as $personNode) {
 			$name = (string)$personNode['name'];
 			$id = (string)$personNode['id'];
 			$person = new Person($id, new Name($this->turnEvil($name)));
@@ -204,11 +207,11 @@ class XmlStateFileFetcher {
 			$this->friendIdMap[$id] = $this->getFriends($personNode);
 		}
 	}
-	
+
 	private function getFriends($personNode)
 	{
 		$friends = array();
-		foreach ( $personNode as $friend ) {
+		foreach ($personNode as $friend) {
 			$friend = trim((string)$friend);
 			if (! empty($friend)) {
 				$friends[] = $friend;
@@ -216,7 +219,26 @@ class XmlStateFileFetcher {
 		}
 		return $friends;
 	}
-	
+
+	public function getPeopleWithApp($appId)
+	{
+		if ($this->peopleWithApp == null) {
+			$xml = $this->fetchStateDocument();
+			$this->peopleWithApp = array();
+			foreach ($xml->applications->application as $appNode) {
+				if ((string)$appNode['id'] == $appId) {
+					foreach ($appNode as $appUser) {
+						$appUser = trim((string)$appUser);
+						if (! empty($appUser)) {
+							$this->peopleWithApp[] = $appUser;
+						}
+					}
+				}
+			}
+		}
+		return $this->peopleWithApp;
+	}
+
 	public function getActivities()
 	{
 		if ($this->allActivities == null) {
@@ -224,21 +246,21 @@ class XmlStateFileFetcher {
 		}
 		return $this->allActivities;
 	}
-	
+
 	private function setupActivities()
 	{
 		$this->allActivities = array();
 		$xml = $this->fetchStateDocument();
-		foreach ( $xml->activities->stream as $streamItem ) {
+		foreach ($xml->activities->stream as $streamItem) {
 			$streamTitle = isset($streamItem['title']) ? (string)$streamItem['title'] : '';
 			$userId = isset($streamItem['userId']) ? (string)$streamItem['userId'] : '';
 			$this->createActivities($streamItem, $userId, $streamTitle);
 		}
 	}
-	
+
 	private function createActivities($streamItem, $userId, $streamTitle)
 	{
-		foreach ( $streamItem->activity as $activityItem ) {
+		foreach ($streamItem->activity as $activityItem) {
 			$title = isset($activityItem['title']) ? (string)$activityItem['title'] : '';
 			$id = isset($activityItem['id']) ? (string)$activityItem['id'] : 0;
 			$body = isset($activityItem['body']) ? (string)$activityItem['body'] : '';
@@ -250,11 +272,11 @@ class XmlStateFileFetcher {
 			$this->createActivity($userId, $activity, 0);
 		}
 	}
-	
+
 	private function getMediaItems($activityItem)
 	{
 		$media = array();
-		foreach ( $activityItem->mediaItem as $mediaItem ) {
+		foreach ($activityItem->mediaItem as $mediaItem) {
 			$type = isset($mediaItem['type']) ? (string)$mediaItem['type'] : '';
 			$mimeType = isset($mediaItem['mimeType']) ? (string)$mediaItem['mimeType'] : '';
 			$url = isset($mediaItem['url']) ? (string)$mediaItem['url'] : '';
@@ -262,10 +284,10 @@ class XmlStateFileFetcher {
 		}
 		return $media;
 	}
-	
+
 	public function createActivity($userId, $activity, $appId)
 	{
-		if ($this->allActivities == null && !is_array($this->allActivities)) {
+		if ($this->allActivities == null && ! is_array($this->allActivities)) {
 			$this->setupActivities();
 		}
 		if (! isset($this->allActivities[$userId])) {

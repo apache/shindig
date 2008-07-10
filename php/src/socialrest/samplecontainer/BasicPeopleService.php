@@ -57,8 +57,15 @@ class BasicPeopleService extends PeopleService {
 				break;
 		}
 		$allPeople = XmlStateFileFetcher::get()->getAllPeople();
+		if ($filter == "hasApp") {
+			$appId = $token->getAppId();
+			$peopleWithApp = XmlStateFileFetcher::get()->getPeopleWithApp($appId);
+		}
 		$people = array();
 		foreach ($ids as $id) {
+			if ($filter == "hasApp" && ! in_array($id, $peopleWithApp)) {
+				continue;
+			}
 			$person = null;
 			if (is_array($allPeople) && isset($allPeople[$id])) {
 				$person = $allPeople[$id];
