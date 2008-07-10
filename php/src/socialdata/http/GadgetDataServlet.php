@@ -32,7 +32,7 @@ require 'src/socialdata/opensocial/model/ApiCollection.php';
 require 'src/socialdata/opensocial/model/BodyType.php';
 require 'src/socialdata/opensocial/model/Email.php';
 require 'src/socialdata/opensocial/model/Enum.php';
-require 'src/socialdata/opensocial/model/idSpec.php';
+require 'src/socialdata/opensocial/model/IdSpec.php';
 require 'src/socialdata/opensocial/model/MediaItem.php';
 require 'src/socialdata/opensocial/model/Message.php';
 require 'src/socialdata/opensocial/model/Name.php';
