@@ -17,6 +17,10 @@
  */
 package org.apache.shindig.social.opensocial.model;
 
+import com.google.inject.ImplementedBy;
+
+@ImplementedBy(MediaItemImpl.class)
+
 public interface MediaItem {
 
   public static enum Field {

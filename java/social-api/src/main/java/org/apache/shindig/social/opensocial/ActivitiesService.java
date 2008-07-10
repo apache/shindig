@@ -19,9 +19,14 @@ package org.apache.shindig.social.opensocial;
 
 import org.apache.shindig.common.SecurityToken;
 import org.apache.shindig.social.ResponseItem;
+import org.apache.shindig.social.samplecontainer.BasicActivitiesService;
 import org.apache.shindig.social.opensocial.model.Activity;
 
 import java.util.List;
+
+import com.google.inject.ImplementedBy;
+
+@ImplementedBy(BasicActivitiesService.class)
 
 public interface ActivitiesService {
   /**

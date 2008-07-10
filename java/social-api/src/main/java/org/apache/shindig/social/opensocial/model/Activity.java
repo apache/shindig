@@ -17,9 +17,12 @@
  */
 package org.apache.shindig.social.opensocial.model;
 
+import com.google.inject.ImplementedBy;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+
+@ImplementedBy(ActivityImpl.class)
 
 public interface Activity {
 

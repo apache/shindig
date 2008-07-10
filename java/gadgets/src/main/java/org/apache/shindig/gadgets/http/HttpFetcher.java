@@ -18,10 +18,13 @@
 package org.apache.shindig.gadgets.http;
 
 import org.apache.shindig.gadgets.GadgetException;
+import com.google.inject.ImplementedBy;
 
 /**
  *  Provide HttpResponse for a HttpRequest
  */
+@ImplementedBy(BasicHttpFetcher.class)
+
 public interface HttpFetcher {
 
   /**

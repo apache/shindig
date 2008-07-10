@@ -18,6 +18,8 @@
  */
 package org.apache.shindig.gadgets;
 
+import com.google.inject.ImplementedBy;
+
 /**
  * Interface for locked domain, a security mechanism that ensures that
  * a gadget is always registered on a fixed, unique domain. This prevents
@@ -25,6 +27,9 @@ package org.apache.shindig.gadgets;
  * modern web browsers implement a same origin policy that prevents pages served
  * from different hosts from accessing each other's data.
  */
+
+@ImplementedBy(HashLockedDomainService.class)
+
 public interface LockedDomainService {
 
   /**

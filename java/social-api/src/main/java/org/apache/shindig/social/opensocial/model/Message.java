@@ -17,6 +17,8 @@
  */
 package org.apache.shindig.social.opensocial.model;
 
+import com.google.inject.ImplementedBy;
+
 /**
  *
  * Base interface for all message objects.
@@ -25,6 +27,9 @@ package org.apache.shindig.social.opensocial.model;
  * http://code.google.com/apis/opensocial/docs/0.7/reference/opensocial.Message.html
  *
  */
+
+@ImplementedBy(MessageImpl.class)
+
 public interface Message {
 
   public static enum Field {

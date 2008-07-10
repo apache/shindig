@@ -17,11 +17,16 @@
  */
 package org.apache.shindig.social.opensocial.model;
 
+import com.google.inject.ImplementedBy;
+
 /**
  * see
  * http://code.google.com/apis/opensocial/docs/0.7/reference/opensocial.Name.Field.html
  *
  */
+
+@ImplementedBy(NameImpl.class)
+
 public interface Name {
 
   public static enum Field {

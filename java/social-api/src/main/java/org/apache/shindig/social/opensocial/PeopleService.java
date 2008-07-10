@@ -19,6 +19,7 @@ package org.apache.shindig.social.opensocial;
 
 import org.apache.shindig.common.SecurityToken;
 import org.apache.shindig.social.ResponseItem;
+import org.apache.shindig.social.samplecontainer.BasicPeopleService;
 import org.apache.shindig.social.opensocial.model.ApiCollection;
 import org.apache.shindig.social.opensocial.model.IdSpec;
 import org.apache.shindig.social.opensocial.model.Person;
@@ -27,6 +28,10 @@ import org.json.JSONException;
 
 import java.util.List;
 import java.util.Set;
+
+import com.google.inject.ImplementedBy;
+
+@ImplementedBy(BasicPeopleService.class)
 
 public interface PeopleService {
   /**

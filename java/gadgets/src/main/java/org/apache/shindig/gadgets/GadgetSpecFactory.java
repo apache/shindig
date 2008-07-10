@@ -22,7 +22,12 @@ import org.apache.shindig.gadgets.spec.GadgetSpec;
 
 import java.net.URI;
 
+import com.google.inject.ImplementedBy;
+
 /** Factory of gadget specs */
+
+@ImplementedBy(BasicGadgetSpecFactory.class)
+
 public interface GadgetSpecFactory {
 
   /** Return a gadget spec for a context */

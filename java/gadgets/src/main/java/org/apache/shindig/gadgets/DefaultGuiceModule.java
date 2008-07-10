@@ -55,29 +55,7 @@ public class DefaultGuiceModule extends AbstractModule {
     System.out.println("Created default injector: " + this);
     Names.bindProperties(this.binder(), properties);
 
-    bind(ContentRewriter.class).to(DefaultContentRewriter.class);
-
-    bind(HttpFetcher.class).to(BasicHttpFetcher.class);
-    bind(HttpCache.class).to(BasicHttpCache.class);
-
-    bind(RemoteContentFetcherFactory.class);
-    bind(SigningFetcherFactory.class);
-    bind(OAuthFetcherFactory.class);
-    bind(ContentFetcherFactory.class);
-
-    bind(GadgetSpecFactory.class)
-        .to(BasicGadgetSpecFactory.class);
-
-    bind(MessageBundleFactory.class)
-        .to(BasicMessageBundleFactory.class);
-
-    bind(GadgetBlacklist.class).to(BasicGadgetBlacklist.class);
     bind(Executor.class).toInstance(Executors.newCachedThreadPool());
-    bind(LockedDomainService.class).to(HashLockedDomainService.class);
-
-    bind(ContainerConfig.class);
-    bind(GadgetFeatureRegistry.class);
-    bind(GadgetServer.class);
 
     // We perform static injection on HttpResponse for cache TTLs.
     requestStaticInjection(HttpResponse.class);

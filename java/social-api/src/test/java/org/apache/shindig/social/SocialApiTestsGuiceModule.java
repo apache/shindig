@@ -20,11 +20,10 @@ package org.apache.shindig.social;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.google.inject.AbstractModule;
 import com.google.inject.Singleton;
 import com.google.inject.name.Names;
 
-import org.apache.shindig.common.BasicSecurityTokenDecoder;
-import org.apache.shindig.common.SecurityTokenDecoder;
 import org.apache.shindig.common.servlet.ParameterFetcher;
 import org.apache.shindig.social.abdera.SocialRouteManager;
 import org.apache.shindig.social.dataservice.ActivityService;
@@ -33,7 +32,6 @@ import org.apache.shindig.social.dataservice.DataServiceServletFetcher;
 import org.apache.shindig.social.dataservice.PersonService;
 import org.apache.shindig.social.opensocial.ActivitiesService;
 import org.apache.shindig.social.opensocial.DataService;
-import org.apache.shindig.social.opensocial.DefaultModelGuiceModule;
 import org.apache.shindig.social.opensocial.PeopleService;
 import org.apache.shindig.social.opensocial.model.Activity;
 import org.apache.shindig.social.opensocial.model.ActivityImpl;
@@ -69,25 +67,15 @@ import java.util.logging.Logger;
 /**
  * Provides social api component injection for all large tests
  */
-public class SocialApiTestsGuiceModule extends DefaultModelGuiceModule {
+public class SocialApiTestsGuiceModule extends AbstractModule {
   private static Logger logger =
       Logger.getLogger(SocialApiTestsGuiceModule.class.getName());
 
   @Override
   protected void configure() {
-    super.configure();
-    bind(PeopleService.class).to(BasicPeopleService.class);
-    bind(DataService.class).to(BasicDataService.class);
-    bind(ActivitiesService.class).to(BasicActivitiesService.class);
-
-    bind(PersonService.class).to(BasicPeopleService.class);
-    bind(ActivityService.class).to(BasicActivitiesService.class);
-    bind(AppDataService.class).to(BasicDataService.class);
 
     bind(XmlStateFileFetcher.class).to(MockXmlStateFileFetcher.class);
     bind(SocialRouteManager.class).to(SampleContainerRouteManager.class);
-
-    bind(SecurityTokenDecoder.class).to(BasicSecurityTokenDecoder.class);
 
     bind(ParameterFetcher.class).annotatedWith(Names.named("GadgetDataServlet")).to(GadgetDataServletFetcher.class);
     bind(ParameterFetcher.class).annotatedWith(Names.named("DataServiceServlet")).to(DataServiceServletFetcher.class);
@@ -99,8 +87,8 @@ public class SocialApiTestsGuiceModule extends DefaultModelGuiceModule {
     public static final PersonImpl janeDoe;
     public static final PersonImpl simpleDoe;
 
-    public static ActivityImpl johnActivity;
-    public static ActivityImpl janeActivity;
+    public static final ActivityImpl johnActivity;
+    public static final ActivityImpl janeActivity;
 
     static {
       // setup John Doe

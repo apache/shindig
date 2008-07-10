@@ -17,11 +17,15 @@
  */
 package org.apache.shindig.social.opensocial.model;
 
+import com.google.inject.ImplementedBy;
+
 /**
  * see
  * http://code.google.com/apis/opensocial/docs/0.7/reference/opensocial.Address.Field.html
  *
  */
+@ImplementedBy(AddressImpl.class)
+
 public interface Address {
 
   public static enum Field {

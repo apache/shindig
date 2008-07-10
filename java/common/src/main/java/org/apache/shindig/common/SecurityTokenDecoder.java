@@ -18,11 +18,16 @@
  */
 package org.apache.shindig.common;
 
+import com.google.inject.ImplementedBy;
+
 import java.util.Map;
 
 /**
  *  Handles verification of gadget security tokens.
  */
+
+@ImplementedBy(BasicSecurityTokenDecoder.class)
+
 public interface SecurityTokenDecoder {
 
   /**

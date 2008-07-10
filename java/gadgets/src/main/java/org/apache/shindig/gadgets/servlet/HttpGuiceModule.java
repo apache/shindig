@@ -32,11 +32,7 @@ public class HttpGuiceModule extends DefaultGuiceModule {
   /** {@inheritDoc} */
   @Override
   protected void configure() {
-    super.configure();
-    bind(ProxyHandler.class).in(Scopes.SINGLETON);
-    bind(JsonRpcHandler.class).in(Scopes.SINGLETON);
-    bind(GadgetRenderingTask.class);
-    bind(UrlGenerator.class).in(Scopes.SINGLETON);
+      super.configure();
   }
 
   public HttpGuiceModule(Properties properties) {

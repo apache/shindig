@@ -17,6 +17,7 @@
  */
 package org.apache.shindig.social.opensocial.model;
 
+import com.google.inject.ImplementedBy;
 import java.util.Date;
 
 /**
@@ -24,6 +25,9 @@ import java.util.Date;
  * http://code.google.com/apis/opensocial/docs/0.7/reference/opensocial.Organization.Field.html
  *
  */
+
+@ImplementedBy(OrganizationImpl.class)
+
 public interface Organization {
   
   public static enum Field {

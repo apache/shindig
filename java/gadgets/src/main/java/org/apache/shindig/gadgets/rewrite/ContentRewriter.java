@@ -25,9 +25,14 @@ import java.io.Reader;
 import java.io.Writer;
 import java.net.URI;
 
+import com.google.inject.ImplementedBy;
+
 /**
  * Standard interface for content rewriters
  */
+
+@ImplementedBy(DefaultContentRewriter.class)
+
 public interface ContentRewriter {
 
   /**
