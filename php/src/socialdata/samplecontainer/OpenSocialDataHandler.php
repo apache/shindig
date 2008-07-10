@@ -47,7 +47,7 @@ class OpenSocialDataHandler extends GadgetDataHandler {
 			$params = $request->getParams();
 			$type = $params['type'];
 			$response = new ResponseItem(NOT_IMPLEMENTED, $type . " has not been implemented yet.", array());
-			$idSpec = idSpec::fromJson($params['idSpec']);
+			$idSpec = IdSpec::fromJson($params['idSpec']);
 			$peopleIds = $this->peopleHandler->getIds($idSpec, $request->getToken());
 			if ($peopleIds !== false) {
 				switch ( $type) {
