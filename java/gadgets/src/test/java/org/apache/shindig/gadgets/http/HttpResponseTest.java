@@ -175,14 +175,22 @@ public class HttpResponseTest extends TestCase {
     assertTrue(response.getCacheTtl() <= HttpResponse.DEFAULT_TTL && response.getCacheTtl() > 0);
   }
 
+  /**
+   * Verifies that the cache TTL is within acceptable ranges.
+   * This always rounds down due to timing, so actual verification will be against maxAge - 1.
+   */
+  private void assertTtlOk(int maxAge, HttpResponse response) {
+    assertEquals(maxAge - 1, roundToSeconds(response.getCacheTtl() - 1));
+  }
+
   public void testExpires() throws Exception {
-    int ttl = 10;
-    int time = roundToSeconds(System.currentTimeMillis()) + ttl;
+    int maxAge = 10;
+    int time = roundToSeconds(System.currentTimeMillis()) + maxAge;
     addHeader("Expires", DateUtil.formatDate(1000L * time));
     HttpResponse response = new HttpResponse(200, null, headers);
     assertEquals(time, roundToSeconds(response.getCacheExpiration()));
-    // 9 because of rounding.
-    assertEquals(9, roundToSeconds(response.getCacheTtl()));
+    // Second rounding makes this n-1.
+    assertTtlOk(maxAge, response);
   }
 
   public void testMaxAgeNoDate() throws Exception {
@@ -194,8 +202,20 @@ public class HttpResponseTest extends TestCase {
     int expiration = roundToSeconds(response.getCacheExpiration());
 
     assertEquals(expected, expiration);
-    // Second rounding makes this n-1.
-    assertEquals(maxAge - 1 , roundToSeconds(response.getCacheTtl()));
+    assertTtlOk(maxAge, response);
+  }
+
+  public void testMaxAgeInvalidDate() throws Exception {
+    int maxAge = 10;
+    // Guess time.
+    int expected = roundToSeconds(System.currentTimeMillis()) + maxAge;
+    addHeader("Date", "Wed, 09 Jul 2008 19:18:33 EDT");
+    addHeader("Cache-Control", "public, max-age=" + maxAge);
+    HttpResponse response = new HttpResponse(200, null, headers);
+    int expiration = roundToSeconds(response.getCacheExpiration());
+
+    assertEquals(expected, expiration);
+    assertTtlOk(maxAge, response);
   }
 
   public void testMaxAgeWithDate() throws Exception {
@@ -206,7 +226,7 @@ public class HttpResponseTest extends TestCase {
     HttpResponse response = new HttpResponse(200, null, headers);
 
     assertEquals(now + maxAge, roundToSeconds(response.getCacheExpiration()));
-    assertEquals(maxAge - 1, roundToSeconds(response.getCacheTtl()));
+    assertTtlOk(maxAge, response);
   }
 
   public void testFixedDate() throws Exception {
@@ -216,6 +236,7 @@ public class HttpResponseTest extends TestCase {
     assertEquals(time, roundToSeconds(response.getDate()));
     assertEquals(time + roundToSeconds(HttpResponse.DEFAULT_TTL),
         roundToSeconds(response.getCacheExpiration()));
+    assertTtlOk(roundToSeconds(HttpResponse.DEFAULT_TTL), response);
   }
 
   public void testNegativeCaching() {
