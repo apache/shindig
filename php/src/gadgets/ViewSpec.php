@@ -32,7 +32,8 @@ class ViewSpec {
 	public $view;
 	public $preferedHeight;
 	public $preferedWidth;
-	
+	public $rewrittenContent;
+
 	public function __construct($name, $gadgetContent)
 	{
 		$attributes = $gadgetContent->attributes();
@@ -56,39 +57,49 @@ class ViewSpec {
 			$this->type = 'HTML';
 		}
 	}
-	
+
 	public function getName()
 	{
 		return $this->name;
 	}
-	
+
 	public function getType()
 	{
 		return $this->type;
 	}
-	
+
 	public function getHref()
 	{
 		return $this->href;
 	}
-	
+
 	public function getQuirks()
 	{
 		return $this->quirks;
 	}
-	
+
 	public function getContent()
 	{
 		return $this->content;
 	}
-	
+
 	public function getView()
 	{
 		return $this->view;
 	}
-	
+
 	public function addContent($data)
 	{
 		$this->content .= $data;
+	}
+
+	public function getRewrittenContent()
+	{
+		return $this->rewrittenContent;
+	}
+
+	public function setRewrittenContent($rewrittenContent)
+	{
+		$this->rewrittenContent = $rewrittenContent;
 	}
 }

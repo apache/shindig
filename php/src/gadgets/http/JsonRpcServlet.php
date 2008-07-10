@@ -47,6 +47,8 @@ require 'src/gadgets/FeatureSpec.php';
 require 'src/gadgets/MessageBundleParser.php';
 require 'src/gadgets/MessageBundle.php';
 require 'src/gadgets/GadgetException.php';
+require 'src/gadgets/rewrite/ContentRewriter.php';
+require 'src/gadgets/rewrite/ContentRewriteFeature.php';
 
 class JsonRpcServlet extends HttpServlet {
 

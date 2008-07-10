@@ -60,8 +60,17 @@ class FilesServlet extends HttpServlet {
 				$this->setContentType('text/javascript');
 			} elseif ($ext == 'css') {
 				$this->setContentType('text/css');
+			} elseif ($ext == 'xml') {
+				$this->setContentType('text/xml');
+			} elseif ($ext == 'png') {
+				$this->setContentType('image/png');
+			} elseif ($ext == 'gif') {
+				$this->setContentType('image/gif');
+			} elseif ($ext == 'jpg' || $ext == 'jpeg') {
+				$this->setContentType('image/jpeg');
 			}
 		}
+		$this->setCharset('');
 		$this->setLastModified(filemtime($file));
 		readfile($file);
 	}

@@ -44,6 +44,8 @@ require 'src/gadgets/JsLibraryFeatureFactory.php';
 require 'src/gadgets/JsLibrary.php';
 require 'src/gadgets/http/HttpUtil.php';
 require 'src/gadgets/ContainerConfig.php';
+require 'src/gadgets/rewrite/ContentRewriter.php';
+require 'src/gadgets/rewrite/ContentRewriteFeature.php';
 
 /**
  * This class deals with the gadget rendering requests (in default config this
@@ -158,11 +160,11 @@ class GadgetRenderingServlet extends HttpServlet {
 		// Forced libs first.
 		if (! empty($forcedLibs)) {
 			$libs = explode(':', $forcedLibs);
-			echo sprintf($externFmt, Config::get('default_js_prefix') . $this->getJsUrl($libs, $gadget)."&container=".$context->getContainer()) . "\n";
+			echo sprintf($externFmt, Config::get('default_js_prefix') . $this->getJsUrl($libs, $gadget) . "&container=" . $context->getContainer()) . "\n";
 		}
 		echo "<script>\n";
 		
-		if (!empty($forcedLibs)) {
+		if (! empty($forcedLibs)) {
 			// if some of the feature libraries are externalized (through a browser cachable <script src="/gadgets/js/opensocial-0.7:settitle.js">
 			// type url), then we don't want to include dependencies twice, so find the complete features chain, so we can skip over those
 			$forcedLibsArray = explode(':', $forcedLibs);
@@ -176,20 +178,23 @@ class GadgetRenderingServlet extends HttpServlet {
 				// TODO: This case needs to be handled more gracefully by the js
 				// servlet. We should probably inline external JS as well.
 				$externJs .= sprintf($externFmt, $library->getContent()) . "\n";
-			// else check if there are no forcedLibs, or if it wasn't included in their dep chain
-			} elseif (empty($forcedLibs) || !in_array($library->getFeatureName(), $forcedLibsArray)) {
+				// else check if there are no forcedLibs, or if it wasn't included in their dep chain
+			} elseif (empty($forcedLibs) || ! in_array($library->getFeatureName(), $forcedLibsArray)) {
 				echo $library->getContent();
 			}
 			// otherwise it was already included by config.forceJsLibs.
 		}
-		echo $this->appendJsConfig($context, $gadget, !empty($forcedLibs)) . $this->appendMessages($gadget) . 
-			 $this->appendPreloads($gadget, $context).
-			 "</script>";
+		echo $this->appendJsConfig($context, $gadget, ! empty($forcedLibs)) . $this->appendMessages($gadget) . $this->appendPreloads($gadget, $context) . "</script>";
 		if (strlen($externJs) > 0) {
 			echo $externJs;
-		}	
+		}
 		$gadgetExceptions = array();
-		$content = $gadget->getSubstitutions()->substitute($view->getContent());
+		$rewriter = new ContentRewriter();
+		if ($rewriter->rewriteGadgetView($gadget, $view)) {
+			$content = $gadget->getSubstitutions()->substitute($view->getRewrittenContent());
+		} else {
+			$content = $gadget->getSubstitutions()->substitute($view->getContent());
+		}
 		if (empty($content)) {
 			// Unknown view
 			$gadgetExceptions[] = "View: '" . $context->getView() . "' invalid for gadget: " . $gadget->getId()->getKey();
@@ -197,8 +202,7 @@ class GadgetRenderingServlet extends HttpServlet {
 		if (count($gadgetExceptions)) {
 			throw new GadgetException(print_r($gadgetExceptions, true));
 		}
-		echo $content . 
-			 "\n<script>gadgets.util.runOnLoadHandlers();</script></body>\n</html>";
+		echo $content . "\n<script>gadgets.util.runOnLoadHandlers();</script></body>\n</html>";
 	}
 
 	/**
@@ -391,9 +395,8 @@ class GadgetRenderingServlet extends HttpServlet {
 							die();
 					}
 					$resp[$preload->getHref()] = array(
-						'body' => $response->getResponseContent(), 
-						'rc' => $response->getHttpCode()
-					);
+							'body' => $response->getResponseContent(), 
+							'rc' => $response->getHttpCode());
 				}
 			} catch (Exception $e) {
 				throw new Exception($e);
