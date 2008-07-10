@@ -28,6 +28,8 @@ require 'src/common/Cache.php';
 require 'src/common/RemoteContentFetcher.php';
 require 'src/gadgets/oauth/OAuth.php';
 require 'src/gadgets/oauth/OAuthStore.php';
+require 'src/gadgets/rewrite/ContentRewriter.php';
+require 'src/gadgets/rewrite/ContentRewriteFeature.php';
 
 class ProxyServlet extends HttpServlet {
 

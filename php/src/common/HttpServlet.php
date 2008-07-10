@@ -40,12 +40,7 @@ class HttpServlet {
 		// set our default cache time (config cache time defaults to 24 hours aka 1 day)
 		$this->cacheTime = Config::get('cache_time');
 		// to do our header magic, we need output buffering on
-		$zlib_output = ini_get('zlib.output_compression');
-		if ((!$zlib_output || strtolower($zlib_output) == 'off') && function_exists('ob_gzhandler')) { 
-			ob_start('ob_gzhandler');
-		} else {
-			ob_start();
-		}
+		ob_start();
 	}
 
 	/**
@@ -57,7 +52,7 @@ class HttpServlet {
 	public function __destruct()
 	{
 		if (! $this->noHeaders) {
-			header("Content-Type: $this->contentType; charset={$this->charset}");
+			header("Content-Type: $this->contentType".(!empty($this->charset) ? "; charset={$this->charset}" : ''));
 			header('Accept-Ranges: bytes');
 			$content = ob_get_contents();
 			if ($this->noCache) {
@@ -71,7 +66,7 @@ class HttpServlet {
 				// Obey browsers (or proxy's) request to send a fresh copy if we recieve a no-cache pragma or cache-control request
 				if (! isset($_SERVER['HTTP_PRAGMA']) || ! strstr(strtolower($_SERVER['HTTP_PRAGMA']), 'no-cache') && (! isset($_SERVER['HTTP_CACHE_CONTROL']) || ! strstr(strtolower($_SERVER['HTTP_CACHE_CONTROL']), 'no-cache'))) {
 					// If the browser send us a E-TAG check if it matches (md5 sum of content), if so send a not modified header instead of content
-					$etag = md5($content);
+					$etag = '"'.md5($content).'"';
 					if (isset($_SERVER['HTTP_IF_NONE_MATCH']) && $_SERVER['HTTP_IF_NONE_MATCH'] == $etag) {
 						header("ETag: \"$etag\"");
 						if ($this->lastModified) {
@@ -82,7 +77,7 @@ class HttpServlet {
 						ob_end_clean();
 						die();
 					}
-					header("ETag: \"$etag\"");
+					header("ETag: $etag");
 					// If no etag is present, then check if maybe this browser supports if_modified_since tags,
 					// check it against our lastModified (if it's set)
 					if (isset($_SERVER['HTTP_IF_MODIFIED_SINCE']) && $this->lastModified && ! isset($_SERVER['HTTP_IF_NONE_MATCH'])) {
@@ -99,6 +94,16 @@ class HttpServlet {
 				}
 			}
 		}
+	}
+	
+	public function getCharset()
+	{
+		return $this->charset;
+	}
+	
+	public function setCharset($charset)
+	{
+		$this->charset = $charset;
 	}
 
 	/**
