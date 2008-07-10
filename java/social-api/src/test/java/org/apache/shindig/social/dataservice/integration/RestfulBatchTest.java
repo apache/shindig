@@ -47,11 +47,11 @@ public class RestfulBatchTest extends AbstractLargeRestfulTests {
    */
   @Test
   public void testGetBatchRequest() throws Exception {
-    String postData = "{"
+    String postData = '{'
         + "friends : {url : '/people/john.doe/@friends', method : 'GET'}, "
         + "john : {url : '/people/john.doe/@self', method : 'GET'}, "
         + "updateData : {url : '/appdata/john.doe/@self/a', method : 'POST', postData : {count : 1}}}"
-        + "}";
+        + '}';
 
     String resp = getJsonResponse("jsonBatch", "POST", postData);
     JSONObject result = getJson(resp);

@@ -154,7 +154,7 @@ public class UrlGeneratorTest {
 
     assertEquals(IFR_PREFIX, iframeUrl.getPath() + '?');
     StringAssert.assertContains("container=" + CONTAINER, iframeUrl.getQuery());
-    StringAssert.assertContains("up_" + UP_NAME + "=" + UP_VALUE, iframeUrl.getQuery());
+    StringAssert.assertContains("up_" + UP_NAME + '=' + UP_VALUE, iframeUrl.getQuery());
     StringAssert.assertContains("mid=" + MODULE_ID, iframeUrl.getQuery());
     StringAssert.assertContains("view=" + VIEW, iframeUrl.getQuery());
   }
@@ -177,7 +177,7 @@ public class UrlGeneratorTest {
     assertEquals(TYPE_URL_HREF_PATH, iframeUrl.getPath());
     StringAssert.assertContains(TYPE_URL_HREF_QUERY, iframeUrl.getQuery());
     StringAssert.assertContains("container=" + CONTAINER, iframeUrl.getQuery());
-    StringAssert.assertContains("up_" + UP_NAME + "=" + UP_VALUE, iframeUrl.getQuery());
+    StringAssert.assertContains("up_" + UP_NAME + '=' + UP_VALUE, iframeUrl.getQuery());
     StringAssert.assertContains("mid=" + MODULE_ID, iframeUrl.getQuery());
   }
 }

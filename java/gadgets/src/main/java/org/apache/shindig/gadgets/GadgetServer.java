@@ -171,7 +171,7 @@ public class GadgetServer {
     Set<String> needed = features.keySet();
     Set<String> unsupported = new HashSet<String>();
     Collection<GadgetFeature> feats = registry.getFeatures(needed, unsupported);
-    if (unsupported.size() > 0) {
+    if (!unsupported.isEmpty()) {
       for (String missing : unsupported) {
         if (features.get(missing).getRequired()) {
           throw new UnsupportedFeatureException(missing);

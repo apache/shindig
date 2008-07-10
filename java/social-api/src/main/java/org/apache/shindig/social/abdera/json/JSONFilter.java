@@ -75,7 +75,7 @@ public class JSONFilter implements Filter {
     return new JsonResponseContext(resp, request.getAbdera(), request);
   }
 
-  private class JsonResponseContext extends ResponseContextWrapper {
+  private static class JsonResponseContext extends ResponseContextWrapper {
     private final Abdera abdera;
     private final RequestContext request;
 

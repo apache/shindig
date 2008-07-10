@@ -58,7 +58,7 @@ public class FeedProcessor {
 
       List<SyndPerson> authors = feed.getAuthors();
       String jsonAuthor = null;
-      if (authors != null && authors.size() > 0) {
+      if (authors != null && !authors.isEmpty()) {
         SyndPerson author = authors.get(0);
         if (author.getName() != null) {
           jsonAuthor = author.getName();

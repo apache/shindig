@@ -96,7 +96,7 @@ public class Feature {
     this.name = name;
     NodeList children = feature.getElementsByTagName("Param");
     if (children.getLength() > 0) {
-      Map<String, String> params = new HashMap<String, String>();
+      Map<String, String> params = new HashMap<String, String>(children.getLength(),1);
       for (int i = 0, j = children.getLength(); i < j; ++i) {
         Element param = (Element)children.item(i);
         String paramName = XmlUtil.getAttribute(param, "name");

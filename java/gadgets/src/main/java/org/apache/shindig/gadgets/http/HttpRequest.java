@@ -20,6 +20,7 @@
 package org.apache.shindig.gadgets.http;
 
 import org.apache.shindig.gadgets.rewrite.ContentRewriter;
+import org.apache.commons.lang.ArrayUtils;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
@@ -188,7 +189,7 @@ public class HttpRequest {
       this.headers = Collections.unmodifiableMap(tmpHeaders);
     }
     if (postBody == null) {
-      this.postBody = new byte[0];
+      this.postBody = ArrayUtils.EMPTY_BYTE_ARRAY;
     } else {
       this.postBody = new byte[postBody.length];
       System.arraycopy(postBody, 0, this.postBody, 0, postBody.length);

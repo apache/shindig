@@ -144,7 +144,7 @@ public class GadgetFeatureRegistry {
         }
       }
     }
-    if (unsupported == null || unsupported.size() == 0) {
+    if (unsupported == null || unsupported.isEmpty()) {
       cache.put(needed, Collections.unmodifiableList(ret));
     }
     return ret;

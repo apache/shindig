@@ -21,6 +21,7 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang.ArrayUtils;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -123,7 +124,7 @@ public class BasicHttpFetcher implements HttpFetcher {
     }
     if (baseIs == null) {
       // Fall back to zero length response.
-      baseIs = new ByteArrayInputStream(new byte[0]);
+      baseIs = new ByteArrayInputStream(ArrayUtils.EMPTY_BYTE_ARRAY);
     }
 
     String encoding = fetcher.getContentEncoding();

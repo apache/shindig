@@ -43,7 +43,7 @@ public class ConcatProxyServlet extends InjectedServlet {
   private static final Logger logger
       = Logger.getLogger(ConcatProxyServlet.class.getName());
 
-  private ProxyHandler proxyHandler;
+  private transient ProxyHandler proxyHandler;
 
   @Inject
   public void setProxyHandler(ProxyHandler proxyHandler) {
@@ -95,7 +95,7 @@ public class ConcatProxyServlet extends InjectedServlet {
   }
 
   /** Simple request wrapper to make repeated calls to ProxyHandler */
-  private class RequestWrapper extends HttpServletRequestWrapper {
+  private static class RequestWrapper extends HttpServletRequestWrapper {
 
     private final String url;
 
@@ -117,7 +117,7 @@ public class ConcatProxyServlet extends InjectedServlet {
    * Wrap the response to prevent writing through of the status code and
    * to hold a reference to the stream across multiple proxied parts
    */
-  private class ResponseWrapper extends HttpServletResponseWrapper {
+  private static class ResponseWrapper extends HttpServletResponseWrapper {
 
     private ServletOutputStream outputStream;
 

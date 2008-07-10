@@ -62,7 +62,7 @@ public class ViewTest extends TestCase {
   public void testNonStandardContentType() throws Exception {
     String contentType = "html-inline";
     String xml = "<Content" +
-                 " type=\"" + contentType + "\"" +
+                 " type=\"" + contentType + '\"' +
                  " quirks=\"false\"><![CDATA[blah]]></Content>";
     View view = new View("default", Arrays.asList(XmlUtil.parse(xml)));
 

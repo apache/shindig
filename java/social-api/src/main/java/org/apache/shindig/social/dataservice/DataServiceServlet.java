@@ -63,11 +63,12 @@ public class DataServiceServlet extends InjectedServlet {
   private static final Logger logger = Logger.getLogger(
       "org.apache.shindig.social.dataservice");
 
-  private SecurityTokenDecoder securityTokenDecoder;
-  private Map<String, Class<? extends DataRequestHandler>> handlers;
-  private BeanJsonConverter jsonConverter;
-  private BeanXmlConverter xmlConverter;
-  private ParameterFetcher parameterFetcher;
+  private transient SecurityTokenDecoder securityTokenDecoder;
+  private transient Map<String, Class<? extends DataRequestHandler>> handlers;
+  private transient BeanJsonConverter jsonConverter;
+  private transient BeanXmlConverter xmlConverter;
+  private transient ParameterFetcher parameterFetcher;
+
   private static final String JSON_BATCH_ROUTE = "jsonBatch";
 
   @Inject
@@ -252,7 +253,7 @@ public class DataServiceServlet extends InjectedServlet {
 
   String getRouteFromParameter(String pathInfo) {
     pathInfo = pathInfo.substring(1);
-    int indexOfNextPathSeparator = pathInfo.indexOf("/");
+    int indexOfNextPathSeparator = pathInfo.indexOf('/');
     return indexOfNextPathSeparator != -1 ?
         pathInfo.substring(0, indexOfNextPathSeparator) :
         pathInfo;

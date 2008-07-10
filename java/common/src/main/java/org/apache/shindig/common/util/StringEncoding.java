@@ -18,6 +18,8 @@
  */
 package org.apache.shindig.common.util;
 
+import org.apache.commons.lang.ArrayUtils;
+
 import java.util.Arrays;
 import java.util.TreeSet;
 
@@ -80,7 +82,7 @@ public class StringEncoding {
   /** Decodes the given encoded string and returns the original raw bytes. */
   public byte[] decode(String encoded) {
     if (encoded.length() == 0) {
-      return new byte[0];
+      return ArrayUtils.EMPTY_BYTE_ARRAY;
     }
     int encodedLength = encoded.length();
     int outLength = encodedLength * SHIFT / 8;
