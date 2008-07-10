@@ -36,7 +36,7 @@ class UserId {
 		return new UserId('userId', $jsonId);
 	}
 
-	public function getUserId($token)
+	public function getUserId(SecurityToken $token)
 	{
 		switch ($this->type) {
 			case 'viewer':

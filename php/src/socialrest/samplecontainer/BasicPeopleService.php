@@ -29,7 +29,7 @@ class BasicPeopleService extends PeopleService {
 		return ($name < $name1) ? - 1 : 1;
 	}
 
-	public function getPerson($userId, $groupId, $profileDetails, $token)
+	public function getPerson($userId, $groupId, $profileDetails, SecurityToken $token)
 	{
 		$person = $this->getPeople($userId, $groupId, null, null, null, null, $profileDetails, $token);
 		// return of getPeople is a ResponseItem(RestfulCollection(ArrayOfPeople)), disassemble to return just one person
@@ -40,7 +40,7 @@ class BasicPeopleService extends PeopleService {
 		return new ResponseItem(NOT_FOUND, "Person not found", null);
 	}
 
-	public function getPeople($userId, $groupId, $sortOrder, $filter, $first, $max, $profileDetails, $token)
+	public function getPeople($userId, $groupId, $sortOrder, $filter, $first, $max, $profileDetails, SecurityToken $token)
 	{
 		$ids = array();
 		switch ($groupId->getType()) {
