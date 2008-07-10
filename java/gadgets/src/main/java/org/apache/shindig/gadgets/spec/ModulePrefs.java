@@ -428,7 +428,7 @@ public class ModulePrefs {
     buf.append("<ModulePrefs");
 
     for (Map.Entry<String, String> attr : attributes.entrySet()) {
-      buf.append(" ").append(attr.getKey()).append("=\"")
+      buf.append(' ').append(attr.getKey()).append("=\"")
          .append(attr.getValue()).append('\"');
     }
     buf.append(">\n");

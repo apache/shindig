@@ -83,7 +83,7 @@ public class PreloadTest {
 
   @Test
   public void multipleViews() throws Exception {
-    String xml = "<Preload href='" + HREF + "'" +
+    String xml = "<Preload href='" + HREF + '\'' +
     		     " views='" + StringUtils.join(VIEWS, ',') + "'/>";
 
     Preload preload = new Preload(XmlUtil.parse(xml));
@@ -124,7 +124,7 @@ public class PreloadTest {
   @Test
   public void toStringIsSane() throws Exception {
     String xml = "<Preload" +
-    		     " href='" + HREF + "'" +
+    		     " href='" + HREF + '\'' +
     		     " sign_owner='false'" +
     		     " views='" + StringUtils.join(VIEWS, ',') + "'/>";
 

@@ -210,9 +210,9 @@ public class GadgetOAuthTokenStore {
       message.append("'.  Known services: ");
       Iterator<String> known = oauthSpec.getServices().keySet().iterator();
       while (known.hasNext()) {
-        message.append("'");
+        message.append('\'');
         message.append(known.next());
-        message.append("'");
+        message.append('\'');
         if (known.hasNext()) {
           message.append(", ");
         }

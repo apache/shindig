@@ -86,10 +86,10 @@ public class Preload {
   @Override
   public String toString() {
     StringBuilder buf = new StringBuilder();
-    buf.append("<Preload href='").append(href).append("'")
-       .append(" authz='").append(auth.toString().toLowerCase()).append("'")
-       .append(" sign_owner='").append(signOwner).append("'")
-       .append(" sign_viewer='").append(signViewer).append("'")
+    buf.append("<Preload href='").append(href).append('\'')
+       .append(" authz='").append(auth.toString().toLowerCase()).append('\'')
+       .append(" sign_owner='").append(signOwner).append('\'')
+       .append(" sign_viewer='").append(signViewer).append('\'')
        .append(" views='").append(StringUtils.join(views, ',')).append("'/>");
     return buf.toString();
   }

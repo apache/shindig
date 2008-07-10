@@ -96,22 +96,22 @@ public class DataServiceServletTest extends TestCase {
   }
 
   public void testPeopleUriRecognition() throws Exception {
-    verifyHandlerWasFoundForPathInfo("/"
+    verifyHandlerWasFoundForPathInfo('/'
         + DataServiceServlet.PEOPLE_ROUTE + "/5/@self", peopleHandler);
   }
 
   public void testActivitiesUriRecognition() throws Exception {
-    verifyHandlerWasFoundForPathInfo("/"
+    verifyHandlerWasFoundForPathInfo('/'
         + DataServiceServlet.ACTIVITY_ROUTE + "/5/@self", activityHandler);
   }
 
   public void testAppDataUriRecognition() throws Exception {
-    verifyHandlerWasFoundForPathInfo("/"
+    verifyHandlerWasFoundForPathInfo('/'
         + DataServiceServlet.APPDATA_ROUTE + "/5/@self", appDataHandler);
   }
 
   public void testMethodOverride() throws Exception {
-    String route = "/" + DataServiceServlet.APPDATA_ROUTE;
+    String route = '/' + DataServiceServlet.APPDATA_ROUTE;
     verifyHandlerWasFoundForPathInfo(route, appDataHandler, "POST", "GET", "GET");
     verifyHandlerWasFoundForPathInfo(route, appDataHandler, "POST", "", "POST");
     verifyHandlerWasFoundForPathInfo(route, appDataHandler, "POST", null, "POST");
@@ -123,7 +123,7 @@ public class DataServiceServletTest extends TestCase {
 
   /** Tests a data handler that returns a failed Future */
   public void testFailedRequest() throws Exception {
-    String route = "/" + DataServiceServlet.APPDATA_ROUTE;
+    String route = '/' + DataServiceServlet.APPDATA_ROUTE;
     setupRequest(route, "GET", null);
     EasyMock.expect(injector.getInstance(AppDataHandler.class)).andStubReturn(appDataHandler);    
     setupInjector();
@@ -292,7 +292,7 @@ public class DataServiceServletTest extends TestCase {
 
     public ResponseItem get(long timeout, TimeUnit unit)
         throws InterruptedException, ExecutionException, TimeoutException {
-      return null;  //To change body of implemented methods use File | Settings | File Templates.
+      return null;
     }
   }
 }

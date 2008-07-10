@@ -154,7 +154,7 @@ public class FakeHttpServletRequest implements HttpServletRequest {
     } else {
       // Look for the second slash which separates the servlet path from the
       // context path. e.g. "/foo/bar"
-      int secondSlash = path.indexOf("/", 1);
+      int secondSlash = path.indexOf('/', 1);
       if (secondSlash < 0) {
         // No second slash
         contextPath = path;
@@ -212,11 +212,11 @@ public class FakeHttpServletRequest implements HttpServletRequest {
   public FakeHttpServletRequest setHeader(String name, String value) {
     if (name.equals(COOKIE_HEADER)) {
       String[] pairs = splitAndTrim(value, ";");
-      for (int i = 0; i < pairs.length; i++) {
-        int equalsPos = pairs[i].indexOf('=');
+      for (String pair : pairs) {
+        int equalsPos = pair.indexOf('=');
         if (equalsPos != -1) {
-          String cookieName = pairs[i].substring(0, equalsPos);
-          String cookieValue = pairs[i].substring(equalsPos + 1);
+          String cookieName = pair.substring(0, equalsPos);
+          String cookieValue = pair.substring(equalsPos + 1);
           addToCookieMap(new Cookie(cookieName, cookieValue));
         }
       }
@@ -276,7 +276,7 @@ public class FakeHttpServletRequest implements HttpServletRequest {
         sb.append("; ");
       }
       sb.append(c.getName());
-      sb.append("=");
+      sb.append('=');
       sb.append(c.getValue());
       isFirst = false;
     }
@@ -413,7 +413,7 @@ public class FakeHttpServletRequest implements HttpServletRequest {
       return format.parse(value).getTime();
     } catch (ParseException e) {
       throw new IllegalArgumentException("Cannot parse number from header "
-          + name + ":" + value, e);
+          + name + ':' + value, e);
     }
   }
 
@@ -468,32 +468,30 @@ public class FakeHttpServletRequest implements HttpServletRequest {
       if (queryString == null && !parameters.isEmpty()) {
         boolean hasPrevious = false;
         StringBuilder queryString = new StringBuilder();
-        for (Iterator<String> it = parameters.keySet().iterator(); it.hasNext();) {
-          String key = it.next();
-  
+        for (String key : parameters.keySet()) {
           // We're not interested in blank keys
           if (key == null || key.equals("") || postParameters.contains(key)) {
             continue;
           }
           if (hasPrevious) {
-            queryString.append("&");
+            queryString.append('&');
           }
-  
+
           String[] values = parameters.get(key);
           // Append the parameters to the query string
           if (values.length == 0) {
             queryString.append(URLEncoder.encode(key, "UTF-8"));
           } else {
             for (int i = 0; i < values.length; i++) {
-              queryString.append(URLEncoder.encode(key, "UTF-8")).append("=").append(
-                  URLEncoder.encode(values[i], "UTF-8"));
+              queryString.append(URLEncoder.encode(key, "UTF-8")).append('=').append(
+                      URLEncoder.encode(values[i], "UTF-8"));
               if (i < values.length - 1) {
-                queryString.append("&");
+                queryString.append('&');
               }
             }
           }
           hasPrevious = true;
-  
+
         }
         this.queryString = queryString.toString();
       }
@@ -512,7 +510,7 @@ public class FakeHttpServletRequest implements HttpServletRequest {
   }
 
   public String getRequestURI() {
-    StringBuffer buf = new StringBuffer();
+    StringBuilder buf = new StringBuilder();
     if (!contextPath.equals("")) {
       buf.append(contextPath);
     }

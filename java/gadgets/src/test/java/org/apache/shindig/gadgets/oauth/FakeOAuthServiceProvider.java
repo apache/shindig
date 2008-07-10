@@ -183,7 +183,7 @@ public class FakeOAuthServiceProvider implements HttpFetcher {
     Map<String, List<String>> headers = new HashMap<String, List<String>>();
     headers.put(
         "WWW-Authenticate",
-        Arrays.asList(new String[] { msg.getAuthorizationHeader("realm") }));
+        Arrays.asList(msg.getAuthorizationHeader("realm")));
     HttpResponse response = new HttpResponse(403, null, headers);
     return response;   
   }
@@ -270,7 +270,7 @@ public class FakeOAuthServiceProvider implements HttpFetcher {
     state.setUserData(parsed.getQueryParam("user_data"));
   }
   
-  public class TokenPair {
+  public static class TokenPair {
     public final String token;
     public final String secret;
     
@@ -302,9 +302,7 @@ public class FakeOAuthServiceProvider implements HttpFetcher {
    * @throws Exception
    */
   public void revokeAllAccessTokens() throws Exception {
-    Iterator<TokenState> it = tokenState.values().iterator();
-    while (it.hasNext()) {
-      TokenState state = it.next();
+    for (TokenState state : tokenState.values()) {
       state.setState(TokenState.State.REVOKED);
     }
   }

@@ -101,7 +101,7 @@ public class RequestItem {
     }
 
     String fullUrl = this.url;
-    int queryParamIndex = fullUrl.indexOf("?");
+    int queryParamIndex = fullUrl.indexOf('?');
 
     if (queryParamIndex != -1) {
       this.url = fullUrl.substring(0, queryParamIndex);

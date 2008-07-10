@@ -284,7 +284,7 @@ public class GadgetRenderingTaskTest extends HttpTestFixture {
     expect(fetcher.fetch(SPEC_REQUEST)).andReturn(new HttpResponse(gadgetXml));
     expect(urlGenerator.getBundledJsParam(isA(Collection.class), isA(GadgetContext.class)))
         .andReturn(jsUrl);
-    response.sendRedirect(contentUrl + "?" + libsUrl + Utf8UrlCoder.encode(jsUrl));
+    response.sendRedirect(contentUrl + '?' + libsUrl + Utf8UrlCoder.encode(jsUrl));
     expectLastCall().once();
 
     replay();

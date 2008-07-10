@@ -46,17 +46,17 @@ public class GadgetTokenStoreTest extends TestCase {
       "    <OAuth>\n" +
       "      <Service name='testservice'>" +
       "        <Access " + 
-      "          url='" + FakeOAuthServiceProvider.ACCESS_TOKEN_URL + "'" +
+      "          url='" + FakeOAuthServiceProvider.ACCESS_TOKEN_URL + '\'' +
       "          param_location='uri-query' " +
       "          method='GET'" +
       "        />" +
       "        <Request " + 
-      "          url='" + FakeOAuthServiceProvider.REQUEST_TOKEN_URL + "'" +
+      "          url='" + FakeOAuthServiceProvider.REQUEST_TOKEN_URL + '\'' +
       "          param_location='uri-query' " +
       "          method='GET'" +
       "        />" +
       "        <Authorization " + 
-      "          url='" + FakeOAuthServiceProvider.APPROVAL_URL + "'" +
+      "          url='" + FakeOAuthServiceProvider.APPROVAL_URL + '\'' +
       "        />" +
       "      </Service>" +
       "    </OAuth>\n" +

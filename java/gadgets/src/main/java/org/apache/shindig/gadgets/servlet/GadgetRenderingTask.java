@@ -359,11 +359,11 @@ public class GadgetRenderingTask {
     // Necessary to avoid double-URL-encoding of the JavaScript bundle portion of the query.
     StringBuilder redirectHref = new StringBuilder(href.toString());
     if (query.toString() != null ) {
-      redirectHref.append("?");
+      redirectHref.append('?');
       redirectHref.append(query.toString());
     }
     if (fragment != null) {
-      redirectHref.append("#");
+      redirectHref.append('#');
       redirectHref.append(fragment);
     }
     response.sendRedirect(redirectHref.toString());

@@ -51,8 +51,8 @@ public class JsonRpcHandlerTest extends HttpTestFixture {
         "  <Link rel='" + LINK_REL + "' href='" + LINK_HREF + "'/>" +
         "</ModulePrefs>" +
         "<Content type=\"html\"" +
-        " preferred_height = \"" + PREFERRED_HEIGHT + "\"" +
-        " preferred_width = \"" + PREFERRED_WIDTH + "\"" +
+        " preferred_height = \"" + PREFERRED_HEIGHT + '\"' +
+        " preferred_width = \"" + PREFERRED_WIDTH + '\"' +
         ">Hello, world</Content>" +
         "</Module>";
   private static final String SPEC_XML2

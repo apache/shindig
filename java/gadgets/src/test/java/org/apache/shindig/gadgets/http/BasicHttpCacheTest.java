@@ -18,6 +18,7 @@
 package org.apache.shindig.gadgets.http;
 
 import org.apache.shindig.common.util.DateUtil;
+import org.apache.commons.lang.ArrayUtils;
 
 import junit.framework.TestCase;
 
@@ -50,7 +51,7 @@ public class BasicHttpCacheTest extends TestCase {
   private HttpRequest createRequest(String method) {
     HttpRequest req = new HttpRequest(method,
         URI.create("http://www.here.com"), new HashMap<String, List<String>>(),
-        new byte[0], new HttpRequest.Options());
+        ArrayUtils.EMPTY_BYTE_ARRAY, new HttpRequest.Options());
     return req;
   }
 
@@ -60,7 +61,7 @@ public class BasicHttpCacheTest extends TestCase {
     if (header != null) {
       headers.put(header, Arrays.asList(headerValue));
     }
-    HttpResponse resp = new HttpResponse(statusCode, new byte[0], headers);
+    HttpResponse resp = new HttpResponse(statusCode, ArrayUtils.EMPTY_BYTE_ARRAY, headers);
     return resp;
   }
 

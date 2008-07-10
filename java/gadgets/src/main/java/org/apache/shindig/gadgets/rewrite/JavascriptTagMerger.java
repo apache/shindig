@@ -42,7 +42,7 @@ public class JavascriptTagMerger implements HtmlTagTransformer {
 
   private final static int MAX_URL_LENGTH = 1500;
 
-  private final List scripts = new ArrayList();
+  private final List<Object> scripts = new ArrayList<Object>();
 
   private final String concatBase;
 
@@ -66,7 +66,7 @@ public class JavascriptTagMerger implements HtmlTagTransformer {
         + Utf8UrlCoder.encode(spec.getUrl().toString())
         + "&fp="
         + rewriterFeature.getFingerprint()
-        + "&";
+        + '&';
 
     this.relativeUrlBase = relativeUrlBase;
   }

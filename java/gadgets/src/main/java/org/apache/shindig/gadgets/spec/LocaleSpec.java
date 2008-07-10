@@ -81,9 +81,9 @@ public class LocaleSpec {
   public String toString() {
     StringBuilder buf = new StringBuilder();
     buf.append("<Locale")
-       .append(" lang='").append(language).append("'")
-       .append(" country='").append(country).append("'")
-       .append(" language_direction='").append(languageDirection).append("'")
+       .append(" lang='").append(language).append('\'')
+       .append(" country='").append(country).append('\'')
+       .append(" language_direction='").append(languageDirection).append('\'')
        .append(" messages='").append(messages).append("'>\n");
     for (Map.Entry<String, String> entry : messageBundle.getMessages().entrySet()) {
       buf.append("<msg name='").append(entry.getKey()).append("'>")

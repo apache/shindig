@@ -18,6 +18,7 @@
 package org.apache.shindig.gadgets.http;
 
 import org.apache.shindig.common.util.DateUtil;
+import org.apache.commons.lang.ArrayUtils;
 
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
@@ -91,7 +92,7 @@ public class HttpResponse {
    * Create a dummy empty map. Access via HttpResponse.ERROR
    */
   public HttpResponse(int statusCode) {
-    this(statusCode, new byte[0], null);
+    this(statusCode, ArrayUtils.EMPTY_BYTE_ARRAY, null);
   }
 
   /**
@@ -103,7 +104,7 @@ public class HttpResponse {
                        Map<String, List<String>> headers) {
     this.httpStatusCode = httpStatusCode;
     if (responseBytes == null) {
-      this.responseBytes = new byte[0];
+      this.responseBytes = ArrayUtils.EMPTY_BYTE_ARRAY;
     } else {
       this.responseBytes = new byte[responseBytes.length];
       System.arraycopy(

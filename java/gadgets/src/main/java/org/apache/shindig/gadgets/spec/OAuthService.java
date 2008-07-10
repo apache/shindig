@@ -151,7 +151,7 @@ public class OAuthService {
     }
 
     public String toString(String element) {
-      return "<" + element + " url='" + url.toString() + "' " +
+      return '<' + element + " url='" + url.toString() + "' " +
       		"method='" + method + "' param_location='" + location + "'/>";
     }
   }
