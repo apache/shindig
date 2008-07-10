@@ -19,6 +19,7 @@
 package org.apache.shindig.social;
 
 import com.google.common.collect.Lists;
+import com.google.inject.AbstractModule;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.TypeLiteral;
@@ -26,41 +27,23 @@ import com.google.inject.name.Names;
 
 import org.apache.shindig.common.servlet.ParameterFetcher;
 import org.apache.shindig.social.abdera.SocialRouteManager;
-import org.apache.shindig.social.dataservice.ActivityService;
-import org.apache.shindig.social.dataservice.AppDataService;
 import org.apache.shindig.social.dataservice.DataServiceServletFetcher;
-import org.apache.shindig.social.dataservice.PersonService;
-import org.apache.shindig.social.opensocial.ActivitiesService;
-import org.apache.shindig.social.opensocial.DataService;
-import org.apache.shindig.social.opensocial.DefaultModelGuiceModule;
 import org.apache.shindig.social.opensocial.OpenSocialDataHandler;
-import org.apache.shindig.social.opensocial.PeopleService;
-import org.apache.shindig.social.samplecontainer.BasicActivitiesService;
-import org.apache.shindig.social.samplecontainer.BasicDataService;
-import org.apache.shindig.social.samplecontainer.BasicPeopleService;
-import org.apache.shindig.social.samplecontainer.SampleContainerRouteManager;
-import org.apache.shindig.social.samplecontainer.StateFileDataHandler;
+import org.apache.shindig.social.samplecontainer.*;
 
 import java.util.List;
 
 /**
  * Provides social api component injection
  */
-public class SocialApiGuiceModule extends DefaultModelGuiceModule {
+public class SocialApiGuiceModule extends AbstractModule {
 
   /** {@inheritDoc} */
   @Override
   protected void configure() {
-    bind(PeopleService.class).to(BasicPeopleService.class);
-    bind(DataService.class).to(BasicDataService.class);
-    bind(ActivitiesService.class).to(BasicActivitiesService.class);
 
     bind(new TypeLiteral<List<GadgetDataHandler>>() {})
         .toProvider(GadgetDataHandlersProvider.class);
-
-    bind(PersonService.class).to(BasicPeopleService.class);
-    bind(ActivityService.class).to(BasicActivitiesService.class);
-    bind(AppDataService.class).to(BasicDataService.class);
 
     bind(SocialRouteManager.class).to(SampleContainerRouteManager.class);
 

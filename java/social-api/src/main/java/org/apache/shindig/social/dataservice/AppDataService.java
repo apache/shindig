@@ -19,11 +19,15 @@ package org.apache.shindig.social.dataservice;
 
 import org.apache.shindig.common.SecurityToken;
 import org.apache.shindig.social.ResponseItem;
+import org.apache.shindig.social.samplecontainer.BasicDataService;
 
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Future;
 
+import com.google.inject.ImplementedBy;
+
+@ImplementedBy(BasicDataService.class)
 public interface AppDataService {
 
   /**

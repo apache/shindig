@@ -23,9 +23,14 @@ import org.apache.shindig.gadgets.spec.MessageBundle;
 
 import java.net.URI;
 
+import com.google.inject.ImplementedBy;
+
 /**
  * Factory of message bundles
  */
+
+@ImplementedBy(BasicMessageBundleFactory.class)
+
 public interface MessageBundleFactory {
 
   MessageBundle getBundle(LocaleSpec localeSpec, GadgetContext context)

@@ -19,9 +19,14 @@ package org.apache.shindig.social.opensocial;
 
 import org.apache.shindig.common.SecurityToken;
 import org.apache.shindig.social.ResponseItem;
+import org.apache.shindig.social.samplecontainer.BasicDataService;
 
 import java.util.List;
 import java.util.Map;
+
+import com.google.inject.ImplementedBy;
+
+@ImplementedBy(BasicDataService.class)
 
 public interface DataService {
 

@@ -17,11 +17,16 @@
  */
 package org.apache.shindig.social.opensocial.model;
 
+import com.google.inject.ImplementedBy;
+
 /**
  * see
  * http://code.google.com/apis/opensocial/docs/0.7/reference/opensocial.Phone.Field.html
  *
  */
+
+@ImplementedBy(PhoneImpl.class)
+
 public interface Phone {
 
   public static enum Field {

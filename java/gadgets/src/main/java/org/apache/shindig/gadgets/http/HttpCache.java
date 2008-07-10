@@ -17,11 +17,16 @@
  */
 package org.apache.shindig.gadgets.http;
 
+import com.google.inject.ImplementedBy;
+
 import java.net.URI;
 
 /**
  * Cache of HttpResponse keyed by URI/HttpRequest
  */
+
+@ImplementedBy(BasicHttpCache.class)
+
 public interface HttpCache {
 
   public HttpResponse getResponse(URI uri);

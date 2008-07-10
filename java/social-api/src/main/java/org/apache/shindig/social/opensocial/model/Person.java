@@ -17,6 +17,7 @@
  */
 package org.apache.shindig.social.opensocial.model;
 
+import com.google.inject.ImplementedBy;
 import org.apache.shindig.social.opensocial.util.EnumUtil;
 
 import java.util.Date;
@@ -28,6 +29,9 @@ import java.util.Set;
  * http://code.google.com/apis/opensocial/docs/0.7/reference/opensocial.Person.Field.html
  *
  */
+
+@ImplementedBy(PersonImpl.class)
+
 public interface Person {
 
   public static enum Field {

@@ -17,6 +17,10 @@
  */
 package org.apache.shindig.social.opensocial.model;
 
+import com.google.inject.ImplementedBy;
+
+@ImplementedBy(BodyTypeImpl.class)
+
 public interface BodyType {
 
   public static enum Field {

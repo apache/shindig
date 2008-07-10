@@ -36,6 +36,8 @@ import org.apache.abdera.protocol.server.impl.RouteManager;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.google.inject.ImplementedBy;
+
 public class SocialRouteManager extends RouteManager {
   private final PersonJsonAdapter personJsonAdapter;
   private final PersonAdapter personAtomAdapter;

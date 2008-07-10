@@ -17,6 +17,10 @@
  */
 package org.apache.shindig.social.opensocial.model;
 
+import com.google.inject.ImplementedBy;
+
+@ImplementedBy(UrlImpl.class)
+
 public interface Url {
 
   public static enum Field {

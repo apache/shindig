@@ -17,11 +17,16 @@
  */
 package org.apache.shindig.social.opensocial.model;
 
+import com.google.inject.ImplementedBy;
+
 /**
  * see
  * http://code.google.com/apis/opensocial/docs/0.7/reference/opensocial.Email.Field.html
  *
  */
+
+@ImplementedBy(EmailImpl.class)
+
 public interface Email {
 
   public static enum Field {
