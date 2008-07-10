@@ -39,7 +39,7 @@ public interface SecurityTokenDecoder {
   /**
    * Decrypts and verifies a gadget security token to return a gadget token.
    *
-   * @param tokenString token in wire format (probably encrypted.)
+   * @param tokenParameters Map containing a entry 'token' in wire format (probably encrypted.)
    * @return the decrypted and verified token.
    * @throws SecurityTokenException If tokenString is not a valid token
    */
