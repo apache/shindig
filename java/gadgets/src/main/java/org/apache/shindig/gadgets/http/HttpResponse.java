@@ -73,6 +73,7 @@ public class HttpResponse {
   private final byte[] responseBytes;
   private final Map<String, List<String>> headers;
   private final Map<String, String> metadata;
+  private final long date;
 
   private HttpResponse rewritten;
 
@@ -119,10 +120,9 @@ public class HttpResponse {
         }
       }
     }
-    // Force Last-Modified header -- caches should be sure to store this value.
-    if (tmpHeaders.get("Date") == null) {
-      tmpHeaders.put("Date", Arrays.asList(DateUtil.formatDate(System.currentTimeMillis())));
-    }
+
+    date = getValidDate(tmpHeaders);
+
     this.headers = tmpHeaders;
 
     this.metadata = new HashMap<String, String>();
@@ -149,6 +149,31 @@ public class HttpResponse {
 
   public static HttpResponse notFound() {
     return new HttpResponse(SC_NOT_FOUND);
+  }
+
+  /**
+   * Tries to find a valid date from the input headers. If one can't be found, the current time is
+   * used.
+   *
+   * @param headers Input headers. If the Date header is missing or invalid, it will be set with the
+   *                current time.
+   * @return The value of the date header, in milliseconds.
+   */
+  private long getValidDate(Map<String, List<String>> headers) {
+    // Validate the Date header. Must conform to the HTTP date format.
+    long timestamp = -1;
+    String dateStr = headers.get("Date") == null ? null : headers.get("Date").get(0);
+    if (dateStr != null) {
+      Date d = DateUtil.parseDate(dateStr);
+      if (d != null) {
+        timestamp = d.getTime();
+      }
+    }
+    if (timestamp == -1) {
+      timestamp = System.currentTimeMillis();
+      headers.put("Date", Arrays.asList(DateUtil.formatDate(timestamp)));
+    }
+    return timestamp;
   }
 
   /**
@@ -355,8 +380,7 @@ public class HttpResponse {
    * @return The value of the HTTP Date header.
    */
   protected long getDate() {
-    String date = getHeader("Date");
-    return DateUtil.parseDate(date).getTime();
+    return date;
   }
 
   /**
