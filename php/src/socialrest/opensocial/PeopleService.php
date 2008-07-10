@@ -28,7 +28,7 @@ abstract class PeopleService {
 	 * @param profileDetails the details to return
 	 * @param security token $token
 	 */
-	abstract public function getPerson($userId, $groupId, $profileDetails, $token);
+	abstract public function getPerson($userId, $groupId, $profileDetails, SecurityToken $token);
 
 	/**
 	 * Returns a list of people that correspond to the passed in person ids.
@@ -40,5 +40,5 @@ abstract class PeopleService {
 	 * @param max The max number of people to fetch.
 	 * @return a list of people.
 	 */
-	abstract public function getPeople($userId, $groupId, $sortOrder, $filter, $first, $max, $profileDetails, $token);
+	abstract public function getPeople($userId, $groupId, $sortOrder, $filter, $first, $max, $profileDetails, SecurityToken $token);
 }
