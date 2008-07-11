@@ -44,8 +44,6 @@ import net.oauth.OAuthProblemException;
  *   
  * TODO: add a third category to cope with reauthorization per the ScalableOAuth
  * extension.
- * 
- * TODO(beaton) test case
  */
 class OAuthProtocolException extends Exception {
 
@@ -104,6 +102,23 @@ class OAuthProtocolException extends Exception {
     } else {
       startFromScratch = true;
       canRetry = true;
+    }
+  }
+
+  /**
+   * Handle OAuth protocol errors for SPs that don't support the problem
+   * reporting extension
+   * @param status HTTP status code, assumed to be between 400 and 499 inclusive
+   */
+  public OAuthProtocolException(int status) {
+    problemCode = Integer.toString(status);
+    problemText = null;
+    if (status == 401) {
+      startFromScratch = true;
+      canRetry = true;
+    } else {
+      startFromScratch = true;
+      canRetry = false;
     }
   }
 
