@@ -35,7 +35,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -110,6 +109,7 @@ public class FakeOAuthServiceProvider implements HttpFetcher {
   private final OAuthConsumer consumer;
 
   private boolean throttled;
+  private boolean vagueErrors;
   
   private int requestTokenCount = 0;
   
@@ -124,6 +124,11 @@ public class FakeOAuthServiceProvider implements HttpFetcher {
         null, CONSUMER_KEY, CONSUMER_SECRET, provider);
     tokenState = new HashMap<String, TokenState>();
     validator = new SimpleOAuthValidator();
+    vagueErrors = false;
+  }
+  
+  public void setVagueErrors(boolean vagueErrors) {
+    this.vagueErrors = vagueErrors;
   }
   
   @SuppressWarnings("unused")
@@ -177,6 +182,13 @@ public class FakeOAuthServiceProvider implements HttpFetcher {
 
   private HttpResponse makeOAuthProblemReport(String code, String text)
       throws IOException {
+    if (vagueErrors) {
+      int rc = 401;
+      if ("consumer_key_unknown".equals(code)) {
+        rc = 403;
+      }
+      return new HttpResponse(rc, null, null);
+    }
     OAuthMessage msg = new OAuthMessage(null, null, null);
     msg.addParameter("oauth_problem", code);
     msg.addParameter("oauth_problem_advice", text);

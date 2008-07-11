@@ -280,7 +280,6 @@ public class OAuthFetcher extends ChainedContentFetcher {
     return buildNonDataResponse();
   }
 
-  // TODO(beaton) test case
   private boolean handleProtocolException(
       OAuthProtocolException pe, int attempts) throws OAuthStoreException {
     if (pe.startFromScratch()) {
@@ -495,13 +494,11 @@ public class OAuthFetcher extends ChainedContentFetcher {
                                  HttpRequest.DEFAULT_OPTIONS);
 
     HttpResponse response = nextFetcher.fetch(oauthRequest);
+    checkForProtocolProblem(response);
     OAuthMessage reply = new OAuthMessage(null, null, null);
     
     reply.addParameters(OAuth.decodeForm(response.getResponseAsString()));
     reply = parseAuthHeader(reply, response);
-    if (reply.getParameter(OAuthProblemException.OAUTH_PROBLEM) != null) {
-      throw new OAuthProtocolException(reply);
-    }
     return reply;
   }
 
@@ -684,14 +681,7 @@ public class OAuthFetcher extends ChainedContentFetcher {
 
       HttpResponse response = nextFetcher.fetch(oauthHttpRequest);
       
-      // TODO is there a better way to detect an SP error?
-      int statusCode = response.getHttpStatusCode();
-      if (statusCode >= 400 && statusCode < 500) {
-        OAuthMessage message = parseAuthHeader(null, response);
-        if (message.getParameter(OAuthProblemException.OAUTH_PROBLEM) != null) {
-          throw new OAuthProtocolException(message);
-        }
-      }
+      checkForProtocolProblem(response);
   
       // Track metadata on the response
       addResponseMetadata(response);
@@ -704,6 +694,20 @@ public class OAuthFetcher extends ChainedContentFetcher {
       throw new GadgetException(GadgetException.Code.INTERNAL_SERVER_ERROR, e);
     } catch (OAuthException e) {
       throw new GadgetException(GadgetException.Code.INTERNAL_SERVER_ERROR, e);
+    }
+  }
+  
+  private void checkForProtocolProblem(HttpResponse response)
+      throws OAuthProtocolException, IOException {
+    int status = response.getHttpStatusCode();
+    if (status >= 400 && status < 500) {
+      OAuthMessage message = parseAuthHeader(null, response);
+      if (message.getParameter(OAuthProblemException.OAUTH_PROBLEM) != null) {
+        // SP reported extended error information
+        throw new OAuthProtocolException(message);
+      }
+      // No extended information, guess based on HTTP response code.
+      throw new OAuthProtocolException(status);
     }
   }
 
