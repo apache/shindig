@@ -40,20 +40,14 @@ require 'src/socialrest/GroupId.php';
 require 'src/socialrest/UserId.php';
 require 'src/socialrest/ResponseItem.php';
 require 'src/socialrest/RestfulCollection.php';
-require 'src/socialrest/http/RestRequestItem.php';
+require 'src/socialrest/RestRequestItem.php';
+require 'src/socialrest/OutputConverter.php';
+require 'src/socialrest/converters/OutputAtomConverter.php';
+require 'src/socialrest/converters/OutputJsonConverter.php';
 
-/*
- * See:
- * http://sites.google.com/a/opensocial.org/opensocial/Technical-Resources/opensocial-specification----implementation-version-08/restful-api-specification
- * OpenSocial uses standard HTTP methods: GET to retrieve, PUT to update in place, POST to create new, and DELETE to remove.
- * POST is special; it operates on collections and creates new activities, persons, or app data within those collections,
- * and returns the base URI for the created resource in the Location: header, per AtomPub semantics.
- *
- * Error status is returned by HTTP error code, with the error message in the html's body
- */
+//FIXME Delete should respond with a 204 No Content to indicate success
 
-//NOTE TO SELF: delete should respond with a 204 No Content to indicate success?
-
+class RestException extends Exception {}
 
 /*
  * Internal error code representations, these get translated into http codes in the outputError() function
@@ -65,8 +59,6 @@ define('FORBIDDEN', "forbidden");
 define('BAD_REQUEST', "badRequest");
 define('INTERNAL_ERROR', "internalError");
 
-class RestException extends Exception {}
-
 class RestServlet extends HttpServlet {
 	
 	private static $JSON_BATCH_ROUTE = "jsonBatch";
@@ -74,18 +66,31 @@ class RestServlet extends HttpServlet {
 	public function doPost($method = 'POST')
 	{
 		$this->setNoCache(true);
-		$this->noHeaders = true;
 		// if oauth, create a token from it's values instead of one based on $_get['st']/$_post['st']
 		// NOTE : if no token is provided an anonymous one is created (owner = viewer = appId = modId = 0)
 		// keep this in mind when creating your data services.. 
 		$token = $this->getSecurityToken();
 		$req = null;
+		$outputFormat = $this->getOutputFormat();
+		switch ($outputFormat) {
+			case 'json':
+				//$this->setContentType('application/json');
+				$outputConverter = new OutputJsonConverter();
+				break;
+			case 'atom':
+				//$this->setContentType('application/xml');
+				$outputConverter = new OutputAtomConverter();
+				break;
+			default:
+				$this->outputError(new ResponseItem(NOT_IMPLEMENTED, "Invalid output format"));
+				break;
+		}
 		if ($this->isBatchUrl()) {
 			$req = $this->handleBatchRequest($token);
-			echo json_encode(array("responses" => $req, "error" => false));
+			$outputConverter->outputBatch($req);
 		} else {
 			$responseItem = $this->handleSingleRequest($token, $method);
-			echo json_encode($responseItem);
+			$outputConverter->outputResponse($responseItem);
 		}
 	}
 
@@ -130,18 +135,11 @@ class RestServlet extends HttpServlet {
 			$class = new $class(null);
 			$response = $class->handleMethod($requestItem);
 		}
-		if ($this->getOutputFormat() == 'json') {
-			if ($this->isBatchUrl()) {
-				return $response;
-			} else {
-				//If the method exists, its an ResponseItem Error
-				if ($response->getError() != null) {
-					$this->outputError($response);
-				}
-				return $response->getResponse();
-			}
-		} else {	// output atom format
+		if ($response->getError() != null && !$this->isBatchUrl()) {
+			// Can't use http error codes in batch mode, instead we return the error code in the response item
+			$this->outputError($response);
 		}
+		return $response;
 	}
 
 	private function getRequestParams()
@@ -242,7 +240,7 @@ class RestServlet extends HttpServlet {
 
 	private function getOutputFormat()
 	{
-		return isset($_POST['format']) && $_POST['format'] == 'atom' ? 'atom' : 'json';
+		return !empty($_POST['format']) ? strtolowe(trim($_POST['format'])) : 'json';
 	}
 
 	private function getListParams()
