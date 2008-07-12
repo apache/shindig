@@ -39,7 +39,7 @@ require 'src/gadgets/GadgetFeature.php';
 require 'src/gadgets/JsLibraryFeatureFactory.php';
 require 'src/gadgets/JsLibrary.php';
 require 'src/common/UrlGenerator.php';
-require 'src/gadgets/http/HttpUtil.php';
+require 'src/gadgets/HttpUtil.php';
 require 'src/gadgets/LocaleSpec.php';
 require 'src/gadgets/LocaleMessageBundle.php';
 require 'src/gadgets/UserPref.php';

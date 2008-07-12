@@ -42,7 +42,7 @@ require 'src/gadgets/GadgetFeatureFactory.php';
 require 'src/gadgets/GadgetFeature.php';
 require 'src/gadgets/JsLibraryFeatureFactory.php';
 require 'src/gadgets/JsLibrary.php';
-require 'src/gadgets/http/HttpUtil.php';
+require 'src/gadgets/HttpUtil.php';
 require 'src/gadgets/ContainerConfig.php';
 require 'src/gadgets/rewrite/ContentRewriter.php';
 require 'src/gadgets/rewrite/ContentRewriteFeature.php';
