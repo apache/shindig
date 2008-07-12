@@ -139,26 +139,38 @@ class RestRequestItem {
 
 	public function getStartIndex()
 	{
-		$startIndex = $this->parameters[self::$START_INDEX];
-		return $startIndex == null ? self::$DEFAULT_START_INDEX : $startIndex;
+		if (!empty(self::$DEFAULT_START_INDEX)) {
+			return self::$DEFAULT_START_INDEX;
+		} else {
+			return self::$DEFAULT_START_INDEX;
+		}
 	}
 
 	public function getCount()
 	{
-		$count = $this->parameters[self::$COUNT];
-		return $count == null ? self::$DEFAULT_COUNT : $count;
+		if (!empty($this->parameters[self::$COUNT])) {
+			return $this->parameters[self::$COUNT];
+		} else {
+			return self::$DEFAULT_COUNT;
+		}
 	}
 
 	public function getOrderBy()
 	{
-		$orderBy = $this->parameters[self::$ORDER_BY];
-		return $orderBy == null ? PeopleService::$sortOrder : $orderBy;
+		if (!empty($this->parameters[self::$ORDER_BY])) {
+			return $this->parameters[self::$ORDER_BY];
+		} else {
+			return PeopleService::$sortOrder;
+		}
 	}
 
 	public function getFilterBy()
 	{
-		$filterBy = $this->parameters[self::$FILTER_BY];
-		return $filterBy == null ? PeopleService::$filterType : $filterBy;
+		if (!empty($this->parameters[self::$FILTER_BY])) {
+			return $this->parameters[self::$FILTER_BY];
+		} else {
+			return PeopleService::$filterType; 
+		}
 	}
 
 	public function getFields()
@@ -168,11 +180,12 @@ class RestRequestItem {
 
 	public function getFieldsWithDefaultValue(Array $defaultValue)
 	{
-		$paramValue = $this->parameters[self::$FIELDS];
-		if ($paramValue != null) {
+		if (!empty($this->parameters[self::$FIELDS])) {
+			$paramValue = $this->parameters[self::$FIELDS];
 			return explode(',', $paramValue);
+		} else {
+			return $defaultValue;
 		}
-		return $defaultValue;
 	}
 
 	public function getPostData()
