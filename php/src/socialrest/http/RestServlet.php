@@ -75,8 +75,9 @@ class RestServlet extends HttpServlet {
 	{
 		$this->setNoCache(true);
 		$this->noHeaders = true;
-		// use security token, for now this is required
-		// (later oauth should also be a way to specify this info)
+		// if oauth, create a token from it's values instead of one based on $_get['st']/$_post['st']
+		// NOTE : if no token is provided an anonymous one is created (owner = viewer = appId = modId = 0)
+		// keep this in mind when creating your data services.. 
 		$token = $this->getSecurityToken();
 		$req = null;
 		if ($this->isBatchUrl()) {
@@ -224,7 +225,12 @@ class RestServlet extends HttpServlet {
 	{
 		$token = isset($_GET['st']) ? $_GET['st'] : '';
 		if (empty($token)) {
-			throw new RestException("Missing security token");
+			// no security token, continue anonymously, remeber to check
+			// for private profiles etc in your code so their not publicly
+			// accessable to anoymous users! Anonymous == owner = viewer = appId = modId = 0
+			$gadgetSigner = Config::get('security_token');
+			// create token with 0 values, no gadget url, no domain and 0 duration
+			return new $gadgetSigner(null, 0, 0, 0, 0, '', '', 0);
 		}
 		if (count(explode(':', $token)) != 6) {
 			$token = urldecode(base64_decode($token));
