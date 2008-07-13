@@ -43,7 +43,8 @@ class BasicPeopleService extends PeopleService {
 	public function getPeople($userId, $groupId, $sortOrder, $filter, $first, $max, $profileDetails, SecurityToken $token)
 	{
 		$ids = array();
-		switch ($groupId->getType()) {
+		$group = is_object($groupId) ? $groupId->getType() : '';
+		switch ($group) {
 			case 'all':
 			case 'friends':
 				$friendIds = XmlStateFileFetcher::get()->getFriendIds();

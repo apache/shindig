@@ -25,9 +25,9 @@ abstract class ActivitiesService {
 	 * @param token A valid SecurityToken
 	 * @return a response item with the list of activities.
 	 */
-	abstract public function getActivities(UserId $userId, GroupId $groupId, SecurityToken $token);
+	abstract public function getActivities(UserId $userId, $groupId, $first, $max, SecurityToken $token);
 	
-	abstract public function getActivity(UserId $userId, GroupId $groupId, $activityId, SecurityToken $token);
+	abstract public function getActivity(UserId $userId, $groupId, $activityId, $first, $max, SecurityToken $token);
 
 	/**
 	 * Creates the passed in activity for the given user. Once createActivity is
