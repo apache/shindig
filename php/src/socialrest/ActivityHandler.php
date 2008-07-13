@@ -49,9 +49,9 @@ class ActivityHandler extends DataRequestHandler {
 		// TODO: Filter by fields
 		// TODO: do we need to add pagination and sorting support?
 		if ($optionalActivityId != null) {
-			return $this->service->getActivity($requestItem->getUser(), $requestItem->getGroup(), $optionalActivityId, $requestItem->getToken());
+			return $this->service->getActivity($requestItem->getUser(), $requestItem->getGroup(), $optionalActivityId, $requestItem->getStartIndex(), $requestItem->getCount(), $requestItem->getToken());
 		}
-		return $this->service->getActivities($requestItem->getUser(), $requestItem->getGroup(), $requestItem->getToken());
+		return $this->service->getActivities($requestItem->getUser(), $requestItem->getGroup(), $requestItem->getStartIndex(), $requestItem->getCount(), $requestItem->getToken());
 	}
 
 	/**

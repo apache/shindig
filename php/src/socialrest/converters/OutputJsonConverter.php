@@ -23,12 +23,12 @@
  */
 class OutputJsonConverter extends OutputConverter {
 	
-	function outputResponse(ResponseItem $responseItem)
+	function outputResponse(ResponseItem $responseItem, RestRequestItem $requestItem)
 	{
 		echo json_encode($responseItem->getResponse());
 	}
 	
-	function outputBatch(Array $responses)
+	function outputBatch(Array $responses, SecurityToken $token)
 	{
 		echo json_encode(array("responses" => $responses, "error" => false));
 	}

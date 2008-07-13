@@ -78,7 +78,7 @@ class RestServlet extends HttpServlet {
 				$outputConverter = new OutputJsonConverter();
 				break;
 			case 'atom':
-				//$this->setContentType('application/xml');
+				//$this->setContentType('application/atom+xml');
 				$outputConverter = new OutputAtomConverter();
 				break;
 			default:
@@ -86,11 +86,11 @@ class RestServlet extends HttpServlet {
 				break;
 		}
 		if ($this->isBatchUrl()) {
-			$req = $this->handleBatchRequest($token);
-			$outputConverter->outputBatch($req);
+			$responses = $this->handleBatchRequest($token);
+			$outputConverter->outputBatch($responses, $token);
 		} else {
-			$responseItem = $this->handleSingleRequest($token, $method);
-			$outputConverter->outputResponse($responseItem);
+			$response = $this->handleSingleRequest($token, $method);
+			$outputConverter->outputResponse($response['response'], $response['request']);
 		}
 	}
 
@@ -102,7 +102,7 @@ class RestServlet extends HttpServlet {
 		$requestParam = $this->getRequestParams();
 		$requestItem->createRequestItem($url, $token, $method, $params, $requestParam);
 		$responseItem = $this->getResponseItem($requestItem);
-		return $responseItem;
+		return array('request' => $requestItem, 'response' => $responseItem);
 	}
 
 	private function getRouteFromParameter($pathInfo)
@@ -240,7 +240,8 @@ class RestServlet extends HttpServlet {
 
 	private function getOutputFormat()
 	{
-		return !empty($_POST['format']) ? strtolowe(trim($_POST['format'])) : 'json';
+		$output = !empty($_POST['format']) ? $_POST['format'] : (!empty($_GET['format']) ? $_GET['format'] : 'json');
+		return strtolower(trim($output));
 	}
 
 	private function getListParams()

@@ -19,7 +19,7 @@
 
 class BasicActivitiesService extends ActivitiesService {
 
-	public function getActivity(UserId $userId, GroupId $groupId, $activityId, SecurityToken $token)
+	public function getActivity(UserId $userId, $groupId, $activityId, $first, $max, SecurityToken $token)
 	{
 		$activities = $this->getActivities($userId, $groupId, $token);
 		$activities = $activities->getResponse();
@@ -34,10 +34,11 @@ class BasicActivitiesService extends ActivitiesService {
 		return new ResponseItem(NOT_FOUND, "Activity not found", null);
 	}
 	
-	public function getActivities(UserId $userId, GroupId $groupId, SecurityToken $token)
+	public function getActivities(UserId $userId, $groupId, $first, $max, SecurityToken $token)
 	{
 		$ids = array();
-		switch ($groupId->getType()) {
+		$type = is_object($groupId) ? $groupId->getType() : 'self';
+		switch ($type) {
 			case 'all':
 			case 'friends':
         		$friendIds = XmlStateFileFetcher::get()->getFriendIds();

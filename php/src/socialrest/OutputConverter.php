@@ -22,6 +22,6 @@
  *
  */
 abstract class OutputConverter {
-	abstract function outputResponse(ResponseItem $responseItem);
-	abstract function outputBatch(Array $responses);
+	abstract function outputResponse(ResponseItem $responseItem, RestRequestItem $requestItem);
+	abstract function outputBatch(Array $responses, SecurityToken $token);
 }

@@ -42,7 +42,7 @@ class PersonHandler extends DataRequestHandler {
 		$parameters = $requestItem->getParameters();
 		$optionalPersonId = in_array('personId', $parameters) ? $parameters['personId'] : null;
 		$fields = $requestItem->getFieldsWithDefaultValue(self::$DEFAULT_PERSON_FIELDS);
-		if ($optionalPersonId || $requestItem->getGroup()->getType() == 'self') {
+		if ($optionalPersonId || (is_object($requestItem->getGroup()) && $requestItem->getGroup()->getType() == 'self')) {
 			//FIXME same logic as the java code here, but doesn't seem to do much with the optionalPersonId which seems odd
 			return $this->service->getPerson($requestItem->getUser(), $requestItem->getGroup(), $fields, $requestItem->getToken());
 		}

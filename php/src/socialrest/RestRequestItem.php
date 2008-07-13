@@ -119,28 +119,29 @@ class RestRequestItem {
 
 	public function getAppId()
 	{
-		$appId = $this->parameters[self::$APP_ID];
-		if ($appId != null && $appId == self::$APP_SUBSTITUTION_TOKEN) {
+		if (isset($this->parameters[self::$APP_ID]) && $this->parameters[self::$APP_ID] == self::$APP_SUBSTITUTION_TOKEN) {
 			return $this->token->getAppId();
+		} elseif (isset($this->parameters[self::$APP_ID])) {
+			return $this->parameters[self::$APP_ID];
 		} else {
-			return $appId;
+			return 0;
 		}
 	}
 
 	public function getUser()
 	{
-		return UserId::fromJson($this->parameters[self::$USER_ID]);
+		return isset($this->parameters[self::$USER_ID]) ? UserId::fromJson($this->parameters[self::$USER_ID]) : false;
 	}
 
 	public function getGroup()
 	{
-		return GroupId::fromJson($this->parameters[self::$GROUP_ID]);
+		return isset($this->parameters[self::$GROUP_ID]) ? GroupId::fromJson($this->parameters[self::$GROUP_ID]) : false;
 	}
 
 	public function getStartIndex()
 	{
-		if (!empty(self::$DEFAULT_START_INDEX)) {
-			return self::$DEFAULT_START_INDEX;
+		if (!empty($this->parameters[self::$START_INDEX])) {
+			return $this->parameters[self::$START_INDEX];
 		} else {
 			return self::$DEFAULT_START_INDEX;
 		}
