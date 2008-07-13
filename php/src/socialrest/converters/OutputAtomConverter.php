@@ -54,7 +54,7 @@ class OutputAtomConverter extends OutputConverter {
 			$entry = $this->addNode($doc, 'feed', '', false, self::$nameSpace);
 
 			// Required Atom fields
-			$this->addNode($entry, 'title', $requestType.' feed for id '.$authorName.' ('.$startIndex. ' - '. ($startIndex + $itemsPerPage).' of '.$totalResults.')');
+			$this->addNode($entry, 'title', $requestType.' feed for id '.$authorName.' ('.$startIndex. ' - '. (($startIndex + $itemsPerPage) - 1).' of '.$totalResults.')');
 			$author = $this->addNode($entry, 'author');
 			$this->addNode($author, 'uri', $guid);
 			$this->addNode($author, 'name', $authorName);			
@@ -179,7 +179,7 @@ class OutputAtomConverter extends OutputConverter {
 		}
 		// Create a 'next' link based on our current url if this is a pageable collection & there is more to display
 		if (($startIndex + $itemsPerPage) < $totalResults) {
-			$nextStartIndex = $startIndex + $itemsPerPage;
+			$nextStartIndex = ($startIndex + $itemsPerPage) - 1;
 			if (($uri = $_SERVER['REQUEST_URI']) === false) {
 				throw new Exception("Could not parse URI : {$_SERVER['REQUEST_URI']}");
 			}
@@ -254,15 +254,15 @@ class OutputAtomConverter extends OutputConverter {
 					$this->addData($newElement, $key, $val);
 				} else {
 					$elm = $newElement->appendChild($this->doc->createElement($key));
-					$elm->appendChild($this->doc->createTextNode(htmlentities($val, ENT_NOQUOTES, 'UTF-8')));
+					$elm->appendChild($this->doc->createTextNode($val));
 				}
 			}
 		} elseif (is_object($data)) {
 			if ($data instanceof Enum) {
 				// enums are output as : <NAME key="$key">$displayValue</NAME> 
 				$keyEntry = $newElement->appendChild($this->doc->createAttribute('key'));
-				$keyEntry->appendChild($this->doc->createTextNode(htmlentities($data->key, ENT_NOQUOTES, 'UTF-8')));
-				$newElement->appendChild($this->doc->createTextNode(htmlentities($data->getDisplayValue(), ENT_NOQUOTES, 'UTF-8')));
+				$keyEntry->appendChild($this->doc->createTextNode($data->key));
+				$newElement->appendChild($this->doc->createTextNode($data->getDisplayValue()));
 			
 			} else {
 				$vars = get_object_vars($data);
@@ -275,12 +275,12 @@ class OutputAtomConverter extends OutputConverter {
 						$this->addData($newElement, $key, $val);
 					} else {
 						$elm = $newElement->appendChild($this->doc->createElement($key));
-						$elm->appendChild($this->doc->createTextNode(htmlentities($val, ENT_NOQUOTES, 'UTF-8')));
+						$elm->appendChild($this->doc->createTextNode($val));
 					}
 				}
 			}
 		} else {
-			$newElement->appendChild($this->doc->createTextNode(htmlentities($data, ENT_NOQUOTES, 'UTF-8')));
+			$newElement->appendChild($this->doc->createTextNode($data));
 		}
 		return $newElement;
 	}
