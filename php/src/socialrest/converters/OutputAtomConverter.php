@@ -54,7 +54,8 @@ class OutputAtomConverter extends OutputConverter {
 			$entry = $this->addNode($doc, 'feed', '', false, self::$nameSpace);
 
 			// Required Atom fields
-			$this->addNode($entry, 'title', $requestType.' feed for id '.$authorName.' ('.$startIndex. ' - '. (($startIndex + $itemsPerPage) - 1).' of '.$totalResults.')');
+			$endPos = ($startIndex + $itemsPerPage) > $totalResults ? $totalResults : ($startIndex + $itemsPerPage);
+			$this->addNode($entry, 'title', $requestType.' feed for id '.$authorName.' ('.$startIndex. ' - '. ($endPos - 1).' of '.$totalResults.')');
 			$author = $this->addNode($entry, 'author');
 			$this->addNode($author, 'uri', $guid);
 			$this->addNode($author, 'name', $authorName);			
