@@ -70,15 +70,14 @@ class RestServlet extends HttpServlet {
 		// NOTE : if no token is provided an anonymous one is created (owner = viewer = appId = modId = 0)
 		// keep this in mind when creating your data services.. 
 		$token = $this->getSecurityToken();
-		$req = null;
 		$outputFormat = $this->getOutputFormat();
 		switch ($outputFormat) {
 			case 'json':
-				//$this->setContentType('application/json');
+				$this->setContentType('application/json');
 				$outputConverter = new OutputJsonConverter();
 				break;
 			case 'atom':
-				//$this->setContentType('application/atom+xml');
+				$this->setContentType('application/atom+xml');
 				$outputConverter = new OutputAtomConverter();
 				break;
 			default:
