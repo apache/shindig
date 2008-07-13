@@ -81,10 +81,10 @@ class OutputAtomConverter extends OutputConverter {
 				
 				if ($response instanceof Activity) {
 					$this->addNode($feedEntry, 'updated', date(DATE_ATOM, $response->postedTime));
-					$this->addNode($feedEntry, 'id', $response->id);
+					$this->addNode($feedEntry, 'id', 'urn:guid:'.$response->id);
 					//FIXME should add a link field but don't have URL's available yet:
 					// <link rel="self" type="application/atom+xml" href="http://api.example.org/activity/feeds/.../af3778"/>
-					$this->addNode($feedEntry, 'title', $response->title);
+					$this->addNode($feedEntry, 'title', strip_tags($response->title));
 					$this->addNode($feedEntry, 'summary', $response->body);
 					// Unset them so addData doesn't include them again
 					unset($response->postedTime);
