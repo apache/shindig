@@ -27,136 +27,103 @@ class OutputAtomConverter extends OutputConverter {
 	private static $xmlVersion = '1.0';
 	private static $charSet = 'UTF-8';
 	private static $formatOutput = true;
+	//FIXME osearch fields break the validator ... remove option once i know if they should be included or not
+	private static $includeOsearch = false;
 	// this maps the REST url to the atom content type
-	private static $entryTypes = array(
-		'people' => 'person', 'appdata' => 'appdata', 'activities' => 'activity'
-	);
+	private static $entryTypes = array('people' => 'person', 'appdata' => 'appdata', 'activities' => 'activity');
+	private $doc;
 
 	function outputResponse(ResponseItem $responseItem, RestRequestItem $requestItem)
 	{
-		$doc = new DOMDocument(self::$xmlVersion, self::$charSet);
-		$doc->formatOutput = self::$formatOutput;
+		$doc = $this->createAtomDoc();
+		$requestType = $this->getRequestType($requestItem);
 		$data = $responseItem->getResponse();
-		$params = $requestItem->getParameters();
-		// map the Request URL to the content type to use  
-		if (empty(self::$entryTypes[$params[0]])) {
-			throw new Exception("Unsupported request type");
-		}
-		$requestType = self::$entryTypes[$params[0]];
-		// Check to see if this is a single entry, or a collection, and construct either an atom 
-		// feed (collection) or an entry (single)
+		$userId = $requestItem->getUser()->getUserId($requestItem->getToken());
+		$guid = 'urn:guid:' . $userId;
+		$authorName = $_SERVER['HTTP_HOST'].':'.$userId;
+		$updatedAtom = date(DATE_ATOM);
 		
+		// Check to see if this is a single entry, or a collection, and construct either an atom 
+		// feed (collection) or an entry (single)		
 		if ($responseItem->getResponse() instanceof RestFulCollection) {
-			$entry = $doc->appendChild($doc->createElementNS(self::$nameSpace, "feed"));
+			$totalResults = $responseItem->getResponse()->getTotalResults();
+			$itemsPerPage = $requestItem->getCount();
+			$startIndex = $requestItem->getStartIndex();
 			
-			// osearch fields and next link
-			$total = $entry->appendChild($doc->createElement('osearch:totalResults'));
-			$total->appendChild($doc->createTextNode($responseItem->getResponse()->getTotalResults()));
-			$startIndex = $entry->appendChild($doc->createElement('osearch:startIndex'));
-			$startIndex->appendChild($doc->createTextNode($requestItem->getStartIndex()));
-			$itemsPerPage = $entry->appendChild($doc->createElement('osearch:itemsPerPage'));
-			$itemsPerPage->appendChild($doc->createTextNode($requestItem->getCount()));
+			// The root Feed element
+			$entry = $this->addNode($doc, 'feed', '', false, self::$nameSpace);
+
+			// Required Atom fields
+			$this->addNode($entry, 'title', $requestType.' feed for id '.$authorName.' ('.$startIndex. ' - '. ($startIndex + $itemsPerPage).' of '.$totalResults.')');
+			$author = $this->addNode($entry, 'author');
+			$this->addNode($author, 'uri', $guid);
+			$this->addNode($author, 'name', $authorName);			
+			$this->addNode($entry, 'updated', $updatedAtom);
+			$this->addNode($entry, 'id', $guid);
+			$this->addNode($entry, 'link', '', array('rel' => 'self', 'href' => 'http://'.$_SERVER['HTTP_HOST'].$_SERVER['REQUEST_URI']));
 			
-			// fabricate a next link based on our current url if this is a pageable collection
-			if (($requestItem->getStartIndex() + $requestItem->getCount()) < $responseItem->getResponse()->getTotalResults()) {
-				$nextStartIndex = $requestItem->getStartIndex() + $requestItem->getCount();
-				if (($uri = $_SERVER['REQUEST_URI']) === false) {
-					throw new Exception("Could not parse URI : {$_SERVER['REQUEST_URI']}");
-				}
-				$uri = parse_url($uri);
-				if (isset($uri['query'])) {
-					parse_str($uri['query'], $params);
-				} else {
-					$params = array();
-				}
-				$params[RestRequestItem::$START_INDEX] = $nextStartIndex;
-				$params[RestRequestItem::$COUNT] = $requestItem->getCount();
-				foreach ($params as $paramKey => $paramVal) {
-					$outParams[] = $paramKey . '=' . $paramVal;
-				}
-				$outParams = '?' . implode('&', $outParams);
-				$nextUri = 'http://' . $_SERVER['HTTP_HOST'] . $uri['path'] . $outParams;
-				// <link rel="next" href="http://api.example.org/..." />
-				$link = $entry->appendChild($doc->createElement('link'));
-				$linkRel = $link->appendChild($doc->createAttribute('rel'));
-				$linkRel->appendChild($doc->createTextNode('next'));
-				$linkHref = $link->appendChild($doc->createAttribute('href'));
-				$linkHref->appendChild($doc->createTextNode($nextUri));
-			}
-			
-			// Atom fields
-			$title = $entry->appendChild($doc->createElement('title'));
-			$author = $entry->appendChild($doc->createElement('author'));
-			$updated = $entry->appendChild($doc->createElement('updated'));
-			$updated->appendChild($doc->createTextNode(date(DATE_ATOM)));
-			$id = $entry->appendChild($doc->createElement('id'));
-			$id->appendChild($doc->createTextNode('urn:guid:' . $requestItem->getToken()->getDomain() . ':' . htmlentities($requestItem->getUser()->getUserId($requestItem->getToken(), ENT_NOQUOTES, 'UTF-8'))));
+			// Add osearch & next link to the entry
+			$this->addPagingFields($entry, $startIndex, $itemsPerPage, $totalResults);
 			
 			// Add response entries to feed
 			$responses = $responseItem->getResponse()->getEntry();
 			foreach ($responses as $response) {
-				$feedEntry = $entry->appendChild($doc->createElement("entry"));
-				$type = $feedEntry->appendChild($doc->createElement('content'));
+				// Attempt to have a real ID field, otherwise we fall back on the idSpec id
+				$idField = is_object($response) && isset($response->id) ? $response->id : (is_array($response) && isset($response['id']) ? $response['id'] : $requestItem->getUser()->getUserId($requestItem->getToken()));
+				// construct <entry> blocks this record
+				$feedEntry = $this->addNode($entry, 'entry');
+				$content = $this->addNode($feedEntry, 'content', '', array('type' => 'application/xml'));
+				// Author node
+				$author = $this->addNode($feedEntry, 'author');
+				$this->addNode($author, 'uri', $guid);
+				$this->addNode($author, 'name', $authorName);
+				// Special hoisting rules for activities
+				
 				if ($response instanceof Activity) {
-					// Special hoisting rules for activities
-					$updated = $feedEntry->appendChild($doc->createElement('updated'));
-					$updated->appendChild($doc->createTextNode(date(DATE_ATOM, $response->postedTime)));
-					$id = $feedEntry->appendChild($doc->createElement('id'));
-					//FIXME these should get proper URL's in the ID and link:
+					$this->addNode($feedEntry, 'updated', date(DATE_ATOM, $response->postedTime));
+					$this->addNode($feedEntry, 'id', $response->id);
+					//FIXME should add a link field but don't have URL's available yet:
 					// <link rel="self" type="application/atom+xml" href="http://api.example.org/activity/feeds/.../af3778"/>
-					$id->appendChild($doc->createTextNode('urn:guid:activity:' . htmlentities($response->id, ENT_NOQUOTES, 'UTF-8')));
-					$summary = $feedEntry->appendChild($doc->createElement('summary'));
-					$summary->appendChild($doc->createTextNode(htmlentities($response->body, ENT_NOQUOTES, 'UTF-8')));
-					$title = $feedEntry->appendChild($doc->createElement('title'));
-					$title->appendChild($doc->createTextNode(htmlentities($response->title, ENT_NOQUOTES, 'UTF-8')));
+					$this->addNode($feedEntry, 'title', $response->title);
+					$this->addNode($feedEntry, 'summary', $response->body);
+					// Unset them so addData doesn't include them again
+					unset($response->postedTime);
 					unset($response->id);
 					unset($response->title);
 					unset($response->body);
-					unset($response->postedTime);
-				}				
-				$content = $this->addData($doc, $type, $requestType, $response, self::$osNameSpace);
-				$contentType = $type->appendChild($doc->createAttribute('type'));
-				$contentType->appendChild($doc->createTextNode('application/xml'));
-				
-				// Attempt to have a real ID field, otherwise we fall back on the idSpec id
-				$idField = is_object($response) && isset($response->id) ? $response->id : (is_array($response) && isset($response['id']) ? $response['id'] : $requestItem->getUser()->getUserId($requestItem->getToken()));
-				
-				// Author node
-				$author = $feedEntry->appendChild($doc->createElement('author'));
-				$authorUrl = $author->appendChild($doc->createElement('uri'));
-				$authorUrl->appendChild($doc->createTextNode('urn:guid:' . htmlentities($idField, ENT_NOQUOTES, 'UTF-8')));
-				// Updated node, only if it's not an activity (special case)
-				if ($response instanceof Activity) {
-					$title = $feedEntry->appendChild($doc->createElement('title'));
-					$updated = $feedEntry->appendChild($doc->createElement('updated'));
-					$updated->appendChild($doc->createTextNode(date(DATE_ATOM)));
-					$id = $feedEntry->appendChild($doc->createElement('id'));
-					$id->appendChild($doc->createTextNode('urn:guid:' . htmlentities($idField, ENT_NOQUOTES, 'UTF-8')));
+				} else {
+					$this->addNode($feedEntry, 'id', 'urn:guid:'.$idField);
+					$this->addNode($feedEntry, 'title', $requestType.' feed entry for id '.$idField);
+					$this->addNode($feedEntry, 'updated', $updatedAtom);
 				}
+				
+				// recursively add responseItem data to the xml structure
+				$this->addData($content, $requestType, $response, self::$osNameSpace);
 			}
-		} else {
-			// Single entry = Atom:Entry
-			$entry = $doc->appendChild($doc->createElementNS(self::$nameSpace, "entry"));
-			$type = $entry->appendChild($doc->createElement('content'));
 			
-			// addData loops through the responseItem data recursively creating a matching XML structure
-			// and appends the nodes to the $type element
-			$content = $this->addData($doc, $type, $requestType, $data, self::$osNameSpace);
-			$contentType = $type->appendChild($doc->createAttribute('type'));
-			$contentType->appendChild($doc->createTextNode('application/xml'));
+		} else {
+			
+			// Single entry = Atom:Entry	
+			$entry = $doc->appendChild($doc->createElementNS(self::$nameSpace, "entry"));
 			
 			// Atom fields
-			$title = $entry->appendChild($doc->createElement('title'));
-			$author = $entry->appendChild($doc->createElement('author'));
-			$authorUri = $author->appendChild($doc->createElement('uri'));
-			$authorUri->appendChild($doc->createTextNode(htmlentities($requestItem->getUser()->getUserId($requestItem->getToken(), ENT_NOQUOTES, 'UTF-8'))));
-			$updated = $entry->appendChild($doc->createElement('updated'));
-			$updated->appendChild($doc->createTextNode(date(DATE_ATOM)));
-			$id = $entry->appendChild($doc->createElement('id'));
-			$id->appendChild($doc->createTextNode('urn:guid:' . htmlentities($requestItem->getUser()->getUserId($requestItem->getToken()), ENT_NOQUOTES, 'UTF-8')));
+			$this->addNode($entry, 'title', $requestType.' entry for '.$authorName);
+			$author = $this->addNode($entry, 'author');
+			$this->addNode($author, 'uri', $guid);
+			$this->addNode($author, 'name', $authorName);
+			$this->addNode($entry, 'id', $guid);
+			$this->addNode($entry, 'updated', $updatedAtom);
+			$content = $this->addNode($entry, 'content', '', array('type' => 'application/xml'));
+			
+			// addData loops through the responseItem data recursively creating a matching XML structure
+			$this->addData($content, $requestType, $data, self::$osNameSpace);
 		}
-		echo $doc->saveXML();
-	
+		$xml = $doc->saveXML();
+		if (self::$includeOsearch && $responseItem->getResponse() instanceof RestFulCollection) {
+			//FIXME dirty hack until i find a way to add multiple name spaces using DomXML functions
+			$xml = str_replace('<feed xmlns="http://www.w3.org/2005/Atom">', '<feed xmlns="http://www.w3.org/2005/Atom" xmlos:osearch="http://a9.com/-/spec/opensearch/1.1">' ,$xml);
+		}
+		echo $xml;
 	}
 
 	function outputBatch(Array $responses, SecurityToken $token)
@@ -164,12 +131,118 @@ class OutputAtomConverter extends OutputConverter {
 		//TODO once we support spec compliance batching, this needs to be added too
 	}
 
-	private function addData(DOMDocument $doc, DOMElement $element, $name, $data, $nameSpace = false)
+	/**
+	 * Easy shortcut for creating & appending XML nodes
+	 *
+	 * @param DOMElement $node node to append the new child node too
+	 * @param string $name name of the new element
+	 * @param string $value value of the element, if empty no text node is created
+	 * @param array $attributes optional array of attributes, false by default. If set attributes are added to the node using the key => val pairs
+	 * @param string $nameSpace optional namespace to use when creating node
+	 * @return DOMElement node
+	 */
+	private function addNode($node, $name, $value = '', $attributes = false, $nameSpace = false)
 	{
 		if ($nameSpace) {
-			$newElement = $element->appendChild($doc->createElementNS($nameSpace, $name));
+			$childNode = $node->appendChild($this->doc->createElementNS($nameSpace, $name));
 		} else {
-			$newElement = $element->appendChild($doc->createElement($name));
+			$childNode = $node->appendChild($this->doc->createElement($name));
+		}
+		if (! empty($value) || $value == '0') {
+			$childNode->appendChild($this->doc->createTextNode($value));
+		}
+		if ($attributes && is_array($attributes)) {
+			foreach ($attributes as $attrName => $attrVal) {
+				$childNodeAttr = $childNode->appendChild($this->doc->createAttribute($attrName));
+				if (! empty($attrVal)) {
+					$childNodeAttr->appendChild($this->doc->createTextNode($attrVal));
+				}
+			}
+		}
+		return $childNode;
+	}
+
+	/**
+	 * Adds the osearch fields & generates a next link if result set > itemsPerPage
+	 *
+	 * @param DOMElement $entry the entry DOMElement to append the links too
+	 * @param int $startIndex
+	 * @param int $itemsPerPage
+	 * @param int $totalResults
+	 */
+	private function addPagingFields($entry, $startIndex, $itemsPerPage, $totalResults)
+	{
+		if (self::$includeOsearch) {
+			$this->addNode($entry, 'osearch:totalResults', $totalResults);
+			$this->addNode($entry, 'osearch:startIndex', $startIndex ? $startIndex : '0');
+			$this->addNode($entry, 'osearch:itemsPerPage', $itemsPerPage);
+		}
+		// Create a 'next' link based on our current url if this is a pageable collection & there is more to display
+		if (($startIndex + $itemsPerPage) < $totalResults) {
+			$nextStartIndex = $startIndex + $itemsPerPage;
+			if (($uri = $_SERVER['REQUEST_URI']) === false) {
+				throw new Exception("Could not parse URI : {$_SERVER['REQUEST_URI']}");
+			}
+			$uri = parse_url($uri);
+			$params = array();
+			if (isset($uri['query'])) {
+				parse_str($uri['query'], $params);
+			}
+			$params[RestRequestItem::$START_INDEX] = $nextStartIndex;
+			$params[RestRequestItem::$COUNT] = $itemsPerPage;
+			foreach ($params as $paramKey => $paramVal) {
+				$outParams[] = $paramKey . '=' . $paramVal;
+			}
+			$outParams = '?' . implode('&', $outParams);
+			$nextUri = 'http://' . $_SERVER['HTTP_HOST'] . $uri['path'] . $outParams;
+			$this->addNode($entry, 'link', '', array('rel' => 'next', 'href' => $nextUri));
+		}
+	}
+
+	/**
+	 * Creates the root document using our xml version & charset
+	 *
+	 * @return DOMDocument
+	 */
+	private function createAtomDoc()
+	{
+		$this->doc = new DOMDocument(self::$xmlVersion, self::$charSet);
+		$this->doc->formatOutput = self::$formatOutput;
+		return $this->doc;
+	}
+
+	/**
+	 * Extracts the Atom entity name from the request url
+	 *
+	 * @param RequestItem $requestItem the request item
+	 * @return string the request type
+	 */
+	private function getRequestType($requestItem)
+	{
+		// map the Request URL to the content type to use  
+		$params = $requestItem->getParameters();
+		if (! is_array($params) || empty(self::$entryTypes[$params[0]])) {
+			throw new Exception("Unsupported request type");
+		}
+		return self::$entryTypes[$params[0]];
+	}
+
+	/**
+	 * Recursive function that maps an data array or object to it's xml represantation 
+	 *
+	 * @param DOMDocument $doc the root document
+	 * @param DOMElement $element the element to append the new node(s) to
+	 * @param string $name the name of the to be created node
+	 * @param array or object $data the data to map to xml
+	 * @param string $nameSpace if specified, the node is created using this namespace
+	 * @return DOMElement returns newly created element
+	 */
+	private function addData(DOMElement $element, $name, $data, $nameSpace = false)
+	{
+		if ($nameSpace) {
+			$newElement = $element->appendChild($this->doc->createElementNS($nameSpace, $name));
+		} else {
+			$newElement = $element->appendChild($this->doc->createElement($name));
 		}
 		if (is_array($data)) {
 			foreach ($data as $key => $val) {
@@ -178,18 +251,18 @@ class OutputAtomConverter extends OutputConverter {
 					if (is_numeric($key)) {
 						$key = is_object($val) ? get_class($val) : $key = $name;
 					}
-					$this->addData($doc, $newElement, $key, $val);
+					$this->addData($newElement, $key, $val);
 				} else {
-					$elm = $newElement->appendChild($doc->createElement($key));
-					$elm->appendChild($doc->createTextNode(htmlentities($val, ENT_NOQUOTES, 'UTF-8')));
+					$elm = $newElement->appendChild($this->doc->createElement($key));
+					$elm->appendChild($this->doc->createTextNode(htmlentities($val, ENT_NOQUOTES, 'UTF-8')));
 				}
 			}
 		} elseif (is_object($data)) {
 			if ($data instanceof Enum) {
 				// enums are output as : <NAME key="$key">$displayValue</NAME> 
-				$keyEntry = $newElement->appendChild($doc->createAttribute('key'));
-				$keyEntry->appendChild($doc->createTextNode(htmlentities($data->key, ENT_NOQUOTES, 'UTF-8')));
-				$newElement->appendChild($doc->createTextNode(htmlentities($data->getDisplayValue(), ENT_NOQUOTES, 'UTF-8')));
+				$keyEntry = $newElement->appendChild($this->doc->createAttribute('key'));
+				$keyEntry->appendChild($this->doc->createTextNode(htmlentities($data->key, ENT_NOQUOTES, 'UTF-8')));
+				$newElement->appendChild($this->doc->createTextNode(htmlentities($data->getDisplayValue(), ENT_NOQUOTES, 'UTF-8')));
 			
 			} else {
 				$vars = get_object_vars($data);
@@ -199,15 +272,15 @@ class OutputAtomConverter extends OutputConverter {
 						if (is_numeric($key)) {
 							$key = is_object($val) ? get_class($val) : $key = $name;
 						}
-						$this->addData($doc, $newElement, $key, $val);
+						$this->addData($newElement, $key, $val);
 					} else {
-						$elm = $newElement->appendChild($doc->createElement($key));
-						$elm->appendChild($doc->createTextNode(htmlentities($val, ENT_NOQUOTES, 'UTF-8')));
+						$elm = $newElement->appendChild($this->doc->createElement($key));
+						$elm->appendChild($this->doc->createTextNode(htmlentities($val, ENT_NOQUOTES, 'UTF-8')));
 					}
 				}
 			}
 		} else {
-			$newElement->appendChild($doc->createTextNode(htmlentities($data, ENT_NOQUOTES, 'UTF-8')));
+			$newElement->appendChild($this->doc->createTextNode(htmlentities($data, ENT_NOQUOTES, 'UTF-8')));
 		}
 		return $newElement;
 	}
