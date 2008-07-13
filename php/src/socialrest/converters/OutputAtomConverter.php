@@ -80,6 +80,7 @@ class OutputAtomConverter extends OutputConverter {
 				// Special hoisting rules for activities
 				
 				if ($response instanceof Activity) {
+					$this->addNode($feedEntry, 'category', '', array('term' => 'status'));
 					$this->addNode($feedEntry, 'updated', date(DATE_ATOM, $response->postedTime));
 					$this->addNode($feedEntry, 'id', 'urn:guid:'.$response->id);
 					//FIXME should add a link field but don't have URL's available yet:
