@@ -34,6 +34,14 @@ public class UserId {
     this.userId = userId;
   }
 
+  public Type getType() {
+    return type;
+  }
+
+  public String getUserId() {
+    return userId;
+  }
+
   public String getUserId(SecurityToken token) {
     switch(type) {
       case owner:
