@@ -256,18 +256,26 @@ RestfulContainer.prototype.newFetchPeopleRequest = function(idSpec,
 
 RestfulContainer.prototype.createPersonFromJson = function(serverJson) {
   return new JsonPerson(serverJson);
-}
+};
 
 RestfulContainer.prototype.getFieldsList = function(keys) {
   // datarequest.js guarantees that keys is an array
-  if (!keys || keys.length == 0 || keys[0] == "*") {
-    // Some containers support * to mean all keys in the js apis.
-    // This allows the RESTful apis to be compatible with them.
+  if (this.hasNoKeys(keys) || this.isWildcardKey(keys[0])) {
     return '';
   } else {
     return 'fields=' + keys.join(',');
   }
-}
+};
+
+RestfulContainer.prototype.hasNoKeys = function(keys) {
+  return !keys || keys.length == 0;
+};
+
+RestfulContainer.prototype.isWildcardKey = function(key) {
+  // Some containers support * to mean all keys in the js apis.
+  // This allows the RESTful apis to be compatible with them.
+  return key == "*";
+};
 
 RestfulContainer.prototype.newFetchPersonAppDataRequest = function(idSpec,
     keys) {
