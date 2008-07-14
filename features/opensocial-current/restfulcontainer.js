@@ -166,7 +166,7 @@ RestfulContainer.prototype.requestData = function(dataRequest, callback) {
   };
 
   gadgets.io.makeNonProxiedRequest(
-    this.baseUrl_ + "/jsonBatch?st=" + shindig.auth.getSecurityToken(),
+    this.baseUrl_ + "/jsonBatch?st=" + escape(shindig.auth.getSecurityToken()),
     sendResponse, makeRequestParams, "application/json");
 };
 
@@ -259,17 +259,20 @@ RestfulContainer.prototype.createPersonFromJson = function(serverJson) {
 }
 
 RestfulContainer.prototype.getFieldsList = function(keys) {
-  if (opensocial.Container.isArray(keys)) {
-    return keys.join(',');
+  // datarequest.js guarantees that keys is an array
+  if (!keys || keys.length == 0 || keys[0] == "*") {
+    // Some containers support * to mean all keys in the js apis.
+    // This allows the RESTful apis to be compatible with them.
+    return '';
   } else {
-    return keys;
+    return 'fields=' + keys.join(',');
   }
 }
 
 RestfulContainer.prototype.newFetchPersonAppDataRequest = function(idSpec,
     keys) {
   var url = "/appdata/" + this.translateIdSpec(idSpec) + "/@app"
-      + "?fields=" + this.getFieldsList(keys);
+      + "?" + this.getFieldsList(keys);
   return new RestfulRequestItem(url, "GET", null,
       function (appData) {
         return gadgets.util.escape(appData['entry'], true);
@@ -287,7 +290,7 @@ RestfulContainer.prototype.newUpdatePersonAppDataRequest = function(id, key,
 
 RestfulContainer.prototype.newRemovePersonAppDataRequest = function(id, keys) {
   var url = "/appdata/" + this.translateIdSpec(this.makeIdSpec(id))
-      + "/@app?fields=" + this.getFieldsList(keys);
+      + "/@app?" + this.getFieldsList(keys);
   return new RestfulRequestItem(url, "DELETE");
 };
 
