@@ -51,8 +51,9 @@ http://shindig.chabotc.com/gadgets/ifr?url=http://www.labpixies.com/campaigns/to
 
 b. Run with an existing host
 
-If you cannot/don't want to create a virtual host, you can edit the file php/config.php and
-change the web_prefix setting to '/shindig/php'.
+If you cannot/don't want to create a virtual host, you can edit the file php/config/container.php
+or php/config/local.php (see the comments php/config/container.php for documentation of the
+configuration system) and change the web_prefix setting to '/shindig/php'.
 
 Then you can run the gadget by pointing your browser to:
 
