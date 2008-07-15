@@ -292,8 +292,7 @@ class OAuthRequest {
 		$parameters = is_array($parameters) ? $parameters : array();
 		$defaults = array("oauth_nonce" => OAuthRequest::generate_nonce(), 
 				"oauth_timestamp" => OAuthRequest::generate_timestamp(), 
-				"oauth_consumer_key" => $consumer->key, 'synd' => 'partuza', 
-				'container' => 'partuza');
+				"oauth_consumer_key" => $consumer->key);
 		$parameters = array_merge($defaults, $parameters);
 		if (isset($token)) {
 			$parameters['oauth_token'] = $token;
@@ -393,6 +392,9 @@ class OAuthRequest {
 		$parts = parse_url($this->http_url);
 		parse_str(@$parts['query'], $params);
 		foreach ($params as $key => $value) {
+			if ($key == "signOwner" || $key == "signViewer") {
+				continue;
+			}
 			$this->parameters[$key] = $value;
 		}
 		$parts = array($this->get_normalized_http_method(), $this->get_normalized_http_url(), 
