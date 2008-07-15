@@ -18,6 +18,8 @@
  * 
  */
 
+require 'src/common/samplecontainer/Crypto.php';
+
 class BlobExpiredException extends Exception {}
 
 /**
