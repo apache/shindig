@@ -21,7 +21,6 @@ require 'src/common/HttpServlet.php';
 require 'src/common/SecurityTokenDecoder.php';
 require 'src/common/SecurityToken.php';
 require 'src/common/BlobCrypter.php';
-require 'src/common/Crypto.php';
 require 'src/socialdata/opensocial/model/Activity.php';
 require 'src/socialdata/opensocial/model/Address.php';
 require 'src/socialdata/opensocial/model/ApiCollection.php';
