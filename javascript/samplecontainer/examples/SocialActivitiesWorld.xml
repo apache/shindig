@@ -113,7 +113,7 @@ function refreshActivities() {
 
 function postNewActivity() {
   var activityElement = document.getElementById('newActivity');
-  var mediaItem = new Array(opensocial.newActivityMediaItem("image", "http://cdn.davesdaily.com/pictures/784-awesome-hands.jpg", {'type' : 'IMAGE'}));
+  var mediaItem = new Array(opensocial.newActivityMediaItem("image", "http://cdn.davesdaily.com/pictures/784-awesome-hands.jpg", {'type' : 'image'}));
   var activity = opensocial.newActivity({ 'title' : viewer.getDisplayName() + ' wrote: ' + activityElement.value,
     'body' : 'write back!', 'mediaItems' : mediaItem});
 
