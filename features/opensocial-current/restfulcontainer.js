@@ -114,9 +114,19 @@ RestfulContainer.prototype.requestData = function(dataRequest, callback) {
   }
 
   var jsonBatchData = {};
+  var systemKeyIndex = 0;
 
   for (var j = 0; j < totalRequests; j++) {
     var requestObject = requestObjects[j];
+
+    if (!requestObject.key) {
+      requestObject.key = "systemKey" + systemKeyIndex;
+      while (jsonBatchData[requestObject.key]) {
+        // If the key exists, choose another and try again
+        systemKeyIndex++;
+        requestObject.key = "systemKey" + systemKeyIndex;
+      }
+    }
 
     jsonBatchData[requestObject.key] = {url : requestObject.request.url,
       method : requestObject.request.method};
