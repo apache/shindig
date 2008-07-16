@@ -18,21 +18,8 @@
  */
 package org.apache.shindig.social;
 
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
-import com.google.inject.AbstractModule;
-import com.google.inject.Singleton;
-import com.google.inject.name.Names;
-
 import org.apache.shindig.common.servlet.ParameterFetcher;
-import org.apache.shindig.social.abdera.SocialRouteManager;
-import org.apache.shindig.social.dataservice.ActivityService;
-import org.apache.shindig.social.dataservice.AppDataService;
 import org.apache.shindig.social.dataservice.DataServiceServletFetcher;
-import org.apache.shindig.social.dataservice.PersonService;
-import org.apache.shindig.social.opensocial.ActivitiesService;
-import org.apache.shindig.social.opensocial.DataService;
-import org.apache.shindig.social.opensocial.PeopleService;
 import org.apache.shindig.social.opensocial.model.Activity;
 import org.apache.shindig.social.opensocial.model.ActivityImpl;
 import org.apache.shindig.social.opensocial.model.Address;
@@ -51,11 +38,13 @@ import org.apache.shindig.social.opensocial.model.Phone;
 import org.apache.shindig.social.opensocial.model.PhoneImpl;
 import org.apache.shindig.social.opensocial.model.Url;
 import org.apache.shindig.social.opensocial.model.UrlImpl;
-import org.apache.shindig.social.samplecontainer.BasicActivitiesService;
-import org.apache.shindig.social.samplecontainer.BasicDataService;
-import org.apache.shindig.social.samplecontainer.BasicPeopleService;
-import org.apache.shindig.social.samplecontainer.SampleContainerRouteManager;
 import org.apache.shindig.social.samplecontainer.XmlStateFileFetcher;
+
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
+import com.google.inject.AbstractModule;
+import com.google.inject.Singleton;
+import com.google.inject.name.Names;
 
 import java.net.URI;
 import java.util.Date;
@@ -75,7 +64,6 @@ public class SocialApiTestsGuiceModule extends AbstractModule {
   protected void configure() {
 
     bind(XmlStateFileFetcher.class).to(MockXmlStateFileFetcher.class);
-    bind(SocialRouteManager.class).to(SampleContainerRouteManager.class);
 
     bind(ParameterFetcher.class).annotatedWith(Names.named("GadgetDataServlet")).to(GadgetDataServletFetcher.class);
     bind(ParameterFetcher.class).annotatedWith(Names.named("DataServiceServlet")).to(DataServiceServletFetcher.class);

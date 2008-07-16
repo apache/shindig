@@ -51,34 +51,17 @@
     </servlet-class>
   </servlet>
 
-  <!-- Serve the new rest code -->
+  <!-- Serve REST api -->
   <servlet>
-    <servlet-name>jsonrest</servlet-name>
+    <servlet-name>restapiServlet</servlet-name>
     <servlet-class>
       org.apache.shindig.social.dataservice.DataServiceServlet
     </servlet-class>
   </servlet>
 
-  <!-- Serve REST api -->
-  <servlet>
-    <servlet-name>restapiServlet</servlet-name>
-    <servlet-class>
-      org.apache.shindig.social.RestServerServlet
-    </servlet-class>
-    <init-param>
-      <param-name>org.apache.abdera.protocol.server.Provider</param-name>
-      <param-value>org.apache.shindig.social.abdera.SocialApiProvider</param-value>
-    </init-param>
-  </servlet>
-
   <servlet-mapping>
     <servlet-name>socialdata</servlet-name>
     <url-pattern>/social/data</url-pattern>
-  </servlet-mapping>
-
-  <servlet-mapping>
-    <servlet-name>jsonrest</servlet-name>
-    <url-pattern>/social/jsonrest/*</url-pattern>
   </servlet-mapping>
 
   <servlet-mapping>
