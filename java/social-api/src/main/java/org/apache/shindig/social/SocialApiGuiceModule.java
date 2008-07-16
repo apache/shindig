@@ -18,18 +18,21 @@
  */
 package org.apache.shindig.social;
 
+import org.apache.shindig.common.servlet.ParameterFetcher;
+import org.apache.shindig.social.abdera.SocialRouteManager;
+import org.apache.shindig.social.dataservice.DataServiceServletFetcher;
+import org.apache.shindig.social.dataservice.HandlerProvider;
+import org.apache.shindig.social.opensocial.OpenSocialDataHandler;
+import org.apache.shindig.social.samplecontainer.SampleContainerHandlerProvider;
+import org.apache.shindig.social.samplecontainer.SampleContainerRouteManager;
+import org.apache.shindig.social.samplecontainer.StateFileDataHandler;
+
 import com.google.common.collect.Lists;
 import com.google.inject.AbstractModule;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.TypeLiteral;
 import com.google.inject.name.Names;
-
-import org.apache.shindig.common.servlet.ParameterFetcher;
-import org.apache.shindig.social.abdera.SocialRouteManager;
-import org.apache.shindig.social.dataservice.DataServiceServletFetcher;
-import org.apache.shindig.social.opensocial.OpenSocialDataHandler;
-import org.apache.shindig.social.samplecontainer.*;
 
 import java.util.List;
 
@@ -46,6 +49,7 @@ public class SocialApiGuiceModule extends AbstractModule {
         .toProvider(GadgetDataHandlersProvider.class);
 
     bind(SocialRouteManager.class).to(SampleContainerRouteManager.class);
+    bind(HandlerProvider.class).to(SampleContainerHandlerProvider.class);
 
     bind(ParameterFetcher.class).annotatedWith(Names.named("GadgetDataServlet")).to(GadgetDataServletFetcher.class);
     bind(ParameterFetcher.class).annotatedWith(Names.named("DataServiceServlet")).to(DataServiceServletFetcher.class);

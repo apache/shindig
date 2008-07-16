@@ -16,30 +16,24 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.shindig.social.dataservice;
+package org.apache.shindig.social.samplecontainer;
+
+import org.apache.shindig.social.dataservice.ActivityHandler;
+import org.apache.shindig.social.dataservice.AppDataHandler;
+import org.apache.shindig.social.dataservice.DataRequestHandler;
+import org.apache.shindig.social.dataservice.HandlerProvider;
+import org.apache.shindig.social.dataservice.PersonHandler;
 
 import com.google.inject.Inject;
-import com.google.common.collect.Maps;
 
 import java.util.Map;
 
-// TODO: We may want to extract an interface here for easier overriding
-// For now you can subclass it and inject with guice
-public class HandlerProvider {
-  protected Map<String, Class<? extends DataRequestHandler>> handlers;
-
-  // Used by tests
-  public HandlerProvider(Map<String, Class<? extends DataRequestHandler>> handlers) {
-    this.handlers = handlers;
-  }
-
+public class SampleContainerHandlerProvider extends HandlerProvider {
   @Inject
-  public HandlerProvider(PersonHandler peopleHandler, ActivityHandler activityHandler,
-      AppDataHandler appDataHandler) {
-    handlers = Maps.newHashMap();
-    handlers.put(DataServiceServlet.PEOPLE_ROUTE, peopleHandler.getClass());
-    handlers.put(DataServiceServlet.ACTIVITY_ROUTE, activityHandler.getClass());
-    handlers.put(DataServiceServlet.APPDATA_ROUTE, appDataHandler.getClass());
+  public SampleContainerHandlerProvider(PersonHandler peopleHandler,
+      ActivityHandler activityHandler, AppDataHandler appDataHandler) {
+    super(peopleHandler, activityHandler, appDataHandler);
+    handlers.put("samplecontainer", SampleContainerHandler.class);
   }
 
   public Map<String, Class<? extends DataRequestHandler>> get() {
