@@ -170,6 +170,8 @@ class ProxyHandler {
 		$status = (int)$result->getHttpCode();
 		if ($status == 200) {
 			$headers = explode("\n", $result->getResponseHeaders());
+			// Send the file as attachment
+			$headers[] = 'Content-Disposition: attachment; filename=p.txt';
 			foreach ($headers as $header) {
 				if (strpos($header, ':')) {
 					$key = trim(substr($header, 0, strpos($header, ':')));
