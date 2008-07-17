@@ -25,7 +25,7 @@ abstract class DataRequestHandler {
 		$owner = $token->getOwnerId();
 		$viewer = $token->getViewerId();
 		$method = $requestItem->getMethod();
-		if ($owner == 0 && $viewer == 0 && $method != 'GET') {
+		if ($owner === 0 && $viewer === 0 && $method != 'GET') {
 			// Anonymous requests are only allowed to GET data (not create/edit/delete)
 			$response = new ResponseItem(BAD_REQUEST, "[$method] not allowed for anonymous users", null);
 		} elseif ($method == 'GET') {			
