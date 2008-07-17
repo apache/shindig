@@ -6,7 +6,7 @@ Prequisites before building Shindig for PHP
 In order to build and run Shindig for PHP, you must have the following:
 
 - A Subversion client installed in order to checkout the code.
-  Instructions for downloading and installing Subversion can be found here: 
+  Instructions for downloading and installing Subversion can be found here:
   http://subversion.tigris.org/
 - Apache with mod_rewrite enabled.
 - PHP 5.2.x with the json, simplexml, mcrypt and curl extentions enabled.
@@ -14,7 +14,7 @@ In order to build and run Shindig for PHP, you must have the following:
 
 Getting the code
 ============================================
-Create a subdirectory in your web document root, e.g. /var/www/html and 
+Create a subdirectory in your web document root, e.g. /var/www/html and
 checkout the Shindig code from its Subversion repository
 
 mkdir /var/www/html/shindig
@@ -24,7 +24,7 @@ svn co http://svn.apache.org/repos/asf/incubator/shindig/trunk/ .
 
 Running Shindig
 ============================================
-With PHP There is no need to build anything - the source code 
+With PHP There is no need to build anything - the source code
 is already built.
 
 To run the code, you have several options:
@@ -54,6 +54,9 @@ b. Run with an existing host
 If you cannot/don't want to create a virtual host, you can edit the file php/config/container.php
 or php/config/local.php (see the comments php/config/container.php for documentation of the
 configuration system) and change the web_prefix setting to '/shindig/php'.
+
+In this case, you should also change all paths in shindig/config/container.js
+(see the comments there for documentation of the JSON configuration system).
 
 Then you can run the gadget by pointing your browser to:
 
