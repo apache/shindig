@@ -23,23 +23,17 @@ import org.apache.shindig.common.servlet.ParameterFetcher;
 
 import com.google.common.collect.Maps;
 
-import java.util.Map;
-
 import javax.servlet.http.HttpServletRequest;
+import java.util.Map;
 
 /**
  * Default implementation for the GadgetDataServlet parameter fetcher. Do not
  * change unless you have a compelling need to pass more parameters into the
  * createResponse method.
  */
-public class DataServiceServletFetcher
-        implements ParameterFetcher
-{
-    public Map<String, String> fetch(HttpServletRequest req)
-    {
-        final Map<String, String> params = Maps.newHashMapWithExpectedSize(1);
-        params.put(SecurityTokenDecoder.SECURITY_TOKEN_NAME, req.getParameter("st"));
-        return params;
-    }
+public class DataServiceServletFetcher implements ParameterFetcher {
+  public Map<String, String> fetch(HttpServletRequest req) {
+    return Maps.immutableMap(SecurityTokenDecoder.SECURITY_TOKEN_NAME, req.getParameter("st"));
+  }
 }
 
