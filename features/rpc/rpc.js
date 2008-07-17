@@ -47,6 +47,7 @@ gadgets.rpc = function() {
   var callId = 0;
   var callbacks = {};
   var setup = {};
+  var sameDomain = {};
 
   var params = {};
 
@@ -371,6 +372,45 @@ gadgets.rpc = function() {
     setTimeout(function() { document.body.appendChild(iframe); }, 0);
   }
 
+  /**
+   * Attempts to make an rpc by calling the target's receive method directly.
+   * This works when gadgets are rendered on the same domain as their container,
+   * a potentially useful optimization for trusted content which keeps
+   * RPC behind a consistent interface.
+   * @param {String} target Module id of the rpc service provider
+   * @param {String} from Module id of the caller (this)
+   * @param {String} callbackId Id of the call
+   * @param {String} rpcData JSON-encoded RPC payload
+   * @return
+   */
+  function callSameDomain(target, rpc) {
+    if (typeof sameDomain[target] === 'undefined') {
+      // Seed with a negative, typed value to avoid
+      // hitting this code path repeatedly
+      sameDomain[target] = false;
+      var targetEl = null;
+      if (target === '..') {
+        targetEl = parent;
+      } else {
+        targetEl = frames[target];
+      }
+      try {
+        // If this succeeds, then same-domain policy applied
+        sameDomain[target] = targetEl.gadgets.rpc.receiveSameDomain;
+      } catch (e) {
+        // Usual case: different domains
+      }
+    }
+
+    if (typeof sameDomain[target] === 'function') {
+      // Call target's receive method
+      sameDomain[target](rpc);
+      return true;
+    }
+
+    return false;
+  }
+
   // gadgets.config might not be available, such as when serving container js.
   if (gadgets.config) {
     /**
@@ -493,13 +533,20 @@ gadgets.rpc = function() {
       }
 
       // Not used by legacy, create it anyway...
-      var rpcData = gadgets.json.stringify({
+      var rpc = {
         s: serviceName,
         f: from,
         c: callback ? callId : 0,
         a: Array.prototype.slice.call(arguments, 3),
         t: authToken[targetId]
-      });
+      };
+
+      // If target is on the same domain, call method directly
+      if (callSameDomain(targetId, rpc)) {
+        return;
+      }
+
+      var rpcData = gadgets.json.stringify(rpc);
 
       var channelType = relayChannel;
 
@@ -595,6 +642,18 @@ gadgets.rpc = function() {
         process(gadgets.json.parse(
             decodeURIComponent(fragment[fragment.length - 1])));
       }
+    },
+
+    /**
+     * Receives and processes an RPC request sent via the same domain.
+     * (Not to be used directly). Converts the inbound rpc object's
+     * Array into a local Array to pass the process() Array test.
+     * @param {Object} rpc RPC object containing all request params
+     */
+    receiveSameDomain: function(rpc) {
+      // Pass through to local process method but converting to a local Array
+      rpc.a = Array.prototype.slice.call(rpc.a);
+      window.setTimeout(function() { process(rpc) }, 0);
     }
   };
 }();
