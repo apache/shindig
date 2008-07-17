@@ -46,22 +46,13 @@ function __autoload($className)
 					'src/gadgets/http',
 					'src/gadgets/oauth',
 					'src/gadgets/samplecontainer',
-					'src/socialdata/opensocial/model' 
+					'src/socialdata/opensocial/model',
+					'src/socialrest',
+					'src/socialrest/http',
+					'src/socialrest/opensocial',
+					'src/socialrest/opensocial/model',
+					'src/socialrest/samplecontainer'
 				);
-	//FIXME the sample container implementations differ between the rest and json wire formats
-	//	this way containers that use the original SPI don't break on update
-	//	remove this hack once we completely switched over
-	if (strpos($_SERVER["REQUEST_URI"], '/social/rest') !== false) {
-		$locations[] = 'src/socialrest';
-		$locations[] = 'src/socialrest/http';
-		$locations[] = 'src/socialrest/opensocial';
-		$locations[] = 'src/socialrest/samplecontainer';
-	} elseif (strpos($_SERVER["REQUEST_URI"], '/social/data') !== false) {
-		$locations[] = 'src/socialdata';
-		$locations[] = 'src/socialdata/http';
-		$locations[] = 'src/socialdata/opensocial';
-		$locations[] = 'src/socialdata/samplecontainer';
-	}
 	$extension_class_paths = Config::get('extension_class_paths');
 	if (!empty($extension_class_paths)) {
 		$locations = array_merge(explode(',', $extension_class_paths), $locations);
@@ -83,7 +74,6 @@ $servletMap = array(
 		Config::get('web_prefix') . '/gadgets/makeRequest' => 'ProxyServlet', 
 		Config::get('web_prefix') . '/gadgets/ifr' => 'GadgetRenderingServlet', 
 		Config::get('web_prefix') . '/gadgets/metadata' => 'JsonRpcServlet', 
-		Config::get('web_prefix') . '/social/data' => 'GadgetDataServlet', 
 		Config::get('web_prefix') . '/social/rest' => 'RestServlet', 
 		Config::get('web_prefix') . '/public.crt' => 'CertServlet'
 		);
