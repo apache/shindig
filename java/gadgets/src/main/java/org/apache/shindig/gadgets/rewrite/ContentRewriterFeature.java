@@ -17,9 +17,12 @@
  */
 package org.apache.shindig.gadgets.rewrite;
 
+import com.google.common.collect.Lists;
+
 import org.apache.shindig.gadgets.spec.Feature;
 import org.apache.shindig.gadgets.spec.GadgetSpec;
 
+import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.regex.Pattern;
@@ -33,6 +36,9 @@ public class ContentRewriterFeature {
   private static final String INCLUDE_URLS = "include-urls";
   private static final String EXCLUDE_URLS = "exclude-urls";
   private static final String INCLUDE_TAGS = "include-tags";
+  private static final String EXPIRES = "expires";
+
+  public static final String EXPIRES_DEFAULT = "HTTP";
 
   // Use tree set to maintain order for fingerprint
   private TreeSet<String> includeTags;
@@ -43,6 +49,9 @@ public class ContentRewriterFeature {
   private Pattern include;
   private Pattern exclude;
 
+  // If null then dont enforce a min TTL for proxied content. Use contents headers
+  private Integer expires;
+
   private Integer fingerprint;
 
   /**
@@ -51,15 +60,20 @@ public class ContentRewriterFeature {
    * @param spec
    * @param defaultInclude As a regex
    * @param defaultExclude As a regex
+   * @param defaultExpires Either "HTTP" or a ttl in seconds
    * @param defaultTags    Set of default tags that can be rewritten
    */
   public ContentRewriterFeature(GadgetSpec spec, String defaultInclude,
-                                String defaultExclude, Set<String> defaultTags) {
+                                String defaultExclude,
+                                String defaultExpires,
+      Set<String> defaultTags) {
     Feature f = spec.getModulePrefs().getFeatures().get("content-rewrite");
     String includeRegex = normalizeParam(defaultInclude, null);
     String excludeRegex = normalizeParam(defaultExclude, null);
+
     this.includeTags = new TreeSet<String>(defaultTags);
 
+    List<String> expiresOptions = Lists.newArrayListWithCapacity(3);
     if (f != null) {
       if (f.getParams().containsKey(INCLUDE_URLS)) {
         includeRegex = normalizeParam(f.getParams().get(INCLUDE_URLS), includeRegex);
@@ -79,6 +93,25 @@ public class ContentRewriterFeature {
           }
         }
         includeTags = tags;
+      }
+
+      if (f.getParams().containsKey(EXPIRES)) {
+        expiresOptions.add(normalizeParam(f.getParams().get(EXPIRES), null));
+      }
+    }
+
+    expiresOptions.add(defaultExpires);
+    expiresOptions.add(EXPIRES_DEFAULT);
+
+    for (String expiryOption : expiresOptions) {
+      try {
+        expires = new Integer(expiryOption);
+        break;
+      } catch (NumberFormatException nfe) {
+        // Not an integer
+        if (EXPIRES_DEFAULT.equalsIgnoreCase(expiryOption)) {
+          break;
+        }
       }
     }
 
@@ -133,6 +166,13 @@ public class ContentRewriterFeature {
 
   public Set<String> getIncludedTags() {
     return includeTags;
+  }
+
+  /**
+   * @return the min TTL to enforce or null if proxy should respect headers
+   */
+  public Integer getExpires() {
+    return expires;
   }
 
   /**

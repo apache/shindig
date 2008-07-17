@@ -18,6 +18,7 @@
 package org.apache.shindig.gadgets.rewrite;
 
 import com.google.common.collect.Sets;
+
 import org.apache.commons.lang.StringUtils;
 import org.apache.shindig.gadgets.EasyMockTestCase;
 import org.apache.shindig.gadgets.GadgetException;
@@ -39,17 +40,20 @@ public abstract class BaseRewriterTestCase extends EasyMockTestCase {
   protected void setUp() throws Exception {
     super.setUp();
     tags = Sets.newHashSet("embed", "img", "script", "link");
-    contentRewriterFeature = new ContentRewriterFeature(getSpecWithoutRewrite(), ".*", "", tags);
+    contentRewriterFeature = new ContentRewriterFeature(getSpecWithoutRewrite(), ".*", "", "HTTP",
+        tags);
     defaultRewriter = new ProxyingLinkRewriter(
       SPEC_URL,
       contentRewriterFeature,
       "http://www.test.com/proxy?url=");
   }
 
-  protected GadgetSpec getSpecWithRewrite(String include, String exclude, Set<String> tags) throws GadgetException {
+  protected GadgetSpec getSpecWithRewrite(String include, String exclude, String expires,
+      Set<String> tags) throws GadgetException {
     String xml = "<Module>" +
                  "<ModulePrefs title=\"title\">" +
                  "<Optional feature=\"content-rewrite\">\n" +
+                 "      <Param name=\"expires\">" + expires + "</Param>\n" +
                  "      <Param name=\"include-urls\">" + include + "</Param>\n" +
                  "      <Param name=\"exclude-urls\">" + exclude + "</Param>\n" +
                  "      <Param name=\"include-tags\">" + StringUtils.join(tags, ",") + "</Param>\n" +

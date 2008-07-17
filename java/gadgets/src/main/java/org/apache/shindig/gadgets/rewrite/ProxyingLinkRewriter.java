@@ -19,6 +19,7 @@
 package org.apache.shindig.gadgets.rewrite;
 
 import org.apache.shindig.common.util.Utf8UrlCoder;
+import org.apache.shindig.gadgets.servlet.ProxyBase;
 
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -53,12 +54,16 @@ public class ProxyingLinkRewriter implements LinkRewriter {
       URI linkUri = new URI(link);
       URI uri = context.resolve(linkUri);
       if (rewriterFeature.shouldRewriteURL(uri.toString())) {
-        return prefix
+        String result = prefix
             + Utf8UrlCoder.encode(uri.toString())
             + "&gadget="
             + Utf8UrlCoder.encode(gadgetUri.toString())
             + "&fp="
             + rewriterFeature.getFingerprint();
+        if (rewriterFeature.getExpires() != null) {
+          result += "&" + ProxyBase.REFRESH_PARAM  + "=" + rewriterFeature.getExpires().toString();
+        }
+        return result;
       } else {
         return uri.toString();
       }
