@@ -17,18 +17,11 @@
  */
 package org.apache.shindig.social.opensocial.util;
 
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
-import com.google.inject.Guice;
-
-import junit.framework.TestCase;
-
 import org.apache.shindig.social.SocialApiTestsGuiceModule;
 import org.apache.shindig.social.opensocial.model.Activity;
 import org.apache.shindig.social.opensocial.model.ActivityImpl;
 import org.apache.shindig.social.opensocial.model.Address;
 import org.apache.shindig.social.opensocial.model.AddressImpl;
-import org.apache.shindig.social.opensocial.model.DataCollection;
 import org.apache.shindig.social.opensocial.model.Email;
 import org.apache.shindig.social.opensocial.model.EmailImpl;
 import org.apache.shindig.social.opensocial.model.MediaItem;
@@ -38,6 +31,11 @@ import org.apache.shindig.social.opensocial.model.Person;
 import org.apache.shindig.social.opensocial.model.PersonImpl;
 import org.apache.shindig.social.opensocial.model.Phone;
 import org.apache.shindig.social.opensocial.model.PhoneImpl;
+
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
+import com.google.inject.Guice;
+import junit.framework.TestCase;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -206,26 +204,6 @@ public class BeanJsonConverterTest extends TestCase {
     assertEquals("hello", actualItem.getUrl());
     assertEquals("mimey", actualItem.getMimeType());
     assertEquals("video", actualItem.getType().toString());
-  }
-
-  public void testJsonToData() throws Exception {
-    String jsonActivity = "{personId : 'john.doe', " +
-        "appdata : {count : 0, favoriteColor : 'yellow'}}";
-    DataCollection.Data result = beanJsonConverter.convertToObject(jsonActivity,
-        DataCollection.Data.class);
-
-    assertEquals("john.doe", result.getPersonId());
-    Map<String, String> data = result.getAppdata();
-    assertEquals(2, data.size());
-
-    for (String key : data.keySet()) {
-      String value = data.get(key);
-      if (key.equals("count")) {
-        assertEquals("0", value);
-      } else if (key.equals("favoriteColor")) {
-        assertEquals("yellow", value);
-      }
-    }
   }
 
   public void testJsonToMap() throws Exception {

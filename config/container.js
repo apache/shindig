@@ -98,7 +98,7 @@
   "opensocial-0.8" : {
     // Path to fetch opensocial data from
     // Must be on the same domain as the gadget rendering server
-    "path" : "/social/data",
+    "path" : "/social/rest",
     "domain" : "shindig",
     "enableCaja" : false,
     "supportedFields" : {
@@ -109,7 +109,7 @@
     // Otherwise, uses the json wire format.
     // If you are using the default Shindig setup and want to use rest, don't
     // forget to change the "path" config to /social/rest
-    "useRestful" : false
+    "useRestful" : true
   }
 
 }}

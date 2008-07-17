@@ -22,15 +22,13 @@ import org.apache.shindig.common.util.ImmediateFuture;
 import org.apache.shindig.social.ResponseError;
 import org.apache.shindig.social.ResponseItem;
 import org.apache.shindig.social.dataservice.ActivityService;
-import org.apache.shindig.social.dataservice.RestfulCollection;
 import org.apache.shindig.social.dataservice.GroupId;
+import org.apache.shindig.social.dataservice.RestfulCollection;
 import org.apache.shindig.social.dataservice.UserId;
-import org.apache.shindig.social.opensocial.ActivitiesService;
 import org.apache.shindig.social.opensocial.model.Activity;
 
 import com.google.common.collect.Lists;
 import com.google.inject.Inject;
-import org.json.JSONObject;
 
 import java.util.Date;
 import java.util.List;
@@ -38,8 +36,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Future;
 
-public class BasicActivitiesService implements ActivitiesService,
-    ActivityService {
+public class BasicActivitiesService implements ActivityService {
   private XmlStateFileFetcher fetcher;
 
   @Inject
@@ -47,49 +44,6 @@ public class BasicActivitiesService implements ActivitiesService,
     this.fetcher = fetcher;
     fetcher.loadDefaultStateFileIfNoneLoaded();
   }
-
-  public ResponseItem<List<Activity>> getActivities(List<String> ids,
-      SecurityToken token) {
-    Map<String, List<Activity>> allActivities = fetcher.getActivities();
-
-    List<Activity> activities = Lists.newArrayList();
-
-    for (String id : ids) {
-      List<Activity> personActivities = allActivities.get(id);
-      if (personActivities != null) {
-        activities.addAll(personActivities);
-      }
-    }
-
-    // TODO: Sort them
-    return new ResponseItem<List<Activity>>(activities);
-  }
-
-  public ResponseItem<Activity> getActivity(String id, String activityId,
-      SecurityToken token) {
-    List<Activity> allActivities = getActivities(
-        Lists.newArrayList(id), token).getResponse();
-
-    for (Activity activity : allActivities) {
-      if (activity.getId().equals(activityId)) {
-        return new ResponseItem<Activity>(activity);
-      }
-    }
-    return new ResponseItem<Activity>(ResponseError.BAD_REQUEST,
-        "Activity not found", null);
-  }
-
-  public ResponseItem createActivity(String personId, Activity activity,
-      SecurityToken token) {
-    // TODO: Validate the activity and do any template expanding
-    activity.setUserId(personId);
-    activity.setPostedTime(new Date().getTime());
-
-    fetcher.createActivity(personId, activity);
-    return new ResponseItem<JSONObject>(new JSONObject());
-  }
-
-  // New interface methods
 
   public Future<ResponseItem<RestfulCollection<Activity>>> getActivities(UserId userId,
       GroupId groupId, String appId, Set<String> fields, SecurityToken token) {

@@ -43,14 +43,6 @@
     <listener-class>org.apache.shindig.common.servlet.GuiceServletContextListener</listener-class>
   </listener>
 
-  <!-- Serve social data -->
-  <servlet>
-    <servlet-name>socialdata</servlet-name>
-    <servlet-class>
-      org.apache.shindig.social.GadgetDataServlet
-    </servlet-class>
-  </servlet>
-
   <!-- Serve REST api -->
   <servlet>
     <servlet-name>restapiServlet</servlet-name>
@@ -58,11 +50,6 @@
       org.apache.shindig.social.dataservice.DataServiceServlet
     </servlet-class>
   </servlet>
-
-  <servlet-mapping>
-    <servlet-name>socialdata</servlet-name>
-    <url-pattern>/social/data</url-pattern>
-  </servlet-mapping>
 
   <servlet-mapping>
     <servlet-name>restapiServlet</servlet-name>

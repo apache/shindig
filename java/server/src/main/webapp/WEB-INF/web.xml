@@ -73,14 +73,6 @@
     </servlet-class>
   </servlet>
 
-  <!-- Serve social data -->
-  <servlet>
-    <servlet-name>socialdata</servlet-name>
-    <servlet-class>
-      org.apache.shindig.social.GadgetDataServlet
-    </servlet-class>
-  </servlet>
-
   <!-- javascript serving -->
   <servlet>
     <servlet-name>js</servlet-name>
@@ -123,11 +115,6 @@
   <servlet-mapping>
     <servlet-name>metadata</servlet-name>
     <url-pattern>/gadgets/metadata</url-pattern>
-  </servlet-mapping>
-
-  <servlet-mapping>
-    <servlet-name>socialdata</servlet-name>
-    <url-pattern>/social/data</url-pattern>
   </servlet-mapping>
 
   <servlet-mapping>
