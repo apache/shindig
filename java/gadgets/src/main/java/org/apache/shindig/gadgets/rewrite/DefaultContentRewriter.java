@@ -17,15 +17,15 @@
  */
 package org.apache.shindig.gadgets.rewrite;
 
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
+import com.google.inject.name.Named;
+
 import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.GadgetSpecFactory;
 import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.http.HttpResponse;
 import org.apache.shindig.gadgets.spec.GadgetSpec;
-
-import com.google.inject.Inject;
-import com.google.inject.Singleton;
-import com.google.inject.name.Named;
 
 import java.io.ByteArrayOutputStream;
 import java.io.InputStreamReader;
@@ -50,6 +50,7 @@ public class DefaultContentRewriter implements ContentRewriter {
   private final GadgetSpecFactory specFactory;
   private final String includeUrls;
   private final String excludeUrls;
+  private final String expires;
   private final Set<String> includeTags;
 
   @Inject
@@ -57,10 +58,12 @@ public class DefaultContentRewriter implements ContentRewriter {
       GadgetSpecFactory specFactory,
       @Named("content-rewrite.include-urls")String includeUrls,
       @Named("content-rewrite.exclude-urls")String excludeUrls,
+      @Named("content-rewrite.expires")String expires,
       @Named("content-rewrite.include-tags")String includeTags) {
     this.specFactory = specFactory;
     this.includeUrls = includeUrls;
     this.excludeUrls = excludeUrls;
+    this.expires = expires;
     this.includeTags = new HashSet<String>();
     for (String s : includeTags.split(",")) {
       if (s != null && s.trim().length() > 0) {
@@ -117,7 +120,8 @@ public class DefaultContentRewriter implements ContentRewriter {
     // Store the feature in the spec so we dont keep parsing it
     ContentRewriterFeature rewriterFeature = (ContentRewriterFeature)spec.getAttribute("content-rewrite");
     if (rewriterFeature == null) {
-      rewriterFeature = new ContentRewriterFeature(spec, includeUrls, excludeUrls, includeTags);
+      rewriterFeature = new ContentRewriterFeature(spec, includeUrls, excludeUrls, expires,
+          includeTags);
       spec.setAttribute("content-rewrite", rewriterFeature);
     }
 

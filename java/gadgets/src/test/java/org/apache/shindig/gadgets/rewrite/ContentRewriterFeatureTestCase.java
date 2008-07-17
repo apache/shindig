@@ -27,50 +27,56 @@ import java.util.Set;
 public class ContentRewriterFeatureTestCase extends BaseRewriterTestCase {
 
   public void testContainerDefaultIncludeAll() throws Exception {
-    contentRewriterFeature = new ContentRewriterFeature(getSpecWithoutRewrite(), ".*", "", tags);
+    contentRewriterFeature = new ContentRewriterFeature(getSpecWithoutRewrite(), ".*", "", "0", tags);
     assertTrue(contentRewriterFeature.isRewriteEnabled());
     assertTrue(contentRewriterFeature.shouldRewriteURL("http://www.test.com"));
   }
 
   public void testContainerDefaultIncludeNone() throws Exception {
-    contentRewriterFeature = new ContentRewriterFeature(getSpecWithoutRewrite(), "", ".*", tags);
+    contentRewriterFeature = new ContentRewriterFeature(getSpecWithoutRewrite(), "", ".*", "0", tags);
     assertFalse(contentRewriterFeature.isRewriteEnabled());
     assertFalse(contentRewriterFeature.shouldRewriteURL("http://www.test.com"));
   }
 
   public void testContainerDefaultExcludeOverridesInclude() throws Exception {
-    contentRewriterFeature = new ContentRewriterFeature(getSpecWithoutRewrite(), ".*", ".*", tags);
+    contentRewriterFeature = new ContentRewriterFeature(getSpecWithoutRewrite(), ".*", ".*", "0",
+        tags);
     assertFalse(contentRewriterFeature.isRewriteEnabled());
     assertFalse(contentRewriterFeature.shouldRewriteURL("http://www.test.com"));
   }
 
   public void testSpecExcludeOverridesContainerDefaultInclude() throws Exception {
-    contentRewriterFeature = new ContentRewriterFeature(getSpecWithRewrite("", ".*", tags), ".*", "", tags);
+    contentRewriterFeature = new ContentRewriterFeature(getSpecWithRewrite("", ".*", "0", tags), ".*",
+        "", "0", tags);
     assertFalse(contentRewriterFeature.isRewriteEnabled());
     assertFalse(contentRewriterFeature.shouldRewriteURL("http://www.test.com"));
   }
 
   public void testSpecIncludeOverridesContainerDefaultExclude() throws Exception {
-    contentRewriterFeature = new ContentRewriterFeature(getSpecWithRewrite(".*", "", tags), "", ".*", tags);
+    contentRewriterFeature = new ContentRewriterFeature(getSpecWithRewrite(".*", "", "0", tags), "",
+        ".*", "0", tags);
     assertTrue(contentRewriterFeature.isRewriteEnabled());
     assertTrue(contentRewriterFeature.shouldRewriteURL("http://www.test.com"));
   }
 
   public void testExcludeOverridesInclude() throws Exception {
-    contentRewriterFeature = new ContentRewriterFeature(getSpecWithRewrite("test\\.com", "test", tags), "", "", tags);
+    contentRewriterFeature = new ContentRewriterFeature(
+        getSpecWithRewrite("test\\.com", "test", "0", tags), "", "", "0", tags);
     assertTrue(contentRewriterFeature.isRewriteEnabled());
     assertFalse(contentRewriterFeature.shouldRewriteURL("http://www.test.com"));
   }
 
   public void testIncludeOnlyMatch() throws Exception {
-    contentRewriterFeature = new ContentRewriterFeature(getSpecWithRewrite("test\\.com", "testx", tags), "", "", tags);
+    contentRewriterFeature = new ContentRewriterFeature(
+        getSpecWithRewrite("test\\.com", "testx", "0", tags), "", "", "0", tags);
     assertTrue(contentRewriterFeature.isRewriteEnabled());
     assertTrue(contentRewriterFeature.shouldRewriteURL("http://www.test.com"));
     assertFalse(contentRewriterFeature.shouldRewriteURL("http://testx.test.com"));
   }
 
   public void testTagRewrite() throws Exception {
-    contentRewriterFeature = new ContentRewriterFeature(getSpecWithRewrite("test\\.com", "testx", tags), "", "", tags);
+    contentRewriterFeature = new ContentRewriterFeature(
+        getSpecWithRewrite("test\\.com", "testx", "0", tags), "", "", "0", tags);
     assertFalse(contentRewriterFeature.shouldRewriteTag("IFRAME"));
     assertTrue(contentRewriterFeature.shouldRewriteTag("img"));
     assertTrue(contentRewriterFeature.shouldRewriteTag("ScripT"));
@@ -78,10 +84,32 @@ public class ContentRewriterFeatureTestCase extends BaseRewriterTestCase {
 
   public void testOverrideTagRewrite() throws Exception {
     Set<String> newTags = Sets.newHashSet("iframe");
-    contentRewriterFeature = new ContentRewriterFeature(getSpecWithRewrite("test\\.com", "testx", newTags), "", "", tags);
+    contentRewriterFeature = new ContentRewriterFeature(
+        getSpecWithRewrite("test\\.com", "testx", "0", newTags), "", "", "0", tags);
     assertTrue(contentRewriterFeature.shouldRewriteTag("IFRAME"));
     assertFalse(contentRewriterFeature.shouldRewriteTag("img"));
     assertFalse(contentRewriterFeature.shouldRewriteTag("ScripT"));
     assertFalse(contentRewriterFeature.shouldRewriteTag("link"));
   }
+
+  public void testExpiresTimeParse() throws Exception {
+    contentRewriterFeature = new ContentRewriterFeature(
+        getSpecWithRewrite("test\\.com", "testx", "12345", tags), "", "", "0", tags);
+    assertNotNull(contentRewriterFeature.getExpires());
+    assertNotNull(contentRewriterFeature.getExpires() == 12345);
+  }
+
+  public void testExpiresHTTPParse() throws Exception {
+    contentRewriterFeature = new ContentRewriterFeature(
+        getSpecWithRewrite("test\\.com", "testx", "htTp ", tags), "", "", "12345", tags);
+    assertNull(contentRewriterFeature.getExpires());
+  }
+
+  public void testExpiresInvalidParse() throws Exception {
+    contentRewriterFeature = new ContentRewriterFeature(
+        getSpecWithRewrite("test\\.com", "testx", "junk", tags), "", "", "12345", tags);
+    assertNotNull(contentRewriterFeature.getExpires());
+    assertNotNull(contentRewriterFeature.getExpires() == 12345);
+  }
+
 }

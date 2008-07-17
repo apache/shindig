@@ -17,6 +17,8 @@
  */
 package org.apache.shindig.gadgets.rewrite;
 
+import com.google.common.collect.Sets;
+
 /**
  * Test of proxying rewriter
  */
@@ -50,9 +52,22 @@ public class ProxyingLinkRewriterTest extends BaseRewriterTestCase {
         rewrite(val));
   }
 
+  public void testWithRefresh() throws Exception {
+    ContentRewriterFeature contentRewriterFeature = new ContentRewriterFeature(
+        getSpecWithoutRewrite(), ".*", "", "86400",
+        Sets.newHashSet("embed", "img", "script", "link"));
+    ProxyingLinkRewriter rewriter = new ProxyingLinkRewriter(
+      SPEC_URL,
+      contentRewriterFeature,
+      "http://www.test.com/proxy?url=");
+    String val = " test.gif ";
+    assertEquals("http://www.test.com/proxy?url=http%3A%2F%2Fexample.org%2Ftest.gif&gadget=http%3A%2F%2Fexample.org%2Fg.xml&fp=-840722081&refresh=86400",
+        rewriter.rewrite(val, SPEC_URL));
+  }
+
   public void testInvalidCharRewrite() {
     String val = "/images/opensocial/movie_trivia/76/${quiz.picture_url}";
-    assertEquals("/images/opensocial/movie_trivia/76/${quiz.picture_url}",
+    assertEquals(val,
         rewrite(val));
   }
 
