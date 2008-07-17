@@ -38,7 +38,7 @@ gadgets.rpc = function() {
   // Consts for FrameElement.
   var FE_G2C_CHANNEL = '__g2c_rpc';
   var FE_C2G_CHANNEL = '__c2g_rpc';
- 
+
   var services = {};
   var iframePool = [];
   var relayUrl = {};
@@ -66,7 +66,7 @@ gadgets.rpc = function() {
    * + For those browsers that support native messaging (various implementations
    *   of the HTML5 postMessage method), use that. Officially defined at
    *   http://www.whatwg.org/specs/web-apps/current-work/multipage/comms.html.
-   *   
+   *
    *   postMessage is a native implementation of XDC. A page registers that
    *   it would like to receive messages by listening the the "message" event
    *   on the window (document in DPM) object. In turn, another page can
@@ -76,7 +76,7 @@ gadgets.rpc = function() {
    *   the message. The target page will then have its "message" event raised
    *   if the domain matches and can, in turn, check the origin of the message
    *   and process the data contained within.
-   *  
+   *
    *     wpm: postMessage on the window object.
    *        - Internet Explorer 8+
    *        - Safari (latest nightlies as of 26/6/2008)
@@ -230,12 +230,37 @@ gadgets.rpc = function() {
         }
       }
 
+      // If there is a callback for this service, attach a callback function
+      // to the rpc context object for asynchronous rpc services.
+      //
+      // Synchronous rpc request handlers should simply ignore it and return a
+      // value as usual.
+      // Asynchronous rpc request handlers, on the other hand, should pass its
+      // result to this callback function and not return a value on exit.
+      //
+      // For example, the following rpc handler passes the first parameter back
+      // to its rpc client with a one-second delay.
+      //
+      // function asyncRpcHandler(param) {
+      //   var me = this;
+      //   setTimeout(function() {
+      //     me.callback(param);
+      //   }, 1000);
+      // }
+      if (rpc.c) {
+        rpc.callback = function(result) {
+          gadgets.rpc.call(rpc.f, CALLBACK_NAME, null, rpc.c, result);
+        };
+      }
+
       // Call the requested RPC service.
       var result = (services[rpc.s] ||
                     services[DEFAULT_NAME]).apply(rpc, rpc.a);
 
-      // If there is a callback for this service, initiate it as well.
-      if (rpc.c) {
+      // If the rpc request handler returns a value, immediately pass it back
+      // to the callback. Otherwise, do nothing, assuming that the rpc handler
+      // will make an asynchronous call later.
+      if (rpc.c && typeof result != 'undefined') {
         gadgets.rpc.call(rpc.f, CALLBACK_NAME, null, rpc.c, result);
       }
     }
@@ -256,7 +281,7 @@ gadgets.rpc = function() {
       if (from != '..') {
         // Call from gadget to the container.
         var fe = window.frameElement;
-      
+
         if (typeof fe[FE_G2C_CHANNEL] === 'function') {
           // Complete the setup of the FE channel if need be.
           if (typeof fe[FE_G2C_CHANNEL][FE_C2G_CHANNEL] !== 'function') {
@@ -460,7 +485,7 @@ gadgets.rpc = function() {
       }
 
       if (serviceName == DEFAULT_NAME) {
-        throw new Error("Cannot overwrite default service:" 
+        throw new Error("Cannot overwrite default service:"
                         + " use registerDefault");
       }
 
@@ -479,7 +504,7 @@ gadgets.rpc = function() {
       }
 
       if (serviceName == DEFAULT_NAME) {
-        throw new Error("Cannot delete default service:" 
+        throw new Error("Cannot delete default service:"
                         + " use unregisterDefault");
       }
 
