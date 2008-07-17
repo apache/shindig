@@ -62,11 +62,9 @@ public class SocialApiTestsGuiceModule extends AbstractModule {
 
   @Override
   protected void configure() {
-
     bind(XmlStateFileFetcher.class).to(MockXmlStateFileFetcher.class);
-
-    bind(ParameterFetcher.class).annotatedWith(Names.named("GadgetDataServlet")).to(GadgetDataServletFetcher.class);
-    bind(ParameterFetcher.class).annotatedWith(Names.named("DataServiceServlet")).to(DataServiceServletFetcher.class);
+    bind(ParameterFetcher.class).annotatedWith(Names.named("DataServiceServlet"))
+        .to(DataServiceServletFetcher.class);
   }
 
   @Singleton

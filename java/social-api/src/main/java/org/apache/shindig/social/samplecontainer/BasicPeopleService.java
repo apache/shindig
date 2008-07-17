@@ -25,15 +25,10 @@ import org.apache.shindig.social.dataservice.GroupId;
 import org.apache.shindig.social.dataservice.PersonService;
 import org.apache.shindig.social.dataservice.RestfulCollection;
 import org.apache.shindig.social.dataservice.UserId;
-import org.apache.shindig.social.opensocial.PeopleService;
-import org.apache.shindig.social.opensocial.model.ApiCollection;
-import org.apache.shindig.social.opensocial.model.ApiCollectionImpl;
-import org.apache.shindig.social.opensocial.model.IdSpec;
 import org.apache.shindig.social.opensocial.model.Person;
 
 import com.google.common.collect.Lists;
 import com.google.inject.Inject;
-import org.json.JSONException;
 
 import java.util.Collections;
 import java.util.Comparator;
@@ -42,7 +37,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Future;
 
-public class BasicPeopleService implements PeopleService, PersonService {
+public class BasicPeopleService implements PersonService {
   private static final Comparator<Person> NAME_COMPARATOR
       = new Comparator<Person>() {
     public int compare(Person person, Person person1) {
@@ -78,73 +73,6 @@ public class BasicPeopleService implements PeopleService, PersonService {
     }
     return people;
   }
-
-  public ResponseItem<ApiCollection<Person>> getPeople(List<String> ids,
-      PeopleService.SortOrder sortOrder, PeopleService.FilterType filter,
-      int first, int max,
-      Set<String> profileDetails, SecurityToken token) {
-    List<Person> people = getPeople(ids, token);
-
-    // We can pretend that by default the people are in top friends order
-    if (sortOrder.equals(PeopleService.SortOrder.name)) {
-      Collections.sort(people, NAME_COMPARATOR);
-    }
-
-    // TODO: The samplecontainer doesn't really have the concept of HAS_APP so
-    // we can't support any filters yet. We should fix this.
-
-    int totalSize = people.size();
-    int last = first + max;
-    people = people.subList(first, Math.min(last, totalSize));
-
-    ApiCollection<Person> collection = new ApiCollectionImpl<Person>(people, first,
-        totalSize);
-    return new ResponseItem<ApiCollection<Person>>(collection);
-  }
-
-  public ResponseItem<Person> getPerson(String id, SecurityToken token) {
-    List<Person> people = getPeople(Lists.newArrayList(id), token);
-    if (people.size() == 1) {
-      return new ResponseItem<Person>(people.get(0));
-    } else {
-      return new ResponseItem<Person>(ResponseError.BAD_REQUEST,
-          "Person " + id + " not found", null);
-    }
-  }
-
-  public List<String> getIds(IdSpec idSpec, SecurityToken token)
-      throws JSONException {
-    Map<String, List<String>> friendIds = fetcher.getFriendIds();
-
-    List<String> ids = Lists.newArrayList();
-    switch(idSpec.getType()) {
-      case OWNER:
-        ids.add(token.getOwnerId());
-        break;
-      case VIEWER:
-        ids.add(token.getViewerId());
-        break;
-      case OWNER_FRIENDS:
-        List<String> ownerFriends = friendIds.get(token.getOwnerId());
-        if (ownerFriends != null) {
-          ids.addAll(ownerFriends);
-        }
-        break;
-      case VIEWER_FRIENDS:
-        List<String> viewerFriends = friendIds.get(token.getViewerId());
-        if (viewerFriends != null) {
-          ids.addAll(viewerFriends);
-        }
-        break;
-      case USER_IDS:
-        ids.addAll(idSpec.fetchUserIds());
-        break;
-    }
-    return ids;
-  }
-
-
-  // New interface methods
 
   public Future<ResponseItem<RestfulCollection<Person>>> getPeople(UserId userId,
       GroupId groupId, PersonService.SortOrder sortOrder,

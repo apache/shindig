@@ -25,19 +25,17 @@ import org.apache.shindig.social.dataservice.AppDataService;
 import org.apache.shindig.social.dataservice.DataCollection;
 import org.apache.shindig.social.dataservice.GroupId;
 import org.apache.shindig.social.dataservice.UserId;
-import org.apache.shindig.social.opensocial.DataService;
 
-import com.google.common.collect.Maps;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import com.google.inject.Inject;
-import org.json.JSONObject;
 
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Future;
 
-public class BasicDataService implements DataService, AppDataService {
+public class BasicDataService implements AppDataService {
 
   private XmlStateFileFetcher fetcher;
 
@@ -47,8 +45,8 @@ public class BasicDataService implements DataService, AppDataService {
     fetcher.loadDefaultStateFileIfNoneLoaded();
   }
 
-  public ResponseItem<Map<String, Map<String, String>>> getPersonData(
-      List<String> ids, List<String> keys, SecurityToken token) {
+  private Map<String, Map<String, String>> getPersonData(
+      List<String> ids, Set<String> keys, SecurityToken token) {
 
     Map<String, Map<String, String>> allData = fetcher.getAppData();
 
@@ -74,19 +72,7 @@ public class BasicDataService implements DataService, AppDataService {
       }
     }
 
-    return new ResponseItem<Map<String, Map<String, String>>>(data);
-  }
-
-  public ResponseItem updatePersonData(String id, String key, String value,
-      SecurityToken token) {
-    if (!isValidKey(key)) {
-      return new ResponseItem<Object>(ResponseError.BAD_REQUEST,
-          "The person data key had invalid characters",
-          null);
-    }
-
-    fetcher.setAppData(id, key, value);
-    return new ResponseItem<JSONObject>(new JSONObject());
+    return data;
   }
 
   /**
@@ -116,9 +102,6 @@ public class BasicDataService implements DataService, AppDataService {
     return true;
   }
 
-
-  // New interface methods
-
   public Future<ResponseItem<DataCollection>> getPersonData(
       UserId userId, GroupId groupId, String appId, Set<String> fields,
       SecurityToken token) {
@@ -136,8 +119,7 @@ public class BasicDataService implements DataService, AppDataService {
     }
 
     // TODO: Respect appId
-    Map<String, Map<String, String>> data
-        = getPersonData(ids, Lists.newArrayList(fields), token).getResponse();
+    Map<String, Map<String, String>> data = getPersonData(ids, fields, token);
     return ImmediateFuture.newInstance(new ResponseItem<DataCollection>(new DataCollection(data)));
   }
 
