@@ -20,6 +20,9 @@
 <feature>
   <name>opensocial-0.8</name>
   <dependency>opensocial-reference</dependency>
+  <!-- <dependency>caja</dependency> -->
+  <!-- Must include the "caja" feature to display samplecontainer -->
+  <!-- gadgets when "use caja" is checked -->
   <gadget>
     <script src="jsonperson.js"></script>
     <script src="jsonactivity.js"></script>
@@ -57,7 +60,7 @@
             opensocial.Container.setContainer(new ShindigContainer());
           }
 
-          if (configParams.enableCaja) {
+          if (window['caja']) {
             opensocial.Container.get().enableCaja();
           }
       });

@@ -51,10 +51,10 @@ var gadgetUrlCookie = 'sampleContainerGadgetUrl';
 var stateFileUrl = baseUrl + 'state-basicfriendlist.xml';
 var stateFileUrlCookie = 'sampleContainerStateFileUrl';
 
-var useCaja = false;
-var useCache = true;
-var usePermissive = false;
-var doEvil = false;
+var useCaja;
+var useCache;
+var usePermissive;
+var doEvil;
 var gadget;
 
 var viewerId = "john.doe";
@@ -93,13 +93,18 @@ function initGadget() {
   });
 };
 
-function changeGadgetUrl() {
+function unpackFormState() {
   useCaja = document.getElementById("useCajaCheckbox").checked;
   useCache = document.getElementById("useCacheCheckbox").checked;
-  gadgets.container.nocache_ = useCache ? 0 : 1;
-
   usePermissive = document.getElementById("usePermissiveCheckbox").checked;
   doEvil = document.getElementById("doEvilCheckbox").checked;
+}
+
+function changeGadgetUrl() {
+  unpackFormState();
+
+  gadgets.container.nocache_ = useCache ? 0 : 1;
+
   setEvilBit();
 
   stateFileUrl = document.getElementById("stateFileUrl").value;
@@ -260,19 +265,23 @@ function encodeValues(fields, opt_noEscaping) {
 
 </script>
 </head>
-<body onLoad="initGadget();">
+<body onLoad="unpackFormState(); initGadget();">
   <div id="headerDiv">
     <div style="float:left">Gadget testing container</div>
     <div class="subTitle">
       Displaying gadget: <input type="text" size="75" id="gadgetUrl"/>
-      <input type="checkbox" id="useCacheCheckbox" checked="true"/>use cache
-      <input type="checkbox" id="useCajaCheckbox"/>use caja
-      <input type="checkbox" id="usePermissiveCheckbox"/>use permissive
+      <input type="checkbox" id="useCacheCheckbox" checked="true"
+       /><label for="useCacheCheckbox">use cache</label>
+      <input type="checkbox" id="useCajaCheckbox"
+       /><label for="useCajaCheckbox">use caja</label>
+      <input type="checkbox" id="usePermissiveCheckbox"
+       /><label for="usePermissiveCheckbox">use permissive</label>
 
       <br/>
 
       Using state: <input type="text" size="75" id="stateFileUrl"/>
-      <input type="checkbox" id="doEvilCheckbox"/>do evil
+      <input type="checkbox" id="doEvilCheckbox"
+       /><label for="doEvilCheckbox">do evil</label>
 
       <br/>
       <br/>
