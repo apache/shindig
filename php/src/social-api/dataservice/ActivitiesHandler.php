@@ -17,7 +17,7 @@
  * specific language governing permissions and limitations under the License.
  */
 
-class ActivityHandler extends DataRequestHandler {
+class ActivitiesHandler extends DataRequestHandler {
 	private $service;
 	
 	private static $ACTIVITY_ID_PATH = "/activities/{userId}/{groupId}/{activityId}";

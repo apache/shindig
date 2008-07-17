@@ -40,9 +40,12 @@ require 'src/social-api/dataservice/UserId.php';
 require 'src/social-api/dataservice/RestRequestItem.php';
 require 'src/social-api/dataservice/RestfulCollection.php';
 require 'src/social-api/dataservice/DataRequestHandler.php';
-require 'src/social-api/dataservice/ActivityHandler.php';
+require 'src/social-api/dataservice/ActivitiesHandler.php';
 require 'src/social-api/dataservice/AppDataHandler.php';
-require 'src/social-api/dataservice/PersonHandler.php';
+require 'src/social-api/dataservice/PeopleHandler.php';
+require 'src/social-api/dataservice/ActivitiesService.php';
+require 'src/social-api/dataservice/AppDataService.php';
+require 'src/social-api/dataservice/PeopleService.php';
 require 'src/social-api/ResponseItem.php';
 require 'src/social-api/converters/OutputConverter.php';
 require 'src/social-api/converters/OutputAtomConverter.php';
@@ -120,10 +123,10 @@ class RestServlet extends HttpServlet {
 		$class = false;
 		switch ($path) {
 			case 'people':
-				$class = 'PersonHandler';
+				$class = 'PeopleHandler';
 				break;
 			case 'activities':
-				$class = 'ActivityHandler';
+				$class = 'ActivitiesHandler';
 				break;
 			case 'appdata':
 				$class = 'AppDataHandler';
