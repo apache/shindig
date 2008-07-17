@@ -19,6 +19,7 @@
 
 package org.apache.shindig.gadgets;
 
+import org.apache.shindig.common.ContainerConfig;
 import org.apache.shindig.common.SecurityTokenDecoder;
 import org.apache.shindig.gadgets.http.ContentFetcherFactory;
 import org.apache.shindig.gadgets.http.HttpFetcher;

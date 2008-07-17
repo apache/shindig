@@ -17,8 +17,8 @@
  */
 package org.apache.shindig.gadgets.servlet;
 
+import org.apache.shindig.common.ContainerConfig;
 import org.apache.shindig.common.servlet.InjectedServlet;
-import org.apache.shindig.gadgets.ContainerConfig;
 import org.apache.shindig.gadgets.GadgetFeature;
 import org.apache.shindig.gadgets.GadgetFeatureRegistry;
 import org.apache.shindig.gadgets.JsLibrary;

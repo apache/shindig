@@ -17,11 +17,11 @@
  * under the License.
  */
 
-package org.apache.shindig.gadgets;
+package org.apache.shindig.common;
 
-import static org.apache.shindig.gadgets.ContainerConfig.CONTAINER_KEY;
-import static org.apache.shindig.gadgets.ContainerConfig.DEFAULT_CONTAINER;
-import static org.apache.shindig.gadgets.ContainerConfig.PARENT_KEY;
+import static org.apache.shindig.common.ContainerConfig.CONTAINER_KEY;
+import static org.apache.shindig.common.ContainerConfig.DEFAULT_CONTAINER;
+import static org.apache.shindig.common.ContainerConfig.PARENT_KEY;
 import static org.junit.Assert.assertEquals;
 
 import org.json.JSONArray;
@@ -147,7 +147,7 @@ public class ContainerConfigTest {
     assertEquals(defaultArrayTest.toString(), defaultArray.toString());
   }
 
-  @Test(expected = GadgetException.class)
+  @Test(expected = ContainerConfigException.class)
   public void badConfigThrows() throws Exception {
     JSONObject json = new JSONObject();
     json.put(CONTAINER_KEY, new String[]{CHILD_CONTAINER});

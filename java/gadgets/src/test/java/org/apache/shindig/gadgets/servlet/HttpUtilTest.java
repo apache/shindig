@@ -24,7 +24,7 @@ import static org.easymock.classextension.EasyMock.replay;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
-import org.apache.shindig.gadgets.ContainerConfig;
+import org.apache.shindig.common.ContainerConfig;
 import org.apache.shindig.gadgets.GadgetContext;
 
 import org.json.JSONException;

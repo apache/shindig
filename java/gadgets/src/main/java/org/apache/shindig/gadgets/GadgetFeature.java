@@ -19,6 +19,8 @@ package org.apache.shindig.gadgets;
 
 import com.google.common.collect.Maps;
 
+import org.apache.shindig.common.ContainerConfig;
+
 import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedList;
