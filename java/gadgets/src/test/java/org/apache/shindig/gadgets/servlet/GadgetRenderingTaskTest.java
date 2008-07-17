@@ -22,10 +22,10 @@ import static org.easymock.EasyMock.expect;
 import static org.easymock.EasyMock.expectLastCall;
 import static org.easymock.EasyMock.isA;
 
+import org.apache.shindig.common.ContainerConfig;
 import org.apache.shindig.common.SecurityTokenDecoder;
 import org.apache.shindig.common.testing.FakeGadgetToken;
 import org.apache.shindig.common.util.Utf8UrlCoder;
-import org.apache.shindig.gadgets.ContainerConfig;
 import org.apache.shindig.gadgets.Gadget;
 import org.apache.shindig.gadgets.GadgetContext;
 import org.apache.shindig.gadgets.http.HttpRequest;

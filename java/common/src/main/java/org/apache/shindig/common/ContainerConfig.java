@@ -17,7 +17,7 @@
  * under the License.
  */
 
-package org.apache.shindig.gadgets;
+package org.apache.shindig.common;
 
 import org.apache.shindig.common.util.ResourceLoader;
 
@@ -146,9 +146,9 @@ public class ContainerConfig {
    * Only files with a .js or .json extension will be loaded.
    *
    * @param files The files to examine.
-   * @throws GadgetException
+   * @throws ContainerConfigException
    */
-  private void loadFiles(File[] files) throws GadgetException {
+  private void loadFiles(File[] files) throws ContainerConfigException {
     try {
       for (File file : files) {
         logger.info("Reading container config: " + file.getName());
@@ -160,16 +160,16 @@ public class ContainerConfig {
         }
       }
     } catch (IOException e) {
-      throw new GadgetException(GadgetException.Code.INVALID_PATH, e);
+      throw new ContainerConfigException(e);
     }
   }
 
   /**
    * Loads resources recursively.
    * @param files The base paths to look for container.xml
-   * @throws GadgetException
+   * @throws ContainerConfigException
    */
-  private void loadResources(String[] files)  throws GadgetException {
+  private void loadResources(String[] files)  throws ContainerConfigException {
     try {
       for (String entry : files) {
         logger.info("Reading container config: " + entry);
@@ -177,7 +177,7 @@ public class ContainerConfig {
         loadFromString(content);
       }
     } catch (IOException e) {
-      throw new GadgetException(GadgetException.Code.INVALID_PATH, e);
+      throw new ContainerConfigException(e);
     }
   }
 
@@ -224,11 +224,11 @@ public class ContainerConfig {
    *
    * @return The object merged with all parents.
    *
-   * @throws GadgetException If there is an invalid parent parameter
+   * @throws ContainerConfigException If there is an invalid parent parameter
    *    in the prototype chain.
    */
   private JSONObject mergeParents(String container)
-      throws GadgetException, JSONException {
+      throws ContainerConfigException, JSONException {
     JSONObject base = config.get(container);
     if (DEFAULT_CONTAINER.equals(container)) {
       return base;
@@ -236,7 +236,7 @@ public class ContainerConfig {
 
     String parent = base.optString(PARENT_KEY, DEFAULT_CONTAINER);
     if (!config.containsKey(parent)) {
-      throw new GadgetException(GadgetException.Code.INVALID_CONFIG,
+      throw new ContainerConfigException(
           "Unable to locate parent '" + parent + "' required by "
           + base.getString(CONTAINER_KEY));
     }
@@ -247,9 +247,9 @@ public class ContainerConfig {
    * Processes a container file.
    *
    * @param json
-   * @throws GadgetException
+   * @throws ContainerConfigException
    */
-  protected void loadFromString(String json) throws GadgetException {
+  protected void loadFromString(String json) throws ContainerConfigException {
     try {
       JSONObject contents = new JSONObject(json);
       JSONArray containers = contents.getJSONArray(CONTAINER_KEY);
@@ -260,7 +260,7 @@ public class ContainerConfig {
         config.put(container, contents);
       }
     } catch (JSONException e) {
-      throw new GadgetException(GadgetException.Code.INVALID_CONFIG, e);
+      throw new ContainerConfigException(e);
     }
   }
 
@@ -269,9 +269,9 @@ public class ContainerConfig {
    * as {@code JsFeatureLoader.loadFeatures} for locating resources.
    *
    * @param path
-   * @throws GadgetException
+   * @throws ContainerConfigException
    */
-  private void loadContainers(String path) throws GadgetException {
+  private void loadContainers(String path) throws ContainerConfigException {
     try {
       for (String location : StringUtils.split(path, FILE_SEPARATOR)) {
         if (location.startsWith("res://")) {
@@ -298,20 +298,20 @@ public class ContainerConfig {
       }
       config.putAll(merged);
     } catch (IOException e) {
-      throw new GadgetException(GadgetException.Code.INVALID_PATH, e);
+      throw new ContainerConfigException(e);
     } catch (JSONException e) {
-      throw new GadgetException(GadgetException.Code.INVALID_CONFIG, e);
+      throw new ContainerConfigException(e);
     }
   }
 
   /**
    * Creates a new, empty configuration.
    * @param containers
-   * @throws GadgetException
+   * @throws ContainerConfigException
    */
   @Inject
   public ContainerConfig(@Named("containers.default") String containers)
-      throws GadgetException {
+      throws ContainerConfigException {
     config = new HashMap<String, JSONObject>();
     if (containers != null) {
       loadContainers(containers);

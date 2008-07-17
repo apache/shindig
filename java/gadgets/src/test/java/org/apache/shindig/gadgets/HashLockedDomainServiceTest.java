@@ -24,6 +24,7 @@ import static org.easymock.EasyMock.eq;
 import static org.easymock.EasyMock.expect;
 import static org.easymock.EasyMock.isA;
 
+import org.apache.shindig.common.ContainerConfig;
 import org.apache.shindig.gadgets.HashLockedDomainService.GadgetReader;
 
 import java.util.Arrays;

@@ -17,6 +17,7 @@
  */
 package org.apache.shindig.gadgets;
 
+import org.apache.shindig.common.ContainerConfig;
 import org.apache.shindig.common.SecurityToken;
 import org.apache.shindig.gadgets.spec.GadgetSpec;
 

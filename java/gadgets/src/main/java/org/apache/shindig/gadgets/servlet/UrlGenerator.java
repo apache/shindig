@@ -18,9 +18,9 @@
  */
 package org.apache.shindig.gadgets.servlet;
 
+import org.apache.shindig.common.ContainerConfig;
 import org.apache.shindig.common.util.HashUtil;
 import org.apache.shindig.common.util.Utf8UrlCoder;
-import org.apache.shindig.gadgets.ContainerConfig;
 import org.apache.shindig.gadgets.Gadget;
 import org.apache.shindig.gadgets.GadgetContext;
 import org.apache.shindig.gadgets.GadgetFeature;
