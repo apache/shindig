@@ -72,8 +72,7 @@ under the License.
               <exclude>**/*.gif</exclude>
               <exclude>**/*.jpeg</exclude>
               <exclude>**/*.png</exclude>
-
-              <!-- Caja has some bugs too -->
+              <!-- Caja is already minified -->
               <exclude>**/caja/*.js</exclude>
             </excludes>
           </configuration>

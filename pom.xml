@@ -771,7 +771,13 @@
       <dependency>
         <groupId>caja</groupId>
         <artifactId>caja</artifactId>
-        <version>r820</version>
+        <version>r1899</version>
+        <scope>compile</scope>
+      </dependency>
+      <dependency>
+        <groupId>caja</groupId>
+        <artifactId>json_simple</artifactId>
+        <version>r1</version>
         <scope>compile</scope>
       </dependency>
       <dependency>

@@ -21,17 +21,19 @@ package org.apache.shindig.gadgets.servlet;
 import org.apache.shindig.gadgets.GadgetContentFilter;
 import org.apache.shindig.gadgets.GadgetException;
 
+import com.google.caja.lexer.CharProducer;
 import com.google.caja.lexer.ExternalReference;
+import com.google.caja.lexer.FilePosition;
+import com.google.caja.lexer.InputSource;
 import com.google.caja.opensocial.DefaultGadgetRewriter;
-import com.google.caja.opensocial.GadgetContentRewriter;
-import com.google.caja.opensocial.UriCallback;
 import com.google.caja.opensocial.GadgetRewriteException;
+import com.google.caja.opensocial.UriCallback;
 import com.google.caja.opensocial.UriCallbackException;
 import com.google.caja.opensocial.UriCallbackOption;
-import com.google.caja.reporting.SimpleMessageQueue;
-import com.google.caja.reporting.MessageQueue;
 import com.google.caja.reporting.Message;
 import com.google.caja.reporting.MessageContext;
+import com.google.caja.reporting.MessageQueue;
+import com.google.caja.reporting.SimpleMessageQueue;
 
 import java.io.IOException;
 import java.io.Reader;
@@ -65,15 +67,15 @@ public class CajaContentFilter implements GadgetContentFilter {
     };
 
     MessageQueue mq = new SimpleMessageQueue();
-    GadgetContentRewriter rw = new DefaultGadgetRewriter(mq);
-    Readable input = new StringReader(content);
-    Appendable output = new StringBuilder();
+    DefaultGadgetRewriter rw = new DefaultGadgetRewriter(mq);
+    CharProducer input = CharProducer.Factory.create(
+        new StringReader(content),
+        FilePosition.instance(new InputSource(retrievedUri), 2, 2, 1, 1));
+    StringBuilder output = new StringBuilder();
 
     try {
       rw.rewriteContent(retrievedUri, input, cb, output);
     } catch (GadgetRewriteException e) {
-      throwCajolingException(e, mq);
-    } catch (UriCallbackException e) {
       throwCajolingException(e, mq);
     } catch (IOException e) {
       throwCajolingException(e, mq);
