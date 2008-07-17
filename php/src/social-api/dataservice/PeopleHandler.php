@@ -17,7 +17,7 @@
  * specific language governing permissions and limitations under the License.
  */
 
-class PersonHandler extends DataRequestHandler {
+class PeopleHandler extends DataRequestHandler {
 	private $service;
 	private static $PEOPLE_PATH = "/people/{userId}/{groupId}/{personId}";
 	protected static $DEFAULT_PERSON_FIELDS = array("id", "name", "thumbnailUrl");
