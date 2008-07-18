@@ -43,6 +43,13 @@ public abstract class AbstractHttpCache implements HttpCache {
 
   public HttpResponse addResponse(HttpRequest request, HttpResponse response) {
     if (canCacheRequest(request)) {
+
+      // If the request forces a minimum TTL for the cached content then have
+      // the response honor it
+      if (response != null) {
+        response.setForcedCacheTTL(request.getOptions().minCacheTtl);
+      }
+
       // !!! Note that we only rewrite cacheable content. Move this call above the if
       // to rewrite all content that passes through the cache regardless of cacheability
       rewrite(request, response);

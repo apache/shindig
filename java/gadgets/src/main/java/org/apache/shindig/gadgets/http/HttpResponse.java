@@ -17,13 +17,15 @@
  */
 package org.apache.shindig.gadgets.http;
 
-import org.apache.shindig.common.util.DateUtil;
-import org.apache.commons.lang.ArrayUtils;
-
+import com.google.common.collect.Lists;
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
+
 import com.ibm.icu.text.CharsetDetector;
 import com.ibm.icu.text.CharsetMatch;
+
+import org.apache.commons.lang.ArrayUtils;
+import org.apache.shindig.common.util.DateUtil;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
@@ -315,6 +317,19 @@ public class HttpResponse {
    */
   public void setRewritten(HttpResponse rewritten) {
     this.rewritten = rewritten;
+  }
+
+  /**
+   * Set the externally forced minimum cache min-TTL
+   * This is derived from the "refresh" param on OpenProxy request
+   * Value is in seconds
+   */
+  public void setForcedCacheTTL(int forcedCacheTtl) {
+    if (forcedCacheTtl > 0) {
+      this.headers.remove("Expires");
+      this.headers.remove("Pragma");
+      this.headers.put("Cache-Control", Lists.newArrayList("public,max-age=" + forcedCacheTtl));
+    }
   }
 
   /**
