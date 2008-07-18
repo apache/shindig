@@ -85,7 +85,7 @@ class BasicAppDataService extends AppDataService {
 		switch($groupId->getType()) {
 			case 'self':
 				foreach ($fields as $key) {
-					$value = isset($values->$key) ? $values->$key : (@isset($values[$key]) ? @$values[$key] : null);
+					$value = isset($values[$key]) ? @$values[$key] : null;
 					XmlStateFileFetcher::get()->setAppData($userId->getUserId($token), $key, $value);	
 				}
 				break;

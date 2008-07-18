@@ -76,7 +76,7 @@ class BasicPeopleService extends PeopleService {
 				if ($id == $token->getOwnerId()) {
 					$person->setIsOwner(true);
 				}
-				if (is_array($profileDetails) && count($profileDetails)) {
+				if (is_array($profileDetails) && count($profileDetails) && !in_array('all', $profileDetails)) {
 					$newPerson = array();
 					$newPerson['isOwner'] = $person->isOwner;
 					$newPerson['isViewer'] = $person->isViewer;

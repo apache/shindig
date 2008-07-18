@@ -51,8 +51,6 @@ require 'src/social-api/converters/OutputConverter.php';
 require 'src/social-api/converters/OutputAtomConverter.php';
 require 'src/social-api/converters/OutputJsonConverter.php';
 
-//FIXME Delete should respond with a 204 No Content to indicate success
-
 class RestException extends Exception {}
 
 /*
@@ -64,42 +62,80 @@ define('UNAUTHORIZED', "unauthorized");
 define('FORBIDDEN', "forbidden");
 define('BAD_REQUEST', "badRequest");
 define('INTERNAL_ERROR', "internalError");
+//FIXME Delete should respond with a 204 No Content to indicate success
 
 class RestServlet extends HttpServlet {
 	
+	// The json Batch Route is used by the gadgets 
 	private static $JSON_BATCH_ROUTE = "jsonBatch";
+	// The Batch Proxy route is used the one defined in the RESTful API specification
+	private static $BATCH_PROXY_ROUTE = "batchProxy";
 
+	public function doGet()
+	{
+		$this->doPost('GET');
+	}
+
+	public function doPut()
+	{
+		$this->doPost('PUT');
+	}
+
+	public function doDelete()
+	{
+		$this->doPost('DELETE');
+	}
+		
 	public function doPost($method = 'POST')
 	{
-		$this->setNoCache(true);
-		// if oauth, create a token from it's values instead of one based on $_get['st']/$_post['st']
-		// NOTE : if no token is provided an anonymous one is created (owner = viewer = appId = modId = 0)
-		// keep this in mind when creating your data services.. 
-		$token = $this->getSecurityToken();
-		$outputFormat = $this->getOutputFormat();
-		switch ($outputFormat) {
-			case 'json':
-				$this->setContentType('application/json');
-				$outputConverter = new OutputJsonConverter();
-				break;
-			case 'atom':
-				$this->setContentType('application/atom+xml');
-				$outputConverter = new OutputAtomConverter();
-				break;
-			default:
-				$this->outputError(new ResponseItem(NOT_IMPLEMENTED, "Invalid output format"));
-				break;
-		}
-		if ($this->isBatchUrl()) {
-			$responses = $this->handleBatchRequest($token);
-			$outputConverter->outputBatch($responses, $token);
-		} else {
-			$response = $this->handleSingleRequest($token, $method);
-			$outputConverter->outputResponse($response['response'], $response['request']);
+		try {
+			$this->setNoCache(true);
+			// if oauth, create a token from it's values instead of one based on $_get['st']/$_post['st']
+			// NOTE : if no token is provided an anonymous one is created (owner = viewer = appId = modId = 0)
+			// keep this in mind when creating your data services.. 
+			$token = $this->getSecurityToken();
+			$outputFormat = $this->getOutputFormat();
+			switch ($outputFormat) {
+				case 'json':
+					$this->setContentType('application/json');
+					$outputConverter = new OutputJsonConverter();
+					break;
+				case 'atom':
+					$this->setContentType('application/atom+xml');
+					$outputConverter = new OutputAtomConverter();
+					break;
+				default:
+					$this->outputError(new ResponseItem(NOT_IMPLEMENTED, "Invalid output format"));
+					break;
+			}
+			if ($this->isJsonBatchUrl()) {
+				// custom json batch format used by the gadgets
+				$responses = $this->handleJsonBatchRequest($token);
+				$outputConverter->outputJsonBatch($responses, $token);
+			} elseif ($this->isBatchProxyUrl()) {
+				// spec compliant batch proxy
+				$this->noHeaders = true;
+				$responses = $this->handleBatchProxyRequest($token);
+				$outputConverter->outputBatch($responses, $token);
+			} else {
+				// single rest request
+				$response = $this->handleRequest($token, $method);
+				$outputConverter->outputResponse($response['response'], $response['request']);
+			}
+		} catch (Exception $e) {
+			header("HTTP/1.0 500 Internal Server Error");
+			echo "<html><body><h1>500 Internal Server Error</h1>";
+			if (Config::get('debug')) {
+				echo "Message: ".$e->getMessage()."<br />\n";
+				echo "<pre>\n";
+				print_r(debug_backtrace());
+				echo "\n</pre>";
+			}
+			echo "</body></html>";
 		}
 	}
 
-	private function handleSingleRequest($token, $method)
+	private function handleRequest($token, $method)
 	{
 		$params = $this->getListParams();
 		$requestItem = new RestRequestItem();
@@ -109,14 +145,115 @@ class RestServlet extends HttpServlet {
 		$responseItem = $this->getResponseItem($requestItem);
 		return array('request' => $requestItem, 'response' => $responseItem);
 	}
-
-	private function getRouteFromParameter($pathInfo)
+	
+	private function handleJsonBatchRequest($token)
 	{
-		$pathInfo = substr($pathInfo, 1);
-		$indexOfNextPathSeparator = strpos($pathInfo, "/");
-		return $indexOfNextPathSeparator != - 1 ? substr($pathInfo, 0, $indexOfNextPathSeparator) : $pathInfo;
+		// we support both a raw http post (without application/x-www-form-urlencoded headers) like java does
+		// and a more php / curl safe version of a form post with 'request' as the post field that holds the request json data
+		if (isset($GLOBALS['HTTP_RAW_POST_DATA']) || isset($_POST['request'])) {
+			$requests = $this->getRequestParams();
+			$responses = array();
+			foreach ($requests as $key => $value) {
+				$requestItem = new RestRequestItem();
+				$requestItem->createRequestItemWithRequest($value, $token);
+				$responses[$key] = $this->getResponseItem($requestItem);
+			}
+			return $responses;
+		} else {
+			throw new Exception("No post data set");
+		}
+	}
+	
+	private function handleBatchProxyRequest($token)
+	{
+		// Is this is a multipath/mixed post? Check content type:
+		if (isset($GLOBALS['HTTP_RAW_POST_DATA']) && strpos($_SERVER['CONTENT_TYPE'], 'multipart/mixed') !== false && strpos($_SERVER['CONTENT_TYPE'],'boundary=') !== false) {
+			// Ok looks swell, see what our boundry is..
+			$boundry = substr($_SERVER['CONTENT_TYPE'], strpos($_SERVER['CONTENT_TYPE'],'boundary=') + strlen('boundary='));
+			// Split up requests per boundry
+			$requests = explode($boundry, $GLOBALS['HTTP_RAW_POST_DATA']);
+			$responses = array();
+			foreach ($requests as $request) {
+				$request = trim($request);
+				if (!empty($request)) {
+					// extractBatchRequest() does the magic parsing of the raw post data to a meaninful request array
+					$request = $this->extractBatchRequest($request);
+					$requestItem = new RestRequestItem();
+					$requestItem->createRequestItemWithRequest($request, $token);
+					$responses[] = array('request' => $requestItem, 'response' => $this->getResponseItem($requestItem));
+				}
+			}
+		} else {
+			$this->outputError(new ResponseItem(BAD_REQUEST, "Invalid multipart/mixed request"));
+		}
+		return $responses;
 	}
 
+	private function extractBatchRequest($request)
+	{
+		/* Multipart request is formatted like:
+		 * -batch-a73hdj3dy3mm347ddjjdf
+		 * Content-Type: application/http;version=1.1
+		 * Content-Transfer-Encoding: binary
+		 * 
+		 * GET /people/@me/@friends?startPage=5&count=10&format=json
+		 * Host: api.example.org
+		 * If-None-Match: "837dyfkdi39df"
+		 * 
+		 * but we only want to have the last bit (the actual request), this filters that down first
+		 */
+		$emptyFound = false;
+		$requestLines = explode("\n", $request);
+		$request = '';
+		foreach ($requestLines as $line) {
+			if ($emptyFound) {
+				$request .= $line."\n";
+			} elseif (empty($line)) {
+				$emptyFound = true;
+			}
+		}
+		// Now that we have the basic request in $request, split that up again & parse it into a meaningful representation
+		$firstFound = $emptyFound = false;
+		$requestLines = explode("\n", $request);
+		$request = array();
+		$request['headers'] = array();
+		$request['postData'] = '';
+		foreach ($requestLines as $line) {
+			if (!$firstFound) {
+				$firstFound = true;
+				$parts = explode(' ', trim($line));
+				if (count($parts) != 2) {
+					throw new Exception("Mallshaped request uri in multipart block");
+				}
+				$request['method'] = strtoupper(trim($parts[0]));
+				// cut it down to an actual meaningful url without the prefix/social/rest part right away 
+				$request['url'] = substr(trim($parts[1]), strlen(Config::get('web_prefix') . '/social/rest'));
+			} elseif (!$emptyFound && !empty($line)) {
+				// convert the key to the PHP 'CONTENT_TYPE' style naming convention.. it's ugly but consitent
+				$key = str_replace('-', '_', strtoupper(trim(substr($line, 0, strpos($line, ':')))));
+				$val = trim(substr($line, strpos($line, ':') + 1));
+				$request['headers'][$key] = $val;
+			} elseif (!$emptyFound && empty($line)) {
+				$emptyFound = true;
+			} else {
+				if (get_magic_quotes_gpc()) {
+					$line = stripslashes($line);
+				}
+				$request['postData'] .= $line."\n";
+			}
+		}
+		if (empty($request['postData'])) {
+			// don't trip the requestItem into thinking there is postData when there's not
+			unset($request['postData']);
+		} else {
+			// if there was a post data blob present, decode it into an array, the format is based on the 
+			// content type header, which is either application/json or 
+			$format = isset($request['headers']['CONTENT_TYPE']) && strtolower($request['headers']['CONTENT_TYPE']) == 'application/atom+xml' ? 'atom' : 'json';
+			$request['postData'] = $this->decodeRequests($request['postData'], $format);
+		}
+		return $request;
+	}
+	
 	private function getResponseItem(RestRequestItem $requestItem)
 	{
 		$path = $this->getRouteFromParameter($requestItem->getUrl());
@@ -140,11 +277,25 @@ class RestServlet extends HttpServlet {
 			$class = new $class(null);
 			$response = $class->handleMethod($requestItem);
 		}
-		if ($response->getError() != null && !$this->isBatchUrl()) {
+		if ($response->getError() != null && !$this->isJsonBatchUrl() && !$this->isBatchProxyUrl()) {
 			// Can't use http error codes in batch mode, instead we return the error code in the response item
 			$this->outputError($response);
 		}
 		return $response;
+	}
+	
+	private function decodeRequests($requestParam, $format = 'json')
+	{
+		// temp hack until i know what the intended way to detect format is
+		if ($format == 'json') {
+			return json_decode($requestParam, true);
+		} elseif ($format == 'atom') {
+			$xml = simplexml_load_string($requestParam);
+			print_r($xml);
+			return $xml;
+		} else {
+			throw Exception("Invalid or unsupported input format");
+		}
 	}
 
 	private function getRequestParams()
@@ -154,44 +305,14 @@ class RestServlet extends HttpServlet {
 		if (get_magic_quotes_gpc()) {
 			$requestParam = stripslashes($requestParam);
 		}
-		$requests = json_decode($requestParam);
-		if ($requests == (isset($GLOBALS['HTTP_RAW_POST_DATA']) ? $GLOBALS['HTTP_RAW_POST_DATA'] : $post)) {
-			return new ResponseItem(BAD_REQUEST, "Malformed json string");
-		}
-		return $requests;
+		return $this->decodeRequests($requestParam);
 	}
 
-	private function handleBatchRequest($token)
+	private function getRouteFromParameter($pathInfo)
 	{
-		// we support both a raw http post (without application/x-www-form-urlencoded headers) like java does
-		// and a more php / curl safe version of a form post with 'request' as the post field that holds the request json data
-		if (isset($GLOBALS['HTTP_RAW_POST_DATA']) || isset($_POST['request'])) {
-			$requests = $this->getRequestParams();
-			$responses = array();
-			foreach ($requests as $key => $value) {
-				$requestItem = new RestRequestItem();
-				$requestItem->createRequestItemWithRequest($value, $token);
-				$responses[$key] = $this->getResponseItem($requestItem);
-			}
-			return $responses;
-		} else {
-			throw new Exception("No post data set");
-		}
-	}
-
-	public function doGet()
-	{
-		$this->doPost('GET');
-	}
-
-	public function doPut()
-	{
-		$this->doPost('PUT');
-	}
-
-	public function doDelete()
-	{
-		$this->doPost('DELETE');
+		$pathInfo = substr($pathInfo, 1);
+		$indexOfNextPathSeparator = strpos($pathInfo, "/");
+		return $indexOfNextPathSeparator != - 1 ? substr($pathInfo, 0, $indexOfNextPathSeparator) : $pathInfo;
 	}
 
 	private function outputError(ResponseItem $response)
@@ -217,7 +338,6 @@ class RestServlet extends HttpServlet {
 			default:
 				$code = '500 Internal Server Error';
 				break;
-		
 		}
 		header("HTTP/1.0 $code", true);
 		echo "$code - $errorMessage";
@@ -265,8 +385,13 @@ class RestServlet extends HttpServlet {
 		return substr($_SERVER["REQUEST_URI"], strlen(Config::get('web_prefix') . '/social/rest'));
 	}
 
-	public function isBatchUrl()
+	public function isJsonBatchUrl()
 	{
 		return strrpos($_SERVER["REQUEST_URI"], RestServlet::$JSON_BATCH_ROUTE) > 0;
+	}
+
+	public function isBatchProxyUrl()
+	{
+		return strrpos($_SERVER["REQUEST_URI"], RestServlet::$BATCH_PROXY_ROUTE) > 0;
 	}
 }
