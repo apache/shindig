@@ -30,6 +30,17 @@ class OutputJsonConverter extends OutputConverter {
 	
 	function outputBatch(Array $responses, SecurityToken $token)
 	{
+		$this->boundryHeaders();
+		foreach ($responses as $response) {
+			$request = $response['request'];
+			$response = $response['response'];
+			$part = json_encode($response);
+			$this->outputPart($part, $response->getError());
+		}
+	}
+	
+	function outputJsonBatch(Array $responses, SecurityToken $token)
+	{
 		echo json_encode(array("responses" => $responses, "error" => false));
 	}
 }

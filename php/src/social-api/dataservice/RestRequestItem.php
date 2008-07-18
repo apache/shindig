@@ -45,12 +45,12 @@ class RestRequestItem {
 
 	public function createRequestItemWithRequest($request, $token)
 	{
-		$this->url = $request->url;
-		$this->parameters = $this->createParameterMap($request->url);
+		$this->url = $request['url'];
+		$this->parameters = $this->createParameterMap($request['url']);
 		$this->token = $token;
-		$this->method = $request->method;
-		if (isset($request->postData)) {
-			$this->postData = $request->postData;
+		$this->method = $request['method'];
+		if (isset($request['postData'])) {
+			$this->postData = $request['postData'];
 		}
 	}
 

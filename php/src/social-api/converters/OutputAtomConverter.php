@@ -1,4 +1,5 @@
 <?php
+
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements. See the NOTICE file
@@ -19,7 +20,7 @@
 
 /**
  * Format = atom output converter, for format definition see:
- * http://www.opensocial.org/Technical-Resources/opensocial-specification----implementation-version-08/restful-api-specification
+ * http://sites.google.com/a/opensocial.org/opensocial/Technical-Resources/opensocial-spec-v08/restful-api-specification
  */
 class OutputAtomConverter extends OutputConverter {
 	private static $nameSpace = 'http://www.w3.org/2005/Atom';
@@ -40,7 +41,7 @@ class OutputAtomConverter extends OutputConverter {
 		$data = $responseItem->getResponse();
 		$userId = $requestItem->getUser()->getUserId($requestItem->getToken());
 		$guid = 'urn:guid:' . $userId;
-		$authorName = $_SERVER['HTTP_HOST'].':'.$userId;
+		$authorName = $_SERVER['HTTP_HOST'] . ':' . $userId;
 		$updatedAtom = date(DATE_ATOM);
 		
 		// Check to see if this is a single entry, or a collection, and construct either an atom 
@@ -52,20 +53,18 @@ class OutputAtomConverter extends OutputConverter {
 			
 			// The root Feed element
 			$entry = $this->addNode($doc, 'feed', '', false, self::$nameSpace);
-
+			
 			// Required Atom fields
 			$endPos = ($startIndex + $itemsPerPage) > $totalResults ? $totalResults : ($startIndex + $itemsPerPage);
-			$this->addNode($entry, 'title', $requestType.' feed for id '.$authorName.' ('.$startIndex. ' - '. ($endPos - 1).' of '.$totalResults.')');
+			$this->addNode($entry, 'title', $requestType . ' feed for id ' . $authorName . ' (' . $startIndex . ' - ' . ($endPos - 1) . ' of ' . $totalResults . ')');
 			$author = $this->addNode($entry, 'author');
 			$this->addNode($author, 'uri', $guid);
-			$this->addNode($author, 'name', $authorName);			
+			$this->addNode($author, 'name', $authorName);
 			$this->addNode($entry, 'updated', $updatedAtom);
 			$this->addNode($entry, 'id', $guid);
-			$this->addNode($entry, 'link', '', array('rel' => 'self', 'href' => 'http://'.$_SERVER['HTTP_HOST'].$_SERVER['REQUEST_URI']));
-			
+			$this->addNode($entry, 'link', '', array('rel' => 'self', 'href' => 'http://' . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI']));
 			// Add osearch & next link to the entry
 			$this->addPagingFields($entry, $startIndex, $itemsPerPage, $totalResults);
-			
 			// Add response entries to feed
 			$responses = $responseItem->getResponse()->getEntry();
 			foreach ($responses as $response) {
@@ -79,11 +78,10 @@ class OutputAtomConverter extends OutputConverter {
 				$this->addNode($author, 'uri', $guid);
 				$this->addNode($author, 'name', $authorName);
 				// Special hoisting rules for activities
-				
 				if ($response instanceof Activity) {
 					$this->addNode($feedEntry, 'category', '', array('term' => 'status'));
 					$this->addNode($feedEntry, 'updated', date(DATE_ATOM, $response->postedTime));
-					$this->addNode($feedEntry, 'id', 'urn:guid:'.$response->id);
+					$this->addNode($feedEntry, 'id', 'urn:guid:' . $response->id);
 					//FIXME should add a link field but don't have URL's available yet:
 					// <link rel="self" type="application/atom+xml" href="http://api.example.org/activity/feeds/.../af3778"/>
 					$this->addNode($feedEntry, 'title', strip_tags($response->title));
@@ -94,43 +92,49 @@ class OutputAtomConverter extends OutputConverter {
 					unset($response->title);
 					unset($response->body);
 				} else {
-					$this->addNode($feedEntry, 'id', 'urn:guid:'.$idField);
-					$this->addNode($feedEntry, 'title', $requestType.' feed entry for id '.$idField);
+					$this->addNode($feedEntry, 'id', 'urn:guid:' . $idField);
+					$this->addNode($feedEntry, 'title', $requestType . ' feed entry for id ' . $idField);
 					$this->addNode($feedEntry, 'updated', $updatedAtom);
 				}
 				
 				// recursively add responseItem data to the xml structure
 				$this->addData($content, $requestType, $response, self::$osNameSpace);
 			}
-			
 		} else {
-			
 			// Single entry = Atom:Entry	
 			$entry = $doc->appendChild($doc->createElementNS(self::$nameSpace, "entry"));
-			
 			// Atom fields
-			$this->addNode($entry, 'title', $requestType.' entry for '.$authorName);
+			$this->addNode($entry, 'title', $requestType . ' entry for ' . $authorName);
 			$author = $this->addNode($entry, 'author');
 			$this->addNode($author, 'uri', $guid);
 			$this->addNode($author, 'name', $authorName);
 			$this->addNode($entry, 'id', $guid);
 			$this->addNode($entry, 'updated', $updatedAtom);
 			$content = $this->addNode($entry, 'content', '', array('type' => 'application/xml'));
-			
 			// addData loops through the responseItem data recursively creating a matching XML structure
 			$this->addData($content, $requestType, $data, self::$osNameSpace);
 		}
 		$xml = $doc->saveXML();
-		if (self::$includeOsearch && $responseItem->getResponse() instanceof RestFulCollection) {
+		if ($responseItem->getResponse() instanceof RestFulCollection) {
 			//FIXME dirty hack until i find a way to add multiple name spaces using DomXML functions
-			$xml = str_replace('<feed xmlns="http://www.w3.org/2005/Atom">', '<feed xmlns="http://www.w3.org/2005/Atom" xmlos:osearch="http://a9.com/-/spec/opensearch/1.1">' ,$xml);
+			$xml = str_replace('<feed xmlns="http://www.w3.org/2005/Atom">', '<feed xmlns="http://www.w3.org/2005/Atom" xmlns:osearch="http://a9.com/-/spec/opensearch/1.1">', $xml);
 		}
 		echo $xml;
 	}
 
 	function outputBatch(Array $responses, SecurityToken $token)
 	{
-		//TODO once we support spec compliance batching, this needs to be added too
+		$this->boundryHeaders();
+		foreach ($responses as $response) {
+			$request = $response['request'];
+			$response = $response['response'];
+			// output buffering supports multiple levels of it.. it's a nice feature to abuse :)
+			ob_start();
+			$this->outputResponse($response, $request);
+			$part = ob_get_contents();
+			ob_end_clean();
+			$this->outputPart($part, $response->getError());
+		}
 	}
 
 	/**
@@ -174,11 +178,9 @@ class OutputAtomConverter extends OutputConverter {
 	 */
 	private function addPagingFields($entry, $startIndex, $itemsPerPage, $totalResults)
 	{
-		if (self::$includeOsearch) {
-			$this->addNode($entry, 'osearch:totalResults', $totalResults);
-			$this->addNode($entry, 'osearch:startIndex', $startIndex ? $startIndex : '0');
-			$this->addNode($entry, 'osearch:itemsPerPage', $itemsPerPage);
-		}
+		$this->addNode($entry, 'osearch:totalResults', $totalResults);
+		$this->addNode($entry, 'osearch:startIndex', $startIndex ? $startIndex : '0');
+		$this->addNode($entry, 'osearch:itemsPerPage', $itemsPerPage);
 		// Create a 'next' link based on our current url if this is a pageable collection & there is more to display
 		if (($startIndex + $itemsPerPage) < $totalResults) {
 			$nextStartIndex = ($startIndex + $itemsPerPage) - 1;
@@ -255,6 +257,9 @@ class OutputAtomConverter extends OutputConverter {
 					}
 					$this->addData($newElement, $key, $val);
 				} else {
+					if (is_numeric($key)) {
+						$key = is_object($val) ? get_class($val) : $key = $name;
+					}					
 					$elm = $newElement->appendChild($this->doc->createElement($key));
 					$elm->appendChild($this->doc->createTextNode($val));
 				}
