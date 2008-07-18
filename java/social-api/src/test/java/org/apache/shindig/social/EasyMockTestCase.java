@@ -17,12 +17,12 @@
  */
 package org.apache.shindig.social;
 
+import java.lang.reflect.Method;
+import java.util.List;
+
 import junit.framework.TestCase;
 
 import org.easymock.classextension.EasyMock;
-
-import java.util.ArrayList;
-import java.util.List;
 
 import com.google.common.collect.Lists;
 
@@ -47,6 +47,31 @@ public abstract class EasyMockTestCase extends TestCase {
    **/
   protected <T> T mock(Class<T> clazz) {
     return mock(clazz, false);
+  }
+
+  /**
+   * Creates a nice mock object for the given class, adds it to the internal
+   * list of all mocks, and returns it.
+   *
+   * @param clazz Class to be mocked.
+   * @return A mock instance of the given type.
+   **/
+  protected <T> T mock(Class<T> clazz, Method[] methods) {
+    return mock(clazz, methods, false);
+  }
+
+  /**
+   * Creates a strict mock object for the given class, adds it to the internal
+   * list of all mocks, and returns it.
+   *
+   * @param clazz Class to be mocked.
+   * @return A mock instance of the given type.
+   **/
+  protected <T> T mock(Class<T> clazz, Method[] methods, boolean strict) {
+    T m = strict ? EasyMock.createMock(clazz, methods)
+        : EasyMock.createNiceMock(clazz, methods);
+    mocks.add(m);
+    return m;
   }
 
   /**

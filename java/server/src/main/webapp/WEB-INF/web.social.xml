@@ -31,7 +31,7 @@
 
   <filter>
     <filter-name>oauthFilter</filter-name>
-    <filter-class>org.apache.shindig.social.oauth.OAuthServletFilter</filter-class>
+    <filter-class>org.apache.shindig.social.oauth.AuthenticationServletFilter</filter-class>
   </filter>
 
   <filter-mapping>
