@@ -115,10 +115,9 @@ under the License.
                   <source>opensocial-reference/phone.js</source>
                   <source>opensocial-reference/responseitem.js</source>
                   <source>opensocial-reference/url.js</source>
-                  <source>opensocial-current/batchrequest.js</source>
                   <source>opensocial-current/jsonactivity.js</source>
                   <source>opensocial-current/jsonperson.js</source>
-                  <source>opensocial-current/jsoncontainer.js</source>
+                  <source>opensocial-current/restfulcontainer.js</source>
                 </sources>
                 <testSourceDirectory>${basedir}</testSourceDirectory>
                 <testSuites>
