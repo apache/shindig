@@ -17,8 +17,9 @@
  */
 package org.apache.shindig.social.opensocial.model;
 
-import com.google.inject.ImplementedBy;
 import org.apache.shindig.social.opensocial.util.EnumUtil;
+
+import com.google.inject.ImplementedBy;
 
 import java.util.Date;
 import java.util.List;
@@ -26,7 +27,9 @@ import java.util.Set;
 
 /**
  * see
- * http://code.google.com/apis/opensocial/docs/0.7/reference/opensocial.Person.Field.html
+ * http://code.google.com/apis/opensocial/docs/0.8/reference/#opensocial.Person.Field
+ * for all field meanings. All fields are represented in the js api at this time except for
+ * lastUpdated. This field is currently only in the RESTful spec. 
  *
  */
 
@@ -60,7 +63,7 @@ public interface Person {
     JOB_INTERESTS("jobInterests"),
     JOBS("jobs"),
     LANGUAGES_SPOKEN("languagesSpoken"),
-    LAST_UPDATED("updated"),
+    LAST_UPDATED("updated"), /** Needed to support the RESTful api **/
     LIVING_ARRANGEMENT("livingArrangement"),
     LOOKING_FOR("lookingFor"),
     MOVIES("movies"),
@@ -109,7 +112,7 @@ public interface Person {
       return this.jsonString;
     }
   }
-  
+
   String getAboutMe();
 
   void setAboutMe(String aboutMe);
