@@ -105,6 +105,14 @@ public class JsonDbOpensocialService implements ActivityService, PersonService, 
     this.converter = converter;
   }
 
+  public JSONObject getDb() {
+    return db;
+  }
+
+  public void setDb(JSONObject db) {
+    this.db = db;
+  }
+
   public Future<ResponseItem<RestfulCollection<Activity>>> getActivities(UserId userId,
       GroupId groupId, String appId, Set<String> fields, SecurityToken token) {
     List<Activity> result = Lists.newArrayList();
@@ -331,6 +339,14 @@ public class JsonDbOpensocialService implements ActivityService, PersonService, 
     // TODO: this seems redundant. No need to pass both fields and a map of field->value
     // TODO: According to rest, yes there is. If a field is in the param list but not in the map
     // that means it is a delete
+
+    for (String key : values.keySet()) {
+      if (!isValidKey(key)) {
+        return ImmediateFuture.newInstance(new ResponseItem<Object>(ResponseError.BAD_REQUEST,
+            "The person data key had invalid characters", null));
+      }
+    }
+
     try {
       JSONObject personData = db.getJSONObject(DATA_TABLE).getJSONObject(userId.getUserId(token));
       if (personData == null) {
@@ -346,6 +362,33 @@ public class JsonDbOpensocialService implements ActivityService, PersonService, 
       return ImmediateFuture.newInstance(new ResponseItem<Object>(
           ResponseError.INTERNAL_ERROR, je.getMessage(), null));
     }
+  }
+
+  /**
+   * Determines whether the input is a valid key. Valid keys match the regular
+   * expression [\w\-\.]+. The logic is not done using java.util.regex.* as
+   * that is 20X slower.
+   *
+   * @param key the key to validate.
+   * @return true if the key is a valid appdata key, false otherwise.
+   */
+  public static boolean isValidKey(String key) {
+    if (key == null || key.length() == 0) {
+      return false;
+    }
+    for (int i = 0; i < key.length(); ++i) {
+      char c = key.charAt(i);
+      if ((c >= 'a' && c <= 'z') ||
+          (c >= 'A' && c <= 'Z') ||
+          (c >= '0' && c <= '9') ||
+          (c == '-') ||
+          (c == '_') ||
+          (c == '.')) {
+        continue;
+      }
+      return false;
+    }
+    return true;
   }
 
   /**

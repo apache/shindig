@@ -206,7 +206,7 @@ public class DataServiceServlet extends InjectedServlet {
 
   /**
    * Delivers a request item to the appropriate DataRequestHandler.
-   * 
+   *
    * @return the resulting ResponseItem
    */
   Future<? extends ResponseItem> handleRequestItem(RequestItem requestItem) {

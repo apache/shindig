@@ -19,15 +19,15 @@ package org.apache.shindig.social.dataservice;
 
 import org.apache.shindig.common.SecurityToken;
 import org.apache.shindig.social.ResponseItem;
-import org.apache.shindig.social.samplecontainer.BasicPeopleService;
+import org.apache.shindig.social.canonical.JsonDbOpensocialService;
 import org.apache.shindig.social.opensocial.model.Person;
+
+import com.google.inject.ImplementedBy;
 
 import java.util.Set;
 import java.util.concurrent.Future;
 
-import com.google.inject.ImplementedBy;
-
-@ImplementedBy(BasicPeopleService.class)
+@ImplementedBy(JsonDbOpensocialService.class)
 
 public interface PersonService {
 

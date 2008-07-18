@@ -17,15 +17,11 @@
  */
 package org.apache.shindig.server.endtoend;
 
+import org.apache.shindig.common.servlet.ParameterFetcher;
+import org.apache.shindig.social.dataservice.DataServiceServletFetcher;
+
 import com.google.inject.AbstractModule;
 import com.google.inject.name.Names;
-
-import org.apache.shindig.common.servlet.ParameterFetcher;
-import org.apache.shindig.social.canonical.JsonDbOpensocialService;
-import org.apache.shindig.social.dataservice.ActivityService;
-import org.apache.shindig.social.dataservice.AppDataService;
-import org.apache.shindig.social.dataservice.DataServiceServletFetcher;
-import org.apache.shindig.social.dataservice.PersonService;
 
 /**
  * Guice module for the end-to-end tests.
@@ -33,9 +29,6 @@ import org.apache.shindig.social.dataservice.PersonService;
 public class EndToEndModule extends AbstractModule {
 
   protected void configure() {
-    bind(ActivityService.class).to(JsonDbOpensocialService.class);
-    bind(PersonService.class).to(JsonDbOpensocialService.class);
-    bind(AppDataService.class).to(JsonDbOpensocialService.class);
     bind(String.class).annotatedWith(Names.named("canonical.json.db"))
         .toInstance("sampledata/canonicaldb.json");
     bind(ParameterFetcher.class).annotatedWith(Names.named("DataServiceServlet"))
