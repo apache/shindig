@@ -33,6 +33,7 @@ import org.apache.shindig.social.dataservice.UserId;
 import org.apache.shindig.social.opensocial.model.Activity;
 import org.apache.shindig.social.opensocial.model.Person;
 import org.apache.shindig.social.opensocial.util.BeanConverter;
+import org.apache.shindig.social.opensocial.util.BeanJsonConverter;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
@@ -63,7 +64,7 @@ public class JsonDbOpensocialService implements ActivityService, PersonService, 
   /**
    * The JSON<->Bean converter
    */
-  private BeanConverter converter;
+  private BeanJsonConverter converter;
 
   /**
    * db["activities"] -> Array<Person>
@@ -87,7 +88,7 @@ public class JsonDbOpensocialService implements ActivityService, PersonService, 
 
   @Inject
   public JsonDbOpensocialService(@Named("canonical.json.db")String jsonLocation,
-      BeanConverter converter) throws Exception {
+      BeanJsonConverter converter) throws Exception {
     String content = IOUtils.toString(ResourceLoader.openResource(jsonLocation), "UTF-8");
     this.db = new JSONObject(content);
     this.converter = converter;

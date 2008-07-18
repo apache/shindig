@@ -55,8 +55,8 @@ under the License.
   </build>
 
   <dependencies>
+    <!-- project dependencies -->
     <dependency>
-      <!-- project dependencies -->
       <groupId>org.apache.shindig</groupId>
       <artifactId>shindig-common</artifactId>
     </dependency>
