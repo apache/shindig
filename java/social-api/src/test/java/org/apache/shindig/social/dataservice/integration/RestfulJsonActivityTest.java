@@ -17,8 +17,8 @@
  */
 package org.apache.shindig.social.dataservice.integration;
 
-import org.apache.shindig.social.SocialApiTestsGuiceModule;
 import org.apache.shindig.social.opensocial.model.Activity;
+import org.apache.shindig.social.opensocial.model.ActivityImpl;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -26,6 +26,15 @@ import org.json.JSONObject;
 import org.junit.Test;
 
 public class RestfulJsonActivityTest extends AbstractLargeRestfulTests {
+  Activity johnsActivity;
+
+  @Override
+  protected void setUp() throws Exception {
+    super.setUp();
+    johnsActivity = new ActivityImpl("1", "john.doe");
+    johnsActivity.setTitle("yellow");
+    johnsActivity.setBody("what a color!");
+  }
 
   /**
    * Expected response for an activity in json:
@@ -42,9 +51,7 @@ public class RestfulJsonActivityTest extends AbstractLargeRestfulTests {
   public void testGetActivityJson() throws Exception {
     String resp = getJsonResponse("/activities/john.doe/@self/1", "GET");
     JSONObject result = getJson(resp);
-    assertActivitiesEqual(
-        SocialApiTestsGuiceModule.MockXmlStateFileFetcher.johnActivity,
-        result);
+    assertActivitiesEqual(johnsActivity, result);
   }
 
   /**
@@ -71,9 +78,7 @@ public class RestfulJsonActivityTest extends AbstractLargeRestfulTests {
 
     assertEquals(1, result.getInt("totalResults"));
     assertEquals(0, result.getInt("startIndex"));
-    assertActivitiesEqual(
-        SocialApiTestsGuiceModule.MockXmlStateFileFetcher.johnActivity,
-        result.getJSONArray("entry").getJSONObject(0));
+    assertActivitiesEqual(johnsActivity, result.getJSONArray("entry").getJSONObject(0));
   }
 
   /**
@@ -82,12 +87,11 @@ public class RestfulJsonActivityTest extends AbstractLargeRestfulTests {
    *
    * {
    *  "author" : "<???>",
-   *  "link" : {"rel" : "next", "href" : "<???>"},
-   *  "totalResults" : 1,
+   *  "totalResults" : 3,
    *  "startIndex" : 0
    *  "itemsPerPage" : 10 // Note: the js doesn't support paging. Should rest?
    *  "entry" : [
-   *     {<activity>} // layed out like above
+   *     {<activity>} // layed out like above, except for jane.doe
    *  ]
    * }
    *
@@ -95,15 +99,11 @@ public class RestfulJsonActivityTest extends AbstractLargeRestfulTests {
    */
   @Test
   public void testGetFriendsActivitiesJson() throws Exception {
-    // TODO: change this test to use different people
     String resp = getJsonResponse("/activities/john.doe/@friends", "GET");
     JSONObject result = getJson(resp);
 
-    assertEquals(1, result.getInt("totalResults"));
+    assertEquals(2, result.getInt("totalResults"));
     assertEquals(0, result.getInt("startIndex"));
-    assertActivitiesEqual(
-        SocialApiTestsGuiceModule.MockXmlStateFileFetcher.janeActivity,
-        result.getJSONArray("entry").getJSONObject(0));
   }
 
   private void assertActivitiesEqual(Activity activity, JSONObject result)
@@ -119,7 +119,7 @@ public class RestfulJsonActivityTest extends AbstractLargeRestfulTests {
     String postData = "{title : 'hi mom!', body : 'and dad.'}";
     getJsonResponse("/activities/john.doe/@self", "POST", postData);
 
-     String resp = getJsonResponse("/activities/john.doe/@self", "GET");
+    String resp = getJsonResponse("/activities/john.doe/@self", "GET");
     JSONObject result = getJson(resp);
 
     assertEquals(2, result.getInt("totalResults"));

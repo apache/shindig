@@ -29,11 +29,11 @@ import org.apache.shindig.social.dataservice.RestfulCollection;
 import org.apache.shindig.social.dataservice.UserId;
 import org.apache.shindig.social.opensocial.model.Activity;
 import org.apache.shindig.social.opensocial.model.Person;
-import org.apache.shindig.social.opensocial.util.BeanJsonConverter;
 
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.google.inject.Guice;
+import com.google.inject.Injector;
 import junit.framework.TestCase;
 
 /**
@@ -53,11 +53,8 @@ public class JsonDbOpensocialServiceTest extends TestCase {
 
   @Override
   protected void setUp() throws Exception {
-    BeanJsonConverter beanJsonConverter = new BeanJsonConverter(
-        Guice.createInjector(new SocialApiTestsGuiceModule()));
-    db = new JsonDbOpensocialService(
-        "sampledata/canonicaldb.json",
-        beanJsonConverter);
+    Injector injector = Guice.createInjector(new SocialApiTestsGuiceModule());
+    db = injector.getInstance(JsonDbOpensocialService.class);
   }
 
   public void testGetPersonDefaultFields() throws Exception {
@@ -113,7 +110,7 @@ public class JsonDbOpensocialServiceTest extends TestCase {
     ResponseItem<Activity> responseItem = db.getActivity(
         CANON_USER, SELF_GROUP, APP_ID,
         Sets.newHashSet("appId", "body", "mediaItems"), APP_ID, new FakeGadgetToken()).get();
-    assertTrue(responseItem == null);
+    assertTrue(responseItem.getResponse() == null);
   }
 
   public void testGetExpectedAppData() throws Exception {

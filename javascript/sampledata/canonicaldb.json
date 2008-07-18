@@ -29,10 +29,12 @@
       "extendedAddress" : "Next door",
       "latitude" : "28.3043",
       "longitude" : "143.0859",
+      "locality" : "who knows",
       "poBox" : "3653",
       "postalCode" : "12345",
       "region" : "Apache, CA",
       "streetAddress" : "1 OpenStandards Way",
+      "type" : "home",
       "unstructuredAddress" : "PoBox 3565, 1 OpenStandards Way, Apache, CA"
       }],
     "age" : 33,
@@ -115,7 +117,7 @@
     },
     "networkPresence" : {
       "key" : "ONLINE",
-      "displayvalue" : "online"
+      "displayvalue" : "Online"
     },
     "nickname" : "diggy",
     "pets" : "dog,cat",
@@ -135,7 +137,8 @@
     "profileUrl" : "http://www.example.org/?id=1",
     "profileVideo" : {
      "address" : "http://www.example.org/videos/Thriller.flv",
-     "linkText" : "Thriller"
+     "linkText" : "Thriller",
+     "type" : "video"
     },
     "quotes" : ["I am therfore I code", "Doh!"],
     "relationshipStatus" : "married to my job",
@@ -148,7 +151,13 @@
       },
       "description" : "High School",
       "endDate" : "1991-01-01",
-      "startDate" : "1982-01-01"
+      "field" : "",
+      "name" : "",
+      "salary" : "",
+      "startDate" : "1982-01-01",
+      "subField" : "",
+      "title" : "",
+      "webpage" : ""
       }],
     "sexualOrientation" : "north",
     "smoker" : {
@@ -233,9 +242,9 @@
     },
     "hasApp" : true,
     "name" : {
-      "familyName" : "Meik‰l‰inen",
+      "familyName" : "Meik√§l√§inen",
       "givenName" : "Maija",
-      "unstructured" : "Maija Meik‰l‰inen"
+      "unstructured" : "Maija Meik√§l√§inen"
     }
   }],
   //
@@ -245,6 +254,9 @@
     "canonical" : {
       "count" : "2",
       "size" : "100"
+    },
+    "john.doe" : {
+      "count" : "0"
     },
     "george.doe" : {
       "count" : "2"
@@ -306,16 +318,22 @@
       "url" : "http://www.example.org/canonical/activities/2",
       "userId" : "canonical"
     }],
+    "john.doe" : [{
+      "id" : "1",
+      "userId" : "john.doe",
+      "title" : "yellow",
+      "body" : "what a color!",
+    }],
     "jane.doe" : [{
       "id" : "1",
       "body" : "and she thinks you look like him",
       "mediaItems" : [{
         "mimeType" : "image/jpeg",
-        "type" : "IMAGE",
+        "type" : "image",
         "url" : "http://animals.nationalgeographic.com/staticfiles/NGS/Shared/StaticFiles/animals/images/primary/black-spider-monkey.jpg"
       },{
         "mimeType" : "image/jpeg",
-        "type" : "IMAGE",
+        "type" : "image",
         "url" : "http://image.guardian.co.uk/sys-images/Guardian/Pix/gallery/2002/01/03/monkey300.jpg"
       }],
       "streamTitle" : "jane's photos",
@@ -326,7 +344,7 @@
       "body" : "or is it you?",
       "mediaItems" : [{
         "mimeType" : "image/jpeg",
-        "type" : "IMAGE",
+        "type" : "image",
         "url" : "http://www.funnyphotos.net.au/images/fancy-dress-dog-yoda-from-star-wars1.jpg"
       }],
       "streamTitle" : "jane's photos",
@@ -339,7 +357,7 @@
   // ----------------------------- Data ---------------------------------------
   //
   "friendLinks" : {
-    "canonical" : ["john.doe", "jane.doe", "george.doe", "maija.m"], 
+    "canonical" : ["john.doe", "jane.doe", "george.doe", "maija.m"],
     "john.doe" : ["jane.doe", "george.doe", "maija.m"],
     "jane.doe" : ["john.doe"],
     "george.doe" : ["john.doe"],

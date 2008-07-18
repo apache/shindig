@@ -67,7 +67,7 @@ public class RestfulBatchTest extends AbstractLargeRestfulTests {
     assertFalse(jsonFriends.has("errorMessage"));
 
     JSONObject jsonFriendsResponse = jsonFriends.getJSONObject("response");
-    assertEquals(2, jsonFriendsResponse.getInt("totalResults"));
+    assertEquals(3, jsonFriendsResponse.getInt("totalResults"));
     assertEquals(0, jsonFriendsResponse.getInt("startIndex"));
 
     // john.doe response
