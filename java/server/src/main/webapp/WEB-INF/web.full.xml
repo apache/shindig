@@ -29,6 +29,16 @@
     <param-value>org.apache.shindig.gadgets.servlet.HttpGuiceModule:org.apache.shindig.social.SocialApiGuiceModule</param-value>
   </context-param>
 
+  <filter>
+    <filter-name>oauthFilter</filter-name>
+    <filter-class>org.apache.shindig.social.oauth.AuthenticationServletFilter</filter-class>
+  </filter>
+
+  <filter-mapping>
+    <filter-name>oauthFilter</filter-name>
+    <url-pattern>/social/*</url-pattern>
+  </filter-mapping>
+
   <listener>
     <listener-class>org.apache.shindig.common.servlet.GuiceServletContextListener</listener-class>
   </listener>

@@ -783,7 +783,7 @@
       <dependency>
         <groupId>net.oauth</groupId>
         <artifactId>core</artifactId>
-        <version>20080524</version>
+        <version>20080621</version>
         <scope>compile</scope>
       </dependency>
       <dependency>

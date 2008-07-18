@@ -21,10 +21,20 @@ package org.apache.shindig.social;
 import org.apache.shindig.common.servlet.ParameterFetcher;
 import org.apache.shindig.social.dataservice.DataServiceServletFetcher;
 import org.apache.shindig.social.dataservice.HandlerProvider;
+import org.apache.shindig.social.oauth.AuthenticationServletFilter;
+import org.apache.shindig.social.oauth.BasicOAuthConsumerStore;
+import org.apache.shindig.social.oauth.BasicOAuthTokenPrincipalMapper;
+import org.apache.shindig.social.oauth.BasicOAuthTokenStore;
+import org.apache.shindig.social.oauth.OAuthConsumerStore;
+import org.apache.shindig.social.oauth.OAuthTokenPrincipalMapper;
+import org.apache.shindig.social.oauth.OAuthTokenStore;
 import org.apache.shindig.social.samplecontainer.SampleContainerHandlerProvider;
 
 import com.google.inject.AbstractModule;
+import com.google.inject.Scopes;
 import com.google.inject.name.Names;
+import net.oauth.OAuthValidator;
+import net.oauth.SimpleOAuthValidator;
 
 /**
  * Provides social api component injection
@@ -41,6 +51,20 @@ public class SocialApiGuiceModule extends AbstractModule {
 
     bind(String.class).annotatedWith(Names.named("canonical.json.db"))
         .toInstance("sampledata/canonicaldb.json");
+
+    // OAuth configuration
+
+    bind(Boolean.class)
+        .annotatedWith(Names.named(AuthenticationServletFilter.ALLOW_UNAUTHENTICATED))
+        .toInstance(Boolean.TRUE);
+
+    bind(OAuthValidator.class).to(SimpleOAuthValidator.class);
+    bind(OAuthTokenStore.class)
+        .to(BasicOAuthTokenStore.class).in(Scopes.SINGLETON);
+    bind(OAuthConsumerStore.class)
+        .to(BasicOAuthConsumerStore.class).in(Scopes.SINGLETON);
+    bind(OAuthTokenPrincipalMapper.class)
+        .to(BasicOAuthTokenPrincipalMapper.class).in(Scopes.SINGLETON);
   }
 
 }
