@@ -18,15 +18,15 @@
  */
 package org.apache.shindig.gadgets.servlet;
 
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
+
 import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.LockedDomainService;
 import org.apache.shindig.gadgets.http.HttpFetcher;
 import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.http.HttpResponse;
 import org.apache.shindig.gadgets.rewrite.ContentRewriter;
-
-import com.google.inject.Inject;
-import com.google.inject.Singleton;
 
 import java.io.IOException;
 import java.net.URI;
@@ -93,6 +93,17 @@ public class ProxyHandler extends ProxyBase {
     // allows proper rewriting of <script src="x"/> where x is returned with
     // a content type like text/html which unfortunately happens all too often
     options.rewriteMimeType = request.getParameter(REWRITE_MIME_TYPE_PARAM);
+
+    // If the proxy request specifies a refresh param then we want to force the min TTL for
+    // the retrieved entry in the cache regardless of the headers on the content when it
+    // is fetched from the original source.
+    if (request.getParameter(REFRESH_PARAM) != null) {
+      try {
+        options.minCacheTtl = Integer.parseInt(request.getParameter(REFRESH_PARAM));
+      } catch (NumberFormatException nfe) {
+        // Ignore
+      }
+    }
 
     return new HttpRequest(url, options);
   }

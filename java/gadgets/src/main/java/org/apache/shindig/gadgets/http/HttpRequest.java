@@ -19,8 +19,8 @@
 
 package org.apache.shindig.gadgets.http;
 
-import org.apache.shindig.gadgets.rewrite.ContentRewriter;
 import org.apache.commons.lang.ArrayUtils;
+import org.apache.shindig.gadgets.rewrite.ContentRewriter;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
@@ -29,9 +29,9 @@ import java.net.URI;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.TreeMap;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeMap;
 
 /**
  * Holds request data for passing to a RemoteContentFetcher.
@@ -358,6 +358,7 @@ public class HttpRequest {
     public boolean ignoreCache = false;
     public boolean ownerSigned = true;
     public boolean viewerSigned = true;
+    public int minCacheTtl = -1;
     public ContentRewriter rewriter = null;
     public String rewriteMimeType = null;
     public URI gadgetUri;
@@ -372,6 +373,7 @@ public class HttpRequest {
       this.ownerSigned = copyFrom.ownerSigned;
       this.viewerSigned = copyFrom.viewerSigned;
       this.rewriter = copyFrom.rewriter;
+      this.minCacheTtl = copyFrom.minCacheTtl;
       if (copyFrom.gadgetUri != null) {
         this.gadgetUri = URI.create(copyFrom.gadgetUri.toString());
       }

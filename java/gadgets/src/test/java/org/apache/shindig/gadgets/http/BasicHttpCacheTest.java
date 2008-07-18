@@ -17,10 +17,10 @@
  */
 package org.apache.shindig.gadgets.http;
 
-import org.apache.shindig.common.util.DateUtil;
-import org.apache.commons.lang.ArrayUtils;
-
 import junit.framework.TestCase;
+
+import org.apache.commons.lang.ArrayUtils;
+import org.apache.shindig.common.util.DateUtil;
 
 import java.net.URI;
 import java.util.Arrays;
@@ -159,6 +159,22 @@ public class BasicHttpCacheTest extends TestCase {
       fail("Failed to wait for cache");
     }
     assertNull(cache.getResponse(req));
+  }
+
+  public void testCacheableWithForcedMinTTL() {
+    HttpRequest req = createRequest("GET");
+    // in seconds
+    req.getOptions().minCacheTtl = 5;
+    HttpResponse resp = createExpiresResponse(200, System.currentTimeMillis());
+    cache.addResponse(req, resp);
+    try {
+      synchronized (cache) {
+        cache.wait(2000L);
+      }
+    } catch (InterruptedException ie) {
+      fail("Failed to wait for cache");
+    }
+    assertNotNull(cache.getResponse(req));
   }
 
 }
