@@ -24,6 +24,7 @@ import com.google.inject.Singleton;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
+import java.net.URLEncoder;
 import java.util.Map;
 
 /**
@@ -40,6 +41,25 @@ public class BasicSecurityTokenDecoder implements SecurityTokenDecoder {
   private static final int APP_URL_INDEX = 4;
   private static final int MODULE_ID_INDEX = 5;
   private static final int TOKEN_COUNT = MODULE_ID_INDEX + 1;
+
+  /**
+   * Encodes a token using the a plaintext dummy format.
+   */
+  public String encodeToken(SecurityToken token) {
+    try {
+    StringBuilder out = new StringBuilder();
+      out.append(URLEncoder.encode(token.getOwnerId(), "UTF-8")).append(':')
+          .append(URLEncoder.encode(token.getViewerId(), "UTF-8")).append(':')
+          .append(URLEncoder.encode(token.getAppId(), "UTF-8")).append(':')
+          .append(URLEncoder.encode(token.getDomain(), "UTF-8")).append(':')
+          .append(URLEncoder.encode(token.getAppUrl(), "UTF-8")).append(':')
+          .append(Long.toString(token.getModuleId()));
+      return out.toString();
+    } catch (UnsupportedEncodingException uee) {
+      throw new IllegalStateException(uee);
+    }
+  }
+
 
   /**
    * {@inheritDoc}
