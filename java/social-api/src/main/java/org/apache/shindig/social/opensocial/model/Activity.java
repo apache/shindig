@@ -24,6 +24,13 @@ import java.util.Map;
 
 @ImplementedBy(ActivityImpl.class)
 
+/**
+ * see
+ * http://code.google.com/apis/opensocial/docs/0.8/reference/#opensocial.Activity.Field
+ * for all field meanings. All fields are represented in the js api at this time except for
+ * lastUpdated. This field is currently only in the RESTful spec.
+ *
+ */
 public interface Activity {
 
   public static enum Field {
@@ -32,7 +39,7 @@ public interface Activity {
     BODY_ID("bodyId"),
     EXTERNAL_ID("externalId"),
     ID("id"),
-    LAST_UPDATED("updated"),
+    LAST_UPDATED("updated"), /** Needed to support the RESTful api **/
     MEDIA_ITEMS("mediaItems"),
     POSTED_TIME("postedTime"),
     PRIORITY("priority"),
