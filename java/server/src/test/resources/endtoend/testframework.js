@@ -47,10 +47,6 @@ function testFinished() {
 
 /** Executes the test identifed by the testMethod URL parameter */
 function executeTest() {
-  // Force the installation of the Restful container
-  // TODO: delete this hack if restful is flipped on by default
-  opensocial.Container.setContainer(new RestfulShindigContainer());
-
   var params = gadgets.util.getUrlParameters();
   var testMethod = params["testMethod"];
   if (!testMethod) {
