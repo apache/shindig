@@ -17,8 +17,6 @@
  */
 package org.apache.shindig.social.dataservice.integration;
 
-import org.apache.shindig.social.SocialApiTestsGuiceModule.MockXmlStateFileFetcher;
-
 import com.google.common.collect.Maps;
 import org.json.JSONObject;
 import org.junit.Test;
@@ -33,8 +31,9 @@ public class RestfulJsonDataTest extends AbstractLargeRestfulTests {
    *
    * {
    *  "entry" : {
-   *    "jane.doe" : {"count" : "5"},
-   *    "simple.doe" : {"count" : "7"},
+   *    "jane.doe" : {"count" : "7"},
+   *    "george.doe" : {"count" : "2"},
+   *    "maija.m" : {}, // TODO: Should this entry really be included if she doesn't have any data?
    *  }
    * }
    *
@@ -48,17 +47,15 @@ public class RestfulJsonDataTest extends AbstractLargeRestfulTests {
     String resp = getJsonResponse("/appdata/john.doe/@friends/app", "GET", extraParams);
 
     JSONObject data = getJson(resp).getJSONObject("entry");
-    assertEquals(2, data.length());
+    assertEquals(3, data.length());
 
-    JSONObject janesEntries = data.getJSONObject(
-        MockXmlStateFileFetcher.janeDoe.getId());
+    JSONObject janesEntries = data.getJSONObject("jane.doe");
     assertEquals(1, janesEntries.length());
-    assertEquals("5", janesEntries.getString("count"));
+    assertEquals("7", janesEntries.getString("count"));
 
-    JSONObject simplesEntries = data.getJSONObject(
-        MockXmlStateFileFetcher.simpleDoe.getId());
-    assertEquals(1, simplesEntries.length());
-    assertEquals("7", simplesEntries.getString("count"));
+    JSONObject georgesEntries = data.getJSONObject("george.doe");
+    assertEquals(1, georgesEntries.length());
+    assertEquals("2", georgesEntries.getString("count"));
   }
 
   /**
@@ -82,8 +79,7 @@ public class RestfulJsonDataTest extends AbstractLargeRestfulTests {
     JSONObject data = getJson(resp).getJSONObject("entry");
     assertEquals(1, data.length());
 
-    JSONObject johnsEntries = data.getJSONObject(
-        MockXmlStateFileFetcher.johnDoe.getId());
+    JSONObject johnsEntries = data.getJSONObject("john.doe");
     assertEquals(1, johnsEntries.length());
     assertEquals("0", johnsEntries.getString("count"));
   }
@@ -109,8 +105,7 @@ public class RestfulJsonDataTest extends AbstractLargeRestfulTests {
     JSONObject data = getJson(resp).getJSONObject("entry");
     assertEquals(1, data.length());
 
-    JSONObject johnsEntries = data.getJSONObject(
-        MockXmlStateFileFetcher.johnDoe.getId());
+    JSONObject johnsEntries = data.getJSONObject("john.doe");
     assertEquals(1, johnsEntries.length());
     assertEquals("0", johnsEntries.getString("count"));
   }
@@ -137,8 +132,7 @@ public class RestfulJsonDataTest extends AbstractLargeRestfulTests {
     JSONObject data = getJson(resp).getJSONObject("entry");
     assertEquals(1, data.length());
 
-    JSONObject johnsEntries = data.getJSONObject(
-        MockXmlStateFileFetcher.johnDoe.getId());
+    JSONObject johnsEntries = data.getJSONObject("john.doe");
     assertEquals(0, johnsEntries.length());
   }
 
@@ -176,8 +170,7 @@ public class RestfulJsonDataTest extends AbstractLargeRestfulTests {
     JSONObject data = getJson(resp).getJSONObject("entry");
     assertEquals(1, data.length());
 
-    JSONObject johnsEntries = data.getJSONObject(
-        MockXmlStateFileFetcher.johnDoe.getId());
+    JSONObject johnsEntries = data.getJSONObject("john.doe");
 
     if (expectedCount != null) {
       assertEquals(1, johnsEntries.length());

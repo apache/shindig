@@ -32,13 +32,13 @@ import org.apache.shindig.social.dataservice.RestfulCollection;
 import org.apache.shindig.social.dataservice.UserId;
 import org.apache.shindig.social.opensocial.model.Activity;
 import org.apache.shindig.social.opensocial.model.Person;
-import org.apache.shindig.social.opensocial.util.BeanConverter;
 import org.apache.shindig.social.opensocial.util.BeanJsonConverter;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.google.inject.Inject;
+import com.google.inject.Singleton;
 import com.google.inject.name.Named;
 import org.apache.commons.io.IOUtils;
 import org.json.JSONArray;
@@ -49,12 +49,23 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.concurrent.Future;
 
 /**
  * Implementation of supported services backed by a JSON DB
  */
+@Singleton
 public class JsonDbOpensocialService implements ActivityService, PersonService, AppDataService {
+
+  private static final Comparator<Person> NAME_COMPARATOR = new Comparator<Person>() {
+    public int compare(Person person, Person person1) {
+      String name = person.getName().getUnstructured();
+      String name1 = person1.getName().getUnstructured();
+      return name.compareTo(name1);
+    }
+  };
 
   /**
    * The DB
@@ -98,7 +109,6 @@ public class JsonDbOpensocialService implements ActivityService, PersonService, 
       GroupId groupId, String appId, Set<String> fields, SecurityToken token) {
     List<Activity> result = Lists.newArrayList();
     try {
-      // TODO Is it really valid to read activities across multiple users in one rpc?
       Set<String> idSet = getIdSet(userId, groupId, token);
       for (String id : idSet) {
         if (db.getJSONObject(ACTIVITIES_TABLE).has(id)) {
@@ -106,6 +116,8 @@ public class JsonDbOpensocialService implements ActivityService, PersonService, 
           for (int i = 0; i < activities.length(); i++) {
             JSONObject activity = activities.getJSONObject(i);
             if (appId != null && activity.get(Activity.Field.APP_ID.toString()).equals(appId)) {
+              result.add(convertToActivity(activity, fields));
+            } else if (appId == null) {
               result.add(convertToActivity(activity, fields));
             }
           }
@@ -134,7 +146,8 @@ public class JsonDbOpensocialService implements ActivityService, PersonService, 
           }
         }
       }
-      return ImmediateFuture.newInstance(null);
+      return ImmediateFuture.newInstance(new ResponseItem<Activity>(ResponseError.BAD_REQUEST,
+          "Activity not found", null));
     } catch (JSONException je) {
       return ImmediateFuture.newInstance(new ResponseItem<Activity>(
           ResponseError.INTERNAL_ERROR, je.getMessage(), null));
@@ -163,7 +176,7 @@ public class JsonDbOpensocialService implements ActivityService, PersonService, 
         }
       }
       // What is the appropriate response here??
-      return ImmediateFuture.newInstance(new ResponseItem<Object>(null));
+      return ImmediateFuture.newInstance(new ResponseItem<Object>(""));
     } catch (JSONException je) {
       return ImmediateFuture.newInstance(new ResponseItem<Object>(
           ResponseError.INTERNAL_ERROR, je.getMessage(), null));
@@ -184,8 +197,7 @@ public class JsonDbOpensocialService implements ActivityService, PersonService, 
         db.getJSONObject(ACTIVITIES_TABLE).put(userId.getUserId(token), jsonArray);
       }
       jsonArray.put(jsonObject);
-      // TODO ??
-      return null;
+      return ImmediateFuture.newInstance(new ResponseItem<Object>(""));
     } catch (JSONException je) {
       return ImmediateFuture.newInstance(new ResponseItem<Object>(
           ResponseError.INTERNAL_ERROR, je.getMessage(), null));
@@ -209,15 +221,31 @@ public class JsonDbOpensocialService implements ActivityService, PersonService, 
         // Add group support later
         result.add(convertToPerson(person, fields));
       }
-      return ImmediateFuture.newInstance(new ResponseItem<RestfulCollection<Person>>(
-          new RestfulCollection<Person>(result)));
+
+      // We can pretend that by default the people are in top friends order
+      if (sortOrder.equals(PersonService.SortOrder.name)) {
+        Collections.sort(result, NAME_COMPARATOR);
+      }
+
+      // TODO: The samplecontainer doesn't really have the concept of HAS_APP so
+      // we can't support any filters yet. We should fix this.
+
+      int totalSize = result.size();
+      int last = first + max;
+      result = result.subList(first, Math.min(last, totalSize));
+
+      RestfulCollection<Person> collection = new RestfulCollection<Person>(result,
+          first, totalSize);
+
+      return ImmediateFuture.newInstance(new ResponseItem<RestfulCollection<Person>>(collection));
     } catch (JSONException je) {
       return ImmediateFuture.newInstance(new ResponseItem<RestfulCollection<Person>>(
           ResponseError.INTERNAL_ERROR, je.getMessage(), null));
     }
   }
 
-  public Future<ResponseItem<Person>> getPerson(UserId id, Set<String> fields, SecurityToken token) {
+  public Future<ResponseItem<Person>> getPerson(UserId id, Set<String> fields,
+      SecurityToken token) {
     try {
       JSONArray people = db.getJSONArray(PEOPLE_TABLE);
 
@@ -229,16 +257,16 @@ public class JsonDbOpensocialService implements ActivityService, PersonService, 
               convertToPerson(person, fields)));
         }
       }
-      // TODO What does this mean?
-      return null;
+      return ImmediateFuture.newInstance(new ResponseItem<Person>(ResponseError.BAD_REQUEST,
+          "Person not found", null));
     } catch (JSONException je) {
       return ImmediateFuture.newInstance(new ResponseItem<Person>(
           ResponseError.INTERNAL_ERROR, je.getMessage(), null));
     }
   }
 
-  public Future<ResponseItem<DataCollection>> getPersonData(UserId userId, GroupId groupId, String appId,
-      Set<String> fields, SecurityToken token) {
+  public Future<ResponseItem<DataCollection>> getPersonData(UserId userId, GroupId groupId,
+      String appId, Set<String> fields, SecurityToken token) {
     // TODO. Does fields==null imply all?
     try {
       Map<String, Map<String, String>> idToData = Maps.newHashMap();
@@ -248,7 +276,7 @@ public class JsonDbOpensocialService implements ActivityService, PersonService, 
         if (!db.getJSONObject(DATA_TABLE).has(id)) {
           personData = new JSONObject();
         } else {
-          if (fields != null) {
+          if (fields != null && !fields.isEmpty()) {
             personData = new JSONObject(
                 db.getJSONObject(DATA_TABLE).getJSONObject(id),
                 fields.toArray(new String[fields.size()]));
@@ -257,6 +285,7 @@ public class JsonDbOpensocialService implements ActivityService, PersonService, 
           }
         }
 
+        // TODO: We can use the converter here to do this for us
         Iterator keys = personData.keys();
         Map<String, String> data = Maps.newHashMap();
         while (keys.hasNext()) {
@@ -290,8 +319,7 @@ public class JsonDbOpensocialService implements ActivityService, PersonService, 
         }
       }
       db.getJSONObject(DATA_TABLE).put(user, newPersonData);
-      // TODO what is the appropriate return value
-      return null;
+      return ImmediateFuture.newInstance(new ResponseItem<Object>(""));
     } catch (JSONException je) {
       return ImmediateFuture.newInstance(new ResponseItem<Object>(
           ResponseError.INTERNAL_ERROR, je.getMessage(), null));
@@ -300,7 +328,9 @@ public class JsonDbOpensocialService implements ActivityService, PersonService, 
 
   public Future<ResponseItem<Object>> updatePersonData(UserId userId, GroupId groupId, String appId,
       Set<String> fields, Map<String, String> values, SecurityToken token) {
-    // TODO this seems redundant. No need to pass both fields and a map of field->value
+    // TODO: this seems redundant. No need to pass both fields and a map of field->value
+    // TODO: According to rest, yes there is. If a field is in the param list but not in the map
+    // that means it is a delete
     try {
       JSONObject personData = db.getJSONObject(DATA_TABLE).getJSONObject(userId.getUserId(token));
       if (personData == null) {
@@ -311,8 +341,7 @@ public class JsonDbOpensocialService implements ActivityService, PersonService, 
       for (Map.Entry<String, String> entry : values.entrySet()) {
         personData.put(entry.getKey(), entry.getValue());
       }
-      // TODO what is the appropriate return value
-      return null;
+      return ImmediateFuture.newInstance(new ResponseItem<Object>(""));
     } catch (JSONException je) {
       return ImmediateFuture.newInstance(new ResponseItem<Object>(
           ResponseError.INTERNAL_ERROR, je.getMessage(), null));
