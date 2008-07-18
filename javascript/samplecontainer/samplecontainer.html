@@ -48,7 +48,7 @@ var socialDataPath = document.location.protocol + "//" + document.location.host
 var gadgetUrl = baseUrl + 'examples/SocialHelloWorld.xml';
 var gadgetUrlCookie = 'sampleContainerGadgetUrl';
 
-var stateFileUrl = baseUrl + 'state-basicfriendlist.xml';
+var stateFileUrl = baseUrl + '../sampledata/canonicaldb.json';
 var stateFileUrlCookie = 'sampleContainerStateFileUrl';
 
 var useCaja;
@@ -114,7 +114,7 @@ function changeGadgetUrl() {
   ownerId = document.getElementById("ownerId").value;
   gadgetUrl = document.getElementById("gadgetUrl").value;
 
-  gadget.secureToken = escape(generateSecureToken());  
+  gadget.secureToken = escape(generateSecureToken());
   gadget.specUrl = gadgetUrl;
   goog.net.cookies.set(gadgetUrlCookie, encodeURIComponent(gadgetUrl));
 

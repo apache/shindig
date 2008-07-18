@@ -38,6 +38,9 @@ public class SocialApiGuiceModule extends AbstractModule {
 
     bind(ParameterFetcher.class).annotatedWith(Names.named("DataServiceServlet"))
         .to(DataServiceServletFetcher.class);
+
+    bind(String.class).annotatedWith(Names.named("canonical.json.db"))
+        .toInstance("sampledata/canonicaldb.json");
   }
 
 }

@@ -21,25 +21,27 @@ package org.apache.shindig.social.samplecontainer;
 import org.apache.shindig.common.util.ImmediateFuture;
 import org.apache.shindig.social.ResponseError;
 import org.apache.shindig.social.ResponseItem;
+import org.apache.shindig.social.canonical.JsonDbOpensocialService;
 import org.apache.shindig.social.dataservice.DataRequestHandler;
 import org.apache.shindig.social.dataservice.RequestItem;
 
-import com.google.common.collect.Maps;
 import com.google.inject.Inject;
+import org.apache.commons.httpclient.HttpClient;
+import org.apache.commons.httpclient.HttpMethod;
+import org.apache.commons.httpclient.methods.GetMethod;
+import org.json.JSONException;
+import org.json.JSONObject;
 
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.util.Map;
+import java.io.IOException;
 import java.util.concurrent.Future;
 
-// TODO(doll): This class won't be needed anymore once we switch to the canonical data set
 public class SampleContainerHandler extends DataRequestHandler {
-  private final XmlStateFileFetcher fetcher;
+  private final JsonDbOpensocialService service;
   private static final String POST_PATH = "/samplecontainer/{type}/{doevil}";
 
   @Inject
-  public SampleContainerHandler(XmlStateFileFetcher fetcher) {
-    this.fetcher = fetcher;
+  public SampleContainerHandler(JsonDbOpensocialService dbService) {
+    this.service = dbService;
   }
 
   /**
@@ -56,18 +58,6 @@ public class SampleContainerHandler extends DataRequestHandler {
     return handlePost(request);
   }
 
-  public static class SetStateInput {
-    public String fileUrl;
-
-    public String getFileUrl() {
-      return fileUrl;
-    }
-
-    public void setFileUrl(String fileUrl) {
-      this.fileUrl = fileUrl;
-    }
-  }
-
   /**
    * Handles /samplecontainer/setstate and /samplecontainer/setevilness/{doevil}
    * TODO(doll): These urls aren't very resty. Consider changing the samplecontainer.html calls
@@ -81,14 +71,14 @@ public class SampleContainerHandler extends DataRequestHandler {
     if (type.equals("setstate")) {
       try {
         String stateFile = request.getParameters().get("fileurl");
-        fetcher.resetStateFile(new URI(stateFile));
-      } catch (URISyntaxException e) {
+        service.setDb(new JSONObject(fetchStateDocument(stateFile)));
+      } catch (JSONException e) {
         response = new ResponseItem<Object>(ResponseError.BAD_REQUEST,
-            "The state file was not a valid url", null);
+            "The json state file was not valid json", null);
       }
     } else if (type.equals("setevilness")) {
-      String doEvil = request.getParameters().get("doevil");
-      fetcher.setEvilness(Boolean.valueOf(doEvil));
+      response = new ResponseItem<Object>(ResponseError.NOT_IMPLEMENTED,
+          "evil data has not been implemented yet", null);
     }
 
     return ImmediateFuture.newInstance(response);
@@ -98,11 +88,26 @@ public class SampleContainerHandler extends DataRequestHandler {
    * Handles /samplecontainer/dumpstate
    */
   protected Future<? extends ResponseItem> handleGet(RequestItem request) {
-    Map<String, Object> state = Maps.newHashMap();
-    state.put("people", fetcher.getAllPeople());
-    state.put("friendIds", fetcher.getFriendIds());
-    state.put("data", fetcher.getAppData());
-    state.put("activities", fetcher.getActivities());
-    return ImmediateFuture.newInstance(new ResponseItem<Object>(state));
+    return ImmediateFuture.newInstance(new ResponseItem<Object>(service.getDb()));
+  }
+
+  private String fetchStateDocument(String stateFileLocation) {
+    String errorMessage = "The json state file " + stateFileLocation
+        + " could not be fetched and parsed.";
+
+    HttpMethod jsonState = new GetMethod(stateFileLocation);
+    HttpClient client = new HttpClient();
+    try {
+      client.executeMethod(jsonState);
+
+      if (jsonState.getStatusCode() != 200) {
+        throw new RuntimeException(errorMessage);
+      }
+      return jsonState.getResponseBodyAsString();
+    } catch (IOException e) {
+      throw new RuntimeException(errorMessage, e);
+    } finally {
+      jsonState.releaseConnection();
+    }
   }
 }
