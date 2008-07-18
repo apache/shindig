@@ -17,10 +17,10 @@
  */
 package org.apache.shindig.gadgets.rewrite;
 
-import com.google.common.collect.Lists;
-
 import org.apache.shindig.gadgets.spec.Feature;
 import org.apache.shindig.gadgets.spec.GadgetSpec;
+
+import com.google.common.collect.Lists;
 
 import java.util.List;
 import java.util.Set;
