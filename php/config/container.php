@@ -32,7 +32,8 @@
  * 	'private_key_phrase' => 'MyCertificatePassword',
  * 	'people_service' => 'MyPeopleService',
  * 	'activity_service' => 'MyActivitiesService',
- * 	'app_data_service' => 'MyAppDataService'
+ * 	'app_data_service' => 'MyAppDataService',
+ * 	'messages_service' => 'MyMessagesDataService'
  * );
  *  
  */
@@ -90,6 +91,7 @@ $shindigConfig = array(
 	'people_service' => 'BasicPeopleService',
 	'activity_service' => 'BasicActivitiesService',
 	'app_data_service' => 'BasicAppDataService',
+	'messages_service' => 'BasicMessagesService',
 	// Also scan these directories when looking for <Class>.php files. You can include multiple paths by seperating them with a , 
 	'extension_class_paths' => '',
 	
