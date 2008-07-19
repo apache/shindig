@@ -30,7 +30,10 @@ class MessageBundleParser {
 
 	public function parse($xml)
 	{
-		$doc = simplexml_load_string($xml);
+		$doc = @simplexml_load_string($xml);
+		if (!$doc) {
+			throw new Exception("Invalid XML structure in message bundle");
+		}
 		$messages = array();
 		if (isset($doc->msg)) {
 			foreach ($doc->msg as $msg) {
