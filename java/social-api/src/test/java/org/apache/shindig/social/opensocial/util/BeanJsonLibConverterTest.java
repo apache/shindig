@@ -1,0 +1,359 @@
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements. See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership. The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License. You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations under the License.
+ */
+package org.apache.shindig.social.opensocial.util;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+
+import junit.framework.TestCase;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.apache.shindig.social.JsonLibTestsGuiceModule;
+import org.apache.shindig.social.opensocial.model.Activity;
+import org.apache.shindig.social.opensocial.model.ActivityImpl;
+import org.apache.shindig.social.opensocial.model.Address;
+import org.apache.shindig.social.opensocial.model.AddressImpl;
+import org.apache.shindig.social.opensocial.model.Email;
+import org.apache.shindig.social.opensocial.model.EmailImpl;
+import org.apache.shindig.social.opensocial.model.MediaItem;
+import org.apache.shindig.social.opensocial.model.MediaItemImpl;
+import org.apache.shindig.social.opensocial.model.Name;
+import org.apache.shindig.social.opensocial.model.NameImpl;
+import org.apache.shindig.social.opensocial.model.Person;
+import org.apache.shindig.social.opensocial.model.PersonImpl;
+import org.apache.shindig.social.opensocial.model.Phone;
+import org.apache.shindig.social.opensocial.model.PhoneImpl;
+
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
+import com.google.inject.Guice;
+
+public class BeanJsonLibConverterTest extends TestCase {
+
+  private static final Log log = LogFactory
+      .getLog(BeanJsonLibConverterTest.class);
+  private Person johnDoe;
+  private Activity activity;
+
+  private BeanJsonLibConverter beanJsonConverter;
+  private APIValidator apiValidator;
+  // set to true to get loging output at info level
+  private boolean outputInfo = false;
+
+  @Override
+  public void setUp() throws Exception {
+    super.setUp();
+    johnDoe = new PersonImpl("johnDoeId", new NameImpl("John Doe"));
+    johnDoe.setPhoneNumbers(Lists.<Phone> newArrayList(new PhoneImpl(
+        "+33H000000000", "home"), new PhoneImpl("+33M000000000", "mobile"),
+        new PhoneImpl("+33W000000000", "work")));
+
+    johnDoe.setAddresses(Lists.<Address> newArrayList(new AddressImpl(
+        "My home address")));
+
+    johnDoe.setEmails(Lists.<Email> newArrayList(new EmailImpl(
+        "john.doe@work.bar", "work"),
+        new EmailImpl("john.doe@home.bar", "home")));
+
+    activity = new ActivityImpl("activityId", johnDoe.getId());
+
+    activity.setMediaItems(Lists.<MediaItem> newArrayList(new MediaItemImpl(
+        "image/jpg", MediaItem.Type.IMAGE, "http://foo.bar")));
+
+    beanJsonConverter = new BeanJsonLibConverter(Guice
+        .createInjector(new JsonLibTestsGuiceModule()));
+
+    apiValidator = new APIValidator("opensocial-reference");
+
+  }
+
+  public static class SpecialPerson extends PersonImpl {
+    public static final String[] OPTIONALFIELDS = {};
+    public static final String[] NULLFIELDS  = {"jobInterests","nickname","romance","religion","timeZone",
+    "relationshipStatus","tags","networkPresence","books","quotes","phoneNumbers","languagesSpoken",
+    "activities","jobs","dateOfBirth","profileVideo","bodyType","urls","schools","music","addresses",
+    "livingArrangement","thumbnailUrl","humor","sports","scaredOf","movies","age","pets","hasApp","turnOffs",
+    "gender","fashion","drinker","aboutMe","children","sexualOrientation","heroes","profileSong","lookingFor",
+    "cars","turnOns","tvShows","profileUrl","status","currentLocation","smoker","happiestWhen","ethnicity",
+    "food","emails","politicalViews","interests","familyName","honorificSuffix","additionalName","honorificPrefix","givenName"};
+
+    private String newfield;
+
+    public SpecialPerson() {
+      super();
+    }
+
+    public SpecialPerson(String id, String name, String newfield) {
+      super(id, new NameImpl(name));
+      this.newfield = newfield;
+    }
+
+    public String getNewfield() {
+      return newfield;
+    }
+
+    public void setNewfield(String newfield) {
+      this.newfield = newfield;
+    }
+
+  }
+
+  public void testToJsonOnInheritedClass() throws Exception {
+    SpecialPerson cassie = new SpecialPerson("5", "robot", "nonsense");
+
+    String result = beanJsonConverter.convertToString(cassie);
+
+    validatePerson(result, "5", "robot", SpecialPerson.OPTIONALFIELDS, SpecialPerson.NULLFIELDS);
+
+    apiValidator.addScript(" specialPerson = { SPECIAL : \"newfield\" }; ");
+    String[] optional = {};
+    String[] nullfields = {};
+    Map<String, Object> special = apiValidator.validate(result,
+        "specialPerson", optional,nullfields);
+    assertNotNull(special.get("newfield"));
+    assertEquals(String.class, special.get("newfield").getClass());
+    assertEquals("nonsense", special.get("newfield"));
+
+    // convert back into an object Tree
+
+    SpecialPerson parseCassie = beanJsonConverter.convertToObject(result,
+        SpecialPerson.class);
+
+    assertNotNull(parseCassie);
+    assertEquals(cassie.getId(), parseCassie.getId());
+    assertEquals(cassie.getNewfield(), parseCassie.getNewfield());
+
+    Name name = parseCassie.getName();
+    Name cassieName = cassie.getName();
+    assertNotNull(name);
+    assertEquals(cassieName.getUnstructured(), name.getUnstructured());
+    assertEquals(cassieName.getAdditionalName(), name.getAdditionalName());
+    assertEquals(cassieName.getFamilyName(), name.getFamilyName());
+    assertEquals(cassieName.getGivenName(), name.getGivenName());
+    assertEquals(cassieName.getHonorificPrefix(), name.getHonorificPrefix());
+    assertEquals(cassieName.getHonorificSuffix(), name.getHonorificSuffix());
+
+  }
+
+  /**
+   * @param result
+   * @throws APIValidatorExpcetion
+   */
+  private void validatePerson(String result, String id, String name, String[] optional, String[] nullfields)
+      throws APIValidatorExpcetion {
+
+    Map<String, Object> standard = apiValidator.validate(result,
+        "opensocial.Person.Field", optional,nullfields);
+    assertNotNull(standard.get("id"));
+    assertEquals(String.class, standard.get("id").getClass());
+    assertEquals(id, standard.get("id"));
+
+    assertNotNull(standard.get("name"));
+    Map<String, Object> nameJSON = apiValidator.validateOject(standard
+        .get("name"), "opensocial.Name.Field", optional,nullfields);
+    APIValidator.dump(nameJSON);
+
+    assertNotNull(nameJSON.get("unstructured"));
+    assertEquals(String.class, nameJSON.get("unstructured").getClass());
+    assertEquals(name, nameJSON.get("unstructured"));
+
+    // additional name
+    assertNull(nameJSON.get("additionalName"));
+
+  }
+
+  public void testPersonToJson() throws Exception {
+    String result = beanJsonConverter.convertToString(johnDoe);
+    if (outputInfo) {
+      log.info("JSON (" + result + ")");
+    }
+    Person parsedPerson = beanJsonConverter.convertToObject(result,
+        Person.class);
+
+    assertEquals(johnDoe.getId(), parsedPerson.getId());
+    assertEquals(johnDoe.getName().getUnstructured(), parsedPerson.getName()
+        .getUnstructured());
+
+    List<Address> addresses = parsedPerson.getAddresses();
+    if (outputInfo) {
+      for (Object o : addresses) {
+        log.info("Address " + o);
+      }
+    }
+
+    assertEquals(1, addresses.size());
+    Address address = addresses.get(0);
+    String unstructured = address.getUnstructuredAddress();
+
+    assertNotNull(unstructured);
+    assertEquals(johnDoe.getAddresses().get(0).getUnstructuredAddress(),
+        parsedPerson.getAddresses().get(0).getUnstructuredAddress());
+
+    assertEquals(3, parsedPerson.getPhoneNumbers().size());
+
+    for (int i = 0; i < johnDoe.getPhoneNumbers().size(); i++) {
+      Phone expectedPhone = johnDoe.getPhoneNumbers().get(i);
+      Phone actualPhone = parsedPerson.getPhoneNumbers().get(i);
+      assertEquals(expectedPhone.getType(), actualPhone.getType());
+      assertEquals(expectedPhone.getNumber(), actualPhone.getNumber());
+    }
+
+    assertEquals(2, parsedPerson.getEmails().size());
+
+    for (int i = 0; i < johnDoe.getEmails().size(); i++) {
+      Email expectedEmail = johnDoe.getEmails().get(i);
+      Email actualEmail = parsedPerson.getEmails().get(i);
+      assertEquals(expectedEmail.getType(), actualEmail.getType());
+      assertEquals(expectedEmail.getAddress(), actualEmail.getAddress());
+    }
+  }
+
+  public void testActivityToJson() throws Exception {
+
+    String result = beanJsonConverter.convertToString(activity);
+    if (outputInfo) {
+      log.info("JSON (" + result + ")");
+    }
+    Activity parsedActivity = beanJsonConverter.convertToObject(result,
+        Activity.class);
+    assertEquals(activity.getUserId(), parsedActivity.getUserId());
+    assertEquals(activity.getId(), parsedActivity.getId());
+
+    assertEquals(1, parsedActivity.getMediaItems().size());
+
+    MediaItem expectedItem = activity.getMediaItems().get(0);
+    MediaItem actualItem = parsedActivity.getMediaItems().get(0);
+
+    assertEquals(expectedItem.getUrl(), actualItem.getUrl());
+    assertEquals(expectedItem.getMimeType(), actualItem.getMimeType());
+    assertEquals(expectedItem.getType().toString(), actualItem.getType()
+        .toString());
+  }
+
+  public void testMapsToJson() throws Exception {
+    Map<String, Map<String, String>> map = Maps.newHashMap();
+
+    Map<String, String> item1Map = Maps.newHashMap();
+    item1Map.put("value", "1");
+
+    // Null values shouldn't cause exceptions
+    item1Map.put("value2", null);
+    map.put("item1", item1Map);
+
+    Map<String, String> item2Map = Maps.newHashMap();
+    item2Map.put("value", "2");
+    map.put("item2", item2Map);
+
+    String result = beanJsonConverter.convertToString(map);
+    if (outputInfo) {
+      log.info("JSON (" + result + ")");
+    }
+    // there is introspection that can tell jsonobject -> bean converter what a
+    // map should contain, so we have to tell it
+    beanJsonConverter.addMapping("item1", Map.class);
+    beanJsonConverter.addMapping("item2", Map.class);
+    Map<?, ?> parsedMap = beanJsonConverter
+        .convertToObject(result, Map.class);
+
+    if (outputInfo) {
+      log.info("Dumping Map (" + parsedMap + ")");
+    }
+    APIValidator.dump(parsedMap);
+
+    assertEquals("1", ((Map<?,?>)parsedMap.get("item1")).get("value"));
+    assertEquals("2", ((Map<?,?>)parsedMap.get("item2")).get("value"));
+  }
+
+  public void testListsToJson() throws Exception {
+    Map<String, String> item1Map = Maps.newHashMap();
+    item1Map.put("value", "1");
+
+    Map<String, String> item2Map = Maps.newHashMap();
+    item2Map.put("value", "2");
+
+    // put the list into a container before serializing, top level lists dont
+    // appear
+    // to be allowed in json
+    // just check that the list is in the holder correctly
+    List<Map<String, String>> list = new ArrayList<Map<String, String>>();
+    list.add(item1Map);
+    list.add(item2Map);
+    String result = beanJsonConverter.convertToString(list);
+    if (outputInfo) {
+      log.info("JSON (" + result + ")");
+    }
+    Map<?, ?>[] parsedList = beanJsonConverter.convertToObject(
+        result, Map[].class);
+
+    assertEquals("1", parsedList[0].get("value"));
+    assertEquals("2", parsedList[1].get("value"));
+  }
+
+  public void testArrayToJson() throws Exception {
+    String[] colors = { "blue", "green", "aquamarine" };
+    String result = beanJsonConverter.convertToString(colors);
+    if (outputInfo) {
+      log.info("JSON (" + result + ")");
+    }
+    String[] parsedColors = beanJsonConverter.convertToObject(result,
+        String[].class);
+    assertEquals(colors.length, parsedColors.length);
+    assertEquals(colors[0], parsedColors[0]);
+    assertEquals(colors[1], parsedColors[1]);
+    assertEquals(colors[2], parsedColors[2]);
+  }
+
+  public void testJsonToActivity() throws Exception {
+    String jsonActivity = "{userId : 5, id : 6, mediaItems : ["
+        + "{url : 'hello', mimeType : 'mimey', type : 'VIDEO'}" + "]}";
+    Activity result = beanJsonConverter.convertToObject(jsonActivity,
+        Activity.class);
+
+    assertEquals("5", result.getUserId());
+    assertEquals("6", result.getId());
+
+    assertEquals(1, result.getMediaItems().size());
+
+    MediaItem actualItem = result.getMediaItems().get(0);
+
+    assertEquals("hello", actualItem.getUrl());
+    assertEquals("mimey", actualItem.getMimeType());
+    assertEquals("video", actualItem.getType().toString());
+  }
+
+  public void testJsonToMap() throws Exception {
+    String jsonActivity = "{count : 0, favoriteColor : 'yellow'}";
+    Map<String, String> data = Maps.newHashMap();
+    data = beanJsonConverter.convertToObject(jsonActivity,
+        (Class<Map<String, String>>) data.getClass());
+
+    assertEquals(2, data.size());
+
+    for (String key : data.keySet()) {
+      Object value = data.get(key);
+      if (key.equals("count")) {
+        assertEquals(0, value);
+      } else if (key.equals("favoriteColor")) {
+        assertEquals("yellow", value);
+      }
+    }
+  }
+
+}
