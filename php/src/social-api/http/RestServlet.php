@@ -50,6 +50,9 @@ require 'src/social-api/ResponseItem.php';
 require 'src/social-api/converters/OutputConverter.php';
 require 'src/social-api/converters/OutputAtomConverter.php';
 require 'src/social-api/converters/OutputJsonConverter.php';
+require 'src/social-api/converters/InputConverter.php';
+require 'src/social-api/converters/InputAtomConverter.php';
+require 'src/social-api/converters/InputJsonConverter.php';
 
 class RestException extends Exception {}
 
@@ -140,7 +143,9 @@ class RestServlet extends HttpServlet {
 		$params = $this->getListParams();
 		$requestItem = new RestRequestItem();
 		$url = $this->getUrl();
-		$requestParam = $this->getRequestParams();
+		$requestType = $this->getRouteFromParameter($url);
+		$requestFormat = $this->getRequestFormat();
+		$requestParam = $this->getRequestParams($requestType, $requestFormat);
 		$requestItem->createRequestItem($url, $token, $method, $params, $requestParam);
 		$responseItem = $this->getResponseItem($requestItem);
 		return array('request' => $requestItem, 'response' => $responseItem);
@@ -151,7 +156,7 @@ class RestServlet extends HttpServlet {
 		// we support both a raw http post (without application/x-www-form-urlencoded headers) like java does
 		// and a more php / curl safe version of a form post with 'request' as the post field that holds the request json data
 		if (isset($GLOBALS['HTTP_RAW_POST_DATA']) || isset($_POST['request'])) {
-			$requests = $this->getRequestParams();
+			$requests = $this->getRequestParams('jsonbatch');
 			$responses = array();
 			foreach ($requests as $key => $value) {
 				$requestItem = new RestRequestItem();
@@ -203,7 +208,7 @@ class RestServlet extends HttpServlet {
 		 * but we only want to have the last bit (the actual request), this filters that down first
 		 */
 		$emptyFound = false;
-		$requestLines = explode("\n", $request);
+		$requestLines = explode("\r\n", $request);
 		$request = '';
 		foreach ($requestLines as $line) {
 			if ($emptyFound) {
@@ -211,6 +216,9 @@ class RestServlet extends HttpServlet {
 			} elseif (empty($line)) {
 				$emptyFound = true;
 			}
+		}
+		if (!$emptyFound) {
+			throw new Exception("Mallformed multipart structure");
 		}
 		// Now that we have the basic request in $request, split that up again & parse it into a meaningful representation
 		$firstFound = $emptyFound = false;
@@ -242,6 +250,9 @@ class RestServlet extends HttpServlet {
 				$request['postData'] .= $line."\n";
 			}
 		}
+		if (empty($request['method']) || empty($request['url'])) {
+			throw new Exception("Mallformed multipart structure");
+		}
 		if (empty($request['postData'])) {
 			// don't trip the requestItem into thinking there is postData when there's not
 			unset($request['postData']);
@@ -249,7 +260,8 @@ class RestServlet extends HttpServlet {
 			// if there was a post data blob present, decode it into an array, the format is based on the 
 			// content type header, which is either application/json or 
 			$format = isset($request['headers']['CONTENT_TYPE']) && strtolower($request['headers']['CONTENT_TYPE']) == 'application/atom+xml' ? 'atom' : 'json';
-			$request['postData'] = $this->decodeRequests($request['postData'], $format);
+			$requestType = $this->getRouteFromParameter($request['url']);
+			$request['postData'] = $this->decodeRequests($request['postData'], $requestType, $format);
 		}
 		return $request;
 	}
@@ -268,7 +280,7 @@ class RestServlet extends HttpServlet {
 			case 'appdata':
 				$class = 'AppDataHandler';
 				break;
-			//TODO add 'groups' here
+			//TODO add 'groups' and 'messages' here
 			default:
 				$response = new ResponseItem(NOT_IMPLEMENTED, "{$path} is not implemented");
 				break;
@@ -284,28 +296,52 @@ class RestServlet extends HttpServlet {
 		return $response;
 	}
 	
-	private function decodeRequests($requestParam, $format = 'json')
+	private function decodeRequests($requestParam, $requestType, $format = 'json')
 	{
-		// temp hack until i know what the intended way to detect format is
-		if ($format == 'json') {
-			return json_decode($requestParam, true);
-		} elseif ($format == 'atom') {
-			$xml = simplexml_load_string($requestParam);
-			print_r($xml);
-			return $xml;
-		} else {
-			throw Exception("Invalid or unsupported input format");
+		switch ($format) {
+			case 'json':
+				$inputConverter = new InputJsonConverter();
+				break;
+			case 'atom':
+				$inputConverter = new InputAtomConverter();
+				break;
+			default:
+				throw new Exception("Invalid or unsupported input format");
+				break;
 		}
+		switch ($requestType) {
+			case 'people':
+				$ret = $inputConverter->convertPeople($requestParam);
+				break;
+			case 'activities':
+				$ret = $inputConverter->convertActivities($requestParam);
+				break;
+			case 'appdata':
+				$ret = $inputConverter->convertAppData($requestParam);
+				break;
+			case 'jsonbatch':
+				// this type is only used by the internal json batch format
+				if ($format != 'json') {
+					throw new Exception("the json batch only supports the json input format");
+				}
+				$ret = $inputConverter->convertJsonBatch($requestParam);
+				break;
+			//TODO add 'groups' and 'messages' here
+			default:
+				throw new Exception("Unsupported REST call");
+				break;
+		}
+		return $ret;
 	}
 
-	private function getRequestParams()
+	private function getRequestParams($requestType, $requestFormat = 'json')
 	{
 		$post = in_array('request', $_POST) != null ? $_POST['request'] : null;
 		$requestParam = isset($GLOBALS['HTTP_RAW_POST_DATA']) ? $GLOBALS['HTTP_RAW_POST_DATA'] : $post;
 		if (get_magic_quotes_gpc()) {
 			$requestParam = stripslashes($requestParam);
 		}
-		return $this->decodeRequests($requestParam);
+		return $this->decodeRequests($requestParam, $requestType, $requestFormat);
 	}
 
 	private function getRouteFromParameter($pathInfo)
@@ -379,6 +415,22 @@ class RestServlet extends HttpServlet {
 		$restParams = explode('/', $uri);
 		return $restParams;
 	}
+	
+	private function getRequestFormat()
+	{
+		if (isset($_SERVER['CONTENT_TYPE'])) {
+			switch ($_SERVER['CONTENT_TYPE']) {
+				case 'application/atom+xml':
+					return 'atom';
+				case 'application/json':
+					return 'json';
+				default:
+					throw new Exception("Invalid request content type");
+			}
+		}
+		// if no Content-Type header is set, we assume json
+		return 'json';
+	}
 
 	private function getUrl()
 	{
@@ -387,11 +439,11 @@ class RestServlet extends HttpServlet {
 
 	public function isJsonBatchUrl()
 	{
-		return strrpos($_SERVER["REQUEST_URI"], RestServlet::$JSON_BATCH_ROUTE) > 0;
+		return strrpos($_SERVER["REQUEST_URI"], RestServlet::$JSON_BATCH_ROUTE) !== false;
 	}
 
 	public function isBatchProxyUrl()
 	{
-		return strrpos($_SERVER["REQUEST_URI"], RestServlet::$BATCH_PROXY_ROUTE) > 0;
+		return strrpos($_SERVER["REQUEST_URI"], RestServlet::$BATCH_PROXY_ROUTE) !== false;
 	}
 }

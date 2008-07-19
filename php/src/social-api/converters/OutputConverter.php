@@ -40,9 +40,9 @@ abstract class OutputConverter {
 	
 	public function outputPart($part, $code)
 	{
-		$boundryHeader = "{$this->boundry}\n".
-				"Content-Type: application/http;version=1.1\n".
-				"Content-Transfer-Encoding: binary\n\n";
+		$boundryHeader = "{$this->boundry}\r\n".
+				"Content-Type: application/http;version=1.1\r\n".
+				"Content-Transfer-Encoding: binary\r\n\r\n";
 		echo $boundryHeader;
 		switch ($code) {
 			case BAD_REQUEST:
@@ -65,7 +65,7 @@ abstract class OutputConverter {
 				$code = '200 OK';
 				break;
 		}
-		echo "$code\n\n";
+		echo "$code\r\n\r\n";
 		echo $part."\n";
 	}
 }

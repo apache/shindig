@@ -88,7 +88,8 @@ class JsLibrary {
 
 	static private function loadFile($fileName)
 	{
-		if (empty($fileName)) {
+		// this hack prevents loadFile from trying to load .jar resources
+		if (empty($fileName) || (strpos($fileName, 'res://') !== false)) {
 			return '';
 		}
 		if (! file_exists($fileName)) {
