@@ -280,6 +280,9 @@ class RestServlet extends HttpServlet {
 			case 'appdata':
 				$class = 'AppDataHandler';
 				break;
+			case 'messages':
+				$class = 'MessagesHandler';
+				break;
 			//TODO add 'groups' and 'messages' here
 			default:
 				$response = new ResponseItem(NOT_IMPLEMENTED, "{$path} is not implemented");
@@ -315,6 +318,9 @@ class RestServlet extends HttpServlet {
 				break;
 			case 'activities':
 				$ret = $inputConverter->convertActivities($requestParam);
+				break;
+			case 'messages':
+				$ret = $inputConverter->convertMessages($requestParam);
 				break;
 			case 'appdata':
 				$ret = $inputConverter->convertAppData($requestParam);

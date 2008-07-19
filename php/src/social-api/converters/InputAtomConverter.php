@@ -71,4 +71,26 @@ class InputAtomConverter extends InputConverter {
 		}
 		return $data;
 	}
+	
+	public function convertMessages($requestParam)
+	{
+		$xml = simplexml_load_string($requestParam, 'SimpleXMLElement', LIBXML_NOCDATA);
+		$message = array();
+		if (!isset($xml->title) || !isset($xml->content)) {
+			throw new Exception("Invalid message structure");
+		}
+		$message['id'] = isset($xml->id) ? trim($xml->id) : null;
+		$message['title'] = trim($xml->title);
+		$message['body'] = trim($xml->content);
+		// retrieve recipients by looking at the osapi name space
+		$xml = simplexml_load_string($requestParam, 'SimpleXMLElement', LIBXML_NOCDATA, "http://opensocial.org/2008/opensocialapi");		
+		if (!isset($xml->recipient)) {
+			throw new Exception("Invalid message structure");
+		}
+		$message['recipients'] = array();
+		foreach ($xml->recipient as $recipient) {
+			$message['recipients'][] = trim($recipient);
+		}
+		return $message;
+	}
 }

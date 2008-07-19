@@ -31,7 +31,7 @@ class OutputAtomConverter extends OutputConverter {
 	//FIXME osearch fields break the validator ... remove option once i know if they should be included or not
 	private static $includeOsearch = false;
 	// this maps the REST url to the atom content type
-	private static $entryTypes = array('people' => 'person', 'appdata' => 'appdata', 'activities' => 'activity');
+	private static $entryTypes = array('people' => 'person', 'appdata' => 'appdata', 'activities' => 'activity', 'messages' => 'messages');
 	private $doc;
 
 	function outputResponse(ResponseItem $responseItem, RestRequestItem $requestItem)

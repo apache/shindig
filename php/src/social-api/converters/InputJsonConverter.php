@@ -53,4 +53,13 @@ class InputJsonConverter extends InputConverter {
 		}
 		return $ret;
 	}
+
+	public function convertMessages($requestParam)
+	{
+		$ret = json_decode($requestParam, true);
+		if ($ret == $requestParam) {
+			throw new Exception("Mallformed json batch string");
+		}
+		return $ret;
+	}
 }

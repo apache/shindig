@@ -17,16 +17,17 @@
  * specific language governing permissions and limitations under the License.
  */
 
-/**
- * Abstract class for the conversion of the RESTful API input
- * Since the data layout between json and atom is completely
- * different (since the structure in atom has a atom meaning
- * and a social data meaning), we have the need to put the
- * hoisting rules somewhere..
- */
-abstract class InputConverter {
-	abstract public function convertPeople($requestParam);
-	abstract public function convertActivities($requestParam);
-	abstract public function convertAppData($requestParam);
-	abstract public function convertMessages($requestParam);
+abstract class MessagesService {
+
+	/**  $message is an array containing the following fields:
+	 *  [id] => {msgid}
+	 *  [title] => You have an invitation from Joe
+	 *  [body] => Click <a href="http://app.example.org/invites/{msgid}">here</a> to review your invitation.
+	 *  [recipients] => Array
+	 *      (
+	 *          [0] => example.org:AD38B3886625AAF
+	 *          [1] => example.org:997638BAA6F25AD
+	 *      )
+	 */
+	abstract public function createMessage($userId, $message, SecurityToken $token);
 }

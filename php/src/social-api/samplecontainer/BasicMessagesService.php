@@ -17,16 +17,10 @@
  * specific language governing permissions and limitations under the License.
  */
 
-/**
- * Abstract class for the conversion of the RESTful API input
- * Since the data layout between json and atom is completely
- * different (since the structure in atom has a atom meaning
- * and a social data meaning), we have the need to put the
- * hoisting rules somewhere..
- */
-abstract class InputConverter {
-	abstract public function convertPeople($requestParam);
-	abstract public function convertActivities($requestParam);
-	abstract public function convertAppData($requestParam);
-	abstract public function convertMessages($requestParam);
+class BasicMessagesService extends MessagesService {
+
+	public function createMessage($userId, $message, SecurityToken $token)
+	{
+		return new ResponseItem(NOT_IMPLEMENTED, "Not implemented", null);
+	}
 }
