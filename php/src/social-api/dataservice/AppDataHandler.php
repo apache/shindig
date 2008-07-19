@@ -35,9 +35,6 @@ class AppDataHandler extends DataRequestHandler {
 	 * /appdata/john.doe/@friends/app?fields=count
 	 * /appdata/john.doe/@self/app
 	 *
-	 * The post data should be a regular json object. All of the fields vars will
-	 * be pulled from the values and set on the person object. If there are no
-	 * fields vars then all of the data will be overridden.
 	 */
 	public function handleDelete(RestRequestItem $requestItem)
 	{
@@ -74,7 +71,15 @@ class AppDataHandler extends DataRequestHandler {
 	public function handlePost(RestRequestItem $requestItem)
 	{
 		$requestItem->parseUrlWithTemplate(self::$APP_DATA_PATH);
-		return $this->service->updatePersonData($requestItem->getUser(), $requestItem->getGroup(), $requestItem->getFields(), $requestItem->getPostData(), $requestItem->getAppId(), $requestItem->getToken());
+		// if no ?fields=foo,bar was specified, we try to guess them from the post data
+		$postFields = array();
+		if ($requestItem->getPostData() != null) {
+			$data = $requestItem->getPostData();
+			foreach ($data as $key => $val) {
+				$postFields[] = $key;
+			}
+		}
+		return $this->service->updatePersonData($requestItem->getUser(), $requestItem->getGroup(), $requestItem->getFieldsWithDefaultValue($postFields), $requestItem->getPostData(), $requestItem->getAppId(), $requestItem->getToken());
 	}
 
 	/**

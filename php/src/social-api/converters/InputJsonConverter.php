@@ -20,25 +20,37 @@
 /**
  * Convert json representations to the internal data structure representation
  */
-class InputJsonConverter {
+class InputJsonConverter extends InputConverter {
 
 	public function convertPeople($requestParam)
 	{
-		return json_decode($requestParam, true);
+		throw new Exception("Opperation not supported");
 	}
 
 	public function convertActivities($requestParam)
 	{
-		return json_decode($requestParam, true);
+		$ret = json_decode($requestParam, true);
+		if ($ret == $requestParam) {
+			throw new Exception("Mallformed activity json string");
+		}
+		return $ret;
 	}
 
 	public function convertAppData($requestParam)
 	{
-		return json_decode($requestParam, true);
+		$ret = json_decode($requestParam, true);
+		if ($ret == $requestParam) {
+			throw new Exception("Mallformed app data json string");
+		}
+		return $ret;
 	}
 
 	public function convertJsonBatch($requestParam)
 	{
-		return json_decode($requestParam, true);
+		$ret = json_decode($requestParam, true);
+		if ($ret == $requestParam) {
+			throw new Exception("Mallformed json batch string");
+		}
+		return $ret;
 	}
 }
