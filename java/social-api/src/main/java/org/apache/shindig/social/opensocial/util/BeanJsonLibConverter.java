@@ -285,6 +285,7 @@ public class BeanJsonLibConverter implements BeanConverter {
    * @param string
    * @param class1
    */
+  @SuppressWarnings("unchecked")
   public void addMapping(String key, Class<?> class1) {
     jsonConfig.getClassMap().put(key, class1);
   }

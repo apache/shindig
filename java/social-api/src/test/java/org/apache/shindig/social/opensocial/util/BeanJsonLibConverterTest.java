@@ -338,6 +338,7 @@ public class BeanJsonLibConverterTest extends TestCase {
     assertEquals("video", actualItem.getType().toString());
   }
 
+  @SuppressWarnings("unchecked")
   public void testJsonToMap() throws Exception {
     String jsonActivity = "{count : 0, favoriteColor : 'yellow'}";
     Map<String, String> data = Maps.newHashMap();
