@@ -23,28 +23,26 @@ import org.apache.shindig.common.cache.LruCache;
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
 
-import java.net.URI;
-
 /**
  * Simple cache of HttpResponse. Uses WeakHashMap for memory management
  */
 public class BasicHttpCache extends AbstractHttpCache {
 
-  private final Cache<URI, HttpResponse> cache;
+  private final Cache<String, HttpResponse> cache;
 
   @Override
-  protected HttpResponse getResponseImpl(URI uri) {
-    return cache.getElement(uri);
+  protected HttpResponse getResponseImpl(String key) {
+    return cache.getElement(key);
   }
 
   @Override
-  protected void addResponseImpl(URI uri, HttpResponse response) {
-    cache.addElement(uri, response);
+  protected void addResponseImpl(String key, HttpResponse response) {
+    cache.addElement(key, response);
   }
 
   @Override
-  protected HttpResponse removeResponseImpl(URI uri) {
-    return cache.removeElement(uri);
+  protected HttpResponse removeResponseImpl(String key) {
+    return cache.removeElement(key);
   }
 
   @Inject

@@ -132,16 +132,60 @@ public class SigningFetcherTest extends TestCase {
   }
 
   public void testNoSignOwner() throws Exception {
-    HttpRequest unsigned
-        = makeHttpRequest("GET", "http://test", null);
+    HttpRequest unsigned = makeHttpRequest("GET", "http://test", null);
+    unsigned.getOptions().viewerSigned = false;
+    HttpRequest out = signAndInspect(unsigned);
+    List<OAuth.Parameter> queryParams = OAuth.decodeForm(out.getUri().getRawQuery());
+    assertTrue(contains(queryParams, "opensocial_owner_id", "o"));
+    assertFalse(contains(queryParams, "opensocial_viewer_id", "v"));
+  }
+  
+  public void testCacheHit() throws Exception {
+    HttpRequest unsigned = makeHttpRequest("GET", "http://test", null);
+    HttpRequest out = signAndInspect(unsigned);
+
+    HttpRequest unsigned2 = makeHttpRequest("GET", "http://test", null);
+    interceptor.interceptedRequest = null;
+    signer.fetch(unsigned2);
+    assertNull(interceptor.interceptedRequest);
+  }
+  
+  public void testCacheMiss_noOwner() throws Exception {
+    HttpRequest unsigned = makeHttpRequest("GET", "http://test", null);
     unsigned.getOptions().ownerSigned = false;
     HttpRequest out = signAndInspect(unsigned);
-    List<OAuth.Parameter> queryParams
-        = OAuth.decodeForm(out.getUri().getRawQuery());
-    assertFalse(contains(queryParams, "opensocial_owner_id", "o"));
-    assertTrue(contains(queryParams, "opensocial_viewer_id", "v"));
-  }
 
+    HttpRequest unsigned2 = makeHttpRequest("GET", "http://test", null);
+    interceptor.interceptedRequest = null;
+    signer.fetch(unsigned2);
+    assertNotNull(interceptor.interceptedRequest);
+  }
+  
+  public void testCacheHit_ownerOnly() throws Exception {
+    HttpRequest unsigned = makeHttpRequest("GET", "http://test", null);
+    unsigned.getOptions().viewerSigned = false;
+    HttpRequest out = signAndInspect(unsigned);
+
+    HttpRequest unsigned2 = makeHttpRequest("GET", "http://test", null);
+    unsigned2.getOptions().viewerSigned = false;
+    interceptor.interceptedRequest = null;
+    signer.fetch(unsigned2);
+    assertNull(interceptor.interceptedRequest);
+  }
+  
+  public void testCacheMiss_bypassCache() throws Exception {
+    HttpRequest unsigned = makeHttpRequest("GET", "http://test", null);
+    unsigned.getOptions().viewerSigned = false;
+    HttpRequest out = signAndInspect(unsigned);
+
+    HttpRequest unsigned2 = makeHttpRequest("GET", "http://test", null);
+    unsigned2.getOptions().ignoreCache = true;
+    unsigned2.getOptions().viewerSigned = false;
+    interceptor.interceptedRequest = null;
+    signer.fetch(unsigned2);
+    assertNotNull(interceptor.interceptedRequest);
+  }
+  
   public void testTrickyParametersInQuery() throws Exception {
     String tricky = "%6fpensocial_owner_id=gotcha";
     HttpRequest unsigned

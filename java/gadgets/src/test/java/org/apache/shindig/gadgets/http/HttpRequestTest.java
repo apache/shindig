@@ -57,4 +57,13 @@ public class HttpRequestTest extends TestCase {
         = new HttpRequest(DEFAULT_URI, headers);
     assertEquals(TEST_HEADER_VALUE, request.getHeader(TEST_HEADER_KEY));
   }
+  
+  public void testDefaultOptionsSafelyMutable() throws Exception {
+    HttpRequest request = new HttpRequest(DEFAULT_URI);
+    assertFalse(request.getOptions().ignoreCache);
+    request.getOptions().ignoreCache = true;
+    
+    request = new HttpRequest(DEFAULT_URI);
+    assertFalse(request.getOptions().ignoreCache);
+  }
 }

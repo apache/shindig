@@ -19,25 +19,20 @@ package org.apache.shindig.gadgets.http;
 
 import com.google.inject.ImplementedBy;
 
-import java.net.URI;
-
 /**
- * Cache of HttpResponse keyed by URI/HttpRequest
+ * Cache of HttpResponse.
+ * 
+ * Keys are made of more or less arbitrary name/value pairs (the HttpCacheKey)
+ * and data about the HttpRequest.  The values are the HttpResponse.
  */
-
 @ImplementedBy(BasicHttpCache.class)
-
 public interface HttpCache {
 
-  public HttpResponse getResponse(URI uri);
+  public HttpResponse getResponse(HttpCacheKey key, HttpRequest request);
 
-  public HttpResponse getResponse(HttpRequest request);
+  public HttpResponse addResponse(HttpCacheKey key, HttpRequest request,
+      HttpResponse response);
 
-  public HttpResponse addResponse(URI uri, HttpResponse response);
+  public HttpResponse removeResponse(HttpCacheKey key);
 
-  public HttpResponse addResponse(HttpRequest request, HttpResponse response);
-
-  public HttpResponse removeResponse(URI uri);
-
-  public HttpResponse removeResponse(HttpRequest request);
 }
