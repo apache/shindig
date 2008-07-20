@@ -89,6 +89,9 @@ public class BeanJsonLibConverter implements BeanConverter {
   @SuppressWarnings("unchecked")
   public <T> T convertToObject(String string, final Class<T> rootBeanClass) {
 
+    if ( "".equals(string) ) {
+      string = "{}";
+    }
     if (string.startsWith("[")) {
       JSONArray jsonArray = JSONArray.fromObject(string, jsonConfig);
       if (debugMode) {
@@ -260,7 +263,10 @@ public class BeanJsonLibConverter implements BeanConverter {
   }
 
   public String convertToString(Object pojo) {
-
+    if ( "".equals(pojo) ) {
+      return "{}";
+    }
+    
     try {
       JSONObject jsonObject = JSONObject.fromObject(pojo, jsonConfig);
       return jsonObject.toString();
