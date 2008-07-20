@@ -145,7 +145,8 @@ public class BasicHttpFetcher implements HttpFetcher {
 
   /** {@inheritDoc} */
   public HttpResponse fetch(HttpRequest request) {
-    HttpResponse response = cache.getResponse(request);
+    HttpCacheKey cacheKey = new HttpCacheKey(request);
+    HttpResponse response = cache.getResponse(cacheKey, request);
     if (response != null) {
       return response;
     }
@@ -162,7 +163,7 @@ public class BasicHttpFetcher implements HttpFetcher {
         IOUtils.copy(request.getPostBody(), fetcher.getOutputStream());
       }
       response = makeResponse(fetcher);
-      return cache.addResponse(request, response);
+      return cache.addResponse(cacheKey, request, response);
     } catch (IOException e) {
       if (e instanceof java.net.SocketTimeoutException ||
           e instanceof java.net.SocketException) {

@@ -75,66 +75,76 @@ public class BasicHttpCacheTest extends TestCase {
   }
 
   public void testEmptyCache() {
-    assertNull(cache.getResponse(createRequest("GET")));
+    HttpRequest req = createRequest("GET");
+    HttpCacheKey key = new HttpCacheKey(req);
+    assertNull(cache.getResponse(key, req));
   }
 
   public void testCacheable() {
     HttpRequest req = createRequest("GET");
     HttpResponse resp = createResponse(200, null, null);
-    cache.addResponse(req, resp);
-    assertEquals(cache.getResponse(req), resp);
+    HttpCacheKey key = new HttpCacheKey(req);
+    cache.addResponse(key, req, resp);
+    assertEquals(cache.getResponse(key, req), resp);
   }
 
   public void testNotCacheableForPost() {
     HttpRequest req = createRequest("POST");
     HttpResponse resp = createResponse(200, null, null);
-    cache.addResponse(req, resp);
-    assertNull(cache.getResponse(req));
+    HttpCacheKey key = new HttpCacheKey(req);
+    cache.addResponse(key, req, resp);
+    assertNull(cache.getResponse(key, req));
   }
 
   public void testCacheableForErr() {
     HttpRequest req = createRequest("GET");
     HttpResponse resp = createResponse(500, null, null);
-    cache.addResponse(req, resp);
-    assertEquals(resp, cache.getResponse(req));
+    HttpCacheKey key = new HttpCacheKey(req);
+    cache.addResponse(key, req, resp);
+    assertEquals(resp, cache.getResponse(key, req));
   }
 
   public void testCacheableForFutureExpires() {
     HttpRequest req = createRequest("GET");
     HttpResponse resp = createExpiresResponse(200,
         System.currentTimeMillis() + 10000L);
-    cache.addResponse(req, resp);
-    assertEquals(cache.getResponse(req), resp);
+    HttpCacheKey key = new HttpCacheKey(req);
+    cache.addResponse(key, req, resp);
+    assertEquals(cache.getResponse(key, req), resp);
   }
 
   public void testNotCacheableForPastExpires() {
     HttpRequest req = createRequest("GET");
     HttpResponse resp = createExpiresResponse(200,
         System.currentTimeMillis() - 10000L);
-    cache.addResponse(req, resp);
-    assertNull(cache.getResponse(req));
+    HttpCacheKey key = new HttpCacheKey(req);
+    cache.addResponse(key, req, resp);
+    assertNull(cache.getResponse(key, req));
   }
 
   public void testCacheableForFutureMaxAge() {
     HttpRequest req = createRequest("GET");
     HttpResponse resp = createMaxAgeResponse(200,
         10000L);
-    cache.addResponse(req, resp);
-    assertEquals(cache.getResponse(req), resp);
+    HttpCacheKey key = new HttpCacheKey(req);
+    cache.addResponse(key, req, resp);
+    assertEquals(cache.getResponse(key, req), resp);
   }
 
   public void testNotCacheableForNoCache() {
     HttpRequest req = createRequest("GET");
     HttpResponse resp = createResponse(200, "Cache-Control", "no-cache");
-    cache.addResponse(req, resp);
-    assertNull(cache.getResponse(req));
+    HttpCacheKey key = new HttpCacheKey(req);
+    cache.addResponse(key, req, resp);
+    assertNull(cache.getResponse(key, req));
   }
 
   public void testCacheableForExpiresWithWait() {
     HttpRequest req = createRequest("GET");
     HttpResponse resp = createExpiresResponse(200,
         System.currentTimeMillis() + 5000L);
-    cache.addResponse(req, resp);
+    HttpCacheKey key = new HttpCacheKey(req);
+    cache.addResponse(key, req, resp);
     try {
       synchronized (cache) {
         cache.wait(500L);
@@ -142,7 +152,7 @@ public class BasicHttpCacheTest extends TestCase {
     } catch (InterruptedException ie) {
       fail("Failed to wait for cache");
     }
-    assertEquals(cache.getResponse(req), resp);
+    assertEquals(cache.getResponse(key, req), resp);
   }
 
 
@@ -150,7 +160,8 @@ public class BasicHttpCacheTest extends TestCase {
     HttpRequest req = createRequest("GET");
     HttpResponse resp = createExpiresResponse(200,
         System.currentTimeMillis() + 1000L);
-    cache.addResponse(req, resp);
+    HttpCacheKey key = new HttpCacheKey(req);
+    cache.addResponse(key, req, resp);
     try {
       synchronized (cache) {
         cache.wait(1001L);
@@ -158,7 +169,7 @@ public class BasicHttpCacheTest extends TestCase {
     } catch (InterruptedException ie) {
       fail("Failed to wait for cache");
     }
-    assertNull(cache.getResponse(req));
+    assertNull(cache.getResponse(key, req));
   }
 
   public void testCacheableWithForcedMinTTL() {
@@ -166,7 +177,8 @@ public class BasicHttpCacheTest extends TestCase {
     // in seconds
     req.getOptions().minCacheTtl = 5;
     HttpResponse resp = createExpiresResponse(200, System.currentTimeMillis());
-    cache.addResponse(req, resp);
+    HttpCacheKey key = new HttpCacheKey(req);
+    cache.addResponse(key, req, resp);
     try {
       synchronized (cache) {
         cache.wait(2000L);
@@ -174,7 +186,7 @@ public class BasicHttpCacheTest extends TestCase {
     } catch (InterruptedException ie) {
       fail("Failed to wait for cache");
     }
-    assertNotNull(cache.getResponse(req));
+    assertNotNull(cache.getResponse(key, req));
   }
 
 }

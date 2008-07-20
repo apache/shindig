@@ -18,6 +18,7 @@ import org.apache.shindig.common.SecurityToken;
 import org.apache.shindig.common.crypto.Crypto;
 import org.apache.shindig.common.util.TimeSource;
 import org.apache.shindig.gadgets.http.HttpCache;
+import org.apache.shindig.gadgets.http.HttpCacheKey;
 import org.apache.shindig.gadgets.http.HttpFetcher;
 import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.http.HttpResponse;
@@ -29,7 +30,6 @@ import net.oauth.OAuthMessage;
 import net.oauth.OAuth.Parameter;
 import net.oauth.signature.RSA_SHA1;
 
-import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
@@ -149,45 +149,36 @@ public class SigningFetcher extends ChainedContentFetcher {
       throws GadgetException {
 
     try {
-      HttpRequest cacheableRequest = makeCacheableRequest(request);
-      HttpResponse result = cache.getResponse(cacheableRequest);
+      HttpCacheKey cacheKey = makeCacheKey(request);
+      HttpResponse result = cache.getResponse(cacheKey, request);
       if (result != null) {
         return result;
       }
 
       HttpRequest signedRequest = signRequest(request);
-      // Signed requests are not externally cacehable
+      // Signed requests are not externally cacheable
       signedRequest.getOptions().ignoreCache = true;
       result = nextFetcher.fetch(signedRequest);
 
       // Try and cache the response
-      return cache.addResponse(cacheableRequest, result);
+      return cache.addResponse(cacheKey, request, result);
     } catch (GadgetException e) {
       throw e;
     } catch (Exception e) {
       throw new GadgetException(GadgetException.Code.INTERNAL_SERVER_ERROR, e);
     }
   }
-
-  private HttpRequest makeCacheableRequest(
-      HttpRequest request)
-      throws IOException, URISyntaxException, RequestSigningException {
-    // Create a request without the OAuth params which includes the
-    // OpenSocial ones and see if we can find it in the cache
-    URI resource = request.getUri();
-    String query = resource.getRawQuery();
-    List<Parameter> cacheableParams = sanitize(OAuth.decodeForm(query));
-    addOpenSocialParams(request.getOptions(), cacheableParams);
-    addOAuthNonTemporalParams(cacheableParams);
-    String cacheableQuery = OAuth.formEncode(cacheableParams);
-    URL url = new URL(
-          resource.getScheme(),
-          resource.getHost(),
-          resource.getPort(),
-          resource.getRawPath() + '?' + cacheableQuery);
-    HttpRequest cacheableRequest =
-        new HttpRequest(url.toURI(), request);
-    return cacheableRequest;
+  
+  private HttpCacheKey makeCacheKey(HttpRequest request) {
+    HttpCacheKey key = new HttpCacheKey(request);
+    key.set("authentication", "signed");
+    List<Parameter> signedFetchParams = new ArrayList<Parameter>();
+    addOpenSocialParams(request.getOptions(), signedFetchParams);
+    addOAuthNonTemporalParams(signedFetchParams);
+    for (Parameter p : signedFetchParams) {
+      key.set(p.getKey(), p.getValue());
+    }
+    return key;
   }
 
   private HttpRequest signRequest(HttpRequest req)

@@ -491,7 +491,7 @@ public class OAuthFetcher extends ChainedContentFetcher {
                                  null,
                                  HttpRequest.DEFAULT_CONTENT_TYPE,
                                  null,
-                                 HttpRequest.DEFAULT_OPTIONS);
+                                 HttpRequest.getIgnoreCacheOptions());
 
     HttpResponse response = nextFetcher.fetch(oauthRequest);
     checkForProtocolProblem(response);

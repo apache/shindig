@@ -16,6 +16,8 @@ package org.apache.shindig.gadgets;
 
 import org.apache.shindig.gadgets.http.HttpResponse;
 import org.apache.shindig.gadgets.http.HttpRequest;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 /**
  * Test utility to intercept remote content requests for inspection.
@@ -30,7 +32,15 @@ public class InterceptingContentFetcher extends ChainedContentFetcher {
 
   public HttpResponse fetch(HttpRequest request) {
     interceptedRequest = request;
-    return null;
+    try {
+      JSONObject resp = new JSONObject();
+      resp.put("url", request.getUri().toASCIIString());
+      resp.put("method", request.getMethod());
+      resp.put("body", request.getPostBodyAsString());
+      return new HttpResponse(resp.toString());
+    } catch (JSONException e) {
+      return new HttpResponse(e.toString());
+    }
   }
 
 }

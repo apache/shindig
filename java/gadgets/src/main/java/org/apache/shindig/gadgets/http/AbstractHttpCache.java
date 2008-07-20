@@ -17,8 +17,6 @@
  */
 package org.apache.shindig.gadgets.http;
 
-import java.net.URI;
-
 /**
  * Base class for content caches. Defines cache expiration rules and
  * and restrictions on allowed content. Also enforces rewriting
@@ -26,24 +24,22 @@ import java.net.URI;
  */
 public abstract class AbstractHttpCache implements HttpCache {
 
-  public final HttpResponse getResponse(HttpRequest request) {
-    if (canCacheRequest(request)) {
-      HttpResponse response = getResponse(request.getUri());
-      return checkRewrite(request, response);
+  public final HttpResponse getResponse(HttpCacheKey key, HttpRequest request) {
+    if (key.isCacheable()) {
+      String keyString = key.toString();
+      HttpResponse cached = getResponseImpl(keyString);
+      if (responseStillUsable(cached)) {
+        return checkRewrite(keyString, request, cached);
+      }
     }
     return null;
   }
 
-  public final HttpResponse getResponse(URI uri) {
-    if (uri == null) return null;
-    return checkResponse(getResponseImpl(uri));
-  }
+  protected abstract HttpResponse getResponseImpl(String key);
 
-  protected abstract HttpResponse getResponseImpl(URI uri);
-
-  public HttpResponse addResponse(HttpRequest request, HttpResponse response) {
-    if (canCacheRequest(request)) {
-
+  public HttpResponse addResponse(HttpCacheKey key, HttpRequest request,
+      HttpResponse response) {
+    if (key.isCacheable()) {
       // If the request forces a minimum TTL for the cached content then have
       // the response honor it
       if (response != null) {
@@ -53,61 +49,44 @@ public abstract class AbstractHttpCache implements HttpCache {
       // !!! Note that we only rewrite cacheable content. Move this call above the if
       // to rewrite all content that passes through the cache regardless of cacheability
       rewrite(request, response);
-      addResponse(request.getUri(), response);
-      return checkRewrite(request, response);
+      String keyString = key.toString();
+      if (responseStillUsable(response)) {
+        addResponseImpl(keyString, response);
+      }
+      return checkRewrite(keyString, request, response);
     }
     return response;
   }
 
-  public HttpResponse addResponse(URI uri, HttpResponse response) {
-    if (uri == null || response == null) return response;
-    response = checkResponse(response);
-    addResponseImpl(uri, response);
-    return response;
+  protected abstract void addResponseImpl(String key, HttpResponse response);
+
+  public HttpResponse removeResponse(HttpCacheKey key) {
+    String keyString = key.toString();
+    HttpResponse response = getResponseImpl(keyString);
+    removeResponseImpl(keyString);
+    if (responseStillUsable(response)) {
+      return response;
+    }
+    return null;
   }
 
-  protected abstract void addResponseImpl(URI uri, HttpResponse response);
-
-  public HttpResponse removeResponse(HttpRequest request) {
-    return removeResponse(request.getUri());
-  }
-
-  public HttpResponse removeResponse(URI uri) {
-    if (uri == null) return null;
-    HttpResponse response = getResponseImpl(uri);
-    removeResponseImpl(uri);
-    return checkResponse(response);
-  }
-
-  protected abstract HttpResponse removeResponseImpl(URI uri);
+  protected abstract HttpResponse removeResponseImpl(String key);
 
   /**
    * Utility function to verify that an entry is cacheable and not expired
-   * Returns null if the content is no longer cacheable.
-   *
-   * @param request
-   * @return content or null
-   */
-  protected boolean canCacheRequest(HttpRequest request) {
-    return ("GET".equals(request.getMethod()) &&
-        !request.getOptions().ignoreCache);
-  }
-
-  /**
-   * Utility function to verify that an entry is cacheable and not expired
-   * Returns null if the content is no longer cacheable.
+   * Returns false if the content is no longer cacheable.
    *
    * @param response
-   * @return content or null
+   * @return true if the response can be used.
    */
-  protected HttpResponse checkResponse(HttpResponse response) {
+  protected boolean responseStillUsable(HttpResponse response) {
     if (response == null) {
-      return null;
+      return false;
     }
     if (response.getCacheExpiration() < System.currentTimeMillis()) {
-      return null;
+      return false;
     }
-    return response;
+    return true;
   }
 
   /**
@@ -115,13 +94,16 @@ public abstract class AbstractHttpCache implements HttpCache {
    * we can add it. Re-cache if we created rewritten content.
    * Return the appropriately re-written version if requested
    */
-  protected HttpResponse checkRewrite(HttpRequest request, HttpResponse response) {
-    if (response == null) return null;
+  protected HttpResponse checkRewrite(String keyString, HttpRequest request,
+      HttpResponse response) {
+    if (response == null) {
+      return null;
+    }
 
     // Perform a rewrite and store the content back to the cache if the
     // content is actually rewritten
     if (rewrite(request, response)) {
-      addResponseImpl(request.getUri(), response);
+      addResponseImpl(keyString, response);
     }
 
     // Return the rewritten version if requested

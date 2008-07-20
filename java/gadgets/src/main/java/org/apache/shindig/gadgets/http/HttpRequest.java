@@ -228,7 +228,7 @@ public class HttpRequest {
    * @param uri
    */
   public HttpRequest(URI uri) {
-    this("GET", uri, null, null, DEFAULT_OPTIONS);
+    this("GET", uri, null, null, getDefaultOptions());
   }
 
   /**
@@ -247,7 +247,7 @@ public class HttpRequest {
    * @param headers
    */
   public HttpRequest(URI uri, Map<String, List<String>> headers) {
-    this("GET", uri, headers, null, DEFAULT_OPTIONS);
+    this("GET", uri, headers, null, getDefaultOptions());
   }
 
   /**
@@ -267,7 +267,7 @@ public class HttpRequest {
    * @param postBody
    */
   public HttpRequest(URI uri, byte[] postBody) {
-    this("POST", uri, null, postBody, DEFAULT_OPTIONS);
+    this("POST", uri, null, postBody, getDefaultOptions());
   }
 
   /**
@@ -288,7 +288,7 @@ public class HttpRequest {
    */
   public HttpRequest(URI uri, Map<String, List<String>> headers,
       byte[] postBody) {
-    this("POST", uri, headers, postBody, DEFAULT_OPTIONS);
+    this("POST", uri, headers, postBody, getDefaultOptions());
   }
 
   /**
@@ -342,10 +342,14 @@ public class HttpRequest {
     return false;
   }
 
-  public static final Options DEFAULT_OPTIONS = new Options();
-  public static final Options IGNORE_CACHE_OPTIONS = new Options();
-  static {
-    IGNORE_CACHE_OPTIONS.ignoreCache = true;
+  public static Options getDefaultOptions() {
+    return new Options();
+  }
+  
+  public static Options getIgnoreCacheOptions() {
+    Options o = new Options();
+    o.ignoreCache = true;
+    return o;
   }
 
   /**
