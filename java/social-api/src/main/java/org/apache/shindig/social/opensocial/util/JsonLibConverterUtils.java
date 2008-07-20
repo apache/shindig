@@ -26,9 +26,9 @@ import net.sf.json.JSONObject;
 /**
  *
  */
-public class JSONLibConverterUtils {
+public class JsonLibConverterUtils {
   protected static final Log log = LogFactory
-  .getLog(JSONLibConverterUtils.class);
+  .getLog(JsonLibConverterUtils.class);
 
   
   /**

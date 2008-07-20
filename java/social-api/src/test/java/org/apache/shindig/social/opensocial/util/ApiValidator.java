@@ -45,9 +45,9 @@ import org.xml.sax.SAXException;
  * A class that loads a feature set from features into a Javascript Parser to
  * make the model available to validate JSON messages against.
  */
-public class APIValidator {
+public class ApiValidator {
 
-  private static final Log log = LogFactory.getLog(APIValidator.class);
+  private static final Log log = LogFactory.getLog(ApiValidator.class);
   private Context ctx;
   private ScriptableObject scope;
 
@@ -65,7 +65,7 @@ public class APIValidator {
    *                 feature is missing
    * 
    */
-  public APIValidator(String feature) throws IOException,
+  public ApiValidator(String feature) throws IOException,
       ParserConfigurationException, SAXException {
     ctx = Context.enter();
     scope = ctx.initStandardObjects();
@@ -83,7 +83,7 @@ public class APIValidator {
    *                If any of the fields that appear in the json structure are
    *                optional, then they should be defined in this parameter.
    * @param nullfields
-   * @throws APIValidatorExpcetion
+   * @throws ApiValidatorExpcetion
    *                 if there is a problem validating the json
    * @return a map so string object pairs containing the fields at the top level
    *         of the json tree. Where these are native java objects, they will
@@ -92,7 +92,7 @@ public class APIValidator {
    */
   public Map<String, Object> validate(String json, String object,
       String[] optionalFields, String[] nullfields)
-      throws APIValidatorExpcetion {
+      throws ApiValidatorExpcetion {
 
     /*
      * Object[] ids = ScriptableObject.getPropertyIds(scope); for (Object id :
@@ -131,11 +131,11 @@ public class APIValidator {
    * @param string
    * @param optional
    * @return
-   * @throws APIValidatorExpcetion
+   * @throws ApiValidatorExpcetion
    */
   public Map<String, Object> validateOject(Object jsonObject, String object,
       String[] optionalFields, String[] nullFields)
-      throws APIValidatorExpcetion {
+      throws ApiValidatorExpcetion {
     Map<String, String> optional = new HashMap<String, String>();
     for (String opt : optionalFields) {
       optional.put(opt, opt);
@@ -164,7 +164,7 @@ public class APIValidator {
             log.warn("Missing Optional Field " + fieldName);
           } else if (!nullf.containsKey(fieldName)) {
             log.error("Missing Field " + fieldName);
-            throw new APIValidatorExpcetion("Missing Field " + fieldName);
+            throw new ApiValidatorExpcetion("Missing Field " + fieldName);
           }
         } else {
           if (nullf.containsKey(fieldName)) {
@@ -187,7 +187,7 @@ public class APIValidator {
       }
 
     } else {
-      throw new APIValidatorExpcetion(
+      throw new ApiValidatorExpcetion(
           "Parsing JSON resulted in invalid Javascript object, which was "
               + jsonObject + " JSON was [[" + jsonObject + "]]");
     }

@@ -30,7 +30,7 @@ import org.xml.sax.SAXException;
 /**
  * Test the api validator to make certain it behaves as is expected.
  */
-public class APIValidatorTest {
+public class ApiValidatorTest {
 
   /**
    * A definition of the test json used in this unit test.
@@ -40,14 +40,14 @@ public class APIValidatorTest {
 
   /**
    * test the validator for successful validation
-   * @throws APIValidatorExpcetion
+   * @throws ApiValidatorExpcetion
    * @throws IOException
    * @throws ParserConfigurationException
    * @throws SAXException
    */
   @Test
-  public void testValidator() throws APIValidatorExpcetion, IOException, ParserConfigurationException, SAXException {
-    APIValidator apiVal = new APIValidator("opensocial-reference");
+  public void testValidator() throws ApiValidatorExpcetion, IOException, ParserConfigurationException, SAXException {
+    ApiValidator apiVal = new ApiValidator("opensocial-reference");
     apiVal.addScript(TEST_DEFINITION);
     String[] optional = {"shouldBeMissing"};
     String[] nullfields = {};
@@ -65,21 +65,21 @@ public class APIValidatorTest {
   
   /**
    * Test for a failing validation
-   * @throws APIValidatorExpcetion
+   * @throws ApiValidatorExpcetion
    * @throws IOException
    * @throws ParserConfigurationException
    * @throws SAXException
    */
   @Test
-  public void testValidatorFail() throws APIValidatorExpcetion, IOException, ParserConfigurationException, SAXException {
-    APIValidator apiVal = new APIValidator("opensocial-reference");
+  public void testValidatorFail() throws ApiValidatorExpcetion, IOException, ParserConfigurationException, SAXException {
+    ApiValidator apiVal = new ApiValidator("opensocial-reference");
     apiVal.addScript(TEST_DEFINITION);
     String[] optional = {};
     String[] nullfields = {};
     try {
       apiVal.validate("{ jsonIsMissing: \"A Test JSON\", xyz : 123 }", "TestDef.Field", optional, nullfields );
       Assert.fail("Should have Generated an APIValidatorException ");
-    } catch ( APIValidatorExpcetion ex ) {
+    } catch ( ApiValidatorExpcetion ex ) {
       
     }
      
