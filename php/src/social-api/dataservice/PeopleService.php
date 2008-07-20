@@ -18,8 +18,8 @@
  */
 
 abstract class PeopleService {
-	static public $sortOrder = array('topFriends', 'name');
-	static public $filterType = array('all', 'hasApp', 'topFriends');
+	public static $sortOrder = array('topFriends', 'name');
+	public static $filterType = array('all', 'hasApp', 'topFriends');
 
 	/**
 	 * Returns a Person object for person with $id or false on not found
@@ -40,5 +40,5 @@ abstract class PeopleService {
 	 * @param max The max number of people to fetch.
 	 * @return a list of people.
 	 */
-	abstract public function getPeople($userId, $groupId, $sortOrder, $filter, $first, $max, $profileDetails, SecurityToken $token);
+	abstract public function getPeople($userId, $groupId, $sortOrder, $filter, $first, $max, $profileDetails, $networkDistance, SecurityToken $token);
 }

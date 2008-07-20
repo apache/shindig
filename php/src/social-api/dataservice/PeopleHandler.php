@@ -48,7 +48,7 @@ class PeopleHandler extends DataRequestHandler {
 			//FIXME same logic as the java code here, but doesn't seem to do much with the optionalPersonId which seems odd
 			return $this->service->getPerson($requestItem->getUser(), $requestItem->getGroup(), $fields, $requestItem->getToken());
 		}
-		return $this->service->getPeople($requestItem->getUser(), $requestItem->getGroup(), $requestItem->getOrderBy(), $requestItem->getFilterBy(), $requestItem->getStartIndex(), $requestItem->getCount(), $fields, $requestItem->getToken());
+		return $this->service->getPeople($requestItem->getUser(), $requestItem->getGroup(), $requestItem->getOrderBy(), $requestItem->getFilterBy(), $requestItem->getStartIndex(), $requestItem->getCount(), $fields, $requestItem->getNetworkDistance(), $requestItem->getToken());
 	}
 
 	public function handleDelete(RestRequestItem $requestItem)

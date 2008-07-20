@@ -28,6 +28,7 @@ class RestRequestItem {
 	public static $START_INDEX = "startIndex";
 	public static $COUNT = "count";
 	public static $ORDER_BY = "orderBy";
+	public static $NETWORK_DISTANCE = "networkDistance";
 	public static $FILTER_BY = "filterBy";
 	public static $FIELDS = "fields";
 	
@@ -140,7 +141,7 @@ class RestRequestItem {
 
 	public function getStartIndex()
 	{
-		if (!empty($this->parameters[self::$START_INDEX])) {
+		if (! empty($this->parameters[self::$START_INDEX])) {
 			return $this->parameters[self::$START_INDEX];
 		} else {
 			return self::$DEFAULT_START_INDEX;
@@ -149,7 +150,7 @@ class RestRequestItem {
 
 	public function getCount()
 	{
-		if (!empty($this->parameters[self::$COUNT])) {
+		if (! empty($this->parameters[self::$COUNT])) {
 			return $this->parameters[self::$COUNT];
 		} else {
 			return self::$DEFAULT_COUNT;
@@ -158,19 +159,28 @@ class RestRequestItem {
 
 	public function getOrderBy()
 	{
-		if (!empty($this->parameters[self::$ORDER_BY])) {
+		if (! empty($this->parameters[self::$ORDER_BY])) {
 			return $this->parameters[self::$ORDER_BY];
 		} else {
 			return PeopleService::$sortOrder;
 		}
 	}
 
+	public function getNetworkDistance()
+	{
+		if (! empty($this->parameters[self::$NETWORK_DISTANCE])) {
+			return $this->parameters[self::$NETWORK_DISTANCE];
+		} else {
+			return false;
+		}
+	}
+
 	public function getFilterBy()
 	{
-		if (!empty($this->parameters[self::$FILTER_BY])) {
+		if (! empty($this->parameters[self::$FILTER_BY])) {
 			return $this->parameters[self::$FILTER_BY];
 		} else {
-			return PeopleService::$filterType; 
+			return PeopleService::$filterType;
 		}
 	}
 
@@ -181,7 +191,7 @@ class RestRequestItem {
 
 	public function getFieldsWithDefaultValue(Array $defaultValue)
 	{
-		if (!empty($this->parameters[self::$FIELDS])) {
+		if (! empty($this->parameters[self::$FIELDS])) {
 			$paramValue = $this->parameters[self::$FIELDS];
 			return explode(',', $paramValue);
 		} else {
