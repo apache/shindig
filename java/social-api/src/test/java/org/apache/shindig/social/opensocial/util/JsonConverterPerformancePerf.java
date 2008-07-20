@@ -50,9 +50,6 @@ public class JsonConverterPerformancePerf extends TestCase {
   private Activity activity;
 
   private BeanJsonLibConverter beanJsonLibConverter;
-  private ApiValidator apiValidator;
-  // set to true to get loging output at info level
-  private boolean outputInfo = false;
   private BeanJsonConverter beanJsonConverter;
 
   @Override
@@ -80,8 +77,6 @@ public class JsonConverterPerformancePerf extends TestCase {
 
     beanJsonConverter = new BeanJsonConverter(Guice
         .createInjector(new SocialApiTestsGuiceModule()));
-
-    apiValidator = new ApiValidator("opensocial-reference");
 
   }
 
