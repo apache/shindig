@@ -89,12 +89,20 @@ class BasicSecurityToken extends SecurityToken {
 			$this->token = $this->crypter->wrap($this->tokenData);
 		}
 	}
+	
+	public function isAnonymous()
+	{
+		return ($this->tokenData[$this->OWNER_KEY] === 0 && $this->tokenData[$this->VIEWER_KEY] === 0);
+	}
 
 	/**
 	 * {@inheritDoc}
 	 */
 	public function getAppId()
 	{
+		if ($this->isAnonymous()) {
+			throw new Exception("Can't get appId from an anonymous token");
+		}
 		return $this->tokenData[$this->APP_KEY];
 	}
 
@@ -103,6 +111,9 @@ class BasicSecurityToken extends SecurityToken {
 	 */
 	public function getDomain()
 	{
+		if ($this->isAnonymous()) {
+			throw new Exception("Can't get domain from an anonymous token");
+		}
 		return $this->tokenData[$this->DOMAIN_KEY];
 	}
 
@@ -111,6 +122,9 @@ class BasicSecurityToken extends SecurityToken {
 	 */
 	public function getOwnerId()
 	{
+		if ($this->isAnonymous()) {
+			throw new Exception("Can't get ownerId from an anonymous token");
+		}
 		return $this->tokenData[$this->OWNER_KEY];
 	}
 
@@ -119,6 +133,9 @@ class BasicSecurityToken extends SecurityToken {
 	 */
 	public function getViewerId()
 	{
+		if ($this->isAnonymous()) {
+			throw new Exception("Can't get viewerId from an anonymous token");
+		}
 		return $this->tokenData[$this->VIEWER_KEY];
 	}
 
@@ -127,6 +144,9 @@ class BasicSecurityToken extends SecurityToken {
 	 */
 	public function getAppUrl()
 	{
+		if ($this->isAnonymous()) {
+			throw new Exception("Can't get appUrl from an anonymous token");
+		}
 		return $this->tokenData[$this->APPURL_KEY];
 	}
 
@@ -135,6 +155,9 @@ class BasicSecurityToken extends SecurityToken {
 	 */
 	public function getModuleId()
 	{
+		if ($this->isAnonymous()) {
+			throw new Exception("Can't get moduleId from an anonymous token");
+		}
 		return intval($this->tokenData[$this->MODULE_KEY]);
 	}
 }

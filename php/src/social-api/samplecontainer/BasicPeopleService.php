@@ -58,7 +58,7 @@ class BasicPeopleService extends PeopleService {
 				break;
 		}
 		$allPeople = XmlStateFileFetcher::get()->getAllPeople();
-		if ($filter == "hasApp") {
+		if (!$token->isAnonymous() && $filter == "hasApp") {
 			$appId = $token->getAppId();
 			$peopleWithApp = XmlStateFileFetcher::get()->getPeopleWithApp($appId);
 		}
@@ -70,10 +70,10 @@ class BasicPeopleService extends PeopleService {
 			$person = null;
 			if (is_array($allPeople) && isset($allPeople[$id])) {
 				$person = $allPeople[$id];
-				if ($id == $token->getViewerId()) {
+				if (!$token->isAnonymous() && $id == $token->getViewerId()) {
 					$person->setIsViewer(true);
 				}
-				if ($id == $token->getOwnerId()) {
+				if (!$token->isAnonymous() && $id == $token->getOwnerId()) {
 					$person->setIsOwner(true);
 				}
 				if (is_array($profileDetails) && count($profileDetails) && !in_array('all', $profileDetails)) {

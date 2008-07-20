@@ -128,10 +128,10 @@ class RestServlet extends HttpServlet {
 		} catch (Exception $e) {
 			header("HTTP/1.0 500 Internal Server Error");
 			echo "<html><body><h1>500 Internal Server Error</h1>";
+			echo "Message: ".$e->getMessage()."<br />\n";
 			if (Config::get('debug')) {
-				echo "Message: ".$e->getMessage()."<br />\n";
 				echo "<pre>\n";
-				print_r(debug_backtrace());
+				print_r($e);
 				echo "\n</pre>";
 			}
 			echo "</body></html>";
@@ -301,6 +301,9 @@ class RestServlet extends HttpServlet {
 	
 	private function decodeRequests($requestParam, $requestType, $format = 'json')
 	{
+		if (empty($requestParam)) {
+			return null;
+		}
 		switch ($format) {
 			case 'json':
 				$inputConverter = new InputJsonConverter();
