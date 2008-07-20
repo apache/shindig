@@ -142,7 +142,7 @@ public class SigningFetcherTest extends TestCase {
   
   public void testCacheHit() throws Exception {
     HttpRequest unsigned = makeHttpRequest("GET", "http://test", null);
-    HttpRequest out = signAndInspect(unsigned);
+    signAndInspect(unsigned);
 
     HttpRequest unsigned2 = makeHttpRequest("GET", "http://test", null);
     interceptor.interceptedRequest = null;
@@ -153,7 +153,7 @@ public class SigningFetcherTest extends TestCase {
   public void testCacheMiss_noOwner() throws Exception {
     HttpRequest unsigned = makeHttpRequest("GET", "http://test", null);
     unsigned.getOptions().ownerSigned = false;
-    HttpRequest out = signAndInspect(unsigned);
+    signAndInspect(unsigned);
 
     HttpRequest unsigned2 = makeHttpRequest("GET", "http://test", null);
     interceptor.interceptedRequest = null;
@@ -164,7 +164,7 @@ public class SigningFetcherTest extends TestCase {
   public void testCacheHit_ownerOnly() throws Exception {
     HttpRequest unsigned = makeHttpRequest("GET", "http://test", null);
     unsigned.getOptions().viewerSigned = false;
-    HttpRequest out = signAndInspect(unsigned);
+    signAndInspect(unsigned);
 
     HttpRequest unsigned2 = makeHttpRequest("GET", "http://test", null);
     unsigned2.getOptions().viewerSigned = false;
@@ -176,7 +176,7 @@ public class SigningFetcherTest extends TestCase {
   public void testCacheMiss_bypassCache() throws Exception {
     HttpRequest unsigned = makeHttpRequest("GET", "http://test", null);
     unsigned.getOptions().viewerSigned = false;
-    HttpRequest out = signAndInspect(unsigned);
+    signAndInspect(unsigned);
 
     HttpRequest unsigned2 = makeHttpRequest("GET", "http://test", null);
     unsigned2.getOptions().ignoreCache = true;
@@ -191,7 +191,7 @@ public class SigningFetcherTest extends TestCase {
     HttpRequest unsigned
         = makeHttpRequest("GET", "http://test?" + tricky, null);
     try {
-    	HttpRequest out = signAndInspect(unsigned);
+    	signAndInspect(unsigned);
     	fail("Should have thrown");
     } catch (RequestSigningException e) {
     	// good.
@@ -203,7 +203,7 @@ public class SigningFetcherTest extends TestCase {
     HttpRequest unsigned
         = makeHttpRequest("POST", "http://test", tricky.getBytes());
     try {
-    	HttpRequest out = signAndInspect(unsigned);
+    	signAndInspect(unsigned);
     	fail("Should have thrown");
     } catch (RequestSigningException e) {
     	// good.
@@ -211,14 +211,12 @@ public class SigningFetcherTest extends TestCase {
   }
 
   public void testGetNoQuery() throws Exception {
-    HttpRequest unsigned
-        = makeHttpRequest("GET", "http://test", null);
-    HttpRequest out = signAndInspect(unsigned);
+    HttpRequest unsigned = makeHttpRequest("GET", "http://test", null);
+    signAndInspect(unsigned);
   }
 
   public void testGetWithQuery() throws Exception {
-    HttpRequest unsigned
-        = makeHttpRequest("GET", "http://test?a=b", null);
+    HttpRequest unsigned = makeHttpRequest("GET", "http://test?a=b", null);
     HttpRequest out = signAndInspect(unsigned);
     List<OAuth.Parameter> queryParams
         = OAuth.decodeForm(out.getUri().getRawQuery());
@@ -247,7 +245,7 @@ public class SigningFetcherTest extends TestCase {
 
   public void testPostNoQueryNoData() throws Exception {
     HttpRequest unsigned = makeHttpRequest("GET", "http://test");
-    HttpRequest out = signAndInspect(unsigned);
+    signAndInspect(unsigned);
   }
 
   public void testPostWithQueryNoData() throws Exception {
@@ -281,7 +279,7 @@ public class SigningFetcherTest extends TestCase {
     HttpRequest unsigned = makeHttpRequest(
         "POST", "http://test?opensocial_foo=bar");
     try {
-      HttpRequest out = signAndInspect(unsigned);
+      signAndInspect(unsigned);
       fail("Should have thrown");
     } catch (RequestSigningException e) {
       // good
@@ -292,7 +290,7 @@ public class SigningFetcherTest extends TestCase {
     HttpRequest unsigned = makeHttpRequest(
         "POST", "http://test?oauth_foo=bar", "name=value".getBytes());
     try {
-      HttpRequest out = signAndInspect(unsigned);
+      signAndInspect(unsigned);
       fail("Should have thrown");
     } catch (RequestSigningException e) {
       // good
@@ -303,7 +301,7 @@ public class SigningFetcherTest extends TestCase {
     HttpRequest unsigned = makeHttpRequest(
         "POST", "http://test", "opensocial_foo=bar".getBytes());
     try {
-    	HttpRequest out = signAndInspect(unsigned);
+    	signAndInspect(unsigned);
     	fail("Should have thrown");
     } catch (RequestSigningException e) {
     	// good.
@@ -314,7 +312,7 @@ public class SigningFetcherTest extends TestCase {
     HttpRequest unsigned = makeHttpRequest(
         "POST", "http://test", "oauth_foo=bar".getBytes());
     try {
-    	HttpRequest out = signAndInspect(unsigned);
+    	signAndInspect(unsigned);
     	fail("Should have thrown");
     } catch (RequestSigningException e) {
     	// good.

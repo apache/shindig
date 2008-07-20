@@ -76,7 +76,7 @@ public class UserPrefTest extends TestCase {
   public void testMissingName() throws Exception {
     String xml = "<UserPref datatype=\"string\"/>";
     try {
-      UserPref pref = new UserPref(XmlUtil.parse(xml));
+      new UserPref(XmlUtil.parse(xml));
       fail("No exception thrown when name is missing");
     } catch (SpecParserException e) {
       // OK
@@ -94,7 +94,7 @@ public class UserPrefTest extends TestCase {
                  " <EnumValue/>" +
                  "</UserPref>";
     try {
-      UserPref pref = new UserPref(XmlUtil.parse(xml));
+      new UserPref(XmlUtil.parse(xml));
       fail("No exception thrown when EnumValue@value is missing");
     } catch (SpecParserException e) {
       // OK

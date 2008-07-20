@@ -21,10 +21,6 @@ import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.http.HttpResponse;
 import org.apache.shindig.gadgets.spec.GadgetSpec;
 
-import java.io.Reader;
-import java.io.Writer;
-import java.net.URI;
-
 import com.google.inject.ImplementedBy;
 
 /**

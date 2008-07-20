@@ -248,7 +248,6 @@ public class HttpGadgetContext extends GadgetContext {
       String paramName = paramNames.nextElement();
       if (paramName.startsWith(USERPREF_PARAM_PREFIX)) {
         String prefName = paramName.substring(USERPREF_PARAM_PREFIX.length());
-        String escapedParam =
         prefs.put(prefName, req.getParameter(paramName));
       }
     }

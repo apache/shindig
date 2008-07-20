@@ -18,29 +18,20 @@
  */
 package org.apache.shindig.gadgets;
 
-import org.apache.shindig.common.util.ResourceLoader;
-import org.apache.shindig.gadgets.http.BasicHttpCache;
-import org.apache.shindig.gadgets.http.BasicHttpFetcher;
-import org.apache.shindig.gadgets.http.ContentFetcherFactory;
-import org.apache.shindig.gadgets.http.HttpCache;
-import org.apache.shindig.gadgets.http.HttpFetcher;
-import org.apache.shindig.gadgets.http.HttpResponse;
-import org.apache.shindig.gadgets.http.RemoteContentFetcherFactory;
-import org.apache.shindig.gadgets.oauth.OAuthFetcherFactory;
-import org.apache.shindig.gadgets.rewrite.ContentRewriter;
-import org.apache.shindig.gadgets.rewrite.DefaultContentRewriter;
-
-import com.google.inject.AbstractModule;
-import com.google.inject.CreationException;
-import com.google.inject.name.Names;
-import com.google.inject.spi.Message;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Arrays;
 import java.util.Properties;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
+
+import org.apache.shindig.common.util.ResourceLoader;
+import org.apache.shindig.gadgets.http.HttpResponse;
+
+import com.google.inject.AbstractModule;
+import com.google.inject.CreationException;
+import com.google.inject.name.Names;
+import com.google.inject.spi.Message;
 
 /**
  * Creates a module to supply all of the Basic* classes

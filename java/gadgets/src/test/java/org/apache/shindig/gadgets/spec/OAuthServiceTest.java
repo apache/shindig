@@ -87,7 +87,8 @@ public class OAuthServiceTest {
   public void testParseEndPoint_badlocation() throws Exception {
     try {
       String xml = "<Request url='http://www.example.com' method='GET' param_location='body'/>";
-      OAuthService.EndPoint ep = service.parseEndPoint("Request", XmlUtil.parse(xml));
+      service.parseEndPoint("Request", XmlUtil.parse(xml));
+      fail("Should have thrown");
     } catch (SpecParserException e) {
       assertEquals("Unknown OAuth param_location: body", e.getMessage());
     }
@@ -146,7 +147,7 @@ public class OAuthServiceTest {
   public void testParseService_nodata() throws Exception {
     String xml = "<Service/>";
     try {
-      OAuthService s = new OAuthService(XmlUtil.parse(xml));
+      new OAuthService(XmlUtil.parse(xml));
     } catch (SpecParserException e) {
       assertEquals("/OAuth/Service/Request is required", e.getMessage());
     }
@@ -158,7 +159,7 @@ public class OAuthServiceTest {
         "<Request url='http://www.example.com/request'/>" +
         "</Service>";
     try {
-      OAuthService s = new OAuthService(XmlUtil.parse(xml));
+      new OAuthService(XmlUtil.parse(xml));
     } catch (SpecParserException e) {
       assertEquals("/OAuth/Service/Access is required", e.getMessage());
     }

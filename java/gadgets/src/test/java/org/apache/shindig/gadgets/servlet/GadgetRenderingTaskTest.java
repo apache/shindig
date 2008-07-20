@@ -37,11 +37,9 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.net.URI;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Enumeration;
-import java.util.List;
 
 // TODO: Migrate this to new Servlet testing setup.
 public class GadgetRenderingTaskTest extends HttpTestFixture {
@@ -137,7 +135,6 @@ public class GadgetRenderingTaskTest extends HttpTestFixture {
   @SuppressWarnings("unchecked")
   public void testForcedLibsIncluded() throws Exception {
     String jsLibs = "http://example.org/js/foo:bar.js";
-    List<String> libs = Arrays.asList(LIBS.split(":"));
     expect(urlGenerator.getBundledJsUrl(isA(Collection.class),
         isA(GadgetContext.class))).andReturn(jsLibs);
     String content = parseBasicGadget(GadgetSpec.DEFAULT_VIEW);
@@ -250,19 +247,19 @@ public class GadgetRenderingTaskTest extends HttpTestFixture {
   }
 
   public void testRenderSetsProperCacheControlHeaders() throws Exception {
-    String content = parseBasicGadget(GadgetSpec.DEFAULT_VIEW);
+    parseBasicGadget(GadgetSpec.DEFAULT_VIEW);
     fixture.checkCacheControlHeaders(GadgetRenderingTask.DEFAULT_CACHE_TTL, true);
   }
 
   public void testRenderSetsLongLivedCacheControlHeadersWhenVParamIsSet() throws Exception {
     expect(fixture.request.getParameter("v")).andReturn("some value");
-    String content = parseBasicGadget(GadgetSpec.DEFAULT_VIEW);
+    parseBasicGadget(GadgetSpec.DEFAULT_VIEW);
     fixture.checkCacheControlHeaders(HttpUtil.DEFAULT_TTL, true);
   }
 
   public void testRenderSetsNoCacheHeadersWhenNoCacheParamIsSet() throws Exception {
     expect(fixture.request.getParameter("nocache")).andReturn("1");
-    String content = parseBasicGadget(GadgetSpec.DEFAULT_VIEW);
+    parseBasicGadget(GadgetSpec.DEFAULT_VIEW);
     fixture.checkCacheControlHeaders(0, true);
   }
 

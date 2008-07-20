@@ -20,8 +20,6 @@ package org.apache.shindig.gadgets.servlet;
 
 import org.apache.shindig.gadgets.DefaultGuiceModule;
 
-import com.google.inject.Scopes;
-
 import java.util.Properties;
 
 /**

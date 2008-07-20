@@ -39,8 +39,6 @@ import java.io.IOException;
 import java.io.Reader;
 import java.io.StringReader;
 import java.net.URI;
-import java.util.ArrayList;
-import java.util.List;
 
 public class CajaContentFilter implements GadgetContentFilter {
   private final URI retrievedUri;
@@ -88,7 +86,6 @@ public class CajaContentFilter implements GadgetContentFilter {
       throws GadgetException {
     StringBuilder errbuilder = new StringBuilder();
     MessageContext mc = new MessageContext();
-    List<GadgetException> exceptions = new ArrayList<GadgetException>();
 
     if (cause != null) {
       errbuilder.append(cause).append('\n');

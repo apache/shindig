@@ -24,14 +24,10 @@ import org.apache.shindig.social.dataservice.DataServiceServletFetcher;
 import com.google.inject.AbstractModule;
 import com.google.inject.name.Names;
 
-import java.util.logging.Logger;
-
 /**
  * Provides social api component injection for all large tests
  */
 public class SocialApiTestsGuiceModule extends AbstractModule {
-  private static Logger logger =
-      Logger.getLogger(SocialApiTestsGuiceModule.class.getName());
 
   @Override
   protected void configure() {

@@ -58,13 +58,13 @@ public class MessageBundleTest {
   @Test(expected = SpecParserException.class)
   public void missingNameThrows() throws SpecParserException {
     String xml = "<messagebundle><msg>foo</msg></messagebundle>";
-    MessageBundle bundle = new MessageBundle(BUNDLE_URL, xml);
+    new MessageBundle(BUNDLE_URL, xml);
   }
 
   @Test(expected = SpecParserException.class)
   public void malformedXmlThrows() throws SpecParserException {
     String xml = "</messagebundle>";
-    MessageBundle bundle = new MessageBundle(BUNDLE_URL, xml);
+    new MessageBundle(BUNDLE_URL, xml);
   }
 
   @Test
@@ -78,7 +78,7 @@ public class MessageBundleTest {
   public void extractFromElementsWithNoName() throws Exception {
     String xml = "<messagebundle><msg>foo</msg></messagebundle>";
     Element element = XmlUtil.parse(xml);
-    MessageBundle bundle = new MessageBundle(element);
+    new MessageBundle(element);
   }
 
   @Test

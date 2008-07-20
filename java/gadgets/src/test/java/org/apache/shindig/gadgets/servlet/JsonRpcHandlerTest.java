@@ -81,8 +81,6 @@ public class JsonRpcHandlerTest extends HttpTestFixture {
         .put("context", createContext("en", "US"))
         .put("gadgets", gadgets);
 
-    GadgetSpec spec = new GadgetSpec(SPEC_URL, SPEC_XML);
-
     expect(fetcher.fetch(SPEC_REQUEST)).andReturn(new HttpResponse(SPEC_XML));
     expect(urlGenerator.getIframeUrl(isA(Gadget.class)))
         .andReturn(SPEC_URL.toString());
@@ -112,9 +110,6 @@ public class JsonRpcHandlerTest extends HttpTestFixture {
     JSONObject input = new JSONObject()
         .put("context", createContext("en", "US"))
         .put("gadgets", gadgets);
-
-    GadgetSpec spec = new GadgetSpec(SPEC_URL, SPEC_XML);
-    GadgetSpec spec2 = new GadgetSpec(SPEC_URL2, SPEC_XML2);
 
     expect(fetcher.fetch(SPEC_REQUEST))
         .andReturn(new HttpResponse(SPEC_XML));

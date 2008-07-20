@@ -197,7 +197,7 @@ public class BasicGadgetSpecFactoryTest {
     expect(fetcher.fetch(request)).andReturn(HttpResponse.error());
     replay(fetcher);
 
-    GadgetSpec spec = specFactory.getGadgetSpec(SPEC_URL, true);
+    specFactory.getGadgetSpec(SPEC_URL, true);
   }
 
   @Test(expected = GadgetException.class)
@@ -209,7 +209,7 @@ public class BasicGadgetSpecFactoryTest {
     expect(fetcher.fetch(viewRequest)).andReturn(HttpResponse.error());
     replay(fetcher);
 
-    GadgetSpec spec = specFactory.getGadgetSpec(SPEC_URL, true);
+    specFactory.getGadgetSpec(SPEC_URL, true);
   }
 
   @Test(expected = GadgetException.class)
@@ -219,7 +219,7 @@ public class BasicGadgetSpecFactoryTest {
         new GadgetException(GadgetException.Code.FAILED_TO_RETRIEVE_CONTENT));
     replay(fetcher);
 
-    GadgetSpec spec = specFactory.getGadgetSpec(SPEC_URL, true);
+    specFactory.getGadgetSpec(SPEC_URL, true);
   }
 
   private static class CaptureRewriter implements ContentRewriter {

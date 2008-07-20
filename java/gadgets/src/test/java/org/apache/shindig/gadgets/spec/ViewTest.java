@@ -76,7 +76,7 @@ public class ViewTest extends TestCase {
         = "<Content type=\"url\" href=\"http://example.org/\"/>";
 
     try {
-      View view = new View("test", Arrays.asList(XmlUtil.parse(content1),
+      new View("test", Arrays.asList(XmlUtil.parse(content1),
                                                  XmlUtil.parse(content2)));
       fail("No exception thrown with conflicting type attributes.");
     } catch (SpecParserException e) {
@@ -87,7 +87,7 @@ public class ViewTest extends TestCase {
   public void testHrefOnTypeUrl() throws Exception {
     String xml = "<Content type=\"url\"/>";
     try {
-      View view = new View("dummy", Arrays.asList(XmlUtil.parse(xml)));
+      new View("dummy", Arrays.asList(XmlUtil.parse(xml)));
       fail("No exception thrown when href attribute is missing for type=url.");
     } catch (SpecParserException e) {
       // Ok
@@ -99,7 +99,7 @@ public class ViewTest extends TestCase {
     // most anything will pass. urn:isbn:0321146530 is valid here.
     String xml = "<Content type=\"url\" href=\"fobad@$%!fdf\"/>";
     try {
-      View view = new View("dummy", Arrays.asList(XmlUtil.parse(xml)));
+      new View("dummy", Arrays.asList(XmlUtil.parse(xml)));
       fail("No exception thrown when href attribute is not a valid uri.");
     } catch (SpecParserException e) {
       // Ok

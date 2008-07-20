@@ -60,7 +60,7 @@ public class GadgetSpecTest extends TestCase {
                  "<Content type=\"html\"/>" +
                  "</Module>";
     try {
-      GadgetSpec spec = new GadgetSpec(SPEC_URL, xml);
+      new GadgetSpec(SPEC_URL, xml);
       fail("No exception thrown when ModulePrefs is missing.");
     } catch (SpecParserException e) {
       // OK
@@ -74,7 +74,7 @@ public class GadgetSpecTest extends TestCase {
                  "<Content type=\"html\"/>" +
                  "</Module>";
     try {
-      GadgetSpec spec = new GadgetSpec(SPEC_URL, xml);
+      new GadgetSpec(SPEC_URL, xml);
       fail("No exception thrown when more than 1 ModulePrefs is specified.");
     } catch (SpecParserException e) {
       // OK
@@ -84,7 +84,7 @@ public class GadgetSpecTest extends TestCase {
   public void testMalformedXml() throws Exception {
     String xml = "<Module><ModulePrefs/>";
     try {
-      GadgetSpec spec = new GadgetSpec(SPEC_URL, xml);
+      new GadgetSpec(SPEC_URL, xml);
       fail("No exception thrown on malformed XML.");
     } catch (SpecParserException e) {
       // OK

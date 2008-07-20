@@ -43,16 +43,18 @@ public class BasicHttpFetcher implements HttpFetcher {
   private static final int CONNECT_TIMEOUT_MS = 5000;
   private static final int DEFAULT_MAX_OBJECT_SIZE = 1024 * 1024;
 
-  private final int maxObjSize;
   private final HttpCache cache;
 
   /**
-   * Creates a new fetcher capable of retrieving objects {@code maxObjSize}
-   * bytes or smaller in size.
-   * @param maxObjSize Maximum size, in bytes, of object to fetch
+   * Creates a new fetcher for fetching HTTP objects.  Not really suitable
+   * for production use.  Someone should probably go and implement maxObjSize,
+   * for one thing.  Use of an HTTP proxy for security is also necessary
+   * for production deployment.
+   * 
+   * @param maxObjSize Maximum size, in bytes, of object to fetch.  Except this
+   * isn't actually implemented.
    */
   public BasicHttpFetcher(HttpCache cache, int maxObjSize) {
-    this.maxObjSize = maxObjSize;
     this.cache = cache;
   }
 

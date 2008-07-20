@@ -55,7 +55,7 @@ public class FeatureTest extends TestCase {
   public void testDoesNotLikeUnnamedFeatures() throws Exception {
     String xml = "<Require/>";
     try {
-      Feature feature = new Feature(XmlUtil.parse(xml));
+      new Feature(XmlUtil.parse(xml));
       fail("No exception thrown when an unnamed feature is passed.");
     } catch (SpecParserException e) {
       // Ok
@@ -65,7 +65,7 @@ public class FeatureTest extends TestCase {
   public void testEnforceParamNames() throws Exception {
     String xml = "<Require feature=\"foo\"><Param>Test</Param></Require>";
     try {
-      Feature feature = new Feature(XmlUtil.parse(xml));
+      new Feature(XmlUtil.parse(xml));
       fail("No exception thrown when an unnamed parameter is passed.");
     } catch (SpecParserException e) {
       // OK.

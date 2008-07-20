@@ -129,7 +129,7 @@ public class FeedProcessorTest {
   @Test
   public void parseRssNoSummaries() throws Exception {
     JSONObject feed = processor.process(URL_RSS, DATA_RSS, false, 1);
-    JSONArray entryArray = feed.getJSONArray("Entry");
+    feed.getJSONArray("Entry");
     JSONObject entry = feed.getJSONArray("Entry").getJSONObject(0);
     assertNull("Summary should not be returned when getSummaries is false",
         entry.optString("Summary", null));
@@ -170,7 +170,7 @@ public class FeedProcessorTest {
   @Test
   public void parseAtomNoSummaries() throws Exception {
     JSONObject feed = processor.process(URL_ATOM, DATA_ATOM, false, 1);
-    JSONArray entryArray = feed.getJSONArray("Entry");
+    feed.getJSONArray("Entry");
     JSONObject entry = feed.getJSONArray("Entry").getJSONObject(0);
     assertNull("Summary should not be returned when getSummaries is false",
         entry.optString("Summary", null));
