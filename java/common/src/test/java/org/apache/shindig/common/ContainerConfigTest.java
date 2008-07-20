@@ -154,8 +154,7 @@ public class ContainerConfigTest {
     json.put(PARENT_KEY, "bad bad bad parent!");
     json.put(ARRAY_NAME, ARRAY_ALT_VALUE);
 
-    ContainerConfig config
-        = new ContainerConfig(createContainer(json).getAbsolutePath());
+    new ContainerConfig(createContainer(json).getAbsolutePath());
   }
 
   public void testPathQuery() throws Exception {

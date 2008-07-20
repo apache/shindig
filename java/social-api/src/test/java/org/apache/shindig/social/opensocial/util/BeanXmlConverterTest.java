@@ -135,7 +135,7 @@ public class BeanXmlConverterTest extends TestCase {
     String xml = beanXmlConverter.convertToXml(map);
 
     // TODO: Change this test to use parsing once we have the right format
-    Element element = XmlUtil.parse(xml);
+    XmlUtil.parse(xml);
 
     // TODO: I don't believe this is the output we are looking for for app
     // data... we will probably have to tweak this.

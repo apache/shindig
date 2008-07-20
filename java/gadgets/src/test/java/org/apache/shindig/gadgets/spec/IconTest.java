@@ -36,7 +36,7 @@ public class IconTest extends TestCase {
   public void testInvalidMode() throws Exception {
     String xml = "<Icon type=\"foo\" mode=\"broken\"/>";
     try {
-      Icon icon = new Icon(XmlUtil.parse(xml));
+      new Icon(XmlUtil.parse(xml));
       fail("No exception thrown when an invalid mode attribute is passed.");
     } catch (SpecParserException e) {
       // OK

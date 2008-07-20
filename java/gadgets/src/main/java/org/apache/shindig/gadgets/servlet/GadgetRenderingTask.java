@@ -261,7 +261,6 @@ public class GadgetRenderingTask {
 
     // Inline any libs that weren't forced
     for (JsLibrary library : gadget.getJsLibraries()) {
-      JsLibrary.Type type = library.getType();
       if (library.getType().equals(JsLibrary.Type.URL)) {
         externJs.append(String.format(externFmt, library.getContent()));
       } else {

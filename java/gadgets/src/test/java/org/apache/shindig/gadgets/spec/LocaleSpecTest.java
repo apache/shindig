@@ -65,13 +65,13 @@ public class LocaleSpecTest {
   @Test(expected = SpecParserException.class)
   public void invalidLanguageDirection() throws Exception {
     String xml = "<Locale language_direction=\"invalid\"/>";
-    LocaleSpec locale = new LocaleSpec(XmlUtil.parse(xml), SPEC_URL);
+    new LocaleSpec(XmlUtil.parse(xml), SPEC_URL);
   }
 
   @Test(expected = SpecParserException.class)
   public void invalidMessagesUrl() throws Exception {
     String xml = "<Locale messages=\"fobad@$%!fdf\"/>";
-    LocaleSpec locale = new LocaleSpec(XmlUtil.parse(xml), SPEC_URL);
+    new LocaleSpec(XmlUtil.parse(xml), SPEC_URL);
   }
 
   @Test

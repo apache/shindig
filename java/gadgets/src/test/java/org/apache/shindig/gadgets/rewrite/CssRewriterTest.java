@@ -17,8 +17,6 @@
  */
 package org.apache.shindig.gadgets.rewrite;
 
-import org.apache.shindig.gadgets.EasyMockTestCase;
-
 import java.net.URI;
 
 /**

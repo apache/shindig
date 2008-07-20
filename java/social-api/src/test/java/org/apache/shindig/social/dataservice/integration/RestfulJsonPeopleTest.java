@@ -410,11 +410,6 @@ public class RestfulJsonPeopleTest extends AbstractLargeRestfulTests {
     assertEquals(expected.intValue(), result.getInt(field.toString()));
   }
 
-  private void assertDateField(JSONObject result, Date expected,
-      Object field) throws JSONException {
-    assertEquals(expected.toString(), result.getString(field.toString()));
-  }
-
   private void assertStringField(JSONObject result, String expected,
       Object field) throws JSONException {
     assertEquals(expected, result.getString(field.toString()));

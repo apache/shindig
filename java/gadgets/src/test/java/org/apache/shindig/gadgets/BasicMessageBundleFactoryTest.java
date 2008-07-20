@@ -121,6 +121,7 @@ public class BasicMessageBundleFactoryTest {
           "<msg name='" + MSG_0_NAME + "'>" + MSG_0_VALUE + "</msg>" +
           "</Locale>";
     LocaleSpec locale = new LocaleSpec(XmlUtil.parse(localeXml), SPEC_URI);
+    assertEquals("all", locale.getLanguage());
     Map<String, List<String>> headers = Maps.newHashMap();
     headers.put("Pragma", Arrays.asList("no-cache"));
     HttpResponse expiredResponse = new HttpResponse(
@@ -134,11 +135,11 @@ public class BasicMessageBundleFactoryTest {
     replay(fetcher);
 
     MessageBundle bundle = bundleFactory.getBundle(BUNDLE_URI, true);
-    MessageBundle bundle2 = bundleFactory.getBundle(BUNDLE_URI, false);
+    bundle = bundleFactory.getBundle(BUNDLE_URI, false);
 
     verify(fetcher);
 
-    assertEquals(MSG_0_VALUE, bundle2.getMessages().get(MSG_0_NAME));
+    assertEquals(MSG_0_VALUE, bundle.getMessages().get(MSG_0_NAME));
   }
 
   @Test

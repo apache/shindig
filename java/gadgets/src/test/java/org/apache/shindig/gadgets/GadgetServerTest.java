@@ -98,7 +98,7 @@ public class GadgetServerTest extends GadgetTestFixture {
     replay();
 
     try {
-      Gadget gadget = gadgetServer.processGadget(BASIC_CONTEXT);
+      gadgetServer.processGadget(BASIC_CONTEXT);
       fail("Expected a GadgetException for a failed http fetch.");
     } catch (GadgetException e) {
       // Expected for a bad gadget spec URI.
@@ -148,13 +148,6 @@ public class GadgetServerTest extends GadgetTestFixture {
           "</Module>";
 
     HttpResponse spec = new HttpResponse(gadgetXml);
-
-    GadgetContext context = new GadgetContext() {
-      @Override
-      public URI getUrl() {
-        return SPEC_URL;
-      }
-    };
 
     expect(fetcher.fetch(SPEC_REQUEST)).andReturn(spec);
     replay();
@@ -270,9 +263,6 @@ public class GadgetServerTest extends GadgetTestFixture {
 
   public void testNoSignedPreloadWithoutToken() throws Exception {
     String preloadUrl = "http://example.org/preload.txt";
-    String preloadData = "Preload Data";
-    HttpRequest preloadRequest
-        = new HttpRequest(URI.create(preloadUrl));
 
     String gadgetXml
         = "<Module>" +
@@ -381,7 +371,7 @@ public class GadgetServerTest extends GadgetTestFixture {
     replay();
 
     try {
-      Gadget gadget = gadgetServer.processGadget(BASIC_CONTEXT);
+      gadgetServer.processGadget(BASIC_CONTEXT);
       fail("Expected a GadgetException for a failed http fetch of remote gadget content.");
     } catch (GadgetException e) {
       // Expected for a bad content href URI.

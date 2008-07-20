@@ -79,7 +79,7 @@ public class BasicGadgetBlacklistTest extends TestCase {
 
   public void testInvalidRegularExpression() throws Exception {
     try {
-      GadgetBlacklist bl = createBlacklist("REGEXP +http://bla.com/.*");
+      createBlacklist("REGEXP +http://bla.com/.*");
       fail();
     } catch (PatternSyntaxException ex) {
       // success

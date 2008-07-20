@@ -212,7 +212,6 @@ public class BeanJsonConverter implements BeanConverter {
       pojo = (T) json; // This is a weird cast...
 
     } else if (pojo instanceof Map) {
-      Type[] types = pojo.getClass().getTypeParameters();
       // TODO: Figure out how to get the actual generic type for the
       // second Map parameter. Right now we are hardcoding to String
       Class<?> mapValueClass = String.class;
