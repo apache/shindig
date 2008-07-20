@@ -41,26 +41,27 @@ public class BasicGadgetOAuthTokenStore extends GadgetOAuthTokenStore {
   public BasicGadgetOAuthTokenStore(OAuthStore store,
       GadgetSpecFactory specFactory) throws GadgetException {
     super(store, specFactory);
-    initFromConfigFile(specFactory);
   }
 
-  public void initFromConfigFile(GadgetSpecFactory specFactory)
-  throws GadgetException {
+  public void initFromConfigFile() throws GadgetException {
     // Read our consumer keys and secrets from config/oauth.js
-    // This actually involves fetching gadget specs
     try {
       String oauthConfigStr = ResourceLoader.getContent(OAUTH_CONFIG);
-
+      initFromConfigString(oauthConfigStr);
+    } catch (IOException e) {
+      throw new GadgetException(GadgetException.Code.OAUTH_STORAGE_ERROR, e);
+    }
+  }
+  
+  public void initFromConfigString(String oauthConfigStr)throws GadgetException {
+    try {
       JSONObject oauthConfigs = new JSONObject(oauthConfigStr);
-
       for (Iterator<?> i = oauthConfigs.keys(); i.hasNext();) {
         String url = (String) i.next();
         URI gadgetUri = new URI(url);
         JSONObject oauthConfig = oauthConfigs.getJSONObject(url);
         storeConsumerInfos(gadgetUri, oauthConfig);
       }
-    } catch (IOException e) {
-      throw new GadgetException(GadgetException.Code.OAUTH_STORAGE_ERROR, e);
     } catch (JSONException e) {
       throw new GadgetException(GadgetException.Code.OAUTH_STORAGE_ERROR, e);
     } catch (URISyntaxException e) {

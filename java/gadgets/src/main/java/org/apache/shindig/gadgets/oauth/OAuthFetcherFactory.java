@@ -55,8 +55,10 @@ public class OAuthFetcherFactory {
       this.oauthCrypter = new BasicBlobCrypter(
           Crypto.getRandomBytes(BasicBlobCrypter.MASTER_KEY_MIN_LEN));
 
-      this.tokenStore =
+      BasicGadgetOAuthTokenStore store =
           new BasicGadgetOAuthTokenStore(new BasicOAuthStore(), specFactory);
+      store.initFromConfigFile();
+      this.tokenStore = store;
     } catch (Throwable t) {
       // Since this happens at startup, we don't want to kill the server just
       // because we can't initialize the OAuth config.
