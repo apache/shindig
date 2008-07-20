@@ -24,47 +24,53 @@
  */
 abstract class SecurityToken {
 
-  //FIXME Hmm seems php is refusing to let me make abstract static functions? odd
-  static public function createFromToken($token, $maxage) {}
-  static public function createFromValues($owner, $viewer, $app, $domain, $appUrl, $moduleId) {}
-  
+	static public function createFromToken($token, $maxage) {}
 
-  /**
-   * Serializes the token into a string. This can be the exact same as
-   * toString; using a different name here is only to force interface
-   * compliance.
-   *
-   * @return A string representation of the token.
-   */
-  abstract public function toSerialForm();
+	static public function createFromValues($owner, $viewer, $app, $domain, $appUrl, $moduleId) {}
+	
+	/**
+	 * is this an anonymous token? Always check this before using the owner/viewer/etc
+	 * 
+	 * @return boolean if it's anonymous
+	 */
+	abstract public function isAnonymous();
 
-  /**
-   * @return the owner from the token, or null if there is none.
-   */
-  abstract public function getOwnerId();
+	/**
+	 * Serializes the token into a string. This can be the exact same as
+	 * toString; using a different name here is only to force interface
+	 * compliance.
+	 *
+	 * @return A string representation of the token.
+	 */
+	abstract public function toSerialForm();
 
-  /**
-   * @return the viewer from the token, or null if there is none.
-   */
-  abstract public function getViewerId();
+	/**
+	 * @return the owner from the token, or null if there is none.
+	 */
+	abstract public function getOwnerId();
 
-  /**
-   * @return the application id from the token, or null if there is none.
-   */
-  abstract public function getAppId();
-  
-  /**
-   * @return the domain from the token, or null if there is none.
-   */
-  abstract public function getDomain();
+	/**
+	 * @return the viewer from the token, or null if there is none.
+	 */
+	abstract public function getViewerId();
 
-  /**
-   * @return the URL of the application
-   */
-  abstract public function getAppUrl();
+	/**
+	 * @return the application id from the token, or null if there is none.
+	 */
+	abstract public function getAppId();
 
-  /**
-   * @return the module ID of the application
-   */
-  abstract public function getModuleId();
+	/**
+	 * @return the domain from the token, or null if there is none.
+	 */
+	abstract public function getDomain();
+
+	/**
+	 * @return the URL of the application
+	 */
+	abstract public function getAppUrl();
+
+	/**
+	 * @return the module ID of the application
+	 */
+	abstract public function getModuleId();
 }
