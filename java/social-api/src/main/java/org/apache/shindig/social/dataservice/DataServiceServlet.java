@@ -25,8 +25,6 @@ import org.apache.shindig.common.servlet.ParameterFetcher;
 import org.apache.shindig.social.ResponseItem;
 import org.apache.shindig.social.ResponseError;
 import org.apache.shindig.social.opensocial.util.BeanConverter;
-import org.apache.shindig.social.opensocial.util.BeanJsonConverter;
-import org.apache.shindig.social.opensocial.util.BeanXmlConverter;
 
 import com.google.common.collect.Maps;
 import com.google.inject.Inject;
@@ -65,8 +63,8 @@ public class DataServiceServlet extends InjectedServlet {
 
   private transient SecurityTokenDecoder securityTokenDecoder;
   private transient Map<String, Class<? extends DataRequestHandler>> handlers;
-  private transient BeanJsonConverter jsonConverter;
-  private transient BeanXmlConverter xmlConverter;
+  private transient BeanConverter jsonConverter;
+  private transient BeanConverter xmlConverter;
   private transient ParameterFetcher parameterFetcher;
 
   private static final String JSON_BATCH_ROUTE = "jsonBatch";
@@ -82,7 +80,7 @@ public class DataServiceServlet extends InjectedServlet {
   }
 
   @Inject
-  public void setBeanConverters(BeanJsonConverter jsonConverter, BeanXmlConverter xmlConverter) {
+  public void setBeanConverters(@Named("bean.converter.json") BeanConverter jsonConverter, @Named("bean.converter.xml") BeanConverter xmlConverter) {
     this.jsonConverter = jsonConverter;
     this.xmlConverter = xmlConverter;
   }

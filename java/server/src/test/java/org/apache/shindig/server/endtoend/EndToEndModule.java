@@ -19,6 +19,9 @@ package org.apache.shindig.server.endtoend;
 
 import org.apache.shindig.common.servlet.ParameterFetcher;
 import org.apache.shindig.social.dataservice.DataServiceServletFetcher;
+import org.apache.shindig.social.opensocial.util.BeanConverter;
+import org.apache.shindig.social.opensocial.util.BeanJsonConverter;
+import org.apache.shindig.social.opensocial.util.BeanXmlConverter;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.name.Names;
@@ -33,5 +36,8 @@ public class EndToEndModule extends AbstractModule {
         .toInstance("sampledata/canonicaldb.json");
     bind(ParameterFetcher.class).annotatedWith(Names.named("DataServiceServlet"))
         .to(DataServiceServletFetcher.class);
+    bind(BeanConverter.class).annotatedWith(Names.named("bean.converter.xml")).to(BeanXmlConverter.class);
+    bind(BeanConverter.class).annotatedWith(Names.named("bean.converter.json")).to(BeanJsonConverter.class);
+
   }
 }

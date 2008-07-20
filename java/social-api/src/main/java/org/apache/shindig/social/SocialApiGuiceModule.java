@@ -28,6 +28,9 @@ import org.apache.shindig.social.oauth.BasicOAuthTokenStore;
 import org.apache.shindig.social.oauth.OAuthConsumerStore;
 import org.apache.shindig.social.oauth.OAuthTokenPrincipalMapper;
 import org.apache.shindig.social.oauth.OAuthTokenStore;
+import org.apache.shindig.social.opensocial.util.BeanConverter;
+import org.apache.shindig.social.opensocial.util.BeanJsonConverter;
+import org.apache.shindig.social.opensocial.util.BeanXmlConverter;
 import org.apache.shindig.social.samplecontainer.SampleContainerHandlerProvider;
 
 import com.google.inject.AbstractModule;
@@ -65,6 +68,8 @@ public class SocialApiGuiceModule extends AbstractModule {
         .to(BasicOAuthConsumerStore.class).in(Scopes.SINGLETON);
     bind(OAuthTokenPrincipalMapper.class)
         .to(BasicOAuthTokenPrincipalMapper.class).in(Scopes.SINGLETON);
+    bind(BeanConverter.class).annotatedWith(Names.named("bean.converter.xml")).to(BeanXmlConverter.class);
+    bind(BeanConverter.class).annotatedWith(Names.named("bean.converter.json")).to(BeanJsonConverter.class);
   }
 
 }
