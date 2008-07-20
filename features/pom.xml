@@ -24,7 +24,7 @@ under the License.
     <groupId>org.apache.shindig</groupId>
     <artifactId>shindig-parent</artifactId>
     <version>1-SNAPSHOT</version>
-    <relativePath>../pom.xml</relativePath>
+    <relativePath>../java/pom.xml</relativePath>
   </parent>
 
   <artifactId>shindig-features</artifactId>
