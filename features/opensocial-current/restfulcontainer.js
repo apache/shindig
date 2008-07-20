@@ -250,13 +250,15 @@ RestfulContainer.prototype.newFetchPeopleRequest = function(idSpec,
   url += "&orderBy=" + (opt_params['sortOrder'] || 'topFriends');
   // TODO: This filterBy isn't in the spec
   url += "&filterBy=" + (opt_params['filter'] || 'all');
-
+  if (opt_params['networkDistance']) {
+    url += "&networkDistance=" + opt_params['networkDistance'];
+  }
   var me = this;
   return new RestfulRequestItem(url, "GET", null,
       function(rawJson) {
         var jsonPeople = rawJson['entry'];
         var people = [];
-        for (var i = 0; i < jsonPeople.length; i++) {
+        for (var i = 0; i < jsonPeople.length; i++) {	
           people.push(me.createPersonFromJson(jsonPeople[i]));
         }
         return new opensocial.Collection(people,

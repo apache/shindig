@@ -31,7 +31,7 @@ class BasicPeopleService extends PeopleService {
 
 	public function getPerson($userId, $groupId, $profileDetails, SecurityToken $token)
 	{
-		$person = $this->getPeople($userId, $groupId, null, null, null, null, $profileDetails, $token);
+		$person = $this->getPeople($userId, $groupId, null, null, null, null, $profileDetails, $token, null);
 		// return of getPeople is a ResponseItem(RestfulCollection(ArrayOfPeople)), disassemble to return just one person
 		$person = $person->getResponse()->getEntry();
 		if (is_array($person) && count($person) == 1) {
@@ -40,7 +40,7 @@ class BasicPeopleService extends PeopleService {
 		return new ResponseItem(NOT_FOUND, "Person not found", null);
 	}
 
-	public function getPeople($userId, $groupId, $sortOrder, $filter, $first, $max, $profileDetails, SecurityToken $token)
+	public function getPeople($userId, $groupId, $sortOrder, $filter, $first, $max, $profileDetails, $networkDistance, SecurityToken $token)
 	{
 		$ids = array();
 		$group = is_object($groupId) ? $groupId->getType() : '';
@@ -58,7 +58,7 @@ class BasicPeopleService extends PeopleService {
 				break;
 		}
 		$allPeople = XmlStateFileFetcher::get()->getAllPeople();
-		if (!$token->isAnonymous() && $filter == "hasApp") {
+		if (! $token->isAnonymous() && $filter == "hasApp") {
 			$appId = $token->getAppId();
 			$peopleWithApp = XmlStateFileFetcher::get()->getPeopleWithApp($appId);
 		}
@@ -70,13 +70,13 @@ class BasicPeopleService extends PeopleService {
 			$person = null;
 			if (is_array($allPeople) && isset($allPeople[$id])) {
 				$person = $allPeople[$id];
-				if (!$token->isAnonymous() && $id == $token->getViewerId()) {
+				if (! $token->isAnonymous() && $id == $token->getViewerId()) {
 					$person->setIsViewer(true);
 				}
-				if (!$token->isAnonymous() && $id == $token->getOwnerId()) {
+				if (! $token->isAnonymous() && $id == $token->getOwnerId()) {
 					$person->setIsOwner(true);
 				}
-				if (is_array($profileDetails) && count($profileDetails) && !in_array('all', $profileDetails)) {
+				if (is_array($profileDetails) && count($profileDetails) && ! in_array('all', $profileDetails)) {
 					$newPerson = array();
 					$newPerson['isOwner'] = $person->isOwner;
 					$newPerson['isViewer'] = $person->isViewer;
