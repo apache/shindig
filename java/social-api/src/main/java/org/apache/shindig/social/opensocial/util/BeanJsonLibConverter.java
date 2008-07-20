@@ -77,7 +77,7 @@ public class BeanJsonLibConverter implements BeanConverter {
         .registerMorpher(new EnumMorpher(Enum.NetworkPresence.class));
     morpherRegistry.registerMorpher(new EnumMorpher(Enum.Smoker.class));
 
-    morpherRegistry.registerMorpher(new JSONObjectToMapMorpher());
+    morpherRegistry.registerMorpher(new JsonObjectToMapMorpher());
   }
 
   @Inject
@@ -92,7 +92,7 @@ public class BeanJsonLibConverter implements BeanConverter {
     if (string.startsWith("[")) {
       JSONArray jsonArray = JSONArray.fromObject(string, jsonConfig);
       if (debugMode) {
-        JSONLibConverterUtils.dumpJsonArray(jsonArray, " ");
+        JsonLibConverterUtils.dumpJsonArray(jsonArray, " ");
       }
 
       if (rootBeanClass.isArray()) {
@@ -114,7 +114,7 @@ public class BeanJsonLibConverter implements BeanConverter {
       JSONObject jsonObject = JSONObject.fromObject(string, jsonConfig);
 
       if (debugMode) {
-        JSONLibConverterUtils.dumpJsonObject(jsonObject, " ");
+        JsonLibConverterUtils.dumpJsonObject(jsonObject, " ");
       }
 
       T rootObject = injector.getInstance(rootBeanClass);

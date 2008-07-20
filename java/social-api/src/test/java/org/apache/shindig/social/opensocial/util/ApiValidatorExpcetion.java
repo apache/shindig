@@ -17,34 +17,26 @@
  */
 package org.apache.shindig.social.opensocial.util;
 
-import java.util.HashMap;
-import java.util.Map;
-
-import net.sf.ezmorph.Morpher;
-import net.sf.ezmorph.ObjectMorpher;
-import net.sf.json.JSONObject;
-
 /**
- *
+ * Thrown when there is a validation exception on one of the apis
  */
-public class JSONObjectToMapMorpher implements Morpher, ObjectMorpher {
+public class ApiValidatorExpcetion extends Exception {
 
-  public Class<?> morphsTo() {
-    return Map.class;
+  private static final long serialVersionUID = -8969858718669454612L;
+
+  public ApiValidatorExpcetion() {
   }
 
-  @SuppressWarnings("unchecked")
-  public boolean supports(Class clazz) {    
-    return (JSONObject.class.equals(clazz));
+  public ApiValidatorExpcetion(String message) {
+    super(message);
   }
 
-  public Object morph(Object bean) {
-    Map<Object, Object> result = new HashMap<Object, Object>();
-    JSONObject jsonObject = (JSONObject) bean;
-    for ( Object key : jsonObject.keySet()) {
-      result.put(key,jsonObject.get(key));
-    }
-    return result;
+  public ApiValidatorExpcetion(Throwable cause) {
+    super(cause);
+  }
+  
+  public ApiValidatorExpcetion(String message, Throwable cause) {
+    super(message, cause);
   }
 
 }

@@ -53,7 +53,7 @@ public class BeanJsonLibConverterTest extends TestCase {
   private Activity activity;
 
   private BeanJsonLibConverter beanJsonConverter;
-  private APIValidator apiValidator;
+  private ApiValidator apiValidator;
   // set to true to get loging output at info level
   private boolean outputInfo = false;
 
@@ -80,7 +80,7 @@ public class BeanJsonLibConverterTest extends TestCase {
     beanJsonConverter = new BeanJsonLibConverter(Guice
         .createInjector(new JsonLibTestsGuiceModule()));
 
-    apiValidator = new APIValidator("opensocial-reference");
+    apiValidator = new ApiValidator("opensocial-reference");
 
   }
 
@@ -154,10 +154,10 @@ public class BeanJsonLibConverterTest extends TestCase {
 
   /**
    * @param result
-   * @throws APIValidatorExpcetion
+   * @throws ApiValidatorExpcetion
    */
   private void validatePerson(String result, String id, String name, String[] optional, String[] nullfields)
-      throws APIValidatorExpcetion {
+      throws ApiValidatorExpcetion {
 
     Map<String, Object> standard = apiValidator.validate(result,
         "opensocial.Person.Field", optional,nullfields);
@@ -168,7 +168,7 @@ public class BeanJsonLibConverterTest extends TestCase {
     assertNotNull(standard.get("name"));
     Map<String, Object> nameJSON = apiValidator.validateOject(standard
         .get("name"), "opensocial.Name.Field", optional,nullfields);
-    APIValidator.dump(nameJSON);
+    ApiValidator.dump(nameJSON);
 
     assertNotNull(nameJSON.get("unstructured"));
     assertEquals(String.class, nameJSON.get("unstructured").getClass());
@@ -275,7 +275,7 @@ public class BeanJsonLibConverterTest extends TestCase {
     if (outputInfo) {
       log.info("Dumping Map (" + parsedMap + ")");
     }
-    APIValidator.dump(parsedMap);
+    ApiValidator.dump(parsedMap);
 
     assertEquals("1", ((Map<?,?>)parsedMap.get("item1")).get("value"));
     assertEquals("2", ((Map<?,?>)parsedMap.get("item2")).get("value"));
