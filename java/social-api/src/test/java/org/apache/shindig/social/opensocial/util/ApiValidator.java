@@ -65,11 +65,20 @@ public class ApiValidator {
    *                 feature is missing
    * 
    */
-  public ApiValidator(String feature) throws IOException,
+  private ApiValidator(String feature) throws IOException,
       ParserConfigurationException, SAXException {
     ctx = Context.enter();
     scope = ctx.initStandardObjects();
     load(feature);
+  }
+
+  /**
+   * Load the ApiValidator with no features, this avoids having features in the classpath
+   * @throws IOException
+   */
+  public ApiValidator() throws IOException {
+    ctx = Context.enter();
+    scope = ctx.initStandardObjects();
   }
 
   /**
@@ -120,7 +129,61 @@ public class ApiValidator {
     }
     log.debug("Loaded " + so);
 
-    return validateOject(so, object, optionalFields, nullfields);
+    ScriptableObject specification = getScriptableObject(object);
+    log.debug("Looking for  " + object + " found " + specification);
+    listScriptable(object, specification);
+    Object[] fields = specification.getIds();
+    String[] fieldNames = new String[fields.length];
+    for (int i = 0; i < fields.length; i++) {
+      Object fieldName = specification.get(String.valueOf(fields[i]), specification);
+      fieldNames[i] = String.valueOf(fieldName);
+    }
+
+    return validateObject(so, fieldNames, optionalFields, nullfields);
+
+  }
+
+  /**
+   * @param json
+   *                The json to validate expected in a form { xyz: yyy } form
+   * @param fieldNames
+   *                An Array of field names that the oject should be tested against
+   * @param optionalFields
+   *                If any of the fields that appear in the json structure are
+   *                optional, then they should be defined in this parameter.
+   * @param nullfields
+   * @throws ApiValidatorExpcetion
+   *                 if there is a problem validating the json
+   * @return a map so string object pairs containing the fields at the top level
+   *         of the json tree. Where these are native java objects, they will
+   *         appear as native object. Complex json objects will appear as Rhino
+   *         specific objects
+   */
+  public Map<String, Object> validate(String json, String[] fieldNames,
+      String[] optionalFields, String[] nullfields)
+      throws ApiValidatorExpcetion {
+
+
+    log.debug("Loading " + json);
+    json = json.trim();
+    if (!json.endsWith("}")) {
+      json = json + "}";
+    }
+    if (!json.startsWith("{")) {
+      json = "{" + json;
+    }
+    json = "( testingObject = " + json + " )";
+
+    Object so = null;
+    try {
+      so = ctx.evaluateString(scope, json, "test json", 0, null);
+    } catch (EvaluatorException ex) {
+      log.error("Non parseable JSON " + json);
+    }
+    log.debug("Loaded " + so);
+
+
+    return validateObject(so, fieldNames, optionalFields, nullfields);
 
   }
 
@@ -133,7 +196,7 @@ public class ApiValidator {
    * @return
    * @throws ApiValidatorExpcetion
    */
-  public Map<String, Object> validateOject(Object jsonObject, String object,
+  public Map<String, Object> validateObject(Object jsonObject, String[] fieldNames,
       String[] optionalFields, String[] nullFields)
       throws ApiValidatorExpcetion {
     Map<String, String> optional = new HashMap<String, String>();
@@ -145,19 +208,14 @@ public class ApiValidator {
       nullf.put(nf, nf);
     }
 
-    ScriptableObject specification = getScriptableObject(object);
-    log.debug("Looking for  " + object + " found " + specification);
-    listScriptable(object, specification);
 
     Map<String, Object> resultFields = new HashMap<String, Object>();
 
     if (jsonObject instanceof ScriptableObject) {
       ScriptableObject parsedJSONObject = (ScriptableObject) jsonObject;
       listScriptable("testingObject", parsedJSONObject);
-      Object[] fields = specification.getIds();
-      for (Object f : fields) {
-        Object fieldName = specification.get(String.valueOf(f), specification);
-        Object o = parsedJSONObject.get(String.valueOf(fieldName),
+      for (String fieldName : fieldNames) {
+        Object o = parsedJSONObject.get(fieldName,
             parsedJSONObject);
         if (o == ScriptableObject.NOT_FOUND) {
           if (optional.containsKey(fieldName)) {
@@ -174,12 +232,12 @@ public class ApiValidator {
             if (nullf.containsKey(fieldName)) {
               log.error("Null Fields has been serialized " + fieldName);
             }
-            log.debug("Got a Null object for Field " + f + ":" + fieldName
+            log.debug("Got a Null object for Field " + fieldName
                 + " on json [[" + jsonObject + "]]");
 
           } else {
 
-            log.debug("Got JSON Field  Field," + f + ":" + fieldName + " as "
+            log.debug("Got JSON Field  Field,"  + fieldName + " as "
                 + o + " " + o.getClass());
           }
           resultFields.put(String.valueOf(fieldName), o);
@@ -266,7 +324,8 @@ public class ApiValidator {
         in = this.getClass().getClassLoader().getResourceAsStream(
             "features/" + scriptPath);
         if (in == null) {
-          throw new IOException("Cant load spec " + spec + " or features/"+spec+" from classpath");
+          throw new IOException("Cant load spec " + spec + " or features/"
+              + spec + " from classpath");
         }
       }
       InputStreamReader reader = new InputStreamReader(in);
@@ -315,9 +374,10 @@ public class ApiValidator {
         features);
     if (in == null) {
       in = this.getClass().getClassLoader().getResourceAsStream(
-          "features/"+features);
+          "features/" + features);
       if (in == null) {
-        throw new IOException("Cant find " + features + " or features/" + features+ " in classpath ");
+        throw new IOException("Cant find " + features + " or features/"
+            + features + " in classpath ");
       }
     }
     DocumentBuilderFactory builderFactory = DocumentBuilderFactory

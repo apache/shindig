@@ -60,13 +60,6 @@ under the License.
       <groupId>org.apache.shindig</groupId>
       <artifactId>shindig-common</artifactId>
     </dependency>
-    <!-- is this Ok, only used in test to load the features -->
-    <dependency>
-      <groupId>org.apache.shindig</groupId>
-      <artifactId>shindig-features</artifactId>
-      <scope>test</scope>
-    </dependency>
-
     <!-- external depenencies -->
     <dependency>
       <groupId>org.json</groupId>

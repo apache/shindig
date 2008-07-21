@@ -49,6 +49,23 @@ public class BeanJsonLibConverterTest extends TestCase {
 
   private static final Log log = LogFactory
       .getLog(BeanJsonLibConverterTest.class);
+  // taken from opensocial-reference/person.js
+  private static final String[] PERSON_FIELDS = { "id", "name", "nickname",
+      "thumbnailUrl", "profileUrl", "currentLocation", "addresses", "emails",
+      "phoneNumbers", "aboutMe", "status", "profileSong", "profileVideo",
+      "gender", "sexualOrientation", "relationshipStatus", "age",
+      "dateOfBirth", "bodyType", "ethnicity", "smoker", "drinker", "children",
+      "pets", "livingArrangement", "timeZone", "languagesSpoken", "jobs",
+      "jobInterests", "schools", "interests", "urls", "music", "movies",
+      "tvShows", "books", "activities", "sports", "heroes", "quotes", "cars",
+      "food", "turnOns", "turnOffs", "tags", "romance", "scaredOf",
+      "happiestWhen", "fashion", "humor", "lookingFor", "religion",
+      "politicalViews", "hasApp", "networkPresence" };
+
+  // taken from opensocial-reference/name.js
+  private static final String[] NAME_FIELDS = { "familyName", "givenName",
+      "additionalName", "honorificPrefix", "honorificSuffix", "unstructured"};
+  
   private Person johnDoe;
   private Activity activity;
 
@@ -80,19 +97,25 @@ public class BeanJsonLibConverterTest extends TestCase {
     beanJsonConverter = new BeanJsonLibConverter(Guice
         .createInjector(new JsonLibTestsGuiceModule()));
 
-    apiValidator = new ApiValidator("opensocial-reference");
+    apiValidator = new ApiValidator();
 
   }
 
   public static class SpecialPerson extends PersonImpl {
     public static final String[] OPTIONALFIELDS = {};
-    public static final String[] NULLFIELDS  = {"jobInterests","nickname","romance","religion","timeZone",
-    "relationshipStatus","tags","networkPresence","books","quotes","phoneNumbers","languagesSpoken",
-    "activities","jobs","dateOfBirth","profileVideo","bodyType","urls","schools","music","addresses",
-    "livingArrangement","thumbnailUrl","humor","sports","scaredOf","movies","age","pets","hasApp","turnOffs",
-    "gender","fashion","drinker","aboutMe","children","sexualOrientation","heroes","profileSong","lookingFor",
-    "cars","turnOns","tvShows","profileUrl","status","currentLocation","smoker","happiestWhen","ethnicity",
-    "food","emails","politicalViews","interests","familyName","honorificSuffix","additionalName","honorificPrefix","givenName"};
+    public static final String[] NULLFIELDS = { "jobInterests", "nickname",
+        "romance", "religion", "timeZone", "relationshipStatus", "tags",
+        "networkPresence", "books", "quotes", "phoneNumbers",
+        "languagesSpoken", "activities", "jobs", "dateOfBirth", "profileVideo",
+        "bodyType", "urls", "schools", "music", "addresses",
+        "livingArrangement", "thumbnailUrl", "humor", "sports", "scaredOf",
+        "movies", "age", "pets", "hasApp", "turnOffs", "gender", "fashion",
+        "drinker", "aboutMe", "children", "sexualOrientation", "heroes",
+        "profileSong", "lookingFor", "cars", "turnOns", "tvShows",
+        "profileUrl", "status", "currentLocation", "smoker", "happiestWhen",
+        "ethnicity", "food", "emails", "politicalViews", "interests",
+        "familyName", "honorificSuffix", "additionalName", "honorificPrefix",
+        "givenName" };
 
     private String newfield;
 
@@ -120,13 +143,13 @@ public class BeanJsonLibConverterTest extends TestCase {
 
     String result = beanJsonConverter.convertToString(cassie);
 
-    validatePerson(result, "5", "robot", SpecialPerson.OPTIONALFIELDS, SpecialPerson.NULLFIELDS);
+    validatePerson(result, "5", "robot", SpecialPerson.OPTIONALFIELDS,
+        SpecialPerson.NULLFIELDS);
 
-    apiValidator.addScript(" specialPerson = { SPECIAL : \"newfield\" }; ");
     String[] optional = {};
     String[] nullfields = {};
     Map<String, Object> special = apiValidator.validate(result,
-        "specialPerson", optional,nullfields);
+        new String[] { "newfield" }, optional, nullfields);
     assertNotNull(special.get("newfield"));
     assertEquals(String.class, special.get("newfield").getClass());
     assertEquals("nonsense", special.get("newfield"));
@@ -156,18 +179,18 @@ public class BeanJsonLibConverterTest extends TestCase {
    * @param result
    * @throws ApiValidatorExpcetion
    */
-  private void validatePerson(String result, String id, String name, String[] optional, String[] nullfields)
-      throws ApiValidatorExpcetion {
+  private void validatePerson(String result, String id, String name,
+      String[] optional, String[] nullfields) throws ApiValidatorExpcetion {
 
-    Map<String, Object> standard = apiValidator.validate(result,
-        "opensocial.Person.Field", optional,nullfields);
+    Map<String, Object> standard = apiValidator.validate(result, PERSON_FIELDS,
+        optional, nullfields);
     assertNotNull(standard.get("id"));
     assertEquals(String.class, standard.get("id").getClass());
     assertEquals(id, standard.get("id"));
 
     assertNotNull(standard.get("name"));
-    Map<String, Object> nameJSON = apiValidator.validateOject(standard
-        .get("name"), "opensocial.Name.Field", optional,nullfields);
+    Map<String, Object> nameJSON = apiValidator.validateObject(standard
+        .get("name"), NAME_FIELDS, optional, nullfields);
     ApiValidator.dump(nameJSON);
 
     assertNotNull(nameJSON.get("unstructured"));
@@ -269,16 +292,15 @@ public class BeanJsonLibConverterTest extends TestCase {
     // map should contain, so we have to tell it
     beanJsonConverter.addMapping("item1", Map.class);
     beanJsonConverter.addMapping("item2", Map.class);
-    Map<?, ?> parsedMap = beanJsonConverter
-        .convertToObject(result, Map.class);
+    Map<?, ?> parsedMap = beanJsonConverter.convertToObject(result, Map.class);
 
     if (outputInfo) {
       log.info("Dumping Map (" + parsedMap + ")");
     }
     ApiValidator.dump(parsedMap);
 
-    assertEquals("1", ((Map<?,?>)parsedMap.get("item1")).get("value"));
-    assertEquals("2", ((Map<?,?>)parsedMap.get("item2")).get("value"));
+    assertEquals("1", ((Map<?, ?>) parsedMap.get("item1")).get("value"));
+    assertEquals("2", ((Map<?, ?>) parsedMap.get("item2")).get("value"));
   }
 
   public void testListsToJson() throws Exception {
@@ -299,8 +321,8 @@ public class BeanJsonLibConverterTest extends TestCase {
     if (outputInfo) {
       log.info("JSON (" + result + ")");
     }
-    Map<?, ?>[] parsedList = beanJsonConverter.convertToObject(
-        result, Map[].class);
+    Map<?, ?>[] parsedList = beanJsonConverter.convertToObject(result,
+        Map[].class);
 
     assertEquals("1", parsedList[0].get("value"));
     assertEquals("2", parsedList[1].get("value"));
