@@ -141,7 +141,6 @@ public class EndToEndTests {
     context.addServlet(gadgetServletHolder, GADGET_BASE);
 
     // Attach DataServiceServlet
-    // TODO: also support the Abdera codebase
     ServletHolder jsonServletHolder = new ServletHolder(new DataServiceServlet());
     context.addServlet(jsonServletHolder, JSON_BASE);
 

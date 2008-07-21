@@ -94,14 +94,6 @@ under the License.
       <artifactId>google-collect</artifactId>
     </dependency>
     <dependency>
-      <groupId>org.apache.abdera</groupId>
-      <artifactId>abdera-server</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.abdera</groupId>
-      <artifactId>abdera-client</artifactId>
-    </dependency>
-    <dependency>
       <artifactId>commons-lang</artifactId>
       <groupId>commons-lang</groupId>
     </dependency>
@@ -112,14 +104,6 @@ under the License.
     <dependency>
       <artifactId>commons-collections</artifactId>
       <groupId>commons-collections</groupId>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.abdera</groupId>
-      <artifactId>abdera-extensions-main</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.abdera</groupId>
-      <artifactId>abdera-extensions-html</artifactId>
     </dependency>
     <dependency>
       <groupId>org.mortbay.jetty</groupId>
