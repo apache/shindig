@@ -249,6 +249,12 @@ public class HttpResponseTest extends TestCase {
     long ttl = HttpResponse.error().getCacheTtl();
     assertTrue(ttl <= HttpResponse.DEFAULT_TTL && ttl > 0);
   }
+  
+  public void testStrictNoCacheAndNegativeCaching() {
+    HttpResponse response = new HttpResponse(401, UTF8_DATA, null);
+    response.setNoCache();
+    assertEquals(-1, response.getCacheTtl());
+  }
 
   public void testNullHeaderNamesStripped() {
     addHeader(null, "dummy");
