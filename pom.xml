@@ -843,6 +843,11 @@
         <artifactId>js</artifactId>
         <version>1.6R7</version>
       </dependency>
+      <dependency>
+        <groupId>org.apache.geronimo.specs</groupId>
+        <artifactId>geronimo-stax-api_1.0_spec</artifactId>
+        <version>1.0.1</version>
+      </dependency>
     </dependencies>
   </dependencyManagement>
 </project>
