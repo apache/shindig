@@ -21,6 +21,8 @@ import org.apache.shindig.common.crypto.BlobCrypter;
 import org.apache.shindig.common.crypto.BlobCrypterException;
 import org.apache.shindig.gadgets.ChainedContentFetcher;
 import org.apache.shindig.gadgets.GadgetException;
+import org.apache.shindig.gadgets.http.HttpCache;
+import org.apache.shindig.gadgets.http.HttpCacheKey;
 import org.apache.shindig.gadgets.http.HttpFetcher;
 import org.apache.shindig.gadgets.http.HttpResponse;
 import org.apache.shindig.gadgets.http.HttpRequest;
@@ -142,6 +144,11 @@ public class OAuthFetcher extends ChainedContentFetcher {
    * to the gadget spec for information (e.g. OAuth URLs).
    */
   private final boolean bypassSpecCache;
+  
+  /**
+   * HTTP cache.
+   */
+  private HttpCache cache;
 
   /**
    *
@@ -151,13 +158,15 @@ public class OAuthFetcher extends ChainedContentFetcher {
    * @param authToken user's gadget security token
    * @param params OAuth fetch parameters sent from makeRequest
    * @param tokenStore storage for long lived tokens.
+   * @param cache cache to use for HTTP responses.
    */
   public OAuthFetcher(
       GadgetOAuthTokenStore tokenStore,
       BlobCrypter oauthCrypter,
       HttpFetcher nextFetcher,
       SecurityToken authToken,
-      OAuthRequestParams params) {
+      OAuthRequestParams params,
+      HttpCache cache) {
     super(nextFetcher);
     this.oauthCrypter = oauthCrypter;
     this.authToken = authToken;
@@ -180,6 +189,7 @@ public class OAuthFetcher extends ChainedContentFetcher {
       this.origClientState = new HashMap<String, String>();
     }
     this.tokenStore = tokenStore;
+    this.cache = cache;
   }
 
   /**
@@ -226,6 +236,12 @@ public class OAuthFetcher extends ChainedContentFetcher {
   }
 
   public HttpResponse fetch(HttpRequest request) throws GadgetException {
+    HttpCacheKey cacheKey = makeCacheKey(request);
+    HttpResponse response = cache.getResponse(cacheKey, request);
+    if (response != null) {
+      return response;
+    }
+    
     try {
       lookupOAuthMetadata();
     } catch (GadgetException e) {
@@ -234,11 +250,7 @@ public class OAuthFetcher extends ChainedContentFetcher {
     }
     
     this.realRequest = request;
-    // Work around for busted HttpCache interface that can't
-    // properly handle authenticated content.
-    this.realRequest.getOptions().ignoreCache = true;
 
-    HttpResponse response = null;
     int attempts = 0;
     boolean retry;
     do {
@@ -259,9 +271,25 @@ public class OAuthFetcher extends ChainedContentFetcher {
           GadgetException.Code.INTERNAL_SERVER_ERROR,
           "No response for OAuth fetch to " + realRequest.getUri());
     }
-    return response;
+    return cache.addResponse(cacheKey, request, response);
   }
   
+  // Builds up a cache key based on the same key that we use into the OAuth
+  // token storage, which should identify precisely which data to return for the
+  // response.  Using the OAuth access token as the cache key is another
+  // possibility.
+  private HttpCacheKey makeCacheKey(HttpRequest request) {
+    HttpCacheKey key = new HttpCacheKey(request);
+    key.set("authentication", "oauth");
+    OAuthStore.TokenKey tokenKey = buildTokenKey();
+    key.set("user", tokenKey.getUserId());
+    key.set("gadget", tokenKey.getGadgetUri());
+    key.set("instance", Long.toString(tokenKey.getModuleId()));
+    key.set("service", tokenKey.getServiceName());
+    key.set("token", tokenKey.getTokenName());
+    return key;
+  }
+
   private HttpResponse buildErrorResponse(GadgetException e) {
     if (error == null) {
       error = OAuthError.UNKNOWN_PROBLEM;
@@ -566,6 +594,7 @@ public class OAuthFetcher extends ChainedContentFetcher {
   private HttpResponse buildNonDataResponse() {
     HttpResponse response = new HttpResponse(0, null, null);
     addResponseMetadata(response);
+    response.setNoCache();
     return response;
   }
 
@@ -678,6 +707,9 @@ public class OAuthFetcher extends ChainedContentFetcher {
           realRequest.getContentType(),
           realRequest.getPostBodyAsString(),
           realRequest.getOptions());
+      
+      // Not externally cacheable.
+      oauthHttpRequest.getOptions().ignoreCache = true;
 
       HttpResponse response = nextFetcher.fetch(oauthHttpRequest);
       

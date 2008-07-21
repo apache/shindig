@@ -30,6 +30,8 @@ import org.apache.shindig.common.crypto.BasicBlobCrypter;
 import org.apache.shindig.common.crypto.BlobCrypter;
 import org.apache.shindig.gadgets.FakeGadgetSpecFactory;
 import org.apache.shindig.gadgets.GadgetException;
+import org.apache.shindig.gadgets.http.BasicHttpCache;
+import org.apache.shindig.gadgets.http.HttpCache;
 import org.apache.shindig.gadgets.http.HttpFetcher;
 import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.http.HttpResponse;
@@ -49,6 +51,7 @@ public class OAuthFetcherTest {
   private GadgetOAuthTokenStore tokenStore;
   private BlobCrypter blobCrypter;
   private FakeOAuthServiceProvider serviceProvider;
+  private HttpCache cache;
 
   public static final String GADGET_URL = "http://www.example.com/gadget.xml";
   public static final String GADGET_URL_NO_KEY =
@@ -59,6 +62,7 @@ public class OAuthFetcherTest {
     serviceProvider = new FakeOAuthServiceProvider();
     tokenStore = getOAuthStore();
     blobCrypter = new BasicBlobCrypter("abcdefghijklmnop".getBytes());
+    cache = new BasicHttpCache(10);
   }
 
   /**
@@ -133,7 +137,7 @@ public class OAuthFetcherTest {
   public HttpFetcher getFetcher(SecurityToken authToken,
       OAuthRequestParams params) throws GadgetException {
     OAuthFetcher fetcher = new OAuthFetcher(
-        tokenStore, blobCrypter, serviceProvider, authToken, params);
+        tokenStore, blobCrypter, serviceProvider, authToken, params, cache);
     return fetcher;
   }
 
@@ -236,6 +240,7 @@ public class OAuthFetcherTest {
             clientState, false));
     request = new HttpRequest(
         new URI(FakeOAuthServiceProvider.RESOURCE_URL));
+    request.getOptions().ignoreCache = true;
     response = fetcher.fetch(request);
 
     clientState = response.getMetadata().get("oauthState");
@@ -250,6 +255,7 @@ public class OAuthFetcherTest {
             clientState, false));
     request = new HttpRequest(
         new URI(FakeOAuthServiceProvider.RESOURCE_URL));
+    request.getOptions().ignoreCache = true;
     response = fetcher.fetch(request);
     assertEquals("User data is reapproved", response.getResponseAsString());
   }
@@ -294,6 +300,7 @@ public class OAuthFetcherTest {
             clientState, false));
     request = new HttpRequest(
         new URI(FakeOAuthServiceProvider.RESOURCE_URL));
+    request.getOptions().ignoreCache = true;
     response = fetcher.fetch(request);
 
     clientState = response.getMetadata().get("oauthState");
@@ -308,6 +315,7 @@ public class OAuthFetcherTest {
             clientState, false));
     request = new HttpRequest(
         new URI(FakeOAuthServiceProvider.RESOURCE_URL));
+    request.getOptions().ignoreCache = true;
     response = fetcher.fetch(request);
     assertEquals("User data is reapproved", response.getResponseAsString());
   }
@@ -371,6 +379,7 @@ public class OAuthFetcherTest {
             false));
     request = new HttpRequest(
         new URI(FakeOAuthServiceProvider.RESOURCE_URL));
+    request.getOptions().ignoreCache = true;
     response = fetcher.fetch(request);
     clientState = response.getMetadata().get("oauthState");
     assertNotNull(clientState);
@@ -387,8 +396,8 @@ public class OAuthFetcherTest {
         getSecurityToken("owner", "owner"),
         new OAuthRequestParams(FakeGadgetSpecFactory.SERVICE_NAME, null,
             clientState, false));
-    request = new HttpRequest(
-        new URI(FakeOAuthServiceProvider.RESOURCE_URL));
+    request = new HttpRequest(new URI(FakeOAuthServiceProvider.RESOURCE_URL));
+    request.getOptions().ignoreCache = true;
     response = fetcher.fetch(request);
     assertEquals("User data is hello-oauth", response.getResponseAsString());
     clientState = response.getMetadata().get("oauthState");
@@ -401,8 +410,8 @@ public class OAuthFetcherTest {
         getSecurityToken("owner", "owner"),
         new OAuthRequestParams(FakeGadgetSpecFactory.SERVICE_NAME, null,
             clientState, false));
-    request = new HttpRequest(
-        new URI(FakeOAuthServiceProvider.RESOURCE_URL));
+    request = new HttpRequest(new URI(FakeOAuthServiceProvider.RESOURCE_URL));
+    request.getOptions().ignoreCache = true;
     response = fetcher.fetch(request);
     assertEquals("User data is hello-oauth", response.getResponseAsString());
     clientState = response.getMetadata().get("oauthState");
@@ -417,8 +426,8 @@ public class OAuthFetcherTest {
         getSecurityToken("owner", "owner"),
         new OAuthRequestParams(FakeGadgetSpecFactory.SERVICE_NAME, null, null,
             false));
-    request = new HttpRequest(
-        new URI(FakeOAuthServiceProvider.RESOURCE_URL));
+    request = new HttpRequest(new URI(FakeOAuthServiceProvider.RESOURCE_URL));
+    request.getOptions().ignoreCache = true;
     response = fetcher.fetch(request);
     Map<String, String> metadata = response.getMetadata();
     assertNotNull(metadata);
@@ -438,8 +447,8 @@ public class OAuthFetcherTest {
         getSecurityToken("owner", "owner"),
         new OAuthRequestParams(FakeGadgetSpecFactory.SERVICE_NAME, null,
             clientState, false));
-    request = new HttpRequest(
-        new URI(FakeOAuthServiceProvider.RESOURCE_URL));
+    request = new HttpRequest(new URI(FakeOAuthServiceProvider.RESOURCE_URL));
+    request.getOptions().ignoreCache = true;
     response = fetcher.fetch(request);
     clientState = response.getMetadata().get("oauthState");
 
@@ -490,8 +499,7 @@ public class OAuthFetcherTest {
             reqToken.secret);
 
     fetcher = getFetcher(getSecurityToken("owner", "owner"), params);
-    request = new HttpRequest(
-        new URI(FakeOAuthServiceProvider.RESOURCE_URL));
+    request = new HttpRequest(new URI(FakeOAuthServiceProvider.RESOURCE_URL));
     response = fetcher.fetch(request);
     
     String clientState = response.getMetadata().get("oauthState");
@@ -504,8 +512,8 @@ public class OAuthFetcherTest {
     assertEquals(1, serviceProvider.getResourceAccessCount());
     
     fetcher = getFetcher(getSecurityToken("owner", "owner"), params);
-    request = new HttpRequest(
-        new URI(FakeOAuthServiceProvider.RESOURCE_URL));
+    request = new HttpRequest(new URI(FakeOAuthServiceProvider.RESOURCE_URL));
+    request.getOptions().ignoreCache = true;
     response = fetcher.fetch(request);
     
     assertEquals("User data is preapproved", response.getResponseAsString());
@@ -514,8 +522,8 @@ public class OAuthFetcherTest {
     assertEquals(2, serviceProvider.getResourceAccessCount());
     
     fetcher = getFetcher(getSecurityToken("owner", "owner"), params);
-    request = new HttpRequest(
-        new URI(FakeOAuthServiceProvider.RESOURCE_URL));
+    request = new HttpRequest(new URI(FakeOAuthServiceProvider.RESOURCE_URL));
+    request.getOptions().ignoreCache = true;
     response = fetcher.fetch(request);
     
     assertEquals("User data is preapproved", response.getResponseAsString());
@@ -610,5 +618,52 @@ public class OAuthFetcherTest {
     assertEquals("User data is hello-oauth", response.getResponseAsString());
   }
   
+  @Test
+  public void testCachedResponse() throws Exception {
+    HttpFetcher fetcher;
+    HttpRequest request;
+    HttpResponse response;
+    
+    assertEquals(0, serviceProvider.getRequestTokenCount());
+    assertEquals(0, serviceProvider.getAccessTokenCount());
+    assertEquals(0, serviceProvider.getResourceAccessCount());
 
+    fetcher = getFetcher(
+        getSecurityToken("owner", "owner"),
+        new OAuthRequestParams(FakeGadgetSpecFactory.SERVICE_NAME, null, null,
+            false));
+    request = new HttpRequest(new URI(FakeOAuthServiceProvider.RESOURCE_URL));
+    response = fetcher.fetch(request);
+    String clientState = response.getMetadata().get("oauthState");
+    assertNotNull(clientState);
+    String approvalUrl = response.getMetadata().get("oauthApprovalUrl");
+    assertNotNull(approvalUrl);
+
+    serviceProvider.browserVisit(approvalUrl + "&user_data=hello-oauth");
+
+    fetcher = getFetcher(
+        getSecurityToken("owner", "owner"),
+        new OAuthRequestParams(FakeGadgetSpecFactory.SERVICE_NAME, null,
+            clientState, false));
+    request = new HttpRequest(new URI(FakeOAuthServiceProvider.RESOURCE_URL));
+    response = fetcher.fetch(request);
+    assertEquals("User data is hello-oauth", response.getResponseAsString());
+
+    assertEquals(1, serviceProvider.getRequestTokenCount());
+    assertEquals(1, serviceProvider.getAccessTokenCount());
+    assertEquals(1, serviceProvider.getResourceAccessCount());
+    
+    fetcher = getFetcher(
+        getSecurityToken("owner", "somebody else"),
+        new OAuthRequestParams(FakeGadgetSpecFactory.SERVICE_NAME, null, null,
+            false));
+    request = new HttpRequest(
+        new URI(FakeOAuthServiceProvider.RESOURCE_URL));
+    response = fetcher.fetch(request);
+    assertEquals("User data is hello-oauth", response.getResponseAsString());
+    
+    assertEquals(1, serviceProvider.getRequestTokenCount());
+    assertEquals(1, serviceProvider.getAccessTokenCount());
+    assertEquals(1, serviceProvider.getResourceAccessCount());
+  }
 }

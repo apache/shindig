@@ -331,16 +331,24 @@ public class HttpResponse {
       this.headers.put("Cache-Control", Lists.newArrayList("public,max-age=" + forcedCacheTtl));
     }
   }
+  
+  /**
+   * Sets cache-control headers indicating the response is not cacheable.
+   */
+  public void setNoCache() {
+    this.headers.put("Cache-Control", Lists.newArrayList("no-cache"));
+    this.headers.put("Pragma", Lists.newArrayList("no-cache"));
+  }
 
   /**
    * @return consolidated cache expiration time or -1
    */
   public long getCacheExpiration() {
-    if (httpStatusCode != SC_OK) {
-      return getDate() + negativeCacheTtl;
-    }
     if (isStrictNoCache()) {
       return -1;
+    }
+    if (httpStatusCode != SC_OK) {
+      return getDate() + negativeCacheTtl;
     }
     long maxAge = getCacheControlMaxAge();
     if (maxAge != -1) {
