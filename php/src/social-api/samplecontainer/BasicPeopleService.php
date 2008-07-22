@@ -31,7 +31,7 @@ class BasicPeopleService extends PeopleService {
 
 	public function getPerson($userId, $groupId, $profileDetails, SecurityToken $token)
 	{
-		$person = $this->getPeople($userId, $groupId, null, null, null, null, $profileDetails, $token, null);
+		$person = $this->getPeople($userId, $groupId, null, null, null, null, $profileDetails, null, $token);
 		// return of getPeople is a ResponseItem(RestfulCollection(ArrayOfPeople)), disassemble to return just one person
 		$person = $person->getResponse()->getEntry();
 		if (is_array($person) && count($person) == 1) {
