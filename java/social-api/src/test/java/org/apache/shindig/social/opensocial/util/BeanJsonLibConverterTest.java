@@ -33,6 +33,7 @@ import org.apache.shindig.social.core.model.MediaItemImpl;
 import org.apache.shindig.social.core.model.NameImpl;
 import org.apache.shindig.social.core.model.PersonImpl;
 import org.apache.shindig.social.core.model.PhoneImpl;
+import org.apache.shindig.social.core.util.BeanJsonLibConversionException;
 import org.apache.shindig.social.core.util.BeanJsonLibConverter;
 import org.apache.shindig.social.opensocial.model.Activity;
 import org.apache.shindig.social.opensocial.model.Address;
@@ -49,25 +50,22 @@ import com.google.inject.Injector;
 
 public class BeanJsonLibConverterTest extends TestCase {
 
-  private static final Log log = LogFactory
-      .getLog(BeanJsonLibConverterTest.class);
+  private static final Log log = LogFactory.getLog(BeanJsonLibConverterTest.class);
   // taken from opensocial-reference/person.js
-  private static final String[] PERSON_FIELDS = { "id", "name", "nickname",
-      "thumbnailUrl", "profileUrl", "currentLocation", "addresses", "emails",
-      "phoneNumbers", "aboutMe", "status", "profileSong", "profileVideo",
-      "gender", "sexualOrientation", "relationshipStatus", "age",
-      "dateOfBirth", "bodyType", "ethnicity", "smoker", "drinker", "children",
-      "pets", "livingArrangement", "timeZone", "languagesSpoken", "jobs",
-      "jobInterests", "schools", "interests", "urls", "music", "movies",
-      "tvShows", "books", "activities", "sports", "heroes", "quotes", "cars",
-      "food", "turnOns", "turnOffs", "tags", "romance", "scaredOf",
-      "happiestWhen", "fashion", "humor", "lookingFor", "religion",
-      "politicalViews", "hasApp", "networkPresence" };
+  private static final String[] PERSON_FIELDS = { "id", "name", "nickname", "thumbnailUrl",
+      "profileUrl", "currentLocation", "addresses", "emails", "phoneNumbers", "aboutMe", "status",
+      "profileSong", "profileVideo", "gender", "sexualOrientation", "relationshipStatus", "age",
+      "dateOfBirth", "bodyType", "ethnicity", "smoker", "drinker", "children", "pets",
+      "livingArrangement", "timeZone", "languagesSpoken", "jobs", "jobInterests", "schools",
+      "interests", "urls", "music", "movies", "tvShows", "books", "activities", "sports", "heroes",
+      "quotes", "cars", "food", "turnOns", "turnOffs", "tags", "romance", "scaredOf",
+      "happiestWhen", "fashion", "humor", "lookingFor", "religion", "politicalViews", "hasApp",
+      "networkPresence" };
 
   // taken from opensocial-reference/name.js
-  private static final String[] NAME_FIELDS = { "familyName", "givenName",
-      "additionalName", "honorificPrefix", "honorificSuffix", "unstructured"};
-  
+  private static final String[] NAME_FIELDS = { "familyName", "givenName", "additionalName",
+      "honorificPrefix", "honorificSuffix", "unstructured" };
+
   private Person johnDoe;
   private Activity activity;
 
@@ -80,21 +78,18 @@ public class BeanJsonLibConverterTest extends TestCase {
   public void setUp() throws Exception {
     super.setUp();
     johnDoe = new PersonImpl("johnDoeId", new NameImpl("John Doe"));
-    johnDoe.setPhoneNumbers(Lists.<Phone> newArrayList(new PhoneImpl(
-        "+33H000000000", "home"), new PhoneImpl("+33M000000000", "mobile"),
-        new PhoneImpl("+33W000000000", "work")));
+    johnDoe.setPhoneNumbers(Lists.<Phone> newArrayList(new PhoneImpl("+33H000000000", "home"),
+        new PhoneImpl("+33M000000000", "mobile"), new PhoneImpl("+33W000000000", "work")));
 
-    johnDoe.setAddresses(Lists.<Address> newArrayList(new AddressImpl(
-        "My home address")));
+    johnDoe.setAddresses(Lists.<Address> newArrayList(new AddressImpl("My home address")));
 
-    johnDoe.setEmails(Lists.<Email> newArrayList(new EmailImpl(
-        "john.doe@work.bar", "work"),
+    johnDoe.setEmails(Lists.<Email> newArrayList(new EmailImpl("john.doe@work.bar", "work"),
         new EmailImpl("john.doe@home.bar", "home")));
 
     activity = new ActivityImpl("activityId", johnDoe.getId());
 
-    activity.setMediaItems(Lists.<MediaItem> newArrayList(new MediaItemImpl(
-        "image/jpg", MediaItem.Type.IMAGE, "http://foo.bar")));
+    activity.setMediaItems(Lists.<MediaItem> newArrayList(new MediaItemImpl("image/jpg",
+        MediaItem.Type.IMAGE, "http://foo.bar")));
 
     Injector injector = Guice.createInjector(new JsonLibTestsGuiceModule());
     beanJsonConverter = injector.getInstance(BeanJsonLibConverter.class);
@@ -105,19 +100,15 @@ public class BeanJsonLibConverterTest extends TestCase {
 
   public static class SpecialPerson extends PersonImpl {
     public static final String[] OPTIONALFIELDS = {};
-    public static final String[] NULLFIELDS = { "jobInterests", "nickname",
-        "romance", "religion", "timeZone", "relationshipStatus", "tags",
-        "networkPresence", "books", "quotes", "phoneNumbers",
-        "languagesSpoken", "activities", "jobs", "dateOfBirth", "profileVideo",
-        "bodyType", "urls", "schools", "music", "addresses",
-        "livingArrangement", "thumbnailUrl", "humor", "sports", "scaredOf",
-        "movies", "age", "pets", "hasApp", "turnOffs", "gender", "fashion",
-        "drinker", "aboutMe", "children", "sexualOrientation", "heroes",
-        "profileSong", "lookingFor", "cars", "turnOns", "tvShows",
-        "profileUrl", "status", "currentLocation", "smoker", "happiestWhen",
-        "ethnicity", "food", "emails", "politicalViews", "interests",
-        "familyName", "honorificSuffix", "additionalName", "honorificPrefix",
-        "givenName" };
+    public static final String[] NULLFIELDS = { "jobInterests", "nickname", "romance", "religion",
+        "timeZone", "relationshipStatus", "tags", "networkPresence", "books", "quotes",
+        "phoneNumbers", "languagesSpoken", "activities", "jobs", "dateOfBirth", "profileVideo",
+        "bodyType", "urls", "schools", "music", "addresses", "livingArrangement", "thumbnailUrl",
+        "humor", "sports", "scaredOf", "movies", "age", "pets", "hasApp", "turnOffs", "gender",
+        "fashion", "drinker", "aboutMe", "children", "sexualOrientation", "heroes", "profileSong",
+        "lookingFor", "cars", "turnOns", "tvShows", "profileUrl", "status", "currentLocation",
+        "smoker", "happiestWhen", "ethnicity", "food", "emails", "politicalViews", "interests",
+        "familyName", "honorificSuffix", "additionalName", "honorificPrefix", "givenName" };
 
     private String newfield;
 
@@ -145,21 +136,19 @@ public class BeanJsonLibConverterTest extends TestCase {
 
     String result = beanJsonConverter.convertToString(cassie);
 
-    validatePerson(result, "5", "robot", SpecialPerson.OPTIONALFIELDS,
-        SpecialPerson.NULLFIELDS);
+    validatePerson(result, "5", "robot", SpecialPerson.OPTIONALFIELDS, SpecialPerson.NULLFIELDS);
 
     String[] optional = {};
     String[] nullfields = {};
-    Map<String, Object> special = apiValidator.validate(result,
-        new String[] { "newfield" }, optional, nullfields);
+    Map<String, Object> special = apiValidator.validate(result, new String[] { "newfield" },
+        optional, nullfields);
     assertNotNull(special.get("newfield"));
     assertEquals(String.class, special.get("newfield").getClass());
     assertEquals("nonsense", special.get("newfield"));
 
     // convert back into an object Tree
 
-    SpecialPerson parseCassie = beanJsonConverter.convertToObject(result,
-        SpecialPerson.class);
+    SpecialPerson parseCassie = beanJsonConverter.convertToObject(result, SpecialPerson.class);
 
     assertNotNull(parseCassie);
     assertEquals(cassie.getId(), parseCassie.getId());
@@ -181,18 +170,18 @@ public class BeanJsonLibConverterTest extends TestCase {
    * @param result
    * @throws ApiValidatorExpcetion
    */
-  private void validatePerson(String result, String id, String name,
-      String[] optional, String[] nullfields) throws ApiValidatorExpcetion {
+  private void validatePerson(String result, String id, String name, String[] optional,
+      String[] nullfields) throws ApiValidatorExpcetion {
 
-    Map<String, Object> standard = apiValidator.validate(result, PERSON_FIELDS,
-        optional, nullfields);
+    Map<String, Object> standard = apiValidator.validate(result, PERSON_FIELDS, optional,
+        nullfields);
     assertNotNull(standard.get("id"));
     assertEquals(String.class, standard.get("id").getClass());
     assertEquals(id, standard.get("id"));
 
     assertNotNull(standard.get("name"));
-    Map<String, Object> nameJSON = apiValidator.validateObject(standard
-        .get("name"), NAME_FIELDS, optional, nullfields);
+    Map<String, Object> nameJSON = apiValidator.validateObject(standard.get("name"), NAME_FIELDS,
+        optional, nullfields);
     ApiValidator.dump(nameJSON);
 
     assertNotNull(nameJSON.get("unstructured"));
@@ -209,12 +198,10 @@ public class BeanJsonLibConverterTest extends TestCase {
     if (outputInfo) {
       log.info("JSON (" + result + ")");
     }
-    Person parsedPerson = beanJsonConverter.convertToObject(result,
-        Person.class);
+    Person parsedPerson = beanJsonConverter.convertToObject(result, Person.class);
 
     assertEquals(johnDoe.getId(), parsedPerson.getId());
-    assertEquals(johnDoe.getName().getUnstructured(), parsedPerson.getName()
-        .getUnstructured());
+    assertEquals(johnDoe.getName().getUnstructured(), parsedPerson.getName().getUnstructured());
 
     List<Address> addresses = parsedPerson.getAddresses();
     if (outputInfo) {
@@ -228,8 +215,8 @@ public class BeanJsonLibConverterTest extends TestCase {
     String unstructured = address.getUnstructuredAddress();
 
     assertNotNull(unstructured);
-    assertEquals(johnDoe.getAddresses().get(0).getUnstructuredAddress(),
-        parsedPerson.getAddresses().get(0).getUnstructuredAddress());
+    assertEquals(johnDoe.getAddresses().get(0).getUnstructuredAddress(), parsedPerson
+        .getAddresses().get(0).getUnstructuredAddress());
 
     assertEquals(3, parsedPerson.getPhoneNumbers().size());
 
@@ -256,8 +243,7 @@ public class BeanJsonLibConverterTest extends TestCase {
     if (outputInfo) {
       log.info("JSON (" + result + ")");
     }
-    Activity parsedActivity = beanJsonConverter.convertToObject(result,
-        Activity.class);
+    Activity parsedActivity = beanJsonConverter.convertToObject(result, Activity.class);
     assertEquals(activity.getUserId(), parsedActivity.getUserId());
     assertEquals(activity.getId(), parsedActivity.getId());
 
@@ -268,8 +254,7 @@ public class BeanJsonLibConverterTest extends TestCase {
 
     assertEquals(expectedItem.getUrl(), actualItem.getUrl());
     assertEquals(expectedItem.getMimeType(), actualItem.getMimeType());
-    assertEquals(expectedItem.getType().toString(), actualItem.getType()
-        .toString());
+    assertEquals(expectedItem.getType().toString(), actualItem.getType().toString());
   }
 
   public void testMapsToJson() throws Exception {
@@ -323,8 +308,7 @@ public class BeanJsonLibConverterTest extends TestCase {
     if (outputInfo) {
       log.info("JSON (" + result + ")");
     }
-    Map<?, ?>[] parsedList = beanJsonConverter.convertToObject(result,
-        Map[].class);
+    Map<?, ?>[] parsedList = beanJsonConverter.convertToObject(result, Map[].class);
 
     assertEquals("1", parsedList[0].get("value"));
     assertEquals("2", parsedList[1].get("value"));
@@ -336,8 +320,7 @@ public class BeanJsonLibConverterTest extends TestCase {
     if (outputInfo) {
       log.info("JSON (" + result + ")");
     }
-    String[] parsedColors = beanJsonConverter.convertToObject(result,
-        String[].class);
+    String[] parsedColors = beanJsonConverter.convertToObject(result, String[].class);
     assertEquals(colors.length, parsedColors.length);
     assertEquals(colors[0], parsedColors[0]);
     assertEquals(colors[1], parsedColors[1]);
@@ -347,8 +330,7 @@ public class BeanJsonLibConverterTest extends TestCase {
   public void testJsonToActivity() throws Exception {
     String jsonActivity = "{userId : 5, id : 6, mediaItems : ["
         + "{url : 'hello', mimeType : 'mimey', type : 'VIDEO'}" + "]}";
-    Activity result = beanJsonConverter.convertToObject(jsonActivity,
-        Activity.class);
+    Activity result = beanJsonConverter.convertToObject(jsonActivity, Activity.class);
 
     assertEquals("5", result.getUserId());
     assertEquals("6", result.getId());
@@ -366,8 +348,8 @@ public class BeanJsonLibConverterTest extends TestCase {
   public void testJsonToMap() throws Exception {
     String jsonActivity = "{count : 0, favoriteColor : 'yellow'}";
     Map<String, String> data = Maps.newHashMap();
-    data = beanJsonConverter.convertToObject(jsonActivity,
-        (Class<Map<String, String>>) data.getClass());
+    data = beanJsonConverter.convertToObject(jsonActivity, (Class<Map<String, String>>) data
+        .getClass());
 
     assertEquals(2, data.size());
 
@@ -379,6 +361,21 @@ public class BeanJsonLibConverterTest extends TestCase {
         assertEquals("yellow", value);
       }
     }
+  }
+
+  public void testEmptyObject() {
+    assertEquals("{}", beanJsonConverter.convertToString(""));
+    assertEquals(0, beanJsonConverter.convertToObject("", Map.class).size());
+    assertEquals(0, beanJsonConverter.convertToObject("[]", String[].class).length);
+    assertEquals(2, beanJsonConverter.convertToObject("[\"a\",\"b\"]", String[].class).length);
+  }
+
+  public void testException() {
+    // a bit brain dead, but makes certain the exception is available in all forms
+    assertNotNull(new BeanJsonLibConversionException());
+    assertNotNull(new BeanJsonLibConversionException("message"));
+    assertNotNull(new BeanJsonLibConversionException(new Exception()));
+    assertNotNull(new BeanJsonLibConversionException("message", new Exception()));
   }
 
 }
