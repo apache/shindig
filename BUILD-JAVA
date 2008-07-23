@@ -77,6 +77,21 @@ Three steps to Use with Eclipse:
 To remove all eclipse-related metatdata from your shindig source tree, run:
 
      mvn eclipse:clean
+
+Building a Maven Site with Reports
+----------------------------------
+
+To build a Maven based site with reports
+
+Run:
+     mvn clean install site:site site:deploy -Dsite.localurl=file:///Users/ieb/public_html/shindig -Dproject.url=/~ieb/shindig
+
+Where
+    file:///Users/ieb/public_html/shindig is the final directory where you want to deploy the site to
+    /~ieb/shindig is absolute site URL where you want the site to be hosted from. 
+
+
+
    
 For more information, see http://incubator.apache.org/projects/shindig.html
 
