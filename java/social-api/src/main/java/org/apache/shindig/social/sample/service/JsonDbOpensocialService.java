@@ -54,7 +54,7 @@ import java.util.Comparator;
 import java.util.concurrent.Future;
 
 /**
- * Implementation of supported services backed by a JSON DB
+ * Implementation of supported services backed by a JSON DB.
  */
 @Singleton
 public class JsonDbOpensocialService implements ActivityService, PersonService, AppDataService {
@@ -147,8 +147,8 @@ public class JsonDbOpensocialService implements ActivityService, PersonService, 
         JSONArray activities = db.getJSONObject(ACTIVITIES_TABLE).getJSONArray(user);
         for (int i = 0; i < activities.length(); i++) {
           JSONObject activity = activities.getJSONObject(i);
-          if (activity.get(Activity.Field.USER_ID.toString()).equals(user) &&
-              activity.get(Activity.Field.ID.toString()).equals(activityId)) {
+          if (activity.get(Activity.Field.USER_ID.toString()).equals(user)
+              && activity.get(Activity.Field.ID.toString()).equals(activityId)) {
             return ImmediateFuture.newInstance(new ResponseItem<Activity>(
                 convertToActivity(activity, fields)));
           }
@@ -199,7 +199,8 @@ public class JsonDbOpensocialService implements ActivityService, PersonService, 
       if (!jsonObject.has(Activity.Field.ID.toString())) {
         jsonObject.put(Activity.Field.ID.toString(), System.currentTimeMillis());
       }
-      JSONArray jsonArray = db.getJSONObject(ACTIVITIES_TABLE).getJSONArray(userId.getUserId(token));
+      JSONArray jsonArray = db.getJSONObject(ACTIVITIES_TABLE)
+          .getJSONArray(userId.getUserId(token));
       if (jsonArray == null) {
         jsonArray = new JSONArray();
         db.getJSONObject(ACTIVITIES_TABLE).put(userId.getUserId(token), jsonArray);
@@ -378,12 +379,11 @@ public class JsonDbOpensocialService implements ActivityService, PersonService, 
     }
     for (int i = 0; i < key.length(); ++i) {
       char c = key.charAt(i);
-      if ((c >= 'a' && c <= 'z') ||
-          (c >= 'A' && c <= 'Z') ||
-          (c >= '0' && c <= '9') ||
-          (c == '-') ||
-          (c == '_') ||
-          (c == '.')) {
+      if ((c >= 'a' && c <= 'z')
+          || (c >= 'A' && c <= 'Z')
+          || (c >= '0' && c <= '9')
+          || (c == '-')
+          || (c == '_') || (c == '.')) {
         continue;
       }
       return false;
@@ -392,7 +392,7 @@ public class JsonDbOpensocialService implements ActivityService, PersonService, 
   }
 
   /**
-   * Get the set of user id's from a user and group
+   * Get the set of user id's from a user and group.
    */
   private Set<String> getIdSet(UserId user, GroupId group, SecurityToken token)
       throws JSONException {

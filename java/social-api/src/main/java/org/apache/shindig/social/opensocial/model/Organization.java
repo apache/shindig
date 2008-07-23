@@ -31,7 +31,7 @@ import java.util.Date;
 @ImplementedBy(OrganizationImpl.class)
 
 public interface Organization {
-  
+
   public static enum Field {
     ADDRESS("address"),
     DESCRIPTION("description"),

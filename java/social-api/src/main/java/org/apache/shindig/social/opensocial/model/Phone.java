@@ -46,7 +46,7 @@ public interface Phone {
       return this.jsonString;
     }
   }
-  
+
   String getNumber();
 
   void setNumber(String number);

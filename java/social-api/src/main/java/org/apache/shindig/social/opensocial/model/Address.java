@@ -54,7 +54,7 @@ public interface Address {
       return this.jsonString;
     }
   }
-  
+
   String getCountry();
 
   void setCountry(String country);

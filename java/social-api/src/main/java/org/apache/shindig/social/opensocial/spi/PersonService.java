@@ -52,7 +52,7 @@ public interface PersonService {
    * @param token The gadget token
    * @return a list of people.
    */
-  public Future<ResponseItem<RestfulCollection<Person>>> getPeople(UserId userId, GroupId groupId,
+  Future<ResponseItem<RestfulCollection<Person>>> getPeople(UserId userId, GroupId groupId,
       SortOrder sortOrder, FilterType filter, int first, int max,
       Set<String> fields, SecurityToken token);
 
@@ -64,5 +64,5 @@ public interface PersonService {
    * @param token The gadget token
    * @return a list of people.
    */
-  public Future<ResponseItem<Person>> getPerson(UserId id, Set<String> fields, SecurityToken token);
+  Future<ResponseItem<Person>> getPerson(UserId id, Set<String> fields, SecurityToken token);
 }

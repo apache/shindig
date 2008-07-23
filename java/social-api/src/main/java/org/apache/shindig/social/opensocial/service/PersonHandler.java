@@ -23,7 +23,6 @@ import org.apache.shindig.social.opensocial.model.Person;
 import org.apache.shindig.social.opensocial.spi.GroupId;
 import org.apache.shindig.social.opensocial.spi.PersonService;
 import org.apache.shindig.social.opensocial.spi.UserId;
-import org.apache.shindig.social.opensocial.spi.GroupId.Type;
 import org.apache.shindig.common.util.ImmediateFuture;
 
 import com.google.common.collect.Sets;

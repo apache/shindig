@@ -34,15 +34,15 @@ public class JsonObjectToMapMorpher implements Morpher, ObjectMorpher {
   }
 
   @SuppressWarnings("unchecked")
-  public boolean supports(Class clazz) {    
+  public boolean supports(Class clazz) {
     return (JSONObject.class.equals(clazz));
   }
 
   public Object morph(Object bean) {
     Map<Object, Object> result = new HashMap<Object, Object>();
     JSONObject jsonObject = (JSONObject) bean;
-    for ( Object key : jsonObject.keySet()) {
-      result.put(key,jsonObject.get(key));
+    for (Object key : jsonObject.keySet()) {
+      result.put(key, jsonObject.get(key));
     }
     return result;
   }

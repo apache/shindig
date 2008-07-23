@@ -24,8 +24,8 @@ public class GroupId {
     all, friends, self, groupId
   }
 
-  Type type;
-  String groupId;
+  private Type type;
+  private String groupId;
 
   public GroupId(Type type, String groupId) {
     this.groupId = groupId;
@@ -64,7 +64,10 @@ public class GroupId {
 
   @Override
   public int hashCode() {
-    int groupHashCode = this.groupId == null ? 0 : this.groupId.hashCode();
+    int groupHashCode = 0;
+    if (this.groupId != null) {
+      groupHashCode = this.groupId.hashCode();
+    }
     return this.type.hashCode() + groupHashCode;
   }
 }

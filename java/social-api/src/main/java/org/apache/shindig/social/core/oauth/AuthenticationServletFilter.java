@@ -131,7 +131,7 @@ public class AuthenticationServletFilter implements Filter {
   // in the case of two-legged OAuth in the absence of a gadget security token
   protected static final String REQUESTOR_ID_PARAM = "xoauth_requestor_id";
 
-  private static final Logger log =
+  private static final Logger LOG =
       Logger.getLogger(AuthenticationServletFilter.class.getName());
 
   /*
@@ -168,8 +168,8 @@ public class AuthenticationServletFilter implements Filter {
         context.getAttribute(GuiceServletContextListener.INJECTOR_ATTRIBUTE);
     if (injector == null) {
       throw new UnavailableException(
-          "Guice Injector not found! Make sure you registered " +
-              GuiceServletContextListener.class.getName() + " as a listener");
+          "Guice Injector not found! Make sure you registered " 
+          + GuiceServletContextListener.class.getName() + " as a listener");
     }
     injector.injectMembers(this);
   }
@@ -204,18 +204,18 @@ public class AuthenticationServletFilter implements Filter {
   public void doFilter(ServletRequest request, ServletResponse response,
       FilterChain chain) throws IOException, ServletException {
 
-    if (! ((request instanceof HttpServletRequest)
+    if ( !((request instanceof HttpServletRequest)
         && (response instanceof HttpServletResponse))) {
       throw new ServletException("Auth filter can only handle HTTP");
     }
 
-    HttpServletRequest req = (HttpServletRequest)request;
-    HttpServletResponse resp = (HttpServletResponse)response;
+    HttpServletRequest req = (HttpServletRequest) request;
+    HttpServletResponse resp = (HttpServletResponse) response;
 
     try {
       HttpServletRequest wrappedRequest = handleRequest(req);
       chain.doFilter(wrappedRequest, response);
-    } catch(OAuthProblemException e) {
+    } catch (OAuthProblemException e) {
       if (allowUnauthenticated) {
         chain.doFilter(request, response);
       } else {
@@ -360,7 +360,7 @@ public class AuthenticationServletFilter implements Filter {
           .append("(treating it as not present). token is: ")
           .append(token)
           .toString();
-      log.log(Level.WARNING, message, e);
+      LOG.log(Level.WARNING, message, e);
       return null;
     }
   }
@@ -438,7 +438,7 @@ public class AuthenticationServletFilter implements Filter {
       if (e instanceof OAuthProblemException) {
         // this one we'll just re-throw since the caller knows how to handle it
         // (this includes the case where the signature doesn't verify)
-        throw (OAuthProblemException)e;
+        throw (OAuthProblemException) e;
       } else {
         throw new ServletException(e);
       }
@@ -452,7 +452,8 @@ public class AuthenticationServletFilter implements Filter {
    * @throws IOException
    * @throws OAuthProblemException
    */
-  protected void requireOAuth(OAuthMessage requestMessage) throws OAuthProblemException, IOException {
+  protected void requireOAuth(OAuthMessage requestMessage) 
+      throws OAuthProblemException, IOException {
     requestMessage.requireParameters(OAuth.OAUTH_CONSUMER_KEY, OAuth.OAUTH_SIGNATURE);
   }
 

@@ -44,7 +44,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * Converts pojos to json objects
+ * Converts pojos to json objects.
  * TODO: Replace with standard library
  */
 public class BeanJsonConverter implements BeanConverter {
@@ -61,7 +61,7 @@ public class BeanJsonConverter implements BeanConverter {
   }
 
   /**
-   * Convert the passed in object to a string
+   * Convert the passed in object to a string.
    *
    * @param pojo The object to convert
    * @return An object whos toString method will return json
@@ -71,7 +71,7 @@ public class BeanJsonConverter implements BeanConverter {
   }
 
   /**
-   * Convert the passed in object to a json object
+   * Convert the passed in object to a json object.
    *
    * @param pojo The object to convert
    * @return An object whos toString method will return json
@@ -136,8 +136,8 @@ public class BeanJsonConverter implements BeanConverter {
 
     JSONObject toReturn = new JSONObject();
     for (MethodPair getter : availableGetters) {
-      String errorMessage = "Could not encode the " + getter.method + " method on " +
-          pojo.getClass().getName();
+      String errorMessage = "Could not encode the " + getter.method + " method on "
+        + pojo.getClass().getName();
       try {
         Object val = getter.method.invoke(pojo, EMPTY_OBJECT);
         if (val != null) {
@@ -227,8 +227,8 @@ public class BeanJsonConverter implements BeanConverter {
 
     } else if (pojo instanceof List) {
       // TODO: process as a JSONArray
-      throw new UnsupportedOperationException("We don't support lists as a " +
-          "base json type yet. You can put it inside a pojo for now.");
+      throw new UnsupportedOperationException("We don't support lists as a "
+          + "base json type yet. You can put it inside a pojo for now.");
 
     } else {
       JSONObject jsonObject = new JSONObject(json);
@@ -313,8 +313,8 @@ public class BeanJsonConverter implements BeanConverter {
         }
         if (value == null) {
           throw new IllegalArgumentException(
-              "No enum value  '" + jsonObject.getString(fieldName) +
-                  "' in " + expectedType.getName());
+              "No enum value  '" + jsonObject.getString(fieldName)
+                  + "' in " + expectedType.getName());
         }
       }
     } else if (expectedType.equals(String.class)) {

@@ -22,7 +22,7 @@ import net.oauth.OAuthMessage;
 import net.oauth.OAuthProblemException;
 
 /**
- * Interface describing a service that can be used to look up 
+ * Interface describing a service that can be used to look up
  * {@link DelegatedPrincipal}s associated with OAuth tokens.
  */
 public interface OAuthTokenPrincipalMapper {

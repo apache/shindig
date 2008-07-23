@@ -28,8 +28,8 @@ public class IdSpec {
     VIEWER, OWNER, VIEWER_FRIENDS, OWNER_FRIENDS, USER_IDS
   }
 
-  String jsonSpec;
-  Type type;
+  private String jsonSpec;
+  private Type type;
 
   public IdSpec(String jsonSpec, Type type) {
     this.jsonSpec = jsonSpec;
@@ -49,7 +49,7 @@ public class IdSpec {
   }
 
   /**
-   * Only valid for IdSpecs of type USER_IDS
+   * Only valid for IdSpecs of type USER_IDS.
    * @return A list of the user ids in the id spec
    *
    * @throws JSONException If the id spec isn't a valid json String array
