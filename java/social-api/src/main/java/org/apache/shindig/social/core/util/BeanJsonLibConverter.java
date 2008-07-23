@@ -17,49 +17,35 @@
  */
 package org.apache.shindig.social.core.util;
 
-import java.lang.reflect.Array;
-import java.lang.reflect.InvocationTargetException;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import net.sf.ezmorph.MorpherRegistry;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONException;
 import net.sf.json.JSONObject;
 import net.sf.json.JsonConfig;
-import net.sf.json.processors.DefaultValueProcessor;
-import net.sf.json.util.EnumMorpher;
 import net.sf.json.util.JSONUtils;
-import net.sf.json.util.NewBeanInstanceStrategy;
-import net.sf.json.util.PropertyFilter;
+
+import com.google.inject.Inject;
+import com.google.inject.Injector;
+import com.google.inject.name.Named;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import org.apache.shindig.social.opensocial.model.Address;
-import org.apache.shindig.social.opensocial.model.Email;
-import org.apache.shindig.social.opensocial.model.Enum;
-import org.apache.shindig.social.opensocial.model.MediaItem;
-import org.apache.shindig.social.opensocial.model.Organization;
-import org.apache.shindig.social.opensocial.model.Phone;
-import org.apache.shindig.social.opensocial.model.Url;
-
-import com.google.inject.Inject;
-import com.google.inject.Injector;
+import java.lang.reflect.Array;
+import java.util.List;
 
 /**
  * BeanConverter implementation us the net.sf.json-lib json library.
  */
 public class BeanJsonLibConverter implements BeanConverter {
 
+
+
   /**
-   * The Logger
+   * The Logger.
    */
   protected static final Log LOG = LogFactory.getLog(BeanJsonLibConverter.class);
   /**
-   * The Guice injector used to create beans
+   * The Guice injector used to create beans.
    */
   private Injector injector;
   /**
@@ -67,35 +53,30 @@ public class BeanJsonLibConverter implements BeanConverter {
    */
   private JsonConfig jsonConfig;
   /**
-   * in IDE debug flag
+   * in IDE debug flag.
    */
   private boolean debugMode = false;
 
-  /*
-   * Register the Enum Morphers so that JSON -> Bean works correctly for enums.
+
+  /**
+   * Create an BeanConverter with an injector.
+   * @param injector the Guice injector to use for conversion
+   * @param jsonConfig the Json Configuration
    */
-  static {
-    MorpherRegistry morpherRegistry = JSONUtils.getMorpherRegistry();
-    morpherRegistry.registerMorpher(new EnumMorpher(Address.Field.class));
-    morpherRegistry.registerMorpher(new EnumMorpher(Phone.Field.class));
-    morpherRegistry.registerMorpher(new EnumMorpher(Email.Field.class));
-    morpherRegistry.registerMorpher(new EnumMorpher(MediaItem.Field.class));
-    morpherRegistry.registerMorpher(new EnumMorpher(MediaItem.Type.class));
-    morpherRegistry.registerMorpher(new EnumMorpher(Enum.Drinker.class));
-    morpherRegistry.registerMorpher(new EnumMorpher(Enum.Field.class));
-    morpherRegistry.registerMorpher(new EnumMorpher(Enum.Gender.class));
-    morpherRegistry.registerMorpher(new EnumMorpher(Enum.NetworkPresence.class));
-    morpherRegistry.registerMorpher(new EnumMorpher(Enum.Smoker.class));
-
-    morpherRegistry.registerMorpher(new JsonObjectToMapMorpher());
-  }
-
   @Inject
-  public BeanJsonLibConverter(Injector injector) {
+  public BeanJsonLibConverter(Injector injector,
+      @Named("ShindigJsonConfig") JsonConfig jsonConfig) {
     this.injector = injector;
-    createJsonConfig();
+    this.jsonConfig = jsonConfig;
   }
 
+  /**
+   * Convert the json string into a pojo based on the supplied root class.
+   * @param string the json string
+   * @param rootBeanClass the root class of the bean
+   * @param <T> The typep of the pojo to be returned
+   * @return A pojo of the same type as the rootBeanClass
+   */
   @SuppressWarnings("unchecked")
   public <T> T convertToObject(String string, final Class<T> rootBeanClass) {
 
@@ -137,139 +118,6 @@ public class BeanJsonLibConverter implements BeanConverter {
     }
   }
 
-  /**
-   * @return
-   */
-  private void createJsonConfig() {
-
-    jsonConfig = new JsonConfig();
-
-    /*
-     * This hook deals with the creation of new beans in the JSON -> Java Bean
-     * conversion
-     */
-    jsonConfig.setNewBeanInstanceStrategy(new NewBeanInstanceStrategy() {
-
-      @SuppressWarnings("unchecked")
-      @Override
-      public Object newInstance(Class beanClass, JSONObject jsonObject)
-          throws InstantiationException, IllegalAccessException, NoSuchMethodException,
-          InvocationTargetException {
-        if (beanClass != null) {
-          Object o = BeanJsonLibConverter.this.injector.getInstance(beanClass);
-          if (debugMode) {
-            LOG.info("Created Object " + o + " for " + beanClass + " with [" + jsonObject + "]");
-          }
-          return o;
-        }
-        return DEFAULT.newInstance(beanClass, jsonObject);
-      }
-
-    });
-
-    /*
-     * We are expecting null for nulls
-     */
-    jsonConfig.registerDefaultValueProcessor(String.class, new DefaultValueProcessor() {
-      @SuppressWarnings("unchecked")
-      public Object getDefaultValue(Class target) {
-        return null;
-      }
-    });
-
-    jsonConfig.setJsonPropertyFilter(new PropertyFilter() {
-
-      public boolean apply(Object source, String name, Object value) {
-        return filterProperty(source, name, value);
-      }
-
-    });
-
-    jsonConfig.setJavaPropertyFilter(new PropertyFilter() {
-
-      public boolean apply(Object source, String name, Object value) {
-        return filterProperty(source, name, value);
-      }
-
-    });
-
-    // the classMap deals with the basic json string to bean conversion
-
-    Map<String, Class<?>> classMap = new HashMap<String, Class<?>>();
-
-    /*
-     * mappings are required where there is a List of objects in the interface
-     * with no indication of what type the list should contain. At the moment,
-     * we are using 1 map for all json trees, as there is no conflict, but if
-     * there is a map could be selected on the basis of the root object. It
-     * would be better to do this with generics, but this is good enough and
-     * compact enough for the moment.
-     *
-     */
-    //
-    // activity
-    classMap.put("mediaItems", MediaItem.class);
-    // this may not be necessary
-    classMap.put("templateParams", Map.class);
-    // BodyType needs no mappings
-    // Message needs no mappings
-    // Name needs no mappings
-    // Organization needs no mappings
-    // Url needs no mappings
-    // Email needs no mappings
-    // Phone Needs no mappings
-    // Address Needs no mappings
-    // MediaItem needs no mappings
-
-    // Person map
-    classMap.put("addresses", Address.class);
-    classMap.put("phoneNumbers", Phone.class);
-    classMap.put("emails", Email.class);
-    classMap.put("mediaItems", MediaItem.class);
-    classMap.put("jobs", Organization.class);
-    classMap.put("schools", Organization.class);
-    classMap.put("urls", Url.class);
-    jsonConfig.setClassMap(classMap);
-
-  }
-
-  /**
-   * Filter the output of a property, if it should be emitted return false.
-   * @param source The object containing the value
-   * @param name the name of the key in the output structure
-   * @param value the value of the object
-   * @return true if the property should be filtered, false if not.
-   */
-  protected boolean filterProperty(Object source, String name, Object value) {
-    if (value == null) {
-      return true;
-    }
-    if (value instanceof JSONArray) {
-      JSONArray array = (JSONArray) value;
-      if (array.size() == 0) {
-        return true;
-      }
-    }
-    if (value instanceof JSONObject) {
-      JSONObject object = (JSONObject) value;
-      if (object.isNullObject() || object.isEmpty()) {
-        return true;
-      }
-    }
-    if (value instanceof Collection) {
-      Collection<?> collection = (Collection<?>) value;
-      if (collection.size() == 0) {
-        return true;
-      }
-    }
-    if (value instanceof Object[]) {
-      Object[] oarray = (Object[]) value;
-      if (oarray.length == 0) {
-        return true;
-      }
-    }
-    return false;
-  }
 
   /**
    * Convert the pojo to a json string representation.

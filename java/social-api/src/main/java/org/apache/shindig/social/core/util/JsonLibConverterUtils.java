@@ -26,18 +26,16 @@ import net.sf.json.JSONObject;
 /**
  * Some utility functions to simpilfy handling SF json-lib objects.
  */
-public class JsonLibConverterUtils {
-  /**
-   * This class is a utility class and can't be constructed.
-   */
-  private JsonLibConverterUtils() {
-  }
+public final class JsonLibConverterUtils {
 
+  /**
+   * The Logger.
+   */
   protected static final Log LOG = LogFactory.getLog(JsonLibConverterUtils.class);
 
   /**
    * Dumps a JSON Object out to the log at info level.
-   * 
+   *
    * @param jsonObject
    *                The object to dump
    * @param indent
@@ -63,8 +61,9 @@ public class JsonLibConverterUtils {
   }
 
   /**
-   * @param value
-   * @param string
+   * Dump a json object to the log.
+   * @param array a json array to dump
+   * @param indent the indent for each level of nesting
    */
   public static void dumpJsonArray(JSONArray array, String indent) {
     for (Object value : array) {

@@ -17,46 +17,17 @@
  */
 package org.apache.shindig.social.core.util;
 
+import net.sf.json.processors.DefaultValueProcessor;
+
 /**
- * Where a conversion exception happens in the Json Lib conversion, this
- * exception is thrown.
+ * Null are serialized as Nulls.
  */
-public class BeanJsonLibConversionException extends RuntimeException {
-
+public class NullDefaultValueProcessor implements DefaultValueProcessor {
   /**
-   * serial ID.
+   * returns the object to be serialized
    */
-  private static final long serialVersionUID = -8609384443448202372L;
-
-  /**
-   * create the exception.
-   */
-  public BeanJsonLibConversionException() {
+  @SuppressWarnings("unchecked")
+  public Object getDefaultValue(Class target) {
+    return null;
   }
-
-  /**
-   * Constructor.
-   * @param message a message
-   */
-  public BeanJsonLibConversionException(String message) {
-    super(message);
-  }
-
-  /**
-   * create with a cause.
-   * @param cause the cause
-   */
-  public BeanJsonLibConversionException(Throwable cause) {
-    super(cause);
-  }
-
-  /**
-   * create with a cause and a message.
-   * @param message a message
-   * @param cause the cause
-   */
-  public BeanJsonLibConversionException(String message, Throwable cause) {
-    super(message, cause);
-  }
-
 }

@@ -25,19 +25,30 @@ import net.sf.ezmorph.ObjectMorpher;
 import net.sf.json.JSONObject;
 
 /**
- *
+ * A morpher that converts objects into maps
  */
 public class JsonObjectToMapMorpher implements Morpher, ObjectMorpher {
 
+  /**
+   * @return the class that the morper will morph to
+   */
   public Class<?> morphsTo() {
     return Map.class;
   }
 
+  /**
+   * @param clazz the class being checked
+   * @return true if this morpher supports the class
+   */
   @SuppressWarnings("unchecked")
   public boolean supports(Class clazz) {
     return (JSONObject.class.equals(clazz));
   }
 
+  /**
+   * @param the bean to be morphed
+   * @return the morphed bean (a map)
+   */
   public Object morph(Object bean) {
     Map<Object, Object> result = new HashMap<Object, Object>();
     JSONObject jsonObject = (JSONObject) bean;
