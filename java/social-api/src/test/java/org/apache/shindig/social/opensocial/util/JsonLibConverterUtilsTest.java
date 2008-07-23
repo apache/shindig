@@ -21,8 +21,6 @@ import static org.junit.Assert.*;
 
 import org.apache.shindig.social.core.util.JsonLibConverterUtils;
 
-import com.sun.speech.freetts.Dumpable;
-
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 
