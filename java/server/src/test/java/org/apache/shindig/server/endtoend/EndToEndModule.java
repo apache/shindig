@@ -18,10 +18,10 @@
 package org.apache.shindig.server.endtoend;
 
 import org.apache.shindig.common.servlet.ParameterFetcher;
-import org.apache.shindig.social.dataservice.DataServiceServletFetcher;
-import org.apache.shindig.social.opensocial.util.BeanConverter;
-import org.apache.shindig.social.opensocial.util.BeanJsonConverter;
-import org.apache.shindig.social.opensocial.util.BeanXmlConverter;
+import org.apache.shindig.social.core.util.BeanConverter;
+import org.apache.shindig.social.core.util.BeanJsonConverter;
+import org.apache.shindig.social.core.util.BeanXmlConverter;
+import org.apache.shindig.social.opensocial.service.DataServiceServletFetcher;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.name.Names;

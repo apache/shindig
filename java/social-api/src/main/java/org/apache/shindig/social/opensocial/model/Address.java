@@ -17,6 +17,8 @@
  */
 package org.apache.shindig.social.opensocial.model;
 
+import org.apache.shindig.social.core.model.AddressImpl;
+
 import com.google.inject.ImplementedBy;
 
 /**

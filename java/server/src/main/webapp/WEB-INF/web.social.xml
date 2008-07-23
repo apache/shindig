@@ -26,12 +26,12 @@
   <!-- If you have your own Guice module(s), put them here as a colon-separated list. -->
   <context-param>
     <param-name>guice-modules</param-name>
-    <param-value>org.apache.shindig.social.SocialApiGuiceModule</param-value>
+    <param-value>org.apache.shindig.social.core.config.SocialApiGuiceModule</param-value>
   </context-param>
 
   <filter>
     <filter-name>oauthFilter</filter-name>
-    <filter-class>org.apache.shindig.social.oauth.AuthenticationServletFilter</filter-class>
+    <filter-class>org.apache.shindig.social.core.oauth.AuthenticationServletFilter</filter-class>
   </filter>
 
   <filter-mapping>
@@ -47,7 +47,7 @@
   <servlet>
     <servlet-name>restapiServlet</servlet-name>
     <servlet-class>
-      org.apache.shindig.social.dataservice.DataServiceServlet
+      org.apache.shindig.social.opensocial.service.DataServiceServlet
     </servlet-class>
   </servlet>
 

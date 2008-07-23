@@ -18,19 +18,20 @@
 package org.apache.shindig.social.opensocial.util;
 
 import org.apache.shindig.social.SocialApiTestsGuiceModule;
+import org.apache.shindig.social.core.model.ActivityImpl;
+import org.apache.shindig.social.core.model.AddressImpl;
+import org.apache.shindig.social.core.model.EmailImpl;
+import org.apache.shindig.social.core.model.MediaItemImpl;
+import org.apache.shindig.social.core.model.NameImpl;
+import org.apache.shindig.social.core.model.PersonImpl;
+import org.apache.shindig.social.core.model.PhoneImpl;
+import org.apache.shindig.social.core.util.BeanJsonConverter;
 import org.apache.shindig.social.opensocial.model.Activity;
-import org.apache.shindig.social.opensocial.model.ActivityImpl;
 import org.apache.shindig.social.opensocial.model.Address;
-import org.apache.shindig.social.opensocial.model.AddressImpl;
 import org.apache.shindig.social.opensocial.model.Email;
-import org.apache.shindig.social.opensocial.model.EmailImpl;
 import org.apache.shindig.social.opensocial.model.MediaItem;
-import org.apache.shindig.social.opensocial.model.MediaItemImpl;
-import org.apache.shindig.social.opensocial.model.NameImpl;
 import org.apache.shindig.social.opensocial.model.Person;
-import org.apache.shindig.social.opensocial.model.PersonImpl;
 import org.apache.shindig.social.opensocial.model.Phone;
-import org.apache.shindig.social.opensocial.model.PhoneImpl;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;

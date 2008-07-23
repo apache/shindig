@@ -19,7 +19,7 @@
 package org.apache.shindig.social;
 
 import org.apache.shindig.common.servlet.ParameterFetcher;
-import org.apache.shindig.social.dataservice.DataServiceServletFetcher;
+import org.apache.shindig.social.opensocial.service.DataServiceServletFetcher;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.name.Names;

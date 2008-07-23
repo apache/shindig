@@ -17,24 +17,24 @@
  */
 package org.apache.shindig.social.dataservice.integration;
 
+import org.apache.shindig.social.core.model.AddressImpl;
+import org.apache.shindig.social.core.model.BodyTypeImpl;
+import org.apache.shindig.social.core.model.EmailImpl;
+import org.apache.shindig.social.core.model.EnumImpl;
+import org.apache.shindig.social.core.model.NameImpl;
+import org.apache.shindig.social.core.model.OrganizationImpl;
+import org.apache.shindig.social.core.model.PersonImpl;
+import org.apache.shindig.social.core.model.PhoneImpl;
+import org.apache.shindig.social.core.model.UrlImpl;
 import org.apache.shindig.social.opensocial.model.Address;
-import org.apache.shindig.social.opensocial.model.AddressImpl;
 import org.apache.shindig.social.opensocial.model.BodyType;
-import org.apache.shindig.social.opensocial.model.BodyTypeImpl;
 import org.apache.shindig.social.opensocial.model.Email;
-import org.apache.shindig.social.opensocial.model.EmailImpl;
 import org.apache.shindig.social.opensocial.model.Enum;
-import org.apache.shindig.social.opensocial.model.EnumImpl;
 import org.apache.shindig.social.opensocial.model.Name;
-import org.apache.shindig.social.opensocial.model.NameImpl;
 import org.apache.shindig.social.opensocial.model.Organization;
-import org.apache.shindig.social.opensocial.model.OrganizationImpl;
 import org.apache.shindig.social.opensocial.model.Person;
-import org.apache.shindig.social.opensocial.model.PersonImpl;
 import org.apache.shindig.social.opensocial.model.Phone;
-import org.apache.shindig.social.opensocial.model.PhoneImpl;
 import org.apache.shindig.social.opensocial.model.Url;
-import org.apache.shindig.social.opensocial.model.UrlImpl;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;

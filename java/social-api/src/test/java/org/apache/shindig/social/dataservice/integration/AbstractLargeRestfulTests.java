@@ -19,15 +19,15 @@ package org.apache.shindig.social.dataservice.integration;
 
 import org.apache.shindig.common.BasicSecurityTokenDecoder;
 import org.apache.shindig.social.SocialApiTestsGuiceModule;
-import org.apache.shindig.social.dataservice.ActivityHandler;
-import org.apache.shindig.social.dataservice.AppDataHandler;
-import org.apache.shindig.social.dataservice.DataRequestHandler;
-import org.apache.shindig.social.dataservice.DataServiceServlet;
-import org.apache.shindig.social.dataservice.DataServiceServletFetcher;
-import org.apache.shindig.social.dataservice.HandlerProvider;
-import org.apache.shindig.social.dataservice.PersonHandler;
-import org.apache.shindig.social.opensocial.util.BeanJsonConverter;
-import org.apache.shindig.social.opensocial.util.BeanXmlConverter;
+import org.apache.shindig.social.core.util.BeanJsonConverter;
+import org.apache.shindig.social.core.util.BeanXmlConverter;
+import org.apache.shindig.social.opensocial.service.ActivityHandler;
+import org.apache.shindig.social.opensocial.service.AppDataHandler;
+import org.apache.shindig.social.opensocial.service.DataRequestHandler;
+import org.apache.shindig.social.opensocial.service.DataServiceServlet;
+import org.apache.shindig.social.opensocial.service.DataServiceServletFetcher;
+import org.apache.shindig.social.opensocial.service.HandlerProvider;
+import org.apache.shindig.social.opensocial.service.PersonHandler;
 
 import com.google.common.collect.Maps;
 import com.google.inject.Guice;
