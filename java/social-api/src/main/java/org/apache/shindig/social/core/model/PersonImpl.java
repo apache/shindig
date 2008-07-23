@@ -30,6 +30,9 @@ import org.apache.shindig.social.opensocial.model.Url;
 import java.util.Date;
 import java.util.List;
 
+/**
+ * Default Implementation of the Person object in the model.
+ */
 public class PersonImpl implements Person {
   private String aboutMe;
   private List<String> activities;
