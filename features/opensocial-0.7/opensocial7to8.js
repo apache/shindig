@@ -58,7 +58,7 @@ opensocial.Environment.ObjectType.ACTIVITY_MEDIA_ITEM
 opensocial.Person.prototype.getFieldOld = opensocial.Person.prototype.getField;
 opensocial.Person.prototype.getField = function(key, opt_params) {
   var value =  this.getFieldOld(key, opt_params);
-  if (key == 'lookingFor') {
+  if (key == 'lookingFor' && value) {
     // The lookingFor field used to return a string instead of an enum
     return value.getDisplayValue();
   } else {

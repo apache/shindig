@@ -68,51 +68,6 @@ RestfulContainer.prototype.requestData = function(dataRequest, callback) {
     return;
   }
 
-  var responseMap = {};
-  var globalError = false;
-  var responsesReceived = 0;
-
-  var checkIfFinished = function() {
-    responsesReceived++;
-    if (responsesReceived == totalRequests) {
-      var dataResponse = new opensocial.DataResponse(responseMap, globalError);
-      callback(dataResponse);
-    }
-  }
-
-  var makeProxiedRequest = function(requestObject, baseUrl, st) {
-    var makeRequestParams = {
-      "CONTENT_TYPE" : "JSON",
-      "METHOD" : requestObject.request.method
-    };
-
-    if (requestObject.request.postData) {
-      makeRequestParams["POST_DATA"] = gadgets.json.stringify(requestObject.request.postData);
-    }
-
-    var url = requestObject.request.url;
-    var separator = url.indexOf("?") != -1 ? "&" : "?";
-
-    gadgets.io.makeNonProxiedRequest(
-        baseUrl + url + separator + "st=" + st,
-        function(result) {
-          var error;
-          if (result.errors) {
-            error = RestfulContainer.translateHttpError(result.errors[0]);
-          }
-
-          // TODO: get error messages
-          var processedData = requestObject.request.processResponse(
-              requestObject.request, result.data, error, null);
-          globalError = globalError || processedData.hadError();
-          responseMap[requestObject.key] = processedData;
-
-          checkIfFinished();
-        },
-        makeRequestParams,
-        "application/json");
-  }
-
   var jsonBatchData = {};
   var systemKeyIndex = 0;
 
@@ -135,14 +90,13 @@ RestfulContainer.prototype.requestData = function(dataRequest, callback) {
     }
   }
 
-  // This is slightly different than jsonContainer
   var sendResponse = function(result) {
-    result = result.data;
-
-    if (!result || result['error']) {
-      callback(new opensocial.DataResponse({}, true));
+    if (result.errors[0] || result.data.error) {
+      RestfulContainer.generateErrorResponse(result, requestObjects, callback);
       return;
     }
+
+    result = result.data;
 
     var responses = result['responses'] || [];
     var globalError = false;
@@ -180,6 +134,18 @@ RestfulContainer.prototype.requestData = function(dataRequest, callback) {
     sendResponse, makeRequestParams, "application/json");
 };
 
+RestfulContainer.generateErrorResponse = function(result, requestObjects, callback) {
+  var globalErrorCode = RestfulContainer.translateHttpError(result.errors[0] || result.data.error)
+      || opensocial.ResponseItem.Error.INTERNAL_ERROR;
+
+  var errorResponseMap = {};
+  for (var i = 0; i < requestObjects.length; i++) {
+    errorResponseMap[requestObjects[i].key] = new opensocial.ResponseItem(
+        requestObjects[i].request, null, globalErrorCode);
+  }
+  callback(new opensocial.DataResponse(errorResponseMap, true));
+};
+
 RestfulContainer.translateHttpError = function(httpError) {
   if (httpError == "Error 501") {
     return opensocial.ResponseItem.Error.NOT_IMPLEMENTED;
@@ -197,11 +163,11 @@ RestfulContainer.translateHttpError = function(httpError) {
   // } else if (httpError == "Error ???") {
   //   return opensocial.ResponseItem.Error.LIMIT_EXCEEDED;
   }
-}
+};
 
 RestfulContainer.prototype.makeIdSpec = function(id) {
   return new opensocial.IdSpec({'userId' : id});
-}
+};
 
 RestfulContainer.prototype.translateIdSpec = function(newIdSpec) {
   var userId = newIdSpec.getField('userId');
@@ -256,9 +222,17 @@ RestfulContainer.prototype.newFetchPeopleRequest = function(idSpec,
   var me = this;
   return new RestfulRequestItem(url, "GET", null,
       function(rawJson) {
-        var jsonPeople = rawJson['entry'];
+        var jsonPeople;
+        if (rawJson['entry']) {
+          // For the array of people response
+          jsonPeople = rawJson['entry'];
+        } else {
+          // For the single person response
+          jsonPeople = [rawJson];
+        }
+
         var people = [];
-        for (var i = 0; i < jsonPeople.length; i++) {	
+        for (var i = 0; i < jsonPeople.length; i++) {
           people.push(me.createPersonFromJson(jsonPeople[i]));
         }
         return new opensocial.Collection(people,
