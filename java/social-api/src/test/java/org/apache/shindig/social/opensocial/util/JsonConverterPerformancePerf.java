@@ -43,6 +43,7 @@ import org.json.JSONObject;
 
 import com.google.common.collect.Lists;
 import com.google.inject.Guice;
+import com.google.inject.Injector;
 
 public class JsonConverterPerformancePerf extends TestCase {
 
@@ -75,8 +76,8 @@ public class JsonConverterPerformancePerf extends TestCase {
     activity.setMediaItems(Lists.<MediaItem> newArrayList(new MediaItemImpl(
         "image/jpg", MediaItem.Type.IMAGE, "http://foo.bar")));
 
-    beanJsonLibConverter = new BeanJsonLibConverter(Guice
-        .createInjector(new JsonLibTestsGuiceModule()));
+    Injector injector = Guice.createInjector(new JsonLibTestsGuiceModule());
+    beanJsonLibConverter = injector.getInstance(BeanJsonLibConverter.class);
 
     beanJsonConverter = new BeanJsonConverter(Guice
         .createInjector(new SocialApiTestsGuiceModule()));

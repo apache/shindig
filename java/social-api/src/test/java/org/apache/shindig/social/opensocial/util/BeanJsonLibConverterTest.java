@@ -45,6 +45,7 @@ import org.apache.shindig.social.opensocial.model.Phone;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.inject.Guice;
+import com.google.inject.Injector;
 
 public class BeanJsonLibConverterTest extends TestCase {
 
@@ -95,8 +96,8 @@ public class BeanJsonLibConverterTest extends TestCase {
     activity.setMediaItems(Lists.<MediaItem> newArrayList(new MediaItemImpl(
         "image/jpg", MediaItem.Type.IMAGE, "http://foo.bar")));
 
-    beanJsonConverter = new BeanJsonLibConverter(Guice
-        .createInjector(new JsonLibTestsGuiceModule()));
+    Injector injector = Guice.createInjector(new JsonLibTestsGuiceModule());
+    beanJsonConverter = injector.getInstance(BeanJsonLibConverter.class);
 
     apiValidator = new ApiValidator();
 

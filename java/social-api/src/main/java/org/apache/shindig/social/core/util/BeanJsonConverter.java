@@ -40,6 +40,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.Map.Entry;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -94,17 +95,17 @@ public class BeanJsonConverter implements BeanConverter {
 
     } else if (val instanceof List) {
       JSONArray list = new JSONArray();
-      for (Object item : (List) val) {
+      for (Object item : (List<?>) val) {
         list.put(translateObjectToJson(item));
       }
       return list;
 
     } else if (val instanceof Map) {
       JSONObject map = new JSONObject();
-      Map originalMap = (Map) val;
+      Map<?, ?> originalMap = (Map<?,?>) val;
 
-      for (Object item : originalMap.keySet()) {
-        map.put(item.toString(), translateObjectToJson(originalMap.get(item)));
+      for (Entry<?, ?> item : originalMap.entrySet()) {
+        map.put(item.getKey().toString(), translateObjectToJson(item.getValue()));
       }
       return map;
 
@@ -218,7 +219,7 @@ public class BeanJsonConverter implements BeanConverter {
       Class<?> mapValueClass = String.class;
 
       JSONObject jsonObject = new JSONObject(json);
-      Iterator iterator = jsonObject.keys();
+      Iterator<?> iterator = jsonObject.keys();
       while (iterator.hasNext()) {
         String key = (String) iterator.next();
         Object value = convertToObject(jsonObject.getString(key), mapValueClass);
@@ -254,7 +255,7 @@ public class BeanJsonConverter implements BeanConverter {
       ParameterizedType genericListType
           = (ParameterizedType) method.getGenericParameterTypes()[0];
       Class<?> listElementClass
-          = (Class) genericListType.getActualTypeArguments()[0];
+          = (Class<?>) genericListType.getActualTypeArguments()[0];
 
       List<Object> list = Lists.newArrayList();
       JSONArray jsonArray = jsonObject.getJSONArray(fieldName);
@@ -268,7 +269,7 @@ public class BeanJsonConverter implements BeanConverter {
       ParameterizedType genericListType
           = (ParameterizedType) method.getGenericParameterTypes()[0];
       Type[] types = genericListType.getActualTypeArguments();
-      Class<?> valueClass = (Class) types[1];
+      Class<?> valueClass = (Class<?>) types[1];
 
       // We only support keys being typed as Strings.
       // Nothing else really makes sense in json.
@@ -287,7 +288,7 @@ public class BeanJsonConverter implements BeanConverter {
     } else if (org.apache.shindig.social.opensocial.model.Enum.class
         .isAssignableFrom(expectedType)) {
       // TODO Need to stop using Enum as a class name :(
-      Class enumType = (Class) ((ParameterizedType) method.getGenericParameterTypes()[0])
+      Class<?> enumType = (Class<?>) ((ParameterizedType) method.getGenericParameterTypes()[0])
           .getActualTypeArguments()[0];
       // TODO This isnt injector friendly but perhaps implementors dont need it. If they do a
       // refactoring of the Enum handling in general is needed.
