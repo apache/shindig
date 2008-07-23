@@ -341,13 +341,6 @@ public class JsonDbOpensocialService implements ActivityService, PersonService, 
     // TODO: According to rest, yes there is. If a field is in the param list but not in the map
     // that means it is a delete
 
-    for (String key : values.keySet()) {
-      if (!isValidKey(key)) {
-        return ImmediateFuture.newInstance(new ResponseItem<Object>(ResponseError.BAD_REQUEST,
-            "The person data key had invalid characters", null));
-      }
-    }
-
     try {
       JSONObject personData = db.getJSONObject(DATA_TABLE).getJSONObject(userId.getUserId(token));
       if (personData == null) {
@@ -366,33 +359,7 @@ public class JsonDbOpensocialService implements ActivityService, PersonService, 
   }
 
   /**
-   * Determines whether the input is a valid key. Valid keys match the regular
-   * expression [\w\-\.]+. The logic is not done using java.util.regex.* as
-   * that is 20X slower.
-   *
-   * @param key the key to validate.
-   * @return true if the key is a valid appdata key, false otherwise.
-   */
-  public static boolean isValidKey(String key) {
-    if (key == null || key.length() == 0) {
-      return false;
-    }
-    for (int i = 0; i < key.length(); ++i) {
-      char c = key.charAt(i);
-      if ((c >= 'a' && c <= 'z')
-          || (c >= 'A' && c <= 'Z')
-          || (c >= '0' && c <= '9')
-          || (c == '-')
-          || (c == '_') || (c == '.')) {
-        continue;
-      }
-      return false;
-    }
-    return true;
-  }
-
-  /**
-   * Get the set of user id's from a user and group.
+   * Get the set of user id's from a user and group
    */
   private Set<String> getIdSet(UserId user, GroupId group, SecurityToken token)
       throws JSONException {

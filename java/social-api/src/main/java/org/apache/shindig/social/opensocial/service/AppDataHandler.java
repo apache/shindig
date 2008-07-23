@@ -17,12 +17,15 @@
  */
 package org.apache.shindig.social.opensocial.service;
 
+import org.apache.shindig.common.util.ImmediateFuture;
+import org.apache.shindig.social.ResponseError;
 import org.apache.shindig.social.ResponseItem;
 import org.apache.shindig.social.opensocial.spi.AppDataService;
 
 import com.google.inject.Inject;
 
 import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.Future;
 
 public class AppDataHandler extends DataRequestHandler {
@@ -85,9 +88,16 @@ public class AppDataHandler extends DataRequestHandler {
   protected Future<? extends ResponseItem> handlePost(RequestItem request) {
     request.parseUrlWithTemplate(APP_DATA_PATH);
 
+    Map<String, String> values = request.getPostData(HashMap.class);
+    for (String key : values.keySet()) {
+      if (!isValidKey(key)) {
+        return ImmediateFuture.newInstance(new ResponseItem<Object>(ResponseError.BAD_REQUEST,
+            "One or more of the app data keys are invalid: " + key, null));
+      }
+    }
+
     return service.updatePersonData(request.getUser(), request.getGroup(),
-        request.getAppId(), request.getFields(), request.getPostData(HashMap.class),
-        request.getToken());
+        request.getAppId(), request.getFields(), values, request.getToken());
   }
 
   /**
@@ -103,6 +113,33 @@ public class AppDataHandler extends DataRequestHandler {
 
     return service.getPersonData(request.getUser(), request.getGroup(),
         request.getAppId(), request.getFields(), request.getToken());
+  }
+
+  /**
+   * Determines whether the input is a valid key. Valid keys match the regular
+   * expression [\w\-\.]+. The logic is not done using java.util.regex.* as
+   * that is 20X slower.
+   *
+   * @param key the key to validate.
+   * @return true if the key is a valid appdata key, false otherwise.
+   */
+  public static boolean isValidKey(String key) {
+    if (key == null || key.length() == 0) {
+      return false;
+    }
+    for (int i = 0; i < key.length(); ++i) {
+      char c = key.charAt(i);
+      if ((c >= 'a' && c <= 'z') ||
+          (c >= 'A' && c <= 'Z') ||
+          (c >= '0' && c <= '9') ||
+          (c == '-') ||
+          (c == '_') ||
+          (c == '.')) {
+        continue;
+      }
+      return false;
+    }
+    return true;
   }
 
 }
