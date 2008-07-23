@@ -80,7 +80,8 @@ public class DataServiceServlet extends InjectedServlet {
   }
 
   @Inject
-  public void setBeanConverters(@Named("bean.converter.json") BeanConverter jsonConverter, @Named("bean.converter.xml") BeanConverter xmlConverter) {
+  public void setBeanConverters(@Named("bean.converter.json") BeanConverter jsonConverter, 
+    @Named("bean.converter.xml")  BeanConverter xmlConverter) {
     this.jsonConverter = jsonConverter;
     this.xmlConverter = xmlConverter;
   }
@@ -252,9 +253,10 @@ public class DataServiceServlet extends InjectedServlet {
   String getRouteFromParameter(String pathInfo) {
     pathInfo = pathInfo.substring(1);
     int indexOfNextPathSeparator = pathInfo.indexOf('/');
-    return indexOfNextPathSeparator != -1 ?
-        pathInfo.substring(0, indexOfNextPathSeparator) :
-        pathInfo;
+    if ( indexOfNextPathSeparator != -1 ) {
+      return pathInfo.substring(0, indexOfNextPathSeparator);
+    }
+    return pathInfo;
   }
 
   boolean isBatchUrl(HttpServletRequest servletRequest) {

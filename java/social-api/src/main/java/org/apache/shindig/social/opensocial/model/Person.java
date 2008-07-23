@@ -30,7 +30,7 @@ import java.util.Set;
  * see
  * http://code.google.com/apis/opensocial/docs/0.8/reference/#opensocial.Person.Field
  * for all field meanings. All fields are represented in the js api at this time except for
- * lastUpdated. This field is currently only in the RESTful spec. 
+ * lastUpdated. This field is currently only in the RESTful spec.
  *
  */
 
@@ -64,7 +64,7 @@ public interface Person {
     JOB_INTERESTS("jobInterests"),
     JOBS("jobs"),
     LANGUAGES_SPOKEN("languagesSpoken"),
-    LAST_UPDATED("updated"), /** Needed to support the RESTful api **/
+    LAST_UPDATED("updated"), /** Needed to support the RESTful api. **/
     LIVING_ARRANGEMENT("livingArrangement"),
     LOOKING_FOR("lookingFor"),
     MOVIES("movies"),

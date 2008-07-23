@@ -24,48 +24,58 @@ import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 
 /**
- *
+ * Some utility functions to simpilfy handling SF json-lib objects.
  */
 public class JsonLibConverterUtils {
-  protected static final Log log = LogFactory
-  .getLog(JsonLibConverterUtils.class);
-
-  
   /**
+   * This class is a utility class and can't be constructed.
+   */
+  private JsonLibConverterUtils() {
+  }
+
+  protected static final Log LOG = LogFactory.getLog(JsonLibConverterUtils.class);
+
+  /**
+   * Dumps a JSON Object out to the log at info level.
+   * 
    * @param jsonObject
+   *                The object to dump
+   * @param indent
+   *                the indent to be used per object nesting.
    */
   public static final void dumpJsonObject(JSONObject jsonObject, String indent) {
     for (Object key : jsonObject.keySet()) {
       Object value = jsonObject.get(key);
       if (value instanceof JSONObject) {
-        log.info(indent + key + ":JSONObject");
+        LOG.info(indent + key + ":JSONObject");
         dumpJsonObject((JSONObject) value, indent + "  ");
       } else if (value instanceof JSONArray) {
-        log.info(indent + key + ":JSONArray " + ((JSONArray) value).size());
+        LOG.info(indent + key + ":JSONArray " + ((JSONArray) value).size());
         dumpJsonArray((JSONArray) value, indent + "  ");
       } else {
-        log.info(indent + key + ":" + value + ":"
-            + (value == null ? "na" : value.getClass()));
+        if (value == null) {
+          LOG.info(indent + key + ":" + value + ":" + "na");
+        } else {
+          LOG.info(indent + key + ":" + value + ":" + value.getClass());
+        }
       }
     }
   }
 
-  
   /**
    * @param value
    * @param string
    */
-  static void dumpJsonArray(JSONArray array, String indent) {
+  public static void dumpJsonArray(JSONArray array, String indent) {
     for (Object value : array) {
       if (value instanceof JSONObject) {
-        log.info(indent + ":JSONObject");
+        LOG.info(indent + ":JSONObject");
         dumpJsonObject((JSONObject) value, indent + "  ");
       } else if (value instanceof JSONArray) {
-        log.info(indent + ":JSONArray " + ((JSONArray) value).size());
+        LOG.info(indent + ":JSONArray " + ((JSONArray) value).size());
         dumpJsonArray((JSONArray) value, indent + "  ");
       } else {
-        log.info(indent + ":" + value + ":"
-            + (value == null ? "na" : value.getClass()));
+        LOG.info(indent + ":" + value + ":" + (value == null ? "na" : value.getClass()));
       }
     }
   }

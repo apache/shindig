@@ -22,8 +22,6 @@ import org.apache.shindig.social.core.util.BeanConverter;
 import org.apache.shindig.social.opensocial.spi.GroupId;
 import org.apache.shindig.social.opensocial.spi.PersonService;
 import org.apache.shindig.social.opensocial.spi.UserId;
-import org.apache.shindig.social.opensocial.spi.PersonService.FilterType;
-import org.apache.shindig.social.opensocial.spi.PersonService.SortOrder;
 
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
@@ -114,7 +112,11 @@ public class RequestItem {
       String queryParams = fullUrl.substring(queryParamIndex + 1);
       for (String param : queryParams.split("&")) {
         String[] paramPieces = param.split("=", 2);
-        this.params.put(paramPieces[0], paramPieces.length == 2 ? paramPieces[1] : "");
+        if (paramPieces.length == 2) {
+          this.params.put(paramPieces[0], paramPieces[1]);
+        } else {
+          this.params.put(paramPieces[0], "");
+        }
       }
     }
   }

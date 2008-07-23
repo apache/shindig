@@ -46,19 +46,29 @@ import org.apache.shindig.social.opensocial.model.Organization;
 import org.apache.shindig.social.opensocial.model.Phone;
 import org.apache.shindig.social.opensocial.model.Url;
 
-
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 
 /**
- * 
+ * BeanConverter implementation us the net.sf.json-lib json library.
  */
 public class BeanJsonLibConverter implements BeanConverter {
 
-  protected static final Log log = LogFactory
-      .getLog(BeanJsonLibConverter.class);
+  /**
+   * The Logger
+   */
+  protected static final Log LOG = LogFactory.getLog(BeanJsonLibConverter.class);
+  /**
+   * The Guice injector used to create beans
+   */
   private Injector injector;
+  /**
+   * Json Config object used by each instance.
+   */
   private JsonConfig jsonConfig;
+  /**
+   * in IDE debug flag
+   */
   private boolean debugMode = false;
 
   /*
@@ -74,8 +84,7 @@ public class BeanJsonLibConverter implements BeanConverter {
     morpherRegistry.registerMorpher(new EnumMorpher(Enum.Drinker.class));
     morpherRegistry.registerMorpher(new EnumMorpher(Enum.Field.class));
     morpherRegistry.registerMorpher(new EnumMorpher(Enum.Gender.class));
-    morpherRegistry
-        .registerMorpher(new EnumMorpher(Enum.NetworkPresence.class));
+    morpherRegistry.registerMorpher(new EnumMorpher(Enum.NetworkPresence.class));
     morpherRegistry.registerMorpher(new EnumMorpher(Enum.Smoker.class));
 
     morpherRegistry.registerMorpher(new JsonObjectToMapMorpher());
@@ -90,7 +99,7 @@ public class BeanJsonLibConverter implements BeanConverter {
   @SuppressWarnings("unchecked")
   public <T> T convertToObject(String string, final Class<T> rootBeanClass) {
 
-    if ( "".equals(string) ) {
+    if ("".equals(string)) {
       string = "{}";
     }
     if (string.startsWith("[")) {
@@ -144,13 +153,12 @@ public class BeanJsonLibConverter implements BeanConverter {
       @SuppressWarnings("unchecked")
       @Override
       public Object newInstance(Class beanClass, JSONObject jsonObject)
-          throws InstantiationException, IllegalAccessException,
-          SecurityException, NoSuchMethodException, InvocationTargetException {
+          throws InstantiationException, IllegalAccessException, NoSuchMethodException,
+          InvocationTargetException {
         if (beanClass != null) {
           Object o = BeanJsonLibConverter.this.injector.getInstance(beanClass);
           if (debugMode) {
-            log.info("Created Object " + o + " for " + beanClass + " with ["
-                + jsonObject + "]");
+            LOG.info("Created Object " + o + " for " + beanClass + " with [" + jsonObject + "]");
           }
           return o;
         }
@@ -162,28 +170,27 @@ public class BeanJsonLibConverter implements BeanConverter {
     /*
      * We are expecting null for nulls
      */
-    jsonConfig.registerDefaultValueProcessor(String.class,
-        new DefaultValueProcessor() {
-          @SuppressWarnings("unchecked")
-          public Object getDefaultValue(Class target) {
-            return null;
-          }
-        });
-    
+    jsonConfig.registerDefaultValueProcessor(String.class, new DefaultValueProcessor() {
+      @SuppressWarnings("unchecked")
+      public Object getDefaultValue(Class target) {
+        return null;
+      }
+    });
+
     jsonConfig.setJsonPropertyFilter(new PropertyFilter() {
 
       public boolean apply(Object source, String name, Object value) {
         return filterProperty(source, name, value);
       }
-      
+
     });
-    
+
     jsonConfig.setJavaPropertyFilter(new PropertyFilter() {
 
       public boolean apply(Object source, String name, Object value) {
-        return filterProperty(source,name,value);
+        return filterProperty(source, name, value);
       }
-      
+
     });
 
     // the classMap deals with the basic json string to bean conversion
@@ -197,7 +204,7 @@ public class BeanJsonLibConverter implements BeanConverter {
      * there is a map could be selected on the basis of the root object. It
      * would be better to do this with generics, but this is good enough and
      * compact enough for the moment.
-     * 
+     *
      */
     //
     // activity
@@ -227,47 +234,53 @@ public class BeanJsonLibConverter implements BeanConverter {
   }
 
   /**
-   * @param source
-   * @param name
-   * @param value
-   * @return
+   * Filter the output of a property, if it should be emitted return false.
+   * @param source The object containing the value
+   * @param name the name of the key in the output structure
+   * @param value the value of the object
+   * @return true if the property should be filtered, false if not.
    */
   protected boolean filterProperty(Object source, String name, Object value) {
-    if ( value == null ) {
+    if (value == null) {
       return true;
     }
-    if ( value instanceof JSONArray ) {
+    if (value instanceof JSONArray) {
       JSONArray array = (JSONArray) value;
-      if ( array.size() == 0 ) {
+      if (array.size() == 0) {
         return true;
       }
     }
-    if ( value instanceof JSONObject ) {
+    if (value instanceof JSONObject) {
       JSONObject object = (JSONObject) value;
-      if ( object.isNullObject() || object.isEmpty()  ) {
+      if (object.isNullObject() || object.isEmpty()) {
         return true;
       }
     }
-    if ( value instanceof Collection) {
+    if (value instanceof Collection) {
       Collection<?> collection = (Collection<?>) value;
-      if ( collection.size() == 0  ) {
+      if (collection.size() == 0) {
         return true;
       }
     }
-    if ( value instanceof Object[] ) {
+    if (value instanceof Object[]) {
       Object[] oarray = (Object[]) value;
-      if ( oarray.length == 0 ) {
+      if (oarray.length == 0) {
         return true;
       }
     }
     return false;
   }
 
+  /**
+   * Convert the pojo to a json string representation.
+   * @param pojo the pojo to convert
+   * @return the json string representation of the pojo.
+   */
   public String convertToString(Object pojo) {
-    if ( "".equals(pojo) ) {
+    if ("".equals(pojo)) {
       return "{}";
     }
-    
+
     try {
       JSONObject jsonObject = JSONObject.fromObject(pojo, jsonConfig);
       return jsonObject.toString();
@@ -283,8 +296,9 @@ public class BeanJsonLibConverter implements BeanConverter {
   }
 
   /**
-   * @param string
-   * @param class1
+   * Add a mapping to the json -> pojo conversion map.
+   * @param key the name of the json key to bind to
+   * @param class1 the class that should be used to represent that key
    */
   @SuppressWarnings("unchecked")
   public void addMapping(String key, Class<?> class1) {

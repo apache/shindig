@@ -52,7 +52,7 @@ public interface Enum<E extends Enum.EnumKey> {
   }
 
   /**
-   * public java.lang.Enum for opensocial.Enum.Drinker
+   * public java.lang.Enum for opensocial.Enum.Drinker.
    */
   public enum Drinker implements EnumKey {
     HEAVILY("HEAVILY", "Heavily"),
@@ -83,7 +83,7 @@ public interface Enum<E extends Enum.EnumKey> {
   }
 
   /**
-   * public java.lang.Enum for opensocial.Enum.Gender
+   * public java.lang.Enum for opensocial.Enum.Gender.
    */
   public enum Gender implements EnumKey {
     FEMALE("FEMALE", "Female"),
@@ -108,7 +108,7 @@ public interface Enum<E extends Enum.EnumKey> {
   }
 
   /**
-   * public java.lang.Enum for opensocial.Enum.Smoker
+   * public java.lang.Enum for opensocial.Enum.Smoker.
    */
   public enum Smoker implements EnumKey {
     HEAVILY("HEAVILY", "Heavily"),
@@ -139,7 +139,7 @@ public interface Enum<E extends Enum.EnumKey> {
   }
 
   /**
-   * public java.lang.Enum for opensocial.Enum.NetworkPresence
+   * public java.lang.Enum for opensocial.Enum.NetworkPresence.
    */
   public enum NetworkPresence implements EnumKey {
     ONLINE("ONLINE", "Online"),

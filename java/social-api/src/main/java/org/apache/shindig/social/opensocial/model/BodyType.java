@@ -43,7 +43,7 @@ public interface BodyType {
       return this.jsonString;
     }
   }
-  
+
   String getBuild();
 
   void setBuild(String build);

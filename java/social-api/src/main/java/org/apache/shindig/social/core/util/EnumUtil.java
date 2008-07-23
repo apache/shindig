@@ -24,10 +24,16 @@ import java.util.Collections;
 import java.util.Set;
 
 /**
- * Utility class for OpenSocial enums
+ * Utility class for OpenSocial enums.
  */
-public class EnumUtil {
+public final class EnumUtil {
 
+  /**
+   * This is a utility class and can't be constructed.
+   */
+  private EnumUtil() {
+
+  }
   /**
    * @param vals array of enums
    * @return a set of the names for a list of Enum values defined by toString

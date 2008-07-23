@@ -26,8 +26,8 @@ public class UserId {
     viewer, owner, userId
   }
 
-  Type type;
-  String userId;
+  private Type type;
+  private String userId;
 
   public UserId(Type type, String userId) {
     this.type = type;

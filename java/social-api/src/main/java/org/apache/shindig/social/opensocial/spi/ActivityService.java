@@ -27,8 +27,11 @@ import com.google.inject.ImplementedBy;
 import java.util.Set;
 import java.util.concurrent.Future;
 
+/**
+ * The ActivityService interface defines the service provider interface to
+ * retrieve activities from the underlying SNS.
+ */
 @ImplementedBy(JsonDbOpensocialService.class)
-
 public interface ActivityService {
 
   /**
@@ -41,7 +44,7 @@ public interface ActivityService {
    * @param token A valid SecurityToken
    * @return a response item with the list of activities.
    */
-  public Future<ResponseItem<RestfulCollection<Activity>>> getActivities(UserId userId,
+   Future<ResponseItem<RestfulCollection<Activity>>> getActivities(UserId userId,
       GroupId groupId, String appId, Set<String> fields, SecurityToken token);
 
   /**
@@ -56,7 +59,7 @@ public interface ActivityService {
    * @param token A valid SecurityToken
    * @return a response item with the list of activities.
    */
-  public Future<ResponseItem<Activity>> getActivity(UserId userId, GroupId groupId, String appId,
+   Future<ResponseItem<Activity>> getActivity(UserId userId, GroupId groupId, String appId,
       Set<String> fields, String activityId, SecurityToken token);
 
   /**
@@ -70,7 +73,7 @@ public interface ActivityService {
    * @param token A valid SecurityToken.
    * @return a response item containing any errors
    */
-  public Future<ResponseItem<Object>> deleteActivity(UserId userId, GroupId groupId, String appId,
+   Future<ResponseItem<Object>> deleteActivity(UserId userId, GroupId groupId, String appId,
       String activityId, SecurityToken token);
 
   /**
@@ -85,6 +88,6 @@ public interface ActivityService {
    * @param token A valid SecurityToken
    * @return a response item containing any errors
    */
-  public Future<ResponseItem<Object>> createActivity(UserId userId, GroupId groupId, String appId,
+   Future<ResponseItem<Object>> createActivity(UserId userId, GroupId groupId, String appId,
       Set<String> fields, Activity activity, SecurityToken token);
 }

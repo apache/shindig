@@ -40,7 +40,7 @@ import net.oauth.OAuthValidator;
 import net.oauth.SimpleOAuthValidator;
 
 /**
- * Provides social api component injection
+ * Provides social api component injection.
  */
 public class SocialApiGuiceModule extends AbstractModule {
 
@@ -68,8 +68,10 @@ public class SocialApiGuiceModule extends AbstractModule {
         .to(BasicOAuthConsumerStore.class).in(Scopes.SINGLETON);
     bind(OAuthTokenPrincipalMapper.class)
         .to(BasicOAuthTokenPrincipalMapper.class).in(Scopes.SINGLETON);
-    bind(BeanConverter.class).annotatedWith(Names.named("bean.converter.xml")).to(BeanXmlConverter.class);
-    bind(BeanConverter.class).annotatedWith(Names.named("bean.converter.json")).to(BeanJsonConverter.class);
+    bind(BeanConverter.class).annotatedWith(Names.named("bean.converter.xml")).to(
+        BeanXmlConverter.class);
+    bind(BeanConverter.class).annotatedWith(Names.named("bean.converter.json")).to(
+        BeanJsonConverter.class);
   }
 
 }

@@ -30,7 +30,8 @@ public class ActivityHandler extends DataRequestHandler {
 
   // TODO: The appId should come from the url. The spec needs to be fixed!
   private static final String ACTIVITY_ID_PATH = "/activities/{userId}/{groupId}/{activityId}";
-  private static final String GROUP_PATH = "/activities/{userId}/{groupId}/{appId}"; // Note: not what the spec says
+  // Note: not what the spec says
+  private static final String GROUP_PATH = "/activities/{userId}/{groupId}/{appId}"; 
 
   @Inject
   public ActivityHandler(ActivityService service) {

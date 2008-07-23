@@ -19,7 +19,7 @@ package org.apache.shindig.social;
 
 /**
  * Represents the response items that get handed back as json within the
- * DataResponse
+ * DataResponse.
  */
 public class ResponseItem<T> {
   private ResponseError error;

@@ -61,8 +61,8 @@ public class BeanXmlConverter implements BeanConverter {
     } finally {
       try {
         writer.close();
-      } catch(IOException e) {
-        // ignore this exception. it won't matter
+      } catch (IOException e) {
+        logger.log(Level.FINEST, e.getMessage(), e);
       }
     }
 

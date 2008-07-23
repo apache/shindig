@@ -45,21 +45,21 @@ public class SampleContainerHandler extends DataRequestHandler {
   }
 
   /**
-   * We don't support any delete methods right now
+   * We don't support any delete methods right now.
    */
   protected Future<? extends ResponseItem> handleDelete(RequestItem request) {
     throw new UnsupportedOperationException();
   }
 
   /**
-   * We don't distinguish between put and post for these urls
+   * We don't distinguish between put and post for these urls.
    */
   protected Future<? extends ResponseItem> handlePut(RequestItem request) {
     return handlePost(request);
   }
 
   /**
-   * Handles /samplecontainer/setstate and /samplecontainer/setevilness/{doevil}
+   * Handles /samplecontainer/setstate and /samplecontainer/setevilness/{doevil}.
    * TODO(doll): These urls aren't very resty. Consider changing the samplecontainer.html calls
    * post.
    */

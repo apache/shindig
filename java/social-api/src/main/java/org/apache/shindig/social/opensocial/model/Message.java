@@ -87,20 +87,20 @@ public interface Message {
   void setBody(String newBody);
 
   /**
-   * Gets the title of the message
+   * Gets the title of the message.
    * @return the title of the message
    */
   String getTitle();
 
   /**
-   * Sets the title of the message
+   * Sets the title of the message.
    * HTML attributes are allowed and are sanitized by the container.
    * @param newTitle the title of the message
    */
   void setTitle(String newTitle);
 
   /**
-   * Gets the type of the message, as specified by opensocial.Message.Type
+   * Gets the type of the message, as specified by opensocial.Message.Type.
    * @return the type of message (enum Message.Type)
    */
   Type getType();
