@@ -17,6 +17,8 @@
  */
 package org.apache.shindig.social.opensocial.model;
 
+import org.apache.shindig.social.core.model.BodyTypeImpl;
+
 import com.google.inject.ImplementedBy;
 
 @ImplementedBy(BodyTypeImpl.class)

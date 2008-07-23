@@ -17,8 +17,8 @@
  */
 package org.apache.shindig.social.dataservice.integration;
 
+import org.apache.shindig.social.core.model.ActivityImpl;
 import org.apache.shindig.social.opensocial.model.Activity;
-import org.apache.shindig.social.opensocial.model.ActivityImpl;
 
 import org.json.JSONArray;
 import org.json.JSONException;

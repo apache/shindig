@@ -17,6 +17,8 @@
  */
 package org.apache.shindig.social.opensocial.model;
 
+import org.apache.shindig.social.core.model.ActivityImpl;
+
 import com.google.inject.ImplementedBy;
 import java.util.Date;
 import java.util.List;
