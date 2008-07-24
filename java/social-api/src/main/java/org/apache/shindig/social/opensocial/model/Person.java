@@ -18,7 +18,6 @@
 package org.apache.shindig.social.opensocial.model;
 
 import org.apache.shindig.social.core.model.PersonImpl;
-import org.apache.shindig.social.core.util.EnumUtil;
 
 import com.google.inject.ImplementedBy;
 

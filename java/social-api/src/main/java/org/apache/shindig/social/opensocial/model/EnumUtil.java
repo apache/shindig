@@ -16,7 +16,8 @@
  * specific language governing permissions and limitations under the License.
  */
 
-package org.apache.shindig.social.core.util;
+package org.apache.shindig.social.opensocial.model;
+
 
 import com.google.common.collect.Sets;
 
@@ -35,12 +36,14 @@ public final class EnumUtil {
 
   }
   /**
+   *
    * @param vals array of enums
    * @return a set of the names for a list of Enum values defined by toString
    */
-  public static Set<String> getEnumStrings(Enum... vals) {
+  // TODO: Because we have a Enum interface in this package we have to explicitly state the java.lang.Enum (bad ?)
+  public static Set<String> getEnumStrings(java.lang.Enum<?>... vals) {
     Set<String> result = Sets.newHashSet();
-    for (Enum v : vals) {
+    for (java.lang.Enum<?> v : vals) {
       result.add(v.toString());
     }
     if (result.size() != vals.length) {
