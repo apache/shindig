@@ -18,6 +18,7 @@
 package org.apache.shindig.social.core.oauth;
 
 import org.apache.shindig.common.SecurityToken;
+import org.apache.shindig.social.opensocial.oauth.DelegatedPrincipal;
 
 public class GadgetSecurityTokenPrincipal extends DelegatedPrincipal {
 

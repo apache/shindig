@@ -15,7 +15,7 @@
  * KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-package org.apache.shindig.social.core.oauth;
+package org.apache.shindig.social.opensocial.oauth;
 
 import java.security.Principal;
 

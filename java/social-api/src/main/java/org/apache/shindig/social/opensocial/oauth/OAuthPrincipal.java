@@ -17,7 +17,6 @@
  */
 package org.apache.shindig.social.opensocial.oauth;
 
-import org.apache.shindig.social.core.oauth.DelegatedPrincipal;
 
 import net.oauth.OAuthMessage;
 

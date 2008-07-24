@@ -21,6 +21,7 @@ import org.apache.shindig.common.SecurityToken;
 import org.apache.shindig.common.SecurityTokenDecoder;
 import org.apache.shindig.common.SecurityTokenException;
 import org.apache.shindig.common.servlet.GuiceServletContextListener;
+import org.apache.shindig.social.opensocial.oauth.DelegatedPrincipal;
 import org.apache.shindig.social.opensocial.oauth.OAuthConsumerStore;
 import org.apache.shindig.social.opensocial.oauth.OAuthTokenPrincipalMapper;
 import org.apache.shindig.social.opensocial.oauth.OAuthTokenStore;

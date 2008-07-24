@@ -17,6 +17,8 @@
  */
 package org.apache.shindig.social.core.oauth;
 
+import org.apache.shindig.social.opensocial.oauth.DelegatedPrincipal;
+
 public class RequestorIdPrincipal extends DelegatedPrincipal {
 
   private String container;
