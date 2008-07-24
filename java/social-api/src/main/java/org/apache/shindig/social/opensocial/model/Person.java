@@ -1044,21 +1044,24 @@ public interface Person {
   void setUrls(List<Url> urls);
 
   /**
-   * @return true if the person accessing this object is the owner.
+   * @return true if this person object represents the owner of the current page.
    */
   boolean getIsOwner();
 
   /**
+   * Set the owner flag.
    * @param isOwner the isOwnerflag
    */
   void setIsOwner(boolean isOwner);
 
   /**
+   * Returns true if this person object represents the currently logged in user.
    * @return true if the person accessing this object is a viewer.
    */
   boolean getIsViewer();
 
   /**
+   * Returns true if this person object represents the currently logged in user.
    * @param isViewer the isViewer Flag
    */
   void setIsViewer(boolean isViewer);

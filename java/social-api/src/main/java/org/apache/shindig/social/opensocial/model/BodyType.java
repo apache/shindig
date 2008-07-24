@@ -21,46 +21,131 @@ import org.apache.shindig.social.core.model.BodyTypeImpl;
 
 import com.google.inject.ImplementedBy;
 
+/**
+ * Base interface for all body type objects. see
+ * http://code.google.com/apis/opensocial/docs/0.8/reference/#opensocial.BodyType.Field_field_detail
+ *
+ */
 @ImplementedBy(BodyTypeImpl.class)
-
 public interface BodyType {
 
+  /**
+   * The fields that represent the person object ion json form.
+   */
   public static enum Field {
+    /** the json field for build. */
     BUILD("build"),
+    /** the json field for build. */
     EYE_COLOR("eyeColor"),
+    /** the json field for hairColor. */
     HAIR_COLOR("hairColor"),
+    /** the json field for height. */
     HEIGHT("height"),
+    /** the json field for weight. */
     WEIGHT("weight");
 
+    /**
+     * The json field that the instance represents.
+     */
     private final String jsonString;
 
+    /**
+     * create a field base on the a json element.
+     *
+     * @param jsonString the name of the element
+     */
     private Field(String jsonString) {
       this.jsonString = jsonString;
     }
 
+    /**
+     * emit the field as a json element.
+     *
+     * @return the field name
+     */
     @Override
     public String toString() {
       return this.jsonString;
     }
   }
 
+  /**
+   * The build of the person's body, specified as a string. Container support for this field is
+   * OPTIONAL.
+   *
+   * @return the build of the person's body
+   */
   String getBuild();
 
+  /**
+   * The build of the person's body, specified as a string. Container support for this field is
+   * OPTIONAL.
+   *
+   * @param build the build of the person's body
+   */
   void setBuild(String build);
 
+  /**
+   * The eye color of the person, specified as a string. Container support for this field is
+   * OPTIONAL.
+   *
+   * @return the eye color of the person
+   */
   String getEyeColor();
 
+  /**
+   * The eye color of the person, specified as a string. Container support for this field is
+   * OPTIONAL.
+   *
+   * @param eyeColor the eye color of the person
+   */
   void setEyeColor(String eyeColor);
 
+  /**
+   * The hair color of the person, specified as a string. Container support for this field is
+   * OPTIONAL.
+   *
+   * @return the hair color of the person
+   */
   String getHairColor();
 
+  /**
+   * The hair color of the person, specified as a string. Container support for this field is
+   * OPTIONAL.
+   *
+   * @param hairColor the hair color of the person
+   */
   void setHairColor(String hairColor);
 
+  /**
+   * The height of the person in meters, specified as a number. Container support for this field is
+   * OPTIONAL.
+   *
+   * @return the height of the person in meters
+   */
   String getHeight();
 
+  /**
+   * The height of the person in meters, specified as a number. Container support for this field is
+   * OPTIONAL.
+   *
+   * @param height the height of the person in meters
+   */
   void setHeight(String height);
 
+  /**
+   * The weight of the person in kilograms, specified as a number. Container support for this field
+   * is OPTIONAL.
+   *
+   * @return the weight of the person in kilograms
+   */
   String getWeight();
 
+  /**
+   * The weight of the person in kilograms, specified as a number. Container support for this field
+   * is OPTIONAL.
+   *
+   * @param weight weight of the person in kilograms
+   */
   void setWeight(String weight);
 }
