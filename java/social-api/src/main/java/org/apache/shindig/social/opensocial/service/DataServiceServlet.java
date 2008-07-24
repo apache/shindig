@@ -24,7 +24,6 @@ import org.apache.shindig.common.servlet.InjectedServlet;
 import org.apache.shindig.common.servlet.ParameterFetcher;
 import org.apache.shindig.social.ResponseItem;
 import org.apache.shindig.social.ResponseError;
-import org.apache.shindig.social.core.util.BeanConverter;
 
 import com.google.common.collect.Maps;
 import com.google.inject.Inject;

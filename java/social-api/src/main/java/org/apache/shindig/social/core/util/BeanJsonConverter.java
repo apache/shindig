@@ -25,6 +25,7 @@ import com.google.inject.Injector;
 
 import org.apache.shindig.social.core.model.EnumImpl;
 import org.apache.shindig.social.opensocial.model.Enum;
+import org.apache.shindig.social.opensocial.service.BeanConverter;
 
 import org.joda.time.DateTime;
 import org.json.JSONArray;

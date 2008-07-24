@@ -23,9 +23,9 @@ import org.apache.shindig.common.util.ImmediateFuture;
 import org.apache.shindig.common.util.ResourceLoader;
 import org.apache.shindig.social.ResponseError;
 import org.apache.shindig.social.ResponseItem;
-import org.apache.shindig.social.core.util.BeanJsonConverter;
 import org.apache.shindig.social.opensocial.model.Activity;
 import org.apache.shindig.social.opensocial.model.Person;
+import org.apache.shindig.social.opensocial.service.BeanConverter;
 import org.apache.shindig.social.opensocial.spi.ActivityService;
 import org.apache.shindig.social.opensocial.spi.AppDataService;
 import org.apache.shindig.social.opensocial.spi.DataCollection;
@@ -75,7 +75,7 @@ public class JsonDbOpensocialService implements ActivityService, PersonService, 
   /**
    * The JSON<->Bean converter
    */
-  private BeanJsonConverter converter;
+  private BeanConverter converter;
 
   /**
    * db["activities"] -> Array<Person>
@@ -99,7 +99,7 @@ public class JsonDbOpensocialService implements ActivityService, PersonService, 
 
   @Inject
   public JsonDbOpensocialService(@Named("canonical.json.db")String jsonLocation,
-      BeanJsonConverter converter) throws Exception {
+      @Named("bean.converter.json") BeanConverter converter) throws Exception {
     String content = IOUtils.toString(ResourceLoader.openResource(jsonLocation), "UTF-8");
     this.db = new JSONObject(content);
     this.converter = converter;

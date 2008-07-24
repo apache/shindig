@@ -19,6 +19,9 @@
 package org.apache.shindig.social;
 
 import org.apache.shindig.common.servlet.ParameterFetcher;
+import org.apache.shindig.social.core.util.BeanJsonConverter;
+import org.apache.shindig.social.core.util.BeanXmlConverter;
+import org.apache.shindig.social.opensocial.service.BeanConverter;
 import org.apache.shindig.social.opensocial.service.DataServiceServletFetcher;
 
 import com.google.inject.AbstractModule;
@@ -36,5 +39,11 @@ public class SocialApiTestsGuiceModule extends AbstractModule {
 
     bind(String.class).annotatedWith(Names.named("canonical.json.db"))
         .toInstance("sampledata/canonicaldb.json");
+    
+    bind(BeanConverter.class).annotatedWith(Names.named("bean.converter.xml")).to(
+        BeanXmlConverter.class);
+    bind(BeanConverter.class).annotatedWith(Names.named("bean.converter.json")).to(
+        BeanJsonConverter.class);
+
   }
 }
