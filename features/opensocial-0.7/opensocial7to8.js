@@ -42,7 +42,7 @@ opensocial.ResponseItem.prototype.getDataOld
     = opensocial.ResponseItem.prototype.getData;
 opensocial.ResponseItem.prototype.getData = function() {
   var oldData = this.getDataOld();
-  if (this.getOriginalDataRequest().isActivityRequest) {
+  if (this.getOriginalDataRequest() && this.getOriginalDataRequest().isActivityRequest) {
     // The fetch activities request used to have an extra pointer to
     // the activities
     return {'activities' : oldData};
