@@ -24,7 +24,6 @@ import org.apache.shindig.common.util.ImmediateFuture;
 import org.apache.shindig.common.testing.FakeGadgetToken;
 import org.apache.shindig.social.ResponseItem;
 import org.apache.shindig.social.SocialApiTestsGuiceModule;
-import org.apache.shindig.social.core.util.BeanConverter;
 import org.apache.shindig.social.core.util.BeanJsonConverter;
 import org.apache.shindig.social.core.util.BeanXmlConverter;
 import org.apache.shindig.social.opensocial.service.ActivityHandler;

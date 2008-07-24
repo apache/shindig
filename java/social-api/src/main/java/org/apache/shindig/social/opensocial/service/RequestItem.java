@@ -18,7 +18,6 @@
 package org.apache.shindig.social.opensocial.service;
 
 import org.apache.shindig.common.SecurityToken;
-import org.apache.shindig.social.core.util.BeanConverter;
 import org.apache.shindig.social.opensocial.spi.GroupId;
 import org.apache.shindig.social.opensocial.spi.PersonService;
 import org.apache.shindig.social.opensocial.spi.UserId;

@@ -17,6 +17,8 @@
  */
 package org.apache.shindig.social.core.util;
 
+import org.apache.shindig.social.opensocial.service.BeanConverter;
+
 import org.apache.commons.betwixt.io.BeanReader;
 import org.apache.commons.betwixt.io.BeanWriter;
 import org.xml.sax.SAXException;

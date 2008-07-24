@@ -17,6 +17,8 @@
  */
 package org.apache.shindig.social.core.util;
 
+import org.apache.shindig.social.opensocial.service.BeanConverter;
+
 import net.sf.json.JSONArray;
 import net.sf.json.JSONException;
 import net.sf.json.JSONObject;
