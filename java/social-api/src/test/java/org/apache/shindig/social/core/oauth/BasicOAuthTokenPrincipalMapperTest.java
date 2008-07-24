@@ -18,7 +18,7 @@
 package org.apache.shindig.social.core.oauth;
 
 import org.apache.shindig.social.core.oauth.BasicOAuthTokenPrincipalMapper;
-import org.apache.shindig.social.core.oauth.DelegatedPrincipal;
+import org.apache.shindig.social.opensocial.oauth.DelegatedPrincipal;
 
 import junit.framework.TestCase;
 
