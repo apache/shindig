@@ -17,6 +17,8 @@
  * under the License.
  */
 
+var tests;
+
 function assertTrue(msg, value) {
   if (!value) {
     throw "assertTrue() failed: " + msg;
@@ -37,11 +39,11 @@ function assertEquals(msg, a, b) {
 }
 
 /**
- * Signals the server code that the test successfully finished.  This
- * method must be called to verify that the test completed successfully,
+ * Signals the server code that a test successfully finished.  This
+ * method must be called to verify that a test completed successfully,
  * instead of simply failing to load.
  */
-function testFinished() {
+function finished() {
   alert("FINISHED");
 }
 
@@ -53,13 +55,28 @@ function executeTest() {
     throw "No testMethod parameter found.";
   }
 
-  var testMethodFunction = window[testMethod];
-  if (!testMethodFunction) {
-    throw "Test method " + testMethod + " not found.";
-  }
+  // "all": run all the tests
+  if ("all" == testMethod) {
+    allTests();
+  } else {
+    // Show an alert for the test method name, identifying what test started.
+    alert(testMethod);
 
-  // Execute the test method
-  testMethodFunction();
+    var testMethodFunction = tests[testMethod];
+    if (!testMethodFunction) {
+      throw "Test method " + testMethod + " not found.";
+    }
+
+    // Execute the test method
+    testMethodFunction();
+  }
+}
+
+function allTests() {
+  for (var testMethod in tests) {
+    alert(testMethod);
+    tests[testMethod]();
+  }
 }
 
 gadgets.util.registerOnLoadHandler(executeTest);

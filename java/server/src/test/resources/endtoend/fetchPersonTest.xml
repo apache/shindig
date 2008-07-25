@@ -26,61 +26,86 @@
     <![CDATA[
       <script type="text/javascript" src="testframework.js"></script>
       <script type="text/javascript">
+        var tests = {
+          /** Test fetching a specific ID */
+          fetchId: function() {
+            var req = opensocial.newDataRequest();
 
-        /** Test fetching a specific ID */
-        function fetchId() {
-          var req = opensocial.newDataRequest();
+            // Request the "canonical" viewer
+            req.add(req.newFetchPersonRequest("canonical"), "canonical");
 
-          // Request the "canonical" viewer
-          req.add(req.newFetchPersonRequest("canonical"), "canonical");
-            
-          function receivedData(response) {
-            var user = getAndCheckError(response, "canonical");
-            assertEquals("Names don't match",
-              "Sir Shin H. Digg Social Butterfly", user.getDisplayName());
-            testFinished();
+            function receivedData(response) {
+              var user = getAndCheckError(response, "canonical");
+              assertEquals("Names don't match",
+                "Sir Shin H. Digg Social Butterfly", user.getDisplayName());
+              finished();
+            }
+
+            // Send the request
+            req.send(receivedData);
+          },
+
+          /** Test fetching the owner, which should be "canonical" */
+          fetchOwner: function() {
+            var req = opensocial.newDataRequest();
+
+            // Request the "canonical" viewer
+            req.add(req.newFetchPersonRequest(opensocial.IdSpec.PersonId.OWNER), "owner");
+
+            function receivedData(response) {
+              var user = getAndCheckError(response, "owner");
+              assertEquals("Names don't match",
+                "Sir Shin H. Digg Social Butterfly", user.getDisplayName());
+              finished();
+            }
+
+            // Send the request
+            req.send(receivedData);
+          },
+
+          /** Test fetching the viewer, which should be "john.doe" */
+          fetchViewer: function() {
+            var req = opensocial.newDataRequest();
+
+            // Request the "canonical" viewer
+            req.add(req.newFetchPersonRequest(opensocial.IdSpec.PersonId.VIEWER), "viewer");
+
+            function receivedData(response) {
+              var user = getAndCheckError(response, "viewer");
+              assertEquals("Names don't match",
+                "John Doe", user.getDisplayName());
+
+              finished();
+            }
+
+            // Send the request
+            req.send(receivedData);
+          },
+
+          /** Test fetching the owner and viewer as a batch */
+          fetchOwnerAndViewer: function() {
+            var req = opensocial.newDataRequest();
+
+            // Request the "canonical" viewer
+            req.add(req.newFetchPersonRequest(opensocial.IdSpec.PersonId.OWNER), "owner");
+            req.add(req.newFetchPersonRequest(opensocial.IdSpec.PersonId.VIEWER), "viewer");
+
+            function receivedData(response) {
+              var user = getAndCheckError(response, "owner");
+              assertEquals("Names don't match",
+                "Sir Shin H. Digg Social Butterfly", user.getDisplayName());
+
+              user = getAndCheckError(response, "viewer");
+              assertEquals("Names don't match",
+                "John Doe", user.getDisplayName());
+              finished();
+            }
+
+            // Send the request
+            req.send(receivedData);
           }
-
-          // Send the request
-          req.send(receivedData);
-        }
-
-        /** Test fetching the owner, which should be "canonical" */
-        function fetchOwner() {
-          var req = opensocial.newDataRequest();
-
-          // Request the "canonical" viewer
-          req.add(req.newFetchPersonRequest(opensocial.IdSpec.PersonId.OWNER), "owner");
-
-          function receivedData(response) {
-            var user = getAndCheckError(response, "owner");
-            assertEquals("Names don't match",
-              "Sir Shin H. Digg Social Butterfly", user.getDisplayName());
-            testFinished();
-          }
-
-          // Send the request
-          req.send(receivedData);
-        }
-
-        /** Test fetching the viewer, which should be "john.doe" */
-        function fetchViewer() {
-          var req = opensocial.newDataRequest();
-
-          // Request the "canonical" viewer
-          req.add(req.newFetchPersonRequest(opensocial.IdSpec.PersonId.VIEWER), "viewer");
-
-          function receivedData(response) {
-            var user = getAndCheckError(response, "viewer");
-            assertEquals("Names don't match",
-              "John Doe", user.getDisplayName());
-
-            testFinished();
-          }
-
-          // Send the request
-          req.send(receivedData);
-        }
+        };
+        
 
         function getAndCheckError(response, key) {
           assertFalse("Data error", response.hadError());
