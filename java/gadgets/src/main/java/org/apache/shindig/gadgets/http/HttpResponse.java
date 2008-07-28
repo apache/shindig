@@ -338,6 +338,7 @@ public class HttpResponse {
   public void setNoCache() {
     this.headers.put("Cache-Control", Lists.newArrayList("no-cache"));
     this.headers.put("Pragma", Lists.newArrayList("no-cache"));
+    this.headers.remove("Expires");
   }
 
   /**

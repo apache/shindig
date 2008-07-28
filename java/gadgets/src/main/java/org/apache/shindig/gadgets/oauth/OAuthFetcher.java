@@ -146,7 +146,8 @@ public class OAuthFetcher extends ChainedContentFetcher {
   private final boolean bypassSpecCache;
   
   /**
-   * HTTP cache.
+   * Cache for HTTP responses, probably shared across multiple different
+   * fetchers.
    */
   private HttpCache cache;
 

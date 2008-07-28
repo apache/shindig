@@ -256,6 +256,16 @@ public class HttpResponseTest extends TestCase {
     assertEquals(-1, response.getCacheTtl());
   }
 
+  public void testSetNoCache() {
+    int time = roundToSeconds(System.currentTimeMillis());
+    addHeader("Expires", DateUtil.formatDate(1000L * time));
+    HttpResponse response = new HttpResponse(200, null, headers);
+    response.setNoCache();
+    assertNull(response.getHeader("Expires"));
+    assertEquals("no-cache", response.getHeader("Pragma"));
+    assertEquals("no-cache", response.getHeader("Cache-Control"));
+  }
+
   public void testNullHeaderNamesStripped() {
     addHeader(null, "dummy");
     HttpResponse response = new HttpResponse(200, null, headers);
