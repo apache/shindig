@@ -291,7 +291,7 @@ RestfulContainer.prototype.newRemovePersonAppDataRequest = function(id, keys) {
 RestfulContainer.prototype.newFetchActivitiesRequest = function(idSpec,
     opt_params) {
   var url = "/activities/" + this.translateIdSpec(idSpec)
-      + "?app=@app"; // TODO: Handle appId correctly
+      + "?appId=@app"; // TODO: Handle appId correctly
   return new RestfulRequestItem(url, "GET", null,
       function(rawJson) {
         rawJson = rawJson['entry'];
