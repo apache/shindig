@@ -32,7 +32,6 @@ shindig.samplecontainer = {};
 
 (function(){
 
-
   /**
    * Private Variables
   */
@@ -60,12 +59,12 @@ shindig.samplecontainer = {};
   var ownerId = "john.doe";
 
   /**
-  * Public Variables
-  */
+   * Public Variables
+   */
 
   /**
-  * Private Functions
-  */
+   * Private Functions
+   */
 
   function generateSecureToken() {
     // TODO: Use a less silly mechanism of mapping a gadget URL to an appid
@@ -98,7 +97,7 @@ shindig.samplecontainer = {};
     }
     return params;
   };
-  
+
   gadgets.container.gadgetClass = SampleContainerGadget;
 
   function setEvilBit() {
@@ -118,9 +117,9 @@ shindig.samplecontainer = {};
     var makeRequestParams = {
       "CONTENT_TYPE" : "JSON",
       "METHOD" : method,
-      "POST_DATA" : encodeValues(opt_postParams)};
+      "POST_DATA" : gadgets.io.encodeValues(opt_postParams)};
 
-    makeRequest(socialDataPath + url + "?st=" + gadget.secureToken,
+    gadgets.io.makeNonProxiedRequest(socialDataPath + url + "?st=" + gadget.secureToken,
       function(data) {
         data = data.data;
         if (opt_callback) {
@@ -131,75 +130,9 @@ shindig.samplecontainer = {};
     );
   };
 
-
-  // Xhr stuff that is copied from io.js.
-  // TODO: We should really get rid of the duplication
-  function makeXhr() {
-    if (window.XMLHttpRequest) {
-      return new XMLHttpRequest();
-    } else if (window.ActiveXObject) {
-      var x = new ActiveXObject("Msxml2.XMLHTTP");
-      if (!x) {
-          x = new ActiveXObject("Microsoft.XMLHTTP");
-      }
-      return x;
-    }
-  };
-
-  function processResponse(url, callback, params, xobj) {
-    if (xobj.readyState !== 4) {
-      return;
-    }
-    if (xobj.status !== 200) {
-      callback({errors : ["Error " + xobj.status] });
-      return;
-    }
-    var txt = xobj.responseText;
-
-    // We are using eval directly here because the outer response comes from a
-    // trusted source, and json parsing is slow in IE.
-    var data = txt ? eval("(" + txt + ")") : "";
-    var resp = {
-      data: data
-    };
-
-    callback(resp);
-  };
-
-  function makeRequest(url, callback, params) {
-    var xhr = makeXhr();
-    xhr.open(params.METHOD, url, true);
-    xhr.onreadystatechange = gadgets.util.makeClosure(
-        null, processResponse, url, callback, params, xhr);
-    xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
-    if (params.METHOD == 'POST') {
-      xhr.send(params.POST_DATA);
-    } else {
-      xhr.send();
-    }
-  };
-
-  function encodeValues(fields, opt_noEscaping) {
-    var escape = !opt_noEscaping;
-
-    var buf = [];
-    var first = false;
-    for (var i in fields) if (fields.hasOwnProperty(i)) {
-      if (!first) {
-          first = true;
-      } else {
-          buf.push("&");
-      }
-      buf.push(escape ? encodeURIComponent(i) : i);
-      buf.push("=");
-      buf.push(escape ? encodeURIComponent(fields[i]) : fields[i]);
-    }
-    return buf.join("");
-  };
-  
   /**
-  * Public Functions
-  */  
+   * Public Functions
+   */
 
   shindig.samplecontainer.initGadget = function() {
     // Fetch cookies
@@ -221,7 +154,7 @@ shindig.samplecontainer = {};
 
     gadget = gadgets.container.createGadget({'specUrl': gadgetUrl});;
     gadget.setServerBase('../../');
-  
+
     // Viewer and Owner
     document.getElementById("viewerId").value = viewerId;
     document.getElementById("ownerId").value = ownerId;
