@@ -306,7 +306,7 @@ public class OAuthFetcher extends ChainedContentFetcher {
     e.printStackTrace(printer);
     printer.flush();
     errorText = errorBuf.toString();
-    return buildNonDataResponse();
+    return buildNonDataResponse(403);
   }
 
   private boolean handleProtocolException(
@@ -589,11 +589,11 @@ public class OAuthFetcher extends ChainedContentFetcher {
   }
 
   private HttpResponse buildOAuthApprovalResponse() {
-    return buildNonDataResponse();
+    return buildNonDataResponse(200);
   }
   
-  private HttpResponse buildNonDataResponse() {
-    HttpResponse response = new HttpResponse(0, null, null);
+  private HttpResponse buildNonDataResponse(int status) {
+    HttpResponse response = new HttpResponse(status, null, null);
     addResponseMetadata(response);
     response.setNoCache();
     return response;
