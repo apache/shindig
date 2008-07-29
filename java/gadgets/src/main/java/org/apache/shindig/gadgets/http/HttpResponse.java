@@ -49,12 +49,17 @@ import java.util.concurrent.ConcurrentHashMap;
 public class HttpResponse {
   // Replicate HTTP status codes here.
   public final static int SC_OK = 200;
+  public final static int SC_UNAUTHORIZED = 401;
+  public final static int SC_FORBIDDEN = 403;
   public final static int SC_NOT_FOUND = 404;
   public final static int SC_INTERNAL_SERVER_ERROR = 500;
   public final static int SC_TIMEOUT = 504;
   private final static Set<String> BINARY_CONTENT_TYPES = new HashSet<String>(Arrays.asList(
     "image/jpeg", "image/png", "image/gif", "image/jpg", "application/x-shockwave-flash"
   ));
+  
+  private final static Set<Integer> CACHE_CONTROL_OK_STATUS_CODES = new HashSet<Integer>(
+      Arrays.asList(SC_OK, SC_UNAUTHORIZED, SC_FORBIDDEN));
 
   // TTL to use when an error response is fetched. This should be non-zero to
   // avoid high rates of requests to bad urls in high-traffic situations.
@@ -345,11 +350,15 @@ public class HttpResponse {
    * @return consolidated cache expiration time or -1
    */
   public long getCacheExpiration() {
+    // We intentionally ignore cache-control headers for most HTTP error responses, because if
+    // we don't we end up hammering sites that have gone down with lots of requests.  Proper
+    // support for caching of OAuth responses is more complex, for that we have to respect
+    // cache-control headers for 401s and 403s.
+    if (!CACHE_CONTROL_OK_STATUS_CODES.contains(httpStatusCode)) {
+      return getDate() + negativeCacheTtl;
+    }
     if (isStrictNoCache()) {
       return -1;
-    }
-    if (httpStatusCode != SC_OK) {
-      return getDate() + negativeCacheTtl;
     }
     long maxAge = getCacheControlMaxAge();
     if (maxAge != -1) {

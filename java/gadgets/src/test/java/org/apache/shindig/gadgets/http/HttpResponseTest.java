@@ -254,6 +254,29 @@ public class HttpResponseTest extends TestCase {
     HttpResponse response = new HttpResponse(401, UTF8_DATA, null);
     response.setNoCache();
     assertEquals(-1, response.getCacheTtl());
+    
+    response = new HttpResponse(403, UTF8_DATA, null);
+    response.setNoCache();
+    assertEquals(-1, response.getCacheTtl());
+    
+    response = new HttpResponse(200, UTF8_DATA, null);
+    response.setNoCache();
+    assertEquals(-1, response.getCacheTtl());
+    
+    response = new HttpResponse(302, UTF8_DATA, null);
+    response.setNoCache();
+    long ttl = response.getCacheTtl();
+    assertTrue(ttl <= HttpResponse.DEFAULT_TTL && ttl > 0);
+    
+    response = new HttpResponse(404, UTF8_DATA, null);
+    response.setNoCache();
+     ttl = response.getCacheTtl();
+    assertTrue(ttl <= HttpResponse.DEFAULT_TTL && ttl > 0);
+    
+    response = new HttpResponse(500, UTF8_DATA, null);
+    response.setNoCache();
+    ttl = response.getCacheTtl();
+    assertTrue(ttl <= HttpResponse.DEFAULT_TTL && ttl > 0);
   }
 
   public void testSetNoCache() {
