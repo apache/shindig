@@ -17,11 +17,9 @@
 package org.apache.shindig.gadgets.oauth;
 
 import org.apache.shindig.common.SecurityToken;
-import org.apache.shindig.common.crypto.BlobCrypter;
 import org.apache.shindig.common.crypto.BlobCrypterException;
 import org.apache.shindig.gadgets.ChainedContentFetcher;
 import org.apache.shindig.gadgets.GadgetException;
-import org.apache.shindig.gadgets.http.HttpCache;
 import org.apache.shindig.gadgets.http.HttpCacheKey;
 import org.apache.shindig.gadgets.http.HttpFetcher;
 import org.apache.shindig.gadgets.http.HttpResponse;
@@ -93,22 +91,12 @@ public class OAuthFetcher extends ChainedContentFetcher {
   protected final OAuthRequestParams requestParams;
 
   /**
-   * Reference to our persistent store for OAuth metadata.
-   */
-  protected GadgetOAuthTokenStore tokenStore;
-
-  /**
    * The accessor we use for signing messages. This also holds metadata about
    * the service provider, such as their URLs and the keys we use to access
    * those URLs.
    */
   private OAuthStore.AccessorInfo accessorInfo;
-
-  /**
-   * We use this to encrypt and sign the state we cache on the client.
-   */
-  private BlobCrypter oauthCrypter;
-
+  
   /**
    * State the client sent with their request.
    */
@@ -146,30 +134,23 @@ public class OAuthFetcher extends ChainedContentFetcher {
   private final boolean bypassSpecCache;
   
   /**
-   * Cache for HTTP responses, probably shared across multiple different
-   * fetchers.
+   * Configuration options for the fetcher.
    */
-  private HttpCache cache;
+  private final OAuthFetcherConfig fetcherConfig;
 
   /**
-   *
-   * @param oauthCrypter used to encrypt transient information we store on the
-   *        client.
+   * @param fetcherConfig configuration options for the fetcher
    * @param nextFetcher fetcher to use for actually making requests
    * @param authToken user's gadget security token
    * @param params OAuth fetch parameters sent from makeRequest
-   * @param tokenStore storage for long lived tokens.
-   * @param cache cache to use for HTTP responses.
    */
   public OAuthFetcher(
-      GadgetOAuthTokenStore tokenStore,
-      BlobCrypter oauthCrypter,
+      OAuthFetcherConfig fetcherConfig,
       HttpFetcher nextFetcher,
       SecurityToken authToken,
-      OAuthRequestParams params,
-      HttpCache cache) {
+      OAuthRequestParams params) {
     super(nextFetcher);
-    this.oauthCrypter = oauthCrypter;
+    this.fetcherConfig = fetcherConfig;
     this.authToken = authToken;
     this.requestParams = params;
     this.bypassSpecCache = params.getBypassSpecCache();
@@ -180,8 +161,8 @@ public class OAuthFetcher extends ChainedContentFetcher {
     String origClientState = params.getOrigClientState();
     if (origClientState != null && origClientState.length() > 0) {
       try {
-        this.origClientState =
-          oauthCrypter.unwrap(origClientState, CLIENT_STATE_MAX_AGE_SECS);
+        this.origClientState = fetcherConfig.getStateCrypter()
+            .unwrap(origClientState, CLIENT_STATE_MAX_AGE_SECS);
       } catch (BlobCrypterException e) {
         // Probably too old, pretend we never saw it at all.
       }
@@ -189,8 +170,6 @@ public class OAuthFetcher extends ChainedContentFetcher {
     if (this.origClientState == null) {
       this.origClientState = new HashMap<String, String>();
     }
-    this.tokenStore = tokenStore;
-    this.cache = cache;
   }
 
   /**
@@ -203,7 +182,7 @@ public class OAuthFetcher extends ChainedContentFetcher {
    */
   private void lookupOAuthMetadata() throws GadgetException {
     OAuthStore.TokenKey tokenKey = buildTokenKey();
-    accessorInfo = tokenStore.getOAuthAccessor(tokenKey, bypassSpecCache);
+    accessorInfo = fetcherConfig.getTokenStore().getOAuthAccessor(tokenKey, bypassSpecCache);
 
     // The persistent data store may be out of sync with reality; we trust
     // the state we stored on the client to be accurate.
@@ -238,7 +217,7 @@ public class OAuthFetcher extends ChainedContentFetcher {
 
   public HttpResponse fetch(HttpRequest request) throws GadgetException {
     HttpCacheKey cacheKey = makeCacheKey(request);
-    HttpResponse response = cache.getResponse(cacheKey, request);
+    HttpResponse response = fetcherConfig.getHttpCache().getResponse(cacheKey, request);
     if (response != null) {
       return response;
     }
@@ -272,7 +251,7 @@ public class OAuthFetcher extends ChainedContentFetcher {
           GadgetException.Code.INTERNAL_SERVER_ERROR,
           "No response for OAuth fetch to " + realRequest.getUri());
     }
-    return cache.addResponse(cacheKey, request, response);
+    return fetcherConfig.getHttpCache().addResponse(cacheKey, request, response);
   }
   
   // Builds up a cache key based on the same key that we use into the OAuth
@@ -313,7 +292,7 @@ public class OAuthFetcher extends ChainedContentFetcher {
       OAuthProtocolException pe, int attempts) throws OAuthStoreException {
     if (pe.startFromScratch()) {
       OAuthStore.TokenKey tokenKey = buildTokenKey();
-      tokenStore.removeToken(tokenKey);
+      fetcherConfig.getTokenStore().removeToken(tokenKey);
       
       accessorInfo.accessor.accessToken = null;
       accessorInfo.accessor.requestToken = null;
@@ -562,7 +541,7 @@ public class OAuthFetcher extends ChainedContentFetcher {
       oauthState.put(REQ_TOKEN_KEY, accessor.requestToken);
       oauthState.put(REQ_TOKEN_SECRET_KEY, accessor.tokenSecret);
       oauthState.put(OWNER_KEY, authToken.getOwnerId());
-      newClientState = oauthCrypter.wrap(oauthState);
+      newClientState = fetcherConfig.getStateCrypter().wrap(oauthState);
     } catch (BlobCrypterException e) {
       throw new GadgetException(GadgetException.Code.INTERNAL_SERVER_ERROR, e);
     }
@@ -659,7 +638,7 @@ public class OAuthFetcher extends ChainedContentFetcher {
     OAuthStore.TokenKey tokenKey = buildTokenKey();
     OAuthStore.TokenInfo tokenInfo = new OAuthStore.TokenInfo(
         accessor.accessToken, accessor.tokenSecret);
-    tokenStore.storeTokenKeyAndSecret(tokenKey, tokenInfo);
+    fetcherConfig.getTokenStore().storeTokenKeyAndSecret(tokenKey, tokenInfo);
   }
 
   /**
@@ -672,7 +651,7 @@ public class OAuthFetcher extends ChainedContentFetcher {
       oauthState.put(ACCESS_TOKEN_KEY, accessor.accessToken);
       oauthState.put(ACCESS_TOKEN_SECRET_KEY, accessor.tokenSecret);
       oauthState.put(OWNER_KEY, authToken.getOwnerId());
-      newClientState = oauthCrypter.wrap(oauthState);
+      newClientState = fetcherConfig.getStateCrypter().wrap(oauthState);
     } catch (BlobCrypterException e) {
       throw new GadgetException(GadgetException.Code.INTERNAL_SERVER_ERROR, e);
     }

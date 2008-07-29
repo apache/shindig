@@ -37,14 +37,7 @@ import java.util.logging.Logger;
  */
 public class OAuthFetcherFactory {
 
-  /** used to encrypt state stored on the client */
-  protected BlobCrypter oauthCrypter;
-
-  /** persistent storage for OAuth tokens */
-  protected GadgetOAuthTokenStore tokenStore;
-
-  /** shared HTTP cache */
-  private HttpCache cache;
+  protected OAuthFetcherConfig fetcherConfig;
 
   private static final Logger logger
       = Logger.getLogger(OAuthFetcherFactory.class.getName());
@@ -56,14 +49,13 @@ public class OAuthFetcherFactory {
   @Inject
   public OAuthFetcherFactory(GadgetSpecFactory specFactory, HttpCache cache) {
     try {
-      this.oauthCrypter = new BasicBlobCrypter(
+      BlobCrypter oauthCrypter = new BasicBlobCrypter(
           Crypto.getRandomBytes(BasicBlobCrypter.MASTER_KEY_MIN_LEN));
 
       BasicGadgetOAuthTokenStore store =
           new BasicGadgetOAuthTokenStore(new BasicOAuthStore(), specFactory);
       store.initFromConfigFile();
-      this.tokenStore = store;
-      this.cache = cache;
+      fetcherConfig = new OAuthFetcherConfig(oauthCrypter, store, cache);
     } catch (Throwable t) {
       // Since this happens at startup, we don't want to kill the server just
       // because we can't initialize the OAuth config.
@@ -74,17 +66,10 @@ public class OAuthFetcherFactory {
   /**
    * Creates an OAuthFetcherFactory based on prepared crypter and token store.
    *
-   * @param oauthCrypter used to wrap client side state
-   * @param tokenStore used as interface to persistent token store.
-   * @param cache shared HTTP cache
+   * @param fetcherConfig configuration
    */
-  protected OAuthFetcherFactory(
-      BlobCrypter oauthCrypter,
-      GadgetOAuthTokenStore tokenStore,
-      HttpCache cache) {
-    this.oauthCrypter = oauthCrypter;
-    this.tokenStore = tokenStore;
-    this.cache = cache;
+  protected OAuthFetcherFactory(OAuthFetcherConfig fetcherConfig) {
+    this.fetcherConfig = fetcherConfig;
   }
 
   /**
@@ -102,8 +87,7 @@ public class OAuthFetcherFactory {
       HttpFetcher nextFetcher,
       SecurityToken token,
       OAuthRequestParams params) throws GadgetException {
-    OAuthFetcher fetcher = new OAuthFetcher(
-        tokenStore, oauthCrypter, nextFetcher, token, params, cache);
+    OAuthFetcher fetcher = new OAuthFetcher(fetcherConfig, nextFetcher, token, params);
     return fetcher;
   }
 }
