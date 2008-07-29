@@ -27,11 +27,9 @@ import java.util.Map;
 import org.apache.shindig.common.BasicSecurityToken;
 import org.apache.shindig.common.SecurityToken;
 import org.apache.shindig.common.crypto.BasicBlobCrypter;
-import org.apache.shindig.common.crypto.BlobCrypter;
 import org.apache.shindig.gadgets.FakeGadgetSpecFactory;
 import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.http.BasicHttpCache;
-import org.apache.shindig.gadgets.http.HttpCache;
 import org.apache.shindig.gadgets.http.HttpFetcher;
 import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.http.HttpResponse;
@@ -48,10 +46,8 @@ import org.junit.Test;
  */
 public class OAuthFetcherTest {
 
-  private GadgetOAuthTokenStore tokenStore;
-  private BlobCrypter blobCrypter;
+  private OAuthFetcherConfig fetcherConfig;
   private FakeOAuthServiceProvider serviceProvider;
-  private HttpCache cache;
 
   public static final String GADGET_URL = "http://www.example.com/gadget.xml";
   public static final String GADGET_URL_NO_KEY =
@@ -60,9 +56,10 @@ public class OAuthFetcherTest {
   @Before
   public void setUp() throws Exception {
     serviceProvider = new FakeOAuthServiceProvider();
-    tokenStore = getOAuthStore();
-    blobCrypter = new BasicBlobCrypter("abcdefghijklmnop".getBytes());
-    cache = new BasicHttpCache(10);
+    fetcherConfig = new OAuthFetcherConfig(
+        new BasicBlobCrypter("abcdefghijklmnop".getBytes()),
+        getOAuthStore(),
+        new BasicHttpCache(10));
   }
 
   /**
@@ -136,8 +133,7 @@ public class OAuthFetcherTest {
   @SuppressWarnings("unused")
   public HttpFetcher getFetcher(SecurityToken authToken,
       OAuthRequestParams params) throws GadgetException {
-    OAuthFetcher fetcher = new OAuthFetcher(
-        tokenStore, blobCrypter, serviceProvider, authToken, params, cache);
+    OAuthFetcher fetcher = new OAuthFetcher(fetcherConfig, serviceProvider, authToken, params);
     return fetcher;
   }
 

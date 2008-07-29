@@ -40,6 +40,7 @@ public class BasicGadgetOAuthTokenStoreTest extends GadgetTestFixture {
   
   private BasicGadgetOAuthTokenStore store;
   
+  @Override
   @Before
   public void setUp() throws Exception {
     OAuthStore backingStore = new BasicOAuthStore();    
