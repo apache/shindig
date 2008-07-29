@@ -19,6 +19,8 @@
 
 package org.apache.shindig.gadgets.servlet;
 
+import com.google.inject.Inject;
+
 import org.apache.shindig.common.ContainerConfig;
 import org.apache.shindig.common.SecurityToken;
 import org.apache.shindig.common.SecurityTokenDecoder;
@@ -40,9 +42,6 @@ import org.apache.shindig.gadgets.spec.MessageBundle;
 import org.apache.shindig.gadgets.spec.ModulePrefs;
 import org.apache.shindig.gadgets.spec.Preload;
 import org.apache.shindig.gadgets.spec.View;
-
-import com.google.inject.Inject;
-
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -70,30 +69,45 @@ import javax.servlet.http.HttpServletResponse;
  * Represents a single rendering task
  */
 public class GadgetRenderingTask {
+
   protected static final int DEFAULT_CACHE_TTL = 60 * 5;
+
   protected static final String CAJA_PARAM = "caja";
+
   protected static final String LIBS_PARAM_NAME = "libs";
+
   protected static final Logger logger
       = Logger.getLogger("org.apache.shindig.gadgets");
-  protected static final String STRICT_MODE_DOCTYPE = "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01//EN\" \"http://www.w3.org/TR/html4/strict.dtd\">";
+
+  protected static final String STRICT_MODE_DOCTYPE
+      = "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01//EN\" \"http://www.w3.org/TR/html4/strict.dtd\">";
 
   private HttpServletRequest request;
+
   private HttpServletResponse response;
+
   private final GadgetServer server;
+
   private final MessageBundleFactory messageBundleFactory;
+
   private final GadgetFeatureRegistry registry;
+
   private final ContainerConfig containerConfig;
+
   private final UrlGenerator urlGenerator;
+
   private final SecurityTokenDecoder tokenDecoder;
+
   private GadgetContext context;
+
   private final List<GadgetContentFilter> filters;
+
   private final LockedDomainService domainLocker;
+
   private String container = null;
 
   /**
    * Processes a single rendering request and produces output html or errors.
-   *
-   * @throws IOException
    */
   public void process(HttpServletRequest request, HttpServletResponse response)
       throws IOException {
@@ -111,7 +125,7 @@ public class GadgetRenderingTask {
 
     if (!"http".equals(url.getScheme()) && !"https".equals(url.getScheme())) {
       response.sendError(HttpServletResponse.SC_BAD_REQUEST,
-                         "Unsupported scheme (must be http or https).");
+          "Unsupported scheme (must be http or https).");
       return;
     }
 
@@ -140,18 +154,14 @@ public class GadgetRenderingTask {
 
   /**
    * Renders a successfully processed gadget.
-   *
-   * @param gadget
-   * @throws IOException
-   * @throws GadgetException
    */
   private void outputGadget(Gadget gadget) throws IOException, GadgetException {
     View view = gadget.getView(containerConfig);
     if (view == null) {
-        throw new GadgetException(GadgetException.Code.UNKNOWN_VIEW_SPECIFIED,
-            "No appropriate view could be found for gadget: " + gadget.getSpec().getUrl());
+      throw new GadgetException(GadgetException.Code.UNKNOWN_VIEW_SPECIFIED,
+          "No appropriate view could be found for gadget: " + gadget.getSpec().getUrl());
     }
-    switch(view.getType()) {
+    switch (view.getType()) {
       case HTML:
         outputHtmlGadget(gadget, view);
         break;
@@ -164,9 +174,7 @@ public class GadgetRenderingTask {
   /**
    * Redirect a type=html gadget to a locked domain if necessary.
    *
-   * @param gadget
    * @return true if the request was handled, false if the request can proceed
-   * @throws IOException
    */
   private boolean mustRedirectToLockedDomain(Gadget gadget)
       throws IOException {
@@ -183,9 +191,9 @@ public class GadgetRenderingTask {
         gadgetUrl, container);
     String redir =
         request.getScheme() + "://" +
-        required +
-        request.getServletPath() + '?' +
-        request.getQueryString();
+            required +
+            request.getServletPath() + '?' +
+            request.getQueryString();
     logger.info("Redirecting gadget " + context.getUrl() + " from domain " +
         host + " to domain " + redir);
     response.sendRedirect(redir);
@@ -195,11 +203,6 @@ public class GadgetRenderingTask {
 
   /**
    * Handles type=html gadget output.
-   *
-   * @param gadget
-   * @param view
-   * @throws IOException
-   * @throws GadgetException
    */
   private void outputHtmlGadget(Gadget gadget, View view)
       throws IOException, GadgetException {
@@ -217,11 +220,11 @@ public class GadgetRenderingTask {
     // TODO: Substitute gadgets.skins values in here.
     String boilerPlate
         = "<html><head><style type=\"text/css\">" +
-          "body,td,div,span,p{font-family:arial,sans-serif;}" +
-          "a {color:#0000cc;}a:visited {color:#551a8b;}" +
-          "a:active {color:#ff0000;}" +
-          "body{margin: 0px;padding: 0px;background-color:white;}" +
-          "</style></head>";
+        "body,td,div,span,p{font-family:arial,sans-serif;}" +
+        "a {color:#0000cc;}a:visited {color:#551a8b;}" +
+        "a:active {color:#ff0000;}" +
+        "body{margin: 0px;padding: 0px;background-color:white;}" +
+        "</style></head>";
     markup.append(boilerPlate);
     LocaleSpec localeSpec = gadget.getSpec().getModulePrefs().getLocale(
         gadget.getContext().getLocale());
@@ -229,11 +232,10 @@ public class GadgetRenderingTask {
       markup.append("<body>");
     } else {
       markup.append("<body dir=\"")
-            .append(localeSpec.getLanguageDirection())
-            .append("\">");
+          .append(localeSpec.getLanguageDirection())
+          .append("\">");
     }
 
-    StringBuilder externJs = new StringBuilder();
     StringBuilder inlineJs = new StringBuilder();
     String externFmt = "<script src=\"%s\"></script>";
     String forcedLibs = request.getParameter("libs");
@@ -262,7 +264,12 @@ public class GadgetRenderingTask {
     // Inline any libs that weren't forced
     for (JsLibrary library : gadget.getJsLibraries()) {
       if (library.getType().equals(JsLibrary.Type.URL)) {
-        externJs.append(String.format(externFmt, library.getContent()));
+        if (inlineJs.length() > 0) {
+          markup.append("<script><!--\n").append(inlineJs)
+              .append("\n-->\n</script>");
+          inlineJs.setLength(0);
+        }
+        markup.append(String.format(externFmt, library.getContent()));
       } else {
         if (!libs.contains(library.getFeature())) {
           // already pulled this file in from the shared contents.
@@ -293,11 +300,7 @@ public class GadgetRenderingTask {
 
     if (inlineJs.length() > 0) {
       markup.append("<script><!--\n").append(inlineJs)
-            .append("\n-->\n</script>");
-    }
-
-    if (externJs.length() > 0) {
-      markup.append(externJs);
+          .append("\n-->\n</script>");
     }
 
     String content = view.getContent();
@@ -306,8 +309,8 @@ public class GadgetRenderingTask {
     }
 
     markup.append(content)
-          .append("<script>gadgets.util.runOnLoadHandlers();</script>")
-          .append("</body></html>");
+        .append("<script>gadgets.util.runOnLoadHandlers();</script>")
+        .append("</body></html>");
     if (context.getIgnoreCache()) {
       HttpUtil.setCachingHeaders(response, 0);
     } else if (request.getParameter("v") != null) {
@@ -323,12 +326,8 @@ public class GadgetRenderingTask {
 
   /**
    * Outputs a url type gadget by redirecting.
-   *
-   * @param gadget
-   * @param view
-   * @throws IOException
    */
-  private void outputUrlGadget(Gadget gadget,  View view) throws IOException {
+  private void outputUrlGadget(Gadget gadget, View view) throws IOException {
     // TODO: generalize this as injectedArgs on Gadget object
 
     // Preserve existing query string parameters.
@@ -344,20 +343,20 @@ public class GadgetRenderingTask {
 
     try {
       href = new URI(href.getScheme(),
-                     href.getUserInfo(),
-                     href.getHost(),
-                     href.getPort(),
-                     href.getPath(),
-                     null,
-                     null);
+          href.getUserInfo(),
+          href.getHost(),
+          href.getPort(),
+          href.getPath(),
+          null,
+          null);
     } catch (URISyntaxException e) {
       // Not really ever going to happen; input values are already OK.
       response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
-                         e.getMessage());
+          e.getMessage());
     }
     // Necessary to avoid double-URL-encoding of the JavaScript bundle portion of the query.
     StringBuilder redirectHref = new StringBuilder(href.toString());
-    if (query.toString() != null ) {
+    if (query.toString() != null) {
       redirectHref.append('?');
       redirectHref.append(query.toString());
     }
@@ -369,12 +368,8 @@ public class GadgetRenderingTask {
   }
 
   /**
-   * Displays errors for failed GadgetRendering.
-   * Also sets the caching headers to insure that our server
-   * is not hurt by failing backends when nocache is not set.
-   *
-   * @param error
-   * @throws IOException
+   * Displays errors for failed GadgetRendering. Also sets the caching headers to insure that our
+   * server is not hurt by failing backends when nocache is not set.
    */
   private void outputErrors(GadgetException error) throws IOException {
     // Log the errors here for now. We might want different severity levels
@@ -396,18 +391,15 @@ public class GadgetRenderingTask {
 
   /**
    * Appends libs to the query string.
-   * @param libs
-   * @param query
    */
   private void appendLibsToQuery(Set<String> libs, StringBuilder query) {
     query.append('&')
-         .append(LIBS_PARAM_NAME)
-         .append('=')
-         .append(Utf8UrlCoder.encode(urlGenerator.getBundledJsParam(libs, context)));
+        .append(LIBS_PARAM_NAME)
+        .append('=')
+        .append(Utf8UrlCoder.encode(urlGenerator.getBundledJsParam(libs, context)));
   }
 
   /**
-   * @param req
    * @return Whether or not to use caja.
    */
   protected boolean getUseCaja(HttpServletRequest req) {
@@ -418,17 +410,16 @@ public class GadgetRenderingTask {
   /**
    * Appends javascript configuration to the bottom of an existing script block.
    *
-   * Appends special configuration for gadgets.util.hasFeature and
-   * gadgets.util.getFeatureParams to the output js.
+   * Appends special configuration for gadgets.util.hasFeature and gadgets.util.getFeatureParams to
+   * the output js.
    *
-   * This can't be handled via the normal configuration mechanism because it is
-   * something that varies per request.
+   * This can't be handled via the normal configuration mechanism because it is something that
+   * varies per request.
    *
    * Only explicitly <Require>'d and <Optional> features will be added.
    *
-   * @param gadget
    * @param reqs The features you require.
-   * @param js Existing js, to which the configuration will be appended.
+   * @param js   Existing js, to which the configuration will be appended.
    * @throws GadgetException if there is a problem with the gadget auth token
    */
   private void appendJsConfig(Gadget gadget, Set<String> reqs,
@@ -467,11 +458,7 @@ public class GadgetRenderingTask {
   }
 
   /**
-   * Appends data from <Preload> elements to make them available to
-   * gadgets.io.
-   *
-   * @param gadget
-   * @param inlineJs
+   * Appends data from <Preload> elements to make them available to gadgets.io.
    */
   private void appendPreloads(Gadget gadget, StringBuilder inlineJs) {
     // Output preloads. We will allow the gadget render to continue
@@ -485,11 +472,11 @@ public class GadgetRenderingTask {
         // Use raw param as key as URL may have to be decoded
         JSONObject jsonEntry = new JSONObject();
         jsonEntry.put("body", response.getResponseAsString())
-                 .put("rc", response.getHttpStatusCode());
+            .put("rc", response.getHttpStatusCode());
         resp.put(entry.getKey().getHref().toString(), jsonEntry);
       } catch (JSONException e) {
         logger.log(
-            Level.INFO,"Error outputting preload for " + preload.getHref(), e);
+            Level.INFO, "Error outputting preload for " + preload.getHref(), e);
       } catch (InterruptedException e) {
         logger.log(
             Level.INFO, "Error scheduling preload for " + preload.getHref(), e);
@@ -499,10 +486,12 @@ public class GadgetRenderingTask {
       }
     }
     inlineJs.append("gadgets.io.preloaded_ = ").append(resp.toString())
-            .append(";\n");
+        .append(";\n");
   }
 
-  /** Gets the container for the current request. */
+  /**
+   * Gets the container for the current request.
+   */
   private String getContainerForRequest() {
     if (container != null) {
       return container;
@@ -521,8 +510,7 @@ public class GadgetRenderingTask {
   /**
    * Validates that the parent parameter was acceptable.
    *
-   * @return True if the parent parameter is valid for the current
-   *     container.
+   * @return True if the parent parameter is valid for the current container.
    */
   private boolean validateParent() {
     String container = getContainerForRequest();
@@ -559,12 +547,12 @@ public class GadgetRenderingTask {
 
   @Inject
   public GadgetRenderingTask(GadgetServer server,
-                             MessageBundleFactory messageBundleFactory,
-                             GadgetFeatureRegistry registry,
-                             ContainerConfig containerConfig,
-                             UrlGenerator urlGenerator,
-                             SecurityTokenDecoder tokenDecoder,
-                             LockedDomainService lockedDomainService) {
+      MessageBundleFactory messageBundleFactory,
+      GadgetFeatureRegistry registry,
+      ContainerConfig containerConfig,
+      UrlGenerator urlGenerator,
+      SecurityTokenDecoder tokenDecoder,
+      LockedDomainService lockedDomainService) {
     this.server = server;
     this.messageBundleFactory = messageBundleFactory;
     this.registry = registry;
