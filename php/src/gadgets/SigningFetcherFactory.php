@@ -22,8 +22,8 @@
  * Produces Signing content fetchers for input tokens.
  */
 class SigningFetcherFactory {
-    private $keyName;
-    private $privateKey;
+	private $keyName;
+	private $privateKey;
 
 	/**
 	 * Produces a signing fetcher that will sign requests and delegate actual
@@ -44,7 +44,7 @@ class SigningFetcherFactory {
 	 */
 	public function __construct($keyFile = null)
 	{
-		$this->keyName = 'http://'.$_SERVER["HTTP_HOST"].Config::get('web_prefix').'/public.crt';
+		$this->keyName = 'http://' . $_SERVER["HTTP_HOST"] . Config::get('web_prefix') . '/public.crt';
 		if (! empty($keyFile)) {
 			$privateKey = null;
 			try {
@@ -54,19 +54,28 @@ class SigningFetcherFactory {
 				if (($cachedKey = $cache->get(md5("RSA_PRIVATE_KEY_" . $this->keyName))) !== false) {
 					$rsa_private_key = $cachedKey;
 				} else {
-					if (! $rsa_private_key = @file_get_contents($keyFile)) {
+					if (file_exists($keyFile) && is_readable($keyFile)) {
+						$rsa_private_key = @file_get_contents($keyFile);
+					} else {
 						throw new Exception("Could not read keyfile ($keyFile), check the file name and permission");
 					}
-					$phrase = Config::get('private_key_phrase') != '' ? (Config::get('private_key_phrase')) : null;
-					if (strpos($rsa_private_key, "-----BEGIN") === false) {
-						$privateKey .= "-----BEGIN PRIVATE KEY-----\n";
-						$chunks = str_split($rsa_private_key, 64);
-						foreach ($chunks as $chunk) {
-							$privateKey .= $chunk . "\n";
-						}
-						$privateKey .= "-----END PRIVATE KEY-----";
+					if (! $rsa_private_key) {
+						$rsa_private_key = "";
 					} else {
-						$privateKey = $rsa_private_key;
+						$phrase = Config::get('private_key_phrase') != '' ? (Config::get('private_key_phrase')) : null;
+						if (strpos($rsa_private_key, "-----BEGIN") === false) {
+							$privateKey .= "-----BEGIN PRIVATE KEY-----\n";
+							$chunks = str_split($rsa_private_key, 64);
+							foreach ($chunks as $chunk) {
+								$privateKey .= $chunk . "\n";
+							}
+							$privateKey .= "-----END PRIVATE KEY-----";
+						} else {
+							$privateKey = $rsa_private_key;
+						}
+						if (! $rsa_private_key = @openssl_pkey_get_private($privateKey, $phrase)) {
+							throw new Exception("Could not create the key");
+						}
 					}
 					$cache->set(md5("RSA_PRIVATE_KEY_" . $this->keyName), $rsa_private_key);
 					if (! $rsa_private_key = @openssl_pkey_get_private($privateKey, $phrase)) {
