@@ -20,10 +20,12 @@ package org.apache.shindig.social.opensocial.model;
 import org.apache.shindig.social.core.model.PersonImpl;
 
 import com.google.inject.ImplementedBy;
+import com.google.common.collect.Maps;
 
 import java.util.Date;
 import java.util.List;
 import java.util.Set;
+import java.util.Map;
 
 /**
  * see http://code.google.com/apis/opensocial/docs/0.8/reference/#opensocial.Person.Field for all
@@ -154,7 +156,7 @@ public interface Person {
     /**
      * The json field that the instance represents.
      */
-    private final String jsonString;
+    private final String urlString;
 
     /**
      * The set of required fields.
@@ -167,13 +169,15 @@ public interface Person {
      */
     public static final Set<String> ALL_FIELDS = EnumUtil.getEnumStrings(Field.values());
 
+    private static Map<String, Field> URL_STRING_TO_FIELD_MAP;
+
     /**
      * create a field base on the a json element.
      *
-     * @param jsonString the name of the element
+     * @param urlString the name of the element
      */
-    private Field(String jsonString) {
-      this.jsonString = jsonString;
+    private Field(String urlString) {
+      this.urlString = urlString;
     }
 
     /**
@@ -183,7 +187,24 @@ public interface Person {
      */
     @Override
     public String toString() {
-      return this.jsonString;
+      return this.urlString;
+    }
+
+    /**
+     * Converts from a url string (usually passed in the fields= parameter) into the
+     * corresponding field enum.
+     * @param urlString The string to translate.
+     * @return The corresponding person field.
+     */
+    public static Person.Field fromUrlString(String urlString) {
+      if (URL_STRING_TO_FIELD_MAP == null) {
+        URL_STRING_TO_FIELD_MAP = Maps.newHashMap();
+        for (Person.Field field : Person.Field.values()) {
+          URL_STRING_TO_FIELD_MAP.put(field.toString(), field);
+        }
+      }
+
+      return URL_STRING_TO_FIELD_MAP.get(urlString);
     }
   }
 

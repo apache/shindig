@@ -36,10 +36,6 @@ public class PersonHandler extends DataRequestHandler {
   private PersonService personService;
 
   private static final String PEOPLE_PATH = "/people/{userId}/{groupId}/{personId}";
-  protected static final Set<String> DEFAULT_PERSON_FIELDS = Sets.newHashSet(
-      Person.Field.ID.toString(),
-      Person.Field.NAME.toString(),
-      Person.Field.THUMBNAIL_URL.toString());
 
   @Inject
   public PersonHandler(PersonService personService) {
@@ -75,7 +71,7 @@ public class PersonHandler extends DataRequestHandler {
     UserId userId = request.getUser();
     GroupId groupId = request.getGroup();
     String optionalPersonId = request.getParameters().get("personId");
-    Set<String> fields = request.getFields(DEFAULT_PERSON_FIELDS);
+    Set<String> fields = request.getFields(Person.Field.DEFAULT_FIELDS);
 
     if (groupId.getType() == GroupId.Type.self) {
       return personService.getPerson(userId, fields, request.getToken());
