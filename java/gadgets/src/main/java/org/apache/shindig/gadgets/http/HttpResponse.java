@@ -62,7 +62,11 @@ public class HttpResponse {
   public final static int SC_TIMEOUT = 504;
 
   private final static Set<String> BINARY_CONTENT_TYPES = new HashSet<String>(Arrays.asList(
-      "image/jpeg", "image/png", "image/gif", "image/jpg", "application/x-shockwave-flash"
+      "image/jpeg", "image/png", "image/gif", "image/jpg", "application/x-shockwave-flash",
+      "application/octet-stream", "application/ogg", "application/zip", "audio/mpeg",
+      "audio/x-ms-wma", "audio/vnd.rn-realaudio", "audio/x-wav", "video/mpeg", "video/mp4",
+      "video/quicktime", "video/x-ms-wmv", "video/x-flv", "video/flv",
+      "video/x-ms-asf", "application/pdf"
   ));
 
   private final static Set<Integer> CACHE_CONTROL_OK_STATUS_CODES = new HashSet<Integer>(
