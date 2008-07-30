@@ -28,6 +28,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.servlet.ServletOutputStream;
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletRequestWrapper;
 import javax.servlet.http.HttpServletResponse;
@@ -57,6 +58,15 @@ public class ConcatProxyServlet extends InjectedServlet {
       response.setStatus(HttpServletResponse.SC_NOT_MODIFIED);
       return;
     }
+    if (request.getParameter(ProxyBase.REWRITE_MIME_TYPE_PARAM) != null) {
+      response.setHeader("Content-Type",
+          request.getParameter(ProxyBase.REWRITE_MIME_TYPE_PARAM));
+    }
+    if (request.getParameter(ProxyBase.REFRESH_PARAM) != null) {
+      HttpUtil.setCachingHeaders(response,
+          Integer.valueOf(request.getParameter(ProxyBase.REFRESH_PARAM)));
+    }
+    response.setHeader("Content-Disposition", "attachment;filename=p.txt");
     ResponseWrapper wrapper = new ResponseWrapper(response);
     for (int i = 1; i < Integer.MAX_VALUE; i++) {
       String url = request.getParameter(Integer.toString(i));
@@ -94,7 +104,9 @@ public class ConcatProxyServlet extends InjectedServlet {
     resp.sendError(HttpServletResponse.SC_BAD_REQUEST, err.toString());
   }
 
-  /** Simple request wrapper to make repeated calls to ProxyHandler */
+  /**
+   * Simple request wrapper to make repeated calls to ProxyHandler
+   */
   private static class RequestWrapper extends HttpServletRequestWrapper {
 
     private final String url;
@@ -114,8 +126,8 @@ public class ConcatProxyServlet extends InjectedServlet {
   }
 
   /**
-   * Wrap the response to prevent writing through of the status code and
-   * to hold a reference to the stream across multiple proxied parts
+   * Wrap the response to prevent writing through of the status code and to hold a reference to the
+   * stream across multiple proxied parts
    */
   private static class ResponseWrapper extends HttpServletResponseWrapper {
 
@@ -131,6 +143,28 @@ public class ConcatProxyServlet extends InjectedServlet {
         outputStream = super.getOutputStream();
       }
       return outputStream;
+    }
+
+    public void addCookie(Cookie cookie) {
+    }
+
+    // Suppress headers
+    public void setDateHeader(String s, long l) {
+    }
+
+    public void addDateHeader(String s, long l) {
+    }
+
+    public void setHeader(String s, String s1) {
+    }
+
+    public void addHeader(String s, String s1) {
+    }
+
+    public void setIntHeader(String s, int i) {
+    }
+
+    public void addIntHeader(String s, int i) {
     }
 
     public void setStatus(int i) {
