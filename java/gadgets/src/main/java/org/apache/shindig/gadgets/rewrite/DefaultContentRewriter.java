@@ -17,17 +17,24 @@
  */
 package org.apache.shindig.gadgets.rewrite;
 
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
+import com.google.inject.name.Named;
+
 import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.GadgetSpecFactory;
 import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.http.HttpResponse;
 import org.apache.shindig.gadgets.spec.GadgetSpec;
 
-import com.google.inject.Inject;
-import com.google.inject.Singleton;
-import com.google.inject.name.Named;
-
-import java.io.*;
+import java.io.ByteArrayOutputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
+import java.io.Reader;
+import java.io.StringReader;
+import java.io.StringWriter;
+import java.io.UnsupportedEncodingException;
+import java.io.Writer;
 import java.net.URI;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -41,9 +48,13 @@ import java.util.Set;
 public class DefaultContentRewriter implements ContentRewriter {
 
   private final GadgetSpecFactory specFactory;
+
   private final String includeUrls;
+
   private final String excludeUrls;
+
   private final String expires;
+
   private final Set<String> includeTags;
 
   @Inject
@@ -85,7 +96,8 @@ public class DefaultContentRewriter implements ContentRewriter {
           output)) {
         return new HttpResponse(original.getHttpStatusCode(),
             baos.toByteArray(),
-            original.getAllHeaders());
+            original.getAllHeaders(),
+            original.getEncoding());
       }
       return null;
     } catch (UnsupportedEncodingException uee) {
@@ -111,7 +123,8 @@ public class DefaultContentRewriter implements ContentRewriter {
     }
 
     // Store the feature in the spec so we dont keep parsing it
-    ContentRewriterFeature rewriterFeature = (ContentRewriterFeature)spec.getAttribute("content-rewrite");
+    ContentRewriterFeature rewriterFeature = (ContentRewriterFeature) spec
+        .getAttribute("content-rewrite");
     if (rewriterFeature == null) {
       rewriterFeature = new ContentRewriterFeature(spec, includeUrls, excludeUrls, expires,
           includeTags);
@@ -157,12 +170,16 @@ public class DefaultContentRewriter implements ContentRewriter {
   }
 
   private boolean isHTML(String mime) {
-    if (mime == null) return false;
+    if (mime == null) {
+      return false;
+    }
     return (mime.toLowerCase().contains("html"));
   }
 
   private boolean isCSS(String mime) {
-    if (mime == null) return false;
+    if (mime == null) {
+      return false;
+    }
     return (mime.toLowerCase().contains("css"));
   }
 
@@ -174,7 +191,8 @@ public class DefaultContentRewriter implements ContentRewriter {
     return "/gadgets/concat?";
   }
 
-  protected LinkRewriter createLinkRewriter(GadgetSpec spec, ContentRewriterFeature rewriterFeature) {
+  protected LinkRewriter createLinkRewriter(GadgetSpec spec,
+      ContentRewriterFeature rewriterFeature) {
     return new ProxyingLinkRewriter(spec.getUrl(), rewriterFeature, getProxyUrl());
   }
 }

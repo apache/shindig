@@ -47,17 +47,24 @@ import java.util.concurrent.ConcurrentHashMap;
  * Represents the results of an HTTP content retrieval operation.
  */
 public class HttpResponse {
+
   // Replicate HTTP status codes here.
   public final static int SC_OK = 200;
+
   public final static int SC_UNAUTHORIZED = 401;
+
   public final static int SC_FORBIDDEN = 403;
+
   public final static int SC_NOT_FOUND = 404;
+
   public final static int SC_INTERNAL_SERVER_ERROR = 500;
+
   public final static int SC_TIMEOUT = 504;
+
   private final static Set<String> BINARY_CONTENT_TYPES = new HashSet<String>(Arrays.asList(
-    "image/jpeg", "image/png", "image/gif", "image/jpg", "application/x-shockwave-flash"
+      "image/jpeg", "image/png", "image/gif", "image/jpg", "application/x-shockwave-flash"
   ));
-  
+
   private final static Set<Integer> CACHE_CONTROL_OK_STATUS_CODES = new HashSet<Integer>(
       Arrays.asList(SC_OK, SC_UNAUTHORIZED, SC_FORBIDDEN));
 
@@ -66,49 +73,65 @@ public class HttpResponse {
   protected final static long NEGATIVE_CACHE_TTL = 30 * 1000;
 
   /**
-   * Default TTL for an entry in the cache that does not have any
-   * cache controlling headers.
+   * Default TTL for an entry in the cache that does not have any cache controlling headers.
    */
   protected static final long DEFAULT_TTL = 5L * 60L * 1000L;
 
   public static final String DEFAULT_ENCODING = "UTF-8";
 
   private final int httpStatusCode;
+
+  // Derivation of encoding from content is EXPENSIVE using icu4j so be careful
+  // how you construct, copy and store response objects.
   private final String encoding;
 
   // Used to lazily convert to a string representation of the input.
   private String responseString = null;
+
   private final byte[] responseBytes;
+
   private final Map<String, List<String>> headers;
+
   private final Map<String, String> metadata;
+
   private final long date;
 
   private HttpResponse rewritten;
 
-  @Inject @Named("http.cache.negativeCacheTtl")
+  @Inject
+  @Named("http.cache.negativeCacheTtl")
   private static long negativeCacheTtl = NEGATIVE_CACHE_TTL;
 
-  @Inject @Named("http.cache.defaultTtl")
+  @Inject
+  @Named("http.cache.defaultTtl")
   private static long defaultTtl = DEFAULT_TTL;
 
   // Holds character sets for fast conversion
-  private static ConcurrentHashMap<String,Charset> encodingToCharset
-      = new ConcurrentHashMap<String,Charset>();
+  private static ConcurrentHashMap<String, Charset> encodingToCharset
+      = new ConcurrentHashMap<String, Charset>();
 
   /**
    * Create a dummy empty map. Access via HttpResponse.ERROR
    */
   public HttpResponse(int statusCode) {
-    this(statusCode, ArrayUtils.EMPTY_BYTE_ARRAY, null);
+    this(statusCode, ArrayUtils.EMPTY_BYTE_ARRAY, null, Charset.defaultCharset().name());
   }
 
   /**
-   * @param httpStatusCode
-   * @param responseBytes
    * @param headers May be null.
    */
   public HttpResponse(int httpStatusCode, byte[] responseBytes,
-                       Map<String, List<String>> headers) {
+      Map<String, List<String>> headers) {
+    this(httpStatusCode, responseBytes, headers, null);
+  }
+
+  /**
+   * @param headers  May be null.
+   * @param encoding May be null.
+   */
+  public HttpResponse(int httpStatusCode, byte[] responseBytes,
+      Map<String, List<String>> headers,
+      String encoding) {
     this.httpStatusCode = httpStatusCode;
     if (responseBytes == null) {
       this.responseBytes = ArrayUtils.EMPTY_BYTE_ARRAY;
@@ -134,17 +157,22 @@ public class HttpResponse {
     this.headers = tmpHeaders;
 
     this.metadata = new HashMap<String, String>();
-    this.encoding = detectEncoding();
+    if (encoding == null) {
+      if (responseBytes != null && responseBytes.length > 0) {
+        this.encoding = detectEncoding();
+      } else {
+        this.encoding = Charset.defaultCharset().name();
+      }
+    } else {
+      this.encoding = encoding;
+    }
   }
 
   /**
-   * Simple constructor for setting a basic response from a string. Mostly used
-   * for testing.
-   *
-   * @param body
+   * Simple constructor for setting a basic response from a string. Mostly used for testing.
    */
   public HttpResponse(String body) {
-    this(SC_OK, body.getBytes(), null);
+    this(SC_OK, body.getBytes(), null, Charset.defaultCharset().name());
   }
 
   public static HttpResponse error() {
@@ -185,8 +213,9 @@ public class HttpResponse {
   }
 
   /**
-   * Attempts to determine the encoding of the body. If it can't be determined,
-   * we use DEFAULT_ENCODING instead.
+   * Attempts to determine the encoding of the body. If it can't be determined, we use
+   * DEFAULT_ENCODING instead.
+   *
    * @return The detected encoding or DEFAULT_ENCODING.
    */
   private String detectEncoding() {
@@ -208,6 +237,13 @@ public class HttpResponse {
     CharsetDetector detector = new CharsetDetector();
     detector.setText(responseBytes);
     CharsetMatch match = detector.detect();
+
+    if (contentType != null) {
+      // Record the charset in the content-type header so that its value can be cached
+      // and re-used. This is a BIG performance win.
+      this.headers.put("Content-Type",
+          Lists.newArrayList(contentType + "; charset=" + match.getName().toUpperCase()));
+    }
     return match.getName().toUpperCase();
   }
 
@@ -237,9 +273,9 @@ public class HttpResponse {
   }
 
   /**
-   * Attempts to convert the response body to a string using the Content-Type
-   * header. If no Content-Type header is specified (or it doesn't include an
-   * encoding), we will assume it is UTF-8.
+   * Attempts to convert the response body to a string using the Content-Type header. If no
+   * Content-Type header is specified (or it doesn't include an encoding), we will assume it is
+   * UTF-8.
    *
    * @return The body as a string.
    */
@@ -248,7 +284,7 @@ public class HttpResponse {
       Charset charset = encodingToCharset.get(encoding);
       if (charset == null) {
         charset = Charset.forName(encoding);
-        encodingToCharset.put(encoding,charset);
+        encodingToCharset.put(encoding, charset);
       }
       responseString = charset.decode(ByteBuffer.wrap(responseBytes)).toString();
 
@@ -275,7 +311,6 @@ public class HttpResponse {
   }
 
   /**
-   * @param name
    * @return All headers with the given name.
    */
   public List<String> getHeaders(String name) {
@@ -288,9 +323,8 @@ public class HttpResponse {
   }
 
   /**
-   * @param name
-   * @return The first set header with the given name or null if not set. If
-   *         you need multiple values for the header, use getHeaders().
+   * @return The first set header with the given name or null if not set. If you need multiple
+   *         values for the header, use getHeaders().
    */
   public String getHeader(String name) {
     List<String> headerList = getHeaders(name);
@@ -310,6 +344,7 @@ public class HttpResponse {
 
   /**
    * Get the rewritten version of this content
+   *
    * @return A rewritten HttpResponse
    */
   public HttpResponse getRewritten() {
@@ -318,16 +353,14 @@ public class HttpResponse {
 
   /**
    * Set the rewritten version of this content
-   * @param rewritten
    */
   public void setRewritten(HttpResponse rewritten) {
     this.rewritten = rewritten;
   }
 
   /**
-   * Set the externally forced minimum cache min-TTL
-   * This is derived from the "refresh" param on OpenProxy request
-   * Value is in seconds
+   * Set the externally forced minimum cache min-TTL This is derived from the "refresh" param on
+   * OpenProxy request Value is in seconds
    */
   public void setForcedCacheTTL(int forcedCacheTtl) {
     if (forcedCacheTtl > 0) {
@@ -336,7 +369,7 @@ public class HttpResponse {
       this.headers.put("Cache-Control", Lists.newArrayList("public,max-age=" + forcedCacheTtl));
     }
   }
-  
+
   /**
    * Sets cache-control headers indicating the response is not cacheable.
    */
