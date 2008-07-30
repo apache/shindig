@@ -158,11 +158,7 @@ public class HttpResponse {
 
     this.metadata = new HashMap<String, String>();
     if (encoding == null) {
-      if (responseBytes != null && responseBytes.length > 0) {
-        this.encoding = detectEncoding();
-      } else {
-        this.encoding = Charset.defaultCharset().name();
-      }
+      this.encoding = detectEncoding();
     } else {
       this.encoding = encoding;
     }
@@ -233,6 +229,9 @@ public class HttpResponse {
       }
     }
 
+    if (responseBytes == null || responseBytes.length == 0) {
+      return Charset.defaultCharset().name();
+    }
     // If the header doesn't specify the charset, try to determine it by examining the content.
     CharsetDetector detector = new CharsetDetector();
     detector.setText(responseBytes);
