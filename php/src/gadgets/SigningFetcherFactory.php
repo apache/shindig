@@ -54,10 +54,12 @@ class SigningFetcherFactory {
 				if (($cachedKey = $cache->get(md5("RSA_PRIVATE_KEY_" . $this->keyName))) !== false) {
 					$rsa_private_key = $cachedKey;
 				} else {
-					if (file_exists($keyFile) && is_readable($keyFile)) {
-						$rsa_private_key = @file_get_contents($keyFile);
-					} else {
-						throw new Exception("Could not read keyfile ($keyFile), check the file name and permission");
+					if (file_exists($keyFile)) {
+						if (is_readable($keyFile)) {
+							$rsa_private_key = @file_get_contents($keyFile);
+						} else {
+							throw new Exception("Could not read keyfile ($keyFile), check the file name and permission");
+						}
 					}
 					if (! $rsa_private_key) {
 						$rsa_private_key = "";
