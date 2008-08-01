@@ -227,14 +227,6 @@ class SigningFetcher extends RemoteContentFetcher {
 		return $list;
 	}
 
-	/*
-	private function allowParam($paramName)
-	{
-		$canonParamName = strtolower($paramName);
-		return (! (substr($canonParamName, 0, 5) == "oauth" || substr($canonParamName, 0, 6) == "xoauth" || substr($canonParamName, 0, 9) == "opensocial")) && ereg(SigningFetcher::$ALLOWED_PARAM_NAME, $canonParamName);
-	}
-	*/
-	
 	private function allowParam($paramName)
 	{
 		$canonParamName = strtolower($paramName);

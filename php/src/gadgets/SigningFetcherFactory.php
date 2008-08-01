@@ -1,4 +1,5 @@
 <?php
+
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -48,41 +49,30 @@ class SigningFetcherFactory {
 		if (! empty($keyFile)) {
 			$privateKey = null;
 			try {
-				// check if the converted from PKCS8 key is in cache, if not, convert it
-				$cache = Config::get('data_cache');
-				$cache = new $cache();
-				if (($cachedKey = $cache->get(md5("RSA_PRIVATE_KEY_" . $this->keyName))) !== false) {
-					$rsa_private_key = $cachedKey;
-				} else {
-					if (file_exists($keyFile)) {
-						if (is_readable($keyFile)) {
-							$rsa_private_key = @file_get_contents($keyFile);
-						} else {
-							throw new Exception("Could not read keyfile ($keyFile), check the file name and permission");
-						}
-					}
-					if (! $rsa_private_key) {
-						$rsa_private_key = "";
+				if (file_exists($keyFile)) {
+					if (is_readable($keyFile)) {
+						$rsa_private_key = @file_get_contents($keyFile);
 					} else {
-						$phrase = Config::get('private_key_phrase') != '' ? (Config::get('private_key_phrase')) : null;
-						if (strpos($rsa_private_key, "-----BEGIN") === false) {
-							$privateKey .= "-----BEGIN PRIVATE KEY-----\n";
-							$chunks = str_split($rsa_private_key, 64);
-							foreach ($chunks as $chunk) {
-								$privateKey .= $chunk . "\n";
-							}
-							$privateKey .= "-----END PRIVATE KEY-----";
-						} else {
-							$privateKey = $rsa_private_key;
-						}
-						if (! $rsa_private_key = @openssl_pkey_get_private($privateKey, $phrase)) {
-							throw new Exception("Could not create the key");
-						}
+						throw new Exception("Could not read keyfile ($keyFile), check the file name and permission");
 					}
-					$cache->set(md5("RSA_PRIVATE_KEY_" . $this->keyName), $rsa_private_key);
-					if (! $rsa_private_key = @openssl_pkey_get_private($privateKey, $phrase)) {
-						throw new Exception("Could not create the key");
+				}
+				if (! $rsa_private_key) {
+					$rsa_private_key = '';
+				} else {
+					$phrase = Config::get('private_key_phrase') != '' ? (Config::get('private_key_phrase')) : null;
+					if (strpos($rsa_private_key, "-----BEGIN") === false) {
+						$privateKey .= "-----BEGIN PRIVATE KEY-----\n";
+						$chunks = str_split($rsa_private_key, 64);
+						foreach ($chunks as $chunk) {
+							$privateKey .= $chunk . "\n";
+						}
+						$privateKey .= "-----END PRIVATE KEY-----";
+					} else {
+						$privateKey = $rsa_private_key;
 					}
+				}
+				if (! $rsa_private_key = @openssl_pkey_get_private($privateKey, $phrase)) {
+					throw new Exception("Could not create the key");
 				}
 			} catch (Exception $e) {
 				throw new Exception("Error loading private key: " . $e);
