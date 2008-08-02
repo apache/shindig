@@ -17,16 +17,22 @@
  * specific language governing permissions and limitations under the License.
  * 
  */
-set_include_path(realpath("../") . PATH_SEPARATOR . realpath("../external/"));
+
+/*
+ * This file is meant to be run through a php command line or cruiscontrol build, and not called directly
+ * through the web browser. To run these tests from the command line:
+ * # cd /path/to/shindig
+ * # phpunit ShindigAllTests php/test/ShindigAllTests.php   
+ */
+
+set_include_path(get_include_path(). PATH_SEPARATOR . realpath('./php') . PATH_SEPARATOR . realpath('./php/external'));
 ini_set('error_reporting', E_COMPILE_ERROR | E_ERROR | E_CORE_ERROR);
 
-require_once "PHPUnit/Framework/TestSuite.php";
-require_once "PHPUnit/TextUI/TestRunner.php";
-require_once realpath('../')."/config.php";
+require_once 'config.php';
 
 function __autoload($className)
 {
-	$basePath = realpath('../');
+	$basePath = realpath('./php');
 	$locations = array(
 					'src/common',
 					'src/common/samplecontainer',
@@ -49,13 +55,18 @@ function __autoload($className)
 	$fileName = $className . '.php';
 	foreach ($locations as $path) {
 		if (file_exists("$basePath/{$path}/$fileName")) {
-			require "$basePath/{$path}/$fileName";
+			require "{$path}/$fileName";
 			break;
 		}
 	}
 }
+;
 
-class AllTests {
+if (defined('PHPUnit_MAIN_METHOD') === false) {
+	define('PHPUnit_MAIN_METHOD', 'ShindigAllTests::main');
+}
+
+class ShindigAllTests {
 
 	public static function main()
 	{
@@ -66,7 +77,7 @@ class AllTests {
 	{
 		$suite = new PHPUnit_Framework_TestSuite();
 		$suite->setName('Shindig');
-		$path = dirname($_SERVER['SCRIPT_FILENAME']);
+		$path = realpath('./php/test/');
 		$testTypes = array('common', 'gadgets', 'social-api');
 		foreach ($testTypes as $type) {
 			foreach (glob("$path/{$type}/*Test.php") as $file) {
@@ -81,13 +92,6 @@ class AllTests {
 	}
 }
 
-echo "<html><body><pre>";
-AllTests::main();
-echo "</pre></body></html>";
-
-// make sure the result page isn't cached, some of the tests set caching headers which is bad here
-header("Expires: Mon, 26 Jul 1997 05:00:00 GMT", true);
-header('Last-Modified: ' . gmdate('D, d M Y H:i:s') . ' GMT', true);
-header('Cache-Control: no-store, no-cache, must-revalidate', true);
-header('Cache-Control: pre-check=0, post-check=0, max-age=0', true);
-header("Pragma: no-cache", true);
+if (PHPUnit_MAIN_METHOD === 'ShindigAllTests::main') {
+	ShindigAllTests::main();
+}

@@ -1,21 +1,22 @@
 <?php
-
-require_once 'src/gadgets/GadgetException.php';
-require_once 'src/gadgets/GadgetServer.php';
-require_once 'src/gadgets/GadgetContext.php';
-
-require_once 'src/common/RemoteContentFetcher.php';
-require_once 'src/common/RemoteContentRequest.php';
-require_once 'src/gadgets/JsFeatureLoader.php';
-require_once 'src/gadgets/GadgetFeatureRegistry.php';
-require_once 'src/gadgets/JsLibrary.php';
-require_once 'src/gadgets/GadgetFeatureFactory.php';
-require_once 'src/gadgets/GadgetFeature.php';
-require_once 'src/gadgets/JsLibraryFeatureFactory.php';
-
-require_once 'src/common/samplecontainer/BasicRemoteContentFetcher.php';
-
-require_once 'PHPUnit/Framework/TestCase.php';
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
 
 /**
  * GadgetServer test case.

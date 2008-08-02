@@ -18,10 +18,6 @@
  * 
  */
 
-require_once 'src/gadgets/GadgetId.php';
-
-require_once 'PHPUnit/Framework/TestCase.php';
-
 /**
  * GadgetId test case.
  */

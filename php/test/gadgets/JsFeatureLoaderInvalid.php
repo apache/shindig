@@ -18,14 +18,6 @@
  * 
  */
 
-require_once 'PHPUnit/Framework/TestCase.php';
-require_once 'src/gadgets/JsFeatureLoader.php';
-require_once 'src/gadgets/GadgetFeatureRegistry.php';
-require_once 'src/gadgets/JsLibrary.php';
-require_once 'src/gadgets/GadgetFeatureFactory.php';
-require_once 'src/gadgets/GadgetFeature.php';
-require_once 'src/gadgets/JsLibraryFeatureFactory.php';
-
 /**
  * JsFeatureLoader test case.
  */

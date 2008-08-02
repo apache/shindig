@@ -18,11 +18,6 @@
  * under the License.
  */
 
-require_once 'config.php';
-require_once 'src/common/Cache.php';
-require_once 'src/common/CacheFile.php';
-require_once 'PHPUnit/Framework/TestCase.php';
-
 /**
  * CacheFile test case.
  */

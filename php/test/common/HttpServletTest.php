@@ -18,9 +18,6 @@
  * under the License.
  */
 
-require_once 'src/common/HttpServlet.php';
-require_once 'PHPUnit/Framework/TestCase.php';
-
 /**
  * HttpServlet test case.
  */
