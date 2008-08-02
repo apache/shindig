@@ -18,12 +18,6 @@
  * 
  */
 
-require_once 'src/gadgets/GadgetSpecParser.php';
-require_once 'PHPUnit/Framework/TestCase.php';
-
-require_once 'src/gadgets/Gadget.php';
-require_once 'src/gadgets/ViewSpec.php';
-
 /**
  * GadgetSpecParser test case.
  */

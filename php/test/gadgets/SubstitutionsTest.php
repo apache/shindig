@@ -18,10 +18,6 @@
  * 
  */
 
-require_once 'src/gadgets/Substitutions.php';
-
-require_once 'PHPUnit/Framework/TestCase.php';
-
 /**
  * Substitutions test case.
  */

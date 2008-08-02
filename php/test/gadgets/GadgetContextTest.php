@@ -18,21 +18,6 @@
  * 
  */
 
-require_once 'src/gadgets/GadgetContext.php';
-require_once 'PHPUnit/Framework/TestCase.php';
-
-require_once 'src/gadgets/GadgetId.php';
-require_once 'config.php';
-require_once 'src/common/Cache.php';
-require_once 'src/common/CacheFile.php';
-require_once 'src/gadgets/samplecontainer/BasicGadgetBlacklist.php';
-require_once 'src/common/RemoteContent.php';
-require_once 'src/common/samplecontainer/BasicRemoteContent.php';
-require_once 'src/gadgets/UserPrefs.php';
-require_once 'src/common/Locale.php';
-require_once 'src/gadgets/JsFeatureLoader.php';
-require_once 'src/gadgets/GadgetFeatureRegistry.php';
-
 /**
  * GadgetContext test case.
  */

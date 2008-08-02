@@ -18,17 +18,6 @@
  * under the License.
  */
 
-require_once 'src/common/UrlGenerator.php';
-require_once 'src/common/Locale.php';
-require_once 'src/gadgets/Substitutions.php';
-require_once 'src/gadgets/UserPrefs.php';
-require_once 'src/gadgets/ViewSpec.php';
-require_once 'src/gadgets/HttpUtil.php';
-require_once 'src/gadgets/GadgetException.php';
-require_once 'src/gadgets/Gadget.php';
-require_once 'src/gadgets/GadgetContext.php';
-require_once 'PHPUnit/Framework/TestCase.php';
-
 /**
  * UrlGenerator test case.
  */
