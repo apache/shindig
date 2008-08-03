@@ -30,14 +30,15 @@ class Message {
 	public $title;
 	public $type;
 	public $types = array(
-    /* An email */
-    'EMAIL',
-    /* A short private message */
-    'NOTIFICATION',
-    /* A message to a specific user that can be seen only by that user */
-    'PRIVATE_MESSAGE',
-    /* A message to a specific user that can be seen by more than that user */
-    'PUBLIC_MESSAGE');
+	    /* An email */
+	    'EMAIL',
+	    /* A short private message */
+	    'NOTIFICATION',
+	    /* A message to a specific user that can be seen only by that user */
+	    'PRIVATE_MESSAGE',
+	    /* A message to a specific user that can be seen by more than that user */
+	    'PUBLIC_MESSAGE'
+	);
 	
 	public function __construct($initBody, $initTitle, $initType)
 	{
@@ -99,7 +100,7 @@ class Message {
 	 */
 	public function setType($newType)
 	{
-		if (! in_array($newType)) {
+		if (! in_array($newType, $this->types)) {
 			throw new Exception('Invalid message type');
 		}
 		$this->type = $newType;
