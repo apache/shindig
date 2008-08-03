@@ -1,4 +1,5 @@
 <?php
+
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements. See the NOTICE file
@@ -197,18 +198,20 @@ class RemoteContentRequest {
 		$options->ignoreCache = $ignoreCache;
 		return $this->createRemoteContentRequestWithUriOptions($uri, $options);
 	}
-	
+
 	/**
 	 * Simple constructor for setting a basic response from a string. Mostly used
 	 * for testing.
 	 *
 	 * @param body
 	 */
-	public function getHttpFalseResponseBody($body) {
+	public function getHttpFalseResponseBody($body)
+	{
 		return $this->createFalseResponse(RemoteContentRequest::$SC_OK, $body, null);
 	}
-	
-	private function createFalseResponse($httpCode, $body, $headers) {
+
+	private function createFalseResponse($httpCode, $body, $headers)
+	{
 		$this->httpCode = $httpCode;
 		$this->responseContent = $body;
 		$this->headers = $headers;
@@ -346,7 +349,7 @@ class RemoteContentRequest {
 		}
 		return null;
 	}
-	
+
 	public function getCreated()
 	{
 		return $this->created;
