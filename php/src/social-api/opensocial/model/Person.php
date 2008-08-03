@@ -191,7 +191,7 @@ class Person {
 	
 	public function getDrinker()
 	{
-		return $this->$this->drinker;
+		return $this->drinker;
 	}
 	
 	public function setDrinker($newDrinker)
