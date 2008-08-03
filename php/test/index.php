@@ -23,6 +23,7 @@ ini_set('error_reporting', E_COMPILE_ERROR | E_ERROR | E_CORE_ERROR);
 require_once "PHPUnit/Framework/TestSuite.php";
 require_once "PHPUnit/TextUI/TestRunner.php";
 require_once realpath('../')."/config.php";
+require_once realpath('../')."/test/TestContext.php";
 
 function __autoload($className)
 {

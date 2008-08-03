@@ -385,5 +385,4 @@ class GadgetContext {
 		}
 		return $signer->createToken($token);
 	}
-
 }
