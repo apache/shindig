@@ -31,7 +31,7 @@ abstract class AppDataService {
 	abstract public function getPersonData(UserId $userId, GroupId $groupId, $fields, $appId, SecurityToken $token);
 
 	abstract public function deletePersonData(UserId $userId, GroupId $groupId, $fields, $appId, SecurityToken $token);
-	
+
 	/**
 	 * Updates the data key for the given person with the new value.
 	 *

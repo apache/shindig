@@ -65,7 +65,9 @@ define('UNAUTHORIZED', "unauthorized");
 define('FORBIDDEN', "forbidden");
 define('BAD_REQUEST', "badRequest");
 define('INTERNAL_ERROR', "internalError");
+
 //FIXME Delete should respond with a 204 No Content to indicate success
+
 
 class RestServlet extends HttpServlet {
 	
@@ -88,7 +90,7 @@ class RestServlet extends HttpServlet {
 	{
 		$this->doPost('DELETE');
 	}
-		
+
 	public function doPost($method = 'POST')
 	{
 		try {
@@ -128,7 +130,7 @@ class RestServlet extends HttpServlet {
 		} catch (Exception $e) {
 			header("HTTP/1.0 500 Internal Server Error");
 			echo "<html><body><h1>500 Internal Server Error</h1>";
-			echo "Message: ".$e->getMessage()."<br />\n";
+			echo "Message: " . $e->getMessage() . "<br />\n";
 			if (Config::get('debug')) {
 				echo "<pre>\n";
 				print_r($e);
@@ -150,7 +152,7 @@ class RestServlet extends HttpServlet {
 		$responseItem = $this->getResponseItem($requestItem);
 		return array('request' => $requestItem, 'response' => $responseItem);
 	}
-	
+
 	private function handleJsonBatchRequest($token)
 	{
 		// we support both a raw http post (without application/x-www-form-urlencoded headers) like java does
@@ -168,24 +170,25 @@ class RestServlet extends HttpServlet {
 			throw new Exception("No post data set");
 		}
 	}
-	
+
 	private function handleBatchProxyRequest($token)
 	{
 		// Is this is a multipath/mixed post? Check content type:
-		if (isset($GLOBALS['HTTP_RAW_POST_DATA']) && strpos($_SERVER['CONTENT_TYPE'], 'multipart/mixed') !== false && strpos($_SERVER['CONTENT_TYPE'],'boundary=') !== false) {
+		if (isset($GLOBALS['HTTP_RAW_POST_DATA']) && strpos($_SERVER['CONTENT_TYPE'], 'multipart/mixed') !== false && strpos($_SERVER['CONTENT_TYPE'], 'boundary=') !== false) {
 			// Ok looks swell, see what our boundry is..
-			$boundry = substr($_SERVER['CONTENT_TYPE'], strpos($_SERVER['CONTENT_TYPE'],'boundary=') + strlen('boundary='));
+			$boundry = substr($_SERVER['CONTENT_TYPE'], strpos($_SERVER['CONTENT_TYPE'], 'boundary=') + strlen('boundary='));
 			// Split up requests per boundry
 			$requests = explode($boundry, $GLOBALS['HTTP_RAW_POST_DATA']);
 			$responses = array();
 			foreach ($requests as $request) {
 				$request = trim($request);
-				if (!empty($request)) {
+				if (! empty($request)) {
 					// extractBatchRequest() does the magic parsing of the raw post data to a meaninful request array
 					$request = $this->extractBatchRequest($request);
 					$requestItem = new RestRequestItem();
 					$requestItem->createRequestItemWithRequest($request, $token);
-					$responses[] = array('request' => $requestItem, 'response' => $this->getResponseItem($requestItem));
+					$responses[] = array('request' => $requestItem, 
+							'response' => $this->getResponseItem($requestItem));
 				}
 			}
 		} else {
@@ -212,12 +215,12 @@ class RestServlet extends HttpServlet {
 		$request = '';
 		foreach ($requestLines as $line) {
 			if ($emptyFound) {
-				$request .= $line."\n";
+				$request .= $line . "\n";
 			} elseif (empty($line)) {
 				$emptyFound = true;
 			}
 		}
-		if (!$emptyFound) {
+		if (! $emptyFound) {
 			throw new Exception("Mallformed multipart structure");
 		}
 		// Now that we have the basic request in $request, split that up again & parse it into a meaningful representation
@@ -227,7 +230,7 @@ class RestServlet extends HttpServlet {
 		$request['headers'] = array();
 		$request['postData'] = '';
 		foreach ($requestLines as $line) {
-			if (!$firstFound) {
+			if (! $firstFound) {
 				$firstFound = true;
 				$parts = explode(' ', trim($line));
 				if (count($parts) != 2) {
@@ -236,18 +239,18 @@ class RestServlet extends HttpServlet {
 				$request['method'] = strtoupper(trim($parts[0]));
 				// cut it down to an actual meaningful url without the prefix/social/rest part right away 
 				$request['url'] = substr(trim($parts[1]), strlen(Config::get('web_prefix') . '/social/rest'));
-			} elseif (!$emptyFound && !empty($line)) {
+			} elseif (! $emptyFound && ! empty($line)) {
 				// convert the key to the PHP 'CONTENT_TYPE' style naming convention.. it's ugly but consitent
 				$key = str_replace('-', '_', strtoupper(trim(substr($line, 0, strpos($line, ':')))));
 				$val = trim(substr($line, strpos($line, ':') + 1));
 				$request['headers'][$key] = $val;
-			} elseif (!$emptyFound && empty($line)) {
+			} elseif (! $emptyFound && empty($line)) {
 				$emptyFound = true;
 			} else {
 				if (get_magic_quotes_gpc()) {
 					$line = stripslashes($line);
 				}
-				$request['postData'] .= $line."\n";
+				$request['postData'] .= $line . "\n";
 			}
 		}
 		if (empty($request['method']) || empty($request['url'])) {
@@ -265,7 +268,7 @@ class RestServlet extends HttpServlet {
 		}
 		return $request;
 	}
-	
+
 	private function getResponseItem(RestRequestItem $requestItem)
 	{
 		$path = $this->getRouteFromParameter($requestItem->getUrl());
@@ -292,13 +295,13 @@ class RestServlet extends HttpServlet {
 			$class = new $class(null);
 			$response = $class->handleMethod($requestItem);
 		}
-		if ($response->getError() != null && !$this->isJsonBatchUrl() && !$this->isBatchProxyUrl()) {
+		if ($response->getError() != null && ! $this->isJsonBatchUrl() && ! $this->isBatchProxyUrl()) {
 			// Can't use http error codes in batch mode, instead we return the error code in the response item
 			$this->outputError($response);
 		}
 		return $response;
 	}
-	
+
 	private function decodeRequests($requestParam, $requestType, $format = 'json')
 	{
 		if (empty($requestParam)) {
@@ -410,7 +413,7 @@ class RestServlet extends HttpServlet {
 
 	private function getOutputFormat()
 	{
-		$output = !empty($_POST['format']) ? $_POST['format'] : (!empty($_GET['format']) ? $_GET['format'] : 'json');
+		$output = ! empty($_POST['format']) ? $_POST['format'] : (! empty($_GET['format']) ? $_GET['format'] : 'json');
 		return strtolower(trim($output));
 	}
 
@@ -424,7 +427,7 @@ class RestServlet extends HttpServlet {
 		$restParams = explode('/', $uri);
 		return $restParams;
 	}
-	
+
 	private function getRequestFormat()
 	{
 		if (isset($_SERVER['CONTENT_TYPE'])) {

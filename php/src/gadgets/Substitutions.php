@@ -21,7 +21,7 @@
 class Substitutions {
 	private $types = array('MESSAGE' => 'MSG', 'BIDI' => 'BIDI', 'USER_PREF' => 'UP', 
 			'MODULE' => 'MODULE');
-
+	
 	private $substitutions = array();
 
 	public function __construct()
@@ -65,12 +65,13 @@ class Substitutions {
 	 * @param uri
 	 * @return The substituted uri, or a dummy value if the result is invalid.
 	 */
-	public function substituteUri($type, $uri) {
+	public function substituteUri($type, $uri)
+	{
 		if (empty($uri)) {
 			return null;
 		}
 		try {
-			if (!empty($type)) {
+			if (! empty($type)) {
 				return $this->substituteType($type, $uri);
 			} else {
 				return $this->substitute($uri);

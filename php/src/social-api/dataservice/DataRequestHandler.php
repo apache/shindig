@@ -26,7 +26,7 @@ abstract class DataRequestHandler {
 		if ($token->isAnonymous() && $method != 'GET') {
 			// Anonymous requests are only allowed to GET data (not create/edit/delete)
 			$response = new ResponseItem(BAD_REQUEST, "[$method] not allowed for anonymous users", null);
-		} elseif ($method == 'GET') {			
+		} elseif ($method == 'GET') {
 			$response = $this->handleGet($requestItem);
 		} elseif ($method == 'POST') {
 			$response = $this->handlePost($requestItem);
@@ -60,7 +60,10 @@ abstract class DataRequestHandler {
 	}
 
 	abstract public function handleDelete(RestRequestItem $requestItem);
+
 	abstract public function handleGet(RestRequestItem $requestItem);
+
 	abstract public function handlePost(RestRequestItem $requestItem);
+
 	abstract public function handlePut(RestRequestItem $requestItem);
 }

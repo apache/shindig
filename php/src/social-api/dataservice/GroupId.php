@@ -18,7 +18,7 @@
  */
 
 class GroupId {
-	static public $types = array('all', 'friends', 'self', 'groupId');
+	public static $types = array('all', 'friends', 'self', 'groupId');
 	private $type;
 	private $groupId;
 
@@ -40,7 +40,7 @@ class GroupId {
 	{
 		return $this->groupId;
 	}
-	
+
 	public function getType()
 	{
 		return $this->type;

@@ -25,8 +25,12 @@
  * hoisting rules somewhere..
  */
 abstract class InputConverter {
+
 	abstract public function convertPeople($requestParam);
+
 	abstract public function convertActivities($requestParam);
+
 	abstract public function convertAppData($requestParam);
+
 	abstract public function convertMessages($requestParam);
 }

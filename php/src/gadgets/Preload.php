@@ -25,7 +25,7 @@ class Preload {
 	private $signViewer;
 	private $signOwner;
 	private $views = array();
-	
+
 	/**
 	 * Creates a new Preload from an xml node.
 	 *

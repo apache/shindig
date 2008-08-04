@@ -25,28 +25,28 @@
 class Email {
 	public $address;
 	public $type;
-	
+
 	public function __construct($address, $type)
 	{
 		$this->address = $address;
 		$this->type = $type;
 	}
-	
+
 	public function getAddress()
 	{
 		return $this->address;
 	}
-	
+
 	public function setAddress($address)
 	{
 		$this->address = $address;
 	}
-	
+
 	public function getType()
 	{
 		return $this->type;
 	}
-	
+
 	public function setType($type)
 	{
 		$this->type = $type;

@@ -52,7 +52,7 @@ class HttpServlet {
 	public function __destruct()
 	{
 		if (! $this->noHeaders) {
-			header("Content-Type: $this->contentType".(!empty($this->charset) ? "; charset={$this->charset}" : ''));
+			header("Content-Type: $this->contentType" . (! empty($this->charset) ? "; charset={$this->charset}" : ''));
 			header('Accept-Ranges: bytes');
 			$content = ob_get_contents();
 			if ($this->noCache) {
@@ -66,7 +66,7 @@ class HttpServlet {
 				// Obey browsers (or proxy's) request to send a fresh copy if we recieve a no-cache pragma or cache-control request
 				if (! isset($_SERVER['HTTP_PRAGMA']) || ! strstr(strtolower($_SERVER['HTTP_PRAGMA']), 'no-cache') && (! isset($_SERVER['HTTP_CACHE_CONTROL']) || ! strstr(strtolower($_SERVER['HTTP_CACHE_CONTROL']), 'no-cache'))) {
 					// If the browser send us a E-TAG check if it matches (md5 sum of content), if so send a not modified header instead of content
-					$etag = '"'.md5($content).'"';
+					$etag = '"' . md5($content) . '"';
 					if (isset($_SERVER['HTTP_IF_NONE_MATCH']) && $_SERVER['HTTP_IF_NONE_MATCH'] == $etag) {
 						header("ETag: \"$etag\"");
 						if ($this->lastModified) {
@@ -95,12 +95,12 @@ class HttpServlet {
 			}
 		}
 	}
-	
+
 	public function getCharset()
 	{
 		return $this->charset;
 	}
-	
+
 	public function setCharset($charset)
 	{
 		$this->charset = $charset;

@@ -53,8 +53,7 @@ class OAuthFetcherFactory {
 			$basicStore = new BasicGadgetOAuthTokenStore(new BasicOAuthStore(), $specFactory);
 			$basicStore->initFromConfigFile($fetcher);
 			$this->tokenStore = $basicStore;
-		} catch (Exeption $e) {
-		}
+		} catch (Exeption $e) {}
 	}
 
 	/**

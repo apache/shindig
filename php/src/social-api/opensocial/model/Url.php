@@ -25,39 +25,39 @@ class Url {
 	public $address;
 	public $linkText;
 	public $type;
-	
+
 	public function __construct($address, $linkText, $type)
 	{
 		$this->address = $address;
 		$this->linkText = $linkText;
 		$this->type = $type;
 	}
-	
+
 	public function getAddress()
 	{
 		return $this->address;
 	}
-	
+
 	public function setAddress($address)
 	{
 		$this->address = $address;
 	}
-	
+
 	public function getLinkText()
 	{
 		return $this->linkText;
 	}
-	
+
 	public function setLinkText($linkText)
 	{
 		$this->linkText = $linkText;
 	}
-	
+
 	public function getType()
 	{
 		return $this->type;
 	}
-	
+
 	public function setType($type)
 	{
 		$this->type = $type;

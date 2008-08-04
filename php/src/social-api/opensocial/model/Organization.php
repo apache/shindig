@@ -33,102 +33,102 @@ class Organization {
 	public $subField;
 	public $title;
 	public $webpage;
-	
+
 	public function getAddress()
 	{
 		return $this->address;
 	}
-	
+
 	public function setAddress($address)
 	{
 		$this->address = $address;
 	}
-	
+
 	public function getDescription()
 	{
 		return $this->description;
 	}
-	
+
 	public function setDescription($description)
 	{
 		$this->description = $description;
 	}
-	
+
 	public function getEndDate()
 	{
 		return $this->endDate;
 	}
-	
+
 	public function setEndDate($endDate)
 	{
 		$this->endDate = $endDate;
 	}
-	
+
 	public function getField()
 	{
 		return $this->field;
 	}
-	
+
 	public function setField($field)
 	{
 		$this->field = $field;
 	}
-	
+
 	public function getName()
 	{
 		return $this->name;
 	}
-	
+
 	public function setName($name)
 	{
 		$this->name = $name;
 	}
-	
+
 	public function getSalary()
 	{
 		return $this->salary;
 	}
-	
+
 	public function setSalary($salary)
 	{
 		$this->salary = $salary;
 	}
-	
+
 	public function getStartDate()
 	{
 		return $this->startDate;
 	}
-	
+
 	public function setStartDate($startDate)
 	{
 		$this->startDate = $startDate;
 	}
-	
+
 	public function getSubField()
 	{
 		return $this->subField;
 	}
-	
+
 	public function setSubField($subField)
 	{
 		$this->subField = $subField;
 	}
-	
+
 	public function getTitle()
 	{
 		return $this->title;
 	}
-	
+
 	public function setTitle($title)
 	{
 		$this->title = $title;
 	}
-	
+
 	public function getWebpage()
 	{
 		return $this->webpage;
 	}
-	
+
 	public function setWebpage($webpage)
 	{
 		$this->webpage = $webpage;

@@ -22,12 +22,12 @@
  *
  */
 class OutputJsonConverter extends OutputConverter {
-	
+
 	function outputResponse(ResponseItem $responseItem, RestRequestItem $requestItem)
 	{
 		echo json_encode($responseItem->getResponse());
 	}
-	
+
 	function outputBatch(Array $responses, SecurityToken $token)
 	{
 		$this->boundryHeaders();
@@ -38,7 +38,7 @@ class OutputJsonConverter extends OutputConverter {
 			$this->outputPart($part, $response->getError());
 		}
 	}
-	
+
 	function outputJsonBatch(Array $responses, SecurityToken $token)
 	{
 		echo json_encode(array("responses" => $responses, "error" => false));

@@ -37,7 +37,7 @@ class ResponseItem {
 			unset($this->errorMessage);
 		}
 	}
-	
+
 	/**
 	 * the json_encode function does not trim null values,
 	 * so we do this manually
@@ -67,7 +67,7 @@ class ResponseItem {
 		}
 		return $object;
 	}
-	
+
 	public function getError()
 	{
 		return isset($this->error) ? $this->error : null;

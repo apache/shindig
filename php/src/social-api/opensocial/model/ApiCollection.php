@@ -25,39 +25,39 @@ class ApiCollection {
 	public $items = array();
 	public $offset;
 	public $totalSize;
-	
+
 	public function __construct($items, $offset = false, $totalSize = false)
 	{
 		$this->items = $items;
 		$this->offset = $offset;
 		$this->totalSize = $totalSize;
 	}
-	
+
 	public function getItems()
 	{
 		return $this->items;
 	}
-	
+
 	public function setItems($items)
 	{
 		$this->items = $items;
 	}
-	
+
 	public function getOffset()
 	{
 		return $this->offset;
 	}
-	
+
 	public function setOffset($offset)
 	{
 		$this->offset = $offset;
 	}
-	
+
 	public function getTotalSize()
 	{
 		return $this->totalSize;
 	}
-	
+
 	public function setTotalSize($totalSize)
 	{
 		$this->totalSize = $totalSize;

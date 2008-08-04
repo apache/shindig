@@ -1,5 +1,4 @@
 <?php
-
 /**
  * jsmin.php - PHP implementation of Douglas Crockford's JSMin.
  *
@@ -91,7 +90,7 @@ class JsMin {
 				$this->a = $this->b;
 				
 				if ($this->a === "'" || $this->a === '"') {
-					for (; ; ) {
+					for (;;) {
 						$this->output .= $this->a;
 						$this->a = $this->get();
 						
@@ -117,7 +116,7 @@ class JsMin {
 					
 					$this->output .= $this->a . $this->b;
 					
-					for (; ; ) {
+					for (;;) {
 						$this->a = $this->get();
 						
 						if ($this->a === '/') {
@@ -254,7 +253,7 @@ class JsMin {
 		if ($c === '/') {
 			switch ($this->peek()) {
 				case '/':
-					for (; ; ) {
+					for (;;) {
 						$c = $this->get();
 						
 						if (ord($c) <= self::ORD_LF) {
@@ -265,7 +264,7 @@ class JsMin {
 				case '*':
 					$this->get();
 					
-					for (; ; ) {
+					for (;;) {
 						switch ($this->get()) {
 							case '*':
 								if ($this->peek() === '/') {

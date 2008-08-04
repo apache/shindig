@@ -90,7 +90,7 @@ class JsonRpcHandler {
 		$response['moduleId'] = $gadgetModuleId;
 		$response['url'] = $gadgetUrl;
 		$response['iframeUrl'] = UrlGenerator::getIframeURL($gadget, $context);
-		$response['userPrefs'] = $prefs;		
+		$response['userPrefs'] = $prefs;
 		return $response;
 	}
 }

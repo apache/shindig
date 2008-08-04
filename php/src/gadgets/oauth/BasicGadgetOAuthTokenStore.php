@@ -63,9 +63,7 @@ class BasicGadgetOAuthTokenStore extends GadgetOAuthTokenStore {
 
 	private function storeConsumerInfo($gadgetUri, $serviceName, $consumerInfo)
 	{
-		if (!isset($consumerInfo[$this->CONSUMER_SECRET_KEY]) || 
-			!isset($consumerInfo[$this->CONSUMER_KEY_KEY]) ||
-			!isset($consumerInfo[$this->KEY_TYPE_KEY]) ) {
+		if (! isset($consumerInfo[$this->CONSUMER_SECRET_KEY]) || ! isset($consumerInfo[$this->CONSUMER_KEY_KEY]) || ! isset($consumerInfo[$this->KEY_TYPE_KEY])) {
 			throw new Exception("Invalid configuration in oauth.json");
 		}
 		$consumerSecret = $consumerInfo[$this->CONSUMER_SECRET_KEY];

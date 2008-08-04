@@ -24,10 +24,14 @@
  */
 abstract class SecurityToken {
 
-	static public function createFromToken($token, $maxage) {}
+	static public function createFromToken($token, $maxage)
+	{
+	}
 
-	static public function createFromValues($owner, $viewer, $app, $domain, $appUrl, $moduleId) {}
-	
+	static public function createFromValues($owner, $viewer, $app, $domain, $appUrl, $moduleId)
+	{
+	}
+
 	/**
 	 * is this an anonymous token? Always check this before using the owner/viewer/etc
 	 * 

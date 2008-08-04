@@ -19,7 +19,6 @@
 
 class BasicAppDataService extends AppDataService {
 
-	
 	public function deletePersonData(UserId $userId, GroupId $groupId, $fields, $appId, SecurityToken $token)
 	{
 		foreach ($fields as $key) {
@@ -27,25 +26,25 @@ class BasicAppDataService extends AppDataService {
 				return new ResponseItem(BAD_REQUEST, "The person app data key had invalid characters", null);
 			}
 		}
-		switch($groupId->getType()) {
+		switch ($groupId->getType()) {
 			case 'self':
 				foreach ($fields as $key) {
-					XmlStateFileFetcher::get()->deleteAppData($userId->getUserId($token), $key);	
+					XmlStateFileFetcher::get()->deleteAppData($userId->getUserId($token), $key);
 				}
 				break;
 			default:
-				return new ResponseItem(NOT_IMPLEMENTED, "We don't support deleting data in batches yet", null);		
+				return new ResponseItem(NOT_IMPLEMENTED, "We don't support deleting data in batches yet", null);
 				break;
 		}
 		return new ResponseItem(null, null, array());
 	}
-	
+
 	public function getPersonData(UserId $userId, GroupId $groupId, $fields, $appId, SecurityToken $token)
 	{
 		$allData = XmlStateFileFetcher::get()->getAppData();
 		$data = array();
 		$ids = array();
-		switch($groupId->getType()) {
+		switch ($groupId->getType()) {
 			case 'self':
 				$ids[] = $userId->getUserId($token);
 				break;
@@ -57,7 +56,7 @@ class BasicAppDataService extends AppDataService {
 				}
 				break;
 			default:
-				return new ResponseItem(NOT_IMPLEMENTED, "We don't support fetching data in batches yet", null);		
+				return new ResponseItem(NOT_IMPLEMENTED, "We don't support fetching data in batches yet", null);
 				break;
 		}
 		foreach ($ids as $id) {
@@ -80,17 +79,17 @@ class BasicAppDataService extends AppDataService {
 		foreach ($fields as $key) {
 			if (! BasicAppDataService::isValidKey($key)) {
 				return new ResponseItem(BAD_REQUEST, "The person app data key had invalid characters", null);
-			}			
+			}
 		}
-		switch($groupId->getType()) {
+		switch ($groupId->getType()) {
 			case 'self':
 				foreach ($fields as $key) {
 					$value = isset($values[$key]) ? @$values[$key] : null;
-					XmlStateFileFetcher::get()->setAppData($userId->getUserId($token), $key, $value);	
+					XmlStateFileFetcher::get()->setAppData($userId->getUserId($token), $key, $value);
 				}
 				break;
 			default:
-				return new ResponseItem(NOT_IMPLEMENTED, "We don't support updating data in batches yet", null);		
+				return new ResponseItem(NOT_IMPLEMENTED, "We don't support updating data in batches yet", null);
 				break;
 		}
 		return new ResponseItem(null, null, array());
