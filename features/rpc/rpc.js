@@ -273,10 +273,11 @@ gadgets.rpc = function() {
    * using the known default of IFPC.
    *
    * @param {String} targetId Module Id of the RPC service provider.
+   * @param {String} serviceName Service name to call.
    * @param {String} from Module Id of the calling provider.
    * @param {Object} rpcData The RPC data for this call.
    */
-  function callFrameElement(targetId, from, rpcData) {
+  function callFrameElement(targetId, serviceName, from, rpcData) {
     try {
       if (from != '..') {
         // Call from gadget to the container.
@@ -312,7 +313,7 @@ gadgets.rpc = function() {
     // If we have reached this point, something has failed
     // with the FrameElement method, so we default to using
     // IFPC for this call.
-    callIfpc(targetId, from, rpcData);
+    callIfpc(targetId, serviceName, from, rpcData);
   }
 
   /**
@@ -321,10 +322,11 @@ gadgets.rpc = function() {
    * method.
    *
    * @param {String} targetId Module Id of the RPC service provider.
+   * @param {String} serviceName Service name to call.
    * @param {String} from Module Id of the calling provider.
    * @param {Object} rpcData The RPC data for this call.
    */
-  function callIfpc(targetId, from, rpcData) {
+  function callIfpc(targetId, serviceName, from, rpcData) {
     // Retrieve the relay file used by IFPC. Note that
     // this must be set before the call, and so we conduct
     // an extra check to ensure it is not blank.
@@ -594,11 +596,11 @@ gadgets.rpc = function() {
           break;
 
         case 'fe': // use FrameElement.
-          callFrameElement(targetId, from, rpcData);
+          callFrameElement(targetId, serviceName, from, rpcData);
           break;
 
         default: // use 'ifpc' as a fallback mechanism.
-          callIfpc(targetId, from, rpcData);
+          callIfpc(targetId, serviceName, from, rpcData);
           break;
       }
     },
