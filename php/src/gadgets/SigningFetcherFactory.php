@@ -70,9 +70,9 @@ class SigningFetcherFactory {
 					} else {
 						$privateKey = $rsa_private_key;
 					}
-				}
-				if (! $rsa_private_key = @openssl_pkey_get_private($privateKey, $phrase)) {
-					throw new Exception("Could not create the key");
+					if (! $rsa_private_key = @openssl_pkey_get_private($privateKey, $phrase)) {
+						throw new Exception("Could not create the key");
+					}
 				}
 			} catch (Exception $e) {
 				throw new Exception("Error loading private key: " . $e);
