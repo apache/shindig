@@ -22,21 +22,21 @@
  * Collection of HTTP utilities
  */
 class HttpUtil {
-	
+
 	static public function getView($gadget, $context)
 	{
-		$view = $gadget->getView($context->getView());	
+		$view = $gadget->getView($context->getView());
 		if (empty($view)) {
 			$containerConfig = $context->getContainerConfig();
 			$config = $containerConfig->getConfig('default', 'gadgets.features');
 			$configViews = $config['views'];
 			if (isset($configViews[$context->getView()])) {
 				$views = $configViews[$context->getView()];
-				if (!empty($views)) {
+				if (! empty($views)) {
 					$aliasesViews = $views['aliases'];
-					for ($i = 0; $i < count($aliasesViews); $i++) {
+					for ($i = 0; $i < count($aliasesViews); $i ++) {
 						$view = $gadget->getView($aliasesViews[$i]);
-						if (!empty($view)) {
+						if (! empty($view)) {
 							break;
 						}
 					}

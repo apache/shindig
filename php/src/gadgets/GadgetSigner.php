@@ -24,6 +24,7 @@
  *  way that is suitable for their site.
  */
 abstract class GadgetSigner {
+
 	/**
 	 * Generates a token for the given gadget.
 	 * Implementations should also add their own user-related context data

@@ -25,16 +25,19 @@ class LocalMessageBundle {
 	private $name;
 	private $desc;
 
-	public function __construct($name, $desc) {
+	public function __construct($name, $desc)
+	{
 		$this->name = $name;
 		$this->desc = $desc;
 	}
 
-	public function getName() {
+	public function getName()
+	{
 		return $this->name;
 	}
 
-	public function getDesc() {
+	public function getDesc()
+	{
 		return $this->desc;
 	}
 }

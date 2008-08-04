@@ -37,16 +37,15 @@ class Message {
 	    /* A message to a specific user that can be seen only by that user */
 	    'PRIVATE_MESSAGE',
 	    /* A message to a specific user that can be seen by more than that user */
-	    'PUBLIC_MESSAGE'
-	);
-	
+	    'PUBLIC_MESSAGE');
+
 	public function __construct($initBody, $initTitle, $initType)
 	{
 		$this->setBody($initBody);
 		$this->setTitle($initTitle);
 		$this->setType($initType);
 	}
-	
+
 	/**
 	 * Gets the main text of the message.
 	 * @return the main text of the message
@@ -55,7 +54,7 @@ class Message {
 	{
 		return $this->body;
 	}
-	
+
 	/**
 	 * Sets the main text of the message.
 	 * HTML attributes are allowed and are sanitized by the container
@@ -65,7 +64,7 @@ class Message {
 	{
 		$this->body = $newBody;
 	}
-	
+
 	/**
 	 * Gets the title of the message
 	 * @return the title of the message
@@ -74,7 +73,7 @@ class Message {
 	{
 		return $this->title;
 	}
-	
+
 	/**
 	 * Sets the title of the message
 	 * HTML attributes are allowed and are sanitized by the container.
@@ -84,7 +83,7 @@ class Message {
 	{
 		$this->title = $newTitle;
 	}
-	
+
 	/**
 	 * Gets the type of the message, as specified by opensocial.Message.Type
 	 * @return the type of message (enum Message.Type)
@@ -93,7 +92,7 @@ class Message {
 	{
 		return $this->type;
 	}
-	
+
 	/**
 	 * Sets the type of the message, as specified by opensocial.Message.Type
 	 * @param newType the type of message (enum Message.Type)
@@ -105,7 +104,7 @@ class Message {
 		}
 		$this->type = $newType;
 	}
-	
+
 	/**
 	 * TODO implement either a standard 'sanitizing' facility or
 	 * define an interface that can be set on this class so

@@ -115,7 +115,7 @@ class BasicBlobCrypter extends BlobCrypter {
 	{
 		$map = array();
 		$items = split("[&=]", $plain);
-		for ($i = 0; $i < count($items); ) {
+		for ($i = 0; $i < count($items);) {
 			$key = urldecode($items[$i ++]);
 			$value = urldecode($items[$i ++]);
 			$map[$key] = $value;

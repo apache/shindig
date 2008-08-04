@@ -28,8 +28,8 @@ class SigningFetcher extends RemoteContentFetcher {
 	protected static $OPENSOCIAL_VIEWERID = "opensocial_viewer_id";
 	protected static $OPENSOCIAL_APPID = "opensocial_app_id";
 	protected static $XOAUTH_PUBLIC_KEY = "xoauth_signature_publickey";
-	protected static $ALLOWED_PARAM_NAME = '^[-_[:alnum:]]+$';	
-
+	protected static $ALLOWED_PARAM_NAME = '^[-_[:alnum:]]+$';
+	
 	/**
 	 * Authentication token for the user and gadget making the request.
 	 */
@@ -115,7 +115,7 @@ class SigningFetcher extends RemoteContentFetcher {
 			// in the $_POST to the Shindig proxy server
 			// Here we parse it and put it into the $postDataParams array which then is merged into the postParams
 			// to be used for the GET/POST request and the building of the signature
-			$postDataParams = array();			
+			$postDataParams = array();
 			if (isset($_POST['postData']) && count($postDataParts = split('&', urldecode($_POST['postData']))) > 0) {
 				foreach ($postDataParts as $postDataPart) {
 					$postDataPartsPair = split('=', $postDataPart);
@@ -139,7 +139,7 @@ class SigningFetcher extends RemoteContentFetcher {
 			// We have to be careful not to copy POST parameters into the query.
 			// If post and query parameters share a name, they end up being removed
 			// from the query.
-			$forPost = array();			
+			$forPost = array();
 			$postData = false;
 			if ($method == 'POST') {
 				foreach ($postParams as $key => $param) {

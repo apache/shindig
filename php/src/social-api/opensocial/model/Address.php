@@ -34,117 +34,117 @@ class Address {
 	public $streetAddress;
 	public $type;
 	public $unstructuredAddress;
-	
+
 	public function __construct($unstructuredAddress)
 	{
 		$this->unstructuredAddress = $unstructuredAddress;
 	}
-	
+
 	public function getCountry()
 	{
 		return $this->country;
 	}
-	
+
 	public function setCountry($country)
 	{
 		$this->country = $country;
 	}
-	
+
 	public function getExtendedAddress()
 	{
 		return $this->extendedAddress;
 	}
-	
+
 	public function setExtendedAddress($extendedAddress)
 	{
 		$this->extendedAddress = $extendedAddress;
 	}
-	
+
 	public function getLatitude()
 	{
 		return $this->latitude;
 	}
-	
+
 	public function setLatitude($latitude)
 	{
 		$this->latitude = $latitude;
 	}
-	
+
 	public function getLocality()
 	{
 		return $this->locality;
 	}
-	
+
 	public function setLocality($locality)
 	{
 		$this->locality = $locality;
 	}
-	
+
 	public function getLongitude()
 	{
 		return $this->longitude;
 	}
-	
+
 	public function setLongitude($longitude)
 	{
 		$this->longitude = $longitude;
 	}
-	
+
 	public function getPoBox()
 	{
 		return $this->poBox;
 	}
-	
+
 	public function setPoBox($poBox)
 	{
 		$this->poBox = $poBox;
 	}
-	
+
 	public function getPostalCode()
 	{
 		return $this->postalCode;
 	}
-	
+
 	public function setPostalCode($postalCode)
 	{
 		$this->postalCode = $postalCode;
 	}
-	
+
 	public function getRegion()
 	{
 		return $this->region;
 	}
-	
+
 	public function setRegion($region)
 	{
 		$this->region = $region;
 	}
-	
+
 	public function getStreetAddress()
 	{
 		return $this->streetAddress;
 	}
-	
+
 	public function setStreetAddress($streetAddress)
 	{
 		$this->streetAddress = $streetAddress;
 	}
-	
+
 	public function getType()
 	{
 		return $this->type;
 	}
-	
+
 	public function setType($type)
 	{
 		$this->type = $type;
 	}
-	
+
 	public function getUnstructuredAddress()
 	{
 		return $this->unstructuredAddress;
 	}
-	
+
 	public function setUnstructuredAddress($unstructuredAddress)
 	{
 		$this->unstructuredAddress = $unstructuredAddress;

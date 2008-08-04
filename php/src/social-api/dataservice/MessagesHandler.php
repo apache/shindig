@@ -18,7 +18,7 @@
  */
 
 class MessagesHandler extends DataRequestHandler {
-
+	
 	private static $MESSAGES_PATH = "/messages/{userId}/outbox/{msgId}";
 	private $service;
 

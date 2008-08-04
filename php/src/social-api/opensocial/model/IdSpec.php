@@ -33,7 +33,7 @@ class IdSpec {
 	{
 		if (! empty($jsonIdSpec) && in_array((string)$jsonIdSpec, idSpec::$types)) {
 			$idSpecEnum = (string)$jsonIdSpec;
-		} elseif (!empty($jsonIdSpec)) {
+		} elseif (! empty($jsonIdSpec)) {
 			$idSpecEnum = 'USER_IDS';
 		} else {
 			throw new Exception("The json request had a bad idSpec");
@@ -49,7 +49,7 @@ class IdSpec {
 	public function fetchUserIds()
 	{
 		$userIdArray = $this->jsonSpec;
-		if (!is_array($userIdArray)) {
+		if (! is_array($userIdArray)) {
 			$userIdArray = array($userIdArray);
 		}
 		$userIds = array();

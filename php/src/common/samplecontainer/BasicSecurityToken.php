@@ -89,7 +89,7 @@ class BasicSecurityToken extends SecurityToken {
 			$this->token = $this->crypter->wrap($this->tokenData);
 		}
 	}
-	
+
 	public function isAnonymous()
 	{
 		return ($this->tokenData[$this->OWNER_KEY] === 0 && $this->tokenData[$this->VIEWER_KEY] === 0);

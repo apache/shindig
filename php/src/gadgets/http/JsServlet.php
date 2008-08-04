@@ -73,7 +73,7 @@ class JsServlet extends HttpServlet {
 							$jsLib = $feature;
 							foreach ($jsLib->getLibraries($context) as $lib) {
 								if ($lib->getType() != 'URL') {
-									$jsData .= $lib->getContent()."\n";
+									$jsData .= $lib->getContent() . "\n";
 								}
 							}
 						}

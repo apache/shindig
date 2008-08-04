@@ -31,23 +31,23 @@ class InputAtomConverter extends InputConverter {
 	{
 		$activity = array();
 		$xml = simplexml_load_string($requestParam, 'SimpleXMLElement', LIBXML_NOCDATA);
-		if (!isset($xml->title)) {
+		if (! isset($xml->title)) {
 			throw new Exception("Mallformed activity xml");
 		}
 		// remember to either type cast to (string) or trim() the string so we don't get 
 		// SimpleXMLString types in the internal data representation. I often prefer
 		// using trim() since it cleans up the data too
-		$activity['id'] = isset($xml->id) ? trim($xml->id) : ''; 
+		$activity['id'] = isset($xml->id) ? trim($xml->id) : '';
 		$activity['title'] = trim($xml->title);
-		$activity['body'] = isset($xml->summary) ? trim($xml->summary) : ''; 
-		$activity['streamTitle'] = isset($xml->content->activity->streamTitle) ? trim($xml->content->activity->streamTitle) : ''; 
-		$activity['streamId'] = isset($xml->content->activity->streamId) ? trim($xml->content->activity->streamId) : ''; 
-		$activity['updated'] = isset($xml->updated) ? trim($xml->updated) : ''; 
+		$activity['body'] = isset($xml->summary) ? trim($xml->summary) : '';
+		$activity['streamTitle'] = isset($xml->content->activity->streamTitle) ? trim($xml->content->activity->streamTitle) : '';
+		$activity['streamId'] = isset($xml->content->activity->streamId) ? trim($xml->content->activity->streamId) : '';
+		$activity['updated'] = isset($xml->updated) ? trim($xml->updated) : '';
 		if (isset($xml->content->activity->mediaItems)) {
 			$activity['mediaItems'] = array();
 			foreach ($xml->content->activity->mediaItems->MediaItem as $mediaItem) {
 				$item = array();
-				if (!isset($mediaItem->type) || !isset($mediaItem->mimeType) || !isset($mediaItem->url)) {
+				if (! isset($mediaItem->type) || ! isset($mediaItem->mimeType) || ! isset($mediaItem->url)) {
 					throw new Exception("Invalid media item in activity xml");
 				}
 				$item['type'] = trim($mediaItem->type);
@@ -62,7 +62,7 @@ class InputAtomConverter extends InputConverter {
 	public function convertAppData($requestParam)
 	{
 		$xml = simplexml_load_string($requestParam, 'SimpleXMLElement', LIBXML_NOCDATA);
-		if (!isset($xml->content) || !isset($xml->content->appdata)) {
+		if (! isset($xml->content) || ! isset($xml->content->appdata)) {
 			throw new Exception("Mallformed AppData xml");
 		}
 		$data = array();
@@ -71,20 +71,20 @@ class InputAtomConverter extends InputConverter {
 		}
 		return $data;
 	}
-	
+
 	public function convertMessages($requestParam)
 	{
 		$xml = simplexml_load_string($requestParam, 'SimpleXMLElement', LIBXML_NOCDATA);
 		$message = array();
-		if (!isset($xml->title) || !isset($xml->content)) {
+		if (! isset($xml->title) || ! isset($xml->content)) {
 			throw new Exception("Invalid message structure");
 		}
 		$message['id'] = isset($xml->id) ? trim($xml->id) : null;
 		$message['title'] = trim($xml->title);
 		$message['body'] = trim($xml->content);
 		// retrieve recipients by looking at the osapi name space
-		$xml = simplexml_load_string($requestParam, 'SimpleXMLElement', LIBXML_NOCDATA, "http://opensocial.org/2008/opensocialapi");		
-		if (!isset($xml->recipient)) {
+		$xml = simplexml_load_string($requestParam, 'SimpleXMLElement', LIBXML_NOCDATA, "http://opensocial.org/2008/opensocialapi");
+		if (! isset($xml->recipient)) {
 			throw new Exception("Invalid message structure");
 		}
 		$message['recipients'] = array();

@@ -183,7 +183,7 @@ class ProxyHandler {
 				}
 			}
 			$etag = md5($result->getResponseContent());
-			$lastModified = $result->getResponseHeader('Last-Modified') != null ? $result->getResponseHeader('Last-Modified') : gmdate('D, d M Y H:i:s', $result->getCreated().' GMT');
+			$lastModified = $result->getResponseHeader('Last-Modified') != null ? $result->getResponseHeader('Last-Modified') : gmdate('D, d M Y H:i:s', $result->getCreated() . ' GMT');
 			$notModified = false;
 			// If HTTP_PRAGMA | HTTP_CACHE_CONTROL == no-cache, the browser wants to do a 'forced reload' 
 			if (! isset($_SERVER['HTTP_PRAGMA']) || ! strstr(strtolower($_SERVER['HTTP_PRAGMA']), 'no-cache') && (! isset($_SERVER['HTTP_CACHE_CONTROL']) || ! strstr(strtolower($_SERVER['HTTP_CACHE_CONTROL']), 'no-cache'))) {
@@ -201,13 +201,13 @@ class ProxyHandler {
 			}
 			$this->setCachingHeaders($etag, $this->context->getRefreshInterval(), $lastModified);
 			// If the cached file time is within the refreshInterval params value and the ETag match, return not-modified
- 			if ($notModified) {
- 				header('HTTP/1.0 304 Not Modified', true);
- 				header('Content-Length: 0', true);
- 			} else {
+			if ($notModified) {
+				header('HTTP/1.0 304 Not Modified', true);
+				header('Content-Length: 0', true);
+			} else {
 				// then echo the content
 				echo $result->getResponseContent();
- 			}
+			}
 		} else {
 			@ob_end_clean();
 			header("HTTP/1.0 404 Not Found", true);
@@ -229,6 +229,7 @@ class ProxyHandler {
 	{
 		//TODO get actual character encoding from the request
 		
+
 		// Extract the request headers from the $_SERVER super-global (this -does- unfortunatly mean that any header that php doesn't understand won't be proxied thru though)
 		// if this turns out to be a problem we could add support for HTTP_RAW_HEADERS, but this depends on a php.ini setting, so i'd rather prevent that from being required
 		$headers = '';

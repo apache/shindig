@@ -560,7 +560,7 @@ class OAuthUtil {
 	public static $AUTH_SCHEME = "OAuth";
 	private static $AUTHORIZATION = "\ *[a-zA-Z0-9*]\ +(.*)";
 	private static $NVP = "(\\S*)\\s*\\=\\s*\"([^\"]*)\"";
-	
+
 	public static function getPostBodyString(Array $params)
 	{
 		$result = '';

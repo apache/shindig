@@ -1,5 +1,4 @@
 <?php
-
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements. See the NOTICE file
@@ -31,7 +30,8 @@ class OutputAtomConverter extends OutputConverter {
 	//FIXME osearch fields break the validator ... remove option once i know if they should be included or not
 	private static $includeOsearch = false;
 	// this maps the REST url to the atom content type
-	private static $entryTypes = array('people' => 'person', 'appdata' => 'appdata', 'activities' => 'activity', 'messages' => 'messages');
+	private static $entryTypes = array('people' => 'person', 'appdata' => 'appdata', 
+			'activities' => 'activity', 'messages' => 'messages');
 	private $doc;
 
 	function outputResponse(ResponseItem $responseItem, RestRequestItem $requestItem)
@@ -62,7 +62,8 @@ class OutputAtomConverter extends OutputConverter {
 			$this->addNode($author, 'name', $authorName);
 			$this->addNode($entry, 'updated', $updatedAtom);
 			$this->addNode($entry, 'id', $guid);
-			$this->addNode($entry, 'link', '', array('rel' => 'self', 'href' => 'http://' . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI']));
+			$this->addNode($entry, 'link', '', array('rel' => 'self', 
+					'href' => 'http://' . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI']));
 			// Add osearch & next link to the entry
 			$this->addPagingFields($entry, $startIndex, $itemsPerPage, $totalResults);
 			// Add response entries to feed
@@ -72,7 +73,8 @@ class OutputAtomConverter extends OutputConverter {
 				$idField = is_object($response) && isset($response->id) ? $response->id : (is_array($response) && isset($response['id']) ? $response['id'] : $requestItem->getUser()->getUserId($requestItem->getToken()));
 				// construct <entry> blocks this record
 				$feedEntry = $this->addNode($entry, 'entry');
-				$content = $this->addNode($feedEntry, 'content', '', array('type' => 'application/xml'));
+				$content = $this->addNode($feedEntry, 'content', '', array(
+						'type' => 'application/xml'));
 				// Author node
 				$author = $this->addNode($feedEntry, 'author');
 				$this->addNode($author, 'uri', $guid);
@@ -259,7 +261,7 @@ class OutputAtomConverter extends OutputConverter {
 				} else {
 					if (is_numeric($key)) {
 						$key = is_object($val) ? get_class($val) : $key = $name;
-					}					
+					}
 					$elm = $newElement->appendChild($this->doc->createElement($key));
 					$elm->appendChild($this->doc->createTextNode($val));
 				}

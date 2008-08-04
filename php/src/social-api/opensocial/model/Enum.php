@@ -27,90 +27,66 @@
  */
 
 abstract class Enum {
-  public $displayValue;
-  public $key;
-  public $values = array();
-  
-  public function __construct($key, $displayValue = '')
-  {
-  	//FIXME should add enum restriction checking to this
-  	if (!isset($this->values[$key])) {
-  		throw new Exception("Invalid Enum key");
-  	}
-  	$this->key = $key;
-  	$this->displayValue = !empty($displayValue) ? $displayValue : $this->values[$key];
-  	unset($this->values);
-  }
-  
-  public function getDisplayValue()
-  {
-	return $this->displayValue;
-  }
-  
-  public function setDisplayValue($displayValue)
-  {
-  	$this->displayValue = $displayValue;
-  }
-  
-  public function toString()
-  {
-  	return $this->jsonString;
-  }
-}
+	public $displayValue;
+	public $key;
+	public $values = array();
 
+	public function __construct($key, $displayValue = '')
+	{
+		//FIXME should add enum restriction checking to this
+		if (! isset($this->values[$key])) {
+			throw new Exception("Invalid Enum key");
+		}
+		$this->key = $key;
+		$this->displayValue = ! empty($displayValue) ? $displayValue : $this->values[$key];
+		unset($this->values);
+	}
+
+	public function getDisplayValue()
+	{
+		return $this->displayValue;
+	}
+
+	public function setDisplayValue($displayValue)
+	{
+		$this->displayValue = $displayValue;
+	}
+
+	public function toString()
+	{
+		return $this->jsonString;
+	}
+}
 
 /**
  * public Enum for opensocial.Enum.Drinker
  */
 class EnumDrinker extends Enum {
-  public $values = array (
-    'HEAVILY' => "Heavily",
-    'NO' => "No",
-    'OCCASIONALLY' => "Occasionally",
-    'QUIT' => "Quit",
-    'QUITTING' => "Quitting",
-    'REGULARLY' => "Regularly",
-    'SOCIALLY' => "Socially",
-    'YES' => "Yes"
-  );
+	public $values = array('HEAVILY' => "Heavily", 'NO' => "No", 'OCCASIONALLY' => "Occasionally", 
+			'QUIT' => "Quit", 'QUITTING' => "Quitting", 'REGULARLY' => "Regularly", 
+			'SOCIALLY' => "Socially", 'YES' => "Yes");
 }
 
 /**
  * public Enum for opensocial.Enum.Gender
  */
 class EnumGender extends Enum {
-	public $values = array (
-    	'FEMALE' => "Female",
-    	'MALE' => "Male"
-	);
+	public $values = array('FEMALE' => "Female", 'MALE' => "Male");
 }
 
 /**
  * public Enum for opensocial.Enum.Smoker
  */
 class EnumSmoker extends Enum {
-	public $values = array(
-    'HEAVILY' => "Heavily",
-    'NO' => "No",
-    'OCCASIONALLY' => "Ocasionally",
-    'QUIT' => "Quit",
-    'QUITTING' => "Quitting",
-    'REGULARLY' => "Regularly",
-    'SOCIALLY' => "Socially",
-	'YES' => "Yes"
-	);
+	public $values = array('HEAVILY' => "Heavily", 'NO' => "No", 'OCCASIONALLY' => "Ocasionally", 
+			'QUIT' => "Quit", 'QUITTING' => "Quitting", 'REGULARLY' => "Regularly", 
+			'SOCIALLY' => "Socially", 'YES' => "Yes");
 }
 
 /**
  * public Enum for opensocial.Enum.Presence
  */
 class EnumPresence extends Enum {
-	public $values = array(
-    'AWAY' => "Away",
-    'CHAT' => "Chat",
-    'DND' => "Do Not Disturb",
-    'OFFLINE' => "Offline",
-    'ONLINE' => "Online",
-    'XA' => "Extended Away"
-    );
+	public $values = array('AWAY' => "Away", 'CHAT' => "Chat", 'DND' => "Do Not Disturb", 
+			'OFFLINE' => "Offline", 'ONLINE' => "Online", 'XA' => "Extended Away");
 }

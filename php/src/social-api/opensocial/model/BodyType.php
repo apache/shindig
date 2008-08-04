@@ -28,52 +28,52 @@ class BodyType {
 	public $hairColor;
 	public $height;
 	public $weight;
-	
+
 	public function getBuild()
 	{
 		return $this->build;
 	}
-	
+
 	public function setBuild($build)
 	{
 		$this->build = $build;
 	}
-	
+
 	public function getEyeColor()
 	{
 		return $this->eyeColor;
 	}
-	
+
 	public function setEyeColor($eyeColor)
 	{
 		$this->eyeColor = $eyeColor;
 	}
-	
+
 	public function getHairColor()
 	{
 		return $this->hairColor;
 	}
-	
+
 	public function setHairColor($hairColor)
 	{
 		$this->hairColor = $hairColor;
 	}
-	
+
 	public function getHeight()
 	{
 		return $this->height;
 	}
-	
+
 	public function setHeight($height)
 	{
 		$this->height = $height;
 	}
-	
+
 	public function getWeight()
 	{
 		return $this->weight;
 	}
-	
+
 	public function setWeight($weight)
 	{
 		$this->weight = $weight;

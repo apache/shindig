@@ -22,7 +22,8 @@
  * The main gadget class, this gets filled in by the GadgetSpecParser, etc
  * and contains all the gadget information.
  *
- */class Gadget {
+ */
+class Gadget {
 	private $jsLibraries;
 	private $substitutions;
 	private $userPrefValues;

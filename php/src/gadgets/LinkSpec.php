@@ -23,7 +23,7 @@ class LinkSpec {
 	public $href;
 	public $method;
 
-	public function __construct($rel, $href, $method='GET')
+	public function __construct($rel, $href, $method = 'GET')
 	{
 		$this->rel = $rel;
 		$this->href = $href;
@@ -34,7 +34,7 @@ class LinkSpec {
 	{
 		return $this->rel;
 	}
-	
+
 	public function getHref()
 	{
 		return $this->href;

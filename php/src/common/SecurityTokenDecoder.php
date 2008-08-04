@@ -23,12 +23,12 @@
  */
 abstract class SecurityTokenDecoder {
 
-  /**
-   * Decrypts and verifies a gadget security token to return a gadget token.
-   * 
-   * @param tokenString String representation of the token to be created.
-   * @return The token representation of the input data.
-   * @throws GadgetException If tokenString is not a valid token
-   */
-  abstract public function createToken($tokenString);
+	/**
+	 * Decrypts and verifies a gadget security token to return a gadget token.
+	 * 
+	 * @param tokenString String representation of the token to be created.
+	 * @return The token representation of the input data.
+	 * @throws GadgetException If tokenString is not a valid token
+	 */
+	abstract public function createToken($tokenString);
 }

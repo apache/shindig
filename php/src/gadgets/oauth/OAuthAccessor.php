@@ -58,11 +58,12 @@ class OAuthAccessor {
 		$signatureMethod = null;
 		if ($parameters[OAuth::$OAUTH_SIGNATURE_METHOD] == OAuth::$RSA_SHA1) {
 			$signatureMethod = new OAuthSignatureMethod_RSA_SHA1();
-		} else if ($parameters[OAuth::$OAUTH_SIGNATURE_METHOD] == OAuth::$HMAC_SHA1) {
-			$signatureMethod = new OAuthSignatureMethod_HMAC_SHA1();
-		} else { //PLAINTEXT
-			$signatureMethod = new OAuthSignatureMethod_PLAINTEXT();
-		}
+		} else 
+			if ($parameters[OAuth::$OAUTH_SIGNATURE_METHOD] == OAuth::$HMAC_SHA1) {
+				$signatureMethod = new OAuthSignatureMethod_HMAC_SHA1();
+			} else { //PLAINTEXT
+				$signatureMethod = new OAuthSignatureMethod_PLAINTEXT();
+			}
 		$message->sign_request($signatureMethod, $this->consumer, $this->tokenSecret);
 		return $message;
 	}

@@ -102,7 +102,7 @@ class GadgetFeatureRegistry {
 			return;
 		}
 		foreach ($feature->deps as $dep) {
-			 //TODO: Temporal fix, double check where empty dependencies are being added
+			//TODO: Temporal fix, double check where empty dependencies are being added
 			if (! empty($dep)) {
 				$this->addFeatureToResults($results, $this->features[$dep]);
 			}

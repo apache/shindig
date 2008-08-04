@@ -18,7 +18,7 @@
  */
 
 class UserId {
-	static public $types = array('viewer', 'owner', 'userId');
+	public static $types = array('viewer', 'owner', 'userId');
 	private $type;
 	private $userId;
 
@@ -53,7 +53,7 @@ class UserId {
 				break;
 		}
 	}
-	
+
 	public function getType()
 	{
 		return $this->type;

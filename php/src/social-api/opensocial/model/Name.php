@@ -29,67 +29,67 @@ class Name {
 	public $honorificPrefix;
 	public $honorificSuffix;
 	public $unstructured;
-	
+
 	public function __construct($unstructured)
 	{
 		$this->unstructured = $unstructured;
 	}
-	
+
 	public function getUnstructured()
 	{
 		return $this->unstructured;
 	}
-	
+
 	public function setUnstructured($unstructured)
 	{
 		$this->unstructured = $unstructured;
 	}
-	
+
 	public function getAdditionalName()
 	{
 		return $this->additionalName;
 	}
-	
+
 	public function setAdditionalName($additionalName)
 	{
 		$this->additionalName = $additionalName;
 	}
-	
+
 	public function getFamilyName()
 	{
 		return $this->familyName;
 	}
-	
+
 	public function setFamilyName($familyName)
 	{
 		$this->familyName = $familyName;
 	}
-	
+
 	public function getGivenName()
 	{
 		return $this->givenName;
 	}
-	
+
 	public function setGivenName($givenName)
 	{
 		$this->givenName = $givenName;
 	}
-	
+
 	public function getHonorificPrefix()
 	{
 		return $this->honorificPrefix;
 	}
-	
+
 	public function setHonorificPrefix($honorificPrefix)
 	{
 		$this->honorificPrefix = $honorificPrefix;
 	}
-	
+
 	public function getHonorificSuffix()
 	{
 		return $this->honorificSuffix;
 	}
-	
+
 	public function setHonorificSuffix($honorificSuffix)
 	{
 		$this->honorificSuffix = $honorificSuffix;

@@ -33,7 +33,7 @@ class BasicActivitiesService extends ActivitiesService {
 		}
 		return new ResponseItem(NOT_FOUND, "Activity not found", null);
 	}
-	
+
 	public function getActivities(UserId $userId, $groupId, $first, $max, SecurityToken $token)
 	{
 		$ids = array();
@@ -41,16 +41,16 @@ class BasicActivitiesService extends ActivitiesService {
 		switch ($type) {
 			case 'all':
 			case 'friends':
-        		$friendIds = XmlStateFileFetcher::get()->getFriendIds();
-        		$friendIds = isset($friendIds[$userId->getUserId($token)]) ? $friendIds[$userId->getUserId($token)] : null;
+				$friendIds = XmlStateFileFetcher::get()->getFriendIds();
+				$friendIds = isset($friendIds[$userId->getUserId($token)]) ? $friendIds[$userId->getUserId($token)] : null;
 				if ($friendIds != null) {
 					$ids = $friendIds;
 				}
 				break;
 			case 'self':
-        		$ids[] = $userId->getUserId($token);
-        		break;
-    	}
+				$ids[] = $userId->getUserId($token);
+				break;
+		}
 		$allActivities = XmlStateFileFetcher::get()->getActivities();
 		$activities = array();
 		foreach ($ids as $id) {
