@@ -63,7 +63,7 @@ class BodyTypeTest extends PHPUnit_Framework_TestCase {
 	 */
 	public function testGetEyeColor()
 	{
-		$this->assertEquals('EYECOLOR', $this->BodyType->eyeColor);
+		$this->assertEquals('EYECOLOR', $this->BodyType->getEyeColor());
 	}
 
 	/**
@@ -71,7 +71,7 @@ class BodyTypeTest extends PHPUnit_Framework_TestCase {
 	 */
 	public function testGetHairColor()
 	{
-		$this->assertEquals('HAIRCOLOR', $this->BodyType->hairColor);
+		$this->assertEquals('HAIRCOLOR', $this->BodyType->getHairColor());
 	}
 
 	/**
@@ -79,7 +79,7 @@ class BodyTypeTest extends PHPUnit_Framework_TestCase {
 	 */
 	public function testGetHeight()
 	{
-		$this->assertEquals('HEIGHT', $this->BodyType->height);
+		$this->assertEquals('HEIGHT', $this->BodyType->getHeight());
 	}
 
 	/**
@@ -87,7 +87,7 @@ class BodyTypeTest extends PHPUnit_Framework_TestCase {
 	 */
 	public function testGetWeight()
 	{
-		$this->assertEquals('WEIGHT', $this->BodyType->weight);
+		$this->assertEquals('WEIGHT', $this->BodyType->getWeight());
 	}
 
 	/**
@@ -96,7 +96,7 @@ class BodyTypeTest extends PHPUnit_Framework_TestCase {
 	public function testSetBuild()
 	{
 		$this->BodyType->setBuild('build');
-		$this->assertEquals('build', $this->BodyType->build);
+		$this->assertEquals('build', $this->BodyType->getBuild());
 	}
 
 	/**
@@ -105,7 +105,7 @@ class BodyTypeTest extends PHPUnit_Framework_TestCase {
 	public function testSetEyeColor()
 	{
 		$this->BodyType->setEyeColor('eyecolor');
-		$this->assertEquals('eyecolor', $this->BodyType->eyeColor);
+		$this->assertEquals('eyecolor', $this->BodyType->getEyeColor());
 	}
 
 	/**
@@ -114,7 +114,7 @@ class BodyTypeTest extends PHPUnit_Framework_TestCase {
 	public function testSetHairColor()
 	{
 		$this->BodyType->setHairColor('haircolor');
-		$this->assertEquals('haircolor', $this->BodyType->hairColor);
+		$this->assertEquals('haircolor', $this->BodyType->getHairColor());
 	}
 
 	/**
@@ -123,7 +123,7 @@ class BodyTypeTest extends PHPUnit_Framework_TestCase {
 	public function testSetHeight()
 	{
 		$this->BodyType->setHeight('height');
-		$this->assertEquals('height', $this->BodyType->height);
+		$this->assertEquals('height', $this->BodyType->getHeight());
 	}
 
 	/**
@@ -132,6 +132,6 @@ class BodyTypeTest extends PHPUnit_Framework_TestCase {
 	public function testSetWeight()
 	{
 		$this->BodyType->setWeight('weight');
-		$this->assertEquals('weight', $this->BodyType->weight);
+		$this->assertEquals('weight', $this->BodyType->getWeight());
 	}
 }
