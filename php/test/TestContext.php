@@ -29,7 +29,7 @@ class TestContext extends GadgetContext {
 		$this->setUrl('http://www.example.org/foo.xml');
 		$this->setModuleId(1);
 		$this->setView('profile');
-		$this->setContainer('test');
+		$this->setContainer('');
 		$this->setRefreshInterval(1);
 	}
 }

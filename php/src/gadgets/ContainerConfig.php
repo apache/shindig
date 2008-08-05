@@ -77,7 +77,6 @@ class ContainerConfig {
 		if ($container != $this->default_container && isset($this->config[$container][$name])) {
 			$config = $this->mergeConfig($this->config[$container][$name], $config);
 		}
-		
 		return $config;
 	}
 

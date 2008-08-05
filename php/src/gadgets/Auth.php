@@ -34,10 +34,10 @@ class Auth {
 			$value = trim($value);
 			if (strlen($value) == 0)
 				return Auth::$NONE;
-			if (strtoupper($value == Auth::$SIGNED)) {
+			if (strtoupper($value) == Auth::$SIGNED) {
 				return Auth::$SIGNED;
 			} else 
-				if (strtoupper($value == Auth::$AUTHENTICATED)) {
+				if (strtoupper($value) == Auth::$AUTHENTICATED) {
 					return Auth::$AUTHENTICATED;
 				} else {
 					return Auth::$NONE;

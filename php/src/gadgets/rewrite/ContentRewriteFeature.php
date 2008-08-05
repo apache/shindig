@@ -33,6 +33,9 @@ class ContentRewriteFeature {
 	public function createRewriteFeature(Gadget $gadget)
 	{
 		$requires = $gadget->getRequires();
+		if (!isset($requires[ContentRewriteFeature::$REWRITE_TAG])) {
+			return;
+		}
 		$rewriteFeature = $requires[ContentRewriteFeature::$REWRITE_TAG];
 		$rewriteParams = $rewriteFeature->getParams();
 		if (isset($rewriteParams[ContentRewriteFeature::$INCLUDE_URLS])) {
