@@ -19,37 +19,41 @@
  */
 
 /**
- * Basic example blacklist class. This class takes a text file with regex
- * rules against which URL's are tested.
- * The default file location is {$base_path}/blacklist.txt
- *
+ * Auth test case.
  */
-class BasicGadgetBlacklist {
-	private $rules = array();
+class AuthTest extends PHPUnit_Framework_TestCase {
+	
+	/**
+	 * @var Auth
+	 */
+	private $Auth;
 
-	public function __construct($file = false)
+	/**
+	 * Prepares the environment before running a test.
+	 */
+	protected function setUp()
 	{
-		if (!$file) {
-			$file = Config::get('base_path') . '/blacklist.txt';
-		}
-		if (file_exists($file) && is_readable($file)) {
-			$this->rules = explode("\n", file_get_contents($file));
-		}
+		parent::setUp();
+		$this->Auth = new Auth();	
 	}
 
 	/**
-	 * Check the URL against the blacklist rules
-	 *
-	 * @param string $url
-	 * @return boolean is blacklisted or not?
+	 * Cleans up the environment after running a test.
 	 */
-	function isBlacklisted($url)
+	protected function tearDown()
 	{
-		foreach ($this->rules as $rule) {
-			if (preg_match($rule, $url)) {
-				return true;
-			}
-		}
-		return false;
+		$this->Auth = null;		
+		parent::tearDown();
+	}
+
+	/**
+	 * Tests Auth::parse()
+	 */
+	public function testParse()
+	{
+		$this->assertEquals(Auth::$AUTHENTICATED, Auth::parse('authenticated'));
+		$this->assertEquals(Auth::$SIGNED, Auth::parse('signed'));
+		$this->assertEquals(Auth::$NONE, Auth::parse('none'));
+		$this->assertEquals(Auth::$NONE, Auth::parse('foo'));
 	}
 }
