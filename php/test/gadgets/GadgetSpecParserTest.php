@@ -68,7 +68,7 @@ class GadgetSpecParserTest extends PHPUnit_Framework_TestCase {
 	}
 
 	/**
-	 * Tests GadgetSpecParser->parse()
+	 * Tests GadgetSpecParser->parse() exception
 	 */
 	public function testParseExeption()
 	{
