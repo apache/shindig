@@ -68,7 +68,6 @@ $shindigConfig = array(
 	'features_path' => realpath(dirname(__FILE__) . '/../../features').'/',
 	'container_path' => realpath(dirname(__FILE__) . '/../../config').'/',
 	'javascript_path' => realpath(dirname(__FILE__) . '/../../javascript').'/',
-	'container_config' => realpath(dirname(__FILE__) . '/../../config').'/container.js',
 
 	// The OAuth SSL certificates to use, and the pass phrase for the private key  
 	'private_key_file' => realpath(dirname(__FILE__) . '/../certs').'/private.key', 
