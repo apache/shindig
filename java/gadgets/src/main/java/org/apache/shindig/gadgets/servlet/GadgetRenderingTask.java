@@ -135,12 +135,18 @@ public class GadgetRenderingTask {
       return;
     }
 
+    boolean addedCaja = false;
     if (getUseCaja(request)) {
       filters.add(new CajaContentFilter(url));
+      addedCaja = true;
     }
 
     try {
       Gadget gadget = server.processGadget(context);
+      if (!addedCaja &&
+          gadget.getSpec().getModulePrefs().getFeatures().containsKey("caja")) {
+        filters.add(new CajaContentFilter(url));
+      }
       outputGadget(gadget);
     } catch (GadgetException e) {
       outputErrors(e);
