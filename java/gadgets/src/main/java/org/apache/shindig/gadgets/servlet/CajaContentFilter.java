@@ -36,12 +36,15 @@ import com.google.caja.reporting.MessageQueue;
 import com.google.caja.reporting.SimpleMessageQueue;
 
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.Reader;
 import java.io.StringReader;
 import java.net.URI;
+import java.util.logging.Logger;
 
 public class CajaContentFilter implements GadgetContentFilter {
   private final URI retrievedUri;
+  private final Logger logger = Logger.getLogger("org.apache.shindig.gadgets");
 
   public CajaContentFilter(URI retrievedUri) {
     this.retrievedUri = retrievedUri;
@@ -49,18 +52,32 @@ public class CajaContentFilter implements GadgetContentFilter {
 
   public String filter(String content) throws GadgetException {
     UriCallback cb = new UriCallback() {
-      public UriCallbackOption getOption(ExternalReference externalReference,
-                                         String string) {
+      public UriCallbackOption getOption(ExternalReference externalReference, String string) {
         return UriCallbackOption.REWRITE;
       }
 
       public Reader retrieve(ExternalReference externalReference, String string)
           throws UriCallbackException {
-        throw new UriCallbackException(externalReference);
+        logger.info("Retrieving " + externalReference.toString());
+        try {
+          Reader in = new InputStreamReader(
+              externalReference.getUri().toURL().openConnection().getInputStream(),
+              "UTF-8");
+          char[] buf = new char[4096];
+          StringBuilder sb = new StringBuilder();
+          for (int n; (n = in.read(buf)) > 0;) {
+            sb.append(buf, 0, n);
+          }
+          return new StringReader(sb.toString());
+        } catch (java.net.MalformedURLException ex) {
+          throw new UriCallbackException(externalReference, ex);
+        } catch (IOException ex) {
+          throw new UriCallbackException(externalReference, ex);
+        }
       }
 
       public URI rewrite(ExternalReference externalReference, String string) {
-        return externalReference.getUri();
+        return retrievedUri.resolve(externalReference.getUri());
       }
     };
 
