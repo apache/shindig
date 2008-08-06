@@ -31,7 +31,6 @@ class InputAtomConverter extends InputConverter {
 	{
 		$activity = array();
 		$xml = simplexml_load_string($requestParam, 'SimpleXMLElement', LIBXML_NOCDATA);
-		file_put_contents('/tmp/activitxml.txt', print_r($xml, true));
 		if (! isset($xml->title)) {
 			throw new Exception("Mallformed activity xml");
 		}
