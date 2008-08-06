@@ -123,9 +123,9 @@ public class JsonDbOpensocialService implements ActivityService, PersonService, 
           JSONArray activities = db.getJSONObject(ACTIVITIES_TABLE).getJSONArray(id);
           for (int i = 0; i < activities.length(); i++) {
             JSONObject activity = activities.getJSONObject(i);
-            if (appId != null && activity.get(Activity.Field.APP_ID.toString()).equals(appId)) {
+            if (appId == null || !activity.has(Activity.Field.APP_ID.toString())) {
               result.add(convertToActivity(activity, fields));
-            } else if (appId == null) {
+            } else if (activity.get(Activity.Field.APP_ID.toString()).equals(appId)) {
               result.add(convertToActivity(activity, fields));
             }
           }
