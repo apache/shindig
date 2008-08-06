@@ -38,6 +38,7 @@ function __autoload($className)
 					'src/social-api',
 					'src/social-api/http',
 					'src/social-api/dataservice',
+					'src/social-api/converters',
 					'src/social-api/opensocial',
 					'src/social-api/opensocial/model',
 					'src/social-api/samplecontainer'
