@@ -128,6 +128,7 @@ public class DataServiceServlet extends InjectedServlet {
     } catch (SecurityTokenException e) {
       sendError(servletResponse, new ResponseItem<Object>(ResponseError.UNAUTHORIZED,
           "The security token was invalid", null));
+      return;
     }
 
     BeanConverter converter = getConverterForRequest(servletRequest);
