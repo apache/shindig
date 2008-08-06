@@ -23,7 +23,7 @@ import org.apache.commons.lang.StringUtils;
 
 public class UserId {
   public enum Type {
-    viewer, owner, userId
+    me, viewer, owner, userId
   }
 
   private Type type;
@@ -47,6 +47,7 @@ public class UserId {
       case owner:
         return token.getOwnerId();
       case viewer:
+      case me:
         return token.getViewerId();
       case userId:
         return userId;
