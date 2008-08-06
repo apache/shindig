@@ -22,8 +22,9 @@ import org.apache.shindig.common.SecurityTokenDecoder;
 import org.apache.shindig.common.SecurityTokenException;
 import org.apache.shindig.common.servlet.InjectedServlet;
 import org.apache.shindig.common.servlet.ParameterFetcher;
-import org.apache.shindig.social.ResponseItem;
+import org.apache.shindig.common.util.ImmediateFuture;
 import org.apache.shindig.social.ResponseError;
+import org.apache.shindig.social.ResponseItem;
 
 import com.google.common.collect.Maps;
 import com.google.inject.Inject;
@@ -79,7 +80,7 @@ public class DataServiceServlet extends InjectedServlet {
   }
 
   @Inject
-  public void setBeanConverters(@Named("bean.converter.json") BeanConverter jsonConverter, 
+  public void setBeanConverters(@Named("bean.converter.json") BeanConverter jsonConverter,
     @Named("bean.converter.xml")  BeanConverter xmlConverter) {
     this.jsonConverter = jsonConverter;
     this.xmlConverter = xmlConverter;
@@ -119,18 +120,34 @@ public class DataServiceServlet extends InjectedServlet {
     logger.finest("Handling restful request for " + servletRequest.getPathInfo());
 
     servletRequest.setCharacterEncoding("UTF-8");
-    SecurityToken token = getSecurityToken(servletRequest);
+
+    SecurityToken token = null;
+    try {
+      // TODO: Integrate this with the oauth filter.
+      token = getSecurityToken(servletRequest);
+    } catch (SecurityTokenException e) {
+      sendError(servletResponse, new ResponseItem<Object>(ResponseError.UNAUTHORIZED,
+          "The security token was invalid", null));
+    }
+
     BeanConverter converter = getConverterForRequest(servletRequest);
 
     if (isBatchUrl(servletRequest)) {
       try {
         handleBatchRequest(servletRequest, servletResponse, token, converter);
       } catch (JSONException e) {
-        throw new RuntimeException("Bad batch format", e);
+        sendError(servletResponse, new ResponseItem<Object>(ResponseError.BAD_REQUEST,
+            "The batch request had an invalid format.", null));
       }
     } else {
       handleSingleRequest(servletRequest, servletResponse, token, converter);
     }
+  }
+
+  private void sendError(HttpServletResponse servletResponse, ResponseItem responseItem)
+      throws IOException {
+    servletResponse.sendError(responseItem.getError().getHttpErrorCode(),
+          responseItem.getErrorMessage());
   }
 
   /** Handler for non-batch requests */
@@ -147,8 +164,7 @@ public class DataServiceServlet extends InjectedServlet {
       PrintWriter writer = servletResponse.getWriter();
       writer.write(converter.convertToString(responseItem.getResponse()));
     } else {
-      servletResponse.sendError(responseItem.getError().getHttpErrorCode(),
-          responseItem.getErrorMessage());
+      sendError(servletResponse, responseItem);
     }
   }
 
@@ -212,7 +228,8 @@ public class DataServiceServlet extends InjectedServlet {
     Class<? extends DataRequestHandler> handlerClass = handlers.get(route);
 
     if (handlerClass == null) {
-      throw new RuntimeException("No handler for route: " + route);
+      return ImmediateFuture.newInstance(new ResponseItem<Object>(ResponseError.BAD_REQUEST,
+          "The url path " + route + " is not supported", null));
     }
 
     DataRequestHandler handler = injector.getInstance(handlerClass);
@@ -223,14 +240,8 @@ public class DataServiceServlet extends InjectedServlet {
     return new ResponseItem<Void>(ResponseError.INTERNAL_ERROR, t.getMessage(), null);
   }
 
-  SecurityToken getSecurityToken(HttpServletRequest servletRequest) {
-    SecurityToken token;
-    try {
-      token = securityTokenDecoder.createToken(parameterFetcher.fetch(servletRequest));
-    } catch (SecurityTokenException e) {
-      throw new RuntimeException("Implement error return for bad security token.", e);
-    }
-    return token;
+  SecurityToken getSecurityToken(HttpServletRequest servletRequest) throws SecurityTokenException {
+    return securityTokenDecoder.createToken(parameterFetcher.fetch(servletRequest));
   }
 
   BeanConverter getConverterForRequest(HttpServletRequest servletRequest) {
