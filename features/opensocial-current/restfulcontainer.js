@@ -18,6 +18,9 @@
 
 /**
  * @fileoverview RESTful based opensocial container.
+ *
+ * TODO: We should probably use a url builder of some sort to construct the restful urls.
+ * They are getting a little too complex for string concatenation
  */
 
 var RestfulContainer = function(baseUrl, domain, supportedFieldsArray) {
@@ -190,10 +193,13 @@ RestfulContainer.prototype.translateIdSpec = function(newIdSpec) {
     groupId = "@self";
   }
 
-  // TODO: Network distance
-
   return userId + "/" + groupId;
 };
+
+RestfulContainer.prototype.getNetworkDistance = function(idSpec) {
+  var networkDistance = idSpec.getField('networkDistance') || '';
+  return "networkDistance=" + networkDistance;
+}
 
 RestfulContainer.prototype.newFetchPersonRequest = function(id, opt_params) {
   var peopleRequest = this.newFetchPeopleRequest(
@@ -216,9 +222,8 @@ RestfulContainer.prototype.newFetchPeopleRequest = function(idSpec,
   url += "&orderBy=" + (opt_params['sortOrder'] || 'topFriends');
   // TODO: This filterBy isn't in the spec
   url += "&filterBy=" + (opt_params['filter'] || 'all');
-  if (opt_params['networkDistance']) {
-    url += "&networkDistance=" + opt_params['networkDistance'];
-  }
+  url += "&" + this.getNetworkDistance(idSpec);
+
   var me = this;
   return new RestfulRequestItem(url, "GET", null,
       function(rawJson) {
@@ -264,12 +269,12 @@ RestfulContainer.prototype.isWildcardKey = function(key) {
 };
 
 RestfulContainer.prototype.newFetchPersonAppDataRequest = function(idSpec,
-    keys) {
+    keys, opt_params) {
   var url = "/appdata/" + this.translateIdSpec(idSpec) + "/@app"
-      + "?" + this.getFieldsList(keys);
+      + "?" + this.getNetworkDistance(idSpec) + "&" + this.getFieldsList(keys);
   return new RestfulRequestItem(url, "GET", null,
       function (appData) {
-        return gadgets.util.escape(appData['entry'], true);
+        return opensocial.Container.escape(appData['entry'], opt_params, true);
       });
 };
 
@@ -291,7 +296,7 @@ RestfulContainer.prototype.newRemovePersonAppDataRequest = function(id, keys) {
 RestfulContainer.prototype.newFetchActivitiesRequest = function(idSpec,
     opt_params) {
   var url = "/activities/" + this.translateIdSpec(idSpec)
-      + "?appId=@app"; // TODO: Handle appId correctly
+      + "?appId=@app&" + this.getNetworkDistance(idSpec); // TODO: Handle appId correctly
   return new RestfulRequestItem(url, "GET", null,
       function(rawJson) {
         rawJson = rawJson['entry'];
@@ -317,7 +322,7 @@ RestfulContainer.prototype.newMediaItem = function(mimeType, url, opt_params) {
 RestfulContainer.prototype.newCreateActivityRequest = function(idSpec,
     activity) {
   var url = "/activities/" + this.translateIdSpec(idSpec)
-      + "/@app"; // TODO: Handle appId correctly
+      + "/@app?" + this.getNetworkDistance(idSpec); // TODO: Handle appId correctly
   return new RestfulRequestItem(url, "POST", activity.toJsonObject());
 };
 
