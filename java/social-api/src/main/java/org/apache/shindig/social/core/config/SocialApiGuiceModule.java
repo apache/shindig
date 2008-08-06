@@ -31,7 +31,7 @@ import org.apache.shindig.social.opensocial.oauth.OAuthTokenStore;
 import org.apache.shindig.social.opensocial.service.BeanConverter;
 import org.apache.shindig.social.opensocial.service.DataServiceServletFetcher;
 import org.apache.shindig.social.opensocial.service.HandlerProvider;
-import org.apache.shindig.social.sample.container.SampleContainerHandlerProvider;
+import org.apache.shindig.social.sample.service.SampleContainerHandlerProvider;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Scopes;
