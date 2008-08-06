@@ -58,7 +58,7 @@ class InputJsonConverter extends InputConverter {
 	{
 		$ret = json_decode($requestParam, true);
 		if ($ret == $requestParam) {
-			throw new Exception("Mallformed json batch string");
+			throw new Exception("Mallformed message string");
 		}
 		return $ret;
 	}
