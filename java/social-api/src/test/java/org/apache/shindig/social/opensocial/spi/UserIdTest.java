@@ -18,7 +18,6 @@
 package org.apache.shindig.social.opensocial.spi;
 
 import org.apache.shindig.common.testing.FakeGadgetToken;
-import org.apache.shindig.social.opensocial.spi.UserId;
 
 import junit.framework.TestCase;
 
@@ -31,6 +30,9 @@ public class UserIdTest extends TestCase {
     UserId viewer = new UserId(UserId.Type.viewer, "hello");
     assertEquals("viewer", viewer.getUserId(new FakeGadgetToken().setViewerId("viewer")));
 
+    UserId me = new UserId(UserId.Type.me, "hello");
+    assertEquals("viewer", me.getUserId(new FakeGadgetToken().setViewerId("viewer")));
+
     UserId user = new UserId(UserId.Type.userId, "hello");
     assertEquals("hello", user.getUserId(new FakeGadgetToken()));
   }
@@ -41,6 +43,9 @@ public class UserIdTest extends TestCase {
 
     UserId viewer = UserId.fromJson("@viewer");
     assertEquals(UserId.Type.viewer, viewer.getType());
+
+    UserId me = UserId.fromJson("@me");
+    assertEquals(UserId.Type.me, me.getType());
 
     UserId user = UserId.fromJson("john.doe");
     assertEquals(UserId.Type.userId, user.getType());
