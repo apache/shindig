@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.shindig.social.canonical;
+package org.apache.shindig.social.sample.spi;
 
 import org.apache.shindig.common.SecurityToken;
 import org.apache.shindig.common.testing.FakeGadgetToken;
@@ -29,7 +29,6 @@ import org.apache.shindig.social.opensocial.spi.GroupId;
 import org.apache.shindig.social.opensocial.spi.PersonService;
 import org.apache.shindig.social.opensocial.spi.RestfulCollection;
 import org.apache.shindig.social.opensocial.spi.UserId;
-import org.apache.shindig.social.sample.service.JsonDbOpensocialService;
 
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;

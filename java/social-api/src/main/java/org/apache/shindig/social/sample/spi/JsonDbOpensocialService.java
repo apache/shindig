@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations under the License.
  */
 
-package org.apache.shindig.social.sample.service;
+package org.apache.shindig.social.sample.spi;
 
 import org.apache.shindig.common.SecurityToken;
 import org.apache.shindig.common.util.ImmediateFuture;
