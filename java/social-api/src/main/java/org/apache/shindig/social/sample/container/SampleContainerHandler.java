@@ -23,7 +23,7 @@ import org.apache.shindig.social.ResponseError;
 import org.apache.shindig.social.ResponseItem;
 import org.apache.shindig.social.opensocial.service.DataRequestHandler;
 import org.apache.shindig.social.opensocial.service.RequestItem;
-import org.apache.shindig.social.sample.service.JsonDbOpensocialService;
+import org.apache.shindig.social.sample.spi.JsonDbOpensocialService;
 
 import com.google.inject.Inject;
 import org.apache.commons.httpclient.HttpClient;

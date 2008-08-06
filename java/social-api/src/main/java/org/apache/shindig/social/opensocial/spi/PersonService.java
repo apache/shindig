@@ -20,7 +20,7 @@ package org.apache.shindig.social.opensocial.spi;
 import org.apache.shindig.common.SecurityToken;
 import org.apache.shindig.social.ResponseItem;
 import org.apache.shindig.social.opensocial.model.Person;
-import org.apache.shindig.social.sample.service.JsonDbOpensocialService;
+import org.apache.shindig.social.sample.spi.JsonDbOpensocialService;
 
 import com.google.inject.ImplementedBy;
 
