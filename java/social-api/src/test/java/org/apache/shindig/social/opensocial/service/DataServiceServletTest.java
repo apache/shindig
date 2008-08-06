@@ -20,20 +20,13 @@ package org.apache.shindig.social.opensocial.service;
 import org.apache.shindig.common.BasicSecurityTokenDecoder;
 import org.apache.shindig.common.SecurityTokenDecoder;
 import org.apache.shindig.common.SecurityTokenException;
-import org.apache.shindig.common.util.ImmediateFuture;
 import org.apache.shindig.common.testing.FakeGadgetToken;
+import org.apache.shindig.common.util.ImmediateFuture;
+import org.apache.shindig.social.ResponseError;
 import org.apache.shindig.social.ResponseItem;
 import org.apache.shindig.social.SocialApiTestsGuiceModule;
 import org.apache.shindig.social.core.util.BeanJsonConverter;
 import org.apache.shindig.social.core.util.BeanXmlConverter;
-import org.apache.shindig.social.opensocial.service.ActivityHandler;
-import org.apache.shindig.social.opensocial.service.AppDataHandler;
-import org.apache.shindig.social.opensocial.service.DataRequestHandler;
-import org.apache.shindig.social.opensocial.service.DataServiceServlet;
-import org.apache.shindig.social.opensocial.service.DataServiceServletFetcher;
-import org.apache.shindig.social.opensocial.service.HandlerProvider;
-import org.apache.shindig.social.opensocial.service.PersonHandler;
-import org.apache.shindig.social.opensocial.service.RequestItem;
 
 import com.google.inject.Guice;
 import com.google.inject.Injector;
@@ -43,12 +36,12 @@ import org.easymock.classextension.EasyMock;
 import javax.servlet.ServletInputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.PrintWriter;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.Collections;
 import java.util.StringTokenizer;
-import java.util.concurrent.Future;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
@@ -131,7 +124,7 @@ public class DataServiceServletTest extends TestCase {
   public void testFailedRequest() throws Exception {
     String route = '/' + DataServiceServlet.APPDATA_ROUTE;
     setupRequest(route, "GET", null);
-    EasyMock.expect(injector.getInstance(AppDataHandler.class)).andStubReturn(appDataHandler);    
+    EasyMock.expect(injector.getInstance(AppDataHandler.class)).andStubReturn(appDataHandler);
     setupInjector();
 
     EasyMock.expect(appDataHandler.handleItem(EasyMock.isA(RequestItem.class)));
@@ -158,7 +151,7 @@ public class DataServiceServletTest extends TestCase {
 
     String jsonObject = "my lovely json";
     ResponseItem<String> response = new ResponseItem<String>(jsonObject);
-    
+
     EasyMock.expect(handler.handleItem(EasyMock.isA(RequestItem.class)));
     EasyMock.expectLastCall().andReturn(ImmediateFuture.newInstance(response));
 
@@ -197,13 +190,9 @@ public class DataServiceServletTest extends TestCase {
   public void testInvalidRoute() throws Exception {
     RequestItem requestItem = new RequestItem();
     requestItem.setUrl("/ahhh!");
-    try {
-      servlet.handleRequestItem(requestItem);
-      fail("The route should not have found a valid handler.");
-    } catch (RuntimeException e) {
-      // Yea!
-      assertEquals("No handler for route: ahhh!", e.getMessage());
-    }
+
+    ResponseItem responseItem = servlet.handleRequestItem(requestItem).get();
+    assertEquals(ResponseError.BAD_REQUEST, responseItem.getError());
   }
 
   public void testSecurityTokenException() throws Exception {
@@ -218,11 +207,8 @@ public class DataServiceServletTest extends TestCase {
     try {
       servlet.getSecurityToken(req);
       fail("The route should have thrown an exception due to the invalid security token.");
-    } catch (RuntimeException e) {
-      // Yea!
-      // TODO: The impl being tested here is not finished. We should return a proper error
-      // instead of just throwing an exception.
-      assertEquals("Implement error return for bad security token.", e.getMessage());
+    } catch (SecurityTokenException e) {
+      // Expected
     }
     EasyMock.verify(req, tokenDecoder);
   }
