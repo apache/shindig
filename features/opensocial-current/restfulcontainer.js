@@ -133,7 +133,7 @@ RestfulContainer.prototype.requestData = function(dataRequest, callback) {
   };
 
   gadgets.io.makeNonProxiedRequest(
-    this.baseUrl_ + "/jsonBatch?st=" + escape(shindig.auth.getSecurityToken()),
+    this.baseUrl_ + "/jsonBatch?st=" + encodeURIComponent(shindig.auth.getSecurityToken()),
     sendResponse, makeRequestParams, "application/json");
 };
 
