@@ -17,15 +17,15 @@
  */
 package org.apache.shindig.social.dataservice.integration;
 
-import org.apache.shindig.common.BasicSecurityTokenDecoder;
+import org.apache.shindig.common.testing.FakeGadgetToken;
 import org.apache.shindig.social.SocialApiTestsGuiceModule;
+import org.apache.shindig.social.core.oauth.AuthenticationServletFilter;
 import org.apache.shindig.social.core.util.BeanJsonConverter;
 import org.apache.shindig.social.core.util.BeanXmlConverter;
 import org.apache.shindig.social.opensocial.service.ActivityHandler;
 import org.apache.shindig.social.opensocial.service.AppDataHandler;
 import org.apache.shindig.social.opensocial.service.DataRequestHandler;
 import org.apache.shindig.social.opensocial.service.DataServiceServlet;
-import org.apache.shindig.social.opensocial.service.DataServiceServletFetcher;
 import org.apache.shindig.social.opensocial.service.HandlerProvider;
 import org.apache.shindig.social.opensocial.service.PersonHandler;
 
@@ -36,7 +36,6 @@ import org.easymock.classextension.EasyMock;
 import org.json.JSONObject;
 
 import javax.servlet.ServletInputStream;
-import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamConstants;
@@ -44,16 +43,18 @@ import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintWriter;
-import java.io.IOException;
 import java.util.Map;
 import java.util.Vector;
 
 public abstract class AbstractLargeRestfulTests extends TestCase {
-  private HttpServletRequest req;
+  private AuthenticationServletFilter.SecurityTokenRequest req;
   private HttpServletResponse res;
   private DataServiceServlet servlet;
+  private static final FakeGadgetToken FAKE_GADGET_TOKEN = new FakeGadgetToken()
+      .setOwnerId("john.doe").setViewerId("john.doe");
 
   @Override
   protected void setUp() throws Exception {
@@ -67,10 +68,8 @@ public abstract class AbstractLargeRestfulTests extends TestCase {
     servlet.setInjector(Guice.createInjector(new SocialApiTestsGuiceModule()));
     servlet.setBeanConverters(new BeanJsonConverter(
         Guice.createInjector(new SocialApiTestsGuiceModule())), new BeanXmlConverter());
-    servlet.setSecurityTokenDecoder(new BasicSecurityTokenDecoder());
-    servlet.setParameterFetcher(new DataServiceServletFetcher());
 
-    req = EasyMock.createMock(HttpServletRequest.class);
+    req = EasyMock.createMock(AuthenticationServletFilter.SecurityTokenRequest.class);
     res = EasyMock.createMock(HttpServletResponse.class);
   }
 
@@ -95,8 +94,8 @@ public abstract class AbstractLargeRestfulTests extends TestCase {
     EasyMock.expect(req.getMethod()).andStubReturn(method);
     EasyMock.expect(req.getParameter("format")).andStubReturn(null);
     EasyMock.expect(req.getParameter("X-HTTP-Method-Override")).andStubReturn(method);
-    EasyMock.expect(req.getParameter("st")).andStubReturn(
-        "john.doe:john.doe:app:container.com:foo:bar");
+
+    EasyMock.expect(req.getToken()).andStubReturn(FAKE_GADGET_TOKEN);
 
     Vector<String> vector = new Vector<String>(extraParams.keySet());
     EasyMock.expect(req.getParameterNames()).andStubReturn(vector.elements());

@@ -25,6 +25,8 @@ import org.apache.shindig.gadgets.servlet.ConcatProxyServlet;
 import org.apache.shindig.gadgets.servlet.GadgetRenderingServlet;
 import org.apache.shindig.gadgets.servlet.HttpGuiceModule;
 import org.apache.shindig.social.opensocial.service.DataServiceServlet;
+import org.apache.shindig.social.core.oauth.AuthenticationServletFilter;
+
 import org.mortbay.jetty.Server;
 import org.mortbay.jetty.handler.ResourceHandler;
 import org.mortbay.jetty.servlet.Context;
@@ -113,6 +115,7 @@ public class EndToEndServer {
     ServletHolder jsonServletHolder = new ServletHolder(new ForceErrorServlet(
         new DataServiceServlet()));
     context.addServlet(jsonServletHolder, JSON_BASE);
+    context.addFilter(AuthenticationServletFilter.class, JSON_BASE, 0);
 
     // Attach the ConcatProxyServlet - needed for
     ServletHolder concatHolder = new ServletHolder(new ConcatProxyServlet());
