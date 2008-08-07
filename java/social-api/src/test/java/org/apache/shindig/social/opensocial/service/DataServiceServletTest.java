@@ -17,14 +17,13 @@
  */
 package org.apache.shindig.social.opensocial.service;
 
-import org.apache.shindig.common.BasicSecurityTokenDecoder;
-import org.apache.shindig.common.SecurityTokenDecoder;
 import org.apache.shindig.common.SecurityTokenException;
 import org.apache.shindig.common.testing.FakeGadgetToken;
 import org.apache.shindig.common.util.ImmediateFuture;
 import org.apache.shindig.social.ResponseError;
 import org.apache.shindig.social.ResponseItem;
 import org.apache.shindig.social.SocialApiTestsGuiceModule;
+import org.apache.shindig.social.core.oauth.AuthenticationServletFilter;
 import org.apache.shindig.social.core.util.BeanJsonConverter;
 import org.apache.shindig.social.core.util.BeanXmlConverter;
 
@@ -34,11 +33,9 @@ import junit.framework.TestCase;
 import org.easymock.classextension.EasyMock;
 
 import javax.servlet.ServletInputStream;
-import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.util.Collections;
 import java.util.StringTokenizer;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
@@ -46,13 +43,15 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
 public class DataServiceServletTest extends TestCase {
-  private HttpServletRequest req;
+  private static final FakeGadgetToken FAKE_GADGET_TOKEN = new FakeGadgetToken()
+      .setOwnerId("john.doe").setViewerId("john.doe");
+
+  private AuthenticationServletFilter.SecurityTokenRequest req;
   private HttpServletResponse res;
   private DataServiceServlet servlet;
   private PersonHandler peopleHandler;
   private ActivityHandler activityHandler;
   private AppDataHandler appDataHandler;
-  private BasicSecurityTokenDecoder tokenDecoder;
   private Injector injector;
   private BeanJsonConverter jsonConverter;
   private BeanXmlConverter xmlConverter;
@@ -65,7 +64,7 @@ public class DataServiceServletTest extends TestCase {
 
   protected void setUp() throws Exception {
     servlet = new DataServiceServlet();
-    req = EasyMock.createMock(HttpServletRequest.class);
+    req = EasyMock.createMock(AuthenticationServletFilter.SecurityTokenRequest.class);
     res = EasyMock.createMock(HttpServletResponse.class);
     jsonConverter = EasyMock.createMock(BeanJsonConverter.class);
     xmlConverter = EasyMock.createMock(BeanXmlConverter.class);
@@ -81,11 +80,6 @@ public class DataServiceServletTest extends TestCase {
         new AppDataHandler(null)));
 
     servlet.setBeanConverters(jsonConverter, xmlConverter);
-
-    servlet.setParameterFetcher(new DataServiceServletFetcher());
-
-    tokenDecoder = EasyMock.createMock(BasicSecurityTokenDecoder.class);
-    servlet.setSecurityTokenDecoder(tokenDecoder);
   }
 
   private void setupInjector() {
@@ -132,10 +126,10 @@ public class DataServiceServletTest extends TestCase {
 
     res.sendError(500, "FAILED");
 
-    EasyMock.replay(req, res, appDataHandler, tokenDecoder, injector, jsonConverter);
+    EasyMock.replay(req, res, appDataHandler, injector, jsonConverter);
     servlet.service(req, res);
-    EasyMock.verify(req, res, appDataHandler, tokenDecoder, injector, jsonConverter);
-    EasyMock.reset(req, res, appDataHandler, tokenDecoder, injector, jsonConverter);
+    EasyMock.verify(req, res, appDataHandler, injector, jsonConverter);
+    EasyMock.reset(req, res, appDataHandler, injector, jsonConverter);
   }
 
   private void verifyHandlerWasFoundForPathInfo(String peoplePathInfo, DataRequestHandler handler)
@@ -161,10 +155,10 @@ public class DataServiceServletTest extends TestCase {
     EasyMock.expect(res.getWriter()).andReturn(writerMock);
     writerMock.write(jsonObject);
 
-    EasyMock.replay(req, res, handler, tokenDecoder, injector, jsonConverter);
+    EasyMock.replay(req, res, handler, injector, jsonConverter);
     servlet.service(req, res);
-    EasyMock.verify(req, res, handler, tokenDecoder, injector, jsonConverter);
-    EasyMock.reset(req, res, handler, tokenDecoder, injector, jsonConverter);
+    EasyMock.verify(req, res, handler, injector, jsonConverter);
+    EasyMock.reset(req, res, handler, injector, jsonConverter);
   }
 
   private void setupRequest(String pathInfo, String actualMethod, String overrideMethod)
@@ -179,12 +173,7 @@ public class DataServiceServletTest extends TestCase {
         overrideMethod);
     EasyMock.expect(req.getParameter(DataServiceServlet.FORMAT_PARAM)).andReturn(null);
 
-    String tokenString = "owner:viewer:app:container.com:foo:bar";
-    EasyMock.expect(req.getParameter(DataServiceServlet.SECURITY_TOKEN_PARAM))
-        .andReturn(tokenString);
-
-    FakeGadgetToken token = new FakeGadgetToken();
-    EasyMock.expect(tokenDecoder.createToken(Collections.singletonMap(SecurityTokenDecoder.SECURITY_TOKEN_NAME, tokenString))).andReturn(token);
+    EasyMock.expect(req.getToken()).andReturn(FAKE_GADGET_TOKEN);
   }
 
   public void testInvalidRoute() throws Exception {
@@ -193,24 +182,6 @@ public class DataServiceServletTest extends TestCase {
 
     ResponseItem responseItem = servlet.handleRequestItem(requestItem).get();
     assertEquals(ResponseError.BAD_REQUEST, responseItem.getError());
-  }
-
-  public void testSecurityTokenException() throws Exception {
-    String tokenString = "owner:viewer:app:container.com:foo:bar";
-    EasyMock.expect(req.getParameter(DataServiceServlet.SECURITY_TOKEN_PARAM))
-        .andReturn(tokenString);
-    EasyMock.expect(tokenDecoder.createToken(
-        Collections.singletonMap(SecurityTokenDecoder.SECURITY_TOKEN_NAME, tokenString)))
-        .andThrow(new SecurityTokenException(""));
-
-    EasyMock.replay(req, tokenDecoder);
-    try {
-      servlet.getSecurityToken(req);
-      fail("The route should have thrown an exception due to the invalid security token.");
-    } catch (SecurityTokenException e) {
-      // Expected
-    }
-    EasyMock.verify(req, tokenDecoder);
   }
 
   public void testGetHttpMethodFromParameter() throws Exception {

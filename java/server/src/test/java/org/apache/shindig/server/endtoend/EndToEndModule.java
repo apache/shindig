@@ -20,6 +20,7 @@ package org.apache.shindig.server.endtoend;
 import org.apache.shindig.common.servlet.ParameterFetcher;
 import org.apache.shindig.social.core.util.BeanJsonConverter;
 import org.apache.shindig.social.core.util.BeanXmlConverter;
+import org.apache.shindig.social.core.oauth.AnonymousAuthenticationHandler;
 import org.apache.shindig.social.opensocial.service.BeanConverter;
 import org.apache.shindig.social.opensocial.service.DataServiceServletFetcher;
 
@@ -36,8 +37,13 @@ public class EndToEndModule extends AbstractModule {
         .toInstance("sampledata/canonicaldb.json");
     bind(ParameterFetcher.class).annotatedWith(Names.named("DataServiceServlet"))
         .to(DataServiceServletFetcher.class);
-    bind(BeanConverter.class).annotatedWith(Names.named("bean.converter.xml")).to(BeanXmlConverter.class);
-    bind(BeanConverter.class).annotatedWith(Names.named("bean.converter.json")).to(BeanJsonConverter.class);
+    bind(BeanConverter.class).annotatedWith(Names.named("bean.converter.xml"))
+        .to(BeanXmlConverter.class);
+    bind(BeanConverter.class).annotatedWith(Names.named("bean.converter.json"))
+        .to(BeanJsonConverter.class);
 
+    bind(Boolean.class)
+        .annotatedWith(Names.named(AnonymousAuthenticationHandler.ALLOW_UNAUTHENTICATED))
+        .toInstance(Boolean.FALSE);
   }
 }

@@ -18,13 +18,11 @@
 package org.apache.shindig.social.opensocial.service;
 
 import org.apache.shindig.common.SecurityToken;
-import org.apache.shindig.common.SecurityTokenDecoder;
-import org.apache.shindig.common.SecurityTokenException;
 import org.apache.shindig.common.servlet.InjectedServlet;
-import org.apache.shindig.common.servlet.ParameterFetcher;
 import org.apache.shindig.common.util.ImmediateFuture;
 import org.apache.shindig.social.ResponseError;
 import org.apache.shindig.social.ResponseItem;
+import org.apache.shindig.social.core.oauth.AuthenticationServletFilter;
 
 import com.google.common.collect.Maps;
 import com.google.inject.Inject;
@@ -61,11 +59,9 @@ public class DataServiceServlet extends InjectedServlet {
   private static final Logger logger = Logger.getLogger(
       "org.apache.shindig.social.opensocial.spi");
 
-  private transient SecurityTokenDecoder securityTokenDecoder;
   private transient Map<String, Class<? extends DataRequestHandler>> handlers;
   private transient BeanConverter jsonConverter;
   private transient BeanConverter xmlConverter;
-  private transient ParameterFetcher parameterFetcher;
 
   private static final String JSON_BATCH_ROUTE = "jsonBatch";
 
@@ -75,20 +71,10 @@ public class DataServiceServlet extends InjectedServlet {
   }
 
   @Inject
-  public void setSecurityTokenDecoder(SecurityTokenDecoder securityTokenDecoder) {
-    this.securityTokenDecoder = securityTokenDecoder;
-  }
-
-  @Inject
   public void setBeanConverters(@Named("bean.converter.json") BeanConverter jsonConverter,
     @Named("bean.converter.xml")  BeanConverter xmlConverter) {
     this.jsonConverter = jsonConverter;
     this.xmlConverter = xmlConverter;
-  }
-
-  @Inject
-  public void setParameterFetcher(@Named("DataServiceServlet") ParameterFetcher parameterFetcher) {
-    this.parameterFetcher = parameterFetcher;
   }
 
   // Only for testing use. Do not override the injector.
@@ -121,13 +107,11 @@ public class DataServiceServlet extends InjectedServlet {
 
     servletRequest.setCharacterEncoding("UTF-8");
 
-    SecurityToken token = null;
-    try {
-      // TODO: Integrate this with the oauth filter.
-      token = getSecurityToken(servletRequest);
-    } catch (SecurityTokenException e) {
+    SecurityToken token = getSecurityToken(servletRequest);
+    if (token == null) {
       sendError(servletResponse, new ResponseItem<Object>(ResponseError.UNAUTHORIZED,
-          "The security token was invalid", null));
+          "The request did not have a proper security token nor oauth message and unauthenticated "
+              + "requests are not allowed", null));
       return;
     }
 
@@ -241,8 +225,8 @@ public class DataServiceServlet extends InjectedServlet {
     return new ResponseItem<Void>(ResponseError.INTERNAL_ERROR, t.getMessage(), null);
   }
 
-  SecurityToken getSecurityToken(HttpServletRequest servletRequest) throws SecurityTokenException {
-    return securityTokenDecoder.createToken(parameterFetcher.fetch(servletRequest));
+  SecurityToken getSecurityToken(HttpServletRequest servletRequest) {
+    return ((AuthenticationServletFilter.SecurityTokenRequest) servletRequest).getToken();
   }
 
   BeanConverter getConverterForRequest(HttpServletRequest servletRequest) {
