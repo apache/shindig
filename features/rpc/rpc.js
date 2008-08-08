@@ -276,8 +276,9 @@ gadgets.rpc = function() {
    * @param {String} serviceName Service name to call.
    * @param {String} from Module Id of the calling provider.
    * @param {Object} rpcData The RPC data for this call.
+   * @param {Array.<Object>} callArgs Original arguments to call()
    */
-  function callFrameElement(targetId, serviceName, from, rpcData) {
+  function callFrameElement(targetId, serviceName, from, rpcData, callArgs) {
     try {
       if (from != '..') {
         // Call from gadget to the container.
@@ -313,7 +314,7 @@ gadgets.rpc = function() {
     // If we have reached this point, something has failed
     // with the FrameElement method, so we default to using
     // IFPC for this call.
-    callIfpc(targetId, serviceName, from, rpcData);
+    callIfpc(targetId, serviceName, from, rpcData, callArgs);
   }
 
   /**
@@ -325,8 +326,9 @@ gadgets.rpc = function() {
    * @param {String} serviceName Service name to call.
    * @param {String} from Module Id of the calling provider.
    * @param {Object} rpcData The RPC data for this call.
+   * @param {Array.<Object>} callArgs Original arguments to call()
    */
-  function callIfpc(targetId, serviceName, from, rpcData) {
+  function callIfpc(targetId, serviceName, from, rpcData, callArgs) {
     // Retrieve the relay file used by IFPC. Note that
     // this must be set before the call, and so we conduct
     // an extra check to ensure it is not blank.
@@ -342,7 +344,7 @@ gadgets.rpc = function() {
       // Format: #iframe_id&callId&num_packets&packet_num&block_of_data
       src = [relay, '#', encodeLegacyData([from, callId, 1, 0,
              encodeLegacyData([from, serviceName, '', '', from].concat(
-               Array.prototype.slice.call(arguments, 3)))])].join('');
+               callArgs))])].join('');
     } else {
       // Format: #targetId & sourceId@callId & packetNum & packetId & packetData
       src = [relay, '#', targetId, '&', from, '@', callId,
@@ -596,11 +598,11 @@ gadgets.rpc = function() {
           break;
 
         case 'fe': // use FrameElement.
-          callFrameElement(targetId, serviceName, from, rpcData);
+          callFrameElement(targetId, serviceName, from, rpcData, rpc.a);
           break;
 
         default: // use 'ifpc' as a fallback mechanism.
-          callIfpc(targetId, serviceName, from, rpcData);
+          callIfpc(targetId, serviceName, from, rpcData, rpc.a);
           break;
       }
     },
