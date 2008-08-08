@@ -479,6 +479,10 @@ public class GadgetRenderingTask {
         JSONObject jsonEntry = new JSONObject();
         jsonEntry.put("body", response.getResponseAsString())
             .put("rc", response.getHttpStatusCode());
+        // Merge in additional response data
+        for (Map.Entry<String, String> metadata : response.getMetadata().entrySet()) {
+          jsonEntry.put(metadata.getKey(), metadata.getValue());
+        }
         resp.put(entry.getKey().getHref().toString(), jsonEntry);
       } catch (JSONException e) {
         logger.log(

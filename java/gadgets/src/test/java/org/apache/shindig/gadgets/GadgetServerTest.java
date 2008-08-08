@@ -19,17 +19,19 @@ package org.apache.shindig.gadgets;
 
 import static org.easymock.EasyMock.eq;
 import static org.easymock.EasyMock.expect;
+import static org.easymock.EasyMock.isA;
+
+import java.net.URI;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.apache.shindig.common.BasicSecurityToken;
 import org.apache.shindig.common.SecurityToken;
 import org.apache.shindig.common.crypto.BlobCrypterException;
 import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.http.HttpResponse;
+import org.apache.shindig.gadgets.oauth.OAuthRequestParams;
 import org.apache.shindig.gadgets.spec.GadgetSpec;
-
-import java.net.URI;
-import java.util.HashMap;
-import java.util.Map;
 
 public class GadgetServerTest extends GadgetTestFixture {
 
@@ -310,7 +312,33 @@ public class GadgetServerTest extends GadgetTestFixture {
     Gadget gadget = gadgetServer.processGadget(BASIC_CONTEXT);
     assertTrue(gadget.getPreloadMap().size() == 1);
   }
+  
+  public void testOAuthPreload() throws Exception {
+    String preloadUrl = "http://example.org/preload.txt";
+    String preloadData = "Preload Data";
+    HttpRequest preloadRequest
+        = new HttpRequest(URI.create(preloadUrl));
 
+    String gadgetXml
+        = "<Module>" +
+        "  <ModulePrefs title=\"foo\">" +
+        "    <Preload href=\"" + preloadUrl + "\" authz=\"oauth\" " +
+        		    "oauth_service_name='service'/>" +
+        "  </ModulePrefs>" +
+        "  <Content type=\"html\" view=\"v1,v2\">dummy</Content>" +
+        "</Module>";
+    expect(fetcher.fetch(SPEC_REQUEST))
+        .andReturn(new HttpResponse(gadgetXml));
+    expect(fetcherFactory.getOAuthFetcher(
+        isA(SecurityToken.class), isA(OAuthRequestParams.class)))
+        .andReturn(fetcher);
+    expect(fetcher.fetch(preloadRequest))
+        .andReturn(new HttpResponse(preloadData));
+    replay();
+
+    Gadget gadget = gadgetServer.processGadget(BASIC_CONTEXT);
+    assertTrue(gadget.getPreloadMap().size() == 1);
+  }
 
   public void testBlacklistedGadget() throws Exception {
     expect(blacklist.isBlacklisted(eq(SPEC_URL))).andReturn(true);

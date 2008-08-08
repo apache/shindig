@@ -223,7 +223,16 @@ gadgets.io = function() {
         if (preload.rc !== 200) {
           callback({errors : ["Error " + preload.rc]});
         } else {
-          callback(transformResponseData(params, { body: preload.body }));
+          if (preload.oauthState) {
+            oauthState = preload.oauthState;
+          }
+          var resp = {
+            body: preload.body,
+            oauthApprovalUrl: preload.oauthApprovalUrl,
+            oauthError: preload.oauthError,
+            oauthErrorText: preload.oauthErrorText,
+          }
+          callback(transformResponseData(params, resp));
         }
         return true;
       }

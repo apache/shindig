@@ -20,7 +20,6 @@ package org.apache.shindig.gadgets.servlet;
 
 import org.apache.shindig.gadgets.GadgetTestFixture;
 import org.apache.shindig.gadgets.LockedDomainService;
-import org.apache.shindig.gadgets.http.ContentFetcherFactory;
 import org.apache.shindig.gadgets.rewrite.ContentRewriter;
 import org.apache.shindig.gadgets.rewrite.NoOpContentRewriter;
 
@@ -31,8 +30,6 @@ import org.apache.shindig.gadgets.rewrite.NoOpContentRewriter;
 public abstract class HttpTestFixture extends GadgetTestFixture {
   public final GadgetRenderingTask gadgetRenderer;
   public final JsonRpcHandler jsonRpcHandler;
-  public final ContentFetcherFactory contentFetcherFactory
-      = mock(ContentFetcherFactory.class);
   public final UrlGenerator urlGenerator = mock(UrlGenerator.class);
   public final LockedDomainService lockedDomainService =
     mock(LockedDomainService.class);

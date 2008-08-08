@@ -18,7 +18,12 @@
  */
 package org.apache.shindig.gadgets.oauth;
 
+import java.util.Map;
+import java.util.TreeMap;
+
 import javax.servlet.http.HttpServletRequest;
+
+import org.apache.shindig.gadgets.spec.Preload;
 
 /**
  * Bundles information about a proxy request that requires OAuth
@@ -32,20 +37,44 @@ public class OAuthRequestParams {
   public static final String CLIENT_STATE_PARAM = "oauthState";
   public static final String BYPASS_SPEC_CACHE_PARAM = "bypassSpecCache";
 
-  protected final String serviceName;
-  protected final String tokenName;
-  protected final String requestToken;
-  protected final String requestTokenSecret;
-  protected final String origClientState;
-  protected final boolean bypassSpecCache;
+  protected String serviceName;
+  protected String tokenName;
+  protected String requestToken;
+  protected String requestTokenSecret;
+  protected String origClientState;
+  protected boolean bypassSpecCache;
 
+  @SuppressWarnings("unchecked")
   public OAuthRequestParams(HttpServletRequest request) {
-    serviceName = getParam(request, SERVICE_PARAM, "");
-    tokenName = getParam(request, TOKEN_PARAM, "");
-    requestToken = getParam(request, REQUEST_TOKEN_PARAM, null);
-    requestTokenSecret = getParam(request, REQUEST_TOKEN_SECRET_PARAM, null);
-    origClientState = getParam(request, CLIENT_STATE_PARAM, null);
-    bypassSpecCache = parseBypassSpecCacheParam(request);
+    Map<String, String> params = new TreeMap<String, String>(String.CASE_INSENSITIVE_ORDER);
+    Map<String, String[]> reqParams = request.getParameterMap();
+    for (String name : reqParams.keySet()) {
+      params.put(name, reqParams.get(name)[0]);
+    }
+    init(params);
+  }
+  
+  public OAuthRequestParams(Preload preload) {
+    Map<String, String> attrs = new TreeMap<String, String>(String.CASE_INSENSITIVE_ORDER);
+    attrs.putAll(preload.getAttributes());
+    init(attrs);
+  }
+  
+  private void init(Map<String, String> attrs) {
+    serviceName = getParam(attrs, SERVICE_PARAM, "");
+    tokenName = getParam(attrs, TOKEN_PARAM, "");
+    requestToken = getParam(attrs, REQUEST_TOKEN_PARAM, null);
+    requestTokenSecret = getParam(attrs, REQUEST_TOKEN_SECRET_PARAM, null);
+    origClientState = getParam(attrs, CLIENT_STATE_PARAM, null);
+    bypassSpecCache = "1".equals(getParam(attrs, BYPASS_SPEC_CACHE_PARAM, null));
+  }
+  
+  private String getParam(Map<String, String> attrs, String name, String def) {
+    String val = attrs.get(name);
+    if (val == null) {
+      val = def;
+    }
+    return val;
   }
 
   // Testing only
@@ -88,17 +117,5 @@ public class OAuthRequestParams {
   
   public String getRequestTokenSecret() {
     return requestTokenSecret;
-  }
-
-  public static boolean parseBypassSpecCacheParam(HttpServletRequest request) {
-    return "1".equals(request.getParameter(BYPASS_SPEC_CACHE_PARAM));
-  }
-  
-  private String getParam(HttpServletRequest request, String name, String def) {
-    String val = request.getParameter(name);
-    if (val == null) {
-      val = def;
-    }
-    return val;
   }
 }

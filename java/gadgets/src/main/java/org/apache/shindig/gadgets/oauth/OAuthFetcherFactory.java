@@ -28,6 +28,7 @@ import org.apache.shindig.gadgets.http.HttpCache;
 import org.apache.shindig.gadgets.http.HttpFetcher;
 
 import com.google.inject.Inject;
+import com.google.inject.Singleton;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -35,6 +36,7 @@ import java.util.logging.Logger;
 /**
  * Produces OAuth content fetchers for input tokens.
  */
+@Singleton
 public class OAuthFetcherFactory {
 
   protected OAuthFetcherConfig fetcherConfig;
