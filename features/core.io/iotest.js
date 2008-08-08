@@ -766,3 +766,49 @@ IoTest.prototype.testPreload_error404 = function() {
       });
   this.assertEquals("not preloaded", resp.text);
 };
+
+IoTest.prototype.testPreload_oauthApproval = function() {
+  gadgets.io.clearOAuthState();
+  gadgets.io.preloaded_ = {
+    "http://target.example.com/somepage" : {
+      "rc" : 200,
+      "oauthState" : "stateinfo",
+      "oauthApprovalUrl" : "http://www.example.com/approve",
+    }
+  };
+
+  var req = new fakeXhr.Expectation("POST", "http://www.example.com/json");
+  this.setStandardArgs(req, true);
+  req.setBodyArg("url", "http://target.example.com/somepage");
+  req.setBodyArg("authz", "oauth");
+  req.setBodyArg("st", "authtoken");
+  req.setBodyArg("refresh", null);
+  req.setBodyArg("oauthState", "stateinfo");
+  req.setHeader("Content-Type", "application/x-www-form-urlencoded");
+
+  var resp = this.makeFakeResponse(gadgets.json.stringify(
+      { 'http://target.example.com/somepage' : { 
+          'body' : 'not preloaded',
+         }
+      }
+      ));
+
+  this.fakeXhrs.expect(req, resp);
+
+  var params = {};
+  params["AUTHORIZATION"] = "OAUTH";
+  var resp = null;
+  gadgets.io.makeRequest("http://target.example.com/somepage",
+      function(data) {
+        resp = data;
+      },
+      params);
+  this.assertEquals("http://www.example.com/approve", resp.oauthApprovalUrl);
+
+  gadgets.io.makeRequest("http://target.example.com/somepage",
+      function(data) {
+        resp = data;
+      },
+      params);
+  this.assertEquals("not preloaded", resp.text);
+};

@@ -23,6 +23,7 @@ import static org.easymock.EasyMock.expectLastCall;
 import static org.easymock.EasyMock.isA;
 
 import org.apache.shindig.common.ContainerConfig;
+import org.apache.shindig.common.SecurityToken;
 import org.apache.shindig.common.SecurityTokenDecoder;
 import org.apache.shindig.common.testing.FakeGadgetToken;
 import org.apache.shindig.common.util.Utf8UrlCoder;
@@ -30,6 +31,8 @@ import org.apache.shindig.gadgets.Gadget;
 import org.apache.shindig.gadgets.GadgetContext;
 import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.http.HttpResponse;
+import org.apache.shindig.gadgets.oauth.OAuthFetcher;
+import org.apache.shindig.gadgets.oauth.OAuthRequestParams;
 import org.apache.shindig.gadgets.spec.GadgetSpec;
 
 import org.easymock.EasyMock;
@@ -65,6 +68,16 @@ public class GadgetRenderingTaskTest extends HttpTestFixture {
         "<Content type='html' view='ALIAS'>" + ALT_CONTENT + "</Content>" +
         "</Module>";
   final static String LIBS = "dummy:blah";
+  
+  final static String PRELOAD_XML =
+      "<Module>" +
+      "<ModulePrefs title='hello'>" +
+      "<Preload authz='oauth' href='http://oauth.example.com'/>" +
+      "</ModulePrefs>" +
+      "<Content type='html' quirks='false'>" + CONTENT + "</Content>" +
+      "<Content type='html' view='quirks' quirks='true'/>" +
+      "<Content type='html' view='ALIAS'>" + ALT_CONTENT + "</Content>" +
+      "</Module>";
 
   private ServletTestFixture fixture;
 
@@ -80,9 +93,9 @@ public class GadgetRenderingTaskTest extends HttpTestFixture {
    * @return Output of the rendering request
    * @throws Exception
    */
-  private String parseBasicGadget(String view) throws Exception {
+  private String parseBasicGadget(String view, String xml) throws Exception {
     expectParseRequestParams(view);
-    expectFetchGadget();
+    expectFetchGadget(xml);
     expectLockedDomainCheck();
     expectWriteResponse();
     replay();
@@ -99,6 +112,7 @@ public class GadgetRenderingTaskTest extends HttpTestFixture {
     expect(fixture.request.getParameterNames()).andReturn(EMPTY_PARAMS);
     expect(fixture.request.getParameter("container")).andReturn(null);
     expect(fixture.request.getHeader("Host")).andReturn("www.example.org");
+    expect(fixture.request.getParameter("st")).andStubReturn("fake-token");
   }
 
   private void expectLockedDomainCheck() throws Exception {
@@ -108,8 +122,8 @@ public class GadgetRenderingTaskTest extends HttpTestFixture {
         EasyMock.eq("default"))).andReturn(true);
   }
 
-  private void expectFetchGadget() throws Exception {
-    expect(fetcher.fetch(SPEC_REQUEST)).andReturn(new HttpResponse(SPEC_XML));
+  private void expectFetchGadget(String xml) throws Exception {
+    expect(fetcher.fetch(SPEC_REQUEST)).andReturn(new HttpResponse(xml));
   }
 
   private void expectWriteResponse() throws Exception {
@@ -117,18 +131,18 @@ public class GadgetRenderingTaskTest extends HttpTestFixture {
   }
 
   public void testStandardsMode() throws Exception {
-    String content = parseBasicGadget(GadgetSpec.DEFAULT_VIEW);
+    String content = parseBasicGadget(GadgetSpec.DEFAULT_VIEW, SPEC_XML);
     assertTrue(content.contains(GadgetRenderingTask.STRICT_MODE_DOCTYPE));
   }
 
   public void testQuirksMode() throws Exception {
-    String content = parseBasicGadget("quirks");
+    String content = parseBasicGadget("quirks", SPEC_XML);
     assertTrue(!content.contains(GadgetRenderingTask.STRICT_MODE_DOCTYPE));
   }
 
 
   public void testContentRendered() throws Exception {
-    String content = parseBasicGadget(GadgetSpec.DEFAULT_VIEW);
+    String content = parseBasicGadget(GadgetSpec.DEFAULT_VIEW, SPEC_XML);
     assertTrue(content.contains(CONTENT));
   }
 
@@ -137,7 +151,7 @@ public class GadgetRenderingTaskTest extends HttpTestFixture {
     String jsLibs = "http://example.org/js/foo:bar.js";
     expect(urlGenerator.getBundledJsUrl(isA(Collection.class),
         isA(GadgetContext.class))).andReturn(jsLibs);
-    String content = parseBasicGadget(GadgetSpec.DEFAULT_VIEW);
+    String content = parseBasicGadget(GadgetSpec.DEFAULT_VIEW, SPEC_XML);
     assertTrue(content.contains("<script src=\"" + jsLibs + "\">"));
   }
 
@@ -146,14 +160,68 @@ public class GadgetRenderingTaskTest extends HttpTestFixture {
     expect(containerConfig.getJsonArray(ContainerConfig.DEFAULT_CONTAINER,
         "gadgets.features/views/dummy/aliases")).andReturn(aliases);
 
-    String content = parseBasicGadget("dummy");
+    String content = parseBasicGadget("dummy", SPEC_XML);
 
     assertTrue(content.contains(ALT_CONTENT));
+  }
+  
+  public void testOAuthPreload_data() throws Exception {
+    expectParseRequestParams(GadgetSpec.DEFAULT_VIEW);
+    expectFetchGadget(PRELOAD_XML);
+    expect(securityTokenDecoder.createToken(
+        Collections.singletonMap(SecurityTokenDecoder.SECURITY_TOKEN_NAME, "fake-token"))).
+        andStubReturn(mock(SecurityToken.class));
+    OAuthFetcher oauthFetcher = mock(OAuthFetcher.class);
+    expect(fetcherFactory.getOAuthFetcher(
+        isA(SecurityToken.class), isA(OAuthRequestParams.class))).
+        andReturn(oauthFetcher);
+
+    expect(oauthFetcher.fetch(isA(HttpRequest.class))).
+        andReturn(new HttpResponse("preloaded data"));
+
+    expectLockedDomainCheck();
+    expectWriteResponse();
+    replay();
+    fixture.replay();
+    gadgetRenderer.process(fixture.request, fixture.recorder);
+    verify();
+    fixture.verify();
+    String content = fixture.recorder.getResponseAsString();
+    assertTrue(content.contains("preloaded data"));
+  }
+  
+  public void testOAuthPreload_metadata() throws Exception {
+    expectParseRequestParams(GadgetSpec.DEFAULT_VIEW);
+    expectFetchGadget(PRELOAD_XML);
+    expect(securityTokenDecoder.createToken(
+        Collections.singletonMap(SecurityTokenDecoder.SECURITY_TOKEN_NAME, "fake-token"))).
+        andStubReturn(mock(SecurityToken.class));
+    OAuthFetcher oauthFetcher = mock(OAuthFetcher.class);
+    expect(fetcherFactory.getOAuthFetcher(
+        isA(SecurityToken.class), isA(OAuthRequestParams.class))).
+        andReturn(oauthFetcher);
+
+    HttpResponse resp = new HttpResponse(401, null, null);
+    resp.getMetadata().put(OAuthFetcher.APPROVAL_URL, "approval please");
+    resp.getMetadata().put(OAuthFetcher.CLIENT_STATE, "state blob");
+
+    expect(oauthFetcher.fetch(isA(HttpRequest.class))).andReturn(resp);
+
+    expectLockedDomainCheck();
+    expectWriteResponse();
+    replay();
+    fixture.replay();
+    gadgetRenderer.process(fixture.request, fixture.recorder);
+    verify();
+    fixture.verify();
+    String content = fixture.recorder.getResponseAsString();
+    assertTrue(content.contains("approval please"));
+    assertTrue(content.contains("state blob"));
   }
 
   public void testLockedDomainFailure() throws Exception {
     expectParseRequestParams(GadgetSpec.DEFAULT_VIEW);
-    expectFetchGadget();
+    expectFetchGadget(SPEC_XML);
     expectLockedDomainFailure();
     expectSendRedirect();
     replay();
@@ -211,7 +279,7 @@ public class GadgetRenderingTaskTest extends HttpTestFixture {
     expect(securityTokenDecoder.createToken(Collections.singletonMap(SecurityTokenDecoder.SECURITY_TOKEN_NAME, "fake-token"))).andReturn(
         new FakeGadgetToken().setUpdatedToken("updated-token")
         .setTrustedJson("{ \"foo\" : \"bar\" }"));
-    String content = parseBasicGadget(GadgetSpec.DEFAULT_VIEW);
+    String content = parseBasicGadget(GadgetSpec.DEFAULT_VIEW, SPEC_XML);
     JSONObject auth = parseShindigAuthConfig(content);
     assertEquals("updated-token", auth.getString("authToken"));
     assertEquals("{ \"foo\" : \"bar\" }", auth.getString("trustedJson"));
@@ -221,7 +289,7 @@ public class GadgetRenderingTaskTest extends HttpTestFixture {
     expect(fixture.request.getParameter("st")).andReturn("fake-token");
     expect(securityTokenDecoder.createToken(Collections.singletonMap(SecurityTokenDecoder.SECURITY_TOKEN_NAME, "fake-token"))).andReturn(
         new FakeGadgetToken());
-    String content = parseBasicGadget(GadgetSpec.DEFAULT_VIEW);
+    String content = parseBasicGadget(GadgetSpec.DEFAULT_VIEW, SPEC_XML);
     JSONObject auth = parseShindigAuthConfig(content);
     assertEquals(0, auth.length());
   }
@@ -230,7 +298,7 @@ public class GadgetRenderingTaskTest extends HttpTestFixture {
     expect(fixture.request.getParameter("st")).andReturn("fake-token");
     expect(securityTokenDecoder.createToken(Collections.singletonMap(SecurityTokenDecoder.SECURITY_TOKEN_NAME, "fake-token"))).andReturn(
         new FakeGadgetToken().setTrustedJson("trusted"));
-    String content = parseBasicGadget(GadgetSpec.DEFAULT_VIEW);
+    String content = parseBasicGadget(GadgetSpec.DEFAULT_VIEW, SPEC_XML);
     JSONObject auth = parseShindigAuthConfig(content);
     assertEquals(1, auth.length());
     assertEquals("trusted", auth.getString("trustedJson"));
@@ -240,26 +308,26 @@ public class GadgetRenderingTaskTest extends HttpTestFixture {
     expect(fixture.request.getParameter("st")).andReturn("fake-token");
     expect(securityTokenDecoder.createToken(Collections.singletonMap(SecurityTokenDecoder.SECURITY_TOKEN_NAME, "fake-token"))).andReturn(
         new FakeGadgetToken().setUpdatedToken("updated-token"));
-    String content = parseBasicGadget(GadgetSpec.DEFAULT_VIEW);
+    String content = parseBasicGadget(GadgetSpec.DEFAULT_VIEW, SPEC_XML);
     JSONObject auth = parseShindigAuthConfig(content);
     assertEquals(1, auth.length());
     assertEquals("updated-token", auth.getString("authToken"));
   }
 
   public void testRenderSetsProperCacheControlHeaders() throws Exception {
-    parseBasicGadget(GadgetSpec.DEFAULT_VIEW);
+    parseBasicGadget(GadgetSpec.DEFAULT_VIEW, SPEC_XML);
     fixture.checkCacheControlHeaders(GadgetRenderingTask.DEFAULT_CACHE_TTL, true);
   }
 
   public void testRenderSetsLongLivedCacheControlHeadersWhenVParamIsSet() throws Exception {
     expect(fixture.request.getParameter("v")).andReturn("some value");
-    parseBasicGadget(GadgetSpec.DEFAULT_VIEW);
+    parseBasicGadget(GadgetSpec.DEFAULT_VIEW, SPEC_XML);
     fixture.checkCacheControlHeaders(HttpUtil.DEFAULT_TTL, true);
   }
 
   public void testRenderSetsNoCacheHeadersWhenNoCacheParamIsSet() throws Exception {
     expect(fixture.request.getParameter("nocache")).andReturn("1");
-    parseBasicGadget(GadgetSpec.DEFAULT_VIEW);
+    parseBasicGadget(GadgetSpec.DEFAULT_VIEW, SPEC_XML);
     fixture.checkCacheControlHeaders(0, true);
   }
 

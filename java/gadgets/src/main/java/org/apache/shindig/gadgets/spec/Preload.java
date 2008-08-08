@@ -22,10 +22,14 @@ import org.apache.shindig.gadgets.Substitutions;
 
 import org.apache.commons.lang.StringUtils;
 import org.w3c.dom.Element;
+import org.w3c.dom.NamedNodeMap;
+import org.w3c.dom.Node;
 
 import java.net.URI;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -75,7 +79,15 @@ public class Preload {
   public Set<String> getViews() {
     return views;
   }
-
+  
+  /**
+   * All attributes from the preload tag
+   */
+  private final Map<String, String> attributes;
+  public Map<String, String> getAttributes() {
+    return Collections.unmodifiableMap(attributes);
+  }
+  
   public Preload substitute(Substitutions substituter) {
     return new Preload(this, substituter);
   }
@@ -90,9 +102,18 @@ public class Preload {
        .append(" authz='").append(auth.toString().toLowerCase()).append('\'')
        .append(" sign_owner='").append(signOwner).append('\'')
        .append(" sign_viewer='").append(signViewer).append('\'')
-       .append(" views='").append(StringUtils.join(views, ',')).append("'/>");
+       .append(" views='").append(StringUtils.join(views, ',')).append('\'');
+    for (String attr : attributes.keySet()) {
+      if (SKIP_AUTO_PARSE.contains(attr)) {
+        continue;
+      }
+      buf.append(' ').append(attr).append("='").append(attributes.get(attr))
+         .append('\'');
+    }
+    buf.append("/>");
     return buf.toString();
   }
+  
   /**
    * Creates a new Preload from an xml node.
    *
@@ -119,6 +140,28 @@ public class Preload {
     this.views = Collections.unmodifiableSet(views);
 
     auth = Auth.parse(XmlUtil.getAttribute(preload, AUTHZ_ATTR));
+    
+    attributes = new HashMap<String, String>();
+    NamedNodeMap attrs = preload.getAttributes();
+    for (int i=0; i < attrs.getLength(); ++i) {
+      Node attr = attrs.item(i);
+      if (SKIP_AUTO_PARSE.contains(attr.getNodeName())) {
+        continue;
+      } 
+      attributes.put(attr.getNodeName(), attr.getNodeValue());
+    }
+  }
+
+  // Attributes we parse by hand.  Other attributes are automatically treated
+  // as plain strings for substitution purposes.
+  private static final Set<String> SKIP_AUTO_PARSE;
+  static {
+    SKIP_AUTO_PARSE = new HashSet<String>();
+    SKIP_AUTO_PARSE.add("href");
+    SKIP_AUTO_PARSE.add("views");
+    SKIP_AUTO_PARSE.add("sign_owner");
+    SKIP_AUTO_PARSE.add("sign_viewer");
+    SKIP_AUTO_PARSE.add(AUTHZ_ATTR);
   }
 
   private Preload(Preload preload, Substitutions substituter) {
@@ -127,5 +170,12 @@ public class Preload {
     views = preload.views;
     auth = preload.auth;
     href = substituter.substituteUri(null, preload.href);
+    attributes = new HashMap<String, String>(preload.attributes);
+    for (Map.Entry<String, String> attr : attributes.entrySet()) {
+      if (SKIP_AUTO_PARSE.contains(attr.getKey())) {
+        continue;
+      }
+      attr.setValue(substituter.substituteString(null, attr.getValue()));
+    }
   }
 }

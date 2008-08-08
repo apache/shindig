@@ -8,6 +8,7 @@
         <Authorization url="http://localhost:9090/oauth-provider/authorize" />
       </Service>
     </OAuth>
+    <Preload authz="oauth" href="http://localhost:9090/oauth-provider/echo" />
   </ModulePrefs>
   <Content type="html">
       <![CDATA[

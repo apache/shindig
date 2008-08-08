@@ -545,9 +545,9 @@ gadgets.IfrGadget.prototype.getIframeUrl = function() {
       (this.debug ? '&debug=1' : '') +
       this.getAdditionalParams() +
       this.getUserPrefsParams() +
+      (this.secureToken ? '&st=' + this.secureToken : '') +
       '&url=' + encodeURIComponent(this.specUrl) +
       '#rpctoken=' + this.rpcToken +
-      (this.secureToken ? '&st=' + this.secureToken : '') +
       (this.viewParams ?
           '&view-params=' +  encodeURIComponent(JSON.stringify(this.viewParams)) : '') +
       (this.hashData ? '&' + this.hashData : '');

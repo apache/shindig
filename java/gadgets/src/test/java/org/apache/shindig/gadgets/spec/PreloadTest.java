@@ -20,6 +20,7 @@ package org.apache.shindig.gadgets.spec;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import org.apache.shindig.common.xml.XmlUtil;
@@ -120,13 +121,28 @@ public class PreloadTest {
 
     assertEquals(HREF, substituted.getHref().toString());
   }
+  
+  @Test
+  public void arbitraryAttributes() throws Exception {
+    String xml = "<Preload href='" + HREF + "' foo='bar' yo='momma' sub='__MSG_preload__'/>";
+    
+    Preload preload = new Preload(XmlUtil.parse(xml));
+    Substitutions substituter = new Substitutions();
+    substituter.addSubstitution(Substitutions.Type.MESSAGE, "preload", "stuff");
+    Preload substituted = preload.substitute(substituter);
+    assertEquals("bar", substituted.getAttributes().get("foo"));
+    assertEquals("momma", substituted.getAttributes().get("yo"));
+    assertEquals("stuff", substituted.getAttributes().get("sub"));
+    assertNull(substituted.getAttributes().get("href"));
+  }
 
   @Test
   public void toStringIsSane() throws Exception {
     String xml = "<Preload" +
     		     " href='" + HREF + '\'' +
     		     " sign_owner='false'" +
-    		     " views='" + StringUtils.join(VIEWS, ',') + "'/>";
+    		     " views='" + StringUtils.join(VIEWS, ',') + "'" +
+    		     " some_attribute='yes' />";
 
     Preload preload = new Preload(XmlUtil.parse(xml));
     Preload preload2 = new Preload(XmlUtil.parse(preload.toString()));
@@ -135,6 +151,7 @@ public class PreloadTest {
     assertFalse(preload2.isSignOwner());
     assertEquals(VIEWS, preload2.getViews());
     assertEquals(HREF, preload2.getHref().toString());
+    assertEquals("yes", preload2.getAttributes().get("some_attribute"));
   }
 
   @Test(expected = SpecParserException.class)

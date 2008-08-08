@@ -315,6 +315,8 @@ public class MakeRequestHandlerTest {
         .andReturn("fake-token").atLeastOnce();
     expect(fixture.request.getParameter(Preload.AUTHZ_ATTR))
         .andReturn(Auth.OAUTH.toString()).atLeastOnce();
+    // This isn't terribly accurate, but is close enough for this test.
+    expect(fixture.request.getParameterMap()).andStubReturn(Collections.EMPTY_MAP);
     fixture.replay();
 
     handler.fetch(fixture.request, fixture.recorder);
