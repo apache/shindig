@@ -65,12 +65,7 @@ class ActivitiesHandler extends DataRequestHandler {
 	public function handlePost(RestRequestItem $requestItem)
 	{
 		$requestItem->parseUrlWithTemplate(self::$ACTIVITY_ID_PATH);
-		//TODO: do we need to add groups here?
-		if ($this->service->createActivity($requestItem->getUser(), $requestItem->getPostData(), $requestItem->getToken())) {
-			return new ResponseItem(null, null, '');
-		} else {
-			return new ResponseItem(BAD_REQUEST, "You can't delete activities. ", null);
-		}
+		return $this->service->createActivity($requestItem->getUser(), $requestItem->getPostData(), $requestItem->getToken());
 	}
 
 	/**
