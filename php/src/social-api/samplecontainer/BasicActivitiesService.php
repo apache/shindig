@@ -17,7 +17,7 @@
  * specific language governing permissions and limitations under the License.
  */
 
-class BasicActivitiesService extends ActivitiesService {
+class BasicActivitiesService implements ActivitiesService {
 
 	public function getActivity(UserId $userId, $groupId, $activityId, $first, $max, SecurityToken $token)
 	{

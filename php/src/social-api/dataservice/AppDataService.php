@@ -17,7 +17,7 @@
  * specific language governing permissions and limitations under the License.
  */
 
-abstract class AppDataService {
+interface AppDataService {
 
 	/**
 	 * Fetch data for a list of ids.
@@ -28,9 +28,9 @@ abstract class AppDataService {
 	 * @return ResponseItem a response item with the error code set if
 	 *     there was a problem
 	 */
-	abstract public function getPersonData(UserId $userId, GroupId $groupId, $fields, $appId, SecurityToken $token);
+	function getPersonData(UserId $userId, GroupId $groupId, $fields, $appId, SecurityToken $token);
 
-	abstract public function deletePersonData(UserId $userId, GroupId $groupId, $fields, $appId, SecurityToken $token);
+	function deletePersonData(UserId $userId, GroupId $groupId, $fields, $appId, SecurityToken $token);
 
 	/**
 	 * Updates the data key for the given person with the new value.
@@ -42,5 +42,5 @@ abstract class AppDataService {
 	 * @return ResponseItem a response item with the error code set if
 	 *     there was a problem
 	 */
-	abstract public function updatePersonData(UserID $userId, GroupId $groupId, $fields, $values, $appId, SecurityToken $token);
+	function updatePersonData(UserID $userId, GroupId $groupId, $fields, $values, $appId, SecurityToken $token);
 }

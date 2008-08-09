@@ -22,29 +22,20 @@ ini_set('error_reporting', E_COMPILE_ERROR | E_ERROR | E_CORE_ERROR);
 
 require_once "PHPUnit/Framework/TestSuite.php";
 require_once "PHPUnit/TextUI/TestRunner.php";
-require_once realpath('../')."/config.php";
-require_once realpath('../')."/test/TestContext.php";
+require_once realpath('../') . "/config.php";
+require_once realpath('../') . "/test/TestContext.php";
 
 function __autoload($className)
 {
 	$basePath = realpath('../');
-	$locations = array(
-					'src/common',
-					'src/common/samplecontainer',
-					'src/gadgets', 
-					'src/gadgets/http',
-					'src/gadgets/oauth',
-					'src/gadgets/samplecontainer',
-					'src/social-api',
-					'src/social-api/http',
-					'src/social-api/dataservice',
-					'src/social-api/converters',
-					'src/social-api/opensocial',
-					'src/social-api/opensocial/model',
-					'src/social-api/samplecontainer'
-				);
+	$locations = array('src/common', 'src/common/samplecontainer', 'src/gadgets', 
+			'src/gadgets/http', 'src/gadgets/oauth', 'src/gadgets/samplecontainer', 
+			'src/social-api', 'src/social-api/canonical', 'src/social-api/http', 
+			'src/social-api/dataservice', 'src/social-api/converters', 
+			'src/social-api/opensocial', 'src/social-api/opensocial/model', 
+			'src/social-api/samplecontainer');
 	$extension_class_paths = Config::get('extension_class_paths');
-	if (!empty($extension_class_paths)) {
+	if (! empty($extension_class_paths)) {
 		$locations = array_merge(explode(',', $extension_class_paths), $locations);
 	}
 	// Check for the presense of this class in our all our directories.

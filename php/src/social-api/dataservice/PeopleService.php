@@ -17,9 +17,7 @@
  * specific language governing permissions and limitations under the License.
  */
 
-abstract class PeopleService {
-	public static $sortOrder = array('topFriends', 'name');
-	public static $filterType = array('all', 'hasApp', 'topFriends');
+interface PeopleService {
 
 	/**
 	 * Returns a Person object for person with $id or false on not found
@@ -28,7 +26,7 @@ abstract class PeopleService {
 	 * @param profileDetails the details to return
 	 * @param security token $token
 	 */
-	abstract public function getPerson($userId, $groupId, $profileDetails, SecurityToken $token);
+	function getPerson($userId, $groupId, $profileDetails, SecurityToken $token);
 
 	/**
 	 * Returns a list of people that correspond to the passed in person ids.
@@ -40,5 +38,10 @@ abstract class PeopleService {
 	 * @param max The max number of people to fetch.
 	 * @return a list of people.
 	 */
-	abstract public function getPeople($userId, $groupId, $sortOrder, $filter, $first, $max, $profileDetails, $networkDistance, SecurityToken $token);
+	function getPeople($userId, $groupId, $sortOrder, $filter, $first, $max, $profileDetails, $networkDistance, SecurityToken $token);
+}
+
+class PeopleOptions {
+	public static $sortOrder = array('topFriends', 'name');
+	public static $filterType = array('all', 'hasApp', 'topFriends');
 }

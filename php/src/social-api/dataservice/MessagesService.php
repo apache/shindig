@@ -17,7 +17,7 @@
  * specific language governing permissions and limitations under the License.
  */
 
-abstract class MessagesService {
+interface MessagesService {
 
 	/**  $message is an array containing the following fields:
 	 *  [id] => {msgid}
@@ -29,5 +29,5 @@ abstract class MessagesService {
 	 *          [1] => example.org:997638BAA6F25AD
 	 *      )
 	 */
-	abstract public function createMessage($userId, $message, SecurityToken $token);
+	public function createMessage($userId, $message, SecurityToken $token);
 }

@@ -73,6 +73,7 @@ $shindigConfig = array(
 	'private_key_file' => realpath(dirname(__FILE__) . '/../certs').'/private.key', 
 	'public_key_file' => realpath(dirname(__FILE__) . '/../certs').'/public.crt', 
 	'private_key_phrase' => 'partuza', 
+	'jsondb_path' => realpath(dirname(__FILE__) . '/../../javascript/sampledata').'/canonicaldb.json',
 
 	// Force these libraries to be external (included through <script src="..."> tags), this way they could be cached by the browser
 	'focedJsLibs' => '', 
@@ -87,10 +88,10 @@ $shindigConfig = array(
 	// Old-style wire format data handler, this is being depreciated 
 	'handlers' => '',
 	// New RESTful API data service classes to use
-	'people_service' => 'BasicPeopleService',
-	'activity_service' => 'BasicActivitiesService',
-	'app_data_service' => 'BasicAppDataService',
-	'messages_service' => 'BasicMessagesService',
+	'people_service' => 'JsonDbOpensocialService',
+	'activity_service' => 'JsonDbOpensocialService',
+	'app_data_service' => 'JsonDbOpensocialService',
+	'messages_service' => 'JsonDbOpensocialService',
 	// Also scan these directories when looking for <Class>.php files. You can include multiple paths by seperating them with a , 
 	'extension_class_paths' => '',
 	

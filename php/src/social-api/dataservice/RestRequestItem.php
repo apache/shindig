@@ -162,7 +162,7 @@ class RestRequestItem {
 		if (! empty($this->parameters[self::$ORDER_BY])) {
 			return $this->parameters[self::$ORDER_BY];
 		} else {
-			return PeopleService::$sortOrder;
+			return PeopleOptions::$sortOrder;
 		}
 	}
 
@@ -180,7 +180,7 @@ class RestRequestItem {
 		if (! empty($this->parameters[self::$FILTER_BY])) {
 			return $this->parameters[self::$FILTER_BY];
 		} else {
-			return PeopleService::$filterType;
+			return PeopleOptions::$filterType;
 		}
 	}
 

@@ -1,5 +1,6 @@
+
 //  WARNING! Changing this file will affect unit-tests
-//  A canonical JSON backed DB of OpenSocial datastrcutres in their RESTful forms
+//  A canonical JSON backed DB of OpenSocial datastructures in their RESTful forms
 //
 //  Basic structure:
 //  { people : Array<Person>,
@@ -66,7 +67,7 @@
     "food" : ["sushi","burgers"],
     "gender" : {
       "key" : "MALE",
-      "displayvalue" : "Male"
+      "displayValue" : "Male"
     },
     "happiestWhen" : "coding",
     "hasApp" : true,
@@ -147,7 +148,7 @@
     "scaredOf" : "COBOL",
     "schools" : [{
       "address" : {
-        "unstructuredAddress" : "1 Edu St.",
+        "unstructuredAddress" : "1 Edu St."
       },
       "description" : "High School",
       "endDate" : "1991-01-01",
@@ -186,7 +187,7 @@
     "id" : "john.doe",
     "gender" : {
       "key" : "MALE",
-      "displayvalue" : "Male"
+      "displayValue" : "Male"
     },
     "hasApp" : true,
     "name" : {
@@ -199,7 +200,7 @@
     "id" : "jane.doe",
     "gender" : {
       "key" : "FEMALE",
-      "displayvalue" : "Female"
+      "displayValue" : "Female"
     },
     "hasApp" : true,
     "name" : {
@@ -212,7 +213,7 @@
     "id" : "george.doe",
     "gender" : {
       "key" : "MALE",
-      "displayvalue" : "Female"
+      "displayValue" : "Female"
     },
     "hasApp" : true,
     "name" : {
@@ -225,7 +226,7 @@
     "id" : "mario.rossi",
     "gender" : {
       "key" : "MALE",
-      "displayvalue" : "Male"
+      "displayValue" : "Male"
     },
     "hasApp" : true,
     "name" : {
@@ -238,7 +239,7 @@
     "id" : "maija.m",
     "gender" : {
       "key" : "FEMALE",
-      "displayvalue" : "Female"
+      "displayValue" : "Female"
     },
     "hasApp" : true,
     "name" : {
@@ -322,7 +323,7 @@
       "id" : "1",
       "userId" : "john.doe",
       "title" : "yellow",
-      "body" : "what a color!",
+      "body" : "what a color!"
     }],
     "jane.doe" : [{
       "id" : "1",
