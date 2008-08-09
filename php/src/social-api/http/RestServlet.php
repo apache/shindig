@@ -53,6 +53,7 @@ require 'src/social-api/converters/OutputJsonConverter.php';
 require 'src/social-api/converters/InputConverter.php';
 require 'src/social-api/converters/InputAtomConverter.php';
 require 'src/social-api/converters/InputJsonConverter.php';
+require 'src/social-api/canonical/JsonDbOpensocialService.php';
 
 class RestException extends Exception {}
 

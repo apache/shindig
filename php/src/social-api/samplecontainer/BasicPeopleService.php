@@ -17,7 +17,7 @@
  * specific language governing permissions and limitations under the License.
  */
 
-class BasicPeopleService extends PeopleService {
+class BasicPeopleService implements PeopleService {
 
 	private function comparator($person, $person1)
 	{

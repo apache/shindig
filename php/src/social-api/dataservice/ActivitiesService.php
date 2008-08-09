@@ -17,7 +17,7 @@
  * specific language governing permissions and limitations under the License.
  */
 
-abstract class ActivitiesService {
+interface ActivitiesService {
 
 	/**
 	 * Returns a list of activities that correspond to the passed in person ids.
@@ -25,9 +25,9 @@ abstract class ActivitiesService {
 	 * @param token A valid SecurityToken
 	 * @return a response item with the list of activities.
 	 */
-	abstract public function getActivities(UserId $userId, $groupId, $first, $max, SecurityToken $token);
+	function getActivities(UserId $userId, $groupId, $first, $max, SecurityToken $token);
 
-	abstract public function getActivity(UserId $userId, $groupId, $activityId, $first, $max, SecurityToken $token);
+	function getActivity(UserId $userId, $groupId, $activityId, $first, $max, SecurityToken $token);
 
 	/**
 	 * Creates the passed in activity for the given user. Once createActivity is
@@ -37,5 +37,5 @@ abstract class ActivitiesService {
 	 * @param token A valid SecurityToken
 	 * @return a response item containing any errors
 	 */
-	abstract public function createActivity(UserId $userId, $activity, SecurityToken $token);
+	function createActivity(UserId $userId, $activity, SecurityToken $token);
 }

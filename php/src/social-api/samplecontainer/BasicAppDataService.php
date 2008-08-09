@@ -17,7 +17,7 @@
  * specific language governing permissions and limitations under the License.
  */
 
-class BasicAppDataService extends AppDataService {
+class BasicAppDataService implements AppDataService {
 
 	public function deletePersonData(UserId $userId, GroupId $groupId, $fields, $appId, SecurityToken $token)
 	{

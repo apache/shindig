@@ -17,7 +17,7 @@
  * specific language governing permissions and limitations under the License.
  */
 
-class BasicMessagesService extends MessagesService {
+class BasicMessagesService implements MessagesService {
 
 	public function createMessage($userId, $message, SecurityToken $token)
 	{
