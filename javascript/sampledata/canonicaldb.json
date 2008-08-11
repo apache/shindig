@@ -1,4 +1,3 @@
-
 //  WARNING! Changing this file will affect unit-tests
 //  A canonical JSON backed DB of OpenSocial datastructures in their RESTful forms
 //
@@ -20,348 +19,348 @@
 //
 //
 {
-  "people" : [
-  {
-    "id" : "canonical",
-    "aboutMe" : "I have an example of every piece of data",
-    "activities" : ["Coding Shindig"],
-    "addresses" : [{
-      "country" : "US",
-      "extendedAddress" : "Next door",
-      "latitude" : "28.3043",
-      "longitude" : "143.0859",
-      "locality" : "who knows",
-      "poBox" : "3653",
-      "postalCode" : "12345",
-      "region" : "Apache, CA",
-      "streetAddress" : "1 OpenStandards Way",
-      "type" : "home",
-      "unstructuredAddress" : "PoBox 3565, 1 OpenStandards Way, Apache, CA"
-      }],
-    "age" : 33,
-    "bodyType" : {
-      "build" : "svelte",
-      "eyeColor" : "blue",
-      "hairColor" : "black",
-      "height" : "1.84M",
-      "weight" : "184lbs"
-    },
-    "books" : ["The Cathedral & the Bazaar","Catch 22"],
-    "cars" : ["beetle","prius"],
-    "children" : "3",
-    "currentLocation" : {
-      "latitude" : "48.858193",
-      "longitude" : "2.29419"
-    },
-    "dateOfBirth" : "1975-01-01",
-    "drinker" : {
-      "key" : "SOCIALLY",
-      "displayvalue" : "Socially"
-    },
-    "emails" : [{
-      "address" : "shindig-dev@incubator.apache.org",
-      "type" : "work"
-    }],
-    "ethnicity" : "developer",
-    "fashion" : "t-shirts",
-    "food" : ["sushi","burgers"],
-    "gender" : {
-      "key" : "MALE",
-      "displayValue" : "Male"
-    },
-    "happiestWhen" : "coding",
-    "hasApp" : true,
-    "heroes" : ["Doug Crockford", "Charles Babbage"],
-    "humor" : "none to speak of",
-    "interests" : ["PHP","Java"],
-    "jobInterests" : "will work for beer",
-    "jobs" : [{
-        "address" : {
-          "unstructuredAddress" : "1 Shindig Drive"
-        },
-        "description" : "lots of coding",
-        "endDate" : "2010-10-10",
-        "field" : "Software Engineering",
-        "name" : "Apache.com",
-        "salary" : "$1000000000",
-        "startDate" : "1995-01-01",
-        "subField" : "Development",
-        "title" : "Grand PooBah",
-        "webpage" : "http://incubator.apache.org/projects/shindig.html"
-      },{
-        "address" : {
-          "unstructuredAddress" : "1 Skid Row"
-        },
-        "description" : "",
-        "endDate" : "1995-01-01",
-        "field" : "College",
-        "name" : "School of hard Knocks",
-        "salary" : "$100",
-        "startDate" : "1991-01-01",
-        "subField" : "Lab Tech",
-        "title" : "Gopher",
-        "webpage" : ""
-    }],
-    "languagesSpoken" : ["English","Dutch","Esperanto"],
-    "updated" : "2006-06-06T12:12:12Z",
-    "livingArrangement" : "in a house",
-    "lookingFor" : "patches",
-    "movies" : ["Iron Man", "Nosferatu"],
-    "music" : ["Chieftains","Beck"],
-    "name" : {
-      "additionalName" : "H",
-      "familyName" : "Digg",
-      "givenName" : "Shin",
-      "honorificPrefix" : "Sir",
-      "honorificSuffix" : "Social Butterfly",
-      "unstructured" : "Sir Shin H. Digg Social Butterfly"
-    },
-    "networkPresence" : {
-      "key" : "ONLINE",
-      "displayvalue" : "Online"
-    },
-    "nickname" : "diggy",
-    "pets" : "dog,cat",
-    "phoneNumbers" : [{
-      "number" : "111-111-111",
-      "type" : "work"
-    },{
-      "number" : "999-999-999",
-      "type" : "mobile"
-    }],
-    "politicalViews" : "open leaning",
-    "profileSong" : {
-      "address" : "http://www.example.org/songs/OnlyTheLonely.mp3",
-      "linkText" : "Feelin' blue",
-      "type" : "road"
-    },
-    "profileUrl" : "http://www.example.org/?id=1",
-    "profileVideo" : {
-     "address" : "http://www.example.org/videos/Thriller.flv",
-     "linkText" : "Thriller",
-     "type" : "video"
-    },
-    "quotes" : ["I am therfore I code", "Doh!"],
-    "relationshipStatus" : "married to my job",
-    "religion" : "druidic",
-    "romance" : "twice a year",
-    "scaredOf" : "COBOL",
-    "schools" : [{
-      "address" : {
-        "unstructuredAddress" : "1 Edu St."
-      },
-      "description" : "High School",
-      "endDate" : "1991-01-01",
-      "field" : "",
-      "name" : "",
-      "salary" : "",
-      "startDate" : "1982-01-01",
-      "subField" : "",
-      "title" : "",
-      "webpage" : ""
-      }],
-    "sexualOrientation" : "north",
-    "smoker" : {
-      "key" : "NO",
-      "displayvalue" : "No"
-    },
-    "sports" : ["frisbee","rugby"],
-    "status" : "happy",
-    "tags" : ["C#","JSON","template"],
-    "thumbnailUrl" : "http://www.example.org/pic/?id=1",
-    "timeZone" : "-8",
-    "turnOffs" : ["lack of unit tests","cabbage"],
-    "turnOns" : ["well document code"],
-    "tvShows" : ["House","Battlestar Galactica"],
-    "urls" : [{
-      "address" : "http://www.example.org/?id=1",
-      "linkText" : "Profile",
-      "type" : "text/html"
-    },{
-      "address" : "http://www.example.org/pic/?id=1",
-      "linkText" : "Thumbnail",
-      "type" : "img/*"
-    }]
-  },
-  {
-    "id" : "john.doe",
-    "gender" : {
-      "key" : "MALE",
-      "displayValue" : "Male"
-    },
-    "hasApp" : true,
-    "name" : {
-      "familyName" : "Doe",
-      "givenName" : "John",
-      "unstructured" : "John Doe"
-    }
-  },
-  {
-    "id" : "jane.doe",
-    "gender" : {
-      "key" : "FEMALE",
-      "displayValue" : "Female"
-    },
-    "hasApp" : true,
-    "name" : {
-      "familyName" : "Doe",
-      "givenName" : "Jane",
-      "unstructured" : "Jane Doe"
-    }
-  },
-  {
-    "id" : "george.doe",
-    "gender" : {
-      "key" : "MALE",
-      "displayValue" : "Female"
-    },
-    "hasApp" : true,
-    "name" : {
-      "familyName" : "Doe",
-      "givenName" : "George",
-      "unstructured" : "George Doe"
-    }
-  },
-  {
-    "id" : "mario.rossi",
-    "gender" : {
-      "key" : "MALE",
-      "displayValue" : "Male"
-    },
-    "hasApp" : true,
-    "name" : {
-      "familyName" : "Rossi",
-      "givenName" : "Mario",
-      "unstructured" : "Mario Rossi"
-    }
-  },
-  {
-    "id" : "maija.m",
-    "gender" : {
-      "key" : "FEMALE",
-      "displayValue" : "Female"
-    },
-    "hasApp" : true,
-    "name" : {
-      "familyName" : "Meikäläinen",
-      "givenName" : "Maija",
-      "unstructured" : "Maija Meikäläinen"
-    }
-  }],
-  //
-  // ----------------------------- Data ---------------------------------------
-  //
-  "data" : {
-    "canonical" : {
-      "count" : "2",
-      "size" : "100"
-    },
-    "john.doe" : {
-      "count" : "0"
-    },
-    "george.doe" : {
-      "count" : "2"
-    },
-    "jane.doe" : {
-      "count" : "7"
-    }
-  },
-  "activities" : {
-    "canonical" : [{
-      "appId" : "1",
-      "body" : "Went rafting",
-      "bodyId" : "1",
-      "externalId" : "http://www.example.org/123456",
-      "id" : "1",
-      "updated" : "2008-06-06T12:12:12Z",
-      "mediaItems" : [{
-        "mimeType" : "image/*",
-        "type" : "image",
-        "url" : "http://upload.wikimedia.org/wikipedia/commons/thumb/7/77/Rafting_em_Brotas.jpg/800px-Rafting_em_Brotas.jpg"
-      },{
-        "mimeType" : "audio/mpeg",
-        "type" : "audio",
-        "url" : "http://www.archive.org/download/testmp3testfile/mpthreetest.mp3"
-      }],
-      "postedTime" : "1111111111",
-      "priority" : "0.7",
-      "streamFaviconUrl" : "http://upload.wikimedia.org/wikipedia/commons/0/02/Nuvola_apps_edu_languages.gif",
-      "streamSourceUrl" : "http://www.example.org/canonical/streamsource",
-      "streamTitle" : "All my activities",
-      "streamUrl" : "http://www.example.org/canonical/activities",
-      "templateParams" : {
-        "small" : "true",
-        "otherContent" : "and got wet"
-      },
-      "title" : "My trip",
-      "titleId" : "1",
-      "url" : "http://www.example.org/canonical/activities/1",
-      "userId" : "canonical"
-    },{
-      "appId" : "1",
-      "body" : "Went skiing",
-      "bodyId" : "1",
-      "externalId" : "http://www.example.org/123457",
-      "id" : "1",
-      "updated" : "2008-06-10T12:12:12Z",
-      "postedTime" : "1111111112",
-      "priority" : "0.7",
-      "streamFaviconUrl" : "http://upload.wikimedia.org/wikipedia/commons/0/02/Nuvola_apps_edu_languages.gif",
-      "streamSourceUrl" : "http://www.example.org/canonical/streamsource",
-      "streamTitle" : "All my activities",
-      "streamUrl" : "http://www.example.org/canonical/activities",
-      "templateParams" : {
-        "small" : "true",
-        "otherContent" : "and went fast"
-      },
-      "title" : "My next trip",
-      "titleId" : "1",
-      "url" : "http://www.example.org/canonical/activities/2",
-      "userId" : "canonical"
-    }],
-    "john.doe" : [{
-      "id" : "1",
-      "userId" : "john.doe",
-      "title" : "yellow",
-      "body" : "what a color!"
-    }],
-    "jane.doe" : [{
-      "id" : "1",
-      "body" : "and she thinks you look like him",
-      "mediaItems" : [{
-        "mimeType" : "image/jpeg",
-        "type" : "image",
-        "url" : "http://animals.nationalgeographic.com/staticfiles/NGS/Shared/StaticFiles/animals/images/primary/black-spider-monkey.jpg"
-      },{
-        "mimeType" : "image/jpeg",
-        "type" : "image",
-        "url" : "http://image.guardian.co.uk/sys-images/Guardian/Pix/gallery/2002/01/03/monkey300.jpg"
-      }],
-      "streamTitle" : "jane's photos",
-      "title" : "Jane just posted a photo of a monkey",
-      "userId" : "jane.doe"
-    },{
-      "id" : "2",
-      "body" : "or is it you?",
-      "mediaItems" : [{
-        "mimeType" : "image/jpeg",
-        "type" : "image",
-        "url" : "http://www.funnyphotos.net.au/images/fancy-dress-dog-yoda-from-star-wars1.jpg"
-      }],
-      "streamTitle" : "jane's photos",
-      "title" : "Jane says George likes yoda!",
-      "userId" : "jane.doe"
-    }]
+"people" : [
+{
+"id" : "canonical",
+"aboutMe" : "I have an example of every piece of data",
+"activities" : ["Coding Shindig"],
+"addresses" : [{
+"country" : "US",
+"extendedAddress" : "Next door",
+"latitude" : "28.3043",
+"longitude" : "143.0859",
+"locality" : "who knows",
+"poBox" : "3653",
+"postalCode" : "12345",
+"region" : "Apache, CA",
+"streetAddress" : "1 OpenStandards Way",
+"type" : "home",
+"unstructuredAddress" : "PoBox 3565, 1 OpenStandards Way, Apache, CA"
+}],
+"age" : 33,
+"bodyType" : {
+"build" : "svelte",
+"eyeColor" : "blue",
+"hairColor" : "black",
+"height" : "1.84M",
+"weight" : "184lbs"
+},
+"books" : ["The Cathedral & the Bazaar","Catch 22"],
+"cars" : ["beetle","prius"],
+"children" : "3",
+"currentLocation" : {
+"latitude" : "48.858193",
+"longitude" : "2.29419"
+},
+"dateOfBirth" : "1975-01-01",
+"drinker" : {
+"key" : "SOCIALLY",
+"displayValue" : "Socially"
+},
+"emails" : [{
+"address" : "shindig-dev@incubator.apache.org",
+"type" : "work"
+}],
+"ethnicity" : "developer",
+"fashion" : "t-shirts",
+"food" : ["sushi","burgers"],
+"gender" : {
+"key" : "MALE",
+"displayValue" : "Male"
+},
+"happiestWhen" : "coding",
+"hasApp" : true,
+"heroes" : ["Doug Crockford", "Charles Babbage"],
+"humor" : "none to speak of",
+"interests" : ["PHP","Java"],
+"jobInterests" : "will work for beer",
+"jobs" : [{
+"address" : {
+"unstructuredAddress" : "1 Shindig Drive"
+},
+"description" : "lots of coding",
+"endDate" : "2010-10-10",
+"field" : "Software Engineering",
+"name" : "Apache.com",
+"salary" : "$1000000000",
+"startDate" : "1995-01-01",
+"subField" : "Development",
+"title" : "Grand PooBah",
+"webpage" : "http://incubator.apache.org/projects/shindig.html"
+},{
+"address" : {
+"unstructuredAddress" : "1 Skid Row"
+},
+"description" : "",
+"endDate" : "1995-01-01",
+"field" : "College",
+"name" : "School of hard Knocks",
+"salary" : "$100",
+"startDate" : "1991-01-01",
+"subField" : "Lab Tech",
+"title" : "Gopher",
+"webpage" : ""
+}],
+"languagesSpoken" : ["English","Dutch","Esperanto"],
+"updated" : "2006-06-06T12:12:12Z",
+"livingArrangement" : "in a house",
+"lookingFor" : "patches",
+"movies" : ["Iron Man", "Nosferatu"],
+"music" : ["Chieftains","Beck"],
+"name" : {
+"additionalName" : "H",
+"familyName" : "Digg",
+"givenName" : "Shin",
+"honorificPrefix" : "Sir",
+"honorificSuffix" : "Social Butterfly",
+"unstructured" : "Sir Shin H. Digg Social Butterfly"
+},
+"networkPresence" : {
+"key" : "ONLINE",
+"displayValue" : "Online"
+},
+"nickname" : "diggy",
+"pets" : "dog,cat",
+"phoneNumbers" : [{
+"number" : "111-111-111",
+"type" : "work"
+},{
+"number" : "999-999-999",
+"type" : "mobile"
+}],
+"politicalViews" : "open leaning",
+"profileSong" : {
+"address" : "http://www.example.org/songs/OnlyTheLonely.mp3",
+"linkText" : "Feelin' blue",
+"type" : "road"
+},
+"profileUrl" : "http://www.example.org/?id=1",
+"profileVideo" : {
+"address" : "http://www.example.org/videos/Thriller.flv",
+"linkText" : "Thriller",
+"type" : "video"
+},
+"quotes" : ["I am therfore I code", "Doh!"],
+"relationshipStatus" : "married to my job",
+"religion" : "druidic",
+"romance" : "twice a year",
+"scaredOf" : "COBOL",
+"schools" : [{
+"address" : {
+"unstructuredAddress" : "1 Edu St."
+},
+"description" : "High School",
+"endDate" : "1991-01-01",
+"field" : "",
+"name" : "",
+"salary" : "",
+"startDate" : "1982-01-01",
+"subField" : "",
+"title" : "",
+"webpage" : ""
+}],
+"sexualOrientation" : "north",
+"smoker" : {
+"key" : "NO",
+"displayValue" : "No"
+},
+"sports" : ["frisbee","rugby"],
+"status" : "happy",
+"tags" : ["C#","JSON","template"],
+"thumbnailUrl" : "http://www.example.org/pic/?id=1",
+"timeZone" : "-8",
+"turnOffs" : ["lack of unit tests","cabbage"],
+"turnOns" : ["well document code"],
+"tvShows" : ["House","Battlestar Galactica"],
+"urls" : [{
+"address" : "http://www.example.org/?id=1",
+"linkText" : "Profile",
+"type" : "text/html"
+},{
+"address" : "http://www.example.org/pic/?id=1",
+"linkText" : "Thumbnail",
+"type" : "img/*"
+}]
+},
+{
+"id" : "john.doe",
+"gender" : {
+"key" : "MALE",
+"displayValue" : "Male"
+},
+"hasApp" : true,
+"name" : {
+"familyName" : "Doe",
+"givenName" : "John",
+"unstructured" : "John Doe"
+}
+},
+{
+"id" : "jane.doe",
+"gender" : {
+"key" : "FEMALE",
+"displayValue" : "Female"
+},
+"hasApp" : true,
+"name" : {
+"familyName" : "Doe",
+"givenName" : "Jane",
+"unstructured" : "Jane Doe"
+}
+},
+{
+"id" : "george.doe",
+"gender" : {
+"key" : "MALE",
+"displayValue" : "Female"
+},
+"hasApp" : true,
+"name" : {
+"familyName" : "Doe",
+"givenName" : "George",
+"unstructured" : "George Doe"
+}
+},
+{
+"id" : "mario.rossi",
+"gender" : {
+"key" : "MALE",
+"displayValue" : "Male"
+},
+"hasApp" : true,
+"name" : {
+"familyName" : "Rossi",
+"givenName" : "Mario",
+"unstructured" : "Mario Rossi"
+}
+},
+{
+"id" : "maija.m",
+"gender" : {
+"key" : "FEMALE",
+"displayValue" : "Female"
+},
+"hasApp" : true,
+"name" : {
+"familyName" : "Meikäläinen",
+"givenName" : "Maija",
+"unstructured" : "Maija Meikäläinen"
+}
+}],
+//
+// ----------------------------- Data ---------------------------------------
+//
+"data" : {
+"canonical" : {
+"count" : "2",
+"size" : "100"
+},
+"john.doe" : {
+"count" : "0"
+},
+"george.doe" : {
+"count" : "2"
+},
+"jane.doe" : {
+"count" : "7"
+}
+},
+"activities" : {
+"canonical" : [{
+"appId" : "1",
+"body" : "Went rafting",
+"bodyId" : "1",
+"externalId" : "http://www.example.org/123456",
+"id" : "1",
+"updated" : "2008-06-06T12:12:12Z",
+"mediaItems" : [{
+"mimeType" : "image/*",
+"type" : "image",
+"url" : "http://upload.wikimedia.org/wikipedia/commons/thumb/7/77/Rafting_em_Brotas.jpg/800px-Rafting_em_Brotas.jpg"
+},{
+"mimeType" : "audio/mpeg",
+"type" : "audio",
+"url" : "http://www.archive.org/download/testmp3testfile/mpthreetest.mp3"
+}],
+"postedTime" : "1111111111",
+"priority" : "0.7",
+"streamFaviconUrl" : "http://upload.wikimedia.org/wikipedia/commons/0/02/Nuvola_apps_edu_languages.gif",
+"streamSourceUrl" : "http://www.example.org/canonical/streamsource",
+"streamTitle" : "All my activities",
+"streamUrl" : "http://www.example.org/canonical/activities",
+"templateParams" : {
+"small" : "true",
+"otherContent" : "and got wet"
+},
+"title" : "My trip",
+"titleId" : "1",
+"url" : "http://www.example.org/canonical/activities/1",
+"userId" : "canonical"
+},{
+"appId" : "1",
+"body" : "Went skiing",
+"bodyId" : "1",
+"externalId" : "http://www.example.org/123457",
+"id" : "1",
+"updated" : "2008-06-10T12:12:12Z",
+"postedTime" : "1111111112",
+"priority" : "0.7",
+"streamFaviconUrl" : "http://upload.wikimedia.org/wikipedia/commons/0/02/Nuvola_apps_edu_languages.gif",
+"streamSourceUrl" : "http://www.example.org/canonical/streamsource",
+"streamTitle" : "All my activities",
+"streamUrl" : "http://www.example.org/canonical/activities",
+"templateParams" : {
+"small" : "true",
+"otherContent" : "and went fast"
+},
+"title" : "My next trip",
+"titleId" : "1",
+"url" : "http://www.example.org/canonical/activities/2",
+"userId" : "canonical"
+}],
+"john.doe" : [{
+"id" : "1",
+"userId" : "john.doe",
+"title" : "yellow",
+"body" : "what a color!"
+}],
+"jane.doe" : [{
+"id" : "1",
+"body" : "and she thinks you look like him",
+"mediaItems" : [{
+"mimeType" : "image/jpeg",
+"type" : "image",
+"url" : "http://animals.nationalgeographic.com/staticfiles/NGS/Shared/StaticFiles/animals/images/primary/black-spider-monkey.jpg"
+},{
+"mimeType" : "image/jpeg",
+"type" : "image",
+"url" : "http://image.guardian.co.uk/sys-images/Guardian/Pix/gallery/2002/01/03/monkey300.jpg"
+}],
+"streamTitle" : "jane's photos",
+"title" : "Jane just posted a photo of a monkey",
+"userId" : "jane.doe"
+},{
+"id" : "2",
+"body" : "or is it you?",
+"mediaItems" : [{
+"mimeType" : "image/jpeg",
+"type" : "image",
+"url" : "http://www.funnyphotos.net.au/images/fancy-dress-dog-yoda-from-star-wars1.jpg"
+}],
+"streamTitle" : "jane's photos",
+"title" : "Jane says George likes yoda!",
+"userId" : "jane.doe"
+}]
 
-  },
-  //
-  // ----------------------------- Data ---------------------------------------
-  //
-  "friendLinks" : {
-    "canonical" : ["john.doe", "jane.doe", "george.doe", "maija.m"],
-    "john.doe" : ["jane.doe", "george.doe", "maija.m"],
-    "jane.doe" : ["john.doe"],
-    "george.doe" : ["john.doe"],
-    "maija.m" : []
-  }
+},
+//
+// ----------------------------- Data ---------------------------------------
+//
+"friendLinks" : {
+"canonical" : ["john.doe", "jane.doe", "george.doe", "maija.m"],
+"john.doe" : ["jane.doe", "george.doe", "maija.m"],
+"jane.doe" : ["john.doe"],
+"george.doe" : ["john.doe"],
+"maija.m" : []
+}
 }

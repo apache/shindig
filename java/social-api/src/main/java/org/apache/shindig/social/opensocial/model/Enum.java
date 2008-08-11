@@ -18,12 +18,10 @@
 package org.apache.shindig.social.opensocial.model;
 
 /**
- * see
- * http://code.google.com/apis/opensocial/docs/0.7/reference/opensocial.Enum.html
+ * see http://code.google.com/apis/opensocial/docs/0.7/reference/opensocial.Enum.html
  *
- * Base class for all Enum objects. This class allows containers to use constants
- * for fields that have a common set of values.
- *
+ * Base class for all Enum objects. This class allows containers to use constants for fields that
+ * have a common set of values.
  */
 public interface Enum<E extends Enum.EnumKey> {
 
@@ -31,9 +29,10 @@ public interface Enum<E extends Enum.EnumKey> {
    * Set of fields associated with an Enum object
    */
   public static enum Field {
+
     KEY("key"),
     // TODO Shouldnt this be 'displayValue'
-    DISPLAY_VALUE("displayvalue");
+    DISPLAY_VALUE("displayValue");
 
     private final String jsonString;
 
@@ -48,6 +47,7 @@ public interface Enum<E extends Enum.EnumKey> {
   }
 
   public interface EnumKey {
+
     String getDisplayValue();
   }
 
@@ -55,6 +55,7 @@ public interface Enum<E extends Enum.EnumKey> {
    * public java.lang.Enum for opensocial.Enum.Drinker.
    */
   public enum Drinker implements EnumKey {
+
     HEAVILY("HEAVILY", "Heavily"),
     NO("NO", "No"),
     OCCASIONALLY("OCCASIONALLY", "Occasionally"),
@@ -65,6 +66,7 @@ public interface Enum<E extends Enum.EnumKey> {
     YES("YES", "Yes");
 
     private final String jsonString;
+
     private final String displayValue;
 
     private Drinker(String jsonString, String displayValue) {
@@ -86,10 +88,12 @@ public interface Enum<E extends Enum.EnumKey> {
    * public java.lang.Enum for opensocial.Enum.Gender.
    */
   public enum Gender implements EnumKey {
+
     FEMALE("FEMALE", "Female"),
     MALE("MALE", "Male");
 
     private final String jsonString;
+
     private final String displayValue;
 
     private Gender(String jsonString, String displayValue) {
@@ -111,6 +115,7 @@ public interface Enum<E extends Enum.EnumKey> {
    * public java.lang.Enum for opensocial.Enum.Smoker.
    */
   public enum Smoker implements EnumKey {
+
     HEAVILY("HEAVILY", "Heavily"),
     NO("NO", "No"),
     OCCASIONALLY("OCCASIONALLY", "Ocasionally"),
@@ -121,6 +126,7 @@ public interface Enum<E extends Enum.EnumKey> {
     YES("YES", "Yes");
 
     private final String jsonString;
+
     private final String displayValue;
 
     private Smoker(String jsonString, String displayValue) {
@@ -142,6 +148,7 @@ public interface Enum<E extends Enum.EnumKey> {
    * public java.lang.Enum for opensocial.Enum.NetworkPresence.
    */
   public enum NetworkPresence implements EnumKey {
+
     ONLINE("ONLINE", "Online"),
     OFFLINE("OFFLINE", "Offline"),
     AWAY("AWAY", "Away"),
@@ -150,6 +157,7 @@ public interface Enum<E extends Enum.EnumKey> {
     XA("XA", "Extended Away");
 
     private final String jsonString;
+
     private final String displayValue;
 
     private NetworkPresence(String jsonString, String displayValue) {
@@ -168,29 +176,31 @@ public interface Enum<E extends Enum.EnumKey> {
   }
 
   /**
-   * Gets the value of this Enum. This is the string displayed to the user.
-   * If the container supports localization, the string should be localized.
+   * Gets the value of this Enum. This is the string displayed to the user. If the container
+   * supports localization, the string should be localized.
+   *
    * @return the Enum's user visible value
    */
   String getDisplayValue();
 
   /**
-   * Sets the value of this Enum. This is the string displayed to the user.
-   * If the container supports localization, the string should be localized.
+   * Sets the value of this Enum. This is the string displayed to the user. If the container
+   * supports localization, the string should be localized.
+   *
    * @param displayValue The value to set.
    */
   void setDisplayValue(String displayValue);
 
   /**
-   * Gets the key for this Enum.
-   * Use this for logic within your gadget.
+   * Gets the key for this Enum. Use this for logic within your gadget.
+   *
    * @return java.lang.Enum key object for this Enum.
    */
   E getKey();
 
   /**
-   * Sets the key for this Enum.
-   * Use this for logic within your gadget.
+   * Sets the key for this Enum. Use this for logic within your gadget.
+   *
    * @param key The value to set.
    */
   void setKey(E key);
