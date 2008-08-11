@@ -26,23 +26,27 @@
 
     <div id="approval" style="display: none">
       <img src="http://localhost:8080/gadgets/files/samplecontainer/examples/new.gif">
-      <a id="personalize"
-        onclick="javascript:showOneSection('waiting'); return true"
-        target="approve">Personalize this gadget</a>
+      <a href="#" id="personalize">Personalize this gadget</a>
     </div>
 
     <div id="waiting" style="display: none">
       Please click
-      <a onclick="javascript:fetchData()">I've approved access</a>
+      <a href="#" id="approvaldone">I've approved access</a>
       once you've approved access to your data.
     </div>
 
+    <script src="http://localhost:8080/gadgets/files/samplecontainer/examples/oauthpopup.js"></script>
+
     <script type="text/javascript">
+      function $(x) {
+        return document.getElementById(x);
+      }
+
       function showOneSection(toshow) {
         var sections = [ 'main', 'approval', 'waiting' ];
         for (var i=0; i < sections.length; ++i) {
           var s = sections[i];
-          var el = document.getElementById(s);
+          var el = $(s);
           if (s === toshow) {
             el.style.display = "block";
           } else {
@@ -62,21 +66,27 @@
           gadgets.io.MethodType.GET;
 
         gadgets.io.makeRequest(url, function (response) {
+          var popup = null;
           if (response.oauthApprovalUrl) {
-            var personalize = document.getElementById('personalize');
-            personalize.href = response.oauthApprovalUrl;
+            popup = oauthPopup();
+            popup.setDestination(response.oauthApprovalUrl);
+            $('personalize').onclick = popup.createOpenerOnClick();
+            $('approvaldone').onclick = popup.createApprovedOnClick();
+            popup.setOnOpen(function() {
+              showOneSection('waiting');
+            });
+            popup.setOnClose(function() {
+              fetchData();
+            });
             showOneSection('approval');
           } else if (response.data) {
-            var main = document.getElementById('main');
-            var txt = document.createTextNode(response.data);
-            main.appendChild(txt);
+            $('main').appendChild(document.createTextNode(response.data));
             showOneSection('main');
           } else {
-            var main = document.getElementById('main');
             var whoops = document.createTextNode(
                 'OAuth error: ' + response.oauthError + ': ' +
                 response.oauthErrorText);
-            main.appendChild(whoops);
+            $('main').appendChild(whoops);
             showOneSection('main');
           }
         }, params);
