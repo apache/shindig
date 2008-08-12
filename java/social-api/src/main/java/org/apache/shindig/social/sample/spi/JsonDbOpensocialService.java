@@ -40,17 +40,18 @@ import com.google.common.collect.Sets;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.inject.name.Named;
+
 import org.apache.commons.io.IOUtils;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.concurrent.Future;
 
 /**
@@ -99,7 +100,7 @@ public class JsonDbOpensocialService implements ActivityService, PersonService, 
 
   @Inject
   public JsonDbOpensocialService(@Named("shindig.canonical.json.db")String jsonLocation,
-      @Named("shindig.bean.converter.json") BeanConverter converter) throws Exception {
+      @Named("shindig.bean.converter.json")BeanConverter converter) throws Exception {
     String content = IOUtils.toString(ResourceLoader.openResource(jsonLocation), "UTF-8");
     this.db = new JSONObject(content);
     this.converter = converter;
@@ -113,11 +114,11 @@ public class JsonDbOpensocialService implements ActivityService, PersonService, 
     this.db = db;
   }
 
-  public Future<ResponseItem<RestfulCollection<Activity>>> getActivities(UserId userId,
+  public Future<ResponseItem<RestfulCollection<Activity>>> getActivities(Set<UserId> userIds,
       GroupId groupId, String appId, Set<String> fields, SecurityToken token) {
     List<Activity> result = Lists.newArrayList();
     try {
-      Set<String> idSet = getIdSet(userId, groupId, token);
+      Set<String> idSet = getIdSet(userIds, groupId, token);
       for (String id : idSet) {
         if (db.getJSONObject(ACTIVITIES_TABLE).has(id)) {
           JSONArray activities = db.getJSONObject(ACTIVITIES_TABLE).getJSONArray(id);
@@ -139,8 +140,32 @@ public class JsonDbOpensocialService implements ActivityService, PersonService, 
     }
   }
 
-  public Future<ResponseItem<Activity>> getActivity(UserId userId, GroupId groupId, String appId,
-      Set<String> fields, String activityId, SecurityToken token) {
+  public Future<ResponseItem<RestfulCollection<Activity>>> getActivities(UserId userId,
+      GroupId groupId, String appId, Set<String> fields,
+      Set<String> activityIds, SecurityToken token) {
+    List<Activity> result = Lists.newArrayList();
+    try {
+      String user = userId.getUserId(token);
+      if (db.getJSONObject(ACTIVITIES_TABLE).has(user)) {
+        JSONArray activities = db.getJSONObject(ACTIVITIES_TABLE).getJSONArray(user);
+        for (int i = 0; i < activities.length(); i++) {
+          JSONObject activity = activities.getJSONObject(i);
+          if (activity.get(Activity.Field.USER_ID.toString()).equals(user)
+              && activityIds.contains(activity.getString(Activity.Field.ID.toString()))) {
+            result.add(convertToActivity(activity, fields));
+          }
+        }
+      }
+      return ImmediateFuture.newInstance(new ResponseItem<RestfulCollection<Activity>>(
+          new RestfulCollection<Activity>(result)));
+    } catch (JSONException je) {
+      return ImmediateFuture.newInstance(new ResponseItem<RestfulCollection<Activity>>(
+          ResponseError.INTERNAL_ERROR, je.getMessage(), null));
+    }
+  }
+
+  public Future<ResponseItem<Activity>> getActivity(UserId userId,
+      GroupId groupId, String appId, Set<String> fields, String activityId, SecurityToken token) {
     try {
       String user = userId.getUserId(token);
       if (db.getJSONObject(ACTIVITIES_TABLE).has(user)) {
@@ -162,8 +187,8 @@ public class JsonDbOpensocialService implements ActivityService, PersonService, 
     }
   }
 
-  public Future<ResponseItem<Object>> deleteActivity(UserId userId, GroupId groupId, String appId,
-      String activityId, SecurityToken token) {
+  public Future<ResponseItem<Object>> deleteActivities(UserId userId, GroupId groupId, String appId,
+      Set<String> activityIds, SecurityToken token) {
     try {
       String user = userId.getUserId(token);
       if (db.getJSONObject(ACTIVITIES_TABLE).has(user)) {
@@ -172,7 +197,7 @@ public class JsonDbOpensocialService implements ActivityService, PersonService, 
           JSONArray newList = new JSONArray();
           for (int i = 0; i < activities.length(); i++) {
             JSONObject activity = activities.getJSONObject(i);
-            if (!activity.get(Activity.Field.ID.toString()).equals(activityId)) {
+            if (!activityIds.contains(activity.getString(Activity.Field.ID.toString()))) {
               newList.put(activity);
             }
           }
@@ -213,14 +238,14 @@ public class JsonDbOpensocialService implements ActivityService, PersonService, 
     }
   }
 
-  public Future<ResponseItem<RestfulCollection<Person>>> getPeople(UserId userId, GroupId groupId,
-      SortOrder sortOrder, FilterType filter, int first, int max,
+  public Future<ResponseItem<RestfulCollection<Person>>> getPeople(Set<UserId> userIds,
+      GroupId groupId, SortOrder sortOrder, FilterType filter, int first, int max,
       Set<String> fields, SecurityToken token) {
     List<Person> result = Lists.newArrayList();
     try {
       JSONArray people = db.getJSONArray(PEOPLE_TABLE);
 
-      Set<String> idSet = getIdSet(userId, groupId, token);
+      Set<String> idSet = getIdSet(userIds, groupId, token);
 
       for (int i = 0; i < people.length(); i++) {
         JSONObject person = people.getJSONObject(i);
@@ -274,18 +299,17 @@ public class JsonDbOpensocialService implements ActivityService, PersonService, 
     }
   }
 
-  public Future<ResponseItem<DataCollection>> getPersonData(UserId userId, GroupId groupId,
+  public Future<ResponseItem<DataCollection>> getPersonData(Set<UserId> userIds, GroupId groupId,
       String appId, Set<String> fields, SecurityToken token) {
-    // TODO. Does fields==null imply all?
     try {
       Map<String, Map<String, String>> idToData = Maps.newHashMap();
-      Set<String> idSet = getIdSet(userId, groupId, token);
+      Set<String> idSet = getIdSet(userIds, groupId, token);
       for (String id : idSet) {
         JSONObject personData;
         if (!db.getJSONObject(DATA_TABLE).has(id)) {
           personData = new JSONObject();
         } else {
-          if (fields != null && !fields.isEmpty()) {
+          if (!fields.isEmpty()) {
             personData = new JSONObject(
                 db.getJSONObject(DATA_TABLE).getJSONObject(id),
                 fields.toArray(new String[fields.size()]));
@@ -323,7 +347,7 @@ public class JsonDbOpensocialService implements ActivityService, PersonService, 
       Iterator keys = oldPersonData.keys();
       while (keys.hasNext()) {
         String key = (String) keys.next();
-        if (fields != null && !fields.contains(key)) {
+        if (!fields.contains(key)) {
           newPersonData.put(key, oldPersonData.getString(key));
         }
       }
@@ -388,8 +412,20 @@ public class JsonDbOpensocialService implements ActivityService, PersonService, 
     return returnVal;
   }
 
+  /**
+   * Get the set of user id's for a set of users and a group
+   */
+  private Set<String> getIdSet(Set<UserId> users, GroupId group, SecurityToken token)
+      throws JSONException {
+    Set<String> ids = Sets.newLinkedHashSet();
+    for (UserId user : users) {
+      ids.addAll(getIdSet(user, group, token));
+    }
+    return ids;
+  }
+
   private Activity convertToActivity(JSONObject object, Set<String> fields) throws JSONException {
-    if (fields != null && !fields.isEmpty()) {
+    if (!fields.isEmpty()) {
       // Create a copy with just the specified fields
       object = new JSONObject(object, fields.toArray(new String[fields.size()]));
     }
@@ -403,7 +439,7 @@ public class JsonDbOpensocialService implements ActivityService, PersonService, 
   }
 
   private Person convertToPerson(JSONObject object, Set<String> fields) throws JSONException {
-    if (fields != null && !fields.isEmpty()) {
+    if (!fields.isEmpty()) {
       // Create a copy with just the specified fields
       object = new JSONObject(object, fields.toArray(new String[fields.size()]));
     }

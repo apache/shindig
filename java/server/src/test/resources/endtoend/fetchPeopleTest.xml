@@ -19,8 +19,8 @@
 -->
 <Module>
   <ModulePrefs title="EndToEndTest">
-    <Require feature="opensocial-0.8" />
-    <Require feature="views" />
+    <Require feature="opensocial-0.8"/>
+    <Require feature="views"/>
   </ModulePrefs>
   <Content type="html">
     <![CDATA[
@@ -57,6 +57,22 @@
             function receivedData(response) {
               var ownerFriends = getAndCheckError(response, 'idFriends');
               assertEquals('Wrong friend count', 0, ownerFriends.size());
+              finished();
+            }
+
+            // Send the request
+            req.send(receivedData);
+          },
+
+          /** Test fetching friends of a list of users */
+          fetchPluralUsers: function() {
+            var req = opensocial.newDataRequest();
+
+            var idSpec = opensocial.newIdSpec({userId : ['john.doe', 'jane.doe']})
+            req.add(req.newFetchPeopleRequest(idSpec), 'idUsers');
+            function receivedData(response) {
+              var users = getAndCheckError(response, 'idUsers');
+              assertEquals('Wrong friend count', 2, users.size());
               finished();
             }
 

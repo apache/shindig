@@ -20,18 +20,24 @@ package org.apache.shindig.social.opensocial.service;
 import org.apache.shindig.social.ResponseItem;
 import org.apache.shindig.social.opensocial.model.Activity;
 import org.apache.shindig.social.opensocial.spi.ActivityService;
+import org.apache.shindig.social.opensocial.spi.UserId;
 
+import com.google.common.collect.Sets;
 import com.google.inject.Inject;
 
+import java.util.List;
+import java.util.Set;
 import java.util.concurrent.Future;
 
 public class ActivityHandler extends DataRequestHandler {
+
   private ActivityService service;
 
   // TODO: The appId should come from the url. The spec needs to be fixed!
-  private static final String ACTIVITY_ID_PATH = "/activities/{userId}/{groupId}/{activityId}";
+  private static final String ACTIVITY_ID_PATH = "/activities/{userId}+/{groupId}/{activityId}+";
+
   // Note: not what the spec says
-  private static final String GROUP_PATH = "/activities/{userId}/{groupId}/{appId}"; 
+  private static final String GROUP_PATH = "/activities/{userId}+/{groupId}/{appId}";
 
   @Inject
   public ActivityHandler(ActivityService service) {
@@ -39,62 +45,85 @@ public class ActivityHandler extends DataRequestHandler {
   }
 
   /**
-   * /activities/{userId}/@self/{actvityId}
+   * Allowed end-points /activities/{userId}/@self/{actvityId}+
    *
-   * examples:
-   * /activities/john.doe/@self/1
+   * examples: /activities/john.doe/@self/1
    */
   protected Future<? extends ResponseItem> handleDelete(RequestItem request) {
     request.parseUrlWithTemplate(ACTIVITY_ID_PATH);
 
-    return service.deleteActivity(request.getUser(), request.getGroup(),
-        request.getAppId(), request.getParameters().get("activityId"), request.getToken());
+    Set<UserId> userIds = request.getUsers();
+    Set<String> activityIds = Sets.newLinkedHashSet(request.getListParameter("activityId"));
+
+    Preconditions.requireNotEmpty(userIds, "No userId specified");
+    Preconditions.requireSingular(userIds, "Multiple userIds not supported");
+
+    return service.deleteActivities(userIds.iterator().next(), request.getGroup(),
+        request.getAppId(), activityIds, request.getToken());
   }
 
   /**
-   * /activities/{userId}/@self
+   * Allowed end-points /activities/{userId}/@self
    *
-   * examples:
-   * /activities/john.doe/@self
-   * - postBody is an activity object
+   * examples: /activities/john.doe/@self - postBody is an activity object
    */
   protected Future<? extends ResponseItem> handlePut(RequestItem request) {
     return handlePost(request);
   }
 
   /**
-   * /activities/{userId}/@self
+   * Allowed end-points /activities/{userId}/@self
    *
-   * examples:
-   * /activities/john.doe/@self
-   * - postBody is an activity object
+   * examples: /activities/john.doe/@self - postBody is an activity object
    */
   protected Future<? extends ResponseItem> handlePost(RequestItem request) {
     request.parseUrlWithTemplate(GROUP_PATH);
 
-    return service.createActivity(request.getUser(), request.getGroup(),
+    Set<UserId> userIds = request.getUsers();
+    List<String> activityIds = request.getListParameter("activityId");
+
+    Preconditions.requireNotEmpty(userIds, "No userId specified");
+    Preconditions.requireSingular(userIds, "Multiple userIds not supported");
+    // TODO(lryan) This seems reasonable to allow on PUT but we don't have an update verb.
+    Preconditions.requireEmpty(activityIds, "Cannot specify activityId in create");
+
+    return service.createActivity(userIds.iterator().next(), request.getGroup(),
         request.getAppId(), request.getFields(), request.getPostData(Activity.class),
         request.getToken());
   }
 
   /**
-   * /activities/{userId}/{groupId}/{optionalActvityId}
+   * Allowed end-points /activities/{userId}/{groupId}/{optionalActvityId}+
+   * /activities/{userId}+/{groupId}
    *
-   * examples:
-   * /activities/john.doe/@self/1
-   * /activities/john.doe/@self
-   * /activities/john.doe/@friends
+   * examples: /activities/john.doe/@self/1 /activities/john.doe/@self
+   * /activities/john.doe,jane.doe/@friends
    */
   protected Future<? extends ResponseItem> handleGet(RequestItem request) {
     request.parseUrlWithTemplate(ACTIVITY_ID_PATH);
-    String optionalActivityId = request.getParameters().get("activityId");
 
-    if (optionalActivityId != null) {
-      return service.getActivity(request.getUser(), request.getGroup(),request.getAppId(),
-          request.getFields(), optionalActivityId, request.getToken());
+    Set<UserId> userIds = request.getUsers();
+    Set<String> optionalActivityIds = Sets.newLinkedHashSet(request.getListParameter("activityId"));
+
+    // Preconditions
+    Preconditions.requireNotEmpty(userIds, "No userId specified");
+    if (userIds.size() > 1 && !optionalActivityIds.isEmpty()) {
+      throw new IllegalArgumentException("Cannot fetch same activityIds for multiple userIds");
     }
 
-    return service.getActivities(request.getUser(), request.getGroup(), request.getAppId(),
+    if (!optionalActivityIds.isEmpty()) {
+      if (optionalActivityIds.size() == 1) {
+        return service
+            .getActivity(userIds.iterator().next(), request.getGroup(), request.getAppId(),
+                request.getFields(), optionalActivityIds.iterator().next(), request.getToken());
+      } else {
+        return service.getActivities(userIds.iterator().next(), request.getGroup(),
+            request.getAppId(), request.getFields(), optionalActivityIds, request.getToken());
+      }
+    }
+
+    return service.getActivities(userIds, request.getGroup(),
+        request.getAppId(),
         // TODO: add pagination and sorting support
         // getOrderBy(params), getFilterBy(params), getStartIndex(params), getCount(params),
         request.getFields(), request.getToken());

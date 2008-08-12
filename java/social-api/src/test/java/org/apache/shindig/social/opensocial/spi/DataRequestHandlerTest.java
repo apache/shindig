@@ -17,17 +17,20 @@
  */
 package org.apache.shindig.social.opensocial.spi;
 
+import org.apache.shindig.common.util.ImmediateFuture;
+import org.apache.shindig.social.ResponseError;
 import org.apache.shindig.social.ResponseItem;
 import org.apache.shindig.social.opensocial.service.DataRequestHandler;
 import org.apache.shindig.social.opensocial.service.RequestItem;
-import org.apache.shindig.common.util.ImmediateFuture;
 
 import junit.framework.TestCase;
 
 import java.util.concurrent.Future;
 
 public class DataRequestHandlerTest extends TestCase {
+
   private DataRequestHandler drh;
+
   private RequestItem request;
 
   @Override
@@ -60,7 +63,7 @@ public class DataRequestHandlerTest extends TestCase {
     verifyItemDispatchMethodCalled("GET");
   }
 
-  private void verifyItemDispatchMethodCalled(String methodName) throws Exception{
+  private void verifyItemDispatchMethodCalled(String methodName) throws Exception {
     request.setMethod(methodName);
     assertEquals(methodName, drh.handleItem(request).get().getResponse());
   }
@@ -85,12 +88,7 @@ public class DataRequestHandlerTest extends TestCase {
 
   private void verifyExceptionThrown(String methodName) throws Exception {
     request.setMethod(methodName);
-    try {
-      drh.handleItem(request);
-      fail("The invalid method " + methodName + " should throw an exception.");
-    } catch (IllegalArgumentException e) {
-      // Yea! We like exeptions
-      assertEquals("Unserviced Http method type", e.getMessage());
-    }
+    Future<? extends ResponseItem> err = drh.handleItem(request);
+    assertEquals(err.get().getError(), ResponseError.NOT_IMPLEMENTED);
   }
 }

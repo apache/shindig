@@ -34,7 +34,10 @@ import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
+
 import junit.framework.TestCase;
+
+import java.util.Collections;
 
 /**
  * Test the JSONOpensocialService
@@ -44,10 +47,17 @@ public class JsonDbOpensocialServiceTest extends TestCase {
   private JsonDbOpensocialService db;
 
   private static final UserId CANON_USER = new UserId(UserId.Type.userId, "canonical");
+
+  private static final UserId JOHN_DOE = new UserId(UserId.Type.userId, "john.doe");
+
+  private static final UserId JANE_DOE = new UserId(UserId.Type.userId, "jane.doe");
+
   private static final GroupId SELF_GROUP = new GroupId(GroupId.Type.self, null);
+
   private static final String APP_ID = "1";
 
   private static final String CANONICAL_USER_ID = "canonical";
+
   private SecurityToken token = new FakeGadgetToken();
 
 
@@ -76,8 +86,21 @@ public class JsonDbOpensocialServiceTest extends TestCase {
 
   public void testGetExpectedFriends() throws Exception {
     ResponseItem<RestfulCollection<Person>> responseItem = db.getPeople(
-        CANON_USER, new GroupId(GroupId.Type.friends, null), PersonService.SortOrder.topFriends,
-        PersonService.FilterType.all, 0, Integer.MAX_VALUE, null, token).get();
+        Sets.newHashSet(CANON_USER), new GroupId(GroupId.Type.friends, null),
+        PersonService.SortOrder.topFriends, PersonService.FilterType.all, 0,
+        Integer.MAX_VALUE, Collections.<String>emptySet(), token).get();
+    assertNotNull(responseItem.getResponse());
+    assertEquals(responseItem.getResponse().getTotalResults(), 4);
+    // Test a couple of users
+    assertEquals(responseItem.getResponse().getEntry().get(0).getId(), "john.doe");
+    assertEquals(responseItem.getResponse().getEntry().get(1).getId(), "jane.doe");
+  }
+
+  public void testGetExpectedUsersForPlural() throws Exception {
+    ResponseItem<RestfulCollection<Person>> responseItem = db.getPeople(
+        Sets.newLinkedHashSet(JOHN_DOE, JANE_DOE), new GroupId(GroupId.Type.friends, null),
+        PersonService.SortOrder.topFriends, PersonService.FilterType.all, 0,
+        Integer.MAX_VALUE, Collections.<String>emptySet(), token).get();
     assertNotNull(responseItem.getResponse());
     assertEquals(responseItem.getResponse().getTotalResults(), 4);
     // Test a couple of users
@@ -87,8 +110,16 @@ public class JsonDbOpensocialServiceTest extends TestCase {
 
   public void testGetExpectedActivities() throws Exception {
     ResponseItem<RestfulCollection<Activity>> responseItem = db.getActivities(
-        CANON_USER, SELF_GROUP, APP_ID, null, new FakeGadgetToken()).get();
+        Sets.newHashSet(CANON_USER), SELF_GROUP, APP_ID, Collections.<String>emptySet(),
+        new FakeGadgetToken()).get();
     assertTrue(responseItem.getResponse().getTotalResults() == 2);
+  }
+
+  public void testGetExpectedActivitiesForPlural() throws Exception {
+    ResponseItem<RestfulCollection<Activity>> responseItem = db.getActivities(
+        Sets.newHashSet(CANON_USER, JOHN_DOE), SELF_GROUP, APP_ID, Collections.<String>emptySet(),
+        new FakeGadgetToken()).get();
+    assertTrue(responseItem.getResponse().getTotalResults() == 3);
   }
 
   public void testGetExpectedActivity() throws Exception {
@@ -103,7 +134,7 @@ public class JsonDbOpensocialServiceTest extends TestCase {
   }
 
   public void testDeleteExpectedActivity() throws Exception {
-    db.deleteActivity(CANON_USER, SELF_GROUP, APP_ID, APP_ID,
+    db.deleteActivities(CANON_USER, SELF_GROUP, APP_ID, Sets.newHashSet(APP_ID),
         new FakeGadgetToken());
 
     // Try to fetch the activity
@@ -115,12 +146,28 @@ public class JsonDbOpensocialServiceTest extends TestCase {
 
   public void testGetExpectedAppData() throws Exception {
     ResponseItem<DataCollection> responseItem = db.getPersonData(
-        CANON_USER, SELF_GROUP, APP_ID, null, new FakeGadgetToken()).get();
+        Sets.newHashSet(CANON_USER), SELF_GROUP, APP_ID, Collections.<String>emptySet(),
+        new FakeGadgetToken()).get();
     assertTrue(!responseItem.getResponse().getEntry().isEmpty());
     assertTrue(!responseItem.getResponse().getEntry().get(CANONICAL_USER_ID).isEmpty());
     assertTrue(responseItem.getResponse().getEntry().get(CANONICAL_USER_ID).size() == 2);
     assertTrue(responseItem.getResponse().getEntry().get(CANONICAL_USER_ID).containsKey("count"));
     assertTrue(responseItem.getResponse().getEntry().get(CANONICAL_USER_ID).containsKey("size"));
+  }
+
+  public void testGetExpectedAppDataForPlural() throws Exception {
+    ResponseItem<DataCollection> responseItem = db.getPersonData(
+        Sets.newHashSet(CANON_USER, JOHN_DOE), SELF_GROUP, APP_ID, Collections.<String>emptySet(),
+        new FakeGadgetToken()).get();
+    assertTrue(!responseItem.getResponse().getEntry().isEmpty());
+    assertTrue(!responseItem.getResponse().getEntry().get(CANONICAL_USER_ID).isEmpty());
+    assertTrue(responseItem.getResponse().getEntry().get(CANONICAL_USER_ID).size() == 2);
+    assertTrue(responseItem.getResponse().getEntry().get(CANONICAL_USER_ID).containsKey("count"));
+    assertTrue(responseItem.getResponse().getEntry().get(CANONICAL_USER_ID).containsKey("size"));
+    assertTrue(!responseItem.getResponse().getEntry().get(JOHN_DOE.getUserId()).isEmpty());
+    assertTrue(responseItem.getResponse().getEntry().get(JOHN_DOE.getUserId()).size() == 1);
+    assertTrue(
+        responseItem.getResponse().getEntry().get(JOHN_DOE.getUserId()).containsKey("count"));
   }
 
   public void testDeleteExpectedAppData() throws Exception {
@@ -130,7 +177,8 @@ public class JsonDbOpensocialServiceTest extends TestCase {
 
     //Fetch the remaining and test
     ResponseItem<DataCollection> responseItem = db.getPersonData(
-        CANON_USER, SELF_GROUP, APP_ID, null, new FakeGadgetToken()).get();
+        Sets.newHashSet(CANON_USER), SELF_GROUP, APP_ID, Collections.<String>emptySet(),
+        new FakeGadgetToken()).get();
     assertTrue(!responseItem.getResponse().getEntry().isEmpty());
     assertTrue(!responseItem.getResponse().getEntry().get(CANONICAL_USER_ID).isEmpty());
     assertTrue(responseItem.getResponse().getEntry().get(CANONICAL_USER_ID).size() == 1);
@@ -145,7 +193,8 @@ public class JsonDbOpensocialServiceTest extends TestCase {
 
     //Fetch the remaining and test
     ResponseItem<DataCollection> responseItem = db.getPersonData(
-        CANON_USER, SELF_GROUP, APP_ID, null, new FakeGadgetToken()).get();
+        Sets.newHashSet(CANON_USER), SELF_GROUP, APP_ID, Collections.<String>emptySet(),
+        new FakeGadgetToken()).get();
     assertTrue(!responseItem.getResponse().getEntry().isEmpty());
     assertTrue(!responseItem.getResponse().getEntry().get(CANONICAL_USER_ID).isEmpty());
     assertTrue(responseItem.getResponse().getEntry().get(CANONICAL_USER_ID).size() == 3);

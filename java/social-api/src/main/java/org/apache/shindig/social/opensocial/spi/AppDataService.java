@@ -28,43 +28,33 @@ import java.util.Set;
 import java.util.concurrent.Future;
 
 /**
- * Data Service SPI interface. This interface represents is used to retrieve
- * information bound to a person, there are methods to update and delete data.
+ * Data Service SPI interface. This interface represents is used to retrieve information bound to a
+ * person, there are methods to update and delete data.
  */
 @ImplementedBy(JsonDbOpensocialService.class)
 public interface AppDataService {
 
   /**
-   * Retrives app data for the specified user and group.
+   * Retrives app data for the specified user list and group.
    *
-   * @param userId
-   *                The user
-   * @param groupId
-   *                The group
-   * @param appId
-   *                The app
-   * @param fields
-   *                The fields to filter the data by.
-   * @param token
-   *                The security token
+   * @param userIds A set of UserIds.
+   * @param groupId The group
+   * @param appId   The app
+   * @param fields  The fields to filter the data by. Empty set implies all
+   * @param token   The security token
    * @return The data fetched
    */
-  Future<ResponseItem<DataCollection>> getPersonData(UserId userId, GroupId groupId, String appId,
-      Set<String> fields, SecurityToken token);
+  Future<ResponseItem<DataCollection>> getPersonData(Set<UserId> userIds, GroupId groupId,
+      String appId, Set<String> fields, SecurityToken token);
 
   /**
    * Deletes data for the specified user and group.
    *
-   * @param userId
-   *                The user
-   * @param groupId
-   *                The group
-   * @param appId
-   *                The app
-   * @param fields
-   *                The fields to delete.
-   * @param token
-   *                The security token
+   * @param userId  The user
+   * @param groupId The group
+   * @param appId   The app
+   * @param fields  The fields to delete. Empty set implies all
+   * @param token   The security token
    * @return an error if one occurs
    */
   Future<ResponseItem<Object>> deletePersonData(UserId userId, GroupId groupId,
@@ -73,18 +63,12 @@ public interface AppDataService {
   /**
    * Updates app data for the specified user and group with the new values.
    *
-   * @param userId
-   *                The user
-   * @param groupId
-   *                The group
-   * @param appId
-   *                The app
-   * @param fields
-   *                The fields to filter the data by.
-   * @param values
-   *                The values to set
-   * @param token
-   *                The security token
+   * @param userId  The user
+   * @param groupId The group
+   * @param appId   The app
+   * @param fields  The fields to filter the data by. Empty set implies all
+   * @param values  The values to set
+   * @param token   The security token
    * @return an error if one occurs
    */
   Future<ResponseItem<Object>> updatePersonData(UserId userId, GroupId groupId,

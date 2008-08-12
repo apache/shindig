@@ -26,6 +26,7 @@ import org.apache.shindig.social.opensocial.service.RequestItem;
 import org.apache.shindig.social.sample.spi.JsonDbOpensocialService;
 
 import com.google.inject.Inject;
+
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpMethod;
 import org.apache.commons.httpclient.methods.GetMethod;
@@ -36,7 +37,9 @@ import java.io.IOException;
 import java.util.concurrent.Future;
 
 public class SampleContainerHandler extends DataRequestHandler {
+
   private final JsonDbOpensocialService service;
+
   private static final String POST_PATH = "/samplecontainer/{type}/{doevil}";
 
   @Inject
@@ -59,18 +62,17 @@ public class SampleContainerHandler extends DataRequestHandler {
   }
 
   /**
-   * Handles /samplecontainer/setstate and /samplecontainer/setevilness/{doevil}.
-   * TODO(doll): These urls aren't very resty. Consider changing the samplecontainer.html calls
-   * post.
+   * Handles /samplecontainer/setstate and /samplecontainer/setevilness/{doevil}. TODO(doll): These
+   * urls aren't very resty. Consider changing the samplecontainer.html calls post.
    */
   protected Future<? extends ResponseItem> handlePost(RequestItem request) {
     ResponseItem<Object> response = new ResponseItem<Object>("");
 
     request.parseUrlWithTemplate(POST_PATH);
-    String type = request.getParameters().get("type");
+    String type = request.getParameter("type");
     if (type.equals("setstate")) {
       try {
-        String stateFile = request.getParameters().get("fileurl");
+        String stateFile = request.getParameter("fileurl");
         service.setDb(new JSONObject(fetchStateDocument(stateFile)));
       } catch (JSONException e) {
         response = new ResponseItem<Object>(ResponseError.BAD_REQUEST,

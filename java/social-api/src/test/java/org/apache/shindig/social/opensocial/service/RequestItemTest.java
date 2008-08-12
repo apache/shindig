@@ -19,16 +19,13 @@ package org.apache.shindig.social.opensocial.service;
 
 import org.apache.shindig.common.SecurityToken;
 import org.apache.shindig.common.testing.FakeGadgetToken;
-import org.apache.shindig.social.opensocial.service.RequestItem;
 import org.apache.shindig.social.opensocial.spi.GroupId;
 import org.apache.shindig.social.opensocial.spi.PersonService;
 import org.apache.shindig.social.opensocial.spi.UserId;
 
-import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
-import junit.framework.TestCase;
 
-import java.util.Map;
+import junit.framework.TestCase;
 
 public class RequestItemTest extends TestCase {
 
@@ -41,7 +38,7 @@ public class RequestItemTest extends TestCase {
     request.putUrlParamsIntoParameters();
 
     assertEquals(path, request.getUrl());
-    assertEquals("huey,dewey,louie", request.getParameters().get("fields"));
+    assertEquals("huey,dewey,louie", request.getParameter("fields"));
 
     // Try it without any params
     request = new RequestItem();
@@ -50,21 +47,17 @@ public class RequestItemTest extends TestCase {
     request.putUrlParamsIntoParameters();
 
     assertEquals(path, request.getUrl());
-    assertEquals(null, request.getParameters().get("fields"));
+    assertEquals(null, request.getParameter("fields"));
   }
 
   public void testBasicFunctions() throws Exception {
     String url = "url";
-    Map<String, String> params = Maps.newHashMap();
     SecurityToken token = null;
     String method = "method";
     RequestItem request = new RequestItem();
 
     request.setUrl(url);
     assertEquals(url, request.getUrl());
-
-    request.setParameters(params);
-    assertEquals(params, request.getParameters());
 
     request.setMethod(method);
     assertEquals(method, request.getMethod());
@@ -76,76 +69,76 @@ public class RequestItemTest extends TestCase {
   public void testGetAppId() throws Exception {
     RequestItem request = new RequestItem();
 
-    request.setParameters(Maps.immutableMap("appId", "100"));
+    request.setParameter("appId", "100");
     assertEquals("100", request.getAppId());
 
     FakeGadgetToken token = new FakeGadgetToken();
     request.setToken(token);
-    request.setParameters(Maps.immutableMap("appId", "@app"));
+    request.setParameter("appId", "@app");
     assertEquals(token.getAppId(), request.getAppId());
   }
 
   public void testGetUser() throws Exception {
     RequestItem request = new RequestItem();
 
-    request.setParameters(Maps.immutableMap("userId", "@owner"));
-    assertEquals(UserId.Type.owner, request.getUser().getType());
+    request.setParameter("userId", "@owner");
+    assertEquals(UserId.Type.owner, request.getUsers().iterator().next().getType());
   }
 
   public void testGetGroup() throws Exception {
     RequestItem request = new RequestItem();
 
-    request.setParameters(Maps.immutableMap("groupId", "@self"));
+    request.setParameter("groupId", "@self");
     assertEquals(GroupId.Type.self, request.getGroup().getType());
   }
 
   public void testStartIndex() throws Exception {
     RequestItem request = new RequestItem();
 
-    request.setParameters(Maps.<String, String>immutableMap("startIndex", null));
+    request.setParameter("startIndex", null);
     assertEquals(0, request.getStartIndex());
 
-    request.setParameters(Maps.immutableMap("startIndex", "5"));
+    request.setParameter("startIndex", "5");
     assertEquals(5, request.getStartIndex());
   }
 
   public void testCount() throws Exception {
     RequestItem request = new RequestItem();
 
-    request.setParameters(Maps.<String, String>immutableMap("count", null));
+    request.setParameter("count", null);
     assertEquals(20, request.getCount());
 
-    request.setParameters(Maps.immutableMap("count", "5"));
+    request.setParameter("count", "5");
     assertEquals(5, request.getCount());
   }
 
   public void testOrderBy() throws Exception {
     RequestItem request = new RequestItem();
 
-    request.setParameters(Maps.<String, String>immutableMap("orderBy", null));
+    request.setParameter("orderBy", null);
     assertEquals(PersonService.SortOrder.topFriends, request.getOrderBy());
 
-    request.setParameters(Maps.immutableMap("orderBy", "name"));
+    request.setParameter("orderBy", "name");
     assertEquals(PersonService.SortOrder.name, request.getOrderBy());
   }
 
   public void testFilterBy() throws Exception {
     RequestItem request = new RequestItem();
 
-    request.setParameters(Maps.<String, String>immutableMap("filterBy", null));
+    request.setParameter("filterBy", null);
     assertEquals(PersonService.FilterType.all, request.getFilterBy());
 
-    request.setParameters(Maps.immutableMap("filterBy", "hasApp"));
+    request.setParameter("filterBy", "hasApp");
     assertEquals(PersonService.FilterType.hasApp, request.getFilterBy());
   }
 
   public void testFields() throws Exception {
     RequestItem request = new RequestItem();
 
-    request.setParameters(Maps.<String, String>immutableMap("fields", null));
+    request.setParameter("fields", null);
     assertEquals(Sets.<String>newHashSet(), request.getFields());
 
-    request.setParameters(Maps.immutableMap("fields", "happy,sad,grumpy"));
+    request.setParameter("fields", "happy,sad,grumpy");
     assertEquals(Sets.newHashSet("happy", "sad", "grumpy"), request.getFields());
   }
 

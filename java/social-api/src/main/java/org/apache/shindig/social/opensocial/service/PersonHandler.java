@@ -23,7 +23,6 @@ import org.apache.shindig.social.opensocial.model.Person;
 import org.apache.shindig.social.opensocial.spi.GroupId;
 import org.apache.shindig.social.opensocial.spi.PersonService;
 import org.apache.shindig.social.opensocial.spi.UserId;
-import org.apache.shindig.common.util.ImmediateFuture;
 
 import com.google.common.collect.Sets;
 import com.google.inject.Inject;
@@ -33,9 +32,10 @@ import java.util.concurrent.Future;
 
 
 public class PersonHandler extends DataRequestHandler {
+
   private PersonService personService;
 
-  private static final String PEOPLE_PATH = "/people/{userId}/{groupId}/{personId}";
+  private static final String PEOPLE_PATH = "/people/{userId}+/{groupId}/{personId}+";
 
   @Inject
   public PersonHandler(PersonService personService) {
@@ -43,48 +43,65 @@ public class PersonHandler extends DataRequestHandler {
   }
 
   protected Future<? extends ResponseItem> handleDelete(RequestItem request) {
-    return ImmediateFuture.newInstance(new ResponseItem<Object>(ResponseError.BAD_REQUEST,
-        "You can't delete people. ", null));
+    return error(ResponseError.BAD_REQUEST, "You can't delete people.", null);
   }
 
   protected Future<? extends ResponseItem> handlePut(RequestItem request) {
-    return ImmediateFuture.newInstance(new ResponseItem<Object>(ResponseError.NOT_IMPLEMENTED,
-        "You can't add people right now. ", null));
+    return error(ResponseError.NOT_IMPLEMENTED, "You can't update right now.", null);
   }
 
   protected Future<? extends ResponseItem> handlePost(RequestItem request) {
-    return ImmediateFuture.newInstance(new ResponseItem<Object>(ResponseError.NOT_IMPLEMENTED,
-        "You can't add people right now. ", null));
+    return error(ResponseError.NOT_IMPLEMENTED, "You can't add people right now.", null);
   }
 
   /**
-   * /people/{userId}/{groupId}/{optionalPersonId}
+   * Allowed end-points /people/{userId}+/{groupId} /people/{userId}/{groupId}/{optionalPersonId}+
    *
-   * examples:
-   * /people/john.doe/@all
-   * /people/john.doe/@friends
-   * /people/john.doe/@self
+   * examples: /people/john.doe/@all /people/john.doe/@friends /people/john.doe/@self
    */
   protected Future<? extends ResponseItem> handleGet(RequestItem request) {
     request.parseUrlWithTemplate(PEOPLE_PATH);
 
-    UserId userId = request.getUser();
     GroupId groupId = request.getGroup();
-    String optionalPersonId = request.getParameters().get("personId");
+    Set<String> optionalPersonId = Sets.newLinkedHashSet(request.getListParameter("personId"));
     Set<String> fields = request.getFields(Person.Field.DEFAULT_FIELDS);
+    Set<UserId> userIds = request.getUsers();
 
-    if (groupId.getType() == GroupId.Type.self) {
-      return personService.getPerson(userId, fields, request.getToken());
-
-    } else if (optionalPersonId != null) {
-      // TODO: Add some crazy concept to handle the userId?
-      return personService.getPerson(new UserId(UserId.Type.userId, optionalPersonId),
-          fields, request.getToken());
+    // Preconditions
+    Preconditions.requireNotEmpty(userIds, "No userId specified");
+    if (userIds.size() > 1 && !optionalPersonId.isEmpty()) {
+      throw new IllegalArgumentException("Cannot fetch personIds for multiple userIds");
     }
 
-    return personService.getPeople(userId, groupId, request.getOrderBy(),
+    if (userIds.size() == 1) {
+      if (optionalPersonId.isEmpty()) {
+        if (groupId.getType() == GroupId.Type.self) {
+          return personService.getPerson(userIds.iterator().next(), fields, request.getToken());
+        } else {
+          return personService.getPeople(userIds, groupId, request.getOrderBy(),
+              request.getFilterBy(), request.getStartIndex(), request.getCount(),
+              fields, request.getToken());
+        }
+      } else if (optionalPersonId.size() == 1) {
+        // TODO: Add some crazy concept to handle the userId?
+        return personService.getPerson(new UserId(UserId.Type.userId,
+            optionalPersonId.iterator().next()),
+            fields, request.getToken());
+      } else {
+        Set<UserId> personIds = Sets.newLinkedHashSet();
+        for (String pid : optionalPersonId) {
+          personIds.add(new UserId(UserId.Type.userId, pid));
+        }
+        // Every other case is a collection response of optional person ids
+        return personService.getPeople(personIds, new GroupId(GroupId.Type.self, null),
+            request.getOrderBy(), request.getFilterBy(), request.getStartIndex(),
+            request.getCount(), fields, request.getToken());
+      }
+    }
+
+    // Every other case is a collection response.
+    return personService.getPeople(userIds, groupId, request.getOrderBy(),
         request.getFilterBy(), request.getStartIndex(), request.getCount(),
         fields, request.getToken());
   }
-
 }

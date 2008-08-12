@@ -31,16 +31,12 @@ import org.apache.shindig.social.opensocial.service.PersonHandler;
 
 import com.google.common.collect.Maps;
 import com.google.inject.Guice;
-import junit.framework.TestCase;
+
 import org.easymock.classextension.EasyMock;
 import org.json.JSONObject;
 
-import javax.servlet.ServletInputStream;
-import javax.servlet.http.HttpServletResponse;
-import javax.xml.stream.XMLInputFactory;
-import javax.xml.stream.XMLStreamConstants;
-import javax.xml.stream.XMLStreamException;
-import javax.xml.stream.XMLStreamReader;
+import junit.framework.TestCase;
+
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -49,10 +45,21 @@ import java.io.PrintWriter;
 import java.util.Map;
 import java.util.Vector;
 
+import javax.servlet.ServletInputStream;
+import javax.servlet.http.HttpServletResponse;
+import javax.xml.stream.XMLInputFactory;
+import javax.xml.stream.XMLStreamConstants;
+import javax.xml.stream.XMLStreamException;
+import javax.xml.stream.XMLStreamReader;
+
 public abstract class AbstractLargeRestfulTests extends TestCase {
+
   private AuthenticationServletFilter.SecurityTokenRequest req;
+
   private HttpServletResponse res;
+
   private DataServiceServlet servlet;
+
   private static final FakeGadgetToken FAKE_GADGET_TOKEN = new FakeGadgetToken()
       .setOwnerId("john.doe").setViewerId("john.doe");
 
@@ -101,7 +108,13 @@ public abstract class AbstractLargeRestfulTests extends TestCase {
     EasyMock.expect(req.getParameterNames()).andStubReturn(vector.elements());
 
     for (Map.Entry<String, String> entry : extraParams.entrySet()) {
-      EasyMock.expect(req.getParameter(entry.getKey())).andStubReturn(entry.getValue());
+      if (entry.getValue() != null) {
+        EasyMock.expect(req.getParameterValues(entry.getKey()))
+            .andStubReturn(new String[]{entry.getValue()});
+      } else {
+        EasyMock.expect(req.getParameterValues(entry.getKey()))
+            .andStubReturn(new String[]{});
+      }
     }
 
     if (postData == null) {
@@ -109,7 +122,7 @@ public abstract class AbstractLargeRestfulTests extends TestCase {
     }
 
     final InputStream stream = new ByteArrayInputStream(postData.getBytes());
-    ServletInputStream servletStream = new ServletInputStream () {
+    ServletInputStream servletStream = new ServletInputStream() {
       public int read() throws IOException {
         return stream.read();
       }
@@ -135,9 +148,11 @@ public abstract class AbstractLargeRestfulTests extends TestCase {
 
   /**
    * parse entry.content xml into a Map<> struct
+   *
    * @param str input content string
    * @return the map<> of <name, value> pairs from the content xml
-   * @throws javax.xml.stream.XMLStreamException If the str is not valid xml
+   * @throws javax.xml.stream.XMLStreamException
+   *          If the str is not valid xml
    */
   protected Map<String, String> parseXmlContent(String str)
       throws XMLStreamException {
@@ -149,11 +164,11 @@ public abstract class AbstractLargeRestfulTests extends TestCase {
     while (true) {
       int event = parser.next();
       if (event == XMLStreamConstants.END_DOCUMENT) {
-         parser.close();
-         break;
+        parser.close();
+        break;
       } else if (event == XMLStreamConstants.START_ELEMENT) {
         String name = parser.getLocalName();
-        int eventType =  parser.next();
+        int eventType = parser.next();
         if (eventType == XMLStreamConstants.CHARACTERS) {
           String value = parser.getText();
           columns.put(name, value);
