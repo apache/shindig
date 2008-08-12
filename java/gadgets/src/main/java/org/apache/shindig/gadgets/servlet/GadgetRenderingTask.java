@@ -123,7 +123,7 @@ public class GadgetRenderingTask {
       return;
     }
 
-    if (!"http".equals(url.getScheme()) && !"https".equals(url.getScheme())) {
+    if (!"http".equalsIgnoreCase(url.getScheme()) && !"https".equalsIgnoreCase(url.getScheme())) {
       response.sendError(HttpServletResponse.SC_BAD_REQUEST,
           "Unsupported scheme (must be http or https).");
       return;
