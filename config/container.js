@@ -17,13 +17,24 @@
  * under the License.
  */
 
-// Default container configuration. Rather than replacing this
-// file, you should create your own container.js file and
-// load it directly by modifying the value of web.xml.
+// Default container configuration. To change the configuration, you have two options:
+//
+// A. If you run the Java server: Create your own "myContainer.js" file and
+// modify the value in web.xml. 
+//
+//  B. If you run the PHP server: Create a myContainer.js, copy the contents of container.js to it,
+//  change 
+//		{"gadgets.container" : ["default"],
+//  to
+//		﻿{"gadgets.container" : ["myContainer"],
+// And make your changes that you need to myContainer.js.
+// Just make sure on the iframe URL you specify &container=myContainer 
+// for it to use that config. 
+//
 // All configurations will automatically inherit values from this
 // config, so you only need to provide configuration for items
 // that you require explicit special casing for.
-
+//
 // Please namespace your attributes using the same conventions
 // as you would for javascript objects, e.g. gadgets.features
 // rather than "features".
