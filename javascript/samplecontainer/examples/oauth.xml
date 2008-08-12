@@ -5,7 +5,7 @@
       <Service>
         <Request url="http://localhost:9090/oauth-provider/request_token" />
         <Access url="http://localhost:9090/oauth-provider/access_token" />
-        <Authorization url="http://localhost:9090/oauth-provider/authorize" />
+        <Authorization url="http://localhost:9090/oauth-provider/authorize?oauth_callback=http://localhost:8080/gadgets/oauthcallback" />
       </Service>
     </OAuth>
     <Preload authz="oauth" href="http://localhost:9090/oauth-provider/echo" />

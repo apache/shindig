@@ -39,6 +39,7 @@ public class HttpServletResponseRecorder extends HttpServletResponseWrapper {
   private final PrintWriter writer = new PrintWriter(baos);
   private final Map<String, String> headers = Maps.newTreeMap(String.CASE_INSENSITIVE_ORDER);
   private int httpStatusCode = 200;
+  private String contentType;
 
   public HttpServletResponseRecorder(HttpServletResponse response) {
     super(response);
@@ -120,5 +121,16 @@ public class HttpServletResponseRecorder extends HttpServletResponseWrapper {
   public void sendError(int httpStatusCode, String msg) {
     writer.write(msg);
     this.httpStatusCode = httpStatusCode;
+  }
+  
+  @Override
+  public void setContentType(String type) {
+    setHeader("Content-Type", type);
+    this.contentType = type;
+  }
+  
+  @Override
+  public String getContentType() {
+    return contentType;
   }
 }

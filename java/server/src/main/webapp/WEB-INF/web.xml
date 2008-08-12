@@ -75,6 +75,14 @@
     </servlet-class>
   </servlet>
 
+  <!-- OAuth callback -->
+  <servlet>
+    <servlet-name>oauthCallback</servlet-name>
+    <servlet-class>
+      org.apache.shindig.gadgets.servlet.OAuthCallbackServlet
+    </servlet-class>
+  </servlet>
+
   <!-- Metadata RPC -->
   <servlet>
     <servlet-name>metadata</servlet-name>
@@ -115,6 +123,11 @@
   <servlet-mapping>
     <servlet-name>concat</servlet-name>
     <url-pattern>/gadgets/concat</url-pattern>
+  </servlet-mapping>
+
+  <servlet-mapping>
+    <servlet-name>oauthCallback</servlet-name>
+    <url-pattern>/gadgets/oauthcallback</url-pattern>
   </servlet-mapping>
 
   <servlet-mapping>
