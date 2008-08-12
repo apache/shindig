@@ -9,27 +9,27 @@ opensocial.DataRequest.Group = {
   VIEWER_FRIENDS : 'VIEWER_FRIENDS'
 };
 
-opensocial.DataRequest.prototype.newFetchPeopleRequestOld
+opensocial.DataRequest.prototype.newFetchPeopleRequest_v08
     = opensocial.DataRequest.prototype.newFetchPeopleRequest;
 opensocial.DataRequest.prototype.newFetchPeopleRequest = function(idSpec,
     opt_params) {
-  return this.newFetchPeopleRequestOld(translateIdSpec(idSpec), opt_params);
+  return this.newFetchPeopleRequest_v08(translateIdSpec(idSpec), opt_params);
 }
 
-opensocial.DataRequest.prototype.newFetchPersonAppDataRequestOld
+opensocial.DataRequest.prototype.newFetchPersonAppDataRequest_v08
     = opensocial.DataRequest.prototype.newFetchPersonAppDataRequest;
 opensocial.DataRequest.prototype.newFetchPersonAppDataRequest = function(idSpec,
     keys, opt_params) {
-  return this.newFetchPersonAppDataRequestOld(translateIdSpec(idSpec), keys,
+  return this.newFetchPersonAppDataRequest_v08(translateIdSpec(idSpec), keys,
       opt_params);
 }
 
-opensocial.DataRequest.prototype.newFetchActivitiesRequestOld
+opensocial.DataRequest.prototype.newFetchActivitiesRequest_v08
     = opensocial.DataRequest.prototype.newFetchActivitiesRequest;
 opensocial.DataRequest.prototype.newFetchActivitiesRequest = function(idSpec,
     opt_params) {
   var request
-      = this.newFetchActivitiesRequestOld(translateIdSpec(idSpec), opt_params);
+      = this.newFetchActivitiesRequest_v08(translateIdSpec(idSpec), opt_params);
   request.isActivityRequest = true;
   return request;
 }
@@ -38,10 +38,10 @@ opensocial.DataRequest.prototype.newFetchActivitiesRequest = function(idSpec,
 // (is it already valid??)
 // opensocial.DataRequest.prototype.newUpdatePersonAppDataRequest
 
-opensocial.ResponseItem.prototype.getDataOld
+opensocial.ResponseItem.prototype.getData_v08
     = opensocial.ResponseItem.prototype.getData;
 opensocial.ResponseItem.prototype.getData = function() {
-  var oldData = this.getDataOld();
+  var oldData = this.getData_v08();
   if (this.getOriginalDataRequest() && this.getOriginalDataRequest().isActivityRequest) {
     // The fetch activities request used to have an extra pointer to
     // the activities
@@ -55,9 +55,9 @@ opensocial.Environment.ObjectType.ACTIVITY_MEDIA_ITEM
     = opensocial.Environment.ObjectType.MEDIA_ITEM;
 
 
-opensocial.Person.prototype.getFieldOld = opensocial.Person.prototype.getField;
+opensocial.Person.prototype.getField_v08 = opensocial.Person.prototype.getField;
 opensocial.Person.prototype.getField = function(key, opt_params) {
-  var value =  this.getFieldOld(key, opt_params);
+  var value =  this.getField_v08(key, opt_params);
   if (key == 'lookingFor' && value) {
     // The lookingFor field used to return a string instead of an enum
     return value.getDisplayValue();
