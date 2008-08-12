@@ -134,4 +134,11 @@ public class BasicSecurityToken implements SecurityToken {
   public String getTrustedJson() {
     return null;
   }
+
+  /**
+   * {@inheritDoc}
+   */
+  public boolean isAnonymous() {
+    return false;
+  }
 }

@@ -70,4 +70,7 @@ public class OAuthSecurityToken implements SecurityToken {
   public String getTrustedJson() {
     throw new UnsupportedOperationException();
   }
+  public boolean isAnonymous() {
+    return false;
+  }
 }
