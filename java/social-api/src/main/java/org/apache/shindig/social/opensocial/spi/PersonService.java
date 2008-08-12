@@ -32,36 +32,38 @@ import java.util.concurrent.Future;
 public interface PersonService {
 
   public enum SortOrder {
+
     topFriends, name
   }
 
   public enum FilterType {
+
     all, hasApp, topFriends
   }
 
   /**
    * Returns a list of people that correspond to the passed in person ids.
    *
-   * @param userId The user
-   * @param groupId The group
+   * @param userIds   A set of users
+   * @param groupId   The group
    * @param sortOrder How to sort the people
-   * @param filter How the people should be filtered.
-   * @param first The index of the first person to fetch.
-   * @param max The max number of people to fetch.
-   * @param fields The profile details to fetch
-   * @param token The gadget token
+   * @param filter    How the people should be filtered.
+   * @param first     The index of the first person to fetch.
+   * @param max       The max number of people to fetch.
+   * @param fields    The profile details to fetch. Empty set implies all
+   * @param token     The gadget token
    * @return a list of people.
    */
-  Future<ResponseItem<RestfulCollection<Person>>> getPeople(UserId userId, GroupId groupId,
+  Future<ResponseItem<RestfulCollection<Person>>> getPeople(Set<UserId> userIds, GroupId groupId,
       SortOrder sortOrder, FilterType filter, int first, int max,
       Set<String> fields, SecurityToken token);
 
   /**
    * Returns a person that corresponds to the passed in person id.
    *
-   * @param id The id of the person to fetch.
+   * @param id     The id of the person to fetch.
    * @param fields The fields to fetch.
-   * @param token The gadget token
+   * @param token  The gadget token
    * @return a list of people.
    */
   Future<ResponseItem<Person>> getPerson(UserId id, Set<String> fields, SecurityToken token);

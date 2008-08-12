@@ -22,8 +22,6 @@ import org.apache.shindig.common.util.ImmediateFuture;
 import org.apache.shindig.social.ResponseError;
 import org.apache.shindig.social.ResponseItem;
 import org.apache.shindig.social.opensocial.model.Person;
-import org.apache.shindig.social.opensocial.service.PersonHandler;
-import org.apache.shindig.social.opensocial.service.RequestItem;
 import org.apache.shindig.social.opensocial.spi.GroupId;
 import org.apache.shindig.social.opensocial.spi.PersonService;
 import org.apache.shindig.social.opensocial.spi.RestfulCollection;
@@ -31,20 +29,30 @@ import org.apache.shindig.social.opensocial.spi.UserId;
 
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
-import junit.framework.TestCase;
+
 import org.easymock.classextension.EasyMock;
+
+import junit.framework.TestCase;
 
 import java.util.Map;
 import java.util.Set;
 
 public class PersonHandlerTest extends TestCase {
+
   private PersonService personService;
+
   private PersonHandler handler;
+
   private FakeGadgetToken token;
+
   private RequestItem request;
+
   private static final Set<String> DEFAULT_FIELDS = Sets.newHashSet(Person.Field.ID.toString(),
-            Person.Field.NAME.toString(),
-            Person.Field.THUMBNAIL_URL.toString());
+      Person.Field.NAME.toString(),
+      Person.Field.THUMBNAIL_URL.toString());
+
+  private static final Set<UserId> JOHN_DOE = Sets
+      .newHashSet(new UserId(UserId.Type.userId, "john.doe"));
 
   @Override
   protected void setUp() throws Exception {
@@ -75,7 +83,9 @@ public class PersonHandlerTest extends TestCase {
   private void setPathAndParams(String path, Map<String, String> params) {
     request = new RequestItem();
     request.setUrl(path);
-    request.setParameters(params);
+    for (Map.Entry<String, String> entry : params.entrySet()) {
+      request.setParameter(entry.getKey(), entry.getValue());
+    }
     request.setToken(token);
   }
 
@@ -85,7 +95,7 @@ public class PersonHandlerTest extends TestCase {
     ResponseItem<RestfulCollection<Person>> data
         = new ResponseItem<RestfulCollection<Person>>(null);
     EasyMock.expect(personService.getPeople(
-        new UserId(UserId.Type.userId, "john.doe"),
+        JOHN_DOE,
         new GroupId(GroupId.Type.all, null),
         PersonService.SortOrder.topFriends,
         PersonService.FilterType.all, 0, 20,
@@ -104,7 +114,7 @@ public class PersonHandlerTest extends TestCase {
     ResponseItem<RestfulCollection<Person>> data
         = new ResponseItem<RestfulCollection<Person>>(null);
     EasyMock.expect(personService.getPeople(
-        new UserId(UserId.Type.userId, "john.doe"),
+        JOHN_DOE,
         new GroupId(GroupId.Type.friends, null),
         PersonService.SortOrder.topFriends,
         PersonService.FilterType.all, 0, 20,
@@ -133,9 +143,9 @@ public class PersonHandlerTest extends TestCase {
     ResponseItem<RestfulCollection<Person>> data
         = new ResponseItem<RestfulCollection<Person>>(null);
     EasyMock.expect(personService.getPeople(
-        new UserId(UserId.Type.userId, "john.doe"),
+        JOHN_DOE,
         new GroupId(GroupId.Type.friends, null), order,
-        filter, 5, 10, Sets.newHashSet("money", "fame", "fortune"), token))
+        filter, 5, 10, Sets.newLinkedHashSet("money", "fame", "fortune"), token))
         .andReturn(ImmediateFuture.newInstance(data));
 
     replay();
@@ -160,8 +170,27 @@ public class PersonHandlerTest extends TestCase {
     setPath("/people/john.doe/@self");
 
     ResponseItem<Person> data = new ResponseItem<Person>(null);
-    EasyMock.expect(personService.getPerson(new UserId(UserId.Type.userId, "john.doe"),
+    EasyMock.expect(personService.getPerson(JOHN_DOE.iterator().next(),
         DEFAULT_FIELDS, token)).andReturn(ImmediateFuture.newInstance(data));
+
+    replay();
+    assertEquals(data, handler.handleGet(request).get());
+    verify();
+  }
+
+  public void testHandleGetPlural() throws Exception {
+    setPath("/people/john.doe,jane.doe/@self");
+
+    ResponseItem<RestfulCollection<Person>> data
+        = new ResponseItem<RestfulCollection<Person>>(null);
+    Set<UserId> userIdSet = Sets.newLinkedHashSet(JOHN_DOE);
+    userIdSet.add(new UserId(UserId.Type.userId, "jane.doe"));
+    EasyMock.expect(personService.getPeople(userIdSet,
+        new GroupId(GroupId.Type.self, null),
+        PersonService.SortOrder.topFriends,
+        PersonService.FilterType.all, 0, 20,
+        DEFAULT_FIELDS,
+        token)).andReturn(ImmediateFuture.newInstance(data));
 
     replay();
     assertEquals(data, handler.handleGet(request).get());

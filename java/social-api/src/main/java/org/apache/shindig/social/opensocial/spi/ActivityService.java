@@ -28,66 +28,81 @@ import java.util.Set;
 import java.util.concurrent.Future;
 
 /**
- * The ActivityService interface defines the service provider interface to
- * retrieve activities from the underlying SNS.
+ * The ActivityService interface defines the service provider interface to retrieve activities from
+ * the underlying SNS.
  */
 @ImplementedBy(JsonDbOpensocialService.class)
 public interface ActivityService {
 
   /**
-   * Returns a list of activities that correspond to the passed in user and group.
+   * Returns a list of activities that correspond to the passed in users and group.
    *
-   * @param userId The id of the person to fetch activities for.
+   * @param userIds The set of ids of the people to fetch activities for.
    * @param groupId Indicates whether to fetch activities for a group.
-   * @param appId The app id.
-   * @param fields The fields to return.
-   * @param token A valid SecurityToken
+   * @param appId   The app id.
+   * @param fields  The fields to return. Empty set implies all
+   * @param token   A valid SecurityToken
    * @return a response item with the list of activities.
    */
-   Future<ResponseItem<RestfulCollection<Activity>>> getActivities(UserId userId,
+  Future<ResponseItem<RestfulCollection<Activity>>> getActivities(Set<UserId> userIds,
       GroupId groupId, String appId, Set<String> fields, SecurityToken token);
 
   /**
-   * Returns the activity for the passed in user and group that corresponds to
-   * the activityId.
+   * Returns a set of activities for the passed in user and group that corresponds to a list of
+   * activityIds.
    *
-   * @param userId The id of the person to fetch activities for.
-   * @param groupId Indicates whether to fetch activities for a group.
-   * @param appId The app id.
-   * @param fields The fields to return.
-   * @param activityId The id of the activity to fetch.
-   * @param token A valid SecurityToken
+   * @param userId      The set of ids of the people to fetch activities for.
+   * @param groupId     Indicates whether to fetch activities for a group.
+   * @param appId       The app id.
+   * @param fields      The fields to return. Empty set implies all
+   * @param activityIds The set of activity ids to fetch.
+   * @param token       A valid SecurityToken
    * @return a response item with the list of activities.
    */
-   Future<ResponseItem<Activity>> getActivity(UserId userId, GroupId groupId, String appId,
+  Future<ResponseItem<RestfulCollection<Activity>>> getActivities(UserId userId, GroupId groupId,
+      String appId, Set<String> fields, Set<String> activityIds, SecurityToken token);
+
+  /**
+   * Returns a set of activities for the passed in user and group that corresponds to a single of
+   * activityId
+   *
+   * @param userId     The set of ids of the people to fetch activities for.
+   * @param groupId    Indicates whether to fetch activities for a group.
+   * @param appId      The app id.
+   * @param fields     The fields to return. Empty set implies all
+   * @param activityId The activity id to fetch.
+   * @param token      A valid SecurityToken
+   * @return a response item with the list of activities.
+   */
+  Future<ResponseItem<Activity>> getActivity(UserId userId, GroupId groupId, String appId,
       Set<String> fields, String activityId, SecurityToken token);
 
-  /**
-   * Deletes the activity for the passed in user and group that corresponds to
-   * the activityId.
-   *
-   * @param userId The user.
-   * @param groupId The group.
-   * @param appId The app id.
-   * @param activityId The id of the activity to delete.
-   * @param token A valid SecurityToken.
-   * @return a response item containing any errors
-   */
-   Future<ResponseItem<Object>> deleteActivity(UserId userId, GroupId groupId, String appId,
-      String activityId, SecurityToken token);
 
   /**
-   * Creates the passed in activity for the passed in user and group. Once createActivity is
-   * called, getActivities will be able to return the Activity.
+   * Deletes the activity for the passed in user and group that corresponds to the activityId.
    *
-   * @param userId The id of the person to create the activity for.
-   * @param groupId The group.
-   * @param appId The app id.
-   * @param fields The fields to return.
-   * @param activity The activity to create.
-   * @param token A valid SecurityToken
+   * @param userId      The user.
+   * @param groupId     The group.
+   * @param appId       The app id.
+   * @param activityIds A list of activity ids to delete.
+   * @param token       A valid SecurityToken.
    * @return a response item containing any errors
    */
-   Future<ResponseItem<Object>> createActivity(UserId userId, GroupId groupId, String appId,
+  Future<ResponseItem<Object>> deleteActivities(UserId userId, GroupId groupId, String appId,
+      Set<String> activityIds, SecurityToken token);
+
+  /**
+   * Creates the passed in activity for the passed in user and group. Once createActivity is called,
+   * getActivities will be able to return the Activity.
+   *
+   * @param userId   The id of the person to create the activity for.
+   * @param groupId  The group.
+   * @param appId    The app id.
+   * @param fields   The fields to return.
+   * @param activity The activity to create.
+   * @param token    A valid SecurityToken
+   * @return a response item containing any errors
+   */
+  Future<ResponseItem<Object>> createActivity(UserId userId, GroupId groupId, String appId,
       Set<String> fields, Activity activity, SecurityToken token);
 }

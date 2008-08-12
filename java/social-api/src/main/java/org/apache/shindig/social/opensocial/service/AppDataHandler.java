@@ -21,16 +21,20 @@ import org.apache.shindig.common.util.ImmediateFuture;
 import org.apache.shindig.social.ResponseError;
 import org.apache.shindig.social.ResponseItem;
 import org.apache.shindig.social.opensocial.spi.AppDataService;
+import org.apache.shindig.social.opensocial.spi.UserId;
 
 import com.google.inject.Inject;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.Future;
 
 public class AppDataHandler extends DataRequestHandler {
+
   private AppDataService service;
-  private static final String APP_DATA_PATH = "/people/{userId}/{groupId}/{appId}";
+
+  private static final String APP_DATA_PATH = "/people/{userId}+/{groupId}/{appId}";
 
   @Inject
   public AppDataHandler(AppDataService service) {
@@ -38,55 +42,54 @@ public class AppDataHandler extends DataRequestHandler {
   }
 
   /**
-   * /people/{userId}/{groupId}/{appId}
-   * - fields={field1, field2}
+   * Allowed endpoints /people/{userId}/{groupId}/{appId} - fields={field1, field2}
    *
-   * examples:
-   * /appdata/john.doe/@friends/app?fields=count
-   * /appdata/john.doe/@self/app
+   * examples: /appdata/john.doe/@friends/app?fields=count /appdata/john.doe/@self/app
    *
-   * The post data should be a regular json object. All of the fields vars will
-   * be pulled from the values and set on the person object. If there are no
-   * fields vars then all of the data will be overridden.
-   * @param request
+   * The post data should be a regular json object. All of the fields vars will be pulled from the
+   * values and set on the person object. If there are no fields vars then all of the data will be
+   * overridden.
    */
   protected Future<? extends ResponseItem> handleDelete(RequestItem request) {
     request.parseUrlWithTemplate(APP_DATA_PATH);
 
-    return service.deletePersonData(request.getUser(), request.getGroup(),
+    Set<UserId> userIds = request.getUsers();
+
+    Preconditions.requireNotEmpty(userIds, "No userId specified");
+    Preconditions.requireSingular(userIds, "Multiple userIds not supported");
+
+    return service.deletePersonData(userIds.iterator().next(), request.getGroup(),
         request.getAppId(), request.getFields(), request.getToken());
   }
 
   /**
-   * /appdata/{userId}/{groupId}/{appId}
-   * - fields={field1, field2}
+   * Allowed endpoints /appdata/{userId}/{groupId}/{appId} - fields={field1, field2}
    *
-   * examples:
-   * /appdata/john.doe/@friends/app?fields=count
-   * /appdata/john.doe/@self/app
+   * examples: /appdata/john.doe/@friends/app?fields=count /appdata/john.doe/@self/app
    *
-   * The post data should be a regular json object. All of the fields vars will
-   * be pulled from the values and set on the person object. If there are no
-   * fields vars then all of the data will be overridden.
+   * The post data should be a regular json object. All of the fields vars will be pulled from the
+   * values and set on the person object. If there are no fields vars then all of the data will be
+   * overridden.
    */
   protected Future<? extends ResponseItem> handlePut(RequestItem request) {
     return handlePost(request);
   }
 
   /**
-   * /appdata/{userId}/{groupId}/{appId}
-   * - fields={field1, field2}
+   * /appdata/{userId}/{groupId}/{appId} - fields={field1, field2}
    *
-   * examples:
-   * /appdata/john.doe/@friends/app?fields=count
-   * /appdata/john.doe/@self/app
+   * examples: /appdata/john.doe/@friends/app?fields=count /appdata/john.doe/@self/app
    *
-   * The post data should be a regular json object. All of the fields vars will
-   * be pulled from the values and set. If there are no
-   * fields vars then all of the data will be overridden.
+   * The post data should be a regular json object. All of the fields vars will be pulled from the
+   * values and set. If there are no fields vars then all of the data will be overridden.
    */
   protected Future<? extends ResponseItem> handlePost(RequestItem request) {
     request.parseUrlWithTemplate(APP_DATA_PATH);
+
+    Set<UserId> userIds = request.getUsers();
+
+    Preconditions.requireNotEmpty(userIds, "No userId specified");
+    Preconditions.requireSingular(userIds, "Multiple userIds not supported");
 
     Map<String, String> values = request.getPostData(HashMap.class);
     for (String key : values.keySet()) {
@@ -96,29 +99,30 @@ public class AppDataHandler extends DataRequestHandler {
       }
     }
 
-    return service.updatePersonData(request.getUser(), request.getGroup(),
+    return service.updatePersonData(userIds.iterator().next(), request.getGroup(),
         request.getAppId(), request.getFields(), values, request.getToken());
   }
 
   /**
-   * /appdata/{userId}/{groupId}/{appId}
-   * - fields={field1, field2}
+   * /appdata/{userId}+/{groupId}/{appId} - fields={field1, field2}
    *
-   * examples:
-   * /appdata/john.doe/@friends/app?fields=count
-   * /appdata/john.doe/@self/app
+   * examples: /appdata/john.doe/@friends/app?fields=count /appdata/john.doe/@self/app
    */
   protected Future<? extends ResponseItem> handleGet(RequestItem request) {
     request.parseUrlWithTemplate(APP_DATA_PATH);
 
-    return service.getPersonData(request.getUser(), request.getGroup(),
+    Set<UserId> userIds = request.getUsers();
+
+    // Preconditions
+    Preconditions.requireNotEmpty(userIds, "No userId specified");
+
+    return service.getPersonData(userIds, request.getGroup(),
         request.getAppId(), request.getFields(), request.getToken());
   }
 
   /**
-   * Determines whether the input is a valid key. Valid keys match the regular
-   * expression [\w\-\.]+. The logic is not done using java.util.regex.* as
-   * that is 20X slower.
+   * Determines whether the input is a valid key. Valid keys match the regular expression [\w\-\.]+.
+   * The logic is not done using java.util.regex.* as that is 20X slower.
    *
    * @param key the key to validate.
    * @return true if the key is a valid appdata key, false otherwise.
