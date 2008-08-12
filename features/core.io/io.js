@@ -231,6 +231,7 @@ gadgets.io = function() {
             oauthApprovalUrl: preload.oauthApprovalUrl,
             oauthError: preload.oauthError,
             oauthErrorText: preload.oauthErrorText,
+            errors: []
           }
           callback(transformResponseData(params, resp));
         }
