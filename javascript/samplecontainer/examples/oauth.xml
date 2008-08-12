@@ -35,7 +35,7 @@
       once you've approved access to your data.
     </div>
 
-    <script src="http://localhost:8080/gadgets/files/samplecontainer/examples/oauthpopup.js"></script>
+    <script src="http://localhost:8080/gadgets/files/samplecontainer/examples/popup.js"></script>
 
     <script type="text/javascript">
       function $(x) {
@@ -68,16 +68,14 @@
         gadgets.io.makeRequest(url, function (response) {
           var popup = null;
           if (response.oauthApprovalUrl) {
-            popup = oauthPopup();
-            popup.setDestination(response.oauthApprovalUrl);
+            popup = shindig.oauth.popup({
+              destination: response.oauthApprovalUrl,
+              windowOptions: null,
+              onOpen: function() { showOneSection('waiting'); },
+              onClose: function() { fetchData(); }
+            });
             $('personalize').onclick = popup.createOpenerOnClick();
             $('approvaldone').onclick = popup.createApprovedOnClick();
-            popup.setOnOpen(function() {
-              showOneSection('waiting');
-            });
-            popup.setOnClose(function() {
-              fetchData();
-            });
             showOneSection('approval');
           } else if (response.data) {
             $('main').appendChild(document.createTextNode(response.data));
