@@ -20,7 +20,7 @@
 /**
  * API to assist with management of the OAuth popup window.
  *
- * Please MAKE A COPY of this file.  Do not hot link to it.
+ * MAKE A COPY OF THIS FILE.  Do not hot link to it.
  *
  * Expected usage:
  *
@@ -34,23 +34,21 @@
  * button, but it should be created and displayed in case we can't
  * automatically detect when the user has approved access to their gadget.
  *
- * 2) Gadget creates an oauthPopup object and associates event handlers with
- * the UI elements:
+ * 2) Gadget creates a popup object and associates event handlers with the UI
+ * elements:
  *  
- *    var popup = oauthPopup();
- *    popup.setDestination(response.oauthApprovalUrl);
- *    popup.setOnOpen(function() {
- *      // Called when the popup window is opened.
- *      $("personalizeDone").style.display = "block";
+ *    var popup = shindig.oauth.popup({
+ *        destination: response.oauthApprovalUrl,
+ *        windowOptions: "height=300,width=200",
+ *        onOpen: function() { 
+ *          $("personalizeDone").style.display = "block"
+ *        },
+ *        onClose: function() {
+ *          $("personalizeDone").style.display = "none"
+ *          $("personalizeDone").style.display = "none"
+ *          fetchData();
+ *        }
  *    });
- *    popup.setOnClose(function() {
- *      // Called when the window is closed or the user indicates they've
- *      // approved access to the gadget
- *      $("personalizeButton").style.display = "none";
- *      $("personalizeDoneButton").style.display = "none";
- *      fetchDataForUser();
- *    });
- *    // Optional: popup.setWindowOptions(parameters for window.open)
  *
  *    personalizeButton.onclick = popup.createOpenerOnClick();
  *    personalizeDoneButton.onclick = popup.createApprovedOnClick();
@@ -62,48 +60,44 @@
  *    and the gadget attempts to fetch the user's data.
  */
 
-var oauthPopup = function() {
-  var destination = null;
-  var windowOptions = null;
-  var onOpen = function() { throw "someone forgot to call setOnOpen"; };
-  var onClose = function() { throw "someone forgot to call setOnClose"; };
+var shindig = shindig || {};
+shindig.oauth = shindig.oauth || {};
+
+/**
+ * Initialize a new OAuth popup manager.  Parameters must be specified as
+ * an object, e.g. shindig.oauth.popup({destination: somewhere,...});
+ *
+ * @param {String} destination Target URL for the popup window.
+ * @param {String} windowOptions Options for window.open, used to specify
+ *     look and feel of the window.
+ * @param {function} onOpen Function to call when the window is opened.
+ * @param {function} onClose Function to call when the window is closed.
+ */
+shindig.oauth.popup = function(options) {
+  if (!("destination" in options)) {
+    throw "Must specify options.destination";
+  }
+  if (!("windowOptions" in options)) {
+    throw "Must specify options.windowOptions";
+  }
+  if (!("onOpen" in options)) {
+    throw "Must specify options.onOpen";
+  }
+  if (!("onClose" in options)) {
+    throw "Must specify options.onClose";
+  }
+  var destination = options.destination;
+  var windowOptions = options.windowOptions;
+  var onOpen = options.onOpen;
+  var onClose = options.onClose;
 
   // created window
   var win = null;
   // setInterval timer
   var timer = null;
 
-  /*
-   * Set the destination for the popup window.
-   */
-  function setDestination(dest) {
-    destination = dest;
-  }
-
-  /*
-   * Set the options to use for the window.open call.  By default no options
-   * are specified, so a full-fledged window with status bar, menu bar, and
-   * location bar is opened.
-   */
-  function setWindowOptions(options) {
-    windowOptions = options;
-  }
-
-  /*
-   * Set the function to call when the popup window is opened.
-   */
-  function setOnOpen(func) {
-    onOpen = func;
-  }
-
-  /*
-   * Set the function to call when the popup window has closed (which usually
-   * indicates that the user has granted permission).
-   */
-  function setOnClose(func) {
-    onClose = func;
-  }
-
+  // Called when we recieve an indication the user has approved access, either
+  // because they closed the popup window or clicked an "I've approved" button.
   function handleApproval() {
     if (timer) {
       window.clearInterval(timer);
@@ -126,8 +120,8 @@ var oauthPopup = function() {
     }
   }
 
-  /*
-   * Returns an onclick handler for the "open the approval window" link.
+  /**
+   * @return an onclick handler for the "open the approval window" link
    */
   function createOpenerOnClick() {
     return function() {
@@ -145,8 +139,8 @@ var oauthPopup = function() {
     };
   }
 
-  /*
-   * Returns an onclick handler for the "I've approved" link.  This may not
+  /**
+   * @return an onclick handler for the "I've approved" link.  This may not
    * ever be called.  If we successfully detect that the window was closed,
    * this link is unnecessary.
    */
@@ -155,10 +149,6 @@ var oauthPopup = function() {
   }
 
   return {
-    setDestination: setDestination,
-    setWindowOptions: setWindowOptions,
-    setOnOpen: setOnOpen,
-    setOnClose: setOnClose,
     createOpenerOnClick: createOpenerOnClick,
     createApprovedOnClick: createApprovedOnClick
   };
