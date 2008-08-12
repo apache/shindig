@@ -106,7 +106,7 @@ public class XmlUtil {
     if (uri == null) {
       return def;
     }
-    if (!"http".equals(uri.getScheme()) && !"https".equals(uri.getScheme())) {
+    if (!"http".equalsIgnoreCase(uri.getScheme()) && !"https".equalsIgnoreCase(uri.getScheme())) {
       return def;
     }
     return uri;
