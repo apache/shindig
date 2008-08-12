@@ -1,3 +1,5 @@
+# List each feature you want to support here
+
 features/analytics/feature.xml
 features/caja/feature.xml
 features/core.io/feature.xml

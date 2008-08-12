@@ -17,6 +17,7 @@
  */
 package org.apache.shindig.gadgets;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.shindig.common.ContainerConfig;
 import org.apache.shindig.common.util.ResourceLoader;
 import org.apache.shindig.common.xml.XmlException;
@@ -29,6 +30,7 @@ import org.w3c.dom.NodeList;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -80,8 +82,14 @@ public class JsFeatureLoader {
           location = location.substring(6);
           logger.info("Loading resources from: " + location);
           if (location.endsWith(".txt")) {
-            loadResources(ResourceLoader.getContent(location).split("[\r\n]+"),
-                features);
+            List<String> resources = new ArrayList<String>();
+            for(String resource : StringUtils.split(ResourceLoader.getContent(location), "[\r\n]+")) {
+              // Skip blank/commented lines
+	      if (StringUtils.trim(resource).length() > 0 && resource.charAt(0) != '#') {
+                resources.add(StringUtils.trim(resource));
+              }
+            }
+            loadResources(resources.toArray(new String [resources.size()]), features);
           } else {
             loadResources(new String[]{location}, features);
           }
