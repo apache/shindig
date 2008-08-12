@@ -74,4 +74,10 @@ public interface SecurityToken {
    * is no JSON from the container.
    */
   public String getTrustedJson();
+
+
+  /**
+   * @return true if the token is for an anonymous viewer/owner
+   */
+  public boolean isAnonymous();
 }

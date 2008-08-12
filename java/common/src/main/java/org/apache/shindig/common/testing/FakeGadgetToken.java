@@ -115,6 +115,10 @@ public class FakeGadgetToken implements SecurityToken {
   public String getTrustedJson() {
     return trustedJson;
   }
+
+  public boolean isAnonymous() {
+    return false;
+  }
   
   /**
    * Create a fake security token parameter string, allows passing around a 

@@ -71,7 +71,8 @@ public class BasicSecurityTokenDecoder implements SecurityTokenDecoder {
 
     final String token = parameters.get(SecurityTokenDecoder.SECURITY_TOKEN_NAME);
     if (token == null || token.trim().length() == 0) {
-      throw new SecurityTokenException("Missing security token");
+      // No token is present, assume anonymous access
+      return AnonymousSecurityToken.getInstance();
     }
 
     try {
