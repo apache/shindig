@@ -120,9 +120,9 @@ public class BasicMessageBundleFactory implements MessageBundleFactory {
 
   @Inject
   public BasicMessageBundleFactory(HttpFetcher fetcher,
-                                   @Named("message-bundle.cache.capacity")int capacity,
-                                   @Named("message-bundle.cache.minTTL")long minTtl,
-                                   @Named("message-bundle.cache.maxTTL")long maxTtl) {
+                                   @Named("shindig.message-bundle.cache.capacity")int capacity,
+                                   @Named("shindig.message-bundle.cache.minTTL")long minTtl,
+                                   @Named("shindig.message-bundle.cache.maxTTL")long maxTtl) {
     this.fetcher = fetcher;
     this.cache = new LruCache<URI, TimeoutPair>(capacity);
     this.minTtl = minTtl;

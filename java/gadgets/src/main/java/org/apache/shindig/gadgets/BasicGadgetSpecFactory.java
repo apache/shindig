@@ -168,9 +168,9 @@ public class BasicGadgetSpecFactory implements GadgetSpecFactory {
   public BasicGadgetSpecFactory(HttpFetcher fetcher,
                                 ContentRewriter rewriter,
                                 Executor executor,
-                                @Named("gadget-spec.cache.capacity")int gadgetSpecCacheCapacity,
-                                @Named("gadget-spec.cache.minTTL")long minTtl,
-                                @Named("gadget-spec.cache.maxTTL")long maxTtl) {
+                                @Named("shindig.gadget-spec.cache.capacity")int gadgetSpecCacheCapacity,
+                                @Named("shindig.gadget-spec.cache.minTTL")long minTtl,
+                                @Named("shindig.gadget-spec.cache.maxTTL")long maxTtl) {
     this.fetcher = fetcher;
     this.rewriter = rewriter;
     this.executor = executor;

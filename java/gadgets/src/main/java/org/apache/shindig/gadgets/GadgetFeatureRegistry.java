@@ -62,7 +62,7 @@ public class GadgetFeatureRegistry {
    * @throws GadgetException
    */
   @Inject
-  public GadgetFeatureRegistry(@Named("features.default") String featureFiles,
+  public GadgetFeatureRegistry(@Named("shindig.features.default") String featureFiles,
       HttpFetcher httpFetcher) throws GadgetException {
     features = new HashMap<String, GadgetFeature>();
     core = new HashMap<String, GadgetFeature>();

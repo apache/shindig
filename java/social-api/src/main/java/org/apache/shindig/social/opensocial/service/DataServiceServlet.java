@@ -71,8 +71,8 @@ public class DataServiceServlet extends InjectedServlet {
   }
 
   @Inject
-  public void setBeanConverters(@Named("bean.converter.json") BeanConverter jsonConverter,
-    @Named("bean.converter.xml")  BeanConverter xmlConverter) {
+  public void setBeanConverters(@Named("shindig.bean.converter.json") BeanConverter jsonConverter,
+    @Named("shindig.bean.converter.xml")  BeanConverter xmlConverter) {
     this.jsonConverter = jsonConverter;
     this.xmlConverter = xmlConverter;
   }

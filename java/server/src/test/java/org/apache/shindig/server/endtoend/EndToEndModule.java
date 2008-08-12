@@ -33,13 +33,13 @@ import com.google.inject.name.Names;
 public class EndToEndModule extends AbstractModule {
 
   protected void configure() {
-    bind(String.class).annotatedWith(Names.named("canonical.json.db"))
+    bind(String.class).annotatedWith(Names.named("shindig.canonical.json.db"))
         .toInstance("sampledata/canonicaldb.json");
     bind(ParameterFetcher.class).annotatedWith(Names.named("DataServiceServlet"))
         .to(DataServiceServletFetcher.class);
-    bind(BeanConverter.class).annotatedWith(Names.named("bean.converter.xml"))
+    bind(BeanConverter.class).annotatedWith(Names.named("shindig.bean.converter.xml"))
         .to(BeanXmlConverter.class);
-    bind(BeanConverter.class).annotatedWith(Names.named("bean.converter.json"))
+    bind(BeanConverter.class).annotatedWith(Names.named("shindig.bean.converter.json"))
         .to(BeanJsonConverter.class);
 
     bind(Boolean.class)

@@ -60,10 +60,10 @@ public class DefaultContentRewriter implements ContentRewriter {
   @Inject
   public DefaultContentRewriter(
       GadgetSpecFactory specFactory,
-      @Named("content-rewrite.include-urls")String includeUrls,
-      @Named("content-rewrite.exclude-urls")String excludeUrls,
-      @Named("content-rewrite.expires")String expires,
-      @Named("content-rewrite.include-tags")String includeTags) {
+      @Named("shindig.content-rewrite.include-urls")String includeUrls,
+      @Named("shindig.content-rewrite.exclude-urls")String excludeUrls,
+      @Named("shindig.content-rewrite.expires")String expires,
+      @Named("shindig.content-rewrite.include-tags")String includeTags) {
     this.specFactory = specFactory;
     this.includeUrls = includeUrls;
     this.excludeUrls = excludeUrls;

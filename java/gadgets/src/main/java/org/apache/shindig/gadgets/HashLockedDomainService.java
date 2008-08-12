@@ -69,8 +69,8 @@ public class HashLockedDomainService implements LockedDomainService {
   @Inject
   public HashLockedDomainService(
       ContainerConfig config,
-      @Named("locked-domain.embed-host")String embedHost,
-      @Named("locked-domain.enabled")boolean enabled) {
+      @Named("shindig.locked-domain.embed-host")String embedHost,
+      @Named("shindig.locked-domain.enabled")boolean enabled) {
     this.config = config;
     this.embedHost = embedHost;
     this.enabled = enabled;

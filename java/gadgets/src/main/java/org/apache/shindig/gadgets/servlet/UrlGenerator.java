@@ -157,8 +157,8 @@ public class UrlGenerator {
   }
 
   @Inject
-  public UrlGenerator(@Named("urls.iframe.prefix") String iframePrefix,
-                      @Named("urls.js.prefix") String jsPrefix,
+  public UrlGenerator(@Named("shindig.urls.iframe.prefix") String iframePrefix,
+                      @Named("shindig.urls.js.prefix") String jsPrefix,
                       GadgetFeatureRegistry registry,
                       ContainerConfig containerConfig) {
     this.iframePrefix = iframePrefix;

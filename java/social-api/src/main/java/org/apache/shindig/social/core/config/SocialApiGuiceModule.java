@@ -43,16 +43,16 @@ public class SocialApiGuiceModule extends AbstractModule {
     bind(ParameterFetcher.class).annotatedWith(Names.named("DataServiceServlet"))
         .to(DataServiceServletFetcher.class);
 
-    bind(String.class).annotatedWith(Names.named("canonical.json.db"))
+    bind(String.class).annotatedWith(Names.named("shindig.canonical.json.db"))
         .toInstance("sampledata/canonicaldb.json");
 
     bind(Boolean.class)
         .annotatedWith(Names.named(AnonymousAuthenticationHandler.ALLOW_UNAUTHENTICATED))
         .toInstance(Boolean.TRUE);
 
-    bind(BeanConverter.class).annotatedWith(Names.named("bean.converter.xml")).to(
+    bind(BeanConverter.class).annotatedWith(Names.named("shindig.bean.converter.xml")).to(
         BeanXmlConverter.class);
-    bind(BeanConverter.class).annotatedWith(Names.named("bean.converter.json")).to(
+    bind(BeanConverter.class).annotatedWith(Names.named("shindig.bean.converter.json")).to(
         BeanJsonConverter.class);
   }
 }
