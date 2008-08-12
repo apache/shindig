@@ -38,28 +38,28 @@ opensocial.ContentRequestParameters.AuthenticationType = {
 };
 
 
-opensocial.Person.prototype.getFieldOld = opensocial.Person.prototype.getField;
+opensocial.Person.prototype.getField_v07 = opensocial.Person.prototype.getField;
 
 opensocial.Person.prototype.getField = function(fieldname) {
   if (fieldname == opensocial.Person.Field.NAME) {
-    return this.getFieldOld(opensocial.Person.Field.NAME)
+    return this.getField_v07(opensocial.Person.Field.NAME)
         .getField(opensocial.Name.Field.UNSTRUCTURED);
   } else {
-    return this.getFieldOld(fieldname);
+    return this.getField_v07(fieldname);
   }
 }
 
-opensocial.Person.prototype.getDisplayNameOld
+opensocial.Person.prototype.getDisplayName_v07
     = opensocial.Person.getDisplayName;
 opensocial.Person.prototype.getDisplayName = function() {
-  return this.getFieldOld(opensocial.Person.Field.NAME)
+  return this.getField_v07(opensocial.Person.Field.NAME)
       .getField(opensocial.Name.Field.UNSTRUCTURED);
 }
 
-opensocial.newActivityOld = opensocial.newActivity;
+opensocial.newActivity_v07 = opensocial.newActivity;
 opensocial.newActivity = function(title, opt_params) {
   opt_params['title'] = title;
-  opensocial.newActivityOld(opt_params);
+  opensocial.newActivity_v07(opt_params);
 };
 
 opensocial.DataRequest.prototype.newFetchGlobalAppDataRequest = function(keys) {
