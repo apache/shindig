@@ -73,8 +73,8 @@ public class SigningFetcherFactory {
    */
   @Inject
   public SigningFetcherFactory(HttpCache cache,
-                               @Named("signing.key-name") String keyName,
-                               @Named("signing.key-file") String keyFile) {
+                               @Named("shindig.signing.key-name") String keyName,
+                               @Named("shindig.signing.key-file") String keyFile) {
     this.cache = cache;
     if (keyName == null || keyName.length() == 0) {
       this.keyName = null;

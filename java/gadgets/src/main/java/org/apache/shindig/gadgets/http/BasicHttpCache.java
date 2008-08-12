@@ -46,7 +46,7 @@ public class BasicHttpCache extends AbstractHttpCache {
   }
 
   @Inject
-  public BasicHttpCache(@Named("cache.capacity") int capacity) {
+  public BasicHttpCache(@Named("shindig.cache.capacity") int capacity) {
     cache = LruCache.create(capacity);
   }
 }

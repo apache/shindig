@@ -82,7 +82,7 @@ public class BasicGadgetBlacklist implements GadgetBlacklist {
   }
 
   @Inject
-  public BasicGadgetBlacklist(@Named("blacklist.file") String file)
+  public BasicGadgetBlacklist(@Named("shindig.blacklist.file") String file)
       throws IOException {
     this(new File(file));
   }

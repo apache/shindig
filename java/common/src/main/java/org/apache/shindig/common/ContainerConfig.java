@@ -310,7 +310,7 @@ public class ContainerConfig {
    * @throws ContainerConfigException
    */
   @Inject
-  public ContainerConfig(@Named("containers.default") String containers)
+  public ContainerConfig(@Named("shindig.containers.default") String containers)
       throws ContainerConfigException {
     config = new HashMap<String, JSONObject>();
     if (containers != null) {

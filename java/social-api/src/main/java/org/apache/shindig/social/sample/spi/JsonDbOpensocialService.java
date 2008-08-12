@@ -98,8 +98,8 @@ public class JsonDbOpensocialService implements ActivityService, PersonService, 
   private static final String FRIEND_LINK_TABLE = "friendLinks";
 
   @Inject
-  public JsonDbOpensocialService(@Named("canonical.json.db")String jsonLocation,
-      @Named("bean.converter.json") BeanConverter converter) throws Exception {
+  public JsonDbOpensocialService(@Named("shindig.canonical.json.db")String jsonLocation,
+      @Named("shindig.bean.converter.json") BeanConverter converter) throws Exception {
     String content = IOUtils.toString(ResourceLoader.openResource(jsonLocation), "UTF-8");
     this.db = new JSONObject(content);
     this.converter = converter;

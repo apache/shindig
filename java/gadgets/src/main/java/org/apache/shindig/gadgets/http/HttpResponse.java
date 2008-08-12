@@ -103,11 +103,11 @@ public class HttpResponse {
   private HttpResponse rewritten;
 
   @Inject
-  @Named("http.cache.negativeCacheTtl")
+  @Named("shindig.http.cache.negativeCacheTtl")
   private static long negativeCacheTtl = NEGATIVE_CACHE_TTL;
 
   @Inject
-  @Named("http.cache.defaultTtl")
+  @Named("shindig.http.cache.defaultTtl")
   private static long defaultTtl = DEFAULT_TTL;
 
   // Holds character sets for fast conversion
