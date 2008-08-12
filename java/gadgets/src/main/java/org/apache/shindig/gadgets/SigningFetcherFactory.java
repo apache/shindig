@@ -84,6 +84,8 @@ public class SigningFetcherFactory {
     String privateKey = null;
     try {
       privateKey = IOUtils.toString(ResourceLoader.open(keyFile), "UTF-8");
+      // Support standard openssl keys by stripping out the headers and blank lines
+      privateKey = privateKey.replaceAll("-----[A-Z ]*-----", "").replace("\n", ""); 
     } catch (IOException e) {
       privateKey = "";
     }
