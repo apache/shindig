@@ -128,40 +128,34 @@ class JsonDbOpensocialService implements ActivitiesService, PeopleService, AppDa
 
 	private function getAllPeople()
 	{
-		if (is_null($this->allPeople)) {
-			$db = $this->getDb();
-			$peopleTable = $db[self::$PEOPLE_TABLE];
-			foreach ($peopleTable as $people) {
-				$this->allPeople[$people['id']] = $people;
-			}
-			$db[self::$PEOPLE_TABLE] = $this->allPeople;
+		$db = $this->getDb();
+		$peopleTable = $db[self::$PEOPLE_TABLE];
+		foreach ($peopleTable as $people) {
+			$this->allPeople[$people['id']] = $people;
 		}
+		$db[self::$PEOPLE_TABLE] = $this->allPeople;
 		return $this->allPeople;
 	}
 
 	private function getAllData()
 	{
-		if (is_null($this->allData)) {
-			$db = $this->getDb();
-			$dataTable = $db[self::$DATA_TABLE];
-			foreach ($dataTable as $key => $value) {
-				$this->allData[$key] = $value;
-			}
-			$db[self::$DATA_TABLE] = $this->allData;
+		$db = $this->getDb();
+		$dataTable = $db[self::$DATA_TABLE];
+		foreach ($dataTable as $key => $value) {
+			$this->allData[$key] = $value;
 		}
+		$db[self::$DATA_TABLE] = $this->allData;
 		return $this->allData;
 	}
 
 	private function getAllActivities()
 	{
-		if (is_null($this->allActivities)) {
-			$db = $this->getDb();
-			$activitiesTable = $db[self::$ACTIVITIES_TABLE];
-			foreach ($activitiesTable as $key => $value) {
-				$this->allActivities[$key] = $value;
-			}
-			$db[self::$ACTIVITIES_TABLE] = $this->allActivities;
+		$db = $this->getDb();
+		$activitiesTable = $db[self::$ACTIVITIES_TABLE];
+		foreach ($activitiesTable as $key => $value) {
+			$this->allActivities[$key] = $value;
 		}
+		$db[self::$ACTIVITIES_TABLE] = $this->allActivities;
 		return $this->allActivities;
 	}
 
@@ -326,8 +320,8 @@ class JsonDbOpensocialService implements ActivitiesService, PeopleService, AppDa
 		}
 		switch ($groupId->getType()) {
 			case 'self':
-				foreach ($fields as $key) {	//TODO: Implement this!
-				}
+				foreach ($fields as $key) {//TODO: Implement this!
+}
 				break;
 			default:
 				return new ResponseItem(NOT_IMPLEMENTED, "We don't support deleting data in batches yet", null);
