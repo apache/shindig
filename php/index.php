@@ -20,7 +20,7 @@
 include_once ('config.php');
 
 // Basic sanity check if we have all required modules
-$modules = array('json', 'SimpleXML', 'libxml', 'curl');
+$modules = array('json', 'SimpleXML', 'libxml', 'curl', 'openssl');
 // if plain text tokens are disallowed we require mcrypt
 if (! Config::get('allow_plaintext_token')) {
 	$modules[] = 'mcrypt';
