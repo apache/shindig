@@ -47,11 +47,13 @@ class BasicBlobCrypter extends BlobCrypter {
 	
 	private $cipherKey;
 	private $hmacKey;
+	protected $allowPlaintextToken;
 
 	public function __construct()
 	{
 		$this->cipherKey = Config::get('token_cipher_key');
 		$this->hmacKey = Config::get('token_hmac_key');
+		$this->allowPlaintextToken = Config::get('allow_plaintext_token');
 	}
 
 	/**
@@ -60,7 +62,7 @@ class BasicBlobCrypter extends BlobCrypter {
 	public function wrap(Array $in)
 	{
 		$encoded = $this->serializeAndTimestamp($in);
-		if (! function_exists('mcrypt_module_open') && Config::get('allow_plaintext_token')) {
+		if (! function_exists('mcrypt_module_open') && $this->allowPlaintextToken) {
 			$cipherText = base64_encode($encoded);
 		} else {
 			$cipherText = Crypto::aes128cbcEncrypt($this->cipherKey, $encoded);
@@ -86,7 +88,7 @@ class BasicBlobCrypter extends BlobCrypter {
 	public function unwrap($in, $maxAgeSec)
 	{
 		//TODO remove this once we have a better way to generate a fake token in the example files
-		if (Config::get('allow_plaintext_token') && count(explode(':', $in)) == 6) {
+		if ($this->allowPlaintextToken && count(explode(':', $in)) == 6) {
 			$data = explode(":", $in);
 			$out = array();
 			$out['o'] = $data[0];
@@ -100,7 +102,7 @@ class BasicBlobCrypter extends BlobCrypter {
 			$cipherText = substr($bin, 0, strlen($bin) - Crypto::$HMAC_SHA1_LEN);
 			$hmac = substr($bin, strlen($cipherText));
 			Crypto::hmacSha1Verify($this->hmacKey, $cipherText, $hmac);
-			if (! function_exists('mcrypt_module_open') && Config::get('allow_plaintext_token')) {
+			if (! function_exists('mcrypt_module_open') && $this->allowPlaintextToken) {
 				$plain = base64_decode($cipherText);
 			} else {
 				$plain = Crypto::aes128cbcDecrypt($this->cipherKey, $cipherText);
