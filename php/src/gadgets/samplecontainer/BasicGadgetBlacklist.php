@@ -24,7 +24,7 @@
  * The default file location is {$base_path}/blacklist.txt
  *
  */
-class BasicGadgetBlacklist {
+class BasicGadgetBlacklist implements GadgetBlacklist {
 	private $rules = array();
 
 	public function __construct($file = false)

@@ -18,7 +18,6 @@
  * 
  */
 
-abstract class GadgetBlacklist {
-
-	abstract function isBlacklisted($url);
+interface GadgetBlacklist {
+	 function isBlacklisted($url);
 }
