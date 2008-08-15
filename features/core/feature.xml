@@ -22,7 +22,7 @@
     <script src="core.js"/>
     <script src="config.js"/>
     <!-- for gadgets.util.sanitizeHtml -->
-    <script src="res:///com/google/caja/plugin/html-sanitizer-minified.js"></script>
+    <script src="res://com/google/caja/plugin/html-sanitizer-minified.js"></script>
     <script src="util.js"/>
     <script src="auth.js"/>
     <script src="auth-init.js"/>
