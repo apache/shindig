@@ -58,6 +58,11 @@ public class GadgetException extends Exception {
 
     // Caja error
     MALFORMED_FOR_SAFE_INLINING,
+    
+    // Parsing errors
+    CSS_PARSE_ERROR,
+    HTML_PARSE_ERROR,
+    JS_PARSE_ERROR,
 
     // View errors
     UNKNOWN_VIEW_SPECIFIED,
