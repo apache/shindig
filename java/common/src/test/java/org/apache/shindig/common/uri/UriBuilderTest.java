@@ -28,6 +28,7 @@ import org.junit.Test;
 
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Map;
 
 /**
  * Tests for UriBuilder
@@ -195,11 +196,14 @@ public class UriBuilderTest {
 
   @Test
   public void addBatchParameters() {
+    Map<String, String> params = Maps.newLinkedHashMap();
+    params.put("foo", "bar");
+    params.put("hello", "world");
     UriBuilder builder = new UriBuilder()
         .setScheme("http")
         .setAuthority("apache.org")
         .setPath("/shindig")
-        .addQueryParameters(Maps.immutableMap("foo", "bar", "hello", "world"))
+        .addQueryParameters(params)
         .setFragment("foo");
     assertEquals("http://apache.org/shindig?foo=bar&hello=world#foo", builder.toString());
   }
