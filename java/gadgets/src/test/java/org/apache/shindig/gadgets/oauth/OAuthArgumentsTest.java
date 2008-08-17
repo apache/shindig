@@ -28,7 +28,7 @@ import org.junit.Test;
 /**
  * Tests parameter parsing
  */
-public class OAuthRequestParamsTest {
+public class OAuthArgumentsTest {
  
   @Test
   public void testInitFromPreload() throws Exception {
@@ -40,7 +40,7 @@ public class OAuthRequestParamsTest {
     		"/>";
 
     Preload preload = new Preload(XmlUtil.parse(xml));
-    OAuthRequestParams params = new OAuthRequestParams(preload);
+    OAuthArguments params = new OAuthArguments(preload);
     assertEquals("service", params.getServiceName());
     assertEquals("token", params.getTokenName());
     assertEquals("requesttoken", params.getRequestToken());

@@ -34,7 +34,7 @@ import org.apache.shindig.gadgets.SigningFetcher;
 import org.apache.shindig.gadgets.http.ContentFetcherFactory;
 import org.apache.shindig.gadgets.http.HttpFetcher;
 import org.apache.shindig.gadgets.oauth.OAuthFetcher;
-import org.apache.shindig.gadgets.oauth.OAuthRequestParams;
+import org.apache.shindig.gadgets.oauth.OAuthArguments;
 import org.apache.shindig.gadgets.rewrite.ContentRewriter;
 import org.apache.shindig.gadgets.rewrite.NoOpContentRewriter;
 
@@ -72,7 +72,7 @@ public class ServletTestFixture {
       expect(contentFetcherFactory.getSigningFetcher(isA(SecurityToken.class)))
           .andReturn(signingFetcher).anyTimes();
       expect(contentFetcherFactory.getOAuthFetcher(
-          isA(SecurityToken.class), isA(OAuthRequestParams.class)))
+          isA(SecurityToken.class), isA(OAuthArguments.class)))
           .andReturn(oauthFetcher).anyTimes();
     } catch (GadgetException e) {
       // Blah

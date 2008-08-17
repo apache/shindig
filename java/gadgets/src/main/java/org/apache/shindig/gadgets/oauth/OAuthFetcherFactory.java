@@ -88,7 +88,7 @@ public class OAuthFetcherFactory {
   public OAuthFetcher getOAuthFetcher(
       HttpFetcher nextFetcher,
       SecurityToken token,
-      OAuthRequestParams params) throws GadgetException {
+      OAuthArguments params) throws GadgetException {
     OAuthFetcher fetcher = new OAuthFetcher(fetcherConfig, nextFetcher, token, params);
     return fetcher;
   }

@@ -21,7 +21,7 @@ import org.apache.shindig.common.SecurityToken;
 import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.SigningFetcherFactory;
 import org.apache.shindig.gadgets.oauth.OAuthFetcherFactory;
-import org.apache.shindig.gadgets.oauth.OAuthRequestParams;
+import org.apache.shindig.gadgets.oauth.OAuthArguments;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
@@ -65,7 +65,7 @@ public class ContentFetcherFactory implements Provider<HttpFetcher> {
    */
   public HttpFetcher getOAuthFetcher(
       SecurityToken token,
-      OAuthRequestParams params)
+      OAuthArguments params)
       throws GadgetException {
     return oauthFetcherFactory.getOAuthFetcher(
         remoteContentFetcherFactory.get(), token, params);
