@@ -69,6 +69,24 @@ public class BlobCrypterTest {
     Map<String, String> out = crypter.unwrap(blob, 0);
     assertEquals(string, out.get("a"));
   }
+  
+  @Test
+  public void testDecryptGarbage() throws Exception {
+    StringBuilder sb = new StringBuilder();
+    for (int i=0; i < 100; ++i) {
+      assertThrowsBlobCrypterException(sb.toString());
+      sb.append("a");
+    }
+  }
+  
+  private void assertThrowsBlobCrypterException(String in) {
+    try {
+      crypter.unwrap(in, 1000);
+      fail("Should have thrown BlobCrypterException for input " + in);
+    } catch (BlobCrypterException e) {
+      // Good.
+    }
+  }
 
   @Test
   public void testManyEntries() throws Exception {
