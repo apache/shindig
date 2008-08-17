@@ -17,7 +17,6 @@
 package org.apache.shindig.gadgets.oauth;
 
 import org.apache.shindig.common.SecurityToken;
-import org.apache.shindig.common.crypto.BlobCrypterException;
 import org.apache.shindig.gadgets.ChainedContentFetcher;
 import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.http.HttpCacheKey;
@@ -54,41 +53,26 @@ import java.util.Map;
  */
 public class OAuthFetcher extends ChainedContentFetcher {
 
-  // We store some blobs of data on the client for later reuse; the blobs
-  // contain key/value pairs, and these are the key names.
-  private static final String REQ_TOKEN_KEY = "r";
-  private static final String REQ_TOKEN_SECRET_KEY = "rs";
-  private static final String ACCESS_TOKEN_KEY = "a";
-  private static final String ACCESS_TOKEN_SECRET_KEY = "as";
-  private static final String OWNER_KEY = "o";
-
   // Maximum number of attempts at the protocol before giving up.
   private static final int MAX_ATTEMPTS = 2;
-  
-  // names for the JSON values we return to the client
-  public static final String CLIENT_STATE = "oauthState";
-  public static final String APPROVAL_URL = "oauthApprovalUrl";
-  public static final String ERROR_CODE = "oauthError";
-  public static final String ERROR_TEXT = "oauthErrorText";
 
   // names of additional OAuth parameters we include in outgoing requests
   public static final String XOAUTH_APP_URL = "xoauth_app_url";
 
   /**
-   * Maximum age for our client state; if this is exceeded we start over. One
-   * hour is a fairly arbitrary time limit here.
+   * Per request configuration for this OAuth fetch.
    */
-  private static final int CLIENT_STATE_MAX_AGE_SECS = 3600;
-
+  protected final OAuthFetchParams fetchParams;
+  
   /**
-   * The gadget security token, with info about owner/viewer/gadget.
+   * Configuration options for the fetcher.
    */
-  protected final SecurityToken authToken;
-
+  protected final OAuthFetcherConfig fetcherConfig;
+  
   /**
-   * Parameters from makeRequest
+   * OAuth specific stuff to include in the response.
    */
-  protected final OAuthRequestParams requestParams;
+  protected final OAuthResponseParams responseParams;
 
   /**
    * The accessor we use for signing messages. This also holds metadata about
@@ -98,46 +82,10 @@ public class OAuthFetcher extends ChainedContentFetcher {
   private OAuthStore.AccessorInfo accessorInfo;
   
   /**
-   * State the client sent with their request.
-   */
-  private Map<String, String> origClientState;
-
-  /**
    * The request the client really wants to make.
    */
   private HttpRequest realRequest;
-
-  /**
-   * State to cache on the client.
-   */
-  private String newClientState;
-
-  /**
-   * Authorization URL for the client
-   */
-  private String aznUrl;
   
-  /**
-   * Error code for the client
-   */
-  private OAuthError error;
-  
-  /**
-   * Error text for the client
-   */
-  private String errorText;
-  
-  /**
-   * Whether or not we're supposed to ignore the spec cache when referring
-   * to the gadget spec for information (e.g. OAuth URLs).
-   */
-  private final boolean bypassSpecCache;
-  
-  /**
-   * Configuration options for the fetcher.
-   */
-  private final OAuthFetcherConfig fetcherConfig;
-
   /**
    * @param fetcherConfig configuration options for the fetcher
    * @param nextFetcher fetcher to use for actually making requests
@@ -148,28 +96,14 @@ public class OAuthFetcher extends ChainedContentFetcher {
       OAuthFetcherConfig fetcherConfig,
       HttpFetcher nextFetcher,
       SecurityToken authToken,
-      OAuthRequestParams params) {
+      OAuthArguments params) {
     super(nextFetcher);
     this.fetcherConfig = fetcherConfig;
-    this.authToken = authToken;
-    this.requestParams = params;
-    this.bypassSpecCache = params.getBypassSpecCache();
-    this.newClientState = null;
-    this.aznUrl = null;
-    this.error = null;
-    this.errorText = null;
-    String origClientState = params.getOrigClientState();
-    if (origClientState != null && origClientState.length() > 0) {
-      try {
-        this.origClientState = fetcherConfig.getStateCrypter()
-            .unwrap(origClientState, CLIENT_STATE_MAX_AGE_SECS);
-      } catch (BlobCrypterException e) {
-        // Probably too old, pretend we never saw it at all.
-      }
-    }
-    if (this.origClientState == null) {
-      this.origClientState = new HashMap<String, String>();
-    }
+    this.fetchParams = new OAuthFetchParams(
+        params, 
+        new OAuthClientState(fetcherConfig.getStateCrypter(), params.getOrigClientState()),
+        authToken);
+    this.responseParams = new OAuthResponseParams(fetcherConfig.getStateCrypter());  
   }
 
   /**
@@ -182,36 +116,37 @@ public class OAuthFetcher extends ChainedContentFetcher {
    */
   private void lookupOAuthMetadata() throws GadgetException {
     OAuthStore.TokenKey tokenKey = buildTokenKey();
-    accessorInfo = fetcherConfig.getTokenStore().getOAuthAccessor(tokenKey, bypassSpecCache);
+    accessorInfo = fetcherConfig.getTokenStore().getOAuthAccessor(
+        tokenKey, fetchParams.getArguments().getBypassSpecCache());
 
     // The persistent data store may be out of sync with reality; we trust
     // the state we stored on the client to be accurate.
     OAuthAccessor accessor = accessorInfo.getAccessor();
-    if (origClientState.containsKey(REQ_TOKEN_KEY)) {
-      accessor.requestToken = origClientState.get(REQ_TOKEN_KEY);
-      accessor.tokenSecret = origClientState.get(REQ_TOKEN_SECRET_KEY);
-    } else if (origClientState.containsKey(ACCESS_TOKEN_KEY)) {
-      accessor.accessToken = origClientState.get(ACCESS_TOKEN_KEY);
-      accessor.tokenSecret = origClientState.get(ACCESS_TOKEN_SECRET_KEY);
+    if (fetchParams.getClientState().getRequestToken() != null) {
+      accessor.requestToken = fetchParams.getClientState().getRequestToken();
+      accessor.tokenSecret = fetchParams.getClientState().getRequestTokenSecret();
+    } else if (fetchParams.getClientState().getAccessToken() != null) {
+      accessor.accessToken = fetchParams.getClientState().getAccessToken();
+      accessor.tokenSecret = fetchParams.getClientState().getAccessTokenSecret();
     } else if (accessor.accessToken == null &&
-               requestParams.getRequestToken() != null) {
+               fetchParams.getArguments().getRequestToken() != null) {
       // We don't have an access token yet, but the client sent us a 
       // (hopefully) preapproved request token.
-      accessor.requestToken = requestParams.getRequestToken();
-      accessor.tokenSecret = requestParams.getRequestTokenSecret();
+      accessor.requestToken = fetchParams.getArguments().getRequestToken();
+      accessor.tokenSecret = fetchParams.getArguments().getRequestTokenSecret();
     }
   }
 
   private OAuthStore.TokenKey buildTokenKey() {
     OAuthStore.TokenKey tokenKey = new OAuthStore.TokenKey();
-    tokenKey.setGadgetUri(authToken.getAppUrl());
-    tokenKey.setModuleId(authToken.getModuleId());
-    tokenKey.setServiceName(requestParams.getServiceName());
-    tokenKey.setTokenName(requestParams.getTokenName());
+    tokenKey.setGadgetUri(fetchParams.getAuthToken().getAppUrl());
+    tokenKey.setModuleId(fetchParams.getAuthToken().getModuleId());
+    tokenKey.setServiceName(fetchParams.getArguments().getServiceName());
+    tokenKey.setTokenName(fetchParams.getArguments().getTokenName());
     // At some point we might want to let gadgets specify whether to use OAuth
     // for the owner, the viewer, or someone else. For now always using the
     // owner identity seems reasonable.
-    tokenKey.setUserId(authToken.getOwnerId());
+    tokenKey.setUserId(fetchParams.getAuthToken().getOwnerId());
     return tokenKey;
   }
 
@@ -225,7 +160,7 @@ public class OAuthFetcher extends ChainedContentFetcher {
     try {
       lookupOAuthMetadata();
     } catch (GadgetException e) {
-      error = OAuthError.BAD_OAUTH_CONFIGURATION;
+      responseParams.setError(OAuthError.BAD_OAUTH_CONFIGURATION);
       return buildErrorResponse(e);
     }
     
@@ -271,20 +206,22 @@ public class OAuthFetcher extends ChainedContentFetcher {
   }
 
   private HttpResponse buildErrorResponse(GadgetException e) {
-    if (error == null) {
-      error = OAuthError.UNKNOWN_PROBLEM;
+    if (responseParams.getError() == null) {
+      responseParams.setError(OAuthError.UNKNOWN_PROBLEM);
     }
     // Take a giant leap of faith and assume that the exception message
     // will be useful to a gadget developer.  Also include the exception
     // stack trace, in case the problem report makes it to someone who knows
     // enough to do something useful with the stack.
+    // TODO(beaton): This seemed like a good idea at the time, but dumping an entire stack trace to
+    // the client is a little much.  Remove this.
     StringWriter errorBuf = new StringWriter();
     errorBuf.append(e.getMessage());
     errorBuf.append("\n\n");
     PrintWriter printer = new PrintWriter(errorBuf);
     e.printStackTrace(printer);
     printer.flush();
-    errorText = errorBuf.toString();
+    responseParams.setErrorText(errorBuf.toString());
     return buildNonDataResponse(403);
   }
 
@@ -338,9 +275,9 @@ public class OAuthFetcher extends ChainedContentFetcher {
    * @throws GadgetException
    */
   private void checkCanApprove() throws GadgetException {
-    String pageOwner = authToken.getOwnerId();
-    String pageViewer = authToken.getViewerId();
-    String stateOwner = origClientState.get(OWNER_KEY);
+    String pageOwner = fetchParams.getAuthToken().getOwnerId();
+    String pageViewer = fetchParams.getAuthToken().getViewerId();
+    String stateOwner = fetchParams.getClientState().getOwner();
     if (!pageOwner.equals(pageViewer)) {
       throw new GadgetException(GadgetException.Code.INTERNAL_SERVER_ERROR,
           "Only page owners can grant OAuth approval");
@@ -357,7 +294,7 @@ public class OAuthFetcher extends ChainedContentFetcher {
       OAuthAccessor accessor = accessorInfo.getAccessor();
       String url = accessor.consumer.serviceProvider.requestTokenURL;
       List<OAuth.Parameter> msgParams = new ArrayList<OAuth.Parameter>();
-      msgParams.add(new OAuth.Parameter(XOAUTH_APP_URL, authToken.getAppUrl()));
+      msgParams.add(new OAuth.Parameter(XOAUTH_APP_URL, fetchParams.getAuthToken().getAppUrl()));
       OAuthMessage request = newRequestMessage(url, msgParams);
       OAuthMessage reply = sendOAuthMessage(request);
       reply.requireParameters(OAuth.OAUTH_TOKEN, OAuth.OAUTH_TOKEN_SECRET);
@@ -535,16 +472,10 @@ public class OAuthFetcher extends ChainedContentFetcher {
    * Builds the data we'll cache on the client while we wait for approval.
    */
   private void buildClientApprovalState() throws GadgetException {
-    try {
-      OAuthAccessor accessor = accessorInfo.getAccessor();
-      Map<String, String> oauthState = new HashMap<String, String>();
-      oauthState.put(REQ_TOKEN_KEY, accessor.requestToken);
-      oauthState.put(REQ_TOKEN_SECRET_KEY, accessor.tokenSecret);
-      oauthState.put(OWNER_KEY, authToken.getOwnerId());
-      newClientState = fetcherConfig.getStateCrypter().wrap(oauthState);
-    } catch (BlobCrypterException e) {
-      throw new GadgetException(GadgetException.Code.INTERNAL_SERVER_ERROR, e);
-    }
+    OAuthAccessor accessor = accessorInfo.getAccessor();
+    responseParams.getNewClientState().setRequestToken(accessor.requestToken);
+    responseParams.getNewClientState().setRequestTokenSecret(accessor.tokenSecret);
+    responseParams.getNewClientState().setOwner(fetchParams.getAuthToken().getOwnerId());
   }
 
   /**
@@ -564,7 +495,7 @@ public class OAuthFetcher extends ChainedContentFetcher {
     azn.append(OAuth.OAUTH_TOKEN);
     azn.append('=');
     azn.append(OAuth.percentEncode(accessor.requestToken));
-    aznUrl = azn.toString();
+    responseParams.setAznUrl(azn.toString());
   }
 
   private HttpResponse buildOAuthApprovalResponse() {
@@ -573,24 +504,9 @@ public class OAuthFetcher extends ChainedContentFetcher {
   
   private HttpResponse buildNonDataResponse(int status) {
     HttpResponse response = new HttpResponse(status, null, null);
-    addResponseMetadata(response);
+    responseParams.addToResponse(response);
     response.setNoCache();
     return response;
-  }
-
-  private void addResponseMetadata(HttpResponse response) {
-    if (newClientState != null) {
-      response.getMetadata().put(CLIENT_STATE, newClientState);
-    }
-    if (aznUrl != null) {
-      response.getMetadata().put(APPROVAL_URL, aznUrl);
-    }
-    if (error != null) {
-      response.getMetadata().put(ERROR_CODE, error.toString());
-    }
-    if (errorText != null) {
-      response.getMetadata().put(ERROR_TEXT, errorText);
-    }
   }
 
   /**
@@ -611,7 +527,7 @@ public class OAuthFetcher extends ChainedContentFetcher {
       OAuthAccessor accessor = accessorInfo.getAccessor();
       String url = accessor.consumer.serviceProvider.accessTokenURL;
       List<OAuth.Parameter> msgParams = new ArrayList<OAuth.Parameter>();
-      msgParams.add(new OAuth.Parameter(XOAUTH_APP_URL, authToken.getAppUrl()));
+      msgParams.add(new OAuth.Parameter(XOAUTH_APP_URL, fetchParams.getAuthToken().getAppUrl()));
       msgParams.add(
           new OAuth.Parameter(OAuth.OAUTH_TOKEN, accessor.requestToken));
       OAuthMessage request = newRequestMessage(url, msgParams);
@@ -645,16 +561,10 @@ public class OAuthFetcher extends ChainedContentFetcher {
    * Builds the data we'll cache on the client while we make requests.
    */
   private void buildClientAccessState() throws GadgetException {
-    try {
-      Map<String, String> oauthState = new HashMap<String, String>();
-      OAuthAccessor accessor = accessorInfo.getAccessor();
-      oauthState.put(ACCESS_TOKEN_KEY, accessor.accessToken);
-      oauthState.put(ACCESS_TOKEN_SECRET_KEY, accessor.tokenSecret);
-      oauthState.put(OWNER_KEY, authToken.getOwnerId());
-      newClientState = fetcherConfig.getStateCrypter().wrap(oauthState);
-    } catch (BlobCrypterException e) {
-      throw new GadgetException(GadgetException.Code.INTERNAL_SERVER_ERROR, e);
-    }
+    OAuthAccessor accessor = accessorInfo.getAccessor();
+    responseParams.getNewClientState().setAccessToken(accessor.accessToken);
+    responseParams.getNewClientState().setAccessTokenSecret(accessor.tokenSecret);
+    responseParams.getNewClientState().setOwner(fetchParams.getAuthToken().getOwnerId());
   }
 
   /**
@@ -673,7 +583,7 @@ public class OAuthFetcher extends ChainedContentFetcher {
 
       String method = realRequest.getMethod();
 
-      msgParams.add(new OAuth.Parameter(XOAUTH_APP_URL, authToken.getAppUrl()));
+      msgParams.add(new OAuth.Parameter(XOAUTH_APP_URL, fetchParams.getAuthToken().getAppUrl()));
 
       // Build and sign the message.
       OAuthMessage oauthRequest = newRequestMessage(
@@ -696,7 +606,7 @@ public class OAuthFetcher extends ChainedContentFetcher {
       checkForProtocolProblem(response);
   
       // Track metadata on the response
-      addResponseMetadata(response);
+      responseParams.addToResponse(response);
       return response;
     } catch (UnsupportedEncodingException e) {
       throw new GadgetException(GadgetException.Code.INTERNAL_SERVER_ERROR, e);

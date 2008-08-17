@@ -27,7 +27,7 @@ import org.apache.shindig.gadgets.http.ContentFetcherFactory;
 import org.apache.shindig.gadgets.http.HttpFetcher;
 import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.http.HttpResponse;
-import org.apache.shindig.gadgets.oauth.OAuthRequestParams;
+import org.apache.shindig.gadgets.oauth.OAuthArguments;
 import org.apache.shindig.gadgets.rewrite.ContentRewriter;
 import org.apache.shindig.gadgets.spec.Auth;
 import org.apache.shindig.gadgets.spec.Preload;
@@ -211,7 +211,7 @@ public class MakeRequestHandler extends ProxyBase{
       case SIGNED:
         return contentFetcherFactory.getSigningFetcher(token);
       case OAUTH:
-        return contentFetcherFactory.getOAuthFetcher(token, new OAuthRequestParams(request));
+        return contentFetcherFactory.getOAuthFetcher(token, new OAuthArguments(request));
       default:
         return contentFetcherFactory.get();
     }

@@ -26,9 +26,9 @@ import javax.servlet.http.HttpServletRequest;
 import org.apache.shindig.gadgets.spec.Preload;
 
 /**
- * Bundles information about a proxy request that requires OAuth
+ * Arguments to an OAuth fetch sent by the client.
  */
-public class OAuthRequestParams {
+public class OAuthArguments {
   public static final String SERVICE_PARAM = "OAUTH_SERVICE_NAME";
   public static final String TOKEN_PARAM = "OAUTH_TOKEN_NAME";
   public static final String REQUEST_TOKEN_PARAM = "OAUTH_REQUEST_TOKEN";
@@ -45,7 +45,7 @@ public class OAuthRequestParams {
   protected boolean bypassSpecCache;
 
   @SuppressWarnings("unchecked")
-  public OAuthRequestParams(HttpServletRequest request) {
+  public OAuthArguments(HttpServletRequest request) {
     Map<String, String> params = new TreeMap<String, String>(String.CASE_INSENSITIVE_ORDER);
     Map<String, String[]> reqParams = request.getParameterMap();
     for (String name : reqParams.keySet()) {
@@ -54,7 +54,7 @@ public class OAuthRequestParams {
     init(params);
   }
   
-  public OAuthRequestParams(Preload preload) {
+  public OAuthArguments(Preload preload) {
     Map<String, String> attrs = new TreeMap<String, String>(String.CASE_INSENSITIVE_ORDER);
     attrs.putAll(preload.getAttributes());
     init(attrs);
@@ -78,13 +78,13 @@ public class OAuthRequestParams {
   }
 
   // Testing only
-  public OAuthRequestParams(String serviceName, String tokenName,
+  public OAuthArguments(String serviceName, String tokenName,
       String origClientState, boolean bypassSpecCache) {
     this(serviceName, tokenName, origClientState, bypassSpecCache, null, null);
   }
 
   // Testing only
-  public OAuthRequestParams(String serviceName, String tokenName,
+  public OAuthArguments(String serviceName, String tokenName,
       String origClientState, boolean bypassSpecCache, String requestToken,
       String requestTokenSecret) {
     this.serviceName = serviceName;

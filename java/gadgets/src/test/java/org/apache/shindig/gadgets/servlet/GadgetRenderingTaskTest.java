@@ -32,7 +32,8 @@ import org.apache.shindig.gadgets.GadgetContext;
 import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.http.HttpResponse;
 import org.apache.shindig.gadgets.oauth.OAuthFetcher;
-import org.apache.shindig.gadgets.oauth.OAuthRequestParams;
+import org.apache.shindig.gadgets.oauth.OAuthArguments;
+import org.apache.shindig.gadgets.oauth.OAuthResponseParams;
 import org.apache.shindig.gadgets.spec.GadgetSpec;
 
 import org.easymock.EasyMock;
@@ -173,7 +174,7 @@ public class GadgetRenderingTaskTest extends HttpTestFixture {
         andStubReturn(mock(SecurityToken.class));
     OAuthFetcher oauthFetcher = mock(OAuthFetcher.class);
     expect(fetcherFactory.getOAuthFetcher(
-        isA(SecurityToken.class), isA(OAuthRequestParams.class))).
+        isA(SecurityToken.class), isA(OAuthArguments.class))).
         andReturn(oauthFetcher);
 
     expect(oauthFetcher.fetch(isA(HttpRequest.class))).
@@ -198,12 +199,12 @@ public class GadgetRenderingTaskTest extends HttpTestFixture {
         andStubReturn(mock(SecurityToken.class));
     OAuthFetcher oauthFetcher = mock(OAuthFetcher.class);
     expect(fetcherFactory.getOAuthFetcher(
-        isA(SecurityToken.class), isA(OAuthRequestParams.class))).
+        isA(SecurityToken.class), isA(OAuthArguments.class))).
         andReturn(oauthFetcher);
 
     HttpResponse resp = new HttpResponse(401, null, null);
-    resp.getMetadata().put(OAuthFetcher.APPROVAL_URL, "approval please");
-    resp.getMetadata().put(OAuthFetcher.CLIENT_STATE, "state blob");
+    resp.getMetadata().put(OAuthResponseParams.APPROVAL_URL, "approval please");
+    resp.getMetadata().put(OAuthResponseParams.CLIENT_STATE, "state blob");
 
     expect(oauthFetcher.fetch(isA(HttpRequest.class))).andReturn(resp);
 

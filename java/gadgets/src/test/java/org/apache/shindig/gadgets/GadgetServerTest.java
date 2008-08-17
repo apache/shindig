@@ -30,7 +30,7 @@ import org.apache.shindig.common.SecurityToken;
 import org.apache.shindig.common.crypto.BlobCrypterException;
 import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.http.HttpResponse;
-import org.apache.shindig.gadgets.oauth.OAuthRequestParams;
+import org.apache.shindig.gadgets.oauth.OAuthArguments;
 import org.apache.shindig.gadgets.spec.GadgetSpec;
 
 public class GadgetServerTest extends GadgetTestFixture {
@@ -330,7 +330,7 @@ public class GadgetServerTest extends GadgetTestFixture {
     expect(fetcher.fetch(SPEC_REQUEST))
         .andReturn(new HttpResponse(gadgetXml));
     expect(fetcherFactory.getOAuthFetcher(
-        isA(SecurityToken.class), isA(OAuthRequestParams.class)))
+        isA(SecurityToken.class), isA(OAuthArguments.class)))
         .andReturn(fetcher);
     expect(fetcher.fetch(preloadRequest))
         .andReturn(new HttpResponse(preloadData));

@@ -20,7 +20,7 @@ package org.apache.shindig.gadgets;
 import org.apache.shindig.gadgets.http.ContentFetcherFactory;
 import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.http.HttpResponse;
-import org.apache.shindig.gadgets.oauth.OAuthRequestParams;
+import org.apache.shindig.gadgets.oauth.OAuthArguments;
 import org.apache.shindig.gadgets.spec.Auth;
 import org.apache.shindig.gadgets.spec.Feature;
 import org.apache.shindig.gadgets.spec.GadgetSpec;
@@ -209,7 +209,7 @@ class PreloadTask implements Callable<HttpResponse> {
               .fetch(request);
         case OAUTH:
           return preloadFetcherFactory.getOAuthFetcher(context.getToken(),
-              new OAuthRequestParams(preload)).fetch(request);
+              new OAuthArguments(preload)).fetch(request);
         default:
           return HttpResponse.error();
       }
