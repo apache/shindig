@@ -151,6 +151,8 @@ public class BasicBlobCrypter implements BlobCrypter {
       throw new BlobCrypterException("Invalid token signature", e);
     } catch (ArrayIndexOutOfBoundsException e) {
       throw new BlobCrypterException("Invalid token format", e);
+    } catch (NegativeArraySizeException e) {
+      throw new BlobCrypterException("Invalid token format", e);
     } catch (UnsupportedEncodingException e) {
       throw new BlobCrypterException(e);
     }
