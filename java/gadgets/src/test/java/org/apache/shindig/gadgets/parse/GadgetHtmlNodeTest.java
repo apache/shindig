@@ -447,9 +447,9 @@ public class GadgetHtmlNodeTest extends TestCase {
   }
   
   public void testRenderOnlyTagNodeShortForm() {
-    String[][] attribs = { { "id", "foo" }, { "bar", "baz" } };
+    String[][] attribs = { { "id", "foo" } };
     GadgetHtmlNode tag = new GadgetHtmlNode("div", attribs);
-    assertEquals("<div bar=\"baz\" id=\"foo\"/>", renderNode(tag));
+    assertEquals("<div id=\"foo\"/>", renderNode(tag));
   }
   
   public void testRenderStyleSrcTag() {
