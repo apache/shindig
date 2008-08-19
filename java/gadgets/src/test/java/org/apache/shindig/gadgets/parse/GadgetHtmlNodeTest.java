@@ -281,6 +281,12 @@ public class GadgetHtmlNodeTest extends TestCase {
     assertEquals(1, remainingKids.size());
     assertSame(parentNode, afterNode.getParentNode());
     assertSame(afterNode, remainingKids.get(0));
+    
+    // clear nodes
+    parentNode.clearChildren();
+    List<GadgetHtmlNode> clearedKids = parentNode.getChildren();
+    assertNotNull(clearedKids);
+    assertEquals(0, clearedKids.size());
   }
   
   // Test: text setter
@@ -413,6 +419,13 @@ public class GadgetHtmlNodeTest extends TestCase {
     
     try {
       textNode.setTagName("div");
+      fail("Text nodes shouldn't be able to use setTagName()");
+    } catch (UnsupportedOperationException e) {
+      // Expected condition
+    }
+    
+    try {
+      textNode.clearChildren();
       fail("Text nodes shouldn't be able to use setTagName()");
     } catch (UnsupportedOperationException e) {
       // Expected condition

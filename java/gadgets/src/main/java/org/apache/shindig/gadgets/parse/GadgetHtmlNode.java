@@ -17,6 +17,7 @@
  */
 package org.apache.shindig.gadgets.parse;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -227,6 +228,17 @@ public class GadgetHtmlNode {
   }
   
   /**
+   * Helper method that removes all children from
+   * the current node.
+   */
+  public void clearChildren() {
+    validateNodeType(NodeType.TAG);
+    for (GadgetHtmlNode child : getChildren()) {
+      removeChild(child);
+    }
+  }
+  
+  /**
    * Returns this nodes parent, or null if none exists.
    * @return
    */
@@ -240,12 +252,15 @@ public class GadgetHtmlNode {
   }
   
   /**
-   * Returns an unmodifiable list of current child nodes.
+   * Returns an unmodifiable view of current child nodes.
+   * While the list itself is unmodifiable, this node's contents
+   * can be modified using list entries.
    * @return
    */
   public List<GadgetHtmlNode> getChildren() {
     validateNodeType(NodeType.TAG);
-    return Collections.unmodifiableList(children);
+    return Collections.unmodifiableList(
+        new ArrayList<GadgetHtmlNode>(children));
   }
   
   /**
