@@ -24,6 +24,8 @@ import org.easymock.classextension.EasyMock;
 
 import junit.framework.TestCase;
 
+import java.io.IOException;
+import java.io.StringWriter;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
@@ -430,5 +432,79 @@ public class GadgetHtmlNodeTest extends TestCase {
     } catch (UnsupportedOperationException e) {
       // Expected condition
     }
+  }
+  
+  public void testRenderOnlyTextNode() {
+    String content = "  hello, world!\n  ";
+    assertEquals(content, renderNode(new GadgetHtmlNode(content)));
+  }
+  
+  public void testRenderOnlyTagNodeShortForm() {
+    String[][] attribs = { { "id", "foo" }, { "bar", "baz" } };
+    GadgetHtmlNode tag = new GadgetHtmlNode("div", attribs);
+    assertEquals("<div bar=\"baz\" id=\"foo\"/>", renderNode(tag));
+  }
+  
+  public void testRenderStyleSrcTag() {
+    String[][] attribs = { { "src", "http://www.foo.com/bar.css" } };
+    GadgetHtmlNode styleTag = new GadgetHtmlNode("style", attribs);
+    assertEquals("<style src=\"http://www.foo.com/bar.css\"></style>",
+                 renderNode(styleTag));
+  }
+  
+  public void testRenderEscapedAttribute() {
+    String[][] attribs = { { "foo", "<script&\"data\">" } };
+    GadgetHtmlNode escapedTag = new GadgetHtmlNode("div", attribs);
+    assertEquals("<div foo=\"&lt;script&amp;&quot;data&quot;&gt;\"/>",
+                 renderNode(escapedTag));
+  }
+  
+  public void testRenderNullValuedAttribute() {
+    String[][] attribs = { { "marker", null } };
+    GadgetHtmlNode tag = new GadgetHtmlNode("span", attribs);
+    assertEquals("<span marker/>", renderNode(tag));
+  }
+  
+  public void testRenderEscapedTextContent() {
+    GadgetHtmlNode escapedTextNode = new GadgetHtmlNode("<script&\"data'>");
+    assertEquals("&lt;script&amp;&quot;data'&gt;",
+                 renderNode(escapedTextNode));
+  }
+  
+  public void testRenderAdjacentStringsInTag() {
+    GadgetHtmlNode container = new GadgetHtmlNode("div", null);
+    container.appendChild(new GadgetHtmlNode("one"));
+    container.appendChild(new GadgetHtmlNode("\n"));
+    container.appendChild(new GadgetHtmlNode(" two "));
+    assertEquals("<div>one\n two </div>", renderNode(container));
+  }
+  
+  public void testRenderMixedContent() {
+    // Something of a catch-all for smaller above tests.
+    String[][] attribs = { { "readonly", null } };
+    GadgetHtmlNode parent = new GadgetHtmlNode("div", attribs);
+    parent.appendChild(new GadgetHtmlNode(" content\n"));
+    parent.appendChild(new GadgetHtmlNode("<br>"));
+    GadgetHtmlNode child1 = new GadgetHtmlNode("span", null);
+    child1.appendChild(new GadgetHtmlNode("hr", null));
+    parent.appendChild(child1);
+    parent.appendChild(new GadgetHtmlNode("\"after text\""));
+    GadgetHtmlNode child2 = new GadgetHtmlNode("p", null);
+    child2.appendChild(new GadgetHtmlNode("paragraph!"));
+    parent.appendChild(child2);
+    assertEquals("<div readonly> content\n&lt;br&gt;<span><hr/>" +
+                 "</span>&quot;after text&quot;<p>paragraph!</p></div>",
+                 renderNode(parent));
+  }
+  
+  private String renderNode(GadgetHtmlNode node) {
+    StringWriter sw = new StringWriter();
+    try {
+      node.render(sw);
+    } catch (IOException e) {
+      // Should never happen, but fail just in case.
+      fail("Unexpected IOException on StringWriter operation");
+    }
+    return sw.toString();
   }
 }

@@ -17,6 +17,8 @@
  */
 package org.apache.shindig.gadgets.parse;
 
+import java.io.IOException;
+import java.io.Writer;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -24,6 +26,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
+import org.apache.commons.lang.StringEscapeUtils;
 
 /**
  * Mutable wrapper around a {@code ParsedHtmlNode}.
@@ -278,6 +282,44 @@ public class GadgetHtmlNode {
   public void setText(String text) {
     validateNodeType(NodeType.TEXT);
     this.text = text;
+  }
+  
+  /**
+   * Render self as HTML. Rendering is relatively simple as no
+   * additional validation is performed on content beyond what
+   * the rest of the class provides, such as attribute key
+   * validation. All whitespace and comments are maintained. Nodes
+   * with zero children are rendered short-form (&lt;foo/&gt;)
+   * unless tagName is "style" since many browsers dislike short-form for that.
+   * One space is provided between attributes. Attribute values are surrounded
+   * in double-quotes. Null-valued attributes are rendered without ="value".
+   * Attributes are rendered in no particular order.
+   * @param w Writer to which to send content
+   * @throws IOException If the writer throws an error on append(...)
+   */
+  public void render(Writer w) throws IOException {
+    if (isText()) {
+      w.append(StringEscapeUtils.escapeHtml(getText()));
+    } else {
+      w.append('<').append(tagName);
+      for (String attrKey : getAttributeKeys()) {
+        String attrValue = getAttributeValue(attrKey);
+        w.append(' ').append(attrKey);
+        if (attrValue != null) {
+          w.append("=\"").append(StringEscapeUtils.escapeHtml(attrValue)).append('"');
+        }
+      }
+      if (children.size() == 0 &&
+          !tagName.equalsIgnoreCase("style")) {
+        w.append("/>");
+      } else {
+        w.append('>');
+        for (GadgetHtmlNode child : children) {
+          child.render(w);
+        }
+        w.append("</").append(tagName).append('>');
+      }
+    }
   }
   
   // Helper that cleans up and validates an attribute key
