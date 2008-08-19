@@ -31,6 +31,14 @@ import java.util.List;
 import java.util.Set;
 
 public class GadgetHtmlNodeTest extends TestCase {
+  private ParsedHtmlAttribute makeParsedAttribute(String key, String val) {
+    ParsedHtmlAttribute parsed = EasyMock.createNiceMock(ParsedHtmlAttribute.class);
+    expect(parsed.getName()).andReturn(key).anyTimes();
+    expect(parsed.getValue()).andReturn(val).anyTimes();
+    replay(parsed);
+    return parsed;
+  }
+  
   private ParsedHtmlNode makeTagNodeFromParsed(
       String tag, String[][] attribs, ParsedHtmlNode[] children) {
     ParsedHtmlNode parsed = EasyMock.createNiceMock(ParsedHtmlNode.class);
@@ -38,8 +46,7 @@ public class GadgetHtmlNodeTest extends TestCase {
     List<ParsedHtmlAttribute> attributes = new LinkedList<ParsedHtmlAttribute>();
     if (attribs != null) {
       for (String[] attrib : attribs) {
-        attributes.add(
-            GadgetHtmlAttributeTest.makeParsedAttribute(attrib[0], attrib[1]));
+        attributes.add(makeParsedAttribute(attrib[0], attrib[1]));
       }
     }
     expect(parsed.getAttributes()).andReturn(attributes).anyTimes();

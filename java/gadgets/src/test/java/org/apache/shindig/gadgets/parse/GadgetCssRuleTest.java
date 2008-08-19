@@ -32,6 +32,14 @@ public class GadgetCssRuleTest extends TestCase {
   private String[][] decls =
       { { "color", "blue" }, { " font-size ", "10 em" } };
   
+  private ParsedCssDeclaration makeParsedDecl(String name, String val) {
+    ParsedCssDeclaration parsedDecl = EasyMock.createNiceMock(ParsedCssDeclaration.class);
+    expect(parsedDecl.getName()).andReturn(name).anyTimes();
+    expect(parsedDecl.getValue()).andReturn(val).anyTimes();
+    replay(parsedDecl);
+    return parsedDecl;
+  }
+  
   private ParsedCssRule makeParsedRule(String[] selectors, String[][] decls) {
     ParsedCssRule parsedMock = EasyMock.createNiceMock(ParsedCssRule.class);
     
@@ -44,8 +52,7 @@ public class GadgetCssRuleTest extends TestCase {
     List<ParsedCssDeclaration> declList =
         new LinkedList<ParsedCssDeclaration>();
     for (String[] decl : decls) {
-      declList.add(
-          GadgetCssDeclarationTest.makeParsedDecl(decl[0], decl[1]));
+      declList.add(makeParsedDecl(decl[0], decl[1]));
     }
     expect(parsedMock.getDeclarations()).andReturn(declList).anyTimes();
     
