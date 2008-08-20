@@ -17,84 +17,77 @@
  */
 package org.apache.shindig.social.opensocial.service;
 
-import org.apache.shindig.common.SecurityToken;
 import org.apache.shindig.common.testing.FakeGadgetToken;
+import org.apache.shindig.social.core.oauth.AuthenticationServletFilter;
 import org.apache.shindig.social.opensocial.spi.GroupId;
 import org.apache.shindig.social.opensocial.spi.PersonService;
 import org.apache.shindig.social.opensocial.spi.UserId;
 
+import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
+
+import org.easymock.classextension.EasyMock;
 
 import junit.framework.TestCase;
 
-public class RequestItemTest extends TestCase {
+import java.util.Collections;
+
+public class RestfulRequestItemTest extends TestCase {
+
+  private static final FakeGadgetToken FAKE_TOKEN = new FakeGadgetToken();
+
+  private static final String DEFAULT_PATH = "/people/john.doe/@self";
+
+  private RestfulRequestItem request;
+
+  protected void setUp() throws Exception {
+    super.setUp();
+    request = new RestfulRequestItem(
+        DEFAULT_PATH + "?fields=huey,dewey,louie", "GET",
+        null, FAKE_TOKEN, null);
+  }
 
   public void testParseUrl() throws Exception {
-    String path = "/people/john.doe/@self";
-
-    RequestItem request = new RequestItem();
-    request.setUrl(path + "?fields=huey,dewey,louie");
-
-    request.putUrlParamsIntoParameters();
-
-    assertEquals(path, request.getUrl());
-    assertEquals("huey,dewey,louie", request.getParameter("fields"));
+    assertEquals("people", request.getService());
+    assertEquals(Lists.newArrayList("huey", "dewey", "louie"), request.getListParameter("fields"));
 
     // Try it without any params
-    request = new RequestItem();
-    request.setUrl(path);
+    request = new RestfulRequestItem(DEFAULT_PATH, "GET", null, null, null);
 
-    request.putUrlParamsIntoParameters();
-
-    assertEquals(path, request.getUrl());
-    assertEquals(null, request.getParameter("fields"));
+    assertEquals("people", request.getService());
+    assertEquals(null, request.getParameters().get("fields"));
   }
 
-  public void testBasicFunctions() throws Exception {
-    String url = "url";
-    SecurityToken token = null;
-    String method = "method";
-    RequestItem request = new RequestItem();
-
-    request.setUrl(url);
-    assertEquals(url, request.getUrl());
-
-    request.setMethod(method);
-    assertEquals(method, request.getMethod());
-
-    request.setToken(token);
-    assertEquals(token, request.getToken());
+  public void testGetHttpMethodFromParameter() throws Exception {
+    AuthenticationServletFilter.SecurityTokenRequest overridden =
+        EasyMock.createMock(AuthenticationServletFilter.SecurityTokenRequest.class);
+    EasyMock.expect(overridden.getParameter(RestfulRequestItem.X_HTTP_METHOD_OVERRIDE))
+        .andReturn("DELETE");
+    EasyMock.replay(overridden);
+    assertEquals("DELETE", RestfulRequestItem.getMethod(overridden));
+    EasyMock.verify(overridden);
   }
+
 
   public void testGetAppId() throws Exception {
-    RequestItem request = new RequestItem();
-
     request.setParameter("appId", "100");
     assertEquals("100", request.getAppId());
 
-    FakeGadgetToken token = new FakeGadgetToken();
-    request.setToken(token);
     request.setParameter("appId", "@app");
-    assertEquals(token.getAppId(), request.getAppId());
+    assertEquals(FAKE_TOKEN.getAppId(), request.getAppId());
   }
 
   public void testGetUser() throws Exception {
-    RequestItem request = new RequestItem();
-
     request.setParameter("userId", "@owner");
     assertEquals(UserId.Type.owner, request.getUsers().iterator().next().getType());
   }
 
   public void testGetGroup() throws Exception {
-    RequestItem request = new RequestItem();
-
     request.setParameter("groupId", "@self");
     assertEquals(GroupId.Type.self, request.getGroup().getType());
   }
 
   public void testStartIndex() throws Exception {
-    RequestItem request = new RequestItem();
-
     request.setParameter("startIndex", null);
     assertEquals(0, request.getStartIndex());
 
@@ -103,8 +96,6 @@ public class RequestItemTest extends TestCase {
   }
 
   public void testCount() throws Exception {
-    RequestItem request = new RequestItem();
-
     request.setParameter("count", null);
     assertEquals(20, request.getCount());
 
@@ -113,8 +104,6 @@ public class RequestItemTest extends TestCase {
   }
 
   public void testOrderBy() throws Exception {
-    RequestItem request = new RequestItem();
-
     request.setParameter("orderBy", null);
     assertEquals(PersonService.SortOrder.topFriends, request.getOrderBy());
 
@@ -123,8 +112,6 @@ public class RequestItemTest extends TestCase {
   }
 
   public void testFilterBy() throws Exception {
-    RequestItem request = new RequestItem();
-
     request.setParameter("filterBy", null);
     assertEquals(PersonService.FilterType.all, request.getFilterBy());
 
@@ -133,13 +120,16 @@ public class RequestItemTest extends TestCase {
   }
 
   public void testFields() throws Exception {
-    RequestItem request = new RequestItem();
-
-    request.setParameter("fields", null);
+    request.setListParameter("fields", Collections.<String>emptyList());
     assertEquals(Sets.<String>newHashSet(), request.getFields());
 
     request.setParameter("fields", "happy,sad,grumpy");
     assertEquals(Sets.newHashSet("happy", "sad", "grumpy"), request.getFields());
   }
 
+  public void testRouteFromParameter() throws Exception {
+    assertEquals("path", RestfulRequestItem.getServiceFromPath("/path"));
+    assertEquals("path", RestfulRequestItem.getServiceFromPath("/path/fun"));
+    assertEquals("path", RestfulRequestItem.getServiceFromPath("/path/fun/yes"));
+  }
 }

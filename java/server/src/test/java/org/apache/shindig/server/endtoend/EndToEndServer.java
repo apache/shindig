@@ -17,15 +17,16 @@
  */
 package org.apache.shindig.server.endtoend;
 
-import com.google.common.base.Join;
-import com.google.common.collect.Maps;
-
 import org.apache.shindig.common.servlet.GuiceServletContextListener;
 import org.apache.shindig.gadgets.servlet.ConcatProxyServlet;
 import org.apache.shindig.gadgets.servlet.GadgetRenderingServlet;
 import org.apache.shindig.gadgets.servlet.HttpGuiceModule;
-import org.apache.shindig.social.opensocial.service.DataServiceServlet;
 import org.apache.shindig.social.core.oauth.AuthenticationServletFilter;
+import org.apache.shindig.social.opensocial.service.DataServiceServlet;
+import org.apache.shindig.social.opensocial.service.JsonRpcServlet;
+
+import com.google.common.base.Join;
+import com.google.common.collect.Maps;
 
 import org.mortbay.jetty.Server;
 import org.mortbay.jetty.handler.ResourceHandler;
@@ -51,7 +52,8 @@ import javax.servlet.http.HttpServletResponse;
 public class EndToEndServer {
   private static final int JETTY_PORT = 9003;
   private static final String GADGET_BASE = "/gadgets/ifr";
-  private static final String JSON_BASE = "/social/rest/*";
+  private static final String REST_BASE = "/social/rest/*";
+  private static final String JSON_RPC_BASE = "/social/rpc/*";
   private static final String CONCAT_BASE = "/gadgets/concat";
   public static final String SERVER_URL = "http://localhost:" + JETTY_PORT;
   public static final String GADGET_BASEURL = SERVER_URL + GADGET_BASE;
@@ -112,10 +114,16 @@ public class EndToEndServer {
     context.addServlet(gadgetServletHolder, GADGET_BASE);
 
     // Attach DataServiceServlet, wrapped in a proxy to fake errors
-    ServletHolder jsonServletHolder = new ServletHolder(new ForceErrorServlet(
+    ServletHolder restServletHolder = new ServletHolder(new ForceErrorServlet(
         new DataServiceServlet()));
-    context.addServlet(jsonServletHolder, JSON_BASE);
-    context.addFilter(AuthenticationServletFilter.class, JSON_BASE, 0);
+    context.addServlet(restServletHolder, REST_BASE);
+    context.addFilter(AuthenticationServletFilter.class, REST_BASE, 0);
+
+    // Attach JsonRpcServlet, wrapped in a proxy to fake errors
+    ServletHolder rpcServletHolder = new ServletHolder(new ForceErrorServlet(
+        new JsonRpcServlet()));
+    context.addServlet(rpcServletHolder, JSON_RPC_BASE);
+    context.addFilter(AuthenticationServletFilter.class, JSON_RPC_BASE, 0);
 
     // Attach the ConcatProxyServlet - needed for
     ServletHolder concatHolder = new ServletHolder(new ConcatProxyServlet());

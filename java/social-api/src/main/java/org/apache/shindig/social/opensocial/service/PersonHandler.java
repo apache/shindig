@@ -33,7 +33,7 @@ import java.util.concurrent.Future;
 
 public class PersonHandler extends DataRequestHandler {
 
-  private PersonService personService;
+  private final PersonService personService;
 
   private static final String PEOPLE_PATH = "/people/{userId}+/{groupId}/{personId}+";
 
@@ -60,7 +60,7 @@ public class PersonHandler extends DataRequestHandler {
    * examples: /people/john.doe/@all /people/john.doe/@friends /people/john.doe/@self
    */
   protected Future<? extends ResponseItem> handleGet(RequestItem request) {
-    request.parseUrlWithTemplate(PEOPLE_PATH);
+    request.applyUrlTemplate(PEOPLE_PATH);
 
     GroupId groupId = request.getGroup();
     Set<String> optionalPersonId = Sets.newLinkedHashSet(request.getListParameter("personId"));

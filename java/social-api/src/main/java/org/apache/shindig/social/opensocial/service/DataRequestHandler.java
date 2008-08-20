@@ -21,32 +21,44 @@ import org.apache.shindig.common.util.ImmediateFuture;
 import org.apache.shindig.social.ResponseError;
 import org.apache.shindig.social.ResponseItem;
 
+import com.google.common.collect.Sets;
+
 import java.util.Collection;
+import java.util.Set;
 import java.util.concurrent.Future;
 
 public abstract class DataRequestHandler {
 
-  public Future<? extends ResponseItem> handleItem(RequestItem request) {
-    String httpMethod = request.getMethod();
-    Future<? extends ResponseItem> responseItem;
+  private static final Set<String> GET_SYNONYMS = Sets.newHashSet("get");
+  private static final Set<String> CREATE_SYNONYMS = Sets.newHashSet("put", "create");
+  private static final Set<String> UPDATE_SYNONYMS = Sets.newHashSet("post", "update");
+  private static final Set<String> DELETE_SYNONYMS = Sets.newHashSet("delete", "delete");
 
+  public Future<? extends ResponseItem> handleItem(RequestItem request) {
+    if (request.getOperation() == null) {
+      return error(ResponseError.NOT_IMPLEMENTED, "Unserviced operation ", null);
+    }
+    String operation = request.getOperation().toLowerCase();
+    Future<? extends ResponseItem> responseItem;
     try {
-      if ("GET".equals(httpMethod)) {
+      if (GET_SYNONYMS.contains(operation)) {
         responseItem = handleGet(request);
-      } else if ("POST".equals(httpMethod)) {
+      } else if (UPDATE_SYNONYMS.contains(operation)) {
         responseItem = handlePost(request);
-      } else if ("PUT".equals(httpMethod)) {
+      } else if (CREATE_SYNONYMS.contains(operation)) {
         responseItem = handlePut(request);
-      } else if ("DELETE".equals(httpMethod)) {
+      } else if (DELETE_SYNONYMS.contains(operation)) {
         responseItem = handleDelete(request);
       } else {
-        return error(ResponseError.NOT_IMPLEMENTED, "Unserviced Http method type", httpMethod);
+        return error(ResponseError.NOT_IMPLEMENTED, "Unserviced operation", operation);
       }
-      return responseItem;
     } catch (IllegalArgumentException iae) {
-      // Upconvert IllegalArgumentExceptions to errors.
+      // Upconvert IllegalArgumentExceptions to BAD_REQUEST.
       return error(ResponseError.BAD_REQUEST, iae.getMessage(), null);
+    } catch (Throwable t) {
+      return error(ResponseError.INTERNAL_ERROR, "Unknown error " + t.getMessage(), null);
     }
+    return responseItem;
   }
 
   protected abstract Future<? extends ResponseItem> handleDelete(RequestItem request);

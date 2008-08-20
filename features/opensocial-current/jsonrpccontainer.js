@@ -17,12 +17,10 @@
  */
 
 /**
- * @fileoverview RESTful based opensocial container.
- *
- * TODO: THIS IS NOW DEPRECATED. Remove once PHP implements rpc support
+ * @fileoverview JSON-RPC based opensocial container.
  */
 
-var RestfulContainer = function(baseUrl, domain, supportedFieldsArray) {
+var JsonRpcContainer = function(baseUrl, domain, supportedFieldsArray) {
   opensocial.Container.call(this);
 
   var supportedFieldsMap = {};
@@ -41,14 +39,14 @@ var RestfulContainer = function(baseUrl, domain, supportedFieldsArray) {
 
   this.securityToken_ = shindig.auth.getSecurityToken();
 };
-RestfulContainer.inherits(opensocial.Container);
+JsonRpcContainer.inherits(opensocial.Container);
 
-RestfulContainer.prototype.getEnvironment = function() {
+JsonRpcContainer.prototype.getEnvironment = function() {
   return this.environment_;
 };
 
-RestfulContainer.prototype.requestCreateActivity = function(activity,
-    priority, opt_callback) {
+JsonRpcContainer.prototype.requestCreateActivity = function(activity,
+                                                            priority, opt_callback) {
   opt_callback = opt_callback || {};
 
   var req = opensocial.newDataRequest();
@@ -59,7 +57,7 @@ RestfulContainer.prototype.requestCreateActivity = function(activity,
   });
 };
 
-RestfulContainer.prototype.requestData = function(dataRequest, callback) {
+JsonRpcContainer.prototype.requestData = function(dataRequest, callback) {
   callback = callback || {};
 
   var requestObjects = dataRequest.getRequestObjects();
@@ -70,7 +68,7 @@ RestfulContainer.prototype.requestData = function(dataRequest, callback) {
     return;
   }
 
-  var jsonBatchData = {};
+  var jsonBatchData = new Array(totalRequests);
   var systemKeyIndex = 0;
 
   for (var j = 0; j < totalRequests; j++) {
@@ -85,33 +83,41 @@ RestfulContainer.prototype.requestData = function(dataRequest, callback) {
       }
     }
 
-    jsonBatchData[requestObject.key] = {url : requestObject.request.url,
-      method : requestObject.request.method};
+    jsonBatchData[j] = requestObject.request.rpc;
+    jsonBatchData[j].id = requestObject.key;
+
     if (requestObject.request.postData) {
-      jsonBatchData[requestObject.key].postData = requestObject.request.postData;
+      jsonBatchData[j].postData = requestObject.request.postData;
     }
   }
 
   var sendResponse = function(result) {
-    if (result.errors[0] || result.data.error) {
-      RestfulContainer.generateErrorResponse(result, requestObjects, callback);
+    if (result.errors[0]) {
+      JsonRpcContainer.generateErrorResponse(result, requestObjects, callback);
       return;
     }
 
     result = result.data;
 
-    var responses = result['responses'] || [];
     var globalError = false;
-
     var responseMap = {};
+
+    // Map from indices to ids.
+    for (var i = 0; i < result.length; i++) {
+      result[result[i].id] = result[i];
+    }
 
     for (var k = 0; k < requestObjects.length; k++) {
       var request = requestObjects[k];
-      var response = responses[request.key];
+      var response = result[request.key];
 
-      var rawData = response['response'];
-      var error = response['error'];
-      var errorMessage = response['errorMessage'];
+      var rawData = response.data;
+      var error = response.error;
+      var errorMessage = "";
+
+      if (error) {
+        errorMessage = error.message;
+      }
 
       var processedData = request.request.processResponse(
           request.request, rawData, error, errorMessage);
@@ -132,12 +138,12 @@ RestfulContainer.prototype.requestData = function(dataRequest, callback) {
   };
 
   gadgets.io.makeNonProxiedRequest(
-      this.baseUrl_ + "/rest/jsonBatch?st=" + encodeURIComponent(shindig.auth.getSecurityToken()),
+      this.baseUrl_ + "/rpc?st=" + encodeURIComponent(shindig.auth.getSecurityToken()),
       sendResponse, makeRequestParams, "application/json");
 };
 
-RestfulContainer.generateErrorResponse = function(result, requestObjects, callback) {
-  var globalErrorCode = RestfulContainer.translateHttpError(result.errors[0] || result.data.error)
+JsonRpcContainer.generateErrorResponse = function(result, requestObjects, callback) {
+  var globalErrorCode = JsonRpcContainer.translateHttpError(result.errors[0] || result.data.error)
       || opensocial.ResponseItem.Error.INTERNAL_ERROR;
 
   var errorResponseMap = {};
@@ -148,7 +154,7 @@ RestfulContainer.generateErrorResponse = function(result, requestObjects, callba
   callback(new opensocial.DataResponse(errorResponseMap, true));
 };
 
-RestfulContainer.translateHttpError = function(httpError) {
+JsonRpcContainer.translateHttpError = function(httpError) {
   if (httpError == "Error 501") {
     return opensocial.ResponseItem.Error.NOT_IMPLEMENTED;
   } else if (httpError == "Error 401") {
@@ -167,11 +173,11 @@ RestfulContainer.translateHttpError = function(httpError) {
   }
 };
 
-RestfulContainer.prototype.makeIdSpec = function(id) {
+JsonRpcContainer.prototype.makeIdSpec = function(id) {
   return new opensocial.IdSpec({'userId' : id});
 };
 
-RestfulContainer.prototype.translateIdSpec = function(newIdSpec) {
+JsonRpcContainer.prototype.translateIdSpec = function(newIdSpec) {
   var userId = newIdSpec.getField('userId');
   var groupId = newIdSpec.getField('groupId');
 
@@ -192,44 +198,50 @@ RestfulContainer.prototype.translateIdSpec = function(newIdSpec) {
     groupId = "@self";
   }
 
-  return userId + "/" + groupId;
+  return { userId : userId, groupId : groupId};
 };
 
-RestfulContainer.prototype.getNetworkDistance = function(idSpec) {
-  var networkDistance = idSpec.getField('networkDistance') || '';
-  return "networkDistance=" + networkDistance;
-}
-
-RestfulContainer.prototype.newFetchPersonRequest = function(id, opt_params) {
+JsonRpcContainer.prototype.newFetchPersonRequest = function(id, opt_params) {
   var peopleRequest = this.newFetchPeopleRequest(
       this.makeIdSpec(id), opt_params);
 
   var me = this;
-  return new RestfulRequestItem(peopleRequest.url, peopleRequest.method, null,
+  return new JsonRpcRequestItem(peopleRequest.rpc,
       function(rawJson) {
         return me.createPersonFromJson(rawJson);
       });
 };
 
-RestfulContainer.prototype.newFetchPeopleRequest = function(idSpec,
-    opt_params) {
-  var url = "/people/" + this.translateIdSpec(idSpec);
-
-  url += "?fields=" + (opt_params['profileDetail'].join(','));
-  url += "&startIndex=" + (opt_params['first'] || 0);
-  url += "&count=" + (opt_params['max'] || 20);
-  url += "&orderBy=" + (opt_params['sortOrder'] || 'topFriends');
-  // TODO: This filterBy isn't in the spec
-  url += "&filterBy=" + (opt_params['filter'] || 'all');
-  url += "&" + this.getNetworkDistance(idSpec);
+JsonRpcContainer.prototype.newFetchPeopleRequest = function(idSpec,
+                                                            opt_params) {
+  var rpc = { method : "people.get" };
+  rpc.params = this.translateIdSpec(idSpec);
+  if (opt_params['profileDetail']) {
+    rpc.params.fields = opt_params['profileDetail'];
+  }
+  if (opt_params['first']) {
+    rpc.params.startIndex = opt_params['first'];
+  }
+  if (opt_params['max']) {
+    rpc.params.count = opt_params['max'];
+  }
+  if (opt_params['sortOrder']) {
+    rpc.params.orderBy = opt_params['sortOrder'];
+  }
+  if (opt_params['filter']) {
+    rpc.params.filterBy = opt_params['filter'];
+  }
+  if (idSpec.getField('networkDistance')) {
+    rpc.params.networkDistance = idSpec.getField('networkDistance');
+  }
 
   var me = this;
-  return new RestfulRequestItem(url, "GET", null,
+  return new JsonRpcRequestItem(rpc,
       function(rawJson) {
         var jsonPeople;
-        if (rawJson['entry']) {
+        if (rawJson['list']) {
           // For the array of people response
-          jsonPeople = rawJson['entry'];
+          jsonPeople = rawJson['list'];
         } else {
           // For the single person response
           jsonPeople = [rawJson];
@@ -244,61 +256,76 @@ RestfulContainer.prototype.newFetchPeopleRequest = function(idSpec,
       });
 };
 
-RestfulContainer.prototype.createPersonFromJson = function(serverJson) {
+JsonRpcContainer.prototype.createPersonFromJson = function(serverJson) {
   return new JsonPerson(serverJson);
 };
 
-RestfulContainer.prototype.getFieldsList = function(keys) {
+JsonRpcContainer.prototype.getFieldsList = function(keys) {
   // datarequest.js guarantees that keys is an array
   if (this.hasNoKeys(keys) || this.isWildcardKey(keys[0])) {
-    return '';
+    return [];
   } else {
-    return 'fields=' + keys.join(',');
+    return keys;
   }
 };
 
-RestfulContainer.prototype.hasNoKeys = function(keys) {
+JsonRpcContainer.prototype.hasNoKeys = function(keys) {
   return !keys || keys.length == 0;
 };
 
-RestfulContainer.prototype.isWildcardKey = function(key) {
+JsonRpcContainer.prototype.isWildcardKey = function(key) {
   // Some containers support * to mean all keys in the js apis.
   // This allows the RESTful apis to be compatible with them.
   return key == "*";
 };
 
-RestfulContainer.prototype.newFetchPersonAppDataRequest = function(idSpec,
-    keys, opt_params) {
-  var url = "/appdata/" + this.translateIdSpec(idSpec) + "/@app"
-      + "?" + this.getNetworkDistance(idSpec) + "&" + this.getFieldsList(keys);
-  return new RestfulRequestItem(url, "GET", null,
+JsonRpcContainer.prototype.newFetchPersonAppDataRequest = function(idSpec,
+                                                                   keys, opt_params) {
+  var rpc = { method : "appdata.get" };
+  rpc.params = this.translateIdSpec(idSpec);
+  rpc.params.app = "@app";
+  rpc.params.fields = this.getFieldsList(keys);
+  if (idSpec.getField('networkDistance')) {
+    rpc.params.networkDistance = idSpec.getField('networkDistance');
+  }
+
+  return new JsonRpcRequestItem(rpc,
       function (appData) {
-        return opensocial.Container.escape(appData['entry'], opt_params, true);
+        return  opensocial.Container.escape(appData['data'], opt_params, true);
       });
 };
 
-RestfulContainer.prototype.newUpdatePersonAppDataRequest = function(id, key,
-    value) {
-  var url = "/appdata/" + this.translateIdSpec(this.makeIdSpec(id))
-      + "/@app?fields=" + key;
-  var data = {};
-  data[key] = value;
-  return new RestfulRequestItem(url, "POST", data);
+JsonRpcContainer.prototype.newUpdatePersonAppDataRequest = function(id, key,
+                                                                    value) {
+  var rpc = { method : "appdata.update" };
+  rpc.params = this.translateIdSpec(this.makeIdSpec(id));
+  rpc.params.app = "@app";
+  rpc.params.data = {};
+  rpc.params.data[key] = value;
+  return new JsonRpcRequestItem(rpc);
 };
 
-RestfulContainer.prototype.newRemovePersonAppDataRequest = function(id, keys) {
-  var url = "/appdata/" + this.translateIdSpec(this.makeIdSpec(id))
-      + "/@app?" + this.getFieldsList(keys);
-  return new RestfulRequestItem(url, "DELETE");
+JsonRpcContainer.prototype.newRemovePersonAppDataRequest = function(id, keys) {
+  var rpc = { method : "appdata.delete" };
+  rpc.params = this.translateIdSpec(this.makeIdSpec(id));
+  rpc.params.app = "@app";
+  rpc.params.keys = keys;
+
+  return new JsonRpcRequestItem(rpc);
 };
 
-RestfulContainer.prototype.newFetchActivitiesRequest = function(idSpec,
-    opt_params) {
-  var url = "/activities/" + this.translateIdSpec(idSpec)
-      + "?appId=@app&" + this.getNetworkDistance(idSpec); // TODO: Handle appId correctly
-  return new RestfulRequestItem(url, "GET", null,
+JsonRpcContainer.prototype.newFetchActivitiesRequest = function(idSpec,
+                                                                opt_params) {
+  var rpc = { method : "activities.get" };
+  rpc.params = this.translateIdSpec(idSpec);
+  rpc.params.app = "@app";
+  if (idSpec.getField('networkDistance')) {
+    rpc.params.networkDistance = idSpec.getField('networkDistance');
+  }
+
+  return new JsonRpcRequestItem(rpc,
       function(rawJson) {
-        rawJson = rawJson['entry'];
+        rawJson = rawJson['list'];
         var activities = [];
         for (var i = 0; i < rawJson.length; i++) {
           activities.push(new JsonActivity(rawJson[i]));
@@ -307,36 +334,39 @@ RestfulContainer.prototype.newFetchActivitiesRequest = function(idSpec,
       });
 };
 
-RestfulContainer.prototype.newActivity = function(opt_params) {
+JsonRpcContainer.prototype.newActivity = function(opt_params) {
   return new JsonActivity(opt_params, true);
 };
 
-RestfulContainer.prototype.newMediaItem = function(mimeType, url, opt_params) {
+JsonRpcContainer.prototype.newMediaItem = function(mimeType, url, opt_params) {
   opt_params = opt_params || {};
   opt_params['mimeType'] = mimeType;
   opt_params['url'] = url;
   return new JsonMediaItem(opt_params);
 };
 
-RestfulContainer.prototype.newCreateActivityRequest = function(idSpec,
-    activity) {
-  var url = "/activities/" + this.translateIdSpec(idSpec)
-      + "/@app?" + this.getNetworkDistance(idSpec); // TODO: Handle appId correctly
-  return new RestfulRequestItem(url, "POST", activity.toJsonObject());
+JsonRpcContainer.prototype.newCreateActivityRequest = function(idSpec,
+                                                               activity) {
+  var rpc = { method : "activities.create" };
+  rpc.params = this.translateIdSpec(idSpec);
+  rpc.params.app = "@app";
+  if (idSpec.getField('networkDistance')) {
+    rpc.params.networkDistance = idSpec.getField('networkDistance');
+  }
+  rpc.params.activity = activity.toJsonObject();
+
+  return new JsonRpcRequestItem(rpc);
 };
 
-var RestfulRequestItem = function(url, method, opt_postData, opt_processData) {
-  this.url = url;
-  this.method = method;
-  this.postData = opt_postData;
+var JsonRpcRequestItem = function(rpc, opt_processData) {
+  this.rpc = rpc;
   this.processData = opt_processData ||
-    function (rawJson) {
-      return rawJson;
-    };
+                     function (rawJson) {
+                       return rawJson;
+                     };
 
   this.processResponse = function(originalDataRequest, rawJson, error,
-      errorMessage) {
-
+                                  errorMessage) {
     return new opensocial.ResponseItem(originalDataRequest,
         error ? null : this.processData(rawJson), error, errorMessage);
   }

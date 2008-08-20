@@ -32,7 +32,7 @@ import java.util.concurrent.Future;
 
 public class AppDataHandler extends DataRequestHandler {
 
-  private AppDataService service;
+  private final AppDataService service;
 
   private static final String APP_DATA_PATH = "/people/{userId}+/{groupId}/{appId}";
 
@@ -51,7 +51,7 @@ public class AppDataHandler extends DataRequestHandler {
    * overridden.
    */
   protected Future<? extends ResponseItem> handleDelete(RequestItem request) {
-    request.parseUrlWithTemplate(APP_DATA_PATH);
+    request.applyUrlTemplate(APP_DATA_PATH);
 
     Set<UserId> userIds = request.getUsers();
 
@@ -84,14 +84,14 @@ public class AppDataHandler extends DataRequestHandler {
    * values and set. If there are no fields vars then all of the data will be overridden.
    */
   protected Future<? extends ResponseItem> handlePost(RequestItem request) {
-    request.parseUrlWithTemplate(APP_DATA_PATH);
+    request.applyUrlTemplate(APP_DATA_PATH);
 
     Set<UserId> userIds = request.getUsers();
 
     Preconditions.requireNotEmpty(userIds, "No userId specified");
     Preconditions.requireSingular(userIds, "Multiple userIds not supported");
 
-    Map<String, String> values = request.getPostData(HashMap.class);
+    Map<String, String> values = request.getTypedParameter("data", HashMap.class);
     for (String key : values.keySet()) {
       if (!isValidKey(key)) {
         return ImmediateFuture.newInstance(new ResponseItem<Object>(ResponseError.BAD_REQUEST,
@@ -109,7 +109,7 @@ public class AppDataHandler extends DataRequestHandler {
    * examples: /appdata/john.doe/@friends/app?fields=count /appdata/john.doe/@self/app
    */
   protected Future<? extends ResponseItem> handleGet(RequestItem request) {
-    request.parseUrlWithTemplate(APP_DATA_PATH);
+    request.applyUrlTemplate(APP_DATA_PATH);
 
     Set<UserId> userIds = request.getUsers();
 

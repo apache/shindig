@@ -22,29 +22,18 @@ import org.apache.shindig.social.opensocial.spi.GroupId;
 import org.apache.shindig.social.opensocial.spi.PersonService;
 import org.apache.shindig.social.opensocial.spi.UserId;
 
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
+import com.google.common.collect.Lists;
 
-import org.apache.commons.io.IOUtils;
-
-import java.io.IOException;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Enumeration;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
-import javax.servlet.ServletInputStream;
-import javax.servlet.http.HttpServletRequest;
-
 /**
- * Represents the request items that come from the restful request.
+ * Abstract base type for social API requests.
  */
-public class RequestItem {
+public abstract class RequestItem {
 
-  // Common OpenSocial RESTful fields
+  // Common OpenSocial API fields
   public static final String APP_ID = "appId";
 
   public static final String USER_ID = "userId";
@@ -61,129 +50,30 @@ public class RequestItem {
 
   public static final String FIELDS = "fields";
 
-  // OpenSocial defaults
+  // Opensocial defaults
   public static final int DEFAULT_START_INDEX = 0;
 
   public static final int DEFAULT_COUNT = 20;
 
   public static final String APP_SUBSTITUTION_TOKEN = "@app";
 
-  private String url;
+  private final SecurityToken token;
 
-  private String method;
+  protected final BeanConverter converter;
 
-  private Map<String, List<String>> params;
+  private final String operation;
 
-  private String postData;
+  private final String service;
 
-  private SecurityToken token;
-
-  private BeanConverter converter;
-
-  public RequestItem() {
-    params = Maps.newHashMap();
-  }
-
-  public RequestItem(HttpServletRequest servletRequest, SecurityToken token, String method,
-      BeanConverter converter) {
-    this.url = servletRequest.getPathInfo();
-    this.params = createParameterMap(servletRequest);
+  public RequestItem(String service, String operation, SecurityToken token, BeanConverter converter) {
+    this.service = service;
+    this.operation = operation;
     this.token = token;
-
-    this.method = method;
     this.converter = converter;
-
-    try {
-      ServletInputStream is = servletRequest.getInputStream();
-      postData = new String(IOUtils.toByteArray(is));
-    } catch (IOException e) {
-      throw new RuntimeException("Could not get the post data from the request", e);
-    }
-  }
-
-  private static Map<String, List<String>> createParameterMap(HttpServletRequest servletRequest) {
-    Map<String, List<String>> parameters = Maps.newHashMap();
-
-    Enumeration names = servletRequest.getParameterNames();
-    while (names.hasMoreElements()) {
-      String name = (String) names.nextElement();
-      String[] paramValues = servletRequest.getParameterValues(name);
-      parameters.put(name, Lists.newArrayList(paramValues));
-    }
-
-    return parameters;
-  }
-
-  /*
-   * Takes any url params out of the url and puts them into the param map.
-   * Usually the servlet request code does this for us but the batch request calls have to do it
-   * by hand.
-   */
-  void putUrlParamsIntoParameters() {
-    if (this.params == null) {
-      this.params = Maps.newHashMap();
-    }
-
-    String fullUrl = this.url;
-    int queryParamIndex = fullUrl.indexOf('?');
-
-    if (queryParamIndex != -1) {
-      this.url = fullUrl.substring(0, queryParamIndex);
-
-      String queryParams = fullUrl.substring(queryParamIndex + 1);
-      for (String param : queryParams.split("&")) {
-        String[] paramPieces = param.split("=", 2);
-        List<String> paramList = this.params.get(paramPieces[0]);
-        if (paramList == null) {
-          paramList = Lists.newArrayListWithCapacity(1);
-          this.params.put(paramPieces[0], paramList);
-        }
-        if (paramPieces.length == 2) {
-          paramList.add(paramPieces[1]);
-        } else {
-          paramList.add("");
-        }
-      }
-    }
-  }
-
-  /**
-   * This could definitely be cleaner.. TODO: Come up with a cleaner way to handle all of this
-   * code.
-   *
-   * @param urlTemplate The template the url follows
-   */
-  public void parseUrlWithTemplate(String urlTemplate) {
-    this.putUrlParamsIntoParameters();
-
-    String[] actualUrl = this.url.split("/");
-    String[] expectedUrl = urlTemplate.split("/");
-
-    for (int i = 0; i < actualUrl.length; i++) {
-      String actualPart = actualUrl[i];
-      String expectedPart = expectedUrl[i];
-
-      if (expectedPart.startsWith("{")) {
-        if (expectedPart.endsWith("}+")) {
-          // The param can be a repeated field. Use ',' as default separator
-          this.params
-              .put(expectedPart.substring(1, expectedPart.length() - 2),
-                  Lists.newArrayList(actualPart.split(",")));
-        } else {
-          if (actualPart.indexOf(',') != -1) {
-            throw new IllegalArgumentException("Cannot expect plural value " + actualPart
-                + " for singular field " + expectedPart + " in " + expectedUrl);
-          }
-          this.params.put(expectedPart.substring(1, expectedPart.length() - 1),
-              Lists.newArrayList(actualPart));
-        }
-      }
-    }
   }
 
   public String getAppId() {
     String appId = getParameter(APP_ID);
-
     if (appId != null && appId.equals(APP_SUBSTITUTION_TOKEN)) {
       return token.getAppId();
     } else {
@@ -193,20 +83,30 @@ public class RequestItem {
 
   public Set<UserId> getUsers() {
     List<String> ids = getListParameter(USER_ID);
-    Set<UserId> returnVal = Sets.newLinkedHashSet();
-    for (String id : ids) {
-      returnVal.add(UserId.fromJson(id));
+    if (ids.isEmpty()) {
+      if (token.getViewerId() != null) {
+        // Assume @me
+        ids = Lists.newArrayList(token.getViewerId());
+      } else {
+        throw new IllegalArgumentException("No userId provided and viewer not available");
+      }
     }
-    return returnVal;
+    Set<UserId> userIds = Sets.newLinkedHashSet();
+    for (String id : ids) {
+      userIds.add(UserId.fromJson(id));
+    }
+    return userIds;
   }
 
+
   public GroupId getGroup() {
-    return GroupId.fromJson(getParameter(GROUP_ID));
+    return GroupId.fromJson(getParameter(GROUP_ID, "@self"));
   }
 
   public int getStartIndex() {
     String startIndex = getParameter(START_INDEX);
-    return startIndex == null ? DEFAULT_START_INDEX : Integer.valueOf(startIndex);
+    return startIndex == null ? DEFAULT_START_INDEX
+        : Integer.valueOf(startIndex);
   }
 
   public int getCount() {
@@ -229,100 +129,37 @@ public class RequestItem {
   }
 
   public Set<String> getFields() {
-    return getFields(Collections.<String>emptySet());
+    return getFields(Sets.<String>newHashSet());
   }
 
   public Set<String> getFields(Set<String> defaultValue) {
-    List<String> paramValue = getListParameter(FIELDS);
-    if (!paramValue.isEmpty()) {
-      return Sets.newHashSet(paramValue);
+    Set result = Sets.newHashSet();
+    result.addAll(getListParameter(FIELDS));
+    if (result.isEmpty()) {
+      return defaultValue;
     }
-    return defaultValue;
+    return result;
   }
 
-  public <T> T getPostData(Class<T> postDataClass) {
-    return converter.convertToObject(postData, postDataClass);
+  public String getOperation() {
+    return operation;
   }
 
-  public String getUrl() {
-    return url;
-  }
-
-  public void setUrl(String url) {
-    this.url = url;
-  }
-
-  public String getMethod() {
-    return method;
-  }
-
-  public void setMethod(String method) {
-    this.method = method;
-  }
-
-  Map<String, List<String>> getParameters() {
-    return params;
-  }
-
-  void setParameter(String paramName, String paramValue) {
-    // Ignore nulls
-    if (paramValue == null) {
-      return;
-    }
-    this.params.put(paramName, Lists.newArrayList(paramValue));
-  }
-
-  void setListParameter(String paramName, List<String> paramValue) {
-    this.params.put(paramName, paramValue);
-  }
-
-  /**
-   * Return a single param value
-   */
-  public String getParameter(String paramName) {
-    List<String> paramValue = this.params.get(paramName);
-    if (paramValue != null && !paramValue.isEmpty()) {
-      return paramValue.get(0);
-    }
-    return null;
-  }
-
-  /**
-   * Return a list param value
-   */
-  public List<String> getListParameter(String paramName) {
-    List<String> stringList = this.params.get(paramName);
-    if (stringList == null) {
-      return Collections.emptyList();
-    }
-    if (stringList.size() == 1 && stringList.get(0).indexOf(',') != -1) {
-      stringList = Arrays.asList(stringList.get(0).split(","));
-      this.params.put(paramName, stringList);
-    }
-    return stringList;
-  }
-
-  public String getPostData() {
-    return postData;
-  }
-
-  public void setPostData(String postData) {
-    this.postData = postData;
+  public String getService() {
+    return service;
   }
 
   public SecurityToken getToken() {
     return token;
   }
 
-  public void setToken(SecurityToken token) {
-    this.token = token;
-  }
+  public abstract <T> T getTypedParameter(String parameterName, Class<T> postDataClass);
 
-  public BeanConverter getConverter() {
-    return converter;
-  }
+  public abstract void applyUrlTemplate(String urlTemplate);
 
-  public void setConverter(BeanConverter converter) {
-    this.converter = converter;
-  }
+  public abstract String getParameter(String paramName);
+
+  public abstract String getParameter(String paramName, String defaultValue);
+
+  public abstract List<String> getListParameter(String paramName);
 }

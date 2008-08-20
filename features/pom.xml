@@ -17,7 +17,9 @@ KIND, either express or implied.  See the License for the
 specific language governing permissions and limitations
 under the License.
 -->
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
   <parent>
@@ -32,18 +34,21 @@ under the License.
 
   <name>Apache Shindig Features</name>
   <description>Packages all the features that shindig provides into a single jar file to allow
-               loading from the classpath</description>
+    loading from the classpath
+  </description>
 
   <scm>
-    <connection>scm:svn:http://svn.apache.org/repos/asf/incubator/shindig/trunk/features</connection>
-    <developerConnection>scm:svn:https://svn.apache.org/repos/asf/incubator/shindig/trunk/features</developerConnection>
+    <connection>scm:svn:http://svn.apache.org/repos/asf/incubator/shindig/trunk/features
+    </connection>
+    <developerConnection>scm:svn:https://svn.apache.org/repos/asf/incubator/shindig/trunk/features
+    </developerConnection>
     <url>http://svn.apache.org/viewvc/incubator/shindig/trunk/features</url>
   </scm>
 
   <build>
     <plugins>
       <plugin>
-        <groupId>org.apache.maven.plugins </groupId>
+        <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-eclipse-plugin</artifactId>
       </plugin>
       <plugin>
@@ -60,90 +65,91 @@ under the License.
             <goals>
               <goal>compress</goal>
             </goals>
-            </execution>
-          </executions>
-          <configuration>
-            <suffix>.opt</suffix>
-            <excludes>
-              <exclude>target/**</exclude>
-              <!-- don't bother with other file types. -->
-              <exclude>**/*.xml</exclude>
-              <exclude>**/*.html</exclude>
-              <exclude>**/*.gif</exclude>
-              <exclude>**/*.jpeg</exclude>
-              <exclude>**/*.png</exclude>
-              <!-- Caja is already minified -->
-              <exclude>**/caja/*.js</exclude>
-            </excludes>
-          </configuration>
-        </plugin>
-        <plugin>
-          <groupId>de.berlios.jsunit</groupId>
-          <artifactId>jsunit-maven2-plugin</artifactId>
-          <executions>
-            <execution>
-              <configuration>
-                <sourceDirectory>${basedir}</sourceDirectory>
-                <sources>
-                  <source>mocks/env.js</source>
-                  <source>mocks/xhr.js</source>
-                  <source>core/config.js</source>
-                  <source>core/json.js</source>
-                  <source>core/auth.js</source>
-                  <source>core/util.js</source>
-                  <source>core/prefs.js</source>
-                  <source>core.io/io.js</source>
-                  <source>views/views.js</source>
-                  <source>opensocial-reference/opensocial.js</source>
-                  <source>opensocial-reference/activity.js</source>
-                  <source>opensocial-reference/address.js</source>
-                  <source>opensocial-reference/bodytype.js</source>
-                  <source>opensocial-reference/collection.js</source>
-                  <source>opensocial-reference/container.js</source>
-                  <source>opensocial-reference/datarequest.js</source>
-                  <source>opensocial-reference/dataresponse.js</source>
-                  <source>opensocial-reference/email.js</source>
-                  <source>opensocial-reference/enum.js</source>
-                  <source>opensocial-reference/environment.js</source>
-                  <source>opensocial-reference/idspec.js</source>
-                  <source>opensocial-reference/mediaitem.js</source>
-                  <source>opensocial-reference/message.js</source>
-                  <source>opensocial-reference/name.js</source>
-                  <source>opensocial-reference/navigationparameters.js</source>
-                  <source>opensocial-reference/organization.js</source>
-                  <source>opensocial-reference/person.js</source>
-                  <source>opensocial-reference/phone.js</source>
-                  <source>opensocial-reference/responseitem.js</source>
-                  <source>opensocial-reference/url.js</source>
-                  <source>opensocial-current/jsonactivity.js</source>
-                  <source>opensocial-current/jsonperson.js</source>
-                  <source>opensocial-current/restfulcontainer.js</source>
-                </sources>
-                <testSourceDirectory>${basedir}</testSourceDirectory>
-                <testSuites>
-                   <testSuite>
-                    <name>GadgetsJSAPITests</name>
-                    <type>TESTCASES</type>
-                    <includes>
-                      <include>core/*test.js</include>
-                      <include>core.io/*test.js</include>
-                      <include>views/*test.js</include>
-                    </includes>
-                  </testSuite>
-                 <testSuite>
-                    <name>OpenSocialJsTests</name>
-                    <type>TESTCASES</type>
-                    <includes>
-                      <include>opensocial-reference/*test.js</include>
-                      <include>opensocial-current/*test.js</include>
-                    </includes>
-                  </testSuite>
-                </testSuites>
-              </configuration>
-              <goals>
-                <goal>jsunit-test</goal>
-              </goals>
-            </execution>
+          </execution>
+        </executions>
+        <configuration>
+          <suffix>.opt</suffix>
+          <excludes>
+            <exclude>target/**</exclude>
+            <!-- don't bother with other file types. -->
+            <exclude>**/*.xml</exclude>
+            <exclude>**/*.html</exclude>
+            <exclude>**/*.gif</exclude>
+            <exclude>**/*.jpeg</exclude>
+            <exclude>**/*.png</exclude>
+            <!-- Caja is already minified -->
+            <exclude>**/caja/*.js</exclude>
+          </excludes>
+        </configuration>
+      </plugin>
+      <plugin>
+        <groupId>de.berlios.jsunit</groupId>
+        <artifactId>jsunit-maven2-plugin</artifactId>
+        <executions>
+          <execution>
+            <configuration>
+              <sourceDirectory>${basedir}</sourceDirectory>
+              <sources>
+                <source>mocks/env.js</source>
+                <source>mocks/xhr.js</source>
+                <source>core/config.js</source>
+                <source>core/json.js</source>
+                <source>core/auth.js</source>
+                <source>core/util.js</source>
+                <source>core/prefs.js</source>
+                <source>core.io/io.js</source>
+                <source>views/views.js</source>
+                <source>opensocial-reference/opensocial.js</source>
+                <source>opensocial-reference/activity.js</source>
+                <source>opensocial-reference/address.js</source>
+                <source>opensocial-reference/bodytype.js</source>
+                <source>opensocial-reference/collection.js</source>
+                <source>opensocial-reference/container.js</source>
+                <source>opensocial-reference/datarequest.js</source>
+                <source>opensocial-reference/dataresponse.js</source>
+                <source>opensocial-reference/email.js</source>
+                <source>opensocial-reference/enum.js</source>
+                <source>opensocial-reference/environment.js</source>
+                <source>opensocial-reference/idspec.js</source>
+                <source>opensocial-reference/mediaitem.js</source>
+                <source>opensocial-reference/message.js</source>
+                <source>opensocial-reference/name.js</source>
+                <source>opensocial-reference/navigationparameters.js</source>
+                <source>opensocial-reference/organization.js</source>
+                <source>opensocial-reference/person.js</source>
+                <source>opensocial-reference/phone.js</source>
+                <source>opensocial-reference/responseitem.js</source>
+                <source>opensocial-reference/url.js</source>
+                <source>opensocial-current/jsonactivity.js</source>
+                <source>opensocial-current/jsonperson.js</source>
+                <source>opensocial-current/restfulcontainer.js</source>
+                <source>opensocial-current/jsonrpccontainer.js</source>
+              </sources>
+              <testSourceDirectory>${basedir}</testSourceDirectory>
+              <testSuites>
+                <testSuite>
+                  <name>GadgetsJSAPITests</name>
+                  <type>TESTCASES</type>
+                  <includes>
+                    <include>core/*test.js</include>
+                    <include>core.io/*test.js</include>
+                    <include>views/*test.js</include>
+                  </includes>
+                </testSuite>
+                <testSuite>
+                  <name>OpenSocialJsTests</name>
+                  <type>TESTCASES</type>
+                  <includes>
+                    <include>opensocial-reference/*test.js</include>
+                    <include>opensocial-current/*test.js</include>
+                  </includes>
+                </testSuite>
+              </testSuites>
+            </configuration>
+            <goals>
+              <goal>jsunit-test</goal>
+            </goals>
+          </execution>
         </executions>
       </plugin>
     </plugins>

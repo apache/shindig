@@ -29,11 +29,11 @@ import org.apache.shindig.social.core.util.BeanXmlConverter;
 
 import com.google.inject.Guice;
 import com.google.inject.Injector;
-import junit.framework.TestCase;
+
 import org.easymock.classextension.EasyMock;
 
-import javax.servlet.ServletInputStream;
-import javax.servlet.http.HttpServletResponse;
+import junit.framework.TestCase;
+
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.StringTokenizer;
@@ -42,7 +42,11 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
+import javax.servlet.ServletInputStream;
+import javax.servlet.http.HttpServletResponse;
+
 public class DataServiceServletTest extends TestCase {
+
   private static final FakeGadgetToken FAKE_GADGET_TOKEN = new FakeGadgetToken()
       .setOwnerId("john.doe").setViewerId("john.doe");
 
@@ -114,14 +118,16 @@ public class DataServiceServletTest extends TestCase {
     verifyHandlerWasFoundForPathInfo(route, appDataHandler, "PUT", null, "PUT");
   }
 
-  /** Tests a data handler that returns a failed Future */
+  /**
+   * Tests a data handler that returns a failed Future
+   */
   public void testFailedRequest() throws Exception {
     String route = '/' + DataServiceServlet.APPDATA_ROUTE;
     setupRequest(route, "GET", null);
     EasyMock.expect(injector.getInstance(AppDataHandler.class)).andStubReturn(appDataHandler);
     setupInjector();
 
-    EasyMock.expect(appDataHandler.handleItem(EasyMock.isA(RequestItem.class)));
+    EasyMock.expect(appDataHandler.handleItem(EasyMock.isA(RestfulRequestItem.class)));
     EasyMock.expectLastCall().andReturn(new FailingFuture());
 
     res.sendError(500, "FAILED");
@@ -169,7 +175,7 @@ public class DataServiceServletTest extends TestCase {
     EasyMock.expect(req.getPathInfo()).andStubReturn(pathInfo);
     EasyMock.expect(req.getMethod()).andStubReturn(actualMethod);
     EasyMock.expect(req.getParameterNames()).andStubReturn(new StringTokenizer(""));
-    EasyMock.expect(req.getParameter(DataServiceServlet.X_HTTP_METHOD_OVERRIDE)).andReturn(
+    EasyMock.expect(req.getParameter(RestfulRequestItem.X_HTTP_METHOD_OVERRIDE)).andReturn(
         overrideMethod);
     EasyMock.expect(req.getParameter(DataServiceServlet.FORMAT_PARAM)).andReturn(null);
 
@@ -177,40 +183,10 @@ public class DataServiceServletTest extends TestCase {
   }
 
   public void testInvalidRoute() throws Exception {
-    RequestItem requestItem = new RequestItem();
-    requestItem.setUrl("/ahhh!");
-
+    RestfulRequestItem requestItem = new RestfulRequestItem("/ahhh!", "GET", null,
+        FAKE_GADGET_TOKEN, jsonConverter);
     ResponseItem responseItem = servlet.handleRequestItem(requestItem).get();
-    assertEquals(ResponseError.BAD_REQUEST, responseItem.getError());
-  }
-
-  public void testGetHttpMethodFromParameter() throws Exception {
-    String method = "POST";
-    assertEquals(method, servlet.getHttpMethodFromParameter(method, null));
-    assertEquals(method, servlet.getHttpMethodFromParameter(method, ""));
-    assertEquals(method, servlet.getHttpMethodFromParameter(method, "  "));
-    assertEquals("DELETE", servlet.getHttpMethodFromParameter(method, "DELETE"));
-  }
-
-  public void testRouteFromParameter() throws Exception {
-    assertEquals("path", servlet.getRouteFromParameter("/path"));
-    assertEquals("path", servlet.getRouteFromParameter("/path/fun"));
-    assertEquals("path", servlet.getRouteFromParameter("/path/fun/yes"));
-  }
-
-  public void testIsBatchUrl() throws Exception {
-    assertBatchUrl("/jsonBatch", true);
-    assertBatchUrl("/path/to/the/jsonBatch", true);
-    assertBatchUrl("/people/normalpath", false);
-    assertBatchUrl("/notjsonBatch", false);
-  }
-
-  private void assertBatchUrl(String url, boolean isBatch) {
-    EasyMock.expect(req.getPathInfo()).andReturn(url);
-    EasyMock.replay(req);
-    assertEquals(isBatch, servlet.isBatchUrl(req));
-    EasyMock.verify(req);
-    EasyMock.reset(req);
+    assertEquals(ResponseError.NOT_IMPLEMENTED, responseItem.getError());
   }
 
   public void testGetConverterForRequest() throws Exception {
@@ -237,6 +213,7 @@ public class DataServiceServletTest extends TestCase {
    * Future implementation that fails with an exception.
    */
   private static class FailingFuture implements Future<ResponseItem> {
+
     public boolean cancel(boolean mayInterruptIfRunning) {
       return false;
     }
