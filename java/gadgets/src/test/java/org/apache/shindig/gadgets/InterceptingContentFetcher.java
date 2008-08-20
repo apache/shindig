@@ -14,8 +14,9 @@
 
 package org.apache.shindig.gadgets;
 
-import org.apache.shindig.gadgets.http.HttpResponse;
 import org.apache.shindig.gadgets.http.HttpRequest;
+import org.apache.shindig.gadgets.http.HttpResponse;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -34,7 +35,7 @@ public class InterceptingContentFetcher extends ChainedContentFetcher {
     interceptedRequest = request;
     try {
       JSONObject resp = new JSONObject();
-      resp.put("url", request.getUri().toASCIIString());
+      resp.put("url", request.getUri().toString());
       resp.put("method", request.getMethod());
       resp.put("body", request.getPostBodyAsString());
       return new HttpResponse(resp.toString());

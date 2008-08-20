@@ -37,13 +37,12 @@ public abstract class AbstractHttpCache implements HttpCache {
 
   protected abstract HttpResponse getResponseImpl(String key);
 
-  public HttpResponse addResponse(HttpCacheKey key, HttpRequest request,
-      HttpResponse response) {
+  public HttpResponse addResponse(HttpCacheKey key, HttpRequest request, HttpResponse response) {
     if (key.isCacheable()) {
       // If the request forces a minimum TTL for the cached content then have
       // the response honor it
       if (response != null) {
-        response.setForcedCacheTTL(request.getOptions().minCacheTtl);
+        response.setForcedCacheTTL(request.getCacheTtl());
       }
 
       // !!! Note that we only rewrite cacheable content. Move this call above the if
@@ -107,9 +106,8 @@ public abstract class AbstractHttpCache implements HttpCache {
     }
 
     // Return the rewritten version if requested
-    if (request.getOptions() != null &&
-        !request.getOptions().ignoreCache &&
-        request.getOptions().rewriter != null &&
+    if (!request.getIgnoreCache() &&
+        request.getContentRewriter() != null &&
         response.getRewritten() != null &&
         response.getRewritten().getResponseAsBytes().length > 0) {
       return response.getRewritten();
@@ -125,9 +123,8 @@ public abstract class AbstractHttpCache implements HttpCache {
     if (response == null) return false;
     // TODO - Make this sensitive to custom rewriting rules
     if (response.getRewritten() == null &&
-        request.getOptions() != null &&
-        request.getOptions().rewriter != null) {
-      response.setRewritten(request.getOptions().rewriter.rewrite(request, response));
+        request.getContentRewriter() != null) {
+      response.setRewritten(request.getContentRewriter().rewrite(request, response));
       if (response.getRewritten() != null) {
         return true;
       }

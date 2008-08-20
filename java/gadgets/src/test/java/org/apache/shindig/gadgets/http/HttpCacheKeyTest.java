@@ -17,23 +17,16 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
-import org.apache.shindig.gadgets.http.HttpRequest.Options;
+import org.apache.shindig.common.uri.Uri;
+
 import org.json.JSONArray;
 import org.json.JSONObject;
-import org.junit.Before;
 import org.junit.Test;
-
-import java.net.URI;
 
 public class HttpCacheKeyTest {
 
-  private URI target;
+  private Uri target = Uri.parse("http://www.example.com/");
 
-  @Before
-  public void setUp() throws Exception {
-    target = new URI("http://www.example.com/");
-  }
-  
   @Test
   public void testGet() throws Exception {
     HttpRequest request = new HttpRequest(target);
@@ -43,29 +36,27 @@ public class HttpCacheKeyTest {
         "[{\"method\":\"GET\"},{\"url\":\"http://www.example.com/\"}]",
         key.toString());
   }
-  
+
   @Test
   public void testNonCacheableOptions() throws Exception {
-    Options options = new Options();
-    options.ignoreCache = true;
-    HttpRequest request = new HttpRequest(target, options);
+    HttpRequest request = new HttpRequest(target).setIgnoreCache(true);
     HttpCacheKey key = new HttpCacheKey(request);
     assertFalse(key.isCacheable());
     assertEquals(
         "[{\"method\":\"GET\"},{\"url\":\"http://www.example.com/\"}]",
         key.toString());
   }
-  
+
   @Test
   public void testNonGet() throws Exception {
-    HttpRequest request = new HttpRequest("POST", target, null, null, null);
+    HttpRequest request = new HttpRequest(target).setMethod("POST");
     HttpCacheKey key = new HttpCacheKey(request);
     assertFalse(key.isCacheable());
     assertEquals(
         "[{\"method\":\"POST\"},{\"url\":\"http://www.example.com/\"}]",
         key.toString());
   }
-  
+
   @Test
   public void testOrdered() {
     HttpCacheKey key = new HttpCacheKey(new HttpRequest(target));
@@ -83,7 +74,7 @@ public class HttpCacheKeyTest {
     	",{\"url\":\"http://www.example.com/\"}]",
     	key.toString());
   }
-  
+
   @Test
   public void testWeirdChars() throws Exception {
     final int CHARS_TO_TEST = 2000;

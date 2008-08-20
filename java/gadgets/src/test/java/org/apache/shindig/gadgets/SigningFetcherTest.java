@@ -14,7 +14,14 @@
 
 package org.apache.shindig.gadgets;
 
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+
 import org.apache.shindig.common.BasicSecurityToken;
+import org.apache.shindig.common.uri.Uri;
+import org.apache.shindig.common.uri.UriBuilder;
 import org.apache.shindig.gadgets.http.BasicHttpCache;
 import org.apache.shindig.gadgets.http.HttpCache;
 import org.apache.shindig.gadgets.http.HttpRequest;
@@ -28,18 +35,16 @@ import net.oauth.SimpleOAuthValidator;
 import net.oauth.OAuth.Parameter;
 import net.oauth.signature.RSA_SHA1;
 
-import junit.framework.TestCase;
+import org.junit.Before;
+import org.junit.Test;
 
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
 /**
  * Tests the signed fetch code.
  */
-public class SigningFetcherTest extends TestCase {
+public class SigningFetcherTest {
   private static final String PRIVATE_KEY_TEXT =
     "MIICdgIBADANBgkqhkiG9w0BAQEFAASCAmAwggJcAgEAAoGBALRiMLAh9iimur8V" +
     "A7qVvdqxevEuUkW4K+2KdMXmnQbG9Aa7k7eBjK1S+0LYmVjPKlJGNXHDGuy5Fw/d" +
@@ -76,9 +81,8 @@ public class SigningFetcherTest extends TestCase {
   private OAuthAccessor accessor;
   private OAuthValidator messageValidator;
 
-  @Override
+  @Before
   public void setUp() throws Exception {
-    super.setUp();
     cache = new BasicHttpCache(10);
     interceptor = new InterceptingContentFetcher();
     authToken = new BasicSecurityToken("o", "v", "a", "d", "u", "m");
@@ -90,29 +94,27 @@ public class SigningFetcherTest extends TestCase {
     messageValidator = new SimpleOAuthValidator();
   }
 
-  private HttpRequest makeHttpRequest(String method, String url)
-      throws URISyntaxException {
+  private HttpRequest makeHttpRequest(String method, String url) {
     return makeHttpRequest(method, url, null);
   }
 
-  private HttpRequest makeHttpRequest(String method, String url,
-      byte[] body) throws URISyntaxException {
-    return new HttpRequest(method, new URI(url), null, body, null);
+  private HttpRequest makeHttpRequest(String method, String url, byte[] body) {
+    return new HttpRequest(Uri.parse(url))
+    .setMethod(method)
+    .setPostBody(body);
   }
 
-  private HttpRequest signAndInspect(HttpRequest orig)
-      throws Exception {
+  private HttpRequest signAndInspect(HttpRequest orig) throws Exception {
     signer.fetch(orig);
     assertSignatureOK(interceptor.interceptedRequest);
     return interceptor.interceptedRequest;
   }
 
+  @Test
   public void testParametersSet() throws Exception {
-    HttpRequest unsigned
-        = makeHttpRequest("GET", "http://test", null);
+    HttpRequest unsigned = makeHttpRequest("GET", "http://test", null);
     HttpRequest out = signAndInspect(unsigned);
-    List<OAuth.Parameter> queryParams
-        = OAuth.decodeForm(out.getUri().getRawQuery());
+    List<OAuth.Parameter> queryParams = OAuth.decodeForm(out.getUri().getQuery());
     assertTrue(contains(queryParams, "opensocial_owner_id", "o"));
     assertTrue(contains(queryParams, "opensocial_viewer_id", "v"));
     assertTrue(contains(queryParams, "opensocial_app_id", "a"));
@@ -120,26 +122,27 @@ public class SigningFetcherTest extends TestCase {
     assertTrue(contains(queryParams, "xoauth_signature_publickey", "foo"));
   }
 
+  @Test
   public void testNoSignViewer() throws Exception {
-    HttpRequest unsigned
-        = makeHttpRequest("GET", "http://test", null);
-    unsigned.getOptions().viewerSigned = false;
+    HttpRequest unsigned = makeHttpRequest("GET", "http://test", null);
+    unsigned.setSignViewer(false);
     HttpRequest out = signAndInspect(unsigned);
-    List<OAuth.Parameter> queryParams
-        = OAuth.decodeForm(out.getUri().getRawQuery());
+    List<OAuth.Parameter> queryParams = OAuth.decodeForm(out.getUri().getQuery());
     assertTrue(contains(queryParams, "opensocial_owner_id", "o"));
     assertFalse(contains(queryParams, "opensocial_viewer_id", "v"));
   }
 
+  @Test
   public void testNoSignOwner() throws Exception {
     HttpRequest unsigned = makeHttpRequest("GET", "http://test", null);
-    unsigned.getOptions().viewerSigned = false;
+    unsigned.setSignOwner(false);
     HttpRequest out = signAndInspect(unsigned);
-    List<OAuth.Parameter> queryParams = OAuth.decodeForm(out.getUri().getRawQuery());
-    assertTrue(contains(queryParams, "opensocial_owner_id", "o"));
-    assertFalse(contains(queryParams, "opensocial_viewer_id", "v"));
+    List<OAuth.Parameter> queryParams = OAuth.decodeForm(out.getUri().getQuery());
+    assertFalse(contains(queryParams, "opensocial_owner_id", "o"));
+    assertTrue(contains(queryParams, "opensocial_viewer_id", "v"));
   }
-  
+
+  @Test
   public void testCacheHit() throws Exception {
     HttpRequest unsigned = makeHttpRequest("GET", "http://test", null);
     signAndInspect(unsigned);
@@ -149,10 +152,11 @@ public class SigningFetcherTest extends TestCase {
     signer.fetch(unsigned2);
     assertNull(interceptor.interceptedRequest);
   }
-  
+
+  @Test
   public void testCacheMiss_noOwner() throws Exception {
     HttpRequest unsigned = makeHttpRequest("GET", "http://test", null);
-    unsigned.getOptions().ownerSigned = false;
+    unsigned.setSignOwner(false);
     signAndInspect(unsigned);
 
     HttpRequest unsigned2 = makeHttpRequest("GET", "http://test", null);
@@ -160,171 +164,141 @@ public class SigningFetcherTest extends TestCase {
     signer.fetch(unsigned2);
     assertNotNull(interceptor.interceptedRequest);
   }
-  
+
+  @Test
   public void testCacheHit_ownerOnly() throws Exception {
     HttpRequest unsigned = makeHttpRequest("GET", "http://test", null);
-    unsigned.getOptions().viewerSigned = false;
+    unsigned.setSignViewer(false);
     signAndInspect(unsigned);
 
     HttpRequest unsigned2 = makeHttpRequest("GET", "http://test", null);
-    unsigned2.getOptions().viewerSigned = false;
+    unsigned2.setSignViewer(false);
     interceptor.interceptedRequest = null;
     signer.fetch(unsigned2);
     assertNull(interceptor.interceptedRequest);
   }
-  
+
+  @Test
   public void testCacheMiss_bypassCache() throws Exception {
     HttpRequest unsigned = makeHttpRequest("GET", "http://test", null);
-    unsigned.getOptions().viewerSigned = false;
+    unsigned.setSignViewer(false);
     signAndInspect(unsigned);
 
     HttpRequest unsigned2 = makeHttpRequest("GET", "http://test", null);
-    unsigned2.getOptions().ignoreCache = true;
-    unsigned2.getOptions().viewerSigned = false;
+    unsigned2.setIgnoreCache(true);
+    unsigned2.setSignViewer(false);
     interceptor.interceptedRequest = null;
     signer.fetch(unsigned2);
     assertNotNull(interceptor.interceptedRequest);
   }
-  
+
+  @Test(expected = RequestSigningException.class)
   public void testTrickyParametersInQuery() throws Exception {
     String tricky = "%6fpensocial_owner_id=gotcha";
-    HttpRequest unsigned
-        = makeHttpRequest("GET", "http://test?" + tricky, null);
-    try {
-    	signAndInspect(unsigned);
-    	fail("Should have thrown");
-    } catch (RequestSigningException e) {
-    	// good.
-    }
+    HttpRequest unsigned = makeHttpRequest("GET", "http://test?" + tricky, null);
+    signAndInspect(unsigned);
   }
 
+  @Test(expected = RequestSigningException.class)
   public void testTrickyParametersInBody() throws Exception {
     String tricky = "%6fpensocial_owner_id=gotcha";
-    HttpRequest unsigned
-        = makeHttpRequest("POST", "http://test", tricky.getBytes());
-    try {
-    	signAndInspect(unsigned);
-    	fail("Should have thrown");
-    } catch (RequestSigningException e) {
-    	// good.
-    }
+    HttpRequest unsigned = makeHttpRequest("POST", "http://test", tricky.getBytes());
+    signAndInspect(unsigned);
   }
 
+  @Test
   public void testGetNoQuery() throws Exception {
     HttpRequest unsigned = makeHttpRequest("GET", "http://test", null);
     signAndInspect(unsigned);
   }
 
+  @Test
   public void testGetWithQuery() throws Exception {
     HttpRequest unsigned = makeHttpRequest("GET", "http://test?a=b", null);
     HttpRequest out = signAndInspect(unsigned);
-    List<OAuth.Parameter> queryParams
-        = OAuth.decodeForm(out.getUri().getRawQuery());
+    List<OAuth.Parameter> queryParams = OAuth.decodeForm(out.getUri().getQuery());
     assertTrue(contains(queryParams, "a", "b"));
   }
 
+  @Test
   public void testGetWithQueryMultiParam() throws Exception {
-    HttpRequest unsigned
-        = makeHttpRequest("GET", "http://test?a=b&a=c");
+    HttpRequest unsigned = makeHttpRequest("GET", "http://test?a=b&a=c");
     HttpRequest out = signAndInspect(unsigned);
-    List<OAuth.Parameter> queryParams
-        = OAuth.decodeForm(out.getUri().getRawQuery());
+    List<OAuth.Parameter> queryParams = OAuth.decodeForm(out.getUri().getQuery());
     assertTrue(contains(queryParams, "a", "b"));
     assertTrue(contains(queryParams, "a", "c"));
   }
 
+  @Test
   public void testValidParameterCharacters() throws Exception {
     String weird = "~!@$*()-_[]:,./";
-    HttpRequest unsigned
-        = makeHttpRequest("GET", "http://test?" + weird + "=foo");
+    HttpRequest unsigned = makeHttpRequest("GET", "http://test?" + weird + "=foo");
     HttpRequest out = signAndInspect(unsigned);
-    List<OAuth.Parameter> queryParams
-        = OAuth.decodeForm(out.getUri().getRawQuery());
+    List<OAuth.Parameter> queryParams = OAuth.decodeForm(out.getUri().getQuery());
     assertTrue(contains(queryParams, weird, "foo"));
   }
 
+  @Test
   public void testPostNoQueryNoData() throws Exception {
     HttpRequest unsigned = makeHttpRequest("GET", "http://test");
     signAndInspect(unsigned);
   }
 
+  @Test
   public void testPostWithQueryNoData() throws Exception {
-    HttpRequest unsigned
-        = makeHttpRequest("GET", "http://test?name=value");
+    HttpRequest unsigned = makeHttpRequest("GET", "http://test?name=value");
     HttpRequest out = signAndInspect(unsigned);
-    List<OAuth.Parameter> queryParams
-        = OAuth.decodeForm(out.getUri().getRawQuery());
+    List<OAuth.Parameter> queryParams = OAuth.decodeForm(out.getUri().getQuery());
     assertTrue(contains(queryParams, "name", "value"));
   }
 
+  @Test
   public void testPostNoQueryWithData() throws Exception {
-    HttpRequest unsigned = makeHttpRequest(
-        "POST", "http://test", "name=value".getBytes());
+    HttpRequest unsigned = makeHttpRequest("POST", "http://test", "name=value".getBytes());
     HttpRequest out = signAndInspect(unsigned);
-    List<OAuth.Parameter> queryParams
-        = OAuth.decodeForm(out.getUri().getRawQuery());
+    List<OAuth.Parameter> queryParams = OAuth.decodeForm(out.getUri().getQuery());
     assertFalse(contains(queryParams, "name", "value"));
   }
 
+  @Test
   public void testPostWithQueryWithData() throws Exception {
     HttpRequest unsigned = makeHttpRequest(
         "POST", "http://test?queryName=queryValue", "name=value".getBytes());
     HttpRequest out = signAndInspect(unsigned);
-    List<OAuth.Parameter> queryParams
-        = OAuth.decodeForm(out.getUri().getRawQuery());
+    List<OAuth.Parameter> queryParams = OAuth.decodeForm(out.getUri().getQuery());
     assertTrue(contains(queryParams, "queryName", "queryValue"));
   }
 
+  @Test(expected = RequestSigningException.class)
   public void testStripOpenSocialParamsFromQuery() throws Exception {
-    HttpRequest unsigned = makeHttpRequest(
-        "POST", "http://test?opensocial_foo=bar");
-    try {
-      signAndInspect(unsigned);
-      fail("Should have thrown");
-    } catch (RequestSigningException e) {
-      // good
-    }
+    HttpRequest unsigned = makeHttpRequest("POST", "http://test?opensocial_foo=bar");
+    signAndInspect(unsigned);
   }
 
+  @Test(expected = RequestSigningException.class)
   public void testStripOAuthParamsFromQuery() throws Exception {
     HttpRequest unsigned = makeHttpRequest(
         "POST", "http://test?oauth_foo=bar", "name=value".getBytes());
-    try {
-      signAndInspect(unsigned);
-      fail("Should have thrown");
-    } catch (RequestSigningException e) {
-      // good
-    }
+    signAndInspect(unsigned);
   }
 
+  @Test(expected = RequestSigningException.class)
   public void testStripOpenSocialParamsFromBody() throws Exception {
-    HttpRequest unsigned = makeHttpRequest(
-        "POST", "http://test", "opensocial_foo=bar".getBytes());
-    try {
-    	signAndInspect(unsigned);
-    	fail("Should have thrown");
-    } catch (RequestSigningException e) {
-    	// good.
-    }
+    HttpRequest unsigned = makeHttpRequest("POST", "http://test", "opensocial_foo=bar".getBytes());
+    signAndInspect(unsigned);
   }
 
+  @Test(expected = RequestSigningException.class)
   public void testStripOAuthParamsFromBody() throws Exception {
-    HttpRequest unsigned = makeHttpRequest(
-        "POST", "http://test", "oauth_foo=bar".getBytes());
-    try {
-    	signAndInspect(unsigned);
-    	fail("Should have thrown");
-    } catch (RequestSigningException e) {
-    	// good.
-    }
+    HttpRequest unsigned = makeHttpRequest("POST", "http://test", "oauth_foo=bar".getBytes());
+    signAndInspect(unsigned);
   }
 
-  private void assertSignatureOK(HttpRequest req)
-  throws Exception {
-    URL url = req.getUri().toURL();
-    URL noQuery = new URL(url.getProtocol(), url.getHost(), url.getPort(),
-        url.getPath());
+  private void assertSignatureOK(HttpRequest req) throws Exception {
+    UriBuilder url = new UriBuilder(req.getUri());
     List<OAuth.Parameter> queryParams = OAuth.decodeForm(url.getQuery());
+    url.setQuery(null);
+
     String body = req.getPostBodyAsString();
     if (body.length() == 0) {
       body = null;
@@ -335,8 +309,7 @@ public class SigningFetcherTest extends TestCase {
     msgParams.addAll(queryParams);
     msgParams.addAll(postParams);
 
-    OAuthMessage message = new OAuthMessage(req.getMethod(), noQuery.toString(),
-        msgParams);
+    OAuthMessage message = new OAuthMessage(req.getMethod(), url.toString(), msgParams);
 
     // Throws on failure
     message.validateMessage(accessor, messageValidator);

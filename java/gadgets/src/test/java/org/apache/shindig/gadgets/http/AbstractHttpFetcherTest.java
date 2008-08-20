@@ -20,18 +20,14 @@ package org.apache.shindig.gadgets.http;
 
 import static org.junit.Assert.assertEquals;
 
+import org.apache.shindig.common.uri.Uri;
+import org.apache.shindig.common.uri.UriBuilder;
+
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
 import junitx.framework.ArrayAssert;
-
-import java.net.URI;
-import java.net.URLEncoder;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 /**
  * Holds test cases that all HttpFetcher implementations should pass.  This
@@ -39,13 +35,9 @@ import java.util.Map;
  */
 public abstract class AbstractHttpFetcherTest {
   private static final int ECHO_PORT = 9003;
-  private static final String BASE_URL = "http://localhost:9003/";
+  private static final Uri BASE_URL = Uri.parse("http://localhost:9003/");
   private static EchoServer server;
   protected HttpFetcher fetcher = null;
-
-  private String encode(String content) throws Exception {
-    return URLEncoder.encode(content, "UTF-8");
-  }
 
   @BeforeClass
   public static void setUpOnce() throws Exception {
@@ -62,8 +54,8 @@ public abstract class AbstractHttpFetcherTest {
 
   @Test public void testHttpFetch() throws Exception {
     String content = "Hello, world!";
-    HttpRequest request = new HttpRequest(new URI(
-        BASE_URL + "?body=" + encode(content)));
+    Uri uri = new UriBuilder(BASE_URL).addQueryParameter("body", content).toUri();
+    HttpRequest request = new HttpRequest(uri);
     HttpResponse response = fetcher.fetch(request);
     assertEquals(200, response.getHttpStatusCode());
     assertEquals(content, response.getResponseAsString());
@@ -71,8 +63,11 @@ public abstract class AbstractHttpFetcherTest {
 
   @Test public void testHttp404() throws Exception {
     String content = "Hello, world!";
-    HttpRequest request = new HttpRequest(new URI(
-        BASE_URL + "?body=" + encode(content) + "&status=404"));
+    Uri uri = new UriBuilder(BASE_URL)
+        .addQueryParameter("body", content)
+        .addQueryParameter("status", "404")
+        .toUri();
+    HttpRequest request = new HttpRequest(uri);
     HttpResponse response = fetcher.fetch(request);
     assertEquals(404, response.getHttpStatusCode());
     assertEquals(content, response.getResponseAsString());
@@ -80,9 +75,12 @@ public abstract class AbstractHttpFetcherTest {
 
   @Test public void testHttp403() throws Exception {
     String content = "Hello, world!";
-    HttpRequest request = new HttpRequest(new URI(
-        BASE_URL + "?body=" + encode(content) + "&status=403" +
-        "&header=" + encode("WWW-Authenticate=some auth data")));
+    Uri uri = new UriBuilder(BASE_URL)
+        .addQueryParameter("body", content)
+        .addQueryParameter("status", "403")
+        .addQueryParameter("header", "WWW-Authenticate=some auth data")
+        .toUri();
+    HttpRequest request = new HttpRequest(uri);
     HttpResponse response = fetcher.fetch(request);
     assertEquals(403, response.getHttpStatusCode());
     assertEquals(content, response.getResponseAsString());
@@ -91,9 +89,12 @@ public abstract class AbstractHttpFetcherTest {
 
   @Test public void testHttp403NoBody() throws Exception {
     String content = "";
-    HttpRequest request = new HttpRequest(new URI(
-        BASE_URL + "?body=" + encode(content) + "&status=403" +
-        "&header=" + encode("WWW-Authenticate=some auth data")));
+    Uri uri = new UriBuilder(BASE_URL)
+        .addQueryParameter("body", content)
+        .addQueryParameter("status", "403")
+        .addQueryParameter("header", "WWW-Authenticate=some auth data")
+        .toUri();
+    HttpRequest request = new HttpRequest(uri);
     HttpResponse response = fetcher.fetch(request);
     assertEquals(403, response.getHttpStatusCode());
     assertEquals(content, response.getResponseAsString());
@@ -102,9 +103,12 @@ public abstract class AbstractHttpFetcherTest {
 
   @Test public void testHttp401NoBody() throws Exception {
     String content = "";
-    HttpRequest request = new HttpRequest(new URI(
-        BASE_URL + "?body=" + encode(content) + "&status=401" +
-        "&header=" + encode("WWW-Authenticate=some auth data")));
+    Uri uri = new UriBuilder(BASE_URL)
+        .addQueryParameter("body", content)
+        .addQueryParameter("status", "401")
+        .addQueryParameter("header", "WWW-Authenticate=some auth data")
+        .toUri();
+    HttpRequest request = new HttpRequest(uri);
     HttpResponse response = fetcher.fetch(request);
     assertEquals(401, response.getHttpStatusCode());
     assertEquals(content, response.getResponseAsString());
@@ -112,15 +116,13 @@ public abstract class AbstractHttpFetcherTest {
   }
 
   @Test public void testDelete() throws Exception {
-    HttpRequest request = new HttpRequest("DELETE", new URI(BASE_URL),
-        null, null, null);
+    HttpRequest request = new HttpRequest(BASE_URL).setMethod("DELETE");
     HttpResponse response = fetcher.fetch(request);
     assertEquals("DELETE", response.getHeader("x-method"));
   }
 
   @Test public void testPost_noBody() throws Exception {
-    HttpRequest request = new HttpRequest("POST", new URI(BASE_URL),
-        null, null, null);
+    HttpRequest request = new HttpRequest(BASE_URL).setMethod("POST");
     HttpResponse response = fetcher.fetch(request);
     assertEquals("POST", response.getHeader("x-method"));
     assertEquals("", response.getResponseAsString());
@@ -131,18 +133,17 @@ public abstract class AbstractHttpFetcherTest {
     for (int i=0; i < body.length; ++i) {
       body[i] = (byte)(i % 255);
     }
-    Map<String, List<String>> headers = new HashMap<String, List<String>>();
-    headers.put("content-type", Arrays.asList("application/octet-stream"));
-    HttpRequest request = new HttpRequest("POST", new URI(BASE_URL),
-        headers, body, null);
+    HttpRequest request = new HttpRequest(BASE_URL)
+        .setMethod("POST")
+        .setPostBody(body)
+        .addHeader("content-type", "application/octet-stream");
     HttpResponse response = fetcher.fetch(request);
     assertEquals("POST", response.getHeader("x-method"));
     ArrayAssert.assertEquals(body, response.getResponseAsBytes());
   }
 
   @Test public void testPut_noBody() throws Exception {
-    HttpRequest request = new HttpRequest("PUT", new URI(BASE_URL),
-        null, null, null);
+    HttpRequest request = new HttpRequest(BASE_URL).setMethod("PUT");
     HttpResponse response = fetcher.fetch(request);
     assertEquals("PUT", response.getHeader("x-method"));
     assertEquals("", response.getResponseAsString());
@@ -153,10 +154,10 @@ public abstract class AbstractHttpFetcherTest {
     for (int i=0; i < body.length; ++i) {
       body[i] = (byte)i;
     }
-    Map<String, List<String>> headers = new HashMap<String, List<String>>();
-    headers.put("content-type", Arrays.asList("application/octet-stream"));
-    HttpRequest request = new HttpRequest("PUT", new URI(BASE_URL),
-        headers, body, null);
+    HttpRequest request = new HttpRequest(BASE_URL)
+        .setMethod("PUT")
+        .setPostBody(body)
+        .addHeader("content-type", "application/octet-stream");
     HttpResponse response = fetcher.fetch(request);
     assertEquals("PUT", response.getHeader("x-method"));
     ArrayAssert.assertEquals(body, response.getResponseAsBytes());
@@ -167,10 +168,10 @@ public abstract class AbstractHttpFetcherTest {
     for (int i=0; i < body.length; ++i) {
       body[i] = (byte)i;
     }
-    Map<String, List<String>> headers = new HashMap<String, List<String>>();
-    headers.put("content-type", Arrays.asList("application/octet-stream"));
-    HttpRequest request = new HttpRequest("POST", new URI(BASE_URL),
-        headers, body, null);
+    HttpRequest request = new HttpRequest(BASE_URL)
+        .setMethod("POST")
+        .setPostBody(body)
+        .addHeader("content-type", "application/octet-stream");
     HttpResponse response = fetcher.fetch(request);
     assertEquals("POST", response.getHeader("x-method"));
     ArrayAssert.assertEquals(body, response.getResponseAsBytes());

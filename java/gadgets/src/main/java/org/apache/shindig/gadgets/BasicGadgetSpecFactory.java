@@ -20,6 +20,7 @@ package org.apache.shindig.gadgets;
 
 import org.apache.shindig.common.cache.Cache;
 import org.apache.shindig.common.cache.LruCache;
+import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.gadgets.http.HttpFetcher;
 import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.http.HttpResponse;
@@ -109,7 +110,7 @@ public class BasicGadgetSpecFactory implements GadgetSpecFactory {
    * adds it to the cache.
    */
   private GadgetSpec fetchFromWeb(URI url, boolean ignoreCache) throws GadgetException {
-    HttpRequest request = HttpRequest.getRequest(url, ignoreCache);
+    HttpRequest request = new HttpRequest(Uri.fromJavaUri(url)).setIgnoreCache(ignoreCache);
     HttpResponse response = fetcher.fetch(request);
     if (response.getHttpStatusCode() != HttpResponse.SC_OK) {
       throw new GadgetException(GadgetException.Code.FAILED_TO_RETRIEVE_CONTENT,

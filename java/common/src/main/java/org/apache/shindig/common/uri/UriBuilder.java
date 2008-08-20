@@ -30,6 +30,9 @@ import java.util.regex.Pattern;
 
 /**
  * Constructs Uris from inputs.
+ *
+ * Note that the builder will only automatically encode query parameters that are added. Other
+ * parameters must be encoded explicitly.
  */
 public class UriBuilder {
   private static final Pattern QUERY_PATTERN = Pattern.compile("([^&=]+)=([^&=]*)");
@@ -37,8 +40,10 @@ public class UriBuilder {
   private String scheme;
   private String authority;
   private String path;
-  private Multimap<String, String> query;
+  private String query;
   private String fragment;
+  private Multimap<String, String> queryParameters;
+
 
   /**
    * Construct a new builder from an existing uri.
@@ -47,15 +52,17 @@ public class UriBuilder {
     scheme = uri.getScheme();
     authority = uri.getAuthority();
     path = uri.getPath();
-    query = Multimaps.newLinkedListMultimap(uri.getQueryParameters());
+    query = uri.getQuery();
     fragment = uri.getFragment();
+
+    queryParameters = Multimaps.newLinkedListMultimap(uri.getQueryParameters());
   }
 
   /**
    * Create an empty builder.
    */
   public UriBuilder() {
-    query = Multimaps.newLinkedListMultimap();
+    queryParameters = Multimaps.newLinkedListMultimap();
   }
 
   /**
@@ -69,7 +76,7 @@ public class UriBuilder {
    * Convert the builder to a Uri.
    */
   public Uri toUri() {
-    return new Uri(scheme, authority, path, query, fragment);
+    return new Uri(this);
   }
 
   /**
@@ -103,6 +110,9 @@ public class UriBuilder {
     return path;
   }
 
+  /**
+   * Sets the path component of the Uri.
+   */
   public UriBuilder setPath(String path) {
     this.path = path;
     return this;
@@ -112,46 +122,56 @@ public class UriBuilder {
    * @return The query part of the uri, or null if none was specified.
    */
   public String getQuery() {
-    return joinParameters(query);
+    if (query == null) {
+      query = joinParameters(queryParameters);
+    }
+    return query;
   }
 
+  /**
+   * Assigns the specified query string as the query portion of the uri, automatically decoding
+   * parameters to populate the parameter map for calls to getParameter.
+   */
   public UriBuilder setQuery(String query) {
-    this.query.clear();
-    this.query.putAll(splitParameters(query));
+    queryParameters.clear();
+    queryParameters.putAll(splitParameters(query));
+    this.query = query;
     return this;
   }
 
   public UriBuilder addQueryParameter(String name, String value) {
-    query.put(name, value);
+    this.query = null;
+    queryParameters.put(name, value);
     return this;
   }
 
   public UriBuilder addQueryParameters(Map<String, String> parameters) {
+    this.query = null;
     for (Map.Entry<String, String> entry : parameters.entrySet()) {
-      query.put(entry.getKey(), entry.getValue());
+      queryParameters.put(entry.getKey(), entry.getValue());
     }
     return this;
   }
 
   /**
-   * @return The query part of the uri, separated into component parts.
+   * @return The queryParameters part of the uri, separated into component parts.
    */
   public Multimap<String, String> getQueryParameters() {
-    return query;
+    return queryParameters;
   }
 
   /**
-   * @return All query parameters with the given name.
+   * @return All queryParameters parameters with the given name.
    */
   public Collection<String> getQueryParameters(String name) {
-    return query.get(name);
+    return queryParameters.get(name);
   }
 
   /**
-   * @return The first query parameter value with the given name.
+   * @return The first queryParameters parameter value with the given name.
    */
   public String getQueryParameter(String name) {
-    Collection<String> values = query.get(name);
+    Collection<String> values = queryParameters.get(name);
     if (values == null || values.isEmpty()) {
       return null;
     }
@@ -159,7 +179,7 @@ public class UriBuilder {
   }
 
   /**
-   * @return The query fragment.
+   * @return The queryParameters fragment.
    */
   public String getFragment() {
     return fragment;
@@ -171,7 +191,7 @@ public class UriBuilder {
   }
 
   /**
-   * Utility method for joining key / value pair parameters into a string.
+   * Utility method for joining key / value pair parameters into a url-encoded string.
    */
   static String joinParameters(Multimap<String, String> query) {
     if (query.size() == 0) {
@@ -191,6 +211,9 @@ public class UriBuilder {
     return buf.toString();
   }
 
+  /**
+   * Utility method for splitting a parameter string into key / value pairs.
+   */
   static Multimap<String, String> splitParameters(String query) {
     if (query == null) {
       return Multimaps.immutableMultimap();

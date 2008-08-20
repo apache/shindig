@@ -26,13 +26,14 @@ import org.apache.shindig.common.ContainerConfig;
 import org.apache.shindig.common.SecurityToken;
 import org.apache.shindig.common.SecurityTokenDecoder;
 import org.apache.shindig.common.testing.FakeGadgetToken;
+import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.common.util.Utf8UrlCoder;
 import org.apache.shindig.gadgets.Gadget;
 import org.apache.shindig.gadgets.GadgetContext;
 import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.http.HttpResponse;
-import org.apache.shindig.gadgets.oauth.OAuthFetcher;
 import org.apache.shindig.gadgets.oauth.OAuthArguments;
+import org.apache.shindig.gadgets.oauth.OAuthFetcher;
 import org.apache.shindig.gadgets.oauth.OAuthResponseParams;
 import org.apache.shindig.gadgets.spec.GadgetSpec;
 
@@ -40,7 +41,6 @@ import org.easymock.EasyMock;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
-import java.net.URI;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Enumeration;
@@ -57,28 +57,28 @@ public class GadgetRenderingTaskTest extends HttpTestFixture {
     }
   };
 
-  final static URI SPEC_URL = URI.create("http://example.org/gadget.xml");
+  final static Uri SPEC_URL = Uri.parse("http://example.org/gadget.xml");
   final static HttpRequest SPEC_REQUEST = new HttpRequest(SPEC_URL);
   final static String CONTENT = "Hello, world!";
   final static String ALT_CONTENT = "Goodbye, city.";
   final static String SPEC_XML
-      = "<Module>" +
-        "<ModulePrefs title='hello'/>" +
-        "<Content type='html' quirks='false'>" + CONTENT + "</Content>" +
-        "<Content type='html' view='quirks' quirks='true'/>" +
-        "<Content type='html' view='ALIAS'>" + ALT_CONTENT + "</Content>" +
-        "</Module>";
+  = "<Module>" +
+  "<ModulePrefs title='hello'/>" +
+  "<Content type='html' quirks='false'>" + CONTENT + "</Content>" +
+  "<Content type='html' view='quirks' quirks='true'/>" +
+  "<Content type='html' view='ALIAS'>" + ALT_CONTENT + "</Content>" +
+  "</Module>";
   final static String LIBS = "dummy:blah";
-  
+
   final static String PRELOAD_XML =
-      "<Module>" +
-      "<ModulePrefs title='hello'>" +
-      "<Preload authz='oauth' href='http://oauth.example.com'/>" +
-      "</ModulePrefs>" +
-      "<Content type='html' quirks='false'>" + CONTENT + "</Content>" +
-      "<Content type='html' view='quirks' quirks='true'/>" +
-      "<Content type='html' view='ALIAS'>" + ALT_CONTENT + "</Content>" +
-      "</Module>";
+    "<Module>" +
+    "<ModulePrefs title='hello'>" +
+    "<Preload authz='oauth' href='http://oauth.example.com'/>" +
+    "</ModulePrefs>" +
+    "<Content type='html' quirks='false'>" + CONTENT + "</Content>" +
+    "<Content type='html' view='quirks' quirks='true'/>" +
+    "<Content type='html' view='ALIAS'>" + ALT_CONTENT + "</Content>" +
+    "</Module>";
 
   private ServletTestFixture fixture;
 
@@ -88,15 +88,14 @@ public class GadgetRenderingTaskTest extends HttpTestFixture {
     fixture = new ServletTestFixture();
   }
 
-
   /**
    * Performs boilerplate operations to get basic gadgets rendered
    * @return Output of the rendering request
    * @throws Exception
    */
-  private String parseBasicGadget(String view, String xml) throws Exception {
+  private String parseBasicGadget(String view, String xml, boolean ignoreCache) throws Exception {
     expectParseRequestParams(view);
-    expectFetchGadget(xml);
+    expectFetchGadget(xml, ignoreCache);
     expectLockedDomainCheck();
     expectWriteResponse();
     replay();
@@ -105,6 +104,10 @@ public class GadgetRenderingTaskTest extends HttpTestFixture {
     verify();
     fixture.verify();
     return fixture.recorder.getResponseAsString();
+  }
+
+  private String parseBasicGadget(String view, String xml) throws Exception {
+    return parseBasicGadget(view, xml, false);
   }
 
   private void expectParseRequestParams(String view) throws Exception {
@@ -123,8 +126,10 @@ public class GadgetRenderingTaskTest extends HttpTestFixture {
         EasyMock.eq("default"))).andReturn(true);
   }
 
-  private void expectFetchGadget(String xml) throws Exception {
-    expect(fetcher.fetch(SPEC_REQUEST)).andReturn(new HttpResponse(xml));
+  private void expectFetchGadget(String xml, boolean ignoreCache) throws Exception {
+    HttpRequest req = new HttpRequest(SPEC_REQUEST);
+    req.setIgnoreCache(ignoreCache);
+    expect(fetcher.fetch(req)).andReturn(new HttpResponse(xml));
   }
 
   private void expectWriteResponse() throws Exception {
@@ -159,16 +164,16 @@ public class GadgetRenderingTaskTest extends HttpTestFixture {
   public void testViewAliases() throws Exception {
     JSONArray aliases = new JSONArray().put("ALIAS");
     expect(containerConfig.getJsonArray(ContainerConfig.DEFAULT_CONTAINER,
-        "gadgets.features/views/dummy/aliases")).andReturn(aliases);
+    "gadgets.features/views/dummy/aliases")).andReturn(aliases);
 
     String content = parseBasicGadget("dummy", SPEC_XML);
 
     assertTrue(content.contains(ALT_CONTENT));
   }
-  
+
   public void testOAuthPreload_data() throws Exception {
     expectParseRequestParams(GadgetSpec.DEFAULT_VIEW);
-    expectFetchGadget(PRELOAD_XML);
+    expectFetchGadget(PRELOAD_XML, false);
     expect(securityTokenDecoder.createToken(
         Collections.singletonMap(SecurityTokenDecoder.SECURITY_TOKEN_NAME, "fake-token"))).
         andStubReturn(mock(SecurityToken.class));
@@ -178,7 +183,7 @@ public class GadgetRenderingTaskTest extends HttpTestFixture {
         andReturn(oauthFetcher);
 
     expect(oauthFetcher.fetch(isA(HttpRequest.class))).
-        andReturn(new HttpResponse("preloaded data"));
+    andReturn(new HttpResponse("preloaded data"));
 
     expectLockedDomainCheck();
     expectWriteResponse();
@@ -190,10 +195,10 @@ public class GadgetRenderingTaskTest extends HttpTestFixture {
     String content = fixture.recorder.getResponseAsString();
     assertTrue(content.contains("preloaded data"));
   }
-  
+
   public void testOAuthPreload_metadata() throws Exception {
     expectParseRequestParams(GadgetSpec.DEFAULT_VIEW);
-    expectFetchGadget(PRELOAD_XML);
+    expectFetchGadget(PRELOAD_XML, false);
     expect(securityTokenDecoder.createToken(
         Collections.singletonMap(SecurityTokenDecoder.SECURITY_TOKEN_NAME, "fake-token"))).
         andStubReturn(mock(SecurityToken.class));
@@ -222,7 +227,7 @@ public class GadgetRenderingTaskTest extends HttpTestFixture {
 
   public void testLockedDomainFailure() throws Exception {
     expectParseRequestParams(GadgetSpec.DEFAULT_VIEW);
-    expectFetchGadget(SPEC_XML);
+    expectFetchGadget(SPEC_XML, false);
     expectLockedDomainFailure();
     expectSendRedirect();
     replay();
@@ -328,7 +333,7 @@ public class GadgetRenderingTaskTest extends HttpTestFixture {
 
   public void testRenderSetsNoCacheHeadersWhenNoCacheParamIsSet() throws Exception {
     expect(fixture.request.getParameter("nocache")).andReturn("1");
-    parseBasicGadget(GadgetSpec.DEFAULT_VIEW, SPEC_XML);
+    parseBasicGadget(GadgetSpec.DEFAULT_VIEW, SPEC_XML, true);
     fixture.checkCacheControlHeaders(0, true);
   }
 
@@ -338,10 +343,10 @@ public class GadgetRenderingTaskTest extends HttpTestFixture {
     String libsUrl = "&libs=";
     String jsUrl = "core.js?v=12345&container=apache&debug=0";
     String gadgetXml
-        = "<Module>" +
-          "<ModulePrefs title='hello'/>" +
-          "<Content type='url' href='" + contentUrl + "'/>" +
-          "</Module>";
+    = "<Module>" +
+    "<ModulePrefs title='hello'/>" +
+    "<Content type='url' href='" + contentUrl + "'/>" +
+    "</Module>";
 
     expect(fixture.request.getParameter("url")).andReturn(SPEC_URL.toString());
     expect(fixture.request.getParameter("view")).andReturn(GadgetSpec.DEFAULT_VIEW);
@@ -349,7 +354,7 @@ public class GadgetRenderingTaskTest extends HttpTestFixture {
     expect(fixture.request.getParameter("container")).andReturn(null);
     expect(fetcher.fetch(SPEC_REQUEST)).andReturn(new HttpResponse(gadgetXml));
     expect(urlGenerator.getBundledJsParam(isA(Collection.class), isA(GadgetContext.class)))
-        .andReturn(jsUrl);
+    .andReturn(jsUrl);
     response.sendRedirect(contentUrl + '?' + libsUrl + Utf8UrlCoder.encode(jsUrl));
     expectLastCall().once();
 
@@ -366,10 +371,10 @@ public class GadgetRenderingTaskTest extends HttpTestFixture {
     String libsUrl = "&libs=";
     String jsUrl = "core.js?v=12345&container=apache&debug=0";
     String gadgetXml
-        = "<Module>" +
-          "<ModulePrefs title='hello'/>" +
-          "<Content type='url' href='" + contentUrl + contentQuery + contentFragment + "'/>" +
-          "</Module>";
+    = "<Module>" +
+    "<ModulePrefs title='hello'/>" +
+    "<Content type='url' href='" + contentUrl + contentQuery + contentFragment + "'/>" +
+    "</Module>";
 
     expect(fixture.request.getParameter("url")).andReturn(SPEC_URL.toString());
     expect(fixture.request.getParameter("view")).andReturn(GadgetSpec.DEFAULT_VIEW);
@@ -377,9 +382,9 @@ public class GadgetRenderingTaskTest extends HttpTestFixture {
     expect(fixture.request.getParameter("container")).andReturn(null);
     expect(fetcher.fetch(SPEC_REQUEST)).andReturn(new HttpResponse(gadgetXml));
     expect(urlGenerator.getBundledJsParam(isA(Collection.class), isA(GadgetContext.class)))
-        .andReturn(jsUrl);
+    .andReturn(jsUrl);
     response.sendRedirect(contentUrl + contentQuery + libsUrl + Utf8UrlCoder.encode(jsUrl) +
-                          contentFragment);
+        contentFragment);
     expectLastCall().once();
 
     replay();

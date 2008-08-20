@@ -21,12 +21,9 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
-import com.google.common.collect.Multimap;
-
 import org.junit.Test;
 
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.Arrays;
 import java.util.Collection;
 
@@ -137,7 +134,7 @@ public class UriTest {
   }
 
   @Test
-  public void toJavaUri() throws URISyntaxException {
+  public void toJavaUri() {
     URI javaUri = URI.create("http://example.org/foo/bar/baz?blah=blah#boo");
     Uri uri = Uri.parse("http://example.org/foo/bar/baz?blah=blah#boo");
 
@@ -145,10 +142,23 @@ public class UriTest {
   }
 
   @Test
+  public void fromJavaUri() throws Exception {
+    URI javaUri = URI.create("http://example.org/foo/bar/baz?blah=blah#boo");
+    Uri uri = Uri.parse("http://example.org/foo/bar/baz?blah=blah#boo");
+
+    assertEquals(uri, Uri.fromJavaUri(javaUri));
+  }
+
+  @Test
   public void equalsAndHashCodeOk() {
     Uri uri = Uri.parse("http://example.org/foo/bar/baz?blah=blah#boo");
-    Multimap<String, String> params = UriBuilder.splitParameters("blah=blah");
-    Uri uri2 = new Uri("http", "example.org", "/foo/bar/baz", params, "boo");
+    Uri uri2 = new UriBuilder()
+        .setScheme("http")
+        .setAuthority("example.org")
+        .setPath("/foo/bar/baz")
+        .addQueryParameter("blah", "blah")
+        .setFragment("boo")
+        .toUri();
 
     assertTrue(uri.equals(uri2));
     assertTrue(uri2.equals(uri));

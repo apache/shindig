@@ -18,12 +18,12 @@
  */
 package org.apache.shindig.gadgets.servlet;
 
+import org.apache.shindig.common.uri.Uri;
+import org.apache.shindig.common.uri.UriBuilder;
 import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.http.HttpResponse;
 
 import java.io.IOException;
-import java.net.URI;
-import java.net.URISyntaxException;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -45,29 +45,23 @@ public abstract class ProxyBase {
    * @return A URI representing a validated form of the url.
    * @throws GadgetException If the url is not valid.
    */
-  protected URI validateUrl(String urlToValidate) throws GadgetException {
+  protected Uri validateUrl(String urlToValidate) throws GadgetException {
     if (urlToValidate == null) {
       throw new GadgetException(GadgetException.Code.INVALID_PARAMETER,
           "url parameter is missing.");
     }
     try {
-      URI url = new URI(urlToValidate);
+      UriBuilder url = UriBuilder.parse(urlToValidate);
       if (!"http".equals(url.getScheme()) && !"https".equals(url.getScheme())) {
         throw new GadgetException(GadgetException.Code.INVALID_PARAMETER,
             "Invalid request url scheme; only " +
             "\"http\" and \"https\" supported.");
       }
       if (url.getPath() == null || url.getPath().length() == 0) {
-        // Forcibly set the path to "/" if it is empty
-        url = new URI(url.getScheme(),
-                      url.getUserInfo(),
-                      url.getHost(),
-                      url.getPort(),
-                      "/", url.getQuery(),
-                      url.getFragment());
+        url.setPath("/");
       }
-      return url;
-    } catch (URISyntaxException use) {
+      return url.toUri();
+    } catch (IllegalArgumentException e) {
       throw new GadgetException(GadgetException.Code.INVALID_PARAMETER,
           "url parameter is not a valid url.");
     }

@@ -17,6 +17,7 @@
  */
 package org.apache.shindig.gadgets;
 
+import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.common.util.ResourceLoader;
 import org.apache.shindig.gadgets.http.HttpFetcher;
 import org.apache.shindig.gadgets.http.HttpRequest;
@@ -24,8 +25,6 @@ import org.apache.shindig.gadgets.http.HttpResponse;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -172,11 +171,10 @@ public final class JsLibrary {
    * @return The contents of the JS file, or null if it can't be fetched.
    * @throws GadgetException
    */
-  private static String loadDataFromUrl(String url,
-      HttpFetcher fetcher) throws GadgetException {
+  private static String loadDataFromUrl(String url, HttpFetcher fetcher) throws GadgetException {
     try {
       logger.info("Attempting to load js from: " + url);
-      URI uri = new URI(url);
+      Uri uri = Uri.parse(url);
       HttpRequest request = new HttpRequest(uri);
       HttpResponse response = fetcher.fetch(request);
       if (response.getHttpStatusCode() == HttpResponse.SC_OK) {
@@ -185,7 +183,7 @@ public final class JsLibrary {
         logger.warning("Unable to retrieve remote library from " + url);
         return null;
       }
-    } catch (URISyntaxException e) {
+    } catch (IllegalArgumentException e) {
       logger.log(Level.WARNING, "Malformed URL: " + url, e);
       return null;
     }

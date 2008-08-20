@@ -17,6 +17,12 @@
  */
 package org.apache.shindig.gadgets.oauth;
 
+import org.apache.shindig.common.crypto.Crypto;
+import org.apache.shindig.gadgets.GadgetException;
+import org.apache.shindig.gadgets.http.HttpFetcher;
+import org.apache.shindig.gadgets.http.HttpRequest;
+import org.apache.shindig.gadgets.http.HttpResponse;
+
 import net.oauth.OAuth;
 import net.oauth.OAuthAccessor;
 import net.oauth.OAuthConsumer;
@@ -24,12 +30,6 @@ import net.oauth.OAuthMessage;
 import net.oauth.OAuthServiceProvider;
 import net.oauth.OAuthValidator;
 import net.oauth.SimpleOAuthValidator;
-
-import org.apache.shindig.common.crypto.Crypto;
-import org.apache.shindig.gadgets.GadgetException;
-import org.apache.shindig.gadgets.http.HttpFetcher;
-import org.apache.shindig.gadgets.http.HttpResponse;
-import org.apache.shindig.gadgets.http.HttpRequest;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -41,38 +41,38 @@ import java.util.Map;
 public class FakeOAuthServiceProvider implements HttpFetcher {
 
   public final static String SP_HOST = "http://www.example.com";
-  
+
   public final static String REQUEST_TOKEN_URL =
       SP_HOST + "/request?param=foo";
-  public final static String ACCESS_TOKEN_URL = 
+  public final static String ACCESS_TOKEN_URL =
       SP_HOST + "/access";
   public final static String APPROVAL_URL =
       SP_HOST + "/authorize";
-  public final static String RESOURCE_URL = 
+  public final static String RESOURCE_URL =
       SP_HOST + "/data";
-  
+
   public final static String CONSUMER_KEY = "consumer";
   public final static String CONSUMER_SECRET = "secret";
-  
+
   private static class TokenState {
     String tokenSecret;
     OAuthConsumer consumer;
     State state;
     String userData;
-    
+
     enum State {
       PENDING,
       APPROVED,
       REVOKED,
-    } 
-    
+    }
+
     public TokenState(String tokenSecret, OAuthConsumer consumer) {
       this.tokenSecret = tokenSecret;
       this.consumer = consumer;
       this.state = State.PENDING;
       this.userData = null;
     }
-    
+
     public static TokenState makeAccessTokenState(String tokenSecret,
         OAuthConsumer consumer) {
       TokenState s = new TokenState(tokenSecret, consumer);
@@ -83,24 +83,24 @@ public class FakeOAuthServiceProvider implements HttpFetcher {
     public void setState(State state) {
       this.state = state;
     }
-    
+
     public State getState() {
       return state;
     }
-    
+
     public String getSecret() {
       return tokenSecret;
     }
-    
+
     public void setUserData(String userData) {
       this.userData = userData;
     }
-    
+
     public String getUserData() {
       return userData;
     }
   }
-  
+
   /**
    * Table of OAuth access tokens
    */
@@ -110,13 +110,13 @@ public class FakeOAuthServiceProvider implements HttpFetcher {
 
   private boolean throttled;
   private boolean vagueErrors;
-  
+
   private int requestTokenCount = 0;
-  
+
   private int accessTokenCount = 0;
-  
+
   private int resourceAccessCount = 0;
-  
+
   public FakeOAuthServiceProvider() {
     OAuthServiceProvider provider = new OAuthServiceProvider(
         REQUEST_TOKEN_URL, APPROVAL_URL, ACCESS_TOKEN_URL);
@@ -126,19 +126,19 @@ public class FakeOAuthServiceProvider implements HttpFetcher {
     validator = new SimpleOAuthValidator();
     vagueErrors = false;
   }
-  
+
   public void setVagueErrors(boolean vagueErrors) {
     this.vagueErrors = vagueErrors;
   }
-  
+
   @SuppressWarnings("unused")
   public HttpResponse fetch(HttpRequest request)
       throws GadgetException {
     return realFetch(request);
   }
-  
+
   private HttpResponse realFetch(HttpRequest request) {
-    String url = request.getUri().toASCIIString();
+    String url = request.getUri().toString();
     try {
       if (url.startsWith(REQUEST_TOKEN_URL)) {
         ++requestTokenCount;
@@ -197,7 +197,7 @@ public class FakeOAuthServiceProvider implements HttpFetcher {
         "WWW-Authenticate",
         Arrays.asList(msg.getAuthorizationHeader("realm")));
     HttpResponse response = new HttpResponse(403, null, headers);
-    return response;   
+    return response;
   }
 
   // Loosely based off net.oauth.OAuthServlet, and even more loosely related
@@ -207,7 +207,7 @@ public class FakeOAuthServiceProvider implements HttpFetcher {
     if (!method.equals("GET")) {
       throw new RuntimeException("Only GET supported for now");
     }
-    ParsedUrl url = new ParsedUrl(request.getUri().toASCIIString());
+    ParsedUrl url = new ParsedUrl(request.getUri().toString());
     List<OAuth.Parameter> params = new ArrayList<OAuth.Parameter>();
     params.addAll(url.getParsedQuery());
     String aznHeader = request.getHeader("Authorization");
@@ -220,7 +220,7 @@ public class FakeOAuthServiceProvider implements HttpFetcher {
     }
     return new OAuthMessage(method, url.getLocation(), params);
   }
-  
+
   /**
    * Utility class for parsing OAuth URLs.
    */
@@ -228,7 +228,7 @@ public class FakeOAuthServiceProvider implements HttpFetcher {
     String location = null;
     String query = null;
     List<OAuth.Parameter> decodedQuery = null;
-    
+
     public ParsedUrl(String url) {
       int queryIndex = url.indexOf('?');
       if (queryIndex != -1) {
@@ -238,15 +238,15 @@ public class FakeOAuthServiceProvider implements HttpFetcher {
         location = url;
       }
     }
-    
+
     public String getLocation() {
       return location;
     }
-    
+
     public String getRawQuery() {
       return query;
     }
-    
+
     public List<OAuth.Parameter> getParsedQuery() {
       if (decodedQuery == null) {
         if (query != null) {
@@ -257,7 +257,7 @@ public class FakeOAuthServiceProvider implements HttpFetcher {
       }
       return decodedQuery;
     }
-    
+
     public String getQueryParam(String name) {
       for (OAuth.Parameter p : getParsedQuery()) {
         if (p.getKey().equals(name)) {
@@ -267,7 +267,7 @@ public class FakeOAuthServiceProvider implements HttpFetcher {
       return null;
     }
   }
-  
+
   /**
    * Used to fake a browser visit to approve a token.
    * @param url
@@ -281,20 +281,20 @@ public class FakeOAuthServiceProvider implements HttpFetcher {
     // Not part of the OAuth spec, just a handy thing for testing.
     state.setUserData(parsed.getQueryParam("user_data"));
   }
-  
+
   public static class TokenPair {
     public final String token;
     public final String secret;
-    
+
     public TokenPair(String token, String secret) {
       this.token = token;
       this.secret = secret;
     }
   }
-  
+
   /**
    * Generate a preapproved request token for the specified user data.
-   * 
+   *
    * @param userData
    * @return the request token and secret
    */
@@ -307,10 +307,10 @@ public class FakeOAuthServiceProvider implements HttpFetcher {
     tokenState.put(requestToken, state);
     return new TokenPair(requestToken, requestTokenSecret);
   }
-  
+
   /**
    * Used to revoke all access tokens issued by this service provider.
-   * 
+   *
    * @throws Exception
    */
   public void revokeAllAccessTokens() throws Exception {
@@ -359,7 +359,7 @@ public class FakeOAuthServiceProvider implements HttpFetcher {
     }
     if (state == null) {
       return makeOAuthProblemReport(
-          "token_rejected", "Access token unknown");     
+          "token_rejected", "Access token unknown");
     }
     if (state.getState() != TokenState.State.APPROVED) {
       return makeOAuthProblemReport(

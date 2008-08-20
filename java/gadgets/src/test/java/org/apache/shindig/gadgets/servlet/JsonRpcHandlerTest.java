@@ -21,6 +21,7 @@ package org.apache.shindig.gadgets.servlet;
 import static org.easymock.EasyMock.expect;
 import static org.easymock.EasyMock.isA;
 
+import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.gadgets.Gadget;
 import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.http.HttpResponse;
@@ -30,14 +31,13 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.net.URI;
 import java.util.Collections;
 import java.util.Map;
 
 public class JsonRpcHandlerTest extends HttpTestFixture {
-  private static final URI SPEC_URL = URI.create("http://example.org/g.xml");
+  private static final Uri SPEC_URL = Uri.parse("http://example.org/g.xml");
   private static final HttpRequest SPEC_REQUEST = new HttpRequest(SPEC_URL);
-  private static final URI SPEC_URL2 = URI.create("http://example.org/g2.xml");
+  private static final Uri SPEC_URL2 = Uri.parse("http://example.org/g2.xml");
   private static final HttpRequest SPEC_REQUEST2 = new HttpRequest(SPEC_URL2);
   private static final String SPEC_TITLE = "JSON-TEST";
   private static final String SPEC_TITLE2 = "JSON-TEST2";

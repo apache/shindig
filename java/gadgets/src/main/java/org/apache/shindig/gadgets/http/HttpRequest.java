@@ -16,32 +16,299 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
 package org.apache.shindig.gadgets.http;
 
-import org.apache.commons.lang.ArrayUtils;
+import org.apache.shindig.common.ContainerConfig;
+import org.apache.shindig.common.SecurityToken;
+import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.gadgets.rewrite.ContentRewriter;
 
+import com.google.common.collect.Multimap;
+import com.google.common.collect.Multimaps;
+
+import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang.ArrayUtils;
+
 import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
-import java.net.URI;
-import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
-import java.util.List;
 import java.util.Map;
-import java.util.TreeMap;
 
 /**
- * Holds request data for passing to a RemoteContentFetcher.
- * Instances of this object are immutable.
- *
- * TODO: This naming seems really ridiculous now. Why don't we just call it
- * what it is -- an HTTP request?
+ * Creates HttpRequests. A new HttpRequest should be created for every unique HttpRequest
+ * being constructed.
  */
 public class HttpRequest {
-  private final byte[] postBody;
+  static final String DEFAULT_CONTENT_TYPE = "application/x-www-form-urlencoded; charset=utf-8";
+
+  private String method = "GET";
+  private Uri uri;
+  private final Multimap<String, String> headers
+  = Multimaps.newTreeMultimap(String.CASE_INSENSITIVE_ORDER, null);
+  private byte[] postBody = ArrayUtils.EMPTY_BYTE_ARRAY;
+
+  // TODO: It might be useful to refactor these into a simple map of objects and use sub classes
+  // for more detailed data.
+
+  // Cache control.
+  private boolean ignoreCache = false;
+  private int cacheTtl = -1;
+
+  // Context for the request.
+  private Uri gadget;
+  private String container = ContainerConfig.DEFAULT_CONTAINER;
+
+  // For signed fetch & OAuth
+  private SecurityToken securityToken;
+  private boolean signOwner = true;
+  private boolean signViewer = true;
+
+  // TODO: Remove this when new rewriting infrastructure is in place.
+  private ContentRewriter contentRewriter;
+  private String rewriteMimeType;
+
+  /**
+   * Construct a new request for the given uri.
+   */
+  public HttpRequest(Uri uri) {
+    this.uri = uri;
+  }
+
+  /**
+   * Clone an existing HttpRequest.
+   */
+  public HttpRequest(HttpRequest request) {
+    method = request.method;
+    uri = request.uri;
+    headers.putAll(request.headers);
+    postBody = request.postBody;
+    ignoreCache = request.ignoreCache;
+    cacheTtl = request.cacheTtl;
+    gadget = request.gadget;
+    container = request.container;
+    securityToken = request.securityToken;
+    signOwner = request.signOwner;
+    signViewer = request.signViewer;
+    contentRewriter = request.contentRewriter;
+    rewriteMimeType = request.rewriteMimeType;
+  }
+
+  public HttpRequest setMethod(String method) {
+    this.method = method;
+    return this;
+  }
+
+  public HttpRequest setUri(Uri uri) {
+    this.uri = uri;
+    return this;
+  }
+
+  /**
+   * Add a single header to the request. If a value for the given name is already set, a second
+   * value is added. If you wish to overwrite any possible values for a header, use
+   * {@link #setHeader(String, String)}.
+   */
+  public HttpRequest addHeader(String name, String value) {
+    headers.put(name, value);
+    return this;
+  }
+
+  /**
+   * Sets a single header value, overwriting any previously set headers with the same name.
+   */
+  public HttpRequest setHeader(String name, String value) {
+    headers.replaceValues(name, Arrays.asList(value));
+    return this;
+  }
+
+  /**
+   * Adds an entire map of headers to the request.
+   */
+  public HttpRequest addHeaders(Map<String, String> headers) {
+    for (Map.Entry<String, String> entry : headers.entrySet()) {
+      this.headers.put(entry.getKey(), entry.getValue());
+    }
+    return this;
+  }
+
+  /**
+   * Adds all headers in the provided multimap to the request.
+   */
+  public HttpRequest addHeaders(Multimap<String, String> headers) {
+    this.headers.putAll(headers);
+    return this;
+  }
+
+  /**
+   * Remove all headers with the given name from the request.
+   *
+   * @return Any values that were removed from the request.
+   */
+  public Collection<String> removeHeader(String name) {
+    return headers.removeAll(name);
+  }
+
+  /**
+   * Assigns the specified body to the request, copying all input bytes.
+   */
+  public HttpRequest setPostBody(byte[] postBody) {
+    if (postBody == null) {
+      this.postBody = ArrayUtils.EMPTY_BYTE_ARRAY;
+    } else {
+      this.postBody = new byte[postBody.length];
+      System.arraycopy(postBody, 0, this.postBody, 0, postBody.length);
+    }
+    return this;
+  }
+
+  /**
+   * Fills in the request body from an InputStream.
+   */
+  public HttpRequest setPostBody(InputStream is) throws IOException {
+    this.postBody = IOUtils.toByteArray(is);
+    return this;
+  }
+
+  /**
+   * @param ignoreCache Whether to ignore all caching for this request.
+   */
+  public HttpRequest setIgnoreCache(boolean ignoreCache) {
+    this.ignoreCache = ignoreCache;
+    if (ignoreCache) {
+      // Bypass any proxy caches as well.
+      headers.put("Pragma", "no-cache");
+    }
+    return this;
+  }
+
+  /**
+   * @param cacheTtl The amount of time to cache the result object for, in milliseconds. If set to
+   * -1, HTTP cache control headers will be honored. Otherwise objects will be cached for the time
+   * specified.
+   */
+  public HttpRequest setCacheTtl(int cacheTtl) {
+    this.cacheTtl = cacheTtl;
+    return this;
+  }
+
+  /**
+   * @param gadget The gadget that caused this HTTP request to be necessary. May be null if the
+   * request was not initiated by the actions of a gadget.
+   */
+  public HttpRequest setGadget(Uri gadget) {
+    this.gadget = gadget;
+    return this;
+  }
+
+  /**
+   * @param container The container that this request originated from.
+   */
+  public HttpRequest setContainer(String container) {
+    this.container = container;
+    return this;
+  }
+
+  /**
+   * Assign the security token to use for making any form of authenticated request.
+   */
+  public HttpRequest setSecurityToken(SecurityToken securityToken) {
+    this.securityToken = securityToken;
+    return this;
+  }
+
+  /**
+   * @param signOwner Whether to include the owner id when making authenticated requests. Defaults
+   * to true.
+   */
+  public HttpRequest setSignOwner(boolean signOwner) {
+    this.signOwner = signOwner;
+    return this;
+  }
+
+  /**
+   * @param signViewer Whether to include the viewer id when making authenticated requests. Defaults
+   * to true.
+   */
+  public HttpRequest setSignViewer(boolean signViewer) {
+    this.signViewer = signViewer;
+    return this;
+  }
+
+  /**
+   * @param contentRewriter The rewriter to use for the object retrieved by this request.
+   * TODO: Move this to new rewriting facility.
+   */
+  public HttpRequest setContentRewriter(ContentRewriter contentRewriter) {
+    this.contentRewriter = contentRewriter;
+    return this;
+  }
+
+  /**
+   * @param rewriteMimeType The assumed content type of the response to be rewritten. Overrides
+   * any values set in the Content-Type response header.
+   *
+   * TODO: Move this to new rewriting facility.
+   */
+  public HttpRequest setRewriteMimeType(String rewriteMimeType) {
+    this.rewriteMimeType = rewriteMimeType;
+    return this;
+  }
+
+  public String getMethod() {
+    return method;
+  }
+
+  public Uri getUri() {
+    return uri;
+  }
+
+  /**
+   * @return All headers to be sent in this request.
+   */
+  public Multimap<String, String> getHeaders() {
+    return headers;
+  }
+
+  /**
+   * @param name The header to fetch
+   * @return A list of headers with that name (may be empty).
+   */
+  public Collection<String> getHeaders(String name) {
+    Collection<String> match = headers.get(name);
+    if (match == null) {
+      return Collections.emptyList();
+    } else {
+      return match;
+    }
+  }
+
+  /**
+   * @return The first set header with the given name or null if not set. If
+   *         you need multiple values for the header, use getHeaders().
+   */
+  public String getHeader(String name) {
+    Collection<String> headerList = getHeaders(name);
+    if (headerList.isEmpty()) {
+      return null;
+    } else {
+      return headerList.iterator().next();
+    }
+  }
+
+  /**
+   * @return The content type of the request (determined from request headers)
+   */
+  public String getContentType() {
+    String type = getHeader("Content-Type");
+    if (type == null) {
+      return DEFAULT_CONTENT_TYPE;
+    }
+    return type;
+  }
 
   /**
    * @return An input stream that can be used to read the post body.
@@ -72,261 +339,84 @@ public class HttpRequest {
     return postBody.length;
   }
 
-  private final String contentType;
-  public final static String DEFAULT_CONTENT_TYPE
-      = "application/x-www-form-urlencoded; charset=utf-8";
-
   /**
-   * @return The content type of the request (determined from request headers)
+   * @return True if caching should be ignored for this request.
    */
-  public String getContentType() {
-    return contentType;
+  public boolean getIgnoreCache() {
+    return ignoreCache;
   }
 
-  private final Map<String, List<String>> headers;
-
   /**
-   * @return All headers set in this request.
+   * @return The amount of time to cache any response objects for, in milliseconds.
    */
-  public Map<String, List<String>> getAllHeaders() {
-    return headers;
+  public int getCacheTtl() {
+    return cacheTtl;
   }
 
   /**
-   * @param name The header to fetch
-   * @return A list of headers with that name (may be empty).
+   * @return The uri of gadget responsible for making this request.
    */
-  public List<String> getHeaders(String name) {
-    List<String> match = headers.get(name);
-    if (match == null) {
-      return Collections.emptyList();
-    } else {
-      return match;
-    }
+  public Uri getGadget() {
+    return gadget;
   }
 
   /**
-   * @param name
-   * @return The first set header with the given name or null if not set. If
-   *         you need multiple values for the header, use getHeaders().
+   * @return The container responsible for making this request.
    */
-  public String getHeader(String name) {
-    List<String> headerList = getHeaders(name);
-    if (headerList.isEmpty()) {
-      return null;
-    } else {
-      return headerList.get(0);
-    }
-  }
-
-  private final String method;
-  public String getMethod() {
-    return method;
-  }
-
-  private final URI uri;
-  public URI getUri() {
-    return uri;
-  }
-
-  private final Options options;
-  public Options getOptions() {
-    return options;
+  public String getContainer() {
+    return container;
   }
 
   /**
-   * Creates a simple GET request
+   * @return The security token used to make this request.
+   */
+  public SecurityToken getSecurityToken() {
+    return securityToken;
+  }
+
+  /**
+   * @return True if the owner id should be passed in the request parameters.
+   */
+  public boolean getSignOwner() {
+    return signOwner;
+  }
+
+  /**
+   * @return True if the viewer id should be passed in the request parameters.
+   */
+  public boolean getSignViewer() {
+    return signViewer;
+  }
+
+  /**
+   * @return The rewriter to be used on any response objects.
+   */
+  public ContentRewriter getContentRewriter() {
+    return contentRewriter;
+  }
+
+  /**
+   * @return The content type to assume when rewriting.
    *
-   * @param uri
-   * @param ignoreCache
+   * TODO: Move this to new rewriting facility.
    */
-  public static HttpRequest getRequest(URI uri, boolean ignoreCache) {
-    Options options = new Options();
-    options.ignoreCache = ignoreCache;
-    return new HttpRequest(uri, options);
-  }
-
-  /**
-   *
-   * @param method
-   * @param uri
-   * @param headers
-   * @param postBody
-   * @param options
-   */
-  public HttpRequest(String method,
-                              URI uri,
-                              Map<String, List<String>> headers,
-                              byte[] postBody,
-                              Options options) {
-    this.method = method;
-    this.uri = uri;
-    if (options == null) {
-      this.options = new Options();
-    } else {
-      this.options = options;
-    }
-    // Copy the headers
-    if (headers == null) {
-      this.headers = Collections.emptyMap();
-    } else {
-      boolean setPragmaHeader = false;
-      Map<String, List<String>> tmpHeaders
-          = new TreeMap<String, List<String>>(String.CASE_INSENSITIVE_ORDER);
-      for (Map.Entry<String, List<String>> entry : headers.entrySet()) {
-        List<String> newList = new ArrayList<String>(entry.getValue());
-        // Proxies should be bypassed with the Pragma: no-cache check.
-        if (entry.getKey().equals("Pragma") && options != null && options.ignoreCache) {
-          newList.add("no-cache");
-          setPragmaHeader = true;
-        }
-        tmpHeaders.put(entry.getKey(), Collections.unmodifiableList(newList));
-      }
-      // Bypass caching in proxies as well.
-      if (!setPragmaHeader && options != null && options.ignoreCache) {
-        tmpHeaders.put("Pragma", Arrays.asList("no-cache"));
-      }
-      this.headers = Collections.unmodifiableMap(tmpHeaders);
-    }
-    if (postBody == null) {
-      this.postBody = ArrayUtils.EMPTY_BYTE_ARRAY;
-    } else {
-      this.postBody = new byte[postBody.length];
-      System.arraycopy(postBody, 0, this.postBody, 0, postBody.length);
-    }
-
-    // Calculate content type.
-    String type = getHeader("Content-Type");
-    if (type == null) {
-      contentType = DEFAULT_CONTENT_TYPE;
-    } else {
-      contentType = type;
-    }
-  }
-
-  /**
-   * Creates a new request to a different URL using all request data from
-   * an existing request.
-   *
-   * TODO - Need to copy by value
-   *
-   * @param uri
-   * @param base The base request to copy data from.
-   */
-  public HttpRequest(URI uri, HttpRequest base) {
-    this.uri = uri;
-    this.method = base.method;
-    this.options = new Options(base.options);
-    this.headers = base.headers;
-    this.contentType = base.contentType;
-    this.postBody = base.postBody;
-  }
-
-  /**
-   * Basic GET request.
-   *
-   * @param uri
-   */
-  public HttpRequest(URI uri) {
-    this("GET", uri, null, null, getDefaultOptions());
-  }
-
-  /**
-   * GET with options
-   *
-   * @param uri
-   * @param options
-   */
-  public HttpRequest(URI uri, Options options) {
-    this("GET", uri, null, null, options);
-  }
-
-  /**
-   * GET request with custom headers and default options
-   * @param uri
-   * @param headers
-   */
-  public HttpRequest(URI uri, Map<String, List<String>> headers) {
-    this("GET", uri, headers, null, getDefaultOptions());
-  }
-
-  /**
-   * GET request with custom headers + options
-   * @param uri
-   * @param headers
-   * @param options
-   */
-  public HttpRequest(URI uri, Map<String, List<String>> headers,
-      Options options) {
-    this("GET", uri, headers, null, options);
-  }
-
-  /**
-   * Basic POST request
-   * @param uri
-   * @param postBody
-   */
-  public HttpRequest(URI uri, byte[] postBody) {
-    this("POST", uri, null, postBody, getDefaultOptions());
-  }
-
-  /**
-   * POST request with options
-   * @param uri
-   * @param postBody
-   * @param options
-   */
-  public HttpRequest(URI uri, byte[] postBody, Options options) {
-    this("POST", uri, null, postBody, options);
-  }
-
-  /**
-   * POST request with headers
-   * @param uri
-   * @param headers
-   * @param postBody
-   */
-  public HttpRequest(URI uri, Map<String, List<String>> headers,
-      byte[] postBody) {
-    this("POST", uri, headers, postBody, getDefaultOptions());
-  }
-
-  /**
-   * POST request with options + headers
-   * @param uri
-   * @param headers
-   * @param postBody
-   * @param options
-   */
-  public HttpRequest(URI uri, Map<String, List<String>> headers,
-      byte[] postBody, Options options) {
-    this("POST", uri, headers, postBody, options);
+  public String getRewriteMimeType() {
+    return rewriteMimeType;
   }
 
   @Override
   public String toString() {
-    StringBuilder buf = new StringBuilder();
-    buf.append(method).append(' ').append(uri.getPath()).append(" HTTP/1.1\r\n")
-       .append("Host: ").append(uri.getHost())
-       .append(uri.getPort() == 80 ? "" : ":" + uri.getPort())
-       .append("\r\n");
-
-    for (Map.Entry<String, List<String>> entry : headers.entrySet()) {
-      buf.append(entry.getKey()).append(": ");
-      boolean first = false;
-      for (String header : entry.getValue()) {
-        if (!first) {
-          first = true;
-        } else {
-          buf.append(", ");
-        }
-        buf.append(header);
-      }
-      buf.append("\r\n");
+    StringBuilder buf = new StringBuilder(method);
+    buf.append(' ').append(uri.getPath())
+    .append(uri.getQuery() == null ? "" : uri.getQuery()).append("\n\n");
+    buf.append("Host: ").append(uri.getAuthority()).append('\n');
+    for (Map.Entry<String, String> entry : headers.entries()) {
+      buf.append(entry.getKey()).append(": ").append(entry.getValue()).append('\n');
     }
-   buf.append("\r\n");
-   buf.append(new String(postBody));
-   return buf.toString();
+    buf.append('\n');
+    buf.append(getPostBodyAsString());
+
+    return buf.toString();
   }
 
   @Override
@@ -335,52 +425,13 @@ public class HttpRequest {
     if (rhs instanceof HttpRequest) {
       HttpRequest req = (HttpRequest)rhs;
       return method.equals(req.method) &&
-             uri.equals(req.uri) &&
-             Arrays.equals(postBody, req.postBody) &&
-             headers.equals(req.headers);
+      uri.equals(req.uri) &&
+      Arrays.equals(postBody, req.postBody) &&
+      headers.equals(req.headers);
+      // TODO: Verify that other fields aren't meaningful.
     }
     return false;
   }
 
-  public static Options getDefaultOptions() {
-    return new Options();
-  }
-  
-  public static Options getIgnoreCacheOptions() {
-    Options o = new Options();
-    o.ignoreCache = true;
-    return o;
-  }
-
-  /**
-   * Bag of options for making a request.
-   *
-   * This object is mutable to keep us sane. Don't mess with it once you've
-   * sent it to HttpRequest or bad things might happen.
-   */
-  public static class Options {
-    public boolean ignoreCache = false;
-    public boolean ownerSigned = true;
-    public boolean viewerSigned = true;
-    public int minCacheTtl = -1;
-    public ContentRewriter rewriter = null;
-    public String rewriteMimeType = null;
-    public URI gadgetUri;
-
-    public Options() {}
-
-    /**
-     * Copy constructor
-     */
-    public Options(Options copyFrom) {
-      this.ignoreCache = copyFrom.ignoreCache;
-      this.ownerSigned = copyFrom.ownerSigned;
-      this.viewerSigned = copyFrom.viewerSigned;
-      this.rewriter = copyFrom.rewriter;
-      this.minCacheTtl = copyFrom.minCacheTtl;
-      if (copyFrom.gadgetUri != null) {
-        this.gadgetUri = URI.create(copyFrom.gadgetUri.toString());
-      }
-    }
-  }
 }
+

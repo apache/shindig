@@ -18,9 +18,7 @@
  */
 package org.apache.shindig.gadgets.servlet;
 
-import com.google.inject.Inject;
-import com.google.inject.Singleton;
-
+import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.LockedDomainService;
 import org.apache.shindig.gadgets.http.HttpFetcher;
@@ -28,8 +26,10 @@ import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.http.HttpResponse;
 import org.apache.shindig.gadgets.rewrite.ContentRewriter;
 
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
+
 import java.io.IOException;
-import java.net.URI;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -82,30 +82,33 @@ public class ProxyHandler extends ProxyBase {
    * Generate a remote content request based on the parameters sent from the client.
    */
   private HttpRequest buildHttpRequest(HttpServletRequest request) throws GadgetException {
-    URI url = validateUrl(request.getParameter(URL_PARAM));
-    HttpRequest.Options options = new HttpRequest.Options();
+    Uri url = validateUrl(request.getParameter(URL_PARAM));
+
+    HttpRequest req = new HttpRequest(url);
+
     if (request.getParameter(GADGET_PARAM) != null) {
-      options.gadgetUri = URI.create(request.getParameter(GADGET_PARAM));
+      req.setGadget(Uri.parse(request.getParameter(GADGET_PARAM)));
     }
-    options.rewriter = rewriter;
+
+    req.setContentRewriter(rewriter);
 
     // Allow the rewriter to use an externally forced mime type. This is needed
     // allows proper rewriting of <script src="x"/> where x is returned with
     // a content type like text/html which unfortunately happens all too often
-    options.rewriteMimeType = request.getParameter(REWRITE_MIME_TYPE_PARAM);
+    req.setRewriteMimeType(request.getParameter(REWRITE_MIME_TYPE_PARAM));
 
     // If the proxy request specifies a refresh param then we want to force the min TTL for
     // the retrieved entry in the cache regardless of the headers on the content when it
     // is fetched from the original source.
     if (request.getParameter(REFRESH_PARAM) != null) {
       try {
-        options.minCacheTtl = Integer.parseInt(request.getParameter(REFRESH_PARAM));
+        req.setCacheTtl(Integer.parseInt(request.getParameter(REFRESH_PARAM)));
       } catch (NumberFormatException nfe) {
         // Ignore
       }
     }
 
-    return new HttpRequest(url, options);
+    return req;
   }
 
   @Override
@@ -140,8 +143,8 @@ public class ProxyHandler extends ProxyBase {
       }
     }
 
-    if (rcr.getOptions().rewriteMimeType != null) {
-      response.setContentType(rcr.getOptions().rewriteMimeType);
+    if (rcr.getRewriteMimeType() != null) {
+      response.setContentType(rcr.getRewriteMimeType());
     }
 
     if (results.getHttpStatusCode() != HttpResponse.SC_OK) {

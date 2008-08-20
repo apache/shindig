@@ -24,6 +24,7 @@ import static org.easymock.EasyMock.expect;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
+import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.http.HttpResponse;
@@ -33,7 +34,6 @@ import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.net.URI;
 import java.util.Collections;
 import java.util.Enumeration;
 
@@ -45,7 +45,7 @@ import javax.servlet.http.HttpServletResponse;
  * Tests are trivial; real tests are in MakeRequestHandlerTest.
  */
 public class MakeRequestServletTest {
-  private static final String REQUEST_URL = "http://example.org/file";
+  private static final Uri REQUEST_URL = Uri.parse("http://example.org/file");
   private static final String RESPONSE_BODY = "Hello, world!";
   private static final String ERROR_MESSAGE = "Broken!";
   private static final Enumeration<String> EMPTY_ENUM
@@ -57,7 +57,7 @@ public class MakeRequestServletTest {
       fixture.securityTokenDecoder, fixture.rewriter);
   private final HttpServletResponseRecorder recorder
       = new HttpServletResponseRecorder(fixture.response);
-  private final HttpRequest request = HttpRequest.getRequest(URI.create(REQUEST_URL), false);
+  private final HttpRequest request = new HttpRequest(REQUEST_URL);
   private final HttpResponse response = new HttpResponse(RESPONSE_BODY);
 
   @Before
@@ -66,7 +66,8 @@ public class MakeRequestServletTest {
     expect(fixture.request.getHeaderNames()).andReturn(EMPTY_ENUM).anyTimes();
     expect(fixture.request.getParameter(MakeRequestHandler.METHOD_PARAM))
         .andReturn("GET").anyTimes();
-    expect(fixture.request.getParameter(ProxyBase.URL_PARAM)).andReturn(REQUEST_URL).anyTimes();
+    expect(fixture.request.getParameter(ProxyBase.URL_PARAM))
+        .andReturn(REQUEST_URL.toString()).anyTimes();
   }
 
   private void setupGet() {
@@ -83,7 +84,7 @@ public class MakeRequestServletTest {
       assertStartsWith(MakeRequestHandler.UNPARSEABLE_CRUFT, body);
       body = body.substring(MakeRequestHandler.UNPARSEABLE_CRUFT.length());
       JSONObject object = new JSONObject(body);
-      object = object.getJSONObject(REQUEST_URL);
+      object = object.getJSONObject(REQUEST_URL.toString());
       assertEquals(expectedStatus, object.getInt("rc"));
       assertEquals(expectedBody, object.getString("body"));
     } else {

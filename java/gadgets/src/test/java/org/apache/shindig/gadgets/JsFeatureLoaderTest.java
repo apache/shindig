@@ -21,13 +21,13 @@ import static org.easymock.EasyMock.eq;
 import static org.easymock.EasyMock.expect;
 
 import org.apache.shindig.common.ContainerConfig;
+import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.http.HttpResponse;
 
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
-import java.net.URI;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -42,7 +42,7 @@ public class JsFeatureLoaderTest extends GadgetTestFixture {
   private static final String ALT_JS_CONTENT = "function test(){while(true);}";
   private static final String CONT_A = "test";
   private static final String CONT_B = "wuwowowaefdf";
-  private static final URI JS_URL = URI.create("http://example.org/feature.js");
+  private static final Uri JS_URL = Uri.parse("http://example.org/feature.js");
 
   @Override
   public void setUp() throws Exception {

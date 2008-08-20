@@ -22,11 +22,14 @@ import com.google.inject.Singleton;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.ArrayUtils;
+import org.apache.commons.lang.StringUtils;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
+import java.net.URL;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.zip.GZIPInputStream;
@@ -50,7 +53,7 @@ public class BasicHttpFetcher implements HttpFetcher {
    * for production use.  Someone should probably go and implement maxObjSize,
    * for one thing.  Use of an HTTP proxy for security is also necessary
    * for production deployment.
-   * 
+   *
    * @param maxObjSize Maximum size, in bytes, of object to fetch.  Except this
    * isn't actually implemented.
    */
@@ -73,33 +76,16 @@ public class BasicHttpFetcher implements HttpFetcher {
    * @return The opened connection
    * @throws IOException
    */
-  private HttpURLConnection getConnection(HttpRequest request)
-      throws IOException {
-    HttpURLConnection fetcher =
-        (HttpURLConnection)request.getUri().toURL().openConnection();
+  private HttpURLConnection getConnection(HttpRequest request) throws IOException {
+    URL url = new URL(request.getUri().toString());
+    HttpURLConnection fetcher = (HttpURLConnection)url.openConnection();
     fetcher.setConnectTimeout(CONNECT_TIMEOUT_MS);
     fetcher.setRequestProperty("Accept-Encoding", "gzip, deflate");
     fetcher.setInstanceFollowRedirects(true);
-    Map<String, List<String>> reqHeaders = request.getAllHeaders();
-    for (Map.Entry<String, List<String>> entry : reqHeaders.entrySet()) {
-      List<String> value = entry.getValue();
-      if (value.size() == 1) {
-        fetcher.setRequestProperty(entry.getKey(), value.get(0));
-      } else {
-        StringBuilder headerList = new StringBuilder();
-        boolean first = false;
-        for (String val : value) {
-          if (!first) {
-            first = true;
-          } else {
-            headerList.append(',');
-          }
-          headerList.append(val);
-        }
-        fetcher.setRequestProperty(entry.getKey(), headerList.toString());
-      }
+    for (Map.Entry<String, Collection<String>> entry : request.getHeaders().asMap().entrySet()) {
+      fetcher.setRequestProperty(entry.getKey(), StringUtils.join(entry.getValue(), ','));
     }
-    fetcher.setDefaultUseCaches(!request.getOptions().ignoreCache);
+    fetcher.setDefaultUseCaches(!request.getIgnoreCache());
     return fetcher;
   }
 

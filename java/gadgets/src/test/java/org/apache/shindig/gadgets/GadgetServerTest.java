@@ -21,30 +21,29 @@ import static org.easymock.EasyMock.eq;
 import static org.easymock.EasyMock.expect;
 import static org.easymock.EasyMock.isA;
 
-import java.net.URI;
-import java.util.HashMap;
-import java.util.Map;
-
 import org.apache.shindig.common.BasicSecurityToken;
 import org.apache.shindig.common.SecurityToken;
 import org.apache.shindig.common.crypto.BlobCrypterException;
+import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.http.HttpResponse;
 import org.apache.shindig.gadgets.oauth.OAuthArguments;
 import org.apache.shindig.gadgets.spec.GadgetSpec;
 
+import java.net.URI;
+import java.util.HashMap;
+import java.util.Map;
+
 public class GadgetServerTest extends GadgetTestFixture {
 
-  private final static URI SPEC_URL = URI.create("http://example.org/g.xml");
-  private final static HttpRequest SPEC_REQUEST
-      = new HttpRequest(SPEC_URL);
-  private final static URI BUNDLE_URL = URI.create("http://example.org/m.xml");
-  private final static HttpRequest BUNDLE_REQUEST
-      = new HttpRequest(BUNDLE_URL);
-  private final static GadgetContext BASIC_CONTEXT = new GadgetContext() {
+  private static final Uri SPEC_URL = Uri.parse("http://example.org/g.xml");
+  private static final HttpRequest SPEC_REQUEST = new HttpRequest(SPEC_URL);
+  private static final Uri BUNDLE_URL = Uri.parse("http://example.org/m.xml");
+  private static final HttpRequest BUNDLE_REQUEST = new HttpRequest(BUNDLE_URL);
+  private static final GadgetContext BASIC_CONTEXT = new GadgetContext() {
     @Override
     public URI getUrl() {
-      return SPEC_URL;
+      return SPEC_URL.toJavaUri();
     }
 
     @Override
@@ -69,13 +68,13 @@ public class GadgetServerTest extends GadgetTestFixture {
       return new UserPrefs(map);
     }
   };
-  private final static String BASIC_SPEC_XML
+  private static final String BASIC_SPEC_XML
       = "<Module>" +
         "  <ModulePrefs title=\"GadgetServerTest\"/>" +
         "  <Content type=\"html\">Hello, world!</Content>" +
         "</Module>";
 
-  private final static String BASIC_BUNDLE_XML
+  private static final String BASIC_BUNDLE_XML
       = "<messagebundle>" +
         "  <msg name=\"title\">TITLE</msg>" +
        "</messagebundle>";
@@ -167,8 +166,7 @@ public class GadgetServerTest extends GadgetTestFixture {
   public void testPreloadsFetched() throws Exception {
     String preloadUrl = "http://example.org/preload.txt";
     String preloadData = "Preload Data";
-    HttpRequest preloadRequest
-        = new HttpRequest(URI.create(preloadUrl));
+    HttpRequest preloadRequest = new HttpRequest(Uri.parse(preloadUrl));
 
     String gadgetXml
         = "<Module>" +
@@ -193,8 +191,7 @@ public class GadgetServerTest extends GadgetTestFixture {
   public void testPreloadViewMatch() throws Exception {
     String preloadUrl = "http://example.org/preload.txt";
     String preloadData = "Preload Data";
-    HttpRequest preloadRequest
-        = new HttpRequest(URI.create(preloadUrl));
+    HttpRequest preloadRequest = new HttpRequest(Uri.parse(preloadUrl));
 
     String gadgetXml
         = "<Module>" +
@@ -213,7 +210,7 @@ public class GadgetServerTest extends GadgetTestFixture {
     GadgetContext context = new GadgetContext() {
       @Override
       public URI getUrl() {
-        return SPEC_URL;
+        return SPEC_URL.toJavaUri();
       }
 
       @Override
@@ -231,7 +228,7 @@ public class GadgetServerTest extends GadgetTestFixture {
     String preloadUrl = "http://example.org/preload.txt";
     String preloadData = "Preload Data";
     HttpRequest preloadRequest
-        = new HttpRequest(URI.create(preloadUrl));
+        = new HttpRequest(Uri.parse(preloadUrl));
 
     String gadgetXml
         = "<Module>" +
@@ -250,7 +247,7 @@ public class GadgetServerTest extends GadgetTestFixture {
     GadgetContext context = new GadgetContext() {
       @Override
       public URI getUrl() {
-        return SPEC_URL;
+        return SPEC_URL.toJavaUri();
       }
 
       @Override
@@ -280,7 +277,7 @@ public class GadgetServerTest extends GadgetTestFixture {
     GadgetContext context = new GadgetContext() {
       @Override
       public URI getUrl() {
-        return SPEC_URL;
+        return SPEC_URL.toJavaUri();
       }
     };
 
@@ -291,8 +288,7 @@ public class GadgetServerTest extends GadgetTestFixture {
   public void testSignedPreloadWithToken() throws Exception {
     String preloadUrl = "http://example.org/preload.txt";
     String preloadData = "Preload Data";
-    HttpRequest preloadRequest
-        = new HttpRequest(URI.create(preloadUrl));
+    HttpRequest preloadRequest = new HttpRequest(Uri.parse(preloadUrl));
 
     String gadgetXml
         = "<Module>" +
@@ -312,12 +308,11 @@ public class GadgetServerTest extends GadgetTestFixture {
     Gadget gadget = gadgetServer.processGadget(BASIC_CONTEXT);
     assertTrue(gadget.getPreloadMap().size() == 1);
   }
-  
+
   public void testOAuthPreload() throws Exception {
     String preloadUrl = "http://example.org/preload.txt";
     String preloadData = "Preload Data";
-    HttpRequest preloadRequest
-        = new HttpRequest(URI.create(preloadUrl));
+    HttpRequest preloadRequest = new HttpRequest(Uri.parse(preloadUrl));
 
     String gadgetXml
         = "<Module>" +
@@ -341,7 +336,8 @@ public class GadgetServerTest extends GadgetTestFixture {
   }
 
   public void testBlacklistedGadget() throws Exception {
-    expect(blacklist.isBlacklisted(eq(SPEC_URL))).andReturn(true);
+    URI test = SPEC_URL.toJavaUri();
+    expect(blacklist.isBlacklisted(eq(test))).andReturn(true);
     replay();
 
     try {
@@ -354,7 +350,7 @@ public class GadgetServerTest extends GadgetTestFixture {
   }
 
   public void testViewContentFetching() throws Exception {
-    URI viewUri = URI.create("http://example.org/content.htm");
+    Uri viewUri = Uri.parse("http://example.org/content.htm");
     String gadgetXml
         = "<Module>" +
           "  <ModulePrefs title=\"foo\">" +
@@ -381,7 +377,7 @@ public class GadgetServerTest extends GadgetTestFixture {
   }
 
   public void testViewContentFetchingWithBadHref() throws Exception {
-    URI viewUri = URI.create("http://example.org/nonexistantcontent.htm");
+    Uri viewUri = Uri.parse("http://example.org/nonexistantcontent.htm");
     String gadgetXml
         = "<Module>" +
           "  <ModulePrefs title=\"foo\">" +

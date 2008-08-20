@@ -227,6 +227,7 @@ public class UriBuilderTest {
         .addQueryParameter("hello world", "foo&bar")
         .setFragment("foo");
     assertEquals("http://apache.org/shindig?hello+world=foo%26bar#foo", builder.toString());
+    assertEquals("hello+world=foo%26bar", builder.getQuery());
   }
 
   @Test

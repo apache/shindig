@@ -23,6 +23,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 
+import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.http.HttpResponse;
 
@@ -30,7 +31,6 @@ import com.google.common.collect.Maps;
 
 import org.junit.Test;
 
-import java.net.URI;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -54,10 +54,9 @@ public class ProxyBaseTest {
 
   @Test
   public void validateUrlNoPath() throws Exception {
-    URI url = proxy.validateUrl("http://www.example.com");
+    Uri url = proxy.validateUrl("http://www.example.com");
     assertEquals("http", url.getScheme());
-    assertEquals("www.example.com", url.getHost());
-    assertEquals(-1, url.getPort());
+    assertEquals("www.example.com", url.getAuthority());
     assertEquals("/", url.getPath());
     assertNull(url.getQuery());
     assertNull(url.getFragment());
@@ -65,10 +64,9 @@ public class ProxyBaseTest {
 
   @Test
   public void validateUrlHttps() throws Exception {
-    URI url = proxy.validateUrl("https://www.example.com");
+    Uri url = proxy.validateUrl("https://www.example.com");
     assertEquals("https", url.getScheme());
-    assertEquals("www.example.com", url.getHost());
-    assertEquals(-1, url.getPort());
+    assertEquals("www.example.com", url.getAuthority());
     assertEquals("/", url.getPath());
     assertNull(url.getQuery());
     assertNull(url.getFragment());
@@ -76,10 +74,9 @@ public class ProxyBaseTest {
 
   @Test
   public void validateUrlWithPath() throws Exception {
-    URI url = proxy.validateUrl("http://www.example.com/foo");
+    Uri url = proxy.validateUrl("http://www.example.com/foo");
     assertEquals("http", url.getScheme());
-    assertEquals("www.example.com", url.getHost());
-    assertEquals(-1, url.getPort());
+    assertEquals("www.example.com", url.getAuthority());
     assertEquals("/foo", url.getPath());
     assertNull(url.getQuery());
     assertNull(url.getFragment());
@@ -87,10 +84,9 @@ public class ProxyBaseTest {
 
   @Test
   public void validateUrlWithPort() throws Exception {
-    URI url = proxy.validateUrl("http://www.example.com:8080/foo");
+    Uri url = proxy.validateUrl("http://www.example.com:8080/foo");
     assertEquals("http", url.getScheme());
-    assertEquals("www.example.com", url.getHost());
-    assertEquals(8080, url.getPort());
+    assertEquals("www.example.com:8080", url.getAuthority());
     assertEquals("/foo", url.getPath());
     assertNull(url.getQuery());
     assertNull(url.getFragment());
@@ -98,37 +94,32 @@ public class ProxyBaseTest {
 
   @Test
   public void validateUrlWithEncodedPath() throws Exception {
-    URI url = proxy.validateUrl("http://www.example.com:8080/foo%20bar");
+    Uri url = proxy.validateUrl("http://www.example.com/foo%20bar");
     assertEquals("http", url.getScheme());
-    assertEquals("www.example.com", url.getHost());
-    assertEquals(8080, url.getPort());
-    assertEquals("/foo%20bar", url.getRawPath());
-    assertEquals("/foo bar", url.getPath());
+    assertEquals("www.example.com", url.getAuthority());
+    assertEquals("/foo%20bar", url.getPath());
     assertNull(url.getQuery());
     assertNull(url.getFragment());
   }
 
   @Test
   public void validateUrlWithEncodedQuery() throws Exception {
-    URI url = proxy.validateUrl("http://www.example.com:8080/foo?q=with%20space");
+    Uri url = proxy.validateUrl("http://www.example.com/foo?q=with%20space");
     assertEquals("http", url.getScheme());
-    assertEquals("www.example.com", url.getHost());
-    assertEquals(8080, url.getPort());
+    assertEquals("www.example.com", url.getAuthority());
     assertEquals("/foo", url.getPath());
-    assertEquals("q=with%20space", url.getRawQuery());
-    assertEquals("q=with space", url.getQuery());
+    assertEquals("q=with%20space", url.getQuery());
+    assertEquals("with space", url.getQueryParameter("q"));
     assertNull(url.getFragment());
   }
 
   @Test
   public void validateUrlWithNoPathAndEncodedQuery() throws Exception {
-    URI url = proxy.validateUrl("http://www.example.com?q=with%20space");
+    Uri url = proxy.validateUrl("http://www.example.com?q=with%20space");
     assertEquals("http", url.getScheme());
-    assertEquals("www.example.com", url.getHost());
-    assertEquals(-1, url.getPort());
+    assertEquals("www.example.com", url.getAuthority());
     assertEquals("/", url.getPath());
-    assertEquals("q=with%20space", url.getRawQuery());
-    assertEquals("q=with space", url.getQuery());
+    assertEquals("q=with%20space", url.getQuery());
     assertNull(url.getFragment());
   }
 

@@ -17,6 +17,7 @@
  */
 package org.apache.shindig.gadgets;
 
+import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.gadgets.http.ContentFetcherFactory;
 import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.http.HttpResponse;
@@ -197,9 +198,9 @@ class PreloadTask implements Callable<HttpResponse> {
   private final GadgetContext context;
 
   public HttpResponse call() {
-    HttpRequest request = new HttpRequest(preload.getHref());
-    request.getOptions().ownerSigned = preload.isSignOwner();
-    request.getOptions().viewerSigned = preload.isSignViewer();
+    HttpRequest request = new HttpRequest(Uri.fromJavaUri(preload.getHref()))
+        .setSignOwner(preload.isSignOwner())
+        .setSignViewer(preload.isSignViewer());
     try {
       switch (preload.getAuth()) {
         case NONE:

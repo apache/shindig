@@ -20,14 +20,14 @@ package org.apache.shindig.gadgets;
 import static org.easymock.EasyMock.eq;
 import static org.easymock.EasyMock.expect;
 
+import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.gadgets.http.HttpFetcher;
-import org.apache.shindig.gadgets.http.HttpResponse;
 import org.apache.shindig.gadgets.http.HttpRequest;
+import org.apache.shindig.gadgets.http.HttpResponse;
 
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
-import java.net.URI;
 
 public class JsLibraryTest extends EasyMockTestCase {
   private final static String INLINE_JS = "var hello = 'world'; alert(hello);";
@@ -39,8 +39,7 @@ public class JsLibraryTest extends EasyMockTestCase {
   private final static String URL_JS = "while(true){alert('hello');}";
 
   public void testInline() throws GadgetException {
-    JsLibrary lib
-        = JsLibrary.create(JsLibrary.Type.INLINE, INLINE_JS, null, null);
+    JsLibrary lib = JsLibrary.create(JsLibrary.Type.INLINE, INLINE_JS, null, null);
     assertEquals(JsLibrary.Type.INLINE, lib.getType());
     assertEquals(INLINE_JS, lib.getContent());
   }
@@ -52,8 +51,7 @@ public class JsLibraryTest extends EasyMockTestCase {
     out.write(FILE_JS);
     out.close();
 
-    JsLibrary lib
-        = JsLibrary.create(JsLibrary.Type.FILE, temp.getPath(), null, null);
+    JsLibrary lib = JsLibrary.create(JsLibrary.Type.FILE, temp.getPath(), null, null);
     assertEquals(JsLibrary.Type.FILE, lib.getType());
     assertEquals(FILE_JS, lib.getContent());
   }
@@ -65,8 +63,7 @@ public class JsLibraryTest extends EasyMockTestCase {
     out.write(UNCOMPRESSED_FILE_JS);
     out.close();
 
-    File compressed
-        = new File(uncompressed.getPath().replace(".js", ".opt.js"));
+    File compressed = new File(uncompressed.getPath().replace(".js", ".opt.js"));
     // This might fail, but it shouldn't fail if the temp creation worked.
     compressed.createNewFile();
     compressed.deleteOnExit();
@@ -74,8 +71,7 @@ public class JsLibraryTest extends EasyMockTestCase {
     out.write(FILE_JS);
     out.close();
 
-    JsLibrary lib = JsLibrary.create(
-          JsLibrary.Type.FILE, uncompressed.getPath(), null, null);
+    JsLibrary lib = JsLibrary.create(JsLibrary.Type.FILE, uncompressed.getPath(), null, null);
     assertEquals(JsLibrary.Type.FILE, lib.getType());
     assertEquals(FILE_JS, lib.getContent());
     assertEquals(UNCOMPRESSED_FILE_JS, lib.getDebugContent());
@@ -83,10 +79,9 @@ public class JsLibraryTest extends EasyMockTestCase {
 
   public void testUrl() throws Exception {
     HttpFetcher mockFetcher = mock(HttpFetcher.class);
-    URI location = new URI("http://example.org/file.js");
+    Uri location = Uri.parse("http://example.org/file.js");
     HttpRequest request = new HttpRequest(location);
-    HttpResponse response
-        = new HttpResponse(HttpResponse.SC_OK, URL_JS.getBytes(), null);
+    HttpResponse response = new HttpResponse(HttpResponse.SC_OK, URL_JS.getBytes(), null);
     expect(mockFetcher.fetch(eq(request))).andReturn(response);
     replay();
     JsLibrary lib = JsLibrary.create(
