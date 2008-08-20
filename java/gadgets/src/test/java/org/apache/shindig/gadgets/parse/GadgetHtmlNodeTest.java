@@ -511,6 +511,25 @@ public class GadgetHtmlNodeTest extends TestCase {
                  renderNode(parent));
   }
   
+  public void testRenderCommentAlone() {
+    String comment = "<!-- comment -->";
+    GadgetHtmlNode commentNode = new GadgetHtmlNode(comment);
+    assertEquals(comment, renderNode(commentNode));
+  }
+  
+  public void testRenderCommentWithWhitespace() {
+    String comment = "\n   <!--      comment\n  \n -->";
+    GadgetHtmlNode commentNode = new GadgetHtmlNode(comment);
+    assertEquals(comment, renderNode(commentNode));
+  }
+  
+  public void testRenderTextWithCommentAndEscaped() {
+    String text = "\n <!-- comment\n <br> --> <foo&bar>";
+    GadgetHtmlNode textNode = new GadgetHtmlNode(text);
+    assertEquals("\n <!-- comment\n <br> --> &lt;foo&amp;bar&gt;",
+                 renderNode(textNode));
+  }
+  
   private String renderNode(GadgetHtmlNode node) {
     StringWriter sw = new StringWriter();
     try {

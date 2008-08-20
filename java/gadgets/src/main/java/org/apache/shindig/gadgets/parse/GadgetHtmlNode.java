@@ -300,7 +300,33 @@ public class GadgetHtmlNode {
    */
   public void render(Writer w) throws IOException {
     if (isText()) {
-      w.append(StringEscapeUtils.escapeHtml(getText()));
+      String rawText = getText();
+      int commentStart = 0;
+      int curPos = 0;
+      while ((commentStart = rawText.indexOf("<!--", curPos)) >= 0) {
+        // Comment found. By definition there must be an end-comment marker
+        // since if there wasn't, the comment would subsume all further text.
+        
+        // First append up to the current point, with proper escaping.
+        w.append(StringEscapeUtils.escapeHtml(rawText.substring(curPos, commentStart)));
+        
+        // Then append the comment verbatim.
+        int commentEnd = rawText.indexOf("-->", commentStart);
+        if (commentEnd == -1) {
+          // Should never happen, per above comment. But we know that the comment
+          // has begun, so just append the rest of the string verbatim to be safe.
+          w.append(rawText.substring(commentStart));
+          return;
+        }
+        int endPos = commentEnd + "-->".length();
+        w.append(rawText.substring(commentStart, endPos));
+        
+        // Then set current position
+        curPos = endPos;
+      }
+      
+      // Append remaining (all, if no comment) text, escaped.
+      w.append(StringEscapeUtils.escapeHtml(rawText.substring(curPos)));
     } else {
       w.append('<').append(tagName);
       for (String attrKey : getAttributeKeys()) {
