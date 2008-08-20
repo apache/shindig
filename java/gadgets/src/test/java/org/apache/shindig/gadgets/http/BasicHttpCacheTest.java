@@ -17,12 +17,13 @@
  */
 package org.apache.shindig.gadgets.http;
 
-import junit.framework.TestCase;
-
-import org.apache.commons.lang.ArrayUtils;
+import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.common.util.DateUtil;
 
-import java.net.URI;
+import org.apache.commons.lang.ArrayUtils;
+
+import junit.framework.TestCase;
+
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
@@ -49,10 +50,7 @@ public class BasicHttpCacheTest extends TestCase {
   }
 
   private HttpRequest createRequest(String method) {
-    HttpRequest req = new HttpRequest(method,
-        URI.create("http://www.here.com"), new HashMap<String, List<String>>(),
-        ArrayUtils.EMPTY_BYTE_ARRAY, new HttpRequest.Options());
-    return req;
+    return new HttpRequest(Uri.parse("http://www.example.org")).setMethod(method);
   }
 
   private HttpResponse createResponse(int statusCode, String header,
@@ -175,7 +173,7 @@ public class BasicHttpCacheTest extends TestCase {
   public void testCacheableWithForcedMinTTL() {
     HttpRequest req = createRequest("GET");
     // in seconds
-    req.getOptions().minCacheTtl = 5;
+    req.setCacheTtl(5);
     HttpResponse resp = createExpiresResponse(200, System.currentTimeMillis());
     HttpCacheKey key = new HttpCacheKey(req);
     cache.addResponse(key, req, resp);

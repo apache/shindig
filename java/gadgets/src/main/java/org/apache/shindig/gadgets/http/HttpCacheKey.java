@@ -36,51 +36,51 @@ public class HttpCacheKey {
 
   /**
    * Create a cache key for the specified request.
-   * 
+   *
    * @param request
    */
   public HttpCacheKey(HttpRequest request) {
     data = new HashMap<String,String>();
     setCacheable(true);
     if (!"GET".equals(request.getMethod()) ||
-        request.getOptions().ignoreCache) {
+        request.getIgnoreCache()) {
       setCacheable(false);
     }
     // In theory we only cache GET, but including the method in the cache key
     // provides some additional insurance that we aren't mixing cache content.
     set("method", request.getMethod());
-    set("url", request.getUri().toASCIIString());
+    set("url", request.getUri().toString());
   }
-  
+
   /**
    * Add additional data to the cache key.
    */
   public void set(String key, String value) {
     data.put(key, value);
   }
-  
+
   /**
    * Remove data from the cache key.
    */
   public void remove(String key) {
     data.remove(key);
   }
-  
+
   public void setCacheable(boolean cacheable) {
     this.cacheable = cacheable;
   }
-  
+
   public boolean isCacheable() {
     return cacheable;
   }
-  
+
   /**
    * Figure out a string representation of this cache key.  The representation
    * will be:
-   * 
+   *
    * canonical: identical sets of key/value pairs will always map to the same
    * string.
-   * 
+   *
    * unique: different sets of key/value pairs will always map to different
    * strings.
    */

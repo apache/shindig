@@ -21,13 +21,13 @@ package org.apache.shindig.gadgets.servlet;
 import static org.easymock.EasyMock.expect;
 import static org.junit.Assert.assertEquals;
 
+import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.http.HttpResponse;
 
 import org.junit.Test;
 
-import java.net.URI;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -46,14 +46,14 @@ public class ProxyHandlerTest {
       = new HttpServletResponseRecorder(fixture.response);
 
   private void expectGetAndReturnData(String url, byte[] data) throws Exception {
-    HttpRequest req = new HttpRequest(new URI(url), new HttpRequest.Options());
+    HttpRequest req = new HttpRequest(Uri.parse(url));
     HttpResponse resp = new HttpResponse(200, data, null);
     expect(fixture.httpFetcher.fetch(req)).andReturn(resp);
   }
 
   private void expectGetAndReturnHeaders(String url,
       Map<String, List<String>> headers) throws Exception {
-    HttpRequest req = new HttpRequest(new URI(url), new HttpRequest.Options());
+    HttpRequest req = new HttpRequest(Uri.parse(url));
     HttpResponse resp = new HttpResponse(200, null, headers);
     expect(fixture.httpFetcher.fetch(req)).andReturn(resp);
   }

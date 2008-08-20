@@ -17,15 +17,15 @@
  */
 package org.apache.shindig.gadgets.rewrite;
 
-import com.google.inject.Inject;
-import com.google.inject.Singleton;
-import com.google.inject.name.Named;
-
 import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.GadgetSpecFactory;
 import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.http.HttpResponse;
 import org.apache.shindig.gadgets.spec.GadgetSpec;
+
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
+import com.google.inject.name.Named;
 
 import java.io.ByteArrayOutputStream;
 import java.io.InputStreamReader;
@@ -83,14 +83,14 @@ public class DefaultContentRewriter implements ContentRewriter {
       OutputStreamWriter output = new OutputStreamWriter(baos,
           original.getEncoding());
       String mimeType = original.getHeader("Content-Type");
-      if (request.getOptions() != null && request.getOptions().rewriteMimeType != null) {
-        mimeType = request.getOptions().rewriteMimeType;
+      if (request.getRewriteMimeType() != null) {
+        mimeType = request.getRewriteMimeType();
       }
       GadgetSpec spec = null;
-      if (request.getOptions() != null && request.getOptions().gadgetUri != null) {
-        spec = specFactory.getGadgetSpec(request.getOptions().gadgetUri, false);
+      if (request.getGadget() != null) {
+        spec = specFactory.getGadgetSpec(request.getGadget().toJavaUri(), false);
       }
-      if (rewrite(spec, request.getUri(),
+      if (rewrite(spec, request.getUri().toJavaUri(),
           new InputStreamReader(original.getResponse(), original.getEncoding()),
           mimeType,
           output)) {

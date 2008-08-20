@@ -16,6 +16,7 @@ package org.apache.shindig.gadgets;
 
 import org.apache.shindig.common.SecurityToken;
 import org.apache.shindig.common.crypto.Crypto;
+import org.apache.shindig.common.uri.UriBuilder;
 import org.apache.shindig.common.util.TimeSource;
 import org.apache.shindig.gadgets.http.HttpCache;
 import org.apache.shindig.gadgets.http.HttpCacheKey;
@@ -30,9 +31,6 @@ import net.oauth.OAuthMessage;
 import net.oauth.OAuth.Parameter;
 import net.oauth.signature.RSA_SHA1;
 
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.net.URL;
 import java.security.PrivateKey;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -157,7 +155,7 @@ public class SigningFetcher extends ChainedContentFetcher {
 
       HttpRequest signedRequest = signRequest(request);
       // Signed requests are not externally cacheable
-      signedRequest.getOptions().ignoreCache = true;
+      signedRequest.setIgnoreCache(true);
       result = nextFetcher.fetch(signedRequest);
 
       // Try and cache the response
@@ -168,12 +166,12 @@ public class SigningFetcher extends ChainedContentFetcher {
       throw new GadgetException(GadgetException.Code.INTERNAL_SERVER_ERROR, e);
     }
   }
-  
+
   private HttpCacheKey makeCacheKey(HttpRequest request) {
     HttpCacheKey key = new HttpCacheKey(request);
     key.set("authentication", "signed");
     List<Parameter> signedFetchParams = new ArrayList<Parameter>();
-    addOpenSocialParams(request.getOptions(), signedFetchParams);
+    addOpenSocialParams(request, signedFetchParams);
     addOAuthNonTemporalParams(signedFetchParams);
     for (Parameter p : signedFetchParams) {
       key.set(p.getKey(), p.getValue());
@@ -181,14 +179,13 @@ public class SigningFetcher extends ChainedContentFetcher {
     return key;
   }
 
-  private HttpRequest signRequest(HttpRequest req)
-      throws GadgetException {
+  private HttpRequest signRequest(HttpRequest req) throws GadgetException {
     try {
       // Parse the request into parameters for OAuth signing, stripping out
       // any OAuth or OpenSocial parameters injected by the client
-      URI resource = req.getUri();
-      String query = resource.getRawQuery();
-      resource = removeQuery(resource);
+      UriBuilder resource = new UriBuilder(req.getUri());
+      String query = resource.getQuery();
+      resource.setQuery(null);
       List<OAuth.Parameter> queryParams = sanitize(OAuth.decodeForm(query));
       String postStr = req.getPostBodyAsString();
       List<OAuth.Parameter> postParams = sanitize(OAuth.decodeForm(postStr));
@@ -196,14 +193,13 @@ public class SigningFetcher extends ChainedContentFetcher {
       msgParams.addAll(queryParams);
       msgParams.addAll(postParams);
 
-      addOpenSocialParams(req.getOptions(), msgParams);
+      addOpenSocialParams(req, msgParams);
 
       addOAuthParams(msgParams);
 
       // Build and sign the OAuthMessage; note that the resource here has
       // no query string, the parameters are all in msgParams
-      OAuthMessage message
-          = new OAuthMessage(req.getMethod(), resource.toString(), msgParams);
+      OAuthMessage message = new OAuthMessage(req.getMethod(), resource.toString(), msgParams);
 
       // Sign the message, this may jump into a subclass
       signMessage(message);
@@ -227,13 +223,8 @@ public class SigningFetcher extends ChainedContentFetcher {
       // the normal form encoding scheme, so we have to use the OAuth library
       // formEncode method.  The java.net.URI code makes it difficult to insert
       // a pre-encoded query string, so we use URL instead.
-      String finalQuery = OAuth.formEncode(newQuery);
-      URL url = new URL(
-          resource.getScheme(),
-          resource.getHost(),
-          resource.getPort(),
-          resource.getRawPath() + '?' + finalQuery);
-      return new HttpRequest(url.toURI(), req);
+      resource.setQuery(OAuth.formEncode(newQuery));
+      return new HttpRequest(req).setUri(resource.toUri());
     } catch (GadgetException e) {
       throw e;
     } catch (Exception e) {
@@ -241,27 +232,15 @@ public class SigningFetcher extends ChainedContentFetcher {
     }
   }
 
-  private URI removeQuery(URI resource) throws URISyntaxException {
-    return new URI(
-        resource.getScheme(),
-        null, // user info
-        resource.getHost(),
-        resource.getPort(),
-        resource.getRawPath(),
-        null, // query
-        null); // fragment
-  }
 
-
-  private void addOpenSocialParams(HttpRequest.Options options,
-      List<Parameter> msgParams) {
+  private void addOpenSocialParams(HttpRequest request, List<Parameter> msgParams) {
     String owner = authToken.getOwnerId();
-    if (owner != null && options.ownerSigned) {
+    if (owner != null && request.getSignOwner()) {
       msgParams.add(new OAuth.Parameter(OPENSOCIAL_OWNERID, owner));
     }
 
     String viewer = authToken.getViewerId();
-    if (viewer != null && options.viewerSigned) {
+    if (viewer != null && request.getSignViewer()) {
       msgParams.add(new OAuth.Parameter(OPENSOCIAL_VIEWERID, viewer));
     }
 

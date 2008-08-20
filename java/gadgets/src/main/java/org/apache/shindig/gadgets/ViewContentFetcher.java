@@ -18,6 +18,7 @@
  */
 package org.apache.shindig.gadgets;
 
+import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.gadgets.http.HttpFetcher;
 import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.http.HttpResponse;
@@ -51,7 +52,8 @@ public class ViewContentFetcher implements Runnable {
    * Retrieves the remote view content.
    */
   public void run() {
-    HttpRequest request = HttpRequest.getRequest(view.getHref(), ignoreCache);
+    HttpRequest request = new HttpRequest(Uri.fromJavaUri(view.getHref()))
+        .setIgnoreCache(ignoreCache);
     try {
       HttpResponse response = httpFetcher.fetch(request);
       if (response.getHttpStatusCode() != HttpResponse.SC_OK) {

@@ -22,14 +22,13 @@ import static junitx.framework.StringAssert.assertContains;
 import static org.easymock.EasyMock.expect;
 import static org.junit.Assert.assertEquals;
 
+import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.http.HttpResponse;
 
 import org.junit.Before;
 import org.junit.Test;
-
-import java.net.URI;
 
 import javax.servlet.http.HttpServletResponse;
 
@@ -40,7 +39,7 @@ import javax.servlet.http.HttpServletResponse;
  */
 public class ProxyServletTest {
   private static final String REQUEST_DOMAIN = "example.org";
-  private static final String REQUEST_URL = "http://example.org/file";
+  private static final Uri REQUEST_URL = Uri.parse("http://example.org/file");
   private static final String BASIC_SYNTAX_URL
       = "http://opensocial.org/proxy?foo=bar&url=" + REQUEST_URL;
   private static final String ALT_SYNTAX_URL
@@ -52,14 +51,14 @@ public class ProxyServletTest {
   private final ProxyHandler proxyHandler
       = new ProxyHandler(fixture.httpFetcher, fixture.lockedDomainService, fixture.rewriter);
   private final ProxyServlet servlet = new ProxyServlet();
-  private final HttpRequest request = HttpRequest.getRequest(URI.create(REQUEST_URL), false);
+  private final HttpRequest request = new HttpRequest(REQUEST_URL);
   private final HttpResponse response = new HttpResponse(RESPONSE_BODY);
 
   @Before
   public void setUp() {
     servlet.setProxyHandler(proxyHandler);
     expect(fixture.request.getParameter(ProxyBase.URL_PARAM))
-        .andReturn(REQUEST_URL).anyTimes();
+        .andReturn(REQUEST_URL.toString()).anyTimes();
     expect(fixture.request.getHeader("Host")).andReturn(REQUEST_DOMAIN).anyTimes();
     expect(fixture.lockedDomainService.embedCanRender(REQUEST_DOMAIN))
         .andReturn(true).anyTimes();

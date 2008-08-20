@@ -17,7 +17,6 @@
  */
 package org.apache.shindig.gadgets;
 
-import org.apache.commons.lang.StringUtils;
 import org.apache.shindig.common.ContainerConfig;
 import org.apache.shindig.common.util.ResourceLoader;
 import org.apache.shindig.common.xml.XmlException;

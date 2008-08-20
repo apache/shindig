@@ -21,6 +21,8 @@ package org.apache.shindig.gadgets.servlet;
 import org.apache.shindig.common.SecurityToken;
 import org.apache.shindig.common.SecurityTokenDecoder;
 import org.apache.shindig.common.SecurityTokenException;
+import org.apache.shindig.common.uri.Uri;
+import org.apache.shindig.common.util.Utf8UrlCoder;
 import org.apache.shindig.gadgets.FeedProcessor;
 import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.http.ContentFetcherFactory;
@@ -32,7 +34,6 @@ import org.apache.shindig.gadgets.rewrite.ContentRewriter;
 import org.apache.shindig.gadgets.spec.Auth;
 import org.apache.shindig.gadgets.spec.Preload;
 
-import com.google.common.collect.Maps;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
@@ -40,10 +41,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.net.URI;
-import java.net.URLDecoder;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -123,68 +120,59 @@ public class MakeRequestHandler extends ProxyBase{
    * @throws GadgetException
    */
   private HttpRequest buildHttpRequest(HttpServletRequest request) throws GadgetException {
-    try {
-      String encoding = request.getCharacterEncoding();
-      if (encoding == null) {
-        encoding = "UTF-8";
-      }
-
-      URI url = validateUrl(request.getParameter(URL_PARAM));
-      String method = request.getMethod();
-      Map<String, List<String>> headers = null;
-      byte[] postBody = null;
-
-      method = getParameter(request, METHOD_PARAM, "GET");
-      postBody = getParameter(request, POST_DATA_PARAM, "").getBytes();
-
-      String headerData = request.getParameter(HEADERS_PARAM);
-      if (headerData == null || headerData.length() == 0) {
-        headers = Collections.emptyMap();
-      } else {
-        // We actually only accept single key value mappings now.
-        headers = Maps.newTreeMap(String.CASE_INSENSITIVE_ORDER);
-        String[] headerList = headerData.split("&");
-        for (String header : headerList) {
-          String[] parts = header.split("=");
-          if (parts.length != 2) {
-            throw new GadgetException(GadgetException.Code.INTERNAL_SERVER_ERROR,
-                "Malformed header specified,");
-          }
-          headers.put(URLDecoder.decode(parts[0], encoding),
-              Arrays.asList(URLDecoder.decode(parts[1], encoding)));
-        }
-      }
-
-      removeUnsafeHeaders(headers);
-
-      HttpRequest.Options options = new HttpRequest.Options();
-      options.ignoreCache = "1".equals(request.getParameter(NOCACHE_PARAM));
-      if (request.getParameter(SIGN_VIEWER) != null) {
-        options.viewerSigned = Boolean.parseBoolean(request.getParameter(SIGN_VIEWER));
-      }
-      if (request.getParameter(SIGN_OWNER) != null) {
-        options.ownerSigned = Boolean.parseBoolean(request.getParameter(SIGN_OWNER));
-      }
-      if (request.getParameter(GADGET_PARAM) != null) {
-        options.gadgetUri = URI.create(request.getParameter(GADGET_PARAM));
-      }
-      options.rewriter = rewriter;
-
-      // Allow the rewriter to use an externally forced mime type. This is needed
-      // allows proper rewriting of <script src="x"/> where x is returned with
-      // a content type like text/html which unfortunately happens all too often
-      options.rewriteMimeType = request.getParameter(REWRITE_MIME_TYPE_PARAM);
-
-      return new HttpRequest(method, url, headers, postBody, options);
-    } catch (UnsupportedEncodingException e) {
-      throw new GadgetException(GadgetException.Code.INTERNAL_SERVER_ERROR, e);
+    String encoding = request.getCharacterEncoding();
+    if (encoding == null) {
+      encoding = "UTF-8";
     }
+
+    Uri url = validateUrl(request.getParameter(URL_PARAM));
+    String method = request.getMethod();
+    Map<String, List<String>> headers = null;
+    byte[] postBody = null;
+
+    HttpRequest req = new HttpRequest(url)
+        .setMethod(getParameter(request, METHOD_PARAM, "GET"))
+        .setPostBody(getParameter(request, POST_DATA_PARAM, "").getBytes());
+
+    String headerData = getParameter(request, HEADERS_PARAM, "");
+    if (headerData.length() > 0) {
+      String[] headerList = headerData.split("&");
+      for (String header : headerList) {
+        String[] parts = header.split("=");
+        if (parts.length != 2) {
+          throw new GadgetException(GadgetException.Code.INTERNAL_SERVER_ERROR,
+              "Malformed header specified,");
+        }
+        req.addHeader(Utf8UrlCoder.decode(parts[0]), Utf8UrlCoder.decode(parts[1]));
+      }
+    }
+
+    removeUnsafeHeaders(req);
+
+    req.setIgnoreCache("1".equals(request.getParameter(NOCACHE_PARAM)));
+
+    if (request.getParameter(SIGN_VIEWER) != null) {
+      req.setSignViewer(Boolean.parseBoolean(request.getParameter(SIGN_VIEWER)));
+    }
+    if (request.getParameter(SIGN_OWNER) != null) {
+      req.setSignOwner(Boolean.parseBoolean(request.getParameter(SIGN_OWNER)));
+    }
+    if (request.getParameter(GADGET_PARAM) != null) {
+      req.setGadget(Uri.parse(request.getParameter(GADGET_PARAM)));
+    }
+    req.setContentRewriter(rewriter);
+
+    // Allow the rewriter to use an externally forced mime type. This is needed
+    // allows proper rewriting of <script src="x"/> where x is returned with
+    // a content type like text/html which unfortunately happens all too often
+    req.setRewriteMimeType(request.getParameter(REWRITE_MIME_TYPE_PARAM));
+    return req;
   }
 
   /**
    * Removes unsafe headers from the header set.
    */
-  private void removeUnsafeHeaders(Map<String, List<String>> headers) {
+  private void removeUnsafeHeaders(HttpRequest request) {
     // Host must be removed.
     final String[] badHeaders = new String[] {
         // No legitimate reason to over ride these.
@@ -192,7 +180,7 @@ public class MakeRequestHandler extends ProxyBase{
         "Host", "Accept", "Accept-Encoding"
     };
     for (String bad : badHeaders) {
-      headers.remove(bad);
+      request.removeHeader(bad);
     }
   }
 

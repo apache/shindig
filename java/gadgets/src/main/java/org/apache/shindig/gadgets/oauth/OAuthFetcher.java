@@ -17,13 +17,13 @@
 package org.apache.shindig.gadgets.oauth;
 
 import org.apache.shindig.common.SecurityToken;
+import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.gadgets.ChainedContentFetcher;
 import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.http.HttpCacheKey;
 import org.apache.shindig.gadgets.http.HttpFetcher;
-import org.apache.shindig.gadgets.http.HttpResponse;
 import org.apache.shindig.gadgets.http.HttpRequest;
-import org.apache.shindig.gadgets.http.HttpRequest.Options;
+import org.apache.shindig.gadgets.http.HttpResponse;
 
 import net.oauth.OAuth;
 import net.oauth.OAuthAccessor;
@@ -35,10 +35,8 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
-import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -63,12 +61,12 @@ public class OAuthFetcher extends ChainedContentFetcher {
    * Per request configuration for this OAuth fetch.
    */
   protected final OAuthFetchParams fetchParams;
-  
+
   /**
    * Configuration options for the fetcher.
    */
   protected final OAuthFetcherConfig fetcherConfig;
-  
+
   /**
    * OAuth specific stuff to include in the response.
    */
@@ -80,12 +78,12 @@ public class OAuthFetcher extends ChainedContentFetcher {
    * those URLs.
    */
   private OAuthStore.AccessorInfo accessorInfo;
-  
+
   /**
    * The request the client really wants to make.
    */
   private HttpRequest realRequest;
-  
+
   /**
    * @param fetcherConfig configuration options for the fetcher
    * @param nextFetcher fetcher to use for actually making requests
@@ -100,10 +98,10 @@ public class OAuthFetcher extends ChainedContentFetcher {
     super(nextFetcher);
     this.fetcherConfig = fetcherConfig;
     this.fetchParams = new OAuthFetchParams(
-        params, 
+        params,
         new OAuthClientState(fetcherConfig.getStateCrypter(), params.getOrigClientState()),
         authToken);
-    this.responseParams = new OAuthResponseParams(fetcherConfig.getStateCrypter());  
+    this.responseParams = new OAuthResponseParams(fetcherConfig.getStateCrypter());
   }
 
   /**
@@ -130,7 +128,7 @@ public class OAuthFetcher extends ChainedContentFetcher {
       accessor.tokenSecret = fetchParams.getClientState().getAccessTokenSecret();
     } else if (accessor.accessToken == null &&
                fetchParams.getArguments().getRequestToken() != null) {
-      // We don't have an access token yet, but the client sent us a 
+      // We don't have an access token yet, but the client sent us a
       // (hopefully) preapproved request token.
       accessor.requestToken = fetchParams.getArguments().getRequestToken();
       accessor.tokenSecret = fetchParams.getArguments().getRequestTokenSecret();
@@ -156,14 +154,14 @@ public class OAuthFetcher extends ChainedContentFetcher {
     if (response != null) {
       return response;
     }
-    
+
     try {
       lookupOAuthMetadata();
     } catch (GadgetException e) {
       responseParams.setError(OAuthError.BAD_OAUTH_CONFIGURATION);
       return buildErrorResponse(e);
     }
-    
+
     this.realRequest = request;
 
     int attempts = 0;
@@ -180,7 +178,7 @@ public class OAuthFetcher extends ChainedContentFetcher {
         }
       }
     } while (retry);
-    
+
     if (response == null) {
       throw new GadgetException(
           GadgetException.Code.INTERNAL_SERVER_ERROR,
@@ -188,7 +186,7 @@ public class OAuthFetcher extends ChainedContentFetcher {
     }
     return fetcherConfig.getHttpCache().addResponse(cacheKey, request, response);
   }
-  
+
   // Builds up a cache key based on the same key that we use into the OAuth
   // token storage, which should identify precisely which data to return for the
   // response.  Using the OAuth access token as the cache key is another
@@ -230,14 +228,14 @@ public class OAuthFetcher extends ChainedContentFetcher {
     if (pe.startFromScratch()) {
       OAuthStore.TokenKey tokenKey = buildTokenKey();
       fetcherConfig.getTokenStore().removeToken(tokenKey);
-      
+
       accessorInfo.accessor.accessToken = null;
       accessorInfo.accessor.requestToken = null;
       accessorInfo.accessor.tokenSecret = null;
     }
     return (attempts < MAX_ATTEMPTS && pe.canRetry());
   }
-  
+
   private HttpResponse attemptFetch()
       throws GadgetException, OAuthProtocolException {
     if (needApproval()) {
@@ -369,79 +367,58 @@ public class OAuthFetcher extends ChainedContentFetcher {
     return result.toString();
   }
 
-  private HttpRequest createHttpRequest(
-      List<Map.Entry<String, String>> oauthParams, String method,
-      String url, Map<String, List<String>> headers, String contentType,
-      String postBody, Options options)
-          throws IOException, URISyntaxException, GadgetException {
+  private HttpRequest createHttpRequest(HttpRequest base,
+      List<Map.Entry<String, String>> oauthParams) throws IOException, GadgetException {
 
-    OAuthStore.OAuthParamLocation paramLocation =
-        accessorInfo.getParamLocation();
-
-    HashMap<String, List<String>> newHeaders =
-      new HashMap<String, List<String>>();
+    OAuthStore.OAuthParamLocation paramLocation = accessorInfo.getParamLocation();
 
     // paramLocation could be overriden by a run-time parameter to fetchRequest
 
+    HttpRequest result = new HttpRequest(base);
+
     switch (paramLocation) {
       case AUTH_HEADER:
-        if (headers != null) {
-          newHeaders.putAll(headers);
-        }
-        List<String> authHeader = new ArrayList<String>();
-        authHeader.add(getAuthorizationHeader(oauthParams));
-        newHeaders.put("Authorization", authHeader);
+        result.addHeader("Authorization", getAuthorizationHeader(oauthParams));
         break;
 
       case POST_BODY:
-        if (!OAuth.isFormEncoded(contentType)) {
+        if (!OAuth.isFormEncoded(result.getContentType())) {
           throw new GadgetException(GadgetException.Code.INVALID_PARAMETER,
               "OAuth param location can only be post_body if post body if of " +
               "type x-www-form-urlencoded");
         }
-        if (postBody == null || postBody.length() == 0) {
-          postBody = OAuth.formEncode(oauthParams);
+        String oauthData = OAuth.formEncode(oauthParams);
+        if (result.getPostBodyLength() == 0) {
+          result.setPostBody(oauthData.getBytes("UTF-8"));
         } else {
-          postBody = new StringBuilder()
-              .append(postBody)
-              .append('&')
-              .append(OAuth.formEncode(oauthParams))
-              .toString();
+          result.setPostBody((result.getPostBodyAsString() + '&' + oauthData).getBytes());
         }
         break;
 
       case URI_QUERY:
-        url = OAuth.addParameters(url, oauthParams);
+        result.setUri(Uri.parse(OAuth.addParameters(result.getUri().toString(), oauthParams)));
         break;
     }
 
-    byte[] postBodyBytes = (postBody == null)
-                           ? null
-                           : postBody.getBytes("UTF-8");
-
-    return new HttpRequest(method, new URI(url), newHeaders,
-                                    postBodyBytes, options);
+    return result;
   }
 
   /**
    * Sends OAuth request token and access token messages.
    */
   private OAuthMessage sendOAuthMessage(OAuthMessage request)
-      throws IOException, URISyntaxException, OAuthProtocolException, GadgetException {
+      throws IOException, OAuthProtocolException, GadgetException {
 
-    HttpRequest oauthRequest =
-      createHttpRequest(filterOAuthParams(request),
-                                 request.method,
-                                 request.URL,
-                                 null,
-                                 HttpRequest.DEFAULT_CONTENT_TYPE,
-                                 null,
-                                 HttpRequest.getIgnoreCacheOptions());
+    HttpRequest req = new HttpRequest(Uri.parse(request.URL))
+        .setMethod(request.method)
+        .setIgnoreCache(true);
+
+    HttpRequest oauthRequest = createHttpRequest(req, filterOAuthParams(request));
 
     HttpResponse response = nextFetcher.fetch(oauthRequest);
     checkForProtocolProblem(response);
     OAuthMessage reply = new OAuthMessage(null, null, null);
-    
+
     reply.addParameters(OAuth.decodeForm(response.getResponseAsString()));
     reply = parseAuthHeader(reply, response);
     return reply;
@@ -450,7 +427,7 @@ public class OAuthFetcher extends ChainedContentFetcher {
   /**
    * Parse OAuth WWW-Authenticate header and either add them to an existing
    * message or create a new message.
-   * 
+   *
    * @param msg
    * @param resp
    * @return the updated message.
@@ -471,7 +448,7 @@ public class OAuthFetcher extends ChainedContentFetcher {
   /**
    * Builds the data we'll cache on the client while we wait for approval.
    */
-  private void buildClientApprovalState() throws GadgetException {
+  private void buildClientApprovalState() {
     OAuthAccessor accessor = accessorInfo.getAccessor();
     responseParams.getNewClientState().setRequestToken(accessor.requestToken);
     responseParams.getNewClientState().setRequestTokenSecret(accessor.tokenSecret);
@@ -501,7 +478,7 @@ public class OAuthFetcher extends ChainedContentFetcher {
   private HttpResponse buildOAuthApprovalResponse() {
     return buildNonDataResponse(200);
   }
-  
+
   private HttpResponse buildNonDataResponse(int status) {
     HttpResponse response = new HttpResponse(status, null, null);
     responseParams.addToResponse(response);
@@ -519,7 +496,7 @@ public class OAuthFetcher extends ChainedContentFetcher {
 
   /**
    * Implements section 6.3 of the OAuth spec.
-   * @throws OAuthProtocolException 
+   * @throws OAuthProtocolException
    */
   private void exchangeRequestToken()
       throws GadgetException, OAuthProtocolException {
@@ -560,7 +537,7 @@ public class OAuthFetcher extends ChainedContentFetcher {
   /**
    * Builds the data we'll cache on the client while we make requests.
    */
-  private void buildClientAccessState() throws GadgetException {
+  private void buildClientAccessState() {
     OAuthAccessor accessor = accessorInfo.getAccessor();
     responseParams.getNewClientState().setAccessToken(accessor.accessToken);
     responseParams.getNewClientState().setAccessTokenSecret(accessor.tokenSecret);
@@ -569,7 +546,7 @@ public class OAuthFetcher extends ChainedContentFetcher {
 
   /**
    * Get honest-to-goodness user data.
-   * 
+   *
    * @throws OAuthProtocolException if the service provider returns an OAuth
    * related error instead of user data.
    */
@@ -587,24 +564,19 @@ public class OAuthFetcher extends ChainedContentFetcher {
 
       // Build and sign the message.
       OAuthMessage oauthRequest = newRequestMessage(
-          method, realRequest.getUri().toASCIIString(), msgParams);
+          method, realRequest.getUri().toString(), msgParams);
 
       HttpRequest oauthHttpRequest = createHttpRequest(
-          filterOAuthParams(oauthRequest),
-          realRequest.getMethod(),
-          realRequest.getUri().toASCIIString(),
-          realRequest.getAllHeaders(),
-          realRequest.getContentType(),
-          realRequest.getPostBodyAsString(),
-          realRequest.getOptions());
-      
+          realRequest,
+          filterOAuthParams(oauthRequest));
+
       // Not externally cacheable.
-      oauthHttpRequest.getOptions().ignoreCache = true;
+      oauthHttpRequest.setIgnoreCache(true);
 
       HttpResponse response = nextFetcher.fetch(oauthHttpRequest);
-      
+
       checkForProtocolProblem(response);
-  
+
       // Track metadata on the response
       responseParams.addToResponse(response);
       return response;
@@ -618,7 +590,7 @@ public class OAuthFetcher extends ChainedContentFetcher {
       throw new GadgetException(GadgetException.Code.INTERNAL_SERVER_ERROR, e);
     }
   }
-  
+
   private void checkForProtocolProblem(HttpResponse response)
       throws OAuthProtocolException, IOException {
     int status = response.getHttpStatusCode();
