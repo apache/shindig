@@ -290,7 +290,8 @@ public class GadgetHtmlNode {
    * the rest of the class provides, such as attribute key
    * validation. All whitespace and comments are maintained. Nodes
    * with zero children are rendered short-form (&lt;foo/&gt;)
-   * unless tagName is "style" since many browsers dislike short-form for that.
+   * unless tagName is "style" or "script" since many browsers dislike short-form
+   * for those.
    * One space is provided between attributes. Attribute values are surrounded
    * in double-quotes. Null-valued attributes are rendered without ="value".
    * Attributes are rendered in no particular order.
@@ -310,7 +311,8 @@ public class GadgetHtmlNode {
         }
       }
       if (children.size() == 0 &&
-          !tagName.equalsIgnoreCase("style")) {
+          !tagName.equalsIgnoreCase("style") &&
+          !tagName.equalsIgnoreCase("script")) {
         w.append("/>");
       } else {
         w.append('>');

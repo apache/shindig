@@ -31,7 +31,7 @@ import java.util.List;
 import java.util.Set;
 
 public class GadgetHtmlNodeTest extends TestCase {
-  private ParsedHtmlAttribute makeParsedAttribute(String key, String val) {
+  public static ParsedHtmlAttribute makeParsedAttribute(String key, String val) {
     ParsedHtmlAttribute parsed = EasyMock.createNiceMock(ParsedHtmlAttribute.class);
     expect(parsed.getName()).andReturn(key).anyTimes();
     expect(parsed.getValue()).andReturn(val).anyTimes();
@@ -39,7 +39,7 @@ public class GadgetHtmlNodeTest extends TestCase {
     return parsed;
   }
   
-  private ParsedHtmlNode makeTagNodeFromParsed(
+  public static ParsedHtmlNode makeParsedTagNode(
       String tag, String[][] attribs, ParsedHtmlNode[] children) {
     ParsedHtmlNode parsed = EasyMock.createNiceMock(ParsedHtmlNode.class);
     expect(parsed.getTagName()).andReturn(tag).anyTimes();
@@ -62,6 +62,16 @@ public class GadgetHtmlNodeTest extends TestCase {
     return parsed;
   }
   
+  public static ParsedHtmlNode makeParsedTextNode(String text) {
+    ParsedHtmlNode parsed = EasyMock.createNiceMock(ParsedHtmlNode.class);
+    expect(parsed.getText()).andReturn(text).anyTimes();
+    expect(parsed.getTagName()).andReturn(null).anyTimes();
+    expect(parsed.getAttributes()).andReturn(null).anyTimes();
+    expect(parsed.getChildren()).andReturn(null).anyTimes();
+    replay(parsed);
+    return parsed;
+  }
+  
   private GadgetHtmlNode makeTagNodeFromNew(
       String tag, String[][] attribs, GadgetHtmlNode[] children) {
     GadgetHtmlNode node = new GadgetHtmlNode(tag, attribs);
@@ -73,16 +83,6 @@ public class GadgetHtmlNodeTest extends TestCase {
     return node;
   }
   
-  private ParsedHtmlNode makeTextNodeFromParsed(String text) {
-    ParsedHtmlNode parsed = EasyMock.createNiceMock(ParsedHtmlNode.class);
-    expect(parsed.getText()).andReturn(text).anyTimes();
-    expect(parsed.getTagName()).andReturn(null).anyTimes();
-    expect(parsed.getAttributes()).andReturn(null).anyTimes();
-    expect(parsed.getChildren()).andReturn(null).anyTimes();
-    replay(parsed);
-    return parsed;
-  }
-  
   private GadgetHtmlNode makeTextNodeFromNew(String text) {
     return new GadgetHtmlNode(text);
   }
@@ -91,10 +91,10 @@ public class GadgetHtmlNodeTest extends TestCase {
   private static String[][] tagTreeAttribs = { { "id", "foo" }, { "name", "bar" } };
   public void testTagTreeCreatedFromParsedGetters() {
     ParsedHtmlNode[] parsedKids = {
-        makeTextNodeFromParsed("content"),
-        makeTagNodeFromParsed("span", null, null)
+        makeParsedTextNode("content"),
+        makeParsedTagNode("span", null, null)
     };
-    ParsedHtmlNode parsed = makeTagNodeFromParsed("div", tagTreeAttribs, parsedKids);
+    ParsedHtmlNode parsed = makeParsedTagNode("div", tagTreeAttribs, parsedKids);
     GadgetHtmlNode node = new GadgetHtmlNode(parsed);
     validateTagTreeGetters(node);
   }
@@ -143,7 +143,7 @@ public class GadgetHtmlNodeTest extends TestCase {
   // Test: basic getters
   private static String textGetterContent = "content";
   public void testTextCreatedFromParsedGetters() {
-    ParsedHtmlNode parsed = makeTextNodeFromParsed(textGetterContent);
+    ParsedHtmlNode parsed = makeParsedTextNode(textGetterContent);
     GadgetHtmlNode node = new GadgetHtmlNode(parsed);
     validateTextGetters(node);
   }
@@ -160,7 +160,7 @@ public class GadgetHtmlNodeTest extends TestCase {
   
   // Test: tag name setter
   public void testTagCreatedFromParsedTagSetter() {
-    ParsedHtmlNode parsed = makeTagNodeFromParsed("div", null, null);
+    ParsedHtmlNode parsed = makeParsedTagNode("div", null, null);
     GadgetHtmlNode node = new GadgetHtmlNode(parsed);
     validateTagNameSetter(node);
   }
@@ -180,7 +180,7 @@ public class GadgetHtmlNodeTest extends TestCase {
   private static String[][] tagManipAttribs = { { "id", "foo" } };
   public void testTagCreatedFromParsedAttributeManipulation() {
     ParsedHtmlNode parsed =
-        makeTagNodeFromParsed("div", tagManipAttribs, null);
+        makeParsedTagNode("div", tagManipAttribs, null);
     GadgetHtmlNode node = new GadgetHtmlNode(parsed);
     validateTagAttributeManipulation(node);
   }
@@ -242,8 +242,8 @@ public class GadgetHtmlNodeTest extends TestCase {
   // We don't do created-from-new testing since html node creation types are
   // already mixed here.
   public void testTagCreatedFromParsedNodeManipulation() {
-    ParsedHtmlNode[] kidNodes = { makeTextNodeFromParsed("content") };
-    ParsedHtmlNode parsed = makeTagNodeFromParsed("div", null, kidNodes);
+    ParsedHtmlNode[] kidNodes = { makeParsedTextNode("content") };
+    ParsedHtmlNode parsed = makeParsedTagNode("div", null, kidNodes);
     GadgetHtmlNode parentNode = new GadgetHtmlNode(parsed);
     
     // Sanity check on created child
@@ -255,7 +255,7 @@ public class GadgetHtmlNodeTest extends TestCase {
     assertSame(parentNode, textNode.getParentNode());
     
     // appendChild
-    GadgetHtmlNode afterNode = new GadgetHtmlNode(makeTagNodeFromParsed("after", null, null));
+    GadgetHtmlNode afterNode = new GadgetHtmlNode(makeParsedTagNode("after", null, null));
     parentNode.appendChild(afterNode);
     List<GadgetHtmlNode> appendKids = parentNode.getChildren();
     assertNotNull(appendKids);
@@ -266,7 +266,7 @@ public class GadgetHtmlNodeTest extends TestCase {
     assertSame(parentNode, afterNode.getParentNode());
     
     // insertBefore
-    GadgetHtmlNode beforeNode = new GadgetHtmlNode(makeTagNodeFromParsed("before", null, null));
+    GadgetHtmlNode beforeNode = new GadgetHtmlNode(makeParsedTagNode("before", null, null));
     parentNode.insertBefore(beforeNode, textNode);
     List<GadgetHtmlNode> insertKids = parentNode.getChildren();
     assertNotNull(insertKids);
@@ -300,7 +300,7 @@ public class GadgetHtmlNodeTest extends TestCase {
   
   // Test: text setter
   public void testTextCreatedFromParsedTextSetter() {
-    ParsedHtmlNode parsed = makeTextNodeFromParsed("content");
+    ParsedHtmlNode parsed = makeParsedTextNode("content");
     GadgetHtmlNode node = new GadgetHtmlNode(parsed);
     validateTextSetter(node);
   }
@@ -319,7 +319,7 @@ public class GadgetHtmlNodeTest extends TestCase {
   // Test: text-node API limitation
   public void testTagsFromParsedCantUseTextApis() {
     validateTagsCantUseTextApis(
-        new GadgetHtmlNode(makeTagNodeFromParsed("tag", null, null)));
+        new GadgetHtmlNode(makeParsedTagNode("tag", null, null)));
   }
   
   public void testTagsFromNewCantUseTextApis() {
@@ -346,7 +346,7 @@ public class GadgetHtmlNodeTest extends TestCase {
   
   // Test: tag-node API limitation
   public void testTextFromParsedCantUseTagsApis() {
-    validateTextCantUseTagsApis(new GadgetHtmlNode(makeTextNodeFromParsed("content")));
+    validateTextCantUseTagsApis(new GadgetHtmlNode(makeParsedTextNode("content")));
   }
   
   public void testTextFromNewCantUseTagsApis() {
@@ -456,6 +456,13 @@ public class GadgetHtmlNodeTest extends TestCase {
     String[][] attribs = { { "src", "http://www.foo.com/bar.css" } };
     GadgetHtmlNode styleTag = new GadgetHtmlNode("style", attribs);
     assertEquals("<style src=\"http://www.foo.com/bar.css\"></style>",
+                 renderNode(styleTag));
+  }
+  
+  public void testRenderScriptSrcTag() {
+    String[][] attribs = { { "src", "http://www.foo.com/bar.js" } };
+    GadgetHtmlNode styleTag = new GadgetHtmlNode("script", attribs);
+    assertEquals("<script src=\"http://www.foo.com/bar.js\"></script>",
                  renderNode(styleTag));
   }
   
