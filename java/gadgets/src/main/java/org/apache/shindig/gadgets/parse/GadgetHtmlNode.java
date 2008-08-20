@@ -333,7 +333,7 @@ public class GadgetHtmlNode {
         String attrValue = getAttributeValue(attrKey);
         w.append(' ').append(attrKey);
         if (attrValue != null) {
-          w.append("=\"").append(StringEscapeUtils.escapeHtml(attrValue)).append('"');
+          w.append("=\"").append(attrValue.replaceAll("\"", "&#34;")).append('"');
         }
       }
       if (children.size() == 0 &&

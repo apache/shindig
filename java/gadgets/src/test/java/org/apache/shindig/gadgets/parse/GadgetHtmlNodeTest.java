@@ -469,7 +469,7 @@ public class GadgetHtmlNodeTest extends TestCase {
   public void testRenderEscapedAttribute() {
     String[][] attribs = { { "foo", "<script&\"data\">" } };
     GadgetHtmlNode escapedTag = new GadgetHtmlNode("div", attribs);
-    assertEquals("<div foo=\"&lt;script&amp;&quot;data&quot;&gt;\"/>",
+    assertEquals("<div foo=\"<script&&#34;data&#34;>\"/>",
                  renderNode(escapedTag));
   }
   
@@ -528,6 +528,20 @@ public class GadgetHtmlNodeTest extends TestCase {
     GadgetHtmlNode textNode = new GadgetHtmlNode(text);
     assertEquals("\n <!-- comment\n <br> --> &lt;foo&amp;bar&gt;",
                  renderNode(textNode));
+  }
+  
+  public void testRenderAttribWithEscapeChars() {
+    String[][] attribs = { { "src", "http://foo.com/img?s=blah&foo=2" } };
+    GadgetHtmlNode node = new GadgetHtmlNode("img", attribs);
+    assertEquals("<img src=\"http://foo.com/img?s=blah&foo=2\"/>",
+                 renderNode(node));
+  }
+  
+  public void testRenderAttribWithEscapeAndQuotes() {
+    String[][] attribs = { { "src", "http://foo.com/\"img\"?q=1&foo=2" } };
+    GadgetHtmlNode node = new GadgetHtmlNode("img", attribs);
+    assertEquals("<img src=\"http://foo.com/&#34;img&#34;?q=1&foo=2\"/>",
+                 renderNode(node));
   }
   
   private String renderNode(GadgetHtmlNode node) {
