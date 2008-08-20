@@ -68,7 +68,7 @@ public class SampleContainerHandler extends DataRequestHandler {
   protected Future<? extends ResponseItem> handlePost(RequestItem request) {
     ResponseItem<Object> response = new ResponseItem<Object>("");
 
-    request.parseUrlWithTemplate(POST_PATH);
+    request.applyUrlTemplate(POST_PATH);
     String type = request.getParameter("type");
     if (type.equals("setstate")) {
       try {

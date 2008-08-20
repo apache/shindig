@@ -45,7 +45,7 @@ public class PersonHandlerTest extends TestCase {
 
   private FakeGadgetToken token;
 
-  private RequestItem request;
+  private RestfulRequestItem request;
 
   private static final Set<String> DEFAULT_FIELDS = Sets.newHashSet(Person.Field.ID.toString(),
       Person.Field.NAME.toString(),
@@ -81,12 +81,10 @@ public class PersonHandlerTest extends TestCase {
   }
 
   private void setPathAndParams(String path, Map<String, String> params) {
-    request = new RequestItem();
-    request.setUrl(path);
+    request = new RestfulRequestItem(path, "GET", null, token, null);
     for (Map.Entry<String, String> entry : params.entrySet()) {
       request.setParameter(entry.getKey(), entry.getValue());
     }
-    request.setToken(token);
   }
 
   public void testHandleGetAllNoParams() throws Exception {

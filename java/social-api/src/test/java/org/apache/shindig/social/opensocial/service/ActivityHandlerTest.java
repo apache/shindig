@@ -28,14 +28,12 @@ import org.apache.shindig.social.opensocial.spi.GroupId;
 import org.apache.shindig.social.opensocial.spi.RestfulCollection;
 import org.apache.shindig.social.opensocial.spi.UserId;
 
-import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 
 import org.easymock.classextension.EasyMock;
 
 import junit.framework.TestCase;
 
-import java.util.Map;
 import java.util.Set;
 
 public class ActivityHandlerTest extends TestCase {
@@ -48,7 +46,7 @@ public class ActivityHandlerTest extends TestCase {
 
   private FakeGadgetToken token;
 
-  private RequestItem request;
+  private RestfulRequestItem request;
 
   private static final Set<UserId> JOHN_DOE = Sets
       .newHashSet(new UserId(UserId.Type.userId, "john.doe"));
@@ -77,16 +75,7 @@ public class ActivityHandlerTest extends TestCase {
   }
 
   private void setPathAndPostData(String path, String postData) {
-    Map<String, String> params = Maps.newHashMap();
-
-    request = new RequestItem();
-    request.setUrl(path);
-    for (Map.Entry<String, String> entry : params.entrySet()) {
-      request.setParameter(entry.getKey(), entry.getValue());
-    }
-    request.setToken(token);
-    request.setConverter(converter);
-    request.setPostData(postData);
+    request = new RestfulRequestItem(path, "GET", postData, token, converter);
   }
 
   private void assertHandleGetForGroup(GroupId.Type group) throws Exception {

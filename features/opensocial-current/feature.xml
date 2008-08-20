@@ -25,7 +25,7 @@
   <!-- gadgets when "use caja" is checked -->
   <gadget>
     <script src="jsonperson.js"></script>
-    <script src="jsonactivity.js"></script>
+    <!--
     <script src="restfulcontainer.js"></script>
     <script>
       var requiredConfig = {
@@ -44,6 +44,34 @@
                 configParams.domain, configParams.supportedFields);
           };
           ShindigContainer.inherits(RestfulContainer);
+
+          opensocial.Container.setContainer(new ShindigContainer());
+
+          if (window['caja']) {
+            opensocial.Container.get().enableCaja();
+          }
+      });
+
+    </script>
+    -->
+    <script src="jsonrpccontainer.js" inline="false"></script>
+    <script>
+      var requiredConfig = {
+        "path": gadgets.config.NonEmptyStringValidator,
+        "domain": gadgets.config.NonEmptyStringValidator,
+        "enableCaja": gadgets.config.BooleanValidator,
+        "supportedFields": gadgets.config.ExistsValidator
+      };
+
+      gadgets.config.register("opensocial-0.8", requiredConfig,
+        function(config) {
+          var configParams = config["opensocial-0.8"];
+
+          ShindigContainer = function() {
+            JsonRpcContainer.call(this, configParams.path,
+            configParams.domain, configParams.supportedFields);
+          };
+          ShindigContainer.inherits(JsonRpcContainer);
 
           opensocial.Container.setContainer(new ShindigContainer());
 

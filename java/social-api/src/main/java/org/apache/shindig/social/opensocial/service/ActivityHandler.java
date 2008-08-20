@@ -31,7 +31,7 @@ import java.util.concurrent.Future;
 
 public class ActivityHandler extends DataRequestHandler {
 
-  private ActivityService service;
+  private final ActivityService service;
 
   // TODO: The appId should come from the url. The spec needs to be fixed!
   private static final String ACTIVITY_ID_PATH = "/activities/{userId}+/{groupId}/{activityId}+";
@@ -50,7 +50,7 @@ public class ActivityHandler extends DataRequestHandler {
    * examples: /activities/john.doe/@self/1
    */
   protected Future<? extends ResponseItem> handleDelete(RequestItem request) {
-    request.parseUrlWithTemplate(ACTIVITY_ID_PATH);
+    request.applyUrlTemplate(ACTIVITY_ID_PATH);
 
     Set<UserId> userIds = request.getUsers();
     Set<String> activityIds = Sets.newLinkedHashSet(request.getListParameter("activityId"));
@@ -77,7 +77,7 @@ public class ActivityHandler extends DataRequestHandler {
    * examples: /activities/john.doe/@self - postBody is an activity object
    */
   protected Future<? extends ResponseItem> handlePost(RequestItem request) {
-    request.parseUrlWithTemplate(GROUP_PATH);
+    request.applyUrlTemplate(GROUP_PATH);
 
     Set<UserId> userIds = request.getUsers();
     List<String> activityIds = request.getListParameter("activityId");
@@ -88,7 +88,8 @@ public class ActivityHandler extends DataRequestHandler {
     Preconditions.requireEmpty(activityIds, "Cannot specify activityId in create");
 
     return service.createActivity(userIds.iterator().next(), request.getGroup(),
-        request.getAppId(), request.getFields(), request.getPostData(Activity.class),
+        request.getAppId(), request.getFields(),
+        request.getTypedParameter("activity", Activity.class),
         request.getToken());
   }
 
@@ -100,7 +101,7 @@ public class ActivityHandler extends DataRequestHandler {
    * /activities/john.doe,jane.doe/@friends
    */
   protected Future<? extends ResponseItem> handleGet(RequestItem request) {
-    request.parseUrlWithTemplate(ACTIVITY_ID_PATH);
+    request.applyUrlTemplate(ACTIVITY_ID_PATH);
 
     Set<UserId> userIds = request.getUsers();
     Set<String> optionalActivityIds = Sets.newLinkedHashSet(request.getListParameter("activityId"));

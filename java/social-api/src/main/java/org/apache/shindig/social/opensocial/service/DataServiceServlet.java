@@ -18,37 +18,19 @@
 package org.apache.shindig.social.opensocial.service;
 
 import org.apache.shindig.common.SecurityToken;
-import org.apache.shindig.common.servlet.InjectedServlet;
-import org.apache.shindig.common.util.ImmediateFuture;
 import org.apache.shindig.social.ResponseError;
 import org.apache.shindig.social.ResponseItem;
-import org.apache.shindig.social.core.oauth.AuthenticationServletFilter;
 
-import com.google.common.collect.Maps;
-import com.google.inject.Inject;
-import com.google.inject.Injector;
-import com.google.inject.name.Named;
-import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang.StringUtils;
-import org.json.JSONException;
-import org.json.JSONObject;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.util.logging.Logger;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
-import java.util.logging.Logger;
 
-public class DataServiceServlet extends InjectedServlet {
+public class DataServiceServlet extends ApiServlet {
 
-  protected static final String X_HTTP_METHOD_OVERRIDE = "X-HTTP-Method-Override";
-  protected static final String SECURITY_TOKEN_PARAM = "st";
-  protected static final String REQUEST_PARAMETER = "request";
   protected static final String FORMAT_PARAM = "format";
   protected static final String ATOM_FORMAT = "atom";
 
@@ -58,29 +40,6 @@ public class DataServiceServlet extends InjectedServlet {
 
   private static final Logger logger = Logger.getLogger(
       "org.apache.shindig.social.opensocial.spi");
-
-  private transient Map<String, Class<? extends DataRequestHandler>> handlers;
-  private transient BeanConverter jsonConverter;
-  private transient BeanConverter xmlConverter;
-
-  private static final String JSON_BATCH_ROUTE = "jsonBatch";
-
-  @Inject
-  public void setHandlers(HandlerProvider handlers) {
-    this.handlers = handlers.get();
-  }
-
-  @Inject
-  public void setBeanConverters(@Named("shindig.bean.converter.json") BeanConverter jsonConverter,
-    @Named("shindig.bean.converter.xml")  BeanConverter xmlConverter) {
-    this.jsonConverter = jsonConverter;
-    this.xmlConverter = xmlConverter;
-  }
-
-  // Only for testing use. Do not override the injector.
-  public void setInjector(Injector injector) {
-    this.injector = injector;
-  }
 
   protected void doGet(HttpServletRequest servletRequest,
       HttpServletResponse servletResponse)
@@ -117,32 +76,22 @@ public class DataServiceServlet extends InjectedServlet {
 
     BeanConverter converter = getConverterForRequest(servletRequest);
 
-    if (isBatchUrl(servletRequest)) {
-      try {
-        handleBatchRequest(servletRequest, servletResponse, token, converter);
-      } catch (JSONException e) {
-        sendError(servletResponse, new ResponseItem<Object>(ResponseError.BAD_REQUEST,
-            "The batch request had an invalid format.", null));
-      }
-    } else {
-      handleSingleRequest(servletRequest, servletResponse, token, converter);
-    }
+    handleSingleRequest(servletRequest, servletResponse, token, converter);
   }
 
   private void sendError(HttpServletResponse servletResponse, ResponseItem responseItem)
       throws IOException {
     servletResponse.sendError(responseItem.getError().getHttpErrorCode(),
-          responseItem.getErrorMessage());
+        responseItem.getErrorMessage());
   }
 
-  /** Handler for non-batch requests */
+  /**
+   * Handler for non-batch requests
+   */
   private void handleSingleRequest(HttpServletRequest servletRequest,
       HttpServletResponse servletResponse, SecurityToken token,
       BeanConverter converter) throws IOException {
-    String method = getHttpMethodFromParameter(servletRequest.getMethod(),
-        servletRequest.getParameter(X_HTTP_METHOD_OVERRIDE));
-
-    RequestItem requestItem = new RequestItem(servletRequest, token, method, converter);
+    RestfulRequestItem requestItem = new RestfulRequestItem(servletRequest, token, converter);
     ResponseItem responseItem = getResponseItem(handleRequestItem(requestItem));
 
     if (responseItem.getError() == null) {
@@ -153,81 +102,6 @@ public class DataServiceServlet extends InjectedServlet {
     }
   }
 
-  private void handleBatchRequest(HttpServletRequest servletRequest,
-      HttpServletResponse servletResponse, SecurityToken token,
-      BeanConverter converter) throws IOException, JSONException {
-
-    byte[] postedBytes = IOUtils.toByteArray(servletRequest.getInputStream());
-    JSONObject requests = new JSONObject(new String(postedBytes));
-    Map<String, Future<? extends ResponseItem>> responses = Maps.newHashMap();
-
-    // Gather all Futures.  We do this up front so that
-    // the first call to get() comes after all futures are created,
-    // which allows for implementations that batch multiple Futures
-    // into single requests.
-    Iterator keys = requests.keys();
-    while (keys.hasNext()) {
-      String key = (String) keys.next();
-      String request = requests.getString(key);
-
-      RequestItem requestItem = converter.convertToObject(request, RequestItem.class);
-      requestItem.setToken(token);
-      requestItem.setConverter(converter);
-
-      responses.put(key, handleRequestItem(requestItem));
-    }
-
-    // Resolve each Future into a response.
-    // TODO: should use shared deadline across each request
-    Map<String, ResponseItem> resolvedResponses = Maps.newHashMap();
-    for (Map.Entry<String, Future<? extends ResponseItem>> responseEntry : responses.entrySet()) {
-      ResponseItem response = getResponseItem(responseEntry.getValue());
-      resolvedResponses.put(responseEntry.getKey(), response);
-    }
-
-    PrintWriter writer = servletResponse.getWriter();
-    writer.write(converter.convertToString(
-        Maps.immutableMap("error", false, "responses", resolvedResponses)));
-  }
-
-  private ResponseItem getResponseItem(Future<? extends ResponseItem> future) {
-    ResponseItem response;
-    try {
-      // TODO: use timeout methods?
-      response = future.get();
-    } catch (InterruptedException ie) {
-      response = responseItemFromException(ie);
-    } catch (ExecutionException ee) {
-      response = responseItemFromException(ee.getCause());
-    }
-    return response;
-  }
-
-  /**
-   * Delivers a request item to the appropriate DataRequestHandler.
-   *
-   * @return the resulting ResponseItem
-   */
-  Future<? extends ResponseItem> handleRequestItem(RequestItem requestItem) {
-    String route = getRouteFromParameter(requestItem.getUrl());
-    Class<? extends DataRequestHandler> handlerClass = handlers.get(route);
-
-    if (handlerClass == null) {
-      return ImmediateFuture.newInstance(new ResponseItem<Object>(ResponseError.BAD_REQUEST,
-          "The url path " + route + " is not supported", null));
-    }
-
-    DataRequestHandler handler = injector.getInstance(handlerClass);
-    return handler.handleItem(requestItem);
-  }
-
-  private ResponseItem<?> responseItemFromException(Throwable t) {
-    return new ResponseItem<Void>(ResponseError.INTERNAL_ERROR, t.getMessage(), null);
-  }
-
-  SecurityToken getSecurityToken(HttpServletRequest servletRequest) {
-    return ((AuthenticationServletFilter.SecurityTokenRequest) servletRequest).getToken();
-  }
 
   BeanConverter getConverterForRequest(HttpServletRequest servletRequest) {
     String formatString = servletRequest.getParameter(FORMAT_PARAM);
@@ -235,27 +109,5 @@ public class DataServiceServlet extends InjectedServlet {
       return xmlConverter;
     }
     return jsonConverter;
-  }
-
-  String getHttpMethodFromParameter(String method, String overrideParameter) {
-    if (!StringUtils.isBlank(overrideParameter)) {
-      return overrideParameter;
-    } else {
-      return method;
-    }
-  }
-
-  String getRouteFromParameter(String pathInfo) {
-    pathInfo = pathInfo.substring(1);
-    int indexOfNextPathSeparator = pathInfo.indexOf('/');
-    if ( indexOfNextPathSeparator != -1 ) {
-      return pathInfo.substring(0, indexOfNextPathSeparator);
-    }
-    return pathInfo;
-  }
-
-  boolean isBatchUrl(HttpServletRequest servletRequest) {
-    String[] parts = servletRequest.getPathInfo().split("/");
-    return parts[parts.length - 1].equals(JSON_BATCH_ROUTE);
   }
 }

@@ -22,6 +22,7 @@ import org.apache.shindig.social.ResponseError;
 import org.apache.shindig.social.ResponseItem;
 import org.apache.shindig.social.opensocial.service.DataRequestHandler;
 import org.apache.shindig.social.opensocial.service.RequestItem;
+import org.apache.shindig.social.opensocial.service.RestfulRequestItem;
 
 import junit.framework.TestCase;
 
@@ -30,8 +31,6 @@ import java.util.concurrent.Future;
 public class DataRequestHandlerTest extends TestCase {
 
   private DataRequestHandler drh;
-
-  private RequestItem request;
 
   @Override
   protected void setUp() throws Exception {
@@ -52,8 +51,6 @@ public class DataRequestHandlerTest extends TestCase {
         return ImmediateFuture.newInstance(new ResponseItem<String>("GET"));
       }
     };
-
-    request = new RequestItem();
   }
 
   public void testHandleItemSuccess() throws Exception {
@@ -64,7 +61,7 @@ public class DataRequestHandlerTest extends TestCase {
   }
 
   private void verifyItemDispatchMethodCalled(String methodName) throws Exception {
-    request.setMethod(methodName);
+    RestfulRequestItem request = new RestfulRequestItem(null, methodName, null, null);
     assertEquals(methodName, drh.handleItem(request).get().getResponse());
   }
 
@@ -76,7 +73,7 @@ public class DataRequestHandlerTest extends TestCase {
   }
 
   private void verifyDispatchMethodCalled(String methodName) throws Exception {
-    request.setMethod(methodName);
+    RestfulRequestItem request = new RestfulRequestItem(null, methodName, null, null);
     assertEquals(methodName, drh.handleItem(request).get().getResponse());
   }
 
@@ -87,7 +84,7 @@ public class DataRequestHandlerTest extends TestCase {
   }
 
   private void verifyExceptionThrown(String methodName) throws Exception {
-    request.setMethod(methodName);
+    RestfulRequestItem request = new RestfulRequestItem(null, methodName, null, null);
     Future<? extends ResponseItem> err = drh.handleItem(request);
     assertEquals(err.get().getError(), ResponseError.NOT_IMPLEMENTED);
   }

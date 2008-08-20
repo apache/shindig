@@ -48,7 +48,8 @@ public class AppDataHandlerTest extends TestCase {
 
   private FakeGadgetToken token;
 
-  private RequestItem request;
+  private RestfulRequestItem request;
+
 
   private static final Set<UserId> JOHN_DOE = Collections.unmodifiableSet(Sets
       .newHashSet(new UserId(UserId.Type.userId, "john.doe")));
@@ -84,14 +85,10 @@ public class AppDataHandlerTest extends TestCase {
   }
 
   private void setPathAndParams(String path, Map<String, String> params, String postData) {
-    request = new RequestItem();
-    request.setUrl(path);
+    request = new RestfulRequestItem(path, "GET", postData, token, converter);
     for (Map.Entry<String, String> entry : params.entrySet()) {
       request.setParameter(entry.getKey(), entry.getValue());
     }
-    request.setToken(token);
-    request.setConverter(converter);
-    request.setPostData(postData);
   }
 
   private void assertHandleGetForGroup(GroupId.Type group) throws Exception {

@@ -18,8 +18,8 @@
   under the License.
 -->
 <!DOCTYPE web-app
-        PUBLIC "-//Sun Microsystems, Inc.//DTD Web Application 2.3//EN"
-        "http://java.sun.com/dtd/web-app_2_3.dtd">
+    PUBLIC "-//Sun Microsystems, Inc.//DTD Web Application 2.3//EN"
+    "http://java.sun.com/dtd/web-app_2_3.dtd">
 
 <web-app>
   <!-- configuration -->
@@ -51,8 +51,21 @@
     </servlet-class>
   </servlet>
 
+  <!-- Serve RPC api -->
+  <servlet>
+    <servlet-name>jsonRpcServlet</servlet-name>
+    <servlet-class>
+      org.apache.shindig.social.opensocial.service.JsonRpcServlet
+    </servlet-class>
+  </servlet>
+
   <servlet-mapping>
     <servlet-name>restapiServlet</servlet-name>
     <url-pattern>/social/rest/*</url-pattern>
+  </servlet-mapping>
+
+  <servlet-mapping>
+    <servlet-name>jsonRpcServlet</servlet-name>
+    <url-pattern>/social/rpc/*</url-pattern>
   </servlet-mapping>
 </web-app>
