@@ -15,7 +15,7 @@
  * KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-package org.apache.shindig.social.opensocial.service;
+package org.apache.shindig.common.util;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
@@ -31,74 +31,74 @@ import java.util.Iterator;
 /**
  * Test for conversion of a structured key-value set to a JSON object
  */
-public class JsonConversionUtilsTest extends TestCase {
+public class JsonConversionUtilTest extends TestCase {
 
-  public JsonConversionUtilsTest() {
+  public JsonConversionUtilTest() {
   }
 
   public void testSimplePathToJsonParsing()
       throws Exception {
     JSONObject root = new JSONObject();
-    JsonConversionUtils.buildHolder(root, "a.a.a".split("\\."), 0);
+    JsonConversionUtil.buildHolder(root, "a.a.a".split("\\."), 0);
     assertJsonEquals(root, new JSONObject("{a:{a:{}}}"));
   }
 
   public void testArrayPathToJsonParsing()
       throws Exception {
     JSONObject root = new JSONObject();
-    JsonConversionUtils.buildHolder(root, "a.a(0).a".split("\\."), 0);
-    JsonConversionUtils.buildHolder(root, "a.a(1).a".split("\\."), 0);
-    JsonConversionUtils.buildHolder(root, "a.a(2).a".split("\\."), 0);
+    JsonConversionUtil.buildHolder(root, "a.a(0).a".split("\\."), 0);
+    JsonConversionUtil.buildHolder(root, "a.a(1).a".split("\\."), 0);
+    JsonConversionUtil.buildHolder(root, "a.a(2).a".split("\\."), 0);
     assertJsonEquals(root, new JSONObject("{a:{a:[{},{},{}]}}"));
   }
 
   public void testValueToJsonParsing()
       throws Exception {
-    assertJsonEquals(JsonConversionUtils.convertToJsonValue("abc"), "abc");
-    assertJsonEquals(JsonConversionUtils.convertToJsonValue("\"a,b,c\""), "a,b,c");
-    assertJsonEquals(JsonConversionUtils.convertToJsonValue("true"), true);
-    assertJsonEquals(JsonConversionUtils.convertToJsonValue("false"), false);
-    assertJsonEquals(JsonConversionUtils.convertToJsonValue("null"), JSONObject.NULL);
-    assertJsonEquals(JsonConversionUtils.convertToJsonValue("'abc'"), "abc");
-    assertJsonEquals(JsonConversionUtils.convertToJsonValue("a,b,c"),
+    assertJsonEquals(JsonConversionUtil.convertToJsonValue("abc"), "abc");
+    assertJsonEquals(JsonConversionUtil.convertToJsonValue("\"a,b,c\""), "a,b,c");
+    assertJsonEquals(JsonConversionUtil.convertToJsonValue("true"), true);
+    assertJsonEquals(JsonConversionUtil.convertToJsonValue("false"), false);
+    assertJsonEquals(JsonConversionUtil.convertToJsonValue("null"), JSONObject.NULL);
+    assertJsonEquals(JsonConversionUtil.convertToJsonValue("'abc'"), "abc");
+    assertJsonEquals(JsonConversionUtil.convertToJsonValue("a,b,c"),
         new JSONArray(Lists.newArrayList("a", "b", "c")));
-    assertJsonEquals(JsonConversionUtils.convertToJsonValue("1,2,3,true,false,null"),
+    assertJsonEquals(JsonConversionUtil.convertToJsonValue("1,2,3,true,false,null"),
         new JSONArray(Lists.newArrayList(1, 2, 3, true,
             false, null)));
-    assertJsonEquals(JsonConversionUtils.convertToJsonValue("(1)"),
+    assertJsonEquals(JsonConversionUtil.convertToJsonValue("(1)"),
         new JSONArray(Lists.newArrayList(1)));
-    assertJsonEquals(JsonConversionUtils.convertToJsonValue("(true)"),
+    assertJsonEquals(JsonConversionUtil.convertToJsonValue("(true)"),
         new JSONArray(Lists.newArrayList(true)));
   }
 
   public void testParameterMapToJsonParsing()
       throws Exception {
-    assertJsonEquals(JsonConversionUtils.parametersToJsonObject(Maps.immutableMap("a.b.c", "1")),
+    assertJsonEquals(JsonConversionUtil.parametersToJsonObject(Maps.immutableMap("a.b.c", "1")),
         new JSONObject("{a:{b:{c:1}}}"));
     assertJsonEquals(
-        JsonConversionUtils.parametersToJsonObject(Maps.immutableMap("a.b.c", "\"1\"")),
+        JsonConversionUtil.parametersToJsonObject(Maps.immutableMap("a.b.c", "\"1\"")),
         new JSONObject("{a:{b:{c:\"1\"}}}"));
-    assertJsonEquals(JsonConversionUtils.parametersToJsonObject(Maps.immutableMap("a.b.c", "true")),
+    assertJsonEquals(JsonConversionUtil.parametersToJsonObject(Maps.immutableMap("a.b.c", "true")),
         new JSONObject("{a:{b:{c:true}}}"));
     assertJsonEquals(
-        JsonConversionUtils.parametersToJsonObject(Maps.immutableMap("a.b.c", "false")),
+        JsonConversionUtil.parametersToJsonObject(Maps.immutableMap("a.b.c", "false")),
         new JSONObject("{a:{b:{c:false}}}"));
-    assertJsonEquals(JsonConversionUtils.parametersToJsonObject(Maps.immutableMap("a.b.c", "null")),
+    assertJsonEquals(JsonConversionUtil.parametersToJsonObject(Maps.immutableMap("a.b.c", "null")),
         new JSONObject("{a:{b:{c:null}}}"));
-    assertJsonEquals(JsonConversionUtils.parametersToJsonObject(
+    assertJsonEquals(JsonConversionUtil.parametersToJsonObject(
         Maps.immutableMap("a.b(0).c", "hello", "a.b(1).c", "hello")),
         new JSONObject("{a:{b:[{c:\"hello\"},{c:\"hello\"}]}}"));
-    assertJsonEquals(JsonConversionUtils.parametersToJsonObject(
+    assertJsonEquals(JsonConversionUtil.parametersToJsonObject(
         Maps.immutableMap("a.b.c", "hello, true, false, null, 1,2, \"null\", \"()\"")),
         new JSONObject("{a:{b:{c:[\"hello\",true,false,null,1,2,\"null\",\"()\"]}}}"));
-    assertJsonEquals(JsonConversionUtils.parametersToJsonObject(
+    assertJsonEquals(JsonConversionUtil.parametersToJsonObject(
         Maps.immutableMap("a.b.c", "\"hello, true, false, null, 1,2\"")),
         new JSONObject("{a:{b:{c:\"hello, true, false, null, 1,2\"}}}"));
   }
 
   public void testJSONToParameterMapParsing()
       throws Exception {
-    java.util.Map resultMap = JsonConversionUtils
+    java.util.Map resultMap = JsonConversionUtil
         .fromJson(new JSONObject("{a:{b:[{c:\"hello\"},{c:\"hello\"}]}}"));
   }
 

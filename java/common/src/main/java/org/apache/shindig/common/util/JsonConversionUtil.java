@@ -15,11 +15,10 @@
  * KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-package org.apache.shindig.social.opensocial.service;
+package org.apache.shindig.common.util;
 
-import com.google.common.collect.Maps;
-import com.google.common.collect.Sets;
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Maps;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -36,7 +35,7 @@ import javax.servlet.http.HttpServletRequest;
 /**
  * Utilities for converting a JSON object to and from a URL encoding
  */
-public class JsonConversionUtils {
+public class JsonConversionUtil {
 
   private static final Pattern ARRAY_MATCH = Pattern.compile("(\\w+)\\((\\d+)\\)");
 
