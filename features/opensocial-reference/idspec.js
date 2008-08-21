@@ -67,13 +67,15 @@ opensocial.IdSpec = function(opt_params) {
  */
 opensocial.IdSpec.Field = {
   /**
-   * A string or an array of strings representing the user id.
+   * A string or an array of strings representing the user id. Can be
+   * one of the opensocial.IdSpec.PersonId values.
    * @member opensocial.IdSpec.Field
    */
   USER_ID : 'userId',
 
   /**
-   * A string representing the group id.
+   * A string representing the group id or one of the
+   * opensocial.IdSpec.GroupId values. Defaults to SELF.
    * @member opensocial.IdSpec.Field
    */
   GROUP_ID : 'groupId',
@@ -109,6 +111,29 @@ opensocial.IdSpec.PersonId = {
   * @member opensocial.IdSpec.PersonId
   */
   VIEWER : 'VIEWER'
+};
+
+
+ /**
+ * @static
+ * @class
+ * Constant group IDs available when fetching collections of people.
+ *
+ * @name opensocial.IdSpec.GroupId
+ */
+opensocial.IdSpec.GroupId = {
+ /**
+  * @member opensocial.IdSpec.GroupId
+  */
+  SELF : 'SELF',
+ /**
+  * @member opensocial.IdSpec.GroupId
+  */
+  FRIENDS : 'FRIENDS',
+ /**
+  * @member opensocial.IdSpec.GroupId
+  */
+  ALL : 'ALL'
 };
 
 
