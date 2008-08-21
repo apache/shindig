@@ -22,6 +22,8 @@ import static org.junit.Assert.assertTrue;
 import org.apache.shindig.common.BasicSecurityToken;
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.common.uri.UriBuilder;
+import org.apache.shindig.common.cache.CacheProvider;
+import org.apache.shindig.common.cache.DefaultCacheProvider;
 import org.apache.shindig.gadgets.http.BasicHttpCache;
 import org.apache.shindig.gadgets.http.HttpCache;
 import org.apache.shindig.gadgets.http.HttpRequest;
@@ -76,6 +78,7 @@ public class SigningFetcherTest {
 
   private InterceptingContentFetcher interceptor;
   private HttpCache cache;
+  private CacheProvider cacheProvider;
   private SigningFetcher signer;
   private BasicSecurityToken authToken;
   private OAuthAccessor accessor;
@@ -83,7 +86,8 @@ public class SigningFetcherTest {
 
   @Before
   public void setUp() throws Exception {
-    cache = new BasicHttpCache(10);
+    cacheProvider = new DefaultCacheProvider();
+    cache = new BasicHttpCache(cacheProvider,10);
     interceptor = new InterceptingContentFetcher();
     authToken = new BasicSecurityToken("o", "v", "a", "d", "u", "m");
     signer = SigningFetcher.makeFromB64PrivateKey(cache,

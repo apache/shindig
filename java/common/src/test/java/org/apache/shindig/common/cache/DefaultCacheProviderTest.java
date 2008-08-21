@@ -1,4 +1,4 @@
-/**
+/*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements. See the NOTICE file
  * distributed with this work for additional information
@@ -7,7 +7,7 @@
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
@@ -15,19 +15,30 @@
  * KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-package org.apache.shindig.gadgets.http;
+package org.apache.shindig.common.cache;
 
-import org.apache.shindig.common.cache.CacheProvider;
-import org.apache.shindig.common.cache.DefaultCacheProvider;
+import org.junit.Test;
+import org.junit.Assert;
 
-import org.junit.Before;
+/**
+ *
+ */
+public class DefaultCacheProviderTest {
 
-public class BasicHttpFetcherTest extends AbstractHttpFetcherTest {
-
-  @Before
-  public void setUp() {
-    CacheProvider cacheProvider = new DefaultCacheProvider();
-    HttpCache cache = new BasicHttpCache(cacheProvider,10);
-    fetcher = new BasicHttpFetcher(cache, Integer.MAX_VALUE);
+  @Test
+  public void getAnonCache() {
+    CacheProvider defaultProvider = new DefaultCacheProvider();
+    Cache<String, String> cache = defaultProvider.createCache(100);
+    Assert.assertNotNull(cache);
   }
+  
+  @Test
+  public void getNamedCache() {
+    CacheProvider defaultProvider = new DefaultCacheProvider();
+    Cache<String, String> cache = defaultProvider.createCache(100, "testcache");
+    Cache<String, String> cache2 = defaultProvider.createCache(100, "testcache");
+    Assert.assertNotNull(cache);
+    Assert.assertEquals(cache, cache2);
+  }
+  
 }

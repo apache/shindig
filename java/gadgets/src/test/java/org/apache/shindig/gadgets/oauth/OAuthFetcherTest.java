@@ -23,6 +23,7 @@ import static org.junit.Assert.assertNull;
 
 import org.apache.shindig.common.BasicSecurityToken;
 import org.apache.shindig.common.SecurityToken;
+import org.apache.shindig.common.cache.DefaultCacheProvider;
 import org.apache.shindig.common.crypto.BasicBlobCrypter;
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.gadgets.FakeGadgetSpecFactory;
@@ -59,7 +60,7 @@ public class OAuthFetcherTest {
     fetcherConfig = new OAuthFetcherConfig(
         new BasicBlobCrypter("abcdefghijklmnop".getBytes()),
         getOAuthStore(),
-        new BasicHttpCache(10));
+        new BasicHttpCache(new DefaultCacheProvider(),10));
   }
 
   /**

@@ -18,6 +18,7 @@
 package org.apache.shindig.gadgets.http;
 
 import org.apache.shindig.common.cache.Cache;
+import org.apache.shindig.common.cache.CacheProvider;
 import org.apache.shindig.common.cache.LruCache;
 
 import com.google.inject.Inject;
@@ -46,7 +47,7 @@ public class BasicHttpCache extends AbstractHttpCache {
   }
 
   @Inject
-  public BasicHttpCache(@Named("shindig.cache.capacity") int capacity) {
-    cache = LruCache.create(capacity);
+  public BasicHttpCache(CacheProvider cacheProvider, @Named("shindig.cache.capacity") int capacity) {
+    cache = cacheProvider.createCache(capacity);
   }
 }

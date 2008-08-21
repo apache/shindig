@@ -24,6 +24,8 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import org.apache.shindig.common.uri.Uri;
+import org.apache.shindig.common.cache.CacheProvider;
+import org.apache.shindig.common.cache.DefaultCacheProvider;
 import org.apache.shindig.gadgets.http.HttpFetcher;
 import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.http.HttpResponse;
@@ -89,9 +91,11 @@ public class BasicGadgetSpecFactoryTest {
 
   private final HttpFetcher fetcher = EasyMock.createNiceMock(HttpFetcher.class);
   private final CaptureRewriter rewriter = new CaptureRewriter();
+  
+  private final CacheProvider cacheProvider = new DefaultCacheProvider();
 
   private final BasicGadgetSpecFactory specFactory
-  = new BasicGadgetSpecFactory(fetcher, rewriter, FAKE_EXECUTOR, 5, -1000, 1000);
+      = new BasicGadgetSpecFactory(fetcher, cacheProvider, rewriter, FAKE_EXECUTOR, 5, -1000, 1000);
 
   @Test
   public void specFetched() throws Exception {
