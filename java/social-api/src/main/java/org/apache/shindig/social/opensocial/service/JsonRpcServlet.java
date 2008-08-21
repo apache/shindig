@@ -18,12 +18,12 @@
 package org.apache.shindig.social.opensocial.service;
 
 import org.apache.shindig.common.SecurityToken;
-import org.apache.shindig.social.ResponseItem;
+import org.apache.shindig.common.util.JsonConversionUtil;
 import org.apache.shindig.social.ResponseError;
+import org.apache.shindig.social.ResponseItem;
 import org.apache.shindig.social.opensocial.spi.DataCollection;
 import org.apache.shindig.social.opensocial.spi.RestfulCollection;
 
-import com.google.common.collect.Maps;
 import com.google.common.collect.Lists;
 
 import org.apache.commons.io.IOUtils;
@@ -32,7 +32,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
-import java.util.Map;
 import java.util.List;
 import java.util.concurrent.Future;
 
@@ -49,7 +48,7 @@ public class JsonRpcServlet extends ApiServlet {
       HttpServletResponse servletResponse)
       throws ServletException, IOException {
     try {
-      JSONObject request = JsonConversionUtils.fromRequest(servletRequest);
+      JSONObject request = JsonConversionUtil.fromRequest(servletRequest);
       SecurityToken token = getSecurityToken(servletRequest);
       dispatch(request, servletResponse, token);
     } catch (JSONException je) {
