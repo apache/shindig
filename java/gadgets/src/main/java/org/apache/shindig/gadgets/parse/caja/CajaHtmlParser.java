@@ -27,6 +27,7 @@ import com.google.caja.parser.html.DomParser;
 import com.google.caja.parser.html.DomTree;
 import com.google.caja.reporting.MessageQueue;
 import com.google.caja.reporting.SimpleMessageQueue;
+import com.google.inject.Singleton;
 
 import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.parse.GadgetHtmlParser;
@@ -42,6 +43,7 @@ import java.util.List;
 /**
  * Caja-based implementation of a {@code GadgetHtmlParser}.
  */
+@Singleton
 public class CajaHtmlParser implements GadgetHtmlParser {
 
   /** {@inheritDoc */
