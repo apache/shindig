@@ -30,6 +30,7 @@ import com.google.caja.parser.css.CssTree;
 import com.google.caja.reporting.MessageContext;
 import com.google.caja.reporting.RenderContext;
 import com.google.caja.util.Criterion;
+import com.google.inject.Singleton;
 
 import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.parse.GadgetCssParser;
@@ -42,6 +43,7 @@ import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
 
+@Singleton
 public class CajaCssParser implements GadgetCssParser {
 
   public List<ParsedCssRule> parse(String css) throws GadgetException {

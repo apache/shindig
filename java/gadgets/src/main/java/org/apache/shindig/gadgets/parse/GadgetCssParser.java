@@ -17,7 +17,10 @@
  */
 package org.apache.shindig.gadgets.parse;
 
+import com.google.inject.ImplementedBy;
+
 import org.apache.shindig.gadgets.GadgetException;
+import org.apache.shindig.gadgets.parse.caja.CajaCssParser;
 
 import java.util.List;
 
@@ -28,6 +31,7 @@ import java.util.List;
  * {@see ParsedCssRule} and {@see ParsedCssDeclaration} for additional
  * parsing requirements and semantics.
  */
+@ImplementedBy(CajaCssParser.class)
 public interface GadgetCssParser {
   public List<ParsedCssRule> parse(String css) throws GadgetException;
   public List<ParsedCssDeclaration> parseInline(String style) throws GadgetException;

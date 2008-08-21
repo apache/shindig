@@ -17,7 +17,10 @@
  */
 package org.apache.shindig.gadgets.parse;
 
+import com.google.inject.ImplementedBy;
+
 import org.apache.shindig.gadgets.GadgetException;
+import org.apache.shindig.gadgets.parse.caja.CajaHtmlParser;
 
 import java.util.List;
 
@@ -29,6 +32,7 @@ import java.util.List;
  * 
  * {@see ParsedHtmlNode} for parsing details
  */
+@ImplementedBy(CajaHtmlParser.class)
 public interface GadgetHtmlParser {
   public List<ParsedHtmlNode> parse(String source) throws GadgetException;
 }
