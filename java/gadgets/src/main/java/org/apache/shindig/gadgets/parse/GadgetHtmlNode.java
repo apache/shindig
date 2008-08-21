@@ -300,33 +300,7 @@ public class GadgetHtmlNode {
    */
   public void render(Writer w) throws IOException {
     if (isText()) {
-      String rawText = getText();
-      int commentStart = 0;
-      int curPos = 0;
-      while ((commentStart = rawText.indexOf("<!--", curPos)) >= 0) {
-        // Comment found. By definition there must be an end-comment marker
-        // since if there wasn't, the comment would subsume all further text.
-        
-        // First append up to the current point, with proper escaping.
-        w.append(StringEscapeUtils.escapeHtml(rawText.substring(curPos, commentStart)));
-        
-        // Then append the comment verbatim.
-        int commentEnd = rawText.indexOf("-->", commentStart);
-        if (commentEnd == -1) {
-          // Should never happen, per above comment. But we know that the comment
-          // has begun, so just append the rest of the string verbatim to be safe.
-          w.append(rawText.substring(commentStart));
-          return;
-        }
-        int endPos = commentEnd + "-->".length();
-        w.append(rawText.substring(commentStart, endPos));
-        
-        // Then set current position
-        curPos = endPos;
-      }
-      
-      // Append remaining (all, if no comment) text, escaped.
-      w.append(StringEscapeUtils.escapeHtml(rawText.substring(curPos)));
+      renderText(w);
     } else {
       w.append('<').append(tagName);
       for (String attrKey : getAttributeKeys()) {
@@ -348,6 +322,50 @@ public class GadgetHtmlNode {
         w.append("</").append(tagName).append('>');
       }
     }
+  }
+  
+  // Helper that renders text content
+  private void renderText(Writer w) throws IOException {
+    String rawText = getText();
+    String parentTag = getParentNode() != null ? getParentNode().getTagName() : null;
+    if (parentTag != null &&
+        (parentTag.equalsIgnoreCase("script") ||
+         parentTag.equalsIgnoreCase("style"))) {
+      // Special dispensation for script and style blocks: don't escape
+      // them at all. The caller is always some server code, so must be
+      // trusted to render content appropriately, not trust user input
+      // verbatim where appropriate, etc. Escaping is avoided in order
+      // to preserve proper interpretation semantics.
+      w.append(rawText);
+      return;
+    }
+    
+    int commentStart = 0;
+    int curPos = 0;
+    while ((commentStart = rawText.indexOf("<!--", curPos)) >= 0) {
+      // Comment found. By definition there must be an end-comment marker
+      // since if there wasn't, the comment would subsume all further text.
+      
+      // First append up to the current point, with proper escaping.
+      w.append(StringEscapeUtils.escapeHtml(rawText.substring(curPos, commentStart)));
+      
+      // Then append the comment verbatim.
+      int commentEnd = rawText.indexOf("-->", commentStart);
+      if (commentEnd == -1) {
+        // Should never happen, per above comment. But we know that the comment
+        // has begun, so just append the rest of the string verbatim to be safe.
+        w.append(rawText.substring(commentStart));
+        return;
+      }
+      int endPos = commentEnd + "-->".length();
+      w.append(rawText.substring(commentStart, endPos));
+      
+      // Then set current position
+      curPos = endPos;
+    }
+    
+    // Append remaining (all, if no comment) text, escaped.
+    w.append(StringEscapeUtils.escapeHtml(rawText.substring(curPos)));
   }
   
   // Helper that cleans up and validates an attribute key

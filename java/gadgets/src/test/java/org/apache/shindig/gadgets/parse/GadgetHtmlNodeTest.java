@@ -485,6 +485,24 @@ public class GadgetHtmlNodeTest extends TestCase {
                  renderNode(escapedTextNode));
   }
   
+  public void testRenderEscapedTextContentInDiv() {
+    GadgetHtmlNode divNode = new GadgetHtmlNode("div", null);
+    divNode.appendChild(new GadgetHtmlNode("<script&\"data'>"));
+    assertEquals("<div>&lt;script&amp;&quot;data'&gt;</div>", renderNode(divNode));
+  }
+  
+  public void testRenderNoEscapingInScript() {
+    GadgetHtmlNode divNode = new GadgetHtmlNode("script", null);
+    divNode.appendChild(new GadgetHtmlNode("<script&\"data'>"));
+    assertEquals("<script><script&\"data'></script>", renderNode(divNode));
+  }
+  
+  public void testRenderNoEscapingInStyle() {
+    GadgetHtmlNode divNode = new GadgetHtmlNode("stYle", null);
+    divNode.appendChild(new GadgetHtmlNode("<script&\"data'>"));
+    assertEquals("<stYle><script&\"data'></stYle>", renderNode(divNode));
+  }
+  
   public void testRenderAdjacentStringsInTag() {
     GadgetHtmlNode container = new GadgetHtmlNode("div", null);
     container.appendChild(new GadgetHtmlNode("one"));
