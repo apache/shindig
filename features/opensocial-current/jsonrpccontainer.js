@@ -45,8 +45,8 @@ JsonRpcContainer.prototype.getEnvironment = function() {
   return this.environment_;
 };
 
-JsonRpcContainer.prototype.requestCreateActivity = function(activity,
-                                                            priority, opt_callback) {
+JsonRpcContainer.prototype.requestCreateActivity = function(activity, priority,
+    opt_callback) {
   opt_callback = opt_callback || {};
 
   var req = opensocial.newDataRequest();
@@ -69,25 +69,13 @@ JsonRpcContainer.prototype.requestData = function(dataRequest, callback) {
   }
 
   var jsonBatchData = new Array(totalRequests);
-  var systemKeyIndex = 0;
 
   for (var j = 0; j < totalRequests; j++) {
     var requestObject = requestObjects[j];
 
-    if (!requestObject.key) {
-      requestObject.key = "systemKey" + systemKeyIndex;
-      while (jsonBatchData[requestObject.key]) {
-        // If the key exists, choose another and try again
-        systemKeyIndex++;
-        requestObject.key = "systemKey" + systemKeyIndex;
-      }
-    }
-
     jsonBatchData[j] = requestObject.request.rpc;
-    jsonBatchData[j].id = requestObject.key;
-
-    if (requestObject.request.postData) {
-      jsonBatchData[j].postData = requestObject.request.postData;
+    if (requestObject.key) {
+      jsonBatchData[j].id = requestObject.key;
     }
   }
 
@@ -109,7 +97,12 @@ JsonRpcContainer.prototype.requestData = function(dataRequest, callback) {
 
     for (var k = 0; k < requestObjects.length; k++) {
       var request = requestObjects[k];
-      var response = result[request.key];
+      var response = result[k];
+
+      if (request.key && response.id != request.key) {
+        throw "Request key(" + request.key +
+            ") and response id(" + response.id + ") do not match";
+      }
 
       var rawData = response.data;
       var error = response.error;
@@ -122,7 +115,9 @@ JsonRpcContainer.prototype.requestData = function(dataRequest, callback) {
       var processedData = request.request.processResponse(
           request.request, rawData, error, errorMessage);
       globalError = globalError || processedData.hadError();
-      responseMap[request.key] = processedData;
+      if (request.key) {
+        responseMap[request.key] = processedData;
+      }
     }
 
     var dataResponse = new opensocial.DataResponse(responseMap, globalError);
@@ -138,13 +133,17 @@ JsonRpcContainer.prototype.requestData = function(dataRequest, callback) {
   };
 
   gadgets.io.makeNonProxiedRequest(
-      this.baseUrl_ + "/rpc?st=" + encodeURIComponent(shindig.auth.getSecurityToken()),
+      this.baseUrl_ + "/rpc?st=" +
+      encodeURIComponent(shindig.auth.getSecurityToken()),
       sendResponse, makeRequestParams, "application/json");
 };
 
-JsonRpcContainer.generateErrorResponse = function(result, requestObjects, callback) {
-  var globalErrorCode = JsonRpcContainer.translateHttpError(result.errors[0] || result.data.error)
-      || opensocial.ResponseItem.Error.INTERNAL_ERROR;
+JsonRpcContainer.generateErrorResponse = function(result, requestObjects,
+    callback) {
+  var globalErrorCode =
+          JsonRpcContainer.translateHttpError(result.errors[0]
+                  || result.data.error)
+                  || opensocial.ResponseItem.Error.INTERNAL_ERROR;
 
   var errorResponseMap = {};
   for (var i = 0; i < requestObjects.length; i++) {
@@ -178,17 +177,19 @@ JsonRpcContainer.prototype.makeIdSpec = function(id) {
 };
 
 JsonRpcContainer.prototype.translateIdSpec = function(newIdSpec) {
-  var userId = newIdSpec.getField('userId');
+  var userIds = newIdSpec.getField('userId');
   var groupId = newIdSpec.getField('groupId');
 
-  if (userId == 'OWNER') {
-    userId = '@owner';
-  } else if (userId == 'VIEWER') {
-    userId = '@viewer';
-  } else if (opensocial.Container.isArray(newIdSpec)) {
-    for (var i = 0; i < newIdSpec.length; i++) {
-      // TODO: We will need multiple urls here....don't want to think about
-      // that yet
+  // Upconvert to array for convenience
+  if (!opensocial.Container.isArray(userIds)) {
+    userIds = [userIds];
+  }
+
+  for (var i = 0; i < userIds.length; i++) {
+    if (userIds[i] == 'OWNER') {
+      userIds[i] = '@owner';
+    } else if (userIds[i] == 'VIEWER') {
+      userIds[i] = '@viewer';
     }
   }
 
@@ -198,7 +199,7 @@ JsonRpcContainer.prototype.translateIdSpec = function(newIdSpec) {
     groupId = "@self";
   }
 
-  return { userId : userId, groupId : groupId};
+  return { userId : userIds, groupId : groupId};
 };
 
 JsonRpcContainer.prototype.newFetchPersonRequest = function(id, opt_params) {
@@ -207,13 +208,13 @@ JsonRpcContainer.prototype.newFetchPersonRequest = function(id, opt_params) {
 
   var me = this;
   return new JsonRpcRequestItem(peopleRequest.rpc,
-      function(rawJson) {
-        return me.createPersonFromJson(rawJson);
-      });
+          function(rawJson) {
+            return me.createPersonFromJson(rawJson);
+          });
 };
 
 JsonRpcContainer.prototype.newFetchPeopleRequest = function(idSpec,
-                                                            opt_params) {
+    opt_params) {
   var rpc = { method : "people.get" };
   rpc.params = this.translateIdSpec(idSpec);
   if (opt_params['profileDetail']) {
@@ -279,8 +280,8 @@ JsonRpcContainer.prototype.isWildcardKey = function(key) {
   return key == "*";
 };
 
-JsonRpcContainer.prototype.newFetchPersonAppDataRequest = function(idSpec,
-                                                                   keys, opt_params) {
+JsonRpcContainer.prototype.newFetchPersonAppDataRequest = function(idSpec, keys,
+    opt_params) {
   var rpc = { method : "appdata.get" };
   rpc.params = this.translateIdSpec(idSpec);
   rpc.params.app = "@app";
@@ -291,12 +292,12 @@ JsonRpcContainer.prototype.newFetchPersonAppDataRequest = function(idSpec,
 
   return new JsonRpcRequestItem(rpc,
       function (appData) {
-        return  opensocial.Container.escape(appData['data'], opt_params, true);
+        return opensocial.Container.escape(appData, opt_params, true);
       });
 };
 
 JsonRpcContainer.prototype.newUpdatePersonAppDataRequest = function(id, key,
-                                                                    value) {
+    value) {
   var rpc = { method : "appdata.update" };
   rpc.params = this.translateIdSpec(this.makeIdSpec(id));
   rpc.params.app = "@app";
@@ -315,7 +316,7 @@ JsonRpcContainer.prototype.newRemovePersonAppDataRequest = function(id, keys) {
 };
 
 JsonRpcContainer.prototype.newFetchActivitiesRequest = function(idSpec,
-                                                                opt_params) {
+    opt_params) {
   var rpc = { method : "activities.get" };
   rpc.params = this.translateIdSpec(idSpec);
   rpc.params.app = "@app";
@@ -346,7 +347,7 @@ JsonRpcContainer.prototype.newMediaItem = function(mimeType, url, opt_params) {
 };
 
 JsonRpcContainer.prototype.newCreateActivityRequest = function(idSpec,
-                                                               activity) {
+    activity) {
   var rpc = { method : "activities.create" };
   rpc.params = this.translateIdSpec(idSpec);
   rpc.params.app = "@app";
@@ -366,7 +367,7 @@ var JsonRpcRequestItem = function(rpc, opt_processData) {
                      };
 
   this.processResponse = function(originalDataRequest, rawJson, error,
-                                  errorMessage) {
+      errorMessage) {
     return new opensocial.ResponseItem(originalDataRequest,
         error ? null : this.processData(rawJson), error, errorMessage);
   }
