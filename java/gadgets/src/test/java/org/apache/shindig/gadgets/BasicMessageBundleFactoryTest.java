@@ -24,6 +24,8 @@ import static org.easymock.EasyMock.replay;
 import static org.easymock.EasyMock.verify;
 import static org.junit.Assert.assertEquals;
 
+import org.apache.shindig.common.cache.CacheProvider;
+import org.apache.shindig.common.cache.DefaultCacheProvider;
 import org.apache.shindig.common.xml.XmlUtil;
 import org.apache.shindig.gadgets.http.HttpFetcher;
 import org.apache.shindig.gadgets.http.HttpRequest;
@@ -68,9 +70,11 @@ public class BasicMessageBundleFactoryTest {
 
   private final HttpFetcher fetcher = EasyMock.createNiceMock(HttpFetcher.class);
   private final MessageBundleFactory bundleFactory;
+  private final CacheProvider cacheProvider;
 
   public BasicMessageBundleFactoryTest() {
-    bundleFactory = new BasicMessageBundleFactory(fetcher, 5, -1000, 1000);
+    cacheProvider = new DefaultCacheProvider();
+    bundleFactory = new BasicMessageBundleFactory(fetcher, cacheProvider, 5, -1000, 1000);
   }
 
   @Test

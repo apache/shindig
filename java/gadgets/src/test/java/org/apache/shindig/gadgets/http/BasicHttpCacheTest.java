@@ -19,6 +19,9 @@ package org.apache.shindig.gadgets.http;
 
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.common.util.DateUtil;
+import org.apache.shindig.common.cache.CacheProvider;
+import org.apache.shindig.common.cache.DefaultCacheProvider;
+import org.apache.shindig.common.util.DateUtil;
 
 import org.apache.commons.lang.ArrayUtils;
 
@@ -36,11 +39,13 @@ import java.util.Map;
 public class BasicHttpCacheTest extends TestCase {
 
   private HttpCache cache;
+  private CacheProvider cacheProvider;
 
   @Override
   public void setUp() throws Exception {
     super.setUp();
-    cache = new BasicHttpCache(10);
+    cacheProvider = new DefaultCacheProvider();
+    cache = new BasicHttpCache(cacheProvider,10);
   }
 
   @Override

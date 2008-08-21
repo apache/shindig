@@ -19,6 +19,7 @@
 package org.apache.shindig.gadgets;
 
 import org.apache.shindig.common.cache.Cache;
+import org.apache.shindig.common.cache.CacheProvider;
 import org.apache.shindig.common.cache.LruCache;
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.gadgets.http.HttpFetcher;
@@ -121,11 +122,12 @@ public class BasicMessageBundleFactory implements MessageBundleFactory {
 
   @Inject
   public BasicMessageBundleFactory(HttpFetcher fetcher,
+                                   CacheProvider cacheProvider,
                                    @Named("shindig.message-bundle.cache.capacity")int capacity,
                                    @Named("shindig.message-bundle.cache.minTTL")long minTtl,
                                    @Named("shindig.message-bundle.cache.maxTTL")long maxTtl) {
     this.fetcher = fetcher;
-    this.cache = new LruCache<URI, TimeoutPair>(capacity);
+    this.cache = cacheProvider.createCache(capacity);
     this.minTtl = minTtl;
     this.maxTtl = maxTtl;
   }

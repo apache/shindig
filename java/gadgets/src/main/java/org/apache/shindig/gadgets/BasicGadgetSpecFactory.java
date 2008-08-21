@@ -19,6 +19,7 @@
 package org.apache.shindig.gadgets;
 
 import org.apache.shindig.common.cache.Cache;
+import org.apache.shindig.common.cache.CacheProvider;
 import org.apache.shindig.common.cache.LruCache;
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.gadgets.http.HttpFetcher;
@@ -31,6 +32,7 @@ import org.apache.shindig.gadgets.spec.View;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.inject.name.Named;
+import com.sun.jmx.remote.util.CacheMap;
 
 import java.net.URI;
 import java.util.ArrayList;
@@ -167,6 +169,7 @@ public class BasicGadgetSpecFactory implements GadgetSpecFactory {
 
   @Inject
   public BasicGadgetSpecFactory(HttpFetcher fetcher,
+                                CacheProvider cacheProvider,
                                 ContentRewriter rewriter,
                                 Executor executor,
                                 @Named("shindig.gadget-spec.cache.capacity")int gadgetSpecCacheCapacity,
@@ -175,7 +178,7 @@ public class BasicGadgetSpecFactory implements GadgetSpecFactory {
     this.fetcher = fetcher;
     this.rewriter = rewriter;
     this.executor = executor;
-    this.cache = new LruCache<URI, TimeoutPair>(gadgetSpecCacheCapacity);
+    this.cache = cacheProvider.createCache(gadgetSpecCacheCapacity);
     this.minTtl = minTtl;
     this.maxTtl = maxTtl;
   }
