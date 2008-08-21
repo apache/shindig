@@ -24,6 +24,7 @@ import org.easymock.classextension.EasyMock;
 import org.apache.shindig.gadgets.parse.GadgetHtmlParser;
 import org.apache.shindig.gadgets.parse.GadgetHtmlNodeTest;
 import org.apache.shindig.gadgets.parse.ParsedHtmlNode;
+import org.apache.shindig.gadgets.parse.caja.CajaHtmlParser;
 
 import org.apache.shindig.gadgets.rewrite.ContentRewriterFeature;
 import org.apache.shindig.gadgets.rewrite.LinkRewriter;
@@ -47,6 +48,7 @@ public class ParseTreeHtmlRewriterTest extends BaseRewriterTestCase {
   private LinkRewriter noOpLinkRewriter;
   private ContentRewriterFeature jsFeature;
   private ContentRewriterFeature styleFeature;
+  private ContentRewriterFeature comboFeature;
   private GadgetSpec spec;
   private String concatBase;
   private static final String LINK_PREFIX = "px-";
@@ -68,6 +70,7 @@ public class ParseTreeHtmlRewriterTest extends BaseRewriterTestCase {
     };
     jsFeature = makeFeature("script");
     styleFeature = makeFeature("style");
+    comboFeature = makeFeature("script", "style");
     spec = EasyMock.createNiceMock(GadgetSpec.class);
     expect(spec.getUrl()).andReturn(baseUri).anyTimes();
     org.easymock.classextension.EasyMock.replay(spec);
@@ -361,5 +364,82 @@ public class ParseTreeHtmlRewriterTest extends BaseRewriterTestCase {
       "<style>div {list-style-image:url(\"" + LINK_PREFIX + "http://a.b.com/bullet.gif\");list-style-position:outside;margin:5px;padding:0}\n" +
       ".someid {background-image:url(\"" + LINK_PREFIX + "http://a.b.com/bigimg.png\");float:right;width:165px;height:23px;margin-top:4px;margin-left:5px}</style>";
     assertEquals(rewritten, rewriteHelper(s, p, styleFeature, pfxLinkRewriter));
+  }
+  
+  public void testMixedRewritingJSMergeTagAndScript() throws Exception {
+    String s = "<style> @import url(rewrite.css); </style>"
+        + "<link href=\"rewritelink.css\"/>"
+        + "<p id=\"foo\">foo</p>"
+        + "<p id=\"bar\">bar</p>"
+        + "<script src=\"http://a.b.com/1.js\"></script>"
+        + "<script src=\"http://a.b.com/2.js\"></script>";
+    ParsedHtmlNode[] styleKid = {
+      GadgetHtmlNodeTest.makeParsedTextNode(" @import url( rewrite.css ); ")
+    };
+    ParsedHtmlNode[] fooKid = {
+      GadgetHtmlNodeTest.makeParsedTextNode("foo")
+    };
+    ParsedHtmlNode[] barKid = {
+      GadgetHtmlNodeTest.makeParsedTextNode("bar")
+    };
+    String[][] linkAttr = { { "href", "rewritelink.css" } };
+    String[][] fooAttr = { { "id", "foo" } };
+    String[][] barAttr = { { "id", "bar" } };
+    String[][] attr1 = { { "src", "http://a.b.com/1.js" } };
+    String[][] attr2 = { { "src", "http://a.b.com/2.js" } };
+    ParsedHtmlNode[] p = {
+      GadgetHtmlNodeTest.makeParsedTagNode("style", null, styleKid),
+      GadgetHtmlNodeTest.makeParsedTagNode("link", linkAttr, null),
+      GadgetHtmlNodeTest.makeParsedTagNode("p", fooAttr, fooKid),
+      GadgetHtmlNodeTest.makeParsedTagNode("p", barAttr, barKid),
+      GadgetHtmlNodeTest.makeParsedTagNode("script", attr1, null),
+      GadgetHtmlNodeTest.makeParsedTagNode("script", attr2, null)
+    };
+    String rewritten =
+        "<style> @import url(\"" + LINK_PREFIX + "rewrite.css\"); </style>" +
+        "<link href=\"" + LINK_PREFIX + "rewritelink.css\"/>" +
+        "<p id=\"foo\">foo</p>" +
+        "<p id=\"bar\">bar</p>" +
+        "<script src=\"" + concatBase + "1=http%3A%2F%2Fa.b.com%2F1.js&2=http%3A%2F%2Fa.b.com%2F2.js\"></script>";
+    assertEquals(rewritten, rewriteHelper(s, p, comboFeature, pfxLinkRewriter));
+  }
+  
+  public void testEndToEndGadgetWithCajaParsing() throws Exception {
+    String s = "<style type=\"text/css\"> @import url(rewrite.css); </style>\n"
+      + "<link href=\"rewritelink.css\"/>\n"
+      + "<p>A simple gadget to demonstrate the content rewriter</p>\n"
+      + "<div>\n"
+      + "  This is a URL in content that was not rewritten http://www.notrewritten.com\n"
+      + "</div>\n"
+      + "<div id=\"backgrdiv\">\n"
+      + "  This div has a background <br/> image from imported CSS\n"
+      + "</div>\n"
+      + "<div id=\"backgrdiv2\">\n"
+      + "  This div has a background <br/> image from linked CSS\n"
+      + "</div>\n"
+      + "<p> This <img src=\"img.png\"/> is an image tag that was rewritten</p>\n"
+      + "<p id=\"foo\">foo</p>\n"
+      + "<p id=\"bar\">bar</p>\n"
+      + "<script src=\"/1.js\"></script>\n"
+      + "<script src=\"/2.js\"></script>";
+    CajaHtmlParser chp = new CajaHtmlParser();
+    ParsedHtmlNode[] p = chp.parse(s).toArray(new ParsedHtmlNode[0]);
+    String rewritten = "<style type=\"text/css\"> @import url(\"" + LINK_PREFIX + "rewrite.css\"); </style>\n"
+      + "<link href=\"" + LINK_PREFIX + "rewritelink.css\"/>\n"
+      + "<p>A simple gadget to demonstrate the content rewriter</p>\n"
+      + "<div>\n"
+      + "  This is a URL in content that was not rewritten http://www.notrewritten.com\n"
+      + "</div>\n"
+      + "<div id=\"backgrdiv\">\n"
+      + "  This div has a background <br/> image from imported CSS\n"
+      + "</div>\n"
+      + "<div id=\"backgrdiv2\">\n"
+      + "  This div has a background <br/> image from linked CSS\n"
+      + "</div>\n"
+      + "<p> This <img src=\"" + LINK_PREFIX + "img.png\"/> is an image tag that was rewritten</p>\n"
+      + "<p id=\"foo\">foo</p>\n"
+      + "<p id=\"bar\">bar</p>\n"
+      + "<script src=\"" + concatBase + "1=http%3A%2F%2Fgadget.org%2F1.js&2=http%3A%2F%2Fgadget.org%2F2.js\"></script>";
+    assertEquals(rewritten, rewriteHelper(s, p, comboFeature, pfxLinkRewriter));
   }
 }

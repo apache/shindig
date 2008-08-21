@@ -150,8 +150,9 @@ public class ParseTreeHtmlRewriter {
     for (GadgetHtmlNode node : nodes) {
       wrapper.appendChild(node);
     }
+
     doJSTagConsolidation(getJsConcatBase(spec, rewriterFeature), wrapper, gadgetUri);
-    
+
     // Replace nodes list with wrapper children.
     // This stuff will be cleaned up with rewriter modularization by introducing
     // a well-defined top-level node for processing purposes.
@@ -214,7 +215,8 @@ public class ParseTreeHtmlRewriter {
             }
             scripts.add(scriptUri);
             toRemove.add(cur);
-          } else if (cur.isText() && cur.getText().matches("\\s*")) {
+          } else if (scripts.size() > 0 && cur.isText() && cur.getText().matches("\\s*")) {
+            // Whitespace after one or more scripts. Ignore and remove.
             toRemove.add(cur);
           } else if (scripts.size() > 0) {
             processScripts = true;
