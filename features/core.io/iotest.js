@@ -26,7 +26,7 @@ IoTest.inherits(TestCase);
 IoTest.prototype.setUp = function() {
   this.oldGetUrlParameters = gadgets.util.getUrlParameters;
   gadgets.util.getUrlParameters = function() {
-    return { "st" : "authtoken", "url" : "http://www.gadget.com/gadget.xml" };
+    return { "st" : "authtoken", "url" : "http://www.gadget.com/gadget.xml", "container" : "foo" };
   };
   if (!shindig.auth) {
     shindig.auth = new shindig.Auth();
@@ -96,6 +96,7 @@ IoTest.prototype.setStandardArgs = function(req, inBody) {
   this.setArg(req, inBody, "signOwner", "true");
   this.setArg(req, inBody, "getSummaries", "false");
   this.setArg(req, inBody, "gadget", "http://www.gadget.com/gadget.xml");
+  this.setArg(req, inBody, "container", "foo");
   this.setArg(req, inBody, "headers", "");
   this.setArg(req, inBody, "numEntries", "3");
   this.setArg(req, inBody, "postData", "");
