@@ -18,24 +18,21 @@
  */
 package org.apache.shindig.gadgets.servlet;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-
 import org.junit.Test;
 
 /**
  * Tests for OAuth callback servlet.
  */
-public class OAuthCallbackServletTest {
+public class OAuthCallbackServletTest extends ServletTestFixture {
 
   private final ServletTestFixture fixture = new ServletTestFixture();
 
   @Test
   public void testServlet() throws Exception {
     OAuthCallbackServlet servlet = new OAuthCallbackServlet();
-    fixture.replay();
+    replay();
     servlet.doGet(fixture.request, fixture.recorder);
-    fixture.verify();
+    verify();
     assertEquals("text/html; charset=UTF-8", fixture.recorder.getContentType());
     String body = fixture.recorder.getResponseAsString();
     assertTrue("body is " + body, body.indexOf("window.close()") != -1);

@@ -23,6 +23,7 @@ import static org.easymock.EasyMock.isA;
 
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.gadgets.Gadget;
+import org.apache.shindig.gadgets.GadgetTestFixture;
 import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.http.HttpResponse;
 import org.apache.shindig.gadgets.spec.GadgetSpec;
@@ -34,7 +35,7 @@ import org.json.JSONObject;
 import java.util.Collections;
 import java.util.Map;
 
-public class JsonRpcHandlerTest extends HttpTestFixture {
+public class JsonRpcHandlerTest extends GadgetTestFixture {
   private static final Uri SPEC_URL = Uri.parse("http://example.org/g.xml");
   private static final HttpRequest SPEC_REQUEST = new HttpRequest(SPEC_URL);
   private static final Uri SPEC_URL2 = Uri.parse("http://example.org/g2.xml");

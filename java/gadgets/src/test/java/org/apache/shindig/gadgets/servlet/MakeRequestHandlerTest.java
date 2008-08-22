@@ -21,10 +21,8 @@ package org.apache.shindig.gadgets.servlet;
 import static junitx.framework.StringAssert.assertStartsWith;
 import static org.easymock.EasyMock.expect;
 import static org.easymock.EasyMock.isA;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+
+import com.google.common.collect.Lists;
 
 import org.apache.shindig.common.SecurityToken;
 import org.apache.shindig.common.SecurityTokenDecoder;
@@ -37,35 +35,28 @@ import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.http.HttpResponse;
 import org.apache.shindig.gadgets.spec.Auth;
 import org.apache.shindig.gadgets.spec.Preload;
-
-import com.google.common.collect.Lists;
-
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.junit.Before;
 import org.junit.Test;
 
 import java.util.Collections;
 import java.util.List;
 
-import javax.servlet.http.HttpServletResponse;
-
 /**
  * Tests for MakeRequestHandler.
  */
-public class MakeRequestHandlerTest {
+public class MakeRequestHandlerTest extends ServletTestFixture {
   private static final Uri REQUEST_URL = Uri.parse("http://example.org/file");
   private static final String REQUEST_BODY = "I+am+the+request+body!foo=baz%20la";
   private static final String RESPONSE_BODY = "makeRequest response body";
   private static final SecurityToken DUMMY_TOKEN = new FakeGadgetToken();
 
-  private final ServletTestFixture fixture = new ServletTestFixture();
-  private final MakeRequestHandler handler = new MakeRequestHandler(fixture.contentFetcherFactory,
-      fixture.securityTokenDecoder, fixture.rewriter);
+  private final MakeRequestHandler handler = new MakeRequestHandler(contentFetcherFactory,
+      securityTokenDecoder, rewriter);
 
   private void expectGetAndReturnBody(String response) throws Exception {
-    expectGetAndReturnBody(fixture.httpFetcher, response);
+    expectGetAndReturnBody(fetcher, response);
   }
 
   private void expectGetAndReturnBody(HttpFetcher fetcher, String response) throws Exception {
@@ -74,7 +65,7 @@ public class MakeRequestHandlerTest {
   }
 
   private void expectPostAndReturnBody(String postData, String response) throws Exception {
-    expectPostAndReturnBody(fixture.httpFetcher, postData, response);
+    expectPostAndReturnBody(fetcher, postData, response);
   }
 
   private void expectPostAndReturnBody(HttpFetcher fetcher, String postData, String response)
@@ -82,39 +73,37 @@ public class MakeRequestHandlerTest {
     HttpRequest req = new HttpRequest(REQUEST_URL).setMethod("POST")
         .setPostBody(REQUEST_BODY.getBytes("UTF-8"));
     expect(fetcher.fetch(req)).andReturn(new HttpResponse(response));
-    expect(fixture.request.getParameter(MakeRequestHandler.METHOD_PARAM)).andReturn("POST");
-    expect(fixture.request.getParameter(MakeRequestHandler.POST_DATA_PARAM))
+    expect(request.getParameter(MakeRequestHandler.METHOD_PARAM)).andReturn("POST");
+    expect(request.getParameter(MakeRequestHandler.POST_DATA_PARAM))
         .andReturn(REQUEST_BODY);
   }
 
   private JSONObject extractJsonFromResponse() throws JSONException {
-    String body = fixture.recorder.getResponseAsString();
+    String body = recorder.getResponseAsString();
     assertStartsWith(MakeRequestHandler.UNPARSEABLE_CRUFT, body);
     body = body.substring(MakeRequestHandler.UNPARSEABLE_CRUFT.length());
     return new JSONObject(body).getJSONObject(REQUEST_URL.toString());
   }
 
-  @Before
+  @Override
   public void setUp() {
-    expect(fixture.request.getMethod()).andReturn("POST").anyTimes();
-    expect(fixture.request.getParameter(MakeRequestHandler.URL_PARAM))
+    expect(request.getMethod()).andReturn("POST").anyTimes();
+    expect(request.getParameter(MakeRequestHandler.URL_PARAM))
         .andReturn(REQUEST_URL.toString()).anyTimes();
   }
 
-  @Test
-  public void getRequest() throws Exception {
+  public void testGetRequest() throws Exception {
     expectGetAndReturnBody(RESPONSE_BODY);
-    fixture.replay();
+    replay();
 
-    handler.fetch(fixture.request, fixture.recorder);
+    handler.fetch(request, recorder);
 
     JSONObject results = extractJsonFromResponse();
     assertEquals(HttpResponse.SC_OK, results.getInt("rc"));
     assertEquals(RESPONSE_BODY, results.get("body"));
   }
 
-  @Test
-  public void explicitHeaders() throws Exception {
+  public void testExplicitHeaders() throws Exception {
     String headerString = "X-Foo=bar&X-Bar=baz%20foo";
 
     final List<HttpRequest> requests = Lists.newArrayList();
@@ -125,14 +114,14 @@ public class MakeRequestHandlerTest {
       }
     };
 
-    fixture.reset();
+    reset();
     setUp();
-    expect(fixture.contentFetcherFactory.get()).andReturn(fakeFetcher);
-    expect(fixture.request.getParameter(MakeRequestHandler.HEADERS_PARAM)).andReturn(headerString);
-    fixture.replay();
+    expect(contentFetcherFactory.get()).andReturn(fakeFetcher);
+    expect(request.getParameter(MakeRequestHandler.HEADERS_PARAM)).andReturn(headerString);
+    replay();
 
-    handler.fetch(fixture.request, fixture.recorder);
-    fixture.verify();
+    handler.fetch(request, recorder);
+    verify();
 
     assertEquals("bar", requests.get(0).getHeader("X-Foo"));
     assertEquals("baz foo", requests.get(0).getHeader("X-Bar"));
@@ -142,13 +131,12 @@ public class MakeRequestHandlerTest {
     assertEquals(RESPONSE_BODY, results.get("body"));
   }
 
-  @Test
-  public void postRequest() throws Exception {
-    expect(fixture.request.getParameter(MakeRequestHandler.METHOD_PARAM)).andReturn("POST");
+  public void testPostRequest() throws Exception {
+    expect(request.getParameter(MakeRequestHandler.METHOD_PARAM)).andReturn("POST");
     expectPostAndReturnBody(REQUEST_BODY, RESPONSE_BODY);
-    fixture.replay();
+    replay();
 
-    handler.fetch(fixture.request, fixture.recorder);
+    handler.fetch(request, recorder);
     JSONObject results = extractJsonFromResponse();
 
     assertEquals(HttpResponse.SC_OK, results.getInt("rc"));
@@ -156,7 +144,7 @@ public class MakeRequestHandlerTest {
   }
 
   @Test
-  public void fetchContentTypeFeed() throws Exception {
+  public void testFetchContentTypeFeed() throws Exception {
     String entryTitle = "Feed title";
     String entryLink = "http://example.org/entry/0/1";
     String entrySummary = "This is the summary";
@@ -172,10 +160,10 @@ public class MakeRequestHandlerTest {
                  "</channel></rss>";
 
     expectGetAndReturnBody(rss);
-    expect(fixture.request.getParameter(MakeRequestHandler.CONTENT_TYPE_PARAM)).andReturn("FEED");
-    fixture.replay();
+    expect(request.getParameter(MakeRequestHandler.CONTENT_TYPE_PARAM)).andReturn("FEED");
+    replay();
 
-    handler.fetch(fixture.request, fixture.recorder);
+    handler.fetch(request, recorder);
     JSONObject results = extractJsonFromResponse();
 
     JSONObject feed = new JSONObject(results.getString("body"));
@@ -187,8 +175,7 @@ public class MakeRequestHandlerTest {
         entry.optString("Summary", null));
   }
 
-  @Test
-  public void fetchFeedWithParameters() throws Exception {
+  public void testFetchFeedWithParameters() throws Exception {
     String entryTitle = "Feed title";
     String entryLink = "http://example.org/entry/0/1";
     String entrySummary = "This is the summary";
@@ -214,12 +201,12 @@ public class MakeRequestHandlerTest {
                  "</channel></rss>";
 
     expectGetAndReturnBody(rss);
-    expect(fixture.request.getParameter(MakeRequestHandler.GET_SUMMARIES_PARAM)).andReturn("true");
-    expect(fixture.request.getParameter(MakeRequestHandler.NUM_ENTRIES_PARAM)).andReturn("2");
-    expect(fixture.request.getParameter(MakeRequestHandler.CONTENT_TYPE_PARAM)).andReturn("FEED");
-    fixture.replay();
+    expect(request.getParameter(MakeRequestHandler.GET_SUMMARIES_PARAM)).andReturn("true");
+    expect(request.getParameter(MakeRequestHandler.NUM_ENTRIES_PARAM)).andReturn("2");
+    expect(request.getParameter(MakeRequestHandler.CONTENT_TYPE_PARAM)).andReturn("FEED");
+    replay();
 
-    handler.fetch(fixture.request, fixture.recorder);
+    handler.fetch(request, recorder);
     JSONObject results = extractJsonFromResponse();
 
     JSONObject feed = new JSONObject(results.getString("body"));
@@ -234,54 +221,51 @@ public class MakeRequestHandlerTest {
     assertEquals(entrySummary, entry.getString("Summary"));
   }
 
-  @Test
-  public void fetchEmptyDocument() throws Exception {
+  public void testFetchEmptyDocument() throws Exception {
     expectGetAndReturnBody("");
-    fixture.replay();
+    replay();
 
-    handler.fetch(fixture.request, fixture.recorder);
+    handler.fetch(request, recorder);
     JSONObject results = extractJsonFromResponse();
 
     assertEquals(HttpResponse.SC_OK, results.getInt("rc"));
     assertEquals("", results.get("body"));
   }
 
-  @Test
-  public void signedGetRequest() throws Exception {
+  public void testSignedGetRequest() throws Exception {
     // Doesn't actually sign since it returns the standard fetcher.
     // Signing tests are in SigningFetcherTest
-    expect(fixture.securityTokenDecoder.createToken(
+    expect(securityTokenDecoder.createToken(
         Collections.singletonMap(SecurityTokenDecoder.SECURITY_TOKEN_NAME, "fake-token")))
         .andReturn(DUMMY_TOKEN);
-    expect(fixture.request.getParameter(MakeRequestHandler.SECURITY_TOKEN_PARAM))
+    expect(request.getParameter(MakeRequestHandler.SECURITY_TOKEN_PARAM))
         .andReturn("fake-token").atLeastOnce();
-    expect(fixture.request.getParameter(Preload.AUTHZ_ATTR))
+    expect(request.getParameter(Preload.AUTHZ_ATTR))
         .andReturn(Auth.SIGNED.toString()).atLeastOnce();
-    expect(fixture.signingFetcher.fetch(isA(HttpRequest.class)))
+    expect(signingFetcher.fetch(isA(HttpRequest.class)))
         .andReturn(new HttpResponse(RESPONSE_BODY));
-    fixture.replay();
+    replay();
 
-    handler.fetch(fixture.request, fixture.recorder);
+    handler.fetch(request, recorder);
     JSONObject results = extractJsonFromResponse();
 
     assertEquals(RESPONSE_BODY, results.get("body"));
   }
 
-  @Test
-  public void signedPostRequest() throws Exception {
+  public void testSignedPostRequest() throws Exception {
     // Doesn't actually sign since it returns the standard fetcher.
     // Signing tests are in SigningFetcherTest
-    expectPostAndReturnBody(fixture.signingFetcher, REQUEST_BODY, RESPONSE_BODY);
-    expect(fixture.securityTokenDecoder.createToken(
+    expectPostAndReturnBody(signingFetcher, REQUEST_BODY, RESPONSE_BODY);
+    expect(securityTokenDecoder.createToken(
         Collections.singletonMap(SecurityTokenDecoder.SECURITY_TOKEN_NAME, "fake-token")))
         .andReturn(DUMMY_TOKEN);
-    expect(fixture.request.getParameter(MakeRequestHandler.SECURITY_TOKEN_PARAM))
+    expect(request.getParameter(MakeRequestHandler.SECURITY_TOKEN_PARAM))
         .andReturn("fake-token").atLeastOnce();
-    expect(fixture.request.getParameter(Preload.AUTHZ_ATTR))
+    expect(request.getParameter(Preload.AUTHZ_ATTR))
         .andReturn(Auth.SIGNED.toString()).atLeastOnce();
-    fixture.replay();
+    replay();
 
-    handler.fetch(fixture.request, fixture.recorder);
+    handler.fetch(request, recorder);
     JSONObject results = extractJsonFromResponse();
 
     assertEquals(RESPONSE_BODY, results.get("body"));
@@ -289,103 +273,99 @@ public class MakeRequestHandlerTest {
         results.has("st"));
   }
 
-  @Test
-  public void changeSecurityToken() throws Exception {
+  public void testChangeSecurityToken() throws Exception {
     // Doesn't actually sign since it returns the standard fetcher.
     // Signing tests are in SigningFetcherTest
-    expectGetAndReturnBody(fixture.signingFetcher, RESPONSE_BODY);
+    expectGetAndReturnBody(signingFetcher, RESPONSE_BODY);
     FakeGadgetToken authToken = new FakeGadgetToken().setUpdatedToken("updated");
-    expect(fixture.securityTokenDecoder.createToken
+    expect(securityTokenDecoder.createToken
         (Collections.singletonMap(SecurityTokenDecoder.SECURITY_TOKEN_NAME, "fake-token")))
         .andReturn(authToken);
-    expect(fixture.request.getParameter(MakeRequestHandler.SECURITY_TOKEN_PARAM))
+    expect(request.getParameter(MakeRequestHandler.SECURITY_TOKEN_PARAM))
         .andReturn("fake-token").atLeastOnce();
-    expect(fixture.request.getParameter(Preload.AUTHZ_ATTR))
+    expect(request.getParameter(Preload.AUTHZ_ATTR))
         .andReturn(Auth.SIGNED.toString()).atLeastOnce();
-    fixture.replay();
+    replay();
 
-    handler.fetch(fixture.request, fixture.recorder);
+    handler.fetch(request, recorder);
     JSONObject results = extractJsonFromResponse();
 
     assertEquals(RESPONSE_BODY, results.get("body"));
     assertEquals("updated", results.getString("st"));
   }
 
-  @Test
-  public void doOAuthRequest() throws Exception {
+  public void testDoOAuthRequest() throws Exception {
     // Doesn't actually do oauth dance since it returns the standard fetcher.
     // OAuth tests are in OAuthFetcherTest
-    expectGetAndReturnBody(fixture.oauthFetcher, RESPONSE_BODY);
+    expectGetAndReturnBody(oauthFetcher, RESPONSE_BODY);
     FakeGadgetToken authToken = new FakeGadgetToken().setUpdatedToken("updated");
-    expect(fixture.securityTokenDecoder.createToken(
+    expect(securityTokenDecoder.createToken(
         Collections.singletonMap(SecurityTokenDecoder.SECURITY_TOKEN_NAME, "fake-token")))
         .andReturn(authToken);
-    expect(fixture.request.getParameter(MakeRequestHandler.SECURITY_TOKEN_PARAM))
+    expect(request.getParameter(MakeRequestHandler.SECURITY_TOKEN_PARAM))
         .andReturn("fake-token").atLeastOnce();
-    expect(fixture.request.getParameter(Preload.AUTHZ_ATTR))
+    expect(request.getParameter(Preload.AUTHZ_ATTR))
         .andReturn(Auth.OAUTH.toString()).atLeastOnce();
     // This isn't terribly accurate, but is close enough for this test.
-    expect(fixture.request.getParameterMap()).andStubReturn(Collections.EMPTY_MAP);
-    fixture.replay();
+    expect(request.getParameterMap()).andStubReturn(Collections.EMPTY_MAP);
+    replay();
 
-    handler.fetch(fixture.request, fixture.recorder);
+    handler.fetch(request, recorder);
     JSONObject results = extractJsonFromResponse();
 
     assertEquals(HttpResponse.SC_OK, results.getInt("rc"));
     assertEquals(RESPONSE_BODY, results.get("body"));
   }
 
-  @Test
-  public void invalidSigningTypeTreatedAsNone() throws Exception {
+  public void testInvalidSigningTypeTreatedAsNone() throws Exception {
     expectGetAndReturnBody(RESPONSE_BODY);
-    expect(fixture.request.getParameter(Preload.AUTHZ_ATTR)).andReturn("garbage");
-    fixture.replay();
+    expect(request.getParameter(Preload.AUTHZ_ATTR)).andReturn("garbage");
+    replay();
 
-    handler.fetch(fixture.request, fixture.recorder);
+    handler.fetch(request, recorder);
     JSONObject results = extractJsonFromResponse();
 
     assertEquals(HttpResponse.SC_OK, results.getInt("rc"));
     assertEquals(RESPONSE_BODY, results.get("body"));
   }
 
-  @Test
-  public void badHttpResponseIsPropagated() throws Exception {
-    HttpRequest request = new HttpRequest(REQUEST_URL);
-    expect(fixture.httpFetcher.fetch(request)).andReturn(HttpResponse.error());
-    fixture.replay();
+  public void testBadHttpResponseIsPropagated() throws Exception {
+    HttpRequest internalRequest = new HttpRequest(REQUEST_URL);
+    expect(fetcher.fetch(internalRequest)).andReturn(HttpResponse.error());
+    replay();
 
-    handler.fetch(fixture.request, fixture.recorder);
+    handler.fetch(request, recorder);
     JSONObject results = extractJsonFromResponse();
 
     assertEquals(HttpResponse.SC_INTERNAL_SERVER_ERROR, results.getInt("rc"));
   }
 
-  @Test(expected = GadgetException.class)
-  public void badSecurityTokenThrows() throws Exception {
-    expect(fixture.request.getParameter(MakeRequestHandler.SECURITY_TOKEN_PARAM))
+  public void testBadSecurityTokenThrows() throws Exception {
+    expect(request.getParameter(MakeRequestHandler.SECURITY_TOKEN_PARAM))
         .andReturn("fake-token").atLeastOnce();
-    expect(fixture.request.getParameter(Preload.AUTHZ_ATTR))
+    expect(request.getParameter(Preload.AUTHZ_ATTR))
         .andReturn(Auth.SIGNED.toString()).atLeastOnce();
-    expect(fixture.securityTokenDecoder.createToken(
+    expect(securityTokenDecoder.createToken(
         Collections.singletonMap(SecurityTokenDecoder.SECURITY_TOKEN_NAME, "fake-token")))
         .andThrow(new SecurityTokenException("No!"));
-    fixture.replay();
+    replay();
 
-    handler.fetch(fixture.request, fixture.recorder);
-
-    assertTrue("Response for bad tokens should not be SC_OK",
-        HttpServletResponse.SC_OK != fixture.recorder.getHttpStatusCode());
+    try {
+      handler.fetch(request, recorder);
+      fail("Should have thrown");
+    } catch (GadgetException e) {
+      // good.
+    }
   }
 
-  @Test
-  public void metadataCopied() throws Exception {
-    HttpRequest request = new HttpRequest(REQUEST_URL);
+  public void testMetadataCopied() throws Exception {
+    HttpRequest internalRequest = new HttpRequest(REQUEST_URL);
     HttpResponse response = new HttpResponse("foo");
     response.getMetadata().put("foo", RESPONSE_BODY);
-    expect(fixture.httpFetcher.fetch(request)).andReturn(response);
-    fixture.replay();
+    expect(fetcher.fetch(internalRequest)).andReturn(response);
+    replay();
 
-    handler.fetch(fixture.request, fixture.recorder);
+    handler.fetch(request, recorder);
     JSONObject results = extractJsonFromResponse();
 
     assertEquals(RESPONSE_BODY, results.getString("foo"));

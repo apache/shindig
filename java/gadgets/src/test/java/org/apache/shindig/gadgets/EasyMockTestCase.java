@@ -76,4 +76,11 @@ public abstract class EasyMockTestCase extends TestCase {
   protected void verify() {
     EasyMock.verify(mocks.toArray());
   }
+  
+  /**
+   * Resets all of the mocks.
+   */
+  protected void reset() {
+    EasyMock.reset(mocks.toArray());
+  }
 }

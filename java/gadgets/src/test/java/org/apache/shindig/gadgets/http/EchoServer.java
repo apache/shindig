@@ -48,9 +48,15 @@ public class EchoServer extends FakeHttpServer {
   
   private static class EchoServlet extends HttpServlet {
 
+    @SuppressWarnings("unused")
     @Override
     protected void service(HttpServletRequest req, HttpServletResponse resp)
         throws ServletException, IOException {
+      handleEcho(req, resp);
+    }
+    
+    private void handleEcho(HttpServletRequest req, HttpServletResponse resp)
+        throws IOException {
       int code = HttpServletResponse.SC_OK;
       if (req.getParameter(STATUS_PARAM) != null) {
         code = Integer.parseInt(req.getParameter(STATUS_PARAM));

@@ -19,6 +19,7 @@
 package org.apache.shindig.gadgets.servlet;
 
 import org.apache.shindig.common.ContainerConfig;
+import org.apache.shindig.common.util.TimeSource;
 import org.apache.shindig.gadgets.GadgetContext;
 
 import org.json.JSONException;
@@ -32,10 +33,21 @@ import javax.servlet.http.HttpServletResponse;
  * Collection of HTTP utilities
  */
 public class HttpUtil {
-  public static final long START_TIME = System.currentTimeMillis();
   // 1 year.
   public static final int DEFAULT_TTL = 60 * 60 * 24 * 365;
+  
+  private static TimeSource timeSource;
+  private static long startTime;
+  
+  static {
+    setTimeSource(new TimeSource());
+  }
 
+  public static void setTimeSource(TimeSource timeSource) {
+    HttpUtil.timeSource = timeSource;
+    startTime = HttpUtil.timeSource.currentTimeMillis();
+  }
+  
   /**
    * Sets HTTP headers that instruct the browser to cache content. Implementations should take care
    * to use cache-busting techniques on the url if caching for a long period of time.
@@ -79,7 +91,7 @@ public class HttpUtil {
    * @param noProxy True if you don't want the response to be cacheable by proxies.
    */
   public static void setCachingHeaders(HttpServletResponse response, int ttl, boolean noProxy) {
-    response.setDateHeader("Expires", System.currentTimeMillis() + (1000L * ttl));
+    response.setDateHeader("Expires", timeSource.currentTimeMillis() + (1000L * ttl));
 
     if (ttl == 0) {
       response.setHeader("Pragma", "no-cache");
@@ -91,7 +103,7 @@ public class HttpUtil {
         response.setHeader("Cache-Control", "public,max-age=" + Integer.toString(ttl));
       }
       // Firefox requires this for certain cases.
-      response.setDateHeader("Last-Modified", START_TIME);
+      response.setDateHeader("Last-Modified", startTime);
     }
   }
 

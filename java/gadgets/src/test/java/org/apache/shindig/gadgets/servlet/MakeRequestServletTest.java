@@ -21,18 +21,13 @@ package org.apache.shindig.gadgets.servlet;
 import static junitx.framework.StringAssert.assertContains;
 import static junitx.framework.StringAssert.assertStartsWith;
 import static org.easymock.EasyMock.expect;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
 
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.http.HttpResponse;
-
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.junit.Before;
-import org.junit.Test;
 
 import java.util.Collections;
 import java.util.Enumeration;
@@ -44,38 +39,36 @@ import javax.servlet.http.HttpServletResponse;
  *
  * Tests are trivial; real tests are in MakeRequestHandlerTest.
  */
-public class MakeRequestServletTest {
+public class MakeRequestServletTest extends ServletTestFixture {
   private static final Uri REQUEST_URL = Uri.parse("http://example.org/file");
   private static final String RESPONSE_BODY = "Hello, world!";
   private static final String ERROR_MESSAGE = "Broken!";
   private static final Enumeration<String> EMPTY_ENUM
       = Collections.enumeration(Collections.<String>emptyList());
 
-  private final ServletTestFixture fixture = new ServletTestFixture();
   private final MakeRequestServlet servlet = new MakeRequestServlet();
-  private final MakeRequestHandler handler = new MakeRequestHandler(fixture.contentFetcherFactory,
-      fixture.securityTokenDecoder, fixture.rewriter);
-  private final HttpServletResponseRecorder recorder
-      = new HttpServletResponseRecorder(fixture.response);
-  private final HttpRequest request = new HttpRequest(REQUEST_URL);
-  private final HttpResponse response = new HttpResponse(RESPONSE_BODY);
+  private final MakeRequestHandler handler = new MakeRequestHandler(contentFetcherFactory,
+      securityTokenDecoder, rewriter);
+  
+  private final HttpRequest internalRequest = new HttpRequest(REQUEST_URL);
+  private final HttpResponse internalResponse = new HttpResponse(RESPONSE_BODY);
 
-  @Before
+  @Override
   public void setUp() {
     servlet.setMakeRequestHandler(handler);
-    expect(fixture.request.getHeaderNames()).andReturn(EMPTY_ENUM).anyTimes();
-    expect(fixture.request.getParameter(MakeRequestHandler.METHOD_PARAM))
+    expect(request.getHeaderNames()).andReturn(EMPTY_ENUM).anyTimes();
+    expect(request.getParameter(MakeRequestHandler.METHOD_PARAM))
         .andReturn("GET").anyTimes();
-    expect(fixture.request.getParameter(ProxyBase.URL_PARAM))
+    expect(request.getParameter(ProxyBase.URL_PARAM))
         .andReturn(REQUEST_URL.toString()).anyTimes();
   }
 
   private void setupGet() {
-    expect(fixture.request.getMethod()).andReturn("GET").anyTimes();
+    expect(request.getMethod()).andReturn("GET").anyTimes();
   }
 
   private void setupPost() {
-    expect(fixture.request.getMethod()).andReturn("POST").anyTimes();
+    expect(request.getMethod()).andReturn("POST").anyTimes();
   }
 
   private void assertResponseOk(int expectedStatus, String expectedBody) throws JSONException {
@@ -92,71 +85,65 @@ public class MakeRequestServletTest {
     }
   }
 
-  @Test
-  public void doGetNormal() throws Exception {
+  public void testDoGetNormal() throws Exception {
     setupGet();
-    expect(fixture.httpFetcher.fetch(request)).andReturn(response);
-    fixture.replay();
+    expect(fetcher.fetch(internalRequest)).andReturn(internalResponse);
+    replay();
 
-    servlet.doGet(fixture.request, recorder);
+    servlet.doGet(request, recorder);
 
     assertResponseOk(HttpResponse.SC_OK, RESPONSE_BODY);
   }
 
-  @Test
-  public void doGetHttpError() throws Exception {
+  public void testDoGetHttpError() throws Exception {
     setupGet();
-    expect(fixture.httpFetcher.fetch(request)).andReturn(HttpResponse.notFound());
-    fixture.replay();
+    expect(fetcher.fetch(internalRequest)).andReturn(HttpResponse.notFound());
+    replay();
 
-    servlet.doGet(fixture.request, recorder);
+    servlet.doGet(request, recorder);
 
     assertResponseOk(HttpResponse.SC_NOT_FOUND, "");
   }
 
-  @Test
-  public void doGetException() throws Exception {
+  public void testDoGetException() throws Exception {
     setupGet();
-    expect(fixture.httpFetcher.fetch(request)).andThrow(
+    expect(fetcher.fetch(internalRequest)).andThrow(
         new GadgetException(GadgetException.Code.FAILED_TO_RETRIEVE_CONTENT, ERROR_MESSAGE));
-    fixture.replay();
+    replay();
 
-    servlet.doGet(fixture.request, recorder);
+    servlet.doGet(request, recorder);
 
     assertEquals(HttpServletResponse.SC_BAD_REQUEST, recorder.getHttpStatusCode());
     assertContains(ERROR_MESSAGE, recorder.getResponseAsString());
   }
 
-  @Test
-  public void doPostNormal() throws Exception {
+  public void testDoPostNormal() throws Exception {
     setupPost();
-    expect(fixture.httpFetcher.fetch(request)).andReturn(response);
-    fixture.replay();
+    expect(fetcher.fetch(internalRequest)).andReturn(internalResponse);
+    replay();
 
-    servlet.doPost(fixture.request, recorder);
+    servlet.doPost(request, recorder);
 
     assertResponseOk(HttpResponse.SC_OK, RESPONSE_BODY);
   }
 
-  @Test
-  public void doPostHttpError() throws Exception {
+  public void testDoPostHttpError() throws Exception {
     setupPost();
-    expect(fixture.httpFetcher.fetch(request)).andReturn(HttpResponse.notFound());
-    fixture.replay();
+    expect(fetcher.fetch(internalRequest)).andReturn(HttpResponse.notFound());
+    replay();
 
-    servlet.doGet(fixture.request, recorder);
+    servlet.doGet(request, recorder);
 
     assertResponseOk(HttpResponse.SC_NOT_FOUND, "");
   }
 
-  @Test
-  public void doPostException() throws Exception {
+  public void testDoPostException() throws Exception {
     setupPost();
-    expect(fixture.httpFetcher.fetch(request)).andThrow(
+    expect(fetcher.fetch(internalRequest)).andThrow(
         new GadgetException(GadgetException.Code.FAILED_TO_RETRIEVE_CONTENT, ERROR_MESSAGE));
-    fixture.replay();
+    replay();
 
-    servlet.doPost(fixture.request, recorder);
+    servlet.doPost(request, recorder);
 
     assertEquals(HttpServletResponse.SC_BAD_REQUEST, recorder.getHttpStatusCode());
     assertContains(ERROR_MESSAGE, recorder.getResponseAsString());

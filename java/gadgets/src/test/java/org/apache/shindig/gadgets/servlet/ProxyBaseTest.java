@@ -19,17 +19,12 @@
 package org.apache.shindig.gadgets.servlet;
 
 import static org.easymock.EasyMock.expect;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
+
+import com.google.common.collect.Maps;
 
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.http.HttpResponse;
-
-import com.google.common.collect.Maps;
-
-import org.junit.Test;
 
 import java.util.Arrays;
 import java.util.List;
@@ -41,9 +36,7 @@ import javax.servlet.http.HttpServletResponse;
 /**
  * Tests for ProxyBase.
  */
-public class ProxyBaseTest {
-
-  private final ServletTestFixture fixture = new ServletTestFixture();
+public class ProxyBaseTest extends ServletTestFixture {
 
   private final ProxyBase proxy = new ProxyBase() {
     @Override
@@ -52,8 +45,7 @@ public class ProxyBaseTest {
     }
   };
 
-  @Test
-  public void validateUrlNoPath() throws Exception {
+  public void testValidateUrlNoPath() throws Exception {
     Uri url = proxy.validateUrl("http://www.example.com");
     assertEquals("http", url.getScheme());
     assertEquals("www.example.com", url.getAuthority());
@@ -62,8 +54,7 @@ public class ProxyBaseTest {
     assertNull(url.getFragment());
   }
 
-  @Test
-  public void validateUrlHttps() throws Exception {
+  public void testValidateUrlHttps() throws Exception {
     Uri url = proxy.validateUrl("https://www.example.com");
     assertEquals("https", url.getScheme());
     assertEquals("www.example.com", url.getAuthority());
@@ -72,8 +63,7 @@ public class ProxyBaseTest {
     assertNull(url.getFragment());
   }
 
-  @Test
-  public void validateUrlWithPath() throws Exception {
+  public void testValidateUrlWithPath() throws Exception {
     Uri url = proxy.validateUrl("http://www.example.com/foo");
     assertEquals("http", url.getScheme());
     assertEquals("www.example.com", url.getAuthority());
@@ -82,8 +72,7 @@ public class ProxyBaseTest {
     assertNull(url.getFragment());
   }
 
-  @Test
-  public void validateUrlWithPort() throws Exception {
+  public void testValidateUrlWithPort() throws Exception {
     Uri url = proxy.validateUrl("http://www.example.com:8080/foo");
     assertEquals("http", url.getScheme());
     assertEquals("www.example.com:8080", url.getAuthority());
@@ -92,8 +81,7 @@ public class ProxyBaseTest {
     assertNull(url.getFragment());
   }
 
-  @Test
-  public void validateUrlWithEncodedPath() throws Exception {
+  public void testValidateUrlWithEncodedPath() throws Exception {
     Uri url = proxy.validateUrl("http://www.example.com/foo%20bar");
     assertEquals("http", url.getScheme());
     assertEquals("www.example.com", url.getAuthority());
@@ -102,8 +90,7 @@ public class ProxyBaseTest {
     assertNull(url.getFragment());
   }
 
-  @Test
-  public void validateUrlWithEncodedQuery() throws Exception {
+  public void testValidateUrlWithEncodedQuery() throws Exception {
     Uri url = proxy.validateUrl("http://www.example.com/foo?q=with%20space");
     assertEquals("http", url.getScheme());
     assertEquals("www.example.com", url.getAuthority());
@@ -113,8 +100,7 @@ public class ProxyBaseTest {
     assertNull(url.getFragment());
   }
 
-  @Test
-  public void validateUrlWithNoPathAndEncodedQuery() throws Exception {
+  public void testValidateUrlWithNoPathAndEncodedQuery() throws Exception {
     Uri url = proxy.validateUrl("http://www.example.com?q=with%20space");
     assertEquals("http", url.getScheme());
     assertEquals("www.example.com", url.getAuthority());
@@ -123,75 +109,80 @@ public class ProxyBaseTest {
     assertNull(url.getFragment());
   }
 
-  @Test(expected = GadgetException.class)
-  public void validateUrlNullInput() throws GadgetException {
-    proxy.validateUrl(null);
+  public void testValidateUrlNullInput() {
+    try {
+      proxy.validateUrl(null);
+      fail("Should have thrown");
+    } catch (GadgetException e) {
+      // good
+    }
   }
 
-  @Test(expected = GadgetException.class)
-  public void validateUrlBadInput() throws GadgetException {
+  public void testValidateUrlBadInput() {
+    try {
     proxy.validateUrl("%$#%#$%#$%");
+    } catch (GadgetException e) {
+      // good
+    }
   }
 
-  @Test(expected = GadgetException.class)
-  public void validateUrlBadProtocol() throws GadgetException {
+  public void testValidateUrlBadProtocol() {
+    try {
     proxy.validateUrl("gopher://foo");
+  } catch (GadgetException e) {
+    // good
+  }
   }
 
-  @Test
-  public void setResponseHeaders() {
+  public void testSetResponseHeaders() {
     HttpResponse results = new HttpResponse(HttpResponse.SC_OK);
-    fixture.replay();
+    replay();
 
-    proxy.setResponseHeaders(fixture.request, fixture.recorder, results);
+    proxy.setResponseHeaders(request, recorder, results);
 
     // Just verify that they were set. Specific values are configurable.
-    assertNotNull("Expires header not set", fixture.recorder.getHeader("Expires"));
-    assertNotNull("Cache-Control header not set", fixture.recorder.getHeader("Cache-Control"));
-    assertEquals("attachment;filename=p.txt", fixture.recorder.getHeader("Content-Disposition"));
+    assertNotNull("Expires header not set", recorder.getHeader("Expires"));
+    assertNotNull("Cache-Control header not set", recorder.getHeader("Cache-Control"));
+    assertEquals("attachment;filename=p.txt", recorder.getHeader("Content-Disposition"));
   }
 
-  @Test
-  public void setResponseHeadersNoCache() {
+  public void testSetResponseHeadersNoCache() {
     Map<String, List<String>> headers = Maps.newTreeMap(String.CASE_INSENSITIVE_ORDER);
     headers.put("Pragma", Arrays.asList("no-cache"));
     HttpResponse results = new HttpResponse(HttpResponse.SC_OK, new byte[0], headers);
-    fixture.replay();
+    replay();
 
-    proxy.setResponseHeaders(fixture.request, fixture.recorder, results);
+    proxy.setResponseHeaders(request, recorder, results);
 
     // Just verify that they were set. Specific values are configurable.
-    assertNotNull("Expires header not set", fixture.recorder.getHeader("Expires"));
-    assertEquals("no-cache", fixture.recorder.getHeader("Pragma"));
-    assertEquals("no-cache", fixture.recorder.getHeader("Cache-Control"));
-    assertEquals("attachment;filename=p.txt", fixture.recorder.getHeader("Content-Disposition"));
+    assertNotNull("Expires header not set", recorder.getHeader("Expires"));
+    assertEquals("no-cache", recorder.getHeader("Pragma"));
+    assertEquals("no-cache", recorder.getHeader("Cache-Control"));
+    assertEquals("attachment;filename=p.txt", recorder.getHeader("Content-Disposition"));
   }
 
-  @Test
-  public void setResponseHeadersForceParam() {
+  public void testSetResponseHeadersForceParam() {
     HttpResponse results = new HttpResponse(HttpResponse.SC_OK);
-    expect(fixture.request.getParameter(ProxyBase.REFRESH_PARAM)).andReturn("30").anyTimes();
-    fixture.replay();
+    expect(request.getParameter(ProxyBase.REFRESH_PARAM)).andReturn("30").anyTimes();
+    replay();
 
-    proxy.setResponseHeaders(fixture.request, fixture.recorder, results);
+    proxy.setResponseHeaders(request, recorder, results);
 
-    fixture.checkCacheControlHeaders(30, false);
-    assertEquals("attachment;filename=p.txt", fixture.recorder.getHeader("Content-Disposition"));
+    checkCacheControlHeaders(30, false);
+    assertEquals("attachment;filename=p.txt", recorder.getHeader("Content-Disposition"));
   }
 
-  @Test
-  public void getParameter() {
-    expect(fixture.request.getParameter("foo")).andReturn("bar");
-    fixture.replay();
+  public void testGetParameter() {
+    expect(request.getParameter("foo")).andReturn("bar");
+    replay();
 
-    assertEquals("bar", proxy.getParameter(fixture.request, "foo", "not foo"));
+    assertEquals("bar", proxy.getParameter(request, "foo", "not foo"));
   }
 
-  @Test
-  public void getParameterWithNullValue() {
-    expect(fixture.request.getParameter("foo")).andReturn(null);
-    fixture.replay();
+  public void testGetParameterWithNullValue() {
+    expect(request.getParameter("foo")).andReturn(null);
+    replay();
 
-    assertEquals("not foo", proxy.getParameter(fixture.request, "foo", "not foo"));
+    assertEquals("not foo", proxy.getParameter(request, "foo", "not foo"));
   }
 }

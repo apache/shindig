@@ -19,14 +19,11 @@
 package org.apache.shindig.gadgets.servlet;
 
 import static org.easymock.EasyMock.expect;
-import static org.junit.Assert.assertEquals;
 
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.http.HttpResponse;
-
-import org.junit.Test;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -35,74 +32,71 @@ import java.util.Map;
 
 import javax.servlet.http.HttpServletResponse;
 
-public class ProxyHandlerTest {
+public class ProxyHandlerTest extends ServletTestFixture {
   private final static String URL_ONE = "http://www.example.org/test.html";
   private final static String DATA_ONE = "hello world";
 
-  private final ServletTestFixture fixture = new ServletTestFixture();
   private final ProxyHandler proxyHandler
-      = new ProxyHandler(fixture.httpFetcher, fixture.lockedDomainService, fixture.rewriter);
-  private final HttpServletResponseRecorder recorder
-      = new HttpServletResponseRecorder(fixture.response);
+      = new ProxyHandler(fetcher, lockedDomainService, rewriter);
 
   private void expectGetAndReturnData(String url, byte[] data) throws Exception {
     HttpRequest req = new HttpRequest(Uri.parse(url));
     HttpResponse resp = new HttpResponse(200, data, null);
-    expect(fixture.httpFetcher.fetch(req)).andReturn(resp);
+    expect(fetcher.fetch(req)).andReturn(resp);
   }
 
   private void expectGetAndReturnHeaders(String url,
       Map<String, List<String>> headers) throws Exception {
     HttpRequest req = new HttpRequest(Uri.parse(url));
     HttpResponse resp = new HttpResponse(200, null, headers);
-    expect(fixture.httpFetcher.fetch(req)).andReturn(resp);
+    expect(fetcher.fetch(req)).andReturn(resp);
   }
 
   private void setupProxyRequestMock(String host, String url) throws Exception {
-    expect(fixture.request.getHeader("Host")).andReturn(host);
-    expect(fixture.request.getParameter("url")).andReturn(url).atLeastOnce();
+    expect(request.getHeader("Host")).andReturn(host);
+    expect(request.getParameter("url")).andReturn(url).atLeastOnce();
   }
 
   private void setupFailedProxyRequestMock(String host, String url) throws Exception {
-    expect(fixture.request.getHeader("Host")).andReturn(host);
+    expect(request.getHeader("Host")).andReturn(host);
   }
 
-  @Test
-  public void ifModifiedSinceAlwaysReturnsEarly() throws Exception {
-    expect(fixture.request.getHeader("If-Modified-Since"))
+  public void testIfModifiedSinceAlwaysReturnsEarly() throws Exception {
+    expect(request.getHeader("If-Modified-Since"))
         .andReturn("Yes, this is an invalid header.");
-    fixture.replay();
+    replay();
 
-    proxyHandler.fetch(fixture.request, recorder);
-    fixture.verify();
+    proxyHandler.fetch(request, recorder);
+    verify();
 
     assertEquals(HttpServletResponse.SC_NOT_MODIFIED, recorder.getHttpStatusCode());
   }
 
-  @Test
-  public void lockedDomainEmbed() throws Exception {
+  public void testLockedDomainEmbed() throws Exception {
     setupProxyRequestMock("www.example.com", URL_ONE);
-    expect(fixture.lockedDomainService.embedCanRender("www.example.com")).andReturn(true);
+    expect(lockedDomainService.embedCanRender("www.example.com")).andReturn(true);
     expectGetAndReturnData(URL_ONE, DATA_ONE.getBytes());
-    fixture.replay();
+    replay();
 
-    proxyHandler.fetch(fixture.request, recorder);
-    fixture.verify();
+    proxyHandler.fetch(request, recorder);
+    verify();
 
     assertEquals(DATA_ONE, recorder.getResponseAsString());
   }
 
-  @Test(expected = GadgetException.class)
-  public void lockedDomainFailedEmbed() throws Exception {
+  public void testLockedDomainFailedEmbed() throws Exception {
     setupFailedProxyRequestMock("www.example.com", URL_ONE);
-    expect(fixture.lockedDomainService.embedCanRender("www.example.com")).andReturn(false);
-    fixture.replay();
-
-    proxyHandler.fetch(fixture.request, fixture.response);
+    expect(lockedDomainService.embedCanRender("www.example.com")).andReturn(false);
+    replay();
+    try {
+      proxyHandler.fetch(request, response);
+      fail("Should have thrown");
+    } catch (GadgetException e) {
+      // good
+    }
   }
 
-  @Test
-  public void headersPreserved() throws Exception {
+  public void testHeadersPreserved() throws Exception {
     // Some headers may be blacklisted. These are ok.
     String url = "http://example.org/file.evil";
     String domain = "example.org";
@@ -112,13 +106,13 @@ public class ProxyHandlerTest {
     headers.put("Content-Type", Arrays.asList(contentType));
     headers.put("X-Magic-Garbage", Arrays.asList(magicGarbage));
 
-    expect(fixture.lockedDomainService.embedCanRender(domain)).andReturn(true).atLeastOnce();
+    expect(lockedDomainService.embedCanRender(domain)).andReturn(true).atLeastOnce();
     setupProxyRequestMock(domain, url);
     expectGetAndReturnHeaders(url, headers);
 
-    fixture.replay();
+    replay();
 
-    proxyHandler.fetch(fixture.request, recorder);
+    proxyHandler.fetch(request, recorder);
 
     assertEquals(contentType, recorder.getHeader("Content-Type"));
     assertEquals(magicGarbage, recorder.getHeader("X-Magic-Garbage"));
