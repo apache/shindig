@@ -158,6 +158,9 @@ class BasicSecurityToken extends SecurityToken {
 		if ($this->isAnonymous()) {
 			throw new Exception("Can't get moduleId from an anonymous token");
 		}
+		if (!is_numeric($this->tokenData[$this->MODULE_KEY])) {
+			throw new Exception("Module ID should be an integer");
+		}
 		return $this->tokenData[$this->MODULE_KEY];
 	}
 }
