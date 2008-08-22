@@ -93,7 +93,7 @@ public class GadgetServerTest extends GadgetTestFixture {
   }
 
   public void testGadgetSpecLookupWithFetcherFailure() throws Exception {
-    HttpResponse resp = new HttpResponse(HttpResponse.SC_NOT_FOUND);
+    HttpResponse resp = HttpResponse.notFound();
 
     expect(fetcher.fetch(SPEC_REQUEST)).andReturn(resp);
     replay();
@@ -389,7 +389,7 @@ public class GadgetServerTest extends GadgetTestFixture {
     expect(fetcher.fetch(SPEC_REQUEST)).andReturn(spec);
 
     HttpRequest viewContentRequest = new HttpRequest(viewUri);
-    HttpResponse viewContentResponse = new HttpResponse(HttpResponse.SC_NOT_FOUND);
+    HttpResponse viewContentResponse = HttpResponse.notFound();
     expect(fetcher.fetch(viewContentRequest)).andReturn(viewContentResponse);
 
     replay();

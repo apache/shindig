@@ -18,6 +18,10 @@
  */
 package org.apache.shindig.gadgets.servlet;
 
+import com.google.common.collect.Sets;
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
+import org.apache.commons.io.IOUtils;
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.LockedDomainService;
@@ -26,18 +30,13 @@ import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.http.HttpResponse;
 import org.apache.shindig.gadgets.rewrite.ContentRewriter;
 
-import com.google.inject.Inject;
-import com.google.inject.Singleton;
-
-import java.io.IOException;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.logging.Logger;
-
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
+import java.util.logging.Logger;
 
 /**
  * Handles open proxy requests.
@@ -47,26 +46,15 @@ public class ProxyHandler extends ProxyBase {
   private static final Logger logger =
       Logger.getLogger(ProxyHandler.class.getPackage().getName());
 
-  private final static Set<String> DISALLOWED_RESPONSE_HEADERS
-      = new HashSet<String>();
-  static {
-    DISALLOWED_RESPONSE_HEADERS.add("set-cookie");
-    DISALLOWED_RESPONSE_HEADERS.add("content-length");
-    DISALLOWED_RESPONSE_HEADERS.add("content-encoding");
-    DISALLOWED_RESPONSE_HEADERS.add("etag");
-    DISALLOWED_RESPONSE_HEADERS.add("last-modified");
-    DISALLOWED_RESPONSE_HEADERS.add("accept-ranges");
-    DISALLOWED_RESPONSE_HEADERS.add("vary");
-    DISALLOWED_RESPONSE_HEADERS.add("expires");
-    DISALLOWED_RESPONSE_HEADERS.add("date");
-    DISALLOWED_RESPONSE_HEADERS.add("pragma");
-    DISALLOWED_RESPONSE_HEADERS.add("cache-control");
-  }
+  private static final Collection<String> DISALLOWED_RESPONSE_HEADERS = Sets.newHashSet(
+      "set-cookie", "content-length", "content-encoding", "etag", "last-modified" ,"accept-ranges",
+      "vary", "expires", "date", "pragma", "cache-control"
+  );
 
   // This isn't a final field because we want to support optional injection.
   // This is a limitation of Guice, but this workaround...works.
   private final HttpFetcher fetcher;
-  private final LockedDomainService domainLocker;
+  private final LockedDomainService lockedDomainService;
   private final ContentRewriter rewriter;
 
   @Inject
@@ -74,7 +62,7 @@ public class ProxyHandler extends ProxyBase {
                       LockedDomainService lockedDomainService,
                       ContentRewriter rewriter) {
     this.fetcher = fetcher;
-    this.domainLocker = lockedDomainService;
+    this.lockedDomainService = lockedDomainService;
     this.rewriter = rewriter;
   }
 
@@ -120,7 +108,7 @@ public class ProxyHandler extends ProxyBase {
     }
 
     String host = request.getHeader("Host");
-    if (!domainLocker.embedCanRender(host)) {
+    if (!lockedDomainService.embedCanRender(host)) {
       // Force embedded images and the like to their own domain to avoid XSS
       // in gadget domains.
       String msg = "Embed request for url " + getParameter(request, URL_PARAM, "") +
@@ -132,9 +120,10 @@ public class ProxyHandler extends ProxyBase {
     HttpRequest rcr = buildHttpRequest(request);
     HttpResponse results = fetcher.fetch(rcr);
 
-    setResponseHeaders(request, response, results);
+    setResponseHeaders(request, response, results);   
 
-    for (Map.Entry<String, List<String>> entry : results.getAllHeaders().entrySet()) {
+
+    for (Map.Entry<String, List<String>> entry : results.getHeaders().entrySet()) {
       String name = entry.getKey();
       if (!DISALLOWED_RESPONSE_HEADERS.contains(name.toLowerCase())) {
         for (String value : entry.getValue()) {
@@ -151,6 +140,6 @@ public class ProxyHandler extends ProxyBase {
       response.sendError(results.getHttpStatusCode());
     }
 
-    response.getOutputStream().write(results.getResponseAsBytes());
+    IOUtils.copy(results.getResponse(), response.getOutputStream());
   }
 }

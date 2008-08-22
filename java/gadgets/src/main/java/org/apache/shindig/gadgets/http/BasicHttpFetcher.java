@@ -17,9 +17,9 @@
  */
 package org.apache.shindig.gadgets.http;
 
+import com.google.common.collect.Maps;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
@@ -29,7 +29,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.zip.GZIPInputStream;
@@ -82,7 +81,7 @@ public class BasicHttpFetcher implements HttpFetcher {
     fetcher.setConnectTimeout(CONNECT_TIMEOUT_MS);
     fetcher.setRequestProperty("Accept-Encoding", "gzip, deflate");
     fetcher.setInstanceFollowRedirects(true);
-    for (Map.Entry<String, Collection<String>> entry : request.getHeaders().asMap().entrySet()) {
+    for (Map.Entry<String, List<String>> entry : request.getHeaders().entrySet()) {
       fetcher.setRequestProperty(entry.getKey(), StringUtils.join(entry.getValue(), ','));
     }
     fetcher.setDefaultUseCaches(!request.getIgnoreCache());
@@ -94,9 +93,10 @@ public class BasicHttpFetcher implements HttpFetcher {
    * @return A HttpResponse object made by consuming the response of the
    *     given HttpURLConnection.
    */
-  private HttpResponse makeResponse(HttpURLConnection fetcher)
-      throws IOException {
-    Map<String, List<String>> headers = fetcher.getHeaderFields();
+  private HttpResponse makeResponse(HttpURLConnection fetcher) throws IOException {
+    Map<String, List<String>> headers = Maps.newHashMap(fetcher.getHeaderFields());
+    // The first header is always null here to provide the response body.
+    headers.remove(null);
     int responseCode = fetcher.getResponseCode();
     // Find the response stream - the error stream may be valid in cases
     // where the input stream is not.
@@ -125,10 +125,14 @@ public class BasicHttpFetcher implements HttpFetcher {
     } else if (encoding.equalsIgnoreCase("deflate")) {
       Inflater inflater = new Inflater(true);
       is = new InflaterInputStream(baseIs, inflater);
-    }
+    }    
 
     byte[] body = IOUtils.toByteArray(is);
-    return new HttpResponse(responseCode, body, headers);
+    return new HttpResponseBuilder()
+        .setHttpStatusCode(responseCode)
+        .setResponse(body)
+        .addAllHeaders(headers)
+        .create();
   }
 
   /** {@inheritDoc} */

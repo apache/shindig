@@ -20,11 +20,11 @@ package org.apache.shindig.gadgets.rewrite;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.inject.name.Named;
-
 import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.GadgetSpecFactory;
 import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.http.HttpResponse;
+import org.apache.shindig.gadgets.http.HttpResponseBuilder;
 import org.apache.shindig.gadgets.parse.GadgetHtmlParser;
 import org.apache.shindig.gadgets.spec.GadgetSpec;
 
@@ -78,8 +78,7 @@ public class ParseTreeDefaultContentRewriter implements ContentRewriter {
     try {
       ByteArrayOutputStream baos = new ByteArrayOutputStream(
           (original.getContentLength() * 110) / 100);
-      OutputStreamWriter output = new OutputStreamWriter(baos,
-          original.getEncoding());
+      OutputStreamWriter output = new OutputStreamWriter(baos, original.getEncoding());
       String mimeType = original.getHeader("Content-Type");
       if (request.getRewriteMimeType() != null) {
         mimeType = request.getRewriteMimeType();
@@ -92,10 +91,9 @@ public class ParseTreeDefaultContentRewriter implements ContentRewriter {
           original.getResponseAsString(),
           mimeType,
           output)) {
-        return new HttpResponse(original.getHttpStatusCode(),
-            baos.toByteArray(),
-            original.getAllHeaders(),
-            original.getEncoding());
+        return new HttpResponseBuilder(original)
+            .setResponse(baos.toByteArray())
+            .create();
       }
       return null;
     } catch (UnsupportedEncodingException uee) {

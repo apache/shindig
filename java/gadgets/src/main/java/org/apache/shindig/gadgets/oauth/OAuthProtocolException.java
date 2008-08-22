@@ -17,14 +17,14 @@
  */
 package org.apache.shindig.gadgets.oauth;
 
+import net.oauth.OAuthMessage;
+import net.oauth.OAuthProblemException;
+import org.apache.shindig.gadgets.http.HttpResponse;
+import org.apache.shindig.gadgets.http.HttpResponseBuilder;
+
 import java.io.IOException;
 import java.util.HashSet;
 import java.util.Set;
-
-import org.apache.shindig.gadgets.http.HttpResponse;
-
-import net.oauth.OAuthMessage;
-import net.oauth.OAuthProblemException;
 
 /**
  * Implements the
@@ -139,12 +139,12 @@ class OAuthProtocolException extends Exception {
   }
 
   public HttpResponse getResponseForGadget() {
-    HttpResponse response = new HttpResponse(0, null, null);
-    // Inch towards opensocial-0.8: this is very much an experiment, don't
-    // hesitate to change it if you've got something better.
-    response.getMetadata().put("oauthError", problemCode);
-    response.getMetadata().put("oauthErrorText", problemText);
-    return response;
+    return new HttpResponseBuilder()
+        .setHttpStatusCode(0)
+        // Inch towards opensocial-0.8: this is very much an experiment, don't
+        // hesitate to change it if you've got something better.
+        .setMetadata("oauthError", problemCode)
+        .setMetadata("oauthErrorText", problemText)
+        .create();
   }
-
 }

@@ -18,30 +18,24 @@
  */
 package org.apache.shindig.gadgets;
 
-import static org.easymock.EasyMock.expect;
-import static org.easymock.EasyMock.isA;
-import static org.easymock.EasyMock.replay;
-import static org.easymock.EasyMock.verify;
-import static org.junit.Assert.assertEquals;
-
 import org.apache.shindig.common.cache.CacheProvider;
 import org.apache.shindig.common.cache.DefaultCacheProvider;
 import org.apache.shindig.common.xml.XmlUtil;
 import org.apache.shindig.gadgets.http.HttpFetcher;
 import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.http.HttpResponse;
+import org.apache.shindig.gadgets.http.HttpResponseBuilder;
 import org.apache.shindig.gadgets.spec.LocaleSpec;
 import org.apache.shindig.gadgets.spec.MessageBundle;
-
-import com.google.common.collect.Maps;
-
 import org.easymock.EasyMock;
+import static org.easymock.EasyMock.expect;
+import static org.easymock.EasyMock.isA;
+import static org.easymock.EasyMock.replay;
+import static org.easymock.EasyMock.verify;
+import static org.junit.Assert.assertEquals;
 import org.junit.Test;
 
 import java.net.URI;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
 
 /**
  * Tests for BasicMessageBundleFactory
@@ -125,11 +119,11 @@ public class BasicMessageBundleFactoryTest {
           "<msg name='" + MSG_0_NAME + "'>" + MSG_0_VALUE + "</msg>" +
           "</Locale>";
     LocaleSpec locale = new LocaleSpec(XmlUtil.parse(localeXml), SPEC_URI);
-    assertEquals("all", locale.getLanguage());
-    Map<String, List<String>> headers = Maps.newHashMap();
-    headers.put("Pragma", Arrays.asList("no-cache"));
-    HttpResponse expiredResponse = new HttpResponse(
-        HttpResponse.SC_OK, BASIC_BUNDLE.getBytes("UTF-8"), headers);
+    assertEquals("all", locale.getLanguage());    
+    HttpResponse expiredResponse = new HttpResponseBuilder()
+        .setResponse(BASIC_BUNDLE.getBytes("UTF-8"))
+        .addHeader("Pragma", "no-cache")
+        .create();
     HttpResponse badResponse = HttpResponse.error();
 
     expect(fetcher.fetch(isA(HttpRequest.class)))

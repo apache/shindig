@@ -17,11 +17,6 @@
  * under the License.
  */
 package org.apache.shindig.gadgets;
-import static org.easymock.EasyMock.expect;
-import static org.easymock.classextension.EasyMock.replay;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
 
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.common.cache.CacheProvider;
@@ -29,18 +24,18 @@ import org.apache.shindig.common.cache.DefaultCacheProvider;
 import org.apache.shindig.gadgets.http.HttpFetcher;
 import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.http.HttpResponse;
+import org.apache.shindig.gadgets.http.HttpResponseBuilder;
 import org.apache.shindig.gadgets.rewrite.ContentRewriter;
 import org.apache.shindig.gadgets.spec.GadgetSpec;
-
-import com.google.common.collect.Maps;
-
 import org.easymock.EasyMock;
+import static org.easymock.EasyMock.expect;
+import static org.easymock.classextension.EasyMock.replay;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import org.junit.Test;
 
 import java.net.URI;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
 import java.util.concurrent.Executor;
 
 /**
@@ -129,10 +124,10 @@ public class BasicGadgetSpecFactoryTest {
   public void staleSpecIsRefetched() throws Exception {
     HttpRequest request = new HttpRequest(SPEC_URL).setIgnoreCache(true);
     HttpRequest retriedRequest = new HttpRequest(SPEC_URL).setIgnoreCache(false);
-    Map<String, List<String>> headers = Maps.newHashMap();
-    headers.put("Pragma", Arrays.asList("no-cache"));
-    HttpResponse expiredResponse = new HttpResponse(
-        HttpResponse.SC_OK, LOCAL_SPEC_XML.getBytes("UTF-8"), headers);
+    HttpResponse expiredResponse = new HttpResponseBuilder()
+        .addHeader("Pragma", "no-cache")
+        .setResponse(LOCAL_SPEC_XML.getBytes("UTF-8"))
+        .create();
     HttpResponse updatedResponse = new HttpResponse(ALT_LOCAL_SPEC_XML);
     expect(fetcher.fetch(request)).andReturn(expiredResponse).once();
     expect(fetcher.fetch(retriedRequest)).andReturn(updatedResponse).once();
@@ -149,11 +144,11 @@ public class BasicGadgetSpecFactoryTest {
   @Test
   public void staleSpecReturnedFromCacheOnError() throws Exception {
     HttpRequest request = new HttpRequest(SPEC_URL).setIgnoreCache(true);
-    HttpRequest retriedRequest = new HttpRequest(SPEC_URL).setIgnoreCache(false);
-    Map<String, List<String>> headers = Maps.newHashMap();
-    headers.put("Pragma", Arrays.asList("no-cache"));
-    HttpResponse expiredResponse = new HttpResponse(
-        HttpResponse.SC_OK, LOCAL_SPEC_XML.getBytes("UTF-8"), headers);
+    HttpRequest retriedRequest = new HttpRequest(SPEC_URL).setIgnoreCache(false);    
+    HttpResponse expiredResponse = new HttpResponseBuilder()
+        .setResponse(LOCAL_SPEC_XML.getBytes("UTF-8"))
+        .addHeader("Pragma", "no-cache")
+        .create();
     expect(fetcher.fetch(request)).andReturn(expiredResponse);
     expect(fetcher.fetch(retriedRequest)).andReturn(HttpResponse.notFound()).once();
     replay(fetcher);

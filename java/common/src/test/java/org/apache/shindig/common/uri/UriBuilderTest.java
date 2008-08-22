@@ -17,17 +17,14 @@
  */
 package org.apache.shindig.common.uri;
 
+import com.google.common.collect.Maps;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-
-import com.google.common.collect.Maps;
-import com.google.common.collect.Multimap;
-
 import org.junit.Test;
 
 import java.util.Arrays;
-import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -242,10 +239,8 @@ public class UriBuilderTest {
 
     assertEquals("bar&baz", builder.getQueryParameter("foo"));
 
-    Collection<String> values = Arrays.asList("bar&baz", "three");
+    List<String> values = Arrays.asList("bar&baz", "three");
     assertEquals(values, builder.getQueryParameters("foo"));
-
-    assertEquals(2, builder.getQueryParameters().size());
   }
 
   @Test
@@ -270,7 +265,7 @@ public class UriBuilderTest {
   @Test
   public void equalsAndHashCodeOk() {
     UriBuilder uri = UriBuilder.parse("http://example.org/foo/bar/baz?blah=blah#boo");
-    Multimap<String, String> params = UriBuilder.splitParameters("blah=blah");
+    Map<String, List<String>> params = UriBuilder.splitParameters("blah=blah");
     UriBuilder uri2 = new UriBuilder(Uri.parse("http://example.org/foo/bar/baz?blah=blah#boo"));
 
     assertTrue(uri.equals(uri2));

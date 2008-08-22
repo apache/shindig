@@ -17,13 +17,13 @@
  */
 package org.apache.shindig.gadgets;
 
-import static org.easymock.EasyMock.eq;
-import static org.easymock.EasyMock.expect;
-
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.gadgets.http.HttpFetcher;
 import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.http.HttpResponse;
+import org.apache.shindig.gadgets.http.HttpResponseBuilder;
+import static org.easymock.EasyMock.eq;
+import static org.easymock.EasyMock.expect;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -81,7 +81,9 @@ public class JsLibraryTest extends EasyMockTestCase {
     HttpFetcher mockFetcher = mock(HttpFetcher.class);
     Uri location = Uri.parse("http://example.org/file.js");
     HttpRequest request = new HttpRequest(location);
-    HttpResponse response = new HttpResponse(HttpResponse.SC_OK, URL_JS.getBytes(), null);
+    HttpResponse response = new HttpResponseBuilder()
+        .setResponse(URL_JS.getBytes())
+        .create();
     expect(mockFetcher.fetch(eq(request))).andReturn(response);
     replay();
     JsLibrary lib = JsLibrary.create(

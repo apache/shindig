@@ -18,16 +18,13 @@
 
 package org.apache.shindig.gadgets.http;
 
-import static org.junit.Assert.assertEquals;
-
+import junitx.framework.ArrayAssert;
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.common.uri.UriBuilder;
-
 import org.junit.AfterClass;
+import static org.junit.Assert.assertEquals;
 import org.junit.BeforeClass;
 import org.junit.Test;
-
-import junitx.framework.ArrayAssert;
 
 /**
  * Holds test cases that all HttpFetcher implementations should pass.  This

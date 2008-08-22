@@ -18,9 +18,8 @@
 package org.apache.shindig.common.uri;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
-
 import org.junit.Test;
 
 import java.net.URI;
@@ -52,7 +51,7 @@ public class UriTest {
   public void parseNoScheme() {
     Uri uri = Uri.parse("//apache.org/foo?a=b&a=c&b=d+e#blah");
 
-    assertEquals(null, uri.getScheme());
+    assertNull(uri.getScheme());
     assertEquals("apache.org", uri.getAuthority());
     assertEquals("/foo", uri.getPath());
     assertEquals("a=b&a=c&b=d+e", uri.getQuery());
@@ -68,7 +67,7 @@ public class UriTest {
     Uri uri = Uri.parse("http:/foo?a=b&a=c&b=d+e#blah");
 
     assertEquals("http", uri.getScheme());
-    assertEquals(null, uri.getAuthority());
+    assertNull(uri.getAuthority());
     assertEquals("/foo", uri.getPath());
     assertEquals("a=b&a=c&b=d+e", uri.getQuery());
     Collection<String> params = Arrays.asList("b", "c");
@@ -101,9 +100,9 @@ public class UriTest {
     assertEquals("http", uri.getScheme());
     assertEquals("apache.org", uri.getAuthority());
     assertEquals("/foo", uri.getPath());
-    assertEquals(null, uri.getQuery());
+    assertNull(uri.getQuery());
     assertEquals(0, uri.getQueryParameters().size());
-    assertEquals(null, uri.getQueryParameter("foo"));
+    assertNull(uri.getQueryParameter("foo"));
     assertEquals("blah", uri.getFragment());
   }
 
@@ -115,7 +114,7 @@ public class UriTest {
     assertEquals("apache.org", uri.getAuthority());
     assertEquals("/foo", uri.getPath());
     assertEquals("a=b&a=c&b=d+e", uri.getQuery());
-    assertEquals(null, uri.getFragment());
+    assertNull(uri.getFragment());
   }
 
   @Test(expected = IllegalArgumentException.class)
@@ -160,13 +159,8 @@ public class UriTest {
         .setFragment("boo")
         .toUri();
 
-    assertTrue(uri.equals(uri2));
-    assertTrue(uri2.equals(uri));
-
-    assertTrue(uri.equals(uri));
-
-    assertFalse(uri.equals(null));
-    assertFalse(uri.equals("http://example.org/foo/bar/baz?blah=blah#boo"));
+    assertEquals(uri, uri2);
+    assertEquals(uri2, uri);    
 
     assertTrue(uri.hashCode() == uri2.hashCode());
   }

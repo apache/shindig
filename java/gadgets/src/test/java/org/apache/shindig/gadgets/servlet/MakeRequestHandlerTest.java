@@ -18,12 +18,8 @@
  */
 package org.apache.shindig.gadgets.servlet;
 
-import static junitx.framework.StringAssert.assertStartsWith;
-import static org.easymock.EasyMock.expect;
-import static org.easymock.EasyMock.isA;
-
 import com.google.common.collect.Lists;
-
+import static junitx.framework.StringAssert.assertStartsWith;
 import org.apache.shindig.common.SecurityToken;
 import org.apache.shindig.common.SecurityTokenDecoder;
 import org.apache.shindig.common.SecurityTokenException;
@@ -33,8 +29,11 @@ import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.http.HttpFetcher;
 import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.http.HttpResponse;
+import org.apache.shindig.gadgets.http.HttpResponseBuilder;
 import org.apache.shindig.gadgets.spec.Auth;
 import org.apache.shindig.gadgets.spec.Preload;
+import static org.easymock.EasyMock.expect;
+import static org.easymock.EasyMock.isA;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -360,8 +359,11 @@ public class MakeRequestHandlerTest extends ServletTestFixture {
 
   public void testMetadataCopied() throws Exception {
     HttpRequest internalRequest = new HttpRequest(REQUEST_URL);
-    HttpResponse response = new HttpResponse("foo");
-    response.getMetadata().put("foo", RESPONSE_BODY);
+    HttpResponse response = new HttpResponseBuilder()
+        .setResponse("foo".getBytes("UTF-8"))
+        .setMetadata("foo", RESPONSE_BODY)
+        .create();
+    
     expect(fetcher.fetch(internalRequest)).andReturn(response);
     replay();
 
