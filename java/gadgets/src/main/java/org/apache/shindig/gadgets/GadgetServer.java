@@ -57,7 +57,6 @@ public class GadgetServer {
   private GadgetSpecFactory specFactory;
   private MessageBundleFactory bundleFactory;
 
-
   @Inject
   public GadgetServer(Executor executor,
       GadgetFeatureRegistry registry,
@@ -88,18 +87,6 @@ public class GadgetServer {
   }
 
   /**
-   *
-   * @param localeSpec
-   * @param context
-   * @return A new message bundle
-   * @throws GadgetException
-   */
-  private MessageBundle getBundle(LocaleSpec localeSpec, GadgetContext context)
-      throws GadgetException {
-    return bundleFactory.getBundle(localeSpec, context);
-  }
-
-  /**
    * Creates a Gadget from the specified gadget spec and context objects.
    * This performs message bundle substitution as well as feature processing.
    *
@@ -110,17 +97,9 @@ public class GadgetServer {
    */
   private Gadget createGadgetFromSpec(GadgetSpec spec, GadgetContext context)
       throws GadgetException {
-    LocaleSpec localeSpec
-        = spec.getModulePrefs().getLocale(context.getLocale());
-    MessageBundle bundle;
-    String dir;
-    if (localeSpec == null) {
-      bundle = MessageBundle.EMPTY;
-      dir = "ltr";
-    } else {
-      bundle = getBundle(localeSpec, context);
-      dir = localeSpec.getLanguageDirection();
-    }
+    MessageBundle bundle
+        = bundleFactory.getBundle(spec, context.getLocale(), context.getIgnoreCache());
+    String dir = bundle.getLanguageDirection();
 
     Substitutions substituter = new Substitutions();
     substituter.addSubstitutions(

@@ -20,7 +20,6 @@ package org.apache.shindig.gadgets;
 
 import org.apache.shindig.common.cache.Cache;
 import org.apache.shindig.common.cache.CacheProvider;
-import org.apache.shindig.common.cache.LruCache;
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.gadgets.http.HttpFetcher;
 import org.apache.shindig.gadgets.http.HttpRequest;
@@ -39,10 +38,9 @@ import java.util.logging.Logger;
  * Basic implementation of a message bundle factory
  */
 @Singleton
-public class BasicMessageBundleFactory implements MessageBundleFactory {
+public class BasicMessageBundleFactory extends AbstractMessageBundleFactory {
 
-  private static final Logger logger
-      = Logger.getLogger(BasicMessageBundleFactory.class.getName());
+  private static final Logger LOG = Logger.getLogger(BasicMessageBundleFactory.class.getName());
 
   private final HttpFetcher fetcher;
 
@@ -51,27 +49,18 @@ public class BasicMessageBundleFactory implements MessageBundleFactory {
   private final long minTtl;
   private final long maxTtl;
 
-  public MessageBundle getBundle(LocaleSpec localeSpec, GadgetContext context)
+  protected MessageBundle fetchBundle(LocaleSpec locale, boolean ignoreCache)
       throws GadgetException {
-    if (localeSpec == null) {
-      return MessageBundle.EMPTY;
-    }
-    URI messages = localeSpec.getMessages();
-    if (messages == null || messages.toString().length() == 0) {
-      return localeSpec.getMessageBundle();
-    }
-    return getBundle(messages, context.getIgnoreCache());
-  }
-
-  public MessageBundle getBundle(URI url, boolean ignoreCache) throws GadgetException {
     if (ignoreCache) {
-      return fetchFromWeb(url, true);
+      return fetchFromWeb(locale, true);
     }
+
+    URI messages = locale.getMessages();
 
     MessageBundle bundle = null;
     long expiration = -1;
     synchronized (cache) {
-      TimeoutPair entry = cache.getElement(url);
+      TimeoutPair entry = cache.getElement(messages);
       if (entry != null) {
         bundle = entry.bundle;
         expiration = entry.timeout;
@@ -81,15 +70,15 @@ public class BasicMessageBundleFactory implements MessageBundleFactory {
     long now = System.currentTimeMillis();
     if (bundle == null || expiration < now) {
       try {
-        return fetchFromWeb(url, false);
+        return fetchFromWeb(locale, false);
       } catch (GadgetException e) {
         if (bundle == null) {
           throw e;
         } else {
-          logger.info("Message bundle fetch failed for " + url + " -  using cached ");
+          LOG.info("Message bundle fetch failed for " + messages + " -  using cached ");
           // Try again later...
           synchronized (cache) {
-            cache.addElement(url, new TimeoutPair(bundle, now + minTtl));
+            cache.addElement(messages, new TimeoutPair(bundle, now + minTtl));
           }
         }
       }
@@ -97,7 +86,8 @@ public class BasicMessageBundleFactory implements MessageBundleFactory {
     return bundle;
   }
 
-  private MessageBundle fetchFromWeb(URI url, boolean ignoreCache) throws GadgetException {
+  private MessageBundle fetchFromWeb(LocaleSpec locale, boolean ignoreCache) throws GadgetException {
+    URI url = locale.getMessages();
     HttpRequest request = new HttpRequest(Uri.fromJavaUri(url)).setIgnoreCache(ignoreCache);
     HttpResponse response = fetcher.fetch(request);
     if (response.getHttpStatusCode() != HttpResponse.SC_OK) {
@@ -106,7 +96,7 @@ public class BasicMessageBundleFactory implements MessageBundleFactory {
           response.getHttpStatusCode());
     }
 
-    MessageBundle bundle  = new MessageBundle(url, response.getResponseAsString());
+    MessageBundle bundle  = new MessageBundle(locale, response.getResponseAsString());
 
     // We enforce the lower bound limit here for situations where a remote server temporarily serves
     // the wrong cache control headers. This allows any distributed caches to be updated and for the
