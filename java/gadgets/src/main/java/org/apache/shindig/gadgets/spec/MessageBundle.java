@@ -17,9 +17,9 @@
  */
 package org.apache.shindig.gadgets.spec;
 
+import com.google.common.collect.Maps;
 import org.apache.shindig.common.xml.XmlException;
 import org.apache.shindig.common.xml.XmlUtil;
-
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 
@@ -36,6 +36,65 @@ public class MessageBundle {
   public static final MessageBundle EMPTY = new MessageBundle();
 
   private final Map<String, String> messages;
+  private final String languageDirection;
+
+   /**
+   * Constructs a message bundle from input xml (fetched from an external file).
+   *
+   * @param locale The LocaleSpec element that this bundle was constructed from.
+   * @param xml The content of the remote file.
+   * @throws SpecParserException if parsing fails.
+   */
+  public MessageBundle(LocaleSpec locale, String xml) throws SpecParserException {
+    Element doc;
+    try {
+      doc = XmlUtil.parse(xml);
+    } catch (XmlException e) {
+      throw new SpecParserException("Malformed XML in file " + locale.getMessages()
+          + ": " + e.getMessage());
+    }
+    messages = parseMessages(doc);
+    languageDirection = locale.getLanguageDirection();
+  }
+
+  /**
+   * Constructs a message bundle from a /ModulePrefs/Locale with nested messages.
+   */
+  public MessageBundle(Element element) throws SpecParserException {
+    messages = parseMessages(element);
+    languageDirection = XmlUtil.getAttribute(element, "language_direction", "ltr");
+  }
+
+  /**
+   * Create a MessageBundle by merging child messages into the parent.
+   *
+   * @param parent The base bundle.
+   * @param child The bundle containing overriding messages.
+   */
+  public MessageBundle(MessageBundle parent, MessageBundle child) {
+    Map<String, String> merged = Maps.newHashMap();
+    if (parent != null) {
+      merged.putAll(parent.messages);
+    }
+    if (child != null) {
+      merged.putAll(child.messages);
+    }
+    messages = Collections.unmodifiableMap(merged);
+    languageDirection = child.languageDirection;
+  }
+
+  private MessageBundle() {
+    this.messages = Collections.emptyMap();
+    languageDirection = "ltr";
+  }
+
+  /**
+   * @return The language direction associated with this message bundle, derived from the LocaleSpec
+   * element that the bundle was constructed from.
+   */
+  public String getLanguageDirection() {
+    return languageDirection;
+  }
 
   /**
    * @return A read-only view of the message bundle.
@@ -76,32 +135,5 @@ public class MessageBundle {
     }
     buf.append("</messagebundle>");
     return buf.toString();
-  }
-
-  /**
-   * Constructs a message bundle from input xml
-   * @param xml
-   * @throws SpecParserException
-   */
-  public MessageBundle(URI url, String xml) throws SpecParserException {
-    Element doc;
-    try {
-      doc = XmlUtil.parse(xml);
-    } catch (XmlException e) {
-      throw new SpecParserException("Malformed XML in file " + url.toString()
-          + ": " + e.getMessage());
-    }
-    messages = parseMessages(doc);
-  }
-
-  /**
-   * Constructs a message bundle from an existing element.
-   */
-  public MessageBundle(Element element) throws SpecParserException {
-    messages = parseMessages(element);
-  }
-
-  private MessageBundle() {
-    this.messages = Collections.emptyMap();
   }
 }

@@ -297,8 +297,9 @@ public class GadgetRenderingTask {
     appendJsConfig(gadget, libs, inlineJs);
 
     // message bundles for prefs object.
-    MessageBundle bundle
-        = messageBundleFactory.getBundle(gadget.getLocale(), gadget.getContext());
+    GadgetContext context = gadget.getContext();
+    MessageBundle bundle = messageBundleFactory.getBundle(
+        gadget.getSpec(), context.getLocale(), context.getIgnoreCache());
 
     String msgs = new JSONObject(bundle.getMessages()).toString();
     inlineJs.append("gadgets.Prefs.setMessages_(").append(msgs).append(");");
