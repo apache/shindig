@@ -21,7 +21,6 @@ import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.common.util.DateUtil;
 import org.apache.shindig.common.cache.CacheProvider;
 import org.apache.shindig.common.cache.DefaultCacheProvider;
-import org.apache.shindig.common.util.DateUtil;
 
 import org.apache.commons.lang.ArrayUtils;
 

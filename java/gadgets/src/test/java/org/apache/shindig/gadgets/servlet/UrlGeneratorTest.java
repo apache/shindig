@@ -19,25 +19,18 @@
 package org.apache.shindig.gadgets.servlet;
 
 import static org.easymock.EasyMock.expect;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-
-import org.apache.shindig.common.ContainerConfig;
-import org.apache.shindig.gadgets.Gadget;
-import org.apache.shindig.gadgets.GadgetContext;
-import org.apache.shindig.gadgets.GadgetFeature;
-import org.apache.shindig.gadgets.GadgetFeatureRegistry;
-import org.apache.shindig.gadgets.JsLibrary;
-import org.apache.shindig.gadgets.UserPrefs;
-import org.apache.shindig.gadgets.spec.GadgetSpec;
 
 import com.google.common.collect.Maps;
 
-import org.apache.commons.lang.StringEscapeUtils;
-import org.junit.Before;
-import org.junit.Test;
-
 import junitx.framework.StringAssert;
+
+import org.apache.commons.lang.StringEscapeUtils;
+import org.apache.shindig.gadgets.Gadget;
+import org.apache.shindig.gadgets.GadgetContext;
+import org.apache.shindig.gadgets.GadgetTestFixture;
+import org.apache.shindig.gadgets.JsLibrary;
+import org.apache.shindig.gadgets.UserPrefs;
+import org.apache.shindig.gadgets.spec.GadgetSpec;
 
 import java.net.URI;
 import java.util.ArrayList;
@@ -49,7 +42,7 @@ import java.util.Map;
 /**
  * Tests for UrlGenerator.
  */
-public class UrlGeneratorTest {
+public class UrlGeneratorTest extends GadgetTestFixture {
   private final static String IFR_PREFIX = "shindig/eye-frame?";
   private final static String JS_PREFIX = "get-together/livescript/";
   private final static String SPEC_URL = "http://example.org/gadget.xml";
@@ -64,18 +57,12 @@ public class UrlGeneratorTest {
   private final static String VIEW = "canvas";
   private final static int MODULE_ID = 3435;
 
-  private final ServletTestFixture fixture = new ServletTestFixture();
-  private final GadgetFeatureRegistry featureRegistry = fixture.mock(GadgetFeatureRegistry.class);
-  private final ContainerConfig containerConfig = fixture.mock(ContainerConfig.class);
-  private final GadgetContext context = fixture.mock(GadgetContext.class);
-  private UrlGenerator urlGenerator;
+  private final GadgetContext context = mock(GadgetContext.class);
+  private UrlGenerator realUrlGenerator;
 
-  @Before
+  @Override
   public void setUp() throws Exception {
-    expect(featureRegistry.getAllFeatures()).andReturn(new ArrayList<GadgetFeature>());
-    fixture.replay();
-    urlGenerator = new UrlGenerator(IFR_PREFIX, JS_PREFIX, featureRegistry, containerConfig);
-    fixture.reset();
+    realUrlGenerator = new UrlGenerator(IFR_PREFIX, JS_PREFIX, registry, containerConfig);
 
     expect(context.getContainer()).andReturn(CONTAINER).anyTimes();
     expect(context.getUrl()).andReturn(URI.create(SPEC_URL)).anyTimes();
@@ -88,58 +75,53 @@ public class UrlGeneratorTest {
     expect(context.getView()).andReturn(VIEW).anyTimes();
   }
 
-  @Test
-  public void getBundledJsParam() throws Exception {
+  public void testGetBundledJsParam() throws Exception {
     List<String> features = new ArrayList<String>();
     features.add("foo");
     features.add("bar");
     expect(context.getDebug()).andReturn(true);
-    fixture.replay();
+    replay();
 
-    String jsParam = urlGenerator.getBundledJsParam(features, context);
+    String jsParam = realUrlGenerator.getBundledJsParam(features, context);
 
     assertTrue(
         jsParam.matches("foo:bar\\.js\\?v=[0-9a-zA-Z]*&container=" + CONTAINER + "&debug=1"));
   }
 
-  @Test
-  public void getBundledJsParamWithBadFeatureName() throws Exception {
+  public void testGetBundledJsParamWithBadFeatureName() throws Exception {
     List<String> features = new ArrayList<String>();
     features.add("foo!");
     features.add("bar");
     expect(context.getDebug()).andReturn(true);
-    fixture.replay();
+    replay();
 
-    String jsParam = urlGenerator.getBundledJsParam(features, context);
+    String jsParam = realUrlGenerator.getBundledJsParam(features, context);
 
     assertTrue(jsParam.matches("bar\\.js\\?v=[0-9a-zA-Z]*&container=" + CONTAINER + "&debug=1"));
   }
 
-  @Test
-  public void getBundledJsParamWithNoFeatures() throws Exception {
+  public void testGetBundledJsParamWithNoFeatures() throws Exception {
     List<String> features = new ArrayList<String>();
     expect(context.getDebug()).andReturn(false);
-    fixture.replay();
+    replay();
 
-    String jsParam = urlGenerator.getBundledJsParam(features, context);
+    String jsParam = realUrlGenerator.getBundledJsParam(features, context);
 
     assertTrue(jsParam.matches("core\\.js\\?v=[0-9a-zA-Z]*&container=" + CONTAINER + "&debug=0"));
   }
 
-  @Test
-  public void getBundledJsUrl() throws Exception {
+  public void testGetBundledJsUrl() throws Exception {
     List<String> features = new ArrayList<String>();
     expect(context.getDebug()).andReturn(false);
-    fixture.replay();
+    replay();
 
-    String jsParam = urlGenerator.getBundledJsUrl(features, context);
+    String jsParam = realUrlGenerator.getBundledJsUrl(features, context);
 
     assertTrue(jsParam.matches(
         JS_PREFIX + "core\\.js\\?v=[0-9a-zA-Z]*&container=" + CONTAINER + "&debug=0"));
   }
 
-  @Test
-  public void getIframeUrlTypeHtml() throws Exception {
+  public void testGetIframeUrlTypeHtml() throws Exception {
     String xml
         = "<Module>" +
           " <ModulePrefs title='test'/>" +
@@ -148,9 +130,9 @@ public class UrlGeneratorTest {
           "</Module>";
     GadgetSpec spec = new GadgetSpec(URI.create(SPEC_URL), xml);
     Gadget gadget = new Gadget(context, spec, Collections.<JsLibrary>emptyList());
-    fixture.replay();
+    replay();
 
-    URI iframeUrl = URI.create(urlGenerator.getIframeUrl(gadget));
+    URI iframeUrl = URI.create(realUrlGenerator.getIframeUrl(gadget));
 
     assertEquals(IFR_PREFIX, iframeUrl.getPath() + '?');
     StringAssert.assertContains("container=" + CONTAINER, iframeUrl.getQuery());
@@ -159,8 +141,7 @@ public class UrlGeneratorTest {
     StringAssert.assertContains("view=" + VIEW, iframeUrl.getQuery());
   }
 
-  @Test
-  public void getIframeUrlTypeUrl() throws Exception {
+  public void testGetIframeUrlTypeUrl() throws Exception {
     String xml
         = "<Module>" +
           " <ModulePrefs title='test'/>" +
@@ -169,9 +150,9 @@ public class UrlGeneratorTest {
           "</Module>";
     GadgetSpec spec = new GadgetSpec(URI.create(SPEC_URL), xml);
     Gadget gadget = new Gadget(context, spec, Collections.<JsLibrary>emptyList());
-    fixture.replay();
+    replay();
 
-    URI iframeUrl = URI.create(urlGenerator.getIframeUrl(gadget));
+    URI iframeUrl = URI.create(realUrlGenerator.getIframeUrl(gadget));
 
     assertEquals(TYPE_URL_HREF_HOST, iframeUrl.getAuthority());
     assertEquals(TYPE_URL_HREF_PATH, iframeUrl.getPath());

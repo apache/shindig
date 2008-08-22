@@ -19,80 +19,64 @@
 package org.apache.shindig.gadgets.servlet;
 
 import static org.easymock.EasyMock.expect;
-import static org.easymock.classextension.EasyMock.createNiceMock;
-import static org.easymock.classextension.EasyMock.replay;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
 
-import org.apache.shindig.common.ContainerConfig;
 import org.apache.shindig.gadgets.GadgetContext;
-
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.junit.Test;
 
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
-public class HttpUtilTest {
+public class HttpUtilTest extends ServletTestFixture {
   private final static String CONTAINER = "container";
   private final static String FEATURE_0 = "featureZero";
   private final static String FEATURE_1 = "feature-One";
 
-  private final ContainerConfig config = createNiceMock(ContainerConfig.class);
-  private final GadgetContext context = createNiceMock(GadgetContext.class);
+  private final GadgetContext context = mock(GadgetContext.class);
 
-  private final ServletTestFixture fixture = new ServletTestFixture();
+  public void testSetCachingHeaders() {
+    HttpUtil.setCachingHeaders(recorder);
+    replay();
 
-  @Test
-  public void setCachingHeaders() {
-    HttpUtil.setCachingHeaders(fixture.recorder);
-    fixture.replay();
-
-    fixture.checkCacheControlHeaders(HttpUtil.DEFAULT_TTL, false);
+    checkCacheControlHeaders(HttpUtil.DEFAULT_TTL, false);
   }
 
-  @Test
-  public void setCachingHeadersNoProxy() {
-    HttpUtil.setCachingHeaders(fixture.recorder, true);
-    fixture.replay();
+  public void testSetCachingHeadersNoProxy() {
+    HttpUtil.setCachingHeaders(recorder, true);
+    replay();
 
-    fixture.checkCacheControlHeaders(HttpUtil.DEFAULT_TTL, true);
+    checkCacheControlHeaders(HttpUtil.DEFAULT_TTL, true);
   }
 
-  @Test
-  public void setCachingHeadersAllowProxy() {
-    HttpUtil.setCachingHeaders(fixture.recorder, false);
-    fixture.replay();
+  public void testSetCachingHeadersAllowProxy() {
+    HttpUtil.setCachingHeaders(recorder, false);
+    replay();
 
-    fixture.checkCacheControlHeaders(HttpUtil.DEFAULT_TTL, false);
+    checkCacheControlHeaders(HttpUtil.DEFAULT_TTL, false);
   }
 
-  @Test
-  public void setCachingHeadersFixedTtl() {
+  public void testSetCachingHeadersFixedTtl() {
     int ttl = 10;
-    HttpUtil.setCachingHeaders(fixture.recorder, ttl);
-    fixture.replay();
+    HttpUtil.setCachingHeaders(recorder, ttl);
+    replay();
 
-    fixture.checkCacheControlHeaders(ttl, false);
+    checkCacheControlHeaders(ttl, false);
   }
 
-  @Test
-  public void setCachingHeadersWithTtlAndNoProxy() {
+  public void testSetCachingHeadersWithTtlAndNoProxy() {
     int ttl = 20;
-    HttpUtil.setCachingHeaders(fixture.recorder, ttl, true);
-    fixture.replay();
+    HttpUtil.setCachingHeaders(recorder, ttl, true);
+    replay();
 
-    fixture.checkCacheControlHeaders(ttl, true);
+    checkCacheControlHeaders(ttl, true);
   }
 
-  @Test
-  public void setCachingHeadersNoCache() {
-    HttpUtil.setCachingHeaders(fixture.recorder, 0);
-    fixture.replay();
+  public void testSetCachingHeadersNoCache() {
+    HttpUtil.setCachingHeaders(recorder, 0);
+    replay();
 
-    fixture.checkCacheControlHeaders(0, true);
+    checkCacheControlHeaders(0, true);
   }
 
   private void assertJsonEquals(JSONObject lhs, JSONObject rhs) throws JSONException {
@@ -108,8 +92,7 @@ public class HttpUtilTest {
     }
   }
 
-  @Test
-  public void getJsConfig() throws JSONException {
+  public void testGetJsConfig() throws JSONException {
     JSONObject features = new JSONObject()
         .put(FEATURE_0, "config")
         .put(FEATURE_1, "other config");
@@ -119,25 +102,23 @@ public class HttpUtilTest {
     needed.add(FEATURE_1);
 
     expect(context.getContainer()).andReturn(CONTAINER);
-    expect(config.getJsonObject(CONTAINER, "gadgets.features"))
+    expect(containerConfig.getJsonObject(CONTAINER, "gadgets.features"))
         .andReturn(features);
 
-    replay(context);
-    replay(config);
+    replay();
 
-    assertJsonEquals(features, HttpUtil.getJsConfig(config, context, needed));
+    assertJsonEquals(features, HttpUtil.getJsConfig(containerConfig, context, needed));
   }
 
-  @Test
-  public void getJsConfigNoFeatures() {
+  public void testGetJsConfigNoFeatures() {
     expect(context.getContainer()).andReturn(CONTAINER);
-    expect(config.getJsonObject(CONTAINER, "gadgets.features"))
+    expect(containerConfig.getJsonObject(CONTAINER, "gadgets.features"))
         .andReturn(null);
 
-    replay(context);
-    replay(config);
+    replay();
 
-    JSONObject results = HttpUtil.getJsConfig(config, context, Collections.<String>emptySet());
+    JSONObject results = HttpUtil.getJsConfig(containerConfig, context,
+        Collections.<String>emptySet());
 
     assertEquals("Results should be empty when there are no features", 0, results.length());
   }
