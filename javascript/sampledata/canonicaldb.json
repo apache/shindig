@@ -363,5 +363,15 @@
 "jane.doe" : ["john.doe"],
 "george.doe" : ["john.doe"],
 "maija.m" : []
+},
+//
+//---------------------------- Data For User Applications --------------------------------------------
+//
+"userApplications" : {
+"canonical" : ["9158", "9703", "9143", "8877"],
+"john.doe" : ["8877", "9143", "9158"],
+"jane.doe" : ["9158", "9703"],
+"george.doe" : ["9143"],
+"maija.m" : []
 }
 }
