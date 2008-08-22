@@ -48,6 +48,11 @@ class JsonDbOpensocialService implements ActivitiesService, PeopleService, AppDa
 	 */
 	private static $FRIEND_LINK_TABLE = "friendLinks";
 	
+	/**
+	 * db["userApplications"] -> Map<Person.Id, Array<Application Ids>>
+	 */
+	private static $USER_APPLICATIONS_TABLE = "userApplications";
+	
 	private $allPeople = null;
 	
 	private $allData = null;
@@ -162,10 +167,12 @@ class JsonDbOpensocialService implements ActivitiesService, PeopleService, AppDa
 	private function getPeopleWithApp($appId)
 	{
 		$peopleWithApp = array();
-		$allPeople = $this->getAllPeople();
-		foreach ($allPeople as $people) {
-			if ($people['hasApp'] == 1) {
-				$peopleWithApp = $people['id'];
+		$db = $this->getDb();
+		$userApplicationsTable = $db[self::$USER_APPLICATIONS_TABLE];
+		
+		foreach ($userApplicationsTable as $key => $value) {
+			if (in_array($appId, $userApplicationsTable[$key])) {
+				$peopleWithApp[] = $key;
 			}
 		}
 		return $peopleWithApp;
