@@ -304,6 +304,8 @@ gadgets.io = function() {
         headers["Content-Type"] = "application/x-www-form-urlencoded";
       }
 
+      var urlParams = gadgets.util.getUrlParameters();
+
       var paramData = {
         url: url,
         httpMethod : httpMethod,
@@ -316,8 +318,8 @@ gadgets.io = function() {
         getSummaries : !!params.GET_SUMMARIES,
         signOwner : signOwner || "true",
         signViewer : signViewer || "true",
-        gadget : gadgets.util.getUrlParameters().url,
-
+        gadget : urlParams.url,
+        container : urlParams.container || urlParams.synd || "default",
         // should we bypass gadget spec cache (e.g. to read OAuth provider URLs)
         bypassSpecCache : gadgets.util.getUrlParameters().nocache || ""
       };

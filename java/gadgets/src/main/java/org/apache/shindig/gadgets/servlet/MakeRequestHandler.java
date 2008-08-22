@@ -97,6 +97,8 @@ public class MakeRequestHandler extends ProxyBase{
       authToken = extractAndValidateToken(request);
     }
 
+    rcr.setSecurityToken(authToken);
+
     // Build the chain of fetchers that will handle the request
     HttpFetcher fetcher = getHttpFetcher(auth, authToken, request);
 
@@ -132,7 +134,8 @@ public class MakeRequestHandler extends ProxyBase{
 
     HttpRequest req = new HttpRequest(url)
         .setMethod(getParameter(request, METHOD_PARAM, "GET"))
-        .setPostBody(getParameter(request, POST_DATA_PARAM, "").getBytes());
+        .setPostBody(getParameter(request, POST_DATA_PARAM, "").getBytes())
+        .setContainer(getContainer(request));
 
     String headerData = getParameter(request, HEADERS_PARAM, "");
     if (headerData.length() > 0) {
@@ -197,8 +200,10 @@ public class MakeRequestHandler extends ProxyBase{
       case NONE:
         return contentFetcherFactory.get();
       case SIGNED:
+        // TODO: Remove token from signature and use what's on the request object instead.
         return contentFetcherFactory.getSigningFetcher(token);
       case OAUTH:
+        // TODO: Remove token from signature, return what's on the request object.
         return contentFetcherFactory.getOAuthFetcher(token, new OAuthArguments(request));
       default:
         return contentFetcherFactory.get();

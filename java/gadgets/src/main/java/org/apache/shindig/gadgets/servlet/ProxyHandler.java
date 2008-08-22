@@ -74,6 +74,7 @@ public class ProxyHandler extends ProxyBase {
 
     HttpRequest req = new HttpRequest(url);
 
+    req.setContainer(getContainer(request));
     if (request.getParameter(GADGET_PARAM) != null) {
       req.setGadget(Uri.parse(request.getParameter(GADGET_PARAM)));
     }

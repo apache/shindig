@@ -177,10 +177,13 @@ class PreloadTask implements Callable<HttpResponse> {
   private final GadgetContext context;
 
   public HttpResponse call() {
-    HttpRequest request = new HttpRequest(Uri.fromJavaUri(preload.getHref()))
-        .setSignOwner(preload.isSignOwner())
-        .setSignViewer(preload.isSignViewer());
     try {
+      HttpRequest request = new HttpRequest(Uri.fromJavaUri(preload.getHref()))
+          .setSignOwner(preload.isSignOwner())
+          .setSignViewer(preload.isSignViewer())
+          .setContainer(context.getContainer())
+          .setSecurityToken(context.getToken())
+          .setGadget(Uri.fromJavaUri(context.getUrl()));
       switch (preload.getAuth()) {
         case NONE:
           return preloadFetcherFactory.get().fetch(request);

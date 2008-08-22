@@ -19,6 +19,7 @@
 package org.apache.shindig.gadgets.servlet;
 
 import com.google.common.collect.Maps;
+import org.apache.shindig.common.ContainerConfig;
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.http.HttpResponse;
@@ -184,5 +185,28 @@ public class ProxyBaseTest extends ServletTestFixture {
     replay();
 
     assertEquals("not foo", proxy.getParameter(request, "foo", "not foo"));
+  }
+
+  public void testGetContainerWithContainer() {
+    expect(request.getParameter(ProxyBase.CONTAINER_PARAM)).andReturn("bar");
+    replay();
+
+    assertEquals("bar", proxy.getContainer(request));
+  }
+
+  public void testGetContainerWithSynd() {
+    expect(request.getParameter(ProxyBase.CONTAINER_PARAM)).andReturn(null);
+    expect(request.getParameter(ProxyBase.SYND_PARAM)).andReturn("syndtainer");
+    replay();
+
+    assertEquals("syndtainer", proxy.getContainer(request));
+  }
+
+  public void testGetContainerNoParam() {
+    expect(request.getParameter(ProxyBase.CONTAINER_PARAM)).andReturn(null);
+    expect(request.getParameter(ProxyBase.SYND_PARAM)).andReturn(null);
+    replay();
+
+    assertEquals(ContainerConfig.DEFAULT_CONTAINER, proxy.getContainer(request));
   }
 }

@@ -18,6 +18,7 @@
  */
 package org.apache.shindig.gadgets.servlet;
 
+import org.apache.shindig.common.ContainerConfig;
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.common.uri.UriBuilder;
 import org.apache.shindig.gadgets.GadgetException;
@@ -34,6 +35,9 @@ public abstract class ProxyBase {
   public static final String URL_PARAM = "url";
   public static final String REFRESH_PARAM = "refresh";
   public static final String GADGET_PARAM = "gadget";
+  public static final String CONTAINER_PARAM = "container";
+  // Old form container name, retained for legacy compatibility.
+  public static final String SYND_PARAM = "synd";
 
   // Public because of rewriter. Rewriter should be cleaned up.
   public static final String REWRITE_MIME_TYPE_PARAM = "rewriteMime";
@@ -77,6 +81,17 @@ public abstract class ProxyBase {
   protected String getParameter(HttpServletRequest request, String name, String defaultValue) {
     String ret = request.getParameter(name);
     return ret == null ? defaultValue : ret;
+  }
+
+  /**
+   * Extracts the container name from the request.
+   */
+  protected String getContainer(HttpServletRequest request) {
+    String container = getParameter(request, CONTAINER_PARAM, null);
+    if (container == null) {
+      container = getParameter(request, SYND_PARAM, ContainerConfig.DEFAULT_CONTAINER);
+    }
+    return container;
   }
 
   /**
