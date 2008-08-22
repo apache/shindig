@@ -17,13 +17,13 @@
  */
 package org.apache.shindig.gadgets;
 
-import static org.easymock.EasyMock.eq;
-import static org.easymock.EasyMock.expect;
-
 import org.apache.shindig.common.ContainerConfig;
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.http.HttpResponse;
+import org.apache.shindig.gadgets.http.HttpResponseBuilder;
+import static org.easymock.EasyMock.eq;
+import static org.easymock.EasyMock.expect;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -114,7 +114,7 @@ public class JsFeatureLoaderTest extends GadgetTestFixture {
                  "</feature>";
     HttpRequest request = new HttpRequest(JS_URL);
     HttpResponse response
-        = new HttpResponse(200, ALT_JS_CONTENT.getBytes(), null);
+        = new HttpResponseBuilder().setResponse(ALT_JS_CONTENT.getBytes()).create();
     expect(fetcher.fetch(eq(request))).andReturn(response);
     replay();
     GadgetFeature feature = loader.loadFeature(registry, xml);

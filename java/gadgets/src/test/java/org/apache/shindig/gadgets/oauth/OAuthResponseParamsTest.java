@@ -19,13 +19,13 @@
 
 package org.apache.shindig.gadgets.oauth;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-
 import org.apache.shindig.common.crypto.BasicBlobCrypter;
 import org.apache.shindig.common.crypto.BlobCrypter;
 import org.apache.shindig.gadgets.http.HttpResponse;
+import org.apache.shindig.gadgets.http.HttpResponseBuilder;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -61,8 +61,9 @@ public class OAuthResponseParamsTest {
     params.setAznUrl("aznurl");
     params.setError(OAuthError.BAD_OAUTH_CONFIGURATION);
     params.setErrorText("errortext");
-    HttpResponse response = new HttpResponse(200);
-    params.addToResponse(response);
+    HttpResponseBuilder responseBuilder = new HttpResponseBuilder();
+    params.addToResponse(responseBuilder);
+    HttpResponse response = responseBuilder.create();
     assertEquals("BAD_OAUTH_CONFIGURATION", response.getMetadata().get("oauthError"));
     assertEquals("errortext", response.getMetadata().get("oauthErrorText"));
     assertEquals("aznurl", response.getMetadata().get("oauthApprovalUrl"));
@@ -72,9 +73,10 @@ public class OAuthResponseParamsTest {
     
   @Test
   public void testAddEmptyParams() {
-    HttpResponse response = new HttpResponse(200);
     OAuthResponseParams params = new OAuthResponseParams(crypter);
-    params.addToResponse(response);
+    HttpResponseBuilder responseBuilder = new HttpResponseBuilder();
+    params.addToResponse(responseBuilder);
+    HttpResponse response = responseBuilder.create();
     assertTrue(response.getMetadata().isEmpty());
   }
 

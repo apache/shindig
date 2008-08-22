@@ -16,6 +16,11 @@
  */
 package org.apache.shindig.gadgets.oauth;
 
+import net.oauth.OAuth;
+import net.oauth.OAuthAccessor;
+import net.oauth.OAuthException;
+import net.oauth.OAuthMessage;
+import net.oauth.OAuthProblemException;
 import org.apache.shindig.common.SecurityToken;
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.gadgets.ChainedContentFetcher;
@@ -24,12 +29,7 @@ import org.apache.shindig.gadgets.http.HttpCacheKey;
 import org.apache.shindig.gadgets.http.HttpFetcher;
 import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.http.HttpResponse;
-
-import net.oauth.OAuth;
-import net.oauth.OAuthAccessor;
-import net.oauth.OAuthException;
-import net.oauth.OAuthMessage;
-import net.oauth.OAuthProblemException;
+import org.apache.shindig.gadgets.http.HttpResponseBuilder;
 
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -436,12 +436,11 @@ public class OAuthFetcher extends ChainedContentFetcher {
     if (msg == null) {
       msg = new OAuthMessage(null, null, null);
     }
-    List<String> authHeaders = resp.getHeaders("WWW-Authenticate");
-    if (authHeaders != null) {
-      for (String auth : authHeaders) {
-        msg.addParameters(OAuthMessage.decodeAuthorization(auth));
-      }
+
+    for (String auth : resp.getHeaders("WWW-Authenticate")) {
+      msg.addParameters(OAuthMessage.decodeAuthorization(auth));
     }
+
     return msg;
   }
 
@@ -480,10 +479,10 @@ public class OAuthFetcher extends ChainedContentFetcher {
   }
 
   private HttpResponse buildNonDataResponse(int status) {
-    HttpResponse response = new HttpResponse(status, null, null);
+    HttpResponseBuilder response = new HttpResponseBuilder().setHttpStatusCode(status);
     responseParams.addToResponse(response);
-    response.setNoCache();
-    return response;
+    response.setStrictNoCache();
+    return response.create();
   }
 
   /**
@@ -578,8 +577,9 @@ public class OAuthFetcher extends ChainedContentFetcher {
       checkForProtocolProblem(response);
 
       // Track metadata on the response
-      responseParams.addToResponse(response);
-      return response;
+      HttpResponseBuilder builder = new HttpResponseBuilder(response);
+      responseParams.addToResponse(builder);
+      return builder.create();
     } catch (UnsupportedEncodingException e) {
       throw new GadgetException(GadgetException.Code.INTERNAL_SERVER_ERROR, e);
     } catch (IOException e) {

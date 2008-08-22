@@ -18,24 +18,22 @@
  */
 package org.apache.shindig.gadgets.http;
 
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
+import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang.ArrayUtils;
 import org.apache.shindig.common.ContainerConfig;
 import org.apache.shindig.common.SecurityToken;
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.gadgets.rewrite.ContentRewriter;
-
-import com.google.common.collect.Multimap;
-import com.google.common.collect.Multimaps;
-
-import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang.ArrayUtils;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -47,15 +45,14 @@ public class HttpRequest {
 
   private String method = "GET";
   private Uri uri;
-  private final Multimap<String, String> headers
-  = Multimaps.newTreeMultimap(String.CASE_INSENSITIVE_ORDER, null);
+  private final Map<String, List<String>> headers = Maps.newTreeMap(String.CASE_INSENSITIVE_ORDER);
   private byte[] postBody = ArrayUtils.EMPTY_BYTE_ARRAY;
 
   // TODO: It might be useful to refactor these into a simple map of objects and use sub classes
   // for more detailed data.
 
   // Cache control.
-  private boolean ignoreCache = false;
+  private boolean ignoreCache;
   private int cacheTtl = -1;
 
   // Context for the request.
@@ -113,7 +110,12 @@ public class HttpRequest {
    * {@link #setHeader(String, String)}.
    */
   public HttpRequest addHeader(String name, String value) {
-    headers.put(name, value);
+    List<String> values = headers.get(name);
+    if (values == null) {
+      values = Lists.newArrayList();
+      headers.put(name, values);
+    }
+    values.add(value);
     return this;
   }
 
@@ -121,7 +123,7 @@ public class HttpRequest {
    * Sets a single header value, overwriting any previously set headers with the same name.
    */
   public HttpRequest setHeader(String name, String value) {
-    headers.replaceValues(name, Arrays.asList(value));
+    headers.put(name, Lists.newArrayList(value));
     return this;
   }
 
@@ -130,15 +132,15 @@ public class HttpRequest {
    */
   public HttpRequest addHeaders(Map<String, String> headers) {
     for (Map.Entry<String, String> entry : headers.entrySet()) {
-      this.headers.put(entry.getKey(), entry.getValue());
+      addHeader(entry.getKey(), entry.getValue());
     }
     return this;
   }
 
   /**
-   * Adds all headers in the provided multimap to the request.
+   * Adds all headers in the provided map to the request.
    */
-  public HttpRequest addHeaders(Multimap<String, String> headers) {
+  public HttpRequest addAllHeaders(Map<String, ? extends List<String>> headers) {
     this.headers.putAll(headers);
     return this;
   }
@@ -148,8 +150,8 @@ public class HttpRequest {
    *
    * @return Any values that were removed from the request.
    */
-  public Collection<String> removeHeader(String name) {
-    return headers.removeAll(name);
+  public List<String> removeHeader(String name) {
+    return headers.remove(name);
   }
 
   /**
@@ -169,7 +171,7 @@ public class HttpRequest {
    * Fills in the request body from an InputStream.
    */
   public HttpRequest setPostBody(InputStream is) throws IOException {
-    this.postBody = IOUtils.toByteArray(is);
+    postBody = IOUtils.toByteArray(is);
     return this;
   }
 
@@ -180,7 +182,7 @@ public class HttpRequest {
     this.ignoreCache = ignoreCache;
     if (ignoreCache) {
       // Bypass any proxy caches as well.
-      headers.put("Pragma", "no-cache");
+      headers.put("Pragma", Lists.newArrayList("no-cache"));
     }
     return this;
   }
@@ -269,7 +271,7 @@ public class HttpRequest {
   /**
    * @return All headers to be sent in this request.
    */
-  public Multimap<String, String> getHeaders() {
+  public Map<String, List<String>> getHeaders() {
     return headers;
   }
 
@@ -277,8 +279,8 @@ public class HttpRequest {
    * @param name The header to fetch
    * @return A list of headers with that name (may be empty).
    */
-  public Collection<String> getHeaders(String name) {
-    Collection<String> match = headers.get(name);
+  public List<String> getHeaders(String name) {
+    List<String> match = headers.get(name);
     if (match == null) {
       return Collections.emptyList();
     } else {
@@ -291,11 +293,11 @@ public class HttpRequest {
    *         you need multiple values for the header, use getHeaders().
    */
   public String getHeader(String name) {
-    Collection<String> headerList = getHeaders(name);
+    List<String> headerList = getHeaders(name);
     if (headerList.isEmpty()) {
       return null;
     } else {
-      return headerList.iterator().next();
+      return headerList.get(0);
     }
   }
 
@@ -325,7 +327,7 @@ public class HttpRequest {
   public String getPostBodyAsString() {
     try {
       return new String(postBody, "UTF-8");
-    } catch (UnsupportedEncodingException e) {
+    } catch (UnsupportedEncodingException ignore) {
       return "";
     }
   }
@@ -408,10 +410,13 @@ public class HttpRequest {
   public String toString() {
     StringBuilder buf = new StringBuilder(method);
     buf.append(' ').append(uri.getPath())
-    .append(uri.getQuery() == null ? "" : uri.getQuery()).append("\n\n");
+       .append(uri.getQuery() == null ? "" : uri.getQuery()).append("\n\n");
     buf.append("Host: ").append(uri.getAuthority()).append('\n');
-    for (Map.Entry<String, String> entry : headers.entries()) {
-      buf.append(entry.getKey()).append(": ").append(entry.getValue()).append('\n');
+    for (Map.Entry<String, List<String>> entry : headers.entrySet()) {
+      String name = entry.getKey();
+      for (String value : entry.getValue()) {
+        buf.append(name).append(": ").append(value).append('\n');
+      }
     }
     buf.append('\n');
     buf.append(getPostBodyAsString());
@@ -420,15 +425,15 @@ public class HttpRequest {
   }
 
   @Override
-  public boolean equals(Object rhs) {
-    if (rhs == this) {return true;}
-    if (rhs instanceof HttpRequest) {
-      HttpRequest req = (HttpRequest)rhs;
+  public boolean equals(Object obj) {
+    if (obj == this) {return true;}
+    if (obj instanceof HttpRequest) {
+      HttpRequest req = (HttpRequest)obj;
       return method.equals(req.method) &&
-      uri.equals(req.uri) &&
-      Arrays.equals(postBody, req.postBody) &&
-      headers.equals(req.headers);
-      // TODO: Verify that other fields aren't meaningful.
+             uri.equals(req.uri) &&
+             Arrays.equals(postBody, req.postBody) &&
+             headers.equals(req.headers);
+             // TODO: Verify that other fields aren't meaningful.
     }
     return false;
   }

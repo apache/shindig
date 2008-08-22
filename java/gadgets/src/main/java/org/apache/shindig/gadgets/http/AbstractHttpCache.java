@@ -38,16 +38,20 @@ public abstract class AbstractHttpCache implements HttpCache {
   protected abstract HttpResponse getResponseImpl(String key);
 
   public HttpResponse addResponse(HttpCacheKey key, HttpRequest request, HttpResponse response) {
-    if (key.isCacheable()) {
-      // If the request forces a minimum TTL for the cached content then have
-      // the response honor it
-      if (response != null) {
-        response.setForcedCacheTTL(request.getCacheTtl());
-      }
-
+    if (key.isCacheable() && response != null) {
       // !!! Note that we only rewrite cacheable content. Move this call above the if
       // to rewrite all content that passes through the cache regardless of cacheability
-      rewrite(request, response);
+      HttpResponse rewritten = rewrite(request, response);
+
+      HttpResponseBuilder responseBuilder = new HttpResponseBuilder(response);
+      responseBuilder.setRewritten(rewritten);
+      int forcedTtl = request.getCacheTtl();
+      if (forcedTtl != -1) {
+        responseBuilder.setCacheTtl(request.getCacheTtl());
+      }
+
+      response = responseBuilder.create();
+
       String keyString = key.toString();
       if (responseStillUsable(response)) {
         addResponseImpl(keyString, response);
@@ -73,19 +77,13 @@ public abstract class AbstractHttpCache implements HttpCache {
 
   /**
    * Utility function to verify that an entry is cacheable and not expired
-   * Returns false if the content is no longer cacheable.
-   *
-   * @param response
-   * @return true if the response can be used.
+   * @return true If the response can be used.
    */
   protected boolean responseStillUsable(HttpResponse response) {
     if (response == null) {
       return false;
-    }
-    if (response.getCacheExpiration() < System.currentTimeMillis()) {
-      return false;
-    }
-    return true;
+    }    
+    return response.getCacheExpiration() > System.currentTimeMillis();
   }
 
   /**
@@ -93,23 +91,26 @@ public abstract class AbstractHttpCache implements HttpCache {
    * we can add it. Re-cache if we created rewritten content.
    * Return the appropriately re-written version if requested
    */
-  protected HttpResponse checkRewrite(String keyString, HttpRequest request,
-      HttpResponse response) {
+  protected HttpResponse checkRewrite(String key, HttpRequest request, HttpResponse response) {
     if (response == null) {
       return null;
     }
 
     // Perform a rewrite and store the content back to the cache if the
     // content is actually rewritten
-    if (rewrite(request, response)) {
-      addResponseImpl(keyString, response);
+    HttpResponse rewritten = rewrite(request, response);
+
+    if (rewritten != null) {
+      // TODO: Remove this when new rewriting mechanism is ready.
+      response = new HttpResponseBuilder(response).setRewritten(rewritten).create();
+      addResponseImpl(key, response);
     }
 
     // Return the rewritten version if requested
     if (!request.getIgnoreCache() &&
         request.getContentRewriter() != null &&
         response.getRewritten() != null &&
-        response.getRewritten().getResponseAsBytes().length > 0) {
+        response.getRewritten().getContentLength() > 0) {
       return response.getRewritten();
     }
     return response;
@@ -119,16 +120,11 @@ public abstract class AbstractHttpCache implements HttpCache {
    * Rewrite the content
    * @return true if rewritten content was generated
    */
-  protected boolean rewrite(HttpRequest request, HttpResponse response) {
-    if (response == null) return false;
+  protected HttpResponse rewrite(HttpRequest request, HttpResponse response) {
     // TODO - Make this sensitive to custom rewriting rules
-    if (response.getRewritten() == null &&
-        request.getContentRewriter() != null) {
-      response.setRewritten(request.getContentRewriter().rewrite(request, response));
-      if (response.getRewritten() != null) {
-        return true;
-      }
+    if (response.getRewritten() == null && request.getContentRewriter() != null) {
+      return request.getContentRewriter().rewrite(request, response);
     }
-    return false;
+    return null;
   }
 }

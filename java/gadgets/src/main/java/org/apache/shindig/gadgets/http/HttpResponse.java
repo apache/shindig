@@ -18,236 +18,126 @@
 package org.apache.shindig.gadgets.http;
 
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
-
 import com.ibm.icu.text.CharsetDetector;
 import com.ibm.icu.text.CharsetMatch;
-
-import org.apache.commons.lang.ArrayUtils;
 import org.apache.shindig.common.util.DateUtil;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
-import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
-import java.util.TreeMap;
-import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Represents the results of an HTTP content retrieval operation.
+ *
+ * HttpResponse objects are immutable in order to allow them to be safely used in concurrent
+ * caches and by multiple threads without worrying about concurrent modification.
  */
-public class HttpResponse {
+public final class HttpResponse {
+  public static final int SC_OK = 200;
+  public static final int SC_MOVED_TEMPORARILY = 301;
+  public static final int SC_MOVED_PERMANENTLY = 302;
+  public static final int SC_UNAUTHORIZED = 401;
+  public static final int SC_FORBIDDEN = 403;
+  public static final int SC_NOT_FOUND = 404;
+  public static final int SC_INTERNAL_SERVER_ERROR = 500;
+  public static final int SC_TIMEOUT = 504;
 
-  // Replicate HTTP status codes here.
-  public final static int SC_OK = 200;
-
-  public final static int SC_UNAUTHORIZED = 401;
-
-  public final static int SC_FORBIDDEN = 403;
-
-  public final static int SC_NOT_FOUND = 404;
-
-  public final static int SC_INTERNAL_SERVER_ERROR = 500;
-
-  public final static int SC_TIMEOUT = 504;
-
-  private final static Set<String> BINARY_CONTENT_TYPES = new HashSet<String>(Arrays.asList(
+  // These content types can always skip encoding detection.
+  private static final Collection<String> BINARY_CONTENT_TYPES = Sets.newHashSet(
       "image/jpeg", "image/png", "image/gif", "image/jpg", "application/x-shockwave-flash",
       "application/octet-stream", "application/ogg", "application/zip", "audio/mpeg",
       "audio/x-ms-wma", "audio/vnd.rn-realaudio", "audio/x-wav", "video/mpeg", "video/mp4",
       "video/quicktime", "video/x-ms-wmv", "video/x-flv", "video/flv",
       "video/x-ms-asf", "application/pdf"
-  ));
+  );
 
-  private final static Set<Integer> CACHE_CONTROL_OK_STATUS_CODES = new HashSet<Integer>(
-      Arrays.asList(SC_OK, SC_UNAUTHORIZED, SC_FORBIDDEN));
+  // These HTTP status codes should always honor the HTTP status returned by the remote host. All
+  // other status codes are treated as errors and will use the negativeCacheTtl value.
+  private static final Collection<Integer> CACHE_CONTROL_OK_STATUS_CODES
+      = Sets.newHashSet(SC_OK, SC_UNAUTHORIZED, SC_FORBIDDEN);
 
   // TTL to use when an error response is fetched. This should be non-zero to
   // avoid high rates of requests to bad urls in high-traffic situations.
-  protected final static long NEGATIVE_CACHE_TTL = 30 * 1000;
+  static final long DEFAULT_NEGATIVE_CACHE_TTL = 30 * 1000;
 
-  /**
-   * Default TTL for an entry in the cache that does not have any cache controlling headers.
-   */
-  protected static final long DEFAULT_TTL = 5L * 60L * 1000L;
+  // Default TTL for an entry in the cache that does not have any cache control headers.
+  static final long DEFAULT_TTL = 5L * 60L * 1000L;
 
-  public static final String DEFAULT_ENCODING = "UTF-8";
+  static final String DEFAULT_ENCODING = "UTF-8";
 
-  private final int httpStatusCode;
+  @Inject @Named("shindig.http.cache.negativeCacheTtl")
+  private static long negativeCacheTtl = DEFAULT_NEGATIVE_CACHE_TTL;
 
-  // Derivation of encoding from content is EXPENSIVE using icu4j so be careful
-  // how you construct, copy and store response objects.
-  private final String encoding;
-
-  // Used to lazily convert to a string representation of the input.
-  private String responseString = null;
-
-  private final byte[] responseBytes;
-
-  private final Map<String, List<String>> headers;
-
-  private final Map<String, String> metadata;
-
-  private final long date;
-
-  private HttpResponse rewritten;
-
-  @Inject
-  @Named("shindig.http.cache.negativeCacheTtl")
-  private static long negativeCacheTtl = NEGATIVE_CACHE_TTL;
-
-  @Inject
-  @Named("shindig.http.cache.defaultTtl")
+  @Inject @Named("shindig.http.cache.defaultTtl")
   private static long defaultTtl = DEFAULT_TTL;
 
   // Holds character sets for fast conversion
-  private static ConcurrentHashMap<String, Charset> encodingToCharset
-      = new ConcurrentHashMap<String, Charset>();
+  private static final Map<String, Charset> encodingToCharset = Maps.newConcurrentHashMap();
+
+  private final int httpStatusCode;
+  private final Map<String, List<String>> headers;
+  private final byte[] responseBytes;
+  private final Map<String, String> metadata;
+
+  private final long date;
+  private final String encoding;
+
+  private final HttpResponse rewritten;
 
   /**
-   * Create a dummy empty map. Access via HttpResponse.ERROR
+   * Construct an HttpResponse from a builder (called by HttpResponseBuilder.create).
    */
-  public HttpResponse(int statusCode) {
-    this(statusCode, ArrayUtils.EMPTY_BYTE_ARRAY, null, Charset.defaultCharset().name());
+  HttpResponse(HttpResponseBuilder builder) {
+    httpStatusCode = builder.getHttpStatusCode();
+    Map<String, List<String>> headerCopy = Maps.newTreeMap(String.CASE_INSENSITIVE_ORDER);
+    headerCopy.putAll(builder.getHeaders());
+
+    // Always safe, HttpResponseBuilder won't modify the body.
+    responseBytes = builder.getResponse();
+
+    Map<String, String> metadataCopy = Maps.newHashMap(builder.getMetadata());
+    metadata = Collections.unmodifiableMap(metadataCopy);
+
+    rewritten = builder.getRewritten();
+
+    // We want to modify the headers to ensure that the proper Content-Type and Date headers
+    // have been set. This allows us to avoid these expensive calculations from the cache.
+    date = getAndUpdateDate(headerCopy);
+    encoding = getAndUpdateEncoding(headerCopy, responseBytes);
+    headers = Collections.unmodifiableMap(headerCopy);
   }
 
-  /**
-   * @param headers May be null.
-   */
-  public HttpResponse(int httpStatusCode, byte[] responseBytes,
-      Map<String, List<String>> headers) {
-    this(httpStatusCode, responseBytes, headers, null);
+  private HttpResponse(int httpStatusCode, String body) {
+    this(new HttpResponseBuilder()
+      .setHttpStatusCode(httpStatusCode)
+      .setResponse(body.getBytes(Charset.forName("UTF-8"))));
   }
 
-  /**
-   * @param headers  May be null.
-   * @param encoding May be null.
-   */
-  public HttpResponse(int httpStatusCode, byte[] responseBytes,
-      Map<String, List<String>> headers,
-      String encoding) {
-    this.httpStatusCode = httpStatusCode;
-    if (responseBytes == null) {
-      this.responseBytes = ArrayUtils.EMPTY_BYTE_ARRAY;
-    } else {
-      this.responseBytes = new byte[responseBytes.length];
-      System.arraycopy(
-          responseBytes, 0, this.responseBytes, 0, responseBytes.length);
-    }
-
-    Map<String, List<String>> tmpHeaders =
-        new TreeMap<String, List<String>>(String.CASE_INSENSITIVE_ORDER);
-    if (headers != null) {
-      for (Map.Entry<String, List<String>> entry : headers.entrySet()) {
-        if (entry.getKey() != null && entry.getValue() != null) {
-          List<String> newList = new ArrayList<String>(entry.getValue());
-          tmpHeaders.put(entry.getKey(), Collections.unmodifiableList(newList));
-        }
-      }
-    }
-
-    date = getValidDate(tmpHeaders);
-
-    this.headers = tmpHeaders;
-
-    this.metadata = new HashMap<String, String>();
-    if (encoding == null) {
-      this.encoding = detectEncoding();
-    } else {
-      this.encoding = encoding;
-    }
-  }
-
-  /**
-   * Simple constructor for setting a basic response from a string. Mostly used for testing.
-   */
   public HttpResponse(String body) {
-    this(SC_OK, body.getBytes(), null, Charset.defaultCharset().name());
+    this(SC_OK, body);
   }
 
   public static HttpResponse error() {
-    return new HttpResponse(SC_INTERNAL_SERVER_ERROR);
+    return new HttpResponse(SC_INTERNAL_SERVER_ERROR, "");
   }
 
   public static HttpResponse timeout() {
-    return new HttpResponse(SC_TIMEOUT);
+    return new HttpResponse(SC_TIMEOUT, "");
   }
 
   public static HttpResponse notFound() {
-    return new HttpResponse(SC_NOT_FOUND);
-  }
-
-  /**
-   * Tries to find a valid date from the input headers. If one can't be found, the current time is
-   * used.
-   *
-   * @param headers Input headers. If the Date header is missing or invalid, it will be set with the
-   *                current time.
-   * @return The value of the date header, in milliseconds.
-   */
-  private long getValidDate(Map<String, List<String>> headers) {
-    // Validate the Date header. Must conform to the HTTP date format.
-    long timestamp = -1;
-    String dateStr = headers.get("Date") == null ? null : headers.get("Date").get(0);
-    if (dateStr != null) {
-      Date d = DateUtil.parseDate(dateStr);
-      if (d != null) {
-        timestamp = d.getTime();
-      }
-    }
-    if (timestamp == -1) {
-      timestamp = System.currentTimeMillis();
-      headers.put("Date", Arrays.asList(DateUtil.formatDate(timestamp)));
-    }
-    return timestamp;
-  }
-
-  /**
-   * Attempts to determine the encoding of the body. If it can't be determined, we use
-   * DEFAULT_ENCODING instead.
-   *
-   * @return The detected encoding or DEFAULT_ENCODING.
-   */
-  private String detectEncoding() {
-    String contentType = getHeader("Content-Type");
-    if (contentType != null) {
-      String[] parts = contentType.split(";");
-      if (BINARY_CONTENT_TYPES.contains(parts[0])) {
-        return DEFAULT_ENCODING;
-      }
-      if (parts.length == 2) {
-        int offset = parts[1].indexOf("charset=");
-        if (offset != -1) {
-          return parts[1].substring(offset + 8).toUpperCase();
-        }
-      }
-    }
-
-    if (responseBytes == null || responseBytes.length == 0) {
-      return Charset.defaultCharset().name();
-    }
-    // If the header doesn't specify the charset, try to determine it by examining the content.
-    CharsetDetector detector = new CharsetDetector();
-    detector.setText(responseBytes);
-    CharsetMatch match = detector.detect();
-
-    if (contentType != null) {
-      // Record the charset in the content-type header so that its value can be cached
-      // and re-used. This is a BIG performance win.
-      this.headers.put("Content-Type",
-          Lists.newArrayList(contentType + "; charset=" + match.getName().toUpperCase()));
-    }
-    return match.getName().toUpperCase();
+    return new HttpResponse(SC_NOT_FOUND, "");
   }
 
   public int getHttpStatusCode() {
@@ -278,43 +168,35 @@ public class HttpResponse {
   /**
    * Attempts to convert the response body to a string using the Content-Type header. If no
    * Content-Type header is specified (or it doesn't include an encoding), we will assume it is
-   * UTF-8.
+   * DEFAULT_ENCODING.
    *
    * @return The body as a string.
    */
   public String getResponseAsString() {
-    if (responseString == null) {
-      Charset charset = encodingToCharset.get(encoding);
-      if (charset == null) {
-        charset = Charset.forName(encoding);
-        encodingToCharset.put(encoding, charset);
-      }
-      responseString = charset.decode(ByteBuffer.wrap(responseBytes)).toString();
+    Charset charset = encodingToCharset.get(encoding);
+    if (charset == null) {
+      charset = Charset.forName(encoding);
+      encodingToCharset.put(encoding, charset);
+    }
+    String responseString = charset.decode(ByteBuffer.wrap(responseBytes)).toString();
 
-      // Strip BOM if present
-      if (responseString.length() > 0 && responseString.codePointAt(0) == 0xFEFF) {
-        responseString = responseString.substring(1);
-      }
+    // Strip BOM if present
+    if (responseString.length() > 0 && responseString.codePointAt(0) == 0xFEFF) {
+      responseString = responseString.substring(1);
     }
     return responseString;
   }
 
   /**
-   * @return The response as a byte array
-   */
-  public byte[] getResponseAsBytes() {
-    return responseBytes;
-  }
-
-  /**
    * @return All headers for this object.
    */
-  public Map<String, List<String>> getAllHeaders() {
+  public Map<String, List<String>> getHeaders() {
     return headers;
   }
 
   /**
-   * @return All headers with the given name.
+   * @return All headers with the given name. If no headers are set for the given name, an empty
+   * collection will be returned.
    */
   public List<String> getHeaders(String name) {
     List<String> ret = headers.get(name);
@@ -342,44 +224,17 @@ public class HttpResponse {
    * @return additional data to embed in responses sent from the JSON proxy.
    */
   public Map<String, String> getMetadata() {
-    return this.metadata;
+    return metadata;
   }
 
   /**
    * Get the rewritten version of this content
    *
    * @return A rewritten HttpResponse
+   * TODO: Remove when new rewriting interfaces are complete. 
    */
   public HttpResponse getRewritten() {
     return rewritten;
-  }
-
-  /**
-   * Set the rewritten version of this content
-   */
-  public void setRewritten(HttpResponse rewritten) {
-    this.rewritten = rewritten;
-  }
-
-  /**
-   * Set the externally forced minimum cache min-TTL This is derived from the "refresh" param on
-   * OpenProxy request Value is in seconds
-   */
-  public void setForcedCacheTTL(int forcedCacheTtl) {
-    if (forcedCacheTtl > 0) {
-      this.headers.remove("Expires");
-      this.headers.remove("Pragma");
-      this.headers.put("Cache-Control", Lists.newArrayList("public,max-age=" + forcedCacheTtl));
-    }
-  }
-
-  /**
-   * Sets cache-control headers indicating the response is not cacheable.
-   */
-  public void setNoCache() {
-    this.headers.put("Cache-Control", Lists.newArrayList("no-cache"));
-    this.headers.put("Pragma", Lists.newArrayList("no-cache"));
-    this.headers.remove("Expires");
   }
 
   /**
@@ -391,20 +246,20 @@ public class HttpResponse {
     // support for caching of OAuth responses is more complex, for that we have to respect
     // cache-control headers for 401s and 403s.
     if (!CACHE_CONTROL_OK_STATUS_CODES.contains(httpStatusCode)) {
-      return getDate() + negativeCacheTtl;
+      return date + negativeCacheTtl;
     }
     if (isStrictNoCache()) {
       return -1;
     }
     long maxAge = getCacheControlMaxAge();
     if (maxAge != -1) {
-      return getDate() + maxAge;
+      return date + maxAge;
     }
-    long expiration = getExpiration();
+    long expiration = getExpiresTime();
     if (expiration != -1) {
       return expiration;
     }
-    return getDate() + defaultTtl;
+    return date + defaultTtl;
   }
 
   /**
@@ -435,28 +290,18 @@ public class HttpResponse {
       }
     }
 
-    List<String> pragmas = getHeaders("Pragma");
-    if (pragmas != null) {
-      for (String pragma : pragmas) {
-        if ("no-cache".equalsIgnoreCase(pragma)) {
-          return true;
-        }
+    for (String pragma : getHeaders("Pragma")) {
+      if ("no-cache".equalsIgnoreCase(pragma)) {
+        return true;
       }
     }
     return false;
   }
 
   /**
-   * @return The value of the HTTP Date header.
-   */
-  protected long getDate() {
-    return date;
-  }
-
-  /**
    * @return the expiration time from the Expires header or -1 if not set
    */
-  protected long getExpiration() {
+  private long getExpiresTime() {
     String expires = getHeader("Expires");
     if (expires != null) {
       Date expiresDate = DateUtil.parseDate(expires);
@@ -470,7 +315,7 @@ public class HttpResponse {
   /**
    * @return max-age value or -1 if invalid or not set
    */
-  protected long getCacheControlMaxAge() {
+  private long getCacheControlMaxAge() {
     String cacheControl = getHeader("Cache-Control");
     if (cacheControl != null) {
       String[] directives = cacheControl.split(",");
@@ -481,7 +326,7 @@ public class HttpResponse {
           if (parts.length == 2) {
             try {
               return Long.parseLong(parts[1]) * 1000;
-            } catch (NumberFormatException e) {
+            } catch (NumberFormatException ignore) {
               return -1;
             }
           }
@@ -489,5 +334,101 @@ public class HttpResponse {
       }
     }
     return -1;
+  }
+
+  /**
+   * Tries to find a valid date from the input headers.
+   *
+   * @return The value of the date header, in milliseconds, or -1 if no Date could be determined.
+   */
+  private static long getAndUpdateDate(Map<String, List<String>> headers) {
+    // Validate the Date header. Must conform to the HTTP date format.
+    long timestamp = -1;
+    List<String> dates = headers.get("Date");
+    String dateStr = dates == null ? null : dates.isEmpty() ? null : dates.get(0);
+    if (dateStr != null) {
+      Date d = DateUtil.parseDate(dateStr);
+      if (d != null) {
+        timestamp = d.getTime();
+      }
+    }
+    if (timestamp == -1) {
+      timestamp = System.currentTimeMillis();
+      headers.put("Date", Lists.newArrayList(DateUtil.formatDate(timestamp)));
+    }
+    return timestamp;
+  }
+
+  /**
+   * Attempts to determine the encoding of the body. If it can't be determined, we use
+   * DEFAULT_ENCODING instead.
+   *
+   * @return The detected encoding or DEFAULT_ENCODING.
+   */
+  private static String getAndUpdateEncoding(Map<String, List<String>> headers, byte[] body) {
+    List<String> values = headers.get("Content-Type");
+    String contentType = values == null ? null : values.isEmpty() ? null : values.get(0);
+    if (contentType != null) {
+      String[] parts = contentType.split(";");
+      if (BINARY_CONTENT_TYPES.contains(parts[0])) {
+        return DEFAULT_ENCODING;
+      }
+      if (parts.length == 2) {
+        int offset = parts[1].indexOf("charset=");
+        if (offset != -1) {
+          return parts[1].substring(offset + 8).toUpperCase();
+        }
+      }
+    }
+
+    if (body == null || body.length == 0) {
+      return DEFAULT_ENCODING;
+    }
+
+    // If the header doesn't specify the charset, try to determine it by examining the content.
+    CharsetDetector detector = new CharsetDetector();
+    detector.setText(body);
+    CharsetMatch match = detector.detect();
+
+    if (contentType != null) {
+      // Record the charset in the content-type header so that its value can be cached
+      // and re-used. This is a BIG performance win.
+      headers.put("Content-Type",
+          Lists.newArrayList(contentType + "; charset=" + match.getName().toUpperCase()));
+    }
+    return match.getName().toUpperCase();
+  }
+
+  @Override
+  public boolean equals(Object obj) {
+    if (obj == this) { return true; }
+    if (!(obj instanceof HttpResponse)) { return false; }
+
+    HttpResponse response = (HttpResponse)obj;
+
+    return httpStatusCode == response.httpStatusCode &&
+           headers.equals(response.headers) &&
+           Arrays.equals(responseBytes, response.responseBytes);
+  }
+
+  @Override
+  public String toString() {
+    StringBuilder buf = new StringBuilder("HTTP/1.1 ").append(httpStatusCode).append("\r\n\r\n");
+    for (Map.Entry<String, List<String>> entry : headers.entrySet()) {
+      String name = entry.getKey();
+      for (String value : entry.getValue()) {
+        buf.append(name).append(": ").append(value).append('\n');
+      }
+    }
+    buf.append("\r\n").append(getResponseAsString()).append("\r\n");
+    return buf.toString();
+  }
+
+  /**
+   * @return The response as a byte array. Only visible to the package to avoid copying when
+   * making a new HttpResponseBuilder.
+   */
+  byte[] getResponseAsBytes() {
+    return responseBytes;
   }
 }

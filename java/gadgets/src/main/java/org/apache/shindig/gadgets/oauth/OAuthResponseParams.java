@@ -21,7 +21,7 @@ package org.apache.shindig.gadgets.oauth;
 
 import org.apache.shindig.common.crypto.BlobCrypter;
 import org.apache.shindig.common.crypto.BlobCrypterException;
-import org.apache.shindig.gadgets.http.HttpResponse;
+import org.apache.shindig.gadgets.http.HttpResponseBuilder;
 
 /**
  * Container for OAuth specific data to include in the response to the client.
@@ -58,23 +58,23 @@ public class OAuthResponseParams {
     newClientState = new OAuthClientState(stateCrypter);
   }
   
-  public void addToResponse(HttpResponse response) {
+  public void addToResponse(HttpResponseBuilder response) {
     if (!newClientState.isEmpty()) {
       try {
-        response.getMetadata().put(CLIENT_STATE, newClientState.getEncryptedState());
+        response.setMetadata(CLIENT_STATE, newClientState.getEncryptedState());
       } catch (BlobCrypterException e) {
         // Configuration error somewhere, this should never happen.
         throw new RuntimeException(e);
       }
     }
     if (aznUrl != null) {
-      response.getMetadata().put(APPROVAL_URL, aznUrl);
+      response.setMetadata(APPROVAL_URL, aznUrl);
     }
     if (error != null) {
-      response.getMetadata().put(ERROR_CODE, error.toString());
+      response.setMetadata(ERROR_CODE, error.toString());
     }
     if (errorText != null) {
-      response.getMetadata().put(ERROR_TEXT, errorText);
+      response.setMetadata(ERROR_TEXT, errorText);
     }
   }
 

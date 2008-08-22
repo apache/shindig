@@ -17,20 +17,13 @@
  */
 package org.apache.shindig.gadgets.http;
 
-import org.apache.shindig.common.uri.Uri;
-import org.apache.shindig.common.util.DateUtil;
+import junit.framework.TestCase;
 import org.apache.shindig.common.cache.CacheProvider;
 import org.apache.shindig.common.cache.DefaultCacheProvider;
+import org.apache.shindig.common.uri.Uri;
+import org.apache.shindig.common.util.DateUtil;
 
-import org.apache.commons.lang.ArrayUtils;
-
-import junit.framework.TestCase;
-
-import java.util.Arrays;
 import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 /**
  * Tests for basic content cache
@@ -53,18 +46,15 @@ public class BasicHttpCacheTest extends TestCase {
     super.tearDown();
   }
 
-  private HttpRequest createRequest(String method) {
+  private static HttpRequest createRequest(String method) {
     return new HttpRequest(Uri.parse("http://www.example.org")).setMethod(method);
   }
 
-  private HttpResponse createResponse(int statusCode, String header,
-      String headerValue) {
-    Map<String, List<String>> headers = new HashMap<String, List<String>>();
-    if (header != null) {
-      headers.put(header, Arrays.asList(headerValue));
-    }
-    HttpResponse resp = new HttpResponse(statusCode, ArrayUtils.EMPTY_BYTE_ARRAY, headers);
-    return resp;
+  private static HttpResponse createResponse(int statusCode, String header, String headerValue) {
+   return new HttpResponseBuilder()
+        .setHttpStatusCode(statusCode)
+        .addHeader(header, headerValue)
+        .create();
   }
 
   private HttpResponse createExpiresResponse(int statusCode, long expiration) {
@@ -87,7 +77,7 @@ public class BasicHttpCacheTest extends TestCase {
     HttpResponse resp = createResponse(200, null, null);
     HttpCacheKey key = new HttpCacheKey(req);
     cache.addResponse(key, req, resp);
-    assertEquals(cache.getResponse(key, req), resp);
+    assertEquals(resp, cache.getResponse(key, req));
   }
 
   public void testNotCacheableForPost() {
@@ -112,7 +102,7 @@ public class BasicHttpCacheTest extends TestCase {
         System.currentTimeMillis() + 10000L);
     HttpCacheKey key = new HttpCacheKey(req);
     cache.addResponse(key, req, resp);
-    assertEquals(cache.getResponse(key, req), resp);
+    assertEquals(resp, cache.getResponse(key, req));
   }
 
   public void testNotCacheableForPastExpires() {
@@ -130,7 +120,7 @@ public class BasicHttpCacheTest extends TestCase {
         10000L);
     HttpCacheKey key = new HttpCacheKey(req);
     cache.addResponse(key, req, resp);
-    assertEquals(cache.getResponse(key, req), resp);
+    assertEquals(resp, cache.getResponse(key, req));
   }
 
   public void testNotCacheableForNoCache() {

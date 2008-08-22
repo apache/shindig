@@ -18,12 +18,13 @@
  */
 package org.apache.shindig.common.uri;
 
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import org.apache.shindig.common.util.Utf8UrlCoder;
 
-import com.google.common.collect.Multimap;
-import com.google.common.collect.Multimaps;
-
 import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -42,7 +43,7 @@ public class UriBuilder {
   private String path;
   private String query;
   private String fragment;
-  private Multimap<String, String> queryParameters;
+  private Map<String, List<String>> queryParameters;
 
 
   /**
@@ -55,14 +56,14 @@ public class UriBuilder {
     query = uri.getQuery();
     fragment = uri.getFragment();
 
-    queryParameters = Multimaps.newLinkedListMultimap(uri.getQueryParameters());
+    queryParameters = Maps.newLinkedHashMap(uri.getQueryParameters());
   }
 
   /**
    * Create an empty builder.
    */
   public UriBuilder() {
-    queryParameters = Multimaps.newLinkedListMultimap();
+    queryParameters =  Maps.newLinkedHashMap();
   }
 
   /**
@@ -140,15 +141,20 @@ public class UriBuilder {
   }
 
   public UriBuilder addQueryParameter(String name, String value) {
-    this.query = null;
-    queryParameters.put(name, value);
+    query = null;
+    List<String> params = queryParameters.get(name);
+    if (params == null) {
+      params = Lists.newArrayList();
+      queryParameters.put(name, params);
+    }
+    params.add(value);
     return this;
   }
 
   public UriBuilder addQueryParameters(Map<String, String> parameters) {
-    this.query = null;
+    query = null;
     for (Map.Entry<String, String> entry : parameters.entrySet()) {
-      queryParameters.put(entry.getKey(), entry.getValue());
+      addQueryParameter(entry.getKey(), entry.getValue());
     }
     return this;
   }
@@ -156,14 +162,14 @@ public class UriBuilder {
   /**
    * @return The queryParameters part of the uri, separated into component parts.
    */
-  public Multimap<String, String> getQueryParameters() {
+  public Map<String, List<String>> getQueryParameters() {
     return queryParameters;
   }
 
   /**
    * @return All queryParameters parameters with the given name.
    */
-  public Collection<String> getQueryParameters(String name) {
+  public List<String> getQueryParameters(String name) {
     return queryParameters.get(name);
   }
 
@@ -193,20 +199,24 @@ public class UriBuilder {
   /**
    * Utility method for joining key / value pair parameters into a url-encoded string.
    */
-  static String joinParameters(Multimap<String, String> query) {
-    if (query.size() == 0) {
+  static String joinParameters(Map<String, List<String>> query) {
+    if (query.isEmpty()) {
       return null;
     }
     StringBuilder buf = new StringBuilder();
     boolean firstDone = false;
-    for (Map.Entry<String, String> entry : query.entries()) {
-      if (firstDone) {
-        buf.append("&");
+    for (Map.Entry<String, List<String>> entry : query.entrySet()) {
+      String name = Utf8UrlCoder.encode(entry.getKey());
+      for (String value : entry.getValue()) {
+        if (firstDone) {
+          buf.append('&');
+        }
+        firstDone = true;
+        
+        buf.append(name)
+           .append('=')
+           .append(Utf8UrlCoder.encode(value));
       }
-      firstDone = true;
-      buf.append(Utf8UrlCoder.encode(entry.getKey()))
-         .append("=")
-         .append(Utf8UrlCoder.encode(entry.getValue()));
     }
     return buf.toString();
   }
@@ -214,17 +224,23 @@ public class UriBuilder {
   /**
    * Utility method for splitting a parameter string into key / value pairs.
    */
-  static Multimap<String, String> splitParameters(String query) {
+  static Map<String, List<String>> splitParameters(String query) {
     if (query == null) {
-      return Multimaps.immutableMultimap();
+      return Collections.emptyMap();
     }
-    Multimap<String, String> params = Multimaps.newLinkedListMultimap();
+    Map<String, List<String>> params = Maps.newHashMap();
     Matcher paramMatcher = QUERY_PATTERN.matcher(query);
     while (paramMatcher.find()) {
-      params.put(Utf8UrlCoder.decode(paramMatcher.group(1)),
-                 Utf8UrlCoder.decode(paramMatcher.group(2)));
+      String name = Utf8UrlCoder.decode(paramMatcher.group(1));
+      String value = Utf8UrlCoder.decode(paramMatcher.group(2));
+      List<String> values = params.get(name);
+      if (values == null) {
+        values = Lists.newArrayList();
+        params.put(name, values);
+      }
+      values.add(value);
     }
-    return Multimaps.unmodifiableMultimap(params);
+    return Collections.unmodifiableMap(params);
   }
 
   @Override
@@ -238,10 +254,10 @@ public class UriBuilder {
   }
 
   @Override
-  public boolean equals(Object rhs) {
-    if (rhs == this) {return true;}
-    if (!(rhs instanceof UriBuilder)) {return false;}
+  public boolean equals(Object obj) {
+    if (obj == this) {return true;}
+    if (!(obj instanceof UriBuilder)) {return false;}
 
-    return toString().equals(rhs.toString());
+    return toString().equals(obj.toString());
   }
 }

@@ -19,7 +19,6 @@ package org.apache.shindig.gadgets.http;
 
 import org.apache.shindig.common.cache.CacheProvider;
 import org.apache.shindig.common.cache.DefaultCacheProvider;
-
 import org.junit.Before;
 
 public class BasicHttpFetcherTest extends AbstractHttpFetcherTest {

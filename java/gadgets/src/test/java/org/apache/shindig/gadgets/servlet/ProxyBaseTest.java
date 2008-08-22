@@ -18,20 +18,18 @@
  */
 package org.apache.shindig.gadgets.servlet;
 
-import static org.easymock.EasyMock.expect;
-
 import com.google.common.collect.Maps;
-
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.http.HttpResponse;
-
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
+import org.apache.shindig.gadgets.http.HttpResponseBuilder;
+import static org.easymock.EasyMock.expect;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Tests for ProxyBase.
@@ -135,7 +133,7 @@ public class ProxyBaseTest extends ServletTestFixture {
   }
 
   public void testSetResponseHeaders() {
-    HttpResponse results = new HttpResponse(HttpResponse.SC_OK);
+    HttpResponse results = new HttpResponseBuilder().create();
     replay();
 
     proxy.setResponseHeaders(request, recorder, results);
@@ -149,7 +147,9 @@ public class ProxyBaseTest extends ServletTestFixture {
   public void testSetResponseHeadersNoCache() {
     Map<String, List<String>> headers = Maps.newTreeMap(String.CASE_INSENSITIVE_ORDER);
     headers.put("Pragma", Arrays.asList("no-cache"));
-    HttpResponse results = new HttpResponse(HttpResponse.SC_OK, new byte[0], headers);
+    HttpResponse results = new HttpResponseBuilder()
+        .addHeader("Pragma", "no-cache")
+        .create();
     replay();
 
     proxy.setResponseHeaders(request, recorder, results);
@@ -162,7 +162,7 @@ public class ProxyBaseTest extends ServletTestFixture {
   }
 
   public void testSetResponseHeadersForceParam() {
-    HttpResponse results = new HttpResponse(HttpResponse.SC_OK);
+    HttpResponse results = new HttpResponseBuilder().create();
     expect(request.getParameter(ProxyBase.REFRESH_PARAM)).andReturn("30").anyTimes();
     replay();
 

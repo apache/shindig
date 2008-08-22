@@ -17,12 +17,6 @@
  */
 package org.apache.shindig.gadgets.oauth;
 
-import org.apache.shindig.common.crypto.Crypto;
-import org.apache.shindig.gadgets.GadgetException;
-import org.apache.shindig.gadgets.http.HttpFetcher;
-import org.apache.shindig.gadgets.http.HttpRequest;
-import org.apache.shindig.gadgets.http.HttpResponse;
-
 import net.oauth.OAuth;
 import net.oauth.OAuthAccessor;
 import net.oauth.OAuthConsumer;
@@ -30,13 +24,17 @@ import net.oauth.OAuthMessage;
 import net.oauth.OAuthServiceProvider;
 import net.oauth.OAuthValidator;
 import net.oauth.SimpleOAuthValidator;
+import org.apache.shindig.common.crypto.Crypto;
+import org.apache.shindig.gadgets.GadgetException;
+import org.apache.shindig.gadgets.http.HttpFetcher;
+import org.apache.shindig.gadgets.http.HttpRequest;
+import org.apache.shindig.gadgets.http.HttpResponse;
+import org.apache.shindig.gadgets.http.HttpResponseBuilder;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 public class FakeOAuthServiceProvider implements HttpFetcher {
 
@@ -180,24 +178,21 @@ public class FakeOAuthServiceProvider implements HttpFetcher {
     return new HttpResponse(resp);
   }
 
-  private HttpResponse makeOAuthProblemReport(String code, String text)
-      throws IOException {
+  private HttpResponse makeOAuthProblemReport(String code, String text) throws IOException {
     if (vagueErrors) {
-      int rc = 401;
+      int rc = HttpResponse.SC_UNAUTHORIZED;
       if ("consumer_key_unknown".equals(code)) {
-        rc = 403;
+        rc = HttpResponse.SC_FORBIDDEN;
       }
-      return new HttpResponse(rc, null, null);
+      return new HttpResponseBuilder().setHttpStatusCode(rc).create();
     }
     OAuthMessage msg = new OAuthMessage(null, null, null);
     msg.addParameter("oauth_problem", code);
-    msg.addParameter("oauth_problem_advice", text);
-    Map<String, List<String>> headers = new HashMap<String, List<String>>();
-    headers.put(
-        "WWW-Authenticate",
-        Arrays.asList(msg.getAuthorizationHeader("realm")));
-    HttpResponse response = new HttpResponse(403, null, headers);
-    return response;
+    msg.addParameter("oauth_problem_advice", text);    
+    return new HttpResponseBuilder()
+        .setHttpStatusCode(HttpResponse.SC_FORBIDDEN)
+        .addHeader("WWW-Authenticate", msg.getAuthorizationHeader("realm"))
+        .create();
   }
 
   // Loosely based off net.oauth.OAuthServlet, and even more loosely related

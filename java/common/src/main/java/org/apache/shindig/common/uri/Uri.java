@@ -18,12 +18,14 @@
  */
 package org.apache.shindig.common.uri;
 
-import com.google.common.collect.Multimap;
-import com.google.common.collect.Multimaps;
+import com.google.common.collect.Maps;
 
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
 
 /**
 * Represents a Uniform Resource Identifier (URI) reference as defined by <a
@@ -39,7 +41,7 @@ public final class Uri {
   private final String query;
   private final String fragment;
 
-  private final Multimap<String, String> queryParameters;
+  private final Map<String, List<String>> queryParameters;
 
 
   Uri(UriBuilder builder) {
@@ -48,8 +50,8 @@ public final class Uri {
     path = builder.getPath();
     query = builder.getQuery();
     fragment = builder.getFragment();
-    Multimap<String, String> copy = Multimaps.newArrayListMultimap(builder.getQueryParameters());
-    queryParameters = Multimaps.unmodifiableMultimap(copy);
+    queryParameters
+        = Collections.unmodifiableMap(Maps.newLinkedHashMap(builder.getQueryParameters()));
 
     StringBuilder out = new StringBuilder();
 
@@ -136,7 +138,7 @@ public final class Uri {
   /**
    * @return The query part of the uri, separated into component parts.
    */
-  public Multimap<String, String> getQueryParameters() {
+  public Map<String, List<String>> getQueryParameters() {
     return queryParameters;
   }
 
@@ -176,10 +178,10 @@ public final class Uri {
   }
 
   @Override
-  public boolean equals(Object rhs) {
-    if (rhs == this) {return true;}
-    if (!(rhs instanceof Uri)) {return false;}
+  public boolean equals(Object obj) {
+    if (obj == this) {return true;}
+    if (!(obj instanceof Uri)) {return false;}
 
-    return text.equals(((Uri)rhs).text);
+    return text.equals(((Uri)obj).text);
   }
 }

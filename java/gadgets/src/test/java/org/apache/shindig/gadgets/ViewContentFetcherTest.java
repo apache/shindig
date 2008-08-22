@@ -100,7 +100,7 @@ public class ViewContentFetcherTest {
     View view = new View(null, elementList);
     CountDownLatch latch = new CountDownLatch(1);
 
-    HttpResponse response = new HttpResponse(HttpResponse.SC_NOT_FOUND);
+    HttpResponse response = HttpResponse.notFound();
     expect(fetcher.fetch(isA(HttpRequest.class))).andReturn(response).once();
 
     replay(fetcher);

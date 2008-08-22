@@ -18,15 +18,11 @@
  */
 package org.apache.shindig.gadgets.http;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-
+import org.apache.commons.io.IOUtils;
 import org.apache.shindig.common.AnonymousSecurityToken;
 import org.apache.shindig.common.uri.Uri;
-
-import com.google.common.collect.Multimaps;
-
-import org.apache.commons.io.IOUtils;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import org.junit.Test;
 
 import java.util.Arrays;
@@ -54,7 +50,7 @@ public class HttpRequestTest {
   @Test
   public void contentTypeExtraction() throws Exception {
     HttpRequest request = new HttpRequest(DEFAULT_URI)
-    .addHeader("Content-Type", CONTENT_TYPE);
+        .addHeader("Content-Type", CONTENT_TYPE);
     assertEquals(CONTENT_TYPE, request.getContentType());
   }
 
@@ -63,15 +59,15 @@ public class HttpRequestTest {
     Map<String, List<String>> headers = new HashMap<String, List<String>>();
     headers.put(TEST_HEADER_KEY, Arrays.asList(TEST_HEADER_VALUE));
     HttpRequest request = new HttpRequest(DEFAULT_URI)
-    .addHeader(TEST_HEADER_KEY, TEST_HEADER_VALUE);
+        .addHeader(TEST_HEADER_KEY, TEST_HEADER_VALUE);
     assertEquals(TEST_HEADER_VALUE, request.getHeader(TEST_HEADER_KEY));
   }
 
   @Test
   public void getHeaders() throws Exception {
     HttpRequest request = new HttpRequest(DEFAULT_URI)
-    .addHeader(TEST_HEADER_KEY, TEST_HEADER_VALUE)
-    .addHeader(TEST_HEADER_KEY, TEST_HEADER_VALUE2);
+        .addHeader(TEST_HEADER_KEY, TEST_HEADER_VALUE)
+        .addHeader(TEST_HEADER_KEY, TEST_HEADER_VALUE2);
 
     Collection<String> expected = Arrays.asList(TEST_HEADER_VALUE, TEST_HEADER_VALUE2);
     assertTrue(request.getHeaders(TEST_HEADER_KEY).containsAll(expected));
@@ -88,17 +84,17 @@ public class HttpRequestTest {
   @Test
   public void copyCtorCopiesAllFields() {
     HttpRequest request = new HttpRequest(DEFAULT_URI)
-    .setCacheTtl(100)
-    .addHeaders(Multimaps.immutableMultimap(TEST_HEADER_KEY, TEST_HEADER_VALUE))
-    .setContainer("container")
-    .setGadget(DEFAULT_URI)
-    .setMethod("POST")
-    .setPostBody(POST_BODY.getBytes())
-    .setContentRewriter(null)
-    .setRewriteMimeType("text/fake")
-    .setSecurityToken(AnonymousSecurityToken.getInstance())
-    .setSignOwner(false)
-    .setSignViewer(false);
+        .setCacheTtl(100)
+        .addHeader(TEST_HEADER_KEY, TEST_HEADER_VALUE)
+        .setContainer("container")
+        .setGadget(DEFAULT_URI)
+        .setMethod("POST")
+        .setPostBody(POST_BODY.getBytes())
+        .setContentRewriter(null)
+        .setRewriteMimeType("text/fake")
+        .setSecurityToken(AnonymousSecurityToken.getInstance())
+        .setSignOwner(false)
+        .setSignViewer(false);
 
     HttpRequest request2 = new HttpRequest(request).setUri(Uri.parse("http://example.org/foo"));
 
