@@ -356,7 +356,7 @@ class Person {
 
 	public function setLookingFor($lookingFor)
 	{
-		$this->lookingFor = $lookingFor;
+		$this->lookingFor = new EnumLookingFor($lookingFor);
 	}
 
 	public function getMovies()

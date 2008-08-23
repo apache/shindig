@@ -34,8 +34,13 @@ abstract class Enum {
 	public function __construct($key, $displayValue = '')
 	{
 		//FIXME should add enum restriction checking to this
-		if (! isset($this->values[$key])) {
-			throw new Exception("Invalid Enum key");
+		if (! empty($key) && ! isset($this->values[$key])) {
+			if (in_array($key, $this->values)) {
+				// case of mixing key <> display value, correct it
+				$key = array_search($key, $this->values);
+			} else {
+				throw new Exception("Invalid Enum key");
+			}
 		}
 		$this->key = $key;
 		$this->displayValue = ! empty($displayValue) ? $displayValue : $this->values[$key];
@@ -72,6 +77,15 @@ class EnumDrinker extends Enum {
  */
 class EnumGender extends Enum {
 	public $values = array('FEMALE' => "Female", 'MALE' => "Male");
+}
+
+/**
+ * public Enum for opensocial.Enum.LookingFor
+ */
+class EnumLookingFor extends Enum {
+	public $values = array('ACTIVITY_PARTNERS' => 'Activity Partners', 'DATING' => 'Dating', 
+			'FRIENDS' => 'Friends', 'NETWORKING' => 'Networking', 'RANDOM' => 'Random', 
+			'RELATIONSHIP' => 'Relationship');
 }
 
 /**
