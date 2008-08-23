@@ -44,8 +44,8 @@ class BasicBlobCrypter extends BlobCrypter {
 	
 	private $UTF8 = "UTF-8";
 	
-	private $cipherKey;
-	private $hmacKey;
+	protected $cipherKey;
+	protected $hmacKey;
 	protected $allowPlaintextToken;
 
 	public function __construct()
