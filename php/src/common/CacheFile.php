@@ -102,7 +102,7 @@ class CacheFile extends Cache {
 		}
 		if (file_exists($cacheFile) && is_readable($cacheFile)) {
 			$now = time();
-			if (($mtime = filemtime($cacheFile)) !== false && ($now - $mtime) < Config::get('cache_time')) {
+			if (($mtime = filemtime($cacheFile)) !== false && ($now - $mtime) < $expiration) {
 				if (($data = @file_get_contents($cacheFile)) !== false) {
 					$data = unserialize($data);
 					return $data;
