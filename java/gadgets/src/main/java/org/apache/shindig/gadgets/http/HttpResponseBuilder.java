@@ -63,6 +63,9 @@ public class HttpResponseBuilder {
    * @param responseBytes The response body. Copied when set.
    */
   public HttpResponseBuilder setResponse(byte[] responseBytes) {
+    if (responseBytes == null) {
+      responseBytes = ArrayUtils.EMPTY_BYTE_ARRAY;
+    }
     this.responseBytes = new byte[responseBytes.length];
     System.arraycopy(responseBytes, 0, this.responseBytes, 0, responseBytes.length);
     return this;

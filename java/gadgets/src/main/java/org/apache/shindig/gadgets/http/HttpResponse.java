@@ -24,10 +24,13 @@ import com.google.inject.Inject;
 import com.google.inject.name.Named;
 import com.ibm.icu.text.CharsetDetector;
 import com.ibm.icu.text.CharsetMatch;
+
+import org.apache.commons.lang.ArrayUtils;
 import org.apache.shindig.common.util.DateUtil;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.util.Arrays;
@@ -121,7 +124,18 @@ public final class HttpResponse {
   private HttpResponse(int httpStatusCode, String body) {
     this(new HttpResponseBuilder()
       .setHttpStatusCode(httpStatusCode)
-      .setResponse(body.getBytes(Charset.forName("UTF-8"))));
+      .setResponse(getUtf8Bytes(body)));
+  }
+  
+  private static byte[] getUtf8Bytes(String body) {
+    try {
+      if (body == null) {
+        return ArrayUtils.EMPTY_BYTE_ARRAY;
+      }
+      return body.getBytes(DEFAULT_ENCODING);
+    } catch (UnsupportedEncodingException e) {
+      throw new RuntimeException(e);
+    }
   }
 
   public HttpResponse(String body) {
