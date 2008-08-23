@@ -29,7 +29,7 @@ class BasicSecurityToken extends SecurityToken {
 	private $tokenData;
 	
 	/** tool to use for signing and encrypting the token */
-	private $crypter;
+	protected $crypter;
 	
 	private $OWNER_KEY = "o";
 	private $APP_KEY = "a";
@@ -74,7 +74,7 @@ class BasicSecurityToken extends SecurityToken {
 
 	public function __construct($token, $maxAge, $owner, $viewer, $app, $domain, $appUrl, $moduleId)
 	{
-		$this->crypter = new BasicBlobCrypter();
+		$this->crypter = $this->getCrypter();
 		if (! empty($token)) {
 			$this->token = $token;
 			$this->tokenData = $this->crypter->unwrap($token, $maxAge);
@@ -89,6 +89,11 @@ class BasicSecurityToken extends SecurityToken {
 			$this->token = $this->crypter->wrap($this->tokenData);
 		}
 	}
+	
+	protected function getCrypter()
+	{
+		return new BasicBlobCrypter();
+	} 
 
 	public function isAnonymous()
 	{
