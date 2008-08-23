@@ -4,7 +4,7 @@ Welcome to Apache Shindig!
 
 * To build and run the Java server see BUILD-JAVA
 
-* Read php/gadgets/README for instructions on how to run a php gadget server
+* Read phps/README for instructions on how to run a php gadget server
   instead of a java gadget server.
 
 * Read javascript/README for instructions for using the Shindig Gadget
