@@ -20,9 +20,7 @@
 class PeopleHandler extends DataRequestHandler {
 	private $service;
 	private static $PEOPLE_PATH = "/people/{userId}/{groupId}/{personId}";
-	//FIXME change this back to array("id", "name", "thumbnailUrl") once the dust settles
-	// on the spec discussion related to this
-	protected static $DEFAULT_PERSON_FIELDS = array('all' => 'all');
+	protected static $DEFAULT_PERSON_FIELDS = array("id", "name", "thumbnailUrl");
 
 	public function __construct()
 	{
