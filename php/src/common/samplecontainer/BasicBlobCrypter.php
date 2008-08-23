@@ -1,4 +1,5 @@
 <?php
+
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements. See the NOTICE file
@@ -97,8 +98,13 @@ class BasicBlobCrypter extends BlobCrypter {
 			$out['m'] = $data[5];
 		} else {
 			$bin = base64_decode($in);
-			$cipherText = substr($bin, 0, strlen($bin) - Crypto::$HMAC_SHA1_LEN);
-			$hmac = substr($bin, strlen($cipherText));
+			if (is_callable('mb_substr')) {
+				$cipherText = mb_substr($bin, 0, - Crypto::$HMAC_SHA1_LEN, 'latin1');
+				$hmac = mb_substr($bin, mb_strlen($cipherText, 'latin1'), Crypto::$HMAC_SHA1_LEN, 'latin1');
+			} else {
+				$cipherText = substr($bin, 0, - Crypto::$HMAC_SHA1_LEN);
+				$hmac = substr($bin, strlen($cipherText));
+			}
 			Crypto::hmacSha1Verify($this->hmacKey, $cipherText, $hmac);
 			if (! function_exists('mcrypt_module_open') && $this->allowPlaintextToken) {
 				$plain = base64_decode($cipherText);
