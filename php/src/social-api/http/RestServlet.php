@@ -46,7 +46,7 @@ require 'src/social-api/dataservice/PeopleHandler.php';
 require 'src/social-api/dataservice/ActivitiesService.php';
 require 'src/social-api/dataservice/AppDataService.php';
 require 'src/social-api/dataservice/PeopleService.php';
-require 'src/social-api/ResponseItem.php';
+require 'src/social-api/dataservice/ResponseItem.php';
 require 'src/social-api/converters/OutputConverter.php';
 require 'src/social-api/converters/OutputAtomConverter.php';
 require 'src/social-api/converters/OutputJsonConverter.php';
