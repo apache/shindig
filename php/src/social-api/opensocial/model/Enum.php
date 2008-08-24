@@ -40,7 +40,6 @@ abstract class Enum {
 			} else {
 				throw new Exception("Invalid Enum key");
 			}
-			throw new Exception("Invalid Enum key");
 		}
 		$this->key = $key;
 		$this->displayValue = ! empty($displayValue) ? $displayValue : $this->values[$key];
