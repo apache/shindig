@@ -51,7 +51,10 @@ class ActivitiesHandler extends DataRequestHandler {
 		if ($optionalActivityId != null) {
 			return $this->service->getActivity($requestItem->getUser(), $requestItem->getGroup(), $optionalActivityId, $requestItem->getStartIndex(), $requestItem->getCount(), $requestItem->getToken());
 		}
-		return $this->service->getActivities($requestItem->getUser(), $requestItem->getGroup(), $requestItem->getStartIndex(), $requestItem->getCount(), $requestItem->getToken());
+		$ret = $this->service->getActivities($requestItem->getUser(), $requestItem->getGroup(), $requestItem->getStartIndex(), $requestItem->getCount(), $requestItem->getToken());
+		if ($ret->getError()) {
+			return new ResponseItem(null, null, array());
+		}
 	}
 
 	/**
