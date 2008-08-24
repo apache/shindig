@@ -33,7 +33,6 @@ abstract class Enum {
 
 	public function __construct($key, $displayValue = '')
 	{
-		//FIXME should add enum restriction checking to this
 		if (! empty($key) && ! isset($this->values[$key])) {
 			if (in_array($key, $this->values)) {
 				// case of mixing key <> display value, correct it
@@ -41,6 +40,7 @@ abstract class Enum {
 			} else {
 				throw new Exception("Invalid Enum key");
 			}
+			throw new Exception("Invalid Enum key");
 		}
 		$this->key = $key;
 		$this->displayValue = ! empty($displayValue) ? $displayValue : $this->values[$key];
