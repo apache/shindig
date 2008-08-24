@@ -69,8 +69,6 @@ class PeopleHandlerTest extends PHPUnit_Framework_TestCase {
 		$response = $this->PeopleHandler->handleGet($requestItem);
 		$person = $response->getResponse();
 		$this->assertEquals('john.doe', $person['id']);
-		$this->assertEquals('MALE', $person['gender']['key']);
-		$this->assertEquals('Male', $person['gender']['displayValue']);
 		$this->assertEquals('Doe', $person['name']['familyName']);
 		$this->assertEquals('John', $person['name']['givenName']);
 		$this->assertEquals('John Doe', $person['name']['unstructured']);

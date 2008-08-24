@@ -59,7 +59,7 @@ class PersonTest extends PHPUnit_Framework_TestCase {
 		$this->Person->jobs = 'JOBS';
 		$this->Person->languagesSpoken = 'LANGUAGESSPOKEN';
 		$this->Person->livingArrangement = 'LIVINGARRANGEMENT';
-		$this->Person->lookingFor = 'LOOKINGFOR';
+		$this->Person->lookingFor = new EnumLookingFor('FRIENDS');
 		$this->Person->movies = 'MOVIES';
 		$this->Person->music = 'MUSIC';
 		$this->Person->networkPresence = 'NETWORKPRESENCE';
@@ -337,7 +337,7 @@ class PersonTest extends PHPUnit_Framework_TestCase {
 	 */
 	public function testGetLookingFor()
 	{
-		$this->assertEquals('LOOKINGFOR', $this->Person->getLookingFor());
+		$this->assertEquals(new EnumLookingFor('FRIENDS'), $this->Person->getLookingFor());
 	}
 
 	/**
@@ -826,8 +826,8 @@ class PersonTest extends PHPUnit_Framework_TestCase {
 	 */
 	public function testSetLookingFor()
 	{
-		$this->Person->setLookingFor('lookingfor');
-		$this->assertEquals('lookingfor', $this->Person->lookingFor);
+		$this->Person->setLookingFor('FRIENDS');
+		$this->assertEquals(new EnumLookingFor('FRIENDS'), $this->Person->getLookingFor());
 	}
 
 	/**
