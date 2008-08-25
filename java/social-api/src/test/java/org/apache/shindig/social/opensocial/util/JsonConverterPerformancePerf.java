@@ -17,15 +17,11 @@
  */
 package org.apache.shindig.social.opensocial.util;
 
-import junit.framework.TestCase;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.apache.shindig.social.JsonLibTestsGuiceModule;
 import org.apache.shindig.social.SocialApiTestsGuiceModule;
 import org.apache.shindig.social.core.model.ActivityImpl;
 import org.apache.shindig.social.core.model.AddressImpl;
-import org.apache.shindig.social.core.model.EmailImpl;
+import org.apache.shindig.social.core.model.ListFieldImpl;
 import org.apache.shindig.social.core.model.MediaItemImpl;
 import org.apache.shindig.social.core.model.NameImpl;
 import org.apache.shindig.social.core.model.PersonImpl;
@@ -34,16 +30,18 @@ import org.apache.shindig.social.core.util.BeanJsonConverter;
 import org.apache.shindig.social.core.util.BeanJsonLibConverter;
 import org.apache.shindig.social.opensocial.model.Activity;
 import org.apache.shindig.social.opensocial.model.Address;
-import org.apache.shindig.social.opensocial.model.Email;
+import org.apache.shindig.social.opensocial.model.ListField;
 import org.apache.shindig.social.opensocial.model.MediaItem;
 import org.apache.shindig.social.opensocial.model.Person;
 import org.apache.shindig.social.opensocial.model.Phone;
 
-import org.json.JSONObject;
-
 import com.google.common.collect.Lists;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
+import junit.framework.TestCase;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.json.JSONObject;
 
 public class JsonConverterPerformancePerf extends TestCase {
 
@@ -64,12 +62,12 @@ public class JsonConverterPerformancePerf extends TestCase {
         "+33H000000000", "home"), new PhoneImpl("+33M000000000", "mobile"),
         new PhoneImpl("+33W000000000", "work")));
 
-    johnDoe.setAddresses(Lists.<Address> newArrayList(new AddressImpl(
-        "My home address")));
+    johnDoe.setAddresses(Lists.<Address>newArrayList(
+        new AddressImpl("My home address")));
 
-    johnDoe.setEmails(Lists.<Email> newArrayList(new EmailImpl(
-        "john.doe@work.bar", "work"),
-        new EmailImpl("john.doe@home.bar", "home")));
+    johnDoe.setEmails(Lists.<ListField>newArrayList(
+        new ListFieldImpl("work", "john.doe@work.bar"),
+        new ListFieldImpl("home", "john.doe@home.bar")));
 
     activity = new ActivityImpl("activityId", johnDoe.getId());
 
@@ -135,7 +133,7 @@ public class JsonConverterPerformancePerf extends TestCase {
     /*
      * Output the time per conversion and the memory usage - the output per
      * conversion.
-     * 
+     *
      */
 
     log.info("SF JSON Lib Output "
@@ -203,7 +201,7 @@ public class JsonConverterPerformancePerf extends TestCase {
     r.gc();
 
     long stringsizeStart = r.totalMemory()-r.freeMemory();
-    
+
     for (int i = 0; i < TEST_SIZE; i++) {
       serializeOutput[i] = new String(source);
     }

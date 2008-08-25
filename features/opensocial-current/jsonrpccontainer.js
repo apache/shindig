@@ -258,6 +258,14 @@ JsonRpcContainer.prototype.newFetchPeopleRequest = function(idSpec,
 };
 
 JsonRpcContainer.prototype.createPersonFromJson = function(serverJson) {
+  // We need to translate from the new person fields to the old ones
+  // TODO(doll): Pull this out into a separate file
+  if (serverJson.emails) {
+    for (var i = 0; i < serverJson.emails.length; i++) {
+      serverJson.emails[i].address = serverJson.emails[i].value;
+    }
+  }
+
   return new JsonPerson(serverJson);
 };
 
