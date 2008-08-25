@@ -19,8 +19,8 @@ package org.apache.shindig.social.dataservice.integration;
 
 import org.apache.shindig.social.core.model.AddressImpl;
 import org.apache.shindig.social.core.model.BodyTypeImpl;
-import org.apache.shindig.social.core.model.EmailImpl;
 import org.apache.shindig.social.core.model.EnumImpl;
+import org.apache.shindig.social.core.model.ListFieldImpl;
 import org.apache.shindig.social.core.model.NameImpl;
 import org.apache.shindig.social.core.model.OrganizationImpl;
 import org.apache.shindig.social.core.model.PersonImpl;
@@ -28,8 +28,8 @@ import org.apache.shindig.social.core.model.PhoneImpl;
 import org.apache.shindig.social.core.model.UrlImpl;
 import org.apache.shindig.social.opensocial.model.Address;
 import org.apache.shindig.social.opensocial.model.BodyType;
-import org.apache.shindig.social.opensocial.model.Email;
 import org.apache.shindig.social.opensocial.model.Enum;
+import org.apache.shindig.social.opensocial.model.ListField;
 import org.apache.shindig.social.opensocial.model.Name;
 import org.apache.shindig.social.opensocial.model.Organization;
 import org.apache.shindig.social.opensocial.model.Person;
@@ -96,7 +96,7 @@ public class RestfulJsonPeopleTest extends AbstractLargeRestfulTests {
 
     canonical.setDateOfBirth(new Date());
     canonical.setDrinker(new EnumImpl<Enum.Drinker>(Enum.Drinker.SOCIALLY));
-    Email email = new EmailImpl("shindig-dev@incubator.apache.org", "work");
+    ListField email = new ListFieldImpl("work", "shindig-dev@incubator.apache.org");
     canonical.setEmails(Lists.newArrayList(email));
 
     canonical.setEthnicity("developer");
@@ -206,7 +206,7 @@ public class RestfulJsonPeopleTest extends AbstractLargeRestfulTests {
    *       {'unstructuredAddress' : 'My home address'}
    *     ],
    *     'emails' : [
-   *       { 'address' : 'john.doe@work.bar', 'type' : 'work'},
+   *       { 'value' : 'john.doe@work.bar', 'type' : 'work'},
    *     ]
    *
    *    ... etc, etc for all fields in the person object
@@ -269,12 +269,12 @@ public class RestfulJsonPeopleTest extends AbstractLargeRestfulTests {
     assertEquals(1, emailArray.length());
 
     for (int i = 0; i < canonical.getEmails().size(); i++) {
-      Email expectedEmail = canonical.getEmails().get(i);
+      ListField expectedEmail = canonical.getEmails().get(i);
       JSONObject actualEmail = emailArray.getJSONObject(i);
       assertEquals(expectedEmail.getType(),
-          actualEmail.getString(Email.Field.TYPE.toString()));
-      assertEquals(expectedEmail.getAddress(),
-          actualEmail.getString(Email.Field.ADDRESS.toString()));
+          actualEmail.getString(ListField.Field.TYPE.toString()));
+      assertEquals(expectedEmail.getValue(),
+          actualEmail.getString(ListField.Field.VALUE.toString()));
     }
 
     assertStringField(result, canonical.getEthnicity(), Person.Field.ETHNICITY);

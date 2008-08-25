@@ -17,7 +17,30 @@
  */
 package org.apache.shindig.social.opensocial.model;
 
+import org.apache.shindig.social.core.model.ListFieldImpl;
+
+import com.google.inject.ImplementedBy;
+
+@ImplementedBy(ListFieldImpl.class)
+
 public interface ListField {
+
+  public static enum Field {
+    VALUE("value"),
+    TYPE("type");
+
+    private final String jsonString;
+
+    private Field(String jsonString) {
+      this.jsonString = jsonString;
+    }
+
+    @Override
+    public String toString() {
+      return this.jsonString;
+    }
+  }
+
   String getType();
 
   void setType(String type);

@@ -18,8 +18,8 @@
 package org.apache.shindig.social.core.util;
 
 import org.apache.shindig.social.opensocial.model.Address;
-import org.apache.shindig.social.opensocial.model.Email;
 import org.apache.shindig.social.opensocial.model.Enum;
+import org.apache.shindig.social.opensocial.model.ListField;
 import org.apache.shindig.social.opensocial.model.MediaItem;
 import org.apache.shindig.social.opensocial.model.Organization;
 import org.apache.shindig.social.opensocial.model.Phone;
@@ -27,14 +27,13 @@ import org.apache.shindig.social.opensocial.model.Url;
 
 import com.google.inject.Inject;
 import com.google.inject.Injector;
-
-import java.util.HashMap;
-import java.util.Map;
-
 import net.sf.ezmorph.MorpherRegistry;
 import net.sf.json.JsonConfig;
 import net.sf.json.util.EnumMorpher;
 import net.sf.json.util.JSONUtils;
+
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * A Json Config class suitable for serializing Shindig json and pojos.
@@ -49,7 +48,7 @@ public class BeanJsonLibConfig extends JsonConfig {
     MorpherRegistry morpherRegistry = JSONUtils.getMorpherRegistry();
     morpherRegistry.registerMorpher(new EnumMorpher(Address.Field.class));
     morpherRegistry.registerMorpher(new EnumMorpher(Phone.Field.class));
-    morpherRegistry.registerMorpher(new EnumMorpher(Email.Field.class));
+    morpherRegistry.registerMorpher(new EnumMorpher(ListField.Field.class));
     morpherRegistry.registerMorpher(new EnumMorpher(MediaItem.Field.class));
     morpherRegistry.registerMorpher(new EnumMorpher(MediaItem.Type.class));
     morpherRegistry.registerMorpher(new EnumMorpher(Enum.Drinker.class));
@@ -110,7 +109,7 @@ public class BeanJsonLibConfig extends JsonConfig {
     // Person map
     classMap.put("addresses", Address.class);
     classMap.put("phoneNumbers", Phone.class);
-    classMap.put("emails", Email.class);
+    classMap.put("emails", ListField.class);
     classMap.put("mediaItems", MediaItem.class);
     classMap.put("jobs", Organization.class);
     classMap.put("schools", Organization.class);

@@ -60,7 +60,7 @@
 "displayValue" : "Socially"
 },
 "emails" : [{
-"address" : "shindig-dev@incubator.apache.org",
+"value" : "shindig-dev@incubator.apache.org",
 "type" : "work"
 }],
 "ethnicity" : "developer",

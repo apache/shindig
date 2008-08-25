@@ -20,7 +20,6 @@ package org.apache.shindig.social.core.model;
 import org.apache.shindig.social.opensocial.model.Account;
 import org.apache.shindig.social.opensocial.model.Address;
 import org.apache.shindig.social.opensocial.model.BodyType;
-import org.apache.shindig.social.opensocial.model.Email;
 import org.apache.shindig.social.opensocial.model.Enum;
 import org.apache.shindig.social.opensocial.model.ListField;
 import org.apache.shindig.social.opensocial.model.Name;
@@ -50,7 +49,7 @@ public class PersonImpl implements Person {
   private Address currentLocation;
   private Date dateOfBirth;
   private Enum<Enum.Drinker> drinker;
-  private List<Email> emails;
+  private List<ListField> emails;
   private String ethnicity;
   private String fashion;
   private List<String> food;
@@ -204,11 +203,11 @@ public class PersonImpl implements Person {
     this.drinker = newDrinker;
   }
 
-  public List<Email> getEmails() {
+  public List<ListField> getEmails() {
     return emails;
   }
 
-  public void setEmails(List<Email> emails) {
+  public void setEmails(List<ListField> emails) {
     this.emails = emails;
   }
 

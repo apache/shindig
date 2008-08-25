@@ -230,7 +230,7 @@ public interface Person {
   void setAboutMe(String aboutMe);
 
   List<Account> getAccounts();
-  
+
   void setAccounts(List<Account> accounts);
 
   /**
@@ -391,20 +391,20 @@ public interface Person {
   void setDrinker(Enum<Enum.Drinker> newDrinker);
 
   /**
-   * Get the person's Emails associated with the person, specified as an List of {@link Email}.
+   * Get the person's Emails associated with the person.
    * Container support for this field is OPTIONAL.
    *
    * @return a list of the person's emails
    */
-  List<Email> getEmails();
+  List<ListField> getEmails();
 
   /**
-   * Set the person's Emails associated with the person, specified as an List of {@link Email}.
+   * Set the person's Emails associated with the person.
    * Container support for this field is OPTIONAL.
    *
    * @param emails a list of the person's emails
    */
-  void setEmails(List<Email> emails);
+  void setEmails(List<ListField> emails);
 
   /**
    * Get the person's ethnicity, specified as a string. Container support for this field is

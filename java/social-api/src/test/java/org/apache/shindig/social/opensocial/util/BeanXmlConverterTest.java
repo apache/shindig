@@ -20,7 +20,7 @@ package org.apache.shindig.social.opensocial.util;
 import org.apache.shindig.common.xml.XmlUtil;
 import org.apache.shindig.social.core.model.ActivityImpl;
 import org.apache.shindig.social.core.model.AddressImpl;
-import org.apache.shindig.social.core.model.EmailImpl;
+import org.apache.shindig.social.core.model.ListFieldImpl;
 import org.apache.shindig.social.core.model.MediaItemImpl;
 import org.apache.shindig.social.core.model.NameImpl;
 import org.apache.shindig.social.core.model.PersonImpl;
@@ -28,7 +28,7 @@ import org.apache.shindig.social.core.model.PhoneImpl;
 import org.apache.shindig.social.core.util.BeanXmlConverter;
 import org.apache.shindig.social.opensocial.model.Activity;
 import org.apache.shindig.social.opensocial.model.Address;
-import org.apache.shindig.social.opensocial.model.Email;
+import org.apache.shindig.social.opensocial.model.ListField;
 import org.apache.shindig.social.opensocial.model.MediaItem;
 import org.apache.shindig.social.opensocial.model.Person;
 import org.apache.shindig.social.opensocial.model.Phone;
@@ -60,9 +60,9 @@ public class BeanXmlConverterTest extends TestCase {
 
     johnDoe.setAddresses(Lists.<Address>newArrayList(new AddressImpl("My home address")));
 
-    johnDoe.setEmails(Lists.<Email>newArrayList(
-        new EmailImpl("john.doe@work.bar", "work"),
-        new EmailImpl("john.doe@home.bar", "home")));
+    johnDoe.setEmails(Lists.<ListField>newArrayList(
+        new ListFieldImpl("work", "john.doe@work.bar"),
+        new ListFieldImpl("home", "john.doe@home.bar")));
 
     activity = new ActivityImpl("activityId", johnDoe.getId());
 

@@ -17,18 +17,10 @@
  */
 package org.apache.shindig.social.opensocial.util;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-
-import junit.framework.TestCase;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.apache.shindig.social.JsonLibTestsGuiceModule;
 import org.apache.shindig.social.core.model.ActivityImpl;
 import org.apache.shindig.social.core.model.AddressImpl;
-import org.apache.shindig.social.core.model.EmailImpl;
+import org.apache.shindig.social.core.model.ListFieldImpl;
 import org.apache.shindig.social.core.model.MediaItemImpl;
 import org.apache.shindig.social.core.model.NameImpl;
 import org.apache.shindig.social.core.model.PersonImpl;
@@ -37,7 +29,7 @@ import org.apache.shindig.social.core.util.BeanJsonLibConversionException;
 import org.apache.shindig.social.core.util.BeanJsonLibConverter;
 import org.apache.shindig.social.opensocial.model.Activity;
 import org.apache.shindig.social.opensocial.model.Address;
-import org.apache.shindig.social.opensocial.model.Email;
+import org.apache.shindig.social.opensocial.model.ListField;
 import org.apache.shindig.social.opensocial.model.MediaItem;
 import org.apache.shindig.social.opensocial.model.Name;
 import org.apache.shindig.social.opensocial.model.Person;
@@ -47,6 +39,13 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
+import junit.framework.TestCase;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 public class BeanJsonLibConverterTest extends TestCase {
 
@@ -78,17 +77,17 @@ public class BeanJsonLibConverterTest extends TestCase {
   public void setUp() throws Exception {
     super.setUp();
     johnDoe = new PersonImpl("johnDoeId", new NameImpl("John Doe"));
-    johnDoe.setPhoneNumbers(Lists.<Phone> newArrayList(new PhoneImpl("+33H000000000", "home"),
+    johnDoe.setPhoneNumbers(Lists.<Phone>newArrayList(new PhoneImpl("+33H000000000", "home"),
         new PhoneImpl("+33M000000000", "mobile"), new PhoneImpl("+33W000000000", "work")));
 
-    johnDoe.setAddresses(Lists.<Address> newArrayList(new AddressImpl("My home address")));
+    johnDoe.setAddresses(Lists.<Address>newArrayList(new AddressImpl("My home address")));
 
-    johnDoe.setEmails(Lists.<Email> newArrayList(new EmailImpl("john.doe@work.bar", "work"),
-        new EmailImpl("john.doe@home.bar", "home")));
+    johnDoe.setEmails(Lists.<ListField>newArrayList(new ListFieldImpl("work", "john.doe@work.bar"),
+        new ListFieldImpl("home", "john.doe@home.bar")));
 
     activity = new ActivityImpl("activityId", johnDoe.getId());
 
-    activity.setMediaItems(Lists.<MediaItem> newArrayList(new MediaItemImpl("image/jpg",
+    activity.setMediaItems(Lists.<MediaItem>newArrayList(new MediaItemImpl("image/jpg",
         MediaItem.Type.IMAGE, "http://foo.bar")));
 
     Injector injector = Guice.createInjector(new JsonLibTestsGuiceModule());
@@ -230,10 +229,10 @@ public class BeanJsonLibConverterTest extends TestCase {
     assertEquals(2, parsedPerson.getEmails().size());
 
     for (int i = 0; i < johnDoe.getEmails().size(); i++) {
-      Email expectedEmail = johnDoe.getEmails().get(i);
-      Email actualEmail = parsedPerson.getEmails().get(i);
+      ListField expectedEmail = johnDoe.getEmails().get(i);
+      ListField actualEmail = parsedPerson.getEmails().get(i);
       assertEquals(expectedEmail.getType(), actualEmail.getType());
-      assertEquals(expectedEmail.getAddress(), actualEmail.getAddress());
+      assertEquals(expectedEmail.getValue(), actualEmail.getValue());
     }
   }
 
