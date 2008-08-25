@@ -45,6 +45,7 @@ public abstract class RequestItem {
   public static final String COUNT = "count";
 
   public static final String SORT_BY = "sortBy";
+  public static final String SORT_ORDER = "sortOrder";
 
   public static final String FILTER_BY = "filterBy";
 
@@ -119,6 +120,13 @@ public abstract class RequestItem {
     return sortBy == null
         ? PersonService.SortOrder.topFriends
         : PersonService.SortOrder.valueOf(sortBy);
+  }
+
+  public PersonService.SortDirection getSortOrder() {
+    String sortOrder = getParameter(SORT_ORDER);
+    return sortOrder == null
+        ? PersonService.SortDirection.ascending
+        : PersonService.SortDirection.valueOf(sortOrder);
   }
 
   public PersonService.FilterType getFilterBy() {
