@@ -17,32 +17,42 @@
  */
 package org.apache.shindig.social.core.model;
 
-import org.apache.shindig.social.opensocial.model.ListField;
+import org.apache.shindig.social.opensocial.model.Account;
 
-public class ListFieldImpl implements ListField {
-  String type;
-  String value;
+public class AccountImpl implements Account {
+  String domain;
+  String userId;
+  String username;
 
-  public ListFieldImpl() { }
+  public AccountImpl() { }
 
-  public ListFieldImpl(String type, String value) {
-    this.type = type;
-    this.value = value;
+  public AccountImpl(String domain, String userId, String username) {
+    this.domain = domain;
+    this.userId = userId;
+    this.username = username;
   }
 
-  public String getType() {
-    return type;
+  public String getDomain() {
+    return domain;
   }
 
-  public void setType(String type) {
-    this.type = type;
+  public void setDomain(String domain) {
+    this.domain = domain;
   }
 
-  public String getValue() {
-    return value;
+  public String getUserId() {
+    return userId;
   }
 
-  public void setValue(String value) {
-    this.value = value;
+  public void setUserId(String userId) {
+    this.userId = userId;
+  }
+
+  public String getUsername() {
+    return username;
+  }
+
+  public void setUsername(String username) {
+    this.username = username;
   }
 }

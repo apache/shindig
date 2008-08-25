@@ -17,6 +17,7 @@
  */
 package org.apache.shindig.social.core.model;
 
+import org.apache.shindig.social.opensocial.model.Account;
 import org.apache.shindig.social.opensocial.model.Address;
 import org.apache.shindig.social.opensocial.model.BodyType;
 import org.apache.shindig.social.opensocial.model.Email;
@@ -38,6 +39,7 @@ import java.util.List;
  */
 public class PersonImpl implements Person {
   private String aboutMe;
+  private List<Account> accounts;
   private List<String> activities;
   private List<Address> addresses;
   private Integer age;
@@ -58,6 +60,7 @@ public class PersonImpl implements Person {
   private List<String> heroes;
   private String humor;
   private String id;
+  private List<ListField> ims;
   private List<String> interests;
   private String jobInterests;
   private List<Organization> jobs;
@@ -111,6 +114,14 @@ public class PersonImpl implements Person {
 
   public void setAboutMe(String aboutMe) {
     this.aboutMe = aboutMe;
+  }
+
+  public List<Account> getAccounts() {
+    return accounts;
+  }
+
+  public void setAccounts(List<Account> accounts) {
+    this.accounts = accounts;
   }
 
   public List<String> getActivities() {
@@ -271,6 +282,14 @@ public class PersonImpl implements Person {
 
   public void setId(String id) {
     this.id = id;
+  }
+
+  public List<ListField> getIms() {
+    return ims;
+  }
+
+  public void setIms(List<ListField> ims) {
+    this.ims = ims;
   }
 
   public List<String> getInterests() {

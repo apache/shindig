@@ -44,6 +44,7 @@ public interface Person {
   public static enum Field {
     /** the json field for aboutMe. */
     ABOUT_ME("aboutMe"),
+    ACCOUNTS("accounts"),
     /** the json field for activities. */
     ACTIVITIES("activities"),
     /** the json field for addresses. */
@@ -84,6 +85,7 @@ public interface Person {
     HUMOR("humor"),
     /** the json field for id. */
     ID("id"),
+    IMS("ims"),
     /** the json field for interests. */
     INTERESTS("interests"),
     /** the json field for jobInterests. */
@@ -226,6 +228,10 @@ public interface Person {
    * @param aboutMe the value of aboutMe
    */
   void setAboutMe(String aboutMe);
+
+  List<Account> getAccounts();
+  
+  void setAccounts(List<Account> accounts);
 
   /**
    * Get the person's favorite activities, specified as an List of strings. Container support for
@@ -541,6 +547,10 @@ public interface Person {
    * @param id the permanent ID of the person
    */
   void setId(String id);
+
+  List<ListField> getIms();
+
+  void setIms(List<ListField> ims);
 
   /**
    * Get the person's interests, hobbies or passions, specified as an List of strings. Container

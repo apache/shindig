@@ -15,34 +15,19 @@
  * KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-package org.apache.shindig.social.core.model;
+package org.apache.shindig.social.opensocial.model;
 
-import org.apache.shindig.social.opensocial.model.ListField;
+public interface Account {
 
-public class ListFieldImpl implements ListField {
-  String type;
-  String value;
+  String getDomain();
 
-  public ListFieldImpl() { }
+  void setDomain(String domain);
 
-  public ListFieldImpl(String type, String value) {
-    this.type = type;
-    this.value = value;
-  }
+  String getUserId();
 
-  public String getType() {
-    return type;
-  }
+  void setUserId(String userId);
 
-  public void setType(String type) {
-    this.type = type;
-  }
+  String getUsername();
 
-  public String getValue() {
-    return value;
-  }
-
-  public void setValue(String value) {
-    this.value = value;
-  }
+  void setUsername(String username);
 }
