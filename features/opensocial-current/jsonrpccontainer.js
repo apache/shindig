@@ -302,8 +302,23 @@ JsonRpcContainer.prototype.createPersonFromJson = function(serverJson) {
     serverJson.gender = {key : key, displayValue : serverJson.gender};
   }
 
+  this.translateUrlJson(serverJson.profileSong);
+  this.translateUrlJson(serverJson.profileVideo);
+
+  if (serverJson.urls) {
+    for (var u = 0; u < serverJson.urls.length; u++) {
+      this.translateUrlJson(serverJson.urls[p]);
+    }
+  }
+
   return new JsonPerson(serverJson);
 };
+
+JsonRpcContainer.prototype.translateUrlJson = function(urlJson) {
+  if (urlJson) {
+    urlJson.address = urlJson.value;
+  }
+}
 
 JsonRpcContainer.prototype.getFieldsList = function(keys) {
   // datarequest.js guarantees that keys is an array

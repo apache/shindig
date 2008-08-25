@@ -376,7 +376,7 @@ public class RestfulJsonPeopleTest extends AbstractLargeRestfulTests {
 
   private void assertUrlField(Url expected, JSONObject actual)
       throws JSONException {
-    assertStringField(actual, expected.getAddress(), Url.Field.ADDRESS);
+    assertStringField(actual, expected.getValue(), Url.Field.VALUE);
     assertStringField(actual, expected.getLinkText(), Url.Field.LINK_TEXT);
     assertStringField(actual, expected.getType(), Url.Field.TYPE);
   }

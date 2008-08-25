@@ -130,13 +130,13 @@
 }],
 "politicalViews" : "open leaning",
 "profileSong" : {
-"address" : "http://www.example.org/songs/OnlyTheLonely.mp3",
+"value" : "http://www.example.org/songs/OnlyTheLonely.mp3",
 "linkText" : "Feelin' blue",
 "type" : "road"
 },
 "profileUrl" : "http://www.example.org/?id=1",
 "profileVideo" : {
-"address" : "http://www.example.org/videos/Thriller.flv",
+"value" : "http://www.example.org/videos/Thriller.flv",
 "linkText" : "Thriller",
 "type" : "video"
 },
@@ -173,11 +173,11 @@
 "turnOns" : ["well document code"],
 "tvShows" : ["House","Battlestar Galactica"],
 "urls" : [{
-"address" : "http://www.example.org/?id=1",
+"value" : "http://www.example.org/?id=1",
 "linkText" : "my profile",
 "type" : "Profile"
 },{
-"address" : "http://www.example.org/pic/?id=1",
+"value" : "http://www.example.org/pic/?id=1",
 "linkText" : "my awesome picture",
 "type" : "Thumbnail"
 }]

@@ -23,10 +23,10 @@ import com.google.inject.ImplementedBy;
 
 @ImplementedBy(UrlImpl.class)
 
-public interface Url {
+public interface Url extends ListField {
 
   public static enum Field {
-    ADDRESS("address"),
+    VALUE("value"),
     LINK_TEXT("linkText"),
     TYPE("type");
 
@@ -42,15 +42,7 @@ public interface Url {
     }
   }
 
-  String getAddress();
-
-  void setAddress(String address);
-
   String getLinkText();
 
   void setLinkText(String linkText);
-
-  String getType();
-
-  void setType(String type);
 }
