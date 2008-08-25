@@ -25,7 +25,6 @@ import org.apache.shindig.social.core.model.ListFieldImpl;
 import org.apache.shindig.social.core.model.MediaItemImpl;
 import org.apache.shindig.social.core.model.NameImpl;
 import org.apache.shindig.social.core.model.PersonImpl;
-import org.apache.shindig.social.core.model.PhoneImpl;
 import org.apache.shindig.social.core.util.BeanJsonConverter;
 import org.apache.shindig.social.core.util.BeanJsonLibConverter;
 import org.apache.shindig.social.opensocial.model.Activity;
@@ -33,7 +32,6 @@ import org.apache.shindig.social.opensocial.model.Address;
 import org.apache.shindig.social.opensocial.model.ListField;
 import org.apache.shindig.social.opensocial.model.MediaItem;
 import org.apache.shindig.social.opensocial.model.Person;
-import org.apache.shindig.social.opensocial.model.Phone;
 
 import com.google.common.collect.Lists;
 import com.google.inject.Guice;
@@ -58,9 +56,10 @@ public class JsonConverterPerformancePerf extends TestCase {
   public void setUp() throws Exception {
     super.setUp();
     johnDoe = new PersonImpl("johnDoeId", new NameImpl("John Doe"));
-    johnDoe.setPhoneNumbers(Lists.<Phone> newArrayList(new PhoneImpl(
-        "+33H000000000", "home"), new PhoneImpl("+33M000000000", "mobile"),
-        new PhoneImpl("+33W000000000", "work")));
+    johnDoe.setPhoneNumbers(Lists.<ListField>newArrayList(
+        new ListFieldImpl("home", "+33H000000000"),
+        new ListFieldImpl("mobile", "+33M000000000"),
+        new ListFieldImpl("work", "+33W000000000")));
 
     johnDoe.setAddresses(Lists.<Address>newArrayList(
         new AddressImpl("My home address")));

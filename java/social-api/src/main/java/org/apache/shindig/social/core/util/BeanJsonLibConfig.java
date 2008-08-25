@@ -22,7 +22,6 @@ import org.apache.shindig.social.opensocial.model.Enum;
 import org.apache.shindig.social.opensocial.model.ListField;
 import org.apache.shindig.social.opensocial.model.MediaItem;
 import org.apache.shindig.social.opensocial.model.Organization;
-import org.apache.shindig.social.opensocial.model.Phone;
 import org.apache.shindig.social.opensocial.model.Url;
 
 import com.google.inject.Inject;
@@ -47,13 +46,12 @@ public class BeanJsonLibConfig extends JsonConfig {
   static {
     MorpherRegistry morpherRegistry = JSONUtils.getMorpherRegistry();
     morpherRegistry.registerMorpher(new EnumMorpher(Address.Field.class));
-    morpherRegistry.registerMorpher(new EnumMorpher(Phone.Field.class));
+    morpherRegistry.registerMorpher(new EnumMorpher(ListField.Field.class));
     morpherRegistry.registerMorpher(new EnumMorpher(ListField.Field.class));
     morpherRegistry.registerMorpher(new EnumMorpher(MediaItem.Field.class));
     morpherRegistry.registerMorpher(new EnumMorpher(MediaItem.Type.class));
     morpherRegistry.registerMorpher(new EnumMorpher(Enum.Drinker.class));
     morpherRegistry.registerMorpher(new EnumMorpher(Enum.Field.class));
-    morpherRegistry.registerMorpher(new EnumMorpher(Enum.Gender.class));
     morpherRegistry.registerMorpher(new EnumMorpher(Enum.NetworkPresence.class));
     morpherRegistry.registerMorpher(new EnumMorpher(Enum.Smoker.class));
     morpherRegistry.registerMorpher(new JsonObjectToMapMorpher());
@@ -108,7 +106,7 @@ public class BeanJsonLibConfig extends JsonConfig {
 
     // Person map
     classMap.put("addresses", Address.class);
-    classMap.put("phoneNumbers", Phone.class);
+    classMap.put("phoneNumbers", ListField.class);
     classMap.put("emails", ListField.class);
     classMap.put("mediaItems", MediaItem.class);
     classMap.put("jobs", Organization.class);

@@ -122,10 +122,10 @@
 "nickname" : "diggy",
 "pets" : "dog,cat",
 "phoneNumbers" : [{
-"number" : "111-111-111",
+"value" : "111-111-111",
 "type" : "work"
 },{
-"number" : "999-999-999",
+"value" : "999-999-999",
 "type" : "mobile"
 }],
 "politicalViews" : "open leaning",
