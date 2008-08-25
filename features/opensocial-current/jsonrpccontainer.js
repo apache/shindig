@@ -285,6 +285,12 @@ JsonRpcContainer.prototype.createPersonFromJson = function(serverJson) {
     serverJson.timeZone = serverJson.utcOffset;
   }
 
+  if (serverJson.addresses) {
+    for (var j = 0; j < serverJson.addresses.length; j++) {
+      serverJson.addresses[j].unstructuredAddress = serverJson.addresses[j].formatted;
+    }    
+  }
+
   return new JsonPerson(serverJson);
 };
 
