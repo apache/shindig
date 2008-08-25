@@ -47,6 +47,32 @@ public class PersonTest extends TestCase {
     assertEquals(address, person.getUrls().get(0).getAddress());
     assertEquals(Person.PROFILE_URL_TYPE, person.getUrls().get(0).getType());
     assertEquals(null, person.getUrls().get(0).getLinkText());
+
+    address = "something new";
+    person.setProfileUrl(address);
+    assertEquals(address, person.getProfileUrl());
+
+    assertEquals(1, person.getUrls().size());
+    assertEquals(address, person.getUrls().get(0).getAddress());
+  }
+
+  public void testGetThumbnailUrl() throws Exception {
+    Person person = new PersonImpl();
+    assertEquals(null, person.getThumbnailUrl());
+
+    String url = "hi";
+    person.setThumbnailUrl(url);
+    assertEquals(url, person.getThumbnailUrl());
+
+    assertEquals(url, person.getPhotos().get(0).getValue());
+    assertEquals(Person.THUMBNAIL_PHOTO_TYPE, person.getPhotos().get(0).getType());
+
+    url = "something new";
+    person.setThumbnailUrl(url);
+    assertEquals(url, person.getThumbnailUrl());
+
+    assertEquals(1, person.getPhotos().size());
+    assertEquals(url, person.getPhotos().get(0).getValue());
   }
 
 }
