@@ -21,7 +21,7 @@ import org.apache.commons.lang.StringUtils;
 
 public class GroupId {
   public enum Type {
-    all, friends, self, groupId
+    all, friends, self, deleted, groupId
   }
 
   private Type type;
