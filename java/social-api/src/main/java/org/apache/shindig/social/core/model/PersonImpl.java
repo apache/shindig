@@ -582,46 +582,36 @@ public class PersonImpl implements Person {
   // Proxied fields
 
   public String getProfileUrl() {
-    Url url = getUrlWithType(PROFILE_URL_TYPE);
-    return url == null ? null : url.getAddress();
+    Url url = getListFieldWithType(PROFILE_URL_TYPE, getUrls());
+    return url == null ? null : url.getValue();
   }
 
   public void setProfileUrl(String profileUrl) {
-    Url url = getUrlWithType(PROFILE_URL_TYPE);
+    Url url = getListFieldWithType(PROFILE_URL_TYPE, getUrls());
     if (url != null) {
-      url.setAddress(profileUrl);
+      url.setValue(profileUrl);
     } else {
-      addUrl(new UrlImpl(profileUrl, null, PROFILE_URL_TYPE));
+      setUrls(addListField(new UrlImpl(profileUrl, null, PROFILE_URL_TYPE), getUrls()));
     }
   }
 
   public String getThumbnailUrl() {
-    ListField photo = getPhotoWithType(THUMBNAIL_PHOTO_TYPE);
+    ListField photo = getListFieldWithType(THUMBNAIL_PHOTO_TYPE, getPhotos());
     return photo == null ? null : photo.getValue();
   }
 
   public void setThumbnailUrl(String thumbnailUrl) {
-    ListField photo = getPhotoWithType(THUMBNAIL_PHOTO_TYPE);
+    ListField photo = getListFieldWithType(THUMBNAIL_PHOTO_TYPE, getPhotos());
     if (photo != null) {
       photo.setValue(thumbnailUrl);
     } else {
-      addPhoto(new ListFieldImpl(THUMBNAIL_PHOTO_TYPE, thumbnailUrl));
+      setPhotos(addListField(new ListFieldImpl(THUMBNAIL_PHOTO_TYPE, thumbnailUrl), getPhotos()));
     }
   }
 
-  // TODO: Generify these once they extend a common subclass
-  private void addUrl(Url url) {
-    List<Url> urls = getUrls();
-    if (urls == null) {
-      setUrls(Lists.<Url>newArrayList());
-    }
-    getUrls().add(url);
-  }
-
-  private Url getUrlWithType(String type) {
-    List<Url> urls = getUrls();
-    if (urls != null) {
-      for (Url url : urls) {
+  private <T extends ListField> T getListFieldWithType(String type, List<T> list) {
+    if (list != null) {
+      for (T url : list) {
         if (type.equalsIgnoreCase(url.getType())) {
           return url;
         }
@@ -631,24 +621,11 @@ public class PersonImpl implements Person {
     return null;
   }
 
-  private void addPhoto(ListField field) {
-    List<ListField> fields = getPhotos();
-    if (fields == null) {
-      setPhotos(Lists.<ListField>newArrayList());
+  private <T extends ListField> List<T> addListField(T field, List<T> list) {
+    if (list == null) {
+      list = Lists.newArrayList();
     }
-    getPhotos().add(field);
-  }
-
-  private ListField getPhotoWithType(String type) {
-    List<ListField> fields = getPhotos();
-    if (fields != null) {
-      for (ListField field : fields) {
-        if (type.equalsIgnoreCase(field.getType())) {
-          return field;
-        }
-      }
-    }
-
-    return null;
+    list.add(field);
+    return list;
   }
 }

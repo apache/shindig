@@ -44,7 +44,7 @@ public class PersonTest extends TestCase {
     person.setProfileUrl(address);
     assertEquals(address, person.getProfileUrl());
 
-    assertEquals(address, person.getUrls().get(0).getAddress());
+    assertEquals(address, person.getUrls().get(0).getValue());
     assertEquals(Person.PROFILE_URL_TYPE, person.getUrls().get(0).getType());
     assertEquals(null, person.getUrls().get(0).getLinkText());
 
@@ -53,7 +53,7 @@ public class PersonTest extends TestCase {
     assertEquals(address, person.getProfileUrl());
 
     assertEquals(1, person.getUrls().size());
-    assertEquals(address, person.getUrls().get(0).getAddress());
+    assertEquals(address, person.getUrls().get(0).getValue());
   }
 
   public void testGetThumbnailUrl() throws Exception {

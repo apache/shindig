@@ -23,27 +23,14 @@ import org.apache.shindig.social.opensocial.model.Url;
  * see
  * http://code.google.com/apis/opensocial/docs/0.7/reference/opensocial.Url.Field.html
  */
-public class UrlImpl implements Url {
-
-  private String address;
+public class UrlImpl extends ListFieldImpl implements Url {
   private String linkText;
-  private String type;
 
-  public UrlImpl() {
-  }
+  public UrlImpl() { }
 
-  public UrlImpl(String address, String linkText, String type) {
-    this.address = address;
+  public UrlImpl(String value, String linkText, String type) {
+    super(type, value);
     this.linkText = linkText;
-    this.type = type;
-  }
-
-  public String getAddress() {
-    return address;
-  }
-
-  public void setAddress(String address) {
-    this.address = address;
   }
 
   public String getLinkText() {
@@ -53,13 +40,4 @@ public class UrlImpl implements Url {
   public void setLinkText(String linkText) {
     this.linkText = linkText;
   }
-
-  public String getType() {
-    return type;
-  }
-
-  public void setType(String type) {
-    this.type = type;
-  }
-
 }
