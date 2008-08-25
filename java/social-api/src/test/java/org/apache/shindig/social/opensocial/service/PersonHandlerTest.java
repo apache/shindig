@@ -98,7 +98,8 @@ public class PersonHandlerTest extends TestCase {
         new GroupId(GroupId.Type.all, null),
         PersonService.SortBy.topFriends,
         PersonService.SortOrder.ascending,
-        PersonService.FilterType.all, 0, 20,
+        PersonService.FilterType.all,
+        PersonService.FilterOperation.contains, "", 0, 20,
         DEFAULT_FIELDS,
         token))
         .andReturn(ImmediateFuture.newInstance(data));
@@ -118,7 +119,9 @@ public class PersonHandlerTest extends TestCase {
         new GroupId(GroupId.Type.friends, null),
         PersonService.SortBy.topFriends,
         PersonService.SortOrder.ascending,
-        PersonService.FilterType.all, 0, 20,
+        PersonService.FilterType.all,
+        PersonService.FilterOperation.contains,
+        "", 0, 20,
         DEFAULT_FIELDS,
         token))
         .andReturn(ImmediateFuture.newInstance(data));
@@ -132,11 +135,15 @@ public class PersonHandlerTest extends TestCase {
     PersonService.SortBy sortBy = PersonService.SortBy.name;
     PersonService.SortOrder sortOrder = PersonService.SortOrder.descending;
     PersonService.FilterType filter = PersonService.FilterType.topFriends;
+    PersonService.FilterOperation filterOp = PersonService.FilterOperation.present;
+    String filterValue = "cassie";
 
     Map<String, String> params = Maps.newHashMap();
     params.put("sortBy", sortBy.toString());
     params.put("sortOrder", sortOrder.toString());
     params.put("filterBy", filter.toString());
+    params.put("filterOp", filterOp.toString());
+    params.put("filterValue", filterValue);
     params.put("startIndex", "5");
     params.put("count", "10");
     params.put("fields", "money,fame,fortune");
@@ -148,7 +155,8 @@ public class PersonHandlerTest extends TestCase {
     EasyMock.expect(personService.getPeople(
         JOHN_DOE,
         new GroupId(GroupId.Type.friends, null), sortBy, sortOrder,
-        filter, 5, 10, Sets.newLinkedHashSet("money", "fame", "fortune"), token))
+        filter, filterOp, filterValue, 5, 10,
+        Sets.newLinkedHashSet("money", "fame", "fortune"), token))
         .andReturn(ImmediateFuture.newInstance(data));
 
     replay();
@@ -192,7 +200,9 @@ public class PersonHandlerTest extends TestCase {
         new GroupId(GroupId.Type.self, null),
         PersonService.SortBy.topFriends,
         PersonService.SortOrder.ascending,
-        PersonService.FilterType.all, 0, 20,
+        PersonService.FilterType.all,
+        PersonService.FilterOperation.contains,
+        "", 0, 20,
         DEFAULT_FIELDS,
         token)).andReturn(ImmediateFuture.newInstance(data));
 

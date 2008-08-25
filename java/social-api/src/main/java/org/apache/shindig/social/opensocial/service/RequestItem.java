@@ -48,6 +48,8 @@ public abstract class RequestItem {
   public static final String SORT_ORDER = "sortOrder";
 
   public static final String FILTER_BY = "filterBy";
+  public static final String FILTER_OPERATION = "filterOp";
+  public static final String FILTER_VALUE = "filterValue";
 
   public static final String FIELDS = "fields";
 
@@ -66,7 +68,8 @@ public abstract class RequestItem {
 
   private final String service;
 
-  public RequestItem(String service, String operation, SecurityToken token, BeanConverter converter) {
+  public RequestItem(String service, String operation, SecurityToken token,
+      BeanConverter converter) {
     this.service = service;
     this.operation = operation;
     this.token = token;
@@ -134,6 +137,18 @@ public abstract class RequestItem {
     return filterBy == null
         ? PersonService.FilterType.all
         : PersonService.FilterType.valueOf(filterBy);
+  }
+
+  public PersonService.FilterOperation getFilterOperation() {
+    String filterOp = getParameter(FILTER_OPERATION);
+    return filterOp == null
+        ? PersonService.FilterOperation.contains
+        : PersonService.FilterOperation.valueOf(filterOp);
+  }
+
+  public String getFilterValue() {
+    String filterValue = getParameter(FILTER_VALUE);
+    return filterValue == null ? "" : filterValue;
   }
 
   public Set<String> getFields() {

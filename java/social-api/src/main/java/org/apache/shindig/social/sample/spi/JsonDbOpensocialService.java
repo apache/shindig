@@ -239,7 +239,8 @@ public class JsonDbOpensocialService implements ActivityService, PersonService, 
   }
 
   public Future<ResponseItem<RestfulCollection<Person>>> getPeople(Set<UserId> userIds,
-      GroupId groupId, SortBy sortBy, SortOrder sortOrder, FilterType filter, int first,
+      GroupId groupId, SortBy sortBy, SortOrder sortOrder, FilterType filter,
+      FilterOperation filterOperation, String filterValue, int first,
       int max, Set<String> fields, SecurityToken token) {
     List<Person> result = Lists.newArrayList();
     try {
