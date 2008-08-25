@@ -28,16 +28,14 @@
 "activities" : ["Coding Shindig"],
 "addresses" : [{
 "country" : "US",
-"extendedAddress" : "Next door",
 "latitude" : "28.3043",
 "longitude" : "143.0859",
 "locality" : "who knows",
-"poBox" : "3653",
 "postalCode" : "12345",
 "region" : "Apache, CA",
 "streetAddress" : "1 OpenStandards Way",
 "type" : "home",
-"unstructuredAddress" : "PoBox 3565, 1 OpenStandards Way, Apache, CA"
+"formatted" : "PoBox 3565, 1 OpenStandards Way, Apache, CA"
 }],
 "age" : 33,
 "bodyType" : {
@@ -54,7 +52,7 @@
 "latitude" : "48.858193",
 "longitude" : "2.29419"
 },
-"dateOfBirth" : "1975-01-01",
+"birthday" : "1975-01-01",
 "drinker" : {
 "key" : "SOCIALLY",
 "displayValue" : "Socially"
@@ -78,7 +76,7 @@
 "jobInterests" : "will work for beer",
 "jobs" : [{
 "address" : {
-"unstructuredAddress" : "1 Shindig Drive"
+"formatted" : "1 Shindig Drive"
 },
 "description" : "lots of coding",
 "endDate" : "2010-10-10",
@@ -91,7 +89,7 @@
 "webpage" : "http://incubator.apache.org/projects/shindig.html"
 },{
 "address" : {
-"unstructuredAddress" : "1 Skid Row"
+"formatted" : "1 Skid Row"
 },
 "description" : "",
 "endDate" : "1995-01-01",
@@ -152,7 +150,7 @@
 "scaredOf" : "COBOL",
 "schools" : [{
 "address" : {
-"unstructuredAddress" : "1 Edu St."
+"formatted" : "1 Edu St."
 },
 "description" : "High School",
 "endDate" : "1991-01-01",
@@ -173,7 +171,7 @@
 "status" : "happy",
 "tags" : ["C#","JSON","template"],
 "thumbnailUrl" : "http://www.example.org/pic/?id=1",
-"timeZone" : "-8",
+"utcOffset" : "-8",
 "turnOffs" : ["lack of unit tests","cabbage"],
 "turnOns" : ["well document code"],
 "tvShows" : ["House","Battlestar Galactica"],

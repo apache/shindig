@@ -66,15 +66,14 @@ public class RestfulJsonPeopleTest extends AbstractLargeRestfulTests {
 
     Address address = new AddressImpl("PoBox 3565, 1 OpenStandards Way, Apache, CA");
     address.setCountry("US");
-    address.setExtendedAddress("Next door");
     address.setLatitude(28.3043F);
     address.setLongitude(143.0859F);
     address.setLocality("who knows");
-    address.setPoBox("3653");
     address.setPostalCode("12345");
     address.setRegion("Apache, CA");
     address.setStreetAddress("1 OpenStandards Way");
     address.setType("home");
+    address.setFormatted("PoBox 3565, 1 OpenStandards Way, Apache, CA");
     canonical.setAddresses(Lists.newArrayList(address));
 
     canonical.setAge(33);
@@ -365,20 +364,17 @@ public class RestfulJsonPeopleTest extends AbstractLargeRestfulTests {
       throws JSONException {
     assertStringField(actual, expected.getCountry(),
         Address.Field.COUNTRY);
-    assertStringField(actual, expected.getExtendedAddress(),
-        Address.Field.EXTENDED_ADDRESS);
     assertFloatField(actual, expected.getLatitude(), Address.Field.LATITUDE);
     assertStringField(actual, expected.getLocality(), Address.Field.LOCALITY);
     assertFloatField(actual, expected.getLongitude(), Address.Field.LONGITUDE);
-    assertStringField(actual, expected.getPoBox(), Address.Field.PO_BOX);
     assertStringField(actual, expected.getPostalCode(),
         Address.Field.POSTAL_CODE);
     assertStringField(actual, expected.getRegion(), Address.Field.REGION);
     assertStringField(actual, expected.getStreetAddress(),
         Address.Field.STREET_ADDRESS);
     assertStringField(actual, expected.getType(), Address.Field.TYPE);
-    assertStringField(actual, expected.getUnstructuredAddress(),
-        Address.Field.UNSTRUCTURED_ADDRESS);
+    assertStringField(actual, expected.getFormatted(),
+        Address.Field.FORMATTED);
   }
 
   private void assertUrlField(Url expected, JSONObject actual)
@@ -391,7 +387,7 @@ public class RestfulJsonPeopleTest extends AbstractLargeRestfulTests {
   private void assertOrganizationField(Organization expected, JSONObject actual)
       throws JSONException {
     assertStringField(actual.getJSONObject(Organization.Field.ADDRESS.toString()),
-        expected.getAddress().getUnstructuredAddress(), Address.Field.UNSTRUCTURED_ADDRESS);
+        expected.getAddress().getFormatted(), Address.Field.FORMATTED);
     assertStringField(actual, expected.getDescription(),
         Organization.Field.DESCRIPTION);
 //    assertDateField(actual, expected.getEndDate(), Organization.Field.END_DATE);

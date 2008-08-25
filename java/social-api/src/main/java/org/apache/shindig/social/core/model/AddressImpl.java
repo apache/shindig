@@ -22,22 +22,19 @@ import org.apache.shindig.social.opensocial.model.Address;
 public class AddressImpl implements Address {
 
   private String country;
-  private String extendedAddress;
   private Float latitude;
   private Float longitude;
   private String locality;
-  private String poBox;
   private String postalCode;
   private String region;
   private String streetAddress;
   private String type;
-  private String unstructuredAddress;
+  private String formatted;
 
-  public AddressImpl() {
-  }
+  public AddressImpl() { }
 
-  public AddressImpl(String unstructuredAddress) {
-    this.unstructuredAddress = unstructuredAddress;
+  public AddressImpl(String formatted) {
+    this.formatted = formatted;
   }
 
   public String getCountry() {
@@ -46,14 +43,6 @@ public class AddressImpl implements Address {
 
   public void setCountry(String country) {
     this.country = country;
-  }
-
-  public String getExtendedAddress() {
-    return extendedAddress;
-  }
-
-  public void setExtendedAddress(String extendedAddress) {
-    this.extendedAddress = extendedAddress;
   }
 
   public Float getLatitude() {
@@ -78,14 +67,6 @@ public class AddressImpl implements Address {
 
   public void setLongitude(Float longitude) {
     this.longitude = longitude;
-  }
-
-  public String getPoBox() {
-    return poBox;
-  }
-
-  public void setPoBox(String poBox) {
-    this.poBox = poBox;
   }
 
   public String getPostalCode() {
@@ -120,12 +101,12 @@ public class AddressImpl implements Address {
     this.type = type;
   }
 
-  public String getUnstructuredAddress() {
-    return unstructuredAddress;
+  public String getFormatted() {
+    return formatted;
   }
 
-  public void setUnstructuredAddress(String unstructuredAddress) {
-    this.unstructuredAddress = unstructuredAddress;
+  public void setFormatted(String formatted) {
+    this.formatted = formatted;
   }
 
 }

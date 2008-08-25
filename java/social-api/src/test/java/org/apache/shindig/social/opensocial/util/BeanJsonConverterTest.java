@@ -101,9 +101,9 @@ public class BeanJsonConverterTest extends TestCase {
     assertEquals(johnDoe.getName().getUnstructured(),
         result.getJSONObject("name").getString("unstructured"));
 
-    assertEquals(johnDoe.getAddresses().get(0).getUnstructuredAddress(),
+    assertEquals(johnDoe.getAddresses().get(0).getFormatted(),
         result.getJSONArray("addresses").getJSONObject(0)
-            .getString("unstructuredAddress"));
+            .getString("formatted"));
 
     JSONArray phoneArray = result.getJSONArray("phoneNumbers");
     assertEquals(3, phoneArray.length());

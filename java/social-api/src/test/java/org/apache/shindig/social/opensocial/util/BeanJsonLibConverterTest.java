@@ -211,11 +211,11 @@ public class BeanJsonLibConverterTest extends TestCase {
 
     assertEquals(1, addresses.size());
     Address address = addresses.get(0);
-    String unstructured = address.getUnstructuredAddress();
+    String unstructured = address.getFormatted();
 
     assertNotNull(unstructured);
-    assertEquals(johnDoe.getAddresses().get(0).getUnstructuredAddress(), parsedPerson
-        .getAddresses().get(0).getUnstructuredAddress());
+    assertEquals(johnDoe.getAddresses().get(0).getFormatted(), parsedPerson
+        .getAddresses().get(0).getFormatted());
 
     assertEquals(3, parsedPerson.getPhoneNumbers().size());
 
