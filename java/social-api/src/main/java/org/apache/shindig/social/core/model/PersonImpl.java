@@ -27,6 +27,8 @@ import org.apache.shindig.social.opensocial.model.Person;
 import org.apache.shindig.social.opensocial.model.Phone;
 import org.apache.shindig.social.opensocial.model.Url;
 
+import com.google.common.collect.Lists;
+
 import java.util.Date;
 import java.util.List;
 
@@ -71,7 +73,6 @@ public class PersonImpl implements Person {
   private List<Phone> phoneNumbers;
   private String politicalViews;
   private Url profileSong;
-  private String profileUrl;
   private Url profileVideo;
   private List<String> quotes;
   private String relationshipStatus;
@@ -399,14 +400,6 @@ public class PersonImpl implements Person {
     this.profileSong = profileSong;
   }
 
-  public String getProfileUrl() {
-    return profileUrl;
-  }
-
-  public void setProfileUrl(String profileUrl) {
-    this.profileUrl = profileUrl;
-  }
-
   public Url getProfileVideo() {
     return profileVideo;
   }
@@ -565,5 +558,43 @@ public class PersonImpl implements Person {
 
   public void setIsViewer(boolean isViewer) {
     this.isViewer = isViewer;
+  }
+
+
+  // Proxied fields
+
+  public String getProfileUrl() {
+    Url url = getUrlWithType(PROFILE_URL_TYPE);
+    return url == null ? null : url.getAddress();
+  }
+
+  public void setProfileUrl(String profileUrl) {
+    Url url = getUrlWithType(PROFILE_URL_TYPE);
+    if (url != null) {
+      url.setAddress(profileUrl);
+    } else {
+      addUrl(new UrlImpl(profileUrl, null, PROFILE_URL_TYPE));
+    }
+  }
+
+  private void addUrl(Url url) {
+    List<Url> urls = getUrls();
+    if (urls == null) {
+      setUrls(Lists.<Url>newArrayList());
+    }
+    getUrls().add(url);
+  }
+
+  private Url getUrlWithType(String type) {
+    List<Url> urls = getUrls();
+    if (urls != null) {
+      for (Url url : urls) {
+        if (type.equalsIgnoreCase(url.getType())) {
+          return url;
+        }
+      }
+    }
+
+    return null;
   }
 }

@@ -175,12 +175,12 @@
 "tvShows" : ["House","Battlestar Galactica"],
 "urls" : [{
 "address" : "http://www.example.org/?id=1",
-"linkText" : "Profile",
-"type" : "text/html"
+"linkText" : "my profile",
+"type" : "Profile"
 },{
 "address" : "http://www.example.org/pic/?id=1",
-"linkText" : "Thumbnail",
-"type" : "img/*"
+"linkText" : "my awesome picture",
+"type" : "Thumbnail"
 }]
 },
 {

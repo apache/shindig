@@ -35,6 +35,7 @@ import java.util.Map;
  */
 @ImplementedBy(PersonImpl.class)
 public interface Person {
+  public static final String PROFILE_URL_TYPE = "profile";
 
   /**
    * The fields that represent the person object ion json form.
@@ -790,22 +791,6 @@ public interface Person {
   void setProfileSong(Url profileSong);
 
   /**
-   * Get the person's profile URL. This URL must be fully qualified. Relative URLs will not work in
-   * gadgets Container support for this field is OPTIONAL.
-   *
-   * @return the person's profile URL
-   */
-  String getProfileUrl();
-
-  /**
-   * Set the person's profile URL. This URL must be fully qualified. Relative URLs will not work in
-   * gadgets Container support for this field is OPTIONAL.
-   *
-   * @param profileUrl the person's profile URL
-   */
-  void setProfileUrl(String profileUrl);
-
-  /**
    * Get the Person's profile video. Container support for this field is OPTIONAL.
    *
    * @return the Person's profile video
@@ -1085,5 +1070,28 @@ public interface Person {
    * @param isViewer the isViewer Flag
    */
   void setIsViewer(boolean isViewer);
+
+
+  // Proxied fields
+
+  /**
+   * Get the person's profile URL. This URL must be fully qualified. Relative URLs will not work in
+   * gadgets. This field MUST be stored in the urls list with a type of "profile".
+   *
+   * Container support for this field is OPTIONAL.
+   *
+   * @return the person's profile URL
+   */
+  String getProfileUrl();
+
+  /**
+   * Set the person's profile URL. This URL must be fully qualified. Relative URLs will not work in
+   * gadgets. This field MUST be stored in the urls list with a type of "profile".
+   *
+   * Container support for this field is OPTIONAL.
+   *
+   * @param profileUrl the person's profile URL
+   */
+  void setProfileUrl(String profileUrl);
 
 }
