@@ -26,13 +26,14 @@ import org.apache.shindig.social.SocialApiTestsGuiceModule;
 import org.apache.shindig.social.core.oauth.AuthenticationServletFilter;
 import org.apache.shindig.social.core.util.BeanJsonConverter;
 import org.apache.shindig.social.core.util.BeanXmlConverter;
+import org.apache.shindig.social.opensocial.spi.RestfulItem;
 
 import com.google.inject.Guice;
 import com.google.inject.Injector;
-
-import org.easymock.classextension.EasyMock;
-
+import com.google.common.collect.Maps;
 import junit.framework.TestCase;
+import org.easymock.classextension.EasyMock;
+import org.json.JSONObject;
 
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -41,7 +42,6 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
-
 import javax.servlet.ServletInputStream;
 import javax.servlet.http.HttpServletResponse;
 
@@ -150,12 +150,13 @@ public class DataServiceServletTest extends TestCase {
     setupInjector();
 
     String jsonObject = "my lovely json";
-    ResponseItem<String> response = new ResponseItem<String>(jsonObject);
+    RestfulItem<String> response = new RestfulItem<String>(jsonObject);
 
     EasyMock.expect(handler.handleItem(EasyMock.isA(RequestItem.class)));
     EasyMock.expectLastCall().andReturn(ImmediateFuture.newInstance(response));
 
-    EasyMock.expect(jsonConverter.convertToString(jsonObject)).andReturn(jsonObject);
+    EasyMock.expect(jsonConverter.convertToString(response))
+        .andReturn("{ 'entry' : " + jsonObject + " }");
 
     PrintWriter writerMock = EasyMock.createMock(PrintWriter.class);
     EasyMock.expect(res.getWriter()).andReturn(writerMock);

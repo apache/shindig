@@ -25,14 +25,13 @@ import org.apache.shindig.social.opensocial.model.Person;
 import org.apache.shindig.social.opensocial.spi.GroupId;
 import org.apache.shindig.social.opensocial.spi.PersonService;
 import org.apache.shindig.social.opensocial.spi.RestfulCollection;
+import org.apache.shindig.social.opensocial.spi.RestfulItem;
 import org.apache.shindig.social.opensocial.spi.UserId;
 
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
-
-import org.easymock.classextension.EasyMock;
-
 import junit.framework.TestCase;
+import org.easymock.classextension.EasyMock;
 
 import java.util.Map;
 import java.util.Set;
@@ -91,8 +90,7 @@ public class PersonHandlerTest extends TestCase {
   public void testHandleGetAllNoParams() throws Exception {
     setPath("/people/john.doe/@all");
 
-    ResponseItem<RestfulCollection<Person>> data
-        = new ResponseItem<RestfulCollection<Person>>(null);
+    RestfulCollection<Person> data = new RestfulCollection<Person>(null, null);
     EasyMock.expect(personService.getPeople(
         JOHN_DOE,
         new GroupId(GroupId.Type.all, null),
@@ -112,8 +110,7 @@ public class PersonHandlerTest extends TestCase {
   public void testHandleGetFriendsNoParams() throws Exception {
     setPath("/people/john.doe/@friends");
 
-    ResponseItem<RestfulCollection<Person>> data
-        = new ResponseItem<RestfulCollection<Person>>(null);
+    RestfulCollection<Person> data = new RestfulCollection<Person>(null, null);
     EasyMock.expect(personService.getPeople(
         JOHN_DOE,
         new GroupId(GroupId.Type.friends, null),
@@ -150,8 +147,7 @@ public class PersonHandlerTest extends TestCase {
 
     setPathAndParams("/people/john.doe/@friends", params);
 
-    ResponseItem<RestfulCollection<Person>> data
-        = new ResponseItem<RestfulCollection<Person>>(null);
+    RestfulCollection<Person> data = new RestfulCollection<Person>(null, null);
     EasyMock.expect(personService.getPeople(
         JOHN_DOE,
         new GroupId(GroupId.Type.friends, null), sortBy, sortOrder,
@@ -167,7 +163,7 @@ public class PersonHandlerTest extends TestCase {
   public void testHandleGetFriendById() throws Exception {
     setPath("/people/john.doe/@friends/jane.doe");
 
-    ResponseItem<Person> data = new ResponseItem<Person>(null);
+    RestfulItem<Person> data = new RestfulItem<Person>(null);
     // TODO: We aren't passing john.doe to the service yet.
     EasyMock.expect(personService.getPerson(new UserId(UserId.Type.userId, "jane.doe"),
         DEFAULT_FIELDS, token)).andReturn(ImmediateFuture.newInstance(data));
@@ -180,7 +176,7 @@ public class PersonHandlerTest extends TestCase {
   public void testHandleGetSelf() throws Exception {
     setPath("/people/john.doe/@self");
 
-    ResponseItem<Person> data = new ResponseItem<Person>(null);
+    RestfulItem<Person> data = new RestfulItem<Person>(null);
     EasyMock.expect(personService.getPerson(JOHN_DOE.iterator().next(),
         DEFAULT_FIELDS, token)).andReturn(ImmediateFuture.newInstance(data));
 
@@ -192,8 +188,7 @@ public class PersonHandlerTest extends TestCase {
   public void testHandleGetPlural() throws Exception {
     setPath("/people/john.doe,jane.doe/@self");
 
-    ResponseItem<RestfulCollection<Person>> data
-        = new ResponseItem<RestfulCollection<Person>>(null);
+    RestfulCollection<Person> data = new RestfulCollection<Person>(null, null);
     Set<UserId> userIdSet = Sets.newLinkedHashSet(JOHN_DOE);
     userIdSet.add(new UserId(UserId.Type.userId, "jane.doe"));
     EasyMock.expect(personService.getPeople(userIdSet,

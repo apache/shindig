@@ -43,15 +43,15 @@ public class PersonHandler extends DataRequestHandler {
   }
 
   protected Future<? extends ResponseItem> handleDelete(RequestItem request) {
-    return error(ResponseError.BAD_REQUEST, "You can't delete people.", null);
+    return error(ResponseError.BAD_REQUEST, "You can't delete people.");
   }
 
   protected Future<? extends ResponseItem> handlePut(RequestItem request) {
-    return error(ResponseError.NOT_IMPLEMENTED, "You can't update right now.", null);
+    return error(ResponseError.NOT_IMPLEMENTED, "You can't update right now.");
   }
 
   protected Future<? extends ResponseItem> handlePost(RequestItem request) {
-    return error(ResponseError.NOT_IMPLEMENTED, "You can't add people right now.", null);
+    return error(ResponseError.NOT_IMPLEMENTED, "You can't add people right now.");
   }
 
   /**

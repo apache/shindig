@@ -21,11 +21,9 @@ import org.apache.shindig.common.SecurityToken;
 import org.apache.shindig.common.util.JsonConversionUtil;
 import org.apache.shindig.social.ResponseError;
 import org.apache.shindig.social.ResponseItem;
-import org.apache.shindig.social.opensocial.spi.DataCollection;
 import org.apache.shindig.social.opensocial.spi.RestfulCollection;
 
 import com.google.common.collect.Lists;
-
 import org.apache.commons.io.IOUtils;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -34,7 +32,6 @@ import org.json.JSONObject;
 import java.io.IOException;
 import java.util.List;
 import java.util.concurrent.Future;
-
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -63,7 +60,7 @@ public class JsonRpcServlet extends ApiServlet {
     try {
       String content = IOUtils.toString(servletRequest.getReader());
       if ((content.indexOf('[') != -1) && content.indexOf('[') < content.indexOf('{')) {
-        //Is a batch
+        // Is a batch
         JSONArray batch = new JSONArray(content);
         dispatchBatch(batch, servletResponse, token);
       } else {
@@ -131,17 +128,17 @@ public class JsonRpcServlet extends ApiServlet {
       error.put("message", response.getErrorMessage());
       result.put("error", error);
     } else {
-      if (response.getResponse() instanceof RestfulCollection) {
-        //FIXME this is a little hacky because of the field names in the DataCollection
-        JSONObject coll = (JSONObject) jsonConverter.convertToJson(response.getResponse());
+      if (response instanceof RestfulCollection) {
+        // FIXME this is a little hacky because of the field names in the DataCollection
+        JSONObject coll = (JSONObject) jsonConverter.convertToJson(response);
         coll.put("list", coll.remove("entry"));
         result.put("data", coll);
-      } else if (response.getResponse() instanceof DataCollection) {
-        //FIXME this is a little hacky because of the field names in the DataCollection
-        JSONObject coll = (JSONObject) jsonConverter.convertToJson(response.getResponse());
-        result.put("data", coll.get("entry"));
       } else {
-        result.put("data", jsonConverter.convertToJson(response.getResponse()));
+        // FIXME this is a little hacky because of the field names in the DataCollection
+        JSONObject coll = (JSONObject) jsonConverter.convertToJson(response);
+        if (coll.has("entry")) {
+          result.put("data", coll.get("entry"));
+        }
       }
     }
     return result;

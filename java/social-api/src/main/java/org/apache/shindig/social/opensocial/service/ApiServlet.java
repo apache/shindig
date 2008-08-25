@@ -39,11 +39,8 @@ import javax.servlet.http.HttpServletRequest;
  * Common base class for API servlets.
  */
 public class ApiServlet extends InjectedServlet {
-
   private Map<String, Class<? extends DataRequestHandler>> handlers;
-
   protected BeanJsonConverter jsonConverter;
-
   protected BeanConverter xmlConverter;
 
   @Inject
@@ -55,7 +52,7 @@ public class ApiServlet extends InjectedServlet {
   public void setBeanConverters(
       @Named("shindig.bean.converter.json")BeanConverter jsonConverter,
       @Named("shindig.bean.converter.xml")BeanConverter xmlConverter) {
-    // fix this    
+    // fix this
     this.jsonConverter = (BeanJsonConverter) jsonConverter;
     this.xmlConverter = xmlConverter;
   }
@@ -76,8 +73,8 @@ public class ApiServlet extends InjectedServlet {
     Class<? extends DataRequestHandler> handlerClass = handlers.get(requestItem.getService());
 
     if (handlerClass == null) {
-      return ImmediateFuture.newInstance(new ResponseItem<Object>(ResponseError.NOT_IMPLEMENTED,
-          "The service " + requestItem.getService() + " is not implemented", null));
+      return ImmediateFuture.newInstance(new ResponseItem(ResponseError.NOT_IMPLEMENTED,
+          "The service " + requestItem.getService() + " is not implemented"));
     }
 
     DataRequestHandler handler = injector.getInstance(handlerClass);
@@ -97,7 +94,7 @@ public class ApiServlet extends InjectedServlet {
     return response;
   }
 
-  protected ResponseItem<?> responseItemFromException(Throwable t) {
-    return new ResponseItem<Void>(ResponseError.INTERNAL_ERROR, t.getMessage(), null);
+  protected ResponseItem responseItemFromException(Throwable t) {
+    return new ResponseItem(ResponseError.INTERNAL_ERROR, t.getMessage());
   }
 }

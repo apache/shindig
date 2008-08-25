@@ -21,22 +21,15 @@ package org.apache.shindig.social;
  * Represents the response items that get handed back as json within the
  * DataResponse.
  */
-public class ResponseItem<T> {
+public class ResponseItem {
   private ResponseError error;
   private String errorMessage;
 
-  // Must be compatible with AbstractSocialData.toJson. This means it should be
-  // an AbstractSocialData or a collection of AbstractSocialData
-  private T response;
+  protected ResponseItem() {}
 
-  public ResponseItem(ResponseError error, String errorMessage, T response) {
+  public ResponseItem(ResponseError error, String errorMessage) {
     this.error = error;
     this.errorMessage = errorMessage;
-    this.response = response;
-  }
-
-  public ResponseItem(T response) {
-    this(null, null, response);
   }
 
   public ResponseError getError() {
@@ -53,13 +46,5 @@ public class ResponseItem<T> {
 
   public void setErrorMessage(String errorMessage) {
     this.errorMessage = errorMessage;
-  }
-
-  public T getResponse() {
-    return response;
-  }
-
-  public void setResponse(T response) {
-    this.response = response;
   }
 }

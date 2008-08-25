@@ -94,8 +94,8 @@ public class AppDataHandler extends DataRequestHandler {
     Map<String, String> values = request.getTypedParameter("data", HashMap.class);
     for (String key : values.keySet()) {
       if (!isValidKey(key)) {
-        return ImmediateFuture.newInstance(new ResponseItem<Object>(ResponseError.BAD_REQUEST,
-            "One or more of the app data keys are invalid: " + key, null));
+        return ImmediateFuture.newInstance(new ResponseItem(ResponseError.BAD_REQUEST,
+            "One or more of the app data keys are invalid: " + key));
       }
     }
 

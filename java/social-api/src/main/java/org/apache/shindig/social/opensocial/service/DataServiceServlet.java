@@ -68,9 +68,9 @@ public class DataServiceServlet extends ApiServlet {
 
     SecurityToken token = getSecurityToken(servletRequest);
     if (token == null) {
-      sendError(servletResponse, new ResponseItem<Object>(ResponseError.UNAUTHORIZED,
+      sendError(servletResponse, new ResponseItem(ResponseError.UNAUTHORIZED,
           "The request did not have a proper security token nor oauth message and unauthenticated "
-              + "requests are not allowed", null));
+              + "requests are not allowed"));
       return;
     }
 
@@ -96,7 +96,7 @@ public class DataServiceServlet extends ApiServlet {
 
     if (responseItem.getError() == null) {
       PrintWriter writer = servletResponse.getWriter();
-      writer.write(converter.convertToString(responseItem.getResponse()));
+      writer.write(converter.convertToString(responseItem));
     } else {
       sendError(servletResponse, responseItem);
     }
