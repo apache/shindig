@@ -94,7 +94,7 @@ public class RestfulJsonPeopleTest extends AbstractLargeRestfulTests {
     location.setLongitude(2.29419F);
     canonical.setCurrentLocation(location);
 
-    canonical.setDateOfBirth(new Date());
+    canonical.setBirthday(new Date());
     canonical.setDrinker(new EnumImpl<Enum.Drinker>(Enum.Drinker.SOCIALLY));
     ListField email = new ListFieldImpl("work", "shindig-dev@incubator.apache.org");
     canonical.setEmails(Lists.newArrayList(email));
@@ -183,7 +183,7 @@ public class RestfulJsonPeopleTest extends AbstractLargeRestfulTests {
     canonical.setStatus("happy");
     canonical.setTags(Lists.newArrayList("C#", "JSON", "template"));
     canonical.setThumbnailUrl("http://www.example.org/pic/?id=1");
-    canonical.setTimeZone(-8L);
+    canonical.setUtcOffset(-8L);
     canonical.setTurnOffs(Lists.newArrayList("lack of unit tests", "cabbage"));
     canonical.setTurnOns(Lists.newArrayList("well document code"));
     canonical.setTvShows(Lists.newArrayList("House", "Battlestar Galactica"));
@@ -261,8 +261,8 @@ public class RestfulJsonPeopleTest extends AbstractLargeRestfulTests {
     assertFloatField(currentLocation, canonical.getCurrentLocation().getLongitude(),
         Address.Field.LONGITUDE);
 
-//    assertLongField(result, canonical.getDateOfBirth().getTime(),
-//        Person.Field.DATE_OF_BIRTH);
+//    assertLongField(result, canonical.getBirthday().getTime(),
+//        Person.Field.BIRTHDAY);
 //    assertEnumField(result, canonical.getDrinker(), Person.Field.DRINKER);
 
     JSONArray emailArray = result.getJSONArray(Person.Field.EMAILS.toString());

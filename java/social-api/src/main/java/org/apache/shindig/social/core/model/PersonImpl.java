@@ -47,7 +47,7 @@ public class PersonImpl implements Person {
   private List<String> cars;
   private String children;
   private Address currentLocation;
-  private Date dateOfBirth;
+  private Date birthday;
   private Enum<Enum.Drinker> drinker;
   private List<ListField> emails;
   private String ethnicity;
@@ -89,7 +89,7 @@ public class PersonImpl implements Person {
   private List<String> sports;
   private String status;
   private List<String> tags;
-  private Long timeZone;
+  private Long utcOffset;
   private List<String> turnOffs;
   private List<String> turnOns;
   private List<String> tvShows;
@@ -187,12 +187,12 @@ public class PersonImpl implements Person {
     this.currentLocation = currentLocation;
   }
 
-  public Date getDateOfBirth() {
-    return dateOfBirth;
+  public Date getBirthday() {
+    return birthday;
   }
 
-  public void setDateOfBirth(Date dateOfBirth) {
-    this.dateOfBirth = dateOfBirth;
+  public void setBirthday(Date birthday) {
+    this.birthday = birthday;
   }
 
   public Enum<Enum.Drinker> getDrinker() {
@@ -523,12 +523,12 @@ public class PersonImpl implements Person {
     this.tags = tags;
   }
 
-  public Long getTimeZone() {
-    return timeZone;
+  public Long getUtcOffset() {
+    return utcOffset;
   }
 
-  public void setTimeZone(Long timeZone) {
-    this.timeZone = timeZone;
+  public void setUtcOffset(Long utcOffset) {
+    this.utcOffset = utcOffset;
   }
 
   public List<String> getTurnOffs() {
