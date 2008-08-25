@@ -21,6 +21,7 @@ import org.apache.shindig.social.opensocial.model.Address;
 import org.apache.shindig.social.opensocial.model.BodyType;
 import org.apache.shindig.social.opensocial.model.Email;
 import org.apache.shindig.social.opensocial.model.Enum;
+import org.apache.shindig.social.opensocial.model.ListField;
 import org.apache.shindig.social.opensocial.model.Name;
 import org.apache.shindig.social.opensocial.model.Organization;
 import org.apache.shindig.social.opensocial.model.Person;
@@ -71,6 +72,7 @@ public class PersonImpl implements Person {
   private String nickname;
   private String pets;
   private List<Phone> phoneNumbers;
+  private List<ListField> photos;
   private String politicalViews;
   private Url profileSong;
   private Url profileVideo;
@@ -85,7 +87,6 @@ public class PersonImpl implements Person {
   private List<String> sports;
   private String status;
   private List<String> tags;
-  private String thumbnailUrl;
   private Long timeZone;
   private List<String> turnOffs;
   private List<String> turnOns;
@@ -384,6 +385,14 @@ public class PersonImpl implements Person {
     this.phoneNumbers = phoneNumbers;
   }
 
+  public List<ListField> getPhotos() {
+    return photos;
+  }
+
+  public void setPhotos(List<ListField> photos) {
+    this.photos = photos;
+  }
+
   public String getPoliticalViews() {
     return politicalViews;
   }
@@ -496,14 +505,6 @@ public class PersonImpl implements Person {
     this.tags = tags;
   }
 
-  public String getThumbnailUrl() {
-    return thumbnailUrl;
-  }
-
-  public void setThumbnailUrl(String thumbnailUrl) {
-    this.thumbnailUrl = thumbnailUrl;
-  }
-
   public Long getTimeZone() {
     return timeZone;
   }
@@ -577,6 +578,21 @@ public class PersonImpl implements Person {
     }
   }
 
+  public String getThumbnailUrl() {
+    ListField photo = getPhotoWithType(THUMBNAIL_PHOTO_TYPE);
+    return photo == null ? null : photo.getValue();
+  }
+
+  public void setThumbnailUrl(String thumbnailUrl) {
+    ListField photo = getPhotoWithType(THUMBNAIL_PHOTO_TYPE);
+    if (photo != null) {
+      photo.setValue(thumbnailUrl);
+    } else {
+      addPhoto(new ListFieldImpl(THUMBNAIL_PHOTO_TYPE, thumbnailUrl));
+    }
+  }
+
+  // TODO: Generify these once they extend a common subclass
   private void addUrl(Url url) {
     List<Url> urls = getUrls();
     if (urls == null) {
@@ -591,6 +607,27 @@ public class PersonImpl implements Person {
       for (Url url : urls) {
         if (type.equalsIgnoreCase(url.getType())) {
           return url;
+        }
+      }
+    }
+
+    return null;
+  }
+
+  private void addPhoto(ListField field) {
+    List<ListField> fields = getPhotos();
+    if (fields == null) {
+      setPhotos(Lists.<ListField>newArrayList());
+    }
+    getPhotos().add(field);
+  }
+
+  private ListField getPhotoWithType(String type) {
+    List<ListField> fields = getPhotos();
+    if (fields != null) {
+      for (ListField field : fields) {
+        if (type.equalsIgnoreCase(field.getType())) {
+          return field;
         }
       }
     }

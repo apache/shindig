@@ -36,6 +36,7 @@ import java.util.Set;
 @ImplementedBy(PersonImpl.class)
 public interface Person {
   public static final String PROFILE_URL_TYPE = "profile";
+  public static final String THUMBNAIL_PHOTO_TYPE = "thumbnail";
 
   /**
    * The fields that represent the person object ion json form.
@@ -111,6 +112,7 @@ public interface Person {
     PETS("pets"),
     /** the json field for phoneNumbers. */
     PHONE_NUMBERS("phoneNumbers"),
+    PHOTOS("photos"),
     /** the json field for politicalViews. */
     POLITICAL_VIEWS("politicalViews"),
     /** the json field for profileSong. */
@@ -758,6 +760,10 @@ public interface Person {
    */
   void setPhoneNumbers(List<Phone> phoneNumbers);
 
+  List<ListField> getPhotos();
+
+  void setPhotos(List<ListField> photos);
+
   /**
    * Get the Person's political views, specified as a string. Container support for this field is
    * OPTIONAL.
@@ -959,22 +965,6 @@ public interface Person {
   void setTags(List<String> tags);
 
   /**
-   * Get the person's photo thumbnail URL, specified as a string. This URL must be fully qualified.
-   * Relative URLs will not work in gadgets. Container support for this field is OPTIONAL.
-   *
-   * @return the person's photo thumbnail URL
-   */
-  String getThumbnailUrl();
-
-  /**
-   * Set the person's photo thumbnail URL, specified as a string. This URL must be fully qualified.
-   * Relative URLs will not work in gadgets. Container support for this field is OPTIONAL.
-   *
-   * @param thumbnailUrl the person's photo thumbnail URL
-   */
-  void setThumbnailUrl(String thumbnailUrl);
-
-  /**
    * Get the Person's time zone, specified as the difference in minutes between Greenwich Mean Time
    * (GMT) and the user's local time. Container support for this field is OPTIONAL.
    *
@@ -1093,5 +1083,27 @@ public interface Person {
    * @param profileUrl the person's profile URL
    */
   void setProfileUrl(String profileUrl);
+
+  /**
+   * Get the person's photo thumbnail URL, specified as a string. This URL must be fully qualified.
+   * Relative URLs will not work in gadgets.
+   * This field MUST be stored in the photos list with a type of "thumbnail".
+   *
+   * Container support for this field is OPTIONAL.
+   *
+   * @return the person's photo thumbnail URL
+   */
+  String getThumbnailUrl();
+
+  /**
+   * Set the person's photo thumbnail URL, specified as a string. This URL must be fully qualified.
+   * Relative URLs will not work in gadgets.
+   * This field MUST be stored in the photos list with a type of "thumbnail".
+   *
+   * Container support for this field is OPTIONAL.
+   *
+   * @param thumbnailUrl the person's photo thumbnail URL
+   */
+  void setThumbnailUrl(String thumbnailUrl);
 
 }
