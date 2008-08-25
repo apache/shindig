@@ -60,7 +60,11 @@ opensocial.Person.prototype.getField = function(key, opt_params) {
   var value =  this.getField_v08(key, opt_params);
   if (key == 'lookingFor' && value) {
     // The lookingFor field used to return a string instead of an enum
-    return value.getDisplayValue();
+    var returnValue = new Array(value.length);
+    for (var i = 0; i < value.length; i++) {
+      returnValue[i] = value[i].getDisplayValue();
+    }
+    return returnValue.join();
   } else {
     return value;
   }

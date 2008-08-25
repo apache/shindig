@@ -38,6 +38,7 @@ import org.apache.shindig.social.opensocial.model.Url;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -138,7 +139,11 @@ public class RestfulJsonPeopleTest extends AbstractLargeRestfulTests {
     canonical.setUpdated(new Date());
     canonical.setLanguagesSpoken(Lists.newArrayList("English", "Dutch", "Esperanto"));
     canonical.setLivingArrangement("in a house");
-    canonical.setLookingFor("patches");
+    Enum<Enum.LookingFor> lookingForRandom =
+        new EnumImpl<Enum.LookingFor>(Enum.LookingFor.RANDOM, "Random");
+    Enum<Enum.LookingFor> lookingForNetworking =
+        new EnumImpl<Enum.LookingFor>(Enum.LookingFor.NETWORKING, "Networking");
+    canonical.setLookingFor(Lists.newArrayList(lookingForRandom, lookingForNetworking));
     canonical.setMovies(Lists.newArrayList("Iron Man", "Nosferatu"));
     canonical.setMusic(Lists.newArrayList("Chieftains", "Beck"));
     canonical.setNetworkPresence(new EnumImpl<Enum.NetworkPresence>(Enum.NetworkPresence.ONLINE));
@@ -295,7 +300,7 @@ public class RestfulJsonPeopleTest extends AbstractLargeRestfulTests {
 //    assertDateField(result, canonical.getUpdated(), Person.Field.LAST_UPDATED);
     assertStringField(result, canonical.getLivingArrangement(),
         Person.Field.LIVING_ARRANGEMENT);
-    assertStringField(result, canonical.getLookingFor(),
+    assertListEnumField(result, canonical.getLookingFor(),
         Person.Field.LOOKING_FOR);
     assertStringListField(result, canonical.getMovies(), Person.Field.MOVIES);
     assertStringListField(result, canonical.getMusic(), Person.Field.MUSIC);
@@ -425,6 +430,18 @@ public class RestfulJsonPeopleTest extends AbstractLargeRestfulTests {
     JSONObject actual = result.getJSONObject(field.toString());
     assertEquals(expected.getDisplayValue(), actual.getString("displayValue"));
     assertEquals(expected.getKey().toString(), actual.getString("key"));
+  }
+
+  private void assertListEnumField(JSONObject result,
+      List<? extends Enum<? extends Enum.EnumKey>> expected,
+      Person.Field field) throws JSONException {
+    JSONArray actual = result.getJSONArray(field.toString());
+    for (int i = 0; i  < actual.length(); i++) {
+      assertEquals(expected.get(i).getDisplayValue(),
+          actual.getJSONObject(i).getString("displayValue"));
+      assertEquals(expected.get(i).getKey().toString(),
+          actual.getJSONObject(i).getString("key"));
+    }
   }
 
   /**

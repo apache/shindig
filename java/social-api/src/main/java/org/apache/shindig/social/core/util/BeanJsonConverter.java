@@ -17,15 +17,15 @@
  */
 package org.apache.shindig.social.core.util;
 
+import org.apache.shindig.social.core.model.EnumImpl;
+import org.apache.shindig.social.opensocial.model.Enum;
+import org.apache.shindig.social.opensocial.service.BeanConverter;
+
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
-
-import org.apache.shindig.social.core.model.EnumImpl;
-import org.apache.shindig.social.opensocial.model.Enum;
-import org.apache.shindig.social.opensocial.service.BeanConverter;
 
 import org.joda.time.DateTime;
 import org.json.JSONArray;
@@ -40,8 +40,8 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.Map.Entry;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -252,16 +252,31 @@ public class BeanJsonConverter implements BeanConverter {
     Class<?> expectedType = method.getParameterTypes()[0];
     Object value = null;
 
-    if (expectedType.equals(List.class)) {
+    if (!jsonObject.has(fieldName)) {
+      // Skip
+    } else if (expectedType.equals(List.class)) {
       ParameterizedType genericListType
           = (ParameterizedType) method.getGenericParameterTypes()[0];
-      Class<?> listElementClass
-          = (Class<?>) genericListType.getActualTypeArguments()[0];
+      Type type = genericListType.getActualTypeArguments()[0];
+      Class<?> rawType;
+      Class<?> listElementClass;
+      if (type instanceof ParameterizedType) {
+        listElementClass = (Class<?>)((ParameterizedType)type).getActualTypeArguments()[0];
+        rawType = (Class<?>)((ParameterizedType)type).getRawType();
+      } else {
+        listElementClass = (Class<?>) type;
+        rawType = listElementClass;
+      }
 
       List<Object> list = Lists.newArrayList();
       JSONArray jsonArray = jsonObject.getJSONArray(fieldName);
       for (int i = 0; i < jsonArray.length(); i++) {
-        list.add(convertToObject(jsonArray.getString(i), listElementClass));
+        if (org.apache.shindig.social.opensocial.model.Enum.class
+            .isAssignableFrom(rawType)) {
+          list.add(convertEnum(listElementClass, jsonArray.getJSONObject(i)));
+        } else {
+          list.add(convertToObject(jsonArray.getString(i), listElementClass));
+        }
       }
 
       value = list;
@@ -289,22 +304,10 @@ public class BeanJsonConverter implements BeanConverter {
     } else if (org.apache.shindig.social.opensocial.model.Enum.class
         .isAssignableFrom(expectedType)) {
       // TODO Need to stop using Enum as a class name :(
-      Class<?> enumType = (Class<?>) ((ParameterizedType) method.getGenericParameterTypes()[0])
-          .getActualTypeArguments()[0];
-      // TODO This isnt injector friendly but perhaps implementors dont need it. If they do a
-      // refactoring of the Enum handling in general is needed.
-      if (jsonObject.has(fieldName)) {
-        JSONObject jsonEnum = jsonObject.getJSONObject(fieldName);
-        if (jsonEnum.has(Enum.Field.KEY.toString())) {
-          Enum.EnumKey enumKey = (Enum.EnumKey) enumType
-              .getField(jsonEnum.getString(Enum.Field.KEY.toString())).get(null);
-          value = new EnumImpl<Enum.EnumKey>(enumKey,
-              jsonEnum.getString(Enum.Field.DISPLAY_VALUE.toString()));
-        } else {
-          value = new EnumImpl<Enum.EnumKey>(null,
-              jsonEnum.getString(Enum.Field.DISPLAY_VALUE.toString()));
-        }
-      }
+      value = convertEnum(
+          (Class<?>)((ParameterizedType) method.getGenericParameterTypes()[0]).
+              getActualTypeArguments()[0],
+          jsonObject.getJSONObject(fieldName));
     } else if (expectedType.isEnum()) {
       if (jsonObject.has(fieldName)) {
         for (Object v : expectedType.getEnumConstants()) {
@@ -341,5 +344,22 @@ public class BeanJsonConverter implements BeanConverter {
     if (value != null) {
       method.invoke(pojo, value);
     }
+  }
+
+  private Object convertEnum(Class<?> enumKeyType, JSONObject jsonEnum)
+      throws JSONException, IllegalAccessException, NoSuchFieldException {
+    // TODO This isnt injector friendly but perhaps implementors dont need it. If they do a
+    // refactoring of the Enum handling in general is needed.
+    Object value;
+    if (jsonEnum.has(Enum.Field.KEY.toString())) {
+      Enum.EnumKey enumKey = (Enum.EnumKey) enumKeyType
+          .getField(jsonEnum.getString(Enum.Field.KEY.toString())).get(null);
+      value = new EnumImpl<Enum.EnumKey>(enumKey,
+          jsonEnum.getString(Enum.Field.DISPLAY_VALUE.toString()));
+    } else {
+      value = new EnumImpl<Enum.EnumKey>(null,
+          jsonEnum.getString(Enum.Field.DISPLAY_VALUE.toString()));
+    }
+    return value;
   }
 }

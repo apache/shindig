@@ -7,6 +7,7 @@
 //    activity : Map<Person.Id, Array<Activity>>
 //    data : Map<Person.Id, Map<String,String>>
 //    friendLinks : Map<Person.Id, Array<Person.Id>>
+//    userApplications : Map<Person.Id, Array<Application.Id>>
 //  }
 //
 //  Notes:
@@ -105,7 +106,10 @@
 "languagesSpoken" : ["English","Dutch","Esperanto"],
 "updated" : "2006-06-06T12:12:12Z",
 "livingArrangement" : "in a house",
-"lookingFor" : "patches",
+"lookingFor" : [
+  { "key" : "RANDOM", "displayValue" : "Random"},
+  { "key" : "NETWORKING", "displayValue" : "Networking"}
+],
 "movies" : ["Iron Man", "Nosferatu"],
 "music" : ["Chieftains","Beck"],
 "name" : {
