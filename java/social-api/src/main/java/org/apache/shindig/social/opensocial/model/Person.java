@@ -61,8 +61,7 @@ public interface Person {
     CHILDREN("children"),
     /** the json field for currentLocation. */
     CURRENT_LOCATION("currentLocation"),
-    /** the json field for dateOfBirth. */
-    DATE_OF_BIRTH("dateOfBirth"),
+    BIRTHDAY("birthday"),
     /** the json field for drinker. */
     DRINKER("drinker"),
     /** the json field for emails. */
@@ -147,8 +146,7 @@ public interface Person {
     TAGS("tags"),
     /** the json field for thumbnailUrl. */
     THUMBNAIL_URL("thumbnailUrl"),
-    /** the json field for timeZone. */
-    TIME_ZONE("timeZone"),
+    UTC_OFFSET("utcOffset"),
     /** the json field for turnOffs. */
     TURN_OFFS("turnOffs"),
     /** the json field for turnOns. */
@@ -364,15 +362,15 @@ public interface Person {
    *
    * @return the person's data of birth
    */
-  Date getDateOfBirth();
+  Date getBirthday();
 
   /**
    * Set the person's date of birth, specified as a {@link Date} object. Container support for this
    * field is OPTIONAL.
    *
-   * @param dateOfBirth the person's data of birth
+   * @param birthday the person's data of birth
    */
-  void setDateOfBirth(Date dateOfBirth);
+  void setBirthday(Date birthday);
 
   /**
    * Get the person's drinking status, specified as an {@link Enum} with the enum's key referencing
@@ -980,15 +978,15 @@ public interface Person {
    *
    * @return the Person's time zone
    */
-  Long getTimeZone();
+  Long getUtcOffset();
 
   /**
    * Set the Person's time zone, specified as the difference in minutes between Greenwich Mean Time
    * (GMT) and the user's local time. Container support for this field is OPTIONAL.
    *
-   * @param timeZone the Person's time zone
+   * @param utcOffset the Person's time zone
    */
-  void setTimeZone(Long timeZone);
+  void setUtcOffset(Long utcOffset);
 
   /**
    * Get the person's turn offs. Container support for this field is OPTIONAL.

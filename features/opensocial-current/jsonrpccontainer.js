@@ -218,6 +218,7 @@ JsonRpcContainer.prototype.newFetchPeopleRequest = function(idSpec,
   var rpc = { method : "people.get" };
   rpc.params = this.translateIdSpec(idSpec);
   if (opt_params['profileDetail']) {
+    this.translateProfileDetails(opt_params['profileDetail']);
     rpc.params.fields = opt_params['profileDetail'];
   }
   if (opt_params['first']) {
@@ -257,6 +258,16 @@ JsonRpcContainer.prototype.newFetchPeopleRequest = function(idSpec,
       });
 };
 
+JsonRpcContainer.prototype.translateProfileDetails = function(profileDetails) {
+  for (var i = 0; i < profileDetails.length; i++) {
+    if (profileDetails[i] == 'dateOfBirth') {
+      profileDetails[i] = 'birthday';
+    } else if (profileDetails[i] == 'timeZone') {
+      profileDetails[i] = 'utcOffset';
+    }
+  }
+}
+
 JsonRpcContainer.prototype.createPersonFromJson = function(serverJson) {
   // We need to translate from the new person fields to the old ones
   // TODO(doll): Pull this out into a separate file
@@ -264,6 +275,14 @@ JsonRpcContainer.prototype.createPersonFromJson = function(serverJson) {
     for (var i = 0; i < serverJson.emails.length; i++) {
       serverJson.emails[i].address = serverJson.emails[i].value;
     }
+  }
+
+  if (serverJson.birthday) {
+    serverJson.dateOfBirth = serverJson.birthday;
+  }
+
+  if (serverJson.utcOffset) {
+    serverJson.timeZone = serverJson.utcOffset;
   }
 
   return new JsonPerson(serverJson);
