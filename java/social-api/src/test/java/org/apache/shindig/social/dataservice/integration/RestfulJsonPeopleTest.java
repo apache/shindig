@@ -150,7 +150,6 @@ public class RestfulJsonPeopleTest extends AbstractLargeRestfulTests {
     canonical.setPoliticalViews("open leaning");
     canonical.setProfileSong(new UrlImpl("http://www.example.org/songs/OnlyTheLonely.mp3",
         "Feelin' blue", "road"));
-    canonical.setProfileUrl("http://www.example.org/?id=1");
     canonical.setProfileVideo(new UrlImpl("http://www.example.org/videos/Thriller.flv",
         "Thriller", "video"));
 
@@ -185,8 +184,8 @@ public class RestfulJsonPeopleTest extends AbstractLargeRestfulTests {
     canonical.setTvShows(Lists.newArrayList("House", "Battlestar Galactica"));
 
     canonical.setUrls(Lists.<Url>newArrayList(
-        new UrlImpl("http://www.example.org/?id=1", "Profile", "text/html"),
-        new UrlImpl("http://www.example.org/pic/?id=1", "Thumbnail", "img/*")));
+        new UrlImpl("http://www.example.org/?id=1", "my profile", "Profile"),
+        new UrlImpl("http://www.example.org/pic/?id=1", "my awesome picture", "Thumbnail")));
   }
 
   /**
