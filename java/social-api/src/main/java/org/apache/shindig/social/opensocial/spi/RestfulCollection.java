@@ -24,6 +24,11 @@ public class RestfulCollection<T> {
   private int startIndex;
   private int totalResults;
 
+  private boolean filtered = true;
+  private boolean sorted = true;
+  private boolean updatedSince = true;
+
+
   public RestfulCollection(List<T> entry) {
     this(entry, 0, entry.size());
   }
@@ -56,5 +61,29 @@ public class RestfulCollection<T> {
 
   public void setTotalResults(int totalResults) {
     this.totalResults = totalResults;
+  }
+
+  public boolean isFiltered() {
+    return filtered;
+  }
+
+  public void setFiltered(boolean filtered) {
+    this.filtered = filtered;
+  }
+
+  public boolean isSorted() {
+    return sorted;
+  }
+
+  public void setSorted(boolean sorted) {
+    this.sorted = sorted;
+  }
+
+  public boolean isUpdatedSince() {
+    return updatedSince;
+  }
+
+  public void setUpdatedSince(boolean updatedSince) {
+    this.updatedSince = updatedSince;
   }
 }
