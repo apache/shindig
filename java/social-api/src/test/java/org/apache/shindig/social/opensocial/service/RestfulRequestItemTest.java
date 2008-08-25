@@ -105,18 +105,18 @@ public class RestfulRequestItemTest extends TestCase {
 
   public void testSortBy() throws Exception {
     request.setParameter("sortBy", null);
-    assertEquals(PersonService.SortOrder.topFriends, request.getSortBy());
+    assertEquals(PersonService.SortBy.topFriends, request.getSortBy());
 
     request.setParameter("sortBy", "name");
-    assertEquals(PersonService.SortOrder.name, request.getSortBy());
+    assertEquals(PersonService.SortBy.name, request.getSortBy());
   }
 
   public void testSortOrder() throws Exception {
     request.setParameter("sortOrder", null);
-    assertEquals(PersonService.SortDirection.ascending, request.getSortOrder());
+    assertEquals(PersonService.SortOrder.ascending, request.getSortOrder());
 
     request.setParameter("sortOrder", "descending");
-    assertEquals(PersonService.SortDirection.descending, request.getSortOrder());
+    assertEquals(PersonService.SortOrder.descending, request.getSortOrder());
   }
 
   public void testFilterBy() throws Exception {

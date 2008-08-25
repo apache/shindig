@@ -239,7 +239,7 @@ public class JsonDbOpensocialService implements ActivityService, PersonService, 
   }
 
   public Future<ResponseItem<RestfulCollection<Person>>> getPeople(Set<UserId> userIds,
-      GroupId groupId, SortOrder sortBy, SortDirection sortOrder, FilterType filter, int first,
+      GroupId groupId, SortBy sortBy, SortOrder sortOrder, FilterType filter, int first,
       int max, Set<String> fields, SecurityToken token) {
     List<Person> result = Lists.newArrayList();
     try {
@@ -257,11 +257,11 @@ public class JsonDbOpensocialService implements ActivityService, PersonService, 
       }
 
       // We can pretend that by default the people are in top friends order
-      if (sortBy.equals(PersonService.SortOrder.name)) {
+      if (sortBy.equals(SortBy.name)) {
         Collections.sort(result, NAME_COMPARATOR);
       }
 
-      if (sortOrder.equals(SortDirection.descending)) {
+      if (sortOrder.equals(SortOrder.descending)) {
         Collections.reverse(result);
       }
 

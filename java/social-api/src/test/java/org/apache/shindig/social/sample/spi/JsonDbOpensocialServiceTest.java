@@ -87,7 +87,7 @@ public class JsonDbOpensocialServiceTest extends TestCase {
   public void testGetExpectedFriends() throws Exception {
     ResponseItem<RestfulCollection<Person>> responseItem = db.getPeople(
         Sets.newHashSet(CANON_USER), new GroupId(GroupId.Type.friends, null),
-        PersonService.SortOrder.topFriends, PersonService.SortDirection.ascending,
+        PersonService.SortBy.topFriends, PersonService.SortOrder.ascending,
         PersonService.FilterType.all, 0,
         Integer.MAX_VALUE, Collections.<String>emptySet(), token).get();
     assertNotNull(responseItem.getResponse());
@@ -100,7 +100,7 @@ public class JsonDbOpensocialServiceTest extends TestCase {
   public void testGetExpectedUsersForPlural() throws Exception {
     ResponseItem<RestfulCollection<Person>> responseItem = db.getPeople(
         Sets.newLinkedHashSet(JOHN_DOE, JANE_DOE), new GroupId(GroupId.Type.friends, null),
-        PersonService.SortOrder.topFriends, PersonService.SortDirection.ascending,
+        PersonService.SortBy.topFriends, PersonService.SortOrder.ascending,
         PersonService.FilterType.all, 0,
         Integer.MAX_VALUE, Collections.<String>emptySet(), token).get();
     assertNotNull(responseItem.getResponse());
