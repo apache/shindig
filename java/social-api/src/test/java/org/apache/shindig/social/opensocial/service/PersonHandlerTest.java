@@ -72,7 +72,7 @@ public class PersonHandlerTest extends TestCase {
 
   private void setPath(String path) {
     Map<String, String> params = Maps.newHashMap();
-    params.put("orderBy", null);
+    params.put("sortBy", null);
     params.put("filterBy", null);
     params.put("startIndex", null);
     params.put("count", null);
@@ -130,7 +130,7 @@ public class PersonHandlerTest extends TestCase {
     PersonService.FilterType filter = PersonService.FilterType.topFriends;
 
     Map<String, String> params = Maps.newHashMap();
-    params.put("orderBy", order.toString());
+    params.put("sortBy", order.toString());
     params.put("filterBy", filter.toString());
     params.put("startIndex", "5");
     params.put("count", "10");

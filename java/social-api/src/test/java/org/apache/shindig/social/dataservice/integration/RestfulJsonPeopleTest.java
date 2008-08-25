@@ -446,7 +446,7 @@ public class RestfulJsonPeopleTest extends AbstractLargeRestfulTests {
   @Test
   public void testGetPeople() throws Exception {
     Map<String, String> extraParams = Maps.newHashMap();
-    extraParams.put("orderBy", "name");
+    extraParams.put("sortBy", "name");
     extraParams.put("filterBy", null);
     extraParams.put("startIndex", null);
     extraParams.put("count", "20");
@@ -469,7 +469,7 @@ public class RestfulJsonPeopleTest extends AbstractLargeRestfulTests {
   @Test
   public void testGetPeoplePagination() throws Exception {
     Map<String, String> extraParams = Maps.newHashMap();
-    extraParams.put("orderBy", "name");
+    extraParams.put("sortBy", "name");
     extraParams.put("filterBy", null);
     extraParams.put("startIndex", "0");
     extraParams.put("count", "1");
