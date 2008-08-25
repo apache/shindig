@@ -17,9 +17,12 @@
  */
 package org.apache.shindig.social.opensocial.spi;
 
+import org.apache.shindig.social.ResponseItem;
+import org.apache.shindig.social.ResponseError;
+
 import java.util.List;
 
-public class RestfulCollection<T> {
+public class RestfulCollection<T> extends ResponseItem {
   private List<T> entry;
   private int startIndex;
   private int totalResults;
@@ -28,6 +31,9 @@ public class RestfulCollection<T> {
   private boolean sorted = true;
   private boolean updatedSince = true;
 
+  public RestfulCollection(ResponseError error, String errorMessage) {
+    super(error, errorMessage);
+  }
 
   public RestfulCollection(List<T> entry) {
     this(entry, 0, entry.size());

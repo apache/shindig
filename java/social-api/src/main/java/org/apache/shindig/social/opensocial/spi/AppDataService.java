@@ -44,7 +44,7 @@ public interface AppDataService {
    * @param token   The security token
    * @return The data fetched
    */
-  Future<ResponseItem<DataCollection>> getPersonData(Set<UserId> userIds, GroupId groupId,
+  Future<DataCollection> getPersonData(Set<UserId> userIds, GroupId groupId,
       String appId, Set<String> fields, SecurityToken token);
 
   /**
@@ -57,7 +57,7 @@ public interface AppDataService {
    * @param token   The security token
    * @return an error if one occurs
    */
-  Future<ResponseItem<Object>> deletePersonData(UserId userId, GroupId groupId,
+  Future<ResponseItem> deletePersonData(UserId userId, GroupId groupId,
       String appId, Set<String> fields, SecurityToken token);
 
   /**
@@ -71,6 +71,6 @@ public interface AppDataService {
    * @param token   The security token
    * @return an error if one occurs
    */
-  Future<ResponseItem<Object>> updatePersonData(UserId userId, GroupId groupId,
+  Future<ResponseItem> updatePersonData(UserId userId, GroupId groupId,
       String appId, Set<String> fields, Map<String, String> values, SecurityToken token);
 }

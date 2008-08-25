@@ -192,21 +192,21 @@ public class RestfulJsonPeopleTest extends AbstractLargeRestfulTests {
   /**
    * Expected response for john.doe's json:
    *
-   * {
-   *   'id' : 'john.doe',
-   *   'name' : {'unstructured' : 'John Doe'},
-   *   'phoneNumbers' : [
-   *     { 'number' : '+33H000000000', 'type' : 'home'},
-   *   ],
-   *   'addresses' : [
-   *     {'unstructuredAddress' : 'My home address'}
-   *   ],
-   *   'emails' : [
-   *     { 'address' : 'john.doe@work.bar', 'type' : 'work'},
-   *   ]
+   * { 'entry' : {
+   *     'id' : 'john.doe',
+   *     'name' : {'unstructured' : 'John Doe'},
+   *     'phoneNumbers' : [
+   *       { 'number' : '+33H000000000', 'type' : 'home'},
+   *     ],
+   *     'addresses' : [
+   *       {'unstructuredAddress' : 'My home address'}
+   *     ],
+   *     'emails' : [
+   *       { 'address' : 'john.doe@work.bar', 'type' : 'work'},
+   *     ]
    *
-   *  ... etc, etc for all fields in the person object
-   *
+   *    ... etc, etc for all fields in the person object
+   *   }
    * }
    * TODO: Finish up this test and make refactor so that it is easier to read
    *
@@ -225,7 +225,7 @@ public class RestfulJsonPeopleTest extends AbstractLargeRestfulTests {
 
     // Currently, for Shindig {pid}/@all/{uid} == {uid}/@self
     String resp = getJsonResponse("/people/canonical/@self", "GET", extraParams);
-    JSONObject result = getJson(resp);
+    JSONObject result = getJson(resp).getJSONObject("entry");
 
     assertStringField(result, canonical.getAboutMe(), Person.Field.ABOUT_ME);
     assertStringListField(result, canonical.getActivities(),

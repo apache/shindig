@@ -44,7 +44,7 @@ public interface ActivityService {
    * @param token   A valid SecurityToken
    * @return a response item with the list of activities.
    */
-  Future<ResponseItem<RestfulCollection<Activity>>> getActivities(Set<UserId> userIds,
+  Future<RestfulCollection<Activity>> getActivities(Set<UserId> userIds,
       GroupId groupId, String appId, Set<String> fields, SecurityToken token);
 
   /**
@@ -59,7 +59,7 @@ public interface ActivityService {
    * @param token       A valid SecurityToken
    * @return a response item with the list of activities.
    */
-  Future<ResponseItem<RestfulCollection<Activity>>> getActivities(UserId userId, GroupId groupId,
+  Future<RestfulCollection<Activity>> getActivities(UserId userId, GroupId groupId,
       String appId, Set<String> fields, Set<String> activityIds, SecurityToken token);
 
   /**
@@ -74,7 +74,7 @@ public interface ActivityService {
    * @param token      A valid SecurityToken
    * @return a response item with the list of activities.
    */
-  Future<ResponseItem<Activity>> getActivity(UserId userId, GroupId groupId, String appId,
+  Future<RestfulItem<Activity>> getActivity(UserId userId, GroupId groupId, String appId,
       Set<String> fields, String activityId, SecurityToken token);
 
 
@@ -88,7 +88,7 @@ public interface ActivityService {
    * @param token       A valid SecurityToken.
    * @return a response item containing any errors
    */
-  Future<ResponseItem<Object>> deleteActivities(UserId userId, GroupId groupId, String appId,
+  Future<ResponseItem> deleteActivities(UserId userId, GroupId groupId, String appId,
       Set<String> activityIds, SecurityToken token);
 
   /**
@@ -103,6 +103,6 @@ public interface ActivityService {
    * @param token    A valid SecurityToken
    * @return a response item containing any errors
    */
-  Future<ResponseItem<Object>> createActivity(UserId userId, GroupId groupId, String appId,
+  Future<ResponseItem> createActivity(UserId userId, GroupId groupId, String appId,
       Set<String> fields, Activity activity, SecurityToken token);
 }

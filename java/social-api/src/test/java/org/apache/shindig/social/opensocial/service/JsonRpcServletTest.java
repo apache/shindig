@@ -18,23 +18,20 @@
 package org.apache.shindig.social.opensocial.service;
 
 import org.apache.shindig.common.SecurityTokenException;
-import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.common.testing.FakeGadgetToken;
 import org.apache.shindig.common.util.ImmediateFuture;
 import org.apache.shindig.social.ResponseItem;
 import org.apache.shindig.social.core.oauth.AuthenticationServletFilter;
 import org.apache.shindig.social.core.util.BeanJsonConverter;
 import org.apache.shindig.social.core.util.BeanXmlConverter;
+import org.apache.shindig.social.opensocial.spi.RestfulItem;
 
-import com.google.inject.Injector;
 import com.google.common.collect.Maps;
-import com.google.common.collect.Multimap;
-
-import org.easymock.classextension.EasyMock;
-import org.json.JSONObject;
-import org.json.JSONArray;
-
+import com.google.inject.Injector;
 import junit.framework.TestCase;
+import org.easymock.classextension.EasyMock;
+import org.json.JSONArray;
+import org.json.JSONObject;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -44,8 +41,6 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
-import java.util.Map;
-
 import javax.servlet.http.HttpServletResponse;
 
 /**
@@ -57,21 +52,16 @@ public class JsonRpcServletTest extends TestCase {
       .setOwnerId("john.doe").setViewerId("john.doe");
 
   private AuthenticationServletFilter.SecurityTokenRequest req;
-
   private HttpServletResponse res;
-
   private JsonRpcServlet servlet;
 
   private PersonHandler peopleHandler;
-
   private ActivityHandler activityHandler;
-
   private AppDataHandler appDataHandler;
 
   private Injector injector;
 
   private BeanJsonConverter jsonConverter;
-
   private BeanXmlConverter xmlConverter;
 
   protected void setUp() throws Exception {
@@ -166,12 +156,13 @@ public class JsonRpcServletTest extends TestCase {
     setupInjector();
 
     String resultObject = "my lovely json";
-    ResponseItem<String> response = new ResponseItem<String>(resultObject);
+    RestfulItem<String> response = new RestfulItem<String>(resultObject);
 
     EasyMock.expect(handler.handleItem(EasyMock.isA(RequestItem.class)));
     EasyMock.expectLastCall().andReturn(ImmediateFuture.newInstance(response));
 
-    EasyMock.expect(jsonConverter.convertToJson(resultObject)).andReturn(resultObject);
+    EasyMock.expect(jsonConverter.convertToJson(response))
+        .andReturn(new JSONObject(Maps.immutableMap("entry", resultObject)));
 
     JSONObject result = new JSONObject();
     result.put("id", "id");
@@ -194,7 +185,7 @@ public class JsonRpcServletTest extends TestCase {
     setupInjector();
 
     String resultObject = "my lovely json";
-    ResponseItem response = new ResponseItem<String>(resultObject);
+    RestfulItem response = new RestfulItem<String>(resultObject);
 
     Future<? extends ResponseItem> responseItemFuture = ImmediateFuture.newInstance(response);
     EasyMock.expect(peopleHandler.handleItem(EasyMock.isA(RequestItem.class)));
@@ -202,8 +193,8 @@ public class JsonRpcServletTest extends TestCase {
     EasyMock.expect(activityHandler.handleItem(EasyMock.isA(RequestItem.class)));
     EasyMock.expectLastCall().andReturn(responseItemFuture);
 
-    EasyMock.expect(jsonConverter.convertToJson(resultObject)).andReturn(resultObject);
-    EasyMock.expect(jsonConverter.convertToJson(resultObject)).andReturn(resultObject);
+    EasyMock.expect(jsonConverter.convertToJson(response))
+        .andStubReturn(new JSONObject(Maps.immutableMap("entry", resultObject)));
 
     JSONArray result = new JSONArray("[{id:'1',data:'my lovely json'}," +
         "{id:'2',data:my lovely json}]");
@@ -226,13 +217,14 @@ public class JsonRpcServletTest extends TestCase {
     setupInjector();
 
     String resultObject = "my lovely json";
-    ResponseItem response = new ResponseItem<String>(resultObject);
+    RestfulItem response = new RestfulItem<String>(resultObject);
 
     Future<? extends ResponseItem> responseItemFuture = ImmediateFuture.newInstance(response);
     EasyMock.expect(peopleHandler.handleItem(EasyMock.isA(RequestItem.class)));
     EasyMock.expectLastCall().andReturn(responseItemFuture);
 
-    EasyMock.expect(jsonConverter.convertToJson(resultObject)).andReturn(resultObject);
+    EasyMock.expect(jsonConverter.convertToJson(response))
+        .andReturn(new JSONObject(Maps.immutableMap("entry", resultObject)));
 
     JSONObject result = new JSONObject("{id:'1',data:'my lovely json'}");
     PrintWriter writerMock = EasyMock.createMock(PrintWriter.class);

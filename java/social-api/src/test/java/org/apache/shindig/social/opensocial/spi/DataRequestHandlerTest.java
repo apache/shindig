@@ -36,19 +36,19 @@ public class DataRequestHandlerTest extends TestCase {
   protected void setUp() throws Exception {
     drh = new DataRequestHandler() {
       protected Future<? extends ResponseItem> handleDelete(RequestItem request) {
-        return ImmediateFuture.newInstance(new ResponseItem<String>("DELETE"));
+        return ImmediateFuture.newInstance(new RestfulItem<String>("DELETE"));
       }
 
       protected Future<? extends ResponseItem> handlePut(RequestItem request) {
-        return ImmediateFuture.newInstance(new ResponseItem<String>("PUT"));
+        return ImmediateFuture.newInstance(new RestfulItem<String>("PUT"));
       }
 
       protected Future<? extends ResponseItem> handlePost(RequestItem request) {
-        return ImmediateFuture.newInstance(new ResponseItem<String>("POST"));
+        return ImmediateFuture.newInstance(new RestfulItem<String>("POST"));
       }
 
       protected Future<? extends ResponseItem> handleGet(RequestItem request) {
-        return ImmediateFuture.newInstance(new ResponseItem<String>("GET"));
+        return ImmediateFuture.newInstance(new RestfulItem<String>("GET"));
       }
     };
   }
@@ -62,7 +62,7 @@ public class DataRequestHandlerTest extends TestCase {
 
   private void verifyItemDispatchMethodCalled(String methodName) throws Exception {
     RestfulRequestItem request = new RestfulRequestItem(null, methodName, null, null);
-    assertEquals(methodName, drh.handleItem(request).get().getResponse());
+    assertEquals(methodName, ((RestfulItem<String>) drh.handleItem(request).get()).getEntry());
   }
 
   public void testHandleMethodSuccess() throws Exception {
@@ -74,7 +74,7 @@ public class DataRequestHandlerTest extends TestCase {
 
   private void verifyDispatchMethodCalled(String methodName) throws Exception {
     RestfulRequestItem request = new RestfulRequestItem(null, methodName, null, null);
-    assertEquals(methodName, drh.handleItem(request).get().getResponse());
+    assertEquals(methodName, ((RestfulItem<String>) drh.handleItem(request).get()).getEntry());
   }
 
   public void testHandleMethodWithInvalidMethod() throws Exception {

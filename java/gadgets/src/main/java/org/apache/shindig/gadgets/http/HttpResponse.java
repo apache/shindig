@@ -126,7 +126,7 @@ public final class HttpResponse {
       .setHttpStatusCode(httpStatusCode)
       .setResponse(getUtf8Bytes(body)));
   }
-  
+
   private static byte[] getUtf8Bytes(String body) {
     try {
       if (body == null) {
@@ -245,7 +245,7 @@ public final class HttpResponse {
    * Get the rewritten version of this content
    *
    * @return A rewritten HttpResponse
-   * TODO: Remove when new rewriting interfaces are complete. 
+   * TODO: Remove when new rewriting interfaces are complete.
    */
   public HttpResponse getRewritten() {
     return rewritten;

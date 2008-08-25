@@ -18,7 +18,6 @@
 package org.apache.shindig.social.opensocial.spi;
 
 import org.apache.shindig.common.SecurityToken;
-import org.apache.shindig.social.ResponseItem;
 import org.apache.shindig.social.opensocial.model.Person;
 import org.apache.shindig.social.sample.spi.JsonDbOpensocialService;
 
@@ -55,7 +54,7 @@ public interface PersonService {
    * @param sortBy How to sort the people
    * @param sortOrder The direction of the sort
    * @param filter How the people should be filtered.
-   * @param filterOperation The operation to filter with 
+   * @param filterOperation The operation to filter with
    * @param filterValue The value to filter with.
    * @param first The index of the first person to fetch.
    * @param max The max number of people to fetch.
@@ -63,7 +62,7 @@ public interface PersonService {
    * @param token The gadget token @return a list of people.
    * TODO(doll): This method is getting way too long. We need to pass a more complex object instead.
    */
-  Future<ResponseItem<RestfulCollection<Person>>> getPeople(Set<UserId> userIds, GroupId groupId,
+  Future<RestfulCollection<Person>> getPeople(Set<UserId> userIds, GroupId groupId,
       SortBy sortBy, SortOrder sortOrder, FilterType filter, FilterOperation filterOperation,
       String filterValue, int first, int max,
       Set<String> fields, SecurityToken token);
@@ -76,5 +75,5 @@ public interface PersonService {
    * @param token The gadget token
    * @return a list of people.
    */
-  Future<ResponseItem<Person>> getPerson(UserId id, Set<String> fields, SecurityToken token);
+  Future<RestfulItem<Person>> getPerson(UserId id, Set<String> fields, SecurityToken token);
 }

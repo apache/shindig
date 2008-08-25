@@ -17,10 +17,17 @@
  */
 package org.apache.shindig.social.opensocial.spi;
 
+import org.apache.shindig.social.ResponseItem;
+import org.apache.shindig.social.ResponseError;
+
 import java.util.Map;
 
-public class DataCollection {
+public class DataCollection extends ResponseItem {
   private Map<String, Map<String, String>> entry;
+
+  public DataCollection(ResponseError error, String errorMessage) {
+    super(error, errorMessage);
+  }
 
   public DataCollection(Map<String, Map<String, String>> entry) {
     this.entry = entry;

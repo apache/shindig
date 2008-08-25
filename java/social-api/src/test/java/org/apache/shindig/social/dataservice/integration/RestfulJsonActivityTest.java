@@ -38,11 +38,12 @@ public class RestfulJsonActivityTest extends AbstractLargeRestfulTests {
 
   /**
    * Expected response for an activity in json:
-   * {
-   *   'id' : '1',
-   *   'userId' : 'john.doe',
-   *   'title' : 'yellow',
-   *   'body' : 'what a color!'
+   * { 'entry' : {
+   *     'id' : '1',
+   *     'userId' : 'john.doe',
+   *     'title' : 'yellow',
+   *     'body' : 'what a color!'
+   *   }
    * }
    *
    * @throws Exception if test encounters an error
@@ -51,16 +52,13 @@ public class RestfulJsonActivityTest extends AbstractLargeRestfulTests {
   public void testGetActivityJson() throws Exception {
     String resp = getJsonResponse("/activities/john.doe/@self/1", "GET");
     JSONObject result = getJson(resp);
-    assertActivitiesEqual(johnsActivity, result);
+    assertActivitiesEqual(johnsActivity, result.getJSONObject("entry"));
   }
 
   /**
    * Expected response for a list of activities in json:
-   * TODO: Fix the question marks...
    *
    * {
-   *  "author" : "<???>",
-   *  "link" : {"rel" : "next", "href" : "<???>"},
    *  "totalResults" : 1,
    *  "startIndex" : 0
    *  "itemsPerPage" : 10 // Note: the js doesn't support paging. Should rest?
@@ -83,10 +81,8 @@ public class RestfulJsonActivityTest extends AbstractLargeRestfulTests {
 
   /**
    * Expected response for a list of activities in json:
-   * TODO: Fix the question marks...
    *
    * {
-   *  "author" : "<???>",
    *  "totalResults" : 3,
    *  "startIndex" : 0
    *  "itemsPerPage" : 10 // Note: the js doesn't support paging. Should rest?

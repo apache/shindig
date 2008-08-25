@@ -23,10 +23,10 @@ import org.apache.shindig.social.ResponseError;
 import org.apache.shindig.social.ResponseItem;
 import org.apache.shindig.social.opensocial.service.DataRequestHandler;
 import org.apache.shindig.social.opensocial.service.RequestItem;
+import org.apache.shindig.social.opensocial.spi.RestfulItem;
 import org.apache.shindig.social.sample.spi.JsonDbOpensocialService;
 
 import com.google.inject.Inject;
-
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpMethod;
 import org.apache.commons.httpclient.methods.GetMethod;
@@ -66,7 +66,7 @@ public class SampleContainerHandler extends DataRequestHandler {
    * urls aren't very resty. Consider changing the samplecontainer.html calls post.
    */
   protected Future<? extends ResponseItem> handlePost(RequestItem request) {
-    ResponseItem<Object> response = new ResponseItem<Object>("");
+    ResponseItem response = new ResponseItem(null, null);
 
     request.applyUrlTemplate(POST_PATH);
     String type = request.getParameter("type");
@@ -75,12 +75,12 @@ public class SampleContainerHandler extends DataRequestHandler {
         String stateFile = request.getParameter("fileurl");
         service.setDb(new JSONObject(fetchStateDocument(stateFile)));
       } catch (JSONException e) {
-        response = new ResponseItem<Object>(ResponseError.BAD_REQUEST,
-            "The json state file was not valid json", null);
+        response = new ResponseItem(ResponseError.BAD_REQUEST,
+            "The json state file was not valid json");
       }
     } else if (type.equals("setevilness")) {
-      response = new ResponseItem<Object>(ResponseError.NOT_IMPLEMENTED,
-          "evil data has not been implemented yet", null);
+      response = new ResponseItem(ResponseError.NOT_IMPLEMENTED,
+          "evil data has not been implemented yet");
     }
 
     return ImmediateFuture.newInstance(response);
@@ -90,7 +90,7 @@ public class SampleContainerHandler extends DataRequestHandler {
    * Handles /samplecontainer/dumpstate
    */
   protected Future<? extends ResponseItem> handleGet(RequestItem request) {
-    return ImmediateFuture.newInstance(new ResponseItem<Object>(service.getDb()));
+    return ImmediateFuture.newInstance(new RestfulItem<JSONObject>(service.getDb()));
   }
 
   private String fetchStateDocument(String stateFileLocation) {

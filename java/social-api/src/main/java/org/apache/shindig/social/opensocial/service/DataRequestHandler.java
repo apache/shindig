@@ -36,7 +36,7 @@ public abstract class DataRequestHandler {
 
   public Future<? extends ResponseItem> handleItem(RequestItem request) {
     if (request.getOperation() == null) {
-      return error(ResponseError.NOT_IMPLEMENTED, "Unserviced operation ", null);
+      return error(ResponseError.NOT_IMPLEMENTED, "Unserviced operation ");
     }
     String operation = request.getOperation().toLowerCase();
     Future<? extends ResponseItem> responseItem;
@@ -50,13 +50,13 @@ public abstract class DataRequestHandler {
       } else if (DELETE_SYNONYMS.contains(operation)) {
         responseItem = handleDelete(request);
       } else {
-        return error(ResponseError.NOT_IMPLEMENTED, "Unserviced operation", operation);
+        return error(ResponseError.NOT_IMPLEMENTED, "Unserviced operation " + operation);
       }
     } catch (IllegalArgumentException iae) {
       // Upconvert IllegalArgumentExceptions to BAD_REQUEST.
-      return error(ResponseError.BAD_REQUEST, iae.getMessage(), null);
+      return error(ResponseError.BAD_REQUEST, iae.getMessage());
     } catch (Throwable t) {
-      return error(ResponseError.INTERNAL_ERROR, "Unknown error " + t.getMessage(), null);
+      return error(ResponseError.INTERNAL_ERROR, "Unknown error " + t.getMessage());
     }
     return responseItem;
   }
@@ -72,8 +72,8 @@ public abstract class DataRequestHandler {
   /**
    * Create standard error messages as futures
    */
-  protected Future<? extends ResponseItem> error(ResponseError type, String message, Object data) {
-    return ImmediateFuture.newInstance(new ResponseItem<Object>(type, message, data));
+  protected Future<? extends ResponseItem> error(ResponseError type, String message) {
+    return ImmediateFuture.newInstance(new ResponseItem(type, message));
   }
 
   /**
