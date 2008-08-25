@@ -64,10 +64,7 @@
 "ethnicity" : "developer",
 "fashion" : "t-shirts",
 "food" : ["sushi","burgers"],
-"gender" : {
-"key" : "MALE",
-"displayValue" : "Male"
-},
+"gender" : "male",
 "happiestWhen" : "coding",
 "hasApp" : true,
 "heroes" : ["Doug Crockford", "Charles Babbage"],
@@ -187,10 +184,7 @@
 },
 {
 "id" : "john.doe",
-"gender" : {
-"key" : "MALE",
-"displayValue" : "Male"
-},
+"gender" : "male",
 "hasApp" : true,
 "name" : {
 "familyName" : "Doe",
@@ -200,10 +194,7 @@
 },
 {
 "id" : "jane.doe",
-"gender" : {
-"key" : "FEMALE",
-"displayValue" : "Female"
-},
+"gender" : "female",
 "hasApp" : true,
 "name" : {
 "familyName" : "Doe",
@@ -213,10 +204,7 @@
 },
 {
 "id" : "george.doe",
-"gender" : {
-"key" : "MALE",
-"displayValue" : "Female"
-},
+"gender" : "male",
 "hasApp" : true,
 "name" : {
 "familyName" : "Doe",
@@ -226,10 +214,7 @@
 },
 {
 "id" : "mario.rossi",
-"gender" : {
-"key" : "MALE",
-"displayValue" : "Male"
-},
+"gender" : "male",
 "hasApp" : true,
 "name" : {
 "familyName" : "Rossi",
@@ -239,10 +224,7 @@
 },
 {
 "id" : "maija.m",
-"gender" : {
-"key" : "FEMALE",
-"displayValue" : "Female"
-},
+"gender" : "female",
 "hasApp" : true,
 "name" : {
 "familyName" : "Meikäläinen",

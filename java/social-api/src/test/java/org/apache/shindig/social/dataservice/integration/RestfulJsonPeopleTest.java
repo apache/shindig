@@ -101,7 +101,7 @@ public class RestfulJsonPeopleTest extends AbstractLargeRestfulTests {
     canonical.setEthnicity("developer");
     canonical.setFashion("t-shirts");
     canonical.setFood(Lists.newArrayList("sushi", "burgers"));
-    canonical.setGender(new EnumImpl<Enum.Gender>(Enum.Gender.MALE));
+    canonical.setGender(Person.Gender.male);
     canonical.setHappiestWhen("coding");
     canonical.setHasApp(true);
     canonical.setHeroes(Lists.newArrayList("Doug Crockford", "Charles Babbage"));
@@ -279,7 +279,7 @@ public class RestfulJsonPeopleTest extends AbstractLargeRestfulTests {
     assertStringField(result, canonical.getEthnicity(), Person.Field.ETHNICITY);
     assertStringField(result, canonical.getFashion(), Person.Field.FASHION);
     assertStringListField(result, canonical.getFood(), Person.Field.FOOD);
-    assertEnumField(result, canonical.getGender(), Person.Field.GENDER);
+    assertStringField(result, canonical.getGender().toString(), Person.Field.GENDER);
     assertStringField(result, canonical.getHappiestWhen(),
         Person.Field.HAPPIEST_WHEN);
     assertBooleanField(result, canonical.getHasApp(), Person.Field.HAS_APP);

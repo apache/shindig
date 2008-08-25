@@ -38,6 +38,10 @@ public interface Person {
   public static final String PROFILE_URL_TYPE = "profile";
   public static final String THUMBNAIL_PHOTO_TYPE = "thumbnail";
 
+  public enum Gender {
+    female, male
+  }
+
   /**
    * The fields that represent the person object ion json form.
    */
@@ -453,20 +457,18 @@ public interface Person {
   void setFood(List<String> food);
 
   /**
-   * Get a person's gender, specified as an {@link Enum} with the enum's key referencing
-   * {@link Enum.Gender} Container support for this field is OPTIONAL.
+   * Get a person's gender, specified as an {@link Gender}
    *
    * @return the person's gender
    */
-  Enum<Enum.Gender> getGender();
+  Gender getGender();
 
   /**
-   * Set a person's gender, specified as an {@link Enum} with the enum's key referencing
-   * {@link Enum.Gender} Container support for this field is OPTIONAL.
+   * Set a person's gender, specified as an {@link Gender}
    *
    * @param newGender the person's gender
    */
-  void setGender(Enum<Enum.Gender> newGender);
+  void setGender(Gender newGender);
 
   /**
    * Get a description of when the person is happiest, specified as a string. Container support for
