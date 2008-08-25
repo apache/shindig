@@ -88,7 +88,7 @@ public class JsonDbOpensocialServiceTest extends TestCase {
     ResponseItem<RestfulCollection<Person>> responseItem = db.getPeople(
         Sets.newHashSet(CANON_USER), new GroupId(GroupId.Type.friends, null),
         PersonService.SortBy.topFriends, PersonService.SortOrder.ascending,
-        PersonService.FilterType.all, 0,
+        PersonService.FilterType.all, PersonService.FilterOperation.contains, "", 0,
         Integer.MAX_VALUE, Collections.<String>emptySet(), token).get();
     assertNotNull(responseItem.getResponse());
     assertEquals(responseItem.getResponse().getTotalResults(), 4);
@@ -101,7 +101,7 @@ public class JsonDbOpensocialServiceTest extends TestCase {
     ResponseItem<RestfulCollection<Person>> responseItem = db.getPeople(
         Sets.newLinkedHashSet(JOHN_DOE, JANE_DOE), new GroupId(GroupId.Type.friends, null),
         PersonService.SortBy.topFriends, PersonService.SortOrder.ascending,
-        PersonService.FilterType.all, 0,
+        PersonService.FilterType.all, PersonService.FilterOperation.contains, "", 0,
         Integer.MAX_VALUE, Collections.<String>emptySet(), token).get();
     assertNotNull(responseItem.getResponse());
     assertEquals(responseItem.getResponse().getTotalResults(), 4);

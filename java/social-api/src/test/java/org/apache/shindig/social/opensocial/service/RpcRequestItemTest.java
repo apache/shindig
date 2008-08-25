@@ -122,6 +122,22 @@ public class RpcRequestItemTest extends TestCase {
     assertEquals(PersonService.FilterType.hasApp, request.getFilterBy());
   }
 
+  public void testFilterOperation() throws Exception {
+    request.setParameter("filterOp", null);
+    assertEquals(PersonService.FilterOperation.contains, request.getFilterOperation());
+
+    request.setParameter("filterOp", "equals");
+    assertEquals(PersonService.FilterOperation.equals, request.getFilterOperation());
+  }
+
+  public void testFilterValue() throws Exception {
+    request.setParameter("filterValue", null);
+    assertEquals("", request.getFilterValue());
+
+    request.setParameter("filterValue", "cassie");
+    assertEquals("cassie", request.getFilterValue());
+  }
+
   public void testFields() throws Exception {
     request.setListParameter("fields", Collections.<String>emptyList());
     assertEquals(Sets.<String>newHashSet(), request.getFields());
