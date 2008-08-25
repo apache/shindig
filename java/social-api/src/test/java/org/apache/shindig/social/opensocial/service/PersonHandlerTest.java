@@ -73,6 +73,7 @@ public class PersonHandlerTest extends TestCase {
   private void setPath(String path) {
     Map<String, String> params = Maps.newHashMap();
     params.put("sortBy", null);
+    params.put("sortOrder", null);
     params.put("filterBy", null);
     params.put("startIndex", null);
     params.put("count", null);
@@ -96,6 +97,7 @@ public class PersonHandlerTest extends TestCase {
         JOHN_DOE,
         new GroupId(GroupId.Type.all, null),
         PersonService.SortOrder.topFriends,
+        PersonService.SortDirection.ascending,
         PersonService.FilterType.all, 0, 20,
         DEFAULT_FIELDS,
         token))
@@ -115,6 +117,7 @@ public class PersonHandlerTest extends TestCase {
         JOHN_DOE,
         new GroupId(GroupId.Type.friends, null),
         PersonService.SortOrder.topFriends,
+        PersonService.SortDirection.ascending,
         PersonService.FilterType.all, 0, 20,
         DEFAULT_FIELDS,
         token))
@@ -126,11 +129,13 @@ public class PersonHandlerTest extends TestCase {
   }
 
   public void testHandleGetFriendsWithParams() throws Exception {
-    PersonService.SortOrder order = PersonService.SortOrder.name;
+    PersonService.SortOrder sortBy = PersonService.SortOrder.name;
+    PersonService.SortDirection sortOrder = PersonService.SortDirection.descending;
     PersonService.FilterType filter = PersonService.FilterType.topFriends;
 
     Map<String, String> params = Maps.newHashMap();
-    params.put("sortBy", order.toString());
+    params.put("sortBy", sortBy.toString());
+    params.put("sortOrder", sortOrder.toString());
     params.put("filterBy", filter.toString());
     params.put("startIndex", "5");
     params.put("count", "10");
@@ -142,7 +147,7 @@ public class PersonHandlerTest extends TestCase {
         = new ResponseItem<RestfulCollection<Person>>(null);
     EasyMock.expect(personService.getPeople(
         JOHN_DOE,
-        new GroupId(GroupId.Type.friends, null), order,
+        new GroupId(GroupId.Type.friends, null), sortBy, sortOrder,
         filter, 5, 10, Sets.newLinkedHashSet("money", "fame", "fortune"), token))
         .andReturn(ImmediateFuture.newInstance(data));
 
@@ -186,6 +191,7 @@ public class PersonHandlerTest extends TestCase {
     EasyMock.expect(personService.getPeople(userIdSet,
         new GroupId(GroupId.Type.self, null),
         PersonService.SortOrder.topFriends,
+        PersonService.SortDirection.ascending,
         PersonService.FilterType.all, 0, 20,
         DEFAULT_FIELDS,
         token)).andReturn(ImmediateFuture.newInstance(data));

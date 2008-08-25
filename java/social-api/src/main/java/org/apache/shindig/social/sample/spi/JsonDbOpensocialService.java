@@ -239,8 +239,8 @@ public class JsonDbOpensocialService implements ActivityService, PersonService, 
   }
 
   public Future<ResponseItem<RestfulCollection<Person>>> getPeople(Set<UserId> userIds,
-      GroupId groupId, SortOrder sortOrder, FilterType filter, int first, int max,
-      Set<String> fields, SecurityToken token) {
+      GroupId groupId, SortOrder sortBy, SortDirection sortOrder, FilterType filter, int first,
+      int max, Set<String> fields, SecurityToken token) {
     List<Person> result = Lists.newArrayList();
     try {
       JSONArray people = db.getJSONArray(PEOPLE_TABLE);
@@ -257,8 +257,12 @@ public class JsonDbOpensocialService implements ActivityService, PersonService, 
       }
 
       // We can pretend that by default the people are in top friends order
-      if (sortOrder.equals(PersonService.SortOrder.name)) {
+      if (sortBy.equals(PersonService.SortOrder.name)) {
         Collections.sort(result, NAME_COMPARATOR);
+      }
+
+      if (sortOrder.equals(SortDirection.descending)) {
+        Collections.reverse(result);
       }
 
       // TODO: The samplecontainer doesn't really have the concept of HAS_APP so

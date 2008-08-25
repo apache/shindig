@@ -79,8 +79,8 @@ public class PersonHandler extends DataRequestHandler {
           return personService.getPerson(userIds.iterator().next(), fields, request.getToken());
         } else {
           return personService.getPeople(userIds, groupId, request.getSortBy(),
-              request.getFilterBy(), request.getStartIndex(), request.getCount(),
-              fields, request.getToken());
+              request.getSortOrder(), request.getFilterBy(), request.getStartIndex(),
+              request.getCount(), fields, request.getToken());
         }
       } else if (optionalPersonId.size() == 1) {
         // TODO: Add some crazy concept to handle the userId?
@@ -94,14 +94,14 @@ public class PersonHandler extends DataRequestHandler {
         }
         // Every other case is a collection response of optional person ids
         return personService.getPeople(personIds, new GroupId(GroupId.Type.self, null),
-            request.getSortBy(), request.getFilterBy(), request.getStartIndex(),
-            request.getCount(), fields, request.getToken());
+            request.getSortBy(), request.getSortOrder(), request.getFilterBy(),
+            request.getStartIndex(), request.getCount(), fields, request.getToken());
       }
     }
 
     // Every other case is a collection response.
     return personService.getPeople(userIds, groupId, request.getSortBy(),
-        request.getFilterBy(), request.getStartIndex(), request.getCount(),
+        request.getSortOrder(), request.getFilterBy(), request.getStartIndex(), request.getCount(),
         fields, request.getToken());
   }
 }
