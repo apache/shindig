@@ -227,7 +227,7 @@ JsonRpcContainer.prototype.newFetchPeopleRequest = function(idSpec,
     rpc.params.count = opt_params['max'];
   }
   if (opt_params['sortOrder']) {
-    rpc.params.orderBy = opt_params['sortOrder'];
+    rpc.params.sortBy = opt_params['sortOrder'];
   }
   if (opt_params['filter']) {
     rpc.params.filterBy = opt_params['filter'];

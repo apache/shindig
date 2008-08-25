@@ -78,7 +78,7 @@ public class PersonHandler extends DataRequestHandler {
         if (groupId.getType() == GroupId.Type.self) {
           return personService.getPerson(userIds.iterator().next(), fields, request.getToken());
         } else {
-          return personService.getPeople(userIds, groupId, request.getOrderBy(),
+          return personService.getPeople(userIds, groupId, request.getSortBy(),
               request.getFilterBy(), request.getStartIndex(), request.getCount(),
               fields, request.getToken());
         }
@@ -94,13 +94,13 @@ public class PersonHandler extends DataRequestHandler {
         }
         // Every other case is a collection response of optional person ids
         return personService.getPeople(personIds, new GroupId(GroupId.Type.self, null),
-            request.getOrderBy(), request.getFilterBy(), request.getStartIndex(),
+            request.getSortBy(), request.getFilterBy(), request.getStartIndex(),
             request.getCount(), fields, request.getToken());
       }
     }
 
     // Every other case is a collection response.
-    return personService.getPeople(userIds, groupId, request.getOrderBy(),
+    return personService.getPeople(userIds, groupId, request.getSortBy(),
         request.getFilterBy(), request.getStartIndex(), request.getCount(),
         fields, request.getToken());
   }
