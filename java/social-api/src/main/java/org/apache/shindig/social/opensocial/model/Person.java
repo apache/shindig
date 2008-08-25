@@ -19,13 +19,13 @@ package org.apache.shindig.social.opensocial.model;
 
 import org.apache.shindig.social.core.model.PersonImpl;
 
-import com.google.inject.ImplementedBy;
 import com.google.common.collect.Maps;
+import com.google.inject.ImplementedBy;
 
 import java.util.Date;
 import java.util.List;
-import java.util.Set;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * see http://code.google.com/apis/opensocial/docs/0.8/reference/#opensocial.Person.Field for all
@@ -641,7 +641,7 @@ public interface Person {
    *
    * @return person's statement about who or what they are looking for
    */
-  String getLookingFor();
+  List<Enum<Enum.LookingFor>> getLookingFor();
 
   /**
    * Get a person's statement about who or what they are looking for, or what they are interested in
@@ -650,7 +650,7 @@ public interface Person {
    *
    * @param lookingFor person's statement about who or what they are looking for
    */
-  void setLookingFor(String lookingFor);
+  void setLookingFor(List<Enum<Enum.LookingFor>> lookingFor);
 
   /**
    * Get the Person's favorite movies, specified as an List of strings. Container support for this

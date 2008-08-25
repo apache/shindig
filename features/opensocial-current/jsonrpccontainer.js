@@ -284,7 +284,7 @@ JsonRpcContainer.prototype.newFetchPersonAppDataRequest = function(idSpec, keys,
     opt_params) {
   var rpc = { method : "appdata.get" };
   rpc.params = this.translateIdSpec(idSpec);
-  rpc.params.app = "@app";
+  rpc.params.appId = "@app";
   rpc.params.fields = this.getFieldsList(keys);
   if (idSpec.getField('networkDistance')) {
     rpc.params.networkDistance = idSpec.getField('networkDistance');
@@ -300,7 +300,7 @@ JsonRpcContainer.prototype.newUpdatePersonAppDataRequest = function(id, key,
     value) {
   var rpc = { method : "appdata.update" };
   rpc.params = this.translateIdSpec(this.makeIdSpec(id));
-  rpc.params.app = "@app";
+  rpc.params.appId = "@app";
   rpc.params.data = {};
   rpc.params.data[key] = value;
   return new JsonRpcRequestItem(rpc);
@@ -309,7 +309,7 @@ JsonRpcContainer.prototype.newUpdatePersonAppDataRequest = function(id, key,
 JsonRpcContainer.prototype.newRemovePersonAppDataRequest = function(id, keys) {
   var rpc = { method : "appdata.delete" };
   rpc.params = this.translateIdSpec(this.makeIdSpec(id));
-  rpc.params.app = "@app";
+  rpc.params.appId = "@app";
   rpc.params.keys = keys;
 
   return new JsonRpcRequestItem(rpc);
@@ -350,7 +350,7 @@ JsonRpcContainer.prototype.newCreateActivityRequest = function(idSpec,
     activity) {
   var rpc = { method : "activities.create" };
   rpc.params = this.translateIdSpec(idSpec);
-  rpc.params.app = "@app";
+  rpc.params.appId = "@app";
   if (idSpec.getField('networkDistance')) {
     rpc.params.networkDistance = idSpec.getField('networkDistance');
   }

@@ -63,7 +63,7 @@ public class PersonImpl implements Person {
   private List<String> languagesSpoken;
   private Date updated;
   private String livingArrangement;
-  private String lookingFor;
+  private List<Enum<Enum.LookingFor>> lookingFor;
   private List<String> movies;
   private List<String> music;
   private Name name;
@@ -320,11 +320,11 @@ public class PersonImpl implements Person {
     this.livingArrangement = livingArrangement;
   }
 
-  public String getLookingFor() {
+  public List<Enum<Enum.LookingFor>> getLookingFor() {
     return lookingFor;
   }
 
-  public void setLookingFor(String lookingFor) {
+  public void setLookingFor(List<Enum<Enum.LookingFor>> lookingFor) {
     this.lookingFor = lookingFor;
   }
 

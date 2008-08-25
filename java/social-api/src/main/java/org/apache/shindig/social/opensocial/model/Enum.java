@@ -176,6 +176,37 @@ public interface Enum<E extends Enum.EnumKey> {
   }
 
   /**
+   * public java.lang.Enum for opensocial.Enum.LookingFor
+   */
+  public enum LookingFor implements EnumKey {
+
+    DATING("DATING", "Dating"),
+    FRIENDS("FRIENDS", "Friends"),
+    RELATIONSHIP("RELATIONSHIP", "Relationship"),
+    NETWORKING("NETWORKING", "Networking"),
+    ACTIVITY_PARTNERS("ACTIVITY_PARTNERS", "Activity partners"),
+    RANDOM("RANDOM", "Random");
+
+    private final String jsonString;
+
+    private final String displayValue;
+
+    private LookingFor(String jsonString, String displayValue) {
+      this.jsonString = jsonString;
+      this.displayValue = displayValue;
+    }
+
+    @Override
+    public String toString() {
+      return this.jsonString;
+    }
+
+    public String getDisplayValue() {
+      return displayValue;
+    }
+  }
+
+  /**
    * Gets the value of this Enum. This is the string displayed to the user. If the container
    * supports localization, the string should be localized.
    *
