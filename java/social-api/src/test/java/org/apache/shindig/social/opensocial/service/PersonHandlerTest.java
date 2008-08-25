@@ -96,8 +96,8 @@ public class PersonHandlerTest extends TestCase {
     EasyMock.expect(personService.getPeople(
         JOHN_DOE,
         new GroupId(GroupId.Type.all, null),
-        PersonService.SortOrder.topFriends,
-        PersonService.SortDirection.ascending,
+        PersonService.SortBy.topFriends,
+        PersonService.SortOrder.ascending,
         PersonService.FilterType.all, 0, 20,
         DEFAULT_FIELDS,
         token))
@@ -116,8 +116,8 @@ public class PersonHandlerTest extends TestCase {
     EasyMock.expect(personService.getPeople(
         JOHN_DOE,
         new GroupId(GroupId.Type.friends, null),
-        PersonService.SortOrder.topFriends,
-        PersonService.SortDirection.ascending,
+        PersonService.SortBy.topFriends,
+        PersonService.SortOrder.ascending,
         PersonService.FilterType.all, 0, 20,
         DEFAULT_FIELDS,
         token))
@@ -129,8 +129,8 @@ public class PersonHandlerTest extends TestCase {
   }
 
   public void testHandleGetFriendsWithParams() throws Exception {
-    PersonService.SortOrder sortBy = PersonService.SortOrder.name;
-    PersonService.SortDirection sortOrder = PersonService.SortDirection.descending;
+    PersonService.SortBy sortBy = PersonService.SortBy.name;
+    PersonService.SortOrder sortOrder = PersonService.SortOrder.descending;
     PersonService.FilterType filter = PersonService.FilterType.topFriends;
 
     Map<String, String> params = Maps.newHashMap();
@@ -190,8 +190,8 @@ public class PersonHandlerTest extends TestCase {
     userIdSet.add(new UserId(UserId.Type.userId, "jane.doe"));
     EasyMock.expect(personService.getPeople(userIdSet,
         new GroupId(GroupId.Type.self, null),
-        PersonService.SortOrder.topFriends,
-        PersonService.SortDirection.ascending,
+        PersonService.SortBy.topFriends,
+        PersonService.SortOrder.ascending,
         PersonService.FilterType.all, 0, 20,
         DEFAULT_FIELDS,
         token)).andReturn(ImmediateFuture.newInstance(data));

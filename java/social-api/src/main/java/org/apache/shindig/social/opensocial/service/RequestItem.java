@@ -115,18 +115,18 @@ public abstract class RequestItem {
     return count == null ? DEFAULT_COUNT : Integer.valueOf(count);
   }
 
-  public PersonService.SortOrder getSortBy() {
+  public PersonService.SortBy getSortBy() {
     String sortBy = getParameter(SORT_BY);
     return sortBy == null
-        ? PersonService.SortOrder.topFriends
-        : PersonService.SortOrder.valueOf(sortBy);
+        ? PersonService.SortBy.topFriends
+        : PersonService.SortBy.valueOf(sortBy);
   }
 
-  public PersonService.SortDirection getSortOrder() {
+  public PersonService.SortOrder getSortOrder() {
     String sortOrder = getParameter(SORT_ORDER);
     return sortOrder == null
-        ? PersonService.SortDirection.ascending
-        : PersonService.SortDirection.valueOf(sortOrder);
+        ? PersonService.SortOrder.ascending
+        : PersonService.SortOrder.valueOf(sortOrder);
   }
 
   public PersonService.FilterType getFilterBy() {

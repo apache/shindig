@@ -31,11 +31,11 @@ import java.util.concurrent.Future;
 
 public interface PersonService {
 
-  public enum SortOrder {
+  public enum SortBy {
     topFriends, name
   }
 
-  public enum SortDirection {
+  public enum SortOrder {
     ascending, descending
   }
 
@@ -57,7 +57,7 @@ public interface PersonService {
    * @param token The gadget token @return a list of people.
    */
   Future<ResponseItem<RestfulCollection<Person>>> getPeople(Set<UserId> userIds, GroupId groupId,
-      SortOrder sortBy, SortDirection sortOrder, FilterType filter, int first, int max,
+      SortBy sortBy, SortOrder sortOrder, FilterType filter, int first, int max,
       Set<String> fields, SecurityToken token);
 
   /**
