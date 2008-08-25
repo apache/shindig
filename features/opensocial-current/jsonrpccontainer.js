@@ -277,6 +277,12 @@ JsonRpcContainer.prototype.createPersonFromJson = function(serverJson) {
     }
   }
 
+  if (serverJson.phoneNumbers) {
+    for (var p = 0; p < serverJson.phoneNumbers.length; p++) {
+      serverJson.phoneNumbers[p].number = serverJson.phoneNumbers[p].value;
+    }
+  }
+
   if (serverJson.birthday) {
     serverJson.dateOfBirth = serverJson.birthday;
   }

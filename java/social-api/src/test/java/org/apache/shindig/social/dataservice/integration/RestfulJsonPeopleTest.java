@@ -24,7 +24,6 @@ import org.apache.shindig.social.core.model.ListFieldImpl;
 import org.apache.shindig.social.core.model.NameImpl;
 import org.apache.shindig.social.core.model.OrganizationImpl;
 import org.apache.shindig.social.core.model.PersonImpl;
-import org.apache.shindig.social.core.model.PhoneImpl;
 import org.apache.shindig.social.core.model.UrlImpl;
 import org.apache.shindig.social.opensocial.model.Address;
 import org.apache.shindig.social.opensocial.model.BodyType;
@@ -33,12 +32,10 @@ import org.apache.shindig.social.opensocial.model.ListField;
 import org.apache.shindig.social.opensocial.model.Name;
 import org.apache.shindig.social.opensocial.model.Organization;
 import org.apache.shindig.social.opensocial.model.Person;
-import org.apache.shindig.social.opensocial.model.Phone;
 import org.apache.shindig.social.opensocial.model.Url;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -148,8 +145,8 @@ public class RestfulJsonPeopleTest extends AbstractLargeRestfulTests {
     canonical.setNetworkPresence(new EnumImpl<Enum.NetworkPresence>(Enum.NetworkPresence.ONLINE));
     canonical.setNickname("diggy");
     canonical.setPets("dog,cat");
-    canonical.setPhoneNumbers(Lists.<Phone>newArrayList(new PhoneImpl("111-111-111", "work"),
-        new PhoneImpl("999-999-999", "mobile")));
+    canonical.setPhoneNumbers(Lists.<ListField>newArrayList(new ListFieldImpl("work", "111-111-111"),
+        new ListFieldImpl("mobile", "999-999-999")));
 
     canonical.setPoliticalViews("open leaning");
     canonical.setProfileSong(new UrlImpl("http://www.example.org/songs/OnlyTheLonely.mp3",
@@ -318,12 +315,12 @@ public class RestfulJsonPeopleTest extends AbstractLargeRestfulTests {
     assertEquals(canonical.getPhoneNumbers().size(), phoneArray.length());
 
     for (int i = 0; i < canonical.getPhoneNumbers().size(); i++) {
-      Phone expectedPhone = canonical.getPhoneNumbers().get(i);
+      ListField expectedPhone = canonical.getPhoneNumbers().get(i);
       JSONObject actualPhone = phoneArray.getJSONObject(i);
       assertEquals(expectedPhone.getType(), actualPhone.getString(
-          Phone.Field.TYPE.toString()));
-      assertEquals(expectedPhone.getNumber(), actualPhone.getString(
-          Phone.Field.NUMBER.toString()));
+          ListField.Field.TYPE.toString()));
+      assertEquals(expectedPhone.getValue(), actualPhone.getString(
+          ListField.Field.VALUE.toString()));
     }
 
     assertStringField(result, canonical.getPoliticalViews(),

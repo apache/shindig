@@ -25,7 +25,6 @@ import org.apache.shindig.social.opensocial.model.ListField;
 import org.apache.shindig.social.opensocial.model.Name;
 import org.apache.shindig.social.opensocial.model.Organization;
 import org.apache.shindig.social.opensocial.model.Person;
-import org.apache.shindig.social.opensocial.model.Phone;
 import org.apache.shindig.social.opensocial.model.Url;
 
 import com.google.common.collect.Lists;
@@ -73,7 +72,7 @@ public class PersonImpl implements Person {
   private Enum<Enum.NetworkPresence> networkPresence;
   private String nickname;
   private String pets;
-  private List<Phone> phoneNumbers;
+  private List<ListField> phoneNumbers;
   private List<ListField> photos;
   private String politicalViews;
   private Url profileSong;
@@ -395,11 +394,11 @@ public class PersonImpl implements Person {
     this.pets = pets;
   }
 
-  public List<Phone> getPhoneNumbers() {
+  public List<ListField> getPhoneNumbers() {
     return phoneNumbers;
   }
 
-  public void setPhoneNumbers(List<Phone> phoneNumbers) {
+  public void setPhoneNumbers(List<ListField> phoneNumbers) {
     this.phoneNumbers = phoneNumbers;
   }
 

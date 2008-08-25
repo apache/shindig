@@ -24,14 +24,12 @@ import org.apache.shindig.social.core.model.ListFieldImpl;
 import org.apache.shindig.social.core.model.MediaItemImpl;
 import org.apache.shindig.social.core.model.NameImpl;
 import org.apache.shindig.social.core.model.PersonImpl;
-import org.apache.shindig.social.core.model.PhoneImpl;
 import org.apache.shindig.social.core.util.BeanJsonConverter;
 import org.apache.shindig.social.opensocial.model.Activity;
 import org.apache.shindig.social.opensocial.model.Address;
 import org.apache.shindig.social.opensocial.model.ListField;
 import org.apache.shindig.social.opensocial.model.MediaItem;
 import org.apache.shindig.social.opensocial.model.Person;
-import org.apache.shindig.social.opensocial.model.Phone;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
@@ -52,10 +50,10 @@ public class BeanJsonConverterTest extends TestCase {
   public void setUp() throws Exception {
     super.setUp();
     johnDoe = new PersonImpl("johnDoeId", new NameImpl("John Doe"));
-    johnDoe.setPhoneNumbers(Lists.<Phone>newArrayList(
-        new PhoneImpl("+33H000000000", "home"),
-        new PhoneImpl("+33M000000000", "mobile"),
-        new PhoneImpl("+33W000000000", "work")));
+    johnDoe.setPhoneNumbers(Lists.<ListField>newArrayList(
+        new ListFieldImpl("home", "+33H000000000"),
+        new ListFieldImpl("mobile", "+33M000000000"),
+        new ListFieldImpl("work", "+33W000000000")));
 
     johnDoe.setAddresses(Lists.<Address>newArrayList(new AddressImpl("My home address")));
 
@@ -109,10 +107,10 @@ public class BeanJsonConverterTest extends TestCase {
     assertEquals(3, phoneArray.length());
 
     for (int i = 0; i < johnDoe.getPhoneNumbers().size(); i++) {
-      Phone expectedPhone = johnDoe.getPhoneNumbers().get(i);
+      ListField expectedPhone = johnDoe.getPhoneNumbers().get(i);
       JSONObject actualPhone = phoneArray.getJSONObject(i);
       assertEquals(expectedPhone.getType(), actualPhone.getString("type"));
-      assertEquals(expectedPhone.getNumber(), actualPhone.getString("number"));
+      assertEquals(expectedPhone.getValue(), actualPhone.getString("value"));
     }
 
     JSONArray emailArray = result.getJSONArray("emails");

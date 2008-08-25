@@ -755,20 +755,18 @@ public interface Person {
   void setPets(String pets);
 
   /**
-   * Get the Phone numbers associated with the person, specified as an List of {@link Phones}.
-   * Container support for this field is OPTIONAL.
+   * Get the Phone numbers associated with the person.
    *
    * @return the Phone numbers associated with the person
    */
-  List<Phone> getPhoneNumbers();
+  List<ListField> getPhoneNumbers();
 
   /**
-   * Set the Phone numbers associated with the person, specified as an List of {@link Phones}.
-   * Container support for this field is OPTIONAL.
+   * Set the Phone numbers associated with the person.
    *
    * @param phoneNumbers the Phone numbers associated with the person
    */
-  void setPhoneNumbers(List<Phone> phoneNumbers);
+  void setPhoneNumbers(List<ListField> phoneNumbers);
 
   List<ListField> getPhotos();
 
