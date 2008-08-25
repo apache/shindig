@@ -53,7 +53,7 @@ public class PersonImpl implements Person {
   private String ethnicity;
   private String fashion;
   private List<String> food;
-  private Enum<Enum.Gender> gender;
+  private Gender gender;
   private String happiestWhen;
   private Boolean hasApp;
   private List<String> heroes;
@@ -235,11 +235,11 @@ public class PersonImpl implements Person {
     this.food = food;
   }
 
-  public Enum<Enum.Gender> getGender() {
-    return this.gender;
+  public Gender getGender() {
+    return gender;
   }
 
-  public void setGender(Enum<Enum.Gender> newGender) {
+  public void setGender(Gender newGender) {
     this.gender = newGender;
   }
 

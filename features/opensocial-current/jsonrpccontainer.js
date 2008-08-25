@@ -288,7 +288,12 @@ JsonRpcContainer.prototype.createPersonFromJson = function(serverJson) {
   if (serverJson.addresses) {
     for (var j = 0; j < serverJson.addresses.length; j++) {
       serverJson.addresses[j].unstructuredAddress = serverJson.addresses[j].formatted;
-    }    
+    }
+  }
+
+  if (serverJson.gender) {
+    var key = serverJson.gender == 'male' ? 'MALE' : 'FEMALE';
+    serverJson.gender = {key : key, displayValue : serverJson.gender};
   }
 
   return new JsonPerson(serverJson);

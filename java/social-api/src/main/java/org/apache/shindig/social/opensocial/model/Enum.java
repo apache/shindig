@@ -85,33 +85,6 @@ public interface Enum<E extends Enum.EnumKey> {
   }
 
   /**
-   * public java.lang.Enum for opensocial.Enum.Gender.
-   */
-  public enum Gender implements EnumKey {
-
-    FEMALE("FEMALE", "Female"),
-    MALE("MALE", "Male");
-
-    private final String jsonString;
-
-    private final String displayValue;
-
-    private Gender(String jsonString, String displayValue) {
-      this.jsonString = jsonString;
-      this.displayValue = displayValue;
-    }
-
-    @Override
-    public String toString() {
-      return this.jsonString;
-    }
-
-    public String getDisplayValue() {
-      return displayValue;
-    }
-  }
-
-  /**
    * public java.lang.Enum for opensocial.Enum.Smoker.
    */
   public enum Smoker implements EnumKey {
