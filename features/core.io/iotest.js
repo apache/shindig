@@ -393,6 +393,94 @@ IoTest.prototype.testSignedPost = function() {
   this.assertEquals('some data', resp.text);
 };
 
+IoTest.prototype.testSignedGet_noViewerBoolean = function() {
+  var req = new fakeXhr.Expectation("POST", "http://www.example.com/json");
+  this.setStandardArgs(req, true);
+  req.setBodyArg("url", "http://target.example.com/somepage");
+  req.setBodyArg("signOwner", "true");
+  req.setBodyArg("signViewer", "false");
+  req.setBodyArg("authz", "signed");
+  req.setBodyArg("st", "authtoken");
+  req.setBodyArg("refresh", null);
+  req.setHeader("Content-Type", "application/x-www-form-urlencoded");
+
+  var resp = this.makeFakeResponse(
+      "{ 'http://target.example.com/somepage' : { 'body' : 'some data' }}");
+
+  this.fakeXhrs.expect(req, resp);
+
+  var resp = null;
+  var params = {};
+  params["AUTHORIZATION"] = "SIGNED";
+  params["VIEWER_SIGNED"] = false;
+  gadgets.io.makeRequest(
+      "http://target.example.com/somepage",
+      function(data) {
+        resp = data;
+      },
+      params);
+  this.assertEquals('some data', resp.text);
+};
+
+IoTest.prototype.testSignedGet_noViewerString = function() {
+  var req = new fakeXhr.Expectation("POST", "http://www.example.com/json");
+  this.setStandardArgs(req, true);
+  req.setBodyArg("url", "http://target.example.com/somepage");
+  req.setBodyArg("signOwner", "true");
+  req.setBodyArg("signViewer", "false");
+  req.setBodyArg("authz", "signed");
+  req.setBodyArg("st", "authtoken");
+  req.setBodyArg("refresh", null);
+  req.setHeader("Content-Type", "application/x-www-form-urlencoded");
+
+  var resp = this.makeFakeResponse(
+      "{ 'http://target.example.com/somepage' : { 'body' : 'some data' }}");
+
+  this.fakeXhrs.expect(req, resp);
+
+  var resp = null;
+  var params = {};
+  params["AUTHORIZATION"] = "SIGNED";
+  params["VIEWER_SIGNED"] = "false";
+  gadgets.io.makeRequest(
+      "http://target.example.com/somepage",
+      function(data) {
+        resp = data;
+      },
+      params);
+  this.assertEquals('some data', resp.text);
+};
+
+IoTest.prototype.testSignedGet_withNoOwnerAndViewerString = function() {
+  var req = new fakeXhr.Expectation("POST", "http://www.example.com/json");
+  this.setStandardArgs(req, true);
+  req.setBodyArg("url", "http://target.example.com/somepage");
+  req.setBodyArg("signOwner", "false");
+  req.setBodyArg("signViewer", "true");
+  req.setBodyArg("authz", "signed");
+  req.setBodyArg("st", "authtoken");
+  req.setBodyArg("refresh", null);
+  req.setHeader("Content-Type", "application/x-www-form-urlencoded");
+
+  var resp = this.makeFakeResponse(
+      "{ 'http://target.example.com/somepage' : { 'body' : 'some data' }}");
+
+  this.fakeXhrs.expect(req, resp);
+
+  var resp = null;
+  var params = {};
+  params["AUTHORIZATION"] = "SIGNED";
+  params["VIEWER_SIGNED"] = "true";
+  params["OWNER_SIGNED"] = false;
+  gadgets.io.makeRequest(
+      "http://target.example.com/somepage",
+      function(data) {
+        resp = data;
+      },
+      params);
+  this.assertEquals('some data', resp.text);
+};
+
 IoTest.prototype.testOAuth = function() {
   gadgets.io.clearOAuthState();
   var req = new fakeXhr.Expectation("POST", "http://www.example.com/json");

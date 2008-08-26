@@ -296,8 +296,18 @@ gadgets.io = function() {
           refreshInterval = 3600;
         }
       }
-      var signOwner = params.OWNER_SIGNED;
-      var signViewer = params.VIEWER_SIGNED;
+
+      // Include owner information?
+      var signOwner = true;
+      if ("OWNER_SIGNED" in params) {
+        signOwner = params.OWNER_SIGNED;
+      }
+
+      // Include viewer information?
+      var signViewer = true;
+      if ("VIEWER_SIGNED" in params) {
+        signViewer = params.VIEWER_SIGNED;
+      }
 
       var headers = params.HEADERS || {};
       if (httpMethod === "POST" && !headers["Content-Type"]) {
@@ -316,8 +326,8 @@ gadgets.io = function() {
         contentType : params.CONTENT_TYPE || "TEXT",
         numEntries : params.NUM_ENTRIES || "3",
         getSummaries : !!params.GET_SUMMARIES,
-        signOwner : signOwner || "true",
-        signViewer : signViewer || "true",
+        signOwner : signOwner,
+        signViewer : signViewer,
         gadget : urlParams.url,
         container : urlParams.container || urlParams.synd || "default",
         // should we bypass gadget spec cache (e.g. to read OAuth provider URLs)
