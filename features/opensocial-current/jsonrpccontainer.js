@@ -316,6 +316,20 @@ JsonRpcContainer.prototype.createPersonFromJson = function(serverJson) {
   this.translateEnumJson(serverJson.networkPresence);
   this.translateEnumJson(serverJson.smoker);
 
+  if (serverJson.organizations) {
+    serverJson.jobs = [];
+    serverJson.schools = [];
+
+    for (var o = 0; o < serverJson.organizations.length; o++) {
+      var org = serverJson.organizations[o];
+      if (org.type == 'job') {
+        serverJson.jobs.push(org);
+      } else if (org.type == 'school') {
+        serverJson.schools.push(org);
+      }
+    }
+  }
+
   return new JsonPerson(serverJson);
 };
 

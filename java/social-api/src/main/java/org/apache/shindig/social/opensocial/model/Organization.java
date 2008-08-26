@@ -42,7 +42,9 @@ public interface Organization {
     START_DATE("startDate"),
     SUB_FIELD("subField"),
     TITLE("title"),
-    WEBPAGE("webpage");
+    WEBPAGE("webpage"),
+    /** Should have the value of "job" or "school" to be put in the right js fields */
+    TYPE("type");
 
     private final String jsonString;
 
@@ -95,5 +97,9 @@ public interface Organization {
   String getWebpage();
 
   void setWebpage(String webpage);
+
+  String getType();
+
+  void setType(String type);
 
 }
