@@ -27,7 +27,8 @@ public interface ListField {
 
   public static enum Field {
     VALUE("value"),
-    TYPE("type");
+    TYPE("type"),
+    PRIMARY("primary");
 
     private final String jsonString;
 
@@ -48,4 +49,8 @@ public interface ListField {
   String getValue();
 
   void setValue(String value);
+
+  Boolean getPrimary();
+
+  void setPrimary(Boolean primary);
 }

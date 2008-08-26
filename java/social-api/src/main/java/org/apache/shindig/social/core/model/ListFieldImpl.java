@@ -22,6 +22,7 @@ import org.apache.shindig.social.opensocial.model.ListField;
 public class ListFieldImpl implements ListField {
   String type;
   String value;
+  Boolean primary;
 
   public ListFieldImpl() { }
 
@@ -44,5 +45,13 @@ public class ListFieldImpl implements ListField {
 
   public void setValue(String value) {
     this.value = value;
+  }
+
+  public Boolean getPrimary() {
+    return primary;
+  }
+
+  public void setPrimary(Boolean primary) {
+    this.primary = primary;
   }
 }

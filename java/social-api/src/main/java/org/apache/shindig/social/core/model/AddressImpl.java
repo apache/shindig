@@ -20,7 +20,6 @@ package org.apache.shindig.social.core.model;
 import org.apache.shindig.social.opensocial.model.Address;
 
 public class AddressImpl implements Address {
-
   private String country;
   private Float latitude;
   private Float longitude;
@@ -30,6 +29,7 @@ public class AddressImpl implements Address {
   private String streetAddress;
   private String type;
   private String formatted;
+  private Boolean primary;
 
   public AddressImpl() { }
 
@@ -109,4 +109,11 @@ public class AddressImpl implements Address {
     this.formatted = formatted;
   }
 
+  public Boolean getPrimary() {
+    return primary;
+  }
+
+  public void setPrimary(Boolean primary) {
+    this.primary = primary;
+  }
 }
