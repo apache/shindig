@@ -37,7 +37,7 @@ import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.Executor;
+import java.util.concurrent.ExecutorService;
 import java.util.logging.Logger;
 
 /**
@@ -53,7 +53,7 @@ public class BasicGadgetSpecFactory implements GadgetSpecFactory {
 
   private final HttpFetcher fetcher;
   private final ContentRewriterRegistry rewriterRegistry;
-  private final Executor executor;
+  private final ExecutorService executor;
   private final long minTtl;
   private final long maxTtl;
 
@@ -174,7 +174,7 @@ public class BasicGadgetSpecFactory implements GadgetSpecFactory {
   public BasicGadgetSpecFactory(HttpFetcher fetcher,
                                 CacheProvider cacheProvider,
                                 ContentRewriterRegistry rewriterRegistry,
-                                Executor executor,
+                                ExecutorService executor,
                                 @Named("shindig.gadget-spec.cache.capacity")int gadgetSpecCacheCapacity,
                                 @Named("shindig.gadget-spec.cache.minTTL")long minTtl,
                                 @Named("shindig.gadget-spec.cache.maxTTL")long maxTtl) {

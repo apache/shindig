@@ -30,7 +30,6 @@ import org.apache.shindig.gadgets.spec.View;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -41,8 +40,8 @@ import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CompletionService;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorCompletionService;
+import java.util.concurrent.ExecutorService;
 
 /**
  * Processes JSON-RPC requests by retrieving all necessary meta data in parallel
@@ -51,7 +50,7 @@ import java.util.concurrent.ExecutorCompletionService;
 @Singleton
 public class JsonRpcHandler {
 
-  private final Executor executor;
+  private final ExecutorService executor;
   private final GadgetServer server;
   private final UrlGenerator urlGenerator;
 
@@ -221,7 +220,7 @@ public class JsonRpcHandler {
   }
 
   @Inject
-  public JsonRpcHandler(Executor executor, GadgetServer server,
+  public JsonRpcHandler(ExecutorService executor, GadgetServer server,
       UrlGenerator iframeUrlGenerator) {
     this.executor = executor;
     this.server = server;
