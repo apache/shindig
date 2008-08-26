@@ -30,7 +30,6 @@ import org.apache.shindig.gadgets.http.HttpFetcher;
 import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.http.HttpResponse;
 import org.apache.shindig.gadgets.oauth.OAuthArguments;
-import org.apache.shindig.gadgets.rewrite.ContentRewriter;
 import org.apache.shindig.gadgets.spec.Auth;
 import org.apache.shindig.gadgets.spec.Preload;
 
@@ -42,7 +41,6 @@ import org.json.JSONObject;
 
 import java.io.IOException;
 import java.util.Collections;
-import java.util.List;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
@@ -71,15 +69,12 @@ public class MakeRequestHandler extends ProxyBase{
 
   private final SecurityTokenDecoder securityTokenDecoder;
   private final ContentFetcherFactory contentFetcherFactory;
-  private final ContentRewriter rewriter;
 
   @Inject
   public MakeRequestHandler(ContentFetcherFactory contentFetcherFactory,
-                            SecurityTokenDecoder securityTokenDecoder,
-                            ContentRewriter rewriter) {
+                            SecurityTokenDecoder securityTokenDecoder) {
     this.contentFetcherFactory = contentFetcherFactory;
     this.securityTokenDecoder = securityTokenDecoder;
-    this.rewriter = rewriter;
   }
 
   /**
@@ -128,9 +123,6 @@ public class MakeRequestHandler extends ProxyBase{
     }
 
     Uri url = validateUrl(request.getParameter(URL_PARAM));
-    String method = request.getMethod();
-    Map<String, List<String>> headers = null;
-    byte[] postBody = null;
 
     HttpRequest req = new HttpRequest(url)
         .setMethod(getParameter(request, METHOD_PARAM, "GET"))
@@ -163,7 +155,6 @@ public class MakeRequestHandler extends ProxyBase{
     if (request.getParameter(GADGET_PARAM) != null) {
       req.setGadget(Uri.parse(request.getParameter(GADGET_PARAM)));
     }
-    req.setContentRewriter(rewriter);
 
     // Allow the rewriter to use an externally forced mime type. This is needed
     // allows proper rewriting of <script src="x"/> where x is returned with

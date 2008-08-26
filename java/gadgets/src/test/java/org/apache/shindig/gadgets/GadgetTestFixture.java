@@ -27,6 +27,7 @@ import org.apache.shindig.common.util.FakeTimeSource;
 import org.apache.shindig.gadgets.http.ContentFetcherFactory;
 import org.apache.shindig.gadgets.http.HttpFetcher;
 import org.apache.shindig.gadgets.oauth.OAuthFetcher;
+import org.apache.shindig.gadgets.rewrite.BasicContentRewriterRegistry;
 import org.apache.shindig.gadgets.rewrite.ContentRewriter;
 import org.apache.shindig.gadgets.rewrite.NoOpContentRewriter;
 import org.apache.shindig.gadgets.servlet.GadgetRenderingTask;
@@ -72,7 +73,7 @@ public abstract class GadgetTestFixture extends EasyMockTestCase {
     }
   };
   public final GadgetSpecFactory specFactory = new BasicGadgetSpecFactory(
-      fetcher, cacheProvider, new NoOpContentRewriter(), executor, 0, 0L, 0L);
+      fetcher, cacheProvider, new BasicContentRewriterRegistry(null), executor, 0, 0L, 0L);
 
 
   public GadgetTestFixture() {

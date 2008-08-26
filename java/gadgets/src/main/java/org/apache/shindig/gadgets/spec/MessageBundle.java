@@ -23,7 +23,6 @@ import org.apache.shindig.common.xml.XmlUtil;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 
-import java.net.URI;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;

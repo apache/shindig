@@ -26,6 +26,8 @@ import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.http.HttpResponse;
 import org.apache.shindig.gadgets.http.HttpResponseBuilder;
 import org.apache.shindig.gadgets.rewrite.ContentRewriter;
+import org.apache.shindig.gadgets.rewrite.ContentRewriterRegistry;
+import org.apache.shindig.gadgets.rewrite.BasicContentRewriterRegistry;
 import org.apache.shindig.gadgets.spec.GadgetSpec;
 import org.easymock.EasyMock;
 import static org.easymock.EasyMock.expect;
@@ -86,11 +88,13 @@ public class BasicGadgetSpecFactoryTest {
 
   private final HttpFetcher fetcher = EasyMock.createNiceMock(HttpFetcher.class);
   private final CaptureRewriter rewriter = new CaptureRewriter();
+  private final ContentRewriterRegistry rewriterRegistry =
+      new BasicContentRewriterRegistry(rewriter);
   
   private final CacheProvider cacheProvider = new DefaultCacheProvider();
 
   private final BasicGadgetSpecFactory specFactory
-      = new BasicGadgetSpecFactory(fetcher, cacheProvider, rewriter, FAKE_EXECUTOR, 5, -1000, 1000);
+      = new BasicGadgetSpecFactory(fetcher, cacheProvider, rewriterRegistry, FAKE_EXECUTOR, 5, -1000, 1000);
 
   @Test
   public void specFetched() throws Exception {

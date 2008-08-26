@@ -48,7 +48,7 @@ public class MakeRequestServletTest extends ServletTestFixture {
 
   private final MakeRequestServlet servlet = new MakeRequestServlet();
   private final MakeRequestHandler handler = new MakeRequestHandler(contentFetcherFactory,
-      securityTokenDecoder, rewriter);
+      securityTokenDecoder);
   
   private final HttpRequest internalRequest = new HttpRequest(REQUEST_URL);
   private final HttpResponse internalResponse = new HttpResponse(RESPONSE_BODY);

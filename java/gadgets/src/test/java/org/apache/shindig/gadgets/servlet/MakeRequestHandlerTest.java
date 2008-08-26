@@ -52,7 +52,7 @@ public class MakeRequestHandlerTest extends ServletTestFixture {
   private static final SecurityToken DUMMY_TOKEN = new FakeGadgetToken();
 
   private final MakeRequestHandler handler = new MakeRequestHandler(contentFetcherFactory,
-      securityTokenDecoder, rewriter);
+      securityTokenDecoder);
 
   private void expectGetAndReturnBody(String response) throws Exception {
     expectGetAndReturnBody(fetcher, response);

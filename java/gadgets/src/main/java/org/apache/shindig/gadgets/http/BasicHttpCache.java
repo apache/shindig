@@ -19,7 +19,6 @@ package org.apache.shindig.gadgets.http;
 
 import org.apache.shindig.common.cache.Cache;
 import org.apache.shindig.common.cache.CacheProvider;
-import org.apache.shindig.common.cache.LruCache;
 
 import com.google.inject.Inject;
 import com.google.inject.name.Named;

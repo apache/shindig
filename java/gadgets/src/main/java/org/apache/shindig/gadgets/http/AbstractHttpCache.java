@@ -17,6 +17,11 @@
  */
 package org.apache.shindig.gadgets.http;
 
+import org.apache.shindig.gadgets.rewrite.ContentRewriter;
+import org.apache.shindig.gadgets.rewrite.ContentRewriterRegistry;
+
+import com.google.inject.Inject;
+
 /**
  * Base class for content caches. Defines cache expiration rules and
  * and restrictions on allowed content. Also enforces rewriting
@@ -24,6 +29,13 @@ package org.apache.shindig.gadgets.http;
  */
 public abstract class AbstractHttpCache implements HttpCache {
 
+  private ContentRewriterRegistry rewriterRegistry;
+  
+  @Inject
+  public void setRewriterRegistry(ContentRewriterRegistry registry) {
+    rewriterRegistry = registry;
+  }
+  
   public final HttpResponse getResponse(HttpCacheKey key, HttpRequest request) {
     if (key.isCacheable()) {
       String keyString = key.toString();
@@ -108,7 +120,7 @@ public abstract class AbstractHttpCache implements HttpCache {
 
     // Return the rewritten version if requested
     if (!request.getIgnoreCache() &&
-        request.getContentRewriter() != null &&
+        rewriterRegistry != null &&
         response.getRewritten() != null &&
         response.getRewritten().getContentLength() > 0) {
       return response.getRewritten();
@@ -122,8 +134,15 @@ public abstract class AbstractHttpCache implements HttpCache {
    */
   protected HttpResponse rewrite(HttpRequest request, HttpResponse response) {
     // TODO - Make this sensitive to custom rewriting rules
-    if (response.getRewritten() == null && request.getContentRewriter() != null) {
-      return request.getContentRewriter().rewrite(request, response);
+    if (response.getRewritten() == null &&
+        rewriterRegistry != null) {
+      HttpResponse rewritten = response;
+      for (ContentRewriter rewriter : rewriterRegistry.getRewriters()) {
+        rewritten = rewriter.rewrite(request, rewritten);
+      }
+      if (response.getRewritten() != null) {
+        return response;
+      }
     }
     return null;
   }
