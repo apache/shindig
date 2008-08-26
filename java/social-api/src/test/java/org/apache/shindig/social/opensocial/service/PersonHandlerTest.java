@@ -20,8 +20,8 @@ package org.apache.shindig.social.opensocial.service;
 import org.apache.shindig.common.testing.FakeGadgetToken;
 import org.apache.shindig.common.util.ImmediateFuture;
 import org.apache.shindig.social.ResponseError;
-import org.apache.shindig.social.ResponseItem;
 import org.apache.shindig.social.opensocial.model.Person;
+import org.apache.shindig.social.opensocial.spi.CollectionOptions;
 import org.apache.shindig.social.opensocial.spi.GroupId;
 import org.apache.shindig.social.opensocial.spi.PersonService;
 import org.apache.shindig.social.opensocial.spi.RestfulCollection;
@@ -37,13 +37,9 @@ import java.util.Map;
 import java.util.Set;
 
 public class PersonHandlerTest extends TestCase {
-
   private PersonService personService;
-
   private PersonHandler handler;
-
   private FakeGadgetToken token;
-
   private RestfulRequestItem request;
 
   private static final Set<String> DEFAULT_FIELDS = Sets.newHashSet(Person.Field.ID.toString(),
@@ -52,6 +48,18 @@ public class PersonHandlerTest extends TestCase {
 
   private static final Set<UserId> JOHN_DOE = Sets
       .newHashSet(new UserId(UserId.Type.userId, "john.doe"));
+
+  private static CollectionOptions DEFAULT_OPTIONS = new CollectionOptions();
+
+  static {
+    DEFAULT_OPTIONS.setSortBy(PersonService.SortBy.topFriends);
+    DEFAULT_OPTIONS.setSortOrder(PersonService.SortOrder.ascending);
+    DEFAULT_OPTIONS.setFilter(PersonService.FilterType.all);
+    DEFAULT_OPTIONS.setFilterOperation(PersonService.FilterOperation.contains);
+    DEFAULT_OPTIONS.setFilterValue("");
+    DEFAULT_OPTIONS.setFirst(0);
+    DEFAULT_OPTIONS.setMax(20);
+  }
 
   @Override
   protected void setUp() throws Exception {
@@ -91,13 +99,11 @@ public class PersonHandlerTest extends TestCase {
     setPath("/people/john.doe/@all");
 
     RestfulCollection<Person> data = new RestfulCollection<Person>(null, null);
+
     EasyMock.expect(personService.getPeople(
         JOHN_DOE,
         new GroupId(GroupId.Type.all, null),
-        PersonService.SortBy.topFriends,
-        PersonService.SortOrder.ascending,
-        PersonService.FilterType.all,
-        PersonService.FilterOperation.contains, "", 0, 20,
+        DEFAULT_OPTIONS,
         DEFAULT_FIELDS,
         token))
         .andReturn(ImmediateFuture.newInstance(data));
@@ -114,11 +120,7 @@ public class PersonHandlerTest extends TestCase {
     EasyMock.expect(personService.getPeople(
         JOHN_DOE,
         new GroupId(GroupId.Type.friends, null),
-        PersonService.SortBy.topFriends,
-        PersonService.SortOrder.ascending,
-        PersonService.FilterType.all,
-        PersonService.FilterOperation.contains,
-        "", 0, 20,
+        DEFAULT_OPTIONS,
         DEFAULT_FIELDS,
         token))
         .andReturn(ImmediateFuture.newInstance(data));
@@ -129,18 +131,21 @@ public class PersonHandlerTest extends TestCase {
   }
 
   public void testHandleGetFriendsWithParams() throws Exception {
-    PersonService.SortBy sortBy = PersonService.SortBy.name;
-    PersonService.SortOrder sortOrder = PersonService.SortOrder.descending;
-    PersonService.FilterType filter = PersonService.FilterType.topFriends;
-    PersonService.FilterOperation filterOp = PersonService.FilterOperation.present;
-    String filterValue = "cassie";
+    CollectionOptions options = new CollectionOptions();
+    options.setSortBy(PersonService.SortBy.name);
+    options.setSortOrder(PersonService.SortOrder.descending);
+    options.setFilter(PersonService.FilterType.topFriends);
+    options.setFilterOperation(PersonService.FilterOperation.present);
+    options.setFilterValue("cassie");
+    options.setFirst(5);
+    options.setMax(10);
 
     Map<String, String> params = Maps.newHashMap();
-    params.put("sortBy", sortBy.toString());
-    params.put("sortOrder", sortOrder.toString());
-    params.put("filterBy", filter.toString());
-    params.put("filterOp", filterOp.toString());
-    params.put("filterValue", filterValue);
+    params.put("sortBy", options.getSortBy().toString());
+    params.put("sortOrder", options.getSortOrder().toString());
+    params.put("filterBy", options.getFilter().toString());
+    params.put("filterOp", options.getFilterOperation().toString());
+    params.put("filterValue", options.getFilterValue());
     params.put("startIndex", "5");
     params.put("count", "10");
     params.put("fields", "money,fame,fortune");
@@ -150,8 +155,7 @@ public class PersonHandlerTest extends TestCase {
     RestfulCollection<Person> data = new RestfulCollection<Person>(null, null);
     EasyMock.expect(personService.getPeople(
         JOHN_DOE,
-        new GroupId(GroupId.Type.friends, null), sortBy, sortOrder,
-        filter, filterOp, filterValue, 5, 10,
+        new GroupId(GroupId.Type.friends, null), options,
         Sets.newLinkedHashSet("money", "fame", "fortune"), token))
         .andReturn(ImmediateFuture.newInstance(data));
 
@@ -193,11 +197,7 @@ public class PersonHandlerTest extends TestCase {
     userIdSet.add(new UserId(UserId.Type.userId, "jane.doe"));
     EasyMock.expect(personService.getPeople(userIdSet,
         new GroupId(GroupId.Type.self, null),
-        PersonService.SortBy.topFriends,
-        PersonService.SortOrder.ascending,
-        PersonService.FilterType.all,
-        PersonService.FilterOperation.contains,
-        "", 0, 20,
+        DEFAULT_OPTIONS,
         DEFAULT_FIELDS,
         token)).andReturn(ImmediateFuture.newInstance(data));
 

@@ -51,21 +51,12 @@ public interface PersonService {
    *
    * @param userIds A set of users
    * @param groupId The group
-   * @param sortBy How to sort the people
-   * @param sortOrder The direction of the sort
-   * @param filter How the people should be filtered.
-   * @param filterOperation The operation to filter with
-   * @param filterValue The value to filter with.
-   * @param first The index of the first person to fetch.
-   * @param max The max number of people to fetch.
+   * @param collectionOptions How to filter, sort and paginate the collection being fetched
    * @param fields The profile details to fetch. Empty set implies all
    * @param token The gadget token @return a list of people.
-   * TODO(doll): This method is getting way too long. We need to pass a more complex object instead.
    */
   Future<RestfulCollection<Person>> getPeople(Set<UserId> userIds, GroupId groupId,
-      SortBy sortBy, SortOrder sortOrder, FilterType filter, FilterOperation filterOperation,
-      String filterValue, int first, int max,
-      Set<String> fields, SecurityToken token);
+      CollectionOptions collectionOptions, Set<String> fields, SecurityToken token);
 
   /**
    * Returns a person that corresponds to the passed in person id.

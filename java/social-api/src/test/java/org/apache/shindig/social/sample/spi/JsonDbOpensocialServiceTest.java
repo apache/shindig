@@ -29,6 +29,7 @@ import org.apache.shindig.social.opensocial.spi.PersonService;
 import org.apache.shindig.social.opensocial.spi.RestfulCollection;
 import org.apache.shindig.social.opensocial.spi.RestfulItem;
 import org.apache.shindig.social.opensocial.spi.UserId;
+import org.apache.shindig.social.opensocial.spi.CollectionOptions;
 
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
@@ -78,11 +79,18 @@ public class JsonDbOpensocialServiceTest extends TestCase {
   }
 
   public void testGetExpectedFriends() throws Exception {
+    CollectionOptions options = new CollectionOptions();
+    options.setSortBy(PersonService.SortBy.topFriends);
+    options.setSortOrder(PersonService.SortOrder.ascending);
+    options.setFilter(PersonService.FilterType.all);
+    options.setFilterOperation(PersonService.FilterOperation.contains);
+    options.setFilterValue("");
+    options.setFirst(0);
+    options.setMax(20);
+
     RestfulCollection<Person> responseItem = db.getPeople(
         Sets.newHashSet(CANON_USER), new GroupId(GroupId.Type.friends, null),
-        PersonService.SortBy.topFriends, PersonService.SortOrder.ascending,
-        PersonService.FilterType.all, PersonService.FilterOperation.contains, "", 0,
-        Integer.MAX_VALUE, Collections.<String>emptySet(), token).get();
+        options, Collections.<String>emptySet(), token).get();
     assertNotNull(responseItem);
     assertEquals(responseItem.getTotalResults(), 4);
     // Test a couple of users
@@ -91,11 +99,18 @@ public class JsonDbOpensocialServiceTest extends TestCase {
   }
 
   public void testGetExpectedUsersForPlural() throws Exception {
+    CollectionOptions options = new CollectionOptions();
+    options.setSortBy(PersonService.SortBy.topFriends);
+    options.setSortOrder(PersonService.SortOrder.ascending);
+    options.setFilter(PersonService.FilterType.all);
+    options.setFilterOperation(PersonService.FilterOperation.contains);
+    options.setFilterValue("");
+    options.setFirst(0);
+    options.setMax(20);
+
     RestfulCollection<Person> responseItem = db.getPeople(
         Sets.newLinkedHashSet(JOHN_DOE, JANE_DOE), new GroupId(GroupId.Type.friends, null),
-        PersonService.SortBy.topFriends, PersonService.SortOrder.ascending,
-        PersonService.FilterType.all, PersonService.FilterOperation.contains, "", 0,
-        Integer.MAX_VALUE, Collections.<String>emptySet(), token).get();
+       options, Collections.<String>emptySet(), token).get();
     assertNotNull(responseItem);
     assertEquals(responseItem.getTotalResults(), 4);
     // Test a couple of users

@@ -20,6 +20,7 @@ package org.apache.shindig.social.opensocial.service;
 import org.apache.shindig.social.ResponseError;
 import org.apache.shindig.social.ResponseItem;
 import org.apache.shindig.social.opensocial.model.Person;
+import org.apache.shindig.social.opensocial.spi.CollectionOptions;
 import org.apache.shindig.social.opensocial.spi.GroupId;
 import org.apache.shindig.social.opensocial.spi.PersonService;
 import org.apache.shindig.social.opensocial.spi.UserId;
@@ -73,15 +74,21 @@ public class PersonHandler extends DataRequestHandler {
       throw new IllegalArgumentException("Cannot fetch personIds for multiple userIds");
     }
 
+    CollectionOptions options = new CollectionOptions();
+    options.setSortBy(request.getSortBy());
+    options.setSortOrder(request.getSortOrder());
+    options.setFilter(request.getFilterBy());
+    options.setFilterOperation(request.getFilterOperation());
+    options.setFilterValue(request.getFilterValue());
+    options.setFirst(request.getStartIndex());
+    options.setMax(request.getCount());
+
     if (userIds.size() == 1) {
       if (optionalPersonId.isEmpty()) {
         if (groupId.getType() == GroupId.Type.self) {
           return personService.getPerson(userIds.iterator().next(), fields, request.getToken());
         } else {
-          return personService.getPeople(userIds, groupId, request.getSortBy(),
-              request.getSortOrder(), request.getFilterBy(), request.getFilterOperation(),
-              request.getFilterValue(), request.getStartIndex(),
-              request.getCount(), fields, request.getToken());
+          return personService.getPeople(userIds, groupId, options, fields, request.getToken());
         }
       } else if (optionalPersonId.size() == 1) {
         // TODO: Add some crazy concept to handle the userId?
@@ -95,16 +102,11 @@ public class PersonHandler extends DataRequestHandler {
         }
         // Every other case is a collection response of optional person ids
         return personService.getPeople(personIds, new GroupId(GroupId.Type.self, null),
-            request.getSortBy(), request.getSortOrder(), request.getFilterBy(),
-            request.getFilterOperation(), request.getFilterValue(), request.getStartIndex(),
-            request.getCount(), fields, request.getToken());
+            options, fields, request.getToken());
       }
     }
 
     // Every other case is a collection response.
-    return personService.getPeople(userIds, groupId, request.getSortBy(),
-        request.getSortOrder(), request.getFilterBy(), request.getFilterOperation(),
-        request.getFilterValue(), request.getStartIndex(), request.getCount(),
-        fields, request.getToken());
+    return personService.getPeople(userIds, groupId, options, fields, request.getToken());
   }
 }

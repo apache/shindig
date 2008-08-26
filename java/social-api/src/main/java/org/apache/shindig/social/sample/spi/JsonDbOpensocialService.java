@@ -28,6 +28,7 @@ import org.apache.shindig.social.opensocial.model.Person;
 import org.apache.shindig.social.opensocial.service.BeanConverter;
 import org.apache.shindig.social.opensocial.spi.ActivityService;
 import org.apache.shindig.social.opensocial.spi.AppDataService;
+import org.apache.shindig.social.opensocial.spi.CollectionOptions;
 import org.apache.shindig.social.opensocial.spi.DataCollection;
 import org.apache.shindig.social.opensocial.spi.GroupId;
 import org.apache.shindig.social.opensocial.spi.PersonService;
@@ -237,9 +238,7 @@ public class JsonDbOpensocialService implements ActivityService, PersonService, 
   }
 
   public Future<RestfulCollection<Person>> getPeople(Set<UserId> userIds,
-      GroupId groupId, SortBy sortBy, SortOrder sortOrder, FilterType filter,
-      FilterOperation filterOperation, String filterValue, int first,
-      int max, Set<String> fields, SecurityToken token) {
+      GroupId groupId, CollectionOptions options, Set<String> fields, SecurityToken token) {
     List<Person> result = Lists.newArrayList();
     try {
       JSONArray people = db.getJSONArray(PEOPLE_TABLE);
@@ -256,11 +255,11 @@ public class JsonDbOpensocialService implements ActivityService, PersonService, 
       }
 
       // We can pretend that by default the people are in top friends order
-      if (sortBy.equals(SortBy.name)) {
+      if (options.getSortBy().equals(SortBy.name)) {
         Collections.sort(result, NAME_COMPARATOR);
       }
 
-      if (sortOrder.equals(SortOrder.descending)) {
+      if (options.getSortOrder().equals(SortOrder.descending)) {
         Collections.reverse(result);
       }
 
@@ -268,10 +267,11 @@ public class JsonDbOpensocialService implements ActivityService, PersonService, 
       // we can't support any filters yet. We should fix this.
 
       int totalSize = result.size();
-      int last = first + max;
-      result = result.subList(first, Math.min(last, totalSize));
+      int last = options.getFirst() + options.getMax();
+      result = result.subList(options.getFirst(), Math.min(last, totalSize));
 
-      return ImmediateFuture.newInstance(new RestfulCollection<Person>(result, first, totalSize));
+      return ImmediateFuture.newInstance(new RestfulCollection<Person>(
+          result, options.getFirst(), totalSize));
     } catch (JSONException je) {
       return ImmediateFuture.newInstance(new RestfulCollection<Person>(
           ResponseError.INTERNAL_ERROR, je.getMessage()));
