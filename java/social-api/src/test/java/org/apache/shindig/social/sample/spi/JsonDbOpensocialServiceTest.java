@@ -80,9 +80,9 @@ public class JsonDbOpensocialServiceTest extends TestCase {
 
   public void testGetExpectedFriends() throws Exception {
     CollectionOptions options = new CollectionOptions();
-    options.setSortBy(PersonService.SortBy.topFriends);
+    options.setSortBy(PersonService.TOP_FRIENDS_SORT);
     options.setSortOrder(PersonService.SortOrder.ascending);
-    options.setFilter(PersonService.FilterType.all);
+    options.setFilter(null);
     options.setFilterOperation(PersonService.FilterOperation.contains);
     options.setFilterValue("");
     options.setFirst(0);
@@ -100,9 +100,9 @@ public class JsonDbOpensocialServiceTest extends TestCase {
 
   public void testGetExpectedUsersForPlural() throws Exception {
     CollectionOptions options = new CollectionOptions();
-    options.setSortBy(PersonService.SortBy.topFriends);
+    options.setSortBy(PersonService.TOP_FRIENDS_SORT);
     options.setSortOrder(PersonService.SortOrder.ascending);
-    options.setFilter(PersonService.FilterType.all);
+    options.setFilter(null);
     options.setFilterOperation(PersonService.FilterOperation.contains);
     options.setFilterValue("");
     options.setFirst(0);

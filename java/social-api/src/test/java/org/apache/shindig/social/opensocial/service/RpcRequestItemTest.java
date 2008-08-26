@@ -100,10 +100,10 @@ public class RpcRequestItemTest extends TestCase {
 
   public void testSortBy() throws Exception {
     request.setParameter("sortBy", null);
-    assertEquals(PersonService.SortBy.topFriends, request.getSortBy());
+    assertEquals("topFriends", request.getSortBy());
 
     request.setParameter("sortBy", "name");
-    assertEquals(PersonService.SortBy.name, request.getSortBy());
+    assertEquals("name", request.getSortBy());
   }
 
   public void testSortOrder() throws Exception {
@@ -116,10 +116,10 @@ public class RpcRequestItemTest extends TestCase {
 
   public void testFilterBy() throws Exception {
     request.setParameter("filterBy", null);
-    assertEquals(PersonService.FilterType.all, request.getFilterBy());
+    assertEquals(null, request.getFilterBy());
 
     request.setParameter("filterBy", "hasApp");
-    assertEquals(PersonService.FilterType.hasApp, request.getFilterBy());
+    assertEquals("hasApp", request.getFilterBy());
   }
 
   public void testFilterOperation() throws Exception {

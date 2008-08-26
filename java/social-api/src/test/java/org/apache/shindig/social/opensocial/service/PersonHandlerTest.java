@@ -52,9 +52,9 @@ public class PersonHandlerTest extends TestCase {
   private static CollectionOptions DEFAULT_OPTIONS = new CollectionOptions();
 
   static {
-    DEFAULT_OPTIONS.setSortBy(PersonService.SortBy.topFriends);
+    DEFAULT_OPTIONS.setSortBy(PersonService.TOP_FRIENDS_SORT);
     DEFAULT_OPTIONS.setSortOrder(PersonService.SortOrder.ascending);
-    DEFAULT_OPTIONS.setFilter(PersonService.FilterType.all);
+    DEFAULT_OPTIONS.setFilter(null);
     DEFAULT_OPTIONS.setFilterOperation(PersonService.FilterOperation.contains);
     DEFAULT_OPTIONS.setFilterValue("");
     DEFAULT_OPTIONS.setFirst(0);
@@ -132,18 +132,18 @@ public class PersonHandlerTest extends TestCase {
 
   public void testHandleGetFriendsWithParams() throws Exception {
     CollectionOptions options = new CollectionOptions();
-    options.setSortBy(PersonService.SortBy.name);
+    options.setSortBy(Person.Field.NAME.toString());
     options.setSortOrder(PersonService.SortOrder.descending);
-    options.setFilter(PersonService.FilterType.topFriends);
+    options.setFilter(PersonService.TOP_FRIENDS_FILTER);
     options.setFilterOperation(PersonService.FilterOperation.present);
     options.setFilterValue("cassie");
     options.setFirst(5);
     options.setMax(10);
 
     Map<String, String> params = Maps.newHashMap();
-    params.put("sortBy", options.getSortBy().toString());
+    params.put("sortBy", options.getSortBy());
     params.put("sortOrder", options.getSortOrder().toString());
-    params.put("filterBy", options.getFilter().toString());
+    params.put("filterBy", options.getFilter());
     params.put("filterOp", options.getFilterOperation().toString());
     params.put("filterValue", options.getFilterValue());
     params.put("startIndex", "5");

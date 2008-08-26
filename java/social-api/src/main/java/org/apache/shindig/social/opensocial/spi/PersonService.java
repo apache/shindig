@@ -30,16 +30,12 @@ import java.util.concurrent.Future;
 
 public interface PersonService {
 
-  public enum SortBy {
-    topFriends, name
-  }
+  public static String TOP_FRIENDS_SORT = "topFriends";
+  public static String TOP_FRIENDS_FILTER = "topFriends";
+  public static String HAS_APP_FILTER = "hasApp";
 
   public enum SortOrder {
     ascending, descending
-  }
-
-  public enum FilterType {
-    all, hasApp, topFriends
   }
 
   public enum FilterOperation {

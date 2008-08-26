@@ -20,19 +20,23 @@ package org.apache.shindig.social.opensocial.spi;
 import org.apache.commons.lang.StringUtils;
 
 public class CollectionOptions {
-  private PersonService.SortBy sortBy;
+  private String sortBy;
   private PersonService.SortOrder sortOrder;
-  private PersonService.FilterType filter;
+  private String filter;
   private PersonService.FilterOperation filterOperation;
   private String filterValue;
   private int first;
   private int max;
 
-  public PersonService.SortBy getSortBy() {
+  /**
+   * This sortBy can be any field of the object being sorted or the special js sort of topFriends.
+   * @return The field to sort by
+   */
+  public String getSortBy() {
     return sortBy;
   }
 
-  public void setSortBy(PersonService.SortBy sortBy) {
+  public void setSortBy(String sortBy) {
     this.sortBy = sortBy;
   }
 
@@ -44,11 +48,16 @@ public class CollectionOptions {
     this.sortOrder = sortOrder;
   }
 
-  public PersonService.FilterType getFilter() {
+  /**
+   * This filter can be any field of the object being filtered or the special js filters,
+   * hasApp or topFriends.  
+   * @return The field to filter by
+   */
+  public String getFilter() {
     return filter;
   }
 
-  public void setFilter(PersonService.FilterType filter) {
+  public void setFilter(String filter) {
     this.filter = filter;
   }
 
@@ -92,9 +101,9 @@ public class CollectionOptions {
     }
 
     CollectionOptions actual = (CollectionOptions) o;
-    return this.sortBy == actual.sortBy
+    return StringUtils.equals(this.sortBy, actual.sortBy)
         && this.sortOrder == actual.sortOrder
-        && this.filter == actual.filter
+        && StringUtils.equals(this.filter, actual.filter)
         && this.filterOperation == actual.filterOperation
         && StringUtils.equals(this.filterValue, actual.filterValue)
         && this.first == actual.first

@@ -118,11 +118,9 @@ public abstract class RequestItem {
     return count == null ? DEFAULT_COUNT : Integer.valueOf(count);
   }
 
-  public PersonService.SortBy getSortBy() {
+  public String getSortBy() {
     String sortBy = getParameter(SORT_BY);
-    return sortBy == null
-        ? PersonService.SortBy.topFriends
-        : PersonService.SortBy.valueOf(sortBy);
+    return sortBy == null ? PersonService.TOP_FRIENDS_SORT : sortBy;
   }
 
   public PersonService.SortOrder getSortOrder() {
@@ -132,11 +130,8 @@ public abstract class RequestItem {
         : PersonService.SortOrder.valueOf(sortOrder);
   }
 
-  public PersonService.FilterType getFilterBy() {
-    String filterBy = getParameter(FILTER_BY);
-    return filterBy == null
-        ? PersonService.FilterType.all
-        : PersonService.FilterType.valueOf(filterBy);
+  public String getFilterBy() {
+    return getParameter(FILTER_BY);
   }
 
   public PersonService.FilterOperation getFilterOperation() {

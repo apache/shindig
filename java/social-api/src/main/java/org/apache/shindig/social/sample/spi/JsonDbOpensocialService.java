@@ -255,7 +255,7 @@ public class JsonDbOpensocialService implements ActivityService, PersonService, 
       }
 
       // We can pretend that by default the people are in top friends order
-      if (options.getSortBy().equals(SortBy.name)) {
+      if (options.getSortBy().equals(Person.Field.NAME.toString())) {
         Collections.sort(result, NAME_COMPARATOR);
       }
 
