@@ -24,7 +24,8 @@ public enum ResponseError {
   UNAUTHORIZED("unauthorized", HttpServletResponse.SC_UNAUTHORIZED),
   FORBIDDEN("forbidden", HttpServletResponse.SC_FORBIDDEN),
   BAD_REQUEST("badRequest", HttpServletResponse.SC_BAD_REQUEST),
-  INTERNAL_ERROR("internalError", HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+  INTERNAL_ERROR("internalError", HttpServletResponse.SC_INTERNAL_SERVER_ERROR),
+  LIMIT_EXCEEDED("limitExceeded", HttpServletResponse.SC_EXPECTATION_FAILED);
 
   private final String jsonValue;
   private int httpErrorCode;

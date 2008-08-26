@@ -166,9 +166,8 @@ JsonRpcContainer.translateHttpError = function(httpError) {
     return opensocial.ResponseItem.Error.INTERNAL_ERROR;
   } else if (httpError == "Error 404") {
     return opensocial.ResponseItem.Error.BAD_REQUEST;
-  // TODO: Which one should the limit exceeded error be?
-    // } else if (httpError == "Error ???") {
-    //   return opensocial.ResponseItem.Error.LIMIT_EXCEEDED;
+  } else if (httpError == "Error 417") {
+    return opensocial.ResponseItem.Error.LIMIT_EXCEEDED;
   }
 };
 
