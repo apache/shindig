@@ -36,6 +36,8 @@ import org.apache.shindig.gadgets.servlet.HttpUtil;
 import org.apache.shindig.gadgets.servlet.JsonRpcHandler;
 import org.apache.shindig.gadgets.servlet.UrlGenerator;
 
+import java.util.List;
+import java.util.Collections;
 import java.util.concurrent.AbstractExecutorService;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -92,8 +94,9 @@ public abstract class GadgetTestFixture extends EasyMockTestCase {
       shutdown = true;
     }
 
-    public void shutdownNow() {
+    public List<Runnable> shutdownNow() {
       shutdown();
+      return Collections.emptyList();
     }
   };
   public final GadgetSpecFactory specFactory = new BasicGadgetSpecFactory(

@@ -39,6 +39,8 @@ import static org.junit.Assert.assertTrue;
 import org.junit.Test;
 
 import java.net.URI;
+import java.util.Collections;
+import java.util.List;
 import java.util.concurrent.AbstractExecutorService;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -106,8 +108,9 @@ public class BasicGadgetSpecFactoryTest {
       shutdown = true;
     }
 
-    public void shutdownNow() {
+    public List<Runnable> shutdownNow() {
       shutdown();
+      return Collections.emptyList();
     }
   };
 
