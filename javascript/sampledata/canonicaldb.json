@@ -71,7 +71,7 @@
 "humor" : "none to speak of",
 "interests" : ["PHP","Java"],
 "jobInterests" : "will work for beer",
-"jobs" : [{
+"organizations" : [{
 "address" : {
 "formatted" : "1 Shindig Drive"
 },
@@ -83,7 +83,8 @@
 "startDate" : "1995-01-01",
 "subField" : "Development",
 "title" : "Grand PooBah",
-"webpage" : "http://incubator.apache.org/projects/shindig.html"
+"webpage" : "http://incubator.apache.org/projects/shindig.html",
+"type" : "job"
 },{
 "address" : {
 "formatted" : "1 Skid Row"
@@ -96,7 +97,8 @@
 "startDate" : "1991-01-01",
 "subField" : "Lab Tech",
 "title" : "Gopher",
-"webpage" : ""
+"webpage" : "",
+"type" : "job"
 }],
 "languagesSpoken" : ["English","Dutch","Esperanto"],
 "updated" : "2006-06-06T12:12:12Z",
@@ -145,20 +147,6 @@
 "religion" : "druidic",
 "romance" : "twice a year",
 "scaredOf" : "COBOL",
-"schools" : [{
-"address" : {
-"formatted" : "1 Edu St."
-},
-"description" : "High School",
-"endDate" : "1991-01-01",
-"field" : "",
-"name" : "",
-"salary" : "",
-"startDate" : "1982-01-01",
-"subField" : "",
-"title" : "",
-"webpage" : ""
-}],
 "sexualOrientation" : "north",
 "smoker" : {
 "value" : "NO",

@@ -93,8 +93,6 @@ public interface Person {
     INTERESTS("interests"),
     /** the json field for jobInterests. */
     JOB_INTERESTS("jobInterests"),
-    /** the json field for jobs. */
-    JOBS("jobs"),
     /** the json field for languagesSpoken. */
     LANGUAGES_SPOKEN("languagesSpoken"),
     /** the json field for updated. */
@@ -113,6 +111,7 @@ public interface Person {
     NETWORKPRESENCE("networkPresence"),
     /** the json field for nickname. */
     NICKNAME("nickname"),
+    ORGANIZATIONS("organizations"),
     /** the json field for pets. */
     PETS("pets"),
     /** the json field for phoneNumbers. */
@@ -136,8 +135,6 @@ public interface Person {
     ROMANCE("romance"),
     /** the json field for scaredOf. */
     SCARED_OF("scaredOf"),
-    /** the json field for schools. */
-    SCHOOLS("schools"),
     /** the json field for sexualOrientation. */
     SEXUAL_ORIENTATION("sexualOrientation"),
     /** the json field for smoker. */
@@ -585,22 +582,6 @@ public interface Person {
   void setJobInterests(String jobInterests);
 
   /**
-   * Get the Jobs the person has held, specified as an List of {@link Organization}. Container
-   * support for this field is OPTIONAL.
-   *
-   * @return the Jobs the person has held
-   */
-  List<Organization> getJobs();
-
-  /**
-   * Set the Jobs the person has held, specified as an List of {@link Organization}. Container
-   * support for this field is OPTIONAL.
-   *
-   * @param jobs the Jobs the person has held
-   */
-  void setJobs(List<Organization> jobs);
-
-  /**
    * Get a List of the languages that the person speaks as ISO 639-1 codes, specified as an List of
    * strings. Container support for this field is OPTIONAL.
    *
@@ -739,6 +720,10 @@ public interface Person {
    * @param nickname the person's nickname.
    */
   void setNickname(String nickname);
+
+  List<Organization> getOrganizations();
+
+  void setOrganizations(List<Organization> organizations);
 
   /**
    * Get a description of the person's pets Container support for this field is OPTIONAL.
@@ -887,20 +872,6 @@ public interface Person {
    * @param scaredOf what the person is scared of
    */
   void setScaredOf(String scaredOf);
-
-  /**
-   * Get schools the person has attended Container support for this field is OPTIONAL.
-   *
-   * @return schools the person has attended
-   */
-  List<Organization> getSchools();
-
-  /**
-   * Set schools the person has attended Container support for this field is OPTIONAL.
-   *
-   * @param schools schools the person has attended
-   */
-  void setSchools(List<Organization> schools);
 
   /**
    * Get the person's sexual orientation. Container support for this field is OPTIONAL.

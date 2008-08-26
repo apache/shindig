@@ -61,7 +61,6 @@ public class PersonImpl implements Person {
   private List<ListField> ims;
   private List<String> interests;
   private String jobInterests;
-  private List<Organization> jobs;
   private List<String> languagesSpoken;
   private Date updated;
   private String livingArrangement;
@@ -71,6 +70,7 @@ public class PersonImpl implements Person {
   private Name name;
   private Enum<Enum.NetworkPresence> networkPresence;
   private String nickname;
+  private List<Organization> organizations;
   private String pets;
   private List<ListField> phoneNumbers;
   private List<ListField> photos;
@@ -82,7 +82,6 @@ public class PersonImpl implements Person {
   private String religion;
   private String romance;
   private String scaredOf;
-  private List<Organization> schools;
   private String sexualOrientation;
   private Enum<Enum.Smoker> smoker;
   private List<String> sports;
@@ -306,14 +305,6 @@ public class PersonImpl implements Person {
     this.jobInterests = jobInterests;
   }
 
-  public List<Organization> getJobs() {
-    return jobs;
-  }
-
-  public void setJobs(List<Organization> jobs) {
-    this.jobs = jobs;
-  }
-
   public List<String> getLanguagesSpoken() {
     return languagesSpoken;
   }
@@ -384,6 +375,14 @@ public class PersonImpl implements Person {
 
   public void setNickname(String nickname) {
     this.nickname = nickname;
+  }
+
+  public List<Organization> getOrganizations() {
+    return organizations;
+  }
+
+  public void setOrganizations(List<Organization> organizations) {
+    this.organizations = organizations;
   }
 
   public String getPets() {
@@ -472,14 +471,6 @@ public class PersonImpl implements Person {
 
   public void setScaredOf(String scaredOf) {
     this.scaredOf = scaredOf;
-  }
-
-  public List<Organization> getSchools() {
-    return schools;
-  }
-
-  public void setSchools(List<Organization> schools) {
-    this.schools = schools;
   }
 
   public String getSexualOrientation() {

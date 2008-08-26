@@ -34,6 +34,7 @@ public class OrganizationImpl implements Organization {
   private String subField;
   private String title;
   private String webpage;
+  private String type;
 
   public Address getAddress() {
     return address;
@@ -115,4 +116,11 @@ public class OrganizationImpl implements Organization {
     this.webpage = webpage;
   }
 
+  public String getType() {
+    return type;
+  }
+
+  public void setType(String type) {
+    this.type = type;
+  }
 }

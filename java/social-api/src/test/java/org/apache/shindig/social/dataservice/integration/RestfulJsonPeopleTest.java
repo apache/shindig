@@ -117,6 +117,7 @@ public class RestfulJsonPeopleTest extends AbstractLargeRestfulTests {
     job1.setSubField("Development");
     job1.setTitle("Grand PooBah");
     job1.setWebpage("http://incubator.apache.org/projects/shindig.html");
+    job1.setType("job");
 
     Organization job2 = new OrganizationImpl();
     job2.setAddress(new AddressImpl("1 Skid Row"));
@@ -129,8 +130,9 @@ public class RestfulJsonPeopleTest extends AbstractLargeRestfulTests {
     job2.setSubField("Lab Tech");
     job2.setTitle("Gopher");
     job2.setWebpage("");
+    job2.setType("job");
 
-    canonical.setJobs(Lists.newArrayList(job1, job2));
+    canonical.setOrganizations(Lists.newArrayList(job1, job2));
 
     canonical.setUpdated(new Date());
     canonical.setLanguagesSpoken(Lists.newArrayList("English", "Dutch", "Esperanto"));
@@ -159,20 +161,6 @@ public class RestfulJsonPeopleTest extends AbstractLargeRestfulTests {
     canonical.setReligion("druidic");
     canonical.setRomance("twice a year");
     canonical.setScaredOf("COBOL");
-
-    Organization school = new OrganizationImpl();
-    school.setAddress(new AddressImpl("1 Edu St."));
-    school.setDescription("High School");
-    school.setEndDate(new Date());
-    school.setField("");
-    school.setName("");
-    school.setSalary("");
-    school.setStartDate(new Date());
-    school.setSubField("");
-    school.setTitle("");
-    school.setWebpage("");
-    canonical.setSchools(Lists.newArrayList(school));
-
     canonical.setSexualOrientation("north");
     canonical.setSmoker(new EnumImpl<Enum.Smoker>(Enum.Smoker.NO));
     canonical.setSports(Lists.newArrayList("frisbee", "rugby"));
@@ -288,8 +276,8 @@ public class RestfulJsonPeopleTest extends AbstractLargeRestfulTests {
     assertStringField(result, canonical.getJobInterests(),
         Person.Field.JOB_INTERESTS);
 
-    assertOrganizationField(canonical.getJobs().get(0),
-        result.getJSONArray(Person.Field.JOBS.toString()).getJSONObject(0));
+    assertOrganizationField(canonical.getOrganizations().get(0),
+        result.getJSONArray(Person.Field.ORGANIZATIONS.toString()).getJSONObject(0));
 
     assertStringListField(result, canonical.getLanguagesSpoken(),
         Person.Field.LANGUAGES_SPOKEN);
@@ -339,9 +327,6 @@ public class RestfulJsonPeopleTest extends AbstractLargeRestfulTests {
     assertStringField(result, canonical.getReligion(), Person.Field.RELIGION);
     assertStringField(result, canonical.getRomance(), Person.Field.ROMANCE);
     assertStringField(result, canonical.getScaredOf(), Person.Field.SCARED_OF);
-
-    assertOrganizationField(canonical.getSchools().get(0),
-        result.getJSONArray(Person.Field.SCHOOLS.toString()).getJSONObject(0));
 
     assertStringField(result, canonical.getSexualOrientation(), Person.Field.SEXUAL_ORIENTATION);
     assertEnumField(result, canonical.getSmoker(), Person.Field.SMOKER);
@@ -395,6 +380,7 @@ public class RestfulJsonPeopleTest extends AbstractLargeRestfulTests {
     assertStringField(actual, expected.getSubField(), Organization.Field.SUB_FIELD);
     assertStringField(actual, expected.getTitle(), Organization.Field.TITLE);
     assertStringField(actual, expected.getWebpage(), Organization.Field.WEBPAGE);
+    assertStringField(actual, expected.getType(), Organization.Field.TYPE);
   }
 
   private void assertBooleanField(JSONObject result, boolean expected,
