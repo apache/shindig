@@ -18,13 +18,6 @@
  */
 package org.apache.shindig.gadgets;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.Arrays;
-import java.util.Properties;
-import java.util.concurrent.Executor;
-import java.util.concurrent.Executors;
-
 import org.apache.shindig.common.util.ResourceLoader;
 import org.apache.shindig.gadgets.http.HttpResponse;
 
@@ -32,6 +25,14 @@ import com.google.inject.AbstractModule;
 import com.google.inject.CreationException;
 import com.google.inject.name.Names;
 import com.google.inject.spi.Message;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Arrays;
+import java.util.Properties;
+import java.util.concurrent.Executor;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 /**
  * Creates a module to supply all of the Basic* classes
@@ -42,11 +43,12 @@ public class DefaultGuiceModule extends AbstractModule {
 
   /** {@inheritDoc} */
   @Override
-  protected void configure() {
-    System.out.println("Created default injector: " + this);
+  protected void configure() {    
     Names.bindProperties(this.binder(), properties);
 
-    bind(Executor.class).toInstance(Executors.newCachedThreadPool());
+    ExecutorService service = Executors.newCachedThreadPool();
+    bind(Executor.class).toInstance(service);
+    bind(ExecutorService.class).toInstance(service);
 
     // We perform static injection on HttpResponse for cache TTLs.
     requestStaticInjection(HttpResponse.class);

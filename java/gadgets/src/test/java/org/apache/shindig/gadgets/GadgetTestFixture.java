@@ -36,7 +36,9 @@ import org.apache.shindig.gadgets.servlet.HttpUtil;
 import org.apache.shindig.gadgets.servlet.JsonRpcHandler;
 import org.apache.shindig.gadgets.servlet.UrlGenerator;
 
-import java.util.concurrent.Executor;
+import java.util.concurrent.AbstractExecutorService;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.TimeUnit;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -67,9 +69,31 @@ public abstract class GadgetTestFixture extends EasyMockTestCase {
   public final LockedDomainService lockedDomainService = mock(LockedDomainService.class);
   public final ContentRewriter rewriter = new NoOpContentRewriter();
   public final FakeTimeSource timeSource = new FakeTimeSource();
-  public final Executor executor = new Executor() {
-    public void execute(Runnable r) {
-      r.run();
+  public final ExecutorService executor = new AbstractExecutorService() {
+    private boolean shutdown;
+
+    public void execute(Runnable command) {
+      command.run();
+    }
+
+    public boolean isTerminated() {
+      return shutdown;
+    }
+
+    public boolean isShutdown() {
+      return shutdown;
+    }
+
+    public boolean awaitTermination(long timeout, TimeUnit unit) {
+      return true;
+    }
+
+    public void shutdown() {
+      shutdown = true;
+    }
+
+    public void shutdownNow() {
+      shutdown();
     }
   };
   public final GadgetSpecFactory specFactory = new BasicGadgetSpecFactory(

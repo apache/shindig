@@ -38,8 +38,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CompletionService;
-import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorCompletionService;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 
 /**
@@ -48,7 +48,7 @@ import java.util.concurrent.Future;
  */
 @Singleton
 public class GadgetServer {
-  private final Executor executor;
+  private final ExecutorService executor;
   private final GadgetFeatureRegistry registry;
   private final GadgetBlacklist blacklist;
 
@@ -57,7 +57,7 @@ public class GadgetServer {
   private MessageBundleFactory bundleFactory;
 
   @Inject
-  public GadgetServer(Executor executor,
+  public GadgetServer(ExecutorService executor,
       GadgetFeatureRegistry registry,
       GadgetBlacklist blacklist,
       ContentFetcherFactory preloadFetcherFactory,
@@ -169,6 +169,7 @@ public class GadgetServer {
 
 /**
  * Provides a task for preloading data into the gadget content
+ * TODO: Remove when new preloading is committed.
  */
 class PreloadTask implements Callable<HttpResponse> {
   private final Preload preload;
