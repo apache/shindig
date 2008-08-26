@@ -90,7 +90,6 @@ public class HttpRequestTest {
         .setGadget(DEFAULT_URI)
         .setMethod("POST")
         .setPostBody(POST_BODY.getBytes())
-        .setContentRewriter(null)
         .setRewriteMimeType("text/fake")
         .setSecurityToken(AnonymousSecurityToken.getInstance())
         .setSignOwner(false)
@@ -104,7 +103,6 @@ public class HttpRequestTest {
     assertEquals(request.getGadget(), request2.getGadget());
     assertEquals(request.getMethod(), request2.getMethod());
     assertEquals(request.getPostBodyAsString(), request2.getPostBodyAsString());
-    assertEquals(request.getContentRewriter(), request2.getContentRewriter());
     assertEquals(request.getRewriteMimeType(), request2.getRewriteMimeType());
     assertEquals(request.getSecurityToken(), request2.getSecurityToken());
     assertEquals(request.getSignOwner(), request2.getSignOwner());

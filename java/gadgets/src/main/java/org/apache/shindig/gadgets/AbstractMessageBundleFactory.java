@@ -21,7 +21,6 @@ import org.apache.shindig.gadgets.spec.GadgetSpec;
 import org.apache.shindig.gadgets.spec.LocaleSpec;
 import org.apache.shindig.gadgets.spec.MessageBundle;
 
-import java.util.List;
 import java.util.Locale;
 import java.net.URI;
 

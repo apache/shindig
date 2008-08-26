@@ -20,19 +20,18 @@ package org.apache.shindig.gadgets;
 
 import org.apache.shindig.common.cache.Cache;
 import org.apache.shindig.common.cache.CacheProvider;
-import org.apache.shindig.common.cache.LruCache;
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.gadgets.http.HttpFetcher;
 import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.http.HttpResponse;
 import org.apache.shindig.gadgets.rewrite.ContentRewriter;
+import org.apache.shindig.gadgets.rewrite.ContentRewriterRegistry;
 import org.apache.shindig.gadgets.spec.GadgetSpec;
 import org.apache.shindig.gadgets.spec.View;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.inject.name.Named;
-import com.sun.jmx.remote.util.CacheMap;
 
 import java.net.URI;
 import java.util.ArrayList;
@@ -53,7 +52,7 @@ public class BasicGadgetSpecFactory implements GadgetSpecFactory {
   private static final Logger logger = Logger.getLogger(BasicGadgetSpecFactory.class.getName());
 
   private final HttpFetcher fetcher;
-  private final ContentRewriter rewriter;
+  private final ContentRewriterRegistry rewriterRegistry;
   private final Executor executor;
   private final long minTtl;
   private final long maxTtl;
@@ -148,8 +147,12 @@ public class BasicGadgetSpecFactory implements GadgetSpecFactory {
           throw new GadgetException(GadgetException.Code.FAILED_TO_RETRIEVE_CONTENT,
                                     "Unable to retrieve remote gadget content.");
         }
-        if (rewriter != null) {
-          v.setRewrittenContent(rewriter.rewriteGadgetView(spec, v.getContent(), "text/html"));
+        if (rewriterRegistry != null) {
+          String content = v.getContent();
+          for (ContentRewriter rewriter : rewriterRegistry.getRewriters()) {
+            content = rewriter.rewriteGadgetView(spec, content, "text/html");
+          }
+          v.setRewrittenContent(content);
         }
       }
     }
@@ -170,13 +173,13 @@ public class BasicGadgetSpecFactory implements GadgetSpecFactory {
   @Inject
   public BasicGadgetSpecFactory(HttpFetcher fetcher,
                                 CacheProvider cacheProvider,
-                                ContentRewriter rewriter,
+                                ContentRewriterRegistry rewriterRegistry,
                                 Executor executor,
                                 @Named("shindig.gadget-spec.cache.capacity")int gadgetSpecCacheCapacity,
                                 @Named("shindig.gadget-spec.cache.minTTL")long minTtl,
                                 @Named("shindig.gadget-spec.cache.maxTTL")long maxTtl) {
     this.fetcher = fetcher;
-    this.rewriter = rewriter;
+    this.rewriterRegistry = rewriterRegistry;
     this.executor = executor;
     this.cache = cacheProvider.createCache(gadgetSpecCacheCapacity);
     this.minTtl = minTtl;

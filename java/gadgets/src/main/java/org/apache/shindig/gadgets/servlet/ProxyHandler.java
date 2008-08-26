@@ -55,7 +55,6 @@ public class ProxyHandler extends ProxyBase {
   // This is a limitation of Guice, but this workaround...works.
   private final HttpFetcher fetcher;
   private final LockedDomainService lockedDomainService;
-  private final ContentRewriter rewriter;
 
   @Inject
   public ProxyHandler(HttpFetcher fetcher,
@@ -63,7 +62,6 @@ public class ProxyHandler extends ProxyBase {
                       ContentRewriter rewriter) {
     this.fetcher = fetcher;
     this.lockedDomainService = lockedDomainService;
-    this.rewriter = rewriter;
   }
 
   /**
@@ -78,8 +76,6 @@ public class ProxyHandler extends ProxyBase {
     if (request.getParameter(GADGET_PARAM) != null) {
       req.setGadget(Uri.parse(request.getParameter(GADGET_PARAM)));
     }
-
-    req.setContentRewriter(rewriter);
 
     // Allow the rewriter to use an externally forced mime type. This is needed
     // allows proper rewriting of <script src="x"/> where x is returned with

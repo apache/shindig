@@ -25,7 +25,6 @@ import org.apache.commons.lang.ArrayUtils;
 import org.apache.shindig.common.ContainerConfig;
 import org.apache.shindig.common.SecurityToken;
 import org.apache.shindig.common.uri.Uri;
-import org.apache.shindig.gadgets.rewrite.ContentRewriter;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -64,8 +63,6 @@ public class HttpRequest {
   private boolean signOwner = true;
   private boolean signViewer = true;
 
-  // TODO: Remove this when new rewriting infrastructure is in place.
-  private ContentRewriter contentRewriter;
   private String rewriteMimeType;
 
   /**
@@ -90,7 +87,6 @@ public class HttpRequest {
     securityToken = request.securityToken;
     signOwner = request.signOwner;
     signViewer = request.signViewer;
-    contentRewriter = request.contentRewriter;
     rewriteMimeType = request.rewriteMimeType;
   }
 
@@ -241,15 +237,6 @@ public class HttpRequest {
   }
 
   /**
-   * @param contentRewriter The rewriter to use for the object retrieved by this request.
-   * TODO: Move this to new rewriting facility.
-   */
-  public HttpRequest setContentRewriter(ContentRewriter contentRewriter) {
-    this.contentRewriter = contentRewriter;
-    return this;
-  }
-
-  /**
    * @param rewriteMimeType The assumed content type of the response to be rewritten. Overrides
    * any values set in the Content-Type response header.
    *
@@ -388,13 +375,6 @@ public class HttpRequest {
    */
   public boolean getSignViewer() {
     return signViewer;
-  }
-
-  /**
-   * @return The rewriter to be used on any response objects.
-   */
-  public ContentRewriter getContentRewriter() {
-    return contentRewriter;
   }
 
   /**
