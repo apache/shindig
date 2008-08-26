@@ -23,7 +23,6 @@ import org.apache.shindig.social.opensocial.model.Organization;
 import java.util.Date;
 
 public class OrganizationImpl implements Organization {
-
   private Address address;
   private String description;
   private Date endDate;
@@ -35,6 +34,7 @@ public class OrganizationImpl implements Organization {
   private String title;
   private String webpage;
   private String type;
+  private Boolean primary;
 
   public Address getAddress() {
     return address;
@@ -122,5 +122,13 @@ public class OrganizationImpl implements Organization {
 
   public void setType(String type) {
     this.type = type;
+  }
+
+  public Boolean getPrimary() {
+    return primary;
+  }
+
+  public void setPrimary(Boolean primary) {
+    this.primary = primary;
   }
 }

@@ -42,7 +42,8 @@ public interface Address {
     /** this field may be multiple lines */
     STREET_ADDRESS("streetAddress"),
     TYPE("type"),
-    FORMATTED("formatted");
+    FORMATTED("formatted"),
+    PRIMARY("primary");
 
     /**
      * The json field that the instance represents.
@@ -194,4 +195,8 @@ public interface Address {
    * @param formatted the formatted address
    */
   void setFormatted(String formatted);
+
+  Boolean getPrimary();
+
+  void setPrimary(Boolean primary);
 }

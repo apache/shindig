@@ -44,7 +44,8 @@ public interface Organization {
     TITLE("title"),
     WEBPAGE("webpage"),
     /** Should have the value of "job" or "school" to be put in the right js fields */
-    TYPE("type");
+    TYPE("type"),
+    PRIMARY("primary");
 
     private final String jsonString;
 
@@ -101,5 +102,9 @@ public interface Organization {
   String getType();
 
   void setType(String type);
+
+  Boolean getPrimary();
+
+  void setPrimary(Boolean primary);
 
 }
