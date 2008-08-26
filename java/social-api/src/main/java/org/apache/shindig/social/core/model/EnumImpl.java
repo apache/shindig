@@ -21,41 +21,41 @@ import org.apache.shindig.social.opensocial.model.Enum;
 
 public final class EnumImpl<E extends Enum.EnumKey> implements Enum<E> {
   private String displayValue;
-  private E key = null;
+  private E value = null;
 
   /**
    * Constructs a Enum object.
-   * @param key EnumKey The key to use
+   * @param value EnumKey The key to use
    * @param displayValue String The display value
    */
-  public EnumImpl(E key, String displayValue) {
-    this.key = key;
+  public EnumImpl(E value, String displayValue) {
+    this.value = value;
     this.displayValue = displayValue;
   }
 
   /**
    * Constructs a Enum object.
-   * @param key The key to use. Will use the value from getDisplayValue() as
+   * @param value The key to use. Will use the value from getDisplayValue() as
    *     the display value.
    */
-  public EnumImpl(E key) {
-    this(key, key.getDisplayValue());
+  public EnumImpl(E value) {
+    this(value, value.getDisplayValue());
   }
 
   public String getDisplayValue() {
-    return this.displayValue;
+    return displayValue;
   }
 
   public void setDisplayValue(String displayValue) {
     this.displayValue = displayValue;
   }
 
-  public E getKey() {
-    return this.key;
+  public E getValue() {
+    return value;
   }
 
-  public void setKey(E key) {
-    this.key = key;
+  public void setValue(E value) {
+    this.value = value;
   }
 
 }
