@@ -17,7 +17,30 @@
  */
 package org.apache.shindig.social.opensocial.model;
 
+import org.apache.shindig.social.core.model.AccountImpl;
+
+import com.google.inject.ImplementedBy;
+
+@ImplementedBy(AccountImpl.class)
+
 public interface Account {
+
+  public static enum Field {
+    DOMAIN("domain"),
+    USER_ID("userId"),
+    USERNAME("username");
+
+    private final String jsonString;
+
+    private Field(String jsonString) {
+      this.jsonString = jsonString;
+    }
+
+    @Override
+    public String toString() {
+      return this.jsonString;
+    }
+  }
 
   String getDomain();
 
