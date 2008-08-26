@@ -188,7 +188,7 @@ RestfulContainer.prototype.translateIdSpec = function(newIdSpec) {
 
   if (groupId == 'FRIENDS') {
     groupId = "@friends";
-  } else if (!groupId) {
+  } else if (groupId == 'SELF' || !groupId) {
     groupId = "@self";
   }
 
