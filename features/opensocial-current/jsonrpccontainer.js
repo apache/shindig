@@ -311,8 +311,19 @@ JsonRpcContainer.prototype.createPersonFromJson = function(serverJson) {
     }
   }
 
+  this.translateEnumJson(serverJson.drinker);
+  this.translateEnumJson(serverJson.lookingFor);
+  this.translateEnumJson(serverJson.networkPresence);
+  this.translateEnumJson(serverJson.smoker);
+
   return new JsonPerson(serverJson);
 };
+
+JsonRpcContainer.prototype.translateEnumJson = function(enumJson) {
+  if (enumJson) {
+    enumJson.key = enumJson.value;
+  }
+}
 
 JsonRpcContainer.prototype.translateUrlJson = function(urlJson) {
   if (urlJson) {

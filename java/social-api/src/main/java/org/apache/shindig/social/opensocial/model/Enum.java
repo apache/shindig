@@ -29,9 +29,7 @@ public interface Enum<E extends Enum.EnumKey> {
    * Set of fields associated with an Enum object
    */
   public static enum Field {
-
-    KEY("key"),
-    // TODO Shouldnt this be 'displayValue'
+    VALUE("value"),
     DISPLAY_VALUE("displayValue");
 
     private final String jsonString;
@@ -47,7 +45,6 @@ public interface Enum<E extends Enum.EnumKey> {
   }
 
   public interface EnumKey {
-
     String getDisplayValue();
   }
 
@@ -200,12 +197,12 @@ public interface Enum<E extends Enum.EnumKey> {
    *
    * @return java.lang.Enum key object for this Enum.
    */
-  E getKey();
+  E getValue();
 
   /**
    * Sets the key for this Enum. Use this for logic within your gadget.
    *
-   * @param key The value to set.
+   * @param value The value to set.
    */
-  void setKey(E key);
+  void setValue(E value);
 }

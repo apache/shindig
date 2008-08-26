@@ -54,7 +54,7 @@
 },
 "birthday" : "1975-01-01",
 "drinker" : {
-"key" : "SOCIALLY",
+"value" : "SOCIALLY",
 "displayValue" : "Socially"
 },
 "emails" : [{
@@ -102,8 +102,8 @@
 "updated" : "2006-06-06T12:12:12Z",
 "livingArrangement" : "in a house",
 "lookingFor" : [
-  { "key" : "RANDOM", "displayValue" : "Random"},
-  { "key" : "NETWORKING", "displayValue" : "Networking"}
+  {"value" : "RANDOM", "displayValue" : "Random"},
+  {"value" : "NETWORKING", "displayValue" : "Networking"}
 ],
 "movies" : ["Iron Man", "Nosferatu"],
 "music" : ["Chieftains","Beck"],
@@ -116,7 +116,7 @@
 "unstructured" : "Sir Shin H. Digg Social Butterfly"
 },
 "networkPresence" : {
-"key" : "ONLINE",
+"value" : "ONLINE",
 "displayValue" : "Online"
 },
 "nickname" : "diggy",
@@ -161,7 +161,7 @@
 }],
 "sexualOrientation" : "north",
 "smoker" : {
-"key" : "NO",
+"value" : "NO",
 "displayValue" : "No"
 },
 "sports" : ["frisbee","rugby"],

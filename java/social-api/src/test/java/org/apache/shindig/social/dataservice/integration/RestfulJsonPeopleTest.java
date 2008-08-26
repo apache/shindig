@@ -422,18 +422,18 @@ public class RestfulJsonPeopleTest extends AbstractLargeRestfulTests {
       Person.Field field) throws JSONException {
     JSONObject actual = result.getJSONObject(field.toString());
     assertEquals(expected.getDisplayValue(), actual.getString("displayValue"));
-    assertEquals(expected.getKey().toString(), actual.getString("key"));
+    assertEquals(expected.getValue().toString(), actual.getString("value"));
   }
 
   private void assertListEnumField(JSONObject result,
       List<? extends Enum<? extends Enum.EnumKey>> expected,
       Person.Field field) throws JSONException {
     JSONArray actual = result.getJSONArray(field.toString());
-    for (int i = 0; i  < actual.length(); i++) {
+    for (int i = 0; i < actual.length(); i++) {
       assertEquals(expected.get(i).getDisplayValue(),
           actual.getJSONObject(i).getString("displayValue"));
-      assertEquals(expected.get(i).getKey().toString(),
-          actual.getJSONObject(i).getString("key"));
+      assertEquals(expected.get(i).getValue().toString(),
+          actual.getJSONObject(i).getString("value"));
     }
   }
 

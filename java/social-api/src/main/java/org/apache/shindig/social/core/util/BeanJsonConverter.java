@@ -351,9 +351,9 @@ public class BeanJsonConverter implements BeanConverter {
     // TODO This isnt injector friendly but perhaps implementors dont need it. If they do a
     // refactoring of the Enum handling in general is needed.
     Object value;
-    if (jsonEnum.has(Enum.Field.KEY.toString())) {
+    if (jsonEnum.has(Enum.Field.VALUE.toString())) {
       Enum.EnumKey enumKey = (Enum.EnumKey) enumKeyType
-          .getField(jsonEnum.getString(Enum.Field.KEY.toString())).get(null);
+          .getField(jsonEnum.getString(Enum.Field.VALUE.toString())).get(null);
       value = new EnumImpl<Enum.EnumKey>(enumKey,
           jsonEnum.getString(Enum.Field.DISPLAY_VALUE.toString()));
     } else {
