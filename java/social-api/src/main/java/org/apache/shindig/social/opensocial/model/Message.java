@@ -34,13 +34,26 @@ import com.google.inject.ImplementedBy;
 
 public interface Message {
 
+  /**
+   * An enumeration of field names in a message.
+   */
   public static enum Field {
+    /** the field name for body. */
     BODY("body"),
+    /** the field name for title. */
     TITLE("title"),
+    /** the field name for type. */
     TYPE("type");
 
+    /**
+     * the name of the field.
+     */
     private final String jsonString;
 
+    /**
+     * Create a field based on a name.
+     * @param jsonString the name of the field
+     */
     private Field(String jsonString) {
       this.jsonString = jsonString;
     }
@@ -51,18 +64,28 @@ public interface Message {
     }
   }
 
+  /**
+   * The type of a message
+   */
   public enum Type {
-    /* An email */
+    /** An email. */
     EMAIL("EMAIL"),
-    /* A short private message */
+    /** A short private message. */
     NOTIFICATION("NOTIFICATION"),
-    /* A message to a specific user that can be seen only by that user */
+    /** A message to a specific user that can be seen only by that user. */
     PRIVATE_MESSAGE("PRIVATE_MESSAGE"),
-    /* A message to a specific user that can be seen by more than that user */
+    /** A message to a specific user that can be seen by more than that user. */
     PUBLIC_MESSAGE("PUBLIC_MESSAGE");
 
+    /**
+     * The type of message.
+     */
     private final String jsonString;
 
+    /**
+     * Create a message type based on a string token.
+     * @param jsonString the type of message
+     */
     private Type(String jsonString) {
       this.jsonString = jsonString;
     }
