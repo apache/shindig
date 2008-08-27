@@ -82,8 +82,11 @@ public class ApiServlet extends InjectedServlet {
   }
 
   protected ResponseItem getResponseItem(Future<? extends ResponseItem> future) {
-    ResponseItem response;
+    ResponseItem response = null;
     try {
+      if (future != null) {
+        response = future.get();
+      }
       // TODO: use timeout methods?
       response = future.get();
     } catch (InterruptedException ie) {
@@ -91,7 +94,8 @@ public class ApiServlet extends InjectedServlet {
     } catch (ExecutionException ee) {
       response = responseItemFromException(ee.getCause());
     }
-    return response;
+    return (response != null) ? response :
+      new ResponseItem(ResponseError.INTERNAL_ERROR, "null response from spi");
   }
 
   protected ResponseItem responseItemFromException(Throwable t) {
