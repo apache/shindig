@@ -33,7 +33,6 @@ import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.UnavailableException;
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletRequestWrapper;
 import java.io.IOException;
 import java.util.List;
 
@@ -86,32 +85,14 @@ public class AuthenticationServletFilter implements Filter {
     for (AuthenticationHandler handler : handlers) {
       SecurityToken token = handler.getSecurityTokenFromRequest(req);
       if (token != null) {
-        chain.doFilter(new SecurityTokenRequest(req, token, handler.getName()), response);
+        AuthInfo.setAuthType(req, handler.getName());
+        AuthInfo.setSecurityToken(req, token);
+        chain.doFilter(req, response);
         return;
       }
     }
 
     // We did not find a security token so we will just pass null
-    chain.doFilter(new SecurityTokenRequest(req, null, null), response);
-  }
-
-  public static class SecurityTokenRequest extends HttpServletRequestWrapper {
-    private final SecurityToken token;
-    private final String authType;
-
-    public SecurityTokenRequest(HttpServletRequest request, SecurityToken token, String authType) {
-      super(request);
-      this.token = token;
-      this.authType = authType;
-    }
-
-    public SecurityToken getToken() {
-      return token;
-    }
-
-    @Override
-    public String getAuthType() {
-      return authType;
-    }
+    chain.doFilter(req, response);
   }
 }
