@@ -48,6 +48,12 @@ under the License.
           <include>container.js</include>
         </includes>
       </resource>
+      <resource>
+        <directory>src/main/bundle</directory>
+        <includes>
+          <include>**/*</include>
+        </includes>
+      </resource>
     </resources>
   </build>
 
