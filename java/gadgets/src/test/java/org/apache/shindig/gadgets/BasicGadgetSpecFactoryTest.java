@@ -21,6 +21,7 @@ package org.apache.shindig.gadgets;
 import org.apache.shindig.common.cache.CacheProvider;
 import org.apache.shindig.common.cache.DefaultCacheProvider;
 import org.apache.shindig.common.uri.Uri;
+import org.apache.shindig.common.testing.TestExecutorService;
 import org.apache.shindig.gadgets.http.HttpFetcher;
 import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.http.HttpResponse;
@@ -39,11 +40,7 @@ import static org.junit.Assert.assertTrue;
 import org.junit.Test;
 
 import java.net.URI;
-import java.util.Collections;
-import java.util.List;
-import java.util.concurrent.AbstractExecutorService;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.TimeUnit;
 
 /**
  * Tests for BasicGadgetSpecFactory
@@ -85,34 +82,7 @@ public class BasicGadgetSpecFactoryTest {
       return SPEC_URL.toJavaUri();
     }
   };
-  private final static ExecutorService FAKE_EXECUTOR = new AbstractExecutorService() {
-    private boolean shutdown;
-
-    public void execute(Runnable command) {
-      command.run();
-    }
-
-    public boolean isTerminated() {
-      return shutdown;
-    }
-
-    public boolean isShutdown() {
-      return shutdown;
-    }
-
-    public boolean awaitTermination(long timeout, TimeUnit unit) {
-      return true;
-    }
-
-    public void shutdown() {
-      shutdown = true;
-    }
-
-    public List<Runnable> shutdownNow() {
-      shutdown();
-      return Collections.emptyList();
-    }
-  };
+  private final static ExecutorService FAKE_EXECUTOR = new TestExecutorService();
 
   private final HttpFetcher fetcher = EasyMock.createNiceMock(HttpFetcher.class);
   private final CaptureRewriter rewriter = new CaptureRewriter();

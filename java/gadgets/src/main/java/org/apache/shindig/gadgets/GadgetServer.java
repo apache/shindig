@@ -165,46 +165,46 @@ public class GadgetServer {
     }
     return libraries;
   }
-}
 
-/**
- * Provides a task for preloading data into the gadget content
- * TODO: Remove when new preloading is committed.
- */
-class PreloadTask implements Callable<HttpResponse> {
-  private final Preload preload;
-  private final ContentFetcherFactory preloadFetcherFactory;
-  private final GadgetContext context;
+  /**
+   * Provides a task for preloading data into the gadget content
+   * TODO: Remove when new preloading is committed.
+   */
+  private static class PreloadTask implements Callable<HttpResponse> {
+    private final Preload preload;
+    private final ContentFetcherFactory preloadFetcherFactory;
+    private final GadgetContext context;
 
-  public HttpResponse call() {
-    try {
-      HttpRequest request = new HttpRequest(Uri.fromJavaUri(preload.getHref()))
-          .setSignOwner(preload.isSignOwner())
-          .setSignViewer(preload.isSignViewer())
-          .setContainer(context.getContainer())
-          .setSecurityToken(context.getToken())
-          .setGadget(Uri.fromJavaUri(context.getUrl()));
-      switch (preload.getAuth()) {
-        case NONE:
-          return preloadFetcherFactory.get().fetch(request);
-        case SIGNED:
-          return preloadFetcherFactory.getSigningFetcher(context.getToken())
-              .fetch(request);
-        case OAUTH:
-          return preloadFetcherFactory.getOAuthFetcher(context.getToken(),
-              new OAuthArguments(preload)).fetch(request);
-        default:
-          return HttpResponse.error();
+    public HttpResponse call() {
+      try {
+        HttpRequest request = new HttpRequest(Uri.fromJavaUri(preload.getHref()))
+            .setSignOwner(preload.isSignOwner())
+            .setSignViewer(preload.isSignViewer())
+            .setContainer(context.getContainer())
+            .setSecurityToken(context.getToken())
+            .setGadget(Uri.fromJavaUri(context.getUrl()));
+        switch (preload.getAuth()) {
+          case NONE:
+            return preloadFetcherFactory.get().fetch(request);
+          case SIGNED:
+            return preloadFetcherFactory.getSigningFetcher(context.getToken())
+                .fetch(request);
+          case OAUTH:
+            return preloadFetcherFactory.getOAuthFetcher(context.getToken(),
+                new OAuthArguments(preload)).fetch(request);
+          default:
+            return HttpResponse.error();
+        }
+      } catch (GadgetException e) {
+        return HttpResponse.error();
       }
-    } catch (GadgetException e) {
-      return HttpResponse.error();
     }
-  }
 
-  public PreloadTask(GadgetContext context, Preload preload,
-      ContentFetcherFactory preloadFetcherFactory) {
-    this.preload = preload;
-    this.preloadFetcherFactory = preloadFetcherFactory;
-    this.context = context;
+    public PreloadTask(GadgetContext context, Preload preload,
+        ContentFetcherFactory preloadFetcherFactory) {
+      this.preload = preload;
+      this.preloadFetcherFactory = preloadFetcherFactory;
+      this.context = context;
+    }
   }
 }

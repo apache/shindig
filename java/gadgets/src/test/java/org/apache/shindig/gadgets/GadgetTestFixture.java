@@ -21,6 +21,7 @@ package org.apache.shindig.gadgets;
 
 import org.apache.shindig.common.ContainerConfig;
 import org.apache.shindig.common.SecurityTokenDecoder;
+import org.apache.shindig.common.testing.TestExecutorService;
 import org.apache.shindig.common.cache.CacheProvider;
 import org.apache.shindig.common.cache.DefaultCacheProvider;
 import org.apache.shindig.common.util.FakeTimeSource;
@@ -36,11 +37,7 @@ import org.apache.shindig.gadgets.servlet.HttpUtil;
 import org.apache.shindig.gadgets.servlet.JsonRpcHandler;
 import org.apache.shindig.gadgets.servlet.UrlGenerator;
 
-import java.util.List;
-import java.util.Collections;
-import java.util.concurrent.AbstractExecutorService;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.TimeUnit;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -71,34 +68,7 @@ public abstract class GadgetTestFixture extends EasyMockTestCase {
   public final LockedDomainService lockedDomainService = mock(LockedDomainService.class);
   public final ContentRewriter rewriter = new NoOpContentRewriter();
   public final FakeTimeSource timeSource = new FakeTimeSource();
-  public final ExecutorService executor = new AbstractExecutorService() {
-    private boolean shutdown;
-
-    public void execute(Runnable command) {
-      command.run();
-    }
-
-    public boolean isTerminated() {
-      return shutdown;
-    }
-
-    public boolean isShutdown() {
-      return shutdown;
-    }
-
-    public boolean awaitTermination(long timeout, TimeUnit unit) {
-      return true;
-    }
-
-    public void shutdown() {
-      shutdown = true;
-    }
-
-    public List<Runnable> shutdownNow() {
-      shutdown();
-      return Collections.emptyList();
-    }
-  };
+  public final ExecutorService executor = new TestExecutorService();
   public final GadgetSpecFactory specFactory = new BasicGadgetSpecFactory(
       fetcher, cacheProvider, new BasicContentRewriterRegistry(null), executor, 0, 0L, 0L);
 
