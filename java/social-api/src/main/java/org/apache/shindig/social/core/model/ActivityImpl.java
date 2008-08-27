@@ -94,11 +94,18 @@ public class ActivityImpl implements Activity {
   }
 
   public Date getUpdated() {
-    return updated;
+    if ( updated == null ) {
+      return null;
+    }
+    return new Date(updated.getTime());
   }
 
   public void setUpdated(Date updated) {
-    this.updated = updated;
+    if ( updated == null ) {
+      this.updated = null;
+    } else {
+      this.updated = new Date(updated.getTime());
+    }
   }
 
   public List<MediaItem> getMediaItems() {

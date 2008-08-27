@@ -186,11 +186,18 @@ public class PersonImpl implements Person {
   }
 
   public Date getBirthday() {
-    return birthday;
+    if ( birthday == null ) {
+      return null;
+    } 
+    return new Date(birthday.getTime());
   }
 
   public void setBirthday(Date birthday) {
-    this.birthday = birthday;
+    if ( birthday == null ) {
+      this.birthday = null;
+    } else {
+      this.birthday = new Date(birthday.getTime());
+    }
   }
 
   public Enum<Enum.Drinker> getDrinker() {
@@ -314,11 +321,18 @@ public class PersonImpl implements Person {
   }
 
   public Date getUpdated() {
-    return updated;
+    if ( updated == null ) {
+      return null;
+    }
+    return new Date(updated.getTime());
   }
 
   public void setUpdated(Date updated) {
-    this.updated = updated;
+    if ( updated == null ) {
+      this.updated = updated;
+    } else {
+      this.updated = new Date(updated.getTime());
+    }
   }
 
   public String getLivingArrangement() {
