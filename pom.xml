@@ -986,6 +986,11 @@
         <artifactId>geronimo-stax-api_1.0_spec</artifactId>
         <version>1.0.1</version>
       </dependency>
+      <dependency>
+        <groupId>net.sf.ehcache</groupId>
+        <artifactId>ehcache</artifactId>
+        <version>1.4.1</version>
+      </dependency>
     </dependencies>
   </dependencyManagement>
 </project>

@@ -29,7 +29,7 @@ import java.util.Map;
 @Singleton
 public class DefaultCacheProvider implements CacheProvider {
 
-  Map<String, Cache<?, ?>> cacheInstances = new HashMap<String, Cache<?, ?>>();
+  private Map<String, Cache<?, ?>> cacheInstances = new HashMap<String, Cache<?, ?>>();
 
   /*
    * (non-Javadoc)
@@ -47,7 +47,7 @@ public class DefaultCacheProvider implements CacheProvider {
           c = new LruCache<K, V>(capacity);
           cacheInstances.put(name, c);
         }
-        return c;     
+        return c;    
       }
     }
   }
