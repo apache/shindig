@@ -51,9 +51,10 @@ public class AbstractHttpCacheTest extends TestCase {
     expect(key.isCacheable()).andReturn(true).anyTimes();
     HttpRequest request = EasyMock.createNiceMock(HttpRequest.class);
     expect(request.getIgnoreCache()).andReturn(false).anyTimes();
+    expect(request.getCacheTtl()).andReturn(Integer.MAX_VALUE).anyTimes();
     replay(key, request);
     HttpResponse response = new HttpResponseBuilder().setHttpStatusCode(200)
-        .setResponse("foo".getBytes()).setExpirationTime(Integer.MAX_VALUE).create();
+        .setResponse("foo".getBytes()).setCacheTtl(Integer.MAX_VALUE).create();
     
     // Actual test.
     AbstractHttpCache ahc = injector.getInstance(TestHttpCache.class);
@@ -61,7 +62,7 @@ public class AbstractHttpCacheTest extends TestCase {
     assertNotSame(rewritten, response);
     assertEquals(PFX_STR + "foo", rewritten.getResponseAsString());
     assertSame(rewritten, ahc.getResponse(key, request));
-    assertSame(response, ahc.removeResponse(key));
+    assertEquals(response, ahc.removeResponse(key));
   }
 
   private static class TestHttpCache extends AbstractHttpCache {
@@ -83,7 +84,6 @@ public class AbstractHttpCacheTest extends TestCase {
     public HttpResponse removeResponseImpl(String key) {
       return map.remove(key);
     }
-    
   }
   
   private static String PFX_STR = "--prefixtest--";
@@ -93,7 +93,7 @@ public class AbstractHttpCacheTest extends TestCase {
     }
     
     public HttpResponse rewrite(HttpRequest req, HttpResponse resp) {
-      return new HttpResponseBuilder().setHttpStatusCode(resp.getHttpStatusCode())
+      return new HttpResponseBuilder(resp)
           .setResponse((PFX_STR + resp.getResponseAsString()).getBytes()).create();
     }
   }
