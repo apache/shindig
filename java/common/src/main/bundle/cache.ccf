@@ -1,0 +1,14 @@
+jcs.default=
+jcs.default.cacheattributes=org.apache.jcs.engine.CompositeCacheAttributes
+jcs.default.cacheattributes.MaxObjects=10000
+jcs.default.cacheattributes.MemoryCacheName=org.apache.jcs.engine.memory.lru.LRUMemoryCache
+jcs.default.cacheattributes.UseMemoryShrinker=false
+jcs.default.cacheattributes.MaxMemoryIdleTimeSeconds=3600
+jcs.default.cacheattributes.ShrinkerIntervalSeconds=60
+jcs.default.elementattributes=org.apache.jcs.engine.ElementAttributes
+jcs.default.elementattributes.IsEternal=false
+jcs.default.elementattributes.MaxLifeSeconds=21600
+jcs.default.elementattributes.IdleTime=1800
+jcs.default.elementattributes.IsSpool=true
+jcs.default.elementattributes.IsRemote=true
+jcs.default.elementattributes.IsLateral=true

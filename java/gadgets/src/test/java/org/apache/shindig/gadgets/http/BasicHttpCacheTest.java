@@ -31,14 +31,13 @@ import java.util.Date;
 public class BasicHttpCacheTest extends TestCase {
 
   private HttpCache cache;
-  private CacheProvider cacheProvider;
 
   @Override
   public void setUp() throws Exception {
     super.setUp();
-    cacheProvider = new DefaultCacheProvider();
-    cache = new BasicHttpCache(cacheProvider,10);
+    cache = new BasicHttpCache(getCacheProvider(),10);
   }
+
 
   @Override
   protected void tearDown() throws Exception {
@@ -46,6 +45,14 @@ public class BasicHttpCacheTest extends TestCase {
     super.tearDown();
   }
 
+  /**
+   * gets the cache provider to use for the set of tests
+   * @return
+   */
+  protected CacheProvider getCacheProvider() {
+    return new DefaultCacheProvider();
+  }
+  
   private static HttpRequest createRequest(String method) {
     return new HttpRequest(Uri.parse("http://www.example.org")).setMethod(method);
   }
