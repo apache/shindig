@@ -18,7 +18,6 @@
 package org.apache.shindig.social.opensocial.service;
 
 import org.apache.shindig.common.testing.FakeGadgetToken;
-import org.apache.shindig.social.core.oauth.AuthenticationServletFilter;
 import org.apache.shindig.social.opensocial.spi.GroupId;
 import org.apache.shindig.social.opensocial.spi.PersonService;
 import org.apache.shindig.social.opensocial.spi.UserId;
@@ -32,6 +31,8 @@ import junit.framework.TestCase;
 
 import java.util.Collections;
 
+import javax.servlet.http.HttpServletRequest;
+
 public class RestfulRequestItemTest extends TestCase {
 
   private static final FakeGadgetToken FAKE_TOKEN = new FakeGadgetToken();
@@ -40,7 +41,7 @@ public class RestfulRequestItemTest extends TestCase {
 
   private RestfulRequestItem request;
 
-  protected void setUp() throws Exception {
+  @Override protected void setUp() throws Exception {
     super.setUp();
     request = new RestfulRequestItem(
         DEFAULT_PATH + "?fields=huey,dewey,louie", "GET",
@@ -59,8 +60,7 @@ public class RestfulRequestItemTest extends TestCase {
   }
 
   public void testGetHttpMethodFromParameter() throws Exception {
-    AuthenticationServletFilter.SecurityTokenRequest overridden =
-        EasyMock.createMock(AuthenticationServletFilter.SecurityTokenRequest.class);
+    HttpServletRequest overridden = EasyMock.createMock(HttpServletRequest.class);
     EasyMock.expect(overridden.getParameter(RestfulRequestItem.X_HTTP_METHOD_OVERRIDE))
         .andReturn("DELETE");
     EasyMock.replay(overridden);

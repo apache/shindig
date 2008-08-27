@@ -22,7 +22,7 @@ import org.apache.shindig.common.servlet.InjectedServlet;
 import org.apache.shindig.common.util.ImmediateFuture;
 import org.apache.shindig.social.ResponseError;
 import org.apache.shindig.social.ResponseItem;
-import org.apache.shindig.social.core.oauth.AuthenticationServletFilter;
+import org.apache.shindig.social.core.oauth.AuthInfo;
 import org.apache.shindig.social.core.util.BeanJsonConverter;
 
 import com.google.inject.Inject;
@@ -63,7 +63,7 @@ public class ApiServlet extends InjectedServlet {
   }
 
   protected SecurityToken getSecurityToken(HttpServletRequest servletRequest) {
-    return ((AuthenticationServletFilter.SecurityTokenRequest) servletRequest).getToken();
+    return AuthInfo.getSecurityToken(servletRequest);
   }
 
   /**

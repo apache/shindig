@@ -19,7 +19,6 @@ package org.apache.shindig.social.dataservice.integration;
 
 import org.apache.shindig.common.testing.FakeGadgetToken;
 import org.apache.shindig.social.SocialApiTestsGuiceModule;
-import org.apache.shindig.social.core.oauth.AuthenticationServletFilter;
 import org.apache.shindig.social.core.util.BeanJsonConverter;
 import org.apache.shindig.social.core.util.BeanXmlConverter;
 import org.apache.shindig.social.opensocial.service.ActivityHandler;
@@ -46,6 +45,7 @@ import java.util.Map;
 import java.util.Vector;
 
 import javax.servlet.ServletInputStream;
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamConstants;
@@ -54,7 +54,7 @@ import javax.xml.stream.XMLStreamReader;
 
 public abstract class AbstractLargeRestfulTests extends TestCase {
 
-  private AuthenticationServletFilter.SecurityTokenRequest req;
+  private HttpServletRequest req;
 
   private HttpServletResponse res;
 
@@ -76,7 +76,7 @@ public abstract class AbstractLargeRestfulTests extends TestCase {
     servlet.setBeanConverters(new BeanJsonConverter(
         Guice.createInjector(new SocialApiTestsGuiceModule())), new BeanXmlConverter());
 
-    req = EasyMock.createMock(AuthenticationServletFilter.SecurityTokenRequest.class);
+    req = EasyMock.createMock(HttpServletRequest.class);
     res = EasyMock.createMock(HttpServletResponse.class);
   }
 
@@ -102,7 +102,7 @@ public abstract class AbstractLargeRestfulTests extends TestCase {
     EasyMock.expect(req.getParameter("format")).andStubReturn(null);
     EasyMock.expect(req.getParameter("X-HTTP-Method-Override")).andStubReturn(method);
 
-    EasyMock.expect(req.getToken()).andStubReturn(FAKE_GADGET_TOKEN);
+    EasyMock.expect(req.getAttribute(EasyMock.isA(String.class))).andReturn(FAKE_GADGET_TOKEN);
 
     Vector<String> vector = new Vector<String>(extraParams.keySet());
     EasyMock.expect(req.getParameterNames()).andStubReturn(vector.elements());
@@ -123,7 +123,7 @@ public abstract class AbstractLargeRestfulTests extends TestCase {
 
     final InputStream stream = new ByteArrayInputStream(postData.getBytes());
     ServletInputStream servletStream = new ServletInputStream() {
-      public int read() throws IOException {
+      @Override public int read() throws IOException {
         return stream.read();
       }
     };

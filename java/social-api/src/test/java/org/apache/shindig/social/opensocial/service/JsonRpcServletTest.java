@@ -17,11 +17,9 @@
  */
 package org.apache.shindig.social.opensocial.service;
 
-import org.apache.shindig.common.SecurityTokenException;
 import org.apache.shindig.common.testing.FakeGadgetToken;
 import org.apache.shindig.common.util.ImmediateFuture;
 import org.apache.shindig.social.ResponseItem;
-import org.apache.shindig.social.core.oauth.AuthenticationServletFilter;
 import org.apache.shindig.social.core.util.BeanJsonConverter;
 import org.apache.shindig.social.core.util.BeanXmlConverter;
 import org.apache.shindig.social.opensocial.spi.RestfulItem;
@@ -40,7 +38,8 @@ import java.io.StringReader;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
+
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 /**
@@ -51,7 +50,7 @@ public class JsonRpcServletTest extends TestCase {
   private static final FakeGadgetToken FAKE_GADGET_TOKEN = new FakeGadgetToken()
       .setOwnerId("john.doe").setViewerId("john.doe");
 
-  private AuthenticationServletFilter.SecurityTokenRequest req;
+  private HttpServletRequest req;
   private HttpServletResponse res;
   private JsonRpcServlet servlet;
 
@@ -64,9 +63,9 @@ public class JsonRpcServletTest extends TestCase {
   private BeanJsonConverter jsonConverter;
   private BeanXmlConverter xmlConverter;
 
-  protected void setUp() throws Exception {
+  @Override protected void setUp() throws Exception {
     servlet = new JsonRpcServlet();
-    req = EasyMock.createMock(AuthenticationServletFilter.SecurityTokenRequest.class);
+    req = EasyMock.createMock(HttpServletRequest.class);
     res = EasyMock.createMock(HttpServletResponse.class);
     jsonConverter = EasyMock.createMock(BeanJsonConverter.class);
     xmlConverter = EasyMock.createMock(BeanXmlConverter.class);
@@ -185,7 +184,7 @@ public class JsonRpcServletTest extends TestCase {
     setupInjector();
 
     String resultObject = "my lovely json";
-    RestfulItem response = new RestfulItem<String>(resultObject);
+    RestfulItem<String> response = new RestfulItem<String>(resultObject);
 
     Future<? extends ResponseItem> responseItemFuture = ImmediateFuture.newInstance(response);
     EasyMock.expect(peopleHandler.handleItem(EasyMock.isA(RequestItem.class)));
@@ -213,11 +212,11 @@ public class JsonRpcServletTest extends TestCase {
     EasyMock.expect(req.getParameterMap()).andStubReturn(
         Maps.immutableMap("method",new String[]{"people.get"},"id", new String[]{"1"}));
     EasyMock.expect(req.getMethod()).andStubReturn("GET");
-    EasyMock.expect(req.getToken()).andReturn(FAKE_GADGET_TOKEN);
+    EasyMock.expect(req.getAttribute(EasyMock.isA(String.class))).andReturn(FAKE_GADGET_TOKEN);
     setupInjector();
 
     String resultObject = "my lovely json";
-    RestfulItem response = new RestfulItem<String>(resultObject);
+    RestfulItem<String> response = new RestfulItem<String>(resultObject);
 
     Future<? extends ResponseItem> responseItemFuture = ImmediateFuture.newInstance(response);
     EasyMock.expect(peopleHandler.handleItem(EasyMock.isA(RequestItem.class)));
@@ -239,10 +238,10 @@ public class JsonRpcServletTest extends TestCase {
   }
 
   private void setupRequest(String json)
-      throws IOException, SecurityTokenException {
+      throws IOException {
     EasyMock.expect(req.getReader()).andStubReturn(new BufferedReader(new StringReader(json)));
     EasyMock.expect(req.getMethod()).andStubReturn("POST");
-    EasyMock.expect(req.getToken()).andReturn(FAKE_GADGET_TOKEN);
+    EasyMock.expect(req.getAttribute(EasyMock.isA(String.class))).andReturn(FAKE_GADGET_TOKEN);
   }
 
   /**
@@ -262,12 +261,11 @@ public class JsonRpcServletTest extends TestCase {
       return true;
     }
 
-    public ResponseItem get() throws InterruptedException, ExecutionException {
+    public ResponseItem get() throws ExecutionException {
       throw new ExecutionException(new RuntimeException("FAILED"));
     }
 
-    public ResponseItem get(long timeout, TimeUnit unit)
-        throws InterruptedException, ExecutionException, TimeoutException {
+    public ResponseItem get(long timeout, TimeUnit unit) {
       return null;
     }
   }
