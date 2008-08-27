@@ -35,9 +35,19 @@ import java.util.Set;
  */
 @ImplementedBy(PersonImpl.class)
 public interface Person {
+  /**
+   * The type of a profile url when represented as a list field.
+   */
   public static final String PROFILE_URL_TYPE = "profile";
+
+  /**
+   * The type of thumbnail photo types when represented as list fields.
+   */
   public static final String THUMBNAIL_PHOTO_TYPE = "thumbnail";
 
+  /**
+   * Enumeration of genders.
+   */
   public enum Gender {
     female, male
   }
@@ -48,6 +58,7 @@ public interface Person {
   public static enum Field {
     /** the json field for aboutMe. */
     ABOUT_ME("aboutMe"),
+    /** the json field for accounts. */
     ACCOUNTS("accounts"),
     /** the json field for activities. */
     ACTIVITIES("activities"),
@@ -65,6 +76,7 @@ public interface Person {
     CHILDREN("children"),
     /** the json field for currentLocation. */
     CURRENT_LOCATION("currentLocation"),
+    /** the json field for birthday. */
     BIRTHDAY("birthday"),
     /** the json field for drinker. */
     DRINKER("drinker"),
@@ -88,6 +100,7 @@ public interface Person {
     HUMOR("humor"),
     /** the json field for id. */
     ID("id"),
+    /** the json field for IM accounts. */
     IMS("ims"),
     /** the json field for interests. */
     INTERESTS("interests"),
@@ -111,11 +124,13 @@ public interface Person {
     NETWORKPRESENCE("networkPresence"),
     /** the json field for nickname. */
     NICKNAME("nickname"),
+    /** the json field for organiztions. */
     ORGANIZATIONS("organizations"),
     /** the json field for pets. */
     PETS("pets"),
     /** the json field for phoneNumbers. */
     PHONE_NUMBERS("phoneNumbers"),
+    /** the json field for photos. */
     PHOTOS("photos"),
     /** the json field for politicalViews. */
     POLITICAL_VIEWS("politicalViews"),
@@ -147,6 +162,7 @@ public interface Person {
     TAGS("tags"),
     /** the json field for thumbnailUrl. */
     THUMBNAIL_URL("thumbnailUrl"),
+    /** the json field for utcOffset. */
     UTC_OFFSET("utcOffset"),
     /** the json field for turnOffs. */
     TURN_OFFS("turnOffs"),
@@ -169,10 +185,13 @@ public interface Person {
         THUMBNAIL_URL);
 
     /**
-     * The set of all fields
+     * The set of all fields.
      */
     public static final Set<String> ALL_FIELDS = EnumUtil.getEnumStrings(Field.values());
 
+    /**
+     * a Map to convert json string to Field representations.
+     */
     private static Map<String, Field> URL_STRING_TO_FIELD_MAP;
 
     /**
@@ -228,8 +247,16 @@ public interface Person {
    */
   void setAboutMe(String aboutMe);
 
+  /**
+   * Get the list of online accounts held by this person.
+   * @return a list of Account objects
+   */
   List<Account> getAccounts();
 
+  /**
+   * Set the list of online accounts held by this person.
+   * @param accounts a list of Account objects
+   */
   void setAccounts(List<Account> accounts);
 
   /**
@@ -454,14 +481,14 @@ public interface Person {
   void setFood(List<String> food);
 
   /**
-   * Get a person's gender, specified as an {@link Gender}
+   * Get a person's gender, specified as an {@link Gender}.
    *
    * @return the person's gender
    */
   Gender getGender();
 
   /**
-   * Set a person's gender, specified as an {@link Gender}
+   * Set a person's gender, specified as an {@link Gender}.
    *
    * @param newGender the person's gender
    */
@@ -545,8 +572,28 @@ public interface Person {
    */
   void setId(String id);
 
+  /**
+   * Get a list of Instant messaging address for this Person. No official canonicalization rules
+   * exist for all instant messaging addresses, but Service Providers SHOULD remove all whitespace
+   * and convert the address to lowercase, if this is appropriate for the service this IM address is
+   * used for. Instead of the standard Canonical Values for type, this field defines the following
+   * Canonical Values to represent currently popular IM services: aim, gtalk, icq, xmpp, msn, skype,
+   * qq, and yahoo.
+   *
+   * @return A list of IM addresses
+   */
   List<ListField> getIms();
 
+  /**
+   * Set a list of Instant messaging address for this Person. No official canonicalization rules
+   * exist for all instant messaging addresses, but Service Providers SHOULD remove all whitespace
+   * and convert the address to lowercase, if this is appropriate for the service this IM address is
+   * used for. Instead of the standard Canonical Values for type, this field defines the following
+   * Canonical Values to represent currently popular IM services: aim, gtalk, icq, xmpp, msn, skype,
+   * qq, and yahoo.
+   *
+   * @param ims a list ListFields representing IM addresses.
+   */
   void setIms(List<ListField> ims);
 
   /**
@@ -721,8 +768,16 @@ public interface Person {
    */
   void setNickname(String nickname);
 
+  /**
+   * Get a list of current or past organizational affiliations of this Person.
+   * @return a list of Organization objects
+   */
   List<Organization> getOrganizations();
 
+  /**
+   * Set a list of current or past organizational affiliations of this Person.
+   * @param organizations a list of Organisation objects
+   */
   void setOrganizations(List<Organization> organizations);
 
   /**
@@ -753,8 +808,23 @@ public interface Person {
    */
   void setPhoneNumbers(List<ListField> phoneNumbers);
 
+  /**
+   * URL of a photo of this person. The value SHOULD be a canonicalized URL, and MUST point to an
+   * actual image file (e.g. a GIF, JPEG, or PNG image file) rather than to a web page containing an
+   * image. Service Providers MAY return the same image at different sizes, though it is recognized
+   * that no standard for describing images of various sizes currently exists. Note that this field
+   * SHOULD NOT be used to send down arbitrary photos taken by this user, but specifically profile
+   * photos of the contact suitable for display when describing the contact.
+   *
+   * @return a list of Photos
+   */
   List<ListField> getPhotos();
 
+  /**
+   * Set a list of Photos for the person.
+   * @see Person.getPhotos()
+   * @param photos a list of photos.
+   */
   void setPhotos(List<ListField> photos);
 
   /**

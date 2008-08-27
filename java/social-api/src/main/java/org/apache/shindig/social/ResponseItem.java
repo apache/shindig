@@ -22,28 +22,60 @@ package org.apache.shindig.social;
  * DataResponse.
  */
 public class ResponseItem {
+  /**
+   * The ResponseError associated with the item.
+   */
   private ResponseError error;
+  /**
+   * The error message.
+   */
   private String errorMessage;
 
-  protected ResponseItem() {}
+  /**
+   * Blank constructor protected for subclasses.
+   */
+  protected ResponseItem() {
+    
+  }
 
+  /**
+   * Create a ResponseItem specifying the ResponseError and error Message.
+   * @param error a ResponseError
+   * @param errorMessage the Error Message
+   */
   public ResponseItem(ResponseError error, String errorMessage) {
     this.error = error;
     this.errorMessage = errorMessage;
   }
 
+  /**
+   * Get the ResponseError associated with this ResponseItem.
+   * @return the ResponseError associated with this ResponseItem
+   */
   public ResponseError getError() {
     return error;
   }
 
+  /**
+   * Set the ResponseError associated with this item.
+   * @param error the new ResponseError
+   */
   public void setError(ResponseError error) {
     this.error = error;
   }
 
+  /**
+   * Get the Error Message associated with this Response Item.
+   * @return the Error Message
+   */
   public String getErrorMessage() {
     return errorMessage;
   }
 
+  /**
+   * Set the Error Message associated with this ResponseItem.
+   * @param errorMessage the new error Message
+   */
   public void setErrorMessage(String errorMessage) {
     this.errorMessage = errorMessage;
   }

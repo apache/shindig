@@ -30,22 +30,22 @@ import com.google.inject.ImplementedBy;
 public interface BodyType {
 
   /**
-   * The fields that represent the person object ion json form.
+   * The fields that represent the person object in serialized form.
    */
   public static enum Field {
-    /** the json field for build. */
+    /** the field name for build. */
     BUILD("build"),
-    /** the json field for build. */
+    /** the field name for build. */
     EYE_COLOR("eyeColor"),
-    /** the json field for hairColor. */
+    /** the field name for hairColor. */
     HAIR_COLOR("hairColor"),
-    /** the json field for height. */
+    /** the field name for height. */
     HEIGHT("height"),
-    /** the json field for weight. */
+    /** the field name for weight. */
     WEIGHT("weight");
 
     /**
-     * The json field that the instance represents.
+     * The field name that the instance represents.
      */
     private final String jsonString;
 

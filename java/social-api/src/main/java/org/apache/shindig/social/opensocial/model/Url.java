@@ -23,15 +23,32 @@ import com.google.inject.ImplementedBy;
 
 @ImplementedBy(UrlImpl.class)
 
+/**
+ * The base interface of all Url objects.
+ */
 public interface Url extends ListField {
 
+  /**
+   * An enumeration of the field names used in Url objects.
+   */
   public static enum Field {
+    /** the name of the value field. */
     VALUE("value"),
+    /** the name of the linkText field. */
     LINK_TEXT("linkText"),
+    /** the name of the type field. */
     TYPE("type");
 
+    /**
+     * The name of this field
+     */
     private final String jsonString;
 
+    /**
+     * Construct a new field based on a name.
+     *
+     * @param jsonString the name of the field
+     */
     private Field(String jsonString) {
       this.jsonString = jsonString;
     }
@@ -42,7 +59,15 @@ public interface Url extends ListField {
     }
   }
 
+  /**
+   * Get the text associated with the link.
+   * @return the link text
+   */
   String getLinkText();
 
+  /**
+   * Set the Link text associated with the link.
+   * @param linkText the link text
+   */
   void setLinkText(String linkText);
 }

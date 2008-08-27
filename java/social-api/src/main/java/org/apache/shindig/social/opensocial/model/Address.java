@@ -30,19 +30,28 @@ import com.google.inject.ImplementedBy;
 public interface Address {
 
   /**
-   * The fields that represent the address object ion json form.
+   * The fields that represent the address object in json form.
    */
   public static enum Field {
+    /** the field name for country. */
     COUNTRY("country"),
+    /** the field name for latitude. */
     LATITUDE("latitude"),
+    /** the field name for locality. */
     LOCALITY("locality"),
+    /** the field name for longitude. */
     LONGITUDE("longitude"),
+    /** the field name for postalCode. */
     POSTAL_CODE("postalCode"),
+    /** the field name for region. */
     REGION("region"),
-    /** this field may be multiple lines */
+    /** the feild name for streetAddress this field may be multiple lines. */
     STREET_ADDRESS("streetAddress"),
+    /** the field name for type. */
     TYPE("type"),
+    /** the field name for formatted. */
     FORMATTED("formatted"),
+    /** the field name for primary. */
     PRIMARY("primary");
 
     /**
@@ -196,7 +205,19 @@ public interface Address {
    */
   void setFormatted(String formatted);
 
+  /**
+   * Get a Boolean value indicating whether this instance of the Plural Field is the primary or
+   * preferred value of for this field, e.g. the preferred mailing address. Service Providers MUST
+   * NOT mark more than one instance of the same Plural Field as primary="true", and MAY choose not
+   * to mark any fields as primary, if this information is not available. Introduced in v0.8.1
+   *
+   * @return true if the instance if the primary instance.
+   */
   Boolean getPrimary();
 
+  /**
+   * @see Address.getPrimary()
+   * @param primary set the Primary status of this Address.
+   */
   void setPrimary(Boolean primary);
 }

@@ -22,16 +22,29 @@ import org.apache.shindig.social.core.model.MediaItemImpl;
 import com.google.inject.ImplementedBy;
 
 @ImplementedBy(MediaItemImpl.class)
-
+/**
+ * A container for the media item.
+ */
 public interface MediaItem {
 
   public static enum Field {
+    /** the field name for mimeType. */
     MIME_TYPE("mimeType"),
+    /** the field name for type. */
     TYPE("type"),
+    /** the field name for url. */
     URL("url");
 
+    /**
+     * The field name that the instance represents.
+     */
     private final String jsonString;
 
+    /**
+     * create a field base on the an element name.
+     *
+     * @param jsonString the name of the element
+     */
     private Field(String jsonString) {
       this.jsonString = jsonString;
     }
@@ -42,13 +55,27 @@ public interface MediaItem {
     }
   }
 
+  /**
+   * An enumeration of potential media types.
+   */
   public enum Type {
+    /** the constant for audio types. */
     AUDIO("audio"),
+    /** the constant for image types. */
     IMAGE("image"),
+    /** the constant for video types. */
     VIDEO("video");
 
+    /**
+     * The field type.
+     */
     private final String jsonString;
 
+    /**
+     * Construct a field type based on the name.
+     *
+     * @param jsonString
+     */
     private Type(String jsonString) {
       this.jsonString = jsonString;
     }
@@ -59,16 +86,46 @@ public interface MediaItem {
     }
   }
 
+  /**
+   * Get the mime type for this Media item.
+   *
+   * @return the mime type.
+   */
   String getMimeType();
 
+  /**
+   * Set the mimetype for this Media Item.
+   *
+   * @param mimeType the mimeType
+   */
   void setMimeType(String mimeType);
 
+  /**
+   * Get the Type of this media item, either audio, image or video.
+   *
+   * @return the Type of this media item
+   */
   Type getType();
 
+  /**
+   * Get the Type of this media item, either audio, image or video.
+   *
+   * @param the type of this media item
+   */
   void setType(Type type);
 
+  /**
+   * Get a URL for the media item.
+   *
+   * @return the url of the media item
+   */
   String getUrl();
 
+  /**
+   * Set a URL for the media item.
+   *
+   * @param url the media item URL
+   */
   void setUrl(String url);
 
 }
