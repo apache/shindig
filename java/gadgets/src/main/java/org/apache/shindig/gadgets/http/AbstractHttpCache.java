@@ -26,6 +26,7 @@ import com.google.inject.Inject;
  * Base class for content caches. Defines cache expiration rules and
  * and restrictions on allowed content. Also enforces rewriting
  * on cacheable content.
+ * TODO: separate this logic from rewriting - it's confusing
  */
 public abstract class AbstractHttpCache implements HttpCache {
 
@@ -52,23 +53,26 @@ public abstract class AbstractHttpCache implements HttpCache {
   public HttpResponse addResponse(HttpCacheKey key, HttpRequest request, HttpResponse response) {
     if (key.isCacheable() && response != null) {
       // !!! Note that we only rewrite cacheable content. Move this call above the if
-      // to rewrite all content that passes through the cache regardless of cacheability
-      HttpResponse rewritten = rewrite(request, response);
-
+      // to rewrite all content that passes through the cache regardless of cacheability.
       HttpResponseBuilder responseBuilder = new HttpResponseBuilder(response);
-      responseBuilder.setRewritten(rewritten);
       int forcedTtl = request.getCacheTtl();
       if (forcedTtl != -1) {
-        responseBuilder.setCacheTtl(request.getCacheTtl());
+        responseBuilder.setCacheTtl(forcedTtl);
       }
 
       response = responseBuilder.create();
-
-      String keyString = key.toString();
-      if (responseStillUsable(response)) {
-        addResponseImpl(keyString, response);
+      HttpResponse rewritten = checkRewrite(key.toString(), request, response);
+      if (rewritten == response) {
+        // Nothing rewritten (and thus cached). Cache the entry.
+        addResponseImpl(key.toString(), response);
+      } else {
+        return rewritten;
       }
-      return checkRewrite(keyString, request, response);
+      
+      if (!request.getIgnoreCache() &&
+           response.getRewritten() != null) {
+        return response.getRewritten();
+      }
     }
     return response;
   }
@@ -100,22 +104,26 @@ public abstract class AbstractHttpCache implements HttpCache {
 
   /**
    * Add rewritten content to the response if its not there and
-   * we can add it. Re-cache if we created rewritten content.
-   * Return the appropriately re-written version if requested
+   * we can add it. (Re-)cache if we created rewritten content.
+   * Return the appropriately re-written version if requested.
+   * @return Original response object if not rewritten; rewritten object if so.
    */
-  protected HttpResponse checkRewrite(String key, HttpRequest request, HttpResponse response) {
+  protected HttpResponse checkRewrite(String key,
+      HttpRequest request, HttpResponse response) {
     if (response == null) {
       return null;
     }
 
     // Perform a rewrite and store the content back to the cache if the
     // content is actually rewritten
-    HttpResponse rewritten = rewrite(request, response);
+    if (response.getRewritten() == null) {
+      HttpResponse rewritten = rewrite(request, response);
 
-    if (rewritten != null) {
-      // TODO: Remove this when new rewriting mechanism is ready.
-      response = new HttpResponseBuilder(response).setRewritten(rewritten).create();
-      addResponseImpl(key, response);
+      if (rewritten != null) {
+        // TODO: Remove this and other rewriting logic from http cache when ready.
+        response = new HttpResponseBuilder(response).setRewritten(rewritten).create();
+        addResponseImpl(key, response);
+      }
     }
 
     // Return the rewritten version if requested
@@ -125,23 +133,22 @@ public abstract class AbstractHttpCache implements HttpCache {
         response.getRewritten().getContentLength() > 0) {
       return response.getRewritten();
     }
+    
     return response;
   }
 
   /**
-   * Rewrite the content
-   * @return true if rewritten content was generated
+   * Rewrite the content.
+   * @return rewritten HttpResponse object, if rewriting occurred.
    */
   protected HttpResponse rewrite(HttpRequest request, HttpResponse response) {
-    // TODO - Make this sensitive to custom rewriting rules
-    if (response.getRewritten() == null &&
-        rewriterRegistry != null) {
+    if (rewriterRegistry != null) {
       HttpResponse rewritten = response;
       for (ContentRewriter rewriter : rewriterRegistry.getRewriters()) {
         rewritten = rewriter.rewrite(request, rewritten);
       }
-      if (response.getRewritten() != null) {
-        return response;
+      if (response != rewritten) {
+        return rewritten;
       }
     }
     return null;
