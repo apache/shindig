@@ -31,17 +31,18 @@ import com.google.inject.Singleton;
 import com.google.inject.name.Named;
 
 import java.net.URI;
+import java.util.logging.Logger;
 
 /**
  * Basic implementation of a message bundle factory.
  */
 @Singleton
 public class BasicMessageBundleFactory extends AbstractMessageBundleFactory {
-
+  static final Logger logger = Logger.getLogger(BasicMessageBundleFactory.class.getName());
   private final HttpFetcher fetcher;
 
   @Override
-  protected FetchedObject<MessageBundle> fetchFromWeb(LocaleSpec locale,
+  protected FetchedObject<MessageBundle> retrieveRawObject(LocaleSpec locale,
       boolean ignoreCache) throws GadgetException {
     URI url = locale.getMessages();
     HttpRequest request = new HttpRequest(Uri.fromJavaUri(url)).setIgnoreCache(ignoreCache);
@@ -59,6 +60,11 @@ public class BasicMessageBundleFactory extends AbstractMessageBundleFactory {
   @Override
   protected URI getCacheKeyFromQueryObj(LocaleSpec queryObj) {
     return queryObj.getMessages();
+  }
+  
+  @Override
+  protected Logger getLogger() {
+    return logger;
   }
 
   protected MessageBundle fetchBundle(LocaleSpec locale, boolean ignoreCache)

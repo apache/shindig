@@ -37,13 +37,15 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
+import java.util.logging.Logger;
 
 /**
  * Basic implementation of a gadget spec factory.
  */
 @Singleton
-public class BasicGadgetSpecFactory extends CachingWebRetrievalFactory<GadgetSpec, URI> 
+public class BasicGadgetSpecFactory extends CachingWebRetrievalFactory<GadgetSpec, URI, URI> 
     implements GadgetSpecFactory {
+  static final Logger logger = Logger.getLogger(BasicGadgetSpecFactory.class.getName());
 
   private final HttpFetcher fetcher;
   private final ContentRewriterRegistry rewriterRegistry;
@@ -52,6 +54,11 @@ public class BasicGadgetSpecFactory extends CachingWebRetrievalFactory<GadgetSpe
   @Override
   protected URI getCacheKeyFromQueryObj(URI queryObj) {
     return queryObj;
+  }
+  
+  @Override
+  protected Logger getLogger() {
+    return logger;
   }
 
   public GadgetSpec getGadgetSpec(GadgetContext context) throws GadgetException {
@@ -69,7 +76,7 @@ public class BasicGadgetSpecFactory extends CachingWebRetrievalFactory<GadgetSpe
    * Retrieves a gadget specification from the Internet, processes its views and
    * adds it to the cache.
    */
-  protected FetchedObject<GadgetSpec> fetchFromWeb(URI url, boolean ignoreCache)
+  protected FetchedObject<GadgetSpec> retrieveRawObject(URI url, boolean ignoreCache)
       throws GadgetException {
     HttpRequest request = new HttpRequest(Uri.fromJavaUri(url)).setIgnoreCache(ignoreCache);
     HttpResponse response = fetcher.fetch(request);

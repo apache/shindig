@@ -18,20 +18,19 @@
  */
 package org.apache.shindig.gadgets;
 
-import java.net.URI;
 import java.util.logging.Logger;
 
 import org.apache.shindig.common.cache.Cache;
 import org.apache.shindig.common.cache.CacheProvider;
 import org.apache.shindig.gadgets.GadgetException;
 
-public abstract class CachingWebRetrievalFactory<T, Q> {
+public abstract class CachingWebRetrievalFactory<T, Q, K> {
   // Subclasses must override these.
-  protected abstract FetchedObject<T> fetchFromWeb(Q queryObj, boolean ignoreCache) throws GadgetException;
-  protected abstract URI getCacheKeyFromQueryObj(Q queryObj);
+  protected abstract FetchedObject<T> retrieveRawObject(Q queryObj, boolean ignoreCache) throws GadgetException;
+  protected abstract K getCacheKeyFromQueryObj(Q queryObj);
+  protected abstract Logger getLogger();
   
-  private static final Logger logger = Logger.getLogger(CachingWebRetrievalFactory.class.getName());
-  private final Cache<URI, TimeoutPair<T>> cache;
+  private final Cache<K, TimeoutPair<T>> cache;
   private final long minTtl, maxTtl;
 
   protected CachingWebRetrievalFactory(CacheProvider cacheProvider,
@@ -48,7 +47,7 @@ public abstract class CachingWebRetrievalFactory<T, Q> {
     
     T resultObj = null;
     long expiration = -1;
-    URI cacheKey = getCacheKeyFromQueryObj(queryObj);
+    K cacheKey = getCacheKeyFromQueryObj(queryObj);
     
     synchronized(cache) {
       TimeoutPair<T> cachedEntry = cache.getElement(cacheKey);
@@ -68,7 +67,7 @@ public abstract class CachingWebRetrievalFactory<T, Q> {
         if (resultObj == null) {
           throw e;
         } else {
-          logger.info("Object fetch failed for " + cacheKey + " -  using cached ");
+          getLogger().info("Object fetch failed for " + cacheKey + " -  using cached ");
           // Try again later...
           synchronized (cache) {
             cache.addElement(cacheKey, new TimeoutPair<T>(resultObj, now + minTtl));
@@ -81,7 +80,7 @@ public abstract class CachingWebRetrievalFactory<T, Q> {
   }
   
   private T fetchObjectAndCache(Q queryObj, boolean ignoreCache) throws GadgetException {
-    FetchedObject<T> fetched = fetchFromWeb(queryObj, ignoreCache);
+    FetchedObject<T> fetched = retrieveRawObject(queryObj, ignoreCache);
     
     long now = System.currentTimeMillis();
     long expiration = fetched.expirationTime;
