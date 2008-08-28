@@ -18,18 +18,17 @@
 
 package org.apache.shindig.social.sample.service;
 
-import org.apache.shindig.common.util.ImmediateFuture;
-import org.apache.shindig.social.ResponseError;
-import org.apache.shindig.social.ResponseItem;
-import org.apache.shindig.social.opensocial.service.DataRequestHandler;
-import org.apache.shindig.social.opensocial.service.RequestItem;
-import org.apache.shindig.social.opensocial.spi.RestfulItem;
-import org.apache.shindig.social.sample.spi.JsonDbOpensocialService;
-
 import com.google.inject.Inject;
+
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpMethod;
 import org.apache.commons.httpclient.methods.GetMethod;
+import org.apache.shindig.common.util.ImmediateFuture;
+import org.apache.shindig.social.ResponseError;
+import org.apache.shindig.social.opensocial.service.DataRequestHandler;
+import org.apache.shindig.social.opensocial.service.RequestItem;
+import org.apache.shindig.social.opensocial.spi.SocialSpiException;
+import org.apache.shindig.social.sample.spi.JsonDbOpensocialService;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -50,14 +49,14 @@ public class SampleContainerHandler extends DataRequestHandler {
   /**
    * We don't support any delete methods right now.
    */
-  protected Future<? extends ResponseItem> handleDelete(RequestItem request) {
-    throw new UnsupportedOperationException();
+  protected Future<?> handleDelete(RequestItem request) throws SocialSpiException {
+    throw new SocialSpiException(ResponseError.NOT_IMPLEMENTED, null);
   }
 
   /**
    * We don't distinguish between put and post for these urls.
    */
-  protected Future<? extends ResponseItem> handlePut(RequestItem request) {
+  protected Future<?> handlePut(RequestItem request) throws SocialSpiException {
     return handlePost(request);
   }
 
@@ -65,9 +64,7 @@ public class SampleContainerHandler extends DataRequestHandler {
    * Handles /samplecontainer/setstate and /samplecontainer/setevilness/{doevil}. TODO(doll): These
    * urls aren't very resty. Consider changing the samplecontainer.html calls post.
    */
-  protected Future<? extends ResponseItem> handlePost(RequestItem request) {
-    ResponseItem response = new ResponseItem(null, null);
-
+  protected Future<?> handlePost(RequestItem request) throws SocialSpiException {
     request.applyUrlTemplate(POST_PATH);
     String type = request.getParameter("type");
     if (type.equals("setstate")) {
@@ -75,22 +72,22 @@ public class SampleContainerHandler extends DataRequestHandler {
         String stateFile = request.getParameter("fileurl");
         service.setDb(new JSONObject(fetchStateDocument(stateFile)));
       } catch (JSONException e) {
-        response = new ResponseItem(ResponseError.BAD_REQUEST,
-            "The json state file was not valid json");
+        throw new SocialSpiException(ResponseError.BAD_REQUEST,
+            "The json state file was not valid json", e);
       }
     } else if (type.equals("setevilness")) {
-      response = new ResponseItem(ResponseError.NOT_IMPLEMENTED,
+      throw new SocialSpiException(ResponseError.NOT_IMPLEMENTED,
           "evil data has not been implemented yet");
     }
 
-    return ImmediateFuture.newInstance(response);
+    return ImmediateFuture.newInstance(null);
   }
 
   /**
    * Handles /samplecontainer/dumpstate
    */
-  protected Future<? extends ResponseItem> handleGet(RequestItem request) {
-    return ImmediateFuture.newInstance(new RestfulItem<JSONObject>(service.getDb()));
+  protected Future<?> handleGet(RequestItem request) {
+    return ImmediateFuture.newInstance(service.getDb());
   }
 
   private String fetchStateDocument(String stateFileLocation) {

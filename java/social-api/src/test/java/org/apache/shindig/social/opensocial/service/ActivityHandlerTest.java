@@ -17,22 +17,24 @@
  */
 package org.apache.shindig.social.opensocial.service;
 
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Sets;
+
+import junit.framework.TestCase;
+
 import org.apache.shindig.common.testing.FakeGadgetToken;
 import org.apache.shindig.common.util.ImmediateFuture;
-import org.apache.shindig.social.ResponseItem;
 import org.apache.shindig.social.core.model.ActivityImpl;
 import org.apache.shindig.social.core.util.BeanJsonConverter;
 import org.apache.shindig.social.opensocial.model.Activity;
 import org.apache.shindig.social.opensocial.spi.ActivityService;
 import org.apache.shindig.social.opensocial.spi.GroupId;
 import org.apache.shindig.social.opensocial.spi.RestfulCollection;
-import org.apache.shindig.social.opensocial.spi.RestfulItem;
+import org.apache.shindig.social.opensocial.spi.SocialSpiException;
 import org.apache.shindig.social.opensocial.spi.UserId;
-
-import com.google.common.collect.Sets;
-import junit.framework.TestCase;
 import org.easymock.classextension.EasyMock;
 
+import java.util.List;
 import java.util.Set;
 
 public class ActivityHandlerTest extends TestCase {
@@ -81,7 +83,8 @@ public class ActivityHandlerTest extends TestCase {
   private void assertHandleGetForGroup(GroupId.Type group) throws Exception {
     setPath("/activities/john.doe/@" + group.toString());
 
-    RestfulCollection<Activity> data = new RestfulCollection<Activity>(null, null);
+    List<Activity> activityList = ImmutableList.of();
+    RestfulCollection<Activity> data = new RestfulCollection<Activity>(activityList);
     EasyMock.expect(activityService.getActivities(JOHN_DOE,
         new GroupId(group, null), null, Sets.<String>newHashSet(), token)).andReturn(
         ImmediateFuture.newInstance(data));
@@ -106,7 +109,8 @@ public class ActivityHandlerTest extends TestCase {
   public void testHandleGetPlural() throws Exception {
     setPath("/activities/john.doe,jane.doe/@self/@app");
 
-    RestfulCollection<Activity> data = new RestfulCollection<Activity>(null, null);
+    List<Activity> activities = ImmutableList.of();
+    RestfulCollection<Activity> data = new RestfulCollection<Activity>(activities);
     Set<UserId> userIdSet = Sets.newLinkedHashSet(JOHN_DOE);
     userIdSet.add(new UserId(UserId.Type.userId, "jane.doe"));
     EasyMock.expect(activityService.getActivities(userIdSet,
@@ -121,18 +125,18 @@ public class ActivityHandlerTest extends TestCase {
   public void testHandleGetActivityById() throws Exception {
     setPath("/people/john.doe/@friends/@app/1");
 
-    RestfulItem<Activity> data = new RestfulItem<Activity>(null, null);
+    Activity activity = new ActivityImpl();
     EasyMock.expect(activityService.getActivity(JOHN_DOE.iterator().next(),
         new GroupId(GroupId.Type.friends, null),
         "appId", Sets.<String>newHashSet(), "1", token)).andReturn(
-        ImmediateFuture.newInstance(data));
+        ImmediateFuture.newInstance(activity));
 
     replay();
-    assertEquals(data, handler.handleGet(request).get());
+    assertEquals(activity, handler.handleGet(request).get());
     verify();
   }
 
-  private ResponseItem setupPostData() {
+  private void setupPostData() throws SocialSpiException {
     String jsonActivity = "{title: hi mom!, etc etc}";
 
     setPathAndPostData("/people/john.doe/@self/@app", jsonActivity);
@@ -140,36 +144,33 @@ public class ActivityHandlerTest extends TestCase {
     Activity activity = new ActivityImpl();
     EasyMock.expect(converter.convertToObject(jsonActivity, Activity.class)).andReturn(activity);
 
-    ResponseItem data = new ResponseItem(null, null);
     EasyMock.expect(activityService.createActivity(JOHN_DOE.iterator().next(),
         new GroupId(GroupId.Type.self, null), "appId", Sets.<String>newHashSet(),
-        activity, token)).andReturn(ImmediateFuture.newInstance(data));
+        activity, token)).andReturn(ImmediateFuture.newInstance((Void) null));
     replay();
-    return data;
   }
 
   public void testHandlePost() throws Exception {
-    ResponseItem data = setupPostData();
-    assertEquals(data, handler.handlePost(request).get());
+    setupPostData();
+    assertNull(handler.handlePost(request).get());
     verify();
   }
 
   public void testHandlePut() throws Exception {
-    ResponseItem data = setupPostData();
-    assertEquals(data, handler.handlePut(request).get());
+    setupPostData();
+    assertNull(handler.handlePut(request).get());
     verify();
   }
 
   public void testHandleDelete() throws Exception {
     setPath("/people/john.doe/@self/@app/1");
 
-    ResponseItem data = new ResponseItem(null, null);
     EasyMock.expect(activityService.deleteActivities(JOHN_DOE.iterator().next(),
         new GroupId(GroupId.Type.self, null), "appId", Sets.newHashSet("1"), token)).andReturn(
-        ImmediateFuture.newInstance(data));
+        ImmediateFuture.newInstance((Void) null));
 
     replay();
-    assertEquals(data, handler.handleDelete(request).get());
+    assertNull(handler.handleDelete(request).get());
     verify();
   }
 }

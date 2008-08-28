@@ -17,15 +17,15 @@
  */
 package org.apache.shindig.social.opensocial.spi;
 
+import junit.framework.TestCase;
+
 import org.apache.shindig.common.util.ImmediateFuture;
 import org.apache.shindig.social.ResponseError;
-import org.apache.shindig.social.ResponseItem;
 import org.apache.shindig.social.opensocial.service.DataRequestHandler;
 import org.apache.shindig.social.opensocial.service.RequestItem;
 import org.apache.shindig.social.opensocial.service.RestfulRequestItem;
 
-import junit.framework.TestCase;
-
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
 public class DataRequestHandlerTest extends TestCase {
@@ -35,20 +35,20 @@ public class DataRequestHandlerTest extends TestCase {
   @Override
   protected void setUp() throws Exception {
     drh = new DataRequestHandler() {
-      protected Future<? extends ResponseItem> handleDelete(RequestItem request) {
-        return ImmediateFuture.newInstance(new RestfulItem<String>("DELETE"));
+      protected Future<?> handleDelete(RequestItem request) {
+        return ImmediateFuture.newInstance("DELETE");
       }
 
-      protected Future<? extends ResponseItem> handlePut(RequestItem request) {
-        return ImmediateFuture.newInstance(new RestfulItem<String>("PUT"));
+      protected Future<?> handlePut(RequestItem request) {
+        return ImmediateFuture.newInstance("PUT");
       }
 
-      protected Future<? extends ResponseItem> handlePost(RequestItem request) {
-        return ImmediateFuture.newInstance(new RestfulItem<String>("POST"));
+      protected Future<?> handlePost(RequestItem request) {
+        return ImmediateFuture.newInstance("POST");
       }
 
-      protected Future<? extends ResponseItem> handleGet(RequestItem request) {
-        return ImmediateFuture.newInstance(new RestfulItem<String>("GET"));
+      protected Future<?> handleGet(RequestItem request) {
+        return ImmediateFuture.newInstance("GET");
       }
     };
   }
@@ -62,19 +62,7 @@ public class DataRequestHandlerTest extends TestCase {
 
   private void verifyItemDispatchMethodCalled(String methodName) throws Exception {
     RestfulRequestItem request = new RestfulRequestItem(null, methodName, null, null);
-    assertEquals(methodName, ((RestfulItem<String>) drh.handleItem(request).get()).getEntry());
-  }
-
-  public void testHandleMethodSuccess() throws Exception {
-    verifyDispatchMethodCalled("DELETE");
-    verifyDispatchMethodCalled("PUT");
-    verifyDispatchMethodCalled("POST");
-    verifyDispatchMethodCalled("GET");
-  }
-
-  private void verifyDispatchMethodCalled(String methodName) throws Exception {
-    RestfulRequestItem request = new RestfulRequestItem(null, methodName, null, null);
-    assertEquals(methodName, ((RestfulItem<String>) drh.handleItem(request).get()).getEntry());
+    assertEquals(methodName, drh.handleItem(request).get());
   }
 
   public void testHandleMethodWithInvalidMethod() throws Exception {
@@ -85,7 +73,13 @@ public class DataRequestHandlerTest extends TestCase {
 
   private void verifyExceptionThrown(String methodName) throws Exception {
     RestfulRequestItem request = new RestfulRequestItem(null, methodName, null, null);
-    Future<? extends ResponseItem> err = drh.handleItem(request);
-    assertEquals(err.get().getError(), ResponseError.NOT_IMPLEMENTED);
+    Future<?> err = drh.handleItem(request);
+    try {
+      err.get();
+    } catch (ExecutionException ee) {
+      assertTrue(ee.getCause() instanceof SocialSpiException);
+      SocialSpiException spe = (SocialSpiException) ee.getCause();
+      assertEquals(ResponseError.NOT_IMPLEMENTED, spe.getError());
+    }
   }
 }

@@ -20,10 +20,11 @@ package org.apache.shindig.social.opensocial.service;
 import org.apache.shindig.common.SecurityToken;
 import org.apache.shindig.common.util.JsonConversionUtil;
 import org.apache.shindig.social.ResponseError;
-import org.apache.shindig.social.ResponseItem;
 import org.apache.shindig.social.opensocial.spi.RestfulCollection;
+import org.apache.shindig.social.opensocial.spi.DataCollection;
 
 import com.google.common.collect.Lists;
+
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import org.json.JSONArray;
@@ -52,7 +53,7 @@ public class JsonRpcServlet extends ApiServlet {
         return;
       }
       JSONObject request = JsonConversionUtil.fromRequest(servletRequest);
-      dispatch(request, servletResponse, token);
+      dispatch(request, servletRequest, servletResponse, token);
     } catch (JSONException je) {
       // FIXME
     }
@@ -71,21 +72,20 @@ public class JsonRpcServlet extends ApiServlet {
       if ((content.indexOf('[') != -1) && content.indexOf('[') < content.indexOf('{')) {
         // Is a batch
         JSONArray batch = new JSONArray(content);
-        dispatchBatch(batch, servletResponse, token);
+        dispatchBatch(batch, servletRequest, servletResponse, token);
       } else {
         JSONObject request = new JSONObject(content);
-        dispatch(request, servletResponse, token);
+        dispatch(request, servletRequest, servletResponse, token);
       }
     } catch (JSONException je) {
       sendBadRequest(je, servletResponse);
     }
-
   }
 
-  private void dispatchBatch(JSONArray batch, HttpServletResponse servletResponse,
-      SecurityToken token) throws JSONException, IOException {
+  protected void dispatchBatch(JSONArray batch, HttpServletRequest servletRequest,
+      HttpServletResponse servletResponse, SecurityToken token) throws JSONException, IOException {
     // Use linked hash map to preserve order
-    List<Future<? extends ResponseItem>> responses = Lists.newArrayListWithExpectedSize(batch.length());
+    List<Future<?>> responses = Lists.newArrayListWithExpectedSize(batch.length());
 
     // Gather all Futures.  We do this up front so that
     // the first call to get() comes after all futures are created,
@@ -111,8 +111,8 @@ public class JsonRpcServlet extends ApiServlet {
     servletResponse.getWriter().write(result.toString());
   }
 
-  private void dispatch(JSONObject request, HttpServletResponse servletResponse,
-      SecurityToken token) throws JSONException, IOException {
+  protected void dispatch(JSONObject request, HttpServletRequest servletRequest,
+      HttpServletResponse servletResponse, SecurityToken token) throws JSONException, IOException {
     String key = null;
     if (request.has("id")) {
       key = request.getString("id");
@@ -126,25 +126,27 @@ public class JsonRpcServlet extends ApiServlet {
     servletResponse.getWriter().write(result.toString());
   }
 
-  private JSONObject getJSONResponse(String key, ResponseItem response) throws JSONException {
+  private JSONObject getJSONResponse(String key, ResponseItem responseItem) throws JSONException {
     JSONObject result = new JSONObject();
     if (key != null) {
       result.put("id", key);
     }
-    if (response.getError() != null) {
-      result.put("error", getErrorJson(response));
+    if (responseItem.getError() != null) {
+      result.put("error", getErrorJson(responseItem));
     } else {
+      Object response = responseItem.getResponse();
+      JSONObject converted = (JSONObject) jsonConverter.convertToJson(response);
+
       if (response instanceof RestfulCollection) {
-        // FIXME this is a little hacky because of the field names in the DataCollection
-        JSONObject coll = (JSONObject) jsonConverter.convertToJson(response);
-        coll.put("list", coll.remove("entry"));
-        result.put("data", coll);
-      } else {
-        // FIXME this is a little hacky because of the field names in the DataCollection
-        JSONObject coll = (JSONObject) jsonConverter.convertToJson(response);
-        if (coll.has("entry")) {
-          result.put("data", coll.get("entry"));
+        // FIXME this is a little hacky because of the field names in the RestfulCollection
+        converted.put("list", converted.remove("entry"));
+        result.put("data", converted);
+      } else if (response instanceof DataCollection) {
+        if (converted.has("entry")) {
+          result.put("data", converted.get("entry"));
         }
+      } else {
+        result.put("data", converted);
       }
     }
     return result;

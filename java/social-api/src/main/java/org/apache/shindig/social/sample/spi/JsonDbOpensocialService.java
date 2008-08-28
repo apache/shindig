@@ -22,7 +22,6 @@ import org.apache.shindig.common.SecurityToken;
 import org.apache.shindig.common.util.ImmediateFuture;
 import org.apache.shindig.common.util.ResourceLoader;
 import org.apache.shindig.social.ResponseError;
-import org.apache.shindig.social.ResponseItem;
 import org.apache.shindig.social.opensocial.model.Activity;
 import org.apache.shindig.social.opensocial.model.Person;
 import org.apache.shindig.social.opensocial.service.BeanConverter;
@@ -33,8 +32,8 @@ import org.apache.shindig.social.opensocial.spi.DataCollection;
 import org.apache.shindig.social.opensocial.spi.GroupId;
 import org.apache.shindig.social.opensocial.spi.PersonService;
 import org.apache.shindig.social.opensocial.spi.RestfulCollection;
-import org.apache.shindig.social.opensocial.spi.RestfulItem;
 import org.apache.shindig.social.opensocial.spi.UserId;
+import org.apache.shindig.social.opensocial.spi.SocialSpiException;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
@@ -116,7 +115,8 @@ public class JsonDbOpensocialService implements ActivityService, PersonService, 
   }
 
   public Future<RestfulCollection<Activity>> getActivities(Set<UserId> userIds,
-      GroupId groupId, String appId, Set<String> fields, SecurityToken token) {
+      GroupId groupId, String appId, Set<String> fields, SecurityToken token)
+      throws SocialSpiException  {
     List<Activity> result = Lists.newArrayList();
     try {
       Set<String> idSet = getIdSet(userIds, groupId, token);
@@ -135,14 +135,13 @@ public class JsonDbOpensocialService implements ActivityService, PersonService, 
       }
       return ImmediateFuture.newInstance(new RestfulCollection<Activity>(result));
     } catch (JSONException je) {
-      return ImmediateFuture.newInstance(new RestfulCollection<Activity>(
-          ResponseError.INTERNAL_ERROR, je.getMessage()));
+      throw new SocialSpiException(ResponseError.INTERNAL_ERROR, je.getMessage(), je);
     }
   }
 
   public Future<RestfulCollection<Activity>> getActivities(UserId userId,
       GroupId groupId, String appId, Set<String> fields,
-      Set<String> activityIds, SecurityToken token) {
+      Set<String> activityIds, SecurityToken token) throws SocialSpiException {
     List<Activity> result = Lists.newArrayList();
     try {
       String user = userId.getUserId(token);
@@ -158,13 +157,13 @@ public class JsonDbOpensocialService implements ActivityService, PersonService, 
       }
       return ImmediateFuture.newInstance(new RestfulCollection<Activity>(result));
     } catch (JSONException je) {
-      return ImmediateFuture.newInstance(new RestfulCollection<Activity>(
-          ResponseError.INTERNAL_ERROR, je.getMessage()));
+      throw new SocialSpiException(ResponseError.INTERNAL_ERROR, je.getMessage(), je);
     }
   }
 
-  public Future<RestfulItem<Activity>> getActivity(UserId userId,
-      GroupId groupId, String appId, Set<String> fields, String activityId, SecurityToken token) {
+  public Future<Activity> getActivity(UserId userId,
+      GroupId groupId, String appId, Set<String> fields, String activityId, SecurityToken token)
+      throws SocialSpiException {
     try {
       String user = userId.getUserId(token);
       if (db.getJSONObject(ACTIVITIES_TABLE).has(user)) {
@@ -173,21 +172,19 @@ public class JsonDbOpensocialService implements ActivityService, PersonService, 
           JSONObject activity = activities.getJSONObject(i);
           if (activity.get(Activity.Field.USER_ID.toString()).equals(user)
               && activity.get(Activity.Field.ID.toString()).equals(activityId)) {
-            return ImmediateFuture.newInstance(new RestfulItem<Activity>(
-                convertToActivity(activity, fields)));
+            return ImmediateFuture.newInstance(convertToActivity(activity, fields));
           }
         }
       }
-      return ImmediateFuture.newInstance(new RestfulItem<Activity>(ResponseError.BAD_REQUEST,
-          "Activity not found"));
+
+      throw new SocialSpiException(ResponseError.BAD_REQUEST, "Activity not found");
     } catch (JSONException je) {
-      return ImmediateFuture.newInstance(new RestfulItem<Activity>(
-          ResponseError.INTERNAL_ERROR, je.getMessage()));
+      throw new SocialSpiException(ResponseError.INTERNAL_ERROR, je.getMessage(), je);
     }
   }
 
-  public Future<ResponseItem> deleteActivities(UserId userId, GroupId groupId, String appId,
-      Set<String> activityIds, SecurityToken token) {
+  public Future<Void> deleteActivities(UserId userId, GroupId groupId, String appId,
+      Set<String> activityIds, SecurityToken token) throws SocialSpiException {
     try {
       String user = userId.getUserId(token);
       if (db.getJSONObject(ACTIVITIES_TABLE).has(user)) {
@@ -208,15 +205,14 @@ public class JsonDbOpensocialService implements ActivityService, PersonService, 
         }
       }
       // What is the appropriate response here??
-      return ImmediateFuture.newInstance(new ResponseItem(null, null));
+      return ImmediateFuture.newInstance(null);
     } catch (JSONException je) {
-      return ImmediateFuture.newInstance(new ResponseItem(
-          ResponseError.INTERNAL_ERROR, je.getMessage()));
+      throw new SocialSpiException(ResponseError.INTERNAL_ERROR, je.getMessage(), je);
     }
   }
 
-  public Future<ResponseItem> createActivity(UserId userId, GroupId groupId, String appId,
-      Set<String> fields, Activity activity, SecurityToken token) {
+  public Future<Void> createActivity(UserId userId, GroupId groupId, String appId,
+      Set<String> fields, Activity activity, SecurityToken token) throws SocialSpiException {
     // Are fields really needed here?
     try {
       JSONObject jsonObject = convertFromActivity(activity, fields);
@@ -230,15 +226,15 @@ public class JsonDbOpensocialService implements ActivityService, PersonService, 
         db.getJSONObject(ACTIVITIES_TABLE).put(userId.getUserId(token), jsonArray);
       }
       jsonArray.put(jsonObject);
-      return ImmediateFuture.newInstance(new ResponseItem(null, null));
+      return ImmediateFuture.newInstance(null);
     } catch (JSONException je) {
-      return ImmediateFuture.newInstance(new ResponseItem(
-          ResponseError.INTERNAL_ERROR, je.getMessage()));
+      throw new SocialSpiException(ResponseError.INTERNAL_ERROR, je.getMessage(), je);
     }
   }
 
   public Future<RestfulCollection<Person>> getPeople(Set<UserId> userIds,
-      GroupId groupId, CollectionOptions options, Set<String> fields, SecurityToken token) {
+      GroupId groupId, CollectionOptions options, Set<String> fields, SecurityToken token)
+      throws SocialSpiException {
     List<Person> result = Lists.newArrayList();
     try {
       JSONArray people = db.getJSONArray(PEOPLE_TABLE);
@@ -273,13 +269,12 @@ public class JsonDbOpensocialService implements ActivityService, PersonService, 
       return ImmediateFuture.newInstance(new RestfulCollection<Person>(
           result, options.getFirst(), totalSize));
     } catch (JSONException je) {
-      return ImmediateFuture.newInstance(new RestfulCollection<Person>(
-          ResponseError.INTERNAL_ERROR, je.getMessage()));
+      throw new SocialSpiException(ResponseError.INTERNAL_ERROR, je.getMessage(), je);
     }
   }
 
-  public Future<RestfulItem<Person>> getPerson(UserId id, Set<String> fields,
-      SecurityToken token) {
+  public Future<Person> getPerson(UserId id, Set<String> fields,
+      SecurityToken token) throws SocialSpiException {
     try {
       JSONArray people = db.getJSONArray(PEOPLE_TABLE);
 
@@ -287,20 +282,17 @@ public class JsonDbOpensocialService implements ActivityService, PersonService, 
         JSONObject person = people.getJSONObject(i);
         if (id != null && person.get(Person.Field.ID.toString())
             .equals(id.getUserId(token))) {
-          return ImmediateFuture.newInstance(new RestfulItem<Person>(
-              convertToPerson(person, fields)));
+          return ImmediateFuture.newInstance(convertToPerson(person, fields));
         }
       }
-      return ImmediateFuture.newInstance(new RestfulItem<Person>(ResponseError.BAD_REQUEST,
-          "Person not found"));
+      throw new SocialSpiException(ResponseError.BAD_REQUEST, "Person not found");
     } catch (JSONException je) {
-      return ImmediateFuture.newInstance(new RestfulItem<Person>(
-          ResponseError.INTERNAL_ERROR, je.getMessage()));
+      throw new SocialSpiException(ResponseError.INTERNAL_ERROR, je.getMessage(), je);
     }
   }
 
   public Future<DataCollection> getPersonData(Set<UserId> userIds, GroupId groupId,
-      String appId, Set<String> fields, SecurityToken token) {
+      String appId, Set<String> fields, SecurityToken token) throws SocialSpiException {
     try {
       Map<String, Map<String, String>> idToData = Maps.newHashMap();
       Set<String> idSet = getIdSet(userIds, groupId, token);
@@ -329,13 +321,12 @@ public class JsonDbOpensocialService implements ActivityService, PersonService, 
       }
       return ImmediateFuture.newInstance(new DataCollection(idToData));
     } catch (JSONException je) {
-      return ImmediateFuture.newInstance(new DataCollection(
-          ResponseError.INTERNAL_ERROR, je.getMessage()));
+      throw new SocialSpiException(ResponseError.INTERNAL_ERROR, je.getMessage(), je);
     }
   }
 
-  public Future<ResponseItem> deletePersonData(UserId userId, GroupId groupId, String appId,
-      Set<String> fields, SecurityToken token) {
+  public Future<Void> deletePersonData(UserId userId, GroupId groupId, String appId,
+      Set<String> fields, SecurityToken token) throws SocialSpiException {
     try {
       String user = userId.getUserId(token);
       if (!db.getJSONObject(DATA_TABLE).has(user)) {
@@ -351,15 +342,15 @@ public class JsonDbOpensocialService implements ActivityService, PersonService, 
         }
       }
       db.getJSONObject(DATA_TABLE).put(user, newPersonData);
-      return ImmediateFuture.newInstance(new ResponseItem(null, null));
+      return ImmediateFuture.newInstance(null);
     } catch (JSONException je) {
-      return ImmediateFuture.newInstance(new ResponseItem(
-          ResponseError.INTERNAL_ERROR, je.getMessage()));
+      throw new SocialSpiException(ResponseError.INTERNAL_ERROR, je.getMessage(), je);
     }
   }
 
-  public Future<ResponseItem> updatePersonData(UserId userId, GroupId groupId, String appId,
-      Set<String> fields, Map<String, String> values, SecurityToken token) {
+  public Future<Void> updatePersonData(UserId userId, GroupId groupId, String appId,
+      Set<String> fields, Map<String, String> values, SecurityToken token)
+      throws SocialSpiException {
     // TODO: this seems redundant. No need to pass both fields and a map of field->value
     // TODO: According to rest, yes there is. If a field is in the param list but not in the map
     // that means it is a delete
@@ -374,10 +365,9 @@ public class JsonDbOpensocialService implements ActivityService, PersonService, 
       for (Map.Entry<String, String> entry : values.entrySet()) {
         personData.put(entry.getKey(), entry.getValue());
       }
-      return ImmediateFuture.newInstance(new ResponseItem(null, null));
+      return ImmediateFuture.newInstance(null);
     } catch (JSONException je) {
-      return ImmediateFuture.newInstance(new ResponseItem(
-          ResponseError.INTERNAL_ERROR, je.getMessage()));
+      throw new SocialSpiException(ResponseError.INTERNAL_ERROR, je.getMessage(), je);
     }
   }
 

@@ -17,10 +17,10 @@
  */
 package org.apache.shindig.social.opensocial.service;
 
-import org.apache.shindig.social.ResponseItem;
 import org.apache.shindig.social.opensocial.model.Activity;
 import org.apache.shindig.social.opensocial.spi.ActivityService;
 import org.apache.shindig.social.opensocial.spi.UserId;
+import org.apache.shindig.social.opensocial.spi.SocialSpiException;
 
 import com.google.common.collect.Sets;
 import com.google.inject.Inject;
@@ -45,7 +45,8 @@ public class ActivityHandler extends DataRequestHandler {
    *
    * examples: /activities/john.doe/@self/1
    */
-  protected Future<? extends ResponseItem> handleDelete(RequestItem request) {
+  protected Future<?> handleDelete(RequestItem request)
+      throws SocialSpiException {
     request.applyUrlTemplate(ACTIVITY_ID_PATH);
 
     Set<UserId> userIds = request.getUsers();
@@ -63,7 +64,7 @@ public class ActivityHandler extends DataRequestHandler {
    *
    * examples: /activities/john.doe/@self - postBody is an activity object
    */
-  protected Future<? extends ResponseItem> handlePut(RequestItem request) {
+  protected Future<?> handlePut(RequestItem request) throws SocialSpiException {
     return handlePost(request);
   }
 
@@ -72,7 +73,7 @@ public class ActivityHandler extends DataRequestHandler {
    *
    * examples: /activities/john.doe/@self - postBody is an activity object
    */
-  protected Future<? extends ResponseItem> handlePost(RequestItem request) {
+  protected Future<?> handlePost(RequestItem request) throws SocialSpiException {
     request.applyUrlTemplate(ACTIVITY_ID_PATH);
 
     Set<UserId> userIds = request.getUsers();
@@ -96,7 +97,8 @@ public class ActivityHandler extends DataRequestHandler {
    * examples: /activities/john.doe/@self/1 /activities/john.doe/@self
    * /activities/john.doe,jane.doe/@friends
    */
-  protected Future<? extends ResponseItem> handleGet(RequestItem request) {
+  protected Future<?> handleGet(RequestItem request)
+      throws SocialSpiException {
     request.applyUrlTemplate(ACTIVITY_ID_PATH);
 
     Set<UserId> userIds = request.getUsers();
@@ -127,5 +129,3 @@ public class ActivityHandler extends DataRequestHandler {
   }
 
 }
-
-

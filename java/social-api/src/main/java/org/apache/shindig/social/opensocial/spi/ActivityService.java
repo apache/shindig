@@ -18,7 +18,6 @@
 package org.apache.shindig.social.opensocial.spi;
 
 import org.apache.shindig.common.SecurityToken;
-import org.apache.shindig.social.ResponseItem;
 import org.apache.shindig.social.opensocial.model.Activity;
 import org.apache.shindig.social.sample.spi.JsonDbOpensocialService;
 
@@ -45,7 +44,8 @@ public interface ActivityService {
    * @return a response item with the list of activities.
    */
   Future<RestfulCollection<Activity>> getActivities(Set<UserId> userIds,
-      GroupId groupId, String appId, Set<String> fields, SecurityToken token);
+      GroupId groupId, String appId, Set<String> fields, SecurityToken token)
+      throws SocialSpiException;
 
   /**
    * Returns a set of activities for the passed in user and group that corresponds to a list of
@@ -60,7 +60,9 @@ public interface ActivityService {
    * @return a response item with the list of activities.
    */
   Future<RestfulCollection<Activity>> getActivities(UserId userId, GroupId groupId,
-      String appId, Set<String> fields, Set<String> activityIds, SecurityToken token);
+      String appId, Set<String> fields, Set<String> activityIds, SecurityToken token)
+      throws SocialSpiException;
+
 
   /**
    * Returns a set of activities for the passed in user and group that corresponds to a single of
@@ -74,9 +76,9 @@ public interface ActivityService {
    * @param token      A valid SecurityToken
    * @return a response item with the list of activities.
    */
-  Future<RestfulItem<Activity>> getActivity(UserId userId, GroupId groupId, String appId,
-      Set<String> fields, String activityId, SecurityToken token);
-
+  Future<Activity> getActivity(UserId userId, GroupId groupId, String appId,
+      Set<String> fields, String activityId, SecurityToken token)
+      throws SocialSpiException;
 
   /**
    * Deletes the activity for the passed in user and group that corresponds to the activityId.
@@ -88,8 +90,8 @@ public interface ActivityService {
    * @param token       A valid SecurityToken.
    * @return a response item containing any errors
    */
-  Future<ResponseItem> deleteActivities(UserId userId, GroupId groupId, String appId,
-      Set<String> activityIds, SecurityToken token);
+  Future<Void> deleteActivities(UserId userId, GroupId groupId, String appId,
+      Set<String> activityIds, SecurityToken token) throws SocialSpiException;
 
   /**
    * Creates the passed in activity for the passed in user and group. Once createActivity is called,
@@ -103,6 +105,6 @@ public interface ActivityService {
    * @param token    A valid SecurityToken
    * @return a response item containing any errors
    */
-  Future<ResponseItem> createActivity(UserId userId, GroupId groupId, String appId,
-      Set<String> fields, Activity activity, SecurityToken token);
+  Future<Void> createActivity(UserId userId, GroupId groupId, String appId,
+      Set<String> fields, Activity activity, SecurityToken token) throws SocialSpiException;
 }

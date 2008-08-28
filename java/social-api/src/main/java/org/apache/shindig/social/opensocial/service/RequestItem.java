@@ -151,7 +151,7 @@ public abstract class RequestItem {
   }
 
   public Set<String> getFields(Set<String> defaultValue) {
-    Set result = Sets.newHashSet();
+    Set<String> result = Sets.newHashSet();
     result.addAll(getListParameter(FIELDS));
     if (result.isEmpty()) {
       return defaultValue;

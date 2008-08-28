@@ -18,7 +18,6 @@
 package org.apache.shindig.social.opensocial.spi;
 
 import org.apache.shindig.common.SecurityToken;
-import org.apache.shindig.social.ResponseItem;
 import org.apache.shindig.social.sample.spi.JsonDbOpensocialService;
 
 import com.google.inject.ImplementedBy;
@@ -45,7 +44,7 @@ public interface AppDataService {
    * @return The data fetched
    */
   Future<DataCollection> getPersonData(Set<UserId> userIds, GroupId groupId,
-      String appId, Set<String> fields, SecurityToken token);
+      String appId, Set<String> fields, SecurityToken token) throws SocialSpiException;
 
   /**
    * Deletes data for the specified user and group.
@@ -57,8 +56,8 @@ public interface AppDataService {
    * @param token   The security token
    * @return an error if one occurs
    */
-  Future<ResponseItem> deletePersonData(UserId userId, GroupId groupId,
-      String appId, Set<String> fields, SecurityToken token);
+  Future<Void> deletePersonData(UserId userId, GroupId groupId,
+      String appId, Set<String> fields, SecurityToken token) throws SocialSpiException;
 
   /**
    * Updates app data for the specified user and group with the new values.
@@ -71,6 +70,7 @@ public interface AppDataService {
    * @param token   The security token
    * @return an error if one occurs
    */
-  Future<ResponseItem> updatePersonData(UserId userId, GroupId groupId,
-      String appId, Set<String> fields, Map<String, String> values, SecurityToken token);
+  Future<Void> updatePersonData(UserId userId, GroupId groupId,
+      String appId, Set<String> fields, Map<String, String> values, SecurityToken token)
+      throws SocialSpiException;
 }

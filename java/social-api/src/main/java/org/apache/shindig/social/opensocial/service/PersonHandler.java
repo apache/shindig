@@ -18,12 +18,12 @@
 package org.apache.shindig.social.opensocial.service;
 
 import org.apache.shindig.social.ResponseError;
-import org.apache.shindig.social.ResponseItem;
 import org.apache.shindig.social.opensocial.model.Person;
 import org.apache.shindig.social.opensocial.spi.CollectionOptions;
 import org.apache.shindig.social.opensocial.spi.GroupId;
 import org.apache.shindig.social.opensocial.spi.PersonService;
 import org.apache.shindig.social.opensocial.spi.UserId;
+import org.apache.shindig.social.opensocial.spi.SocialSpiException;
 
 import com.google.common.collect.Sets;
 import com.google.inject.Inject;
@@ -43,16 +43,16 @@ public class PersonHandler extends DataRequestHandler {
     this.personService = personService;
   }
 
-  protected Future<? extends ResponseItem> handleDelete(RequestItem request) {
-    return error(ResponseError.BAD_REQUEST, "You can't delete people.");
+  protected Future<?> handleDelete(RequestItem request) throws SocialSpiException {
+    throw new SocialSpiException(ResponseError.BAD_REQUEST, "You can't delete people.");
   }
 
-  protected Future<? extends ResponseItem> handlePut(RequestItem request) {
-    return error(ResponseError.NOT_IMPLEMENTED, "You can't update right now.");
+  protected Future<?> handlePut(RequestItem request) throws SocialSpiException {
+    throw new SocialSpiException(ResponseError.NOT_IMPLEMENTED, "You can't update right now.");
   }
 
-  protected Future<? extends ResponseItem> handlePost(RequestItem request) {
-    return error(ResponseError.NOT_IMPLEMENTED, "You can't add people right now.");
+  protected Future<?> handlePost(RequestItem request) throws SocialSpiException {
+    throw new SocialSpiException(ResponseError.NOT_IMPLEMENTED, "You can't add people right now.");
   }
 
   /**
@@ -60,7 +60,7 @@ public class PersonHandler extends DataRequestHandler {
    *
    * examples: /people/john.doe/@all /people/john.doe/@friends /people/john.doe/@self
    */
-  protected Future<? extends ResponseItem> handleGet(RequestItem request) {
+  protected Future<?> handleGet(RequestItem request) throws SocialSpiException {
     request.applyUrlTemplate(PEOPLE_PATH);
 
     GroupId groupId = request.getGroup();

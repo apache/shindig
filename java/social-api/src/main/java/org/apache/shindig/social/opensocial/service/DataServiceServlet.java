@@ -17,8 +17,11 @@
  */
 package org.apache.shindig.social.opensocial.service;
 
+import com.google.common.collect.Maps;
+
 import org.apache.shindig.common.SecurityToken;
-import org.apache.shindig.social.ResponseItem;
+import org.apache.shindig.social.opensocial.spi.RestfulCollection;
+import org.apache.shindig.social.opensocial.spi.DataCollection;
 
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -92,7 +95,13 @@ public class DataServiceServlet extends ApiServlet {
 
     if (responseItem.getError() == null) {
       PrintWriter writer = servletResponse.getWriter();
-      writer.write(converter.convertToString(responseItem));
+      Object response = responseItem.getResponse();
+      // TODO: ugliness resulting from not using RestfulItem
+      if (!(response instanceof DataCollection) && !(response instanceof RestfulCollection)) {
+        response = Maps.immutableMap("entry", response);
+      }
+      
+      writer.write(converter.convertToString(response));
     } else {
       sendError(servletResponse, responseItem);
     }

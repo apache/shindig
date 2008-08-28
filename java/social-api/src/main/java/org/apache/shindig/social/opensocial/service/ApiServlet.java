@@ -21,7 +21,7 @@ import org.apache.shindig.common.SecurityToken;
 import org.apache.shindig.common.servlet.InjectedServlet;
 import org.apache.shindig.common.util.ImmediateFuture;
 import org.apache.shindig.social.ResponseError;
-import org.apache.shindig.social.ResponseItem;
+import org.apache.shindig.social.opensocial.spi.SocialSpiException;
 import org.apache.shindig.social.core.oauth.AuthInfo;
 import org.apache.shindig.social.core.util.BeanJsonConverter;
 
@@ -30,6 +30,7 @@ import com.google.inject.Injector;
 import com.google.inject.name.Named;
 
 import java.io.IOException;
+import java.util.Collections;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
@@ -79,11 +80,11 @@ public abstract class ApiServlet extends InjectedServlet {
   /**
    * Delivers a request item to the appropriate DataRequestHandler.
    */
-  protected Future<? extends ResponseItem> handleRequestItem(RequestItem requestItem) {
+  protected Future<?> handleRequestItem(RequestItem requestItem) {
     Class<? extends DataRequestHandler> handlerClass = handlers.get(requestItem.getService());
 
     if (handlerClass == null) {
-      return ImmediateFuture.newInstance(new ResponseItem(ResponseError.NOT_IMPLEMENTED,
+      return ImmediateFuture.errorInstance(new SocialSpiException(ResponseError.NOT_IMPLEMENTED,
           "The service " + requestItem.getService() + " is not implemented"));
     }
 
@@ -91,24 +92,30 @@ public abstract class ApiServlet extends InjectedServlet {
     return handler.handleItem(requestItem);
   }
 
-  protected ResponseItem getResponseItem(Future<? extends ResponseItem> future) {
-    ResponseItem response = null;
+  protected ResponseItem getResponseItem(Future<?> future) {
+    ResponseItem response;
     try {
-      if (future != null) {
-        response = future.get();
-      }
       // TODO: use timeout methods?
-      response = future.get();
+      Object result = future != null ? future.get() : null;
+      // TODO: null is now a supported return value for post/delete, but
+      // is bad for get().
+      response = new ResponseItem(result != null ? result : Collections.emptyMap());
     } catch (InterruptedException ie) {
       response = responseItemFromException(ie);
     } catch (ExecutionException ee) {
       response = responseItemFromException(ee.getCause());
     }
-    return (response != null) ? response :
-      new ResponseItem(ResponseError.INTERNAL_ERROR, "null response from spi");
+
+    return response;
   }
 
   protected ResponseItem responseItemFromException(Throwable t) {
+    if (t instanceof SocialSpiException) {
+      SocialSpiException spe = (SocialSpiException) t;
+      return new ResponseItem(spe.getError(), spe.getMessage());
+    }
+
     return new ResponseItem(ResponseError.INTERNAL_ERROR, t.getMessage());
   }
+
 }
