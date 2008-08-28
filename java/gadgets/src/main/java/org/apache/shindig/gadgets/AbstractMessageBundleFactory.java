@@ -30,7 +30,7 @@ import java.net.URI;
  * delegates caching and network retrieval to concreate implementations.
  */
 public abstract class AbstractMessageBundleFactory
-    extends CachingWebRetrievalFactory<MessageBundle, LocaleSpec>
+    extends CachingWebRetrievalFactory<MessageBundle, LocaleSpec, URI>
     implements MessageBundleFactory {
   
   protected AbstractMessageBundleFactory(CacheProvider cacheProvider,
