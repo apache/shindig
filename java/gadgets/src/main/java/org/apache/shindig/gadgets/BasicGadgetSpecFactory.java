@@ -18,7 +18,6 @@
  */
 package org.apache.shindig.gadgets;
 
-import org.apache.shindig.common.cache.Cache;
 import org.apache.shindig.common.cache.CacheProvider;
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.gadgets.http.HttpFetcher;
@@ -38,27 +37,22 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
-import java.util.logging.Logger;
 
 /**
  * Basic implementation of a gadget spec factory.
- *
- * TODO: This needs to be unified with message bundle fetching. We've basically copied the class in
- * two places, which is horrible.
  */
 @Singleton
-public class BasicGadgetSpecFactory implements GadgetSpecFactory {
-
-  private static final Logger logger = Logger.getLogger(BasicGadgetSpecFactory.class.getName());
+public class BasicGadgetSpecFactory extends CachingWebRetrievalFactory<GadgetSpec, URI> 
+    implements GadgetSpecFactory {
 
   private final HttpFetcher fetcher;
   private final ContentRewriterRegistry rewriterRegistry;
   private final ExecutorService executor;
-  private final long minTtl;
-  private final long maxTtl;
 
-  // A cache of GadgetSpecs with expirations
-  private final Cache<URI, TimeoutPair> cache;
+  @Override
+  protected URI getCacheKeyFromQueryObj(URI queryObj) {
+    return queryObj;
+  }
 
   public GadgetSpec getGadgetSpec(GadgetContext context) throws GadgetException {
     return getGadgetSpec(context.getUrl(), context.getIgnoreCache());
@@ -68,49 +62,15 @@ public class BasicGadgetSpecFactory implements GadgetSpecFactory {
    * Retrieves a gadget specification from the cache or from the Internet.
    */
   public GadgetSpec getGadgetSpec(URI url, boolean ignoreCache) throws GadgetException {
-    if (ignoreCache) {
-      return fetchFromWeb(url, true);
-    }
-
-    GadgetSpec spec = null;
-    long expiration = -1;
-
-    // Attempt to retrieve the gadget spec from the cache.
-    synchronized (cache) {
-      TimeoutPair gadgetSpecEntry = cache.getElement(url);
-      if (gadgetSpecEntry != null) {
-        spec = gadgetSpecEntry.spec;
-        expiration = gadgetSpecEntry.timeout;
-      }
-    }
-
-    long now = System.currentTimeMillis();
-
-    // If the gadget spec is not in the cache or has expired, fetch it from its URI.
-    if (spec == null || expiration < now) {
-      try {
-        return fetchFromWeb(url, false);
-      } catch (GadgetException e) {
-        if (spec == null) {
-          throw e;
-        } else {
-          logger.info("Gadget spec fetch failed for " + url + " -  using cached ");
-          // Try again later...
-          synchronized (cache) {
-            cache.addElement(url, new TimeoutPair(spec, now + minTtl));
-          }
-        }
-      }
-    }
-
-    return spec;
+    return doCachedFetch(url, ignoreCache);
   }
 
   /**
    * Retrieves a gadget specification from the Internet, processes its views and
    * adds it to the cache.
    */
-  private GadgetSpec fetchFromWeb(URI url, boolean ignoreCache) throws GadgetException {
+  protected FetchedObject<GadgetSpec> fetchFromWeb(URI url, boolean ignoreCache)
+      throws GadgetException {
     HttpRequest request = new HttpRequest(Uri.fromJavaUri(url)).setIgnoreCache(ignoreCache);
     HttpResponse response = fetcher.fetch(request);
     if (response.getHttpStatusCode() != HttpResponse.SC_OK) {
@@ -157,17 +117,7 @@ public class BasicGadgetSpecFactory implements GadgetSpecFactory {
       }
     }
 
-    // We enforce the lower bound limit here for situations where a remote server temporarily serves
-    // the wrong cache control headers. This allows any distributed caches to be updated and for the
-    // updates to eventually cascade back into the factory.
-    long now = System.currentTimeMillis();
-    long expiration = response.getCacheExpiration();
-    expiration = Math.max(now + minTtl, Math.min(now + maxTtl, expiration));
-    synchronized (cache) {
-      cache.addElement(url, new TimeoutPair(spec, expiration));
-    }
-
-    return spec;
+    return new FetchedObject<GadgetSpec>(spec, response.getCacheExpiration());
   }
 
   @Inject
@@ -178,21 +128,9 @@ public class BasicGadgetSpecFactory implements GadgetSpecFactory {
                                 @Named("shindig.gadget-spec.cache.capacity")int gadgetSpecCacheCapacity,
                                 @Named("shindig.gadget-spec.cache.minTTL")long minTtl,
                                 @Named("shindig.gadget-spec.cache.maxTTL")long maxTtl) {
+    super(cacheProvider, gadgetSpecCacheCapacity, minTtl, maxTtl);
     this.fetcher = fetcher;
     this.rewriterRegistry = rewriterRegistry;
     this.executor = executor;
-    this.cache = cacheProvider.createCache(gadgetSpecCacheCapacity);
-    this.minTtl = minTtl;
-    this.maxTtl = maxTtl;
-  }
-
-  private static class TimeoutPair {
-    private final GadgetSpec spec;
-    private final long timeout;
-
-    private TimeoutPair(GadgetSpec spec, long timeout) {
-      this.spec = spec;
-      this.timeout = timeout;
-    }
   }
 }
