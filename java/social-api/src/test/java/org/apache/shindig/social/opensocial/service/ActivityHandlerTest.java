@@ -53,6 +53,7 @@ public class ActivityHandlerTest extends TestCase {
   @Override
   protected void setUp() throws Exception {
     token = new FakeGadgetToken();
+    token.setAppId("appId");
     converter = EasyMock.createMock(BeanJsonConverter.class);
     activityService = EasyMock.createMock(ActivityService.class);
 
@@ -103,13 +104,13 @@ public class ActivityHandlerTest extends TestCase {
   }
 
   public void testHandleGetPlural() throws Exception {
-    setPath("/activities/john.doe,jane.doe/@self");
+    setPath("/activities/john.doe,jane.doe/@self/@app");
 
     RestfulCollection<Activity> data = new RestfulCollection<Activity>(null, null);
     Set<UserId> userIdSet = Sets.newLinkedHashSet(JOHN_DOE);
     userIdSet.add(new UserId(UserId.Type.userId, "jane.doe"));
     EasyMock.expect(activityService.getActivities(userIdSet,
-        new GroupId(GroupId.Type.self, null), null, Sets.<String>newHashSet(), token)).andReturn(
+        new GroupId(GroupId.Type.self, null), "appId", Sets.<String>newHashSet(), token)).andReturn(
         ImmediateFuture.newInstance(data));
 
     replay();
@@ -118,12 +119,12 @@ public class ActivityHandlerTest extends TestCase {
   }
 
   public void testHandleGetActivityById() throws Exception {
-    setPath("/people/john.doe/@friends/jane.doe");
+    setPath("/people/john.doe/@friends/@app/1");
 
     RestfulItem<Activity> data = new RestfulItem<Activity>(null, null);
     EasyMock.expect(activityService.getActivity(JOHN_DOE.iterator().next(),
         new GroupId(GroupId.Type.friends, null),
-        null, Sets.<String>newHashSet(), "jane.doe", token)).andReturn(
+        "appId", Sets.<String>newHashSet(), "1", token)).andReturn(
         ImmediateFuture.newInstance(data));
 
     replay();
@@ -134,14 +135,14 @@ public class ActivityHandlerTest extends TestCase {
   private ResponseItem setupPostData() {
     String jsonActivity = "{title: hi mom!, etc etc}";
 
-    setPathAndPostData("/people/john.doe/@self", jsonActivity);
+    setPathAndPostData("/people/john.doe/@self/@app", jsonActivity);
 
     Activity activity = new ActivityImpl();
     EasyMock.expect(converter.convertToObject(jsonActivity, Activity.class)).andReturn(activity);
 
     ResponseItem data = new ResponseItem(null, null);
     EasyMock.expect(activityService.createActivity(JOHN_DOE.iterator().next(),
-        new GroupId(GroupId.Type.self, null), null, Sets.<String>newHashSet(),
+        new GroupId(GroupId.Type.self, null), "appId", Sets.<String>newHashSet(),
         activity, token)).andReturn(ImmediateFuture.newInstance(data));
     replay();
     return data;
@@ -160,11 +161,11 @@ public class ActivityHandlerTest extends TestCase {
   }
 
   public void testHandleDelete() throws Exception {
-    setPath("/people/john.doe/@self/1");
+    setPath("/people/john.doe/@self/@app/1");
 
     ResponseItem data = new ResponseItem(null, null);
     EasyMock.expect(activityService.deleteActivities(JOHN_DOE.iterator().next(),
-        new GroupId(GroupId.Type.self, null), null, Sets.newHashSet("1"), token)).andReturn(
+        new GroupId(GroupId.Type.self, null), "appId", Sets.newHashSet("1"), token)).andReturn(
         ImmediateFuture.newInstance(data));
 
     replay();
