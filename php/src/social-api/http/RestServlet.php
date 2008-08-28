@@ -50,9 +50,11 @@ require 'src/social-api/dataservice/ResponseItem.php';
 require 'src/social-api/converters/OutputConverter.php';
 require 'src/social-api/converters/OutputAtomConverter.php';
 require 'src/social-api/converters/OutputJsonConverter.php';
+require 'src/social-api/converters/OutputXmlConverter.php';
 require 'src/social-api/converters/InputConverter.php';
 require 'src/social-api/converters/InputAtomConverter.php';
 require 'src/social-api/converters/InputJsonConverter.php';
+require 'src/social-api/converters/InputXmlConverter.php';
 require 'src/social-api/canonical/JsonDbOpensocialService.php';
 
 class RestException extends Exception {}
@@ -109,6 +111,10 @@ class RestServlet extends HttpServlet {
 				case 'atom':
 					$this->setContentType('application/atom+xml');
 					$outputConverter = new OutputAtomConverter();
+					break;
+				case 'xml':
+					$this->setContentType('application/xml');
+					$outputConverter = new OutputXmlConverter();
 					break;
 				default:
 					$this->outputError(new ResponseItem(NOT_IMPLEMENTED, "Invalid output format"));
@@ -314,6 +320,9 @@ class RestServlet extends HttpServlet {
 				break;
 			case 'atom':
 				$inputConverter = new InputAtomConverter();
+				break;
+			case 'xml':
+				$inputConverter = new InputXmlConverter();
 				break;
 			default:
 				throw new Exception("Invalid or unsupported input format");
