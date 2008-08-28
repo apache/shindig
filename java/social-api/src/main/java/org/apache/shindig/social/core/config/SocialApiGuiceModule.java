@@ -20,14 +20,19 @@ package org.apache.shindig.social.core.config;
 
 import org.apache.shindig.common.servlet.ParameterFetcher;
 import org.apache.shindig.social.core.oauth.AnonymousAuthenticationHandler;
+import org.apache.shindig.social.core.oauth.AuthenticationHandlerProvider;
 import org.apache.shindig.social.core.util.BeanJsonConverter;
 import org.apache.shindig.social.core.util.BeanXmlConverter;
+import org.apache.shindig.social.opensocial.oauth.AuthenticationHandler;
 import org.apache.shindig.social.opensocial.service.BeanConverter;
 import org.apache.shindig.social.opensocial.service.DataServiceServletFetcher;
 import org.apache.shindig.social.opensocial.service.HandlerProvider;
 import org.apache.shindig.social.sample.service.SampleContainerHandlerProvider;
 
+import java.util.List;
+
 import com.google.inject.AbstractModule;
+import com.google.inject.TypeLiteral;
 import com.google.inject.name.Names;
 
 /**
@@ -57,5 +62,8 @@ public class SocialApiGuiceModule extends AbstractModule {
         BeanXmlConverter.class);
     bind(BeanConverter.class).annotatedWith(Names.named("shindig.bean.converter.json")).to(
         BeanJsonConverter.class);
+
+    bind(new TypeLiteral<List<AuthenticationHandler>>(){}).toProvider(
+        AuthenticationHandlerProvider.class);
   }
 }
