@@ -110,7 +110,7 @@ public class JsonRpcServletTest extends TestCase {
     setupInjector();
 
     JSONObject err = new JSONObject(
-        "{id:id,error:{message:'The service junk is not implemented',code:501}}");
+        "{id:id,error:{message:'notImplemented: The service junk is not implemented',code:501}}");
 
     PrintWriter writerMock = EasyMock.createMock(PrintWriter.class);
     EasyMock.expect(res.getWriter()).andReturn(writerMock);
@@ -136,7 +136,7 @@ public class JsonRpcServletTest extends TestCase {
     EasyMock.expectLastCall().andReturn(new FailingFuture());
 
     JSONObject err = new JSONObject(
-        "{id:id,error:{message:'FAILED',code:500}}");
+        "{id:id,error:{message:'internalError: FAILED',code:500}}");
 
     PrintWriter writerMock = EasyMock.createMock(PrintWriter.class);
     EasyMock.expect(res.getWriter()).andReturn(writerMock);

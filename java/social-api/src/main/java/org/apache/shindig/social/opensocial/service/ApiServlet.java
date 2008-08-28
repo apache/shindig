@@ -29,16 +29,17 @@ import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.name.Named;
 
+import java.io.IOException;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
-
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 /**
  * Common base class for API servlets.
  */
-public class ApiServlet extends InjectedServlet {
+public abstract class ApiServlet extends InjectedServlet {
   private Map<String, Class<? extends DataRequestHandler>> handlers;
   protected BeanJsonConverter jsonConverter;
   protected BeanConverter xmlConverter;
@@ -64,6 +65,15 @@ public class ApiServlet extends InjectedServlet {
 
   protected SecurityToken getSecurityToken(HttpServletRequest servletRequest) {
     return AuthInfo.getSecurityToken(servletRequest);
+  }
+
+  protected abstract void sendError(HttpServletResponse servletResponse, ResponseItem responseItem)
+      throws IOException;
+
+  protected void sendSecurityError(HttpServletResponse servletResponse) throws IOException {
+    sendError(servletResponse, new ResponseItem(ResponseError.UNAUTHORIZED,
+        "The request did not have a proper security token nor oauth message and unauthenticated "
+            + "requests are not allowed"));
   }
 
   /**
