@@ -114,7 +114,7 @@
     "domain" : "shindig",
     "enableCaja" : false,
     "supportedFields" : {
-       "person" : ["id", "name", "thumbnailUrl", "profileUrl"],
+       "person" : ["id", {"name" : ["familyName", "givenName", "unstructured"]}, "thumbnailUrl", "profileUrl"],
        "activity" : ["id", "title"]
     }
   }
