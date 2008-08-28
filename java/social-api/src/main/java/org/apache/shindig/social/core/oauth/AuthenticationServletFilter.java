@@ -67,8 +67,8 @@ public class AuthenticationServletFilter implements Filter {
   }
 
   @Inject
-  public void setAuthenticationHandlers(AuthenticationHandlerProvider handlerProvider) {
-    this.handlers = handlerProvider.get();
+  public void setAuthenticationHandlers(List<AuthenticationHandler> handlers) {
+    this.handlers = handlers;
   }
 
   public void destroy() { }

@@ -21,10 +21,15 @@ import org.apache.shindig.common.servlet.ParameterFetcher;
 import org.apache.shindig.social.core.util.BeanJsonConverter;
 import org.apache.shindig.social.core.util.BeanXmlConverter;
 import org.apache.shindig.social.core.oauth.AnonymousAuthenticationHandler;
+import org.apache.shindig.social.core.oauth.AuthenticationHandlerProvider;
+import org.apache.shindig.social.opensocial.oauth.AuthenticationHandler;
 import org.apache.shindig.social.opensocial.service.BeanConverter;
 import org.apache.shindig.social.opensocial.service.DataServiceServletFetcher;
 
+import java.util.List;
+
 import com.google.inject.AbstractModule;
+import com.google.inject.TypeLiteral;
 import com.google.inject.name.Names;
 
 /**
@@ -32,6 +37,7 @@ import com.google.inject.name.Names;
  */
 public class EndToEndModule extends AbstractModule {
 
+  @Override
   protected void configure() {
     bind(String.class).annotatedWith(Names.named("shindig.canonical.json.db"))
         .toInstance("sampledata/canonicaldb.json");
@@ -45,5 +51,8 @@ public class EndToEndModule extends AbstractModule {
     bind(Boolean.class)
         .annotatedWith(Names.named(AnonymousAuthenticationHandler.ALLOW_UNAUTHENTICATED))
         .toInstance(Boolean.FALSE);
+
+    bind(new TypeLiteral<List<AuthenticationHandler>>(){}).toProvider(
+        AuthenticationHandlerProvider.class);
   }
 }

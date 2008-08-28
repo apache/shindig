@@ -21,10 +21,11 @@ import org.apache.shindig.social.opensocial.oauth.AuthenticationHandler;
 
 import com.google.common.collect.Lists;
 import com.google.inject.Inject;
+import com.google.inject.Provider;
 
 import java.util.List;
 
-public class AuthenticationHandlerProvider {
+public class AuthenticationHandlerProvider implements Provider<List<AuthenticationHandler>> {
   protected List<AuthenticationHandler> handlers;
 
   @Inject
