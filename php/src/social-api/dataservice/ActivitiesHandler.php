@@ -55,6 +55,7 @@ class ActivitiesHandler extends DataRequestHandler {
 		if ($ret->getError()) {
 			return new ResponseItem(null, null, array());
 		}
+		return $ret;
 	}
 
 	/**
