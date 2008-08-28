@@ -18,13 +18,11 @@
 package org.apache.shindig.social.opensocial.service;
 
 import org.apache.shindig.common.SecurityToken;
-import org.apache.shindig.social.ResponseError;
 import org.apache.shindig.social.ResponseItem;
 
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.logging.Logger;
-
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -68,9 +66,7 @@ public class DataServiceServlet extends ApiServlet {
 
     SecurityToken token = getSecurityToken(servletRequest);
     if (token == null) {
-      sendError(servletResponse, new ResponseItem(ResponseError.UNAUTHORIZED,
-          "The request did not have a proper security token nor oauth message and unauthenticated "
-              + "requests are not allowed"));
+      sendSecurityError(servletResponse);
       return;
     }
 
@@ -79,7 +75,7 @@ public class DataServiceServlet extends ApiServlet {
     handleSingleRequest(servletRequest, servletResponse, token, converter);
   }
 
-  private void sendError(HttpServletResponse servletResponse, ResponseItem responseItem)
+  protected void sendError(HttpServletResponse servletResponse, ResponseItem responseItem)
       throws IOException {
     servletResponse.sendError(responseItem.getError().getHttpErrorCode(),
         responseItem.getErrorMessage());

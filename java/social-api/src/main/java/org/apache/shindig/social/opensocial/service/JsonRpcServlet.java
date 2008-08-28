@@ -25,6 +25,7 @@ import org.apache.shindig.social.opensocial.spi.RestfulCollection;
 
 import com.google.common.collect.Lists;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang.StringUtils;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -45,8 +46,12 @@ public class JsonRpcServlet extends ApiServlet {
       HttpServletResponse servletResponse)
       throws ServletException, IOException {
     try {
-      JSONObject request = JsonConversionUtil.fromRequest(servletRequest);
       SecurityToken token = getSecurityToken(servletRequest);
+      if (token == null) {
+        sendSecurityError(servletResponse);
+        return;
+      }
+      JSONObject request = JsonConversionUtil.fromRequest(servletRequest);
       dispatch(request, servletResponse, token);
     } catch (JSONException je) {
       // FIXME
@@ -57,6 +62,10 @@ public class JsonRpcServlet extends ApiServlet {
       HttpServletResponse servletResponse)
       throws ServletException, IOException {
     SecurityToken token = getSecurityToken(servletRequest);
+    if (token == null) {
+      sendSecurityError(servletResponse);
+      return;
+    }
     try {
       String content = IOUtils.toString(servletRequest.getReader());
       if ((content.indexOf('[') != -1) && content.indexOf('[') < content.indexOf('{')) {
@@ -123,10 +132,7 @@ public class JsonRpcServlet extends ApiServlet {
       result.put("id", key);
     }
     if (response.getError() != null) {
-      JSONObject error = new JSONObject();
-      error.put("code", response.getError().getHttpErrorCode());
-      error.put("message", response.getErrorMessage());
-      result.put("error", error);
+      result.put("error", getErrorJson(response));
     } else {
       if (response instanceof RestfulCollection) {
         // FIXME this is a little hacky because of the field names in the DataCollection
@@ -144,17 +150,35 @@ public class JsonRpcServlet extends ApiServlet {
     return result;
   }
 
-  private void sendBadRequest(Throwable t, HttpServletResponse response) throws IOException {
+  // TODO(doll): Refactor the responseItem so that the fields on it line up with this format.
+  // Then we can use the general converter to output the response to the client and we won't
+  // be harcoded to json.
+  private JSONObject getErrorJson(ResponseItem responseItem) throws JSONException {
+    JSONObject error = new JSONObject();
+    error.put("code", responseItem.getError().getHttpErrorCode());
+
+    String message = responseItem.getError().toString();
+    if (StringUtils.isNotBlank(responseItem.getErrorMessage())) {
+      message += ": " + responseItem.getErrorMessage();
+    }
+    error.put("message", message);
+    return error;
+  }
+
+  protected void sendError(HttpServletResponse servletResponse, ResponseItem responseItem)
+      throws IOException {
     try {
-      JSONObject error = new JSONObject();
-      error.put("code", ResponseError.BAD_REQUEST.getHttpErrorCode());
-      error.put("message", "Invalid batch - " + t.getMessage());
-      response.getWriter().write(error.toString());
+      JSONObject error = getErrorJson(responseItem);
+      servletResponse.getWriter().write(error.toString());
     } catch (JSONException je) {
-      // This really shouldnt ever happen
-      response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
+      // This really shouldn't ever happen
+      servletResponse.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
           "Error generating error response " + je.getMessage());
     }
   }
 
+  private void sendBadRequest(Throwable t, HttpServletResponse response) throws IOException {
+    sendError(response, new ResponseItem(ResponseError.BAD_REQUEST,
+        "Invalid batch - " + t.getMessage()));
+  }
 }
