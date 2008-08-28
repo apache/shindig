@@ -33,8 +33,8 @@ class BasicRemoteContentFetcher extends RemoteContentFetcher {
 		curl_setopt($request->handle, CURLOPT_RETURNTRANSFER, 1);
 		curl_setopt($request->handle, CURLOPT_AUTOREFERER, 1);
 		curl_setopt($request->handle, CURLOPT_MAXREDIRS, 10);
-		curl_setopt($request->handle, CURLOPT_CONNECTTIMEOUT, 10);
-		curl_setopt($request->handle, CURLOPT_TIMEOUT, 20);
+		curl_setopt($request->handle, CURLOPT_CONNECTTIMEOUT, 2);
+		curl_setopt($request->handle, CURLOPT_TIMEOUT, 2);
 		curl_setopt($request->handle, CURLOPT_HEADER, 1);
 		curl_setopt($request->handle, CURLOPT_SSL_VERIFYPEER, 0);
 		$proxy = Config::get('proxy');
