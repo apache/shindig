@@ -30,14 +30,10 @@ import java.util.Set;
 import java.util.concurrent.Future;
 
 public class ActivityHandler extends DataRequestHandler {
-
   private final ActivityService service;
 
-  // TODO: The appId should come from the url. The spec needs to be fixed!
-  private static final String ACTIVITY_ID_PATH = "/activities/{userId}+/{groupId}/{activityId}+";
-
-  // Note: not what the spec says
-  private static final String GROUP_PATH = "/activities/{userId}+/{groupId}/{appId}";
+  private static final String ACTIVITY_ID_PATH
+      = "/activities/{userId}+/{groupId}/{appId}/{activityId}+";
 
   @Inject
   public ActivityHandler(ActivityService service) {
@@ -77,7 +73,7 @@ public class ActivityHandler extends DataRequestHandler {
    * examples: /activities/john.doe/@self - postBody is an activity object
    */
   protected Future<? extends ResponseItem> handlePost(RequestItem request) {
-    request.applyUrlTemplate(GROUP_PATH);
+    request.applyUrlTemplate(ACTIVITY_ID_PATH);
 
     Set<UserId> userIds = request.getUsers();
     List<String> activityIds = request.getListParameter("activityId");
@@ -114,9 +110,9 @@ public class ActivityHandler extends DataRequestHandler {
 
     if (!optionalActivityIds.isEmpty()) {
       if (optionalActivityIds.size() == 1) {
-        return service
-            .getActivity(userIds.iterator().next(), request.getGroup(), request.getAppId(),
-                request.getFields(), optionalActivityIds.iterator().next(), request.getToken());
+        return service.getActivity(userIds.iterator().next(), request.getGroup(),
+            request.getAppId(), request.getFields(), optionalActivityIds.iterator().next(),
+            request.getToken());
       } else {
         return service.getActivities(userIds.iterator().next(), request.getGroup(),
             request.getAppId(), request.getFields(), optionalActivityIds, request.getToken());

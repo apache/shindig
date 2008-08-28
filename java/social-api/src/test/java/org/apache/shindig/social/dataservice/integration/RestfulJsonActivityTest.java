@@ -50,7 +50,7 @@ public class RestfulJsonActivityTest extends AbstractLargeRestfulTests {
    */
   @Test
   public void testGetActivityJson() throws Exception {
-    String resp = getJsonResponse("/activities/john.doe/@self/1", "GET");
+    String resp = getJsonResponse("/activities/john.doe/@self/@app/1", "GET");
     JSONObject result = getJson(resp);
     assertActivitiesEqual(johnsActivity, result.getJSONObject("entry"));
   }
