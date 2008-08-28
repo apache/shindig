@@ -21,6 +21,7 @@ import junit.framework.TestCase;
 
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.ExecutionException;
 
 /**
  * Tests ImmediateFuture.
@@ -47,5 +48,16 @@ public class ImmediateFutureTest extends TestCase {
 
   public void testIsDone() {
     assertTrue(ImmediateFuture.newInstance("foo").isDone());
+  }
+
+  public void testErrorInstance() throws Exception {
+    RuntimeException re = new RuntimeException();
+    Future<String> errorFuture = ImmediateFuture.errorInstance(re);
+    try {
+      errorFuture.get();
+      fail();
+    } catch (ExecutionException ee) {
+      assertSame(re, ee.getCause());
+    }
   }
 }

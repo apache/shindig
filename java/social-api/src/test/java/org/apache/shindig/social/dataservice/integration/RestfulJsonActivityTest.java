@@ -113,7 +113,7 @@ public class RestfulJsonActivityTest extends AbstractLargeRestfulTests {
   @Test
   public void testCreateActivity() throws Exception {
     String postData = "{title : 'hi mom!', body : 'and dad.'}";
-    getJsonResponse("/activities/john.doe/@self", "POST", postData);
+    String createResponse = getJsonResponse("/activities/john.doe/@self", "POST", postData);
 
     String resp = getJsonResponse("/activities/john.doe/@self", "GET");
     JSONObject result = getJson(resp);

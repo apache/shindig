@@ -19,7 +19,7 @@ package org.apache.shindig.social.opensocial.service;
 
 import org.apache.shindig.common.util.ImmediateFuture;
 import org.apache.shindig.social.ResponseError;
-import org.apache.shindig.social.ResponseItem;
+import org.apache.shindig.social.opensocial.spi.SocialSpiException;
 
 import com.google.common.collect.Sets;
 
@@ -32,14 +32,16 @@ public abstract class DataRequestHandler {
   private static final Set<String> GET_SYNONYMS = Sets.newHashSet("get");
   private static final Set<String> CREATE_SYNONYMS = Sets.newHashSet("put", "create");
   private static final Set<String> UPDATE_SYNONYMS = Sets.newHashSet("post", "update");
+  // TODO: is there a missing synonym for delete, or is it really here twice?
   private static final Set<String> DELETE_SYNONYMS = Sets.newHashSet("delete", "delete");
 
-  public Future<? extends ResponseItem> handleItem(RequestItem request) {
+  public Future<?> handleItem(RequestItem request) {
     if (request.getOperation() == null) {
-      return error(ResponseError.NOT_IMPLEMENTED, "Unserviced operation ");
+      return ImmediateFuture.errorInstance(new SocialSpiException(ResponseError.NOT_IMPLEMENTED,
+          "Unserviced operation"));
     }
     String operation = request.getOperation().toLowerCase();
-    Future<? extends ResponseItem> responseItem;
+    Future<?> responseItem;
     try {
       if (GET_SYNONYMS.contains(operation)) {
         responseItem = handleGet(request);
@@ -50,58 +52,58 @@ public abstract class DataRequestHandler {
       } else if (DELETE_SYNONYMS.contains(operation)) {
         responseItem = handleDelete(request);
       } else {
-        return error(ResponseError.NOT_IMPLEMENTED, "Unserviced operation " + operation);
+        throw new SocialSpiException(ResponseError.NOT_IMPLEMENTED,
+            "Unserviced operation " + operation);
       }
-    } catch (IllegalArgumentException iae) {
-      // Upconvert IllegalArgumentExceptions to BAD_REQUEST.
-      return error(ResponseError.BAD_REQUEST, iae.getMessage());
+    } catch (SocialSpiException spe) {
+      return ImmediateFuture.errorInstance(spe);
     } catch (Throwable t) {
-      return error(ResponseError.INTERNAL_ERROR, "Unknown error " + t.getMessage());
+      return ImmediateFuture.errorInstance(new SocialSpiException(ResponseError.INTERNAL_ERROR,
+          "Unknown error " + t.getMessage(), t));
     }
     return responseItem;
   }
 
-  protected abstract Future<? extends ResponseItem> handleDelete(RequestItem request);
+  protected abstract Future<?> handleDelete(RequestItem request)
+      throws SocialSpiException;
 
-  protected abstract Future<? extends ResponseItem> handlePut(RequestItem request);
+  protected abstract Future<?> handlePut(RequestItem request)
+      throws SocialSpiException;
 
-  protected abstract Future<? extends ResponseItem> handlePost(RequestItem request);
+  protected abstract Future<?> handlePost(RequestItem request)
+      throws SocialSpiException;
 
-  protected abstract Future<? extends ResponseItem> handleGet(RequestItem request);
-
-  /**
-   * Create standard error messages as futures
-   */
-  protected Future<? extends ResponseItem> error(ResponseError type, String message) {
-    return ImmediateFuture.newInstance(new ResponseItem(type, message));
-  }
+  protected abstract Future<?> handleGet(RequestItem request)
+      throws SocialSpiException;
 
   /**
    * Utility class for common API call preconditions
    */
   public static class Preconditions {
 
-    public static void requireNotEmpty(Collection<?> coll, String message) {
+    public static void requireNotEmpty(Collection<?> coll, String message)
+        throws SocialSpiException {
       if (coll.isEmpty()) {
-        throw new IllegalArgumentException(message);
+        throw new SocialSpiException(ResponseError.BAD_REQUEST, message);
       }
     }
 
-    public static void requireEmpty(Collection<?> list, String message) {
+    public static void requireEmpty(Collection<?> list, String message) throws SocialSpiException {
       if (!list.isEmpty()) {
-        throw new IllegalArgumentException(message);
+        throw new SocialSpiException(ResponseError.BAD_REQUEST, message);
       }
     }
 
-    public static void requireSingular(Collection<?> coll, String message) {
+    public static void requireSingular(Collection<?> coll, String message)
+        throws SocialSpiException {
       if (coll.size() != 1) {
-        throw new IllegalArgumentException(message);
+        throw new SocialSpiException(ResponseError.BAD_REQUEST, message);
       }
     }
 
-    public static void requirePlural(Collection<?> coll, String message) {
+    public static void requirePlural(Collection<?> coll, String message) throws SocialSpiException {
       if (coll.size() <= 1) {
-        throw new IllegalArgumentException(message);
+        throw new SocialSpiException(ResponseError.BAD_REQUEST, message);
       }
     }
   }

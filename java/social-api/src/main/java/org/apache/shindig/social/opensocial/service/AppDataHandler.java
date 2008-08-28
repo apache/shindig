@@ -17,11 +17,10 @@
  */
 package org.apache.shindig.social.opensocial.service;
 
-import org.apache.shindig.common.util.ImmediateFuture;
 import org.apache.shindig.social.ResponseError;
-import org.apache.shindig.social.ResponseItem;
 import org.apache.shindig.social.opensocial.spi.AppDataService;
 import org.apache.shindig.social.opensocial.spi.UserId;
+import org.apache.shindig.social.opensocial.spi.SocialSpiException;
 
 import com.google.inject.Inject;
 
@@ -50,7 +49,8 @@ public class AppDataHandler extends DataRequestHandler {
    * values and set on the person object. If there are no fields vars then all of the data will be
    * overridden.
    */
-  protected Future<? extends ResponseItem> handleDelete(RequestItem request) {
+  protected Future<?> handleDelete(RequestItem request)
+      throws SocialSpiException {
     request.applyUrlTemplate(APP_DATA_PATH);
 
     Set<UserId> userIds = request.getUsers();
@@ -71,7 +71,7 @@ public class AppDataHandler extends DataRequestHandler {
    * values and set on the person object. If there are no fields vars then all of the data will be
    * overridden.
    */
-  protected Future<? extends ResponseItem> handlePut(RequestItem request) {
+  protected Future<?> handlePut(RequestItem request) throws SocialSpiException {
     return handlePost(request);
   }
 
@@ -83,7 +83,7 @@ public class AppDataHandler extends DataRequestHandler {
    * The post data should be a regular json object. All of the fields vars will be pulled from the
    * values and set. If there are no fields vars then all of the data will be overridden.
    */
-  protected Future<? extends ResponseItem> handlePost(RequestItem request) {
+  protected Future<?> handlePost(RequestItem request) throws SocialSpiException {
     request.applyUrlTemplate(APP_DATA_PATH);
 
     Set<UserId> userIds = request.getUsers();
@@ -94,8 +94,8 @@ public class AppDataHandler extends DataRequestHandler {
     Map<String, String> values = request.getTypedParameter("data", HashMap.class);
     for (String key : values.keySet()) {
       if (!isValidKey(key)) {
-        return ImmediateFuture.newInstance(new ResponseItem(ResponseError.BAD_REQUEST,
-            "One or more of the app data keys are invalid: " + key));
+        throw new SocialSpiException(ResponseError.BAD_REQUEST,
+            "One or more of the app data keys are invalid: " + key);
       }
     }
 
@@ -108,7 +108,7 @@ public class AppDataHandler extends DataRequestHandler {
    *
    * examples: /appdata/john.doe/@friends/app?fields=count /appdata/john.doe/@self/app
    */
-  protected Future<? extends ResponseItem> handleGet(RequestItem request) {
+  protected Future<?> handleGet(RequestItem request) throws SocialSpiException {
     request.applyUrlTemplate(APP_DATA_PATH);
 
     Set<UserId> userIds = request.getUsers();

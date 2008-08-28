@@ -20,14 +20,15 @@ package org.apache.shindig.social.opensocial.service;
 import org.apache.shindig.common.testing.FakeGadgetToken;
 import org.apache.shindig.common.util.ImmediateFuture;
 import org.apache.shindig.social.ResponseError;
-import org.apache.shindig.social.ResponseItem;
 import org.apache.shindig.social.SocialApiTestsGuiceModule;
+import org.apache.shindig.social.opensocial.spi.SocialSpiException;
 import org.apache.shindig.social.core.util.BeanJsonConverter;
 import org.apache.shindig.social.core.util.BeanXmlConverter;
-import org.apache.shindig.social.opensocial.spi.RestfulItem;
 
 import com.google.inject.Guice;
 import com.google.inject.Injector;
+import com.google.common.collect.Maps;
+
 import junit.framework.TestCase;
 import org.easymock.classextension.EasyMock;
 
@@ -35,8 +36,6 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.StringTokenizer;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
 import javax.servlet.ServletInputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -54,7 +53,6 @@ public class DataServiceServletTest extends TestCase {
   private AppDataHandler appDataHandler;
   private Injector injector;
   private BeanJsonConverter jsonConverter;
-  private BeanXmlConverter xmlConverter;
 
   private final ServletInputStream dummyPostData = new ServletInputStream() {
     @Override public int read()  {
@@ -67,7 +65,7 @@ public class DataServiceServletTest extends TestCase {
     req = EasyMock.createMock(HttpServletRequest.class);
     res = EasyMock.createMock(HttpServletResponse.class);
     jsonConverter = EasyMock.createMock(BeanJsonConverter.class);
-    xmlConverter = EasyMock.createMock(BeanXmlConverter.class);
+    BeanXmlConverter xmlConverter = EasyMock.createMock(BeanXmlConverter.class);
 
     peopleHandler = EasyMock.createMock(PersonHandler.class);
     activityHandler = EasyMock.createMock(ActivityHandler.class);
@@ -124,7 +122,8 @@ public class DataServiceServletTest extends TestCase {
     setupInjector();
 
     EasyMock.expect(appDataHandler.handleItem(EasyMock.isA(RestfulRequestItem.class)));
-    EasyMock.expectLastCall().andReturn(new FailingFuture());
+    EasyMock.expectLastCall().andReturn(
+        ImmediateFuture.errorInstance(new RuntimeException("FAILED")));
 
     res.sendError(500, "FAILED");
 
@@ -146,12 +145,11 @@ public class DataServiceServletTest extends TestCase {
     setupInjector();
 
     String jsonObject = "my lovely json";
-    RestfulItem<String> response = new RestfulItem<String>(jsonObject);
 
     EasyMock.expect(handler.handleItem(EasyMock.isA(RequestItem.class)));
-    EasyMock.expectLastCall().andReturn(ImmediateFuture.newInstance(response));
+    EasyMock.expectLastCall().andReturn(ImmediateFuture.newInstance(jsonObject));
 
-    EasyMock.expect(jsonConverter.convertToString(response))
+    EasyMock.expect(jsonConverter.convertToString(Maps.immutableMap("entry", jsonObject)))
         .andReturn("{ 'entry' : " + jsonObject + " }");
 
     PrintWriter writerMock = EasyMock.createMock(PrintWriter.class);
@@ -182,8 +180,13 @@ public class DataServiceServletTest extends TestCase {
   public void testInvalidRoute() throws Exception {
     RestfulRequestItem requestItem = new RestfulRequestItem("/ahhh!", "GET", null,
         FAKE_GADGET_TOKEN, jsonConverter);
-    ResponseItem responseItem = servlet.handleRequestItem(requestItem).get();
-    assertEquals(ResponseError.NOT_IMPLEMENTED, responseItem.getError());
+    try {
+      servlet.handleRequestItem(requestItem).get();
+      fail();
+    } catch (ExecutionException ee) {
+      assertTrue(ee.getCause() instanceof SocialSpiException);
+      assertEquals(ResponseError.NOT_IMPLEMENTED, ((SocialSpiException) ee.getCause()).getError());
+    }
   }
 
   public void testGetConverterForRequest() throws Exception {
@@ -204,31 +207,5 @@ public class DataServiceServletTest extends TestCase {
     assertEquals(converter, servlet.getConverterForRequest(req));
     EasyMock.verify(req);
     EasyMock.reset(req);
-  }
-
-  /**
-   * Future implementation that fails with an exception.
-   */
-  private static class FailingFuture implements Future<ResponseItem> {
-
-    public boolean cancel(boolean mayInterruptIfRunning) {
-      return false;
-    }
-
-    public boolean isCancelled() {
-      return false;
-    }
-
-    public boolean isDone() {
-      return true;
-    }
-
-    public ResponseItem get() throws ExecutionException {
-      throw new ExecutionException(new RuntimeException("FAILED"));
-    }
-
-    public ResponseItem get(long timeout, TimeUnit unit) {
-      return null;
-    }
   }
 }

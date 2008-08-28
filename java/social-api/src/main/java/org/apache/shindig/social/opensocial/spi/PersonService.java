@@ -52,7 +52,8 @@ public interface PersonService {
    * @param token The gadget token @return a list of people.
    */
   Future<RestfulCollection<Person>> getPeople(Set<UserId> userIds, GroupId groupId,
-      CollectionOptions collectionOptions, Set<String> fields, SecurityToken token);
+      CollectionOptions collectionOptions, Set<String> fields, SecurityToken token)
+      throws SocialSpiException;
 
   /**
    * Returns a person that corresponds to the passed in person id.
@@ -62,5 +63,6 @@ public interface PersonService {
    * @param token The gadget token
    * @return a list of people.
    */
-  Future<RestfulItem<Person>> getPerson(UserId id, Set<String> fields, SecurityToken token);
+  Future<Person> getPerson(UserId id, Set<String> fields, SecurityToken token)
+      throws SocialSpiException;
 }

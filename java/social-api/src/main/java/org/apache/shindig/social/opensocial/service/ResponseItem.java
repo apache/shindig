@@ -15,28 +15,31 @@
  * KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-package org.apache.shindig.social;
+package org.apache.shindig.social.opensocial.service;
+
+import org.apache.shindig.social.ResponseError;
+
+import com.google.common.base.Objects;
 
 /**
  * Represents the response items that get handed back as json within the
  * DataResponse.
  */
-public class ResponseItem {
+public final class ResponseItem {
   /**
    * The ResponseError associated with the item.
    */
-  private ResponseError error;
+  private final ResponseError error;
+
   /**
    * The error message.
    */
-  private String errorMessage;
+  private final String errorMessage;
 
   /**
-   * Blank constructor protected for subclasses.
+   * The response value.
    */
-  protected ResponseItem() {
-    
-  }
+  private final Object response;
 
   /**
    * Create a ResponseItem specifying the ResponseError and error Message.
@@ -46,6 +49,23 @@ public class ResponseItem {
   public ResponseItem(ResponseError error, String errorMessage) {
     this.error = error;
     this.errorMessage = errorMessage;
+    this.response = null;
+  }
+
+  /**
+   * Create a ResponseItem specifying a value.
+   */
+  public ResponseItem(Object response) {
+    this.error = null;
+    this.errorMessage = null;
+    this.response = response;
+  }
+
+  /**
+   * Get the response value.
+   */
+  public Object getResponse() {
+    return response;
   }
 
   /**
@@ -57,14 +77,6 @@ public class ResponseItem {
   }
 
   /**
-   * Set the ResponseError associated with this item.
-   * @param error the new ResponseError
-   */
-  public void setError(ResponseError error) {
-    this.error = error;
-  }
-
-  /**
    * Get the Error Message associated with this Response Item.
    * @return the Error Message
    */
@@ -72,11 +84,27 @@ public class ResponseItem {
     return errorMessage;
   }
 
-  /**
-   * Set the Error Message associated with this ResponseItem.
-   * @param errorMessage the new error Message
-   */
-  public void setErrorMessage(String errorMessage) {
-    this.errorMessage = errorMessage;
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) {
+      return true;
+    }
+
+    if (!(o instanceof ResponseItem)) {
+      return false;
+    }
+
+    ResponseItem that = (ResponseItem) o;
+    return (error == that.error)
+        && Objects.equal(errorMessage, that.errorMessage)
+        && Objects.equal(response, that.response);
+  }
+
+  @Override
+  public int hashCode() {
+    int result = (error != null ? error.hashCode() : 0);
+    result = 31 * result + (errorMessage != null ? errorMessage.hashCode() : 0);
+    result = 31 * result + (response != null ? response.hashCode() : 0);
+    return result;
   }
 }

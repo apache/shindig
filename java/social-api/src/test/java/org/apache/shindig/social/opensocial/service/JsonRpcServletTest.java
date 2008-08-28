@@ -19,10 +19,8 @@ package org.apache.shindig.social.opensocial.service;
 
 import org.apache.shindig.common.testing.FakeGadgetToken;
 import org.apache.shindig.common.util.ImmediateFuture;
-import org.apache.shindig.social.ResponseItem;
 import org.apache.shindig.social.core.util.BeanJsonConverter;
 import org.apache.shindig.social.core.util.BeanXmlConverter;
-import org.apache.shindig.social.opensocial.spi.RestfulItem;
 
 import com.google.common.collect.Maps;
 import com.google.inject.Injector;
@@ -35,9 +33,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringReader;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -133,7 +129,8 @@ public class JsonRpcServletTest extends TestCase {
     setupInjector();
 
     EasyMock.expect(appDataHandler.handleItem(EasyMock.isA(RpcRequestItem.class)));
-    EasyMock.expectLastCall().andReturn(new FailingFuture());
+    EasyMock.expectLastCall().andReturn(
+        ImmediateFuture.errorInstance(new RuntimeException("FAILED")));
 
     JSONObject err = new JSONObject(
         "{id:id,error:{message:'internalError: FAILED',code:500}}");
@@ -155,17 +152,16 @@ public class JsonRpcServletTest extends TestCase {
     setupInjector();
 
     String resultObject = "my lovely json";
-    RestfulItem<String> response = new RestfulItem<String>(resultObject);
 
     EasyMock.expect(handler.handleItem(EasyMock.isA(RequestItem.class)));
-    EasyMock.expectLastCall().andReturn(ImmediateFuture.newInstance(response));
+    EasyMock.expectLastCall().andReturn(ImmediateFuture.newInstance(resultObject));
 
-    EasyMock.expect(jsonConverter.convertToJson(response))
-        .andReturn(new JSONObject(Maps.immutableMap("entry", resultObject)));
+    EasyMock.expect(jsonConverter.convertToJson(resultObject))
+        .andReturn(new JSONObject(Maps.immutableMap("foo", "bar")));
 
     JSONObject result = new JSONObject();
     result.put("id", "id");
-    result.put("data", resultObject);
+    result.put("data", Maps.immutableMap("foo", "bar"));
     PrintWriter writerMock = EasyMock.createMock(PrintWriter.class);
     EasyMock.expect(res.getWriter()).andReturn(writerMock);
     writerMock.write(EasyMock.eq(result.toString()));
@@ -184,19 +180,17 @@ public class JsonRpcServletTest extends TestCase {
     setupInjector();
 
     String resultObject = "my lovely json";
-    RestfulItem<String> response = new RestfulItem<String>(resultObject);
-
-    Future<? extends ResponseItem> responseItemFuture = ImmediateFuture.newInstance(response);
+    Future<?> responseItemFuture = ImmediateFuture.newInstance(resultObject);
     EasyMock.expect(peopleHandler.handleItem(EasyMock.isA(RequestItem.class)));
     EasyMock.expectLastCall().andReturn(responseItemFuture);
     EasyMock.expect(activityHandler.handleItem(EasyMock.isA(RequestItem.class)));
     EasyMock.expectLastCall().andReturn(responseItemFuture);
 
-    EasyMock.expect(jsonConverter.convertToJson(response))
-        .andStubReturn(new JSONObject(Maps.immutableMap("entry", resultObject)));
+    EasyMock.expect(jsonConverter.convertToJson(resultObject))
+        .andStubReturn(new JSONObject(Maps.immutableMap("foo", "bar")));
 
-    JSONArray result = new JSONArray("[{id:'1',data:'my lovely json'}," +
-        "{id:'2',data:my lovely json}]");
+    JSONArray result = new JSONArray("[{id:'1',data:{foo:'bar'}}," +
+        "{id:'2',data:{foo:'bar'}}]");
     PrintWriter writerMock = EasyMock.createMock(PrintWriter.class);
     EasyMock.expect(res.getWriter()).andReturn(writerMock);
     writerMock.write(EasyMock.eq(result.toString()));
@@ -216,16 +210,15 @@ public class JsonRpcServletTest extends TestCase {
     setupInjector();
 
     String resultObject = "my lovely json";
-    RestfulItem<String> response = new RestfulItem<String>(resultObject);
 
-    Future<? extends ResponseItem> responseItemFuture = ImmediateFuture.newInstance(response);
+    Future<?> responseItemFuture = ImmediateFuture.newInstance(resultObject);
     EasyMock.expect(peopleHandler.handleItem(EasyMock.isA(RequestItem.class)));
     EasyMock.expectLastCall().andReturn(responseItemFuture);
 
-    EasyMock.expect(jsonConverter.convertToJson(response))
-        .andReturn(new JSONObject(Maps.immutableMap("entry", resultObject)));
+    EasyMock.expect(jsonConverter.convertToJson(resultObject))
+        .andReturn(new JSONObject(Maps.immutableMap("foo", "bar")));
 
-    JSONObject result = new JSONObject("{id:'1',data:'my lovely json'}");
+    JSONObject result = new JSONObject("{id:'1',data:{foo:'bar'}}");
     PrintWriter writerMock = EasyMock.createMock(PrintWriter.class);
     EasyMock.expect(res.getWriter()).andReturn(writerMock);
     writerMock.write(EasyMock.eq(result.toString()));
@@ -242,32 +235,6 @@ public class JsonRpcServletTest extends TestCase {
     EasyMock.expect(req.getReader()).andStubReturn(new BufferedReader(new StringReader(json)));
     EasyMock.expect(req.getMethod()).andStubReturn("POST");
     EasyMock.expect(req.getAttribute(EasyMock.isA(String.class))).andReturn(FAKE_GADGET_TOKEN);
-  }
-
-  /**
-   * Future implementation that fails with an exception.
-   */
-  private static class FailingFuture implements Future<ResponseItem> {
-
-    public boolean cancel(boolean mayInterruptIfRunning) {
-      return false;
-    }
-
-    public boolean isCancelled() {
-      return false;
-    }
-
-    public boolean isDone() {
-      return true;
-    }
-
-    public ResponseItem get() throws ExecutionException {
-      throw new ExecutionException(new RuntimeException("FAILED"));
-    }
-
-    public ResponseItem get(long timeout, TimeUnit unit) {
-      return null;
-    }
   }
 }
 

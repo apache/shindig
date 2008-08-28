@@ -18,24 +18,26 @@
  */
 package org.apache.shindig.social.sample.spi;
 
-import org.apache.shindig.common.SecurityToken;
-import org.apache.shindig.common.testing.FakeGadgetToken;
-import org.apache.shindig.social.SocialApiTestsGuiceModule;
-import org.apache.shindig.social.opensocial.model.Activity;
-import org.apache.shindig.social.opensocial.model.Person;
-import org.apache.shindig.social.opensocial.spi.DataCollection;
-import org.apache.shindig.social.opensocial.spi.GroupId;
-import org.apache.shindig.social.opensocial.spi.PersonService;
-import org.apache.shindig.social.opensocial.spi.RestfulCollection;
-import org.apache.shindig.social.opensocial.spi.RestfulItem;
-import org.apache.shindig.social.opensocial.spi.UserId;
-import org.apache.shindig.social.opensocial.spi.CollectionOptions;
-
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
+
 import junit.framework.TestCase;
+
+import org.apache.shindig.common.SecurityToken;
+import org.apache.shindig.common.testing.FakeGadgetToken;
+import org.apache.shindig.social.SocialApiTestsGuiceModule;
+import org.apache.shindig.social.ResponseError;
+import org.apache.shindig.social.opensocial.model.Activity;
+import org.apache.shindig.social.opensocial.model.Person;
+import org.apache.shindig.social.opensocial.spi.CollectionOptions;
+import org.apache.shindig.social.opensocial.spi.DataCollection;
+import org.apache.shindig.social.opensocial.spi.GroupId;
+import org.apache.shindig.social.opensocial.spi.PersonService;
+import org.apache.shindig.social.opensocial.spi.RestfulCollection;
+import org.apache.shindig.social.opensocial.spi.UserId;
+import org.apache.shindig.social.opensocial.spi.SocialSpiException;
 
 import java.util.Collections;
 
@@ -62,20 +64,20 @@ public class JsonDbOpensocialServiceTest extends TestCase {
   }
 
   public void testGetPersonDefaultFields() throws Exception {
-    RestfulItem<Person> personResponseItem = db
+    Person person = db
         .getPerson(CANON_USER, Person.Field.DEFAULT_FIELDS, token).get();
 
-    assertNotNull("Canonical user not found", personResponseItem.getEntry());
-    assertNotNull("Canonical user has no id", personResponseItem.getEntry().getId());
-    assertNotNull("Canonical user has no name", personResponseItem.getEntry().getName());
+    assertNotNull("Canonical user not found", person);
+    assertNotNull("Canonical user has no id", person.getId());
+    assertNotNull("Canonical user has no name", person.getName());
     assertNotNull("Canonical user has no thumbnail",
-        personResponseItem.getEntry().getThumbnailUrl());
+        person.getThumbnailUrl());
   }
 
   public void testGetPersonAllFields() throws Exception {
-    RestfulItem<Person> personResponseItem = db
+    Person person = db
         .getPerson(CANON_USER, Person.Field.ALL_FIELDS, token).get();
-    assertNotNull("Canonical user not found", personResponseItem.getEntry());
+    assertNotNull("Canonical user not found", person);
   }
 
   public void testGetExpectedFriends() throws Exception {
@@ -133,14 +135,13 @@ public class JsonDbOpensocialServiceTest extends TestCase {
   }
 
   public void testGetExpectedActivity() throws Exception {
-    RestfulItem<Activity> responseItem = db.getActivity(
+    Activity activity = db.getActivity(
         CANON_USER, SELF_GROUP, APP_ID,
         Sets.newHashSet("appId", "body", "mediaItems"), APP_ID, new FakeGadgetToken()).get();
-    assertTrue(responseItem != null);
-    assertTrue(responseItem.getEntry() != null);
+    assertNotNull(activity);
     // Check that some fields are fetched and others are not
-    assertTrue(responseItem.getEntry().getBody() != null);
-    assertTrue(responseItem.getEntry().getBodyId() == null);
+    assertNotNull(activity.getBody());
+    assertNull(activity.getBodyId());
   }
 
   public void testDeleteExpectedActivity() throws Exception {
@@ -148,10 +149,14 @@ public class JsonDbOpensocialServiceTest extends TestCase {
         new FakeGadgetToken());
 
     // Try to fetch the activity
-    RestfulItem<Activity> responseItem = db.getActivity(
-        CANON_USER, SELF_GROUP, APP_ID,
-        Sets.newHashSet("appId", "body", "mediaItems"), APP_ID, new FakeGadgetToken()).get();
-    assertTrue(responseItem.getEntry() == null);
+    try {
+      db.getActivity(
+          CANON_USER, SELF_GROUP, APP_ID,
+          Sets.newHashSet("appId", "body", "mediaItems"), APP_ID, new FakeGadgetToken()).get();
+      fail();
+    } catch (SocialSpiException sse) {
+      assertEquals(ResponseError.BAD_REQUEST, sse.getError());
+    }
   }
 
   public void testGetExpectedAppData() throws Exception {
