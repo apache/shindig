@@ -32,8 +32,7 @@ public abstract class DataRequestHandler {
   private static final Set<String> GET_SYNONYMS = Sets.newHashSet("get");
   private static final Set<String> CREATE_SYNONYMS = Sets.newHashSet("put", "create");
   private static final Set<String> UPDATE_SYNONYMS = Sets.newHashSet("post", "update");
-  // TODO: is there a missing synonym for delete, or is it really here twice?
-  private static final Set<String> DELETE_SYNONYMS = Sets.newHashSet("delete", "delete");
+  private static final Set<String> DELETE_SYNONYMS = Sets.newHashSet("delete");
 
   public Future<?> handleItem(RequestItem request) {
     if (request.getOperation() == null) {
