@@ -46,7 +46,7 @@ class OutputAtomConverter extends OutputConverter {
 		
 		// Check to see if this is a single entry, or a collection, and construct either an atom 
 		// feed (collection) or an entry (single)		
-		if ($responseItem->getResponse() instanceof RestFulCollection) {
+		if ($responseItem->getResponse() instanceof RestfulCollection) {
 			$totalResults = $responseItem->getResponse()->getTotalResults();
 			$itemsPerPage = $requestItem->getCount();
 			$startIndex = $requestItem->getStartIndex();
@@ -117,7 +117,7 @@ class OutputAtomConverter extends OutputConverter {
 			$this->addData($content, $requestType, $data, self::$osNameSpace);
 		}
 		$xml = $doc->saveXML();
-		if ($responseItem->getResponse() instanceof RestFulCollection) {
+		if ($responseItem->getResponse() instanceof RestfulCollection) {
 			//FIXME dirty hack until i find a way to add multiple name spaces using DomXML functions
 			$xml = str_replace('<feed xmlns="http://www.w3.org/2005/Atom">', '<feed xmlns="http://www.w3.org/2005/Atom" xmlns:osearch="http://a9.com/-/spec/opensearch/1.1">', $xml);
 		}

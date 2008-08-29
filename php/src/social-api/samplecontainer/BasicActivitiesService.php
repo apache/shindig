@@ -23,7 +23,7 @@ class BasicActivitiesService implements ActivitiesService {
 	{
 		$activities = $this->getActivities($userId, $groupId, $token);
 		$activities = $activities->getResponse();
-		if ($activities instanceof RestFulCollection) {
+		if ($activities instanceof RestfulCollection) {
 			$activities = $activities->getEntry();
 			foreach ($activities as $activity) {
 				if ($activity->getId() == $activityId) {

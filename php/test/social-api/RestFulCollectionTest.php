@@ -33,7 +33,7 @@ class RestFulCollectionTest extends PHPUnit_Framework_TestCase {
 	protected function setUp()
 	{
 		parent::setUp();
-		$this->RestFulCollection = new RestFulCollection($entry, 1, 1);
+		$this->RestFulCollection = new RestfulCollection($entry, 1, 1);
 	}
 
 	/**
