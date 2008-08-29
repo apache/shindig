@@ -19,6 +19,7 @@ package org.apache.shindig.server.endtoend;
 
 import com.gargoylesoftware.htmlunit.CollectingAlertHandler;
 import com.gargoylesoftware.htmlunit.NicelyResynchronizingAjaxController;
+import com.gargoylesoftware.htmlunit.Page;
 import com.gargoylesoftware.htmlunit.WebClient;
 import com.gargoylesoftware.htmlunit.html.HtmlPage;
 
@@ -44,11 +45,27 @@ import javax.servlet.http.HttpServletResponse;
  * Base class for end-to-end tests.
  */
 public class EndToEndTest {
+  private static final String[] EXPECTED_RESOURCES = {
+    "fetchPersonTest.xml",
+    "fetchPeopleTest.xml",
+    "errorTest.xml",
+    "testframework.js"
+  };
+
   static private EndToEndServer server = null;
 
   private WebClient webClient;
   private CollectingAlertHandler alertHandler;
   private SecurityToken token;
+  
+  @Test
+  public void checkResources() throws Exception {
+    for ( String resource : EXPECTED_RESOURCES ) {
+      String url = EndToEndServer.SERVER_URL + "/" + resource;
+      Page p = webClient.getPage(url);
+      assertEquals("Failed to load test resource "+url,200,p.getWebResponse().getStatusCode());
+    }
+  }
 
   @Test
   public void fetchPerson() throws Exception {
