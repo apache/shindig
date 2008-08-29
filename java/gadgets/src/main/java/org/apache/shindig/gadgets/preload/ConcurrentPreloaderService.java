@@ -15,46 +15,38 @@
  * KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-package org.apache.shindig.gadgets;
+package org.apache.shindig.gadgets.preload;
 
-import com.google.common.collect.Maps;
 import com.google.inject.Inject;
+
+import org.apache.shindig.gadgets.Gadget;
 
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Future;
 
 /**
- * Handles preloading operations, such as HTTP fetches, social data retrieval, or anything else that
- * would benefit from preloading on the server instead of incurring a network request for users.
- *
  * Preloads will be fetched concurrently using the injected ExecutorService, and they can be read
  * lazily using the returned map of futures.
  */
-public class PreloaderService {
+public class ConcurrentPreloaderService implements PreloaderService {
   private final ExecutorService executor;
   private final List<? extends Preloader> preloaders;
 
   @Inject
-  public PreloaderService(ExecutorService executor, List<? extends Preloader> preloaders) {
+  public ConcurrentPreloaderService(ExecutorService executor,
+      List<? extends Preloader> preloaders) {
     this.executor = executor;
     this.preloaders = preloaders;
   }
 
-  /**
-   * Begin all preload operations.
-   *
-   * @param gadget The gadget to perform preloading for.
-   * @return A map of all preloaded data. Callers can retrieve preloads by unique key.
-   */
-  public Map<String, Future<Preload>> preload(Gadget gadget) {
-    Map<String, Future<Preload>> preloads = Maps.newHashMap();
+  public Preloads preload(Gadget gadget) {
+    ConcurrentPreloads preloads = new ConcurrentPreloads();
     for (Preloader preloader : preloaders) {
-      Map<String, Callable<Preload>> tasks = preloader.createPreloadTasks(gadget);
-      for (Map.Entry<String, Callable<Preload>> entry : tasks.entrySet()) {
-        preloads.put(entry.getKey(), executor.submit(entry.getValue()));
+      Map<String, Callable<PreloadedData>> tasks = preloader.createPreloadTasks(gadget);
+      for (Map.Entry<String, Callable<PreloadedData>> entry : tasks.entrySet()) {
+        preloads.add(entry.getKey(), executor.submit(entry.getValue()));
       }
     }
     return preloads;
