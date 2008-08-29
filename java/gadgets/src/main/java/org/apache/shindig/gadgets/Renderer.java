@@ -35,7 +35,8 @@ public class Renderer {
   private final HttpFetcher httpFetcher;
 
   @Inject
-  public Renderer(GadgetSpecFactory gadgetSpecFactory, HttpFetcher httpFetcher) {
+  public Renderer(GadgetSpecFactory gadgetSpecFactory,
+                  HttpFetcher httpFetcher) {
     this.gadgetSpecFactory = gadgetSpecFactory;
     this.httpFetcher = httpFetcher;
   }

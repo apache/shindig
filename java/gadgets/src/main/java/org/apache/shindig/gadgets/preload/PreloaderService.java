@@ -15,17 +15,23 @@
  * KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-package org.apache.shindig.gadgets;
+package org.apache.shindig.gadgets.preload;
+
+import com.google.inject.ImplementedBy;
+
+import org.apache.shindig.gadgets.Gadget;
 
 /**
- * Contains preloaded data and methods for manipulating it.
+ * Handles preloading operations, such as HTTP fetches, social data retrieval, or anything else that
+ * would benefit from preloading on the server instead of incurring a network request for users.
  */
-public interface Preload {
-
+@ImplementedBy(ConcurrentPreloaderService.class)
+public interface PreloaderService {
   /**
-   * Serialize the preloaded data into json.
+   * Begin all preload operations.
    *
-   * @return A JSON object suitable for passing to org.json.JSONObject.put(String, Object).
+   * @param gadget The gadget to perform preloading for.
+   * @return The preloads for the gadget.
    */
-  Object toJson();
+  Preloads preload(Gadget gadget);
 }

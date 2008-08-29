@@ -15,7 +15,9 @@
  * KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-package org.apache.shindig.gadgets;
+package org.apache.shindig.gadgets.preload;
+
+import org.apache.shindig.gadgets.Gadget;
 
 import java.util.Map;
 import java.util.concurrent.Callable;
@@ -28,9 +30,8 @@ public interface Preloader {
    * Create new preload tasks for the provided gadget.
    *
    * @param gadget The gadget that the operations will be performed for.
-   * @return Preloading tasks that will be executed in parallel with other preloading tasks by
-   * {@link PreloaderService#preload(Gadget)}. Callables will be converted to Futures for lazy
-   * evaluation.
+   * @return Preloading tasks that will be executed by
+   *  {@link PreloaderService#preload(Gadget)}.
    */
-  Map<String, Callable<Preload>> createPreloadTasks(Gadget gadget);
+  Map<String, Callable<PreloadedData>> createPreloadTasks(Gadget gadget);
 }

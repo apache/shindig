@@ -15,58 +15,49 @@
  * KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-package org.apache.shindig.gadgets;
+package org.apache.shindig.gadgets.preload;
+
+import static org.junit.Assert.assertEquals;
 
 import org.apache.shindig.common.testing.TestExecutorService;
+import org.apache.shindig.gadgets.Gadget;
 
 import com.google.common.collect.Maps;
-import static org.junit.Assert.assertEquals;
+
 import org.junit.Test;
 
 import java.util.Arrays;
 import java.util.Map;
 import java.util.concurrent.Callable;
-import java.util.concurrent.Future;
 
 /**
- * Tests for PreloaderService.
+ * Tests for FuturePreloaderService.
  */
-public class PreloaderServiceTest {
+public class ConcurrentPreloaderServiceTest {
   private static final String PRELOAD_STRING_KEY = "key a";
   private static final String PRELOAD_NUMERIC_KEY = "key b";
   private static final String PRELOAD_MAP_KEY = "key c";
-  private static final String PRELOAD_BEAN_KEY = "key d";
   private static final String PRELOAD_STRING_VALUE = "Some random string";
   private static final Integer PRELOAD_NUMERIC_VALUE = 5;
   private static final Map<String, String> PRELOAD_MAP_VALUE
       = Maps.immutableMap("foo", "bar", "baz", "blah");
-  private static final Object PRELOAD_BEAN_VALUE = new Object() {
-    public String getFoo() {
-      return "foo";
-    }
-
-    public String getBar() {
-      return "bar";
-    }
-  };
 
   private final TestPreloader preloader = new TestPreloader();
   private final TestPreloader preloader2 = new TestPreloader();
 
   @Test
-  public void preloadSingleService() throws Exception {
+  public void preloadSingleService() throws PreloadException {
     preloader.tasks.put(PRELOAD_STRING_KEY,
         new TestPreloadCallable(new DataPreload(PRELOAD_STRING_VALUE)));
 
     PreloaderService service
-        = new PreloaderService(new TestExecutorService(), Arrays.asList(preloader));
+        = new ConcurrentPreloaderService(new TestExecutorService(), Arrays.asList(preloader));
 
-    assertEquals(PRELOAD_STRING_VALUE,
-                (String)service.preload(null).get(PRELOAD_STRING_KEY).get().toJson());
+    assertEquals(PRELOAD_STRING_VALUE, service.preload(null).getData(PRELOAD_STRING_KEY).toJson());
   }
 
   @Test
-  public void preloadMultipleServices() throws Exception {
+  public void preloadMultipleServices() throws PreloadException {
     preloader.tasks.put(PRELOAD_STRING_KEY,
         new TestPreloadCallable(new DataPreload(PRELOAD_STRING_VALUE)));
 
@@ -76,44 +67,48 @@ public class PreloaderServiceTest {
     preloader2.tasks.put(PRELOAD_MAP_KEY,
         new TestPreloadCallable(new DataPreload(PRELOAD_MAP_VALUE)));
 
-    preloader2.tasks.put(PRELOAD_BEAN_KEY,
-        new TestPreloadCallable(new DataPreload(PRELOAD_BEAN_VALUE)));
+    PreloaderService service = new ConcurrentPreloaderService(new TestExecutorService(),
+        Arrays.asList(preloader, preloader2));
 
+    Preloads preloads = service.preload(null);
+
+    assertEquals(PRELOAD_STRING_VALUE, preloads.getData(PRELOAD_STRING_KEY).toJson());
+    assertEquals(PRELOAD_NUMERIC_VALUE, preloads.getData(PRELOAD_NUMERIC_KEY).toJson());
+    assertEquals(PRELOAD_MAP_VALUE, preloads.getData(PRELOAD_MAP_KEY).toJson());
+  }
+
+  @Test(expected = PreloadException.class)
+  public void exceptionsArePropagated() throws PreloadException {
+    preloader.tasks.put(PRELOAD_STRING_KEY, new TestPreloadCallable(null));
     PreloaderService service
-        = new PreloaderService(new TestExecutorService(), Arrays.asList(preloader, preloader2));
-
-    Map<String, Future<Preload>> preloads = service.preload(null);
-
-    assertEquals(PRELOAD_STRING_VALUE,
-                 (String) preloads.get(PRELOAD_STRING_KEY).get().toJson());
-    assertEquals(PRELOAD_NUMERIC_VALUE,
-                 (Integer) preloads.get(PRELOAD_NUMERIC_KEY).get().toJson());
-    assertEquals(PRELOAD_MAP_VALUE,
-                 (Map) preloads.get(PRELOAD_MAP_KEY).get().toJson());
-    assertEquals(PRELOAD_BEAN_VALUE, preloads.get(PRELOAD_BEAN_KEY).get().toJson());
+        = new ConcurrentPreloaderService(new TestExecutorService(), Arrays.asList(preloader));
+    service.preload(null).getData(PRELOAD_STRING_KEY);
   }
 
   private static class TestPreloader implements Preloader {
-    private final Map<String, Callable<Preload>> tasks = Maps.newHashMap();
+    private final Map<String, Callable<PreloadedData>> tasks = Maps.newHashMap();
 
-    public Map<String, Callable<Preload>> createPreloadTasks(Gadget gadget) {
+    public Map<String, Callable<PreloadedData>> createPreloadTasks(Gadget gadget) {
       return tasks;
     }
   }
 
-  private static class TestPreloadCallable implements Callable<Preload> {
-    private final Preload preload;
+  private static class TestPreloadCallable implements Callable<PreloadedData> {
+    private final PreloadedData preload;
 
-    public TestPreloadCallable(Preload preload) {
+    public TestPreloadCallable(PreloadedData preload) {
       this.preload = preload;
     }
 
-    public Preload call() {
+    public PreloadedData call() throws Exception {
+      if (preload == null) {
+        throw new PreloadException("No preload for this test.");
+      }
       return preload;
     }
   }
 
-  private static class DataPreload implements Preload {
+  private static class DataPreload implements PreloadedData {
     private final Object data;
 
     public DataPreload(Object data) {
