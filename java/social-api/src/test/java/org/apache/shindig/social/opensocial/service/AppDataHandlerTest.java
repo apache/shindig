@@ -174,6 +174,60 @@ public class AppDataHandlerTest extends TestCase {
     verify();
   }
 
+  /**
+   * Test that the handler correctly recognizes null keys in the data.
+   * @throws Exception if the test fails
+   */
+  public void testHandleNullPostDataKeys() throws Exception {
+    String jsonAppData = "{pandas: 'are fuzzy'}";
+
+    Map<String, String> params = Maps.newHashMap();
+    params.put("fields", "pandas");
+    setPathAndParams("/appData/john.doe/@self/appId", params, jsonAppData);
+
+    HashMap<String, String> values = Maps.newHashMap();
+    // create an invalid set of app data and inject
+    values.put("Aokkey", "an ok key");
+    values.put("", "an empty value");
+    EasyMock.expect(converter.convertToObject(jsonAppData, HashMap.class)).andReturn(values);
+
+    replay();
+    try {
+      handler.handlePost(request).get();
+      fail();
+    } catch ( SocialSpiException spi ) {
+      // was expecting an Exception
+    }
+    verify();
+  }
+  /**
+   * Test that the handler correctly recognizes invalid keys in the data.
+   * @throws Exception if the test fails
+   */
+  public void testHandleInvalidPostDataKeys() throws Exception {
+    String jsonAppData = "{pandas: 'are fuzzy'}";
+
+    Map<String, String> params = Maps.newHashMap();
+    params.put("fields", "pandas");
+    setPathAndParams("/appData/john.doe/@self/appId", params, jsonAppData);
+
+    HashMap<String, String> values = Maps.newHashMap();
+    // create an invalid set of app data and inject
+    values.put("Aokkey", "an ok key");
+    values.put("a bad key", "a good value");
+    EasyMock.expect(converter.convertToObject(jsonAppData, HashMap.class)).andReturn(values);
+
+    replay();
+    try {
+      handler.handlePost(request).get();
+      fail();
+    } catch ( SocialSpiException spi ) {
+      // was expecting an Exception
+    }
+    verify();
+  }
+
+  
   public void testHandleDelete() throws Exception {
     Map<String, String> params = Maps.newHashMap();
     params.put("fields", "pandas");
