@@ -1044,6 +1044,7 @@ opensocial.Container.prototype.enableCaja = function() {
       s_hasPermission: 0,
       s_newActivity: 0,
       s_newDataRequest: 0,
+      s_newIdSpec: 0,
       s_newMediaItem: 0,
       s_newMessage: 0,
       s_newNavigationParameters: 0,
