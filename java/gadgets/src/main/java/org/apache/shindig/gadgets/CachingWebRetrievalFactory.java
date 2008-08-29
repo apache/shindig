@@ -24,6 +24,30 @@ import org.apache.shindig.common.cache.Cache;
 import org.apache.shindig.common.cache.CacheProvider;
 import org.apache.shindig.gadgets.GadgetException;
 
+/**
+ * Base class for a factory which utilizes a time-to-live cache under the hood.
+ * The provided logic is that if ignoreCache is specified, the requested object
+ * will be freshly retrieved and cached. Otherwise, the object is returned from
+ * the cache if it's either still valid (below its TTL), or if the raw retrieval
+ * operation failed.
+ * 
+ * The class is templatized by T = type of the object to be retrieved and cached;
+ * Q = type used to query for T, and K = type of the cache key.
+ * 
+ * Subclasses must implement two methods:
+ * retrieveRawObject(), which uses the query param to retrieve an object of type T,
+ * along with its expiration time in milliseconds.
+ * getCacheKeyFromQueryObj(), which computes a cache key for the query param.
+ * 
+ * Still, due to the templatization, this class is admittedly not as easy as it
+ * perhaps ought to be to read. As such, it's due for cleanup and possible removal.
+ * 
+ * @param <T> Type of object to retrieve and cache.
+ * @param <Q> Type of query parameter used to fetch the cached object. May not be
+ * the same as the cache key (K), since K may not contain enough information for the
+ * retrieval operation.
+ * @param <K> Type of the key used to cache object of type T.
+ */
 public abstract class CachingWebRetrievalFactory<T, Q, K> {
   // Subclasses must override these.
   protected abstract FetchedObject<T> retrieveRawObject(Q queryObj, boolean ignoreCache) throws GadgetException;
@@ -97,7 +121,7 @@ public abstract class CachingWebRetrievalFactory<T, Q, K> {
     private T fetchedObj;
     private long expirationTime;
     
-    protected FetchedObject(T fetchedObj, long expirationTime) {
+    public FetchedObject(T fetchedObj, long expirationTime) {
       this.fetchedObj = fetchedObj;
       this.expirationTime = expirationTime;
     }
