@@ -42,7 +42,7 @@ abstract class Enum {
 			}
 		}
 		$this->key = $key;
-		$this->displayValue = ! empty($displayValue) ? $displayValue : $this->values[$key];
+		$this->displayValue = ! empty($displayValue) ? $displayValue : (isset($this->values[$key]) ? $this->values[$key] : '');
 		unset($this->values);
 	}
 
