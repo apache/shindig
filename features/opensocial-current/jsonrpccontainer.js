@@ -386,6 +386,7 @@ JsonRpcContainer.prototype.newUpdatePersonAppDataRequest = function(id, key,
   rpc.params.appId = "@app";
   rpc.params.data = {};
   rpc.params.data[key] = value;
+  rpc.params.fields = key;
   return new JsonRpcRequestItem(rpc);
 };
 
@@ -393,7 +394,7 @@ JsonRpcContainer.prototype.newRemovePersonAppDataRequest = function(id, keys) {
   var rpc = { method : "appdata.delete" };
   rpc.params = this.translateIdSpec(this.makeIdSpec(id));
   rpc.params.appId = "@app";
-  rpc.params.keys = keys;
+  rpc.params.fields = this.getFieldsList(keys);
 
   return new JsonRpcRequestItem(rpc);
 };
