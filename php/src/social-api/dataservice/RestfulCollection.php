@@ -21,7 +21,7 @@
  * This class represents a RESTful social data response
  *
  */
-class RestFulCollection {
+class RestfulCollection {
 	
 	public $entry;
 	public $startIndex;
@@ -29,7 +29,7 @@ class RestFulCollection {
 
 	public static function createFromEntry($entry)
 	{
-		return new RestFulCollection($entry, 0, count($entry));
+		return new RestfulCollection($entry, 0, count($entry));
 	}
 
 	public function __construct($entry, $startIndex, $totalResults)

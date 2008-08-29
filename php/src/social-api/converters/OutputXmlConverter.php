@@ -39,7 +39,7 @@ class OutputXmlConverter extends OutputConverter {
 		
 		// Check to see if this is a single entry, or a collection, and construct either an xml 
 		// feed (collection) or an entry (single)		
-		if ($responseItem->getResponse() instanceof RestFulCollection) {
+		if ($responseItem->getResponse() instanceof RestfulCollection) {
 			$totalResults = $responseItem->getResponse()->getTotalResults();
 			$itemsPerPage = $requestItem->getCount();
 			$startIndex = $requestItem->getStartIndex();

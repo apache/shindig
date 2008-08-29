@@ -379,7 +379,7 @@ class JsonDbOpensocialService implements ActivitiesService, PeopleService, AppDa
 	{
 		$activities = $this->getActivities($userId, $groupId, null, null, $token);
 		$activities = $activities->getResponse();
-		if ($activities instanceof RestFulCollection) {
+		if ($activities instanceof RestfulCollection) {
 			$activities = $activities->getEntry();
 			foreach ($activities as $activity) {
 				if ($activity['id'] == $activityId) {

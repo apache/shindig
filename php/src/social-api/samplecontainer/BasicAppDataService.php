@@ -71,7 +71,7 @@ class BasicAppDataService implements AppDataService {
 				$data[$id] = $personData;
 			}
 		}
-		return new ResponseItem(null, null, RestFulCollection::createFromEntry($data));
+		return new ResponseItem(null, null, RestfulCollection::createFromEntry($data));
 	}
 
 	public function updatePersonData(UserID $userId, GroupId $groupId, $fields, $values, $appId, SecurityToken $token)
