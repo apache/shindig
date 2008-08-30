@@ -22,6 +22,7 @@ import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.gadgets.http.HttpFetcher;
 import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.http.HttpResponse;
+import org.apache.shindig.gadgets.preload.PreloaderService;
 import org.apache.shindig.gadgets.spec.GadgetSpec;
 import org.apache.shindig.gadgets.spec.View;
 
@@ -33,12 +34,15 @@ import com.google.inject.Inject;
 public class Renderer {
   private final GadgetSpecFactory gadgetSpecFactory;
   private final HttpFetcher httpFetcher;
+  private final PreloaderService preloader;
 
   @Inject
   public Renderer(GadgetSpecFactory gadgetSpecFactory,
-                  HttpFetcher httpFetcher) {
+                  HttpFetcher httpFetcher,
+                  PreloaderService preloader) {
     this.gadgetSpecFactory = gadgetSpecFactory;
     this.httpFetcher = httpFetcher;
+    this.preloader = preloader;
   }
 
   /**
@@ -57,10 +61,19 @@ public class Renderer {
   public String render(GadgetContext context) throws RenderingException {
     try {
       GadgetSpec spec = gadgetSpecFactory.getGadgetSpec(context);
+
+      ProcessedGadget gadget = new ProcessedGadget()
+          .setContext(context)
+          .setSpec(spec);
+
+      // TODO: Move Gadget.getView into a utility method so that the correct view can be pulled from
+      // the gadget with aliasing done automatically.
       View view = spec.getView(context.getView());
       if (view.getType() == View.ContentType.URL) {
         throw new RenderingException("Attempted to render a url-type gadget.");
       }
+
+      gadget.setPreloads(preloader.preload(context, spec));
 
       // TODO: Add current url to GadgetContext to support transitive proxying.
 

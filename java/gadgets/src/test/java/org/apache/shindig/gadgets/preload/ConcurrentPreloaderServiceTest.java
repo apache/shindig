@@ -20,7 +20,8 @@ package org.apache.shindig.gadgets.preload;
 import static org.junit.Assert.assertEquals;
 
 import org.apache.shindig.common.testing.TestExecutorService;
-import org.apache.shindig.gadgets.Gadget;
+import org.apache.shindig.gadgets.GadgetContext;
+import org.apache.shindig.gadgets.spec.GadgetSpec;
 
 import com.google.common.collect.Maps;
 
@@ -53,7 +54,8 @@ public class ConcurrentPreloaderServiceTest {
     PreloaderService service
         = new ConcurrentPreloaderService(new TestExecutorService(), Arrays.asList(preloader));
 
-    assertEquals(PRELOAD_STRING_VALUE, service.preload(null).getData(PRELOAD_STRING_KEY).toJson());
+    assertEquals(PRELOAD_STRING_VALUE,
+                 service.preload(null, null).getData(PRELOAD_STRING_KEY).toJson());
   }
 
   @Test
@@ -70,7 +72,7 @@ public class ConcurrentPreloaderServiceTest {
     PreloaderService service = new ConcurrentPreloaderService(new TestExecutorService(),
         Arrays.asList(preloader, preloader2));
 
-    Preloads preloads = service.preload(null);
+    Preloads preloads = service.preload(null, null);
 
     assertEquals(PRELOAD_STRING_VALUE, preloads.getData(PRELOAD_STRING_KEY).toJson());
     assertEquals(PRELOAD_NUMERIC_VALUE, preloads.getData(PRELOAD_NUMERIC_KEY).toJson());
@@ -82,13 +84,14 @@ public class ConcurrentPreloaderServiceTest {
     preloader.tasks.put(PRELOAD_STRING_KEY, new TestPreloadCallable(null));
     PreloaderService service
         = new ConcurrentPreloaderService(new TestExecutorService(), Arrays.asList(preloader));
-    service.preload(null).getData(PRELOAD_STRING_KEY);
+    service.preload(null, null).getData(PRELOAD_STRING_KEY);
   }
 
   private static class TestPreloader implements Preloader {
     private final Map<String, Callable<PreloadedData>> tasks = Maps.newHashMap();
 
-    public Map<String, Callable<PreloadedData>> createPreloadTasks(Gadget gadget) {
+    public Map<String, Callable<PreloadedData>> createPreloadTasks(
+        GadgetContext context, GadgetSpec spec) {
       return tasks;
     }
   }

@@ -17,9 +17,10 @@
  */
 package org.apache.shindig.gadgets.preload;
 
-import com.google.inject.Inject;
+import org.apache.shindig.gadgets.GadgetContext;
+import org.apache.shindig.gadgets.spec.GadgetSpec;
 
-import org.apache.shindig.gadgets.Gadget;
+import com.google.inject.Inject;
 
 import java.util.List;
 import java.util.Map;
@@ -41,10 +42,10 @@ public class ConcurrentPreloaderService implements PreloaderService {
     this.preloaders = preloaders;
   }
 
-  public Preloads preload(Gadget gadget) {
+  public Preloads preload(GadgetContext context, GadgetSpec gadget) {
     ConcurrentPreloads preloads = new ConcurrentPreloads();
     for (Preloader preloader : preloaders) {
-      Map<String, Callable<PreloadedData>> tasks = preloader.createPreloadTasks(gadget);
+      Map<String, Callable<PreloadedData>> tasks = preloader.createPreloadTasks(context, gadget);
       for (Map.Entry<String, Callable<PreloadedData>> entry : tasks.entrySet()) {
         preloads.add(entry.getKey(), executor.submit(entry.getValue()));
       }
