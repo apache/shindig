@@ -19,11 +19,14 @@
 package org.apache.shindig.gadgets;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.gadgets.http.HttpFetcher;
 import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.http.HttpResponse;
+import org.apache.shindig.gadgets.preload.PreloaderService;
+import org.apache.shindig.gadgets.preload.Preloads;
 import org.apache.shindig.gadgets.spec.GadgetSpec;
 
 import com.google.common.collect.Maps;
@@ -49,9 +52,10 @@ public class RendererTest {
       " <Content view='url' type='url' href='http://example.org/always/an/error.html'/>" +
       "</Module>";
 
+  private final FakeGadgetSpecFactory specFactory = new FakeGadgetSpecFactory();
   private final FakeHttpFetcher httpFetcher = new FakeHttpFetcher();
-
-  private final Renderer renderer = new Renderer(new FakeGadgetSpecFactory(), httpFetcher);
+  private final FakePreloaderService preloaderService = new FakePreloaderService();
+  private final Renderer renderer = new Renderer(specFactory, httpFetcher, preloaderService);
 
   private GadgetContext makeContext(final String view, final Uri specUrl) {
     return new GadgetContext() {
@@ -87,7 +91,13 @@ public class RendererTest {
 
   @Test(expected = RenderingException.class)
   public void renderInvalidUrl() throws RenderingException {
-    renderer.render(makeContext("url", Uri.parse("doesnotexist")));    
+    renderer.render(makeContext("url", Uri.parse("doesnotexist")));
+  }
+
+  @Test
+  public void doPreloading() throws Exception {
+    renderer.render(makeContext("html", SPEC_URL));
+    assertTrue("Preloading not performed.", preloaderService.wasPreloaded);
   }
 
   private static class FakeGadgetSpecFactory implements GadgetSpecFactory {
@@ -110,6 +120,14 @@ public class RendererTest {
             "Unknown gadget: " + request.getUri());
       }
       return response;
+    }
+  }
+
+  private static class FakePreloaderService implements PreloaderService {
+    private boolean wasPreloaded;
+    public Preloads preload(GadgetContext context, GadgetSpec gadget) {
+      wasPreloaded = true;
+      return null;
     }
   }
 }

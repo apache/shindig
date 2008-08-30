@@ -17,7 +17,8 @@
  */
 package org.apache.shindig.gadgets.preload;
 
-import org.apache.shindig.gadgets.Gadget;
+import org.apache.shindig.gadgets.GadgetContext;
+import org.apache.shindig.gadgets.spec.GadgetSpec;
 
 import java.util.Map;
 import java.util.concurrent.Callable;
@@ -29,9 +30,10 @@ public interface Preloader {
   /**
    * Create new preload tasks for the provided gadget.
    *
+   * @param context The request that needs preloading.
    * @param gadget The gadget that the operations will be performed for.
    * @return Preloading tasks that will be executed by
-   *  {@link PreloaderService#preload(Gadget)}.
+   *  {@link PreloaderService#preload(GadgetContext, GadgetSpec)}.
    */
-  Map<String, Callable<PreloadedData>> createPreloadTasks(Gadget gadget);
+  Map<String, Callable<PreloadedData>> createPreloadTasks(GadgetContext context, GadgetSpec gadget);
 }
