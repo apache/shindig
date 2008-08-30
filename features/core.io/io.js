@@ -299,13 +299,13 @@ gadgets.io = function() {
 
       // Include owner information?
       var signOwner = true;
-      if ("OWNER_SIGNED" in params) {
+      if (typeof params.OWNER_SIGNED !== "undefined") {
         signOwner = params.OWNER_SIGNED;
       }
 
       // Include viewer information?
       var signViewer = true;
-      if ("VIEWER_SIGNED" in params) {
+      if (typeof params.VIEWER_SIGNED !== "undefined") {
         signViewer = params.VIEWER_SIGNED;
       }
 
