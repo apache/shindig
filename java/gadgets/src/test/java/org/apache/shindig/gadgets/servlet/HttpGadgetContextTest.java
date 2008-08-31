@@ -26,21 +26,17 @@ import java.util.Locale;
 
 public class HttpGadgetContextTest extends GadgetTestFixture {
   public void testIgnoreCacheParam() {
-    expect(request.getParameter("nocache")).andReturn(
-        Integer.toString(Integer.MAX_VALUE));
+    expect(request.getParameter("nocache")).andReturn(Integer.toString(Integer.MAX_VALUE));
     replay();
     GadgetContext context = new HttpGadgetContext(request, securityTokenDecoder);
-    verify();
     assertEquals(true, context.getIgnoreCache());
   }
 
   public void testLocale() {
     expect(request.getParameter("lang")).andReturn(Locale.CHINA.getLanguage());
-    expect(request.getParameter("country")).andReturn(
-        Locale.CHINA.getCountry());
+    expect(request.getParameter("country")).andReturn(Locale.CHINA.getCountry());
     replay();
     GadgetContext context = new HttpGadgetContext(request, securityTokenDecoder);
-    verify();
     assertEquals(Locale.CHINA, context.getLocale());
   }
 
@@ -48,7 +44,13 @@ public class HttpGadgetContextTest extends GadgetTestFixture {
     expect(request.getParameter("debug")).andReturn("1");
     replay();
     GadgetContext context = new HttpGadgetContext(request, securityTokenDecoder);
-    verify();
     assertEquals(true, context.getDebug());
+  }
+
+  public void testGetParameter() {
+    expect(request.getParameter("foo")).andReturn("bar");
+    replay();
+    GadgetContext context = new HttpGadgetContext(request, securityTokenDecoder);
+    assertEquals("bar", context.getParameter("foo"));
   }
 }

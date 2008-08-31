@@ -36,16 +36,77 @@ import java.util.Map;
  * Extracts context from JSON input.
  */
 public class JsonRpcGadgetContext extends GadgetContext {
+  private final JSONObject context;
+  private final JSONObject gadget;
+
+  private final String container;
+  private final Boolean debug;
+  private final Boolean ignoreCache;
+  private final Locale locale;
+  private final Integer moduleId;
+  private final RenderingContext renderingContext;
   private final URI url;
-  @Override
-  public URI getUrl() {
-    if (url == null) {
-      return super.getUrl();
-    }
-    return url;
+  private final UserPrefs userPrefs;
+  private final String view;
+
+  /**
+   * @param context Request global parameters.
+   * @param gadget Values for the gadget being rendered.
+   * @throws JSONException If parameters can't be extracted or aren't correctly formed.
+   */
+  public JsonRpcGadgetContext(JSONObject context, JSONObject gadget) throws JSONException {
+    this.context = context;
+    this.gadget = gadget;
+
+    url = getUrl(gadget);
+    moduleId = getModuleId(gadget);
+    userPrefs = getUserPrefs(gadget);
+    locale = getLocale(context);
+    view = context.optString("view");
+    ignoreCache = context.optBoolean("ignoreCache");
+    container = context.optString("container");
+    debug = context.optBoolean("debug");
+    renderingContext = RenderingContext.METADATA;
   }
 
-  private final Integer moduleId;
+  @Override
+  public String getParameter(String name) {
+    if (gadget.has(name)) {
+      return gadget.optString(name);
+    }
+    return context.optString(name, null);
+  }
+
+  @Override
+  public String getContainer() {
+    if (container == null) {
+      return super.getContainer();
+    }
+    return container;
+  }
+
+  @Override
+  public boolean getDebug() {
+    if (debug == null) {
+      return super.getDebug();
+    }
+    return debug;
+  }
+  @Override
+  public boolean getIgnoreCache() {
+    if (ignoreCache == null) {
+      return super.getIgnoreCache();
+    }
+    return ignoreCache;
+  }
+
+  @Override
+  public Locale getLocale() {
+    if (locale == null) {
+      return super.getLocale();
+    }
+    return locale;
+  }
   @Override
   public int getModuleId() {
     if (moduleId == null) {
@@ -54,14 +115,34 @@ public class JsonRpcGadgetContext extends GadgetContext {
     return moduleId;
   }
 
-
-  private final Locale locale;
   @Override
-  public Locale getLocale() {
-    if (locale == null) {
-      return super.getLocale();
+  public RenderingContext getRenderingContext() {
+    if (renderingContext == null) {
+      return super.getRenderingContext();
     }
-    return locale;
+    return renderingContext;
+  }
+  @Override
+  public URI getUrl() {
+    if (url == null) {
+      return super.getUrl();
+    }
+    return url;
+  }
+
+  @Override
+  public UserPrefs getUserPrefs() {
+    if (userPrefs == null) {
+      return super.getUserPrefs();
+    }
+    return userPrefs;
+  }
+  @Override
+  public String getView() {
+    if (view == null) {
+      return super.getView();
+    }
+    return view;
   }
 
   /**
@@ -77,58 +158,31 @@ public class JsonRpcGadgetContext extends GadgetContext {
     return new Locale(language, country);
   }
 
-  private final RenderingContext renderingContext;
-  @Override
-  public RenderingContext getRenderingContext() {
-    if (renderingContext == null) {
-      return super.getRenderingContext();
+  /**
+   * @param json
+   * @return module id from the request, or null if not present
+   * @throws JSONException
+   */
+  private static Integer getModuleId(JSONObject json) throws JSONException {
+    if (json.has("moduleId")) {
+      return Integer.valueOf(json.getInt("moduleId"));
     }
-    return renderingContext;
+    return null;
   }
 
-  private final Boolean ignoreCache;
-  @Override
-  public boolean getIgnoreCache() {
-    if (ignoreCache == null) {
-      return super.getIgnoreCache();
+  /**
+   *
+   * @param json
+   * @return URL from the request, or null if not present
+   * @throws JSONException
+   */
+  private static URI getUrl(JSONObject json) throws JSONException {
+    try {
+      String url = json.getString("url");
+      return new URI(url);
+    } catch (URISyntaxException e) {
+      return null;
     }
-    return ignoreCache;
-  }
-
-  private final String container;
-  @Override
-  public String getContainer() {
-    if (container == null) {
-      return super.getContainer();
-    }
-    return container;
-  }
-
-  private final Boolean debug;
-  @Override
-  public boolean getDebug() {
-    if (debug == null) {
-      return super.getDebug();
-    }
-    return debug;
-  }
-
-  private final String view;
-  @Override
-  public String getView() {
-    if (view == null) {
-      return super.getView();
-    }
-    return view;
-  }
-
-  private final UserPrefs userPrefs;
-  @Override
-  public UserPrefs getUserPrefs() {
-    if (userPrefs == null) {
-      return super.getUserPrefs();
-    }
-    return userPrefs;
   }
 
   /**
@@ -149,51 +203,5 @@ public class JsonRpcGadgetContext extends GadgetContext {
       p.put(key, prefs.getString(key));
     }
     return new UserPrefs(p);
-  }
-
-  /**
-   *
-   * @param json
-   * @return URL from the request, or null if not present
-   * @throws JSONException
-   */
-  private static URI getUrl(JSONObject json) throws JSONException {
-    try {
-      String url = json.getString("url");
-      return new URI(url);
-    } catch (URISyntaxException e) {
-      return null;
-    }
-  }
-
-  /**
-   * @param json
-   * @return module id from the request, or null if not present
-   * @throws JSONException
-   */
-  private static Integer getModuleId(JSONObject json) throws JSONException {
-    if (json.has("moduleId")) {
-      return Integer.valueOf(json.getInt("moduleId"));
-    }
-    return null;
-  }
-
-  /**
-   * @param context
-   * @param gadget
-   * @throws JSONException
-   */
-  public JsonRpcGadgetContext(JSONObject context, JSONObject gadget)
-      throws JSONException {
-    url = getUrl(gadget);
-    moduleId = getModuleId(gadget);
-    userPrefs = getUserPrefs(gadget);
-
-    locale = getLocale(context);
-    view = context.optString("view");
-    ignoreCache = context.optBoolean("ignoreCache");
-    container = context.optString("container");
-    debug = context.optBoolean("debug");
-    renderingContext = RenderingContext.METADATA;
   }
 }
