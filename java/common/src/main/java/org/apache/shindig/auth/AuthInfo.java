@@ -17,8 +17,6 @@
  */
 package org.apache.shindig.auth;
 
-import org.apache.shindig.common.SecurityToken;
-
 import javax.servlet.http.HttpServletRequest;
 
 /**

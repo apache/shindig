@@ -17,10 +17,11 @@
  */
 package org.apache.shindig.social.opensocial.oauth;
 
-import org.apache.shindig.common.SecurityToken;
+import org.apache.shindig.auth.SecurityToken;
 import org.apache.shindig.social.sample.oauth.SampleContainerOAuthLookupService;
 
 import com.google.inject.ImplementedBy;
+
 import net.oauth.OAuthMessage;
 
 @ImplementedBy(SampleContainerOAuthLookupService.class)

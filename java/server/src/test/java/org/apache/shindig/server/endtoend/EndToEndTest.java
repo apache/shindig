@@ -17,21 +17,23 @@
  */
 package org.apache.shindig.server.endtoend;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
+
+import org.apache.shindig.auth.BasicSecurityToken;
+import org.apache.shindig.auth.BasicSecurityTokenDecoder;
+import org.apache.shindig.auth.SecurityToken;
+import org.apache.shindig.common.crypto.BlobCrypterException;
+
 import com.gargoylesoftware.htmlunit.CollectingAlertHandler;
 import com.gargoylesoftware.htmlunit.NicelyResynchronizingAjaxController;
 import com.gargoylesoftware.htmlunit.Page;
 import com.gargoylesoftware.htmlunit.WebClient;
 import com.gargoylesoftware.htmlunit.html.HtmlPage;
 
-import org.apache.shindig.common.BasicSecurityToken;
-import org.apache.shindig.common.BasicSecurityTokenDecoder;
-import org.apache.shindig.common.SecurityToken;
-import org.apache.shindig.common.crypto.BlobCrypterException;
 import org.junit.After;
 import org.junit.AfterClass;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNull;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;

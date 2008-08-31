@@ -21,8 +21,8 @@ import static org.easymock.EasyMock.eq;
 import static org.easymock.EasyMock.expect;
 import static org.easymock.EasyMock.isA;
 
-import org.apache.shindig.common.BasicSecurityToken;
-import org.apache.shindig.common.SecurityToken;
+import org.apache.shindig.auth.BasicSecurityToken;
+import org.apache.shindig.auth.SecurityToken;
 import org.apache.shindig.common.crypto.BlobCrypterException;
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.gadgets.http.HttpRequest;

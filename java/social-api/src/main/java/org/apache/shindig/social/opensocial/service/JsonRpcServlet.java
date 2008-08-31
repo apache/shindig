@@ -17,11 +17,11 @@
  */
 package org.apache.shindig.social.opensocial.service;
 
-import org.apache.shindig.common.SecurityToken;
+import org.apache.shindig.auth.SecurityToken;
 import org.apache.shindig.common.util.JsonConversionUtil;
 import org.apache.shindig.social.ResponseError;
-import org.apache.shindig.social.opensocial.spi.RestfulCollection;
 import org.apache.shindig.social.opensocial.spi.DataCollection;
+import org.apache.shindig.social.opensocial.spi.RestfulCollection;
 
 import com.google.common.collect.Lists;
 
@@ -34,6 +34,7 @@ import org.json.JSONObject;
 import java.io.IOException;
 import java.util.List;
 import java.util.concurrent.Future;
+
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -43,6 +44,7 @@ import javax.servlet.http.HttpServletResponse;
  */
 public class JsonRpcServlet extends ApiServlet {
 
+  @Override
   protected void doGet(HttpServletRequest servletRequest,
       HttpServletResponse servletResponse)
       throws ServletException, IOException {
@@ -59,6 +61,7 @@ public class JsonRpcServlet extends ApiServlet {
     }
   }
 
+  @Override
   protected void doPost(HttpServletRequest servletRequest,
       HttpServletResponse servletResponse)
       throws ServletException, IOException {
@@ -167,6 +170,7 @@ public class JsonRpcServlet extends ApiServlet {
     return error;
   }
 
+  @Override
   protected void sendError(HttpServletResponse servletResponse, ResponseItem responseItem)
       throws IOException {
     try {

@@ -18,7 +18,7 @@
  */
 package org.apache.shindig.gadgets;
 
-import org.apache.shindig.common.SecurityToken;
+import org.apache.shindig.auth.SecurityToken;
 import org.apache.shindig.common.util.ResourceLoader;
 import org.apache.shindig.gadgets.http.HttpCache;
 import org.apache.shindig.gadgets.http.HttpFetcher;
@@ -85,7 +85,7 @@ public class SigningFetcherFactory {
     try {
       privateKey = IOUtils.toString(ResourceLoader.open(keyFile), "UTF-8");
       // Support standard openssl keys by stripping out the headers and blank lines
-      privateKey = privateKey.replaceAll("-----[A-Z ]*-----", "").replace("\n", ""); 
+      privateKey = privateKey.replaceAll("-----[A-Z ]*-----", "").replace("\n", "");
     } catch (IOException e) {
       privateKey = "";
     }

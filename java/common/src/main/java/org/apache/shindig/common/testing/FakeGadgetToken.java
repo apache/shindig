@@ -18,10 +18,10 @@
  */
 package org.apache.shindig.common.testing;
 
-import com.google.common.collect.Maps;
+import org.apache.shindig.auth.SecurityToken;
+import org.apache.shindig.auth.SecurityTokenDecoder;
 
-import org.apache.shindig.common.SecurityToken;
-import org.apache.shindig.common.SecurityTokenDecoder;
+import com.google.common.collect.Maps;
 
 import java.util.Map;
 
@@ -32,7 +32,7 @@ public class FakeGadgetToken implements SecurityToken {
 
   private String updatedToken = null;
   private String trustedJson = null;
-  
+
   private String ownerId = null;
   private String viewerId = null;
   private String appId = null;
@@ -119,58 +119,58 @@ public class FakeGadgetToken implements SecurityToken {
   public boolean isAnonymous() {
     return false;
   }
-  
+
   /**
-   * Create a fake security token parameter string, allows passing around a 
+   * Create a fake security token parameter string, allows passing around a
    * security token of format key=value&key2=value2, where key is one of:
    * ownerId, viewerId, domain, appUrl, appId, trustedJson, module.
-   * 
+   *
    * Useful for creating tokens that can be decoded with FakeGadgetToken.Decoder
-   * 
+   *
    * @param tokenString the parameter string
    * @return The fake token
    */
   public static SecurityToken createToken(String tokenString)  {
     String keyValuePairs[] = tokenString.split("&");
     Map<String, String> paramMap = Maps.newHashMap();
-    
+
     for (String keyValuePair : keyValuePairs) {
       String[] keyAndValue = keyValuePair.split("=");
       if (keyAndValue.length == 2) {
         paramMap.put(keyAndValue[0], keyAndValue[1]);
       }
     }
-    
+
     return createToken(paramMap);
   }
-  
+
   /**
    * Create a fake security token from a map of parameter strings, keys are one of:
    * ownerId, viewerId, domain, appUrl, appId, trustedJson, module
-   * 
+   *
    * @param paramMap
    * @return The fake token
    */
   public static SecurityToken createToken(Map<String, String> paramMap) {
     FakeGadgetToken fakeToken = new FakeGadgetToken();
-    
+
     fakeToken.setAppId(paramMap.get("appId"));
     fakeToken.setAppUrl(paramMap.get("appUrl"));
     fakeToken.setDomain(paramMap.get("domain"));
     fakeToken.setOwnerId(paramMap.get("ownerId"));
     fakeToken.setTrustedJson(paramMap.get("trustedJson"));
     fakeToken.setViewerId(paramMap.get("viewerId"));
-    
+
     String moduleIdStr = paramMap.get("module");
     if (moduleIdStr != null) {
       fakeToken.setModuleId(Integer.parseInt(moduleIdStr));
     }
-    
+
     return fakeToken;
   }
-  
+
   /**
-   * SecurityTokenDecoder for testing - this allows passing around a 
+   * SecurityTokenDecoder for testing - this allows passing around a
    * security token of format key=value&key2=value2, where key is one of:
    * ownerId, viewerId, domain, appUrl, appId, trustedJson, module
    */
@@ -179,5 +179,5 @@ public class FakeGadgetToken implements SecurityToken {
       return FakeGadgetToken.createToken(tokenParameters);
     }
   }
-  
+
 }

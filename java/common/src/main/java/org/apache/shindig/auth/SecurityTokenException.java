@@ -16,8 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
-package org.apache.shindig.common;
+package org.apache.shindig.auth;
 
 /**
  * Exceptions thrown by SecurityTokenDecoder implementations.

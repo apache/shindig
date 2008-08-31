@@ -17,12 +17,13 @@
  */
 package org.apache.shindig.social.sample.oauth;
 
-import org.apache.shindig.common.SecurityToken;
-import org.apache.shindig.social.opensocial.oauth.OAuthLookupService;
+import org.apache.shindig.auth.SecurityToken;
 import org.apache.shindig.social.core.oauth.OAuthSecurityToken;
+import org.apache.shindig.social.opensocial.oauth.OAuthLookupService;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+
 import net.oauth.OAuthAccessor;
 import net.oauth.OAuthConsumer;
 import net.oauth.OAuthException;

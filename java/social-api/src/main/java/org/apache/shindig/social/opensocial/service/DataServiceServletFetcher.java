@@ -17,7 +17,7 @@
  */
 package org.apache.shindig.social.opensocial.service;
 
-import org.apache.shindig.common.SecurityTokenDecoder;
+import org.apache.shindig.auth.SecurityTokenDecoder;
 import org.apache.shindig.common.servlet.ParameterFetcher;
 
 import com.google.common.collect.Maps;

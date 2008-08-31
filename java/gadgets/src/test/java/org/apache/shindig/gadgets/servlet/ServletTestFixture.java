@@ -23,12 +23,13 @@ import static junitx.framework.ComparableAssert.assertLesser;
 import static org.easymock.EasyMock.expect;
 import static org.easymock.EasyMock.isA;
 
-import org.apache.commons.lang.StringUtils;
-import org.apache.shindig.common.SecurityToken;
+import org.apache.shindig.auth.SecurityToken;
 import org.apache.shindig.common.util.DateUtil;
 import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.GadgetTestFixture;
 import org.apache.shindig.gadgets.oauth.OAuthArguments;
+
+import org.apache.commons.lang.StringUtils;
 
 import java.util.Arrays;
 import java.util.List;
@@ -37,9 +38,9 @@ import java.util.List;
  * Contains everything needed for making servlet requests.
  */
 public class ServletTestFixture extends GadgetTestFixture {
-  
+
   private final long testStartTime = timeSource.currentTimeMillis();
-  
+
   public ServletTestFixture() {
     try {
       // TODO: This is horrible. It needs to be fixed.

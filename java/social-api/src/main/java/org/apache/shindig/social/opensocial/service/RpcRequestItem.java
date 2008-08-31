@@ -18,7 +18,7 @@
  */
 package org.apache.shindig.social.opensocial.service;
 
-import org.apache.shindig.common.SecurityToken;
+import org.apache.shindig.auth.SecurityToken;
 
 import com.google.common.collect.Lists;
 
@@ -56,6 +56,7 @@ public class RpcRequestItem extends RequestItem {
     }
   }
 
+  @Override
   public String getParameter(String paramName) {
     try {
       if (data.has(paramName)) {
@@ -68,6 +69,7 @@ public class RpcRequestItem extends RequestItem {
     }
   }
 
+  @Override
   public String getParameter(String paramName, String defaultValue) {
     try {
       if (data.has(paramName)) {
@@ -80,6 +82,7 @@ public class RpcRequestItem extends RequestItem {
     }
   }
 
+  @Override
   public List<String> getListParameter(String paramName) {
     try {
       if (data.has(paramName)) {
@@ -102,6 +105,7 @@ public class RpcRequestItem extends RequestItem {
     }
   }
 
+  @Override
   public <T> T getTypedParameter(String parameterName, Class<T> dataTypeClass) {
     try {
       return converter.convertToObject(data.get(parameterName).toString(), dataTypeClass);
@@ -111,6 +115,7 @@ public class RpcRequestItem extends RequestItem {
   }
 
 
+  @Override
   public void applyUrlTemplate(String urlTemplate) {
     // No params in the URL
   }

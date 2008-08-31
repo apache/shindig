@@ -17,7 +17,7 @@
  */
 package org.apache.shindig.social.opensocial.service;
 
-import org.apache.shindig.common.SecurityToken;
+import org.apache.shindig.auth.SecurityToken;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
@@ -146,6 +146,7 @@ public class RestfulRequestItem extends RequestItem {
    *
    * @param urlTemplate The template the url follows
    */
+  @Override
   public void applyUrlTemplate(String urlTemplate) {
     this.putUrlParamsIntoParameters();
 
@@ -175,6 +176,7 @@ public class RestfulRequestItem extends RequestItem {
   }
 
 
+  @Override
   public <T> T getTypedParameter(String parameterName, Class<T> postDataClass) {
     // We assume the the only typed parameter in a restful request is the post-content
     // and so we simply ignore the parameter name
@@ -201,6 +203,7 @@ public class RestfulRequestItem extends RequestItem {
   /**
    * Return a single param value
    */
+  @Override
   public String getParameter(String paramName) {
     List<String> paramValue = this.params.get(paramName);
     if (paramValue != null && !paramValue.isEmpty()) {
@@ -209,6 +212,7 @@ public class RestfulRequestItem extends RequestItem {
     return null;
   }
 
+  @Override
   public String getParameter(String paramName, String defaultValue) {
     String result = getParameter(paramName);
     if (result == null) {
@@ -220,6 +224,7 @@ public class RestfulRequestItem extends RequestItem {
   /**
    * Return a list param value
    */
+  @Override
   public List<String> getListParameter(String paramName) {
     List<String> stringList = this.params.get(paramName);
     if (stringList == null) {

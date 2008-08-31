@@ -21,7 +21,8 @@ package org.apache.shindig.gadgets.oauth;
 
 import static org.junit.Assert.assertEquals;
 
-import org.apache.shindig.common.SecurityToken;
+import org.apache.shindig.auth.SecurityToken;
+
 import org.easymock.classextension.EasyMock;
 import org.junit.Test;
 

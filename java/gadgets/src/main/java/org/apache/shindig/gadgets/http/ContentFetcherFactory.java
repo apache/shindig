@@ -17,11 +17,11 @@
  */
 package org.apache.shindig.gadgets.http;
 
-import org.apache.shindig.common.SecurityToken;
+import org.apache.shindig.auth.SecurityToken;
 import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.SigningFetcherFactory;
-import org.apache.shindig.gadgets.oauth.OAuthFetcherFactory;
 import org.apache.shindig.gadgets.oauth.OAuthArguments;
+import org.apache.shindig.gadgets.oauth.OAuthFetcherFactory;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;

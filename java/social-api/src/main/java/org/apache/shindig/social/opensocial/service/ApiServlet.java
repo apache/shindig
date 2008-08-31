@@ -18,7 +18,7 @@
 package org.apache.shindig.social.opensocial.service;
 
 import org.apache.shindig.auth.AuthInfo;
-import org.apache.shindig.common.SecurityToken;
+import org.apache.shindig.auth.SecurityToken;
 import org.apache.shindig.common.servlet.InjectedServlet;
 import org.apache.shindig.common.util.ImmediateFuture;
 import org.apache.shindig.social.ResponseError;

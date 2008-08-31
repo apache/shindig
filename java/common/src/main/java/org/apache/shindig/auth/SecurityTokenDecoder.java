@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.shindig.common;
+package org.apache.shindig.auth;
 
 import com.google.inject.ImplementedBy;
 
@@ -25,9 +25,7 @@ import java.util.Map;
 /**
  *  Handles verification of gadget security tokens.
  */
-
 @ImplementedBy(BasicSecurityTokenDecoder.class)
-
 public interface SecurityTokenDecoder {
 
   /**
