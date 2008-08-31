@@ -72,7 +72,7 @@ public class BasicSecurityTokenDecoder implements SecurityTokenDecoder {
     final String token = parameters.get(SecurityTokenDecoder.SECURITY_TOKEN_NAME);
     if (token == null || token.trim().length() == 0) {
       // No token is present, assume anonymous access
-      return AnonymousSecurityToken.getInstance();
+      return new AnonymousSecurityToken();
     }
 
     try {
@@ -80,7 +80,7 @@ public class BasicSecurityTokenDecoder implements SecurityTokenDecoder {
       if (tokens.length != TOKEN_COUNT) {
         throw new SecurityTokenException("Malformed security token");
       }
-      
+
       return new BasicSecurityToken(
           URLDecoder.decode(tokens[OWNER_INDEX], "UTF-8"),
           URLDecoder.decode(tokens[VIEWER_INDEX], "UTF-8"),
