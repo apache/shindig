@@ -15,13 +15,28 @@
  * KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-package org.apache.shindig.social.opensocial.oauth;
+package org.apache.shindig.auth;
 
 import org.apache.shindig.common.SecurityToken;
+import org.apache.shindig.common.testing.FakeGadgetToken;
+import org.apache.shindig.common.testing.FakeHttpServletRequest;
+
+import junit.framework.TestCase;
 
 import javax.servlet.http.HttpServletRequest;
 
-public interface AuthenticationHandler {
-  String getName();
-  SecurityToken getSecurityTokenFromRequest(HttpServletRequest request);
+public class AuthInfoTest extends TestCase {
+
+  public void testToken() throws Exception {
+    HttpServletRequest req = new FakeHttpServletRequest();
+    SecurityToken token = new FakeGadgetToken();
+    AuthInfo.setSecurityToken(req, token);
+    assertEquals(token, AuthInfo.getSecurityToken(req));
+  }
+
+  public void testAuthType() throws Exception {
+    HttpServletRequest req = new FakeHttpServletRequest();
+    AuthInfo.setAuthType(req, "FakeAuth");
+    assertEquals("FakeAuth", AuthInfo.getAuthType(req));
+  }
 }

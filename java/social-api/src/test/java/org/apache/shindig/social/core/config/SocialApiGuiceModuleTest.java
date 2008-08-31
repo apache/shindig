@@ -17,8 +17,8 @@
  */
 package org.apache.shindig.social.core.config;
 
+import org.apache.shindig.auth.AuthenticationHandler;
 import org.apache.shindig.social.core.oauth.AuthenticationHandlerProvider;
-import org.apache.shindig.social.opensocial.oauth.AuthenticationHandler;
 
 import com.google.inject.Guice;
 import com.google.inject.Injector;
@@ -31,26 +31,25 @@ import java.util.List;
 
 public class SocialApiGuiceModuleTest extends TestCase {
   private Injector injector;
-  
+
   @Override public void setUp() throws Exception {
     super.setUp();
     injector = Guice.createInjector(new SocialApiGuiceModule());
   }
-  
+
   /**
    * Test default auth handler injection
    */
   public void testAuthHandler() {
-    List<AuthenticationHandler> expected =
-        injector.getInstance(AuthenticationHandlerProvider.class).get();
-    
+    injector.getInstance(AuthenticationHandlerProvider.class).get();
+
     AuthenticationHandlerProvider provider =
         injector.getInstance(AuthenticationHandlerProvider.class);
     assertEquals(3, provider.get().size());
 
     List<AuthenticationHandler> handlers = injector.getInstance(
         Key.get(new TypeLiteral<List<AuthenticationHandler>>(){}));
-    
+
     assertEquals(3, handlers.size());
   }
 }

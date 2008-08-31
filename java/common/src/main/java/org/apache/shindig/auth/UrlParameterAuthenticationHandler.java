@@ -15,21 +15,24 @@
  * KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-package org.apache.shindig.social.core.oauth;
+package org.apache.shindig.auth;
 
 import org.apache.shindig.common.SecurityToken;
 import org.apache.shindig.common.SecurityTokenDecoder;
 import org.apache.shindig.common.SecurityTokenException;
-import org.apache.shindig.common.servlet.ParameterFetcher;
-import org.apache.shindig.social.opensocial.oauth.AuthenticationHandler;
 
 import com.google.inject.Inject;
-import com.google.inject.name.Named;
 
-import javax.servlet.http.HttpServletRequest;
+import java.util.Collections;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import javax.servlet.http.HttpServletRequest;
+
+/**
+ * Produces security tokens by extracting the "st" parameter from the request url or post body.
+ */
 public class UrlParameterAuthenticationHandler implements AuthenticationHandler {
   public static final String AUTH_URL_PARAMETER = "SecurityTokenUrlParameter";
 
@@ -37,13 +40,10 @@ public class UrlParameterAuthenticationHandler implements AuthenticationHandler 
       UrlParameterAuthenticationHandler.class.getName());
 
   private final SecurityTokenDecoder securityTokenDecoder;
-  private final ParameterFetcher parameterFetcher;
 
   @Inject
-  public UrlParameterAuthenticationHandler(SecurityTokenDecoder securityTokenDecoder,
-      @Named("DataServiceServlet")ParameterFetcher parameterFetcher) {
+  public UrlParameterAuthenticationHandler(SecurityTokenDecoder securityTokenDecoder) {
     this.securityTokenDecoder = securityTokenDecoder;
-    this.parameterFetcher = parameterFetcher;
   }
 
   public String getName() {
@@ -52,7 +52,10 @@ public class UrlParameterAuthenticationHandler implements AuthenticationHandler 
 
   public SecurityToken getSecurityTokenFromRequest(HttpServletRequest request) {
     try {
-      return securityTokenDecoder.createToken(parameterFetcher.fetch(request));
+      String token = request.getParameter("st");
+      Map<String, String> parameters
+          = Collections.singletonMap(SecurityTokenDecoder.SECURITY_TOKEN_NAME, token);
+      return securityTokenDecoder.createToken(parameters);
     } catch (SecurityTokenException e) {
       logger.log(Level.INFO, "Valid security token not found.", e);
       return null;

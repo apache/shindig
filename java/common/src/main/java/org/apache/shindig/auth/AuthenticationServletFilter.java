@@ -15,26 +15,21 @@
  * KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-package org.apache.shindig.social.core.oauth;
+package org.apache.shindig.auth;
 
 import org.apache.shindig.common.SecurityToken;
-import org.apache.shindig.common.servlet.GuiceServletContextListener;
-import org.apache.shindig.social.opensocial.oauth.AuthenticationHandler;
+import org.apache.shindig.common.servlet.InjectedFilter;
 
 import com.google.inject.Inject;
-import com.google.inject.Injector;
 
-import javax.servlet.Filter;
+import java.io.IOException;
+import java.util.List;
+
 import javax.servlet.FilterChain;
-import javax.servlet.FilterConfig;
-import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
-import javax.servlet.UnavailableException;
 import javax.servlet.http.HttpServletRequest;
-import java.io.IOException;
-import java.util.List;
 
 /**
  * Filter that attempts to authenticate an incoming HTTP request. It uses the guice injected
@@ -44,27 +39,10 @@ import java.util.List;
  * If you wish to add a container specific type of auth system simply register an
  * additional handler.
  */
-public class AuthenticationServletFilter implements Filter {
+public class AuthenticationServletFilter extends InjectedFilter {
   public static final String AUTH_TYPE_OAUTH = "OAuth";
 
   private List<AuthenticationHandler> handlers;
-
-  /**
-   * Initializes the filter. We retrieve the Guice injector and ask for all
-   * the injected methods to be called, setting a variety of helper objects
-   * and configuration state.
-   */
-  public void init(FilterConfig filterConfig) throws ServletException {
-    ServletContext context = filterConfig.getServletContext();
-    Injector injector = (Injector)
-        context.getAttribute(GuiceServletContextListener.INJECTOR_ATTRIBUTE);
-    if (injector == null) {
-      throw new UnavailableException(
-          "Guice Injector not found! Make sure you registered "
-          + GuiceServletContextListener.class.getName() + " as a listener");
-    }
-    injector.injectMembers(this);
-  }
 
   @Inject
   public void setAuthenticationHandlers(List<AuthenticationHandler> handlers) {

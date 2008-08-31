@@ -17,8 +17,8 @@
  */
 package org.apache.shindig.social.core.oauth;
 
+import org.apache.shindig.auth.AuthenticationHandler;
 import org.apache.shindig.social.core.config.SocialApiGuiceModule;
-import org.apache.shindig.social.opensocial.oauth.AuthenticationHandler;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Guice;
@@ -40,16 +40,16 @@ public class AuthenticationProviderHandlerTest extends TestCase {
   public void testCustomHandler() {
     Injector injector = Guice.createInjector(new SocialApiGuiceModule(),
         new CustomAuthHandlerProviderModule());
-    
+
     AuthenticationHandlerProvider provider = injector.getInstance(
         AuthenticationHandlerProvider.class);
     assertEquals(0, provider.get().size());
-    
+
     List<AuthenticationHandler> handlers = injector.getInstance(
         Key.get(new TypeLiteral<List<AuthenticationHandler>>(){}));
     assertEquals(0, handlers.size());
   }
-  
+
   /**
    * AuthenticationHandlerProvider with no handlers
    */
@@ -57,13 +57,13 @@ public class AuthenticationProviderHandlerTest extends TestCase {
     public ProvidesNoHandlers() {
       super(null, null, null);
     }
-    
+
     @Override
     public List<AuthenticationHandler> get() {
       return Collections.emptyList();
     }
   }
-  
+
   /**
    * Module with a custom AuthenticationHandler
    */

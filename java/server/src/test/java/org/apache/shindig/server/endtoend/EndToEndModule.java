@@ -17,20 +17,20 @@
  */
 package org.apache.shindig.server.endtoend;
 
+import org.apache.shindig.auth.AnonymousAuthenticationHandler;
+import org.apache.shindig.auth.AuthenticationHandler;
 import org.apache.shindig.common.servlet.ParameterFetcher;
+import org.apache.shindig.social.core.oauth.AuthenticationHandlerProvider;
 import org.apache.shindig.social.core.util.BeanJsonConverter;
 import org.apache.shindig.social.core.util.BeanXmlConverter;
-import org.apache.shindig.social.core.oauth.AnonymousAuthenticationHandler;
-import org.apache.shindig.social.core.oauth.AuthenticationHandlerProvider;
-import org.apache.shindig.social.opensocial.oauth.AuthenticationHandler;
 import org.apache.shindig.social.opensocial.service.BeanConverter;
 import org.apache.shindig.social.opensocial.service.DataServiceServletFetcher;
-
-import java.util.List;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.TypeLiteral;
 import com.google.inject.name.Names;
+
+import java.util.List;
 
 /**
  * Guice module for the end-to-end tests.

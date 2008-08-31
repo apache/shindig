@@ -17,13 +17,13 @@
  */
 package org.apache.shindig.social.opensocial.service;
 
+import org.apache.shindig.auth.AuthInfo;
 import org.apache.shindig.common.SecurityToken;
 import org.apache.shindig.common.servlet.InjectedServlet;
 import org.apache.shindig.common.util.ImmediateFuture;
 import org.apache.shindig.social.ResponseError;
-import org.apache.shindig.social.opensocial.spi.SocialSpiException;
-import org.apache.shindig.social.core.oauth.AuthInfo;
 import org.apache.shindig.social.core.util.BeanJsonConverter;
+import org.apache.shindig.social.opensocial.spi.SocialSpiException;
 
 import com.google.inject.Inject;
 import com.google.inject.Injector;
@@ -34,6 +34,7 @@ import java.util.Collections;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
