@@ -17,11 +17,11 @@
  */
 package org.apache.shindig.server.endtoend;
 
+import org.apache.shindig.auth.AuthenticationServletFilter;
 import org.apache.shindig.common.servlet.GuiceServletContextListener;
 import org.apache.shindig.gadgets.servlet.ConcatProxyServlet;
 import org.apache.shindig.gadgets.servlet.GadgetRenderingServlet;
 import org.apache.shindig.gadgets.servlet.HttpGuiceModule;
-import org.apache.shindig.social.core.oauth.AuthenticationServletFilter;
 import org.apache.shindig.social.opensocial.service.DataServiceServlet;
 import org.apache.shindig.social.opensocial.service.JsonRpcServlet;
 

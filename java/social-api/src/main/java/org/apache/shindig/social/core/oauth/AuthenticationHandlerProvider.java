@@ -17,7 +17,9 @@
  */
 package org.apache.shindig.social.core.oauth;
 
-import org.apache.shindig.social.opensocial.oauth.AuthenticationHandler;
+import org.apache.shindig.auth.AnonymousAuthenticationHandler;
+import org.apache.shindig.auth.AuthenticationHandler;
+import org.apache.shindig.auth.UrlParameterAuthenticationHandler;
 
 import com.google.common.collect.Lists;
 import com.google.inject.Inject;

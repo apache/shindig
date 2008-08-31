@@ -17,18 +17,21 @@
  */
 package org.apache.shindig.social.core.oauth;
 
+import org.apache.shindig.auth.AuthenticationHandler;
 import org.apache.shindig.common.SecurityToken;
-import org.apache.shindig.social.opensocial.oauth.AuthenticationHandler;
 import org.apache.shindig.social.opensocial.oauth.OAuthLookupService;
 
 import com.google.inject.Inject;
+
 import net.oauth.OAuth;
 import net.oauth.OAuthMessage;
 import net.oauth.server.OAuthServlet;
+
 import org.apache.commons.lang.StringUtils;
 
-import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
+
+import javax.servlet.http.HttpServletRequest;
 
 /**
  * This class only handles "two-legged" OAuth (aka Consumer Request) OAuth requests. The request
