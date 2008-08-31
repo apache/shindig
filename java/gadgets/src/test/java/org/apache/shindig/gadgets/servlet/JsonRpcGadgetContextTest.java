@@ -18,9 +18,11 @@
  */
 package org.apache.shindig.gadgets.servlet;
 
-import org.json.JSONObject;
+import org.apache.shindig.gadgets.GadgetContext;
 
 import junit.framework.TestCase;
+
+import org.json.JSONObject;
 
 import java.util.HashMap;
 import java.util.Locale;
@@ -42,14 +44,15 @@ public class JsonRpcGadgetContextTest extends TestCase {
     JSONObject gadget = new JSONObject()
         .put("url", SPEC_URL)
         .put("moduleId", SPEC_ID)
-        .put("prefs", prefs);
+        .put("prefs", prefs)
+        .put("gadget-field", "gadget-value");
 
     JSONObject context = new JSONObject()
         .put("language", Locale.US.getLanguage())
-        .put("country", Locale.US.getCountry().toUpperCase());
+        .put("country", Locale.US.getCountry().toUpperCase())
+        .put("context-field", "context-value");
 
-    JsonRpcGadgetContext jsonContext
-        = new JsonRpcGadgetContext(context, gadget);
+    GadgetContext jsonContext = new JsonRpcGadgetContext(context, gadget);
     assertEquals(SPEC_URL, jsonContext.getUrl().toString());
     assertEquals(SPEC_ID, jsonContext.getModuleId());
     assertEquals(Locale.US.getLanguage(),
@@ -60,5 +63,8 @@ public class JsonRpcGadgetContextTest extends TestCase {
       String value = jsonContext.getUserPrefs().getPref(key);
       assertEquals(prefs.get(key), value);
     }
+
+    assertEquals("gadget-value", jsonContext.getParameter("gadget-field"));
+    assertEquals("context-value", jsonContext.getParameter("context-field"));
   }
 }

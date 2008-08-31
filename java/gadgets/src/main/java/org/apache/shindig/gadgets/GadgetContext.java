@@ -29,6 +29,15 @@ import java.util.Locale;
  * data.
  */
 public class GadgetContext {
+
+  /**
+   * @param name The parameter to get data for.
+   * @return The parameter set under the given name, or null.
+   */
+  public String getParameter(String name) {
+    return null;
+  }
+
   /**
    * @return The url for this gadget.
    */

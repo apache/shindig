@@ -72,7 +72,6 @@ import javax.servlet.http.HttpServletResponse;
 public class GadgetRenderingTask {
 
   protected static final int DEFAULT_CACHE_TTL = 60 * 5;
-
   protected static final String CAJA_PARAM = "caja";
 
   protected static final String LIBS_PARAM_NAME = "libs";

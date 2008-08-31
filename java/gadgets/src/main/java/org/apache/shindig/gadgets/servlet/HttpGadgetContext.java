@@ -41,29 +41,68 @@ import javax.servlet.http.HttpServletRequest;
  * Implements GadgetContext using an HttpServletRequest
  */
 public class HttpGadgetContext extends GadgetContext {
-
   public static final String USERPREF_PARAM_PREFIX = "up_";
 
-  private final URI url;
-  @Override
-  public URI getUrl() {
-    if (url == null) {
-      return super.getUrl();
-    }
-    return url;
-  }
+  private final HttpServletRequest request;
+  private final SecurityTokenDecoder tokenDecoder;
 
-  private final Integer moduleId;
-  @Override
-  public int getModuleId() {
-    if (moduleId == null) {
-      return super.getModuleId();
-    }
-    return moduleId;
-  }
-
-
+  private final String container;
+  private final Boolean debug;
+  private final Boolean ignoreCache;
   private final Locale locale;
+  private final Integer moduleId;
+  private final RenderingContext renderingContext;
+  private final String tokenString;
+  private final URI url;
+  private final UserPrefs userPrefs;
+  private final String view;
+
+  public HttpGadgetContext(HttpServletRequest request, SecurityTokenDecoder tokenDecoder) {
+    this.request = request;
+    this.tokenDecoder = tokenDecoder;
+
+    container = getContainer(request);
+    debug = getDebug(request);
+    ignoreCache = getIgnoreCache(request);
+    locale = getLocale(request);
+    moduleId = getModuleId(request);
+    renderingContext = getRenderingContext(request);
+    // TODO: This shouldn't be depending on MakeRequest at all.
+    tokenString = request.getParameter(MakeRequestHandler.SECURITY_TOKEN_PARAM);
+    url = getUrl(request);
+    userPrefs = getUserPrefs(request);
+    view = getView(request);
+  }
+
+  @Override
+  public String getParameter(String name) {
+    return request.getParameter(name);
+  }
+
+  @Override
+  public String getContainer() {
+    if (container == null) {
+      return super.getContainer();
+    }
+    return container;
+  }
+
+  @Override
+  public boolean getDebug() {
+    if (debug == null) {
+      return super.getDebug();
+    }
+    return debug;
+  }
+
+  @Override
+  public boolean getIgnoreCache() {
+    if (ignoreCache == null) {
+      return super.getIgnoreCache();
+    }
+    return ignoreCache;
+  }
+
   @Override
   public Locale getLocale() {
     if (locale == null) {
@@ -72,34 +111,102 @@ public class HttpGadgetContext extends GadgetContext {
     return locale;
   }
 
+  @Override
+  public int getModuleId() {
+    if (moduleId == null) {
+      return super.getModuleId();
+    }
+    return moduleId;
+  }
+
+  @Override
+  public RenderingContext getRenderingContext() {
+    if (renderingContext == null) {
+      return super.getRenderingContext();
+    }
+    return renderingContext;
+  }
+
+  @Override
+  public SecurityToken getToken() throws GadgetException {
+    if (tokenString == null || tokenString.length() == 0) {
+      return super.getToken();
+    } else {
+      try {
+        Map<String, String> tokenMap
+            = Collections.singletonMap(SecurityTokenDecoder.SECURITY_TOKEN_NAME, tokenString);
+        return tokenDecoder.createToken(tokenMap);
+      } catch (SecurityTokenException e) {
+        throw new GadgetException(
+            GadgetException.Code.INVALID_SECURITY_TOKEN, e);
+      }
+    }
+  }
+
+  @Override
+  public URI getUrl() {
+    if (url == null) {
+      return super.getUrl();
+    }
+    return url;
+  }
+
+  @Override
+  public UserPrefs getUserPrefs() {
+    if (userPrefs == null) {
+      return super.getUserPrefs();
+    }
+    return userPrefs;
+  }
+
+  @Override
+  public String getView() {
+    if (view == null) {
+      return super.getView();
+    }
+    return view;
+  }
+
+  /**
+   * @param req
+   * @return The container, if set, or null.
+   */
+  private static String getContainer(HttpServletRequest req) {
+    String container = req.getParameter("container");
+    if (container == null) {
+      // The parameter used to be called 'synd' FIXME: schedule removal
+      container = req.getParameter("synd");
+    }
+    return container;
+  }
+
+  /**
+   * @param req
+   * @return Debug setting, if set, or null.
+   */
+  private static Boolean getDebug(HttpServletRequest req) {
+    String debug = req.getParameter("debug");
+    if (debug == null) {
+      return null;
+    } else if ("0".equals(debug)) {
+      return Boolean.FALSE;
+    }
+    return Boolean.TRUE;
+  }
+
   /**
    * @param req
    * @return The ignore cache setting, if appropriate params are set, or null.
    */
-  private static URI getUrl(HttpServletRequest req) {
-    String url = req.getParameter("url");
-    if (url == null) {
+  private static Boolean getIgnoreCache(HttpServletRequest req) {
+    String ignoreCache = req.getParameter("nocache");
+    if (ignoreCache == null) {
       return null;
+    } else if ("0".equals(ignoreCache)) {
+      return Boolean.FALSE;
     }
-    try {
-      return new URI(url);
-    } catch (URISyntaxException e) {
-      return null;
-    }
+    return Boolean.TRUE;
   }
-
-  /**
-   * @param req
-   * @return module id, if specified
-   */
-  private static Integer getModuleId(HttpServletRequest req) {
-    String mid = req.getParameter("mid");
-    if (mid == null) {
-      return null;
-    }
-    return Integer.parseInt(mid);
-  }
-
 
   /**
    * @param req
@@ -118,13 +225,16 @@ public class HttpGadgetContext extends GadgetContext {
     return new Locale(language, country);
   }
 
-  private final RenderingContext renderingContext;
-  @Override
-  public RenderingContext getRenderingContext() {
-    if (renderingContext == null) {
-      return super.getRenderingContext();
+  /**
+   * @param req
+   * @return module id, if specified
+   */
+  private static Integer getModuleId(HttpServletRequest req) {
+    String mid = req.getParameter("mid");
+    if (mid == null) {
+      return null;
     }
-    return renderingContext;
+    return Integer.parseInt(mid);
   }
 
   /**
@@ -139,98 +249,20 @@ public class HttpGadgetContext extends GadgetContext {
     return c.equals("1") ? RenderingContext.CONTAINER : RenderingContext.GADGET;
   }
 
-  private final Boolean ignoreCache;
-  @Override
-  public boolean getIgnoreCache() {
-    if (ignoreCache == null) {
-      return super.getIgnoreCache();
-    }
-    return ignoreCache;
-  }
-
   /**
    * @param req
    * @return The ignore cache setting, if appropriate params are set, or null.
    */
-  private static Boolean getIgnoreCache(HttpServletRequest req) {
-    String ignoreCache = req.getParameter("nocache");
-    if (ignoreCache == null) {
+  private static URI getUrl(HttpServletRequest req) {
+    String url = req.getParameter("url");
+    if (url == null) {
       return null;
-    } else if ("0".equals(ignoreCache)) {
-      return Boolean.FALSE;
     }
-    return Boolean.TRUE;
-  }
-
-  private final String container;
-  @Override
-  public String getContainer() {
-    if (container == null) {
-      return super.getContainer();
-    }
-    return container;
-  }
-
-  /**
-   * @param req
-   * @return The container, if set, or null.
-   */
-  private static String getContainer(HttpServletRequest req) {
-    String container = req.getParameter("container");
-    if (container == null) {
-      // The parameter used to be called 'synd' FIXME: schedule removal
-      container = req.getParameter("synd");
-    }
-    return container;
-  }
-
-  private final Boolean debug;
-  @Override
-  public boolean getDebug() {
-    if (debug == null) {
-      return super.getDebug();
-    }
-    return debug;
-  }
-
-  /**
-   * @param req
-   * @return Debug setting, if set, or null.
-   */
-  private static Boolean getDebug(HttpServletRequest req) {
-    String debug = req.getParameter("debug");
-    if (debug == null) {
+    try {
+      return new URI(url);
+    } catch (URISyntaxException e) {
       return null;
-    } else if ("0".equals(debug)) {
-      return Boolean.FALSE;
     }
-    return Boolean.TRUE;
-  }
-
-  private final String view;
-  @Override
-  public String getView() {
-    if (view == null) {
-      return super.getView();
-    }
-    return view;
-  }
-
-  /**
-   * @param req
-   * @return The view, if specified, or null.
-   */
-  private static String getView(HttpServletRequest req) {
-    return req.getParameter("view");
-  }
-
-  private final UserPrefs userPrefs;
-  @Override
-  public UserPrefs getUserPrefs() {
-    if (userPrefs == null) {
-      return super.getUserPrefs();
-    }
-    return userPrefs;
   }
 
   /**
@@ -254,35 +286,11 @@ public class HttpGadgetContext extends GadgetContext {
     return new UserPrefs(prefs);
   }
 
-  private final String tokenString;
-  private final SecurityTokenDecoder tokenDecoder;
-  @Override
-  public SecurityToken getToken() throws GadgetException {
-    if (tokenString == null || tokenString.length() == 0) {
-      return super.getToken();
-    } else {
-      try {
-        return tokenDecoder.createToken(Collections.singletonMap(SecurityTokenDecoder.SECURITY_TOKEN_NAME, tokenString));
-      } catch (SecurityTokenException e) {
-        throw new GadgetException(
-            GadgetException.Code.INVALID_SECURITY_TOKEN, e);
-      }
-    }
-  }
-
-  public HttpGadgetContext(HttpServletRequest request,
-      SecurityTokenDecoder tokenDecoder) {
-    url = getUrl(request);
-    moduleId = getModuleId(request);
-    locale = getLocale(request);
-    renderingContext = getRenderingContext(request);
-    ignoreCache = getIgnoreCache(request);
-    container = getContainer(request);
-    debug = getDebug(request);
-    view = getView(request);
-    userPrefs = getUserPrefs(request);
-    // TODO: This shouldn't be depending on MakeRequest at all.
-    tokenString = request.getParameter(MakeRequestHandler.SECURITY_TOKEN_PARAM);
-    this.tokenDecoder = tokenDecoder;
+  /**
+   * @param req
+   * @return The view, if specified, or null.
+   */
+  private static String getView(HttpServletRequest req) {
+    return req.getParameter("view");
   }
 }
