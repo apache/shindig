@@ -19,11 +19,11 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
-import org.apache.shindig.common.BasicSecurityToken;
-import org.apache.shindig.common.uri.Uri;
-import org.apache.shindig.common.uri.UriBuilder;
+import org.apache.shindig.auth.BasicSecurityToken;
 import org.apache.shindig.common.cache.CacheProvider;
 import org.apache.shindig.common.cache.DefaultCacheProvider;
+import org.apache.shindig.common.uri.Uri;
+import org.apache.shindig.common.uri.UriBuilder;
 import org.apache.shindig.gadgets.http.BasicHttpCache;
 import org.apache.shindig.gadgets.http.HttpCache;
 import org.apache.shindig.gadgets.http.HttpRequest;

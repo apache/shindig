@@ -19,8 +19,8 @@ package org.apache.shindig.social.opensocial.service;
 
 import org.apache.shindig.social.opensocial.model.Activity;
 import org.apache.shindig.social.opensocial.spi.ActivityService;
-import org.apache.shindig.social.opensocial.spi.UserId;
 import org.apache.shindig.social.opensocial.spi.SocialSpiException;
+import org.apache.shindig.social.opensocial.spi.UserId;
 
 import com.google.common.collect.Sets;
 import com.google.inject.Inject;
@@ -45,6 +45,7 @@ public class ActivityHandler extends DataRequestHandler {
    *
    * examples: /activities/john.doe/@self/1
    */
+  @Override
   protected Future<?> handleDelete(RequestItem request)
       throws SocialSpiException {
     request.applyUrlTemplate(ACTIVITY_ID_PATH);
@@ -64,6 +65,7 @@ public class ActivityHandler extends DataRequestHandler {
    *
    * examples: /activities/john.doe/@self - postBody is an activity object
    */
+  @Override
   protected Future<?> handlePut(RequestItem request) throws SocialSpiException {
     return handlePost(request);
   }
@@ -73,6 +75,7 @@ public class ActivityHandler extends DataRequestHandler {
    *
    * examples: /activities/john.doe/@self - postBody is an activity object
    */
+  @Override
   protected Future<?> handlePost(RequestItem request) throws SocialSpiException {
     request.applyUrlTemplate(ACTIVITY_ID_PATH);
 
@@ -97,6 +100,7 @@ public class ActivityHandler extends DataRequestHandler {
    * examples: /activities/john.doe/@self/1 /activities/john.doe/@self
    * /activities/john.doe,jane.doe/@friends
    */
+  @Override
   protected Future<?> handleGet(RequestItem request)
       throws SocialSpiException {
     request.applyUrlTemplate(ACTIVITY_ID_PATH);

@@ -17,10 +17,6 @@
  */
 package org.apache.shindig.auth;
 
-import org.apache.shindig.common.SecurityToken;
-import org.apache.shindig.common.SecurityTokenDecoder;
-import org.apache.shindig.common.SecurityTokenException;
-
 import com.google.inject.Inject;
 
 import java.util.Collections;

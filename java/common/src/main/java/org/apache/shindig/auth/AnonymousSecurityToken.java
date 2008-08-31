@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.shindig.common;
+package org.apache.shindig.auth;
 
 /**
  * A special class of Token representing the anonymous viewer/owner

@@ -19,11 +19,11 @@
 
 package org.apache.shindig.gadgets;
 
+import org.apache.shindig.auth.SecurityTokenDecoder;
 import org.apache.shindig.common.ContainerConfig;
-import org.apache.shindig.common.SecurityTokenDecoder;
-import org.apache.shindig.common.testing.TestExecutorService;
 import org.apache.shindig.common.cache.CacheProvider;
 import org.apache.shindig.common.cache.DefaultCacheProvider;
+import org.apache.shindig.common.testing.TestExecutorService;
 import org.apache.shindig.common.util.FakeTimeSource;
 import org.apache.shindig.gadgets.http.ContentFetcherFactory;
 import org.apache.shindig.gadgets.http.HttpFetcher;

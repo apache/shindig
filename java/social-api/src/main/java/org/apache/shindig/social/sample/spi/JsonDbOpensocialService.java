@@ -18,7 +18,7 @@
 
 package org.apache.shindig.social.sample.spi;
 
-import org.apache.shindig.common.SecurityToken;
+import org.apache.shindig.auth.SecurityToken;
 import org.apache.shindig.common.util.ImmediateFuture;
 import org.apache.shindig.common.util.ResourceLoader;
 import org.apache.shindig.social.ResponseError;
@@ -32,8 +32,8 @@ import org.apache.shindig.social.opensocial.spi.DataCollection;
 import org.apache.shindig.social.opensocial.spi.GroupId;
 import org.apache.shindig.social.opensocial.spi.PersonService;
 import org.apache.shindig.social.opensocial.spi.RestfulCollection;
-import org.apache.shindig.social.opensocial.spi.UserId;
 import org.apache.shindig.social.opensocial.spi.SocialSpiException;
+import org.apache.shindig.social.opensocial.spi.UserId;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
@@ -41,6 +41,7 @@ import com.google.common.collect.Sets;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.inject.name.Named;
+
 import org.apache.commons.io.IOUtils;
 import org.json.JSONArray;
 import org.json.JSONException;

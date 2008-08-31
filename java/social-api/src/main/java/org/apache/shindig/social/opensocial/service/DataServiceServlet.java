@@ -17,15 +17,16 @@
  */
 package org.apache.shindig.social.opensocial.service;
 
-import com.google.common.collect.Maps;
-
-import org.apache.shindig.common.SecurityToken;
-import org.apache.shindig.social.opensocial.spi.RestfulCollection;
+import org.apache.shindig.auth.SecurityToken;
 import org.apache.shindig.social.opensocial.spi.DataCollection;
+import org.apache.shindig.social.opensocial.spi.RestfulCollection;
+
+import com.google.common.collect.Maps;
 
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.logging.Logger;
+
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -42,24 +43,28 @@ public class DataServiceServlet extends ApiServlet {
   private static final Logger logger = Logger.getLogger(
       "org.apache.shindig.social.opensocial.spi");
 
+  @Override
   protected void doGet(HttpServletRequest servletRequest,
       HttpServletResponse servletResponse)
       throws ServletException, IOException {
     doPost(servletRequest, servletResponse);
   }
 
+  @Override
   protected void doPut(HttpServletRequest servletRequest,
       HttpServletResponse servletResponse)
       throws ServletException, IOException {
     doPost(servletRequest, servletResponse);
   }
 
+  @Override
   protected void doDelete(HttpServletRequest servletRequest,
       HttpServletResponse servletResponse)
       throws ServletException, IOException {
     doPost(servletRequest, servletResponse);
   }
 
+  @Override
   protected void doPost(HttpServletRequest servletRequest,
       HttpServletResponse servletResponse)
       throws ServletException, IOException {
@@ -78,6 +83,7 @@ public class DataServiceServlet extends ApiServlet {
     handleSingleRequest(servletRequest, servletResponse, token, converter);
   }
 
+  @Override
   protected void sendError(HttpServletResponse servletResponse, ResponseItem responseItem)
       throws IOException {
     servletResponse.sendError(responseItem.getError().getHttpErrorCode(),
@@ -100,7 +106,7 @@ public class DataServiceServlet extends ApiServlet {
       if (!(response instanceof DataCollection) && !(response instanceof RestfulCollection)) {
         response = Maps.immutableMap("entry", response);
       }
-      
+
       writer.write(converter.convertToString(response));
     } else {
       sendError(servletResponse, responseItem);

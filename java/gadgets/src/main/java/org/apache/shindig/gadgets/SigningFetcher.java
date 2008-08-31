@@ -14,7 +14,7 @@
 
 package org.apache.shindig.gadgets;
 
-import org.apache.shindig.common.SecurityToken;
+import org.apache.shindig.auth.SecurityToken;
 import org.apache.shindig.common.crypto.Crypto;
 import org.apache.shindig.common.uri.UriBuilder;
 import org.apache.shindig.common.util.TimeSource;

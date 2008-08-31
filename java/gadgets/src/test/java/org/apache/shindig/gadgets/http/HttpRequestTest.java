@@ -21,7 +21,7 @@ package org.apache.shindig.gadgets.http;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
-import org.apache.shindig.common.AnonymousSecurityToken;
+import org.apache.shindig.auth.AnonymousSecurityToken;
 import org.apache.shindig.common.uri.Uri;
 
 import org.apache.commons.io.IOUtils;

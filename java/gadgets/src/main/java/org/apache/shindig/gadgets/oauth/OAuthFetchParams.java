@@ -19,14 +19,14 @@
 
 package org.apache.shindig.gadgets.oauth;
 
-import org.apache.shindig.common.SecurityToken;
+import org.apache.shindig.auth.SecurityToken;
 
 /**
  * Holds per-request configuration for an OAuth fetch.  Some of this is
  * sent directly from the client, other bits are calculated.
  */
 public class OAuthFetchParams {
-  
+
   private final OAuthArguments arguments;
   private final OAuthClientState clientState;
   private final SecurityToken authToken;
@@ -37,15 +37,15 @@ public class OAuthFetchParams {
     this.clientState = clientState;
     this.authToken = authToken;
   }
-  
+
   public OAuthArguments getArguments() {
     return arguments;
   }
-  
+
   public OAuthClientState getClientState() {
     return clientState;
   }
-  
+
   public SecurityToken getAuthToken() {
     return authToken;
   }

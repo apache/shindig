@@ -18,17 +18,10 @@
  */
 package org.apache.shindig.social.sample.spi;
 
-import com.google.common.collect.Maps;
-import com.google.common.collect.Sets;
-import com.google.inject.Guice;
-import com.google.inject.Injector;
-
-import junit.framework.TestCase;
-
-import org.apache.shindig.common.SecurityToken;
+import org.apache.shindig.auth.SecurityToken;
 import org.apache.shindig.common.testing.FakeGadgetToken;
-import org.apache.shindig.social.SocialApiTestsGuiceModule;
 import org.apache.shindig.social.ResponseError;
+import org.apache.shindig.social.SocialApiTestsGuiceModule;
 import org.apache.shindig.social.opensocial.model.Activity;
 import org.apache.shindig.social.opensocial.model.Person;
 import org.apache.shindig.social.opensocial.spi.CollectionOptions;
@@ -36,8 +29,15 @@ import org.apache.shindig.social.opensocial.spi.DataCollection;
 import org.apache.shindig.social.opensocial.spi.GroupId;
 import org.apache.shindig.social.opensocial.spi.PersonService;
 import org.apache.shindig.social.opensocial.spi.RestfulCollection;
-import org.apache.shindig.social.opensocial.spi.UserId;
 import org.apache.shindig.social.opensocial.spi.SocialSpiException;
+import org.apache.shindig.social.opensocial.spi.UserId;
+
+import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
+import com.google.inject.Guice;
+import com.google.inject.Injector;
+
+import junit.framework.TestCase;
 
 import java.util.Collections;
 

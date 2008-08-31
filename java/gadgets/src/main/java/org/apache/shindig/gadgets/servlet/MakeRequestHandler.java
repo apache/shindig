@@ -18,9 +18,9 @@
  */
 package org.apache.shindig.gadgets.servlet;
 
-import org.apache.shindig.common.SecurityToken;
-import org.apache.shindig.common.SecurityTokenDecoder;
-import org.apache.shindig.common.SecurityTokenException;
+import org.apache.shindig.auth.SecurityToken;
+import org.apache.shindig.auth.SecurityTokenDecoder;
+import org.apache.shindig.auth.SecurityTokenException;
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.common.util.Utf8UrlCoder;
 import org.apache.shindig.gadgets.FeedProcessor;

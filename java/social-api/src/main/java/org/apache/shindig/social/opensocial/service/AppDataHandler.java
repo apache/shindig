@@ -19,8 +19,8 @@ package org.apache.shindig.social.opensocial.service;
 
 import org.apache.shindig.social.ResponseError;
 import org.apache.shindig.social.opensocial.spi.AppDataService;
-import org.apache.shindig.social.opensocial.spi.UserId;
 import org.apache.shindig.social.opensocial.spi.SocialSpiException;
+import org.apache.shindig.social.opensocial.spi.UserId;
 
 import com.google.inject.Inject;
 
@@ -49,6 +49,7 @@ public class AppDataHandler extends DataRequestHandler {
    * values and set on the person object. If there are no fields vars then all of the data will be
    * overridden.
    */
+  @Override
   protected Future<?> handleDelete(RequestItem request)
       throws SocialSpiException {
     request.applyUrlTemplate(APP_DATA_PATH);
@@ -71,6 +72,7 @@ public class AppDataHandler extends DataRequestHandler {
    * values and set on the person object. If there are no fields vars then all of the data will be
    * overridden.
    */
+  @Override
   protected Future<?> handlePut(RequestItem request) throws SocialSpiException {
     return handlePost(request);
   }
@@ -83,6 +85,7 @@ public class AppDataHandler extends DataRequestHandler {
    * The post data should be a regular json object. All of the fields vars will be pulled from the
    * values and set. If there are no fields vars then all of the data will be overridden.
    */
+  @Override
   protected Future<?> handlePost(RequestItem request) throws SocialSpiException {
     request.applyUrlTemplate(APP_DATA_PATH);
 
@@ -108,6 +111,7 @@ public class AppDataHandler extends DataRequestHandler {
    *
    * examples: /appdata/john.doe/@friends/app?fields=count /appdata/john.doe/@self/app
    */
+  @Override
   protected Future<?> handleGet(RequestItem request) throws SocialSpiException {
     request.applyUrlTemplate(APP_DATA_PATH);
 

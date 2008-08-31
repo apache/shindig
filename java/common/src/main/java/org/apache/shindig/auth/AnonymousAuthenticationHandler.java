@@ -17,9 +17,6 @@
  */
 package org.apache.shindig.auth;
 
-import org.apache.shindig.common.AnonymousSecurityToken;
-import org.apache.shindig.common.SecurityToken;
-
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
 

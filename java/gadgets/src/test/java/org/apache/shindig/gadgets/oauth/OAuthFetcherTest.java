@@ -21,8 +21,8 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 
-import org.apache.shindig.common.BasicSecurityToken;
-import org.apache.shindig.common.SecurityToken;
+import org.apache.shindig.auth.BasicSecurityToken;
+import org.apache.shindig.auth.SecurityToken;
 import org.apache.shindig.common.cache.DefaultCacheProvider;
 import org.apache.shindig.common.crypto.BasicBlobCrypter;
 import org.apache.shindig.common.uri.Uri;

@@ -18,9 +18,13 @@
  */
 package org.apache.shindig.gadgets.servlet;
 
+import static org.easymock.EasyMock.expect;
+import static org.easymock.EasyMock.expectLastCall;
+import static org.easymock.EasyMock.isA;
+
+import org.apache.shindig.auth.SecurityToken;
+import org.apache.shindig.auth.SecurityTokenDecoder;
 import org.apache.shindig.common.ContainerConfig;
-import org.apache.shindig.common.SecurityToken;
-import org.apache.shindig.common.SecurityTokenDecoder;
 import org.apache.shindig.common.testing.FakeGadgetToken;
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.common.util.Utf8UrlCoder;
@@ -33,10 +37,8 @@ import org.apache.shindig.gadgets.oauth.OAuthArguments;
 import org.apache.shindig.gadgets.oauth.OAuthFetcher;
 import org.apache.shindig.gadgets.oauth.OAuthResponseParams;
 import org.apache.shindig.gadgets.spec.GadgetSpec;
+
 import org.easymock.EasyMock;
-import static org.easymock.EasyMock.expect;
-import static org.easymock.EasyMock.expectLastCall;
-import static org.easymock.EasyMock.isA;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -45,7 +47,7 @@ import java.util.Collections;
 import java.util.Enumeration;
 
 public class GadgetRenderingTaskTest extends ServletTestFixture {
-  
+
   final static Enumeration<String> EMPTY_PARAMS = new Enumeration<String>() {
     public boolean hasMoreElements() {
       return false;
@@ -147,7 +149,7 @@ public class GadgetRenderingTaskTest extends ServletTestFixture {
     String content = parseBasicGadget(GadgetSpec.DEFAULT_VIEW, SPEC_XML);
     assertTrue(content.contains("<script src=\"" + jsLibs + "\">"));
   }
-  
+
   public void testViewAliases() throws Exception {
     JSONArray aliases = new JSONArray().put("ALIAS");
     expect(containerConfig.getJsonArray(ContainerConfig.DEFAULT_CONTAINER,

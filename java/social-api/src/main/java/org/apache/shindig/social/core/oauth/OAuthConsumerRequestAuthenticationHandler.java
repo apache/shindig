@@ -18,7 +18,7 @@
 package org.apache.shindig.social.core.oauth;
 
 import org.apache.shindig.auth.AuthenticationHandler;
-import org.apache.shindig.common.SecurityToken;
+import org.apache.shindig.auth.SecurityToken;
 import org.apache.shindig.social.opensocial.oauth.OAuthLookupService;
 
 import com.google.inject.Inject;

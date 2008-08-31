@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.shindig.common;
+package org.apache.shindig.auth;
 
 /**
  * An abstract representation of a signing token.
@@ -47,7 +47,7 @@ public interface SecurityToken {
    * @return the application id from the token, or null if there is none.
    */
   public String getAppId();
-  
+
   /**
    * @return the domain from the token, or null if there is none.
    */
@@ -62,7 +62,7 @@ public interface SecurityToken {
    * @return the module ID of the application
    */
   public long getModuleId();
-  
+
   /**
    * @return an updated version of the token to return to the gadget, or null
    * if there is no need to update the token.

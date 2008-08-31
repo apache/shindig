@@ -22,8 +22,8 @@ import org.apache.shindig.social.opensocial.model.Person;
 import org.apache.shindig.social.opensocial.spi.CollectionOptions;
 import org.apache.shindig.social.opensocial.spi.GroupId;
 import org.apache.shindig.social.opensocial.spi.PersonService;
-import org.apache.shindig.social.opensocial.spi.UserId;
 import org.apache.shindig.social.opensocial.spi.SocialSpiException;
+import org.apache.shindig.social.opensocial.spi.UserId;
 
 import com.google.common.collect.Sets;
 import com.google.inject.Inject;
@@ -43,14 +43,17 @@ public class PersonHandler extends DataRequestHandler {
     this.personService = personService;
   }
 
+  @Override
   protected Future<?> handleDelete(RequestItem request) throws SocialSpiException {
     throw new SocialSpiException(ResponseError.BAD_REQUEST, "You can't delete people.");
   }
 
+  @Override
   protected Future<?> handlePut(RequestItem request) throws SocialSpiException {
     throw new SocialSpiException(ResponseError.NOT_IMPLEMENTED, "You can't update right now.");
   }
 
+  @Override
   protected Future<?> handlePost(RequestItem request) throws SocialSpiException {
     throw new SocialSpiException(ResponseError.NOT_IMPLEMENTED, "You can't add people right now.");
   }
@@ -60,6 +63,7 @@ public class PersonHandler extends DataRequestHandler {
    *
    * examples: /people/john.doe/@all /people/john.doe/@friends /people/john.doe/@self
    */
+  @Override
   protected Future<?> handleGet(RequestItem request) throws SocialSpiException {
     request.applyUrlTemplate(PEOPLE_PATH);
 

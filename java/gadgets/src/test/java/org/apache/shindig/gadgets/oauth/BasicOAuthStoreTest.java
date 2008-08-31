@@ -21,13 +21,14 @@ package org.apache.shindig.gadgets.oauth;
 import static org.easymock.EasyMock.eq;
 import static org.easymock.EasyMock.expect;
 
+import org.apache.shindig.auth.SecurityTokenDecoder;
+
 import junit.framework.TestCase;
 
 import net.oauth.OAuthAccessor;
 import net.oauth.OAuthServiceProvider;
 import net.oauth.signature.RSA_SHA1;
 
-import org.apache.shindig.common.SecurityTokenDecoder;
 import org.easymock.classextension.EasyMock;
 import org.easymock.classextension.IMocksControl;
 

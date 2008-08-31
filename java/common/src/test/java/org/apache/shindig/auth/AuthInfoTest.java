@@ -17,7 +17,6 @@
  */
 package org.apache.shindig.auth;
 
-import org.apache.shindig.common.SecurityToken;
 import org.apache.shindig.common.testing.FakeGadgetToken;
 import org.apache.shindig.common.testing.FakeHttpServletRequest;
 

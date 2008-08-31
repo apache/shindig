@@ -17,7 +17,7 @@
  */
 package org.apache.shindig.social.core.oauth;
 
-import org.apache.shindig.common.SecurityToken;
+import org.apache.shindig.auth.SecurityToken;
 
 public class OAuthSecurityToken implements SecurityToken {
   private final String userId;

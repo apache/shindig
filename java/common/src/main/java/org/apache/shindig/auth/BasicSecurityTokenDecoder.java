@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.shindig.common;
+package org.apache.shindig.auth;
 
 import org.apache.shindig.common.crypto.BlobCrypterException;
 
