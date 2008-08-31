@@ -17,11 +17,12 @@
  */
 package org.apache.shindig.social.core.oauth;
 
+import org.apache.shindig.common.AnonymousSecurityToken;
 import org.apache.shindig.common.SecurityToken;
 import org.apache.shindig.social.opensocial.oauth.AuthenticationHandler;
 
-import com.google.inject.name.Named;
 import com.google.inject.Inject;
+import com.google.inject.name.Named;
 
 import javax.servlet.http.HttpServletRequest;
 
