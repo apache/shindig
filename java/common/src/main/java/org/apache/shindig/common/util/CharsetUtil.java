@@ -23,7 +23,6 @@ import org.apache.commons.lang.ArrayUtils;
 
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
-import java.util.Arrays;
 
 /**
  * Utilities for dealing with character set encoding.
@@ -47,6 +46,6 @@ public class CharsetUtil {
       return ArrayUtils.EMPTY_BYTE_ARRAY;
     }
     ByteBuffer bb = UTF8.encode(s);
-    return Arrays.copyOf(bb.array(), bb.limit());
+    return ArrayUtils.subarray(bb.array(), 0, bb.limit());
   }
 }
