@@ -48,7 +48,7 @@ public class SampleContainerOAuthLookupService implements OAuthLookupService {
 
   // If we were a real social network we would probably be keeping track of this in a db somewhere
   private static Map<String, ArrayList<String>> sampleContainerAppInstalls = Maps.immutableMap(
-      "john.doe", Lists.newArrayList( "7810", "8355")
+      "john.doe", Lists.newArrayList("7810", "8355")
   );
 
   // If we were a real social network we would establish shared secrets with each of our gadgets

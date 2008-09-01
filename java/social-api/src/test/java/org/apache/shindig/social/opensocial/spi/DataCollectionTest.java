@@ -27,7 +27,7 @@ import java.util.Map;
 public class DataCollectionTest extends TestCase {
 
   public void testBasicMethods() throws Exception {
-    Map<String, Map<String,String>> entry = Maps.newHashMap();
+    Map<String, Map<String, String>> entry = Maps.newHashMap();
     DataCollection collection = new DataCollection(entry);
     assertEquals(entry, collection.getEntry());
 

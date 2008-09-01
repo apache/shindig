@@ -195,7 +195,7 @@ public class AppDataHandlerTest extends TestCase {
     try {
       handler.handlePost(request).get();
       fail();
-    } catch ( SocialSpiException spi ) {
+    } catch (SocialSpiException spi) {
       // was expecting an Exception
     }
     verify();
@@ -221,7 +221,7 @@ public class AppDataHandlerTest extends TestCase {
     try {
       handler.handlePost(request).get();
       fail();
-    } catch ( SocialSpiException spi ) {
+    } catch (SocialSpiException spi) {
       // was expecting an Exception
     }
     verify();

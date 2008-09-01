@@ -147,8 +147,8 @@ public class RestfulJsonPeopleTest extends AbstractLargeRestfulTests {
     canonical.setNetworkPresence(new EnumImpl<Enum.NetworkPresence>(Enum.NetworkPresence.ONLINE));
     canonical.setNickname("diggy");
     canonical.setPets("dog,cat");
-    canonical.setPhoneNumbers(Lists.<ListField>newArrayList(new ListFieldImpl("work", "111-111-111"),
-        new ListFieldImpl("mobile", "999-999-999")));
+    canonical.setPhoneNumbers(Lists.<ListField> newArrayList(new ListFieldImpl("work",
+        "111-111-111"), new ListFieldImpl("mobile", "999-999-999")));
 
     canonical.setPoliticalViews("open leaning");
     canonical.setProfileSong(new UrlImpl("http://www.example.org/songs/OnlyTheLonely.mp3",

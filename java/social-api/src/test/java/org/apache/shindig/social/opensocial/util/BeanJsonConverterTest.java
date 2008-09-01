@@ -186,9 +186,9 @@ public class BeanJsonConverterTest extends TestCase {
   }
 
   public void testJsonToActivity() throws Exception {
-    String jsonActivity = "{userId : 5, id : 6, mediaItems : [" +
-        "{url : 'hello', mimeType : 'mimey', type : 'video'}" +
-        "]}";
+    String jsonActivity = "{userId : 5, id : 6, mediaItems : [" 
+      + "{url : 'hello', mimeType : 'mimey', type : 'video'}" 
+      + "]}";
     // TODO: rename the enums to be lowercase
     Activity result = beanJsonConverter.convertToObject(jsonActivity,
         Activity.class);

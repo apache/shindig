@@ -35,8 +35,8 @@ public class ApiValidatorTest {
   /**
    * A definition of the test json used in this unit test.
    */
-  private static final String TEST_DEFINITION = 
-    "var TestDef = {}; TestDef.Field = { FIELD1 : \"json\", FIELD2 : \"xyz\", FIELD3 : \"shouldBeMissing\" };";
+  private static final String TEST_DEFINITION = "var TestDef = {}; "
+    + "TestDef.Field = { FIELD1 : \"json\", FIELD2 : \"xyz\", FIELD3 : \"shouldBeMissing\" };";
   private static final String[] TEST_DEFINITION_FIELDS = {
     "json",
     "xyz",
@@ -44,72 +44,77 @@ public class ApiValidatorTest {
   };
 
   /**
-   * test the validator for successful validation
+   * test the validator for successful validation.
    * @throws ApiValidatorExpcetion
    * @throws IOException
    * @throws ParserConfigurationException
    * @throws SAXException
    */
   @Test
-  public void testValidator() throws ApiValidatorExpcetion, IOException, ParserConfigurationException, SAXException {
+  public void testValidator() throws ApiValidatorExpcetion, IOException,
+      ParserConfigurationException, SAXException {
     ApiValidator apiVal = new ApiValidator();
     apiVal.addScript(TEST_DEFINITION);
-    String[] optional = {"shouldBeMissing"};
+    String[] optional = { "shouldBeMissing" };
     String[] nullfields = {};
-     Map<String, Object> result = apiVal.validate("{ json: \"A Test JSON\", xyz : 123 }", "TestDef.Field", optional, nullfields );
-     Assert.assertNotNull(result);
-     Assert.assertNotNull(result.get("json"));
-     Assert.assertNotNull(result.get("xyz"));
-     Assert.assertEquals(String.class,result.get("json").getClass());
-     Assert.assertEquals(Integer.class,result.get("xyz").getClass());
-     Assert.assertEquals("A Test JSON",result.get("json"));
-     Assert.assertEquals(123,((Integer)result.get("xyz")).intValue());
-     
-    
+    Map<String, Object> result = apiVal.validate("{ json: \"A Test JSON\", xyz : 123 }",
+        "TestDef.Field", optional, nullfields);
+    Assert.assertNotNull(result);
+    Assert.assertNotNull(result.get("json"));
+    Assert.assertNotNull(result.get("xyz"));
+    Assert.assertEquals(String.class, result.get("json").getClass());
+    Assert.assertEquals(Integer.class, result.get("xyz").getClass());
+    Assert.assertEquals("A Test JSON", result.get("json"));
+    Assert.assertEquals(123, ((Integer) result.get("xyz")).intValue());
   }
-  
+
   /**
    * Test for a failing validation
+   *
    * @throws ApiValidatorExpcetion
    * @throws IOException
    * @throws ParserConfigurationException
    * @throws SAXException
    */
   @Test
-  public void testValidatorFail() throws ApiValidatorExpcetion, IOException, ParserConfigurationException, SAXException {
+  public void testValidatorFail() throws ApiValidatorExpcetion, IOException,
+      ParserConfigurationException, SAXException {
     ApiValidator apiVal = new ApiValidator();
     apiVal.addScript(TEST_DEFINITION);
     String[] optional = {};
     String[] nullfields = {};
     try {
-      apiVal.validate("{ jsonIsMissing: \"A Test JSON\", xyz : 123 }", "TestDef.Field", optional, nullfields );
+      apiVal.validate("{ jsonIsMissing: \"A Test JSON\", xyz : 123 }", "TestDef.Field", optional,
+          nullfields);
       Assert.fail("Should have Generated an APIValidatorException ");
-    } catch ( ApiValidatorExpcetion ex ) {
-      
+    } catch (ApiValidatorExpcetion ex) {
+
     }
   }
   /**
    * test the validator for successful validation
+   *
    * @throws ApiValidatorExpcetion
    * @throws IOException
    * @throws ParserConfigurationException
    * @throws SAXException
    */
   @Test
-  public void testFieldsValidator() throws ApiValidatorExpcetion, IOException, ParserConfigurationException, SAXException {
+  public void testFieldsValidator() throws ApiValidatorExpcetion, IOException,
+      ParserConfigurationException, SAXException {
     ApiValidator apiVal = new ApiValidator();
-    String[] optional = {"shouldBeMissing"};
+    String[] optional = { "shouldBeMissing" };
     String[] nullfields = {};
-     Map<String, Object> result = apiVal.validate("{ json: \"A Test JSON\", xyz : 123 }", TEST_DEFINITION_FIELDS, optional, nullfields );
-     Assert.assertNotNull(result);
-     Assert.assertNotNull(result.get("json"));
-     Assert.assertNotNull(result.get("xyz"));
-     Assert.assertEquals(String.class,result.get("json").getClass());
-     Assert.assertEquals(Integer.class,result.get("xyz").getClass());
-     Assert.assertEquals("A Test JSON",result.get("json"));
-     Assert.assertEquals(123,((Integer)result.get("xyz")).intValue());
-     
-    
+    Map<String, Object> result = apiVal.validate("{ json: \"A Test JSON\", xyz : 123 }",
+        TEST_DEFINITION_FIELDS, optional, nullfields);
+    Assert.assertNotNull(result);
+    Assert.assertNotNull(result.get("json"));
+    Assert.assertNotNull(result.get("xyz"));
+    Assert.assertEquals(String.class, result.get("json").getClass());
+    Assert.assertEquals(Integer.class, result.get("xyz").getClass());
+    Assert.assertEquals("A Test JSON", result.get("json"));
+    Assert.assertEquals(123, ((Integer) result.get("xyz")).intValue());
+
   }
   
   /**
@@ -120,15 +125,17 @@ public class ApiValidatorTest {
    * @throws SAXException
    */
   @Test
-  public void testFieldsValidatorFail() throws ApiValidatorExpcetion, IOException, ParserConfigurationException, SAXException {
+  public void testFieldsValidatorFail() throws ApiValidatorExpcetion, IOException,
+      ParserConfigurationException, SAXException {
     ApiValidator apiVal = new ApiValidator();
     String[] optional = {};
     String[] nullfields = {};
     try {
-      apiVal.validate("{ jsonIsMissing: \"A Test JSON\", xyz : 123 }", TEST_DEFINITION_FIELDS, optional, nullfields );
+      apiVal.validate("{ jsonIsMissing: \"A Test JSON\", xyz : 123 }", TEST_DEFINITION_FIELDS,
+          optional, nullfields);
       Assert.fail("Should have Generated an APIValidatorException ");
-    } catch ( ApiValidatorExpcetion ex ) {
-      
+    } catch (ApiValidatorExpcetion ex) {
+      // was expcting this
     }
   }
 

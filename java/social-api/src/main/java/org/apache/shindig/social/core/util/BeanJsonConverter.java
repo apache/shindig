@@ -103,7 +103,7 @@ public class BeanJsonConverter implements BeanConverter {
 
     } else if (val instanceof Map) {
       JSONObject map = new JSONObject();
-      Map<?, ?> originalMap = (Map<?,?>) val;
+      Map<?, ?> originalMap = (Map<?, ?>) val;
 
       for (Entry<?, ?> item : originalMap.entrySet()) {
         map.put(item.getKey().toString(), translateObjectToJson(item.getValue()));
