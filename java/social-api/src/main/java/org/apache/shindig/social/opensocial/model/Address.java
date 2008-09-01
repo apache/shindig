@@ -206,11 +206,19 @@ public interface Address {
   void setFormatted(String formatted);
 
   /**
+   * <p>
    * Get a Boolean value indicating whether this instance of the Plural Field is the primary or
    * preferred value of for this field, e.g. the preferred mailing address. Service Providers MUST
    * NOT mark more than one instance of the same Plural Field as primary="true", and MAY choose not
    * to mark any fields as primary, if this information is not available. Introduced in v0.8.1
-   *
+   * </p><p>
+   * The service provider may wish to share the address instance between items and primary related
+   * to the address from which this came, so if the address came from an Organization, primary
+   * relates to the primary address of the organization, and not necessary the primary address of
+   * all addresses.
+   * </p><p>
+   * If the address is not part of a list (eg Person.location ) primary has no meaning.
+   * <p>
    * @return true if the instance if the primary instance.
    */
   Boolean getPrimary();
