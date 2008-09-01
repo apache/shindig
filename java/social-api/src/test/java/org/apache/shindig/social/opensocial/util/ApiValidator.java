@@ -24,6 +24,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -401,10 +402,10 @@ public class ApiValidator {
    */
   public static void dump(Map<?, ?> nameJSON) {
     if (log.isDebugEnabled()) {
-      for (Object k : nameJSON.keySet()) {
-        Object o = nameJSON.get(k);
-        log.info("Key [" + k + "] value:["
-            + (o == null ? o : o + ":" + o.getClass()) + "]");
+      for (Entry<?, ?> entry : nameJSON.entrySet()) {
+        Object k = entry.getKey();
+        Object o = entry.getValue();
+        log.info("Key [" + k + "] value:[" + (o == null ? "null" : o + ":" + o.getClass()) + "]");
       }
     }
   }
