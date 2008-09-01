@@ -512,7 +512,8 @@ public interface Person {
 
   /**
    * Get if the person has used the current app. Container support for this field is OPTIONAL.
-   *
+   * Has app needs to take account of the context of the application that is performing the
+   * query on this person object.
    * @return true the current app has been used
    */
   Boolean getHasApp();
