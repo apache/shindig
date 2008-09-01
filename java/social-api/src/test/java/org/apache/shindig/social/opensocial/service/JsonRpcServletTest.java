@@ -121,7 +121,8 @@ public class JsonRpcServletTest extends TestCase {
 
 
   /**
-   * Tests a data handler that returns a failed Future
+   * Tests a data handler that returns a failed Future.
+   * @throws Exception on failure
    */
   public void testFailedRequest() throws Exception {
     setupRequest("{id:id,method:appdata.get}");
@@ -189,8 +190,7 @@ public class JsonRpcServletTest extends TestCase {
     EasyMock.expect(jsonConverter.convertToJson(resultObject))
         .andStubReturn(new JSONObject(Maps.immutableMap("foo", "bar")));
 
-    JSONArray result = new JSONArray("[{id:'1',data:{foo:'bar'}}," +
-        "{id:'2',data:{foo:'bar'}}]");
+    JSONArray result = new JSONArray("[{id:'1',data:{foo:'bar'}}," + "{id:'2',data:{foo:'bar'}}]");
     PrintWriter writerMock = EasyMock.createMock(PrintWriter.class);
     EasyMock.expect(res.getWriter()).andReturn(writerMock);
     writerMock.write(EasyMock.eq(result.toString()));
@@ -204,7 +204,7 @@ public class JsonRpcServletTest extends TestCase {
 
   public void testGetExecution() throws Exception {
     EasyMock.expect(req.getParameterMap()).andStubReturn(
-        Maps.immutableMap("method",new String[]{"people.get"},"id", new String[]{"1"}));
+        Maps.immutableMap("method", new String[]{"people.get"}, "id", new String[]{"1"}));
     EasyMock.expect(req.getMethod()).andStubReturn("GET");
     EasyMock.expect(req.getAttribute(EasyMock.isA(String.class))).andReturn(FAKE_GADGET_TOKEN);
     setupInjector();

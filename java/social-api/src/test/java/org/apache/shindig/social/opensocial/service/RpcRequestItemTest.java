@@ -142,7 +142,7 @@ public class RpcRequestItemTest extends TestCase {
     request.setListParameter("fields", Collections.<String>emptyList());
     assertEquals(Sets.<String>newHashSet(), request.getFields());
 
-    request.setListParameter("fields", Lists.newArrayList("happy","sad","grumpy"));
+    request.setListParameter("fields", Lists.newArrayList("happy", "sad", "grumpy"));
     assertEquals(Sets.newHashSet("happy", "sad", "grumpy"), request.getFields());
   }
 }

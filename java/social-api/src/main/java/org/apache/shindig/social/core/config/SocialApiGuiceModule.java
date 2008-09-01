@@ -36,10 +36,10 @@ import com.google.inject.name.Names;
 import java.util.List;
 
 /**
- * Provides social api component injection. Implementor may want to replace this module if they
- * need to replace some of the internals of the Social API, like for instance the JSON to Bean to JSON
- * converter Beans, however in general this should not be required, as most default implementations have
- * been specified with the Guice @ImplementedBy annotation.
+ * Provides social api component injection. Implementor may want to replace this module if they need
+ * to replace some of the internals of the Social API, like for instance the JSON to Bean to JSON
+ * converter Beans, however in general this should not be required, as most default implementations
+ * have been specified with the Guice @ImplementedBy annotation.
  */
 public class SocialApiGuiceModule extends AbstractModule {
 

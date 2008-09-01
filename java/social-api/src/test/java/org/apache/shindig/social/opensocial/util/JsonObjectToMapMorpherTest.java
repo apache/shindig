@@ -70,16 +70,16 @@ public class JsonObjectToMapMorpherTest {
     testObj.put("1", "z");
     Object o = om.morph(testObj);
     assertNotSame(testObj, o);
-    if ( o instanceof Map ) {
+    if (o instanceof Map) {
       Map<?, ?> fm = (Map<?, ?>) o;
-      assertEquals("y",fm.get("x"));
-      assertEquals("z",fm.get("1"));
+      assertEquals("y", fm.get("x"));
+      assertEquals("z", fm.get("1"));
       assertNull(fm.get("xyz"));
     }
     try {
       om.morph(o);
       fail();
-    } catch ( ClassCastException cce ) {
+    } catch (ClassCastException cce) {
       assertTrue(true);
     }
   }

@@ -43,8 +43,7 @@ import org.json.JSONObject;
 
 public class JsonConverterPerformancePerf extends TestCase {
 
-  private static final Log log = LogFactory
-      .getLog(JsonConverterPerformancePerf.class);
+  private static final Log log = LogFactory.getLog(JsonConverterPerformancePerf.class);
   private static final int TEST_SIZE = 10000;
   private Person johnDoe;
   private Activity activity;
@@ -56,28 +55,26 @@ public class JsonConverterPerformancePerf extends TestCase {
   public void setUp() throws Exception {
     super.setUp();
     johnDoe = new PersonImpl("johnDoeId", new NameImpl("John Doe"));
-    johnDoe.setPhoneNumbers(Lists.<ListField>newArrayList(
-        new ListFieldImpl("home", "+33H000000000"),
-        new ListFieldImpl("mobile", "+33M000000000"),
-        new ListFieldImpl("work", "+33W000000000")));
+    johnDoe.setPhoneNumbers(Lists.<ListField> newArrayList(new ListFieldImpl("home",
+        "+33H000000000"), new ListFieldImpl("mobile", "+33M000000000"), new ListFieldImpl("work",
+        "+33W000000000")));
 
-    johnDoe.setAddresses(Lists.<Address>newArrayList(
-        new AddressImpl("My home address")));
+    johnDoe.setAddresses(Lists.<Address> newArrayList(new AddressImpl("My home address")));
 
-    johnDoe.setEmails(Lists.<ListField>newArrayList(
-        new ListFieldImpl("work", "john.doe@work.bar"),
-        new ListFieldImpl("home", "john.doe@home.bar")));
+    johnDoe.setEmails(Lists.<ListField> newArrayList(
+        new ListFieldImpl("work", "john.doe@work.bar"), new ListFieldImpl("home",
+            "john.doe@home.bar")));
 
     activity = new ActivityImpl("activityId", johnDoe.getId());
 
-    activity.setMediaItems(Lists.<MediaItem> newArrayList(new MediaItemImpl(
-        "image/jpg", MediaItem.Type.IMAGE, "http://foo.bar")));
+    activity.setMediaItems(Lists.<MediaItem> newArrayList(new MediaItemImpl("image/jpg",
+        MediaItem.Type.IMAGE, "http://foo.bar")));
 
     Injector injector = Guice.createInjector(new JsonLibTestsGuiceModule());
     beanJsonLibConverter = injector.getInstance(BeanJsonLibConverter.class);
 
-    beanJsonConverter = new BeanJsonConverter(Guice
-        .createInjector(new SocialApiTestsGuiceModule()));
+    beanJsonConverter = new BeanJsonConverter(
+        Guice.createInjector(new SocialApiTestsGuiceModule()));
 
   }
 
@@ -110,24 +107,24 @@ public class JsonConverterPerformancePerf extends TestCase {
     }
     Runtime r = Runtime.getRuntime();
     r.gc();
-    long memstart = r.totalMemory()-r.freeMemory();
+    long memstart = r.totalMemory() - r.freeMemory();
     long startOutput = System.currentTimeMillis();
     String[] output = new String[TEST_SIZE];
     for (int i = 0; i < TEST_SIZE; i++) {
       output[i] = beanJsonLibConverter.convertToString(spa[i]);
     }
     long endOutput = System.currentTimeMillis();
-    long memend = r.totalMemory()-r.freeMemory();
+    long memend = r.totalMemory() - r.freeMemory();
 
     String[] serializeOutput = new String[TEST_SIZE];
     char[] source = output[0].toCharArray();
     r.gc();
 
-    long stringsizeStart = r.totalMemory()-r.freeMemory();
+    long stringsizeStart = r.totalMemory() - r.freeMemory();
     for (int i = 0; i < TEST_SIZE; i++) {
       serializeOutput[i] = new String(source);
     }
-    long stringsizeEnd = r.totalMemory()-r.freeMemory();
+    long stringsizeEnd = r.totalMemory() - r.freeMemory();
 
     /*
      * Output the time per conversion and the memory usage - the output per
@@ -135,13 +132,15 @@ public class JsonConverterPerformancePerf extends TestCase {
      *
      */
 
-    log.info("SF JSON Lib Output "
-        + average(startOutput, endOutput, TEST_SIZE)
-        + " ms/conversion, "
-        + (average(memstart, memend, TEST_SIZE)-average(stringsizeStart, stringsizeEnd, TEST_SIZE))
-        + " heap bytes/conversion, output packet consumed on average "
-        + average(stringsizeStart, stringsizeEnd, TEST_SIZE)+" for a string length of "+output[0].length());
-    log.info("Output Was ["+output[0]+"]");
+    log
+        .info("SF JSON Lib Output "
+            + average(startOutput, endOutput, TEST_SIZE)
+            + " ms/conversion, "
+            + (average(memstart, memend, TEST_SIZE) - average(stringsizeStart, stringsizeEnd,
+                TEST_SIZE)) + " heap bytes/conversion, output packet consumed on average "
+            + average(stringsizeStart, stringsizeEnd, TEST_SIZE) + " for a string length of "
+            + output[0].length());
+    log.info("Output Was [" + output[0] + "]");
   }
 
   public void testToJsonLibOnInheritedClassInput() throws Exception {
@@ -149,11 +148,11 @@ public class JsonConverterPerformancePerf extends TestCase {
     SpecialPerson[] sparesult = new SpecialPerson[TEST_SIZE];
     Runtime r = Runtime.getRuntime();
     r.gc();
-    long personStart = r.totalMemory()-r.freeMemory();
+    long personStart = r.totalMemory() - r.freeMemory();
     for (int i = 0; i < TEST_SIZE; i++) {
       spa[i] = new SpecialPerson(String.valueOf(i), "robot", "nonsense");
     }
-    long personEnd = r.totalMemory()-r.freeMemory();
+    long personEnd = r.totalMemory() - r.freeMemory();
 
     String[] serializeOutput = new String[TEST_SIZE];
     r.gc();
@@ -163,19 +162,16 @@ public class JsonConverterPerformancePerf extends TestCase {
     }
 
     r.gc();
-    long memstart = r.totalMemory()-r.freeMemory();
+    long memstart = r.totalMemory() - r.freeMemory();
     long startInput = System.currentTimeMillis();
     for (int i = 0; i < TEST_SIZE; i++) {
-        sparesult[i] = beanJsonLibConverter.convertToObject(
-          serializeOutput[i], SpecialPerson.class);
+      sparesult[i] = beanJsonLibConverter.convertToObject(serializeOutput[i], SpecialPerson.class);
     }
     long endInput = System.currentTimeMillis();
-    long memend = r.totalMemory()-r.freeMemory();
+    long memend = r.totalMemory() - r.freeMemory();
 
-    log.info("SF JSON Lib Input "
-        + average(startInput, endInput, TEST_SIZE)
-        + " ms/conversion, "
-        + (average(memstart, memend, TEST_SIZE)-average(personStart, personEnd, TEST_SIZE))
+    log.info("SF JSON Lib Input " + average(startInput, endInput, TEST_SIZE) + " ms/conversion, "
+        + (average(memstart, memend, TEST_SIZE) - average(personStart, personEnd, TEST_SIZE))
         + " heap bytes/conversion, person object consumed on average "
         + average(personStart, personEnd, TEST_SIZE));
   }
@@ -188,31 +184,33 @@ public class JsonConverterPerformancePerf extends TestCase {
     Runtime r = Runtime.getRuntime();
     String[] output = new String[TEST_SIZE];
     r.gc();
-    long memstart = r.totalMemory()-r.freeMemory();
+    long memstart = r.totalMemory() - r.freeMemory();
     long startOutput = System.currentTimeMillis();
     for (int i = 0; i < TEST_SIZE; i++) {
-      output[i]  = ((JSONObject) beanJsonConverter.convertToJson(spa[i])).toString();
+      output[i] = ((JSONObject) beanJsonConverter.convertToJson(spa[i])).toString();
     }
     long endOutput = System.currentTimeMillis();
-    long memend = r.totalMemory()-r.freeMemory();
+    long memend = r.totalMemory() - r.freeMemory();
     String[] serializeOutput = new String[TEST_SIZE];
     char[] source = output[0].toCharArray();
     r.gc();
 
-    long stringsizeStart = r.totalMemory()-r.freeMemory();
+    long stringsizeStart = r.totalMemory() - r.freeMemory();
 
     for (int i = 0; i < TEST_SIZE; i++) {
       serializeOutput[i] = new String(source);
     }
-    long stringsizeEnd = r.totalMemory()-r.freeMemory();
+    long stringsizeEnd = r.totalMemory() - r.freeMemory();
 
-    log.info("ORG JSON Lib Output "
-        + average(startOutput, endOutput, TEST_SIZE)
-        + " ms/conversion, "
-        + (average(memstart, memend, TEST_SIZE)-average(stringsizeStart, stringsizeEnd, TEST_SIZE))
-        + " heap bytes/conversion, output packet consumed on average "
-        + average(stringsizeStart, stringsizeEnd, TEST_SIZE)+" for a string length of "+output[0].length());
-    log.info("Output Was ["+output[0]+"]");
+    log
+        .info("ORG JSON Lib Output "
+            + average(startOutput, endOutput, TEST_SIZE)
+            + " ms/conversion, "
+            + (average(memstart, memend, TEST_SIZE) - average(stringsizeStart, stringsizeEnd,
+                TEST_SIZE)) + " heap bytes/conversion, output packet consumed on average "
+            + average(stringsizeStart, stringsizeEnd, TEST_SIZE) + " for a string length of "
+            + output[0].length());
+    log.info("Output Was [" + output[0] + "]");
   }
 
   /**
@@ -232,11 +230,11 @@ public class JsonConverterPerformancePerf extends TestCase {
     SpecialPerson[] sparesult = new SpecialPerson[TEST_SIZE];
     Runtime r = Runtime.getRuntime();
     r.gc();
-    long personStart = r.totalMemory()-r.freeMemory();
+    long personStart = r.totalMemory() - r.freeMemory();
     for (int i = 0; i < TEST_SIZE; i++) {
       spa[i] = new SpecialPerson(String.valueOf(i), "robot", "nonsense");
     }
-    long personEnd = r.totalMemory()-r.freeMemory();
+    long personEnd = r.totalMemory() - r.freeMemory();
 
     String[] serializeOutput = new String[TEST_SIZE];
     r.gc();
@@ -246,20 +244,17 @@ public class JsonConverterPerformancePerf extends TestCase {
     }
 
     r.gc();
-    long memstart = r.totalMemory()-r.freeMemory();
+    long memstart = r.totalMemory() - r.freeMemory();
     long startInput = System.currentTimeMillis();
 
     for (int i = 0; i < TEST_SIZE; i++) {
-      sparesult[i] = beanJsonConverter.convertToObject(
-          serializeOutput[i], SpecialPerson.class);
+      sparesult[i] = beanJsonConverter.convertToObject(serializeOutput[i], SpecialPerson.class);
     }
     long endInput = System.currentTimeMillis();
-    long memend = r.totalMemory()-r.freeMemory();
+    long memend = r.totalMemory() - r.freeMemory();
 
-    log.info("SF JSON Lib Input "
-        + average(startInput, endInput, TEST_SIZE)
-        + " ms/conversion, "
-        + (average(memstart, memend, TEST_SIZE)-average(personStart, personEnd, TEST_SIZE))
+    log.info("SF JSON Lib Input " + average(startInput, endInput, TEST_SIZE) + " ms/conversion, "
+        + (average(memstart, memend, TEST_SIZE) - average(personStart, personEnd, TEST_SIZE))
         + " heap bytes/conversion, person object consumed on average "
         + average(personStart, personEnd, TEST_SIZE));
   }

@@ -94,14 +94,14 @@ public class ActivityImpl implements Activity {
   }
 
   public Date getUpdated() {
-    if ( updated == null ) {
+    if (updated == null) {
       return null;
     }
     return new Date(updated.getTime());
   }
 
   public void setUpdated(Date updated) {
-    if ( updated == null ) {
+    if (updated == null) {
       this.updated = null;
     } else {
       this.updated = new Date(updated.getTime());

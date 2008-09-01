@@ -186,14 +186,14 @@ public class PersonImpl implements Person {
   }
 
   public Date getBirthday() {
-    if ( birthday == null ) {
+    if (birthday == null) {
       return null;
-    } 
+    }
     return new Date(birthday.getTime());
   }
 
   public void setBirthday(Date birthday) {
-    if ( birthday == null ) {
+    if (birthday == null) {
       this.birthday = null;
     } else {
       this.birthday = new Date(birthday.getTime());
@@ -321,14 +321,14 @@ public class PersonImpl implements Person {
   }
 
   public Date getUpdated() {
-    if ( updated == null ) {
+    if (updated == null) {
       return null;
     }
     return new Date(updated.getTime());
   }
 
   public void setUpdated(Date updated) {
-    if ( updated == null ) {
+    if (updated == null) {
       this.updated = updated;
     } else {
       this.updated = new Date(updated.getTime());

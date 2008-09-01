@@ -53,14 +53,14 @@ public class OrganizationImpl implements Organization {
   }
 
   public Date getEndDate() {
-    if ( endDate == null ) {
+    if (endDate == null) {
       return null;
     }
     return new Date(endDate.getTime());
   }
 
   public void setEndDate(Date endDate) {
-    if ( endDate == null ) {
+    if (endDate == null) {
       this.endDate = null;
     } else {
       this.endDate = new Date(endDate.getTime());
@@ -92,14 +92,14 @@ public class OrganizationImpl implements Organization {
   }
 
   public Date getStartDate() {
-    if ( startDate == null ) {
+    if (startDate == null) {
       return null;
-    } 
+    }
     return new Date(startDate.getTime());
   }
 
   public void setStartDate(Date startDate) {
-    if ( startDate == null ) {
+    if (startDate == null) {
       this.startDate = null;
     } else {
       this.startDate = new Date(startDate.getTime());
