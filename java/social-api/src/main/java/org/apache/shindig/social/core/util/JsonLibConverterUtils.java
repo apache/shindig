@@ -20,6 +20,8 @@ package org.apache.shindig.social.core.util;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import java.util.Map.Entry;
+
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 
@@ -42,8 +44,10 @@ public final class JsonLibConverterUtils {
    *                the indent to be used per object nesting.
    */
   public static final void dumpJsonObject(JSONObject jsonObject, String indent) {
-    for (Object key : jsonObject.keySet()) {
-      Object value = jsonObject.get(key);
+    for (Object o : jsonObject.entrySet()) {
+      Entry<?, ?> entry = (Entry<?, ?>) o;
+      Object key = entry.getKey();
+      Object value = entry.getValue();
       if (value instanceof JSONObject) {
         LOG.info(indent + key + ":JSONObject");
         dumpJsonObject((JSONObject) value, indent + "  ");
@@ -52,7 +56,7 @@ public final class JsonLibConverterUtils {
         dumpJsonArray((JSONArray) value, indent + "  ");
       } else {
         if (value == null) {
-          LOG.info(indent + key + ":" + value + ":" + "na");
+          LOG.info(indent + key + ":null:na");
         } else {
           LOG.info(indent + key + ":" + value + ":" + value.getClass());
         }

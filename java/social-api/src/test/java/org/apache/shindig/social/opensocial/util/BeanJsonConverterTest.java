@@ -39,6 +39,7 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.util.Map;
+import java.util.Map.Entry;
 
 public class BeanJsonConverterTest extends TestCase {
   private Person johnDoe;
@@ -213,8 +214,9 @@ public class BeanJsonConverterTest extends TestCase {
 
     assertEquals(2, data.size());
 
-    for (String key : data.keySet()) {
-      String value = data.get(key);
+    for (Entry<String, String> entry : data.entrySet()) {
+      String key = entry.getKey();
+      String value = entry.getValue();
       if (key.equals("count")) {
         assertEquals("0", value);
       } else if (key.equals("favoriteColor")) {

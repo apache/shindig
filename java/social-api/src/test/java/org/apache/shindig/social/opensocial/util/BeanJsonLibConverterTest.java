@@ -44,6 +44,7 @@ import org.apache.commons.logging.LogFactory;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 public class BeanJsonLibConverterTest extends TestCase {
 
@@ -346,14 +347,15 @@ public class BeanJsonLibConverterTest extends TestCase {
   @SuppressWarnings("unchecked")
   public void testJsonToMap() throws Exception {
     String jsonActivity = "{count : 0, favoriteColor : 'yellow'}";
-    Map<String, String> data = Maps.newHashMap();
-    data = beanJsonConverter.convertToObject(jsonActivity, (Class<Map<String, String>>) data
+    Map<String, Object> data = Maps.newHashMap();
+    data = beanJsonConverter.convertToObject(jsonActivity, (Class<Map<String, Object>>) data
         .getClass());
 
     assertEquals(2, data.size());
 
-    for (String key : data.keySet()) {
-      Object value = data.get(key);
+    for (Entry<String, Object> entry : data.entrySet()) {
+      String key = entry.getKey();
+      Object value = entry.getValue();
       if (key.equals("count")) {
         assertEquals(0, value);
       } else if (key.equals("favoriteColor")) {

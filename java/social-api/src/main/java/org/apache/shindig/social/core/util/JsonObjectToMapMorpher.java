@@ -19,6 +19,7 @@ package org.apache.shindig.social.core.util;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import net.sf.ezmorph.Morpher;
 import net.sf.ezmorph.ObjectMorpher;
@@ -52,8 +53,8 @@ public class JsonObjectToMapMorpher implements Morpher, ObjectMorpher {
   public Object morph(Object bean) {
     Map<Object, Object> result = new HashMap<Object, Object>();
     JSONObject jsonObject = (JSONObject) bean;
-    for (Object key : jsonObject.keySet()) {
-      result.put(key, jsonObject.get(key));
+    for (Object entry : jsonObject.entrySet()) {
+      result.put(((Entry)entry).getKey(), ((Entry)entry).getValue());
     }
     return result;
   }

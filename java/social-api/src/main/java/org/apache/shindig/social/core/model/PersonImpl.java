@@ -329,7 +329,7 @@ public class PersonImpl implements Person {
 
   public void setUpdated(Date updated) {
     if (updated == null) {
-      this.updated = updated;
+      this.updated = null;
     } else {
       this.updated = new Date(updated.getTime());
     }
