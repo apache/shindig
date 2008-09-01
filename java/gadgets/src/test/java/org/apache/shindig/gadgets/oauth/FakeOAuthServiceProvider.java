@@ -24,19 +24,27 @@ import net.oauth.OAuthMessage;
 import net.oauth.OAuthServiceProvider;
 import net.oauth.OAuthValidator;
 import net.oauth.SimpleOAuthValidator;
+
 import org.apache.shindig.common.crypto.Crypto;
 import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.http.HttpFetcher;
 import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.http.HttpResponse;
 import org.apache.shindig.gadgets.http.HttpResponseBuilder;
+import org.apache.shindig.gadgets.oauth.OAuthStore.OAuthParamLocation;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 public class FakeOAuthServiceProvider implements HttpFetcher {
+
+  public static final String BODY_ECHO_HEADER = "X-Echoed-Body";
+
+  public static final String AUTHZ_ECHO_HEADER = "X-Echoed-Authz";
 
   public final static String SP_HOST = "http://www.example.com";
 
@@ -115,6 +123,8 @@ public class FakeOAuthServiceProvider implements HttpFetcher {
 
   private int resourceAccessCount = 0;
 
+  private Set<OAuthParamLocation> validParamLocations;
+
   public FakeOAuthServiceProvider() {
     OAuthServiceProvider provider = new OAuthServiceProvider(
         REQUEST_TOKEN_URL, APPROVAL_URL, ACCESS_TOKEN_URL);
@@ -123,10 +133,25 @@ public class FakeOAuthServiceProvider implements HttpFetcher {
     tokenState = new HashMap<String, TokenState>();
     validator = new SimpleOAuthValidator();
     vagueErrors = false;
+    validParamLocations = new HashSet<OAuthParamLocation>();
+    validParamLocations.add(OAuthParamLocation.URI_QUERY);
   }
 
   public void setVagueErrors(boolean vagueErrors) {
     this.vagueErrors = vagueErrors;
+  }
+  
+  public void addParamLocation(OAuthParamLocation paramLocation) {
+    validParamLocations.add(paramLocation);
+  }
+  
+  public void removeParamLocation(OAuthParamLocation paramLocation) {
+    validParamLocations.remove(paramLocation);
+  }
+  
+  public void setParamLocation(OAuthParamLocation paramLocation) {
+    validParamLocations.clear();
+    validParamLocations.add(paramLocation);
   }
 
   @SuppressWarnings("unused")
@@ -156,7 +181,7 @@ public class FakeOAuthServiceProvider implements HttpFetcher {
 
   private HttpResponse handleRequestTokenUrl(HttpRequest request)
       throws Exception {
-    OAuthMessage message = parseMessage(request);
+    OAuthMessage message = parseMessage(request).message;
     String requestConsumer = message.getParameter(OAuth.OAUTH_CONSUMER_KEY);
     if (!CONSUMER_KEY.equals(requestConsumer)) {
       return makeOAuthProblemReport(
@@ -197,23 +222,61 @@ public class FakeOAuthServiceProvider implements HttpFetcher {
 
   // Loosely based off net.oauth.OAuthServlet, and even more loosely related
   // to the OAuth specification
-  private OAuthMessage parseMessage(HttpRequest request) {
+  private MessageInfo parseMessage(HttpRequest request) {
+    MessageInfo info = new MessageInfo();
     String method = request.getMethod();
-    if (!method.equals("GET")) {
-      throw new RuntimeException("Only GET supported for now");
-    }
-    ParsedUrl url = new ParsedUrl(request.getUri().toString());
+    ParsedUrl parsed = new ParsedUrl(request.getUri().toString());
+    
     List<OAuth.Parameter> params = new ArrayList<OAuth.Parameter>();
-    params.addAll(url.getParsedQuery());
-    String aznHeader = request.getHeader("Authorization");
-    if (aznHeader != null) {
-      for (OAuth.Parameter p : OAuthMessage.decodeAuthorization(aznHeader)) {
-        if (!p.getKey().equalsIgnoreCase("realm")) {
-          params.add(p);
+    params.addAll(parsed.getParsedQuery());
+    
+    if (!validParamLocations.contains(OAuthParamLocation.URI_QUERY)) {
+      // Make sure nothing OAuth related ended up in the query string
+      for (OAuth.Parameter p : params) {
+        if (p.getKey().contains("oauth_")) {
+          throw new RuntimeException("Found unexpected query param " + p.getKey());
         }
       }
     }
-    return new OAuthMessage(method, url.getLocation(), params);
+    
+    // Parse authorization header
+    if (validParamLocations.contains(OAuthParamLocation.AUTH_HEADER)) {
+      String aznHeader = request.getHeader("Authorization");
+      if (aznHeader != null) {
+        info.aznHeader = aznHeader;
+        for (OAuth.Parameter p : OAuthMessage.decodeAuthorization(aznHeader)) {
+          if (!p.getKey().equalsIgnoreCase("realm")) {
+            params.add(p);
+          }
+        }
+      }
+    }
+    
+    // Parse body
+    if (validParamLocations.contains(OAuthParamLocation.POST_BODY)) {
+      String body = request.getPostBodyAsString();
+      if (request.getMethod().equals("POST")) {
+        String type = request.getHeader("Content-Type");
+        if (!"application/x-www-form-urlencoded".equals(type)) {
+          throw new RuntimeException("Wrong content-type header: " + type);
+        }
+        info.body = body;
+        params.addAll(OAuth.decodeForm(request.getPostBodyAsString()));
+      }
+    }
+    
+    // Return the lot
+    info.message = new OAuthMessage(method, parsed.getLocation(), params);
+    return info;
+  }
+  
+  /**
+   * Bundles information about a received OAuthMessage.
+   */
+  private static class MessageInfo {
+    public OAuthMessage message;
+    public String aznHeader;
+    public String body;
   }
 
   /**
@@ -316,7 +379,7 @@ public class FakeOAuthServiceProvider implements HttpFetcher {
 
   private HttpResponse handleAccessTokenUrl(HttpRequest request)
       throws Exception {
-    OAuthMessage message = parseMessage(request);
+    OAuthMessage message = parseMessage(request).message;
     String requestToken = message.getParameter("oauth_token");
     TokenState state = tokenState.get(requestToken);
     if (throttled) {
@@ -345,8 +408,8 @@ public class FakeOAuthServiceProvider implements HttpFetcher {
 
   private HttpResponse handleResourceUrl(HttpRequest request)
       throws Exception {
-    OAuthMessage message = parseMessage(request);
-    String accessToken = message.getParameter("oauth_token");
+    MessageInfo info = parseMessage(request);
+    String accessToken = info.message.getParameter("oauth_token");
     TokenState state = tokenState.get(accessToken);
     if (throttled) {
       return makeOAuthProblemReport(
@@ -363,8 +426,17 @@ public class FakeOAuthServiceProvider implements HttpFetcher {
     OAuthAccessor accessor = new OAuthAccessor(consumer);
     accessor.accessToken = accessToken;
     accessor.tokenSecret = state.getSecret();
-    message.validateMessage(accessor, validator);
-    return new HttpResponse("User data is " + state.getUserData());
+    info.message.validateMessage(accessor, validator);
+    HttpResponseBuilder resp = new HttpResponseBuilder()
+        .setHttpStatusCode(HttpResponse.SC_OK)
+        .setResponseString("User data is " + state.getUserData());
+    if (info.aznHeader != null) {
+      resp.setHeader(AUTHZ_ECHO_HEADER, info.aznHeader);
+    }
+    if (info.body != null) {
+      resp.setHeader(BODY_ECHO_HEADER, info.body);
+    }
+    return resp.create();
   }
 
   public void setConsumersThrottled(boolean throttled) {

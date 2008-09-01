@@ -37,12 +37,23 @@ public class FakeGadgetSpecFactory implements GadgetSpecFactory {
   
   public GadgetSpec getGadgetSpec(URI gadgetUri, boolean ignoreCache)
       throws GadgetException {
-    if (gadgetUri.toString().contains("nokey")) {
-      String nokeySpec = GadgetTokenStoreTest.GADGET_SPEC.replace(
-          SERVICE_NAME, SERVICE_NAME_NO_KEY);
+    String gadget = gadgetUri.toString();
+    String baseSpec = GadgetTokenStoreTest.GADGET_SPEC;
+    if (gadget.contains("nokey")) {
+      // For testing key lookup failures
+      String nokeySpec = baseSpec.replace(SERVICE_NAME, SERVICE_NAME_NO_KEY);
       return new GadgetSpec(gadgetUri, nokeySpec);
+    } else if (gadget.contains("header")) {
+      // For testing oauth data in header
+      String headerSpec = baseSpec.replace("uri-query", "auth-header");
+      return new GadgetSpec(gadgetUri, headerSpec);
+    } else if (gadget.contains("body")) {
+      // For testing oauth data in body
+      String bodySpec = baseSpec.replace("uri-query", "post-body");
+      bodySpec = bodySpec.replace("'GET'", "'POST'");
+      return new GadgetSpec(gadgetUri, bodySpec);
     } else {
-      return new GadgetSpec(gadgetUri, GadgetTokenStoreTest.GADGET_SPEC);
+      return new GadgetSpec(gadgetUri, baseSpec);
     }
   }
 }

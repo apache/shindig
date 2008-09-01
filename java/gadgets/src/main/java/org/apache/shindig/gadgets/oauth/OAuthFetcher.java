@@ -25,6 +25,7 @@ import org.apache.shindig.gadgets.http.HttpFetcher;
 import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.http.HttpResponse;
 import org.apache.shindig.gadgets.http.HttpResponseBuilder;
+import org.apache.shindig.gadgets.oauth.OAuthStore.OAuthParamLocation;
 
 import net.oauth.OAuth;
 import net.oauth.OAuthAccessor;
@@ -376,6 +377,16 @@ public class OAuthFetcher extends ChainedContentFetcher {
     // paramLocation could be overriden by a run-time parameter to fetchRequest
 
     HttpRequest result = new HttpRequest(base);
+    
+    // If someone specifies that OAuth parameters go in the body, but then sends a request for
+    // data using GET, we've got a choice.  We can throw some type of error, since a GET request
+    // can't have a body, or we can stick the parameters somewhere else, like, say, the header.
+    // We opt to put them in the header, since that stands some chance of working with some
+    // OAuth service providers.
+    if (paramLocation == OAuthStore.OAuthParamLocation.POST_BODY &&
+        !result.getMethod().equals("POST")) {
+      paramLocation = OAuthStore.OAuthParamLocation.AUTH_HEADER;
+    }
 
     switch (paramLocation) {
       case AUTH_HEADER:
@@ -413,6 +424,11 @@ public class OAuthFetcher extends ChainedContentFetcher {
     HttpRequest req = new HttpRequest(Uri.parse(request.URL))
         .setMethod(request.method)
         .setIgnoreCache(true);
+    
+    // Per section 5.2 of OAuth spec
+    if (accessorInfo.paramLocation == OAuthParamLocation.POST_BODY) {
+      req.setHeader("Content-Type", "application/x-www-form-urlencoded");
+    }
 
     HttpRequest oauthRequest = createHttpRequest(req, filterOAuthParams(request));
 
