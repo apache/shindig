@@ -19,6 +19,7 @@ package org.apache.shindig.gadgets.http;
 
 import com.google.common.collect.*;
 import org.apache.commons.lang.ArrayUtils;
+import org.apache.shindig.common.util.CharsetUtil;
 import org.apache.shindig.common.util.DateUtil;
 
 import java.util.*;
@@ -59,6 +60,14 @@ public class HttpResponseBuilder {
     return new HttpResponse(this);
   }
 
+  /**
+   * @param responseString The response string.  Converted to UTF-8 bytes and copied when set.
+   */
+  public HttpResponseBuilder setResponseString(String body) {
+    responseBytes = CharsetUtil.getUtf8Bytes(body);
+    return this;
+  }
+  
   /**   
    * @param responseBytes The response body. Copied when set.
    */

@@ -123,4 +123,11 @@ public class HttpResponseBuilderTest {
   }
 
 
+  @Test
+  public void setResponseString() {
+    HttpResponse resp = new HttpResponseBuilder()
+        .setResponseString("foo")
+        .create();
+    assertEquals("foo", resp.getResponseAsString());
+  }
 }
