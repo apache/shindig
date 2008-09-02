@@ -306,7 +306,7 @@ JsonRpcContainer.prototype.createPersonFromJson = function(serverJson) {
 
   if (serverJson.urls) {
     for (var u = 0; u < serverJson.urls.length; u++) {
-      this.translateUrlJson(serverJson.urls[p]);
+      this.translateUrlJson(serverJson.urls[u]);
     }
   }
 
