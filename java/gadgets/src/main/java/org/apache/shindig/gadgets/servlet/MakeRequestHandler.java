@@ -235,7 +235,7 @@ public class MakeRequestHandler extends ProxyBase{
    * @return A valid token for the given input.
    */
   private SecurityToken extractAndValidateToken(HttpServletRequest request) throws GadgetException {
-    SecurityToken token = AuthInfo.getSecurityToken(request);
+    SecurityToken token = new AuthInfo(request).getSecurityToken();
     if (token == null) {
       throw new GadgetException(GadgetException.Code.INVALID_SECURITY_TOKEN);
     }

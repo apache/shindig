@@ -121,7 +121,7 @@ public class HttpGadgetContext extends GadgetContext {
 
   @Override
   public SecurityToken getToken() {
-    return AuthInfo.getSecurityToken(request);
+    return new AuthInfo(request).getSecurityToken();
   }
 
   @Override

@@ -17,16 +17,33 @@
  */
 package org.apache.shindig.auth;
 
+import com.google.inject.Inject;
+
 import javax.servlet.http.HttpServletRequest;
 
 /**
- * Class to get/set authorization information on a servlet request.
- * Used by auth filters.
+ * Class to get authorization information on a servlet request.
+ * 
+ * Information is set by adding an AuthentiationServletFilter, and there
+ * is no way to set in a public API. This can be added in the future for testing
+ * purposes.
  */
 public class AuthInfo {
+  private HttpServletRequest req;
+  
+  /**
+   * Create AuthInfo from a given HttpServletRequest
+   * @param req
+   */
+  @Inject
+  public AuthInfo(HttpServletRequest req) {
+    this.req = req;
+  }
 
   /**
    * Constants for request attribute keys
+   * 
+   * This is only public for testing.
    */
   public enum Attribute {
     /** The security token */
@@ -42,41 +59,41 @@ public class AuthInfo {
   /**
    * Get the security token for this request.
    *
-   * @param req The request
    * @return The security token
    */
-  public static SecurityToken getSecurityToken(HttpServletRequest req) {
+  public SecurityToken getSecurityToken() {
     return getRequestAttribute(req, Attribute.SECURITY_TOKEN);
   }
 
   /**
    * Get the hosted domain for this request.
    *
-   * @param req The request
    * @return The domain, or {@code null} if no domain was found
    */
-  public static String getAuthType(HttpServletRequest req) {
+  public String getAuthType() {
     return getRequestAttribute(req, Attribute.AUTH_TYPE);
   }
 
   /**
    * Set the security token for the request.
    *
-   * @param req The request
    * @param token The security token
+   * @return This object
    */
-  public static void setSecurityToken(HttpServletRequest req, SecurityToken token) {
+  AuthInfo setSecurityToken(SecurityToken token) {
     setRequestAttribute(req, Attribute.SECURITY_TOKEN, token);
+    return this;
   }
 
   /**
    * Set the auth type for the request.
    *
-   * @param req The request
    * @param authType The named auth type
+   * @return This object
    */
-  public static void setAuthType(HttpServletRequest req, String authType) {
+  AuthInfo setAuthType(String authType) {
     setRequestAttribute(req, Attribute.AUTH_TYPE, authType);
+    return this;
   }
 
   /**
