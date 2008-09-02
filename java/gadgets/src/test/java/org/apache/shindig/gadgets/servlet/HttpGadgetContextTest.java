@@ -19,16 +19,18 @@ package org.apache.shindig.gadgets.servlet;
 
 import static org.easymock.EasyMock.expect;
 
+import org.apache.shindig.auth.AnonymousSecurityToken;
+import org.apache.shindig.auth.AuthInfo;
+import org.apache.shindig.auth.SecurityToken;
 import org.apache.shindig.gadgets.GadgetContext;
-import org.apache.shindig.gadgets.GadgetTestFixture;
 
 import java.util.Locale;
 
-public class HttpGadgetContextTest extends GadgetTestFixture {
+public class HttpGadgetContextTest extends ServletTestFixture {
   public void testIgnoreCacheParam() {
     expect(request.getParameter("nocache")).andReturn(Integer.toString(Integer.MAX_VALUE));
     replay();
-    GadgetContext context = new HttpGadgetContext(request, securityTokenDecoder);
+    GadgetContext context = new HttpGadgetContext(request);
     assertEquals(true, context.getIgnoreCache());
   }
 
@@ -36,21 +38,29 @@ public class HttpGadgetContextTest extends GadgetTestFixture {
     expect(request.getParameter("lang")).andReturn(Locale.CHINA.getLanguage());
     expect(request.getParameter("country")).andReturn(Locale.CHINA.getCountry());
     replay();
-    GadgetContext context = new HttpGadgetContext(request, securityTokenDecoder);
+    GadgetContext context = new HttpGadgetContext(request);
     assertEquals(Locale.CHINA, context.getLocale());
   }
 
   public void testDebug() {
     expect(request.getParameter("debug")).andReturn("1");
     replay();
-    GadgetContext context = new HttpGadgetContext(request, securityTokenDecoder);
+    GadgetContext context = new HttpGadgetContext(request);
     assertEquals(true, context.getDebug());
   }
 
   public void testGetParameter() {
     expect(request.getParameter("foo")).andReturn("bar");
     replay();
-    GadgetContext context = new HttpGadgetContext(request, securityTokenDecoder);
+    GadgetContext context = new HttpGadgetContext(request);
     assertEquals("bar", context.getParameter("foo"));
+  }
+
+  public void testGetSecurityToken() throws Exception {
+    SecurityToken expected = new AnonymousSecurityToken();
+    expect(request.getAttribute(AuthInfo.Attribute.SECURITY_TOKEN.getId())).andReturn(expected);
+    replay();
+    GadgetContext context = new HttpGadgetContext(request);
+    assertEquals(expected, context.getToken());
   }
 }

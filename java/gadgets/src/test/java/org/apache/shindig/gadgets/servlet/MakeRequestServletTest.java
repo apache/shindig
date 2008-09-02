@@ -26,6 +26,7 @@ import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.http.HttpResponse;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -47,9 +48,8 @@ public class MakeRequestServletTest extends ServletTestFixture {
       = Collections.enumeration(Collections.<String>emptyList());
 
   private final MakeRequestServlet servlet = new MakeRequestServlet();
-  private final MakeRequestHandler handler = new MakeRequestHandler(contentFetcherFactory,
-      securityTokenDecoder);
-  
+  private final MakeRequestHandler handler = new MakeRequestHandler(contentFetcherFactory);
+
   private final HttpRequest internalRequest = new HttpRequest(REQUEST_URL);
   private final HttpResponse internalResponse = new HttpResponse(RESPONSE_BODY);
 

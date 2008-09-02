@@ -19,17 +19,14 @@
 
 package org.apache.shindig.gadgets.servlet;
 
+import org.apache.shindig.auth.AuthInfo;
 import org.apache.shindig.auth.SecurityToken;
-import org.apache.shindig.auth.SecurityTokenDecoder;
-import org.apache.shindig.auth.SecurityTokenException;
 import org.apache.shindig.gadgets.GadgetContext;
-import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.RenderingContext;
 import org.apache.shindig.gadgets.UserPrefs;
 
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Locale;
@@ -44,7 +41,6 @@ public class HttpGadgetContext extends GadgetContext {
   public static final String USERPREF_PARAM_PREFIX = "up_";
 
   private final HttpServletRequest request;
-  private final SecurityTokenDecoder tokenDecoder;
 
   private final String container;
   private final Boolean debug;
@@ -52,14 +48,12 @@ public class HttpGadgetContext extends GadgetContext {
   private final Locale locale;
   private final Integer moduleId;
   private final RenderingContext renderingContext;
-  private final String tokenString;
   private final URI url;
   private final UserPrefs userPrefs;
   private final String view;
 
-  public HttpGadgetContext(HttpServletRequest request, SecurityTokenDecoder tokenDecoder) {
+  public HttpGadgetContext(HttpServletRequest request) {
     this.request = request;
-    this.tokenDecoder = tokenDecoder;
 
     container = getContainer(request);
     debug = getDebug(request);
@@ -67,8 +61,6 @@ public class HttpGadgetContext extends GadgetContext {
     locale = getLocale(request);
     moduleId = getModuleId(request);
     renderingContext = getRenderingContext(request);
-    // TODO: This shouldn't be depending on MakeRequest at all.
-    tokenString = request.getParameter(MakeRequestHandler.SECURITY_TOKEN_PARAM);
     url = getUrl(request);
     userPrefs = getUserPrefs(request);
     view = getView(request);
@@ -128,19 +120,8 @@ public class HttpGadgetContext extends GadgetContext {
   }
 
   @Override
-  public SecurityToken getToken() throws GadgetException {
-    if (tokenString == null || tokenString.length() == 0) {
-      return super.getToken();
-    } else {
-      try {
-        Map<String, String> tokenMap
-            = Collections.singletonMap(SecurityTokenDecoder.SECURITY_TOKEN_NAME, tokenString);
-        return tokenDecoder.createToken(tokenMap);
-      } catch (SecurityTokenException e) {
-        throw new GadgetException(
-            GadgetException.Code.INVALID_SECURITY_TOKEN, e);
-      }
-    }
+  public SecurityToken getToken() {
+    return AuthInfo.getSecurityToken(request);
   }
 
   @Override
