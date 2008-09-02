@@ -34,4 +34,9 @@ public class SpecParserException extends GadgetException {
   public SpecParserException(XmlException e) {
     super(GadgetException.Code.MALFORMED_XML_DOCUMENT, e);
   }
+  
+  public SpecParserException(String message, XmlException e) {
+    super(GadgetException.Code.MALFORMED_XML_DOCUMENT, message, e);
+  }
+  
 }

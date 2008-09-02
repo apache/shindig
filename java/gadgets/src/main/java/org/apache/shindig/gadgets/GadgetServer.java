@@ -151,13 +151,20 @@ public class GadgetServer {
     Set<String> needed = features.keySet();
     Set<String> unsupported = new HashSet<String>();
     Collection<GadgetFeature> feats = registry.getFeatures(needed, unsupported);
+
     if (!unsupported.isEmpty()) {
+      // Remove non-required libs
       for (String missing : unsupported) {
-        if (features.get(missing).getRequired()) {
-          throw new UnsupportedFeatureException(missing);
+        if (!features.get(missing).getRequired()) {
+          unsupported.remove(missing);
         }
       }
+      // Throw error with full list of unsupported libraries
+      if (!unsupported.isEmpty()) {
+        throw new UnsupportedFeatureException(unsupported.toString());
+      }
     }
+
     Collection<JsLibrary> libraries = new LinkedList<JsLibrary>();
     for (GadgetFeature feature : feats) {
       libraries.addAll(feature.getJsLibraries(
