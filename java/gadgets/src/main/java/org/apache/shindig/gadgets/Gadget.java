@@ -68,6 +68,11 @@ public class Gadget {
   public LocaleSpec getLocale() {
     return spec.getModulePrefs().getLocale(context.getLocale());
   }
+  
+  private final View currentView;
+  public View getCurrentView() {
+	  return currentView;
+  }
 
   /**
    * Attempts to extract the "current" view for this gadget.
@@ -75,7 +80,7 @@ public class Gadget {
    * @param config The container configuration; used to look for any view name
    *        aliases for the container specified in the context.
    */
-  public View getView(ContainerConfig config) {
+  View getView(ContainerConfig config) {
     String viewName = context.getView();
     View view = spec.getView(viewName);
     if (view == null) {
@@ -101,11 +106,33 @@ public class Gadget {
     }
     return view;
   }
+  
+  private String content;
+  public String getContent() {
+    return content;
+  }
+  
+  public void setContent(String newContent) {
+    this.content = newContent;
+  }
 
+  private ContainerConfig containerConfig;
+  public ContainerConfig getContainerConfig() {
+    return containerConfig;
+  }
+  
   public Gadget(GadgetContext context, GadgetSpec spec,
-      Collection<JsLibrary> jsLibraries) {
+      Collection<JsLibrary> jsLibraries, ContainerConfig containerConfig) {
     this.context = context;
     this.spec = spec;
     this.jsLibraries = jsLibraries;
+    this.containerConfig = containerConfig;
+    this.currentView = getView(this.containerConfig);
+    if (this.currentView != null) {
+      // View might be invalid or associated with no content (type=URL)
+      this.content = this.currentView.getContent();
+    } else {
+      this.content = null;
+    }
   }
 }

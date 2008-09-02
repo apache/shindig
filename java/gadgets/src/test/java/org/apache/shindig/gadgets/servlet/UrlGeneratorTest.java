@@ -62,7 +62,7 @@ public class UrlGeneratorTest extends GadgetTestFixture {
 
   @Override
   public void setUp() throws Exception {
-    realUrlGenerator = new UrlGenerator(IFR_PREFIX, JS_PREFIX, registry, containerConfig);
+    realUrlGenerator = new UrlGenerator(IFR_PREFIX, JS_PREFIX, registry);
 
     expect(context.getContainer()).andReturn(CONTAINER).anyTimes();
     expect(context.getUrl()).andReturn(URI.create(SPEC_URL)).anyTimes();
@@ -129,8 +129,8 @@ public class UrlGeneratorTest extends GadgetTestFixture {
           " <UserPref name='" + UP_NAME + "' datatype='string'/>" +
           "</Module>";
     GadgetSpec spec = new GadgetSpec(URI.create(SPEC_URL), xml);
-    Gadget gadget = new Gadget(context, spec, Collections.<JsLibrary>emptyList());
     replay();
+    Gadget gadget = new Gadget(context, spec, Collections.<JsLibrary>emptyList(), containerConfig);
 
     URI iframeUrl = URI.create(realUrlGenerator.getIframeUrl(gadget));
 
@@ -149,9 +149,9 @@ public class UrlGeneratorTest extends GadgetTestFixture {
           " <UserPref name='" + UP_NAME + "' datatype='string'/>" +
           "</Module>";
     GadgetSpec spec = new GadgetSpec(URI.create(SPEC_URL), xml);
-    Gadget gadget = new Gadget(context, spec, Collections.<JsLibrary>emptyList());
     replay();
-
+    Gadget gadget = new Gadget(context, spec, Collections.<JsLibrary>emptyList(), containerConfig);
+    
     URI iframeUrl = URI.create(realUrlGenerator.getIframeUrl(gadget));
 
     assertEquals(TYPE_URL_HREF_HOST, iframeUrl.getAuthority());

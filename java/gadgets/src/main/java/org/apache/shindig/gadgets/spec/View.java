@@ -64,10 +64,7 @@ public class View {
   public URI getHref() {
     return href;
   }
-  public void setHref(URI href) {
-    this.href = href;
-  }
-
+  
   /**
    * Content@quirks
    */
@@ -101,8 +98,18 @@ public class View {
   public String getContent() {
     return content;
   }
-  public void setContent(String content) {
+  
+  /**
+   * Set content for a type=html, href=URL style gadget.
+   * This is the last bastion of GadgetSpec mutability,
+   * and should only be used for the described case.
+   * Call nulls out href in order to indicate content was
+   * successfully retrieved.
+   * @param content New gadget content retrieved from href.
+   */
+  public void setHrefContent(String content) {
     this.content = content;
+    this.href = null;
   }
 
   /**
@@ -120,13 +127,9 @@ public class View {
    * @param substituter
    * @return The substituted view.
    */
-  public View substitute(Substitutions substituter, boolean rewrite) {
+  public View substitute(Substitutions substituter) {
     View view = new View(this);
-    if (rewrite && rewrittenContent != null) {
-      view.content = substituter.substituteString(null, rewrittenContent);
-    } else {
-      view.content = substituter.substituteString(null, content);
-    }
+    view.content = substituter.substituteString(null, content);
     view.href = substituter.substituteUri(null, href);
     return view;
   }
@@ -228,18 +231,5 @@ public class View {
     public static ContentType parse(String value) {
       return "url".equals(value) ? URL : HTML;
     }
-  }
-
-  //
-  // Decorations
-  //
-  private String rewrittenContent;
-
-  public String getRewrittenContent() {
-    return rewrittenContent;
-  }
-
-  public void setRewrittenContent(String rewrittenContent) {
-    this.rewrittenContent = rewrittenContent;
   }
 }

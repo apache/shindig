@@ -26,17 +26,12 @@ import org.apache.shindig.gadgets.http.HttpFetcher;
 import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.http.HttpResponse;
 import org.apache.shindig.gadgets.http.HttpResponseBuilder;
-import org.apache.shindig.gadgets.rewrite.BasicContentRewriterRegistry;
-import org.apache.shindig.gadgets.rewrite.ContentRewriter;
-import org.apache.shindig.gadgets.rewrite.ContentRewriterRegistry;
 import org.apache.shindig.gadgets.spec.GadgetSpec;
 
 import org.easymock.EasyMock;
 import static org.easymock.EasyMock.expect;
 import static org.easymock.classextension.EasyMock.replay;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
 import org.junit.Test;
 
 import java.net.URI;
@@ -85,14 +80,11 @@ public class BasicGadgetSpecFactoryTest {
   private final static ExecutorService FAKE_EXECUTOR = new TestExecutorService();
 
   private final HttpFetcher fetcher = EasyMock.createNiceMock(HttpFetcher.class);
-  private final CaptureRewriter rewriter = new CaptureRewriter();
-  private final ContentRewriterRegistry rewriterRegistry =
-      new BasicContentRewriterRegistry(rewriter);
   
   private final CacheProvider cacheProvider = new DefaultCacheProvider();
 
   private final BasicGadgetSpecFactory specFactory
-      = new BasicGadgetSpecFactory(fetcher, cacheProvider, rewriterRegistry, FAKE_EXECUTOR, 5, -1000, 1000);
+      = new BasicGadgetSpecFactory(fetcher, cacheProvider, FAKE_EXECUTOR, 5, -1000, 1000);
 
   @Test
   public void specFetched() throws Exception {
@@ -104,8 +96,6 @@ public class BasicGadgetSpecFactoryTest {
     GadgetSpec spec = specFactory.getGadgetSpec(SPEC_URL.toJavaUri(), true);
 
     assertEquals(LOCAL_CONTENT, spec.getView(GadgetSpec.DEFAULT_VIEW).getContent());
-    assertEquals(LOCAL_CONTENT, spec.getView(GadgetSpec.DEFAULT_VIEW).getRewrittenContent());
-    assertTrue("Content not rewritten.", rewriter.rewroteView);
   }
 
   @Test
@@ -118,8 +108,6 @@ public class BasicGadgetSpecFactoryTest {
     GadgetSpec spec = specFactory.getGadgetSpec(NO_CACHE_CONTEXT);
 
     assertEquals(LOCAL_CONTENT, spec.getView(GadgetSpec.DEFAULT_VIEW).getContent());
-    assertEquals(LOCAL_CONTENT, spec.getView(GadgetSpec.DEFAULT_VIEW).getRewrittenContent());
-    assertTrue("Content not rewritten.", rewriter.rewroteView);
   }
 
   @Test
@@ -139,8 +127,6 @@ public class BasicGadgetSpecFactoryTest {
     GadgetSpec spec = specFactory.getGadgetSpec(SPEC_URL.toJavaUri(), false);
 
     assertEquals(ALT_LOCAL_CONTENT, spec.getView(GadgetSpec.DEFAULT_VIEW).getContent());
-    assertEquals(ALT_LOCAL_CONTENT, spec.getView(GadgetSpec.DEFAULT_VIEW).getRewrittenContent());
-    assertTrue("Content not rewritten.", rewriter.rewroteView);
   }
 
   @Test
@@ -159,8 +145,6 @@ public class BasicGadgetSpecFactoryTest {
     GadgetSpec spec = specFactory.getGadgetSpec(SPEC_URL.toJavaUri(), false);
 
     assertEquals(ALT_LOCAL_CONTENT, spec.getView(GadgetSpec.DEFAULT_VIEW).getContent());
-    assertEquals(ALT_LOCAL_CONTENT, spec.getView(GadgetSpec.DEFAULT_VIEW).getRewrittenContent());
-    assertTrue("Content not rewritten.", rewriter.rewroteView);
   }
 
   @Test
@@ -176,8 +160,6 @@ public class BasicGadgetSpecFactoryTest {
     GadgetSpec spec = specFactory.getGadgetSpec(SPEC_URL.toJavaUri(), true);
 
     assertEquals(REMOTE_CONTENT, spec.getView(GadgetSpec.DEFAULT_VIEW).getContent());
-    assertEquals(REMOTE_CONTENT, spec.getView(GadgetSpec.DEFAULT_VIEW).getRewrittenContent());
-    assertTrue("Content not rewritten.", rewriter.rewroteView);
   }
 
   @Test
@@ -191,8 +173,6 @@ public class BasicGadgetSpecFactoryTest {
 
     assertEquals(REMOTE_URL.toJavaUri(), spec.getView(GadgetSpec.DEFAULT_VIEW).getHref());
     assertEquals("", spec.getView(GadgetSpec.DEFAULT_VIEW).getContent());
-    assertEquals(null, spec.getView(GadgetSpec.DEFAULT_VIEW).getRewrittenContent());
-    assertFalse("Content was rewritten for type=url.", rewriter.rewroteView);
   }
 
   @Test(expected = GadgetException.class)
@@ -224,18 +204,5 @@ public class BasicGadgetSpecFactoryTest {
     replay(fetcher);
 
     specFactory.getGadgetSpec(SPEC_URL.toJavaUri(), true);
-  }
-
-  private static class CaptureRewriter implements ContentRewriter {
-    private boolean rewroteView = false;
-
-    public HttpResponse rewrite(HttpRequest request, HttpResponse original) {
-      return original;
-    }
-
-    public String rewriteGadgetView(GadgetSpec spec, String original, String mimeType) {
-      rewroteView = true;
-      return original;
-    }
   }
 }

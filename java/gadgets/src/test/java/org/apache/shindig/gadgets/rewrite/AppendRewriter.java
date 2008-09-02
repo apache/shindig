@@ -17,27 +17,30 @@
  */
 package org.apache.shindig.gadgets.rewrite;
 
-import com.google.inject.ImplementedBy;
+import org.apache.shindig.gadgets.http.HttpRequest;
+import org.apache.shindig.gadgets.http.HttpResponse;
+import org.apache.shindig.gadgets.spec.GadgetSpec;
 
-import java.util.List;
-
-import org.apache.shindig.gadgets.Gadget;
-import org.apache.shindig.gadgets.GadgetContext;
-import org.apache.shindig.gadgets.GadgetException;
-
-@ImplementedBy(BasicContentRewriterRegistry.class)
-public interface ContentRewriterRegistry {
-  /**
-   * @return An immutable list of all content rewriters
-   */
-  public List<ContentRewriter> getRewriters();
+/**
+ * Simple ContentRewriter implementation that appends
+ * some particular String to the given input content.
+ * Used for testing.
+ */
+class AppendRewriter implements ContentRewriter {
+  private final String appender;
   
-  /**
-   * Rewrites a {@code Gadget} object given the registered rewriters.
-   * @param context Context for gadget rewriting
-   * @param gadget Gadget object to rewrite
-   * @return True if rewriting occurred
-   * @throws GadgetException Potentially passed through from rewriters
-   */
-  public boolean rewriteGadget(GadgetContext context, Gadget gadget) throws GadgetException;
+  AppendRewriter(String appender) {
+    this.appender = appender;
+  }
+
+  public HttpResponse rewrite(HttpRequest request, HttpResponse original) {
+    // Does nothing.
+    return null;
+  }
+
+  public String rewriteGadgetView(GadgetSpec spec, String original,
+      String mimeType) {
+    // Appends appender to the end of the input string.
+    return original + appender;
+  }
 }

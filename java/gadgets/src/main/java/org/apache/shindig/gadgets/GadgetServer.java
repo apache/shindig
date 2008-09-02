@@ -17,11 +17,13 @@
  */
 package org.apache.shindig.gadgets;
 
+import org.apache.shindig.common.ContainerConfig;
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.gadgets.http.ContentFetcherFactory;
 import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.http.HttpResponse;
 import org.apache.shindig.gadgets.oauth.OAuthArguments;
+import org.apache.shindig.gadgets.rewrite.ContentRewriterRegistry;
 import org.apache.shindig.gadgets.spec.Auth;
 import org.apache.shindig.gadgets.spec.Feature;
 import org.apache.shindig.gadgets.spec.GadgetSpec;
@@ -51,6 +53,8 @@ public class GadgetServer {
   private final ExecutorService executor;
   private final GadgetFeatureRegistry registry;
   private final GadgetBlacklist blacklist;
+  private final ContainerConfig containerConfig;
+  private final ContentRewriterRegistry rewriterRegistry;
 
   private ContentFetcherFactory preloadFetcherFactory;
   private GadgetSpecFactory specFactory;
@@ -60,46 +64,41 @@ public class GadgetServer {
   public GadgetServer(ExecutorService executor,
       GadgetFeatureRegistry registry,
       GadgetBlacklist blacklist,
+      ContainerConfig containerConfig,
+      ContentRewriterRegistry rewriterRegistry,
       ContentFetcherFactory preloadFetcherFactory,
       GadgetSpecFactory specFactory,
       MessageBundleFactory bundleFactory) {
     this.executor = executor;
     this.registry = registry;
     this.blacklist = blacklist;
+    this.containerConfig = containerConfig;
+    this.rewriterRegistry = rewriterRegistry;
     this.preloadFetcherFactory = preloadFetcherFactory;
     this.specFactory = specFactory;
     this.bundleFactory = bundleFactory;
   }
-
+  
   /**
-   * Process a single gadget.
+   * Process a single gadget. Creates a gadget from a retrieved
+   * GadgetSpec and context object. Performs rewriting, then message
+   * bundle substitution and feature processing.
    *
-   * @param context
-   * @return The processed gadget.
+   * @param context Gadget request context.
+   * @return The processed gadget, ready for consumption.
    * @throws GadgetException
    */
   public Gadget processGadget(GadgetContext context) throws GadgetException {
     if (blacklist.isBlacklisted(context.getUrl())) {
       throw new GadgetException(GadgetException.Code.BLACKLISTED_GADGET);
     }
-    return createGadgetFromSpec(specFactory.getGadgetSpec(context), context);
-  }
-
-  /**
-   * Creates a Gadget from the specified gadget spec and context objects.
-   * This performs message bundle substitution as well as feature processing.
-   *
-   * @param spec
-   * @param context
-   * @return The final Gadget, ready for consumption.
-   * @throws GadgetException
-   */
-  private Gadget createGadgetFromSpec(GadgetSpec spec, GadgetContext context)
-      throws GadgetException {
+    // Retrieve the GadgetSpec for the given context.
+    GadgetSpec spec = specFactory.getGadgetSpec(context);
+    
+    // Create substituted GadgetSpec object, including message bundle substitutions.
     MessageBundle bundle
         = bundleFactory.getBundle(spec, context.getLocale(), context.getIgnoreCache());
     String dir = bundle.getLanguageDirection();
-
     Substitutions substituter = new Substitutions();
     substituter.addSubstitutions(
         Substitutions.Type.MESSAGE, bundle.getMessages());
@@ -108,10 +107,16 @@ public class GadgetServer {
         Integer.toString(context.getModuleId()));
     UserPrefSubstituter.addSubstitutions(
         substituter, spec, context.getUserPrefs());
-    spec = spec.substitute(substituter, !context.getIgnoreCache());
-
+    spec = spec.substitute(substituter);
+    
     Collection<JsLibrary> jsLibraries = getLibraries(spec, context);
-    Gadget gadget = new Gadget(context, spec, jsLibraries);
+    Gadget gadget = new Gadget(context, spec, jsLibraries, containerConfig);
+    
+    // Perform rewriting operations on the Gadget.
+    if (rewriterRegistry != null) {
+      rewriterRegistry.rewriteGadget(context, gadget);
+    }
+
     startPreloads(gadget);
     return gadget;
   }

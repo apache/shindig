@@ -18,7 +18,6 @@
  */
 package org.apache.shindig.gadgets.servlet;
 
-import org.apache.shindig.common.ContainerConfig;
 import org.apache.shindig.common.util.HashUtil;
 import org.apache.shindig.common.util.Utf8UrlCoder;
 import org.apache.shindig.gadgets.Gadget;
@@ -47,7 +46,6 @@ public class UrlGenerator {
   private final String jsPrefix;
   private final String iframePrefix;
   private final String jsChecksum;
-  private final ContainerConfig containerConfig;
   private final static Pattern ALLOWED_FEATURE_NAME
       = Pattern.compile("[0-9a-zA-Z\\.\\-]+");
 
@@ -100,7 +98,7 @@ public class UrlGenerator {
     GadgetContext context = gadget.getContext();
     GadgetSpec spec = gadget.getSpec();
     String url = context.getUrl().toString();
-    View view = gadget.getView(containerConfig);
+    View view = gadget.getCurrentView();
     View.ContentType type;
     if (view == null) {
       type = View.ContentType.HTML;
@@ -159,11 +157,9 @@ public class UrlGenerator {
   @Inject
   public UrlGenerator(@Named("shindig.urls.iframe.prefix") String iframePrefix,
                       @Named("shindig.urls.js.prefix") String jsPrefix,
-                      GadgetFeatureRegistry registry,
-                      ContainerConfig containerConfig) {
+                      GadgetFeatureRegistry registry) {
     this.iframePrefix = iframePrefix;
     this.jsPrefix = jsPrefix;
-    this.containerConfig = containerConfig;
 
     StringBuilder jsBuf = new StringBuilder();
     for (GadgetFeature feature : registry.getAllFeatures()) {

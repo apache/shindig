@@ -150,7 +150,7 @@ public class ViewTest extends TestCase {
     substituter.addSubstitution(Type.MODULE, "ID", "3");
 
     View view = new View("test",
-        Arrays.asList(XmlUtil.parse(xml))).substitute(substituter, false);
+        Arrays.asList(XmlUtil.parse(xml))).substitute(substituter);
     assertEquals("Hello, foo Earthright 3", view.getContent());
   }
 
@@ -166,7 +166,7 @@ public class ViewTest extends TestCase {
     substituter.addSubstitution(Type.MODULE, "ID", "123");
 
     View view = new View("test",
-        Arrays.asList(XmlUtil.parse(xml))).substitute(substituter, false);
+        Arrays.asList(XmlUtil.parse(xml))).substitute(substituter);
     assertEquals("http://up.example.org/123?dir=rtl",
                  view.getHref().toString());
   }

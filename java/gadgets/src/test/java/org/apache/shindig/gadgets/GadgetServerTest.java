@@ -77,6 +77,11 @@ public class GadgetServerTest extends GadgetTestFixture {
       = "<messagebundle>" +
         "  <msg name=\"title\">TITLE</msg>" +
        "</messagebundle>";
+  
+  @Override
+  protected void setUp() throws Exception {
+    rewriter.resetWasRewritten();
+  }
 
   public void testGadgetSpecLookup() throws Exception {
     HttpRequest req = new HttpRequest(SPEC_URL);
@@ -89,6 +94,7 @@ public class GadgetServerTest extends GadgetTestFixture {
     verify();
     assertEquals("GadgetServerTest",
         gadget.getSpec().getModulePrefs().getTitle());
+    assertTrue(rewriter.viewWasRewritten());
   }
 
   public void testGadgetSpecLookupWithFetcherFailure() throws Exception {
@@ -132,6 +138,7 @@ public class GadgetServerTest extends GadgetTestFixture {
     assertEquals("TITLE", gadget.getSpec().getModulePrefs().getTitle());
     assertEquals("BODY",
         gadget.getSpec().getView(GadgetSpec.DEFAULT_VIEW).getContent());
+    assertTrue(rewriter.viewWasRewritten());
   }
 
   public void testBundledSubstitutionsDone() throws Exception {
@@ -160,6 +167,7 @@ public class GadgetServerTest extends GadgetTestFixture {
     assertEquals("TITLE", gadget.getSpec().getModulePrefs().getTitle());
     assertEquals("BODY",
         gadget.getSpec().getView(GadgetSpec.DEFAULT_VIEW).getContent());
+    assertTrue(rewriter.viewWasRewritten());
   }
 
   public void testPreloadsFetched() throws Exception {
@@ -185,6 +193,7 @@ public class GadgetServerTest extends GadgetTestFixture {
 
     assertEquals(preloadData, gadget.getPreloadMap().values().iterator().next()
                                     .get().getResponseAsString());
+    assertTrue(rewriter.viewWasRewritten());
   }
 
   public void testPreloadViewMatch() throws Exception {
@@ -221,6 +230,7 @@ public class GadgetServerTest extends GadgetTestFixture {
     Gadget gadget = gadgetServer.processGadget(context);
 
     assertTrue(gadget.getPreloadMap().size() == 1);
+    assertTrue(rewriter.viewWasRewritten());
   }
 
   public void testPreloadAntiMatch() throws Exception {
@@ -257,6 +267,7 @@ public class GadgetServerTest extends GadgetTestFixture {
 
     Gadget gadget = gadgetServer.processGadget(context);
     assertTrue(gadget.getPreloadMap().isEmpty());
+    assertTrue(rewriter.viewWasRewritten());
   }
 
   public void testNoSignedPreloadWithoutToken() throws Exception {
@@ -306,6 +317,7 @@ public class GadgetServerTest extends GadgetTestFixture {
 
     Gadget gadget = gadgetServer.processGadget(BASIC_CONTEXT);
     assertTrue(gadget.getPreloadMap().size() == 1);
+    assertTrue(rewriter.viewWasRewritten());
   }
 
   public void testOAuthPreload() throws Exception {
@@ -332,6 +344,7 @@ public class GadgetServerTest extends GadgetTestFixture {
 
     Gadget gadget = gadgetServer.processGadget(BASIC_CONTEXT);
     assertTrue(gadget.getPreloadMap().size() == 1);
+    assertTrue(rewriter.viewWasRewritten());
   }
 
   public void testBlacklistedGadget() throws Exception {
