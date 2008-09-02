@@ -68,9 +68,14 @@ gadgets.io = function() {
     if (xobj.readyState !== 4) {
       return true;
     }
-    if (xobj.status !== 200) {
-      // TODO Need to work on standardizing errors
-      callback({errors : ["Error " + xobj.status]});
+    try {
+      if (xobj.status !== 200) {
+        // TODO Need to work on standardizing errors
+        callback({errors : ["Error " + xobj.status]});
+        return true;
+      }
+    } catch(e) {
+      callback({errors : ["Error not specified"]});
       return true;
     }
     return false;
