@@ -28,7 +28,7 @@ public class AuthInfo {
   /**
    * Constants for request attribute keys
    */
-  enum Attribute {
+  public enum Attribute {
     /** The security token */
     SECURITY_TOKEN,
     /** The named auth type */
@@ -86,8 +86,7 @@ public class AuthInfo {
    * @param att The attribute
    * @param value The value
    */
-  private static<T> void setRequestAttribute(HttpServletRequest req,
-      Attribute att, T value) {
+  private static<T> void setRequestAttribute(HttpServletRequest req, Attribute att, T value) {
     req.setAttribute(att.getId(), value);
   }
 
@@ -99,8 +98,7 @@ public class AuthInfo {
    * @return The value
    */
   @SuppressWarnings("unchecked")
-  private static<T> T getRequestAttribute(HttpServletRequest req,
-      Attribute att) {
+  private static<T> T getRequestAttribute(HttpServletRequest req, Attribute att) {
     return (T)req.getAttribute(att.getId());
   }
 }

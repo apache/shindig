@@ -26,12 +26,27 @@
   <!-- If you have your own Guice module(s), put them here as a colon-separated list. -->
   <context-param>
     <param-name>guice-modules</param-name>
-    <param-value>org.apache.shindig.gadgets.servlet.HttpGuiceModule</param-value>
+    <param-value>org.apache.shindig.gadgets.servlet.HttpGuiceModule:org.apache.shindig.gadgets.servlet.AuthenticationModule</param-value>
   </context-param>
 
   <listener>
     <listener-class>org.apache.shindig.common.servlet.GuiceServletContextListener</listener-class>
   </listener>
+
+  <filter>
+    <filter-name>authFilter</filter-name>
+    <filter-class>org.apache.shindig.auth.AuthenticationServletFilter</filter-class>
+  </filter>
+  
+  <filter-mapping>
+    <filter-name>authFilter</filter-name>
+    <url-pattern>/gadgets/ifr</url-pattern>
+  </filter-mapping>
+
+  <filter-mapping>
+    <filter-name>authFilter</filter-name>
+    <url-pattern>/gadgets/makeRequest</url-pattern>
+  </filter-mapping>
 
   <!-- Render a Gadget -->
   <servlet>

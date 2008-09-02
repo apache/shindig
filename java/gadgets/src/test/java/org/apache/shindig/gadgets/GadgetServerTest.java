@@ -47,8 +47,7 @@ public class GadgetServerTest extends GadgetTestFixture {
     }
 
     @Override
-    @SuppressWarnings("unused")
-    public SecurityToken getToken() throws GadgetException {
+    public SecurityToken getToken() {
       try {
         return new BasicSecurityToken("o", "v", "a", "d", "u", "m");
       } catch (BlobCrypterException bce) {

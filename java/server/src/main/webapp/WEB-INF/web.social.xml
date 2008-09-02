@@ -30,12 +30,12 @@
   </context-param>
 
   <filter>
-    <filter-name>oauthFilter</filter-name>
+    <filter-name>authFilter</filter-name>
     <filter-class>org.apache.shindig.auth.AuthenticationServletFilter</filter-class>
   </filter>
 
   <filter-mapping>
-    <filter-name>oauthFilter</filter-name>
+    <filter-name>authFilter</filter-name>
     <url-pattern>/social/*</url-pattern>
   </filter-mapping>
 

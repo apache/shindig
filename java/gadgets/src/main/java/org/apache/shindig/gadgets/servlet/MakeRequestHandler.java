@@ -18,9 +18,8 @@
  */
 package org.apache.shindig.gadgets.servlet;
 
+import org.apache.shindig.auth.AuthInfo;
 import org.apache.shindig.auth.SecurityToken;
-import org.apache.shindig.auth.SecurityTokenDecoder;
-import org.apache.shindig.auth.SecurityTokenException;
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.common.util.Utf8UrlCoder;
 import org.apache.shindig.gadgets.FeedProcessor;
@@ -40,7 +39,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
-import java.util.Collections;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
@@ -57,7 +55,6 @@ public class MakeRequestHandler extends ProxyBase{
   public static final String UNPARSEABLE_CRUFT = "throw 1; < don't be evil' >";
   public static final String POST_DATA_PARAM = "postData";
   public static final String METHOD_PARAM = "httpMethod";
-  public static final String SECURITY_TOKEN_PARAM = "st";
   public static final String HEADERS_PARAM = "headers";
   public static final String NOCACHE_PARAM = "nocache";
   public static final String SIGN_VIEWER = "signViewer";
@@ -67,14 +64,11 @@ public class MakeRequestHandler extends ProxyBase{
   public static final String DEFAULT_NUM_ENTRIES = "3";
   public static final String GET_SUMMARIES_PARAM = "getSummaries";
 
-  private final SecurityTokenDecoder securityTokenDecoder;
   private final ContentFetcherFactory contentFetcherFactory;
 
   @Inject
-  public MakeRequestHandler(ContentFetcherFactory contentFetcherFactory,
-                            SecurityTokenDecoder securityTokenDecoder) {
+  public MakeRequestHandler(ContentFetcherFactory contentFetcherFactory) {
     this.contentFetcherFactory = contentFetcherFactory;
-    this.securityTokenDecoder = securityTokenDecoder;
   }
 
   /**
@@ -240,14 +234,12 @@ public class MakeRequestHandler extends ProxyBase{
    * @param request
    * @return A valid token for the given input.
    */
-  private SecurityToken extractAndValidateToken(HttpServletRequest request)
-      throws GadgetException {
-    String token = getParameter(request, SECURITY_TOKEN_PARAM, "");
-    try {
-      return securityTokenDecoder.createToken(Collections.singletonMap(SecurityTokenDecoder.SECURITY_TOKEN_NAME, token));
-    } catch (SecurityTokenException e) {
-      throw new GadgetException(GadgetException.Code.INVALID_SECURITY_TOKEN, e);
+  private SecurityToken extractAndValidateToken(HttpServletRequest request) throws GadgetException {
+    SecurityToken token = AuthInfo.getSecurityToken(request);
+    if (token == null) {
+      throw new GadgetException(GadgetException.Code.INVALID_SECURITY_TOKEN);
     }
+    return token;
   }
 
   /**

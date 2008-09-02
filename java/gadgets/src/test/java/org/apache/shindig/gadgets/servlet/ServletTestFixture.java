@@ -27,6 +27,7 @@ import org.apache.shindig.auth.SecurityToken;
 import org.apache.shindig.common.util.DateUtil;
 import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.GadgetTestFixture;
+import org.apache.shindig.gadgets.LockedDomainService;
 import org.apache.shindig.gadgets.oauth.OAuthArguments;
 
 import org.apache.commons.lang.StringUtils;
@@ -34,22 +35,36 @@ import org.apache.commons.lang.StringUtils;
 import java.util.Arrays;
 import java.util.List;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
 /**
  * Contains everything needed for making servlet requests.
  */
 public class ServletTestFixture extends GadgetTestFixture {
+  public final HttpServletRequest request = mock(HttpServletRequest.class);
+  public final HttpServletResponse response = mock(HttpServletResponse.class);
+  public final HttpServletResponseRecorder recorder = new HttpServletResponseRecorder(response);
+  public final GadgetRenderingTask gadgetRenderer;
+  public final JsonRpcHandler jsonRpcHandler;
+  public final UrlGenerator urlGenerator = mock(UrlGenerator.class);
+  public final LockedDomainService lockedDomainService = mock(LockedDomainService.class);
 
   private final long testStartTime = timeSource.currentTimeMillis();
 
   public ServletTestFixture() {
     try {
       // TODO: This is horrible. It needs to be fixed.
+      HttpUtil.setTimeSource(timeSource);
       expect(contentFetcherFactory.get()).andReturn(fetcher).anyTimes();
       expect(contentFetcherFactory.getSigningFetcher(isA(SecurityToken.class)))
           .andReturn(signingFetcher).anyTimes();
       expect(contentFetcherFactory.getOAuthFetcher(
           isA(SecurityToken.class), isA(OAuthArguments.class)))
           .andReturn(oauthFetcher).anyTimes();
+      gadgetRenderer = new GadgetRenderingTask(gadgetServer, bundleFactory,
+          registry, containerConfig, urlGenerator, lockedDomainService);
+      jsonRpcHandler = new JsonRpcHandler(executor, gadgetServer, urlGenerator);
     } catch (GadgetException e) {
       throw new RuntimeException(e);
     }

@@ -18,12 +18,13 @@
  */
 package org.apache.shindig.gadgets.servlet;
 
+import static org.easymock.EasyMock.eq;
 import static org.easymock.EasyMock.expect;
 import static org.easymock.EasyMock.expectLastCall;
 import static org.easymock.EasyMock.isA;
 
+import org.apache.shindig.auth.AuthInfo;
 import org.apache.shindig.auth.SecurityToken;
-import org.apache.shindig.auth.SecurityTokenDecoder;
 import org.apache.shindig.common.ContainerConfig;
 import org.apache.shindig.common.testing.FakeGadgetToken;
 import org.apache.shindig.common.uri.Uri;
@@ -43,12 +44,10 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Enumeration;
 
 public class GadgetRenderingTaskTest extends ServletTestFixture {
-
-  final static Enumeration<String> EMPTY_PARAMS = new Enumeration<String>() {
+  private static final Enumeration<String> EMPTY_PARAMS = new Enumeration<String>() {
     public boolean hasMoreElements() {
       return false;
     }
@@ -57,28 +56,30 @@ public class GadgetRenderingTaskTest extends ServletTestFixture {
     }
   };
 
-  final static Uri SPEC_URL = Uri.parse("http://example.org/gadget.xml");
-  final static HttpRequest SPEC_REQUEST = new HttpRequest(SPEC_URL);
-  final static String CONTENT = "Hello, world!";
-  final static String ALT_CONTENT = "Goodbye, city.";
-  final static String SPEC_XML
-  = "<Module>" +
-  "<ModulePrefs title='hello'/>" +
-  "<Content type='html' quirks='false'>" + CONTENT + "</Content>" +
-  "<Content type='html' view='quirks' quirks='true'/>" +
-  "<Content type='html' view='ALIAS'>" + ALT_CONTENT + "</Content>" +
-  "</Module>";
-  final static String LIBS = "dummy:blah";
+  private static final Uri SPEC_URL = Uri.parse("http://example.org/gadget.xml");
+  private static final HttpRequest SPEC_REQUEST = new HttpRequest(SPEC_URL);
+  private static final String CONTENT = "Hello, world!";
+  private static final String ALT_CONTENT = "Goodbye, city.";
+  private static final String SPEC_XML =
+      "<Module>" +
+      "<ModulePrefs title='hello'/>" +
+      "<Content type='html' quirks='false'>" + CONTENT + "</Content>" +
+      "<Content type='html' view='quirks' quirks='true'/>" +
+      "<Content type='html' view='ALIAS'>" + ALT_CONTENT + "</Content>" +
+      "</Module>";
+  private static final String LIBS = "dummy:blah";
 
-  final static String PRELOAD_XML =
-    "<Module>" +
-    "<ModulePrefs title='hello'>" +
-    "<Preload authz='oauth' href='http://oauth.example.com'/>" +
-    "</ModulePrefs>" +
-    "<Content type='html' quirks='false'>" + CONTENT + "</Content>" +
-    "<Content type='html' view='quirks' quirks='true'/>" +
-    "<Content type='html' view='ALIAS'>" + ALT_CONTENT + "</Content>" +
-    "</Module>";
+  private static final String PRELOAD_XML =
+      "<Module>" +
+      "<ModulePrefs title='hello'>" +
+      "<Preload authz='oauth' href='http://oauth.example.com'/>" +
+      "</ModulePrefs>" +
+      "<Content type='html' quirks='false'>" + CONTENT + "</Content>" +
+      "<Content type='html' view='quirks' quirks='true'/>" +
+      "<Content type='html' view='ALIAS'>" + ALT_CONTENT + "</Content>" +
+      "</Module>";
+
+  private static final SecurityToken DUMMY_TOKEN = new FakeGadgetToken();
 
   /**
    * Performs boilerplate operations to get basic gadgets rendered
@@ -106,7 +107,6 @@ public class GadgetRenderingTaskTest extends ServletTestFixture {
     expect(request.getParameterNames()).andReturn(EMPTY_PARAMS);
     expect(request.getParameter("container")).andReturn(null);
     expect(request.getHeader("Host")).andReturn("www.example.org");
-    expect(request.getParameter("st")).andStubReturn("fake-token");
   }
 
   private void expectLockedDomainCheck() throws Exception {
@@ -163,12 +163,10 @@ public class GadgetRenderingTaskTest extends ServletTestFixture {
   public void testOAuthPreload_data() throws Exception {
     expectParseRequestParams(GadgetSpec.DEFAULT_VIEW);
     expectFetchGadget(PRELOAD_XML, false);
-    expect(securityTokenDecoder.createToken(
-        Collections.singletonMap(SecurityTokenDecoder.SECURITY_TOKEN_NAME, "fake-token"))).
-        andStubReturn(mock(SecurityToken.class));
+    expect(request.getAttribute(AuthInfo.Attribute.SECURITY_TOKEN.getId()))
+        .andReturn(DUMMY_TOKEN).atLeastOnce();
     OAuthFetcher oauthFetcher = mock(OAuthFetcher.class);
-    expect(fetcherFactory.getOAuthFetcher(
-        isA(SecurityToken.class), isA(OAuthArguments.class))).
+    expect(fetcherFactory.getOAuthFetcher(eq(DUMMY_TOKEN), isA(OAuthArguments.class))).
         andReturn(oauthFetcher);
 
     expect(oauthFetcher.fetch(isA(HttpRequest.class))).
@@ -186,12 +184,10 @@ public class GadgetRenderingTaskTest extends ServletTestFixture {
   public void testOAuthPreload_metadata() throws Exception {
     expectParseRequestParams(GadgetSpec.DEFAULT_VIEW);
     expectFetchGadget(PRELOAD_XML, false);
-    expect(securityTokenDecoder.createToken(
-        Collections.singletonMap(SecurityTokenDecoder.SECURITY_TOKEN_NAME, "fake-token"))).
-        andStubReturn(mock(SecurityToken.class));
+    expect(request.getAttribute(AuthInfo.Attribute.SECURITY_TOKEN.getId()))
+        .andReturn(DUMMY_TOKEN).atLeastOnce();
     OAuthFetcher oauthFetcher = mock(OAuthFetcher.class);
-    expect(fetcherFactory.getOAuthFetcher(
-        isA(SecurityToken.class), isA(OAuthArguments.class))).
+    expect(fetcherFactory.getOAuthFetcher(eq(DUMMY_TOKEN), isA(OAuthArguments.class))).
         andReturn(oauthFetcher);
 
     HttpResponse resp = new HttpResponseBuilder()
@@ -266,10 +262,11 @@ public class GadgetRenderingTaskTest extends ServletTestFixture {
   }
 
   public void testAuthTokenInjection_allparams() throws Exception {
-    expect(request.getParameter("st")).andReturn("fake-token");
-    expect(securityTokenDecoder.createToken(Collections.singletonMap(SecurityTokenDecoder.SECURITY_TOKEN_NAME, "fake-token"))).andReturn(
-        new FakeGadgetToken().setUpdatedToken("updated-token")
-        .setTrustedJson("{ \"foo\" : \"bar\" }"));
+    SecurityToken token = new FakeGadgetToken()
+        .setUpdatedToken("updated-token")
+        .setTrustedJson("{ \"foo\" : \"bar\" }");
+    expect(request.getAttribute(AuthInfo.Attribute.SECURITY_TOKEN.getId()))
+        .andReturn(token).atLeastOnce();
     String content = parseBasicGadget(GadgetSpec.DEFAULT_VIEW, SPEC_XML);
     JSONObject auth = parseShindigAuthConfig(content);
     assertEquals("updated-token", auth.getString("authToken"));
@@ -277,18 +274,18 @@ public class GadgetRenderingTaskTest extends ServletTestFixture {
   }
 
   public void testAuthTokenInjection_none() throws Exception {
-    expect(request.getParameter("st")).andReturn("fake-token");
-    expect(securityTokenDecoder.createToken(Collections.singletonMap(SecurityTokenDecoder.SECURITY_TOKEN_NAME, "fake-token"))).andReturn(
-        new FakeGadgetToken());
+    expect(request.getAttribute(AuthInfo.Attribute.SECURITY_TOKEN.getId()))
+        .andReturn(DUMMY_TOKEN).atLeastOnce();
     String content = parseBasicGadget(GadgetSpec.DEFAULT_VIEW, SPEC_XML);
     JSONObject auth = parseShindigAuthConfig(content);
     assertEquals(0, auth.length());
   }
 
   public void testAuthTokenInjection_trustedJson() throws Exception {
-    expect(request.getParameter("st")).andReturn("fake-token");
-    expect(securityTokenDecoder.createToken(Collections.singletonMap(SecurityTokenDecoder.SECURITY_TOKEN_NAME, "fake-token"))).andReturn(
-        new FakeGadgetToken().setTrustedJson("trusted"));
+    SecurityToken token = new FakeGadgetToken()
+        .setTrustedJson("trusted");
+    expect(request.getAttribute(AuthInfo.Attribute.SECURITY_TOKEN.getId()))
+        .andReturn(token).atLeastOnce();
     String content = parseBasicGadget(GadgetSpec.DEFAULT_VIEW, SPEC_XML);
     JSONObject auth = parseShindigAuthConfig(content);
     assertEquals(1, auth.length());
@@ -296,9 +293,10 @@ public class GadgetRenderingTaskTest extends ServletTestFixture {
   }
 
   public void testAuthTokenInjection_updatedToken() throws Exception {
-    expect(request.getParameter("st")).andReturn("fake-token");
-    expect(securityTokenDecoder.createToken(Collections.singletonMap(SecurityTokenDecoder.SECURITY_TOKEN_NAME, "fake-token"))).andReturn(
-        new FakeGadgetToken().setUpdatedToken("updated-token"));
+    SecurityToken token = new FakeGadgetToken()
+        .setUpdatedToken("updated-token");
+    expect(request.getAttribute(AuthInfo.Attribute.SECURITY_TOKEN.getId()))
+        .andReturn(token).atLeastOnce();
     String content = parseBasicGadget(GadgetSpec.DEFAULT_VIEW, SPEC_XML);
     JSONObject auth = parseShindigAuthConfig(content);
     assertEquals(1, auth.length());

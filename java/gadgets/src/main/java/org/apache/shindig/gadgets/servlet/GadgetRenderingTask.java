@@ -20,7 +20,6 @@
 package org.apache.shindig.gadgets.servlet;
 
 import org.apache.shindig.auth.SecurityToken;
-import org.apache.shindig.auth.SecurityTokenDecoder;
 import org.apache.shindig.common.ContainerConfig;
 import org.apache.shindig.common.util.Utf8UrlCoder;
 import org.apache.shindig.gadgets.Gadget;
@@ -96,8 +95,6 @@ public class GadgetRenderingTask {
 
   private final UrlGenerator urlGenerator;
 
-  private final SecurityTokenDecoder tokenDecoder;
-
   private GadgetContext context;
 
   private final List<GadgetContentFilter> filters;
@@ -113,7 +110,7 @@ public class GadgetRenderingTask {
       throws IOException {
     this.request = request;
     this.response = response;
-    context = new HttpGadgetContext(request, tokenDecoder);
+    context = new HttpGadgetContext(request);
 
     URI url = context.getUrl();
 
@@ -562,14 +559,12 @@ public class GadgetRenderingTask {
       GadgetFeatureRegistry registry,
       ContainerConfig containerConfig,
       UrlGenerator urlGenerator,
-      SecurityTokenDecoder tokenDecoder,
       LockedDomainService lockedDomainService) {
     this.server = server;
     this.messageBundleFactory = messageBundleFactory;
     this.registry = registry;
     this.containerConfig = containerConfig;
     this.urlGenerator = urlGenerator;
-    this.tokenDecoder = tokenDecoder;
     this.domainLocker = lockedDomainService;
     filters = new LinkedList<GadgetContentFilter>();
   }

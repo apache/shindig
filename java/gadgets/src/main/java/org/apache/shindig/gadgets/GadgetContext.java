@@ -104,8 +104,7 @@ public class GadgetContext {
   /**
    * @return The token associated with this request
    */
-  @SuppressWarnings("unused")
-  public SecurityToken getToken() throws GadgetException {
+  public SecurityToken getToken() {
     return null;
   }
 }

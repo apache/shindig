@@ -22,9 +22,8 @@ import static junitx.framework.StringAssert.assertStartsWith;
 import static org.easymock.EasyMock.expect;
 import static org.easymock.EasyMock.isA;
 
+import org.apache.shindig.auth.AuthInfo;
 import org.apache.shindig.auth.SecurityToken;
-import org.apache.shindig.auth.SecurityTokenDecoder;
-import org.apache.shindig.auth.SecurityTokenException;
 import org.apache.shindig.common.testing.FakeGadgetToken;
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.gadgets.GadgetException;
@@ -54,8 +53,7 @@ public class MakeRequestHandlerTest extends ServletTestFixture {
   private static final String RESPONSE_BODY = "makeRequest response body";
   private static final SecurityToken DUMMY_TOKEN = new FakeGadgetToken();
 
-  private final MakeRequestHandler handler = new MakeRequestHandler(contentFetcherFactory,
-      securityTokenDecoder);
+  private final MakeRequestHandler handler = new MakeRequestHandler(contentFetcherFactory);
 
   private void expectGetAndReturnBody(String response) throws Exception {
     expectGetAndReturnBody(fetcher, response);
@@ -235,13 +233,9 @@ public class MakeRequestHandlerTest extends ServletTestFixture {
   }
 
   public void testSignedGetRequest() throws Exception {
-    // Doesn't actually sign since it returns the standard fetcher.
-    // Signing tests are in SigningFetcherTest
-    expect(securityTokenDecoder.createToken(
-        Collections.singletonMap(SecurityTokenDecoder.SECURITY_TOKEN_NAME, "fake-token")))
-        .andReturn(DUMMY_TOKEN);
-    expect(request.getParameter(MakeRequestHandler.SECURITY_TOKEN_PARAM))
-        .andReturn("fake-token").atLeastOnce();
+
+    expect(request.getAttribute(AuthInfo.Attribute.SECURITY_TOKEN.getId()))
+        .andReturn(DUMMY_TOKEN).atLeastOnce();
     expect(request.getParameter(Preload.AUTHZ_ATTR))
         .andReturn(Auth.SIGNED.toString()).atLeastOnce();
     expect(signingFetcher.fetch(isA(HttpRequest.class)))
@@ -258,11 +252,8 @@ public class MakeRequestHandlerTest extends ServletTestFixture {
     // Doesn't actually sign since it returns the standard fetcher.
     // Signing tests are in SigningFetcherTest
     expectPostAndReturnBody(signingFetcher, REQUEST_BODY, RESPONSE_BODY);
-    expect(securityTokenDecoder.createToken(
-        Collections.singletonMap(SecurityTokenDecoder.SECURITY_TOKEN_NAME, "fake-token")))
-        .andReturn(DUMMY_TOKEN);
-    expect(request.getParameter(MakeRequestHandler.SECURITY_TOKEN_PARAM))
-        .andReturn("fake-token").atLeastOnce();
+    expect(request.getAttribute(AuthInfo.Attribute.SECURITY_TOKEN.getId()))
+        .andReturn(DUMMY_TOKEN).atLeastOnce();
     expect(request.getParameter(Preload.AUTHZ_ATTR))
         .andReturn(Auth.SIGNED.toString()).atLeastOnce();
     replay();
@@ -280,11 +271,8 @@ public class MakeRequestHandlerTest extends ServletTestFixture {
     // Signing tests are in SigningFetcherTest
     expectGetAndReturnBody(signingFetcher, RESPONSE_BODY);
     FakeGadgetToken authToken = new FakeGadgetToken().setUpdatedToken("updated");
-    expect(securityTokenDecoder.createToken
-        (Collections.singletonMap(SecurityTokenDecoder.SECURITY_TOKEN_NAME, "fake-token")))
-        .andReturn(authToken);
-    expect(request.getParameter(MakeRequestHandler.SECURITY_TOKEN_PARAM))
-        .andReturn("fake-token").atLeastOnce();
+    expect(request.getAttribute(AuthInfo.Attribute.SECURITY_TOKEN.getId()))
+        .andReturn(authToken).atLeastOnce();
     expect(request.getParameter(Preload.AUTHZ_ATTR))
         .andReturn(Auth.SIGNED.toString()).atLeastOnce();
     replay();
@@ -301,11 +289,8 @@ public class MakeRequestHandlerTest extends ServletTestFixture {
     // OAuth tests are in OAuthFetcherTest
     expectGetAndReturnBody(oauthFetcher, RESPONSE_BODY);
     FakeGadgetToken authToken = new FakeGadgetToken().setUpdatedToken("updated");
-    expect(securityTokenDecoder.createToken(
-        Collections.singletonMap(SecurityTokenDecoder.SECURITY_TOKEN_NAME, "fake-token")))
-        .andReturn(authToken);
-    expect(request.getParameter(MakeRequestHandler.SECURITY_TOKEN_PARAM))
-        .andReturn("fake-token").atLeastOnce();
+    expect(request.getAttribute(AuthInfo.Attribute.SECURITY_TOKEN.getId()))
+        .andReturn(authToken).atLeastOnce();
     expect(request.getParameter(Preload.AUTHZ_ATTR))
         .andReturn(Auth.OAUTH.toString()).atLeastOnce();
     // This isn't terribly accurate, but is close enough for this test.
@@ -343,13 +328,10 @@ public class MakeRequestHandlerTest extends ServletTestFixture {
   }
 
   public void testBadSecurityTokenThrows() throws Exception {
-    expect(request.getParameter(MakeRequestHandler.SECURITY_TOKEN_PARAM))
-        .andReturn("fake-token").atLeastOnce();
+    expect(request.getAttribute(AuthInfo.Attribute.SECURITY_TOKEN.getId()))
+        .andReturn(null).atLeastOnce();
     expect(request.getParameter(Preload.AUTHZ_ATTR))
         .andReturn(Auth.SIGNED.toString()).atLeastOnce();
-    expect(securityTokenDecoder.createToken(
-        Collections.singletonMap(SecurityTokenDecoder.SECURITY_TOKEN_NAME, "fake-token")))
-        .andThrow(new SecurityTokenException("No!"));
     replay();
 
     try {
