@@ -26,10 +26,12 @@ import org.apache.shindig.common.testing.TestExecutorService;
 import org.apache.shindig.common.util.FakeTimeSource;
 import org.apache.shindig.gadgets.http.ContentFetcherFactory;
 import org.apache.shindig.gadgets.http.HttpFetcher;
+import org.apache.shindig.gadgets.http.HttpRequest;
+import org.apache.shindig.gadgets.http.HttpResponse;
 import org.apache.shindig.gadgets.oauth.OAuthFetcher;
 import org.apache.shindig.gadgets.rewrite.BasicContentRewriterRegistry;
 import org.apache.shindig.gadgets.rewrite.ContentRewriter;
-import org.apache.shindig.gadgets.rewrite.NoOpContentRewriter;
+import org.apache.shindig.gadgets.spec.GadgetSpec;
 
 import java.util.concurrent.ExecutorService;
 
@@ -46,19 +48,41 @@ public abstract class GadgetTestFixture extends EasyMockTestCase {
       new BasicMessageBundleFactory(fetcher, cacheProvider, 0, 0L, 0L);
   public final GadgetFeatureRegistry registry;
   public final ContainerConfig containerConfig = mock(ContainerConfig.class);
-  public final ContentRewriter rewriter = new NoOpContentRewriter();
+  public final CaptureRewriter rewriter = new CaptureRewriter();
   public final FakeTimeSource timeSource = new FakeTimeSource();
   public final ExecutorService executor = new TestExecutorService();
   public final GadgetSpecFactory specFactory = new BasicGadgetSpecFactory(
-      fetcher, cacheProvider, new BasicContentRewriterRegistry(null), executor, 0, 0L, 0L);
+      fetcher, cacheProvider, executor, 0, 0L, 0L);
 
   public GadgetTestFixture() {
     try {
       registry = new GadgetFeatureRegistry(null, fetcher);
       gadgetServer = new GadgetServer(executor, registry, blacklist,
+          containerConfig, new BasicContentRewriterRegistry(rewriter),
           fetcherFactory, specFactory, bundleFactory);
     } catch (Exception e) {
       throw new RuntimeException(e);
+    }
+  }
+  
+  protected static class CaptureRewriter implements ContentRewriter {
+    private boolean rewroteView = false;
+
+    public HttpResponse rewrite(HttpRequest request, HttpResponse original) {
+      return original;
+    }
+
+    public String rewriteGadgetView(GadgetSpec spec, String original, String mimeType) {
+      rewroteView = true;
+      return original;
+    }
+    
+    public boolean viewWasRewritten() {
+      return rewroteView;
+    }
+    
+    protected void resetWasRewritten() {
+      rewroteView = false;
     }
   }
 }

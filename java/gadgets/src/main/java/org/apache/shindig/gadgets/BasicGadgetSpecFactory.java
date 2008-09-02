@@ -23,8 +23,6 @@ import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.gadgets.http.HttpFetcher;
 import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.http.HttpResponse;
-import org.apache.shindig.gadgets.rewrite.ContentRewriter;
-import org.apache.shindig.gadgets.rewrite.ContentRewriterRegistry;
 import org.apache.shindig.gadgets.spec.GadgetSpec;
 import org.apache.shindig.gadgets.spec.View;
 
@@ -48,7 +46,6 @@ public class BasicGadgetSpecFactory extends CachingWebRetrievalFactory<GadgetSpe
   static final Logger logger = Logger.getLogger(BasicGadgetSpecFactory.class.getName());
 
   private final HttpFetcher fetcher;
-  private final ContentRewriterRegistry rewriterRegistry;
   private final ExecutorService executor;
 
   @Override
@@ -114,30 +111,26 @@ public class BasicGadgetSpecFactory extends CachingWebRetrievalFactory<GadgetSpe
           throw new GadgetException(GadgetException.Code.FAILED_TO_RETRIEVE_CONTENT,
                                     "Unable to retrieve remote gadget content.");
         }
-        if (rewriterRegistry != null) {
-          String content = v.getContent();
-          for (ContentRewriter rewriter : rewriterRegistry.getRewriters()) {
-            content = rewriter.rewriteGadgetView(spec, content, "text/html");
-          }
-          v.setRewrittenContent(content);
-        }
       }
     }
 
+    // Annotate this spec instance with the expiration time (as a Long) associated
+    // with its retrieval. This enables CachingContentRewriterRegistry to properly
+    // cache rewritten content generated from Gadgets based on the spec.
+    spec.setAttribute(GadgetSpec.EXPIRATION_ATTRIB, new Long(response.getCacheExpiration()));
+    
     return new FetchedObject<GadgetSpec>(spec, response.getCacheExpiration());
   }
 
   @Inject
   public BasicGadgetSpecFactory(HttpFetcher fetcher,
                                 CacheProvider cacheProvider,
-                                ContentRewriterRegistry rewriterRegistry,
                                 ExecutorService executor,
                                 @Named("shindig.gadget-spec.cache.capacity")int gadgetSpecCacheCapacity,
                                 @Named("shindig.gadget-spec.cache.minTTL")long minTtl,
                                 @Named("shindig.gadget-spec.cache.maxTTL")long maxTtl) {
     super(cacheProvider, gadgetSpecCacheCapacity, minTtl, maxTtl);
     this.fetcher = fetcher;
-    this.rewriterRegistry = rewriterRegistry;
     this.executor = executor;
   }
 }

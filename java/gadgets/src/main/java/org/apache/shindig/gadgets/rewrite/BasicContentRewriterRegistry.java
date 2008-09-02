@@ -23,6 +23,10 @@ import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.apache.shindig.gadgets.Gadget;
+import org.apache.shindig.gadgets.GadgetContext;
+import org.apache.shindig.gadgets.GadgetException;
+
 /**
  * Registry into which is injected a single rewriter, which
  * bootstraps the rewriters list. This enables modularization
@@ -48,6 +52,26 @@ public class BasicContentRewriterRegistry implements ContentRewriterRegistry {
     if (rewriter != null) {
       rewriters.add(rewriter);
     }
+  }
+  
+  /** {@inheritDoc} */
+  public boolean rewriteGadget(GadgetContext context, Gadget gadget) throws GadgetException {
+    String content = gadget.getContent();
+    String originalContent = content;
+    
+    if (originalContent == null) {
+      return false;
+    }
+    
+    for (ContentRewriter rewriter : getRewriters()) {
+      String rewritten = rewriter.rewriteGadgetView(gadget.getSpec(), content, "text/html");
+      if (rewritten != null) {
+        content = rewritten;
+      }
+    }
+    
+    gadget.setContent(content);
+    return !originalContent.equals(content);
   }
 
 }

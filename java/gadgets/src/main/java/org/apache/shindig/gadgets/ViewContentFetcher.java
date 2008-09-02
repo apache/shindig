@@ -61,11 +61,9 @@ public class ViewContentFetcher implements Runnable {
                                   "Unable to retrieve gadget content. HTTP error " +
                                   response.getHttpStatusCode());
       } else {
-        view.setContent(response.getResponseAsString());
-
-        // Reset the href since the content is now inline; a non-null href will
-        // indicate a failed retrieval attempt.
-        view.setHref(null);
+        // Href is reset by setHrefContent call since content is now inline;
+        // a non-null href indicates a failed retrieval attempt.
+        view.setHrefContent(response.getResponseAsString());
       }
     } catch (GadgetException e) {
       logger.info("Failed to retrieve content at "  + view.getHref());

@@ -73,7 +73,7 @@ public class GadgetTest {
 
     spec = new GadgetSpec(URI.create(SPEC_URL), SPEC_XML);
     libraries = Arrays.asList(lib);
-    gadget = new Gadget(context, spec, libraries);
+    gadget = new Gadget(context, spec, libraries, config);
   }
 
   @Test

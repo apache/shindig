@@ -159,7 +159,7 @@ public class GadgetRenderingTask {
    * Renders a successfully processed gadget.
    */
   private void outputGadget(Gadget gadget) throws IOException, GadgetException {
-    View view = gadget.getView(containerConfig);
+    View view = gadget.getCurrentView();
     if (view == null) {
       throw new GadgetException(GadgetException.Code.UNKNOWN_VIEW_SPECIFIED,
           "No appropriate view could be found for gadget: " + gadget.getSpec().getUrl());
@@ -307,7 +307,9 @@ public class GadgetRenderingTask {
           .append("\n-->\n</script>");
     }
 
-    String content = view.getContent();
+    // Content to output now comes from the Gadget, which is processed,
+    // rather than the Gadget's View, a sub-component of immutable GadgetSpec
+    String content = gadget.getContent();
     for (GadgetContentFilter filter : filters) {
       content = filter.filter(content);
     }

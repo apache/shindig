@@ -41,6 +41,7 @@ import java.util.Map;
 public class GadgetSpec {
   public static final String DEFAULT_VIEW = "default";
   public static final Locale DEFAULT_LOCALE = new Locale("all", "ALL");
+  public static final String EXPIRATION_ATTRIB = "expiration";
 
   /**
    * The url for this gadget spec.
@@ -114,7 +115,7 @@ public class GadgetSpec {
    * @param substituter
    * @return The substituted spec.
    */
-  public GadgetSpec substitute(Substitutions substituter, boolean rewrite) {
+  public GadgetSpec substitute(Substitutions substituter) {
     GadgetSpec spec = new GadgetSpec(this);
     spec.modulePrefs = modulePrefs.substitute(substituter);
     if (userPrefs.isEmpty()) {
@@ -128,7 +129,7 @@ public class GadgetSpec {
     }
     Map<String, View> viewMap = new HashMap<String, View>(views.size());
     for (View view : views.values()) {
-     viewMap.put(view.getName(), view.substitute(substituter, rewrite));
+      viewMap.put(view.getName(), view.substitute(substituter));
     }
     spec.views = Collections.unmodifiableMap(viewMap);
 
