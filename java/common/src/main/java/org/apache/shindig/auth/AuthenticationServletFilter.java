@@ -62,8 +62,7 @@ public class AuthenticationServletFilter extends InjectedFilter {
     for (AuthenticationHandler handler : handlers) {
       SecurityToken token = handler.getSecurityTokenFromRequest(req);
       if (token != null) {
-        AuthInfo.setAuthType(req, handler.getName());
-        AuthInfo.setSecurityToken(req, token);
+        new AuthInfo(req).setAuthType(handler.getName()).setSecurityToken(token);
         chain.doFilter(req, response);
         return;
       }

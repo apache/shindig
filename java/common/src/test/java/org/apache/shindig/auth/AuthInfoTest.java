@@ -17,6 +17,10 @@
  */
 package org.apache.shindig.auth;
 
+import com.google.inject.AbstractModule;
+import com.google.inject.Guice;
+import com.google.inject.Injector;
+
 import org.apache.shindig.common.testing.FakeGadgetToken;
 import org.apache.shindig.common.testing.FakeHttpServletRequest;
 
@@ -29,13 +33,45 @@ public class AuthInfoTest extends TestCase {
   public void testToken() throws Exception {
     HttpServletRequest req = new FakeHttpServletRequest();
     SecurityToken token = new FakeGadgetToken();
-    AuthInfo.setSecurityToken(req, token);
-    assertEquals(token, AuthInfo.getSecurityToken(req));
+    
+    AuthInfo info = new AuthInfo(req).setSecurityToken(token);
+    
+    assertEquals(token, info.getSecurityToken());
+    // This should work when creating a new AuthInfo from the same request
+    assertEquals(token, new AuthInfo(req).getSecurityToken());
   }
 
   public void testAuthType() throws Exception {
     HttpServletRequest req = new FakeHttpServletRequest();
-    AuthInfo.setAuthType(req, "FakeAuth");
-    assertEquals("FakeAuth", AuthInfo.getAuthType(req));
+
+    AuthInfo info = new AuthInfo(req).setAuthType("FakeAuth");
+
+    assertEquals("FakeAuth", info.getAuthType());
+    // This should work when creating a new AuthInfo from the same request
+    assertEquals("FakeAuth", new AuthInfo(req).getAuthType());
+  }
+  
+  public void testBinding() throws Exception {
+    HttpServletRequest req = new FakeHttpServletRequest();
+    SecurityToken token = new FakeGadgetToken();
+    new AuthInfo(req).setSecurityToken(token).setAuthType("FakeAuth");
+    
+    Injector injector = Guice.createInjector(new TestModule(req));
+    AuthInfo injected = injector.getInstance(AuthInfo.class);
+    assertEquals(token, injected.getSecurityToken());
+    assertEquals("FakeAuth", injected.getAuthType());
+  }
+  
+  private static class TestModule extends AbstractModule {
+    private HttpServletRequest req;
+    
+    public TestModule(HttpServletRequest req) {
+      this.req = req;
+    }
+    @Override
+    protected void configure() {
+      bind(HttpServletRequest.class).toInstance(req);
+    }
+    
   }
 }

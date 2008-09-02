@@ -66,7 +66,7 @@ public abstract class ApiServlet extends InjectedServlet {
   }
 
   protected SecurityToken getSecurityToken(HttpServletRequest servletRequest) {
-    return AuthInfo.getSecurityToken(servletRequest);
+    return new AuthInfo(servletRequest).getSecurityToken();
   }
 
   protected abstract void sendError(HttpServletResponse servletResponse, ResponseItem responseItem)
