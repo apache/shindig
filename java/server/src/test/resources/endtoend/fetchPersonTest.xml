@@ -103,6 +103,25 @@
 
             // Send the request
             req.send(receivedData);
+          },
+
+          fetchPersonNotFound: function() {
+            var req = opensocial.newDataRequest();
+
+            // Request the "canonical" viewer
+            req.add(req.newFetchPersonRequest("not.a.real.id"), "bad");
+
+            function receivedData(response) {
+              assertTrue("No data error", response.hadError());
+              var dataItem = response.get("bad");
+              assertTrue("No data item error", dataItem.hadError());
+              assertEquals("Not a badRequest", "badRequest", dataItem.getErrorCode());
+              assertEquals("Not null data", null, dataItem.getData());
+              finished();
+            }
+
+            // Send the request
+            req.send(receivedData);
           }
         };
         
