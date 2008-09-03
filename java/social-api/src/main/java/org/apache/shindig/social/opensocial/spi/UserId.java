@@ -21,9 +21,26 @@ import org.apache.shindig.auth.SecurityToken;
 
 import org.apache.commons.lang.StringUtils;
 
+import com.google.common.collect.Maps;
+
+import java.util.Map;
+
 public class UserId {
   public enum Type {
-    me, viewer, owner, userId
+    me, viewer, owner, userId;
+
+    /** A map of JSON strings to Type objects */
+    private static final Map<String, Type> jsonTypeMap = Maps.newHashMap();
+
+    static {
+      for (Type type : Type.values()) {
+        jsonTypeMap.put("@" + type.name(), type);
+      }
+    }
+    /** Return the Type enum value given a specific jsonType **/
+    public static Type jsonValueOf(String jsonType) {
+       return jsonTypeMap.get(jsonType);
+    }
   }
 
   private Type type;
@@ -57,12 +74,12 @@ public class UserId {
   }
 
   public static UserId fromJson(String jsonId) {
-    try {
-      Type idSpecEnum = Type.valueOf(jsonId.substring(1));
+    Type idSpecEnum = Type.jsonValueOf(jsonId);
+    if (idSpecEnum != null) {
       return new UserId(idSpecEnum, null);
-    } catch (IllegalArgumentException e) {
-      return new UserId(Type.userId, jsonId);
     }
+
+    return new UserId(Type.userId, jsonId);
   }
 
   // These are overriden so that EasyMock doesn't throw a fit
