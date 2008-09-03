@@ -26,10 +26,10 @@ import org.apache.shindig.gadgets.spec.GadgetSpec;
  * some particular String to the given input content.
  * Used for testing.
  */
-class AppendRewriter implements ContentRewriter {
+class AppendingRewriter implements ContentRewriter {
   private final String appender;
   
-  AppendRewriter(String appender) {
+  AppendingRewriter(String appender) {
     this.appender = appender;
   }
 

@@ -45,7 +45,7 @@ public class CachingContentRewriterRegistryTest extends TestCase {
     for (int i = 0; i < 3; ++i) {
       String appendNew = "-" + i;
       appendFull.append(appendNew);
-      r.appendRewriter(new AppendRewriter(appendNew));
+      r.appendRewriter(new AppendingRewriter(appendNew));
     }
     String inputContent = "foo";
     String rewrittenContent = inputContent + appendFull.toString();
@@ -69,7 +69,7 @@ public class CachingContentRewriterRegistryTest extends TestCase {
     assertTrue(r.rewriteGadget(context, gadget));
     assertEquals(rewrittenContent, gadget.getContent());
     
-    r.appendRewriter(new AppendRewriter("-end"));
+    r.appendRewriter(new AppendingRewriter("-end"));
     
     // Should also be rewritten the second time, but with the previous
     // expected rewritten content value.

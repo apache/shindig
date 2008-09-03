@@ -38,7 +38,7 @@ import com.google.inject.name.Named;
  * provides a layer of caching atop that.
  */
 public class CachingContentRewriterRegistry
-    extends CachingWebRetrievalFactory<Gadget, CachingContentRewriterRegistry.QueryPair, String>
+    extends CachingWebRetrievalFactory<String, CachingContentRewriterRegistry.QueryPair, String>
     implements ContentRewriterRegistry {
   
   static final Logger logger = Logger.getLogger(CachingContentRewriterRegistry.class.getName());
@@ -71,7 +71,7 @@ public class CachingContentRewriterRegistry
   }
 
   @Override
-  protected FetchedObject<Gadget> retrieveRawObject(QueryPair qp,
+  protected FetchedObject<String> retrieveRawObject(QueryPair qp,
       boolean ignoreCache) throws GadgetException {
     // Always attempt to rewrite the inbound gadget object.
     // Even if that fails, the non-rewritten Gadget should be cached,
@@ -86,19 +86,7 @@ public class CachingContentRewriterRegistry
       expiration = (Long)expirationObj;
     }
     
-    return new FetchedObject<Gadget>(createGadgetCopy(qp.gadget), expiration);
-  }
-  
-  private Gadget createGadgetCopy(Gadget source) {
-    // We need to make a copy of the gadget we cache to avoid
-    // the first instance of the gadget being directly written into
-    // the cache, since it might go on to be modified further in
-    // the processing pipeline (changes which would be inherited by
-    // all subsequent requests that have a cache hit).
-    Gadget gadget = new Gadget(source.getContext(), source.getSpec(),
-        source.getJsLibraries(), source.getContainerConfig());
-    gadget.setContent(source.getContent());
-    return gadget;
+    return new FetchedObject<String>(qp.gadget.getContent(), expiration);
   }
   
   /** {@inheritDoc} */
@@ -109,14 +97,14 @@ public class CachingContentRewriterRegistry
   /** {@inheritDoc} */
   public boolean rewriteGadget(GadgetContext context, Gadget gadget)
       throws GadgetException {
-    Gadget cached = doCachedFetch(new QueryPair(context, gadget), context.getIgnoreCache());
+    String cached = doCachedFetch(new QueryPair(context, gadget), context.getIgnoreCache());
     // At present, the output of rewriting is just the string contained within
     // the Gadget object. Thus, a successful cache hit results in copying over the
     // rewritten value to the input gadget object.
     // TODO: Clean up the ContentRewriter interface so rewriting "output" is clearer.
     // TODO: If necessary later, copy other modified contents to Gadget object.
     if (cached != null) {
-      gadget.setContent(cached.getContent());
+      gadget.setContent(cached);
       return true;
     }
     return baseRegistry.rewriteGadget(context, gadget);

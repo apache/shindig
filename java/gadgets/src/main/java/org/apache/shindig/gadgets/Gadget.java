@@ -117,9 +117,6 @@ public class Gadget {
   }
 
   private ContainerConfig containerConfig;
-  public ContainerConfig getContainerConfig() {
-    return containerConfig;
-  }
   
   public Gadget(GadgetContext context, GadgetSpec spec,
       Collection<JsLibrary> jsLibraries, ContainerConfig containerConfig) {

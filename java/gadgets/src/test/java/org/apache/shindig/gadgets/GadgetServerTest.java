@@ -77,11 +77,6 @@ public class GadgetServerTest extends GadgetTestFixture {
       = "<messagebundle>" +
         "  <msg name=\"title\">TITLE</msg>" +
        "</messagebundle>";
-  
-  @Override
-  protected void setUp() throws Exception {
-    rewriter.resetWasRewritten();
-  }
 
   public void testGadgetSpecLookup() throws Exception {
     HttpRequest req = new HttpRequest(SPEC_URL);
@@ -111,6 +106,7 @@ public class GadgetServerTest extends GadgetTestFixture {
     }
 
     verify();
+    assertFalse(rewriter.viewWasRewritten());
   }
 
   public void testSubstitutionsDone() throws Exception {
@@ -359,6 +355,7 @@ public class GadgetServerTest extends GadgetTestFixture {
       assertEquals(GadgetException.Code.BLACKLISTED_GADGET, e.getCode());
     }
     verify();
+    assertFalse(rewriter.viewWasRewritten());
   }
 
   public void testViewContentFetching() throws Exception {
