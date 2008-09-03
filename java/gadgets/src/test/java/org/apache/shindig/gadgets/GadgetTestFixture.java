@@ -80,9 +80,5 @@ public abstract class GadgetTestFixture extends EasyMockTestCase {
     public boolean viewWasRewritten() {
       return rewroteView;
     }
-    
-    protected void resetWasRewritten() {
-      rewroteView = false;
-    }
   }
 }

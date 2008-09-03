@@ -63,7 +63,7 @@ public class BasicContentRewriterRegistryTest extends TestCase {
     for (int i = 0; i < 3; ++i) {
       String appendNew = "-" + i;
       appendFull.append(appendNew);
-      r.appendRewriter(new AppendRewriter(appendNew));
+      r.appendRewriter(new AppendingRewriter(appendNew));
     }
     String inputContent = "foo";
     String rewrittenContent = inputContent + appendFull.toString();
