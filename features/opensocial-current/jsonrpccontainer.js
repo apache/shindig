@@ -452,7 +452,10 @@ var JsonRpcRequestItem = function(rpc, opt_processData) {
 
   this.processResponse = function(originalDataRequest, rawJson, error,
       errorMessage) {
+    var errorCode = error
+      ? JsonRpcContainer.translateHttpError("Error " + error['code'])
+      : null;
     return new opensocial.ResponseItem(originalDataRequest,
-        error ? null : this.processData(rawJson), error, errorMessage);
+        error ? null : this.processData(rawJson), errorCode, errorMessage);
   }
 };
