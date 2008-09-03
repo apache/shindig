@@ -21,6 +21,8 @@ import org.apache.shindig.auth.SecurityToken;
 import org.apache.shindig.social.opensocial.spi.GroupId;
 import org.apache.shindig.social.opensocial.spi.PersonService;
 import org.apache.shindig.social.opensocial.spi.UserId;
+import org.apache.shindig.social.opensocial.spi.SocialSpiException;
+import org.apache.shindig.social.ResponseError;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
@@ -109,13 +111,23 @@ public abstract class RequestItem {
 
   public int getStartIndex() {
     String startIndex = getParameter(START_INDEX);
-    return startIndex == null ? DEFAULT_START_INDEX
-        : Integer.valueOf(startIndex);
+    try {
+      return startIndex == null ? DEFAULT_START_INDEX
+          : Integer.valueOf(startIndex);
+    } catch (NumberFormatException nfe) {
+      throw new SocialSpiException(ResponseError.BAD_REQUEST,
+          "Parameter " + START_INDEX + " (" + startIndex + ") is not a number.");
+    }
   }
 
   public int getCount() {
     String count = getParameter(COUNT);
-    return count == null ? DEFAULT_COUNT : Integer.valueOf(count);
+    try {
+      return count == null ? DEFAULT_COUNT : Integer.valueOf(count);
+    } catch (NumberFormatException nfe) {
+      throw new SocialSpiException(ResponseError.BAD_REQUEST,
+           "Parameter " + COUNT + " (" + count + ") is not a number.");
+    }
   }
 
   public String getSortBy() {
@@ -125,9 +137,14 @@ public abstract class RequestItem {
 
   public PersonService.SortOrder getSortOrder() {
     String sortOrder = getParameter(SORT_ORDER);
-    return sortOrder == null
-        ? PersonService.SortOrder.ascending
-        : PersonService.SortOrder.valueOf(sortOrder);
+    try {
+      return sortOrder == null
+            ? PersonService.SortOrder.ascending
+            : PersonService.SortOrder.valueOf(sortOrder);
+    } catch (IllegalArgumentException iae) {
+      throw new SocialSpiException(ResponseError.BAD_REQUEST,
+           "Parameter " + SORT_ORDER + " (" + sortOrder + ") is not valid.");
+    }
   }
 
   public String getFilterBy() {
@@ -136,9 +153,14 @@ public abstract class RequestItem {
 
   public PersonService.FilterOperation getFilterOperation() {
     String filterOp = getParameter(FILTER_OPERATION);
-    return filterOp == null
-        ? PersonService.FilterOperation.contains
-        : PersonService.FilterOperation.valueOf(filterOp);
+    try {
+      return filterOp == null
+          ? PersonService.FilterOperation.contains
+          : PersonService.FilterOperation.valueOf(filterOp);
+    } catch (IllegalArgumentException iae) {
+      throw new SocialSpiException(ResponseError.BAD_REQUEST,
+           "Parameter " + FILTER_OPERATION + " (" + filterOp + ") is not valid.");
+    }
   }
 
   public String getFilterValue() {

@@ -19,6 +19,8 @@
 package org.apache.shindig.social.opensocial.service;
 
 import org.apache.shindig.auth.SecurityToken;
+import org.apache.shindig.social.opensocial.spi.SocialSpiException;
+import org.apache.shindig.social.ResponseError;
 
 import com.google.common.collect.Lists;
 
@@ -65,7 +67,7 @@ public class RpcRequestItem extends RequestItem {
         return null;
       }
     } catch (JSONException je) {
-      throw new IllegalArgumentException(je);
+      throw new SocialSpiException(ResponseError.BAD_REQUEST, je.getMessage(), je);
     }
   }
 
@@ -78,7 +80,7 @@ public class RpcRequestItem extends RequestItem {
         return defaultValue;
       }
     } catch (JSONException je) {
-      throw new IllegalArgumentException(je);
+      throw new SocialSpiException(ResponseError.BAD_REQUEST, je.getMessage(), je);
     }
   }
 
@@ -101,7 +103,7 @@ public class RpcRequestItem extends RequestItem {
         return Collections.emptyList();
       }
     } catch (JSONException je) {
-      throw new IllegalArgumentException(je);
+      throw new SocialSpiException(ResponseError.BAD_REQUEST, je.getMessage(), je);
     }
   }
 
@@ -110,7 +112,7 @@ public class RpcRequestItem extends RequestItem {
     try {
       return converter.convertToObject(data.get(parameterName).toString(), dataTypeClass);
     } catch (JSONException je) {
-      throw new IllegalArgumentException(je);
+      throw new SocialSpiException(ResponseError.BAD_REQUEST, je.getMessage(), je);
     }
   }
 
@@ -120,6 +122,7 @@ public class RpcRequestItem extends RequestItem {
     // No params in the URL
   }
 
+  /** Method used only by tests */
   void setParameter(String paramName, String param) {
     try {
       data.put(paramName, param);
@@ -128,6 +131,7 @@ public class RpcRequestItem extends RequestItem {
     }
   }
 
+  /** Method used only by tests */
   void setListParameter(String paramName, List<String> params) {
     try {
       JSONArray arr = new JSONArray(params);
