@@ -20,6 +20,7 @@ package org.apache.shindig.gadgets.rewrite;
 import org.apache.shindig.gadgets.Gadget;
 import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.http.HttpResponse;
+import org.apache.shindig.gadgets.rewrite.lexer.DefaultContentRewriter;
 
 import com.google.inject.ImplementedBy;
 
