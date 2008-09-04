@@ -403,7 +403,7 @@ JsonRpcContainer.prototype.newFetchActivitiesRequest = function(idSpec,
     opt_params) {
   var rpc = { method : "activities.get" };
   rpc.params = this.translateIdSpec(idSpec);
-  rpc.params.app = "@app";
+  rpc.params.appId = "@app";
   if (idSpec.getField('networkDistance')) {
     rpc.params.networkDistance = idSpec.getField('networkDistance');
   }
