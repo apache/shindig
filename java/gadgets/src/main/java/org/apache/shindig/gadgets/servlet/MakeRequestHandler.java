@@ -30,7 +30,6 @@ import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.http.HttpResponse;
 import org.apache.shindig.gadgets.oauth.OAuthArguments;
 import org.apache.shindig.gadgets.spec.Auth;
-import org.apache.shindig.gadgets.spec.Preload;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -63,6 +62,7 @@ public class MakeRequestHandler extends ProxyBase{
   public static final String NUM_ENTRIES_PARAM = "numEntries";
   public static final String DEFAULT_NUM_ENTRIES = "3";
   public static final String GET_SUMMARIES_PARAM = "getSummaries";
+  public static final String AUTHZ_PARAM = "authz";
 
   private final ContentFetcherFactory contentFetcherFactory;
 
@@ -80,7 +80,7 @@ public class MakeRequestHandler extends ProxyBase{
     HttpRequest rcr = buildHttpRequest(request);
 
     // Figure out whether authentication is required
-    Auth auth = Auth.parse(getParameter(request, Preload.AUTHZ_ATTR, ""));
+    Auth auth = Auth.parse(getParameter(request, AUTHZ_PARAM, ""));
     SecurityToken authToken = null;
     if (auth != Auth.NONE) {
       authToken = extractAndValidateToken(request);

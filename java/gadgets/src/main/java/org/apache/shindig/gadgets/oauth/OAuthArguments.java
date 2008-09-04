@@ -18,12 +18,12 @@
  */
 package org.apache.shindig.gadgets.oauth;
 
+import org.apache.shindig.gadgets.spec.RequestAuthenticationInfo;
+
 import java.util.Map;
 import java.util.TreeMap;
 
 import javax.servlet.http.HttpServletRequest;
-
-import org.apache.shindig.gadgets.spec.Preload;
 
 /**
  * Arguments to an OAuth fetch sent by the client.
@@ -53,13 +53,13 @@ public class OAuthArguments {
     }
     init(params);
   }
-  
-  public OAuthArguments(Preload preload) {
+
+  public OAuthArguments(RequestAuthenticationInfo request) {
     Map<String, String> attrs = new TreeMap<String, String>(String.CASE_INSENSITIVE_ORDER);
-    attrs.putAll(preload.getAttributes());
+    attrs.putAll(request.getAttributes());
     init(attrs);
   }
-  
+
   private void init(Map<String, String> attrs) {
     serviceName = getParam(attrs, SERVICE_PARAM, "");
     tokenName = getParam(attrs, TOKEN_PARAM, "");
@@ -68,7 +68,7 @@ public class OAuthArguments {
     origClientState = getParam(attrs, CLIENT_STATE_PARAM, null);
     bypassSpecCache = "1".equals(getParam(attrs, BYPASS_SPEC_CACHE_PARAM, null));
   }
-  
+
   private String getParam(Map<String, String> attrs, String name, String def) {
     String val = attrs.get(name);
     if (val == null) {
@@ -110,11 +110,11 @@ public class OAuthArguments {
   public boolean getBypassSpecCache() {
     return bypassSpecCache;
   }
-  
+
   public String getRequestToken() {
     return requestToken;
   }
-  
+
   public String getRequestTokenSecret() {
     return requestTokenSecret;
   }
