@@ -21,6 +21,7 @@ package org.apache.shindig.common.servlet;
 import com.google.inject.Injector;
 import com.google.inject.Guice;
 import com.google.inject.Module;
+import com.google.inject.Stage;
 import com.google.inject.tools.jmx.Manager;
 
 import java.util.LinkedList;
@@ -56,7 +57,7 @@ public class GuiceServletContextListener implements ServletContextListener {
         }
       }
     }
-    Injector injector = Guice.createInjector(modules);
+    Injector injector = Guice.createInjector(Stage.PRODUCTION, modules);
     context.setAttribute(INJECTOR_ATTRIBUTE, injector);
 
     try {
