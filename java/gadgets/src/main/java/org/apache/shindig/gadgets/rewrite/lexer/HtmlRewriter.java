@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.shindig.gadgets.rewrite;
+package org.apache.shindig.gadgets.rewrite.lexer;
 
 import com.google.caja.lexer.CharProducer;
 import com.google.caja.lexer.HtmlLexer;

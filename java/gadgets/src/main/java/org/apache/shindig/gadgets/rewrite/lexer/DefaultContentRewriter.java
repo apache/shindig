@@ -15,7 +15,7 @@
  * KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-package org.apache.shindig.gadgets.rewrite;
+package org.apache.shindig.gadgets.rewrite.lexer;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -27,6 +27,11 @@ import org.apache.shindig.gadgets.GadgetSpecFactory;
 import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.http.HttpResponse;
 import org.apache.shindig.gadgets.http.HttpResponseBuilder;
+import org.apache.shindig.gadgets.rewrite.ContentRewriter;
+import org.apache.shindig.gadgets.rewrite.ContentRewriterFeature;
+import org.apache.shindig.gadgets.rewrite.CssRewriter;
+import org.apache.shindig.gadgets.rewrite.LinkRewriter;
+import org.apache.shindig.gadgets.rewrite.ProxyingLinkRewriter;
 import org.apache.shindig.gadgets.spec.GadgetSpec;
 
 import java.io.ByteArrayOutputStream;
