@@ -78,9 +78,9 @@ public class BasicContentRewriterRegistryTest extends TestCase {
     expect(context.getView()).andReturn(GadgetSpec.DEFAULT_VIEW).anyTimes();
     replay(context, view, spec);
     
-    Gadget gadget = new Gadget(context, spec, null, null);
+    Gadget gadget = new Gadget(context, spec, null, null, null);
     assertEquals(inputContent, gadget.getContent());
-    assertTrue(r.rewriteGadget(context, gadget));
+    assertTrue(r.rewriteGadget(gadget));
     assertEquals(rewrittenContent, gadget.getContent());
   }
 }

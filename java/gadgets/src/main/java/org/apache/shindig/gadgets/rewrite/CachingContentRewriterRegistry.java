@@ -23,7 +23,6 @@ import java.util.logging.Logger;
 import org.apache.shindig.common.cache.CacheProvider;
 import org.apache.shindig.gadgets.CachingWebRetrievalFactory;
 import org.apache.shindig.gadgets.Gadget;
-import org.apache.shindig.gadgets.GadgetContext;
 import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.rewrite.BasicContentRewriterRegistry;
 import org.apache.shindig.gadgets.rewrite.ContentRewriter;
@@ -38,7 +37,7 @@ import com.google.inject.name.Named;
  * provides a layer of caching atop that.
  */
 public class CachingContentRewriterRegistry
-    extends CachingWebRetrievalFactory<String, CachingContentRewriterRegistry.QueryPair, String>
+    extends CachingWebRetrievalFactory<String, Gadget, String>
     implements ContentRewriterRegistry {
   
   static final Logger logger = Logger.getLogger(CachingContentRewriterRegistry.class.getName());
@@ -59,10 +58,10 @@ public class CachingContentRewriterRegistry
   }
 
   @Override
-  protected String getCacheKeyFromQueryObj(QueryPair qp) {
+  protected String getCacheKeyFromQueryObj(Gadget gadget) {
     // Cache by URI + View. Since we always append a view, there should be no
     // key conflicts associated with this operation.
-    return qp.gadget.getSpec().getUrl().toString() + "#v=" + qp.gadget.getCurrentView().getName();
+    return gadget.getSpec().getUrl().toString() + "#v=" + gadget.getCurrentView().getName();
   }
 
   @Override
@@ -71,22 +70,22 @@ public class CachingContentRewriterRegistry
   }
 
   @Override
-  protected FetchedObject<String> retrieveRawObject(QueryPair qp,
+  protected FetchedObject<String> retrieveRawObject(Gadget gadget,
       boolean ignoreCache) throws GadgetException {
     // Always attempt to rewrite the inbound gadget object.
     // Even if that fails, the non-rewritten Gadget should be cached,
     // to avoid superfluous rewrites later.
-    baseRegistry.rewriteGadget(qp.context, qp.gadget);
+    baseRegistry.rewriteGadget(gadget);
     
     // Expiration time of 30 minutes by default. This number is arbitrary.
     // TODO: Make this value configurable.
     long expiration = System.currentTimeMillis() + (1000 * 60 * 30);
-    Object expirationObj = qp.gadget.getSpec().getAttribute(GadgetSpec.EXPIRATION_ATTRIB);
+    Object expirationObj = gadget.getSpec().getAttribute(GadgetSpec.EXPIRATION_ATTRIB);
     if (expirationObj instanceof Long) {
       expiration = (Long)expirationObj;
     }
     
-    return new FetchedObject<String>(qp.gadget.getContent(), expiration);
+    return new FetchedObject<String>(gadget.getContent(), expiration);
   }
   
   /** {@inheritDoc} */
@@ -95,9 +94,9 @@ public class CachingContentRewriterRegistry
   }
 
   /** {@inheritDoc} */
-  public boolean rewriteGadget(GadgetContext context, Gadget gadget)
+  public boolean rewriteGadget(Gadget gadget)
       throws GadgetException {
-    String cached = doCachedFetch(new QueryPair(context, gadget), context.getIgnoreCache());
+    String cached = doCachedFetch(gadget, gadget.getContext().getIgnoreCache());
     // At present, the output of rewriting is just the string contained within
     // the Gadget object. Thus, a successful cache hit results in copying over the
     // rewritten value to the input gadget object.
@@ -107,19 +106,10 @@ public class CachingContentRewriterRegistry
       gadget.setContent(cached);
       return true;
     }
-    return baseRegistry.rewriteGadget(context, gadget);
+    return baseRegistry.rewriteGadget(gadget);
   }
   
   public void appendRewriter(ContentRewriter rewriter) {
     baseRegistry.appendRewriter(rewriter);
-  }
-  
-  public static class QueryPair {
-    private GadgetContext context;
-    private Gadget gadget;
-    private QueryPair(GadgetContext context, Gadget gadget) {
-      this.context = context;
-      this.gadget = gadget;
-    }
   }
 }

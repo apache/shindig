@@ -130,7 +130,7 @@ public class UrlGeneratorTest extends GadgetTestFixture {
           "</Module>";
     GadgetSpec spec = new GadgetSpec(URI.create(SPEC_URL), xml);
     replay();
-    Gadget gadget = new Gadget(context, spec, Collections.<JsLibrary>emptyList(), containerConfig);
+    Gadget gadget = new Gadget(context, spec, Collections.<JsLibrary>emptyList(), containerConfig, null);
 
     URI iframeUrl = URI.create(realUrlGenerator.getIframeUrl(gadget));
 
@@ -150,7 +150,7 @@ public class UrlGeneratorTest extends GadgetTestFixture {
           "</Module>";
     GadgetSpec spec = new GadgetSpec(URI.create(SPEC_URL), xml);
     replay();
-    Gadget gadget = new Gadget(context, spec, Collections.<JsLibrary>emptyList(), containerConfig);
+    Gadget gadget = new Gadget(context, spec, Collections.<JsLibrary>emptyList(), containerConfig, null);
     
     URI iframeUrl = URI.create(realUrlGenerator.getIframeUrl(gadget));
 

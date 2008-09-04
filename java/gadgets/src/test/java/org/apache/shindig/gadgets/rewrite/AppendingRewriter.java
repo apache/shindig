@@ -17,9 +17,9 @@
  */
 package org.apache.shindig.gadgets.rewrite;
 
+import org.apache.shindig.gadgets.Gadget;
 import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.http.HttpResponse;
-import org.apache.shindig.gadgets.spec.GadgetSpec;
 
 /**
  * Simple ContentRewriter implementation that appends
@@ -38,9 +38,8 @@ class AppendingRewriter implements ContentRewriter {
     return null;
   }
 
-  public String rewriteGadgetView(GadgetSpec spec, String original,
-      String mimeType) {
+  public void rewrite(Gadget gadget) {
     // Appends appender to the end of the input string.
-    return original + appender;
+	gadget.setContent(gadget.getContent() + appender);
   }
 }
