@@ -18,8 +18,10 @@
  */
 package org.apache.shindig.common.servlet;
 
+import com.google.inject.Injector;
 import com.google.inject.Guice;
 import com.google.inject.Module;
+import com.google.inject.tools.jmx.Manager;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -35,6 +37,7 @@ import javax.servlet.ServletContextListener;
 public class GuiceServletContextListener implements ServletContextListener {
   public static final String INJECTOR_ATTRIBUTE = "guice-injector";
   public static final String MODULES_ATTRIBUTE = "guice-modules";
+  private boolean jmxInitialized = false;
 
   public void contextInitialized(ServletContextEvent event) {
     ServletContext context = event.getServletContext();
@@ -53,7 +56,17 @@ public class GuiceServletContextListener implements ServletContextListener {
         }
       }
     }
-    context.setAttribute(INJECTOR_ATTRIBUTE, Guice.createInjector(modules));
+    Injector injector = Guice.createInjector(modules);
+    context.setAttribute(INJECTOR_ATTRIBUTE, injector);
+
+    try {
+      if (jmxInitialized == false) {
+        Manager.manage("ShindigGuiceContext", injector);
+        jmxInitialized = true;
+      }
+    } catch (Exception e) {
+      // Ignore errors
+    }
   }
 
   public void contextDestroyed(ServletContextEvent event) {
