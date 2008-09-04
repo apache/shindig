@@ -20,6 +20,8 @@ package org.apache.shindig.gadgets.rewrite;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.inject.name.Named;
+
+import org.apache.shindig.gadgets.Gadget;
 import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.GadgetSpecFactory;
 import org.apache.shindig.gadgets.http.HttpRequest;
@@ -103,12 +105,11 @@ public class DefaultContentRewriter implements ContentRewriter {
     }
   }
 
-  public String rewriteGadgetView(GadgetSpec spec, String view, String mimeType) {
+  public void rewrite(Gadget gadget) {
     StringWriter sw = new StringWriter();
-    if (rewrite(spec, spec.getUrl(), new StringReader(view), mimeType, sw)) {
-      return sw.toString();
-    } else {
-      return null;
+    GadgetSpec spec = gadget.getSpec();
+    if (rewrite(spec, spec.getUrl(), new StringReader(gadget.getContent()), "text/html", sw)) {
+      gadget.setContent(sw.toString());
     }
   }
 

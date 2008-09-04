@@ -17,7 +17,7 @@
  */
 package org.apache.shindig.gadgets.http;
 
-import org.apache.shindig.gadgets.spec.GadgetSpec;
+import org.apache.shindig.gadgets.Gadget;
 import org.apache.shindig.gadgets.rewrite.ContentRewriter;
 
 import static org.easymock.EasyMock.expect;
@@ -88,8 +88,8 @@ public class AbstractHttpCacheTest extends TestCase {
   
   private static String PFX_STR = "--prefixtest--";
   private static class TestContentRewriter implements ContentRewriter {
-    public String rewriteGadgetView(GadgetSpec spec, String content, String mime) {
-      return PFX_STR + content;
+    public void rewrite(Gadget gadget) {
+      gadget.setContent(PFX_STR + gadget.getContent());
     }
     
     public HttpResponse rewrite(HttpRequest req, HttpResponse resp) {

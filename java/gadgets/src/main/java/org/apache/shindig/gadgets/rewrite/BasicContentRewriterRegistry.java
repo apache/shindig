@@ -24,7 +24,6 @@ import java.util.LinkedList;
 import java.util.List;
 
 import org.apache.shindig.gadgets.Gadget;
-import org.apache.shindig.gadgets.GadgetContext;
 import org.apache.shindig.gadgets.GadgetException;
 
 /**
@@ -55,23 +54,19 @@ public class BasicContentRewriterRegistry implements ContentRewriterRegistry {
   }
   
   /** {@inheritDoc} */
-  public boolean rewriteGadget(GadgetContext context, Gadget gadget) throws GadgetException {
-    String content = gadget.getContent();
-    String originalContent = content;
+  public boolean rewriteGadget(Gadget gadget) throws GadgetException {
+    String originalContent = gadget.getContent();
     
     if (originalContent == null) {
+      // Nothing to rewrite.
       return false;
     }
-    
+
     for (ContentRewriter rewriter : getRewriters()) {
-      String rewritten = rewriter.rewriteGadgetView(gadget.getSpec(), content, "text/html");
-      if (rewritten != null) {
-        content = rewritten;
-      }
+      rewriter.rewrite(gadget);
     }
     
-    gadget.setContent(content);
-    return !originalContent.equals(content);
+    return !originalContent.equals(gadget.getContent());
   }
 
 }

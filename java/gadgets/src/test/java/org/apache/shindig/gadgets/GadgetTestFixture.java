@@ -31,7 +31,6 @@ import org.apache.shindig.gadgets.http.HttpResponse;
 import org.apache.shindig.gadgets.oauth.OAuthFetcher;
 import org.apache.shindig.gadgets.rewrite.BasicContentRewriterRegistry;
 import org.apache.shindig.gadgets.rewrite.ContentRewriter;
-import org.apache.shindig.gadgets.spec.GadgetSpec;
 
 import java.util.concurrent.ExecutorService;
 
@@ -59,7 +58,7 @@ public abstract class GadgetTestFixture extends EasyMockTestCase {
       registry = new GadgetFeatureRegistry(null, fetcher);
       gadgetServer = new GadgetServer(executor, registry, blacklist,
           containerConfig, new BasicContentRewriterRegistry(rewriter),
-          fetcherFactory, specFactory, bundleFactory);
+          null, fetcherFactory, specFactory, bundleFactory);
     } catch (Exception e) {
       throw new RuntimeException(e);
     }
@@ -72,9 +71,8 @@ public abstract class GadgetTestFixture extends EasyMockTestCase {
       return original;
     }
 
-    public String rewriteGadgetView(GadgetSpec spec, String original, String mimeType) {
+    public void rewrite(Gadget gadget) {
       rewroteView = true;
-      return original;
     }
     
     public boolean viewWasRewritten() {

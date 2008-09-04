@@ -337,7 +337,7 @@ public class ParseTreeHtmlRewriter {
     
     List<GadgetHtmlNode> nodes = new LinkedList<GadgetHtmlNode>();
     for (ParsedHtmlNode parsedNode : parsed) {
-      nodes.add(new GadgetHtmlNode(parsedNode));
+      nodes.add(new GadgetHtmlNode(parsedNode, null));
     }
     return nodes;
   }

@@ -62,19 +62,19 @@ public class CachingContentRewriterRegistryTest extends TestCase {
     expect(context.getView()).andReturn(GadgetSpec.DEFAULT_VIEW).anyTimes();
     replay(context, view, spec);
     
-    Gadget gadget = new Gadget(context, spec, null, null);
+    Gadget gadget = new Gadget(context, spec, null, null, null);
     assertEquals(inputContent, gadget.getContent());
     
     // Should be rewritten the first time.
-    assertTrue(r.rewriteGadget(context, gadget));
+    assertTrue(r.rewriteGadget(gadget));
     assertEquals(rewrittenContent, gadget.getContent());
     
     r.appendRewriter(new AppendingRewriter("-end"));
     
     // Should also be rewritten the second time, but with the previous
     // expected rewritten content value.
-    Gadget nextGadget = new Gadget(context, spec, null, null);
-    assertTrue(r.rewriteGadget(context, nextGadget));
+    Gadget nextGadget = new Gadget(context, spec, null, null, null);
+    assertTrue(r.rewriteGadget(nextGadget));
     assertEquals(rewrittenContent, nextGadget.getContent());
   }
 }

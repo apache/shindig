@@ -42,6 +42,7 @@ public class GadgetHtmlNode {
   private Map<String, String> attributes;
   private List<GadgetHtmlNode> children;
   private String text;
+  private EditListener editListener;
   
   private enum NodeType {
     TAG, TEXT
@@ -50,8 +51,10 @@ public class GadgetHtmlNode {
   /**
    * Construct a mutable HTML node from a parsed one.
    * @param parsed HTML node object from parser.
+   * @param editListener Object receiving notifications when an edit op happens to
+   * the original contents of a node, as created from parsed equivalent. May be null.
    */
-  public GadgetHtmlNode(ParsedHtmlNode parsed) {
+  public GadgetHtmlNode(ParsedHtmlNode parsed, EditListener editListener) {
     if (parsed.getText() == null) {
       // Tag type
       type = NodeType.TAG;
@@ -63,12 +66,13 @@ public class GadgetHtmlNode {
       }
       children = new LinkedList<GadgetHtmlNode>();
       for (ParsedHtmlNode node: parsed.getChildren()) {
-        appendChild(new GadgetHtmlNode(node));
+        appendChild(new GadgetHtmlNode(node, editListener));
       }
     } else {
       type = NodeType.TEXT;
       setText(parsed.getText());
     }
+	this.editListener = editListener;
   }
   
   /**
@@ -126,6 +130,7 @@ public class GadgetHtmlNode {
       newTag = newTag.trim();
       if (newTag.matches("[\\w\\-_:]+")) {
         this.tagName = newTag;
+        sendEditNotice();
         return true;
       }
     }
@@ -151,7 +156,11 @@ public class GadgetHtmlNode {
     validateNodeType(NodeType.TAG);
     boolean hasBefore = hasAttribute(key);
     attributes.remove(key);
-    return hasBefore && !hasAttribute(key);
+    boolean ret = hasBefore && !hasAttribute(key);
+    if (ret) {
+      sendEditNotice();
+    }
+    return ret;
   }
   
   /**
@@ -167,6 +176,7 @@ public class GadgetHtmlNode {
       return false;
     }
     attributes.put(putKey, value);
+    sendEditNotice();
     return true;
   }
   
@@ -208,14 +218,15 @@ public class GadgetHtmlNode {
     node.setParentNode(this);
     if (before == null) {
       children.add(node);
-      return;
-    }
-    int befIx = children.indexOf(before);
-    if (befIx >= 0) {
-      children.add(befIx, node);
     } else {
-      children.add(node);
+      int befIx = children.indexOf(before);
+      if (befIx >= 0) {
+        children.add(befIx, node);
+      } else {
+        children.add(node);
+      }
     }
+    sendEditNotice();
   }
   
   /**
@@ -228,7 +239,11 @@ public class GadgetHtmlNode {
     
     // For good measure, dissociate from parent
     node.setParentNode(null);
-    return children.remove(node);
+    boolean ret = children.remove(node);
+    if (ret) {
+      sendEditNotice();
+    }
+    return ret;
   }
   
   /**
@@ -252,6 +267,9 @@ public class GadgetHtmlNode {
   
   // Internal helper: sets parent for tree-node management
   private void setParentNode(GadgetHtmlNode parent) {
+	if (parentNode != parent) {
+	  sendEditNotice();
+	}
     parentNode = parent;
   }
   
@@ -282,6 +300,7 @@ public class GadgetHtmlNode {
   public void setText(String text) {
     validateNodeType(NodeType.TEXT);
     this.text = text;
+    sendEditNotice();
   }
   
   /**
@@ -386,5 +405,15 @@ public class GadgetHtmlNode {
       throw new UnsupportedOperationException("Code error: " +
           "Attempted " + expected + " operation on node of type " + type);
     }
+  }
+  
+  private void sendEditNotice() {
+	if (editListener != null) {
+	  editListener.nodeEdited();
+	}
+  }
+  
+  public static interface EditListener {
+	public void nodeEdited();
   }
 }

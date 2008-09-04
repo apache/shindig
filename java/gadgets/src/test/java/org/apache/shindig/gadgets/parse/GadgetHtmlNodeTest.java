@@ -95,8 +95,10 @@ public class GadgetHtmlNodeTest extends TestCase {
         makeParsedTagNode("span", null, null)
     };
     ParsedHtmlNode parsed = makeParsedTagNode("div", tagTreeAttribs, parsedKids);
-    GadgetHtmlNode node = new GadgetHtmlNode(parsed);
+    TestEditListener tel = new TestEditListener();
+    GadgetHtmlNode node = new GadgetHtmlNode(parsed, tel);
     validateTagTreeGetters(node);
+    assertTrue(tel.numEdits > 0);
   }
   
   public void testTagTreeCreatedByNewGetters() {
@@ -144,8 +146,10 @@ public class GadgetHtmlNodeTest extends TestCase {
   private static String textGetterContent = "content";
   public void testTextCreatedFromParsedGetters() {
     ParsedHtmlNode parsed = makeParsedTextNode(textGetterContent);
-    GadgetHtmlNode node = new GadgetHtmlNode(parsed);
+    TestEditListener tel = new TestEditListener();
+    GadgetHtmlNode node = new GadgetHtmlNode(parsed, tel);
     validateTextGetters(node);
+    assertEquals(0, tel.numEdits);
   }
   
   public void testTextCreatedByNewGetters() {
@@ -161,8 +165,10 @@ public class GadgetHtmlNodeTest extends TestCase {
   // Test: tag name setter
   public void testTagCreatedFromParsedTagSetter() {
     ParsedHtmlNode parsed = makeParsedTagNode("div", null, null);
-    GadgetHtmlNode node = new GadgetHtmlNode(parsed);
+    TestEditListener tel = new TestEditListener();
+    GadgetHtmlNode node = new GadgetHtmlNode(parsed, tel);
     validateTagNameSetter(node);
+    assertEquals(1, tel.numEdits);
   }
   
   public void testTagCreatedFromNewTagSetter() {
@@ -181,8 +187,10 @@ public class GadgetHtmlNodeTest extends TestCase {
   public void testTagCreatedFromParsedAttributeManipulation() {
     ParsedHtmlNode parsed =
         makeParsedTagNode("div", tagManipAttribs, null);
-    GadgetHtmlNode node = new GadgetHtmlNode(parsed);
+    TestEditListener tel = new TestEditListener();
+    GadgetHtmlNode node = new GadgetHtmlNode(parsed, tel);
     validateTagAttributeManipulation(node);
+    assertTrue(tel.numEdits > 0);
   }
   
   public void testTagCreatedFromNewAttributeManipulation() {
@@ -244,7 +252,9 @@ public class GadgetHtmlNodeTest extends TestCase {
   public void testTagCreatedFromParsedNodeManipulation() {
     ParsedHtmlNode[] kidNodes = { makeParsedTextNode("content") };
     ParsedHtmlNode parsed = makeParsedTagNode("div", null, kidNodes);
-    GadgetHtmlNode parentNode = new GadgetHtmlNode(parsed);
+    TestEditListener tel = new TestEditListener();
+    GadgetHtmlNode parentNode = new GadgetHtmlNode(parsed, tel);
+    tel.numEdits = 0;
     
     // Sanity check on created child
     List<GadgetHtmlNode> initialChildren = parentNode.getChildren();
@@ -253,10 +263,12 @@ public class GadgetHtmlNodeTest extends TestCase {
     GadgetHtmlNode textNode = initialChildren.get(0);
     assertTrue(textNode.isText());
     assertSame(parentNode, textNode.getParentNode());
+    assertEquals(0, tel.numEdits);
     
     // appendChild
-    GadgetHtmlNode afterNode = new GadgetHtmlNode(makeParsedTagNode("after", null, null));
+    GadgetHtmlNode afterNode = new GadgetHtmlNode(makeParsedTagNode("after", null, null), null);
     parentNode.appendChild(afterNode);
+    assertEquals(1, tel.numEdits);
     List<GadgetHtmlNode> appendKids = parentNode.getChildren();
     assertNotNull(appendKids);
     assertEquals(2, appendKids.size());
@@ -264,10 +276,12 @@ public class GadgetHtmlNodeTest extends TestCase {
     assertSame(afterNode, appendKids.get(1));
     assertSame(parentNode, textNode.getParentNode());
     assertSame(parentNode, afterNode.getParentNode());
+    assertEquals(1, tel.numEdits);
     
     // insertBefore
-    GadgetHtmlNode beforeNode = new GadgetHtmlNode(makeParsedTagNode("before", null, null));
+    GadgetHtmlNode beforeNode = new GadgetHtmlNode(makeParsedTagNode("before", null, null), null);
     parentNode.insertBefore(beforeNode, textNode);
+    assertEquals(2, tel.numEdits);
     List<GadgetHtmlNode> insertKids = parentNode.getChildren();
     assertNotNull(insertKids);
     assertEquals(3, insertKids.size());
@@ -280,9 +294,13 @@ public class GadgetHtmlNodeTest extends TestCase {
     
     // remove before and text, leaving only after
     assertTrue(parentNode.removeChild(beforeNode));
+    assertEquals(3, tel.numEdits);
     assertFalse(parentNode.removeChild(beforeNode));
+    assertEquals(3, tel.numEdits);
     assertTrue(parentNode.removeChild(textNode));
+    assertEquals(5, tel.numEdits);  // 5 = parent node change plus removal
     assertFalse(parentNode.removeChild(textNode));
+    assertEquals(5, tel.numEdits);
     assertNull(beforeNode.getParentNode());
     assertNull(textNode.getParentNode());
     List<GadgetHtmlNode> remainingKids = parentNode.getChildren();
@@ -290,9 +308,11 @@ public class GadgetHtmlNodeTest extends TestCase {
     assertEquals(1, remainingKids.size());
     assertSame(parentNode, afterNode.getParentNode());
     assertSame(afterNode, remainingKids.get(0));
+    assertEquals(5, tel.numEdits);
     
     // clear nodes
     parentNode.clearChildren();
+    assertEquals(6, tel.numEdits);
     List<GadgetHtmlNode> clearedKids = parentNode.getChildren();
     assertNotNull(clearedKids);
     assertEquals(0, clearedKids.size());
@@ -301,11 +321,13 @@ public class GadgetHtmlNodeTest extends TestCase {
   // Test: text setter
   public void testTextCreatedFromParsedTextSetter() {
     ParsedHtmlNode parsed = makeParsedTextNode("content");
-    GadgetHtmlNode node = new GadgetHtmlNode(parsed);
+    TestEditListener tel = new TestEditListener();
+    GadgetHtmlNode node = new GadgetHtmlNode(parsed, tel);
     validateTextSetter(node);
+    assertEquals(1, tel.numEdits);
   }
   
-  public void tesetTextCreatedFromNewTextSetter() {
+  public void testTextCreatedFromNewTextSetter() {
     validateTextSetter(makeTextNodeFromNew("content"));
   }
   
@@ -319,7 +341,7 @@ public class GadgetHtmlNodeTest extends TestCase {
   // Test: text-node API limitation
   public void testTagsFromParsedCantUseTextApis() {
     validateTagsCantUseTextApis(
-        new GadgetHtmlNode(makeParsedTagNode("tag", null, null)));
+        new GadgetHtmlNode(makeParsedTagNode("tag", null, null), null));
   }
   
   public void testTagsFromNewCantUseTextApis() {
@@ -346,7 +368,7 @@ public class GadgetHtmlNodeTest extends TestCase {
   
   // Test: tag-node API limitation
   public void testTextFromParsedCantUseTagsApis() {
-    validateTextCantUseTagsApis(new GadgetHtmlNode(makeParsedTextNode("content")));
+    validateTextCantUseTagsApis(new GadgetHtmlNode(makeParsedTextNode("content"), null));
   }
   
   public void testTextFromNewCantUseTagsApis() {
@@ -571,5 +593,13 @@ public class GadgetHtmlNodeTest extends TestCase {
       fail("Unexpected IOException on StringWriter operation");
     }
     return sw.toString();
+  }
+  
+  private static class TestEditListener implements GadgetHtmlNode.EditListener {
+	private int numEdits = 0;
+	
+	public void nodeEdited() {
+      ++numEdits;
+	}
   }
 }

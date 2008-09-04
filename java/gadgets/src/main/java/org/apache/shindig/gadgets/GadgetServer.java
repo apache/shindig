@@ -23,6 +23,7 @@ import org.apache.shindig.gadgets.http.ContentFetcherFactory;
 import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.http.HttpResponse;
 import org.apache.shindig.gadgets.oauth.OAuthArguments;
+import org.apache.shindig.gadgets.parse.GadgetHtmlParser;
 import org.apache.shindig.gadgets.rewrite.ContentRewriterRegistry;
 import org.apache.shindig.gadgets.spec.Auth;
 import org.apache.shindig.gadgets.spec.Feature;
@@ -55,6 +56,7 @@ public class GadgetServer {
   private final GadgetBlacklist blacklist;
   private final ContainerConfig containerConfig;
   private final ContentRewriterRegistry rewriterRegistry;
+  private final GadgetHtmlParser htmlParser;
 
   private ContentFetcherFactory preloadFetcherFactory;
   private GadgetSpecFactory specFactory;
@@ -66,6 +68,7 @@ public class GadgetServer {
       GadgetBlacklist blacklist,
       ContainerConfig containerConfig,
       ContentRewriterRegistry rewriterRegistry,
+      GadgetHtmlParser htmlParser,
       ContentFetcherFactory preloadFetcherFactory,
       GadgetSpecFactory specFactory,
       MessageBundleFactory bundleFactory) {
@@ -74,6 +77,7 @@ public class GadgetServer {
     this.blacklist = blacklist;
     this.containerConfig = containerConfig;
     this.rewriterRegistry = rewriterRegistry;
+    this.htmlParser = htmlParser;
     this.preloadFetcherFactory = preloadFetcherFactory;
     this.specFactory = specFactory;
     this.bundleFactory = bundleFactory;
@@ -110,11 +114,11 @@ public class GadgetServer {
     spec = spec.substitute(substituter);
     
     Collection<JsLibrary> jsLibraries = getLibraries(spec, context);
-    Gadget gadget = new Gadget(context, spec, jsLibraries, containerConfig);
+    Gadget gadget = new Gadget(context, spec, jsLibraries, containerConfig, htmlParser);
     
     // Perform rewriting operations on the Gadget.
     if (rewriterRegistry != null) {
-      rewriterRegistry.rewriteGadget(context, gadget);
+      rewriterRegistry.rewriteGadget(gadget);
     }
 
     startPreloads(gadget);

@@ -22,7 +22,6 @@ import com.google.inject.ImplementedBy;
 import java.util.List;
 
 import org.apache.shindig.gadgets.Gadget;
-import org.apache.shindig.gadgets.GadgetContext;
 import org.apache.shindig.gadgets.GadgetException;
 
 @ImplementedBy(BasicContentRewriterRegistry.class)
@@ -34,10 +33,9 @@ public interface ContentRewriterRegistry {
   
   /**
    * Rewrites a {@code Gadget} object given the registered rewriters.
-   * @param context Context for gadget rewriting
    * @param gadget Gadget object to rewrite
    * @return True if rewriting occurred
    * @throws GadgetException Potentially passed through from rewriters
    */
-  public boolean rewriteGadget(GadgetContext context, Gadget gadget) throws GadgetException;
+  public boolean rewriteGadget(Gadget gadget) throws GadgetException;
 }
