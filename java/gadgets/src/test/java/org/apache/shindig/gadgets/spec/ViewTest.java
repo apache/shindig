@@ -19,16 +19,21 @@
 
 package org.apache.shindig.gadgets.spec;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+
 import org.apache.shindig.common.xml.XmlUtil;
 import org.apache.shindig.gadgets.Substitutions;
 import org.apache.shindig.gadgets.Substitutions.Type;
 
-import junit.framework.TestCase;
+import org.junit.Test;
 
 import java.util.Arrays;
 
-public class ViewTest extends TestCase {
+public class ViewTest {
 
+  @Test
   public void testSimpleView() throws Exception {
     String viewName = "VIEW NAME";
     String content = "This is the content";
@@ -47,8 +52,11 @@ public class ViewTest extends TestCase {
     assertEquals(View.ContentType.HTML, view.getType());
     assertEquals("html", view.getRawType());
     assertEquals(content, view.getContent());
+    assertTrue("Default value for sign_owner should be true.", view.isSignOwner());
+    assertTrue("Default value for sign_viewer should be true.", view.isSignViewer());
   }
 
+  @Test
   public void testConcatenation() throws Exception {
    String body1 = "Hello, ";
    String body2 = "World!";
@@ -59,6 +67,7 @@ public class ViewTest extends TestCase {
    assertEquals(body1 + body2, view.getContent());
   }
 
+  @Test
   public void testNonStandardContentType() throws Exception {
     String contentType = "html-inline";
     String xml = "<Content" +
@@ -70,42 +79,28 @@ public class ViewTest extends TestCase {
     assertEquals(contentType, view.getRawType());
   }
 
+  @Test(expected = SpecParserException.class)
   public void testContentTypeConflict() throws Exception {
     String content1 = "<Content type=\"html\"/>";
-    String content2
-        = "<Content type=\"url\" href=\"http://example.org/\"/>";
-
-    try {
-      new View("test", Arrays.asList(XmlUtil.parse(content1),
-                                                 XmlUtil.parse(content2)));
-      fail("No exception thrown with conflicting type attributes.");
-    } catch (SpecParserException e) {
-      // this is what was supposed to happen.
-    }
+    String content2 = "<Content type=\"url\" href=\"http://example.org/\"/>";
+    new View("test", Arrays.asList(XmlUtil.parse(content1), XmlUtil.parse(content2)));
   }
 
+  @Test(expected = SpecParserException.class)
   public void testHrefOnTypeUrl() throws Exception {
     String xml = "<Content type=\"url\"/>";
-    try {
-      new View("dummy", Arrays.asList(XmlUtil.parse(xml)));
-      fail("No exception thrown when href attribute is missing for type=url.");
-    } catch (SpecParserException e) {
-      // Ok
-    }
+    new View("dummy", Arrays.asList(XmlUtil.parse(xml)));
   }
 
+  @Test(expected = SpecParserException.class)
   public void testHrefMalformed() throws Exception {
     // Unfortunately, this actually does URI validation rather than URL, so
     // most anything will pass. urn:isbn:0321146530 is valid here.
     String xml = "<Content type=\"url\" href=\"fobad@$%!fdf\"/>";
-    try {
-      new View("dummy", Arrays.asList(XmlUtil.parse(xml)));
-      fail("No exception thrown when href attribute is not a valid uri.");
-    } catch (SpecParserException e) {
-      // Ok
-    }
+    new View("dummy", Arrays.asList(XmlUtil.parse(xml)));
   }
 
+  @Test
   public void testQuirksCascade() throws Exception {
     String content1 = "<Content type=\"html\" quirks=\"true\"/>";
     String content2 = "<Content type=\"html\" quirks=\"false\"/>";
@@ -114,6 +109,7 @@ public class ViewTest extends TestCase {
     assertEquals(false, view.getQuirks());
   }
 
+  @Test
   public void testQuirksCascadeReverse() throws Exception {
     String content1 = "<Content type=\"html\" quirks=\"false\"/>";
     String content2 = "<Content type=\"html\" quirks=\"true\"/>";
@@ -122,6 +118,7 @@ public class ViewTest extends TestCase {
     assertEquals(true, view.getQuirks());
   }
 
+  @Test
   public void testPreferredHeight() throws Exception {
     String content1 = "<Content type=\"html\" preferred_height=\"100\"/>";
     String content2 = "<Content type=\"html\" preferred_height=\"300\"/>";
@@ -130,6 +127,7 @@ public class ViewTest extends TestCase {
     assertEquals(300, view.getPreferredHeight());
   }
 
+  @Test
   public void testPreferredWidth() throws Exception {
     String content1 = "<Content type=\"html\" preferred_width=\"300\"/>";
     String content2 = "<Content type=\"html\" preferred_width=\"172\"/>";
@@ -138,6 +136,7 @@ public class ViewTest extends TestCase {
     assertEquals(172, view.getPreferredWidth());
   }
 
+  @Test
   public void testContentSubstitution() throws Exception {
     String xml
         = "<Content type=\"html\">Hello, __MSG_world__ __MODULE_ID__</Content>";
@@ -154,6 +153,7 @@ public class ViewTest extends TestCase {
     assertEquals("Hello, foo Earthright 3", view.getContent());
   }
 
+  @Test
   public void testHrefSubstitution() throws Exception {
     String href = "http://__MSG_domain__/__MODULE_ID__?dir=__BIDI_DIR__";
     String xml = "<Content type=\"url\" href=\"" + href + "\"/>";
@@ -169,5 +169,21 @@ public class ViewTest extends TestCase {
         Arrays.asList(XmlUtil.parse(xml))).substitute(substituter);
     assertEquals("http://up.example.org/123?dir=rtl",
                  view.getHref().toString());
+  }
+
+  @Test
+  public void authAttributes() throws Exception {
+    String xml = "<Content type='html' sign_owner='false' sign_viewer='false' foo='bar' " +
+                 "yo='momma' sub='__MSG_view__'/>";
+
+    View view = new View("test", Arrays.asList(XmlUtil.parse(xml)));
+    Substitutions substituter = new Substitutions();
+    substituter.addSubstitution(Substitutions.Type.MESSAGE, "view", "stuff");
+    View substituted = view.substitute(substituter);
+    assertEquals("bar", substituted.getAttributes().get("foo"));
+    assertEquals("momma", substituted.getAttributes().get("yo"));
+    assertEquals("stuff", substituted.getAttributes().get("sub"));
+    assertFalse("sign_owner parsed incorrectly.", view.isSignOwner());
+    assertFalse("sign_viewer parsed incorrectly.", view.isSignViewer());
   }
 }

@@ -19,8 +19,6 @@
 package org.apache.shindig.gadgets.spec;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import org.apache.shindig.common.xml.XmlUtil;
@@ -48,7 +46,8 @@ public class PreloadTest {
     Preload preload = new Preload(XmlUtil.parse(xml));
 
     assertEquals(HREF, preload.getHref().toString());
-    assertEquals(Auth.NONE, preload.getAuth());
+    assertEquals(Auth.NONE, preload.getAuthType());
+    assertEquals(0, preload.getAttributes().size());
     assertTrue("Default value for sign_owner should be true.",
                 preload.isSignOwner());
     assertTrue("Default value for sign_viewer should be true.",
@@ -61,7 +60,7 @@ public class PreloadTest {
 
     Preload preload = new Preload(XmlUtil.parse(xml));
 
-    assertEquals(Auth.SIGNED, preload.getAuth());
+    assertEquals(Auth.SIGNED, preload.getAuthType());
   }
 
   @Test
@@ -70,7 +69,7 @@ public class PreloadTest {
 
     Preload preload = new Preload(XmlUtil.parse(xml));
 
-    assertEquals(Auth.OAUTH, preload.getAuth());
+    assertEquals(Auth.OAUTH, preload.getAuthType());
   }
 
   @Test
@@ -79,7 +78,7 @@ public class PreloadTest {
 
     Preload preload = new Preload(XmlUtil.parse(xml));
 
-    assertEquals(Auth.NONE, preload.getAuth());
+    assertEquals(Auth.NONE, preload.getAuthType());
   }
 
   @Test
@@ -93,24 +92,6 @@ public class PreloadTest {
   }
 
   @Test
-  public void signOwner() throws Exception {
-    String xml = "<Preload href='" + HREF + "' sign_owner='false'/>";
-
-    Preload preload = new Preload(XmlUtil.parse(xml));
-
-    assertFalse("sign_owner parsing is incorrect.", preload.isSignOwner());
-  }
-
-  @Test
-  public void signViewer() throws Exception {
-    String xml = "<Preload href='" + HREF + "' sign_viewer='false'/>";
-
-    Preload preload = new Preload(XmlUtil.parse(xml));
-
-    assertFalse("sign_viewer parsing is incorrect.", preload.isSignViewer());
-  }
-
-  @Test
   public void substitutionsOk() throws Exception {
     String xml = "<Preload href='__MSG_preload__'/>";
 
@@ -121,11 +102,11 @@ public class PreloadTest {
 
     assertEquals(HREF, substituted.getHref().toString());
   }
-  
+
   @Test
   public void arbitraryAttributes() throws Exception {
     String xml = "<Preload href='" + HREF + "' foo='bar' yo='momma' sub='__MSG_preload__'/>";
-    
+
     Preload preload = new Preload(XmlUtil.parse(xml));
     Substitutions substituter = new Substitutions();
     substituter.addSubstitution(Substitutions.Type.MESSAGE, "preload", "stuff");
@@ -133,24 +114,22 @@ public class PreloadTest {
     assertEquals("bar", substituted.getAttributes().get("foo"));
     assertEquals("momma", substituted.getAttributes().get("yo"));
     assertEquals("stuff", substituted.getAttributes().get("sub"));
-    assertNull(substituted.getAttributes().get("href"));
   }
 
   @Test
   public void toStringIsSane() throws Exception {
     String xml = "<Preload" +
     		     " href='" + HREF + '\'' +
-    		     " sign_owner='false'" +
+    		     " authz='signed'" +
     		     " views='" + StringUtils.join(VIEWS, ',') + "'" +
     		     " some_attribute='yes' />";
 
     Preload preload = new Preload(XmlUtil.parse(xml));
     Preload preload2 = new Preload(XmlUtil.parse(preload.toString()));
 
-    assertTrue(preload2.isSignViewer());
-    assertFalse(preload2.isSignOwner());
     assertEquals(VIEWS, preload2.getViews());
     assertEquals(HREF, preload2.getHref().toString());
+    assertEquals(Auth.SIGNED, preload2.getAuthType());
     assertEquals("yes", preload2.getAttributes().get("some_attribute"));
   }
 

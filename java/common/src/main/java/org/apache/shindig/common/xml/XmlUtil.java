@@ -91,7 +91,7 @@ public class XmlUtil {
   public static URI getUriAttribute(Node node, String attr) {
     return getUriAttribute(node, attr, null);
   }
-  
+
   /**
    * Retrieves an attribute as a URI, and verifies that the URI is an http
    * or https URI.
@@ -111,7 +111,7 @@ public class XmlUtil {
     }
     return uri;
   }
-  
+
   /**
    * Retrieves an attribute as a URI, and verifies that the URI is an http
    * or https URI.

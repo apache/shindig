@@ -82,7 +82,7 @@ public class GadgetServer {
     this.specFactory = specFactory;
     this.bundleFactory = bundleFactory;
   }
-  
+
   /**
    * Process a single gadget. Creates a gadget from a retrieved
    * GadgetSpec and context object. Performs rewriting, then message
@@ -98,7 +98,7 @@ public class GadgetServer {
     }
     // Retrieve the GadgetSpec for the given context.
     GadgetSpec spec = specFactory.getGadgetSpec(context);
-    
+
     // Create substituted GadgetSpec object, including message bundle substitutions.
     MessageBundle bundle
         = bundleFactory.getBundle(spec, context.getLocale(), context.getIgnoreCache());
@@ -112,10 +112,10 @@ public class GadgetServer {
     UserPrefSubstituter.addSubstitutions(
         substituter, spec, context.getUserPrefs());
     spec = spec.substitute(substituter);
-    
+
     Collection<JsLibrary> jsLibraries = getLibraries(spec, context);
     Gadget gadget = new Gadget(context, spec, jsLibraries, containerConfig, htmlParser);
-    
+
     // Perform rewriting operations on the Gadget.
     if (rewriterRegistry != null) {
       rewriterRegistry.rewriteGadget(gadget);
@@ -130,19 +130,18 @@ public class GadgetServer {
    *
    * Preloads are processed in parallel.
    */
-  private void startPreloads(Gadget gadget) throws GadgetException {
+  private void startPreloads(Gadget gadget) {
     RenderingContext renderContext = gadget.getContext().getRenderingContext();
     if (RenderingContext.GADGET.equals(renderContext)) {
       CompletionService<HttpResponse> preloadProcessor
           = new ExecutorCompletionService<HttpResponse>(executor);
       for (Preload preload : gadget.getSpec().getModulePrefs().getPreloads()) {
         // Cant execute signed/oauth preloads without the token
-        if ((preload.getAuth() == Auth.NONE ||
+        if ((preload.getAuthType() == Auth.NONE ||
             gadget.getContext().getToken() != null) &&
             (preload.getViews().isEmpty() ||
             preload.getViews().contains(gadget.getContext().getView()))) {
-          PreloadTask task = new PreloadTask(gadget.getContext(), preload,
-              preloadFetcherFactory);
+          PreloadTask task = new PreloadTask(gadget.getContext(), preload, preloadFetcherFactory);
           Future<HttpResponse> future = preloadProcessor.submit(task);
           gadget.getPreloadMap().put(preload, future);
         }
@@ -199,7 +198,7 @@ public class GadgetServer {
             .setContainer(context.getContainer())
             .setSecurityToken(context.getToken())
             .setGadget(Uri.fromJavaUri(context.getUrl()));
-        switch (preload.getAuth()) {
+        switch (preload.getAuthType()) {
           case NONE:
             return preloadFetcherFactory.get().fetch(request);
           case SIGNED:
