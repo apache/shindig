@@ -32,38 +32,38 @@ public class AnonymousSecurityToken implements SecurityToken {
   }
 
   public String toSerialForm() {
-    throw new UnsupportedOperationException();
+    return "";
   }
 
   public String getOwnerId() {
-    throw new UnsupportedOperationException();
+    return "";
   }
 
   public String getViewerId() {
-    throw new UnsupportedOperationException();
+    return "";
   }
 
   public String getAppId() {
-    throw new UnsupportedOperationException();
+    return "";
   }
 
   public String getDomain() {
-    throw new UnsupportedOperationException();
+    return "";
   }
 
   public String getAppUrl() {
-    throw new UnsupportedOperationException();
+    return "";
   }
 
   public long getModuleId() {
-    throw new UnsupportedOperationException();
+    return 0L;
   }
 
   public String getUpdatedToken() {
-    throw new UnsupportedOperationException();
+    return "";
   }
 
   public String getTrustedJson() {
-    throw new UnsupportedOperationException();
+    return "";
   }
 }
