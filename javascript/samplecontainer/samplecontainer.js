@@ -136,12 +136,12 @@ shindig.samplecontainer = {};
 
   shindig.samplecontainer.initGadget = function() {
     // Fetch cookies
-    var cookieGadgetUrl = decodeURIComponent(goog.net.cookies.get(gadgetUrlCookie));
+    var cookieGadgetUrl = decodeURIComponent(shindig.cookies.get(gadgetUrlCookie));
     if (cookieGadgetUrl && cookieGadgetUrl != "undefined") {
       gadgetUrl = cookieGadgetUrl;
     }
 
-    var cookieStateFileUrl = decodeURIComponent(goog.net.cookies.get(stateFileUrlCookie));
+    var cookieStateFileUrl = decodeURIComponent(shindig.cookies.get(stateFileUrlCookie));
     if (cookieStateFileUrl && cookieStateFileUrl != "undefined") {
       stateFileUrl = cookieStateFileUrl;
     }
@@ -181,7 +181,7 @@ shindig.samplecontainer = {};
     setEvilBit();
 
     stateFileUrl = document.getElementById("stateFileUrl").value;
-    goog.net.cookies.set(stateFileUrlCookie, encodeURIComponent(stateFileUrl));
+    shindig.cookies.set(stateFileUrlCookie, encodeURIComponent(stateFileUrl));
 
     viewerId = document.getElementById("viewerId").value;
     ownerId = document.getElementById("ownerId").value;
@@ -189,7 +189,7 @@ shindig.samplecontainer = {};
 
     gadget.secureToken = escape(generateSecureToken());
     gadget.specUrl = gadgetUrl;
-    goog.net.cookies.set(gadgetUrlCookie, encodeURIComponent(gadgetUrl));
+    shindig.cookies.set(gadgetUrlCookie, encodeURIComponent(gadgetUrl));
 
     reloadStateFile(function() {
       gadgets.container.renderGadgets();
