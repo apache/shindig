@@ -18,6 +18,7 @@
 package org.apache.shindig.gadgets.http;
 
 import org.apache.shindig.gadgets.Gadget;
+import org.apache.shindig.gadgets.MutableContent;
 import org.apache.shindig.gadgets.rewrite.ContentRewriter;
 
 import static org.easymock.EasyMock.expect;
@@ -92,9 +93,8 @@ public class AbstractHttpCacheTest extends TestCase {
       gadget.setContent(PFX_STR + gadget.getContent());
     }
     
-    public HttpResponse rewrite(HttpRequest req, HttpResponse resp) {
-      return new HttpResponseBuilder(resp)
-          .setResponse((PFX_STR + resp.getResponseAsString()).getBytes()).create();
+    public void rewrite(HttpRequest req, HttpResponse resp, MutableContent c) {
+      c.setContent(PFX_STR + c.getContent());;
     }
   }
   

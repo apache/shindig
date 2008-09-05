@@ -37,7 +37,7 @@ import java.util.concurrent.Future;
  * Intermediary representation of all state associated with processing
  * of a single gadget request.
  */
-public class Gadget extends MutableHtmlContent {
+public class Gadget extends MutableContent {
   private final GadgetContext context;
   
   /**

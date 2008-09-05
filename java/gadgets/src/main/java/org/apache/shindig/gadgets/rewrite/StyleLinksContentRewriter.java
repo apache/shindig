@@ -22,10 +22,13 @@ import java.util.LinkedList;
 import java.util.Queue;
 
 import org.apache.shindig.gadgets.Gadget;
+import org.apache.shindig.gadgets.MutableContent;
 import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.http.HttpResponse;
 import org.apache.shindig.gadgets.parse.GadgetHtmlNode;
 import org.apache.shindig.gadgets.rewrite.ContentRewriterFeature;
+
+import java.net.URI;
 
 public class StyleLinksContentRewriter implements ContentRewriter {
   // TODO: consider providing helper base class for node-visitor content rewriters
@@ -38,9 +41,13 @@ public class StyleLinksContentRewriter implements ContentRewriter {
     this.linkRewriter = linkRewriter;
   }
 
-  public HttpResponse rewrite(HttpRequest request, HttpResponse original) {
-    // TODO Auto-generated method stub
-    return null;
+  public void rewrite(HttpRequest request, HttpResponse original, MutableContent content) {
+    String mimeType = HtmlContentRewriter.getMimeType(request, original);
+    if (mimeType.contains("html")) {
+      rewriteHtml(content.getParseTree(), request.getUri().toJavaUri());
+    } else if (mimeType.contains("css")) {
+      content.setContent(rewriteCss(content.getContent(), request.getUri().toJavaUri()));
+    }
   }
 
   public void rewrite(Gadget gadget) {
@@ -51,12 +58,16 @@ public class StyleLinksContentRewriter implements ContentRewriter {
       return;
     }
     
-    Queue<GadgetHtmlNode> nodesToProcess =
-      new LinkedList<GadgetHtmlNode>();
-    GadgetHtmlNode root = gadget.getParseTree();
+    rewriteHtml(gadget.getParseTree(), gadget.getSpec().getUrl());
+  }
+  
+  private void rewriteHtml(GadgetHtmlNode root, URI baseUri) {
     if (root == null) {
       return;
     }
+    
+    Queue<GadgetHtmlNode> nodesToProcess =
+      new LinkedList<GadgetHtmlNode>();
     
     nodesToProcess.addAll(root.getChildren());
   
@@ -69,11 +80,14 @@ public class StyleLinksContentRewriter implements ContentRewriter {
         if (curNode.getTagName().equalsIgnoreCase("style")) {
           String styleText = getNodeChildText(curNode);
           curNode.clearChildren();
-          curNode.appendChild(new GadgetHtmlNode(
-              CssRewriter.rewrite(styleText, gadget.getSpec().getUrl(), linkRewriter)));
+          curNode.appendChild(new GadgetHtmlNode(rewriteCss(styleText, baseUri)));
         }
       }
     }
+  }
+  
+  private String rewriteCss(String styleText, URI baseUri) {
+    return CssRewriter.rewrite(styleText, baseUri, linkRewriter);
   }
   
   private static String getNodeChildText(GadgetHtmlNode node) {

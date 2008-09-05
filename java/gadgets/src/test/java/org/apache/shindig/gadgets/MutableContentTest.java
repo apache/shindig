@@ -30,15 +30,15 @@ import org.apache.shindig.gadgets.parse.caja.CajaHtmlParser;
 import org.junit.Before;
 import org.junit.Test;
 
-public class MutableHtmlContentTest {
-  private MutableHtmlContent mhc;
+public class MutableContentTest {
+  private MutableContent mhc;
   
   @Before
   public void setUp() throws Exception {
     // Note dependency on CajaHtmlParser - this isn't particularly ideal but is
     // sufficient given that this test doesn't exercise the parser extensively at all,
     // instead focusing on the additional utility provided by MutableHtmlContent
-    mhc = new MutableHtmlContent(new CajaHtmlParser());
+    mhc = new MutableContent(new CajaHtmlParser());
     mhc.setContent("DEFAULT VIEW");
   }
   
