@@ -19,6 +19,7 @@ package org.apache.shindig.social.core.util;
 
 import org.apache.shindig.social.opensocial.service.BeanConverter;
 
+import org.apache.commons.betwixt.IntrospectionConfiguration;
 import org.apache.commons.betwixt.io.BeanReader;
 import org.apache.commons.betwixt.io.BeanWriter;
 import org.xml.sax.SAXException;
@@ -41,16 +42,28 @@ public class BeanXmlConverter implements BeanConverter {
   public String convertToXml(Object obj) {
     StringWriter outputWriter = new StringWriter();
     BeanWriter writer = new BeanWriter(outputWriter);
-    writer.getXMLIntrospector()
-        .getConfiguration()
-        .setAttributesForPrimitives(false);
+    IntrospectionConfiguration configuration = writer.getXMLIntrospector().getConfiguration();
+    configuration.setAttributesForPrimitives(false);
+    configuration.setWrapCollectionsInElement(true);
+
     writer.getBindingConfiguration().setMapIDs(false);
     // Print no line endings
     writer.setEndOfLine("");
     writer.setWriteEmptyElements(false);
+
+    // Still left to do:
+    //
+    // Fix map output with custom outputter:
+    // for a map with {key : value, key2 : value2} we need:
+    // <key>value</key> <key2>value2</key2>
+
+    // Supress empty lists
+
+    // Within a list the items need to be renamed - this probably means with need a .betwixt file
+
     String toReturn = null;
     try {
-      writer.write(obj.getClass().getSimpleName().toLowerCase(), obj);
+      writer.write("response", obj);
       toReturn = outputWriter.toString();
       logger.finest("XML is: " + toReturn + "\n **** \n\n");
 
