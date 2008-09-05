@@ -38,7 +38,7 @@ gadgets.CookieBasedUserPrefStore.prototype.USER_PREFS_PREFIX =
 gadgets.CookieBasedUserPrefStore.prototype.getPrefs = function(gadget) {
   var userPrefs = {};
   var cookieName = this.USER_PREFS_PREFIX + gadget.id;
-  var cookie = goog.net.cookies.get(cookieName);
+  var cookie = shindig.cookies.get(cookieName);
   if (cookie) {
     var pairs = cookie.split('&');
     for (var i = 0; i < pairs.length; i++) {
@@ -62,7 +62,7 @@ gadgets.CookieBasedUserPrefStore.prototype.savePrefs = function(gadget) {
 
   var cookieName = this.USER_PREFS_PREFIX + gadget.id;
   var cookieValue = pairs.join('&');
-  goog.net.cookies.set(cookieName, cookieValue);
+  shindig.cookies.set(cookieName, cookieValue);
 };
 
 gadgets.Container.prototype.userPrefStore =

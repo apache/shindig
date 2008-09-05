@@ -23,19 +23,18 @@
 /**
  * Namespace for cookie functions
  */
-// goog.provide('goog.net.cookies');
+
 // TODO: find the official solution for a cookies library
-var goog = goog || {};
-goog.net = goog.net || {};
-goog.net.cookies = goog.net.cookies || {};
+var shindig = shindig || {};
+shindig.cookies = shindig.cookies || {};
 
 
-goog.JsType_ = {
+shindig.cookies.JsType_ = {
   UNDEFINED: 'undefined'
 };
 
-goog.isDef = function(val) {
-  return typeof val != goog.JsType_.UNDEFINED;
+shindig.cookies.isDef = function(val) {
+  return typeof val != shindig.cookies.JsType_.UNDEFINED;
 };
 
 
@@ -59,7 +58,7 @@ goog.isDef = function(val) {
  *                            is null (i.e. let browser use full request host
  *                            name).
  */
-goog.net.cookies.set = function(name, value, opt_maxAge, opt_path, opt_domain) {
+shindig.cookies.set = function(name, value, opt_maxAge, opt_path, opt_domain) {
   // we do not allow '=' or ';' in the name
   if (/;=/g.test(name)) {
     throw new Error('Invalid cookie name "' + name + '"');
@@ -69,7 +68,7 @@ goog.net.cookies.set = function(name, value, opt_maxAge, opt_path, opt_domain) {
     throw new Error('Invalid cookie value "' + value + '"');
   }
 
-  if (!goog.isDef(opt_maxAge)) {
+  if (!shindig.cookies.isDef(opt_maxAge)) {
     opt_maxAge = -1;
   }
 
@@ -110,7 +109,7 @@ goog.net.cookies.set = function(name, value, opt_maxAge, opt_path, opt_domain) {
  *                            returns opt_default or undefined if opt_default is
  *                            not provided.
  */
-goog.net.cookies.get = function(name, opt_default) {
+shindig.cookies.get = function(name, opt_default) {
   var nameEq = name + "=";
   var cookie = String(document.cookie);
   for (var pos = -1; (pos = cookie.indexOf(nameEq, pos + 1)) >= 0;) {
@@ -149,9 +148,9 @@ goog.net.cookies.get = function(name, opt_default) {
  *                            provided, the default is null (i.e. cookie at
  *                            full request host name).
  */
-goog.net.cookies.remove = function(name, opt_path, opt_domain) {
-  var rv = goog.net.cookies.containsKey(name);
-  goog.net.cookies.set(name, '', 0, opt_path, opt_domain);
+shindig.cookies.remove = function(name, opt_path, opt_domain) {
+  var rv = shindig.cookies.containsKey(name);
+  shindig.cookies.set(name, '', 0, opt_path, opt_domain);
   return rv;
 };
 
@@ -161,7 +160,7 @@ goog.net.cookies.remove = function(name, opt_path, opt_domain) {
  * @private
  * @return {Object} An object with keys and values
  */
-goog.net.cookies.getKeyValues_ = function() {
+shindig.cookies.getKeyValues_ = function() {
   var cookie = String(document.cookie);
   var parts = cookie.split(/\s*;\s*/);
   var keys = [], values = [], index, part;
@@ -184,8 +183,8 @@ goog.net.cookies.getKeyValues_ = function() {
  * Gets the names for all the cookies
  * @return {Array} An array with the names of the cookies
  */
-goog.net.cookies.getKeys = function() {
-  return goog.net.cookies.getKeyValues_().keys;
+shindig.cookies.getKeys = function() {
+  return shindig.cookies.getKeyValues_().keys;
 };
 
 
@@ -193,8 +192,8 @@ goog.net.cookies.getKeys = function() {
  * Gets the values for all the cookies
  * @return {Array} An array with the values of the cookies
  */
-goog.net.cookies.getValues = function() {
-  return goog.net.cookies.getKeyValues_().values;
+shindig.cookies.getValues = function() {
+  return shindig.cookies.getKeyValues_().values;
 };
 
 
@@ -202,7 +201,7 @@ goog.net.cookies.getValues = function() {
  * Whether there are any cookies for this document
  * @return {boolean}
  */
-goog.net.cookies.isEmpty = function() {
+shindig.cookies.isEmpty = function() {
   return document.cookie == '';
 };
 
@@ -211,7 +210,7 @@ goog.net.cookies.isEmpty = function() {
  * Returns the number of cookies for this document
  * @return {number}
  */
-goog.net.cookies.getCount = function() {
+shindig.cookies.getCount = function() {
   var cookie = String(document.cookie);
   if (cookie == '') {
     return 0;
@@ -226,12 +225,12 @@ goog.net.cookies.getCount = function() {
  * @param {string} key The name of the cookie to test for
  * @return {boolean}
  */
-goog.net.cookies.containsKey = function(key) {
+shindig.cookies.containsKey = function(key) {
   var sentinel = {};
   // if get does not find the key it returns the default value. We therefore
   // compare the result with an object to ensure we do not get any false
   // positives.
-  return goog.net.cookies.get(key, sentinel) !== sentinel;
+  return shindig.cookies.get(key, sentinel) !== sentinel;
 };
 
 
@@ -241,9 +240,9 @@ goog.net.cookies.containsKey = function(key) {
  * @param {string} value The value to check for
  * @return {boolean}
  */
-goog.net.cookies.containsValue = function(value) {
+shindig.cookies.containsValue = function(value) {
   // this O(n) in any case so lets do the trivial thing.
-  var values = goog.net.cookies.getKeyValues_().values;
+  var values = shindig.cookies.getKeyValues_().values;
   for (var i = 0; i < values.length; i++) {
     if (values[i] == value) {
       return true;
@@ -256,10 +255,10 @@ goog.net.cookies.containsValue = function(value) {
 /**
  * Removes all cookies for this document
  */
-goog.net.cookies.clear = function() {
-  var keys = goog.net.cookies.getKeyValues_().keys;
+shindig.cookies.clear = function() {
+  var keys = shindig.cookies.getKeyValues_().keys;
   for (var i = keys.length - 1; i >= 0; i--) {
-    goog.net.cookies.remove(keys[i]);
+    shindig.cookies.remove(keys[i]);
   }
 };
 
@@ -270,4 +269,4 @@ goog.net.cookies.clear = function() {
  * browsers/proxies that interpret 4K as 4000 rather than 4096
  * @type number
  */
-goog.net.cookies.MAX_COOKIE_LENGTH = 3950;
+shindig.cookies.MAX_COOKIE_LENGTH = 3950;
