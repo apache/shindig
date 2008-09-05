@@ -190,4 +190,30 @@ public class ContentRewriterFeature {
     }
     return fingerprint;
   }
+  
+  public static class Factory {
+    private final String defaultIncludeUrls;
+    private final String defaultExcludeUrls;
+    private final String defaultExpires;
+    private final Set<String> defaultIncludeTags;
+    
+    public Factory(String includeUrls, String excludeUrls, String expires,
+        Set<String> includeTags) {
+      defaultIncludeUrls = includeUrls;
+      defaultExcludeUrls = excludeUrls;
+      defaultExpires = expires;
+      defaultIncludeTags = includeTags;
+    }
+    
+    public ContentRewriterFeature get(GadgetSpec spec) {
+      ContentRewriterFeature rewriterFeature =
+        (ContentRewriterFeature)spec.getAttribute("content-rewrite");
+      if (rewriterFeature == null) {
+        rewriterFeature = new ContentRewriterFeature(spec, defaultIncludeUrls,
+            defaultExcludeUrls, defaultExpires, defaultIncludeTags);
+        spec.setAttribute("content-rewrite", rewriterFeature);
+      }
+      return rewriterFeature;
+    }
+  }
 }
