@@ -26,12 +26,11 @@ import java.util.Map;
 import java.util.Queue;
 import java.util.Set;
 
-import org.apache.shindig.gadgets.Gadget;
-import org.apache.shindig.gadgets.http.HttpRequest;
-import org.apache.shindig.gadgets.http.HttpResponse;
 import org.apache.shindig.gadgets.parse.GadgetHtmlNode;
 
-public class LinkingTagContentRewriter implements ContentRewriter {
+import java.net.URI;
+
+public class LinkingTagContentRewriter extends HtmlContentRewriter {
   private final LinkRewriter linkRewriter;
   private final Map<String, Set<String>> tagAttributeTargets;
   
@@ -45,12 +44,7 @@ public class LinkingTagContentRewriter implements ContentRewriter {
     }
   }
 
-  public HttpResponse rewrite(HttpRequest request, HttpResponse original) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	public void rewrite(Gadget gadget) {
+	protected void rewrite(GadgetHtmlNode root, URI baseUri) {
 	  if (linkRewriter == null) {
 	    // Sanity test.
 	    return;
@@ -58,11 +52,6 @@ public class LinkingTagContentRewriter implements ContentRewriter {
 	  
     Queue<GadgetHtmlNode> nodesToProcess =
       new LinkedList<GadgetHtmlNode>();
-    GadgetHtmlNode root = gadget.getParseTree();
-    if (root == null) {
-      return;
-    }
-    
     nodesToProcess.addAll(root.getChildren());
   
     while (!nodesToProcess.isEmpty()) {
@@ -80,7 +69,7 @@ public class LinkingTagContentRewriter implements ContentRewriter {
             
               // Attribute marked for rewriting: do it!
               curNode.setAttribute(attrKey,
-                  linkRewriter.rewrite(attrValue, gadget.getSpec().getUrl()));
+                  linkRewriter.rewrite(attrValue, baseUri));
             }
           }
         }

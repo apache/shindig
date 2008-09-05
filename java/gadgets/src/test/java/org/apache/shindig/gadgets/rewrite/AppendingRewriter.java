@@ -18,6 +18,7 @@
 package org.apache.shindig.gadgets.rewrite;
 
 import org.apache.shindig.gadgets.Gadget;
+import org.apache.shindig.gadgets.MutableContent;
 import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.http.HttpResponse;
 
@@ -33,13 +34,13 @@ class AppendingRewriter implements ContentRewriter {
     this.appender = appender;
   }
 
-  public HttpResponse rewrite(HttpRequest request, HttpResponse original) {
-    // Does nothing.
-    return null;
+  public void rewrite(HttpRequest request, HttpResponse original, MutableContent c) {
+    // Appends appender to the end of the content string.
+    c.setContent(c.getContent() + appender);
   }
 
   public void rewrite(Gadget gadget) {
     // Appends appender to the end of the input string.
-	gadget.setContent(gadget.getContent() + appender);
+	  gadget.setContent(gadget.getContent() + appender);
   }
 }

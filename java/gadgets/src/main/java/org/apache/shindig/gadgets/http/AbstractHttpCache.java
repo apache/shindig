@@ -17,6 +17,7 @@
  */
 package org.apache.shindig.gadgets.http;
 
+import org.apache.shindig.gadgets.MutableContent;
 import org.apache.shindig.gadgets.rewrite.ContentRewriter;
 import org.apache.shindig.gadgets.rewrite.ContentRewriterRegistry;
 
@@ -143,12 +144,13 @@ public abstract class AbstractHttpCache implements HttpCache {
    */
   protected HttpResponse rewrite(HttpRequest request, HttpResponse response) {
     if (rewriterRegistry != null) {
-      HttpResponse rewritten = response;
+      MutableContent mc = new MutableContent(null);
+      mc.setContent(response.getResponseAsString());
       for (ContentRewriter rewriter : rewriterRegistry.getRewriters()) {
-        rewritten = rewriter.rewrite(request, rewritten);
+        rewriter.rewrite(request, response, mc);
       }
-      if (response != rewritten) {
-        return rewritten;
+      if (!mc.getContent().equals(response.getResponseAsString())) {
+        return new HttpResponseBuilder(response).setResponseString(mc.getContent()).create();
       }
     }
     return null;

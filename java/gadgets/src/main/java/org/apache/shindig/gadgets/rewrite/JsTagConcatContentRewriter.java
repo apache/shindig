@@ -29,6 +29,7 @@ import java.util.Queue;
 
 import org.apache.shindig.common.util.Utf8UrlCoder;
 import org.apache.shindig.gadgets.Gadget;
+import org.apache.shindig.gadgets.MutableContent;
 import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.http.HttpResponse;
 import org.apache.shindig.gadgets.parse.GadgetHtmlNode;
@@ -53,9 +54,8 @@ public class JsTagConcatContentRewriter implements ContentRewriter {
     }
   }
 
-  public HttpResponse rewrite(HttpRequest request, HttpResponse original) {
-    // TODO Auto-generated method stub
-    return null;
+  public void rewrite(HttpRequest request, HttpResponse original, MutableContent content) {
+    // JS Concatenation not supported for HTTP responses at present.
   }
 
   public void rewrite(Gadget gadget) {
@@ -70,7 +70,6 @@ public class JsTagConcatContentRewriter implements ContentRewriter {
     Queue<GadgetHtmlNode> nodesToProcess =
         new LinkedList<GadgetHtmlNode>();
     nodesToProcess.add(gadget.getParseTree());
-
     
     String concatBase = getJsConcatBase(gadget.getSpec(), rewriterFeature);
     

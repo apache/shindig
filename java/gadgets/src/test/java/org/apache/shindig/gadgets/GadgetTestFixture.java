@@ -24,6 +24,7 @@ import org.apache.shindig.common.cache.CacheProvider;
 import org.apache.shindig.common.cache.DefaultCacheProvider;
 import org.apache.shindig.common.testing.TestExecutorService;
 import org.apache.shindig.common.util.FakeTimeSource;
+import org.apache.shindig.gadgets.MutableContent;
 import org.apache.shindig.gadgets.http.ContentFetcherFactory;
 import org.apache.shindig.gadgets.http.HttpFetcher;
 import org.apache.shindig.gadgets.http.HttpRequest;
@@ -66,9 +67,14 @@ public abstract class GadgetTestFixture extends EasyMockTestCase {
   
   protected static class CaptureRewriter implements ContentRewriter {
     private boolean rewroteView = false;
+    private boolean rewroteResponse = false;
 
-    public HttpResponse rewrite(HttpRequest request, HttpResponse original) {
-      return original;
+    public void rewrite(HttpRequest request, HttpResponse original, MutableContent content) {
+      rewroteResponse = true;
+    }
+    
+    public boolean responseWasRewritten() {
+      return rewroteResponse;
     }
 
     public void rewrite(Gadget gadget) {

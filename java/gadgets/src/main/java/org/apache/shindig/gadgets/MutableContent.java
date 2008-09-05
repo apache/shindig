@@ -29,7 +29,7 @@ import org.apache.shindig.gadgets.parse.ParsedHtmlNode;
  * Object that maintains a String representation of arbitrary contents
  * and a consistent view of those contents as an HTML parse tree.
  */
-public class MutableHtmlContent {
+public class MutableContent {
   private String content;
   private GadgetHtmlNode parseTree;
   private ContentEditListener editListener;
@@ -37,7 +37,7 @@ public class MutableHtmlContent {
   private int contentParseId;
   private final GadgetHtmlParser contentParser;
 
-  public MutableHtmlContent(GadgetHtmlParser contentParser) {
+  public MutableContent(GadgetHtmlParser contentParser) {
     this.contentParser = contentParser;
     this.contentParseId = parseEditId = 0;
   }

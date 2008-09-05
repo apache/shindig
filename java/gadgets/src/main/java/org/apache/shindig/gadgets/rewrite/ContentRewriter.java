@@ -18,6 +18,7 @@
 package org.apache.shindig.gadgets.rewrite;
 
 import org.apache.shindig.gadgets.Gadget;
+import org.apache.shindig.gadgets.MutableContent;
 import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.http.HttpResponse;
 import org.apache.shindig.gadgets.rewrite.lexer.DefaultContentRewriter;
@@ -34,11 +35,12 @@ public interface ContentRewriter {
 
   /**
    * Rewrite the original content located at source.
-   * @param request  Originating request
-   * @param original Original content
-   * @return A rewritten copy of the original or null if no rewriting occurred
+   * 
+   * @param request Originating request, as context.
+   * @param response Original HTTP response, for context.
+   * @param content Original content.
    */
-  public HttpResponse rewrite(HttpRequest request, HttpResponse original);
+  public void rewrite(HttpRequest request, HttpResponse original, MutableContent content);
 
   /**
    * Rewrite the gadget. The Gadget object's manipulation methods are used

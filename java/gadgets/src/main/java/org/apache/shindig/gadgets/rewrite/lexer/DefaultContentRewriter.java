@@ -24,9 +24,9 @@ import com.google.inject.name.Named;
 import org.apache.shindig.gadgets.Gadget;
 import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.GadgetSpecFactory;
+import org.apache.shindig.gadgets.MutableContent;
 import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.http.HttpResponse;
-import org.apache.shindig.gadgets.http.HttpResponseBuilder;
 import org.apache.shindig.gadgets.rewrite.ContentRewriter;
 import org.apache.shindig.gadgets.rewrite.ContentRewriterFeature;
 import org.apache.shindig.gadgets.rewrite.CssRewriter;
@@ -35,7 +35,6 @@ import org.apache.shindig.gadgets.rewrite.ProxyingLinkRewriter;
 import org.apache.shindig.gadgets.spec.GadgetSpec;
 
 import java.io.ByteArrayOutputStream;
-import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.Reader;
 import java.io.StringReader;
@@ -83,10 +82,10 @@ public class DefaultContentRewriter implements ContentRewriter {
     }
   }
 
-  public HttpResponse rewrite(HttpRequest request, HttpResponse original) {
+  public void rewrite(HttpRequest request, HttpResponse original, MutableContent content) {
     try {
       ByteArrayOutputStream baos = new ByteArrayOutputStream(
-          (original.getContentLength() * 110) / 100);
+          (content.getContent().length() * 110) / 100);
       OutputStreamWriter output = new OutputStreamWriter(baos, original.getEncoding());
       String mimeType = original.getHeader("Content-Type");
       if (request.getRewriteMimeType() != null) {
@@ -96,17 +95,14 @@ public class DefaultContentRewriter implements ContentRewriter {
       if (request.getGadget() != null) {
         spec = specFactory.getGadgetSpec(request.getGadget().toJavaUri(), false);
       }
-      if (rewrite(spec, request.getUri().toJavaUri(),
-          new InputStreamReader(original.getResponse(), original.getEncoding()),
+      rewrite(spec, request.getUri().toJavaUri(),
+          new StringReader(content.getContent()),
           mimeType,
-          output)) {
-        return new HttpResponseBuilder(original).setResponse(baos.toByteArray()).create();
-      }
-      return null;
+          output);
     } catch (UnsupportedEncodingException uee) {
       throw new RuntimeException(uee);
     } catch (GadgetException ge) {
-      return null;
+      // Couldn't retrieve gadgetSpec
     }
   }
 

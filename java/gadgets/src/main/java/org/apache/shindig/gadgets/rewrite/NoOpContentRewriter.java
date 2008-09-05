@@ -19,6 +19,7 @@
 package org.apache.shindig.gadgets.rewrite;
 
 import org.apache.shindig.gadgets.Gadget;
+import org.apache.shindig.gadgets.MutableContent;
 import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.http.HttpResponse;
 
@@ -30,11 +31,11 @@ public class NoOpContentRewriter implements ContentRewriter {
   public NoOpContentRewriter() {
   }
 
-  public HttpResponse rewrite(HttpRequest request, HttpResponse original) {
-    return null;
+  public void rewrite(HttpRequest request, HttpResponse original, MutableContent content) {
+    // Do nothing.
   }
 
   public void rewrite(Gadget gadget) {
-	// Do nothing.
+	  // Do nothing.
   }
 }
