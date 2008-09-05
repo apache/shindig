@@ -95,8 +95,7 @@ public abstract class AbstractLargeRestfulTests extends TestCase {
 
   protected String getJsonResponse(String path, String method, Map<String, String> extraParams,
       String postData) throws Exception {
-    req.setCharacterEncoding("UTF-8");
-
+    EasyMock.expect(req.getCharacterEncoding()).andStubReturn("UTF-8");
     EasyMock.expect(req.getPathInfo()).andStubReturn(path);
     EasyMock.expect(req.getMethod()).andStubReturn(method);
     EasyMock.expect(req.getParameter("format")).andStubReturn(null);
@@ -132,6 +131,7 @@ public abstract class AbstractLargeRestfulTests extends TestCase {
     ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
     PrintWriter writer = new PrintWriter(outputStream);
     EasyMock.expect(res.getWriter()).andReturn(writer);
+    res.setCharacterEncoding("UTF-8");
 
     EasyMock.replay(req, res);
     servlet.service(req, res);

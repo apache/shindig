@@ -34,7 +34,6 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringReader;
 import java.util.concurrent.Future;
-
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -207,6 +206,8 @@ public class JsonRpcServletTest extends TestCase {
         Maps.immutableMap("method", new String[]{"people.get"}, "id", new String[]{"1"}));
     EasyMock.expect(req.getMethod()).andStubReturn("GET");
     EasyMock.expect(req.getAttribute(EasyMock.isA(String.class))).andReturn(FAKE_GADGET_TOKEN);
+    EasyMock.expect(req.getCharacterEncoding()).andStubReturn("UTF-8");
+    res.setCharacterEncoding("UTF-8");
     setupInjector();
 
     String resultObject = "my lovely json";
@@ -235,6 +236,8 @@ public class JsonRpcServletTest extends TestCase {
     EasyMock.expect(req.getReader()).andStubReturn(new BufferedReader(new StringReader(json)));
     EasyMock.expect(req.getMethod()).andStubReturn("POST");
     EasyMock.expect(req.getAttribute(EasyMock.isA(String.class))).andReturn(FAKE_GADGET_TOKEN);
+    EasyMock.expect(req.getCharacterEncoding()).andStubReturn("UTF-8");
+    res.setCharacterEncoding("UTF-8");
   }
-}
 
+}

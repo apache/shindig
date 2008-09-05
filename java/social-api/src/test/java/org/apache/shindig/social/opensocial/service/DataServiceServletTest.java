@@ -126,6 +126,7 @@ public class DataServiceServletTest extends TestCase {
         ImmediateFuture.errorInstance(new RuntimeException("FAILED")));
 
     res.sendError(500, "FAILED");
+    res.setCharacterEncoding("UTF-8");
 
     EasyMock.replay(req, res, appDataHandler, injector, jsonConverter);
     servlet.service(req, res);
@@ -155,6 +156,7 @@ public class DataServiceServletTest extends TestCase {
     PrintWriter writerMock = EasyMock.createMock(PrintWriter.class);
     EasyMock.expect(res.getWriter()).andReturn(writerMock);
     writerMock.write(jsonObject);
+    res.setCharacterEncoding("UTF-8");
 
     EasyMock.replay(req, res, handler, injector, jsonConverter);
     servlet.service(req, res);
@@ -164,8 +166,7 @@ public class DataServiceServletTest extends TestCase {
 
   private void setupRequest(String pathInfo, String actualMethod, String overrideMethod)
       throws IOException {
-    req.setCharacterEncoding("UTF-8");
-
+    EasyMock.expect(req.getCharacterEncoding()).andStubReturn("UTF-8");
     EasyMock.expect(req.getInputStream()).andStubReturn(dummyPostData);
     EasyMock.expect(req.getPathInfo()).andStubReturn(pathInfo);
     EasyMock.expect(req.getMethod()).andStubReturn(actualMethod);
