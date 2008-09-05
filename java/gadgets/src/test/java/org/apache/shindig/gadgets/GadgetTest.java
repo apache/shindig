@@ -21,14 +21,9 @@ package org.apache.shindig.gadgets;
 import static org.easymock.EasyMock.expect;
 import static org.easymock.classextension.EasyMock.replay;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotSame;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
 import org.apache.shindig.common.ContainerConfig;
 import org.apache.shindig.gadgets.http.HttpResponse;
-import org.apache.shindig.gadgets.parse.GadgetHtmlNode;
 import org.apache.shindig.gadgets.parse.caja.CajaHtmlParser;
 import org.apache.shindig.gadgets.spec.GadgetSpec;
 import org.apache.shindig.gadgets.spec.LocaleSpec;
@@ -100,80 +95,6 @@ public class GadgetTest {
     View view = gadget.getView(config);
 
     assertEquals("DEFAULT VIEW", view.getContent());
-  }
-  
-  @Test
-  public void getContentAndParseTreeNoSets() throws Exception {
-	replay(config);
-
-	String content = gadget.getContent();
-	assertEquals("DEFAULT VIEW", content);
-	
-	GadgetHtmlNode root = gadget.getParseTree();
-	assertEquals(1, root.getChildren().size());
-	assertTrue(root.getChildren().get(0).isText());
-	assertEquals(content, root.getChildren().get(0).getText());
-	
-	assertSame(content, gadget.getContent());
-	assertSame(root, gadget.getParseTree());
-  }
-  
-  @Test
-  public void modifyContentReflectedInTree() throws Exception {
-	replay(config);
-	
-	gadget.setContent("NEW CONTENT");
-	GadgetHtmlNode root = gadget.getParseTree();
-	assertEquals(1, root.getChildren().size());
-	assertEquals("NEW CONTENT", root.getChildren().get(0).getText());
-  }
-  
-  @Test
-  public void modifyTreeReflectedInContent() throws Exception {
-	replay(config);
-	
-	GadgetHtmlNode root = gadget.getParseTree();
-	
-	// First child should be text node per other tests. Modify it.
-	root.getChildren().get(0).setText("FOO CONTENT");
-	assertEquals("FOO CONTENT", gadget.getContent());
-	
-	// Do it again
-	root.getChildren().get(0).setText("BAR CONTENT");
-	assertEquals("BAR CONTENT", gadget.getContent());
-	
-	// GadgetHtmlNode hasn't changed because string hasn't changed
-	assertSame(root, gadget.getParseTree());
-  }
-  
-  @Test
-  public void staleTreeEditsInvalidatedAfterContentSet() throws Exception {
-	replay(config);
-	
-	GadgetHtmlNode firstRoot = gadget.getParseTree();
-	
-	// Re-set content
-	gadget.setContent("INVALIDATING CONTENT");
-	
-	// Should still be able to obtain this.
-	GadgetHtmlNode secondRoot = gadget.getParseTree();
-	assertNotSame(firstRoot, secondRoot);
-	
-	// Should be able to *obtain* first child node...
-	GadgetHtmlNode firstTextNode = firstRoot.getChildren().get(0);
-	try {
-      // ...but not edit it.
-      firstTextNode.setText("STALE-SET CONTENT");
-      fail("Should not be able to modify stale parse tree");
-	} catch (IllegalStateException e) {
-	  // Expected condition.
-	}
-	
-	assertEquals("INVALIDATING CONTENT", secondRoot.getChildren().get(0).getText());
-	
-	// For good measure, modify secondRoot and get content
-	secondRoot.getChildren().get(0).setText("NEW CONTENT");
-	assertEquals("NEW CONTENT", gadget.getContent());
   }
 
   @Test
