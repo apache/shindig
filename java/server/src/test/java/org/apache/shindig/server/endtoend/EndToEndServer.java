@@ -152,6 +152,7 @@ public class EndToEndServer {
       if (errorCode > 0) {
         ((HttpServletResponse) servletResponse).sendError(errorCode, errorMessage);
       } else {
+        servletRequest.setCharacterEncoding("UTF-8");
         proxiedServlet.service(servletRequest, servletResponse);
       }
     }

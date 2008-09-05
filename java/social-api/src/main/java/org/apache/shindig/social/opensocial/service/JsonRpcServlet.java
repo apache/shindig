@@ -48,12 +48,14 @@ public class JsonRpcServlet extends ApiServlet {
   protected void doGet(HttpServletRequest servletRequest,
       HttpServletResponse servletResponse)
       throws ServletException, IOException {
+    SecurityToken token = getSecurityToken(servletRequest);
+    if (token == null) {
+      sendSecurityError(servletResponse);
+      return;
+    }
+
     try {
-      SecurityToken token = getSecurityToken(servletRequest);
-      if (token == null) {
-        sendSecurityError(servletResponse);
-        return;
-      }
+      setCharacterEncodings(servletRequest, servletResponse);
       JSONObject request = JsonConversionUtil.fromRequest(servletRequest);
       dispatch(request, servletRequest, servletResponse, token);
     } catch (JSONException je) {
@@ -70,6 +72,9 @@ public class JsonRpcServlet extends ApiServlet {
       sendSecurityError(servletResponse);
       return;
     }
+
+    setCharacterEncodings(servletRequest, servletResponse);
+
     try {
       String content = IOUtils.toString(servletRequest.getReader());
       if ((content.indexOf('[') != -1) && content.indexOf('[') < content.indexOf('{')) {

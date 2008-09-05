@@ -34,7 +34,6 @@ import java.util.Collections;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
-
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -42,6 +41,8 @@ import javax.servlet.http.HttpServletResponse;
  * Common base class for API servlets.
  */
 public abstract class ApiServlet extends InjectedServlet {
+  protected static final String DEFAULT_ENCODING = "UTF-8";
+
   private Map<String, Class<? extends DataRequestHandler>> handlers;
   protected BeanJsonConverter jsonConverter;
   protected BeanConverter xmlConverter;
@@ -119,4 +120,11 @@ public abstract class ApiServlet extends InjectedServlet {
     return new ResponseItem(ResponseError.INTERNAL_ERROR, t.getMessage());
   }
 
+  protected void setCharacterEncodings(HttpServletRequest servletRequest,
+      HttpServletResponse servletResponse) throws IOException {
+    if (servletRequest.getCharacterEncoding() == null) {
+      servletRequest.setCharacterEncoding(DEFAULT_ENCODING);
+    }
+    servletResponse.setCharacterEncoding(DEFAULT_ENCODING);
+  }
 }

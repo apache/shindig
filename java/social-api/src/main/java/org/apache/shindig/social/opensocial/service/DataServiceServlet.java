@@ -70,7 +70,7 @@ public class DataServiceServlet extends ApiServlet {
       throws ServletException, IOException {
     logger.finest("Handling restful request for " + servletRequest.getPathInfo());
 
-    servletRequest.setCharacterEncoding("UTF-8");
+    setCharacterEncodings(servletRequest, servletResponse);
 
     SecurityToken token = getSecurityToken(servletRequest);
     if (token == null) {
