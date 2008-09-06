@@ -434,12 +434,14 @@ gadgets.io = function() {
       if (refresh === undefined) {
         refresh = "3600";
       }
+      
+      var urlParams = gadgets.util.getUrlParameters();
 
       return config.proxyUrl.replace("%url%", encodeURIComponent(url)).
           replace("%rawurl%", url).
           replace("%refresh%", encodeURIComponent(refresh)).
-          replace("%gadget%", encodeURIComponent(gadgets.util.getUrlParameters().url)).
-          replace("%container%", encodeURIComponent(gadgets.util.getUrlParameters().container));
+          replace("%gadget%", encodeURIComponent(urlParams.url)).
+          replace("%container%", encodeURIComponent(urlParams.container || urlParams.synd));
     }
   };
 }();
