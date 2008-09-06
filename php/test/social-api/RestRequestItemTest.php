@@ -34,7 +34,7 @@ class RestRequestItemTest extends PHPUnit_Framework_TestCase {
 	{
 		parent::setUp();
 		$this->RestRequestItem = new RestRequestItem();
-		$url = '/people/@viewer/@self?fields=age,name,gender,profileUrl,thumbnailUrl,' . 'status,id&startIndex=0&count=40&orderBy=name&filterBy=all&networkDistance=1';
+		$url = '/people/@viewer/@self?fields=age,name,gender,profileUrl,thumbnailUrl,' . 'status,id&startIndex=0&count=40&sortBy=name&filterBy=all&networkDistance=1';
 		$request = array();
 		$request['url'] = $url;
 		$request['method'] = 'GET';
@@ -77,7 +77,7 @@ class RestRequestItemTest extends PHPUnit_Framework_TestCase {
 	 */
 	public function testCreateRequestItemWithRequest()
 	{
-		$url = '/people/@viewer/@self?fields=age,name,gender,profileUrl,thumbnailUrl,' . 'status,id&startIndex=0&count=40&orderBy=name&filterBy=all&networkDistance=1';
+		$url = '/people/@viewer/@self?fields=age,name,gender,profileUrl,thumbnailUrl,' . 'status,id&startIndex=0&count=40&sortBy=name&filterBy=all&networkDistance=1';
 		$request = array();
 		$request['url'] = $url;
 		$request['method'] = 'GET';
@@ -92,8 +92,9 @@ class RestRequestItemTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals(false, $this->RestRequestItem->getGroup());
 		$this->assertEquals('0', $this->RestRequestItem->getStartIndex());
 		$this->assertEquals('20', $this->RestRequestItem->getCount());
-		$this->assertEquals(PeopleOptions::$sortOrder, $this->RestRequestItem->getOrderBy());
-		$this->assertEquals(PeopleOptions::$filterType, $this->RestRequestItem->getFilterBy());
+		// TODO: add more robust testing of all CollectionOptions options
+		//$this->assertEquals(PeopleOptions::$sortOrder, $this->RestRequestItem->getSortBy());
+		//$this->assertEquals(PeopleOptions::$filterType, $this->RestRequestItem->getFilterBy());
 		$this->assertEquals(false, $this->RestRequestItem->getNetworkDistance());
 	}
 
@@ -203,11 +204,11 @@ class RestRequestItemTest extends PHPUnit_Framework_TestCase {
 	}
 
 	/**
-	 * Tests RestRequestItem->getOrderBy()
+	 * Tests RestRequestItem->getSortBy()
 	 */
-	public function testGetOrderBy()
+	public function testGetSortBy()
 	{
-		$this->assertEquals('name', $this->RestRequestItem->getOrderBy());
+		$this->assertEquals('name', $this->RestRequestItem->getSortBy());
 	}
 
 	/**

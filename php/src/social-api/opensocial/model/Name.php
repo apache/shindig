@@ -22,27 +22,27 @@
  * http://code.google.com/apis/opensocial/docs/0.7/reference/opensocial.Name.Field.html
  *
  */
-class Name {
+class Name implements ComplexField {
 	public $additionalName;
 	public $familyName;
 	public $givenName;
 	public $honorificPrefix;
 	public $honorificSuffix;
-	public $unstructured;
+	public $formatted;
 
-	public function __construct($unstructured)
+	public function __construct($formatted)
 	{
-		$this->unstructured = $unstructured;
+		$this->formatted = $formatted;
 	}
 
-	public function getUnstructured()
+	public function getFormatted()
 	{
-		return $this->unstructured;
+		return $this->formatted;
 	}
 
-	public function setUnstructured($unstructured)
+	public function setFormatted($formatted)
 	{
-		$this->unstructured = $unstructured;
+		$this->formatted = $formatted;
 	}
 
 	public function getAdditionalName()
@@ -93,5 +93,10 @@ class Name {
 	public function setHonorificSuffix($honorificSuffix)
 	{
 		$this->honorificSuffix = $honorificSuffix;
+	}
+
+	public function getPrimarySubValue()
+	{
+		return $this->getFormatted();
 	}
 }

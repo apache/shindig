@@ -20,7 +20,7 @@
 class PeopleHandler extends DataRequestHandler {
 	private $service;
 	private static $PEOPLE_PATH = "/people/{userId}/{groupId}/{personId}";
-	protected static $DEFAULT_PERSON_FIELDS = array("id", "name", "thumbnailUrl");
+	protected static $DEFAULT_PERSON_FIELDS = array("id" => 1, "name" => 1, "thumbnailUrl" => 1);
 
 	public function __construct()
 	{
@@ -40,21 +40,31 @@ class PeopleHandler extends DataRequestHandler {
 	{
 		$requestItem->parseUrlWithTemplate(self::$PEOPLE_PATH);
 		$parameters = $requestItem->getParameters();
-		$optionalPersonId = in_array('personId', $parameters) ? $parameters['personId'] : null;
+		$optionalPersonId = isset($parameters['personId']) ? $parameters['personId'] : null;
 		$fields = $requestItem->getFieldsWithDefaultValue(self::$DEFAULT_PERSON_FIELDS);
-		if ($optionalPersonId || (is_object($requestItem->getGroup()) && $requestItem->getGroup()->getType() == 'self')) {
-			//FIXME same logic as the java code here, but doesn't seem to do much with the optionalPersonId which seems odd
-			return $this->service->getPerson($requestItem->getUser(), $requestItem->getGroup(), $fields, $requestItem->getToken());
-		}
+		if ($optionalPersonId) {
+			return $this->service->getPerson($requestItem->getUser(), $optionalPersonId, $fields, $requestItem->getToken());
+		} else 
+			if (is_object($requestItem->getGroup()) && $requestItem->getGroup()->getType() == 'self') {
+				return $this->service->getPerson($requestItem->getUser(), $requestItem->getGroup(), $fields, $requestItem->getToken());
+			}
 		$startIndex = $requestItem->getStartIndex();
 		$count = $requestItem->getCount();
 		$networkDistance = $requestItem->getNetworkDistance();
-		if ((!empty($startIndex) && !is_numeric($startIndex)) ||
-			(!empty($count) && !is_numeric($count)) ||
-			(!empty($networkDistance) && !is_numeric($networkDistance))) {
+		if ((! empty($startIndex) && ! is_numeric($startIndex)) || (! empty($count) && ! is_numeric($count)) || (! empty($networkDistance) && ! is_numeric($networkDistance))) {
 			return new ResponseItem(BAD_REQUEST, "Invalid options specified", null);
 		} else {
-			return $this->service->getPeople($requestItem->getUser(), $requestItem->getGroup(), $requestItem->getOrderBy(), $requestItem->getFilterBy(), $startIndex, $count, $fields, $networkDistance, $requestItem->getToken());
+			$options = new CollectionOptions();
+			$options->setSortBy($requestItem->getSortBy());
+			$options->setSortOrder($requestItem->getSortOrder());
+			$options->setFilterBy($requestItem->getFilterBy());
+			$options->setFilterOperation($requestItem->getFilterOperation());
+			$options->setFilterValue($requestItem->getFilterValue());
+			$options->setUpdatedSince($requestItem->getUpdatedSince());
+			$options->setStartIndex($startIndex);
+			$options->setCount($count);
+			$options->setNetworkDistance($networkDistance);
+			return $this->service->getPeople($requestItem->getUser(), $requestItem->getGroup(), $options, $fields, $requestItem->getToken());
 		}
 	}
 

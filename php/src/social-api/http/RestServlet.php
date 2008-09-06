@@ -370,7 +370,7 @@ class RestServlet extends HttpServlet {
 	{
 		$pathInfo = substr($pathInfo, 1);
 		$indexOfNextPathSeparator = strpos($pathInfo, "/");
-		return $indexOfNextPathSeparator != - 1 ? substr($pathInfo, 0, $indexOfNextPathSeparator) : $pathInfo;
+		return $indexOfNextPathSeparator !== false ? substr($pathInfo, 0, $indexOfNextPathSeparator) : $pathInfo;
 	}
 
 	private function outputError(ResponseItem $response)

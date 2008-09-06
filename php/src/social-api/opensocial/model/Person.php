@@ -24,15 +24,17 @@
  */
 class Person {
 	public $aboutMe;
+	public $accounts;
 	public $activities;
 	public $addresses;
 	public $age;
+	public $birthday;
 	public $bodyType;
 	public $books;
 	public $cars;
 	public $children;
 	public $currentLocation;
-	public $dateOfBirth;
+	public $displayName;
 	public $drinker;
 	public $emails;
 	public $ethnicity;
@@ -44,19 +46,21 @@ class Person {
 	public $heroes;
 	public $humor;
 	public $id;
+	public $ims;
 	public $interests;
 	public $jobInterests;
-	public $jobs;
 	public $languagesSpoken;
 	public $livingArrangement;
 	public $lookingFor;
 	public $movies;
 	public $music;
+	public $organizations;
 	public $name;
 	public $networkPresence;
 	public $nickname;
 	public $pets;
 	public $phoneNumbers;
+	public $photos;
 	public $politicalViews;
 	public $profileSong;
 	public $profileUrl;
@@ -66,14 +70,13 @@ class Person {
 	public $religion;
 	public $romance;
 	public $scaredOf;
-	public $schools;
 	public $sexualOrientation;
 	public $smoker;
 	public $sports;
 	public $status;
 	public $tags;
 	public $thumbnailUrl;
-	public $timeZone;
+	public $utcOffset;
 	public $turnOffs;
 	public $turnOns;
 	public $tvShows;
@@ -89,6 +92,27 @@ class Person {
 		$this->name = $name;
 	}
 
+	private function setFieldImpl($fieldName, $value)
+	{
+		// treat empty singular/plural fields as null so they don't pollute the output
+		if ($value == '' || (is_array($value) && ! count($value))) {
+			$value = null;
+		}
+		$this->$fieldName = $value;
+	}
+
+	/** 
+	 * Returns the field value for the given fieldName, if present.
+	 * @param $fieldName name of the contact field, e.g. "displayName"
+	 */
+	public function getFieldByName($fieldName)
+	{
+		if (isset($this->$fieldName)) {
+			return $this->$fieldName;
+		}
+		return null;
+	}
+
 	public function getAboutMe()
 	{
 		return $this->aboutMe;
@@ -96,7 +120,17 @@ class Person {
 
 	public function setAboutMe($aboutMe)
 	{
-		$this->aboutMe = $aboutMe;
+		$this->setFieldImpl('aboutMe', $aboutMe);
+	}
+
+	public function getAccounts()
+	{
+		return $this->accounts;
+	}
+
+	public function setAccounts($accounts)
+	{
+		$this->setFieldImpl('accounts', $accounts);
 	}
 
 	public function getActivities()
@@ -106,7 +140,7 @@ class Person {
 
 	public function setActivities($activities)
 	{
-		$this->activities = $activities;
+		$this->setFieldImpl('activities', $activities);
 	}
 
 	public function getAddresses()
@@ -116,7 +150,7 @@ class Person {
 
 	public function setAddresses($addresses)
 	{
-		$this->addresses = $addresses;
+		$this->setFieldImpl('addresses', $addresses);
 	}
 
 	public function getAge()
@@ -126,7 +160,18 @@ class Person {
 
 	public function setAge($age)
 	{
-		$this->age = $age;
+		$this->setFieldImpl('age', $age);
+	}
+
+	public function getBirthday()
+	{
+		return $this->birthday;
+	}
+
+	public function setBirthday($birthday)
+	{
+		// TODO: enforce YYYY-MM-DD format here?
+		$this->setFieldImpl('birthday', $birthday);
 	}
 
 	public function getBodyType()
@@ -136,7 +181,7 @@ class Person {
 
 	public function setBodyType($bodyType)
 	{
-		$this->bodyType = $bodyType;
+		$this->setFieldImpl('bodyType', $bodyType);
 	}
 
 	public function getBooks()
@@ -146,7 +191,7 @@ class Person {
 
 	public function setBooks($books)
 	{
-		$this->books = $books;
+		$this->setFieldImpl('books', $books);
 	}
 
 	public function getCars()
@@ -156,7 +201,7 @@ class Person {
 
 	public function setCars($cars)
 	{
-		$this->cars = $cars;
+		$this->setFieldImpl('cars', $cars);
 	}
 
 	public function getChildren()
@@ -166,7 +211,7 @@ class Person {
 
 	public function setChildren($children)
 	{
-		$this->children = $children;
+		$this->setFieldImpl('children', $children);
 	}
 
 	public function getCurrentLocation()
@@ -176,17 +221,17 @@ class Person {
 
 	public function setCurrentLocation($currentLocation)
 	{
-		$this->currentLocation = $currentLocation;
+		$this->setFieldImpl('currentLocation', $currentLocation);
 	}
 
-	public function getDateOfBirth()
+	public function getDisplayName()
 	{
-		return $this->dateOfBirth;
+		return $this->displayName;
 	}
 
-	public function setDateOfBirth($dateOfBirth)
+	public function setDisplayName($displayName)
 	{
-		$this->dateOfBirth = $dateOfBirth;
+		$this->setFieldImpl('displayName', $displayName);
 	}
 
 	public function getDrinker()
@@ -194,9 +239,9 @@ class Person {
 		return $this->drinker;
 	}
 
-	public function setDrinker($newDrinker)
+	public function setDrinker($drinker)
 	{
-		$this->drinker = new EnumDrinker($newDrinker);
+		$this->setFieldImpl('drinker', new EnumDrinker($drinker));
 	}
 
 	public function getEmails()
@@ -206,7 +251,7 @@ class Person {
 
 	public function setEmails($emails)
 	{
-		$this->emails = $emails;
+		$this->setFieldImpl('emails', $emails);
 	}
 
 	public function getEthnicity()
@@ -216,7 +261,7 @@ class Person {
 
 	public function setEthnicity($ethnicity)
 	{
-		$this->ethnicity = $ethnicity;
+		$this->setFieldImpl('ethnicity', $ethnicity);
 	}
 
 	public function getFashion()
@@ -226,7 +271,7 @@ class Person {
 
 	public function setFashion($fashion)
 	{
-		$this->fashion = $fashion;
+		$this->setFieldImpl('fashion', $fashion);
 	}
 
 	public function getFood()
@@ -236,7 +281,7 @@ class Person {
 
 	public function setFood($food)
 	{
-		$this->food = $food;
+		$this->setFieldImpl('food', $food);
 	}
 
 	public function getGender()
@@ -244,9 +289,9 @@ class Person {
 		return $this->gender;
 	}
 
-	public function setGender($newGender)
+	public function setGender($gender)
 	{
-		$this->gender = new EnumGender($newGender);
+		$this->setFieldImpl('gender', $gender);
 	}
 
 	public function getHappiestWhen()
@@ -256,7 +301,7 @@ class Person {
 
 	public function setHappiestWhen($happiestWhen)
 	{
-		$this->happiestWhen = $happiestWhen;
+		$this->setFieldImpl('happiestWhen', $happiestWhen);
 	}
 
 	public function getHeroes()
@@ -266,7 +311,7 @@ class Person {
 
 	public function setHeroes($heroes)
 	{
-		$this->heroes = $heroes;
+		$this->setFieldImpl('heroes', $heroes);
 	}
 
 	public function getHasApp()
@@ -276,7 +321,7 @@ class Person {
 
 	public function setHasApp($hasApp)
 	{
-		$this->hasApp = $hasApp;
+		$this->setFieldImpl('hasApp', $hasApp);
 	}
 
 	public function getHumor()
@@ -286,7 +331,7 @@ class Person {
 
 	public function setHumor($humor)
 	{
-		$this->humor = $humor;
+		$this->setFieldImpl('humor', $humor);
 	}
 
 	public function getId()
@@ -296,7 +341,17 @@ class Person {
 
 	public function setId($id)
 	{
-		$this->id = $id;
+		$this->setFieldImpl('id', $id);
+	}
+
+	public function getIms()
+	{
+		return $this->ims;
+	}
+
+	public function setIms($ims)
+	{
+		$this->setFieldImpl('ims', $ims);
 	}
 
 	public function getInterests()
@@ -306,7 +361,7 @@ class Person {
 
 	public function setInterests($interests)
 	{
-		$this->interests = $interests;
+		$this->setFieldImpl('interests', $interests);
 	}
 
 	public function getJobInterests()
@@ -316,17 +371,7 @@ class Person {
 
 	public function setJobInterests($jobInterests)
 	{
-		$this->jobInterests = $jobInterests;
-	}
-
-	public function getJobs()
-	{
-		return $this->jobs;
-	}
-
-	public function setJobs($jobs)
-	{
-		$this->jobs = $jobs;
+		$this->setFieldImpl('jobInterests', $jobInterests);
 	}
 
 	public function getLanguagesSpoken()
@@ -336,7 +381,7 @@ class Person {
 
 	public function setLanguagesSpoken($languagesSpoken)
 	{
-		$this->languagesSpoken = $languagesSpoken;
+		$this->setFieldImpl('languagesSpoken', $languagesSpoken);
 	}
 
 	public function getLivingArrangement()
@@ -346,7 +391,7 @@ class Person {
 
 	public function setLivingArrangement($livingArrangement)
 	{
-		$this->livingArrangement = $livingArrangement;
+		$this->setFieldImpl('livingArrangement', $livingArrangement);
 	}
 
 	public function getLookingFor()
@@ -356,7 +401,7 @@ class Person {
 
 	public function setLookingFor($lookingFor)
 	{
-		$this->lookingFor = new EnumLookingFor($lookingFor);
+		$this->setFieldImpl('lookingFor', new EnumLookingFor($lookingFor));
 	}
 
 	public function getMovies()
@@ -366,7 +411,7 @@ class Person {
 
 	public function setMovies($movies)
 	{
-		$this->movies = $movies;
+		$this->setFieldImpl('movies', $movies);
 	}
 
 	public function getMusic()
@@ -376,7 +421,7 @@ class Person {
 
 	public function setMusic($music)
 	{
-		$this->music = $music;
+		$this->setFieldImpl('music', $music);
 	}
 
 	public function getName()
@@ -386,7 +431,7 @@ class Person {
 
 	public function setName($name)
 	{
-		$this->name = $name;
+		$this->setFieldImpl('name', $name);
 	}
 
 	public function getNetworkPresence()
@@ -396,7 +441,7 @@ class Person {
 
 	public function setNetworkPresence($networkPresence)
 	{
-		$this->networkPresence = new EnumPresence($networkPresence);
+		$this->setFieldImpl('networkPresence', new EnumPresence($networkPresence));
 	}
 
 	public function getNickname()
@@ -407,6 +452,17 @@ class Person {
 	public function setNickname($nickname)
 	{
 		$this->nickname = $nickname;
+		$this->setFieldImpl('nickname', $nickname);
+	}
+
+	public function getOrganizations()
+	{
+		return $this->organizations;
+	}
+
+	public function setOrganizations($organizations)
+	{
+		$this->setFieldImpl('organizations', $organizations);
 	}
 
 	public function getPets()
@@ -416,7 +472,7 @@ class Person {
 
 	public function setPets($pets)
 	{
-		$this->pets = $pets;
+		$this->setFieldImpl('pets', $pets);
 	}
 
 	public function getPhoneNumbers()
@@ -426,7 +482,17 @@ class Person {
 
 	public function setPhoneNumbers($phoneNumbers)
 	{
-		$this->phoneNumbers = $phoneNumbers;
+		$this->setFieldImpl('phoneNumbers', $phoneNumbers);
+	}
+
+	public function getPhotos()
+	{
+		return $this->photos;
+	}
+
+	public function setPhotos($photos)
+	{
+		$this->setFieldImpl('photos', $photos);
 	}
 
 	public function getPoliticalViews()
@@ -436,7 +502,7 @@ class Person {
 
 	public function setPoliticalViews($politicalViews)
 	{
-		$this->politicalViews = $politicalViews;
+		$this->setFieldImpl('politicalViews', $politicalViews);
 	}
 
 	public function getProfileSong()
@@ -446,7 +512,7 @@ class Person {
 
 	public function setProfileSong($profileSong)
 	{
-		$this->profileSong = $profileSong;
+		$this->setFieldImpl('profileSong', $profileSong);
 	}
 
 	public function getProfileUrl()
@@ -456,7 +522,7 @@ class Person {
 
 	public function setProfileUrl($profileUrl)
 	{
-		$this->profileUrl = $profileUrl;
+		$this->setFieldImpl('profileUrl', $profileUrl);
 	}
 
 	public function getProfileVideo()
@@ -466,7 +532,7 @@ class Person {
 
 	public function setProfileVideo($profileVideo)
 	{
-		$this->profileVideo = $profileVideo;
+		$this->setFieldImpl('profileVideo', $profileVideo);
 	}
 
 	public function getQuotes()
@@ -476,7 +542,7 @@ class Person {
 
 	public function setQuotes($quotes)
 	{
-		$this->quotes = $quotes;
+		$this->setFieldImpl('quotes', $quotes);
 	}
 
 	public function getRelationshipStatus()
@@ -486,7 +552,7 @@ class Person {
 
 	public function setRelationshipStatus($relationshipStatus)
 	{
-		$this->relationshipStatus = $relationshipStatus;
+		$this->setFieldImpl('relationshipStatus', $relationshipStatus);
 	}
 
 	public function getReligion()
@@ -506,7 +572,7 @@ class Person {
 
 	public function setRomance($romance)
 	{
-		$this->romance = $romance;
+		$this->setFieldImpl('romance', $romance);
 	}
 
 	public function getScaredOf()
@@ -516,17 +582,7 @@ class Person {
 
 	public function setScaredOf($scaredOf)
 	{
-		$this->scaredOf = $scaredOf;
-	}
-
-	public function getSchools()
-	{
-		return $this->schools;
-	}
-
-	public function setSchools($schools)
-	{
-		$this->schools = $schools;
+		$this->setFieldImpl('scaredOf', $scaredOf);
 	}
 
 	public function getSexualOrientation()
@@ -536,7 +592,7 @@ class Person {
 
 	public function setSexualOrientation($sexualOrientation)
 	{
-		$this->sexualOrientation = $sexualOrientation;
+		$this->setFieldImpl('sexualOrientation', $sexualOrientation);
 	}
 
 	public function getSmoker()
@@ -544,9 +600,9 @@ class Person {
 		return $this->smoker;
 	}
 
-	public function setSmoker($newSmoker)
+	public function setSmoker($smoker)
 	{
-		$this->smoker = new EnumSmoker($newSmoker);
+		$this->setFieldImpl('smoker', new EnumSmoker($smoker));
 	}
 
 	public function getSports()
@@ -556,7 +612,7 @@ class Person {
 
 	public function setSports($sports)
 	{
-		$this->sports = $sports;
+		$this->setFieldImpl('sports', $sports);
 	}
 
 	public function getStatus()
@@ -566,7 +622,7 @@ class Person {
 
 	public function setStatus($status)
 	{
-		$this->status = $status;
+		$this->setFieldImpl('status', $status);
 	}
 
 	public function getTags()
@@ -576,7 +632,7 @@ class Person {
 
 	public function setTags($tags)
 	{
-		$this->tags = $tags;
+		$this->setFieldImpl('tags', $tags);
 	}
 
 	public function getThumbnailUrl()
@@ -586,17 +642,18 @@ class Person {
 
 	public function setThumbnailUrl($thumbnailUrl)
 	{
-		$this->thumbnailUrl = $thumbnailUrl;
+		$this->setFieldImpl('thumbnailUrl', $thumbnailUrl);
 	}
 
-	public function getTimeZone()
+	public function getUtcOffset()
 	{
-		return $this->timeZone;
+		return $this->utcOffset;
 	}
 
-	public function setTimeZone($timeZone)
+	public function setUtcOffset($utcOffset)
 	{
-		$this->timeZone = $timeZone;
+		// TODO: validate +00:00 format here?
+		$this->setFieldImpl('utcOffset', $utcOffset);
 	}
 
 	public function getTurnOffs()
@@ -606,7 +663,7 @@ class Person {
 
 	public function setTurnOffs($turnOffs)
 	{
-		$this->turnOffs = $turnOffs;
+		$this->setFieldImpl('turnOffs', $turnOffs);
 	}
 
 	public function getTurnOns()
@@ -616,7 +673,7 @@ class Person {
 
 	public function setTurnOns($turnOns)
 	{
-		$this->turnOns = $turnOns;
+		$this->setFieldImpl('turnOns', $turnOns);
 	}
 
 	public function getTvShows()
@@ -626,7 +683,7 @@ class Person {
 
 	public function setTvShows($tvShows)
 	{
-		$this->tvShows = $tvShows;
+		$this->setFieldImpl('tvShows', $tvShows);
 	}
 
 	public function getUrls()
@@ -636,7 +693,7 @@ class Person {
 
 	public function setUrls($urls)
 	{
-		$this->urls = $urls;
+		$this->setFieldImpl('urls', $urls);
 	}
 
 	public function getIsOwner()
@@ -646,7 +703,7 @@ class Person {
 
 	public function setIsOwner($isOwner)
 	{
-		$this->isOwner = $isOwner;
+		$this->setFieldImpl('isOwner', $isOwner);
 	}
 
 	public function getIsViewer()
@@ -656,6 +713,6 @@ class Person {
 
 	public function setIsViewer($isViewer)
 	{
-		$this->isViewer = $isViewer;
+		$this->setFieldImpl('isViewer', $isViewer);
 	}
 }

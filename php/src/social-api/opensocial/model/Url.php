@@ -21,27 +21,11 @@
  * see
  * http://code.google.com/apis/opensocial/docs/0.7/reference/opensocial.Url.Field.html
  */
-class Url {
-	public $address;
+class Url extends ListField {
+	public $value;
 	public $linkText;
 	public $type;
-
-	public function __construct($address, $linkText, $type)
-	{
-		$this->address = $address;
-		$this->linkText = $linkText;
-		$this->type = $type;
-	}
-
-	public function getAddress()
-	{
-		return $this->address;
-	}
-
-	public function setAddress($address)
-	{
-		$this->address = $address;
-	}
+	public $primary;
 
 	public function getLinkText()
 	{
@@ -52,15 +36,4 @@ class Url {
 	{
 		$this->linkText = $linkText;
 	}
-
-	public function getType()
-	{
-		return $this->type;
-	}
-
-	public function setType($type)
-	{
-		$this->type = $type;
-	}
-
 }

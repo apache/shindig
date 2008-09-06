@@ -21,14 +21,14 @@ class BasicAppDataService implements AppDataService {
 
 	public function deletePersonData(UserId $userId, GroupId $groupId, $fields, $appId, SecurityToken $token)
 	{
-		foreach ($fields as $key) {
+		foreach ($fields as $key => $present) {
 			if (! BasicAppDataService::isValidKey($key)) {
 				return new ResponseItem(BAD_REQUEST, "The person app data key had invalid characters", null);
 			}
 		}
 		switch ($groupId->getType()) {
 			case 'self':
-				foreach ($fields as $key) {
+				foreach ($fields as $key => $present) {
 					XmlStateFileFetcher::get()->deleteAppData($userId->getUserId($token), $key);
 				}
 				break;
@@ -76,14 +76,14 @@ class BasicAppDataService implements AppDataService {
 
 	public function updatePersonData(UserID $userId, GroupId $groupId, $fields, $values, $appId, SecurityToken $token)
 	{
-		foreach ($fields as $key) {
+		foreach ($fields as $key => $present) {
 			if (! BasicAppDataService::isValidKey($key)) {
 				return new ResponseItem(BAD_REQUEST, "The person app data key had invalid characters", null);
 			}
 		}
 		switch ($groupId->getType()) {
 			case 'self':
-				foreach ($fields as $key) {
+				foreach ($fields as $key => $present) {
 					$value = isset($values[$key]) ? @$values[$key] : null;
 					XmlStateFileFetcher::get()->setAppData($userId->getUserId($token), $key, $value);
 				}

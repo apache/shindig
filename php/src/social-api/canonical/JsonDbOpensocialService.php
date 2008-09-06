@@ -178,9 +178,9 @@ class JsonDbOpensocialService implements ActivitiesService, PeopleService, AppDa
 		return $peopleWithApp;
 	}
 
-	public function getPerson($userId, $groupId, $profileDetails, SecurityToken $token)
+	public function getPerson($userId, $groupId, $fields, SecurityToken $token)
 	{
-		$person = $this->getPeople($userId, $groupId, null, null, null, null, $profileDetails, null, $token);
+		$person = $this->getPeople($userId, $groupId, new CollectionOptions(), $fields, $token);
 		// return of getPeople is a ResponseItem(RestfulCollection(ArrayOfPeople)), disassemble to return just one person
 		$person = $person->getResponse()->getEntry();
 		if (is_array($person) && count($person) == 1) {
@@ -189,8 +189,14 @@ class JsonDbOpensocialService implements ActivitiesService, PeopleService, AppDa
 		return new ResponseItem(NOT_FOUND, "Person not found", null);
 	}
 
-	public function getPeople($userId, $groupId, $sortOrder, $filter, $first, $max, $profileDetails, $networkDistance, SecurityToken $token)
+	public function getPeople($userId, $groupId, CollectionOptions $options, $fields, SecurityToken $token)
 	{
+		$sortOrder = $options->getSortOrder();
+		$filter = $options->getFilterBy();
+		$first = $options->getStartIndex();
+		$max = $options->getCount();
+		$networkDistance = $options->getNetworkDistance();
+		
 		$db = $this->getDb();
 		$friendsTable = $db[self::$FRIEND_LINK_TABLE];
 		$ids = array();
@@ -226,12 +232,12 @@ class JsonDbOpensocialService implements ActivitiesService, PeopleService, AppDa
 				if (! $token->isAnonymous() && $id == $token->getOwnerId()) {
 					$person['isOwner'] = true;
 				}
-				if (is_array($profileDetails) && count($profileDetails) && ! in_array('all', $profileDetails)) {
+				if (! isset($fields['@all'])) {
 					$newPerson = array();
 					$newPerson['isOwner'] = isset($person['isOwner']) ? $person['isOwner'] : false;
 					$newPerson['isViewer'] = isset($person['isViewer']) ? $person['isViewer'] : false;
 					$newPerson['name'] = $person['name'];
-					foreach ($profileDetails as $field) {
+					foreach ($fields as $field => $present) {
 						if (isset($person[$field]) && ! isset($newPerson[$field])) {
 							$newPerson[$field] = $person[$field];
 						}
@@ -281,7 +287,7 @@ class JsonDbOpensocialService implements ActivitiesService, PeopleService, AppDa
 				$allPersonData = $allData[$id];
 				$personData = array();
 				foreach (array_keys($allPersonData) as $key) {
-					if (in_array($key, $fields) || (isset($fields[0]) && $fields[0] == "*")) {
+					if (isset($fields[$key]) || isset($fields['@all'])) {
 						$personData[$key] = $allPersonData[$key];
 					}
 				}
@@ -294,7 +300,7 @@ class JsonDbOpensocialService implements ActivitiesService, PeopleService, AppDa
 	public function updatePersonData(UserID $userId, GroupId $groupId, $fields, $values, $appId, SecurityToken $token)
 	{
 		$db = $this->getDb();
-		foreach ($fields as $key) {
+		foreach ($fields as $key => $present) {
 			if (! $this->isValidKey($key)) {
 				return new ResponseItem(BAD_REQUEST, "The person app data key had invalid characters", null);
 			}
@@ -303,7 +309,7 @@ class JsonDbOpensocialService implements ActivitiesService, PeopleService, AppDa
 		$person = $allData[$userId->getUserId($token)];
 		switch ($groupId->getType()) {
 			case 'self':
-				foreach ($fields as $key) {
+				foreach ($fields as $key => $present) {
 					$value = isset($values[$key]) ? @$values[$key] : null;
 					$person[$key] = $value;
 				}
@@ -320,14 +326,14 @@ class JsonDbOpensocialService implements ActivitiesService, PeopleService, AppDa
 
 	public function deletePersonData(UserId $userId, GroupId $groupId, $fields, $appId, SecurityToken $token)
 	{
-		foreach ($fields as $key) {
+		foreach ($fields as $key => $present) {
 			if (! $this->isValidKey($key)) {
 				return new ResponseItem(BAD_REQUEST, "The person app data key had invalid characters", null);
 			}
 		}
 		switch ($groupId->getType()) {
 			case 'self':
-				foreach ($fields as $key) {//TODO: Implement this!
+				foreach ($fields as $key => $present) {//TODO: Implement this!
 }
 				break;
 			default:

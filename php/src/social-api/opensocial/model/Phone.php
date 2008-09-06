@@ -22,33 +22,4 @@
  * http://code.google.com/apis/opensocial/docs/0.7/reference/opensocial.Phone.Field.html
  *
  */
-class Phone {
-	public $number;
-	public $type;
-
-	public function __construct($number, $type)
-	{
-		$this->number = $number;
-		$this->type = $type;
-	}
-
-	public function getNumber()
-	{
-		return $this->number;
-	}
-
-	public function setNumber($number)
-	{
-		$this->number = $number;
-	}
-
-	public function getType()
-	{
-		return $this->type;
-	}
-
-	public function setType($type)
-	{
-		$this->type = $type;
-	}
-}
+class Phone extends ListField {}
