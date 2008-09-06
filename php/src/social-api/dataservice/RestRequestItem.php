@@ -27,14 +27,19 @@ class RestRequestItem {
 	public static $GROUP_ID = "groupId";
 	public static $START_INDEX = "startIndex";
 	public static $COUNT = "count";
-	public static $ORDER_BY = "orderBy";
+	public static $SORT_BY = "sortBy";
+	public static $SORT_ORDER = "sortOrder";
 	public static $NETWORK_DISTANCE = "networkDistance";
 	public static $FILTER_BY = "filterBy";
+	public static $FILTER_OP = "filterOp";
+	public static $FILTER_VALUE = "filterValue";
+	public static $UPDATED_SINCE = "updatedSince";
 	public static $FIELDS = "fields";
 	
 	// OpenSocial defaults
 	public static $DEFAULT_START_INDEX = 0;
 	public static $DEFAULT_COUNT = 20;
+	public static $DEFAULT_SORT_ORDER = 'ascending';
 	
 	public static $APP_SUBSTITUTION_TOKEN = "@app";
 	
@@ -93,7 +98,7 @@ class RestRequestItem {
 			$params = explode("&", $queryParams);
 			foreach ($params as $param) {
 				$paramPieces = explode("=", $param, 2);
-				$this->parameters[$paramPieces[0]] = count($paramPieces) == 2 ? $paramPieces[1] : "";
+				$this->parameters[$paramPieces[0]] = count($paramPieces) == 2 ? urldecode($paramPieces[1]) : "";
 			}
 		}
 	}
@@ -157,31 +162,60 @@ class RestRequestItem {
 		}
 	}
 
-	public function getOrderBy()
+	public function getSortBy()
 	{
-		if (! empty($this->parameters[self::$ORDER_BY])) {
-			return $this->parameters[self::$ORDER_BY];
-		} else {
-			return PeopleOptions::$sortOrder;
+		if (! empty($this->parameters[self::$SORT_BY])) {
+			return $this->parameters[self::$SORT_BY];
 		}
+		return null;
+	}
+
+	public function getSortOrder()
+	{
+		if (! empty($this->parameters[self::$SORT_ORDER])) {
+			return $this->parameters[self::$SORT_ORDER];
+		}
+		return self::$DEFAULT_SORT_ORDER;
 	}
 
 	public function getNetworkDistance()
 	{
 		if (! empty($this->parameters[self::$NETWORK_DISTANCE])) {
 			return $this->parameters[self::$NETWORK_DISTANCE];
-		} else {
-			return false;
 		}
+		return false;
 	}
 
 	public function getFilterBy()
 	{
 		if (! empty($this->parameters[self::$FILTER_BY])) {
 			return $this->parameters[self::$FILTER_BY];
-		} else {
-			return PeopleOptions::$filterType;
 		}
+		return null;
+	}
+
+	public function getFilterOperation()
+	{
+		if (! empty($this->parameters[self::$FILTER_OP])) {
+			return $this->parameters[self::$FILTER_OP];
+		}
+		return null;
+	}
+
+	public function getFilterValue()
+	{
+		if (! empty($this->parameters[self::$FILTER_VALUE])) {
+			return $this->parameters[self::$FILTER_VALUE];
+		}
+		return null;
+	}
+
+	public function getUpdatedSince()
+	{
+		if (! empty($this->parameters[self::$UPDATED_SINCE])) {
+			return $this->parameters[self::$UPDATED_SINCE];
+		}
+		return null;
 	}
 
 	public function getFields()
@@ -193,7 +227,12 @@ class RestRequestItem {
 	{
 		if (! empty($this->parameters[self::$FIELDS])) {
 			$paramValue = $this->parameters[self::$FIELDS];
-			return explode(',', $paramValue);
+			$fieldNames = explode(',', $paramValue);
+			$fields = array();
+			foreach ($fieldNames as $fieldName) {
+				$fields[$fieldName] = 1;
+			}
+			return $fields;
 		} else {
 			return $defaultValue;
 		}

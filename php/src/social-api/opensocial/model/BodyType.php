@@ -22,7 +22,7 @@
  * http://code.google.com/apis/opensocial/docs/0.7/reference/opensocial.BodyType.Field.html
  *
  */
-class BodyType {
+class BodyType implements ComplexField {
 	public $build;
 	public $eyeColor;
 	public $hairColor;
@@ -77,5 +77,11 @@ class BodyType {
 	public function setWeight($weight)
 	{
 		$this->weight = $weight;
+	}
+
+	public function getPrimarySubValue()
+	{
+		// FIXME: is primary sub-field specified for bodyType in the spec??
+		return $this->getBuild(); 
 	}
 }

@@ -29,9 +29,9 @@ class BasicPeopleService implements PeopleService {
 		return ($name < $name1) ? - 1 : 1;
 	}
 
-	public function getPerson($userId, $groupId, $profileDetails, SecurityToken $token)
+	public function getPerson($userId, $groupId, $fields, SecurityToken $token)
 	{
-		$person = $this->getPeople($userId, $groupId, null, null, null, null, $profileDetails, null, $token);
+		$person = $this->getPeople($userId, $groupId, new CollectionOptions(), $fields, $token);
 		// return of getPeople is a ResponseItem(RestfulCollection(ArrayOfPeople)), disassemble to return just one person
 		$person = $person->getResponse()->getEntry();
 		if (is_array($person) && count($person) == 1) {
@@ -40,8 +40,14 @@ class BasicPeopleService implements PeopleService {
 		return new ResponseItem(NOT_FOUND, "Person not found", null);
 	}
 
-	public function getPeople($userId, $groupId, $sortOrder, $filter, $first, $max, $profileDetails, $networkDistance, SecurityToken $token)
+	public function getPeople($userId, $groupId, $options, $fields, SecurityToken $token)
 	{
+		$sortOrder = $options->getSortOrder();
+		$filter = $options->getFilterBy();
+		$first = $options->getStartIndex();
+		$max = $options->getCount();
+		$networkDistance = $options->getNetworkDistance();
+		
 		$ids = array();
 		$group = is_object($groupId) ? $groupId->getType() : '';
 		switch ($group) {
@@ -76,12 +82,12 @@ class BasicPeopleService implements PeopleService {
 				if (! $token->isAnonymous() && $id == $token->getOwnerId()) {
 					$person->setIsOwner(true);
 				}
-				if (is_array($profileDetails) && count($profileDetails) && ! in_array('all', $profileDetails)) {
+				if (! isset($fields['@all'])) {
 					$newPerson = array();
 					$newPerson['isOwner'] = $person->isOwner;
 					$newPerson['isViewer'] = $person->isViewer;
 					$newPerson['name'] = $person->name;
-					foreach ($profileDetails as $field) {
+					foreach ($fields as $field => $present) {
 						if (isset($person->$field) && ! isset($newPerson[$field])) {
 							$newPerson[$field] = $person->$field;
 						}
@@ -104,5 +110,4 @@ class BasicPeopleService implements PeopleService {
 		$collection = new RestfulCollection($people, $first, $totalSize);
 		return new ResponseItem(null, null, $collection);
 	}
-
 }

@@ -1,4 +1,4 @@
-<?
+<?php
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -59,12 +59,18 @@ class JsonDbOpensocialServiceTest extends PHPUnit_Framework_TestCase {
 		$filter = null;
 		$first = null;
 		$max = null;
-		$profileDetails = array('id', 'name', 'thumbnailUrl');
+		$fields = array('id' => 1, 'name' => 1, 'thumbnailUrl' => 1);
 		$networkDistance = null;
 		
 		//With existing data
 		$token = BasicSecurityToken::createFromValues('john.doe', 'john.doe', 'app', 'domain', 'appUrl', '1');
-		$responseItem = $this->JsonDbOpensocialService->getPeople($userId, $groupId, $sortOrder, $filter, $first, $max, $profileDetails, $networkDistance, $token);
+		$options = new CollectionOptions();
+		$options->setSortBy($sortOrder);
+		$options->setFilterBy($filter);
+		$options->setStartIndex($first);
+		$options->setCount($max);
+		$options->setNetworkDistance($networkDistance);
+		$responseItem = $this->JsonDbOpensocialService->getPeople($userId, $groupId, $options, $fields, $token);
 		$response = $responseItem->getResponse();
 		$entry = $response->getEntry();
 		$this->assertEquals(1, $response->getTotalResults());
@@ -76,7 +82,7 @@ class JsonDbOpensocialServiceTest extends PHPUnit_Framework_TestCase {
 		
 		//With non existing data
 		$token = BasicSecurityToken::createFromValues('notexists', 'notexists', 'app', 'domain', 'appUrl', '1');
-		$responseItem = $this->JsonDbOpensocialService->getPeople($userId, $groupId, $sortOrder, $filter, $first, $max, $profileDetails, $networkDistance, $token);
+		$responseItem = $this->JsonDbOpensocialService->getPeople($userId, $groupId, $options, $fields, $token);
 		$response = $responseItem->getResponse();
 		$this->assertEquals(0, $response->getTotalResults());
 		$this->assertEquals(0, count($response->getEntry()));
@@ -89,11 +95,11 @@ class JsonDbOpensocialServiceTest extends PHPUnit_Framework_TestCase {
 	{
 		$userId = new UserId('viewer', null);
 		$groupId = new GroupId('self', null);
-		$profileDetails = array('id', 'name', 'thumbnailUrl');
+		$fields = array('id' => 1, 'name' => 1, 'thumbnailUrl' => 1);
 		
 		//With existing data
 		$token = BasicSecurityToken::createFromValues('john.doe', 'john.doe', 'app', 'domain', 'appUrl', '1');
-		$person = $this->JsonDbOpensocialService->getPerson($userId, $groupId, $profileDetails, $token);
+		$person = $this->JsonDbOpensocialService->getPerson($userId, $groupId, $fields, $token);
 		$response = $person->getResponse();
 		$this->assertNotNull($response);
 		$this->assertEquals('john.doe', $response['id']);
@@ -103,7 +109,7 @@ class JsonDbOpensocialServiceTest extends PHPUnit_Framework_TestCase {
 		
 		//With non existing data
 		$token = BasicSecurityToken::createFromValues('notexists', 'notexists', 'app', 'domain', 'appUrl', '1');
-		$person = $this->JsonDbOpensocialService->getPerson($userId, $groupId, $profileDetails, $token);
+		$person = $this->JsonDbOpensocialService->getPerson($userId, $groupId, $fields, $token);
 		$response = $person->getResponse();
 		$this->assertEquals('NOT_FOUND', $person->getError());
 		$this->assertEquals('Person not found', $person->getErrorMessage());
@@ -117,12 +123,12 @@ class JsonDbOpensocialServiceTest extends PHPUnit_Framework_TestCase {
 	{
 		$userId = new UserId('viewer', null);
 		$groupId = new GroupId('self', null);
-		$profileDetails = array('count', 'size');
+		$fields = array('count' => 1, 'size' => 1);
 		$appId = 'app';
 		
 		//With existing data
 		$token = BasicSecurityToken::createFromValues('canonical', 'canonical', 'app', 'domain', 'appUrl', '1');
-		$responseItem = $this->JsonDbOpensocialService->getPersonData($userId, $groupId, $profileDetails, $appId, $token);
+		$responseItem = $this->JsonDbOpensocialService->getPersonData($userId, $groupId, $fields, $appId, $token);
 		$response = $responseItem->getResponse();
 		$entry = $response->getEntry();
 		$this->assertEquals(1, $response->getTotalResults());
@@ -132,7 +138,7 @@ class JsonDbOpensocialServiceTest extends PHPUnit_Framework_TestCase {
 		
 		//With non existing data
 		$token = BasicSecurityToken::createFromValues('notexists', 'notexists', 'app', 'domain', 'appUrl', '1');
-		$responseItem = $this->JsonDbOpensocialService->getPersonData($userId, $groupId, $profileDetails, $appId, $token);
+		$responseItem = $this->JsonDbOpensocialService->getPersonData($userId, $groupId, $fields, $appId, $token);
 		$response = $responseItem->getResponse();
 		$this->assertEquals(0, $response->getTotalResults());
 		$this->assertEquals(0, count($response->getEntry()));
@@ -145,17 +151,17 @@ class JsonDbOpensocialServiceTest extends PHPUnit_Framework_TestCase {
 	{
 		$userId = new UserId('viewer', null);
 		$groupId = new GroupId('self', null);
-		$profileDetails = array('count', 'size');
+		$fields = array('count' => 1, 'size' => 1);
 		$values = array();
 		$values['count'] = 10;
 		$values['size'] = 500;
 		$appId = 'app';
 		
-/*
+	/*
 		//With existing data
 		$token = BasicSecurityToken::createFromValues('canonical', 'canonical', 'app', 'domain', 'appUrl', '1');
-		$this->JsonDbOpensocialService->updatePersonData($userId, $groupId, $profileDetails, $values, $appId, $token);
-		$responseItem = $this->JsonDbOpensocialService->getPersonData($userId, $groupId, $profileDetails, $appId, $token);
+		$this->JsonDbOpensocialService->updatePersonData($userId, $groupId, $fields, $values, $appId, $token);
+		$responseItem = $this->JsonDbOpensocialService->getPersonData($userId, $groupId, $fields, $appId, $token);
 		$response = $responseItem->getResponse();
 		$entry = $response->getEntry();
 		$this->assertEquals(1, $response->getTotalResults());
@@ -165,8 +171,8 @@ class JsonDbOpensocialServiceTest extends PHPUnit_Framework_TestCase {
 		
 		//With non existing data
 		$token = BasicSecurityToken::createFromValues('notexists', 'notexists', 'app', 'domain', 'appUrl', '1');
-		$this->JsonDbOpensocialService->updatePersonData($userId, $groupId, $profileDetails, $values, $appId, $token);
-		$responseItem = $this->JsonDbOpensocialService->getPersonData($userId, $groupId, $profileDetails, $appId, $token);
+		$this->JsonDbOpensocialService->updatePersonData($userId, $groupId, $fields, $values, $appId, $token);
+		$responseItem = $this->JsonDbOpensocialService->getPersonData($userId, $groupId, $fields, $appId, $token);
 		$response = $responseItem->getResponse();
 		$entry = $response->getEntry();
 		$this->assertEquals(1, $response->getTotalResults());
@@ -293,7 +299,7 @@ class JsonDbOpensocialServiceTest extends PHPUnit_Framework_TestCase {
 		$activity['mediaItems'][0]['mimeType'] = 'image';
 		$activity['mediaItems'][0]['image'] = 'http://cdn.davesdaily.com/pictures/784-awesome-hands.jpg';
 		$this->JsonDbOpensocialService->createActivity($userId, $activity, $token);
-/*		
+		/*		
 		//Validating the created activity
 		$token = BasicSecurityToken::createFromValues('john.doe', 'john.doe', 'app', 'domain', 'appUrl', '1');
 		$responseItem = $this->JsonDbOpensocialService->getActivity($userId, $groupId, 2, null, null, $token);

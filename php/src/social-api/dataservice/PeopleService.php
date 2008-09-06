@@ -23,25 +23,18 @@ interface PeopleService {
 	 * Returns a Person object for person with $id or false on not found
 	 *
 	 * @param container specific id $id
-	 * @param profileDetails the details to return
+	 * @param fields set of contact fields to return, as array('fieldName' => 1)
 	 * @param security token $token
 	 */
-	function getPerson($userId, $groupId, $profileDetails, SecurityToken $token);
+	function getPerson($userId, $groupId, $fields, SecurityToken $token);
 
 	/**
 	 * Returns a list of people that correspond to the passed in person ids.
 	 * @param ids The ids of the people to fetch.
-	 * @param sortOrder How to sort the people
-	 * @param filter How the people should be filtered.
-	 * @param first The index of the first person to fetch.
-	 * @param profileDetails the details to return
-	 * @param max The max number of people to fetch.
+	 * @param options Request options for filtering/sorting/paging
+	 * @param fields set of contact fields to return, as array('fieldName' => 1)
 	 * @return a list of people.
 	 */
-	function getPeople($userId, $groupId, $sortOrder, $filter, $first, $max, $profileDetails, $networkDistance, SecurityToken $token);
+	function getPeople($userId, $groupId, CollectionOptions $options, $fields, SecurityToken $token);
 }
 
-class PeopleOptions {
-	public static $sortOrder = array('topFriends', 'name');
-	public static $filterType = array('all', 'hasApp', 'topFriends');
-}

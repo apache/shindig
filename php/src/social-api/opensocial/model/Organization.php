@@ -22,17 +22,25 @@
  * http://code.google.com/apis/opensocial/docs/0.7/reference/opensocial.Organization.Field.html
  *
  */
-class Organization {
+class Organization implements ComplexField {
 	public $address;
 	public $description;
 	public $endDate;
 	public $field;
 	public $name;
+	public $primary;
 	public $salary;
 	public $startDate;
 	public $subField;
 	public $title;
+	public $type;
 	public $webpage;
+
+  public function __construct($name, $primary = null)
+  {
+    $this->name = $name;
+    $this->primary = $primary;
+  }
 
 	public function getAddress()
 	{
@@ -124,6 +132,16 @@ class Organization {
 		$this->title = $title;
 	}
 
+	public function getType()
+	{
+		return $this->type;
+	}
+
+	public function setType($type)
+	{
+		$this->type = $type;
+	}
+
 	public function getWebpage()
 	{
 		return $this->webpage;
@@ -134,4 +152,17 @@ class Organization {
 		$this->webpage = $webpage;
 	}
 
+	public function getPrimary()
+	{
+		return $this->primary;
+	}
+
+	public function setPrimary($primary)
+	{
+		$this->primary = $primary;
+	}
+
+  public function getPrimarySubValue() {
+    return $this->getName();
+  }
 }

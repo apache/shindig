@@ -26,7 +26,7 @@
  *
  */
 
-abstract class Enum {
+abstract class Enum implements ComplexField {
 	public $displayValue;
 	public $key;
 	public $values = array();
@@ -38,7 +38,7 @@ abstract class Enum {
 				// case of mixing key <> display value, correct it
 				$key = array_search($key, $this->values);
 			} else {
-				throw new Exception("Invalid Enum key");
+				throw new Exception("Invalid Enum key: $key");
 			}
 		}
 		$this->key = $key;
@@ -60,6 +60,10 @@ abstract class Enum {
 	{
 		return $this->jsonString;
 	}
+
+  public function getPrimarySubValue() {
+    return $this->key;
+  }
 }
 
 /**

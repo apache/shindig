@@ -22,22 +22,22 @@
  * http://code.google.com/apis/opensocial/docs/0.7/reference/opensocial.Address.Field.html
  *
  */
-class Address {
+class Address implements ComplexField {
 	public $country;
-	public $extendedAddress;
 	public $latitude;
 	public $longitude;
 	public $locality;
-	public $poBox;
 	public $postalCode;
 	public $region;
 	public $streetAddress;
 	public $type;
-	public $unstructuredAddress;
+	public $formatted;
+	public $primary;
 
-	public function __construct($unstructuredAddress)
+	public function __construct($formatted, $primary = null)
 	{
-		$this->unstructuredAddress = $unstructuredAddress;
+		$this->formatted = $formatted;
+		$this->primary = $primary;
 	}
 
 	public function getCountry()
@@ -48,16 +48,6 @@ class Address {
 	public function setCountry($country)
 	{
 		$this->country = $country;
-	}
-
-	public function getExtendedAddress()
-	{
-		return $this->extendedAddress;
-	}
-
-	public function setExtendedAddress($extendedAddress)
-	{
-		$this->extendedAddress = $extendedAddress;
 	}
 
 	public function getLatitude()
@@ -88,16 +78,6 @@ class Address {
 	public function setLongitude($longitude)
 	{
 		$this->longitude = $longitude;
-	}
-
-	public function getPoBox()
-	{
-		return $this->poBox;
-	}
-
-	public function setPoBox($poBox)
-	{
-		$this->poBox = $poBox;
 	}
 
 	public function getPostalCode()
@@ -140,14 +120,28 @@ class Address {
 		$this->type = $type;
 	}
 
-	public function getUnstructuredAddress()
+	public function getFormatted()
 	{
-		return $this->unstructuredAddress;
+		return $this->formatted;
 	}
 
-	public function setUnstructuredAddress($unstructuredAddress)
+	public function setFormatted($formatted)
 	{
-		$this->unstructuredAddress = $unstructuredAddress;
+		$this->formatted = $formatted;
 	}
 
+	public function getPrimary()
+	{
+		return $this->primary;
+	}
+
+	public function setPrimary($primary)
+	{
+		$this->primary = $primary;
+	}
+
+	public function getPrimarySubValue()
+	{
+		return $this->getFormatted();
+	}
 }

@@ -26,6 +26,11 @@ class RestfulCollection {
 	public $entry;
 	public $startIndex;
 	public $totalResults;
+	
+	// boolean flags to indicate whether the requested operations were performed or declined
+	public $filtered;
+	public $sorted;
+	public $updatedSince;
 
 	public static function createFromEntry($entry)
 	{
@@ -67,5 +72,35 @@ class RestfulCollection {
 	public function setTotalResults($totalResults)
 	{
 		$this->totalResults = $totalResults;
+	}
+
+	public function getFiltered($filtered)
+	{
+		$this->filtered = $filtered;
+	}
+
+	public function setFiltered($filtered)
+	{
+		$this->filtered = $filtered;
+	}
+
+	public function getSorted($sorted)
+	{
+		$this->sorted = $sorted;
+	}
+
+	public function setSorted($sorted)
+	{
+		$this->sorted = $sorted;
+	}
+
+	public function getUpdatedSince($updatedSince)
+	{
+		$this->updatedSince = $updatedSince;
+	}
+
+	public function setUpdatedSince($updatedSince)
+	{
+		$this->updatedSince = $updatedSince;
 	}
 }
