@@ -106,20 +106,24 @@ shindig.samplecontainer = {};
 
   function reloadStateFile(opt_callback) {
     sendRequestToServer('setstate', 'POST',
-        {"fileurl" : stateFileUrl},
+        gadgets.io.encodeValues({"fileurl" : stateFileUrl}),
         opt_callback);
   };
 
-  function sendRequestToServer(url, method, opt_postParams, opt_callback) {
+  function sendRequestToServer(url, method, opt_postParams, opt_callback, opt_excludeSecurityToken) {
     // TODO: Should re-use the jsoncontainer code somehow
     opt_postParams = opt_postParams || {};
 
     var makeRequestParams = {
       "CONTENT_TYPE" : "JSON",
       "METHOD" : method,
-      "POST_DATA" : gadgets.io.encodeValues(opt_postParams)};
+      "POST_DATA" : opt_postParams};
 
-    gadgets.io.makeNonProxiedRequest(socialDataPath + url + "?st=" + gadget.secureToken,
+    if (!opt_excludeSecurityToken) {
+	  url = socialDataPath + url + "?st=" + gadget.secureToken;
+    }
+
+    gadgets.io.makeNonProxiedRequest(url,
       function(data) {
         data = data.data;
         if (opt_callback) {
@@ -129,6 +133,54 @@ shindig.samplecontainer = {};
       makeRequestParams
     );
   };
+
+  function generateGadgets(metadata) {
+	// TODO: The gadget.js file should really have a clearGadgets method
+    gadgets.container.gadgets_ = {};
+    for (var i = 0; i < metadata.gadgets.length; i++) {
+      gadget = gadgets.container.createGadget(
+          {'specUrl': metadata.gadgets[i].url, 'title': metadata.gadgets[i].title});
+      gadget.setServerBase('../../');
+      gadget.secureToken = escape(generateSecureToken());
+      gadgets.container.addGadget(gadget);
+    }
+
+    gadgets.container.layoutManager.setGadgetChromeIds(['gadget-chrome']);
+    reloadStateFile(function() {
+      gadgets.container.renderGadgets();
+    });
+  };
+
+  function refreshGadgets(metadata) {
+	// TODO: The gadget.js file should really have a getGadgets method
+    for (var gadget in gadgets.container.gadgets_) {
+      var newtitle = metadata.gadgets[0].title;
+      var specUrl = metadata.gadgets[0].url;
+      gadgets.container.gadgets_[gadget].title = newtitle;
+      gadgets.container.gadgets_[gadget].specUrl = specUrl;
+    }
+    reloadStateFile(function() {
+      gadgets.container.renderGadgets();
+    });
+  }
+
+  function requestGadgetMetaData(opt_callback) {
+    var request = {
+      context: {
+        country: "default",
+        language: "default",
+        view: "default",
+        container: "default"
+      },
+      gadgets: [{
+        url: gadgetUrl,
+        moduleId: 1
+      }]
+    };
+
+    sendRequestToServer("/gadgets/metadata", "POST", 
+        gadgets.json.stringify(request), opt_callback, true);
+  }
 
   /**
    * Public Functions
@@ -152,20 +204,12 @@ shindig.samplecontainer = {};
     // Render gadget
     document.getElementById("gadgetUrl").value = gadgetUrl;
 
-    gadget = gadgets.container.createGadget({'specUrl': gadgetUrl});;
-    gadget.setServerBase('../../');
-
     // Viewer and Owner
     document.getElementById("viewerId").value = viewerId;
     document.getElementById("ownerId").value = ownerId;
-    gadget.secureToken = escape(generateSecureToken());
 
-    gadgets.container.addGadget(gadget);
-    gadgets.container.layoutManager.setGadgetChromeIds(['gadget-chrome']);
-    reloadStateFile(function() {
-      gadgets.container.renderGadgets();
-    });
-  };
+    requestGadgetMetaData(generateGadgets);
+  }
 
   shindig.samplecontainer.unpackFormState = function() {
     useCaja = document.getElementById("useCajaCheckbox").checked;
@@ -187,13 +231,9 @@ shindig.samplecontainer = {};
     ownerId = document.getElementById("ownerId").value;
     gadgetUrl = document.getElementById("gadgetUrl").value;
 
-    gadget.secureToken = escape(generateSecureToken());
-    gadget.specUrl = gadgetUrl;
     shindig.cookies.set(gadgetUrlCookie, encodeURIComponent(gadgetUrl));
 
-    reloadStateFile(function() {
-      gadgets.container.renderGadgets();
-    });
+    requestGadgetMetaData(refreshGadgets);
   };
 
   shindig.samplecontainer.dumpStateFile = function() {
