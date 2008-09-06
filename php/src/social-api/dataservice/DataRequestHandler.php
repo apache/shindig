@@ -1,4 +1,5 @@
 <?php
+
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements. See the NOTICE file
@@ -27,7 +28,12 @@ abstract class DataRequestHandler {
 			// Anonymous requests are only allowed to GET data (not create/edit/delete)
 			$response = new ResponseItem(BAD_REQUEST, "[$method] not allowed for anonymous users", null);
 		} elseif ($method == 'GET') {
-			$response = $this->handleGet($requestItem);
+			$parameters = $requestItem->getParameters();
+			if (in_array("@supportedFields", $parameters)) {
+				$response = $this->getSupportedFields($parameters);
+			} else {
+				$response = $this->handleGet($requestItem);
+			}
 		} elseif ($method == 'POST') {
 			$response = $this->handlePost($requestItem);
 		} elseif ($method == 'DELETE') {
@@ -57,6 +63,46 @@ abstract class DataRequestHandler {
 			throw new Exception("Invalid JSON syntax");
 		}
 		return $decoded;
+	}
+
+	/* 
+	*  To support people/@supportedFields and activity/@supportedFields 
+	*  @param parameters url parameters to get request type(people/activity)
+	*/
+	public function getSupportedFields($parameters)
+	{
+		$context = new GadgetContext('GADGET');
+		$container = $context->getContainer();
+		$containerConfig = new ContainerConfig(Config::get('container_path'));
+		$config = $containerConfig->getConfig($container, 'gadgets.features');
+		$version = $this->getOpenSocialVersion($config);
+		$supportedFields = $config[$version]['supportedFields'];
+		if (in_array('people', $parameters)) {
+			$ret = $supportedFields['person'];
+		} else {
+			$ret = $supportedFields['activity'];
+		}
+		return new ResponseItem(null, null, $ret);
+	}
+
+	/* 
+	*  To get OpenSocial version fro getting supportedFields 
+	*  @param config configuration values from container's js files
+	*/
+	private function getOpenSocialVersion($config)
+	{
+		$str = "opensocial-";
+		$version = array();
+		foreach ($config as $key => $value) {
+			if (substr($str, 0, strlen($key)) == $str) {
+				$version[] = $key;
+			}
+		}
+		if (!count($version)) {
+			throw new Exception("Invalid container configuration, opensocial-x.y key not found");
+		}
+		rsort($version);
+		return $version[0];
 	}
 
 	abstract public function handleDelete(RestRequestItem $requestItem);
