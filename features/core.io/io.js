@@ -437,7 +437,9 @@ gadgets.io = function() {
 
       return config.proxyUrl.replace("%url%", encodeURIComponent(url)).
           replace("%rawurl%", url).
-          replace("%refresh%", encodeURIComponent(refresh));
+          replace("%refresh%", encodeURIComponent(refresh)).
+          replace("%gadget%", encodeURIComponent(gadgets.util.getUrlParameters().url)).
+          replace("%container%", encodeURIComponent(gadgets.util.getUrlParameters().container));
     }
   };
 }();

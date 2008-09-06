@@ -37,8 +37,8 @@ IoTest.prototype.setUp = function() {
   window.XMLHttpRequest = this.fakeXhrs.getXhrConstructor();
 
   gadgets.config.init({ "core.io" : {
-      "proxyUrl" : "http://www.example.com/proxy?url=%url%&refresh=%refresh%",
-      "jsonProxyUrl" : "http://www.example.com/json" }}); 
+      "proxyUrl" : "http://example.com/proxy?url=%url%&refresh=%refresh%&g=%gadget%&c=%container%",
+      "jsonProxyUrl" : "http://example.com/json" }}); 
   gadgets.io.preloaded_ = {};
 };
 
@@ -50,8 +50,10 @@ IoTest.prototype.tearDown = function() {
 IoTest.prototype.testGetProxyUrl = function() {
   var proxied = gadgets.io.getProxyUrl("http://target.example.com/image.gif");
   this.assertEquals(
-      "http://www.example.com/proxy?url=http%3a%2f%2ftarget.example.com%2f" +
-          "image.gif&refresh=3600",
+      "http://example.com/proxy?url=http%3a%2f%2ftarget.example.com%2fimage.gif" +
+          "&refresh=3600" +
+          "&g=http%3a%2f%2fwww.gadget.com%2fgadget.xml" +
+          "&c=foo",
       proxied);
 };
 
@@ -59,8 +61,10 @@ IoTest.prototype.testGetProxyUrl_nondefaultRefresh = function() {
   var proxied = gadgets.io.getProxyUrl("http://target.example.com/image.gif",
       { 'REFRESH_INTERVAL' : 30 });
   this.assertEquals(
-      "http://www.example.com/proxy?url=http%3a%2f%2ftarget.example.com%2f" +
-          "image.gif&refresh=30",
+      "http://example.com/proxy?url=http%3a%2f%2ftarget.example.com%2fimage.gif" +
+          "&refresh=30" +
+          "&g=http%3a%2f%2fwww.gadget.com%2fgadget.xml" +
+          "&c=foo",
       proxied);
 };
 
@@ -68,8 +72,10 @@ IoTest.prototype.testGetProxyUrl_disableCache = function() {
   var proxied = gadgets.io.getProxyUrl("http://target.example.com/image.gif",
       { 'REFRESH_INTERVAL' : 0 });
   this.assertEquals(
-      "http://www.example.com/proxy?url=http%3a%2f%2ftarget.example.com%2f" +
-          "image.gif&refresh=0",
+      "http://example.com/proxy?url=http%3a%2f%2ftarget.example.com%2fimage.gif" +
+          "&refresh=0" +
+          "&g=http%3a%2f%2fwww.gadget.com%2fgadget.xml" +
+          "&c=foo",
       proxied);
 };
 
@@ -108,7 +114,7 @@ IoTest.prototype.makeFakeResponse = function(text) {
 };
 
 IoTest.prototype.testNoMethod = function() {
-  var req = new fakeXhr.Expectation("GET", "http://www.example.com/json");
+  var req = new fakeXhr.Expectation("GET", "http://example.com/json");
   this.setStandardArgs(req, false);
   req.setQueryArg("url", "http://target.example.com/somepage");
 
@@ -126,7 +132,7 @@ IoTest.prototype.testNoMethod = function() {
 };
 
 IoTest.prototype.testNoMethod_nonDefaultRefresh = function() {
-  var req = new fakeXhr.Expectation("GET", "http://www.example.com/json");
+  var req = new fakeXhr.Expectation("GET", "http://example.com/json");
   this.setStandardArgs(req, false);
   req.setQueryArg("url", "http://target.example.com/somepage");
   req.setQueryArg("refresh", "1800");
@@ -148,7 +154,7 @@ IoTest.prototype.testNoMethod_nonDefaultRefresh = function() {
 };
 
 IoTest.prototype.testNoMethod_disableRefresh = function() {
-  var req = new fakeXhr.Expectation("POST", "http://www.example.com/json");
+  var req = new fakeXhr.Expectation("POST", "http://example.com/json");
   this.setStandardArgs(req, true);
   req.setBodyArg("url", "http://target.example.com/somepage");
   req.setBodyArg("refresh", null);
@@ -173,7 +179,7 @@ IoTest.prototype.testNoMethod_disableRefresh = function() {
 // Make sure we don't accidentally include any cache-busting parameters
 // in our GET requests
 IoTest.prototype.testRepeatGet = function() {
-  var req = new fakeXhr.Expectation("GET", "http://www.example.com/json");
+  var req = new fakeXhr.Expectation("GET", "http://example.com/json");
   this.setStandardArgs(req, false);
   req.setQueryArg("url", "http://target.example.com/somepage");
 
@@ -199,7 +205,7 @@ IoTest.prototype.testRepeatGet = function() {
 };
 
 IoTest.prototype.testPost = function() {
-  var req = new fakeXhr.Expectation("POST", "http://www.example.com/json");
+  var req = new fakeXhr.Expectation("POST", "http://example.com/json");
   this.setStandardArgs(req, true);
   req.setBodyArg("httpMethod", "POST");
   req.setBodyArg("postData", "foo=bar");
@@ -227,7 +233,7 @@ IoTest.prototype.testPost = function() {
 };
 
 IoTest.prototype.testPost_noBody = function() {
-  var req = new fakeXhr.Expectation("POST", "http://www.example.com/json");
+  var req = new fakeXhr.Expectation("POST", "http://example.com/json");
   this.setStandardArgs(req, true);
   req.setBodyArg("httpMethod", "POST");
   req.setBodyArg("postData", "");
@@ -254,7 +260,7 @@ IoTest.prototype.testPost_noBody = function() {
 };
 
 IoTest.prototype.testPost_emptyBody = function() {
-  var req = new fakeXhr.Expectation("POST", "http://www.example.com/json");
+  var req = new fakeXhr.Expectation("POST", "http://example.com/json");
   this.setStandardArgs(req, true);
   req.setBodyArg("httpMethod", "POST");
   req.setBodyArg("postData", "");
@@ -282,7 +288,7 @@ IoTest.prototype.testPost_emptyBody = function() {
 };
 
 IoTest.prototype.testPut = function() {
-  var req = new fakeXhr.Expectation("POST", "http://www.example.com/json");
+  var req = new fakeXhr.Expectation("POST", "http://example.com/json");
   this.setStandardArgs(req, true);
   req.setBodyArg("httpMethod", "PUT");
   req.setBodyArg("postData", "abcd");
@@ -309,7 +315,7 @@ IoTest.prototype.testPut = function() {
 };
 
 IoTest.prototype.testPut_noBody = function() {
-  var req = new fakeXhr.Expectation("POST", "http://www.example.com/json");
+  var req = new fakeXhr.Expectation("POST", "http://example.com/json");
   this.setStandardArgs(req, true);
   req.setBodyArg("httpMethod", "PUT");
   req.setBodyArg("postData", "");
@@ -335,7 +341,7 @@ IoTest.prototype.testPut_noBody = function() {
 };
 
 IoTest.prototype.testSignedGet = function() {
-  var req = new fakeXhr.Expectation("POST", "http://www.example.com/json");
+  var req = new fakeXhr.Expectation("POST", "http://example.com/json");
   this.setStandardArgs(req, true);
   req.setBodyArg("url", "http://target.example.com/somepage");
   req.setBodyArg("signOwner", "true");
@@ -363,7 +369,7 @@ IoTest.prototype.testSignedGet = function() {
 };
 
 IoTest.prototype.testSignedPost = function() {
-  var req = new fakeXhr.Expectation("POST", "http://www.example.com/json");
+  var req = new fakeXhr.Expectation("POST", "http://example.com/json");
   this.setStandardArgs(req, true);
   req.setBodyArg("url", "http://target.example.com/somepage");
   req.setBodyArg("signOwner", "true");
@@ -394,7 +400,7 @@ IoTest.prototype.testSignedPost = function() {
 };
 
 IoTest.prototype.testSignedGet_noViewerBoolean = function() {
-  var req = new fakeXhr.Expectation("POST", "http://www.example.com/json");
+  var req = new fakeXhr.Expectation("POST", "http://example.com/json");
   this.setStandardArgs(req, true);
   req.setBodyArg("url", "http://target.example.com/somepage");
   req.setBodyArg("signOwner", "true");
@@ -423,7 +429,7 @@ IoTest.prototype.testSignedGet_noViewerBoolean = function() {
 };
 
 IoTest.prototype.testSignedGet_noViewerString = function() {
-  var req = new fakeXhr.Expectation("POST", "http://www.example.com/json");
+  var req = new fakeXhr.Expectation("POST", "http://example.com/json");
   this.setStandardArgs(req, true);
   req.setBodyArg("url", "http://target.example.com/somepage");
   req.setBodyArg("signOwner", "true");
@@ -452,7 +458,7 @@ IoTest.prototype.testSignedGet_noViewerString = function() {
 };
 
 IoTest.prototype.testSignedGet_withNoOwnerAndViewerString = function() {
-  var req = new fakeXhr.Expectation("POST", "http://www.example.com/json");
+  var req = new fakeXhr.Expectation("POST", "http://example.com/json");
   this.setStandardArgs(req, true);
   req.setBodyArg("url", "http://target.example.com/somepage");
   req.setBodyArg("signOwner", "false");
@@ -483,7 +489,7 @@ IoTest.prototype.testSignedGet_withNoOwnerAndViewerString = function() {
 
 IoTest.prototype.testOAuth = function() {
   gadgets.io.clearOAuthState();
-  var req = new fakeXhr.Expectation("POST", "http://www.example.com/json");
+  var req = new fakeXhr.Expectation("POST", "http://example.com/json");
   this.setStandardArgs(req, true);
   req.setBodyArg("url", "http://target.example.com/somepage");
   req.setBodyArg("authz", "oauth");
@@ -513,7 +519,7 @@ IoTest.prototype.testOAuth = function() {
   this.assertEquals("http://sp.example.com/authz?oauth_token=foo",
       resp.oauthApprovalUrl);
 
-  var req = new fakeXhr.Expectation("POST", "http://www.example.com/json");
+  var req = new fakeXhr.Expectation("POST", "http://example.com/json");
   this.setStandardArgs(req, true);
   req.setBodyArg("url", "http://target.example.com/somepage");
   req.setBodyArg("authz", "oauth");
@@ -541,7 +547,7 @@ IoTest.prototype.testOAuth = function() {
 
 IoTest.prototype.testOAuth_error = function() {
   gadgets.io.clearOAuthState();
-  var req = new fakeXhr.Expectation("POST", "http://www.example.com/json");
+  var req = new fakeXhr.Expectation("POST", "http://example.com/json");
   this.setStandardArgs(req, true);
   req.setBodyArg("url", "http://target.example.com/somepage");
   req.setBodyArg("authz", "oauth");
@@ -576,7 +582,7 @@ IoTest.prototype.testOAuth_error = function() {
 
 IoTest.prototype.testOAuth_serviceAndToken = function() {
   gadgets.io.clearOAuthState();
-  var req = new fakeXhr.Expectation("POST", "http://www.example.com/json");
+  var req = new fakeXhr.Expectation("POST", "http://example.com/json");
   this.setStandardArgs(req, true);
   req.setBodyArg("url", "http://target.example.com/somepage");
   req.setBodyArg("authz", "oauth");
@@ -610,7 +616,7 @@ IoTest.prototype.testOAuth_serviceAndToken = function() {
   this.assertEquals("http://sp.example.com/authz?oauth_token=foo",
       resp.oauthApprovalUrl);
 
-  var req = new fakeXhr.Expectation("POST", "http://www.example.com/json");
+  var req = new fakeXhr.Expectation("POST", "http://example.com/json");
   this.setStandardArgs(req, true);
   req.setBodyArg("url", "http://target.example.com/somepage");
   req.setBodyArg("authz", "oauth");
@@ -642,7 +648,7 @@ IoTest.prototype.testOAuth_serviceAndToken = function() {
 
 IoTest.prototype.testOAuth_preapprovedToken = function() {
   gadgets.io.clearOAuthState();
-  var req = new fakeXhr.Expectation("POST", "http://www.example.com/json");
+  var req = new fakeXhr.Expectation("POST", "http://example.com/json");
   this.setStandardArgs(req, true);
   req.setBodyArg("url", "http://target.example.com/somepage");
   req.setBodyArg("authz", "oauth");
@@ -674,7 +680,7 @@ IoTest.prototype.testOAuth_preapprovedToken = function() {
 };
 
 IoTest.prototype.testJson = function() {
-  var req = new fakeXhr.Expectation("GET", "http://www.example.com/json");
+  var req = new fakeXhr.Expectation("GET", "http://example.com/json");
   this.setStandardArgs(req, false);
   req.setQueryArg("url", "http://target.example.com/somepage");
   req.setQueryArg("contentType", "JSON");
@@ -699,7 +705,7 @@ IoTest.prototype.testJson = function() {
 };
 
 IoTest.prototype.testJson_malformed = function() {
-  var req = new fakeXhr.Expectation("GET", "http://www.example.com/json");
+  var req = new fakeXhr.Expectation("GET", "http://example.com/json");
   this.setStandardArgs(req, false);
   req.setQueryArg("url", "http://target.example.com/somepage");
   req.setQueryArg("contentType", "JSON");
@@ -739,7 +745,7 @@ IoTest.prototype.testPreload = function() {
 
   this.assertEquals("preloadedbody", resp.text);
 
-  var req = new fakeXhr.Expectation("GET", "http://www.example.com/json");
+  var req = new fakeXhr.Expectation("GET", "http://example.com/json");
   this.setStandardArgs(req, false);
   req.setQueryArg("url", "http://target.example.com/somepage");
 
@@ -767,7 +773,7 @@ IoTest.prototype.testPreloadMiss_postRequest = function() {
     }
   };
 
-  var req = new fakeXhr.Expectation("POST", "http://www.example.com/json");
+  var req = new fakeXhr.Expectation("POST", "http://example.com/json");
   this.setStandardArgs(req, true);
   req.setBodyArg("httpMethod", "POST");
   req.setBodyArg("postData", "foo=bar");
@@ -802,7 +808,7 @@ IoTest.prototype.testPreloadMiss_wrongUrl = function() {
     }
   };
 
-  var req = new fakeXhr.Expectation("GET", "http://www.example.com/json");
+  var req = new fakeXhr.Expectation("GET", "http://example.com/json");
   this.setStandardArgs(req, false);
   req.setQueryArg("url", "http://target.example.com/somepage");
 
@@ -829,7 +835,7 @@ IoTest.prototype.testPreload_error404 = function() {
     }
   };
 
-  var req = new fakeXhr.Expectation("GET", "http://www.example.com/json");
+  var req = new fakeXhr.Expectation("GET", "http://example.com/json");
   this.setStandardArgs(req, false);
   req.setQueryArg("url", "http://target.example.com/somepage");
 
@@ -862,11 +868,11 @@ IoTest.prototype.testPreload_oauthApproval = function() {
     "http://target.example.com/somepage" : {
       "rc" : 200,
       "oauthState" : "stateinfo",
-      "oauthApprovalUrl" : "http://www.example.com/approve",
+      "oauthApprovalUrl" : "http://example.com/approve",
     }
   };
 
-  var req = new fakeXhr.Expectation("POST", "http://www.example.com/json");
+  var req = new fakeXhr.Expectation("POST", "http://example.com/json");
   this.setStandardArgs(req, true);
   req.setBodyArg("url", "http://target.example.com/somepage");
   req.setBodyArg("authz", "oauth");
@@ -892,7 +898,7 @@ IoTest.prototype.testPreload_oauthApproval = function() {
         resp = data;
       },
       params);
-  this.assertEquals("http://www.example.com/approve", resp.oauthApprovalUrl);
+  this.assertEquals("http://example.com/approve", resp.oauthApprovalUrl);
 
   gadgets.io.makeRequest("http://target.example.com/somepage",
       function(data) {
