@@ -33,7 +33,7 @@ class UrlTest extends PHPUnit_Framework_TestCase {
 	protected function setUp()
 	{
 		parent::setUp();
-		$this->Url = new Url('A', 'L', 'T');
+		$this->Url = new Url('A', 'T', 'L');
 	}
 
 	/**
@@ -50,7 +50,7 @@ class UrlTest extends PHPUnit_Framework_TestCase {
 	 */
 	public function testGetAddress()
 	{
-		$this->assertEquals('A', $this->Url->getAddress());
+		$this->assertEquals('A', $this->Url->getValue());
 	}
 
 	/**
@@ -74,8 +74,8 @@ class UrlTest extends PHPUnit_Framework_TestCase {
 	 */
 	public function testSetAddress()
 	{
-		$this->Url->setAddress('a');
-		$this->assertEquals('a', $this->Url->address);
+		$this->Url->setValue('a');
+		$this->assertEquals('a', $this->Url->getValue());
 	}
 
 	/**
@@ -84,7 +84,7 @@ class UrlTest extends PHPUnit_Framework_TestCase {
 	public function testSetLinkText()
 	{
 		$this->Url->setLinkText('l');
-		$this->assertEquals('l', $this->Url->linkText);
+		$this->assertEquals('l', $this->Url->getLinkText());
 	}
 
 	/**

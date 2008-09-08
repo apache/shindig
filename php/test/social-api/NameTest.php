@@ -128,7 +128,7 @@ class NameTest extends PHPUnit_Framework_TestCase {
 	public function testGetUnstructured()
 	{
 		$this->Name->unstructured = $this->unstructured;
-		$this->assertEquals($this->Name->getUnstructured(), $this->unstructured);
+		$this->assertEquals($this->Name->getFormatted(), $this->unstructured);
 	}
 
 	/**
@@ -137,7 +137,7 @@ class NameTest extends PHPUnit_Framework_TestCase {
 	public function testSetAdditionalName()
 	{
 		$this->Name->setAdditionalName($this->additionalName);
-		$this->assertEquals($this->Name->additionalName, $this->additionalName);
+		$this->assertEquals($this->Name->getAdditionalName(), $this->additionalName);
 	}
 
 	/**
@@ -146,7 +146,7 @@ class NameTest extends PHPUnit_Framework_TestCase {
 	public function testSetFamilyName()
 	{
 		$this->Name->setFamilyName($this->familyName);
-		$this->assertEquals($this->Name->familyName, $this->familyName);
+		$this->assertEquals($this->Name->getFamilyName(), $this->familyName);
 	}
 
 	/**
@@ -155,7 +155,7 @@ class NameTest extends PHPUnit_Framework_TestCase {
 	public function testSetGivenName()
 	{
 		$this->Name->setGivenName($this->givenName);
-		$this->assertEquals($this->Name->givenName, $this->givenName);
+		$this->assertEquals($this->Name->getGivenName(), $this->givenName);
 	}
 
 	/**
@@ -164,7 +164,7 @@ class NameTest extends PHPUnit_Framework_TestCase {
 	public function testSetHonorificPrefix()
 	{
 		$this->Name->setHonorificPrefix($this->honorificPrefix);
-		$this->assertEquals($this->Name->honorificPrefix, $this->honorificPrefix);
+		$this->assertEquals($this->Name->getHonorificPrefix(), $this->honorificPrefix);
 	
 	}
 
@@ -174,7 +174,7 @@ class NameTest extends PHPUnit_Framework_TestCase {
 	public function testSetHonorificSuffix()
 	{
 		$this->Name->setHonorificSuffix($this->honorificSuffix);
-		$this->assertEquals($this->Name->honorificSuffix, $this->honorificSuffix);
+		$this->assertEquals($this->Name->getHonorificSuffix(), $this->honorificSuffix);
 	}
 
 	/**
@@ -182,7 +182,7 @@ class NameTest extends PHPUnit_Framework_TestCase {
 	 */
 	public function testSetUnstructured()
 	{
-		$this->Name->setUnstructured($this->unstructured);
-		$this->assertEquals($this->Name->unstructured, $this->unstructured);
+		$this->Name->setFormatted($this->unstructured);
+		$this->assertEquals($this->Name->getFormatted(), $this->unstructured);
 	}
 }
