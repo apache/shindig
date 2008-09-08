@@ -144,14 +144,7 @@ public abstract class AbstractHttpCache implements HttpCache {
    */
   protected HttpResponse rewrite(HttpRequest request, HttpResponse response) {
     if (rewriterRegistry != null) {
-      MutableContent mc = new MutableContent(null);
-      mc.setContent(response.getResponseAsString());
-      for (ContentRewriter rewriter : rewriterRegistry.getRewriters()) {
-        rewriter.rewrite(request, response, mc);
-      }
-      if (!mc.getContent().equals(response.getResponseAsString())) {
-        return new HttpResponseBuilder(response).setResponseString(mc.getContent()).create();
-      }
+      return rewriterRegistry.rewriteHttpResponse(request, response);
     }
     return null;
   }
