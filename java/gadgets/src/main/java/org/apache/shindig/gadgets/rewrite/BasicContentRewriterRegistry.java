@@ -25,6 +25,11 @@ import java.util.List;
 
 import org.apache.shindig.gadgets.Gadget;
 import org.apache.shindig.gadgets.GadgetException;
+import org.apache.shindig.gadgets.MutableContent;
+import org.apache.shindig.gadgets.http.HttpRequest;
+import org.apache.shindig.gadgets.http.HttpResponse;
+import org.apache.shindig.gadgets.http.HttpResponseBuilder;
+import org.apache.shindig.gadgets.parse.GadgetHtmlParser;
 
 /**
  * Registry into which is injected a single rewriter, which
@@ -35,10 +40,13 @@ import org.apache.shindig.gadgets.GadgetException;
  */
 public class BasicContentRewriterRegistry implements ContentRewriterRegistry {
   private final List<ContentRewriter> rewriters;
+  private final GadgetHtmlParser htmlParser;
   
   @Inject
-  public BasicContentRewriterRegistry(ContentRewriter firstRewriter) {
-    rewriters = new LinkedList<ContentRewriter>();
+  public BasicContentRewriterRegistry(ContentRewriter firstRewriter,
+      GadgetHtmlParser htmlParser) {
+    this.rewriters = new LinkedList<ContentRewriter>();
+    this.htmlParser = htmlParser;
     appendRewriter(firstRewriter);
   }
   
@@ -67,6 +75,24 @@ public class BasicContentRewriterRegistry implements ContentRewriterRegistry {
     }
     
     return !originalContent.equals(gadget.getContent());
+  }
+  
+  /** {@inheritDoc} */
+  public HttpResponse rewriteHttpResponse(HttpRequest req, HttpResponse resp) {
+    MutableContent mc = new MutableContent(htmlParser);
+    String originalContent = resp.getResponseAsString();
+    mc.setContent(originalContent);
+    
+    for (ContentRewriter rewriter : getRewriters()) {
+      rewriter.rewrite(req, resp, mc);
+    }
+    
+    String rewrittenContent = mc.getContent();
+    if (rewrittenContent.equals(originalContent)) {
+      return resp;
+    }
+    
+    return new HttpResponseBuilder(resp).setResponseString(rewrittenContent).create();
   }
 
 }

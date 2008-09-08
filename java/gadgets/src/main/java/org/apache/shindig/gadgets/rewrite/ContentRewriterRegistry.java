@@ -23,6 +23,8 @@ import java.util.List;
 
 import org.apache.shindig.gadgets.Gadget;
 import org.apache.shindig.gadgets.GadgetException;
+import org.apache.shindig.gadgets.http.HttpRequest;
+import org.apache.shindig.gadgets.http.HttpResponse;
 
 @ImplementedBy(BasicContentRewriterRegistry.class)
 public interface ContentRewriterRegistry {
@@ -38,4 +40,13 @@ public interface ContentRewriterRegistry {
    * @throws GadgetException Potentially passed through from rewriters
    */
   public boolean rewriteGadget(Gadget gadget) throws GadgetException;
+  
+  /**
+   * Rewrites an {@code HttpResponse} object with the given request as context,
+   * using the registered rewriters.
+   * @param req Request object for context.
+   * @param resp Original response object.
+   * @return Rewritten response object, or resp if not modified.
+   */
+  public HttpResponse rewriteHttpResponse(HttpRequest req, HttpResponse resp);
 }

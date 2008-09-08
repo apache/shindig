@@ -23,6 +23,9 @@ import static org.easymock.classextension.EasyMock.replay;
 
 import org.apache.shindig.gadgets.Gadget;
 import org.apache.shindig.gadgets.GadgetContext;
+import org.apache.shindig.gadgets.http.HttpRequest;
+import org.apache.shindig.gadgets.http.HttpResponse;
+import org.apache.shindig.gadgets.http.HttpResponseBuilder;
 import org.apache.shindig.gadgets.spec.GadgetSpec;
 import org.apache.shindig.gadgets.spec.View;
 
@@ -30,14 +33,14 @@ import junit.framework.TestCase;
 
 public class BasicContentRewriterRegistryTest extends TestCase {
   public void testNoArgsCreatedBasicRegistry() {
-    BasicContentRewriterRegistry r = new BasicContentRewriterRegistry(null);
+    BasicContentRewriterRegistry r = new BasicContentRewriterRegistry(null, null);
     assertNotNull(r.getRewriters());
     assertEquals(0, r.getRewriters().size());
   }
   
   public void testSingleValuedBasicRegistry() {
     BasicContentRewriterRegistry r = new BasicContentRewriterRegistry(
-        new NoOpContentRewriter());
+        new NoOpContentRewriter(), null);
     assertNotNull(r.getRewriters());
     assertEquals(1, r.getRewriters().size());
     assertTrue(r.getRewriters().get(0) instanceof NoOpContentRewriter);
@@ -45,7 +48,7 @@ public class BasicContentRewriterRegistryTest extends TestCase {
   
   public void testBasicContentRegistryWithAdds() {
     ContentRewriter cr0 = new NoOpContentRewriter();
-    BasicContentRewriterRegistry r = new BasicContentRewriterRegistry(cr0);
+    BasicContentRewriterRegistry r = new BasicContentRewriterRegistry(cr0, null);
     ContentRewriter cr1 = new NoOpContentRewriter();
     ContentRewriter cr2 = new NoOpContentRewriter();
     r.appendRewriter(cr1);
@@ -57,8 +60,8 @@ public class BasicContentRewriterRegistryTest extends TestCase {
     assertSame(cr2, r.getRewriters().get(2));
   }
   
-  public void testRunGadgetRewrites() throws Exception {
-    BasicContentRewriterRegistry r = new BasicContentRewriterRegistry(null);
+  public void testRunGadgetAndHttpResponseRewrites() throws Exception {
+    BasicContentRewriterRegistry r = new BasicContentRewriterRegistry(null, null);
     StringBuilder appendFull = new StringBuilder();
     for (int i = 0; i < 3; ++i) {
       String appendNew = "-" + i;
@@ -82,5 +85,13 @@ public class BasicContentRewriterRegistryTest extends TestCase {
     assertEquals(inputContent, gadget.getContent());
     assertTrue(r.rewriteGadget(gadget));
     assertEquals(rewrittenContent, gadget.getContent());
+    
+    HttpResponse resp = new HttpResponseBuilder().setResponseString(inputContent).create();
+    assertEquals(inputContent, resp.getResponseAsString());
+    HttpRequest req = EasyMock.createNiceMock(HttpRequest.class);  // use mock to be lazy
+    HttpResponse rewritten = r.rewriteHttpResponse(req, resp);
+    assertNotSame(resp, rewritten);
+    assertEquals(rewrittenContent, rewritten.getResponseAsString());
   }
+  
 }
