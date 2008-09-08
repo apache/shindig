@@ -48,6 +48,7 @@ public class PersonImpl implements Person {
   private Address currentLocation;
   private Date birthday;
   private Enum<Enum.Drinker> drinker;
+  private String displayName;
   private List<ListField> emails;
   private String ethnicity;
   private String fashion;
@@ -100,8 +101,15 @@ public class PersonImpl implements Person {
   public PersonImpl() {
   }
 
-  public PersonImpl(String id, Name name) {
+  /**
+   * A constructor which contains all of the required fields on a person object
+   * @param id The id of the person
+   * @param displayName The displayName of the person
+   * @param name The person's name broken down into components
+   */
+  public PersonImpl(String id, String displayName, Name name) {
     this.id = id;
+    this.displayName = displayName;
     this.name = name;
   }
 
@@ -198,6 +206,14 @@ public class PersonImpl implements Person {
     } else {
       this.birthday = new Date(birthday.getTime());
     }
+  }
+
+  public String getDisplayName() {
+    return displayName;
+  }
+
+  public void setDisplayName(String displayName) {
+    this.displayName = displayName;
   }
 
   public Enum<Enum.Drinker> getDrinker() {

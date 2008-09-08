@@ -265,6 +265,10 @@ JsonRpcContainer.prototype.translateProfileDetails = function(profileDetails) {
       profileDetails[i] = 'utcOffset';
     }
   }
+
+  // displayName and id always need to be requested
+  profileDetails.push("id");
+  profileDetails.push("displayName");
 }
 
 JsonRpcContainer.prototype.createPersonFromJson = function(serverJson) {
@@ -327,6 +331,10 @@ JsonRpcContainer.prototype.createPersonFromJson = function(serverJson) {
         serverJson.schools.push(org);
       }
     }
+  }
+
+  if (serverJson.name) {
+    serverJson.name.unstructured = serverJson.name.formatted;
   }
 
   return new JsonPerson(serverJson);

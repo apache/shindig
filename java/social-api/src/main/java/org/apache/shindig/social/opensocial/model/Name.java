@@ -37,7 +37,7 @@ public interface Name {
     GIVEN_NAME("givenName"),
     HONORIFIC_PREFIX("honorificPrefix"),
     HONORIFIC_SUFFIX("honorificSuffix"),
-    UNSTRUCTURED("unstructured");
+    FORMATTED("formatted");
 
     private final String jsonString;
 
@@ -51,9 +51,9 @@ public interface Name {
     }
   }
 
-  String getUnstructured();
+  String getFormatted();
 
-  void setUnstructured(String unstructured);
+  void setFormatted(String formatted);
 
   String getAdditionalName();
 

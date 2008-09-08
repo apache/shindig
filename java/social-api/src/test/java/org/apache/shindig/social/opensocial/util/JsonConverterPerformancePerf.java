@@ -54,7 +54,7 @@ public class JsonConverterPerformancePerf extends TestCase {
   @Override
   public void setUp() throws Exception {
     super.setUp();
-    johnDoe = new PersonImpl("johnDoeId", new NameImpl("John Doe"));
+    johnDoe = new PersonImpl("johnDoeId", "Johnny", new NameImpl("John Doe"));
     johnDoe.setPhoneNumbers(Lists.<ListField> newArrayList(new ListFieldImpl("home",
         "+33H000000000"), new ListFieldImpl("mobile", "+33M000000000"), new ListFieldImpl("work",
         "+33W000000000")));
@@ -86,7 +86,7 @@ public class JsonConverterPerformancePerf extends TestCase {
     }
 
     public SpecialPerson(String id, String name, String newfield) {
-      super(id, new NameImpl(name));
+      super(id, name, new NameImpl(name));
       this.newfield = newfield;
     }
 

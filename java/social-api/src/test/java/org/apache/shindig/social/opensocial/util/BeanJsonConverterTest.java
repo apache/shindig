@@ -50,7 +50,7 @@ public class BeanJsonConverterTest extends TestCase {
   @Override
   public void setUp() throws Exception {
     super.setUp();
-    johnDoe = new PersonImpl("johnDoeId", new NameImpl("John Doe"));
+    johnDoe = new PersonImpl("johnDoeId", "Johnny", new NameImpl("John Doe"));
     johnDoe.setPhoneNumbers(Lists.<ListField>newArrayList(
         new ListFieldImpl("home", "+33H000000000"),
         new ListFieldImpl("mobile", "+33M000000000"),
@@ -75,7 +75,7 @@ public class BeanJsonConverterTest extends TestCase {
     private String newfield;
 
     public SpecialPerson(String id, String name, String newfield) {
-      super(id, new NameImpl(name));
+      super(id, name, new NameImpl(name));
       this.newfield = newfield;
     }
 
@@ -97,8 +97,8 @@ public class BeanJsonConverterTest extends TestCase {
 
     assertEquals(johnDoe.getId(), result.getString("id"));
 
-    assertEquals(johnDoe.getName().getUnstructured(),
-        result.getJSONObject("name").getString("unstructured"));
+    assertEquals(johnDoe.getName().getFormatted(),
+        result.getJSONObject("name").getString("formatted"));
 
     assertEquals(johnDoe.getAddresses().get(0).getFormatted(),
         result.getJSONArray("addresses").getJSONObject(0)
@@ -187,8 +187,8 @@ public class BeanJsonConverterTest extends TestCase {
   }
 
   public void testJsonToActivity() throws Exception {
-    String jsonActivity = "{userId : 5, id : 6, mediaItems : [" 
-      + "{url : 'hello', mimeType : 'mimey', type : 'video'}" 
+    String jsonActivity = "{userId : 5, id : 6, mediaItems : ["
+      + "{url : 'hello', mimeType : 'mimey', type : 'video'}"
       + "]}";
     // TODO: rename the enums to be lowercase
     Activity result = beanJsonConverter.convertToObject(jsonActivity,

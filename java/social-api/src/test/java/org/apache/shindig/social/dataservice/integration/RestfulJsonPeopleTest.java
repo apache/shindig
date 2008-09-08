@@ -56,7 +56,7 @@ public class RestfulJsonPeopleTest extends AbstractLargeRestfulTests {
     name.setGivenName("Shin");
     name.setHonorificPrefix("Sir");
     name.setHonorificSuffix("Social Butterfly");
-    canonical = new PersonImpl("canonical", name);
+    canonical = new PersonImpl("canonical", "Shin Digg", name);
 
     canonical.setAboutMe("I have an example of every piece of data");
     canonical.setActivities(Lists.newArrayList("Coding Shindig"));
@@ -245,6 +245,8 @@ public class RestfulJsonPeopleTest extends AbstractLargeRestfulTests {
     assertFloatField(currentLocation, canonical.getCurrentLocation().getLongitude(),
         Address.Field.LONGITUDE);
 
+    assertStringField(result, canonical.getDisplayName(), Person.Field.DISPLAY_NAME);
+
 //    assertLongField(result, canonical.getBirthday().getTime(),
 //        Person.Field.BIRTHDAY);
 //    assertEnumField(result, canonical.getDrinker(), Person.Field.DRINKER);
@@ -289,9 +291,9 @@ public class RestfulJsonPeopleTest extends AbstractLargeRestfulTests {
     assertStringListField(result, canonical.getMovies(), Person.Field.MOVIES);
     assertStringListField(result, canonical.getMusic(), Person.Field.MUSIC);
 
-    assertEquals(canonical.getName().getUnstructured(),
+    assertEquals(canonical.getName().getFormatted(),
         result.getJSONObject(Person.Field.NAME.toString()).getString(
-            Name.Field.UNSTRUCTURED.toString()));
+            Name.Field.FORMATTED.toString()));
 
     assertEnumField(result, canonical.getNetworkPresence(),
         Person.Field.NETWORKPRESENCE);
@@ -496,7 +498,7 @@ public class RestfulJsonPeopleTest extends AbstractLargeRestfulTests {
   private void assertPerson(JSONObject person, String expectedId, String expectedName)
       throws Exception {
     assertEquals(expectedId, person.getString("id"));
-    assertEquals(expectedName, person.getJSONObject("name").getString("unstructured"));
+    assertEquals(expectedName, person.getJSONObject("name").getString("formatted"));
   }
 
   // TODO: Add tests for fields parameter

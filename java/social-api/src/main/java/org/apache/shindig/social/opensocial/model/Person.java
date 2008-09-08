@@ -45,6 +45,10 @@ public interface Person {
    */
   public static final String THUMBNAIL_PHOTO_TYPE = "thumbnail";
 
+  String getDisplayName();
+
+  void setDisplayName(String displayName);
+
   /**
    * Enumeration of genders.
    */
@@ -78,6 +82,8 @@ public interface Person {
     CURRENT_LOCATION("currentLocation"),
     /** the json field for birthday. */
     BIRTHDAY("birthday"),
+    /** the json field for display name. */
+    DISPLAY_NAME("displayName"), /** Needed to support the RESTful api. */
     /** the json field for drinker. */
     DRINKER("drinker"),
     /** the json field for emails. */
@@ -109,7 +115,7 @@ public interface Person {
     /** the json field for languagesSpoken. */
     LANGUAGES_SPOKEN("languagesSpoken"),
     /** the json field for updated. */
-    LAST_UPDATED("updated"), /* Needed to support the RESTful api. */
+    LAST_UPDATED("updated"), /** Needed to support the RESTful api. */
     /** the json field for livingArrangement. */
     LIVING_ARRANGEMENT("livingArrangement"),
     /** the json field for lookingFor. */

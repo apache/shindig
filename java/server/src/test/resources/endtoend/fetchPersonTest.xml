@@ -37,7 +37,7 @@
             function receivedData(response) {
               var user = getAndCheckError(response, "canonical");
               assertEquals("Names don't match",
-                "Sir Shin H. Digg Social Butterfly", user.getDisplayName());
+                "Shin Digg", user.getDisplayName());
               finished();
             }
 
@@ -55,7 +55,7 @@
             function receivedData(response) {
               var user = getAndCheckError(response, "owner");
               assertEquals("Names don't match",
-                "Sir Shin H. Digg Social Butterfly", user.getDisplayName());
+                "Shin Digg", user.getDisplayName());
               finished();
             }
 
@@ -73,7 +73,7 @@
             function receivedData(response) {
               var user = getAndCheckError(response, "viewer");
               assertEquals("Names don't match",
-                "John Doe", user.getDisplayName());
+                "Johnny", user.getDisplayName());
 
               finished();
             }
@@ -93,11 +93,11 @@
             function receivedData(response) {
               var user = getAndCheckError(response, "owner");
               assertEquals("Names don't match",
-                "Sir Shin H. Digg Social Butterfly", user.getDisplayName());
+                "Shin Digg", user.getDisplayName());
 
               user = getAndCheckError(response, "viewer");
               assertEquals("Names don't match",
-                "John Doe", user.getDisplayName());
+                "Johnny", user.getDisplayName());
               finished();
             }
 
@@ -124,7 +124,7 @@
             req.send(receivedData);
           }
         };
-        
+
 
         function getAndCheckError(response, key) {
           assertFalse("Data error", response.hadError());

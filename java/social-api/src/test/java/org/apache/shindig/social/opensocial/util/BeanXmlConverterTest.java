@@ -50,7 +50,7 @@ public class BeanXmlConverterTest extends TestCase {
   @Override
   public void setUp() throws Exception {
     super.setUp();
-    johnDoe = new PersonImpl("johnDoeId", new NameImpl("John Doe"));
+    johnDoe = new PersonImpl("johnDoeId", "Johnny", new NameImpl("John Doe"));
     johnDoe.setPhoneNumbers(Lists.<ListField>newArrayList(
         new ListFieldImpl("home", "+33H000000000"),
         new ListFieldImpl("mobile", "+33M000000000"),
