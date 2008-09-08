@@ -178,7 +178,8 @@ class PersonTest extends PHPUnit_Framework_TestCase {
 	 */
 	public function testGetDateOfBirth()
 	{
-		$this->assertEquals('DATEOFBIRTH', $this->Person->getDateOfBirth());
+		$this->Person->setBirthday('DATEOFBIRTH');
+		$this->assertEquals('DATEOFBIRTH', $this->Person->getBirthday());
 	}
 
 	/**
@@ -230,9 +231,8 @@ class PersonTest extends PHPUnit_Framework_TestCase {
 	 */
 	public function testGetGender()
 	{
-		$gender = new EnumGender('FEMALE');
 		$this->Person->setGender('FEMALE');
-		$this->assertEquals($gender, $this->Person->getGender());
+		$this->assertEquals('FEMALE', $this->Person->getGender());
 	}
 
 	/**
@@ -306,14 +306,6 @@ class PersonTest extends PHPUnit_Framework_TestCase {
 	public function testGetJobInterests()
 	{
 		$this->assertEquals('JOBINTERESTS', $this->Person->getJobInterests());
-	}
-
-	/**
-	 * Tests Person->getJobs()
-	 */
-	public function testGetJobs()
-	{
-		$this->assertEquals('JOBS', $this->Person->getJobs());
 	}
 
 	/**
@@ -472,14 +464,6 @@ class PersonTest extends PHPUnit_Framework_TestCase {
 	}
 
 	/**
-	 * Tests Person->getSchools()
-	 */
-	public function testGetSchools()
-	{
-		$this->assertEquals('SCHOOLS', $this->Person->getSchools());
-	}
-
-	/**
 	 * Tests Person->getSexualOrientation()
 	 */
 	public function testGetSexualOrientation()
@@ -527,14 +511,6 @@ class PersonTest extends PHPUnit_Framework_TestCase {
 	public function testGetThumbnailUrl()
 	{
 		$this->assertEquals('THUMBNAILSURL', $this->Person->getThumbnailUrl());
-	}
-
-	/**
-	 * Tests Person->getTimeZone()
-	 */
-	public function testGetTimeZone()
-	{
-		$this->assertEquals('TIMEZONE', $this->Person->getTimeZone());
 	}
 
 	/**
@@ -655,8 +631,8 @@ class PersonTest extends PHPUnit_Framework_TestCase {
 	 */
 	public function testSetDateOfBirth()
 	{
-		$this->Person->setDateOfBirth('dateofbirth');
-		$this->assertEquals('dateofbirth', $this->Person->dateOfBirth);
+		$this->Person->setBirthday('dateofbirth');
+		$this->assertEquals('dateofbirth', $this->Person->getBirthday());
 	}
 
 	/**
@@ -710,7 +686,7 @@ class PersonTest extends PHPUnit_Framework_TestCase {
 	public function testSetGender()
 	{
 		$this->Person->setGender('MALE');
-		$this->assertEquals('Male', $this->Person->gender->displayValue);
+		$this->assertEquals('MALE', $this->Person->gender);
 	}
 
 	/**
@@ -792,15 +768,6 @@ class PersonTest extends PHPUnit_Framework_TestCase {
 	{
 		$this->Person->setJobInterests('jobinterests');
 		$this->assertEquals('jobinterests', $this->Person->jobInterests);
-	}
-
-	/**
-	 * Tests Person->setJobs()
-	 */
-	public function testSetJobs()
-	{
-		$this->Person->setJobs('jobs');
-		$this->assertEquals('jobs', $this->Person->jobs);
 	}
 
 	/**
@@ -975,15 +942,6 @@ class PersonTest extends PHPUnit_Framework_TestCase {
 	}
 
 	/**
-	 * Tests Person->setSchools()
-	 */
-	public function testSetSchools()
-	{
-		$this->Person->setSchools('schools');
-		$this->assertEquals('schools', $this->Person->schools);
-	}
-
-	/**
 	 * Tests Person->setSexualOrientation()
 	 */
 	public function testSetSexualOrientation()
@@ -1035,15 +993,6 @@ class PersonTest extends PHPUnit_Framework_TestCase {
 	{
 		$this->Person->setThumbnailUrl('thumbnailurl');
 		$this->assertEquals('thumbnailurl', $this->Person->thumbnailUrl);
-	}
-
-	/**
-	 * Tests Person->setTimeZone()
-	 */
-	public function testSetTimeZone()
-	{
-		$this->Person->setTimeZone('timezone');
-		$this->assertEquals('timezone', $this->Person->timeZone);
 	}
 
 	/**

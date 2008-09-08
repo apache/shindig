@@ -64,14 +64,6 @@ class AddressTest extends PHPUnit_Framework_TestCase {
 	}
 
 	/**
-	 * Tests Address->getExtendedAddress()
-	 */
-	public function testGetExtendedAddress()
-	{
-		$this->assertEquals('EXTENDEDADDRESS', $this->Address->getExtendedAddress());
-	}
-
-	/**
 	 * Tests Address->getLatitude()
 	 */
 	public function testGetLatitude()
@@ -93,14 +85,6 @@ class AddressTest extends PHPUnit_Framework_TestCase {
 	public function testGetLongitude()
 	{
 		$this->assertEquals('LONGITUDE', $this->Address->getLongitude());
-	}
-
-	/**
-	 * Tests Address->getPoBox()
-	 */
-	public function testGetPoBox()
-	{
-		$this->assertEquals('POBOX', $this->Address->getPoBox());
 	}
 
 	/**
@@ -136,11 +120,11 @@ class AddressTest extends PHPUnit_Framework_TestCase {
 	}
 
 	/**
-	 * Tests Address->getUnstructuredAddress()
+	 * Tests Address->getFormatted()
 	 */
-	public function testGetUnstructuredAddress()
+	public function testGetFormatted()
 	{
-		$this->assertEquals('UNSTRUCTUREDADDRESS', $this->Address->getUnstructuredAddress());
+		$this->assertEquals('UNSTRUCTUREDADDRESS', $this->Address->getFormatted());
 	}
 
 	/**
@@ -149,16 +133,7 @@ class AddressTest extends PHPUnit_Framework_TestCase {
 	public function testSetCountry()
 	{
 		$this->Address->setCountry('country');
-		$this->assertEquals('country', $this->Address->country);
-	}
-
-	/**
-	 * Tests Address->setExtendedAddress()
-	 */
-	public function testSetExtendedAddress()
-	{
-		$this->Address->setExtendedAddress('extendedaddress');
-		$this->assertEquals('extendedaddress', $this->Address->extendedAddress);
+		$this->assertEquals('country', $this->Address->getCountry());
 	}
 
 	/**
@@ -167,7 +142,7 @@ class AddressTest extends PHPUnit_Framework_TestCase {
 	public function testSetLatitude()
 	{
 		$this->Address->setLatitude('latitude');
-		$this->assertEquals('latitude', $this->Address->latitude);
+		$this->assertEquals('latitude', $this->Address->getLatitude());
 	}
 
 	/**
@@ -176,7 +151,7 @@ class AddressTest extends PHPUnit_Framework_TestCase {
 	public function testSetLocality()
 	{
 		$this->Address->setLocality('locality');
-		$this->assertEquals('locality', $this->Address->locality);
+		$this->assertEquals('locality', $this->Address->getLocality());
 	}
 
 	/**
@@ -185,16 +160,7 @@ class AddressTest extends PHPUnit_Framework_TestCase {
 	public function testSetLongitude()
 	{
 		$this->Address->setLongitude('longitude');
-		$this->assertEquals('longitude', $this->Address->longitude);
-	}
-
-	/**
-	 * Tests Address->setPoBox()
-	 */
-	public function testSetPoBox()
-	{
-		$this->Address->setPoBox('pobox');
-		$this->assertEquals('pobox', $this->Address->poBox);
+		$this->assertEquals('longitude', $this->Address->getLongitude());
 	}
 
 	/**
@@ -203,7 +169,7 @@ class AddressTest extends PHPUnit_Framework_TestCase {
 	public function testSetPostalCode()
 	{
 		$this->Address->setPostalCode('postalcode');
-		$this->assertEquals('postalcode', $this->Address->postalCode);
+		$this->assertEquals('postalcode', $this->Address->getPostalCode());
 	}
 
 	/**
@@ -212,7 +178,7 @@ class AddressTest extends PHPUnit_Framework_TestCase {
 	public function testSetRegion()
 	{
 		$this->Address->setRegion('religion');
-		$this->assertEquals('religion', $this->Address->region);
+		$this->assertEquals('religion', $this->Address->getRegion());
 	}
 
 	/**
@@ -221,7 +187,7 @@ class AddressTest extends PHPUnit_Framework_TestCase {
 	public function testSetStreetAddress()
 	{
 		$this->Address->setStreetAddress('streetaddress');
-		$this->assertEquals('streetaddress', $this->Address->streetAddress);
+		$this->assertEquals('streetaddress', $this->Address->getStreetAddress());
 	}
 
 	/**
@@ -230,15 +196,15 @@ class AddressTest extends PHPUnit_Framework_TestCase {
 	public function testSetType()
 	{
 		$this->Address->setType('type');
-		$this->assertEquals('type', $this->Address->type);
+		$this->assertEquals('type', $this->Address->getType());
 	}
 
 	/**
-	 * Tests Address->setUnstructuredAddress()
+	 * Tests Address->setFormatted()
 	 */
-	public function testSetUnstructuredAddress()
+	public function testSetFormatted()
 	{
-		$this->Address->setUnstructuredAddress('unstructuredaddress');
-		$this->assertEquals('unstructuredaddress', $this->Address->unstructuredAddress);
+		$this->Address->setFormatted('unstructuredaddress');
+		$this->assertEquals('unstructuredaddress', $this->Address->getFormatted());
 	}
 }

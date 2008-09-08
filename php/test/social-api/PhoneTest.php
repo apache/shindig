@@ -50,7 +50,7 @@ class PhoneTest extends PHPUnit_Framework_TestCase {
 	 */
 	public function testGetNumber()
 	{
-		$this->assertEquals('number', $this->Phone->getNumber());
+		$this->assertEquals('number', $this->Phone->getValue());
 	}
 
 	/**
@@ -66,8 +66,8 @@ class PhoneTest extends PHPUnit_Framework_TestCase {
 	 */
 	public function testSetNumber()
 	{
-		$this->Phone->setNumber('NUMBER');
-		$this->assertEquals('NUMBER', $this->Phone->number);
+		$this->Phone->setValue('NUMBER');
+		$this->assertEquals('NUMBER', $this->Phone->getValue());
 	}
 
 	/**

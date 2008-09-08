@@ -46,14 +46,6 @@ class EmailTest extends PHPUnit_Framework_TestCase {
 	}
 
 	/**
-	 * Tests Email->getAddress()
-	 */
-	public function testGetAddress()
-	{
-		$this->assertEquals('ADDRESS', $this->Email->getAddress());
-	}
-
-	/**
 	 * Tests Email->getType()
 	 */
 	public function testGetType()
@@ -66,8 +58,8 @@ class EmailTest extends PHPUnit_Framework_TestCase {
 	 */
 	public function testSetAddress()
 	{
-		$this->Email->setAddress('address');
-		$this->assertEquals('address', $this->Email->address);
+		$this->Email->setValue('address');
+		$this->assertEquals('address', $this->Email->getValue());
 	}
 
 	/**
@@ -76,6 +68,6 @@ class EmailTest extends PHPUnit_Framework_TestCase {
 	public function testSetType()
 	{
 		$this->Email->setType('type');
-		$this->assertEquals('type', $this->Email->type);
+		$this->assertEquals('type', $this->Email->getType());
 	}
 }
