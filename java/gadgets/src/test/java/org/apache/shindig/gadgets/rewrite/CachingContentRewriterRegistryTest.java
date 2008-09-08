@@ -40,7 +40,7 @@ public class CachingContentRewriterRegistryTest extends TestCase {
     // yet expired. To ensure no expiry, set expiration date
     // to the largest possible date.
     CachingContentRewriterRegistry r = new CachingContentRewriterRegistry(null,
-        new DefaultCacheProvider(), 100, 0, Integer.MAX_VALUE);
+        null, new DefaultCacheProvider(), 100, 0, Integer.MAX_VALUE);
     StringBuilder appendFull = new StringBuilder();
     for (int i = 0; i < 3; ++i) {
       String appendNew = "-" + i;

@@ -58,7 +58,7 @@ public abstract class GadgetTestFixture extends EasyMockTestCase {
     try {
       registry = new GadgetFeatureRegistry(null, fetcher);
       gadgetServer = new GadgetServer(executor, registry, blacklist,
-          containerConfig, new BasicContentRewriterRegistry(rewriter),
+          containerConfig, new BasicContentRewriterRegistry(rewriter, null),
           null, fetcherFactory, specFactory, bundleFactory);
     } catch (Exception e) {
       throw new RuntimeException(e);

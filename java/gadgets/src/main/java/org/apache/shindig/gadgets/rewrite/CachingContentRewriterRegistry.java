@@ -24,6 +24,9 @@ import org.apache.shindig.common.cache.CacheProvider;
 import org.apache.shindig.gadgets.CachingWebRetrievalFactory;
 import org.apache.shindig.gadgets.Gadget;
 import org.apache.shindig.gadgets.GadgetException;
+import org.apache.shindig.gadgets.http.HttpRequest;
+import org.apache.shindig.gadgets.http.HttpResponse;
+import org.apache.shindig.gadgets.parse.GadgetHtmlParser;
 import org.apache.shindig.gadgets.rewrite.BasicContentRewriterRegistry;
 import org.apache.shindig.gadgets.rewrite.ContentRewriter;
 import org.apache.shindig.gadgets.spec.GadgetSpec;
@@ -45,6 +48,7 @@ public class CachingContentRewriterRegistry
   
   @Inject
   public CachingContentRewriterRegistry(ContentRewriter firstRewriter,
+      GadgetHtmlParser htmlParser,
       CacheProvider cacheProvider,
       @Named("shindig.gadget-spec.cache.capacity")int capacity,
       @Named("shindig.gadget-spec.cache.minTTL")long minTtl,
@@ -54,7 +58,7 @@ public class CachingContentRewriterRegistry
     // caching is set up for specs, it's set up for rewritten content as well)
     // TODO: create separate rewritten-content config values.
     super(cacheProvider, capacity, minTtl, maxTtl);
-    baseRegistry = new BasicContentRewriterRegistry(firstRewriter);
+    baseRegistry = new BasicContentRewriterRegistry(firstRewriter, htmlParser);
   }
 
   @Override
@@ -97,6 +101,7 @@ public class CachingContentRewriterRegistry
   public boolean rewriteGadget(Gadget gadget)
       throws GadgetException {
     String cached = doCachedFetch(gadget, gadget.getContext().getIgnoreCache());
+    
     // At present, the output of rewriting is just the string contained within
     // the Gadget object. Thus, a successful cache hit results in copying over the
     // rewritten value to the input gadget object.
@@ -106,7 +111,13 @@ public class CachingContentRewriterRegistry
       gadget.setContent(cached);
       return true;
     }
+    
     return baseRegistry.rewriteGadget(gadget);
+  }
+  
+  /** {@inheritDoc} */
+  public HttpResponse rewriteHttpResponse(HttpRequest req, HttpResponse resp) {
+    return baseRegistry.rewriteHttpResponse(req, resp);
   }
   
   public void appendRewriter(ContentRewriter rewriter) {
