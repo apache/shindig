@@ -53,6 +53,7 @@
 "longitude" : "2.29419"
 },
 "birthday" : "1975-01-01",
+"displayName" : "Shin Digg",
 "drinker" : {
 "value" : "SOCIALLY",
 "displayValue" : "Socially"
@@ -115,7 +116,7 @@
 "givenName" : "Shin",
 "honorificPrefix" : "Sir",
 "honorificSuffix" : "Social Butterfly",
-"unstructured" : "Sir Shin H. Digg Social Butterfly"
+"formatted" : "Sir Shin H. Digg Social Butterfly"
 },
 "networkPresence" : {
 "value" : "ONLINE",
@@ -172,52 +173,57 @@
 },
 {
 "id" : "john.doe",
+"displayName" : "Johnny",
 "gender" : "male",
 "hasApp" : true,
 "name" : {
 "familyName" : "Doe",
 "givenName" : "John",
-"unstructured" : "John Doe"
+"formatted" : "John Doe"
 }
 },
 {
 "id" : "jane.doe",
+"displayName" : "Janey",
 "gender" : "female",
 "hasApp" : true,
 "name" : {
 "familyName" : "Doe",
 "givenName" : "Jane",
-"unstructured" : "Jane Doe"
+"formatted" : "Jane Doe"
 }
 },
 {
 "id" : "george.doe",
+"displayName" : "Georgey",
 "gender" : "male",
 "hasApp" : true,
 "name" : {
 "familyName" : "Doe",
 "givenName" : "George",
-"unstructured" : "George Doe"
+"formatted" : "George Doe"
 }
 },
 {
 "id" : "mario.rossi",
+"displayName" : "Mario",
 "gender" : "male",
 "hasApp" : true,
 "name" : {
 "familyName" : "Rossi",
 "givenName" : "Mario",
-"unstructured" : "Mario Rossi"
+"formatted" : "Mario Rossi"
 }
 },
 {
 "id" : "maija.m",
+"displayName" : "Maija",
 "gender" : "female",
 "hasApp" : true,
 "name" : {
 "familyName" : "Meikäläinen",
 "givenName" : "Maija",
-"unstructured" : "Maija Meikäläinen"
+"formatted" : "Maija Meikäläinen"
 }
 }],
 //

@@ -40,7 +40,7 @@
               assertEquals('Wrong friend count', 4, ownerFriends.size());
 
               var johnDoe = ownerFriends.getById('john.doe');
-              assertEquals('Wrong name for john doe', 'John Doe', johnDoe.getDisplayName());
+              assertEquals('Wrong name for john doe', 'Johnny', johnDoe.getDisplayName());
               finished();
             }
 
@@ -80,7 +80,7 @@
             req.send(receivedData);
           }
         };
-        
+
 
         function getAndCheckError(response, key) {
           assertFalse('Data error', response.hadError());

@@ -87,3 +87,7 @@ JsonPerson.constructArrayObject = function(map, fieldName, className) {
     }
   }
 }
+
+JsonPerson.prototype.getDisplayName = function() {
+  return this.getField("displayName");
+}
