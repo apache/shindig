@@ -26,6 +26,14 @@ class Url extends ListField {
 	public $linkText;
 	public $type;
 	public $primary;
+	
+	public function __construct($value, $type, $linkText, $primary = null)
+	{
+		$this->value = $value;
+		$this->type = $type;
+		$this->linkText = $linkText;
+		$this->primary = $primary;
+	}
 
 	public function getLinkText()
 	{
