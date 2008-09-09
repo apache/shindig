@@ -18,11 +18,11 @@
 package org.apache.shindig.social.opensocial.service;
 
 import org.apache.shindig.auth.SecurityToken;
+import org.apache.shindig.social.ResponseError;
 import org.apache.shindig.social.opensocial.spi.GroupId;
 import org.apache.shindig.social.opensocial.spi.PersonService;
-import org.apache.shindig.social.opensocial.spi.UserId;
 import org.apache.shindig.social.opensocial.spi.SocialSpiException;
-import org.apache.shindig.social.ResponseError;
+import org.apache.shindig.social.opensocial.spi.UserId;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
@@ -92,7 +92,7 @@ public abstract class RequestItem {
     if (ids.isEmpty()) {
       if (token.getViewerId() != null) {
         // Assume @me
-        ids = Lists.newArrayList(token.getViewerId());
+        ids = Lists.newArrayList("@me");
       } else {
         throw new IllegalArgumentException("No userId provided and viewer not available");
       }
