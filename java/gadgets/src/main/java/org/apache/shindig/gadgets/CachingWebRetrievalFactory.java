@@ -20,8 +20,8 @@ package org.apache.shindig.gadgets;
 
 import java.util.logging.Logger;
 
-import org.apache.shindig.common.cache.Cache;
 import org.apache.shindig.common.cache.CacheProvider;
+import org.apache.shindig.common.cache.TtlCache;
 import org.apache.shindig.gadgets.GadgetException;
 
 /**
@@ -54,14 +54,11 @@ public abstract class CachingWebRetrievalFactory<T, Q, K> {
   protected abstract K getCacheKeyFromQueryObj(Q queryObj);
   protected abstract Logger getLogger();
   
-  private final Cache<K, TimeoutPair<T>> cache;
-  private final long minTtl, maxTtl;
+  private final TtlCache<K, T> ttlCache;
 
   protected CachingWebRetrievalFactory(CacheProvider cacheProvider,
       int capacity, long minTtl, long maxTtl) {
-    this.cache = cacheProvider.createCache(capacity);
-    this.minTtl = minTtl;
-    this.maxTtl = maxTtl;
+    this.ttlCache = new TtlCache<K, T>(cacheProvider, capacity, minTtl, maxTtl);
   }
   
   protected T doCachedFetch(Q queryObj, boolean ignoreCache) throws GadgetException {
@@ -69,49 +66,34 @@ public abstract class CachingWebRetrievalFactory<T, Q, K> {
       return fetchObjectAndCache(queryObj, ignoreCache);
     }
     
-    T resultObj = null;
-    long expiration = -1;
+    TtlCache.CachedObject<T> cached = null;
     K cacheKey = getCacheKeyFromQueryObj(queryObj);
     
-    synchronized(cache) {
-      TimeoutPair<T> cachedEntry = cache.getElement(cacheKey);
-      if (cachedEntry != null) {
-        resultObj = cachedEntry.cachedObj;
-        expiration = cachedEntry.timeout;
-      }
+    synchronized(ttlCache) {
+      cached = ttlCache.getElementWithExpiration(cacheKey);
     }
     
-    // If the obj is not in the cache or has expired, fetch it from its URI.
-    long now = System.currentTimeMillis();
-    
-    if (resultObj == null || expiration < now) {
+    if (cached.obj == null || cached.isExpired) {
       try {
         return fetchObjectAndCache(queryObj, false);
       } catch (GadgetException e) {
-        if (resultObj == null) {
+        // Failed to re-fetch raw object. Use cached object if it exists.
+        if (cached.obj == null) {
           throw e;
         } else {
-          getLogger().info("Object fetch failed for " + cacheKey + " -  using cached ");
-          // Try again later...
-          synchronized (cache) {
-            cache.addElement(cacheKey, new TimeoutPair<T>(resultObj, now + minTtl));
-          }
+          getLogger().info("Object fetch failed for " + cacheKey + " -  using cached.");
         }
       }
     }
     
-    return resultObj;
+    return cached.obj;
   }
   
   private T fetchObjectAndCache(Q queryObj, boolean ignoreCache) throws GadgetException {
     FetchedObject<T> fetched = retrieveRawObject(queryObj, ignoreCache);
     
-    long now = System.currentTimeMillis();
-    long expiration = fetched.expirationTime;
-    expiration = Math.max(now + minTtl, Math.min(now + maxTtl, expiration));
-    synchronized (cache) {
-      cache.addElement(getCacheKeyFromQueryObj(queryObj),
-          new TimeoutPair<T>(fetched.fetchedObj, expiration));
+    synchronized(ttlCache) {
+      ttlCache.addElement(getCacheKeyFromQueryObj(queryObj), fetched.fetchedObj, fetched.expirationTime);
     }
     
     return fetched.fetchedObj;
@@ -124,16 +106,6 @@ public abstract class CachingWebRetrievalFactory<T, Q, K> {
     public FetchedObject(T fetchedObj, long expirationTime) {
       this.fetchedObj = fetchedObj;
       this.expirationTime = expirationTime;
-    }
-  }
-  
-  private static class TimeoutPair<T> {
-    private T cachedObj;
-    private long timeout;
-
-    private TimeoutPair(T cachedObj, long timeout) {
-      this.cachedObj = cachedObj;
-      this.timeout = timeout;
     }
   }
 }
