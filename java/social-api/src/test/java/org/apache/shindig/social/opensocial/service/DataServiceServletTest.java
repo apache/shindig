@@ -18,6 +18,7 @@
 package org.apache.shindig.social.opensocial.service;
 
 import org.apache.shindig.common.testing.FakeGadgetToken;
+import org.apache.shindig.common.testing.FakeHttpServletRequest;
 import org.apache.shindig.common.util.ImmediateFuture;
 import org.apache.shindig.social.ResponseError;
 import org.apache.shindig.social.SocialApiTestsGuiceModule;
@@ -182,7 +183,7 @@ public class DataServiceServletTest extends TestCase {
     RestfulRequestItem requestItem = new RestfulRequestItem("/ahhh!", "GET", null,
         FAKE_GADGET_TOKEN, jsonConverter);
     try {
-      servlet.handleRequestItem(requestItem).get();
+      servlet.handleRequestItem(requestItem, new FakeHttpServletRequest()).get();
       fail();
     } catch (ExecutionException ee) {
       assertTrue(ee.getCause() instanceof SocialSpiException);

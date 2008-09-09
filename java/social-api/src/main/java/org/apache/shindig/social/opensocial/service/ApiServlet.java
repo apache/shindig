@@ -82,7 +82,7 @@ public abstract class ApiServlet extends InjectedServlet {
   /**
    * Delivers a request item to the appropriate DataRequestHandler.
    */
-  protected Future<?> handleRequestItem(RequestItem requestItem) {
+  protected Future<?> handleRequestItem(RequestItem requestItem, HttpServletRequest servletRequest) {
     Class<? extends DataRequestHandler> handlerClass = handlers.get(requestItem.getService());
 
     if (handlerClass == null) {
