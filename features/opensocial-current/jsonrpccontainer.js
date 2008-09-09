@@ -301,7 +301,9 @@ JsonRpcContainer.prototype.createPersonFromJson = function(serverJson) {
   }
 
   if (serverJson.gender) {
-    var key = serverJson.gender == 'male' ? 'MALE' : 'FEMALE';
+    var key = serverJson.gender == 'male' ? 'MALE' : 
+             (serverJson.gender == 'female') ? 'FEMALE' :
+             null;
     serverJson.gender = {key : key, displayValue : serverJson.gender};
   }
 
