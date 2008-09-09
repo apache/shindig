@@ -26,7 +26,6 @@ import com.google.common.collect.Maps;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.logging.Logger;
-
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -97,7 +96,7 @@ public class DataServiceServlet extends ApiServlet {
       HttpServletResponse servletResponse, SecurityToken token,
       BeanConverter converter) throws IOException {
     RestfulRequestItem requestItem = new RestfulRequestItem(servletRequest, token, converter);
-    ResponseItem responseItem = getResponseItem(handleRequestItem(requestItem));
+    ResponseItem responseItem = getResponseItem(handleRequestItem(requestItem, servletRequest));
 
     if (responseItem.getError() == null) {
       PrintWriter writer = servletResponse.getWriter();

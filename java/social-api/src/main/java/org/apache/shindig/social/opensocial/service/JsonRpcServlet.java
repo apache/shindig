@@ -24,7 +24,6 @@ import org.apache.shindig.social.opensocial.spi.DataCollection;
 import org.apache.shindig.social.opensocial.spi.RestfulCollection;
 
 import com.google.common.collect.Lists;
-
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import org.json.JSONArray;
@@ -34,7 +33,6 @@ import org.json.JSONObject;
 import java.io.IOException;
 import java.util.List;
 import java.util.concurrent.Future;
-
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -102,7 +100,7 @@ public class JsonRpcServlet extends ApiServlet {
     for (int i = 0; i < batch.length(); i++) {
       JSONObject batchObj = batch.getJSONObject(i);
       RpcRequestItem requestItem = new RpcRequestItem(batchObj, token, jsonConverter);
-      responses.add(handleRequestItem(requestItem));
+      responses.add(handleRequestItem(requestItem, servletRequest));
     }
 
     // Resolve each Future into a response.
@@ -129,7 +127,7 @@ public class JsonRpcServlet extends ApiServlet {
 
     // Resolve each Future into a response.
     // TODO: should use shared deadline across each request
-    ResponseItem response = getResponseItem(handleRequestItem(requestItem));
+    ResponseItem response = getResponseItem(handleRequestItem(requestItem, servletRequest));
     JSONObject result = getJSONResponse(key, response);
     servletResponse.getWriter().write(result.toString());
   }
