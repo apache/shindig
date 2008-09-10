@@ -207,7 +207,7 @@ RestfulContainer.prototype.newFetchPersonRequest = function(id, opt_params) {
   var me = this;
   return new RestfulRequestItem(peopleRequest.url, peopleRequest.method, null,
       function(rawJson) {
-        return me.createPersonFromJson(rawJson);
+        return me.createPersonFromJson(rawJson['entry']);
       });
 };
 
