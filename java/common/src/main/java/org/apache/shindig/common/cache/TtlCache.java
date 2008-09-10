@@ -109,11 +109,10 @@ public class TtlCache<K, V> implements Cache<K, V> {
    * minTtl, minTtl is used. If above maxTtl, maxTtl is used.
    * @param key Element key.
    * @param val Element value to cache.
-   * @param lifetime Intended lifetime, in millis, of the element's entry.
+   * @param expiration Time, in millis, that the value is to expire.
    */
-  public void addElement(K key, V val, long lifetime) {
+  public void addElement(K key, V val, long expiration) {
     long now = timeSource.currentTimeMillis();
-    long expiration = lifetime;
     expiration = Math.max(now + minTtl, Math.min(now + maxTtl, expiration));
     TimeoutPair<V> entry = new TimeoutPair<V>(val, expiration);
     synchronized(baseCache) {

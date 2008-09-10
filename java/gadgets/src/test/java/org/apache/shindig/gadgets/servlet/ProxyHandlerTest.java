@@ -23,6 +23,7 @@ import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.http.HttpResponse;
 import org.apache.shindig.gadgets.http.HttpResponseBuilder;
+import org.apache.shindig.gadgets.rewrite.BasicContentRewriterRegistry;
 import static org.easymock.EasyMock.expect;
 
 import javax.servlet.http.HttpServletResponse;
@@ -36,7 +37,7 @@ public class ProxyHandlerTest extends ServletTestFixture {
   private final static String DATA_ONE = "hello world";
 
   private final ProxyHandler proxyHandler
-      = new ProxyHandler(fetcher, lockedDomainService, rewriter);
+      = new ProxyHandler(fetcher, lockedDomainService, new BasicContentRewriterRegistry(rewriter, null));
 
   private void expectGetAndReturnData(String url, byte[] data) throws Exception {
     HttpRequest req = new HttpRequest(Uri.parse(url));
@@ -69,6 +70,7 @@ public class ProxyHandlerTest extends ServletTestFixture {
     verify();
 
     assertEquals(HttpServletResponse.SC_NOT_MODIFIED, recorder.getHttpStatusCode());
+    assertFalse(rewriter.responseWasRewritten());
   }
 
   public void testLockedDomainEmbed() throws Exception {
@@ -81,6 +83,7 @@ public class ProxyHandlerTest extends ServletTestFixture {
     verify();
 
     assertEquals(DATA_ONE, recorder.getResponseAsString());
+    assertTrue(rewriter.responseWasRewritten());
   }
 
   public void testLockedDomainFailedEmbed() throws Exception {
@@ -115,5 +118,6 @@ public class ProxyHandlerTest extends ServletTestFixture {
 
     assertEquals(contentType, recorder.getHeader("Content-Type"));
     assertEquals(magicGarbage, recorder.getHeader("X-Magic-Garbage"));
+    assertTrue(rewriter.responseWasRewritten());
   }
 }

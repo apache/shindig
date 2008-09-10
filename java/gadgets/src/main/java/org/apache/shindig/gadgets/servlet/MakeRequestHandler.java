@@ -29,6 +29,7 @@ import org.apache.shindig.gadgets.http.HttpFetcher;
 import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.http.HttpResponse;
 import org.apache.shindig.gadgets.oauth.OAuthArguments;
+import org.apache.shindig.gadgets.rewrite.ContentRewriterRegistry;
 import org.apache.shindig.gadgets.spec.Auth;
 
 import com.google.inject.Inject;
@@ -49,7 +50,7 @@ import javax.servlet.http.HttpServletResponse;
  * Unlike ProxyHandler, this may perform operations such as OAuth or signed fetch.
  */
 @Singleton
-public class MakeRequestHandler extends ProxyBase{
+public class MakeRequestHandler extends ProxyBase {
   // Relaxed visibility for ease of integration. Try to avoid relying on these.
   public static final String UNPARSEABLE_CRUFT = "throw 1; < don't be evil' >";
   public static final String POST_DATA_PARAM = "postData";
@@ -63,10 +64,13 @@ public class MakeRequestHandler extends ProxyBase{
   public static final String AUTHZ_PARAM = "authz";
 
   private final ContentFetcherFactory contentFetcherFactory;
+  private final ContentRewriterRegistry contentRewriterRegistry;
 
   @Inject
-  public MakeRequestHandler(ContentFetcherFactory contentFetcherFactory) {
+  public MakeRequestHandler(ContentFetcherFactory contentFetcherFactory,
+      ContentRewriterRegistry contentRewriterRegistry) {
     this.contentFetcherFactory = contentFetcherFactory;
+    this.contentRewriterRegistry = contentRewriterRegistry;
   }
 
   /**
@@ -94,6 +98,11 @@ public class MakeRequestHandler extends ProxyBase{
 
     // Serialize the response
     HttpResponse results = fetcher.fetch(rcr);
+    
+    // Rewrite the response
+    if (contentRewriterRegistry != null) {
+      results = contentRewriterRegistry.rewriteHttpResponse(rcr, results);
+    }
 
     // Serialize the response
     String output = convertResponseToJson(authToken, request, results);
