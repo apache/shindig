@@ -89,6 +89,7 @@ public final class HttpResponse {
   private final int httpStatusCode;
   private final Map<String, List<String>> headers;
   private final byte[] responseBytes;
+  private String responseString;
   private final Map<String, String> metadata;
 
   private final long date;
@@ -170,16 +171,18 @@ public final class HttpResponse {
    * @return The body as a string.
    */
   public String getResponseAsString() {
-    Charset charset = encodingToCharset.get(encoding);
-    if (charset == null) {
-      charset = Charset.forName(encoding);
-      encodingToCharset.put(encoding, charset);
-    }
-    String responseString = charset.decode(ByteBuffer.wrap(responseBytes)).toString();
+    if (responseString == null) {
+      Charset charset = encodingToCharset.get(encoding);
+      if (charset == null) {
+        charset = Charset.forName(encoding);
+        encodingToCharset.put(encoding, charset);
+      }
+      responseString = charset.decode(ByteBuffer.wrap(responseBytes)).toString();
 
-    // Strip BOM if present
-    if (responseString.length() > 0 && responseString.codePointAt(0) == 0xFEFF) {
-      responseString = responseString.substring(1);
+      // Strip BOM if present
+      if (responseString.length() > 0 && responseString.codePointAt(0) == 0xFEFF) {
+        responseString = responseString.substring(1);
+      }
     }
     return responseString;
   }
@@ -284,7 +287,7 @@ public final class HttpResponse {
     }
     return false;
   }
-
+  
   /**
    * @return the expiration time from the Expires header or -1 if not set
    */
