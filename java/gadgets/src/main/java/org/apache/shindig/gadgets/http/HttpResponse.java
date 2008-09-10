@@ -94,8 +94,6 @@ public final class HttpResponse {
   private final long date;
   private final String encoding;
 
-  private final HttpResponse rewritten;
-
   /**
    * Construct an HttpResponse from a builder (called by HttpResponseBuilder.create).
    */
@@ -109,8 +107,6 @@ public final class HttpResponse {
 
     Map<String, String> metadataCopy = Maps.newHashMap(builder.getMetadata());
     metadata = Collections.unmodifiableMap(metadataCopy);
-
-    rewritten = builder.getRewritten();
 
     // We want to modify the headers to ensure that the proper Content-Type and Date headers
     // have been set. This allows us to avoid these expensive calculations from the cache.
@@ -226,16 +222,6 @@ public final class HttpResponse {
    */
   public Map<String, String> getMetadata() {
     return metadata;
-  }
-
-  /**
-   * Get the rewritten version of this content
-   *
-   * @return A rewritten HttpResponse
-   * TODO: Remove when new rewriting interfaces are complete.
-   */
-  public HttpResponse getRewritten() {
-    return rewritten;
   }
 
   /**
