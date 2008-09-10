@@ -167,11 +167,12 @@ class OutputXmlConverter extends OutputConverter {
 			}
 		} elseif (is_object($data)) {
 			if ($data instanceof Enum) {
-				// enums are output as : <NAME key="$key">$displayValue</NAME> 
-				$keyEntry = $newElement->appendChild($this->doc->createAttribute('key'));
-				$keyEntry->appendChild($this->doc->createTextNode($data->key));
-				$newElement->appendChild($this->doc->createTextNode($data->getDisplayValue()));
-			
+				if (isset($data->key)) {
+					// enums are output as : <NAME key="$key">$displayValue</NAME>
+					$keyEntry = $newElement->appendChild($this->doc->createAttribute('key'));
+					$keyEntry->appendChild($this->doc->createTextNode($data->key));
+					$newElement->appendChild($this->doc->createTextNode($data->getDisplayValue()));
+				}			
 			} else {
 				$vars = get_object_vars($data);
 				foreach ($vars as $key => $val) {
