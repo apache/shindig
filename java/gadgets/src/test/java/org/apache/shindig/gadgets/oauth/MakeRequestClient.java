@@ -27,7 +27,9 @@ import org.apache.shindig.gadgets.http.HttpResponse;
 import org.apache.shindig.gadgets.oauth.OAuthArguments.UseToken;
 
 /**
- * 
+ * Test utility to emulate the requests sent via gadgets.io.makeRequest.  The simulation starts
+ * at what arrives at OAuthFetcher.  Code above OAuthFetcher (MakeRequestHandler, preloads) are not
+ * exercised here.
  */
 public class MakeRequestClient {
   
@@ -40,6 +42,15 @@ public class MakeRequestClient {
   private String approvalUrl;
   private boolean ignoreCache;
 
+  /**
+   * Create a make request client with the given security token, sending requests through an
+   * OAuth fetcher to an OAuth service provider.
+   * 
+   * @param securityToken identity of the user.
+   * @param fetcherConfig configuration for the OAuthFetcher
+   * @param serviceProvider service provider being targeted.
+   * @param serviceName nickname for the service being accessed.
+   */
   public MakeRequestClient(SecurityToken securityToken, OAuthFetcherConfig fetcherConfig,
       FakeOAuthServiceProvider serviceProvider, String serviceName) {
     this.securityToken = securityToken;
@@ -50,6 +61,9 @@ public class MakeRequestClient {
     this.ignoreCache = false;
   }
   
+  /**
+   * Set the arguments to the OAuth fetch.
+   */
   public void setBaseArgs(OAuthArguments baseArgs) {
     this.baseArgs = baseArgs;
   }
@@ -62,6 +76,9 @@ public class MakeRequestClient {
     this.ignoreCache = ignoreCache;
   }
   
+  /**
+   * Send an OAuth GET request to the given URL.
+   */
   public HttpResponse sendGet(String target) throws Exception {
     HttpRequest request = new HttpRequest(Uri.parse(target));
     request.setOAuthArguments(recallState());
@@ -73,6 +90,9 @@ public class MakeRequestClient {
     return response;
   }
   
+  /**
+   * Send an OAuth POST request to the given URL.
+   */
   public HttpResponse sendFormPost(String target, String body) throws Exception {
     HttpRequest request = new HttpRequest(Uri.parse(target));
     request.setOAuthArguments(recallState());
@@ -86,6 +106,9 @@ public class MakeRequestClient {
     return response;
   }
   
+  /**
+   * Create arguments simulating authz=OAUTH.
+   */
   public OAuthArguments makeNonSocialOAuthArguments() {
     OAuthArguments params = new OAuthArguments();
     params.setUseToken(UseToken.ALWAYS);
@@ -95,6 +118,9 @@ public class MakeRequestClient {
     return params;
   }
   
+  /**
+   * Create arguments simulating authz=SIGNED.
+   */
   public OAuthArguments makeSignedFetchArguments() {
     OAuthArguments params = new OAuthArguments();
     params.setUseToken(UseToken.NEVER);
@@ -102,13 +128,19 @@ public class MakeRequestClient {
     params.setSignViewer(true);
     return params;
   }
-    
+   
+  /**
+   * Track state (see gadgets.io.makeRequest handling of the oauthState parameter).
+   */
   private OAuthArguments recallState() {
     OAuthArguments params = new OAuthArguments(baseArgs);
     params.setOrigClientState(oauthState);
     return params;
   }
   
+  /**
+   * Track state (see gadgets.io.makeRequest handling of the oauthState parameter).
+   */
   private void saveState(HttpResponse response) {
     approvalUrl = null;
     if (response.getMetadata() != null) {
@@ -119,6 +151,9 @@ public class MakeRequestClient {
     }
   }
   
+  /**
+   * Simulate the user visiting the service provider and approved access to their data.
+   */
   public void approveToken(String params) throws Exception {
     // This will throw if approvalUrl looks wrong.
     serviceProvider.browserVisit(approvalUrl + "&" + params);
