@@ -24,6 +24,7 @@
   <!-- Must include the "caja" feature to display samplecontainer -->
   <!-- gadgets when "use caja" is checked -->
   <gadget>
+    <script src="fieldtranslations.js"></script>
     <script src="jsonactivity.js"></script>
     <script src="jsonperson.js"></script>
     <script src="restfulcontainer.js"></script>

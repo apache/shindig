@@ -217,7 +217,7 @@ JsonRpcContainer.prototype.newFetchPeopleRequest = function(idSpec,
   var rpc = { method : "people.get" };
   rpc.params = this.translateIdSpec(idSpec);
   if (opt_params['profileDetail']) {
-    this.translateProfileDetails(opt_params['profileDetail']);
+    FieldTranslations.translateJsPersonFieldsToServerFields(opt_params['profileDetail']);
     rpc.params.fields = opt_params['profileDetail'];
   }
   if (opt_params['first']) {
@@ -257,102 +257,10 @@ JsonRpcContainer.prototype.newFetchPeopleRequest = function(idSpec,
       });
 };
 
-JsonRpcContainer.prototype.translateProfileDetails = function(profileDetails) {
-  for (var i = 0; i < profileDetails.length; i++) {
-    if (profileDetails[i] == 'dateOfBirth') {
-      profileDetails[i] = 'birthday';
-    } else if (profileDetails[i] == 'timeZone') {
-      profileDetails[i] = 'utcOffset';
-    }
-  }
-
-  // displayName and id always need to be requested
-  profileDetails.push("id");
-  profileDetails.push("displayName");
-}
-
 JsonRpcContainer.prototype.createPersonFromJson = function(serverJson) {
-  // We need to translate from the new person fields to the old ones
-  // TODO(doll): Pull this out into a separate file
-  if (serverJson.emails) {
-    for (var i = 0; i < serverJson.emails.length; i++) {
-      serverJson.emails[i].address = serverJson.emails[i].value;
-    }
-  }
-
-  if (serverJson.phoneNumbers) {
-    for (var p = 0; p < serverJson.phoneNumbers.length; p++) {
-      serverJson.phoneNumbers[p].number = serverJson.phoneNumbers[p].value;
-    }
-  }
-
-  if (serverJson.birthday) {
-    serverJson.dateOfBirth = serverJson.birthday;
-  }
-
-  if (serverJson.utcOffset) {
-    serverJson.timeZone = serverJson.utcOffset;
-  }
-
-  if (serverJson.addresses) {
-    for (var j = 0; j < serverJson.addresses.length; j++) {
-      serverJson.addresses[j].unstructuredAddress = serverJson.addresses[j].formatted;
-    }
-  }
-
-  if (serverJson.gender) {
-    var key = serverJson.gender == 'male' ? 'MALE' : 
-             (serverJson.gender == 'female') ? 'FEMALE' :
-             null;
-    serverJson.gender = {key : key, displayValue : serverJson.gender};
-  }
-
-  this.translateUrlJson(serverJson.profileSong);
-  this.translateUrlJson(serverJson.profileVideo);
-
-  if (serverJson.urls) {
-    for (var u = 0; u < serverJson.urls.length; u++) {
-      this.translateUrlJson(serverJson.urls[u]);
-    }
-  }
-
-  this.translateEnumJson(serverJson.drinker);
-  this.translateEnumJson(serverJson.lookingFor);
-  this.translateEnumJson(serverJson.networkPresence);
-  this.translateEnumJson(serverJson.smoker);
-
-  if (serverJson.organizations) {
-    serverJson.jobs = [];
-    serverJson.schools = [];
-
-    for (var o = 0; o < serverJson.organizations.length; o++) {
-      var org = serverJson.organizations[o];
-      if (org.type == 'job') {
-        serverJson.jobs.push(org);
-      } else if (org.type == 'school') {
-        serverJson.schools.push(org);
-      }
-    }
-  }
-
-  if (serverJson.name) {
-    serverJson.name.unstructured = serverJson.name.formatted;
-  }
-
+  FieldTranslations.translateServerPersonToJsPerson(serverJson);
   return new JsonPerson(serverJson);
 };
-
-JsonRpcContainer.prototype.translateEnumJson = function(enumJson) {
-  if (enumJson) {
-    enumJson.key = enumJson.value;
-  }
-}
-
-JsonRpcContainer.prototype.translateUrlJson = function(urlJson) {
-  if (urlJson) {
-    urlJson.address = urlJson.value;
-  }
-}
 
 JsonRpcContainer.prototype.getFieldsList = function(keys) {
   // datarequest.js guarantees that keys is an array
