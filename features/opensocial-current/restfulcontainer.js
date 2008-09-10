@@ -215,6 +215,7 @@ RestfulContainer.prototype.newFetchPeopleRequest = function(idSpec,
     opt_params) {
   var url = "/people/" + this.translateIdSpec(idSpec);
 
+  FieldTranslations.translateJsPersonFieldsToServerFields(opt_params['profileDetail']);
   url += "?fields=" + (opt_params['profileDetail'].join(','));
   url += "&startIndex=" + (opt_params['first'] || 0);
   url += "&count=" + (opt_params['max'] || 20);
@@ -245,6 +246,7 @@ RestfulContainer.prototype.newFetchPeopleRequest = function(idSpec,
 };
 
 RestfulContainer.prototype.createPersonFromJson = function(serverJson) {
+  FieldTranslations.translateServerPersonToJsPerson(serverJson);
   return new JsonPerson(serverJson);
 };
 
