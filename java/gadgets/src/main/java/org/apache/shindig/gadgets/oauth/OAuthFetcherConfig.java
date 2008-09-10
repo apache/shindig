@@ -17,7 +17,11 @@
 
 package org.apache.shindig.gadgets.oauth;
 
+import com.google.inject.Inject;
+import com.google.inject.name.Named;
+
 import org.apache.shindig.common.crypto.BlobCrypter;
+import org.apache.shindig.gadgets.DefaultGuiceModule;
 import org.apache.shindig.gadgets.http.HttpCache;
 
 /**
@@ -28,6 +32,16 @@ public class OAuthFetcherConfig {
   private final BlobCrypter stateCrypter;
   private final GadgetOAuthTokenStore tokenStore;
   private final HttpCache httpCache;
+  
+  @Inject
+  public OAuthFetcherConfig(
+      @Named(DefaultGuiceModule.OAUTH_STATE_CRYPTER_ANNOTATION) BlobCrypter stateCrypter,
+      GadgetOAuthTokenStore tokenStore,
+      HttpCache httpCache) {
+    this.stateCrypter = stateCrypter;
+    this.tokenStore = tokenStore;
+    this.httpCache = httpCache;
+  }
   
   /**
    * Used to encrypt state stored on the client.
@@ -50,10 +64,4 @@ public class OAuthFetcherConfig {
     return httpCache;
   }
 
-  public OAuthFetcherConfig(BlobCrypter stateCrypter, GadgetOAuthTokenStore tokenStore,
-      HttpCache httpCache) {
-    this.stateCrypter = stateCrypter;
-    this.tokenStore = tokenStore;
-    this.httpCache = httpCache;
-  }
 }

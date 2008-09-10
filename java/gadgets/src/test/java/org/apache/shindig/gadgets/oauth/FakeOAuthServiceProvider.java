@@ -24,6 +24,7 @@ import net.oauth.OAuthMessage;
 import net.oauth.OAuthServiceProvider;
 import net.oauth.OAuthValidator;
 import net.oauth.SimpleOAuthValidator;
+import net.oauth.signature.RSA_SHA1;
 
 import org.apache.shindig.common.crypto.Crypto;
 import org.apache.shindig.gadgets.GadgetException;
@@ -31,7 +32,7 @@ import org.apache.shindig.gadgets.http.HttpFetcher;
 import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.http.HttpResponse;
 import org.apache.shindig.gadgets.http.HttpResponseBuilder;
-import org.apache.shindig.gadgets.oauth.OAuthStore.OAuthParamLocation;
+import org.apache.shindig.gadgets.oauth.AccessorInfo.OAuthParamLocation;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -59,6 +60,9 @@ public class FakeOAuthServiceProvider implements HttpFetcher {
 
   public final static String CONSUMER_KEY = "consumer";
   public final static String CONSUMER_SECRET = "secret";
+  
+  public final static String SIGNED_FETCH_CONSUMER_KEY = "signedfetch";
+
 
   private static class TokenState {
     String tokenSecret;
@@ -112,7 +116,8 @@ public class FakeOAuthServiceProvider implements HttpFetcher {
    */
   private final HashMap<String, TokenState> tokenState;
   private final OAuthValidator validator;
-  private final OAuthConsumer consumer;
+  private final OAuthConsumer signedFetchConsumer;
+  private final OAuthConsumer oauthConsumer;
 
   private boolean throttled;
   private boolean vagueErrors;
@@ -128,13 +133,25 @@ public class FakeOAuthServiceProvider implements HttpFetcher {
   public FakeOAuthServiceProvider() {
     OAuthServiceProvider provider = new OAuthServiceProvider(
         REQUEST_TOKEN_URL, APPROVAL_URL, ACCESS_TOKEN_URL);
-    consumer = new OAuthConsumer(
-        null, CONSUMER_KEY, CONSUMER_SECRET, provider);
+    
+    signedFetchConsumer = new OAuthConsumer(null, null, null, null);
+    signedFetchConsumer.setProperty(RSA_SHA1.X509_CERTIFICATE, OAuthFetcherTest.CERTIFICATE_TEXT);
+
+    oauthConsumer = new OAuthConsumer(null, CONSUMER_KEY, CONSUMER_SECRET, provider);
+    
     tokenState = new HashMap<String, TokenState>();
     validator = new SimpleOAuthValidator();
     vagueErrors = false;
     validParamLocations = new HashSet<OAuthParamLocation>();
     validParamLocations.add(OAuthParamLocation.URI_QUERY);
+  }
+  
+  public OAuthConsumer getConsumer(String consumerKey) {
+    if (consumerKey.equals("signedfetch")) {
+      return signedFetchConsumer;
+    } else {
+      return oauthConsumer;
+    }
   }
 
   public void setVagueErrors(boolean vagueErrors) {
@@ -183,7 +200,12 @@ public class FakeOAuthServiceProvider implements HttpFetcher {
       throws Exception {
     OAuthMessage message = parseMessage(request).message;
     String requestConsumer = message.getParameter(OAuth.OAUTH_CONSUMER_KEY);
-    if (!CONSUMER_KEY.equals(requestConsumer)) {
+    OAuthConsumer consumer;
+    if (CONSUMER_KEY.equals(requestConsumer)) {
+      consumer = oauthConsumer;
+    } else if (SIGNED_FETCH_CONSUMER_KEY.equals(requestConsumer)) {
+      consumer = signedFetchConsumer;
+    } else {
       return makeOAuthProblemReport(
           "consumer_key_unknown", "invalid consumer: " + requestConsumer);
     }
@@ -238,7 +260,7 @@ public class FakeOAuthServiceProvider implements HttpFetcher {
         }
       }
     }
-    
+        
     // Parse authorization header
     if (validParamLocations.contains(OAuthParamLocation.AUTH_HEADER)) {
       String aznHeader = request.getHeader("Authorization");
@@ -253,15 +275,21 @@ public class FakeOAuthServiceProvider implements HttpFetcher {
     }
     
     // Parse body
-    if (validParamLocations.contains(OAuthParamLocation.POST_BODY)) {
-      String body = request.getPostBodyAsString();
-      if (request.getMethod().equals("POST")) {
-        String type = request.getHeader("Content-Type");
-        if (!"application/x-www-form-urlencoded".equals(type)) {
-          throw new RuntimeException("Wrong content-type header: " + type);
-        }
-        info.body = body;
-        params.addAll(OAuth.decodeForm(request.getPostBodyAsString()));
+    String body = request.getPostBodyAsString();
+    if (request.getMethod().equals("POST")) {
+      String type = request.getHeader("Content-Type");
+      if (!"application/x-www-form-urlencoded".equals(type)) {
+        throw new RuntimeException("Wrong content-type header: " + type);
+      }
+      info.body = body;
+      params.addAll(OAuth.decodeForm(request.getPostBodyAsString()));
+    }
+    
+    // If we're not configured to pass oauth parameters in the post body, double check
+    // that they didn't end up there.
+    if (!validParamLocations.contains(OAuthParamLocation.POST_BODY)) {
+      if (body.contains("oauth_")) {
+        throw new RuntimeException("Found unexpected post body data" + body);
       }
     }
     
@@ -359,7 +387,7 @@ public class FakeOAuthServiceProvider implements HttpFetcher {
   public TokenPair getPreapprovedToken(String userData) {
     String requestToken = Crypto.getRandomString(16);
     String requestTokenSecret = Crypto.getRandomString(16);
-    TokenState state = new TokenState(requestTokenSecret, consumer);
+    TokenState state = new TokenState(requestTokenSecret, oauthConsumer);
     state.setState(TokenState.State.APPROVED);
     state.setUserData(userData);
     tokenState.put(requestToken, state);
@@ -391,7 +419,7 @@ public class FakeOAuthServiceProvider implements HttpFetcher {
     if (state.getState() != TokenState.State.APPROVED) {
       throw new Exception("Token not approved");
     }
-    OAuthAccessor accessor = new OAuthAccessor(consumer);
+    OAuthAccessor accessor = new OAuthAccessor(oauthConsumer);
     accessor.requestToken = requestToken;
     accessor.tokenSecret = state.tokenSecret;
     message.validateMessage(accessor, validator);
@@ -409,27 +437,50 @@ public class FakeOAuthServiceProvider implements HttpFetcher {
   private HttpResponse handleResourceUrl(HttpRequest request)
       throws Exception {
     MessageInfo info = parseMessage(request);
-    String accessToken = info.message.getParameter("oauth_token");
-    TokenState state = tokenState.get(accessToken);
-    if (throttled) {
-      return makeOAuthProblemReport(
-          "consumer_key_refused", "exceeded quota");
-    }
-    if (state == null) {
-      return makeOAuthProblemReport(
-          "token_rejected", "Access token unknown");
-    }
-    if (state.getState() != TokenState.State.APPROVED) {
-      return makeOAuthProblemReport(
-          "token_revoked", "User revoked permissions");
+    String consumerId = info.message.getParameter("oauth_consumer_key");
+    OAuthConsumer consumer;
+    if (CONSUMER_KEY.equals(consumerId)) {
+      consumer = oauthConsumer;
+    } else if ("signedfetch".equals(consumerId)) {
+      consumer = signedFetchConsumer;
+    } else if ("container.com".equals(consumerId)) {
+      consumer = signedFetchConsumer;
+    } else {
+      return makeOAuthProblemReport("parameter_missing", "oauth_consumer_key not found");
     }
     OAuthAccessor accessor = new OAuthAccessor(consumer);
-    accessor.accessToken = accessToken;
-    accessor.tokenSecret = state.getSecret();
+    String responseBody = null;
+    if (consumer == oauthConsumer) {
+      // for OAuth, check the access token.  We skip this for signed fetch
+      String accessToken = info.message.getParameter("oauth_token");
+      TokenState state = tokenState.get(accessToken);
+      if (throttled) {
+        return makeOAuthProblemReport(
+            "consumer_key_refused", "exceeded quota");
+      }
+      if (state == null) {
+        return makeOAuthProblemReport(
+            "token_rejected", "Access token unknown");
+      }
+      if (state.getState() != TokenState.State.APPROVED) {
+        return makeOAuthProblemReport(
+            "token_revoked", "User revoked permissions");
+      }
+      accessor.accessToken = accessToken;
+      accessor.tokenSecret = state.getSecret();
+      responseBody = "User data is " + state.getUserData();
+    } else {
+      // For signed fetch, just echo back the query parameters in the body
+      responseBody = request.getUri().getQuery();
+    }
+    
+    // Check the signature
     info.message.validateMessage(accessor, validator);
+    
+    // Send back a response
     HttpResponseBuilder resp = new HttpResponseBuilder()
         .setHttpStatusCode(HttpResponse.SC_OK)
-        .setResponseString("User data is " + state.getUserData());
+        .setResponseString(responseBody);
     if (info.aznHeader != null) {
       resp.setHeader(AUTHZ_ECHO_HEADER, info.aznHeader);
     }

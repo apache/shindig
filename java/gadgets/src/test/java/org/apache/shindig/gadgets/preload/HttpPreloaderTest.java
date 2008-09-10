@@ -62,7 +62,6 @@ public class HttpPreloaderTest {
   private final IMocksControl control = EasyMock.createNiceControl();
   private final ContentFetcherFactory fetchers = control.createMock(ContentFetcherFactory.class);
   private final RecordingHttpFetcher plainFetcher = new RecordingHttpFetcher();
-  private final RecordingHttpFetcher signedFetcher = new RecordingHttpFetcher();
   private final RecordingHttpFetcher oauthFetcher = new RecordingHttpFetcher();
 
   private final GadgetContext context = new GadgetContext() {
@@ -86,10 +85,7 @@ public class HttpPreloaderTest {
   public void setUp() throws Exception {
     expect(fetchers.get())
         .andReturn(plainFetcher).anyTimes();
-    expect(fetchers.getSigningFetcher(isA(SecurityToken.class)))
-        .andReturn(signedFetcher).anyTimes();
-    expect(fetchers.getOAuthFetcher(isA(SecurityToken.class), isA(OAuthArguments.class)))
-        .andReturn(oauthFetcher).anyTimes();
+    expect(fetchers.getOAuthFetcher(isA(HttpRequest.class))).andReturn(oauthFetcher).anyTimes();
     control.replay();
   }
 
@@ -138,10 +134,10 @@ public class HttpPreloaderTest {
 
     PreloadedData data = preloaded.get(PRELOAD_HREF).call();
 
-    HttpRequest request = signedFetcher.requests.get(0);
+    HttpRequest request = oauthFetcher.requests.get(0);
     checkRequest(request);
-    assertTrue(request.getSignOwner());
-    assertFalse(request.getSignViewer());
+    assertTrue(request.getOAuthArguments().getSignOwner());
+    assertFalse(request.getOAuthArguments().getSignViewer());
     checkResults((Map<String, String>)data.toJson());
   }
 

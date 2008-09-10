@@ -17,18 +17,26 @@
  */
 package org.apache.shindig.gadgets.oauth;
 
+import com.google.inject.Inject;
+
 import net.oauth.OAuthServiceProvider;
 
+import org.apache.commons.lang.StringUtils;
+import org.apache.shindig.auth.SecurityToken;
 import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.GadgetSpecFactory;
+import org.apache.shindig.gadgets.oauth.AccessorInfo.HttpMethod;
+import org.apache.shindig.gadgets.oauth.AccessorInfo.OAuthParamLocation;
+import org.apache.shindig.gadgets.oauth.OAuthStore.ConsumerInfo;
+import org.apache.shindig.gadgets.oauth.OAuthStore.TokenInfo;
 import org.apache.shindig.gadgets.spec.GadgetSpec;
 import org.apache.shindig.gadgets.spec.OAuthService;
 import org.apache.shindig.gadgets.spec.OAuthSpec;
+import org.apache.shindig.gadgets.spec.OAuthService.Location;
+import org.apache.shindig.gadgets.spec.OAuthService.Method;
 
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.Iterator;
-import java.util.logging.Logger;
 
 /**
  * Higher-level interface that allows callers to store and retrieve
@@ -38,33 +46,7 @@ import java.util.logging.Logger;
  */
 public class GadgetOAuthTokenStore {
 
-  /**
-   * Internal class used to communicate results of parsing the gadget spec
-   * between methods.
-   */
-  static class GadgetInfo {
-    private String serviceName;
-    private OAuthStore.ProviderInfo providerInfo;
-
-    public String getServiceName() {
-      return serviceName;
-    }
-    public void setServiceName(String serviceName) {
-      this.serviceName = serviceName;
-    }
-    public OAuthStore.ProviderInfo getProviderInfo() {
-      return providerInfo;
-    }
-    public void setProviderInfo(OAuthStore.ProviderInfo providerInfo) {
-      this.providerInfo = providerInfo;
-    }
-  }
-
-  private static final Logger log =
-      Logger.getLogger(GadgetOAuthTokenStore.class.getName());
-
   private final OAuthStore store;
-
   private final GadgetSpecFactory specFactory;
 
   /**
@@ -73,201 +55,199 @@ public class GadgetOAuthTokenStore {
    * @param store an {@link OAuthStore} that can store and retrieve OAuth
    *              tokens, as well as information about service providers.
    */
-  public GadgetOAuthTokenStore(OAuthStore store,
-      GadgetSpecFactory specFactory) {
+  @Inject
+  public GadgetOAuthTokenStore(OAuthStore store, GadgetSpecFactory specFactory) {
     this.store = store;
     this.specFactory = specFactory;
   }
 
   /**
-   * Stores a negotiated consumer key and secret in the gadget store.
-   * The "secret" can either be a consumer secret in the strict OAuth sense,
-   * or it can be a PKCS8-then-Base64 encoded private key that we'll be using
-   * with this service provider.
-   *
-   * @param gadgetUrl the URL of the gadget
-   * @param serviceName the service provider with whom we have negotiated a
-   *                    consumer key and secret.
-   * @throws OAuthStoreException if there is a problem talking to the
-   *                             backend store.
-   * @throws OAuthNoDataException if there is no data about this service
-   *                              provider stored for this gadget.
+   * Retrieve an AccessorInfo and OAuthAccessor that are ready for signing OAuthMessages.  To do
+   * this, we need to figure out:
+   * 
+   * - what consumer key/secret to use for signing.
+   * - if an access token should be used for the request, and if so what it is.   *   
+   * - the OAuth request/authorization/access URLs.
+   * - what HTTP method to use for request token and access token requests
+   * - where the OAuth parameters are located.
+   * 
+   * Note that most of that work gets skipped for signed fetch, we just look up the consumer key
+   * and secret for that.  Signed fetch always sticks the parameters in the query string.
    */
-  public void storeConsumerKeyAndSecret(
-      URI gadgetUrl,
-      String serviceName,
-      OAuthStore.ConsumerKeyAndSecret keyAndSecret)
-        throws OAuthStoreException, OAuthNoDataException {
+  public AccessorInfo getOAuthAccessor(SecurityToken securityToken,
+      OAuthArguments arguments, OAuthClientState clientState) throws GadgetException {
+    
+    AccessorInfoBuilder accessorBuilder = new AccessorInfoBuilder();
 
-    OAuthStore.ProviderKey providerKey = new OAuthStore.ProviderKey();
-    providerKey.setGadgetUri(gadgetUrl.toString());
-    providerKey.setServiceName(serviceName);
-
-    store.setOAuthConsumerKeyAndSecret(providerKey, keyAndSecret);
-  }
-
-  /**
-   * Stores an access token in the OAuth Data Store.
-   * @param tokenKey information about the Gadget storing the token.
-   * @param tokenInfo the TokenInfo to be stored in the OAuth data store.
-   * @throws OAuthStoreException
-   */
-  public void storeTokenKeyAndSecret(OAuthStore.TokenKey tokenKey,
-                                     OAuthStore.TokenInfo tokenInfo)
-      throws OAuthStoreException {
-
-    if (isEmpty(tokenKey.getGadgetUri())) {
-      throw new IllegalArgumentException("found empty gadget URI in TokenKey");
-    }
-
-    if (isEmpty(tokenKey.getUserId())) {
-      throw new IllegalArgumentException("found empty userId in TokenKey");
-    }
-
-    store.setTokenAndSecret(tokenKey, tokenInfo);
-  }
-
-  /**
-   * Removes an access token from the OAuth data store.
-   *
-   * @return true if the token is removed, false if the token was not found.
-   * @throws OAuthStoreException if we can't communicate with the token store.
-   */
-  public boolean removeToken(OAuthStore.TokenKey tokenKey)
-      throws OAuthStoreException {
-    try {
-      store.removeToken(tokenKey);
-      return true;
-    } catch (OAuthNoDataException e) {
-      return false;
-    }
-  }
-
-  /**
-   * Retrieve an OAuthAccessor that is ready to sign OAuthMessages.
-   *
-   * @param tokenKey information about the gadget retrieving the accessor.
-   *
-   * @return an OAuthAccessorInfo containing an OAuthAccessor (which can be
-   *         passed to an OAuthMessage.sign method), as well as httpMethod and
-   *         signatureType fields.
-   * @throws OAuthNoDataException if the token couldn't be found
-   * @throws OAuthStoreException if an error occurred accessing the data
-   *                             store.
-   */
-  public OAuthStore.AccessorInfo getOAuthAccessor(OAuthStore.TokenKey tokenKey,
-      boolean bypassSpecCache)
-      throws GadgetException {
-
-    if (isEmpty(tokenKey.getGadgetUri())) {
-      throw new OAuthStoreException("found empty gadget URI in TokenKey");
-    }
-
-    if (isEmpty(tokenKey.getUserId())) {
-      throw new OAuthStoreException("found empty userId in TokenKey");
-    }
-
-    GadgetSpec spec;
-    try {
-      spec = specFactory.getGadgetSpec(
-          new URI(tokenKey.getGadgetUri()),
-          bypassSpecCache);
-    } catch (URISyntaxException e) {
-      throw new OAuthStoreException("could not fetch gadget spec, gadget URI " +
-          "invalid", e);
-    }
-
-    OAuthStore.ProviderInfo provInfo;
-    provInfo = getProviderInfo(spec, tokenKey.getServiceName());
-
-    return store.getOAuthAccessor(tokenKey, provInfo);
-  }
-
-  /**
-   * Reads OAuth provider information out of gadget spec.
-   * @param spec
-   * @return a GadgetInfo
-   * @throws GadgetException if some information is missing, or something else
-   *                         is wrong with the spec.
-   */
-  public static OAuthStore.ProviderInfo getProviderInfo(
-      GadgetSpec spec, String serviceName) throws GadgetException {
-
-    OAuthSpec oauthSpec = spec.getModulePrefs().getOAuthSpec();
-
-    if (oauthSpec == null) {
-      String message = "gadget spec is missing /ModulePrefs/OAuth section";
-      log.warning(message);
-      throw new GadgetException(GadgetException.Code.MISSING_PARAMETER,
-                                message);
+    // Does the gadget spec tell us any details about the service provider, like where to put the
+    // OAuth parameters and what methods to use for their URLs?
+    OAuthServiceProvider provider = null;
+    if (arguments.mayUseToken()) {
+      provider = lookupSpecInfo(securityToken, arguments, accessorBuilder);
+    } else {
+      // This is plain old signed fetch.
+      accessorBuilder.setParameterLocation(AccessorInfo.OAuthParamLocation.URI_QUERY);
     }
     
-    OAuthService service = oauthSpec.getServices().get(serviceName);
-    if (service == null) {
-      StringBuilder message = new StringBuilder();
-      message.append("Spec does not contain OAuth service '");
-      message.append(serviceName);
-      message.append("'.  Known services: ");
-      Iterator<String> known = oauthSpec.getServices().keySet().iterator();
-      while (known.hasNext()) {
-        message.append('\'');
-        message.append(known.next());
-        message.append('\'');
-        if (known.hasNext()) {
-          message.append(", ");
-        }
-      }
-      log.warning(message.toString());
-      throw new GadgetException(GadgetException.Code.INVALID_PARAMETER,
-          message.toString());
-    }
+    // What consumer key/secret should we use?
+    ConsumerInfo consumer = store.getConsumerKeyAndSecret(
+        securityToken, arguments.getServiceName(), provider);
+    accessorBuilder.setConsumer(consumer);
 
+    // Should we use the OAuth access token?  We never do this unless the client allows it, and
+    // if owner == viewer.
+    if (arguments.mayUseToken()
+        && securityToken.getOwnerId() != null
+        && securityToken.getViewerId().equals(securityToken.getOwnerId())) {  
+      lookupToken(securityToken, consumer, arguments, clientState, accessorBuilder);
+    }
+   
+    return accessorBuilder.create();
+  }
+  
+  /**
+   * Lookup information contained in the gadget spec.
+   */
+  private OAuthServiceProvider lookupSpecInfo(SecurityToken securityToken, OAuthArguments arguments,
+      AccessorInfoBuilder accessorBuilder) throws GadgetException {
+    GadgetSpec spec = findSpec(securityToken, arguments);
+    OAuthSpec oauthSpec = spec.getModulePrefs().getOAuthSpec();
+    if (oauthSpec == null) {
+      throw oauthNotFoundEx(securityToken);
+    }
+    OAuthService service = oauthSpec.getServices().get(arguments.getServiceName());
+    if (service == null) {
+      throw serviceNotFoundEx(securityToken, oauthSpec, arguments.getServiceName());
+    }
+    // In theory some one could specify different parameter locations for request token and
+    // access token requests, but that's probably not useful.  We just use the request token
+    // rules for everything.
+    accessorBuilder.setParameterLocation(getStoreLocation(service.getRequestUrl().location));
+    accessorBuilder.setMethod(getStoreMethod(service.getRequestUrl().method));
     OAuthServiceProvider provider = new OAuthServiceProvider(
         service.getRequestUrl().url.toASCIIString(),
         service.getAuthorizationUrl().toASCIIString(),
         service.getAccessUrl().url.toASCIIString());
-
-    OAuthStore.HttpMethod httpMethod;
-    switch(service.getRequestUrl().method) {
-      case GET:
-        httpMethod = OAuthStore.HttpMethod.GET;
-        break;
-      case POST:
-      default:
-        httpMethod = OAuthStore.HttpMethod.POST;
-        break;
+    return provider;
+  }
+  
+  /**
+   * Figure out the OAuth token that should be used with this request.  We check for this in three
+   * places.  In order of priority:
+   * 
+   * 1) From information we cached on the client.
+   *    We encrypt the token and cache on the client for performance.
+   *    
+   * 2) From information we have in our persistent state.
+   *    We persist the token server-side so we can look it up if necessary.
+   *    
+   * 3) From information the gadget developer tells us to use (a preapproved request token.)
+   *    Gadgets can be initialized with preapproved request tokens.  If the user tells the service
+   *    provider they want to add a gadget to a gadget container site, the service provider can
+   *    create a preapproved request token for that site and pass it to the gadget as a user
+   *    preference.
+   * @throws GadgetException 
+   */
+  private void lookupToken(SecurityToken securityToken, ConsumerInfo consumerInfo,
+      OAuthArguments arguments, OAuthClientState clientState, AccessorInfoBuilder accessorBuilder)
+      throws GadgetException {
+    if (clientState.getRequestToken() != null) {
+      // We cached the request token on the client.
+      accessorBuilder.setRequestToken(clientState.getRequestToken());
+      accessorBuilder.setTokenSecret(clientState.getRequestTokenSecret());
+    } else if (clientState.getAccessToken() != null) {
+      // We cached the access token on the client
+      accessorBuilder.setAccessToken(clientState.getAccessToken());
+      accessorBuilder.setTokenSecret(clientState.getAccessTokenSecret());
+    } else {
+      // No useful client-side state, check persistent storage
+      TokenInfo tokenInfo = store.getTokenInfo(securityToken, consumerInfo,
+          arguments.getServiceName(), arguments.getTokenName());
+      if (tokenInfo != null && tokenInfo.getAccessToken() != null) {
+        // We have an access token in persistent storage, use that.
+        accessorBuilder.setAccessToken(tokenInfo.getAccessToken());
+        accessorBuilder.setTokenSecret(tokenInfo.getTokenSecret());
+      } else {
+        // We don't have an access token yet, but the client sent us a (hopefully) preapproved
+        // request token.
+        accessorBuilder.setRequestToken(arguments.getRequestToken());
+        accessorBuilder.setTokenSecret(arguments.getRequestTokenSecret());
+      }
     }
- 
-    OAuthStore.OAuthParamLocation paramLocation;
-    switch(service.getRequestUrl().location) {
-      case URL:
-        paramLocation = OAuthStore.OAuthParamLocation.URI_QUERY;
-        break;
-      case BODY:
-        paramLocation = OAuthStore.OAuthParamLocation.POST_BODY;
-        break;
-      case HEADER:
-      default:
-        paramLocation = OAuthStore.OAuthParamLocation.AUTH_HEADER;
-        break;
-    }
-
-    OAuthStore.ProviderInfo provInfo = new OAuthStore.ProviderInfo();
-    provInfo.setHttpMethod(httpMethod);
-    provInfo.setParamLocation(paramLocation);
-
-    // TODO: for now, we'll just set the signature type to HMAC_SHA1
-    // as this will be ignored later on when retrieving consumer information.
-    // There, if we find a negotiated HMAC key, we will use HMAC_SHA1. If we
-    // find a negotiated RSA key, we will use RSA_SHA1. And if we find neither,
-    // we may use RSA_SHA1 with a default signing key.
-    provInfo.setSignatureType(OAuthStore.SignatureType.HMAC_SHA1);
-    provInfo.setProvider(provider);
-
-    return provInfo;
   }
 
-  static boolean isEmpty(String string) {
-    return (string == null) || (string.trim().length() == 0);
+  private OAuthParamLocation getStoreLocation(Location location) throws GadgetException {
+    switch(location) {
+    case HEADER:
+      return OAuthParamLocation.AUTH_HEADER;
+    case URL:
+      return OAuthParamLocation.URI_QUERY;
+    case BODY:
+      return OAuthParamLocation.POST_BODY;
+    }
+    throw new GadgetException(GadgetException.Code.INTERNAL_SERVER_ERROR,
+        "Unknown parameter location " + location);
+  }
+  
+  private HttpMethod getStoreMethod(Method method) throws GadgetException {
+    switch(method) {
+    case GET:
+      return HttpMethod.GET;
+    case POST:
+      return HttpMethod.POST;
+    }
+    throw new GadgetException(GadgetException.Code.INTERNAL_SERVER_ERROR,
+        "Unknown method " + method);
+  }
+
+  private GadgetSpec findSpec(SecurityToken securityToken, OAuthArguments arguments)
+      throws GadgetException {
+    try {
+      return specFactory.getGadgetSpec(
+          new URI(securityToken.getAppUrl()),
+          arguments.getBypassSpecCache());
+    } catch (URISyntaxException e) {
+      throw new OAuthStoreException("could not fetch gadget spec, gadget URI invalid", e);
+    }
+  }
+  
+  private GadgetException serviceNotFoundEx(SecurityToken securityToken, OAuthSpec oauthSpec,
+      String serviceName) {
+    StringBuilder message = new StringBuilder()
+        .append("Spec for gadget ")
+        .append(securityToken.getAppUrl())
+        .append(" does not contain OAuth service ")
+        .append(serviceName)
+        .append(".  Known services: ")
+        .append(StringUtils.join(oauthSpec.getServices().keySet(), ','));
+    return new GadgetException(GadgetException.Code.INVALID_PARAMETER,
+        message.toString());
+  }
+
+  private GadgetException oauthNotFoundEx(SecurityToken securityToken) {
+    StringBuilder message = new StringBuilder()
+        .append("Spec for gadget ")
+        .append(securityToken.getAppUrl())
+        .append(" does not contain OAuth element.");
+    return new GadgetException(GadgetException.Code.INVALID_PARAMETER,
+        message.toString());
+  }
+  
+  /**
+   * Store an access token for the given user/gadget/service/token name
+   */
+  public void storeTokenKeyAndSecret(SecurityToken securityToken, ConsumerInfo consumerInfo,
+      OAuthArguments arguments, TokenInfo tokenInfo) throws GadgetException {
+    store.setTokenInfo(securityToken, consumerInfo, arguments.getServiceName(),
+        arguments.getTokenName(), tokenInfo);
+  }
+
+  /**
+   * Remove an access token for the given user/gadget/service/token name
+   */
+  public void removeToken(SecurityToken securityToken, ConsumerInfo consumerInfo,
+      OAuthArguments arguments) throws GadgetException {
+    store.removeToken(securityToken, consumerInfo, arguments.getServiceName(),
+        arguments.getTokenName());
   }
 }

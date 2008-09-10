@@ -33,8 +33,8 @@ public class HttpGuiceModule extends DefaultGuiceModule {
       super.configure();
   }
 
-  public HttpGuiceModule(Properties properties) {
-    super(properties);
+  public HttpGuiceModule(Properties properties, String oauthConfigJson) {
+    super(properties, oauthConfigJson);
   }
 
   public HttpGuiceModule() {

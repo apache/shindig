@@ -18,7 +18,6 @@
  */
 package org.apache.shindig.gadgets.servlet;
 
-import static org.easymock.EasyMock.eq;
 import static org.easymock.EasyMock.expect;
 import static org.easymock.EasyMock.expectLastCall;
 import static org.easymock.EasyMock.isA;
@@ -34,7 +33,6 @@ import org.apache.shindig.gadgets.GadgetContext;
 import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.http.HttpResponse;
 import org.apache.shindig.gadgets.http.HttpResponseBuilder;
-import org.apache.shindig.gadgets.oauth.OAuthArguments;
 import org.apache.shindig.gadgets.oauth.OAuthFetcher;
 import org.apache.shindig.gadgets.oauth.OAuthResponseParams;
 import org.apache.shindig.gadgets.spec.GadgetSpec;
@@ -166,7 +164,7 @@ public class GadgetRenderingTaskTest extends ServletTestFixture {
     expect(request.getAttribute(AuthInfo.Attribute.SECURITY_TOKEN.getId()))
         .andReturn(DUMMY_TOKEN).atLeastOnce();
     OAuthFetcher oauthFetcher = mock(OAuthFetcher.class);
-    expect(fetcherFactory.getOAuthFetcher(eq(DUMMY_TOKEN), isA(OAuthArguments.class))).
+    expect(fetcherFactory.getOAuthFetcher(isA(HttpRequest.class))).
         andReturn(oauthFetcher);
 
     expect(oauthFetcher.fetch(isA(HttpRequest.class))).
@@ -187,7 +185,7 @@ public class GadgetRenderingTaskTest extends ServletTestFixture {
     expect(request.getAttribute(AuthInfo.Attribute.SECURITY_TOKEN.getId()))
         .andReturn(DUMMY_TOKEN).atLeastOnce();
     OAuthFetcher oauthFetcher = mock(OAuthFetcher.class);
-    expect(fetcherFactory.getOAuthFetcher(eq(DUMMY_TOKEN), isA(OAuthArguments.class))).
+    expect(fetcherFactory.getOAuthFetcher(isA(HttpRequest.class))).
         andReturn(oauthFetcher);
 
     HttpResponse resp = new HttpResponseBuilder()

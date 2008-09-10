@@ -71,8 +71,7 @@ public class HttpPreloader implements Preloader {
       // TODO: This should be extracted into a common helper that takes any
       // org.apache.shindig.gadgets.spec.RequestAuthenticationInfo.
       HttpRequest request = new HttpRequest(Uri.fromJavaUri(preload.getHref()))
-            .setSignOwner(preload.isSignOwner())
-            .setSignViewer(preload.isSignViewer())
+            .setOAuthArguments(new OAuthArguments(preload))
             .setContainer(context.getContainer())
             .setSecurityToken(context.getToken())
             .setGadget(Uri.fromJavaUri(context.getUrl()));
@@ -82,11 +81,8 @@ public class HttpPreloader implements Preloader {
           response = fetcher.get().fetch(request);
           break;
         case SIGNED:
-          response = fetcher.getSigningFetcher(context.getToken()).fetch(request);
-          break;
         case OAUTH:
-          response = fetcher.getOAuthFetcher(context.getToken(), new OAuthArguments(preload))
-              .fetch(request);
+          response = fetcher.getOAuthFetcher(request).fetch(request);
           break;
       }
       return new HttpPreloadData(response);

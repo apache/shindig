@@ -17,12 +17,23 @@
  */
 package org.apache.shindig.gadgets.oauth;
 
-import net.oauth.OAuthAccessor;
+import com.google.inject.Singleton;
+
+import net.oauth.OAuth;
 import net.oauth.OAuthConsumer;
 import net.oauth.OAuthServiceProvider;
 import net.oauth.signature.RSA_SHA1;
 
+import org.apache.shindig.auth.SecurityToken;
+import org.apache.shindig.gadgets.GadgetException;
+import org.apache.shindig.gadgets.oauth.BasicOAuthStoreConsumerKeyAndSecret.KeyType;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 
 /**
@@ -31,178 +42,160 @@ import java.util.Map;
  * return an OAuthAccessor in {@code getOAuthAccessor} that uses that private
  * key if no consumer key and secret could be found.
  */
+@Singleton
 public class BasicOAuthStore implements OAuthStore {
 
+  private static final String CONSUMER_SECRET_KEY = "consumer_secret";
+  private static final String CONSUMER_KEY_KEY = "consumer_key";
+  private static final String KEY_TYPE_KEY = "key_type";
+  
   /**
-   * HashMap of provider and consumer information. Maps ProviderKeys (i.e.
+   * HashMap of provider and consumer information. Maps BasicOAuthStoreConsumerIndexs (i.e.
    * nickname of a service provider and the gadget that uses that nickname) to
-   * {@link OAuthStore.ProviderInfo}s.
+   * {@link BasicOAuthStoreConsumerKeyAndSecret}s.
    */
-  private Map<ProviderKey, ConsumerKeyAndSecret> consumerInfos =
-      new HashMap<ProviderKey, ConsumerKeyAndSecret>();
+  private final Map<BasicOAuthStoreConsumerIndex, BasicOAuthStoreConsumerKeyAndSecret> consumerInfos;
 
   /**
-   * HashMap of token information. Maps TokenKeys (i.e. gadget id, token
+   * HashMap of token information. Maps BasicOAuthStoreTokenIndexs (i.e. gadget id, token
    * nickname, module id, etc.) to TokenInfos (i.e. access token and token
    * secrets).
    */
-  private Map<TokenKey, TokenInfo> tokens = new HashMap<TokenKey, TokenInfo>();
-
+  private final Map<BasicOAuthStoreTokenIndex, TokenInfo> tokens;
+  
   /**
-   * The default consumer key to be used if no consumer key could be found in
-   * the store.
+   * Key to use when no other key is found.
    */
-  private String defaultConsumerKey;
+  private BasicOAuthStoreConsumerKeyAndSecret defaultKey;
 
-  /**
-   * The default consumer "secret" to be used when no secret could be found in
-   * store. This <b>must</b> be a PKCS8-then-Base64-encoded RSA private key.
-   * (Can also be null.)
-   */
-  private String defaultConsumerSecret;
-
-  /**
-   * Public constructor. Makes an OAuthStoreImpl that doesn't have a fallback
-   * RSA key to sign outgoing requests. When no consumer secret can be found,
-   * {@code getOAuthAccessor} will throw an exception.
-   */
   public BasicOAuthStore() {
-    this(null, null);
+    consumerInfos = new HashMap<BasicOAuthStoreConsumerIndex, BasicOAuthStoreConsumerKeyAndSecret>();
+    tokens = new HashMap<BasicOAuthStoreTokenIndex, TokenInfo>();
   }
-
-  /**
-   * Public constructor. Makes an OAuthStoreImpl with a fallback
-   * RSA key to sign outgoing requests. When no consumer secret can be found,
-   * {@code getOAuthAccessor} will create an OAuthAccessor that uses the
-   * fallback RSA private key.
-   *
-   * @param consumerKey the consumer key to be used when no consumer key
-   *        can be found in the oauth store for a specific
-   *        {@code getOAuthAccessor} request.
-   * @param privateKey the RSA private key to be used when no consumer secret
-   *        can be found in the oauth store for a specific
-   *        {@code getOAuthAccessor} request.
-   */
-  public BasicOAuthStore(String consumerKey, String privateKey) {
-    defaultConsumerKey = consumerKey;
-    defaultConsumerSecret = privateKey;
-  }
-
-  void setHashMapsForTesting(
-      Map<ProviderKey, ConsumerKeyAndSecret> consumers,
-      Map<TokenKey, TokenInfo> tokens) {
-    this.consumerInfos = consumers;
-    this.tokens = tokens;
-  }
-
-  /**
-   * {@inheritDoc}
-   */
-  public AccessorInfo getOAuthAccessor(TokenKey tokenKey, ProviderInfo provInfo)
-      throws OAuthNoDataException {
-
-    ProviderKey provKey = new ProviderKey();
-    provKey.setGadgetUri(tokenKey.getGadgetUri());
-    provKey.setServiceName(tokenKey.getServiceName());
-
-    AccessorInfo result = getOAuthAccessor(provKey, provInfo);
-
-    TokenInfo accessToken = tokens.get(tokenKey);
-
-    if (accessToken != null) {
-      result.getAccessor().accessToken = accessToken.getAccessToken();
-      result.getAccessor().tokenSecret = accessToken.getTokenSecret();
-    }
-
-    return result;
-  }
-
-  private AccessorInfo getOAuthAccessor(ProviderKey providerKey,
-      ProviderInfo provInfo)
-      throws OAuthNoDataException {
-
-    if (provInfo == null) {
-      throw new OAuthNoDataException("must pass non-null provider info to" +
-          " getOAuthAccessor");
-    }
-
-    AccessorInfo result = new AccessorInfo();
-    result.setHttpMethod(provInfo.getHttpMethod());
-    result.setParamLocation(provInfo.getParamLocation());
-
-    ConsumerKeyAndSecret consumerKeyAndSecret = consumerInfos.get(providerKey);
-
-    if (consumerKeyAndSecret == null) {
-      if (defaultConsumerKey == null || defaultConsumerSecret == null) {
-        // if we don't have a fallback key and secret, that's all we can do
-        throw new OAuthNoDataException("ConsumerKeyAndSecret " +
-                                       "was null in oauth store");
-      } else {
-        // we'll use the fallback key and secret.
-        consumerKeyAndSecret =
-          new ConsumerKeyAndSecret(defaultConsumerKey,
-              defaultConsumerSecret,
-              OAuthStore.KeyType.RSA_PRIVATE);
+  
+  public void initFromConfigString(String oauthConfigStr) throws GadgetException {
+    try {
+      JSONObject oauthConfigs = new JSONObject(oauthConfigStr);
+      for (Iterator<?> i = oauthConfigs.keys(); i.hasNext();) {
+        String url = (String) i.next();
+        URI gadgetUri = new URI(url);
+        JSONObject oauthConfig = oauthConfigs.getJSONObject(url);
+        storeConsumerInfos(gadgetUri, oauthConfig);
       }
+    } catch (JSONException e) {
+      throw new GadgetException(GadgetException.Code.OAUTH_STORAGE_ERROR, e);
+    } catch (URISyntaxException e) {
+      throw new GadgetException(GadgetException.Code.OAUTH_STORAGE_ERROR, e);
     }
-
-    OAuthServiceProvider oauthProvider = provInfo.getProvider();
-
-    if (oauthProvider == null) {
-      throw new OAuthNoDataException("OAuthService provider " +
-      "was null in provider info");
-    }
-
-    boolean usePublicKeyCrypto =
-      (consumerKeyAndSecret.getKeyType() == OAuthStore.KeyType.RSA_PRIVATE);
-
-    OAuthConsumer consumer = usePublicKeyCrypto
-                             ? new OAuthConsumer(null,  // no callback URL
-                                 consumerKeyAndSecret.getConsumerKey(),
-                                 null,
-                                 oauthProvider)
-                             : new OAuthConsumer(null,  // no callback URL
-                                 consumerKeyAndSecret.getConsumerKey(),
-                                 consumerKeyAndSecret.getConsumerSecret(),
-                                 oauthProvider);
-
-    if (usePublicKeyCrypto) {
-      consumer.setProperty(RSA_SHA1.PRIVATE_KEY,
-                           consumerKeyAndSecret.getConsumerSecret());
-      result.setSignatureType(OAuthStore.SignatureType.RSA_SHA1);
-    } else {
-      result.setSignatureType(OAuthStore.SignatureType.HMAC_SHA1);
-    }
-
-    result.setAccessor(new OAuthAccessor(consumer));
-
-    return result;
   }
 
-  /**
-   * {@inheritDoc}
-   */
-  public void setOAuthConsumerKeyAndSecret(ProviderKey providerKey,
-                                           ConsumerKeyAndSecret keyAndSecret) {
+  private void storeConsumerInfos(URI gadgetUri, JSONObject oauthConfig)
+      throws JSONException, GadgetException {
+    for (String serviceName : JSONObject.getNames(oauthConfig)) {
+      JSONObject consumerInfo = oauthConfig.getJSONObject(serviceName);
+      storeConsumerInfo(gadgetUri, serviceName, consumerInfo);
+    }
+  }
+
+  @SuppressWarnings("unused")
+  private void storeConsumerInfo(URI gadgetUri, String serviceName, JSONObject consumerInfo)
+      throws JSONException, GadgetException {
+    realStoreConsumerInfo(gadgetUri, serviceName, consumerInfo);
+  }
+  
+  private void realStoreConsumerInfo(URI gadgetUri, String serviceName, JSONObject consumerInfo)
+      throws JSONException {
+    String consumerSecret = consumerInfo.getString(CONSUMER_SECRET_KEY);
+    String consumerKey = consumerInfo.getString(CONSUMER_KEY_KEY);
+    String keyTypeStr = consumerInfo.getString(KEY_TYPE_KEY);
+    KeyType keyType = KeyType.HMAC_SYMMETRIC;
+
+    if (keyTypeStr.equals("RSA_PRIVATE")) {
+      keyType = KeyType.RSA_PRIVATE;
+      consumerSecret = convertFromOpenSsl(consumerSecret);
+    }
+
+    BasicOAuthStoreConsumerKeyAndSecret kas = new BasicOAuthStoreConsumerKeyAndSecret(
+        consumerKey, consumerSecret, keyType, null);
+
+    BasicOAuthStoreConsumerIndex index = new BasicOAuthStoreConsumerIndex();
+    index.setGadgetUri(gadgetUri.toASCIIString());
+    index.setServiceName(serviceName);
+    setConsumerKeyAndSecret(index, kas);
+  }
+  
+  // Support standard openssl keys by stripping out the headers and blank lines
+  public static String convertFromOpenSsl(String privateKey) {
+    return privateKey.replaceAll("-----[A-Z ]*-----", "").replace("\n", "");
+  }
+    
+  public void setDefaultKey(BasicOAuthStoreConsumerKeyAndSecret defaultKey) {
+    this.defaultKey = defaultKey;
+  }
+
+  public void setConsumerKeyAndSecret(
+      BasicOAuthStoreConsumerIndex providerKey, BasicOAuthStoreConsumerKeyAndSecret keyAndSecret) {
     consumerInfos.put(providerKey, keyAndSecret);
   }
 
-  /**
-   * {@inheritDoc}
-   */
-  public void setTokenAndSecret(TokenKey tokenKey, TokenInfo tokenInfo) {
+  public ConsumerInfo getConsumerKeyAndSecret(
+      SecurityToken securityToken, String serviceName, OAuthServiceProvider provider)
+      throws GadgetException {
+    BasicOAuthStoreConsumerIndex pk = new BasicOAuthStoreConsumerIndex();
+    pk.setGadgetUri(securityToken.getAppUrl());
+    pk.setServiceName(serviceName);
+    BasicOAuthStoreConsumerKeyAndSecret cks = consumerInfos.get(pk);
+    if (cks == null) {
+      cks = defaultKey;
+    }
+    if (cks == null) {
+      throw new GadgetException(GadgetException.Code.INTERNAL_SERVER_ERROR,
+          "No key for gadget " + securityToken.getAppUrl() + " and service " + serviceName);
+    }
+    OAuthConsumer consumer = null;
+    if (cks.getKeyType() == KeyType.RSA_PRIVATE) {
+      consumer = new OAuthConsumer(null, cks.getConsumerKey(), null, provider);
+      // The oauth.net java code has lots of magic.  By setting this property here, code thousands
+      // of lines away knows that the consumerSecret value in the consumer should be treated as
+      // an RSA private key and not an HMAC key.
+      consumer.setProperty(OAuth.OAUTH_SIGNATURE_METHOD, OAuth.RSA_SHA1);
+      consumer.setProperty(RSA_SHA1.PRIVATE_KEY, cks.getConsumerSecret());
+    } else {
+      consumer = new OAuthConsumer(null, cks.getConsumerKey(), cks.getConsumerSecret(), provider);
+      consumer.setProperty(OAuth.OAUTH_SIGNATURE_METHOD, OAuth.HMAC_SHA1);
+    }
+    return new ConsumerInfo(consumer, cks.getKeyName());
+  }
+  
+  private BasicOAuthStoreTokenIndex makeBasicOAuthStoreTokenIndex(
+      SecurityToken securityToken, String serviceName, String tokenName) {
+    BasicOAuthStoreTokenIndex tokenKey = new BasicOAuthStoreTokenIndex();
+    tokenKey.setGadgetUri(securityToken.getAppUrl());
+    tokenKey.setModuleId(securityToken.getModuleId());
+    tokenKey.setServiceName(serviceName);
+    tokenKey.setTokenName(tokenName);
+    tokenKey.setUserId(securityToken.getViewerId());
+    return tokenKey;
+  }
+
+  public TokenInfo getTokenInfo(SecurityToken securityToken, ConsumerInfo consumerInfo,
+      String serviceName, String tokenName) {
+    BasicOAuthStoreTokenIndex tokenKey =
+        makeBasicOAuthStoreTokenIndex(securityToken, serviceName, tokenName);
+    return tokens.get(tokenKey);
+  }
+
+  public void setTokenInfo(SecurityToken securityToken, ConsumerInfo consumerInfo,
+      String serviceName, String tokenName, TokenInfo tokenInfo) {
+    BasicOAuthStoreTokenIndex tokenKey =
+        makeBasicOAuthStoreTokenIndex(securityToken, serviceName, tokenName);
     tokens.put(tokenKey, tokenInfo);
   }
 
-  /**
-   * {@inheritDoc}
-   */
-  public void removeToken(TokenKey tokenKey) throws OAuthStoreException,
-      OAuthNoDataException {
-    if (tokens.containsKey(tokenKey)) {
-      tokens.remove(tokenKey);
-    } else {
-      throw new OAuthNoDataException("Could not find access token");
-    }
+  public void removeToken(SecurityToken securityToken, ConsumerInfo consumerInfo,
+      String serviceName, String tokenName) {
+    BasicOAuthStoreTokenIndex tokenKey =
+        makeBasicOAuthStoreTokenIndex(securityToken, serviceName, tokenName);
+    tokens.remove(tokenKey);    
   }
 }

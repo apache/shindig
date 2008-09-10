@@ -237,7 +237,7 @@ public class MakeRequestHandlerTest extends ServletTestFixture {
         .andReturn(DUMMY_TOKEN).atLeastOnce();
     expect(request.getParameter(MakeRequestHandler.AUTHZ_PARAM))
         .andReturn(Auth.SIGNED.toString()).atLeastOnce();
-    expect(signingFetcher.fetch(isA(HttpRequest.class)))
+    expect(oauthFetcher.fetch(isA(HttpRequest.class)))
         .andReturn(new HttpResponse(RESPONSE_BODY));
     replay();
 
@@ -250,7 +250,7 @@ public class MakeRequestHandlerTest extends ServletTestFixture {
   public void testSignedPostRequest() throws Exception {
     // Doesn't actually sign since it returns the standard fetcher.
     // Signing tests are in SigningFetcherTest
-    expectPostAndReturnBody(signingFetcher, REQUEST_BODY, RESPONSE_BODY);
+    expectPostAndReturnBody(oauthFetcher, REQUEST_BODY, RESPONSE_BODY);
     expect(request.getAttribute(AuthInfo.Attribute.SECURITY_TOKEN.getId()))
         .andReturn(DUMMY_TOKEN).atLeastOnce();
     expect(request.getParameter(MakeRequestHandler.AUTHZ_PARAM))
@@ -268,7 +268,7 @@ public class MakeRequestHandlerTest extends ServletTestFixture {
   public void testChangeSecurityToken() throws Exception {
     // Doesn't actually sign since it returns the standard fetcher.
     // Signing tests are in SigningFetcherTest
-    expectGetAndReturnBody(signingFetcher, RESPONSE_BODY);
+    expectGetAndReturnBody(oauthFetcher, RESPONSE_BODY);
     FakeGadgetToken authToken = new FakeGadgetToken().setUpdatedToken("updated");
     expect(request.getAttribute(AuthInfo.Attribute.SECURITY_TOKEN.getId()))
         .andReturn(authToken).atLeastOnce();

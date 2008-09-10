@@ -305,7 +305,8 @@ public class GadgetServerTest extends GadgetTestFixture {
         "</Module>";
     expect(fetcher.fetch(SPEC_REQUEST))
         .andReturn(new HttpResponse(gadgetXml));
-    expect(fetcherFactory.getSigningFetcher(BASIC_CONTEXT.getToken()))
+    expect(fetcherFactory.getOAuthFetcher(
+        isA(HttpRequest.class)))
         .andReturn(fetcher);
     expect(fetcher.fetch(preloadRequest))
         .andReturn(new HttpResponse(preloadData));
@@ -332,7 +333,7 @@ public class GadgetServerTest extends GadgetTestFixture {
     expect(fetcher.fetch(SPEC_REQUEST))
         .andReturn(new HttpResponse(gadgetXml));
     expect(fetcherFactory.getOAuthFetcher(
-        isA(SecurityToken.class), isA(OAuthArguments.class)))
+        isA(HttpRequest.class)))
         .andReturn(fetcher);
     expect(fetcher.fetch(preloadRequest))
         .andReturn(new HttpResponse(preloadData));

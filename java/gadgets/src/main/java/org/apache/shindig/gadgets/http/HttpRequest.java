@@ -21,6 +21,7 @@ package org.apache.shindig.gadgets.http;
 import org.apache.shindig.auth.SecurityToken;
 import org.apache.shindig.common.ContainerConfig;
 import org.apache.shindig.common.uri.Uri;
+import org.apache.shindig.gadgets.oauth.OAuthArguments;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
@@ -62,8 +63,7 @@ public class HttpRequest {
 
   // For signed fetch & OAuth
   private SecurityToken securityToken;
-  private boolean signOwner = true;
-  private boolean signViewer = true;
+  private OAuthArguments oauthArguments;
 
   private String rewriteMimeType;
 
@@ -87,8 +87,9 @@ public class HttpRequest {
     gadget = request.gadget;
     container = request.container;
     securityToken = request.securityToken;
-    signOwner = request.signOwner;
-    signViewer = request.signViewer;
+    if (request.oauthArguments != null) {
+      oauthArguments = new OAuthArguments(request.oauthArguments);
+    }
     rewriteMimeType = request.rewriteMimeType;
   }
 
@@ -221,20 +222,10 @@ public class HttpRequest {
   }
 
   /**
-   * @param signOwner Whether to include the owner id when making authenticated requests. Defaults
-   * to true.
+   * @param oauthArguments arguments for OAuth/signed fetched
    */
-  public HttpRequest setSignOwner(boolean signOwner) {
-    this.signOwner = signOwner;
-    return this;
-  }
-
-  /**
-   * @param signViewer Whether to include the viewer id when making authenticated requests. Defaults
-   * to true.
-   */
-  public HttpRequest setSignViewer(boolean signViewer) {
-    this.signViewer = signViewer;
+  public HttpRequest setOAuthArguments(OAuthArguments oauthArguments) {
+    this.oauthArguments = oauthArguments;
     return this;
   }
 
@@ -366,17 +357,10 @@ public class HttpRequest {
   }
 
   /**
-   * @return True if the owner id should be passed in the request parameters.
+   * @return arguments for OAuth and signed fetch
    */
-  public boolean getSignOwner() {
-    return signOwner;
-  }
-
-  /**
-   * @return True if the viewer id should be passed in the request parameters.
-   */
-  public boolean getSignViewer() {
-    return signViewer;
+  public OAuthArguments getOAuthArguments() {
+    return oauthArguments;
   }
 
   /**

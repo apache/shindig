@@ -39,7 +39,6 @@ public abstract class GadgetTestFixture extends EasyMockTestCase {
   public final GadgetServer gadgetServer;
   public final ContentFetcherFactory fetcherFactory = mock(ContentFetcherFactory.class);
   public final HttpFetcher fetcher = mock(HttpFetcher.class);
-  public final SigningFetcher signingFetcher = mock(SigningFetcher.class);
   public final OAuthFetcher oauthFetcher = mock(OAuthFetcher.class);
   public final ContentFetcherFactory contentFetcherFactory = mock(ContentFetcherFactory.class);
   public final GadgetBlacklist blacklist = mock(GadgetBlacklist.class);

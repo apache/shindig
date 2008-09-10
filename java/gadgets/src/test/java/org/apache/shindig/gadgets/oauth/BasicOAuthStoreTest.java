@@ -18,330 +18,122 @@
  */
 package org.apache.shindig.gadgets.oauth;
 
-import static org.easymock.EasyMock.eq;
-import static org.easymock.EasyMock.expect;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.fail;
 
-import org.apache.shindig.auth.SecurityTokenDecoder;
-
-import junit.framework.TestCase;
-
-import net.oauth.OAuthAccessor;
+import net.oauth.OAuthConsumer;
 import net.oauth.OAuthServiceProvider;
 import net.oauth.signature.RSA_SHA1;
 
-import org.easymock.classextension.EasyMock;
-import org.easymock.classextension.IMocksControl;
+import org.apache.shindig.common.testing.FakeGadgetToken;
+import org.apache.shindig.gadgets.GadgetException;
+import org.apache.shindig.gadgets.oauth.BasicOAuthStoreConsumerKeyAndSecret.KeyType;
+import org.apache.shindig.gadgets.oauth.OAuthStore.ConsumerInfo;
+import org.apache.shindig.gadgets.oauth.OAuthStore.TokenInfo;
+import org.junit.Before;
+import org.junit.Test;
 
-import java.util.HashMap;
-import java.util.Map;
+public class BasicOAuthStoreTest {
+  
+  private static final String SAMPLE_FILE =
+    "{" +
+    "'http://localhost:8080/gadgets/files/samplecontainer/examples/oauth.xml' : {" +
+    "'' : {" + 
+    "'consumer_key' : 'gadgetConsumer'," + 
+    "'consumer_secret' : 'gadgetSecret'," + 
+    "'key_type' : 'HMAC_SYMMETRIC'" +
+    "}" +
+    "}," +
+    "'http://rsagadget/test.xml' : {" +
+    "'' : {" + 
+    "'consumer_key' : 'rsaconsumer'," + 
+    "'consumer_secret' : 'rsaprivate'," + 
+    "'key_type' : 'RSA_PRIVATE'" +
+    "}" +
+    "}" +
 
-public class BasicOAuthStoreTest extends TestCase {
+    "}";
 
-  private IMocksControl control;
-  private Map<OAuthStore.ProviderKey, OAuthStore.ConsumerKeyAndSecret>
-      mockConsumerInfos;
-  private Map<OAuthStore.TokenKey, OAuthStore.TokenInfo> mockTokens;
-  private BasicOAuthStore noDefaultStore;
-  private BasicOAuthStore withDefaultStore;
-  private String defaultKey = "defaultkey";
-  private String defaultSecret = "defaultsecret";  // not quite a PKCS8-encoded
-                                                   // RSA key, but that's ok
-
-  @Override
-  @SuppressWarnings("unchecked")
-  protected void setUp() throws Exception {
-    super.setUp();
-    control = EasyMock.createStrictControl();
-    mockConsumerInfos = control.createMock(
-        new HashMap<OAuthStore.ProviderKey,
-                    OAuthStore.ConsumerKeyAndSecret>().getClass());
-    mockTokens = control.createMock(
-        new HashMap<OAuthStore.TokenKey, OAuthStore.TokenInfo>().getClass());
-
-    noDefaultStore = new BasicOAuthStore();
-    noDefaultStore.setHashMapsForTesting(mockConsumerInfos, mockTokens);
-
-    withDefaultStore = new BasicOAuthStore(defaultKey, defaultSecret);
-    withDefaultStore.setHashMapsForTesting(mockConsumerInfos, mockTokens);
+  private BasicOAuthStore store;
+  
+  @Before
+  public void setUp() throws Exception {
+    store = new BasicOAuthStore();
+    store.initFromConfigString(SAMPLE_FILE);
   }
+  
+  @Test
+  public void testInit() throws Exception {
+    FakeGadgetToken t = new FakeGadgetToken();
+    t.setAppUrl("http://localhost:8080/gadgets/files/samplecontainer/examples/oauth.xml");
+    OAuthServiceProvider provider = new OAuthServiceProvider("req", "authorize", "access");
+    ConsumerInfo consumerInfo = store.getConsumerKeyAndSecret(t, "", provider);
+    OAuthConsumer consumer = consumerInfo.getConsumer();
+    assertEquals("gadgetConsumer", consumer.consumerKey);
+    assertEquals("gadgetSecret", consumer.consumerSecret);
+    assertEquals("HMAC-SHA1", consumer.getProperty("oauth_signature_method"));
+    assertEquals(provider, consumer.serviceProvider);
+    assertNull(consumerInfo.getKeyName());
 
-  public void testGetOAuthAccessor() throws Exception {
-    OAuthStore.TokenKey tokenKey = new OAuthStore.TokenKey();
-    tokenKey.setGadgetUri("http://foo.bar.com/gadget.xml");
-    tokenKey.setModuleId(2348709L);
-    tokenKey.setUserId("testuser");
-    tokenKey.setServiceName("testservice");
-    tokenKey.setTokenName("testtoken");
-
-    OAuthStore.TokenInfo tokenInfo = new OAuthStore.TokenInfo("accesstoken",
-                                                              "tokensecret");
-
-    OAuthStore.ProviderKey provKey = new OAuthStore.ProviderKey();
-    provKey.setGadgetUri(tokenKey.getGadgetUri());
-    provKey.setServiceName(tokenKey.getServiceName());
-
-    OAuthServiceProvider provider = new OAuthServiceProvider(
-        "request", "authorize", "access");
-
-    OAuthStore.ProviderInfo info = new BasicOAuthStore.ProviderInfo();
-
-    info.setHttpMethod(OAuthStore.HttpMethod.GET);
-    info.setSignatureType(OAuthStore.SignatureType.HMAC_SHA1);
-    info.setProvider(provider);
-    info.setParamLocation(OAuthStore.OAuthParamLocation.AUTH_HEADER);
-
-    ////////////////////////////////////////////////////////////////////////////
-    // first, the case where we don't have a consumer key/secret
-
-    control.checkOrder(false);
-
-    expect(mockConsumerInfos.get(eq(provKey))).andReturn(null).once();
-    expect(mockTokens.get(tokenKey)).andReturn(tokenInfo);
-
-    control.replay();
-
-    OAuthStore.AccessorInfo accessorInfo =
-        withDefaultStore.getOAuthAccessor(tokenKey, info);
-
-    control.verify();
-
-    OAuthAccessor accessor = accessorInfo.getAccessor();
-
-    assertSame(info.getHttpMethod(), accessorInfo.getHttpMethod());
-    assertSame(OAuthStore.OAuthParamLocation.AUTH_HEADER,
-               accessorInfo.getParamLocation());
-
-    assertEquals("accesstoken", accessor.accessToken);
-    assertEquals("tokensecret", accessor.tokenSecret);
-    assertEquals(defaultKey, accessor.consumer.consumerKey);
-    assertNull(accessor.consumer.consumerSecret);
-    assertEquals(defaultSecret, accessor.consumer
-        .getProperty(RSA_SHA1.PRIVATE_KEY));
-    assertEquals("access", accessor.consumer.serviceProvider.accessTokenURL);
-    assertEquals("request", accessor.consumer.serviceProvider.requestTokenURL);
-    assertEquals("authorize",
-                 accessor.consumer.serviceProvider.userAuthorizationURL);
-
-    // now for the one that doesn't have default keys set
-    control.reset();
-    control.checkOrder(false);
-
-    expect(mockConsumerInfos.get(eq(provKey))).andReturn(null).once();
-    expect(mockTokens.get(tokenKey)).andStubReturn(tokenInfo);
-
-    control.replay();
+    t.setAppUrl("http://rsagadget/test.xml");
+    consumerInfo = store.getConsumerKeyAndSecret(t, "", provider);
+    consumer = consumerInfo.getConsumer();
+    assertEquals("rsaconsumer", consumer.consumerKey);
+    assertNull(consumer.consumerSecret);
+    assertEquals("RSA-SHA1", consumer.getProperty("oauth_signature_method"));
+    assertEquals(provider, consumer.serviceProvider);
+    assertEquals("rsaprivate", consumer.getProperty(RSA_SHA1.PRIVATE_KEY));
+    assertNull(consumerInfo.getKeyName());
+  }
+  
+  @Test
+  public void testGetAndSetAndRemoveToken() {
+    FakeGadgetToken t = new FakeGadgetToken();
+    ConsumerInfo consumer = new ConsumerInfo(null, null);
+    t.setAppUrl("http://localhost:8080/gadgets/files/samplecontainer/examples/oauth.xml");
+    t.setViewerId("viewer-one");
+    assertNull(store.getTokenInfo(t, consumer, "", ""));
+    
+    TokenInfo info = new TokenInfo("token", "secret");
+    store.setTokenInfo(t, consumer, "service", "token", info);
+    
+    info = store.getTokenInfo(t, consumer, "service", "token");
+    assertEquals("token", info.getAccessToken());
+    assertEquals("secret", info.getTokenSecret());
+    
+    FakeGadgetToken t2 = new FakeGadgetToken();
+    t2.setAppUrl("http://localhost:8080/gadgets/files/samplecontainer/examples/oauth.xml");
+    t2.setViewerId("viewer-two");
+    assertNull(store.getTokenInfo(t2, consumer, "service", "token"));
+    
+    store.removeToken(t, consumer, "service", "token");
+    assertNull(store.getTokenInfo(t, consumer, "service", "token"));
+  }
+  
+  @Test
+  public void testDefaultKey() throws Exception {
+    FakeGadgetToken t = new FakeGadgetToken();
+    t.setAppUrl("http://localhost:8080/not-in-store.xml");
+    OAuthServiceProvider provider = new OAuthServiceProvider("req", "authorize", "access");
 
     try {
-      accessorInfo = noDefaultStore.getOAuthAccessor(tokenKey, info);
-      fail("expected exception, but didn't get it");
-    } catch (OAuthNoDataException e) {
-      // this is expected
+      store.getConsumerKeyAndSecret(t, "", provider);
+      fail();
+    } catch (GadgetException e) {
+      // good
     }
-
-    control.verify();
-
-    ////////////////////////////////////////////////////////////////////////////
-    // now the case where we have negotiated an HMAC consumer secret
-
-    OAuthStore.ConsumerKeyAndSecret kas =
-        new OAuthStore.ConsumerKeyAndSecret("negotiatedkey",
-                                            "negotiatedsecret",
-                                            OAuthStore.KeyType.HMAC_SYMMETRIC);
-
-    info.setParamLocation(OAuthStore.OAuthParamLocation.POST_BODY);
-
-    control.reset();
-    control.checkOrder(false);
-
-    expect(mockConsumerInfos.get(eq(provKey))).andReturn(kas).once();
-    expect(mockTokens.get(tokenKey)).andReturn(tokenInfo);
-
-    control.replay();
-
-    accessorInfo = noDefaultStore.getOAuthAccessor(tokenKey, info);
-
-    control.verify();
-
-    assertSame(OAuthStore.OAuthParamLocation.POST_BODY,
-               accessorInfo.getParamLocation());
-
-    accessor = accessorInfo.getAccessor();
-
-    assertEquals("accesstoken", accessor.accessToken);
-    assertEquals("tokensecret", accessor.tokenSecret);
-    assertEquals("negotiatedkey", accessor.consumer.consumerKey);
-    assertEquals("negotiatedsecret", accessor.consumer.consumerSecret);
-    assertEquals("access", accessor.consumer.serviceProvider.accessTokenURL);
-    assertEquals("request", accessor.consumer.serviceProvider.requestTokenURL);
-    assertEquals("authorize",
-                 accessor.consumer.serviceProvider.userAuthorizationURL);
-
-    // the store with fallback keys should do the same thing
-
-    control.reset();
-    control.checkOrder(false);
-
-    expect(mockConsumerInfos.get(eq(provKey))).andReturn(kas).once();
-    expect(mockTokens.get(tokenKey)).andReturn(tokenInfo);
-
-    control.replay();
-
-    accessorInfo = withDefaultStore.getOAuthAccessor(tokenKey, info);
-
-    control.verify();
-
-    accessor = accessorInfo.getAccessor();
-
-    assertEquals("accesstoken", accessor.accessToken);
-    assertEquals("tokensecret", accessor.tokenSecret);
-    assertEquals("negotiatedkey", accessor.consumer.consumerKey);
-    assertEquals("negotiatedsecret", accessor.consumer.consumerSecret);
-    assertEquals("access", accessor.consumer.serviceProvider.accessTokenURL);
-    assertEquals("request", accessor.consumer.serviceProvider.requestTokenURL);
-    assertEquals("authorize",
-                 accessor.consumer.serviceProvider.userAuthorizationURL);
-
-    ////////////////////////////////////////////////////////////////////////////
-    // now the case where we have negotiated an RSA consumer key
-
-    kas = new OAuthStore.ConsumerKeyAndSecret("negotiatedkey",
-                                              "negotiatedsecret",
-                                              OAuthStore.KeyType.RSA_PRIVATE);
-
-    control.reset();
-    control.checkOrder(false);
-
-    expect(mockConsumerInfos.get(eq(provKey))).andReturn(kas).once();
-    expect(mockTokens.get(tokenKey)).andReturn(tokenInfo);
-
-    control.replay();
-
-    accessorInfo = noDefaultStore.getOAuthAccessor(tokenKey, info);
-
-    control.verify();
-
-    accessor = accessorInfo.getAccessor();
-
-    assertEquals("accesstoken", accessor.accessToken);
-    assertEquals("tokensecret", accessor.tokenSecret);
-    assertEquals("negotiatedkey", accessor.consumer.consumerKey);
-    assertNull(accessor.consumer.consumerSecret);
-    assertEquals("negotiatedsecret",
-                 accessor.consumer.getProperty(RSA_SHA1.PRIVATE_KEY));
-    assertEquals("access", accessor.consumer.serviceProvider.accessTokenURL);
-    assertEquals("request", accessor.consumer.serviceProvider.requestTokenURL);
-    assertEquals("authorize",
-                 accessor.consumer.serviceProvider.userAuthorizationURL);
-
-    // store with fallback keys should do the same
-
-    control.reset();
-    control.checkOrder(false);
-
-    expect(mockConsumerInfos.get(eq(provKey))).andReturn(kas).once();
-    expect(mockTokens.get(tokenKey)).andReturn(tokenInfo);
-
-    control.replay();
-
-    accessorInfo = noDefaultStore.getOAuthAccessor(tokenKey, info);
-
-    control.verify();
-
-    accessor = accessorInfo.getAccessor();
-
-    assertEquals("accesstoken", accessor.accessToken);
-    assertEquals("tokensecret", accessor.tokenSecret);
-    assertEquals("negotiatedkey", accessor.consumer.consumerKey);
-    assertNull(accessor.consumer.consumerSecret);
-    assertEquals("negotiatedsecret",
-                 accessor.consumer.getProperty(RSA_SHA1.PRIVATE_KEY));
-    assertEquals("access", accessor.consumer.serviceProvider.accessTokenURL);
-    assertEquals("request", accessor.consumer.serviceProvider.requestTokenURL);
-    assertEquals("authorize",
-                 accessor.consumer.serviceProvider.userAuthorizationURL);
-
-    ////////////////////////////////////////////////////////////////////////////
-    // now, test some error conditions: no token found
-
-    control.reset();
-    control.checkOrder(false);
-
-    expect(mockConsumerInfos.get(eq(provKey))).andStubReturn(kas);
-    expect(mockTokens.get(tokenKey)).andReturn(null);
-
-    control.replay();
-
-    accessorInfo = noDefaultStore.getOAuthAccessor(tokenKey, info);
-
-    control.verify();
-
-    assertNull(accessorInfo.getAccessor().accessToken);
-    assertNull(accessorInfo.getAccessor().requestToken);
-
-    // same with the store with fallback keys
-
-    control.reset();
-    control.checkOrder(false);
-
-    expect(mockConsumerInfos.get(eq(provKey))).andStubReturn(kas);
-    expect(mockTokens.get(tokenKey)).andReturn(null);
-
-    control.replay();
-
-    accessorInfo = withDefaultStore.getOAuthAccessor(tokenKey, info);
-    assertNull(accessorInfo.getAccessor().accessToken);
-    assertNull(accessorInfo.getAccessor().requestToken);
-
-    control.verify();
-
-  }
-
-  public void testSetOAuthConsumerKeyAndSecret() throws Exception {
-    OAuthStore.ProviderKey provKey = new OAuthStore.ProviderKey();
-    provKey.setGadgetUri("http://foo.bar.com/gadget.xml");
-    provKey.setServiceName("testservice");
-
-    OAuthStore.ConsumerKeyAndSecret kas =
-        new OAuthStore.ConsumerKeyAndSecret("consumerkey",
-                                            "consumersecret",
-                                            OAuthStore.KeyType.HMAC_SYMMETRIC);
-
-    OAuthServiceProvider provider = new OAuthServiceProvider(
-        "request", "authorize", "access");
-
-    OAuthStore.ProviderInfo info = new OAuthStore.ProviderInfo();
-    info.setHttpMethod(OAuthStore.HttpMethod.GET);
-    info.setSignatureType(OAuthStore.SignatureType.HMAC_SHA1);
-    info.setProvider(provider);
-
-    expect(mockConsumerInfos.put(provKey, kas)).andReturn(kas).once();
-
-    control.replay();
-
-    noDefaultStore.setOAuthConsumerKeyAndSecret(provKey, kas);
-
-    control.verify();
-
-  }
-
-  public void testSetTokenAndSecret() throws Exception {
-    OAuthStore.TokenKey tokenKey = new OAuthStore.TokenKey();
-    tokenKey.setGadgetUri("http://foo.bar.com/gadget.xml");
-    tokenKey.setServiceName("testservice");
-    tokenKey.setModuleId(9843243278L);
-    tokenKey.setTokenName("testtoken");
-    tokenKey.setUserId("test user");
-
-    OAuthStore.TokenInfo tokenInfo =
-        new OAuthStore.TokenInfo(SecurityTokenDecoder.SECURITY_TOKEN_NAME, "secret");
-
-
-    expect(mockTokens.put(tokenKey, tokenInfo)).andReturn(null);
-
-    control.replay();
-
-    noDefaultStore.setTokenAndSecret(tokenKey, tokenInfo);
-
-    control.verify();
+    
+    BasicOAuthStoreConsumerKeyAndSecret cks = new BasicOAuthStoreConsumerKeyAndSecret(
+        "somekey", "default", KeyType.RSA_PRIVATE, "keyname");
+    store.setDefaultKey(cks);
+    
+    ConsumerInfo consumer = store.getConsumerKeyAndSecret(t, "", provider);
+    assertEquals("somekey", consumer.getConsumer().consumerKey);
+    assertNull(consumer.getConsumer().consumerSecret);
+    assertEquals("RSA-SHA1", consumer.getConsumer().getProperty("oauth_signature_method"));
+    assertEquals("default", consumer.getConsumer().getProperty(RSA_SHA1.PRIVATE_KEY));
+    assertEquals(provider, consumer.getConsumer().serviceProvider);
+    assertEquals("keyname", consumer.getKeyName());
   }
 }

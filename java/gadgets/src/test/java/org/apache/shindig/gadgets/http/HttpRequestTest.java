@@ -23,6 +23,7 @@ import static org.junit.Assert.assertTrue;
 
 import org.apache.shindig.auth.AnonymousSecurityToken;
 import org.apache.shindig.common.uri.Uri;
+import org.apache.shindig.gadgets.oauth.OAuthArguments;
 
 import org.apache.commons.io.IOUtils;
 import org.junit.Test;
@@ -85,6 +86,9 @@ public class HttpRequestTest {
 
   @Test
   public void copyCtorCopiesAllFields() {
+    OAuthArguments oauthArguments = new OAuthArguments();
+    oauthArguments.setSignOwner(false);
+    oauthArguments.setSignViewer(true);
     HttpRequest request = new HttpRequest(DEFAULT_URI)
         .setCacheTtl(100)
         .addHeader(TEST_HEADER_KEY, TEST_HEADER_VALUE)
@@ -94,8 +98,7 @@ public class HttpRequestTest {
         .setPostBody(POST_BODY.getBytes())
         .setRewriteMimeType("text/fake")
         .setSecurityToken(new AnonymousSecurityToken())
-        .setSignOwner(false)
-        .setSignViewer(false);
+        .setOAuthArguments(oauthArguments);
 
     HttpRequest request2 = new HttpRequest(request).setUri(Uri.parse("http://example.org/foo"));
 
@@ -107,7 +110,9 @@ public class HttpRequestTest {
     assertEquals(request.getPostBodyAsString(), request2.getPostBodyAsString());
     assertEquals(request.getRewriteMimeType(), request2.getRewriteMimeType());
     assertEquals(request.getSecurityToken(), request2.getSecurityToken());
-    assertEquals(request.getSignOwner(), request2.getSignOwner());
-    assertEquals(request.getSignViewer(), request2.getSignViewer());
+    assertEquals(request.getOAuthArguments().getSignOwner(),
+        request2.getOAuthArguments().getSignOwner());
+    assertEquals(request.getOAuthArguments().getSignViewer(),
+        request2.getOAuthArguments().getSignViewer());
   }
 }
