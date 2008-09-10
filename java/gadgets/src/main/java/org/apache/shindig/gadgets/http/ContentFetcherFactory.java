@@ -17,10 +17,7 @@
  */
 package org.apache.shindig.gadgets.http;
 
-import org.apache.shindig.auth.SecurityToken;
 import org.apache.shindig.gadgets.GadgetException;
-import org.apache.shindig.gadgets.SigningFetcherFactory;
-import org.apache.shindig.gadgets.oauth.OAuthArguments;
 import org.apache.shindig.gadgets.oauth.OAuthFetcherFactory;
 
 import com.google.inject.Inject;
@@ -34,41 +31,23 @@ import com.google.inject.Provider;
 public class ContentFetcherFactory implements Provider<HttpFetcher> {
 
   private final RemoteContentFetcherFactory remoteContentFetcherFactory;
-  private final SigningFetcherFactory signingFetcherFactory;
   private final OAuthFetcherFactory oauthFetcherFactory;
 
   @Inject
   public ContentFetcherFactory(RemoteContentFetcherFactory remoteContentFetcherFactory,
-      SigningFetcherFactory signingFetcherFactory,
       OAuthFetcherFactory oauthFetcherFactory) {
-    this.signingFetcherFactory = signingFetcherFactory;
     this.remoteContentFetcherFactory = remoteContentFetcherFactory;
     this.oauthFetcherFactory = oauthFetcherFactory;
   }
 
   /**
-   * @param token
-   * @return A signing content fetcher
-   * @throws GadgetException
-   */
-  public HttpFetcher getSigningFetcher(SecurityToken token)
-      throws GadgetException {
-    return signingFetcherFactory.getSigningFetcher(
-            remoteContentFetcherFactory.get(), token);
-  }
-
-  /**
-   * @param token
-   * @param params
+   * @param request HttpRequest that will be sent through the fetcher
    * @return an OAuth fetcher
    * @throws GadgetException
    */
-  public HttpFetcher getOAuthFetcher(
-      SecurityToken token,
-      OAuthArguments params)
+  public HttpFetcher getOAuthFetcher(HttpRequest request)
       throws GadgetException {
-    return oauthFetcherFactory.getOAuthFetcher(
-        remoteContentFetcherFactory.get(), token, params);
+    return oauthFetcherFactory.getOAuthFetcher(remoteContentFetcherFactory.get(), request);
   }
 
   /**

@@ -193,8 +193,7 @@ public class GadgetServer {
     public HttpResponse call() {
       try {
         HttpRequest request = new HttpRequest(Uri.fromJavaUri(preload.getHref()))
-            .setSignOwner(preload.isSignOwner())
-            .setSignViewer(preload.isSignViewer())
+            .setOAuthArguments(new OAuthArguments(preload))
             .setContainer(context.getContainer())
             .setSecurityToken(context.getToken())
             .setGadget(Uri.fromJavaUri(context.getUrl()));
@@ -202,11 +201,8 @@ public class GadgetServer {
           case NONE:
             return preloadFetcherFactory.get().fetch(request);
           case SIGNED:
-            return preloadFetcherFactory.getSigningFetcher(context.getToken())
-                .fetch(request);
           case OAUTH:
-            return preloadFetcherFactory.getOAuthFetcher(context.getToken(),
-                new OAuthArguments(preload)).fetch(request);
+            return preloadFetcherFactory.getOAuthFetcher(request).fetch(request);
           default:
             return HttpResponse.error();
         }

@@ -20,10 +20,17 @@ package org.apache.shindig.gadgets.oauth;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.fail;
 
+import org.apache.shindig.common.testing.FakeHttpServletRequest;
 import org.apache.shindig.common.xml.XmlUtil;
+import org.apache.shindig.gadgets.GadgetException;
+import org.apache.shindig.gadgets.oauth.OAuthArguments.UseToken;
+import org.apache.shindig.gadgets.spec.Auth;
 import org.apache.shindig.gadgets.spec.Preload;
 import org.junit.Test;
+
+import javax.servlet.http.HttpServletRequest;
 
 /**
  * Tests parameter parsing
@@ -37,6 +44,7 @@ public class OAuthArgumentsTest {
     		"OAUTH_TOKEN_NAME='token' " +
     		"OAUTH_REQuest_token='requesttoken' " +
     		"oauth_request_token_secret='tokensecret' " +
+    		"OAUTH_USE_TOKEN='never' " +
     		"/>";
 
     Preload preload = new Preload(XmlUtil.parse(xml));
@@ -45,7 +53,150 @@ public class OAuthArgumentsTest {
     assertEquals("token", params.getTokenName());
     assertEquals("requesttoken", params.getRequestToken());
     assertEquals("tokensecret", params.getRequestTokenSecret());
+    assertEquals(UseToken.NEVER, params.getUseToken());
     assertNull(params.getOrigClientState());
     assertFalse(params.getBypassSpecCache());
+  }
+  
+  private FakeHttpServletRequest makeDummyRequest() throws Exception {
+    FakeHttpServletRequest req = new FakeHttpServletRequest();
+    req.setParameter("OAUTH_USE_TOKEN", true, "never");
+    req.setParameter("OAUTH_SERVICE_NAME", true, "service");
+    req.setParameter("OAUTH_TOKEN_NAME", true, "token");
+    req.setParameter("OAUTH_REQUEST_TOKEN", true, "reqtoken");
+    req.setParameter("OAUTH_REQUEST_TOKEN_SECRET", true, "secret");
+    req.setParameter("oauthState", true, "state");
+    req.setParameter("bypassSpecCache", true, "1");
+    req.setParameter("signOwner", true, "false");
+    req.setParameter("signViewer", true, "false");
+    return req;
+  }
+  
+  @Test
+  public void testInitFromRequest() throws Exception {
+    HttpServletRequest req = makeDummyRequest();
+    
+    OAuthArguments args = new OAuthArguments(Auth.SIGNED, req);
+    assertEquals(UseToken.NEVER, args.getUseToken());
+    assertEquals("service", args.getServiceName());
+    assertEquals("token", args.getTokenName());
+    assertEquals("reqtoken", args.getRequestToken());
+    assertEquals("secret", args.getRequestTokenSecret());
+    assertEquals("state", args.getOrigClientState());
+    assertEquals(true, args.getBypassSpecCache());
+    assertEquals(false, args.getSignOwner());
+    assertEquals(false, args.getSignViewer());
+  }
+  
+  @Test
+  public void testInitFromRequest_defaults() throws Exception {
+    HttpServletRequest req = new FakeHttpServletRequest();
+    OAuthArguments args = new OAuthArguments(Auth.SIGNED, req);
+    assertEquals(UseToken.NEVER, args.getUseToken());
+    assertEquals("", args.getServiceName());
+    assertEquals("", args.getTokenName());
+    assertEquals(null, args.getRequestToken());
+    assertEquals(null, args.getRequestTokenSecret());
+    assertEquals(null, args.getOrigClientState());
+    assertEquals(false, args.getBypassSpecCache());
+    assertEquals(true, args.getSignOwner());
+    assertEquals(true, args.getSignViewer());
+  }
+  
+  @Test
+  public void testInitFromRequest_oauthDefaults() throws Exception {
+    FakeHttpServletRequest req = new FakeHttpServletRequest();
+    OAuthArguments args = new OAuthArguments(Auth.OAUTH, req);
+    assertEquals(UseToken.ALWAYS, args.getUseToken());
+  }
+  
+  @Test
+  public void testNoArgConstructorDefaults() throws Exception {
+    OAuthArguments args = new OAuthArguments();
+    assertEquals(UseToken.ALWAYS, args.getUseToken());
+    assertEquals("", args.getServiceName());
+    assertEquals("", args.getTokenName());
+    assertEquals(null, args.getRequestToken());
+    assertEquals(null, args.getRequestTokenSecret());
+    assertEquals(null, args.getOrigClientState());
+    assertEquals(false, args.getBypassSpecCache());
+    assertEquals(false, args.getSignOwner());
+    assertEquals(false, args.getSignViewer());
+  }
+  
+  @Test
+  public void testGetAndSet() throws Exception {
+    OAuthArguments args = new OAuthArguments();
+    args.setBypassSpecCache(true);
+    assertEquals(true, args.getBypassSpecCache());
+    
+    args.setOrigClientState("thestate");
+    assertEquals("thestate", args.getOrigClientState());
+    
+    args.setRequestToken("rt");
+    assertEquals("rt", args.getRequestToken());
+    
+    args.setRequestTokenSecret("rts");
+    assertEquals("rts", args.getRequestTokenSecret());
+    
+    args.setServiceName("s");
+    assertEquals("s", args.getServiceName());
+    
+    args.setSignOwner(true);
+    assertEquals(true, args.getSignOwner());
+    
+    args.setSignViewer(true);
+    assertEquals(true, args.getSignViewer());
+    
+    args.setUseToken(UseToken.IF_AVAILABLE);
+    assertEquals(UseToken.IF_AVAILABLE, args.getUseToken());
+  }
+  
+  @Test
+  public void testCopyConstructor() throws Exception {
+    HttpServletRequest req = makeDummyRequest();
+    OAuthArguments args = new OAuthArguments(Auth.OAUTH, req);
+    args = new OAuthArguments(args);
+    assertEquals(UseToken.NEVER, args.getUseToken());
+    assertEquals("service", args.getServiceName());
+    assertEquals("token", args.getTokenName());
+    assertEquals("reqtoken", args.getRequestToken());
+    assertEquals("secret", args.getRequestTokenSecret());
+    assertEquals("state", args.getOrigClientState());
+    assertEquals(true, args.getBypassSpecCache());
+    assertEquals(false, args.getSignOwner());
+    assertEquals(false, args.getSignViewer());
+  }
+  
+  @Test
+  public void testParseUseToken() throws Exception {
+    FakeHttpServletRequest req = new FakeHttpServletRequest();
+    req.setParameter("OAUTH_USE_TOKEN", "ALWAYS");
+    OAuthArguments args = new OAuthArguments(Auth.SIGNED, req);
+    assertEquals(UseToken.ALWAYS, args.getUseToken());
+    
+    req.setParameter("OAUTH_USE_TOKEN", "if_available");
+    args = new OAuthArguments(Auth.SIGNED, req);
+    assertEquals(UseToken.IF_AVAILABLE, args.getUseToken());     
+    
+    req.setParameter("OAUTH_USE_TOKEN", "never");
+    args = new OAuthArguments(Auth.SIGNED, req);
+    assertEquals(UseToken.NEVER, args.getUseToken());
+    
+    req.setParameter("OAUTH_USE_TOKEN", "");
+    args = new OAuthArguments(Auth.SIGNED, req);
+    assertEquals(UseToken.NEVER, args.getUseToken());
+    
+    req.setParameter("OAUTH_USE_TOKEN", "");
+    args = new OAuthArguments(Auth.OAUTH, req);
+    assertEquals(UseToken.ALWAYS, args.getUseToken());
+    
+    try {
+      req.setParameter("OAUTH_USE_TOKEN", "stuff");
+      new OAuthArguments(Auth.OAUTH, req);
+      fail("Should have thrown");
+    } catch (GadgetException e) {
+      // good.
+    }
   }
 }

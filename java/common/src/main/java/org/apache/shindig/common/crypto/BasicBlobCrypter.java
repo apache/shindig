@@ -18,11 +18,17 @@
  */
 package org.apache.shindig.common.crypto;
 
+import org.apache.shindig.common.util.CharsetUtil;
 import org.apache.shindig.common.util.TimeSource;
 
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.codec.digest.DigestUtils;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
@@ -55,11 +61,46 @@ public class BasicBlobCrypter implements BlobCrypter {
   private byte[] hmacKey;
   
   /**
+   * Creates a crypter based on a key in a file.  The key is the first line
+   * in the file, whitespace trimmed from either end, as UTF-8 bytes.
+   * 
+   * The following *nix command line will create an excellent key:
+   * 
+   * dd if=/dev/random bs=32 count=1  | openssl base64 > /tmp/key.txt
+   * 
+   * @throws IOException if the file can't be read.
+   */
+  public BasicBlobCrypter(File keyfile) throws IOException {
+    FileInputStream openFile = null;
+    try {
+      openFile = new FileInputStream(keyfile);
+      BufferedReader reader = new BufferedReader(
+          new InputStreamReader(openFile, CharsetUtil.UTF8));
+      String line = reader.readLine();
+      line = line.trim();
+      byte[] keyBytes = CharsetUtil.getUtf8Bytes(line);
+      init(keyBytes);
+    } finally {
+      try {
+        if (openFile != null) {
+          openFile.close();
+        }
+      } catch (IOException e) {
+        // oh well.
+      }
+    }
+  }
+  
+  /**
    * Builds a BlobCrypter from the specified master key
    * 
    * @param masterKey
    */
   public BasicBlobCrypter(byte[] masterKey) {
+    init(masterKey);
+  }
+  
+  private void init(byte[] masterKey) {
     if (masterKey.length < MASTER_KEY_MIN_LEN) {
       throw new IllegalArgumentException("Master key needs at least " +
           MASTER_KEY_MIN_LEN + " bytes");

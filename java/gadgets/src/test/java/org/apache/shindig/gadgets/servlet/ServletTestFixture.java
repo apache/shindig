@@ -23,12 +23,11 @@ import static junitx.framework.ComparableAssert.assertLesser;
 import static org.easymock.EasyMock.expect;
 import static org.easymock.EasyMock.isA;
 
-import org.apache.shindig.auth.SecurityToken;
 import org.apache.shindig.common.util.DateUtil;
 import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.GadgetTestFixture;
 import org.apache.shindig.gadgets.LockedDomainService;
-import org.apache.shindig.gadgets.oauth.OAuthArguments;
+import org.apache.shindig.gadgets.http.HttpRequest;
 
 import org.apache.commons.lang.StringUtils;
 
@@ -57,10 +56,8 @@ public class ServletTestFixture extends GadgetTestFixture {
       // TODO: This is horrible. It needs to be fixed.
       HttpUtil.setTimeSource(timeSource);
       expect(contentFetcherFactory.get()).andReturn(fetcher).anyTimes();
-      expect(contentFetcherFactory.getSigningFetcher(isA(SecurityToken.class)))
-          .andReturn(signingFetcher).anyTimes();
       expect(contentFetcherFactory.getOAuthFetcher(
-          isA(SecurityToken.class), isA(OAuthArguments.class)))
+          isA(HttpRequest.class)))
           .andReturn(oauthFetcher).anyTimes();
       gadgetRenderer = new GadgetRenderingTask(gadgetServer, bundleFactory,
           registry, containerConfig, urlGenerator, lockedDomainService);

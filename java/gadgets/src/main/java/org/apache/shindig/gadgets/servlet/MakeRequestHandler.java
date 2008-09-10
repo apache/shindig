@@ -56,8 +56,6 @@ public class MakeRequestHandler extends ProxyBase{
   public static final String METHOD_PARAM = "httpMethod";
   public static final String HEADERS_PARAM = "headers";
   public static final String NOCACHE_PARAM = "nocache";
-  public static final String SIGN_VIEWER = "signViewer";
-  public static final String SIGN_OWNER = "signOwner";
   public static final String CONTENT_TYPE_PARAM = "contentType";
   public static final String NUM_ENTRIES_PARAM = "numEntries";
   public static final String DEFAULT_NUM_ENTRIES = "3";
@@ -82,14 +80,17 @@ public class MakeRequestHandler extends ProxyBase{
     // Figure out whether authentication is required
     Auth auth = Auth.parse(getParameter(request, AUTHZ_PARAM, ""));
     SecurityToken authToken = null;
+    OAuthArguments oauthArguments = null;
     if (auth != Auth.NONE) {
       authToken = extractAndValidateToken(request);
+      oauthArguments = new OAuthArguments(auth, request);
     }
 
     rcr.setSecurityToken(authToken);
+    rcr.setOAuthArguments(oauthArguments);
 
     // Build the chain of fetchers that will handle the request
-    HttpFetcher fetcher = getHttpFetcher(auth, authToken, request);
+    HttpFetcher fetcher = getHttpFetcher(auth, rcr);
 
     // Serialize the response
     HttpResponse results = fetcher.fetch(rcr);
@@ -140,12 +141,6 @@ public class MakeRequestHandler extends ProxyBase{
 
     req.setIgnoreCache("1".equals(request.getParameter(NOCACHE_PARAM)));
 
-    if (request.getParameter(SIGN_VIEWER) != null) {
-      req.setSignViewer(Boolean.parseBoolean(request.getParameter(SIGN_VIEWER)));
-    }
-    if (request.getParameter(SIGN_OWNER) != null) {
-      req.setSignOwner(Boolean.parseBoolean(request.getParameter(SIGN_OWNER)));
-    }
     if (request.getParameter(GADGET_PARAM) != null) {
       req.setGadget(Uri.parse(request.getParameter(GADGET_PARAM)));
     }
@@ -179,17 +174,13 @@ public class MakeRequestHandler extends ProxyBase{
    * Whatever we do needs to return a reference to the OAuthFetcher, if it is
    * present, so we can pull data out as needed.
    */
-  private HttpFetcher getHttpFetcher(Auth auth, SecurityToken token, HttpServletRequest request)
-      throws GadgetException {
+  private HttpFetcher getHttpFetcher(Auth auth, HttpRequest request) throws GadgetException {
     switch (auth) {
       case NONE:
         return contentFetcherFactory.get();
       case SIGNED:
-        // TODO: Remove token from signature and use what's on the request object instead.
-        return contentFetcherFactory.getSigningFetcher(token);
       case OAUTH:
-        // TODO: Remove token from signature, return what's on the request object.
-        return contentFetcherFactory.getOAuthFetcher(token, new OAuthArguments(request));
+        return contentFetcherFactory.getOAuthFetcher(request);
       default:
         return contentFetcherFactory.get();
     }

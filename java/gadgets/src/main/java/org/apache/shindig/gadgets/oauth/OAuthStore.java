@@ -17,7 +17,10 @@
  */
 package org.apache.shindig.gadgets.oauth;
 
-import net.oauth.OAuthAccessor;
+import org.apache.shindig.auth.SecurityToken;
+import org.apache.shindig.gadgets.GadgetException;
+
+import net.oauth.OAuthConsumer;
 import net.oauth.OAuthServiceProvider;
 
 /**
@@ -44,306 +47,37 @@ import net.oauth.OAuthServiceProvider;
 public interface OAuthStore {
 
   /**
-   * If we or a gadget negotiate a separate consumer key and secret with a
-   * service provider, use this method to store it. The "secret" can either
-   * be a consumer secret in the strict OAuth sense, or it can be a
-   * PKCS8-then-Base64 encoded private key that we'll be using with this
-   * service provider. Even if we never set a consumer secret, an implementation
-   * of this interface may still be able to return useful OAuthAccessors in
-   * the getOAuthAccessor method, e.g. by returning a fallback private key and
-   * default consumer key, which could be used with service providers that we
-   * haven't negotiated a consumer secret with.
-   *
-   * @param providerKey the gadget that wants to use the service provider, and
-   *                    a nickName under which the gadget will refer to this
-   *                    service provider in the future.
-   * @param keyAndSecret the consumer key and secret. If the secret is an RSA
-   *                     private key, it must be PKCS8-then-Base64 encoded.
-   * @throws OAuthStoreException if something goes wrong accessing the
-   *                                   data store.
-   * @throws OAuthNoDataException if no provider info can be found for the
-   *                              provider specified in the providerKey.
+   * Information about an OAuth consumer.
    */
-  public void setOAuthConsumerKeyAndSecret(ProviderKey providerKey,
-                                           ConsumerKeyAndSecret keyAndSecret)
-      throws OAuthStoreException, OAuthNoDataException;
-
-  /**
-   * Stores an access token.
-   * @param tokenKey a structure uniquely identifying the key under which this
-   *                 access token should be retrievable: a userId, a gadgetId,
-   *                 a moduleId (in case there are more than one gadget of the
-   *                 same type on a page), a tokenName (which distinguishes
-   *                 this token from others that the same gadget might hold for
-   *                 the same service provider) and a serviceName (which is the
-   *                 same as the service name in the ProviderKey structure).
-   * @param tokenInfo an access token and token secret.
-   * @throws OAuthStoreException if an error occurs talking to the
-   *                                   data store.
-   */
-  public void setTokenAndSecret(TokenKey tokenKey, TokenInfo tokenInfo)
-      throws OAuthStoreException;
-
-
-  /**
-   * Removes an access token
-   * @param tokenKey the identifier for the access token
-   * @throws OAuthStoreException if an error occurs talking to the data store.
-   * @throws OAuthNoDataException if no existing access token is found.
-   */
-  public void removeToken(TokenKey tokenKey)
-      throws OAuthStoreException, OAuthNoDataException;
+  public static class ConsumerInfo {
+    private final OAuthConsumer consumer;
+    private final String keyName;
+    
+    /**
+     * @param consumer the OAuth consumer
+     * @param keyName the name of the key to use for this consumer (passed on query parameters to
+     * help with key rotation.)
+     */
+    public ConsumerInfo(OAuthConsumer consumer, String keyName) {
+      this.consumer = consumer;
+      this.keyName = keyName;
+    }
+    
+    public OAuthConsumer getConsumer() {
+      return consumer;
+    }
+    
+    public String getKeyName() {
+      return keyName;
+    }
+  }
   
   /**
-   * Retrieve an OAuthAccessor that is ready to sign OAuthMessages for
-   * resource access.
-   * @param tokenKey a structure uniquely identifying the token: a userId,
-   *                 a gadgetId, a moduleId (in case there are more than one
-   *                 gadget of the same type on a page), a tokenName (which
-   *                 distinguishes this token from others that the same gadget
-   *                 might hold for the same service provider) and a serviceName
-   *                 (which is the same as the service name in the ProviderKey
-   *                 structure).
-   * @param provInfo provider information. The store combines information stored
-   *                 in the store (consumer key/secret, token, token secret,
-   *                 etc.) with the provider information (access URL, request
-   *                 URL etc.) passed in here to create an AccessorInfo object.
-   *                 If no information can be found in the
-   *                 store, it may use default keys that identify the container,
-   *                 as opposed to consumer keys and secrets that are specific
-   *                 to this gadget.
-   * @return an OAuthAccessor object than can be passed to an OAuthMessage.sign
-   *         method.
-   * @throws OAuthNoDataException if the token couldn't be found
-   * @throws OAuthStoreException if an error occurred accessing the data
-   *                                   store.
+   * Information about an access token.
    */
-  public AccessorInfo getOAuthAccessor(TokenKey tokenKey,
-      ProviderInfo provInfo)
-      throws OAuthNoDataException, OAuthStoreException;
-
-
-  //////////////////////////////////////////////////////////////////////////////
-  // Auxiliary types needed to work with this interface
-  //////////////////////////////////////////////////////////////////////////////
-
-  public static enum HttpMethod { GET, POST }
-  public static enum SignatureType {HMAC_SHA1, RSA_SHA1, PLAINTEXT}
-  public static enum KeyType { HMAC_SYMMETRIC, RSA_PRIVATE }
-  public static enum OAuthParamLocation {
-    AUTH_HEADER,
-    POST_BODY,
-    URI_QUERY
-  }
-
-  public static class AccessorInfo {
-    OAuthAccessor accessor;
-    HttpMethod httpMethod;
-    SignatureType signatureType;
-    OAuthParamLocation paramLocation;
-
-    public OAuthParamLocation getParamLocation() {
-      return paramLocation;
-    }
-    public void setParamLocation(OAuthParamLocation paramLocation) {
-      this.paramLocation = paramLocation;
-    }
-    public OAuthAccessor getAccessor() {
-      return accessor;
-    }
-    public void setAccessor(OAuthAccessor accessor) {
-      this.accessor = accessor;
-    }
-    public HttpMethod getHttpMethod() {
-      return httpMethod;
-    }
-    public void setHttpMethod(HttpMethod httpMethod) {
-      this.httpMethod = httpMethod;
-    }
-    public SignatureType getSignatureType() {
-      return signatureType;
-    }
-    public void setSignatureType(SignatureType signatureType) {
-      this.signatureType = signatureType;
-    }
-  }
-
-  public static class ConsumerKeyAndSecret {
-    private String consumerKey;
-    private String consumerSecret;
-    private KeyType keyType;
-
-    public ConsumerKeyAndSecret(String key, String secret, KeyType type) {
-      consumerKey = key;
-      consumerSecret = secret;
-      keyType = type;
-    }
-    public String getConsumerKey() {
-      return consumerKey;
-    }
-    public String getConsumerSecret() {
-      return consumerSecret;
-    }
-    public KeyType getKeyType() {
-      return keyType;
-    }
-  }
-
-  public static class ProviderKey {
-    private String gadgetUri;
-    private String serviceName;
-
-    public String getGadgetUri() {
-      return gadgetUri;
-    }
-    public void setGadgetUri(String gadgetUri) {
-      this.gadgetUri = gadgetUri;
-    }
-    public String getServiceName() {
-      return serviceName;
-    }
-    public void setServiceName(String serviceName) {
-      this.serviceName = serviceName;
-    }
-
-    @Override
-    public int hashCode() {
-      final int prime = 31;
-      int result = 1;
-      result =
-          prime * result + ((gadgetUri == null) ? 0 : gadgetUri.hashCode());
-      result =
-          prime * result + ((serviceName == null) ? 0 : serviceName.hashCode());
-      return result;
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-      if (this == obj) return true;
-      if (obj == null) return false;
-      if (getClass() != obj.getClass()) return false;
-      final ProviderKey other = (ProviderKey) obj;
-      if (gadgetUri == null) {
-        if (other.gadgetUri != null) return false;
-      } else if (!gadgetUri.equals(other.gadgetUri)) return false;
-      if (serviceName == null) {
-        if (other.serviceName != null) return false;
-      } else if (!serviceName.equals(other.serviceName)) return false;
-      return true;
-    }
-  }
-
-  public static class ProviderInfo {
-    private OAuthServiceProvider provider;
-    private HttpMethod httpMethod;
-    private SignatureType signatureType;
-    private OAuthParamLocation paramLocation;
-
-    public OAuthParamLocation getParamLocation() {
-      return paramLocation;
-    }
-    public void setParamLocation(OAuthParamLocation paramLocation) {
-      this.paramLocation = paramLocation;
-    }
-    public OAuthServiceProvider getProvider() {
-      return provider;
-    }
-    public void setProvider(OAuthServiceProvider provider) {
-      this.provider = provider;
-    }
-    public HttpMethod getHttpMethod() {
-      return httpMethod;
-    }
-    public void setHttpMethod(HttpMethod httpMethod) {
-      this.httpMethod = httpMethod;
-    }
-    public SignatureType getSignatureType() {
-      return signatureType;
-    }
-    public void setSignatureType(SignatureType signatureType) {
-      this.signatureType = signatureType;
-    }
-  }
-
-  public static class TokenKey {
-    private String userId;
-    private String gadgetUri;
-    private long moduleId;
-    private String tokenName;
-    private String serviceName;
-
-    public String getUserId() {
-      return userId;
-    }
-    public void setUserId(String userId) {
-      this.userId = userId;
-    }
-    public String getGadgetUri() {
-      return gadgetUri;
-    }
-    public void setGadgetUri(String gadgetUri) {
-      this.gadgetUri = gadgetUri;
-    }
-    public long getModuleId() {
-      return moduleId;
-    }
-    public void setModuleId(long moduleId) {
-      this.moduleId = moduleId;
-    }
-    public String getTokenName() {
-      return tokenName;
-    }
-    public void setTokenName(String tokenName) {
-      this.tokenName = tokenName;
-    }
-    public String getServiceName() {
-      return serviceName;
-    }
-    public void setServiceName(String serviceName) {
-      this.serviceName = serviceName;
-    }
-
-    @Override
-    public int hashCode() {
-      final int prime = 31;
-      int result = 1;
-      result =
-          prime * result + ((gadgetUri == null) ? 0 : gadgetUri.hashCode());
-      result = prime * result + (int) (moduleId ^ (moduleId >>> 32));
-      result =
-          prime * result + ((serviceName == null) ? 0 : serviceName.hashCode());
-      result =
-          prime * result + ((tokenName == null) ? 0 : tokenName.hashCode());
-      result = prime * result + ((userId == null) ? 0 : userId.hashCode());
-      return result;
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-      if (this == obj) return true;
-      if (obj == null) return false;
-      if (getClass() != obj.getClass()) return false;
-      final TokenKey other = (TokenKey) obj;
-      if (gadgetUri == null) {
-        if (other.gadgetUri != null) return false;
-      } else if (!gadgetUri.equals(other.gadgetUri)) return false;
-      if (moduleId != other.moduleId) return false;
-      if (serviceName == null) {
-        if (other.serviceName != null) return false;
-      } else if (!serviceName.equals(other.serviceName)) return false;
-      if (tokenName == null) {
-        if (other.tokenName != null) return false;
-      } else if (!tokenName.equals(other.tokenName)) return false;
-      if (userId == null) {
-        if (other.userId != null) return false;
-      } else if (!userId.equals(other.userId)) return false;
-      return true;
-    }
-  }
-
   public static class TokenInfo {
-    private String accessToken;
-    private String tokenSecret;
+    private final String accessToken;
+    private final String tokenSecret;
     public TokenInfo(String token, String secret) {
       accessToken = token;
       tokenSecret = secret;
@@ -355,4 +89,41 @@ public interface OAuthStore {
       return tokenSecret;
     }
   }
+
+  /**
+   * Retrieve OAuth consumer to use for requests.  The returned consumer is ready to use for signed
+   * fetch requests.
+   * 
+   * @param securityToken token for user/gadget making request.
+   * @param serviceName gadget's nickname for the service being accessed.
+   * @param provider OAuth service provider info to be inserted into the returned consumer.
+   * 
+   * @throws GadgetException if no OAuth consumer can be found (e.g. no consumer key can be used.)
+   */
+  public ConsumerInfo getConsumerKeyAndSecret(SecurityToken securityToken, String serviceName,
+      OAuthServiceProvider provider) throws GadgetException;
+
+  /**
+   * Retrieve OAuth access token to use for the request.
+   * @param securityToken token for user/gadget making request.
+   * @param consumerInfo OAuth consumer that will be used for the request.
+   * @param serviceName gadget's nickname for the service being accessed.
+   * @param tokenName gadget's nickname for the token to use.
+   * @return the token and secret, or null if none exist
+   * @throws GadgetException if an error occurs during lookup
+   */
+  public TokenInfo getTokenInfo(SecurityToken securityToken, ConsumerInfo consumerInfo,
+      String serviceName, String tokenName) throws GadgetException;
+
+  /**
+   * Set the access token for the given user/gadget/service/token
+   */
+  public void setTokenInfo(SecurityToken securityToken, ConsumerInfo consumerInfo, String serviceName,
+      String tokenName, TokenInfo tokenInfo) throws GadgetException;
+
+  /**
+   * Remove the access token for the given user/gadget/service/token
+   */
+  public void removeToken(SecurityToken securityToken, ConsumerInfo consumerInfo,
+      String serviceName, String tokenName) throws GadgetException;
 }
