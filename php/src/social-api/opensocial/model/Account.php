@@ -19,7 +19,6 @@
 
 /**
  * see
- * http://code.google.com/apis/opensocial/docs/0.7/reference/opensocial.Account.Field.html
  *
  */
 class Account implements ComplexField {

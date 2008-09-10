@@ -22,7 +22,7 @@
  * Base interface for all message objects.
  * 
  * see
- * http://code.google.com/apis/opensocial/docs/0.7/reference/opensocial.Message.html
+ * http://code.google.com/apis/opensocial/docs/0.8/reference/#opensocial.Message
  *
  */
 class Message {

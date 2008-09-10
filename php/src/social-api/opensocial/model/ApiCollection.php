@@ -19,7 +19,7 @@
 
 /**
  * see
- * http://code.google.com/apis/opensocial/docs/0.7/reference/opensocial.Collection.html
+ * http://code.google.com/apis/opensocial/docs/0.8/reference/#opensocial.Collection
  */
 class ApiCollection {
 	public $items = array();

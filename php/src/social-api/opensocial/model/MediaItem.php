@@ -19,7 +19,7 @@
 
 /**
  * see
- * http://code.google.com/apis/opensocial/docs/0.7/reference/opensocial.Activity.MediaItem.Field.html
+ * http://code.google.com/apis/opensocial/docs/0.8/reference/#opensocial.MediaItem
  *
  */
 class MediaItem {

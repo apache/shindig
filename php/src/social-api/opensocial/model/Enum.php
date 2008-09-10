@@ -19,7 +19,7 @@
 
 /**
  * see
- * http://code.google.com/apis/opensocial/docs/0.7/reference/opensocial.Enum.html
+ * http://code.google.com/apis/opensocial/docs/0.8/reference/#opensocial.Enum
  *
  * Base class for all Enum objects. This class allows containers to use constants
  * for fields that have a common set of values.
