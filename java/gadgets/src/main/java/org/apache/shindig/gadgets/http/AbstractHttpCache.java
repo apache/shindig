@@ -51,11 +51,6 @@ public abstract class AbstractHttpCache implements HttpCache {
 
       response = responseBuilder.create();
       addResponseImpl(key.toString(), response);
-      
-      if (!request.getIgnoreCache() &&
-           response.getRewritten() != null) {
-        return response.getRewritten();
-      }
     }
     
     return response;

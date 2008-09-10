@@ -50,7 +50,6 @@ public class HttpResponseBuilder {
     headers.putAll(response.getHeaders());
     metadata.putAll(response.getMetadata());
     responseBytes = response.getResponseAsBytes();
-    rewritten = response.getRewritten();
   }
 
   /**
