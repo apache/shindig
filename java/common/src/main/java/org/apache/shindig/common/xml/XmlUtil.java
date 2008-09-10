@@ -21,6 +21,7 @@ package org.apache.shindig.common.xml;
 import org.w3c.dom.Element;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
+import org.xml.sax.ErrorHandler;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 import org.xml.sax.SAXParseException;
@@ -29,11 +30,28 @@ import java.io.IOException;
 import java.io.StringReader;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
+import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
 public class XmlUtil {
+  private static final Logger LOG = Logger.getLogger(XmlUtil.class.getName());
+  // Handles xml errors so that they're not logged to stderr.
+  private static final ErrorHandler errorHandler = new ErrorHandler() {
+    public void error(SAXParseException exception) throws SAXException {
+      throw exception;
+    }
+    public void fatalError(SAXParseException exception) throws SAXException {
+      throw exception;
+    }
+    public void warning(SAXParseException exception) {
+      // warnings can be ignored.
+      LOG.log(Level.INFO, "XmlUtil warning", exception);
+    }
+  };
 
   private XmlUtil() {}
 
@@ -183,7 +201,9 @@ public class XmlUtil {
     try {
       DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
       InputSource is = new InputSource(new StringReader(xml.trim()));
-      return factory.newDocumentBuilder().parse(is).getDocumentElement();
+      DocumentBuilder builder = factory.newDocumentBuilder();
+      builder.setErrorHandler(errorHandler);
+      return builder.parse(is).getDocumentElement();
     } catch (SAXParseException e) {
       throw new XmlException(e.getMessage()+" At: ("+e.getLineNumber()+ ',' +e.getColumnNumber()+ ')', e);
     } catch (SAXException e) {
