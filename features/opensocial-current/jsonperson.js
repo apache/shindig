@@ -26,7 +26,6 @@
 var JsonPerson = function(opt_params) {
   opt_params = opt_params || {};
 
-  // TODO: doesn't handle drinker, smoker, or gender yet
   JsonPerson.constructObject(opt_params, "bodyType", opensocial.BodyType);
   JsonPerson.constructObject(opt_params, "currentLocation", opensocial.Address);
   JsonPerson.constructObject(opt_params, "dateOfBirth", Date);
