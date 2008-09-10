@@ -64,7 +64,7 @@ public abstract class GadgetTestFixture extends EasyMockTestCase {
     }
   }
   
-  protected static class CaptureRewriter implements ContentRewriter {
+  public static class CaptureRewriter implements ContentRewriter {
     private boolean rewroteView = false;
     private boolean rewroteResponse = false;
 

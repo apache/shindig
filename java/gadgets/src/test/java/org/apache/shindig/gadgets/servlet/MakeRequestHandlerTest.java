@@ -31,6 +31,7 @@ import org.apache.shindig.gadgets.http.HttpFetcher;
 import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.http.HttpResponse;
 import org.apache.shindig.gadgets.http.HttpResponseBuilder;
+import org.apache.shindig.gadgets.rewrite.BasicContentRewriterRegistry;
 import org.apache.shindig.gadgets.spec.Auth;
 
 import com.google.common.collect.Lists;
@@ -52,7 +53,8 @@ public class MakeRequestHandlerTest extends ServletTestFixture {
   private static final String RESPONSE_BODY = "makeRequest response body";
   private static final SecurityToken DUMMY_TOKEN = new FakeGadgetToken();
 
-  private final MakeRequestHandler handler = new MakeRequestHandler(contentFetcherFactory);
+  private final MakeRequestHandler handler = new MakeRequestHandler(contentFetcherFactory,
+      new BasicContentRewriterRegistry(rewriter, null));
 
   private void expectGetAndReturnBody(String response) throws Exception {
     expectGetAndReturnBody(fetcher, response);
@@ -100,6 +102,7 @@ public class MakeRequestHandlerTest extends ServletTestFixture {
     JSONObject results = extractJsonFromResponse();
     assertEquals(HttpResponse.SC_OK, results.getInt("rc"));
     assertEquals(RESPONSE_BODY, results.get("body"));
+    assertTrue(rewriter.responseWasRewritten());
   }
 
   public void testExplicitHeaders() throws Exception {
@@ -128,6 +131,7 @@ public class MakeRequestHandlerTest extends ServletTestFixture {
     JSONObject results = extractJsonFromResponse();
     assertEquals(HttpResponse.SC_OK, results.getInt("rc"));
     assertEquals(RESPONSE_BODY, results.get("body"));
+    assertTrue(rewriter.responseWasRewritten());
   }
 
   public void testPostRequest() throws Exception {
@@ -140,6 +144,7 @@ public class MakeRequestHandlerTest extends ServletTestFixture {
 
     assertEquals(HttpResponse.SC_OK, results.getInt("rc"));
     assertEquals(RESPONSE_BODY, results.get("body"));
+    assertTrue(rewriter.responseWasRewritten());
   }
 
   @Test
@@ -172,6 +177,7 @@ public class MakeRequestHandlerTest extends ServletTestFixture {
     assertEquals(entryLink, entry.getString("Link"));
     assertNull("getSummaries has the wrong default value (should be false).",
         entry.optString("Summary", null));
+    assertTrue(rewriter.responseWasRewritten());
   }
 
   public void testFetchFeedWithParameters() throws Exception {
@@ -218,6 +224,7 @@ public class MakeRequestHandlerTest extends ServletTestFixture {
     assertEquals(entryLink, entry.getString("Link"));
     assertTrue("getSummaries not parsed correctly.", entry.has("Summary"));
     assertEquals(entrySummary, entry.getString("Summary"));
+    assertTrue(rewriter.responseWasRewritten());
   }
 
   public void testFetchEmptyDocument() throws Exception {
@@ -229,6 +236,7 @@ public class MakeRequestHandlerTest extends ServletTestFixture {
 
     assertEquals(HttpResponse.SC_OK, results.getInt("rc"));
     assertEquals("", results.get("body"));
+    assertTrue(rewriter.responseWasRewritten());
   }
 
   public void testSignedGetRequest() throws Exception {
@@ -245,6 +253,7 @@ public class MakeRequestHandlerTest extends ServletTestFixture {
     JSONObject results = extractJsonFromResponse();
 
     assertEquals(RESPONSE_BODY, results.get("body"));
+    assertTrue(rewriter.responseWasRewritten());
   }
 
   public void testSignedPostRequest() throws Exception {
@@ -263,6 +272,7 @@ public class MakeRequestHandlerTest extends ServletTestFixture {
     assertEquals(RESPONSE_BODY, results.get("body"));
     assertFalse("A security token was returned when it was not requested.",
         results.has("st"));
+    assertTrue(rewriter.responseWasRewritten());
   }
 
   public void testChangeSecurityToken() throws Exception {
@@ -281,6 +291,7 @@ public class MakeRequestHandlerTest extends ServletTestFixture {
 
     assertEquals(RESPONSE_BODY, results.get("body"));
     assertEquals("updated", results.getString("st"));
+    assertTrue(rewriter.responseWasRewritten());
   }
 
   public void testDoOAuthRequest() throws Exception {
@@ -301,6 +312,7 @@ public class MakeRequestHandlerTest extends ServletTestFixture {
 
     assertEquals(HttpResponse.SC_OK, results.getInt("rc"));
     assertEquals(RESPONSE_BODY, results.get("body"));
+    assertTrue(rewriter.responseWasRewritten());
   }
 
   public void testInvalidSigningTypeTreatedAsNone() throws Exception {
@@ -313,6 +325,7 @@ public class MakeRequestHandlerTest extends ServletTestFixture {
 
     assertEquals(HttpResponse.SC_OK, results.getInt("rc"));
     assertEquals(RESPONSE_BODY, results.get("body"));
+    assertTrue(rewriter.responseWasRewritten());
   }
 
   public void testBadHttpResponseIsPropagated() throws Exception {
@@ -324,6 +337,7 @@ public class MakeRequestHandlerTest extends ServletTestFixture {
     JSONObject results = extractJsonFromResponse();
 
     assertEquals(HttpResponse.SC_INTERNAL_SERVER_ERROR, results.getInt("rc"));
+    assertTrue(rewriter.responseWasRewritten());
   }
 
   public void testBadSecurityTokenThrows() throws Exception {
@@ -355,5 +369,6 @@ public class MakeRequestHandlerTest extends ServletTestFixture {
     JSONObject results = extractJsonFromResponse();
 
     assertEquals(RESPONSE_BODY, results.getString("foo"));
+    assertTrue(rewriter.responseWasRewritten());
   }
 }

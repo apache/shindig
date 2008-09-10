@@ -21,8 +21,12 @@ import static org.easymock.EasyMock.expect;
 import static org.easymock.classextension.EasyMock.replay;
 
 import org.apache.shindig.common.cache.DefaultCacheProvider;
+import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.gadgets.Gadget;
 import org.apache.shindig.gadgets.GadgetContext;
+import org.apache.shindig.gadgets.http.HttpRequest;
+import org.apache.shindig.gadgets.http.HttpResponse;
+import org.apache.shindig.gadgets.http.HttpResponseBuilder;
 import org.apache.shindig.gadgets.spec.GadgetSpec;
 import org.apache.shindig.gadgets.spec.View;
 import org.easymock.classextension.EasyMock;
@@ -60,6 +64,10 @@ public class CachingContentRewriterRegistryTest extends TestCase {
     expect(spec.getUrl()).andReturn(new URI("http://gadget.org/gadget.xml")).anyTimes();
     GadgetContext context = EasyMock.createNiceMock(GadgetContext.class);
     expect(context.getView()).andReturn(GadgetSpec.DEFAULT_VIEW).anyTimes();
+    HttpRequest request = new HttpRequest(Uri.parse("http://request.org/cgi-bin/request.py"));
+    request.setCacheTtl(Integer.MAX_VALUE);
+    HttpResponse resp = new HttpResponseBuilder().setResponseString(inputContent)
+        .setCacheTtl(-1).setExpirationTime(-1).setHttpStatusCode(200).create();
     replay(context, view, spec);
     
     Gadget gadget = new Gadget(context, spec, null, null, null);
@@ -69,6 +77,11 @@ public class CachingContentRewriterRegistryTest extends TestCase {
     assertTrue(r.rewriteGadget(gadget));
     assertEquals(rewrittenContent, gadget.getContent());
     
+    // Likewise for the http response
+    HttpResponse rewrittenResp = r.rewriteHttpResponse(request, resp);
+    assertNotSame(rewrittenResp, resp);
+    assertEquals(rewrittenContent, rewrittenResp.getResponseAsString());
+    
     r.appendRewriter(new AppendingRewriter("-end"));
     
     // Should also be rewritten the second time, but with the previous
@@ -76,5 +89,8 @@ public class CachingContentRewriterRegistryTest extends TestCase {
     Gadget nextGadget = new Gadget(context, spec, null, null, null);
     assertTrue(r.rewriteGadget(nextGadget));
     assertEquals(rewrittenContent, nextGadget.getContent());
+    
+    HttpResponse rewrittenResp2 = r.rewriteHttpResponse(request, resp);
+    assertEquals(rewrittenContent, rewrittenResp2.getResponseAsString());
   }
 }

@@ -17,15 +17,14 @@
  */
 package org.apache.shindig.gadgets.rewrite;
 
-import java.util.List;
-import java.util.logging.Logger;
-
 import org.apache.shindig.common.cache.CacheProvider;
-import org.apache.shindig.gadgets.CachingWebRetrievalFactory;
+import org.apache.shindig.common.cache.TtlCache;
+import org.apache.shindig.common.util.HashUtil;
 import org.apache.shindig.gadgets.Gadget;
 import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.http.HttpResponse;
+import org.apache.shindig.gadgets.http.HttpResponseBuilder;
 import org.apache.shindig.gadgets.parse.GadgetHtmlParser;
 import org.apache.shindig.gadgets.rewrite.BasicContentRewriterRegistry;
 import org.apache.shindig.gadgets.rewrite.ContentRewriter;
@@ -34,93 +33,115 @@ import org.apache.shindig.gadgets.spec.GadgetSpec;
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
 
+import java.util.List;
+
 /**
- * Implementation of a content rewriter registry that delegates to
- * {@code BasicContentRewriterRegistry} for base operations, but also
- * provides a layer of caching atop that.
+ * Standard implementation of a content rewriter with caching logic layered atop it.
+ * Uses {@code BasicContentRewriterRegistry} for actual rewriting, and a
+ * {@code TtlCache}, whose underlying persistence is provided by {@code CacheProvider},
+ * as the cache.
  */
-public class CachingContentRewriterRegistry
-    extends CachingWebRetrievalFactory<String, Gadget, String>
-    implements ContentRewriterRegistry {
+public class CachingContentRewriterRegistry extends BasicContentRewriterRegistry {
   
-  static final Logger logger = Logger.getLogger(CachingContentRewriterRegistry.class.getName());
-  private final BasicContentRewriterRegistry baseRegistry;
+  private final TtlCache<String, String> rewrittenCache;
+  private String rewritersKey;
   
   @Inject
   public CachingContentRewriterRegistry(ContentRewriter firstRewriter,
       GadgetHtmlParser htmlParser,
       CacheProvider cacheProvider,
-      @Named("shindig.gadget-spec.cache.capacity")int capacity,
-      @Named("shindig.gadget-spec.cache.minTTL")long minTtl,
-      @Named("shindig.gadget-spec.cache.maxTTL")long maxTtl) {
-    // Cache configuration values are currently identical to those for the spec
-    // cache in BasicGadgetSpecFactory for backward compatibility (ensuring that if
-    // caching is set up for specs, it's set up for rewritten content as well)
-    // TODO: create separate rewritten-content config values.
-    super(cacheProvider, capacity, minTtl, maxTtl);
-    baseRegistry = new BasicContentRewriterRegistry(firstRewriter, htmlParser);
+      @Named("shindig.rewritten-content.cache.capacity")int capacity,
+      @Named("shindig.rewritten-content.cache.minTTL")long minTtl,
+      @Named("shindig.rewritten-content.cache.maxTTL")long maxTtl) {
+    super(firstRewriter, htmlParser);
+    rewrittenCache = new TtlCache<String, String>(cacheProvider, capacity, minTtl, maxTtl);
   }
 
-  @Override
-  protected String getCacheKeyFromQueryObj(Gadget gadget) {
-    // Cache by URI + View. Since we always append a view, there should be no
-    // key conflicts associated with this operation.
-    return gadget.getSpec().getUrl().toString() + "#v=" + gadget.getCurrentView().getName();
-  }
-
-  @Override
-  protected Logger getLogger() {
-    return logger;
-  }
-
-  @Override
-  protected FetchedObject<String> retrieveRawObject(Gadget gadget,
-      boolean ignoreCache) throws GadgetException {
-    // Always attempt to rewrite the inbound gadget object.
-    // Even if that fails, the non-rewritten Gadget should be cached,
-    // to avoid superfluous rewrites later.
-    baseRegistry.rewriteGadget(gadget);
-    
-    // Expiration time of 30 minutes by default. This number is arbitrary.
-    // TODO: Make this value configurable.
-    long expiration = System.currentTimeMillis() + (1000 * 60 * 30);
-    Object expirationObj = gadget.getSpec().getAttribute(GadgetSpec.EXPIRATION_ATTRIB);
-    if (expirationObj instanceof Long) {
-      expiration = (Long)expirationObj;
-    }
-    
-    return new FetchedObject<String>(gadget.getContent(), expiration);
+  protected String getGadgetCacheKey(Gadget gadget) {
+    return getRewritersKey() + ":" + HashUtil.checksum(gadget.getContent().getBytes());
   }
   
-  /** {@inheritDoc} */
-  public List<ContentRewriter> getRewriters() {
-    return baseRegistry.getRewriters();
+  protected String getHttpResponseCacheKey(HttpRequest req, HttpResponse response) {
+    return getRewritersKey() + ":" + req.getUri().toString() + ":" + 
+        HashUtil.checksum(response.getResponseAsString().getBytes());
+  }
+  
+  private String getRewritersKey() {
+    if (rewritersKey == null) {
+      // No need for lock: "rewriter key" generation is idempotent
+      StringBuilder keyBuilder = new StringBuilder();
+      List<ContentRewriter> rewriters = getRewriters();
+      for (ContentRewriter rewriter : rewriters) {
+        keyBuilder.append(rewriter.getClass().getCanonicalName())
+            .append("-").append(rewriter.getClass().hashCode());
+      }
+      rewritersKey = keyBuilder.toString();
+    }
+    return rewritersKey;
   }
 
   /** {@inheritDoc} */
   public boolean rewriteGadget(Gadget gadget)
       throws GadgetException {
-    String cached = doCachedFetch(gadget, gadget.getContext().getIgnoreCache());
+    if (gadget.getContext().getIgnoreCache()) {
+      return super.rewriteGadget(gadget);
+    }
     
-    // At present, the output of rewriting is just the string contained within
-    // the Gadget object. Thus, a successful cache hit results in copying over the
-    // rewritten value to the input gadget object.
-    // TODO: Clean up the ContentRewriter interface so rewriting "output" is clearer.
-    // TODO: If necessary later, copy other modified contents to Gadget object.
+    String cacheKey = getGadgetCacheKey(gadget);
+    String cached = rewrittenCache.getElement(cacheKey);
+    
     if (cached != null) {
       gadget.setContent(cached);
       return true;
     }
     
-    return baseRegistry.rewriteGadget(gadget);
+    // Do a fresh rewrite and cache the results.
+    boolean rewritten = super.rewriteGadget(gadget);
+    if (rewritten) {
+      // Only cache if the rewriters did something.
+      long expiration = 0;
+      Object expirationObj = gadget.getSpec().getAttribute(GadgetSpec.EXPIRATION_ATTRIB);
+      if (expirationObj instanceof Long) {
+        expiration = (Long)expirationObj;
+      }
+      rewrittenCache.addElement(cacheKey, gadget.getContent(), expiration);
+    }
+
+    return rewritten;
   }
   
   /** {@inheritDoc} */
   public HttpResponse rewriteHttpResponse(HttpRequest req, HttpResponse resp) {
-    return baseRegistry.rewriteHttpResponse(req, resp);
-  }
-  
-  public void appendRewriter(ContentRewriter rewriter) {
-    baseRegistry.appendRewriter(rewriter);
+    if (req.getIgnoreCache()) {
+      return super.rewriteHttpResponse(req, resp);
+    }
+    
+    String cacheKey = getHttpResponseCacheKey(req, resp);
+    String cached = rewrittenCache.getElement(cacheKey);
+    
+    if (cached != null) {
+      return new HttpResponseBuilder(resp).setResponseString(cached).create();
+    }
+    
+    HttpResponse rewritten = super.rewriteHttpResponse(req, resp);
+    if (rewritten != null) {
+      // Favor forced cache TTL from request first, then
+      // the response's cache expiration, then the response's cache TTL
+      long forceTtl = req.getCacheTtl();
+      long expiration = 0;
+      if (forceTtl > 0) {
+        expiration = System.currentTimeMillis() + forceTtl;
+      } else {
+        expiration = resp.getCacheExpiration();
+      }
+      if (expiration == -1) {
+        expiration = System.currentTimeMillis() + resp.getCacheTtl();
+      }
+      
+      // All these are bounded by the provided TTLs
+      rewrittenCache.addElement(cacheKey, rewritten.getResponseAsString(), expiration);
+    }
+    
+    return rewritten;
   }
 }

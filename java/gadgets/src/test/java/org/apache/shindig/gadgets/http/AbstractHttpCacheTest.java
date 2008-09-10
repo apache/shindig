@@ -46,7 +46,7 @@ public class AbstractHttpCacheTest extends TestCase {
     injector = Guice.createInjector(new TestCacheModule());
   }
   
-  public void testCacheWithRewritingOps() {
+  public void testCache() {
     // Setup: could move this elsewhere, but no real need right now.
     HttpCacheKey key = EasyMock.createNiceMock(HttpCacheKey.class);
     expect(key.isCacheable()).andReturn(true).anyTimes();
@@ -59,10 +59,12 @@ public class AbstractHttpCacheTest extends TestCase {
     
     // Actual test.
     AbstractHttpCache ahc = injector.getInstance(TestHttpCache.class);
-    HttpResponse rewritten = ahc.addResponse(key, request, response);
-    assertNotSame(rewritten, response);
-    assertEquals(PFX_STR + "foo", rewritten.getResponseAsString());
-    assertSame(rewritten, ahc.getResponse(key, request));
+    HttpResponse added = ahc.addResponse(key, request, response);
+    assertNotSame(added, response);
+    
+    // Not rewritten (anymore).
+    assertEquals("foo", added.getResponseAsString());
+    assertSame(added, ahc.getResponse(key, request));
     assertEquals(response, ahc.removeResponse(key));
   }
 

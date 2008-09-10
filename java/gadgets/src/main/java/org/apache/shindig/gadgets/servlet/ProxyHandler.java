@@ -28,7 +28,7 @@ import org.apache.shindig.gadgets.LockedDomainService;
 import org.apache.shindig.gadgets.http.HttpFetcher;
 import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.http.HttpResponse;
-import org.apache.shindig.gadgets.rewrite.ContentRewriter;
+import org.apache.shindig.gadgets.rewrite.ContentRewriterRegistry;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -55,13 +55,15 @@ public class ProxyHandler extends ProxyBase {
   // This is a limitation of Guice, but this workaround...works.
   private final HttpFetcher fetcher;
   private final LockedDomainService lockedDomainService;
+  private final ContentRewriterRegistry contentRewriterRegistry;
 
   @Inject
   public ProxyHandler(HttpFetcher fetcher,
                       LockedDomainService lockedDomainService,
-                      ContentRewriter rewriter) {
+                      ContentRewriterRegistry contentRewriterRegistry) {
     this.fetcher = fetcher;
     this.lockedDomainService = lockedDomainService;
+    this.contentRewriterRegistry = contentRewriterRegistry;
   }
 
   /**
@@ -116,9 +118,11 @@ public class ProxyHandler extends ProxyBase {
 
     HttpRequest rcr = buildHttpRequest(request);
     HttpResponse results = fetcher.fetch(rcr);
+    if (contentRewriterRegistry != null) {
+      results = contentRewriterRegistry.rewriteHttpResponse(rcr, results);
+    }
 
     setResponseHeaders(request, response, results);   
-
 
     for (Map.Entry<String, List<String>> entry : results.getHeaders().entrySet()) {
       String name = entry.getKey();

@@ -44,7 +44,7 @@ public class ProxyServletTest extends ServletTestFixture {
   private static final String ERROR_MESSAGE = "Broken!";
 
   private final ProxyHandler proxyHandler
-      = new ProxyHandler(fetcher, lockedDomainService, rewriter);
+      = new ProxyHandler(fetcher, lockedDomainService, null);
   private final ProxyServlet servlet = new ProxyServlet();
   private final HttpRequest internalRequest = new HttpRequest(REQUEST_URL);
   private final HttpResponse internalResponse = new HttpResponse(RESPONSE_BODY);
