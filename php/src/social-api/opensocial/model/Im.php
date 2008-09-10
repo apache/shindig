@@ -19,7 +19,7 @@
 
 /**
  * see
- * http://code.google.com/apis/opensocial/docs/0.7/reference/opensocial.Im.Field.html
+ * WRONG URL -> http://code.google.com/apis/opensocial/docs/0.7/reference/opensocial.Im.Field.html 
  *
  */
 class Im extends ListField {}

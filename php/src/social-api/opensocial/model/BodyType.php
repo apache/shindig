@@ -19,7 +19,7 @@
 
 /**
  * see
- * http://code.google.com/apis/opensocial/docs/0.7/reference/opensocial.BodyType.Field.html
+ * http://code.google.com/apis/opensocial/docs/0.8/reference/#opensocial.BodyType
  *
  */
 class BodyType implements ComplexField {

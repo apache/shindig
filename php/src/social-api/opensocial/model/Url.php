@@ -19,7 +19,7 @@
 
 /**
  * see
- * http://code.google.com/apis/opensocial/docs/0.7/reference/opensocial.Url.Field.html
+ * http://code.google.com/apis/opensocial/docs/0.8/reference/#opensocial.Url
  */
 class Url extends ListField {
 	public $value;

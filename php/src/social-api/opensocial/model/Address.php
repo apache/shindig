@@ -19,7 +19,7 @@
 
 /**
  * see
- * http://code.google.com/apis/opensocial/docs/0.7/reference/opensocial.Address.Field.html
+ * http://code.google.com/apis/opensocial/docs/0.8/reference/#opensocial.Address
  *
  */
 class Address implements ComplexField {
