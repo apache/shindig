@@ -452,14 +452,14 @@ public class FakeOAuthServiceProvider implements HttpFetcher {
     }
     OAuthAccessor accessor = new OAuthAccessor(consumer);
     String responseBody = null;
+    if (throttled) {
+      return makeOAuthProblemReport(
+          "consumer_key_refused", "exceeded quota");
+    }
     if (consumer == oauthConsumer) {
       // for OAuth, check the access token.  We skip this for signed fetch
       String accessToken = info.message.getParameter("oauth_token");
       TokenState state = tokenState.get(accessToken);
-      if (throttled) {
-        return makeOAuthProblemReport(
-            "consumer_key_refused", "exceeded quota");
-      }
       if (state == null) {
         return makeOAuthProblemReport(
             "token_rejected", "Access token unknown");

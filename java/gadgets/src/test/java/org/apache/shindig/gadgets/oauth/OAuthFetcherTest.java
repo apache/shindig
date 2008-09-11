@@ -39,6 +39,7 @@ import org.apache.shindig.gadgets.http.HttpResponse;
 import org.apache.shindig.gadgets.oauth.AccessorInfo.OAuthParamLocation;
 import org.apache.shindig.gadgets.oauth.BasicOAuthStoreConsumerKeyAndSecret.KeyType;
 import org.apache.shindig.gadgets.oauth.FakeOAuthServiceProvider.TokenPair;
+import org.apache.shindig.gadgets.oauth.OAuthArguments.UseToken;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -216,6 +217,15 @@ public class OAuthFetcherTest {
     SecurityToken securityToken = getSecurityToken(owner, viewer, gadget);
     return new MakeRequestClient(securityToken, fetcherConfig, serviceProvider,
         FakeGadgetSpecFactory.SERVICE_NAME);
+  }
+  
+  private MakeRequestClient makeSocialOAuthClient(String owner, String viewer, String gadget)
+      throws Exception {
+    SecurityToken securityToken = getSecurityToken(owner, viewer, gadget);
+    MakeRequestClient client = new MakeRequestClient(securityToken, fetcherConfig, serviceProvider,
+        FakeGadgetSpecFactory.SERVICE_NAME);
+    client.getBaseArgs().setUseToken(UseToken.IF_AVAILABLE);
+    return client;
   }
   
   private MakeRequestClient makeSignedFetchClient(String owner, String viewer, String gadget)
@@ -492,6 +502,26 @@ public class OAuthFetcherTest {
   }
 
   @Test
+  public void testSocialOAuth_tokenRevoked() throws Exception {
+    MakeRequestClient client = makeNonSocialClient("owner", "owner", GADGET_URL);
+    
+    HttpResponse response = client.sendGet(FakeOAuthServiceProvider.RESOURCE_URL);
+    assertEquals("", response.getResponseAsString());
+
+    client.approveToken("user_data=hello-oauth");    
+    response = client.sendGet(FakeOAuthServiceProvider.RESOURCE_URL);
+    assertEquals("User data is hello-oauth", response.getResponseAsString());
+    
+    serviceProvider.revokeAllAccessTokens();
+    
+    assertEquals(0, base.getAccessTokenRemoveCount());
+    client = makeSocialOAuthClient("owner", "owner", GADGET_URL);
+    response = client.sendGet(FakeOAuthServiceProvider.RESOURCE_URL + "?cb=1");
+    assertEquals("", response.getResponseAsString());
+    assertEquals(1, base.getAccessTokenRemoveCount());
+  }
+  
+  @Test
   public void testWrongServiceName() throws Exception {
     SecurityToken securityToken = getSecurityToken("owner", "owner", GADGET_URL);
     MakeRequestClient client = new MakeRequestClient(securityToken, fetcherConfig, serviceProvider,
@@ -618,6 +648,17 @@ public class OAuthFetcherTest {
     assertTrue(contains(queryParams, "opensocial_app_id", "app"));
     assertTrue(contains(queryParams, OAuth.OAUTH_CONSUMER_KEY, "signedfetch"));
     assertTrue(contains(queryParams, "xoauth_signature_publickey", "foo"));
+  }
+  
+  @Test
+  public void testSignedFetch_error401() throws Exception {
+    assertEquals(0, base.getAccessTokenRemoveCount());
+    serviceProvider.setConsumersThrottled(true);
+    serviceProvider.setVagueErrors(true);
+    MakeRequestClient client = makeSignedFetchClient("o", "v", "http://www.example.com/app");
+
+    HttpResponse response = client.sendGet(FakeOAuthServiceProvider.RESOURCE_URL);
+    assertEquals(0, base.getAccessTokenRemoveCount());
   }
   
   @Test
