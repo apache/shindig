@@ -594,7 +594,7 @@ gadgets.rpc = function() {
 
         case 'wpm': // use window.postMessage.
           var targetWin = targetId === '..' ? parent : frames[targetId];
-          targetWin.postMessage(rpcData, "*");
+          targetWin.postMessage(rpcData, relayUrl[targetId]);
           break;
 
         case 'fe': // use FrameElement.
