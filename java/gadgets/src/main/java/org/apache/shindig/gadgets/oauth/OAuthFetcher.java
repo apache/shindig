@@ -39,13 +39,13 @@ import net.oauth.OAuthProblemException;
 import net.oauth.OAuth.Parameter;
 
 import java.io.IOException;
-import java.io.PrintWriter;
-import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.regex.Pattern;
 
 /**
@@ -65,6 +65,9 @@ import java.util.regex.Pattern;
  */
 public class OAuthFetcher extends ChainedContentFetcher {
 
+  // Logger
+  private static final Logger logger = Logger.getLogger(OAuthFetcher.class.getName());
+  
   // Maximum number of attempts at the protocol before giving up.
   private static final int MAX_ATTEMPTS = 2;
 
@@ -211,19 +214,10 @@ public class OAuthFetcher extends ChainedContentFetcher {
     if (responseParams.getError() == null) {
       responseParams.setError(OAuthError.UNKNOWN_PROBLEM);
     }
-    // Take a giant leap of faith and assume that the exception message
-    // will be useful to a gadget developer.  Also include the exception
-    // stack trace, in case the problem report makes it to someone who knows
-    // enough to do something useful with the stack.
-    // TODO(beaton): This seemed like a good idea at the time, but dumping an entire stack trace to
-    // the client is a little much.  Remove this.
-    StringWriter errorBuf = new StringWriter();
-    errorBuf.append(e.getMessage());
-    errorBuf.append("\n\n");
-    PrintWriter printer = new PrintWriter(errorBuf);
-    e.printStackTrace(printer);
-    printer.flush();
-    responseParams.setErrorText(errorBuf.toString());
+    if (responseParams.getErrorText() == null && (e instanceof UserVisibleOAuthException)) {
+      responseParams.setErrorText(e.getMessage());
+    }
+    logger.log(Level.WARNING, "OAuth error", e);
     return buildNonDataResponse(403);
   }
 
@@ -281,8 +275,7 @@ public class OAuthFetcher extends ChainedContentFetcher {
     String pageViewer = realRequest.getSecurityToken().getViewerId();
     String stateOwner = clientState.getOwner();
     if (!pageOwner.equals(pageViewer)) {
-      throw new GadgetException(GadgetException.Code.INTERNAL_SERVER_ERROR,
-          "Only page owners can grant OAuth approval");
+      throw new UserVisibleOAuthException("Only page owners can grant OAuth approval");
     }
     if (stateOwner != null && !stateOwner.equals(pageOwner)) {
       throw new GadgetException(GadgetException.Code.INTERNAL_SERVER_ERROR,
@@ -309,7 +302,7 @@ public class OAuthFetcher extends ChainedContentFetcher {
       accessor.requestToken = reply.getParameter(OAuth.OAUTH_TOKEN);
       accessor.tokenSecret = reply.getParameter(OAuth.OAUTH_TOKEN_SECRET);
     } catch (OAuthException e) {
-      throw new GadgetException(GadgetException.Code.INTERNAL_SERVER_ERROR, e);
+      throw new UserVisibleOAuthException(e.getMessage(), e);
     } catch (IOException e) {
       throw new GadgetException(GadgetException.Code.INTERNAL_SERVER_ERROR, e);
     }
@@ -468,7 +461,7 @@ public class OAuthFetcher extends ChainedContentFetcher {
       case POST_BODY:
         String contentType = result.getHeader("Content-Type");
         if (!OAuth.isFormEncoded(contentType)) {
-          throw new GadgetException(GadgetException.Code.INVALID_PARAMETER,
+          throw new UserVisibleOAuthException(
               "OAuth param location can only be post_body if post body if of " +
               "type x-www-form-urlencoded");
         }
@@ -601,7 +594,7 @@ public class OAuthFetcher extends ChainedContentFetcher {
       accessor.accessToken = reply.getParameter(OAuth.OAUTH_TOKEN);
       accessor.tokenSecret = reply.getParameter(OAuth.OAUTH_TOKEN_SECRET);
     } catch (OAuthException e) {
-      throw new GadgetException(GadgetException.Code.INTERNAL_SERVER_ERROR, e);
+      throw new UserVisibleOAuthException(e.getMessage(), e);
     } catch (IOException e) {
       throw new GadgetException(GadgetException.Code.INTERNAL_SERVER_ERROR, e);
     }
