@@ -32,8 +32,6 @@ public class HttpResponseBuilder {
   private Map<String, List<String>> headers = Maps.newTreeMap(String.CASE_INSENSITIVE_ORDER);
   private byte[] responseBytes = ArrayUtils.EMPTY_BYTE_ARRAY;
   private Map<String, String> metadata = Maps.newHashMap();
-  // TODO: This needs to be moved out of here..
-  private HttpResponse rewritten;
 
   public HttpResponseBuilder() {}
 
@@ -42,7 +40,6 @@ public class HttpResponseBuilder {
     headers.putAll(builder.headers);
     metadata.putAll(builder.metadata);
     responseBytes = builder.responseBytes;
-    rewritten = builder.rewritten;
   }
 
   public HttpResponseBuilder(HttpResponse response) {
@@ -172,17 +169,6 @@ public class HttpResponseBuilder {
   }
 
   /**
-   * Assigns the rewritten content for the response. This will be removed once better rewriting
-   * facilities are in place.
-   *
-   * @param rewritten The rewritten version of this response.
-   */
-  public HttpResponseBuilder setRewritten(HttpResponse rewritten) {
-    this.rewritten = rewritten;
-    return this;
-  }
-
-  /**
    * Adds a new piece of metadata to the response.
    */
   public HttpResponseBuilder setMetadata(String key, String value) {
@@ -212,9 +198,5 @@ public class HttpResponseBuilder {
 
   int getHttpStatusCode() {
     return httpStatusCode;
-  }
-
-  HttpResponse getRewritten() {
-    return rewritten;
   }
 }

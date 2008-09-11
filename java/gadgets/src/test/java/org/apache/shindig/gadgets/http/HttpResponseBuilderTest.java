@@ -40,8 +40,7 @@ public class HttpResponseBuilderTest {
     HttpResponseBuilder builder = new HttpResponseBuilder()
         .setHttpStatusCode(HttpResponse.SC_NOT_FOUND)
         .setMetadata("foo", "bar")
-        .addHeader("Foo-bar", "baz")
-        .setRewritten(HttpResponse.notFound());
+        .addHeader("Foo-bar", "baz");
 
     HttpResponseBuilder builder2 = new HttpResponseBuilder(builder);
     assertEquals(builder.create(), builder2.create());
