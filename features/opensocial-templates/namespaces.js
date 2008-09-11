@@ -145,10 +145,10 @@ os.defineBuiltinTags = function() {
       os.createNamespace("os", "http://opensocial.com/#template");
       
   /**
-   * renderAll custom tag renders the specified child nodes of the current 
+   * <os:Render> custom tag renders the specified child nodes of the current 
    * context.
    */
-  osn.renderAll = function(node, data, context) {
+  osn.Render = function(node, data, context) {
     var parent = context.getVariable(os.VAR_parentnode);
     var exp = node.getAttribute("content") || "*";
     var result = os.getValueFromNode_(parent, exp);
@@ -177,8 +177,13 @@ os.defineBuiltinTags = function() {
     
     return result;
   }
-  osn.RenderAll = osn.renderAll;
+  osn.render = osn.RenderAll = osn.renderAll = osn.Render;
   
+  /**
+   * <os:Html> custom tag renders HTML content (as opposed to HTML code), so
+   * <os:Html code="<b>Hello</b>"/> would result in the bold string "Hello", 
+   * rather than the text of the markup. 
+   */
   osn.Html = function(node) {
     var html = node.code ? "" + node.code : node.getAttribute("code") || "";
     // TODO(levik): Sanitize the HTML here to avoid script injection issues.
