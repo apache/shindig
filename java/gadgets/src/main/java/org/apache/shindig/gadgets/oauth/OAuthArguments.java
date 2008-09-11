@@ -18,11 +18,11 @@
  */
 package org.apache.shindig.gadgets.oauth;
 
-import com.google.common.collect.Maps;
-
+import org.apache.shindig.gadgets.AuthType;
 import org.apache.shindig.gadgets.GadgetException;
-import org.apache.shindig.gadgets.spec.Auth;
-import org.apache.shindig.gadgets.spec.Preload;
+import org.apache.shindig.gadgets.spec.RequestAuthenticationInfo;
+
+import com.google.common.collect.Maps;
 
 import java.util.Map;
 
@@ -41,7 +41,7 @@ public class OAuthArguments {
   private static final String BYPASS_SPEC_CACHE_PARAM = "bypassSpecCache";
   private static final String SIGN_OWNER_PARAM = "signOwner";
   private static final String SIGN_VIEWER_PARAM = "signViewer";
- 
+
   /**
    * Should the OAuth access token be used?
    */
@@ -53,42 +53,42 @@ public class OAuthArguments {
     /** Use the access token if it exists, and prompt if it doesn't */
     ALWAYS,
   }
-  
+
   /** Should we attempt to use an access token for the request */
   private UseToken useToken = UseToken.ALWAYS;
-  
+
   /** OAuth service nickname.  Signed fetch uses the empty string */
   private String serviceName = "";
-  
+
   /** OAuth token nickname.  Signed fetch uses the empty string */
   private String tokenName = "";
-  
+
   /** Request token the client wants us to use, may be null */
   private String requestToken = null;
-  
+
   /** Token secret that goes with the request token */
   private String requestTokenSecret = null;
-  
+
   /** Encrypted state blob stored on the client */
   private String origClientState = null;
-  
+
   /** Whether we should bypass the gadget spec cache */
   private boolean bypassSpecCache = false;
-  
+
   /** Include information about the owner? */
   private boolean signOwner = false;
-  
+
   /** Include information about the viewer? */
   private boolean signViewer = false;
 
   /**
    * Parse OAuthArguments from parameters to the makeRequest servlet.
-   * 
+   *
    * @param auth authentication type for the request
    * @param request servlet request
    * @throws GadgetException if any parameters are invalid.
    */
-  public OAuthArguments(Auth auth, HttpServletRequest request) throws GadgetException {
+  public OAuthArguments(AuthType auth, HttpServletRequest request) throws GadgetException {
     useToken = parseUseToken(auth, getRequestParam(request, USE_TOKEN_PARAM, ""));
     serviceName = getRequestParam(request, SERVICE_PARAM, "");
     tokenName = getRequestParam(request, TOKEN_PARAM, "");
@@ -99,26 +99,26 @@ public class OAuthArguments {
     signOwner = Boolean.parseBoolean(getRequestParam(request, SIGN_OWNER_PARAM, "true"));
     signViewer = Boolean.parseBoolean(getRequestParam(request, SIGN_VIEWER_PARAM, "true"));
   }
-  
-  public OAuthArguments(Preload preload) throws GadgetException {
+
+  public OAuthArguments(RequestAuthenticationInfo info) throws GadgetException {
     Map<String, String> attrs = Maps.newTreeMap(String.CASE_INSENSITIVE_ORDER);
-    attrs.putAll(preload.getAttributes());
-    useToken = parseUseToken(preload.getAuthType(), getPreloadParam(attrs, USE_TOKEN_PARAM, ""));
-    serviceName = getPreloadParam(attrs, SERVICE_PARAM, "");
-    tokenName = getPreloadParam(attrs, TOKEN_PARAM, "");
-    requestToken = getPreloadParam(attrs, REQUEST_TOKEN_PARAM, null);
-    requestTokenSecret = getPreloadParam(attrs, REQUEST_TOKEN_SECRET_PARAM, null);
+    attrs.putAll(info.getAttributes());
+    useToken = parseUseToken(info.getAuthType(), getAuthInfoParam(attrs, USE_TOKEN_PARAM, ""));
+    serviceName = getAuthInfoParam(attrs, SERVICE_PARAM, "");
+    tokenName = getAuthInfoParam(attrs, TOKEN_PARAM, "");
+    requestToken = getAuthInfoParam(attrs, REQUEST_TOKEN_PARAM, null);
+    requestTokenSecret = getAuthInfoParam(attrs, REQUEST_TOKEN_SECRET_PARAM, null);
     origClientState = null;
     bypassSpecCache = false;
-    signOwner = preload.isSignOwner();
-    signViewer = preload.isSignViewer();
+    signOwner = info.isSignOwner();
+    signViewer = info.isSignViewer();
   }
-  
+
   /**
    * @return the named attribute from the Preload tag attributes, or default if the attribute is
    * not present.
    */
-  private String getPreloadParam(Map<String, String> attrs, String name, String def) {
+  private static String getAuthInfoParam(Map<String, String> attrs, String name, String def) {
     String val = attrs.get(name);
     if (val == null) {
       val = def;
@@ -141,9 +141,9 @@ public class OAuthArguments {
   /**
    * Figure out what the client wants us to do with the OAuth access token.
    */
-  private static UseToken parseUseToken(Auth auth, String useTokenStr) throws GadgetException {
+  private static UseToken parseUseToken(AuthType auth, String useTokenStr) throws GadgetException {
     if (useTokenStr.length() == 0) {
-      if (auth == Auth.SIGNED) {
+      if (auth == AuthType.SIGNED) {
         // signed fetch defaults to not using the token
         return UseToken.NEVER;
       } else {
@@ -164,18 +164,18 @@ public class OAuthArguments {
     throw new GadgetException(GadgetException.Code.INVALID_PARAMETER,
         "Unknown use token value " + useTokenStr);
   }
-  
+
   /**
    * Create an OAuthArguments object with all default values.  The details can be filled in later
    * using the setters.
-   * 
+   *
    * Be careful using this in anything except test code.  If you find yourself wanting to use this
    * method in real code, consider writing a new constructor instead.
    */
   public OAuthArguments() {
   }
-  
-  
+
+
   /**
    * Copy constructor.
    */
@@ -194,7 +194,7 @@ public class OAuthArguments {
   public boolean mustUseToken() {
     return (useToken == UseToken.ALWAYS);
   }
-  
+
   public boolean mayUseToken() {
     return (useToken == UseToken.IF_AVAILABLE || useToken == UseToken.ALWAYS);
   }

@@ -21,6 +21,7 @@ package org.apache.shindig.gadgets.http;
 import org.apache.shindig.auth.SecurityToken;
 import org.apache.shindig.common.ContainerConfig;
 import org.apache.shindig.common.uri.Uri;
+import org.apache.shindig.gadgets.AuthType;
 import org.apache.shindig.gadgets.oauth.OAuthArguments;
 
 import com.google.common.collect.Lists;
@@ -64,6 +65,7 @@ public class HttpRequest {
   // For signed fetch & OAuth
   private SecurityToken securityToken;
   private OAuthArguments oauthArguments;
+  private AuthType authType;
 
   private String rewriteMimeType;
 
@@ -72,6 +74,7 @@ public class HttpRequest {
    */
   public HttpRequest(Uri uri) {
     this.uri = uri;
+    authType = AuthType.NONE;
   }
 
   /**
@@ -90,6 +93,7 @@ public class HttpRequest {
     if (request.oauthArguments != null) {
       oauthArguments = new OAuthArguments(request.oauthArguments);
     }
+    authType = request.authType;
     rewriteMimeType = request.rewriteMimeType;
   }
 
@@ -230,6 +234,14 @@ public class HttpRequest {
   }
 
   /**
+   * @param authType The type of authentication being used for this request.
+   */
+  public HttpRequest setAuthType(AuthType authType) {
+    this.authType = authType;
+    return this;
+  }
+
+  /**
    * @param rewriteMimeType The assumed content type of the response to be rewritten. Overrides
    * any values set in the Content-Type response header.
    *
@@ -364,6 +376,13 @@ public class HttpRequest {
   }
 
   /**
+   * @return The type of authentication being used for this request.
+   */
+  public AuthType getAuthType() {
+    return authType;
+  }
+
+  /**
    * @return The content type to assume when rewriting.
    *
    * TODO: Move this to new rewriting facility.
@@ -378,6 +397,7 @@ public class HttpRequest {
     buf.append(' ').append(uri.getPath())
        .append(uri.getQuery() == null ? "" : uri.getQuery()).append("\n\n");
     buf.append("Host: ").append(uri.getAuthority()).append('\n');
+    buf.append("X-Shindig-AuthType: ").append(authType).append('\n');
     for (Map.Entry<String, List<String>> entry : headers.entrySet()) {
       String name = entry.getKey();
       for (String value : entry.getValue()) {
@@ -397,9 +417,11 @@ public class HttpRequest {
       HttpRequest req = (HttpRequest)obj;
       return method.equals(req.method) &&
              uri.equals(req.uri) &&
+             authType.equals(req.authType) &&
              Arrays.equals(postBody, req.postBody) &&
              headers.equals(req.headers);
-             // TODO: Verify that other fields aren't meaningful.
+             // TODO: Verify that other fields aren't meaningful. Especially important to check for
+             // oauth args.
     }
     return false;
   }

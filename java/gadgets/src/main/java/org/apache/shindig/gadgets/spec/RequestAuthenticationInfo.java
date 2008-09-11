@@ -18,6 +18,8 @@
  */
 package org.apache.shindig.gadgets.spec;
 
+import org.apache.shindig.gadgets.AuthType;
+
 import java.net.URI;
 import java.util.Map;
 
@@ -28,7 +30,7 @@ public interface RequestAuthenticationInfo {
   /**
    * @return The type of authentication to use.
    */
-  Auth getAuthType();
+  AuthType getAuthType();
 
   /**
    * @return The destination URI for making authenticated requests to.

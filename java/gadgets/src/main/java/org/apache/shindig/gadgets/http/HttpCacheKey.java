@@ -50,6 +50,7 @@ public class HttpCacheKey {
     // provides some additional insurance that we aren't mixing cache content.
     set("method", request.getMethod());
     set("url", request.getUri().toString());
+    // TODO: We can go ahead and add authentication info here as well.
   }
 
   /**

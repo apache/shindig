@@ -19,7 +19,6 @@ package org.apache.shindig.gadgets;
 
 import static org.easymock.EasyMock.eq;
 import static org.easymock.EasyMock.expect;
-import static org.easymock.EasyMock.isA;
 
 import org.apache.shindig.auth.BasicSecurityToken;
 import org.apache.shindig.auth.SecurityToken;
@@ -27,7 +26,6 @@ import org.apache.shindig.common.crypto.BlobCrypterException;
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.http.HttpResponse;
-import org.apache.shindig.gadgets.oauth.OAuthArguments;
 import org.apache.shindig.gadgets.spec.GadgetSpec;
 
 import java.net.URI;
@@ -178,10 +176,9 @@ public class GadgetServerTest extends GadgetTestFixture {
           "  </ModulePrefs>" +
           "  <Content type=\"html\">dummy</Content>" +
           "</Module>";
-    expect(fetcherFactory.get()).andReturn(fetcher);
     expect(fetcher.fetch(SPEC_REQUEST))
          .andReturn(new HttpResponse(gadgetXml));
-    expect(fetcher.fetch(preloadRequest))
+    expect(fetcherFactory.fetch(preloadRequest))
         .andReturn(new HttpResponse(preloadData));
     replay();
 
@@ -204,10 +201,9 @@ public class GadgetServerTest extends GadgetTestFixture {
           "  </ModulePrefs>" +
           "  <Content type=\"html\" view=\"v1,v2\">dummy</Content>" +
           "</Module>";
-    expect(fetcherFactory.get()).andReturn(fetcher);
     expect(fetcher.fetch(SPEC_REQUEST))
          .andReturn(new HttpResponse(gadgetXml));
-    expect(fetcher.fetch(preloadRequest))
+    expect(fetcherFactory.fetch(preloadRequest))
         .andReturn(new HttpResponse(preloadData));
     replay();
 
@@ -242,10 +238,9 @@ public class GadgetServerTest extends GadgetTestFixture {
         "  </ModulePrefs>" +
         "  <Content type=\"html\" view=\"v1,v2\">dummy</Content>" +
         "</Module>";
-    expect(fetcherFactory.get()).andReturn(fetcher);
     expect(fetcher.fetch(SPEC_REQUEST))
         .andReturn(new HttpResponse(gadgetXml));
-    expect(fetcher.fetch(preloadRequest))
+    expect(fetcherFactory.fetch(preloadRequest))
         .andReturn(new HttpResponse(preloadData));
     replay();
 
@@ -294,7 +289,8 @@ public class GadgetServerTest extends GadgetTestFixture {
   public void testSignedPreloadWithToken() throws Exception {
     String preloadUrl = "http://example.org/preload.txt";
     String preloadData = "Preload Data";
-    HttpRequest preloadRequest = new HttpRequest(Uri.parse(preloadUrl));
+    HttpRequest preloadRequest = new HttpRequest(Uri.parse(preloadUrl))
+        .setAuthType(AuthType.SIGNED);
 
     String gadgetXml
         = "<Module>" +
@@ -305,10 +301,7 @@ public class GadgetServerTest extends GadgetTestFixture {
         "</Module>";
     expect(fetcher.fetch(SPEC_REQUEST))
         .andReturn(new HttpResponse(gadgetXml));
-    expect(fetcherFactory.getOAuthFetcher(
-        isA(HttpRequest.class)))
-        .andReturn(fetcher);
-    expect(fetcher.fetch(preloadRequest))
+    expect(fetcherFactory.fetch(preloadRequest))
         .andReturn(new HttpResponse(preloadData));
     replay();
 
@@ -320,7 +313,8 @@ public class GadgetServerTest extends GadgetTestFixture {
   public void testOAuthPreload() throws Exception {
     String preloadUrl = "http://example.org/preload.txt";
     String preloadData = "Preload Data";
-    HttpRequest preloadRequest = new HttpRequest(Uri.parse(preloadUrl));
+    HttpRequest preloadRequest = new HttpRequest(Uri.parse(preloadUrl))
+        .setAuthType(AuthType.OAUTH);
 
     String gadgetXml
         = "<Module>" +
@@ -332,10 +326,7 @@ public class GadgetServerTest extends GadgetTestFixture {
         "</Module>";
     expect(fetcher.fetch(SPEC_REQUEST))
         .andReturn(new HttpResponse(gadgetXml));
-    expect(fetcherFactory.getOAuthFetcher(
-        isA(HttpRequest.class)))
-        .andReturn(fetcher);
-    expect(fetcher.fetch(preloadRequest))
+    expect(fetcherFactory.fetch(preloadRequest))
         .andReturn(new HttpResponse(preloadData));
     replay();
 

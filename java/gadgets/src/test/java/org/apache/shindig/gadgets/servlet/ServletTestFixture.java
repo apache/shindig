@@ -20,14 +20,10 @@ package org.apache.shindig.gadgets.servlet;
 
 import static junitx.framework.ComparableAssert.assertGreater;
 import static junitx.framework.ComparableAssert.assertLesser;
-import static org.easymock.EasyMock.expect;
-import static org.easymock.EasyMock.isA;
 
 import org.apache.shindig.common.util.DateUtil;
-import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.GadgetTestFixture;
 import org.apache.shindig.gadgets.LockedDomainService;
-import org.apache.shindig.gadgets.http.HttpRequest;
 
 import org.apache.commons.lang.StringUtils;
 
@@ -52,19 +48,10 @@ public class ServletTestFixture extends GadgetTestFixture {
   private final long testStartTime = timeSource.currentTimeMillis();
 
   public ServletTestFixture() {
-    try {
-      // TODO: This is horrible. It needs to be fixed.
-      HttpUtil.setTimeSource(timeSource);
-      expect(contentFetcherFactory.get()).andReturn(fetcher).anyTimes();
-      expect(contentFetcherFactory.getOAuthFetcher(
-          isA(HttpRequest.class)))
-          .andReturn(oauthFetcher).anyTimes();
-      gadgetRenderer = new GadgetRenderingTask(gadgetServer, bundleFactory,
-          registry, containerConfig, urlGenerator, lockedDomainService);
-      jsonRpcHandler = new JsonRpcHandler(executor, gadgetServer, urlGenerator);
-    } catch (GadgetException e) {
-      throw new RuntimeException(e);
-    }
+    HttpUtil.setTimeSource(timeSource);
+    gadgetRenderer = new GadgetRenderingTask(gadgetServer, bundleFactory,
+        registry, containerConfig, urlGenerator, lockedDomainService);
+    jsonRpcHandler = new JsonRpcHandler(executor, gadgetServer, urlGenerator);
   }
 
   public void checkCacheControlHeaders(int ttl, boolean noProxy) {

@@ -18,6 +18,7 @@
 package org.apache.shindig.gadgets.spec;
 
 import org.apache.shindig.common.xml.XmlUtil;
+import org.apache.shindig.gadgets.AuthType;
 import org.apache.shindig.gadgets.Substitutions;
 
 import com.google.common.collect.ImmutableSet;
@@ -99,7 +100,7 @@ public class View implements RequestAuthenticationInfo {
     this.preferredHeight = preferredHeight;
     this.preferredWidth = preferredWidth;
     this.attributes = Collections.unmodifiableMap(attributes);
-    this.auth = Auth.parse(auth);
+    this.authType = AuthType.parse(auth);
     this.signOwner = signOwner;
     this.signViewer = signViewer;
     if (type == ContentType.URL && this.href == null) {
@@ -119,7 +120,7 @@ public class View implements RequestAuthenticationInfo {
     quirks = view.quirks;
     preferredHeight = view.preferredHeight;
     preferredWidth = view.preferredWidth;
-    auth = view.auth;
+    authType = view.authType;
     signOwner = view.signOwner;
     signViewer = view.signViewer;
 
@@ -224,9 +225,9 @@ public class View implements RequestAuthenticationInfo {
   /**
    * Content/@authz
    */
-  private final Auth auth;
-  public Auth getAuthType() {
-    return auth;
+  private final AuthType authType;
+  public AuthType getAuthType() {
+    return authType;
   }
 
   /**
@@ -274,7 +275,7 @@ public class View implements RequestAuthenticationInfo {
        .append(" quirks='").append(quirks).append('\'')
        .append(" preferred_height='").append(preferredHeight).append('\'')
        .append(" preferred_width='").append(preferredWidth).append('\'')
-       .append(" authz=").append(auth.toString().toLowerCase()).append('\'');
+       .append(" authz=").append(authType.toString().toLowerCase()).append('\'');
     for (Map.Entry<String, String> entry : attributes.entrySet()) {
       buf.append(entry.getKey()).append("='").append(entry.getValue()).append('\'');
     }
