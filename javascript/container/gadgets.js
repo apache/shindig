@@ -61,7 +61,7 @@ gadgets.callAsyncAndJoin = function(functions, continuation, opt_this) {
     var wrapper = function(index) {
       functions[index].call(opt_this, function(result) {
         results[index] = result;
-        if (--pending == 0) {
+        if (--pending === 0) {
           continuation(results);
         }
       });
