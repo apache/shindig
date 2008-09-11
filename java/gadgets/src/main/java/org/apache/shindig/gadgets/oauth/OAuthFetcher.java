@@ -263,7 +263,7 @@ public class OAuthFetcher extends ChainedContentFetcher {
             && accessorInfo.getAccessor().requestToken == null
             && accessorInfo.getAccessor().accessToken == null);
   }
-
+  
   /**
    * Make sure the user is authorized to approve access tokens.  At the moment
    * we restrict this to page owner's viewing their own pages.
@@ -648,18 +648,45 @@ public class OAuthFetcher extends ChainedContentFetcher {
     }
   }
 
+  /**
+   * Look for an OAuth protocol problem.  For cases where no access token is in play 
+   * @param response
+   * @throws OAuthProtocolException
+   * @throws IOException
+   */
   private void checkForProtocolProblem(HttpResponse response)
       throws OAuthProtocolException, IOException {
-    int status = response.getHttpStatusCode();
-    if (status >= 400 && status < 500) {
+    if (isFullOAuthError(response)) {
       OAuthMessage message = parseAuthHeader(null, response);
       if (message.getParameter(OAuthProblemException.OAUTH_PROBLEM) != null) {
         // SP reported extended error information
         throw new OAuthProtocolException(message);
       }
       // No extended information, guess based on HTTP response code.
-      throw new OAuthProtocolException(status);
+      throw new OAuthProtocolException(response.getHttpStatusCode());
     }
+  }
+  
+  /**
+   * Check if a response might be due to an OAuth protocol error.  We don't want to intercept
+   * errors for signed fetch, we only care about places where we are dealing with OAuth request
+   * and/or access tokens.
+   */
+  private boolean isFullOAuthError(HttpResponse response) {
+    // Is this an error in the 4xx range?  If so, it might be OAuth related.
+    if (response.getHttpStatusCode() < 400 || response.getHttpStatusCode() >= 500) {
+      return false;
+    }
+    // If the client forced us to use full OAuth, this might be OAuth related.
+    if (realRequest.getOAuthArguments().mustUseToken()) {
+      return true;
+    }
+    // If we're using an access token, this might be OAuth related.
+    if (accessorInfo.getAccessor().accessToken != null) {
+      return true;
+    }
+    // Not OAuth related.
+    return false;
   }
 
   /**

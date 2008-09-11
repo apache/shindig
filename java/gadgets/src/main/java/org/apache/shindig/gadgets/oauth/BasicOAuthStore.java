@@ -67,6 +67,18 @@ public class BasicOAuthStore implements OAuthStore {
    * Key to use when no other key is found.
    */
   private BasicOAuthStoreConsumerKeyAndSecret defaultKey;
+  
+  /** Number of times we looked up a consumer key */
+  private int consumerKeyLookupCount = 0;
+  
+  /** Number of times we looked up an access token */
+  private int accessTokenLookupCount = 0;
+  
+  /** Number of times we added an access token */
+  private int accessTokenAddCount = 0;
+  
+  /** Number of times we removed an access token */
+  private int accessTokenRemoveCount = 0;
 
   public BasicOAuthStore() {
     consumerInfos = new HashMap<BasicOAuthStoreConsumerIndex, BasicOAuthStoreConsumerKeyAndSecret>();
@@ -141,6 +153,7 @@ public class BasicOAuthStore implements OAuthStore {
   public ConsumerInfo getConsumerKeyAndSecret(
       SecurityToken securityToken, String serviceName, OAuthServiceProvider provider)
       throws GadgetException {
+    ++consumerKeyLookupCount;
     BasicOAuthStoreConsumerIndex pk = new BasicOAuthStoreConsumerIndex();
     pk.setGadgetUri(securityToken.getAppUrl());
     pk.setServiceName(serviceName);
@@ -180,6 +193,7 @@ public class BasicOAuthStore implements OAuthStore {
 
   public TokenInfo getTokenInfo(SecurityToken securityToken, ConsumerInfo consumerInfo,
       String serviceName, String tokenName) {
+    ++accessTokenLookupCount;
     BasicOAuthStoreTokenIndex tokenKey =
         makeBasicOAuthStoreTokenIndex(securityToken, serviceName, tokenName);
     return tokens.get(tokenKey);
@@ -187,6 +201,7 @@ public class BasicOAuthStore implements OAuthStore {
 
   public void setTokenInfo(SecurityToken securityToken, ConsumerInfo consumerInfo,
       String serviceName, String tokenName, TokenInfo tokenInfo) {
+    ++accessTokenAddCount;
     BasicOAuthStoreTokenIndex tokenKey =
         makeBasicOAuthStoreTokenIndex(securityToken, serviceName, tokenName);
     tokens.put(tokenKey, tokenInfo);
@@ -194,8 +209,25 @@ public class BasicOAuthStore implements OAuthStore {
 
   public void removeToken(SecurityToken securityToken, ConsumerInfo consumerInfo,
       String serviceName, String tokenName) {
+    ++accessTokenRemoveCount;
     BasicOAuthStoreTokenIndex tokenKey =
         makeBasicOAuthStoreTokenIndex(securityToken, serviceName, tokenName);
     tokens.remove(tokenKey);    
+  }
+
+  public int getConsumerKeyLookupCount() {
+    return consumerKeyLookupCount;
+  }
+
+  public int getAccessTokenLookupCount() {
+    return accessTokenLookupCount;
+  }
+
+  public int getAccessTokenAddCount() {
+    return accessTokenAddCount;
+  }
+
+  public int getAccessTokenRemoveCount() {
+    return accessTokenRemoveCount;
   }
 }
