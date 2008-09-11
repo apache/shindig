@@ -22,15 +22,14 @@ import org.apache.shindig.auth.AuthInfo;
 import org.apache.shindig.auth.SecurityToken;
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.common.util.Utf8UrlCoder;
+import org.apache.shindig.gadgets.AuthType;
 import org.apache.shindig.gadgets.FeedProcessor;
 import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.http.ContentFetcherFactory;
-import org.apache.shindig.gadgets.http.HttpFetcher;
 import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.http.HttpResponse;
 import org.apache.shindig.gadgets.oauth.OAuthArguments;
 import org.apache.shindig.gadgets.rewrite.ContentRewriterRegistry;
-import org.apache.shindig.gadgets.spec.Auth;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -81,31 +80,16 @@ public class MakeRequestHandler extends ProxyBase {
       throws GadgetException, IOException {
     HttpRequest rcr = buildHttpRequest(request);
 
-    // Figure out whether authentication is required
-    Auth auth = Auth.parse(getParameter(request, AUTHZ_PARAM, ""));
-    SecurityToken authToken = null;
-    OAuthArguments oauthArguments = null;
-    if (auth != Auth.NONE) {
-      authToken = extractAndValidateToken(request);
-      oauthArguments = new OAuthArguments(auth, request);
-    }
-
-    rcr.setSecurityToken(authToken);
-    rcr.setOAuthArguments(oauthArguments);
-
-    // Build the chain of fetchers that will handle the request
-    HttpFetcher fetcher = getHttpFetcher(auth, rcr);
-
     // Serialize the response
-    HttpResponse results = fetcher.fetch(rcr);
-    
+    HttpResponse results = contentFetcherFactory.fetch(rcr);
+
     // Rewrite the response
     if (contentRewriterRegistry != null) {
       results = contentRewriterRegistry.rewriteHttpResponse(rcr, results);
     }
 
     // Serialize the response
-    String output = convertResponseToJson(authToken, request, results);
+    String output = convertResponseToJson(rcr.getSecurityToken(), request, results);
 
     // Find and set the refresh interval
     setResponseHeaders(request, response, results);
@@ -158,6 +142,14 @@ public class MakeRequestHandler extends ProxyBase {
     // allows proper rewriting of <script src="x"/> where x is returned with
     // a content type like text/html which unfortunately happens all too often
     req.setRewriteMimeType(request.getParameter(REWRITE_MIME_TYPE_PARAM));
+
+    // Figure out whether authentication is required
+    AuthType auth = AuthType.parse(getParameter(request, AUTHZ_PARAM, null));
+    req.setAuthType(auth);
+    if (auth != AuthType.NONE) {
+      req.setSecurityToken(extractAndValidateToken(request));
+      req.setOAuthArguments(new OAuthArguments(auth, request));
+    }
     return req;
   }
 
@@ -173,25 +165,6 @@ public class MakeRequestHandler extends ProxyBase {
     };
     for (String bad : badHeaders) {
       request.removeHeader(bad);
-    }
-  }
-
-  /**
-   * At the moment our fetcher chain is short.  In the future we might add
-   * additional layers for things like caching or throttling.
-   *
-   * Whatever we do needs to return a reference to the OAuthFetcher, if it is
-   * present, so we can pull data out as needed.
-   */
-  private HttpFetcher getHttpFetcher(Auth auth, HttpRequest request) throws GadgetException {
-    switch (auth) {
-      case NONE:
-        return contentFetcherFactory.get();
-      case SIGNED:
-      case OAUTH:
-        return contentFetcherFactory.getOAuthFetcher(request);
-      default:
-        return contentFetcherFactory.get();
     }
   }
 

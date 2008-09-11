@@ -21,15 +21,19 @@ import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.oauth.OAuthFetcherFactory;
 
 import com.google.inject.Inject;
-import com.google.inject.Provider;
+import com.google.inject.Singleton;
 
 /**
- * A factory of the supported HttpFetcher types.
+ * Implements HttpFetcher by delegating fetches to either plain or authenticated Http fetchers.
  *
- * TODO: Remove this.
+ * TODO: Make this actually implement HttpFetcher to simplify the bindings. Currently we just
+ * pretend that is implements HttpFetcher.
+ *
+ * TODO: Get rid of RemoteContentFetcherFactory by just injecting HttpFetcher.
+ * TODO: Get rid of OAUthFetcherFactory by injecting OAuthFetcher (requires significant work.
  */
-public class ContentFetcherFactory implements Provider<HttpFetcher> {
-
+@Singleton
+public class ContentFetcherFactory {
   private final RemoteContentFetcherFactory remoteContentFetcherFactory;
   private final OAuthFetcherFactory oauthFetcherFactory;
 
@@ -40,20 +44,17 @@ public class ContentFetcherFactory implements Provider<HttpFetcher> {
     this.oauthFetcherFactory = oauthFetcherFactory;
   }
 
-  /**
-   * @param request HttpRequest that will be sent through the fetcher
-   * @return an OAuth fetcher
-   * @throws GadgetException
-   */
-  public HttpFetcher getOAuthFetcher(HttpRequest request)
-      throws GadgetException {
-    return oauthFetcherFactory.getOAuthFetcher(remoteContentFetcherFactory.get(), request);
-  }
-
-  /**
-   * @return a standard fetcher
-   */
-  public HttpFetcher get() {
-    return remoteContentFetcherFactory.get();
+  public HttpResponse fetch(HttpRequest request) throws GadgetException {
+    switch (request.getAuthType()) {
+      case NONE:
+        return remoteContentFetcherFactory.get().fetch(request);
+      case SIGNED:
+      case OAUTH:
+        // TODO: Why do we have to pass the request twice? This doesn't make sense...
+        return oauthFetcherFactory.getOAuthFetcher(remoteContentFetcherFactory.get(), request)
+            .fetch(request);
+      default:
+        return HttpResponse.error();
+    }
   }
 }

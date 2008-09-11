@@ -20,21 +20,17 @@ package org.apache.shindig.gadgets.servlet;
 
 import static junitx.framework.StringAssert.assertStartsWith;
 import static org.easymock.EasyMock.expect;
-import static org.easymock.EasyMock.isA;
 
 import org.apache.shindig.auth.AuthInfo;
 import org.apache.shindig.auth.SecurityToken;
 import org.apache.shindig.common.testing.FakeGadgetToken;
 import org.apache.shindig.common.uri.Uri;
+import org.apache.shindig.gadgets.AuthType;
 import org.apache.shindig.gadgets.GadgetException;
-import org.apache.shindig.gadgets.http.HttpFetcher;
 import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.http.HttpResponse;
 import org.apache.shindig.gadgets.http.HttpResponseBuilder;
 import org.apache.shindig.gadgets.rewrite.BasicContentRewriterRegistry;
-import org.apache.shindig.gadgets.spec.Auth;
-
-import com.google.common.collect.Lists;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -42,7 +38,6 @@ import org.json.JSONObject;
 import org.junit.Test;
 
 import java.util.Collections;
-import java.util.List;
 
 /**
  * Tests for MakeRequestHandler.
@@ -53,27 +48,28 @@ public class MakeRequestHandlerTest extends ServletTestFixture {
   private static final String RESPONSE_BODY = "makeRequest response body";
   private static final SecurityToken DUMMY_TOKEN = new FakeGadgetToken();
 
-  private final MakeRequestHandler handler = new MakeRequestHandler(contentFetcherFactory,
+  private final MakeRequestHandler handler = new MakeRequestHandler(fetcherFactory,
       new BasicContentRewriterRegistry(rewriter, null));
 
   private void expectGetAndReturnBody(String response) throws Exception {
-    expectGetAndReturnBody(fetcher, response);
+    expectGetAndReturnBody(AuthType.NONE, response);
   }
 
-  private void expectGetAndReturnBody(HttpFetcher fetcher, String response) throws Exception {
-    HttpRequest request = new HttpRequest(REQUEST_URL);
-    expect(fetcher.fetch(request)).andReturn(new HttpResponse(response));
+  private void expectGetAndReturnBody(AuthType authType, String response) throws Exception {
+    HttpRequest request = new HttpRequest(REQUEST_URL).setAuthType(authType);
+    expect(fetcherFactory.fetch(request)).andReturn(new HttpResponse(response));
   }
 
   private void expectPostAndReturnBody(String postData, String response) throws Exception {
-    expectPostAndReturnBody(fetcher, postData, response);
+    expectPostAndReturnBody(AuthType.NONE, postData, response);
   }
 
-  private void expectPostAndReturnBody(HttpFetcher fetcher, String postData, String response)
+  private void expectPostAndReturnBody(AuthType authType, String postData, String response)
       throws Exception {
     HttpRequest req = new HttpRequest(REQUEST_URL).setMethod("POST")
-        .setPostBody(REQUEST_BODY.getBytes("UTF-8"));
-    expect(fetcher.fetch(req)).andReturn(new HttpResponse(response));
+        .setPostBody(REQUEST_BODY.getBytes("UTF-8"))
+        .setAuthType(authType);
+    expect(fetcherFactory.fetch(req)).andReturn(new HttpResponse(response));
     expect(request.getParameter(MakeRequestHandler.METHOD_PARAM)).andReturn("POST");
     expect(request.getParameter(MakeRequestHandler.POST_DATA_PARAM))
         .andReturn(REQUEST_BODY);
@@ -108,25 +104,15 @@ public class MakeRequestHandlerTest extends ServletTestFixture {
   public void testExplicitHeaders() throws Exception {
     String headerString = "X-Foo=bar&X-Bar=baz%20foo";
 
-    final List<HttpRequest> requests = Lists.newArrayList();
-    HttpFetcher fakeFetcher = new HttpFetcher() {
-      public HttpResponse fetch(HttpRequest request) {
-        requests.add(request);
-        return new HttpResponse(RESPONSE_BODY);
-      }
-    };
-
-    reset();
-    setUp();
-    expect(contentFetcherFactory.get()).andReturn(fakeFetcher);
+    HttpRequest expected = new HttpRequest(REQUEST_URL)
+        .addHeader("X-Foo", "bar")
+        .addHeader("X-Bar", "baz foo");
+    expect(fetcherFactory.fetch(expected)).andReturn(new HttpResponse(RESPONSE_BODY));
     expect(request.getParameter(MakeRequestHandler.HEADERS_PARAM)).andReturn(headerString);
     replay();
 
     handler.fetch(request, recorder);
     verify();
-
-    assertEquals("bar", requests.get(0).getHeader("X-Foo"));
-    assertEquals("baz foo", requests.get(0).getHeader("X-Bar"));
 
     JSONObject results = extractJsonFromResponse();
     assertEquals(HttpResponse.SC_OK, results.getInt("rc"));
@@ -244,8 +230,10 @@ public class MakeRequestHandlerTest extends ServletTestFixture {
     expect(request.getAttribute(AuthInfo.Attribute.SECURITY_TOKEN.getId()))
         .andReturn(DUMMY_TOKEN).atLeastOnce();
     expect(request.getParameter(MakeRequestHandler.AUTHZ_PARAM))
-        .andReturn(Auth.SIGNED.toString()).atLeastOnce();
-    expect(oauthFetcher.fetch(isA(HttpRequest.class)))
+        .andReturn(AuthType.SIGNED.toString()).atLeastOnce();
+    HttpRequest expected = new HttpRequest(REQUEST_URL)
+        .setAuthType(AuthType.SIGNED);
+    expect(fetcherFactory.fetch(expected))
         .andReturn(new HttpResponse(RESPONSE_BODY));
     replay();
 
@@ -259,11 +247,11 @@ public class MakeRequestHandlerTest extends ServletTestFixture {
   public void testSignedPostRequest() throws Exception {
     // Doesn't actually sign since it returns the standard fetcher.
     // Signing tests are in SigningFetcherTest
-    expectPostAndReturnBody(oauthFetcher, REQUEST_BODY, RESPONSE_BODY);
+    expectPostAndReturnBody(AuthType.SIGNED, REQUEST_BODY, RESPONSE_BODY);
     expect(request.getAttribute(AuthInfo.Attribute.SECURITY_TOKEN.getId()))
         .andReturn(DUMMY_TOKEN).atLeastOnce();
     expect(request.getParameter(MakeRequestHandler.AUTHZ_PARAM))
-        .andReturn(Auth.SIGNED.toString()).atLeastOnce();
+        .andReturn(AuthType.SIGNED.toString()).atLeastOnce();
     replay();
 
     handler.fetch(request, recorder);
@@ -278,12 +266,12 @@ public class MakeRequestHandlerTest extends ServletTestFixture {
   public void testChangeSecurityToken() throws Exception {
     // Doesn't actually sign since it returns the standard fetcher.
     // Signing tests are in SigningFetcherTest
-    expectGetAndReturnBody(oauthFetcher, RESPONSE_BODY);
+    expectGetAndReturnBody(AuthType.SIGNED, RESPONSE_BODY);
     FakeGadgetToken authToken = new FakeGadgetToken().setUpdatedToken("updated");
     expect(request.getAttribute(AuthInfo.Attribute.SECURITY_TOKEN.getId()))
         .andReturn(authToken).atLeastOnce();
     expect(request.getParameter(MakeRequestHandler.AUTHZ_PARAM))
-        .andReturn(Auth.SIGNED.toString()).atLeastOnce();
+        .andReturn(AuthType.SIGNED.toString()).atLeastOnce();
     replay();
 
     handler.fetch(request, recorder);
@@ -297,12 +285,12 @@ public class MakeRequestHandlerTest extends ServletTestFixture {
   public void testDoOAuthRequest() throws Exception {
     // Doesn't actually do oauth dance since it returns the standard fetcher.
     // OAuth tests are in OAuthFetcherTest
-    expectGetAndReturnBody(oauthFetcher, RESPONSE_BODY);
+    expectGetAndReturnBody(AuthType.OAUTH, RESPONSE_BODY);
     FakeGadgetToken authToken = new FakeGadgetToken().setUpdatedToken("updated");
     expect(request.getAttribute(AuthInfo.Attribute.SECURITY_TOKEN.getId()))
         .andReturn(authToken).atLeastOnce();
     expect(request.getParameter(MakeRequestHandler.AUTHZ_PARAM))
-        .andReturn(Auth.OAUTH.toString()).atLeastOnce();
+        .andReturn(AuthType.OAUTH.toString()).atLeastOnce();
     // This isn't terribly accurate, but is close enough for this test.
     expect(request.getParameterMap()).andStubReturn(Collections.EMPTY_MAP);
     replay();
@@ -330,7 +318,7 @@ public class MakeRequestHandlerTest extends ServletTestFixture {
 
   public void testBadHttpResponseIsPropagated() throws Exception {
     HttpRequest internalRequest = new HttpRequest(REQUEST_URL);
-    expect(fetcher.fetch(internalRequest)).andReturn(HttpResponse.error());
+    expect(fetcherFactory.fetch(internalRequest)).andReturn(HttpResponse.error());
     replay();
 
     handler.fetch(request, recorder);
@@ -344,7 +332,7 @@ public class MakeRequestHandlerTest extends ServletTestFixture {
     expect(request.getAttribute(AuthInfo.Attribute.SECURITY_TOKEN.getId()))
         .andReturn(null).atLeastOnce();
     expect(request.getParameter(MakeRequestHandler.AUTHZ_PARAM))
-        .andReturn(Auth.SIGNED.toString()).atLeastOnce();
+        .andReturn(AuthType.SIGNED.toString()).atLeastOnce();
     replay();
 
     try {
@@ -362,7 +350,7 @@ public class MakeRequestHandlerTest extends ServletTestFixture {
         .setMetadata("foo", RESPONSE_BODY)
         .create();
 
-    expect(fetcher.fetch(internalRequest)).andReturn(response);
+    expect(fetcherFactory.fetch(internalRequest)).andReturn(response);
     replay();
 
     handler.fetch(request, recorder);

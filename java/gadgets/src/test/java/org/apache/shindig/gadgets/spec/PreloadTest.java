@@ -22,6 +22,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 import org.apache.shindig.common.xml.XmlUtil;
+import org.apache.shindig.gadgets.AuthType;
 import org.apache.shindig.gadgets.Substitutions;
 
 import org.apache.commons.lang.StringUtils;
@@ -46,7 +47,7 @@ public class PreloadTest {
     Preload preload = new Preload(XmlUtil.parse(xml));
 
     assertEquals(HREF, preload.getHref().toString());
-    assertEquals(Auth.NONE, preload.getAuthType());
+    assertEquals(AuthType.NONE, preload.getAuthType());
     assertEquals(0, preload.getAttributes().size());
     assertTrue("Default value for sign_owner should be true.",
                 preload.isSignOwner());
@@ -60,7 +61,7 @@ public class PreloadTest {
 
     Preload preload = new Preload(XmlUtil.parse(xml));
 
-    assertEquals(Auth.SIGNED, preload.getAuthType());
+    assertEquals(AuthType.SIGNED, preload.getAuthType());
   }
 
   @Test
@@ -69,7 +70,7 @@ public class PreloadTest {
 
     Preload preload = new Preload(XmlUtil.parse(xml));
 
-    assertEquals(Auth.OAUTH, preload.getAuthType());
+    assertEquals(AuthType.OAUTH, preload.getAuthType());
   }
 
   @Test
@@ -78,7 +79,7 @@ public class PreloadTest {
 
     Preload preload = new Preload(XmlUtil.parse(xml));
 
-    assertEquals(Auth.NONE, preload.getAuthType());
+    assertEquals(AuthType.NONE, preload.getAuthType());
   }
 
   @Test
@@ -129,7 +130,7 @@ public class PreloadTest {
 
     assertEquals(VIEWS, preload2.getViews());
     assertEquals(HREF, preload2.getHref().toString());
-    assertEquals(Auth.SIGNED, preload2.getAuthType());
+    assertEquals(AuthType.SIGNED, preload2.getAuthType());
     assertEquals("yes", preload2.getAttributes().get("some_attribute"));
   }
 

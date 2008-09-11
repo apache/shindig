@@ -18,6 +18,7 @@
 package org.apache.shindig.gadgets.spec;
 
 import org.apache.shindig.common.xml.XmlUtil;
+import org.apache.shindig.gadgets.AuthType;
 import org.apache.shindig.gadgets.Substitutions;
 
 import com.google.common.collect.ImmutableSet;
@@ -65,7 +66,7 @@ public class Preload implements RequestAuthenticationInfo {
     }
     this.views = Collections.unmodifiableSet(views);
 
-    auth = Auth.parse(XmlUtil.getAttribute(preload, "authz"));
+    auth = AuthType.parse(XmlUtil.getAttribute(preload, "authz"));
     signOwner = XmlUtil.getBoolAttribute(preload, "sign_owner", true);
     signViewer = XmlUtil.getBoolAttribute(preload, "sign_viewer", true);
     Map<String, String> attributes = Maps.newHashMap();
@@ -103,8 +104,8 @@ public class Preload implements RequestAuthenticationInfo {
   /**
    * Preload@auth
    */
-  private final Auth auth;
-  public Auth getAuthType() {
+  private final AuthType auth;
+  public AuthType getAuthType() {
     return auth;
   }
 

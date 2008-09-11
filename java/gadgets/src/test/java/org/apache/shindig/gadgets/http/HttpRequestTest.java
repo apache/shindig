@@ -23,6 +23,7 @@ import static org.junit.Assert.assertTrue;
 
 import org.apache.shindig.auth.AnonymousSecurityToken;
 import org.apache.shindig.common.uri.Uri;
+import org.apache.shindig.gadgets.AuthType;
 import org.apache.shindig.gadgets.oauth.OAuthArguments;
 
 import org.apache.commons.io.IOUtils;
@@ -98,7 +99,8 @@ public class HttpRequestTest {
         .setPostBody(POST_BODY.getBytes())
         .setRewriteMimeType("text/fake")
         .setSecurityToken(new AnonymousSecurityToken())
-        .setOAuthArguments(oauthArguments);
+        .setOAuthArguments(oauthArguments)
+        .setAuthType(AuthType.OAUTH);
 
     HttpRequest request2 = new HttpRequest(request).setUri(Uri.parse("http://example.org/foo"));
 
@@ -114,5 +116,6 @@ public class HttpRequestTest {
         request2.getOAuthArguments().getSignOwner());
     assertEquals(request.getOAuthArguments().getSignViewer(),
         request2.getOAuthArguments().getSignViewer());
+    assertEquals(AuthType.OAUTH, request.getAuthType());
   }
 }

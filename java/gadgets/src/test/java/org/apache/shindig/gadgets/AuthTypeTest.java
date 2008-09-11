@@ -17,24 +17,24 @@
  * under the License.
  */
 
-package org.apache.shindig.gadgets.spec;
+package org.apache.shindig.gadgets;
 
 import static org.junit.Assert.assertEquals;
 
 import org.junit.Test;
 
-public class AuthTest {
-  
+public class AuthTypeTest {
+
   @Test
   public void testAuth() {
-    assertEquals(Auth.OAUTH, Auth.parse("oauth"));
-    assertEquals(Auth.OAUTH, Auth.parse("   oauth   "));
-    assertEquals(Auth.SIGNED, Auth.parse("SiGnEd"));
-    assertEquals(Auth.NONE, Auth.parse("NONE"));
-    assertEquals(Auth.NONE, Auth.parse(""));
-    assertEquals(Auth.NONE, Auth.parse(null));
-    assertEquals(Auth.NONE, Auth.parse("foo"));
-    assertEquals("none", Auth.NONE.toString());
-    assertEquals("oauth", Auth.OAUTH.toString());
+    assertEquals(AuthType.OAUTH, AuthType.parse("oauth"));
+    assertEquals(AuthType.OAUTH, AuthType.parse("   oauth   "));
+    assertEquals(AuthType.SIGNED, AuthType.parse("SiGnEd"));
+    assertEquals(AuthType.NONE, AuthType.parse("NONE"));
+    assertEquals(AuthType.NONE, AuthType.parse(""));
+    assertEquals(AuthType.NONE, AuthType.parse(null));
+    assertEquals(AuthType.NONE, AuthType.parse("foo"));
+    assertEquals("none", AuthType.NONE.toString());
+    assertEquals("oauth", AuthType.OAUTH.toString());
   }
 }

@@ -15,32 +15,30 @@
  * KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-package org.apache.shindig.gadgets.spec;
-
+package org.apache.shindig.gadgets;
 
 /**
-   * The supported auth modes for Preload
+ * The supported auth modes for outbound requests.
  */
-public enum Auth {
+public enum AuthType {
   NONE, SIGNED, OAUTH;
 
   /**
-   * @param value
    * @return The parsed value (defaults to NONE)
    */
-  public static Auth parse(String value) {
+  public static AuthType parse(String value) {
     if (value != null) {
       value = value.trim();
       if (value.length() == 0) {
-        return Auth.NONE;
+        return NONE;
       }
       try {
-        return Auth.valueOf(value.toUpperCase());
+        return valueOf(value.toUpperCase());
       } catch (IllegalArgumentException iae) {
-        return Auth.NONE;
+        return NONE;
       }
     } else {
-      return Auth.NONE;
+      return NONE;
     }
   }
 

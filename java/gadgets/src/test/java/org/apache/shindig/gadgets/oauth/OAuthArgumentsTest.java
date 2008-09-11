@@ -24,10 +24,11 @@ import static org.junit.Assert.fail;
 
 import org.apache.shindig.common.testing.FakeHttpServletRequest;
 import org.apache.shindig.common.xml.XmlUtil;
+import org.apache.shindig.gadgets.AuthType;
 import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.oauth.OAuthArguments.UseToken;
-import org.apache.shindig.gadgets.spec.Auth;
 import org.apache.shindig.gadgets.spec.Preload;
+
 import org.junit.Test;
 
 import javax.servlet.http.HttpServletRequest;
@@ -36,7 +37,7 @@ import javax.servlet.http.HttpServletRequest;
  * Tests parameter parsing
  */
 public class OAuthArgumentsTest {
- 
+
   @Test
   public void testInitFromPreload() throws Exception {
     String xml = "<Preload href='http://www.example.com' " +
@@ -57,7 +58,7 @@ public class OAuthArgumentsTest {
     assertNull(params.getOrigClientState());
     assertFalse(params.getBypassSpecCache());
   }
-  
+
   private FakeHttpServletRequest makeDummyRequest() throws Exception {
     FakeHttpServletRequest req = new FakeHttpServletRequest();
     req.setParameter("OAUTH_USE_TOKEN", true, "never");
@@ -71,12 +72,12 @@ public class OAuthArgumentsTest {
     req.setParameter("signViewer", true, "false");
     return req;
   }
-  
+
   @Test
   public void testInitFromRequest() throws Exception {
     HttpServletRequest req = makeDummyRequest();
-    
-    OAuthArguments args = new OAuthArguments(Auth.SIGNED, req);
+
+    OAuthArguments args = new OAuthArguments(AuthType.SIGNED, req);
     assertEquals(UseToken.NEVER, args.getUseToken());
     assertEquals("service", args.getServiceName());
     assertEquals("token", args.getTokenName());
@@ -87,11 +88,11 @@ public class OAuthArgumentsTest {
     assertEquals(false, args.getSignOwner());
     assertEquals(false, args.getSignViewer());
   }
-  
+
   @Test
   public void testInitFromRequest_defaults() throws Exception {
     HttpServletRequest req = new FakeHttpServletRequest();
-    OAuthArguments args = new OAuthArguments(Auth.SIGNED, req);
+    OAuthArguments args = new OAuthArguments(AuthType.SIGNED, req);
     assertEquals(UseToken.NEVER, args.getUseToken());
     assertEquals("", args.getServiceName());
     assertEquals("", args.getTokenName());
@@ -102,14 +103,14 @@ public class OAuthArgumentsTest {
     assertEquals(true, args.getSignOwner());
     assertEquals(true, args.getSignViewer());
   }
-  
+
   @Test
   public void testInitFromRequest_oauthDefaults() throws Exception {
     FakeHttpServletRequest req = new FakeHttpServletRequest();
-    OAuthArguments args = new OAuthArguments(Auth.OAUTH, req);
+    OAuthArguments args = new OAuthArguments(AuthType.OAUTH, req);
     assertEquals(UseToken.ALWAYS, args.getUseToken());
   }
-  
+
   @Test
   public void testNoArgConstructorDefaults() throws Exception {
     OAuthArguments args = new OAuthArguments();
@@ -123,39 +124,39 @@ public class OAuthArgumentsTest {
     assertEquals(false, args.getSignOwner());
     assertEquals(false, args.getSignViewer());
   }
-  
+
   @Test
   public void testGetAndSet() throws Exception {
     OAuthArguments args = new OAuthArguments();
     args.setBypassSpecCache(true);
     assertEquals(true, args.getBypassSpecCache());
-    
+
     args.setOrigClientState("thestate");
     assertEquals("thestate", args.getOrigClientState());
-    
+
     args.setRequestToken("rt");
     assertEquals("rt", args.getRequestToken());
-    
+
     args.setRequestTokenSecret("rts");
     assertEquals("rts", args.getRequestTokenSecret());
-    
+
     args.setServiceName("s");
     assertEquals("s", args.getServiceName());
-    
+
     args.setSignOwner(true);
     assertEquals(true, args.getSignOwner());
-    
+
     args.setSignViewer(true);
     assertEquals(true, args.getSignViewer());
-    
+
     args.setUseToken(UseToken.IF_AVAILABLE);
     assertEquals(UseToken.IF_AVAILABLE, args.getUseToken());
   }
-  
+
   @Test
   public void testCopyConstructor() throws Exception {
     HttpServletRequest req = makeDummyRequest();
-    OAuthArguments args = new OAuthArguments(Auth.OAUTH, req);
+    OAuthArguments args = new OAuthArguments(AuthType.OAUTH, req);
     args = new OAuthArguments(args);
     assertEquals(UseToken.NEVER, args.getUseToken());
     assertEquals("service", args.getServiceName());
@@ -167,33 +168,33 @@ public class OAuthArgumentsTest {
     assertEquals(false, args.getSignOwner());
     assertEquals(false, args.getSignViewer());
   }
-  
+
   @Test
   public void testParseUseToken() throws Exception {
     FakeHttpServletRequest req = new FakeHttpServletRequest();
     req.setParameter("OAUTH_USE_TOKEN", "ALWAYS");
-    OAuthArguments args = new OAuthArguments(Auth.SIGNED, req);
+    OAuthArguments args = new OAuthArguments(AuthType.SIGNED, req);
     assertEquals(UseToken.ALWAYS, args.getUseToken());
-    
+
     req.setParameter("OAUTH_USE_TOKEN", "if_available");
-    args = new OAuthArguments(Auth.SIGNED, req);
-    assertEquals(UseToken.IF_AVAILABLE, args.getUseToken());     
-    
+    args = new OAuthArguments(AuthType.SIGNED, req);
+    assertEquals(UseToken.IF_AVAILABLE, args.getUseToken());
+
     req.setParameter("OAUTH_USE_TOKEN", "never");
-    args = new OAuthArguments(Auth.SIGNED, req);
+    args = new OAuthArguments(AuthType.SIGNED, req);
     assertEquals(UseToken.NEVER, args.getUseToken());
-    
+
     req.setParameter("OAUTH_USE_TOKEN", "");
-    args = new OAuthArguments(Auth.SIGNED, req);
+    args = new OAuthArguments(AuthType.SIGNED, req);
     assertEquals(UseToken.NEVER, args.getUseToken());
-    
+
     req.setParameter("OAUTH_USE_TOKEN", "");
-    args = new OAuthArguments(Auth.OAUTH, req);
+    args = new OAuthArguments(AuthType.OAUTH, req);
     assertEquals(UseToken.ALWAYS, args.getUseToken());
-    
+
     try {
       req.setParameter("OAUTH_USE_TOKEN", "stuff");
-      new OAuthArguments(Auth.OAUTH, req);
+      new OAuthArguments(AuthType.OAUTH, req);
       fail("Should have thrown");
     } catch (GadgetException e) {
       // good.

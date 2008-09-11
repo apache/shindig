@@ -24,7 +24,6 @@ import org.apache.shindig.common.cache.CacheProvider;
 import org.apache.shindig.common.cache.DefaultCacheProvider;
 import org.apache.shindig.common.testing.TestExecutorService;
 import org.apache.shindig.common.util.FakeTimeSource;
-import org.apache.shindig.gadgets.MutableContent;
 import org.apache.shindig.gadgets.http.ContentFetcherFactory;
 import org.apache.shindig.gadgets.http.HttpFetcher;
 import org.apache.shindig.gadgets.http.HttpRequest;
@@ -36,11 +35,11 @@ import org.apache.shindig.gadgets.rewrite.ContentRewriter;
 import java.util.concurrent.ExecutorService;
 
 public abstract class GadgetTestFixture extends EasyMockTestCase {
+  // TODO: Remove all of these.
   public final GadgetServer gadgetServer;
   public final ContentFetcherFactory fetcherFactory = mock(ContentFetcherFactory.class);
   public final HttpFetcher fetcher = mock(HttpFetcher.class);
   public final OAuthFetcher oauthFetcher = mock(OAuthFetcher.class);
-  public final ContentFetcherFactory contentFetcherFactory = mock(ContentFetcherFactory.class);
   public final GadgetBlacklist blacklist = mock(GadgetBlacklist.class);
   private final CacheProvider cacheProvider = new DefaultCacheProvider();
   public final MessageBundleFactory bundleFactory =
@@ -63,7 +62,7 @@ public abstract class GadgetTestFixture extends EasyMockTestCase {
       throw new RuntimeException(e);
     }
   }
-  
+
   public static class CaptureRewriter implements ContentRewriter {
     private boolean rewroteView = false;
     private boolean rewroteResponse = false;
@@ -71,7 +70,7 @@ public abstract class GadgetTestFixture extends EasyMockTestCase {
     public void rewrite(HttpRequest request, HttpResponse original, MutableContent content) {
       rewroteResponse = true;
     }
-    
+
     public boolean responseWasRewritten() {
       return rewroteResponse;
     }
@@ -79,7 +78,7 @@ public abstract class GadgetTestFixture extends EasyMockTestCase {
     public void rewrite(Gadget gadget) {
       rewroteView = true;
     }
-    
+
     public boolean viewWasRewritten() {
       return rewroteView;
     }

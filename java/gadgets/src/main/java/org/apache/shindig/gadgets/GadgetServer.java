@@ -25,7 +25,6 @@ import org.apache.shindig.gadgets.http.HttpResponse;
 import org.apache.shindig.gadgets.oauth.OAuthArguments;
 import org.apache.shindig.gadgets.parse.GadgetHtmlParser;
 import org.apache.shindig.gadgets.rewrite.ContentRewriterRegistry;
-import org.apache.shindig.gadgets.spec.Auth;
 import org.apache.shindig.gadgets.spec.Feature;
 import org.apache.shindig.gadgets.spec.GadgetSpec;
 import org.apache.shindig.gadgets.spec.MessageBundle;
@@ -137,11 +136,11 @@ public class GadgetServer {
           = new ExecutorCompletionService<HttpResponse>(executor);
       for (Preload preload : gadget.getSpec().getModulePrefs().getPreloads()) {
         // Cant execute signed/oauth preloads without the token
-        if ((preload.getAuthType() == Auth.NONE ||
+        if ((preload.getAuthType() == AuthType.NONE ||
             gadget.getContext().getToken() != null) &&
             (preload.getViews().isEmpty() ||
             preload.getViews().contains(gadget.getContext().getView()))) {
-          PreloadTask task = new PreloadTask(gadget.getContext(), preload, preloadFetcherFactory);
+          PreloadTask task = new PreloadTask(gadget.getContext(), preload);
           Future<HttpResponse> future = preloadProcessor.submit(task);
           gadget.getPreloadMap().put(preload, future);
         }
@@ -185,36 +184,26 @@ public class GadgetServer {
    * Provides a task for preloading data into the gadget content
    * TODO: Remove when new preloading is committed.
    */
-  private static class PreloadTask implements Callable<HttpResponse> {
+  private class PreloadTask implements Callable<HttpResponse> {
     private final Preload preload;
-    private final ContentFetcherFactory preloadFetcherFactory;
     private final GadgetContext context;
 
     public HttpResponse call() {
       try {
         HttpRequest request = new HttpRequest(Uri.fromJavaUri(preload.getHref()))
-            .setOAuthArguments(new OAuthArguments(preload))
-            .setContainer(context.getContainer())
             .setSecurityToken(context.getToken())
+            .setOAuthArguments(new OAuthArguments(preload))
+            .setAuthType(preload.getAuthType())
+            .setContainer(context.getContainer())
             .setGadget(Uri.fromJavaUri(context.getUrl()));
-        switch (preload.getAuthType()) {
-          case NONE:
-            return preloadFetcherFactory.get().fetch(request);
-          case SIGNED:
-          case OAUTH:
-            return preloadFetcherFactory.getOAuthFetcher(request).fetch(request);
-          default:
-            return HttpResponse.error();
-        }
+        return preloadFetcherFactory.fetch(request);
       } catch (GadgetException e) {
         return HttpResponse.error();
       }
     }
 
-    public PreloadTask(GadgetContext context, Preload preload,
-        ContentFetcherFactory preloadFetcherFactory) {
+    public PreloadTask(GadgetContext context, Preload preload) {
       this.preload = preload;
-      this.preloadFetcherFactory = preloadFetcherFactory;
       this.context = context;
     }
   }

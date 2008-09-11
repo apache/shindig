@@ -163,12 +163,10 @@ public class GadgetRenderingTaskTest extends ServletTestFixture {
     expectFetchGadget(PRELOAD_XML, false);
     expect(request.getAttribute(AuthInfo.Attribute.SECURITY_TOKEN.getId()))
         .andReturn(DUMMY_TOKEN).atLeastOnce();
-    OAuthFetcher oauthFetcher = mock(OAuthFetcher.class);
-    expect(fetcherFactory.getOAuthFetcher(isA(HttpRequest.class))).
-        andReturn(oauthFetcher);
+    mock(OAuthFetcher.class);
 
-    expect(oauthFetcher.fetch(isA(HttpRequest.class))).
-    andReturn(new HttpResponse("preloaded data"));
+    expect(fetcherFactory.fetch(isA(HttpRequest.class)))
+        .andReturn(new HttpResponse("preloaded data"));
 
     expectLockedDomainCheck();
     expectWriteResponse();
@@ -184,9 +182,6 @@ public class GadgetRenderingTaskTest extends ServletTestFixture {
     expectFetchGadget(PRELOAD_XML, false);
     expect(request.getAttribute(AuthInfo.Attribute.SECURITY_TOKEN.getId()))
         .andReturn(DUMMY_TOKEN).atLeastOnce();
-    OAuthFetcher oauthFetcher = mock(OAuthFetcher.class);
-    expect(fetcherFactory.getOAuthFetcher(isA(HttpRequest.class))).
-        andReturn(oauthFetcher);
 
     HttpResponse resp = new HttpResponseBuilder()
         .setHttpStatusCode(HttpResponse.SC_UNAUTHORIZED)
@@ -194,7 +189,7 @@ public class GadgetRenderingTaskTest extends ServletTestFixture {
         .setMetadata(OAuthResponseParams.CLIENT_STATE, "state blob")
         .create();
 
-    expect(oauthFetcher.fetch(isA(HttpRequest.class))).andReturn(resp);
+    expect(fetcherFactory.fetch(isA(HttpRequest.class))).andReturn(resp);
 
     expectLockedDomainCheck();
     expectWriteResponse();

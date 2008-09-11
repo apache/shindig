@@ -18,29 +18,24 @@
  */
 package org.apache.shindig.gadgets.preload;
 
-import static org.easymock.EasyMock.expect;
-import static org.easymock.EasyMock.isA;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import org.apache.shindig.auth.SecurityToken;
 import org.apache.shindig.common.testing.FakeGadgetToken;
+import org.apache.shindig.gadgets.AuthType;
 import org.apache.shindig.gadgets.GadgetContext;
 import org.apache.shindig.gadgets.http.ContentFetcherFactory;
 import org.apache.shindig.gadgets.http.HttpFetcher;
 import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.http.HttpResponse;
 import org.apache.shindig.gadgets.http.HttpResponseBuilder;
-import org.apache.shindig.gadgets.oauth.OAuthArguments;
 import org.apache.shindig.gadgets.spec.GadgetSpec;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 
-import org.easymock.IMocksControl;
-import org.easymock.classextension.EasyMock;
-import org.junit.Before;
 import org.junit.Test;
 
 import java.net.URI;
@@ -58,11 +53,18 @@ public class HttpPreloaderTest {
   private static final String CONTAINER = "some-container";
   private static final URI GADGET_URL = URI.create("http://example.org/gadget.xml");
   private static final Map<String, String> PRELOAD_METADATA = Maps.immutableMap("foo", "bar");
-
-  private final IMocksControl control = EasyMock.createNiceControl();
-  private final ContentFetcherFactory fetchers = control.createMock(ContentFetcherFactory.class);
   private final RecordingHttpFetcher plainFetcher = new RecordingHttpFetcher();
   private final RecordingHttpFetcher oauthFetcher = new RecordingHttpFetcher();
+
+  private final ContentFetcherFactory fetchers = new ContentFetcherFactory(null, null) {
+    @Override
+    public HttpResponse fetch(HttpRequest request) {
+      if (request.getAuthType() == AuthType.NONE) {
+        return plainFetcher.fetch(request);
+      }
+      return oauthFetcher.fetch(request);
+    }
+  };
 
   private final GadgetContext context = new GadgetContext() {
     @Override
@@ -80,14 +82,6 @@ public class HttpPreloaderTest {
       return GADGET_URL;
     }
   };
-
-  @Before
-  public void setUp() throws Exception {
-    expect(fetchers.get())
-        .andReturn(plainFetcher).anyTimes();
-    expect(fetchers.getOAuthFetcher(isA(HttpRequest.class))).andReturn(oauthFetcher).anyTimes();
-    control.replay();
-  }
 
   private void checkRequest(HttpRequest request) {
     assertEquals(context.getContainer(), request.getContainer());
