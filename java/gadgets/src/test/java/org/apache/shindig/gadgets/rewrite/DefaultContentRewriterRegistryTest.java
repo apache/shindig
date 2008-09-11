@@ -31,15 +31,15 @@ import org.apache.shindig.gadgets.spec.View;
 
 import junit.framework.TestCase;
 
-public class BasicContentRewriterRegistryTest extends TestCase {
+public class DefaultContentRewriterRegistryTest extends TestCase {
   public void testNoArgsCreatedBasicRegistry() {
-    BasicContentRewriterRegistry r = new BasicContentRewriterRegistry(null, null);
+    DefaultContentRewriterRegistry r = new DefaultContentRewriterRegistry(null, null);
     assertNotNull(r.getRewriters());
     assertEquals(0, r.getRewriters().size());
   }
   
   public void testSingleValuedBasicRegistry() {
-    BasicContentRewriterRegistry r = new BasicContentRewriterRegistry(
+    DefaultContentRewriterRegistry r = new DefaultContentRewriterRegistry(
         new NoOpContentRewriter(), null);
     assertNotNull(r.getRewriters());
     assertEquals(1, r.getRewriters().size());
@@ -48,7 +48,7 @@ public class BasicContentRewriterRegistryTest extends TestCase {
   
   public void testBasicContentRegistryWithAdds() {
     ContentRewriter cr0 = new NoOpContentRewriter();
-    BasicContentRewriterRegistry r = new BasicContentRewriterRegistry(cr0, null);
+    DefaultContentRewriterRegistry r = new DefaultContentRewriterRegistry(cr0, null);
     ContentRewriter cr1 = new NoOpContentRewriter();
     ContentRewriter cr2 = new NoOpContentRewriter();
     r.appendRewriter(cr1);
@@ -61,7 +61,7 @@ public class BasicContentRewriterRegistryTest extends TestCase {
   }
   
   public void testRunGadgetAndHttpResponseRewrites() throws Exception {
-    BasicContentRewriterRegistry r = new BasicContentRewriterRegistry(null, null);
+    DefaultContentRewriterRegistry r = new DefaultContentRewriterRegistry(null, null);
     StringBuilder appendFull = new StringBuilder();
     for (int i = 0; i < 3; ++i) {
       String appendNew = "-" + i;

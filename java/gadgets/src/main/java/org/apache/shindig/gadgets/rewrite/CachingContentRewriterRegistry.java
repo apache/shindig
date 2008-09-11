@@ -26,7 +26,7 @@ import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.http.HttpResponse;
 import org.apache.shindig.gadgets.http.HttpResponseBuilder;
 import org.apache.shindig.gadgets.parse.GadgetHtmlParser;
-import org.apache.shindig.gadgets.rewrite.BasicContentRewriterRegistry;
+import org.apache.shindig.gadgets.rewrite.DefaultContentRewriterRegistry;
 import org.apache.shindig.gadgets.rewrite.ContentRewriter;
 import org.apache.shindig.gadgets.spec.GadgetSpec;
 
@@ -41,7 +41,7 @@ import java.util.List;
  * {@code TtlCache}, whose underlying persistence is provided by {@code CacheProvider},
  * as the cache.
  */
-public class CachingContentRewriterRegistry extends BasicContentRewriterRegistry {
+public class CachingContentRewriterRegistry extends DefaultContentRewriterRegistry {
   
   private final TtlCache<String, String> rewrittenCache;
   private String rewritersKey;

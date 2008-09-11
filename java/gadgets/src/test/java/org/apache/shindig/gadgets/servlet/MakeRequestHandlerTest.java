@@ -30,7 +30,7 @@ import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.http.HttpResponse;
 import org.apache.shindig.gadgets.http.HttpResponseBuilder;
-import org.apache.shindig.gadgets.rewrite.BasicContentRewriterRegistry;
+import org.apache.shindig.gadgets.rewrite.DefaultContentRewriterRegistry;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -49,7 +49,7 @@ public class MakeRequestHandlerTest extends ServletTestFixture {
   private static final SecurityToken DUMMY_TOKEN = new FakeGadgetToken();
 
   private final MakeRequestHandler handler = new MakeRequestHandler(fetcherFactory,
-      new BasicContentRewriterRegistry(rewriter, null));
+      new DefaultContentRewriterRegistry(rewriter, null));
 
   private void expectGetAndReturnBody(String response) throws Exception {
     expectGetAndReturnBody(AuthType.NONE, response);

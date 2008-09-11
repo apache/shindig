@@ -38,12 +38,12 @@ import org.apache.shindig.gadgets.parse.GadgetHtmlParser;
  * Guice injection bindings. The class also provides a method
  * for manipulating a simple list of rewriters.
  */
-public class BasicContentRewriterRegistry implements ContentRewriterRegistry {
+public class DefaultContentRewriterRegistry implements ContentRewriterRegistry {
   private final List<ContentRewriter> rewriters;
   private final GadgetHtmlParser htmlParser;
   
   @Inject
-  public BasicContentRewriterRegistry(ContentRewriter firstRewriter,
+  public DefaultContentRewriterRegistry(ContentRewriter firstRewriter,
       GadgetHtmlParser htmlParser) {
     this.rewriters = new LinkedList<ContentRewriter>();
     this.htmlParser = htmlParser;

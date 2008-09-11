@@ -24,7 +24,7 @@ import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.http.HttpResponse;
 
-@ImplementedBy(BasicContentRewriterRegistry.class)
+@ImplementedBy(DefaultContentRewriterRegistry.class)
 public interface ContentRewriterRegistry {
   /**
    * Rewrites a {@code Gadget} object given the registered rewriters.
