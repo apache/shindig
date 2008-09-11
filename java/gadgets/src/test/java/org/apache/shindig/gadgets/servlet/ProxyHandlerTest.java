@@ -23,7 +23,7 @@ import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.http.HttpResponse;
 import org.apache.shindig.gadgets.http.HttpResponseBuilder;
-import org.apache.shindig.gadgets.rewrite.BasicContentRewriterRegistry;
+import org.apache.shindig.gadgets.rewrite.DefaultContentRewriterRegistry;
 import static org.easymock.EasyMock.expect;
 
 import javax.servlet.http.HttpServletResponse;
@@ -37,7 +37,7 @@ public class ProxyHandlerTest extends ServletTestFixture {
   private final static String DATA_ONE = "hello world";
 
   private final ProxyHandler proxyHandler
-      = new ProxyHandler(fetcher, lockedDomainService, new BasicContentRewriterRegistry(rewriter, null));
+      = new ProxyHandler(fetcher, lockedDomainService, new DefaultContentRewriterRegistry(rewriter, null));
 
   private void expectGetAndReturnData(String url, byte[] data) throws Exception {
     HttpRequest req = new HttpRequest(Uri.parse(url));

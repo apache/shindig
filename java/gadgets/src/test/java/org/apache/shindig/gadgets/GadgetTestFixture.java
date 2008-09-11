@@ -29,7 +29,7 @@ import org.apache.shindig.gadgets.http.HttpFetcher;
 import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.http.HttpResponse;
 import org.apache.shindig.gadgets.oauth.OAuthFetcher;
-import org.apache.shindig.gadgets.rewrite.BasicContentRewriterRegistry;
+import org.apache.shindig.gadgets.rewrite.DefaultContentRewriterRegistry;
 import org.apache.shindig.gadgets.rewrite.ContentRewriter;
 
 import java.util.concurrent.ExecutorService;
@@ -56,7 +56,7 @@ public abstract class GadgetTestFixture extends EasyMockTestCase {
     try {
       registry = new GadgetFeatureRegistry(null, fetcher);
       gadgetServer = new GadgetServer(executor, registry, blacklist,
-          containerConfig, new BasicContentRewriterRegistry(rewriter, null),
+          containerConfig, new DefaultContentRewriterRegistry(rewriter, null),
           null, fetcherFactory, specFactory, bundleFactory);
     } catch (Exception e) {
       throw new RuntimeException(e);
