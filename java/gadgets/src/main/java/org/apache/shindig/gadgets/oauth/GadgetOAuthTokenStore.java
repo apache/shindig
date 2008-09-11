@@ -207,7 +207,7 @@ public class GadgetOAuthTokenStore {
           new URI(securityToken.getAppUrl()),
           arguments.getBypassSpecCache());
     } catch (URISyntaxException e) {
-      throw new OAuthStoreException("could not fetch gadget spec, gadget URI invalid", e);
+      throw new UserVisibleOAuthException("could not fetch gadget spec, gadget URI invalid", e);
     }
   }
   
@@ -220,8 +220,7 @@ public class GadgetOAuthTokenStore {
         .append(serviceName)
         .append(".  Known services: ")
         .append(StringUtils.join(oauthSpec.getServices().keySet(), ','));
-    return new GadgetException(GadgetException.Code.INVALID_PARAMETER,
-        message.toString());
+    return new UserVisibleOAuthException(message.toString());
   }
 
   private GadgetException oauthNotFoundEx(SecurityToken securityToken) {
@@ -229,8 +228,7 @@ public class GadgetOAuthTokenStore {
         .append("Spec for gadget ")
         .append(securityToken.getAppUrl())
         .append(" does not contain OAuth element.");
-    return new GadgetException(GadgetException.Code.INVALID_PARAMETER,
-        message.toString());
+    return new UserVisibleOAuthException(message.toString());
   }
   
   /**
