@@ -19,8 +19,6 @@ package org.apache.shindig.gadgets.rewrite;
 
 import com.google.inject.ImplementedBy;
 
-import java.util.List;
-
 import org.apache.shindig.gadgets.Gadget;
 import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.http.HttpRequest;
@@ -28,11 +26,6 @@ import org.apache.shindig.gadgets.http.HttpResponse;
 
 @ImplementedBy(BasicContentRewriterRegistry.class)
 public interface ContentRewriterRegistry {
-  /**
-   * @return An immutable list of all content rewriters
-   */
-  public List<ContentRewriter> getRewriters();
-  
   /**
    * Rewrites a {@code Gadget} object given the registered rewriters.
    * @param gadget Gadget object to rewrite
