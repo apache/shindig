@@ -19,6 +19,7 @@
 package org.apache.shindig.gadgets.http;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import org.apache.shindig.auth.AnonymousSecurityToken;
@@ -86,6 +87,12 @@ public class HttpRequestTest {
   }
 
   @Test
+  public void testDefaultIsFollowRedirects() {
+    HttpRequest request = new HttpRequest(DEFAULT_URI);
+    assertTrue(request.getFollowRedirects());
+  }
+  
+  @Test
   public void copyCtorCopiesAllFields() {
     OAuthArguments oauthArguments = new OAuthArguments();
     oauthArguments.setSignOwner(false);
@@ -100,7 +107,8 @@ public class HttpRequestTest {
         .setRewriteMimeType("text/fake")
         .setSecurityToken(new AnonymousSecurityToken())
         .setOAuthArguments(oauthArguments)
-        .setAuthType(AuthType.OAUTH);
+        .setAuthType(AuthType.OAUTH)
+        .setFollowRedirects(false);
 
     HttpRequest request2 = new HttpRequest(request).setUri(Uri.parse("http://example.org/foo"));
 
@@ -117,5 +125,6 @@ public class HttpRequestTest {
     assertEquals(request.getOAuthArguments().getSignViewer(),
         request2.getOAuthArguments().getSignViewer());
     assertEquals(AuthType.OAUTH, request.getAuthType());
+    assertFalse(request.getFollowRedirects());
   }
 }

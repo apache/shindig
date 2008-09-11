@@ -36,11 +36,17 @@ import org.apache.shindig.gadgets.spec.GadgetSpec;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 
+import org.easymock.IMocksControl;
+import org.easymock.classextension.EasyMock;
+import org.json.JSONException;
+import org.json.JSONObject;
+import org.junit.Before;
 import org.junit.Test;
 
 import java.net.URI;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.concurrent.Callable;
 
 /**
@@ -89,11 +95,15 @@ public class HttpPreloaderTest {
     assertEquals(context.getToken().getAppId(), request.getSecurityToken().getAppId());
   }
 
-  private static void checkResults(Map<String, String> results) {
+  private static void checkResults(JSONObject results) throws JSONException {
     assertEquals(PRELOAD_CONTENT, results.get("body"));
-    assertEquals(HttpResponse.SC_OK, Integer.parseInt(results.get("rc")));
-    assertTrue("Metadata values not copied to output.",
-        results.entrySet().containsAll(PRELOAD_METADATA.entrySet()));
+    assertEquals(HttpResponse.SC_OK, results.getInt("rc"));
+    assertEquals("yo=momma", results.getJSONObject("headers").getJSONArray("set-cookie").get(0));
+
+    for (Entry<String, String> entry : PRELOAD_METADATA.entrySet()) {
+      assertEquals("Metadata values not copied to output.",
+          entry.getValue(), results.get(entry.getKey()));
+    }
   }
 
   @Test
@@ -111,7 +121,7 @@ public class HttpPreloaderTest {
     PreloadedData data = preloaded.get(PRELOAD_HREF).call();
 
     checkRequest(plainFetcher.requests.get(0));
-    checkResults((Map<String, String>)data.toJson());
+    checkResults((JSONObject)data.toJson());
   }
 
   @Test
@@ -132,7 +142,7 @@ public class HttpPreloaderTest {
     checkRequest(request);
     assertTrue(request.getOAuthArguments().getSignOwner());
     assertFalse(request.getOAuthArguments().getSignViewer());
-    checkResults((Map<String, String>)data.toJson());
+    checkResults((JSONObject) data.toJson());
   }
 
   @Test
@@ -152,7 +162,7 @@ public class HttpPreloaderTest {
 
     HttpRequest request = oauthFetcher.requests.get(0);
     checkRequest(request);
-    checkResults((Map<String, String>)data.toJson());
+    checkResults((JSONObject) data.toJson());
   }
 
   @Test
@@ -170,11 +180,11 @@ public class HttpPreloaderTest {
 
     PreloadedData data = preloaded.get(PRELOAD_HREF).call();
     checkRequest(plainFetcher.requests.get(0));
-    checkResults((Map<String, String>)data.toJson());
+    checkResults((JSONObject) data.toJson());
 
     data = preloaded.get(PRELOAD_HREF2).call();
     checkRequest(plainFetcher.requests.get(1));
-    checkResults((Map<String, String>)data.toJson());
+    checkResults((JSONObject) data.toJson());
   }
 
   private static class RecordingHttpFetcher implements HttpFetcher {
@@ -185,6 +195,7 @@ public class HttpPreloaderTest {
       return new HttpResponseBuilder()
           .setMetadata(PRELOAD_METADATA)
           .setResponseString(PRELOAD_CONTENT)
+          .addHeader("Set-Cookie", "yo=momma")
           .create();
     }
   }

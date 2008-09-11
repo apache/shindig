@@ -63,7 +63,6 @@ public class FakeOAuthServiceProvider implements HttpFetcher {
   
   public final static String SIGNED_FETCH_CONSUMER_KEY = "signedfetch";
 
-
   private static class TokenState {
     String tokenSecret;
     OAuthConsumer consumer;
@@ -157,7 +156,7 @@ public class FakeOAuthServiceProvider implements HttpFetcher {
   public void setVagueErrors(boolean vagueErrors) {
     this.vagueErrors = vagueErrors;
   }
-  
+
   public void addParamLocation(OAuthParamLocation paramLocation) {
     validParamLocations.add(paramLocation);
   }
@@ -178,6 +177,9 @@ public class FakeOAuthServiceProvider implements HttpFetcher {
   }
 
   private HttpResponse realFetch(HttpRequest request) {
+    if (request.getFollowRedirects()) {
+      throw new RuntimeException("Not supposed to follow OAuth redirects");
+    }
     String url = request.getUri().toString();
     try {
       if (url.startsWith(REQUEST_TOKEN_URL)) {

@@ -58,6 +58,9 @@ public class HttpRequest {
   private boolean ignoreCache;
   private int cacheTtl = -1;
 
+  // Whether to follow redirects
+  private boolean followRedirects = true;
+  
   // Context for the request.
   private Uri gadget;
   private String container = ContainerConfig.DEFAULT_CONTAINER;
@@ -95,6 +98,7 @@ public class HttpRequest {
     }
     authType = request.authType;
     rewriteMimeType = request.rewriteMimeType;
+    followRedirects = request.followRedirects;
   }
 
   public HttpRequest setMethod(String method) {
@@ -230,6 +234,14 @@ public class HttpRequest {
    */
   public HttpRequest setOAuthArguments(OAuthArguments oauthArguments) {
     this.oauthArguments = oauthArguments;
+    return this;
+  }
+  
+  /**
+   * @param followRedirects whether this request should automatically follow redirects.
+   */
+  public HttpRequest setFollowRedirects(boolean followRedirects) {
+    this.followRedirects = followRedirects;
     return this;
   }
 
@@ -373,6 +385,13 @@ public class HttpRequest {
    */
   public OAuthArguments getOAuthArguments() {
     return oauthArguments;
+  }
+  
+  /**
+   * @return true if redirects should be followed.
+   */
+  public boolean getFollowRedirects() {
+    return followRedirects;
   }
 
   /**

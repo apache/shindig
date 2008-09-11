@@ -24,8 +24,11 @@ import org.apache.shindig.gadgets.http.ContentFetcherFactory;
 import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.http.HttpResponse;
 import org.apache.shindig.gadgets.oauth.OAuthArguments;
+import org.apache.shindig.gadgets.servlet.MakeRequestHandler;
 import org.apache.shindig.gadgets.spec.GadgetSpec;
 import org.apache.shindig.gadgets.spec.Preload;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import com.google.common.collect.Maps;
 import com.google.inject.Inject;
@@ -84,12 +87,16 @@ public class HttpPreloader implements Preloader {
    * Implements PreloadData by returning a Map that matches the output format used by makeRequest.
    */
   private static class HttpPreloadData implements PreloadedData {
-    private final Map<String, String> data;
+    private final JSONObject data;
 
     public HttpPreloadData(HttpResponse response) {
-      data = Maps.newHashMap(response.getMetadata());
-      data.put("body", response.getResponseAsString());
-      data.put("rc", Integer.toString(response.getHttpStatusCode()));
+      JSONObject data = null;
+      try {
+        data = MakeRequestHandler.getResponseAsJson(response, response.getResponseAsString());
+      } catch (JSONException e) {
+        data = new JSONObject();
+      }
+      this.data = data;
     }
 
     public Object toJson() {

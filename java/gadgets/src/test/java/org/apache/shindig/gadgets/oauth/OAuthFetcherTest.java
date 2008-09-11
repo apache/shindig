@@ -736,7 +736,8 @@ public class OAuthFetcherTest {
     HttpResponse resp = client.sendGet(FakeOAuthServiceProvider.RESOURCE_URL);
     List<Parameter> queryParams = OAuth.decodeForm(resp.getResponseAsString());
     assertTrue(contains(queryParams, "opensocial_owner_id", "o"));
-    assertTrue(contains(queryParams, "opensocial_viewer_id", "v"));  }
+    assertTrue(contains(queryParams, "opensocial_viewer_id", "v"));
+  }
   
   @Test
   public void testGetWithQuery() throws Exception {

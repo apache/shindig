@@ -173,4 +173,32 @@ public abstract class AbstractHttpFetcherTest {
     assertEquals("POST", response.getHeader("x-method"));
     ArrayAssert.assertEquals(body, response.getResponseAsBytes());
   }
+  
+  @Test public void testFollowRedirects() throws Exception {
+    String content = "";
+    Uri uri = new UriBuilder(BASE_URL)
+        .addQueryParameter("body", content)
+        .addQueryParameter("status", "302")
+        .addQueryParameter("header", "Location=" + BASE_URL.toString() + "?body=redirected")
+        .toUri();
+    HttpRequest request = new HttpRequest(uri);
+    HttpResponse response = fetcher.fetch(request);
+    assertEquals(200, response.getHttpStatusCode());
+    assertEquals("redirected", response.getResponseAsString());
+  }
+  
+  @Test public void testNoFollowRedirects() throws Exception {
+    String content = "";
+    Uri uri = new UriBuilder(BASE_URL)
+        .addQueryParameter("body", content)
+        .addQueryParameter("status", "302")
+        .addQueryParameter("header", "Location=" + BASE_URL.toString() + "?body=redirected")
+        .toUri();
+    HttpRequest request = new HttpRequest(uri)
+        .setFollowRedirects(false);
+    HttpResponse response = fetcher.fetch(request);
+    assertEquals(302, response.getHttpStatusCode());
+    assertEquals(content, response.getResponseAsString());
+    assertEquals(BASE_URL.toString() + "?body=redirected", response.getHeader("Location"));
+  }
 }
