@@ -333,8 +333,8 @@ class JsonDbOpensocialService implements ActivitiesService, PeopleService, AppDa
 		}
 		switch ($groupId->getType()) {
 			case 'self':
-				foreach ($fields as $key => $present) {//TODO: Implement this!
-}
+				foreach ($fields as $key => $present) {//TODO: Implement this!  
+				}
 				break;
 			default:
 				return new ResponseItem(NOT_IMPLEMENTED, "We don't support deleting data in batches yet", null);
