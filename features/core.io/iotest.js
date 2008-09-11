@@ -734,6 +734,10 @@ IoTest.prototype.testPreload = function() {
     "http://target.example.com/somepage" : {
       "rc" : 200,
       "body" : "preloadedbody",
+      "headers": {
+        "set-cookie": ["foo=bar","baz=quux"],
+        "location": ["somewhere"],
+      }
     }
   };
 
@@ -744,6 +748,9 @@ IoTest.prototype.testPreload = function() {
       });
 
   this.assertEquals("preloadedbody", resp.text);
+  this.assertEquals("somewhere", resp.headers["location"][0]);
+  this.assertEquals("foo=bar", resp.headers["set-cookie"][0]);
+  this.assertEquals("baz=quux", resp.headers["set-cookie"][1]);
 
   var req = new fakeXhr.Expectation("GET", "http://example.com/json");
   this.setStandardArgs(req, false);

@@ -359,4 +359,46 @@ public class MakeRequestHandlerTest extends ServletTestFixture {
     assertEquals(RESPONSE_BODY, results.getString("foo"));
     assertTrue(rewriter.responseWasRewritten());
   }
+  
+  public void testSetCookiesReturned() throws Exception {
+    HttpRequest internalRequest = new HttpRequest(REQUEST_URL);
+    HttpResponse response = new HttpResponseBuilder()
+        .setResponse("foo".getBytes("UTF-8"))
+        .addHeader("Set-Cookie", "foo=bar; Secure")
+        .addHeader("Set-Cookie", "name=value")
+        .create();
+    
+    expect(fetcherFactory.fetch(internalRequest)).andReturn(response);
+    replay();
+
+    handler.fetch(request, recorder);
+    JSONObject results = extractJsonFromResponse();
+    JSONObject headers = results.getJSONObject("headers");
+    assertNotNull(headers);
+    JSONArray cookies = headers.getJSONArray("set-cookie");
+    assertNotNull(cookies);
+    assertEquals(2, cookies.length());
+    assertEquals("foo=bar; Secure", cookies.get(0));
+    assertEquals("name=value", cookies.get(1));
+  }
+  
+  public void testLocationReturned() throws Exception {
+    HttpRequest internalRequest = new HttpRequest(REQUEST_URL);
+    HttpResponse response = new HttpResponseBuilder()
+        .setResponse("foo".getBytes("UTF-8"))
+        .addHeader("Location", "somewhere else")
+        .create();
+    
+    expect(fetcherFactory.fetch(internalRequest)).andReturn(response);
+    replay();
+
+    handler.fetch(request, recorder);
+    JSONObject results = extractJsonFromResponse();
+    JSONObject headers = results.getJSONObject("headers");
+    assertNotNull(headers);
+    JSONArray locations = headers.getJSONArray("location");
+    assertNotNull(locations);
+    assertEquals(1, locations.length());
+    assertEquals("somewhere else", locations.get(0));
+  }
 }

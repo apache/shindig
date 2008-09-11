@@ -429,6 +429,8 @@ public class OAuthFetcher extends ChainedContentFetcher {
       OAuthMessage signed = accessorInfo.getAccessor().newRequestMessage(
           base.getMethod(), target.toString(), params);
       HttpRequest oauthHttpRequest = createHttpRequest(base, selectOAuthParams(signed));
+      // Following 302s on OAuth responses is unlikely to be productive.
+      oauthHttpRequest.setFollowRedirects(false);
       return oauthHttpRequest;
     } catch (IOException e) {
       throw new GadgetException(GadgetException.Code.INTERNAL_SERVER_ERROR, e);

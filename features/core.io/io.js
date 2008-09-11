@@ -134,6 +134,8 @@ gadgets.io = function() {
   function transformResponseData(params, data) {
     var resp = {
      text: data.body,
+     rc: data.rc,
+     headers: data.headers,
      oauthApprovalUrl: data.oauthApprovalUrl,
      oauthError: data.oauthError,
      oauthErrorText: data.oauthErrorText,
@@ -233,6 +235,8 @@ gadgets.io = function() {
           }
           var resp = {
             body: preload.body,
+            rc: preload.rc,
+            headers: preload.headers,
             oauthApprovalUrl: preload.oauthApprovalUrl,
             oauthError: preload.oauthError,
             oauthErrorText: preload.oauthErrorText,

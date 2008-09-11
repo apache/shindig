@@ -80,7 +80,7 @@ public class BasicHttpFetcher implements HttpFetcher {
     HttpURLConnection fetcher = (HttpURLConnection)url.openConnection();
     fetcher.setConnectTimeout(CONNECT_TIMEOUT_MS);
     fetcher.setRequestProperty("Accept-Encoding", "gzip, deflate");
-    fetcher.setInstanceFollowRedirects(true);
+    fetcher.setInstanceFollowRedirects(request.getFollowRedirects());
     for (Map.Entry<String, List<String>> entry : request.getHeaders().entrySet()) {
       fetcher.setRequestProperty(entry.getKey(), StringUtils.join(entry.getValue(), ','));
     }
