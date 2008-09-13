@@ -46,12 +46,12 @@ function __autoload($className)
 					'src/gadgets/http',
 					'src/gadgets/oauth',
 					'src/gadgets/samplecontainer',
-					'src/social-api',
-					'src/social-api/http',
-					'src/social-api/dataservice',
-					'src/social-api/opensocial',
-					'src/social-api/opensocial/model',
-					'src/social-api/samplecontainer'
+					'src/social',
+					'src/social/http',
+					'src/social/dataservice',
+					'src/social/opensocial',
+					'src/social/opensocial/model',
+					'src/social/samplecontainer'
 				);
 	$extension_class_paths = Config::get('extension_class_paths');
 	if (!empty($extension_class_paths)) {

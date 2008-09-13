@@ -30,10 +30,10 @@ function __autoload($className)
 	$basePath = realpath('../');
 	$locations = array('src/common', 'src/common/samplecontainer', 'src/gadgets', 
 			'src/gadgets/http', 'src/gadgets/oauth', 'src/gadgets/samplecontainer', 
-			'src/social-api', 'src/social-api/canonical', 'src/social-api/http', 
-			'src/social-api/dataservice', 'src/social-api/converters', 
-			'src/social-api/opensocial', 'src/social-api/opensocial/model', 
-			'src/social-api/samplecontainer');
+			'src/social', 'src/social/canonical', 'src/social/http', 
+			'src/social/dataservice', 'src/social/converters', 
+			'src/social/opensocial', 'src/social/opensocial/model', 
+			'src/social/samplecontainer');
 	$extension_class_paths = Config::get('extension_class_paths');
 	if (! empty($extension_class_paths)) {
 		$locations = array_merge(explode(',', $extension_class_paths), $locations);
@@ -60,7 +60,7 @@ class AllTests {
 		$suite = new PHPUnit_Framework_TestSuite();
 		$suite->setName('Shindig');
 		$path = dirname($_SERVER['SCRIPT_FILENAME']);
-		$testTypes = array('common', 'gadgets', 'social-api');
+		$testTypes = array('common', 'gadgets', 'social');
 		foreach ($testTypes as $type) {
 			foreach (glob("$path/{$type}/*Test.php") as $file) {
 				if (is_readable($file)) {
