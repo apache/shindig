@@ -32,7 +32,7 @@ function __autoload($className)
 			'src/gadgets/http', 'src/gadgets/oauth', 'src/gadgets/samplecontainer', 
 			'src/social', 'src/social/canonical', 'src/social/http', 
 			'src/social/dataservice', 'src/social/converters', 
-			'src/social/opensocial', 'src/social/model', 
+			'src/social/opensocial', 'src/social/spi', 'src/social/model', 
 			'src/social/samplecontainer');
 	$extension_class_paths = Config::get('extension_class_paths');
 	if (! empty($extension_class_paths)) {
