@@ -76,8 +76,6 @@ class RestServlet extends HttpServlet {
 	
 	// The json Batch Route is used by the gadgets 
 	private static $JSON_BATCH_ROUTE = "jsonBatch";
-	// The Batch Proxy route is used the one defined in the RESTful API specification
-	private static $BATCH_PROXY_ROUTE = "batchProxy";
 
 	public function doGet()
 	{
@@ -199,7 +197,7 @@ class RestServlet extends HttpServlet {
 			$class = new $class(null);
 			$response = $class->handleMethod($requestItem);
 		}
-		if ($response->getError() != null && ! $this->isJsonBatchUrl() && ! $this->isBatchProxyUrl()) {
+		if ($response->getError() != null && ! $this->isJsonBatchUrl()) {
 			// Can't use http error codes in batch mode, instead we return the error code in the response item
 			$this->outputError($response);
 		}
@@ -359,10 +357,5 @@ class RestServlet extends HttpServlet {
 	public function isJsonBatchUrl()
 	{
 		return strrpos($_SERVER["REQUEST_URI"], RestServlet::$JSON_BATCH_ROUTE) !== false;
-	}
-
-	public function isBatchProxyUrl()
-	{
-		return strrpos($_SERVER["REQUEST_URI"], RestServlet::$BATCH_PROXY_ROUTE) !== false;
 	}
 }
