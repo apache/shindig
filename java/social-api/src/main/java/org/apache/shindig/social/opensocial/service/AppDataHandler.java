@@ -33,7 +33,7 @@ public class AppDataHandler extends DataRequestHandler {
 
   private final AppDataService service;
 
-  private static final String APP_DATA_PATH = "/people/{userId}+/{groupId}/{appId}";
+  private static final String APP_DATA_PATH = "/appdata/{userId}+/{groupId}/{appId}";
 
   @Inject
   public AppDataHandler(AppDataService service) {
@@ -41,7 +41,7 @@ public class AppDataHandler extends DataRequestHandler {
   }
 
   /**
-   * Allowed endpoints /people/{userId}/{groupId}/{appId} - fields={field1, field2}
+   * Allowed endpoints /appdata/{userId}/{groupId}/{appId} - fields={field1, field2}
    *
    * examples: /appdata/john.doe/@friends/app?fields=count /appdata/john.doe/@self/app
    *
