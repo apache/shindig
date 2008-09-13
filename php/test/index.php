@@ -31,7 +31,7 @@ function __autoload($className)
 	$locations = array('src/common', 'src/common/sample', 'src/gadgets', 'src/gadgets/http', 
 			'src/gadgets/oauth', 'src/gadgets/sample', 'src/social', 'src/social/http', 
 			'src/social/service', 'src/social/converters', 'src/social/opensocial', 
-			'src/social/spi', 'src/social/model', 'src/social/sample');
+			'src/social/spi', 'src/social/model', 'src/social/sample', 'src/social/oauth');
 	$extension_class_paths = Config::get('extension_class_paths');
 	if (! empty($extension_class_paths)) {
 		$locations = array_merge(explode(',', $extension_class_paths), $locations);
