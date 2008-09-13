@@ -124,11 +124,6 @@ class RestServlet extends HttpServlet {
 				// custom json batch format used by the gadgets
 				$responses = $this->handleJsonBatchRequest($token);
 				$outputConverter->outputJsonBatch($responses, $token);
-			} elseif ($this->isBatchProxyUrl()) {
-				// spec compliant batch proxy
-				$this->noHeaders = true;
-				$responses = $this->handleBatchProxyRequest($token);
-				$outputConverter->outputBatch($responses, $token);
 			} else {
 				// single rest request
 				$response = $this->handleRequest($token, $method);
@@ -176,104 +171,6 @@ class RestServlet extends HttpServlet {
 		} else {
 			throw new Exception("No post data set");
 		}
-	}
-
-	private function handleBatchProxyRequest($token)
-	{
-		// Is this is a multipath/mixed post? Check content type:
-		if (isset($GLOBALS['HTTP_RAW_POST_DATA']) && strpos($_SERVER['CONTENT_TYPE'], 'multipart/mixed') !== false && strpos($_SERVER['CONTENT_TYPE'], 'boundary=') !== false) {
-			// Ok looks swell, see what our boundry is..
-			$boundry = substr($_SERVER['CONTENT_TYPE'], strpos($_SERVER['CONTENT_TYPE'], 'boundary=') + strlen('boundary='));
-			// Split up requests per boundry
-			$requests = explode($boundry, $GLOBALS['HTTP_RAW_POST_DATA']);
-			$responses = array();
-			foreach ($requests as $request) {
-				$request = trim($request);
-				if (! empty($request)) {
-					// extractBatchRequest() does the magic parsing of the raw post data to a meaninful request array
-					$request = $this->extractBatchRequest($request);
-					$requestItem = new RestRequestItem();
-					$requestItem->createRequestItemWithRequest($request, $token);
-					$responses[] = array('request' => $requestItem, 
-							'response' => $this->getResponseItem($requestItem));
-				}
-			}
-		} else {
-			$this->outputError(new ResponseItem(BAD_REQUEST, "Invalid multipart/mixed request"));
-		}
-		return $responses;
-	}
-
-	private function extractBatchRequest($request)
-	{
-		/* Multipart request is formatted like:
-		 * -batch-a73hdj3dy3mm347ddjjdf
-		 * Content-Type: application/http;version=1.1
-		 * Content-Transfer-Encoding: binary
-		 * 
-		 * GET /people/@me/@friends?startPage=5&count=10&format=json
-		 * Host: api.example.org
-		 * If-None-Match: "837dyfkdi39df"
-		 * 
-		 * but we only want to have the last bit (the actual request), this filters that down first
-		 */
-		$emptyFound = false;
-		$requestLines = explode("\r\n", $request);
-		$request = '';
-		foreach ($requestLines as $line) {
-			if ($emptyFound) {
-				$request .= $line . "\n";
-			} elseif (empty($line)) {
-				$emptyFound = true;
-			}
-		}
-		if (! $emptyFound) {
-			throw new Exception("Mallformed multipart structure");
-		}
-		// Now that we have the basic request in $request, split that up again & parse it into a meaningful representation
-		$firstFound = $emptyFound = false;
-		$requestLines = explode("\n", $request);
-		$request = array();
-		$request['headers'] = array();
-		$request['postData'] = '';
-		foreach ($requestLines as $line) {
-			if (! $firstFound) {
-				$firstFound = true;
-				$parts = explode(' ', trim($line));
-				if (count($parts) != 2) {
-					throw new Exception("Mallshaped request uri in multipart block");
-				}
-				$request['method'] = strtoupper(trim($parts[0]));
-				// cut it down to an actual meaningful url without the prefix/social/rest part right away 
-				$request['url'] = substr(trim($parts[1]), strlen(Config::get('web_prefix') . '/social/rest'));
-			} elseif (! $emptyFound && ! empty($line)) {
-				// convert the key to the PHP 'CONTENT_TYPE' style naming convention.. it's ugly but consitent
-				$key = str_replace('-', '_', strtoupper(trim(substr($line, 0, strpos($line, ':')))));
-				$val = trim(substr($line, strpos($line, ':') + 1));
-				$request['headers'][$key] = $val;
-			} elseif (! $emptyFound && empty($line)) {
-				$emptyFound = true;
-			} else {
-				if (get_magic_quotes_gpc()) {
-					$line = stripslashes($line);
-				}
-				$request['postData'] .= $line . "\n";
-			}
-		}
-		if (empty($request['method']) || empty($request['url'])) {
-			throw new Exception("Mallformed multipart structure");
-		}
-		if (empty($request['postData'])) {
-			// don't trip the requestItem into thinking there is postData when there's not
-			unset($request['postData']);
-		} else {
-			// if there was a post data blob present, decode it into an array, the format is based on the 
-			// content type header, which is either application/json or 
-			$format = isset($request['headers']['CONTENT_TYPE']) && strtolower($request['headers']['CONTENT_TYPE']) == 'application/atom+xml' ? 'atom' : 'json';
-			$requestType = $this->getRouteFromParameter($request['url']);
-			$request['postData'] = $this->decodeRequests($request['postData'], $requestType, $format);
-		}
-		return $request;
 	}
 
 	private function getResponseItem(RestRequestItem $requestItem)
