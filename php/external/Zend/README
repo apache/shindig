@@ -1,0 +1,6 @@
+This is a stripped copy of the Zend Framework: http://framework.zend.com/
+Which is licensed under the New BSD license: http://framework.zend.com/license
+
+To prevent having to modify the include_path, the require_once 'Zend/<file>.php' statements were rewritten using:
+# find . -type f -name "*.php" | xargs grep -l "require_once 'Zend" | xargs sed -i '' -e "s/require_once \'Zend/require_once 'external\/Zend/g"
+

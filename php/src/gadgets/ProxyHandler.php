@@ -75,7 +75,7 @@ class ProxyHandler {
 		if ($status == 200) {
 			$output = '';
 			if (isset($_GET['contentType']) && $_GET['contentType'] == 'FEED') {
-				require 'src/common/Zend/Feed.php';
+				require 'external/Zend/Feed.php';
 				$numEntries = $_GET['numEntries'];
 				$getSummaries = $_GET['getSummaries'];
 				$channel = array();
