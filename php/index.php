@@ -48,7 +48,7 @@ function __autoload($className)
 					'src/gadgets/samplecontainer',
 					'src/social',
 					'src/social/http',
-					'src/social/dataservice',
+					'src/social/service',
 					'src/social/opensocial',
 					'src/social/model',
 					'src/social/spi',

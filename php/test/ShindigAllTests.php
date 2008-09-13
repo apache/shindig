@@ -31,7 +31,7 @@ function __autoload($className)
 	$locations = array('src/common', 'src/common/samplecontainer', 'src/gadgets', 
 			'src/gadgets/http', 'src/gadgets/oauth', 'src/gadgets/samplecontainer', 
 			'src/social', 'src/social/http', 'src/social/canonical', 
-			'src/social/dataservice', 'src/social/converters', 
+			'src/social/service', 'src/social/converters', 
 			'src/social/opensocial', 'src/social/spi', 'src/social/model', 
 			'src/social/samplecontainer');
 	$extension_class_paths = Config::get('extension_class_paths');
