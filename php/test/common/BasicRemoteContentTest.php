@@ -1,6 +1,6 @@
 <?php
 
-require_once 'src/common/samplecontainer/BasicRemoteContent.php';
+require_once 'src/common/sample/BasicRemoteContent.php';
 
 require_once 'external/PHPUnit/Framework/TestCase.php';
 

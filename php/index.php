@@ -41,18 +41,18 @@ function __autoload($className)
 {
 	$locations = array(
 					'src/common',
-					'src/common/samplecontainer',
+					'src/common/sample',
 					'src/gadgets', 
 					'src/gadgets/http',
 					'src/gadgets/oauth',
-					'src/gadgets/samplecontainer',
+					'src/gadgets/sample',
 					'src/social',
 					'src/social/http',
 					'src/social/service',
 					'src/social/opensocial',
 					'src/social/model',
 					'src/social/spi',
-					'src/social/samplecontainer'
+					'src/social/sample'
 				);
 	$extension_class_paths = Config::get('extension_class_paths');
 	if (!empty($extension_class_paths)) {

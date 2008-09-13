@@ -1,6 +1,6 @@
 <?php
 
-require_once 'src/common/samplecontainer/BasicSecurityToken.php';
+require_once 'src/common/sample/BasicSecurityToken.php';
 
 require_once 'external/PHPUnit/Framework/TestCase.php';
 
