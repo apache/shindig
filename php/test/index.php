@@ -28,12 +28,12 @@ require_once realpath('../') . "/test/TestContext.php";
 function __autoload($className)
 {
 	$basePath = realpath('../');
-	$locations = array('src/common', 'src/common/samplecontainer', 'src/gadgets', 
-			'src/gadgets/http', 'src/gadgets/oauth', 'src/gadgets/samplecontainer', 
+	$locations = array('src/common', 'src/common/sample', 'src/gadgets', 
+			'src/gadgets/http', 'src/gadgets/oauth', 'src/gadgets/sample', 
 			'src/social', 'src/social/canonical', 'src/social/http', 
 			'src/social/service', 'src/social/converters', 
 			'src/social/opensocial', 'src/social/spi', 'src/social/model', 
-			'src/social/samplecontainer');
+			'src/social/sample');
 	$extension_class_paths = Config::get('extension_class_paths');
 	if (! empty($extension_class_paths)) {
 		$locations = array_merge(explode(',', $extension_class_paths), $locations);
