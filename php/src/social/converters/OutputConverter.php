@@ -27,44 +27,4 @@ abstract class OutputConverter {
 	abstract function outputResponse(ResponseItem $responseItem, RestRequestItem $requestItem);
 
 	abstract function outputBatch(Array $responses, SecurityToken $token);
-
-	/**
-	 * Output the multipart/mixed headers and returns the boundry token used
-	 *
-	 */
-	public function boundryHeaders()
-	{
-		$this->boundry = '--batch-' . md5(rand(0, 32000));
-		header("HTTP/1.1 200 OK", true);
-		header("Content-Type: multipart/mixed; boundary=$this->boundry", true);
-	}
-
-	public function outputPart($part, $code)
-	{
-		$boundryHeader = "{$this->boundry}\r\n" . "Content-Type: application/http;version=1.1\r\n" . "Content-Transfer-Encoding: binary\r\n\r\n";
-		echo $boundryHeader;
-		switch ($code) {
-			case BAD_REQUEST:
-				$code = '400 Bad Request';
-				break;
-			case UNAUTHORIZED:
-				$code = '401 Unauthorized';
-				break;
-			case FORBIDDEN:
-				$code = '403 Forbidden';
-				break;
-			case FORBIDDEN:
-				$code = '404 Not Found';
-				break;
-			case NOT_IMPLEMENTED:
-				$code = '501 Not Implemented';
-				break;
-			case INTERNAL_ERROR:
-			default:
-				$code = '200 OK';
-				break;
-		}
-		echo "$code\r\n\r\n";
-		echo $part . "\n";
-	}
 }

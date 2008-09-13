@@ -126,17 +126,7 @@ class OutputAtomConverter extends OutputConverter {
 
 	function outputBatch(Array $responses, SecurityToken $token)
 	{
-		$this->boundryHeaders();
-		foreach ($responses as $response) {
-			$request = $response['request'];
-			$response = $response['response'];
-			// output buffering supports multiple levels of it.. it's a nice feature to abuse :)
-			ob_start();
-			$this->outputResponse($response, $request);
-			$part = ob_get_contents();
-			ob_end_clean();
-			$this->outputPart($part, $response->getError());
-		}
+		throw new Exception("Atom batch not supported");
 	}
 
 	/**
