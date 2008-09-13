@@ -55,7 +55,7 @@ require 'src/social/converters/InputConverter.php';
 require 'src/social/converters/InputAtomConverter.php';
 require 'src/social/converters/InputJsonConverter.php';
 require 'src/social/converters/InputXmlConverter.php';
-require 'src/social/canonical/JsonDbOpensocialService.php';
+require 'src/social/sample/JsonDbOpensocialService.php';
 
 class RestException extends Exception {}
 
