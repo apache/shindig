@@ -51,6 +51,7 @@ function __autoload($className)
 					'src/social/dataservice',
 					'src/social/opensocial',
 					'src/social/model',
+					'src/social/spi',
 					'src/social/samplecontainer'
 				);
 	$extension_class_paths = Config::get('extension_class_paths');
