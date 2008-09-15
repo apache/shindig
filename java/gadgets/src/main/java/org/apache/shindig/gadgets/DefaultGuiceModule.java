@@ -74,11 +74,17 @@ public class DefaultGuiceModule extends AbstractModule {
     
     try {
       configureOAuthStore();
-      configureOAuthStateCrypter();
     } catch (Throwable t) {
       // Since this happens at startup, we don't want to kill the server just
       // because we can't initialize the OAuth config.
       logger.log(Level.WARNING, "Failed to initialize OAuth", t);
+    }
+    try {
+      configureOAuthStateCrypter();
+    } catch (Throwable t) {
+      // Since this happens at startup, we don't want to kill the server just
+      // because we can't initialize the OAuth config.
+      logger.log(Level.WARNING, "Failed to initialize Crypter", t);
     }
     
     // We perform static injection on HttpResponse for cache TTLs.
