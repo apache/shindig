@@ -26,13 +26,17 @@ import javax.persistence.PrimaryKeyJoinColumn;
 import javax.persistence.Table;
 
 /**
- *
+ * A property, associated with a person, extends the "list_field" table, 
+ * and sets the "list_field_type" to PersonPropertiesDb.
  */
 @Entity
 @Table(name="person_properties")
 @PrimaryKeyJoinColumn(name="oid")
 public class PersonPropertiesDb extends ListFieldDb {
 
+  /**
+   * The person who this property is associated with.
+   */
   @ManyToOne(targetEntity=PersonDb.class)
   @JoinColumn(name="person_id", referencedColumnName="oid")
   protected Person person;

@@ -18,6 +18,7 @@
 package org.apache.shindig.social.opensocial.jpa;
 
 import org.apache.shindig.social.opensocial.model.Account;
+import org.apache.shindig.social.opensocial.model.Person;
 
 import javax.persistence.Basic;
 import javax.persistence.Column;
@@ -33,29 +34,54 @@ import javax.persistence.Version;
 
 import static javax.persistence.GenerationType.IDENTITY;
 
+/**
+ * Storage object for the Person. Stored in a table "account" which is also used by
+ * joined extension classes, the account usage column defines the class where the extension
+ * is used, but in most cases addresses are shared and this column has the value "sharedaccount"
+ * For more information on the API see {@link Account}
+ */
 @Entity
 @Table(name = "account")
 @Inheritance(strategy = InheritanceType.JOINED)
 @DiscriminatorColumn(name = "account_usage")
 @DiscriminatorValue(value = "sharedaccount")
 public class AccountDb implements Account, DbObject {
+  /**
+   * The internal object ID used for references to this object. Should be generated
+   * by the underlying storage mechanism
+   */
   @Id
   @GeneratedValue(strategy = IDENTITY)
   @Column(name = "oid")
   protected long objectId;
 
+  /**
+   * An optimistic locking field.
+   */
   @Version
   @Column(name = "version")
   protected long version;
 
+  /**
+   * model field.
+   * @see Account
+   */
   @Basic
   @Column(name = "domain", length = 255)
   protected String domain;
 
+  /**
+   * model field.
+   * @see Account
+   */
   @Basic
   @Column(name = "user_id", length = 255)
   protected String userId;
 
+  /**
+   * model field.
+   * @see Account
+   */
   @Basic
   @Column(name = "username", length = 255)
   protected String username;
@@ -100,10 +126,4 @@ public class AccountDb implements Account, DbObject {
     return objectId;
   }
 
-  /**
-   * @param objectId the objectId to set
-   */
-  public void setObjectId(long objectId) {
-    this.objectId = objectId;
-  }
 }

@@ -21,7 +21,6 @@ import org.apache.shindig.social.opensocial.jpa.EmailDb;
 import org.apache.shindig.social.opensocial.jpa.eclipselink.Bootstrap;
 import org.apache.shindig.social.opensocial.model.Person;
 
-
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -32,19 +31,23 @@ import javax.persistence.EntityTransaction;
 import java.util.Random;
 
 /**
- *
+ * 
  */
 public class SchemaTest {
-  
+
   private static EntityManager entityManager;
 
   @BeforeClass
   public static void config() {
-    Bootstrap b = new Bootstrap("org.apache.derby.jdbc.EmbeddedDriver","jdbc:derby:testdb;create=true","sa","","1","1");
-    //Bootstrap b = new Bootstrap("com.mysql.jdbc.Driver","jdbc:mysql://localhost/sakaikernel?useUnicode=true&amp;characterEncoding=UTF-8","sakaikernel","sakaikernel","1","1");
+    Bootstrap b = new Bootstrap("org.apache.derby.jdbc.EmbeddedDriver",
+        "jdbc:derby:testdb;create=true", "sa", "", "1", "1");
+    // Bootstrap b = new
+    // Bootstrap("com.mysql.jdbc.Driver",
+    // "jdbc:mysql://localhost/sakaikernel?useUnicode=true&amp;characterEncoding=UTF-8",
+    // "sakaikernel","sakaikernel","1","1");
     entityManager = b.getEntityManager("default");
   }
-  
+
   @AfterClass
   public static void stop() {
   }
@@ -59,14 +62,14 @@ public class SchemaTest {
     entityManager.persist(email);
     transaction.commit();
   }
-  
+
   @Test
   public void checkPersonCreate() throws Exception {
     EntityTransaction transaction = entityManager.getTransaction();
     transaction.begin();
     PersonPopulate pp = new PersonPopulate(entityManager);
     int i = 1;
-    long key= System.currentTimeMillis();
+    long key = System.currentTimeMillis();
     Random r = new Random();
     Person p = pp.createPerson(i, key, r);
     entityManager.persist(p);
@@ -78,12 +81,12 @@ public class SchemaTest {
     EntityTransaction transaction = entityManager.getTransaction();
     transaction.begin();
     PersonPopulate pp = new PersonPopulate(entityManager);
-    long key= System.currentTimeMillis();
+    long key = System.currentTimeMillis();
     Random r = new Random();
-    for ( int i = 0; i < 20; i++ ) {
+    for (int i = 0; i < 20; i++) {
       Person p = pp.createPerson(i, key, r);
       entityManager.persist(p);
-      if ( i%10 == 0 ) {
+      if (i % 10 == 0) {
         transaction.commit();
         transaction = entityManager.getTransaction();
         transaction.begin();

@@ -57,31 +57,44 @@ import static javax.persistence.CascadeType.ALL;
 @Entity
 @Table(name = "template_params")
 public class ActivityTemplateParamsDb {
-
+  /**
+   * The internal object ID used for references to this object. Should be generated 
+   * by the underlying storage mechanism
+   */
   @Id
   @GeneratedValue(strategy = IDENTITY)
   @Column(name = "oid")
   protected long objectId;
 
+  /**
+   * An optimistic locking field
+   */
   @Version
   @Column(name = "version")
   protected long version;
+
+  /**
+   * Create a link to the activities joining activity_id here to oid in activities.
+   */
+  @ManyToOne(targetEntity = ActivityDb.class, cascade = ALL)
+  @JoinColumn(name = "activity_id", referencedColumnName = "oid")
+  protected Collection<Activity> activities;
   // TODO: <openjpa-1.2.0-r422266:683325 fatal user error>
   // org.apache.openjpa.persistence.ArgumentException: The type of field
   // "org.apache.shindig.social.opensocial.jpa.ActivityTemplateParamsDb.activities" isn't supported
   // by declared persistence strategy "ManyToOne". Please choose a different strategy.
 
-  /*
-   * Create a link to the activities joining activity_id here to oid in activities
-   */
-  @ManyToOne(targetEntity = ActivityDb.class, cascade = ALL)
-  @JoinColumn(name = "activity_id", referencedColumnName = "oid")
-  protected Collection<Activity> activities;
 
+  /**
+   * The name of the value in the template parameters.
+   */
   @Basic
   @Column(name = "template_name")
   protected String name;
 
+  /**
+   * The value of the parameter.
+   */
   @Basic
   @Column(name = "template_value")
   protected String value;

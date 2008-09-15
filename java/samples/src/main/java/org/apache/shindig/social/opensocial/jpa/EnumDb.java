@@ -19,12 +19,19 @@ package org.apache.shindig.social.opensocial.jpa;
 
 import org.apache.shindig.social.opensocial.model.Enum;
 
+/**
+ * This a utility holder class for Enums to assist in database storage. It does not have any
+ * database tables or persistence associated with it.
+ * 
+ * @param <E> The Enum type.
+ */
 public final class EnumDb<E extends Enum.EnumKey> implements Enum<E> {
   private String displayValue;
   private E value = null;
 
   /**
    * Constructs a Enum object.
+   * 
    * @param value EnumKey The key to use
    * @param displayValue String The display value
    */
@@ -35,8 +42,8 @@ public final class EnumDb<E extends Enum.EnumKey> implements Enum<E> {
 
   /**
    * Constructs a Enum object.
-   * @param value The key to use. Will use the value from getDisplayValue() as
-   *     the display value.
+   * 
+   * @param value The key to use. Will use the value from getDisplayValue() as the display value.
    */
   public EnumDb(E value) {
     this(value, value.getDisplayValue());

@@ -31,33 +31,32 @@ import static javax.persistence.CascadeType.MERGE;
 import static javax.persistence.CascadeType.REFRESH;
 
 /**
- *
+ * 
  */
 /*
- * This object connects to a single Address, and to a single organization, 
- * defining the organizations relationship with the address
+ * This object connects to a single Address, and to a single organization, defining the
+ * organizations relationship with the address
  */
 @Entity
-@Table(name="organizational_address")
-@DiscriminatorValue(value="sharedaddress") // this is the same as others since we want to share the data.
+@Table(name = "organizational_address")
+@DiscriminatorValue(value = "sharedaddress")
+// this is the same as others since we want to share the data.
 public class OrganizationAddressDb extends AddressDb {
   @Basic
-  @Column(name="primary_organization")
+  @Column(name = "primary_organization")
   private Boolean primary;
-  
-  @ManyToOne(targetEntity=OrganizationDb.class, cascade = { PERSIST, MERGE, REFRESH })
-  @JoinColumn(name="organization_id", referencedColumnName="oid")
-  private Organization organization;
-  
-  @Basic
-  @Column(name="type", length=255)
-  private String type;
 
+  @ManyToOne(targetEntity = OrganizationDb.class, cascade = { PERSIST, MERGE, REFRESH })
+  @JoinColumn(name = "organization_id", referencedColumnName = "oid")
+  private Organization organization;
+
+  @Basic
+  @Column(name = "type", length = 255)
+  private String type;
 
   public OrganizationAddressDb() {
     // TODO Auto-generated constructor stub
   }
-
 
   public String getType() {
     return type;
@@ -67,7 +66,6 @@ public class OrganizationAddressDb extends AddressDb {
     this.type = type;
   }
 
-
   public Boolean getPrimary() {
     return primary;
   }
@@ -76,7 +74,6 @@ public class OrganizationAddressDb extends AddressDb {
     this.primary = primary;
   }
 
-
   /**
    * @return the organization
    */
@@ -84,13 +81,11 @@ public class OrganizationAddressDb extends AddressDb {
     return organization;
   }
 
-
   /**
    * @param organization the organization to set
    */
   public void setOrganization(Organization organization) {
     this.organization = organization;
   }
-
 
 }

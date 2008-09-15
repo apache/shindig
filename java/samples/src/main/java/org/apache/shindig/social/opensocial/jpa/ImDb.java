@@ -26,7 +26,9 @@ import javax.persistence.PrimaryKeyJoinColumn;
 import javax.persistence.Table;
 
 /**
- *
+ * IM (Instant Message account) Entity, extends the ListField object
+ * (and list_field table), joining on the object ID.
+ * Objects of this type will have "list_field_type" set to ImDb in list_field
  */
 @Entity
 @Table(name="im")

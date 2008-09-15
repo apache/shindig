@@ -27,18 +27,31 @@ import javax.persistence.PrimaryKeyJoinColumn;
 import javax.persistence.Table;
 
 /**
- *
+ * Email Entity, extends the ListField object (and list_field table), joining on the object ID.
+ * Objects of this type will have "list_field_type" set to EmailDb in list_field
  */
 @Entity
-@Table(name="email")
-@PrimaryKeyJoinColumn(name="oid")
-@NamedQuery(name=EmailDb.FINDBY_EMAIL,query="select e from EmailDb e where e.value = :email ")
+@Table(name = "email")
+@PrimaryKeyJoinColumn(name = "oid")
+@NamedQuery(name = EmailDb.FINDBY_EMAIL, query = "select e from EmailDb e where e.value = :email ")
 public class EmailDb extends ListFieldDb {
 
+  /**
+   * The name of the JPA query to find Email by email address
+   */
   public static final String FINDBY_EMAIL = "q.emai.findbyemail";
+  /**
+   * The name of the JPA parameter used for email address
+   */
   public static final String PARAM_EMAIL = "email";
-  @ManyToOne(targetEntity=PersonDb.class)
-  @JoinColumn(name="person_id", referencedColumnName="oid")
+
+  /**
+   * A list of People who have this address, a human may have more than one person and so may shared
+   * email addresses. Perhaps thats not valid in an implementation, but within this model it is
+   * possible.
+   */
+  @ManyToOne(targetEntity = PersonDb.class)
+  @JoinColumn(name = "person_id", referencedColumnName = "oid")
   protected Person person;
 
 }

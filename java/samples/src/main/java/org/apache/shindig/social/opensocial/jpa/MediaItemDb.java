@@ -37,18 +37,23 @@ import javax.persistence.Version;
 import java.util.List;
 
 /**
- * see
- * http://code.google.com/apis/opensocial/docs/0.7/reference/opensocial.Activity.MediaItem.Field.html
  * 
  */
 @Entity
 @Table(name = "media_item")
 public class MediaItemDb implements MediaItem, DbObject {
+  /**
+   * The internal object ID used for references to this object. Should be generated 
+   * by the underlying storage mechanism
+   */
   @Id
   @GeneratedValue(strategy = IDENTITY)
   @Column(name = "oid")
   private long objectId;
 
+  /**
+   * An optimistic locking field
+   */
   @Version
   @Column(name = "version")
   protected long version;
@@ -112,13 +117,6 @@ public class MediaItemDb implements MediaItem, DbObject {
    */
   public long getObjectId() {
     return objectId;
-  }
-
-  /**
-   * @param objectId the objectId to set
-   */
-  public void setObjectId(long objectId) {
-    this.objectId = objectId;
   }
 
   @PrePersist

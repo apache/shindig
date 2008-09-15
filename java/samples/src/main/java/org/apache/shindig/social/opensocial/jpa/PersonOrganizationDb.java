@@ -29,36 +29,35 @@ import javax.persistence.NamedQuery;
 import javax.persistence.Table;
 
 /**
- *
+ * 
  */
 /*
- * This object connects to a single Address, and to a single organization, 
- * defining the organizations relationship with the address
+ * This object connects to a single Address, and to a single organization, defining the
+ * organizations relationship with the address
  */
 @Entity
-@Table(name="person_organization")
+@Table(name = "person_organization")
 @DiscriminatorValue("shared")
-@NamedQuery(name=PersonOrganizationDb.PERSON_ORG_FINDBY_NAME,query="select p from PersonOrganizationDb p where p.name = :name ")
+@NamedQuery(name = PersonOrganizationDb.PERSON_ORG_FINDBY_NAME, 
+    query = "select p from PersonOrganizationDb p where p.name = :name ")
 public class PersonOrganizationDb extends OrganizationDb {
   public static final String PERSON_ORG_FINDBY_NAME = "q.personorganizationdb.findbyname";
 
   @Basic
-  @Column(name="primary_organization", table="person_organization")
+  @Column(name = "primary_organization", table = "person_organization")
   private Boolean primary;
-  
-  @ManyToOne(targetEntity=PersonDb.class)
-  @JoinColumn(name="person_id", referencedColumnName="oid")
-  protected Person person;
-  
-  @Basic
-  @Column(name="type", length=255, table="person_organization")
-  private String type;
 
+  @ManyToOne(targetEntity = PersonDb.class)
+  @JoinColumn(name = "person_id", referencedColumnName = "oid")
+  protected Person person;
+
+  @Basic
+  @Column(name = "type", length = 255, table = "person_organization")
+  private String type;
 
   public PersonOrganizationDb() {
     // TODO Auto-generated constructor stub
   }
-
 
   public String getType() {
     return type;
@@ -68,7 +67,6 @@ public class PersonOrganizationDb extends OrganizationDb {
     this.type = type;
   }
 
-
   public Boolean getPrimary() {
     return primary;
   }
@@ -76,8 +74,5 @@ public class PersonOrganizationDb extends OrganizationDb {
   public void setPrimary(Boolean primary) {
     this.primary = primary;
   }
-
-
-
 
 }

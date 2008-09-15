@@ -19,9 +19,14 @@ package org.apache.shindig.social.opensocial.jpa;
 
 
 /**
- *
+ * All Database objects should implement this, mainly to ensure that each has an
+ * object ID. The object ID cant be set, its generated.
  */
 public interface DbObject {
+  /**
+   * Get the internal object ID used for references to this object. Should be generated
+   * by the underlying storage mechanism.
+   * @return the ID of the object
+   */
   long getObjectId();
-  void setObjectId(long objectId);
 }
