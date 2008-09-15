@@ -30,7 +30,8 @@ import javax.persistence.PrimaryKeyJoinColumn;
 import javax.persistence.Table;
 
 /**
- * see http://code.google.com/apis/opensocial/docs/0.7/reference/opensocial.Url.Field.html
+ * Url Entity, extends the ListField object (and list_field table), joining on the object ID.
+ * Objects of this type will have "list_field_type" set to UrlDb in list_field
  */
 @Entity
 @Table(name = "url")
@@ -45,6 +46,9 @@ public class UrlDb extends ListFieldDb implements Url {
   @Column(name = "link_text")
   private String linkText;
 
+  /**
+   * The person who is using this url.
+   */
   @ManyToOne(targetEntity = PersonDb.class)
   @JoinColumn(name = "person_id", referencedColumnName = "oid")
   protected Person person;

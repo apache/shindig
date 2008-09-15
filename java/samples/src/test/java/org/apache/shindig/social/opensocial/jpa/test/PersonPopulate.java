@@ -175,7 +175,8 @@ public class PersonPopulate {
 
   private Url getNewUrl(int i) {
     String targetUrl = "http://sdfsdfsd.sdfdsf/" + String.valueOf(i % 33);
-    List<?> l = find(UrlDb.FINDBY_URL, new String[] { UrlDb.PARAM_URL }, new Object[] { targetUrl });
+    List<?> l = find(UrlDb.FINDBY_URL, 
+        new String[] { UrlDb.PARAM_URL }, new Object[] { targetUrl });
     if (l.size() == 0) {
       Url url = new UrlDb();
       url.setValue(targetUrl);

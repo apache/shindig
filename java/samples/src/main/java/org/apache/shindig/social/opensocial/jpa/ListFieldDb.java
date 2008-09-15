@@ -40,11 +40,18 @@ import javax.persistence.Version;
 @DiscriminatorColumn(name="list_field_type", length=30, discriminatorType=DiscriminatorType.STRING)
 @DiscriminatorValue(value="ListFieldDb")
 public class ListFieldDb implements ListField, DbObject {
+  /**
+   * The internal object ID used for references to this object. Should be generated 
+   * by the underlying storage mechanism
+   */
   @Id
   @GeneratedValue(strategy=IDENTITY)
   @Column(name="oid")
   protected long objectId;
   
+  /**
+   * An optimistic locking field
+   */
   @Version
   @Column(name="version")
   protected long version;
@@ -100,10 +107,4 @@ public class ListFieldDb implements ListField, DbObject {
     return objectId;
   }
 
-  /**
-   * @param objectId the objectId to set
-   */
-  public void setObjectId(long objectId) {
-    this.objectId = objectId;
-  }
 }

@@ -26,13 +26,17 @@ import javax.persistence.PrimaryKeyJoinColumn;
 import javax.persistence.Table;
 
 /**
- *
+ * Photo Entity, extends the ListField object (and list_field table), joining on the object ID.
+ * Objects of this type will have "list_field_type" set to PhotoDb in list_field
  */
 @Entity
 @Table(name="photo")
 @PrimaryKeyJoinColumn(name="oid")
 public class PhotoDb extends ListFieldDb {
 
+  /**
+   * The person who is using this photo.
+   */
   @ManyToOne(targetEntity=PersonDb.class)
   @JoinColumn(name="person_id", referencedColumnName="oid")
   protected Person person;
