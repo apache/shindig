@@ -27,15 +27,15 @@ import com.google.inject.Provider;
  */
 public class RemoteContentFetcherFactory implements Provider<HttpFetcher> {
 
-  private HttpCache cache;
+  private HttpFetcher fetcher;
 
   @Inject
-  public RemoteContentFetcherFactory(HttpCache cache) {
-    this.cache = cache;
+  public RemoteContentFetcherFactory(HttpFetcher fetcher) {
+    this.fetcher = fetcher;
   }
 
   public HttpFetcher get() {
-    return new BasicHttpFetcher(cache);
+    return fetcher;
   }
 }
 
