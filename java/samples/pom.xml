@@ -27,7 +27,7 @@ under the License.
     <relativePath>../pom.xml</relativePath>
   </parent>
 
-  <artifactId>shindig-samaples</artifactId>
+  <artifactId>shindig-samples</artifactId>
   <packaging>jar</packaging>
 
   <name>Apache Shindig Sample SPI and API Implementations</name>
@@ -38,6 +38,14 @@ under the License.
     <developerConnection>scm:svn:https://svn.apache.org/repos/asf/incubator/shindig/trunk/java/samples</developerConnection>
     <url>http://svn.apache.org/viewvc/incubator/shindig/trunk/java/samples</url>
   </scm>
+
+  <repositories>
+    <repository>
+     <id>EclipseLink Repo</id>
+     <url>http://www.eclipse.org/downloads/download.php?r=1&amp;nf=1&amp;file=/rt/eclipselink/maven.repo</url>
+    </repository>    
+  </repositories> 
+
 
   <dependencies>
     <!-- project dependencies -->
@@ -59,12 +67,24 @@ under the License.
       <artifactId>guice</artifactId>
     </dependency>
     <dependency>
-      <groupId>com.google.code.google-collections</groupId>
-      <artifactId>google-collect</artifactId>
+      <groupId>javax.persistence</groupId>
+      <artifactId>persistence-api</artifactId>
+      <version>1.0</version>
+    </dependency>
+     <dependency>
+      <groupId>org.eclipse.persistence</groupId>
+      <artifactId>eclipselink</artifactId>
+      <version>1.0</version>
     </dependency>
     <dependency>
-      <artifactId>commons-lang</artifactId>
-      <groupId>commons-lang</groupId>
+      <groupId>org.apache.derby</groupId>
+      <artifactId>derby</artifactId>
+      <version>10.4.2.0</version>
+    </dependency>
+    <dependency>
+      <groupId>commons-dbcp</groupId>
+      <artifactId>commons-dbcp</artifactId>
+      <version>1.2.2</version>
     </dependency>
     <dependency>
       <artifactId>commons-collections</artifactId>
