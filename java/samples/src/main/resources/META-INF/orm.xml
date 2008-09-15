@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<entity-mappings xmlns="http://java.sun.com/xml/ns/persistence/orm"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://java.sun.com/xml/ns/persistence/orm http://java.sun.com/xml/ns/persistence/orm_1_0.xsd"
+  version="1.0"> 
+  <entity class="org.apache.shindig.social.opensocial.jpa.AccountDb">
+  </entity>
+  <entity class="org.apache.shindig.social.opensocial.jpa.ActivityDb">
+  </entity>
+  <entity class="org.apache.shindig.social.opensocial.jpa.AddressDb">
+  </entity>
+  <entity class="org.apache.shindig.social.opensocial.jpa.BodyTypeDb">
+  </entity>
+  <entity
+    class="org.apache.shindig.social.opensocial.jpa.MediaItemDb">
+  </entity>
+  <entity class="org.apache.shindig.social.opensocial.jpa.NameDb">
+  </entity>
+  <entity
+    class="org.apache.shindig.social.opensocial.jpa.OrganizationDb">
+  </entity>
+  <entity class="org.apache.shindig.social.opensocial.jpa.PersonDb">
+  </entity>
+  <entity class="org.apache.shindig.social.opensocial.jpa.UrlDb">
+  </entity>
+  <entity
+    class="org.apache.shindig.social.opensocial.jpa.ListFieldDb">
+  </entity>
+  <entity class="org.apache.shindig.social.opensocial.jpa.MessageDb">
+  </entity>
+  <entity class="org.apache.shindig.social.opensocial.jpa.ActivityTemplateParamsDb">
+  </entity>
+  <entity class="org.apache.shindig.social.opensocial.jpa.OrganizationAddressDb">
+  </entity>
+  <entity class="org.apache.shindig.social.opensocial.jpa.EmailDb">
+  </entity>
+  <entity class="org.apache.shindig.social.opensocial.jpa.ImDb">
+  </entity>
+  <entity class="org.apache.shindig.social.opensocial.jpa.PersonAccountDb">
+  </entity>
+  <entity class="org.apache.shindig.social.opensocial.jpa.PersonAddressDb">
+  </entity>
+  <entity class="org.apache.shindig.social.opensocial.jpa.PersonOrganizationDb">
+  </entity>
+  <entity class="org.apache.shindig.social.opensocial.jpa.PhoneDb">
+  </entity>
+  <entity class="org.apache.shindig.social.opensocial.jpa.PhotoDb">
+  </entity>
+  <entity class="org.apache.shindig.social.opensocial.jpa.PersonPropertiesDb">
+  </entity>
+</entity-mappings>
