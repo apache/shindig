@@ -24,7 +24,7 @@
   </ModulePrefs>
   <Content type="html">
     <![CDATA[
-      <script type="text/javascript" src="testframework.js"></script>
+      <script type="text/javascript" src="/testframework.js"></script>
       <script type="text/javascript">
 
         var tests = {
