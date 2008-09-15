@@ -163,89 +163,176 @@ public class AddressDb implements Address, DbObject {
   @Column(name = "primary_address")
   private Boolean primary;
 
+  /**
+   *  default constructor
+   */
   public AddressDb() {
   }
 
+  /**
+   * Create an address from the formatted address, no parsing of the address will be performed.
+   * @param formatted the formatted address.
+   */
   public AddressDb(String formatted) {
     this.formatted = formatted;
   }
 
+  /** 
+   * {@inheritDoc}
+   * @see org.apache.shindig.social.opensocial.model.Address#getCountry()
+   */
   public String getCountry() {
     return country;
   }
 
+  /** 
+   * {@inheritDoc}
+   * @see org.apache.shindig.social.opensocial.model.Address#setCountry(java.lang.String)
+   */
   public void setCountry(String country) {
     this.country = country;
   }
 
+  /** 
+   * {@inheritDoc}
+   * @see org.apache.shindig.social.opensocial.model.Address#getLatitude()
+   */
   public Float getLatitude() {
     return latitude;
   }
 
+  /** 
+   * {@inheritDoc}
+   * @see org.apache.shindig.social.opensocial.model.Address#setLatitude(java.lang.Float)
+   */
   public void setLatitude(Float latitude) {
     this.latitude = latitude;
   }
 
+  /** 
+   * {@inheritDoc}
+   * @see org.apache.shindig.social.opensocial.model.Address#getLocality()
+   */
   public String getLocality() {
     return locality;
   }
 
+  /** 
+   * {@inheritDoc}
+   * @see org.apache.shindig.social.opensocial.model.Address#setLocality(java.lang.String)
+   */
   public void setLocality(String locality) {
     this.locality = locality;
   }
 
+  /** 
+   * {@inheritDoc}
+   * @see org.apache.shindig.social.opensocial.model.Address#getLongitude()
+   */
   public Float getLongitude() {
     return longitude;
   }
 
+  /** 
+   * {@inheritDoc}
+   * @see org.apache.shindig.social.opensocial.model.Address#setLongitude(java.lang.Float)
+   */
   public void setLongitude(Float longitude) {
     this.longitude = longitude;
   }
 
+  /** 
+   * {@inheritDoc}
+   * @see org.apache.shindig.social.opensocial.model.Address#getPostalCode()
+   */
   public String getPostalCode() {
     return postalCode;
   }
 
+  /** 
+   * {@inheritDoc}
+   * @see org.apache.shindig.social.opensocial.model.Address#setPostalCode(java.lang.String)
+   */
   public void setPostalCode(String postalCode) {
     this.postalCode = postalCode;
   }
 
+  /** 
+   * {@inheritDoc}
+   * @see org.apache.shindig.social.opensocial.model.Address#getRegion()
+   */
   public String getRegion() {
     return region;
   }
 
+  /** 
+   * {@inheritDoc}
+   * @see org.apache.shindig.social.opensocial.model.Address#setRegion(java.lang.String)
+   */
   public void setRegion(String region) {
     this.region = region;
   }
 
+  /** 
+   * {@inheritDoc}
+   * @see org.apache.shindig.social.opensocial.model.Address#getStreetAddress()
+   */
   public String getStreetAddress() {
     return streetAddress;
   }
 
+  /** 
+   * {@inheritDoc}
+   * @see org.apache.shindig.social.opensocial.model.Address#setStreetAddress(java.lang.String)
+   */
   public void setStreetAddress(String streetAddress) {
     this.streetAddress = streetAddress;
   }
 
+  /** 
+   * {@inheritDoc}
+   * @see org.apache.shindig.social.opensocial.model.Address#getType()
+   */
   public String getType() {
     return type;
   }
 
+  /** 
+   * {@inheritDoc}
+   * @see org.apache.shindig.social.opensocial.model.Address#setType(java.lang.String)
+   */
   public void setType(String type) {
     this.type = type;
   }
 
+  /** 
+   * {@inheritDoc}
+   * @see org.apache.shindig.social.opensocial.model.Address#getFormatted()
+   */
   public String getFormatted() {
     return formatted;
   }
 
+  /** 
+   * {@inheritDoc}
+   * @see org.apache.shindig.social.opensocial.model.Address#setFormatted(java.lang.String)
+   */
   public void setFormatted(String formatted) {
     this.formatted = formatted;
   }
 
+  /** 
+   * {@inheritDoc}
+   * @see org.apache.shindig.social.opensocial.model.Address#getPrimary()
+   */
   public Boolean getPrimary() {
     return primary;
   }
 
+  /** 
+   * {@inheritDoc}
+   * @see org.apache.shindig.social.opensocial.model.Address#setPrimary(java.lang.Boolean)
+   */
   public void setPrimary(Boolean primary) {
     this.primary = primary;
   }

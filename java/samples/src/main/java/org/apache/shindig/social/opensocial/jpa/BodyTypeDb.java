@@ -21,7 +21,6 @@ package org.apache.shindig.social.opensocial.jpa;
 
 import static javax.persistence.GenerationType.IDENTITY;
 
-import org.apache.shindig.social.opensocial.model.Address;
 import org.apache.shindig.social.opensocial.model.BodyType;
 import org.apache.shindig.social.opensocial.model.Person;
 
@@ -115,42 +114,82 @@ public class BodyTypeDb implements BodyType, DbObject {
   @Column(name = "weight", length = 255)
   private String weight;
 
+  /** 
+   * {@inheritDoc}
+   * @see org.apache.shindig.social.opensocial.model.BodyType#getBuild()
+   */
   public String getBuild() {
     return build;
   }
 
+  /** 
+   * {@inheritDoc}
+   * @see org.apache.shindig.social.opensocial.model.BodyType#setBuild(java.lang.String)
+   */
   public void setBuild(String build) {
     this.build = build;
   }
 
+  /** 
+   * {@inheritDoc}
+   * @see org.apache.shindig.social.opensocial.model.BodyType#getEyeColor()
+   */
   public String getEyeColor() {
     return eyeColor;
   }
 
+  /** 
+   * {@inheritDoc}
+   * @see org.apache.shindig.social.opensocial.model.BodyType#setEyeColor(java.lang.String)
+   */
   public void setEyeColor(String eyeColor) {
     this.eyeColor = eyeColor;
   }
 
+  /** 
+   * {@inheritDoc}
+   * @see org.apache.shindig.social.opensocial.model.BodyType#getHairColor()
+   */
   public String getHairColor() {
     return hairColor;
   }
 
+  /** 
+   * {@inheritDoc}
+   * @see org.apache.shindig.social.opensocial.model.BodyType#setHairColor(java.lang.String)
+   */
   public void setHairColor(String hairColor) {
     this.hairColor = hairColor;
   }
 
+  /** 
+   * {@inheritDoc}
+   * @see org.apache.shindig.social.opensocial.model.BodyType#getHeight()
+   */
   public String getHeight() {
     return height;
   }
 
+  /** 
+   * {@inheritDoc}
+   * @see org.apache.shindig.social.opensocial.model.BodyType#setHeight(java.lang.String)
+   */
   public void setHeight(String height) {
     this.height = height;
   }
 
+  /** 
+   * {@inheritDoc}
+   * @see org.apache.shindig.social.opensocial.model.BodyType#getWeight()
+   */
   public String getWeight() {
     return weight;
   }
 
+  /** 
+   * {@inheritDoc}
+   * @see org.apache.shindig.social.opensocial.model.BodyType#setWeight(java.lang.String)
+   */
   public void setWeight(String weight) {
     this.weight = weight;
   }
