@@ -32,6 +32,9 @@ import javax.persistence.Table;
 import javax.persistence.Transient;
 import javax.persistence.Version;
 
+/**
+ * Messages are stored in the message table.
+ */
 @Entity
 @Table(name="message")
 public class MessageDb implements Message, DbObject {
@@ -51,70 +54,130 @@ public class MessageDb implements Message, DbObject {
   @Column(name="version")
   protected long version;
 
+  /**
+   * model field.
+   * @see Message
+   */
   @Basic
   @Column(name="body", length=255)
   protected String body;
   
+  /**
+   * model field.
+   * @see Message
+   */
   @Basic
   @Column(name="title", length=255)
   protected String title;
   
+  /**
+   * model field. (database representation of type)
+   * @see Message
+   */
   @Basic
   @Column(name="message_type")
   protected String typeDb;
   
+  /**
+   * model field.
+   * @see Message
+   */
   @Transient
   protected Type type;
 
+  /**
+   * create an empty message.
+   */
   public MessageDb() {
   }
 
+  /**
+   * Create a message object with body, title and type.
+   * @param initBody the body of the message.
+   * @param initTitle the title of the message.
+   * @param initType the type of the message.
+   */
   public MessageDb(String initBody, String initTitle, Type initType) {
     this.body = initBody;
     this.title = initTitle;
     this.type = initType;
   }
 
+  /**
+   * {@inheritDoc}
+   * @see org.apache.shindig.social.opensocial.model.Message#getBody()
+   */
   public String getBody() {
     return this.body;
   }
 
+  /**
+   * {@inheritDoc}
+   * @see org.apache.shindig.social.opensocial.model.Message#setBody(java.lang.String)
+   */
   public void setBody(String newBody) {
     this.body = newBody;
   }
 
+  /**
+   * {@inheritDoc}
+   * @see org.apache.shindig.social.opensocial.model.Message#getTitle()
+   */
   public String getTitle() {
     return this.title;
   }
 
+  /**
+   * {@inheritDoc}
+   * @see org.apache.shindig.social.opensocial.model.Message#setTitle(java.lang.String)
+   */
   public void setTitle(String newTitle) {
     this.title = newTitle;
   }
 
+  /**
+   * {@inheritDoc}
+   * @see org.apache.shindig.social.opensocial.model.Message#getType()
+   */
   public Type getType() {
     return type;
   }
 
+  /**
+   * {@inheritDoc}
+   * @see org.apache.shindig.social.opensocial.model.Message#setType(org.apache.shindig.social.opensocial.model.Message.Type)
+   */
   public void setType(Type newType) {
     this.type = newType;
   }
 
+  /**
+   * {@inheritDoc}
+   * @see org.apache.shindig.social.opensocial.model.Message#sanitizeHTML(java.lang.String)
+   */
   public String sanitizeHTML(String htmlStr) {
     return htmlStr;
   }
 
   /**
-   * @return the objectId
+   * {@inheritDoc}
+   * @see org.apache.shindig.social.opensocial.jpa.DbObject#getObjectId()
    */
   public long getObjectId() {
     return objectId;
   }
 
+  /**
+   * 
+   */
   @PrePersist
   public void populateDbFields() {
     typeDb = type.toString();
   }
 
+  /**
+   * 
+   */
   @PostLoad
   public void loadTransientFields() {
     type = Type.valueOf(typeDb);

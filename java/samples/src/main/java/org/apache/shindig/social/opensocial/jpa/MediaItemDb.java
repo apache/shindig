@@ -37,7 +37,8 @@ import javax.persistence.Version;
 import java.util.List;
 
 /**
- * 
+ * Media items are stored in the media_item table, Items may be shared amongst activities and are
+ * related to people.
  */
 @Entity
 @Table(name = "media_item")
@@ -58,72 +59,131 @@ public class MediaItemDb implements MediaItem, DbObject {
   @Column(name = "version")
   protected long version;
 
-  /*
-   * The mapping for this is in ActivityDb.
+  /**
+   * The list of activities which this media item is reference in, this relationship is specified by
+   * the java property mediaItems in the class ActivityDb.
+   *
+   * @see ActivityDb for more information on this mapping.
    */
   @ManyToMany(targetEntity = ActivityDb.class, mappedBy = "mediaItems")
   protected List<Activity> activities;
 
+  /**
+   * model field.
+   * @see MediaItem
+   */
   @Basic
   @Column(name = "mime_type", length = 255)
   private String mimeType;
 
+  /**
+   * model field.
+   * @see MediaItem
+   */
   @Basic
   @Column(name = "media_type")
   private String typeDb;
 
+  /**
+   * model field.
+   * @see MediaItem
+   */
   @Transient
   private Type type;
 
+  /**
+   * model field.
+   * @see MediaItem
+   */
   @Basic
   @Column(name = "url", length = 255)
   private String url;
 
+  /**
+   * Create a new blank media item.
+   */
   public MediaItemDb() {
   }
 
+  /**
+   * Create a media item specifying the mimeType, type and url.
+   * @param mimeType the mime type of the media item.
+   * @param type the type of the media items (see the specification)
+   * @param url the url pointing to the media item.
+   */
   public MediaItemDb(String mimeType, Type type, String url) {
     this.mimeType = mimeType;
     this.type = type;
     this.url = url;
   }
 
+  /** 
+   * {@inheritDoc}
+   * @see org.apache.shindig.social.opensocial.model.MediaItem#getMimeType()
+   */
   public String getMimeType() {
     return mimeType;
   }
 
+  /** 
+   * {@inheritDoc}
+   * @see org.apache.shindig.social.opensocial.model.MediaItem#setMimeType(java.lang.String)
+   */
   public void setMimeType(String mimeType) {
     this.mimeType = mimeType;
   }
 
+  /** 
+   * {@inheritDoc}
+   * @see org.apache.shindig.social.opensocial.model.MediaItem#getType()
+   */
   public Type getType() {
     return type;
   }
 
+  /** 
+   * {@inheritDoc}
+   * @see org.apache.shindig.social.opensocial.model.MediaItem#setType(org.apache.shindig.social.opensocial.model.MediaItem.Type)
+   */
   public void setType(Type type) {
     this.type = type;
   }
 
+  /** 
+   * {@inheritDoc}
+   * @see org.apache.shindig.social.opensocial.model.MediaItem#getUrl()
+   */
   public String getUrl() {
     return url;
   }
 
+  /** 
+   * {@inheritDoc}
+   * @see org.apache.shindig.social.opensocial.model.MediaItem#setUrl(java.lang.String)
+   */
   public void setUrl(String url) {
     this.url = url;
   }
 
-  /**
-   * @return the objectId
+  /** 
+   * {@inheritDoc}
+   * @see org.apache.shindig.social.opensocial.jpa.DbObject#getObjectId()
    */
   public long getObjectId() {
     return objectId;
   }
 
+  /**
+   * a hook into the pre persist phase of JPA to convert type into the db representation.
+   */
   @PrePersist
   public void populateDbFields() {
     typeDb = type.toString();
   }
 
+  /**
+   * A hook into the load to convert the type in the Db into the Type Enum.
+   */
   @PostLoad
   public void loadTransientFields() {
     type = Type.valueOf(typeDb);

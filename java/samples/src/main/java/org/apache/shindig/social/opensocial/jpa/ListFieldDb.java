@@ -34,6 +34,12 @@ import javax.persistence.MappedSuperclass;
 import javax.persistence.Table;
 import javax.persistence.Version;
 
+/**
+ * List fields represent storage of list of fields potentially with a preferred or primary value.
+ * This is the base storage class for all list fields, stored in the lsit_field table. Classes will
+ * extend this class using a join strategy and setting the list_field_type column to the type of
+ * class represented by the record. If there is no type it defaults to ListFieldDb.
+ */
 @MappedSuperclass
 @Table(name="list_field")
 @Inheritance(strategy=InheritanceType.JOINED)
@@ -50,58 +56,103 @@ public class ListFieldDb implements ListField, DbObject {
   protected long objectId;
   
   /**
-   * An optimistic locking field
+   * An optimistic locking field.
    */
   @Version
   @Column(name="version")
   protected long version;
 
   
+  /**
+   * model field.
+   * @see ListField
+   */
   @Basic
   @Column(name="field_type", length=255)
   protected String type;
   
+  /**
+   * model field.
+   * @see ListField
+   */
   @Basic
   @Column(name="field_value", length=255)
   protected String value;
   
+  /**
+   * model field.
+   * @see ListField
+   */
   @Basic
   @Column(name="primary_field")
   protected Boolean primary;
 
+  /**
+   * Create a list field.
+   */
   public ListFieldDb() { }
 
+  /**
+   * Create a list field, specifying the type and the value.
+   * @param type the type or name of the field
+   * @param value the value contained in the field.
+   */
   public ListFieldDb(String type, String value) {
     this.type = type;
     this.value = value;
   }
 
+  /** 
+   * {@inheritDoc}
+   * @see org.apache.shindig.social.opensocial.model.ListField#getType()
+   */
   public String getType() {
     return type;
   }
 
+  /** 
+   * {@inheritDoc}
+   * @see org.apache.shindig.social.opensocial.model.ListField#setType(java.lang.String)
+   */
   public void setType(String type) {
     this.type = type;
   }
 
+  /** 
+   * {@inheritDoc}
+   * @see org.apache.shindig.social.opensocial.model.ListField#getValue()
+   */
   public String getValue() {
     return value;
   }
 
+  /** 
+   * {@inheritDoc}
+   * @see org.apache.shindig.social.opensocial.model.ListField#setValue(java.lang.String)
+   */
   public void setValue(String value) {
     this.value = value;
   }
 
+  /** 
+   * {@inheritDoc}
+   * @see org.apache.shindig.social.opensocial.model.ListField#getPrimary()
+   */
   public Boolean getPrimary() {
     return primary;
   }
 
+  /** 
+   * {@inheritDoc}
+   * @see org.apache.shindig.social.opensocial.model.ListField#setPrimary(java.lang.Boolean)
+   */
   public void setPrimary(Boolean primary) {
     this.primary = primary;
   }
 
-  /**
-   * @return the objectId
+  /** 
+   * {@inheritDoc}
+   * @see org.apache.shindig.social.opensocial.jpa.DbObject#getObjectId()
    */
   public long getObjectId() {
     return objectId;

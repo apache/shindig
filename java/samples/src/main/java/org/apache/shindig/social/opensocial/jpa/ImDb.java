@@ -26,17 +26,20 @@ import javax.persistence.PrimaryKeyJoinColumn;
 import javax.persistence.Table;
 
 /**
- * IM (Instant Message account) Entity, extends the ListField object
- * (and list_field table), joining on the object ID.
- * Objects of this type will have "list_field_type" set to ImDb in list_field
+ * IM (Instant Message account) Entity, extends the ListField object (and list_field table), joining
+ * on the object ID. Objects of this type will have "list_field_type" set to ImDb in list_field
  */
 @Entity
-@Table(name="im")
-@PrimaryKeyJoinColumn(name="oid")
+@Table(name = "im")
+@PrimaryKeyJoinColumn(name = "oid")
 public class ImDb extends ListFieldDb {
 
-  @ManyToOne(targetEntity=PersonDb.class)
-  @JoinColumn(name="person_id", referencedColumnName="oid")
+  /**
+   * The person who owns this IM account. This information is maintained in the database using a
+   * join column "person_id" in the im table that points to oid in the person table.
+   */
+  @ManyToOne(targetEntity = PersonDb.class)
+  @JoinColumn(name = "person_id", referencedColumnName = "oid")
   protected Person person;
 
 }

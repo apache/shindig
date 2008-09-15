@@ -19,7 +19,6 @@ package org.apache.shindig.social.opensocial.jpa;
 
 import static javax.persistence.GenerationType.IDENTITY;
 
-import org.apache.shindig.social.opensocial.model.Account;
 import org.apache.shindig.social.opensocial.model.Activity;
 import org.apache.shindig.social.opensocial.model.MediaItem;
 
@@ -72,33 +71,60 @@ public class ActivityDb implements Activity, DbObject {
   @Column(name = "version")
   protected long version;
 
+  /**
+   * model field.
+   * @see Activity
+   */
   @Basic
   @Column(name = "app_id", length = 255)
   protected String appId;
 
+  /**
+   * model field.
+   * @see Activity
+   */
   @Basic
   @Column(name = "body", length = 255)
   protected String body;
 
+  /**
+   * model field.
+   * @see Activity
+   */
   @Basic
   @Column(name = "body_id", length = 255)
   protected String bodyId;
 
+  /**
+   * model field.
+   * @see Activity
+   */
   @Basic
   @Column(name = "external_id", length = 255)
   protected String externalId;
 
+  /**
+   * model field.
+   * @see Activity
+   */
   @Basic
   @Column(name = "activity_id", length = 255)
   protected String id;
 
+  /**
+   * model field.
+   * @see Activity
+   */
   @Basic
   @Column(name = "updated")
   @Temporal(TemporalType.TIMESTAMP)
   protected Date updated;
 
-  /*
-   * Do a many to many join using table activity_media
+  /**
+   * A list of shared media items associated with this activity, joined by the table
+   * "activity_media" such that activity_media.activity_id = activity.oid and 
+   * activity_media.media_id = media.oid. Media items may be shared amongst
+   * many activities or other entities.
    */
   @ManyToMany(targetEntity = MediaItemDb.class)
   @JoinTable(name = "activity_media",
@@ -213,46 +239,90 @@ public class ActivityDb implements Activity, DbObject {
     this.userId = userId;
   }
 
+  /** 
+   * {@inheritDoc}
+   * @see org.apache.shindig.social.opensocial.model.Activity#getAppId()
+   */
   public String getAppId() {
     return appId;
   }
 
+  /** 
+   * {@inheritDoc}
+   * @see org.apache.shindig.social.opensocial.model.Activity#setAppId(java.lang.String)
+   */
   public void setAppId(String appId) {
     this.appId = appId;
   }
 
+  /** 
+   * {@inheritDoc}
+   * @see org.apache.shindig.social.opensocial.model.Activity#getBody()
+   */
   public String getBody() {
     return body;
   }
 
+  /** 
+   * {@inheritDoc}
+   * @see org.apache.shindig.social.opensocial.model.Activity#setBody(java.lang.String)
+   */
   public void setBody(String body) {
     this.body = body;
   }
 
+  /** 
+   * {@inheritDoc}
+   * @see org.apache.shindig.social.opensocial.model.Activity#getBodyId()
+   */
   public String getBodyId() {
     return bodyId;
   }
 
+  /** 
+   * {@inheritDoc}
+   * @see org.apache.shindig.social.opensocial.model.Activity#setBodyId(java.lang.String)
+   */
   public void setBodyId(String bodyId) {
     this.bodyId = bodyId;
   }
 
+  /** 
+   * {@inheritDoc}
+   * @see org.apache.shindig.social.opensocial.model.Activity#getExternalId()
+   */
   public String getExternalId() {
     return externalId;
   }
 
+  /** 
+   * {@inheritDoc}
+   * @see org.apache.shindig.social.opensocial.model.Activity#setExternalId(java.lang.String)
+   */
   public void setExternalId(String externalId) {
     this.externalId = externalId;
   }
 
+  /** 
+   * {@inheritDoc}
+   * @see org.apache.shindig.social.opensocial.model.Activity#getId()
+   */
   public String getId() {
     return id;
   }
 
+  /** 
+   * {@inheritDoc}
+   * @see org.apache.shindig.social.opensocial.model.Activity#setId(java.lang.String)
+   */
   public void setId(String id) {
     this.id = id;
   }
 
+  /** 
+   * {@inheritDoc}
+   * @see org.apache.shindig.social.opensocial.model.Activity#getUpdated()
+   */
   public Date getUpdated() {
     if (updated == null) {
       return null;
@@ -260,6 +330,10 @@ public class ActivityDb implements Activity, DbObject {
     return new Date(updated.getTime());
   }
 
+  /** 
+   * {@inheritDoc}
+   * @see org.apache.shindig.social.opensocial.model.Activity#setUpdated(java.util.Date)
+   */
   public void setUpdated(Date updated) {
     if (updated == null) {
       this.updated = null;
@@ -268,109 +342,210 @@ public class ActivityDb implements Activity, DbObject {
     }
   }
 
+  /** 
+   * {@inheritDoc}
+   * @see org.apache.shindig.social.opensocial.model.Activity#getMediaItems()
+   */
   public List<MediaItem> getMediaItems() {
     return mediaItems;
   }
 
+  /** 
+   * {@inheritDoc}
+   * @see org.apache.shindig.social.opensocial.model.Activity#setMediaItems(java.util.List)
+   */
   public void setMediaItems(List<MediaItem> mediaItems) {
     this.mediaItems = mediaItems;
   }
 
+  /** 
+   * {@inheritDoc}
+   * @see org.apache.shindig.social.opensocial.model.Activity#getPostedTime()
+   */
   public Long getPostedTime() {
     return postedTime;
   }
 
+  /** 
+   * {@inheritDoc}
+   * @see org.apache.shindig.social.opensocial.model.Activity#setPostedTime(java.lang.Long)
+   */
   public void setPostedTime(Long postedTime) {
     this.postedTime = postedTime;
   }
 
+  /** 
+   * {@inheritDoc}
+   * @see org.apache.shindig.social.opensocial.model.Activity#getPriority()
+   */
   public Float getPriority() {
     return priority;
   }
 
+  /** 
+   * {@inheritDoc}
+   * @see org.apache.shindig.social.opensocial.model.Activity#setPriority(java.lang.Float)
+   */
   public void setPriority(Float priority) {
     this.priority = priority;
   }
 
+  /** 
+   * {@inheritDoc}
+   * @see org.apache.shindig.social.opensocial.model.Activity#getStreamFaviconUrl()
+   */
   public String getStreamFaviconUrl() {
     return streamFaviconUrl;
   }
 
+  /** 
+   * {@inheritDoc}
+   * @see org.apache.shindig.social.opensocial.model.Activity#setStreamFaviconUrl(java.lang.String)
+   */
   public void setStreamFaviconUrl(String streamFaviconUrl) {
     this.streamFaviconUrl = streamFaviconUrl;
   }
 
+  /** 
+   * {@inheritDoc}
+   * @see org.apache.shindig.social.opensocial.model.Activity#getStreamSourceUrl()
+   */
   public String getStreamSourceUrl() {
     return streamSourceUrl;
   }
 
+  /** 
+   * {@inheritDoc}
+   * @see org.apache.shindig.social.opensocial.model.Activity#setStreamSourceUrl(java.lang.String)
+   */
   public void setStreamSourceUrl(String streamSourceUrl) {
     this.streamSourceUrl = streamSourceUrl;
   }
 
+  /** 
+   * {@inheritDoc}
+   * @see org.apache.shindig.social.opensocial.model.Activity#getStreamTitle()
+   */
   public String getStreamTitle() {
     return streamTitle;
   }
 
+  /** 
+   * {@inheritDoc}
+   * @see org.apache.shindig.social.opensocial.model.Activity#setStreamTitle(java.lang.String)
+   */
   public void setStreamTitle(String streamTitle) {
     this.streamTitle = streamTitle;
   }
 
+  /** 
+   * {@inheritDoc}
+   * @see org.apache.shindig.social.opensocial.model.Activity#getStreamUrl()
+   */
   public String getStreamUrl() {
     return streamUrl;
   }
 
+  /** 
+   * {@inheritDoc}
+   * @see org.apache.shindig.social.opensocial.model.Activity#setStreamUrl(java.lang.String)
+   */
   public void setStreamUrl(String streamUrl) {
     this.streamUrl = streamUrl;
   }
 
+  /** 
+   * {@inheritDoc}
+   * @see org.apache.shindig.social.opensocial.model.Activity#getTemplateParams()
+   */
   public Map<String, String> getTemplateParams() {
     return templateParams;
   }
 
+  /** 
+   * {@inheritDoc}
+   * @see org.apache.shindig.social.opensocial.model.Activity#setTemplateParams(java.util.Map)
+   */
   public void setTemplateParams(Map<String, String> templateParams) {
     this.templateParams = templateParams;
   }
 
+  /** 
+   * {@inheritDoc}
+   * @see org.apache.shindig.social.opensocial.model.Activity#getTitle()
+   */
   public String getTitle() {
     return title;
   }
 
+  /** 
+   * {@inheritDoc}
+   * @see org.apache.shindig.social.opensocial.model.Activity#setTitle(java.lang.String)
+   */
   public void setTitle(String title) {
     this.title = title;
   }
 
+  /** 
+   * {@inheritDoc}
+   * @see org.apache.shindig.social.opensocial.model.Activity#getTitleId()
+   */
   public String getTitleId() {
     return titleId;
   }
 
+  /** 
+   * {@inheritDoc}
+   * @see org.apache.shindig.social.opensocial.model.Activity#setTitleId(java.lang.String)
+   */
   public void setTitleId(String titleId) {
     this.titleId = titleId;
   }
 
+  /** 
+   * {@inheritDoc}
+   * @see org.apache.shindig.social.opensocial.model.Activity#getUrl()
+   */
   public String getUrl() {
     return url;
   }
 
+  /** 
+   * {@inheritDoc}
+   * @see org.apache.shindig.social.opensocial.model.Activity#setUrl(java.lang.String)
+   */
   public void setUrl(String url) {
     this.url = url;
   }
 
+  /** 
+   * {@inheritDoc}
+   * @see org.apache.shindig.social.opensocial.model.Activity#getUserId()
+   */
   public String getUserId() {
     return userId;
   }
 
+  /** 
+   * {@inheritDoc}
+   * @see org.apache.shindig.social.opensocial.model.Activity#setUserId(java.lang.String)
+   */
   public void setUserId(String userId) {
     this.userId = userId;
   }
 
-  /**
-   * @return the objectId
+  /** 
+   * {@inheritDoc}
+   * @see org.apache.shindig.social.opensocial.jpa.DbObject#getObjectId()
    */
   public long getObjectId() {
     return objectId;
   }
 
+  /**
+   * Hook into the pre persist JPA event to take the transient fields and populate the DB fields
+   * prior to persisting the data
+   */
   @PrePersist
   public void populateDbFields() {
     // add new entries
@@ -399,6 +574,10 @@ public class ActivityDb implements Activity, DbObject {
     }
   }
 
+  /**
+   * Hook into the post load event in JPA to take the database fields and load the transient fields
+   * prior to making the object available to java
+   */
   @PostLoad
   public void loadTransientFields() {
     templateParams = new ConcurrentHashMap<String, String>();

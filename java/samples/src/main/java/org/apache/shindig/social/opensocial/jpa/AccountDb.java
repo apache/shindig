@@ -18,7 +18,6 @@
 package org.apache.shindig.social.opensocial.jpa;
 
 import org.apache.shindig.social.opensocial.model.Account;
-import org.apache.shindig.social.opensocial.model.Person;
 
 import javax.persistence.Basic;
 import javax.persistence.Column;
