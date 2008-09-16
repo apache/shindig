@@ -436,8 +436,9 @@ os.compileNode_ = function(node) {
         var context = node.getAttribute("context") || "$this||true";
         output.setAttribute(ATT_select, context);
 
-        // For renderAll, create a parent node reference.
-        if (node.tagName == "os:renderAll" || node.tagName == "os:RenderAll") {
+        // For os:Render, create a parent node reference.
+        if (node.tagName == "os:render" || node.tagName == "os:Render" ||
+            node.tagName == "os:renderAll" || node.tagName == "os:RenderAll") {
           os.appendJSTAttribute_(output, ATT_values, os.VAR_parentnode + ":" +
               os.VAR_node);
         }
