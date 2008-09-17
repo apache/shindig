@@ -210,8 +210,8 @@ public class PersonDb implements Person, DbObject {
   @Column(name = "about_me", length = 255)
   protected String aboutMe;
 
-  @OneToMany(targetEntity = PersonPropertiesDb.class, mappedBy = "person", cascade = ALL)
-  protected List<PersonPropertiesDb> properties = new ArrayList<PersonPropertiesDb>();
+  @OneToMany(targetEntity = PersonPropertyDb.class, mappedBy = "person", cascade = ALL)
+  protected List<PersonPropertyDb> properties = new ArrayList<PersonPropertyDb>();
 
   @OneToMany(targetEntity = PersonAccountDb.class, mappedBy = "person", cascade = ALL)
   protected List<Account> accounts;
@@ -1149,21 +1149,21 @@ public class PersonDb implements Person, DbObject {
       // add new entries
       for (String v : e.getValue()) {
         boolean present = false;
-        for (PersonPropertiesDb pp : properties) {
+        for (PersonPropertyDb pp : properties) {
           if (e.getKey().equals(pp.getType()) && v.equals(pp.getValue())) {
             present = true;
             break;
           }
         }
         if (!present) {
-          PersonPropertiesDb pp = new PersonPropertiesDb();
+          PersonPropertyDb pp = new PersonPropertyDb();
           pp.setType(e.getKey());
           pp.setValue(v);
         }
       }
       // remove missing entries
-      List<PersonPropertiesDb> toRemove = new ArrayList<PersonPropertiesDb>();
-      for (PersonPropertiesDb pp : properties) {
+      List<PersonPropertyDb> toRemove = new ArrayList<PersonPropertyDb>();
+      for (PersonPropertyDb pp : properties) {
         if (e.getKey().equals(pp.getType())) {
           boolean present = false;
           for (String v : e.getValue()) {
@@ -1230,7 +1230,7 @@ public class PersonDb implements Person, DbObject {
     toSave.put(TURNONS_PROPERTY, this.turnOns);
     toSave.put(TVSHOWS_PROPERTY, this.tvShows);
 
-    for (PersonPropertiesDb pp : properties) {
+    for (PersonPropertyDb pp : properties) {
       List<String> l = toSave.get(pp.type);
       if (l != null) {
         l.add(pp.getValue());
