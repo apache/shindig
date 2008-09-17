@@ -20,6 +20,7 @@ package org.apache.shindig.social.opensocial.jpa;
 import static javax.persistence.GenerationType.IDENTITY;
 
 import org.apache.shindig.social.opensocial.jpa.api.DbObject;
+import org.apache.shindig.social.opensocial.model.ListField;
 import org.apache.shindig.social.opensocial.model.Person;
 
 import javax.persistence.Basic;
@@ -31,10 +32,13 @@ import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
+import javax.persistence.MapKey;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Version;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * Represents a group in the social database. The assumption in this object is that groups are
@@ -72,9 +76,9 @@ public class GroupDb implements DbObject {
   @ManyToMany(targetEntity = PersonDb.class)
   @JoinTable(name = "membership", 
       joinColumns = 
-        @JoinColumn(name = "person_id", referencedColumnName = "oid"), 
+        @JoinColumn(name = "group_id", referencedColumnName = "oid"), 
       inverseJoinColumns = 
-        @JoinColumn(name = "group_id", referencedColumnName = "oid"))
+        @JoinColumn(name = "person_id", referencedColumnName = "oid"))
   protected List<Person> members;
 
   /**
@@ -83,6 +87,13 @@ public class GroupDb implements DbObject {
   @Basic
   @Column(name = "id", length = 255)
   protected String id;
+
+  /**
+   * The group has properties.
+   */
+  @OneToMany(targetEntity = GroupPropertyDb.class, mappedBy = "group")
+  @MapKey(name = "type")
+  protected Map<String, ListField> properties;
 
   /**
    * @return the owner
@@ -138,6 +149,20 @@ public class GroupDb implements DbObject {
    */
   public long getVersion() {
     return version;
+  }
+
+  /**
+   * @return the properties
+   */
+  public Map<String, ListField> getProperties() {
+    return properties;
+  }
+
+  /**
+   * @param properties the properties to set
+   */
+  public void setProperties(Map<String, ListField> properties) {
+    this.properties = properties;
   }
 
 }
