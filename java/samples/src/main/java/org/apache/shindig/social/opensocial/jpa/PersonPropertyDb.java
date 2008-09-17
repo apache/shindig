@@ -32,7 +32,7 @@ import javax.persistence.Table;
 @Entity
 @Table(name="person_properties")
 @PrimaryKeyJoinColumn(name="oid")
-public class PersonPropertiesDb extends ListFieldDb {
+public class PersonPropertyDb extends ListFieldDb {
 
   /**
    * The person who this property is associated with.

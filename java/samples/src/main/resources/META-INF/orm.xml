@@ -46,6 +46,12 @@
   </entity>
   <entity class="org.apache.shindig.social.opensocial.jpa.PhotoDb">
   </entity>
-  <entity class="org.apache.shindig.social.opensocial.jpa.PersonPropertiesDb">
+  <entity class="org.apache.shindig.social.opensocial.jpa.PersonPropertyDb">
+  </entity>
+  <entity class="org.apache.shindig.social.opensocial.jpa.FriendDb">
+  </entity>
+  <entity class="org.apache.shindig.social.opensocial.jpa.FriendPropertyDb">
+  </entity>
+  <entity class="org.apache.shindig.social.opensocial.jpa.GroupDb">
   </entity>
 </entity-mappings>
