@@ -60,4 +60,10 @@
   </entity>
   <entity class="org.apache.shindig.social.opensocial.jpa.ApplicationPropertyDb">
   </entity>
+  <entity class="org.apache.shindig.social.opensocial.jpa.ApplicationDataDb">
+  </entity>
+  <entity class="org.apache.shindig.social.opensocial.jpa.ApplicationDataMapDb">
+  </entity>
+  <entity class="org.apache.shindig.social.opensocial.jpa.ApplicationDataMapValueDb">
+  </entity>
 </entity-mappings>
