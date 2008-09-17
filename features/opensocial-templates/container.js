@@ -45,6 +45,78 @@ os.Container = {};
 os.Container.inlineTemplates_ = [];
 
 /**
+ * @type {Array.<Function>} An array of callbacks to fire when the page DOM has
+ * loaded. This will be null until the first callback is added 
+ * @see registerDomListener_
+ * @private
+ */
+os.Container.domLoadCallbacks_ = null;
+
+/**
+ * @type {boolean} A boolean flag determining wether the page DOM has loaded.
+ * @private
+ */
+os.Container.domLoaded_ = false;
+
+/**
+ * Registers the DOM Load listener to fire when the page DOM is available.
+ * TODO: See if we can use gadgets.util.regiterOnLoadHandler() here.
+ * TODO: Currently for everything but Mozilla, this just registers an 
+ * onLoad listener on the window. Should use DOMContentLoaded on Opera9, 
+ * appropriate hacks (polling?) on IE and Safari.
+ * @private
+ */
+os.Container.registerDomLoadListener_ = function() {
+  if (navigator.product == 'Gecko') {
+    window.addEventListener("DOMContentLoaded", os.Container.onDomLoad_, false);
+  } if (window.addEventListener) {
+    window.addEventListener("load", os.Container.onDomLoad_, false);
+  } else {          
+    if (!window.body) {
+      setTimeout(arguments.callee, 0);
+      return;
+    }
+    var oldOnLoad = window.onload || function() {};
+    window.onload = function() {
+      oldOnLoad();
+      os.Container.onDomLoad_();
+    }              
+  }
+  os.Container.domLoadCallbacks_ = [];
+};
+
+/**
+ * To be called when the page DOM is available - will fire all the callbacks
+ * in os.Container.domLoadCallbacks_.
+ * @private
+ */
+os.Container.onDomLoad_ = function() {
+  if (os.Container.domLoaded_) {
+    return;
+  }
+  while (os.Container.domLoadCallbacks_.length) {
+    os.Container.domLoadCallbacks_.pop()();
+  }
+  os.Container.domLoaded_ = true;  
+};
+
+/**
+ * Adds a callback to be fired when the page DOM is available. If the page
+ * is already loaded, the callback will execute asynchronously.
+ * @param {Function} callback The callback to be fired when DOM is loaded.
+ */
+os.Container.executeOnDomLoad = function(callback) {
+  if (os.Container.domLoaded_) {
+    setTimeout(callback, 0);    
+  } else {
+    if (os.Container.domLoadCallbacks_ == null) {
+      os.Container.registerDomLoadListener_();
+    }
+    os.Container.domLoadCallbacks_.push(callback);
+  }
+};
+
+/**
  * Compiles and registers all DOM elements in the document. Templates are
  * registered as tags if they specify their name with the "tag" attribute
  * and as templates if they have a name (or id) attribute.
@@ -65,6 +137,8 @@ os.Container.registerDocumentTemplates = function(opt_doc) {
     }
   }
 };
+
+os.Container.executeOnDomLoad(os.Container.registerDocumentTemplates);
 
 /**
  * Compiles and registers all unnamed templates in the document.
