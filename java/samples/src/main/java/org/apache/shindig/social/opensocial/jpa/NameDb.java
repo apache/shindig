@@ -34,12 +34,20 @@ import javax.persistence.Version;
 
 import java.util.List;
 
+/**
+ * The name object, stored in the name table.
+ */
 @Entity
 @Table(name = "name")
-@NamedQuery(name = NameDb.FINDBY_FAMILY_NAME, 
-    query = "select n from NameDb n where n.familyName = :familyName ")
+@NamedQuery(name = NameDb.FINDBY_FAMILY_NAME, query = "select n from NameDb n where n.familyName = :familyName ")
 public class NameDb implements Name, DbObject {
+  /**
+   * the name of the JPA query that selects a name by family name.
+   */
   public static final String FINDBY_FAMILY_NAME = "q.name.findbyfamilyname";
+  /**
+   * the name of the family name parameter used in JPA named queries.
+   */
   public static final String PARAM_FAMILY_NAME = "familyName";
 
   /**
@@ -58,88 +66,182 @@ public class NameDb implements Name, DbObject {
   @Column(name = "version")
   protected long version;
 
+  /**
+   * A list of people who shared this name, relationship is specified by the name property on the
+   * Person Object.
+   */
   @OneToMany(targetEntity = PersonDb.class, mappedBy = "name")
   private List<Person> persons;
 
+  /**
+   * model field.
+   * 
+   * @see org.apache.shindig.social.opensocial.model.Name
+   */
   @Basic
   @Column(name = "additional_name", length = 255)
   private String additionalName;
 
+  /**
+   * model field.
+   * 
+   * @see org.apache.shindig.social.opensocial.model.Name
+   */
   @Basic
   @Column(name = "family_name", length = 255)
   private String familyName;
 
+  /**
+   * model field.
+   * 
+   * @see org.apache.shindig.social.opensocial.model.Name
+   */
   @Basic
   @Column(name = "given_name", length = 255)
   private String givenName;
 
+  /**
+   * model field.
+   * 
+   * @see org.apache.shindig.social.opensocial.model.Name
+   */
   @Basic
   @Column(name = "honorific_prefix", length = 255)
   private String honorificPrefix;
 
+  /**
+   * model field.
+   * 
+   * @see org.apache.shindig.social.opensocial.model.Name
+   */
   @Basic
   @Column(name = "honorific_suffix", length = 255)
   private String honorificSuffix;
 
+  /**
+   * model field.
+   * 
+   * @see org.apache.shindig.social.opensocial.model.Name
+   */
   @Basic
   @Column(name = "formatted", length = 255)
   private String formatted;
 
+  /**
+   * 
+   */
   public NameDb() {
   }
 
+  /**
+   * @param formatted
+   */
   public NameDb(String formatted) {
     this.formatted = formatted;
   }
 
+  /**
+   * {@inheritDoc}
+   * 
+   * @see org.apache.shindig.social.opensocial.model.Name#getAdditionalName()
+   */
   public String getAdditionalName() {
     return additionalName;
   }
 
+  /**
+   * {@inheritDoc}
+   * 
+   * @see org.apache.shindig.social.opensocial.model.Name#setAdditionalName(java.lang.String)
+   */
   public void setAdditionalName(String additionalName) {
     this.additionalName = additionalName;
   }
 
+  /**
+   * {@inheritDoc}
+   * 
+   * @see org.apache.shindig.social.opensocial.model.Name#getFamilyName()
+   */
   public String getFamilyName() {
     return familyName;
   }
 
+  /**
+   * {@inheritDoc}
+   * 
+   * @see org.apache.shindig.social.opensocial.model.Name#setFamilyName(java.lang.String)
+   */
   public void setFamilyName(String familyName) {
     this.familyName = familyName;
   }
 
+  /**
+   * {@inheritDoc}
+   * 
+   * @see org.apache.shindig.social.opensocial.model.Name#getGivenName()
+   */
   public String getGivenName() {
     return givenName;
   }
 
+  /**
+   * {@inheritDoc}
+   * 
+   * @see org.apache.shindig.social.opensocial.model.Name#setGivenName(java.lang.String)
+   */
   public void setGivenName(String givenName) {
     this.givenName = givenName;
   }
 
+  /**
+   * {@inheritDoc}
+   * 
+   * @see org.apache.shindig.social.opensocial.model.Name#getHonorificPrefix()
+   */
   public String getHonorificPrefix() {
     return honorificPrefix;
   }
 
+  /**
+   * {@inheritDoc}
+   * 
+   * @see org.apache.shindig.social.opensocial.model.Name#setHonorificPrefix(java.lang.String)
+   */
   public void setHonorificPrefix(String honorificPrefix) {
     this.honorificPrefix = honorificPrefix;
   }
 
+  /**
+   * {@inheritDoc}
+   * 
+   * @see org.apache.shindig.social.opensocial.model.Name#getHonorificSuffix()
+   */
   public String getHonorificSuffix() {
     return honorificSuffix;
   }
 
+  /**
+   * {@inheritDoc}
+   * 
+   * @see org.apache.shindig.social.opensocial.model.Name#setHonorificSuffix(java.lang.String)
+   */
   public void setHonorificSuffix(String honorificSuffix) {
     this.honorificSuffix = honorificSuffix;
   }
 
   /**
-   * @return the objectId
+   * {@inheritDoc}
+   * 
+   * @see org.apache.shindig.social.opensocial.jpa.DbObject#getObjectId()
    */
   public long getObjectId() {
     return objectId;
   }
 
   /**
+   * A list of people who have this name
+   * 
    * @return the persons
    */
   public List<Person> getPersons() {
@@ -147,6 +249,8 @@ public class NameDb implements Name, DbObject {
   }
 
   /**
+   * Set the list of people who have this name
+   * 
    * @param persons the persons to set
    */
   public void setPersons(List<Person> persons) {
@@ -154,8 +258,8 @@ public class NameDb implements Name, DbObject {
 
   }
 
-  /*
-   * (non-Javadoc)
+  /**
+   * {@inheritDoc}
    * 
    * @see org.apache.shindig.social.opensocial.model.Name#getFormatted()
    */
@@ -163,8 +267,8 @@ public class NameDb implements Name, DbObject {
     return formatted;
   }
 
-  /*
-   * (non-Javadoc)
+  /**
+   * {@inheritDoc}
    * 
    * @see org.apache.shindig.social.opensocial.model.Name#setFormatted(java.lang.String)
    */

@@ -28,11 +28,10 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
 /**
- *
- */
-/*
- * This object connects to a single Address, and to a single organization, 
- * defining the organizations relationship with the address
+ * This object connects to a single account to a person, defining the relationship
+ * between the person and the account. It extends the account object, which stored its instances in
+ * the 'account' table by storing instances of this class in the 'person_account table. Records 
+ * are joined using oid, and use the same shared account discriminator.
  */
 @Entity
 @Table(name="person_account")
@@ -42,6 +41,9 @@ public class PersonAccountDb extends AccountDb {
   @Column(name="primary_account")
   private Boolean primary;
   
+  /**
+   * The person connected the account
+   */
   @ManyToOne(targetEntity=PersonDb.class)
   @JoinColumn(name="person_id", referencedColumnName="oid")
   private Person person;
@@ -52,7 +54,6 @@ public class PersonAccountDb extends AccountDb {
 
 
   public PersonAccountDb() {
-    // TODO Auto-generated constructor stub
   }
 
 

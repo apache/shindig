@@ -56,7 +56,7 @@ public class MessageDb implements Message, DbObject {
 
   /**
    * model field.
-   * @see Message
+   * @see org.apache.shindig.social.opensocial.model.Message
    */
   @Basic
   @Column(name="body", length=255)
@@ -64,7 +64,7 @@ public class MessageDb implements Message, DbObject {
   
   /**
    * model field.
-   * @see Message
+   * @see org.apache.shindig.social.opensocial.model.Message
    */
   @Basic
   @Column(name="title", length=255)
@@ -72,7 +72,7 @@ public class MessageDb implements Message, DbObject {
   
   /**
    * model field. (database representation of type)
-   * @see Message
+   * @see org.apache.shindig.social.opensocial.model.Message
    */
   @Basic
   @Column(name="message_type")
@@ -80,7 +80,7 @@ public class MessageDb implements Message, DbObject {
   
   /**
    * model field.
-   * @see Message
+   * @see org.apache.shindig.social.opensocial.model.Message
    */
   @Transient
   protected Type type;

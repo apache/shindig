@@ -65,7 +65,7 @@ public class ListFieldDb implements ListField, DbObject {
   
   /**
    * model field.
-   * @see ListField
+   * @see org.apache.shindig.social.opensocial.model.ListField
    */
   @Basic
   @Column(name="field_type", length=255)
@@ -73,7 +73,7 @@ public class ListFieldDb implements ListField, DbObject {
   
   /**
    * model field.
-   * @see ListField
+   * @see org.apache.shindig.social.opensocial.model.ListField
    */
   @Basic
   @Column(name="field_value", length=255)
@@ -81,7 +81,7 @@ public class ListFieldDb implements ListField, DbObject {
   
   /**
    * model field.
-   * @see ListField
+   * @see org.apache.shindig.social.opensocial.model.ListField
    */
   @Basic
   @Column(name="primary_field")

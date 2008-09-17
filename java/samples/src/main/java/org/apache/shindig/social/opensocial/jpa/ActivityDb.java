@@ -73,7 +73,7 @@ public class ActivityDb implements Activity, DbObject {
 
   /**
    * model field.
-   * @see Activity
+   * @see org.apache.shindig.social.opensocial.model.Activity
    */
   @Basic
   @Column(name = "app_id", length = 255)
@@ -81,7 +81,7 @@ public class ActivityDb implements Activity, DbObject {
 
   /**
    * model field.
-   * @see Activity
+   * @see org.apache.shindig.social.opensocial.model.Activity
    */
   @Basic
   @Column(name = "body", length = 255)
@@ -89,7 +89,7 @@ public class ActivityDb implements Activity, DbObject {
 
   /**
    * model field.
-   * @see Activity
+   * @see org.apache.shindig.social.opensocial.model.Activity
    */
   @Basic
   @Column(name = "body_id", length = 255)
@@ -97,7 +97,7 @@ public class ActivityDb implements Activity, DbObject {
 
   /**
    * model field.
-   * @see Activity
+   * @see org.apache.shindig.social.opensocial.model.Activity
    */
   @Basic
   @Column(name = "external_id", length = 255)
@@ -105,7 +105,7 @@ public class ActivityDb implements Activity, DbObject {
 
   /**
    * model field.
-   * @see Activity
+   * @see org.apache.shindig.social.opensocial.model.Activity
    */
   @Basic
   @Column(name = "activity_id", length = 255)
@@ -113,7 +113,7 @@ public class ActivityDb implements Activity, DbObject {
 
   /**
    * model field.
-   * @see Activity
+   * @see org.apache.shindig.social.opensocial.model.Activity
    */
   @Basic
   @Column(name = "updated")
@@ -136,7 +136,7 @@ public class ActivityDb implements Activity, DbObject {
 
   /**
    * model field.
-   * @see Activity
+   * @see org.apache.shindig.social.opensocial.model.Activity
    */
   @Basic
   @Column(name = "posted_time")
@@ -144,7 +144,7 @@ public class ActivityDb implements Activity, DbObject {
 
   /**
    * model field.
-   * @see Activity
+   * @see org.apache.shindig.social.opensocial.model.Activity
    */
   @Basic
   @Column(name = "priority")
@@ -152,7 +152,7 @@ public class ActivityDb implements Activity, DbObject {
 
   /**
    * model field.
-   * @see Activity
+   * @see org.apache.shindig.social.opensocial.model.Activity
    */
   @Basic
   @Column(name = "stream_favicon_url", length = 255)
@@ -160,7 +160,7 @@ public class ActivityDb implements Activity, DbObject {
 
   /**
    * model field.
-   * @see Activity
+   * @see org.apache.shindig.social.opensocial.model.Activity
    */
   @Basic
   @Column(name = "stream_source_url", length = 255)
@@ -168,7 +168,7 @@ public class ActivityDb implements Activity, DbObject {
 
   /**
    * model field.
-   * @see Activity
+   * @see org.apache.shindig.social.opensocial.model.Activity
    */
   @Basic
   @Column(name = "stream_title", length = 255)
@@ -176,7 +176,7 @@ public class ActivityDb implements Activity, DbObject {
 
   /**
    * model field.
-   * @see Activity
+   * @see org.apache.shindig.social.opensocial.model.Activity
    */
   @Basic
   @Column(name = "stream_url", length = 255)
@@ -201,7 +201,7 @@ public class ActivityDb implements Activity, DbObject {
 
   /**
    * model field.
-   * @see Activity
+   * @see org.apache.shindig.social.opensocial.model.Activity
    */
   @Basic
   @Column(name = "title", length = 255)
@@ -209,7 +209,7 @@ public class ActivityDb implements Activity, DbObject {
 
   /**
    * model field.
-   * @see Activity
+   * @see org.apache.shindig.social.opensocial.model.Activity
    */
   @Basic
   @Column(name = "title_id", length = 255)
@@ -217,7 +217,7 @@ public class ActivityDb implements Activity, DbObject {
 
   /**
    * model field.
-   * @see Activity
+   * @see org.apache.shindig.social.opensocial.model.Activity
    */
   @Basic
   @Column(name = "url", length = 255)
@@ -225,7 +225,7 @@ public class ActivityDb implements Activity, DbObject {
 
   /**
    * model field.
-   * @see Activity
+   * @see org.apache.shindig.social.opensocial.model.Activity
    */
   @Basic
   @Column(name = "user_id", length = 255)

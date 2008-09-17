@@ -31,50 +31,91 @@ import static javax.persistence.CascadeType.MERGE;
 import static javax.persistence.CascadeType.REFRESH;
 
 /**
- * 
- */
-/*
  * This object connects to a single Address, and to a single organization, defining the
- * organizations relationship with the address
+ * organizations relationship with the address. The class extends AddressDb, which stores itself in
+ * the address table. The specialization of this class is stored in organization_address and joined
+ * on the objectId property (oid column). Records are discriminated using the address_usage column
+ * in the address table and set to the value 'sharedaddress' (i.e. no discrimination) indicating
+ * that the address is shared.
  */
+// TODO, uncertain about the mapping of this, oid <-> oid means one to one, and this is only
+// associated with a single
+// Organization. IMHO, we should be mapping organizational_address.address_id to address.oid, but
+// need to think about this.
 @Entity
 @Table(name = "organizational_address")
 @DiscriminatorValue(value = "sharedaddress")
 // this is the same as others since we want to share the data.
 public class OrganizationAddressDb extends AddressDb {
+  /**
+   * Indicates this address is the primary address for the organization.
+   */
   @Basic
   @Column(name = "primary_organization")
   private Boolean primary;
 
+  /**
+   * This address is associated with a single organization in this form.
+   *
+   */
   @ManyToOne(targetEntity = OrganizationDb.class, cascade = { PERSIST, MERGE, REFRESH })
   @JoinColumn(name = "organization_id", referencedColumnName = "oid")
   private Organization organization;
 
+  /**
+   * the type of the address for the organization.
+   *
+   * @see org.apache.shindig.social.opensocial.model.Address
+   */
   @Basic
   @Column(name = "type", length = 255)
   private String type;
 
+  /**
+   * Create an organizational address.
+   */
   public OrganizationAddressDb() {
-    // TODO Auto-generated constructor stub
   }
 
+  /**
+   * {@inheritDoc}
+   *
+   * @see org.apache.shindig.social.opensocial.jpa.AddressDb#getType()
+   */
   public String getType() {
     return type;
   }
 
+  /**
+   * {@inheritDoc}
+   *
+   * @see org.apache.shindig.social.opensocial.jpa.AddressDb#setType(java.lang.String)
+   */
   public void setType(String type) {
     this.type = type;
   }
 
+  /**
+   * {@inheritDoc}
+   *
+   * @see org.apache.shindig.social.opensocial.jpa.AddressDb#getPrimary()
+   */
   public Boolean getPrimary() {
     return primary;
   }
 
+  /**
+   * {@inheritDoc}
+   *
+   * @see org.apache.shindig.social.opensocial.jpa.AddressDb#setPrimary(java.lang.Boolean)
+   */
   public void setPrimary(Boolean primary) {
     this.primary = primary;
   }
 
   /**
+   * The organization this address address relates to.
+   *
    * @return the organization
    */
   public Organization getOrganization() {
@@ -82,6 +123,8 @@ public class OrganizationAddressDb extends AddressDb {
   }
 
   /**
+   * Set the organization this address relates to.
+   *
    * @param organization the organization to set
    */
   public void setOrganization(Organization organization) {
