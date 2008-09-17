@@ -97,6 +97,11 @@ public class EndToEndTest {
     executePageTest("errorTest", "internalError");
   }
 
+  @Test
+  public void testTemplates() throws Exception {
+    executeAllPageTests("opensocial-templates/ost_test");
+  }
+
   @BeforeClass
   public static void setUpOnce() throws Exception {
     server = new EndToEndServer();
