@@ -43,6 +43,12 @@ import static javax.persistence.CascadeType.PERSIST;
 import static javax.persistence.CascadeType.MERGE;
 import static javax.persistence.CascadeType.REFRESH;
 
+/**
+ * An organization is stored in the organization table. There may be types of organization where
+ * this class is extended. The storage contains a org_usage column which is used to discriminate the
+ * usage of each organization record. Where the record is shared the value will be shared. Classes
+ * that extend this class may have other values.
+ */
 @Entity
 @Table(name = "organization")
 @Inheritance(strategy = InheritanceType.JOINED)
@@ -51,7 +57,13 @@ import static javax.persistence.CascadeType.REFRESH;
 @NamedQuery(name = OrganizationDb.FINDBY_NAME, 
     query = "select o from OrganizationDb o where o.name = :name ")
 public class OrganizationDb implements Organization, DbObject {
+  /**
+   * The name of the JPA named query to find the organization by name.
+   */
   public static final String FINDBY_NAME = "q.organization.findbyname";
+  /**
+   * The name of the parameter used for the name column in JPA queries.
+   */
   public static final String PARAM_NAME = "name";
 
   /**
@@ -70,73 +82,140 @@ public class OrganizationDb implements Organization, DbObject {
   @Column(name = "version")
   protected long version;
 
-  @OneToOne(targetEntity = OrganizationAddressDb.class, 
-      mappedBy = "organization", cascade = {
+  /**
+   * The address associated with this Organization.
+   */
+  // TODO: does an organization have only one address, or many with one primary
+  @OneToOne(targetEntity = OrganizationAddressDb.class, mappedBy = "organization", cascade = {
       PERSIST, MERGE, REFRESH })
   private Address address;
 
+  /**
+   * Part of the Organization Model
+   * @see org.apache.shindig.social.opensocial.model.Organization
+   */
   @Basic
   @Column(name = "description", length = 255)
   private String description;
 
+  /**
+   * Part of the Organization Model
+   * @see org.apache.shindig.social.opensocial.model.Organization
+   */
   @Basic
   @Column(name = "endDate")
   @Temporal(TemporalType.DATE)
   private Date endDate;
 
+  /**
+   * Part of the Organization Model
+   * @see org.apache.shindig.social.opensocial.model.Organization
+   */
   @Basic
   @Column(name = "field", length = 255)
   private String field;
 
+  /**
+   * Part of the Organization Model
+   * @see org.apache.shindig.social.opensocial.model.Organization
+   */
   @Basic
   @Column(name = "name", length = 255)
   private String name;
 
+  /**
+   * Part of the Organization Model
+   * @see org.apache.shindig.social.opensocial.model.Organization
+   */
   @Basic
   @Column(name = "salary", length = 255)
   private String salary;
 
+  /**
+   * Part of the Organization Model
+   * @see org.apache.shindig.social.opensocial.model.Organization
+   */
   @Basic
   @Column(name = "start_date")
   @Temporal(TemporalType.DATE)
   private Date startDate;
 
+  /**
+   * Part of the Organization Model
+   * @see org.apache.shindig.social.opensocial.model.Organization
+   */
   @Basic
   @Column(name = "sub_field", length = 255)
   private String subField;
 
+  /**
+   * Part of the Organization Model
+   * @see org.apache.shindig.social.opensocial.model.Organization
+   */
   @Basic
   @Column(name = "title", length = 255)
   private String title;
 
+  /**
+   * Part of the Organization Model
+   * @see org.apache.shindig.social.opensocial.model.Organization
+   */
   @Basic
   @Column(name = "webpage", length = 255)
   private String webpage;
 
+  /**
+   * Part of the Organization Model
+   * @see org.apache.shindig.social.opensocial.model.Organization
+   */
   @Basic
   @Column(name = "type", length = 255)
   private String type;
 
+  /**
+   * Part of the Organization Model
+   * @see org.apache.shindig.social.opensocial.model.Organization
+   */
   @Basic
   @Column(name = "primary_organization")
   private Boolean primary;
 
+  /**
+   * {@inheritDoc}
+   * @see org.apache.shindig.social.opensocial.model.Organization#getAddress()
+   */
   public Address getAddress() {
     return address;
   }
 
+  /**
+   * {@inheritDoc}
+   * @see org.apache.shindig.social.opensocial.model.Organization#setAddress(org.apache.shindig.social.opensocial.model.Address)
+   */
   public void setAddress(Address address) {
     this.address = address;
   }
 
+  /**
+   * {@inheritDoc}
+   * @see org.apache.shindig.social.opensocial.model.Organization#getDescription()
+   */
   public String getDescription() {
     return description;
   }
 
+  /**
+   * {@inheritDoc}
+   * @see org.apache.shindig.social.opensocial.model.Organization#setDescription(java.lang.String)
+   */
   public void setDescription(String description) {
     this.description = description;
   }
 
+  /**
+   * {@inheritDoc}
+   * @see org.apache.shindig.social.opensocial.model.Organization#getEndDate()
+   */
   public Date getEndDate() {
     if (endDate == null) {
       return null;
@@ -144,6 +223,10 @@ public class OrganizationDb implements Organization, DbObject {
     return new Date(endDate.getTime());
   }
 
+  /**
+   * {@inheritDoc}
+   * @see org.apache.shindig.social.opensocial.model.Organization#setEndDate(java.util.Date)
+   */
   public void setEndDate(Date endDate) {
     if (endDate == null) {
       this.endDate = null;
@@ -152,30 +235,58 @@ public class OrganizationDb implements Organization, DbObject {
     }
   }
 
+  /**
+   * {@inheritDoc}
+   * @see org.apache.shindig.social.opensocial.model.Organization#getField()
+   */
   public String getField() {
     return field;
   }
 
+  /**
+   * {@inheritDoc}
+   * @see org.apache.shindig.social.opensocial.model.Organization#setField(java.lang.String)
+   */
   public void setField(String field) {
     this.field = field;
   }
 
+  /**
+   * {@inheritDoc}
+   * @see org.apache.shindig.social.opensocial.model.Organization#getName()
+   */
   public String getName() {
     return name;
   }
 
+  /**
+   * {@inheritDoc}
+   * @see org.apache.shindig.social.opensocial.model.Organization#setName(java.lang.String)
+   */
   public void setName(String name) {
     this.name = name;
   }
 
+  /**
+   * {@inheritDoc}
+   * @see org.apache.shindig.social.opensocial.model.Organization#getSalary()
+   */
   public String getSalary() {
     return salary;
   }
 
+  /**
+   * {@inheritDoc}
+   * @see org.apache.shindig.social.opensocial.model.Organization#setSalary(java.lang.String)
+   */
   public void setSalary(String salary) {
     this.salary = salary;
   }
 
+  /**
+   * {@inheritDoc}
+   * @see org.apache.shindig.social.opensocial.model.Organization#getStartDate()
+   */
   public Date getStartDate() {
     if (startDate == null) {
       return null;
@@ -183,6 +294,10 @@ public class OrganizationDb implements Organization, DbObject {
     return new Date(startDate.getTime());
   }
 
+  /**
+   * {@inheritDoc}
+   * @see org.apache.shindig.social.opensocial.model.Organization#setStartDate(java.util.Date)
+   */
   public void setStartDate(Date startDate) {
     if (startDate == null) {
       this.startDate = null;
@@ -191,48 +306,89 @@ public class OrganizationDb implements Organization, DbObject {
     }
   }
 
+  /**
+   * {@inheritDoc}
+   * @see org.apache.shindig.social.opensocial.model.Organization#getSubField()
+   */
   public String getSubField() {
     return subField;
   }
 
+  /**
+   * {@inheritDoc}
+   * @see org.apache.shindig.social.opensocial.model.Organization#setSubField(java.lang.String)
+   */
   public void setSubField(String subField) {
     this.subField = subField;
   }
 
+  /**
+   * {@inheritDoc}
+   * @see org.apache.shindig.social.opensocial.model.Organization#getTitle()
+   */
   public String getTitle() {
     return title;
   }
 
+  /**
+   * {@inheritDoc}
+   * @see org.apache.shindig.social.opensocial.model.Organization#setTitle(java.lang.String)
+   */
   public void setTitle(String title) {
     this.title = title;
   }
 
+  /**
+   * {@inheritDoc}
+   * @see org.apache.shindig.social.opensocial.model.Organization#getWebpage()
+   */
   public String getWebpage() {
     return webpage;
   }
 
+  /**
+   * {@inheritDoc}
+   * @see org.apache.shindig.social.opensocial.model.Organization#setWebpage(java.lang.String)
+   */
   public void setWebpage(String webpage) {
     this.webpage = webpage;
   }
 
+  /**
+   * {@inheritDoc}
+   * @see org.apache.shindig.social.opensocial.model.Organization#getType()
+   */
   public String getType() {
     return type;
   }
 
+  /**
+   * {@inheritDoc}
+   * @see org.apache.shindig.social.opensocial.model.Organization#setType(java.lang.String)
+   */
   public void setType(String type) {
     this.type = type;
   }
 
+  /**
+   * {@inheritDoc}
+   * @see org.apache.shindig.social.opensocial.model.Organization#getPrimary()
+   */
   public Boolean getPrimary() {
     return primary;
   }
 
+  /**
+   * {@inheritDoc}
+   * @see org.apache.shindig.social.opensocial.model.Organization#setPrimary(java.lang.Boolean)
+   */
   public void setPrimary(Boolean primary) {
     this.primary = primary;
   }
 
   /**
-   * @return the objectId
+   * {@inheritDoc}
+   * @see org.apache.shindig.social.opensocial.jpa.DbObject#getObjectId()
    */
   public long getObjectId() {
     return objectId;

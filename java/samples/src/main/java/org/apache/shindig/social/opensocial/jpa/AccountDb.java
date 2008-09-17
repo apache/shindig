@@ -63,7 +63,7 @@ public class AccountDb implements Account, DbObject {
 
   /**
    * model field.
-   * @see Account
+   * @see org.apache.shindig.social.opensocial.model.Account
    */
   @Basic
   @Column(name = "domain", length = 255)
@@ -71,7 +71,7 @@ public class AccountDb implements Account, DbObject {
 
   /**
    * model field.
-   * @see Account
+   * @see org.apache.shindig.social.opensocial.model.Account
    */
   @Basic
   @Column(name = "user_id", length = 255)
@@ -79,47 +79,81 @@ public class AccountDb implements Account, DbObject {
 
   /**
    * model field.
-   * @see Account
+   * @see org.apache.shindig.social.opensocial.model.Account
    */
   @Basic
   @Column(name = "username", length = 255)
   protected String username;
 
+  /**
+   * create an empty account object.
+   */
   public AccountDb() {
   }
 
+  /**
+   * Create an account object based on domain, userId and username
+   * @param domain the domain of the account
+   * @param userId the user id of the account
+   * @param username the username of the account
+   */
   public AccountDb(String domain, String userId, String username) {
     this.domain = domain;
     this.userId = userId;
     this.username = username;
   }
 
+  /**
+   * {@inheritDoc}
+   * @see org.apache.shindig.social.opensocial.model.Account#getDomain()
+   */
   public String getDomain() {
     return domain;
   }
 
+  /**
+   * {@inheritDoc}
+   * @see org.apache.shindig.social.opensocial.model.Account#setDomain(java.lang.String)
+   */
   public void setDomain(String domain) {
     this.domain = domain;
   }
 
+  /**
+   * {@inheritDoc}
+   * @see org.apache.shindig.social.opensocial.model.Account#getUserId()
+   */
   public String getUserId() {
     return userId;
   }
 
+  /**
+   * {@inheritDoc}
+   * @see org.apache.shindig.social.opensocial.model.Account#setUserId(java.lang.String)
+   */
   public void setUserId(String userId) {
     this.userId = userId;
   }
 
+  /**
+   * {@inheritDoc}
+   * @see org.apache.shindig.social.opensocial.model.Account#getUsername()
+   */
   public String getUsername() {
     return username;
   }
 
+  /**
+   * {@inheritDoc}
+   * @see org.apache.shindig.social.opensocial.model.Account#setUsername(java.lang.String)
+   */
   public void setUsername(String username) {
     this.username = username;
   }
 
   /**
-   * @return the objectId
+   * {@inheritDoc}
+   * @see org.apache.shindig.social.opensocial.jpa.DbObject#getObjectId()
    */
   public long getObjectId() {
     return objectId;

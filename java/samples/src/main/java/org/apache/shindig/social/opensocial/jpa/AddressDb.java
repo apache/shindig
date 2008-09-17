@@ -85,7 +85,7 @@ public class AddressDb implements Address, DbObject {
 
   /**
    * model field.
-   * @see Address
+   * @see org.apache.shindig.social.opensocial.model.Address
    */
   @Basic
   @Column(name = "country", length = 255)
@@ -93,7 +93,7 @@ public class AddressDb implements Address, DbObject {
 
   /**
    * model field.
-   * @see Address
+   * @see org.apache.shindig.social.opensocial.model.Address
    */
   @Basic
   @Column(name = "latitude")
@@ -101,7 +101,7 @@ public class AddressDb implements Address, DbObject {
 
   /**
    * model field.
-   * @see Address
+   * @see org.apache.shindig.social.opensocial.model.Address
    */
   @Basic
   @Column(name = "longitude")
@@ -109,7 +109,7 @@ public class AddressDb implements Address, DbObject {
 
   /**
    * model field.
-   * @see Address
+   * @see org.apache.shindig.social.opensocial.model.Address
    */
   @Basic
   @Column(name = "locality", length = 255)
@@ -117,7 +117,7 @@ public class AddressDb implements Address, DbObject {
 
   /**
    * model field.
-   * @see Address
+   * @see org.apache.shindig.social.opensocial.model.Address
    */
   @Basic
   @Column(name = "postal_code", length = 255)
@@ -125,7 +125,7 @@ public class AddressDb implements Address, DbObject {
 
   /**
    * model field.
-   * @see Address
+   * @see org.apache.shindig.social.opensocial.model.Address
    */
   @Basic
   @Column(name = "region", length = 255)
@@ -133,7 +133,7 @@ public class AddressDb implements Address, DbObject {
 
   /**
    * model field.
-   * @see Address
+   * @see org.apache.shindig.social.opensocial.model.Address
    */
   @Basic
   @Column(name = "street_address", length = 255)
@@ -141,7 +141,7 @@ public class AddressDb implements Address, DbObject {
 
   /**
    * model field.
-   * @see Address
+   * @see org.apache.shindig.social.opensocial.model.Address
    */
   @Basic
   @Column(name = "type", length = 255)
@@ -149,15 +149,15 @@ public class AddressDb implements Address, DbObject {
 
   /**
    * model field.
-   * @see Address
+   * @see org.apache.shindig.social.opensocial.model.Address
    */
   @Basic
   @Column(name = "formatted", length = 255)
   private String formatted;
 
   /**
-   * model field. 
-   * @see Address
+   * model field.
+   * @see org.apache.shindig.social.opensocial.model.Address
    */
   @Basic
   @Column(name = "primary_address")

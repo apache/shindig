@@ -70,7 +70,7 @@ public class MediaItemDb implements MediaItem, DbObject {
 
   /**
    * model field.
-   * @see MediaItem
+   * @see org.apache.shindig.social.opensocial.model.MediaItem
    */
   @Basic
   @Column(name = "mime_type", length = 255)
@@ -78,7 +78,7 @@ public class MediaItemDb implements MediaItem, DbObject {
 
   /**
    * model field.
-   * @see MediaItem
+   * @see org.apache.shindig.social.opensocial.model.MediaItem
    */
   @Basic
   @Column(name = "media_type")
@@ -86,14 +86,14 @@ public class MediaItemDb implements MediaItem, DbObject {
 
   /**
    * model field.
-   * @see MediaItem
+   * @see org.apache.shindig.social.opensocial.model.MediaItem
    */
   @Transient
   private Type type;
 
   /**
    * model field.
-   * @see MediaItem
+   * @see org.apache.shindig.social.opensocial.model.MediaItem
    */
   @Basic
   @Column(name = "url", length = 255)

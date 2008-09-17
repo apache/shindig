@@ -76,7 +76,7 @@ public class BodyTypeDb implements BodyType, DbObject {
 
   /**
    * model field.
-   * @see BodyType
+   * @see org.apache.shindig.social.opensocial.model.BodyType
    */
   @Basic
   @Column(name = "build", length = 255)
@@ -84,7 +84,7 @@ public class BodyTypeDb implements BodyType, DbObject {
 
   /**
    * model field.
-   * @see BodyType
+   * @see org.apache.shindig.social.opensocial.model.BodyType
    */
   @Basic
   @Column(name = "eye_color", length = 255)
@@ -92,7 +92,7 @@ public class BodyTypeDb implements BodyType, DbObject {
 
   /**
    * model field.
-   * @see BodyType
+   * @see org.apache.shindig.social.opensocial.model.BodyType
    */
   @Basic
   @Column(name = "hair_color", length = 255)
@@ -100,7 +100,7 @@ public class BodyTypeDb implements BodyType, DbObject {
 
   /**
    * model field.
-   * @see BodyType
+   * @see org.apache.shindig.social.opensocial.model.BodyType
    */
   @Basic
   @Column(name = "height", length = 255)
@@ -108,7 +108,7 @@ public class BodyTypeDb implements BodyType, DbObject {
 
   /**
    * model field.
-   * @see BodyType
+   * @see org.apache.shindig.social.opensocial.model.BodyType
    */
   @Basic
   @Column(name = "weight", length = 255)
