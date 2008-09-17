@@ -54,4 +54,10 @@
   </entity>
   <entity class="org.apache.shindig.social.opensocial.jpa.GroupDb">
   </entity>
+  <entity class="org.apache.shindig.social.opensocial.jpa.GroupPropertyDb">
+  </entity>
+  <entity class="org.apache.shindig.social.opensocial.jpa.ApplicationDb">
+  </entity>
+  <entity class="org.apache.shindig.social.opensocial.jpa.ApplicationPropertyDb">
+  </entity>
 </entity-mappings>
