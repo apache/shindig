@@ -19,6 +19,7 @@ package org.apache.shindig.social.opensocial.jpa;
 
 import static javax.persistence.GenerationType.IDENTITY;
 
+import org.apache.shindig.social.opensocial.jpa.api.DbObject;
 import org.apache.shindig.social.opensocial.model.Message;
 
 import javax.persistence.Basic;
@@ -161,7 +162,7 @@ public class MessageDb implements Message, DbObject {
 
   /**
    * {@inheritDoc}
-   * @see org.apache.shindig.social.opensocial.jpa.DbObject#getObjectId()
+   * @see org.apache.shindig.social.opensocial.jpa.api.DbObject#getObjectId()
    */
   public long getObjectId() {
     return objectId;
