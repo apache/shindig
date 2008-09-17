@@ -33,7 +33,7 @@ import javax.persistence.Table;
 @PrimaryKeyJoinColumn(name = "oid")
 public class FriendPropertyDb extends ListFieldDb {
   /**
-   * The friend relationship connected with this property. 
+   * The friend relationship connected with this property.
    */
   @ManyToOne(targetEntity = FriendDb.class)
   @JoinColumn(name = "friend_id", referencedColumnName = "oid")
