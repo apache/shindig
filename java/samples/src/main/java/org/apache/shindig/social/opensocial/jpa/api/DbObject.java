@@ -15,12 +15,12 @@
  * KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-package org.apache.shindig.social.opensocial.jpa;
+package org.apache.shindig.social.opensocial.jpa.api;
 
 
 /**
  * All Database objects should implement this, mainly to ensure that each has an
- * object ID. The object ID cant be set, its generated.
+ * object ID. The object ID can't be set, its generated.
  */
 public interface DbObject {
   /**

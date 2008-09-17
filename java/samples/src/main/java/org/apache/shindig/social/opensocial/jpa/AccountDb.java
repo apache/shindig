@@ -17,6 +17,7 @@
  */
 package org.apache.shindig.social.opensocial.jpa;
 
+import org.apache.shindig.social.opensocial.jpa.api.DbObject;
 import org.apache.shindig.social.opensocial.model.Account;
 
 import javax.persistence.Basic;
@@ -153,7 +154,7 @@ public class AccountDb implements Account, DbObject {
 
   /**
    * {@inheritDoc}
-   * @see org.apache.shindig.social.opensocial.jpa.DbObject#getObjectId()
+   * @see org.apache.shindig.social.opensocial.jpa.api.DbObject#getObjectId()
    */
   public long getObjectId() {
     return objectId;
