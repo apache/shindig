@@ -45,6 +45,8 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
+import javax.persistence.JoinTable;
+import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
@@ -119,53 +121,52 @@ public class PersonDb implements Person, DbObject {
   private static final String TVSHOWS_PROPERTY = "tvshow";
 
   private static final Map<String, FilterSpecification> FILTER_COLUMNS = 
-      new HashMap<String, FilterSpecification>();
+    new HashMap<String, FilterSpecification>();
 
   private static final FilterOperation[] ALL_FILTEROPTIONS = new FilterOperation[] {
       FilterOperation.equals, FilterOperation.contains, FilterOperation.present,
       FilterOperation.startsWith };
   private static final FilterOperation[] NUMERIC_FILTEROPTIONS = new FilterOperation[] {
       FilterOperation.equals, FilterOperation.present };
-  private static final FilterOperation[] EQUALS_FILTEROPTIONS = new FilterOperation[] { 
-    FilterOperation.equals };
+  private static final FilterOperation[] EQUALS_FILTEROPTIONS = 
+    new FilterOperation[] { FilterOperation.equals };
 
-  
   static {
-    FILTER_COLUMNS.put("aboutMe", new FilterSpecification("aboutMe",ALL_FILTEROPTIONS));
-    FILTER_COLUMNS.put("age",new FilterSpecification("age",NUMERIC_FILTEROPTIONS));
-    FILTER_COLUMNS.put("birthday",new FilterSpecification("birthday",NUMERIC_FILTEROPTIONS));
-    FILTER_COLUMNS.put("children",new FilterSpecification("children",ALL_FILTEROPTIONS));
-    FILTER_COLUMNS.put("displayName",new FilterSpecification("displayName",ALL_FILTEROPTIONS));
-    FILTER_COLUMNS.put("drinker",new FilterSpecification("drinkerDb",ALL_FILTEROPTIONS));
-    FILTER_COLUMNS.put("ethnicity",new FilterSpecification("ethnicity",ALL_FILTEROPTIONS));
-    FILTER_COLUMNS.put("fashion",new FilterSpecification("fashion",ALL_FILTEROPTIONS));
-    FILTER_COLUMNS.put("gender",new FilterSpecification("gender",ALL_FILTEROPTIONS));
-    FILTER_COLUMNS.put("happiestWhen",new FilterSpecification("happiestWhen",ALL_FILTEROPTIONS));
-    FILTER_COLUMNS.put("humor",new FilterSpecification("humor",ALL_FILTEROPTIONS));
-    FILTER_COLUMNS.put("jobInterests",new FilterSpecification("jobInterests",ALL_FILTEROPTIONS));
-    FILTER_COLUMNS.put("livingArrangement",
-        new FilterSpecification("livingArrangement",ALL_FILTEROPTIONS));
-    FILTER_COLUMNS.put("movies",new FilterSpecification("movies",ALL_FILTEROPTIONS));
-    FILTER_COLUMNS.put("networkPresenceDb",
-        new FilterSpecification("networkPresenceDb",ALL_FILTEROPTIONS));
-    FILTER_COLUMNS.put("nickname",new FilterSpecification("nickname",ALL_FILTEROPTIONS));
-    FILTER_COLUMNS.put("pets",new FilterSpecification("pets",ALL_FILTEROPTIONS));
-    FILTER_COLUMNS.put("politicalViews",
-        new FilterSpecification("politicalViews",ALL_FILTEROPTIONS));
-    FILTER_COLUMNS.put("relationshipStatus",
-        new FilterSpecification("relationshipStatus",ALL_FILTEROPTIONS));
-    FILTER_COLUMNS.put("religion",new FilterSpecification("religion",ALL_FILTEROPTIONS));
-    FILTER_COLUMNS.put("romance",new FilterSpecification("romance",ALL_FILTEROPTIONS));
-    FILTER_COLUMNS.put("scaredOf",new FilterSpecification("scaredOf",ALL_FILTEROPTIONS));
-    FILTER_COLUMNS.put("sexualOrientation",
-        new FilterSpecification("sexualOrientation",ALL_FILTEROPTIONS));
-    FILTER_COLUMNS.put("smokerDb",new FilterSpecification("smokerDb",ALL_FILTEROPTIONS));
-    FILTER_COLUMNS.put("status",new FilterSpecification("status",ALL_FILTEROPTIONS));
-    FILTER_COLUMNS.put("utcOffset",new FilterSpecification("utcOffset",NUMERIC_FILTEROPTIONS));
-    
+    FILTER_COLUMNS.put("aboutMe", new FilterSpecification("aboutMe", ALL_FILTEROPTIONS));
+    FILTER_COLUMNS.put("age", new FilterSpecification("age", NUMERIC_FILTEROPTIONS));
+    FILTER_COLUMNS.put("birthday", new FilterSpecification("birthday", NUMERIC_FILTEROPTIONS));
+    FILTER_COLUMNS.put("children", new FilterSpecification("children", ALL_FILTEROPTIONS));
+    FILTER_COLUMNS.put("displayName", new FilterSpecification("displayName", ALL_FILTEROPTIONS));
+    FILTER_COLUMNS.put("drinker", new FilterSpecification("drinkerDb", ALL_FILTEROPTIONS));
+    FILTER_COLUMNS.put("ethnicity", new FilterSpecification("ethnicity", ALL_FILTEROPTIONS));
+    FILTER_COLUMNS.put("fashion", new FilterSpecification("fashion", ALL_FILTEROPTIONS));
+    FILTER_COLUMNS.put("gender", new FilterSpecification("gender", ALL_FILTEROPTIONS));
+    FILTER_COLUMNS.put("happiestWhen", new FilterSpecification("happiestWhen", ALL_FILTEROPTIONS));
+    FILTER_COLUMNS.put("humor", new FilterSpecification("humor", ALL_FILTEROPTIONS));
+    FILTER_COLUMNS.put("jobInterests", new FilterSpecification("jobInterests", ALL_FILTEROPTIONS));
+    FILTER_COLUMNS.put("livingArrangement", new FilterSpecification("livingArrangement",
+        ALL_FILTEROPTIONS));
+    FILTER_COLUMNS.put("movies", new FilterSpecification("movies", ALL_FILTEROPTIONS));
+    FILTER_COLUMNS.put("networkPresenceDb", new FilterSpecification("networkPresenceDb",
+        ALL_FILTEROPTIONS));
+    FILTER_COLUMNS.put("nickname", new FilterSpecification("nickname", ALL_FILTEROPTIONS));
+    FILTER_COLUMNS.put("pets", new FilterSpecification("pets", ALL_FILTEROPTIONS));
+    FILTER_COLUMNS.put("politicalViews", new FilterSpecification("politicalViews",
+        ALL_FILTEROPTIONS));
+    FILTER_COLUMNS.put("relationshipStatus", new FilterSpecification("relationshipStatus",
+        ALL_FILTEROPTIONS));
+    FILTER_COLUMNS.put("religion", new FilterSpecification("religion", ALL_FILTEROPTIONS));
+    FILTER_COLUMNS.put("romance", new FilterSpecification("romance", ALL_FILTEROPTIONS));
+    FILTER_COLUMNS.put("scaredOf", new FilterSpecification("scaredOf", ALL_FILTEROPTIONS));
+    FILTER_COLUMNS.put("sexualOrientation", new FilterSpecification("sexualOrientation",
+        ALL_FILTEROPTIONS));
+    FILTER_COLUMNS.put("smokerDb", new FilterSpecification("smokerDb", ALL_FILTEROPTIONS));
+    FILTER_COLUMNS.put("status", new FilterSpecification("status", ALL_FILTEROPTIONS));
+    FILTER_COLUMNS.put("utcOffset", new FilterSpecification("utcOffset", NUMERIC_FILTEROPTIONS));
+
     // the following are special operations which are accepted, but work differently
-    FILTER_COLUMNS.put("topFriends",new FilterSpecification());
-    FILTER_COLUMNS.put("hasApp",new FilterSpecification());
+    FILTER_COLUMNS.put("topFriends", new FilterSpecification());
+    FILTER_COLUMNS.put("hasApp", new FilterSpecification());
   }
 
   private static final FilterCapability FILTER_CAPABILITY = new FilterCapability() {
@@ -571,6 +572,17 @@ public class PersonDb implements Person, DbObject {
   @Transient
   private boolean isViewer = false;
 
+  /**
+   * People have applications that they use, many people may use the same application, hence this is
+   * a many to many property, the link table is person_application where
+   * person_application.person_id points to person.oid and person_application.application_id points
+   * to application.oid.
+   */
+  @ManyToMany(targetEntity = ApplicationDb.class)
+  @JoinTable(name = "person_application", 
+      joinColumns = @JoinColumn(name = "person_id", referencedColumnName = "oid"), 
+      inverseJoinColumns = @JoinColumn(name = "application_id", referencedColumnName = "oid"))
+  protected List<ApplicationDb> applictions;
 
   public PersonDb() {
   }
@@ -1265,5 +1277,19 @@ public class PersonDb implements Person, DbObject {
   public static FilterCapability getFilterCapability() {
     return FILTER_CAPABILITY;
 
+  }
+
+  /**
+   * @return the applictions
+   */
+  public List<ApplicationDb> getApplictions() {
+    return applictions;
+  }
+
+  /**
+   * @param applictions the applictions to set
+   */
+  public void setApplictions(List<ApplicationDb> applictions) {
+    this.applictions = applictions;
   }
 }
