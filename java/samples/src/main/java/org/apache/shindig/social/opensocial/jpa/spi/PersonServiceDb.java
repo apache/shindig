@@ -18,6 +18,7 @@
 package org.apache.shindig.social.opensocial.jpa.spi;
 
 import org.apache.shindig.auth.SecurityToken;
+import org.apache.shindig.common.util.ImmediateFuture;
 import org.apache.shindig.social.ResponseError;
 import org.apache.shindig.social.opensocial.jpa.PersonDb;
 import org.apache.shindig.social.opensocial.jpa.api.FilterCapability;
@@ -35,27 +36,28 @@ import com.google.inject.Inject;
 import javax.persistence.EntityManager;
 import javax.persistence.Query;
 
-import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 
 /**
- * 
+ * Implements the PersonService from the SPI binding to the JPA model and providing
+ * queries to support the OpenSocial implementation.
  */
 public class PersonServiceDb implements PersonService {
 
+  /**
+   * This is the JPA entity manager, shared by all threads accessing this service (need to check
+   * that its really thread safe).
+   */
   private EntityManager entiyManager;
 
   /**
-   * 
+   * Create the PersonServiceDb, injecting an entity manager that is configured with the social
+   * model.
+   * @param entityManager the entity manager containing the social model.
    */
   @Inject
   public PersonServiceDb(EntityManager entityManager) {
@@ -78,135 +80,122 @@ public class PersonServiceDb implements PersonService {
     // using the collectionOptions and return the fields requested.
 
     // not dealing with the collection options at the moment, and not the fields because they are
-    // either lazy or at no extra costs.
+    // either lazy or at no extra costs, the consumer will either access the proeprties or not
 
-    return new Future<RestfulCollection<Person>>() {
-
-      private boolean cancel = false;
-
-      public boolean cancel(boolean cancel) {
-        this.cancel = this.cancel || cancel;
-        return this.cancel;
+    // sanitize the list to get the uid's and remove duplicates
+    HashMap<String, String> userIdMap = new HashMap<String, String>();
+    List<String> paramList = new ArrayList<String>();
+    List<Person> plist = null;
+    for (UserId u : userIds) {
+      try {
+        String uid = u.getUserId(token);
+        if (uid != null) {
+          userIdMap.put(uid, uid);
+          paramList.add(uid);
+        }
+      } catch (IllegalStateException istate) {
+        // ignore the user id.
       }
-
-      public RestfulCollection<Person> get() throws InterruptedException, ExecutionException {
-
-        // sanitize the list to get the uid's and remove duplicates
-        HashMap<String, String> userIdMap = new HashMap<String, String>();
-        List<String> paramList = new ArrayList<String>();
-        for (UserId u : userIds) {
-          try {
-            String uid = u.getUserId(token);
-            if (uid != null) {
-              userIdMap.put(uid, uid);
-              paramList.add(uid);
-            }
-          } catch (IllegalStateException istate) {
-            // ignore the user id.
-          }
-        }
-        // select the group Id as this will drive the query
-        switch (groupId.getType()) {
-        case all: {
-          // select all contacts
-          StringBuilder sb = new StringBuilder();
-          sb.append(PersonDb.JPQL_FINDALLPERSON);
-          addInClause(sb, "id", paramList.size());
-          int filterPos = addFilterClause(sb, PersonDb.getFilterCapability(), collectionOptions,
-              paramList.size() + 1);
-          if (filterPos > 0) {
-            paramList.add(collectionOptions.getFilterValue());
-          }
-          addOrderClause(sb, collectionOptions);
-
-          List<Person> plist = getListQuery(sb.toString(), paramList, collectionOptions);
-          return new RestfulCollection<Person>(plist);
-        }
-        case friends: {
-          // select all friends
-          StringBuilder sb = new StringBuilder();
-          sb.append(PersonDb.JPQL_FINDPERSON_BY_FRIENDS);
-          addInClause(sb, "id", paramList.size());
-          int filterPos = addFilterClause(sb, PersonDb.getFilterCapability(), collectionOptions,
-              paramList.size() + 1);
-          if (filterPos > 0) {
-            paramList.add(collectionOptions.getFilterValue());
-          }
-          addOrderClause(sb, collectionOptions);
-
-          List<Person> plist = getListQuery(sb.toString(), paramList, collectionOptions);
-          return new RestfulCollection<Person>(plist);
-        }
-        case groupId: {
-          // select those in the group
-          StringBuilder sb = new StringBuilder();
-          sb.append(PersonDb.JPQL_FINDPERSON_BY_GROUP);
-          List<Object> params = new ArrayList<Object>();
-          params.add(groupId.getGroupId());
-          params.addAll(paramList);
-
-          addInClause(sb, "id", paramList.size());
-          int filterPos = addFilterClause(sb, PersonDb.getFilterCapability(), collectionOptions,
-              params.size() + 1);
-          if (filterPos > 0) {
-            params.add(collectionOptions.getFilterValue());
-          }
-          addOrderClause(sb, collectionOptions);
-
-          List<Person> plist = getListQuery(sb.toString(), params, collectionOptions);
-          return new RestfulCollection<Person>(plist);
-        }
-        case deleted:
-          // ???
-          break;
-        case self: {
-          // select self
-          StringBuilder sb = new StringBuilder();
-          sb.append(PersonDb.JPQL_FINDPERSON);
-          addInClause(sb, "id", paramList.size());
-          int filterPos = addFilterClause(sb, PersonDb.getFilterCapability(), collectionOptions,
-              paramList.size() + 1);
-          if (filterPos > 0) {
-            paramList.add(collectionOptions.getFilterValue());
-          }
-          addOrderClause(sb, collectionOptions);
-
-          List<Person> plist = getListQuery(sb.toString(), paramList, collectionOptions);
-          return new RestfulCollection<Person>(plist);
-
-        }
-
-        }
-        throw new SocialSpiException(ResponseError.BAD_REQUEST, "Group ID not recognized");
+    }
+    // select the group Id as this will drive the query
+    switch (groupId.getType()) {
+    case all: {
+      // select all contacts
+      StringBuilder sb = new StringBuilder();
+      sb.append(PersonDb.JPQL_FINDALLPERSON);
+      addInClause(sb, "id", paramList.size());
+      int filterPos = addFilterClause(sb, PersonDb.getFilterCapability(), collectionOptions,
+          paramList.size() + 1);
+      if (filterPos > 0) {
+        paramList.add(collectionOptions.getFilterValue());
       }
+      addOrderClause(sb, collectionOptions);
 
-      public RestfulCollection<Person> get(long arg0, TimeUnit arg1) throws InterruptedException,
-          ExecutionException, TimeoutException {
-        return get();
+      plist = getListQuery(sb.toString(), paramList, collectionOptions);
+    }
+    case friends: {
+      // select all friends
+      StringBuilder sb = new StringBuilder();
+      sb.append(PersonDb.JPQL_FINDPERSON_BY_FRIENDS);
+      addInClause(sb, "id", paramList.size());
+      int filterPos = addFilterClause(sb, PersonDb.getFilterCapability(), collectionOptions,
+          paramList.size() + 1);
+      if (filterPos > 0) {
+        paramList.add(collectionOptions.getFilterValue());
       }
+      addOrderClause(sb, collectionOptions);
 
-      public boolean isCancelled() {
-        return false;
+      plist = getListQuery(sb.toString(), paramList, collectionOptions);
+    }
+    case groupId: {
+      // select those in the group
+      StringBuilder sb = new StringBuilder();
+      sb.append(PersonDb.JPQL_FINDPERSON_BY_GROUP);
+      List<Object> params = new ArrayList<Object>();
+      params.add(groupId.getGroupId());
+      params.addAll(paramList);
+
+      addInClause(sb, "id", paramList.size());
+      int filterPos = addFilterClause(sb, PersonDb.getFilterCapability(), collectionOptions, params
+          .size() + 1);
+      if (filterPos > 0) {
+        params.add(collectionOptions.getFilterValue());
       }
+      addOrderClause(sb, collectionOptions);
 
-      public boolean isDone() {
-        return true;
+      plist = getListQuery(sb.toString(), params, collectionOptions);
+    }
+    case deleted:
+      // ???
+      break;
+    case self: {
+      // select self
+      StringBuilder sb = new StringBuilder();
+      sb.append(PersonDb.JPQL_FINDPERSON);
+      addInClause(sb, "id", paramList.size());
+      int filterPos = addFilterClause(sb, PersonDb.getFilterCapability(), collectionOptions,
+          paramList.size() + 1);
+      if (filterPos > 0) {
+        paramList.add(collectionOptions.getFilterValue());
       }
+      addOrderClause(sb, collectionOptions);
 
-    };
+      plist = getListQuery(sb.toString(), paramList, collectionOptions);
+
+    }
+    default:
+      throw new SocialSpiException(ResponseError.BAD_REQUEST, "Group ID not recognized");
+
+    }
+
+    if (plist == null) {
+      plist = new ArrayList<Person>();
+    }
+    // all of the above could equally have been placed into a thread to overlay the
+    // db wait times.
+    return ImmediateFuture.newInstance(new RestfulCollection<Person>(plist));
 
   }
 
-  /*
-   * (non-Javadoc)
+  /**
+   * {@inheritDoc}
    * 
    * @see org.apache.shindig.social.opensocial.spi.PersonService#getPerson(org.apache.shindig.social.opensocial.spi.UserId,
    *      java.util.Set, org.apache.shindig.auth.SecurityToken)
    */
   public Future<Person> getPerson(UserId id, Set<String> fields, SecurityToken token)
       throws SocialSpiException {
-    // TODO Auto-generated method stub
-    return null;
+    String uid = id.getUserId(token);
+    Query q = entiyManager.createNamedQuery(PersonDb.FINDBY_PERSONID);
+    q.setParameter(PersonDb.PARAM_PERSONID, uid);
+    q.setFirstResult(1);
+    q.setMaxResults(1);
+    List<?> plist = q.getResultList();
+    Person person = null;
+    if (plist != null && plist.size() > 0) {
+      person = (Person) plist.get(0);
+    }
+    return ImmediateFuture.newInstance(person);
   }
 
   /**
