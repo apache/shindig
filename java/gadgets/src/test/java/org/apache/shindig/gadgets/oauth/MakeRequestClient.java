@@ -107,6 +107,24 @@ public class MakeRequestClient {
   }
   
   /**
+   * Send an OAuth POST with binary data in the binary.
+   */
+  public HttpResponse sendRawPost(String target, String type, byte[] body) throws Exception {
+    HttpRequest request = new HttpRequest(Uri.parse(target));
+    request.setOAuthArguments(recallState());
+    OAuthFetcher dest = new OAuthFetcher(fetcherConfig, serviceProvider, request);
+    request.setMethod("POST");
+    if (type != null) {
+      request.setHeader("Content-Type", type);
+    }
+    request.setPostBody(body);
+    request.setSecurityToken(securityToken);
+    HttpResponse response = dest.fetch(request);
+    saveState(response);
+    return response;
+  }
+
+  /**
    * Create arguments simulating authz=OAUTH.
    */
   public OAuthArguments makeNonSocialOAuthArguments() {

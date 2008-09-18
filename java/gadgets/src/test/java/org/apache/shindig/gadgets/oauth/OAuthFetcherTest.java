@@ -27,10 +27,12 @@ import static org.junit.Assert.fail;
 import net.oauth.OAuth;
 import net.oauth.OAuth.Parameter;
 
+import org.apache.commons.codec.binary.Base64;
 import org.apache.shindig.auth.BasicSecurityToken;
 import org.apache.shindig.auth.SecurityToken;
 import org.apache.shindig.common.cache.DefaultCacheProvider;
 import org.apache.shindig.common.crypto.BasicBlobCrypter;
+import org.apache.shindig.common.util.CharsetUtil;
 import org.apache.shindig.gadgets.FakeGadgetSpecFactory;
 import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.RequestSigningException;
@@ -44,6 +46,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -650,6 +653,33 @@ public class OAuthFetcherTest {
     assertTrue(contains(queryParams, "xoauth_signature_publickey", "foo"));
   }
   
+  @Test
+  public void testPostBinaryData() throws Exception {
+    byte[] raw = new byte[] { 0, 1, 2, 3, 4, 5 };
+    MakeRequestClient client = makeSignedFetchClient("o", "v", "http://www.example.com/app");
+    HttpResponse resp = client.sendRawPost(FakeOAuthServiceProvider.RESOURCE_URL, null, raw);
+    List<Parameter> queryParams = OAuth.decodeForm(resp.getResponseAsString());
+    assertTrue(contains(queryParams, "opensocial_owner_id", "o"));
+    assertTrue(contains(queryParams, OAuth.OAUTH_CONSUMER_KEY, "signedfetch"));
+    String echoed = resp.getHeader(FakeOAuthServiceProvider.RAW_BODY_ECHO_HEADER);
+    byte[] echoedBytes = Base64.decodeBase64(CharsetUtil.getUtf8Bytes(echoed));
+    assertTrue(Arrays.equals(raw, echoedBytes));
+  }
+
+  @Test
+  public void testPostWeirdContentType() throws Exception {
+    byte[] raw = new byte[] { 0, 1, 2, 3, 4, 5 };
+    MakeRequestClient client = makeSignedFetchClient("o", "v", "http://www.example.com/app");
+    HttpResponse resp = client.sendRawPost(FakeOAuthServiceProvider.RESOURCE_URL,
+        "funky-content", raw);
+    List<Parameter> queryParams = OAuth.decodeForm(resp.getResponseAsString());
+    assertTrue(contains(queryParams, "opensocial_owner_id", "o"));
+    assertTrue(contains(queryParams, OAuth.OAUTH_CONSUMER_KEY, "signedfetch"));
+    String echoed = resp.getHeader(FakeOAuthServiceProvider.RAW_BODY_ECHO_HEADER);
+    byte[] echoedBytes = Base64.decodeBase64(CharsetUtil.getUtf8Bytes(echoed));
+    assertTrue(Arrays.equals(raw, echoedBytes));
+  }
+
   @Test
   public void testSignedFetch_error401() throws Exception {
     assertEquals(0, base.getAccessTokenRemoveCount());

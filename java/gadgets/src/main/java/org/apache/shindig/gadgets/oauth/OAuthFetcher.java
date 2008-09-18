@@ -412,7 +412,9 @@ public class OAuthFetcher extends ChainedContentFetcher {
     String query = target.getQuery();
     target.setQuery(null);
     params.addAll(sanitize(OAuth.decodeForm(query)));
-    params.addAll(sanitize(OAuth.decodeForm(base.getPostBodyAsString())));
+    if (OAuth.isFormEncoded(base.getHeader("Content-Type"))) {
+      params.addAll(sanitize(OAuth.decodeForm(base.getPostBodyAsString())));
+    }
 
     addIdentityParams(params);
     
