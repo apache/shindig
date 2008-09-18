@@ -49,8 +49,25 @@ public class CollectionOptions {
   }
 
   /**
+   * <p>
    * This filter can be any field of the object being filtered or the special js filters,
-   * hasApp or topFriends.  
+   * hasApp or topFriends.
+   * Other special Filters are
+   * </p>
+   * <dl>
+   * <dt>all</dt>
+   * <dd>Retrieves all friends</dd>
+   * <dt>hasApp</dt>
+   * <dd>Retrieves all friends with any data for this application.</dd>
+   * <dt>'topFriends</dt>
+   * <dd>Retrieves only the user's top friends.</dd>
+   * <dt>isFriendsWith</dt>
+   * <dd>Will filter the people requested by checking if they are friends with
+   * the given <a href="opensocial.IdSpec.html">idSpec</a>. Expects a
+   *    filterOptions parameter to be passed with the following fields defined:
+   *  - idSpec The <a href="opensocial.IdSpec.html">idSpec</a> that each person
+   *        must be friends with.</dd>
+   * </dl>
    * @return The field to filter by
    */
   public String getFilter() {
@@ -69,6 +86,13 @@ public class CollectionOptions {
     this.filterOperation = filterOperation;
   }
 
+  /**
+   * Where a field filter has been specified (ie a non special filter) then this is the value of the
+   * filter. The exception is the isFriendsWith filter where this contains the value of the id who
+   * the all the results need to be friends with.
+   *
+   * @return
+   */
   public String getFilterValue() {
     return filterValue;
   }
@@ -77,6 +101,10 @@ public class CollectionOptions {
     this.filterValue = filterValue;
   }
 
+  /**
+   * When paginating, the index of the first item to fetch.
+   * @return
+   */
   public int getFirst() {
     return first;
   }
@@ -85,6 +113,13 @@ public class CollectionOptions {
     this.first = first;
   }
 
+  
+  /**
+   * The maximum number of items to fetch; defaults to 20. If set to a larger
+   * number, a container may honor the request, or may limit the number to a
+   * container-specified limit of at least 20.
+   * @return
+   */
   public int getMax() {
     return max;
   }
