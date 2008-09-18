@@ -23,6 +23,7 @@ import org.apache.shindig.social.opensocial.jpa.api.DbObject;
 import org.apache.shindig.social.opensocial.model.ListField;
 import org.apache.shindig.social.opensocial.model.Person;
 
+import javax.persistence.Basic;
 import javax.persistence.Column;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
@@ -67,6 +68,10 @@ public class FriendDb implements DbObject {
   @ManyToOne(targetEntity = PersonDb.class)
   @JoinColumn(name = "friend_id", referencedColumnName = "oid")
   protected Person friend;
+
+  @Basic
+  @Column(name="score")
+  protected int score;
 
   /**
    * The friendship has properties.

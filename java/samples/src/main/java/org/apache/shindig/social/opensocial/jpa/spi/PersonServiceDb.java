@@ -43,8 +43,8 @@ import java.util.Set;
 import java.util.concurrent.Future;
 
 /**
- * Implements the PersonService from the SPI binding to the JPA model and providing
- * queries to support the OpenSocial implementation.
+ * Implements the PersonService from the SPI binding to the JPA model and providing queries to
+ * support the OpenSocial implementation.
  */
 public class PersonServiceDb implements PersonService {
 
@@ -57,6 +57,7 @@ public class PersonServiceDb implements PersonService {
   /**
    * Create the PersonServiceDb, injecting an entity manager that is configured with the social
    * model.
+   * 
    * @param entityManager the entity manager containing the social model.
    */
   @Inject
@@ -114,7 +115,7 @@ public class PersonServiceDb implements PersonService {
       plist = getListQuery(sb.toString(), paramList, collectionOptions);
     }
     case friends: {
-      // select all friends
+      // select all friends (subset of contacts)
       StringBuilder sb = new StringBuilder();
       sb.append(PersonDb.JPQL_FINDPERSON_BY_FRIENDS);
       addInClause(sb, "id", paramList.size());
@@ -252,8 +253,22 @@ public class PersonServiceDb implements PersonService {
     int filterPos = 0;
     if (FilterSpecification.isValid(filter)) {
       if (FilterSpecification.isSpecial(filter)) {
-        if ("hasApp".equals(filter)) {
-        } else if ("topFriends".equals(filter)) {
+        if (PersonService.HAS_APP_FILTER.equals(filter)) {
+          // Retrieves all friends with any data for this application.
+          // TODO: how do we determine which application is being talked about
+        } else if (PersonService.TOP_FRIENDS_FILTER.equals(filter)) {
+          // Retrieves only the user's top friends, this is defined here by the implementation
+          // and there is an assumption that the sort order has already been applied.
+          // to do this we need to modify the collections options
+          // there will only ever b x friends in the list and it will only ever start at 1
+          collectionOptions.setFirst(1);
+          collectionOptions.setMax(20);
+          
+        } else if (PersonService.ALL_FILTER.equals(filter)) {
+           // select all, ie no filtering
+        } else if (PersonService.IS_WITH_FRIENDS_FILTER.equals(filter)) {
+          // all matches must also be friends with the value of the filter.
+
         }
       } else {
         sb.append("p.").append(filter);
@@ -290,14 +305,19 @@ public class PersonServiceDb implements PersonService {
   private void addOrderClause(StringBuilder sb, CollectionOptions collectionOptions) {
     String sortBy = collectionOptions.getSortBy();
     if (sortBy != null && sortBy.length() > 0) {
-      sb.append(" order by p.").append(sortBy);
-      switch (collectionOptions.getSortOrder()) {
-      case ascending:
-        sb.append(" asc ");
-        break;
-      case descending:
-        sb.append(" desc ");
-        break;
+      if (PersonService.TOP_FRIENDS_SORT.equals(sortBy)) {
+        // this assumes that the query is a join with the friends store.
+        sb.append(" order by f.score ");
+      } else {
+        sb.append(" order by p.").append(sortBy);
+        switch (collectionOptions.getSortOrder()) {
+        case ascending:
+          sb.append(" asc ");
+          break;
+        case descending:
+          sb.append(" desc ");
+          break;
+        }
       }
     }
   }
