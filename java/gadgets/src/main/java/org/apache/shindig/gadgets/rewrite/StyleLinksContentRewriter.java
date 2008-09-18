@@ -41,29 +41,31 @@ public class StyleLinksContentRewriter implements ContentRewriter {
     this.linkRewriter = linkRewriter;
   }
 
-  public void rewrite(HttpRequest request, HttpResponse original, MutableContent content) {
+  public RewriterResults rewrite(HttpRequest request, HttpResponse original,
+      MutableContent content) {
     String mimeType = HtmlContentRewriter.getMimeType(request, original);
     if (mimeType.contains("html")) {
       rewriteHtml(content.getParseTree(), request.getUri().toJavaUri());
     } else if (mimeType.contains("css")) {
       content.setContent(rewriteCss(content.getContent(), request.getUri().toJavaUri()));
     }
+    return RewriterResults.cacheableIndefinitely();
   }
 
-  public void rewrite(Gadget gadget) {
+  public RewriterResults rewrite(Gadget gadget) {
     ContentRewriterFeature rewriterFeature = rewriterFeatureFactory.get(gadget.getSpec());
     if (linkRewriter == null || 
         !rewriterFeature.isRewriteEnabled() ||
         !rewriterFeature.getIncludedTags().contains("style")) {
-      return;
+      return null;
     }
     
-    rewriteHtml(gadget.getParseTree(), gadget.getSpec().getUrl());
+    return rewriteHtml(gadget.getParseTree(), gadget.getSpec().getUrl());
   }
   
-  private void rewriteHtml(GadgetHtmlNode root, URI baseUri) {
+  private RewriterResults rewriteHtml(GadgetHtmlNode root, URI baseUri) {
     if (root == null) {
-      return;
+      return null;
     }
     
     Queue<GadgetHtmlNode> nodesToProcess =
@@ -84,6 +86,8 @@ public class StyleLinksContentRewriter implements ContentRewriter {
         }
       }
     }
+    
+    return RewriterResults.cacheableIndefinitely();
   }
   
   private String rewriteCss(String styleText, URI baseUri) {

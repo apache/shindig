@@ -28,14 +28,14 @@ import org.apache.shindig.gadgets.http.HttpResponse;
  */
 public class NoOpContentRewriter implements ContentRewriter {
 
-  public NoOpContentRewriter() {
+  public NoOpContentRewriter() { }
+
+  public RewriterResults rewrite(HttpRequest request,
+      HttpResponse original, MutableContent content) {
+    return null;
   }
 
-  public void rewrite(HttpRequest request, HttpResponse original, MutableContent content) {
-    // Do nothing.
-  }
-
-  public void rewrite(Gadget gadget) {
-	  // Do nothing.
+  public RewriterResults rewrite(Gadget gadget) {
+	return null;
   }
 }

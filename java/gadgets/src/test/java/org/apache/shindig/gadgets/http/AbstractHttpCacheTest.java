@@ -20,6 +20,7 @@ package org.apache.shindig.gadgets.http;
 import org.apache.shindig.gadgets.Gadget;
 import org.apache.shindig.gadgets.MutableContent;
 import org.apache.shindig.gadgets.rewrite.ContentRewriter;
+import org.apache.shindig.gadgets.rewrite.RewriterResults;
 
 import static org.easymock.EasyMock.expect;
 import static org.easymock.classextension.EasyMock.replay;
@@ -42,6 +43,7 @@ import java.util.Map;
 public class AbstractHttpCacheTest extends TestCase {
   private Injector injector;
   
+  @Override
   protected void setUp() throws Exception {
     injector = Guice.createInjector(new TestCacheModule());
   }
@@ -76,14 +78,17 @@ public class AbstractHttpCacheTest extends TestCase {
       map = new HashMap<String, HttpResponse>();
     }
     
+    @Override
     public void addResponseImpl(String key, HttpResponse response) {
       map.put(key, response);
     }
     
+    @Override
     public HttpResponse getResponseImpl(String key) {
       return map.get(key);
     }
     
+    @Override
     public HttpResponse removeResponseImpl(String key) {
       return map.remove(key);
     }
@@ -91,16 +96,19 @@ public class AbstractHttpCacheTest extends TestCase {
   
   private static String PFX_STR = "--prefixtest--";
   private static class TestContentRewriter implements ContentRewriter {
-    public void rewrite(Gadget gadget) {
+    public RewriterResults rewrite(Gadget gadget) {
       gadget.setContent(PFX_STR + gadget.getContent());
+      return null;
     }
     
-    public void rewrite(HttpRequest req, HttpResponse resp, MutableContent c) {
-      c.setContent(PFX_STR + c.getContent());;
+    public RewriterResults rewrite(HttpRequest req, HttpResponse resp, MutableContent c) {
+      c.setContent(PFX_STR + c.getContent());
+      return null;
     }
   }
   
   private static class TestCacheModule extends AbstractModule {
+    @Override
     protected void configure() {
       bind(ContentRewriter.class).to(TestContentRewriter.class);
     }

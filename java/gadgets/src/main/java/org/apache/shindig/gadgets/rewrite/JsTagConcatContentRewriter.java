@@ -54,15 +54,16 @@ public class JsTagConcatContentRewriter implements ContentRewriter {
     }
   }
 
-  public void rewrite(HttpRequest request, HttpResponse original, MutableContent content) {
+  public RewriterResults rewrite(HttpRequest request, HttpResponse original, MutableContent content) {
     // JS Concatenation not supported for HTTP responses at present.
+    return null;
   }
 
-  public void rewrite(Gadget gadget) {
+  public RewriterResults rewrite(Gadget gadget) {
     ContentRewriterFeature rewriterFeature = rewriterFeatureFactory.get(gadget.getSpec());
     if (!rewriterFeature.isRewriteEnabled() ||
         !rewriterFeature.getIncludedTags().contains("script")) {
-      return;
+      return null;
     }
     
     // Bootstrap queue of children over which to iterate,
@@ -137,6 +138,8 @@ public class JsTagConcatContentRewriter implements ContentRewriter {
         }
       }
     }
+    
+    return RewriterResults.cacheableIndefinitely();
   }
   
   private List<URI> getConcatenatedUris(String concatBase, List<URI> uris) {

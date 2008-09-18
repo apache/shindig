@@ -47,7 +47,7 @@ public class BasicHttpCacheTest extends TestCase {
 
   /**
    * gets the cache provider to use for the set of tests
-   * @return
+   * @return default cache provider
    */
   protected CacheProvider getCacheProvider() {
     return new DefaultCacheProvider();

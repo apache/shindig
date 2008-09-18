@@ -36,7 +36,8 @@ import org.apache.shindig.gadgets.parse.GadgetHtmlParser;
  * bootstraps the rewriters list. This enables modularization
  * of {@code ContentRewriter} instances without changing
  * Guice injection bindings. The class also provides a method
- * for manipulating a simple list of rewriters.
+ * for manipulating a simple list of rewriters. It does not
+ * support caching of rewritten contents in any way.
  */
 public class DefaultContentRewriterRegistry implements ContentRewriterRegistry {
   private final List<ContentRewriter> rewriters;

@@ -34,13 +34,16 @@ class AppendingRewriter implements ContentRewriter {
     this.appender = appender;
   }
 
-  public void rewrite(HttpRequest request, HttpResponse original, MutableContent c) {
+  public RewriterResults rewrite(HttpRequest request, HttpResponse original,
+      MutableContent c) {
     // Appends appender to the end of the content string.
     c.setContent(c.getContent() + appender);
+    return RewriterResults.cacheableIndefinitely();
   }
 
-  public void rewrite(Gadget gadget) {
+  public RewriterResults rewrite(Gadget gadget) {
     // Appends appender to the end of the input string.
-	  gadget.setContent(gadget.getContent() + appender);
+	gadget.setContent(gadget.getContent() + appender);
+	return RewriterResults.cacheableIndefinitely();
   }
 }
