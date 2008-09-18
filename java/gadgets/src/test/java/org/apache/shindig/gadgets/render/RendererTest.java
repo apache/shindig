@@ -21,11 +21,13 @@ package org.apache.shindig.gadgets.render;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
+import org.apache.shindig.auth.AnonymousSecurityToken;
+import org.apache.shindig.auth.SecurityToken;
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.gadgets.GadgetContext;
 import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.GadgetSpecFactory;
-import org.apache.shindig.gadgets.http.HttpFetcher;
+import org.apache.shindig.gadgets.http.ContentFetcherFactory;
 import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.http.HttpResponse;
 import org.apache.shindig.gadgets.preload.PreloaderService;
@@ -52,13 +54,17 @@ public class RendererTest {
       " <ModulePrefs title='foo'/>" +
       " <Content view='html' type='html'>" + BASIC_HTML_CONTENT + "</Content>" +
       " <Content view='proxied' type='html' href='" + PROXIED_HTML_HREF + "'/>" +
+      " <Content view='proxied-signed' authz='signed' href='" + PROXIED_HTML_HREF + "'/>" +
+      " <Content view='proxied-oauth' authz='oauth' href='" + PROXIED_HTML_HREF + "'/>" +
       " <Content view='url' type='url' href='http://example.org/always/an/error.html'/>" +
       "</Module>";
 
   private final FakeGadgetSpecFactory specFactory = new FakeGadgetSpecFactory();
-  private final FakeHttpFetcher httpFetcher = new FakeHttpFetcher();
+
+  private final FakeContentFetcherFactory fetcher = new FakeContentFetcherFactory();
+
   private final FakePreloaderService preloaderService = new FakePreloaderService();
-  private final Renderer renderer = new Renderer(specFactory, httpFetcher, preloaderService);
+  private final Renderer renderer = new Renderer(specFactory, fetcher, preloaderService);
 
   private GadgetContext makeContext(final String view, final Uri specUrl) {
     return new GadgetContext() {
@@ -71,6 +77,11 @@ public class RendererTest {
       public String getView() {
         return view;
       }
+
+      @Override
+      public SecurityToken getToken() {
+        return new AnonymousSecurityToken();
+      }
     };
   }
 
@@ -82,7 +93,7 @@ public class RendererTest {
 
   @Test
   public void renderProxiedTypeHtml() throws Exception {
-    httpFetcher.responses.put(PROXIED_HTML_HREF, new HttpResponse(PROXIED_HTML_CONTENT));
+    fetcher.plainResponses.put(PROXIED_HTML_HREF, new HttpResponse(PROXIED_HTML_CONTENT));
     String content = renderer.render(makeContext("proxied", SPEC_URL));
     assertEquals(PROXIED_HTML_CONTENT, content);
   }
@@ -98,9 +109,23 @@ public class RendererTest {
   }
 
   @Test
-  public void doPreloading() throws Exception {
+  public void doPreloading() throws RenderingException {
     renderer.render(makeContext("html", SPEC_URL));
     assertTrue("Preloading not performed.", preloaderService.wasPreloaded);
+  }
+
+  @Test
+  public void renderProxiedSigned() throws RenderingException {
+    fetcher.oauthResponses.put(PROXIED_HTML_HREF, new HttpResponse(PROXIED_HTML_CONTENT));
+    String content = renderer.render(makeContext("proxied-signed", SPEC_URL));
+    assertEquals(PROXIED_HTML_CONTENT, content);
+  }
+
+  @Test
+  public void renderProxiedOAuth() throws RenderingException {
+    fetcher.oauthResponses.put(PROXIED_HTML_HREF, new HttpResponse(PROXIED_HTML_CONTENT));
+    String content = renderer.render(makeContext("proxied-oauth", SPEC_URL));
+    assertEquals(PROXIED_HTML_CONTENT, content);
   }
 
   private static class FakeGadgetSpecFactory implements GadgetSpecFactory {
@@ -113,14 +138,52 @@ public class RendererTest {
     }
   }
 
-  private static class FakeHttpFetcher implements HttpFetcher {
-    private final Map<Uri, HttpResponse> responses = Maps.newHashMap();
+  private static class FakeContentFetcherFactory extends ContentFetcherFactory {
+    private final Map<Uri, HttpResponse> plainResponses = Maps.newHashMap();
+    private final Map<Uri, HttpResponse> oauthResponses = Maps.newHashMap();
 
+    public FakeContentFetcherFactory() {
+      super(null, null);
+    }
+
+    @Override
     public HttpResponse fetch(HttpRequest request) throws GadgetException {
-      HttpResponse response = responses.get(request.getUri());
+      if (request.getGadget() == null) {
+        throw new GadgetException(GadgetException.Code.FAILED_TO_RETRIEVE_CONTENT,
+            "No gadget associated with rendering request.");
+      }
+
+      if (request.getContainer() == null) {
+        throw new GadgetException(GadgetException.Code.FAILED_TO_RETRIEVE_CONTENT,
+            "No container associated with rendering request.");
+      }
+
+      if (request.getSecurityToken() == null) {
+        throw new GadgetException(GadgetException.Code.FAILED_TO_RETRIEVE_CONTENT,
+            "No security token associated with rendering request.");
+      }
+
+      if (request.getOAuthArguments() == null) {
+        throw new GadgetException(GadgetException.Code.FAILED_TO_RETRIEVE_CONTENT,
+            "No oauth arguments associated with rendering request.");
+      }
+
+      HttpResponse response;
+      switch (request.getAuthType()) {
+        case NONE:
+          response = plainResponses.get(request.getUri());
+          break;
+        case SIGNED:
+        case OAUTH:
+          response = oauthResponses.get(request.getUri());
+          break;
+        default:
+          response = null;
+          break;
+      }
       if (response == null) {
         throw new GadgetException(GadgetException.Code.FAILED_TO_RETRIEVE_CONTENT,
-            "Unknown gadget: " + request.getUri());
+            "Unknown file: " + request.getUri());
       }
       return response;
     }

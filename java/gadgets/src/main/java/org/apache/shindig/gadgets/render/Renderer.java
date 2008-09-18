@@ -23,9 +23,10 @@ import org.apache.shindig.gadgets.GadgetContext;
 import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.GadgetSpecFactory;
 import org.apache.shindig.gadgets.ProcessedGadget;
-import org.apache.shindig.gadgets.http.HttpFetcher;
+import org.apache.shindig.gadgets.http.ContentFetcherFactory;
 import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.http.HttpResponse;
+import org.apache.shindig.gadgets.oauth.OAuthArguments;
 import org.apache.shindig.gadgets.preload.PreloaderService;
 import org.apache.shindig.gadgets.spec.GadgetSpec;
 import org.apache.shindig.gadgets.spec.View;
@@ -37,15 +38,15 @@ import com.google.inject.Inject;
  */
 public class Renderer {
   private final GadgetSpecFactory gadgetSpecFactory;
-  private final HttpFetcher httpFetcher;
+  private final ContentFetcherFactory fetcher;
   private final PreloaderService preloader;
 
   @Inject
   public Renderer(GadgetSpecFactory gadgetSpecFactory,
-                  HttpFetcher httpFetcher,
+                  ContentFetcherFactory fetcher,
                   PreloaderService preloader) {
     this.gadgetSpecFactory = gadgetSpecFactory;
-    this.httpFetcher = httpFetcher;
+    this.fetcher = fetcher;
     this.preloader = preloader;
   }
 
@@ -79,13 +80,17 @@ public class Renderer {
 
       gadget.setPreloads(preloader.preload(context, spec));
 
-      // TODO: Add current url to GadgetContext to support transitive proxying.
-
       if (view.getHref() == null) {
         return view.getContent();
       } else {
-        HttpRequest request = new HttpRequest(Uri.fromJavaUri(view.getHref()));
-        HttpResponse response = httpFetcher.fetch(request);
+        // TODO: Add current url to GadgetContext to support transitive proxying.
+        HttpRequest request = new HttpRequest(Uri.fromJavaUri(view.getHref()))
+            .setSecurityToken(context.getToken())
+            .setOAuthArguments(new OAuthArguments(view))
+            .setAuthType(view.getAuthType())
+            .setContainer(context.getContainer())
+            .setGadget(Uri.fromJavaUri(context.getUrl()));
+        HttpResponse response = fetcher.fetch(request);
         return response.getResponseAsString();
       }
     } catch (GadgetException e) {
