@@ -34,7 +34,7 @@ import java.net.URI;
  */
 public abstract class HtmlContentRewriter implements ContentRewriter {
   
-  protected abstract void rewrite(GadgetHtmlNode root, URI baseUri);
+  protected abstract RewriterResults rewrite(GadgetHtmlNode root, URI baseUri);
 
   public static String getMimeType(HttpRequest request, HttpResponse original) {
     String mimeType = request.getRewriteMimeType();
@@ -44,22 +44,24 @@ public abstract class HtmlContentRewriter implements ContentRewriter {
     return mimeType != null ? mimeType.toLowerCase() : null;
   }
   
-  public void rewrite(HttpRequest request, HttpResponse original,
+  public RewriterResults rewrite(HttpRequest request, HttpResponse original,
       MutableContent content) {
     String mimeType = getMimeType(request, original);
     if (mimeType.toLowerCase().contains("html")) {
-      rewriteHtml(content.getParseTree(), request.getUri().toJavaUri());
+      return rewriteHtml(content.getParseTree(), request.getUri().toJavaUri());
     }
+    return null;
   }
 
-  public void rewrite(Gadget gadget) {
-    rewriteHtml(gadget.getParseTree(), gadget.getSpec().getUrl());
+  public RewriterResults rewrite(Gadget gadget) {
+    return rewriteHtml(gadget.getParseTree(), gadget.getSpec().getUrl());
   }
   
-  private void rewriteHtml(GadgetHtmlNode root, URI baseUri) {
+  private RewriterResults rewriteHtml(GadgetHtmlNode root, URI baseUri) {
     if (root != null) {
-      rewrite(root, baseUri);
+      return rewrite(root, baseUri);
     }
+    return null;
   }
 
 }

@@ -37,16 +37,19 @@ public interface ContentRewriter {
    * Rewrite the original content located at source.
    * 
    * @param request Originating request, as context.
-   * @param response Original HTTP response, for context.
+   * @param original Original HTTP response, for context.
    * @param content Original content.
+   * @return Object indicating results cacheability, or null (indicates not cacheable).
    */
-  public void rewrite(HttpRequest request, HttpResponse original, MutableContent content);
+  public RewriterResults rewrite(HttpRequest request,
+      HttpResponse original, MutableContent content);
 
   /**
    * Rewrite the gadget. The Gadget object's manipulation methods are used
    * for the bulk of this.
    * 
    * @param gadget Gadget to rewrite.
+   * @return Object indicating results cacheability, or null (indicates not cacheable).
    */
-  public void rewrite(Gadget gadget);
+  public RewriterResults rewrite(Gadget gadget);
 }

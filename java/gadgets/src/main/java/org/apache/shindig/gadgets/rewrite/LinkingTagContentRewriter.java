@@ -44,38 +44,38 @@ public class LinkingTagContentRewriter extends HtmlContentRewriter {
     }
   }
 
-	protected void rewrite(GadgetHtmlNode root, URI baseUri) {
-	  if (linkRewriter == null) {
-	    // Sanity test.
-	    return;
-	  }
+  @Override
+  protected RewriterResults rewrite(GadgetHtmlNode root, URI baseUri) {
+	if (linkRewriter == null) {
+	  // Sanity test.
+	  return null;
+	}
 	  
-    Queue<GadgetHtmlNode> nodesToProcess =
-      new LinkedList<GadgetHtmlNode>();
+    Queue<GadgetHtmlNode> nodesToProcess = new LinkedList<GadgetHtmlNode>();
     nodesToProcess.addAll(root.getChildren());
-  
+
     while (!nodesToProcess.isEmpty()) {
       GadgetHtmlNode curNode = nodesToProcess.remove();
       if (!curNode.isText()) {
         // Depth-first iteration over children. Order doesn't matter anyway.
         nodesToProcess.addAll(curNode.getChildren());
-        
+
         Set<String> curTagAttrs =
             tagAttributeTargets.get(curNode.getTagName().toLowerCase());
         if (curTagAttrs != null) {
           for (String attrKey : curNode.getAttributeKeys()) {
             if (curTagAttrs.contains(attrKey.toLowerCase())) {
               String attrValue = curNode.getAttributeValue(attrKey);
-            
-              // Attribute marked for rewriting: do it!
-              curNode.setAttribute(attrKey,
-                  linkRewriter.rewrite(attrValue, baseUri));
+               // Attribute marked for rewriting: do it!
+              curNode.setAttribute(attrKey, linkRewriter.rewrite(attrValue, baseUri));
             }
           }
         }
       }
     }
-	}
+      
+    return RewriterResults.cacheableIndefinitely();
+  }
 
   private static Map<String, Set<String>> getDefaultTargets() {
     Map<String, Set<String>> targets  = new HashMap<String, Set<String>>();

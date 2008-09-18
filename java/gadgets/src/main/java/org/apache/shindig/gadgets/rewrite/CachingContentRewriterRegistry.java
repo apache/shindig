@@ -81,6 +81,7 @@ public class CachingContentRewriterRegistry extends DefaultContentRewriterRegist
   }
 
   /** {@inheritDoc} */
+  @Override
   public boolean rewriteGadget(Gadget gadget)
       throws GadgetException {
     if (gadget.getContext().getIgnoreCache()) {
@@ -111,6 +112,7 @@ public class CachingContentRewriterRegistry extends DefaultContentRewriterRegist
   }
   
   /** {@inheritDoc} */
+  @Override
   public HttpResponse rewriteHttpResponse(HttpRequest req, HttpResponse resp) {
     if (req.getIgnoreCache()) {
       return super.rewriteHttpResponse(req, resp);

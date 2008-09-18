@@ -32,6 +32,7 @@ import org.apache.shindig.gadgets.rewrite.ContentRewriterFeature;
 import org.apache.shindig.gadgets.rewrite.CssRewriter;
 import org.apache.shindig.gadgets.rewrite.LinkRewriter;
 import org.apache.shindig.gadgets.rewrite.ProxyingLinkRewriter;
+import org.apache.shindig.gadgets.rewrite.RewriterResults;
 import org.apache.shindig.gadgets.spec.GadgetSpec;
 
 import java.io.ByteArrayOutputStream;
@@ -82,7 +83,8 @@ public class DefaultContentRewriter implements ContentRewriter {
     }
   }
 
-  public void rewrite(HttpRequest request, HttpResponse original, MutableContent content) {
+  public RewriterResults rewrite(HttpRequest request, HttpResponse original,
+      MutableContent content) {
     try {
       ByteArrayOutputStream baos = new ByteArrayOutputStream(
           (content.getContent().length() * 110) / 100);
@@ -104,14 +106,17 @@ public class DefaultContentRewriter implements ContentRewriter {
     } catch (GadgetException ge) {
       // Couldn't retrieve gadgetSpec
     }
+    
+    return RewriterResults.cacheableIndefinitely();
   }
 
-  public void rewrite(Gadget gadget) {
+  public RewriterResults rewrite(Gadget gadget) {
     StringWriter sw = new StringWriter();
     GadgetSpec spec = gadget.getSpec();
     if (rewrite(spec, spec.getUrl(), new StringReader(gadget.getContent()), "text/html", sw)) {
       gadget.setContent(sw.toString());
     }
+    return RewriterResults.cacheableIndefinitely();
   }
 
   private boolean rewrite(GadgetSpec spec, URI source, Reader r, String mimeType, Writer w) {

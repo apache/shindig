@@ -31,6 +31,7 @@ import org.apache.shindig.gadgets.http.HttpResponse;
 import org.apache.shindig.gadgets.oauth.OAuthFetcher;
 import org.apache.shindig.gadgets.rewrite.DefaultContentRewriterRegistry;
 import org.apache.shindig.gadgets.rewrite.ContentRewriter;
+import org.apache.shindig.gadgets.rewrite.RewriterResults;
 
 import java.util.concurrent.ExecutorService;
 
@@ -67,16 +68,19 @@ public abstract class GadgetTestFixture extends EasyMockTestCase {
     private boolean rewroteView = false;
     private boolean rewroteResponse = false;
 
-    public void rewrite(HttpRequest request, HttpResponse original, MutableContent content) {
+    public RewriterResults rewrite(HttpRequest request, HttpResponse original,
+        MutableContent content) {
       rewroteResponse = true;
+      return null;
     }
 
     public boolean responseWasRewritten() {
       return rewroteResponse;
     }
 
-    public void rewrite(Gadget gadget) {
+    public RewriterResults rewrite(Gadget gadget) {
       rewroteView = true;
+      return null;
     }
 
     public boolean viewWasRewritten() {
