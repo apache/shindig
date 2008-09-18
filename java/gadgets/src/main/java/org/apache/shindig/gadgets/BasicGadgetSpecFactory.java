@@ -19,6 +19,7 @@
 package org.apache.shindig.gadgets;
 
 import org.apache.shindig.common.cache.CacheProvider;
+import org.apache.shindig.common.cache.TtlCache;
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.gadgets.http.HttpFetcher;
 import org.apache.shindig.gadgets.http.HttpRequest;
@@ -41,40 +42,51 @@ import java.util.logging.Logger;
  * Basic implementation of a gadget spec factory.
  */
 @Singleton
-public class BasicGadgetSpecFactory extends CachingWebRetrievalFactory<GadgetSpec, URI, URI> 
-    implements GadgetSpecFactory {
+public class BasicGadgetSpecFactory implements GadgetSpecFactory {
   static final Logger logger = Logger.getLogger(BasicGadgetSpecFactory.class.getName());
 
   private final HttpFetcher fetcher;
   private final ExecutorService executor;
-
-  @Override
-  protected URI getCacheKeyFromQueryObj(URI queryObj) {
-    return queryObj;
-  }
-  
-  @Override
-  protected Logger getLogger() {
-    return logger;
-  }
+  private final TtlCache<URI, GadgetSpec> ttlCache;
 
   public GadgetSpec getGadgetSpec(GadgetContext context) throws GadgetException {
     return getGadgetSpec(context.getUrl(), context.getIgnoreCache());
   }
-
+  
   /**
    * Retrieves a gadget specification from the cache or from the Internet.
    */
-  public GadgetSpec getGadgetSpec(URI url, boolean ignoreCache) throws GadgetException {
-    return doCachedFetch(url, ignoreCache);
+  public GadgetSpec getGadgetSpec(URI gadgetUri, boolean ignoreCache) throws GadgetException {     
+    if (ignoreCache) {
+      return fetchObjectAndCache(gadgetUri, ignoreCache);
+    }
+    
+    TtlCache.CachedObject<GadgetSpec> cached = null;
+    synchronized(ttlCache) {
+      cached = ttlCache.getElementWithExpiration(gadgetUri);
+    }
+    
+    if (cached.obj == null || cached.isExpired) {
+      try {
+        return fetchObjectAndCache(gadgetUri, ignoreCache);
+      } catch (GadgetException e) {
+        // Failed to re-fetch raw object. Use cached object if it exists.
+        if (cached.obj == null) {
+          throw e;
+        } else {
+          logger.info("GadgetSpec fetch failed for " + gadgetUri + " -  using cached.");
+        }
+      }
+    }
+    
+    return cached.obj;
   }
 
   /**
    * Retrieves a gadget specification from the Internet, processes its views and
    * adds it to the cache.
    */
-  protected FetchedObject<GadgetSpec> retrieveRawObject(URI url, boolean ignoreCache)
-      throws GadgetException {
+  private GadgetSpec fetchObjectAndCache(URI url, boolean ignoreCache) throws GadgetException {
     HttpRequest request = new HttpRequest(Uri.fromJavaUri(url)).setIgnoreCache(ignoreCache);
     HttpResponse response = fetcher.fetch(request);
     if (response.getHttpStatusCode() != HttpResponse.SC_OK) {
@@ -114,23 +126,21 @@ public class BasicGadgetSpecFactory extends CachingWebRetrievalFactory<GadgetSpe
       }
     }
 
-    // Annotate this spec instance with the expiration time (as a Long) associated
-    // with its retrieval. This enables CachingContentRewriterRegistry to properly
-    // cache rewritten content generated from Gadgets based on the spec.
-    spec.setAttribute(GadgetSpec.EXPIRATION_ATTRIB, new Long(response.getCacheExpiration()));
+    ttlCache.addElement(url, spec, response.getCacheExpiration());
     
-    return new FetchedObject<GadgetSpec>(spec, response.getCacheExpiration());
+    return spec;
   }
 
   @Inject
   public BasicGadgetSpecFactory(HttpFetcher fetcher,
-                                CacheProvider cacheProvider,
-                                ExecutorService executor,
-                                @Named("shindig.gadget-spec.cache.capacity")int gadgetSpecCacheCapacity,
-                                @Named("shindig.gadget-spec.cache.minTTL")long minTtl,
-                                @Named("shindig.gadget-spec.cache.maxTTL")long maxTtl) {
-    super(cacheProvider, gadgetSpecCacheCapacity, minTtl, maxTtl);
+      CacheProvider cacheProvider,
+      ExecutorService executor,
+      @Named("shindig.gadget-spec.cache.capacity")int gadgetSpecCacheCapacity,
+      @Named("shindig.gadget-spec.cache.minTTL")long minTtl,
+      @Named("shindig.gadget-spec.cache.maxTTL")long maxTtl) {
     this.fetcher = fetcher;
     this.executor = executor;
+    this.ttlCache =
+        new TtlCache<URI, GadgetSpec>(cacheProvider, gadgetSpecCacheCapacity, minTtl, maxTtl);
   }
 }

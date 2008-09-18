@@ -19,6 +19,7 @@
 package org.apache.shindig.gadgets;
 
 import org.apache.shindig.common.cache.CacheProvider;
+import org.apache.shindig.common.cache.TtlCache;
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.gadgets.http.HttpFetcher;
 import org.apache.shindig.gadgets.http.HttpRequest;
@@ -40,9 +41,37 @@ import java.util.logging.Logger;
 public class BasicMessageBundleFactory extends AbstractMessageBundleFactory {
   static final Logger logger = Logger.getLogger(BasicMessageBundleFactory.class.getName());
   private final HttpFetcher fetcher;
-
+  private final TtlCache<URI, MessageBundle> ttlCache;
+  
   @Override
-  protected FetchedObject<MessageBundle> retrieveRawObject(LocaleSpec locale,
+  protected MessageBundle fetchBundle(LocaleSpec locale, boolean ignoreCache)
+      throws GadgetException {
+    if (ignoreCache) {
+      return fetchAndCacheBundle(locale, ignoreCache);
+    }
+    
+    TtlCache.CachedObject<MessageBundle> cached = null;
+    
+    synchronized(ttlCache) {
+      cached = ttlCache.getElementWithExpiration(locale.getMessages());
+    }
+    
+    if (cached.obj == null || cached.isExpired) {
+      try {
+        return fetchAndCacheBundle(locale, ignoreCache);
+      } catch (GadgetException e) {
+        if (cached.obj == null) {
+          throw e;
+        } else {
+          logger.info("Message bundle fetch failed for " + locale + " -  using cached.");
+        }
+      }
+    }
+    
+    return cached.obj;
+  }
+
+  private MessageBundle fetchAndCacheBundle(LocaleSpec locale,
       boolean ignoreCache) throws GadgetException {
     URI url = locale.getMessages();
     HttpRequest request = new HttpRequest(Uri.fromJavaUri(url)).setIgnoreCache(ignoreCache);
@@ -54,22 +83,8 @@ public class BasicMessageBundleFactory extends AbstractMessageBundleFactory {
     }
 
     MessageBundle bundle  = new MessageBundle(locale, response.getResponseAsString());
-    return new FetchedObject<MessageBundle>(bundle, response.getCacheExpiration());
-  }
-
-  @Override
-  protected URI getCacheKeyFromQueryObj(LocaleSpec queryObj) {
-    return queryObj.getMessages();
-  }
-  
-  @Override
-  protected Logger getLogger() {
-    return logger;
-  }
-
-  protected MessageBundle fetchBundle(LocaleSpec locale, boolean ignoreCache)
-      throws GadgetException {
-    return doCachedFetch(locale, ignoreCache);
+    ttlCache.addElement(url, bundle, response.getCacheExpiration());
+    return bundle;
   }
 
   @Inject
@@ -78,7 +93,7 @@ public class BasicMessageBundleFactory extends AbstractMessageBundleFactory {
                                    @Named("shindig.message-bundle.cache.capacity")int capacity,
                                    @Named("shindig.message-bundle.cache.minTTL")long minTtl,
                                    @Named("shindig.message-bundle.cache.maxTTL")long maxTtl) {
-    super(cacheProvider, capacity, minTtl, maxTtl);
     this.fetcher = fetcher;
+    this.ttlCache = new TtlCache<URI, MessageBundle>(cacheProvider, capacity, minTtl, maxTtl);
   }
 }
