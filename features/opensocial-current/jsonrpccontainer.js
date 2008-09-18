@@ -132,11 +132,14 @@ JsonRpcContainer.prototype.requestData = function(dataRequest, callback) {
     "POST_DATA" : gadgets.json.stringify(jsonBatchData)
   };
 
-  gadgets.io.makeNonProxiedRequest(
-      this.baseUrl_ + "/rpc?st=" +
+  this.sendRequest(this.baseUrl_ + "/rpc?st=" +
       encodeURIComponent(shindig.auth.getSecurityToken()),
       sendResponse, makeRequestParams, "application/json");
 };
+
+JsonRpcContainer.prototype.sendRequest = function(relativeUrl, callback, params, contentType) {
+  gadgets.io.makeNonProxiedRequest(relativeUrl, callback, params, contentType);
+}
 
 JsonRpcContainer.generateErrorResponse = function(result, requestObjects,
     callback) {
