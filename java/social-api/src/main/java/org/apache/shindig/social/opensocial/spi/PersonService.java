@@ -30,9 +30,31 @@ import java.util.concurrent.Future;
 
 public interface PersonService {
 
+  /**
+   * When used will sort people by the container's definition of top friends. Note that both the
+   * sort order and the filter are required to deliver a topFriends response. The PersonService
+   * implementation should take this into account when delivering a topFriends response.
+   */
   public static String TOP_FRIENDS_SORT = "topFriends";
+  /**
+   * Retrieves only the user's top friends. The meaning of top and how many top is is defined by the
+   * PersonService implementation.
+   */
   public static String TOP_FRIENDS_FILTER = "topFriends";
+  /**
+   * Retrieves all friends with any data for this application.
+   * TODO: how is this application defined
+   */
   public static String HAS_APP_FILTER = "hasApp";
+  /**
+   * Retrieves all friends. (ie no filter)
+   */
+  public static String ALL_FILTER = "all";
+  /**
+   * Will filter the people requested by checking if they are friends with the given idSpec. The
+   * filter value will be set to the userId of the target friend.
+   */
+  public static String IS_WITH_FRIENDS_FILTER = "isFriendsWith";
 
   public enum SortOrder {
     ascending, descending
