@@ -36,11 +36,8 @@ import org.apache.shindig.gadgets.spec.GadgetSpec;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 
-import org.easymock.IMocksControl;
-import org.easymock.classextension.EasyMock;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.junit.Before;
 import org.junit.Test;
 
 import java.net.URI;
@@ -188,7 +185,7 @@ public class HttpPreloaderTest {
   }
 
   private static class RecordingHttpFetcher implements HttpFetcher {
-    private List<HttpRequest> requests = Lists.newArrayList();
+    private final List<HttpRequest> requests = Lists.newArrayList();
 
     public HttpResponse fetch(HttpRequest request) {
       requests.add(request);
