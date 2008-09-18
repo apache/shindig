@@ -17,7 +17,6 @@
  */
 package org.apache.shindig.gadgets;
 
-import org.apache.shindig.common.cache.CacheProvider;
 import org.apache.shindig.gadgets.spec.GadgetSpec;
 import org.apache.shindig.gadgets.spec.LocaleSpec;
 import org.apache.shindig.gadgets.spec.MessageBundle;
@@ -29,15 +28,7 @@ import java.net.URI;
  * Core implementation of MessageBundleFactory that ensures proper MessageBundle creation and
  * delegates caching and network retrieval to concreate implementations.
  */
-public abstract class AbstractMessageBundleFactory
-    extends CachingWebRetrievalFactory<MessageBundle, LocaleSpec, URI>
-    implements MessageBundleFactory {
-  
-  protected AbstractMessageBundleFactory(CacheProvider cacheProvider,
-      int capacity, long minTtl, long maxTtl) {
-    super(cacheProvider, capacity, minTtl, maxTtl);
-  }
-  
+public abstract class AbstractMessageBundleFactory implements MessageBundleFactory {
   private static final Locale ALL_ALL = new Locale("all", "ALL");
 
   public MessageBundle getBundle(GadgetSpec spec, Locale locale, boolean ignoreCache)
