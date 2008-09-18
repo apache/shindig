@@ -26,6 +26,7 @@ import net.oauth.OAuthValidator;
 import net.oauth.SimpleOAuthValidator;
 import net.oauth.signature.RSA_SHA1;
 
+import org.apache.commons.codec.binary.Base64;
 import org.apache.shindig.common.crypto.Crypto;
 import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.http.HttpFetcher;
@@ -34,6 +35,9 @@ import org.apache.shindig.gadgets.http.HttpResponse;
 import org.apache.shindig.gadgets.http.HttpResponseBuilder;
 import org.apache.shindig.gadgets.oauth.AccessorInfo.OAuthParamLocation;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.InputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -44,6 +48,8 @@ import java.util.Set;
 public class FakeOAuthServiceProvider implements HttpFetcher {
 
   public static final String BODY_ECHO_HEADER = "X-Echoed-Body";
+
+  public static final String RAW_BODY_ECHO_HEADER = "X-Echoed-Raw-Body";
 
   public static final String AUTHZ_ECHO_HEADER = "X-Echoed-Authz";
 
@@ -277,21 +283,32 @@ public class FakeOAuthServiceProvider implements HttpFetcher {
     }
     
     // Parse body
-    String body = request.getPostBodyAsString();
     if (request.getMethod().equals("POST")) {
       String type = request.getHeader("Content-Type");
-      if (!"application/x-www-form-urlencoded".equals(type)) {
-        throw new RuntimeException("Wrong content-type header: " + type);
-      }
-      info.body = body;
-      params.addAll(OAuth.decodeForm(request.getPostBodyAsString()));
-    }
-    
-    // If we're not configured to pass oauth parameters in the post body, double check
-    // that they didn't end up there.
-    if (!validParamLocations.contains(OAuthParamLocation.POST_BODY)) {
-      if (body.contains("oauth_")) {
-        throw new RuntimeException("Found unexpected post body data" + body);
+      if ("application/x-www-form-urlencoded".equals(type)) {
+        String body = request.getPostBodyAsString();
+        info.body = body;
+        params.addAll(OAuth.decodeForm(request.getPostBodyAsString()));
+        // If we're not configured to pass oauth parameters in the post body, double check
+        // that they didn't end up there.
+        if (!validParamLocations.contains(OAuthParamLocation.POST_BODY)) {
+          if (body.contains("oauth_")) {
+            throw new RuntimeException("Found unexpected post body data" + body);
+          }
+        }
+      } else {
+        try {
+          InputStream is = request.getPostBody();
+          ByteArrayOutputStream baos = new ByteArrayOutputStream();
+          byte[] buf = new byte[1024];
+          int read;
+          while ((read = is.read(buf, 0, buf.length)) != -1) {
+            baos.write(buf, 0, read);
+          }
+          info.rawBody = baos.toByteArray();
+        } catch (IOException e) {
+          throw new RuntimeException(e);
+        }
       }
     }
     
@@ -307,6 +324,7 @@ public class FakeOAuthServiceProvider implements HttpFetcher {
     public OAuthMessage message;
     public String aznHeader;
     public String body;
+    public byte[] rawBody;
   }
 
   /**
@@ -488,6 +506,9 @@ public class FakeOAuthServiceProvider implements HttpFetcher {
     }
     if (info.body != null) {
       resp.setHeader(BODY_ECHO_HEADER, info.body);
+    }
+    if (info.rawBody != null) {
+      resp.setHeader(RAW_BODY_ECHO_HEADER, new String(Base64.encodeBase64(info.rawBody)));
     }
     return resp.create();
   }
