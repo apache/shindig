@@ -37,7 +37,6 @@ import javax.persistence.EntityManager;
 import javax.persistence.Query;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.Future;
@@ -57,7 +56,7 @@ public class PersonServiceDb implements PersonService {
   /**
    * Create the PersonServiceDb, injecting an entity manager that is configured with the social
    * model.
-   * 
+   *
    * @param entityManager the entity manager containing the social model.
    */
   @Inject
@@ -67,107 +66,63 @@ public class PersonServiceDb implements PersonService {
 
   /**
    * {@inheritDoc}
-   * 
-   * @see org.apache.shindig.social.opensocial.spi.PersonService#getPeople(java.util.Set,
-   *      org.apache.shindig.social.opensocial.spi.GroupId,
-   *      org.apache.shindig.social.opensocial.spi.CollectionOptions, java.util.Set,
-   *      org.apache.shindig.auth.SecurityToken)
    */
-  public Future<RestfulCollection<Person>> getPeople(final Set<UserId> userIds,
-      final GroupId groupId, final CollectionOptions collectionOptions, final Set<String> fields,
-      final SecurityToken token) throws SocialSpiException {
+  public Future<RestfulCollection<Person>> getPeople(Set<UserId> userIds,
+       GroupId groupId, CollectionOptions collectionOptions, Set<String> fields,
+       SecurityToken token) throws SocialSpiException {
     // for each user id get the filtered userid using the token and then, get the users identified
     // by the group id, the final set is filtered
     // using the collectionOptions and return the fields requested.
 
     // not dealing with the collection options at the moment, and not the fields because they are
-    // either lazy or at no extra costs, the consumer will either access the proeprties or not
-
-    // sanitize the list to get the uid's and remove duplicates
-    HashMap<String, String> userIdMap = new HashMap<String, String>();
-    List<String> paramList = new ArrayList<String>();
+    // either lazy or at no extra costs, the consumer will either access the properties or not
     List<Person> plist = null;
-    for (UserId u : userIds) {
-      try {
-        String uid = u.getUserId(token);
-        if (uid != null) {
-          userIdMap.put(uid, uid);
-          paramList.add(uid);
-        }
-      } catch (IllegalStateException istate) {
-        // ignore the user id.
-      }
-    }
+    int lastPos = 1;
+
+    StringBuilder sb = new StringBuilder();
+    // sanitize the list to get the uid's and remove duplicates
+    List<String> paramList = SPIUtils.getUserList(userIds, token);
     // select the group Id as this will drive the query
     switch (groupId.getType()) {
-    case all: {
+    case all:
       // select all contacts
-      StringBuilder sb = new StringBuilder();
       sb.append(PersonDb.JPQL_FINDALLPERSON);
-      addInClause(sb, "id", paramList.size());
-      int filterPos = addFilterClause(sb, PersonDb.getFilterCapability(), collectionOptions,
-          paramList.size() + 1);
-      if (filterPos > 0) {
-        paramList.add(collectionOptions.getFilterValue());
-      }
-      addOrderClause(sb, collectionOptions);
-
-      plist = getListQuery(sb.toString(), paramList, collectionOptions);
-    }
-    case friends: {
+      lastPos = JPQLUtils.addInClause(sb, "p", "id", lastPos, paramList.size());
+      break;
+    case friends:
       // select all friends (subset of contacts)
-      StringBuilder sb = new StringBuilder();
       sb.append(PersonDb.JPQL_FINDPERSON_BY_FRIENDS);
-      addInClause(sb, "id", paramList.size());
-      int filterPos = addFilterClause(sb, PersonDb.getFilterCapability(), collectionOptions,
-          paramList.size() + 1);
-      if (filterPos > 0) {
-        paramList.add(collectionOptions.getFilterValue());
-      }
-      addOrderClause(sb, collectionOptions);
-
-      plist = getListQuery(sb.toString(), paramList, collectionOptions);
-    }
-    case groupId: {
+      lastPos = JPQLUtils.addInClause(sb, "p", "id", lastPos, paramList.size());
+      break;
+    case groupId:
       // select those in the group
-      StringBuilder sb = new StringBuilder();
       sb.append(PersonDb.JPQL_FINDPERSON_BY_GROUP);
-      List<Object> params = new ArrayList<Object>();
-      params.add(groupId.getGroupId());
-      params.addAll(paramList);
-
-      addInClause(sb, "id", paramList.size());
-      int filterPos = addFilterClause(sb, PersonDb.getFilterCapability(), collectionOptions, params
-          .size() + 1);
-      if (filterPos > 0) {
-        params.add(collectionOptions.getFilterValue());
-      }
-      addOrderClause(sb, collectionOptions);
-
-      plist = getListQuery(sb.toString(), params, collectionOptions);
-    }
+      lastPos = JPQLUtils.addInClause(sb, "p", "id", lastPos, paramList.size());
+      sb.append(" and g.id = ?").append(lastPos);
+      lastPos++;
+      break;
     case deleted:
       // ???
       break;
-    case self: {
+    case self:
       // select self
-      StringBuilder sb = new StringBuilder();
       sb.append(PersonDb.JPQL_FINDPERSON);
-      addInClause(sb, "id", paramList.size());
-      int filterPos = addFilterClause(sb, PersonDb.getFilterCapability(), collectionOptions,
-          paramList.size() + 1);
-      if (filterPos > 0) {
-        paramList.add(collectionOptions.getFilterValue());
-      }
-      addOrderClause(sb, collectionOptions);
-
-      plist = getListQuery(sb.toString(), paramList, collectionOptions);
-
-    }
+      lastPos = JPQLUtils.addInClause(sb, "p", "id", lastPos, paramList.size());
+      break;
     default:
       throw new SocialSpiException(ResponseError.BAD_REQUEST, "Group ID not recognized");
 
     }
+
+
+    int filterPos = addFilterClause(sb, PersonDb.getFilterCapability(), collectionOptions,
+        lastPos);
+    if (filterPos > 0) {
+      paramList.add(collectionOptions.getFilterValue());
+    }
+    addOrderClause(sb, collectionOptions);
+
+    plist = JPQLUtils.getListQuery(entiyManager, sb.toString(), paramList, collectionOptions);
 
     if (plist == null) {
       plist = new ArrayList<Person>();
@@ -180,9 +135,6 @@ public class PersonServiceDb implements PersonService {
 
   /**
    * {@inheritDoc}
-   * 
-   * @see org.apache.shindig.social.opensocial.spi.PersonService#getPerson(org.apache.shindig.social.opensocial.spi.UserId,
-   *      java.util.Set, org.apache.shindig.auth.SecurityToken)
    */
   public Future<Person> getPerson(UserId id, Set<String> fields, SecurityToken token)
       throws SocialSpiException {
@@ -199,46 +151,11 @@ public class PersonServiceDb implements PersonService {
     return ImmediateFuture.newInstance(person);
   }
 
-  /**
-   * Perform a JPAQ, and return a typed list.
-   * 
-   * @param <T> The type of list
-   * @param query the JPQL Query with positional parameters
-   * @param parametersValues a list of parameters
-   * @param collectionOptions the options used for paging.
-   * @return a typed list of objects
-   */
-  protected <T> List<T> getListQuery(String query, List<?> parametersValues,
-      CollectionOptions collectionOptions) {
-    Query q = entiyManager.createQuery(query);
-    int i = 1;
-    for (Object p : parametersValues) {
-      q.setParameter(i, p);
-      i++;
-    }
-    q.setFirstResult(collectionOptions.getFirst());
-    q.setMaxResults(collectionOptions.getFirst() + collectionOptions.getMax());
-    return q.getResultList();
-  }
 
-  /**
-   * Append an in clause to the query builder buffer, using positional parameters.
-   * 
-   * @param sb the query builder buffer
-   * @param inField the infield name (assumes that this is bound to a p. object)
-   * @param nfields the number of infields
-   */
-  private void addInClause(StringBuilder sb, String inField, int nfields) {
-    sb.append("p.").append(inField).append(" in (");
-    for (int i = 1; i <= nfields; i++) {
-      sb.append(" ?").append(i).append(" ");
-    }
-    sb.append(")");
-  }
 
   /**
    * Add a filter clause specified by the collection options.
-   * 
+   *
    * @param sb the query builder buffer
    * @param collectionOptions the options
    * @param lastPos the last positional parameter that was used so far in the query
@@ -255,20 +172,24 @@ public class PersonServiceDb implements PersonService {
       if (FilterSpecification.isSpecial(filter)) {
         if (PersonService.HAS_APP_FILTER.equals(filter)) {
           // Retrieves all friends with any data for this application.
-          // TODO: how do we determine which application is being talked about
+          // TODO: how do we determine which application is being talked about,
+          // the assumption below is wrong
+          filterPos = lastPos + 1;
+          sb.append(" f.application_id  = ?").append(filterPos);
         } else if (PersonService.TOP_FRIENDS_FILTER.equals(filter)) {
           // Retrieves only the user's top friends, this is defined here by the implementation
           // and there is an assumption that the sort order has already been applied.
           // to do this we need to modify the collections options
           // there will only ever b x friends in the list and it will only ever start at 1
+
           collectionOptions.setFirst(1);
           collectionOptions.setMax(20);
-          
+
         } else if (PersonService.ALL_FILTER.equals(filter)) {
            // select all, ie no filtering
         } else if (PersonService.IS_WITH_FRIENDS_FILTER.equals(filter)) {
-          // all matches must also be friends with the value of the filter.
-
+          filterPos = lastPos + 1;
+          sb.append(" f.friend  = ?").append(filterPos);
         }
       } else {
         sb.append("p.").append(filter);
@@ -277,6 +198,7 @@ public class PersonServiceDb implements PersonService {
           filterPos = lastPos + 1;
           sb.append(" like ").append(" ?").append(filterPos);
           filterValue = "%" + filterValue + "%";
+          collectionOptions.setFilter(filterValue);
           break;
         case equals:
           filterPos = lastPos + 1;
@@ -289,6 +211,7 @@ public class PersonServiceDb implements PersonService {
           filterPos = lastPos + 1;
           sb.append(" like ").append(" ?").append(filterPos);
           filterValue = "%" + filterValue + "%";
+          collectionOptions.setFilter(filterValue);
           break;
         }
       }
@@ -298,7 +221,7 @@ public class PersonServiceDb implements PersonService {
 
   /**
    * Add an order clause to the query string.
-   * 
+   *
    * @param sb the buffer for the query string
    * @param collectionOptions the options to use for the order.
    */
