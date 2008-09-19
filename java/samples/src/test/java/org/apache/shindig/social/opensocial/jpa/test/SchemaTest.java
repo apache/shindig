@@ -40,7 +40,7 @@ public class SchemaTest {
   @BeforeClass
   public static void config() {
     Bootstrap b = new Bootstrap("org.apache.derby.jdbc.EmbeddedDriver",
-        "jdbc:derby:testdb;create=true", "sa", "", "1", "1");
+        "jdbc:derby:target/testdb;create=true", "sa", "", "1", "1");
     // Bootstrap b = new
     // Bootstrap("com.mysql.jdbc.Driver",
     // "jdbc:mysql://localhost/sakaikernel?useUnicode=true&amp;characterEncoding=UTF-8",
