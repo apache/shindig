@@ -16,21 +16,17 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.shindig.gadgets.servlet;
+package org.apache.shindig.gadgets;
 
 import static org.easymock.EasyMock.expect;
 
+import org.apache.shindig.gadgets.spec.GadgetSpec;
+
 import com.google.common.collect.Maps;
 
-import junitx.framework.StringAssert;
-
 import org.apache.commons.lang.StringEscapeUtils;
-import org.apache.shindig.gadgets.Gadget;
-import org.apache.shindig.gadgets.GadgetContext;
-import org.apache.shindig.gadgets.GadgetTestFixture;
-import org.apache.shindig.gadgets.JsLibrary;
-import org.apache.shindig.gadgets.UserPrefs;
-import org.apache.shindig.gadgets.spec.GadgetSpec;
+
+import junitx.framework.StringAssert;
 
 import java.net.URI;
 import java.util.ArrayList;
@@ -40,9 +36,9 @@ import java.util.Locale;
 import java.util.Map;
 
 /**
- * Tests for UrlGenerator.
+ * Tests for DefaultUrlGenerator.
  */
-public class UrlGeneratorTest extends GadgetTestFixture {
+public class DefaultUrlGeneratorTest extends GadgetTestFixture {
   private final static String IFR_PREFIX = "shindig/eye-frame?";
   private final static String JS_PREFIX = "get-together/livescript/";
   private final static String SPEC_URL = "http://example.org/gadget.xml";
@@ -58,11 +54,11 @@ public class UrlGeneratorTest extends GadgetTestFixture {
   private final static int MODULE_ID = 3435;
 
   private final GadgetContext context = mock(GadgetContext.class);
-  private UrlGenerator realUrlGenerator;
+  private DefaultUrlGenerator realUrlGenerator;
 
   @Override
   public void setUp() throws Exception {
-    realUrlGenerator = new UrlGenerator(IFR_PREFIX, JS_PREFIX, registry);
+    realUrlGenerator = new DefaultUrlGenerator(IFR_PREFIX, JS_PREFIX, registry);
 
     expect(context.getContainer()).andReturn(CONTAINER).anyTimes();
     expect(context.getUrl()).andReturn(URI.create(SPEC_URL)).anyTimes();
@@ -151,7 +147,7 @@ public class UrlGeneratorTest extends GadgetTestFixture {
     GadgetSpec spec = new GadgetSpec(URI.create(SPEC_URL), xml);
     replay();
     Gadget gadget = new Gadget(context, spec, Collections.<JsLibrary>emptyList(), containerConfig, null);
-    
+
     URI iframeUrl = URI.create(realUrlGenerator.getIframeUrl(gadget));
 
     assertEquals(TYPE_URL_HREF_HOST, iframeUrl.getAuthority());

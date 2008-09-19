@@ -16,16 +16,10 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.shindig.gadgets.servlet;
+package org.apache.shindig.gadgets;
 
 import org.apache.shindig.common.util.HashUtil;
 import org.apache.shindig.common.util.Utf8UrlCoder;
-import org.apache.shindig.gadgets.Gadget;
-import org.apache.shindig.gadgets.GadgetContext;
-import org.apache.shindig.gadgets.GadgetFeature;
-import org.apache.shindig.gadgets.GadgetFeatureRegistry;
-import org.apache.shindig.gadgets.JsLibrary;
-import org.apache.shindig.gadgets.UserPrefs;
 import org.apache.shindig.gadgets.spec.GadgetSpec;
 import org.apache.shindig.gadgets.spec.UserPref;
 import org.apache.shindig.gadgets.spec.View;
@@ -38,32 +32,38 @@ import java.util.Collection;
 import java.util.regex.Pattern;
 
 /**
- * Generates urls for various public entrypoints
+ * Default url generator. Produces js urls that include checksums for cache-busting.
+ *
+ * TODO: iframe and js url generation are two distinct things, and should probably be different
+ * interfaces.
  */
 @Singleton
-public class UrlGenerator {
-
+public class DefaultUrlGenerator implements UrlGenerator {
+  private final static Pattern ALLOWED_FEATURE_NAME = Pattern.compile("[0-9a-zA-Z\\.\\-]+");
   private final String jsPrefix;
   private final String iframePrefix;
   private final String jsChecksum;
-  private final static Pattern ALLOWED_FEATURE_NAME
-      = Pattern.compile("[0-9a-zA-Z\\.\\-]+");
 
-  /**
-   * @param features The list of features that js is needed for.
-   * @return The url for the bundled javascript that includes all referenced
-   *    feature libraries.
-   */
-  public String getBundledJsUrl(Collection<String> features,
-      GadgetContext context) {
+  @Inject
+  public DefaultUrlGenerator(@Named("shindig.urls.iframe.prefix") String iframePrefix,
+                             @Named("shindig.urls.js.prefix") String jsPrefix,
+                             GadgetFeatureRegistry registry) {
+    this.iframePrefix = iframePrefix;
+    this.jsPrefix = jsPrefix;
+
+    StringBuilder jsBuf = new StringBuilder();
+    for (GadgetFeature feature : registry.getAllFeatures()) {
+      for (JsLibrary library : feature.getJsLibraries(null, null)) {
+        jsBuf.append(library.getContent());
+      }
+    }
+    jsChecksum = HashUtil.checksum(jsBuf.toString().getBytes());
+  }
+
+  public String getBundledJsUrl(Collection<String> features, GadgetContext context) {
     return jsPrefix + getBundledJsParam(features, context);
   }
 
-  /**
-   * @param features
-   * @param context
-   * @return The bundled js parameter for type=url gadgets.
-   */
   public String getBundledJsParam(Collection<String> features, GadgetContext context) {
     StringBuilder buf = new StringBuilder();
     boolean first = false;
@@ -87,11 +87,8 @@ public class UrlGenerator {
   }
 
   /**
-   * Generates iframe urls for meta data service.
-   * Use this rather than generating your own urls by hand.
-   *
-   * @param gadget
-   * @return The generated iframe url.
+   * TODO: This is in need of a rewrite most likely. It doesn't even take locked domain into
+   * consideration!
    */
   public String getIframeUrl(Gadget gadget) {
     StringBuilder buf = new StringBuilder();
@@ -152,21 +149,5 @@ public class UrlGenerator {
       }
 
     return buf.toString();
-  }
-
-  @Inject
-  public UrlGenerator(@Named("shindig.urls.iframe.prefix") String iframePrefix,
-                      @Named("shindig.urls.js.prefix") String jsPrefix,
-                      GadgetFeatureRegistry registry) {
-    this.iframePrefix = iframePrefix;
-    this.jsPrefix = jsPrefix;
-
-    StringBuilder jsBuf = new StringBuilder();
-    for (GadgetFeature feature : registry.getAllFeatures()) {
-      for (JsLibrary library : feature.getJsLibraries(null, null)) {
-        jsBuf.append(library.getContent());
-      }
-    }
-    jsChecksum = HashUtil.checksum(jsBuf.toString().getBytes());
   }
 }
