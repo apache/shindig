@@ -26,6 +26,7 @@ import org.apache.shindig.gadgets.MutableContent;
 import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.http.HttpResponse;
 import org.apache.shindig.gadgets.rewrite.ContentRewriter;
+import org.apache.shindig.gadgets.rewrite.RewriterResults;
 import org.apache.shindig.gadgets.spec.LocaleSpec;
 import org.apache.shindig.gadgets.spec.MessageBundle;
 
@@ -68,17 +69,19 @@ public class RenderingContentRewriter implements ContentRewriter {
     this.messageBundleFactory = messageBundleFactory;
   }
 
-  public void rewrite(HttpRequest request, HttpResponse original, MutableContent content) {
+  public RewriterResults rewrite(HttpRequest request, HttpResponse original,
+      MutableContent content) {
     throw new UnsupportedOperationException();
   }
 
-  public void rewrite(Gadget gadget) {
+  public RewriterResults rewrite(Gadget gadget) {
     try {
       GadgetContent content = createGadgetContent(gadget);
       insertJavascriptLibraries(gadget, content);
       injectMessageBundles(gadget, content);
       // TODO: Use preloads when RenderedGadget gets promoted to Gadget.
       finalizeDocument(gadget, content);
+      return RewriterResults.notCacheable();
     } catch (GadgetException e) {
       // TODO: Rewriter interface needs to be modified to handle GadgetException or
       // RewriterException or something along those lines.

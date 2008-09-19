@@ -67,7 +67,7 @@ public class RenderingContentRewriterTest {
 
     control.replay();
 
-    rewriter.rewrite(gadget);
+    assertEquals(0, rewriter.rewrite(gadget).getCacheTtl());
 
     Matcher matcher = EXPECTED_DOCUMENT_PATTERN.matcher(gadget.getContent());
     assertTrue("Output is not valid HTML.", matcher.matches());
