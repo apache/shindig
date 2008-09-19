@@ -22,6 +22,7 @@ import org.apache.shindig.gadgets.Gadget;
 import org.apache.shindig.gadgets.GadgetContext;
 import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.GadgetServer;
+import org.apache.shindig.gadgets.DefaultUrlGenerator;
 import org.apache.shindig.gadgets.spec.GadgetSpec;
 import org.apache.shindig.gadgets.spec.LinkSpec;
 import org.apache.shindig.gadgets.spec.ModulePrefs;
@@ -52,7 +53,7 @@ public class JsonRpcHandler {
 
   private final ExecutorService executor;
   private final GadgetServer server;
-  private final UrlGenerator urlGenerator;
+  private final DefaultUrlGenerator urlGenerator;
 
   /**
    * Processes a JSON request.
@@ -221,7 +222,7 @@ public class JsonRpcHandler {
 
   @Inject
   public JsonRpcHandler(ExecutorService executor, GadgetServer server,
-      UrlGenerator iframeUrlGenerator) {
+      DefaultUrlGenerator iframeUrlGenerator) {
     this.executor = executor;
     this.server = server;
     this.urlGenerator = iframeUrlGenerator;

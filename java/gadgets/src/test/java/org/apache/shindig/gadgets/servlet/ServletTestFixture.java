@@ -24,6 +24,7 @@ import static junitx.framework.ComparableAssert.assertLesser;
 import org.apache.shindig.common.util.DateUtil;
 import org.apache.shindig.gadgets.GadgetTestFixture;
 import org.apache.shindig.gadgets.LockedDomainService;
+import org.apache.shindig.gadgets.DefaultUrlGenerator;
 
 import org.apache.commons.lang.StringUtils;
 
@@ -42,7 +43,7 @@ public class ServletTestFixture extends GadgetTestFixture {
   public final HttpServletResponseRecorder recorder = new HttpServletResponseRecorder(response);
   public final GadgetRenderingTask gadgetRenderer;
   public final JsonRpcHandler jsonRpcHandler;
-  public final UrlGenerator urlGenerator = mock(UrlGenerator.class);
+  public final DefaultUrlGenerator urlGenerator = mock(DefaultUrlGenerator.class);
   public final LockedDomainService lockedDomainService = mock(LockedDomainService.class);
 
   private final long testStartTime = timeSource.currentTimeMillis();
