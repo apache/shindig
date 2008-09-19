@@ -18,6 +18,8 @@
 
 package org.apache.shindig.common.xml;
 
+import com.google.common.collect.Lists;
+
 import org.w3c.dom.Element;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
@@ -30,13 +32,19 @@ import java.io.IOException;
 import java.io.StringReader;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import javax.xml.XMLConstants;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
+/**
+ * Utility class for simplifying parsing of xml documents. Documents are not validated, and
+ * loading of external files (xinclude, external entities, DTDs, etc.) are disabled.
+ */
 public class XmlUtil {
   private static final Logger LOG = Logger.getLogger(XmlUtil.class.getName());
   // Handles xml errors so that they're not logged to stderr.
@@ -52,6 +60,57 @@ public class XmlUtil {
       LOG.log(Level.INFO, "XmlUtil warning", exception);
     }
   };
+
+  private static final List<DocumentBuilder> builderPool = Lists.newArrayList();
+  private static boolean canUsePooling = false;
+
+  private static final DocumentBuilderFactory builderFactory
+      = DocumentBuilderFactory.newInstance();
+  static {
+    // Disable various insecure and/or expensive options.
+    builderFactory.setValidating(false);
+
+    // Can't disable doctypes entirely because they're usually harmless. External entity
+    // resolution, however, is both expensive and insecure.
+    try {
+      builderFactory.setAttribute(
+          "http://xml.org/sax/features/external-general-entities", false);
+    } catch (IllegalArgumentException e) {
+      // Not supported by some very old parsers.
+    }
+
+    try {
+      builderFactory.setAttribute(
+          "http://xml.org/sax/features/external-parameter-entities", false);
+    } catch (IllegalArgumentException e) {
+      // Not supported by some very old parsers.
+    }
+
+    try {
+      builderFactory.setAttribute(
+          "http://apache.org/xml/features/nonvalidating/load-external-dtd", false);
+    } catch (IllegalArgumentException e) {
+      // Only supported by Apache's XML parsers.
+    }
+
+    try {
+      builderFactory.setAttribute(XMLConstants.FEATURE_SECURE_PROCESSING, true);
+    } catch (IllegalArgumentException e) {
+      // Not supported by older parsers.
+    }
+
+    try {
+      DocumentBuilder builder = builderFactory.newDocumentBuilder();
+      builder.reset();
+      canUsePooling = true;
+    } catch (UnsupportedOperationException e) {
+      // Only supported by newer parsers (xerces 2.8.x+ for instance).
+      canUsePooling = false;
+    } catch (ParserConfigurationException e) {
+      // Only supported by newer parsers (xerces 2.8.x+ for instance).
+      canUsePooling = false;
+    }
+  }
 
   private XmlUtil() {}
 
@@ -192,6 +251,39 @@ public class XmlUtil {
   }
 
   /**
+   * Fetch a builder from the pool, creating a new one only if necessary.
+   */
+  private static DocumentBuilder getBuilderFromPool() throws ParserConfigurationException {
+    DocumentBuilder builder;
+    if (canUsePooling) {
+      synchronized (builderPool) {
+        int size = builderPool.size();
+        if (size > 0) {
+          builder = builderPool.remove(size - 1);
+          builder.reset();
+        } else {
+          builder = builderFactory.newDocumentBuilder();
+        }
+      }
+    } else {
+      builder = builderFactory.newDocumentBuilder();
+    }
+    builder.setErrorHandler(errorHandler);
+    return builder;
+  }
+
+  /**
+   * Return a builder to the pool, allowing it to be re-used by future operations.
+   */
+  private static void returnBuilderToPool(DocumentBuilder builder) {
+    if (canUsePooling) {
+      synchronized (builderPool) {
+        builderPool.add(builder);
+      }
+    }
+  }
+
+  /**
    * Attempts to parse the input xml into a single element.
    * @param xml
    * @return The document object
@@ -199,13 +291,14 @@ public class XmlUtil {
    */
   public static Element parse(String xml) throws XmlException {
     try {
-      DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+      DocumentBuilder builder = getBuilderFromPool();
       InputSource is = new InputSource(new StringReader(xml.trim()));
-      DocumentBuilder builder = factory.newDocumentBuilder();
-      builder.setErrorHandler(errorHandler);
-      return builder.parse(is).getDocumentElement();
+      Element element = builder.parse(is).getDocumentElement();
+      returnBuilderToPool(builder);
+      return element;
     } catch (SAXParseException e) {
-      throw new XmlException(e.getMessage()+" At: ("+e.getLineNumber()+ ',' +e.getColumnNumber()+ ')', e);
+      throw new XmlException(
+          e.getMessage() + " At: (" + e.getLineNumber() + ',' + e.getColumnNumber() + ')', e);
     } catch (SAXException e) {
       throw new XmlException(e);
     } catch (ParserConfigurationException e) {
