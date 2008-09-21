@@ -24,17 +24,17 @@ import org.apache.shindig.common.ContainerConfig;
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.gadgets.Gadget;
 import org.apache.shindig.gadgets.GadgetContext;
+import org.apache.shindig.gadgets.JsLibrary;
 import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.http.HttpResponse;
 import org.apache.shindig.gadgets.spec.GadgetSpec;
-
-import edu.emory.mathcs.backport.java.util.Collections;
 
 import org.easymock.classextension.EasyMock;
 import org.easymock.classextension.IMocksControl;
 import org.junit.Test;
 
 import java.net.URI;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -47,13 +47,12 @@ public class DefaultContentRewriterRegistryTest {
   private final ContainerConfig config = control.createMock(ContainerConfig.class);
 
   @Test
-  @SuppressWarnings("unchecked")
   public void rewriteGadget() throws Exception {
     String body = "Hello, world";
     String xml = "<Module><ModulePrefs title=''/><Content>" + body + "</Content></Module>";
     GadgetSpec spec = new GadgetSpec(URI.create("#"), xml);
     GadgetContext context = new GadgetContext();
-    Gadget gadget = new Gadget(context, spec, Collections.emptyList(), config, null);
+    Gadget gadget = new Gadget(context, spec, new ArrayList<JsLibrary>(), config, null);
 
     control.replay();
 
