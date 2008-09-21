@@ -30,7 +30,6 @@ import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.http.HttpResponse;
 import org.apache.shindig.gadgets.http.HttpResponseBuilder;
-import org.apache.shindig.gadgets.rewrite.DefaultContentRewriterRegistry;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -48,8 +47,8 @@ public class MakeRequestHandlerTest extends ServletTestFixture {
   private static final String RESPONSE_BODY = "makeRequest response body";
   private static final SecurityToken DUMMY_TOKEN = new FakeGadgetToken();
 
-  private final MakeRequestHandler handler = new MakeRequestHandler(fetcherFactory,
-      new DefaultContentRewriterRegistry(rewriter, null));
+  private final MakeRequestHandler handler
+      = new MakeRequestHandler(fetcherFactory, rewriterRegistry);
 
   private void expectGetAndReturnBody(String response) throws Exception {
     expectGetAndReturnBody(AuthType.NONE, response);
@@ -359,7 +358,7 @@ public class MakeRequestHandlerTest extends ServletTestFixture {
     assertEquals(RESPONSE_BODY, results.getString("foo"));
     assertTrue(rewriter.responseWasRewritten());
   }
-  
+
   public void testSetCookiesReturned() throws Exception {
     HttpRequest internalRequest = new HttpRequest(REQUEST_URL);
     HttpResponse response = new HttpResponseBuilder()
@@ -367,7 +366,7 @@ public class MakeRequestHandlerTest extends ServletTestFixture {
         .addHeader("Set-Cookie", "foo=bar; Secure")
         .addHeader("Set-Cookie", "name=value")
         .create();
-    
+
     expect(fetcherFactory.fetch(internalRequest)).andReturn(response);
     replay();
 
@@ -381,14 +380,14 @@ public class MakeRequestHandlerTest extends ServletTestFixture {
     assertEquals("foo=bar; Secure", cookies.get(0));
     assertEquals("name=value", cookies.get(1));
   }
-  
+
   public void testLocationReturned() throws Exception {
     HttpRequest internalRequest = new HttpRequest(REQUEST_URL);
     HttpResponse response = new HttpResponseBuilder()
         .setResponse("foo".getBytes("UTF-8"))
         .addHeader("Location", "somewhere else")
         .create();
-    
+
     expect(fetcherFactory.fetch(internalRequest)).andReturn(response);
     replay();
 

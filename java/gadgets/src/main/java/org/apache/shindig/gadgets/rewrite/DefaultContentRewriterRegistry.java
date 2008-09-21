@@ -17,12 +17,6 @@
  */
 package org.apache.shindig.gadgets.rewrite;
 
-import com.google.inject.Inject;
-
-import java.util.Collections;
-import java.util.LinkedList;
-import java.util.List;
-
 import org.apache.shindig.gadgets.Gadget;
 import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.MutableContent;
@@ -31,68 +25,62 @@ import org.apache.shindig.gadgets.http.HttpResponse;
 import org.apache.shindig.gadgets.http.HttpResponseBuilder;
 import org.apache.shindig.gadgets.parse.GadgetHtmlParser;
 
+import com.google.inject.Inject;
+
+import java.util.Collections;
+import java.util.LinkedList;
+import java.util.List;
+
 /**
- * Registry into which is injected a single rewriter, which
- * bootstraps the rewriters list. This enables modularization
- * of {@code ContentRewriter} instances without changing
- * Guice injection bindings. The class also provides a method
- * for manipulating a simple list of rewriters. It does not
- * support caching of rewritten contents in any way.
+ * Basic registry -- just iterates over rewriters and invokes them sequentially.
+ *
+ * TODO: Make abstract and bind CachingContentRewriterRegistry as the default.
  */
 public class DefaultContentRewriterRegistry implements ContentRewriterRegistry {
-  private final List<ContentRewriter> rewriters;
-  private final GadgetHtmlParser htmlParser;
-  
+  protected final List<ContentRewriter> rewriters;
+  protected final GadgetHtmlParser htmlParser;
+
   @Inject
-  public DefaultContentRewriterRegistry(ContentRewriter firstRewriter,
+  public DefaultContentRewriterRegistry(List<? extends ContentRewriter> rewriters,
       GadgetHtmlParser htmlParser) {
-    this.rewriters = new LinkedList<ContentRewriter>();
-    this.htmlParser = htmlParser;
-    appendRewriter(firstRewriter);
-  }
-  
-  /** {@inheritDoc} */
-  public List<ContentRewriter> getRewriters() {
-    return Collections.unmodifiableList(rewriters);
-  }
-  
-  public void appendRewriter(ContentRewriter rewriter) {
-    if (rewriter != null) {
-      rewriters.add(rewriter);
+    if (rewriters == null) {
+      rewriters = Collections.emptyList();
     }
+    this.rewriters = new LinkedList<ContentRewriter>(rewriters);
+    this.htmlParser = htmlParser;
   }
-  
+
   /** {@inheritDoc} */
   public boolean rewriteGadget(Gadget gadget) throws GadgetException {
     String originalContent = gadget.getContent();
-    
+
     if (originalContent == null) {
       // Nothing to rewrite.
       return false;
     }
 
-    for (ContentRewriter rewriter : getRewriters()) {
+    for (ContentRewriter rewriter : rewriters) {
       rewriter.rewrite(gadget);
     }
-    
+
     return !originalContent.equals(gadget.getContent());
   }
-  
+
   /** {@inheritDoc} */
   public HttpResponse rewriteHttpResponse(HttpRequest req, HttpResponse resp) {
     MutableContent mc = new MutableContent(htmlParser);
     String originalContent = resp.getResponseAsString();
     mc.setContent(originalContent);
-    
-    for (ContentRewriter rewriter : getRewriters()) {
+
+    for (ContentRewriter rewriter : rewriters) {
       rewriter.rewrite(req, resp, mc);
     }
-    
+
     String rewrittenContent = mc.getContent();
     if (rewrittenContent.equals(originalContent)) {
       return resp;
     }
-    
+
     return new HttpResponseBuilder(resp).setResponseString(rewrittenContent).create();
   }
 

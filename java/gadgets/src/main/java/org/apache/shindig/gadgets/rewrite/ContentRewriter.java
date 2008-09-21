@@ -21,35 +21,28 @@ import org.apache.shindig.gadgets.Gadget;
 import org.apache.shindig.gadgets.MutableContent;
 import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.http.HttpResponse;
-import org.apache.shindig.gadgets.rewrite.lexer.DefaultContentRewriter;
-
-import com.google.inject.ImplementedBy;
 
 /**
  * Standard interface for content rewriters
  */
-
-@ImplementedBy(DefaultContentRewriter.class)
-
 public interface ContentRewriter {
 
   /**
    * Rewrite the original content located at source.
-   * 
+   *
    * @param request Originating request, as context.
    * @param original Original HTTP response, for context.
    * @param content Original content.
    * @return Object indicating results cacheability, or null (indicates not cacheable).
    */
-  public RewriterResults rewrite(HttpRequest request,
-      HttpResponse original, MutableContent content);
+  RewriterResults rewrite(HttpRequest request, HttpResponse original, MutableContent content);
 
   /**
    * Rewrite the gadget. The Gadget object's manipulation methods are used
    * for the bulk of this.
-   * 
+   *
    * @param gadget Gadget to rewrite.
    * @return Object indicating results cacheability, or null (indicates not cacheable).
    */
-  public RewriterResults rewrite(Gadget gadget);
+  RewriterResults rewrite(Gadget gadget);
 }
