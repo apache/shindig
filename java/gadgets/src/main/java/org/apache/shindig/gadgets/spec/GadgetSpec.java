@@ -21,6 +21,7 @@ import org.apache.shindig.common.util.HashUtil;
 import org.apache.shindig.common.xml.XmlException;
 import org.apache.shindig.common.xml.XmlUtil;
 import org.apache.shindig.gadgets.Substitutions;
+
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
@@ -41,7 +42,6 @@ import java.util.Map;
 public class GadgetSpec {
   public static final String DEFAULT_VIEW = "default";
   public static final Locale DEFAULT_LOCALE = new Locale("all", "ALL");
-  public static final String EXPIRATION_ATTRIB = "expiration";
 
   /**
    * The url for this gadget spec.
@@ -103,7 +103,7 @@ public class GadgetSpec {
   public Object getAttribute(String key) {
     return attributes.get(key);
   }
-  
+
   public void setAttribute(String key, Object o) {
     attributes.put(key, o);
   }

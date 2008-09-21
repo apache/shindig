@@ -29,7 +29,12 @@ import java.util.regex.Pattern;
 
 /**
  * Parser for the "content-rewrite" feature. The supported params are
- * include-urls,exclude-urls,include-tags. Default values are container specific
+ * include-urls,exclude-urls,include-tags. Default values are container specific.
+ *
+ * TODO: This really needs to be fixed, because it makes GadgetSpec mutable. It is *ONLY* needed
+ * by code in the rewrite package, and that code isn't even being used, and can't be used the way
+ * that they are currently written -- they require values from the gadget during construction, which
+ * are, of course, unavailable.
  */
 public class ContentRewriterFeature {
 
@@ -190,13 +195,13 @@ public class ContentRewriterFeature {
     }
     return fingerprint;
   }
-  
+
   public static class Factory {
     private final String defaultIncludeUrls;
     private final String defaultExcludeUrls;
     private final String defaultExpires;
     private final Set<String> defaultIncludeTags;
-    
+
     public Factory(String includeUrls, String excludeUrls, String expires,
         Set<String> includeTags) {
       defaultIncludeUrls = includeUrls;
@@ -204,7 +209,7 @@ public class ContentRewriterFeature {
       defaultExpires = expires;
       defaultIncludeTags = includeTags;
     }
-    
+
     public ContentRewriterFeature get(GadgetSpec spec) {
       ContentRewriterFeature rewriterFeature =
         (ContentRewriterFeature)spec.getAttribute("content-rewrite");

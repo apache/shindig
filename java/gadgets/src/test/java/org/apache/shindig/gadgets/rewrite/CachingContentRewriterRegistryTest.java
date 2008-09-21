@@ -17,80 +17,228 @@
  */
 package org.apache.shindig.gadgets.rewrite;
 
-import static org.easymock.EasyMock.expect;
-import static org.easymock.classextension.EasyMock.replay;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
-import org.apache.shindig.common.cache.DefaultCacheProvider;
+import org.apache.shindig.common.ContainerConfig;
+import org.apache.shindig.common.cache.Cache;
+import org.apache.shindig.common.cache.CacheProvider;
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.gadgets.Gadget;
 import org.apache.shindig.gadgets.GadgetContext;
+import org.apache.shindig.gadgets.MutableContent;
 import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.http.HttpResponse;
-import org.apache.shindig.gadgets.http.HttpResponseBuilder;
 import org.apache.shindig.gadgets.spec.GadgetSpec;
-import org.apache.shindig.gadgets.spec.View;
-import org.easymock.classextension.EasyMock;
 
-import junit.framework.TestCase;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
+
+import edu.emory.mathcs.backport.java.util.Collections;
+
+import org.easymock.classextension.EasyMock;
+import org.easymock.classextension.IMocksControl;
+import org.junit.Test;
 
 import java.net.URI;
+import java.util.List;
+import java.util.Map;
 
-public class CachingContentRewriterRegistryTest extends TestCase {
-  public void testCachedRewriteIsReturned() throws Exception {
-    // Sort of a weird test, but gets the basic idea of caching across.
-    // Perform a rewrite, then update the rewriter in such a way that
-    // would yield a different rewritten result, but ensure that
-    // the result of the rewriter is the old version, which hasn't
-    // yet expired. To ensure no expiry, set expiration date
-    // to the largest possible date.
-    CachingContentRewriterRegistry r = new CachingContentRewriterRegistry(null,
-        null, new DefaultCacheProvider(), 100, 0, Integer.MAX_VALUE);
-    StringBuilder appendFull = new StringBuilder();
-    for (int i = 0; i < 3; ++i) {
-      String appendNew = "-" + i;
-      appendFull.append(appendNew);
-      r.appendRewriter(new AppendingRewriter(appendNew));
+public class CachingContentRewriterRegistryTest {
+  private final List<CaptureRewriter> rewriters
+      = Lists.newArrayList(new CaptureRewriter(), new ModifyingCaptureContentRewriter());
+  private final FakeCacheProvider provider = new FakeCacheProvider();
+  private final ContentRewriterRegistry registry
+      = new CachingContentRewriterRegistry(rewriters, null, provider, 100);
+  private final IMocksControl control = EasyMock.createNiceControl();
+  private final ContainerConfig config = control.createMock(ContainerConfig.class);
+
+  @Test
+  @SuppressWarnings("unchecked")
+  public void gadgetGetsCached() throws Exception {
+    String body = "Hello, world";
+    String xml = "<Module><ModulePrefs title=''/><Content>" + body + "</Content></Module>";
+    GadgetSpec spec = new GadgetSpec(URI.create("#"), xml);
+    GadgetContext context = new GadgetContext();
+    Gadget gadget = new Gadget(context, spec, Collections.emptyList(), config, null);
+
+    control.replay();
+
+    registry.rewriteGadget(gadget);
+
+    // TODO: We're not actually testing the TTL of the entries here.
+    assertEquals(1, provider.readCount);
+    assertEquals(1, provider.writeCount);
+  }
+
+  @Test
+  @SuppressWarnings("unchecked")
+  public void gadgetFetchedFromCache() throws Exception {
+    String body = "Hello, world";
+    String xml = "<Module><ModulePrefs title=''/><Content>" + body + "</Content></Module>";
+    GadgetSpec spec = new GadgetSpec(URI.create("#"), xml);
+
+    GadgetContext context = new GadgetContext();
+
+    control.replay();
+
+    // We have to re-create Gadget objects because they get mutated directly, which is really
+    // inconsistent with the behavior of rewriteHttpResponse.
+    Gadget gadget = new Gadget(context, spec, Collections.emptyList(), config, null);
+    registry.rewriteGadget(gadget);
+    gadget = new Gadget(context, spec, Collections.emptyList(), config, null);
+    registry.rewriteGadget(gadget);
+    gadget = new Gadget(context, spec, Collections.emptyList(), config, null);
+    registry.rewriteGadget(gadget);
+
+    // TODO: We're not actually testing the TTL of the entries here.
+    assertEquals(3, provider.readCount);
+    assertEquals(1, provider.writeCount);
+  }
+
+  @Test
+  @SuppressWarnings("unchecked")
+  public void noCacheGadgetDoesNotGetCached() throws Exception {
+    String body = "Hello, world";
+    String xml = "<Module><ModulePrefs title=''/><Content>" + body + "</Content></Module>";
+    GadgetSpec spec = new GadgetSpec(URI.create("#"), xml);
+    GadgetContext context = new GadgetContext() {
+      @Override
+      public boolean getIgnoreCache() {
+        return true;
+      }
+    };
+
+    Gadget gadget = new Gadget(context, spec, Collections.emptyList(), config, null);
+
+    control.replay();
+
+    registry.rewriteGadget(gadget);
+
+    assertTrue("Rewriting not performed on uncacheable content.",
+        rewriters.get(0).viewWasRewritten());
+    assertEquals(0, provider.readCount);
+    assertEquals(0, provider.writeCount);
+  }
+
+  @Test
+  public void httpResponseGetsCached() throws Exception {
+    String body = "Hello, world";
+    HttpRequest request = new HttpRequest(Uri.parse("#"));
+    HttpResponse response = new HttpResponse(body);
+
+    registry.rewriteHttpResponse(request, response);
+
+    assertEquals(1, provider.readCount);
+    assertEquals(1, provider.writeCount);
+  }
+
+  @Test
+  public void httpResponseFetchedFromCache() throws Exception {
+    String body = "Hello, world";
+    HttpRequest request = new HttpRequest(Uri.parse("#"));
+    HttpResponse response = new HttpResponse(body);
+
+    registry.rewriteHttpResponse(request, response);
+    registry.rewriteHttpResponse(request, response);
+    registry.rewriteHttpResponse(request, response);
+
+    assertEquals(3, provider.readCount);
+    assertEquals(1, provider.writeCount);
+  }
+
+  @Test
+  public void noCacheHttpResponseDoesNotGetCached() throws Exception {
+    String body = "Hello, world";
+    HttpRequest request = new HttpRequest(Uri.parse("#")).setIgnoreCache(true);
+    HttpResponse response = new HttpResponse(body);
+
+    registry.rewriteHttpResponse(request, response);
+
+    assertTrue("Rewriting not performed on uncacheable content.",
+        rewriters.get(0).responseWasRewritten());
+    assertEquals(0, provider.readCount);
+    assertEquals(0, provider.writeCount);
+  }
+
+  @Test
+  public void changingRewritersBustsCache() {
+    // What we're testing here is actually impossible (you can't swap the registry on a running
+    // application), but there's a good chance that implementations will be using a shared cache,
+    // which persists across server restarts / reconfigurations. This verifies that the entries in
+    // the cache will be invalidated if the rewriters change.
+
+    // Just HTTP here; we'll assume this code is common between both methods.
+    String body = "Hello, world";
+    HttpRequest request = new HttpRequest(Uri.parse("#"));
+    HttpResponse response = new HttpResponse(body);
+
+    registry.rewriteHttpResponse(request, response);
+
+    assertEquals(1, provider.readCount);
+    assertEquals(1, provider.writeCount);
+
+    // The new registry is created using one additional rewriter, but the same cache.
+    rewriters.add(new CaptureRewriter());
+    ContentRewriterRegistry newRegistry
+        = new CachingContentRewriterRegistry(rewriters, null, provider, 100);
+
+    newRegistry.rewriteHttpResponse(request, response);
+
+    assertEquals(2, provider.readCount);
+    assertEquals(2, provider.writeCount);
+    assertFalse("Cache was written using identical keys.",
+        provider.keys.get(0).equals(provider.keys.get(1)));
+  }
+
+  private static class FakeCacheProvider implements CacheProvider {
+    private final Map<String, Object> entries = Maps.newHashMap();
+    private final List<String> keys = Lists.newLinkedList();
+    private int readCount = 0;
+    private int writeCount = 0;
+    private final Cache<String, Object> cache = new Cache<String, Object>() {
+      public void addElement(String key, Object value) {
+        entries.put(key, value);
+        keys.add(key);
+        writeCount++;
+      }
+
+      public Object getElement(String key) {
+        readCount++;
+        return entries.get(key);
+      }
+
+      public Object removeElement(String key) {
+        return entries.remove(key);
+      }
+    };
+
+    public <K, V> Cache<K, V> createCache(int capacity, String name) {
+      throw new UnsupportedOperationException();
     }
-    String inputContent = "foo";
-    String rewrittenContent = inputContent + appendFull.toString();
-    
-    GadgetSpec spec = EasyMock.createNiceMock(GadgetSpec.class);
-    View view = EasyMock.createNiceMock(View.class);
-    expect(view.getName()).andReturn(GadgetSpec.DEFAULT_VIEW).anyTimes();
-    expect(view.getType()).andReturn(View.ContentType.HTML).anyTimes();
-    expect(view.getContent()).andReturn(inputContent).anyTimes();
-    expect(spec.getView(GadgetSpec.DEFAULT_VIEW)).andReturn(view).anyTimes();
-    expect(spec.getAttribute(GadgetSpec.EXPIRATION_ATTRIB)).andReturn(Long.MAX_VALUE).anyTimes();
-    expect(spec.getUrl()).andReturn(new URI("http://gadget.org/gadget.xml")).anyTimes();
-    GadgetContext context = EasyMock.createNiceMock(GadgetContext.class);
-    expect(context.getView()).andReturn(GadgetSpec.DEFAULT_VIEW).anyTimes();
-    HttpRequest request = new HttpRequest(Uri.parse("http://request.org/cgi-bin/request.py"));
-    request.setCacheTtl(Integer.MAX_VALUE);
-    HttpResponse resp = new HttpResponseBuilder().setResponseString(inputContent)
-        .setCacheTtl(-1).setExpirationTime(-1).setHttpStatusCode(200).create();
-    replay(context, view, spec);
-    
-    Gadget gadget = new Gadget(context, spec, null, null, null);
-    assertEquals(inputContent, gadget.getContent());
-    
-    // Should be rewritten the first time.
-    assertTrue(r.rewriteGadget(gadget));
-    assertEquals(rewrittenContent, gadget.getContent());
-    
-    // Likewise for the http response
-    HttpResponse rewrittenResp = r.rewriteHttpResponse(request, resp);
-    assertNotSame(rewrittenResp, resp);
-    assertEquals(rewrittenContent, rewrittenResp.getResponseAsString());
-    
-    r.appendRewriter(new AppendingRewriter("-end"));
-    
-    // Should also be rewritten the second time, but with the previous
-    // expected rewritten content value.
-    Gadget nextGadget = new Gadget(context, spec, null, null, null);
-    assertTrue(r.rewriteGadget(nextGadget));
-    assertEquals(rewrittenContent, nextGadget.getContent());
-    
-    HttpResponse rewrittenResp2 = r.rewriteHttpResponse(request, resp);
-    assertEquals(rewrittenContent, rewrittenResp2.getResponseAsString());
+
+    @SuppressWarnings("unchecked")
+    public <K, V> Cache<K, V> createCache(int capacity) {
+      return (Cache<K, V>)cache;
+    }
+  }
+
+  private static class ModifyingCaptureContentRewriter extends CaptureRewriter {
+
+    @Override
+    public RewriterResults rewrite(HttpRequest request, HttpResponse original,
+        MutableContent content) {
+      super.rewrite(request, original, content);
+      content.setContent(content.getContent() + "-modified");
+      return RewriterResults.cacheableIndefinitely();
+    }
+
+    @Override
+    public RewriterResults rewrite(Gadget gadget) {
+      super.rewrite(gadget);
+      gadget.setContent(gadget.getContent() + "-modified");
+      return RewriterResults.cacheableIndefinitely();
+    }
   }
 }

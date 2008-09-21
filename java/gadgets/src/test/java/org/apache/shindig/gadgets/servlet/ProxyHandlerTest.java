@@ -18,26 +18,27 @@
  */
 package org.apache.shindig.gadgets.servlet;
 
+import static org.easymock.EasyMock.expect;
+
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.http.HttpResponse;
 import org.apache.shindig.gadgets.http.HttpResponseBuilder;
-import org.apache.shindig.gadgets.rewrite.DefaultContentRewriterRegistry;
-import static org.easymock.EasyMock.expect;
 
-import javax.servlet.http.HttpServletResponse;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import javax.servlet.http.HttpServletResponse;
 
 public class ProxyHandlerTest extends ServletTestFixture {
   private final static String URL_ONE = "http://www.example.org/test.html";
   private final static String DATA_ONE = "hello world";
 
   private final ProxyHandler proxyHandler
-      = new ProxyHandler(fetcher, lockedDomainService, new DefaultContentRewriterRegistry(rewriter, null));
+      = new ProxyHandler(fetcher, lockedDomainService, rewriterRegistry);
 
   private void expectGetAndReturnData(String url, byte[] data) throws Exception {
     HttpRequest req = new HttpRequest(Uri.parse(url));

@@ -18,26 +18,34 @@
  */
 package org.apache.shindig.gadgets;
 
-import org.apache.commons.io.IOUtils;
 import org.apache.shindig.common.crypto.BasicBlobCrypter;
 import org.apache.shindig.common.crypto.BlobCrypter;
 import org.apache.shindig.common.crypto.Crypto;
 import org.apache.shindig.common.util.ResourceLoader;
 import org.apache.shindig.gadgets.http.HttpResponse;
+import org.apache.shindig.gadgets.oauth.BasicOAuthStore;
 import org.apache.shindig.gadgets.oauth.BasicOAuthStoreConsumerKeyAndSecret;
 import org.apache.shindig.gadgets.oauth.OAuthStore;
-import org.apache.shindig.gadgets.oauth.BasicOAuthStore;
 import org.apache.shindig.gadgets.oauth.BasicOAuthStoreConsumerKeyAndSecret.KeyType;
+import org.apache.shindig.gadgets.rewrite.ContentRewriter;
+import org.apache.shindig.gadgets.rewrite.lexer.DefaultContentRewriter;
 
+import com.google.common.collect.Lists;
 import com.google.inject.AbstractModule;
 import com.google.inject.CreationException;
+import com.google.inject.Inject;
+import com.google.inject.Provider;
+import com.google.inject.TypeLiteral;
 import com.google.inject.name.Names;
 import com.google.inject.spi.Message;
+
+import org.apache.commons.io.IOUtils;
 
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Properties;
 import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
@@ -52,26 +60,30 @@ public class DefaultGuiceModule extends AbstractModule {
 
   private static final Logger logger
       = Logger.getLogger(DefaultGuiceModule.class.getName());
-  
+
   private final Properties properties;
   private final String oauthConfig;
-  
+
   private final static String DEFAULT_PROPERTIES = "gadgets.properties";
   private final static String OAUTH_CONFIG = "config/oauth.json";
-  
+
   public final static String OAUTH_STATE_CRYPTER_ANNOTATION = "shindig.oauth.state-key";
   public final static String OAUTH_SIGNING_KEY_NAME = "shindig.signing.key-name";
   public final static String OAUTH_SIGNING_KEY_FILE = "shindig.signing.key-file";
 
   /** {@inheritDoc} */
   @Override
-  protected void configure() {    
+  protected void configure() {
     Names.bindProperties(this.binder(), properties);
 
     ExecutorService service = Executors.newCachedThreadPool();
     bind(Executor.class).toInstance(service);
     bind(ExecutorService.class).toInstance(service);
-    
+
+    bind(new TypeLiteral<List<ContentRewriter>>(){}).toProvider(ContentRewritersProvider.class);
+
+    // TODO: This is not the proper way to use a Guice module. It needs to be fixed before we can
+    // do a release.
     try {
       configureOAuthStore();
     } catch (Throwable t) {
@@ -86,22 +98,25 @@ public class DefaultGuiceModule extends AbstractModule {
       // because we can't initialize the OAuth config.
       logger.log(Level.WARNING, "Failed to initialize Crypter", t);
     }
-    
+
     // We perform static injection on HttpResponse for cache TTLs.
     requestStaticInjection(HttpResponse.class);
   }
-  
+
   /**
    * Create a store for OAuth consumer keys and access tokens.  By default consumer keys are read
    * from config/oauth.json, and access tokens are stored in memory.
-   * 
+   *
    * We read the default key from disk, in a location specified in our properties file.
+   *
+   * TODO: This doesn't belong here! It can't be reused by anyone who wants to customize shindig,
+   * which *FORCES* everyone to re-implement it.
    */
   private void configureOAuthStore() throws GadgetException {
     BasicOAuthStore store = new BasicOAuthStore();
     bind(OAuthStore.class).toInstance(store);
     store.initFromConfigString(oauthConfig);
-    
+
     String keyName = properties.getProperty(OAUTH_SIGNING_KEY_NAME);
     String keyFile = properties.getProperty(OAUTH_SIGNING_KEY_FILE);
     BasicOAuthStoreConsumerKeyAndSecret defaultKey = null;
@@ -129,7 +144,7 @@ public class DefaultGuiceModule extends AbstractModule {
       		OAUTH_SIGNING_KEY_NAME + "=mykey\n");
     }
   }
-  
+
   /**
    * Create a crypter to handle OAuth state.  This can be loaded from disk, if
    * shindig.oauth.state-key-file is specified in your gadgets.properties file, or it can be
@@ -151,7 +166,7 @@ public class DefaultGuiceModule extends AbstractModule {
       logger.info("Creating OAuth state crypter with random key");
       oauthCrypter = new BasicBlobCrypter(
           Crypto.getRandomBytes(BasicBlobCrypter.MASTER_KEY_MIN_LEN));
-    }        
+    }
     bind(BlobCrypter.class).annotatedWith(
         Names.named(OAUTH_STATE_CRYPTER_ANNOTATION))
         .toInstance(oauthCrypter);
@@ -183,5 +198,18 @@ public class DefaultGuiceModule extends AbstractModule {
     }
     this.properties = properties;
     this.oauthConfig = oauthConfig;
+  }
+
+  private static class ContentRewritersProvider implements Provider<List<ContentRewriter>> {
+    private final List<ContentRewriter> rewriters;
+
+    @Inject
+    public ContentRewritersProvider(DefaultContentRewriter optimizingRewriter) {
+      rewriters = Lists.<ContentRewriter>newArrayList(optimizingRewriter);
+    }
+
+    public List<ContentRewriter> get() {
+      return rewriters;
+    }
   }
 }

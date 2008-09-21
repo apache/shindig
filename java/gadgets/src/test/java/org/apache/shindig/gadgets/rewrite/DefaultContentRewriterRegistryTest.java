@@ -17,81 +17,65 @@
  */
 package org.apache.shindig.gadgets.rewrite;
 
-import org.easymock.classextension.EasyMock;
-import static org.easymock.EasyMock.expect;
-import static org.easymock.classextension.EasyMock.replay;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
+import org.apache.shindig.common.ContainerConfig;
+import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.gadgets.Gadget;
 import org.apache.shindig.gadgets.GadgetContext;
 import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.http.HttpResponse;
-import org.apache.shindig.gadgets.http.HttpResponseBuilder;
 import org.apache.shindig.gadgets.spec.GadgetSpec;
-import org.apache.shindig.gadgets.spec.View;
 
-import junit.framework.TestCase;
+import edu.emory.mathcs.backport.java.util.Collections;
 
-public class DefaultContentRewriterRegistryTest extends TestCase {
-  public void testNoArgsCreatedBasicRegistry() {
-    DefaultContentRewriterRegistry r = new DefaultContentRewriterRegistry(null, null);
-    assertNotNull(r.getRewriters());
-    assertEquals(0, r.getRewriters().size());
+import org.easymock.classextension.EasyMock;
+import org.easymock.classextension.IMocksControl;
+import org.junit.Test;
+
+import java.net.URI;
+import java.util.Arrays;
+import java.util.List;
+
+public class DefaultContentRewriterRegistryTest {
+  private final List<CaptureRewriter> rewriters
+      = Arrays.asList(new CaptureRewriter(), new CaptureRewriter());
+  private final ContentRewriterRegistry registry
+      = new DefaultContentRewriterRegistry(rewriters, null);
+  private final IMocksControl control = EasyMock.createNiceControl();
+  private final ContainerConfig config = control.createMock(ContainerConfig.class);
+
+  @Test
+  @SuppressWarnings("unchecked")
+  public void rewriteGadget() throws Exception {
+    String body = "Hello, world";
+    String xml = "<Module><ModulePrefs title=''/><Content>" + body + "</Content></Module>";
+    GadgetSpec spec = new GadgetSpec(URI.create("#"), xml);
+    GadgetContext context = new GadgetContext();
+    Gadget gadget = new Gadget(context, spec, Collections.emptyList(), config, null);
+
+    control.replay();
+
+    registry.rewriteGadget(gadget);
+
+    assertTrue("First rewriter not invoked.", rewriters.get(0).viewWasRewritten());
+    assertTrue("Second rewriter not invoked.", rewriters.get(1).viewWasRewritten());
+
+    assertEquals(body, gadget.getContent());
   }
-  
-  public void testSingleValuedBasicRegistry() {
-    DefaultContentRewriterRegistry r = new DefaultContentRewriterRegistry(
-        new NoOpContentRewriter(), null);
-    assertNotNull(r.getRewriters());
-    assertEquals(1, r.getRewriters().size());
-    assertTrue(r.getRewriters().get(0) instanceof NoOpContentRewriter);
+
+  @Test
+  public void rewriteHttpResponse() throws Exception {
+    String body = "Hello, world";
+    HttpRequest request = new HttpRequest(Uri.parse("#"));
+    HttpResponse response = new HttpResponse(body);
+
+    HttpResponse rewritten = registry.rewriteHttpResponse(request, response);
+
+    assertTrue("First rewriter not invoked.", rewriters.get(0).responseWasRewritten());
+    assertTrue("Second rewriter not invoked.", rewriters.get(1).responseWasRewritten());
+
+    assertEquals(response, rewritten);
   }
-  
-  public void testBasicContentRegistryWithAdds() {
-    ContentRewriter cr0 = new NoOpContentRewriter();
-    DefaultContentRewriterRegistry r = new DefaultContentRewriterRegistry(cr0, null);
-    ContentRewriter cr1 = new NoOpContentRewriter();
-    ContentRewriter cr2 = new NoOpContentRewriter();
-    r.appendRewriter(cr1);
-    r.appendRewriter(cr2);
-    assertNotNull(r.getRewriters());
-    assertEquals(3, r.getRewriters().size());
-    assertSame(cr0, r.getRewriters().get(0));
-    assertSame(cr1, r.getRewriters().get(1));
-    assertSame(cr2, r.getRewriters().get(2));
-  }
-  
-  public void testRunGadgetAndHttpResponseRewrites() throws Exception {
-    DefaultContentRewriterRegistry r = new DefaultContentRewriterRegistry(null, null);
-    StringBuilder appendFull = new StringBuilder();
-    for (int i = 0; i < 3; ++i) {
-      String appendNew = "-" + i;
-      appendFull.append(appendNew);
-      r.appendRewriter(new AppendingRewriter(appendNew));
-    }
-    String inputContent = "foo";
-    String rewrittenContent = inputContent + appendFull.toString();
-    
-    GadgetSpec spec = EasyMock.createNiceMock(GadgetSpec.class);
-    View view = EasyMock.createNiceMock(View.class);
-    expect(view.getName()).andReturn(GadgetSpec.DEFAULT_VIEW).anyTimes();
-    expect(view.getType()).andReturn(View.ContentType.HTML).anyTimes();
-    expect(view.getContent()).andReturn(inputContent).anyTimes();
-    expect(spec.getView(GadgetSpec.DEFAULT_VIEW)).andReturn(view).anyTimes();
-    GadgetContext context = EasyMock.createNiceMock(GadgetContext.class);
-    expect(context.getView()).andReturn(GadgetSpec.DEFAULT_VIEW).anyTimes();
-    replay(context, view, spec);
-    
-    Gadget gadget = new Gadget(context, spec, null, null, null);
-    assertEquals(inputContent, gadget.getContent());
-    assertTrue(r.rewriteGadget(gadget));
-    assertEquals(rewrittenContent, gadget.getContent());
-    
-    HttpResponse resp = new HttpResponseBuilder().setResponseString(inputContent).create();
-    assertEquals(inputContent, resp.getResponseAsString());
-    HttpRequest req = EasyMock.createNiceMock(HttpRequest.class);  // use mock to be lazy
-    HttpResponse rewritten = r.rewriteHttpResponse(req, resp);
-    assertNotSame(resp, rewritten);
-    assertEquals(rewrittenContent, rewritten.getResponseAsString());
-  }
-  
 }

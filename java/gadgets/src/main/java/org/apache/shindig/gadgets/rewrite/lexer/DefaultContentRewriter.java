@@ -17,10 +17,6 @@
  */
 package org.apache.shindig.gadgets.rewrite.lexer;
 
-import com.google.inject.Inject;
-import com.google.inject.Singleton;
-import com.google.inject.name.Named;
-
 import org.apache.shindig.gadgets.Gadget;
 import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.GadgetSpecFactory;
@@ -34,6 +30,10 @@ import org.apache.shindig.gadgets.rewrite.LinkRewriter;
 import org.apache.shindig.gadgets.rewrite.ProxyingLinkRewriter;
 import org.apache.shindig.gadgets.rewrite.RewriterResults;
 import org.apache.shindig.gadgets.spec.GadgetSpec;
+
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
+import com.google.inject.name.Named;
 
 import java.io.ByteArrayOutputStream;
 import java.io.OutputStreamWriter;
@@ -106,7 +106,7 @@ public class DefaultContentRewriter implements ContentRewriter {
     } catch (GadgetException ge) {
       // Couldn't retrieve gadgetSpec
     }
-    
+
     return RewriterResults.cacheableIndefinitely();
   }
 
@@ -125,14 +125,8 @@ public class DefaultContentRewriter implements ContentRewriter {
       return false;
     }
 
-    // Store the feature in the spec so we dont keep parsing it
-    ContentRewriterFeature rewriterFeature = (ContentRewriterFeature) spec
-        .getAttribute("content-rewrite");
-    if (rewriterFeature == null) {
-      rewriterFeature = new ContentRewriterFeature(spec, includeUrls, excludeUrls, expires,
-          includeTags);
-      spec.setAttribute("content-rewrite", rewriterFeature);
-    }
+    ContentRewriterFeature rewriterFeature
+        = new ContentRewriterFeature(spec, includeUrls, excludeUrls, expires, includeTags);
 
     if (!rewriterFeature.isRewriteEnabled()) {
       return false;
