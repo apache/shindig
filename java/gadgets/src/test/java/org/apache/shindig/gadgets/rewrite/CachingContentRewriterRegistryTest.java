@@ -27,6 +27,7 @@ import org.apache.shindig.common.cache.CacheProvider;
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.gadgets.Gadget;
 import org.apache.shindig.gadgets.GadgetContext;
+import org.apache.shindig.gadgets.JsLibrary;
 import org.apache.shindig.gadgets.MutableContent;
 import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.http.HttpResponse;
@@ -35,13 +36,12 @@ import org.apache.shindig.gadgets.spec.GadgetSpec;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 
-import edu.emory.mathcs.backport.java.util.Collections;
-
 import org.easymock.classextension.EasyMock;
 import org.easymock.classextension.IMocksControl;
 import org.junit.Test;
 
 import java.net.URI;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -55,13 +55,12 @@ public class CachingContentRewriterRegistryTest {
   private final ContainerConfig config = control.createMock(ContainerConfig.class);
 
   @Test
-  @SuppressWarnings("unchecked")
   public void gadgetGetsCached() throws Exception {
     String body = "Hello, world";
     String xml = "<Module><ModulePrefs title=''/><Content>" + body + "</Content></Module>";
     GadgetSpec spec = new GadgetSpec(URI.create("#"), xml);
     GadgetContext context = new GadgetContext();
-    Gadget gadget = new Gadget(context, spec, Collections.emptyList(), config, null);
+    Gadget gadget = new Gadget(context, spec, new ArrayList<JsLibrary>(), config, null);
 
     control.replay();
 
@@ -73,7 +72,6 @@ public class CachingContentRewriterRegistryTest {
   }
 
   @Test
-  @SuppressWarnings("unchecked")
   public void gadgetFetchedFromCache() throws Exception {
     String body = "Hello, world";
     String xml = "<Module><ModulePrefs title=''/><Content>" + body + "</Content></Module>";
@@ -85,11 +83,11 @@ public class CachingContentRewriterRegistryTest {
 
     // We have to re-create Gadget objects because they get mutated directly, which is really
     // inconsistent with the behavior of rewriteHttpResponse.
-    Gadget gadget = new Gadget(context, spec, Collections.emptyList(), config, null);
+    Gadget gadget = new Gadget(context, spec, new ArrayList<JsLibrary>(), config, null);
     registry.rewriteGadget(gadget);
-    gadget = new Gadget(context, spec, Collections.emptyList(), config, null);
+    gadget = new Gadget(context, spec, new ArrayList<JsLibrary>(), config, null);
     registry.rewriteGadget(gadget);
-    gadget = new Gadget(context, spec, Collections.emptyList(), config, null);
+    gadget = new Gadget(context, spec, new ArrayList<JsLibrary>(), config, null);
     registry.rewriteGadget(gadget);
 
     // TODO: We're not actually testing the TTL of the entries here.
@@ -98,7 +96,6 @@ public class CachingContentRewriterRegistryTest {
   }
 
   @Test
-  @SuppressWarnings("unchecked")
   public void noCacheGadgetDoesNotGetCached() throws Exception {
     String body = "Hello, world";
     String xml = "<Module><ModulePrefs title=''/><Content>" + body + "</Content></Module>";
@@ -110,7 +107,7 @@ public class CachingContentRewriterRegistryTest {
       }
     };
 
-    Gadget gadget = new Gadget(context, spec, Collections.emptyList(), config, null);
+    Gadget gadget = new Gadget(context, spec, new ArrayList<JsLibrary>(), config, null);
 
     control.replay();
 
