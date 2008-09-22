@@ -17,9 +17,9 @@
  */
 package org.apache.shindig.gadgets;
 
-import com.google.common.collect.Maps;
-
 import org.apache.shindig.common.ContainerConfig;
+
+import com.google.common.collect.Maps;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -115,7 +115,7 @@ public class GadgetFeature {
    * Simplified ctor that registers a set of libraries for all contexts and
    * the default container. Used for testing.
    */
-  GadgetFeature(String name, List<JsLibrary> libraries,
+  public GadgetFeature(String name, List<JsLibrary> libraries,
       Collection<String> dependencies) {
     this.name = name;
     this.libraries = Maps.newEnumMap(RenderingContext.class);

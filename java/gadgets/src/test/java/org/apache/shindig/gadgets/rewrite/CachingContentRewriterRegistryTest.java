@@ -48,9 +48,11 @@ import java.util.Map;
 public class CachingContentRewriterRegistryTest {
   private final List<CaptureRewriter> rewriters
       = Lists.newArrayList(new CaptureRewriter(), new ModifyingCaptureContentRewriter());
+  private final List<ContentRewriter> contentRewriters
+      = Lists.<ContentRewriter>newArrayList(rewriters);
   private final FakeCacheProvider provider = new FakeCacheProvider();
   private final ContentRewriterRegistry registry
-      = new CachingContentRewriterRegistry(rewriters, null, provider, 100);
+      = new CachingContentRewriterRegistry(contentRewriters, null, provider, 100);
   private final IMocksControl control = EasyMock.createNiceControl();
   private final ContainerConfig config = control.createMock(ContainerConfig.class);
 
@@ -179,7 +181,7 @@ public class CachingContentRewriterRegistryTest {
     // The new registry is created using one additional rewriter, but the same cache.
     rewriters.add(new CaptureRewriter());
     ContentRewriterRegistry newRegistry
-        = new CachingContentRewriterRegistry(rewriters, null, provider, 100);
+        = new CachingContentRewriterRegistry(contentRewriters, null, provider, 100);
 
     newRegistry.rewriteHttpResponse(request, response);
 
