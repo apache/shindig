@@ -179,7 +179,7 @@ public class CachingContentRewriterRegistryTest {
     assertEquals(1, provider.writeCount);
 
     // The new registry is created using one additional rewriter, but the same cache.
-    rewriters.add(new CaptureRewriter());
+    contentRewriters.add(new CaptureRewriter());
     ContentRewriterRegistry newRegistry
         = new CachingContentRewriterRegistry(contentRewriters, null, provider, 100);
 
