@@ -32,7 +32,7 @@ import org.apache.shindig.gadgets.GadgetServer;
 import org.apache.shindig.gadgets.JsLibrary;
 import org.apache.shindig.gadgets.LockedDomainService;
 import org.apache.shindig.gadgets.MessageBundleFactory;
-import org.apache.shindig.gadgets.DefaultUrlGenerator;
+import org.apache.shindig.gadgets.UrlGenerator;
 import org.apache.shindig.gadgets.http.HttpResponse;
 import org.apache.shindig.gadgets.spec.Feature;
 import org.apache.shindig.gadgets.spec.LocaleSpec;
@@ -94,7 +94,7 @@ public class GadgetRenderingTask {
 
   private final ContainerConfig containerConfig;
 
-  private final DefaultUrlGenerator urlGenerator;
+  private final UrlGenerator urlGenerator;
 
   private GadgetContext context;
 
@@ -561,7 +561,7 @@ public class GadgetRenderingTask {
       MessageBundleFactory messageBundleFactory,
       GadgetFeatureRegistry registry,
       ContainerConfig containerConfig,
-      DefaultUrlGenerator urlGenerator,
+      UrlGenerator urlGenerator,
       LockedDomainService lockedDomainService) {
     this.server = server;
     this.messageBundleFactory = messageBundleFactory;

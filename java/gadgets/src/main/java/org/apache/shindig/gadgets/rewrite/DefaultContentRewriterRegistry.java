@@ -41,7 +41,7 @@ public class DefaultContentRewriterRegistry implements ContentRewriterRegistry {
   protected final GadgetHtmlParser htmlParser;
 
   @Inject
-  public DefaultContentRewriterRegistry(List<? extends ContentRewriter> rewriters,
+  public DefaultContentRewriterRegistry(List<ContentRewriter> rewriters,
       GadgetHtmlParser htmlParser) {
     if (rewriters == null) {
       rewriters = Collections.emptyList();

@@ -29,6 +29,8 @@ import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.http.HttpResponse;
 import org.apache.shindig.gadgets.spec.GadgetSpec;
 
+import com.google.common.collect.Lists;
+
 import org.easymock.classextension.EasyMock;
 import org.easymock.classextension.IMocksControl;
 import org.junit.Test;
@@ -41,8 +43,10 @@ import java.util.List;
 public class DefaultContentRewriterRegistryTest {
   private final List<CaptureRewriter> rewriters
       = Arrays.asList(new CaptureRewriter(), new CaptureRewriter());
+  private final List<ContentRewriter> contentRewriters
+      = Lists.<ContentRewriter>newArrayList(rewriters);
   private final ContentRewriterRegistry registry
-      = new DefaultContentRewriterRegistry(rewriters, null);
+      = new DefaultContentRewriterRegistry(contentRewriters, null);
   private final IMocksControl control = EasyMock.createNiceControl();
   private final ContainerConfig config = control.createMock(ContainerConfig.class);
 

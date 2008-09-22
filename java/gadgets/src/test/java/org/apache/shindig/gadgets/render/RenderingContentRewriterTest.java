@@ -18,26 +18,49 @@
  */
 package org.apache.shindig.gadgets.render;
 
+import static org.apache.shindig.gadgets.render.RenderingContentRewriter.BEFORE_HEAD_GROUP;
+import static org.apache.shindig.gadgets.render.RenderingContentRewriter.BODY_ATTRIBUTES_GROUP;
+import static org.apache.shindig.gadgets.render.RenderingContentRewriter.BODY_GROUP;
+import static org.apache.shindig.gadgets.render.RenderingContentRewriter.DEFAULT_HEAD_CONTENT;
+import static org.apache.shindig.gadgets.render.RenderingContentRewriter.DOCUMENT_SPLIT_PATTERN;
+import static org.apache.shindig.gadgets.render.RenderingContentRewriter.HEAD_GROUP;
+import static org.easymock.EasyMock.expect;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 import org.apache.shindig.common.ContainerConfig;
 import org.apache.shindig.gadgets.Gadget;
 import org.apache.shindig.gadgets.GadgetContext;
+import org.apache.shindig.gadgets.GadgetException;
+import org.apache.shindig.gadgets.GadgetFeature;
+import org.apache.shindig.gadgets.GadgetFeatureRegistry;
 import org.apache.shindig.gadgets.JsLibrary;
 import org.apache.shindig.gadgets.MessageBundleFactory;
+import org.apache.shindig.gadgets.UrlGenerator;
 import org.apache.shindig.gadgets.spec.GadgetSpec;
 import org.apache.shindig.gadgets.spec.LocaleSpec;
 import org.apache.shindig.gadgets.spec.MessageBundle;
 
+import com.google.caja.util.Join;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
+
 import org.easymock.classextension.EasyMock;
 import org.easymock.classextension.IMocksControl;
 import org.json.JSONObject;
+import org.junit.Before;
 import org.junit.Test;
 
 import java.net.URI;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Locale;
+import java.util.Map;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -46,13 +69,20 @@ import java.util.regex.Pattern;
  */
 public class RenderingContentRewriterTest {
   private static final String BODY_CONTENT = "Some body content";
-  private static final Pattern EXPECTED_DOCUMENT_PATTERN = Pattern.compile(
-      "(.*</head>)(.*</body>)(.*)", Pattern.DOTALL);
   private final IMocksControl control = EasyMock.createNiceControl();
-  private final ContainerConfig config = control.createMock(ContainerConfig.class);
   private final FakeMessageBundleFactory messageBundleFactory = new FakeMessageBundleFactory();
-  private final RenderingContentRewriter rewriter
-      = new RenderingContentRewriter(messageBundleFactory);
+  private final ContainerConfig config = control.createMock(ContainerConfig.class);
+  private final UrlGenerator urlGenerator = new FakeUrlGenerator();
+
+  private FakeGadgetFeatureRegistry featureRegistry;
+  private RenderingContentRewriter rewriter;
+
+  @Before
+  public void setUp() throws Exception {
+    featureRegistry = new FakeGadgetFeatureRegistry();
+    rewriter
+        = new RenderingContentRewriter(messageBundleFactory, config, featureRegistry, urlGenerator);
+  }
 
   @Test
   public void defaultOutput() throws Exception {
@@ -69,22 +99,79 @@ public class RenderingContentRewriterTest {
 
     assertEquals(0, rewriter.rewrite(gadget).getCacheTtl());
 
-    Matcher matcher = EXPECTED_DOCUMENT_PATTERN.matcher(gadget.getContent());
+    Matcher matcher = DOCUMENT_SPLIT_PATTERN.matcher(gadget.getContent());
     assertTrue("Output is not valid HTML.", matcher.matches());
-    assertTrue("Missing opening html tag", matcher.group(1).contains("<html>"));
+    assertTrue("Missing opening html tag", matcher.group(BEFORE_HEAD_GROUP).contains("<html>"));
     assertTrue("Default head content is missing.",
-        matcher.group(1).contains(RenderingContentRewriter.DEFAULT_HEAD_CONTENT));
+        matcher.group(HEAD_GROUP).contains(DEFAULT_HEAD_CONTENT));
     // Not very accurate -- could have just been user prefs.
-    assertTrue("Default javascript not included.", matcher.group(1).contains("<script>"));
-    assertTrue("Original document not preserved.", matcher.group(2).contains(BODY_CONTENT));
-    assertTrue("Missing closing html tag.", matcher.group(3).contains("</html>"));
+    assertTrue("Default javascript not included.",
+        matcher.group(HEAD_GROUP).contains("<script>"));
+    assertTrue("Original document not preserved.",
+        matcher.group(BODY_GROUP).contains(BODY_CONTENT));
+    assertTrue("gadgets.util.runOnLoadHandlers not invoked.",
+        matcher.group(BODY_GROUP).contains("gadgets.util.runOnLoadHandlers();"));
+  }
+
+  @Test
+  public void completeDocument() throws Exception {
+    String docType = "<![DOCTYPE html]>";
+    String head = "<script src='foo.js'></script><style type='text/css'>body{color:red;}</style>";
+    String bodyAttr = " onload='foo();'";
+    String body = "hello, world.";
+    String doc = new StringBuilder()
+        .append(docType)
+        .append("<html><head>")
+        .append(head)
+        .append("</head><body").append(bodyAttr).append(">")
+        .append(body)
+        .append("</body></html>")
+        .toString();
+    String gadgetXml =
+        "<Module><ModulePrefs title=''/>" +
+        "<Content type='html'><![CDATA[" + doc + "]]></Content>" +
+        "</Module>";
+
+    GadgetSpec spec = new GadgetSpec(URI.create("#"), gadgetXml);
+    GadgetContext context = new GadgetContext() {
+      @Override
+      public String getParameter(String name) {
+        if (name.equals("libs")) {
+          return "foo";
+        }
+        return null;
+      }
+    };
+
+    Gadget gadget = new Gadget(context, spec, Collections.<JsLibrary>emptySet(), config, null);
+
+    featureRegistry.addInline("foo", "does-not-matter");
+    control.replay();
+
+    assertEquals(0, rewriter.rewrite(gadget).getCacheTtl());
+
+    Matcher matcher = DOCUMENT_SPLIT_PATTERN.matcher(gadget.getContent());
+    assertTrue("Output is not valid HTML.", matcher.matches());
+    assertTrue("DOCTYPE not preserved", matcher.group(BEFORE_HEAD_GROUP).contains(docType));
+    assertTrue("Missing opening html tag", matcher.group(BEFORE_HEAD_GROUP).contains("<html>"));
+    assertTrue("Custom head content is missing.", matcher.group(HEAD_GROUP).contains(head));
+    assertTrue("Forced javascript not included.",
+        matcher.group(HEAD_GROUP).contains("<script src=\"/js/foo\">"));
+    assertTrue("Custom body attributes missing.",
+        matcher.group(BODY_ATTRIBUTES_GROUP).contains(bodyAttr));
+    assertTrue("Original document not preserved.",
+        matcher.group(BODY_GROUP).contains(body));
+    assertTrue("gadgets.util.runOnLoadHandlers not invoked.",
+        matcher.group(BODY_GROUP).contains("gadgets.util.runOnLoadHandlers();"));
+
+    // Skipping other tests; code path should be the same for the rest.
   }
 
   @Test
   public void bidiSettings() throws Exception {
     String gadgetXml =
       "<Module><ModulePrefs title=''>" +
-      " <Locale language_direction='rtl'/>" +
+      "  <Locale language_direction='rtl'/>" +
       "</ModulePrefs>" +
       "<Content type='html'>" + BODY_CONTENT + "</Content>" +
       "</Module>";
@@ -101,10 +188,254 @@ public class RenderingContentRewriterTest {
         gadget.getContent().contains("<body dir='rtl'>"));
   }
 
-  @Test
-  public void jsConfigurationInjected() throws Exception {
-    // TODO
+  private Set<String> getInjectedScript(Gadget gadget) {
+    Pattern featurePattern
+        = Pattern.compile("(?:.*)<script src=\"\\/js\\/(.*?)\"><\\/script>(?:.*)", Pattern.DOTALL);
+    Matcher matcher = featurePattern.matcher(gadget.getContent());
+
+    assertTrue("Forced scripts not injected.", matcher.matches());
+
+    return Sets.newHashSet(matcher.group(1).split(":"));
   }
+
+  @Test
+  public void forcedFeaturesInjectedExternal() throws Exception {
+    String gadgetXml =
+      "<Module><ModulePrefs title=''>" +
+      "  <Require feature='foo'/>" +
+      "</ModulePrefs>" +
+      "<Content type='html'/>" +
+      "</Module>";
+
+    GadgetSpec spec = new GadgetSpec(URI.create("#"), gadgetXml);
+
+    final Collection<String> libs = Arrays.asList("foo", "bar", "baz");
+    GadgetContext context = new GadgetContext() {
+      @Override
+      public String getParameter(String name) {
+        if (name.equals("libs")) {
+          return Join.join(":", libs);
+        }
+        return null;
+      }
+    };
+
+    Gadget gadget = new Gadget(context, spec, Collections.<JsLibrary>emptySet(), config, null);
+
+    featureRegistry.addInline("foo", "does-not-matter");
+    featureRegistry.addInline("bar", "does-not-matter");
+    featureRegistry.addInline("baz", "does-not-matter");
+    control.replay();
+
+    rewriter.rewrite(gadget);
+
+    Set<String> actual = getInjectedScript(gadget);
+    Set<String> expected = Sets.immutableSortedSet("foo", "bar", "baz");
+    assertEquals(expected, actual);
+  }
+
+  @Test
+  public void inlinedFeaturesWhenNothingForced() throws Exception {
+    String gadgetXml =
+      "<Module><ModulePrefs title=''>" +
+      "  <Require feature='foo'/>" +
+      "</ModulePrefs>" +
+      "<Content type='html'/>" +
+      "</Module>";
+
+    GadgetSpec spec = new GadgetSpec(URI.create("#"), gadgetXml);
+
+    Gadget gadget
+        = new Gadget(new GadgetContext(), spec, Collections.<JsLibrary>emptySet(), config, null);
+
+    featureRegistry.addInline("foo", "foo_content();");
+    control.replay();
+
+    rewriter.rewrite(gadget);
+
+    assertTrue("Requested scripts not inlined.", gadget.getContent().contains("foo_content();"));
+  }
+
+  @Test
+  public void mixedExternalAndInline() throws Exception {
+    String gadgetXml =
+      "<Module><ModulePrefs title=''>" +
+      "  <Require feature='foo'/>" +
+      "</ModulePrefs>" +
+      "<Content type='html'/>" +
+      "</Module>";
+
+    GadgetSpec spec = new GadgetSpec(URI.create("#"), gadgetXml);
+
+    final Collection<String> libs = Arrays.asList("bar", "baz");
+    GadgetContext context = new GadgetContext() {
+      @Override
+      public String getParameter(String name) {
+        if (name.equals("libs")) {
+          return Join.join(":", libs);
+        }
+        return null;
+      }
+    };
+
+    Gadget gadget = new Gadget(context, spec, Collections.<JsLibrary>emptySet(), config, null);
+
+    featureRegistry.addInline("foo", "foo_content();");
+    featureRegistry.addInline("bar", "does-not-matter");
+    featureRegistry.addInline("baz", "does-not-matter");
+    control.replay();
+
+    rewriter.rewrite(gadget);
+
+    Set<String> actual = getInjectedScript(gadget);
+    Set<String> expected = Sets.immutableSortedSet("bar", "baz");
+    assertEquals(expected, actual);
+    assertTrue("Requested scripts not inlined.", gadget.getContent().contains("foo_content();"));
+  }
+
+  @Test
+  public void urlFeaturesForcedExternal() throws Exception {
+    String gadgetXml =
+      "<Module><ModulePrefs title=''>" +
+      "  <Require feature='foo'/>" +
+      "  <Require feature='bar'/>" +
+      "</ModulePrefs>" +
+      "<Content type='html'/>" +
+      "</Module>";
+
+    GadgetSpec spec = new GadgetSpec(URI.create("#"), gadgetXml);
+
+    GadgetContext context = new GadgetContext() {
+      @Override
+      public String getParameter(String name) {
+        if (name.equals("libs")) {
+          return "baz";
+        }
+        return null;
+      }
+    };
+
+    Gadget gadget = new Gadget(context, spec, Collections.<JsLibrary>emptySet(), config, null);
+
+    featureRegistry.addInline("foo", "foo_content();");
+    featureRegistry.addExternal("bar", "http://example.org/external.js");
+    featureRegistry.addInline("baz", "does-not-matter");
+    control.replay();
+
+    rewriter.rewrite(gadget);
+
+    Set<String> actual = getInjectedScript(gadget);
+    Set<String> expected = Sets.immutableSortedSet("baz");
+    assertEquals(expected, actual);
+    assertTrue("Requested scripts not inlined.", gadget.getContent().contains("foo_content();"));
+    assertTrue("Forced external file not forced.",
+        gadget.getContent().contains("<script src=\"http://example.org/external.js\">"));
+  }
+
+  private JSONObject getJson(Gadget gadget) throws Exception {
+    Pattern prefsPattern
+        = Pattern.compile("(?:.*)gadgets\\.config\\.init\\((.*)\\);(?:.*)", Pattern.DOTALL);
+    Matcher matcher = prefsPattern.matcher(gadget.getContent());
+    assertTrue("gadgets.config.init not invoked.", matcher.matches());
+    return new JSONObject(matcher.group(1));
+  }
+
+  @Test
+  public void featureConfigurationInjected() throws Exception {
+    String gadgetXml =
+      "<Module><ModulePrefs title=''>" +
+      "  <Require feature='foo'/>" +
+      "</ModulePrefs>" +
+      "<Content type='html'/>" +
+      "</Module>";
+
+    GadgetSpec spec = new GadgetSpec(URI.create("#"), gadgetXml);
+    Gadget gadget
+        = new Gadget(new GadgetContext(), spec, Collections.<JsLibrary>emptySet(), config, null);
+
+    featureRegistry.addInline("foo", "");
+
+    JSONObject conf = new JSONObject();
+    conf.put("foo", "blah");
+    expect(config.getJsonObject("default", "gadgets.features")).andReturn(conf);
+    control.replay();
+
+    rewriter.rewrite(gadget);
+
+    JSONObject json = getJson(gadget);
+    assertEquals("blah", json.get("foo"));
+  }
+
+  @Test
+  public void featureConfigurationForced() throws Exception {
+    String gadgetXml =
+      "<Module><ModulePrefs title=''>" +
+      "  <Require feature='foo'/>" +
+      "</ModulePrefs>" +
+      "<Content type='html'/>" +
+      "</Module>";
+
+    GadgetSpec spec = new GadgetSpec(URI.create("#"), gadgetXml);
+
+    GadgetContext context = new GadgetContext() {
+      @Override
+      public String getParameter(String name) {
+        if (name.equals("libs")) {
+          return "bar";
+        }
+        return null;
+      }
+    };
+
+    Gadget gadget = new Gadget(context, spec, Collections.<JsLibrary>emptySet(), config, null);
+
+    featureRegistry.addInline("foo", "");
+    featureRegistry.addInline("bar", "");
+    JSONObject conf = new JSONObject();
+    conf.put("foo", "blah")
+        .put("bar", "baz");
+    expect(config.getJsonObject("default", "gadgets.features")).andReturn(conf);
+    control.replay();
+
+    rewriter.rewrite(gadget);
+
+    JSONObject json = getJson(gadget);
+    assertEquals("blah", json.get("foo"));
+    assertEquals("baz", json.get("bar"));
+  }
+
+  @Test
+  public void gadgetsUtilConfigInjected() throws Exception {
+    String gadgetXml =
+      "<Module><ModulePrefs title=''>" +
+      "  <Require feature='foo'>" +
+      "    <Param name='bar'>baz</Param>" +
+      "  </Require>" +
+      "</ModulePrefs>" +
+      "<Content type='html'/>" +
+      "</Module>";
+
+    GadgetSpec spec = new GadgetSpec(URI.create("#"), gadgetXml);
+    Gadget gadget
+        = new Gadget(new GadgetContext(), spec, Collections.<JsLibrary>emptySet(), config, null);
+
+    featureRegistry.addInline("foo", "");
+    JSONObject conf = new JSONObject();
+    conf.put("foo", "blah");
+    expect(config.getJsonObject("default", "gadgets.features")).andReturn(conf);
+    control.replay();
+
+    rewriter.rewrite(gadget);
+
+    JSONObject json = getJson(gadget);
+    assertEquals("blah", json.get("foo"));
+
+    JSONObject util = json.getJSONObject("core.util");
+    JSONObject foo = util.getJSONObject("foo");
+    assertEquals("baz", foo.get("bar"));
+  }
+
+  // TODO: Test for auth token stuff.
 
   @Test
   public void userPrefsInitializationInjected() throws Exception {
@@ -115,7 +446,7 @@ public class RenderingContentRewriterTest {
       "    <msg name='two'>bar</msg>" +
       "  </Locale>" +
       "</ModulePrefs>" +
-      "<Content type='html'>" + BODY_CONTENT + "</Content>" +
+      "<Content type='html'/>" +
       "</Module>";
 
     GadgetSpec spec = new GadgetSpec(URI.create("#"), gadgetXml);
@@ -126,12 +457,51 @@ public class RenderingContentRewriterTest {
 
     rewriter.rewrite(gadget);
 
-    Pattern prefsPattern = Pattern.compile("(?:.*)gadgets\\.Prefs\\.setMessages_\\((.*)\\);(?:.*)");
+    Pattern prefsPattern
+        = Pattern.compile("(?:.*)gadgets\\.Prefs\\.setMessages_\\((.*)\\);(?:.*)", Pattern.DOTALL);
     Matcher matcher = prefsPattern.matcher(gadget.getContent());
     assertTrue("gadgets.Prefs.setMessages_ not invoked.", matcher.matches());
     JSONObject json = new JSONObject(matcher.group(1));
     assertEquals("foo", json.get("one"));
     assertEquals("bar", json.get("two"));
+  }
+
+  @Test(expected = RuntimeException.class)
+  public void unsupportedFeatureThrows() throws Exception {
+    String gadgetXml =
+      "<Module><ModulePrefs title=''>" +
+      "  <Require feature='foo'/>" +
+      "</ModulePrefs>" +
+      "<Content type='html'/>" +
+      "</Module>";
+
+    GadgetSpec spec = new GadgetSpec(URI.create("#"), gadgetXml);
+    Gadget gadget
+        = new Gadget(new GadgetContext(), spec, Collections.<JsLibrary>emptySet(), config, null);
+
+    control.replay();
+
+    rewriter.rewrite(gadget);
+  }
+
+  @Test
+  public void unsupportedOptionalFeatureDoesNotThrow() throws Exception {
+    String gadgetXml =
+      "<Module><ModulePrefs title=''>" +
+      "  <Optional feature='foo'/>" +
+      "</ModulePrefs>" +
+      "<Content type='html'/>" +
+      "</Module>";
+
+    GadgetSpec spec = new GadgetSpec(URI.create("#"), gadgetXml);
+    Gadget gadget
+        = new Gadget(new GadgetContext(), spec, Collections.<JsLibrary>emptySet(), config, null);
+
+    control.replay();
+
+    rewriter.rewrite(gadget);
+
+    // rewrite will throw if the optional unsupported feature doesn't work.
   }
 
   /**
@@ -144,6 +514,59 @@ public class RenderingContentRewriterTest {
         return MessageBundle.EMPTY;
       }
       return spec.getModulePrefs().getLocale(locale).getMessageBundle();
+    }
+  }
+
+  private static class FakeUrlGenerator implements UrlGenerator {
+    public String getBundledJsParam(Collection<String> features, GadgetContext context) {
+      throw new UnsupportedOperationException();
+    }
+
+    public String getIframeUrl(Gadget gadget) {
+      throw new UnsupportedOperationException();
+    }
+
+    public String getBundledJsUrl(Collection<String> features, GadgetContext context) {
+      return "/js/" + Join.join(":", features);
+    }
+  }
+
+  private static class FakeGadgetFeatureRegistry extends GadgetFeatureRegistry {
+    private final Map<String, GadgetFeature> features = Maps.newHashMap();
+
+    public void addInline(String name, String content) throws GadgetException {
+      List<JsLibrary> libs = Lists.newArrayList();
+      libs.add(JsLibrary.create(JsLibrary.Type.INLINE, content, name, null));
+      features.put(name, new GadgetFeature(name, libs, null));
+    }
+
+    public void addExternal(String name, String content) throws GadgetException {
+      List<JsLibrary> libs = Lists.newArrayList();
+      libs.add(JsLibrary.create(JsLibrary.Type.URL, content, name, null));
+      features.put(name, new GadgetFeature(name, libs, null));
+    }
+
+    public FakeGadgetFeatureRegistry() throws GadgetException {
+      super(null, null);
+    }
+
+    @Override
+    public Collection<GadgetFeature> getFeatures(Collection<String> needed) {
+      return getFeatures(needed, new HashSet<String>());
+    }
+
+    @Override
+    public Collection<GadgetFeature> getFeatures(Collection<String> needed,
+        Collection<String> unsupported) {
+      List<GadgetFeature> out = Lists.newArrayList();
+      for (String name : needed) {
+        if (features.containsKey(name)) {
+          out.add(features.get(name));
+        } else {
+          unsupported.add(name);
+        }
+      }
+      return out;
     }
   }
 }

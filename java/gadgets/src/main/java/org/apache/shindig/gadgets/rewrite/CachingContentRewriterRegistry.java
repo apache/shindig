@@ -45,7 +45,7 @@ public class CachingContentRewriterRegistry extends DefaultContentRewriterRegist
   private String rewritersKey;
 
   @Inject
-  public CachingContentRewriterRegistry(List<? extends ContentRewriter> rewriters,
+  public CachingContentRewriterRegistry(List<ContentRewriter> rewriters,
       GadgetHtmlParser htmlParser,
       CacheProvider cacheProvider,
       @Named("shindig.rewritten-content.cache.capacity")int capacity) {
