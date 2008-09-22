@@ -42,11 +42,26 @@ opensocial.template = opensocial.template || {};
 var os = opensocial.template;
 
 /**
- * Sends a log to the console.
+ * Sends a log to the console. Currently uses Firebug console if available,
+ * otherwise supresses the message.
+ * TODO: What other logging APIs can we use? Does gadgets provide one?
+ * @param {string} msg The message to send.
  */
 os.log = function(msg) {
-  log("LOG: " + msg);
+  var console = window['console'];
+  if (console && console.log) {
+    console.log(msg);
+  }
 };
+
+// Register our logging function as the global logger function.
+// TODO: Remove global variables once JsTemplates supports setting logger
+if (typeof log != 'undefined') {
+  // Overwrite existing variable if present.
+  log = os.log;
+} else {
+  window['log'] = os.log;
+}
 
 /**
  * Logs a warning to the console.
