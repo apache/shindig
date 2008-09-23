@@ -57,7 +57,7 @@ public class HttpResponseBuilder {
   }
 
   /**
-   * @param responseString The response string.  Converted to UTF-8 bytes and copied when set.
+   * @param body The response string.  Converted to UTF-8 bytes and copied when set.
    */
   public HttpResponseBuilder setResponseString(String body) {
     responseBytes = CharsetUtil.getUtf8Bytes(body);
