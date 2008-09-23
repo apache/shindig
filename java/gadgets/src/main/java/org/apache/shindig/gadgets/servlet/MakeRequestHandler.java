@@ -24,6 +24,7 @@ import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.common.util.Utf8UrlCoder;
 import org.apache.shindig.gadgets.AuthType;
 import org.apache.shindig.gadgets.FeedProcessor;
+import org.apache.shindig.gadgets.FetchResponseUtils;
 import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.http.ContentFetcherFactory;
 import org.apache.shindig.gadgets.http.HttpRequest;
@@ -34,13 +35,10 @@ import org.apache.shindig.gadgets.rewrite.ContentRewriterRegistry;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
-import java.util.List;
-import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -171,42 +169,6 @@ public class MakeRequestHandler extends ProxyBase {
   }
 
   /**
-   * Convert a response to a JSON object.  static so it can be used by HttpPreloaders as well.
-   * 
-   * The returned JSON object contains the following values:
-   * rc: integer response code
-   * body: string response body
-   * headers: object, keys are header names, values are lists of header values
-   * 
-   * @param response the response body
-   * @param body string to use as the body of the response.
-   * @return a JSONObject representation of the response body.
-   */
-  public static JSONObject getResponseAsJson(HttpResponse response, String body)
-      throws JSONException {
-    JSONObject resp = new JSONObject();
-    resp.put("rc", response.getHttpStatusCode());
-    resp.put("body", body);
-    JSONObject headers = new JSONObject();
-    addHeaders(headers, response, "set-cookie");
-    addHeaders(headers, response, "location");
-    resp.put("headers", headers);
-    // Merge in additional response data
-    for (Map.Entry<String, String> entry : response.getMetadata().entrySet()) {
-      resp.put(entry.getKey(), entry.getValue());
-    }
-    return resp;
-  }
-  
-  private static void addHeaders(JSONObject headers, HttpResponse response, String headerName)
-      throws JSONException {
-    List<String> values = response.getHeaders(headerName);
-    if (!values.isEmpty()) {
-      headers.put(headerName.toLowerCase(), new JSONArray(values));
-    }
-  }
-  
-  /**
    * Format a response as JSON, including additional JSON inserted by
    * chained content fetchers.
    */
@@ -218,7 +180,7 @@ public class MakeRequestHandler extends ProxyBase {
       if ("FEED".equals(request.getParameter(CONTENT_TYPE_PARAM))) {
         body = processFeed(originalUrl, request, body);
       }
-      JSONObject resp = getResponseAsJson(results, body);
+      JSONObject resp = FetchResponseUtils.getResponseAsJson(results, body);
 
       if (authToken != null) {
         String updatedAuthToken = authToken.getUpdatedToken();

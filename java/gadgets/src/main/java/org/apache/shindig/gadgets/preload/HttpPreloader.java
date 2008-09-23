@@ -19,12 +19,12 @@
 package org.apache.shindig.gadgets.preload;
 
 import org.apache.shindig.common.uri.Uri;
+import org.apache.shindig.gadgets.FetchResponseUtils;
 import org.apache.shindig.gadgets.GadgetContext;
 import org.apache.shindig.gadgets.http.ContentFetcherFactory;
 import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.http.HttpResponse;
 import org.apache.shindig.gadgets.oauth.OAuthArguments;
-import org.apache.shindig.gadgets.servlet.MakeRequestHandler;
 import org.apache.shindig.gadgets.spec.GadgetSpec;
 import org.apache.shindig.gadgets.spec.Preload;
 import org.json.JSONException;
@@ -92,7 +92,7 @@ public class HttpPreloader implements Preloader {
     public HttpPreloadData(HttpResponse response) {
       JSONObject data = null;
       try {
-        data = MakeRequestHandler.getResponseAsJson(response, response.getResponseAsString());
+        data = FetchResponseUtils.getResponseAsJson(response, response.getResponseAsString());
       } catch (JSONException e) {
         data = new JSONObject();
       }
