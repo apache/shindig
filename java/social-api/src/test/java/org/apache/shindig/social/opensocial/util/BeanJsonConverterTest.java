@@ -225,4 +225,12 @@ public class BeanJsonConverterTest extends TestCase {
     }
   }
 
+  public void testJsonToPerson() throws Exception {
+    String jsonPerson = "{age : '10', hasApp : 'true'}";
+    Person result = beanJsonConverter.convertToObject(jsonPerson, Person.class);
+
+    assertEquals(10, result.getAge().intValue());
+    assertEquals(true, result.getHasApp().booleanValue());
+  }
+
 }
