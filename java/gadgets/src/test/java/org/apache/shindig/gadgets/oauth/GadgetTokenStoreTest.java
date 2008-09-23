@@ -32,6 +32,7 @@ import org.apache.shindig.gadgets.oauth.AccessorInfo.OAuthParamLocation;
 import org.apache.shindig.gadgets.oauth.BasicOAuthStoreConsumerKeyAndSecret.KeyType;
 import org.apache.shindig.gadgets.oauth.OAuthArguments.UseToken;
 import org.apache.shindig.gadgets.oauth.OAuthStore.TokenInfo;
+import org.apache.shindig.gadgets.oauth.testing.FakeOAuthServiceProvider;
 import org.junit.Before;
 import org.junit.Test;
 
