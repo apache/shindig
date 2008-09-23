@@ -17,13 +17,16 @@
  * under the License.
  */
 
-package org.apache.shindig.gadgets.oauth;
+package org.apache.shindig.gadgets.oauth.testing;
 
 import org.apache.shindig.auth.SecurityToken;
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.common.util.CharsetUtil;
 import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.http.HttpResponse;
+import org.apache.shindig.gadgets.oauth.OAuthArguments;
+import org.apache.shindig.gadgets.oauth.OAuthFetcher;
+import org.apache.shindig.gadgets.oauth.OAuthFetcherConfig;
 import org.apache.shindig.gadgets.oauth.OAuthArguments.UseToken;
 
 /**

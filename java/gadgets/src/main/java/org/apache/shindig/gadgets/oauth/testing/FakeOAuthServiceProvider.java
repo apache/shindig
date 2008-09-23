@@ -15,7 +15,7 @@
  * KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-package org.apache.shindig.gadgets.oauth;
+package org.apache.shindig.gadgets.oauth.testing;
 
 import net.oauth.OAuth;
 import net.oauth.OAuthAccessor;
@@ -35,7 +35,6 @@ import org.apache.shindig.gadgets.http.HttpResponse;
 import org.apache.shindig.gadgets.http.HttpResponseBuilder;
 import org.apache.shindig.gadgets.oauth.AccessorInfo.OAuthParamLocation;
 
-import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.io.IOException;
@@ -67,8 +66,35 @@ public class FakeOAuthServiceProvider implements HttpFetcher {
   public final static String CONSUMER_KEY = "consumer";
   public final static String CONSUMER_SECRET = "secret";
   
-  public final static String SIGNED_FETCH_CONSUMER_KEY = "signedfetch";
+  public static final String PRIVATE_KEY_TEXT =
+    "MIICdgIBADANBgkqhkiG9w0BAQEFAASCAmAwggJcAgEAAoGBALRiMLAh9iimur8V" +
+    "A7qVvdqxevEuUkW4K+2KdMXmnQbG9Aa7k7eBjK1S+0LYmVjPKlJGNXHDGuy5Fw/d" +
+    "7rjVJ0BLB+ubPK8iA/Tw3hLQgXMRRGRXXCn8ikfuQfjUS1uZSatdLB81mydBETlJ" +
+    "hI6GH4twrbDJCR2Bwy/XWXgqgGRzAgMBAAECgYBYWVtleUzavkbrPjy0T5FMou8H" +
+    "X9u2AC2ry8vD/l7cqedtwMPp9k7TubgNFo+NGvKsl2ynyprOZR1xjQ7WgrgVB+mm" +
+    "uScOM/5HVceFuGRDhYTCObE+y1kxRloNYXnx3ei1zbeYLPCHdhxRYW7T0qcynNmw" +
+    "rn05/KO2RLjgQNalsQJBANeA3Q4Nugqy4QBUCEC09SqylT2K9FrrItqL2QKc9v0Z" +
+    "zO2uwllCbg0dwpVuYPYXYvikNHHg+aCWF+VXsb9rpPsCQQDWR9TT4ORdzoj+Nccn" +
+    "qkMsDmzt0EfNaAOwHOmVJ2RVBspPcxt5iN4HI7HNeG6U5YsFBb+/GZbgfBT3kpNG" +
+    "WPTpAkBI+gFhjfJvRw38n3g/+UeAkwMI2TJQS4n8+hid0uus3/zOjDySH3XHCUno" +
+    "cn1xOJAyZODBo47E+67R4jV1/gzbAkEAklJaspRPXP877NssM5nAZMU0/O/NGCZ+" +
+    "3jPgDUno6WbJn5cqm8MqWhW1xGkImgRk+fkDBquiq4gPiT898jusgQJAd5Zrr6Q8" +
+    "AO/0isr/3aa6O6NLQxISLKcPDk2NOccAfS/xOtfOz4sJYM3+Bs4Io9+dZGSDCA54" +
+    "Lw03eHTNQghS0A==";
 
+  public static final String CERTIFICATE_TEXT =
+    "-----BEGIN CERTIFICATE-----\n" +
+    "MIIBpjCCAQ+gAwIBAgIBATANBgkqhkiG9w0BAQUFADAZMRcwFQYDVQQDDA5UZXN0\n" +
+    "IFByaW5jaXBhbDAeFw03MDAxMDEwODAwMDBaFw0zODEyMzEwODAwMDBaMBkxFzAV\n" +
+    "BgNVBAMMDlRlc3QgUHJpbmNpcGFsMIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKB\n" +
+    "gQC0YjCwIfYoprq/FQO6lb3asXrxLlJFuCvtinTF5p0GxvQGu5O3gYytUvtC2JlY\n" +
+    "zypSRjVxwxrsuRcP3e641SdASwfrmzyvIgP08N4S0IFzEURkV1wp/IpH7kH41Etb\n" +
+    "mUmrXSwfNZsnQRE5SYSOhh+LcK2wyQkdgcMv11l4KoBkcwIDAQABMA0GCSqGSIb3\n" +
+    "DQEBBQUAA4GBAGZLPEuJ5SiJ2ryq+CmEGOXfvlTtEL2nuGtr9PewxkgnOjZpUy+d\n" +
+    "4TvuXJbNQc8f4AMWL/tO9w0Fk80rWKp9ea8/df4qMq5qlFWlx6yOLQxumNOmECKb\n" +
+    "WpkUQDIDJEoFUzKMVuJf4KO/FJ345+BNLGgbJ6WujreoM1X/gYfdnJ/J\n" +
+    "-----END CERTIFICATE-----";
+  
   private static class TokenState {
     String tokenSecret;
     OAuthConsumer consumer;
@@ -140,7 +166,7 @@ public class FakeOAuthServiceProvider implements HttpFetcher {
         REQUEST_TOKEN_URL, APPROVAL_URL, ACCESS_TOKEN_URL);
     
     signedFetchConsumer = new OAuthConsumer(null, null, null, null);
-    signedFetchConsumer.setProperty(RSA_SHA1.X509_CERTIFICATE, OAuthFetcherTest.CERTIFICATE_TEXT);
+    signedFetchConsumer.setProperty(RSA_SHA1.X509_CERTIFICATE, CERTIFICATE_TEXT);
 
     oauthConsumer = new OAuthConsumer(null, CONSUMER_KEY, CONSUMER_SECRET, provider);
     
@@ -149,14 +175,6 @@ public class FakeOAuthServiceProvider implements HttpFetcher {
     vagueErrors = false;
     validParamLocations = new HashSet<OAuthParamLocation>();
     validParamLocations.add(OAuthParamLocation.URI_QUERY);
-  }
-  
-  public OAuthConsumer getConsumer(String consumerKey) {
-    if (consumerKey.equals("signedfetch")) {
-      return signedFetchConsumer;
-    } else {
-      return oauthConsumer;
-    }
   }
 
   public void setVagueErrors(boolean vagueErrors) {
@@ -211,8 +229,6 @@ public class FakeOAuthServiceProvider implements HttpFetcher {
     OAuthConsumer consumer;
     if (CONSUMER_KEY.equals(requestConsumer)) {
       consumer = oauthConsumer;
-    } else if (SIGNED_FETCH_CONSUMER_KEY.equals(requestConsumer)) {
-      consumer = signedFetchConsumer;
     } else {
       return makeOAuthProblemReport(
           "consumer_key_unknown", "invalid consumer: " + requestConsumer);
