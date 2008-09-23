@@ -74,7 +74,8 @@ public class JsonRpcServlet extends ApiServlet {
     setCharacterEncodings(servletRequest, servletResponse);
 
     try {
-      String content = IOUtils.toString(servletRequest.getReader());
+      String content = IOUtils.toString(servletRequest.getInputStream(),
+          servletRequest.getCharacterEncoding());
       if ((content.indexOf('[') != -1) && content.indexOf('[') < content.indexOf('{')) {
         // Is a batch
         JSONArray batch = new JSONArray(content);
