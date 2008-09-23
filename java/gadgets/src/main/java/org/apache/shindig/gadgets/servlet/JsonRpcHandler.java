@@ -169,7 +169,8 @@ public class JsonRpcHandler {
               .put("displayName", pref.getDisplayName())
               .put("type", pref.getDataType().toString().toLowerCase())
               .put("default", pref.getDefaultValue())
-              .put("enumValues", pref.getEnumValues());
+              .put("enumValues", pref.getEnumValues())
+              .put("orderedEnumValues", getOrderedEnums(pref));
           userPrefs.put(pref.getName(), up);
         }
 
@@ -215,6 +216,19 @@ public class JsonRpcHandler {
         throw new RpcException(context, e);
       }
     }
+    
+    private List<JSONObject> getOrderedEnums(UserPref pref) throws JSONException {
+      List<UserPref.EnumValuePair> orderedEnums = pref.getOrderedEnumValues();
+      List<JSONObject> jsonEnums = new ArrayList<JSONObject>(orderedEnums.size());
+      for (UserPref.EnumValuePair evp : orderedEnums) {
+        JSONObject curEnum = new JSONObject();
+        curEnum.put("value", evp.getValue());
+        curEnum.put("displayValue", evp.getDisplayValue());
+        jsonEnums.add(curEnum);
+      }
+      return jsonEnums;
+    }
+    
     public Job(GadgetContext context) {
       this.context = context;
     }

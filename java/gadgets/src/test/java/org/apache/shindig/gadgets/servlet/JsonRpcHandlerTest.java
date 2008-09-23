@@ -50,6 +50,12 @@ public class JsonRpcHandlerTest extends ServletTestFixture {
         "<ModulePrefs title=\"" + SPEC_TITLE + "\">" +
         "  <Link rel='" + LINK_REL + "' href='" + LINK_HREF + "'/>" +
         "</ModulePrefs>" +
+        "<UserPref name=\"up_one\">" +
+        "  <EnumValue value=\"val1\" display_value=\"disp1\"/>" +
+        "  <EnumValue value=\"abc\" display_value=\"disp2\"/>" +
+        "  <EnumValue value=\"z_xabc\" display_value=\"disp3\"/>" +
+        "  <EnumValue value=\"foo\" display_value=\"disp4\"/>" +
+        "</UserPref>" +
         "<Content type=\"html\"" +
         " preferred_height = \"" + PREFERRED_HEIGHT + '\"' +
         " preferred_width = \"" + PREFERRED_WIDTH + '\"' +
@@ -99,6 +105,24 @@ public class JsonRpcHandlerTest extends ServletTestFixture {
     assertEquals(PREFERRED_HEIGHT, view.getInt("preferredHeight"));
     assertEquals(PREFERRED_WIDTH, view.getInt("preferredWidth"));
     assertEquals(LINK_HREF, gadget.getJSONObject("links").getString(LINK_REL));
+    
+    JSONObject userPrefs = gadget.getJSONObject("userPrefs");
+    assertNotNull(userPrefs);
+    JSONObject userPrefData = userPrefs.getJSONObject("up_one");
+    assertNotNull(userPrefData);
+    JSONObject upEnums = userPrefData.getJSONObject("enumValues");
+    assertNotNull(upEnums);
+    assertEquals("disp1", upEnums.get("val1"));
+    assertEquals("disp2", upEnums.get("abc"));
+    assertEquals("disp3", upEnums.get("z_xabc"));
+    assertEquals("disp4", upEnums.get("foo"));
+    JSONArray orderedEnums = userPrefData.getJSONArray("orderedEnumValues");
+    assertNotNull(orderedEnums);
+    assertEquals(4, orderedEnums.length());
+    assertEquals("val1", orderedEnums.getJSONObject(0).getString("value"));
+    assertEquals("abc", orderedEnums.getJSONObject(1).getString("value"));
+    assertEquals("z_xabc", orderedEnums.getJSONObject(2).getString("value"));
+    assertEquals("foo", orderedEnums.getJSONObject(3).getString("value"));
   }
 
   // TODO: Verify that user pref specs are returned correctly.
