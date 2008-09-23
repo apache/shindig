@@ -43,7 +43,11 @@ shindig.samplecontainer = {};
   var socialDataPath = document.location.protocol + "//" + document.location.host
     + "/social/rest/samplecontainer/";
 
-  var gadgetUrl = baseUrl + 'examples/SocialHelloWorld.xml';
+  var gadgetUrlMatches = /[?&]url=((?:[^#&]+|&amp;)+)/.exec(parentUrl);
+  var gadgetUrl = (gadgetUrlMatches)
+      ? gadgetUrlMatches[1]
+      : baseUrl + 'examples/SocialHelloWorld.xml';
+
   var gadgetUrlCookie = 'sampleContainerGadgetUrl';
 
   var stateFileUrl = baseUrl + '../sampledata/canonicaldb.json';
@@ -120,7 +124,7 @@ shindig.samplecontainer = {};
       "POST_DATA" : opt_postParams};
 
     if (!opt_excludeSecurityToken) {
-	  url = socialDataPath + url + "?st=" + gadget.secureToken;
+      url = socialDataPath + url + "?st=" + gadget.secureToken;
     }
 
     gadgets.io.makeNonProxiedRequest(url,
@@ -135,7 +139,7 @@ shindig.samplecontainer = {};
   };
 
   function generateGadgets(metadata) {
-	// TODO: The gadget.js file should really have a clearGadgets method
+    // TODO: The gadget.js file should really have a clearGadgets method
     gadgets.container.gadgets_ = {};
     for (var i = 0; i < metadata.gadgets.length; i++) {
       gadget = gadgets.container.createGadget(
@@ -152,7 +156,7 @@ shindig.samplecontainer = {};
   };
 
   function refreshGadgets(metadata) {
-	// TODO: The gadget.js file should really have a getGadgets method
+    // TODO: The gadget.js file should really have a getGadgets method
     for (var gadget in gadgets.container.gadgets_) {
       var newtitle = metadata.gadgets[0].title;
       var specUrl = metadata.gadgets[0].url;
@@ -178,14 +182,22 @@ shindig.samplecontainer = {};
       }]
     };
 
-    sendRequestToServer("/gadgets/metadata", "POST", 
+    sendRequestToServer("/gadgets/metadata", "POST",
         gadgets.json.stringify(request), opt_callback, true);
   }
 
   /**
    * Public Functions
    */
-
+  shindig.samplecontainer.initSampleContainer = function() {
+     // Upon initial load, check for the cache query parameter (we don't want
+     // to overwrite when clicking "refresh all")
+     var cacheUrlMatches = /[?&]cache=([01])/.exec(parentUrl);
+     if (cacheUrlMatches && cacheUrlMatches[1] == "0") {
+       document.getElementById("useCacheCheckbox").checked = false;
+     }
+  }
+  
   shindig.samplecontainer.initGadget = function() {
     // Fetch cookies
     var cookieGadgetUrl = decodeURIComponent(shindig.cookies.get(gadgetUrlCookie));
