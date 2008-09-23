@@ -29,11 +29,12 @@ import org.easymock.classextension.EasyMock;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
-import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.io.StringReader;
+import java.io.InputStream;
+import java.io.ByteArrayInputStream;
 import java.util.concurrent.Future;
+import javax.servlet.ServletInputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -231,9 +232,16 @@ public class JsonRpcServletTest extends TestCase {
     EasyMock.reset(req, res, peopleHandler, activityHandler, injector, jsonConverter);
   }
 
-  private void setupRequest(String json)
-      throws IOException {
-    EasyMock.expect(req.getReader()).andStubReturn(new BufferedReader(new StringReader(json)));
+  private void setupRequest(String json) throws IOException {
+    final InputStream in = new ByteArrayInputStream(json.getBytes());
+    ServletInputStream stream = new ServletInputStream() {
+      @Override
+      public int read() throws IOException {
+        return in.read();
+      }
+    };
+
+    EasyMock.expect(req.getInputStream()).andStubReturn(stream);
     EasyMock.expect(req.getMethod()).andStubReturn("POST");
     EasyMock.expect(req.getAttribute(EasyMock.isA(String.class))).andReturn(FAKE_GADGET_TOKEN);
     EasyMock.expect(req.getCharacterEncoding()).andStubReturn("UTF-8");

@@ -71,7 +71,7 @@ public class RestfulRequestItem extends RequestItem {
 
     try {
       ServletInputStream is = servletRequest.getInputStream();
-      postData = new String(IOUtils.toByteArray(is));
+      postData = IOUtils.toString(is, servletRequest.getCharacterEncoding());
     } catch (IOException e) {
       throw new RuntimeException("Could not get the post data from the request", e);
     }
