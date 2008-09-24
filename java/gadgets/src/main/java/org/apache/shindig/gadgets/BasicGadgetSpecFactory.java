@@ -32,6 +32,7 @@ import com.google.inject.Singleton;
 import com.google.inject.name.Named;
 
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
@@ -43,6 +44,9 @@ import java.util.logging.Logger;
  */
 @Singleton
 public class BasicGadgetSpecFactory implements GadgetSpecFactory {
+  public static final String RAW_GADGETSPEC_XML_PARAM_NAME = "rawxml";
+  public static final URI RAW_GADGET_URI = getRawGadgetUri();
+  
   static final Logger logger = Logger.getLogger(BasicGadgetSpecFactory.class.getName());
 
   private final HttpFetcher fetcher;
@@ -50,6 +54,13 @@ public class BasicGadgetSpecFactory implements GadgetSpecFactory {
   private final TtlCache<URI, GadgetSpec> ttlCache;
 
   public GadgetSpec getGadgetSpec(GadgetContext context) throws GadgetException {
+    String rawxml = context.getParameter(RAW_GADGETSPEC_XML_PARAM_NAME);
+    if (rawxml != null) {
+      // Set URI to a fixed, safe value (localhost), preventing a gadget rendered
+      // via raw XML (eg. via POST) to be rendered on a locked domain of any other
+      // gadget whose spec is hosted non-locally.
+      return new GadgetSpec(RAW_GADGET_URI, rawxml);
+    }
     return getGadgetSpec(context.getUrl(), context.getIgnoreCache());
   }
   
@@ -129,6 +140,15 @@ public class BasicGadgetSpecFactory implements GadgetSpecFactory {
     ttlCache.addElement(url, spec, response.getCacheExpiration());
     
     return spec;
+  }
+  
+  private static URI getRawGadgetUri() {
+    try {
+      return new URI("http", "localhost", "/raw.xml", null);
+    } catch (URISyntaxException e) {
+      // Never happens
+    }
+    return null;
   }
 
   @Inject

@@ -52,4 +52,10 @@ public class GadgetRenderingServlet extends InjectedServlet {
     }
     renderProvider.get().process(req, resp);
   }
+  
+  @Override
+  protected void doPost(HttpServletRequest req, HttpServletResponse resp) 
+      throws IOException {
+    renderProvider.get().process(req, resp);
+  }
 }
