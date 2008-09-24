@@ -18,12 +18,17 @@
 package org.apache.shindig.gadgets;
 
 import org.apache.shindig.common.ContainerConfig;
+import org.apache.shindig.common.util.Check;
 import org.apache.shindig.gadgets.http.HttpResponse;
+import org.apache.shindig.gadgets.parse.GadgetHtmlNode;
 import org.apache.shindig.gadgets.parse.GadgetHtmlParser;
+import org.apache.shindig.gadgets.preload.Preloads;
 import org.apache.shindig.gadgets.spec.GadgetSpec;
 import org.apache.shindig.gadgets.spec.LocaleSpec;
 import org.apache.shindig.gadgets.spec.Preload;
 import org.apache.shindig.gadgets.spec.View;
+
+import edu.emory.mathcs.backport.java.util.Collections;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -37,41 +42,109 @@ import java.util.concurrent.Future;
  * Intermediary representation of all state associated with processing
  * of a single gadget request.
  */
-public class Gadget extends MutableContent {
-  private final GadgetContext context;
-  
+public class Gadget {
+  private GadgetContext context;
+  private GadgetSpec spec;
+  private Preloads preloads;
+  private MutableContent mutableContent;
+
+  @Deprecated
+  private Collection<JsLibrary> jsLibraries = Collections.emptyList();
+
+  @Deprecated
+  private final Map<Preload, Future<HttpResponse>> preloadMap
+      = new HashMap<Preload, Future<HttpResponse>>();
+
+  @Deprecated
+  private View currentView;
+
+  public Gadget() {}
+
   /**
-   * @return The context in which this gadget was created.
+   * @deprecated Use default ctor and setter methods instead.
    */
+  @Deprecated
+  public Gadget(GadgetContext context, GadgetSpec spec,
+      Collection<JsLibrary> jsLibraries, ContainerConfig containerConfig,
+      GadgetHtmlParser contentParser) {
+
+    this.context = context;
+    this.spec = spec;
+    this.jsLibraries = jsLibraries;
+    this.currentView = getView(containerConfig);
+
+    mutableContent = new MutableContent(contentParser);
+    if (this.currentView != null) {
+      // View might be invalid or associated with no content (type=URL)
+      mutableContent.setContent(this.currentView.getContent());
+    } else {
+      mutableContent.setContent(null);
+    }
+  }
+
+  /**
+   * @param context The request that the gadget is being processed for.
+   */
+  public Gadget setContext(GadgetContext context) {
+    this.context = context;
+    return this;
+  }
+
   public GadgetContext getContext() {
     return context;
   }
 
-  private final GadgetSpec spec;
-  
   /**
-   * @return The spec from which this gadget was originally built.
+   * @param spec The spec for the gadget that is being processed.
    */
+  public Gadget setSpec(GadgetSpec spec) {
+    this.spec = spec;
+    return this;
+  }
+
   public GadgetSpec getSpec() {
     return spec;
   }
 
-  private final Collection<JsLibrary> jsLibraries;
-  
   /**
-   * @return A mutable collection of JsLibrary objects attached to this Gadget.
+   * @param mutableContent Content associated with rendering this gadget.
    */
-  public Collection<JsLibrary> getJsLibraries() {
-    return jsLibraries;
+  public Gadget setMutableContent(MutableContent mutableContent) {
+    this.mutableContent = mutableContent;
+    return this;
   }
 
-  private final Map<Preload, Future<HttpResponse>> preloads
-      = new HashMap<Preload, Future<HttpResponse>>();
-  
+  public MutableContent getMutableContent() {
+    return mutableContent;
+  }
+
   /**
-   * @return A mutable map of preloads.
+   * Sets the current content of the rendered output of this gadget.
    */
-  public Map<Preload, Future<HttpResponse>> getPreloadMap() {
+  public Gadget setContent(String newContent) {
+    Check.notNull(mutableContent, "Can not set content without setting mutable content.");
+    mutableContent.setContent(newContent);
+    return this;
+  }
+
+  public String getContent() {
+    Check.notNull(mutableContent, "Can not get content without setting mutable content.");
+    return mutableContent.getContent();
+  }
+
+  public GadgetHtmlNode getParseTree() {
+    return mutableContent.getParseTree();
+  }
+
+  /**
+   * @param preloads The preloads for the gadget that is being processed.
+   */
+  public Gadget setPreloads(Preloads preloads) {
+    this.preloads = preloads;
+    return this;
+  }
+
+  public Preloads getPreloads() {
     return preloads;
   }
 
@@ -85,12 +158,29 @@ public class Gadget extends MutableContent {
   public LocaleSpec getLocale() {
     return spec.getModulePrefs().getLocale(context.getLocale());
   }
-  
-  private final View currentView;
-  
+
+
+
   /**
-   * @return The (immutable) View applicable for the current request (part of GadgetSpec).
+   * @return A mutable collection of JsLibrary objects attached to this Gadget.
    */
+  @Deprecated
+  public Collection<JsLibrary> getJsLibraries() {
+    return jsLibraries;
+  }
+
+  /**
+   * @return A mutable map of preloads.
+   */
+  @Deprecated
+  public Map<Preload, Future<HttpResponse>> getPreloadMap() {
+    return preloadMap;
+  }
+
+  /**
+   * @return The View applicable for the current request.
+   */
+  @Deprecated
   public View getCurrentView() {
     return currentView;
   }
@@ -101,6 +191,7 @@ public class Gadget extends MutableContent {
    * @param config The container configuration; used to look for any view name
    *        aliases for the container specified in the context.
    */
+  @Deprecated
   View getView(ContainerConfig config) {
     String viewName = context.getView();
     View view = spec.getView(viewName);
@@ -126,21 +217,5 @@ public class Gadget extends MutableContent {
       }
     }
     return view;
-  }
-  public Gadget(GadgetContext context, GadgetSpec spec,
-      Collection<JsLibrary> jsLibraries, ContainerConfig containerConfig,
-      GadgetHtmlParser contentParser) {
-    super(contentParser);
-    
-    this.context = context;
-    this.spec = spec;
-    this.jsLibraries = jsLibraries;
-    this.currentView = getView(containerConfig);
-    if (this.currentView != null) {
-      // View might be invalid or associated with no content (type=URL)
-      setContent(this.currentView.getContent());
-    } else {
-      setContent(null);
-    }
   }
 }

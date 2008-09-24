@@ -19,10 +19,10 @@
 package org.apache.shindig.gadgets.render;
 
 import org.apache.shindig.common.uri.Uri;
+import org.apache.shindig.gadgets.Gadget;
 import org.apache.shindig.gadgets.GadgetContext;
 import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.GadgetSpecFactory;
-import org.apache.shindig.gadgets.ProcessedGadget;
 import org.apache.shindig.gadgets.http.ContentFetcherFactory;
 import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.http.HttpResponse;
@@ -67,7 +67,7 @@ public class Renderer {
     try {
       GadgetSpec spec = gadgetSpecFactory.getGadgetSpec(context);
 
-      ProcessedGadget gadget = new ProcessedGadget()
+      Gadget gadget = new Gadget()
           .setContext(context)
           .setSpec(spec);
 
