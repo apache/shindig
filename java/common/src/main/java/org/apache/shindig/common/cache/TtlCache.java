@@ -104,8 +104,8 @@ public class TtlCache<K, V> implements Cache<K, V> {
   }
   
   /**
-   * Add an element to the cache, with the intended amount of time
-   * it should live in the cache provided in milliseconds. If below
+   * Add an element to the cache, with the intended expiration time
+   * for its cache entry provided in milliseconds. If below
    * minTtl, minTtl is used. If above maxTtl, maxTtl is used.
    * @param key Element key.
    * @param val Element value to cache.
@@ -113,11 +113,31 @@ public class TtlCache<K, V> implements Cache<K, V> {
    */
   public void addElement(K key, V val, long expiration) {
     long now = timeSource.currentTimeMillis();
-    expiration = Math.max(now + minTtl, Math.min(now + maxTtl, expiration));
+    long minAllowed = Math.min(now + maxTtl, expiration);
+    if (now > 0 && maxTtl > 0 && minAllowed < 0) {
+      // Long-value overflow.
+      minAllowed = maxTtl;
+    }
+    expiration = Math.max(now + minTtl, minAllowed);
     TimeoutPair<V> entry = new TimeoutPair<V>(val, expiration);
     synchronized(baseCache) {
       baseCache.addElement(key, entry);
     }
+  }
+  
+  /**
+   * Add an element to the cache with the intended number of milliseconds,
+   * from the time of add, it is expected to live in the cache. This method
+   * is less precise than standard {@code addElement}, to which is specified
+   * the exact expiration time (also in ms) of the entry, due to calculation
+   * of the current time as relative to the add call. In many scenarios,
+   * however, this behavior is perfectly acceptable. It is provided as a convenience.
+   * @param key Element key.
+   * @param val Element value to cache.
+   * @param ttl Amount of time, in millis, for the cache entry to be valid.
+   */
+  public void addElementWithTtl(K key, V val, long ttl) {
+    addElement(key, val, System.currentTimeMillis() + ttl);
   }
   
   /**

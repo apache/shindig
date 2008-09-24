@@ -29,11 +29,12 @@ import org.apache.shindig.gadgets.http.HttpResponse;
 public class CaptureRewriter implements ContentRewriter {
   private boolean rewroteView = false;
   private boolean rewroteResponse = false;
+  private long cacheTtl = -1;
 
   public RewriterResults rewrite(HttpRequest request, HttpResponse original,
       MutableContent content) {
     rewroteResponse = true;
-    return null;
+    return results();
   }
 
   public boolean responseWasRewritten() {
@@ -42,10 +43,25 @@ public class CaptureRewriter implements ContentRewriter {
 
   public RewriterResults rewrite(Gadget gadget) {
     rewroteView = true;
-    return null;
+    return results();
   }
 
   public boolean viewWasRewritten() {
     return rewroteView;
+  }
+  
+  private RewriterResults results() {
+    if (cacheTtl == -1) {
+      return RewriterResults.cacheableIndefinitely();
+    }
+    return RewriterResults.cacheable(cacheTtl);
+  }
+  
+  /**
+   * Sets cache TTL. -1 means cacheable indefinitely.
+   * @param cacheTtl
+   */
+  public void setCacheTtl(long cacheTtl) {
+    this.cacheTtl = cacheTtl;
   }
 }

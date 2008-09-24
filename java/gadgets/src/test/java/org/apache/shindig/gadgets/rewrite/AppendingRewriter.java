@@ -28,22 +28,35 @@ import org.apache.shindig.gadgets.http.HttpResponse;
  * Used for testing.
  */
 class AppendingRewriter implements ContentRewriter {
-  private final String appender;
+  private String appender;
+  private final long cacheTtl;
   
   AppendingRewriter(String appender) {
     this.appender = appender;
+    this.cacheTtl = 0;
+  }
+  
+  AppendingRewriter(String appender, long cacheTtl) {
+    this.appender = appender;
+    this.cacheTtl = cacheTtl;
   }
 
   public RewriterResults rewrite(HttpRequest request, HttpResponse original,
       MutableContent c) {
     // Appends appender to the end of the content string.
     c.setContent(c.getContent() + appender);
-    return RewriterResults.cacheableIndefinitely();
+    return RewriterResults.cacheable(cacheTtl);
   }
 
   public RewriterResults rewrite(Gadget gadget) {
     // Appends appender to the end of the input string.
 	gadget.setContent(gadget.getContent() + appender);
-	return RewriterResults.cacheableIndefinitely();
+	return RewriterResults.cacheable(cacheTtl);
+  }
+  
+  void setAppender(String newAppender) {
+    // This can be used to simulate a rewriter that returns different
+    // results per run for the same input content.
+    this.appender = newAppender;
   }
 }
