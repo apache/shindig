@@ -26,6 +26,7 @@ import org.apache.shindig.social.core.util.BeanXmlConverter;
 import org.apache.shindig.social.core.util.BeanAtomConverter;
 import org.apache.shindig.social.opensocial.service.BeanConverter;
 import org.apache.shindig.social.opensocial.service.DataServiceServletFetcher;
+import org.apache.shindig.social.opensocial.service.HandlerProvider;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.TypeLiteral;
@@ -58,5 +59,7 @@ public class EndToEndModule extends AbstractModule {
 
     bind(new TypeLiteral<List<AuthenticationHandler>>(){}).toProvider(
         AuthenticationHandlerProvider.class);
+
+    bind(HandlerProvider.class).toInstance(HandlerProvider.defaultProviders());
   }
 }

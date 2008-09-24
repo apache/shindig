@@ -64,12 +64,9 @@ public abstract class AbstractLargeRestfulTests extends TestCase {
   @Override
   protected void setUp() throws Exception {
     Map<String, Class<? extends DataRequestHandler>> handlers = Maps.newHashMap();
-    handlers.put(DataServiceServlet.PEOPLE_ROUTE, PersonHandler.class);
-    handlers.put(DataServiceServlet.ACTIVITY_ROUTE, ActivityHandler.class);
-    handlers.put(DataServiceServlet.APPDATA_ROUTE, AppDataHandler.class);
-
+    
     servlet = new DataServiceServlet();
-    servlet.setHandlers(new HandlerProvider(handlers));
+    servlet.setHandlers(HandlerProvider.defaultProviders());
     servlet.setInjector(Guice.createInjector(new SocialApiTestsGuiceModule()));
     servlet.setBeanConverters(new BeanJsonConverter(
         Guice.createInjector(new SocialApiTestsGuiceModule())), new BeanXmlConverter(),
