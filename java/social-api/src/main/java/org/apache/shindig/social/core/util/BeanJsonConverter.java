@@ -327,13 +327,13 @@ public class BeanJsonConverter implements BeanConverter {
     } else if (expectedType.equals(Date.class)) {
       // Use JODA ISO parsing for the conversion
       value = new DateTime(jsonObject.getString(fieldName)).toDate();
-    } else if (expectedType.equals(Long.class)) {
+    } else if (expectedType.equals(Long.class) || expectedType.equals(Long.TYPE)) {
       value = jsonObject.getLong(fieldName);
-    } else if (expectedType.equals(Integer.class)) {
+    } else if (expectedType.equals(Integer.class) || expectedType.equals(Integer.TYPE)) {
       value = jsonObject.getInt(fieldName);
-    } else if (expectedType.equals(Boolean.class)) {
+    } else if (expectedType.equals(Boolean.class) || expectedType.equals(Boolean.TYPE)) {
       value = jsonObject.getBoolean(fieldName);
-    } else if (expectedType.equals(Float.class)) {
+    } else if (expectedType.equals(Float.class) || expectedType.equals(Float.TYPE)) {
       String stringFloat = jsonObject.getString(fieldName);
       value = new Float(stringFloat);
     } else {
