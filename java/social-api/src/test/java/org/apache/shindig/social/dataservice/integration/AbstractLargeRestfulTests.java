@@ -19,6 +19,7 @@ package org.apache.shindig.social.dataservice.integration;
 
 import org.apache.shindig.common.testing.FakeGadgetToken;
 import org.apache.shindig.social.SocialApiTestsGuiceModule;
+import org.apache.shindig.social.core.util.BeanAtomConverter;
 import org.apache.shindig.social.core.util.BeanJsonConverter;
 import org.apache.shindig.social.core.util.BeanXmlConverter;
 import org.apache.shindig.social.opensocial.service.ActivityHandler;
@@ -30,11 +31,9 @@ import org.apache.shindig.social.opensocial.service.PersonHandler;
 
 import com.google.common.collect.Maps;
 import com.google.inject.Guice;
-
+import junit.framework.TestCase;
 import org.easymock.classextension.EasyMock;
 import org.json.JSONObject;
-
-import junit.framework.TestCase;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -43,7 +42,6 @@ import java.io.InputStream;
 import java.io.PrintWriter;
 import java.util.Map;
 import java.util.Vector;
-
 import javax.servlet.ServletInputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -74,7 +72,8 @@ public abstract class AbstractLargeRestfulTests extends TestCase {
     servlet.setHandlers(new HandlerProvider(handlers));
     servlet.setInjector(Guice.createInjector(new SocialApiTestsGuiceModule()));
     servlet.setBeanConverters(new BeanJsonConverter(
-        Guice.createInjector(new SocialApiTestsGuiceModule())), new BeanXmlConverter());
+        Guice.createInjector(new SocialApiTestsGuiceModule())), new BeanXmlConverter(),
+        new BeanAtomConverter());
 
     req = EasyMock.createMock(HttpServletRequest.class);
     res = EasyMock.createMock(HttpServletResponse.class);

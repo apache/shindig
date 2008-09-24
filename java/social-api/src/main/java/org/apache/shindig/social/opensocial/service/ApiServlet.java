@@ -46,6 +46,7 @@ public abstract class ApiServlet extends InjectedServlet {
   private Map<String, Class<? extends DataRequestHandler>> handlers;
   protected BeanJsonConverter jsonConverter;
   protected BeanConverter xmlConverter;
+  protected BeanConverter atomConverter;
 
   @Inject
   public void setHandlers(HandlerProvider handlers) {
@@ -54,11 +55,13 @@ public abstract class ApiServlet extends InjectedServlet {
 
   @Inject
   public void setBeanConverters(
-      @Named("shindig.bean.converter.json")BeanConverter jsonConverter,
-      @Named("shindig.bean.converter.xml")BeanConverter xmlConverter) {
+      @Named("shindig.bean.converter.json") BeanConverter jsonConverter,
+      @Named("shindig.bean.converter.xml") BeanConverter xmlConverter,
+      @Named("shindig.bean.converter.atom") BeanConverter atomConverter) {
     // fix this
     this.jsonConverter = (BeanJsonConverter) jsonConverter;
     this.xmlConverter = xmlConverter;
+    this.atomConverter = atomConverter;
   }
 
   // Only for testing use. Do not override the injector.

@@ -34,6 +34,7 @@ public class DataServiceServlet extends ApiServlet {
 
   protected static final String FORMAT_PARAM = "format";
   protected static final String ATOM_FORMAT = "atom";
+  protected static final String XML_FORMAT = "xml";
 
   public static final String PEOPLE_ROUTE = "people";
   public static final String ACTIVITY_ROUTE = "activities";
@@ -116,8 +117,13 @@ public class DataServiceServlet extends ApiServlet {
   BeanConverter getConverterForRequest(HttpServletRequest servletRequest) {
     String formatString = servletRequest.getParameter(FORMAT_PARAM);
     if (ATOM_FORMAT.equals(formatString)) {
+      return atomConverter;
+    }
+
+    else if (XML_FORMAT.equals(formatString)) {
       return xmlConverter;
     }
+
     return jsonConverter;
   }
 }

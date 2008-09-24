@@ -19,6 +19,7 @@ package org.apache.shindig.social.opensocial.service;
 
 import org.apache.shindig.common.testing.FakeGadgetToken;
 import org.apache.shindig.common.util.ImmediateFuture;
+import org.apache.shindig.social.core.util.BeanAtomConverter;
 import org.apache.shindig.social.core.util.BeanJsonConverter;
 import org.apache.shindig.social.core.util.BeanXmlConverter;
 
@@ -29,10 +30,10 @@ import org.easymock.classextension.EasyMock;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.io.InputStream;
 import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.PrintWriter;
 import java.util.concurrent.Future;
 import javax.servlet.ServletInputStream;
 import javax.servlet.http.HttpServletRequest;
@@ -65,6 +66,7 @@ public class JsonRpcServletTest extends TestCase {
     res = EasyMock.createMock(HttpServletResponse.class);
     jsonConverter = EasyMock.createMock(BeanJsonConverter.class);
     xmlConverter = EasyMock.createMock(BeanXmlConverter.class);
+    BeanAtomConverter atomConverter = EasyMock.createMock(BeanAtomConverter.class);
 
     peopleHandler = EasyMock.createMock(PersonHandler.class);
     activityHandler = EasyMock.createMock(ActivityHandler.class);
@@ -76,7 +78,7 @@ public class JsonRpcServletTest extends TestCase {
     servlet.setHandlers(new HandlerProvider(new PersonHandler(null), new ActivityHandler(null),
         new AppDataHandler(null)));
 
-    servlet.setBeanConverters(jsonConverter, xmlConverter);
+    servlet.setBeanConverters(jsonConverter, xmlConverter, atomConverter);
   }
 
   private void setupInjector() {
