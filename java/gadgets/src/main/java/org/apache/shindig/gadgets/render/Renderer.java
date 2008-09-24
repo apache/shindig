@@ -18,6 +18,7 @@
  */
 package org.apache.shindig.gadgets.render;
 
+import org.apache.shindig.common.ContainerConfig;
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.gadgets.Gadget;
 import org.apache.shindig.gadgets.GadgetContext;
@@ -33,6 +34,9 @@ import org.apache.shindig.gadgets.spec.View;
 
 import com.google.inject.Inject;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+
 /**
  * Handles producing output markup for a gadget based on the provided context.
  */
@@ -40,14 +44,17 @@ public class Renderer {
   private final GadgetSpecFactory gadgetSpecFactory;
   private final ContentFetcherFactory fetcher;
   private final PreloaderService preloader;
+  private final ContainerConfig containerConfig;
 
   @Inject
   public Renderer(GadgetSpecFactory gadgetSpecFactory,
                   ContentFetcherFactory fetcher,
-                  PreloaderService preloader) {
+                  PreloaderService preloader,
+                  ContainerConfig containerConfig) {
     this.gadgetSpecFactory = gadgetSpecFactory;
     this.fetcher = fetcher;
     this.preloader = preloader;
+    this.containerConfig = containerConfig;
   }
 
   /**
@@ -73,7 +80,13 @@ public class Renderer {
 
       // TODO: Move Gadget.getView into a utility method so that the correct view can be pulled from
       // the gadget with aliasing done automatically.
-      View view = spec.getView(context.getView());
+      View view = getView(context, spec);
+
+      if (view == null) {
+        throw new RenderingException("Unable to locate an appropriate view in this gadget. " +
+            "Requested: '" + context.getView() + "' Available: " + spec.getViews().keySet());
+      }
+
       if (view.getType() == View.ContentType.URL) {
         throw new RenderingException("Attempted to render a url-type gadget.");
       }
@@ -96,5 +109,35 @@ public class Renderer {
     } catch (GadgetException e) {
       throw new RenderingException(e);
     }
+  }
+
+  /**
+   * Attempts to extract the "current" view for the given gadget.
+   */
+  private View getView(GadgetContext context, GadgetSpec spec) {
+    String viewName = context.getView();
+    View view = spec.getView(viewName);
+    if (view == null) {
+      JSONArray aliases = containerConfig.getJsonArray(context.getContainer(),
+          "gadgets.features/views/" + viewName + "/aliases");
+      if (aliases != null) {
+        try {
+          for (int i = 0, j = aliases.length(); i < j; ++i) {
+            viewName = aliases.getString(i);
+            view = spec.getView(viewName);
+            if (view != null) {
+              break;
+            }
+          }
+        } catch (JSONException e) {
+          view = null;
+        }
+      }
+
+      if (view == null) {
+        view = spec.getView(GadgetSpec.DEFAULT_VIEW);
+      }
+    }
+    return view;
   }
 }
