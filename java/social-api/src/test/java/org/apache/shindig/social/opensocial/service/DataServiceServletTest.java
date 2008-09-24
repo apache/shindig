@@ -75,8 +75,7 @@ public class DataServiceServletTest extends TestCase {
     injector = EasyMock.createMock(Injector.class);
     servlet.setInjector(injector);
 
-    servlet.setHandlers(new HandlerProvider(new PersonHandler(null), new ActivityHandler(null),
-        new AppDataHandler(null)));
+    servlet.setHandlers(HandlerProvider.defaultProviders());
 
     servlet.setBeanConverters(jsonConverter, xmlConverter, atomConverter);
   }

@@ -17,25 +17,12 @@
  */
 package org.apache.shindig.social.sample.service;
 
-import org.apache.shindig.social.opensocial.service.ActivityHandler;
-import org.apache.shindig.social.opensocial.service.AppDataHandler;
-import org.apache.shindig.social.opensocial.service.DataRequestHandler;
 import org.apache.shindig.social.opensocial.service.HandlerProvider;
-import org.apache.shindig.social.opensocial.service.PersonHandler;
-
-import com.google.inject.Inject;
-
-import java.util.Map;
 
 public class SampleContainerHandlerProvider extends HandlerProvider {
-  @Inject
-  public SampleContainerHandlerProvider(PersonHandler peopleHandler,
-      ActivityHandler activityHandler, AppDataHandler appDataHandler) {
-    super(peopleHandler, activityHandler, appDataHandler);
-    handlers.put("samplecontainer", SampleContainerHandler.class);
-  }
 
-  public Map<String, Class<? extends DataRequestHandler>> get() {
-    return handlers;
+  public SampleContainerHandlerProvider() {
+    super(true);
+    addHandler("samplecontainer", SampleContainerHandler.class);
   }
 }
