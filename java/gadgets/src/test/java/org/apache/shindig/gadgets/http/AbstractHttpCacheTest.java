@@ -17,18 +17,10 @@
  */
 package org.apache.shindig.gadgets.http;
 
-import org.apache.shindig.gadgets.Gadget;
-import org.apache.shindig.gadgets.MutableContent;
-import org.apache.shindig.gadgets.rewrite.ContentRewriter;
-import org.apache.shindig.gadgets.rewrite.RewriterResults;
-
 import static org.easymock.EasyMock.expect;
 import static org.easymock.classextension.EasyMock.replay;
-import org.easymock.classextension.EasyMock;
 
-import com.google.inject.AbstractModule;
-import com.google.inject.Guice;
-import com.google.inject.Injector;
+import org.easymock.classextension.EasyMock;
 
 import junit.framework.TestCase;
 
@@ -41,13 +33,7 @@ import java.util.Map;
  * in properly rewriting cacheable content.
  */
 public class AbstractHttpCacheTest extends TestCase {
-  private Injector injector;
-  
-  @Override
-  protected void setUp() throws Exception {
-    injector = Guice.createInjector(new TestCacheModule());
-  }
-  
+
   public void testCache() {
     // Setup: could move this elsewhere, but no real need right now.
     HttpCacheKey key = EasyMock.createNiceMock(HttpCacheKey.class);
@@ -58,12 +44,12 @@ public class AbstractHttpCacheTest extends TestCase {
     replay(key, request);
     HttpResponse response = new HttpResponseBuilder().setHttpStatusCode(200)
         .setResponse("foo".getBytes()).setCacheTtl(Integer.MAX_VALUE).create();
-    
+
     // Actual test.
-    AbstractHttpCache ahc = injector.getInstance(TestHttpCache.class);
+    HttpCache ahc = new TestHttpCache();
     HttpResponse added = ahc.addResponse(key, request, response);
     assertNotSame(added, response);
-    
+
     // Not rewritten (anymore).
     assertEquals("foo", added.getResponseAsString());
     assertSame(added, ahc.getResponse(key, request));
@@ -72,45 +58,25 @@ public class AbstractHttpCacheTest extends TestCase {
 
   private static class TestHttpCache extends AbstractHttpCache {
     private final Map<String, HttpResponse> map;
-    
+
     public TestHttpCache() {
       super();
       map = new HashMap<String, HttpResponse>();
     }
-    
+
     @Override
     public void addResponseImpl(String key, HttpResponse response) {
       map.put(key, response);
     }
-    
+
     @Override
     public HttpResponse getResponseImpl(String key) {
       return map.get(key);
     }
-    
+
     @Override
     public HttpResponse removeResponseImpl(String key) {
       return map.remove(key);
-    }
-  }
-  
-  private static String PFX_STR = "--prefixtest--";
-  private static class TestContentRewriter implements ContentRewriter {
-    public RewriterResults rewrite(Gadget gadget) {
-      gadget.setContent(PFX_STR + gadget.getContent());
-      return null;
-    }
-    
-    public RewriterResults rewrite(HttpRequest req, HttpResponse resp, MutableContent c) {
-      c.setContent(PFX_STR + c.getContent());
-      return null;
-    }
-  }
-  
-  private static class TestCacheModule extends AbstractModule {
-    @Override
-    protected void configure() {
-      bind(ContentRewriter.class).to(TestContentRewriter.class);
     }
   }
 }
