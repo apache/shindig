@@ -46,6 +46,7 @@ public class BasicGadgetSpecFactoryTest {
   private final static String LOCAL_CONTENT = "Hello, local content!";
   private final static String ALT_LOCAL_CONTENT = "Hello, local content!";
   private final static String REMOTE_CONTENT = "Hello, remote content!";
+  private final static String RAWXML_CONTENT = "Hello, rawxml content!";
   private final static String LOCAL_SPEC_XML
   = "<Module>" +
   "  <ModulePrefs title='GadgetSpecFactoryTest'/>" +
@@ -61,6 +62,11 @@ public class BasicGadgetSpecFactoryTest {
   "  <ModulePrefs title='GadgetSpecFactoryTest'/>" +
   "  <Content type='html' href='" + REMOTE_URL + "'/>" +
   "</Module>";
+  private final static String RAWXML_SPEC_XML
+  = "<Module>" +
+  "  <ModulePrefs title='GadgetSpecFactoryTest'/>" +
+  "  <Content type='html'>" + RAWXML_CONTENT + "</Content>" +
+  "</Module>";
   private final static String URL_SPEC_XML
   = "<Module>" +
   "  <ModulePrefs title='GadgetSpecFactoryTest'/>" +
@@ -75,6 +81,27 @@ public class BasicGadgetSpecFactoryTest {
     @Override
     public URI getUrl() {
       return SPEC_URL.toJavaUri();
+    }
+  };
+  
+  private final static GadgetContext RAWXML_GADGET_CONTEXT = new GadgetContext() {
+    @Override
+    public boolean getIgnoreCache() {
+      // This should be ignored by calling code.
+      return false;
+    }
+    
+    @Override
+    public URI getUrl() {
+      return SPEC_URL.toJavaUri();
+    }
+    
+    @Override
+    public String getParameter(String param) {
+      if (param.equals(BasicGadgetSpecFactory.RAW_GADGETSPEC_XML_PARAM_NAME)) {
+        return RAWXML_SPEC_XML;
+      }
+      return null;
     }
   };
   private final static ExecutorService FAKE_EXECUTOR = new TestExecutorService();
@@ -108,6 +135,21 @@ public class BasicGadgetSpecFactoryTest {
     GadgetSpec spec = specFactory.getGadgetSpec(NO_CACHE_CONTEXT);
 
     assertEquals(LOCAL_CONTENT, spec.getView(GadgetSpec.DEFAULT_VIEW).getContent());
+  }
+  
+  @Test
+  public void specFetchedFromParam() throws Exception {
+    // Set up request as if it's a regular spec request, and ensure that
+    // the return value comes from rawxml, not the fetcher.
+    HttpRequest request = new HttpRequest(SPEC_URL).setIgnoreCache(false);
+    HttpResponse response = new HttpResponse(LOCAL_SPEC_XML);
+    expect(fetcher.fetch(request)).andReturn(response);
+    replay(fetcher);
+    
+    GadgetSpec spec = specFactory.getGadgetSpec(RAWXML_GADGET_CONTEXT);
+    
+    assertEquals(RAWXML_CONTENT, spec.getView(GadgetSpec.DEFAULT_VIEW).getContent());
+    assertEquals(BasicGadgetSpecFactory.RAW_GADGET_URI, spec.getUrl());
   }
 
   @Test
