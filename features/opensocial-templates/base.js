@@ -220,7 +220,8 @@ os.doAttribute = function(node, attrName, data, context) {
 os.doTag = function(node, ns, tag, data, context) {
   var tagFunction = os.getCustomTag(ns, tag);
   if (!tagFunction) {
-    throw "Custom tag <" + ns + ":" + tag + "> not defined.";
+    os.warn("Custom tag <" + ns + ":" + tag + "> not defined.");
+    return;
   }
   
   // Process tag's inner content before processing the tag.

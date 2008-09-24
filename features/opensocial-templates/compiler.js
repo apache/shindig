@@ -429,20 +429,19 @@ os.compileNode_ = function(node) {
       output = document.createElement("span");
       output.setAttribute(os.ATT_customtag, node.tagName);
 
-      var custom;
-      if (custom = os.checkCustom_(node.tagName)) {
-        os.appendJSTAttribute_(output, ATT_eval, "os.doTag(this, \"" 
-            + custom[0] + "\", \"" + custom[1] + "\", $this, $context)");
-        var context = node.getAttribute("context") || "$this||true";
-        output.setAttribute(ATT_select, context);
+      var custom = node.tagName.split(":");
+      os.appendJSTAttribute_(output, ATT_eval, "os.doTag(this, \"" 
+          + custom[0] + "\", \"" + custom[1] + "\", $this, $context)");
+      var context = node.getAttribute("context") || "$this||true";
+      output.setAttribute(ATT_select, context);
 
-        // For os:Render, create a parent node reference.
-        if (node.tagName == "os:render" || node.tagName == "os:Render" ||
-            node.tagName == "os:renderAll" || node.tagName == "os:RenderAll") {
-          os.appendJSTAttribute_(output, ATT_values, os.VAR_parentnode + ":" +
-              os.VAR_node);
-        }
+      // For os:Render, create a parent node reference.
+      if (node.tagName == "os:render" || node.tagName == "os:Render" ||
+          node.tagName == "os:renderAll" || node.tagName == "os:RenderAll") {
+        os.appendJSTAttribute_(output, ATT_values, os.VAR_parentnode + ":" +
+            os.VAR_node);
       }
+      
       os.copyAttributes_(node, output, node.tagName);
     } else {
       output = os.xmlToHtml_(node);
