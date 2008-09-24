@@ -22,14 +22,14 @@ import org.apache.shindig.common.testing.FakeHttpServletRequest;
 import org.apache.shindig.common.util.ImmediateFuture;
 import org.apache.shindig.social.ResponseError;
 import org.apache.shindig.social.SocialApiTestsGuiceModule;
-import org.apache.shindig.social.opensocial.spi.SocialSpiException;
+import org.apache.shindig.social.core.util.BeanAtomConverter;
 import org.apache.shindig.social.core.util.BeanJsonConverter;
 import org.apache.shindig.social.core.util.BeanXmlConverter;
+import org.apache.shindig.social.opensocial.spi.SocialSpiException;
 
+import com.google.common.collect.Maps;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
-import com.google.common.collect.Maps;
-
 import junit.framework.TestCase;
 import org.easymock.classextension.EasyMock;
 
@@ -67,7 +67,7 @@ public class DataServiceServletTest extends TestCase {
     res = EasyMock.createMock(HttpServletResponse.class);
     jsonConverter = EasyMock.createMock(BeanJsonConverter.class);
     BeanXmlConverter xmlConverter = EasyMock.createMock(BeanXmlConverter.class);
-
+    BeanAtomConverter atomConverter = EasyMock.createMock(BeanAtomConverter.class);
     peopleHandler = EasyMock.createMock(PersonHandler.class);
     activityHandler = EasyMock.createMock(ActivityHandler.class);
     appDataHandler = EasyMock.createMock(AppDataHandler.class);
@@ -78,7 +78,7 @@ public class DataServiceServletTest extends TestCase {
     servlet.setHandlers(new HandlerProvider(new PersonHandler(null), new ActivityHandler(null),
         new AppDataHandler(null)));
 
-    servlet.setBeanConverters(jsonConverter, xmlConverter);
+    servlet.setBeanConverters(jsonConverter, xmlConverter, atomConverter);
   }
 
   private void setupInjector() {
@@ -195,9 +195,11 @@ public class DataServiceServletTest extends TestCase {
     BeanJsonConverter json = new BeanJsonConverter(
         Guice.createInjector(new SocialApiTestsGuiceModule()));
     BeanXmlConverter xml = new BeanXmlConverter();
-    servlet.setBeanConverters(json, xml);
+    BeanAtomConverter atom = new BeanAtomConverter();
+    servlet.setBeanConverters(json, xml, atom);
 
-    assertConverter(xml, "atom");
+    assertConverter(atom, "atom");
+    assertConverter(xml, "xml");
     assertConverter(json, "");
     assertConverter(json, null);
     assertConverter(json, "ahhhh!");
