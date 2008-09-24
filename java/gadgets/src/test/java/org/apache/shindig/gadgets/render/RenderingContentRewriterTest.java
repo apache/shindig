@@ -36,7 +36,12 @@ import org.apache.shindig.gadgets.GadgetFeature;
 import org.apache.shindig.gadgets.GadgetFeatureRegistry;
 import org.apache.shindig.gadgets.JsLibrary;
 import org.apache.shindig.gadgets.MessageBundleFactory;
+import org.apache.shindig.gadgets.MutableContent;
 import org.apache.shindig.gadgets.UrlGenerator;
+import org.apache.shindig.gadgets.preload.NullPreloads;
+import org.apache.shindig.gadgets.preload.PreloadException;
+import org.apache.shindig.gadgets.preload.PreloadedData;
+import org.apache.shindig.gadgets.preload.Preloads;
 import org.apache.shindig.gadgets.spec.GadgetSpec;
 import org.apache.shindig.gadgets.spec.LocaleSpec;
 import org.apache.shindig.gadgets.spec.MessageBundle;
@@ -48,6 +53,7 @@ import com.google.common.collect.Sets;
 
 import org.easymock.classextension.EasyMock;
 import org.easymock.classextension.IMocksControl;
+import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
@@ -55,7 +61,6 @@ import org.junit.Test;
 import java.net.URI;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
@@ -84,16 +89,24 @@ public class RenderingContentRewriterTest {
         = new RenderingContentRewriter(messageBundleFactory, config, featureRegistry, urlGenerator);
   }
 
+  private Gadget makeGadgetWithSpec(String gadgetXml) throws GadgetException {
+    GadgetSpec spec = new GadgetSpec(URI.create("#"), gadgetXml);
+    return new Gadget()
+        .setContext(new GadgetContext())
+        .setMutableContent(new MutableContent(null))
+        .setPreloads(new NullPreloads())
+        .setSpec(spec)
+        .setContent(spec.getView("default").getContent());
+  }
+
+  private Gadget makeGadgetWithContent(String content) throws GadgetException {
+    String defaultXml = "<Module><ModulePrefs title=''/><Content type='html'/></Module>";
+    return makeGadgetWithSpec(defaultXml).setContent(content);
+  }
+
   @Test
   public void defaultOutput() throws Exception {
-    String gadgetXml =
-        "<Module><ModulePrefs title=''/>" +
-        "<Content type='html'>" + BODY_CONTENT + "</Content>" +
-        "</Module>";
-
-    GadgetSpec spec = new GadgetSpec(URI.create("#"), gadgetXml);
-    Gadget gadget
-        = new Gadget(new GadgetContext(), spec, Collections.<JsLibrary>emptySet(), config, null);
+    Gadget gadget = makeGadgetWithContent(BODY_CONTENT);
 
     control.replay();
 
@@ -127,12 +140,7 @@ public class RenderingContentRewriterTest {
         .append(body)
         .append("</body></html>")
         .toString();
-    String gadgetXml =
-        "<Module><ModulePrefs title=''/>" +
-        "<Content type='html'><![CDATA[" + doc + "]]></Content>" +
-        "</Module>";
 
-    GadgetSpec spec = new GadgetSpec(URI.create("#"), gadgetXml);
     GadgetContext context = new GadgetContext() {
       @Override
       public String getParameter(String name) {
@@ -143,7 +151,8 @@ public class RenderingContentRewriterTest {
       }
     };
 
-    Gadget gadget = new Gadget(context, spec, Collections.<JsLibrary>emptySet(), config, null);
+    Gadget gadget = makeGadgetWithContent(doc)
+        .setContext(context);
 
     featureRegistry.addInline("foo", "does-not-matter");
     control.replay();
@@ -173,12 +182,10 @@ public class RenderingContentRewriterTest {
       "<Module><ModulePrefs title=''>" +
       "  <Locale language_direction='rtl'/>" +
       "</ModulePrefs>" +
-      "<Content type='html'>" + BODY_CONTENT + "</Content>" +
+      "<Content type='html'/>" +
       "</Module>";
 
-    GadgetSpec spec = new GadgetSpec(URI.create("#"), gadgetXml);
-    Gadget gadget
-        = new Gadget(new GadgetContext(), spec, Collections.<JsLibrary>emptySet(), config, null);
+    Gadget gadget = makeGadgetWithSpec(gadgetXml);
 
     control.replay();
 
@@ -207,8 +214,6 @@ public class RenderingContentRewriterTest {
       "<Content type='html'/>" +
       "</Module>";
 
-    GadgetSpec spec = new GadgetSpec(URI.create("#"), gadgetXml);
-
     final Collection<String> libs = Arrays.asList("foo", "bar", "baz");
     GadgetContext context = new GadgetContext() {
       @Override
@@ -220,7 +225,7 @@ public class RenderingContentRewriterTest {
       }
     };
 
-    Gadget gadget = new Gadget(context, spec, Collections.<JsLibrary>emptySet(), config, null);
+    Gadget gadget = makeGadgetWithSpec(gadgetXml).setContext(context);
 
     featureRegistry.addInline("foo", "does-not-matter");
     featureRegistry.addInline("bar", "does-not-matter");
@@ -243,10 +248,7 @@ public class RenderingContentRewriterTest {
       "<Content type='html'/>" +
       "</Module>";
 
-    GadgetSpec spec = new GadgetSpec(URI.create("#"), gadgetXml);
-
-    Gadget gadget
-        = new Gadget(new GadgetContext(), spec, Collections.<JsLibrary>emptySet(), config, null);
+    Gadget gadget = makeGadgetWithSpec(gadgetXml);
 
     featureRegistry.addInline("foo", "foo_content();");
     control.replay();
@@ -265,8 +267,6 @@ public class RenderingContentRewriterTest {
       "<Content type='html'/>" +
       "</Module>";
 
-    GadgetSpec spec = new GadgetSpec(URI.create("#"), gadgetXml);
-
     final Collection<String> libs = Arrays.asList("bar", "baz");
     GadgetContext context = new GadgetContext() {
       @Override
@@ -278,7 +278,7 @@ public class RenderingContentRewriterTest {
       }
     };
 
-    Gadget gadget = new Gadget(context, spec, Collections.<JsLibrary>emptySet(), config, null);
+    Gadget gadget = makeGadgetWithSpec(gadgetXml).setContext(context);
 
     featureRegistry.addInline("foo", "foo_content();");
     featureRegistry.addInline("bar", "does-not-matter");
@@ -303,8 +303,6 @@ public class RenderingContentRewriterTest {
       "<Content type='html'/>" +
       "</Module>";
 
-    GadgetSpec spec = new GadgetSpec(URI.create("#"), gadgetXml);
-
     GadgetContext context = new GadgetContext() {
       @Override
       public String getParameter(String name) {
@@ -315,7 +313,7 @@ public class RenderingContentRewriterTest {
       }
     };
 
-    Gadget gadget = new Gadget(context, spec, Collections.<JsLibrary>emptySet(), config, null);
+    Gadget gadget = makeGadgetWithSpec(gadgetXml).setContext(context);
 
     featureRegistry.addInline("foo", "foo_content();");
     featureRegistry.addExternal("bar", "http://example.org/external.js");
@@ -332,7 +330,7 @@ public class RenderingContentRewriterTest {
         gadget.getContent().contains("<script src=\"http://example.org/external.js\">"));
   }
 
-  private JSONObject getJson(Gadget gadget) throws Exception {
+  private JSONObject getConfigJson(Gadget gadget) throws JSONException {
     Pattern prefsPattern
         = Pattern.compile("(?:.*)gadgets\\.config\\.init\\((.*)\\);(?:.*)", Pattern.DOTALL);
     Matcher matcher = prefsPattern.matcher(gadget.getContent());
@@ -349,9 +347,7 @@ public class RenderingContentRewriterTest {
       "<Content type='html'/>" +
       "</Module>";
 
-    GadgetSpec spec = new GadgetSpec(URI.create("#"), gadgetXml);
-    Gadget gadget
-        = new Gadget(new GadgetContext(), spec, Collections.<JsLibrary>emptySet(), config, null);
+    Gadget gadget = makeGadgetWithSpec(gadgetXml);
 
     featureRegistry.addInline("foo", "");
 
@@ -362,7 +358,7 @@ public class RenderingContentRewriterTest {
 
     rewriter.rewrite(gadget);
 
-    JSONObject json = getJson(gadget);
+    JSONObject json = getConfigJson(gadget);
     assertEquals("blah", json.get("foo"));
   }
 
@@ -375,8 +371,6 @@ public class RenderingContentRewriterTest {
       "<Content type='html'/>" +
       "</Module>";
 
-    GadgetSpec spec = new GadgetSpec(URI.create("#"), gadgetXml);
-
     GadgetContext context = new GadgetContext() {
       @Override
       public String getParameter(String name) {
@@ -387,7 +381,7 @@ public class RenderingContentRewriterTest {
       }
     };
 
-    Gadget gadget = new Gadget(context, spec, Collections.<JsLibrary>emptySet(), config, null);
+    Gadget gadget = makeGadgetWithSpec(gadgetXml).setContext(context);
 
     featureRegistry.addInline("foo", "");
     featureRegistry.addInline("bar", "");
@@ -399,7 +393,7 @@ public class RenderingContentRewriterTest {
 
     rewriter.rewrite(gadget);
 
-    JSONObject json = getJson(gadget);
+    JSONObject json = getConfigJson(gadget);
     assertEquals("blah", json.get("foo"));
     assertEquals("baz", json.get("bar"));
   }
@@ -415,9 +409,7 @@ public class RenderingContentRewriterTest {
       "<Content type='html'/>" +
       "</Module>";
 
-    GadgetSpec spec = new GadgetSpec(URI.create("#"), gadgetXml);
-    Gadget gadget
-        = new Gadget(new GadgetContext(), spec, Collections.<JsLibrary>emptySet(), config, null);
+    Gadget gadget = makeGadgetWithSpec(gadgetXml);
 
     featureRegistry.addInline("foo", "");
     JSONObject conf = new JSONObject();
@@ -427,7 +419,7 @@ public class RenderingContentRewriterTest {
 
     rewriter.rewrite(gadget);
 
-    JSONObject json = getJson(gadget);
+    JSONObject json = getConfigJson(gadget);
     assertEquals("blah", json.get("foo"));
 
     JSONObject util = json.getJSONObject("core.util");
@@ -449,9 +441,7 @@ public class RenderingContentRewriterTest {
       "<Content type='html'/>" +
       "</Module>";
 
-    GadgetSpec spec = new GadgetSpec(URI.create("#"), gadgetXml);
-    Gadget gadget
-        = new Gadget(new GadgetContext(), spec, Collections.<JsLibrary>emptySet(), config, null);
+    Gadget gadget = makeGadgetWithSpec(gadgetXml);
 
     control.replay();
 
@@ -475,9 +465,7 @@ public class RenderingContentRewriterTest {
       "<Content type='html'/>" +
       "</Module>";
 
-    GadgetSpec spec = new GadgetSpec(URI.create("#"), gadgetXml);
-    Gadget gadget
-        = new Gadget(new GadgetContext(), spec, Collections.<JsLibrary>emptySet(), config, null);
+    Gadget gadget = makeGadgetWithSpec(gadgetXml);
 
     control.replay();
 
@@ -493,15 +481,81 @@ public class RenderingContentRewriterTest {
       "<Content type='html'/>" +
       "</Module>";
 
-    GadgetSpec spec = new GadgetSpec(URI.create("#"), gadgetXml);
-    Gadget gadget
-        = new Gadget(new GadgetContext(), spec, Collections.<JsLibrary>emptySet(), config, null);
+    Gadget gadget = makeGadgetWithSpec(gadgetXml);
 
     control.replay();
 
     rewriter.rewrite(gadget);
 
     // rewrite will throw if the optional unsupported feature doesn't work.
+  }
+
+  private JSONObject getPreloadedJson(Gadget gadget) throws JSONException {
+    Pattern preloadPattern
+        = Pattern.compile("(?:.*)gadgets\\.io\\.preloaded_=\\{(.*?)\\};(?:.*)", Pattern.DOTALL);
+    Matcher matcher = preloadPattern.matcher(gadget.getContent());
+    assertTrue("gadgets.io.preloaded not set.", matcher.matches());
+    return new JSONObject('{' + matcher.group(1) + '}');
+  }
+
+  @Test
+  public void preloadsInjected() throws Exception {
+    final Map<String, Object> preloadData = Maps.newHashMap();
+
+    // We want a variety of data.
+    preloadData.put("string", "string");
+    preloadData.put("integer", 99);
+    preloadData.put("double", 4343434.345345d);
+
+    // Other types are supported (anything valid for org.json.JSONObject), but equality comparisons
+    // are more complicated because JSON doesn't implement interfaces like Collection or Map, or
+    // implementing equals.
+
+    Preloads preloads = new Preloads() {
+
+      public PreloadedData getData(final String key) {
+        return new PreloadedData() {
+          public Object toJson() {
+            return preloadData.get(key);
+          }
+        };
+      }
+
+      public Set<String> getKeys() {
+        return preloadData.keySet();
+      }
+    };
+
+    Gadget gadget = makeGadgetWithContent("").setPreloads(preloads);
+    control.replay();
+
+    rewriter.rewrite(gadget);
+
+    JSONObject json = getPreloadedJson(gadget);
+    for (Map.Entry<String, Object> entry : preloadData.entrySet()) {
+      assertEquals(entry.getValue(), json.get(entry.getKey()));
+    }
+  }
+
+  @Test
+  public void failedPreloadHandledGracefully() throws Exception {
+    Preloads preloads = new Preloads() {
+      public PreloadedData getData(final String key) throws PreloadException {
+        throw new PreloadException("broken");
+      }
+      public Set<String> getKeys() {
+        return Sets.immutableSortedSet("foo");
+      }
+    };
+
+    Gadget gadget = makeGadgetWithContent("").setPreloads(preloads);
+    control.replay();
+
+    rewriter.rewrite(gadget);
+
+    JSONObject json = getPreloadedJson(gadget);
+
+    assertEquals(0, json.length());
   }
 
   /**

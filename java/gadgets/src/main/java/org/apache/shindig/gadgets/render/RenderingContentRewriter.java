@@ -33,6 +33,8 @@ import org.apache.shindig.gadgets.UnsupportedFeatureException;
 import org.apache.shindig.gadgets.UrlGenerator;
 import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.http.HttpResponse;
+import org.apache.shindig.gadgets.preload.PreloadException;
+import org.apache.shindig.gadgets.preload.Preloads;
 import org.apache.shindig.gadgets.rewrite.ContentRewriter;
 import org.apache.shindig.gadgets.rewrite.RewriterResults;
 import org.apache.shindig.gadgets.spec.Feature;
@@ -51,6 +53,8 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -71,6 +75,7 @@ import java.util.regex.Pattern;
  * - html document normalization
  */
 public class RenderingContentRewriter implements ContentRewriter {
+  private static final Logger LOG = Logger.getLogger(RenderingContentRewriter.class.getName());
   static final Pattern DOCUMENT_SPLIT_PATTERN = Pattern.compile(
       "(.*)<head>(.*?)<\\/head>(?:.*)<body(.*?)>(.*?)<\\/body>(?:.*)", Pattern.DOTALL);
   static final int BEFORE_HEAD_GROUP = 1;
@@ -104,17 +109,21 @@ public class RenderingContentRewriter implements ContentRewriter {
     this.urlGenerator = urlGenerator;
   }
 
-  public RewriterResults rewrite(HttpRequest request, HttpResponse original,
-      MutableContent content) {
-    throw new UnsupportedOperationException();
+  public RewriterResults rewrite(HttpRequest req, HttpResponse resp,  MutableContent content) {
+    return RewriterResults.notCacheable();
   }
 
   public RewriterResults rewrite(Gadget gadget) {
     try {
       GadgetContent content = createGadgetContent(gadget);
+
       injectFeatureLibraries(gadget, content);
-      injectOnLoadHandlers(content);
+      // This can be one script block.
+      content.appendHead("<script>");
       injectMessageBundles(gadget, content);
+      injectPreloads(gadget, content);
+      content.appendHead("</script>");
+      injectOnLoadHandlers(content);
       // TODO: Use preloads when RenderedGadget gets promoted to Gadget.
       finalizeDocument(gadget, content);
       return RewriterResults.notCacheable();
@@ -305,10 +314,35 @@ public class RenderingContentRewriter implements ContentRewriter {
         gadget.getSpec(), context.getLocale(), context.getIgnoreCache());
 
     String msgs = new JSONObject(bundle.getMessages()).toString();
-    // TODO: Figure out a simple way to merge scripts.
-    content.appendHead("<script>gadgets.Prefs.setMessages_(")
+    content.appendHead("gadgets.Prefs.setMessages_(")
            .appendHead(msgs)
-           .appendHead(");</script>");
+           .appendHead(");");
+  }
+
+  /**
+   * Injects preloads into the gadget output.
+   *
+   * If preloading fails for any reason, we just output an empty object.
+   */
+  private void injectPreloads(Gadget gadget, GadgetContent content) {
+    JSONObject preload = new JSONObject();
+    Preloads preloads = gadget.getPreloads();
+
+    for (String name : preloads.getKeys()) {
+      try {
+        preload.put(name, preloads.getData(name).toJson());
+      } catch (PreloadException e) {
+        // This will be thrown in the event of some unexpected exception. We can move on.
+        LOG.log(Level.WARNING, "Unexpected error attempting to preload " + name, e);
+      } catch (JSONException e) {
+        // Shouldn't ever happen. Probably indicates a big problem, so we'll abort.
+        throw new RuntimeException(e);
+      }
+    }
+
+    content.appendHead("gadgets.io.preloaded_=")
+           .appendHead(preload.toString())
+           .appendHead(";");
   }
 
   /**
