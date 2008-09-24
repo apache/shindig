@@ -23,6 +23,8 @@ import static org.junit.Assert.assertTrue;
 
 import org.apache.shindig.auth.AnonymousSecurityToken;
 import org.apache.shindig.auth.SecurityToken;
+import org.apache.shindig.common.ContainerConfig;
+import org.apache.shindig.common.ContainerConfigException;
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.gadgets.GadgetContext;
 import org.apache.shindig.gadgets.GadgetException;
@@ -36,9 +38,13 @@ import org.apache.shindig.gadgets.spec.GadgetSpec;
 
 import com.google.common.collect.Maps;
 
+import org.json.JSONArray;
+import org.json.JSONObject;
+import org.junit.Before;
 import org.junit.Test;
 
 import java.net.URI;
+import java.util.Arrays;
 import java.util.Map;
 
 /**
@@ -57,14 +63,20 @@ public class RendererTest {
       " <Content view='proxied-signed' authz='signed' href='" + PROXIED_HTML_HREF + "'/>" +
       " <Content view='proxied-oauth' authz='oauth' href='" + PROXIED_HTML_HREF + "'/>" +
       " <Content view='url' type='url' href='http://example.org/always/an/error.html'/>" +
+      " <Content view='alias' type='html'>" + BASIC_HTML_CONTENT + "</Content>" +
       "</Module>";
 
   private final FakeGadgetSpecFactory specFactory = new FakeGadgetSpecFactory();
-
   private final FakeContentFetcherFactory fetcher = new FakeContentFetcherFactory();
-
   private final FakePreloaderService preloaderService = new FakePreloaderService();
-  private final Renderer renderer = new Renderer(specFactory, fetcher, preloaderService);
+  private FakeContainerConfig containerConfig;
+  private Renderer renderer;
+
+  @Before
+  public void setUp() throws Exception {
+    containerConfig = new FakeContainerConfig();
+    renderer = new Renderer(specFactory, fetcher, preloaderService, containerConfig);
+  }
 
   private GadgetContext makeContext(final String view, final Uri specUrl) {
     return new GadgetContext() {
@@ -126,6 +138,19 @@ public class RendererTest {
     fetcher.oauthResponses.put(PROXIED_HTML_HREF, new HttpResponse(PROXIED_HTML_CONTENT));
     String content = renderer.render(makeContext("proxied-oauth", SPEC_URL));
     assertEquals(PROXIED_HTML_CONTENT, content);
+  }
+
+  @Test
+  public void doViewAliasing() throws Exception {
+    JSONArray aliases = new JSONArray(Arrays.asList("alias"));
+    containerConfig.json.put("gadgets.features/views/aliased/aliases", aliases);
+    String content = renderer.render(makeContext("alias", SPEC_URL));
+    assertEquals(BASIC_HTML_CONTENT, content);
+  }
+
+  @Test(expected = RenderingException.class)
+  public void noSupportedViewThrows() throws RenderingException {
+    renderer.render(makeContext("not-real-view", SPEC_URL));
   }
 
   private static class FakeGadgetSpecFactory implements GadgetSpecFactory {
@@ -194,6 +219,19 @@ public class RendererTest {
     public Preloads preload(GadgetContext context, GadgetSpec gadget) {
       wasPreloaded = true;
       return null;
+    }
+  }
+
+  private static class FakeContainerConfig extends ContainerConfig {
+    private final JSONObject json = new JSONObject();
+
+    public FakeContainerConfig() throws ContainerConfigException {
+      super(null);
+    }
+
+    @Override
+    public Object getJson(String container, String parameter) {
+      return json.opt(parameter);
     }
   }
 }
