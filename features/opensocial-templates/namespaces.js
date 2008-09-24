@@ -119,25 +119,6 @@ os.getRequiredNamespaces = function(templateSrc) {
 };
 
 /**
- * Checks if an XML tag corresponds to a known custom function.
- * If so, the namespace and tag name are returned in an array.
- * @param {string} nodeName Name of XML tag.
- * @return {Array.<string>|null}
- */
-os.checkCustom_ = function(nodeName) {
-  var index;
-  if ((index = nodeName.indexOf(':')) < 0) {
-    return null;
-  }
-  var ns = nodeName.substring(0, index);
-  var tag = nodeName.substring(index + 1);
-  if (os.getCustomTag(ns, tag)) {
-    return [ns, tag]; 
-  }
-  return null;
-};
-
-/**
  * Define 'os:renderAll' and 'os:Html' tags and the @onAttach attribute
  */
 os.defineBuiltinTags = function() {
