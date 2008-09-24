@@ -23,16 +23,7 @@ package org.apache.shindig.auth;
  * Use in conjunction with @code SecurityTokenDecoder.
  */
 public interface SecurityToken {
-
-  /**
-   * Serializes the token into a string. This can be the exact same as
-   * toString; using a different name here is only to force interface
-   * compliance.
-   *
-   * @return A string representation of the token.
-   */
-  public String toSerialForm();
-
+  
   /**
    * @return the owner from the token, or null if there is none.
    */
