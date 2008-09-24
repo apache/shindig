@@ -28,13 +28,12 @@ import org.apache.shindig.gadgets.spec.LocaleSpec;
 import org.apache.shindig.gadgets.spec.Preload;
 import org.apache.shindig.gadgets.spec.View;
 
-import edu.emory.mathcs.backport.java.util.Collections;
+import com.google.common.collect.Maps;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.Future;
 
@@ -49,25 +48,27 @@ public class Gadget {
   private MutableContent mutableContent;
 
   @Deprecated
-  private Collection<JsLibrary> jsLibraries = Collections.emptyList();
+  private Collection<JsLibrary> jsLibraries;
 
   @Deprecated
-  private final Map<Preload, Future<HttpResponse>> preloadMap
-      = new HashMap<Preload, Future<HttpResponse>>();
+  private Map<Preload, Future<HttpResponse>> preloadMap;
 
   @Deprecated
   private View currentView;
 
-  public Gadget() {}
+  public Gadget() { }
 
   /**
    * @deprecated Use default ctor and setter methods instead.
+   *
+   * TODO: Remove this entirely. The only code paths using it should be for the old rendering
+   * pipeline, so this can be removed once that's gone.
    */
   @Deprecated
   public Gadget(GadgetContext context, GadgetSpec spec,
       Collection<JsLibrary> jsLibraries, ContainerConfig containerConfig,
       GadgetHtmlParser contentParser) {
-
+    this.preloadMap = Maps.newHashMap();
     this.context = context;
     this.spec = spec;
     this.jsLibraries = jsLibraries;
