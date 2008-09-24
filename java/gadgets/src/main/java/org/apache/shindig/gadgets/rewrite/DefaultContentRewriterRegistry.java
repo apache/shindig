@@ -18,7 +18,6 @@
 package org.apache.shindig.gadgets.rewrite;
 
 import org.apache.shindig.gadgets.Gadget;
-import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.MutableContent;
 import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.http.HttpResponse;
@@ -51,7 +50,7 @@ public class DefaultContentRewriterRegistry implements ContentRewriterRegistry {
   }
 
   /** {@inheritDoc} */
-  public boolean rewriteGadget(Gadget gadget) throws GadgetException {
+  public boolean rewriteGadget(Gadget gadget) {
     String originalContent = gadget.getContent();
 
     if (originalContent == null) {
@@ -68,9 +67,8 @@ public class DefaultContentRewriterRegistry implements ContentRewriterRegistry {
 
   /** {@inheritDoc} */
   public HttpResponse rewriteHttpResponse(HttpRequest req, HttpResponse resp) {
-    MutableContent mc = new MutableContent(htmlParser);
     String originalContent = resp.getResponseAsString();
-    mc.setContent(originalContent);
+    MutableContent mc = getMutableContent(originalContent);
 
     for (ContentRewriter rewriter : rewriters) {
       rewriter.rewrite(req, resp, mc);
@@ -84,4 +82,13 @@ public class DefaultContentRewriterRegistry implements ContentRewriterRegistry {
     return new HttpResponseBuilder(resp).setResponseString(rewrittenContent).create();
   }
 
+  protected MutableContent getMutableContent(String content) {
+    MutableContent mc = new MutableContent(htmlParser);
+    mc.setContent(content);
+    return mc;
+  }
+  
+  protected List<ContentRewriter> getRewriters() {
+    return rewriters;
+  }
 }

@@ -17,11 +17,11 @@
  */
 package org.apache.shindig.gadgets.rewrite;
 
-import org.apache.shindig.common.cache.Cache;
 import org.apache.shindig.common.cache.CacheProvider;
+import org.apache.shindig.common.cache.TtlCache;
 import org.apache.shindig.common.util.HashUtil;
 import org.apache.shindig.gadgets.Gadget;
-import org.apache.shindig.gadgets.GadgetException;
+import org.apache.shindig.gadgets.MutableContent;
 import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.http.HttpResponse;
 import org.apache.shindig.gadgets.http.HttpResponseBuilder;
@@ -41,17 +41,30 @@ import java.util.List;
  */
 public class CachingContentRewriterRegistry extends DefaultContentRewriterRegistry {
 
-  private final Cache<String, String> rewrittenCache;
+  private final TtlCache<String, String> rewrittenCache;
+  private long minCacheTtl;
   private String rewritersKey;
 
+  /**
+   * Creates a registry with underlying cache configured by the provided params.
+   * @param htmlParser Parser used to generate parse tree versions of content.
+   * @param cacheProvider Used to generate a cache instance.
+   * @param capacity Maximum number of rewritten content entries to store in the cache.
+   * @param minCacheTtl Minimum TTL value, in milliseconds, that it makes sense to cache an entry.
+   */
   @Inject
   public CachingContentRewriterRegistry(List<ContentRewriter> rewriters,
       GadgetHtmlParser htmlParser,
       CacheProvider cacheProvider,
-      @Named("shindig.rewritten-content.cache.capacity")int capacity) {
+      @Named("shindig.rewritten-content.cache.capacity")int capacity,
+      @Named("shindig.rewritten-content.cache.minTTL")long minCacheTtl) {
     super(rewriters, htmlParser);
-
-    rewrittenCache = cacheProvider.createCache(capacity);
+    // minTtl = 0 and maxTtl = MAX_VALUE because the underlying cache is willing to store data 
+    // with any TTL value specified. Entries are added with a given TTL value per slightly
+    // different logic by this class: if a rewrite pass has a cacheTtl lower than minCacheTtl,
+    // it's simply not added.
+    rewrittenCache = new TtlCache<String, String>(cacheProvider, capacity, 0, Long.MAX_VALUE);
+    this.minCacheTtl = minCacheTtl;
   }
 
   protected String getGadgetCacheKey(Gadget gadget) {
@@ -69,7 +82,7 @@ public class CachingContentRewriterRegistry extends DefaultContentRewriterRegist
       StringBuilder keyBuilder = new StringBuilder();
       for (ContentRewriter rewriter : rewriters) {
         keyBuilder.append(rewriter.getClass().getCanonicalName())
-            .append('-').append(rewriter.getClass().hashCode());
+            .append("-").append(rewriter.getClass().hashCode()).append(":");
       }
       rewritersKey = keyBuilder.toString();
     }
@@ -78,7 +91,7 @@ public class CachingContentRewriterRegistry extends DefaultContentRewriterRegist
 
   /** {@inheritDoc} */
   @Override
-  public boolean rewriteGadget(Gadget gadget) throws GadgetException {
+  public boolean rewriteGadget(Gadget gadget) {
     if (gadget.getContext().getIgnoreCache()) {
       return super.rewriteGadget(gadget);
     }
@@ -91,14 +104,25 @@ public class CachingContentRewriterRegistry extends DefaultContentRewriterRegist
       return true;
     }
 
-    // Do a fresh rewrite and cache the results.
-    boolean rewritten = super.rewriteGadget(gadget);
-    if (rewritten) {
-      // Only cache if the rewriters did something.
-      rewrittenCache.addElement(cacheKey, gadget.getContent());
+    long cacheTtl = Long.MAX_VALUE;
+    String original = gadget.getContent();
+    for (ContentRewriter rewriter : getRewriters()) {
+      RewriterResults rr = rewriter.rewrite(gadget);
+      if (rr == null) {
+        cacheTtl = 0;
+      } else {
+        cacheTtl = Math.min(cacheTtl, rr.getCacheTtl());
+      }
+    }
+    
+    if (cacheTtl >= minCacheTtl) {
+      // Only cache if the cacheTtl is greater than the minimum time configured for doing so.
+      // This prevents cache churn and may be more efficient when rewriting is cheaper
+      // than a cache lookup.
+      rewrittenCache.addElementWithTtl(cacheKey, gadget.getContent(), cacheTtl);
     }
 
-    return rewritten;
+    return !original.equals(gadget.getContent());
   }
 
   /** {@inheritDoc} */
@@ -115,12 +139,32 @@ public class CachingContentRewriterRegistry extends DefaultContentRewriterRegist
       return new HttpResponseBuilder(resp).setResponseString(cached).create();
     }
 
-    HttpResponse rewritten = super.rewriteHttpResponse(req, resp);
-    if (rewritten != null) {
-      // All these are bounded by the provided TTLs
-      rewrittenCache.addElement(cacheKey, rewritten.getResponseAsString());
+    String original = resp.getResponseAsString();
+    MutableContent mc = getMutableContent(original);
+    long cacheTtl = Long.MAX_VALUE;
+    for (ContentRewriter rewriter : getRewriters()) {
+      RewriterResults rr = rewriter.rewrite(req, resp, mc);
+      if (rr == null) {
+        cacheTtl = 0;
+      } else {
+        cacheTtl = Math.min(cacheTtl, rr.getCacheTtl());
+      }
     }
 
-    return rewritten;
+    if (cacheTtl >= minCacheTtl) {
+      rewrittenCache.addElementWithTtl(cacheKey, mc.getContent(), cacheTtl);
+    }
+    
+    if (!original.equals(mc.getContent())) {
+      return new HttpResponseBuilder(resp).setResponseString(mc.getContent()).create();
+    }
+    
+    // Not rewritten, just return original.
+    return resp;
+  }
+  
+  // Methods for testing purposes
+  void setMinCacheTtl(long minCacheTtl) {
+    this.minCacheTtl = minCacheTtl;
   }
 }

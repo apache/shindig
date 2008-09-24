@@ -46,13 +46,14 @@ import java.util.List;
 import java.util.Map;
 
 public class CachingContentRewriterRegistryTest {
+  private final CaptureRewriter captureRewriter = new CaptureRewriter();
   private final List<CaptureRewriter> rewriters
-      = Lists.newArrayList(new CaptureRewriter(), new ModifyingCaptureContentRewriter());
+      = Lists.newArrayList(captureRewriter, new ModifyingCaptureContentRewriter());
   private final List<ContentRewriter> contentRewriters
       = Lists.<ContentRewriter>newArrayList(rewriters);
   private final FakeCacheProvider provider = new FakeCacheProvider();
-  private final ContentRewriterRegistry registry
-      = new CachingContentRewriterRegistry(contentRewriters, null, provider, 100);
+  private final CachingContentRewriterRegistry registry
+      = new CachingContentRewriterRegistry(contentRewriters, null, provider, 100, 0);
   private final IMocksControl control = EasyMock.createNiceControl();
   private final ContainerConfig config = control.createMock(ContainerConfig.class);
 
@@ -92,7 +93,6 @@ public class CachingContentRewriterRegistryTest {
     gadget = new Gadget(context, spec, new ArrayList<JsLibrary>(), config, null);
     registry.rewriteGadget(gadget);
 
-    // TODO: We're not actually testing the TTL of the entries here.
     assertEquals(3, provider.readCount);
     assertEquals(1, provider.writeCount);
   }
@@ -181,7 +181,7 @@ public class CachingContentRewriterRegistryTest {
     // The new registry is created using one additional rewriter, but the same cache.
     contentRewriters.add(new CaptureRewriter());
     ContentRewriterRegistry newRegistry
-        = new CachingContentRewriterRegistry(contentRewriters, null, provider, 100);
+        = new CachingContentRewriterRegistry(contentRewriters, null, provider, 100, 0);
 
     newRegistry.rewriteHttpResponse(request, response);
 
@@ -189,6 +189,27 @@ public class CachingContentRewriterRegistryTest {
     assertEquals(2, provider.writeCount);
     assertFalse("Cache was written using identical keys.",
         provider.keys.get(0).equals(provider.keys.get(1)));
+  }
+  
+  @Test
+  public void rewriteBelowMinCacheDoesntWriteToCache() throws Exception {
+    registry.setMinCacheTtl(1000);
+    captureRewriter.setCacheTtl(500);
+    
+    String body = "Hello, world";
+    String xml = "<Module><ModulePrefs title=''/><Content>" + body + "</Content></Module>";
+    GadgetSpec spec = new GadgetSpec(URI.create("#"), xml);
+    GadgetContext context = new GadgetContext();
+
+    control.replay();
+
+    // We have to re-create Gadget objects because they get mutated directly, which is really
+    // inconsistent with the behavior of rewriteHttpResponse.
+    Gadget gadget = new Gadget(context, spec, new ArrayList<JsLibrary>(), config, null);
+    registry.rewriteGadget(gadget);
+    
+    assertEquals(1, provider.readCount);
+    assertEquals(0, provider.writeCount);
   }
 
   private static class FakeCacheProvider implements CacheProvider {
@@ -239,5 +260,7 @@ public class CachingContentRewriterRegistryTest {
       gadget.setContent(gadget.getContent() + "-modified");
       return RewriterResults.cacheableIndefinitely();
     }
+    
   }
+  
 }
