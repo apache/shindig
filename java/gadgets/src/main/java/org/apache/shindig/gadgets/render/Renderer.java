@@ -39,19 +39,17 @@ import java.util.regex.Pattern;
 
 /**
  * Validates a rendering request parameters before calling an appropriate renderer.
- *
- * TODO: Rename to Renderer
  */
-public class RenderDispatcher {
-  private static final Logger LOG = Logger.getLogger(RenderDispatcher.class.getName());
+public class Renderer {
+  private static final Logger LOG = Logger.getLogger(Renderer.class.getName());
   private final HtmlRenderer renderer;
   private final GadgetSpecFactory gadgetSpecFactory;
   private final ContainerConfig containerConfig;
 
   @Inject
-  public RenderDispatcher(HtmlRenderer renderer,
-                          GadgetSpecFactory gadgetSpecFactory,
-                          ContainerConfig containerConfig) {
+  public Renderer(HtmlRenderer renderer,
+                  GadgetSpecFactory gadgetSpecFactory,
+                  ContainerConfig containerConfig) {
     this.renderer = renderer;
     this.gadgetSpecFactory = gadgetSpecFactory;
     this.containerConfig = containerConfig;

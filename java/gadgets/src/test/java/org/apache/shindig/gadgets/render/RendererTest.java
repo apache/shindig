@@ -39,9 +39,9 @@ import java.net.URI;
 import java.util.Arrays;
 
 /**
- * Tests for RenderDispatcher.
+ * Tests for Renderer.
  */
-public class RenderDispatcherTest {
+public class RendererTest {
   private static final Uri SPEC_URL = Uri.parse("http://example.org/gadget.xml");
   private static final Uri TYPE_URL_HREF = Uri.parse("http://example.org/gadget.php");
   private static final String BASIC_HTML_CONTENT = "Hello, World!";
@@ -56,12 +56,12 @@ public class RenderDispatcherTest {
   private final FakeHtmlRenderer htmlRenderer = new FakeHtmlRenderer();
   private final FakeGadgetSpecFactory gadgetSpecFactory = new FakeGadgetSpecFactory();
   private FakeContainerConfig containerConfig;
-  private RenderDispatcher renderer;
+  private Renderer renderer;
 
   @Before
   public void setUp() throws Exception {
     containerConfig = new FakeContainerConfig();
-    renderer = new RenderDispatcher(htmlRenderer, gadgetSpecFactory, containerConfig);
+    renderer = new Renderer(htmlRenderer, gadgetSpecFactory, containerConfig);
   }
 
   private GadgetContext makeContext(final String view, final Uri specUrl) {

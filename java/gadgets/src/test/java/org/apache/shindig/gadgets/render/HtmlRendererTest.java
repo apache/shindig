@@ -45,7 +45,7 @@ import java.util.Arrays;
 import java.util.Map;
 
 /**
- * Tests for Renderer
+ * Tests for HtmlRenderer
  */
 public class HtmlRendererTest {
   private static final Uri SPEC_URL = Uri.parse("http://example.org/gadget.xml");
