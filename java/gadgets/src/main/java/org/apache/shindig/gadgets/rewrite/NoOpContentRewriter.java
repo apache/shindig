@@ -35,7 +35,7 @@ public class NoOpContentRewriter implements ContentRewriter {
     return null;
   }
 
-  public RewriterResults rewrite(Gadget gadget) {
+  public RewriterResults rewrite(Gadget gadget, MutableContent content) {
 	return null;
   }
 }

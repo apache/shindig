@@ -17,16 +17,17 @@
  */
 package org.apache.shindig.gadgets.rewrite;
 
-import org.easymock.classextension.EasyMock;
 import static org.easymock.EasyMock.expect;
 import static org.easymock.classextension.EasyMock.replay;
 
 import org.apache.shindig.gadgets.Gadget;
 import org.apache.shindig.gadgets.GadgetContext;
+import org.apache.shindig.gadgets.MutableContent;
 import org.apache.shindig.gadgets.parse.GadgetHtmlParser;
 import org.apache.shindig.gadgets.parse.ParsedHtmlNode;
 import org.apache.shindig.gadgets.spec.GadgetSpec;
-import org.apache.shindig.gadgets.spec.View;
+
+import org.easymock.classextension.EasyMock;
 
 import junit.framework.TestCase;
 
@@ -36,7 +37,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-public class FeatureBasedRewriterTestBase extends TestCase {
+public abstract class FeatureBasedRewriterTestBase extends TestCase {
   protected URI baseUri;
 
   @Override
@@ -44,12 +45,12 @@ public class FeatureBasedRewriterTestBase extends TestCase {
     super.setUp();
     baseUri = new URI("http://gadget.org/dir/gadget.xml");
   }
-  
+
   protected ContentRewriterFeature.Factory mockContentRewriterFeatureFactory(
       ContentRewriterFeature feature) {
     return new MockRewriterFeatureFactory(feature);
   }
-  
+
   protected ContentRewriterFeature makeFeature(String... includedTags) {
     ContentRewriterFeature rewriterFeature =
         EasyMock.createNiceMock(ContentRewriterFeature.class);
@@ -63,32 +64,43 @@ public class FeatureBasedRewriterTestBase extends TestCase {
     replay(rewriterFeature);
     return rewriterFeature;
   }
-  
-  protected String rewriteHelper(ContentRewriter rewriter, String s,
-      ParsedHtmlNode[] p) throws Exception {
+
+  protected String rewriteHelper(ContentRewriter rewriter, String s, ParsedHtmlNode[] p)
+      throws Exception {
     GadgetHtmlParser parser = EasyMock.createNiceMock(GadgetHtmlParser.class);
     List<ParsedHtmlNode> expected = p != null ? Arrays.asList(p) : null;
     expect(parser.parse(s)).andReturn(expected).anyTimes();
-    View view = EasyMock.createNiceMock(View.class);
-    expect(view.getContent()).andReturn(s).anyTimes();
-    expect(view.getName()).andReturn(GadgetSpec.DEFAULT_VIEW).anyTimes();
-    GadgetSpec spec = EasyMock.createNiceMock(GadgetSpec.class);
-    expect(spec.getUrl()).andReturn(baseUri).anyTimes();
-    expect(spec.getView(GadgetSpec.DEFAULT_VIEW)).andReturn(view).anyTimes();
-    replay(parser, view, spec);
-    Gadget gadget = new Gadget(new GadgetContext(), spec, null, null, parser);
-    rewriter.rewrite(gadget);
-    return gadget.getContent();
+
+    replay(parser);
+
+    MutableContent mc = new MutableContent(parser);
+    mc.setContent(s);
+
+    GadgetSpec spec = new GadgetSpec(baseUri,
+        "<Module><ModulePrefs title=''/><Content><![CDATA[" + s + "]]></Content></Module>");
+
+    GadgetContext context = new GadgetContext() {
+      @Override
+      public URI getUrl() {
+        return baseUri;
+      }
+    };
+
+    Gadget gadget = new Gadget()
+        .setContext(context)
+        .setSpec(spec);
+    rewriter.rewrite(gadget, mc);
+    return mc.getContent();
   }
-  
+
   private static class MockRewriterFeatureFactory extends ContentRewriterFeature.Factory {
     private final ContentRewriterFeature feature;
-    
+
     public MockRewriterFeatureFactory(ContentRewriterFeature feature) {
       super(".*", "", "HTTP", null);
       this.feature = feature;
     }
-    
+
     @Override
     public ContentRewriterFeature get(GadgetSpec spec) {
       return feature;

@@ -59,7 +59,7 @@ public class CachingContentRewriterRegistry extends DefaultContentRewriterRegist
       @Named("shindig.rewritten-content.cache.capacity")int capacity,
       @Named("shindig.rewritten-content.cache.minTTL")long minCacheTtl) {
     super(rewriters, htmlParser);
-    // minTtl = 0 and maxTtl = MAX_VALUE because the underlying cache is willing to store data 
+    // minTtl = 0 and maxTtl = MAX_VALUE because the underlying cache is willing to store data
     // with any TTL value specified. Entries are added with a given TTL value per slightly
     // different logic by this class: if a rewrite pass has a cacheTtl lower than minCacheTtl,
     // it's simply not added.
@@ -104,17 +104,21 @@ public class CachingContentRewriterRegistry extends DefaultContentRewriterRegist
       return true;
     }
 
+    MutableContent mc = getMutableContent(gadget.getContent());
+
     long cacheTtl = Long.MAX_VALUE;
     String original = gadget.getContent();
     for (ContentRewriter rewriter : getRewriters()) {
-      RewriterResults rr = rewriter.rewrite(gadget);
+      RewriterResults rr = rewriter.rewrite(gadget, mc);
       if (rr == null) {
         cacheTtl = 0;
       } else {
         cacheTtl = Math.min(cacheTtl, rr.getCacheTtl());
       }
     }
-    
+
+    gadget.setContent(mc.getContent());
+
     if (cacheTtl >= minCacheTtl) {
       // Only cache if the cacheTtl is greater than the minimum time configured for doing so.
       // This prevents cache churn and may be more efficient when rewriting is cheaper
@@ -154,15 +158,15 @@ public class CachingContentRewriterRegistry extends DefaultContentRewriterRegist
     if (cacheTtl >= minCacheTtl) {
       rewrittenCache.addElementWithTtl(cacheKey, mc.getContent(), cacheTtl);
     }
-    
+
     if (!original.equals(mc.getContent())) {
       return new HttpResponseBuilder(resp).setResponseString(mc.getContent()).create();
     }
-    
+
     // Not rewritten, just return original.
     return resp;
   }
-  
+
   // Methods for testing purposes
   void setMinCacheTtl(long minCacheTtl) {
     this.minCacheTtl = minCacheTtl;

@@ -36,8 +36,7 @@ public class ConcurrentPreloaderService implements PreloaderService {
   private final List<? extends Preloader> preloaders;
 
   @Inject
-  public ConcurrentPreloaderService(ExecutorService executor,
-      List<? extends Preloader> preloaders) {
+  public ConcurrentPreloaderService(ExecutorService executor, List<Preloader> preloaders) {
     this.executor = executor;
     this.preloaders = preloaders;
   }

@@ -33,7 +33,7 @@ import java.net.URI;
  * was derived in doing so.
  */
 public abstract class HtmlContentRewriter implements ContentRewriter {
-  
+
   protected abstract RewriterResults rewrite(GadgetHtmlNode root, URI baseUri);
 
   public static String getMimeType(HttpRequest request, HttpResponse original) {
@@ -43,7 +43,7 @@ public abstract class HtmlContentRewriter implements ContentRewriter {
     }
     return mimeType != null ? mimeType.toLowerCase() : null;
   }
-  
+
   public RewriterResults rewrite(HttpRequest request, HttpResponse original,
       MutableContent content) {
     String mimeType = getMimeType(request, original);
@@ -53,10 +53,10 @@ public abstract class HtmlContentRewriter implements ContentRewriter {
     return null;
   }
 
-  public RewriterResults rewrite(Gadget gadget) {
-    return rewriteHtml(gadget.getParseTree(), gadget.getSpec().getUrl());
+  public RewriterResults rewrite(Gadget gadget, MutableContent content) {
+    return rewriteHtml(content.getParseTree(), gadget.getSpec().getUrl());
   }
-  
+
   private RewriterResults rewriteHtml(GadgetHtmlNode root, URI baseUri) {
     if (root != null) {
       return rewrite(root, baseUri);

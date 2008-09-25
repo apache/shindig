@@ -93,7 +93,6 @@ public class RenderingContentRewriterTest {
     GadgetSpec spec = new GadgetSpec(URI.create("#"), gadgetXml);
     return new Gadget()
         .setContext(new GadgetContext())
-        .setMutableContent(new MutableContent(null))
         .setPreloads(new NullPreloads())
         .setSpec(spec)
         .setContent(spec.getView("default").getContent());
@@ -104,13 +103,20 @@ public class RenderingContentRewriterTest {
     return makeGadgetWithSpec(defaultXml).setContent(content);
   }
 
+  private void rewrite(Gadget gadget) {
+    MutableContent mc = new MutableContent(null);
+    mc.setContent(gadget.getContent());
+    assertEquals(0, rewriter.rewrite(gadget, mc).getCacheTtl());
+    gadget.setContent(mc.getContent());
+  }
+
   @Test
   public void defaultOutput() throws Exception {
     Gadget gadget = makeGadgetWithContent(BODY_CONTENT);
 
     control.replay();
 
-    assertEquals(0, rewriter.rewrite(gadget).getCacheTtl());
+    rewrite(gadget);
 
     Matcher matcher = DOCUMENT_SPLIT_PATTERN.matcher(gadget.getContent());
     assertTrue("Output is not valid HTML.", matcher.matches());
@@ -157,7 +163,7 @@ public class RenderingContentRewriterTest {
     featureRegistry.addInline("foo", "does-not-matter");
     control.replay();
 
-    assertEquals(0, rewriter.rewrite(gadget).getCacheTtl());
+    rewrite(gadget);
 
     Matcher matcher = DOCUMENT_SPLIT_PATTERN.matcher(gadget.getContent());
     assertTrue("Output is not valid HTML.", matcher.matches());
@@ -189,7 +195,7 @@ public class RenderingContentRewriterTest {
 
     control.replay();
 
-    rewriter.rewrite(gadget);
+    rewrite(gadget);
 
     assertTrue("Bi-directional locale settings not preserved.",
         gadget.getContent().contains("<body dir='rtl'>"));
@@ -232,7 +238,7 @@ public class RenderingContentRewriterTest {
     featureRegistry.addInline("baz", "does-not-matter");
     control.replay();
 
-    rewriter.rewrite(gadget);
+    rewrite(gadget);
 
     Set<String> actual = getInjectedScript(gadget);
     Set<String> expected = Sets.immutableSortedSet("foo", "bar", "baz");
@@ -253,7 +259,7 @@ public class RenderingContentRewriterTest {
     featureRegistry.addInline("foo", "foo_content();");
     control.replay();
 
-    rewriter.rewrite(gadget);
+    rewrite(gadget);
 
     assertTrue("Requested scripts not inlined.", gadget.getContent().contains("foo_content();"));
   }
@@ -285,7 +291,7 @@ public class RenderingContentRewriterTest {
     featureRegistry.addInline("baz", "does-not-matter");
     control.replay();
 
-    rewriter.rewrite(gadget);
+    rewrite(gadget);
 
     Set<String> actual = getInjectedScript(gadget);
     Set<String> expected = Sets.immutableSortedSet("bar", "baz");
@@ -320,7 +326,7 @@ public class RenderingContentRewriterTest {
     featureRegistry.addInline("baz", "does-not-matter");
     control.replay();
 
-    rewriter.rewrite(gadget);
+    rewrite(gadget);
 
     Set<String> actual = getInjectedScript(gadget);
     Set<String> expected = Sets.immutableSortedSet("baz");
@@ -356,7 +362,7 @@ public class RenderingContentRewriterTest {
     expect(config.getJsonObject("default", "gadgets.features")).andReturn(conf);
     control.replay();
 
-    rewriter.rewrite(gadget);
+    rewrite(gadget);
 
     JSONObject json = getConfigJson(gadget);
     assertEquals("blah", json.get("foo"));
@@ -391,7 +397,7 @@ public class RenderingContentRewriterTest {
     expect(config.getJsonObject("default", "gadgets.features")).andReturn(conf);
     control.replay();
 
-    rewriter.rewrite(gadget);
+    rewrite(gadget);
 
     JSONObject json = getConfigJson(gadget);
     assertEquals("blah", json.get("foo"));
@@ -417,7 +423,7 @@ public class RenderingContentRewriterTest {
     expect(config.getJsonObject("default", "gadgets.features")).andReturn(conf);
     control.replay();
 
-    rewriter.rewrite(gadget);
+    rewrite(gadget);
 
     JSONObject json = getConfigJson(gadget);
     assertEquals("blah", json.get("foo"));
@@ -445,7 +451,7 @@ public class RenderingContentRewriterTest {
 
     control.replay();
 
-    rewriter.rewrite(gadget);
+    rewrite(gadget);
 
     Pattern prefsPattern
         = Pattern.compile("(?:.*)gadgets\\.Prefs\\.setMessages_\\((.*)\\);(?:.*)", Pattern.DOTALL);
@@ -469,7 +475,7 @@ public class RenderingContentRewriterTest {
 
     control.replay();
 
-    rewriter.rewrite(gadget);
+    rewrite(gadget);
   }
 
   @Test
@@ -485,7 +491,7 @@ public class RenderingContentRewriterTest {
 
     control.replay();
 
-    rewriter.rewrite(gadget);
+    rewrite(gadget);
 
     // rewrite will throw if the optional unsupported feature doesn't work.
   }
@@ -529,7 +535,7 @@ public class RenderingContentRewriterTest {
     Gadget gadget = makeGadgetWithContent("").setPreloads(preloads);
     control.replay();
 
-    rewriter.rewrite(gadget);
+    rewrite(gadget);
 
     JSONObject json = getPreloadedJson(gadget);
     for (Map.Entry<String, Object> entry : preloadData.entrySet()) {
@@ -551,7 +557,7 @@ public class RenderingContentRewriterTest {
     Gadget gadget = makeGadgetWithContent("").setPreloads(preloads);
     control.replay();
 
-    rewriter.rewrite(gadget);
+    rewrite(gadget);
 
     JSONObject json = getPreloadedJson(gadget);
 

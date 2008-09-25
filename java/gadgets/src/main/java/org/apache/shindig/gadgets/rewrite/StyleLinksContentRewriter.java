@@ -18,23 +18,21 @@
  */
 package org.apache.shindig.gadgets.rewrite;
 
-import java.util.LinkedList;
-import java.util.Queue;
-
 import org.apache.shindig.gadgets.Gadget;
 import org.apache.shindig.gadgets.MutableContent;
 import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.http.HttpResponse;
 import org.apache.shindig.gadgets.parse.GadgetHtmlNode;
-import org.apache.shindig.gadgets.rewrite.ContentRewriterFeature;
 
 import java.net.URI;
+import java.util.LinkedList;
+import java.util.Queue;
 
 public class StyleLinksContentRewriter implements ContentRewriter {
   // TODO: consider providing helper base class for node-visitor content rewriters
   private final ContentRewriterFeature.Factory rewriterFeatureFactory;
   private final LinkRewriter linkRewriter;
-  
+
   public StyleLinksContentRewriter(ContentRewriterFeature.Factory rewriterFeatureFactory,
       LinkRewriter linkRewriter) {
     this.rewriterFeatureFactory = rewriterFeatureFactory;
@@ -52,33 +50,33 @@ public class StyleLinksContentRewriter implements ContentRewriter {
     return RewriterResults.cacheableIndefinitely();
   }
 
-  public RewriterResults rewrite(Gadget gadget) {
+  public RewriterResults rewrite(Gadget gadget, MutableContent content) {
     ContentRewriterFeature rewriterFeature = rewriterFeatureFactory.get(gadget.getSpec());
-    if (linkRewriter == null || 
+    if (linkRewriter == null ||
         !rewriterFeature.isRewriteEnabled() ||
         !rewriterFeature.getIncludedTags().contains("style")) {
       return null;
     }
-    
-    return rewriteHtml(gadget.getParseTree(), gadget.getSpec().getUrl());
+
+    return rewriteHtml(content.getParseTree(), gadget.getSpec().getUrl());
   }
-  
+
   private RewriterResults rewriteHtml(GadgetHtmlNode root, URI baseUri) {
     if (root == null) {
       return null;
     }
-    
+
     Queue<GadgetHtmlNode> nodesToProcess =
       new LinkedList<GadgetHtmlNode>();
-    
+
     nodesToProcess.addAll(root.getChildren());
-  
+
     while (!nodesToProcess.isEmpty()) {
       GadgetHtmlNode curNode = nodesToProcess.remove();
       if (!curNode.isText()) {
         // Depth-first iteration over children. Order doesn't matter anyway.
         nodesToProcess.addAll(curNode.getChildren());
-        
+
         if (curNode.getTagName().equalsIgnoreCase("style")) {
           String styleText = getNodeChildText(curNode);
           curNode.clearChildren();
@@ -86,14 +84,14 @@ public class StyleLinksContentRewriter implements ContentRewriter {
         }
       }
     }
-    
+
     return RewriterResults.cacheableIndefinitely();
   }
-  
+
   private String rewriteCss(String styleText, URI baseUri) {
     return CssRewriter.rewrite(styleText, baseUri, linkRewriter);
   }
-  
+
   private static String getNodeChildText(GadgetHtmlNode node) {
     // TODO: move this to GadgetHtmlNode as a helper
     StringBuilder builder = new StringBuilder();
@@ -104,5 +102,5 @@ public class StyleLinksContentRewriter implements ContentRewriter {
     }
     return builder.toString();
   }
-  
+
 }

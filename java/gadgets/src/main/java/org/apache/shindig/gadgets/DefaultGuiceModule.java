@@ -27,6 +27,9 @@ import org.apache.shindig.gadgets.oauth.BasicOAuthStore;
 import org.apache.shindig.gadgets.oauth.BasicOAuthStoreConsumerKeyAndSecret;
 import org.apache.shindig.gadgets.oauth.OAuthStore;
 import org.apache.shindig.gadgets.oauth.BasicOAuthStoreConsumerKeyAndSecret.KeyType;
+import org.apache.shindig.gadgets.preload.HttpPreloader;
+import org.apache.shindig.gadgets.preload.Preloader;
+import org.apache.shindig.gadgets.render.RenderingContentRewriter;
 import org.apache.shindig.gadgets.rewrite.ContentRewriter;
 import org.apache.shindig.gadgets.rewrite.lexer.DefaultContentRewriter;
 
@@ -81,6 +84,7 @@ public class DefaultGuiceModule extends AbstractModule {
     bind(ExecutorService.class).toInstance(service);
 
     bind(new TypeLiteral<List<ContentRewriter>>(){}).toProvider(ContentRewritersProvider.class);
+    bind(new TypeLiteral<List<Preloader>>(){}).toProvider(PreloaderProvider.class);
 
     // TODO: This is not the proper way to use a Guice module. It needs to be fixed before we can
     // do a release.
@@ -204,12 +208,26 @@ public class DefaultGuiceModule extends AbstractModule {
     private final List<ContentRewriter> rewriters;
 
     @Inject
-    public ContentRewritersProvider(DefaultContentRewriter optimizingRewriter) {
-      rewriters = Lists.<ContentRewriter>newArrayList(optimizingRewriter);
+    public ContentRewritersProvider(DefaultContentRewriter optimizingRewriter,
+                                    RenderingContentRewriter renderingRewriter) {
+      rewriters = Lists.<ContentRewriter>newArrayList(optimizingRewriter, renderingRewriter);
     }
 
     public List<ContentRewriter> get() {
       return rewriters;
+    }
+  }
+
+  private static class PreloaderProvider implements Provider<List<Preloader>> {
+    private final List<Preloader> preloaders;
+
+    @Inject
+    public PreloaderProvider(HttpPreloader httpPreloader) {
+      preloaders = Lists.<Preloader>newArrayList(httpPreloader);
+    }
+
+    public List<Preloader> get() {
+      return preloaders;
     }
   }
 }

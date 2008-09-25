@@ -18,9 +18,11 @@
 package org.apache.shindig.gadgets.servlet;
 
 import org.apache.shindig.common.servlet.InjectedServlet;
+import org.apache.shindig.gadgets.GadgetContext;
+import org.apache.shindig.gadgets.render.Renderer;
+import org.apache.shindig.gadgets.render.RenderingResults;
 
 import com.google.inject.Inject;
-import com.google.inject.Provider;
 
 import java.io.IOException;
 
@@ -28,19 +30,46 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 /**
- * Servlet for rendering Gadgets, typically in an IFRAME.
+ * Servlet for rendering Gadgets.
  */
 public class GadgetRenderingServlet extends InjectedServlet {
+  private static final int DEFAULT_CACHE_TTL = 60 * 5;
+  private Renderer renderer;
 
-  private Provider<GadgetRenderingTask> renderProvider;
   @Inject
-  public void setGadgetRenderer(Provider<GadgetRenderingTask> renderProvider) {
-    this.renderProvider = renderProvider;
+  public void setRenderer(Renderer renderer) {
+    this.renderer = renderer;
+  }
+
+  private void render(HttpServletRequest req, HttpServletResponse resp) throws IOException {
+    GadgetContext context = new HttpGadgetContext(req);
+    RenderingResults results = renderer.render(context);
+    switch (results.getStatus()) {
+      case OK:
+        if (context.getIgnoreCache()) {
+          HttpUtil.setCachingHeaders(resp, 0);
+        } else if (req.getParameter("v") != null) {
+          // Versioned files get cached indefinitely
+          HttpUtil.setCachingHeaders(resp, true);
+        } else {
+          // Unversioned files get cached for 5 minutes.
+          // TODO: This should be configurable
+          HttpUtil.setCachingHeaders(resp, DEFAULT_CACHE_TTL, true);
+        }
+        resp.setHeader("Content-Type", "text/html; charset=utf-8");
+        resp.getWriter().print(results.getContent());
+        break;
+      case ERROR:
+        resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, results.getErrorMessage());
+        break;
+      case MUST_REDIRECT:
+        resp.sendRedirect(results.getRedirect().toString());
+        break;
+    }
   }
 
   @Override
-  protected void doGet(HttpServletRequest req, HttpServletResponse resp)
-      throws IOException {
+  protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
     // If an If-Modified-Since header is ever provided, we always say
     // not modified. This is because when there actually is a change,
     // cache busting should occur.
@@ -50,12 +79,11 @@ public class GadgetRenderingServlet extends InjectedServlet {
       resp.setStatus(HttpServletResponse.SC_NOT_MODIFIED);
       return;
     }
-    renderProvider.get().process(req, resp);
+    render(req, resp);
   }
-  
+
   @Override
-  protected void doPost(HttpServletRequest req, HttpServletResponse resp) 
-      throws IOException {
-    renderProvider.get().process(req, resp);
+  protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException {
+    render(req, resp);
   }
 }

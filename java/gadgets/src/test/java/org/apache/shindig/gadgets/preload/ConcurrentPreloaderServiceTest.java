@@ -51,8 +51,8 @@ public class ConcurrentPreloaderServiceTest {
     preloader.tasks.put(PRELOAD_STRING_KEY,
         new TestPreloadCallable(new DataPreload(PRELOAD_STRING_VALUE)));
 
-    PreloaderService service
-        = new ConcurrentPreloaderService(new TestExecutorService(), Arrays.asList(preloader));
+    PreloaderService service = new ConcurrentPreloaderService(new TestExecutorService(),
+        Arrays.<Preloader>asList(preloader));
 
     assertEquals(PRELOAD_STRING_VALUE,
                  service.preload(null, null).getData(PRELOAD_STRING_KEY).toJson());
@@ -70,7 +70,7 @@ public class ConcurrentPreloaderServiceTest {
         new TestPreloadCallable(new DataPreload(PRELOAD_MAP_VALUE)));
 
     PreloaderService service = new ConcurrentPreloaderService(new TestExecutorService(),
-        Arrays.asList(preloader, preloader2));
+        Arrays.<Preloader>asList(preloader, preloader2));
 
     Preloads preloads = service.preload(null, null);
 
@@ -82,8 +82,8 @@ public class ConcurrentPreloaderServiceTest {
   @Test(expected = PreloadException.class)
   public void exceptionsArePropagated() throws PreloadException {
     preloader.tasks.put(PRELOAD_STRING_KEY, new TestPreloadCallable(null));
-    PreloaderService service
-        = new ConcurrentPreloaderService(new TestExecutorService(), Arrays.asList(preloader));
+    PreloaderService service = new ConcurrentPreloaderService(new TestExecutorService(),
+        Arrays.<Preloader>asList(preloader));
     service.preload(null, null).getData(PRELOAD_STRING_KEY);
   }
 

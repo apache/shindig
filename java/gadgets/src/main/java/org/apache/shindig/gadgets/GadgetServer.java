@@ -49,6 +49,7 @@ import java.util.concurrent.Future;
  * Gadget
  */
 @Singleton
+@Deprecated
 public class GadgetServer {
   private final ExecutorService executor;
   private final GadgetFeatureRegistry registry;
@@ -57,9 +58,9 @@ public class GadgetServer {
   private final ContentRewriterRegistry rewriterRegistry;
   private final GadgetHtmlParser htmlParser;
 
-  private ContentFetcherFactory preloadFetcherFactory;
-  private GadgetSpecFactory specFactory;
-  private MessageBundleFactory bundleFactory;
+  private final ContentFetcherFactory preloadFetcherFactory;
+  private final GadgetSpecFactory specFactory;
+  private final MessageBundleFactory bundleFactory;
 
   @Inject
   public GadgetServer(ExecutorService executor,
