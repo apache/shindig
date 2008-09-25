@@ -21,13 +21,11 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
-import org.apache.shindig.common.ContainerConfig;
 import org.apache.shindig.common.cache.Cache;
 import org.apache.shindig.common.cache.CacheProvider;
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.gadgets.Gadget;
 import org.apache.shindig.gadgets.GadgetContext;
-import org.apache.shindig.gadgets.JsLibrary;
 import org.apache.shindig.gadgets.MutableContent;
 import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.http.HttpResponse;
@@ -36,12 +34,9 @@ import org.apache.shindig.gadgets.spec.GadgetSpec;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 
-import org.easymock.classextension.EasyMock;
-import org.easymock.classextension.IMocksControl;
 import org.junit.Test;
 
 import java.net.URI;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -54,8 +49,6 @@ public class CachingContentRewriterRegistryTest {
   private final FakeCacheProvider provider = new FakeCacheProvider();
   private final CachingContentRewriterRegistry registry
       = new CachingContentRewriterRegistry(contentRewriters, null, provider, 100, 0);
-  private final IMocksControl control = EasyMock.createNiceControl();
-  private final ContainerConfig config = control.createMock(ContainerConfig.class);
 
   @Test
   public void gadgetGetsCached() throws Exception {
@@ -63,9 +56,10 @@ public class CachingContentRewriterRegistryTest {
     String xml = "<Module><ModulePrefs title=''/><Content>" + body + "</Content></Module>";
     GadgetSpec spec = new GadgetSpec(URI.create("#"), xml);
     GadgetContext context = new GadgetContext();
-    Gadget gadget = new Gadget(context, spec, new ArrayList<JsLibrary>(), config, null);
-
-    control.replay();
+    Gadget gadget = new Gadget()
+        .setContext(context)
+        .setSpec(spec)
+        .setContent(body);
 
     registry.rewriteGadget(gadget);
 
@@ -82,16 +76,13 @@ public class CachingContentRewriterRegistryTest {
 
     GadgetContext context = new GadgetContext();
 
-    control.replay();
-
-    // We have to re-create Gadget objects because they get mutated directly, which is really
-    // inconsistent with the behavior of rewriteHttpResponse.
-    Gadget gadget = new Gadget(context, spec, new ArrayList<JsLibrary>(), config, null);
-    registry.rewriteGadget(gadget);
-    gadget = new Gadget(context, spec, new ArrayList<JsLibrary>(), config, null);
-    registry.rewriteGadget(gadget);
-    gadget = new Gadget(context, spec, new ArrayList<JsLibrary>(), config, null);
-    registry.rewriteGadget(gadget);
+    for (int i = 0; i < 3; ++i) {
+      Gadget gadget = new Gadget()
+          .setContext(context)
+          .setSpec(spec)
+          .setContent(body);
+      registry.rewriteGadget(gadget);
+    }
 
     assertEquals(3, provider.readCount);
     assertEquals(1, provider.writeCount);
@@ -109,9 +100,10 @@ public class CachingContentRewriterRegistryTest {
       }
     };
 
-    Gadget gadget = new Gadget(context, spec, new ArrayList<JsLibrary>(), config, null);
-
-    control.replay();
+    Gadget gadget = new Gadget()
+        .setContext(context)
+        .setSpec(spec)
+        .setContent(body);
 
     registry.rewriteGadget(gadget);
 
@@ -190,24 +182,25 @@ public class CachingContentRewriterRegistryTest {
     assertFalse("Cache was written using identical keys.",
         provider.keys.get(0).equals(provider.keys.get(1)));
   }
-  
+
   @Test
   public void rewriteBelowMinCacheDoesntWriteToCache() throws Exception {
     registry.setMinCacheTtl(1000);
     captureRewriter.setCacheTtl(500);
-    
+
     String body = "Hello, world";
     String xml = "<Module><ModulePrefs title=''/><Content>" + body + "</Content></Module>";
     GadgetSpec spec = new GadgetSpec(URI.create("#"), xml);
     GadgetContext context = new GadgetContext();
 
-    control.replay();
-
     // We have to re-create Gadget objects because they get mutated directly, which is really
     // inconsistent with the behavior of rewriteHttpResponse.
-    Gadget gadget = new Gadget(context, spec, new ArrayList<JsLibrary>(), config, null);
+    Gadget gadget = new Gadget()
+        .setContext(context)
+        .setSpec(spec)
+        .setContent(body);
     registry.rewriteGadget(gadget);
-    
+
     assertEquals(1, provider.readCount);
     assertEquals(0, provider.writeCount);
   }
@@ -255,12 +248,12 @@ public class CachingContentRewriterRegistryTest {
     }
 
     @Override
-    public RewriterResults rewrite(Gadget gadget) {
-      super.rewrite(gadget);
-      gadget.setContent(gadget.getContent() + "-modified");
+    public RewriterResults rewrite(Gadget gadget, MutableContent content) {
+      super.rewrite(gadget, content);
+      content.setContent(content.getContent() + "-modified");
       return RewriterResults.cacheableIndefinitely();
     }
-    
+
   }
-  
+
 }

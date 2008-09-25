@@ -113,9 +113,9 @@ public class RenderingContentRewriter implements ContentRewriter {
     return RewriterResults.notCacheable();
   }
 
-  public RewriterResults rewrite(Gadget gadget) {
+  public RewriterResults rewrite(Gadget gadget, MutableContent mutableContent) {
     try {
-      GadgetContent content = createGadgetContent(gadget);
+      GadgetContent content = createGadgetContent(gadget, mutableContent);
 
       injectFeatureLibraries(gadget, content);
       // This can be one script block.
@@ -125,7 +125,7 @@ public class RenderingContentRewriter implements ContentRewriter {
       content.appendHead("</script>");
       injectOnLoadHandlers(content);
       // TODO: Use preloads when RenderedGadget gets promoted to Gadget.
-      finalizeDocument(gadget, content);
+      mutableContent.setContent(finalizeDocument(gadget, content));
       return RewriterResults.notCacheable();
     } catch (GadgetException e) {
       // TODO: Rewriter interface needs to be modified to handle GadgetException or
@@ -348,9 +348,9 @@ public class RenderingContentRewriter implements ContentRewriter {
   /**
    * Produces GadgetContent by parsing the document into 3 pieces (head, body, and tail). If the
    */
-  private GadgetContent createGadgetContent(Gadget gadget) {
+  private GadgetContent createGadgetContent(Gadget gadget, MutableContent mutableContent) {
     GadgetContent content = new GadgetContent();
-    String doc = gadget.getContent();
+    String doc = mutableContent.getContent();
     if (doc.contains("<html>") && doc.contains("</html>")) {
       Matcher matcher = DOCUMENT_SPLIT_PATTERN.matcher(doc);
       if (matcher.matches()) {
@@ -399,8 +399,8 @@ public class RenderingContentRewriter implements ContentRewriter {
   /**
    * Produces a final document for the gadget's content.
    */
-  private void finalizeDocument(Gadget gadget, GadgetContent content) {
-    gadget.setContent(content.assemble());
+  private String finalizeDocument(Gadget gadget, GadgetContent content) {
+    return content.assemble();
   }
 
   private static class GadgetContent {

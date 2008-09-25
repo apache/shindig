@@ -44,5 +44,5 @@ public interface ContentRewriter {
    * @param gadget Gadget to rewrite.
    * @return Object indicating results cacheability, or null (indicates not cacheable).
    */
-  RewriterResults rewrite(Gadget gadget);
+  RewriterResults rewrite(Gadget gadget, MutableContent content);
 }

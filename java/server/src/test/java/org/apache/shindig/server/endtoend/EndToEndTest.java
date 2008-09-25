@@ -20,6 +20,7 @@ package org.apache.shindig.server.endtoend;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.fail;
 
 import org.apache.shindig.auth.BasicSecurityToken;
 import org.apache.shindig.auth.BasicSecurityTokenDecoder;
@@ -59,7 +60,7 @@ public class EndToEndTest {
   private WebClient webClient;
   private CollectingAlertHandler alertHandler;
   private SecurityToken token;
-  
+
   @Test
   public void checkResources() throws Exception {
     for ( String resource : EXPECTED_RESOURCES ) {
@@ -166,7 +167,12 @@ public class EndToEndTest {
     BasicSecurityTokenDecoder decoder = new BasicSecurityTokenDecoder();
     url += "&st=" + URLEncoder.encode(decoder.encodeToken(token), "UTF-8");
     url += "&testMethod=" + URLEncoder.encode(testMethod, "UTF-8");
-    return (HtmlPage) webClient.getPage(url);
+    url += "&nocache=1";
+    Page page = webClient.getPage(url);
+    if (!(page instanceof HtmlPage)) {
+      fail("Got wrong page type. Was: " + page.getWebResponse().getContentType());
+    }
+    return (HtmlPage) page;
   }
 
   /**

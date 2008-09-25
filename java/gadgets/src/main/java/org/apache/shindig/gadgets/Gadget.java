@@ -18,9 +18,7 @@
 package org.apache.shindig.gadgets;
 
 import org.apache.shindig.common.ContainerConfig;
-import org.apache.shindig.common.util.Check;
 import org.apache.shindig.gadgets.http.HttpResponse;
-import org.apache.shindig.gadgets.parse.GadgetHtmlNode;
 import org.apache.shindig.gadgets.parse.GadgetHtmlParser;
 import org.apache.shindig.gadgets.preload.Preloads;
 import org.apache.shindig.gadgets.spec.GadgetSpec;
@@ -46,9 +44,7 @@ public class Gadget {
   private GadgetSpec spec;
   private Preloads preloads;
   private View currentView;
-
-  @Deprecated
-  private MutableContent mutableContent;
+  private String content;
 
   @Deprecated
   private Collection<JsLibrary> jsLibraries;
@@ -72,14 +68,9 @@ public class Gadget {
     this.context = context;
     this.spec = spec;
     this.jsLibraries = jsLibraries;
-    this.currentView = getView(containerConfig);
-
-    mutableContent = new MutableContent(contentParser);
-    if (this.currentView != null) {
-      // View might be invalid or associated with no content (type=URL)
-      mutableContent.setContent(this.currentView.getContent());
-    } else {
-      mutableContent.setContent(null);
+    currentView = getView(containerConfig);
+    if (currentView != null) {
+      content = currentView.getContent();
     }
   }
 
@@ -107,19 +98,16 @@ public class Gadget {
     return spec;
   }
 
-
   /**
    * Sets the current content of the rendered output of this gadget.
    */
-  public Gadget setContent(String newContent) {
-    Check.notNull(mutableContent, "Can not set content without setting mutable content.");
-    mutableContent.setContent(newContent);
+  public Gadget setContent(String content) {
+    this.content = content;
     return this;
   }
 
   public String getContent() {
-    Check.notNull(mutableContent, "Can not get content without setting mutable content.");
-    return mutableContent.getContent();
+    return content;
   }
 
   /**
@@ -155,22 +143,6 @@ public class Gadget {
    */
   public LocaleSpec getLocale() {
     return spec.getModulePrefs().getLocale(context.getLocale());
-  }
-
-  @Deprecated
-  public Gadget setMutableContent(MutableContent mutableContent) {
-    this.mutableContent = mutableContent;
-    return this;
-  }
-
-  @Deprecated
-  public MutableContent getMutableContent() {
-    return mutableContent;
-  }
-
-  @Deprecated
-  public GadgetHtmlNode getParseTree() {
-    return mutableContent.getParseTree();
   }
 
   /**

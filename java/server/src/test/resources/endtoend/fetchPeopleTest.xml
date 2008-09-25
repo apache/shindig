@@ -21,6 +21,9 @@
   <ModulePrefs title="EndToEndTest">
     <Require feature="opensocial-0.8"/>
     <Require feature="views"/>
+    <Optional feature="content-rewrite">
+      <Param name="exclude-urls">.*</Param>
+    </Optional>
   </ModulePrefs>
   <Content type="html">
     <![CDATA[

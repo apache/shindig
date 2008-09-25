@@ -41,7 +41,7 @@ public class CaptureRewriter implements ContentRewriter {
     return rewroteResponse;
   }
 
-  public RewriterResults rewrite(Gadget gadget) {
+  public RewriterResults rewrite(Gadget gadget, MutableContent content) {
     rewroteView = true;
     return results();
   }
@@ -49,14 +49,14 @@ public class CaptureRewriter implements ContentRewriter {
   public boolean viewWasRewritten() {
     return rewroteView;
   }
-  
+
   private RewriterResults results() {
     if (cacheTtl == -1) {
       return RewriterResults.cacheableIndefinitely();
     }
     return RewriterResults.cacheable(cacheTtl);
   }
-  
+
   /**
    * Sets cache TTL. -1 means cacheable indefinitely.
    * @param cacheTtl

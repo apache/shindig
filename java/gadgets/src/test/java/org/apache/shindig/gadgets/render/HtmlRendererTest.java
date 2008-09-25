@@ -33,6 +33,7 @@ import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.http.HttpResponse;
 import org.apache.shindig.gadgets.preload.PreloaderService;
 import org.apache.shindig.gadgets.preload.Preloads;
+import org.apache.shindig.gadgets.rewrite.ContentRewriterRegistry;
 import org.apache.shindig.gadgets.spec.GadgetSpec;
 import org.apache.shindig.gadgets.spec.View;
 
@@ -66,7 +67,8 @@ public class HtmlRendererTest {
 
   private final FakeContentFetcherFactory fetcher = new FakeContentFetcherFactory();
   private final FakePreloaderService preloaderService = new FakePreloaderService();
-  private final HtmlRenderer renderer = new HtmlRenderer(fetcher, preloaderService);
+  private final FakeContentRewriterRegistry rewriter = new FakeContentRewriterRegistry();
+  private final HtmlRenderer renderer = new HtmlRenderer(fetcher, preloaderService, rewriter);
 
   private Gadget makeGadget(String content) throws GadgetException {
     GadgetSpec spec = new GadgetSpec(URI.create("#"),
@@ -120,7 +122,11 @@ public class HtmlRendererTest {
     assertTrue("Preloading not performed.", preloaderService.wasPreloaded);
   }
 
-  // TODO: rewriting
+  @Test
+  public void doRewriting() throws Exception {
+    renderer.render(makeGadget(BASIC_HTML_CONTENT));
+    assertTrue("Rewriting not performed.", rewriter.wasRewritten);
+  }
 
   private static class FakeContentFetcherFactory extends ContentFetcherFactory {
     private final Map<Uri, HttpResponse> plainResponses = Maps.newHashMap();
@@ -181,6 +187,19 @@ public class HtmlRendererTest {
     public Preloads preload(GadgetContext context, GadgetSpec gadget) {
       wasPreloaded = true;
       return null;
+    }
+  }
+
+  private static class FakeContentRewriterRegistry implements ContentRewriterRegistry {
+    private boolean wasRewritten = false;
+
+    public boolean rewriteGadget(Gadget gadget) {
+      wasRewritten = true;
+      return true;
+    }
+
+    public HttpResponse rewriteHttpResponse(HttpRequest req, HttpResponse resp) {
+      throw new UnsupportedOperationException();
     }
   }
 }

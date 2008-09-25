@@ -58,11 +58,15 @@ public class DefaultContentRewriterRegistry implements ContentRewriterRegistry {
       return false;
     }
 
+    MutableContent mc = getMutableContent(originalContent);
+
     for (ContentRewriter rewriter : rewriters) {
-      rewriter.rewrite(gadget);
+      rewriter.rewrite(gadget, mc);
     }
 
-    return !originalContent.equals(gadget.getContent());
+    String currentContent = mc.getContent();
+    gadget.setContent(currentContent);
+    return !originalContent.equals(currentContent);
   }
 
   /** {@inheritDoc} */
@@ -87,7 +91,7 @@ public class DefaultContentRewriterRegistry implements ContentRewriterRegistry {
     mc.setContent(content);
     return mc;
   }
-  
+
   protected List<ContentRewriter> getRewriters() {
     return rewriters;
   }

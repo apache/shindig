@@ -18,15 +18,6 @@
  */
 package org.apache.shindig.gadgets.rewrite;
 
-import java.io.UnsupportedEncodingException;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.net.URLEncoder;
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Queue;
-
 import org.apache.shindig.common.util.Utf8UrlCoder;
 import org.apache.shindig.gadgets.Gadget;
 import org.apache.shindig.gadgets.MutableContent;
@@ -36,14 +27,23 @@ import org.apache.shindig.gadgets.parse.GadgetHtmlNode;
 import org.apache.shindig.gadgets.servlet.ProxyBase;
 import org.apache.shindig.gadgets.spec.GadgetSpec;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URLEncoder;
+import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Queue;
+
 public class JsTagConcatContentRewriter implements ContentRewriter {
   private final static int MAX_URL_LENGTH = 1500;
-  
+
   private final ContentRewriterFeature.Factory rewriterFeatureFactory;
   private final String concatUrlBase;
-  
+
   private static final String DEFAULT_CONCAT_URL_BASE = "/gadgets/concat?";
-  
+
   public JsTagConcatContentRewriter(ContentRewriterFeature.Factory rewriterFeatureFactory,
       String concatUrlBase) {
     this.rewriterFeatureFactory = rewriterFeatureFactory;
@@ -54,41 +54,42 @@ public class JsTagConcatContentRewriter implements ContentRewriter {
     }
   }
 
-  public RewriterResults rewrite(HttpRequest request, HttpResponse original, MutableContent content) {
+  public RewriterResults rewrite(HttpRequest request, HttpResponse original,
+      MutableContent content) {
     // JS Concatenation not supported for HTTP responses at present.
     return null;
   }
 
-  public RewriterResults rewrite(Gadget gadget) {
+  public RewriterResults rewrite(Gadget gadget, MutableContent content) {
     ContentRewriterFeature rewriterFeature = rewriterFeatureFactory.get(gadget.getSpec());
     if (!rewriterFeature.isRewriteEnabled() ||
         !rewriterFeature.getIncludedTags().contains("script")) {
       return null;
     }
-    
+
     // Bootstrap queue of children over which to iterate,
     // ie. lists of siblings to potentially combine
     Queue<GadgetHtmlNode> nodesToProcess =
         new LinkedList<GadgetHtmlNode>();
-    nodesToProcess.add(gadget.getParseTree());
-    
+    nodesToProcess.add(content.getParseTree());
+
     String concatBase = getJsConcatBase(gadget.getSpec(), rewriterFeature);
-    
+
     while (!nodesToProcess.isEmpty()) {
       GadgetHtmlNode parentNode = nodesToProcess.remove();
       if (!parentNode.isText()) {
         List<GadgetHtmlNode> childList = parentNode.getChildren();
-        
+
         // Iterate over children next in depth-first fashion.
         // Text nodes (such as <script src> processed here) will be ignored.
         nodesToProcess.addAll(childList);
-        
+
         List<GadgetHtmlNode> toRemove = new ArrayList<GadgetHtmlNode>();
         List<URI> scripts = new ArrayList<URI>();
         boolean processScripts = false;
         for (int i = 0; i < childList.size(); ++i) {
           GadgetHtmlNode cur = childList.get(i);
-        
+
           // Find consecutive <script src=...> tags
           if (!cur.isText() &&
                cur.getTagName().equalsIgnoreCase("script") &&
@@ -110,27 +111,27 @@ public class JsTagConcatContentRewriter implements ContentRewriter {
           } else if (scripts.size() > 0) {
             processScripts = true;
           }
-          
+
           if (i == (childList.size() - 1)) {
             processScripts = true;
           }
-        
+
           if (processScripts && scripts.size() > 0) {
             // Tags found. Concatenate scripts together.
             List<URI> concatUris = getConcatenatedUris(concatBase, scripts);
-            
+
             // Insert concatenated nodes before first match
             for (URI concatUri : concatUris) {
               GadgetHtmlNode newScript = new GadgetHtmlNode("script", null);
               newScript.setAttribute("src", concatUri.toString());
               parentNode.insertBefore(newScript, toRemove.get(0));
             }
-            
+
             // Remove contributing match nodes
             for (GadgetHtmlNode remove : toRemove) {
               parentNode.removeChild(remove);
             }
-            
+
             processScripts = false;
             scripts.clear();
             toRemove.clear();
@@ -138,10 +139,10 @@ public class JsTagConcatContentRewriter implements ContentRewriter {
         }
       }
     }
-    
+
     return RewriterResults.cacheableIndefinitely();
   }
-  
+
   private List<URI> getConcatenatedUris(String concatBase, List<URI> uris) {
     List<URI> concatUris = new LinkedList<URI>();
     int paramIndex = 1;
@@ -174,7 +175,7 @@ public class JsTagConcatContentRewriter implements ContentRewriter {
     }
     return concatUris;
   }
-  
+
   String getJsConcatBase(GadgetSpec spec, ContentRewriterFeature rewriterFeature) {
     return concatUrlBase +
            ProxyBase.REWRITE_MIME_TYPE_PARAM +

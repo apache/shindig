@@ -77,8 +77,11 @@ public class Renderer {
       return RenderingResults.error("Unsupported parent parameter. Check your container code.");
     }
 
+    // TODO: Locked domain.
+
     try {
       GadgetSpec spec = gadgetSpecFactory.getGadgetSpec(context);
+      // TODO: Variable substitution.
       View view = getView(context, spec);
 
       if (view == null) {

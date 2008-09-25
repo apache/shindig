@@ -27,6 +27,8 @@ import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.http.HttpResponse;
 import org.apache.shindig.gadgets.oauth.OAuthArguments;
 import org.apache.shindig.gadgets.preload.PreloaderService;
+import org.apache.shindig.gadgets.preload.Preloads;
+import org.apache.shindig.gadgets.rewrite.ContentRewriterRegistry;
 import org.apache.shindig.gadgets.spec.GadgetSpec;
 import org.apache.shindig.gadgets.spec.View;
 
@@ -38,12 +40,15 @@ import com.google.inject.Inject;
 public class HtmlRenderer {
   private final ContentFetcherFactory fetcher;
   private final PreloaderService preloader;
+  private final ContentRewriterRegistry rewriter;
 
   @Inject
   public HtmlRenderer(ContentFetcherFactory fetcher,
-                  PreloaderService preloader) {
+                      PreloaderService preloader,
+                      ContentRewriterRegistry rewriter) {
     this.fetcher = fetcher;
     this.preloader = preloader;
+    this.rewriter = rewriter;
   }
 
   /**
@@ -65,10 +70,11 @@ public class HtmlRenderer {
       GadgetContext context = gadget.getContext();
       GadgetSpec spec = gadget.getSpec();
 
-      gadget.setPreloads(preloader.preload(context, spec));
+      Preloads preloads = preloader.preload(context, spec);
 
       if (view.getHref() == null) {
-        return view.getContent();
+        gadget.setPreloads(preloads);
+        return doRewriting(gadget, view.getContent());
       } else {
         // TODO: Add current url to GadgetContext to support transitive proxying.
         HttpRequest request = new HttpRequest(Uri.fromJavaUri(view.getHref()))
@@ -78,10 +84,20 @@ public class HtmlRenderer {
             .setContainer(context.getContainer())
             .setGadget(Uri.fromJavaUri(context.getUrl()));
         HttpResponse response = fetcher.fetch(request);
-        return response.getResponseAsString();
+        if (response.getHttpStatusCode() != HttpResponse.SC_OK) {
+          throw new RenderingException("Unable to reach remote host. HTTP status " +
+              response.getHttpStatusCode());
+        }
+        return doRewriting(gadget, response.getResponseAsString());
       }
     } catch (GadgetException e) {
       throw new RenderingException(e);
     }
+  }
+
+  private String doRewriting(Gadget gadget, String content) throws GadgetException {
+    gadget.setContent(content);
+    rewriter.rewriteGadget(gadget);
+    return gadget.getContent();
   }
 }

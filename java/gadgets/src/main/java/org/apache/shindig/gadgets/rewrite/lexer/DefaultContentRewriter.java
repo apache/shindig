@@ -110,10 +110,10 @@ public class DefaultContentRewriter implements ContentRewriter {
     return RewriterResults.cacheableIndefinitely();
   }
 
-  public RewriterResults rewrite(Gadget gadget) {
+  public RewriterResults rewrite(Gadget gadget, MutableContent content) {
     StringWriter sw = new StringWriter();
     GadgetSpec spec = gadget.getSpec();
-    if (rewrite(spec, spec.getUrl(), new StringReader(gadget.getContent()), "text/html", sw)) {
+    if (rewrite(spec, spec.getUrl(), new StringReader(content.getContent()), "text/html", sw)) {
       gadget.setContent(sw.toString());
     }
     return RewriterResults.cacheableIndefinitely();
