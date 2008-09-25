@@ -45,6 +45,9 @@ public class Gadget {
   private GadgetContext context;
   private GadgetSpec spec;
   private Preloads preloads;
+  private View currentView;
+
+  @Deprecated
   private MutableContent mutableContent;
 
   @Deprecated
@@ -52,9 +55,6 @@ public class Gadget {
 
   @Deprecated
   private Map<Preload, Future<HttpResponse>> preloadMap;
-
-  @Deprecated
-  private View currentView;
 
   public Gadget() { }
 
@@ -107,17 +107,6 @@ public class Gadget {
     return spec;
   }
 
-  /**
-   * @param mutableContent Content associated with rendering this gadget.
-   */
-  public Gadget setMutableContent(MutableContent mutableContent) {
-    this.mutableContent = mutableContent;
-    return this;
-  }
-
-  public MutableContent getMutableContent() {
-    return mutableContent;
-  }
 
   /**
    * Sets the current content of the rendered output of this gadget.
@@ -133,10 +122,6 @@ public class Gadget {
     return mutableContent.getContent();
   }
 
-  public GadgetHtmlNode getParseTree() {
-    return mutableContent.getParseTree();
-  }
-
   /**
    * @param preloads The preloads for the gadget that is being processed.
    */
@@ -147,6 +132,18 @@ public class Gadget {
 
   public Preloads getPreloads() {
     return preloads;
+  }
+
+  public Gadget setCurrentView(View currentView) {
+    this.currentView = currentView;
+    return this;
+  }
+
+  /**
+   * @return The View applicable for the current request.
+   */
+  public View getCurrentView() {
+    return currentView;
   }
 
   /**
@@ -160,7 +157,21 @@ public class Gadget {
     return spec.getModulePrefs().getLocale(context.getLocale());
   }
 
+  @Deprecated
+  public Gadget setMutableContent(MutableContent mutableContent) {
+    this.mutableContent = mutableContent;
+    return this;
+  }
 
+  @Deprecated
+  public MutableContent getMutableContent() {
+    return mutableContent;
+  }
+
+  @Deprecated
+  public GadgetHtmlNode getParseTree() {
+    return mutableContent.getParseTree();
+  }
 
   /**
    * @return A mutable collection of JsLibrary objects attached to this Gadget.
@@ -176,14 +187,6 @@ public class Gadget {
   @Deprecated
   public Map<Preload, Future<HttpResponse>> getPreloadMap() {
     return preloadMap;
-  }
-
-  /**
-   * @return The View applicable for the current request.
-   */
-  @Deprecated
-  public View getCurrentView() {
-    return currentView;
   }
 
   /**
