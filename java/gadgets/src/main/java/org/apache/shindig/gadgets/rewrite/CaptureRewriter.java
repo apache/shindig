@@ -19,7 +19,6 @@
 package org.apache.shindig.gadgets.rewrite;
 
 import org.apache.shindig.gadgets.Gadget;
-import org.apache.shindig.gadgets.MutableContent;
 import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.http.HttpResponse;
 

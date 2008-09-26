@@ -17,10 +17,13 @@
  * under the License.
  */
 
-package org.apache.shindig.gadgets;
+package org.apache.shindig.gadgets.variables;
 
-import org.apache.shindig.gadgets.Substitutions.Type;
+import org.apache.shindig.gadgets.UserPrefs;
 import org.apache.shindig.gadgets.spec.GadgetSpec;
+import org.apache.shindig.gadgets.variables.Substitutions;
+import org.apache.shindig.gadgets.variables.UserPrefSubstituter;
+import org.apache.shindig.gadgets.variables.Substitutions.Type;
 
 import junit.framework.TestCase;
 

@@ -24,8 +24,8 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import org.apache.shindig.common.xml.XmlUtil;
-import org.apache.shindig.gadgets.Substitutions;
-import org.apache.shindig.gadgets.Substitutions.Type;
+import org.apache.shindig.gadgets.variables.Substitutions;
+import org.apache.shindig.gadgets.variables.Substitutions.Type;
 
 import org.junit.Test;
 

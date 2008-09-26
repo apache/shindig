@@ -21,7 +21,6 @@ import org.apache.shindig.common.cache.CacheProvider;
 import org.apache.shindig.common.cache.TtlCache;
 import org.apache.shindig.common.util.HashUtil;
 import org.apache.shindig.gadgets.Gadget;
-import org.apache.shindig.gadgets.MutableContent;
 import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.http.HttpResponse;
 import org.apache.shindig.gadgets.http.HttpResponseBuilder;
