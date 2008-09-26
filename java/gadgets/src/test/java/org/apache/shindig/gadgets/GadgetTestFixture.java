@@ -38,9 +38,6 @@ import java.util.concurrent.ExecutorService;
 // DO NOT ADD ANYTHING ELSE TO THIS CLASS. IT IS GOING AWAY SOON!!!
 public abstract class GadgetTestFixture extends EasyMockTestCase {
   // TODO: Remove all of these.
-
-  // DO NOT ADD ANYTHING ELSE TO THIS CLASS. IT IS GOING AWAY SOON!!!
-  public final GadgetServer gadgetServer;
   // DO NOT ADD ANYTHING ELSE TO THIS CLASS. IT IS GOING AWAY SOON!!!
   public final ContentFetcherFactory fetcherFactory = mock(ContentFetcherFactory.class);
   // DO NOT ADD ANYTHING ELSE TO THIS CLASS. IT IS GOING AWAY SOON!!!
@@ -48,12 +45,7 @@ public abstract class GadgetTestFixture extends EasyMockTestCase {
   // DO NOT ADD ANYTHING ELSE TO THIS CLASS. IT IS GOING AWAY SOON!!!
   public final OAuthFetcher oauthFetcher = mock(OAuthFetcher.class);
   // DO NOT ADD ANYTHING ELSE TO THIS CLASS. IT IS GOING AWAY SOON!!!
-  public final GadgetBlacklist blacklist = mock(GadgetBlacklist.class);
-  // DO NOT ADD ANYTHING ELSE TO THIS CLASS. IT IS GOING AWAY SOON!!!
   private final CacheProvider cacheProvider = new DefaultCacheProvider();
-  // DO NOT ADD ANYTHING ELSE TO THIS CLASS. IT IS GOING AWAY SOON!!!
-  public final MessageBundleFactory bundleFactory =
-      new BasicMessageBundleFactory(fetcher, cacheProvider, 0, 0L, 0L);
   // DO NOT ADD ANYTHING ELSE TO THIS CLASS. IT IS GOING AWAY SOON!!!
   public final GadgetFeatureRegistry registry;
   // DO NOT ADD ANYTHING ELSE TO THIS CLASS. IT IS GOING AWAY SOON!!!
@@ -75,9 +67,6 @@ public abstract class GadgetTestFixture extends EasyMockTestCase {
     try {
       // DO NOT ADD ANYTHING ELSE TO THIS CLASS. IT IS GOING AWAY SOON!!!
       registry = new GadgetFeatureRegistry(null, fetcher);
-      // DO NOT ADD ANYTHING ELSE TO THIS CLASS. IT IS GOING AWAY SOON!!!
-      gadgetServer = new GadgetServer(executor, registry, blacklist,
-          containerConfig, rewriterRegistry, null, fetcherFactory, specFactory, bundleFactory);
       // DO NOT ADD ANYTHING ELSE TO THIS CLASS. IT IS GOING AWAY SOON!!!
     } catch (Exception e) {
       throw new RuntimeException(e);
