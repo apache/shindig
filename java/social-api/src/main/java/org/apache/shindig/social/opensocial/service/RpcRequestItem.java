@@ -115,7 +115,11 @@ public class RpcRequestItem extends RequestItem {
       throw new SocialSpiException(ResponseError.BAD_REQUEST, je.getMessage(), je);
     }
   }
-
+  
+  @Override
+  public<T> T getTypedParameters(Class<T> dataTypeClass) {
+    return converter.convertToObject(data.toString(), dataTypeClass);
+  }
 
   @Override
   public void applyUrlTemplate(String urlTemplate) {
@@ -124,6 +128,15 @@ public class RpcRequestItem extends RequestItem {
 
   /** Method used only by tests */
   void setParameter(String paramName, String param) {
+    try {
+      data.put(paramName, param);
+    } catch (JSONException je) {
+      throw new IllegalArgumentException(je);
+    }
+  }
+
+  /** Method used only by tests */
+  void setJsonParameter(String paramName, JSONObject param) {
     try {
       data.put(paramName, param);
     } catch (JSONException je) {

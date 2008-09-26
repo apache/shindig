@@ -98,7 +98,7 @@ public class RestfulRequestItem extends RequestItem {
   private static Map<String, List<String>> createParameterMap(HttpServletRequest servletRequest) {
     Map<String, List<String>> parameters = Maps.newHashMap();
 
-    Enumeration names = servletRequest.getParameterNames();
+    Enumeration<?> names = servletRequest.getParameterNames();
     while (names.hasMoreElements()) {
       String name = (String) names.nextElement();
       String[] paramValues = servletRequest.getParameterValues(name);
@@ -177,10 +177,15 @@ public class RestfulRequestItem extends RequestItem {
 
 
   @Override
-  public <T> T getTypedParameter(String parameterName, Class<T> postDataClass) {
+  public <T> T getTypedParameter(String parameterName, Class<T> dataTypeClass) {
     // We assume the the only typed parameter in a restful request is the post-content
     // and so we simply ignore the parameter name
-    return converter.convertToObject(postData, postDataClass);
+    return getTypedParameters(dataTypeClass);
+  }
+  
+  @Override
+  public <T> T getTypedParameters(Class<T> dataTypeClass) {
+    return converter.convertToObject(postData, dataTypeClass);
   }
 
 

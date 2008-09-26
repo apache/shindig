@@ -18,12 +18,14 @@
 package org.apache.shindig.social.opensocial.service;
 
 import org.apache.shindig.common.testing.FakeGadgetToken;
+import org.apache.shindig.social.core.util.BeanJsonConverter;
 import org.apache.shindig.social.opensocial.spi.GroupId;
 import org.apache.shindig.social.opensocial.spi.PersonService;
 import org.apache.shindig.social.opensocial.spi.UserId;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
+import com.google.inject.Guice;
 
 import org.json.JSONObject;
 
@@ -35,11 +37,11 @@ public class RpcRequestItemTest extends TestCase {
 
   private static final FakeGadgetToken FAKE_TOKEN = new FakeGadgetToken();
 
-
   private RpcRequestItem request;
 
   private JSONObject baseRpc;
 
+  @Override
   protected void setUp() throws Exception {
     super.setUp();
     baseRpc = new JSONObject(
@@ -48,7 +50,7 @@ public class RpcRequestItemTest extends TestCase {
             + "groupId:@self,"
             + "fields:[huey,dewey,louie]"
             + "}}");
-    request = new RpcRequestItem(baseRpc, FAKE_TOKEN, null);
+    request = new RpcRequestItem(baseRpc, FAKE_TOKEN, new BeanJsonConverter(Guice.createInjector()));
   }
 
   public void testParseMethod() throws Exception {
@@ -144,5 +146,39 @@ public class RpcRequestItemTest extends TestCase {
 
     request.setListParameter("fields", Lists.newArrayList("happy", "sad", "grumpy"));
     assertEquals(Sets.newHashSet("happy", "sad", "grumpy"), request.getFields());
+  }
+  
+  public static class InputData {
+    String name;
+    int id;
+    
+    public void setName(String name) {
+      this.name = name;
+    }
+    
+    public void setId(int id) {
+      this.id = id;
+    }
+  }
+  
+  public void testGetTypedParameter() throws Exception {
+    JSONObject obj = new JSONObject();
+    obj.put("name", "Bob");
+    obj.put("id", "1234");
+    
+    request.setJsonParameter("tp", obj);
+    
+    InputData input = request.getTypedParameter("tp", InputData.class);
+    assertEquals("Bob", input.name);
+    assertEquals(1234, input.id);
+  }
+  
+  public void testGetTypedParameters() throws Exception {
+    request.setParameter("name", "Bob");
+    request.setParameter("id", "1234");
+    
+    InputData input = request.getTypedParameters(InputData.class);
+    assertEquals("Bob", input.name);
+    assertEquals(1234, input.id);
   }
 }
