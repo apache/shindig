@@ -61,6 +61,7 @@ public class DefaultContentRewriterRegistry implements ContentRewriterRegistry {
     MutableContent mc = getMutableContent(originalContent);
 
     for (ContentRewriter rewriter : rewriters) {
+      mc.getContent();
       rewriter.rewrite(gadget, mc);
     }
 
