@@ -18,6 +18,8 @@
  */
 package org.apache.shindig.gadgets;
 
+import org.apache.shindig.gadgets.spec.GadgetSpec;
+
 import com.google.inject.ImplementedBy;
 
 /**
@@ -27,51 +29,33 @@ import com.google.inject.ImplementedBy;
  * modern web browsers implement a same origin policy that prevents pages served
  * from different hosts from accessing each other's data.
  */
-
 @ImplementedBy(HashLockedDomainService.class)
-
 public interface LockedDomainService {
+  /**
+   * @return True if the host is safe for use with the open proxy.
+   */
+  boolean isSafeForOpenProxy(String host);
 
-  /**
-   * Is locked domain enabled
-   * @return true is locked domain is enabled
-   */
-  public boolean isEnabled();
-
-  /**
-   * Check whether embedded content (img src, for example) can render on
-   * a particular host.
-   * 
-   * @param host host name for rendered content
-   * @return true if the content should be allowed to render
-   */
-  public boolean embedCanRender(String host);
-  
-  /**
-   * Figure out where embedded content should render.
-   * 
-   * @return host name for safe rendering of embedded content.
-   */
-  public String getEmbedHost();
-  
-  /**
-   * Calculate the locked domain for a particular gadget on a particular
-   * container.
-   * 
-   * @param gadget URL of the gadget
-   * @param container name of the container page
-   * @return the host name on which the gadget should render
-   */
-  public String getLockedDomainForGadget(String gadget, String container);
-  
   /**
    * Check whether a gadget should be allowed to render on a particular
    * host.
-   * 
+   *
    * @param host host name for the content
    * @param gadget URL of the gadget
    * @param container container
    * @return true if the gadget can render
    */
-  public boolean gadgetCanRender(String host, Gadget gadget, String container);
+  boolean gadgetCanRender(String host, GadgetSpec gadget, String container);
+
+  /**
+   * Calculate the locked domain for a particular gadget on a particular
+   * container.
+   *
+   * @param gadget URL of the gadget
+   * @param container name of the container page
+   * @return the host name on which the gadget should render, or null if locked domain should not
+   * be used to render this gadget.
+   */
+  public String getLockedDomainForGadget(GadgetSpec gadget, String container);
+
 }

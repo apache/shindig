@@ -55,7 +55,7 @@ public class ProxyServletTest extends ServletTestFixture {
     expect(request.getParameter(ProxyBase.URL_PARAM))
         .andReturn(REQUEST_URL.toString()).anyTimes();
     expect(request.getHeader("Host")).andReturn(REQUEST_DOMAIN).anyTimes();
-    expect(lockedDomainService.embedCanRender(REQUEST_DOMAIN))
+    expect(lockedDomainService.isSafeForOpenProxy(REQUEST_DOMAIN))
         .andReturn(true).anyTimes();
   }
 

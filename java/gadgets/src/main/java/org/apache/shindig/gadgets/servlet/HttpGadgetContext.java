@@ -80,6 +80,15 @@ public class HttpGadgetContext extends GadgetContext {
   }
 
   @Override
+  public String getHost() {
+    String host = request.getHeader("Host");
+    if (host == null) {
+      return super.getHost();
+    }
+    return host;
+  }
+
+  @Override
   public boolean getDebug() {
     if (debug == null) {
       return super.getDebug();

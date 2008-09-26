@@ -20,20 +20,15 @@
 package org.apache.shindig.gadgets;
 
 import org.apache.shindig.common.ContainerConfig;
-import org.apache.shindig.common.cache.CacheProvider;
-import org.apache.shindig.common.cache.DefaultCacheProvider;
-import org.apache.shindig.common.testing.TestExecutorService;
 import org.apache.shindig.common.util.FakeTimeSource;
 import org.apache.shindig.gadgets.http.ContentFetcherFactory;
 import org.apache.shindig.gadgets.http.HttpFetcher;
-import org.apache.shindig.gadgets.oauth.OAuthFetcher;
 import org.apache.shindig.gadgets.rewrite.CaptureRewriter;
 import org.apache.shindig.gadgets.rewrite.ContentRewriter;
 import org.apache.shindig.gadgets.rewrite.ContentRewriterRegistry;
 import org.apache.shindig.gadgets.rewrite.DefaultContentRewriterRegistry;
 
 import java.util.Arrays;
-import java.util.concurrent.ExecutorService;
 
 // DO NOT ADD ANYTHING ELSE TO THIS CLASS. IT IS GOING AWAY SOON!!!
 public abstract class GadgetTestFixture extends EasyMockTestCase {
@@ -42,10 +37,6 @@ public abstract class GadgetTestFixture extends EasyMockTestCase {
   public final ContentFetcherFactory fetcherFactory = mock(ContentFetcherFactory.class);
   // DO NOT ADD ANYTHING ELSE TO THIS CLASS. IT IS GOING AWAY SOON!!!
   public final HttpFetcher fetcher = mock(HttpFetcher.class);
-  // DO NOT ADD ANYTHING ELSE TO THIS CLASS. IT IS GOING AWAY SOON!!!
-  public final OAuthFetcher oauthFetcher = mock(OAuthFetcher.class);
-  // DO NOT ADD ANYTHING ELSE TO THIS CLASS. IT IS GOING AWAY SOON!!!
-  private final CacheProvider cacheProvider = new DefaultCacheProvider();
   // DO NOT ADD ANYTHING ELSE TO THIS CLASS. IT IS GOING AWAY SOON!!!
   public final GadgetFeatureRegistry registry;
   // DO NOT ADD ANYTHING ELSE TO THIS CLASS. IT IS GOING AWAY SOON!!!
@@ -57,11 +48,6 @@ public abstract class GadgetTestFixture extends EasyMockTestCase {
       = new DefaultContentRewriterRegistry(Arrays.<ContentRewriter>asList(rewriter), null);
   // DO NOT ADD ANYTHING ELSE TO THIS CLASS. IT IS GOING AWAY SOON!!!
   public final FakeTimeSource timeSource = new FakeTimeSource();
-  // DO NOT ADD ANYTHING ELSE TO THIS CLASS. IT IS GOING AWAY SOON!!!
-  public final ExecutorService executor = new TestExecutorService();
-  // DO NOT ADD ANYTHING ELSE TO THIS CLASS. IT IS GOING AWAY SOON!!!
-  public final GadgetSpecFactory specFactory = new BasicGadgetSpecFactory(
-      fetcher, cacheProvider, executor, 0, 0L, 0L);
   // DO NOT ADD ANYTHING ELSE TO THIS CLASS. IT IS GOING AWAY SOON!!!
   public GadgetTestFixture() {
     try {

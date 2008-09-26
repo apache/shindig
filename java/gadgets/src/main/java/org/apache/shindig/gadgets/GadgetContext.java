@@ -81,6 +81,13 @@ public class GadgetContext {
   }
 
   /**
+   * @return The host for which the current request is being made.
+   */
+  public String getHost() {
+    return null;
+  }
+
+  /**
    * @return Whether or not to show debug output.
    */
   public boolean getDebug() {
