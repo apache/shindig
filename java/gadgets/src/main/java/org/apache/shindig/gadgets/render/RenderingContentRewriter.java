@@ -349,11 +349,11 @@ public class RenderingContentRewriter implements ContentRewriter {
    * Produces GadgetContent by parsing the document into 3 pieces (head, body, and tail). If the
    */
   private GadgetContent createGadgetContent(Gadget gadget, MutableContent mutableContent) {
-    GadgetContent content = new GadgetContent();
     String doc = mutableContent.getContent();
     if (doc.contains("<html>") && doc.contains("</html>")) {
       Matcher matcher = DOCUMENT_SPLIT_PATTERN.matcher(doc);
       if (matcher.matches()) {
+        GadgetContent content = new GadgetContent();
         content.appendHead(matcher.group(BEFORE_HEAD_GROUP))
                .appendHead("<head>")
                .appendHead(matcher.group(HEAD_GROUP));
@@ -363,25 +363,26 @@ public class RenderingContentRewriter implements ContentRewriter {
                .appendBody(matcher.group(BODY_GROUP));
 
         content.appendTail("</body></html>");
+        return content;
       } else {
-        makeDefaultContent(gadget, content);
+        return makeDefaultContent(gadget, mutableContent);
       }
-    } else {
-      makeDefaultContent(gadget, content);
     }
-    return content;
+    return makeDefaultContent(gadget, mutableContent);
   }
 
   /**
    * Inserts basic content for a gadget. Used when the content does not contain a valid html doc.
    */
-  private void makeDefaultContent(Gadget gadget, GadgetContent content) {
+  private GadgetContent makeDefaultContent(Gadget gadget, MutableContent mutableContent) {
+    GadgetContent content = new GadgetContent();
     content.appendHead("<html><head>");
     content.appendHead(DEFAULT_HEAD_CONTENT);
     content.appendBody("</head>");
     content.appendBody(createBodyTag(gadget, ""));
-    content.appendBody(gadget.getContent());
+    content.appendBody(mutableContent.getContent());
     content.appendTail("</body></html>");
+    return content;
   }
 
   /**

@@ -210,12 +210,12 @@ public class DefaultGuiceModule extends AbstractModule {
 
     @Inject
     public ContentRewritersProvider(DefaultContentRewriter optimizingRewriter,
-                                    RenderingContentRewriter renderingRewriter,
-                                    CajaContentRewriter cajaRewriter) {
+                                    CajaContentRewriter cajaRewriter,
+                                    RenderingContentRewriter renderingRewriter) {
       rewriters = Lists.newArrayList();
       rewriters.add(optimizingRewriter);
-      rewriters.add(renderingRewriter);
       rewriters.add(cajaRewriter);
+      rewriters.add(renderingRewriter);
     }
 
     public List<ContentRewriter> get() {

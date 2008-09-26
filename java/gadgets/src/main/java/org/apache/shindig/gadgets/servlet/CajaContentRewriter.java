@@ -102,8 +102,7 @@ public class CajaContentRewriter implements ContentRewriter {
       } catch (IOException e) {
         throwCajolingException(e, mq);
         return RewriterResults.notCacheable();
-      }
-
+      }      
       content.setContent(output.toString());
     }
     return RewriterResults.notCacheable();
