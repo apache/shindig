@@ -19,10 +19,10 @@
 package org.apache.shindig.gadgets.servlet;
 
 import org.apache.shindig.gadgets.Gadget;
-import org.apache.shindig.gadgets.MutableContent;
 import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.http.HttpResponse;
 import org.apache.shindig.gadgets.rewrite.ContentRewriter;
+import org.apache.shindig.gadgets.rewrite.MutableContent;
 import org.apache.shindig.gadgets.rewrite.RewriterResults;
 
 import com.google.caja.lexer.CharProducer;

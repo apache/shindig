@@ -16,13 +16,18 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.shindig.gadgets;
+package org.apache.shindig.gadgets.variables;
 
 import static org.junit.Assert.assertEquals;
 
+import org.apache.shindig.gadgets.GadgetContext;
+import org.apache.shindig.gadgets.GadgetException;
+import org.apache.shindig.gadgets.MessageBundleFactory;
+import org.apache.shindig.gadgets.UserPrefs;
 import org.apache.shindig.gadgets.spec.GadgetSpec;
 import org.apache.shindig.gadgets.spec.LocaleSpec;
 import org.apache.shindig.gadgets.spec.MessageBundle;
+import org.apache.shindig.gadgets.variables.VariableSubstituter;
 
 import com.google.common.collect.Maps;
 

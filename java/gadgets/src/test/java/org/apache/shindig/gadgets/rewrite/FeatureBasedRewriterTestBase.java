@@ -22,7 +22,6 @@ import static org.easymock.classextension.EasyMock.replay;
 
 import org.apache.shindig.gadgets.Gadget;
 import org.apache.shindig.gadgets.GadgetContext;
-import org.apache.shindig.gadgets.MutableContent;
 import org.apache.shindig.gadgets.parse.GadgetHtmlParser;
 import org.apache.shindig.gadgets.parse.ParsedHtmlNode;
 import org.apache.shindig.gadgets.spec.GadgetSpec;

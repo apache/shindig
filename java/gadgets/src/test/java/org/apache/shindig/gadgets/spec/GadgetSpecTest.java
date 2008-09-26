@@ -22,8 +22,8 @@ package org.apache.shindig.gadgets.spec;
 import junit.framework.TestCase;
 
 import org.apache.shindig.gadgets.GadgetException;
-import org.apache.shindig.gadgets.Substitutions;
-import org.apache.shindig.gadgets.Substitutions.Type;
+import org.apache.shindig.gadgets.variables.Substitutions;
+import org.apache.shindig.gadgets.variables.Substitutions.Type;
 
 import java.net.URI;
 

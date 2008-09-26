@@ -23,7 +23,7 @@ import static org.junit.Assert.assertTrue;
 
 import org.apache.shindig.common.xml.XmlUtil;
 import org.apache.shindig.gadgets.AuthType;
-import org.apache.shindig.gadgets.Substitutions;
+import org.apache.shindig.gadgets.variables.Substitutions;
 
 import org.apache.commons.lang.StringUtils;
 import org.junit.Test;

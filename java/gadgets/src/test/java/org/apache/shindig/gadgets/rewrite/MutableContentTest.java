@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.shindig.gadgets;
+package org.apache.shindig.gadgets.rewrite;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotSame;
@@ -26,6 +26,7 @@ import static org.junit.Assert.fail;
 
 import org.apache.shindig.gadgets.parse.GadgetHtmlNode;
 import org.apache.shindig.gadgets.parse.caja.CajaHtmlParser;
+import org.apache.shindig.gadgets.rewrite.MutableContent;
 
 import org.junit.Before;
 import org.junit.Test;

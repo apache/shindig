@@ -15,12 +15,13 @@
  * KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-package org.apache.shindig.gadgets;
+package org.apache.shindig.gadgets.rewrite;
 
 import java.io.IOException;
 import java.io.StringWriter;
 import java.util.List;
 
+import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.parse.GadgetHtmlNode;
 import org.apache.shindig.gadgets.parse.GadgetHtmlParser;
 import org.apache.shindig.gadgets.parse.ParsedHtmlNode;

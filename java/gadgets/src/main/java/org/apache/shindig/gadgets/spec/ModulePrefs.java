@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations under the License.
  */
 package org.apache.shindig.gadgets.spec;
-import org.apache.shindig.gadgets.Substitutions;
+import org.apache.shindig.gadgets.variables.Substitutions;
 
 import org.w3c.dom.Element;
 import org.w3c.dom.NamedNodeMap;
