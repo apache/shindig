@@ -20,6 +20,7 @@ package org.apache.shindig.gadgets.render;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 import org.apache.shindig.common.ContainerConfig;
 import org.apache.shindig.common.ContainerConfigException;
@@ -28,6 +29,7 @@ import org.apache.shindig.gadgets.Gadget;
 import org.apache.shindig.gadgets.GadgetContext;
 import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.GadgetSpecFactory;
+import org.apache.shindig.gadgets.VariableSubstituter;
 import org.apache.shindig.gadgets.spec.GadgetSpec;
 
 import org.json.JSONArray;
@@ -55,13 +57,14 @@ public class RendererTest {
 
   private final FakeHtmlRenderer htmlRenderer = new FakeHtmlRenderer();
   private final FakeGadgetSpecFactory gadgetSpecFactory = new FakeGadgetSpecFactory();
+  private final FakeVariableSubstituter substituter = new FakeVariableSubstituter();
   private FakeContainerConfig containerConfig;
   private Renderer renderer;
 
   @Before
   public void setUp() throws Exception {
     containerConfig = new FakeContainerConfig();
-    renderer = new Renderer(htmlRenderer, gadgetSpecFactory, containerConfig);
+    renderer = new Renderer(htmlRenderer, gadgetSpecFactory, containerConfig, substituter);
   }
 
   private GadgetContext makeContext(final String view, final Uri specUrl) {
@@ -187,6 +190,18 @@ public class RendererTest {
     assertNotNull("No error message provided for bad parent.", results.getErrorMessage());
   }
 
+  @Test
+  public void substitutionsPerformedTypeHtml() throws Exception {
+    renderer.render(makeContext("html", SPEC_URL));
+    assertTrue("Substitutions not performed", substituter.wasSubstituted);
+  }
+
+  @Test
+  public void substitutionsPerformedTypeUrl() throws Exception {
+    renderer.render(makeContext("url", SPEC_URL));
+    assertTrue("Substitutions not performed", substituter.wasSubstituted);
+  }
+
   private static class FakeGadgetSpecFactory implements GadgetSpecFactory {
     private GadgetException exception;
     public GadgetSpec getGadgetSpec(GadgetContext context) throws GadgetException {
@@ -227,6 +242,20 @@ public class RendererTest {
         throw exception;
       }
       return gadget.getCurrentView().getContent();
+    }
+  }
+
+  private static class FakeVariableSubstituter extends VariableSubstituter {
+    private boolean wasSubstituted;
+
+    public FakeVariableSubstituter() {
+      super(null);
+    }
+
+    @Override
+    public GadgetSpec substitute(GadgetContext context, GadgetSpec spec) {
+      wasSubstituted = true;
+      return spec;
     }
   }
 }
