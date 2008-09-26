@@ -20,23 +20,18 @@ package org.apache.shindig.gadgets.rewrite;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
-import org.apache.shindig.common.ContainerConfig;
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.gadgets.Gadget;
 import org.apache.shindig.gadgets.GadgetContext;
-import org.apache.shindig.gadgets.JsLibrary;
 import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.http.HttpResponse;
 import org.apache.shindig.gadgets.spec.GadgetSpec;
 
 import com.google.common.collect.Lists;
 
-import org.easymock.classextension.EasyMock;
-import org.easymock.classextension.IMocksControl;
 import org.junit.Test;
 
 import java.net.URI;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -47,8 +42,6 @@ public class DefaultContentRewriterRegistryTest {
       = Lists.<ContentRewriter>newArrayList(rewriters);
   private final ContentRewriterRegistry registry
       = new DefaultContentRewriterRegistry(contentRewriters, null);
-  private final IMocksControl control = EasyMock.createNiceControl();
-  private final ContainerConfig config = control.createMock(ContainerConfig.class);
 
   @Test
   public void rewriteGadget() throws Exception {
@@ -56,9 +49,10 @@ public class DefaultContentRewriterRegistryTest {
     String xml = "<Module><ModulePrefs title=''/><Content>" + body + "</Content></Module>";
     GadgetSpec spec = new GadgetSpec(URI.create("#"), xml);
     GadgetContext context = new GadgetContext();
-    Gadget gadget = new Gadget(context, spec, new ArrayList<JsLibrary>(), config, null);
-
-    control.replay();
+    Gadget gadget = new Gadget()
+        .setContext(context)
+        .setSpec(spec)
+        .setContent(spec.getView("default").getContent());
 
     registry.rewriteGadget(gadget);
 
