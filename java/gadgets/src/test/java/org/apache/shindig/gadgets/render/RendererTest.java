@@ -20,7 +20,6 @@ package org.apache.shindig.gadgets.render;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
 
 import org.apache.shindig.common.ContainerConfig;
 import org.apache.shindig.common.ContainerConfigException;
@@ -28,9 +27,10 @@ import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.gadgets.Gadget;
 import org.apache.shindig.gadgets.GadgetContext;
 import org.apache.shindig.gadgets.GadgetException;
-import org.apache.shindig.gadgets.GadgetSpecFactory;
-import org.apache.shindig.gadgets.VariableSubstituter;
+import org.apache.shindig.gadgets.process.ProcessingException;
+import org.apache.shindig.gadgets.process.Processor;
 import org.apache.shindig.gadgets.spec.GadgetSpec;
+import org.apache.shindig.gadgets.spec.View;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -44,7 +44,6 @@ import java.util.Arrays;
  * Tests for Renderer.
  */
 public class RendererTest {
-  private static final Uri SPEC_URL = Uri.parse("http://example.org/gadget.xml");
   private static final Uri TYPE_URL_HREF = Uri.parse("http://example.org/gadget.php");
   private static final String BASIC_HTML_CONTENT = "Hello, World!";
   private static final String GADGET =
@@ -52,76 +51,54 @@ public class RendererTest {
       " <ModulePrefs title='foo'/>" +
       " <Content view='html' type='html'>" + BASIC_HTML_CONTENT + "</Content>" +
       " <Content view='url' type='url' href='" + TYPE_URL_HREF + "'/>" +
-      " <Content view='alias' type='html'>" + BASIC_HTML_CONTENT + "</Content>" +
       "</Module>";
 
   private final FakeHtmlRenderer htmlRenderer = new FakeHtmlRenderer();
-  private final FakeGadgetSpecFactory gadgetSpecFactory = new FakeGadgetSpecFactory();
-  private final FakeVariableSubstituter substituter = new FakeVariableSubstituter();
+  private final FakeProcessor processor = new FakeProcessor();
   private FakeContainerConfig containerConfig;
   private Renderer renderer;
 
   @Before
   public void setUp() throws Exception {
     containerConfig = new FakeContainerConfig();
-    renderer = new Renderer(htmlRenderer, gadgetSpecFactory, containerConfig, substituter);
+    renderer = new Renderer(processor, htmlRenderer, containerConfig);
   }
 
-  private GadgetContext makeContext(final String view, final Uri specUrl) {
+  private GadgetContext makeContext(final String view) {
     return new GadgetContext() {
-      @Override
-      public URI getUrl() {
-        return specUrl.toJavaUri();
-      }
-
       @Override
       public String getView() {
         return view;
+      }
+
+      @Override
+      public String getParameter(String name) {
+        if (name.equals("parent")) {
+          return "http://example.org/foo";
+        }
+        return null;
       }
     };
   }
 
   @Test
   public void renderTypeHtml() {
-    RenderingResults results = renderer.render(makeContext("html", SPEC_URL));
+    RenderingResults results = renderer.render(makeContext("html"));
     assertEquals(RenderingResults.Status.OK, results.getStatus());
     assertEquals(BASIC_HTML_CONTENT, results.getContent());
   }
 
   @Test
   public void renderTypeUrl() {
-    RenderingResults results = renderer.render(makeContext("url", SPEC_URL));
+    RenderingResults results = renderer.render(makeContext("url"));
     assertEquals(RenderingResults.Status.MUST_REDIRECT, results.getStatus());
     assertEquals(TYPE_URL_HREF, results.getRedirect());
   }
 
   @Test
-  public void renderInvalidUrl() {
-    RenderingResults results = renderer.render(makeContext("url", Uri.parse("doesnotexist")));
-    assertEquals(RenderingResults.Status.ERROR, results.getStatus());
-    assertNotNull("No error message provided for invalid url.", results.getErrorMessage());
-  }
-
-  @Test
-  public void doViewAliasing() throws Exception {
-    JSONArray aliases = new JSONArray(Arrays.asList("some-alias", "alias"));
-    containerConfig.json.put("gadgets.features/views/aliased/aliases", aliases);
-    RenderingResults results = renderer.render(makeContext("aliased", SPEC_URL));
-    assertEquals(RenderingResults.Status.OK, results.getStatus());
-    assertEquals(BASIC_HTML_CONTENT, results.getContent());
-  }
-
-  @Test
-  public void noSupportedViewThrows() {
-    RenderingResults results = renderer.render(makeContext("not-real-view", SPEC_URL));
-    assertEquals(RenderingResults.Status.ERROR, results.getStatus());
-    assertNotNull("No error message provided for invalid view.", results.getErrorMessage());
-  }
-
-  @Test
-  public void handlesGadgetExceptionGracefully() {
-    gadgetSpecFactory.exception = new GadgetException(GadgetException.Code.INVALID_PATH, "foo");
-    RenderingResults results = renderer.render(makeContext("does-not-matter", SPEC_URL));
+  public void handlesProcessingExceptionGracefully() {
+    processor.exception = new ProcessingException("foo");
+    RenderingResults results = renderer.render(makeContext("does-not-matter"));
     assertEquals(RenderingResults.Status.ERROR, results.getStatus());
     assertEquals("foo", results.getErrorMessage());
   }
@@ -129,92 +106,29 @@ public class RendererTest {
   @Test
   public void handlesRenderingExceptionGracefully() {
     htmlRenderer.exception = new RenderingException("oh no!");
-    RenderingResults results = renderer.render(makeContext("html", SPEC_URL));
+    RenderingResults results = renderer.render(makeContext("html"));
     assertEquals(RenderingResults.Status.ERROR, results.getStatus());
     assertEquals("oh no!", results.getErrorMessage());
   }
 
   @Test
   public void validateParent() throws Exception {
-    final String parent = "http://example.org/foo";
-    GadgetContext context = new GadgetContext() {
-      @Override
-      public URI getUrl() {
-        return SPEC_URL.toJavaUri();
-      }
-
-      @Override
-      public String getView() {
-        return "html";
-      }
-
-      @Override
-      public String getParameter(String name) {
-        if (name.equals("parent")) {
-          return parent;
-        }
-        return null;
-      }
-    };
-
     containerConfig.json.put("gadgets.parent",
         new JSONArray(Arrays.asList("http:\\/\\/example\\.org\\/[a-z]+", "localhost")));
 
-    RenderingResults results = renderer.render(context);
+    RenderingResults results = renderer.render(makeContext("html"));
     assertEquals(RenderingResults.Status.OK, results.getStatus());
   }
 
   @Test
   public void validateBadParent() throws Exception {
-    final String parent = "http://example.org/foo";
-    GadgetContext context = new GadgetContext() {
-      @Override
-      public URI getUrl() {
-        return SPEC_URL.toJavaUri();
-      }
-
-      @Override
-      public String getParameter(String name) {
-        if (name.equals("parent")) {
-          return parent;
-        }
-        return null;
-      }
-    };
-
     containerConfig.json.put("gadgets.parent",
         new JSONArray(Arrays.asList("http:\\/\\/example\\.com\\/[a-z]+", "localhost")));
-
-    RenderingResults results = renderer.render(context);
+    RenderingResults results = renderer.render(makeContext("html"));
     assertEquals(RenderingResults.Status.ERROR, results.getStatus());
     assertNotNull("No error message provided for bad parent.", results.getErrorMessage());
   }
 
-  @Test
-  public void substitutionsPerformedTypeHtml() throws Exception {
-    renderer.render(makeContext("html", SPEC_URL));
-    assertTrue("Substitutions not performed", substituter.wasSubstituted);
-  }
-
-  @Test
-  public void substitutionsPerformedTypeUrl() throws Exception {
-    renderer.render(makeContext("url", SPEC_URL));
-    assertTrue("Substitutions not performed", substituter.wasSubstituted);
-  }
-
-  private static class FakeGadgetSpecFactory implements GadgetSpecFactory {
-    private GadgetException exception;
-    public GadgetSpec getGadgetSpec(GadgetContext context) throws GadgetException {
-      if (exception != null) {
-        throw exception;
-      }
-      return new GadgetSpec(context.getUrl(), GADGET);
-    }
-
-    public GadgetSpec getGadgetSpec(URI uri, boolean ignoreCache) {
-      throw new UnsupportedOperationException();
-    }
-  }
 
   private static class FakeContainerConfig extends ContainerConfig {
     private final JSONObject json = new JSONObject();
@@ -245,17 +159,29 @@ public class RendererTest {
     }
   }
 
-  private static class FakeVariableSubstituter extends VariableSubstituter {
-    private boolean wasSubstituted;
+  private static class FakeProcessor extends Processor {
+    private ProcessingException exception;
 
-    public FakeVariableSubstituter() {
-      super(null);
+    public FakeProcessor() {
+      super(null, null, null, null);
     }
 
     @Override
-    public GadgetSpec substitute(GadgetContext context, GadgetSpec spec) {
-      wasSubstituted = true;
-      return spec;
+    public Gadget process(GadgetContext context) throws ProcessingException {
+      if (exception != null) {
+        throw exception;
+      }
+
+      try {
+        GadgetSpec spec = new GadgetSpec(URI.create("#"), GADGET);
+        View view = spec.getView(context.getView());
+        return new Gadget()
+            .setContext(context)
+            .setSpec(spec)
+            .setCurrentView(view);
+      } catch (GadgetException e) {
+        throw new RuntimeException(e);
+      }
     }
   }
 }

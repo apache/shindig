@@ -22,10 +22,8 @@ import org.apache.shindig.common.ContainerConfig;
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.gadgets.Gadget;
 import org.apache.shindig.gadgets.GadgetContext;
-import org.apache.shindig.gadgets.GadgetException;
-import org.apache.shindig.gadgets.GadgetSpecFactory;
-import org.apache.shindig.gadgets.VariableSubstituter;
-import org.apache.shindig.gadgets.spec.GadgetSpec;
+import org.apache.shindig.gadgets.process.ProcessingException;
+import org.apache.shindig.gadgets.process.Processor;
 import org.apache.shindig.gadgets.spec.View;
 
 import com.google.inject.Inject;
@@ -33,7 +31,6 @@ import com.google.inject.Inject;
 import org.json.JSONArray;
 import org.json.JSONException;
 
-import java.net.URI;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Pattern;
@@ -43,20 +40,15 @@ import java.util.regex.Pattern;
  */
 public class Renderer {
   private static final Logger LOG = Logger.getLogger(Renderer.class.getName());
+  private final Processor processor;
   private final HtmlRenderer renderer;
-  private final GadgetSpecFactory gadgetSpecFactory;
   private final ContainerConfig containerConfig;
-  private final VariableSubstituter substituter;
 
   @Inject
-  public Renderer(HtmlRenderer renderer,
-                  GadgetSpecFactory gadgetSpecFactory,
-                  ContainerConfig containerConfig,
-                  VariableSubstituter substituter) {
+  public Renderer(Processor processor, HtmlRenderer renderer, ContainerConfig containerConfig) {
+    this.processor = processor;
     this.renderer = renderer;
-    this.gadgetSpecFactory = gadgetSpecFactory;
     this.containerConfig = containerConfig;
-    this.substituter = substituter;
   }
 
   /**
@@ -67,16 +59,6 @@ public class Renderer {
    * TODO: Localize error messages.
    */
   public RenderingResults render(GadgetContext context) {
-    URI url = context.getUrl();
-
-    if (url == null) {
-      return RenderingResults.error("Missing or malformed url parameter");
-    }
-
-    if (!"http".equalsIgnoreCase(url.getScheme()) && !"https".equalsIgnoreCase(url.getScheme())) {
-      return RenderingResults.error("Unsupported scheme (must be http or https).");
-    }
-
     if (!validateParent(context)) {
       return RenderingResults.error("Unsupported parent parameter. Check your container code.");
     }
@@ -84,25 +66,10 @@ public class Renderer {
     // TODO: Locked domain.
 
     try {
-      GadgetSpec spec = gadgetSpecFactory.getGadgetSpec(context);
+      Gadget gadget = processor.process(context);
 
-      // We have to perform all possible substitutions here, because subsequent steps may require
-      // access to any arbitrary post-substituted field.
-      spec = substituter.substitute(context, spec);
 
-      View view = getView(context, spec);
-
-      if (view == null) {
-        return RenderingResults.error("Unable to locate an appropriate view in this gadget. " +
-            "Requested: '" + context.getView() + "' Available: " + spec.getViews().keySet());
-      }
-
-      Gadget gadget = new Gadget()
-          .setContext(context)
-          .setSpec(spec)
-          .setCurrentView(view);
-
-      if (view.getType() == View.ContentType.URL) {
+      if (gadget.getCurrentView().getType() == View.ContentType.URL) {
         return RenderingResults.mustRedirect(getTypeUrlRedirect(gadget));
       }
 
@@ -112,7 +79,7 @@ public class Renderer {
     } catch (RenderingException e) {
       LOG.log(Level.WARNING, "Failed to render gadget " + context.getUrl(), e);
       return RenderingResults.error(e.getLocalizedMessage());
-    } catch (GadgetException e) {
+    } catch (ProcessingException e) {
       LOG.log(Level.WARNING, "Failed to process gadget " + context.getUrl(), e);
       return RenderingResults.error(e.getLocalizedMessage());
     }
@@ -155,31 +122,5 @@ public class Renderer {
     return Uri.fromJavaUri(gadget.getCurrentView().getHref());
   }
 
-  /**
-   * Attempts to extract the "current" view for the given gadget.
-   */
-  private View getView(GadgetContext context, GadgetSpec spec) {
-    String viewName = context.getView();
-    View view = spec.getView(viewName);
-    if (view == null) {
-      JSONArray aliases = containerConfig.getJsonArray(context.getContainer(),
-          "gadgets.features/views/" + viewName + "/aliases");
-      if (aliases != null) {
-        for (int i = 0, j = aliases.length(); i < j; ++i) {
-          viewName = aliases.optString(i);
-          if (viewName != null) {
-            view = spec.getView(viewName);
-            if (view != null) {
-              break;
-            }
-          }
-        }
-      }
 
-      if (view == null) {
-        view = spec.getView(GadgetSpec.DEFAULT_VIEW);
-      }
-    }
-    return view;
-  }
 }

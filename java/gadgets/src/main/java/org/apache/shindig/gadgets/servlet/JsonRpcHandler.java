@@ -20,9 +20,9 @@ package org.apache.shindig.gadgets.servlet;
 
 import org.apache.shindig.gadgets.Gadget;
 import org.apache.shindig.gadgets.GadgetContext;
-import org.apache.shindig.gadgets.GadgetException;
-import org.apache.shindig.gadgets.GadgetServer;
-import org.apache.shindig.gadgets.DefaultUrlGenerator;
+import org.apache.shindig.gadgets.UrlGenerator;
+import org.apache.shindig.gadgets.process.ProcessingException;
+import org.apache.shindig.gadgets.process.Processor;
 import org.apache.shindig.gadgets.spec.GadgetSpec;
 import org.apache.shindig.gadgets.spec.LinkSpec;
 import org.apache.shindig.gadgets.spec.ModulePrefs;
@@ -30,7 +30,7 @@ import org.apache.shindig.gadgets.spec.UserPref;
 import org.apache.shindig.gadgets.spec.View;
 
 import com.google.inject.Inject;
-import com.google.inject.Singleton;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -45,15 +45,20 @@ import java.util.concurrent.ExecutorCompletionService;
 import java.util.concurrent.ExecutorService;
 
 /**
- * Processes JSON-RPC requests by retrieving all necessary meta data in parallel
- * and coalescing into a single output JSON construct.
+ * Processes JSON-RPC requests by retrieving all necessary meta data in parallel and coalescing into
+ * a single output JSON construct.
  */
-@Singleton
 public class JsonRpcHandler {
-
   private final ExecutorService executor;
-  private final GadgetServer server;
-  private final DefaultUrlGenerator urlGenerator;
+  private final Processor processor;
+  private final UrlGenerator urlGenerator;
+
+  @Inject
+  public JsonRpcHandler(ExecutorService executor, Processor processor, UrlGenerator urlGenerator) {
+    this.executor = executor;
+    this.processor = processor;
+    this.urlGenerator = urlGenerator;
+  }
 
   /**
    * Processes a JSON request.
@@ -61,14 +66,7 @@ public class JsonRpcHandler {
    * @param request Original JSON request
    * @return The JSON response.
    */
-  public JSONObject process(JSONObject request)
-      throws RpcException, JSONException {
-    JSONObject response = new JSONObject();
-
-    // Dispatch a separate thread for each gadget that we wish to render.
-    CompletionService<JSONObject> processor =
-      new ExecutorCompletionService<JSONObject>(executor);
-
+  public JSONObject process(JSONObject request) throws RpcException, JSONException {
     List<GadgetContext> gadgets;
 
     JSONObject requestContext = request.getJSONObject("context");
@@ -83,9 +81,16 @@ public class JsonRpcHandler {
       gadgets.add(context);
     }
 
+    // Dispatch a separate thread for each gadget that we wish to render.
+    // We could probably just submit these directly to the ExecutorService, but if it's an async
+    // service instead of a threaded one we would just block.
+    CompletionService<JSONObject> processor =  new ExecutorCompletionService<JSONObject>(executor);
+
     for (GadgetContext context : gadgets) {
       processor.submit(new Job(context));
     }
+
+    JSONObject response = new JSONObject();
 
     int numJobs = gadgets.size();
     do {
@@ -102,20 +107,10 @@ public class JsonRpcHandler {
         // Just one gadget failed; mark it as such.
         try {
           GadgetContext context = e.getContext();
-
-          if (context == null) {
-            throw e;
-          }
-
           JSONObject errorObj = new JSONObject();
           errorObj.put("url", context.getUrl())
                   .put("moduleId", context.getModuleId());
-          if (e.getCause() instanceof GadgetException) {
-            GadgetException gpe = (GadgetException)e.getCause();
-            errorObj.append("errors", gpe.getMessage());
-          } else {
-            errorObj.append("errors", e.getMessage());
-          }
+          errorObj.append("errors", e.getCause().getLocalizedMessage());
           response.append("gadgets", errorObj);
         } catch (JSONException je) {
           throw new RpcException("Unable to write JSON", je);
@@ -131,13 +126,18 @@ public class JsonRpcHandler {
 
   private class Job implements Callable<JSONObject> {
     private final GadgetContext context;
+
+    public Job(GadgetContext context) {
+      this.context = context;
+    }
+
     public JSONObject call() throws RpcException {
       try {
-        Gadget gadget = server.processGadget(context);
+        Gadget gadget = processor.process(context);
+        GadgetSpec spec = gadget.getSpec();
 
         JSONObject gadgetJson = new JSONObject();
 
-        GadgetSpec spec = gadget.getSpec();
         ModulePrefs prefs = spec.getModulePrefs();
 
         // TODO: modularize response fields based on requested items.
@@ -178,8 +178,8 @@ public class JsonRpcHandler {
         // ModulePrefs.getAttributes(), but names have to be converted to
         // camel case.
         gadgetJson.put("iframeUrl", urlGenerator.getIframeUrl(gadget))
-                  .put("url", gadget.getContext().getUrl().toString())
-                  .put("moduleId", gadget.getContext().getModuleId())
+                  .put("url",context.getUrl().toString())
+                  .put("moduleId", context.getModuleId())
                   .put("title", prefs.getTitle())
                   .put("titleUrl", prefs.getTitleUrl().toString())
                   .put("views", views)
@@ -209,14 +209,14 @@ public class JsonRpcHandler {
                   .put("scaling", prefs.getScaling())
                   .put("scrolling", prefs.getScrolling());
         return gadgetJson;
-      } catch (GadgetException e) {
+      } catch (ProcessingException e) {
         throw new RpcException(context, e);
       } catch (JSONException e) {
         // Shouldn't be possible
         throw new RpcException(context, e);
       }
     }
-    
+
     private List<JSONObject> getOrderedEnums(UserPref pref) throws JSONException {
       List<UserPref.EnumValuePair> orderedEnums = pref.getOrderedEnumValues();
       List<JSONObject> jsonEnums = new ArrayList<JSONObject>(orderedEnums.size());
@@ -228,17 +228,5 @@ public class JsonRpcHandler {
       }
       return jsonEnums;
     }
-    
-    public Job(GadgetContext context) {
-      this.context = context;
-    }
-  }
-
-  @Inject
-  public JsonRpcHandler(ExecutorService executor, GadgetServer server,
-      DefaultUrlGenerator iframeUrlGenerator) {
-    this.executor = executor;
-    this.server = server;
-    this.urlGenerator = iframeUrlGenerator;
   }
 }
