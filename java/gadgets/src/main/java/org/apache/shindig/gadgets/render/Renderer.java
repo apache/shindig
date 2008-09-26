@@ -24,6 +24,7 @@ import org.apache.shindig.gadgets.Gadget;
 import org.apache.shindig.gadgets.GadgetContext;
 import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.GadgetSpecFactory;
+import org.apache.shindig.gadgets.VariableSubstituter;
 import org.apache.shindig.gadgets.spec.GadgetSpec;
 import org.apache.shindig.gadgets.spec.View;
 
@@ -45,14 +46,17 @@ public class Renderer {
   private final HtmlRenderer renderer;
   private final GadgetSpecFactory gadgetSpecFactory;
   private final ContainerConfig containerConfig;
+  private final VariableSubstituter substituter;
 
   @Inject
   public Renderer(HtmlRenderer renderer,
                   GadgetSpecFactory gadgetSpecFactory,
-                  ContainerConfig containerConfig) {
+                  ContainerConfig containerConfig,
+                  VariableSubstituter substituter) {
     this.renderer = renderer;
     this.gadgetSpecFactory = gadgetSpecFactory;
     this.containerConfig = containerConfig;
+    this.substituter = substituter;
   }
 
   /**
@@ -81,7 +85,11 @@ public class Renderer {
 
     try {
       GadgetSpec spec = gadgetSpecFactory.getGadgetSpec(context);
-      // TODO: Variable substitution.
+
+      // We have to perform all possible substitutions here, because subsequent steps may require
+      // access to any arbitrary post-substituted field.
+      spec = substituter.substitute(context, spec);
+
       View view = getView(context, spec);
 
       if (view == null) {
@@ -129,12 +137,11 @@ public class Renderer {
       JSONArray parents = containerConfig.getJsonArray(container, "gadgets.parent");
       if (parents == null) {
         return true;
-      } else {
-        // We need to check each possible parent parameter against this regex.
-        for (int i = 0, j = parents.length(); i < j; ++i) {
-          if (Pattern.matches(parents.getString(i), parent)) {
-            return true;
-          }
+      }
+      // We need to check each possible parent parameter against this regex.
+      for (int i = 0, j = parents.length(); i < j; ++i) {
+        if (Pattern.matches(parents.getString(i), parent)) {
+          return true;
         }
       }
     } catch (JSONException e) {
@@ -158,16 +165,14 @@ public class Renderer {
       JSONArray aliases = containerConfig.getJsonArray(context.getContainer(),
           "gadgets.features/views/" + viewName + "/aliases");
       if (aliases != null) {
-        try {
-          for (int i = 0, j = aliases.length(); i < j; ++i) {
-            viewName = aliases.getString(i);
+        for (int i = 0, j = aliases.length(); i < j; ++i) {
+          viewName = aliases.optString(i);
+          if (viewName != null) {
             view = spec.getView(viewName);
             if (view != null) {
               break;
             }
           }
-        } catch (JSONException e) {
-          view = null;
         }
       }
 
