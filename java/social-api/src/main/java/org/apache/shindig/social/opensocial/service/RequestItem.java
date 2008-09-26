@@ -193,7 +193,9 @@ public abstract class RequestItem {
     return token;
   }
 
-  public abstract <T> T getTypedParameter(String parameterName, Class<T> postDataClass);
+  public abstract <T> T getTypedParameter(String parameterName, Class<T> dataTypeClass);
+
+  public abstract <T> T getTypedParameters(Class<T> dataTypeClass);
 
   public abstract void applyUrlTemplate(String urlTemplate);
 
