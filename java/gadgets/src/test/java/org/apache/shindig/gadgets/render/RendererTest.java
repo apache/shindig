@@ -20,6 +20,8 @@ package org.apache.shindig.gadgets.render;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
 import org.apache.shindig.common.ContainerConfig;
 import org.apache.shindig.common.ContainerConfigException;
@@ -27,6 +29,7 @@ import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.gadgets.Gadget;
 import org.apache.shindig.gadgets.GadgetContext;
 import org.apache.shindig.gadgets.GadgetException;
+import org.apache.shindig.gadgets.LockedDomainService;
 import org.apache.shindig.gadgets.process.ProcessingException;
 import org.apache.shindig.gadgets.process.Processor;
 import org.apache.shindig.gadgets.spec.GadgetSpec;
@@ -55,13 +58,14 @@ public class RendererTest {
 
   private final FakeHtmlRenderer htmlRenderer = new FakeHtmlRenderer();
   private final FakeProcessor processor = new FakeProcessor();
+  private final FakeLockedDomainService lockedDomainService =  new FakeLockedDomainService();
   private FakeContainerConfig containerConfig;
   private Renderer renderer;
 
   @Before
   public void setUp() throws Exception {
     containerConfig = new FakeContainerConfig();
-    renderer = new Renderer(processor, htmlRenderer, containerConfig);
+    renderer = new Renderer(processor, htmlRenderer, containerConfig, lockedDomainService);
   }
 
   private GadgetContext makeContext(final String view) {
@@ -129,6 +133,20 @@ public class RendererTest {
     assertNotNull("No error message provided for bad parent.", results.getErrorMessage());
   }
 
+  @Test
+  public void verifyLockedDomain() throws Exception {
+    renderer.render(makeContext("html"));
+    assertTrue("Locked domain not verified", lockedDomainService.wasChecked);
+  }
+
+  @Test
+  public void wrongDomainRedirects() throws Exception {
+    lockedDomainService.canRender = false;
+    RenderingResults results = renderer.render(makeContext("html"));
+    assertEquals(RenderingResults.Status.MUST_REDIRECT, results.getStatus());
+    // TODO: Verify the real url for redirection.
+    assertNull(results.getRedirect());
+  }
 
   private static class FakeContainerConfig extends ContainerConfig {
     private final JSONObject json = new JSONObject();
@@ -182,6 +200,23 @@ public class RendererTest {
       } catch (GadgetException e) {
         throw new RuntimeException(e);
       }
+    }
+  }
+
+  private static class FakeLockedDomainService implements LockedDomainService {
+    private boolean wasChecked = false;
+    private boolean canRender = true;
+    public boolean gadgetCanRender(String host, GadgetSpec gadget, String container) {
+      wasChecked = true;
+      return canRender;
+    }
+
+    public String getLockedDomainForGadget(GadgetSpec gadget, String container) {
+      return null;
+    }
+
+    public boolean isSafeForOpenProxy(String host) {
+      return false;
     }
   }
 }

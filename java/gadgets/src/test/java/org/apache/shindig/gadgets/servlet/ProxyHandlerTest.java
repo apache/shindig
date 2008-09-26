@@ -76,7 +76,7 @@ public class ProxyHandlerTest extends ServletTestFixture {
 
   public void testLockedDomainEmbed() throws Exception {
     setupProxyRequestMock("www.example.com", URL_ONE);
-    expect(lockedDomainService.embedCanRender("www.example.com")).andReturn(true);
+    expect(lockedDomainService.isSafeForOpenProxy("www.example.com")).andReturn(true);
     expectGetAndReturnData(URL_ONE, DATA_ONE.getBytes());
     replay();
 
@@ -89,7 +89,7 @@ public class ProxyHandlerTest extends ServletTestFixture {
 
   public void testLockedDomainFailedEmbed() throws Exception {
     setupFailedProxyRequestMock("www.example.com", URL_ONE);
-    expect(lockedDomainService.embedCanRender("www.example.com")).andReturn(false);
+    expect(lockedDomainService.isSafeForOpenProxy("www.example.com")).andReturn(false);
     replay();
     try {
       proxyHandler.fetch(request, response);
@@ -109,7 +109,7 @@ public class ProxyHandlerTest extends ServletTestFixture {
     headers.put("Content-Type", Arrays.asList(contentType));
     headers.put("X-Magic-Garbage", Arrays.asList(magicGarbage));
 
-    expect(lockedDomainService.embedCanRender(domain)).andReturn(true).atLeastOnce();
+    expect(lockedDomainService.isSafeForOpenProxy(domain)).andReturn(true).atLeastOnce();
     setupProxyRequestMock(domain, url);
     expectGetAndReturnHeaders(url, headers);
 

@@ -25,62 +25,49 @@ import static org.easymock.EasyMock.expect;
 import static org.easymock.EasyMock.isA;
 
 import org.apache.shindig.common.ContainerConfig;
-import org.apache.shindig.gadgets.HashLockedDomainService.GadgetReader;
+import org.apache.shindig.gadgets.spec.GadgetSpec;
 
+import java.net.URI;
 import java.util.Arrays;
 
 public class HashLockedDomainServiceTest extends EasyMockTestCase {
+  private HashLockedDomainService lockedDomainService;
+  private final GadgetSpec wantsLocked = makeSpec(true, "http://somehost.com/somegadget.xml");
+  private final GadgetSpec notLocked = makeSpec(false, "not-locked");
+  private final ContainerConfig requiredConfig = mock(ContainerConfig.class);
+  private final ContainerConfig enabledConfig = mock(ContainerConfig.class);
 
-  HashLockedDomainService domainLocker;
-  Gadget gadget;
-  FakeSpecReader wantsLocked = new FakeSpecReader(
-      true, "http://somehost.com/somegadget.xml");
-  FakeSpecReader noLocked = new FakeSpecReader(
-      false, "http://somehost.com/somegadget.xml");
-  ContainerConfig containerEnabledConfig;
-  ContainerConfig containerRequiredConfig;
-
-  /**
-   * Mocked out spec reader, rather than mocking the whole
-   * Gadget object.
-   */
-  public static class FakeSpecReader extends GadgetReader {
-    private boolean wantsLockedDomain;
-    private String gadgetUrl;
-
-    public FakeSpecReader(boolean wantsLockedDomain, String gadgetUrl) {
-      this.wantsLockedDomain = wantsLockedDomain;
-      this.gadgetUrl = gadgetUrl;
+  private static GadgetSpec makeSpec(boolean wantsLocked, String url) {
+    String gadgetXml;
+    if (wantsLocked) {
+      gadgetXml =
+          "<Module><ModulePrefs title=''>" +
+          "  <Require feature='locked-domain'/>" +
+          "</ModulePrefs><Content/></Module>";
+    } else {
+      gadgetXml = "<Module><ModulePrefs title=''/><Content/></Module>";
     }
 
-    @Override
-    protected boolean gadgetWantsLockedDomain(Gadget gadget) {
-      return wantsLockedDomain;
-    }
-
-    @Override
-    protected String getGadgetUrl(Gadget gadget) {
-      return gadgetUrl;
+    try {
+      return new GadgetSpec(URI.create(url), gadgetXml);
+    } catch (GadgetException e) {
+      return null;
     }
   }
 
   @Override
   protected void setUp() throws Exception {
     super.setUp();
-    containerRequiredConfig  = mock(ContainerConfig.class);
-    expect(containerRequiredConfig.get(ContainerConfig.DEFAULT_CONTAINER,
-        LOCKED_DOMAIN_REQUIRED_KEY)).andReturn("true").anyTimes();
-    expect(containerRequiredConfig.get(ContainerConfig.DEFAULT_CONTAINER,
+    expect(requiredConfig.get(ContainerConfig.DEFAULT_CONTAINER,
         LOCKED_DOMAIN_SUFFIX_KEY)).andReturn("-a.example.com:8080").anyTimes();
-    expect(containerRequiredConfig.getContainers())
+    expect(requiredConfig.get(ContainerConfig.DEFAULT_CONTAINER,
+        LOCKED_DOMAIN_REQUIRED_KEY)).andReturn("true").anyTimes();
+    expect(requiredConfig.getContainers())
         .andReturn(Arrays.asList(ContainerConfig.DEFAULT_CONTAINER)).anyTimes();
 
-    containerEnabledConfig = mock(ContainerConfig.class);
-    expect(containerEnabledConfig.get(ContainerConfig.DEFAULT_CONTAINER,
-        LOCKED_DOMAIN_REQUIRED_KEY)).andReturn("false").anyTimes();
-    expect(containerEnabledConfig.get(ContainerConfig.DEFAULT_CONTAINER,
+    expect(enabledConfig.get(ContainerConfig.DEFAULT_CONTAINER,
         LOCKED_DOMAIN_SUFFIX_KEY)).andReturn("-a.example.com:8080").anyTimes();
-    expect(containerEnabledConfig.getContainers())
+    expect(enabledConfig.getContainers())
         .andReturn(Arrays.asList(ContainerConfig.DEFAULT_CONTAINER)).anyTimes();
   }
 
@@ -88,84 +75,76 @@ public class HashLockedDomainServiceTest extends EasyMockTestCase {
   public void testDisabledGlobally() {
     replay();
 
-    domainLocker = new HashLockedDomainService(
-        containerRequiredConfig, "embed.com", false);
-    assertTrue(domainLocker.embedCanRender("anywhere.com"));
-    assertTrue(domainLocker.embedCanRender("embed.com"));
-    assertTrue(domainLocker.gadgetCanRender("embed.com", gadget, "default"));
+    lockedDomainService = new HashLockedDomainService(requiredConfig, false);
+    assertTrue(lockedDomainService.isSafeForOpenProxy("anywhere.com"));
+    assertTrue(lockedDomainService.isSafeForOpenProxy("embed.com"));
+    assertTrue(lockedDomainService.gadgetCanRender("embed.com", wantsLocked, "default"));
+    assertTrue(lockedDomainService.gadgetCanRender("embed.com", notLocked, "default"));
 
-    domainLocker = new HashLockedDomainService(
-        containerEnabledConfig, "embed.com", false);
-    assertTrue(domainLocker.embedCanRender("anywhere.com"));
-    assertTrue(domainLocker.embedCanRender("embed.com"));
-    assertTrue(domainLocker.gadgetCanRender("embed.com", gadget, "default"));
+    lockedDomainService = new HashLockedDomainService(enabledConfig, false);
+    assertTrue(lockedDomainService.isSafeForOpenProxy("anywhere.com"));
+    assertTrue(lockedDomainService.isSafeForOpenProxy("embed.com"));
+    assertTrue(lockedDomainService.gadgetCanRender("embed.com", wantsLocked, "default"));
+    assertTrue(lockedDomainService.gadgetCanRender("embed.com", notLocked, "default"));
   }
 
   public void testEnabledForGadget() {
     replay();
 
-    domainLocker = new HashLockedDomainService(
-        containerEnabledConfig, "embed.com", true);
-    assertFalse(domainLocker.embedCanRender("anywhere.com"));
-    assertTrue(domainLocker.embedCanRender("embed.com"));
-    domainLocker.setSpecReader(wantsLocked);
-    assertFalse(domainLocker.gadgetCanRender(
-        "www.example.com", gadget, "default"));
-    assertTrue(domainLocker.gadgetCanRender(
-        "8uhr00296d2o3sfhqilj387krjmgjv3v-a.example.com:8080",
-        gadget,
-        "default"));
-    String target = domainLocker.getLockedDomainForGadget(
-        wantsLocked.getGadgetUrl(gadget), "default");
-    assertEquals(
-        "8uhr00296d2o3sfhqilj387krjmgjv3v-a.example.com:8080",
-        target);
+    lockedDomainService = new HashLockedDomainService(enabledConfig, true);
+    assertFalse(lockedDomainService.isSafeForOpenProxy("images-a.example.com:8080"));
+    assertFalse(lockedDomainService.isSafeForOpenProxy("-a.example.com:8080"));
+    assertTrue(lockedDomainService.isSafeForOpenProxy("embed.com"));
+    assertFalse(lockedDomainService.gadgetCanRender("www.example.com", wantsLocked, "default"));
+    assertTrue(lockedDomainService.gadgetCanRender(
+        "8uhr00296d2o3sfhqilj387krjmgjv3v-a.example.com:8080", wantsLocked, "default"));
+    String target = lockedDomainService.getLockedDomainForGadget(wantsLocked, "default");
+    assertEquals("8uhr00296d2o3sfhqilj387krjmgjv3v-a.example.com:8080", target);
   }
 
   public void testNotEnabledForGadget() {
     replay();
 
-    domainLocker = new HashLockedDomainService(
-        containerEnabledConfig, "embed.com", true);
-    domainLocker.setSpecReader(noLocked);
-    assertTrue(domainLocker.gadgetCanRender(
-        "www.example.com", gadget, "default"));
-    assertFalse(domainLocker.gadgetCanRender(
-        "8uhr00296d2o3sfhqilj387krjmgjv3v-a.example.com:8080",
-        gadget,
-        "default"));
-    assertFalse(domainLocker.gadgetCanRender(
-        "foo-a.example.com:8080",
-        gadget,
-        "default"));
-    assertFalse(domainLocker.gadgetCanRender(
-        "foo-a.example.com:8080",
-        gadget,
-        "othercontainer"));
-    String target = domainLocker.getLockedDomainForGadget(
-        wantsLocked.getGadgetUrl(gadget), "default");
-    assertEquals(
-        "8uhr00296d2o3sfhqilj387krjmgjv3v-a.example.com:8080",
-        target);
+    lockedDomainService = new HashLockedDomainService(enabledConfig, true);
+
+    assertFalse(lockedDomainService.isSafeForOpenProxy("images-a.example.com:8080"));
+    assertFalse(lockedDomainService.isSafeForOpenProxy("-a.example.com:8080"));
+    assertTrue(lockedDomainService.isSafeForOpenProxy("embed.com"));
+
+    assertTrue(lockedDomainService.gadgetCanRender("www.example.com", notLocked, "default"));
+    assertFalse(lockedDomainService.gadgetCanRender(
+        "8uhr00296d2o3sfhqilj387krjmgjv3v-a.example.com:8080", notLocked, "default"));
+    assertTrue(lockedDomainService.gadgetCanRender(
+        "auvn86n7q0l4ju2tq5cq8akotcjlda66-a.example.com:8080", notLocked, "default"));
+    assertNull(lockedDomainService.getLockedDomainForGadget(notLocked, "default"));
   }
 
   public void testRequiredForContainer() {
     replay();
 
-    domainLocker = new HashLockedDomainService(
-        containerRequiredConfig, "embed.com", true);
-    domainLocker.setSpecReader(noLocked);
-    assertFalse(domainLocker.gadgetCanRender(
-        "www.example.com", gadget, "default"));
-    assertTrue(domainLocker.gadgetCanRender(
-        "8uhr00296d2o3sfhqilj387krjmgjv3v-a.example.com:8080",
-        gadget,
-        "default"));
-    String target = domainLocker.getLockedDomainForGadget(
-        wantsLocked.getGadgetUrl(gadget), "default");
-    assertEquals(
-        "8uhr00296d2o3sfhqilj387krjmgjv3v-a.example.com:8080",
-        target);
+    lockedDomainService = new HashLockedDomainService(requiredConfig, true);
+
+    assertFalse(lockedDomainService.isSafeForOpenProxy("images-a.example.com:8080"));
+    assertFalse(lockedDomainService.isSafeForOpenProxy("-a.example.com:8080"));
+    assertTrue(lockedDomainService.isSafeForOpenProxy("embed.com"));
+
+    assertFalse(lockedDomainService.gadgetCanRender("www.example.com", wantsLocked, "default"));
+    assertFalse(lockedDomainService.gadgetCanRender("www.example.com", notLocked, "default"));
+
+    String target = lockedDomainService.getLockedDomainForGadget(wantsLocked, "default");
+    assertEquals("8uhr00296d2o3sfhqilj387krjmgjv3v-a.example.com:8080", target);
+    target = lockedDomainService.getLockedDomainForGadget(notLocked, "default");
+    assertEquals("auvn86n7q0l4ju2tq5cq8akotcjlda66-a.example.com:8080", target);
+
+    assertTrue(lockedDomainService.gadgetCanRender(
+        "8uhr00296d2o3sfhqilj387krjmgjv3v-a.example.com:8080", wantsLocked, "default"));
+    assertFalse(lockedDomainService.gadgetCanRender(
+        "auvn86n7q0l4ju2tq5cq8akotcjlda66-a.example.com:8080", wantsLocked, "default"));
+    assertTrue(lockedDomainService.gadgetCanRender(
+        "auvn86n7q0l4ju2tq5cq8akotcjlda66-a.example.com:8080", notLocked, "default"));
+    assertFalse(lockedDomainService.gadgetCanRender(
+        "8uhr00296d2o3sfhqilj387krjmgjv3v-a.example.com:8080", notLocked, "default"));
+
   }
 
   public void testMissingConfig() throws Exception {
@@ -174,11 +153,9 @@ public class HashLockedDomainServiceTest extends EasyMockTestCase {
       .andReturn(Arrays.asList(ContainerConfig.DEFAULT_CONTAINER));
     replay();
 
-    domainLocker = new HashLockedDomainService(
-        containerMissingConfig, "embed.com", false);
-    domainLocker.setSpecReader(wantsLocked);
-    assertTrue(domainLocker.gadgetCanRender(
-        "www.example.com", gadget, "default"));
+    lockedDomainService = new HashLockedDomainService(containerMissingConfig, true);
+    assertFalse(lockedDomainService.gadgetCanRender("www.example.com", wantsLocked, "default"));
+    assertTrue(lockedDomainService.gadgetCanRender("www.example.com", notLocked, "default"));
   }
 
   public void testMultiContainer() throws Exception {
@@ -191,14 +168,10 @@ public class HashLockedDomainServiceTest extends EasyMockTestCase {
         .andReturn("-a.example.com:8080").anyTimes();
     replay();
 
-    domainLocker = new HashLockedDomainService(
-        inheritsConfig, "embed.com", true);
-    domainLocker.setSpecReader(wantsLocked);
-    assertFalse(domainLocker.gadgetCanRender(
-        "www.example.com", gadget, "other"));
-    assertTrue(domainLocker.gadgetCanRender(
-        "8uhr00296d2o3sfhqilj387krjmgjv3v-a.example.com:8080",
-        gadget,
-        "other"));
+    lockedDomainService = new HashLockedDomainService(inheritsConfig, true);
+    assertFalse(lockedDomainService.gadgetCanRender("www.example.com", wantsLocked, "other"));
+    assertFalse(lockedDomainService.gadgetCanRender("www.example.com", notLocked, "other"));
+    assertTrue(lockedDomainService.gadgetCanRender(
+        "8uhr00296d2o3sfhqilj387krjmgjv3v-a.example.com:8080", wantsLocked, "other"));
   }
 }

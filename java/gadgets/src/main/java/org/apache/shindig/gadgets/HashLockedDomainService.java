@@ -19,8 +19,9 @@ package org.apache.shindig.gadgets;
 
 import org.apache.shindig.common.ContainerConfig;
 import org.apache.shindig.common.util.Base32;
-import org.apache.shindig.gadgets.spec.Feature;
+import org.apache.shindig.gadgets.spec.GadgetSpec;
 
+import com.google.common.collect.Maps;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.inject.name.Named;
@@ -28,9 +29,8 @@ import com.google.inject.name.Named;
 import org.apache.commons.codec.digest.DigestUtils;
 
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.Map;
-import java.util.Set;
+import java.util.logging.Logger;
 
 /**
  * Locked domain implementation based on sha1.
@@ -43,43 +43,37 @@ import java.util.Set;
  */
 @Singleton
 public class HashLockedDomainService implements LockedDomainService {
-
-  private final ContainerConfig config;
-
-  private final String embedHost;
-
+  private static final Logger LOG = Logger.getLogger(HashLockedDomainService.class.getName());
   private final boolean enabled;
+  private final Map<String, String> lockedSuffixes;
+  private final Map<String, Boolean> required;
 
-  private final Set<String> suffixes;
-
-  private GadgetReader gadgetReader = new GadgetReader();
-
-  public static final String LOCKED_DOMAIN_REQUIRED_KEY =
-      "gadgets.lockedDomainRequired";
-
-  public static final String LOCKED_DOMAIN_SUFFIX_KEY =
-      "gadgets.lockedDomainSuffix";
+  public static final String LOCKED_DOMAIN_REQUIRED_KEY = "gadgets.lockedDomainRequired";
+  public static final String LOCKED_DOMAIN_SUFFIX_KEY = "gadgets.lockedDomainSuffix";
 
   /**
    * Create a LockedDomainService
    * @param config per-container configuration
-   * @param embedHost host name to use for embedded content
    * @param enabled whether this service should do anything at all.
    */
   @Inject
-  public HashLockedDomainService(
-      ContainerConfig config,
-      @Named("shindig.locked-domain.embed-host")String embedHost,
-      @Named("shindig.locked-domain.enabled")boolean enabled) {
-    this.config = config;
-    this.embedHost = embedHost;
+  public HashLockedDomainService(ContainerConfig config,
+                                 @Named("shindig.locked-domain.enabled") boolean enabled) {
     this.enabled = enabled;
-    suffixes = new HashSet<String>();
+    lockedSuffixes = Maps.newHashMap();
+    required = Maps.newHashMap();
     Collection<String> containers = config.getContainers();
     if (enabled) {
       for (String container : containers) {
         String suffix = config.get(container, LOCKED_DOMAIN_SUFFIX_KEY);
-        suffixes.add(suffix);
+        if (suffix == null) {
+          LOG.warning("No locked domain configuration for " + container);
+        } else {
+          lockedSuffixes.put(container, suffix);
+        }
+
+        String require = config.get(container, LOCKED_DOMAIN_REQUIRED_KEY);
+        required.put(container, "true".equals(require));
       }
     }
   }
@@ -88,58 +82,53 @@ public class HashLockedDomainService implements LockedDomainService {
     return enabled;
   }
 
-  public String getEmbedHost() {
-    return embedHost;
-  }
-
-  public boolean embedCanRender(String host) {
-    return (!enabled || host.endsWith(embedHost));
-  }
-
-  public boolean gadgetCanRender(String host, Gadget gadget, String container) {
-    if (!enabled) {
-      return true;
+  public boolean isSafeForOpenProxy(String host) {
+    if (enabled) {
+      return !hostRequiresLockedDomain(host);
     }
-    // Gadgets can opt-in to locked domains, or they can be enabled globally
-    // for a particular container
-    if (gadgetReader.gadgetWantsLockedDomain(gadget) ||
-        containerWantsLockedDomain(container)) {
-      String neededHost = getLockedDomainForGadget(
-          gadgetReader.getGadgetUrl(gadget), container);
-      return (neededHost.equals(host));
+    return true;
+  }
+
+  public boolean gadgetCanRender(String host, GadgetSpec gadget, String container) {
+    container = normalizeContainer(container);
+    if (enabled) {
+      if (gadgetWantsLockedDomain(gadget) ||
+          hostRequiresLockedDomain(host) ||
+          containerRequiresLockedDomain(container)) {
+        String neededHost = getLockedDomain(gadget, container);
+        return host.equals(neededHost);
+      }
     }
-    // Make sure gadgets that don't ask for locked domain aren't allowed
-    // to render on one.
-    return !gadgetUsingLockedDomain(host, gadget);
+    return true;
   }
 
-  // Simple class for dependency injection, so we don't need a full-fledged
-  // Gadget mock for these test cases
-  static class GadgetReader {
-    protected boolean gadgetWantsLockedDomain(Gadget gadget) {
-      Map<String, Feature> prefs =
-        gadget.getSpec().getModulePrefs().getFeatures();
-      return prefs.containsKey("locked-domain");
+  public String getLockedDomainForGadget(GadgetSpec gadget, String container) {
+    container = normalizeContainer(container);
+    if (enabled) {
+      if (gadgetWantsLockedDomain(gadget) ||
+          containerRequiresLockedDomain(container)) {
+        return getLockedDomain(gadget, container);
+      }
     }
+    return null;
+  }
 
-    protected String getGadgetUrl(Gadget gadget) {
-      return gadget.getContext().getUrl().toString();
+  private String getLockedDomain(GadgetSpec gadget, String container) {
+    String suffix = lockedSuffixes.get(container);
+    if (suffix == null) {
+      return null;
     }
+    byte[] sha1 = DigestUtils.sha(gadget.getUrl().toString());
+    String hash = new String(Base32.encodeBase32(sha1));
+    return hash + suffix;
   }
 
-  // For testing only
-  void setSpecReader(GadgetReader gadgetReader) {
-    this.gadgetReader = gadgetReader;
+  private boolean gadgetWantsLockedDomain(GadgetSpec gadget) {
+    return gadget.getModulePrefs().getFeatures().containsKey("locked-domain");
   }
 
-  private boolean containerWantsLockedDomain(String container) {
-    String required = config.get(
-        container, LOCKED_DOMAIN_REQUIRED_KEY);
-    return ("true".equals(required));
-  }
-
-  private boolean gadgetUsingLockedDomain(String host, Gadget gadget) {
-    for (String suffix : suffixes) {
+  private boolean hostRequiresLockedDomain(String host) {
+    for (String suffix : lockedSuffixes.values()) {
       if (host.endsWith(suffix)) {
         return true;
       }
@@ -147,14 +136,14 @@ public class HashLockedDomainService implements LockedDomainService {
     return false;
   }
 
-  public String getLockedDomainForGadget(String gadget, String container) {
-    String suffix = config.get(container, LOCKED_DOMAIN_SUFFIX_KEY);
-    if (suffix == null) {
-      throw new IllegalStateException(
-          "Cannot redirect to locked domain if it is not configured");
+  private boolean containerRequiresLockedDomain(String container) {
+    return required.get(container);
+  }
+
+  private String normalizeContainer(String container) {
+    if (required.containsKey(container)) {
+      return container;
     }
-    byte[] sha1 = DigestUtils.sha(gadget);
-    String hash = new String(Base32.encodeBase32(sha1));
-    return hash + suffix;
+    return ContainerConfig.DEFAULT_CONTAINER;
   }
 }

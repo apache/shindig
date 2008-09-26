@@ -22,8 +22,10 @@ import org.apache.shindig.common.ContainerConfig;
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.gadgets.Gadget;
 import org.apache.shindig.gadgets.GadgetContext;
+import org.apache.shindig.gadgets.LockedDomainService;
 import org.apache.shindig.gadgets.process.ProcessingException;
 import org.apache.shindig.gadgets.process.Processor;
+import org.apache.shindig.gadgets.spec.GadgetSpec;
 import org.apache.shindig.gadgets.spec.View;
 
 import com.google.inject.Inject;
@@ -43,12 +45,17 @@ public class Renderer {
   private final Processor processor;
   private final HtmlRenderer renderer;
   private final ContainerConfig containerConfig;
+  private final LockedDomainService lockedDomainService;
 
   @Inject
-  public Renderer(Processor processor, HtmlRenderer renderer, ContainerConfig containerConfig) {
+  public Renderer(Processor processor,
+                  HtmlRenderer renderer,
+                  ContainerConfig containerConfig,
+                  LockedDomainService lockedDomainService) {
     this.processor = processor;
     this.renderer = renderer;
     this.containerConfig = containerConfig;
+    this.lockedDomainService = lockedDomainService;
   }
 
   /**
@@ -63,17 +70,17 @@ public class Renderer {
       return RenderingResults.error("Unsupported parent parameter. Check your container code.");
     }
 
-    // TODO: Locked domain.
-
     try {
       Gadget gadget = processor.process(context);
 
-
       if (gadget.getCurrentView().getType() == View.ContentType.URL) {
-        return RenderingResults.mustRedirect(getTypeUrlRedirect(gadget));
+        return RenderingResults.mustRedirect(getRedirect(gadget));
       }
 
-      // TODO: Validate locked domain.
+      GadgetSpec spec = gadget.getSpec();
+      if (!lockedDomainService.gadgetCanRender(context.getHost(), spec, context.getContainer())) {
+        return RenderingResults.mustRedirect(getRedirect(gadget));
+      }
 
       return RenderingResults.ok(renderer.render(gadget));
     } catch (RenderingException e) {
@@ -117,10 +124,14 @@ public class Renderer {
     return false;
   }
 
-  private Uri getTypeUrlRedirect(Gadget gadget) {
-    // TODO: This should probably just call UrlGenerator.getIframeUrl().
-    return Uri.fromJavaUri(gadget.getCurrentView().getHref());
+  private Uri getRedirect(Gadget gadget) {
+    // TODO: This should probably just call UrlGenerator.getIframeUrl(), but really it should
+    // never happen.
+    View view = gadget.getCurrentView();
+    if (view.getType() == View.ContentType.URL) {
+      return Uri.fromJavaUri(gadget.getCurrentView().getHref());
+    }
+    // TODO
+    return null;
   }
-
-
 }
