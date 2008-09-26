@@ -26,14 +26,13 @@ import com.google.common.collect.Maps;
 
 import org.apache.commons.lang.StringEscapeUtils;
 
-import junitx.framework.StringAssert;
-
 import java.net.URI;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+
+import junitx.framework.StringAssert;
 
 /**
  * Tests for DefaultUrlGenerator.
@@ -126,7 +125,11 @@ public class DefaultUrlGeneratorTest extends GadgetTestFixture {
           "</Module>";
     GadgetSpec spec = new GadgetSpec(URI.create(SPEC_URL), xml);
     replay();
-    Gadget gadget = new Gadget(context, spec, Collections.<JsLibrary>emptyList(), containerConfig, null);
+
+    Gadget gadget = new Gadget()
+        .setContext(context)
+        .setSpec(spec)
+        .setCurrentView(spec.getView("default"));
 
     URI iframeUrl = URI.create(realUrlGenerator.getIframeUrl(gadget));
 
@@ -146,7 +149,10 @@ public class DefaultUrlGeneratorTest extends GadgetTestFixture {
           "</Module>";
     GadgetSpec spec = new GadgetSpec(URI.create(SPEC_URL), xml);
     replay();
-    Gadget gadget = new Gadget(context, spec, Collections.<JsLibrary>emptyList(), containerConfig, null);
+    Gadget gadget = new Gadget()
+        .setContext(context)
+        .setSpec(spec)
+        .setCurrentView(spec.getView("default"));
 
     URI iframeUrl = URI.create(realUrlGenerator.getIframeUrl(gadget));
 

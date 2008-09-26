@@ -17,23 +17,10 @@
  */
 package org.apache.shindig.gadgets;
 
-import org.apache.shindig.common.ContainerConfig;
-import org.apache.shindig.gadgets.http.HttpResponse;
-import org.apache.shindig.gadgets.parse.GadgetHtmlParser;
 import org.apache.shindig.gadgets.preload.Preloads;
 import org.apache.shindig.gadgets.spec.GadgetSpec;
 import org.apache.shindig.gadgets.spec.LocaleSpec;
-import org.apache.shindig.gadgets.spec.Preload;
 import org.apache.shindig.gadgets.spec.View;
-
-import com.google.common.collect.Maps;
-
-import org.json.JSONArray;
-import org.json.JSONException;
-
-import java.util.Collection;
-import java.util.Map;
-import java.util.concurrent.Future;
 
 /**
  * Intermediary representation of all state associated with processing
@@ -45,34 +32,6 @@ public class Gadget {
   private Preloads preloads;
   private View currentView;
   private String content;
-
-  @Deprecated
-  private Collection<JsLibrary> jsLibraries;
-
-  @Deprecated
-  private Map<Preload, Future<HttpResponse>> preloadMap;
-
-  public Gadget() { }
-
-  /**
-   * @deprecated Use default ctor and setter methods instead.
-   *
-   * TODO: Remove this entirely. The only code paths using it should be for the old rendering
-   * pipeline, so this can be removed once that's gone.
-   */
-  @Deprecated
-  public Gadget(GadgetContext context, GadgetSpec spec,
-      Collection<JsLibrary> jsLibraries, ContainerConfig containerConfig,
-      GadgetHtmlParser contentParser) {
-    this.preloadMap = Maps.newHashMap();
-    this.context = context;
-    this.spec = spec;
-    this.jsLibraries = jsLibraries;
-    currentView = getView(containerConfig);
-    if (currentView != null) {
-      content = currentView.getContent();
-    }
-  }
 
   /**
    * @param context The request that the gadget is being processed for.
@@ -143,55 +102,5 @@ public class Gadget {
    */
   public LocaleSpec getLocale() {
     return spec.getModulePrefs().getLocale(context.getLocale());
-  }
-
-  /**
-   * @return A mutable collection of JsLibrary objects attached to this Gadget.
-   */
-  @Deprecated
-  public Collection<JsLibrary> getJsLibraries() {
-    return jsLibraries;
-  }
-
-  /**
-   * @return A mutable map of preloads.
-   */
-  @Deprecated
-  public Map<Preload, Future<HttpResponse>> getPreloadMap() {
-    return preloadMap;
-  }
-
-  /**
-   * Attempts to extract the "current" view for this gadget.
-   *
-   * @param config The container configuration; used to look for any view name
-   *        aliases for the container specified in the context.
-   */
-  @Deprecated
-  View getView(ContainerConfig config) {
-    String viewName = context.getView();
-    View view = spec.getView(viewName);
-    if (view == null) {
-      JSONArray aliases = config.getJsonArray(context.getContainer(),
-          "gadgets.features/views/" + viewName + "/aliases");
-      if (aliases != null) {
-        try {
-          for (int i = 0, j = aliases.length(); i < j; ++i) {
-            viewName = aliases.getString(i);
-            view = spec.getView(viewName);
-            if (view != null) {
-              break;
-            }
-          }
-        } catch (JSONException e) {
-          view = null;
-        }
-      }
-
-      if (view == null) {
-        view = spec.getView(GadgetSpec.DEFAULT_VIEW);
-      }
-    }
-    return view;
   }
 }
