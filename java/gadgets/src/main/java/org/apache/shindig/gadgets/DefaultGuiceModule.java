@@ -32,6 +32,7 @@ import org.apache.shindig.gadgets.preload.Preloader;
 import org.apache.shindig.gadgets.render.RenderingContentRewriter;
 import org.apache.shindig.gadgets.rewrite.ContentRewriter;
 import org.apache.shindig.gadgets.rewrite.lexer.DefaultContentRewriter;
+import org.apache.shindig.gadgets.servlet.CajaContentRewriter;
 
 import com.google.common.collect.Lists;
 import com.google.inject.AbstractModule;
@@ -209,8 +210,12 @@ public class DefaultGuiceModule extends AbstractModule {
 
     @Inject
     public ContentRewritersProvider(DefaultContentRewriter optimizingRewriter,
-                                    RenderingContentRewriter renderingRewriter) {
-      rewriters = Lists.<ContentRewriter>newArrayList(optimizingRewriter, renderingRewriter);
+                                    RenderingContentRewriter renderingRewriter,
+                                    CajaContentRewriter cajaRewriter) {
+      rewriters = Lists.newArrayList();
+      rewriters.add(optimizingRewriter);
+      rewriters.add(renderingRewriter);
+      rewriters.add(cajaRewriter);
     }
 
     public List<ContentRewriter> get() {
