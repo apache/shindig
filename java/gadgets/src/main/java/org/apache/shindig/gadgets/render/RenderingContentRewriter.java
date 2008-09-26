@@ -110,7 +110,7 @@ public class RenderingContentRewriter implements ContentRewriter {
   }
 
   public RewriterResults rewrite(HttpRequest req, HttpResponse resp,  MutableContent content) {
-    return RewriterResults.notCacheable();
+    return RewriterResults.cacheableIndefinitely();
   }
 
   public RewriterResults rewrite(Gadget gadget, MutableContent mutableContent) {
