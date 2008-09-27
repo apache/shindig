@@ -18,6 +18,7 @@
 package org.apache.shindig.gadgets.process;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import org.apache.shindig.common.ContainerConfig;
@@ -105,9 +106,10 @@ public class ProcessorTest {
     assertEquals(BASIC_HTML_CONTENT, gadget.getCurrentView().getContent());
   }
 
-  @Test(expected = ProcessingException.class)
-  public void noSupportedViewThrows() throws Exception {
-    processor.process(makeContext("not-real-view"));
+  @Test
+  public void noSupportedViewHasNoCurrentView() throws Exception {
+    Gadget gadget = processor.process(makeContext("not-real-view"));
+    assertNull(gadget.getCurrentView());
   }
 
   @Test

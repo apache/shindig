@@ -72,6 +72,12 @@ public class Renderer {
 
     try {
       Gadget gadget = processor.process(context);
+      
+      if (gadget.getCurrentView() == null) {
+        return RenderingResults.error("Unable to locate an appropriate view in this gadget. " +
+            "Requested: '" + gadget.getContext().getView() +
+            "' Available: " + gadget.getSpec().getViews().keySet());
+      }
 
       if (gadget.getCurrentView().getType() == View.ContentType.URL) {
         return RenderingResults.mustRedirect(getRedirect(gadget));
