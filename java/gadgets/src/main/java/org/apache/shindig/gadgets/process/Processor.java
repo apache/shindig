@@ -83,17 +83,10 @@ public class Processor {
       GadgetSpec spec = gadgetSpecFactory.getGadgetSpec(context);
       spec = substituter.substitute(context, spec);
 
-      View view = getView(context, spec);
-
-      if (view == null) {
-        throw new ProcessingException("Unable to locate an appropriate view in this gadget. " +
-            "Requested: '" + context.getView() + "' Available: " + spec.getViews().keySet());
-      }
-
       return new Gadget()
           .setContext(context)
           .setSpec(spec)
-          .setCurrentView(view);
+          .setCurrentView(getView(context, spec));
     } catch (GadgetException e) {
       throw new ProcessingException(e);
     }
