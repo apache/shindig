@@ -102,7 +102,7 @@ public class RendererTest {
   @Test
   public void handlesProcessingExceptionGracefully() {
     processor.exception = new ProcessingException("foo");
-    RenderingResults results = renderer.render(makeContext("does-not-matter"));
+    RenderingResults results = renderer.render(makeContext("html"));
     assertEquals(RenderingResults.Status.ERROR, results.getStatus());
     assertEquals("foo", results.getErrorMessage());
   }
@@ -131,6 +131,13 @@ public class RendererTest {
     RenderingResults results = renderer.render(makeContext("html"));
     assertEquals(RenderingResults.Status.ERROR, results.getStatus());
     assertNotNull("No error message provided for bad parent.", results.getErrorMessage());
+  }
+  
+  @Test
+  public void handlesNoCurrentViewGracefully() throws Exception {
+    RenderingResults results = renderer.render(makeContext("bad-view-name"));
+    assertEquals(RenderingResults.Status.ERROR, results.getStatus());
+    assertNotNull("No error message for missing current view", results.getErrorMessage());
   }
 
   @Test
