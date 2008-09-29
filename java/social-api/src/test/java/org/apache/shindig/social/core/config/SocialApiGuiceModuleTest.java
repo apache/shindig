@@ -18,6 +18,7 @@
 package org.apache.shindig.social.core.config;
 
 import org.apache.shindig.auth.AuthenticationHandler;
+import org.apache.shindig.common.PropertiesModule;
 import org.apache.shindig.social.core.oauth.AuthenticationHandlerProvider;
 
 import com.google.inject.Guice;
@@ -34,7 +35,7 @@ public class SocialApiGuiceModuleTest extends TestCase {
 
   @Override public void setUp() throws Exception {
     super.setUp();
-    injector = Guice.createInjector(new SocialApiGuiceModule());
+    injector = Guice.createInjector(new SocialApiGuiceModule(), new PropertiesModule());
   }
 
   /**

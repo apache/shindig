@@ -18,8 +18,10 @@
 package org.apache.shindig.server.endtoend;
 
 import org.apache.shindig.auth.AuthenticationServletFilter;
+import org.apache.shindig.common.PropertiesModule;
 import org.apache.shindig.common.servlet.GuiceServletContextListener;
 import org.apache.shindig.gadgets.DefaultGuiceModule;
+import org.apache.shindig.gadgets.oauth.OAuthModule;
 import org.apache.shindig.gadgets.servlet.ConcatProxyServlet;
 import org.apache.shindig.gadgets.servlet.GadgetRenderingServlet;
 import org.apache.shindig.social.opensocial.service.DataServiceServlet;
@@ -104,7 +106,8 @@ public class EndToEndServer {
 
     Map<String, String> initParams = Maps.newHashMap();
     String modules = Join
-        .join(":", EndToEndModule.class.getName(), DefaultGuiceModule.class.getName());
+        .join(":", EndToEndModule.class.getName(), DefaultGuiceModule.class.getName(),
+            PropertiesModule.class.getName(), OAuthModule.class.getName());
 
     initParams.put(GuiceServletContextListener.MODULES_ATTRIBUTE, modules);
     context.setInitParams(initParams);

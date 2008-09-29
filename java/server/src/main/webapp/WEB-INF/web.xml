@@ -27,7 +27,7 @@
   <context-param>
     <param-name>guice-modules</param-name>
     <param-value>
-      org.apache.shindig.gadgets.servlet.HttpGuiceModule:org.apache.shindig.social.core.config.SocialApiGuiceModule
+      org.apache.shindig.common.PropertiesModule:org.apache.shindig.gadgets.DefaultGuiceModule:org.apache.shindig.social.core.config.SocialApiGuiceModule:org.apache.shindig.gadgets.oauth.OAuthModule
     </param-value>
   </context-param>
 

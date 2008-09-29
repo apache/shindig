@@ -95,9 +95,6 @@ under the License.
           <include>oauth.json</include>
         </includes>
       </resource>
-      <resource>
-        <directory>conf</directory>
-      </resource>
     </resources>
   </build>
 
