@@ -54,6 +54,9 @@ under the License.
           <include>**/*</include>
         </includes>
       </resource>
+      <resource>
+        <directory>conf</directory>
+      </resource>
     </resources>
   </build>
 

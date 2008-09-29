@@ -21,7 +21,6 @@ import com.google.inject.Inject;
 import com.google.inject.name.Named;
 
 import org.apache.shindig.common.crypto.BlobCrypter;
-import org.apache.shindig.gadgets.DefaultGuiceModule;
 import org.apache.shindig.gadgets.http.HttpCache;
 
 /**
@@ -29,13 +28,15 @@ import org.apache.shindig.gadgets.http.HttpCache;
  */
 public class OAuthFetcherConfig {
   
+  public static final String OAUTH_STATE_CRYPTER = "shindig.oauth.state-crypter";
+  
   private final BlobCrypter stateCrypter;
   private final GadgetOAuthTokenStore tokenStore;
   private final HttpCache httpCache;
   
   @Inject
   public OAuthFetcherConfig(
-      @Named(DefaultGuiceModule.OAUTH_STATE_CRYPTER_ANNOTATION) BlobCrypter stateCrypter,
+      @Named(OAUTH_STATE_CRYPTER) BlobCrypter stateCrypter,
       GadgetOAuthTokenStore tokenStore,
       HttpCache httpCache) {
     this.stateCrypter = stateCrypter;

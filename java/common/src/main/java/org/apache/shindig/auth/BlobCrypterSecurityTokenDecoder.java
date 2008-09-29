@@ -47,9 +47,9 @@ import java.util.Map;
 @Singleton
 public class BlobCrypterSecurityTokenDecoder implements SecurityTokenDecoder {
 
-  public static final String SECURITY_TOKEN_KEY_FILE = "securityTokenKeyFile";
+  public static final String SECURITY_TOKEN_KEY_FILE = "gadgets.securityTokenKeyFile";
   
-  public static final String SIGNED_FETCH_DOMAIN = "signedFetchDomain";
+  public static final String SIGNED_FETCH_DOMAIN = "gadgets.signedFetchDomain";
   
   /**
    * Keys are container ids, values are crypters
