@@ -31,8 +31,6 @@ public class Gadget {
   private GadgetSpec spec;
   private Preloads preloads;
   private View currentView;
-  private String content;
-
   /**
    * @param context The request that the gadget is being processed for.
    */
@@ -55,18 +53,6 @@ public class Gadget {
 
   public GadgetSpec getSpec() {
     return spec;
-  }
-
-  /**
-   * Sets the current content of the rendered output of this gadget.
-   */
-  public Gadget setContent(String content) {
-    this.content = content;
-    return this;
-  }
-
-  public String getContent() {
-    return content;
   }
 
   /**

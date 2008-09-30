@@ -193,9 +193,9 @@ public class HtmlRendererTest {
   private static class FakeContentRewriterRegistry implements ContentRewriterRegistry {
     private boolean wasRewritten = false;
 
-    public boolean rewriteGadget(Gadget gadget) {
+    public String rewriteGadget(Gadget gadget, String content) {
       wasRewritten = true;
-      return true;
+      return content;
     }
 
     public HttpResponse rewriteHttpResponse(HttpRequest req, HttpResponse resp) {

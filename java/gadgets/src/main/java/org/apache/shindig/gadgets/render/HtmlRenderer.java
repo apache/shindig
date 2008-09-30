@@ -74,7 +74,7 @@ public class HtmlRenderer {
 
       if (view.getHref() == null) {
         gadget.setPreloads(preloads);
-        return doRewriting(gadget, view.getContent());
+        return rewriter.rewriteGadget(gadget, view.getContent());
       } else {
         // TODO: Add current url to GadgetContext to support transitive proxying.
         HttpRequest request = new HttpRequest(Uri.fromJavaUri(view.getHref()))
@@ -88,16 +88,10 @@ public class HtmlRenderer {
           throw new RenderingException("Unable to reach remote host. HTTP status " +
               response.getHttpStatusCode());
         }
-        return doRewriting(gadget, response.getResponseAsString());
+        return rewriter.rewriteGadget(gadget, response.getResponseAsString());
       }
     } catch (GadgetException e) {
       throw new RenderingException(e);
     }
-  }
-
-  private String doRewriting(Gadget gadget, String content) throws GadgetException {
-    gadget.setContent(content);
-    rewriter.rewriteGadget(gadget);
-    return gadget.getContent();
   }
 }

@@ -94,31 +94,30 @@ public class RenderingContentRewriterTest {
     return new Gadget()
         .setContext(new GadgetContext())
         .setPreloads(new NullPreloads())
-        .setSpec(spec)
-        .setContent(spec.getView("default").getContent());
+        .setSpec(spec);
   }
 
-  private Gadget makeGadgetWithContent(String content) throws GadgetException {
+  private Gadget makeDefaultGadget() throws GadgetException {
     String defaultXml = "<Module><ModulePrefs title=''/><Content type='html'/></Module>";
-    return makeGadgetWithSpec(defaultXml).setContent(content);
+    return makeGadgetWithSpec(defaultXml);
   }
 
-  private void rewrite(Gadget gadget) {
+  private String rewrite(Gadget gadget, String content) {
     MutableContent mc = new MutableContent(null);
-    mc.setContent(gadget.getContent());
+    mc.setContent(content);
     assertEquals(0, rewriter.rewrite(gadget, mc).getCacheTtl());
-    gadget.setContent(mc.getContent());
+    return mc.getContent();
   }
 
   @Test
   public void defaultOutput() throws Exception {
-    Gadget gadget = makeGadgetWithContent(BODY_CONTENT);
+    Gadget gadget = makeDefaultGadget();
 
     control.replay();
 
-    rewrite(gadget);
+    String rewritten = rewrite(gadget, BODY_CONTENT);
 
-    Matcher matcher = DOCUMENT_SPLIT_PATTERN.matcher(gadget.getContent());
+    Matcher matcher = DOCUMENT_SPLIT_PATTERN.matcher(rewritten);
     assertTrue("Output is not valid HTML.", matcher.matches());
     assertTrue("Missing opening html tag", matcher.group(BEFORE_HEAD_GROUP).contains("<html>"));
     assertTrue("Default head content is missing.",
@@ -157,15 +156,15 @@ public class RenderingContentRewriterTest {
       }
     };
 
-    Gadget gadget = makeGadgetWithContent(doc)
+    Gadget gadget = makeDefaultGadget()
         .setContext(context);
 
     featureRegistry.addInline("foo", "does-not-matter");
     control.replay();
 
-    rewrite(gadget);
+    String rewritten = rewrite(gadget, doc);
 
-    Matcher matcher = DOCUMENT_SPLIT_PATTERN.matcher(gadget.getContent());
+    Matcher matcher = DOCUMENT_SPLIT_PATTERN.matcher(rewritten);
     assertTrue("Output is not valid HTML.", matcher.matches());
     assertTrue("DOCTYPE not preserved", matcher.group(BEFORE_HEAD_GROUP).contains(docType));
     assertTrue("Missing opening html tag", matcher.group(BEFORE_HEAD_GROUP).contains("<html>"));
@@ -195,16 +194,16 @@ public class RenderingContentRewriterTest {
 
     control.replay();
 
-    rewrite(gadget);
+    String rewritten = rewrite(gadget, "");
 
     assertTrue("Bi-directional locale settings not preserved.",
-        gadget.getContent().contains("<body dir='rtl'>"));
+        rewritten.contains("<body dir='rtl'>"));
   }
 
-  private Set<String> getInjectedScript(Gadget gadget) {
+  private Set<String> getInjectedScript(String content) {
     Pattern featurePattern
         = Pattern.compile("(?:.*)<script src=\"\\/js\\/(.*?)\"><\\/script>(?:.*)", Pattern.DOTALL);
-    Matcher matcher = featurePattern.matcher(gadget.getContent());
+    Matcher matcher = featurePattern.matcher(content);
 
     assertTrue("Forced scripts not injected.", matcher.matches());
 
@@ -238,9 +237,9 @@ public class RenderingContentRewriterTest {
     featureRegistry.addInline("baz", "does-not-matter");
     control.replay();
 
-    rewrite(gadget);
+    String rewritten = rewrite(gadget, "");
 
-    Set<String> actual = getInjectedScript(gadget);
+    Set<String> actual = getInjectedScript(rewritten);
     Set<String> expected = Sets.immutableSortedSet("foo", "bar", "baz");
     assertEquals(expected, actual);
   }
@@ -259,9 +258,9 @@ public class RenderingContentRewriterTest {
     featureRegistry.addInline("foo", "foo_content();");
     control.replay();
 
-    rewrite(gadget);
+    String rewritten = rewrite(gadget, "");
 
-    assertTrue("Requested scripts not inlined.", gadget.getContent().contains("foo_content();"));
+    assertTrue("Requested scripts not inlined.", rewritten.contains("foo_content();"));
   }
 
   @Test
@@ -291,12 +290,12 @@ public class RenderingContentRewriterTest {
     featureRegistry.addInline("baz", "does-not-matter");
     control.replay();
 
-    rewrite(gadget);
+    String rewritten = rewrite(gadget, "");
 
-    Set<String> actual = getInjectedScript(gadget);
+    Set<String> actual = getInjectedScript(rewritten);
     Set<String> expected = Sets.immutableSortedSet("bar", "baz");
     assertEquals(expected, actual);
-    assertTrue("Requested scripts not inlined.", gadget.getContent().contains("foo_content();"));
+    assertTrue("Requested scripts not inlined.", rewritten.contains("foo_content();"));
   }
 
   @Test
@@ -326,20 +325,20 @@ public class RenderingContentRewriterTest {
     featureRegistry.addInline("baz", "does-not-matter");
     control.replay();
 
-    rewrite(gadget);
+    String rewritten = rewrite(gadget, "");
 
-    Set<String> actual = getInjectedScript(gadget);
+    Set<String> actual = getInjectedScript(rewritten);
     Set<String> expected = Sets.immutableSortedSet("baz");
     assertEquals(expected, actual);
-    assertTrue("Requested scripts not inlined.", gadget.getContent().contains("foo_content();"));
+    assertTrue("Requested scripts not inlined.", rewritten.contains("foo_content();"));
     assertTrue("Forced external file not forced.",
-        gadget.getContent().contains("<script src=\"http://example.org/external.js\">"));
+        rewritten.contains("<script src=\"http://example.org/external.js\">"));
   }
 
-  private JSONObject getConfigJson(Gadget gadget) throws JSONException {
+  private JSONObject getConfigJson(String content) throws JSONException {
     Pattern prefsPattern
         = Pattern.compile("(?:.*)gadgets\\.config\\.init\\((.*)\\);(?:.*)", Pattern.DOTALL);
-    Matcher matcher = prefsPattern.matcher(gadget.getContent());
+    Matcher matcher = prefsPattern.matcher(content);
     assertTrue("gadgets.config.init not invoked.", matcher.matches());
     return new JSONObject(matcher.group(1));
   }
@@ -362,9 +361,9 @@ public class RenderingContentRewriterTest {
     expect(config.getJsonObject("default", "gadgets.features")).andReturn(conf);
     control.replay();
 
-    rewrite(gadget);
+    String rewritten = rewrite(gadget, "");
 
-    JSONObject json = getConfigJson(gadget);
+    JSONObject json = getConfigJson(rewritten);
     assertEquals("blah", json.get("foo"));
   }
 
@@ -397,9 +396,9 @@ public class RenderingContentRewriterTest {
     expect(config.getJsonObject("default", "gadgets.features")).andReturn(conf);
     control.replay();
 
-    rewrite(gadget);
+    String rewritten = rewrite(gadget, "");
 
-    JSONObject json = getConfigJson(gadget);
+    JSONObject json = getConfigJson(rewritten);
     assertEquals("blah", json.get("foo"));
     assertEquals("baz", json.get("bar"));
   }
@@ -423,9 +422,9 @@ public class RenderingContentRewriterTest {
     expect(config.getJsonObject("default", "gadgets.features")).andReturn(conf);
     control.replay();
 
-    rewrite(gadget);
+    String rewritten = rewrite(gadget, "");
 
-    JSONObject json = getConfigJson(gadget);
+    JSONObject json = getConfigJson(rewritten);
     assertEquals("blah", json.get("foo"));
 
     JSONObject util = json.getJSONObject("core.util");
@@ -451,11 +450,11 @@ public class RenderingContentRewriterTest {
 
     control.replay();
 
-    rewrite(gadget);
+    String rewritten = rewrite(gadget, "");
 
     Pattern prefsPattern
         = Pattern.compile("(?:.*)gadgets\\.Prefs\\.setMessages_\\((.*)\\);(?:.*)", Pattern.DOTALL);
-    Matcher matcher = prefsPattern.matcher(gadget.getContent());
+    Matcher matcher = prefsPattern.matcher(rewritten);
     assertTrue("gadgets.Prefs.setMessages_ not invoked.", matcher.matches());
     JSONObject json = new JSONObject(matcher.group(1));
     assertEquals("foo", json.get("one"));
@@ -475,7 +474,7 @@ public class RenderingContentRewriterTest {
 
     control.replay();
 
-    rewrite(gadget);
+    rewrite(gadget, "");
   }
 
   @Test
@@ -491,15 +490,14 @@ public class RenderingContentRewriterTest {
 
     control.replay();
 
-    rewrite(gadget);
-
+    rewrite(gadget, "");
     // rewrite will throw if the optional unsupported feature doesn't work.
   }
 
-  private JSONObject getPreloadedJson(Gadget gadget) throws JSONException {
+  private JSONObject getPreloadedJson(String content) throws JSONException {
     Pattern preloadPattern
         = Pattern.compile("(?:.*)gadgets\\.io\\.preloaded_=\\{(.*?)\\};(?:.*)", Pattern.DOTALL);
-    Matcher matcher = preloadPattern.matcher(gadget.getContent());
+    Matcher matcher = preloadPattern.matcher(content);
     assertTrue("gadgets.io.preloaded not set.", matcher.matches());
     return new JSONObject('{' + matcher.group(1) + '}');
   }
@@ -532,12 +530,12 @@ public class RenderingContentRewriterTest {
       }
     };
 
-    Gadget gadget = makeGadgetWithContent("").setPreloads(preloads);
+    Gadget gadget = makeDefaultGadget().setPreloads(preloads);
     control.replay();
 
-    rewrite(gadget);
+    String rewritten = rewrite(gadget, "");
 
-    JSONObject json = getPreloadedJson(gadget);
+    JSONObject json = getPreloadedJson(rewritten);
     for (Map.Entry<String, Object> entry : preloadData.entrySet()) {
       assertEquals(entry.getValue(), json.get(entry.getKey()));
     }
@@ -554,12 +552,12 @@ public class RenderingContentRewriterTest {
       }
     };
 
-    Gadget gadget = makeGadgetWithContent("").setPreloads(preloads);
+    Gadget gadget = makeDefaultGadget().setPreloads(preloads);
     control.replay();
 
-    rewrite(gadget);
+    String rewritten = rewrite(gadget, "");
 
-    JSONObject json = getPreloadedJson(gadget);
+    JSONObject json = getPreloadedJson(rewritten);
 
     assertEquals(0, json.length());
   }

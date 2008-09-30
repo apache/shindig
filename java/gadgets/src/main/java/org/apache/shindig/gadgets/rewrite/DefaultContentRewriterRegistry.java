@@ -49,24 +49,20 @@ public class DefaultContentRewriterRegistry implements ContentRewriterRegistry {
   }
 
   /** {@inheritDoc} */
-  public boolean rewriteGadget(Gadget gadget) {
-    String originalContent = gadget.getContent();
-
-    if (originalContent == null) {
+  public String rewriteGadget(Gadget gadget, String content) {
+    if (content == null) {
       // Nothing to rewrite.
-      return false;
+      return null;
     }
 
-    MutableContent mc = getMutableContent(originalContent);
+    MutableContent mc = getMutableContent(content);
 
     for (ContentRewriter rewriter : rewriters) {
       mc.getContent();
       rewriter.rewrite(gadget, mc);
     }
 
-    String currentContent = mc.getContent();
-    gadget.setContent(currentContent);
-    return !originalContent.equals(currentContent);
+    return mc.getContent();
   }
 
   /** {@inheritDoc} */
