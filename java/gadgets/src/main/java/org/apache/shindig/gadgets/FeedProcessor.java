@@ -18,6 +18,7 @@
  */
 package org.apache.shindig.gadgets;
 
+import com.sun.syndication.feed.synd.SyndContent;
 import com.sun.syndication.feed.synd.SyndEntry;
 import com.sun.syndication.feed.synd.SyndFeed;
 import com.sun.syndication.feed.synd.SyndPerson;
@@ -81,8 +82,13 @@ public class FeedProcessor {
         entry.put("Title", e.getTitle());
         entry.put("Link", e.getLink());
         if (getSummaries) {
-          entry.put("Summary",
-              e.getDescription() != null ? e.getDescription().getValue() : "");
+          if (e.getContents() != null && e.getContents().size() > 0) {
+            entry.put("Summary",
+                ((SyndContent)e.getContents().get(0)).getValue());
+          } else {
+            entry.put("Summary",
+                e.getDescription() != null ? e.getDescription().getValue() : "");
+          }
         }
 
         if (e.getUpdatedDate() != null) {
