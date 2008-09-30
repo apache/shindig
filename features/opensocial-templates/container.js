@@ -72,7 +72,7 @@ os.Container.registerDomLoadListener_ = function() {
   } if (window.addEventListener) {
     window.addEventListener("load", os.Container.onDomLoad_, false);
   } else {          
-    if (!window.body) {
+    if (!document.body) {
       setTimeout(arguments.callee, 0);
       return;
     }
@@ -82,7 +82,6 @@ os.Container.registerDomLoadListener_ = function() {
       os.Container.onDomLoad_();
     }              
   }
-  os.Container.domLoadCallbacks_ = [];
 };
 
 /**
@@ -110,6 +109,7 @@ os.Container.executeOnDomLoad = function(callback) {
     setTimeout(callback, 0);    
   } else {
     if (os.Container.domLoadCallbacks_ == null) {
+      os.Container.domLoadCallbacks_ = [];
       os.Container.registerDomLoadListener_();
     }
     os.Container.domLoadCallbacks_.push(callback);

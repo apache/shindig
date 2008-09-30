@@ -24,14 +24,14 @@
   </ModulePrefs>
   <Content type="html">
     <![CDATA[
-    <script type="text/javascript" src="testadapter.js"></script>
+    <script type="text/javascript" src="/opensocial-templates/testadapter.js"></script>
     <!-- the JsUnit tests -->
-    <script type="text/javascript" src="compiler_test.js"></script>
-    <script type="text/javascript" src="data_test.js"></script>
-    <script type="text/javascript" src="container_test.js"></script>
-    <script type="text/javascript" src="loader_test.js"></script>
-    <script type="text/javascript" src="os_test.js"></script>
-    <script type="text/javascript" src="util_test.js"></script>
+    <script type="text/javascript" src="/opensocial-templates/compiler_test.js"></script>
+    <script type="text/javascript" src="/opensocial-templates/data_test.js"></script>
+    <script type="text/javascript" src="/opensocial-templates/container_test.js"></script>
+    <script type="text/javascript" src="/opensocial-templates/loader_test.js"></script>
+    <script type="text/javascript" src="/opensocial-templates/os_test.js"></script>
+    <script type="text/javascript" src="/opensocial-templates/util_test.js"></script>
 
     <div style="display: none">
       <div id="domSource">

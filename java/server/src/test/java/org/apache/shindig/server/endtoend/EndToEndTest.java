@@ -100,8 +100,7 @@ public class EndToEndTest {
 
   @Test
   public void testTemplates() throws Exception {
-    // TODO: Re-enable when the test is passing
-    //executeAllPageTests("opensocial-templates/ost_test");
+    executeAllPageTests("opensocial-templates/ost_test");
   }
 
   @BeforeClass
