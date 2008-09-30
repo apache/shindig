@@ -66,8 +66,8 @@ public class CachingContentRewriterRegistry extends DefaultContentRewriterRegist
     this.minCacheTtl = minCacheTtl;
   }
 
-  protected String getGadgetCacheKey(Gadget gadget) {
-    return getRewritersKey() + ':' + HashUtil.checksum(gadget.getContent().getBytes());
+  protected String getGadgetCacheKey(Gadget gadget, String content) {
+    return getRewritersKey() + ':' + HashUtil.checksum(content.getBytes());
   }
 
   protected String getHttpResponseCacheKey(HttpRequest req, HttpResponse response) {
@@ -90,23 +90,21 @@ public class CachingContentRewriterRegistry extends DefaultContentRewriterRegist
 
   /** {@inheritDoc} */
   @Override
-  public boolean rewriteGadget(Gadget gadget) {
+  public String rewriteGadget(Gadget gadget, String content) {
     if (gadget.getContext().getIgnoreCache()) {
-      return super.rewriteGadget(gadget);
+      return super.rewriteGadget(gadget, content);
     }
 
-    String cacheKey = getGadgetCacheKey(gadget);
+    String cacheKey = getGadgetCacheKey(gadget, content);
     String cached = rewrittenCache.getElement(cacheKey);
 
     if (cached != null) {
-      gadget.setContent(cached);
-      return true;
+      return cached;
     }
 
-    MutableContent mc = getMutableContent(gadget.getContent());
+    MutableContent mc = getMutableContent(content);
 
     long cacheTtl = Long.MAX_VALUE;
-    String original = gadget.getContent();
     for (ContentRewriter rewriter : getRewriters()) {
       RewriterResults rr = rewriter.rewrite(gadget, mc);
       if (rr == null) {
@@ -116,16 +114,14 @@ public class CachingContentRewriterRegistry extends DefaultContentRewriterRegist
       }
     }
 
-    gadget.setContent(mc.getContent());
-
     if (cacheTtl >= minCacheTtl) {
       // Only cache if the cacheTtl is greater than the minimum time configured for doing so.
       // This prevents cache churn and may be more efficient when rewriting is cheaper
       // than a cache lookup.
-      rewrittenCache.addElementWithTtl(cacheKey, gadget.getContent(), cacheTtl);
+      rewrittenCache.addElementWithTtl(cacheKey, content, cacheTtl);
     }
 
-    return !original.equals(gadget.getContent());
+    return content;
   }
 
   /** {@inheritDoc} */

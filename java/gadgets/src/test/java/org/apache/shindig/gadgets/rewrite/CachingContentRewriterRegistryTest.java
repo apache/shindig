@@ -52,15 +52,14 @@ public class CachingContentRewriterRegistryTest {
   @Test
   public void gadgetGetsCached() throws Exception {
     String body = "Hello, world";
-    String xml = "<Module><ModulePrefs title=''/><Content>" + body + "</Content></Module>";
+    String xml = "<Module><ModulePrefs title=''/><Content/></Module>";
     GadgetSpec spec = new GadgetSpec(URI.create("#"), xml);
     GadgetContext context = new GadgetContext();
     Gadget gadget = new Gadget()
         .setContext(context)
-        .setSpec(spec)
-        .setContent(body);
+        .setSpec(spec);
 
-    registry.rewriteGadget(gadget);
+    registry.rewriteGadget(gadget, body);
 
     // TODO: We're not actually testing the TTL of the entries here.
     assertEquals(1, provider.readCount);
@@ -70,7 +69,7 @@ public class CachingContentRewriterRegistryTest {
   @Test
   public void gadgetFetchedFromCache() throws Exception {
     String body = "Hello, world";
-    String xml = "<Module><ModulePrefs title=''/><Content>" + body + "</Content></Module>";
+    String xml = "<Module><ModulePrefs title=''/><Content/></Module>";
     GadgetSpec spec = new GadgetSpec(URI.create("#"), xml);
 
     GadgetContext context = new GadgetContext();
@@ -78,9 +77,8 @@ public class CachingContentRewriterRegistryTest {
     for (int i = 0; i < 3; ++i) {
       Gadget gadget = new Gadget()
           .setContext(context)
-          .setSpec(spec)
-          .setContent(body);
-      registry.rewriteGadget(gadget);
+          .setSpec(spec);
+      registry.rewriteGadget(gadget, body);
     }
 
     assertEquals(3, provider.readCount);
@@ -90,7 +88,7 @@ public class CachingContentRewriterRegistryTest {
   @Test
   public void noCacheGadgetDoesNotGetCached() throws Exception {
     String body = "Hello, world";
-    String xml = "<Module><ModulePrefs title=''/><Content>" + body + "</Content></Module>";
+    String xml = "<Module><ModulePrefs title=''/><Content/></Module>";
     GadgetSpec spec = new GadgetSpec(URI.create("#"), xml);
     GadgetContext context = new GadgetContext() {
       @Override
@@ -101,10 +99,9 @@ public class CachingContentRewriterRegistryTest {
 
     Gadget gadget = new Gadget()
         .setContext(context)
-        .setSpec(spec)
-        .setContent(body);
+        .setSpec(spec);
 
-    registry.rewriteGadget(gadget);
+    registry.rewriteGadget(gadget, body);
 
     assertTrue("Rewriting not performed on uncacheable content.",
         rewriters.get(0).viewWasRewritten());
@@ -188,7 +185,7 @@ public class CachingContentRewriterRegistryTest {
     captureRewriter.setCacheTtl(500);
 
     String body = "Hello, world";
-    String xml = "<Module><ModulePrefs title=''/><Content>" + body + "</Content></Module>";
+    String xml = "<Module><ModulePrefs title=''/><Content/></Module>";
     GadgetSpec spec = new GadgetSpec(URI.create("#"), xml);
     GadgetContext context = new GadgetContext();
 
@@ -196,9 +193,8 @@ public class CachingContentRewriterRegistryTest {
     // inconsistent with the behavior of rewriteHttpResponse.
     Gadget gadget = new Gadget()
         .setContext(context)
-        .setSpec(spec)
-        .setContent(body);
-    registry.rewriteGadget(gadget);
+        .setSpec(spec);
+    registry.rewriteGadget(gadget, body);
 
     assertEquals(1, provider.readCount);
     assertEquals(0, provider.writeCount);

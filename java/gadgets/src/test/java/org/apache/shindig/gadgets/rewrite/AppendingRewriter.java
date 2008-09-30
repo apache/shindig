@@ -49,7 +49,7 @@ class AppendingRewriter implements ContentRewriter {
 
   public RewriterResults rewrite(Gadget gadget, MutableContent content) {
     // Appends appender to the end of the input string.
-	gadget.setContent(content.getContent() + appender);
+	content.setContent(content.getContent() + appender);
 	return RewriterResults.cacheable(cacheTtl);
   }
 

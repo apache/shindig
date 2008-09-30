@@ -51,15 +51,14 @@ public class DefaultContentRewriterRegistryTest {
     GadgetContext context = new GadgetContext();
     Gadget gadget = new Gadget()
         .setContext(context)
-        .setSpec(spec)
-        .setContent(spec.getView("default").getContent());
+        .setSpec(spec);
 
-    registry.rewriteGadget(gadget);
+    String rewritten = registry.rewriteGadget(gadget, body);
 
     assertTrue("First rewriter not invoked.", rewriters.get(0).viewWasRewritten());
     assertTrue("Second rewriter not invoked.", rewriters.get(1).viewWasRewritten());
 
-    assertEquals(body, gadget.getContent());
+    assertEquals(body, rewritten);
   }
 
   @Test

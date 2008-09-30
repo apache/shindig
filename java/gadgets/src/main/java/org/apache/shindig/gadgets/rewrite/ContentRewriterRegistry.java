@@ -31,11 +31,12 @@ import com.google.inject.ImplementedBy;
 public interface ContentRewriterRegistry {
   /**
    * Rewrites a {@code Gadget} object given the registered rewriters.
-   * @param gadget Gadget object to rewrite
-   * @return True if rewriting occurred
+   * @param gadget Gadget object to use as a rewriting context.
+   * @param content The content to be rewritten.
+   * @return The rewritten content.
    * @throws GadgetException Potentially passed through from rewriters
    */
-  boolean rewriteGadget(Gadget gadget) throws GadgetException;
+  String rewriteGadget(Gadget gadget, String content) throws GadgetException;
 
   /**
    * Rewrites an {@code HttpResponse} object with the given request as context,
