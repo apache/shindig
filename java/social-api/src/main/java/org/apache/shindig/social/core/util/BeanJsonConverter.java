@@ -42,6 +42,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -53,8 +54,13 @@ public class BeanJsonConverter implements BeanConverter {
 
   private static final Object[] EMPTY_OBJECT = {};
   private static final Set<String> EXCLUDED_FIELDS = Sets.newHashSet("class", "declaringclass");
-  private static final Pattern GETTER = Pattern.compile("^get([a-zA-Z]+)$");
-  private static final Pattern SETTER = Pattern.compile("^set([a-zA-Z]+)$");
+  private static final String GETTER_PREFIX  = "get";
+  private static final String SETTER_PREFIX = "set";
+
+  // Only compute the filtered getters/setters once per-class
+  private static final ConcurrentHashMap<Class,List<MethodPair>> GETTER_METHODS = Maps.newConcurrentHashMap();
+  private static final ConcurrentHashMap<Class,List<MethodPair>> SETTER_METHODS = Maps.newConcurrentHashMap();
+
   private Injector injector;
 
   @Inject
@@ -134,7 +140,13 @@ public class BeanJsonConverter implements BeanConverter {
    * @return A JSONObject representing this pojo
    */
   private JSONObject convertMethodsToJson(Object pojo) {
-    List<MethodPair> availableGetters = getMatchingMethods(pojo, GETTER);
+    List<MethodPair> availableGetters;
+
+    availableGetters = GETTER_METHODS.get(pojo.getClass());
+    if (availableGetters == null) {
+      availableGetters = getMatchingMethods(pojo, GETTER_PREFIX);
+      GETTER_METHODS.putIfAbsent(pojo.getClass(), availableGetters);
+    }
 
     JSONObject toReturn = new JSONObject();
     for (MethodPair getter : availableGetters) {
@@ -168,18 +180,21 @@ public class BeanJsonConverter implements BeanConverter {
     }
   }
 
-  private List<MethodPair> getMatchingMethods(Object pojo, Pattern pattern) {
-    List<MethodPair> availableGetters = Lists.newArrayList();
 
+  private List<MethodPair> getMatchingMethods(Object pojo, String prefix) {
+
+    List<MethodPair> availableGetters = Lists.newArrayList();
     Method[] methods = pojo.getClass().getMethods();
     for (Method method : methods) {
-      Matcher matcher = pattern.matcher(method.getName());
-      if (!matcher.matches()) {
+      String name = method.getName();
+      if (!method.getName().startsWith(prefix)) {
         continue;
       }
+      int prefixlen = prefix.length();
 
-      String name = matcher.group();
-      String fieldName = name.substring(3, 4).toLowerCase() + name.substring(4);
+      String fieldName = name.substring(prefixlen, prefixlen+1).toLowerCase() +
+          name.substring(prefixlen + 1);
+      
       if (EXCLUDED_FIELDS.contains(fieldName.toLowerCase())) {
         continue;
       }
@@ -234,7 +249,13 @@ public class BeanJsonConverter implements BeanConverter {
 
     } else {
       JSONObject jsonObject = new JSONObject(json);
-      List<MethodPair> methods = getMatchingMethods(pojo, SETTER);
+      List<MethodPair> methods;
+      methods = SETTER_METHODS.get(pojo.getClass());
+      if (methods == null) {
+        methods = getMatchingMethods(pojo, SETTER_PREFIX);
+        SETTER_METHODS.putIfAbsent(pojo.getClass(), methods);
+      }
+
       for (MethodPair setter : methods) {
         if (jsonObject.has(setter.fieldName)) {
           callSetterWithValue(pojo, setter.method, jsonObject, setter.fieldName);
