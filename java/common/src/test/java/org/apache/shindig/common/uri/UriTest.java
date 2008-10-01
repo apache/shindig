@@ -18,8 +18,10 @@
 package org.apache.shindig.common.uri;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+
 import org.junit.Test;
 
 import java.net.URI;
@@ -149,6 +151,66 @@ public class UriTest {
   }
 
   @Test
+  public void resolveFragment() throws Exception {
+    Uri base = Uri.parse("http://example.org/foo/bar/baz?blah=blah#boo");
+    Uri other = Uri.parse("#bar");
+
+    assertEquals("http://example.org/foo/bar/baz?blah=blah#bar", base.resolve(other).toString());
+  }
+
+  @Test
+  public void resolveQuery() throws Exception {
+    Uri base = Uri.parse("http://example.org/foo/bar/baz?blah=blah#boo");
+    Uri other = Uri.parse("?hello=world");
+
+    assertEquals("http://example.org/foo/bar/?hello=world", base.resolve(other).toString());
+  }
+
+  @Test
+  public void resolvePathRelative() throws Exception {
+    Uri base = Uri.parse("http://example.org/foo/bar/baz?blah=blah#boo");
+    Uri other = Uri.parse("wee");
+
+    assertEquals("http://example.org/foo/bar/wee", base.resolve(other).toString());
+  }
+
+  @Test
+  public void resolvePathAbsolute() throws Exception {
+    Uri base = Uri.parse("http://example.org/foo/bar/baz?blah=blah#boo");
+    Uri other = Uri.parse("/blah");
+
+    assertEquals("http://example.org/blah", base.resolve(other).toString());
+  }
+
+  @Test
+  public void resolveAuthority() throws Exception {
+    Uri base = Uri.parse("https://example.org/foo/bar/baz?blah=blah#boo");
+    Uri other = Uri.parse("//example.com/blah");
+
+    assertEquals("https://example.com/blah", base.resolve(other).toString());
+  }
+
+  @Test
+  public void resolveAbsolute() throws Exception {
+    Uri base = Uri.parse("http://example.org/foo/bar/baz?blah=blah#boo");
+    Uri other = Uri.parse("http://www.ietf.org/rfc/rfc2396.txt");
+
+    assertEquals("http://www.ietf.org/rfc/rfc2396.txt", base.resolve(other).toString());
+  }
+
+  @Test
+  public void absoluteUrlIsAbsolute() {
+    assertTrue("Url with scheme not reported absolute.",
+        Uri.parse("http://example.org/foo").isAbsolute());
+  }
+
+  @Test
+  public void relativeUrlIsNotAbsolute() {
+    assertFalse("Url without scheme reported absolute.",
+        Uri.parse("//example.org/foo").isAbsolute());
+  }
+
+  @Test
   public void equalsAndHashCodeOk() {
     Uri uri = Uri.parse("http://example.org/foo/bar/baz?blah=blah#boo");
     Uri uri2 = new UriBuilder()
@@ -160,7 +222,7 @@ public class UriTest {
         .toUri();
 
     assertEquals(uri, uri2);
-    assertEquals(uri2, uri);    
+    assertEquals(uri2, uri);
 
     assertTrue(uri.hashCode() == uri2.hashCode());
   }

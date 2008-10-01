@@ -104,7 +104,31 @@ public final class Uri {
    * @return a java.net.URI equal to this Uri.
    */
   public URI toJavaUri() {
-    return URI.create(toString());
+    try {
+      return new URI(scheme, authority, path, query, fragment);
+    } catch (URISyntaxException e) {
+      // Shouldn't ever happen.
+      throw new IllegalArgumentException(e);
+    }
+  }
+
+  /**
+   * Resolves a given url relative to this url. Resolution rules are the same as for
+   * {@code java.net.URI.resolve(URI)}
+   *
+   * @param other The url to resolve against.
+   * @return The new url.
+   */
+  public Uri resolve(Uri other) {
+    // TODO: We can probably make this more efficient by implementing resolve ourselves.
+    return fromJavaUri(toJavaUri().resolve(other.toJavaUri()));
+  }
+
+  /**
+   * @return True if the Uri is absolute.
+   */
+  public boolean isAbsolute() {
+    return scheme != null;
   }
 
   /**
@@ -146,7 +170,7 @@ public final class Uri {
    * @return All query parameters with the given name.
    */
   public Collection<String> getQueryParameters(String name) {
-    return queryParameters.get(name);    
+    return queryParameters.get(name);
   }
 
   /**
