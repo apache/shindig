@@ -39,12 +39,12 @@ import java.util.logging.Logger;
 @Singleton
 public class BasicGadgetSpecFactory implements GadgetSpecFactory {
   static final String RAW_GADGETSPEC_XML_PARAM_NAME = "rawxml";
-  static final URI RAW_GADGET_URI = URI.create("http://localhost/raw.xml");
+  static final Uri RAW_GADGET_URI = Uri.parse("http://localhost/raw.xml");
 
   static final Logger logger = Logger.getLogger(BasicGadgetSpecFactory.class.getName());
 
   private final HttpFetcher fetcher;
-  private final TtlCache<URI, GadgetSpec> ttlCache;
+  private final TtlCache<Uri, GadgetSpec> ttlCache;
 
    @Inject
   public BasicGadgetSpecFactory(HttpFetcher fetcher,
@@ -53,7 +53,7 @@ public class BasicGadgetSpecFactory implements GadgetSpecFactory {
                                 @Named("shindig.gadget-spec.cache.minTTL") long minTtl,
                                 @Named("shindig.gadget-spec.cache.maxTTL") long maxTtl) {
     this.fetcher = fetcher;
-    this.ttlCache = new TtlCache<URI, GadgetSpec>(cacheProvider, capacity, minTtl, maxTtl);
+    this.ttlCache = new TtlCache<Uri, GadgetSpec>(cacheProvider, capacity, minTtl, maxTtl);
   }
 
   public GadgetSpec getGadgetSpec(GadgetContext context) throws GadgetException {
@@ -71,24 +71,25 @@ public class BasicGadgetSpecFactory implements GadgetSpecFactory {
    * Retrieves a gadget specification from the cache or from the Internet.
    */
   public GadgetSpec getGadgetSpec(URI gadgetUri, boolean ignoreCache) throws GadgetException {
+    Uri uri = Uri.fromJavaUri(gadgetUri);
     if (ignoreCache) {
-      return fetchObjectAndCache(gadgetUri, ignoreCache);
+      return fetchObjectAndCache(uri, ignoreCache);
     }
 
     TtlCache.CachedObject<GadgetSpec> cached = null;
     synchronized(ttlCache) {
-      cached = ttlCache.getElementWithExpiration(gadgetUri);
+      cached = ttlCache.getElementWithExpiration(uri);
     }
 
     if (cached.obj == null || cached.isExpired) {
       try {
-        return fetchObjectAndCache(gadgetUri, ignoreCache);
+        return fetchObjectAndCache(uri, ignoreCache);
       } catch (GadgetException e) {
         // Failed to re-fetch raw object. Use cached object if it exists.
         if (cached.obj == null) {
           throw e;
         } else {
-          logger.info("GadgetSpec fetch failed for " + gadgetUri + " -  using cached.");
+          logger.info("GadgetSpec fetch failed for " + uri + " -  using cached.");
         }
       }
     }
@@ -100,8 +101,8 @@ public class BasicGadgetSpecFactory implements GadgetSpecFactory {
    * Retrieves a gadget specification from the Internet, processes its views and
    * adds it to the cache.
    */
-  private GadgetSpec fetchObjectAndCache(URI url, boolean ignoreCache) throws GadgetException {
-    HttpRequest request = new HttpRequest(Uri.fromJavaUri(url)).setIgnoreCache(ignoreCache);
+  private GadgetSpec fetchObjectAndCache(Uri url, boolean ignoreCache) throws GadgetException {
+    HttpRequest request = new HttpRequest(url).setIgnoreCache(ignoreCache);
     HttpResponse response = fetcher.fetch(request);
     if (response.getHttpStatusCode() != HttpResponse.SC_OK) {
       throw new GadgetException(GadgetException.Code.FAILED_TO_RETRIEVE_CONTENT,

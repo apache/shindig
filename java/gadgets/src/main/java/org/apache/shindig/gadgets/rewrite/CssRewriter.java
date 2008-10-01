@@ -72,8 +72,7 @@ public class CssRewriter {
     }
   }
 
-  private static String rewriteLink(Token<CssTokenType> token,
-      URI base, LinkRewriter rewriter) {
+  private static String rewriteLink(Token<CssTokenType> token, URI base, LinkRewriter rewriter) {
     Matcher matcher = urlMatcher.matcher(token.text);
     if (!matcher.find()) return token.text;
     return "url(\"" + rewriter.rewrite(matcher.group(2).trim(), base) + "\")";

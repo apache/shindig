@@ -29,6 +29,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 import org.apache.shindig.common.ContainerConfig;
+import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.gadgets.Gadget;
 import org.apache.shindig.gadgets.GadgetContext;
 import org.apache.shindig.gadgets.GadgetException;
@@ -58,7 +59,6 @@ import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.net.URI;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
@@ -73,6 +73,7 @@ import java.util.regex.Pattern;
  * Tests for RenderingContentRewriter.
  */
 public class RenderingContentRewriterTest {
+  private static final Uri SPEC_URL = Uri.parse("http://example.org/gadget.xml");
   private static final String BODY_CONTENT = "Some body content";
   private final IMocksControl control = EasyMock.createNiceControl();
   private final FakeMessageBundleFactory messageBundleFactory = new FakeMessageBundleFactory();
@@ -90,7 +91,7 @@ public class RenderingContentRewriterTest {
   }
 
   private Gadget makeGadgetWithSpec(String gadgetXml) throws GadgetException {
-    GadgetSpec spec = new GadgetSpec(URI.create("#"), gadgetXml);
+    GadgetSpec spec = new GadgetSpec(SPEC_URL, gadgetXml);
     return new Gadget()
         .setContext(new GadgetContext())
         .setPreloads(new NullPreloads())

@@ -19,15 +19,13 @@
 
 package org.apache.shindig.gadgets.variables;
 
+import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.gadgets.UserPrefs;
 import org.apache.shindig.gadgets.spec.GadgetSpec;
-import org.apache.shindig.gadgets.variables.Substitutions;
-import org.apache.shindig.gadgets.variables.UserPrefSubstituter;
 import org.apache.shindig.gadgets.variables.Substitutions.Type;
 
 import junit.framework.TestCase;
 
-import java.net.URI;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -57,7 +55,7 @@ public class UserPrefSubstituterTest extends TestCase {
   @Override
   public void setUp() throws Exception {
     super.setUp();
-    spec = new GadgetSpec(URI.create(""), DEFAULT_XML);
+    spec = new GadgetSpec(Uri.parse("#"), DEFAULT_XML);
   }
 
   public void testSubstitutions() throws Exception {

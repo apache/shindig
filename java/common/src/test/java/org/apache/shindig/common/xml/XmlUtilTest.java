@@ -23,11 +23,11 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
+import org.apache.shindig.common.uri.Uri;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.w3c.dom.Element;
-
-import java.net.URI;
 
 /**
  * Tests for XmlUtil
@@ -40,13 +40,13 @@ public class XmlUtilTest {
   private final static String BOOL_TRUE_ATTR = "bool-true";
   private final static String BOOL_FALSE_ATTR = "bool-false";
   private final static String URI_ATTR = "uri";
-  private final static URI URI_VALUE = URI.create("http://example.org/file");
+  private final static Uri URI_VALUE = Uri.parse("http://example.org/file");
   private final static String URI_MALFORMED_ATTR = "uri-malformed";
   private final static String FAKE_ATTR = "fake";
   private final static String HTTPS_URI_ATTR = "httpsuri";
-  private final static URI HTTPS_URI_VALUE = URI.create("https://example.org");
+  private final static Uri HTTPS_URI_VALUE = Uri.parse("https://example.org");
   private final static String FTP_URI_ATTR = "ftpuri";
-  private final static URI FTP_URI_VALUE = URI.create("ftp://ftp.example.org");
+  private final static Uri FTP_URI_VALUE = Uri.parse("ftp://ftp.example.org");
 
   private final static String XML
       = "<Element " +
@@ -103,7 +103,7 @@ public class XmlUtilTest {
         XmlUtil.getUriAttribute(node, FAKE_ATTR));
     assertEquals(FTP_URI_VALUE, XmlUtil.getUriAttribute(node, FTP_URI_ATTR));
   }
-  
+
   @Test
   public void testHttpUriAttribute() {
     assertEquals(HTTPS_URI_VALUE, XmlUtil.getHttpUriAttribute(node, HTTPS_URI_ATTR));

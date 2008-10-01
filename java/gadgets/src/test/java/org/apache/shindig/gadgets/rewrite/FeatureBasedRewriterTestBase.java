@@ -20,15 +20,16 @@ package org.apache.shindig.gadgets.rewrite;
 import static org.easymock.EasyMock.expect;
 import static org.easymock.classextension.EasyMock.replay;
 
+import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.gadgets.Gadget;
 import org.apache.shindig.gadgets.GadgetContext;
 import org.apache.shindig.gadgets.parse.GadgetHtmlParser;
 import org.apache.shindig.gadgets.parse.ParsedHtmlNode;
 import org.apache.shindig.gadgets.spec.GadgetSpec;
 
-import org.easymock.classextension.EasyMock;
-
 import junit.framework.TestCase;
+
+import org.easymock.classextension.EasyMock;
 
 import java.net.URI;
 import java.util.Arrays;
@@ -75,7 +76,7 @@ public abstract class FeatureBasedRewriterTestBase extends TestCase {
     MutableContent mc = new MutableContent(parser);
     mc.setContent(s);
 
-    GadgetSpec spec = new GadgetSpec(baseUri,
+    GadgetSpec spec = new GadgetSpec(Uri.fromJavaUri(baseUri),
         "<Module><ModulePrefs title=''/><Content><![CDATA[" + s + "]]></Content></Module>");
 
     GadgetContext context = new GadgetContext() {

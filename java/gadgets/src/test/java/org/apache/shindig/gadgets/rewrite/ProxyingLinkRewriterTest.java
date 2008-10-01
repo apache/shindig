@@ -23,11 +23,11 @@ import com.google.common.collect.Sets;
  * Test of proxying rewriter
  */
 public class ProxyingLinkRewriterTest extends BaseRewriterTestCase {
-  
+
   private String rewrite(String uri) {
-    return defaultRewriter.rewrite(uri, SPEC_URL);
+    return defaultRewriter.rewrite(uri, SPEC_URL.toJavaUri());
   }
-  
+
   public void testAbsoluteRewrite() {
     String val = "http://a.b.com";
     assertEquals("http://www.test.com/proxy?url=http%3A%2F%2Fa.b.com&gadget=http%3A%2F%2Fexample.org%2Fg.xml&fp=-840722081",
@@ -57,12 +57,12 @@ public class ProxyingLinkRewriterTest extends BaseRewriterTestCase {
         getSpecWithoutRewrite(), ".*", "", "86400",
         Sets.newHashSet("embed", "img", "script", "link"));
     ProxyingLinkRewriter rewriter = new ProxyingLinkRewriter(
-      SPEC_URL,
+      SPEC_URL.toJavaUri(),
       contentRewriterFeature,
       "http://www.test.com/proxy?url=");
     String val = " test.gif ";
     assertEquals("http://www.test.com/proxy?url=http%3A%2F%2Fexample.org%2Ftest.gif&gadget=http%3A%2F%2Fexample.org%2Fg.xml&fp=-840722081&refresh=86400",
-        rewriter.rewrite(val, SPEC_URL));
+        rewriter.rewrite(val, SPEC_URL.toJavaUri()));
   }
 
   public void testInvalidCharRewrite() {

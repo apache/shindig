@@ -18,6 +18,8 @@
 
 package org.apache.shindig.common.xml;
 
+import org.apache.shindig.common.uri.Uri;
+
 import com.google.common.collect.Lists;
 
 import org.w3c.dom.Element;
@@ -30,8 +32,6 @@ import org.xml.sax.SAXParseException;
 
 import java.io.IOException;
 import java.io.StringReader;
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -147,12 +147,12 @@ public class XmlUtil {
    * @return The parsed uri, or def if the attribute doesn't exist or can not
    *     be parsed as a URI.
    */
-  public static URI getUriAttribute(Node node, String attr, URI def) {
+  public static Uri getUriAttribute(Node node, String attr, Uri def) {
     String uri = getAttribute(node, attr);
     if (uri != null) {
       try {
-        return new URI(uri);
-      } catch (URISyntaxException e) {
+        return Uri.parse(uri);
+      } catch (IllegalArgumentException e) {
         return def;
       }
     }
@@ -165,7 +165,7 @@ public class XmlUtil {
    * @param attr
    * @return The parsed uri, or null.
    */
-  public static URI getUriAttribute(Node node, String attr) {
+  public static Uri getUriAttribute(Node node, String attr) {
     return getUriAttribute(node, attr, null);
   }
 
@@ -178,8 +178,8 @@ public class XmlUtil {
    * @return the parsed uri, or def if the attribute is not a valid http or
    * https URI.
    */
-  public static URI getHttpUriAttribute(Node node, String attr, URI def) {
-    URI uri = getUriAttribute(node, attr, def);
+  public static Uri getHttpUriAttribute(Node node, String attr, Uri def) {
+    Uri uri = getUriAttribute(node, attr, def);
     if (uri == null) {
       return def;
     }
@@ -190,14 +190,13 @@ public class XmlUtil {
   }
 
   /**
-   * Retrieves an attribute as a URI, and verifies that the URI is an http
-   * or https URI.
+   * Retrieves an attribute as a URI, and verifies that the URI is an http or https URI.
    * @param node
    * @param attr
    * @return the parsed uri, or null if the attribute is not a valid http or
    * https URI.
    */
-  public static URI getHttpUriAttribute(Node node, String attr) {
+  public static Uri getHttpUriAttribute(Node node, String attr) {
     return getHttpUriAttribute(node, attr, null);
   }
 

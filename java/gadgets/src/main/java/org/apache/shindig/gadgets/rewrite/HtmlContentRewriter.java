@@ -18,10 +18,12 @@
  */
 package org.apache.shindig.gadgets.rewrite;
 
+import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.gadgets.Gadget;
 import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.http.HttpResponse;
 import org.apache.shindig.gadgets.parse.GadgetHtmlNode;
+import org.apache.shindig.gadgets.spec.View;
 
 import java.net.URI;
 
@@ -53,7 +55,12 @@ public abstract class HtmlContentRewriter implements ContentRewriter {
   }
 
   public RewriterResults rewrite(Gadget gadget, MutableContent content) {
-    return rewriteHtml(content.getParseTree(), gadget.getSpec().getUrl());
+    Uri base = gadget.getSpec().getUrl();
+    View view = gadget.getCurrentView();
+    if (view != null && view.getHref() != null) {
+      base = view.getHref();
+    }
+    return rewriteHtml(content.getParseTree(), base.toJavaUri());
   }
 
   private RewriterResults rewriteHtml(GadgetHtmlNode root, URI baseUri) {

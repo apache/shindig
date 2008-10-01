@@ -17,21 +17,22 @@
  */
 package org.apache.shindig.gadgets.rewrite;
 
-import com.google.common.collect.Sets;
-
-import org.apache.commons.lang.StringUtils;
+import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.gadgets.EasyMockTestCase;
 import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.spec.GadgetSpec;
 
-import java.net.URI;
+import com.google.common.collect.Sets;
+
+import org.apache.commons.lang.StringUtils;
+
 import java.util.Set;
 
 /**
  * Base class for testing content rewriting functionality
  */
 public abstract class BaseRewriterTestCase extends EasyMockTestCase {
-  static final URI SPEC_URL = URI.create("http://example.org/g.xml");
+  static final Uri SPEC_URL = Uri.parse("http://example.org/g.xml");
   protected Set<String> tags;
   protected ContentRewriterFeature contentRewriterFeature;
   protected LinkRewriter defaultRewriter;
@@ -43,7 +44,7 @@ public abstract class BaseRewriterTestCase extends EasyMockTestCase {
     contentRewriterFeature = new ContentRewriterFeature(getSpecWithoutRewrite(), ".*", "", "HTTP",
         tags);
     defaultRewriter = new ProxyingLinkRewriter(
-      SPEC_URL,
+      SPEC_URL.toJavaUri(),
       contentRewriterFeature,
       "http://www.test.com/proxy?url=");
   }

@@ -17,6 +17,7 @@
  */
 package org.apache.shindig.gadgets.spec;
 
+import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.common.xml.XmlUtil;
 import org.apache.shindig.gadgets.AuthType;
 import org.apache.shindig.gadgets.variables.Substitutions;
@@ -29,7 +30,6 @@ import org.w3c.dom.Element;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 
-import java.net.URI;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Map;
@@ -43,13 +43,16 @@ public class Preload implements RequestAuthenticationInfo {
   private static final Set<String> KNOWN_ATTRIBUTES
       = ImmutableSet.of("views", "href", "authz", "sign_owner", "sign_viewer");
 
+  private final Uri base;
+
   /**
    * Creates a new Preload from an xml node.
    *
    * @param preload The Preload to create
    * @throws SpecParserException When the href is not specified
    */
-  public Preload(Element preload) throws SpecParserException {
+  public Preload(Element preload, Uri base) throws SpecParserException {
+    this.base = base;
     href = XmlUtil.getUriAttribute(preload, "href");
     if (href == null) {
       throw new SpecParserException("Preload/@href is missing or invalid.");
@@ -81,11 +84,12 @@ public class Preload implements RequestAuthenticationInfo {
   }
 
   private Preload(Preload preload, Substitutions substituter) {
+    base = preload.base;
     views = preload.views;
     auth = preload.auth;
     signOwner = preload.signOwner;
     signViewer = preload.signViewer;
-    href = substituter.substituteUri(null, preload.href);
+    href = base.resolve(substituter.substituteUri(null, preload.href));
     Map<String, String> attributes = Maps.newHashMap();
     for (Map.Entry<String, String> entry : preload.attributes.entrySet()) {
       attributes.put(entry.getKey(), substituter.substituteString(null, entry.getValue()));
@@ -96,8 +100,8 @@ public class Preload implements RequestAuthenticationInfo {
   /**
    * Preload@href
    */
-  private final URI href;
-  public URI getHref() {
+  private final Uri href;
+  public Uri getHref() {
     return href;
   }
 

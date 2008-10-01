@@ -27,11 +27,12 @@ import org.apache.shindig.gadgets.http.HttpResponse;
 import org.apache.shindig.gadgets.oauth.OAuthArguments;
 import org.apache.shindig.gadgets.spec.GadgetSpec;
 import org.apache.shindig.gadgets.spec.Preload;
-import org.json.JSONException;
-import org.json.JSONObject;
 
 import com.google.common.collect.Maps;
 import com.google.inject.Inject;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.util.Map;
 import java.util.concurrent.Callable;
@@ -73,7 +74,7 @@ public class HttpPreloader implements Preloader {
     public PreloadedData call() throws Exception {
       // TODO: This should be extracted into a common helper that takes any
       // org.apache.shindig.gadgets.spec.RequestAuthenticationInfo.
-      HttpRequest request = new HttpRequest(Uri.fromJavaUri(preload.getHref()))
+      HttpRequest request = new HttpRequest(preload.getHref())
           .setSecurityToken(context.getToken())
           .setOAuthArguments(new OAuthArguments(preload))
           .setAuthType(preload.getAuthType())

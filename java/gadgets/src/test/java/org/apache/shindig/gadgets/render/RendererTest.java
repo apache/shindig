@@ -40,13 +40,13 @@ import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.net.URI;
 import java.util.Arrays;
 
 /**
  * Tests for Renderer.
  */
 public class RendererTest {
+  private static final Uri SPEC_URL = Uri.parse("http://example.org/gadget.xml");
   private static final Uri TYPE_URL_HREF = Uri.parse("http://example.org/gadget.php");
   private static final String BASIC_HTML_CONTENT = "Hello, World!";
   private static final String GADGET =
@@ -132,7 +132,7 @@ public class RendererTest {
     assertEquals(RenderingResults.Status.ERROR, results.getStatus());
     assertNotNull("No error message provided for bad parent.", results.getErrorMessage());
   }
-  
+
   @Test
   public void handlesNoCurrentViewGracefully() throws Exception {
     RenderingResults results = renderer.render(makeContext("bad-view-name"));
@@ -198,7 +198,7 @@ public class RendererTest {
       }
 
       try {
-        GadgetSpec spec = new GadgetSpec(URI.create("#"), GADGET);
+        GadgetSpec spec = new GadgetSpec(SPEC_URL, GADGET);
         View view = spec.getView(context.getView());
         return new Gadget()
             .setContext(context)

@@ -31,11 +31,11 @@ import com.google.common.collect.Lists;
 
 import org.junit.Test;
 
-import java.net.URI;
 import java.util.Arrays;
 import java.util.List;
 
 public class DefaultContentRewriterRegistryTest {
+  private static final Uri SPEC_URL = Uri.parse("http://example.org/gadget.xml");
   private final List<CaptureRewriter> rewriters
       = Arrays.asList(new CaptureRewriter(), new CaptureRewriter());
   private final List<ContentRewriter> contentRewriters
@@ -47,7 +47,7 @@ public class DefaultContentRewriterRegistryTest {
   public void rewriteGadget() throws Exception {
     String body = "Hello, world";
     String xml = "<Module><ModulePrefs title=''/><Content>" + body + "</Content></Module>";
-    GadgetSpec spec = new GadgetSpec(URI.create("#"), xml);
+    GadgetSpec spec = new GadgetSpec(SPEC_URL, xml);
     GadgetContext context = new GadgetContext();
     Gadget gadget = new Gadget()
         .setContext(context)
@@ -64,7 +64,7 @@ public class DefaultContentRewriterRegistryTest {
   @Test
   public void rewriteHttpResponse() throws Exception {
     String body = "Hello, world";
-    HttpRequest request = new HttpRequest(Uri.parse("#"));
+    HttpRequest request = new HttpRequest(SPEC_URL);
     HttpResponse response = new HttpResponse(body);
 
     HttpResponse rewritten = registry.rewriteHttpResponse(request, response);

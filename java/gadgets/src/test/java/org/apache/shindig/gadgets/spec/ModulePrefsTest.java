@@ -24,16 +24,16 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
+import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.common.xml.XmlUtil;
 import org.apache.shindig.gadgets.variables.Substitutions;
 
 import org.junit.Test;
 
-import java.net.URI;
 import java.util.Locale;
 
 public class ModulePrefsTest {
-  private static final URI SPEC_URL = URI.create("http://example.org/g.xml");
+  private static final Uri SPEC_URL = Uri.parse("http://example.org/g.xml");
   private static final String FULL_XML
       = "<ModulePrefs" +
         " title='title'" +
@@ -66,10 +66,10 @@ public class ModulePrefsTest {
         "  <Link rel='link' href='http://example.org/link'/>" +
         "  <OAuth>" +
         "    <Service name='serviceOne'>" +
-        "      <Request url='http://www.example.com/request'" + 
+        "      <Request url='http://www.example.com/request'" +
         "          method='GET' param_location='auth-header' />" +
         "      <Authorization url='http://www.example.com/authorize'/>" +
-        "      <Access url='http://www.example.com/access' method='GET'" + 
+        "      <Access url='http://www.example.com/access' method='GET'" +
         "          param_location='auth-header' />" +
         "    </Service>" +
         "  </OAuth>" +
@@ -77,12 +77,12 @@ public class ModulePrefsTest {
 
   private void doAsserts(ModulePrefs prefs) {
     assertEquals("title", prefs.getTitle());
-    assertEquals("title_url", prefs.getTitleUrl().toString());
+    assertEquals(SPEC_URL.resolve(Uri.parse("title_url")), prefs.getTitleUrl());
     assertEquals("description", prefs.getDescription());
     assertEquals("author", prefs.getAuthor());
     assertEquals("author_email", prefs.getAuthorEmail());
-    assertEquals("screenshot", prefs.getScreenshot().toString());
-    assertEquals("thumbnail", prefs.getThumbnail().toString());
+    assertEquals(SPEC_URL.resolve(Uri.parse("screenshot")), prefs.getScreenshot());
+    assertEquals(SPEC_URL.resolve(Uri.parse("thumbnail")), prefs.getThumbnail());
     assertEquals("directory_title", prefs.getDirectoryTitle());
     assertEquals(1, prefs.getWidth());
     assertEquals(2, prefs.getHeight());
@@ -92,7 +92,8 @@ public class ModulePrefsTest {
     assertEquals("category2", prefs.getCategories().get(1));
     assertEquals("author_affiliation", prefs.getAuthorAffiliation());
     assertEquals("author_location", prefs.getAuthorLocation());
-    assertEquals("author_photo", prefs.getAuthorPhoto());
+    assertEquals(SPEC_URL.resolve(Uri.parse("author_photo")), prefs.getAuthorPhoto());
+    assertEquals(SPEC_URL.resolve(Uri.parse("author_link")), prefs.getAuthorLink());
     assertEquals("author_aboutme", prefs.getAuthorAboutme());
     assertEquals("author_quote", prefs.getAuthorQuote());
     assertEquals(true, prefs.getShowStats());
@@ -109,15 +110,14 @@ public class ModulePrefsTest {
 
     assertEquals(1, prefs.getLocales().size());
 
-    assertEquals(URI.create("http://example.org/link"),
-                 prefs.getLinks().get("link").getHref());
-    
+    assertEquals(Uri.parse("http://example.org/link"), prefs.getLinks().get("link").getHref());
+
     OAuthService oauth = prefs.getOAuthSpec().getServices().get("serviceOne");
-    assertEquals(URI.create("http://www.example.com/request"), oauth.getRequestUrl().url);
+    assertEquals(Uri.parse("http://www.example.com/request"), oauth.getRequestUrl().url);
     assertEquals(OAuthService.Method.GET, oauth.getRequestUrl().method);
     assertEquals(OAuthService.Method.GET, oauth.getAccessUrl().method);
     assertEquals(OAuthService.Location.HEADER, oauth.getAccessUrl().location);
-    assertEquals(URI.create("http://www.example.com/authorize"), oauth.getAuthorizationUrl());
+    assertEquals(Uri.parse("http://www.example.com/authorize"), oauth.getAuthorizationUrl());
   }
 
   @Test
@@ -154,17 +154,18 @@ public class ModulePrefsTest {
   public void getLinks() throws Exception {
     String link1Rel = "foo";
     String link2Rel = "bar";
-    URI link1Href = URI.create("http://example.org/foo");
-    URI link2Href = URI.create("http://example.org/bar");
+    Uri link1Href = Uri.parse("http://example.org/foo");
+    Uri link2Href = Uri.parse("/bar");
     String xml = "<ModulePrefs title='links'>" +
                  "  <Link rel='" + link1Rel + "' href='" + link1Href + "'/>" +
                  "  <Link rel='" + link2Rel + "' href='" + link2Href + "'/>" +
                  "</ModulePrefs>";
 
-    ModulePrefs prefs = new ModulePrefs(XmlUtil.parse(xml), SPEC_URL);
+    ModulePrefs prefs = new ModulePrefs(XmlUtil.parse(xml), SPEC_URL)
+        .substitute(new Substitutions());
 
     assertEquals(link1Href, prefs.getLinks().get(link1Rel).getHref());
-    assertEquals(link2Href, prefs.getLinks().get(link2Rel).getHref());
+    assertEquals(SPEC_URL.resolve(link2Href), prefs.getLinks().get(link2Rel).getHref());
   }
 
   @Test

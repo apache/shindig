@@ -21,14 +21,13 @@ package org.apache.shindig.gadgets.spec;
 
 import static org.junit.Assert.assertEquals;
 
+import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.common.xml.XmlUtil;
 
 import org.junit.Test;
 
-import java.net.URI;
-
 public class LocaleSpecTest {
-  private static final URI SPEC_URL = URI.create("http://example.org/foo.xml");
+  private static final Uri SPEC_URL = Uri.parse("http://example.org/foo.xml");
 
   @Test
   public void normalLocale() throws Exception {
@@ -42,16 +41,14 @@ public class LocaleSpecTest {
     assertEquals("en", locale.getLanguage());
     assertEquals("US", locale.getCountry());
     assertEquals("rtl", locale.getLanguageDirection());
-    assertEquals("http://example.org/msgs.xml",
-        locale.getMessages().toString());
+    assertEquals("http://example.org/msgs.xml", locale.getMessages().toString());
   }
 
   @Test
   public void relativeLocale() throws Exception {
     String xml = "<Locale messages=\"/test/msgs.xml\"/>";
     LocaleSpec locale = new LocaleSpec(XmlUtil.parse(xml), SPEC_URL);
-    assertEquals("http://example.org/test/msgs.xml",
-        locale.getMessages().toString());
+    assertEquals("http://example.org/test/msgs.xml", locale.getMessages().toString());
   }
 
   @Test

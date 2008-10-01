@@ -17,11 +17,6 @@
  */
 package org.apache.shindig.gadgets.oauth;
 
-import com.google.inject.Inject;
-
-import net.oauth.OAuthServiceProvider;
-
-import org.apache.commons.lang.StringUtils;
 import org.apache.shindig.auth.SecurityToken;
 import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.GadgetSpecFactory;
@@ -34,6 +29,12 @@ import org.apache.shindig.gadgets.spec.OAuthService;
 import org.apache.shindig.gadgets.spec.OAuthSpec;
 import org.apache.shindig.gadgets.spec.OAuthService.Location;
 import org.apache.shindig.gadgets.spec.OAuthService.Method;
+
+import com.google.inject.Inject;
+
+import net.oauth.OAuthServiceProvider;
+
+import org.apache.commons.lang.StringUtils;
 
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -64,19 +65,19 @@ public class GadgetOAuthTokenStore {
   /**
    * Retrieve an AccessorInfo and OAuthAccessor that are ready for signing OAuthMessages.  To do
    * this, we need to figure out:
-   * 
+   *
    * - what consumer key/secret to use for signing.
-   * - if an access token should be used for the request, and if so what it is.   *   
+   * - if an access token should be used for the request, and if so what it is.   *
    * - the OAuth request/authorization/access URLs.
    * - what HTTP method to use for request token and access token requests
    * - where the OAuth parameters are located.
-   * 
+   *
    * Note that most of that work gets skipped for signed fetch, we just look up the consumer key
    * and secret for that.  Signed fetch always sticks the parameters in the query string.
    */
   public AccessorInfo getOAuthAccessor(SecurityToken securityToken,
       OAuthArguments arguments, OAuthClientState clientState) throws GadgetException {
-    
+
     AccessorInfoBuilder accessorBuilder = new AccessorInfoBuilder();
 
     // Does the gadget spec tell us any details about the service provider, like where to put the
@@ -88,7 +89,7 @@ public class GadgetOAuthTokenStore {
       // This is plain old signed fetch.
       accessorBuilder.setParameterLocation(AccessorInfo.OAuthParamLocation.URI_QUERY);
     }
-    
+
     // What consumer key/secret should we use?
     ConsumerInfo consumer = store.getConsumerKeyAndSecret(
         securityToken, arguments.getServiceName(), provider);
@@ -98,13 +99,13 @@ public class GadgetOAuthTokenStore {
     // if owner == viewer.
     if (arguments.mayUseToken()
         && securityToken.getOwnerId() != null
-        && securityToken.getViewerId().equals(securityToken.getOwnerId())) {  
+        && securityToken.getViewerId().equals(securityToken.getOwnerId())) {
       lookupToken(securityToken, consumer, arguments, clientState, accessorBuilder);
     }
-   
+
     return accessorBuilder.create();
   }
-  
+
   /**
    * Lookup information contained in the gadget spec.
    */
@@ -125,28 +126,28 @@ public class GadgetOAuthTokenStore {
     accessorBuilder.setParameterLocation(getStoreLocation(service.getRequestUrl().location));
     accessorBuilder.setMethod(getStoreMethod(service.getRequestUrl().method));
     OAuthServiceProvider provider = new OAuthServiceProvider(
-        service.getRequestUrl().url.toASCIIString(),
-        service.getAuthorizationUrl().toASCIIString(),
-        service.getAccessUrl().url.toASCIIString());
+        service.getRequestUrl().url.toJavaUri().toASCIIString(),
+        service.getAuthorizationUrl().toJavaUri().toASCIIString(),
+        service.getAccessUrl().url.toJavaUri().toASCIIString());
     return provider;
   }
-  
+
   /**
    * Figure out the OAuth token that should be used with this request.  We check for this in three
    * places.  In order of priority:
-   * 
+   *
    * 1) From information we cached on the client.
    *    We encrypt the token and cache on the client for performance.
-   *    
+   *
    * 2) From information we have in our persistent state.
    *    We persist the token server-side so we can look it up if necessary.
-   *    
+   *
    * 3) From information the gadget developer tells us to use (a preapproved request token.)
    *    Gadgets can be initialized with preapproved request tokens.  If the user tells the service
    *    provider they want to add a gadget to a gadget container site, the service provider can
    *    create a preapproved request token for that site and pass it to the gadget as a user
    *    preference.
-   * @throws GadgetException 
+   * @throws GadgetException
    */
   private void lookupToken(SecurityToken securityToken, ConsumerInfo consumerInfo,
       OAuthArguments arguments, OAuthClientState clientState, AccessorInfoBuilder accessorBuilder)
@@ -188,7 +189,7 @@ public class GadgetOAuthTokenStore {
     throw new GadgetException(GadgetException.Code.INTERNAL_SERVER_ERROR,
         "Unknown parameter location " + location);
   }
-  
+
   private HttpMethod getStoreMethod(Method method) throws GadgetException {
     switch(method) {
     case GET:
@@ -210,7 +211,7 @@ public class GadgetOAuthTokenStore {
       throw new UserVisibleOAuthException("could not fetch gadget spec, gadget URI invalid", e);
     }
   }
-  
+
   private GadgetException serviceNotFoundEx(SecurityToken securityToken, OAuthSpec oauthSpec,
       String serviceName) {
     StringBuilder message = new StringBuilder()
@@ -230,7 +231,7 @@ public class GadgetOAuthTokenStore {
         .append(" does not contain OAuth element.");
     return new UserVisibleOAuthException(message.toString());
   }
-  
+
   /**
    * Store an access token for the given user/gadget/service/token name
    */

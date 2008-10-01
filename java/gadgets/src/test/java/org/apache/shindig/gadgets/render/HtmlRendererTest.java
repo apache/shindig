@@ -71,7 +71,7 @@ public class HtmlRendererTest {
   private final HtmlRenderer renderer = new HtmlRenderer(fetcher, preloaderService, rewriter);
 
   private Gadget makeGadget(String content) throws GadgetException {
-    GadgetSpec spec = new GadgetSpec(URI.create("#"),
+    GadgetSpec spec = new GadgetSpec(SPEC_URL,
         "<Module><ModulePrefs title=''/><Content><![CDATA[" + content + "]]></Content></Module>");
 
     return new Gadget()
@@ -83,7 +83,7 @@ public class HtmlRendererTest {
   private Gadget makeHrefGadget(String authz) throws Exception {
     Gadget gadget = makeGadget("");
     String doc = "<Content href='" + PROXIED_HTML_HREF + "' authz='" + authz + "'/>";
-    View view = new View("proxied", Arrays.asList(XmlUtil.parse(doc)));
+    View view = new View("proxied", Arrays.asList(XmlUtil.parse(doc)), SPEC_URL);
     gadget.setCurrentView(view);
     return gadget;
   }

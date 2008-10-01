@@ -17,6 +17,7 @@
  */
 package org.apache.shindig.gadgets.spec;
 
+import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.common.xml.XmlUtil;
 import org.apache.shindig.gadgets.AuthType;
 import org.apache.shindig.gadgets.variables.Substitutions;
@@ -30,7 +31,6 @@ import org.w3c.dom.Element;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 
-import java.net.URI;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -45,17 +45,22 @@ public class View implements RequestAuthenticationInfo {
       "sign_owner", "sign_viwer"
   );
 
+  private final Uri base;
+
   /**
+   * @param name The name of this view.
    * @param elements List of all views, in order, that make up this view.
    *     An ordered list is required per the spec, since values must
    *     overwrite one another.
+   * @param base The base url to resolve href against.
    * @throws SpecParserException
    */
-  public View(String name, List<Element> elements) throws SpecParserException {
+  public View(String name, List<Element> elements, Uri base) throws SpecParserException {
     this.name = name;
+    this.base = base;
 
     boolean quirks = true;
-    URI href = null;
+    Uri href = null;
     String contentType = null;
     ContentType type = null;
     int preferredHeight = 0;
@@ -125,7 +130,8 @@ public class View implements RequestAuthenticationInfo {
     signViewer = view.signViewer;
 
     content = substituter.substituteString(null, view.content);
-    href = substituter.substituteUri(null, view.href);
+    base = view.base;
+    href = base.resolve(substituter.substituteUri(null, view.href));
     Map<String, String> attributes = Maps.newHashMap();
     for (Map.Entry<String, String> entry : view.attributes.entrySet()) {
       attributes.put(entry.getKey(), substituter.substituteString(null, entry.getValue()));
@@ -162,8 +168,8 @@ public class View implements RequestAuthenticationInfo {
    *
    * All substitutions
    */
-  private URI href;
-  public URI getHref() {
+  private Uri href;
+  public Uri getHref() {
     return href;
   }
 

@@ -19,18 +19,21 @@
 
 package org.apache.shindig.gadgets.spec;
 
-import com.google.common.collect.Maps;
-import org.apache.shindig.common.xml.XmlUtil;
 import static org.junit.Assert.assertEquals;
+
+import org.apache.shindig.common.uri.Uri;
+import org.apache.shindig.common.xml.XmlUtil;
+
+import com.google.common.collect.Maps;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.w3c.dom.Element;
 
-import java.net.URI;
 import java.util.Map;
 
 public class MessageBundleTest {
-  private static final URI BUNDLE_URL = URI.create("http://example.org/m.xml");
+  private static final Uri BUNDLE_URL = Uri.parse("http://example.org/m.xml");
   private static final String LOCALE
       = "<Locale lang='en' country='US' messages='" + BUNDLE_URL + "'/>";
   private static final String PARENT_LOCALE
@@ -58,7 +61,7 @@ public class MessageBundleTest {
 
   @Before
   public void setUp() throws Exception {
-    locale = new LocaleSpec(XmlUtil.parse(LOCALE), URI.create("http://example.org/gadget"));
+    locale = new LocaleSpec(XmlUtil.parse(LOCALE), Uri.parse("http://example.org/gadget"));
   }
 
   @Test

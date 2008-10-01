@@ -23,6 +23,7 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.fail;
 
 import org.apache.shindig.common.testing.FakeHttpServletRequest;
+import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.common.xml.XmlUtil;
 import org.apache.shindig.gadgets.AuthType;
 import org.apache.shindig.gadgets.GadgetException;
@@ -48,7 +49,7 @@ public class OAuthArgumentsTest {
     		"OAUTH_USE_TOKEN='never' " +
     		"/>";
 
-    Preload preload = new Preload(XmlUtil.parse(xml));
+    Preload preload = new Preload(XmlUtil.parse(xml), Uri.parse(""));
     OAuthArguments params = new OAuthArguments(preload);
     assertEquals("service", params.getServiceName());
     assertEquals("token", params.getTokenName());

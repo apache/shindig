@@ -35,11 +35,11 @@ import com.google.common.collect.Maps;
 
 import org.junit.Test;
 
-import java.net.URI;
 import java.util.List;
 import java.util.Map;
 
 public class CachingContentRewriterRegistryTest {
+  private static final Uri SPEC_URL = Uri.parse("http://example.org/gadget.xml");
   private final CaptureRewriter captureRewriter = new CaptureRewriter();
   private final List<CaptureRewriter> rewriters
       = Lists.newArrayList(captureRewriter, new ModifyingCaptureContentRewriter());
@@ -53,7 +53,7 @@ public class CachingContentRewriterRegistryTest {
   public void gadgetGetsCached() throws Exception {
     String body = "Hello, world";
     String xml = "<Module><ModulePrefs title=''/><Content/></Module>";
-    GadgetSpec spec = new GadgetSpec(URI.create("#"), xml);
+    GadgetSpec spec = new GadgetSpec(SPEC_URL, xml);
     GadgetContext context = new GadgetContext();
     Gadget gadget = new Gadget()
         .setContext(context)
@@ -70,7 +70,7 @@ public class CachingContentRewriterRegistryTest {
   public void gadgetFetchedFromCache() throws Exception {
     String body = "Hello, world";
     String xml = "<Module><ModulePrefs title=''/><Content/></Module>";
-    GadgetSpec spec = new GadgetSpec(URI.create("#"), xml);
+    GadgetSpec spec = new GadgetSpec(SPEC_URL, xml);
 
     GadgetContext context = new GadgetContext();
 
@@ -89,7 +89,7 @@ public class CachingContentRewriterRegistryTest {
   public void noCacheGadgetDoesNotGetCached() throws Exception {
     String body = "Hello, world";
     String xml = "<Module><ModulePrefs title=''/><Content/></Module>";
-    GadgetSpec spec = new GadgetSpec(URI.create("#"), xml);
+    GadgetSpec spec = new GadgetSpec(SPEC_URL, xml);
     GadgetContext context = new GadgetContext() {
       @Override
       public boolean getIgnoreCache() {
@@ -112,7 +112,7 @@ public class CachingContentRewriterRegistryTest {
   @Test
   public void httpResponseGetsCached() throws Exception {
     String body = "Hello, world";
-    HttpRequest request = new HttpRequest(Uri.parse("#"));
+    HttpRequest request = new HttpRequest(SPEC_URL);
     HttpResponse response = new HttpResponse(body);
 
     registry.rewriteHttpResponse(request, response);
@@ -124,7 +124,7 @@ public class CachingContentRewriterRegistryTest {
   @Test
   public void httpResponseFetchedFromCache() throws Exception {
     String body = "Hello, world";
-    HttpRequest request = new HttpRequest(Uri.parse("#"));
+    HttpRequest request = new HttpRequest(SPEC_URL);
     HttpResponse response = new HttpResponse(body);
 
     registry.rewriteHttpResponse(request, response);
@@ -138,7 +138,7 @@ public class CachingContentRewriterRegistryTest {
   @Test
   public void noCacheHttpResponseDoesNotGetCached() throws Exception {
     String body = "Hello, world";
-    HttpRequest request = new HttpRequest(Uri.parse("#")).setIgnoreCache(true);
+    HttpRequest request = new HttpRequest(SPEC_URL).setIgnoreCache(true);
     HttpResponse response = new HttpResponse(body);
 
     registry.rewriteHttpResponse(request, response);
@@ -158,7 +158,7 @@ public class CachingContentRewriterRegistryTest {
 
     // Just HTTP here; we'll assume this code is common between both methods.
     String body = "Hello, world";
-    HttpRequest request = new HttpRequest(Uri.parse("#"));
+    HttpRequest request = new HttpRequest(SPEC_URL);
     HttpResponse response = new HttpResponse(body);
 
     registry.rewriteHttpResponse(request, response);
@@ -186,7 +186,7 @@ public class CachingContentRewriterRegistryTest {
 
     String body = "Hello, world";
     String xml = "<Module><ModulePrefs title=''/><Content/></Module>";
-    GadgetSpec spec = new GadgetSpec(URI.create("#"), xml);
+    GadgetSpec spec = new GadgetSpec(SPEC_URL, xml);
     GadgetContext context = new GadgetContext();
 
     // We have to re-create Gadget objects because they get mutated directly, which is really
