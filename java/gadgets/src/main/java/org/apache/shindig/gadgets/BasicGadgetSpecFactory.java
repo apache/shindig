@@ -25,18 +25,12 @@ import org.apache.shindig.gadgets.http.HttpFetcher;
 import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.http.HttpResponse;
 import org.apache.shindig.gadgets.spec.GadgetSpec;
-import org.apache.shindig.gadgets.spec.View;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.inject.name.Named;
 
 import java.net.URI;
-import java.net.URISyntaxException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.ExecutorService;
 import java.util.logging.Logger;
 
 /**
@@ -44,14 +38,23 @@ import java.util.logging.Logger;
  */
 @Singleton
 public class BasicGadgetSpecFactory implements GadgetSpecFactory {
-  public static final String RAW_GADGETSPEC_XML_PARAM_NAME = "rawxml";
-  public static final URI RAW_GADGET_URI = getRawGadgetUri();
-  
+  static final String RAW_GADGETSPEC_XML_PARAM_NAME = "rawxml";
+  static final URI RAW_GADGET_URI = URI.create("http://localhost/raw.xml");
+
   static final Logger logger = Logger.getLogger(BasicGadgetSpecFactory.class.getName());
 
   private final HttpFetcher fetcher;
-  private final ExecutorService executor;
   private final TtlCache<URI, GadgetSpec> ttlCache;
+
+   @Inject
+  public BasicGadgetSpecFactory(HttpFetcher fetcher,
+                                CacheProvider cacheProvider,
+                                @Named("shindig.gadget-spec.cache.capacity") int capacity,
+                                @Named("shindig.gadget-spec.cache.minTTL") long minTtl,
+                                @Named("shindig.gadget-spec.cache.maxTTL") long maxTtl) {
+    this.fetcher = fetcher;
+    this.ttlCache = new TtlCache<URI, GadgetSpec>(cacheProvider, capacity, minTtl, maxTtl);
+  }
 
   public GadgetSpec getGadgetSpec(GadgetContext context) throws GadgetException {
     String rawxml = context.getParameter(RAW_GADGETSPEC_XML_PARAM_NAME);
@@ -63,20 +66,20 @@ public class BasicGadgetSpecFactory implements GadgetSpecFactory {
     }
     return getGadgetSpec(context.getUrl(), context.getIgnoreCache());
   }
-  
+
   /**
    * Retrieves a gadget specification from the cache or from the Internet.
    */
-  public GadgetSpec getGadgetSpec(URI gadgetUri, boolean ignoreCache) throws GadgetException {     
+  public GadgetSpec getGadgetSpec(URI gadgetUri, boolean ignoreCache) throws GadgetException {
     if (ignoreCache) {
       return fetchObjectAndCache(gadgetUri, ignoreCache);
     }
-    
+
     TtlCache.CachedObject<GadgetSpec> cached = null;
     synchronized(ttlCache) {
       cached = ttlCache.getElementWithExpiration(gadgetUri);
     }
-    
+
     if (cached.obj == null || cached.isExpired) {
       try {
         return fetchObjectAndCache(gadgetUri, ignoreCache);
@@ -89,7 +92,7 @@ public class BasicGadgetSpecFactory implements GadgetSpecFactory {
         }
       }
     }
-    
+
     return cached.obj;
   }
 
@@ -105,62 +108,11 @@ public class BasicGadgetSpecFactory implements GadgetSpecFactory {
                                 "Unable to retrieve gadget xml. HTTP error " +
                                 response.getHttpStatusCode());
     }
+
     GadgetSpec spec = new GadgetSpec(url, response.getResponseAsString());
 
-    // Find the type=HTML views that link to their content externally.
-    List<View> hrefViewList = new ArrayList<View>();
-    for (View v : spec.getViews().values()) {
-      if (v.getType() != View.ContentType.URL && v.getHref() != null) {
-        hrefViewList.add(v);
-      }
-    }
-
-    // Retrieve all external view contents simultaneously.
-    CountDownLatch latch = new CountDownLatch(hrefViewList.size());
-    for (View v : hrefViewList) {
-      executor.execute(new ViewContentFetcher(v, latch, fetcher, ignoreCache));
-    }
-    try {
-      latch.await();
-    } catch (InterruptedException e) {
-      throw new RuntimeException(e);
-    }
-
-    for (View v : spec.getViews().values()) {
-      if (v.getType() != View.ContentType.URL) {
-        // A non-null href at this point indicates that the retrieval of remote
-        // content has failed.
-        if (v.getHref() != null) {
-          throw new GadgetException(GadgetException.Code.FAILED_TO_RETRIEVE_CONTENT,
-                                    "Unable to retrieve remote gadget content.");
-        }
-      }
-    }
-
     ttlCache.addElement(url, spec, response.getCacheExpiration());
-    
-    return spec;
-  }
-  
-  private static URI getRawGadgetUri() {
-    try {
-      return new URI("http", "localhost", "/raw.xml", null);
-    } catch (URISyntaxException e) {
-      // Never happens
-    }
-    return null;
-  }
 
-  @Inject
-  public BasicGadgetSpecFactory(HttpFetcher fetcher,
-      CacheProvider cacheProvider,
-      ExecutorService executor,
-      @Named("shindig.gadget-spec.cache.capacity")int gadgetSpecCacheCapacity,
-      @Named("shindig.gadget-spec.cache.minTTL")long minTtl,
-      @Named("shindig.gadget-spec.cache.maxTTL")long maxTtl) {
-    this.fetcher = fetcher;
-    this.executor = executor;
-    this.ttlCache =
-        new TtlCache<URI, GadgetSpec>(cacheProvider, gadgetSpecCacheCapacity, minTtl, maxTtl);
+    return spec;
   }
 }
