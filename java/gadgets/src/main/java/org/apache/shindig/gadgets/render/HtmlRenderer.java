@@ -71,13 +71,14 @@ public class HtmlRenderer {
       GadgetSpec spec = gadget.getSpec();
 
       Preloads preloads = preloader.preload(context, spec);
+      gadget.setPreloads(preloads);
 
       if (view.getHref() == null) {
-        gadget.setPreloads(preloads);
         return rewriter.rewriteGadget(gadget, view.getContent());
       } else {
         // TODO: Add current url to GadgetContext to support transitive proxying.
         HttpRequest request = new HttpRequest(Uri.fromJavaUri(view.getHref()))
+            .setIgnoreCache(context.getIgnoreCache())
             .setOAuthArguments(new OAuthArguments(view))
             .setAuthType(view.getAuthType())
             .setSecurityToken(context.getToken())
