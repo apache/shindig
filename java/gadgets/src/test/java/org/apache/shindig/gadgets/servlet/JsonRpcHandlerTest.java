@@ -243,7 +243,7 @@ public class JsonRpcHandlerTest {
       }
 
       try {
-        GadgetSpec spec = new GadgetSpec(URI.create("#"), gadgets.get(context.getUrl()));
+        GadgetSpec spec = new GadgetSpec(Uri.parse("#"), gadgets.get(context.getUrl()));
         View view = spec.getView(context.getView());
         return new Gadget()
             .setContext(context)

@@ -18,17 +18,35 @@
  */
 package org.apache.shindig.gadgets.spec;
 
+import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.common.xml.XmlUtil;
 import org.apache.shindig.gadgets.variables.Substitutions;
 
 import org.w3c.dom.Element;
 
-import java.net.URI;
-
 /**
  * Represents /ModulePrefs/Link elements.
  */
 public class LinkSpec {
+  private final Uri base;
+
+  public LinkSpec(Element element, Uri base) throws SpecParserException {
+    this.base = base;
+    rel = XmlUtil.getAttribute(element, "rel");
+    if (rel == null) {
+      throw new SpecParserException("Link/@rel is required!");
+    }
+    href = XmlUtil.getUriAttribute(element, "href");
+    if (href == null) {
+      throw new SpecParserException("Link/@href is required!");
+    }
+  }
+
+  private LinkSpec(LinkSpec rhs, Substitutions substitutions) {
+    rel = substitutions.substituteString(null, rhs.rel);
+    base = rhs.base;
+    href = base.resolve(substitutions.substituteUri(null, rhs.href));
+  }
 
   /**
    * Link/@rel
@@ -41,8 +59,8 @@ public class LinkSpec {
   /**
    * Link/@href
    */
-  private final URI href;
-  public URI getHref() {
+  private final Uri href;
+  public Uri getHref() {
     return href;
   }
 
@@ -56,21 +74,5 @@ public class LinkSpec {
   @Override
   public String toString() {
     return "<Link rel='" + rel + "' href='" + href.toString() + "'/>";
-  }
-
-  public LinkSpec(Element element) throws SpecParserException {
-    rel = XmlUtil.getAttribute(element, "rel");
-    if (rel == null) {
-      throw new SpecParserException("Link/@rel is required!");
-    }
-    href = XmlUtil.getUriAttribute(element, "href");
-    if (href == null) {
-      throw new SpecParserException("Link/@href is required!");
-    }
-  }
-
-  private LinkSpec(LinkSpec rhs, Substitutions substitutions) {
-    rel = substitutions.substituteString(null, rhs.rel);
-    href = substitutions.substituteUri(null, rhs.href);
   }
 }

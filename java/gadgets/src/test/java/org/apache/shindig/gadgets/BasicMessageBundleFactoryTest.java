@@ -18,31 +18,33 @@
  */
 package org.apache.shindig.gadgets;
 
+import static org.easymock.EasyMock.expect;
+import static org.easymock.EasyMock.isA;
+import static org.easymock.EasyMock.replay;
+import static org.easymock.EasyMock.verify;
+import static org.junit.Assert.assertEquals;
+
 import org.apache.shindig.common.cache.CacheProvider;
 import org.apache.shindig.common.cache.DefaultCacheProvider;
+import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.gadgets.http.HttpFetcher;
 import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.http.HttpResponse;
 import org.apache.shindig.gadgets.http.HttpResponseBuilder;
 import org.apache.shindig.gadgets.spec.GadgetSpec;
 import org.apache.shindig.gadgets.spec.MessageBundle;
+
 import org.easymock.EasyMock;
-import static org.easymock.EasyMock.expect;
-import static org.easymock.EasyMock.isA;
-import static org.easymock.EasyMock.replay;
-import static org.easymock.EasyMock.verify;
-import static org.junit.Assert.assertEquals;
 import org.junit.Test;
 
-import java.net.URI;
 import java.util.Locale;
 
 /**
  * Tests for BasicMessageBundleFactory
  */
 public class BasicMessageBundleFactoryTest {
-  private static final URI BUNDLE_URI = URI.create("http://example.org/messagex.xml");
-  private static final URI SPEC_URI = URI.create("http://example.org/gadget.xml");
+  private static final Uri BUNDLE_URI = Uri.parse("http://example.org/messagex.xml");
+  private static final Uri SPEC_URI = Uri.parse("http://example.org/gadget.xml");
 
   private static final String MSG_0_NAME = "messageZero";
   private static final String MSG_1_NAME = "message1";

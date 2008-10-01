@@ -17,6 +17,7 @@
  */
 package org.apache.shindig.gadgets.spec;
 
+import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.common.util.HashUtil;
 import org.apache.shindig.common.xml.XmlException;
 import org.apache.shindig.common.xml.XmlUtil;
@@ -26,7 +27,6 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
-import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -44,10 +44,99 @@ public class GadgetSpec {
   public static final Locale DEFAULT_LOCALE = new Locale("all", "ALL");
 
   /**
+   * Creates a new Module from the given xml input.
+   *
+   * @throws SpecParserException If xml can not be parsed as a valid gadget spec.
+   */
+  public GadgetSpec(Uri url, String xml) throws SpecParserException {
+    Element doc;
+    try {
+      doc = XmlUtil.parse(xml);
+    } catch (XmlException e) {
+      throw new SpecParserException("Malformed XML in file " + url.toString(), e);
+    }
+    this.url = url;
+
+    // This might not be good enough; should we take message bundle changes
+    // into account?
+    this.checksum = HashUtil.checksum(xml.getBytes());
+
+    NodeList children = doc.getChildNodes();
+
+    ModulePrefs modulePrefs = null;
+    List<UserPref> userPrefs = new LinkedList<UserPref>();
+    Map<String, List<Element>> views = new HashMap<String, List<Element>>();
+    for (int i = 0, j = children.getLength(); i < j; ++i) {
+      Node child = children.item(i);
+      if (!(child instanceof Element)) {
+        continue;
+      }
+      Element element = (Element)child;
+      String name = element.getTagName();
+      if ("ModulePrefs".equals(name)) {
+        if (modulePrefs == null) {
+          modulePrefs = new ModulePrefs(element, url);
+        } else {
+          throw new SpecParserException(
+              "Only 1 ModulePrefs is allowed.");
+        }
+      }
+      if ("UserPref".equals(name)) {
+        UserPref pref = new UserPref(element);
+        userPrefs.add(pref);
+      }
+      if ("Content".equals(name)) {
+        String viewNames = XmlUtil.getAttribute(element, "view", "default");
+        for (String view : viewNames.split(",")) {
+          view = view.trim();
+          List<Element> viewElements = views.get(view);
+          if (viewElements == null) {
+            viewElements = new LinkedList<Element>();
+            views.put(view, viewElements);
+          }
+          viewElements.add(element);
+        }
+      }
+    }
+
+    if (modulePrefs == null) {
+      throw new SpecParserException("At least 1 ModulePrefs is required.");
+    } else {
+      this.modulePrefs = modulePrefs;
+    }
+
+    if (views.isEmpty()) {
+      throw new SpecParserException("At least 1 Content is required.");
+    } else {
+      Map<String, View> tmpViews = new HashMap<String, View>();
+      for (Map.Entry<String, List<Element>> view : views.entrySet()) {
+        View v = new View(view.getKey(), view.getValue(), url);
+        tmpViews.put(v.getName(), v);
+      }
+      this.views = Collections.unmodifiableMap(tmpViews);
+    }
+
+    if (!userPrefs.isEmpty()) {
+      this.userPrefs = Collections.unmodifiableList(userPrefs);
+    } else {
+      this.userPrefs = Collections.emptyList();
+    }
+  }
+
+  /**
+   * Constructs a GadgetSpec for substitute calls.
+   * @param spec
+   */
+  private GadgetSpec(GadgetSpec spec) {
+    url = spec.url;
+    checksum = spec.checksum;
+  }
+
+  /**
    * The url for this gadget spec.
    */
-  private final URI url;
-  public URI getUrl() {
+  private final Uri url;
+  public Uri getUrl() {
     return url;
   }
 
@@ -149,97 +238,5 @@ public class GadgetSpec {
     }
     buf.append("</Module>");
     return buf.toString();
-  }
-
-  /**
-   * Creates a new Module from the given xml input.
-   *
-   * @param url
-   * @param xml
-   * @throws SpecParserException
-   */
-  public GadgetSpec(URI url, String xml) throws SpecParserException {
-    Element doc;
-    try {
-      doc = XmlUtil.parse(xml);
-    } catch (XmlException e) {
-      throw new SpecParserException("Malformed XML in file " + url.toString(), e);
-    }
-    this.url = url;
-
-    // This might not be good enough; should we take message bundle changes
-    // into account?
-    this.checksum = HashUtil.checksum(xml.getBytes());
-
-    NodeList children = doc.getChildNodes();
-
-    ModulePrefs modulePrefs = null;
-    List<UserPref> userPrefs = new LinkedList<UserPref>();
-    Map<String, List<Element>> views = new HashMap<String, List<Element>>();
-    for (int i = 0, j = children.getLength(); i < j; ++i) {
-      Node child = children.item(i);
-      if (!(child instanceof Element)) {
-        continue;
-      }
-      Element element = (Element)child;
-      String name = element.getTagName();
-      if ("ModulePrefs".equals(name)) {
-        if (modulePrefs == null) {
-          modulePrefs = new ModulePrefs(element, url);
-        } else {
-          throw new SpecParserException(
-              "Only 1 ModulePrefs is allowed.");
-        }
-      }
-      if ("UserPref".equals(name)) {
-        UserPref pref = new UserPref(element);
-        userPrefs.add(pref);
-      }
-      if ("Content".equals(name)) {
-        String viewNames = XmlUtil.getAttribute(element, "view", "default");
-        for (String view : viewNames.split(",")) {
-          view = view.trim();
-          List<Element> viewElements = views.get(view);
-          if (viewElements == null) {
-            viewElements = new LinkedList<Element>();
-            views.put(view, viewElements);
-          }
-          viewElements.add(element);
-        }
-      }
-    }
-
-    if (modulePrefs == null) {
-      throw new SpecParserException(
-          "At least 1 ModulePrefs is required.");
-    } else {
-      this.modulePrefs = modulePrefs;
-    }
-
-    if (views.isEmpty()) {
-      throw new SpecParserException("At least 1 Content is required.");
-    } else {
-      Map<String, View> tmpViews = new HashMap<String, View>();
-      for (Map.Entry<String, List<Element>> view : views.entrySet()) {
-        View v = new View(view.getKey(), view.getValue());
-        tmpViews.put(v.getName(), v);
-      }
-      this.views = Collections.unmodifiableMap(tmpViews);
-    }
-
-    if (!userPrefs.isEmpty()) {
-      this.userPrefs = Collections.unmodifiableList(userPrefs);
-    } else {
-      this.userPrefs = Collections.emptyList();
-    }
-  }
-
-  /**
-   * Constructs a GadgetSpec for substitute calls.
-   * @param spec
-   */
-  private GadgetSpec(GadgetSpec spec) {
-    url = spec.url;
-    checksum = spec.checksum;
   }
 }

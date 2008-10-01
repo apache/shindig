@@ -190,7 +190,7 @@ public class BasicGadgetSpecFactoryTest {
 
     GadgetSpec spec = specFactory.getGadgetSpec(SPEC_URL.toJavaUri(), true);
 
-    assertEquals(REMOTE_URL.toJavaUri(), spec.getView(GadgetSpec.DEFAULT_VIEW).getHref());
+    assertEquals(REMOTE_URL, spec.getView(GadgetSpec.DEFAULT_VIEW).getHref());
     assertEquals("", spec.getView(GadgetSpec.DEFAULT_VIEW).getContent());
   }
 

@@ -17,6 +17,7 @@
  */
 package org.apache.shindig.gadgets.rewrite.lexer;
 
+import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.gadgets.Gadget;
 import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.GadgetSpecFactory;
@@ -30,6 +31,7 @@ import org.apache.shindig.gadgets.rewrite.MutableContent;
 import org.apache.shindig.gadgets.rewrite.ProxyingLinkRewriter;
 import org.apache.shindig.gadgets.rewrite.RewriterResults;
 import org.apache.shindig.gadgets.spec.GadgetSpec;
+import org.apache.shindig.gadgets.spec.View;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -113,7 +115,13 @@ public class DefaultContentRewriter implements ContentRewriter {
   public RewriterResults rewrite(Gadget gadget, MutableContent content) {
     StringWriter sw = new StringWriter();
     GadgetSpec spec = gadget.getSpec();
-    if (rewrite(spec, spec.getUrl(), new StringReader(content.getContent()), "text/html", sw)) {
+    StringReader reader = new StringReader(content.getContent());
+    Uri base = spec.getUrl();
+    View view = gadget.getCurrentView();
+    if (view != null && view.getHref() != null) {
+      base = view.getHref();
+    }
+    if (rewrite(spec, base.toJavaUri(), reader, "text/html", sw)) {
       content.setContent(sw.toString());
     }
     return RewriterResults.cacheableIndefinitely();
@@ -190,6 +198,6 @@ public class DefaultContentRewriter implements ContentRewriter {
 
   protected LinkRewriter createLinkRewriter(GadgetSpec spec,
       ContentRewriterFeature rewriterFeature) {
-    return new ProxyingLinkRewriter(spec.getUrl(), rewriterFeature, getProxyUrl());
+    return new ProxyingLinkRewriter(spec.getUrl().toJavaUri(), rewriterFeature, getProxyUrl());
   }
 }

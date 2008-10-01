@@ -18,9 +18,9 @@
  */
 package org.apache.shindig.gadgets.spec;
 
+import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.gadgets.AuthType;
 
-import java.net.URI;
 import java.util.Map;
 
 /**
@@ -35,7 +35,7 @@ public interface RequestAuthenticationInfo {
   /**
    * @return The destination URI for making authenticated requests to.
    */
-  URI getHref();
+  Uri getHref();
 
   /**
    * @return True if owner signing is needed.

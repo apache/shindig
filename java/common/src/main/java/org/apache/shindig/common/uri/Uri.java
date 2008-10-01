@@ -121,6 +121,9 @@ public final class Uri {
    */
   public Uri resolve(Uri other) {
     // TODO: We can probably make this more efficient by implementing resolve ourselves.
+    if (other == null) {
+      return null;
+    }
     return fromJavaUri(toJavaUri().resolve(other.toJavaUri()));
   }
 

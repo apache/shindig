@@ -18,14 +18,15 @@
  */
 package org.apache.shindig.gadgets.spec;
 
-import java.net.URI;
-import java.util.HashMap;
-import java.util.Map;
-
+import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.common.xml.XmlUtil;
+
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
+
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Information about an OAuth service that a gadget wants to use.
@@ -35,128 +36,15 @@ import org.w3c.dom.NodeList;
 public class OAuthService {
   private EndPoint requestUrl;
   private EndPoint accessUrl;
-  private URI authorizationUrl;
+  private Uri authorizationUrl;
   private String name;
 
   /**
-   * Represents /OAuth/Service/Request elements.
+   * Constructor for testing only.
    */
-  public EndPoint getRequestUrl() {
-    return requestUrl;
-  }
+  OAuthService() { }
 
-  /**
-   * Represents /OAuth/Service/Access elements.
-   */
-  public EndPoint getAccessUrl() {
-    return accessUrl;
-  }
-  /**
-   * Represents /OAuth/Service/Authorization elements.
-   */  
-  public URI getAuthorizationUrl() {
-    return authorizationUrl;
-  }
-  
-  /**
-   * Represents /OAuth/Service@name
-   */
-  public String getName() {
-    return name;
-  }  
-  
-  /**
-   * Method to use for requests to an OAuth request token or access token URL.
-   */
-  public enum Method {
-    GET, POST;
-    
-    private static Map<String, Method> METHODS;
-    
-    static {
-      METHODS = new HashMap<String, Method>();
-      for (Method m : Method.values()) {
-        METHODS.put(m.toString(), m);
-      }
-      // Default
-      METHODS.put("", Method.GET);
-    }
-    
-    public static Method parse(String value) throws SpecParserException {
-      value = value.trim();
-      Method result = METHODS.get(value);
-      if (result == null) {
-        throw new SpecParserException("Unknown OAuth method: " + value);
-      }
-      return result;
-    }
-  }
-  
-  /**
-   * Location for OAuth parameters in requests to an OAuth request token,
-   * access token, or resource URL.
-   */
-  public enum Location {
-    HEADER("auth-header"),
-    URL("uri-query"),
-    BODY("post-body");
-    
-    private static Map<String, Location> LOCATIONS;
-    
-    static {
-      LOCATIONS = new HashMap<String, Location>();
-      for (Location l : Location.values()) {
-        LOCATIONS.put(l.locationString, l);
-      }
-      // Default value
-      LOCATIONS.put("", Location.HEADER);
-    }
-    
-    private String locationString;
-    private Location(String locationString) {
-      this.locationString = locationString;
-    }
-
-    @Override
-    public String toString() {
-      return locationString;
-    }
-    
-    public static Location parse(String value) throws SpecParserException {
-      value = value.trim();
-      Location result = LOCATIONS.get(value);
-      if (result == null) {
-        throw new SpecParserException("Unknown OAuth param_location: " + value);        
-      }
-      return result;
-    }
-  }
-  
-  private static final String URL_ATTR = "url";
-  private static final String PARAM_LOCATION_ATTR = "param_location";
-  private static final String METHOD_ATTR = "method";
-  
-  /**
-   * Description of an OAuth request token or access token URL.
-   */
-  public static class EndPoint {
-    public final URI url;
-    public final Method method;
-    public final Location location;
-    
-    public EndPoint(URI url, Method method, Location location) {
-      this.url = url;
-      this.method = method;
-      this.location = location;
-    }
-
-    public String toString(String element) {
-      return '<' + element + " url='" + url.toString() + "' " +
-      		"method='" + method + "' param_location='" + location + "'/>";
-    }
-  }
-  
-  public OAuthService(Element serviceElement) throws SpecParserException {
+  public OAuthService(Element serviceElement, Uri base) throws SpecParserException {
     name = serviceElement.getAttribute("name");
     NodeList children = serviceElement.getChildNodes();
     for (int i=0; i < children.getLength(); ++i) {
@@ -169,17 +57,17 @@ public class OAuthService {
         if (requestUrl != null) {
           throw new SpecParserException("Multiple OAuth/Service/Request elements");
         }
-        requestUrl = parseEndPoint("OAuth/Service/Request", (Element)child);
+        requestUrl = parseEndPoint("OAuth/Service/Request", (Element)child, base);
       } else if (childName.equals("Authorization")) {
         if (authorizationUrl != null) {
           throw new SpecParserException("Multiple OAuth/Service/Authorization elements");
         }
-        authorizationUrl = parseAuthorizationUrl((Element)child);
+        authorizationUrl = parseAuthorizationUrl((Element)child, base);
       } else if (childName.equals("Access")) {
         if (accessUrl != null) {
-          throw new SpecParserException("Multiple OAuth/Service/Access elements");          
+          throw new SpecParserException("Multiple OAuth/Service/Access elements");
         }
-        accessUrl = parseEndPoint("OAuth/Service/Access", (Element)child);
+        accessUrl = parseEndPoint("OAuth/Service/Access", (Element)child, base);
       }
     }
     if (requestUrl == null) {
@@ -197,7 +85,7 @@ public class OAuthService {
     }
     if (requestUrl.method != accessUrl.method) {
       throw new SpecParserException(
-          "Access@method must be identical to Request@method");     
+          "Access@method must be identical to Request@method");
     }
     if (requestUrl.location == Location.BODY &&
         requestUrl.method == Method.GET) {
@@ -205,31 +93,143 @@ public class OAuthService {
           "use post-body with GET requests");
     }
   }
-  
+
   /**
-   * Constructor for testing only.
+   * Represents /OAuth/Service/Request elements.
    */
-  OAuthService() {    
+  public EndPoint getRequestUrl() {
+    return requestUrl;
   }
 
-  URI parseAuthorizationUrl(Element child) throws SpecParserException {
-    URI url = XmlUtil.getHttpUriAttribute(child, URL_ATTR);
+  /**
+   * Represents /OAuth/Service/Access elements.
+   */
+  public EndPoint getAccessUrl() {
+    return accessUrl;
+  }
+  /**
+   * Represents /OAuth/Service/Authorization elements.
+   */
+  public Uri getAuthorizationUrl() {
+    return authorizationUrl;
+  }
+
+  /**
+   * Represents /OAuth/Service@name
+   */
+  public String getName() {
+    return name;
+  }
+
+  /**
+   * Method to use for requests to an OAuth request token or access token URL.
+   */
+  public enum Method {
+    GET, POST;
+
+    private static Map<String, Method> METHODS;
+
+    static {
+      METHODS = new HashMap<String, Method>();
+      for (Method m : Method.values()) {
+        METHODS.put(m.toString(), m);
+      }
+      // Default
+      METHODS.put("", Method.GET);
+    }
+
+    public static Method parse(String value) throws SpecParserException {
+      value = value.trim();
+      Method result = METHODS.get(value);
+      if (result == null) {
+        throw new SpecParserException("Unknown OAuth method: " + value);
+      }
+      return result;
+    }
+  }
+
+  /**
+   * Location for OAuth parameters in requests to an OAuth request token,
+   * access token, or resource URL.
+   */
+  public enum Location {
+    HEADER("auth-header"),
+    URL("uri-query"),
+    BODY("post-body");
+
+    private static Map<String, Location> LOCATIONS;
+
+    static {
+      LOCATIONS = new HashMap<String, Location>();
+      for (Location l : Location.values()) {
+        LOCATIONS.put(l.locationString, l);
+      }
+      // Default value
+      LOCATIONS.put("", Location.HEADER);
+    }
+
+    private String locationString;
+    private Location(String locationString) {
+      this.locationString = locationString;
+    }
+
+    @Override
+    public String toString() {
+      return locationString;
+    }
+
+    public static Location parse(String value) throws SpecParserException {
+      value = value.trim();
+      Location result = LOCATIONS.get(value);
+      if (result == null) {
+        throw new SpecParserException("Unknown OAuth param_location: " + value);
+      }
+      return result;
+    }
+  }
+
+  private static final String URL_ATTR = "url";
+  private static final String PARAM_LOCATION_ATTR = "param_location";
+  private static final String METHOD_ATTR = "method";
+
+  /**
+   * Description of an OAuth request token or access token URL.
+   */
+  public static class EndPoint {
+    public final Uri url;
+    public final Method method;
+    public final Location location;
+
+    public EndPoint(Uri url, Method method, Location location) {
+      this.url = url;
+      this.method = method;
+      this.location = location;
+    }
+
+    public String toString(String element) {
+      return '<' + element + " url='" + url.toString() + "' " +
+      		"method='" + method + "' param_location='" + location + "'/>";
+    }
+  }
+
+  Uri parseAuthorizationUrl(Element child, Uri base) throws SpecParserException {
+    Uri url = XmlUtil.getHttpUriAttribute(child, URL_ATTR);
     if (url == null) {
       throw new SpecParserException("OAuth/Service/Authorization @url is not valid: " +
           child.getAttribute(URL_ATTR));
     }
-    return url;
+    return base.resolve(url);
   }
 
 
-  EndPoint parseEndPoint(String where, Element child) throws SpecParserException {
-    URI url = XmlUtil.getHttpUriAttribute(child, URL_ATTR);
+  EndPoint parseEndPoint(String where, Element child, Uri base) throws SpecParserException {
+    Uri url = XmlUtil.getHttpUriAttribute(child, URL_ATTR);
     if (url == null) {
       throw new SpecParserException("Not an HTTP url: " + child.getAttribute(URL_ATTR));
     }
-    
+
     Location location = Location.parse(child.getAttribute(PARAM_LOCATION_ATTR));
     Method method = Method.parse(child.getAttribute(METHOD_ATTR));
-    return new EndPoint(url, method, location);
+    return new EndPoint(base.resolve(url), method, location);
   }
 }

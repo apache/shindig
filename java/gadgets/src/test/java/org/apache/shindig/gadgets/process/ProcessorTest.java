@@ -175,7 +175,7 @@ public class ProcessorTest {
       if (exception != null) {
         throw exception;
       }
-      return new GadgetSpec(context.getUrl(), GADGET);
+      return new GadgetSpec(Uri.fromJavaUri(context.getUrl()), GADGET);
     }
 
     public GadgetSpec getGadgetSpec(URI uri, boolean ignoreCache) {

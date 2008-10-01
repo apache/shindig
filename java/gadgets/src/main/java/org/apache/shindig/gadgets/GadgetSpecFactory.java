@@ -20,9 +20,9 @@ package org.apache.shindig.gadgets;
 
 import org.apache.shindig.gadgets.spec.GadgetSpec;
 
-import java.net.URI;
-
 import com.google.inject.ImplementedBy;
+
+import java.net.URI;
 
 /** Factory of gadget specs */
 

@@ -24,6 +24,7 @@ import static org.junit.Assert.assertTrue;
 
 import org.apache.shindig.auth.SecurityToken;
 import org.apache.shindig.common.testing.FakeGadgetToken;
+import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.gadgets.AuthType;
 import org.apache.shindig.gadgets.GadgetContext;
 import org.apache.shindig.gadgets.http.ContentFetcherFactory;
@@ -54,7 +55,7 @@ public class HttpPreloaderTest {
   private static final String PRELOAD_HREF2 = "http://www.example.org/file";
   private static final String PRELOAD_CONTENT = "Preloaded data";
   private static final String CONTAINER = "some-container";
-  private static final URI GADGET_URL = URI.create("http://example.org/gadget.xml");
+  private static final Uri GADGET_URL = Uri.parse("http://example.org/gadget.xml");
   private static final Map<String, String> PRELOAD_METADATA = Maps.immutableMap("foo", "bar");
   private final RecordingHttpFetcher plainFetcher = new RecordingHttpFetcher();
   private final RecordingHttpFetcher oauthFetcher = new RecordingHttpFetcher();
@@ -82,7 +83,7 @@ public class HttpPreloaderTest {
 
     @Override
     public URI getUrl() {
-      return GADGET_URL;
+      return GADGET_URL.toJavaUri();
     }
   };
 
@@ -122,7 +123,6 @@ public class HttpPreloaderTest {
   }
 
   @Test
-  @SuppressWarnings("unchecked")
   public void signedPreloads() throws Exception {
     String xml =
         "<Module><ModulePrefs title=''>" +
@@ -143,7 +143,6 @@ public class HttpPreloaderTest {
   }
 
   @Test
-  @SuppressWarnings("unchecked")
   public void oauthPreloads() throws Exception {
     String xml =
         "<Module><ModulePrefs title=''>" +
@@ -163,7 +162,6 @@ public class HttpPreloaderTest {
   }
 
   @Test
-  @SuppressWarnings("unchecked")
   public void multiplePreloads() throws Exception {
     String xml =
         "<Module><ModulePrefs title=''>" +

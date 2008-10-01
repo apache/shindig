@@ -17,8 +17,8 @@
  */
 package org.apache.shindig.gadgets.variables;
 
-import java.net.URI;
-import java.net.URISyntaxException;
+import org.apache.shindig.common.uri.Uri;
+
 import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.Map;
@@ -177,14 +177,14 @@ public class Substitutions {
    * @param uri
    * @return The substituted uri, or a dummy value if the result is invalid.
    */
-  public URI substituteUri(Type type, URI uri) {
+  public Uri substituteUri(Type type, Uri uri) {
     if (uri == null) {
       return null;
     }
     try {
-      return new URI(substituteString(type, uri.toString()));
-    } catch (URISyntaxException e) {
-      return URI.create("");
+      return Uri.parse(substituteString(type, uri.toString()));
+    } catch (IllegalArgumentException e) {
+      return Uri.parse("");
     }
   }
 }

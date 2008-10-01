@@ -16,14 +16,11 @@
  * specific language governing permissions and limitations under the License.
  */
 package org.apache.shindig.gadgets.spec;
+import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.common.xml.XmlUtil;
 
 import org.w3c.dom.Element;
 
-import java.net.MalformedURLException;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.net.URL;
 import java.util.Map;
 
 /**
@@ -36,6 +33,31 @@ import java.util.Map;
  * No user pref substitution.
  */
 public class LocaleSpec {
+
+  /**
+   * @param specUrl The url that the spec is loaded from. messages is assumed
+   *     to be relative to this path.
+   * @throws SpecParserException If language_direction is not valid
+   */
+  public LocaleSpec(Element element, Uri specUrl) throws SpecParserException {
+    language = XmlUtil.getAttribute(element, "lang", "all").toLowerCase();
+    country = XmlUtil.getAttribute(element, "country", "ALL").toUpperCase();
+    languageDirection = XmlUtil.getAttribute(element, "language_direction", "ltr");
+    if (!("ltr".equals(languageDirection) || "rtl".equals(languageDirection))) {
+      throw new SpecParserException("Locale/@language_direction must be ltr or rtl");
+    }
+    String messages = XmlUtil.getAttribute(element, "messages");
+    if (messages == null) {
+      this.messages = Uri.parse("");
+    } else {
+      try {
+        this.messages = specUrl.resolve(Uri.parse(messages));
+      } catch (IllegalArgumentException e) {
+        throw new SpecParserException("Locale@messages url is invalid.");
+      }
+    }
+    messageBundle = new MessageBundle(element);
+  }
 
   /**
    * Locale@lang
@@ -64,8 +86,8 @@ public class LocaleSpec {
   /**
    * Locale@messages
    */
-  private final URI messages;
-  public URI getMessages() {
+  private final Uri messages;
+  public Uri getMessages() {
     return messages;
   }
 
@@ -92,36 +114,5 @@ public class LocaleSpec {
     }
     buf.append("</Locale>");
     return buf.toString();
-  }
-
-  /**
-   * @param element
-   * @param specUrl The url that the spec is loaded from. messages is assumed
-   *     to be relative to this path.
-   * @throws SpecParserException If language_direction is not valid
-   */
-  public LocaleSpec(Element element, URI specUrl) throws SpecParserException {
-    language = XmlUtil.getAttribute(element, "lang", "all").toLowerCase();
-    country = XmlUtil.getAttribute(element, "country", "ALL").toUpperCase();
-    languageDirection
-        = XmlUtil.getAttribute(element, "language_direction", "ltr");
-    if (!("ltr".equals(languageDirection) ||
-          "rtl".equals(languageDirection))) {
-      throw new SpecParserException(
-          "Locale@language_direction must be ltr or rtl");
-    }
-    String messages = XmlUtil.getAttribute(element, "messages");
-    if (messages == null) {
-      this.messages = URI.create("");
-    } else {
-      try {
-        this.messages = new URL(specUrl.toURL(), messages).toURI();
-      } catch (URISyntaxException e) {
-        throw new SpecParserException("Locale@messages url is invalid.");
-      } catch (MalformedURLException e) {
-        throw new SpecParserException("Locale@messages url is invalid.");
-      }
-    }
-    messageBundle = new MessageBundle(element);
   }
 }

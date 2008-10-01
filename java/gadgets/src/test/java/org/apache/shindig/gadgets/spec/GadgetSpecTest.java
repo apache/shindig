@@ -19,16 +19,15 @@
 
 package org.apache.shindig.gadgets.spec;
 
-import junit.framework.TestCase;
-
+import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.variables.Substitutions;
 import org.apache.shindig.gadgets.variables.Substitutions.Type;
 
-import java.net.URI;
+import junit.framework.TestCase;
 
 public class GadgetSpecTest extends TestCase {
-  private static final URI SPEC_URL = URI.create("http://example.org/g.xml");
+  private static final Uri SPEC_URL = Uri.parse("http://example.org/g.xml");
   public void testBasic() throws Exception {
     String xml = "<Module>" +
                  "<ModulePrefs title=\"title\"/>" +

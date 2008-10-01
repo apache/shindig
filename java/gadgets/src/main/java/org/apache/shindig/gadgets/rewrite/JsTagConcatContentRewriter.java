@@ -18,6 +18,7 @@
  */
 package org.apache.shindig.gadgets.rewrite;
 
+import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.common.util.Utf8UrlCoder;
 import org.apache.shindig.gadgets.Gadget;
 import org.apache.shindig.gadgets.http.HttpRequest;
@@ -25,6 +26,7 @@ import org.apache.shindig.gadgets.http.HttpResponse;
 import org.apache.shindig.gadgets.parse.GadgetHtmlNode;
 import org.apache.shindig.gadgets.servlet.ProxyBase;
 import org.apache.shindig.gadgets.spec.GadgetSpec;
+import org.apache.shindig.gadgets.spec.View;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
@@ -68,8 +70,7 @@ public class JsTagConcatContentRewriter implements ContentRewriter {
 
     // Bootstrap queue of children over which to iterate,
     // ie. lists of siblings to potentially combine
-    Queue<GadgetHtmlNode> nodesToProcess =
-        new LinkedList<GadgetHtmlNode>();
+    Queue<GadgetHtmlNode> nodesToProcess = new LinkedList<GadgetHtmlNode>();
     nodesToProcess.add(content.getParseTree());
 
     String concatBase = getJsConcatBase(gadget.getSpec(), rewriterFeature);
@@ -95,12 +96,16 @@ public class JsTagConcatContentRewriter implements ContentRewriter {
                cur.hasAttribute("src")) {
             URI scriptUri = null;
             try {
-              scriptUri =
-                  gadget.getSpec().getUrl().resolve(new URI(cur.getAttributeValue("src")));
-            } catch (URISyntaxException use) {
+              Uri base = gadget.getSpec().getUrl();
+              View view = gadget.getCurrentView();
+              if (view != null && view.getHref() != null) {
+                base = view.getHref();
+              }
+              scriptUri = base.resolve(Uri.parse(cur.getAttributeValue("src"))).toJavaUri();
+            } catch (IllegalArgumentException e) {
               // Same behavior as JavascriptTagMerger
               // Perhaps switch to ignoring script src instead?
-              throw new RuntimeException(use);
+              throw new RuntimeException(e);
             }
             scripts.add(scriptUri);
             toRemove.add(cur);

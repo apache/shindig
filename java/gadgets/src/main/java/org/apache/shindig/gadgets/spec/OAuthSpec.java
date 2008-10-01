@@ -17,13 +17,15 @@
  */
 package org.apache.shindig.gadgets.spec;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
+import org.apache.shindig.common.uri.Uri;
 
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
+
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Wraps an <OAuth> element from the gadget spec.
@@ -31,26 +33,26 @@ import org.w3c.dom.NodeList;
  * Instances are immutable.
  */
 public class OAuthSpec {
-  
+
   /** Keys are service names, values are service descriptors */
   private final Map<String, OAuthService> serviceMap;
 
-  public OAuthSpec(Element element) throws SpecParserException {
+  public OAuthSpec(Element element, Uri base) throws SpecParserException {
     serviceMap = new HashMap<String, OAuthService>();
     NodeList services = element.getElementsByTagName("Service");
     for (int i=0; i < services.getLength(); ++i) {
       Node node = services.item(i);
       if (node.getNodeType() == Element.ELEMENT_NODE) {
-        parseService((Element)node);
+        parseService((Element)node, base);
       }
     }
   }
 
-  private void parseService(Element serviceElement) throws SpecParserException {
-    OAuthService service = new OAuthService(serviceElement);
+  private void parseService(Element serviceElement, Uri base) throws SpecParserException {
+    OAuthService service = new OAuthService(serviceElement, base);
     serviceMap.put(service.getName(), service);
   }
-  
+
   public Map<String, OAuthService> getServices() {
     return Collections.unmodifiableMap(serviceMap);
   }

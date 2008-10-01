@@ -18,19 +18,21 @@
  */
 package org.apache.shindig.gadgets.rewrite;
 
-import org.easymock.classextension.EasyMock;
 import static org.easymock.EasyMock.expect;
 import static org.easymock.classextension.EasyMock.replay;
 
+import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.gadgets.parse.GadgetHtmlNodeTest;
 import org.apache.shindig.gadgets.parse.ParsedHtmlNode;
 import org.apache.shindig.gadgets.spec.GadgetSpec;
+
+import org.easymock.classextension.EasyMock;
 
 public class JsTagConcatContentRewriterTest extends FeatureBasedRewriterTestBase {
   private ContentRewriterFeature jsFeature;
   private JsTagConcatContentRewriter rewriter;
   private String concatBase;
-  
+
   @Override
   protected void setUp() throws Exception {
     super.setUp();
@@ -38,7 +40,7 @@ public class JsTagConcatContentRewriterTest extends FeatureBasedRewriterTestBase
     ContentRewriterFeature.Factory factory = mockContentRewriterFeatureFactory(jsFeature);
     rewriter = new JsTagConcatContentRewriter(factory, null);
     GadgetSpec spec = EasyMock.createNiceMock(GadgetSpec.class);
-    expect(spec.getUrl()).andReturn(baseUri).anyTimes();
+    expect(spec.getUrl()).andReturn(Uri.fromJavaUri(baseUri)).anyTimes();
     replay(spec);
     concatBase = rewriter.getJsConcatBase(spec, jsFeature);
   }
@@ -172,7 +174,7 @@ public class JsTagConcatContentRewriterTest extends FeatureBasedRewriterTestBase
     String s = "<script src=\"/1.js\"></script>";
     String[][] attr1 = { { "src", "/1.js" } };
     ParsedHtmlNode[] p = {
-      GadgetHtmlNodeTest.makeParsedTagNode("script", attr1, null)  
+      GadgetHtmlNodeTest.makeParsedTagNode("script", attr1, null)
     };
     String rewritten
         = "<script src=\"" + concatBase + "1=http%3A%2F%2Fgadget.org%2F1.js\"></script>";
@@ -183,7 +185,7 @@ public class JsTagConcatContentRewriterTest extends FeatureBasedRewriterTestBase
     String s = "<script src=\"1.js\"></script>";
     String[][] attr1 = { { "src", "1.js" } };
     ParsedHtmlNode[] p = {
-      GadgetHtmlNodeTest.makeParsedTagNode("script", attr1, null)  
+      GadgetHtmlNodeTest.makeParsedTagNode("script", attr1, null)
     };
     String rewritten
         = "<script src=\"" + concatBase + "1=http%3A%2F%2Fgadget.org%2Fdir%2F1.js\"></script>";

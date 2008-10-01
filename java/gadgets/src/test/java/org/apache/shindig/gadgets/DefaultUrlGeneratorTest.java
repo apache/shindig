@@ -20,9 +20,12 @@ package org.apache.shindig.gadgets;
 
 import static org.easymock.EasyMock.expect;
 
+import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.gadgets.spec.GadgetSpec;
 
 import com.google.common.collect.Maps;
+
+import junitx.framework.StringAssert;
 
 import org.apache.commons.lang.StringEscapeUtils;
 
@@ -31,8 +34,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-
-import junitx.framework.StringAssert;
 
 /**
  * Tests for DefaultUrlGenerator.
@@ -123,7 +124,7 @@ public class DefaultUrlGeneratorTest extends GadgetTestFixture {
           " <Content type='html'/>" +
           " <UserPref name='" + UP_NAME + "' datatype='string'/>" +
           "</Module>";
-    GadgetSpec spec = new GadgetSpec(URI.create(SPEC_URL), xml);
+    GadgetSpec spec = new GadgetSpec(Uri.parse(SPEC_URL), xml);
     replay();
 
     Gadget gadget = new Gadget()
@@ -147,7 +148,7 @@ public class DefaultUrlGeneratorTest extends GadgetTestFixture {
           " <Content type='url' href='" + StringEscapeUtils.escapeHtml(TYPE_URL_HREF) + "'/>" +
           " <UserPref name='" + UP_NAME + "' datatype='string'/>" +
           "</Module>";
-    GadgetSpec spec = new GadgetSpec(URI.create(SPEC_URL), xml);
+    GadgetSpec spec = new GadgetSpec(Uri.parse(SPEC_URL), xml);
     replay();
     Gadget gadget = new Gadget()
         .setContext(context)

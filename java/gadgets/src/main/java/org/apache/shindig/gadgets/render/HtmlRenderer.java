@@ -77,7 +77,7 @@ public class HtmlRenderer {
         return rewriter.rewriteGadget(gadget, view.getContent());
       } else {
         // TODO: Add current url to GadgetContext to support transitive proxying.
-        HttpRequest request = new HttpRequest(Uri.fromJavaUri(view.getHref()))
+        HttpRequest request = new HttpRequest(view.getHref())
             .setIgnoreCache(context.getIgnoreCache())
             .setOAuthArguments(new OAuthArguments(view))
             .setAuthType(view.getAuthType())

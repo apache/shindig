@@ -19,13 +19,16 @@ package org.apache.shindig.gadgets.spec;
 
 import static org.junit.Assert.assertEquals;
 
+import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.common.xml.XmlUtil;
+
 import org.junit.Test;
 
 /**
  * Tests for OAuthSpec
  */
 public class OAuthSpecTest {
+  private static final Uri SPEC_URL = Uri.parse("http://example.org/g.xml");
 
   @Test
   public void testOAuthSpec() throws Exception {
@@ -34,14 +37,14 @@ public class OAuthSpecTest {
       "<Access url='http://www.example.com/access'/>" +
       "<Authorization url='http://www.example.com/authorize'/>" +
       "</Service></OAuth>";
-    OAuthSpec oauth = new OAuthSpec(XmlUtil.parse(xml));
+    OAuthSpec oauth = new OAuthSpec(XmlUtil.parse(xml), SPEC_URL);
     assertEquals(1, oauth.getServices().size());
   }
-  
+
   @Test
   public void testOAuthSpec_noservice() throws Exception {
     String xml = "<OAuth/>";
-    OAuthSpec oauth = new OAuthSpec(XmlUtil.parse(xml));
+    OAuthSpec oauth = new OAuthSpec(XmlUtil.parse(xml), SPEC_URL);
     assertEquals(0, oauth.getServices().size());
   }
 
@@ -64,7 +67,7 @@ public class OAuthSpecTest {
         " <Authorization url='http://three.example.com/authorize'/>" +
         "</Service>" +
     	"</OAuth>";
-    OAuthSpec oauth = new OAuthSpec(XmlUtil.parse(xml));
+    OAuthSpec oauth = new OAuthSpec(XmlUtil.parse(xml), SPEC_URL);
     assertEquals("http://req.example.com",
         oauth.getServices().get("one").getRequestUrl().url.toString());
     assertEquals(OAuthService.Location.URL,
@@ -74,8 +77,8 @@ public class OAuthSpecTest {
     assertEquals(OAuthService.Method.POST,
         oauth.getServices().get("three").getRequestUrl().method);
     assertEquals("http://three.example.com/acc",
-        oauth.getServices().get("three").getAccessUrl().url.toASCIIString());
+        oauth.getServices().get("three").getAccessUrl().url.toJavaUri().toASCIIString());
     assertEquals("http://three.example.com/authorize",
-        oauth.getServices().get("three").getAuthorizationUrl().toASCIIString());
+        oauth.getServices().get("three").getAuthorizationUrl().toJavaUri().toASCIIString());
   }
 }

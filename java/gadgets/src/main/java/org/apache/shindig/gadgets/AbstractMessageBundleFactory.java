@@ -17,12 +17,12 @@
  */
 package org.apache.shindig.gadgets;
 
+import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.gadgets.spec.GadgetSpec;
 import org.apache.shindig.gadgets.spec.LocaleSpec;
 import org.apache.shindig.gadgets.spec.MessageBundle;
 
 import java.util.Locale;
-import java.net.URI;
 
 /**
  * Core implementation of MessageBundleFactory that ensures proper MessageBundle creation and
@@ -39,7 +39,7 @@ public abstract class AbstractMessageBundleFactory implements MessageBundleFacto
     if (localeSpec == null) {
       return parent == null ? MessageBundle.EMPTY : parent;
     }
-    URI messages = localeSpec.getMessages();
+    Uri messages = localeSpec.getMessages();
     if (messages == null || messages.toString().length() == 0) {
       child = localeSpec.getMessageBundle();
     } else {
