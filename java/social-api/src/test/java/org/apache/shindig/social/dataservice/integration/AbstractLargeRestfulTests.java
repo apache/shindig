@@ -31,6 +31,8 @@ import org.apache.shindig.social.opensocial.service.PersonHandler;
 
 import com.google.common.collect.Maps;
 import com.google.inject.Guice;
+import com.google.inject.Injector;
+
 import junit.framework.TestCase;
 import org.easymock.classextension.EasyMock;
 import org.json.JSONObject;
@@ -63,13 +65,12 @@ public abstract class AbstractLargeRestfulTests extends TestCase {
 
   @Override
   protected void setUp() throws Exception {
-    Map<String, Class<? extends DataRequestHandler>> handlers = Maps.newHashMap();
+    Injector injector = Guice.createInjector(new SocialApiTestsGuiceModule());
     
     servlet = new DataServiceServlet();
-    servlet.setHandlers(HandlerProvider.defaultProviders());
-    servlet.setInjector(Guice.createInjector(new SocialApiTestsGuiceModule()));
-    servlet.setBeanConverters(new BeanJsonConverter(
-        Guice.createInjector(new SocialApiTestsGuiceModule())), new BeanXmlConverter(),
+
+    servlet.setHandlers(injector.getInstance(HandlerProvider.class));
+    servlet.setBeanConverters(new BeanJsonConverter(injector), new BeanXmlConverter(),
         new BeanAtomConverter());
 
     req = EasyMock.createMock(HttpServletRequest.class);

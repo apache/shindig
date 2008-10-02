@@ -24,7 +24,8 @@ import org.apache.shindig.social.core.util.BeanJsonConverter;
 import org.apache.shindig.social.core.util.BeanXmlConverter;
 
 import com.google.common.collect.Maps;
-import com.google.inject.Injector;
+import com.google.inject.Provider;
+
 import junit.framework.TestCase;
 import org.easymock.classextension.EasyMock;
 import org.json.JSONArray;
@@ -55,8 +56,6 @@ public class JsonRpcServletTest extends TestCase {
   private ActivityHandler activityHandler;
   private AppDataHandler appDataHandler;
 
-  private Injector injector;
-
   private BeanJsonConverter jsonConverter;
   private BeanXmlConverter xmlConverter;
 
@@ -72,18 +71,19 @@ public class JsonRpcServletTest extends TestCase {
     activityHandler = EasyMock.createMock(ActivityHandler.class);
     appDataHandler = EasyMock.createMock(AppDataHandler.class);
 
-    injector = EasyMock.createMock(Injector.class);
-    servlet.setInjector(injector);
-
-    servlet.setHandlers(HandlerProvider.defaultProviders());
+    servlet.setHandlers(new HandlerProvider(constant(peopleHandler), constant(activityHandler),
+        constant(appDataHandler)));
 
     servlet.setBeanConverters(jsonConverter, xmlConverter, atomConverter);
   }
 
-  private void setupInjector() {
-    EasyMock.expect(injector.getInstance(PersonHandler.class)).andStubReturn(peopleHandler);
-    EasyMock.expect(injector.getInstance(ActivityHandler.class)).andStubReturn(activityHandler);
-    EasyMock.expect(injector.getInstance(AppDataHandler.class)).andStubReturn(appDataHandler);
+  // TODO: replace with Providers.of() when Guice version is upgraded
+  private static <T> Provider<T> constant(final T value) {
+    return new Provider<T>() {
+      public T get() {
+        return value;
+      }
+    };
   }
 
   public void testPeopleMethodRecognition() throws Exception {
@@ -104,7 +104,6 @@ public class JsonRpcServletTest extends TestCase {
   public void testInvalidService() throws Exception {
     String json = "{method:junk.get,id:id,params:{userId:5,groupId:@self}}";
     setupRequest(json);
-    setupInjector();
 
     JSONObject err = new JSONObject(
         "{id:id,error:{message:'notImplemented: The service junk is not implemented',code:501}}");
@@ -114,10 +113,10 @@ public class JsonRpcServletTest extends TestCase {
     writerMock.write(EasyMock.eq(err.toString()));
     EasyMock.expectLastCall();
 
-    EasyMock.replay(req, res, injector, jsonConverter, writerMock);
+    EasyMock.replay(req, res, jsonConverter, writerMock);
     servlet.service(req, res);
-    EasyMock.verify(req, res, injector, jsonConverter, writerMock);
-    EasyMock.reset(req, res, injector, jsonConverter);
+    EasyMock.verify(req, res, jsonConverter, writerMock);
+    EasyMock.reset(req, res, jsonConverter);
   }
 
 
@@ -127,9 +126,6 @@ public class JsonRpcServletTest extends TestCase {
    */
   public void testFailedRequest() throws Exception {
     setupRequest("{id:id,method:appdata.get}");
-    EasyMock.expect(injector.getInstance(AppDataHandler.class)).andStubReturn(appDataHandler);
-    setupInjector();
-
     EasyMock.expect(appDataHandler.handleItem(EasyMock.isA(RpcRequestItem.class)));
     EasyMock.expectLastCall().andReturn(
         ImmediateFuture.errorInstance(new RuntimeException("FAILED")));
@@ -142,16 +138,15 @@ public class JsonRpcServletTest extends TestCase {
     writerMock.write(EasyMock.eq(err.toString()));
     EasyMock.expectLastCall();
 
-    EasyMock.replay(req, res, appDataHandler, injector, jsonConverter, writerMock);
+    EasyMock.replay(req, res, appDataHandler, jsonConverter, writerMock);
     servlet.service(req, res);
-    EasyMock.verify(req, res, appDataHandler, injector, jsonConverter, writerMock);
-    EasyMock.reset(req, res, appDataHandler, injector, jsonConverter);
+    EasyMock.verify(req, res, appDataHandler, jsonConverter, writerMock);
+    EasyMock.reset(req, res, appDataHandler, jsonConverter);
   }
 
   private void verifyHandlerWasFoundForMethod(String json, DataRequestHandler handler)
       throws Exception {
     setupRequest(json);
-    setupInjector();
 
     String resultObject = "my lovely json";
 
@@ -169,17 +164,16 @@ public class JsonRpcServletTest extends TestCase {
     writerMock.write(EasyMock.eq(result.toString()));
     EasyMock.expectLastCall();
 
-    EasyMock.replay(req, res, handler, injector, jsonConverter, writerMock);
+    EasyMock.replay(req, res, handler, jsonConverter, writerMock);
     servlet.service(req, res);
-    EasyMock.verify(req, res, handler, injector, jsonConverter, writerMock);
-    EasyMock.reset(req, res, handler, injector, jsonConverter);
+    EasyMock.verify(req, res, handler, jsonConverter, writerMock);
+    EasyMock.reset(req, res, handler, jsonConverter);
   }
 
   public void testBasicBatch() throws Exception {
     String batchJson =
         "[{method:people.get,id:'1'},{method:activities.get,id:'2'}]";
     setupRequest(batchJson);
-    setupInjector();
 
     String resultObject = "my lovely json";
     Future<?> responseItemFuture = ImmediateFuture.newInstance(resultObject);
@@ -197,10 +191,10 @@ public class JsonRpcServletTest extends TestCase {
     writerMock.write(EasyMock.eq(result.toString()));
     EasyMock.expectLastCall();
 
-    EasyMock.replay(req, res, peopleHandler, activityHandler, injector, jsonConverter, writerMock);
+    EasyMock.replay(req, res, peopleHandler, activityHandler, jsonConverter, writerMock);
     servlet.service(req, res);
-    EasyMock.verify(req, res, peopleHandler, activityHandler, injector, jsonConverter, writerMock);
-    EasyMock.reset(req, res, peopleHandler, activityHandler, injector, jsonConverter);
+    EasyMock.verify(req, res, peopleHandler, activityHandler, jsonConverter, writerMock);
+    EasyMock.reset(req, res, peopleHandler, activityHandler, jsonConverter);
   }
 
   public void testGetExecution() throws Exception {
@@ -210,7 +204,6 @@ public class JsonRpcServletTest extends TestCase {
     EasyMock.expect(req.getAttribute(EasyMock.isA(String.class))).andReturn(FAKE_GADGET_TOKEN);
     EasyMock.expect(req.getCharacterEncoding()).andStubReturn("UTF-8");
     res.setCharacterEncoding("UTF-8");
-    setupInjector();
 
     String resultObject = "my lovely json";
 
@@ -227,10 +220,10 @@ public class JsonRpcServletTest extends TestCase {
     writerMock.write(EasyMock.eq(result.toString()));
     EasyMock.expectLastCall();
 
-    EasyMock.replay(req, res, peopleHandler, activityHandler, injector, jsonConverter, writerMock);
+    EasyMock.replay(req, res, peopleHandler, activityHandler, jsonConverter, writerMock);
     servlet.service(req, res);
-    EasyMock.verify(req, res, peopleHandler, activityHandler, injector, jsonConverter, writerMock);
-    EasyMock.reset(req, res, peopleHandler, activityHandler, injector, jsonConverter);
+    EasyMock.verify(req, res, peopleHandler, activityHandler, jsonConverter, writerMock);
+    EasyMock.reset(req, res, peopleHandler, activityHandler, jsonConverter);
   }
 
   private void setupRequest(String json) throws IOException {

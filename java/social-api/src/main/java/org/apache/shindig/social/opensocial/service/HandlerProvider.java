@@ -18,9 +18,11 @@
 
 package org.apache.shindig.social.opensocial.service;
 
+import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.common.collect.Maps;
 
+import java.util.Collections;
 import java.util.Map;
 
 /**
@@ -33,34 +35,31 @@ import java.util.Map;
  * Provider<Map<String, Class<? extends DataRequestHandler>>> along
  * with a default set of handlers.
  */
-public class HandlerProvider implements Provider<Map<String,
-    Class<? extends DataRequestHandler>>> {
-  
-  private Map<String, Class<? extends DataRequestHandler>> handlers;
-  
-  private static Map<String, Class<? extends DataRequestHandler>> DEFAULT_HANDLERS =
-      Maps.immutableMap(
-          DataServiceServlet.PEOPLE_ROUTE, PersonHandler.class,
-          DataServiceServlet.ACTIVITY_ROUTE, ActivityHandler.class,
-          DataServiceServlet.APPDATA_ROUTE, AppDataHandler.class);
-  
-  protected HandlerProvider(boolean useDefaultProviders) {
-    handlers = Maps.newHashMap(useDefaultProviders ? DEFAULT_HANDLERS : null);
+public class HandlerProvider implements Provider<Map<String, Provider<? extends DataRequestHandler>>> {
+  private final Map<String, Provider<? extends DataRequestHandler>> handlers;
+
+  /**
+   * Constructor for the default handlers.
+   */
+  @Inject
+  public HandlerProvider(Provider<PersonHandler> personHandlerProvider,
+      Provider<ActivityHandler> activityHandlerProvider,
+      Provider<AppDataHandler> appDataHandlerProvider) {
+    this(Maps.immutableMap(
+        DataServiceServlet.PEOPLE_ROUTE, personHandlerProvider,
+        DataServiceServlet.ACTIVITY_ROUTE, activityHandlerProvider,
+        DataServiceServlet.APPDATA_ROUTE, appDataHandlerProvider));
   }
-  
-  public void addHandler(String path, Class<? extends DataRequestHandler> handler) {
+
+  public HandlerProvider(Map<String,Provider<? extends DataRequestHandler>> handlers) {
+    this.handlers = Maps.newHashMap(handlers);
+  }
+
+  public void addHandler(String path, Provider<? extends DataRequestHandler> handler) {
     handlers.put(path, handler);
   }
   
-  public HandlerProvider(Map<String,Class<? extends DataRequestHandler>> handlers) {
-    this.handlers = Maps.newHashMap(handlers);
-  }
-  
-  public Map<String, Class<? extends DataRequestHandler>> get() {
-    return handlers;
-  }
-  
-  public static HandlerProvider defaultProviders() {
-    return new HandlerProvider(DEFAULT_HANDLERS);
+  public Map<String, Provider<? extends DataRequestHandler>> get() {
+    return Collections.unmodifiableMap(handlers);
   }
 }

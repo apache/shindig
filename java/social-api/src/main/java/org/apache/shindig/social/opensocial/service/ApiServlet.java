@@ -26,7 +26,7 @@ import org.apache.shindig.social.core.util.BeanJsonConverter;
 import org.apache.shindig.social.opensocial.spi.SocialSpiException;
 
 import com.google.inject.Inject;
-import com.google.inject.Injector;
+import com.google.inject.Provider;
 import com.google.inject.name.Named;
 
 import java.io.IOException;
@@ -43,7 +43,7 @@ import javax.servlet.http.HttpServletResponse;
 public abstract class ApiServlet extends InjectedServlet {
   protected static final String DEFAULT_ENCODING = "UTF-8";
 
-  private Map<String, Class<? extends DataRequestHandler>> handlers;
+  private Map<String, Provider<? extends DataRequestHandler>> handlers;
   protected BeanJsonConverter jsonConverter;
   protected BeanConverter xmlConverter;
   protected BeanConverter atomConverter;
@@ -64,11 +64,6 @@ public abstract class ApiServlet extends InjectedServlet {
     this.atomConverter = atomConverter;
   }
 
-  // Only for testing use. Do not override the injector.
-  public void setInjector(Injector injector) {
-    this.injector = injector;
-  }
-
   protected SecurityToken getSecurityToken(HttpServletRequest servletRequest) {
     return new AuthInfo(servletRequest).getSecurityToken();
   }
@@ -85,15 +80,16 @@ public abstract class ApiServlet extends InjectedServlet {
   /**
    * Delivers a request item to the appropriate DataRequestHandler.
    */
-  protected Future<?> handleRequestItem(RequestItem requestItem, HttpServletRequest servletRequest) {
-    Class<? extends DataRequestHandler> handlerClass = handlers.get(requestItem.getService());
+  protected Future<?> handleRequestItem(RequestItem requestItem,
+      HttpServletRequest servletRequest) {
+    Provider<? extends DataRequestHandler> handlerProvider = handlers.get(requestItem.getService());
 
-    if (handlerClass == null) {
+    if (handlerProvider == null) {
       return ImmediateFuture.errorInstance(new SocialSpiException(ResponseError.NOT_IMPLEMENTED,
           "The service " + requestItem.getService() + " is not implemented"));
     }
 
-    DataRequestHandler handler = injector.getInstance(handlerClass);
+    DataRequestHandler handler = handlerProvider.get();
     return handler.handleItem(requestItem);
   }
 
