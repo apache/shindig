@@ -20,6 +20,7 @@ package org.apache.shindig.gadgets.http;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 import org.apache.shindig.auth.AnonymousSecurityToken;
@@ -43,6 +44,13 @@ public class HttpRequestTest {
   private static final String TEST_HEADER_VALUE = "Hello!";
   private static final String TEST_HEADER_VALUE2 = "Goodbye.";
   private static final Uri DEFAULT_URI = Uri.parse("http://example.org/");
+
+  @Test
+  public void dosPreventionHeaderAdded() {
+    HttpRequest request = new HttpRequest(DEFAULT_URI);
+    assertNotNull("DoS prevention header not present in request.",
+        request.getHeader(HttpRequest.DOS_PREVENTION_HEADER));
+  }
 
   @Test
   public void postBodyCopied() throws Exception {
@@ -91,7 +99,7 @@ public class HttpRequestTest {
     HttpRequest request = new HttpRequest(DEFAULT_URI);
     assertTrue(request.getFollowRedirects());
   }
-  
+
   @Test
   public void copyCtorCopiesAllFields() {
     OAuthArguments oauthArguments = new OAuthArguments();

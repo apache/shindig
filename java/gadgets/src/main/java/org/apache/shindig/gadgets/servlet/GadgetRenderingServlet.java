@@ -19,6 +19,7 @@ package org.apache.shindig.gadgets.servlet;
 
 import org.apache.shindig.common.servlet.InjectedServlet;
 import org.apache.shindig.gadgets.GadgetContext;
+import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.render.Renderer;
 import org.apache.shindig.gadgets.render.RenderingResults;
 
@@ -42,6 +43,14 @@ public class GadgetRenderingServlet extends InjectedServlet {
   }
 
   private void render(HttpServletRequest req, HttpServletResponse resp) throws IOException {
+    if (req.getHeader(HttpRequest.DOS_PREVENTION_HEADER) != null) {
+      // Refuse to render for any request that came from us.
+      // TODO: Is this necessary for any other type of request? Rendering seems to be the only one
+      // that can potentially result in an infinite loop.
+      resp.sendError(HttpServletResponse.SC_FORBIDDEN);
+      return;
+    }
+
     GadgetContext context = new HttpGadgetContext(req);
     RenderingResults results = renderer.render(context);
     switch (results.getStatus()) {
