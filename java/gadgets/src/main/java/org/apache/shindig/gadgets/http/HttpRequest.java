@@ -44,6 +44,8 @@ import java.util.Map;
  * being constructed.
  */
 public class HttpRequest {
+  /** Automatically added to every request so that we know that the request came from our server. */
+  public static final String DOS_PREVENTION_HEADER = "X-shindig-dos";
   static final String DEFAULT_CONTENT_TYPE = "application/x-www-form-urlencoded; charset=utf-8";
 
   private String method = "GET";
@@ -60,7 +62,7 @@ public class HttpRequest {
 
   // Whether to follow redirects
   private boolean followRedirects = true;
-  
+
   // Context for the request.
   private Uri gadget;
   private String container = ContainerConfig.DEFAULT_CONTAINER;
@@ -78,6 +80,7 @@ public class HttpRequest {
   public HttpRequest(Uri uri) {
     this.uri = uri;
     authType = AuthType.NONE;
+    addHeader(DOS_PREVENTION_HEADER, "on");
   }
 
   /**
@@ -236,7 +239,7 @@ public class HttpRequest {
     this.oauthArguments = oauthArguments;
     return this;
   }
-  
+
   /**
    * @param followRedirects whether this request should automatically follow redirects.
    */
@@ -386,7 +389,7 @@ public class HttpRequest {
   public OAuthArguments getOAuthArguments() {
     return oauthArguments;
   }
-  
+
   /**
    * @return true if redirects should be followed.
    */
