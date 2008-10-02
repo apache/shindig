@@ -450,7 +450,8 @@ os.compileNode_ = function(node) {
       for (var child = node.firstChild; child; child = child.nextSibling) {
         var compiledChild = os.compileNode_(child);
         if (compiledChild) {
-          if (typeof(compiledChild.length) == 'number') {
+          if (!compiledChild.tagName && 
+            typeof(compiledChild.length) == 'number') {
             for (var i = 0; i < compiledChild.length; i++) {
               output.appendChild(compiledChild[i]);
             }
