@@ -115,7 +115,9 @@ function getStyleRule(name) {
     var rules = sheets[i].cssRules || sheets[i].rules;
     if (rules) {
       for (var j = 0; j < rules.length; ++j) {
-        if (rules[j].selectorText == name) {
+        if (rules[j].selectorText == name
+            //hack for WebKit Quirks mode
+            || rules[j].selectorText == name.toLowerCase()) {
           return rules[j];
         }
       }

@@ -363,7 +363,8 @@ os.copyAttributes_ = function(from, to, opt_customTag) {
             // where they can be accessed as objects, rather than placing them
             // into attributes where they need to be serialized.
             outName = '.' + outName;
-          } else if (os.isIe && outName.substring(0, 2).toLowerCase() == 'on') {
+          } else if (os.isIe && !os.customAttributes_[outName] &&
+              outName.substring(0, 2).toLowerCase() == 'on') {
             // For event handlers on IE, setAttribute doesn't work, so we need
             // to create a function to set as a property.
             outName = '.' + outName;
@@ -394,7 +395,8 @@ os.copyAttributes_ = function(from, to, opt_customTag) {
             // The cssText property of the style object must be set instead.
             to.style.cssText = value;
           } 
-          if (os.isIe && outName.substring(0, 2).toLowerCase() == 'on') {
+          if (os.isIe && !os.customAttributes_[outName] &&
+              outName.substring(0, 2).toLowerCase() == 'on') {
             // In IE, setAttribute doesn't create event handlers, so we must
             // use attachEvent in order to create handlers that are preserved
             // by calls to cloneNode().

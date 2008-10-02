@@ -137,7 +137,7 @@ function assertTemplateDomEquals(lhs, rhs) {
   lhs = normalizeNodeOrMarkup(lhs);
   rhs = normalizeNodeOrMarkup(rhs);
   
-  assertEquals('DOM nodes not equal: \n_ ' + lhs + '\n_ ' + rhs, lhs, rhs);
+  assertEquals(lhs, rhs);
 }
 
 
@@ -206,10 +206,9 @@ function testSubstitution_text() {
     title: "count",
     value: 0
   };
-  var outputNode = compileAndRender_("_T_Substitution_text", data);
-
-  assertEquals(data.title + ":" + data.value,
-    domutil.getVisibleText(outputNode));
+  assertTemplateOutput('<div>${title}:${value}</div>',
+    '<div>' + data.title + ":" + data.value + '</div>',
+    data);
 }
 
 function testSubstitution_attribute() {
@@ -730,11 +729,9 @@ function testHtmlTag() {
 };
 
 function testOnAttachAttribute() {
-  /* fails on IE.
   var template = os.compileTemplateString(
       '<div onAttach="this.title=\'bar\'"/>');
   var output = document.createElement('div');
   template.renderInto(output);
   assertEquals('bar', output.firstChild.title);
-  */
 };

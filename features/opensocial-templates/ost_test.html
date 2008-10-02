@@ -41,6 +41,21 @@ limitations under the License.
     <script type="text/javascript" src="os_test.js"></script>
     <script type="text/javascript" src="util_test.js"></script>
     <script type="text/javascript" src="template_test.js"></script>
+    <!-- JsUnit work-around for non-FireFox browsers -->
+    <script type="text/javascript">
+      function exposeTestFunctionNames() {
+        var testSource = typeof RuntimeObject != 'undefined' ?
+                         RuntimeObject('test' + '*') : self;
+        var testFunctionNames = new Array();
+        for (i in testSource) {
+          if (i.substring(0, 4) == 'test' && typeof(testSource[i]) == 'function')
+            push(testFunctionNames, i);
+        }
+        return testFunctionNames;
+      }
+ 
+      os.createNamespace("test", "http://www.google.com/#test");
+    </script>
   </head>
   <body>
     <script type="text/os-template" tag="os:Test">tag template</script>
@@ -60,9 +75,6 @@ limitations under the License.
       </div>
     </div>
 
-    <xmp id="_T_Substitution_text" style="display: none">${title}:${value}</xmp>
-
-    <xmp id="_T_Substitution_text" style="display: none">${title}:${value}</xmp>
     <xmp id="_T_Substitution_attribute" style="display: none">
       <button id="${id}" style="color: ${color}" a1="value ${A1}">${text}</button>
     </xmp>
