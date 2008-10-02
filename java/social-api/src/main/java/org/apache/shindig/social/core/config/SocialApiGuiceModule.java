@@ -28,11 +28,9 @@ import org.apache.shindig.social.core.util.BeanXmlConverter;
 import org.apache.shindig.social.opensocial.service.BeanConverter;
 import org.apache.shindig.social.opensocial.service.DataServiceServletFetcher;
 import org.apache.shindig.social.opensocial.service.HandlerProvider;
-import org.apache.shindig.social.sample.service.SampleContainerHandler;
+import org.apache.shindig.social.sample.service.SampleContainerHandlerProvider;
 
 import com.google.inject.AbstractModule;
-import com.google.inject.Inject;
-import com.google.inject.Provider;
 import com.google.inject.TypeLiteral;
 import com.google.inject.name.Names;
 
@@ -49,7 +47,7 @@ public class SocialApiGuiceModule extends AbstractModule {
   /** {@inheritDoc} */
   @Override
   protected void configure() {
-    bind(HandlerProvider.class).toProvider(HandlerProviderProvider.class);
+    bind(HandlerProvider.class).to(SampleContainerHandlerProvider.class);
 
     bind(ParameterFetcher.class).annotatedWith(Names.named("DataServiceServlet"))
         .to(DataServiceServletFetcher.class);
@@ -70,26 +68,5 @@ public class SocialApiGuiceModule extends AbstractModule {
 
     bind(new TypeLiteral<List<AuthenticationHandler>>(){}).toProvider(
         AuthenticationHandlerProvider.class);
-  }
-
-  /**
-   * Provider for the HandlerProvider.  Adds the sample container handler
-   * at "samplecontainer".
-   */
-  static class HandlerProviderProvider implements Provider<HandlerProvider> {
-    private final HandlerProvider handlerProvider;
-    private final Provider<SampleContainerHandler> sampleHandler;
-
-    @Inject
-    public HandlerProviderProvider(HandlerProvider handlerProvider,
-        Provider<SampleContainerHandler> sampleHandler) {
-      this.handlerProvider = handlerProvider;
-      this.sampleHandler = sampleHandler;
-    }
-
-    public HandlerProvider get() {
-      handlerProvider.addHandler("samplecontainer", sampleHandler);
-      return handlerProvider;
-    }
   }
 }
