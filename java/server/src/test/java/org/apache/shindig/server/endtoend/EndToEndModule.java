@@ -59,7 +59,5 @@ public class EndToEndModule extends AbstractModule {
 
     bind(new TypeLiteral<List<AuthenticationHandler>>(){}).toProvider(
         AuthenticationHandlerProvider.class);
-
-    bind(HandlerProvider.class).toInstance(HandlerProvider.defaultProviders());
   }
 }

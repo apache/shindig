@@ -29,7 +29,8 @@ import org.apache.shindig.social.opensocial.spi.SocialSpiException;
 
 import com.google.common.collect.Maps;
 import com.google.inject.Guice;
-import com.google.inject.Injector;
+import com.google.inject.Provider;
+
 import junit.framework.TestCase;
 import org.easymock.classextension.EasyMock;
 
@@ -52,7 +53,6 @@ public class DataServiceServletTest extends TestCase {
   private PersonHandler peopleHandler;
   private ActivityHandler activityHandler;
   private AppDataHandler appDataHandler;
-  private Injector injector;
   private BeanJsonConverter jsonConverter;
 
   private final ServletInputStream dummyPostData = new ServletInputStream() {
@@ -72,18 +72,19 @@ public class DataServiceServletTest extends TestCase {
     activityHandler = EasyMock.createMock(ActivityHandler.class);
     appDataHandler = EasyMock.createMock(AppDataHandler.class);
 
-    injector = EasyMock.createMock(Injector.class);
-    servlet.setInjector(injector);
-
-    servlet.setHandlers(HandlerProvider.defaultProviders());
+    servlet.setHandlers(new HandlerProvider(constant(peopleHandler),
+        constant(activityHandler), constant(appDataHandler)));
 
     servlet.setBeanConverters(jsonConverter, xmlConverter, atomConverter);
   }
 
-  private void setupInjector() {
-    EasyMock.expect(injector.getInstance(PersonHandler.class)).andStubReturn(peopleHandler);
-    EasyMock.expect(injector.getInstance(ActivityHandler.class)).andStubReturn(activityHandler);
-    EasyMock.expect(injector.getInstance(AppDataHandler.class)).andStubReturn(appDataHandler);
+  // TODO: replace with Providers.of() when Guice version is upgraded
+  private static <T> Provider<T> constant(final T value) {
+    return new Provider<T>() {
+      public T get() {
+        return value;
+      }
+    };
   }
 
   public void testPeopleUriRecognition() throws Exception {
@@ -118,8 +119,6 @@ public class DataServiceServletTest extends TestCase {
   public void testFailedRequest() throws Exception {
     String route = '/' + DataServiceServlet.APPDATA_ROUTE;
     setupRequest(route, "GET", null);
-    EasyMock.expect(injector.getInstance(AppDataHandler.class)).andStubReturn(appDataHandler);
-    setupInjector();
 
     EasyMock.expect(appDataHandler.handleItem(EasyMock.isA(RestfulRequestItem.class)));
     EasyMock.expectLastCall().andReturn(
@@ -128,10 +127,10 @@ public class DataServiceServletTest extends TestCase {
     res.sendError(500, "FAILED");
     res.setCharacterEncoding("UTF-8");
 
-    EasyMock.replay(req, res, appDataHandler, injector, jsonConverter);
+    EasyMock.replay(req, res, appDataHandler, jsonConverter);
     servlet.service(req, res);
-    EasyMock.verify(req, res, appDataHandler, injector, jsonConverter);
-    EasyMock.reset(req, res, appDataHandler, injector, jsonConverter);
+    EasyMock.verify(req, res, appDataHandler, jsonConverter);
+    EasyMock.reset(req, res, appDataHandler, jsonConverter);
   }
 
   private void verifyHandlerWasFoundForPathInfo(String peoplePathInfo, DataRequestHandler handler)
@@ -143,7 +142,6 @@ public class DataServiceServletTest extends TestCase {
   private void verifyHandlerWasFoundForPathInfo(String pathInfo, DataRequestHandler handler,
       String actualMethod, String overrideMethod, String expectedMethod) throws Exception {
     setupRequest(pathInfo, actualMethod, overrideMethod);
-    setupInjector();
 
     String jsonObject = "my lovely json";
 
@@ -158,10 +156,10 @@ public class DataServiceServletTest extends TestCase {
     writerMock.write(jsonObject);
     res.setCharacterEncoding("UTF-8");
 
-    EasyMock.replay(req, res, handler, injector, jsonConverter);
+    EasyMock.replay(req, res, handler, jsonConverter);
     servlet.service(req, res);
-    EasyMock.verify(req, res, handler, injector, jsonConverter);
-    EasyMock.reset(req, res, handler, injector, jsonConverter);
+    EasyMock.verify(req, res, handler, jsonConverter);
+    EasyMock.reset(req, res, handler, jsonConverter);
   }
 
   private void setupRequest(String pathInfo, String actualMethod, String overrideMethod)
