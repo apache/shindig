@@ -59,7 +59,11 @@ public abstract class AbstractCachingGadgetHtmlParser implements GadgetHtmlParse
     String cacheKey = HashUtil.checksum(source.getBytes());
     byte[] cached = parseTreeCache.getElement(cacheKey);
     if (cached != null) {
-      return pts.deserialize(cached);
+      List<ParsedHtmlNode> ret = pts.deserialize(cached);
+      if (ret != null) {
+        // This might be null if the cached blob has timed out or has a different version.
+        return ret;
+      }
     }
     
     long parseStart = System.currentTimeMillis();
