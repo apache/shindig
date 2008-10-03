@@ -66,17 +66,25 @@ public class DefaultContentRewriter implements ContentRewriter {
 
   private final Set<String> includeTags;
 
+  private final String proxyUrl;
+
+  private final String concatUrl;
+
   @Inject
   public DefaultContentRewriter(
       GadgetSpecFactory specFactory,
       @Named("shindig.content-rewrite.include-urls")String includeUrls,
       @Named("shindig.content-rewrite.exclude-urls")String excludeUrls,
       @Named("shindig.content-rewrite.expires")String expires,
-      @Named("shindig.content-rewrite.include-tags")String includeTags) {
+      @Named("shindig.content-rewrite.include-tags")String includeTags,
+      @Named("shindig.content-rewrite.proxy-url")String proxyUrl,
+      @Named("shindig.content-rewrite.concat-url")String concatUrl) {
     this.specFactory = specFactory;
     this.includeUrls = includeUrls;
     this.excludeUrls = excludeUrls;
     this.expires = expires;
+    this.proxyUrl = proxyUrl;
+    this.concatUrl = concatUrl;
     this.includeTags = new HashSet<String>();
     for (String s : includeTags.split(",")) {
       if (s != null && s.trim().length() > 0) {
@@ -188,12 +196,14 @@ public class DefaultContentRewriter implements ContentRewriter {
     return (mime.toLowerCase().contains("css"));
   }
 
+  // TODO: This needs to be per-container
   protected String getProxyUrl() {
-    return "/gadgets/proxy?url=";
+    return proxyUrl;
   }
 
+  // TODO: This needs to be per-container
   protected String getConcatUrl() {
-    return "/gadgets/concat?";
+    return concatUrl;
   }
 
   protected LinkRewriter createLinkRewriter(GadgetSpec spec,

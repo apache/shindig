@@ -18,8 +18,9 @@
  */
 package org.apache.shindig.gadgets;
 
+import org.apache.shindig.common.uri.Uri;
+import org.apache.shindig.common.uri.UriBuilder;
 import org.apache.shindig.common.util.HashUtil;
-import org.apache.shindig.common.util.Utf8UrlCoder;
 import org.apache.shindig.gadgets.spec.GadgetSpec;
 import org.apache.shindig.gadgets.spec.UserPref;
 import org.apache.shindig.gadgets.spec.View;
@@ -36,6 +37,8 @@ import java.util.regex.Pattern;
  *
  * TODO: iframe and js url generation are two distinct things, and should probably be different
  * interfaces.
+ *
+ * TODO: iframe and js urls should be able to be generated per container.
  */
 @Singleton
 public class DefaultUrlGenerator implements UrlGenerator {
@@ -61,7 +64,8 @@ public class DefaultUrlGenerator implements UrlGenerator {
   }
 
   public String getBundledJsUrl(Collection<String> features, GadgetContext context) {
-    return jsPrefix + getBundledJsParam(features, context);
+    return jsPrefix.replace("%host%", context.getHost())
+                   .replace("%js%", getBundledJsParam(features, context));
   }
 
   public String getBundledJsParam(Collection<String> features, GadgetContext context) {
@@ -91,7 +95,6 @@ public class DefaultUrlGenerator implements UrlGenerator {
    * consideration!
    */
   public String getIframeUrl(Gadget gadget) {
-    StringBuilder buf = new StringBuilder();
     GadgetContext context = gadget.getContext();
     GadgetSpec spec = gadget.getSpec();
     String url = context.getUrl().toString();
@@ -102,35 +105,32 @@ public class DefaultUrlGenerator implements UrlGenerator {
     } else {
       type = view.getType();
     }
+
+    UriBuilder uri;
     switch (type) {
       case URL:
-        // type = url
-        String href = view.getHref().toString();
-        buf.append(href);
-        if (href.indexOf('?') == -1) {
-          buf.append('?');
-        } else {
-          buf.append('&');
-        }
+        uri = new UriBuilder(view.getHref());
         break;
       case HTML:
       default:
-        buf.append(iframePrefix);
+        // TODO: Locked domain support.
+        uri = new UriBuilder(Uri.parse(iframePrefix));
         break;
     }
-    buf.append("container=").append(context.getContainer());
+
+    uri.addQueryParameter("container", context.getContainer());
     if (context.getModuleId() != 0) {
-      buf.append("&mid=").append(context.getModuleId());
+      uri.addQueryParameter("mid", Integer.toString(context.getModuleId()));
     }
     if (context.getIgnoreCache()) {
-      buf.append("&nocache=1");
+      uri.addQueryParameter("nocache", "1");
     } else {
-      buf.append("&v=").append(spec.getChecksum());
+      uri.addQueryParameter("v", spec.getChecksum());
     }
 
-    buf.append("&lang=").append(context.getLocale().getLanguage());
-    buf.append("&country=").append(context.getLocale().getCountry());
-    buf.append("&view=").append(context.getView());
+    uri.addQueryParameter("lang", context.getLocale().getLanguage());
+    uri.addQueryParameter("country", context.getLocale().getCountry());
+    uri.addQueryParameter("view", context.getView());
 
     UserPrefs prefs = context.getUserPrefs();
     for (UserPref pref : gadget.getSpec().getUserPrefs()) {
@@ -139,15 +139,13 @@ public class DefaultUrlGenerator implements UrlGenerator {
       if (value == null) {
         value = pref.getDefaultValue();
       }
-      buf.append("&up_").append(Utf8UrlCoder.encode(pref.getName()))
-         .append('=').append(Utf8UrlCoder.encode(value));
+      uri.addQueryParameter("up_" + pref.getName(), value);
     }
     // add url last to work around browser bugs
     if(!type.equals(View.ContentType.URL)) {
-        buf.append("&url=")
-           .append(Utf8UrlCoder.encode(url));
-      }
+      uri.addQueryParameter("url", url);
+    }
 
-    return buf.toString();
+    return uri.toString();
   }
 }

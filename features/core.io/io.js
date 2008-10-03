@@ -354,6 +354,8 @@ gadgets.io = function() {
         }
       }
 
+      var proxyUrl = config.jsonProxyUrl.replace("%host%", document.location.host);
+
       if (!respondWithPreload(paramData, params, callback, processResponse)) {
         if (httpMethod === "GET" && refreshInterval > 0) {
           // this content should be cached
@@ -361,11 +363,11 @@ gadgets.io = function() {
           var extraparams = "?refresh=" + refreshInterval + '&'
               + gadgets.io.encodeValues(paramData);
 
-          makeXhrRequest(url, config.jsonProxyUrl + extraparams, callback,
+          makeXhrRequest(url, proxyUrl + extraparams, callback,
               null, "GET", params, processResponse);
 
         } else {
-          makeXhrRequest(url, config.jsonProxyUrl, callback,
+          makeXhrRequest(url, proxyUrl, callback,
               gadgets.io.encodeValues(paramData), "POST", params,
               processResponse);
         }
@@ -442,6 +444,7 @@ gadgets.io = function() {
       var urlParams = gadgets.util.getUrlParameters();
 
       return config.proxyUrl.replace("%url%", encodeURIComponent(url)).
+          replace("%host%", document.location.host).
           replace("%rawurl%", url).
           replace("%refresh%", encodeURIComponent(refresh)).
           replace("%gadget%", encodeURIComponent(urlParams.url)).
