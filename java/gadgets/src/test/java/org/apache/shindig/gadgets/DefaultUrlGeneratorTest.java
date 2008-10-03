@@ -31,6 +31,7 @@ import org.apache.commons.lang.StringEscapeUtils;
 
 import java.net.URI;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -39,19 +40,19 @@ import java.util.Map;
  * Tests for DefaultUrlGenerator.
  */
 public class DefaultUrlGeneratorTest extends GadgetTestFixture {
-  private final static String IFR_PREFIX = "shindig/eye-frame?";
-  private final static String JS_PREFIX = "get-together/livescript/";
-  private final static String SPEC_URL = "http://example.org/gadget.xml";
-  private final static String TYPE_URL_HREF_HOST = "opensocial.org";
-  private final static String TYPE_URL_HREF_PATH = "/app/foo";
-  private final static String TYPE_URL_HREF_QUERY = "foo=bar&bar=baz";
-  private final static String TYPE_URL_HREF
+  private static final String IFR_PREFIX = "shindig/eye-frame";
+  private static final String JS_PREFIX = "http://%host%/get-together/livescript/%js%";
+  private static final String SPEC_URL = "http://example.org/gadget.xml";
+  private static final String TYPE_URL_HREF_HOST = "opensocial.org";
+  private static final String TYPE_URL_HREF_PATH = "/app/foo";
+  private static final String TYPE_URL_HREF_QUERY = "foo=bar&bar=baz";
+  private static final String TYPE_URL_HREF
       = "http://" + TYPE_URL_HREF_HOST + TYPE_URL_HREF_PATH + '?' + TYPE_URL_HREF_QUERY;
-  private final static String UP_NAME = "user-pref-name";
-  private final static String UP_VALUE = "user-pref-value";
-  private final static String CONTAINER = "shindig";
-  private final static String VIEW = "canvas";
-  private final static int MODULE_ID = 3435;
+  private static final String UP_NAME = "user-pref-name";
+  private static final String UP_VALUE = "user-pref-value";
+  private static final String CONTAINER = "shindig";
+  private static final String VIEW = "canvas";
+  private static final int MODULE_ID = 3435;
 
   private final GadgetContext context = mock(GadgetContext.class);
   private DefaultUrlGenerator realUrlGenerator;
@@ -107,14 +108,20 @@ public class DefaultUrlGeneratorTest extends GadgetTestFixture {
   }
 
   public void testGetBundledJsUrl() throws Exception {
-    List<String> features = new ArrayList<String>();
+    List<String> features = Arrays.asList("foo", "bar");
     expect(context.getDebug()).andReturn(false);
+    expect(context.getHost()).andReturn("example.org");
     replay();
 
     String jsParam = realUrlGenerator.getBundledJsUrl(features, context);
 
-    assertTrue(jsParam.matches(
-        JS_PREFIX + "core\\.js\\?v=[0-9a-zA-Z]*&container=" + CONTAINER + "&debug=0"));
+    Uri uri = Uri.parse(jsParam);
+
+    assertEquals("example.org", uri.getAuthority());
+    assertEquals("/get-together/livescript/foo:bar.js", uri.getPath());
+    assertTrue("Missing checksum.", uri.getQueryParameter("v").matches("[0-9a-zA-Z]*"));
+    assertEquals(CONTAINER, uri.getQueryParameter("container"));
+    assertEquals("0", uri.getQueryParameter("debug"));
   }
 
   public void testGetIframeUrlTypeHtml() throws Exception {
@@ -132,13 +139,13 @@ public class DefaultUrlGeneratorTest extends GadgetTestFixture {
         .setSpec(spec)
         .setCurrentView(spec.getView("default"));
 
-    URI iframeUrl = URI.create(realUrlGenerator.getIframeUrl(gadget));
+    Uri iframeUrl = Uri.parse(realUrlGenerator.getIframeUrl(gadget));
 
-    assertEquals(IFR_PREFIX, iframeUrl.getPath() + '?');
-    StringAssert.assertContains("container=" + CONTAINER, iframeUrl.getQuery());
-    StringAssert.assertContains("up_" + UP_NAME + '=' + UP_VALUE, iframeUrl.getQuery());
-    StringAssert.assertContains("mid=" + MODULE_ID, iframeUrl.getQuery());
-    StringAssert.assertContains("view=" + VIEW, iframeUrl.getQuery());
+    assertEquals(IFR_PREFIX, iframeUrl.getPath());
+    assertEquals(CONTAINER, iframeUrl.getQueryParameter("container"));
+    assertEquals(UP_VALUE, iframeUrl.getQueryParameter("up_" + UP_NAME));
+    assertEquals(Integer.toString(MODULE_ID), iframeUrl.getQueryParameter("mid"));
+    assertEquals(VIEW, iframeUrl.getQueryParameter("view"));
   }
 
   public void testGetIframeUrlTypeUrl() throws Exception {

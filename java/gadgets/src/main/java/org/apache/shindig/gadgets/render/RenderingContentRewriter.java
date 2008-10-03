@@ -20,6 +20,7 @@ package org.apache.shindig.gadgets.render;
 
 import org.apache.shindig.auth.SecurityToken;
 import org.apache.shindig.common.ContainerConfig;
+import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.gadgets.Gadget;
 import org.apache.shindig.gadgets.GadgetContext;
 import org.apache.shindig.gadgets.GadgetException;
@@ -42,6 +43,7 @@ import org.apache.shindig.gadgets.spec.GadgetSpec;
 import org.apache.shindig.gadgets.spec.LocaleSpec;
 import org.apache.shindig.gadgets.spec.MessageBundle;
 import org.apache.shindig.gadgets.spec.ModulePrefs;
+import org.apache.shindig.gadgets.spec.View;
 
 import com.google.common.collect.Sets;
 import com.google.inject.Inject;
@@ -117,6 +119,7 @@ public class RenderingContentRewriter implements ContentRewriter {
     try {
       GadgetContent content = createGadgetContent(gadget, mutableContent);
 
+      injectBaseTag(gadget, content);
       injectFeatureLibraries(gadget, content);
       // This can be one script block.
       content.appendHead("<script>");
@@ -134,6 +137,15 @@ public class RenderingContentRewriter implements ContentRewriter {
     }
   }
 
+  private void injectBaseTag(Gadget gadget, GadgetContent content) {
+    Uri base = gadget.getSpec().getUrl();
+    View view = gadget.getCurrentView();
+    if (view != null && view.getHref() != null) {
+      base = view.getHref();
+    }
+    content.appendHead("<base href='" + base + "'/>");
+  }
+
   private void injectOnLoadHandlers(GadgetContent content) {
     content.appendBody("<script>gadgets.util.runOnLoadHandlers();</script>");
   }
@@ -148,7 +160,7 @@ public class RenderingContentRewriter implements ContentRewriter {
     GadgetSpec spec = gadget.getSpec();
     String forcedLibs = context.getParameter("libs");
     Set<String> forced;
-    if (forcedLibs == null) {
+    if (forcedLibs == null || forcedLibs.length() == 0) {
       forced = Sets.newHashSet();
     } else {
       forced = Sets.newHashSet(forcedLibs.split(":"));

@@ -30,6 +30,7 @@ import static org.junit.Assert.assertTrue;
 
 import org.apache.shindig.common.ContainerConfig;
 import org.apache.shindig.common.uri.Uri;
+import org.apache.shindig.common.xml.XmlUtil;
 import org.apache.shindig.gadgets.Gadget;
 import org.apache.shindig.gadgets.GadgetContext;
 import org.apache.shindig.gadgets.GadgetException;
@@ -46,6 +47,7 @@ import org.apache.shindig.gadgets.rewrite.MutableContent;
 import org.apache.shindig.gadgets.spec.GadgetSpec;
 import org.apache.shindig.gadgets.spec.LocaleSpec;
 import org.apache.shindig.gadgets.spec.MessageBundle;
+import org.apache.shindig.gadgets.spec.View;
 
 import com.google.caja.util.Join;
 import com.google.common.collect.Lists;
@@ -561,6 +563,45 @@ public class RenderingContentRewriterTest {
     JSONObject json = getPreloadedJson(rewritten);
 
     assertEquals(0, json.length());
+  }
+
+  private String getBaseElement(String content) {
+    Matcher matcher = DOCUMENT_SPLIT_PATTERN.matcher(content);
+    assertTrue("Output is not valid HTML.", matcher.matches());
+    Pattern baseElementPattern
+        = Pattern.compile("(?:.*)<base href='(.*?)'\\/>(?:.*)", Pattern.DOTALL);
+    Matcher baseElementMatcher = baseElementPattern.matcher(matcher.group(HEAD_GROUP));
+    assertTrue("base element missing from head of document.", baseElementMatcher.matches());
+    return baseElementMatcher.group(1);
+  }
+
+  @Test
+  public void baseElementInsertedWhenContentIsInline() throws Exception {
+    Gadget gadget = makeDefaultGadget();
+
+    control.replay();
+
+    String rewritten = rewrite(gadget, BODY_CONTENT);
+    String base = getBaseElement(rewritten);
+
+    assertEquals(SPEC_URL.toString(), base);
+  }
+
+  @Test
+  public void baseElementInsertedWhenContentIsProxied() throws Exception {
+    Gadget gadget = makeDefaultGadget();
+
+    String viewUrl = "http://example.org/view.html";
+    String xml = "<Content href='" + viewUrl + "'/>";
+    View fakeView = new View("foo", Arrays.asList(XmlUtil.parse(xml)), SPEC_URL);
+    gadget.setCurrentView(fakeView);
+
+    control.replay();
+
+    String rewritten = rewrite(gadget, BODY_CONTENT);
+    String base = getBaseElement(rewritten);
+
+    assertEquals(viewUrl, base);
   }
 
   /**
