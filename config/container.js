@@ -118,7 +118,7 @@
     // Path to fetch opensocial data from
     // Must be on the same domain as the gadget rendering server
     "impl" : "rpc",  //Use "rpc" to enable JSON-RPC, "rest' for REST
-    "path" : "/social",
+    "path" : "http://%host%/social",
     "domain" : "shindig",
     "enableCaja" : false,
     "supportedFields" : {
