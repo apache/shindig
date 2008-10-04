@@ -41,16 +41,18 @@
       gadgets.config.register("opensocial-0.8", requiredConfig,
         function(config) {
           var configParams = config["opensocial-0.8"];
+          var path = configParams.path;
+          path = path.replace("%host%", document.location.host);
 
           if (configParams.impl == "rpc") {
             ShindigContainer = function() {
-              JsonRpcContainer.call(this, configParams.path,
+              JsonRpcContainer.call(this, path,
               configParams.domain, configParams.supportedFields);
             };
             ShindigContainer.inherits(JsonRpcContainer);
           } else {
             ShindigContainer = function() {
-              RestfulContainer.call(this, configParams.path,
+              RestfulContainer.call(this, path,
               configParams.domain, configParams.supportedFields);
             };
             ShindigContainer.inherits(RestfulContainer);
