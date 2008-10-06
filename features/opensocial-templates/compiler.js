@@ -516,9 +516,9 @@ os.xmlToHtml_ = function(xmlNode) {
  */
 os.createContext = function(data, opt_globals) {
   var context = JsEvalContext.create(data);
-  //context.setVariable(os.VAR_cur, os.getValueFromObject_);
   context.setVariable(os.VAR_callbacks, []);
   context.setVariable(os.VAR_identifierresolver, os.getFromContext);
+  context.setVariable(os.VAR_msg, os.getPrefMessage);
   if (opt_globals) {
     for (var global in opt_globals) {
       context.setVariable(global, opt_globals[global]);
