@@ -79,6 +79,7 @@ os.ATT_customtag = "customtag";
 os.VAR_my = "$my";
 os.VAR_cur = "$cur";
 os.VAR_node = "$node"; 
+os.VAR_msg = "Msg";
 os.VAR_parentnode = "$parentnode";
 os.VAR_uniqueId = "$uniqueId";
 os.VAR_identifierresolver = "$_ir";
@@ -169,6 +170,38 @@ os.createNodeAccessor_ = function(node) {
   return function(name) {
     return os.getValueFromNode_(node, name);
   }         
+};
+
+/**
+ * A singleton instance of the current gadget Prefs - only instantiated if
+ * we are in a gadget container. 
+ * @type gadgets.Prefs
+ */
+os.gadgetPrefs_ = null;
+if (window['gadgets'] && window['gadgets']['Prefs']) {
+  os.gadgetPrefs_ = new window['gadgets']['Prefs']();
+};
+
+/**
+ * A convenience function to get a localized message by key from the shared
+ * gadgets.Prefs object.
+ * @param {string} key The message key to get
+ * @return {string|null} The localized message for a given key, or null if not
+ * found, or not in the gadgets environment.
+ */
+os.getPrefMessage = function(key) {
+  if (!os.gadgetPrefs_) {
+    return null;
+  }
+  return os.gadgetPrefs_.getMsg(key);
+};
+
+/**
+ * A convenience function for identifier resolver to be able to use 
+ * getPrefMessage() both as ${Msg.foo} and ${Msg('foo')}.
+ */
+os.getPrefMessage.get = function(key) {
+  return os.getPrefMessage(key);
 };
 
 /**
