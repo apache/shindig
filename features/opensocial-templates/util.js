@@ -20,6 +20,16 @@
  * @fileoverview Provides various utility functions used throughout the library.
  */
 
+
+/**
+ * Trims leading and trailing whitespace from a string.
+ * @param {string} string The input string.
+ * @returns {string} Input with leading and trailing whitespace removed.
+ */
+os.trim = function(string) {
+  return string.replace(/^\s+/, '').replace(/\s+$/, '');         
+};
+
 /**
  * Checks whether or not a given character is alpha-numeric.
  * @param {string} ch Character to check.

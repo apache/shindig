@@ -108,6 +108,7 @@ os.compileTemplate = function(node, opt_id) {
   
   opt_id = opt_id || node.id;
   var src = node.value || node.innerHTML;
+  src = os.trim(src);
   var template = os.compileTemplateString(src, opt_id);
   return template;
 };
@@ -119,7 +120,7 @@ os.compileTemplate = function(node, opt_id) {
  * @return {os.Template} A compiled Template object.
  */
 os.compileTemplateString = function(src, opt_id) {
-  var src = os.prepareTemplateXML_(src);
+  src = os.prepareTemplateXML_(src);
   var doc = os.parseXML_(src);
   return os.compileXMLDoc(doc, opt_id);
 };
@@ -194,14 +195,6 @@ os.getPrefMessage = function(key) {
     return null;
   }
   return os.gadgetPrefs_.getMsg(key);
-};
-
-/**
- * A convenience function for identifier resolver to be able to use 
- * getPrefMessage() both as ${Msg.foo} and ${Msg('foo')}.
- */
-os.getPrefMessage.get = function(key) {
-  return os.getPrefMessage(key);
 };
 
 /**

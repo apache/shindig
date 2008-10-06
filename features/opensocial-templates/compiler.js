@@ -518,7 +518,6 @@ os.createContext = function(data, opt_globals) {
   var context = JsEvalContext.create(data);
   context.setVariable(os.VAR_callbacks, []);
   context.setVariable(os.VAR_identifierresolver, os.getFromContext);
-  context.setVariable(os.VAR_msg, os.getPrefMessage);
   if (opt_globals) {
     for (var global in opt_globals) {
       context.setVariable(global, opt_globals[global]);
@@ -853,6 +852,18 @@ os.wrapIdentifiersInToken = function(token, opt_default) {
   if (!os.canStartIdentifier(token.charAt(0))) {
     return token;
   }
+
+  // If the identifier is accessing a message 
+  // (and gadget messages are obtainable), inline it here.
+  // TODO: This is inefficient for times when the message contains no markup - 
+  // such cases should be optimized.  
+  if (token.substring(0, os.VAR_msg.length + 1) == (os.VAR_msg + '.') && 
+      os.gadgetPrefs_) {
+    var key = token.split(".")[1];
+    var msg = os.getPrefMessage(key) || '';
+    return os.parseAttribute_(msg) || os.transformLiteral_(msg);
+  }
+  
   var identifiers = os.tokenToIdentifiers(token);
   var parts = false;
   var buffer = [];
