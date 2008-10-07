@@ -105,7 +105,7 @@ public final class Uri {
    */
   public URI toJavaUri() {
     try {
-      return new URI(scheme, authority, path, query, fragment);
+      return new URI(toString());
     } catch (URISyntaxException e) {
       // Shouldn't ever happen.
       throw new IllegalArgumentException(e);
