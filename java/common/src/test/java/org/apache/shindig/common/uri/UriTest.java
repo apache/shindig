@@ -143,6 +143,14 @@ public class UriTest {
   }
 
   @Test
+  public void toJavaUriWithSpecialChars() {
+    URI javaUri = URI.create("http://example.org/foo/bar/baz?blah=bl%25ah#boo");
+    Uri uri = Uri.parse("http://example.org/foo/bar/baz?blah=bl%25ah#boo");
+
+    assertEquals(javaUri, uri.toJavaUri());
+  }
+
+  @Test
   public void fromJavaUri() throws Exception {
     URI javaUri = URI.create("http://example.org/foo/bar/baz?blah=blah#boo");
     Uri uri = Uri.parse("http://example.org/foo/bar/baz?blah=blah#boo");
@@ -208,6 +216,13 @@ public class UriTest {
   public void relativeUrlIsNotAbsolute() {
     assertFalse("Url without scheme reported absolute.",
         Uri.parse("//example.org/foo").isAbsolute());
+  }
+
+  @Test
+  public void parseWithSpecialCharacters() {
+    String original = "http://example.org/?foo%25pbar=baz+blah";
+
+    assertEquals(original, Uri.parse(original).toString());
   }
 
   @Test
