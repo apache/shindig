@@ -497,6 +497,24 @@ public class RenderingContentRewriterTest {
     // rewrite will throw if the optional unsupported feature doesn't work.
   }
 
+  @Test
+  public void multipleUnsupportedOptionalFeaturesDoNotThrow() throws Exception {
+    String gadgetXml =
+      "<Module><ModulePrefs title=''>" +
+      "  <Optional feature='foo'/>" +
+      "  <Optional feature='bar'/>" +
+      "</ModulePrefs>" +
+      "<Content type='html'/>" +
+      "</Module>";
+
+    Gadget gadget = makeGadgetWithSpec(gadgetXml);
+
+    control.replay();
+
+    rewrite(gadget, "");
+    // rewrite will throw if the optional unsupported feature doesn't work.
+  }
+
   private JSONObject getPreloadedJson(String content) throws JSONException {
     Pattern preloadPattern
         = Pattern.compile("(?:.*)gadgets\\.io\\.preloaded_=\\{(.*?)\\};(?:.*)", Pattern.DOTALL);
