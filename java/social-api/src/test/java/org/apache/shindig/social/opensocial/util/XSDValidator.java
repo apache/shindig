@@ -17,36 +17,35 @@
  */
 package org.apache.shindig.social.opensocial.util;
 
-import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
-import org.xml.sax.SAXNotRecognizedException;
-import org.xml.sax.SAXParseException;
-import org.xml.sax.helpers.DefaultHandler;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.StringReader;
 import java.io.UnsupportedEncodingException;
 
-import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
-import javax.xml.transform.Source;
 import javax.xml.transform.stream.StreamSource;
 import javax.xml.validation.Schema;
 import javax.xml.validation.SchemaFactory;
 import javax.xml.validation.Validator;
 
 /**
- *
+ * Validator utility for testing.
  */
 public class XSDValidator {
-  private static final String JAXP_SCHEMA_LANGUAGE = "http://java.sun.com/xml/jaxp/properties/schemaLanguage";
-
+  /**
+   * The schema langiage being used.
+   */
   private static final String W3C_XML_SCHEMA = "http://www.w3.org/2001/XMLSchema";
 
+  /**
+   * Validate a xml string against a supplied schema.
+   *
+   * @param xml the xml presented as a string
+   * @param schema an input stream containing the xsd
+   * @return a list of errors or a 0 lenght string if none.
+   */
   public static String validate(String xml, InputStream schema) {
     try {
       return validate(new ByteArrayInputStream(xml.getBytes("UTF-8")), schema);
@@ -54,17 +53,24 @@ public class XSDValidator {
       return e.getMessage();
     }
   }
+
+  /**
+   * Validate a xml input stream against a supplied schema.
+   * @param xml a stream containing the xml
+   * @param schema a stream containing the schema
+   * @return a list of errors or warnings, a 0 lenght string if none.
+   */
   public static String validate(InputStream xml, InputStream schema) {
-  
+
     SAXParserFactory factory = SAXParserFactory.newInstance();
     factory.setNamespaceAware(true);
     factory.setValidating(true);
     final StringBuilder errors = new StringBuilder();
     try {
-      
+
       SchemaFactory schemaFactory = SchemaFactory.newInstance(W3C_XML_SCHEMA);
       Schema s = schemaFactory.newSchema(new StreamSource(schema));
-      System.err.println("Schema is "+s);
+      System.err.println("Schema is " + s);
       Validator validator = s.newValidator();
       validator.validate(new StreamSource(xml));
     } catch (IOException e) {

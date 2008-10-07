@@ -22,7 +22,7 @@ import junit.framework.TestCase;
 import org.apache.shindig.common.xml.XmlException;
 
 /**
- *
+ * Tests the XSDValidator
  */
 public class XSDValidatorTest extends TestCase {
 
