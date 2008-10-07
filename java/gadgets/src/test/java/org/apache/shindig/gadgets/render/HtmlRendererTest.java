@@ -24,6 +24,7 @@ import static org.junit.Assert.assertTrue;
 import org.apache.shindig.auth.AnonymousSecurityToken;
 import org.apache.shindig.auth.SecurityToken;
 import org.apache.shindig.common.uri.Uri;
+import org.apache.shindig.common.uri.UriBuilder;
 import org.apache.shindig.common.xml.XmlUtil;
 import org.apache.shindig.gadgets.Gadget;
 import org.apache.shindig.gadgets.GadgetContext;
@@ -41,8 +42,8 @@ import com.google.common.collect.Maps;
 
 import org.junit.Test;
 
-import java.net.URI;
 import java.util.Arrays;
+import java.util.Locale;
 import java.util.Map;
 
 /**
@@ -53,12 +54,9 @@ public class HtmlRendererTest {
   private static final String BASIC_HTML_CONTENT = "Hello, World!";
   private static final String PROXIED_HTML_CONTENT = "Hello, Universe!";
   private static final Uri PROXIED_HTML_HREF = Uri.parse("http://example.org/proxied.php");
+  private static final Uri EXPECTED_PROXIED_HTML_HREF
+      = Uri.parse("http://example.org/proxied.php?lang=all&country=ALL");
   private static final GadgetContext CONTEXT = new GadgetContext() {
-    @Override
-    public URI getUrl() {
-      return SPEC_URL.toJavaUri();
-    }
-
     @Override
     public SecurityToken getToken() {
       return new AnonymousSecurityToken();
@@ -96,14 +94,14 @@ public class HtmlRendererTest {
 
   @Test
   public void renderProxied() throws Exception {
-    fetcher.plainResponses.put(PROXIED_HTML_HREF, new HttpResponse(PROXIED_HTML_CONTENT));
+    fetcher.plainResponses.put(EXPECTED_PROXIED_HTML_HREF, new HttpResponse(PROXIED_HTML_CONTENT));
     String content = renderer.render(makeHrefGadget("none"));
     assertEquals(PROXIED_HTML_CONTENT, content);
   }
 
   @Test
   public void renderProxiedSigned() throws Exception {
-    fetcher.signedResponses.put(PROXIED_HTML_HREF, new HttpResponse(PROXIED_HTML_CONTENT));
+    fetcher.signedResponses.put(EXPECTED_PROXIED_HTML_HREF, new HttpResponse(PROXIED_HTML_CONTENT));
     String content = renderer.render(makeHrefGadget("signed"));
     assertEquals(PROXIED_HTML_CONTENT, content);
   }
@@ -111,8 +109,31 @@ public class HtmlRendererTest {
   @Test
   public void renderProxiedOAuth() throws Exception {
     // TODO: We need to disambiguate between oauth and signed.
-    fetcher.oauthResponses.put(PROXIED_HTML_HREF, new HttpResponse(PROXIED_HTML_CONTENT));
+    fetcher.oauthResponses.put(EXPECTED_PROXIED_HTML_HREF, new HttpResponse(PROXIED_HTML_CONTENT));
     String content = renderer.render(makeHrefGadget("oauth"));
+    assertEquals(PROXIED_HTML_CONTENT, content);
+  }
+
+  @Test
+  public void renderProxiedCustomLocale() throws Exception {
+    UriBuilder uri = new UriBuilder(PROXIED_HTML_HREF);
+    uri.putQueryParameter("lang", "foo");
+    uri.putQueryParameter("country", "BAR");
+    Gadget gadget = makeHrefGadget("none");
+    gadget.setContext(new GadgetContext() {
+      @Override
+      public Locale getLocale() {
+        return new Locale("foo", "BAR");
+      }
+
+      @Override
+      public SecurityToken getToken() {
+        return new AnonymousSecurityToken();
+      }
+    });
+
+    fetcher.plainResponses.put(uri.toUri(), new HttpResponse(PROXIED_HTML_CONTENT));
+    String content = renderer.render(gadget);
     assertEquals(PROXIED_HTML_CONTENT, content);
   }
 

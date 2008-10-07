@@ -18,9 +18,10 @@
  */
 package org.apache.shindig.common.uri;
 
+import org.apache.shindig.common.util.Utf8UrlCoder;
+
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import org.apache.shindig.common.util.Utf8UrlCoder;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -43,7 +44,7 @@ public class UriBuilder {
   private String path;
   private String query;
   private String fragment;
-  private Map<String, List<String>> queryParameters;
+  private final Map<String, List<String>> queryParameters;
 
 
   /**
@@ -160,6 +161,14 @@ public class UriBuilder {
   }
 
   /**
+   * Force overwrites a given query parameter with the given value.
+   */
+  public UriBuilder putQueryParameter(String name, String... values) {
+    queryParameters.put(name, Lists.newArrayList(values));
+    return this;
+  }
+
+  /**
    * @return The queryParameters part of the uri, separated into component parts.
    */
   public Map<String, List<String>> getQueryParameters() {
@@ -212,7 +221,7 @@ public class UriBuilder {
           buf.append('&');
         }
         firstDone = true;
-        
+
         buf.append(name)
            .append('=')
            .append(Utf8UrlCoder.encode(value));

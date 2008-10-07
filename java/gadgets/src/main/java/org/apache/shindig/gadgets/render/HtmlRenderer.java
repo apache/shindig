@@ -18,7 +18,7 @@
  */
 package org.apache.shindig.gadgets.render;
 
-import org.apache.shindig.common.uri.Uri;
+import org.apache.shindig.common.uri.UriBuilder;
 import org.apache.shindig.gadgets.Gadget;
 import org.apache.shindig.gadgets.GadgetContext;
 import org.apache.shindig.gadgets.GadgetException;
@@ -77,13 +77,17 @@ public class HtmlRenderer {
         return rewriter.rewriteGadget(gadget, view.getContent());
       } else {
         // TODO: Add current url to GadgetContext to support transitive proxying.
-        HttpRequest request = new HttpRequest(view.getHref())
+        UriBuilder uri = new UriBuilder(view.getHref());
+        uri.addQueryParameter("lang", context.getLocale().getLanguage());
+        uri.addQueryParameter("country", context.getLocale().getCountry());
+
+        HttpRequest request = new HttpRequest(uri.toUri())
             .setIgnoreCache(context.getIgnoreCache())
             .setOAuthArguments(new OAuthArguments(view))
             .setAuthType(view.getAuthType())
             .setSecurityToken(context.getToken())
             .setContainer(context.getContainer())
-            .setGadget(Uri.fromJavaUri(context.getUrl()));
+            .setGadget(spec.getUrl());
         HttpResponse response = fetcher.fetch(request);
         if (response.getHttpStatusCode() != HttpResponse.SC_OK) {
           throw new RenderingException("Unable to reach remote host. HTTP status " +
