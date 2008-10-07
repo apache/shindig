@@ -26,7 +26,6 @@ import org.apache.shindig.social.core.util.BeanXmlConverter;
 import org.apache.shindig.social.core.util.BeanAtomConverter;
 import org.apache.shindig.social.opensocial.service.BeanConverter;
 import org.apache.shindig.social.opensocial.service.DataServiceServletFetcher;
-import org.apache.shindig.social.opensocial.service.HandlerProvider;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.TypeLiteral;

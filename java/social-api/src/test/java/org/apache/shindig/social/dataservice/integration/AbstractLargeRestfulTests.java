@@ -22,12 +22,8 @@ import org.apache.shindig.social.SocialApiTestsGuiceModule;
 import org.apache.shindig.social.core.util.BeanAtomConverter;
 import org.apache.shindig.social.core.util.BeanJsonConverter;
 import org.apache.shindig.social.core.util.BeanXmlConverter;
-import org.apache.shindig.social.opensocial.service.ActivityHandler;
-import org.apache.shindig.social.opensocial.service.AppDataHandler;
-import org.apache.shindig.social.opensocial.service.DataRequestHandler;
 import org.apache.shindig.social.opensocial.service.DataServiceServlet;
-import org.apache.shindig.social.opensocial.service.HandlerProvider;
-import org.apache.shindig.social.opensocial.service.PersonHandler;
+import org.apache.shindig.social.opensocial.service.HandlerDispatcher;
 
 import com.google.common.collect.Maps;
 import com.google.inject.Guice;
@@ -69,7 +65,7 @@ public abstract class AbstractLargeRestfulTests extends TestCase {
     
     servlet = new DataServiceServlet();
 
-    servlet.setHandlers(injector.getInstance(HandlerProvider.class));
+    servlet.setHandlerDispatcher(injector.getInstance(HandlerDispatcher.class));
     servlet.setBeanConverters(new BeanJsonConverter(injector), new BeanXmlConverter(),
         new BeanAtomConverter());
 
