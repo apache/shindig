@@ -19,16 +19,12 @@
 -->
 <feature>
   <name>opensocial-0.8</name>
-  <dependency>opensocial-reference</dependency>
+  <dependency>opensocial-jsonrpc</dependency>
+  <dependency>opensocial-rest</dependency>
   <!-- <dependency>caja</dependency> -->
   <!-- Must include the "caja" feature to display samplecontainer -->
   <!-- gadgets when "use caja" is checked -->
-  <gadget>
-    <script src="fieldtranslations.js"></script>
-    <script src="jsonactivity.js"></script>
-    <script src="jsonperson.js"></script>
-    <script src="restfulcontainer.js"></script>
-    <script src="jsonrpccontainer.js"></script>
+  <gadget>    
     <script>
       var requiredConfig = {
         "impl": gadgets.config.NonEmptyStringValidator,
@@ -64,7 +60,6 @@
             opensocial.Container.get().enableCaja();
           }
       });
-
     </script>
   </gadget>
 </feature>
