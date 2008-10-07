@@ -53,6 +53,7 @@ import org.json.JSONObject;
 
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 import java.util.logging.Level;
@@ -240,9 +241,11 @@ public class RenderingContentRewriter implements ContentRewriter {
 
     if (!unsupported.isEmpty()) {
       // Remove non-required libs
-      for (String missing : unsupported) {
+      Iterator<String> missingIter = unsupported.iterator();
+      while (missingIter.hasNext()) {
+        String missing = missingIter.next();
         if (!features.get(missing).getRequired()) {
-          unsupported.remove(missing);
+          missingIter.remove();
         }
       }
 
