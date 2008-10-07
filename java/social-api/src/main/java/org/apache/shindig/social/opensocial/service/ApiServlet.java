@@ -26,12 +26,10 @@ import org.apache.shindig.social.core.util.BeanJsonConverter;
 import org.apache.shindig.social.opensocial.spi.SocialSpiException;
 
 import com.google.inject.Inject;
-import com.google.inject.Provider;
 import com.google.inject.name.Named;
 
 import java.io.IOException;
 import java.util.Collections;
-import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import javax.servlet.http.HttpServletRequest;
@@ -43,14 +41,14 @@ import javax.servlet.http.HttpServletResponse;
 public abstract class ApiServlet extends InjectedServlet {
   protected static final String DEFAULT_ENCODING = "UTF-8";
 
-  private Map<String, Provider<? extends DataRequestHandler>> handlers;
+  private HandlerDispatcher dispatcher;
   protected BeanJsonConverter jsonConverter;
   protected BeanConverter xmlConverter;
   protected BeanConverter atomConverter;
 
   @Inject
-  public void setHandlers(HandlerProvider handlers) {
-    this.handlers = handlers.get();
+  public void setHandlerDispatcher(HandlerDispatcher dispatcher) {
+    this.dispatcher = dispatcher;
   }
 
   @Inject
@@ -82,14 +80,13 @@ public abstract class ApiServlet extends InjectedServlet {
    */
   protected Future<?> handleRequestItem(RequestItem requestItem,
       HttpServletRequest servletRequest) {
-    Provider<? extends DataRequestHandler> handlerProvider = handlers.get(requestItem.getService());
+    DataRequestHandler handler = dispatcher.getHandler(requestItem.getService());
 
-    if (handlerProvider == null) {
+    if (handler == null) {
       return ImmediateFuture.errorInstance(new SocialSpiException(ResponseError.NOT_IMPLEMENTED,
           "The service " + requestItem.getService() + " is not implemented"));
     }
 
-    DataRequestHandler handler = handlerProvider.get();
     return handler.handleItem(requestItem);
   }
 

@@ -72,8 +72,9 @@ public class DataServiceServletTest extends TestCase {
     activityHandler = EasyMock.createMock(ActivityHandler.class);
     appDataHandler = EasyMock.createMock(AppDataHandler.class);
 
-    servlet.setHandlers(new HandlerProvider(constant(peopleHandler),
-        constant(activityHandler), constant(appDataHandler)));
+    HandlerDispatcher dispatcher = new StandardHandlerDispatcher(constant(peopleHandler),
+        constant(activityHandler), constant(appDataHandler));
+    servlet.setHandlerDispatcher(dispatcher);
 
     servlet.setBeanConverters(jsonConverter, xmlConverter, atomConverter);
   }
