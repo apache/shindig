@@ -302,6 +302,28 @@ public class RenderingContentRewriterTest {
   }
 
   @Test
+  public void featuresInjectedBeforeExistingScript() throws Exception {
+    Gadget gadget = makeDefaultGadget();
+    control.replay();
+
+    String rewritten = rewrite(gadget,
+        "<html><head><script src='foo.js'></script></head><body>hello</body></html>");
+
+    Matcher matcher = DOCUMENT_SPLIT_PATTERN.matcher(rewritten);
+    assertTrue("Output is not valid HTML.", matcher.matches());
+
+    String headContent = matcher.group(HEAD_GROUP);
+
+    // Locate user script.
+    int userPosition = headContent.indexOf("<script src='foo.js'></script>");
+
+    // Anything else here, we added.
+    int ourPosition = headContent.indexOf("<script>");
+
+    assertTrue("Injected script must come before user script.", ourPosition < userPosition);
+  }
+
+  @Test
   public void urlFeaturesForcedExternal() throws Exception {
     String gadgetXml =
       "<Module><ModulePrefs title=''>" +
