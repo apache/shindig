@@ -18,8 +18,12 @@
  */
 package org.apache.shindig.gadgets;
 
+import static org.easymock.EasyMock.eq;
 import static org.easymock.EasyMock.expect;
+import static org.easymock.EasyMock.isA;
 
+import org.apache.shindig.common.ContainerConfig;
+import org.apache.shindig.common.ContainerConfigException;
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.gadgets.spec.GadgetSpec;
 
@@ -32,6 +36,7 @@ import org.apache.commons.lang.StringEscapeUtils;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -40,8 +45,8 @@ import java.util.Map;
  * Tests for DefaultUrlGenerator.
  */
 public class DefaultUrlGeneratorTest extends GadgetTestFixture {
-  private static final String IFR_PREFIX = "shindig/eye-frame";
-  private static final String JS_PREFIX = "http://%host%/get-together/livescript/%js%";
+  private static final String IFR_BASE = "/gadgets/eye-frame";
+  private static final String JS_BASE = "http://%host%/get-together/livescript/%js%";
   private static final String SPEC_URL = "http://example.org/gadget.xml";
   private static final String TYPE_URL_HREF_HOST = "opensocial.org";
   private static final String TYPE_URL_HREF_PATH = "/app/foo";
@@ -55,12 +60,12 @@ public class DefaultUrlGeneratorTest extends GadgetTestFixture {
   private static final int MODULE_ID = 3435;
 
   private final GadgetContext context = mock(GadgetContext.class);
+  private final LockedDomainService lockedDomainService = mock(LockedDomainService.class);
+  private FakeContainerConfig config;
   private DefaultUrlGenerator realUrlGenerator;
 
   @Override
   public void setUp() throws Exception {
-    realUrlGenerator = new DefaultUrlGenerator(IFR_PREFIX, JS_PREFIX, registry);
-
     expect(context.getContainer()).andReturn(CONTAINER).anyTimes();
     expect(context.getUrl()).andReturn(URI.create(SPEC_URL)).anyTimes();
     Map<String, String> prefMap = Maps.newHashMap();
@@ -70,6 +75,11 @@ public class DefaultUrlGeneratorTest extends GadgetTestFixture {
     expect(context.getLocale()).andReturn(Locale.getDefault()).anyTimes();
     expect(context.getModuleId()).andReturn(MODULE_ID).anyTimes();
     expect(context.getView()).andReturn(VIEW).anyTimes();
+
+    config = new FakeContainerConfig();
+    config.properties.put(DefaultUrlGenerator.IFRAME_URI_PARAM, IFR_BASE);
+    config.properties.put(DefaultUrlGenerator.JS_URI_PARAM, JS_BASE);
+    realUrlGenerator = new DefaultUrlGenerator(config, lockedDomainService, registry);
   }
 
   public void testGetBundledJsParam() throws Exception {
@@ -141,7 +151,35 @@ public class DefaultUrlGeneratorTest extends GadgetTestFixture {
 
     Uri iframeUrl = Uri.parse(realUrlGenerator.getIframeUrl(gadget));
 
-    assertEquals(IFR_PREFIX, iframeUrl.getPath());
+    assertEquals(IFR_BASE, iframeUrl.getPath());
+    assertEquals(CONTAINER, iframeUrl.getQueryParameter("container"));
+    assertEquals(UP_VALUE, iframeUrl.getQueryParameter("up_" + UP_NAME));
+    assertEquals(Integer.toString(MODULE_ID), iframeUrl.getQueryParameter("mid"));
+    assertEquals(VIEW, iframeUrl.getQueryParameter("view"));
+  }
+
+  public void testGetIframeUrlTypeHtmlWithLockedDomain() throws Exception {
+    String xml
+        = "<Module>" +
+          " <ModulePrefs title='test'/>" +
+          " <Content type='html'/>" +
+          " <UserPref name='" + UP_NAME + "' datatype='string'/>" +
+          "</Module>";
+    GadgetSpec spec = new GadgetSpec(Uri.parse(SPEC_URL), xml);
+
+    expect(lockedDomainService.getLockedDomainForGadget(isA(GadgetSpec.class), eq(CONTAINER)))
+        .andReturn("locked.example.org");
+    replay();
+
+    Gadget gadget = new Gadget()
+        .setContext(context)
+        .setSpec(spec)
+        .setCurrentView(spec.getView("default"));
+
+    Uri iframeUrl = Uri.parse(realUrlGenerator.getIframeUrl(gadget));
+
+    assertEquals("locked.example.org", iframeUrl.getAuthority());
+    assertEquals(IFR_BASE, iframeUrl.getPath());
     assertEquals(CONTAINER, iframeUrl.getQueryParameter("container"));
     assertEquals(UP_VALUE, iframeUrl.getQueryParameter("up_" + UP_NAME));
     assertEquals(Integer.toString(MODULE_ID), iframeUrl.getQueryParameter("mid"));
@@ -157,6 +195,7 @@ public class DefaultUrlGeneratorTest extends GadgetTestFixture {
           "</Module>";
     GadgetSpec spec = new GadgetSpec(Uri.parse(SPEC_URL), xml);
     replay();
+
     Gadget gadget = new Gadget()
         .setContext(context)
         .setSpec(spec)
@@ -170,5 +209,23 @@ public class DefaultUrlGeneratorTest extends GadgetTestFixture {
     StringAssert.assertContains("container=" + CONTAINER, iframeUrl.getQuery());
     StringAssert.assertContains("up_" + UP_NAME + '=' + UP_VALUE, iframeUrl.getQuery());
     StringAssert.assertContains("mid=" + MODULE_ID, iframeUrl.getQuery());
+  }
+
+  private static class FakeContainerConfig extends ContainerConfig {
+    private final Map<String, String> properties = Maps.newHashMap();
+
+    public FakeContainerConfig() throws ContainerConfigException {
+      super(null);
+    }
+
+    @Override
+    public String get(String container, String property) {
+      return properties.get(property);
+    }
+
+    @Override
+    public Collection<String> getContainers() {
+      return Arrays.asList(CONTAINER);
+    }
   }
 }

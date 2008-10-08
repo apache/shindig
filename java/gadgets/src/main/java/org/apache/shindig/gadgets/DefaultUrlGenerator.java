@@ -18,6 +18,7 @@
  */
 package org.apache.shindig.gadgets;
 
+import org.apache.shindig.common.ContainerConfig;
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.common.uri.UriBuilder;
 import org.apache.shindig.common.util.HashUtil;
@@ -25,11 +26,12 @@ import org.apache.shindig.gadgets.spec.GadgetSpec;
 import org.apache.shindig.gadgets.spec.UserPref;
 import org.apache.shindig.gadgets.spec.View;
 
+import com.google.common.collect.Maps;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import com.google.inject.name.Named;
 
 import java.util.Collection;
+import java.util.Map;
 import java.util.regex.Pattern;
 
 /**
@@ -42,17 +44,26 @@ import java.util.regex.Pattern;
  */
 @Singleton
 public class DefaultUrlGenerator implements UrlGenerator {
-  private final static Pattern ALLOWED_FEATURE_NAME = Pattern.compile("[0-9a-zA-Z\\.\\-]+");
-  private final String jsPrefix;
-  private final String iframePrefix;
+  protected static final Pattern ALLOWED_FEATURE_NAME = Pattern.compile("[0-9a-zA-Z\\.\\-]+");
+  protected static final String IFRAME_URI_PARAM = "gadgets.iframeBaseUri";
+  protected static final String JS_URI_PARAM = "gadgets.jsUriTemplate";
   private final String jsChecksum;
+  private final Map<String, Uri> iframeBaseUris;
+  private final Map<String, String> jsUriTemplates;
+  private final LockedDomainService lockedDomainService;
 
   @Inject
-  public DefaultUrlGenerator(@Named("shindig.urls.iframe.prefix") String iframePrefix,
-                             @Named("shindig.urls.js.prefix") String jsPrefix,
+  public DefaultUrlGenerator(ContainerConfig containerConfig,
+                             LockedDomainService lockedDomainService,
                              GadgetFeatureRegistry registry) {
-    this.iframePrefix = iframePrefix;
-    this.jsPrefix = jsPrefix;
+    iframeBaseUris = Maps.newHashMap();
+    jsUriTemplates = Maps.newHashMap();
+    for (String container : containerConfig.getContainers()) {
+      iframeBaseUris.put(container, Uri.parse(containerConfig.get(container, IFRAME_URI_PARAM)));
+      jsUriTemplates.put(container, containerConfig.get(container, JS_URI_PARAM));
+    }
+
+    this.lockedDomainService = lockedDomainService;
 
     StringBuilder jsBuf = new StringBuilder();
     for (GadgetFeature feature : registry.getAllFeatures()) {
@@ -61,9 +72,15 @@ public class DefaultUrlGenerator implements UrlGenerator {
       }
     }
     jsChecksum = HashUtil.checksum(jsBuf.toString().getBytes());
+
   }
 
   public String getBundledJsUrl(Collection<String> features, GadgetContext context) {
+    String jsPrefix = jsUriTemplates.get(context.getContainer());
+    if (jsPrefix == null) {
+      return "";
+    }
+
     return jsPrefix.replace("%host%", context.getHost())
                    .replace("%js%", getBundledJsParam(features, context));
   }
@@ -114,7 +131,16 @@ public class DefaultUrlGenerator implements UrlGenerator {
       case HTML:
       default:
         // TODO: Locked domain support.
-        uri = new UriBuilder(Uri.parse(iframePrefix));
+        Uri iframeBaseUri = iframeBaseUris.get(context.getContainer());
+        if (iframeBaseUri != null) {
+          uri = new UriBuilder(iframeBaseUri);
+        } else {
+          uri = new UriBuilder();
+        }
+        String host = lockedDomainService.getLockedDomainForGadget(spec, context.getContainer());
+        if (host != null) {
+          uri.setAuthority(host);
+        }
         break;
     }
 
