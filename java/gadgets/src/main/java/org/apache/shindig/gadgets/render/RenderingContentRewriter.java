@@ -370,10 +370,10 @@ public class RenderingContentRewriter implements ContentRewriter {
       if (matcher.matches()) {
         GadgetContent content = new GadgetContent();
         content.appendHead(matcher.group(BEFORE_HEAD_GROUP))
-               .appendHead("<head>")
-               .appendHead(matcher.group(HEAD_GROUP));
+               .appendHead("<head>");
 
-        content.appendBody("</head>")
+        content.appendBody(matcher.group(HEAD_GROUP))
+               .appendBody("</head>")
                .appendBody(createBodyTag(gadget, matcher.group(BODY_ATTRIBUTES_GROUP)))
                .appendBody(matcher.group(BODY_GROUP));
 
