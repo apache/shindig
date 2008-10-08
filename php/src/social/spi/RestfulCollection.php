@@ -19,13 +19,13 @@
 
 /**
  * This class represents a RESTful social data response
- *
  */
 class RestfulCollection {
 	
 	public $entry;
 	public $startIndex;
 	public $totalResults;
+	public $itemsPerPage;
 	
 	// boolean flags to indicate whether the requested operations were performed or declined
 	public $filtered;
@@ -62,6 +62,16 @@ class RestfulCollection {
 	public function setStartIndex($startIndex)
 	{
 		$this->startIndex = $startIndex;
+	}
+
+	public function getItemsPerPage()
+	{
+		return $this->itemsPerPage;
+	}
+
+	public function setItemsPerPage($startIndex)
+	{
+		$this->startIndex = itemsPerPage;
 	}
 
 	public function getTotalResults()

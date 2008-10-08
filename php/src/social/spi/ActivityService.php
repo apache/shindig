@@ -17,7 +17,7 @@
  * specific language governing permissions and limitations under the License.
  */
 
-interface ActivitiesService {
+interface ActivityService {
 
 	/**
 	 * Returns a list of activities that correspond to the passed in person ids.
@@ -25,9 +25,9 @@ interface ActivitiesService {
 	 * @param token A valid SecurityToken
 	 * @return a response item with the list of activities.
 	 */
-	function getActivities(UserId $userId, $groupId, $first, $max, SecurityToken $token);
+	function getActivities($userId, $groupId, $first, $max, SecurityToken $token);
 
-	function getActivity(UserId $userId, $groupId, $activityId, $first, $max, SecurityToken $token);
+	function getActivity($userId, $groupId, $activityId, $first, $max, SecurityToken $token);
 
 	/**
 	 * Creates the passed in activity for the given user. Once createActivity is
@@ -37,5 +37,5 @@ interface ActivitiesService {
 	 * @param token A valid SecurityToken
 	 * @return a response item containing any errors
 	 */
-	function createActivity(UserId $userId, $activity, SecurityToken $token);
+	function createActivity($userId, $activity, SecurityToken $token);
 }

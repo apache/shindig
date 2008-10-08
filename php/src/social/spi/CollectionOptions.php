@@ -29,10 +29,15 @@ class CollectionOptions {
 	private $filterBy;
 	private $filterOp;
 	private $filterValue;
+	
 	const FILTER_OP_EQUALS = 'equals';
 	const FILTER_OP_CONTAINS = 'contains';
 	const FILTER_OP_STARTSWITH = 'startswith';
 	const FILTER_OP_PRESENT = 'present';
+
+	const TOP_FRIENDS_SORT = "topFriends";
+	const TOP_FRIENDS_FILTER = "topFriends";
+	const HAS_APP_FILTER = "hasApp";
 	
 	private $updatedSince;
 	

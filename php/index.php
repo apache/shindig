@@ -75,8 +75,9 @@ $servletMap = array(
 		Config::get('web_prefix') . '/gadgets/proxy' => 'ProxyServlet', 
 		Config::get('web_prefix') . '/gadgets/makeRequest' => 'ProxyServlet', 
 		Config::get('web_prefix') . '/gadgets/ifr' => 'GadgetRenderingServlet', 
-		Config::get('web_prefix') . '/gadgets/metadata' => 'JsonRpcServlet', 
-		Config::get('web_prefix') . '/social/rest' => 'RestServlet', 
+		Config::get('web_prefix') . '/gadgets/metadata' => 'MetadataServlet', 
+		Config::get('web_prefix') . '/social/rest' => 'DataServiceServlet', 
+		Config::get('web_prefix') . '/social/rpc' => 'JsonRpcServlet', 
 		Config::get('web_prefix') . '/public.crt' => 'CertServlet',
 		Config::get('web_prefix') . '/public.cer' => 'CertServlet'
 		);

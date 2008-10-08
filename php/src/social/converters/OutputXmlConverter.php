@@ -120,10 +120,20 @@ class OutputXmlConverter extends OutputConverter {
 	{
 		// map the Request URL to the content type to use  
 		$params = $requestItem->getParameters();
-		if (! is_array($params) || empty(self::$entryTypes[$params[0]])) {
+		if (! is_array($params)) {
 			throw new Exception("Unsupported request type");
 		}
-		return self::$entryTypes[$params[0]];
+		$type = false;
+		foreach ($params as $key => $val) {
+			if (isset(self::$entryTypes[$key])) {
+				$type = self::$entryTypes[$key];
+				break;
+			}
+		}
+		if (!$type) {
+			throw new Exception("Unsupported request type");
+		}
+		return $type;
 	}
 
 	/**

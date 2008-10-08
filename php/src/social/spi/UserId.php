@@ -30,8 +30,14 @@ class UserId {
 
 	static public function fromJson($jsonId)
 	{
-		if (in_array(substr($jsonId, 1), UserId::$types)) {
-			return new UserId(substr($jsonId, 1), null);
+		if (is_array($jsonId)) {
+			//FIXME need to verify why this data structure is so different between 0.7 and 0.8 opensocial gadgets
+			// (this if is the 0.8 version, the else is for 0.7)
+			return new UserId(strtolower($jsonId['fields_']['userId']), strtolower($jsonId['fields_']['groupId']));
+		} else {
+			if (in_array(substr($jsonId, 1), UserId::$types)) {
+				return new UserId(substr($jsonId, 1), null);
+			}
 		}
 		return new UserId('userId', $jsonId);
 	}

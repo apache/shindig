@@ -28,9 +28,9 @@ interface AppDataService {
 	 * @return ResponseItem a response item with the error code set if
 	 *     there was a problem
 	 */
-	function getPersonData(UserId $userId, GroupId $groupId, $fields, $appId, SecurityToken $token);
+	function getPersonData($userId, GroupId $groupId, $appId, $fields, SecurityToken $token);
 
-	function deletePersonData(UserId $userId, GroupId $groupId, $fields, $appId, SecurityToken $token);
+	function deletePersonData($userId, GroupId $groupId, $appId, $fields, SecurityToken $token);
 
 	/**
 	 * Updates the data key for the given person with the new value.
@@ -42,5 +42,5 @@ interface AppDataService {
 	 * @return ResponseItem a response item with the error code set if
 	 *     there was a problem
 	 */
-	function updatePersonData(UserID $userId, GroupId $groupId, $fields, $values, $appId, SecurityToken $token);
+	function updatePersonData(UserId $userId, GroupId $groupId, $appId, $fields, $values, SecurityToken $token);
 }

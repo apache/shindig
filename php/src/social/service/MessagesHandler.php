@@ -28,17 +28,17 @@ class MessagesHandler extends DataRequestHandler {
 		$this->service = new $service();
 	}
 
-	public function handleDelete(RestRequestItem $requestItem)
+	public function handleDelete(RequestItem $requestItem)
 	{
 		return new ResponseItem(NOT_IMPLEMENTED, "You can't delete messages", null);
 	}
 
-	public function handleGet(RestRequestItem $requestItem)
+	public function handleGet(RequestItem $requestItem)
 	{
 		return new ResponseItem(NOT_IMPLEMENTED, "You can't retrieve messages", null);
 	}
 
-	public function handlePost(RestRequestItem $requestItem)
+	public function handlePost(RequestItem $requestItem)
 	{
 		return new ResponseItem(NOT_IMPLEMENTED, "You can't edit messages", null);
 	}
@@ -46,10 +46,10 @@ class MessagesHandler extends DataRequestHandler {
 	/**
 	 * /messages/{groupId}/outbox/{msgId}
 	 *
-	 * @param RestRequestItem $requestItem
+	 * @param RequestItem $requestItem
 	 * @return responseItem
 	 */
-	public function handlePut(RestRequestItem $requestItem)
+	public function handlePut(RequestItem $requestItem)
 	{
 		$requestItem->parseUrlWithTemplate(self::$MESSAGES_PATH);
 		return $this->service->createMessage($requestItem->getUser(), $requestItem->getPostData(), $requestItem->getToken());

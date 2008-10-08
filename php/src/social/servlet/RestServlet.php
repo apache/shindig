@@ -38,12 +38,12 @@ require 'src/social/model/Url.php';
 require 'src/social/spi/GroupId.php';
 require 'src/social/spi/UserId.php';
 require 'src/social/spi/RestfulCollection.php';
-require 'src/social/spi/ActivitiesService.php';
+require 'src/social/spi/ActivityService.php';
 require 'src/social/spi/AppDataService.php';
-require 'src/social/spi/PeopleService.php';
+require 'src/social/spi/PersonService.php';
 require 'src/social/service/RestRequestItem.php';
 require 'src/social/service/DataRequestHandler.php';
-require 'src/social/service/ActivitiesHandler.php';
+require 'src/social/service/ActivityHandler.php';
 require 'src/social/service/AppDataHandler.php';
 require 'src/social/service/PeopleHandler.php';
 require 'src/social/service/ResponseItem.php';
@@ -180,7 +180,7 @@ class RestServlet extends HttpServlet {
 				$class = 'PeopleHandler';
 				break;
 			case 'activities':
-				$class = 'ActivitiesHandler';
+				$class = 'ActivityHandler';
 				break;
 			case 'appdata':
 				$class = 'AppDataHandler';

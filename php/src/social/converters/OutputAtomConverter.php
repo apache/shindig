@@ -39,7 +39,8 @@ class OutputAtomConverter extends OutputConverter {
 		$doc = $this->createAtomDoc();
 		$requestType = $this->getRequestType($requestItem);
 		$data = $responseItem->getResponse();
-		$userId = $requestItem->getUser()->getUserId($requestItem->getToken());
+		$params = $requestItem->getParameters();
+		$userId = isset($params['userId']) ? $params['userId'][0] : ''; 
 		$guid = 'urn:guid:' . $userId;
 		$authorName = $_SERVER['HTTP_HOST'] . ':' . $userId;
 		$updatedAtom = date(DATE_ATOM);
@@ -217,10 +218,20 @@ class OutputAtomConverter extends OutputConverter {
 	{
 		// map the Request URL to the content type to use  
 		$params = $requestItem->getParameters();
-		if (! is_array($params) || empty(self::$entryTypes[$params[0]])) {
+		if (! is_array($params)) {
 			throw new Exception("Unsupported request type");
 		}
-		return self::$entryTypes[$params[0]];
+		$type = false;
+		foreach ($params as $key => $val) {
+			if (isset(self::$entryTypes[$key])) {
+				$type = self::$entryTypes[$key];
+				break;
+			}
+		}
+		if (!$type) {
+			throw new Exception("Unsupported request type");
+		}
+		return $type;
 	}
 
 	/**

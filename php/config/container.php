@@ -88,7 +88,7 @@ $shindigConfig = array(
 	// Old-style wire format data handler, this is being depreciated 
 	'handlers' => '',
 	// New RESTful API data service classes to use
-	'people_service' => 'JsonDbOpensocialService',
+	'person_service' => 'JsonDbOpensocialService',
 	'activity_service' => 'JsonDbOpensocialService',
 	'app_data_service' => 'JsonDbOpensocialService',
 	'messages_service' => 'JsonDbOpensocialService',
