@@ -18,7 +18,7 @@
  */
 
 class AppDataHandler extends DataRequestHandler {
-	private static $APP_DATA_PATH = "/people/{userId}/{groupId}/{appId}";
+	private static $APP_DATA_PATH = "/appdata/{userId}/{groupId}/{appId}";
 	private $service;
 
 	public function __construct()
@@ -36,10 +36,16 @@ class AppDataHandler extends DataRequestHandler {
 	 * /appdata/john.doe/@self/app
 	 *
 	 */
-	public function handleDelete(RestRequestItem $requestItem)
+	public function handleDelete(RequestItem $requestItem)
 	{
-		$requestItem->parseUrlWithTemplate(self::$APP_DATA_PATH);
-		return $this->service->deletePersonData($requestItem->getUser(), $requestItem->getGroup(), $requestItem->getFields(), $requestItem->getAppId(), $requestItem->getToken());
+		$requestItem->applyUrlTemplate(self::$APP_DATA_PATH);
+		$userIds = $requestItem->getUsers();
+		if (count($userIds) < 1) {
+			throw new InvalidArgumentException("No userId specified");
+		} elseif (count($userIds) > 1) {
+			throw new InvalidArgumentException("Multiple userIds not supported");
+		}
+		return $this->service->deletePersonData($userIds[0], $requestItem->getGroup(), $requestItem->getAppId(), $requestItem->getFields(), $requestItem->getToken());
 	}
 
 	/**
@@ -50,14 +56,18 @@ class AppDataHandler extends DataRequestHandler {
 	 * /appdata/john.doe/@friends/app?fields=count
 	 * /appdata/john.doe/@self/app
 	 */
-	public function handleGet(RestRequestItem $requestItem)
+	public function handleGet(RequestItem $requestItem)
 	{
-		$requestItem->parseUrlWithTemplate(self::$APP_DATA_PATH);
-		return $this->service->getPersonData($requestItem->getUser(), $requestItem->getGroup(), $requestItem->getFields(), $requestItem->getAppId(), $requestItem->getToken());
+		$requestItem->applyUrlTemplate(self::$APP_DATA_PATH);
+		$userIds = $requestItem->getUsers();
+		if (count($userIds) < 1) {
+			throw new InvalidArgumentException("No userId(s) specified");
+		}
+		return $this->service->getPersonData($userIds[0], $requestItem->getGroup(), $requestItem->getAppId(), $requestItem->getFields(), $requestItem->getToken());
 	}
 
 	/**
-	 * /people/{userId}/{groupId}/{appId}
+	 * /appdata/{userId}/{groupId}/{appId}
 	 * - fields={field1, field2}
 	 *
 	 * examples:
@@ -68,22 +78,36 @@ class AppDataHandler extends DataRequestHandler {
 	 * be pulled from the values and set on the person object. If there are no
 	 * fields vars then all of the data will be overridden.
 	 */
-	public function handlePost(RestRequestItem $requestItem)
+	public function handlePost(RequestItem $requestItem)
 	{
-		$requestItem->parseUrlWithTemplate(self::$APP_DATA_PATH);
-		// if no ?fields=foo,bar was specified, we try to guess them from the post data
-		$postFields = array();
+		$requestItem->applyUrlTemplate(self::$APP_DATA_PATH);
+		$userIds = $requestItem->getUsers();
+		
+		if (count($userIds) < 1) {
+			throw new InvalidArgumentException("No userId specified");
+		} elseif (count($userIds) > 1) {
+			throw new InvalidArgumentException("Multiple userIds not supported");
+		}
+		$values = $requestItem->getParameter("data");
+		foreach (array_keys($values) as $key) {
+			if (! $this->isValidKey($key)) {
+				throw new SocialSpiException("One or more of the app data keys are invalid: " . $key, ResponseError::$BAD_REQUEST);
+			}
+		}
+		/*
+   		$postFields = array();
 		if ($requestItem->getPostData() != null) {
 			$data = $requestItem->getPostData();
 			foreach ($data as $key => $val) {
 				$postFields[] = $key;
 			}
 		}
-		return $this->service->updatePersonData($requestItem->getUser(), $requestItem->getGroup(), $requestItem->getFieldsWithDefaultValue($postFields), $requestItem->getPostData(), $requestItem->getAppId(), $requestItem->getToken());
+		*/
+		return $this->service->updatePersonData($userIds[0], $requestItem->getGroup(), $requestItem->getAppId(), $requestItem->getFields(), $values, $requestItem->getToken());
 	}
 
 	/**
-	 * /people/{userId}/{groupId}/{appId}
+	 * /appdata/{userId}/{groupId}/{appId}
 	 * - fields={field1, field2}
 	 *
 	 * examples:
@@ -94,8 +118,29 @@ class AppDataHandler extends DataRequestHandler {
 	 * be pulled from the values and set on the person object. If there are no
 	 * fields vars then all of the data will be overridden.
 	 */
-	public function handlePut(RestRequestItem $requestItem)
+	public function handlePut(RequestItem $requestItem)
 	{
 		return $this->handlePost($requestItem);
+	}
+
+	/**
+	 * Determines whether the input is a valid key.
+	 *
+	 * @param key the key to validate.
+	 * @return true if the key is a valid appdata key, false otherwise.
+	 */
+	public static function isValidKey($key)
+	{
+		if (empty($key)) {
+			return false;
+		}
+		for ($i = 0; $i < strlen($key); ++ $i) {
+			$c = substr($key, $i, 1);
+			if (($c >= 'a' && $c <= 'z') || ($c >= 'A' && $c <= 'Z') || ($c >= '0' && $c <= '9') || ($c == '-') || ($c == '_') || ($c == '.')) {
+				continue;
+			}
+			return false;
+		}
+		return true;
 	}
 }

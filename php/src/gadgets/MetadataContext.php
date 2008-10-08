@@ -18,7 +18,7 @@
  * 
  */
 
-class JsonRpcGadgetContext extends GadgetContext {
+class MetadataGadgetContext extends GadgetContext {
 
 	public function __construct($jsonContext, $url)
 	{

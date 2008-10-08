@@ -1,5 +1,4 @@
 <?php
-
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements. See the NOTICE file
@@ -19,29 +18,40 @@
  */
 
 abstract class DataRequestHandler {
+	
+	private static $GET_SYNONYMS = array("get");
+	private static $CREATE_SYNONYMS = array("put", "create");
+	private static $UPDATE_SYNONYMS = array("post", "update");
+	private static $DELETE_SYNONYMS = array("delete");
 
-	public function handleMethod(RestRequestItem $requestItem)
+	public function handleItem(RequestItem $requestItem)
 	{
-		$token = $requestItem->getToken();
-		$method = $requestItem->getMethod();
-		if ($token->isAnonymous() && $method != 'GET') {
-			// Anonymous requests are only allowed to GET data (not create/edit/delete)
-			$response = new ResponseItem(BAD_REQUEST, "[$method] not allowed for anonymous users", null);
-		} elseif ($method == 'GET') {
-			$parameters = $requestItem->getParameters();
-			if (in_array("@supportedFields", $parameters)) {
-				$response = $this->getSupportedFields($parameters);
+		try {
+			$token = $requestItem->getToken();
+			$method = strtolower($requestItem->getMethod());
+			if ($token->isAnonymous() && !in_array($method, self::$GET_SYNONYMS)) {
+				// Anonymous requests are only allowed to GET data (not create/edit/delete)
+				throw new SocialSpiException("[$method] not allowed for anonymous users", ResponseError::$BAD_REQUEST);
+			} elseif (in_array($method, self::$GET_SYNONYMS)) {
+				$parameters = $requestItem->getParameters();
+				if (in_array("@supportedFields", $parameters)) {
+					$response = $this->getSupportedFields($parameters);
+				} else {
+					$response = $this->handleGet($requestItem);
+				}
+			} elseif (in_array($method, self::$UPDATE_SYNONYMS)) {
+				$response = $this->handlePost($requestItem);
+			} elseif (in_array($method, self::$DELETE_SYNONYMS)) {
+				$response = $this->handleDelete($requestItem);
+			} elseif (in_array($method, self::$CREATE_SYNONYMS)) {
+				$response = $this->handlePut($requestItem);
 			} else {
-				$response = $this->handleGet($requestItem);
+				throw new SocialSpiException("Unserviced Http method type", ResponseError::$BAD_REQUEST);
 			}
-		} elseif ($method == 'POST') {
-			$response = $this->handlePost($requestItem);
-		} elseif ($method == 'DELETE') {
-			$response = $this->handleDelete($requestItem);
-		} elseif ($method == 'PUT') {
-			$response = $this->handlePut($requestItem);
-		} else {
-			$response = new ResponseItem(BAD_REQUEST, "Unserviced Http method type", null);
+		} catch (SocialSpiException $e) {
+			$response = new ResponseItem($e->getCode(), $e->getMessage());
+		} catch (Exception $e) {
+			$response = new ResponseItem(ResponseError::$INTERNAL_ERROR, "Internal error: ".$e->getMessage());
 		}
 		return $response;
 	}
@@ -98,18 +108,18 @@ abstract class DataRequestHandler {
 				$version[] = $key;
 			}
 		}
-		if (!count($version)) {
+		if (! count($version)) {
 			throw new Exception("Invalid container configuration, opensocial-x.y key not found");
 		}
 		rsort($version);
 		return $version[0];
 	}
 
-	abstract public function handleDelete(RestRequestItem $requestItem);
+	abstract public function handleDelete(RequestItem $requestItem);
 
-	abstract public function handleGet(RestRequestItem $requestItem);
+	abstract public function handleGet(RequestItem $requestItem);
 
-	abstract public function handlePost(RestRequestItem $requestItem);
+	abstract public function handlePost(RequestItem $requestItem);
 
-	abstract public function handlePut(RestRequestItem $requestItem);
+	abstract public function handlePut(RequestItem $requestItem);
 }

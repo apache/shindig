@@ -18,7 +18,7 @@
  * 
  */
 
-class JsonRpcHandler {
+class MetadataHandler {
 
 	public function process($requests)
 	{
@@ -27,7 +27,7 @@ class JsonRpcHandler {
 			try {
 				$gadgetUrl = $gadget->url;
 				$gadgetModuleId = $gadget->moduleId;
-				$context = new JsonRpcGadgetContext($requests->context, $gadgetUrl);
+				$context = new MetadataGadgetContext($requests->context, $gadgetUrl);
 				$gadgetServer = new GadgetServer();
 				$gadget = $gadgetServer->processGadget($context);
 				$response[] = $this->makeResponse($gadget, $gadgetModuleId, $gadgetUrl, $context);

@@ -340,11 +340,6 @@ class GadgetRenderingServlet extends HttpServlet {
 				}
 			}
 		}
-		//FIXME temp fix to force the js api to use the REST interface until we finish implementing the JSON-RPC service
-		if (!isset($gadgetConfig['opensocial-0.8'])) {
-			$gadgetConfig['opensocial-0.8'] = array();
-		}
-		$gadgetConfig['opensocial-0.8']['impl'] = "rest";
 		return "gadgets.config.init(" . json_encode($gadgetConfig) . ");\n";
 	}
 

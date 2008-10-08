@@ -18,9 +18,9 @@
  *
  */
 require 'src/common/HttpServlet.php';
-require 'src/gadgets/JsonRpcHandler.php';
+require 'src/gadgets/MetadataHandler.php';
 require 'src/gadgets/GadgetContext.php';
-require 'src/gadgets/JsonRpcGadgetContext.php';
+require 'src/gadgets/MetadataContext.php';
 require 'src/common/Locale.php';
 require 'src/gadgets/GadgetServer.php';
 require 'src/common/RemoteContentRequest.php';
@@ -50,7 +50,7 @@ require 'src/gadgets/GadgetException.php';
 require 'src/gadgets/rewrite/ContentRewriter.php';
 require 'src/gadgets/rewrite/ContentRewriteFeature.php';
 
-class JsonRpcServlet extends HttpServlet {
+class MetadataServlet extends HttpServlet {
 
 	public function doPost()
 	{
@@ -66,7 +66,7 @@ class JsonRpcServlet extends HttpServlet {
 				if ($request == (isset($GLOBALS['HTTP_RAW_POST_DATA']) ? $GLOBALS['HTTP_RAW_POST_DATA'] : $_POST['request'])) {
 					throw new Exception("Malformed json string");
 				}
-				$handler = new JsonRpcHandler();
+				$handler = new MetadataHandler();
 				$response = $handler->process($request);
 				echo json_encode(array('gadgets' => $response));
 			} else {

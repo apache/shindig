@@ -21,7 +21,7 @@
 /**
  * Implementation of supported services backed by a JSON DB
  */
-class JsonDbOpensocialService implements ActivitiesService, PeopleService, AppDataService, MessagesService {
+class JsonDbOpensocialService implements ActivityService, PersonService, AppDataService, MessagesService {
 	
 	/**
 	 * The DB
@@ -169,7 +169,6 @@ class JsonDbOpensocialService implements ActivitiesService, PeopleService, AppDa
 		$peopleWithApp = array();
 		$db = $this->getDb();
 		$userApplicationsTable = $db[self::$USER_APPLICATIONS_TABLE];
-		
 		foreach ($userApplicationsTable as $key => $value) {
 			if (in_array($appId, $userApplicationsTable[$key])) {
 				$peopleWithApp[] = $key;
@@ -261,7 +260,7 @@ class JsonDbOpensocialService implements ActivitiesService, PeopleService, AppDa
 		return new ResponseItem(null, null, $collection);
 	}
 
-	public function getPersonData(UserId $userId, GroupId $groupId, $fields, $appId, SecurityToken $token)
+	public function getPersonData($userId, GroupId $groupId, $appId, $fields, SecurityToken $token)
 	{
 		$db = $this->getDb();
 		$allData = $this->getAllData();
@@ -297,7 +296,7 @@ class JsonDbOpensocialService implements ActivitiesService, PeopleService, AppDa
 		return new ResponseItem(null, null, RestfulCollection::createFromEntry($data));
 	}
 
-	public function updatePersonData(UserID $userId, GroupId $groupId, $fields, $values, $appId, SecurityToken $token)
+	public function updatePersonData(UserId $userId, GroupId $groupId, $appId, $fields, $values, SecurityToken $token)
 	{
 		$db = $this->getDb();
 		foreach ($fields as $key => $present) {
@@ -324,7 +323,7 @@ class JsonDbOpensocialService implements ActivitiesService, PeopleService, AppDa
 		return new ResponseItem(null, null, array());
 	}
 
-	public function deletePersonData(UserId $userId, GroupId $groupId, $fields, $appId, SecurityToken $token)
+	public function deletePersonData($userId, GroupId $groupId, $appId, $fields, SecurityToken $token)
 	{
 		foreach ($fields as $key => $present) {
 			if (! $this->isValidKey($key)) {
@@ -333,7 +332,8 @@ class JsonDbOpensocialService implements ActivitiesService, PeopleService, AppDa
 		}
 		switch ($groupId->getType()) {
 			case 'self':
-				foreach ($fields as $key => $present) {//TODO: Implement this!  
+				foreach ($fields as $key => $present) {
+					//TODO: actually implement this!  
 				}
 				break;
 			default:
@@ -343,7 +343,7 @@ class JsonDbOpensocialService implements ActivitiesService, PeopleService, AppDa
 		return new ResponseItem(null, null, array());
 	}
 
-	public function getActivities(UserId $userId, $groupId, $first, $max, SecurityToken $token)
+	public function getActivities($userId, $groupId, $first, $max, SecurityToken $token)
 	{
 		$db = $this->getDb();
 		$friendsTable = $db[self::$FRIEND_LINK_TABLE];
@@ -370,7 +370,7 @@ class JsonDbOpensocialService implements ActivitiesService, PeopleService, AppDa
 		return new ResponseItem(null, null, RestfulCollection::createFromEntry($activities));
 	}
 
-	public function createActivity(UserId $userId, $activity, SecurityToken $token)
+	public function createActivity($userId, $activity, SecurityToken $token)
 	{
 		$db = $this->getDb();
 		$activitiesTable = $this->getAllActivities();
@@ -381,7 +381,7 @@ class JsonDbOpensocialService implements ActivitiesService, PeopleService, AppDa
 		return new ResponseItem(null, null, array());
 	}
 
-	public function getActivity(UserId $userId, $groupId, $activityId, $first, $max, SecurityToken $token)
+	public function getActivity($userId, $groupId, $activityId, $first, $max, SecurityToken $token)
 	{
 		$activities = $this->getActivities($userId, $groupId, null, null, $token);
 		$activities = $activities->getResponse();

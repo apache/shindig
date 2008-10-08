@@ -17,24 +17,4 @@
  * specific language governing permissions and limitations under the License.
  */
 
-interface PeopleService {
-
-	/**
-	 * Returns a Person object for person with $id or false on not found
-	 *
-	 * @param container specific id $id
-	 * @param fields set of contact fields to return, as array('fieldName' => 1)
-	 * @param security token $token
-	 */
-	function getPerson($userId, $groupId, $fields, SecurityToken $token);
-
-	/**
-	 * Returns a list of people that correspond to the passed in person ids.
-	 * @param ids The ids of the people to fetch.
-	 * @param options Request options for filtering/sorting/paging
-	 * @param fields set of contact fields to return, as array('fieldName' => 1)
-	 * @return a list of people.
-	 */
-	function getPeople($userId, $groupId, CollectionOptions $options, $fields, SecurityToken $token);
-}
-
+class IllegalArgumentException extends Exception {}
