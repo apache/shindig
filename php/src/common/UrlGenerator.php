@@ -45,6 +45,6 @@ class UrlGenerator {
 		}
 		
 		// note: put the URL last, else some browsers seem to get confused (reported by hi5)
-		return Config::get('default_iframe_prefix') . 'container=' . $context->getContainer() . ($context->getIgnoreCache() ? 'nocache=1' : '&v=' . $v) . ($context->getModuleId() != 0 ? '&mid=' . $context->getModuleId() : '') . '&lang=' . $context->getLocale()->getLanguage() . '&country=' . $context->getLocale()->getCountry() . '&view=' . $view->getName() . $up . '&url=' . urlencode($context->getUrl());
+		return Config::get('default_iframe_prefix') . 'container=' . $context->getContainer() . ($context->getIgnoreCache() ? '&nocache=1' : '&v=' . $v) . ($context->getModuleId() != 0 ? '&mid=' . $context->getModuleId() : '') . '&lang=' . $context->getLocale()->getLanguage() . '&country=' . $context->getLocale()->getCountry() . '&view=' . $view->getName() . $up . '&url=' . urlencode($context->getUrl());
 	}
 }
