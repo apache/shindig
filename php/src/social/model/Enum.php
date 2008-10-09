@@ -38,7 +38,8 @@ abstract class Enum implements ComplexField {
 				// case of mixing key <> display value, correct it
 				$key = array_search($key, $this->values);
 			} else {
-				throw new Exception("Invalid Enum key: $key");
+				$this->displayValue = $displayValue;
+				//throw new Exception("Invalid Enum key: $key\n". print_r(debug_backtrace(), true));
 			}
 		}
 		$this->key = $key;
