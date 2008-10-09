@@ -241,7 +241,7 @@ class Person {
 
 	public function setDrinker($drinker)
 	{
-		$this->setFieldImpl('drinker', new EnumDrinker($drinker));
+		$this->setFieldImpl('drinker', $drinker);
 	}
 
 	public function getEmails()
@@ -401,7 +401,7 @@ class Person {
 
 	public function setLookingFor($lookingFor)
 	{
-		$this->setFieldImpl('lookingFor', new EnumLookingFor($lookingFor));
+		$this->setFieldImpl('lookingFor', $lookingFor);
 	}
 
 	public function getMovies()
@@ -441,7 +441,7 @@ class Person {
 
 	public function setNetworkPresence($networkPresence)
 	{
-		$this->setFieldImpl('networkPresence', new EnumPresence($networkPresence));
+		$this->setFieldImpl('networkPresence', $networkPresence);
 	}
 
 	public function getNickname()
@@ -602,7 +602,7 @@ class Person {
 
 	public function setSmoker($smoker)
 	{
-		$this->setFieldImpl('smoker', new EnumSmoker($smoker));
+		$this->setFieldImpl('smoker', $smoker);
 	}
 
 	public function getSports()
