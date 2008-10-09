@@ -155,6 +155,21 @@ os.defineBuiltinTags = function() {
       }
       result = resultArray;      
     }
+
+    // Trim away leading and trailing spaces on IE, which interprets them 
+    // literally.
+    if (os.isIe) {
+      for (var i = 0; i < result.length; i++) {
+        if (result[i].nodeType == DOM_TEXT_NODE) {
+          var trimmed = os.trimWhitespaceForIE_(
+              result[i].nodeValue, (i == 0), (i == result.length - 1));
+          if (trimmed != result[i].nodeValue) {
+            result[i].parentNode.removeChild(result[i]);
+            result[i] = document.createTextNode(trimmed);
+          }
+        }
+      }
+    }
     
     return result;
   }
