@@ -29,6 +29,7 @@ class Gadget {
 	private $userPrefValues;
 	private $oAuthSpec;
 	private $messageBundle = array();
+	private $checksum;
 	public $contentTypes = array('HTML', 'URL');
 	public $id;
 	public $author;
@@ -320,6 +321,16 @@ class Gadget {
 	public function setOAuthSpec($oAuthSpec)
 	{
 		$this->oAuthSpec = $oAuthSpec;
+	}
+
+	public function setChecksum($xml)
+	{
+		$this->checksum = md5($xml);
+	}
+
+	public function getChecksum($xml)
+	{
+		return $this->checksum;
 	}
 }
 

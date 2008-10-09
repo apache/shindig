@@ -43,6 +43,10 @@ class GadgetSpecParser {
 			throw new SpecParserException("Missing or duplicated <ModulePrefs>");
 		}
 		$gadget = new Gadget($context->getGadgetId(), $context);
+		
+		// record Checksum to trace xml version
+		$gadget->setChecksum($xml);
+		
 		// process ModulePref attributes
 		$this->processModulePrefs($gadget, $doc->ModulePrefs, $context);
 		if (isset($doc->ModulePrefs->OAuth)) {
