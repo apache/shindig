@@ -17,6 +17,10 @@
  * specific language governing permissions and limitations under the License.
  */
 
+if (!class_exists('Enum')) {
+	require 'Enum.php';
+}
+
 /**
  * see
  * http://code.google.com/apis/opensocial/docs/0.8/reference/#opensocial.Person
