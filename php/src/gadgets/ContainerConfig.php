@@ -74,8 +74,8 @@ class ContainerConfig {
 		if (isset($this->config[$container]) && isset($this->config[$container][$name])) {
 			$config = $this->config[$container][$name];
 		}
-		if ($container != $this->default_container && isset($this->config[$container][$name])) {
-			$config = $this->mergeConfig($this->config[$container][$name], $config);
+		if ($container != $this->default_container && isset($this->config[$this->default_container]) && isset($this->config[$this->default_container][$name])) {
+			$config = $this->mergeConfig($this->config[$this->default_container][$name], $config);
 		}
 		return $config;
 	}
