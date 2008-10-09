@@ -27,9 +27,17 @@ class GadgetSpecParser {
 		if (empty($xml)) {
 			throw new SpecParserException("Empty XML document");
 		}
+		// make sure we can generate a detailed error report
+		libxml_use_internal_errors(true);
 		//TODO add libxml_get_errors() functionality so we can have a bit more understandable errors..
 		if (($doc = simplexml_load_string($xml, 'SimpleXMLElement', LIBXML_NOCDATA)) == false) {
-			throw new SpecParserException("Invalid XML document");
+			$errors = libxml_get_errors();
+			$xmlErrors = '';
+			foreach ($errors as $error) {
+				$xmlErrors .= $this->displayXmlError($error);
+			}
+			libxml_clear_errors();
+			throw new SpecParserException("<b>Invalid XML Document</b> <br>" . $xmlErrors);
 		}
 		if (count($doc->ModulePrefs) != 1) {
 			throw new SpecParserException("Missing or duplicated <ModulePrefs>");
@@ -100,7 +108,7 @@ class GadgetSpecParser {
 			$gadget->links[] = $this->processLink($link);
 		}
 		foreach ($ModulePrefs->Locale as $locale) {
-			$gadget->localeSpecs[] = $this->processLocale($locale, $context);
+			$gadget->localeSpecs[] = $this->processLocale($locale);
 		}
 	}
 
@@ -114,7 +122,7 @@ class GadgetSpecParser {
 		return $link;
 	}
 
-	private function processLocale($locale, $context)
+	private function processLocale($locale)
 	{
 		$attributes = $locale->attributes();
 		$messageAttr = isset($attributes['messages']) ? trim($attributes['messages']) : '';
@@ -220,5 +228,26 @@ class GadgetSpecParser {
 	{
 		$oauthSpec = new OAuthSpec($OAuthSpec->Service);
 		$gadget->setOAuthSpec($oauthSpec);
+	}
+
+	private function displayXmlError($error)
+	{
+		$return = '';
+		switch ($error->level) {
+			case LIBXML_ERR_WARNING:
+				$return .= "Warning [{$error->code}]: ";
+				break;
+			case LIBXML_ERR_ERROR:
+				$return .= "Error [{$error->code}]: ";
+				break;
+			case LIBXML_ERR_FATAL:
+				$return .= "Fatal Error [{$error->code}]: ";
+				break;
+		}
+		$return .= trim($error->message) . ", Line: {$error->line}" . " Column: {$error->column}";
+		if ($error->file) {
+			$return .= "File: {$error->file}";
+		}
+		return "$return\n";
 	}
 }
