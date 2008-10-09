@@ -71,16 +71,31 @@ public class ParseTreeSerializerTest {
     // Caja parser.
     System.out.println("Parsing contents of '" + fileArg + "' " + numRuns + " times...");
     CajaHtmlParser parser = new CajaHtmlParser();
-    long parseStart = System.currentTimeMillis();
+
+    // Some warmup runs with wait. Enough iterations to trigger the HIT
+    // Wait to allow it to swap execution paths etc...
     List<ParsedHtmlNode> nodes = null;
+    for (int i = 0; i < 10; ++i) {
+      nodes = parser.parse(inputData);
+    }
+    for (int i = 0; i < 10; ++i) {
+      byte[] ser = pts.serialize(nodes);
+      List<ParsedHtmlNode> outs = pts.deserialize(ser);
+    }
+    Thread.sleep(1000L);
+
+    long parseStart = System.currentTimeMillis();
     for (int i = 0; i < numRuns; ++i) {
       nodes = parser.parse(inputData);
     }
+
+
     long parseMillis = System.currentTimeMillis() - parseStart;
     
     // Serializer/deserializer
     System.out.println("Serializing and deserializing results of Caja run (" +
         nodes.size() + " top-level nodes, " + numRuns + " runs)\n");
+
     long serTime = 0, deserTime = 0;
     for (int i = 0; i < numRuns; ++i) {
       long serStart = System.currentTimeMillis();
@@ -89,7 +104,7 @@ public class ParseTreeSerializerTest {
       long deserStart = System.currentTimeMillis();
       List<ParsedHtmlNode> outs = pts.deserialize(ser);
       deserTime += (System.currentTimeMillis() - deserStart);
-      checkListEquality(nodes, outs);
+      //checkListEquality(nodes, outs);
     }
     
     System.out.println("Parsing [" + parseMillis + " ms total: " + 
