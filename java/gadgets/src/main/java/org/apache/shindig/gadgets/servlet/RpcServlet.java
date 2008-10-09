@@ -18,15 +18,17 @@
  */
 package org.apache.shindig.gadgets.servlet;
 
-import com.google.inject.Inject;
 import org.apache.commons.io.IOUtils;
 import org.apache.shindig.common.servlet.InjectedServlet;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import com.google.inject.Inject;
+
 import javax.servlet.ServletInputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.logging.Level;
