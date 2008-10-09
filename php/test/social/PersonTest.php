@@ -59,7 +59,7 @@ class PersonTest extends PHPUnit_Framework_TestCase {
 		$this->Person->jobs = 'JOBS';
 		$this->Person->languagesSpoken = 'LANGUAGESSPOKEN';
 		$this->Person->livingArrangement = 'LIVINGARRANGEMENT';
-		$this->Person->lookingFor = new EnumLookingFor('FRIENDS');
+		//$this->Person->lookingFor = new EnumLookingFor('FRIENDS');
 		$this->Person->movies = 'MOVIES';
 		$this->Person->music = 'MUSIC';
 		$this->Person->networkPresence = 'NETWORKPRESENCE';
@@ -187,9 +187,9 @@ class PersonTest extends PHPUnit_Framework_TestCase {
 	 */
 	public function testGetDrinker()
 	{
-		$drinker = new EnumDrinker('HEAVILY');
+		//$drinker = new EnumDrinker('HEAVILY');
 		$this->Person->setDrinker('HEAVILY');
-		$this->assertEquals($drinker, $this->Person->getDrinker());
+		$this->assertEquals('HEAVILY', $this->Person->getDrinker());
 	}
 
 	/**
@@ -324,13 +324,6 @@ class PersonTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals('LIVINGARRANGEMENT', $this->Person->getLivingArrangement());
 	}
 
-	/**
-	 * Tests Person->getLookingFor()
-	 */
-	public function testGetLookingFor()
-	{
-		$this->assertEquals(new EnumLookingFor('FRIENDS'), $this->Person->getLookingFor());
-	}
 
 	/**
 	 * Tests Person->getMovies()
@@ -361,9 +354,8 @@ class PersonTest extends PHPUnit_Framework_TestCase {
 	 */
 	public function testGetNetworkPresence()
 	{
-		$presence = new EnumPresence('DND');
 		$this->Person->setNetworkPresence('DND');
-		$this->assertEquals($presence, $this->Person->getNetworkPresence());
+		$this->assertEquals('DND', $this->Person->getNetworkPresence());
 	}
 
 	/**
@@ -476,9 +468,8 @@ class PersonTest extends PHPUnit_Framework_TestCase {
 	 */
 	public function testGetSmoker()
 	{
-		$smoker = new EnumSmoker('OCCASIONALLY');
 		$this->Person->setSmoker('OCCASIONALLY');
-		$this->assertEquals($smoker, $this->Person->getSmoker());
+		$this->assertEquals('OCCASIONALLY', $this->Person->getSmoker());
 	}
 
 	/**
@@ -636,15 +627,6 @@ class PersonTest extends PHPUnit_Framework_TestCase {
 	}
 
 	/**
-	 * Tests Person->setDrinker()
-	 */
-	public function testSetDrinker()
-	{
-		$this->Person->setDrinker('NO');
-		$this->assertEquals('No', $this->Person->drinker->displayValue);
-	}
-
-	/**
 	 * Tests Person->setEmails()
 	 */
 	public function testSetEmails()
@@ -794,7 +776,7 @@ class PersonTest extends PHPUnit_Framework_TestCase {
 	public function testSetLookingFor()
 	{
 		$this->Person->setLookingFor('FRIENDS');
-		$this->assertEquals(new EnumLookingFor('FRIENDS'), $this->Person->getLookingFor());
+		$this->assertEquals('FRIENDS', $this->Person->getLookingFor());
 	}
 
 	/**
@@ -822,15 +804,6 @@ class PersonTest extends PHPUnit_Framework_TestCase {
 	{
 		$this->Person->setName('name');
 		$this->assertEquals('name', $this->Person->name);
-	}
-
-	/**
-	 * Tests Person->setNetworkPresence()
-	 */
-	public function testSetNetworkPresence()
-	{
-		$this->Person->setNetworkPresence('AWAY');
-		$this->assertEquals('Away', $this->Person->networkPresence->displayValue);
 	}
 
 	/**
@@ -948,15 +921,6 @@ class PersonTest extends PHPUnit_Framework_TestCase {
 	{
 		$this->Person->setSexualOrientation('sexualorientation');
 		$this->assertEquals('sexualorientation', $this->Person->sexualOrientation);
-	}
-
-	/**
-	 * Tests Person->setSmoker()
-	 */
-	public function testSetSmoker()
-	{
-		$this->Person->setSmoker('NO');
-		$this->assertEquals('No', $this->Person->smoker->displayValue);
 	}
 
 	/**
