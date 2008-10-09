@@ -102,7 +102,12 @@ class SigningFetcher extends RemoteContentFetcher {
 		return $this->getNextFetcher()->fetchRequest($signed);
 	}
 
-	private function signRequest($url, $method)
+	public function multiFetchRequest(Array $requests)
+	{
+		return $this->getNextFetcher()->multiFetchRequest($requests);
+	}
+
+	public function signRequest($url, $method)
 	{
 		try {
 			// Parse the request into parameters for OAuth signing, stripping out
@@ -238,5 +243,4 @@ class SigningFetcher extends RemoteContentFetcher {
 		// make a last sanity check on the key of the data by using a regular expression
 		return ereg(SigningFetcher::$ALLOWED_PARAM_NAME, $canonParamName);
 	}
-
 }

@@ -29,6 +29,8 @@ abstract class RemoteContentFetcher {
 
 	abstract public function fetchRequest($request);
 
+	abstract public function multiFetchRequest(Array $requests);
+
 	public function getNextFetcher()
 	{
 		return $this->fetcher;

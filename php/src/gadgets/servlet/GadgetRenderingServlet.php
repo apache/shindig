@@ -361,7 +361,7 @@ class GadgetRenderingServlet extends HttpServlet {
 	 */
 	private function appendPreloads(Gadget $gadget, GadgetContext $context)
 	{
-		$resp = '';
+		$resp = Array();
 		$gadgetSigner = Config::get('security_token_signer');
 		$gadgetSigner = new $gadgetSigner();
 		$token = '';
@@ -371,6 +371,8 @@ class GadgetRenderingServlet extends HttpServlet {
 			$token = '';
 			// no token given, safe to ignore
 		}
+		$unsignedRequests = $unsignedContexts = Array();
+		$signedRequests = Array();
 		foreach ($gadget->getPreloads() as $preload) {
 			try {
 				if (($preload->getAuth() == Auth::$NONE || $token != null) && (count($preload->getViews()) == 0 || in_array($context->getView(), $preload->getViews()))) {
@@ -380,13 +382,17 @@ class GadgetRenderingServlet extends HttpServlet {
 					$request->getOptions()->viewerSigned = $preload->isSignViewer();
 					switch (strtoupper(trim($preload->getAuth()))) {
 						case "NONE":
-							$brc = new BasicRemoteContent();
-							$response = $brc->fetch($request, $context);
+							//						Unify all unsigned requests to one single multi request
+							$unsignedRequests[] = $request;
+							$unsignedContexts[] = $context;
 							break;
 						case "SIGNED":
+							//						Unify all signed requests to one single multi request
 							$signingFetcherFactory = new SigningFetcherFactory(Config::get("private_key_file"));
 							$fetcher = $signingFetcherFactory->getSigningFetcher(new BasicRemoteContentFetcher(), $token);
-							$response = $fetcher->fetch($preload->getHref(), $request->getMethod());
+							$req = $fetcher->signRequest($preload->getHref(), $request->getMethod());
+							$req->setNotSignedUri($preload->getHref());
+							$signedRequests[] = $req;
 							break;
 						default:
 							@ob_end_clean();
@@ -394,7 +400,17 @@ class GadgetRenderingServlet extends HttpServlet {
 							echo "<html><body><h1>" . "500 - Internal Server Error" . "</h1></body></html>";
 							die();
 					}
-					$resp[$preload->getHref()] = array(
+				}
+			} catch (Exception $e) {
+				throw new Exception($e);
+			}
+		}
+		if (count($unsignedRequests)) {
+			try {
+				$brc = new BasicRemoteContent();
+				$responses = $brc->multiFetch($unsignedRequests, $unsignedContexts);
+				foreach ($responses as $response) {
+					$resp[$response->getUrl()] = array(
 							'body' => $response->getResponseContent(), 
 							'rc' => $response->getHttpCode());
 				}
@@ -402,8 +418,20 @@ class GadgetRenderingServlet extends HttpServlet {
 				throw new Exception($e);
 			}
 		}
+		if (count($signedRequests)) {
+			try {
+				$fetcher = $signingFetcherFactory->getSigningFetcher(new BasicRemoteContentFetcher(), $token);
+				$responses = $fetcher->multiFetchRequest($signedRequests);
+				foreach ($responses as $response) {
+					$resp[$response->getNotSignedUrl()] = array(
+							'body' => $response->getResponseContent(), 
+							'rc' => $response->getHttpCode());
+				}
+			} catch (Exception $e) {
+				throw new Exception($e);
+			}
+		}		
 		$resp = count($resp) ? json_encode($resp) : "{}";
 		return "gadgets.io.preloaded_ = " . $resp . ";\n";
 	}
-
 }

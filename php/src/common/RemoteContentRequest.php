@@ -21,6 +21,8 @@
 class RemoteContentRequest {
 	// these are used for making the request
 	private $uri = '';
+	// to get real url after signed requests
+	private $notSignedUri = '';
 	private $method = '';
 	private $headers = array();
 	private $postBody = false;
@@ -39,6 +41,7 @@ class RemoteContentRequest {
 	public function __construct($uri, $headers = false, $postBody = false)
 	{
 		$this->uri = $uri;
+		$this->notSignedUri = $uri;
 		$this->headers = $headers;
 		$this->postBody = $postBody;
 		$this->created = time();
@@ -279,6 +282,11 @@ class RemoteContentRequest {
 		return $this->uri;
 	}
 
+	public function getNotSignedUrl()
+	{
+		return $this->notSignedUri;
+	}
+
 	public function getMethod()
 	{
 		return $this->method;
@@ -362,6 +370,11 @@ class RemoteContentRequest {
 	public function setUri($uri)
 	{
 		$this->uri = $uri;
+	}
+
+	public function setNotSignedUri($uri)
+	{
+		$this->notSignedUri = $uri;
 	}
 }
 
