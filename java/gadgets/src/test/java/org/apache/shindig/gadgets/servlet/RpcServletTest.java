@@ -18,13 +18,16 @@
  */
 package org.apache.shindig.gadgets.servlet;
 
-import junit.framework.TestCase;
 import static org.easymock.classextension.EasyMock.*;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import junit.framework.TestCase;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
 import java.io.IOException;
 import java.io.PrintWriter;
 
