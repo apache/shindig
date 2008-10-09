@@ -118,7 +118,7 @@ class ProxyHandler {
 								}
 								$channel['items'][] = array('id' => $entry->id(), 
 										'title' => $entry->title(), 
-										'link' => $entry->link(), 
+										'link' => $entry->link('alternate'), 
 										'summary' => $entry->summary(), 
 										'content' => $entry->content(), 
 										'author' => $entry->author(), 
