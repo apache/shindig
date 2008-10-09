@@ -22,15 +22,7 @@ class UrlGenerator {
 
 	static function getIframeURL($gadget, $context)
 	{
-		$inlineJs = '';
-		foreach ($gadget->getJsLibraries() as $library) {
-			$type = $library->getType();
-			if ($type != 'URL') {
-				$inlineJs .= $library->getContent() . "\n";
-			}
-		}
-		$v = md5($inlineJs);
-		
+		$v = $gadget->getChecksum();
 		$view = HttpUtil::getView($gadget, $context);
 		
 		$up = '';
