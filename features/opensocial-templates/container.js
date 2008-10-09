@@ -67,7 +67,10 @@ os.Container.domLoaded_ = false;
  * @private
  */
 os.Container.registerDomLoadListener_ = function() {
-  if (navigator.product == 'Gecko') {
+  var gadgets = window['gadgets'];
+  if (gadgets && gadgets.util) {
+    gadgets.util.registerOnLoadHandler(os.Container.onDomLoad_); 
+  } else if (navigator.product == 'Gecko') {
     window.addEventListener("DOMContentLoaded", os.Container.onDomLoad_, false);
   } if (window.addEventListener) {
     window.addEventListener("load", os.Container.onDomLoad_, false);

@@ -50,7 +50,8 @@ os.compileXMLNode = function(node, opt_id) {
     if (child.nodeType == DOM_ELEMENT_NODE) {
       nodes.push(os.compileNode_(child));
     } else if (child.nodeType == DOM_TEXT_NODE) {
-      if (!child.nodeValue.match(os.regExps_.onlyWhitespace)) {
+      if (child != node.firstChild || 
+          !child.nodeValue.match(os.regExps_.onlyWhitespace)) {
         var compiled = os.breakTextNode_(child);
         for (var i = 0; i < compiled.length; i++) {
           nodes.push(compiled[i]);
@@ -453,12 +454,12 @@ os.compileNode_ = function(node) {
         var compiledChild = os.compileNode_(child);
         if (compiledChild) {
           if (!compiledChild.tagName && 
-            typeof(compiledChild.length) == 'number') {
+              typeof(compiledChild.length) == 'number') {
             for (var i = 0; i < compiledChild.length; i++) {
               output.appendChild(compiledChild[i]);
             }
           } else {
-            // If inserting a TRw into a TABLE, inject a TBODY element. 
+            // If inserting a TR into a TABLE, inject a TBODY element. 
             if (compiledChild.tagName == 'TR' && output.tagName == 'TABLE') {
               var lastEl = output.lastChild;
               while (lastEl && lastEl.nodeType != DOM_ELEMENT_NODE && 
@@ -497,7 +498,7 @@ os.ENTITIES = "<!ENTITY nbsp \"&#160;\">";
  */
 os.prepareTemplateXML_ = function(templateSrc) {
   var namespaces = os.getRequiredNamespaces(templateSrc);
-  return "<!DOCTYPE root [" + os.ENTITIES + "]><root " + 
+  return "<!DOCTYPE root [" + os.ENTITIES + "]><root xml:space=\"preserve\"" + 
       namespaces + ">" + templateSrc + "</root>";;
 };
 
