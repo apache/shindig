@@ -31,4 +31,6 @@ class RemoteContentException extends Exception {}
 abstract class RemoteContent {
 
 	abstract public function fetch($request, $context);
+
+	abstract public function multiFetch(Array $requests, Array $contexts);
 }
