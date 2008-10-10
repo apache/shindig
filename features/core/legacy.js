@@ -85,6 +85,12 @@ function _IG_GetCachedUrl(url) {
 function _IG_GetImageUrl(url) {
   return gadgets.io.getProxyUrl(url);
 }
+function _IG_GetImage(url) {
+  var img = document.createElement('img');
+  img.src = _IG_GetCachedUrl(url);
+  return img;
+}
+
 
 function _IG_RegisterOnloadHandler(callback) {
   gadgets.util.registerOnLoadHandler(callback);
