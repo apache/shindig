@@ -328,7 +328,7 @@ class Gadget {
 		$this->checksum = md5($xml);
 	}
 
-	public function getChecksum($xml)
+	public function getChecksum()
 	{
 		return $this->checksum;
 	}
