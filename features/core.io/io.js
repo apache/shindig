@@ -344,7 +344,7 @@ gadgets.io = function() {
       };
 
       // OAuth goodies
-      if (params.AUTHORIZATION === "OAUTH") {
+      if (auth === "oauth" || auth === "signed") {
         paramData.oauthState = oauthState || "";
         // Just copy the OAuth parameters into the req to the server
         for (opt in params) if (params.hasOwnProperty(opt)) {

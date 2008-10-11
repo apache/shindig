@@ -341,6 +341,7 @@ IoTest.prototype.testPut_noBody = function() {
 };
 
 IoTest.prototype.testSignedGet = function() {
+  gadgets.io.clearOAuthState();
   var req = new fakeXhr.Expectation("POST", "http://example.com/json");
   this.setStandardArgs(req, true);
   req.setBodyArg("url", "http://target.example.com/somepage");
@@ -348,6 +349,7 @@ IoTest.prototype.testSignedGet = function() {
   req.setBodyArg("signViewer", "true");
   req.setBodyArg("authz", "signed");
   req.setBodyArg("st", "authtoken");
+  req.setBodyArg("oauthState", "");
   req.setBodyArg("refresh", null);
   req.setHeader("Content-Type", "application/x-www-form-urlencoded");
 
@@ -369,6 +371,7 @@ IoTest.prototype.testSignedGet = function() {
 };
 
 IoTest.prototype.testSignedPost = function() {
+  gadgets.io.clearOAuthState();
   var req = new fakeXhr.Expectation("POST", "http://example.com/json");
   this.setStandardArgs(req, true);
   req.setBodyArg("url", "http://target.example.com/somepage");
@@ -376,6 +379,7 @@ IoTest.prototype.testSignedPost = function() {
   req.setBodyArg("signViewer", "true");
   req.setBodyArg("authz", "signed");
   req.setBodyArg("st", "authtoken");
+  req.setBodyArg("oauthState", "");
   req.setBodyArg("refresh", null);
   req.setBodyArg("httpMethod", "POST");
   req.setBodyArg("headers", "Content-Type=application%2fx-www-form-urlencoded");
@@ -400,6 +404,7 @@ IoTest.prototype.testSignedPost = function() {
 };
 
 IoTest.prototype.testSignedGet_noViewerBoolean = function() {
+  gadgets.io.clearOAuthState();
   var req = new fakeXhr.Expectation("POST", "http://example.com/json");
   this.setStandardArgs(req, true);
   req.setBodyArg("url", "http://target.example.com/somepage");
@@ -407,6 +412,7 @@ IoTest.prototype.testSignedGet_noViewerBoolean = function() {
   req.setBodyArg("signViewer", "false");
   req.setBodyArg("authz", "signed");
   req.setBodyArg("st", "authtoken");
+  req.setBodyArg("oauthState", "");
   req.setBodyArg("refresh", null);
   req.setHeader("Content-Type", "application/x-www-form-urlencoded");
 
@@ -429,6 +435,7 @@ IoTest.prototype.testSignedGet_noViewerBoolean = function() {
 };
 
 IoTest.prototype.testSignedGet_noViewerString = function() {
+  gadgets.io.clearOAuthState();
   var req = new fakeXhr.Expectation("POST", "http://example.com/json");
   this.setStandardArgs(req, true);
   req.setBodyArg("url", "http://target.example.com/somepage");
@@ -436,6 +443,7 @@ IoTest.prototype.testSignedGet_noViewerString = function() {
   req.setBodyArg("signViewer", "false");
   req.setBodyArg("authz", "signed");
   req.setBodyArg("st", "authtoken");
+  req.setBodyArg("oauthState", "");
   req.setBodyArg("refresh", null);
   req.setHeader("Content-Type", "application/x-www-form-urlencoded");
 
@@ -458,6 +466,7 @@ IoTest.prototype.testSignedGet_noViewerString = function() {
 };
 
 IoTest.prototype.testSignedGet_withNoOwnerAndViewerString = function() {
+  gadgets.io.clearOAuthState();
   var req = new fakeXhr.Expectation("POST", "http://example.com/json");
   this.setStandardArgs(req, true);
   req.setBodyArg("url", "http://target.example.com/somepage");
@@ -465,6 +474,7 @@ IoTest.prototype.testSignedGet_withNoOwnerAndViewerString = function() {
   req.setBodyArg("signViewer", "true");
   req.setBodyArg("authz", "signed");
   req.setBodyArg("st", "authtoken");
+  req.setBodyArg("oauthState", "");
   req.setBodyArg("refresh", null);
   req.setHeader("Content-Type", "application/x-www-form-urlencoded");
 
@@ -543,6 +553,41 @@ IoTest.prototype.testOAuth = function() {
       },
       params);
   this.assertEquals("personal data", resp.text);
+};
+
+IoTest.prototype.testSignedEquivalentToOAuth = function() {
+  gadgets.io.clearOAuthState();
+  var req = new fakeXhr.Expectation("POST", "http://example.com/json");
+  this.setStandardArgs(req, true);
+  req.setBodyArg("url", "http://target.example.com/somepage");
+  req.setBodyArg("authz", "signed");
+  req.setBodyArg("st", "authtoken");
+  req.setBodyArg("refresh", null);
+  req.setBodyArg("oauthState", "");
+  req.setBodyArg("OAUTH_USE_TOKEN", "always");
+  req.setHeader("Content-Type", "application/x-www-form-urlencoded");
+
+  var resp = this.makeFakeResponse(gadgets.json.stringify(
+      { 'http://target.example.com/somepage' : { 
+          'oauthApprovalUrl' : 'http://sp.example.com/authz?oauth_token=foo',
+          'oauthState' : 'newState' 
+         }
+      }));
+
+  this.fakeXhrs.expect(req, resp);
+
+  var resp = null;
+  var params = {};
+  params["AUTHORIZATION"] = "SIGNED";
+  params["OAUTH_USE_TOKEN"] = "always";
+  gadgets.io.makeRequest(
+      "http://target.example.com/somepage",
+      function(data) {
+        resp = data;
+      },
+      params);
+  this.assertEquals("http://sp.example.com/authz?oauth_token=foo",
+      resp.oauthApprovalUrl);
 };
 
 IoTest.prototype.testOAuth_error = function() {
