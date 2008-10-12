@@ -67,9 +67,11 @@ class RestRequestItem extends RequestItem {
 				break;
 			case DataServiceServlet::$ACTIVITY_ROUTE:
 				$data = $this->inputConverter->convertActivities($this->postData);
+				$this->params['activity'] = $data;
 				break;
 			case DataServiceServlet::$APPDATA_ROUTE:
 				$data = $this->inputConverter->convertAppData($this->postData);
+				$this->params['data'] = $data;
 				break;
 			case DataServiceServlet::$MESSAGE_ROUTE:
 				$data = $this->inputConverter->convertMessages($this->postData);
@@ -78,7 +80,7 @@ class RestRequestItem extends RequestItem {
 				throw new Exception("Invalid or unknown service endpoint: $service");
 				break;
 		}
-		$this->params['data'] = $data;
+		
 	}
 
 	static function getServiceFromPath($pathInfo)

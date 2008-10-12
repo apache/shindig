@@ -69,9 +69,9 @@ class RestfulCollection {
 		return $this->itemsPerPage;
 	}
 
-	public function setItemsPerPage($startIndex)
+	public function setItemsPerPage($itemsPerPage)
 	{
-		$this->startIndex = itemsPerPage;
+		$this->itemsPerPage = $itemsPerPage;
 	}
 
 	public function getTotalResults()

@@ -21,21 +21,14 @@ interface ActivityService {
 
 	/**
 	 * Returns a list of activities that correspond to the passed in person ids.
-	 * @param ids The ids of the people to fetch activities for.
-	 * @param token A valid SecurityToken
-	 * @return a response item with the list of activities.
 	 */
-	function getActivities($userId, $groupId, $first, $max, SecurityToken $token);
+	function getActivities($userIds, $groupId, $appId, $sortBy, $filterBy, $startIndex, $count, $fields, $token);
 
-	function getActivity($userId, $groupId, $activityId, $first, $max, SecurityToken $token);
+	function getActivity($userId, $groupId, $appdId, $fields, $activityId, SecurityToken $token);
 
 	/**
 	 * Creates the passed in activity for the given user. Once createActivity is
 	 * called, getActivities will be able to return the Activity.
-	 * @param personId The id of the person to create the activity for.
-	 * @param activity The activity to create.
-	 * @param token A valid SecurityToken
-	 * @return a response item containing any errors
 	 */
-	function createActivity($userId, $activity, SecurityToken $token);
+	function createActivity($userId, $groupId, $appId, $fields, $activity, SecurityToken $token);
 }

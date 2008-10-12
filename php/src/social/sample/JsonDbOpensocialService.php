@@ -342,9 +342,26 @@ class JsonDbOpensocialService implements ActivityService, PersonService, AppData
 		}
 		return new ResponseItem(null, null, array());
 	}
-
-	public function getActivities($userId, $groupId, $first, $max, SecurityToken $token)
+	
+	public function getActivity($userId, $groupId, $appdId, $fields, $activityId, SecurityToken $token)
 	{
+		die("broken code, please use partuza to test for now");
+		$activities = $this->getActivities($userId, $groupId, null, null, $token);
+		$activities = $activities->getResponse();
+		if ($activities instanceof RestfulCollection) {
+			$activities = $activities->getEntry();
+			foreach ($activities as $activity) {
+				if ($activity['id'] == $activityId) {
+					return new ResponseItem(null, null, $activity);
+				}
+			}
+		}
+		return new ResponseItem(NOT_FOUND, "Activity not found", null);
+	}
+
+	public function getActivities($userIds, $groupId, $appId, $sortBy, $filterBy, $startIndex, $count, $fields, $token)
+	{
+		die("broken code, please use partuza to test for now");
 		$db = $this->getDb();
 		$friendsTable = $db[self::$FRIEND_LINK_TABLE];
 		$ids = array();
@@ -370,7 +387,7 @@ class JsonDbOpensocialService implements ActivityService, PersonService, AppData
 		return new ResponseItem(null, null, RestfulCollection::createFromEntry($activities));
 	}
 
-	public function createActivity($userId, $activity, SecurityToken $token)
+	public function createActivity($userId, $groupId, $appId, $fields, $activity, SecurityToken $token)
 	{
 		$db = $this->getDb();
 		$activitiesTable = $this->getAllActivities();
@@ -379,21 +396,6 @@ class JsonDbOpensocialService implements ActivityService, PersonService, AppData
 		$db[self::$ACTIVITIES_TABLE] = $activitiesTable;
 		$this->saveDb($db);
 		return new ResponseItem(null, null, array());
-	}
-
-	public function getActivity($userId, $groupId, $activityId, $first, $max, SecurityToken $token)
-	{
-		$activities = $this->getActivities($userId, $groupId, null, null, $token);
-		$activities = $activities->getResponse();
-		if ($activities instanceof RestfulCollection) {
-			$activities = $activities->getEntry();
-			foreach ($activities as $activity) {
-				if ($activity['id'] == $activityId) {
-					return new ResponseItem(null, null, $activity);
-				}
-			}
-		}
-		return new ResponseItem(NOT_FOUND, "Activity not found", null);
 	}
 
 	public function createMessage($userId, $message, SecurityToken $token)
