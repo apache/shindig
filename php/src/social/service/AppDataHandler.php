@@ -82,28 +82,21 @@ class AppDataHandler extends DataRequestHandler {
 	{
 		$requestItem->applyUrlTemplate(self::$APP_DATA_PATH);
 		$userIds = $requestItem->getUsers();
-		
 		if (count($userIds) < 1) {
 			throw new InvalidArgumentException("No userId specified");
 		} elseif (count($userIds) > 1) {
 			throw new InvalidArgumentException("Multiple userIds not supported");
-		}
+		}		
 		$values = $requestItem->getParameter("data");
+		$fields = array();
 		foreach (array_keys($values) as $key) {
+			$fields[] = $key;
 			if (! $this->isValidKey($key)) {
 				throw new SocialSpiException("One or more of the app data keys are invalid: " . $key, ResponseError::$BAD_REQUEST);
 			}
 		}
-		/*
-   		$postFields = array();
-		if ($requestItem->getPostData() != null) {
-			$data = $requestItem->getPostData();
-			foreach ($data as $key => $val) {
-				$postFields[] = $key;
-			}
-		}
-		*/
-		return $this->service->updatePersonData($userIds[0], $requestItem->getGroup(), $requestItem->getAppId(), $requestItem->getFields(), $values, $requestItem->getToken());
+		// this used to be $requestItem->getFields() instead of using the fields, but that makes no sense to me
+		return $this->service->updatePersonData($userIds[0], $requestItem->getGroup(), $requestItem->getAppId(), $fields, $values, $requestItem->getToken());
 	}
 
 	/**
