@@ -65,13 +65,10 @@ class ActivityHandler extends DataRequestHandler {
 			if (count($optionalActivityIds) == 1) {
 				return $this->service->getActivity($userIds[0], $requestItem->getGroup(), $requestItem->getAppId(), $requestItem->getFields(), $optionalActivityIds[0], $requestItem->getToken());
 			} else {
-				return $this->service->getActivities($userIds[0], $requestItem->getGroup(), $requestItem->getAppId(), $requestItem->getFields(), $optionalActivityIds, $requestItem->getToken());
+				return $this->service->getActivities($userIds[0], $requestItem->getGroup(), $requestItem->getAppId(), $requestItem->getSortBy(), $requestItem->getFilterBy(), $requestItem->getStartIndex(), $requestItem->getCount(), $requestItem->getFields(), $optionalActivityIds, $requestItem->getToken());
 			}
 		}
-		return $this->service->getActivities($userIds, $requestItem->getGroup(), $requestItem->getAppId(), 
-			// TODO: add pagination and sorting support
-			// getSortBy(params), getFilterBy(params), getStartIndex(params), getCount(params),
-			$requestItem->getFields(), $requestItem->getToken());
+		return $this->service->getActivities($userIds, $requestItem->getGroup(), $requestItem->getAppId(), $requestItem->getSortBy(), $requestItem->getFilterBy(), $requestItem->getStartIndex(), $requestItem->getCount(), $requestItem->getFields(), $requestItem->getToken());
 	}
 
 	/**
