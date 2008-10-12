@@ -1,5 +1,4 @@
 <?php
-
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements. See the NOTICE file
@@ -104,7 +103,7 @@ abstract class RequestItem {
 		} elseif (is_numeric($startIndex)) {
 			return intval($startIndex);
 		} else {
-			throw new SocialSpiException("Parameter " + self::$START_INDEX + " (" + $startIndex + ") is not a number.", ResponseError::$BAD_REQUEST);
+			throw new SocialSpiException("Parameter " . self::$START_INDEX . " (" . $startIndex . ") is not a number.", ResponseError::$BAD_REQUEST);
 		}
 	}
 
@@ -116,7 +115,7 @@ abstract class RequestItem {
 		} elseif (is_numeric($count)) {
 			return intval($count);
 		} else {
-			throw new SocialSpiException("Parameter " + self::$COUNT + " (" + $count + ") is not a number.", ResponseError::$BAD_REQUEST);
+			throw new SocialSpiException("Parameter " . self::$COUNT . " (" . $count . ") is not a number.", ResponseError::$BAD_REQUEST);
 		}
 	}
 
@@ -134,7 +133,7 @@ abstract class RequestItem {
 		} elseif ($sortOrder == CollectionOptions::SORT_ORDER_ASCENDING || $sortOrder == CollectionOptions::SORT_ORDER_DESCENDING) {
 			return $sortOrder;
 		} else {
-			throw new SocialSpiException("Parameter " + SORT_ORDER + " (" + sortOrder + ") is not valid.", ResponseError . BAD_REQUEST);
+			throw new SocialSpiException("Parameter " . sef::$SORT_ORDER . " (" . $sortOrder . ") is not valid.", ResponseError::$BAD_REQUEST);
 		}
 	}
 
@@ -151,7 +150,7 @@ abstract class RequestItem {
 		} elseif ($filterOp == CollectionOptions::FILTER_OP_EQUALS || $filterOp == CollectionOptions::FILTER_OP_CONTAINS || $filterOp == CollectionOptions::FILTER_OP_STARTSWITH || $filterOp == CollectionOptions::FILTER_OP_PRESENT) {
 			return $filterOp;
 		} else {
-			throw new SocialSpiException("Parameter " + FILTER_OPERATION + " (" + filterOp + ") is not valid.", ResponseError . BAD_REQUEST);
+			throw new SocialSpiException("Parameter " . self::$FILTER_OPERATION . " (" . $filterOp . ") is not valid.", ResponseError::$BAD_REQUEST);
 		}
 	}
 
@@ -174,7 +173,7 @@ abstract class RequestItem {
 			// often we get duplicate fields, remove'm
 			$cleanResult = array();
 			foreach ($result as $field) {
-				if (!in_array($field, $cleanResult)) {
+				if (! in_array($field, $cleanResult)) {
 					$cleanResult[] = $field;
 				}
 			}
