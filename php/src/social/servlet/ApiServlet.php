@@ -130,6 +130,6 @@ abstract class ApiServlet {
 		if ($e instanceof SocialSpiException) {
 			return new ResponseItem($e->getCode(), $e->getMessage(), null);
 		}
-		return new ResponseItem(ResponseError . INTERNAL_ERROR, t . getMessage());
+		return new ResponseItem(ResponseError::$INTERNAL_ERROR, $e->getMessage());
 	}
 }

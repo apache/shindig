@@ -18,7 +18,7 @@
  */
 
 class AppDataHandler extends DataRequestHandler {
-	private static $APP_DATA_PATH = "/appdata/{userId}/{groupId}/{appId}";
+	private static $APP_DATA_PATH = "/appdata/{userId}/{groupId}/appId";
 	private $service;
 
 	public function __construct()
