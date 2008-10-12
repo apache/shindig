@@ -23,35 +23,27 @@
 class RestRequestItem extends RequestItem {
 	
 	protected static $X_HTTP_METHOD_OVERRIDE = "X-HTTP-Method-Override";
-	
 	private $url;
-	
 	private $params;
-	
+	private $inputConverter;
+	private $outputConverter;
 	private $postData;
 
-	public function __construct($service, $method, SecurityToken $token, $converter)
+	public function __construct($service, $method, SecurityToken $token, $inputConverter, $outputConverter)
 	{
-		parent::__construct($service, $method, $token, $converter);
+		parent::__construct($service, $method, $token);
+		$this->inputConverter = $inputConverter;
+		$this->outputConverter = $outputConverter;
 	}
 
-	public static function createWithPath($path, $method, $postData, SecurityToken $token, $converter)
+	public static function createWithRequest($servletRequest, $token, $inputConverter, $outputConverter)
 	{
-		$restfulRequestItem = new RestRequestItem($this->getServiceFromPath($path), $method, $token, $converter);
-		$restfulRequestItem->setPostData($postData);
-		$restfulRequestItem->setUrl($path);
-		$restfulRequestItem->putUrlParamsIntoParameters();
-		return $restfulRequestItem;
-	}
-
-	public static function createWithRequest($servletRequest, $token, $converter)
-	{
-		$restfulRequestItem = new RestRequestItem(self::getServiceFromPath($servletRequest['url']), self::getMethod(), $token, $converter);
+		$restfulRequestItem = new RestRequestItem(self::getServiceFromPath($servletRequest['url']), self::getMethod(), $token, $inputConverter, $outputConverter);
 		$restfulRequestItem->setUrl($servletRequest['url']);
+		$restfulRequestItem->setParams($restfulRequestItem->createParameterMap());
 		if (isset($servletRequest['postData'])) {
 			$restfulRequestItem->setPostData($servletRequest['postData']);
 		}
-		$restfulRequestItem->setParams($restfulRequestItem->createParameterMap());
 		return $restfulRequestItem;
 	}
 
@@ -68,6 +60,25 @@ class RestRequestItem extends RequestItem {
 	public function setPostData($postData)
 	{
 		$this->postData = $postData;
+		$service = $this->getServiceFromPath($this->url);
+		switch ($service) {
+			case DataServiceServlet::$PEOPLE_ROUTE:
+				$data = $this->inputConverter->convertPeople($this->postData);
+				break;
+			case DataServiceServlet::$ACTIVITY_ROUTE:
+				$data = $this->inputConverter->convertActivities($this->postData);
+				break;
+			case DataServiceServlet::$APPDATA_ROUTE:
+				$data = $this->inputConverter->convertAppData($this->postData);
+				break;
+			case DataServiceServlet::$MESSAGE_ROUTE:
+				$data = $this->inputConverter->convertMessages($this->postData);
+				break;
+			default:
+				throw new Exception("Invalid or unknown service endpoint: $service");
+				break;
+		}
+		$this->params['data'] = $data;
 	}
 
 	static function getServiceFromPath($pathInfo)
@@ -150,7 +161,7 @@ class RestRequestItem extends RequestItem {
 		if ($paramValue == null) {
 			return;
 		}
-		$this->params[$paramName] = is_array($paramValue) ? $paramValue : array($paramValue);
+		$this->params[$paramName] = $paramValue;
 	}
 
 	/**
@@ -159,8 +170,8 @@ class RestRequestItem extends RequestItem {
 	public function getParameter($paramName, $defaultValue = null)
 	{
 		$paramValue = isset($this->params[$paramName]) ? $this->params[$paramName] : null;
-		if ($paramValue != null && ! empty($paramValue) && is_array($this->params[$paramName])) {
-			return $paramValue[0];
+		if ($paramValue != null && ! empty($paramValue)) {
+			return $paramValue;
 		}
 		return $defaultValue;
 	}

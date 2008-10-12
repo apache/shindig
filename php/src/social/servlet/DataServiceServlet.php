@@ -51,12 +51,18 @@ class DataServiceServlet extends ApiServlet {
 				$this->sendSecurityError();
 				return;
 			}
-			$converter = $this->getConverterForRequest();
-			$this->handleSingleRequest($token, $converter);
+			$inputConverter = $this->getInputConverterForRequest();
+			$outputConverter = $this->getOutputConverterForRequest();
+			$this->handleSingleRequest($token, $inputConverter, $outputConverter);
 		} catch (Exception $e) {
-			echo "<b>Exception: " . $e->getMessage() . "</b><br><pre>\n";
-			echo $e->getTraceAsString();
-			echo "</pre>";
+			$code = '500 Internal Server Error';
+			header("HTTP/1.0 $code", true);
+			echo "<h1>$code - Internal Server Error</h1>\n". $e->getMessage();
+			if (Config::get('debug')) {
+				echo "\n\n<br>\nDebug backtrace:\n<br>\n<pre>\n";
+				echo $e->getTraceAsString();
+				echo "\n</pre>\n";
+			}
 		}
 	}
 
@@ -64,22 +70,22 @@ class DataServiceServlet extends ApiServlet {
 	{
 		$errorMessage = $responseItem->getErrorMessage();
 		switch ($responseItem->getError()) {
-			case BAD_REQUEST:
+			case ResponseError::$BAD_REQUEST:
 				$code = '400 Bad Request';
 				break;
-			case UNAUTHORIZED:
+			case ResponseError::$UNAUTHORIZED:
 				$code = '401 Unauthorized';
 				break;
-			case FORBIDDEN:
+			case ResponseError::$FORBIDDEN:
 				$code = '403 Forbidden';
 				break;
-			case FORBIDDEN:
+			case ResponseError::$FORBIDDEN:
 				$code = '404 Not Found';
 				break;
-			case NOT_IMPLEMENTED:
+			case ResponseError::$NOT_IMPLEMENTED:
 				$code = '501 Not Implemented';
 				break;
-			case INTERNAL_ERROR:
+			case ResponseError::$INTERNAL_ERROR:
 			default:
 				$code = '500 Internal Server Error';
 				break;
@@ -90,26 +96,34 @@ class DataServiceServlet extends ApiServlet {
 	}
 
 	/**
-	 * Handler for non-batch requests
+	 * Handler for non-batch requests (REST only has non-batch requests)
 	 */
-	private function handleSingleRequest(SecurityToken $token, $converter)
+	private function handleSingleRequest(SecurityToken $token, $inputConverter, $outputConverter)
 	{
 		$servletRequest = array(
-				'url' => substr($_SERVER["REQUEST_URI"], strlen(Config::get('web_prefix') . '/social/rest')));
-		$requestItem = RestRequestItem::createWithRequest($servletRequest, $token, $converter);
+				'url' => substr($_SERVER["REQUEST_URI"], strlen(Config::get('web_prefix') . '/social/rest'))
+		);
+		if (isset($GLOBALS['HTTP_RAW_POST_DATA'])) {
+			$servletRequest['postData'] = $GLOBALS['HTTP_RAW_POST_DATA'];
+			if (get_magic_quotes_gpc()) {
+				$servletRequest['postData'] = stripslashes($servletRequest['postData']);
+			}
+		}
+		$requestItem = RestRequestItem::createWithRequest($servletRequest, $token, $inputConverter, $outputConverter);
 		$responseItem = $this->getResponseItem($this->handleRequestItem($requestItem));
 		if ($responseItem->getError() == null) {
-			//FIXME does this code have to be here? bah, breaks our converters :)
-			/*if (! ($responseItem instanceof DataCollection) && ! ($responseItem instanceof RestfulCollection)) {
-				$responseItem = array("entry" => $responseItem);
-			}*/
-			$converter->outputResponse($responseItem, $requestItem);
+			$outputConverter->outputResponse($responseItem, $requestItem);
 		} else {
 			$this->sendError($responseItem);
 		}
 	}
 
-	private function getConverterForRequest()
+	/**
+	 * Returns the output converter to use
+	 *
+	 * @return OutputConverter
+	 */
+	private function getOutputConverterForRequest()
 	{
 		$outputFormat = strtolower(trim(! empty($_POST[self::$FORMAT_PARAM]) ? $_POST[self::$FORMAT_PARAM] : (! empty($_GET[self::$FORMAT_PARAM]) ? $_GET[self::$FORMAT_PARAM] : 'json')));
 		switch ($outputFormat) {
@@ -120,26 +134,77 @@ class DataServiceServlet extends ApiServlet {
 			case 'json':
 				return new OutputJsonConverter();
 			default:
-				throw new Exception("Unknown format param: $outputFormat");
+				// if no output format is set, see if we can match an input format header
+				// if not, default to json
+				if (isset($_SERVER['CONTENT_TYPE'])) {
+					switch ($_SERVER['CONTENT_TYPE']) {
+						case 'application/atom+xml':
+							return new OutputAtomConverter();
+						case 'application/xml':
+							return new OutputXmlConverter();
+						default:
+						case 'application/json':
+							return new OutputJsonConverter();
+					}
+				}
+				break;
+		}
+	}
+	
+	/**
+	 * Returns the input converter to use
+	 *
+	 * @return InputConverter
+	 */
+	private function getInputConverterForRequest()
+	{
+		$inputFormat = $this->getInputRequestFormat();
+		switch ($inputFormat) {
+			case 'xml':
+				return new InputXmlConverter();
+			case 'atom':
+				return new InputAtomConverter();
+			case 'json':
+				return new InputJsonConverter();
+			default:
+				throw new Exception("Unknown format param: $inputFormat");
 		}
 	}
 
-	private function getRequestFormat()
+	/**
+	 * Tries to guess the input format based on the Content-Type
+	 * header, of if none is set, the format query param
+	 *
+	 * @return string request format to use
+	 */
+	private function getInputRequestFormat()
 	{
+		// input format is defined by the Content-Type header
+		// if that isn't set we use the &format= param
+		// if that isn't set, we default to json
 		if (isset($_SERVER['CONTENT_TYPE'])) {
 			switch ($_SERVER['CONTENT_TYPE']) {
 				case 'application/atom+xml':
 					return 'atom';
+				case 'application/xml':
+					return 'xml';
 				case 'application/json':
-					return 'json';
 				default:
-					throw new Exception("Invalid request content type");
+					return 'json';
 			}
+		} else {
+			// if no Content-Type header is set, we assume the input format will be the same as the &format=<foo> param
+			// if that isn't set either, we assume json
+			return strtolower(trim(! empty($_POST[self::$FORMAT_PARAM]) ? $_POST[self::$FORMAT_PARAM] : (! empty($_GET[self::$FORMAT_PARAM]) ? $_GET[self::$FORMAT_PARAM] : 'json')));
 		}
-		// if no Content-Type header is set, we assume json
-		return 'json';
 	}
 
+	/**
+	 * Returns the route to use (activities, people, appdata, messages)
+	 *
+	 * @param string $pathInfo
+	 * @return string the route name
+	 */
 	private function getRouteFromParameter($pathInfo)
 	{
 		$pathInfo = substr($pathInfo, 1);

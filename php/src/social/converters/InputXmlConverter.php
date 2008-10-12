@@ -62,12 +62,14 @@ class InputXmlConverter extends InputConverter {
 	public function convertAppData($requestParam)
 	{
 		$xml = simplexml_load_string($requestParam, 'SimpleXMLElement', LIBXML_NOCDATA);
-		if (! isset($xml->appdata)) {
+		if (! isset($xml->entry)) {
 			throw new Exception("Mallformed AppData xml");
 		}
 		$data = array();
-		foreach (get_object_vars($xml->appdata) as $key => $val) {
-			$data[trim($key)] = trim($val);
+		foreach ($xml->entry as $entry) {
+			$key = trim($entry->key);
+			$val = isset($entry->value) ? trim($entry->value) : null;
+			$data[$key] = $val;
 		}
 		return $data;
 	}

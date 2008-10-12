@@ -24,7 +24,6 @@ class UrlGenerator {
 	{
 		$v = $gadget->getChecksum();
 		$view = HttpUtil::getView($gadget, $context);
-		
 		$up = '';
 		$prefs = $context->getUserPrefs();
 		foreach ($gadget->getUserPrefs() as $pref) {

@@ -39,8 +39,7 @@ class ActivityHandler extends DataRequestHandler {
 		} elseif (count($userIds) > 1) {
 			throw new InvalidArgumentException("Multiple userIds not supported");
 		}
-		
-		return $this->service . deleteActivities($userIds[0], $requestItem->getGroup(), $requestItem->getAppId(), $activityIds, $request->getToken());
+		return $this->service->deleteActivities($userIds[0], $requestItem->getGroup(), $requestItem->getAppId(), $activityIds, $request->getToken());
 	}
 
 	/**

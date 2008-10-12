@@ -30,7 +30,13 @@ class GroupId {
 
 	static public function fromJson($jsonId)
 	{
-		if (in_array(substr($jsonId, 1), GroupId::$types)) {
+		if (is_array($jsonId)) {
+			if (in_array(substr($jsonId[0], 1), GroupId::$types)) {
+				return new GroupId(substr($jsonId[0], 1), null);
+			} else {
+				return new GroupId('groupId', $jsonId);
+			}
+		} elseif (in_array(substr($jsonId, 1), GroupId::$types)) {
 			return new GroupId(substr($jsonId, 1), null);
 		}
 		return new GroupId('groupId', $jsonId);
