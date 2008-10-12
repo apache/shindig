@@ -110,7 +110,7 @@ abstract class ApiServlet {
 	protected function handleRequestItem(RequestItem $requestItem)
 	{
 		if (! isset($this->handlers[$requestItem->getService()])) {
-			throw new SocialSpiException("The service " + $requestItem->getService() + " is not implemented", ResponseError::$NOT_IMPLEMENTED);
+			throw new SocialSpiException("The service " . $requestItem->getService() . " is not implemented", ResponseError::$NOT_IMPLEMENTED);
 		}
 		$handler = $this->handlers[$requestItem->getService()];
 		return $handler->handleItem($requestItem);
