@@ -84,7 +84,6 @@ class RpcRequestItem extends RequestItem {
 			}
 		} else {
 			return array();
-			;
 		}
 	}
 

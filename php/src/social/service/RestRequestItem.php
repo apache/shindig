@@ -184,11 +184,17 @@ class RestRequestItem extends RequestItem {
 		$stringList = isset($this->params[$paramName]) ? $this->params[$paramName] : null;
 		if ($stringList == null) {
 			return array();
+		} elseif (is_array($stringList)) {
+			// already converted to array, return straight away
+			return $stringList;
 		}
-		if (count($stringList) == 1 && strpos($stringList[0], ',') !== false) {
+		if (strpos($stringList, ',') !== false) {
 			$stringList = explode(',', $stringList);
-			$this->params[$paramName] = $stringList;
+		} else {
+			// Allow up-conversion of non-array to array params.
+			$stringList = array($stringList);
 		}
+		$this->params[$paramName] = $stringList;
 		return $stringList;
 	}
 }

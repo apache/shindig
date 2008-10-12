@@ -18,7 +18,7 @@
  */
 
 class DataCollection {
-	private $entry;
+	public $entry;
 
 	public function __construct($entry)
 	{
