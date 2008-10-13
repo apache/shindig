@@ -17,6 +17,10 @@
  */
 package org.apache.shindig.social.opensocial.util;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.w3c.dom.ls.LSInput;
+import org.w3c.dom.ls.LSResourceResolver;
 import org.xml.sax.SAXException;
 
 import java.io.ByteArrayInputStream;
@@ -38,6 +42,7 @@ public class XSDValidator {
    * The schema langiage being used.
    */
   private static final String W3C_XML_SCHEMA = "http://www.w3.org/2001/XMLSchema";
+  protected static final Log log = LogFactory.getLog(XSDValidator.class);
 
   /**
    * Validate a xml string against a supplied schema.
@@ -69,7 +74,20 @@ public class XSDValidator {
     try {
       SchemaFactory schemaFactory = SchemaFactory.newInstance(W3C_XML_SCHEMA);
       Schema s = schemaFactory.newSchema(new StreamSource(schema));
+      
+      
       Validator validator = s.newValidator();
+      final LSResourceResolver lsr = validator.getResourceResolver();
+      validator.setResourceResolver(new LSResourceResolver() {
+
+        public LSInput resolveResource(String arg0, String arg1, String arg2,
+            String arg3, String arg4) {
+          log.info("resolveResource("+arg0+","+arg1+","+arg2+","+arg3+","+arg4+")");
+          return lsr.resolveResource(arg0, arg1, arg2, arg3, arg4);
+        }
+        
+      });
+      
       validator.validate(new StreamSource(xml));
     } catch (IOException e) {
     } catch (SAXException e) {

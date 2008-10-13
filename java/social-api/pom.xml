@@ -123,5 +123,14 @@ under the License.
         <artifactId>annotations</artifactId>
         <scope>compile</scope> 
     </dependency>
+    <dependency>
+        <groupId>xstream</groupId>
+        <artifactId>xstream</artifactId>
+    </dependency>
+    <dependency>
+        <groupId>xpp3</groupId>
+        <artifactId>xpp3</artifactId>
+    </dependency>
+    
   </dependencies>
 </project>

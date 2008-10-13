@@ -3,6 +3,16 @@
   elementFormDefault="qualified"
   targetNamespace="http://ns.opensocial.org/2008/opensocial"
   xmlns:xs="http://www.w3.org/2001/XMLSchema">
+  
+  <!--  the following element allows the tests to pass validation, its is not part of the official opensocial xsd -->
+  <xs:element name="list.container" type="tns:list.container" />
+  <xs:complexType name="list.container">
+    <xs:sequence>
+      <xs:any minOccurs="0" maxOccurs="unbounded" />
+    </xs:sequence>
+  </xs:complexType>
+  
+  
   <xs:complexType name="ActivityCollection">
     <xs:all>
       <xs:element minOccurs="0" name="activities" type="tns:ArrayOfActivity" />
