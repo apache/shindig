@@ -327,6 +327,11 @@ class JsonDbOpensocialService implements ActivityService, PersonService, AppData
 		$this->saveDb($db);
 		return new ResponseItem(null, null, array());
 	}
+	
+	public function deleteActivities($userId, $groupId, $appId, $activityIds, SecurityToken $token)
+	{
+		throw new SocialSpiException("Not implemented", ResponseError::$NOT_IMPLEMENTED);
+	}
 
 	public function createMessage($userId, $message, SecurityToken $token)
 	{
