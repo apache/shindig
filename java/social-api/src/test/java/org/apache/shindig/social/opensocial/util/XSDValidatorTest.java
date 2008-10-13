@@ -34,5 +34,18 @@ public class XSDValidatorTest extends TestCase {
     assertEquals("", XSDValidator.validate(this.getClass().getResourceAsStream("testschema1.xml"),this.getClass().getResourceAsStream("opensocial.xsd")));
     assertNotSame("", XSDValidator.validate(this.getClass().getResourceAsStream("testschema1bad.xml"),this.getClass().getResourceAsStream("opensocial.xsd")));
   }
+  
+  public void testPerson1() throws XmlException {
+    assertEquals("", XSDValidator.validate(this.getClass().getResourceAsStream("testxml/person1.xml"),this.getClass().getResourceAsStream("opensocial.xsd")));
+  }
+  public void testActivity1() throws XmlException {
+    assertEquals("", XSDValidator.validate(this.getClass().getResourceAsStream("testxml/activity1.xml"),this.getClass().getResourceAsStream("opensocial.xsd")));
+  }
+  public void testAppdata1() throws XmlException {
+    assertEquals("", XSDValidator.validate(this.getClass().getResourceAsStream("testxml/appdata1.xml"),this.getClass().getResourceAsStream("opensocial.xsd")));
+  }
+  public void testGroup1() throws XmlException {
+    assertEquals("", XSDValidator.validate(this.getClass().getResourceAsStream("testxml/group1.xml"),this.getClass().getResourceAsStream("opensocial.xsd")));
+  }
 
 }
