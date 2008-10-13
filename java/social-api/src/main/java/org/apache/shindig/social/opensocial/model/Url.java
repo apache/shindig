@@ -21,11 +21,11 @@ import org.apache.shindig.social.core.model.UrlImpl;
 
 import com.google.inject.ImplementedBy;
 
-@ImplementedBy(UrlImpl.class)
 
 /**
  * The base interface of all Url objects.
  */
+@ImplementedBy(UrlImpl.class)
 public interface Url extends ListField {
 
   /**
@@ -40,7 +40,7 @@ public interface Url extends ListField {
     TYPE("type");
 
     /**
-     * The name of this field
+     * The name of this field.
      */
     private final String jsonString;
 
@@ -53,6 +53,9 @@ public interface Url extends ListField {
       this.jsonString = jsonString;
     }
 
+    /**
+     * The string representation of the enum.
+     */
     @Override
     public String toString() {
       return this.jsonString;

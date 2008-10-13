@@ -38,22 +38,37 @@ public interface Person {
   /**
    * The type of a profile url when represented as a list field.
    */
-  public static final String PROFILE_URL_TYPE = "profile";
+  String PROFILE_URL_TYPE = "profile";
 
   /**
    * The type of thumbnail photo types when represented as list fields.
    */
-  public static final String THUMBNAIL_PHOTO_TYPE = "thumbnail";
+  String THUMBNAIL_PHOTO_TYPE = "thumbnail";
 
+  /**
+   * The display name for the user.
+   * @return the display name
+   */
   String getDisplayName();
 
+  /**
+   * Set the display name.
+   * @param displayName the new display name.
+   */
   void setDisplayName(String displayName);
 
   /**
    * Enumeration of genders.
    */
   public enum Gender {
-    female, male
+    /**
+     * Female.
+     */
+    female,
+    /**
+     * Male.
+     */
+    male
   }
 
   /**
