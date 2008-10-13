@@ -101,36 +101,6 @@ class JsonDbOpensocialService implements ActivityService, PersonService, AppData
 		}
 	}
 
-	/**
-	 * Get the set of user id's from a user and group
-	 */
-	private function getIdSet(UserId $user, $group, SecurityToken $token)
-	{
-		$userId = $user->getUserId($token);
-		if ($group == null) {
-			return array($userId);
-		}
-		$returnVal = array();
-		switch ($group->getType()) {
-			case 'all':
-			case 'friends':
-			case 'groupId':
-				$db = $this->getDb();
-				$friendsLinkTable = $db[self::$FRIEND_LINK_TABLE];
-				if (isset($friendsLinkTable[$userId])) {
-					$friends = $friendsLinkTable[$userId];
-					foreach ($friends as $friend) {
-						$returnVal[$friend['id']] = $friend;
-					}
-				}
-				break;
-			case 'self':
-				$returnVal[$userId] = $userId;
-				break;
-		}
-		return $returnVal;
-	}
-
 	private function getAllPeople()
 	{
 		$db = $this->getDb();
@@ -190,28 +160,13 @@ class JsonDbOpensocialService implements ActivityService, PersonService, AppData
 
 	public function getPeople($userId, $groupId, CollectionOptions $options, $fields, SecurityToken $token)
 	{
+		
 		$sortOrder = $options->getSortOrder();
 		$filter = $options->getFilterBy();
 		$first = $options->getStartIndex();
 		$max = $options->getCount();
 		$networkDistance = $options->getNetworkDistance();
-		
-		$db = $this->getDb();
-		$friendsTable = $db[self::$FRIEND_LINK_TABLE];
-		$ids = array();
-		$group = is_object($groupId) ? $groupId->getType() : '';
-		switch ($group) {
-			case 'all':
-			case 'friends':
-				if (is_array($friendsTable) && count($friendsTable) && isset($friendsTable[$userId->getUserId($token)])) {
-					$ids = $friendsTable[$userId->getUserId($token)];
-				}
-				break;
-			case 'self':
-			default:
-				$ids[] = $userId->getUserId($token);
-				break;
-		}
+		$ids = $this->getIdSet($userId, $groupId, $token);
 		$allPeople = $this->getAllPeople();
 		if (! $token->isAnonymous() && $filter == "hasApp") {
 			$appId = $token->getAppId();
@@ -237,8 +192,9 @@ class JsonDbOpensocialService implements ActivityService, PersonService, AppData
 					$newPerson['isViewer'] = isset($person['isViewer']) ? $person['isViewer'] : false;
 					$newPerson['name'] = $person['name'];
 					foreach ($fields as $field => $present) {
-						if (isset($person[$field]) && ! isset($newPerson[$field])) {
-							$newPerson[$field] = $person[$field];
+						$present = strtolower($present);
+						if (isset($person[$present]) && ! isset($newPerson[$present])) {
+							$newPerson[$present] = $person[$present];
 						}
 					}
 					$person = $newPerson;
@@ -266,21 +222,8 @@ class JsonDbOpensocialService implements ActivityService, PersonService, AppData
 		$allData = $this->getAllData();
 		$friendsTable = $db[self::$FRIEND_LINK_TABLE];
 		$data = array();
-		$ids = array();
-		switch ($groupId->getType()) {
-			case 'self':
-				$ids[] = $userId->getUserId($token);
-				break;
-			case 'all':
-			case 'friends':
-				if (is_array($friendsTable) && count($friendsTable) && isset($friendsTable[$userId->getUserId($token)])) {
-					$ids = $friendsTable[$userId->getUserId($token)];
-				}
-				break;
-			default:
-				return new ResponseItem(NOT_IMPLEMENTED, "We don't support fetching data in batches yet", null);
-				break;
-		}
+		$ids = $this->getIdSet($userId, $groupId, $token);
+		
 		foreach ($ids as $id) {
 			if (isset($allData[$id])) {
 				$allPersonData = $allData[$id];
@@ -332,8 +275,7 @@ class JsonDbOpensocialService implements ActivityService, PersonService, AppData
 		}
 		switch ($groupId->getType()) {
 			case 'self':
-				foreach ($fields as $key => $present) {
-					//TODO: actually implement this!  
+				foreach ($fields as $key => $present) {	//TODO: actually implement this!  
 				}
 				break;
 			default:
@@ -342,11 +284,10 @@ class JsonDbOpensocialService implements ActivityService, PersonService, AppData
 		}
 		return new ResponseItem(null, null, array());
 	}
-	
+
 	public function getActivity($userId, $groupId, $appdId, $fields, $activityId, SecurityToken $token)
 	{
-		die("broken code, please use partuza to test for now");
-		$activities = $this->getActivities($userId, $groupId, null, null, $token);
+		$activities = $this->getActivities($userId, $groupId, $appdId, null, null, null, null, $fields, $token);
 		$activities = $activities->getResponse();
 		if ($activities instanceof RestfulCollection) {
 			$activities = $activities->getEntry();
@@ -361,21 +302,10 @@ class JsonDbOpensocialService implements ActivityService, PersonService, AppData
 
 	public function getActivities($userIds, $groupId, $appId, $sortBy, $filterBy, $startIndex, $count, $fields, $token)
 	{
-		die("broken code, please use partuza to test for now");
 		$db = $this->getDb();
 		$friendsTable = $db[self::$FRIEND_LINK_TABLE];
 		$ids = array();
-		switch ($groupId->getType()) {
-			case 'all':
-			case 'friends':
-				if (is_array($friendsTable) && count($friendsTable) && isset($friendsTable[$userId->getUserId($token)])) {
-					$ids = $friendsTable[$userId->getUserId($token)];
-				}
-				break;
-			case 'self':
-				$ids[] = $userId->getUserId($token);
-				break;
-		}
+		$ids = $this->getIdSet($userIds, $groupId, $token);
 		$allActivities = $this->getAllActivities();
 		$activities = array();
 		foreach ($ids as $id) {
@@ -432,5 +362,42 @@ class JsonDbOpensocialService implements ActivityService, PersonService, AppData
 			return 0;
 		}
 		return ($name < $name1) ? - 1 : 1;
+	}
+
+	/**
+	 * Get the set of user id's from a user or collection of users, and group
+	 * Code taken from http://code.google.com/p/partuza/source/browse/trunk/Shindig/PartuzaService.php
+	 */
+	private function getIdSet($user, GroupId $group, SecurityToken $token)
+	{
+		$ids = array();
+		$db = $this->getDb();
+		$friendsTable = $db[self::$FRIEND_LINK_TABLE];
+		if ($user instanceof UserId) {
+			$userId = $user->getUserId($token);
+			if ($group == null) {
+				return array($userId);
+			}
+			switch ($group->getType()) {
+				case 'self':
+					$ids[] = $userId;
+					break;
+				case 'all':
+				case 'friends':
+					if (is_array($friendsTable) && count($friendsTable) && isset($friendsTable[$userId])) {
+						$ids = $friendsTable[$userId];
+					}
+					break;
+				default:
+					return new ResponseItem(NOT_IMPLEMENTED, "We don't support fetching data in batches yet", null);
+					break;
+			}
+		} elseif (is_array($user)) {
+			$ids = array();
+			foreach ($user as $id) {
+				$ids = array_merge($ids, $this->getIdSet($id, $group, $token));
+			}
+		}
+		return $ids;
 	}
 }
