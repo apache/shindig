@@ -67,10 +67,8 @@ public class XSDValidator {
     factory.setValidating(true);
     final StringBuilder errors = new StringBuilder();
     try {
-
       SchemaFactory schemaFactory = SchemaFactory.newInstance(W3C_XML_SCHEMA);
       Schema s = schemaFactory.newSchema(new StreamSource(schema));
-      System.err.println("Schema is " + s);
       Validator validator = s.newValidator();
       validator.validate(new StreamSource(xml));
     } catch (IOException e) {
