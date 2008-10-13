@@ -22,13 +22,15 @@ interface ActivityService {
 	/**
 	 * Returns a list of activities that correspond to the passed in person ids.
 	 */
-	function getActivities($userIds, $groupId, $appId, $sortBy, $filterBy, $startIndex, $count, $fields, $token);
+	public function getActivities($userIds, $groupId, $appId, $sortBy, $filterBy, $startIndex, $count, $fields, $token);
 
-	function getActivity($userId, $groupId, $appdId, $fields, $activityId, SecurityToken $token);
+	public function getActivity($userId, $groupId, $appdId, $fields, $activityId, SecurityToken $token);
+	
+	public function deleteActivities($userId, $groupId, $appId, $activityIds, SecurityToken $token);
 
 	/**
 	 * Creates the passed in activity for the given user. Once createActivity is
 	 * called, getActivities will be able to return the Activity.
 	 */
-	function createActivity($userId, $groupId, $appId, $fields, $activity, SecurityToken $token);
+	public function createActivity($userId, $groupId, $appId, $fields, $activity, SecurityToken $token);
 }

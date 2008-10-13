@@ -21,7 +21,7 @@
 class ActivityHandler extends DataRequestHandler {
 	private $service;
 	
-	private static $ACTIVITY_ID_PATH = "/activities/{userId}/{groupId}/{activityId}";
+	private static $ACTIVITY_ID_PATH = "/activities/{userId}/{groupId}/appId/{activityId}";
 
 	public function __construct()
 	{
@@ -33,13 +33,13 @@ class ActivityHandler extends DataRequestHandler {
 	{
 		$requestItem->applyUrlTemplate(self::$ACTIVITY_ID_PATH);
 		$userIds = $requestItem->getUsers();
-		$activityIds = $request->getListParameter("activityId");
+		$activityIds = $requestItem->getListParameter("activityId");
 		if (empty($userIds)) {
 			throw new InvalidArgumentException("No userId specified");
 		} elseif (count($userIds) > 1) {
 			throw new InvalidArgumentException("Multiple userIds not supported");
 		}
-		return $this->service->deleteActivities($userIds[0], $requestItem->getGroup(), $requestItem->getAppId(), $activityIds, $request->getToken());
+		return $this->service->deleteActivities($userIds[0], $requestItem->getGroup(), $requestItem->getAppId(), $activityIds, $requestItem->getToken());
 	}
 
 	/**
