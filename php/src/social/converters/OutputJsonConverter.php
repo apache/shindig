@@ -31,10 +31,13 @@ class OutputJsonConverter extends OutputConverter {
 			if ($itemsPerPage > 0)
 				$response->itemsPerPage = $itemsPerPage;
 		}
-		if (Config::get('debug')) {
-			echo self::json_format(json_encode($response)); // TODO: add a query option to pretty-print json output
-		} else {
-			echo json_encode($response);
+		// several service calls return a null value
+		if (!is_null($response)) {
+			if (Config::get('debug')) {
+				echo self::json_format(json_encode($response)); // TODO: add a query option to pretty-print json output
+			} else {
+				echo json_encode($response);
+			}
 		}
 	}
 
