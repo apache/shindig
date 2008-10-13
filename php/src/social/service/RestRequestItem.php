@@ -63,6 +63,8 @@ class RestRequestItem extends RequestItem {
 		$service = $this->getServiceFromPath($this->url);
 		switch ($service) {
 			case DataServiceServlet::$PEOPLE_ROUTE:
+				// in our current implementation this will throw a SocialSPIException since we don't support 
+				// adding people/friendships in our API yet, but this might be added some day
 				$data = $this->inputConverter->convertPeople($this->postData);
 				break;
 			case DataServiceServlet::$ACTIVITY_ROUTE:

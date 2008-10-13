@@ -88,6 +88,8 @@ class AppDataHandler extends DataRequestHandler {
 			throw new InvalidArgumentException("Multiple userIds not supported");
 		}		
 		$values = $requestItem->getParameter("data");
+		// this used to be $requestItem->getFields() instead of using the fields, but that makes no sense to me
+		// better to detect the fields depending on input right?
 		$fields = array();
 		foreach (array_keys($values) as $key) {
 			$fields[] = $key;
@@ -95,8 +97,7 @@ class AppDataHandler extends DataRequestHandler {
 				throw new SocialSpiException("One or more of the app data keys are invalid: " . $key, ResponseError::$BAD_REQUEST);
 			}
 		}
-		// this used to be $requestItem->getFields() instead of using the fields, but that makes no sense to me
-		return $this->service->updatePersonData($userIds[0], $requestItem->getGroup(), $requestItem->getAppId(), $fields, $values, $requestItem->getToken());
+		$this->service->updatePersonData($userIds[0], $requestItem->getGroup(), $requestItem->getAppId(), $fields, $values, $requestItem->getToken());
 	}
 
 	/**
