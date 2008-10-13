@@ -58,6 +58,9 @@ public interface Message {
       this.jsonString = jsonString;
     }
 
+    /**
+     * @return a string representation of the enum.
+     */
     @Override
     public String toString() {
       return this.jsonString;
@@ -65,7 +68,7 @@ public interface Message {
   }
 
   /**
-   * The type of a message
+   * The type of a message.
    */
   public enum Type {
     /** An email. */
@@ -90,6 +93,9 @@ public interface Message {
       this.jsonString = jsonString;
     }
 
+    /**
+     * @return a string representation of the enum.
+     */
     @Override
     public String toString() {
       return this.jsonString;
@@ -129,7 +135,7 @@ public interface Message {
   Type getType();
 
   /**
-   * Sets the type of the message, as specified by opensocial.Message.Type
+   * Sets the type of the message, as specified by opensocial.Message.Type.
    * @param newType the type of message (enum Message.Type)
    */
   void setType(Type newType);

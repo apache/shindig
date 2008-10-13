@@ -35,7 +35,7 @@ import java.util.Date;
 public interface Organization {
 
   /**
-   * An Enumberation of field names for Organization.
+   * An Enumeration of field names for Organization.
    */
   public static enum Field {
     /** the name of the address field. */
@@ -80,6 +80,9 @@ public interface Organization {
       this.jsonString = jsonString;
     }
 
+    /**
+     * @return a string representation of the enum.
+     */
     @Override
     public String toString() {
       return this.jsonString;

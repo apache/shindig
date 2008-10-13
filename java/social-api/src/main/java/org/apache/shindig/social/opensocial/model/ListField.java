@@ -21,7 +21,6 @@ import org.apache.shindig.social.core.model.ListFieldImpl;
 
 import com.google.inject.ImplementedBy;
 
-@ImplementedBy(ListFieldImpl.class)
 
 /**
  * <p>
@@ -32,6 +31,7 @@ import com.google.inject.ImplementedBy;
  * Introduced in v0.8.1
  * </p>
  */
+@ImplementedBy(ListFieldImpl.class)
 public interface ListField {
 
   /**
@@ -59,6 +59,9 @@ public interface ListField {
       this.jsonString = jsonString;
     }
 
+    /**
+     * @return the string representation of the enum.
+     */
     @Override
     public String toString() {
       return this.jsonString;

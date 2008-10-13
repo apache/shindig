@@ -21,12 +21,15 @@ import org.apache.shindig.social.core.model.MediaItemImpl;
 
 import com.google.inject.ImplementedBy;
 
-@ImplementedBy(MediaItemImpl.class)
 /**
  * A container for the media item.
  */
+@ImplementedBy(MediaItemImpl.class)
 public interface MediaItem {
 
+  /**
+   * Fields for MediaItem.
+   */
   public static enum Field {
     /** the field name for mimeType. */
     MIME_TYPE("mimeType"),
@@ -49,6 +52,9 @@ public interface MediaItem {
       this.jsonString = jsonString;
     }
 
+    /**
+     * @return a string representation of the enum.
+     */
     @Override
     public String toString() {
       return this.jsonString;
@@ -80,6 +86,9 @@ public interface MediaItem {
       this.jsonString = jsonString;
     }
 
+    /**
+     * @return a string representation of the enum.
+     */
     @Override
     public String toString() {
       return this.jsonString;
@@ -110,7 +119,7 @@ public interface MediaItem {
   /**
    * Get the Type of this media item, either audio, image or video.
    *
-   * @param the type of this media item
+   * @param type the type of this media item
    */
   void setType(Type type);
 
