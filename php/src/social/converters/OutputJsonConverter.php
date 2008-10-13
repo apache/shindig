@@ -68,15 +68,12 @@ class OutputJsonConverter extends OutputConverter {
 		$new_json = "";
 		$indent_level = 0;
 		$in_string = false;
-		
 		$json_obj = json_decode($json);
-		
-		if (! $json_obj)
+		if (! $json_obj) {
 			return false;
-		
+		}
 		$json = json_encode($json_obj);
 		$len = strlen($json);
-		
 		for ($c = 0; $c < $len; $c ++) {
 			$char = $json[$c];
 			switch ($char) {
@@ -124,7 +121,6 @@ class OutputJsonConverter extends OutputConverter {
 					break;
 			}
 		}
-		
 		return $new_json;
 	}
 }

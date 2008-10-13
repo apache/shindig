@@ -24,7 +24,7 @@ class InputAtomConverter extends InputConverter {
 
 	public function convertPeople($requestParam)
 	{
-		throw new Exception("Operation not supported");
+		throw new SocialSpiException("Operation not supported", ResponseError::$NOT_IMPLEMENTED);
 	}
 
 	public function convertActivities($requestParam)
