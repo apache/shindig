@@ -17,11 +17,6 @@
  */
 package org.apache.shindig.social.opensocial.util;
 
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
-
-import junit.framework.TestCase;
-
 import org.apache.shindig.common.xml.XmlException;
 import org.apache.shindig.common.xml.XmlUtil;
 import org.apache.shindig.social.core.model.ActivityImpl;
@@ -37,17 +32,22 @@ import org.apache.shindig.social.opensocial.model.ListField;
 import org.apache.shindig.social.opensocial.model.MediaItem;
 import org.apache.shindig.social.opensocial.model.Person;
 
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
+
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
+import junit.framework.TestCase;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
@@ -158,7 +158,7 @@ public class BeanXStreamConverterTest extends TestCase {
   }
 
   public void testMapToXml() throws XmlException {
-    Map<String, String> m = new HashMap<String, String>();
+    Map<String, String> m = new LinkedHashMap<String, String>();
     m.put("key1", "value1");
     m.put("key2", "value2");
     String xml = beanXmlConverter.convertToXml(m);
