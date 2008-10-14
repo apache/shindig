@@ -45,6 +45,8 @@ public class BasicGadgetSpecFactory implements GadgetSpecFactory {
 
   private final HttpFetcher fetcher;
   private final TtlCache<Uri, GadgetSpec> ttlCache;
+  private final long minTtl;
+  private final long maxTtl;
 
    @Inject
   public BasicGadgetSpecFactory(HttpFetcher fetcher,
@@ -53,6 +55,8 @@ public class BasicGadgetSpecFactory implements GadgetSpecFactory {
                                 @Named("shindig.gadget-spec.cache.minTTL") long minTtl,
                                 @Named("shindig.gadget-spec.cache.maxTTL") long maxTtl) {
     this.fetcher = fetcher;
+    this.minTtl = minTtl;
+    this.maxTtl = maxTtl;
     this.ttlCache = new TtlCache<Uri, GadgetSpec>(cacheProvider, capacity, minTtl, maxTtl);
   }
 
@@ -103,6 +107,12 @@ public class BasicGadgetSpecFactory implements GadgetSpecFactory {
    */
   private GadgetSpec fetchObjectAndCache(Uri url, boolean ignoreCache) throws GadgetException {
     HttpRequest request = new HttpRequest(url).setIgnoreCache(ignoreCache);
+    if (minTtl == maxTtl) {
+      // Since we don't allow any variance in cache time, we should just force the cache time
+      // globally. This ensures propagation to shared caches when this is set.
+      request.setCacheTtl((int) (maxTtl / 1000));
+    }
+
     HttpResponse response = fetcher.fetch(request);
     if (response.getHttpStatusCode() != HttpResponse.SC_OK) {
       throw new GadgetException(GadgetException.Code.FAILED_TO_RETRIEVE_CONTENT,

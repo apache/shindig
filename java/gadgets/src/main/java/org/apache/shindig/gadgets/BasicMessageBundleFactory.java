@@ -41,6 +41,8 @@ public class BasicMessageBundleFactory extends AbstractMessageBundleFactory {
   static final Logger logger = Logger.getLogger(BasicMessageBundleFactory.class.getName());
   private final HttpFetcher fetcher;
   private final TtlCache<Uri, MessageBundle> ttlCache;
+  private final long minTtl;
+  private final long maxTtl;
 
   @Inject
   public BasicMessageBundleFactory(HttpFetcher fetcher,
@@ -49,6 +51,8 @@ public class BasicMessageBundleFactory extends AbstractMessageBundleFactory {
                                    @Named("shindig.message-bundle.cache.minTTL")long minTtl,
                                    @Named("shindig.message-bundle.cache.maxTTL")long maxTtl) {
     this.fetcher = fetcher;
+    this.minTtl = minTtl;
+    this.maxTtl = maxTtl;
     this.ttlCache = new TtlCache<Uri, MessageBundle>(cacheProvider, capacity, minTtl, maxTtl);
   }
 
@@ -84,6 +88,12 @@ public class BasicMessageBundleFactory extends AbstractMessageBundleFactory {
       throws GadgetException {
     Uri url = locale.getMessages();
     HttpRequest request = new HttpRequest(url).setIgnoreCache(ignoreCache);
+    if (minTtl == maxTtl) {
+      // Since we don't allow any variance in cache time, we should just force the cache time
+      // globally. This ensures propagation to shared caches when this is set.
+      request.setCacheTtl((int) (maxTtl / 1000));
+    }
+
     HttpResponse response = fetcher.fetch(request);
     if (response.getHttpStatusCode() != HttpResponse.SC_OK) {
       throw new GadgetException(GadgetException.Code.FAILED_TO_RETRIEVE_CONTENT,

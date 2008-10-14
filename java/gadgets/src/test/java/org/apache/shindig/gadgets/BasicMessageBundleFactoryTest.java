@@ -20,8 +20,8 @@ package org.apache.shindig.gadgets;
 
 import static org.easymock.EasyMock.expect;
 import static org.easymock.EasyMock.isA;
-import static org.easymock.EasyMock.replay;
 import static org.easymock.EasyMock.verify;
+import static org.easymock.classextension.EasyMock.replay;
 import static org.junit.Assert.assertEquals;
 
 import org.apache.shindig.common.cache.CacheProvider;
@@ -145,5 +145,30 @@ public class BasicMessageBundleFactoryTest {
     verify(fetcher);
 
     assertEquals(MSG_0_VALUE, bundle.getMessages().get(MSG_0_NAME));
+  }
+
+  @Test
+  public void identicalMaxTtlAndMinTtlPropagatesToFetcher() throws Exception {
+    CapturingFetcher capturingFetcher = new CapturingFetcher();
+
+    BasicMessageBundleFactory forcedBundleFactory
+        = new BasicMessageBundleFactory(capturingFetcher, cacheProvider, 5, 10000, 10000);
+
+    HttpRequest request = new HttpRequest(BUNDLE_URI)
+        .setIgnoreCache(false)
+        .setCacheTtl(10);
+
+    forcedBundleFactory.getBundle(gadgetSpec, LOCALE, false);
+
+    assertEquals(10, capturingFetcher.request.getCacheTtl());
+  }
+
+  private static class CapturingFetcher implements HttpFetcher {
+    HttpRequest request;
+
+    public HttpResponse fetch(HttpRequest request) {
+      this.request = request;
+      return new HttpResponse(BASIC_BUNDLE);
+    }
   }
 }
