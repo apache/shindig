@@ -67,30 +67,30 @@ class JsonDbOpensocialService implements ActivityService, PersonService, AppData
 			$fileName = sys_get_temp_dir() . '/' . $this->jsonDbFileName;
 			if (file_exists($fileName)) {
 				if (! is_readable($fileName)) {
-					throw new Exception("Could not read temp json db file: $fileName, check permissions");
+					throw new SocialSpiException("Could not read temp json db file: $fileName, check permissions", ResponseError::$INTERNAL_ERROR);
 				}
 				$cachedDb = file_get_contents($fileName);
 				$jsonDecoded = json_decode($cachedDb, true);
 				if ($jsonDecoded == $cachedDb) {
-					throw new Exception("Failed to decode the json db");
+					throw new SocialSpiException("Failed to decode the json db", ResponseError::$INTERNAL_ERROR);
 				}
 				return $jsonDecoded;
 			} else {
 				$jsonDb = Config::get('jsondb_path');
 				if (! file_exists($jsonDb) || ! is_readable($jsonDb)) {
-					throw new Exception("Could not read json db file: $jsonDb, check if the file exists & has proper permissions");
+					throw new SocialSpiException("Could not read json db file: $jsonDb, check if the file exists & has proper permissions", ResponseError::$INTERNAL_ERROR);
 				}
 				$dbConfig = @file_get_contents($jsonDb);
 				$contents = preg_replace('/[^http:\/\/|^https:\/\/]\/\/.*$/m', '', preg_replace('@/\\*(?:.|[\\n\\r])*?\\*/@', '', $dbConfig));
 				$jsonDecoded = json_decode($contents, true);
 				if ($jsonDecoded == $contents) {
-					throw new Exception("Failed to decode the json db");
+					throw new SocialSpiException("Failed to decode the json db", ResponseError::$INTERNAL_ERROR);
 				}
 				$this->saveDb($jsonDecoded);
 				return $jsonDecoded;
 			}
 		} catch (Exception $e) {
-			throw new Exception("An error occured while reading/writing the json db: " . $e);
+			throw new SocialSpiException("An error occured while reading/writing the json db: " . $e->getMessage(), ResponseError::$INTERNAL_ERROR);
 		}
 	}
 
@@ -149,13 +149,17 @@ class JsonDbOpensocialService implements ActivityService, PersonService, AppData
 
 	public function getPerson($userId, $groupId, $fields, SecurityToken $token)
 	{
-		$person = $this->getPeople($userId, $groupId, new CollectionOptions(), $fields, $token);
-		// return of getPeople is a ResponseItem(RestfulCollection(ArrayOfPeople)), disassemble to return just one person
-		$person = $person->getResponse()->getEntry();
-		if (is_array($person) && count($person) == 1) {
-			return new ResponseItem(null, null, $person[0]);
+		if (! is_object($groupId)) {
+			throw new SocialSpiException("Not Implemented", ResponseError::$NOT_IMPLEMENTED);
 		}
-		return new ResponseItem(NOT_FOUND, "Person not found", null);
+		$person = $this->getPeople($userId, $groupId, new CollectionOptions(), $fields, $token);
+		if (is_array($person->getEntry())) {
+			$person = $person->getEntry();
+			if (is_array($person) && count($person) == 1) {
+				return array_pop($person);
+			}
+		}
+		throw new SocialSpiException("Person not found", ResponseError::$BAD_REQUEST);
 	}
 
 	public function getPeople($userId, $groupId, CollectionOptions $options, $fields, SecurityToken $token)
@@ -191,6 +195,7 @@ class JsonDbOpensocialService implements ActivityService, PersonService, AppData
 					$newPerson['isOwner'] = isset($person['isOwner']) ? $person['isOwner'] : false;
 					$newPerson['isViewer'] = isset($person['isViewer']) ? $person['isViewer'] : false;
 					$newPerson['name'] = $person['name'];
+					$newPerson['displayName'] = $person['displayName'];
 					foreach ($fields as $field => $present) {
 						$present = strtolower($present);
 						if (isset($person[$present]) && ! isset($newPerson[$present])) {
@@ -207,13 +212,9 @@ class JsonDbOpensocialService implements ActivityService, PersonService, AppData
 		}
 		//TODO: The samplecontainer doesn't support any filters yet. We should fix this.
 		$totalSize = count($people);
-		$last = $first + $max;
-		$last = min($last, $totalSize);
-		if ($first !== false && $first != null && $last) {
-			$people = array_slice($people, $first, $last);
-		}
-		$collection = new RestfulCollection($people, $first, $totalSize);
-		return new ResponseItem(null, null, $collection);
+		$collection = new RestfulCollection($people, $options->getStartIndex(), $totalSize);
+		$collection->setItemsPerPage($options->getCount());
+		return $collection;
 	}
 
 	public function getPersonData($userId, GroupId $groupId, $appId, $fields, SecurityToken $token)
@@ -223,28 +224,27 @@ class JsonDbOpensocialService implements ActivityService, PersonService, AppData
 		$friendsTable = $db[self::$FRIEND_LINK_TABLE];
 		$data = array();
 		$ids = $this->getIdSet($userId, $groupId, $token);
-		
 		foreach ($ids as $id) {
 			if (isset($allData[$id])) {
 				$allPersonData = $allData[$id];
 				$personData = array();
 				foreach (array_keys($allPersonData) as $key) {
-					if (isset($fields[$key]) || isset($fields['@all'])) {
+					if (in_array($key, $fields) || in_array("@all", $fields)) {
 						$personData[$key] = $allPersonData[$key];
 					}
 				}
 				$data[$id] = $personData;
 			}
 		}
-		return new ResponseItem(null, null, RestfulCollection::createFromEntry($data));
+		return new DataCollection($data);
 	}
 
 	public function updatePersonData(UserId $userId, GroupId $groupId, $appId, $fields, $values, SecurityToken $token)
 	{
 		$db = $this->getDb();
 		foreach ($fields as $key => $present) {
-			if (! $this->isValidKey($key)) {
-				return new ResponseItem(BAD_REQUEST, "The person app data key had invalid characters", null);
+			if (! $this->isValidKey($present)) {
+				throw new SocialSpiException("The person app data key had invalid characters", ResponseError::$BAD_REQUEST);
 			}
 		}
 		$allData = $this->getAllData();
@@ -252,52 +252,56 @@ class JsonDbOpensocialService implements ActivityService, PersonService, AppData
 		switch ($groupId->getType()) {
 			case 'self':
 				foreach ($fields as $key => $present) {
-					$value = isset($values[$key]) ? @$values[$key] : null;
-					$person[$key] = $value;
+					$value = isset($values[$present]) ? @$values[$present] : null;
+					$person[$present] = $value;
 				}
 				break;
 			default:
-				return new ResponseItem(NOT_IMPLEMENTED, "We don't support updating data in batches yet", null);
+				throw new SocialSpiException("We don't support updating data in batches yet", ResponseError::$NOT_IMPLEMENTED);
 				break;
 		}
 		$allData[$userId->getUserId($token)] = $person;
 		$db[self::$DATA_TABLE] = $allData;
 		$this->saveDb($db);
-		return new ResponseItem(null, null, array());
+		return null;
 	}
 
 	public function deletePersonData($userId, GroupId $groupId, $appId, $fields, SecurityToken $token)
 	{
 		foreach ($fields as $key => $present) {
 			if (! $this->isValidKey($key)) {
-				return new ResponseItem(BAD_REQUEST, "The person app data key had invalid characters", null);
+				throw new SocialSpiException("The person app data key had invalid characters", ResponseError::$BAD_REQUEST);
 			}
 		}
 		switch ($groupId->getType()) {
 			case 'self':
-				foreach ($fields as $key => $present) {	//TODO: actually implement this!  
+				foreach ($fields as $key => $present) {
+					$value = isset($values[$key]) ? null : @$values[$key];
+					$person[$key] = $value;
 				}
+				$allData[$userId->getUserId($token)] = $person;
+				$db[self::$DATA_TABLE] = $allData;
+				$this->saveDb($db);
 				break;
 			default:
-				return new ResponseItem(NOT_IMPLEMENTED, "We don't support deleting data in batches yet", null);
+				throw new SocialSpiException("We don't support updating data in batches yet", ResponseError::$NOT_IMPLEMENTED);
 				break;
 		}
-		return new ResponseItem(null, null, array());
+		return null;
 	}
 
 	public function getActivity($userId, $groupId, $appdId, $fields, $activityId, SecurityToken $token)
 	{
 		$activities = $this->getActivities($userId, $groupId, $appdId, null, null, null, null, $fields, $token);
-		$activities = $activities->getResponse();
 		if ($activities instanceof RestfulCollection) {
 			$activities = $activities->getEntry();
 			foreach ($activities as $activity) {
-				if ($activity['id'] == $activityId) {
-					return new ResponseItem(null, null, $activity);
+				if ($activity->getId() == $activityId) {
+					return $activity;
 				}
 			}
 		}
-		return new ResponseItem(NOT_FOUND, "Activity not found", null);
+		throw new SocialSpiException("Activity not found", ResponseError::$NOT_FOUND);
 	}
 
 	public function getActivities($userIds, $groupId, $appId, $sortBy, $filterBy, $startIndex, $count, $fields, $token)
@@ -313,8 +317,13 @@ class JsonDbOpensocialService implements ActivityService, PersonService, AppData
 				$activities = array_merge($activities, $allActivities[$id]);
 			}
 		}
-		// TODO: Sort them
-		return new ResponseItem(null, null, RestfulCollection::createFromEntry($activities));
+		$totalResults = count($activities);
+		if (! $totalResults) {
+			throw new SocialSpiException("Activity not found", ResponseError::$NOT_FOUND);
+		}
+		$ret = new RestfulCollection($activities, $startIndex, $totalResults);
+		$ret->setItemsPerPage($count);
+		return $ret;
 	}
 
 	public function createActivity($userId, $groupId, $appId, $fields, $activity, SecurityToken $token)
@@ -322,12 +331,16 @@ class JsonDbOpensocialService implements ActivityService, PersonService, AppData
 		$db = $this->getDb();
 		$activitiesTable = $this->getAllActivities();
 		$activity['appId'] = $token->getAppId();
-		array_push($activitiesTable[$userId->getUserId($token)], $activity);
-		$db[self::$ACTIVITIES_TABLE] = $activitiesTable;
-		$this->saveDb($db);
-		return new ResponseItem(null, null, array());
+		try {
+			array_push($activitiesTable[$userId->getUserId($token)], $activity);
+			$db[self::$ACTIVITIES_TABLE] = $activitiesTable;
+			$this->saveDb($db);
+			// Should this return something to show success?
+		} catch (Exception $e) {
+			throw new SocialSpiException("Activity can't be created: " . $e->getMessage(), ResponseError::$INTERNAL_ERROR);
+		}
 	}
-	
+
 	public function deleteActivities($userId, $groupId, $appId, $activityIds, SecurityToken $token)
 	{
 		throw new SocialSpiException("Not implemented", ResponseError::$NOT_IMPLEMENTED);
@@ -335,7 +348,7 @@ class JsonDbOpensocialService implements ActivityService, PersonService, AppData
 
 	public function createMessage($userId, $message, SecurityToken $token)
 	{
-		return new ResponseItem(NOT_IMPLEMENTED, "Not implemented", null);
+		throw new SocialSpiException("Not implemented", ResponseError::$NOT_IMPLEMENTED);
 	}
 
 	/**
