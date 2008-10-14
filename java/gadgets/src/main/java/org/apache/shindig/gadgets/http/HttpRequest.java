@@ -198,8 +198,8 @@ public class HttpRequest {
   }
 
   /**
-   * @param cacheTtl The amount of time to cache the result object for, in milliseconds. If set to
-   * -1, HTTP cache control headers will be honored. Otherwise objects will be cached for the time
+   * @param cacheTtl The amount of time to cache the result object for, in seconds. If set to -1,
+   * HTTP cache control headers will be honored. Otherwise objects will be cached for the time
    * specified.
    */
   public HttpRequest setCacheTtl(int cacheTtl) {
@@ -356,7 +356,7 @@ public class HttpRequest {
   }
 
   /**
-   * @return The amount of time to cache any response objects for, in milliseconds.
+   * @return The amount of time to cache any response objects for, in seconds.
    */
   public int getCacheTtl() {
     return cacheTtl;

@@ -182,6 +182,22 @@ public class BasicGadgetSpecFactoryTest {
   }
 
   @Test
+  public void identicalMaxTtlAndMinTtlPropagatesToFetcher() throws Exception {
+    CapturingFetcher capturingFetcher = new CapturingFetcher();
+
+    BasicGadgetSpecFactory forcedCacheFactory
+        = new BasicGadgetSpecFactory(capturingFetcher, cacheProvider, 5, 10000, 10000);
+
+    new HttpRequest(SPEC_URL)
+        .setIgnoreCache(false)
+        .setCacheTtl(10);
+
+    forcedCacheFactory.getGadgetSpec(SPEC_URL.toJavaUri(), false);
+
+    assertEquals(10, capturingFetcher.request.getCacheTtl());
+  }
+
+  @Test
   public void typeUrlNotFetchedRemote() throws Exception {
     HttpRequest request = new HttpRequest(SPEC_URL).setIgnoreCache(true);
     HttpResponse response = new HttpResponse(URL_SPEC_XML);
@@ -211,5 +227,14 @@ public class BasicGadgetSpecFactoryTest {
     replay(fetcher);
 
     specFactory.getGadgetSpec(SPEC_URL.toJavaUri(), true);
+  }
+
+  private static class CapturingFetcher implements HttpFetcher {
+    HttpRequest request;
+
+    public HttpResponse fetch(HttpRequest request) {
+      this.request = request;
+      return new HttpResponse(LOCAL_SPEC_XML);
+    }
   }
 }
