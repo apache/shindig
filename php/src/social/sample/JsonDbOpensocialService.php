@@ -346,7 +346,7 @@ class JsonDbOpensocialService implements ActivityService, PersonService, AppData
 		throw new SocialSpiException("Not implemented", ResponseError::$NOT_IMPLEMENTED);
 	}
 
-	public function createMessage($userId, $message, SecurityToken $token)
+	public function createMessage($userId, $appId, $message, $optionalMessageId, SecurityToken $token)
 	{
 		throw new SocialSpiException("Not implemented", ResponseError::$NOT_IMPLEMENTED);
 	}

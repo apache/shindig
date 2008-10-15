@@ -19,15 +19,21 @@
 
 interface MessagesService {
 
-	/**  $message is an array containing the following fields:
+	/**  
+	 * Send a message to the chosen recipients.
+	 * $userId - the sender
+	 * $appId - the application Id
+	 * $message - an array containing the following fields:
 	 *  [id] => {msgid}
 	 *  [title] => You have an invitation from Joe
 	 *  [body] => Click <a href="http://app.example.org/invites/{msgid}">here</a> to review your invitation.
 	 *  [recipients] => Array
 	 *      (
-	 *          [0] => example.org:AD38B3886625AAF
-	 *          [1] => example.org:997638BAA6F25AD
+	 *          [0] => UserId1
+	 *          [1] => UserId2
 	 *      )
+	 * $optionalMessageId - if the REST action was a PUT containing an message id this is filled in
+	 * $token - the security token
 	 */
-	public function createMessage($userId, $message, SecurityToken $token);
+	public function createMessage($userId, $appId, $message, $optionalMessageId, SecurityToken $token);
 }

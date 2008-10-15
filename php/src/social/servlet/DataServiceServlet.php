@@ -26,7 +26,7 @@ class DataServiceServlet extends ApiServlet {
 	public static $PEOPLE_ROUTE = "people";
 	public static $ACTIVITY_ROUTE = "activities";
 	public static $APPDATA_ROUTE = "appdata";
-	public static $MESSAGE_ROUTE = "message";
+	public static $MESSAGE_ROUTE = "messages";
 
 	public function doGet()
 	{
