@@ -19,7 +19,7 @@
 
 class MessagesHandler extends DataRequestHandler {
 	
-	private static $MESSAGES_PATH = "/messages/{userId}/outbox/{msgId}";
+	private static $MESSAGES_PATH = "/messages/userId/outbox/msgId";
 	private $service;
 
 	public function __construct()
@@ -30,28 +30,32 @@ class MessagesHandler extends DataRequestHandler {
 
 	public function handleDelete(RequestItem $requestItem)
 	{
-		return new ResponseItem(NOT_IMPLEMENTED, "You can't delete messages", null);
+		throw new SocialSpiException("You can't delete messages", ResponseError::$NOT_IMPLEMENTED); 
 	}
 
 	public function handleGet(RequestItem $requestItem)
 	{
-		return new ResponseItem(NOT_IMPLEMENTED, "You can't retrieve messages", null);
-	}
-
-	public function handlePost(RequestItem $requestItem)
-	{
-		return new ResponseItem(NOT_IMPLEMENTED, "You can't edit messages", null);
+		throw new SocialSpiException("You can't retrieve messages", ResponseError::$NOT_IMPLEMENTED); 
 	}
 
 	/**
 	 * /messages/{groupId}/outbox/{msgId}
+	 * /messages/{groupId}/outbox
 	 *
 	 * @param RequestItem $requestItem
 	 * @return responseItem
 	 */
+	public function handlePost(RequestItem $requestItem)
+	{
+		$requestItem->applyUrlTemplate(self::$MESSAGES_PATH);
+		$userIds = $requestItem->getUsers();
+		$message = $requestItem->getParameter('message');
+		$optionalMessageId = $requestItem->getParameter('msgId');
+		return $this->service->createMessage($userIds[0], $requestItem->getAppId(), $message, $optionalMessageId, $requestItem->getToken());
+	}
+
 	public function handlePut(RequestItem $requestItem)
 	{
-		$requestItem->parseUrlWithTemplate(self::$MESSAGES_PATH);
-		return $this->service->createMessage($requestItem->getUser(), $requestItem->getPostData(), $requestItem->getToken());
+		$this->handlePost($requestItem);
 	}
 }

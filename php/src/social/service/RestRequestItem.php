@@ -77,6 +77,7 @@ class RestRequestItem extends RequestItem {
 				break;
 			case DataServiceServlet::$MESSAGE_ROUTE:
 				$data = $this->inputConverter->convertMessages($this->postData);
+				$this->params['message'] = $data;
 				break;
 			default:
 				throw new Exception("Invalid or unknown service endpoint: $service");
