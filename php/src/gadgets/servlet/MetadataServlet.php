@@ -64,7 +64,7 @@ class MetadataServlet extends HttpServlet {
 				}
 				$request = json_decode($requestParam);
 				if ($request == $requestParam) {
-					throw new Exception("Malformed json string: $requestParam");
+					throw new Exception("Malformed json string");
 				}
 				$handler = new MetadataHandler();
 				$response = $handler->process($request);
