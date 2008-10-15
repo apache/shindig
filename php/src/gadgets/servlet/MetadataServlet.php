@@ -58,13 +58,13 @@ class MetadataServlet extends HttpServlet {
 			// we support both a raw http post (without application/x-www-form-urlencoded headers) like java does
 			// and a more php / curl safe version of a form post with 'request' as the post field that holds the request json data
 			if (isset($GLOBALS['HTTP_RAW_POST_DATA']) || isset($_POST['request'])) {
-				$requestParam = isset($GLOBALS['HTTP_RAW_POST_DATA']) ? $GLOBALS['HTTP_RAW_POST_DATA'] : $_POST['request'];
+				$requestParam = urldecode(isset($_POST['request']) ? $_POST['request'] : $GLOBALS['HTTP_RAW_POST_DATA']);
 				if (get_magic_quotes_gpc()) {
 					$requestParam = stripslashes($requestParam);
 				}
 				$request = json_decode($requestParam);
-				if ($request == (isset($GLOBALS['HTTP_RAW_POST_DATA']) ? $GLOBALS['HTTP_RAW_POST_DATA'] : $_POST['request'])) {
-					throw new Exception("Malformed json string");
+				if ($request == $requestParam) {
+					throw new Exception("Malformed json string: $requestParam");
 				}
 				$handler = new MetadataHandler();
 				$response = $handler->process($request);
