@@ -18,19 +18,22 @@
  */
 package org.apache.shindig.gadgets.servlet;
 
-import com.google.common.collect.Maps;
+import static org.easymock.EasyMock.expect;
+
 import org.apache.shindig.common.ContainerConfig;
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.http.HttpResponse;
 import org.apache.shindig.gadgets.http.HttpResponseBuilder;
-import static org.easymock.EasyMock.expect;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import com.google.common.collect.Maps;
+
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 /**
  * Tests for ProxyBase.
@@ -143,6 +146,22 @@ public class ProxyBaseTest extends ServletTestFixture {
     assertNotNull("Expires header not set", recorder.getHeader("Expires"));
     assertNotNull("Cache-Control header not set", recorder.getHeader("Cache-Control"));
     assertEquals("attachment;filename=p.txt", recorder.getHeader("Content-Disposition"));
+  }
+
+  public void testSetResponseHeadersForFlash() {
+    HttpResponse results = new HttpResponseBuilder()
+        .setHeader("Content-Type", "application/x-shockwave-flash")
+        .create();
+
+    replay();
+
+    proxy.setResponseHeaders(request, recorder, results);
+
+    // Just verify that they were set. Specific values are configurable.
+    assertNotNull("Expires header not set", recorder.getHeader("Expires"));
+    assertNotNull("Cache-Control header not set", recorder.getHeader("Cache-Control"));
+    assertNull("Content-Disposition header set for flash",
+        recorder.getHeader("Content-Disposition"));
   }
 
   public void testSetResponseHeadersNoCache() {
