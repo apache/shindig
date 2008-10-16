@@ -58,8 +58,8 @@ public abstract class ProxyBase {
       UriBuilder url = UriBuilder.parse(urlToValidate);
       if (!"http".equals(url.getScheme()) && !"https".equals(url.getScheme())) {
         throw new GadgetException(GadgetException.Code.INVALID_PARAMETER,
-            "Invalid request url scheme; only " +
-            "\"http\" and \"https\" supported.");
+            "Invalid request url scheme in url: " + urlToValidate +
+            "; only \"http\" and \"https\" supported.");
       }
       if (url.getPath() == null || url.getPath().length() == 0) {
         url.setPath("/");

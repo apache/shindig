@@ -468,6 +468,8 @@ public class RenderingContentRewriterTest {
       "    <msg name='two'>bar</msg>" +
       "  </Locale>" +
       "</ModulePrefs>" +
+      "<UserPref name='pref_one' default_value='default_one'/>" +
+      "<UserPref name='pref_two'/>" +
       "<Content type='html'/>" +
       "</Module>";
 
@@ -484,6 +486,15 @@ public class RenderingContentRewriterTest {
     JSONObject json = new JSONObject(matcher.group(1));
     assertEquals("foo", json.get("one"));
     assertEquals("bar", json.get("two"));
+    
+    Pattern defaultsPattern = Pattern.compile(
+        "(?:.*)gadgets\\.Prefs\\.setDefaultPrefs_\\((.*)\\);(?:.*)", Pattern.DOTALL);
+    Matcher defaultsMatcher = defaultsPattern.matcher(rewritten);
+    assertTrue("gadgets.Prefs.setDefaultPrefs_ not invoked.", defaultsMatcher.matches());
+    JSONObject defaultsJson = new JSONObject(defaultsMatcher.group(1));
+    assertEquals(2, defaultsJson.length());
+    assertEquals("default_one", defaultsJson.get("pref_one"));
+    assertEquals("", defaultsJson.get("pref_two"));
   }
 
   @Test(expected = RuntimeException.class)
