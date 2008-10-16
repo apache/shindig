@@ -254,7 +254,10 @@ public class FakeOAuthServiceProvider implements HttpFetcher {
       if ("consumer_key_unknown".equals(code)) {
         rc = HttpResponse.SC_FORBIDDEN;
       }
-      return new HttpResponseBuilder().setHttpStatusCode(rc).create();
+      return new HttpResponseBuilder()
+          .setHttpStatusCode(rc)
+          .setResponseString("some vague error")
+          .create();
     }
     OAuthMessage msg = new OAuthMessage(null, null, null);
     msg.addParameter("oauth_problem", code);

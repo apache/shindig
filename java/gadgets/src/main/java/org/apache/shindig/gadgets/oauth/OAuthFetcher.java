@@ -295,7 +295,6 @@ public class OAuthFetcher extends ChainedContentFetcher {
  
       OAuthMessage reply = sendOAuthMessage(signed);
       
-      OAuthUtil.requireParameters(reply, OAuth.OAUTH_TOKEN, OAuth.OAUTH_TOKEN_SECRET);
       accessor.requestToken = OAuthUtil.getParameter(reply, OAuth.OAUTH_TOKEN);
       accessor.tokenSecret = OAuthUtil.getParameter(reply, OAuth.OAUTH_TOKEN_SECRET);
     } catch (OAuthException e) {
@@ -476,18 +475,25 @@ public class OAuthFetcher extends ChainedContentFetcher {
 
   /**
    * Sends OAuth request token and access token messages.
-   * @throws GadgetException 
-   * @throws OAuthProtocolException 
    */
   private OAuthMessage sendOAuthMessage(HttpRequest request)
-      throws GadgetException, OAuthProtocolException {
+      throws GadgetException, OAuthProtocolException, OAuthProblemException {
     HttpResponse response = nextFetcher.fetch(request);
-    checkForProtocolProblem(response);
-    OAuthMessage reply = new OAuthMessage(null, null, null);
+    boolean done = false;
+    try {
+      checkForProtocolProblem(response);
+      OAuthMessage reply = new OAuthMessage(null, null, null);
 
-    reply.addParameters(OAuth.decodeForm(response.getResponseAsString()));
-    reply = parseAuthHeader(reply, response);
-    return reply;
+      reply.addParameters(OAuth.decodeForm(response.getResponseAsString()));
+      reply = parseAuthHeader(reply, response);
+      OAuthUtil.requireParameters(reply, OAuth.OAUTH_TOKEN, OAuth.OAUTH_TOKEN_SECRET);
+      done = true;
+      return reply;
+    } finally {
+      if (!done) {
+        logServiceProviderError(request, response);
+      }
+    }
   }
 
   /**
@@ -582,7 +588,6 @@ public class OAuthFetcher extends ChainedContentFetcher {
       
       OAuthMessage reply = sendOAuthMessage(signed);
       
-      OAuthUtil.requireParameters(reply, OAuth.OAUTH_TOKEN, OAuth.OAUTH_TOKEN_SECRET);
       accessor.accessToken = OAuthUtil.getParameter(reply, OAuth.OAUTH_TOKEN);
       accessor.tokenSecret = OAuthUtil.getParameter(reply, OAuth.OAUTH_TOKEN_SECRET);
     } catch (OAuthException e) {
@@ -623,7 +628,12 @@ public class OAuthFetcher extends ChainedContentFetcher {
 
     HttpResponse response = nextFetcher.fetch(signed);
 
-    checkForProtocolProblem(response);
+    try {
+      checkForProtocolProblem(response);
+    } catch (OAuthProtocolException e) {
+      logServiceProviderError(signed, response);
+      throw e;
+    }
 
     // Track metadata on the response
     HttpResponseBuilder builder = new HttpResponseBuilder(response);
@@ -701,5 +711,11 @@ public class OAuthFetcher extends ChainedContentFetcher {
   private boolean isContainerInjectedParameter(String key) {
     key = key.toLowerCase();
     return key.startsWith("oauth") || key.startsWith("xoauth") || key.startsWith("opensocial");
+  }
+  
+  
+  /** Logging for errors that service providers return to us, useful for integration problems */
+  private void logServiceProviderError(HttpRequest request, HttpResponse response) {
+    logger.log(Level.INFO, "OAuth request failed:\n" + request + "\nresponse:\n" + response);
   }
 }
