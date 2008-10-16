@@ -43,6 +43,7 @@ import org.apache.shindig.gadgets.spec.GadgetSpec;
 import org.apache.shindig.gadgets.spec.LocaleSpec;
 import org.apache.shindig.gadgets.spec.MessageBundle;
 import org.apache.shindig.gadgets.spec.ModulePrefs;
+import org.apache.shindig.gadgets.spec.UserPref;
 import org.apache.shindig.gadgets.spec.View;
 
 import com.google.common.collect.Sets;
@@ -125,6 +126,7 @@ public class RenderingContentRewriter implements ContentRewriter {
       // This can be one script block.
       content.appendHead("<script>");
       injectMessageBundles(gadget, content);
+      injectDefaultPrefs(gadget, content);
       injectPreloads(gadget, content);
       content.appendHead("</script>");
       injectOnLoadHandlers(content);
@@ -331,6 +333,23 @@ public class RenderingContentRewriter implements ContentRewriter {
     String msgs = new JSONObject(bundle.getMessages()).toString();
     content.appendHead("gadgets.Prefs.setMessages_(")
            .appendHead(msgs)
+           .appendHead(");");
+  }
+  
+  /**
+   * Injects default values for user prefs into the gadget output.
+   */
+  private void injectDefaultPrefs(Gadget gadget, GadgetContent content) {
+    JSONObject defaultPrefs = new JSONObject();
+    try {
+      for (UserPref up : gadget.getSpec().getUserPrefs()) {
+        defaultPrefs.put(up.getName(), up.getDefaultValue());
+      }
+    } catch (JSONException e) {
+      // Never happens. Name is required (cannot be null). Default value is a String.
+    }
+    content.appendHead("gadgets.Prefs.setDefaultPrefs_(")
+           .appendHead(defaultPrefs.toString())
            .appendHead(");");
   }
 

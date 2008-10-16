@@ -47,6 +47,7 @@ var gadgets = gadgets || {};
 var instance = null;
 var prefs = {};
 var messages = {};
+var defaultPrefs = {};
 var language = "en";
 var country = "US";
 var moduleId = 0;
@@ -66,6 +67,18 @@ function parseUrl() {
       language = params[i];
     } else if (i === "mid") {
       moduleId = params[i];
+    }
+  }
+};
+
+/**
+ * Sets default pref values for values left unspecified in the
+ * rendering call, but with default_value provided in the spec.
+ */
+function mergeDefaults() {
+  for (var name in defaultPrefs) {
+    if (!prefs[name]) {
+      prefs[name] = defaultPrefs[name];
     }
   }
 };
@@ -91,6 +104,7 @@ var lang = prefs.getLang();</pre>
 gadgets.Prefs = function() {
   if (!instance) {
     parseUrl();
+    mergeDefaults();
     instance = this;
   }
   return instance;
@@ -112,8 +126,15 @@ gadgets.Prefs.setInternal_ = function(key, value) {
 /**
  * Initializes message bundles.
  */
-gadgets.Prefs.setMessages_ = function(messages) {
-  msgs = messages;
+gadgets.Prefs.setMessages_ = function(msgs) {
+  messages = msgs;
+};
+
+/**
+ * Initializes default user prefs values.
+ */
+gadgets.Prefs.setDefaultPrefs_ = function(defprefs) {
+  defaultPrefs = defprefs;
 };
 
 /**
@@ -218,7 +239,7 @@ gadgets.Prefs.prototype.setArray = function(key, val) {
  * @return {String} The message
  */
 gadgets.Prefs.prototype.getMsg = function(key) {
-  return msgs[key] || "";
+  return messages[key] || "";
 };
 
 /**
