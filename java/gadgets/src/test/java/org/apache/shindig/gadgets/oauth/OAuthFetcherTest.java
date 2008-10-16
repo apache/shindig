@@ -421,6 +421,25 @@ public class OAuthFetcherTest {
     assertEquals("403", metadata.get("oauthError"));
     assertNull(metadata.get("oauthErrorText"));
   }
+  
+  @Test
+  public void testError404() throws Exception {
+    MakeRequestClient client = makeNonSocialClient("owner", "owner", GADGET_URL);
+    
+    HttpResponse response = client.sendGet(FakeOAuthServiceProvider.RESOURCE_URL);
+    assertEquals("", response.getResponseAsString());
+    client.approveToken("user_data=hello-oauth");
+    
+    response = client.sendGet(FakeOAuthServiceProvider.RESOURCE_URL + "?cachebust=1");
+    assertEquals("User data is hello-oauth", response.getResponseAsString());
+    
+    response = client.sendGet(FakeOAuthServiceProvider.NOT_FOUND_URL);
+    assertEquals("not found", response.getResponseAsString());
+    assertEquals(404, response.getHttpStatusCode());
+    
+    response = client.sendGet(FakeOAuthServiceProvider.RESOURCE_URL + "?cachebust=3");
+    assertEquals("User data is hello-oauth", response.getResponseAsString());
+  }
 
   @Test
   public void testConsumerThrottled() throws Exception {

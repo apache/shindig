@@ -675,8 +675,9 @@ public class OAuthFetcher extends ChainedContentFetcher {
    * and/or access tokens.
    */
   private boolean isFullOAuthError(HttpResponse response) {
-    // Is this an error in the 4xx range?  If so, it might be OAuth related.
-    if (response.getHttpStatusCode() < 400 || response.getHttpStatusCode() >= 500) {
+    // 400, 401 and 403 are likely to be authentication errors.
+    if (response.getHttpStatusCode() != 400 && response.getHttpStatusCode() != 401 &&
+        response.getHttpStatusCode() != 403) {
       return false;
     }
     // If the client forced us to use full OAuth, this might be OAuth related.

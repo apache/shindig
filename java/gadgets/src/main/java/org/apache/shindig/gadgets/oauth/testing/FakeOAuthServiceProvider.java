@@ -54,14 +54,11 @@ public class FakeOAuthServiceProvider implements HttpFetcher {
 
   public final static String SP_HOST = "http://www.example.com";
 
-  public final static String REQUEST_TOKEN_URL =
-      SP_HOST + "/request?param=foo";
-  public final static String ACCESS_TOKEN_URL =
-      SP_HOST + "/access";
-  public final static String APPROVAL_URL =
-      SP_HOST + "/authorize";
-  public final static String RESOURCE_URL =
-      SP_HOST + "/data";
+  public final static String REQUEST_TOKEN_URL = SP_HOST + "/request?param=foo";
+  public final static String ACCESS_TOKEN_URL = SP_HOST + "/access";
+  public final static String APPROVAL_URL = SP_HOST + "/authorize";
+  public final static String RESOURCE_URL = SP_HOST + "/data";
+  public final static String NOT_FOUND_URL = SP_HOST + "/404";
 
   public final static String CONSUMER_KEY = "consumer";
   public final static String CONSUMER_SECRET = "secret";
@@ -215,6 +212,8 @@ public class FakeOAuthServiceProvider implements HttpFetcher {
       } else if (url.startsWith(RESOURCE_URL)){
         ++resourceAccessCount;
         return handleResourceUrl(request);
+      } else if (url.startsWith(NOT_FOUND_URL)) {
+        return handleNotFoundUrl(request);
       }
     } catch (Exception e) {
       throw new RuntimeException("Problem with request for URL " + url, e);
@@ -527,6 +526,13 @@ public class FakeOAuthServiceProvider implements HttpFetcher {
       resp.setHeader(RAW_BODY_ECHO_HEADER, new String(Base64.encodeBase64(info.rawBody)));
     }
     return resp.create();
+  }
+  
+  private HttpResponse handleNotFoundUrl(HttpRequest request) throws Exception {
+    return new HttpResponseBuilder()
+        .setHttpStatusCode(HttpResponse.SC_NOT_FOUND)
+        .setResponseString("not found")
+        .create();
   }
 
   public void setConsumersThrottled(boolean throttled) {
