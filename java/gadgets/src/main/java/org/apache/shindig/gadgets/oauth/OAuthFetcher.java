@@ -19,6 +19,7 @@ package org.apache.shindig.gadgets.oauth;
 import org.apache.shindig.auth.SecurityToken;
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.common.uri.UriBuilder;
+import org.apache.shindig.common.util.CharsetUtil;
 import org.apache.shindig.gadgets.ChainedContentFetcher;
 import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.RequestSigningException;
@@ -38,9 +39,6 @@ import net.oauth.OAuthMessage;
 import net.oauth.OAuthProblemException;
 import net.oauth.OAuth.Parameter;
 
-import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -283,8 +281,7 @@ public class OAuthFetcher extends ChainedContentFetcher {
     }
   }
 
-  private void fetchRequestToken()
-      throws GadgetException, OAuthProtocolException {
+  private void fetchRequestToken() throws GadgetException, OAuthProtocolException {
     try {
       OAuthAccessor accessor = accessorInfo.getAccessor();
       HttpRequest request = new HttpRequest(
@@ -298,13 +295,11 @@ public class OAuthFetcher extends ChainedContentFetcher {
  
       OAuthMessage reply = sendOAuthMessage(signed);
       
-      reply.requireParameters(OAuth.OAUTH_TOKEN, OAuth.OAUTH_TOKEN_SECRET);
-      accessor.requestToken = reply.getParameter(OAuth.OAUTH_TOKEN);
-      accessor.tokenSecret = reply.getParameter(OAuth.OAUTH_TOKEN_SECRET);
+      OAuthUtil.requireParameters(reply, OAuth.OAUTH_TOKEN, OAuth.OAUTH_TOKEN_SECRET);
+      accessor.requestToken = OAuthUtil.getParameter(reply, OAuth.OAUTH_TOKEN);
+      accessor.tokenSecret = OAuthUtil.getParameter(reply, OAuth.OAUTH_TOKEN_SECRET);
     } catch (OAuthException e) {
       throw new UserVisibleOAuthException(e.getMessage(), e);
-    } catch (IOException e) {
-      throw new GadgetException(GadgetException.Code.INTERNAL_SERVER_ERROR, e);
     }
   }
 
@@ -421,23 +416,19 @@ public class OAuthFetcher extends ChainedContentFetcher {
     addSignatureParams(params);
 
     try {
-      OAuthMessage signed = accessorInfo.getAccessor().newRequestMessage(
+      OAuthMessage signed = OAuthUtil.newRequestMessage(accessorInfo.getAccessor(), 
           base.getMethod(), target.toString(), params);
       HttpRequest oauthHttpRequest = createHttpRequest(base, selectOAuthParams(signed));
       // Following 302s on OAuth responses is unlikely to be productive.
       oauthHttpRequest.setFollowRedirects(false);
       return oauthHttpRequest;
-    } catch (IOException e) {
-      throw new GadgetException(GadgetException.Code.INTERNAL_SERVER_ERROR, e);
     } catch (OAuthException e) {
-      throw new GadgetException(GadgetException.Code.INTERNAL_SERVER_ERROR, e);
-    } catch (URISyntaxException e) {
       throw new GadgetException(GadgetException.Code.INTERNAL_SERVER_ERROR, e);
     }
   }
 
   private HttpRequest createHttpRequest(HttpRequest base,
-      List<Map.Entry<String, String>> oauthParams) throws IOException, GadgetException {
+      List<Map.Entry<String, String>> oauthParams) throws GadgetException {
 
     OAuthParamLocation paramLocation = accessorInfo.getParamLocation();
 
@@ -467,16 +458,16 @@ public class OAuthFetcher extends ChainedContentFetcher {
               "OAuth param location can only be post_body if post body if of " +
               "type x-www-form-urlencoded");
         }
-        String oauthData = OAuth.formEncode(oauthParams);
+        String oauthData = OAuthUtil.formEncode(oauthParams);
         if (result.getPostBodyLength() == 0) {
-          result.setPostBody(oauthData.getBytes("UTF-8"));
+          result.setPostBody(CharsetUtil.getUtf8Bytes(oauthData));
         } else {
           result.setPostBody((result.getPostBodyAsString() + '&' + oauthData).getBytes());
         }
         break;
 
       case URI_QUERY:
-        result.setUri(Uri.parse(OAuth.addParameters(result.getUri().toString(), oauthParams)));
+        result.setUri(Uri.parse(OAuthUtil.addParameters(result.getUri().toString(), oauthParams)));
         break;
     }
 
@@ -486,11 +477,10 @@ public class OAuthFetcher extends ChainedContentFetcher {
   /**
    * Sends OAuth request token and access token messages.
    * @throws GadgetException 
-   * @throws IOException 
    * @throws OAuthProtocolException 
    */
   private OAuthMessage sendOAuthMessage(HttpRequest request)
-      throws GadgetException, OAuthProtocolException, IOException {
+      throws GadgetException, OAuthProtocolException {
     HttpResponse response = nextFetcher.fetch(request);
     checkForProtocolProblem(response);
     OAuthMessage reply = new OAuthMessage(null, null, null);
@@ -592,13 +582,11 @@ public class OAuthFetcher extends ChainedContentFetcher {
       
       OAuthMessage reply = sendOAuthMessage(signed);
       
-      reply.requireParameters(OAuth.OAUTH_TOKEN, OAuth.OAUTH_TOKEN_SECRET);
-      accessor.accessToken = reply.getParameter(OAuth.OAUTH_TOKEN);
-      accessor.tokenSecret = reply.getParameter(OAuth.OAUTH_TOKEN_SECRET);
+      OAuthUtil.requireParameters(reply, OAuth.OAUTH_TOKEN, OAuth.OAUTH_TOKEN_SECRET);
+      accessor.accessToken = OAuthUtil.getParameter(reply, OAuth.OAUTH_TOKEN);
+      accessor.tokenSecret = OAuthUtil.getParameter(reply, OAuth.OAUTH_TOKEN_SECRET);
     } catch (OAuthException e) {
       throw new UserVisibleOAuthException(e.getMessage(), e);
-    } catch (IOException e) {
-      throw new GadgetException(GadgetException.Code.INTERNAL_SERVER_ERROR, e);
     }
   }
 
@@ -630,37 +618,28 @@ public class OAuthFetcher extends ChainedContentFetcher {
    * @throws OAuthProtocolException if the service provider returns an OAuth
    * related error instead of user data.
    */
-  private HttpResponse fetchData()
-      throws GadgetException, OAuthProtocolException {
-    try {
-      HttpRequest signed = sanitizeAndSign(realRequest, null);
-      
-      HttpResponse response = nextFetcher.fetch(signed);
-      
-      checkForProtocolProblem(response);
+  private HttpResponse fetchData() throws GadgetException, OAuthProtocolException {
+    HttpRequest signed = sanitizeAndSign(realRequest, null);
 
-      // Track metadata on the response
-      HttpResponseBuilder builder = new HttpResponseBuilder(response);
-      responseParams.addToResponse(builder);
-      return builder.create();
-    } catch (UnsupportedEncodingException e) {
-      throw new GadgetException(GadgetException.Code.INTERNAL_SERVER_ERROR, e);
-    } catch (IOException e) {
-      throw new GadgetException(GadgetException.Code.INTERNAL_SERVER_ERROR, e);
-    }
+    HttpResponse response = nextFetcher.fetch(signed);
+
+    checkForProtocolProblem(response);
+
+    // Track metadata on the response
+    HttpResponseBuilder builder = new HttpResponseBuilder(response);
+    responseParams.addToResponse(builder);
+    return builder.create();
   }
 
   /**
    * Look for an OAuth protocol problem.  For cases where no access token is in play 
    * @param response
    * @throws OAuthProtocolException
-   * @throws IOException
    */
-  private void checkForProtocolProblem(HttpResponse response)
-      throws OAuthProtocolException, IOException {
+  private void checkForProtocolProblem(HttpResponse response) throws OAuthProtocolException {
     if (isFullOAuthError(response)) {
       OAuthMessage message = parseAuthHeader(null, response);
-      if (message.getParameter(OAuthProblemException.OAUTH_PROBLEM) != null) {
+      if (OAuthUtil.getParameter(message, OAuthProblemException.OAUTH_PROBLEM) != null) {
         // SP reported extended error information
         throw new OAuthProtocolException(message);
       }
@@ -706,14 +685,12 @@ public class OAuthFetcher extends ChainedContentFetcher {
    * oauth_timestamp or oauth_signature).
    *
    * @return a list that contains only the oauth_related parameters.
-   *
-   * @throws IOException
    */
   private List<Map.Entry<String, String>>
-      selectOAuthParams(OAuthMessage message) throws IOException {
+      selectOAuthParams(OAuthMessage message) {
     List<Map.Entry<String, String>> result =
         new ArrayList<Map.Entry<String, String>>();
-    for (Map.Entry<String, String> param : message.getParameters()) {
+    for (Map.Entry<String, String> param : OAuthUtil.getParameters(message)) {
       if (isContainerInjectedParameter(param.getKey())) {
         result.add(param);
       }

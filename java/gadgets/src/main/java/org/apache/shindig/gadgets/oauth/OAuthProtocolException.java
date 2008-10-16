@@ -22,7 +22,6 @@ import net.oauth.OAuthProblemException;
 import org.apache.shindig.gadgets.http.HttpResponse;
 import org.apache.shindig.gadgets.http.HttpResponseBuilder;
 
-import java.io.IOException;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -85,14 +84,14 @@ class OAuthProtocolException extends Exception {
     this.startFromScratch = false;
   }
   
-  public OAuthProtocolException(OAuthMessage reply) throws IOException {
-    String problem = reply.getParameter(OAuthProblemException.OAUTH_PROBLEM);
+  public OAuthProtocolException(OAuthMessage reply) {
+    String problem = OAuthUtil.getParameter(reply, OAuthProblemException.OAUTH_PROBLEM);
     if (problem == null) {
       throw new IllegalArgumentException(
           "No problem reported for OAuthProtocolException");
     }
     this.problemCode = problem;
-    this.problemText = reply.getParameter("oauth_problem_advice");
+    this.problemText = OAuthUtil.getParameter(reply, "oauth_problem_advice");
     if (fatalProblems.contains(problem)) {
       startFromScratch = true;
       canRetry = false;
