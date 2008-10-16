@@ -24,6 +24,8 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+import com.google.common.collect.Lists;
+
 import net.oauth.OAuth;
 import net.oauth.OAuth.Parameter;
 
@@ -51,6 +53,9 @@ import org.junit.Test;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Handler;
+import java.util.logging.LogRecord;
+import java.util.logging.Logger;
 
 /**
  * Tests for signing requests.
@@ -60,6 +65,7 @@ public class OAuthFetcherTest {
   private OAuthFetcherConfig fetcherConfig;
   private FakeOAuthServiceProvider serviceProvider;
   private BasicOAuthStore base;
+  private List<LogRecord> logRecords = Lists.newArrayList();
 
   public static final String GADGET_URL = "http://www.example.com/gadget.xml";
   public static final String GADGET_URL_NO_KEY = "http://www.example.com/nokey.xml";
@@ -74,6 +80,22 @@ public class OAuthFetcherTest {
         new BasicBlobCrypter("abcdefghijklmnop".getBytes()),
         getOAuthStore(base),
         new BasicHttpCache(new DefaultCacheProvider(),10));
+    
+    Logger logger = Logger.getLogger(OAuthFetcher.class.getName());
+    logger.addHandler(new Handler() {
+      @Override
+      public void close() throws SecurityException {
+      }
+
+      @Override
+      public void flush() {
+      }
+
+      @Override
+      public void publish(LogRecord arg0) {
+        logRecords.add(arg0);
+      }
+    });
   }
 
   /**
@@ -223,6 +245,7 @@ public class OAuthFetcherTest {
     
     response = client.sendGet(FakeOAuthServiceProvider.RESOURCE_URL);
     assertEquals("User data is hello-oauth", response.getResponseAsString());
+    checkEmptyLog();
   }
   
   @Test
@@ -381,6 +404,8 @@ public class OAuthFetcherTest {
     serviceProvider.revokeAllAccessTokens();
     
     response = client.sendGet(FakeOAuthServiceProvider.RESOURCE_URL + "?cachebust=2");
+    checkLogContains("GET /data?cachebust=2");
+    checkLogContains("HTTP/1.1 401");
     assertEquals("", response.getResponseAsString());
     assertNotNull(response.getMetadata().get("oauthApprovalUrl"));
     
@@ -420,6 +445,9 @@ public class OAuthFetcherTest {
     assertNotNull(metadata);
     assertEquals("403", metadata.get("oauthError"));
     assertNull(metadata.get("oauthErrorText"));
+    checkLogContains("HTTP/1.1 403");
+    checkLogContains("GET /request");
+    checkLogContains("some vague error");
   }
   
   @Test
@@ -903,4 +931,23 @@ public class OAuthFetcherTest {
     }
     return false;
   }
-}
+
+  private String getLogText() {
+    StringBuilder logText = new StringBuilder();
+    for (LogRecord record : logRecords) {
+      logText.append(record.getMessage());
+    }
+    return logText.toString();
+  }
+  
+  private void checkLogContains(String text) {
+    String logText = getLogText();
+    if (!logText.contains(text)) {
+      fail("Should have logged '" + text + "', instead got " + logText);
+    }
+  }
+  
+  private void checkEmptyLog() {
+    assertEquals("", getLogText());
+  }
+} 
