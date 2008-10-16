@@ -21,6 +21,7 @@ package org.apache.shindig.gadgets.servlet;
 import org.apache.shindig.common.ContainerConfig;
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.common.uri.UriBuilder;
+import org.apache.shindig.common.util.Utf8UrlCoder;
 import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.http.HttpResponse;
 
@@ -58,7 +59,7 @@ public abstract class ProxyBase {
       UriBuilder url = UriBuilder.parse(urlToValidate);
       if (!"http".equals(url.getScheme()) && !"https".equals(url.getScheme())) {
         throw new GadgetException(GadgetException.Code.INVALID_PARAMETER,
-            "Invalid request url scheme in url: " + urlToValidate +
+            "Invalid request url scheme in url: " + Utf8UrlCoder.encode(urlToValidate) +
             "; only \"http\" and \"https\" supported.");
       }
       if (url.getPath() == null || url.getPath().length() == 0) {
