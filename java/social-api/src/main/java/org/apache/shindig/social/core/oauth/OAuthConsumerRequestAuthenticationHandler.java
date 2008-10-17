@@ -23,11 +23,12 @@ import org.apache.shindig.social.opensocial.oauth.OAuthLookupService;
 
 import com.google.inject.Inject;
 
+import org.apache.commons.lang.StringUtils;
+
 import net.oauth.OAuth;
+import net.oauth.OAuthException;
 import net.oauth.OAuthMessage;
 import net.oauth.server.OAuthServlet;
-
-import org.apache.commons.lang.StringUtils;
 
 import java.io.IOException;
 
@@ -64,10 +65,14 @@ public class OAuthConsumerRequestAuthenticationHandler implements Authentication
       return null;
     }
 
-    if (service.thirdPartyHasAccessToUser(requestMessage, containerKey, userId)) {
-      return service.getSecurityToken(containerKey, userId);
-    } else {
-      return null;
+    try {
+      if (service.thirdPartyHasAccessToUser(requestMessage, containerKey, userId)) {
+        return service.getSecurityToken(containerKey, userId);
+      } else {
+        return null;
+      }
+    } catch (OAuthException oae) {
+      throw new InvalidAuthenticationException(oae.getMessage(), oae);
     }
   }
 

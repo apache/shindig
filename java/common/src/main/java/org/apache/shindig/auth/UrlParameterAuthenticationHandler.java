@@ -21,8 +21,6 @@ import com.google.inject.Inject;
 
 import java.util.Collections;
 import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -31,9 +29,6 @@ import javax.servlet.http.HttpServletRequest;
  */
 public class UrlParameterAuthenticationHandler implements AuthenticationHandler {
   public static final String AUTH_URL_PARAMETER = "SecurityTokenUrlParameter";
-
-  private static final Logger logger = Logger.getLogger(
-      UrlParameterAuthenticationHandler.class.getName());
 
   private final SecurityTokenDecoder securityTokenDecoder;
 
@@ -47,14 +42,17 @@ public class UrlParameterAuthenticationHandler implements AuthenticationHandler 
   }
 
   public SecurityToken getSecurityTokenFromRequest(HttpServletRequest request) {
+    String token = request.getParameter("st");
+    // Not token provided, try an alternate auth method
+    if (token == null) {
+      return null;
+    }
     try {
-      String token = request.getParameter("st");
       Map<String, String> parameters
           = Collections.singletonMap(SecurityTokenDecoder.SECURITY_TOKEN_NAME, token);
       return securityTokenDecoder.createToken(parameters);
     } catch (SecurityTokenException e) {
-      logger.log(Level.INFO, "Valid security token not found.", e);
-      return null;
+      throw new InvalidAuthenticationException("Malformed security token " + token, e);
     }
   }
 }

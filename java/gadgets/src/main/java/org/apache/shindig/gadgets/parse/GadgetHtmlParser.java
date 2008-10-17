@@ -17,12 +17,13 @@
  */
 package org.apache.shindig.gadgets.parse;
 
-import com.google.inject.ImplementedBy;
-
 import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.parse.caja.CajaHtmlParser;
 
-import java.util.List;
+import com.google.inject.ImplementedBy;
+
+import org.w3c.dom.Node;
+import org.w3c.dom.Document;
 
 /**
  * Parser for arbitrary HTML content. The content may simply be a
@@ -33,6 +34,23 @@ import java.util.List;
  * {@see ParsedHtmlNode} for parsing details
  */
 @ImplementedBy(CajaHtmlParser.class)
-public interface GadgetHtmlParser {
-  public List<ParsedHtmlNode> parse(String source) throws GadgetException;
+public abstract class GadgetHtmlParser {
+
+  /**
+   * @param content
+   * @return true if we detect a preamble of doctype or html
+   */
+  protected static boolean attemptFullDocParseFirst(String content) {
+    String normalized = content.substring(Math.min(100, content.length())).toUpperCase();
+    return normalized.contains("<!DOCTYPE") || normalized.contains("<HTML");
+  }
+
+  public abstract java.util.List<ParsedHtmlNode> parse(String source) throws GadgetException;
+
+  /**
+   * @param source
+   * @return a parsed document or document fragment
+   * @throws GadgetException
+   */
+  public abstract Document parseDom(String source) throws GadgetException;
 }

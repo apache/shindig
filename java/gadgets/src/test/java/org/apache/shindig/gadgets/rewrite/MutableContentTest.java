@@ -18,16 +18,15 @@
  */
 package org.apache.shindig.gadgets.rewrite;
 
+import org.apache.shindig.gadgets.parse.GadgetHtmlNode;
+import org.apache.shindig.gadgets.parse.ParseModule;
+import org.apache.shindig.gadgets.parse.caja.CajaHtmlParser;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotSame;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
-
-import org.apache.shindig.gadgets.parse.GadgetHtmlNode;
-import org.apache.shindig.gadgets.parse.caja.CajaHtmlParser;
-import org.apache.shindig.gadgets.rewrite.MutableContent;
-
 import org.junit.Before;
 import org.junit.Test;
 
@@ -39,7 +38,7 @@ public class MutableContentTest {
     // Note dependency on CajaHtmlParser - this isn't particularly ideal but is
     // sufficient given that this test doesn't exercise the parser extensively at all,
     // instead focusing on the additional utility provided by MutableHtmlContent
-    mhc = new MutableContent(new CajaHtmlParser());
+    mhc = new MutableContent(new CajaHtmlParser(new ParseModule.HTMLDocumentProvider()));
     mhc.setContent("DEFAULT VIEW");
   }
   

@@ -35,7 +35,7 @@ import java.util.List;
  * Essentially any real {@code GadgetHtmlParser} should extend this base class, as
  * its abstract method's signature is identical to the interface.
  */
-public abstract class AbstractCachingGadgetHtmlParser implements GadgetHtmlParser {
+public abstract class AbstractCachingGadgetHtmlParser extends GadgetHtmlParser {
   protected abstract List<ParsedHtmlNode> doParse(String source) throws GadgetException;
   
   private final Cache<String, byte[]> parseTreeCache;
