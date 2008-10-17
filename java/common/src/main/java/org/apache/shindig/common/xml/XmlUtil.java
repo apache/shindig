@@ -15,7 +15,6 @@
  * KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-
 package org.apache.shindig.common.xml;
 
 import org.apache.shindig.common.uri.Uri;
@@ -249,6 +248,20 @@ public class XmlUtil {
     return getIntAttribute(node, attr, 0);
   }
 
+  /** 
+   * @return first child node matching the specified name
+   */
+  public static Node getFirstNamedChildNode(Node root, String nodeName) {
+    Node current = root.getFirstChild();
+    while (current != null) {
+      if (current.getNodeName().equalsIgnoreCase(nodeName)) {
+        return current;
+      }
+      current = current.getNextSibling();
+    }
+    return null;
+  }
+
   /**
    * Fetch a builder from the pool, creating a new one only if necessary.
    */
@@ -281,6 +294,8 @@ public class XmlUtil {
       }
     }
   }
+
+
 
   /**
    * Attempts to parse the input xml into a single element.

@@ -57,13 +57,15 @@ public class SampleContainerOAuthLookupService implements OAuthLookupService {
       "8355", "SocialActivitiesWorldSharedSecret"
   );
 
-  public boolean thirdPartyHasAccessToUser(OAuthMessage message, String appUrl, String userId) {
+  public boolean thirdPartyHasAccessToUser(OAuthMessage message, String appUrl, String userId)
+    throws OAuthException {
     String appId = getAppId(appUrl);
     return hasValidSignature(message, appUrl, appId)
         && userHasAppInstalled(userId, appId);
   }
 
-  private boolean hasValidSignature(OAuthMessage message, String appUrl, String appId) {
+  private boolean hasValidSignature(OAuthMessage message, String appUrl, String appId)
+      throws OAuthException {
     String sharedSecret = sampleContainerSharedSecrets.get(appId);
     if (sharedSecret == null) {
       return false;
@@ -76,12 +78,10 @@ public class SampleContainerOAuthLookupService implements OAuthLookupService {
     SimpleOAuthValidator validator = new SimpleOAuthValidator();
     try {
       validator.validateMessage(message, accessor);
-    } catch (OAuthException e) {
-      return false;
     } catch (IOException e) {
-      return false;
+      throw new OAuthException(e);
     } catch (URISyntaxException e) {
-      return false;
+      throw new OAuthException(e);
     }
 
     return true;

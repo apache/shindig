@@ -25,6 +25,7 @@ import org.apache.shindig.gadgets.render.RenderingContentRewriter;
 import org.apache.shindig.gadgets.rewrite.ContentRewriter;
 import org.apache.shindig.gadgets.rewrite.lexer.DefaultContentRewriter;
 import org.apache.shindig.gadgets.servlet.CajaContentRewriter;
+import org.apache.shindig.gadgets.parse.ParseModule;
 
 import com.google.common.collect.Lists;
 import com.google.inject.AbstractModule;
@@ -49,6 +50,8 @@ public class DefaultGuiceModule extends AbstractModule {
     ExecutorService service = Executors.newCachedThreadPool();
     bind(Executor.class).toInstance(service);
     bind(ExecutorService.class).toInstance(service);
+
+    this.install(new ParseModule());
 
     bind(new TypeLiteral<List<ContentRewriter>>(){}).toProvider(ContentRewritersProvider.class);
     bind(new TypeLiteral<List<Preloader>>(){}).toProvider(PreloaderProvider.class);
