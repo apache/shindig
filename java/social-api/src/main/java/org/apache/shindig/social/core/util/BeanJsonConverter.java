@@ -243,10 +243,10 @@ public class BeanJsonConverter implements BeanConverter {
       }
 
     } else if (pojo instanceof List) {
-      // TODO: process as a JSONArray
-      throw new UnsupportedOperationException("We don't support lists as a "
-          + "base json type yet. You can put it inside a pojo for now.");
-
+      JSONArray array = new JSONArray(json);
+      for (int i = 0; i < array.length(); i++) {
+        ((List<Object>) pojo).add(array.get(i));
+      }
     } else {
       JSONObject jsonObject = new JSONObject(json);
       List<MethodPair> methods;
