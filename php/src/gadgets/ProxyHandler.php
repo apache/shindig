@@ -183,7 +183,7 @@ class ProxyHandler {
 				}
 			}
 			$etag = md5($result->getResponseContent());
-			$lastModified = $result->getResponseHeader('Last-Modified') != null ? $result->getResponseHeader('Last-Modified') : gmdate('D, d M Y H:i:s', $result->getCreated() . ' GMT');
+			$lastModified = $result->getResponseHeader('Last-Modified') != null ? $result->getResponseHeader('Last-Modified') : gmdate('D, d M Y H:i:s', $result->getCreated()) . ' GMT';
 			$notModified = false;
 			// If HTTP_PRAGMA | HTTP_CACHE_CONTROL == no-cache, the browser wants to do a 'forced reload' 
 			if (! isset($_SERVER['HTTP_PRAGMA']) || ! strstr(strtolower($_SERVER['HTTP_PRAGMA']), 'no-cache') && (! isset($_SERVER['HTTP_CACHE_CONTROL']) || ! strstr(strtolower($_SERVER['HTTP_CACHE_CONTROL']), 'no-cache'))) {
