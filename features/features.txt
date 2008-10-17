@@ -1,6 +1,7 @@
 # List each feature you want to support here
 
 features/analytics/feature.xml
+features/auth-refresh/feature.xml
 features/caja/feature.xml
 features/core.io/feature.xml
 features/core/feature.xml
