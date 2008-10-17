@@ -22,13 +22,12 @@ import org.apache.shindig.social.sample.oauth.SampleContainerOAuthLookupService;
 
 import com.google.inject.ImplementedBy;
 
-import net.oauth.OAuthException;
 import net.oauth.OAuthMessage;
 
 @ImplementedBy(SampleContainerOAuthLookupService.class)
 
 public interface OAuthLookupService {
   boolean thirdPartyHasAccessToUser(OAuthMessage message, String appUrl,
-      String userId) throws OAuthException;
+      String userId);
   SecurityToken getSecurityToken(String appUrl, String userId);
 }
