@@ -74,10 +74,6 @@ public class ServletTestFixture extends GadgetTestFixture {
       } else {
         assertTrue("No public Cache-Control directive was set.", directives.contains("public"));
       }
-
-      long lastModified = DateUtil.parseDate(recorder.getHeader("Last-Modified")).getTime();
-
-      assertGreater("Invalid Last-Modified header set.", 0L, lastModified);
     }
   }
 }
