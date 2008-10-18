@@ -21,6 +21,7 @@ package org.apache.shindig.gadgets;
 import static org.easymock.EasyMock.expect;
 import static org.easymock.classextension.EasyMock.replay;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 
 import org.apache.shindig.common.cache.CacheProvider;
 import org.apache.shindig.common.cache.DefaultCacheProvider;
@@ -103,7 +104,7 @@ public class BasicGadgetSpecFactoryTest {
   private final CacheProvider cacheProvider = new DefaultCacheProvider();
 
   private final BasicGadgetSpecFactory specFactory
-      = new BasicGadgetSpecFactory(fetcher, cacheProvider, 5, -1000, 1000);
+      = new BasicGadgetSpecFactory(fetcher, cacheProvider, 5, 1000, 1000);
 
   @Test
   public void specFetched() throws Exception {
@@ -217,6 +218,45 @@ public class BasicGadgetSpecFactoryTest {
     replay(fetcher);
 
     specFactory.getGadgetSpec(SPEC_URL.toJavaUri(), true);
+  }
+
+  @Test(expected = GadgetException.class)
+  public void badFetchServesCached() throws Exception {
+    HttpRequest firstRequest = new HttpRequest(SPEC_URL).setIgnoreCache(false);
+    expect(fetcher.fetch(firstRequest)).andReturn(new HttpResponse(LOCAL_SPEC_XML)).once();
+    HttpRequest secondRequest = new HttpRequest(SPEC_URL).setIgnoreCache(true);
+    expect(fetcher.fetch(secondRequest)).andReturn(HttpResponse.error()).once();
+    replay(fetcher);
+
+    GadgetSpec original = specFactory.getGadgetSpec(SPEC_URL.toJavaUri(), false);
+    GadgetSpec cached = specFactory.getGadgetSpec(SPEC_URL.toJavaUri(), true);
+
+    assertEquals(original.getUrl(), cached.getUrl());
+    assertEquals(original.getChecksum(), cached.getChecksum());
+  }
+
+  @Test(expected = GadgetException.class)
+  public void malformedGadgetSpecThrows() throws Exception {
+    HttpRequest request = new HttpRequest(SPEC_URL).setIgnoreCache(true);
+    expect(fetcher.fetch(request)).andReturn(new HttpResponse("malformed junk"));
+    replay(fetcher);
+
+    specFactory.getGadgetSpec(SPEC_URL.toJavaUri(), true);
+  }
+
+  @Test(expected = GadgetException.class)
+  public void malformedGadgetSpecIsCachedAndThrows() throws Exception {
+    HttpRequest request = new HttpRequest(SPEC_URL).setIgnoreCache(false);
+    expect(fetcher.fetch(request)).andReturn(new HttpResponse("malformed junk")).once();
+    replay(fetcher);
+
+    try {
+      specFactory.getGadgetSpec(SPEC_URL.toJavaUri(), false);
+      fail("No exception thrown on bad parse");
+    } catch (GadgetException e) {
+      // Expected.
+    }
+    specFactory.getGadgetSpec(SPEC_URL.toJavaUri(), false);
   }
 
   @Test(expected = GadgetException.class)

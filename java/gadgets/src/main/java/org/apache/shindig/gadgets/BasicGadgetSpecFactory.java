@@ -40,7 +40,8 @@ import java.util.logging.Logger;
 public class BasicGadgetSpecFactory implements GadgetSpecFactory {
   static final String RAW_GADGETSPEC_XML_PARAM_NAME = "rawxml";
   static final Uri RAW_GADGET_URI = Uri.parse("http://localhost/raw.xml");
-
+  static final String ERROR_SPEC = "<Module><ModulePrefs title='Error'/><Content/></Module>";
+  static final String ERROR_KEY = "parse.exception";
   static final Logger logger = Logger.getLogger(BasicGadgetSpecFactory.class.getName());
 
   private final HttpFetcher fetcher;
@@ -48,7 +49,7 @@ public class BasicGadgetSpecFactory implements GadgetSpecFactory {
   private final long minTtl;
   private final long maxTtl;
 
-   @Inject
+  @Inject
   public BasicGadgetSpecFactory(HttpFetcher fetcher,
                                 CacheProvider cacheProvider,
                                 @Named("shindig.gadget-spec.cache.capacity") int capacity,
@@ -89,15 +90,25 @@ public class BasicGadgetSpecFactory implements GadgetSpecFactory {
       try {
         return fetchObjectAndCache(uri, ignoreCache);
       } catch (GadgetException e) {
-        // Failed to re-fetch raw object. Use cached object if it exists.
-        if (cached.obj == null) {
-          throw e;
+        // Enforce negative caching.
+        GadgetSpec spec;
+        if (cached.obj != null) {
+          spec = cached.obj;
         } else {
-          logger.info("GadgetSpec fetch failed for " + uri + " -  using cached.");
+          // We create this dummy spec to avoid the cost of re-parsing when a remote site is out.
+          spec = new GadgetSpec(uri, ERROR_SPEC);
+          spec.setAttribute(ERROR_KEY, e);
+          cached.obj = spec;
         }
+        logger.info("GadgetSpec fetch failed for " + uri + " - using cached for " + minTtl + " ms");
+        ttlCache.addElementWithTtl(uri, spec, minTtl);
       }
     }
 
+    GadgetException exception = (GadgetException) cached.obj.getAttribute(ERROR_KEY);
+    if (exception != null) {
+      throw exception;
+    }
     return cached.obj;
   }
 
