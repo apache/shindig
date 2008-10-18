@@ -96,7 +96,7 @@ public class HtmlRenderer {
         return rewriter.rewriteGadget(gadget, response.getResponseAsString());
       }
     } catch (GadgetException e) {
-      throw new RenderingException(e);
+      throw new RenderingException(e.getMessage(), e);
     }
   }
 }
