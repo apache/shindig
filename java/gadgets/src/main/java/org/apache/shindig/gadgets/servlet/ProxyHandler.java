@@ -46,16 +46,13 @@ import javax.servlet.http.HttpServletResponse;
  */
 @Singleton
 public class ProxyHandler extends ProxyBase {
-  private static final Logger logger =
-      Logger.getLogger(ProxyHandler.class.getPackage().getName());
+  private static final Logger logger = Logger.getLogger(ProxyHandler.class.getName());
 
   private static final Collection<String> DISALLOWED_RESPONSE_HEADERS = Sets.newHashSet(
       "set-cookie", "content-length", "content-encoding", "etag", "last-modified" ,"accept-ranges",
       "vary", "expires", "date", "pragma", "cache-control"
   );
 
-  // This isn't a final field because we want to support optional injection.
-  // This is a limitation of Guice, but this workaround...works.
   private final HttpFetcher fetcher;
   private final LockedDomainService lockedDomainService;
   private final ContentRewriterRegistry contentRewriterRegistry;
@@ -67,6 +64,14 @@ public class ProxyHandler extends ProxyBase {
     this.fetcher = fetcher;
     this.lockedDomainService = lockedDomainService;
     this.contentRewriterRegistry = contentRewriterRegistry;
+  }
+
+  private boolean getIgnoreCache(HttpServletRequest request) {
+    String ignoreCache = request.getParameter(IGNORE_CACHE_PARAM);
+    if (ignoreCache == null) {
+      return false;
+    }
+    return !ignoreCache.equals("0");
   }
 
   /**
@@ -86,6 +91,8 @@ public class ProxyHandler extends ProxyBase {
     // allows proper rewriting of <script src="x"/> where x is returned with
     // a content type like text/html which unfortunately happens all too often
     req.setRewriteMimeType(request.getParameter(REWRITE_MIME_TYPE_PARAM));
+
+    req.setIgnoreCache(getIgnoreCache(request));
 
     // If the proxy request specifies a refresh param then we want to force the min TTL for
     // the retrieved entry in the cache regardless of the headers on the content when it

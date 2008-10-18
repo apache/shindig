@@ -121,4 +121,23 @@ public class ProxyHandlerTest extends ServletTestFixture {
     assertEquals(magicGarbage, recorder.getHeader("X-Magic-Garbage"));
     assertTrue(rewriter.responseWasRewritten());
   }
+
+  public void testNoCache() throws Exception {
+    String url = "http://example.org/file.evil";
+    String domain = "example.org";
+
+    expect(lockedDomainService.isSafeForOpenProxy(domain)).andReturn(true).atLeastOnce();
+    setupProxyRequestMock(domain, url);
+    expect(request.getParameter(ProxyBase.IGNORE_CACHE_PARAM)).andReturn("1").atLeastOnce();
+
+    HttpRequest req = new HttpRequest(Uri.parse(url)).setIgnoreCache(true);
+    HttpResponse resp = new HttpResponse("Hello");
+    expect(fetcher.fetch(req)).andReturn(resp);
+
+    replay();
+
+    proxyHandler.fetch(request, recorder);
+
+    verify();
+  }
 }
