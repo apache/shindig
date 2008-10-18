@@ -88,7 +88,7 @@ public class Processor {
           .setSpec(spec)
           .setCurrentView(getView(context, spec));
     } catch (GadgetException e) {
-      throw new ProcessingException(e);
+      throw new ProcessingException(e.getMessage(), e);
     }
   }
 

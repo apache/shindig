@@ -69,7 +69,7 @@ public class GadgetRenderingServlet extends InjectedServlet {
         resp.getWriter().print(results.getContent());
         break;
       case ERROR:
-        resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, results.getErrorMessage());
+        resp.sendError(HttpServletResponse.SC_BAD_GATEWAY, results.getErrorMessage());
         break;
       case MUST_REDIRECT:
         resp.sendRedirect(results.getRedirect().toString());
