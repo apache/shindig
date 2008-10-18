@@ -36,6 +36,7 @@ import javax.servlet.http.HttpServletResponse;
 public abstract class ProxyBase {
   public static final String URL_PARAM = "url";
   public static final String REFRESH_PARAM = "refresh";
+  public static final String IGNORE_CACHE_PARAM = "nocache";
   public static final String GADGET_PARAM = "gadget";
   public static final String CONTAINER_PARAM = "container";
   // Old form container name, retained for legacy compatibility.
