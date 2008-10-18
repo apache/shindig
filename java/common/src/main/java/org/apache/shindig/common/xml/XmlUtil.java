@@ -19,8 +19,6 @@ package org.apache.shindig.common.xml;
 
 import org.apache.shindig.common.uri.Uri;
 
-import com.google.common.collect.Lists;
-
 import org.w3c.dom.Element;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
@@ -31,7 +29,6 @@ import org.xml.sax.SAXParseException;
 
 import java.io.IOException;
 import java.io.StringReader;
-import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -60,11 +57,24 @@ public class XmlUtil {
     }
   };
 
-  private static final List<DocumentBuilder> builderPool = Lists.newArrayList();
-  private static boolean canUsePooling = false;
+  private static boolean canReuseBuilders = false;
 
   private static final DocumentBuilderFactory builderFactory
       = DocumentBuilderFactory.newInstance();
+
+  private static final ThreadLocal<DocumentBuilder> reusableBuilder
+      = new ThreadLocal<DocumentBuilder>() {
+          @Override
+          protected DocumentBuilder initialValue() {
+            try {
+              LOG.info("Created a new document builder");
+              return builderFactory.newDocumentBuilder();
+            } catch (ParserConfigurationException e) {
+              throw new RuntimeException(e);
+            }
+          }
+        };
+
   static {
     // Disable various insecure and/or expensive options.
     builderFactory.setValidating(false);
@@ -76,6 +86,7 @@ public class XmlUtil {
           "http://xml.org/sax/features/external-general-entities", false);
     } catch (IllegalArgumentException e) {
       // Not supported by some very old parsers.
+      LOG.info("XML parsers will load external general entities.");
     }
 
     try {
@@ -83,6 +94,7 @@ public class XmlUtil {
           "http://xml.org/sax/features/external-parameter-entities", false);
     } catch (IllegalArgumentException e) {
       // Not supported by some very old parsers.
+      LOG.info("XML parsers will load external parameter entities.");
     }
 
     try {
@@ -90,24 +102,29 @@ public class XmlUtil {
           "http://apache.org/xml/features/nonvalidating/load-external-dtd", false);
     } catch (IllegalArgumentException e) {
       // Only supported by Apache's XML parsers.
+      LOG.info("XML parsers will load external DTDs.");
     }
 
     try {
       builderFactory.setAttribute(XMLConstants.FEATURE_SECURE_PROCESSING, true);
     } catch (IllegalArgumentException e) {
       // Not supported by older parsers.
+      LOG.info("Not using secure XML processing.");
     }
 
     try {
       DocumentBuilder builder = builderFactory.newDocumentBuilder();
       builder.reset();
-      canUsePooling = true;
+      canReuseBuilders = true;
+      LOG.info("Reusing document builders");
     } catch (UnsupportedOperationException e) {
       // Only supported by newer parsers (xerces 2.8.x+ for instance).
-      canUsePooling = false;
+      canReuseBuilders = false;
+      LOG.info("Not reusing document builders");
     } catch (ParserConfigurationException e) {
       // Only supported by newer parsers (xerces 2.8.x+ for instance).
-      canUsePooling = false;
+      canReuseBuilders = false;
+      LOG.info("Not reusing document builders");
     }
   }
 
@@ -248,7 +265,7 @@ public class XmlUtil {
     return getIntAttribute(node, attr, 0);
   }
 
-  /** 
+  /**
    * @return first child node matching the specified name
    */
   public static Node getFirstNamedChildNode(Node root, String nodeName) {
@@ -265,37 +282,17 @@ public class XmlUtil {
   /**
    * Fetch a builder from the pool, creating a new one only if necessary.
    */
-  private static DocumentBuilder getBuilderFromPool() throws ParserConfigurationException {
+  private static DocumentBuilder getBuilder() throws ParserConfigurationException {
     DocumentBuilder builder;
-    if (canUsePooling) {
-      synchronized (builderPool) {
-        int size = builderPool.size();
-        if (size > 0) {
-          builder = builderPool.remove(size - 1);
-          builder.reset();
-        } else {
-          builder = builderFactory.newDocumentBuilder();
-        }
-      }
+    if (canReuseBuilders) {
+      builder = reusableBuilder.get();
+      builder.reset();
     } else {
       builder = builderFactory.newDocumentBuilder();
     }
     builder.setErrorHandler(errorHandler);
     return builder;
   }
-
-  /**
-   * Return a builder to the pool, allowing it to be re-used by future operations.
-   */
-  private static void returnBuilderToPool(DocumentBuilder builder) {
-    if (canUsePooling) {
-      synchronized (builderPool) {
-        builderPool.add(builder);
-      }
-    }
-  }
-
-
 
   /**
    * Attempts to parse the input xml into a single element.
@@ -305,10 +302,9 @@ public class XmlUtil {
    */
   public static Element parse(String xml) throws XmlException {
     try {
-      DocumentBuilder builder = getBuilderFromPool();
+      DocumentBuilder builder = getBuilder();
       InputSource is = new InputSource(new StringReader(xml.trim()));
       Element element = builder.parse(is).getDocumentElement();
-      returnBuilderToPool(builder);
       return element;
     } catch (SAXParseException e) {
       throw new XmlException(
