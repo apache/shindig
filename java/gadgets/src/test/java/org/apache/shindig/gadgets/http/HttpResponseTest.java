@@ -17,9 +17,11 @@
  */
 package org.apache.shindig.gadgets.http;
 
-import junit.framework.TestCase;
-import org.apache.commons.io.IOUtils;
 import org.apache.shindig.common.util.DateUtil;
+
+import junit.framework.TestCase;
+
+import org.apache.commons.io.IOUtils;
 
 import java.util.Arrays;
 
@@ -240,7 +242,7 @@ public class HttpResponseTest extends TestCase {
     int time = roundToSeconds(System.currentTimeMillis());
     HttpResponse response = new HttpResponseBuilder()
         .addHeader("Date", DateUtil.formatDate(1000L * time))
-        .create();    
+        .create();
     assertEquals(time + roundToSeconds(HttpResponse.DEFAULT_TTL),
         roundToSeconds(response.getCacheExpiration()));
     assertTtlOk(roundToSeconds(HttpResponse.DEFAULT_TTL), response);
@@ -275,14 +277,14 @@ public class HttpResponseTest extends TestCase {
     long ttl = response.getCacheTtl();
     assertTrue(ttl <= HttpResponse.DEFAULT_TTL && ttl > 0);
   }
-  
+
   public void testStrictNoCacheAndNegativeCaching() {
     assertDoesNotAllowNegativeCaching(HttpResponse.SC_UNAUTHORIZED);
     assertDoesNotAllowNegativeCaching(HttpResponse.SC_FORBIDDEN);
     assertDoesNotAllowNegativeCaching(HttpResponse.SC_OK);
     assertAllowsNegativeCaching(HttpResponse.SC_NOT_FOUND);
     assertAllowsNegativeCaching(HttpResponse.SC_INTERNAL_SERVER_ERROR);
-    assertAllowsNegativeCaching(HttpResponse.SC_TIMEOUT);
+    assertAllowsNegativeCaching(HttpResponse.SC_GATEWAY_TIMEOUT);
   }
 
   public void testSetNoCache() {

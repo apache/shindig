@@ -17,6 +17,8 @@
  */
 package org.apache.shindig.gadgets.http;
 
+import org.apache.shindig.common.util.DateUtil;
+
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
@@ -24,8 +26,6 @@ import com.google.inject.Inject;
 import com.google.inject.name.Named;
 import com.ibm.icu.text.CharsetDetector;
 import com.ibm.icu.text.CharsetMatch;
-
-import org.apache.shindig.common.util.DateUtil;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
@@ -45,14 +45,50 @@ import java.util.Map;
  * caches and by multiple threads without worrying about concurrent modification.
  */
 public final class HttpResponse {
+  public static final int SC_CONTINUE = 100;
+  public static final int SC_SWITCHING_PROTOCOLS = 101;
+
   public static final int SC_OK = 200;
-  public static final int SC_MOVED_TEMPORARILY = 301;
-  public static final int SC_MOVED_PERMANENTLY = 302;
+  public static final int SC_CREATED = 201;
+  public static final int SC_ACCEPTED = 202;
+  public static final int SC_NON_AUTHORITATIVE_INFORMATION = 203;
+  public static final int SC_NO_CONTENT = 204;
+  public static final int SC_RESET_CONTENT = 205;
+  public static final int SC_PARTIAL_CONTENT = 206;
+
+  public static final int SC_MULTIPLE_CHOICES = 300;
+  public static final int SC_MOVED_PERMANENTLY = 301;
+  public static final int SC_FOUND = 302;
+  public static final int SC_SEE_OTHER = 303;
+  public static final int SC_NOT_MODIFIED = 304;
+  public static final int SC_USE_PROXY = 305;
+  public static final int SC_TEMPORARY_REDIRECT = 307;
+
+  public static final int SC_BAD_REQUEST = 400;
   public static final int SC_UNAUTHORIZED = 401;
+  public static final int SC_PAYMENT_REQUIRED = 402;
   public static final int SC_FORBIDDEN = 403;
   public static final int SC_NOT_FOUND = 404;
+  public static final int SC_METHOD_NOT_ALLOWED = 405;
+  public static final int SC_NOT_ACCEPTABLE = 406;
+  public static final int SC_PROXY_AUTHENTICATION_REQUIRED = 407;
+  public static final int SC_REQUEST_TIMEOUT = 408;
+  public static final int SC_CONFLICT = 409;
+  public static final int SC_GONE = 410;
+  public static final int SC_LENGTH_REQUIRED = 411;
+  public static final int SC_PRECONDITION_FAILED = 412;
+  public static final int SC_REQUEST_ENTITY_TOO_LARGE = 413;
+  public static final int SC_REQUEST_URI_TOO_LONG = 414;
+  public static final int SC_UNSUPPORTED_MEDIA_TYPE = 415;
+  public static final int SC_REQUESTED_RANGE_NOT_SATISFIABLE = 416;
+  public static final int SC_EXPECTATION_FAILED = 417;
+
   public static final int SC_INTERNAL_SERVER_ERROR = 500;
-  public static final int SC_TIMEOUT = 504;
+  public static final int SC_NOT_IMPLEMENTED = 501;
+  public static final int SC_BAD_GATEWAY = 502;
+  public static final int SC_SERVICE_UNAVAILABLE = 503;
+  public static final int SC_GATEWAY_TIMEOUT = 504;
+  public static final int SC_HTTP_VERSION_NOT_SUPPORTED = 505;
 
   // These content types can always skip encoding detection.
   private static final Collection<String> BINARY_CONTENT_TYPES = Sets.newHashSet(
@@ -64,9 +100,9 @@ public final class HttpResponse {
   );
 
   // These HTTP status codes should always honor the HTTP status returned by the remote host. All
-  // other status codes are treated as errors and will use the negativeCacheTtl value.
-  private static final Collection<Integer> CACHE_CONTROL_OK_STATUS_CODES
-      = Sets.newHashSet(SC_OK, SC_UNAUTHORIZED, SC_FORBIDDEN);
+  // other error codes are treated as errors and will use the negativeCacheTtl value.
+  private static final Collection<Integer> NEGATIVE_CACHING_EXEMPT_STATUS
+      = Sets.newHashSet(SC_UNAUTHORIZED, SC_FORBIDDEN);
 
   // TTL to use when an error response is fetched. This should be non-zero to
   // avoid high rates of requests to bad urls in high-traffic situations.
@@ -131,7 +167,7 @@ public final class HttpResponse {
   }
 
   public static HttpResponse timeout() {
-    return new HttpResponse(SC_TIMEOUT, "");
+    return new HttpResponse(SC_GATEWAY_TIMEOUT, "");
   }
 
   public static HttpResponse notFound() {
@@ -140,6 +176,13 @@ public final class HttpResponse {
 
   public int getHttpStatusCode() {
     return httpStatusCode;
+  }
+
+  /**
+   * @return 400
+   */
+  public boolean isError() {
+    return httpStatusCode > 400;
   }
 
   /**
@@ -232,12 +275,14 @@ public final class HttpResponse {
    */
   public long getCacheExpiration() {
     // We intentionally ignore cache-control headers for most HTTP error responses, because if
-    // we don't we end up hammering sites that have gone down with lots of requests.  Proper
-    // support for caching of OAuth responses is more complex, for that we have to respect
-    // cache-control headers for 401s and 403s.
-    if (!CACHE_CONTROL_OK_STATUS_CODES.contains(httpStatusCode)) {
+    // we don't we end up hammering sites that have gone down with lots of requests. Certain classes
+    // of client errors (authentication) have more severe behavioral implications if we cache them.
+    if (isError() && !NEGATIVE_CACHING_EXEMPT_STATUS.contains(httpStatusCode)) {
       return date + negativeCacheTtl;
     }
+
+    // We technically shouldn't be caching certain 300 class status codes either, such as 302, but
+    // in practice this is a better option for performance.
     if (isStrictNoCache()) {
       return -1;
     }
@@ -287,7 +332,7 @@ public final class HttpResponse {
     }
     return false;
   }
-  
+
   /**
    * @return the expiration time from the Expires header or -1 if not set
    */
