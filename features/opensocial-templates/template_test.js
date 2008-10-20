@@ -281,21 +281,24 @@ function testSubstitution_nested() {
  * Tests if attribute.
  */
 function testConditional_Number() {
-  var outputNode = compileAndRender_("_T_Conditional_Number");
-
-  assertEquals("TRUE", domutil.getVisibleText(outputNode));
+  var outputNode = os.compileTemplateString(
+      '<span if="42==42">TRUE</span><span if="!(42==42)">FALSE</span>'
+      ).render();   
+  assertEquals("TRUE", domutil.getVisibleTextTrim(outputNode));
 }
 
 function testConditional_String() {
-  var outputNode = compileAndRender_("_T_Conditional_String");
-
-  assertEquals("TRUE", domutil.getVisibleText(outputNode));
+  var outputNode = os.compileTemplateString(
+      "<span if=\"'101'=='101'\">TRUE</span><span if=\"'101'!='101'\">FALSE</span>"
+      ).render(); 
+  assertEquals("TRUE", domutil.getVisibleTextTrim(outputNode));
 }
 
 function testConditional_Mixed() {
-  var outputNode = compileAndRender_("_T_Conditional_Mixed");
-
-  assertEquals("TRUE", domutil.getVisibleText(outputNode));
+  var outputNode = os.compileTemplateString(
+      "<span if=\"'101' gt 42\">TRUE</span><span if=\"'101' lt 42\">FALSE</span>"
+      ).render();   
+  assertEquals("TRUE", domutil.getVisibleTextTrim(outputNode));
 }
 
 /**
@@ -371,10 +374,13 @@ function testTag_input() {
 
   var data = {
     data: "Some default data"
-  };
-  var outputNode = compileAndRender_("_T_Tag_input", data);
-  // contentNode is wrapped by <div><span>
-  var contentNode = outputNode.firstChild.firstChild;
+  };  
+  var template = os.compileTemplateString("<custom:input value=\"data\"/>");
+  var output = template.render(data);
+  
+  // extract contentNode
+  var contentNode = output.getElementsByTagName("input")[0];
+  
   assertEquals(contentNode.value, data.data);
 }
 
@@ -734,4 +740,31 @@ function testOnAttachAttribute() {
   var output = document.createElement('div');
   template.renderInto(output);
   assertEquals('bar', output.firstChild.title);
+};
+
+function testSpacesAmongTags() {
+  var tryTemplateContent = function(templateText) {
+    var output = os.compileTemplateString(templateText).render();
+    assertEquals('Hello world!', domutil.getVisibleTextTrim(output));
+  }
+
+  os.Loader.loadContent('<Templates xmlns:os="uri:unused">' +
+    '<Template tag="os:msg">${My.text}</Template></Templates>');
+
+  tryTemplateContent('<div><os:msg text="Hello"/>\n' +
+      ' <os:msg text="world!"/></div>');
+  tryTemplateContent('<div><os:msg text="Hello"/>  ' +
+      '<os:msg text="world!"/></div>');
+  tryTemplateContent('<div> <os:msg text="Hello"/>  ' +
+      '<os:msg text="world!"/>\n</div>');
+
+  os.Loader.loadContent('<Templates xmlns:os="uri:unused">' +
+    '<Template tag="os:msg"><os:Render/></Template></Templates>');
+
+  tryTemplateContent('<div><os:msg>Hello</os:msg>\n' +
+      ' <os:msg>world!</os:msg>\n</div>');
+  tryTemplateContent('<div><os:msg>Hello</os:msg>' +
+      '  <os:msg>world!</os:msg></div>');
+  tryTemplateContent('<div>\n  <os:msg>Hello</os:msg>' +
+      '  <os:msg>world!</os:msg>\n</div>');
 };
