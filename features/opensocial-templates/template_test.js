@@ -283,19 +283,19 @@ function testSubstitution_nested() {
 function testConditional_Number() {
   var outputNode = compileAndRender_("_T_Conditional_Number");
 
-  assertEquals("TRUE", domutil.getVisibleText(outputNode));
+  assertEquals("TRUE", domutil.getVisibleTextTrim(outputNode));
 }
 
 function testConditional_String() {
   var outputNode = compileAndRender_("_T_Conditional_String");
 
-  assertEquals("TRUE", domutil.getVisibleText(outputNode));
+  assertEquals("TRUE", domutil.getVisibleTextTrim(outputNode));
 }
 
 function testConditional_Mixed() {
   var outputNode = compileAndRender_("_T_Conditional_Mixed");
 
-  assertEquals("TRUE", domutil.getVisibleText(outputNode));
+  assertEquals("TRUE", domutil.getVisibleTextTrim(outputNode));
 }
 
 /**
@@ -735,3 +735,32 @@ function testOnAttachAttribute() {
   template.renderInto(output);
   assertEquals('bar', output.firstChild.title);
 };
+
+function testSpacesAmongTags() {
+  var tryTemplateContent = function(templateText) {
+    var template = os.compileTemplateString(templateText);
+    var output = template.render();
+    assertEquals('Hello world!', domutil.getVisibleTextTrim(output));
+  }
+
+  os.Loader.loadContent('<Templates xmlns:os="uri:unused">' +
+    '<Template tag="os:msg">${My.text}</Template></Templates>');
+
+  tryTemplateContent('<div><os:msg text="Hello"/>\n' +
+      ' <os:msg text="world!"/></div>');
+  tryTemplateContent('<div><os:msg text="Hello"/>  ' +
+      '<os:msg text="world!"/></div>');
+  tryTemplateContent('<div> <os:msg text="Hello"/>  ' +
+      '<os:msg text="world!"/>\n</div>');
+
+  os.Loader.loadContent('<Templates xmlns:os="uri:unused">' +
+    '<Template tag="os:msg"><os:Render/></Template></Templates>');
+
+  tryTemplateContent('<div><os:msg>Hello</os:msg>\n' +
+      ' <os:msg>world!</os:msg>\n</div>');
+  tryTemplateContent('<div><os:msg>Hello</os:msg>' +
+      '  <os:msg>world!</os:msg></div>');
+  tryTemplateContent('<div>\n  <os:msg>Hello</os:msg>' +
+      '  <os:msg>world!</os:msg>\n</div>');
+};
+
