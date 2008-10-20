@@ -306,4 +306,22 @@ public class HttpResponseTest extends TestCase {
       assertNotNull("Null header not removed.", key);
     }
   }
+
+  public void testIsError() {
+    // These aren't all valid status codes, but they're reserved in these blocks. Changes
+    // would be required to the HTTP standard anyway before this test would be invalid.
+    for (int i = 100; i < 400; i += 100) {
+      for (int j = 0; j < 10; ++j) {
+        HttpResponse response = new HttpResponseBuilder().setHttpStatusCode(i).create();
+        assertFalse("Status below 400 considered to be an error", response.isError());
+      }
+    }
+
+    for (int i = 400; i < 600; i += 100) {
+      for (int j = 0; j < 10; ++j) {
+        HttpResponse response = new HttpResponseBuilder().setHttpStatusCode(i).create();
+        assertTrue("Status above 400 considered to be an error", response.isError());
+      }
+    }
+  }
 }

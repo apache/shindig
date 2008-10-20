@@ -179,10 +179,10 @@ public final class HttpResponse {
   }
 
   /**
-   * @return 400
+   * @return True if the status code is considered to be an error.
    */
   public boolean isError() {
-    return httpStatusCode > 400;
+    return httpStatusCode >= 400;
   }
 
   /**
