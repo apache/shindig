@@ -49,7 +49,7 @@ RestfulContainer.prototype.getEnvironment = function() {
 
 RestfulContainer.prototype.requestCreateActivity = function(activity,
     priority, opt_callback) {
-  opt_callback = opt_callback || {};
+  opt_callback = opt_callback || function(){};
 
   var req = opensocial.newDataRequest();
   var viewer = new opensocial.IdSpec({'userId' : 'VIEWER'});
@@ -60,7 +60,7 @@ RestfulContainer.prototype.requestCreateActivity = function(activity,
 };
 
 RestfulContainer.prototype.requestData = function(dataRequest, callback) {
-  callback = callback || {};
+  callback = callback || function(){};
 
   var requestObjects = dataRequest.getRequestObjects();
   var totalRequests = requestObjects.length;
