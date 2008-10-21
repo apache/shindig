@@ -19,8 +19,6 @@
 /**
  * @fileoverview Remote procedure call library for gadget-to-container,
  * container-to-gadget, and gadget-to-gadget (thru container) communication.
- *
- *
  */
 
 var gadgets = gadgets || {};
@@ -38,6 +36,21 @@ gadgets.rpc = function() {
   // Consts for FrameElement.
   var FE_G2C_CHANNEL = '__g2c_rpc';
   var FE_C2G_CHANNEL = '__c2g_rpc';
+ 
+  // Consts for NIX. VBScript doesn't
+  // allow items to start with _ for some reason,
+  // so we need to make these names quite unique, as 
+  // they will go into the global namespace.
+  var NIX_WRAPPER = 'GRPC____NIXVBS_wrapper';
+  var NIX_GET_WRAPPER = 'GRPC____NIXVBS_get_wrapper';
+  var NIX_HANDLE_MESSAGE = 'GRPC____NIXVBS_handle_message';
+  var NIX_CREATE_CHANNEL = 'GRPC____NIXVBS_create_channel';
+ 
+  // JavaScript reference to the NIX VBScript wrappers.
+  // Gadgets will have but a single channel under
+  // nix_channels['..'] while containers will have a channel
+  // per gadget stored under the gadget's ID.
+  var nix_channels = {};
 
   var services = {};
   var iframePool = [];
@@ -48,7 +61,6 @@ gadgets.rpc = function() {
   var callbacks = {};
   var setup = {};
   var sameDomain = {};
-
   var params = {};
 
   // Load the authentication token for speaking to the container
@@ -66,7 +78,7 @@ gadgets.rpc = function() {
    * + For those browsers that support native messaging (various implementations
    *   of the HTML5 postMessage method), use that. Officially defined at
    *   http://www.whatwg.org/specs/web-apps/current-work/multipage/comms.html.
-   *
+   *   
    *   postMessage is a native implementation of XDC. A page registers that
    *   it would like to receive messages by listening the the "message" event
    *   on the window (document in DPM) object. In turn, another page can
@@ -76,7 +88,7 @@ gadgets.rpc = function() {
    *   the message. The target page will then have its "message" event raised
    *   if the domain matches and can, in turn, check the origin of the message
    *   and process the data contained within.
-   *
+   *  
    *     wpm: postMessage on the window object.
    *        - Internet Explorer 8+
    *        - Safari (latest nightlies as of 26/6/2008)
@@ -85,6 +97,49 @@ gadgets.rpc = function() {
    *
    *     dpm: postMessage on the document object.
    *        - Opera 8+
+   *
+   * + For Internet Explorer before version 8, the security model allows anyone
+   *   parent to set the value of the "opener" property on another window,
+   *   with only the receiving window able to read it.
+   *   This method is dubbed "Native IE XDC" (NIX). 
+   *   
+   *   This method works by placing a handler object in the "opener" property
+   *   of a gadget when the container sets up the authentication information
+   *   for that gadget (by calling setAuthToken(...)). At that point, a NIX
+   *   wrapper is created and placed into the gadget by calling
+   *   theframe.contentWindow.opener = wrapper. Note that as a result, NIX can
+   *   only be used by a container to call a particular gadget *after* that
+   *   gadget has called the container at least once via NIX.
+   *
+   *   The NIX wrappers in this RPC implementation are instances of a VBScript
+   *   class that is created when this implementation loads. The reason for
+   *   using a VBScript class stems from the fact that any object can be passed
+   *   into the opener property.
+   *   While this is a good thing, as it lets us pass functions and setup a true
+   *   bidirectional channel via callbacks, it opens a potential security hole
+   *   by which the other page can get ahold of the "window" or "document"
+   *   objects in the parent page and in turn wreak havok. This is due to the
+   *   fact that any JS object useful for establishing such a bidirectional
+   *   channel (such as a function) can be used to access a function
+   *   (eg. obj.toString, or a function itself) created in a specific context,
+   *   in particular the global context of the sender. Suppose container
+   *   domain C passes object obj to gadget on domain G. Then the gadget can
+   *   access C's global context using:
+   *   var parentWindow = (new obj.toString.constructor("return window;"))();
+   *   Nulling out all of obj's properties doesn't fix this, since IE helpfully 
+   *   restores them to their original values if you do something like:
+   *   delete obj.toString; delete obj.toString;
+   *   Thus, we wrap the necessary functions and information inside a VBScript
+   *   object. VBScript objects in IE, like DOM objects, are in fact COM
+   *   wrappers when used in JavaScript, so we can safely pass them around
+   *   without worrying about a breach of context while at the same time
+   *   allowing them to act as a pass-through mechanism for information
+   *   and function calls. The implementation details of this VBScript wrapper
+   *   can be found in the setupChannel() method below.
+   *
+   *     nix: Internet Explorer-specific window.opener trick.
+   *       - Internet Explorer 6
+   *       - Internet Explorer 7
    *
    * + For Gecko-based browsers, the security model allows a child to call a
    *   function on the frameElement of the iframe, even if the child is in
@@ -123,6 +178,7 @@ gadgets.rpc = function() {
   function getRelayChannel() {
     return typeof window.postMessage === 'function' ? 'wpm' :
            typeof document.postMessage === 'function' ? 'dpm' :
+           window.ActiveXObject ? 'nix' : 
            navigator.product === 'Gecko' ? 'fe' :
            'ifpc';
   }
@@ -140,6 +196,105 @@ gadgets.rpc = function() {
         // TODO validate packet.domain for security reasons
         process(gadgets.json.parse(packet.data));
       }, false);
+    }
+
+    // If the channel type is NIX, we need to ensure the
+    // VBScript wrapper code is in the page and that the
+    // global Javascript handlers have been set.
+    if (relayChannel === 'nix') {
+      // VBScript methods return a type of 'unknown' when
+      // checked via the typeof operator in IE. Fortunately
+      // for us, this only applies to COM objects, so we
+      // won't see this for a real Javascript object.
+      if (typeof window[NIX_GET_WRAPPER] !== 'unknown') {
+        window[NIX_HANDLE_MESSAGE] = function(data) {
+          process(gadgets.json.parse(data));
+        };
+
+        window[NIX_CREATE_CHANNEL] = function(name, channel, token) {
+          // Verify the authentication token of the gadget trying
+          // to create a channel for us.
+          if (authToken[name] == token) {
+            nix_channels[name] = channel;
+          }
+        };
+
+        // Inject the VBScript code needed.
+        var vbscript = 
+          // We create a class to act as a wrapper for
+          // a Javascript call, to prevent a break in of
+          // the context.
+          'Class ' + NIX_WRAPPER + '\n '
+
+          // An internal member for keeping track of the
+          // name of the document (container or gadget)
+          // for which this wrapper is intended. For
+          // those wrappers created by gadgets, this is not
+          // used (although it is set to "..")
+          + 'Private m_Intended\n'
+
+          // Stores the auth token used to communicate with
+          // the gadget. The GetChannelCreator method returns
+          // an object that returns this auth token. Upon matching
+          // that with its own, the gadget uses the object
+          // to actually establish the communication channel.
+          + 'Private m_Auth\n'
+
+          // Method for internally setting the value
+          // of the m_Intended property.
+          + 'Public Sub SetIntendedName(name)\n '
+          + 'If isEmpty(m_Intended) Then\n'
+          + 'm_Intended = name\n'
+          + 'End If\n'
+          + 'End Sub\n' 
+
+          // Method for internally setting the value of the m_Auth property.
+          + 'Public Sub SetAuth(auth)\n '
+          + 'If isEmpty(m_Auth) Then\n'
+          + 'm_Auth = auth\n'
+          + 'End If\n'
+          + 'End Sub\n'
+
+          // A wrapper method which actually causes a 
+          // message to be sent to the other context.
+          + 'Public Sub SendMessage(data)\n '
+          + NIX_HANDLE_MESSAGE + '(data)\n'
+          + 'End Sub\n' 
+
+          // Returns the auth token to the gadget, so it can
+          // confirm a match before initiating the connection
+          + 'Public Function GetAuthToken()\n '
+          + 'GetAuthToken = m_Auth\n'
+          + 'End Function\n'
+
+          // Method for setting up the container->gadget
+          // channel. Not strictly needed in the gadget's
+          // wrapper, but no reason to get rid of it. Note here
+          // that we pass the intended name to the NIX_CREATE_CHANNEL
+          // method so that it can save the channel in the proper place
+          // *and* verify the channel via the authentication token passed
+          // here.
+          + 'Public Sub CreateChannel(channel, auth)\n '
+          + 'Call ' + NIX_CREATE_CHANNEL + '(m_Intended, channel, auth)\n'
+          + 'End Sub\n'
+          + 'End Class\n'
+
+          // Function to get a reference to the wrapper.
+          + 'Function ' + NIX_GET_WRAPPER + '(name, auth)\n'
+          + 'Dim wrap\n'
+          + 'Set wrap = New ' + NIX_WRAPPER + '\n'
+          + 'wrap.SetIntendedName name\n'
+          + 'wrap.SetAuth auth\n'
+          + 'Set ' + NIX_GET_WRAPPER + ' = wrap\n'
+          + 'End Function';
+
+        try {
+          window.execScript(vbscript, 'vbscript');
+        } catch (e) {
+          // Fall through to IFPC.
+          relayChannel = 'ifpc';
+        }
+      }
     }
   }
 
@@ -170,7 +325,7 @@ gadgets.rpc = function() {
    * RPC mechanism. Gadgets, in turn, will complete the setup
    * of the channel once they send their first messages.
    */
-  function setupFrame(frameId) {
+  function setupFrame(frameId, token) {
     if (setup[frameId]) {
       return;
     }
@@ -181,6 +336,17 @@ gadgets.rpc = function() {
         frame[FE_G2C_CHANNEL] = function(args) {
           process(gadgets.json.parse(args));
         };
+      } catch (e) {
+        // Something went wrong. System will fallback to
+        // IFPC.
+      }
+    }
+
+    if (relayChannel === 'nix') {
+      try {
+        var frame = document.getElementById(frameId);
+        var wrapper = window[NIX_GET_WRAPPER](frameId, token);
+        frame.contentWindow.opener = wrapper;
       } catch (e) {
         // Something went wrong. System will fallback to
         // IFPC.
@@ -268,6 +434,72 @@ gadgets.rpc = function() {
 
   /**
    * Attempts to conduct an RPC call to the specified
+   * target with the specified data via the NIX
+   * method. If this method fails, the system attempts again
+   * using the known default of IFPC.
+   *
+   * @param {String} targetId Module Id of the RPC service provider.
+   * @param {String} serviceName Name of the service to call.
+   * @param {String} from Module Id of the calling provider.
+   * @param {Object} rpcData The RPC data for this call.
+   */
+  function callNix(targetId, serviceName, from, rpcData) {
+    try {
+      if (from != '..') {
+        // Call from gadget to the container.
+        var handler = nix_channels['..'];
+
+        // If the gadget has yet to retrieve a reference to
+        // the NIX handler, try to do so now. We don't do a
+        // typeof(window.opener.GetAuthToken) check here
+        // because it means accessing that field on the COM object, which,
+        // being an internal function reference, is not allowed.
+        // "in" works because it merely checks for the prescence of 
+        // the key, rather than actually accessing the object's property.
+        // This is just a sanity check, not a validity check.
+        if (!handler && window.opener && "GetAuthToken" in window.opener) {
+          handler = window.opener;
+
+          // Create the channel to the parent/container.
+          // First verify that it knows our auth token to ensure it's not
+          // an impostor.
+          if (handler.GetAuthToken() == authToken['..']) {
+            // Auth match - pass it back along with our wrapper to finish.
+            // own wrapper and our authentication token for co-verification.
+            var token = authToken['..'];
+            handler.CreateChannel(window[NIX_GET_WRAPPER]('..', token),
+                                  token);
+            // Set channel handler
+            nix_channels['..'] = handler;
+            window.opener = null;
+          }
+        }
+
+        // If we have a handler, call it.
+        if (handler) {
+          handler.SendMessage(rpcData);
+          return;
+        }
+      } else {
+        // Call from container to a gadget[targetId].
+
+        // If we have a handler, call it.
+        if (nix_channels[targetId]) {
+          nix_channels[targetId].SendMessage(rpcData);
+          return;
+        }
+      }
+    } catch (e) {
+    }
+
+    // If we have reached this point, something has failed
+    // with the NIX method, so we default to using
+    // IFPC for this call.
+    callIfpc(targetId, serviceName, from, rpcData);
+  }
+
+  /**
+   * Attempts to conduct an RPC call to the specified
    * target with the specified data via the FrameElement
    * method. If this method fails, the system attempts again
    * using the known default of IFPC.
@@ -283,7 +515,7 @@ gadgets.rpc = function() {
       if (from != '..') {
         // Call from gadget to the container.
         var fe = window.frameElement;
-
+      
         if (typeof fe[FE_G2C_CHANNEL] === 'function') {
           // Complete the setup of the FE channel if need be.
           if (typeof fe[FE_G2C_CHANNEL][FE_C2G_CHANNEL] !== 'function') {
@@ -597,6 +829,10 @@ gadgets.rpc = function() {
           targetWin.postMessage(rpcData, relayUrl[targetId]);
           break;
 
+        case 'nix': // use NIX.
+          callNix(targetId, serviceName, from, rpcData);
+          break;
+
         case 'fe': // use FrameElement.
           callFrameElement(targetId, serviceName, from, rpcData, rpc.a);
           break;
@@ -642,7 +878,7 @@ gadgets.rpc = function() {
      */
     setAuthToken: function(targetId, token) {
       authToken[targetId] = token;
-      setupFrame(targetId);
+      setupFrame(targetId, token);
     },
 
     /**

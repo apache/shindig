@@ -42,12 +42,14 @@
         container.innerHTML = "<iframe id='gadget' name='gadget' height=300 width=300 src='" + gadgetUrl + "?parent=" + containerRelay + "#rpctoken=" + secret + "'></iframe>";
         gadgets.rpc.setAuthToken('gadget', secret);
 
+        document.getElementById('relaymethod').innerHTML = gadgets.rpc.getRelayChannel();
+
         initPerfTest();
       };
     </script>
   </head>
   <body onload="initTest();">
-    <div>gadgets.rpc Performance: Container Page</div><hr/>
+    <div>gadgets.rpc Performance: Container Page (method: <span id="relaymethod"></span>)</div><hr/>
     <div>Test<br/>
       <ul>
         <li>Number of messages to send:
