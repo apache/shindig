@@ -47,7 +47,7 @@ JsonRpcContainer.prototype.getEnvironment = function() {
 
 JsonRpcContainer.prototype.requestCreateActivity = function(activity, priority,
     opt_callback) {
-  opt_callback = opt_callback || {};
+  opt_callback = opt_callback || function(){};
 
   var req = opensocial.newDataRequest();
   var viewer = new opensocial.IdSpec({'userId' : 'VIEWER'});
@@ -58,7 +58,7 @@ JsonRpcContainer.prototype.requestCreateActivity = function(activity, priority,
 };
 
 JsonRpcContainer.prototype.requestData = function(dataRequest, callback) {
-  callback = callback || {};
+  callback = callback || function(){};
 
   var requestObjects = dataRequest.getRequestObjects();
   var totalRequests = requestObjects.length;
