@@ -89,6 +89,15 @@ public class HttpGadgetContext extends GadgetContext {
   }
 
   @Override
+  public String getUserIp() {
+    String ip = request.getRemoteAddr();
+    if (ip == null) {
+      return super.getUserIp();
+    }
+    return ip;
+  }
+
+  @Override
   public boolean getDebug() {
     if (debug == null) {
       return super.getDebug();

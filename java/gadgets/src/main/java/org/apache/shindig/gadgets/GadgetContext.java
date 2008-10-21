@@ -25,8 +25,10 @@ import java.net.URI;
 import java.util.Locale;
 
 /**
- * Bundles together context data for the current request with server config
- * data.
+ * Bundles together context data for the current request with server config data.
+ *
+ * TODO: This should probably be called "GadgetRequest" instead of GadgetContext, since it is
+ * actually serving as abstraction over different request types.
  */
 public class GadgetContext {
 
@@ -84,6 +86,13 @@ public class GadgetContext {
    * @return The host for which the current request is being made.
    */
   public String getHost() {
+    return null;
+  }
+
+  /**
+   * @return The IP Address for the current user.
+   */
+  public String getUserIp() {
     return null;
   }
 

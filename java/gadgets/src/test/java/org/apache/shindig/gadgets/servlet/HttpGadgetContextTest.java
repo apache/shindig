@@ -63,6 +63,13 @@ public class HttpGadgetContextTest extends ServletTestFixture {
     assertEquals("foo.org", context.getHost());
   }
 
+  public void testGetUserIp() {
+    expect(request.getRemoteAddr()).andReturn("2.3.4.5");
+    replay();
+    GadgetContext context = new HttpGadgetContext(request);
+    assertEquals("2.3.4.5", context.getUserIp());
+  }
+
   public void testGetSecurityToken() throws Exception {
     SecurityToken expected = new AnonymousSecurityToken();
     expect(request.getAttribute(AuthInfo.Attribute.SECURITY_TOKEN.getId())).andReturn(expected);
