@@ -51,6 +51,9 @@ public class GadgetRenderingServlet extends InjectedServlet {
       return;
     }
 
+    resp.setContentType("text/html");
+    resp.setCharacterEncoding("UTF-8");
+
     GadgetContext context = new HttpGadgetContext(req);
     RenderingResults results = renderer.render(context);
     switch (results.getStatus()) {
@@ -65,7 +68,6 @@ public class GadgetRenderingServlet extends InjectedServlet {
           // TODO: This should be configurable
           HttpUtil.setCachingHeaders(resp, DEFAULT_CACHE_TTL, true);
         }
-        resp.setHeader("Content-Type", "text/html; charset=utf-8");
         resp.getWriter().print(results.getContent());
         break;
       case ERROR:

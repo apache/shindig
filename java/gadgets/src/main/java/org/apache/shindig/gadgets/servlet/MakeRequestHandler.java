@@ -95,7 +95,8 @@ public class MakeRequestHandler extends ProxyBase {
     setResponseHeaders(request, response, results);
 
     response.setStatus(HttpServletResponse.SC_OK);
-    response.setContentType("application/json; charset=utf-8");
+    response.setContentType("application/json");
+    response.setCharacterEncoding("UTF-8");
     response.getWriter().write(UNPARSEABLE_CRUFT + output);
   }
 
