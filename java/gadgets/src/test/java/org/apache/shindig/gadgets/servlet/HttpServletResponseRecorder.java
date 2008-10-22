@@ -24,7 +24,10 @@ import com.google.common.collect.Maps;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
+import java.io.UnsupportedEncodingException;
+import java.nio.charset.Charset;
 import java.util.Map;
 
 import javax.servlet.ServletOutputStream;
@@ -36,10 +39,11 @@ import javax.servlet.http.HttpServletResponseWrapper;
  */
 public class HttpServletResponseRecorder extends HttpServletResponseWrapper {
   private final ByteArrayOutputStream baos = new ByteArrayOutputStream();
-  private final PrintWriter writer = new PrintWriter(baos);
+  private PrintWriter writer;
   private final Map<String, String> headers = Maps.newTreeMap(String.CASE_INSENSITIVE_ORDER);
   private int httpStatusCode = 200;
   private String contentType;
+  private String encoding = Charset.defaultCharset().name();
 
   public HttpServletResponseRecorder(HttpServletResponse response) {
     super(response);
@@ -47,7 +51,7 @@ public class HttpServletResponseRecorder extends HttpServletResponseWrapper {
 
   public String getResponseAsString() {
     try {
-      writer.close();
+      getWriter().close();
       return new String(baos.toByteArray(), "UTF-8");
     } catch (IOException e) {
       return null;
@@ -67,7 +71,10 @@ public class HttpServletResponseRecorder extends HttpServletResponseWrapper {
   }
 
   @Override
-  public PrintWriter getWriter() {
+  public PrintWriter getWriter() throws UnsupportedEncodingException {
+    if (writer == null) {
+      writer = new PrintWriter(new OutputStreamWriter(baos, encoding));
+    }
     return writer;
   }
 
@@ -112,25 +119,42 @@ public class HttpServletResponseRecorder extends HttpServletResponseWrapper {
   }
 
   @Override
-  public void setStatus(int httpStatusCode, String msg) {
-    writer.write(msg);
-    this.httpStatusCode = httpStatusCode;
+  public void setStatus(int httpStatusCode, String msg)  {
+    try {
+      getWriter().write(msg);
+      this.httpStatusCode = httpStatusCode;
+    } catch (UnsupportedEncodingException e) {
+      throw new RuntimeException(e);
+    }
   }
 
   @Override
   public void sendError(int httpStatusCode, String msg) {
-    writer.write(msg);
-    this.httpStatusCode = httpStatusCode;
+    try {
+      getWriter().write(msg);
+      this.httpStatusCode = httpStatusCode;
+    } catch (UnsupportedEncodingException e) {
+      throw new RuntimeException(e);
+    }
   }
-  
+
   @Override
   public void setContentType(String type) {
-    setHeader("Content-Type", type);
     this.contentType = type;
   }
-  
+
   @Override
   public String getContentType() {
     return contentType;
+  }
+
+  @Override
+  public void setCharacterEncoding(String encoding) {
+    this.encoding = encoding;
+  }
+
+  @Override
+  public String getCharacterEncoding() {
+    return encoding;
   }
 }

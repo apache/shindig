@@ -19,23 +19,32 @@
 package org.apache.shindig.gadgets.servlet;
 
 import static org.easymock.EasyMock.expect;
+import static org.easymock.EasyMock.isA;
 import static org.junit.Assert.assertEquals;
 
+import org.apache.shindig.gadgets.GadgetContext;
 import org.apache.shindig.gadgets.http.HttpRequest;
+import org.apache.shindig.gadgets.render.Renderer;
+import org.apache.shindig.gadgets.render.RenderingResults;
 
-import org.easymock.EasyMock;
 import org.easymock.IMocksControl;
+import org.easymock.classextension.EasyMock;
 import org.junit.Test;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 public class GadgetRenderingServletTest {
+  private static final String NON_ASCII_STRING
+      = "Games, HQ, Mang\u00E1, Anime e tudo que um bom nerd ama";
+
   private final IMocksControl control = EasyMock.createNiceControl();
   private final HttpServletRequest request = control.createMock(HttpServletRequest.class);
   private final HttpServletResponse response = control.createMock(HttpServletResponse.class);
+  private final Renderer renderer = control.createMock(Renderer.class);
   public final HttpServletResponseRecorder recorder = new HttpServletResponseRecorder(response);
   private final GadgetRenderingServlet servlet = new GadgetRenderingServlet();
+
 
   @Test
   public void dosHeaderRejected() throws Exception {
@@ -44,5 +53,20 @@ public class GadgetRenderingServletTest {
     servlet.doGet(request, recorder);
 
     assertEquals(HttpServletResponse.SC_FORBIDDEN, recorder.getHttpStatusCode());
+  }
+
+  @Test
+  public void outputEncodingIsUtf8() throws Exception {
+    servlet.setRenderer(renderer);
+    expect(renderer.render(isA(GadgetContext.class)))
+        .andReturn(RenderingResults.ok(NON_ASCII_STRING));
+    control.replay();
+
+    servlet.doGet(request, recorder);
+
+
+    assertEquals("UTF-8", recorder.getCharacterEncoding());
+    assertEquals("text/html", recorder.getContentType());
+    assertEquals(NON_ASCII_STRING, recorder.getResponseAsString());
   }
 }
