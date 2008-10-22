@@ -21,8 +21,8 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
-import org.apache.shindig.common.ContainerConfig;
 import org.apache.shindig.common.ContainerConfigException;
+import org.apache.shindig.common.JsonContainerConfig;
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.gadgets.Gadget;
 import org.apache.shindig.gadgets.GadgetBlacklist;
@@ -156,7 +156,7 @@ public class ProcessorTest {
     }
   }
 
-  private static class FakeContainerConfig extends ContainerConfig {
+  private static class FakeContainerConfig extends JsonContainerConfig {
     private final JSONObject json = new JSONObject();
 
     public FakeContainerConfig() throws ContainerConfigException {

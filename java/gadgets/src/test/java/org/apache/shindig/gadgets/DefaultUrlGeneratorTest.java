@@ -23,7 +23,6 @@ import static org.easymock.EasyMock.expect;
 import static org.easymock.EasyMock.isA;
 
 import org.apache.shindig.common.ContainerConfig;
-import org.apache.shindig.common.ContainerConfigException;
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.gadgets.spec.GadgetSpec;
 
@@ -32,6 +31,8 @@ import com.google.common.collect.Maps;
 import junitx.framework.StringAssert;
 
 import org.apache.commons.lang.StringEscapeUtils;
+import org.json.JSONArray;
+import org.json.JSONObject;
 
 import java.net.URI;
 import java.util.ArrayList;
@@ -61,7 +62,7 @@ public class DefaultUrlGeneratorTest extends GadgetTestFixture {
 
   private final GadgetContext context = mock(GadgetContext.class);
   private final LockedDomainService lockedDomainService = mock(LockedDomainService.class);
-  private FakeContainerConfig config;
+  private final FakeContainerConfig config = new FakeContainerConfig();
   private DefaultUrlGenerator realUrlGenerator;
 
   @Override
@@ -76,7 +77,6 @@ public class DefaultUrlGeneratorTest extends GadgetTestFixture {
     expect(context.getModuleId()).andReturn(MODULE_ID).anyTimes();
     expect(context.getView()).andReturn(VIEW).anyTimes();
 
-    config = new FakeContainerConfig();
     config.properties.put(DefaultUrlGenerator.IFRAME_URI_PARAM, IFR_BASE);
     config.properties.put(DefaultUrlGenerator.JS_URI_PARAM, JS_BASE);
     realUrlGenerator = new DefaultUrlGenerator(config, lockedDomainService, registry);
@@ -211,21 +211,27 @@ public class DefaultUrlGeneratorTest extends GadgetTestFixture {
     StringAssert.assertContains("mid=" + MODULE_ID, iframeUrl.getQuery());
   }
 
-  private static class FakeContainerConfig extends ContainerConfig {
+  private static class FakeContainerConfig implements ContainerConfig {
     private final Map<String, String> properties = Maps.newHashMap();
 
-    public FakeContainerConfig() throws ContainerConfigException {
-      super(null);
-    }
-
-    @Override
     public String get(String container, String property) {
       return properties.get(property);
     }
 
-    @Override
     public Collection<String> getContainers() {
       return Arrays.asList(CONTAINER);
+    }
+
+    public Object getJson(String container, String parameter) {
+      return null;
+    }
+
+    public JSONArray getJsonArray(String container, String parameter) {
+      return null;
+    }
+
+    public JSONObject getJsonObject(String container, String parameter) {
+      return null;
     }
   }
 }

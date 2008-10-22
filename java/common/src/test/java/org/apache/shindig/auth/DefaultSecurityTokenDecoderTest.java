@@ -22,10 +22,11 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+import org.apache.shindig.common.ContainerConfigException;
+import org.apache.shindig.common.JsonContainerConfig;
+
 import com.google.common.collect.Lists;
 
-import org.apache.shindig.common.ContainerConfig;
-import org.apache.shindig.common.ContainerConfigException;
 import org.junit.Test;
 
 import java.util.Collection;
@@ -37,14 +38,14 @@ import java.util.Map;
  */
 public class DefaultSecurityTokenDecoderTest {
 
-  private static class FakeContainerConfig extends ContainerConfig {
+  private static class FakeContainerConfig extends JsonContainerConfig {
     private final String tokenType;
 
     public FakeContainerConfig(String tokenType) throws ContainerConfigException {
       super(null);
       this.tokenType = tokenType;
     }
-    
+
     @Override
     public String get(String container, String parameter) {
       if ("gadgets.securityTokenType".equals(parameter)) {
@@ -56,13 +57,13 @@ public class DefaultSecurityTokenDecoderTest {
       }
       return null;
     }
-    
+
     @Override
     public Collection<String> getContainers() {
       return Lists.newArrayList("somecontainer");
     }
   }
-  
+
   @Test
   public void testBasicDecoder() throws Exception {
     DefaultSecurityTokenDecoder decoder = new DefaultSecurityTokenDecoder(
@@ -75,7 +76,7 @@ public class DefaultSecurityTokenDecoderTest {
     assertEquals("v", st.getViewerId());
     assertEquals("appurl", st.getAppUrl());
   }
-  
+
   @Test
   public void testInvalidDecoder() throws Exception {
     try {
@@ -85,7 +86,7 @@ public class DefaultSecurityTokenDecoderTest {
       assertTrue("exception should contain garbage: " + e, e.getMessage().contains("garbage"));
     }
   }
-  
+
   @Test
   public void testNullDecoder() throws Exception {
     try {
@@ -95,7 +96,7 @@ public class DefaultSecurityTokenDecoderTest {
       assertTrue("exception should contain null: " + e, e.getMessage().contains("null"));
     }
   }
-  
+
   @Test
   public void testRealDecoder() throws Exception {
     // Just verifies that "secure" tokens get routed to the right decoder class.
@@ -105,6 +106,6 @@ public class DefaultSecurityTokenDecoderTest {
     } catch (RuntimeException e) {
       assertTrue("root cause should have been FileNotFoundException: " + e,
           e.getMessage().contains("FileNotFoundException: container key file: somecontainer"));
-    }    
+    }
   }
 }
