@@ -19,9 +19,9 @@
 
 package org.apache.shindig.common;
 
-import static org.apache.shindig.common.ContainerConfig.CONTAINER_KEY;
 import static org.apache.shindig.common.ContainerConfig.DEFAULT_CONTAINER;
-import static org.apache.shindig.common.ContainerConfig.PARENT_KEY;
+import static org.apache.shindig.common.JsonContainerConfig.CONTAINER_KEY;
+import static org.apache.shindig.common.JsonContainerConfig.PARENT_KEY;
 import static org.junit.Assert.assertEquals;
 
 import org.json.JSONArray;
@@ -32,7 +32,7 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 
-public class ContainerConfigTest {
+public class JsonContainerConfigTest {
 
   private static final String TOP_LEVEL_NAME = "Top level name";
   private static final String TOP_LEVEL_VALUE = "Top level value";
@@ -77,8 +77,7 @@ public class ContainerConfigTest {
 
   @Test
   public void parseBasicConfig() throws Exception {
-    ContainerConfig config
-        = new ContainerConfig(createDefaultContainer().getAbsolutePath());
+    ContainerConfig config = new JsonContainerConfig(createDefaultContainer().getAbsolutePath());
 
     assertEquals(1, config.getContainers().size());
     for (String container : config.getContainers()) {
@@ -104,8 +103,8 @@ public class ContainerConfigTest {
     File parentFile = createDefaultContainer();
     File childFile = createContainer(json);
 
-    ContainerConfig config = new ContainerConfig(childFile.getAbsolutePath() +
-        ContainerConfig.FILE_SEPARATOR + parentFile.getAbsolutePath());
+    ContainerConfig config = new JsonContainerConfig(childFile.getAbsolutePath() +
+        JsonContainerConfig.FILE_SEPARATOR + parentFile.getAbsolutePath());
 
     assertEquals(NESTED_VALUE, config.get(CONTAINER_A, NESTED_KEY));
     assertEquals(NESTED_VALUE, config.get(CONTAINER_B, NESTED_KEY));
@@ -126,8 +125,8 @@ public class ContainerConfigTest {
 
     File childFile = createContainer(json);
     File parentFile = createDefaultContainer();
-    ContainerConfig config = new ContainerConfig(childFile.getAbsolutePath() +
-        ContainerConfig.FILE_SEPARATOR + parentFile.getAbsolutePath());
+    ContainerConfig config = new JsonContainerConfig(childFile.getAbsolutePath() +
+        JsonContainerConfig.FILE_SEPARATOR + parentFile.getAbsolutePath());
 
     String value = config.get(CHILD_CONTAINER, TOP_LEVEL_NAME);
     assertEquals(TOP_LEVEL_VALUE, value);
@@ -154,12 +153,12 @@ public class ContainerConfigTest {
     json.put(PARENT_KEY, "bad bad bad parent!");
     json.put(ARRAY_NAME, ARRAY_ALT_VALUE);
 
-    new ContainerConfig(createContainer(json).getAbsolutePath());
+    new JsonContainerConfig(createContainer(json).getAbsolutePath());
   }
 
-  public void testPathQuery() throws Exception {
-    ContainerConfig config
-        = new ContainerConfig(createDefaultContainer().getAbsolutePath());
+  @Test
+  public void pathQuery() throws Exception {
+    ContainerConfig config = new JsonContainerConfig(createDefaultContainer().getAbsolutePath());
     String path = NESTED_KEY + '/' + NESTED_NAME;
     String data = config.get(DEFAULT_CONTAINER, path);
     assertEquals(NESTED_VALUE, data);
