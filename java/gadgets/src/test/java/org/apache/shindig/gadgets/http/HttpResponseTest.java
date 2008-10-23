@@ -58,6 +58,13 @@ public class HttpResponseTest extends TestCase {
     assertEquals("TEST-CHARACTER-SET", response.getEncoding());
   }
 
+  public void testGetEncodingQuotes() throws Exception {
+    HttpResponse response = new HttpResponseBuilder()
+        .addHeader("Content-Type", "text/plain; charset=\"TEST-CHARACTER-SET\"")
+        .create();
+    assertEquals("TEST-CHARACTER-SET", response.getEncoding());
+  }
+  
   public void testEncodingDetectionUtf8WithBom() throws Exception {
      HttpResponse response = new HttpResponseBuilder()
          .addHeader("Content-Type", "text/plain; charset=UTF-8")
