@@ -203,8 +203,34 @@ public class DataServiceServletTest extends TestCase {
     assertConverter(json, "ahhhh!");
   }
 
+  public void testGetConverterForRequestContentType() throws Exception {
+    BeanJsonConverter json = new BeanJsonConverter(Guice
+        .createInjector(new SocialApiTestsGuiceModule()));
+    BeanXmlConverter xml = new BeanXmlConverter();
+    BeanAtomConverter atom = new BeanAtomConverter();
+    servlet.setBeanConverters(json, xml, atom);
+
+    assertConverterForContentType(atom, "application/atom+xml");
+    assertConverterForContentType(xml, "application/xml");
+    assertConverterForContentType(json, "");
+    assertConverterForContentType(json, null);
+    assertConverterForContentType(json, "abcd!");
+
+  }
+
   private void assertConverter(BeanConverter converter, String format) {
-    EasyMock.expect(req.getParameter(DataServiceServlet.FORMAT_PARAM)).andReturn(format);
+    EasyMock.expect(req.getParameter(DataServiceServlet.FORMAT_PARAM))
+        .andReturn(format);
+    EasyMock.replay(req);
+    assertEquals(converter, servlet.getConverterForRequest(req));
+    EasyMock.verify(req);
+    EasyMock.reset(req);
+  }
+
+  private void assertConverterForContentType(BeanConverter converter,
+      String contentType) {
+    EasyMock.expect(req.getHeader(DataServiceServlet.CONTENT_TYPE)).andReturn(
+        contentType);
     EasyMock.replay(req);
     assertEquals(converter, servlet.getConverterForRequest(req));
     EasyMock.verify(req);

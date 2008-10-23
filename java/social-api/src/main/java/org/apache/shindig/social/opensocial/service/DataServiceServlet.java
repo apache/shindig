@@ -40,6 +40,8 @@ public class DataServiceServlet extends ApiServlet {
   public static final String ACTIVITY_ROUTE = "activities";
   public static final String APPDATA_ROUTE = "appdata";
 
+  public static final String CONTENT_TYPE = "CONTENT_TYPE";
+
   private static final Logger logger = Logger.getLogger(
       "org.apache.shindig.social.opensocial.spi");
 
@@ -91,7 +93,7 @@ public class DataServiceServlet extends ApiServlet {
   }
 
   /**
-   * Handler for non-batch requests
+   * Handler for non-batch requests.
    */
   private void handleSingleRequest(HttpServletRequest servletRequest,
       HttpServletResponse servletResponse, SecurityToken token,
@@ -115,15 +117,45 @@ public class DataServiceServlet extends ApiServlet {
 
 
   BeanConverter getConverterForRequest(HttpServletRequest servletRequest) {
-    String formatString = servletRequest.getParameter(FORMAT_PARAM);
-    if (ATOM_FORMAT.equals(formatString)) {
-      return atomConverter;
+    String formatString = null;
+    BeanConverter converter = null;
+    String contentType = null;
+
+    try {
+      formatString = servletRequest.getParameter(FORMAT_PARAM);
+    } catch (Throwable t) {
+      // this happens while testing
+      logger.fine("Unexpected error : format param is null " + t.toString());
+    }
+    try {
+      contentType = servletRequest.getHeader(CONTENT_TYPE);
+    } catch (Throwable t) {
+      //this happens while testing
+      logger.fine("Unexpected error : content type is null " + t.toString());
     }
 
-    else if (XML_FORMAT.equals(formatString)) {
-      return xmlConverter;
+    if (contentType != null) {
+      if (contentType.equals("application/json")) {
+        converter = jsonConverter;
+      } else if (contentType.equals("application/atom+xml")) {
+        converter = atomConverter;
+      } else if (contentType.equals("application/xml")) {
+        converter = xmlConverter;
+      } else if (formatString == null) {
+        // takes care of cases where content!= null but is ""
+        converter = jsonConverter;
+      }
+    } else if (formatString != null) {
+      if (formatString.equals(ATOM_FORMAT)) {
+        converter = atomConverter;
+      } else if (formatString.equals(XML_FORMAT)) {
+        converter = xmlConverter;
+      } else {
+        converter = jsonConverter;
+      }
+    } else {
+      converter = jsonConverter;
     }
-
-    return jsonConverter;
+    return converter;
   }
 }
