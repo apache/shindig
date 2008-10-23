@@ -99,8 +99,10 @@ opensocial.Container.prototype.getEnvironment = function() {};
 opensocial.Container.prototype.requestSendMessage = function(recipients,
     message, opt_callback, opt_params) {
   if (opt_callback) {
-    opt_callback(new opensocial.ResponseItem(
-        null, null, opensocial.ResponseItem.Error.NOT_IMPLEMENTED, null));
+    window.setTimeout(function() {
+      opt_callback(new opensocial.ResponseItem(
+          null, null, opensocial.ResponseItem.Error.NOT_IMPLEMENTED, null));
+    }, 0);
   }
 };
 
@@ -132,8 +134,10 @@ opensocial.Container.prototype.requestSendMessage = function(recipients,
 opensocial.Container.prototype.requestShareApp = function(recipients, reason,
     opt_callback, opt_params) {
   if (opt_callback) {
-    opt_callback(new opensocial.ResponseItem(
-        null, null, opensocial.ResponseItem.Error.NOT_IMPLEMENTED, null));
+    window.setTimeout(function() {
+      opt_callback(new opensocial.ResponseItem(
+          null, null, opensocial.ResponseItem.Error.NOT_IMPLEMENTED, null));
+    }, 0);
   }
 };
 
@@ -155,8 +159,10 @@ opensocial.Container.prototype.requestShareApp = function(recipients, reason,
 opensocial.Container.prototype.requestCreateActivity = function(activity,
     priority, opt_callback) {
   if (opt_callback) {
-    opt_callback(new opensocial.ResponseItem(
-        null, null, opensocial.ResponseItem.Error.NOT_IMPLEMENTED, null));
+    window.setTimeout(function() {
+      opt_callback(new opensocial.ResponseItem(
+          null, null, opensocial.ResponseItem.Error.NOT_IMPLEMENTED, null));
+    }, 0);
   }
 };
 
@@ -191,8 +197,10 @@ opensocial.Container.prototype.hasPermission = function(permission) {
 opensocial.Container.prototype.requestPermission = function(permissions, reason,
     opt_callback) {
   if (opt_callback) {
-    opt_callback(new opensocial.ResponseItem(
-        null, null, opensocial.ResponseItem.Error.NOT_IMPLEMENTED, null));
+    window.setTimeout(function () {
+      opt_callback(new opensocial.ResponseItem(
+          null, null, opensocial.ResponseItem.Error.NOT_IMPLEMENTED, null));
+    }, 0);
   }
 };
 

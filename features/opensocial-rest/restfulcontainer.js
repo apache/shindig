@@ -66,7 +66,9 @@ RestfulContainer.prototype.requestData = function(dataRequest, callback) {
   var totalRequests = requestObjects.length;
 
   if (totalRequests == 0) {
-    callback(new opensocial.DataResponse({}, true));
+    window.setTimeout(function () {
+      callback(new opensocial.DataResponse({}, true));
+    }, 0);
     return;
   }
 

@@ -169,9 +169,11 @@ opensocial.requestCreateActivity = function(activity, priority, opt_callback) {
   if (!activity || (!activity.getField(opensocial.Activity.Field.TITLE)
       && !activity.getField(opensocial.Activity.Field.TITLE_ID))) {
     if (opt_callback) {
-      opt_callback(new opensocial.ResponseItem(null, null,
-          opensocial.ResponseItem.Error.BAD_REQUEST,
-          "You must pass in an activity with a title or title id."));
+      window.setTimeout(function() {
+        opt_callback(new opensocial.ResponseItem(null, null,
+            opensocial.ResponseItem.Error.BAD_REQUEST,
+            "You must pass in an activity with a title or title id."));
+      }, 0);
     }
     return;
   }
