@@ -107,10 +107,12 @@ public class DefaultContentRewriter implements ContentRewriter {
       if (request.getGadget() != null) {
         spec = specFactory.getGadgetSpec(request.getGadget().toJavaUri(), false);
       }
-      rewrite(spec, request.getUri().toJavaUri(),
-          new StringReader(content.getContent()),
-          mimeType,
-          output);
+      if (rewrite(spec, request.getUri().toJavaUri(),
+                  new StringReader(content.getContent()),
+                  mimeType,
+                  output)) {
+        content.setContent(new String(baos.toByteArray()));
+      }
     } catch (UnsupportedEncodingException uee) {
       throw new RuntimeException(uee);
     } catch (GadgetException ge) {
