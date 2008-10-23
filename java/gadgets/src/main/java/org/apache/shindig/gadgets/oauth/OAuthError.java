@@ -30,4 +30,14 @@ public enum OAuthError {
    * The request cannot be completed for an unspecified reason.
    */
   UNKNOWN_PROBLEM,
+  
+  /**
+   * The user is not authenticated.
+   */
+  UNAUTHENTICATED,
+  
+  /**
+   * The user is not the owner of the page.
+   */
+  NOT_OWNER,
 }

@@ -25,6 +25,8 @@ import org.apache.shindig.gadgets.GadgetException;
  */
 public class UserVisibleOAuthException extends GadgetException {
 
+  private OAuthError oauthErrorCode;
+
   public UserVisibleOAuthException(String msg) {
     super(Code.INVALID_PARAMETER, msg);
   }
@@ -32,5 +34,16 @@ public class UserVisibleOAuthException extends GadgetException {
   public UserVisibleOAuthException(String msg, Throwable t) {
     super(Code.INVALID_PARAMETER, msg, t);
   }
-
+  
+  public UserVisibleOAuthException(OAuthError oauthErrorCode, String msg) {
+    super(Code.INVALID_PARAMETER, msg);
+    this.oauthErrorCode = oauthErrorCode;
+  }
+  
+  /**
+   * @return the OAuth error code, or null if no code was specified.
+   */
+  public OAuthError getOAuthErrorCode() {
+    return oauthErrorCode;
+  }
 }

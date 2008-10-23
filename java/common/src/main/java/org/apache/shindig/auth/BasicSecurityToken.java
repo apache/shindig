@@ -48,9 +48,6 @@ public class BasicSecurityToken implements SecurityToken {
   private static final String APPURL_KEY = "u";
   private static final String MODULE_KEY = "m";
 
-  /**
-   * {@inheritDoc}
-   */
   public String toSerialForm() {
     return token;
   }
@@ -70,13 +67,19 @@ public class BasicSecurityToken implements SecurityToken {
   public BasicSecurityToken(String owner, String viewer, String app,
       String domain, String appUrl, String moduleId) throws BlobCrypterException {
     tokenData = new HashMap<String, String>(5,1);
-    tokenData.put(OWNER_KEY, owner);
-    tokenData.put(VIEWER_KEY, viewer);
-    tokenData.put(APP_KEY, app);
-    tokenData.put(DOMAIN_KEY, domain);
-    tokenData.put(APPURL_KEY, appUrl);
-    tokenData.put(MODULE_KEY, moduleId);
+    putNullSafe(OWNER_KEY, owner);
+    putNullSafe(VIEWER_KEY, viewer);
+    putNullSafe(APP_KEY, app);
+    putNullSafe(DOMAIN_KEY, domain);
+    putNullSafe(APPURL_KEY, appUrl);
+    putNullSafe(MODULE_KEY, moduleId);
     token = crypter.wrap(tokenData);
+  }
+  
+  private void putNullSafe(String key, String value) {
+    if (value != null) {
+      tokenData.put(key, value);
+    }
   }
 
   /**

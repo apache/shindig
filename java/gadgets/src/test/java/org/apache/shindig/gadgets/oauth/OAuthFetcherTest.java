@@ -266,6 +266,15 @@ public class OAuthFetcherTest {
   }
   
   @Test
+  public void testOAuthFlow_unauthUser() throws Exception {
+    MakeRequestClient client = makeNonSocialClient(null, null, GADGET_URL);
+    HttpResponse response = client.sendGet(FakeOAuthServiceProvider.RESOURCE_URL);
+    assertEquals("", response.getResponseAsString());
+    assertEquals(403, response.getHttpStatusCode());
+    assertEquals(OAuthError.UNAUTHENTICATED.toString(), response.getMetadata().get("oauthError"));
+  }
+  
+  @Test
   public void testAccessTokenNotUsedForSocialPage() throws Exception {
     MakeRequestClient client = makeNonSocialClient("owner", "owner", GADGET_URL);
     
@@ -277,12 +286,10 @@ public class OAuthFetcherTest {
     assertEquals("User data is hello-oauth", response.getResponseAsString());
     
     MakeRequestClient friend = makeNonSocialClient("owner", "friend", GADGET_URL);
-    try {
-      friend.sendGet(FakeOAuthServiceProvider.RESOURCE_URL);
-      fail("Attempt to use OAuth token on non-social page");
-    } catch (GadgetException e) {
-      // good.
-    }
+    response = friend.sendGet(FakeOAuthServiceProvider.RESOURCE_URL);
+    assertEquals("", response.getResponseAsString());
+    assertEquals(403, response.getHttpStatusCode());
+    assertEquals(OAuthError.NOT_OWNER.toString(), response.getMetadata().get("oauthError"));
   }
   
   @Test
