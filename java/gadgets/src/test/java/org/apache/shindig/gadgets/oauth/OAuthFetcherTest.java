@@ -714,7 +714,7 @@ public class OAuthFetcherTest {
     serviceProvider.setVagueErrors(true);
     MakeRequestClient client = makeSignedFetchClient("o", "v", "http://www.example.com/app");
 
-    HttpResponse response = client.sendGet(FakeOAuthServiceProvider.RESOURCE_URL);
+    client.sendGet(FakeOAuthServiceProvider.RESOURCE_URL);
     assertEquals(0, base.getAccessTokenRemoveCount());
   }
   
