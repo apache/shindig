@@ -170,6 +170,9 @@ public class OAuthFetcher extends ChainedContentFetcher {
         if (!retry) {
           response = pe.getResponseForGadget();
         }
+      } catch (UserVisibleOAuthException e) {
+        responseParams.setError(e.getOAuthErrorCode());
+        return buildErrorResponse(e);
       }
     } while (retry);
 
@@ -272,8 +275,12 @@ public class OAuthFetcher extends ChainedContentFetcher {
     String pageOwner = realRequest.getSecurityToken().getOwnerId();
     String pageViewer = realRequest.getSecurityToken().getViewerId();
     String stateOwner = clientState.getOwner();
+    if (pageOwner == null) {
+      throw new UserVisibleOAuthException(OAuthError.UNAUTHENTICATED, "Unauthenticated");
+    }
     if (!pageOwner.equals(pageViewer)) {
-      throw new UserVisibleOAuthException("Only page owners can grant OAuth approval");
+      throw new UserVisibleOAuthException(OAuthError.NOT_OWNER,
+          "Only page owners can grant OAuth approval");
     }
     if (stateOwner != null && !stateOwner.equals(pageOwner)) {
       throw new GadgetException(GadgetException.Code.INTERNAL_SERVER_ERROR,
