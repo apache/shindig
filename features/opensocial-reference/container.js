@@ -512,7 +512,7 @@ opensocial.Container.escape = function(value, opt_params, opt_escapeObjects) {
 /**
  * Caja Support.  See features/caja/*.js
  */
-var caja;
+var cajita;
 var ___;
 var attachDocumentStub;
 // See features/caja/domita.js for uriCallback's contract.
@@ -540,15 +540,23 @@ var uriCallback = {
  */
 
 // TODO(doll): As caja evolves this method should get a lot smaller
+var alert=window['alert'] || function () { 1/0};
+alert('cajita=' + cajita);
 opensocial.Container.prototype.enableCaja = function() {
 
   ___ = window["___"];
-  caja = window["caja"];
+  cajita = window["cajita"];
+  valijaMaker = window["valijaMaker"];
   attachDocumentStub = window["attachDocumentStub"];
 
-  var imports = caja.copy(___.sharedImports);
+  alert('cajita=' + cajita);
+  var imports = ___.copy(___.sharedImports);
+  imports.outers = imports;
+  imports.console = console;
+  imports.$v = ___.asSimpleFunc(valijaMaker)(imports);
   ___.getNewModuleHandler().setImports(imports);
 
+  
   attachDocumentStub('-g___', uriCallback, imports);
   var gadgetRoot = document.createElement('div');
   gadgetRoot.className = 'g___';

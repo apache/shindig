@@ -902,7 +902,7 @@
       <dependency>
         <groupId>caja</groupId>
         <artifactId>caja</artifactId>
-        <version>r2178</version>
+        <version>r2438</version>
         <scope>compile</scope>
       </dependency>
       <dependency>
