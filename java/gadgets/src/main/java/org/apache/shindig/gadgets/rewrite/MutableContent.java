@@ -17,14 +17,14 @@
  */
 package org.apache.shindig.gadgets.rewrite;
 
+import org.apache.shindig.gadgets.GadgetException;
+import org.apache.shindig.gadgets.parse.GadgetHtmlParser;
+import org.apache.xml.serialize.HTMLSerializer;
+import org.apache.xml.serialize.OutputFormat;
+import org.w3c.dom.Document;
+
 import java.io.IOException;
 import java.io.StringWriter;
-import java.util.List;
-
-import org.apache.shindig.gadgets.GadgetException;
-import org.apache.shindig.gadgets.parse.GadgetHtmlNode;
-import org.apache.shindig.gadgets.parse.GadgetHtmlParser;
-import org.apache.shindig.gadgets.parse.ParsedHtmlNode;
 
 /**
  * Object that maintains a String representation of arbitrary contents
@@ -32,19 +32,26 @@ import org.apache.shindig.gadgets.parse.ParsedHtmlNode;
  */
 public class MutableContent {
   private String content;
-  private GadgetHtmlNode parseTree;
+  private Document document;
   private ContentEditListener editListener;
   private int parseEditId;
   private int contentParseId;
   private final GadgetHtmlParser contentParser;
+
+  private static final String MUTABLE_CONTENT_LISTENER = "MutableContentListener";
+
+  public static void notifyEdit(Document doc) {
+    ContentEditListener listener = (ContentEditListener)doc.getUserData(MUTABLE_CONTENT_LISTENER);
+    if (listener != null) {
+      listener.nodeEdited();
+    }
+  }
 
   public MutableContent(GadgetHtmlParser contentParser) {
     this.contentParser = contentParser;
     this.contentParseId = parseEditId = 0;
   }
 
-  public static final String ROOT_NODE_TAG_NAME = "gadget-root";
-  
   /**
    * Retrieves the current content for this object in String form.
    * If content has been retrieved in parse tree form and has
@@ -63,13 +70,12 @@ public class MutableContent {
       // per rendering cycle: all rewriters (or other manipulators)
       // operating on the parse tree should happen together.
       contentParseId = parseEditId;
-      StringWriter sw = new StringWriter();
-      for (GadgetHtmlNode node : parseTree.getChildren()) {
-        try {
-          node.render(sw);
-        } catch (IOException e) {
-          // Never happens.
-        }
+      StringWriter sw = new StringWriter((content.length() * 10) / 9);
+
+      try {
+        new HTMLSerializer(sw, new OutputFormat(document)).serialize(document);
+      } catch (IOException e) {
+        // Never happens.
       }
       content = sw.toString();
     }
@@ -112,9 +118,9 @@ public class MutableContent {
    * @return Top-level node whose children represent the gadget's contents, or
    *         null if no parser is configured, String contents are null, or contents unparseable.
    */
-  public GadgetHtmlNode getParseTree() {
-    if (parseTree != null && !editListener.stringWasEdited()) {
-      return parseTree;
+  public Document getDocument() {
+    if (document != null && !editListener.stringWasEdited()) {
+      return document;
     }
   
     if (content == null || contentParser == null) {
@@ -123,34 +129,27 @@ public class MutableContent {
   
     // One ContentEditListener per parse tree.
     editListener = new ContentEditListener();
-    parseTree = new GadgetHtmlNode(ROOT_NODE_TAG_NAME, null);
-    List<ParsedHtmlNode> parsed = null;
     try {
-      parsed = contentParser.parse(content);
+      document = contentParser.parseDom(content);
+      if (document != null) {
+        document.setUserData(MUTABLE_CONTENT_LISTENER, editListener, null);
+      }
     } catch (GadgetException e) {
       // TODO: emit info message
       return null;
     }
   
-    if (parsed == null) {
-      return null;
-    }
-    
-    for (ParsedHtmlNode parsedNode : parsed) {
-      parseTree.appendChild(new GadgetHtmlNode(parsedNode, editListener));
-    }
-  
     // Parse tree created from content: edit IDs are the same
     contentParseId = parseEditId;
-    return parseTree;
+    return document;
   }
   
   // Intermediary object tracking edit behavior for the MutableHtmlContent to help maintain
   // state consistency. GadgetHtmlNode calls nodeEdited whenever a modification
   // is made to its original source.
-  private class ContentEditListener implements GadgetHtmlNode.EditListener {
+  private class ContentEditListener {
     private boolean stringEdited = false;
-  
+
     public void nodeEdited() {
       ++parseEditId;
       if (stringEdited) {
@@ -159,11 +158,11 @@ public class MutableContent {
         throw new IllegalStateException("Edited parse node after setting String content");
       }
     }
-  
+
     private void stringEdited() {
       stringEdited = true;
     }
-  
+
     private boolean stringWasEdited() {
       return stringEdited;
     }

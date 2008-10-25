@@ -18,10 +18,13 @@
  */
 package org.apache.shindig.gadgets.rewrite;
 
-import java.net.URI;
+import com.google.inject.Guice;
+import com.google.inject.Injector;
+import org.apache.shindig.gadgets.parse.GadgetHtmlParser;
+import org.apache.shindig.gadgets.parse.ParseModule;
+import org.w3c.dom.Document;
 
-import org.apache.shindig.gadgets.parse.GadgetHtmlNodeTest;
-import org.apache.shindig.gadgets.parse.ParsedHtmlNode;
+import java.net.URI;
 
 public class StyleLinksContentRewriterTest extends FeatureBasedRewriterTestBase {
   private LinkRewriter pfxLinkRewriter;
@@ -30,9 +33,13 @@ public class StyleLinksContentRewriterTest extends FeatureBasedRewriterTestBase 
   
   private static final String LINK_PREFIX = "px-";
 
+  private GadgetHtmlParser htmlParser;
+
   @Override
   protected void setUp() throws Exception {
     super.setUp();
+    Injector injector = Guice.createInjector(new ParseModule());
+    htmlParser = injector.getInstance(GadgetHtmlParser.class);
     pfxLinkRewriter = new LinkRewriter() {
       public String rewrite(String uri, URI context) {
         // Just prefixes with LINK_PREFIX
@@ -49,16 +56,15 @@ public class StyleLinksContentRewriterTest extends FeatureBasedRewriterTestBase 
       "div {list-style-image:url('http://a.b.com/bullet.gif');list-style-position:outside;margin:5px;padding:0}\n" +
       ".someid {background-image:url(http://a.b.com/bigimg.png);float:right;width:165px;height:23px;margin-top:4px;margin-left:5px}";
     String s = "<style>" + css + "</style>";
-    ParsedHtmlNode[] styleKids = {
-      GadgetHtmlNodeTest.makeParsedTextNode(css)
-    };
-    ParsedHtmlNode[] p = {
-      GadgetHtmlNodeTest.makeParsedTagNode("style", null, styleKids)
-    };
+
+    Document document = htmlParser.parseDom(s);
+
     String rewritten =
-      "<style>div {list-style-image:url(\"" + LINK_PREFIX + "http://a.b.com/bullet.gif\");list-style-position:outside;margin:5px;padding:0}\n" +
-      ".someid {background-image:url(\"" + LINK_PREFIX + "http://a.b.com/bigimg.png\");float:right;width:165px;height:23px;margin-top:4px;margin-left:5px}</style>";
-    assertEquals(rewritten, rewriteHelper(rewriter, s, p));
+      "div {list-style-image:url(\"" + LINK_PREFIX + "http://a.b.com/bullet.gif\");list-style-position:outside;margin:5px;padding:0}\n" +
+      ".someid {background-image:url(\"" + LINK_PREFIX + "http://a.b.com/bigimg.png\");float:right;width:165px;height:23px;margin-top:4px;margin-left:5px}";
+    // Rewrite, document is mutated in-place
+    rewriteHelper(rewriter, s, document);
+    assertEquals(rewritten, document.getElementsByTagName("STYLE").item(0).getTextContent());
   }
   
   public void testStyleTagRewritesIgnoredOnBadParse() throws Exception {
@@ -77,13 +83,8 @@ public class StyleLinksContentRewriterTest extends FeatureBasedRewriterTestBase 
       "div {list-style-image:url('http://a.b.com/bullet.gif');list-style-position:outside;margin:5px;padding:0}\n" +
       ".someid {background-image:url(http://a.b.com/bigimg.png);float:right;width:165px;height:23px;margin-top:4px;margin-left:5px}";
     String s = "<style>" + css + "</style>";
-    ParsedHtmlNode[] styleKids = {
-      GadgetHtmlNodeTest.makeParsedTextNode(css)
-    };
-    ParsedHtmlNode[] p = {
-      GadgetHtmlNodeTest.makeParsedTagNode("style", null, styleKids)
-    };
-    assertEquals(s, rewriteHelper(overrideRewriter, s, p));
+    Document document = htmlParser.parseDom(s);
+    assertEquals(s, rewriteHelper(overrideRewriter, s, document));
   }
   
   public void testStyleTagRewritesIgnoredOnNullLinkRewriter() throws Exception {
@@ -93,12 +94,7 @@ public class StyleLinksContentRewriterTest extends FeatureBasedRewriterTestBase 
       "div {list-style-image:url('http://a.b.com/bullet.gif');list-style-position:outside;margin:5px;padding:0}\n" +
       ".someid {background-image:url(http://a.b.com/bigimg.png);float:right;width:165px;height:23px;margin-top:4px;margin-left:5px}";
     String s = "<style>" + css + "</style>";
-    ParsedHtmlNode[] styleKids = {
-      GadgetHtmlNodeTest.makeParsedTextNode(css)
-    };
-    ParsedHtmlNode[] p = {
-      GadgetHtmlNodeTest.makeParsedTagNode("style", null, styleKids)
-    };
-    assertEquals(s, rewriteHelper(overrideRewriter, s, p));
+    Document document = htmlParser.parseDom(s);
+    assertEquals(s, rewriteHelper(overrideRewriter, s, document));
   }
 }

@@ -18,17 +18,15 @@
  */
 package org.apache.shindig.gadgets.rewrite;
 
-import org.apache.shindig.gadgets.parse.GadgetHtmlNode;
+import com.google.inject.Guice;
+import com.google.inject.Injector;
+import org.apache.shindig.gadgets.parse.GadgetHtmlParser;
 import org.apache.shindig.gadgets.parse.ParseModule;
-import org.apache.shindig.gadgets.parse.caja.CajaHtmlParser;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotSame;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.*;
 import org.junit.Before;
 import org.junit.Test;
+import org.w3c.dom.Document;
+import org.w3c.dom.Node;
 
 public class MutableContentTest {
   private MutableContent mhc;
@@ -38,7 +36,8 @@ public class MutableContentTest {
     // Note dependency on CajaHtmlParser - this isn't particularly ideal but is
     // sufficient given that this test doesn't exercise the parser extensively at all,
     // instead focusing on the additional utility provided by MutableHtmlContent
-    mhc = new MutableContent(new CajaHtmlParser(new ParseModule.HTMLDocumentProvider()));
+    Injector injector = Guice.createInjector(new ParseModule());
+    mhc = new MutableContent(injector.getInstance(GadgetHtmlParser.class));
     mhc.setContent("DEFAULT VIEW");
   }
   
@@ -47,64 +46,69 @@ public class MutableContentTest {
     String content = mhc.getContent();
     assertEquals("DEFAULT VIEW", content);
   
-    GadgetHtmlNode root = mhc.getParseTree();
-    assertEquals(1, root.getChildren().size());
-    assertTrue(root.getChildren().get(0).isText());
-    assertEquals(content, root.getChildren().get(0).getText());
+    Document document = mhc.getDocument();
+    assertEquals(1, document.getFirstChild().getChildNodes().getLength());
+    assertTrue(document.getFirstChild().getChildNodes().item(0).getNodeType() == Node.TEXT_NODE);
+    assertEquals(content, document.getFirstChild().getChildNodes().item(0).getTextContent());
   
     assertSame(content, mhc.getContent());
-    assertSame(root, mhc.getParseTree());
+    assertSame(document, mhc.getDocument());
   }
   
   @Test
   public void modifyContentReflectedInTree() throws Exception {
     mhc.setContent("NEW CONTENT");
-    GadgetHtmlNode root = mhc.getParseTree();
-    assertEquals(1, root.getChildren().size());
-    assertEquals("NEW CONTENT", root.getChildren().get(0).getText());
+    Document document = mhc.getDocument();
+    assertEquals(1, document.getChildNodes().getLength());
+    assertEquals("NEW CONTENT", document.getChildNodes().item(0).getTextContent());
   }
   
   @Test
   public void modifyTreeReflectedInContent() throws Exception {
-    GadgetHtmlNode root = mhc.getParseTree();
+    Document document = mhc.getDocument();
   
     // First child should be text node per other tests. Modify it.
-    root.getChildren().get(0).setText("FOO CONTENT");
-    assertEquals("FOO CONTENT", mhc.getContent());
-  
+    document.getFirstChild().getFirstChild().setTextContent("FOO CONTENT");
+    MutableContent.notifyEdit(document);
+    assertTrue(mhc.getContent().contains("FOO CONTENT"));
+
     // Do it again
-    root.getChildren().get(0).setText("BAR CONTENT");
-    assertEquals("BAR CONTENT", mhc.getContent());
+    document.getFirstChild().getFirstChild().setTextContent("BAR CONTENT");
+    MutableContent.notifyEdit(document);
+    assertTrue(mhc.getContent().contains("BAR CONTENT"));
   
     // GadgetHtmlNode hasn't changed because string hasn't changed
-    assertSame(root, mhc.getParseTree());
+    assertSame(document, mhc.getDocument());
   }
   
   @Test
   public void staleTreeEditsInvalidatedAfterContentSet() throws Exception {
-    GadgetHtmlNode firstRoot = mhc.getParseTree();
+    Document document = mhc.getDocument();
   
     // Re-set content
     mhc.setContent("INVALIDATING CONTENT");
   
     // Should still be able to obtain this.
-    GadgetHtmlNode secondRoot = mhc.getParseTree();
-    assertNotSame(firstRoot, secondRoot);
+    Document document2 = mhc.getDocument();
+    assertNotSame(document, document2);
   
     // Should be able to *obtain* first child node...
-    GadgetHtmlNode firstTextNode = firstRoot.getChildren().get(0);
+    Node firstTextNode = document.getFirstChild().getChildNodes().item(0);
     try {
       // ...but not edit it.
-      firstTextNode.setText("STALE-SET CONTENT");
+      firstTextNode.setTextContent("STALE-SET CONTENT");
+      MutableContent.notifyEdit(document);
       fail("Should not be able to modify stale parse tree");
     } catch (IllegalStateException e) {
       // Expected condition.
     }
   
-    assertEquals("INVALIDATING CONTENT", secondRoot.getChildren().get(0).getText());
+    assertEquals("INVALIDATING CONTENT",
+        document2.getFirstChild().getChildNodes().item(0).getTextContent());
   
     // For good measure, modify secondRoot and get content
-    secondRoot.getChildren().get(0).setText("NEW CONTENT");
-    assertEquals("NEW CONTENT", mhc.getContent());
+    document2.getFirstChild().getChildNodes().item(0).setTextContent("NEW CONTENT");
+    MutableContent.notifyEdit(document2);
+    assertTrue(mhc.getContent().contains("NEW CONTENT"));
   }
 }

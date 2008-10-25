@@ -17,36 +17,25 @@
  */
 package org.apache.shindig.gadgets.parse.caja;
 
-import org.apache.shindig.gadgets.GadgetException;
-import org.apache.shindig.gadgets.parse.GadgetHtmlParser;
-import org.apache.shindig.gadgets.parse.ParsedHtmlAttribute;
-import org.apache.shindig.gadgets.parse.ParsedHtmlNode;
-
-import com.google.caja.lexer.CharProducer;
-import com.google.caja.lexer.HtmlLexer;
-import com.google.caja.lexer.HtmlTokenType;
-import com.google.caja.lexer.InputSource;
-import com.google.caja.lexer.ParseException;
-import com.google.caja.lexer.TokenQueue;
+import com.google.caja.lexer.*;
 import com.google.caja.parser.html.DomParser;
 import com.google.caja.parser.html.DomTree;
 import com.google.caja.reporting.MessageQueue;
 import com.google.caja.reporting.SimpleMessageQueue;
+import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
-import com.google.inject.Inject;
-
+import org.apache.shindig.gadgets.GadgetException;
+import org.apache.shindig.gadgets.parse.GadgetHtmlParser;
 import org.w3c.dom.Attr;
+import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
-import org.w3c.dom.Document;
 import org.w3c.dom.html.HTMLDocument;
 
 import java.io.StringReader;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Caja-based implementation of a {@code GadgetHtmlParser}.
@@ -59,17 +48,6 @@ public class CajaHtmlParser extends GadgetHtmlParser {
   @Inject
   public CajaHtmlParser(Provider<HTMLDocument> documentProvider) {
     this.documentProvider = documentProvider;
-  }
-
-  @Override
-  public List<ParsedHtmlNode> parse(String source) throws GadgetException {
-    DomTree domTree = getFragment(source);
-    List<ParsedHtmlNode> nodes =
-        new ArrayList<ParsedHtmlNode>(domTree.children().size());
-    for (DomTree child : domTree.children()) {
-      nodes.add(new CajaParsedHtmlNode(child));
-    }
-    return nodes;
   }
 
   @Override
@@ -147,87 +125,6 @@ public class CajaHtmlParser extends GadgetHtmlParser {
       parent.appendChild(doc.createCDATASection(elem.getValue()));
     } else {
       // TODO Implement for comment, fragment etc...
-    }
-  }
-
-  /**
-   * {@code ParsedHtmlNode} implementation built using Caja parsing primitives.
-   */
-  private static class CajaParsedHtmlNode implements ParsedHtmlNode {
-    private final List<ParsedHtmlAttribute> attributes;
-    private final List<ParsedHtmlNode> children;
-    private final String name;
-    private final String text;
-    
-    private CajaParsedHtmlNode(DomTree elem) {
-      if (elem instanceof DomTree.Tag) {
-        DomTree.Tag tag = (DomTree.Tag)elem;
-        attributes = new ArrayList<ParsedHtmlAttribute>(1);
-        children = new ArrayList<ParsedHtmlNode>();
-        name = tag.getTagName();
-        text = null;
-        for (DomTree child : elem.children()) {
-          if (child instanceof DomTree.Attrib) {
-            attributes.add(new CajaParsedHtmlAttribute((DomTree.Attrib)child));
-          } else {
-            children.add(new CajaParsedHtmlNode(child));
-          }
-        }
-      } else if (elem instanceof DomTree.Text ||
-                 elem instanceof DomTree.CData) {
-        // DomTree.CData can theoretically occur since it's supported
-        // in HTML5, but the implementation doesn't supply this yet.
-        attributes = null;
-        children = null;
-        name = null;
-        text = ((DomTree.Text)elem).getValue();
-      } else {
-        // This should never happen. The only remaining types are
-        // DomTree.Fragment, which is simply a top-level container
-        // that results from the DomTree.parseFragment() method,
-        // and DomTree.Value, which is always a child of DomTree.Attrib.
-        attributes = null;
-        children = null;
-        name = null;
-        text = null;
-      }
-    }
-    
-    public List<ParsedHtmlAttribute> getAttributes() {
-      return attributes;
-    }
-
-    public List<ParsedHtmlNode> getChildren() {
-      return children;
-    }
-
-    public String getTagName() {
-      return name;
-    }
-
-    public String getText() {
-      return text;
-    }
-  }
-  
-  /**
-   * {@code ParsedHtmlAttribute} built from a Caja DomTree primitive.
-   */
-  private static class CajaParsedHtmlAttribute implements ParsedHtmlAttribute {
-    private final String name;
-    private final String value;
-    
-    private CajaParsedHtmlAttribute(DomTree.Attrib attrib) {
-      name = attrib.getAttribName();
-      value = attrib.getAttribValue();
-    }
-    
-    public String getName() {
-      return name;
-    }
-
-    public String getValue() {
-      return value;
     }
   }
 }

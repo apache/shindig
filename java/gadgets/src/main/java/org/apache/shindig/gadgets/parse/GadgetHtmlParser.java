@@ -17,12 +17,9 @@
  */
 package org.apache.shindig.gadgets.parse;
 
+import com.google.inject.ImplementedBy;
 import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.parse.caja.CajaHtmlParser;
-
-import com.google.inject.ImplementedBy;
-
-import org.w3c.dom.Node;
 import org.w3c.dom.Document;
 
 /**
@@ -44,8 +41,6 @@ public abstract class GadgetHtmlParser {
     String normalized = content.substring(Math.min(100, content.length())).toUpperCase();
     return normalized.contains("<!DOCTYPE") || normalized.contains("<HTML");
   }
-
-  public abstract java.util.List<ParsedHtmlNode> parse(String source) throws GadgetException;
 
   /**
    * @param source

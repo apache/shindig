@@ -17,13 +17,17 @@
  */
 package org.apache.shindig.gadgets.parse;
 
+import junit.framework.TestCase;
 import org.apache.shindig.gadgets.parse.caja.CajaHtmlParser;
 import org.apache.shindig.gadgets.parse.nekohtml.NekoHtmlParser;
+import org.w3c.dom.Document;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 
-import junit.framework.TestCase;
-
-import java.util.List;
-
+/**
+ * Note these tests are of marginal use. Consider removing. More useful tests would exercise
+ * the capability of the parser to handle strange HTML.
+ */
 public class HtmlParserTest extends TestCase {
 
   private final GadgetHtmlParser cajaParser = new CajaHtmlParser(
@@ -38,16 +42,14 @@ public class HtmlParserTest extends TestCase {
   }
 
   private void parseSimpleString(GadgetHtmlParser htmlParser) throws Exception {
-    List<ParsedHtmlNode> nodes = htmlParser.parse("content");
-    assertNotNull(nodes);
-    assertEquals(1, nodes.size());
-    
-    ParsedHtmlNode node = nodes.get(0);
+    Document doc = htmlParser.parseDom("content");
+
+    Node node = doc.getDocumentElement().getFirstChild();
     assertNotNull(node);
-    assertEquals("content", node.getText());
+    assertEquals("content", node.getTextContent());
     assertNull(node.getAttributes());
-    assertNull(node.getChildren());
-    assertNull(node.getTagName());
+    assertNullOrEmpty(node.getChildNodes());
+    assertEquals(Node.TEXT_NODE, node.getNodeType());
   }
 
   public void testParseTagWithStringContents() throws Exception {
@@ -56,19 +58,11 @@ public class HtmlParserTest extends TestCase {
   }
 
   public void parseTagWithStringContents(GadgetHtmlParser htmlParser) throws Exception {
-    List<ParsedHtmlNode> nodes =
-        htmlParser.parse("<span>content</span>");
-    assertNotNull(nodes);
-    assertEquals(1, nodes.size());
-    
-    ParsedHtmlNode node = nodes.get(0);
-    assertNull(node.getText());
-    assertNotNull(node.getAttributes());
-    assertEquals(0, node.getAttributes().size());
-    assertNotNull(node.getChildren());
-    assertEquals(1, node.getChildren().size());
-    assertEquals("content", node.getChildren().get(0).getText());
-    assertEquals("span", node.getTagName().toLowerCase());
+    Document doc = htmlParser.parseDom("<span>content</span>");
+
+    Node node = doc.getDocumentElement().getFirstChild();
+    assertEquals("content", node.getTextContent());
+    assertEquals("span", node.getNodeName().toLowerCase());
   }
 
   public void testParseTagWithAttributes() throws Exception {
@@ -77,21 +71,17 @@ public class HtmlParserTest extends TestCase {
   }
 
   void parseTagWithAttributes(GadgetHtmlParser htmlParser) throws Exception {
-    List<ParsedHtmlNode> nodes =
-        htmlParser.parse("<div id=\"foo\">content</div>");
-    assertNotNull(nodes);
-    assertEquals(1, nodes.size());
-    
-    ParsedHtmlNode node = nodes.get(0);
+    Document doc = htmlParser.parseDom("<div id=\"foo\">content</div>");
+
+    Node node = doc.getDocumentElement().getFirstChild();
     assertNotNull(node);
-    assertNull(node.getText());
     assertNotNull(node.getAttributes());
-    assertEquals(1, node.getAttributes().size());
-    assertEquals("id", node.getAttributes().get(0).getName());
-    assertEquals("foo", node.getAttributes().get(0).getValue());
-    assertNotNull(node.getChildren());
-    assertEquals(1, node.getChildren().size());
-    assertEquals("content", node.getChildren().get(0).getText());
+    assertEquals(1, node.getAttributes().getLength());
+    assertEquals("id", node.getAttributes().item(0).getNodeName());
+    assertEquals("foo", node.getAttributes().item(0).getNodeValue());
+    assertNotNull(node.getChildNodes());
+    assertEquals(1, node.getChildNodes().getLength());
+    assertEquals("content", node.getChildNodes().item(0).getTextContent());
   }
 
   public void testParseStringUnescapesProperly() throws Exception {
@@ -100,17 +90,13 @@ public class HtmlParserTest extends TestCase {
   }
 
   void parseStringUnescapesProperly(GadgetHtmlParser htmlParser) throws Exception {
-    List<ParsedHtmlNode> nodes =
-        htmlParser.parse("&lt;content&amp;&apos;chrome&apos;&gt;");
-    assertNotNull(nodes);
-    assertEquals(1, nodes.size());
-    
-    ParsedHtmlNode node = nodes.get(0);
+    Document doc = htmlParser.parseDom("&lt;content&amp;&apos;chrome&apos;&gt;");
+
+    Node node = doc.getDocumentElement().getFirstChild();
     assertNotNull(node);
-    assertEquals("<content&'chrome'>", node.getText());
+    assertEquals("<content&'chrome'>", node.getTextContent());
     assertNull(node.getAttributes());
-    assertNull(node.getChildren());
-    assertNull(node.getTagName());
+    assertNullOrEmpty(node.getChildNodes());
   }
 
   public void testParseNestedContentWithNoCloseForBrAndHr() throws Exception {
@@ -119,99 +105,50 @@ public class HtmlParserTest extends TestCase {
   }
 
   void parseNestedContentWithNoCloseForBrAndHr(GadgetHtmlParser htmlParser) throws Exception {
-    List<ParsedHtmlNode> nodes =
-        htmlParser.parse("<div><br>  and  <hr></div>");
-    assertNotNull(nodes);
-    assertEquals(1, nodes.size());
-    
-    ParsedHtmlNode divNode = nodes.get(0);
-    assertNull(divNode.getText());
-    assertEquals("div", divNode.getTagName().toLowerCase());
+    Document doc = htmlParser.parseDom("<div><br>  and  <hr></div>");
+
+    Node divNode = doc.getDocumentElement().getFirstChild();
+    assertEquals("div", divNode.getNodeName().toLowerCase());
     assertNotNull(divNode.getAttributes());
-    assertEquals(0, divNode.getAttributes().size());
-    assertNotNull(divNode.getChildren());
-    assertEquals(3, divNode.getChildren().size());
+    assertEquals(0, divNode.getAttributes().getLength());
+    assertNotNull(divNode.getChildNodes());
+    assertEquals(3, divNode.getChildNodes().getLength());
     
     {
       // <br>
-      ParsedHtmlNode divChild = divNode.getChildren().get(0);
+      Node divChild = divNode.getChildNodes().item(0);
       assertNotNull(divChild);
-      assertEquals("br", divChild.getTagName().toLowerCase());
-      assertNull(divChild.getText());
+      assertEquals("br", divChild.getNodeName().toLowerCase());
       assertNotNull(divChild.getAttributes());
-      assertEquals(0, divChild.getAttributes().size());
-      assertNullOrEmpty(divChild.getChildren());
+      assertEquals(0, divChild.getAttributes().getLength());
+      assertEquals(0, divChild.getChildNodes().getLength());
     }
     
     {
       // text
-      ParsedHtmlNode divChild = divNode.getChildren().get(1);
-      assertEquals("  and  ", divChild.getText());
+      Node divChild = divNode.getChildNodes().item(1);
+      assertEquals("  and  ", divChild.getTextContent());
       assertNull(divChild.getAttributes());
-      assertNull(divChild.getChildren());
-      assertNull(divChild.getTagName());
+      assertNullOrEmpty(divChild.getChildNodes());
     }
     
     {
       // <hr> should be parsed lieniently
-      ParsedHtmlNode divChild = divNode.getChildren().get(2);
+      Node divChild = divNode.getChildNodes().item(2);
       assertNotNull(divChild);
-      assertEquals("hr", divChild.getTagName().toLowerCase());
-      assertNull(divChild.getText());
+      assertEquals("hr", divChild.getNodeName().toLowerCase());
       assertNotNull(divChild.getAttributes());
-      assertEquals(0, divChild.getAttributes().size());
-      assertNullOrEmpty(divChild.getChildren());
+      assertEquals(0, divChild.getAttributes().getLength());
+      assertEquals(0, divChild.getChildNodes().getLength());
     }
   }
 
-  public void testParseMixedSiblings() throws Exception {
-    parseMixedSiblings(nekoParser);
-    parseMixedSiblings(cajaParser);
-  }
-
-  void parseMixedSiblings(GadgetHtmlParser htmlParser) throws Exception {
-    List<ParsedHtmlNode> nodes =
-        htmlParser.parse("content<span>more</span><div id=\"foo\">yet more</div>");
-    assertNotNull(nodes);
-    assertEquals(3, nodes.size());
-    
-    {
-      ParsedHtmlNode textNode = nodes.get(0);
-      assertEquals("content", textNode.getText());
-    }
-    
-    {
-      ParsedHtmlNode spanNode = nodes.get(1);
-      assertNull(spanNode.getText());
-      assertNotNull(spanNode.getAttributes());
-      assertEquals(0, spanNode.getAttributes().size());
-      assertNotNull(spanNode.getChildren());
-      assertEquals(1, spanNode.getChildren().size());
-      assertEquals("more", spanNode.getChildren().get(0).getText());
-    }
-    
-    {
-      ParsedHtmlNode divNode = nodes.get(2);
-      assertNull(divNode.getText());
-      assertNotNull(divNode.getAttributes());
-      assertEquals(1, divNode.getAttributes().size());
-      assertEquals("id", divNode.getAttributes().get(0).getName());
-      assertEquals("foo", divNode.getAttributes().get(0).getValue());
-      assertNotNull(divNode.getChildren());
-      assertEquals(1, divNode.getChildren().size());
-      assertEquals("yet more", divNode.getChildren().get(0).getText());
-    }
-  }
-  
   // TODO: figure out to what extent it makes sense to test "invalid"
   // HTML, semi-structured HTML, and comment parsing
 
   // Different parsers either return null or empty child lists.
   // In particular because Caja is a non-w3c compliant parser
-  private void assertNullOrEmpty(List l) {
-    if (l != null && !l.isEmpty()) {
-      assertTrue(true);
-    }
-    return;
+  private void assertNullOrEmpty(NodeList l) {
+    assertTrue(l == null || l.getLength() == 0);
   }
 }

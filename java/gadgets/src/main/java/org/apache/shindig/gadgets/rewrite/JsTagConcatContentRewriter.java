@@ -18,24 +18,23 @@
  */
 package org.apache.shindig.gadgets.rewrite;
 
+import com.google.common.collect.Lists;
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.common.util.Utf8UrlCoder;
 import org.apache.shindig.gadgets.Gadget;
 import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.http.HttpResponse;
-import org.apache.shindig.gadgets.parse.GadgetHtmlNode;
 import org.apache.shindig.gadgets.servlet.ProxyBase;
 import org.apache.shindig.gadgets.spec.GadgetSpec;
 import org.apache.shindig.gadgets.spec.View;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 
 import java.io.UnsupportedEncodingException;
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Queue;
 
 public class JsTagConcatContentRewriter implements ContentRewriter {
   private final static int MAX_URL_LENGTH = 1500;
@@ -68,93 +67,90 @@ public class JsTagConcatContentRewriter implements ContentRewriter {
       return null;
     }
 
-    // Bootstrap queue of children over which to iterate,
-    // ie. lists of siblings to potentially combine
-    Queue<GadgetHtmlNode> nodesToProcess = new LinkedList<GadgetHtmlNode>();
-    nodesToProcess.add(content.getParseTree());
+    // Get all the script tags
+    NodeList scriptTags = content.getDocument().getElementsByTagName("SCRIPT");
+
+    // Copy NodeList as it respects changes to the underlying document which is a
+    // behavior we dont want when removing nodes
+    List<Node> nodeList = Lists.newArrayListWithExpectedSize(scriptTags.getLength());
+    for (int i = 0; i < scriptTags.getLength(); i++) {
+      nodeList.add(scriptTags.item(i));
+    }
 
     String concatBase = getJsConcatBase(gadget.getSpec(), rewriterFeature);
+    Uri contentBase = gadget.getSpec().getUrl();
+    View view = gadget.getCurrentView();
+    if (view != null && view.getHref() != null) {
+      contentBase = view.getHref();
+    }
 
-    while (!nodesToProcess.isEmpty()) {
-      GadgetHtmlNode parentNode = nodesToProcess.remove();
-      if (!parentNode.isText()) {
-        List<GadgetHtmlNode> childList = parentNode.getChildren();
-
-        // Iterate over children next in depth-first fashion.
-        // Text nodes (such as <script src> processed here) will be ignored.
-        nodesToProcess.addAll(childList);
-
-        List<GadgetHtmlNode> toRemove = new ArrayList<GadgetHtmlNode>();
-        List<URI> scripts = new ArrayList<URI>();
-        boolean processScripts = false;
-        for (int i = 0; i < childList.size(); ++i) {
-          GadgetHtmlNode cur = childList.get(i);
-
-          // Find consecutive <script src=...> tags
-          if (!cur.isText() &&
-               cur.getTagName().equalsIgnoreCase("script") &&
-               cur.hasAttribute("src")) {
-            URI scriptUri = null;
-            try {
-              Uri base = gadget.getSpec().getUrl();
-              View view = gadget.getCurrentView();
-              if (view != null && view.getHref() != null) {
-                base = view.getHref();
-              }
-              scriptUri = base.resolve(Uri.parse(cur.getAttributeValue("src"))).toJavaUri();
-            } catch (IllegalArgumentException e) {
-              // Same behavior as JavascriptTagMerger
-              // Perhaps switch to ignoring script src instead?
-              throw new RuntimeException(e);
-            }
-            scripts.add(scriptUri);
-            toRemove.add(cur);
-          } else if (scripts.size() > 0 && cur.isText() && cur.getText().matches("\\s*")) {
-            // Whitespace after one or more scripts. Ignore and remove.
-            toRemove.add(cur);
-          } else if (scripts.size() > 0) {
-            processScripts = true;
-          }
-
-          if (i == (childList.size() - 1)) {
-            processScripts = true;
-          }
-
-          if (processScripts && scripts.size() > 0) {
-            // Tags found. Concatenate scripts together.
-            List<URI> concatUris = getConcatenatedUris(concatBase, scripts);
-
-            // Insert concatenated nodes before first match
-            for (URI concatUri : concatUris) {
-              GadgetHtmlNode newScript = new GadgetHtmlNode("script", null);
-              newScript.setAttribute("src", concatUri.toString());
-              parentNode.insertBefore(newScript, toRemove.get(0));
-            }
-
-            // Remove contributing match nodes
-            for (GadgetHtmlNode remove : toRemove) {
-              parentNode.removeChild(remove);
-            }
-
-            processScripts = false;
-            scripts.clear();
-            toRemove.clear();
-          }
-        }
+    boolean mutated = false;
+    List<Node> concatenateable = new ArrayList<Node>();
+    for (int i = 0; i < nodeList.size(); i++) {
+      Node scriptTag = nodeList.get(i);
+      Node nextSciptTag = null;
+      if (i + 1 < nodeList.size()) {
+        nextSciptTag = nodeList.get(i+1);
       }
+      Node src = scriptTag.getAttributes().getNamedItem("src");
+      if (src != null) {
+        mutated = true;
+        concatenateable.add(scriptTag);
+        if (nextSciptTag == null ||
+            !nextSciptTag.equals(getNextSiblingElement(scriptTag))) {
+          // Next tag is not concatenateable
+          concatenateTags(concatenateable, concatBase, contentBase);
+          concatenateable.clear();
+        }
+      } else {
+        concatenateTags(concatenateable, concatBase, contentBase);
+        concatenateable.clear();
+      }
+    }
+    concatenateTags(concatenateable, concatBase, contentBase);
+
+    if (mutated) {
+      MutableContent.notifyEdit(content.getDocument());
     }
 
     return RewriterResults.cacheableIndefinitely();
   }
 
-  private List<URI> getConcatenatedUris(String concatBase, List<URI> uris) {
-    List<URI> concatUris = new LinkedList<URI>();
+  private void concatenateTags(List<Node> tags, String concatBase, Uri contentBase) {
+    List<Uri> scriptSrcList = Lists.newArrayListWithExpectedSize(tags.size());
+    for (Node scriptNode : tags) {
+      try {
+        scriptSrcList.add(
+            contentBase.resolve(
+                Uri.parse(scriptNode.getAttributes().getNamedItem("src").getNodeValue())));
+      } catch (IllegalArgumentException e) {
+        // Same behavior as JavascriptTagMerger
+        // Perhaps switch to ignoring script src instead?
+        throw new RuntimeException(e);
+      }
+    }
+
+    List<Uri> concatented = getConcatenatedUris(concatBase, scriptSrcList);
+    for (int i = 0; i < tags.size(); i++) {
+      if (i < concatented.size()) {
+        // Set new URLs into existing tags
+        tags.get(i).getAttributes().getNamedItem("src").setNodeValue(
+            concatented.get(i).toString());
+      } else {
+        // Remove remainder
+        tags.get(i).getParentNode().removeChild(tags.get(i));
+      }
+    }
+  }
+
+  private List<Uri> getConcatenatedUris(String concatBase, List<Uri> uris) {
+    List<Uri> concatUris = new LinkedList<Uri>();
     int paramIndex = 1;
     StringBuilder builder = null;
     int maxUriLen = MAX_URL_LENGTH + concatBase.length();
     try {
       int uriIx = 0, lastUriIx = (uris.size() - 1);
-      for (URI uri : uris) {
+      for (Uri uri : uris) {
         if (paramIndex == 1) {
           builder = new StringBuilder(concatBase);
         } else {
@@ -165,7 +161,7 @@ public class JsTagConcatContentRewriter implements ContentRewriter {
         if (builder.length() > maxUriLen ||
             uriIx == lastUriIx) {
           // Went over URI length warning limit or on the last uri
-          concatUris.add(new URI(builder.toString()));
+          concatUris.add(Uri.parse(builder.toString()));
           builder = null;
           paramIndex = 0;
         }
@@ -173,8 +169,6 @@ public class JsTagConcatContentRewriter implements ContentRewriter {
         ++uriIx;
       }
     } catch (UnsupportedEncodingException e) {
-      throw new RuntimeException(e);
-    } catch (URISyntaxException e) {
       throw new RuntimeException(e);
     }
     return concatUris;
@@ -189,6 +183,14 @@ public class JsTagConcatContentRewriter implements ContentRewriter {
            "&fp=" +
            rewriterFeature.getFingerprint() +
            '&';
+  }
+
+  private Node getNextSiblingElement(Node n) {
+    n = n.getNextSibling();
+    while (n != null && n.getNodeType() != Node.ELEMENT_NODE) {
+      n = n.getNextSibling();
+    }
+    return n;
   }
 
 }
