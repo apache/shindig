@@ -18,21 +18,26 @@
  */
 package org.apache.shindig.gadgets.rewrite;
 
+import com.google.inject.Guice;
+import com.google.inject.Injector;
+import org.apache.shindig.gadgets.parse.GadgetHtmlParser;
+import org.apache.shindig.gadgets.parse.ParseModule;
+import org.w3c.dom.Document;
+
 import java.net.URI;
 
-import org.apache.shindig.gadgets.parse.GadgetHtmlNodeTest;
-import org.apache.shindig.gadgets.parse.ParsedHtmlNode;
-
 public class LinkingTagContentRewriterTest extends FeatureBasedRewriterTestBase {
-  private LinkRewriter pfxLinkRewriter;
   private LinkingTagContentRewriter rewriter;
+  private GadgetHtmlParser htmlParser;
   
   private static final String LINK_PREFIX = "px-";
 
   @Override
   protected void setUp() throws Exception {
     super.setUp();
-    pfxLinkRewriter = new LinkRewriter() {
+    Injector injector = Guice.createInjector(new ParseModule());
+    htmlParser = injector.getInstance(GadgetHtmlParser.class);
+    LinkRewriter pfxLinkRewriter = new LinkRewriter() {
       public String rewrite(String uri, URI context) {
         // Just prefixes with LINK_PREFIX
         return LINK_PREFIX + uri;
@@ -42,41 +47,29 @@ public class LinkingTagContentRewriterTest extends FeatureBasedRewriterTestBase 
   }
   
   public void testLinkingTagStandardRewrite() throws Exception {
-    String s = "<img src=\"http://a.b.com/img.gif\"></img>\n"
-        + "<IMG src=\"http://a.b.com/img2.gif\"/>\n"
-        + "<eMbeD src=\"http://a.b.com/some.mov\"/>\n"
+    String s = "<img src=\"http://a.b.com/img.gif\"></img>"
+        + "<IMG src=\"http://a.b.com/img2.gif\"/>"
+        + "<eMbeD src=\"http://a.b.com/some.mov\"/>"
         + "<link href=\"http://a.b.com/link.html\"></link>";
-    String[][] img1attrib = { { "src", "http://a.b.com/img.gif" } };
-    String[][] img2attrib = { { "src", "http://a.b.com/img2.gif" } };
-    String[][] emb1attrib = { { "src", "http://a.b.com/some.mov" } };
-    String[][] href1attr = { { "href", "http://a.b.com/link.html" } };
-    ParsedHtmlNode[] p = {
-        GadgetHtmlNodeTest.makeParsedTagNode("img", img1attrib, null),
-        GadgetHtmlNodeTest.makeParsedTextNode("\n"),
-        GadgetHtmlNodeTest.makeParsedTagNode("IMG", img2attrib, null),
-        GadgetHtmlNodeTest.makeParsedTextNode("\n"),
-        GadgetHtmlNodeTest.makeParsedTagNode("eMbeD", emb1attrib, null),
-        GadgetHtmlNodeTest.makeParsedTextNode("\n"),
-        GadgetHtmlNodeTest.makeParsedTagNode("link", href1attr, null)
-    };
-    String rewritten = "<img src=\"" + LINK_PREFIX + "http://a.b.com/img.gif\"/>\n"
-        + "<IMG src=\"" + LINK_PREFIX + "http://a.b.com/img2.gif\"/>\n"
-        + "<eMbeD src=\"" + LINK_PREFIX + "http://a.b.com/some.mov\"/>\n"
-        + "<link href=\"" + LINK_PREFIX + "http://a.b.com/link.html\"/>";
-    assertEquals(rewritten, rewriteHelper(rewriter, s, p));
+    String expected = "<IMG src=\"" + LINK_PREFIX + "http://a.b.com/img.gif\">"
+        + "<IMG src=\"" + LINK_PREFIX + "http://a.b.com/img2.gif\">"
+        + "<EMBED src=\"" + LINK_PREFIX + "http://a.b.com/some.mov\"></EMBED>"
+        + "<LINK href=\"" + LINK_PREFIX + "http://a.b.com/link.html\">";
+    Document document = htmlParser.parseDom(s);
+    String rewritten = rewriteHelper(rewriter, s, document);
+    assertEquals(rewritten, expected);
   }
   
   public void testLinkingTagIgnoredWithNoRewriter() throws Exception {
     String s = "<img src=\"http://a.b.com/img.gif\"></img>";
-    String[][] img1attrib = { { "src", "http://a.b.com/img.gif" } };
-    ParsedHtmlNode[] p = {
-        GadgetHtmlNodeTest.makeParsedTagNode("img", img1attrib, null),
-    };
-    assertEquals(s, rewriteHelper(new LinkingTagContentRewriter(null, null), s, p));
+    Document document = htmlParser.parseDom(s);
+    String rewritten = rewriteHelper(new LinkingTagContentRewriter(null, null), s, document);
+    assertEquals(s, rewritten);
   }
   
   public void testLinkingTagIgnoredWithBadParse() throws Exception {
     String s = "<img src=\"http://a.b.com/img.gif></img>";
-    assertEquals(s, rewriteHelper(rewriter, s, null));  // null = couldn't parse
+    String rewritten = rewriteHelper(rewriter, s, null);
+    assertEquals(s, rewritten);  // null = couldn't parse
   }
 }

@@ -18,25 +18,28 @@
  */
 package org.apache.shindig.gadgets.rewrite;
 
-import static org.easymock.EasyMock.expect;
-import static org.easymock.classextension.EasyMock.replay;
-
+import com.google.inject.Guice;
+import com.google.inject.Injector;
 import org.apache.shindig.common.uri.Uri;
-import org.apache.shindig.gadgets.parse.GadgetHtmlNodeTest;
-import org.apache.shindig.gadgets.parse.ParsedHtmlNode;
+import org.apache.shindig.gadgets.parse.GadgetHtmlParser;
+import org.apache.shindig.gadgets.parse.ParseModule;
 import org.apache.shindig.gadgets.spec.GadgetSpec;
-
+import static org.easymock.EasyMock.expect;
 import org.easymock.classextension.EasyMock;
+import static org.easymock.classextension.EasyMock.replay;
+import org.w3c.dom.Document;
 
 public class JsTagConcatContentRewriterTest extends FeatureBasedRewriterTestBase {
-  private ContentRewriterFeature jsFeature;
   private JsTagConcatContentRewriter rewriter;
   private String concatBase;
+  private GadgetHtmlParser htmlParser;
 
   @Override
   protected void setUp() throws Exception {
     super.setUp();
-    jsFeature = makeFeature("script");
+    ContentRewriterFeature jsFeature = makeFeature("script");
+    Injector injector = Guice.createInjector(new ParseModule());
+    htmlParser = injector.getInstance(GadgetHtmlParser.class);
     ContentRewriterFeature.Factory factory = mockContentRewriterFeatureFactory(jsFeature);
     rewriter = new JsTagConcatContentRewriter(factory, null);
     GadgetSpec spec = EasyMock.createNiceMock(GadgetSpec.class);
@@ -46,149 +49,101 @@ public class JsTagConcatContentRewriterTest extends FeatureBasedRewriterTestBase
   }
 
   public void testJSMergePreserveNoExternal() throws Exception {
-    String s = "<script>\n"
+    String s = "<SCRIPT>\n"
         + "doSomething\n"
-        + "</script>";
-    ParsedHtmlNode[] scriptKids = {
-      GadgetHtmlNodeTest.makeParsedTextNode("\ndoSomething\n")
-    };
-    ParsedHtmlNode[] p = {
-      GadgetHtmlNodeTest.makeParsedTagNode("script", null, scriptKids)
-    };
-    assertEquals(s, rewriteHelper(rewriter, s, p));
+        + "</SCRIPT>";
+
+    Document document = htmlParser.parseDom(s);
+    String rewritten = rewriteHelper(rewriter, s, document);
+    assertEquals(rewritten, s);
   }
 
   public void testJSMergePreserveNoScript() throws Exception {
     String s
-        = "<html><div id=\"test\">ceci ne pas une script</div></html>";
-    String[][] attribs = { { "id", "test" } };
-    ParsedHtmlNode[] divKids = {
-      GadgetHtmlNodeTest.makeParsedTextNode("ceci ne pas une script")
-    };
-    ParsedHtmlNode[] htmlKids = {
-      GadgetHtmlNodeTest.makeParsedTagNode("div", attribs, divKids)
-    };
-    ParsedHtmlNode[] p = {
-      GadgetHtmlNodeTest.makeParsedTagNode("html", null, htmlKids)
-    };
-    assertEquals(s, rewriteHelper(rewriter, s, p));
+        = "<DIV id=\"test\">ceci ne pas une script</DIV>";
+    Document document = htmlParser.parseDom(s);
+    String rewritten = rewriteHelper(rewriter, s, document);
+    assertEquals(rewritten, s);
   }
 
   public void testJSMergePreserveWithComment() throws Exception {
-    String s = "<script>" +
+    String s = "<SCRIPT>" +
         "<!--\ndoSomething\n-->" +
-        "</script>";
-    ParsedHtmlNode[] scriptKids = {
-      GadgetHtmlNodeTest.makeParsedTextNode("<!--\ndoSomething\n-->")
-    };
-    ParsedHtmlNode[] p = {
-      GadgetHtmlNodeTest.makeParsedTagNode("script", null, scriptKids)
-    };
-    assertEquals(s, rewriteHelper(rewriter, s, p));
+        "</SCRIPT>";
+    Document document = htmlParser.parseDom(s);
+    String rewritten = rewriteHelper(rewriter, s, document);
+    assertEquals(rewritten, s);
   }
 
   public void testJSMergeSingleScriptReWrite() throws Exception {
-    String s = "<script src=\"http://a.b.com/1.js\"></script>";
-    String[][] attribs = { { "src", "http://a.b.com/1.js" } };
-    ParsedHtmlNode[] p = {
-      GadgetHtmlNodeTest.makeParsedTagNode("script", attribs, null)
-    };
-    String rewritten
-        = "<script src=\"" + concatBase + "1=http%3A%2F%2Fa.b.com%2F1.js\"></script>";
-    assertEquals(rewritten, rewriteHelper(rewriter, s, p));
+    String s = "<SCRIPT src=\"http://a.b.com/1.js\"></SCRIPT>";
+    String expected = "<SCRIPT src=\"" + concatBase + "1=http%3A%2F%2Fa.b.com%2F1.js\"></SCRIPT>";
+    Document document = htmlParser.parseDom(s);
+    String rewritten = rewriteHelper(rewriter, s, document);
+    assertEquals(rewritten, expected);
   }
 
   public void testJSMergeTwoScriptReWriteWithWhitespace() throws Exception {
-    String s = "<script src=\"http://a.b.com/1.js\"></script>\n"
-        + "<script src=\"http://a.b.com/2.js\"></script>";
-    String[][] attr1 = { { "src", "http://a.b.com/1.js" } };
-    String[][] attr2 = { { "src", "http://a.b.com/2.js" } };
-    ParsedHtmlNode[] p = {
-      GadgetHtmlNodeTest.makeParsedTagNode("script", attr1, null),
-      GadgetHtmlNodeTest.makeParsedTextNode("\n"),
-      GadgetHtmlNodeTest.makeParsedTagNode("script", attr2, null)
-    };
-    String rewritten
-        = "<script src=\"" + concatBase + "1=http%3A%2F%2Fa.b.com%2F1.js&2=http%3A%2F%2Fa.b.com%2F2.js\"></script>";
-    assertEquals(rewritten, rewriteHelper(rewriter, s, p));
+    String s = "<SCRIPT src=\"http://a.b.com/1.js\"></SCRIPT>"
+        + "<SCRIPT src=\"http://a.b.com/2.js\"></SCRIPT>";
+    String expected
+        = "<SCRIPT src=\"" + concatBase + "1=http%3A%2F%2Fa.b.com%2F1.js&2=http%3A%2F%2Fa.b.com%2F2.js\"></SCRIPT>";
+    Document document = htmlParser.parseDom(s);
+    String rewritten = rewriteHelper(rewriter, s, document);
+    assertEquals(rewritten, expected);
   }
 
   public void testJSMergeLeadAndTrailingScriptReWrite() throws Exception {
-    String s = "<script>\n"
+    String s = "<SCRIPT>\n"
         + "doSomething\n"
-        + "</script>"
-        + "<script src=\"http://a.b.com/1.js\"></script>"
-        + "<script src=\"http://a.b.com/2.js\"></script>"
-        + "<script>"
+        + "</SCRIPT>"
+        + "<SCRIPT src=\"http://a.b.com/1.js\"></SCRIPT>"
+        + "<SCRIPT src=\"http://a.b.com/2.js\"></SCRIPT>"
+        + "<SCRIPT>\n"
         + "doSomething\n"
-        + "</script>";
-    String[][] attr1 = { { "src", "http://a.b.com/1.js" } };
-    String[][] attr2 = { { "src", "http://a.b.com/2.js" } };
-    ParsedHtmlNode[] scriptKids = {
-      GadgetHtmlNodeTest.makeParsedTextNode("\ndoSomething\n")
-    };
-    ParsedHtmlNode[] p = {
-      GadgetHtmlNodeTest.makeParsedTagNode("script", null, scriptKids),
-      GadgetHtmlNodeTest.makeParsedTagNode("script", attr1, null),
-      GadgetHtmlNodeTest.makeParsedTagNode("script", attr2, null),
-      GadgetHtmlNodeTest.makeParsedTagNode("script", null, scriptKids)
-    };
-    String rewritten = "<script>\n"
+        + "</SCRIPT>";
+    String expected = "<SCRIPT>\n"
         + "doSomething\n"
-        + "</script>"
-        + "<script src=\"" + concatBase + "1=http%3A%2F%2Fa.b.com%2F1.js&2=http%3A%2F%2Fa.b.com%2F2.js\"></script>"
-        + "<script>\n"
+        + "</SCRIPT>"
+        + "<SCRIPT src=\"" + concatBase + "1=http%3A%2F%2Fa.b.com%2F1.js&2=http%3A%2F%2Fa.b.com%2F2.js\"></SCRIPT>"
+        + "<SCRIPT>\n"
         + "doSomething\n"
-        + "</script>";
-    assertEquals(rewritten, rewriteHelper(rewriter, s, p));
+        + "</SCRIPT>";
+    Document document = htmlParser.parseDom(s);
+    String rewritten = rewriteHelper(rewriter, s, document);
+    assertEquals(rewritten, expected);
   }
 
   public void testJSMergeInterspersed() throws Exception {
-    String s = "<script src=\"http://a.b.com/1.js\"></script>"
-        + "<script src=\"http://a.b.com/2.js\"></script>"
-        + "<script><!-- doSomething --></script>"
-        + "<script src=\"http://a.b.com/3.js\"></script>"
-        + "<script src=\"http://a.b.com/4.js\"></script>";
-    String[][] attr1 = { { "src", "http://a.b.com/1.js" } };
-    String[][] attr2 = { { "src", "http://a.b.com/2.js" } };
-    String[][] attr3 = { { "src", "http://a.b.com/3.js" } };
-    String[][] attr4 = { { "src", "http://a.b.com/4.js" } };
-    ParsedHtmlNode[] scriptKids = {
-      GadgetHtmlNodeTest.makeParsedTextNode("<!-- doSomething -->")
-    };
-    ParsedHtmlNode[] p = {
-      GadgetHtmlNodeTest.makeParsedTagNode("script", attr1, null),
-      GadgetHtmlNodeTest.makeParsedTagNode("script", attr2, null),
-      GadgetHtmlNodeTest.makeParsedTagNode("script", null, scriptKids),
-      GadgetHtmlNodeTest.makeParsedTagNode("script", attr3, null),
-      GadgetHtmlNodeTest.makeParsedTagNode("script", attr4, null)
-    };
-    String rewritten =
-        "<script src=\"" + concatBase + "1=http%3A%2F%2Fa.b.com%2F1.js&2=http%3A%2F%2Fa.b.com%2F2.js\"></script>" +
-        "<script><!-- doSomething --></script>" +
-        "<script src=\"" + concatBase + "1=http%3A%2F%2Fa.b.com%2F3.js&2=http%3A%2F%2Fa.b.com%2F4.js\"></script>";
-    assertEquals(rewritten, rewriteHelper(rewriter, s, p));
+    String s = "<SCRIPT src=\"http://a.b.com/1.js\"></SCRIPT>"
+        + "<SCRIPT src=\"http://a.b.com/2.js\"></SCRIPT>"
+        + "<SCRIPT><!-- doSomething --></SCRIPT>"
+        + "<SCRIPT src=\"http://a.b.com/3.js\"></SCRIPT>"
+        + "<SCRIPT src=\"http://a.b.com/4.js\"></SCRIPT>";
+    String expected =
+        "<SCRIPT src=\"" + concatBase + "1=http%3A%2F%2Fa.b.com%2F1.js&2=http%3A%2F%2Fa.b.com%2F2.js\"></SCRIPT>" +
+        "<SCRIPT><!-- doSomething --></SCRIPT>" +
+        "<SCRIPT src=\"" + concatBase + "1=http%3A%2F%2Fa.b.com%2F3.js&2=http%3A%2F%2Fa.b.com%2F4.js\"></SCRIPT>";
+    Document document = htmlParser.parseDom(s);
+    String rewritten = rewriteHelper(rewriter, s, document);
+    assertEquals(expected, rewritten);
   }
 
   public void testJSMergeDerelativizeHostRelative() throws Exception {
-    String s = "<script src=\"/1.js\"></script>";
-    String[][] attr1 = { { "src", "/1.js" } };
-    ParsedHtmlNode[] p = {
-      GadgetHtmlNodeTest.makeParsedTagNode("script", attr1, null)
-    };
-    String rewritten
-        = "<script src=\"" + concatBase + "1=http%3A%2F%2Fgadget.org%2F1.js\"></script>";
-    assertEquals(rewritten, rewriteHelper(rewriter, s, p));
+    String s = "<SCRIPT src=\"/1.js\"></SCRIPT>";
+    String expected
+        = "<SCRIPT src=\"" + concatBase + "1=http%3A%2F%2Fgadget.org%2F1.js\"></SCRIPT>";
+    Document document = htmlParser.parseDom(s);
+    String rewritten = rewriteHelper(rewriter, s, document);
+    assertEquals(rewritten, expected);
   }
 
   public void testJSMergeDerelativizePathRelative() throws Exception {
-    String s = "<script src=\"1.js\"></script>";
-    String[][] attr1 = { { "src", "1.js" } };
-    ParsedHtmlNode[] p = {
-      GadgetHtmlNodeTest.makeParsedTagNode("script", attr1, null)
-    };
-    String rewritten
-        = "<script src=\"" + concatBase + "1=http%3A%2F%2Fgadget.org%2Fdir%2F1.js\"></script>";
-    assertEquals(rewritten, rewriteHelper(rewriter, s, p));
+    String s = "<SCRIPT src=\"1.js\"></SCRIPT>";
+    String expected
+        = "<SCRIPT src=\"" + concatBase + "1=http%3A%2F%2Fgadget.org%2Fdir%2F1.js\"></SCRIPT>";
+    Document document = htmlParser.parseDom(s);
+    String rewritten = rewriteHelper(rewriter, s, document);
+    assertEquals(rewritten, expected);
   }
 }

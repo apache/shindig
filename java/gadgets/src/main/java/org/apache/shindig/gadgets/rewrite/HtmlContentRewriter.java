@@ -22,8 +22,8 @@ import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.gadgets.Gadget;
 import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.http.HttpResponse;
-import org.apache.shindig.gadgets.parse.GadgetHtmlNode;
 import org.apache.shindig.gadgets.spec.View;
+import org.w3c.dom.Document;
 
 import java.net.URI;
 
@@ -35,7 +35,7 @@ import java.net.URI;
  */
 public abstract class HtmlContentRewriter implements ContentRewriter {
 
-  protected abstract RewriterResults rewrite(GadgetHtmlNode root, URI baseUri);
+  protected abstract RewriterResults rewrite(Document doc, URI baseUri);
 
   public static String getMimeType(HttpRequest request, HttpResponse original) {
     String mimeType = request.getRewriteMimeType();
@@ -49,7 +49,7 @@ public abstract class HtmlContentRewriter implements ContentRewriter {
       MutableContent content) {
     String mimeType = getMimeType(request, original);
     if (mimeType.toLowerCase().contains("html")) {
-      return rewriteHtml(content.getParseTree(), request.getUri().toJavaUri());
+      return rewriteHtml(content.getDocument(), request.getUri().toJavaUri());
     }
     return null;
   }
@@ -60,12 +60,12 @@ public abstract class HtmlContentRewriter implements ContentRewriter {
     if (view != null && view.getHref() != null) {
       base = view.getHref();
     }
-    return rewriteHtml(content.getParseTree(), base.toJavaUri());
+    return rewriteHtml(content.getDocument(), base.toJavaUri());
   }
 
-  private RewriterResults rewriteHtml(GadgetHtmlNode root, URI baseUri) {
-    if (root != null) {
-      return rewrite(root, baseUri);
+  private RewriterResults rewriteHtml(Document doc, URI baseUri) {
+    if (doc != null) {
+      return rewrite(doc, baseUri);
     }
     return null;
   }

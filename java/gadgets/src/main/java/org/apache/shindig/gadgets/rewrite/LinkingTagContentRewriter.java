@@ -18,24 +18,22 @@
  */
 package org.apache.shindig.gadgets.rewrite;
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.Map;
-import java.util.Queue;
-import java.util.Set;
-
-import org.apache.shindig.gadgets.parse.GadgetHtmlNode;
+import org.w3c.dom.Document;
+import org.w3c.dom.NamedNodeMap;
+import org.w3c.dom.Node;
+import org.w3c.dom.traversal.DocumentTraversal;
+import org.w3c.dom.traversal.NodeFilter;
+import org.w3c.dom.traversal.NodeIterator;
 
 import java.net.URI;
+import java.util.*;
 
 public class LinkingTagContentRewriter extends HtmlContentRewriter {
   private final LinkRewriter linkRewriter;
   private final Map<String, Set<String>> tagAttributeTargets;
-  
+
   public LinkingTagContentRewriter(LinkRewriter linkRewriter,
-      Map<String, Set<String>> attributeTargets) {
+                                   Map<String, Set<String>> attributeTargets) {
     this.linkRewriter = linkRewriter;
     if (attributeTargets != null) {
       this.tagAttributeTargets = attributeTargets;
@@ -45,44 +43,55 @@ public class LinkingTagContentRewriter extends HtmlContentRewriter {
   }
 
   @Override
-  protected RewriterResults rewrite(GadgetHtmlNode root, URI baseUri) {
-	if (linkRewriter == null) {
-	  // Sanity test.
-	  return null;
-	}
-	  
-    Queue<GadgetHtmlNode> nodesToProcess = new LinkedList<GadgetHtmlNode>();
-    nodesToProcess.addAll(root.getChildren());
+  protected RewriterResults rewrite(Document root, final URI baseUri) {
+    if (linkRewriter == null) {
+      // Sanity test.
+      return null;
+    }
+    boolean mutated = false;
 
-    while (!nodesToProcess.isEmpty()) {
-      GadgetHtmlNode curNode = nodesToProcess.remove();
-      if (!curNode.isText()) {
-        // Depth-first iteration over children. Order doesn't matter anyway.
-        nodesToProcess.addAll(curNode.getChildren());
-
-        Set<String> curTagAttrs =
-            tagAttributeTargets.get(curNode.getTagName().toLowerCase());
-        if (curTagAttrs != null) {
-          for (String attrKey : curNode.getAttributeKeys()) {
-            if (curTagAttrs.contains(attrKey.toLowerCase())) {
-              String attrValue = curNode.getAttributeValue(attrKey);
-               // Attribute marked for rewriting: do it!
-              curNode.setAttribute(attrKey, linkRewriter.rewrite(attrValue, baseUri));
-            }
-          }
-        }
+    if (root instanceof DocumentTraversal) {
+      NodeIterator nodeIterator = ((DocumentTraversal) root)
+          .createNodeIterator(root, NodeFilter.SHOW_ELEMENT,
+              new NodeFilter() {
+                public short acceptNode(Node n) {
+                  Set<String> stringSet = tagAttributeTargets.get(n.getNodeName());
+                  if (stringSet != null) {
+                    NamedNodeMap attributes = n.getAttributes();
+                    // TODO - Check is NodeMap lookup is case insensitive, if so use that
+                    for (String attribute : stringSet) {
+                      for (int j = 0; j < attributes.getLength(); j++) {
+                        Node attributeNode = attributes.item(j);
+                        if (attributeNode.getNodeName().equalsIgnoreCase(attribute)) {
+                          attributeNode.setNodeValue(linkRewriter.rewrite(
+                              attributeNode.getNodeValue(), baseUri));
+                        }
+                      }
+                    }
+                    return NodeFilter.FILTER_ACCEPT;
+                  } else {
+                    return NodeFilter.FILTER_REJECT;
+                  }
+                }
+              }, false);
+      
+      while (nodeIterator.nextNode() != null) {
+        mutated= true;
       }
     }
-      
+
+    if (mutated) {
+      MutableContent.notifyEdit(root);
+    }
+
     return RewriterResults.cacheableIndefinitely();
   }
 
   private static Map<String, Set<String>> getDefaultTargets() {
-    Map<String, Set<String>> targets  = new HashMap<String, Set<String>>();
-    targets.put("img", new HashSet<String>(Arrays.asList("src")));
-    targets.put("embed", new HashSet<String>(Arrays.asList("src")));
-    targets.put("link", new HashSet<String>(Arrays.asList("href")));
+    Map<String, Set<String>> targets = new HashMap<String, Set<String>>();
+    targets.put("IMG", new HashSet<String>(Arrays.asList("src")));
+    targets.put("EMBED", new HashSet<String>(Arrays.asList("src")));
+    targets.put("LINK", new HashSet<String>(Arrays.asList("href")));
     return targets;
   }
-
 }
