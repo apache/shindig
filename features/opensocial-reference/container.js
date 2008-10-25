@@ -540,8 +540,6 @@ var uriCallback = {
  */
 
 // TODO(doll): As caja evolves this method should get a lot smaller
-var alert=window['alert'] || function () { 1/0};
-alert('cajita=' + cajita);
 opensocial.Container.prototype.enableCaja = function() {
 
   ___ = window["___"];
@@ -549,7 +547,6 @@ opensocial.Container.prototype.enableCaja = function() {
   valijaMaker = window["valijaMaker"];
   attachDocumentStub = window["attachDocumentStub"];
 
-  alert('cajita=' + cajita);
   var imports = ___.copy(___.sharedImports);
   imports.outers = imports;
   imports.console = console;
