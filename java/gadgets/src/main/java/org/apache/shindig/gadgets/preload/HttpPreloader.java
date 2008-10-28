@@ -35,6 +35,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.Callable;
 
 /**
@@ -56,7 +57,10 @@ public class HttpPreloader implements Preloader {
     Map<String, Callable<PreloadedData>> preloads = Maps.newHashMap();
 
     for (Preload preload : gadget.getModulePrefs().getPreloads()) {
-      preloads.put(preload.getHref().toString(), new PreloadTask(context, preload));
+      Set<String> preloadViews = preload.getViews();
+      if (preloadViews.isEmpty() || preloadViews.contains(context.getView())) {
+        preloads.put(preload.getHref().toString(), new PreloadTask(context, preload));
+      }
     }
 
     return preloads;
