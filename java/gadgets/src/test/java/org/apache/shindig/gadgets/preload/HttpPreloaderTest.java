@@ -20,6 +20,7 @@ package org.apache.shindig.gadgets.preload;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import org.apache.shindig.auth.SecurityToken;
@@ -52,7 +53,7 @@ import java.util.concurrent.Callable;
  */
 public class HttpPreloaderTest {
   private static final String PRELOAD_HREF = "http://www.example.org/file";
-  private static final String PRELOAD_HREF2 = "http://www.example.org/file";
+  private static final String PRELOAD_HREF2 = "http://www.example.org/file-two";
   private static final String PRELOAD_CONTENT = "Preloaded data";
   private static final String CONTAINER = "some-container";
   private static final Uri GADGET_URL = Uri.parse("http://example.org/gadget.xml");
@@ -180,6 +181,48 @@ public class HttpPreloaderTest {
     data = preloaded.get(PRELOAD_HREF2).call();
     checkRequest(plainFetcher.requests.get(1));
     checkResults((JSONObject) data.toJson());
+  }
+
+  @Test
+  public void onlyPreloadForCorrectView() throws Exception {
+    String xml =
+        "<Module><ModulePrefs title=''>" +
+        " <Preload href='" + PRELOAD_HREF + "' views='foo,bar,baz'/>" +
+        " <Preload href='" + PRELOAD_HREF2 + "' views='bar'/>" +
+        "</ModulePrefs><Content/></Module>";
+    GadgetSpec gadget = new GadgetSpec(GADGET_URL, xml);
+    Preloader preloader = new HttpPreloader(fetchers);
+
+    GadgetContext fooViewContext = new GadgetContext() {
+      @Override
+      public SecurityToken getToken() {
+        return new FakeGadgetToken();
+      }
+
+      @Override
+      public String getContainer() {
+        return CONTAINER;
+      }
+
+      @Override
+      public URI getUrl() {
+        return GADGET_URL.toJavaUri();
+      }
+
+      @Override
+      public String getView() {
+        return "foo";
+      }
+    };
+
+    Map<String, Callable<PreloadedData>> preloaded
+        = preloader.createPreloadTasks(fooViewContext, gadget);
+
+    PreloadedData data = preloaded.get(PRELOAD_HREF).call();
+    checkRequest(plainFetcher.requests.get(0));
+    checkResults((JSONObject) data.toJson());
+
+    assertNull("Preloaded an item that should not have been.", preloaded.get(PRELOAD_HREF2));
   }
 
   private static class RecordingHttpFetcher implements HttpFetcher {
