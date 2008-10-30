@@ -69,14 +69,7 @@ gadgets.views = function() {
     var urlParams = gadgets.util.getUrlParameters();
     // View parameters are passed as a single parameter.
     if (urlParams["view-params"]) {
-      var tmpParams = gadgets.json.parse(
-          decodeURIComponent(urlParams["view-params"]));
-      if (tmpParams) {
-        params = tmpParams;
-        for (var p in params) if (params.hasOwnProperty(p)) {
-          params[p] = gadgets.util.escapeString(params[p]);
-        }
-      }
+      params = gadgets.json.parse(urlParams["view-params"]) || params;
     }
     currentView = supportedViews[urlParams.view] || supportedViews["default"];
   }
