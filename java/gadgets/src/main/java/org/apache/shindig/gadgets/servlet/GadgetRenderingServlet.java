@@ -34,7 +34,7 @@ import javax.servlet.http.HttpServletResponse;
  * Servlet for rendering Gadgets.
  */
 public class GadgetRenderingServlet extends InjectedServlet {
-  private static final int DEFAULT_CACHE_TTL = 60 * 5;
+  static final int DEFAULT_CACHE_TTL = 60 * 5;
   private Renderer renderer;
 
   @Inject
@@ -71,7 +71,7 @@ public class GadgetRenderingServlet extends InjectedServlet {
         resp.getWriter().print(results.getContent());
         break;
       case ERROR:
-        resp.sendError(HttpServletResponse.SC_BAD_GATEWAY, results.getErrorMessage());
+        resp.getWriter().print(results.getErrorMessage());
         break;
       case MUST_REDIRECT:
         resp.sendRedirect(results.getRedirect().toString());
