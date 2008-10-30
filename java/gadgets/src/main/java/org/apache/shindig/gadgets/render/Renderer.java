@@ -22,6 +22,7 @@ import org.apache.shindig.common.ContainerConfig;
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.gadgets.Gadget;
 import org.apache.shindig.gadgets.GadgetContext;
+import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.LockedDomainService;
 import org.apache.shindig.gadgets.process.ProcessingException;
 import org.apache.shindig.gadgets.process.Processor;
@@ -33,6 +34,7 @@ import com.google.inject.Inject;
 import org.json.JSONArray;
 import org.json.JSONException;
 
+import java.net.URI;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Pattern;
@@ -90,12 +92,20 @@ public class Renderer {
 
       return RenderingResults.ok(renderer.render(gadget));
     } catch (RenderingException e) {
-      LOG.log(Level.WARNING, "Failed to render gadget " + context.getUrl(), e);
-      return RenderingResults.error(e.getLocalizedMessage());
+      return logError(context.getUrl(), e);
     } catch (ProcessingException e) {
-      LOG.log(Level.WARNING, "Failed to process gadget " + context.getUrl(), e);
-      return RenderingResults.error(e.getLocalizedMessage());
+      return logError(context.getUrl(), e);
+    } catch (RuntimeException e) {
+      if (e.getCause() instanceof GadgetException) {
+        return logError(context.getUrl(), e.getCause());
+      }
+      throw e;
     }
+  }
+
+  private RenderingResults logError(URI gadgetUrl, Throwable t) {
+    LOG.info("Failed to render gadget " + gadgetUrl + ": " + t.getMessage());
+    return RenderingResults.error(t.getMessage());
   }
 
   /**

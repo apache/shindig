@@ -116,6 +116,21 @@ public class RendererTest {
   }
 
   @Test
+  public void handlesRuntimeWrappedGadgetExceptionGracefully() {
+    htmlRenderer.runtimeException = new RuntimeException(
+        new GadgetException(GadgetException.Code.FAILED_TO_RETRIEVE_CONTENT, "oh no!"));
+    RenderingResults results = renderer.render(makeContext("html"));
+    assertEquals(RenderingResults.Status.ERROR, results.getStatus());
+    assertEquals("oh no!", results.getErrorMessage());
+  }
+
+  @Test(expected = RuntimeException.class)
+  public void otherRuntimeExceptionsThrow() {
+    htmlRenderer.runtimeException = new RuntimeException("Help!");
+    renderer.render(makeContext("html"));
+  }
+
+  @Test
   public void validateParent() throws Exception {
     containerConfig.json.put("gadgets.parent",
         new JSONArray(Arrays.asList("http:\\/\\/example\\.org\\/[a-z]+", "localhost")));
@@ -170,6 +185,7 @@ public class RendererTest {
 
   private static class FakeHtmlRenderer extends HtmlRenderer {
     private RenderingException exception;
+    private RuntimeException runtimeException;
 
     public FakeHtmlRenderer() {
       super(null, null, null);
@@ -179,6 +195,9 @@ public class RendererTest {
     public String render(Gadget gadget) throws RenderingException {
       if (exception != null) {
         throw exception;
+      }
+      if (runtimeException != null) {
+        throw runtimeException;
       }
       return gadget.getCurrentView().getContent();
     }
@@ -196,7 +215,6 @@ public class RendererTest {
       if (exception != null) {
         throw exception;
       }
-
       try {
         GadgetSpec spec = new GadgetSpec(SPEC_URL, GADGET);
         View view = spec.getView(context.getView());

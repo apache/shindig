@@ -21,6 +21,7 @@ package org.apache.shindig.gadgets.servlet;
 import static org.easymock.EasyMock.expect;
 import static org.easymock.EasyMock.isA;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 
 import org.apache.shindig.gadgets.GadgetContext;
 import org.apache.shindig.gadgets.http.HttpRequest;
@@ -53,6 +54,36 @@ public class GadgetRenderingServletTest {
     servlet.doGet(request, recorder);
 
     assertEquals(HttpServletResponse.SC_FORBIDDEN, recorder.getHttpStatusCode());
+  }
+
+  @Test
+  public void normalResponse() throws Exception {
+    servlet.setRenderer(renderer);
+    expect(renderer.render(isA(GadgetContext.class)))
+        .andReturn(RenderingResults.ok("working"));
+    control.replay();
+
+    servlet.doGet(request, recorder);
+
+    assertEquals(HttpServletResponse.SC_OK, recorder.getHttpStatusCode());
+    assertEquals("private,max-age=" + GadgetRenderingServlet.DEFAULT_CACHE_TTL,
+        recorder.getHeader("Cache-Control"));
+    assertEquals("working", recorder.getResponseAsString());
+  }
+
+  @Test
+  public void errorsPassedThrough() throws Exception {
+    servlet.setRenderer(renderer);
+    expect(renderer.render(isA(GadgetContext.class)))
+        .andReturn(RenderingResults.error("busted"));
+    control.replay();
+
+    servlet.doGet(request, recorder);
+
+    assertEquals(HttpServletResponse.SC_OK, recorder.getHttpStatusCode());
+    assertNull("Cache-Control header passed where it should not be.",
+        recorder.getHeader("Cache-Control"));
+    assertEquals("busted", recorder.getResponseAsString());
   }
 
   @Test
