@@ -57,7 +57,6 @@ function _IG_FetchXmlContent(url, callback, opt_params) {
   gadgets.io.makeRequest(url, cb, params);
 }
 
-// TODO: The server doesn't actually support FEED. Fix this!
 function _IG_FetchFeedAsJSON(url, callback, numItems, getDescriptions,
                              opt_params) {
   var params = opt_params || {};
@@ -67,11 +66,31 @@ function _IG_FetchFeedAsJSON(url, callback, numItems, getDescriptions,
   gadgets.io.makeRequest(url,
       function(resp) {
         // special case error reporting for back-compatibility
-        // see http://code.google.com/apis/gadgets/docs/remote-content.html#Fetch_JSON
-        if (resp.errors) {
-          resp.data = resp.data || {};
-          if (resp.errors && resp.errors.length > 0) {
-            resp.data.ErrorMsg = resp.errors[0];
+        // see http://code.google.com/apis/gadgets/docs/legacy/remote-content.html#Fetch_JSON
+        resp.data = resp.data || {};
+        if (resp.errors && resp.errors.length > 0) {
+          resp.data.ErrorMsg = resp.errors[0];
+        }
+        if (resp.data.link) {
+          resp.data.URL = url;
+        }
+        if (resp.data.title) {
+          resp.data.Title = resp.data.title;
+        }
+        if (resp.data.description) {
+          resp.data.Description = resp.data.description;
+        }
+        if (resp.data.link) {
+          resp.data.Link = resp.data.link;
+        }
+        if (resp.data.items && resp.data.items.length > 0) {
+          resp.data.Entry = resp.data.items;
+          for (var index = 0; index < resp.data.Entry.length; ++index) {
+            var entry = resp.data.Entry[index];
+            entry.Title = entry.title;
+            entry.Link = entry.link;
+            entry.Summary = entry.summary || entry.description;
+            entry.Date = entry.pubDate;
           }
         }
         // for Gadgets back-compatibility, return the feed obj directly
@@ -270,3 +289,4 @@ function _exportSymbols(name, sym) {
   }
   attach[parts[parts.length - 1]] = obj;
 }
+
