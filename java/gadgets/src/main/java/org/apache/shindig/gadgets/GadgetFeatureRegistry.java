@@ -30,6 +30,8 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.logging.Logger;
 
 /**
@@ -48,6 +50,7 @@ public class GadgetFeatureRegistry {
   // Caches the transitive dependencies to enable faster lookups.
   private final Map<Collection<String>, Collection<GadgetFeature>> cache
       = Maps.newHashMap();
+  private final ReadWriteLock cacheLock = new ReentrantReadWriteLock();
 
   private boolean graphComplete = false;
 
@@ -130,7 +133,9 @@ public class GadgetFeatureRegistry {
     }
     // We use the cache only for situations where all needed are available.
     // if any are missing, the result won't be cached.
+    cacheLock.readLock().lock();
     Collection<GadgetFeature> libCache = cache.get(needed);
+    cacheLock.readLock().unlock();
     if (libCache != null) {
       return libCache;
     }
@@ -145,7 +150,9 @@ public class GadgetFeatureRegistry {
       }
     }
     if (unsupported == null || unsupported.isEmpty()) {
+      cacheLock.writeLock().lock();
       cache.put(needed, Collections.unmodifiableList(ret));
+      cacheLock.writeLock().unlock();
     }
     return ret;
   }
