@@ -21,4 +21,6 @@ public interface BeanConverter {
   <T> T convertToObject(String string, Class<T> className);
 
   String convertToString(Object pojo);
+
+  String getContentType();
 }

@@ -72,6 +72,10 @@ public class DataServiceServletTest extends TestCase {
     activityHandler = EasyMock.createMock(ActivityHandler.class);
     appDataHandler = EasyMock.createMock(AppDataHandler.class);
 
+    EasyMock.expect(jsonConverter.getContentType()).andReturn("application/json");
+    EasyMock.expect(xmlConverter.getContentType()).andReturn("application/xml");
+    EasyMock.expect(atomConverter.getContentType()).andReturn("application/atom+xml");
+
     HandlerDispatcher dispatcher = new StandardHandlerDispatcher(constant(peopleHandler),
         constant(activityHandler), constant(appDataHandler));
     servlet.setHandlerDispatcher(dispatcher);
@@ -127,6 +131,7 @@ public class DataServiceServletTest extends TestCase {
 
     res.sendError(500, "FAILED");
     res.setCharacterEncoding("UTF-8");
+    res.setContentType("application/json");
 
     EasyMock.replay(req, res, appDataHandler, jsonConverter);
     servlet.service(req, res);
@@ -156,11 +161,14 @@ public class DataServiceServletTest extends TestCase {
     EasyMock.expect(res.getWriter()).andReturn(writerMock);
     writerMock.write(jsonObject);
     res.setCharacterEncoding("UTF-8");
+    res.setContentType("application/json");
 
     EasyMock.replay(req, res, handler, jsonConverter);
     servlet.service(req, res);
     EasyMock.verify(req, res, handler, jsonConverter);
     EasyMock.reset(req, res, handler, jsonConverter);
+    // ick, this resets for the next call...
+    EasyMock.expect(jsonConverter.getContentType()).andReturn("application/json");
   }
 
   private void setupRequest(String pathInfo, String actualMethod, String overrideMethod)

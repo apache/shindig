@@ -68,6 +68,10 @@ public class BeanJsonConverter implements BeanConverter {
     this.injector = injector;
   }
 
+  public String getContentType() {
+    return "application/json";
+  }
+
   /**
    * Convert the passed in object to a string.
    *

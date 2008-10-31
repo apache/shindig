@@ -125,6 +125,7 @@ public abstract class AbstractLargeRestfulTests extends TestCase {
     PrintWriter writer = new PrintWriter(outputStream);
     EasyMock.expect(res.getWriter()).andReturn(writer);
     res.setCharacterEncoding("UTF-8");
+    res.setContentType("application/json");
 
     EasyMock.replay(req, res);
     servlet.service(req, res);

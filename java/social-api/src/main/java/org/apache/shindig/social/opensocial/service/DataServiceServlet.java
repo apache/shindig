@@ -101,6 +101,7 @@ public class DataServiceServlet extends ApiServlet {
     RestfulRequestItem requestItem = new RestfulRequestItem(servletRequest, token, converter);
     ResponseItem responseItem = getResponseItem(handleRequestItem(requestItem, servletRequest));
 
+    servletResponse.setContentType(converter.getContentType());
     if (responseItem.getError() == null) {
       PrintWriter writer = servletResponse.getWriter();
       Object response = responseItem.getResponse();

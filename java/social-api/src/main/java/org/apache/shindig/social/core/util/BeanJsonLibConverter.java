@@ -72,6 +72,10 @@ public class BeanJsonLibConverter implements BeanConverter {
     this.jsonConfig = jsonConfig;
   }
 
+  public String getContentType() {
+    return "application/json";
+  }
+
   /**
    * Convert the json string into a pojo based on the supplied root class.
    * @param string the json string

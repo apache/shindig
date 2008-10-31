@@ -72,6 +72,7 @@ public class JsonRpcServlet extends ApiServlet {
     }
 
     setCharacterEncodings(servletRequest, servletResponse);
+    servletResponse.setContentType("application/json");
 
     try {
       String content = IOUtils.toString(servletRequest.getInputStream(),
