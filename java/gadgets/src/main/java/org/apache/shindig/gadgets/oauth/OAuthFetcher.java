@@ -23,6 +23,8 @@ import org.apache.shindig.common.util.CharsetUtil;
 import org.apache.shindig.gadgets.ChainedContentFetcher;
 import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.RequestSigningException;
+import org.apache.shindig.gadgets.http.BasicHttpFetcher;
+import org.apache.shindig.gadgets.http.HttpCache;
 import org.apache.shindig.gadgets.http.HttpCacheKey;
 import org.apache.shindig.gadgets.http.HttpFetcher;
 import org.apache.shindig.gadgets.http.HttpRequest;
@@ -32,13 +34,19 @@ import org.apache.shindig.gadgets.oauth.AccessorInfo.HttpMethod;
 import org.apache.shindig.gadgets.oauth.AccessorInfo.OAuthParamLocation;
 import org.apache.shindig.gadgets.oauth.OAuthStore.TokenInfo;
 
+import com.google.common.collect.Maps;
+
+import org.apache.commons.io.IOUtils;
+
 import net.oauth.OAuth;
+import net.oauth.OAuth.Parameter;
 import net.oauth.OAuthAccessor;
+import net.oauth.OAuthConsumer;
 import net.oauth.OAuthException;
 import net.oauth.OAuthMessage;
 import net.oauth.OAuthProblemException;
-import net.oauth.OAuth.Parameter;
 
+import java.io.FileInputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -375,7 +383,7 @@ public class OAuthFetcher extends ChainedContentFetcher {
     }
   }
 
-  private String getAuthorizationHeader(
+  private static String getAuthorizationHeader(
       List<Map.Entry<String, String>> oauthParams) {
     StringBuilder result = new StringBuilder("OAuth ");
 
@@ -703,7 +711,7 @@ public class OAuthFetcher extends ChainedContentFetcher {
    *
    * @return a list that contains only the oauth_related parameters.
    */
-  private List<Map.Entry<String, String>>
+  private static List<Map.Entry<String, String>>
       selectOAuthParams(OAuthMessage message) {
     List<Map.Entry<String, String>> result =
         new ArrayList<Map.Entry<String, String>>();
@@ -715,7 +723,7 @@ public class OAuthFetcher extends ChainedContentFetcher {
     return result;
   }
 
-  private boolean isContainerInjectedParameter(String key) {
+  private static boolean isContainerInjectedParameter(String key) {
     key = key.toLowerCase();
     return key.startsWith("oauth") || key.startsWith("xoauth") || key.startsWith("opensocial");
   }
@@ -724,5 +732,128 @@ public class OAuthFetcher extends ChainedContentFetcher {
   /** Logging for errors that service providers return to us, useful for integration problems */
   private void logServiceProviderError(HttpRequest request, HttpResponse response) {
     logger.log(Level.INFO, "OAuth request failed:\n" + request + "\nresponse:\n" + response);
+  }
+
+  /**
+   *  Run a simple OAuth fetcher to execute a variety of OAuth fetches and output
+   *  the result
+   *
+   *  Arguments
+   *  --consumerKey <oauth_consumer_key>
+   *  --consumerSecret <oauth_consumer_secret>
+   *  --requestorId <xoauth_requestor_id>
+   *  --accessToken <oauth_access_token>
+   *  --method <GET | POST>
+   *  --url <url>
+   *  --contentType <contentType>
+   *  --postBody <encoded post body>
+   *  --postFile <file path of post body contents>
+   *  --paramLocation <URI_QUERY | POST_BODY | AUTH_HEADER>
+   *
+   */
+  public static void main(String[] argv) throws Exception {
+    Map<String, String> params = Maps.newHashMap();
+    for (int i = 0; i < argv.length; i+=2) {
+      params.put(argv[i], argv[i+1]);
+    }
+    final String consumerKey = params.get("--consumerKey");
+    final String consumerSecret = params.get("--consumerSecret");
+    final String xOauthRequestor = params.get("--requestorId");
+    final String accessToken = params.get("--accessToken");
+    final String method = params.get("--method") == null ? "GET" :params.get("--method");
+    String url = params.get("--url");
+    String contentType = params.get("--contentType");
+    String postBody = params.get("--postBody");
+    String postFile = params.get("--postFile");
+    String paramLocation = params.get("--paramLocation");
+
+    HttpRequest request = new HttpRequest(Uri.parse(url));
+    if (contentType != null) {
+      request.setHeader("Content-Type", contentType);
+    } else {
+      request.setHeader("Content-Type", OAuth.FORM_ENCODED);
+    }
+    if (postBody != null) {
+      request.setPostBody(postBody.getBytes());
+    }
+    if (postFile != null) {
+      request.setPostBody(IOUtils.toByteArray(new FileInputStream(postFile)));
+    }
+
+    OAuthParamLocation paramLocationEnum = OAuthParamLocation.URI_QUERY;
+    if (paramLocation != null) {
+      paramLocationEnum = OAuthParamLocation.valueOf(paramLocation);
+    }
+
+
+    List<OAuth.Parameter> oauthParams = new ArrayList<OAuth.Parameter>();
+    UriBuilder target = new UriBuilder(Uri.parse(url));
+    String query = target.getQuery();
+    target.setQuery(null);
+    oauthParams.addAll(OAuth.decodeForm(query));
+    if (OAuth.isFormEncoded(contentType) && request.getPostBodyAsString() != null) {
+      oauthParams.addAll(OAuth.decodeForm(request.getPostBodyAsString()));
+    }
+    if (consumerKey != null) {
+      oauthParams.add(new OAuth.Parameter(OAuth.OAUTH_CONSUMER_KEY, consumerKey));
+    }
+    if (xOauthRequestor != null) {
+      oauthParams.add(new OAuth.Parameter("xoauth_requestor_id", xOauthRequestor));
+    }
+
+    OAuthConsumer consumer = new OAuthConsumer(null, consumerKey, consumerSecret, null);
+    OAuthAccessor accessor = new OAuthAccessor(consumer);
+    accessor.accessToken = accessToken;
+    OAuthMessage message = accessor.newRequestMessage(method, target.toString(), oauthParams);
+
+    List<Map.Entry<String, String>> entryList = selectOAuthParams(message);
+
+    switch (paramLocationEnum) {
+      case AUTH_HEADER:
+        request.addHeader("Authorization", getAuthorizationHeader(entryList));
+        break;
+
+      case POST_BODY:
+        if (!OAuth.isFormEncoded(contentType)) {
+          throw new UserVisibleOAuthException(
+              "OAuth param location can only be post_body if post body if of " +
+                  "type x-www-form-urlencoded");
+        }
+        String oauthData = OAuthUtil.formEncode(oauthParams);
+        if (request.getPostBodyLength() == 0) {
+          request.setPostBody(CharsetUtil.getUtf8Bytes(oauthData));
+        } else {
+          request.setPostBody((request.getPostBodyAsString() + '&' + oauthData).getBytes());
+        }
+        break;
+
+      case URI_QUERY:
+        request.setUri(Uri.parse(OAuthUtil.addParameters(request.getUri().toString(),
+            entryList)));
+        break;
+    }
+    request.setMethod(method);
+
+    HttpCache nullCache = new HttpCache() {
+      public HttpResponse getResponse(HttpCacheKey key, HttpRequest request) {
+        return null;
+      }
+
+      public HttpResponse addResponse(HttpCacheKey key, HttpRequest request,
+          HttpResponse response) {
+        return response;
+      }
+
+      public HttpResponse removeResponse(HttpCacheKey key) {
+        return null;
+      }
+    };
+    HttpFetcher fetcher = new BasicHttpFetcher(nullCache);
+    HttpResponse response = fetcher.fetch(request);
+
+    System.out.println("Request ------------------------------");
+    System.out.println(request.toString());
+    System.out.println("Response -----------------------------");
+    System.out.println(response.toString());
   }
 }
