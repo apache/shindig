@@ -164,6 +164,10 @@ public class BeanXStreamConverter implements BeanConverter {
     mapConverter = new MapConverter(icmapper);
   }
 
+  public String getContentType() {
+    return "application/xml";
+  }
+
   public String convertToString(Object pojo) {
     return convertToXml(pojo);
   }

@@ -241,6 +241,7 @@ public class JsonRpcServletTest extends TestCase {
     EasyMock.expect(req.getAttribute(EasyMock.isA(String.class))).andReturn(FAKE_GADGET_TOKEN);
     EasyMock.expect(req.getCharacterEncoding()).andStubReturn("UTF-8");
     res.setCharacterEncoding("UTF-8");
+    res.setContentType("application/json");
   }
 
 }

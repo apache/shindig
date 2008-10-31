@@ -36,6 +36,11 @@ public class BeanAtomConverter implements BeanConverter {
   private static Logger logger =
       Logger.getLogger(BeanXmlConverter.class.getName());
 
+
+  public String getContentType() {
+    return "application/atom+xml";
+  }
+
   public String convertToString(Object pojo) {
     return convertToXml(pojo);
   }
