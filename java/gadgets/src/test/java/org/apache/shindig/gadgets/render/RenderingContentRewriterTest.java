@@ -23,9 +23,12 @@ import static org.apache.shindig.gadgets.render.RenderingContentRewriter.BODY_AT
 import static org.apache.shindig.gadgets.render.RenderingContentRewriter.BODY_GROUP;
 import static org.apache.shindig.gadgets.render.RenderingContentRewriter.DEFAULT_HEAD_CONTENT;
 import static org.apache.shindig.gadgets.render.RenderingContentRewriter.DOCUMENT_SPLIT_PATTERN;
+import static org.apache.shindig.gadgets.render.RenderingContentRewriter.FEATURES_KEY;
 import static org.apache.shindig.gadgets.render.RenderingContentRewriter.HEAD_GROUP;
+import static org.apache.shindig.gadgets.render.RenderingContentRewriter.INSERT_BASE_ELEMENT_KEY;
 import static org.easymock.EasyMock.expect;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import org.apache.shindig.common.ContainerConfig;
@@ -383,7 +386,8 @@ public class RenderingContentRewriterTest {
 
     JSONObject conf = new JSONObject();
     conf.put("foo", "blah");
-    expect(config.getJsonObject("default", "gadgets.features")).andReturn(conf);
+    expect(config.getJsonObject(ContainerConfig.DEFAULT_CONTAINER, FEATURES_KEY))
+        .andReturn(conf);
     control.replay();
 
     String rewritten = rewrite(gadget, "");
@@ -418,7 +422,8 @@ public class RenderingContentRewriterTest {
     JSONObject conf = new JSONObject();
     conf.put("foo", "blah")
         .put("bar", "baz");
-    expect(config.getJsonObject("default", "gadgets.features")).andReturn(conf);
+    expect(config.getJsonObject(ContainerConfig.DEFAULT_CONTAINER, FEATURES_KEY))
+        .andReturn(conf);
     control.replay();
 
     String rewritten = rewrite(gadget, "");
@@ -444,7 +449,8 @@ public class RenderingContentRewriterTest {
     featureRegistry.addInline("foo", "");
     JSONObject conf = new JSONObject();
     conf.put("foo", "blah");
-    expect(config.getJsonObject("default", "gadgets.features")).andReturn(conf);
+    expect(config.getJsonObject(ContainerConfig.DEFAULT_CONTAINER, FEATURES_KEY))
+        .andReturn(conf);
     control.replay();
 
     String rewritten = rewrite(gadget, "");
@@ -486,7 +492,7 @@ public class RenderingContentRewriterTest {
     JSONObject json = new JSONObject(matcher.group(1));
     assertEquals("foo", json.get("one"));
     assertEquals("bar", json.get("two"));
-    
+
     Pattern defaultsPattern = Pattern.compile(
         "(?:.*)gadgets\\.Prefs\\.setDefaultPrefs_\\((.*)\\);(?:.*)", Pattern.DOTALL);
     Matcher defaultsMatcher = defaultsPattern.matcher(rewritten);
@@ -630,6 +636,9 @@ public class RenderingContentRewriterTest {
   public void baseElementInsertedWhenContentIsInline() throws Exception {
     Gadget gadget = makeDefaultGadget();
 
+    expect(config.get(ContainerConfig.DEFAULT_CONTAINER, INSERT_BASE_ELEMENT_KEY))
+        .andReturn("true");
+
     control.replay();
 
     String rewritten = rewrite(gadget, BODY_CONTENT);
@@ -647,12 +656,28 @@ public class RenderingContentRewriterTest {
     View fakeView = new View("foo", Arrays.asList(XmlUtil.parse(xml)), SPEC_URL);
     gadget.setCurrentView(fakeView);
 
+    expect(config.get(ContainerConfig.DEFAULT_CONTAINER, INSERT_BASE_ELEMENT_KEY))
+        .andReturn("true");
+
     control.replay();
 
     String rewritten = rewrite(gadget, BODY_CONTENT);
     String base = getBaseElement(rewritten);
 
     assertEquals(viewUrl, base);
+  }
+
+  @Test
+  public void baseElementNotInsertedWhenConfigDoesNotAllowIt() throws Exception {
+    Gadget gadget = makeDefaultGadget();
+
+    expect(config.get(ContainerConfig.DEFAULT_CONTAINER, INSERT_BASE_ELEMENT_KEY))
+        .andReturn("false");
+
+    control.replay();
+
+    String rewritten = rewrite(gadget, BODY_CONTENT);
+    assertFalse("Base element injected incorrectly.", rewritten.contains("<base"));
   }
 
   /**

@@ -93,6 +93,8 @@ public class RenderingContentRewriter implements ContentRewriter {
       "a:active {color:#ff0000;}" +
       "body{margin: 0px;padding: 0px;background-color:white;}" +
       "</style>";
+  static final String INSERT_BASE_ELEMENT_KEY = "gadgets.insertBaseElement";
+  static final String FEATURES_KEY = "gadgets.features";
 
   private final MessageBundleFactory messageBundleFactory;
   private final ContainerConfig containerConfig;
@@ -141,12 +143,15 @@ public class RenderingContentRewriter implements ContentRewriter {
   }
 
   private void injectBaseTag(Gadget gadget, GadgetContent content) {
-    Uri base = gadget.getSpec().getUrl();
-    View view = gadget.getCurrentView();
-    if (view != null && view.getHref() != null) {
-      base = view.getHref();
+    GadgetContext context = gadget.getContext();
+    if ("true".equals(containerConfig.get(context.getContainer(), INSERT_BASE_ELEMENT_KEY))) {
+      Uri base = gadget.getSpec().getUrl();
+      View view = gadget.getCurrentView();
+      if (view != null && view.getHref() != null) {
+        base = view.getHref();
+      }
+      content.appendHead("<base href='" + base + "'/>");
     }
-    content.appendHead("<base href='" + base + "'/>");
   }
 
   private void injectOnLoadHandlers(GadgetContent content) {
@@ -275,7 +280,7 @@ public class RenderingContentRewriter implements ContentRewriter {
       throws GadgetException {
     GadgetContext context = gadget.getContext();
 
-    JSONObject features = containerConfig.getJsonObject(context.getContainer(), "gadgets.features");
+    JSONObject features = containerConfig.getJsonObject(context.getContainer(), FEATURES_KEY);
 
     try {
       // Discard what we don't care about.
@@ -335,7 +340,7 @@ public class RenderingContentRewriter implements ContentRewriter {
            .appendHead(msgs)
            .appendHead(");");
   }
-  
+
   /**
    * Injects default values for user prefs into the gadget output.
    */
