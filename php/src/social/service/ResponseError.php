@@ -70,7 +70,7 @@ class ResponseError {
 				$this->httpErrorMsg = '403 Forbidden';
 				$this->httpErrorcode = 403;
 				break;
-			case self::$FORBIDDEN:
+			case self::$NOT_FOUND:
 				$this->httpErrorMsg = '404 Not Found';
 				$this->httpErrorcode = 404;
 				break;
