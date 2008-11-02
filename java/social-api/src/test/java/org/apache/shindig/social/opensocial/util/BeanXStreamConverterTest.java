@@ -26,6 +26,7 @@ import org.apache.shindig.social.core.model.MediaItemImpl;
 import org.apache.shindig.social.core.model.NameImpl;
 import org.apache.shindig.social.core.model.PersonImpl;
 import org.apache.shindig.social.core.util.BeanXStreamConverter;
+import org.apache.shindig.social.core.util.xstream.XStream081Configuration;
 import org.apache.shindig.social.opensocial.model.Activity;
 import org.apache.shindig.social.opensocial.model.Address;
 import org.apache.shindig.social.opensocial.model.ListField;
@@ -83,7 +84,7 @@ public class BeanXStreamConverterTest extends TestCase {
     activity.setMediaItems(Lists.<MediaItem> newArrayList(new MediaItemImpl(
         "image/jpg", MediaItem.Type.IMAGE, "http://foo.bar")));
 
-    beanXmlConverter = new BeanXStreamConverter();
+    beanXmlConverter = new BeanXStreamConverter(new XStream081Configuration());
   }
 
   public static class SimplePerson {
