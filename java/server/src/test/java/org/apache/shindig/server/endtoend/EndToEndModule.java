@@ -22,6 +22,8 @@ import org.apache.shindig.auth.AuthenticationHandler;
 import org.apache.shindig.common.servlet.ParameterFetcher;
 import org.apache.shindig.social.core.oauth.AuthenticationHandlerProvider;
 import org.apache.shindig.social.core.util.BeanJsonConverter;
+import org.apache.shindig.social.core.util.BeanXStreamAtomConverter;
+import org.apache.shindig.social.core.util.BeanXStreamConverter;
 import org.apache.shindig.social.core.util.BeanXmlConverter;
 import org.apache.shindig.social.core.util.BeanAtomConverter;
 import org.apache.shindig.social.opensocial.service.BeanConverter;
@@ -46,11 +48,11 @@ public class EndToEndModule extends AbstractModule {
         .to(DataServiceServletFetcher.class);
 
     bind(BeanConverter.class).annotatedWith(Names.named("shindig.bean.converter.xml"))
-        .to(BeanXmlConverter.class);
+        .to(BeanXStreamConverter.class);
     bind(BeanConverter.class).annotatedWith(Names.named("shindig.bean.converter.json"))
         .to(BeanJsonConverter.class);
     bind(BeanConverter.class).annotatedWith(Names.named("shindig.bean.converter.atom"))
-        .to(BeanAtomConverter.class);
+        .to(BeanXStreamAtomConverter.class);
 
     bind(Boolean.class)
         .annotatedWith(Names.named(AnonymousAuthenticationHandler.ALLOW_UNAUTHENTICATED))

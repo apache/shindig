@@ -21,6 +21,8 @@ import org.apache.shindig.common.testing.FakeGadgetToken;
 import org.apache.shindig.common.util.ImmediateFuture;
 import org.apache.shindig.social.core.util.BeanAtomConverter;
 import org.apache.shindig.social.core.util.BeanJsonConverter;
+import org.apache.shindig.social.core.util.BeanXStreamAtomConverter;
+import org.apache.shindig.social.core.util.BeanXStreamConverter;
 import org.apache.shindig.social.core.util.BeanXmlConverter;
 
 import com.google.common.collect.Maps;
@@ -57,15 +59,15 @@ public class JsonRpcServletTest extends TestCase {
   private AppDataHandler appDataHandler;
 
   private BeanJsonConverter jsonConverter;
-  private BeanXmlConverter xmlConverter;
+  private BeanXStreamConverter xmlConverter;
 
   @Override protected void setUp() throws Exception {
     servlet = new JsonRpcServlet();
     req = EasyMock.createMock(HttpServletRequest.class);
     res = EasyMock.createMock(HttpServletResponse.class);
     jsonConverter = EasyMock.createMock(BeanJsonConverter.class);
-    xmlConverter = EasyMock.createMock(BeanXmlConverter.class);
-    BeanAtomConverter atomConverter = EasyMock.createMock(BeanAtomConverter.class);
+    xmlConverter = EasyMock.createMock(BeanXStreamConverter.class);
+    BeanXStreamAtomConverter atomConverter = EasyMock.createMock(BeanXStreamAtomConverter.class);
 
     peopleHandler = EasyMock.createMock(PersonHandler.class);
     activityHandler = EasyMock.createMock(ActivityHandler.class);

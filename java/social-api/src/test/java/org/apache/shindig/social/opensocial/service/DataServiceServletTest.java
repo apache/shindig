@@ -24,7 +24,10 @@ import org.apache.shindig.social.ResponseError;
 import org.apache.shindig.social.SocialApiTestsGuiceModule;
 import org.apache.shindig.social.core.util.BeanAtomConverter;
 import org.apache.shindig.social.core.util.BeanJsonConverter;
+import org.apache.shindig.social.core.util.BeanXStreamAtomConverter;
+import org.apache.shindig.social.core.util.BeanXStreamConverter;
 import org.apache.shindig.social.core.util.BeanXmlConverter;
+import org.apache.shindig.social.core.util.xstream.XStream081Configuration;
 import org.apache.shindig.social.opensocial.spi.SocialSpiException;
 
 import com.google.common.collect.Maps;
@@ -66,8 +69,8 @@ public class DataServiceServletTest extends TestCase {
     req = EasyMock.createMock(HttpServletRequest.class);
     res = EasyMock.createMock(HttpServletResponse.class);
     jsonConverter = EasyMock.createMock(BeanJsonConverter.class);
-    BeanXmlConverter xmlConverter = EasyMock.createMock(BeanXmlConverter.class);
-    BeanAtomConverter atomConverter = EasyMock.createMock(BeanAtomConverter.class);
+    BeanXStreamConverter xmlConverter = EasyMock.createMock(BeanXStreamConverter.class);
+    BeanXStreamAtomConverter atomConverter = EasyMock.createMock(BeanXStreamAtomConverter.class);
     peopleHandler = EasyMock.createMock(PersonHandler.class);
     activityHandler = EasyMock.createMock(ActivityHandler.class);
     appDataHandler = EasyMock.createMock(AppDataHandler.class);
@@ -200,8 +203,8 @@ public class DataServiceServletTest extends TestCase {
   public void testGetConverterForRequest() throws Exception {
     BeanJsonConverter json = new BeanJsonConverter(
         Guice.createInjector(new SocialApiTestsGuiceModule()));
-    BeanXmlConverter xml = new BeanXmlConverter();
-    BeanAtomConverter atom = new BeanAtomConverter();
+    BeanXStreamConverter xml = new BeanXStreamConverter(new XStream081Configuration());
+    BeanXStreamAtomConverter atom = new BeanXStreamAtomConverter(new XStream081Configuration());
     servlet.setBeanConverters(json, xml, atom);
 
     assertConverter(atom, "atom");
@@ -214,8 +217,8 @@ public class DataServiceServletTest extends TestCase {
   public void testGetConverterForRequestContentType() throws Exception {
     BeanJsonConverter json = new BeanJsonConverter(Guice
         .createInjector(new SocialApiTestsGuiceModule()));
-    BeanXmlConverter xml = new BeanXmlConverter();
-    BeanAtomConverter atom = new BeanAtomConverter();
+    BeanXStreamConverter xml = new BeanXStreamConverter(new XStream081Configuration());
+    BeanXStreamAtomConverter atom = new BeanXStreamAtomConverter(new XStream081Configuration());
     servlet.setBeanConverters(json, xml, atom);
 
     assertConverterForContentType(atom, "application/atom+xml");

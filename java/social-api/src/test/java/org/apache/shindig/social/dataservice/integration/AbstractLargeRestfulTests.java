@@ -19,9 +19,10 @@ package org.apache.shindig.social.dataservice.integration;
 
 import org.apache.shindig.common.testing.FakeGadgetToken;
 import org.apache.shindig.social.SocialApiTestsGuiceModule;
-import org.apache.shindig.social.core.util.BeanAtomConverter;
 import org.apache.shindig.social.core.util.BeanJsonConverter;
-import org.apache.shindig.social.core.util.BeanXmlConverter;
+import org.apache.shindig.social.core.util.BeanXStreamAtomConverter;
+import org.apache.shindig.social.core.util.BeanXStreamConverter;
+import org.apache.shindig.social.core.util.xstream.XStream081Configuration;
 import org.apache.shindig.social.opensocial.service.DataServiceServlet;
 import org.apache.shindig.social.opensocial.service.HandlerDispatcher;
 
@@ -66,32 +67,32 @@ public abstract class AbstractLargeRestfulTests extends TestCase {
     servlet = new DataServiceServlet();
 
     servlet.setHandlerDispatcher(injector.getInstance(HandlerDispatcher.class));
-    servlet.setBeanConverters(new BeanJsonConverter(injector), new BeanXmlConverter(),
-        new BeanAtomConverter());
+    servlet.setBeanConverters(new BeanJsonConverter(injector), new BeanXStreamConverter(new XStream081Configuration()),
+        new BeanXStreamAtomConverter(new XStream081Configuration()));
 
     req = EasyMock.createMock(HttpServletRequest.class);
     res = EasyMock.createMock(HttpServletResponse.class);
   }
 
-  protected String getJsonResponse(String path, String method) throws Exception {
-    return getJsonResponse(path, method, Maps.<String, String>newHashMap(), "");
+  protected String getResponse(String path, String method, String format, String contentType) throws Exception {
+    return getResponse(path, method, Maps.<String, String>newHashMap(), "", format, contentType);
   }
 
-  protected String getJsonResponse(String path, String method,
-      Map<String, String> extraParams) throws Exception {
-    return getJsonResponse(path, method, extraParams, "");
+  protected String getResponse(String path, String method,
+      Map<String, String> extraParams, String format, String contentType) throws Exception {
+    return getResponse(path, method, extraParams, "", format, contentType);
   }
 
-  protected String getJsonResponse(String path, String method, String postData) throws Exception {
-    return getJsonResponse(path, method, Maps.<String, String>newHashMap(), postData);
+  protected String getResponse(String path, String method, String postData, String format, String contentType) throws Exception {
+    return getResponse(path, method, Maps.<String, String>newHashMap(), postData, format, contentType);
   }
 
-  protected String getJsonResponse(String path, String method, Map<String, String> extraParams,
-      String postData) throws Exception {
+  protected String getResponse(String path, String method, Map<String, String> extraParams,
+      String postData, String format, String contentType) throws Exception {
     EasyMock.expect(req.getCharacterEncoding()).andStubReturn("UTF-8");
     EasyMock.expect(req.getPathInfo()).andStubReturn(path);
     EasyMock.expect(req.getMethod()).andStubReturn(method);
-    EasyMock.expect(req.getParameter("format")).andStubReturn(null);
+    EasyMock.expect(req.getParameter("format")).andStubReturn(format);
     EasyMock.expect(req.getParameter("X-HTTP-Method-Override")).andStubReturn(method);
 
     EasyMock.expect(req.getAttribute(EasyMock.isA(String.class))).andReturn(FAKE_GADGET_TOKEN);
@@ -125,7 +126,7 @@ public abstract class AbstractLargeRestfulTests extends TestCase {
     PrintWriter writer = new PrintWriter(outputStream);
     EasyMock.expect(res.getWriter()).andReturn(writer);
     res.setCharacterEncoding("UTF-8");
-    res.setContentType("application/json");
+    res.setContentType(contentType);
 
     EasyMock.replay(req, res);
     servlet.service(req, res);
