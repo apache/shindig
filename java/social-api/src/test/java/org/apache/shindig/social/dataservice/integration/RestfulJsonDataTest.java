@@ -44,7 +44,7 @@ public class RestfulJsonDataTest extends AbstractLargeRestfulTests {
     // app id is mocked out
     Map<String, String> extraParams = Maps.newHashMap();
     extraParams.put("fields", "count");
-    String resp = getJsonResponse("/appdata/john.doe/@friends/app", "GET", extraParams);
+    String resp = getResponse("/appdata/john.doe/@friends/app", "GET", extraParams, null, "application/json");
 
     JSONObject data = getJson(resp).getJSONObject("entry");
     assertEquals(3, data.length());
@@ -74,7 +74,7 @@ public class RestfulJsonDataTest extends AbstractLargeRestfulTests {
     // app id is mocked out
     Map<String, String> extraParams = Maps.newHashMap();
     extraParams.put("fields", null);
-    String resp = getJsonResponse("/appdata/john.doe/@self/app", "GET", extraParams);
+    String resp = getResponse("/appdata/john.doe/@self/app", "GET", extraParams, null, "application/json");
 
     JSONObject data = getJson(resp).getJSONObject("entry");
     assertEquals(1, data.length());
@@ -100,7 +100,7 @@ public class RestfulJsonDataTest extends AbstractLargeRestfulTests {
     // app id is mocked out
     Map<String, String> extraParams = Maps.newHashMap();
     extraParams.put("fields", "count");
-    String resp = getJsonResponse("/appdata/john.doe/@self/app", "GET", extraParams);
+    String resp = getResponse("/appdata/john.doe/@self/app", "GET", extraParams, null, "application/json");
 
     JSONObject data = getJson(resp).getJSONObject("entry");
     assertEquals(1, data.length());
@@ -127,7 +127,7 @@ public class RestfulJsonDataTest extends AbstractLargeRestfulTests {
     // app id is mocked out
     Map<String, String> extraParams = Maps.newHashMap();
     extraParams.put("fields", "peabody");
-    String resp = getJsonResponse("/appdata/john.doe/@self/app", "GET", extraParams);
+    String resp = getResponse("/appdata/john.doe/@self/app", "GET", extraParams, null, "application/json");
 
     JSONObject data = getJson(resp).getJSONObject("entry");
     assertEquals(1, data.length());
@@ -143,12 +143,12 @@ public class RestfulJsonDataTest extends AbstractLargeRestfulTests {
     // With the wrong field
     Map<String, String> extraParams = Maps.newHashMap();
     extraParams.put("fields", "peabody");
-    getJsonResponse("/appdata/john.doe/@self/app", "DELETE", extraParams);
+    getResponse("/appdata/john.doe/@self/app", "DELETE", extraParams, null, "application/json");
 
     assertCount("0");
 
     extraParams.put("fields", "count");
-    getJsonResponse("/appdata/john.doe/@self/app", "DELETE", extraParams);
+    getResponse("/appdata/john.doe/@self/app", "DELETE", extraParams, null, "application/json");
 
     assertCount(null);
   }
@@ -160,13 +160,13 @@ public class RestfulJsonDataTest extends AbstractLargeRestfulTests {
     Map<String, String> extraParams = Maps.newHashMap();
     extraParams.put("fields", "count");
     String postData = "{count : 5}";
-    getJsonResponse("/appdata/john.doe/@self/app", "POST", extraParams, postData);
+    getResponse("/appdata/john.doe/@self/app", "POST", extraParams, postData, null, "application/json");
 
     assertCount("5");
   }
 
   private void assertCount(String expectedCount) throws Exception {
-    String resp = getJsonResponse("/appdata/john.doe/@self/app", "GET");
+    String resp = getResponse("/appdata/john.doe/@self/app", "GET", null, "application/json");
     JSONObject data = getJson(resp).getJSONObject("entry");
     assertEquals(1, data.length());
 

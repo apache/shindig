@@ -50,7 +50,7 @@ public class RestfulJsonActivityTest extends AbstractLargeRestfulTests {
    */
   @Test
   public void testGetActivityJson() throws Exception {
-    String resp = getJsonResponse("/activities/john.doe/@self/@app/1", "GET");
+    String resp = getResponse("/activities/john.doe/@self/@app/1", "GET", null, "application/json");
     JSONObject result = getJson(resp);
     assertActivitiesEqual(johnsActivity, result.getJSONObject("entry"));
   }
@@ -71,7 +71,7 @@ public class RestfulJsonActivityTest extends AbstractLargeRestfulTests {
    */
   @Test
   public void testGetActivitiesJson() throws Exception {
-    String resp = getJsonResponse("/activities/john.doe/@self", "GET");
+    String resp = getResponse("/activities/john.doe/@self", "GET", null, "application/json");
     JSONObject result = getJson(resp);
 
     assertEquals(1, result.getInt("totalResults"));
@@ -95,7 +95,7 @@ public class RestfulJsonActivityTest extends AbstractLargeRestfulTests {
    */
   @Test
   public void testGetFriendsActivitiesJson() throws Exception {
-    String resp = getJsonResponse("/activities/john.doe/@friends", "GET");
+    String resp = getResponse("/activities/john.doe/@friends", "GET", null, "application/json");
     JSONObject result = getJson(resp);
 
     assertEquals(2, result.getInt("totalResults"));
@@ -113,9 +113,9 @@ public class RestfulJsonActivityTest extends AbstractLargeRestfulTests {
   @Test
   public void testCreateActivity() throws Exception {
     String postData = "{title : 'hi mom!', body : 'and dad.'}";
-    String createResponse = getJsonResponse("/activities/john.doe/@self", "POST", postData);
+    String createResponse = getResponse("/activities/john.doe/@self", "POST", postData, null, "application/json");
 
-    String resp = getJsonResponse("/activities/john.doe/@self", "GET");
+    String resp = getResponse("/activities/john.doe/@self", "GET", null, "application/json");
     JSONObject result = getJson(resp);
 
     assertEquals(2, result.getInt("totalResults"));

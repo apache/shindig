@@ -212,7 +212,7 @@ public class RestfulJsonPeopleTest extends AbstractLargeRestfulTests {
     extraParams.put("fields", allFieldsParam);
 
     // Currently, for Shindig {pid}/@all/{uid} == {uid}/@self
-    String resp = getJsonResponse("/people/canonical/@self", "GET", extraParams);
+    String resp = getResponse("/people/canonical/@self", "GET", extraParams, null, "application/json");
     JSONObject result = getJson(resp).getJSONObject("entry");
 
     assertStringField(result, canonical.getAboutMe(), Person.Field.ABOUT_ME);
@@ -451,7 +451,7 @@ public class RestfulJsonPeopleTest extends AbstractLargeRestfulTests {
     extraParams.put("fields", null);
 
     // Currently, for Shindig @all == @friends
-    String resp = getJsonResponse("/people/john.doe/@friends", "GET", extraParams);
+    String resp = getResponse("/people/john.doe/@friends", "GET", extraParams, null, "application/json");
     JSONObject result = getJson(resp);
 
     assertEquals(3, result.getInt("totalResults"));
@@ -474,7 +474,7 @@ public class RestfulJsonPeopleTest extends AbstractLargeRestfulTests {
     extraParams.put("count", "1");
     extraParams.put("fields", null);
 
-    String resp = getJsonResponse("/people/john.doe/@friends", "GET", extraParams);
+    String resp = getResponse("/people/john.doe/@friends", "GET", extraParams, null, "application/json");
     JSONObject result = getJson(resp);
 
     assertEquals(3, result.getInt("totalResults"));
@@ -485,7 +485,7 @@ public class RestfulJsonPeopleTest extends AbstractLargeRestfulTests {
 
     // Get the second page
     extraParams.put("startIndex", "1");
-    resp = getJsonResponse("/people/john.doe/@friends", "GET", extraParams);
+    resp = getResponse("/people/john.doe/@friends", "GET", extraParams, null, "application/json");
     result = getJson(resp);
 
     assertEquals(3, result.getInt("totalResults"));
