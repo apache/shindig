@@ -17,6 +17,12 @@
  */
 package org.apache.shindig.social.dataservice.integration;
 
+import com.google.common.collect.Maps;
+import com.google.inject.Guice;
+import com.google.inject.Injector;
+
+import junit.framework.TestCase;
+
 import org.apache.shindig.common.testing.FakeGadgetToken;
 import org.apache.shindig.social.SocialApiTestsGuiceModule;
 import org.apache.shindig.social.core.util.BeanJsonConverter;
@@ -26,21 +32,22 @@ import org.apache.shindig.social.core.util.xstream.XStream081Configuration;
 import org.apache.shindig.social.opensocial.service.DataServiceServlet;
 import org.apache.shindig.social.opensocial.service.HandlerDispatcher;
 
-import com.google.common.collect.Maps;
-import com.google.inject.Guice;
-import com.google.inject.Injector;
-
-import junit.framework.TestCase;
 import org.easymock.classextension.EasyMock;
 import org.json.JSONObject;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintWriter;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Vector;
+
 import javax.servlet.ServletInputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -168,9 +175,99 @@ public abstract class AbstractLargeRestfulTests extends TestCase {
           String value = parser.getText();
           columns.put(name, value);
         }
-      }
+      } 
     }
     return columns;
   }
+  
+  /**
+   * Converts a node which child nodes into a map keyed on element names
+   * containing the text inside each child node.
+   *
+   * @param n the node to convert.
+   * @return a map keyed on element name, containing the contents of each element.
+   */
+  protected Map<String, List<String>> childNodesToMap(Node n) {
+    Map<String, List<String>> v = new HashMap<String, List<String>>();
+    NodeList result = n.getChildNodes();
+    for (int i = 0; i < result.getLength(); i++) {
+      Node nv = result.item(i);
+      if (nv.getNodeType() == Node.ELEMENT_NODE) {
+        List<String> l = v.get(nv.getLocalName());
+        if ( l == null ) {
+          l = new ArrayList<String>();
+          v.put(nv.getLocalName(),l);
+        }
+        l.add(nv.getTextContent());
+      }
+    }
+    return v;
+  }
+  
+  
+  /**
+   * Converts 
+   * <entry>
+   *    <key>k</key>
+   *    <value>
+   *       <entry>
+   *         <key>count</key>
+   *         <value>val</value>
+   *       </entry>
+   *       <entry>
+   *         <key>lastUpdate</key>
+   *         <value>val</value>
+   *       </entry>
+   *    </value>
+   * </entry>
+   * 
+   * To map.get("k").get("count") 
+   * @param result
+   * @return
+   */
+  protected Map<String, Map<String, List<String>>> childNodesToMapofMap(NodeList result) {
+    Map<String, Map<String, List<String>>> v = new HashMap<String, Map<String, List<String>>>();
+    for ( int i = 0; i < 3; i++ ) {
+      Node entry = result.item(i);
+      NodeList keyValue = entry.getChildNodes();
+      assertEquals(2, keyValue.getLength());
+      Node key = keyValue.item(0);
+      Node value = keyValue.item(1);
+      if ( "key".equals(keyValue.item(1).getNodeName()) ) {
+        key = value;
+        value = keyValue.item(0);
+      }      
+      NodeList entries = value.getChildNodes();
+      for ( int j = 0; j < entries.getLength(); j++) {
+        Map<String, List<String>> ve = childNodesToMap(entries.item(j));
+        assertTrue(ve.containsKey("key"));
+        v.put(key.getTextContent(), ve);
+      }
+    }
+    return v;
+  }
+  
+  
+  /**
+   * @param personNode
+   * @return
+   */
+  protected Map<String, List<Node>> childNodesToNodeMap(Node n) {
+    Map<String, List<Node>> v = new HashMap<String, List<Node>>();
+    NodeList result = n.getChildNodes();
+    for (int i = 0; i < result.getLength(); i++) {
+      Node nv = result.item(i);
+      if (nv.getNodeType() == Node.ELEMENT_NODE) {
+        List<Node> l = v.get(nv.getLocalName());
+        if ( l == null ) {
+          l = new ArrayList<Node>();
+          v.put(nv.getLocalName(),l);
+        }
+        l.add(nv);
+      }
+    }
+    return v;
+  }
+
 
 }
