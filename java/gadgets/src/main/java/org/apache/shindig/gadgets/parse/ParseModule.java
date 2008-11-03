@@ -17,12 +17,11 @@
  */
 package org.apache.shindig.gadgets.parse;
 
-import org.apache.shindig.gadgets.parse.caja.CajaHtmlParser;
-
 import com.google.inject.AbstractModule;
 import com.google.inject.Provider;
-
-import org.w3c.dom.html.HTMLDocument;
+import org.apache.shindig.gadgets.parse.caja.CajaHtmlParser;
+import org.w3c.dom.DOMImplementation;
+import org.w3c.dom.bootstrap.DOMImplementationRegistry;
 
 /**
  * Provide parse bindings
@@ -36,36 +35,47 @@ public class ParseModule extends AbstractModule {
   protected void configure() {
     //bind(GadgetHtmlParser.class).to(NekoHtmlParser.class);
     bind(GadgetHtmlParser.class).to(CajaHtmlParser.class);
-    bind(HTMLDocument.class).toProvider(HTMLDocumentProvider.class);
+    bind(DOMImplementation.class).toProvider(DOMImplementationProvider.class);
   }
 
   /**
    * Provider of new HTMLDocument implementations. Used to hide XML parser weirdness
    */
-  public static class HTMLDocumentProvider implements Provider<HTMLDocument> {
+  public static class DOMImplementationProvider implements Provider<DOMImplementation> {
 
-    Class htmlDocImpl;
+    DOMImplementation domImpl;
 
-    public HTMLDocumentProvider() {
+    public DOMImplementationProvider() {
+      try {
+        DOMImplementationRegistry registry = DOMImplementationRegistry.newInstance();
+        // Require the traversal API
+        domImpl = registry.getDOMImplementation("XML 1.0 Traversal 2.0");
+      } catch (Exception e) {
+        // Try another
+      }
       // This is ugly but effective
       try {
-        htmlDocImpl = Class.forName("org.apache.html.dom.HTMLDocumentImpl");
-      } catch (ClassNotFoundException cnfe) {
-        try {
-          htmlDocImpl = Class.forName("com.sun.org.apache.html.internal.dom.HTMLDocumentImpl");
-        } catch (ClassNotFoundException cnfe2) {
-          throw new RuntimeException("Could not find HTML DOM implementation", cnfe2);
+        if (domImpl == null) {
+          domImpl = (DOMImplementation)
+              Class.forName("org.apache.xerces.internal.dom.DOMImplementationImpl").
+                  getMethod("getDOMImplementation").invoke(null);
         }
+      } catch (Exception ex) {
+        //try another
+      }
+      try {
+        if (domImpl == null) {
+        domImpl = (DOMImplementation)
+          Class.forName("com.sun.org.apache.xerces.internal.dom.DOMImplementationImpl").
+              getMethod("getDOMImplementation").invoke(null);
+        }
+      } catch (Exception ex) {
+        throw new RuntimeException("Could not find HTML DOM implementation", ex);
       }
     }
 
-    public HTMLDocument get() {
-      try {
-        return (HTMLDocument) htmlDocImpl.newInstance();
-      } catch (Exception e) {
-        throw new RuntimeException("Could not create HTML DOM from class "
-            + htmlDocImpl.getName(), e);
-      }
+    public DOMImplementation get() {
+      return domImpl;
     }
   }
 }

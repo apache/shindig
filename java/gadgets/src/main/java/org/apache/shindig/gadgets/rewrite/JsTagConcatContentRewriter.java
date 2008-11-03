@@ -19,6 +19,7 @@
 package org.apache.shindig.gadgets.rewrite;
 
 import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.common.util.Utf8UrlCoder;
 import org.apache.shindig.gadgets.Gadget;
@@ -28,11 +29,11 @@ import org.apache.shindig.gadgets.servlet.ProxyBase;
 import org.apache.shindig.gadgets.spec.GadgetSpec;
 import org.apache.shindig.gadgets.spec.View;
 import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -43,6 +44,7 @@ public class JsTagConcatContentRewriter implements ContentRewriter {
   private final String concatUrlBase;
 
   private static final String DEFAULT_CONCAT_URL_BASE = "/gadgets/concat?";
+  private static final HashSet<String> TAG_NAMES = Sets.newHashSet("script");
 
   public JsTagConcatContentRewriter(ContentRewriterFeature.Factory rewriterFeatureFactory,
       String concatUrlBase) {
@@ -68,14 +70,9 @@ public class JsTagConcatContentRewriter implements ContentRewriter {
     }
 
     // Get all the script tags
-    NodeList scriptTags = content.getDocument().getElementsByTagName("SCRIPT");
+    List<Node> nodeList =
+        HtmlContentRewriter.getElementsByTagNameCaseInsensitive(content.getDocument(), TAG_NAMES);
 
-    // Copy NodeList as it respects changes to the underlying document which is a
-    // behavior we dont want when removing nodes
-    List<Node> nodeList = Lists.newArrayListWithExpectedSize(scriptTags.getLength());
-    for (int i = 0; i < scriptTags.getLength(); i++) {
-      nodeList.add(scriptTags.item(i));
-    }
 
     String concatBase = getJsConcatBase(gadget.getSpec(), rewriterFeature);
     Uri contentBase = gadget.getSpec().getUrl();

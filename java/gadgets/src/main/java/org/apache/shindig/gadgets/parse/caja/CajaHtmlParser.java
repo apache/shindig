@@ -23,17 +23,17 @@ import com.google.caja.parser.html.DomTree;
 import com.google.caja.reporting.MessageQueue;
 import com.google.caja.reporting.SimpleMessageQueue;
 import com.google.inject.Inject;
-import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.parse.GadgetHtmlParser;
-import org.w3c.dom.Attr;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.Node;
-import org.w3c.dom.html.HTMLDocument;
+import org.apache.shindig.gadgets.parse.HtmlSerializer;
+import org.apache.xml.serialize.HTMLSerializer;
+import org.apache.xml.serialize.OutputFormat;
+import org.w3c.dom.*;
 
+import java.io.IOException;
 import java.io.StringReader;
+import java.io.StringWriter;
 import java.net.URI;
 import java.net.URISyntaxException;
 
@@ -43,17 +43,19 @@ import java.net.URISyntaxException;
 @Singleton
 public class CajaHtmlParser extends GadgetHtmlParser {
 
-  Provider<HTMLDocument> documentProvider;
+  private final DOMImplementation documentProvider;
 
   @Inject
-  public CajaHtmlParser(Provider<HTMLDocument> documentProvider) {
+  public CajaHtmlParser(DOMImplementation documentProvider) {
     this.documentProvider = documentProvider;
   }
 
   @Override
   public Document parseDom(String source) throws GadgetException {
     // Wrap the whole thing in a top-level node to get full contents.
-    return makeDocument(getFragment(source));
+    Document document = makeDocument(getFragment(source));
+    HtmlSerializer.attach(document, new Serializer(), source);
+    return document;
   }
 
   DomTree.Fragment getFragment(String content) throws GadgetException {
@@ -87,8 +89,8 @@ public class CajaHtmlParser extends GadgetHtmlParser {
     return new DomParser(new TokenQueue<HtmlTokenType>(lexer, source), false, mQueue);
   }
 
-  private HTMLDocument makeDocument(DomTree.Fragment fragment) {
-    HTMLDocument htmlDocument = documentProvider.get();
+  private Document makeDocument(DomTree.Fragment fragment) {
+    Document htmlDocument = documentProvider.createDocument(null, null, null);
 
     // Check if doc contains an HTML node. If so just add it and recurse
     for (DomTree node : fragment.children()) {
@@ -105,7 +107,7 @@ public class CajaHtmlParser extends GadgetHtmlParser {
     return htmlDocument;
   }
 
-  private static void recurseDocument(HTMLDocument doc, Node parent, DomTree elem) {
+  private static void recurseDocument(Document doc, Node parent, DomTree elem) {
     if (elem instanceof DomTree.Tag) {
       DomTree.Tag tag = (DomTree.Tag) elem;
       Element element = doc.createElement(tag.getTagName());
@@ -125,6 +127,26 @@ public class CajaHtmlParser extends GadgetHtmlParser {
       parent.appendChild(doc.createCDATASection(elem.getValue()));
     } else {
       // TODO Implement for comment, fragment etc...
+    }
+  }
+
+  static class Serializer extends HtmlSerializer {
+
+    static final OutputFormat outputFormat = new OutputFormat();
+    static {
+      outputFormat.setPreserveSpace(true);
+      outputFormat.setPreserveEmptyAttributes(false);
+    }
+
+    public String serializeImpl(Document doc) {
+      StringWriter sw = createWriter(doc);
+      HTMLSerializer serializer = new HTMLSerializer(sw, outputFormat);
+      try {
+        serializer.serialize(doc);
+        return sw.toString();
+      } catch (IOException ioe) {
+        return null;
+      }
     }
   }
 }
