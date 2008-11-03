@@ -19,12 +19,8 @@ package org.apache.shindig.gadgets.rewrite;
 
 import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.parse.GadgetHtmlParser;
-import org.apache.xml.serialize.HTMLSerializer;
-import org.apache.xml.serialize.OutputFormat;
+import org.apache.shindig.gadgets.parse.HtmlSerializer;
 import org.w3c.dom.Document;
-
-import java.io.IOException;
-import java.io.StringWriter;
 
 /**
  * Object that maintains a String representation of arbitrary contents
@@ -70,14 +66,9 @@ public class MutableContent {
       // per rendering cycle: all rewriters (or other manipulators)
       // operating on the parse tree should happen together.
       contentParseId = parseEditId;
-      StringWriter sw = new StringWriter((content.length() * 10) / 9);
 
-      try {
-        new HTMLSerializer(sw, new OutputFormat(document)).serialize(document);
-      } catch (IOException e) {
-        // Never happens.
-      }
-      content = sw.toString();
+      // Parser will have bound an HTML serializer to the document
+      content = HtmlSerializer.serialize(document);
     }
     return content;
   }

@@ -18,14 +18,21 @@
  */
 package org.apache.shindig.gadgets.rewrite;
 
+import com.google.common.collect.Lists;
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.gadgets.Gadget;
 import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.http.HttpResponse;
 import org.apache.shindig.gadgets.spec.View;
 import org.w3c.dom.Document;
+import org.w3c.dom.Node;
+import org.w3c.dom.traversal.DocumentTraversal;
+import org.w3c.dom.traversal.NodeFilter;
+import org.w3c.dom.traversal.NodeIterator;
 
 import java.net.URI;
+import java.util.List;
+import java.util.Set;
 
 /**
  * Simple helper base class for ContentRewriters that manipulate an
@@ -70,4 +77,22 @@ public abstract class HtmlContentRewriter implements ContentRewriter {
     return null;
   }
 
+  public static List<Node> getElementsByTagNameCaseInsensitive(Document doc,
+      final Set<String> lowerCaseNames) {
+    final List<Node> result = Lists.newArrayList();
+    NodeIterator nodeIterator = ((DocumentTraversal) doc)
+        .createNodeIterator(doc, NodeFilter.SHOW_ELEMENT,
+            new NodeFilter() {
+              public short acceptNode(Node n) {
+                if (lowerCaseNames.contains(n.getNodeName().toLowerCase())) {
+                  return NodeFilter.FILTER_ACCEPT;
+                }
+                return NodeFilter.FILTER_REJECT;
+              }
+            }, false);
+    for (Node n = nodeIterator.nextNode(); n != null ; n = nodeIterator.nextNode()) {
+      result.add(n);
+    }
+    return result;
+  }
 }

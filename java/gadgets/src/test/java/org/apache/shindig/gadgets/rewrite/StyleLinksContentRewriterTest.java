@@ -18,6 +18,7 @@
  */
 package org.apache.shindig.gadgets.rewrite;
 
+import com.google.common.collect.Sets;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import org.apache.shindig.gadgets.parse.GadgetHtmlParser;
@@ -64,7 +65,9 @@ public class StyleLinksContentRewriterTest extends FeatureBasedRewriterTestBase 
       ".someid {background-image:url(\"" + LINK_PREFIX + "http://a.b.com/bigimg.png\");float:right;width:165px;height:23px;margin-top:4px;margin-left:5px}";
     // Rewrite, document is mutated in-place
     rewriteHelper(rewriter, s, document);
-    assertEquals(rewritten, document.getElementsByTagName("STYLE").item(0).getTextContent());
+    assertEquals(rewritten,
+        HtmlContentRewriter.getElementsByTagNameCaseInsensitive(document,
+            Sets.newHashSet("style")).get(0).getTextContent());
   }
   
   public void testStyleTagRewritesIgnoredOnBadParse() throws Exception {

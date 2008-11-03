@@ -21,28 +21,40 @@ import org.apache.commons.io.IOUtils;
 import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.parse.caja.CajaHtmlParser;
 import org.apache.shindig.gadgets.parse.nekohtml.NekoHtmlParser;
-import org.apache.xml.serialize.HTMLSerializer;
-import org.cyberneko.html.parsers.SAXParser;
-import org.w3c.dom.Node;
+import org.apache.shindig.gadgets.parse.nekohtml.NekoSimplifiedHtmlParser;
+import org.w3c.dom.DOMImplementation;
 import org.w3c.dom.bootstrap.DOMImplementationRegistry;
-import org.w3c.dom.ls.*;
 
-import java.io.*;
+import javax.xml.transform.OutputKeys;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.StringWriter;
 
 /**
  * Benchmarks for HTML parsing and serialization
- *
- * NOTE - Uncomment DOM4J bits to test that.
  */
 public class ParseTreeSerializerBenchmark {
   private DOMImplementationRegistry registry = DOMImplementationRegistry.newInstance();
   private int numRuns;
   private String content;
-  private GadgetHtmlParser cajaParser = new CajaHtmlParser(new ParseModule.HTMLDocumentProvider());
-  private GadgetHtmlParser nekoParser = new NekoHtmlParser(new ParseModule.HTMLDocumentProvider());
+
+  private GadgetHtmlParser cajaParser = new CajaHtmlParser(
+      DOCUMENT_PROVIDER);
+
+  private GadgetHtmlParser nekoParser = new NekoHtmlParser(
+      DOCUMENT_PROVIDER);
+
+  private GadgetHtmlParser nekoSimpleParser = new NekoSimplifiedHtmlParser(
+      DOCUMENT_PROVIDER);
+  
   private boolean warmup;
-  private SAXParser saxParser;
-  //private SAXReader saxReader;
+
+  private static final DOMImplementation DOCUMENT_PROVIDER =
+      new ParseModule.DOMImplementationProvider().get();
 
   private ParseTreeSerializerBenchmark(String file, int numRuns) throws Exception {
     File inputFile = new File(file);
@@ -52,23 +64,18 @@ public class ParseTreeSerializerBenchmark {
     }
     content = new String(IOUtils.toByteArray(new FileInputStream(file)));
 
-    saxParser = new SAXParser();
-    //saxParser.setFeature("http://cyberneko.org/html/features/scanner/script/strip-comment-delims",true);
-    saxParser.setFeature("http://cyberneko.org/html/features/scanner/notify-builtin-refs",true);
-    //saxReader = new SAXReader(saxParser);
-    //saxReader.setValidation(false);
-
-    this.numRuns = 50;
+    this.numRuns = 10;
     warmup = true;
-    runCaja();
+    //runCaja();
     runNeko();
-    runLS();
+    runNekoSimple();
+    //Sleep to let JIT kick in
     Thread.sleep(10000L);
-    this.numRuns = 300; //numRuns;
+    this.numRuns = 50; //numRuns;
     warmup = false;
-    runCaja();
+    //runCaja();
     runNeko();
-    runLS();
+    runNekoSimple();
   }
 
   private void runCaja() throws Exception {
@@ -76,19 +83,19 @@ public class ParseTreeSerializerBenchmark {
     // Some warmup runs with wait. Enough iterations to trigger the JIT
     // Wait to allow it to swap execution paths etc...
     timeParseDom(cajaParser);
+    timeParseDomSerialize(cajaParser);
   }
 
   private void runNeko() throws Exception {
     output("Neko-----------------");
     timeParseDom(nekoParser);
-    //timeParseDom4J();
-    //timeParseDom4JSerialize();
     timeParseDomSerialize(nekoParser);
   }
 
-  private void runLS() throws Exception {
-    output("LOAD/STORE-----------------");
-    runLSSerializationTiming(nekoParser);
+  private void runNekoSimple() throws Exception {
+    output("NekoSimple-----------------");
+    timeParseDom(nekoSimpleParser);
+    timeParseDomSerialize(nekoSimpleParser);
   }
 
   private void output(String string) {
@@ -108,117 +115,40 @@ public class ParseTreeSerializerBenchmark {
           ((double)parseMillis)/numRuns + "ms/run]");
   }
 
-  /*
-  private void timeParseDom4J() throws GadgetException {
-    try {
-      long parseStart = System.currentTimeMillis();
-      for (int i = 0; i < numRuns; ++i) {
-         saxReader.read(new InputSource(new StringReader(content)));
-      }
-      long parseMillis = System.currentTimeMillis() - parseStart;
-
-      output("Parsing DOM4J [" + parseMillis + " ms total: " +
-            ((double)parseMillis)/numRuns + "ms/run]");
-    } catch (Exception e) {
-      throw new GadgetException(GadgetException.Code.HTML_PARSE_ERROR, e);
-    }
-  }
-  */
-
-  /*
-  private void timeParseDom4JSerialize() throws GadgetException {
-    try {
-      Document document =  saxReader.read(new InputSource(new StringReader(content)));
-      OutputFormat format = OutputFormat.createCompactFormat();
-      format.setXHTML(false);
-
-      long parseStart = System.currentTimeMillis();
-      for (int i = 0; i < numRuns; ++i) {
-        StringWriter sw = new StringWriter((content.length() * 11) / 10);
-        HTMLWriter htmlWriter = new HTMLWriter(sw, format) {
-          protected void writeEntity(Entity entity) throws IOException {
-            writer.write("&");
-            writer.write(entity.getName());
-            writer.write(";");
-            lastOutputNodeType = org.dom4j.Node.ENTITY_REFERENCE_NODE;
-          }
-        };
-        //htmlWriter.setResolveEntityRefs(false);
-        htmlWriter.setEscapeText(false);
-        htmlWriter.write(document);
-      }
-      long parseMillis = System.currentTimeMillis() - parseStart;
-
-      output("Serializing DOM4J [" + parseMillis + " ms total: " +
-            ((double)parseMillis)/numRuns + "ms/run]");
-    } catch (Exception e) {
-      throw new GadgetException(GadgetException.Code.HTML_PARSE_ERROR, e);
-    }
-
-  }
-  */
-
   private void timeParseDomSerialize(GadgetHtmlParser parser) throws GadgetException {
     org.w3c.dom.Document document = parser.parseDom(content);
-
     try {
       long parseStart = System.currentTimeMillis();
       for (int i = 0; i < numRuns; ++i) {
-        StringWriter sw = new StringWriter((content.length() * 11) / 10);
-        HTMLSerializer xercesSerializer = new HTMLSerializer(sw, new org.apache.xml.serialize.OutputFormat());
-        xercesSerializer.serialize(document);
+        HtmlSerializer.serialize(document);
       }
       long parseMillis = System.currentTimeMillis() - parseStart;
 
-      output("Serializing Xerces [" + parseMillis + " ms total: " +
+      output("Serializing [" + parseMillis + " ms total: " +
             ((double) parseMillis) / numRuns + "ms/run]");
     } catch (Exception e) {
       throw new GadgetException(GadgetException.Code.HTML_PARSE_ERROR, e);
     }
-  }
 
-  /*
-  private void timeParseOld(GadgetHtmlParser parser) throws GadgetException {
-    long parseStart = System.currentTimeMillis();
-    for (int i = 0; i < numRuns; ++i) {
-      parser.parse(content);
+    try {
+      // Create an "identity" transformer - copies input to output
+      Transformer t = TransformerFactory.newInstance().newTransformer();
+      t.setOutputProperty(OutputKeys.METHOD, "html");
+
+      long parseStart = System.currentTimeMillis();
+      for (int i = 0; i < numRuns; ++i) {
+        StringWriter sw = new StringWriter((content.length() * 11) / 10);
+        t.transform(new DOMSource(document), new StreamResult(sw));
+        sw.toString();
+      }
+      long parseMillis = System.currentTimeMillis() - parseStart;
+
+      output("Serializing DOM Transformer [" + parseMillis + " ms total: " +
+            ((double) parseMillis) / numRuns + "ms/run]");
+      
+    } catch (Exception e) {
+      throw new GadgetException(GadgetException.Code.HTML_PARSE_ERROR, e);
     }
-    long parseMillis = System.currentTimeMillis() - parseStart;
-
-    output("Parsing [" + parseMillis + " ms total: " +
-          ((double)parseMillis)/numRuns + "ms/run]");
-  }
-  */
-
-  private void runLSSerializationTiming(GadgetHtmlParser parser) throws Exception {
-    Node n = parser.parseDom(content);
-    DOMImplementationLS impl = (DOMImplementationLS) registry.getDOMImplementation("LS");
-    ByteArrayOutputStream baos;
-    baos = new ByteArrayOutputStream(content.length() * 2);
-    LSSerializer writer = impl.createLSSerializer();
-    LSParser lsParser = impl.createLSParser(LSParser.ACTION_APPEND_AS_CHILDREN, null);
-
-    long serTime = 0, deserTime = 0;
-    for (int i = 0; i < numRuns; ++i) {
-      long serStart = System.currentTimeMillis();
-      LSOutput output = impl.createLSOutput();
-      baos.reset();
-      output.setByteStream(baos);
-      writer.write(n, output);
-      serTime += (System.currentTimeMillis() - serStart);
-      LSInput input = impl.createLSInput();
-      input.setByteStream(new ByteArrayInputStream(baos.toByteArray()));
-      long deserStart = System.currentTimeMillis();
-      //XmlUtil.parse(new String(baos.toByteArray()));
-      lsParser.parse(input);
-      deserTime += (System.currentTimeMillis() - deserStart);
-      //checkListEquality(nodes, outs);
-    }
-
-    output("LS Serialization [" + serTime + " ms total: "
-          + ((double)serTime)/numRuns + "ms/run]");
-    output("LS Deserialization [" + deserTime + " ms total: "
-          + ((double)deserTime)/numRuns + "ms/run]");
   }
 
   public static void main(String[] args) {

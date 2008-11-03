@@ -31,10 +31,10 @@ import org.w3c.dom.NodeList;
 public class HtmlParserTest extends TestCase {
 
   private final GadgetHtmlParser cajaParser = new CajaHtmlParser(
-      new ParseModule.HTMLDocumentProvider());
+      new ParseModule.DOMImplementationProvider().get());
 
   private final GadgetHtmlParser nekoParser = new NekoHtmlParser(
-      new ParseModule.HTMLDocumentProvider());
+      new ParseModule.DOMImplementationProvider().get());
 
   public void testParseSimpleString() throws Exception {
     parseSimpleString(cajaParser);
@@ -57,7 +57,7 @@ public class HtmlParserTest extends TestCase {
     parseTagWithStringContents(cajaParser);
   }
 
-  public void parseTagWithStringContents(GadgetHtmlParser htmlParser) throws Exception {
+  void parseTagWithStringContents(GadgetHtmlParser htmlParser) throws Exception {
     Document doc = htmlParser.parseDom("<span>content</span>");
 
     Node node = doc.getDocumentElement().getFirstChild();

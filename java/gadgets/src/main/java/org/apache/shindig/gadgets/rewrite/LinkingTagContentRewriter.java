@@ -55,7 +55,7 @@ public class LinkingTagContentRewriter extends HtmlContentRewriter {
           .createNodeIterator(root, NodeFilter.SHOW_ELEMENT,
               new NodeFilter() {
                 public short acceptNode(Node n) {
-                  Set<String> stringSet = tagAttributeTargets.get(n.getNodeName());
+                  Set<String> stringSet = tagAttributeTargets.get(n.getNodeName().toUpperCase());
                   if (stringSet != null) {
                     NamedNodeMap attributes = n.getAttributes();
                     // TODO - Check is NodeMap lookup is case insensitive, if so use that

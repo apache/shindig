@@ -51,10 +51,10 @@ public class LinkingTagContentRewriterTest extends FeatureBasedRewriterTestBase 
         + "<IMG src=\"http://a.b.com/img2.gif\"/>"
         + "<eMbeD src=\"http://a.b.com/some.mov\"/>"
         + "<link href=\"http://a.b.com/link.html\"></link>";
-    String expected = "<IMG src=\"" + LINK_PREFIX + "http://a.b.com/img.gif\">"
-        + "<IMG src=\"" + LINK_PREFIX + "http://a.b.com/img2.gif\">"
-        + "<EMBED src=\"" + LINK_PREFIX + "http://a.b.com/some.mov\"></EMBED>"
-        + "<LINK href=\"" + LINK_PREFIX + "http://a.b.com/link.html\">";
+    String expected = "<img src=\"" + LINK_PREFIX + "http://a.b.com/img.gif\">"
+        + "<img src=\"" + LINK_PREFIX + "http://a.b.com/img2.gif\">"
+        + "<embed src=\"" + LINK_PREFIX + "http://a.b.com/some.mov\"></embed>"
+        + "<link href=\"" + LINK_PREFIX + "http://a.b.com/link.html\">";
     Document document = htmlParser.parseDom(s);
     String rewritten = rewriteHelper(rewriter, s, document);
     assertEquals(rewritten, expected);

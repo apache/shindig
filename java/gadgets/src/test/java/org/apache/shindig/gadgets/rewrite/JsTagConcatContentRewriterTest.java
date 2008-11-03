@@ -49,9 +49,9 @@ public class JsTagConcatContentRewriterTest extends FeatureBasedRewriterTestBase
   }
 
   public void testJSMergePreserveNoExternal() throws Exception {
-    String s = "<SCRIPT>\n"
+    String s = "<script>\n"
         + "doSomething\n"
-        + "</SCRIPT>";
+        + "</script>";
 
     Document document = htmlParser.parseDom(s);
     String rewritten = rewriteHelper(rewriter, s, document);
@@ -67,81 +67,81 @@ public class JsTagConcatContentRewriterTest extends FeatureBasedRewriterTestBase
   }
 
   public void testJSMergePreserveWithComment() throws Exception {
-    String s = "<SCRIPT>" +
+    String s = "<script>" +
         "<!--\ndoSomething\n-->" +
-        "</SCRIPT>";
+        "</script>";
     Document document = htmlParser.parseDom(s);
     String rewritten = rewriteHelper(rewriter, s, document);
     assertEquals(rewritten, s);
   }
 
   public void testJSMergeSingleScriptReWrite() throws Exception {
-    String s = "<SCRIPT src=\"http://a.b.com/1.js\"></SCRIPT>";
-    String expected = "<SCRIPT src=\"" + concatBase + "1=http%3A%2F%2Fa.b.com%2F1.js\"></SCRIPT>";
+    String s = "<script src=\"http://a.b.com/1.js\"></script>";
+    String expected = "<script src=\"" + concatBase + "1=http%3A%2F%2Fa.b.com%2F1.js\"></script>";
     Document document = htmlParser.parseDom(s);
     String rewritten = rewriteHelper(rewriter, s, document);
     assertEquals(rewritten, expected);
   }
 
   public void testJSMergeTwoScriptReWriteWithWhitespace() throws Exception {
-    String s = "<SCRIPT src=\"http://a.b.com/1.js\"></SCRIPT>"
-        + "<SCRIPT src=\"http://a.b.com/2.js\"></SCRIPT>";
+    String s = "<script src=\"http://a.b.com/1.js\"></script>"
+        + "<script src=\"http://a.b.com/2.js\"></script>";
     String expected
-        = "<SCRIPT src=\"" + concatBase + "1=http%3A%2F%2Fa.b.com%2F1.js&2=http%3A%2F%2Fa.b.com%2F2.js\"></SCRIPT>";
+        = "<script src=\"" + concatBase + "1=http%3A%2F%2Fa.b.com%2F1.js&2=http%3A%2F%2Fa.b.com%2F2.js\"></script>";
     Document document = htmlParser.parseDom(s);
     String rewritten = rewriteHelper(rewriter, s, document);
     assertEquals(rewritten, expected);
   }
 
   public void testJSMergeLeadAndTrailingScriptReWrite() throws Exception {
-    String s = "<SCRIPT>\n"
+    String s = "<script>\n"
         + "doSomething\n"
-        + "</SCRIPT>"
-        + "<SCRIPT src=\"http://a.b.com/1.js\"></SCRIPT>"
-        + "<SCRIPT src=\"http://a.b.com/2.js\"></SCRIPT>"
-        + "<SCRIPT>\n"
+        + "</script>"
+        + "<script src=\"http://a.b.com/1.js\"></script>"
+        + "<script src=\"http://a.b.com/2.js\"></script>"
+        + "<script>\n"
         + "doSomething\n"
-        + "</SCRIPT>";
-    String expected = "<SCRIPT>\n"
+        + "</script>";
+    String expected = "<script>\n"
         + "doSomething\n"
-        + "</SCRIPT>"
-        + "<SCRIPT src=\"" + concatBase + "1=http%3A%2F%2Fa.b.com%2F1.js&2=http%3A%2F%2Fa.b.com%2F2.js\"></SCRIPT>"
-        + "<SCRIPT>\n"
+        + "</script>"
+        + "<script src=\"" + concatBase + "1=http%3A%2F%2Fa.b.com%2F1.js&2=http%3A%2F%2Fa.b.com%2F2.js\"></script>"
+        + "<script>\n"
         + "doSomething\n"
-        + "</SCRIPT>";
+        + "</script>";
     Document document = htmlParser.parseDom(s);
     String rewritten = rewriteHelper(rewriter, s, document);
     assertEquals(rewritten, expected);
   }
 
   public void testJSMergeInterspersed() throws Exception {
-    String s = "<SCRIPT src=\"http://a.b.com/1.js\"></SCRIPT>"
-        + "<SCRIPT src=\"http://a.b.com/2.js\"></SCRIPT>"
-        + "<SCRIPT><!-- doSomething --></SCRIPT>"
-        + "<SCRIPT src=\"http://a.b.com/3.js\"></SCRIPT>"
-        + "<SCRIPT src=\"http://a.b.com/4.js\"></SCRIPT>";
+    String s = "<script src=\"http://a.b.com/1.js\"></script>"
+        + "<script src=\"http://a.b.com/2.js\"></script>"
+        + "<script><!-- doSomething --></script>"
+        + "<script src=\"http://a.b.com/3.js\"></script>"
+        + "<script src=\"http://a.b.com/4.js\"></script>";
     String expected =
-        "<SCRIPT src=\"" + concatBase + "1=http%3A%2F%2Fa.b.com%2F1.js&2=http%3A%2F%2Fa.b.com%2F2.js\"></SCRIPT>" +
-        "<SCRIPT><!-- doSomething --></SCRIPT>" +
-        "<SCRIPT src=\"" + concatBase + "1=http%3A%2F%2Fa.b.com%2F3.js&2=http%3A%2F%2Fa.b.com%2F4.js\"></SCRIPT>";
+        "<script src=\"" + concatBase + "1=http%3A%2F%2Fa.b.com%2F1.js&2=http%3A%2F%2Fa.b.com%2F2.js\"></script>" +
+        "<script><!-- doSomething --></script>" +
+        "<script src=\"" + concatBase + "1=http%3A%2F%2Fa.b.com%2F3.js&2=http%3A%2F%2Fa.b.com%2F4.js\"></script>";
     Document document = htmlParser.parseDom(s);
     String rewritten = rewriteHelper(rewriter, s, document);
     assertEquals(expected, rewritten);
   }
 
   public void testJSMergeDerelativizeHostRelative() throws Exception {
-    String s = "<SCRIPT src=\"/1.js\"></SCRIPT>";
+    String s = "<script src=\"/1.js\"></script>";
     String expected
-        = "<SCRIPT src=\"" + concatBase + "1=http%3A%2F%2Fgadget.org%2F1.js\"></SCRIPT>";
+        = "<script src=\"" + concatBase + "1=http%3A%2F%2Fgadget.org%2F1.js\"></script>";
     Document document = htmlParser.parseDom(s);
     String rewritten = rewriteHelper(rewriter, s, document);
     assertEquals(rewritten, expected);
   }
 
   public void testJSMergeDerelativizePathRelative() throws Exception {
-    String s = "<SCRIPT src=\"1.js\"></SCRIPT>";
+    String s = "<script src=\"1.js\"></script>";
     String expected
-        = "<SCRIPT src=\"" + concatBase + "1=http%3A%2F%2Fgadget.org%2Fdir%2F1.js\"></SCRIPT>";
+        = "<script src=\"" + concatBase + "1=http%3A%2F%2Fgadget.org%2Fdir%2F1.js\"></script>";
     Document document = htmlParser.parseDom(s);
     String rewritten = rewriteHelper(rewriter, s, document);
     assertEquals(rewritten, expected);

@@ -18,20 +18,23 @@
 package org.apache.shindig.gadgets.parse.nekohtml;
 
 import com.google.inject.Inject;
-import com.google.inject.Provider;
 import org.apache.shindig.common.xml.XmlUtil;
 import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.parse.GadgetHtmlParser;
+import org.apache.shindig.gadgets.parse.HtmlSerializer;
+import org.apache.xml.serialize.HTMLSerializer;
+import org.apache.xml.serialize.OutputFormat;
 import org.cyberneko.html.parsers.DOMFragmentParser;
+import org.w3c.dom.DOMImplementation;
 import org.w3c.dom.Document;
 import org.w3c.dom.DocumentFragment;
 import org.w3c.dom.Node;
-import org.w3c.dom.html.HTMLDocument;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
 import java.io.IOException;
 import java.io.StringReader;
+import java.io.StringWriter;
 
 /**
  * Parser that uses the NekoHtml parser.
@@ -43,17 +46,19 @@ import java.io.StringReader;
  */
 public class NekoHtmlParser extends GadgetHtmlParser {
 
-  Provider<HTMLDocument> documentProvider;
+  private final DOMImplementation documentProvider;
 
   @Inject
-  public NekoHtmlParser(Provider<HTMLDocument> documentProvider) {
+  public NekoHtmlParser(DOMImplementation documentProvider) {
     this.documentProvider = documentProvider;
   }
 
   @Override
   public Document parseDom(String source) throws GadgetException {
     try {
-      return parseFragment(source);
+      Document document = parseFragment(source);
+      HtmlSerializer.attach(document, new Serializer(), source);
+      return document;
     } catch (Exception e) {
       throw new GadgetException(GadgetException.Code.HTML_PARSE_ERROR, e);
     }
@@ -63,7 +68,7 @@ public class NekoHtmlParser extends GadgetHtmlParser {
     InputSource input = new InputSource(new StringReader(source));
     DOMFragmentParser parser = new DOMFragmentParser();
 
-    HTMLDocument htmlDoc = documentProvider.get();
+    Document htmlDoc = documentProvider.createDocument(null, null, null);
     DocumentFragment fragment = htmlDoc.createDocumentFragment();
     parser.parse(input, fragment);
     Node htmlNode = XmlUtil.getFirstNamedChildNode(fragment, "HTML");
@@ -74,5 +79,25 @@ public class NekoHtmlParser extends GadgetHtmlParser {
       root.appendChild(fragment);
     }
     return htmlDoc;
+  }
+
+  static class Serializer extends HtmlSerializer {
+
+    static final OutputFormat outputFormat = new OutputFormat();
+    static {
+      outputFormat.setPreserveSpace(true);
+      outputFormat.setPreserveEmptyAttributes(false);
+    }
+
+    public String serializeImpl(Document doc) {
+      StringWriter sw = createWriter(doc);
+      HTMLSerializer serializer = new HTMLSerializer(sw, outputFormat);
+      try {
+        serializer.serialize(doc);
+        return sw.toString();
+      } catch (IOException ioe) {
+        return null;
+      }
+    }
   }
 }

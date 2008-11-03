@@ -18,16 +18,18 @@
  */
 package org.apache.shindig.gadgets.rewrite;
 
+import com.google.common.collect.Sets;
 import org.apache.shindig.common.uri.Uri;
+import org.apache.shindig.common.xml.XmlUtil;
 import org.apache.shindig.gadgets.Gadget;
 import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.http.HttpResponse;
 import org.apache.shindig.gadgets.spec.View;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
 
 import java.net.URI;
+import java.util.List;
 
 public class StyleLinksContentRewriter implements ContentRewriter {
   // TODO: consider providing helper base class for node-visitor content rewriters
@@ -74,20 +76,18 @@ public class StyleLinksContentRewriter implements ContentRewriter {
     }
     boolean mutated = false;
 
-    Node head;
-    NodeList headTags = doc.getElementsByTagName("HEAD");
-    if (headTags.getLength() == 0) {
+    // TODO This should move into parsers
+    Node head = XmlUtil.getFirstNamedChildNode(doc.getDocumentElement(), "head");
+    if (head == null) {
       mutated = true;
-      head = doc.getDocumentElement().appendChild(doc.createElement("HEAD"));
-    } else {
-      head = headTags.item(0);
+      head = doc.getDocumentElement().appendChild(doc.createElement("head"));
     }
 
     // Move all style tags into head
     // TODO Convert all @imports into a concatenated link tag
-    NodeList styleTags = doc.getElementsByTagName("STYLE");
-    for (int i = 0; i < styleTags.getLength(); i++) {
-      Node styleNode = styleTags.item(i);
+    List<Node> styleTags = HtmlContentRewriter.getElementsByTagNameCaseInsensitive(doc,
+        Sets.newHashSet("style"));
+    for (Node styleNode : styleTags) {      
       mutated = true;
       if (!styleNode.getParentNode().getNodeName().equalsIgnoreCase("HEAD")) {
         styleNode.getParentNode().removeChild(styleNode);
