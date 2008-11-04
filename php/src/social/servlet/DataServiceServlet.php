@@ -45,6 +45,10 @@ class DataServiceServlet extends ApiServlet {
 
 	public function doPost()
 	{
+		$xrdsLocation = Config::get('xrds_location');
+		if ($xrdsLocation) {
+			header("X-XRDS-Location: $xrdsLocation", false);
+		}
 		try {
 			$token = $this->getSecurityToken();
 			if ($token == null) {
@@ -57,7 +61,7 @@ class DataServiceServlet extends ApiServlet {
 		} catch (Exception $e) {
 			$code = '500 Internal Server Error';
 			header("HTTP/1.0 $code", true);
-			echo "<h1>$code - Internal Server Error</h1>\n". $e->getMessage();
+			echo "<h1>$code - Internal Server Error</h1>\n" . $e->getMessage();
 			if (Config::get('debug')) {
 				echo "\n\n<br>\nDebug backtrace:\n<br>\n<pre>\n";
 				echo $e->getTraceAsString();
@@ -68,6 +72,7 @@ class DataServiceServlet extends ApiServlet {
 
 	public function sendError(ResponseItem $responseItem)
 	{
+		$unauthorized = false;
 		$errorMessage = $responseItem->getErrorMessage();
 		switch ($responseItem->getError()) {
 			case ResponseError::$BAD_REQUEST:
@@ -75,6 +80,7 @@ class DataServiceServlet extends ApiServlet {
 				break;
 			case ResponseError::$UNAUTHORIZED:
 				$code = '401 Unauthorized';
+				$unauthorized = true;
 				break;
 			case ResponseError::$FORBIDDEN:
 				$code = '403 Forbidden';
@@ -91,6 +97,8 @@ class DataServiceServlet extends ApiServlet {
 				break;
 		}
 		header("HTTP/1.0 $code", true);
+		if ($unauthorized)
+			header("WWW-Authenticate: OAuth realm", true);
 		echo "$code - $errorMessage";
 		die();
 	}
@@ -101,8 +109,7 @@ class DataServiceServlet extends ApiServlet {
 	private function handleSingleRequest(SecurityToken $token, $inputConverter, $outputConverter)
 	{
 		$servletRequest = array(
-				'url' => substr($_SERVER["REQUEST_URI"], strlen(Config::get('web_prefix') . '/social/rest'))
-		);
+				'url' => substr($_SERVER["REQUEST_URI"], strlen(Config::get('web_prefix') . '/social/rest')));
 		if (isset($GLOBALS['HTTP_RAW_POST_DATA'])) {
 			$servletRequest['postData'] = $GLOBALS['HTTP_RAW_POST_DATA'];
 			if (get_magic_quotes_gpc()) {
@@ -149,8 +156,10 @@ class DataServiceServlet extends ApiServlet {
 				}
 				break;
 		}
+		// just to satisfy the code scanner, code is actually unreachable
+		return null;
 	}
-	
+
 	/**
 	 * Returns the input converter to use
 	 *
@@ -197,6 +206,8 @@ class DataServiceServlet extends ApiServlet {
 			// if that isn't set either, we assume json
 			return strtolower(trim(! empty($_POST[self::$FORMAT_PARAM]) ? $_POST[self::$FORMAT_PARAM] : (! empty($_GET[self::$FORMAT_PARAM]) ? $_GET[self::$FORMAT_PARAM] : 'json')));
 		}
+		// just to satisfy the code scanner, code is actually unreachable
+		return null;
 	}
 
 	/**

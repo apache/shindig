@@ -131,7 +131,8 @@ class GadgetRenderingServlet extends HttpServlet {
 	 */
 	private function outputHtmlGadget($gadget, $context, $view)
 	{
-		$externJs = "";
+		$content = '';
+		$externJs = '';
 		$externFmt = "<script src=\"%s\"></script>";
 		$forcedLibs = $context->getForcedJsLibs();
 		// allow the &libs=.. param to override our forced js libs configuration value
@@ -154,15 +155,15 @@ class GadgetRenderingServlet extends HttpServlet {
 			header("P3P: " . Config::get('P3P'));
 		}
 		if (! $view->getQuirks()) {
-			echo "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01//EN\" \"http://www.w3.org/TR/html4/strict.dtd\">\n";
+			$content .= "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01//EN\" \"http://www.w3.org/TR/html4/strict.dtd\">\n";
 		}
-		echo "<html><head><style type=\"text/css\">" . Config::get('gadget_css') . "</style></head><body>\n";
+		$content .= "<html><head><meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\"/><style type=\"text/css\">" . Config::get('gadget_css') . "</style></head><body>\n";
 		// Forced libs first.
 		if (! empty($forcedLibs)) {
 			$libs = explode(':', $forcedLibs);
 			echo sprintf($externFmt, Config::get('default_js_prefix') . $this->getJsUrl($libs, $gadget) . "&container=" . $context->getContainer()) . "\n";
 		}
-		echo "<script>\n";
+		$content .= "<script>\n"; 
 		
 		if (! empty($forcedLibs)) {
 			// if some of the feature libraries are externalized (through a browser cachable <script src="/gadgets/js/opensocial-0.7:settitle.js">
@@ -180,20 +181,20 @@ class GadgetRenderingServlet extends HttpServlet {
 				$externJs .= sprintf($externFmt, $library->getContent()) . "\n";
 				// else check if there are no forcedLibs, or if it wasn't included in their dep chain
 			} elseif (empty($forcedLibs) || ! in_array($library->getFeatureName(), $forcedLibsArray)) {
-				echo $library->getContent();
+				$content .= $library->getContent();
 			}
 			// otherwise it was already included by config.forceJsLibs.
 		}
-		echo $this->appendJsConfig($context, $gadget, ! empty($forcedLibs)) . $this->appendMessages($gadget) . $this->appendPreloads($gadget, $context) . "</script>";
+		$content .= $this->appendJsConfig($context, $gadget, ! empty($forcedLibs)) . $this->appendMessages($gadget) . $this->appendPreloads($gadget, $context) . "</script>";
 		if (strlen($externJs) > 0) {
-			echo $externJs;
+			$content .= $externJs;
 		}
 		$gadgetExceptions = array();
 		$rewriter = new ContentRewriter();
 		if ($rewriter->rewriteGadgetView($gadget, $view)) {
-			$content = $gadget->getSubstitutions()->substitute($view->getRewrittenContent());
+			$content .= $gadget->getSubstitutions()->substitute($view->getRewrittenContent());
 		} else {
-			$content = $gadget->getSubstitutions()->substitute($view->getContent());
+			$content .= $gadget->getSubstitutions()->substitute($view->getContent());
 		}
 		if (empty($content)) {
 			// Unknown view
@@ -202,8 +203,9 @@ class GadgetRenderingServlet extends HttpServlet {
 		if (count($gadgetExceptions)) {
 			throw new GadgetException(print_r($gadgetExceptions, true));
 		}
-		echo $content . "\n<script>gadgets.util.runOnLoadHandlers();</script></body>\n</html>";
-	}
+		$content .= "\n<script>gadgets.util.runOnLoadHandlers();</script></body>\n</html>";
+		echo $content;
+		}
 
 	/**
 	 * Output's a URL content type gadget, it adds libs=<list:of:js:libraries>.js and user preferences

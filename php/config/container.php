@@ -33,7 +33,9 @@
  * 	'people_service' => 'MyPeopleService',
  * 	'activity_service' => 'MyActivitiesService',
  * 	'app_data_service' => 'MyAppDataService',
- * 	'messages_service' => 'MyMessagesDataService'
+ * 	'app_data_service' => 'MyAppDataService',
+ * 	'oauth_lookup_service' => 'MyOAuthLookupService'
+ * 	'xrds_location' => 'http://www.mycontainer.com/xrds'
  * );
  *  
  */
@@ -51,6 +53,9 @@ $shindigConfig = array(
 	// If you changed the web prefix, add the prefix to these too
 	'default_js_prefix' => '/gadgets/js/', 
 	'default_iframe_prefix' => '/gadgets/ifr?', 
+	
+	// The X-XRDS-Location value for your implementing container, if any, see http://code.google.com/p/partuza/source/browse/trunk/Library/XRDS.php for an example
+	'xrds_location' => '',
 	
 	// The encryption keys for encrypting the security token, and the expiration of it. Make sure these match the keys used in your container/site
 	'token_cipher_key' => 'INSECURE_DEFAULT_KEY',
@@ -83,15 +88,18 @@ $shindigConfig = array(
 	'remote_content' => 'BasicRemoteContent', 
 	'security_token_signer' => 'BasicSecurityTokenDecoder', 
 	'security_token' => 'BasicSecurityToken', 
+	'oauth_lookup_service' => 'BasicOAuthLookupService',
+
 	// Caching back-end to use. Shindig ships with CacheFile and CacheMemcache out of the box
 	'data_cache' => 'CacheFile',
-	// Old-style wire format data handler, this is being depreciated 
-	'handlers' => '',
-	// New RESTful API data service classes to use
+
+	// RESTful API data service classes to use
+	// See http://code.google.com/p/partuza/source/browse/#svn/trunk/Shindig for a MySql powered example
 	'person_service' => 'JsonDbOpensocialService',
 	'activity_service' => 'JsonDbOpensocialService',
 	'app_data_service' => 'JsonDbOpensocialService',
 	'messages_service' => 'JsonDbOpensocialService',
+
 	// Also scan these directories when looking for <Class>.php files. You can include multiple paths by seperating them with a , 
 	'extension_class_paths' => '',
 	

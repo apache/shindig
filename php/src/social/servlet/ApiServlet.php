@@ -21,6 +21,7 @@ require 'src/common/HttpServlet.php';
 require 'src/common/SecurityTokenDecoder.php';
 require 'src/common/SecurityToken.php';
 require 'src/common/BlobCrypter.php';
+require 'src/common/OAuthLookupService.php';
 require 'src/social/model/Activity.php';
 require 'src/social/model/Address.php';
 require 'src/social/model/ApiCollection.php';
@@ -55,6 +56,7 @@ require 'src/social/converters/InputConverter.php';
 require 'src/social/converters/InputAtomConverter.php';
 require 'src/social/converters/InputJsonConverter.php';
 require 'src/social/converters/InputXmlConverter.php';
+require 'src/social/oauth/OAuth.php';
 
 /**
  * Common base class for API servlets.
@@ -79,6 +81,26 @@ abstract class ApiServlet {
 
 	public function getSecurityToken()
 	{
+		// see if we have an OAuth request
+		$request = OAuthRequest::from_request();
+		$appUrl = $request->get_parameter('oauth_consumer_key');
+		$userId = $request->get_parameter('xoauth_requestor_id'); // from Consumer Request extension (2-legged OAuth)
+		$signature = $request->get_parameter('oauth_signature');
+		
+		// TODO: also allow userId to be specified via oauth token and/or in URL?
+		if ($appUrl && $signature) {
+			//if ($appUrl && $signature && $userId) {
+			// look up the user and perms for this oauth request
+			$oauthLookupService = Config::get('oauth_lookup_service');
+			$oauthLookupService = new $oauthLookupService();
+			if ($oauthLookupService->thirdPartyHasAccessToUser($request, $appUrl, $userId)) {
+				return $oauthLookupService->getSecurityToken($appUrl, $userId);
+			} else {
+				return null; // invalid oauth request
+			}
+		} // else, not a valid oauth request, so don't bother
+
+		// look for encrypted security token
 		$token = isset($_POST['st']) ? $_POST['st'] : (isset($_GET['st']) ? $_GET['st'] : '');
 		if (empty($token)) {
 			// no security token, continue anonymously, remeber to check
