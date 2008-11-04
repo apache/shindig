@@ -227,9 +227,11 @@ public class RestfulXmlPeopleDisabled extends AbstractLargeRestfulTests {
     // Currently, for Shindig {pid}/@all/{uid} == {uid}/@self
     String resp = getResponse("/people/canonical/@self", "GET", extraParams,
         "xml", "application/xml");
+    
+    System.err.println("Got Response \n"+resp);
 
     XPath xp = xpathFactory.newXPath();
-    NodeList resultNodeList = (NodeList) xp.evaluate("/response/entry",
+    NodeList resultNodeList = (NodeList) xp.evaluate("/response/person",
         new InputSource(new StringReader(resp)), XPathConstants.NODESET);
     assertEquals(1, resultNodeList.getLength());
 
@@ -490,6 +492,9 @@ public class RestfulXmlPeopleDisabled extends AbstractLargeRestfulTests {
     // Currently, for Shindig @all == @friends
     String resp = getResponse("/people/john.doe/@friends", "GET", extraParams,
         "xml", "application/xml");
+    
+    System.err.println("Got Response \n"+resp);
+
     XPath xp = xpathFactory.newXPath();
     NodeList resultNodeList = (NodeList) xp.evaluate("/response/entry",
         new InputSource(new StringReader(resp)), XPathConstants.NODESET);
@@ -521,9 +526,11 @@ public class RestfulXmlPeopleDisabled extends AbstractLargeRestfulTests {
 
     String resp = getResponse("/people/john.doe/@friends", "GET", extraParams,
         "xml", "application/xml");
+    
+    System.err.println("Got Response \n"+resp);
 
     XPath xp = xpathFactory.newXPath();
-    NodeList resultNodeList = (NodeList) xp.evaluate("/response/entry",
+    NodeList resultNodeList = (NodeList) xp.evaluate("/response",
         new InputSource(new StringReader(resp)), XPathConstants.NODESET);
     assertEquals(1, resultNodeList.getLength());
 
@@ -542,7 +549,7 @@ public class RestfulXmlPeopleDisabled extends AbstractLargeRestfulTests {
     resp = getResponse("/people/john.doe/@friends", "GET", extraParams, "xml",
         "application/xml");
     xp = xpathFactory.newXPath();
-    resultNodeList = (NodeList) xp.evaluate("/response/entry", new InputSource(
+    resultNodeList = (NodeList) xp.evaluate("/response", new InputSource(
         new StringReader(resp)), XPathConstants.NODESET);
     assertEquals(1, resultNodeList.getLength());
 

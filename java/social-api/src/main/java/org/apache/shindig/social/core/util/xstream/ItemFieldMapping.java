@@ -17,13 +17,57 @@
  */
 package org.apache.shindig.social.core.util.xstream;
 
+import com.thoughtworks.xstream.mapper.Mapper.ImplicitCollectionMapping;
+
 /**
+ * <p>
  * ItemFieldMapping defines a mapping of a class within a class to an element
  * name. Where classes are tested, the must implement or extend the specified
  * classes, unlike the standard behaviour of XStream they dont need to be the
  * classes in question.
+ * </p>
+ * <p>
+ * The structure is used for implicit collections of the form *
+ * </p>
+ *
+ * <pre>
+ * &lt;outerobject&gt;
+ *    &lt;listelement&gt;
+ *       &lt;objectcontent&gt;
+ *    &lt;/listelement&gt;
+ *    &lt;listelement&gt;
+ *       &lt;objectcontent&gt;
+ *    &lt;/listelement&gt;
+ * ...
+ * &lt;/outerobject&gt;
+ * </pre>
+ * <p>
+ * or
+ * </p>
+ *
+ * <pre>
+ * &lt;person&gt;
+ *     &lt;emails&gt;
+ *        &lt;type&gt;&lt;/type&gt;
+ *        &lt;value&gt;&lt;/value&gt;
+ *     &lt;/emails&gt;
+ *     &lt;emails&gt;
+ *        &lt;type&gt;&lt;/type&gt;
+ *        &lt;value&gt;&lt;/value&gt;
+ *     &lt;/emails&gt;
+ *     &lt;emails&gt;
+ *        &lt;type&gt;&lt;/type&gt;
+ *        &lt;value&gt;&lt;/value&gt;
+ *     &lt;/emails&gt;
+ *     ...
+ * &lt;/person&gt;
+ * </pre>
+ * <p>
+ * would be specified with NewItemFieldMapping(Person.class, "emails",
+ * ListField.class, "emails");
+ * </p>
  */
-public class ItemFieldMapping {
+public class ItemFieldMapping implements ImplicitCollectionMapping {
 
   /**
    * The Class that the field is defined in.
@@ -34,9 +78,13 @@ public class ItemFieldMapping {
    */
   private Class<?> itemType;
   /**
+   * The name of the fields in the class (get and set methods)
+   */
+  private String fieldName;
+  /**
    * The name of the element that should be used for this field.
    */
-  private String elementName;
+  private String itemFieldName;
 
   /**
    * Create a Item Field Mapping object specifying that where the class itemType
@@ -44,18 +92,21 @@ public class ItemFieldMapping {
    * Element Name.
    *
    * @param definedIn
-   *          the class which contains the class of interest.
+   *          the class which contains the method
+   * @param fieldName
+   *          the name of the method/field in the class.
    * @param itemType
-   *          the class of the class of interest.
-   * @param elementName
-   *          the element name to use for this class.
+   *          the type of the method/field in the class.
+   * @param itemFieldName
+   *          the name of element in the xml
    *
    */
-  public ItemFieldMapping(Class<?> definedIn, Class<?> itemType,
-      String elementName) {
+  public ItemFieldMapping(Class<?> definedIn, String fieldName,
+      Class<?> itemType, String itemFieldName) {
     this.definedIn = definedIn;
     this.itemType = itemType;
-    this.elementName = elementName;
+    this.itemFieldName = itemFieldName;
+    this.fieldName = fieldName;
   }
 
   /**
@@ -75,11 +126,30 @@ public class ItemFieldMapping {
         .isAssignableFrom(itemType));
   }
 
+  public boolean matches(Class<?> definedIn, String fieldName) {
+    return (this.definedIn.isAssignableFrom(definedIn) && this.fieldName
+        .equals(fieldName));
+  }
+
   /**
-   * @return the element name for this ItemFieldMapping.
+   * @return
    */
-  public String getElementName() {
-    return elementName;
+  public String getFieldName() {
+    return fieldName;
+  }
+
+  /**
+   * @return
+   */
+  public String getItemFieldName() {
+    return itemFieldName;
+  }
+
+  /**
+   * @return
+   */
+  public Class<?> getItemType() {
+    return itemType;
   }
 
 }

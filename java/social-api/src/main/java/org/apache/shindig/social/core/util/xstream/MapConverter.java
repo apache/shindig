@@ -166,8 +166,6 @@ public class MapConverter extends AbstractCollectionConverter {
   // API is not generic
   public boolean canConvert(Class clazz) {
     boolean convert = (Map.class.isAssignableFrom(clazz));
-    if (log.isDebugEnabled()) {
-    }
     return convert;
   }
 

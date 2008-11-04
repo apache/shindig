@@ -3,15 +3,13 @@
    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xsi:schemaLocation="http://ns.opensocial.org/2008/opensocial classpath:opensocial.xsd">
   <aboutMe></aboutMe>
+  <activities>Activity1</activities>
   <accounts>
     <domain>Domain</domain>
     <primary>true</primary>
     <userid>useid</userid>
     <username>username</username>
   </accounts>
-  <activities>
-    <activity>Activity1</activity>    
-  </activities>
   <anniversary>2001-10-26T21:32:52</anniversary>
   <birthday>2001-10-26T21:32:52</birthday>
   <bodyType></bodyType>
@@ -44,8 +42,8 @@
   <nickname></nickname>
   <organizations></organizations>
   <pets></pets>
-  <phoneNumbers></phoneNumbers>
   <photos></photos>
+  <phoneNumbers></phoneNumbers>
   <politicalViews></politicalViews>
   <preferredUsername></preferredUsername>
   <profileSong></profileSong>
