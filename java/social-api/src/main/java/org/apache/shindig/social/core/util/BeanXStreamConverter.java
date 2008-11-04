@@ -33,6 +33,7 @@ import org.apache.shindig.social.core.util.xstream.ThreadSafeWriterStack;
 import org.apache.shindig.social.core.util.xstream.WriterStack;
 import org.apache.shindig.social.core.util.xstream.XStreamConfiguration;
 import org.apache.shindig.social.opensocial.service.BeanConverter;
+import org.apache.shindig.social.opensocial.spi.DataCollection;
 import org.apache.shindig.social.opensocial.spi.RestfulCollection;
 
 import org.apache.commons.logging.Log;
@@ -122,6 +123,13 @@ public class BeanXStreamConverter implements BeanConverter {
     } else if (obj instanceof RestfulCollection) {
       ConverterConfig cc = converterMap
           .get(XStreamConfiguration.ConverterSet.COLLECTION);
+      cc.mapper.setBaseObject(obj); // thread safe method
+      String result = cc.xstream.toXML(obj);
+      log.debug("Result is " + result);
+      return result;
+    } else if (obj instanceof DataCollection) {
+      ConverterConfig cc = converterMap
+          .get(XStreamConfiguration.ConverterSet.MAP);
       cc.mapper.setBaseObject(obj); // thread safe method
       String result = cc.xstream.toXML(obj);
       log.debug("Result is " + result);

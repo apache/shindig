@@ -70,50 +70,59 @@ public abstract class AbstractLargeRestfulTests extends TestCase {
   @Override
   protected void setUp() throws Exception {
     Injector injector = Guice.createInjector(new SocialApiTestsGuiceModule());
-    
+
     servlet = new DataServiceServlet();
 
     servlet.setHandlerDispatcher(injector.getInstance(HandlerDispatcher.class));
-    servlet.setBeanConverters(new BeanJsonConverter(injector), new BeanXStreamConverter(new XStream081Configuration()),
+    servlet.setBeanConverters(new BeanJsonConverter(injector),
+        new BeanXStreamConverter(new XStream081Configuration()),
         new BeanXStreamAtomConverter(new XStream081Configuration()));
 
     req = EasyMock.createMock(HttpServletRequest.class);
     res = EasyMock.createMock(HttpServletResponse.class);
   }
 
-  protected String getResponse(String path, String method, String format, String contentType) throws Exception {
-    return getResponse(path, method, Maps.<String, String>newHashMap(), "", format, contentType);
+  protected String getResponse(String path, String method, String format,
+      String contentType) throws Exception {
+    return getResponse(path, method, Maps.<String, String> newHashMap(), "",
+        format, contentType);
   }
 
   protected String getResponse(String path, String method,
-      Map<String, String> extraParams, String format, String contentType) throws Exception {
+      Map<String, String> extraParams, String format, String contentType)
+      throws Exception {
     return getResponse(path, method, extraParams, "", format, contentType);
   }
 
-  protected String getResponse(String path, String method, String postData, String format, String contentType) throws Exception {
-    return getResponse(path, method, Maps.<String, String>newHashMap(), postData, format, contentType);
+  protected String getResponse(String path, String method, String postData,
+      String format, String contentType) throws Exception {
+    return getResponse(path, method, Maps.<String, String> newHashMap(),
+        postData, format, contentType);
   }
 
-  protected String getResponse(String path, String method, Map<String, String> extraParams,
-      String postData, String format, String contentType) throws Exception {
+  protected String getResponse(String path, String method,
+      Map<String, String> extraParams, String postData, String format,
+      String contentType) throws Exception {
     EasyMock.expect(req.getCharacterEncoding()).andStubReturn("UTF-8");
     EasyMock.expect(req.getPathInfo()).andStubReturn(path);
     EasyMock.expect(req.getMethod()).andStubReturn(method);
     EasyMock.expect(req.getParameter("format")).andStubReturn(format);
-    EasyMock.expect(req.getParameter("X-HTTP-Method-Override")).andStubReturn(method);
+    EasyMock.expect(req.getParameter("X-HTTP-Method-Override")).andStubReturn(
+        method);
 
-    EasyMock.expect(req.getAttribute(EasyMock.isA(String.class))).andReturn(FAKE_GADGET_TOKEN);
+    EasyMock.expect(req.getAttribute(EasyMock.isA(String.class))).andReturn(
+        FAKE_GADGET_TOKEN);
 
     Vector<String> vector = new Vector<String>(extraParams.keySet());
     EasyMock.expect(req.getParameterNames()).andStubReturn(vector.elements());
 
     for (Map.Entry<String, String> entry : extraParams.entrySet()) {
       if (entry.getValue() != null) {
-        EasyMock.expect(req.getParameterValues(entry.getKey()))
-            .andStubReturn(new String[]{entry.getValue()});
+        EasyMock.expect(req.getParameterValues(entry.getKey())).andStubReturn(
+            new String[] { entry.getValue() });
       } else {
-        EasyMock.expect(req.getParameterValues(entry.getKey()))
-            .andStubReturn(new String[]{});
+        EasyMock.expect(req.getParameterValues(entry.getKey())).andStubReturn(
+            new String[] {});
       }
     }
 
@@ -123,7 +132,8 @@ public abstract class AbstractLargeRestfulTests extends TestCase {
 
     final InputStream stream = new ByteArrayInputStream(postData.getBytes());
     ServletInputStream servletStream = new ServletInputStream() {
-      @Override public int read() throws IOException {
+      @Override
+      public int read() throws IOException {
         return stream.read();
       }
     };
@@ -150,11 +160,12 @@ public abstract class AbstractLargeRestfulTests extends TestCase {
 
   /**
    * parse entry.content xml into a Map<> struct
-   *
-   * @param str input content string
+   * 
+   * @param str
+   *          input content string
    * @return the map<> of <name, value> pairs from the content xml
    * @throws javax.xml.stream.XMLStreamException
-   *          If the str is not valid xml
+   *           If the str is not valid xml
    */
   protected Map<String, String> parseXmlContent(String str)
       throws XMLStreamException {
@@ -175,17 +186,19 @@ public abstract class AbstractLargeRestfulTests extends TestCase {
           String value = parser.getText();
           columns.put(name, value);
         }
-      } 
+      }
     }
     return columns;
   }
-  
+
   /**
    * Converts a node which child nodes into a map keyed on element names
    * containing the text inside each child node.
-   *
-   * @param n the node to convert.
-   * @return a map keyed on element name, containing the contents of each element.
+   * 
+   * @param n
+   *          the node to convert.
+   * @return a map keyed on element name, containing the contents of each
+   *         element.
    */
   protected Map<String, List<String>> childNodesToMap(Node n) {
     Map<String, List<String>> v = new HashMap<String, List<String>>();
@@ -194,60 +207,57 @@ public abstract class AbstractLargeRestfulTests extends TestCase {
       Node nv = result.item(i);
       if (nv.getNodeType() == Node.ELEMENT_NODE) {
         List<String> l = v.get(nv.getLocalName());
-        if ( l == null ) {
+        if (l == null) {
           l = new ArrayList<String>();
-          v.put(nv.getLocalName(),l);
+          v.put(nv.getLocalName(), l);
         }
         l.add(nv.getTextContent());
       }
     }
     return v;
   }
-  
-  
+
   /**
-   * Converts 
-   * <entry>
-   *    <key>k</key>
-   *    <value>
-   *       <entry>
-   *         <key>count</key>
-   *         <value>val</value>
-   *       </entry>
-   *       <entry>
-   *         <key>lastUpdate</key>
-   *         <value>val</value>
-   *       </entry>
-   *    </value>
-   * </entry>
+   * Converts <entry> <key>k</key> <value> <entry> <key>count</key>
+   * <value>val</value> </entry> <entry> <key>lastUpdate</key>
+   * <value>val</value> </entry> </value> </entry>
    * 
-   * To map.get("k").get("count") 
+   * To map.get("k").get("count")
+   * 
    * @param result
    * @return
    */
-  protected Map<String, Map<String, List<String>>> childNodesToMapofMap(NodeList result) {
+  protected Map<String, Map<String, List<String>>> childNodesToMapofMap(
+      NodeList result) {
     Map<String, Map<String, List<String>>> v = new HashMap<String, Map<String, List<String>>>();
-    for ( int i = 0; i < 3; i++ ) {
-      Node entry = result.item(i);
-      NodeList keyValue = entry.getChildNodes();
-      assertEquals(2, keyValue.getLength());
-      Node key = keyValue.item(0);
-      Node value = keyValue.item(1);
-      if ( "key".equals(keyValue.item(1).getNodeName()) ) {
-        key = value;
-        value = keyValue.item(0);
-      }      
-      NodeList entries = value.getChildNodes();
-      for ( int j = 0; j < entries.getLength(); j++) {
-        Map<String, List<String>> ve = childNodesToMap(entries.item(j));
-        assertTrue(ve.containsKey("key"));
-        v.put(key.getTextContent(), ve);
+    for (int i = 0; i < result.getLength(); i++) {
+      Map<String, List<Node>> keyValue = childNodesToNodeMap(result.item(i));
+
+      assertEquals(2, keyValue.size());
+      assertTrue(keyValue.containsKey("key"));
+      assertTrue(keyValue.containsKey("value"));
+      Node valueNode = keyValue.get("value").get(0);
+      Node key = keyValue.get("key").get(0);
+      NodeList entryList = valueNode.getChildNodes();
+      Map<String, List<String>> pv = new HashMap<String, List<String>>();
+      v.put(key.getTextContent(), pv);
+      for (int j = 0; j < entryList.getLength(); j++) {
+        Node n = entryList.item(j);
+        if ("entry".equals(n.getNodeName())) {
+          Map<String, List<String>> ve = childNodesToMap(entryList.item(j));
+          assertTrue(ve.containsKey("key"));
+          List<String> l = pv.get(ve.get("key").get(0));
+          if ( l == null ) {
+            l = new ArrayList<String>();
+            pv.put(ve.get("key").get(0), l);
+          }
+          l.add(ve.get("value").get(0));
+        }
       }
     }
     return v;
   }
-  
-  
+
   /**
    * @param personNode
    * @return
@@ -259,15 +269,14 @@ public abstract class AbstractLargeRestfulTests extends TestCase {
       Node nv = result.item(i);
       if (nv.getNodeType() == Node.ELEMENT_NODE) {
         List<Node> l = v.get(nv.getLocalName());
-        if ( l == null ) {
+        if (l == null) {
           l = new ArrayList<Node>();
-          v.put(nv.getLocalName(),l);
+          v.put(nv.getLocalName(), l);
         }
         l.add(nv);
       }
     }
     return v;
   }
-
 
 }

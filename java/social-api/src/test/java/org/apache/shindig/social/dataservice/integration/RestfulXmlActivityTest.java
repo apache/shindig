@@ -70,7 +70,6 @@ public class RestfulXmlActivityTest extends AbstractLargeRestfulTests {
   public void testGetActivityJson() throws Exception {
     String resp = getResponse("/activities/john.doe/@self/@app/1", "GET",
         "xml", "application/xml");
-    System.err.println("Got:\n" + resp);
 
     InputSource source = new InputSource(new StringReader(resp));
     XPath xp = xpathFactory.newXPath();
@@ -129,7 +128,6 @@ public class RestfulXmlActivityTest extends AbstractLargeRestfulTests {
   public void testGetActivitiesJson() throws Exception {
     String resp = getResponse("/activities/john.doe/@self", "GET", "xml",
         "application/xml");
-    System.err.println("Got testGetActivitiesJson:\n" + resp);
     XPath xp = xpathFactory.newXPath();
     assertEquals("0", xp.evaluate("/response/startIndex", new InputSource(
         new StringReader(resp))));
@@ -189,8 +187,7 @@ public class RestfulXmlActivityTest extends AbstractLargeRestfulTests {
   public void testGetFriendsActivitiesJson() throws Exception {
     String resp = getResponse("/activities/john.doe/@friends", "GET", "xml",
         "application/xml");
-    System.err.println("Got:\n" + resp);
-
+ 
     XPath xp = xpathFactory.newXPath();
     assertEquals("0", xp.evaluate("/response/startIndex", new InputSource(
         new StringReader(resp))));
@@ -215,11 +212,9 @@ public class RestfulXmlActivityTest extends AbstractLargeRestfulTests {
     String postData = XSDValidator.XMLDEC+"<activity><body>and dad.</body><title>hi mom!</title></activity>";
     String createResponse = getResponse("/activities/john.doe/@self", "POST",
         postData, "xml", "application/xml");
-    System.err.println("Got testCreateActivity1 " + createResponse);
 
     String resp = getResponse("/activities/john.doe/@self", "GET", "xml",
         "application/xml");
-    System.err.println("Got testCreateActivity2 " + resp);
 
     XPath xp = xpathFactory.newXPath();
     assertEquals("0", xp.evaluate("/response/startIndex", new InputSource(
