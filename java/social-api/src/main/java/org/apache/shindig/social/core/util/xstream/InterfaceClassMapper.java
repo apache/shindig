@@ -80,6 +80,11 @@ public class InterfaceClassMapper extends MapperWrapper {
    * as it is shared over multiple threads.
    */
   private WriterStack writerStack;
+  
+  /**
+   * A list of explicit mapping specifications. 
+   */
+  private List<ItemFieldMapping> itemFieldMappings;
 
   /**
    * Create an Interface Class Mapper with a configuration.
@@ -105,6 +110,7 @@ public class InterfaceClassMapper extends MapperWrapper {
   public InterfaceClassMapper(WriterStack writerStack, Mapper wrapped,
       List<ClassFieldMapping> elementMappingList,
       List<ClassFieldMapping> listElementMappingList,
+      List<ItemFieldMapping> itemFieldMappings,
       Map<String, Class<?>[]> omitMap, Map<String, Class<?>> elementClassMap) {
     super(wrapped);
     this.elementClassMap = elementClassMap;
@@ -112,6 +118,7 @@ public class InterfaceClassMapper extends MapperWrapper {
     this.listElementMappingList = listElementMappingList;
     this.omitMap = omitMap;
     this.writerStack = writerStack;
+    this.itemFieldMappings = itemFieldMappings;
   }
 
   /**
@@ -315,6 +322,21 @@ public class InterfaceClassMapper extends MapperWrapper {
       log.debug("====defaultImplementationOf==Class " + type + " is " + clazz);
     }
     return clazz;
+  }
+  
+  /**
+   * {@inheritDoc}
+   * @see com.thoughtworks.xstream.mapper.MapperWrapper#getImplicitCollectionDefForFieldName(java.lang.Class, java.lang.String)
+   */
+  @Override
+  public ImplicitCollectionMapping getImplicitCollectionDefForFieldName(
+      Class itemType, String fieldName) {
+    for ( ItemFieldMapping ifm : itemFieldMappings) {
+      if ( ifm.matches(itemType, fieldName) ) {
+        return ifm;
+      }
+    }
+    return super.getImplicitCollectionDefForFieldName(itemType, fieldName);
   }
 
 }

@@ -39,9 +39,15 @@ import javax.xml.validation.Validator;
  */
 public class XSDValidator {
   /**
-   * The schema langiage being used.
+   * The schema language being used.
    */
   private static final String W3C_XML_SCHEMA = "http://www.w3.org/2001/XMLSchema";
+  
+  /**
+   * The XML declaration
+   */
+  public static final String XMLDEC = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n";
+
   protected static final Log log = LogFactory.getLog(XSDValidator.class);
 
   /**
@@ -96,4 +102,50 @@ public class XSDValidator {
 
     return errors.toString();
   }
+  
+  
+  /**
+   * Process the response string to strip the container element and insert the
+   * opensocial schema.
+   * 
+   * @param xml
+   * @return
+   */
+  public static String insertSchema(String xml, String schemaStatement, boolean container) {
+    if (xml == null || xml.trim().length() == 0) {
+      return xml;
+    }
+    if (xml.startsWith("<response>")) {
+      xml = xml.substring("<response>".length());
+    }
+    if (xml.endsWith("</response>")) {
+      xml = xml.substring(0, xml.length() - "</response>".length());
+    }
+    xml = xml.trim();
+
+    int gt = xml.indexOf('>');
+    if (gt > 0) {
+      return XMLDEC + xml.substring(0, gt) + schemaStatement + xml.substring(gt);
+    }
+    return xml;
+  }
+
+  /**
+   * @param xmlFragment
+   * @return a list of errors
+   */
+  public static String validate(String xmlFragment, String schemaStatement, String schemaResource ) {
+    String xml = XSDValidator.insertSchema(xmlFragment, schemaStatement, true);
+    log.debug("Valiating " + xml);
+    String errors = XSDValidator.validate(xml, XSDValidator.class
+        .getResourceAsStream(schemaResource));
+    if ( !"".equals(errors) ) {
+      log.error("Failed to validate "+xml);
+    }
+    if ( !"".equals(errors) ) {
+      throw new Error("XML document does not validate \n"+errors+"\n"+xml);
+    }
+    return xml;
+  }
+
 }

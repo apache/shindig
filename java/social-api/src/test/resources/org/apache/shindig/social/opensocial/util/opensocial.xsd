@@ -4,38 +4,72 @@
   targetNamespace="http://ns.opensocial.org/2008/opensocial"
   xmlns:xs="http://www.w3.org/2001/XMLSchema">
   
-  <!--  the following element allows the tests to pass validation, its is not part of the official opensocial xsd -->
-  <xs:element name="list.container" type="tns:list.container" />
-  <xs:complexType name="list.container">
-    <xs:sequence>
-      <xs:any minOccurs="0" maxOccurs="unbounded" />
-    </xs:sequence>
+  <!--  this is a proposal for the OpenSocial 0.9 XSD. -->
+  <xs:element name="person" type="tns:Person" />
+  <xs:element name="group" type="tns:Group" />
+  <xs:element name="activity" type="tns:Activity" />
+  <xs:element name="appdata" type="tns:Appdata" />
+  
+  <xs:element name="response" type="tns:Response" />
+  
+  <xs:element name="list.container" type="xs:anyType" />
+  
+  <xs:complexType name="Response">
+    <xs:choice>
+      <xs:element name="activity" type="tns:ActivityCollection" />
+      <xs:element name="person" type="tns:PersonCollection" />
+      <xs:element name="group" type="tns:GroupCollection" />
+    </xs:choice>
   </xs:complexType>
   
-  
-  <xs:complexType name="ActivityCollection">
-    <xs:all>
-      <xs:element minOccurs="0" name="activities" type="tns:ArrayOfActivity" />
+  <xs:complexType name="Collection" abstract="true">
+    <xs:sequence>
       <xs:element minOccurs="0" name="itemsPerPage" type="xs:int" />
       <xs:element minOccurs="0" name="startIndex" type="xs:long" />
       <xs:element minOccurs="0" name="totalResults" type="xs:long" />
-    </xs:all>
-  </xs:complexType>
-  <xs:element name="ActivityCollection" type="tns:ActivityCollection" />
-  <xs:complexType name="ArrayOfActivity">
-    <xs:sequence>
-      <xs:element minOccurs="0" maxOccurs="unbounded" name="Activity" type="tns:Activity" />
     </xs:sequence>
   </xs:complexType>
-  <xs:element name="ArrayOfActivity" type="tns:ArrayOfActivity" />
+  
+  <xs:complexType name="ActivityCollection" >
+    <xs:complexContent>
+      <xs:extension base="tns:Collection">
+        <xs:sequence>
+          <xs:element minOccurs="0" maxOccurs="unbounded" name="entry" type="tns:Activity" />      
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="PersonCollection" >
+    <xs:complexContent>
+      <xs:extension base="tns:Collection">
+        <xs:sequence>
+          <xs:element minOccurs="0" maxOccurs="unbounded" name="entry" type="tns:Person" />      
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="GroupCollection" >
+    <xs:complexContent>
+      <xs:extension base="tns:Collection">
+        <xs:sequence>
+          <xs:element minOccurs="0" maxOccurs="unbounded" name="entry" type="tns:Group" />      
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  
+  
+  
   <xs:complexType name="Activity">
-    <xs:all>
+    <xs:sequence>
       <xs:element minOccurs="0" name="appId" type="xs:string" />
       <xs:element minOccurs="0" name="body" type="xs:string" />
       <xs:element minOccurs="0" name="bodyId" type="xs:string" />
       <xs:element minOccurs="0" name="externalId" type="xs:string" />
       <xs:element minOccurs="0" name="id" type="xs:string" />
-      <xs:element minOccurs="0" name="mediaItems" type="tns:ArrayOfMediaItem" />
+      <xs:element minOccurs="0" maxOccurs="unbounded" name="mediaItems" type="tns:MediaItem" />
       <xs:element minOccurs="0" name="postedTime" type="xs:long" />
       <xs:element minOccurs="0" name="priority" type="xs:double" />
       <xs:element minOccurs="0" name="streamFaviconUrl" type="xs:string" />
@@ -47,147 +81,104 @@
       <xs:element minOccurs="0" name="titleId" type="xs:string" />
       <xs:element minOccurs="0" name="url" type="xs:string" />
       <xs:element minOccurs="0" name="userId" type="xs:string" />
-    </xs:all>
-  </xs:complexType>
-  <xs:element name="Activity" type="tns:Activity" />
-  <xs:complexType name="ArrayOfMediaItem">
-    <xs:sequence>
-      <xs:element minOccurs="0" maxOccurs="unbounded" name="MediaItem" type="tns:MediaItem" />
     </xs:sequence>
   </xs:complexType>
-  <xs:element name="ArrayOfMediaItem" type="tns:ArrayOfMediaItem" />
-  <xs:complexType name="MediaItem">
-    <xs:all>
-      <xs:element minOccurs="0" name="mimeType" type="xs:string" />
-      <xs:element minOccurs="0" name="type" type="tns:MediaItemType" />
-      <xs:element minOccurs="0" name="url" type="xs:string" />
-    </xs:all>
-  </xs:complexType>
-  <xs:element name="MediaItem" type="tns:MediaItem" />
-  <xs:simpleType name="MediaItemType">
-    <xs:restriction base="xs:string">
-      <xs:enumeration value="AUDIO" />
-      <xs:enumeration value="IMAGE" />
-      <xs:enumeration value="VIDEO" />
-    </xs:restriction>
-  </xs:simpleType>
-  <xs:element name="MediaItemType" type="tns:MediaItemType" />
+  
+  
   <xs:complexType name="ActivityTemplateParams">
     <xs:all>
       <xs:element minOccurs="0" name="PersonKey" type="xs:string" />
       <xs:element minOccurs="0" name="PersonKey.DisplayName" type="xs:string" />
       <xs:element minOccurs="0" name="PersonKey.Id" type="xs:string" />
       <xs:element minOccurs="0" name="PersonKey.ProfileUrl" type="xs:string" />
-      <xs:element minOccurs="0" name="person" type="tns:person" />
+      <xs:element minOccurs="0" name="person" type="tns:Person" />
     </xs:all>
   </xs:complexType>
-  <xs:element name="ActivityTemplateParams" type="tns:ActivityTemplateParams" />
-  <xs:complexType name="person">
-    <xs:all>
+  
+  <xs:complexType name="Person">
+    <xs:sequence>
       <xs:element minOccurs="0" name="aboutMe" type="xs:string" />
-      <xs:element minOccurs="0" name="activities" type="tns:ArrayOfActivities" />
-      <xs:element minOccurs="0" name="accounts" type="tns:account"/>
+      <xs:element minOccurs="0" maxOccurs="unbounded" name="addresses" type="tns:Address" />
+      <xs:element minOccurs="0" maxOccurs="unbounded" name="activities" type="xs:string" />
+      <xs:element minOccurs="0" name="accounts" type="tns:Account"/>
       <xs:element minOccurs="0" name="anniversary" type="xs:dateTime" />
       <xs:element minOccurs="0" name="birthday" type="xs:dateTime" />
       <xs:element minOccurs="0" name="bodyType" type="tns:BodyType" />
-      <xs:element minOccurs="0" name="books" type="tns:ArrayOfBooks" />
-      <xs:element minOccurs="0" name="cars" type="tns:ArrayOfCars" />
+      <xs:element minOccurs="0" maxOccurs="unbounded" name="books" type="xs:string" />
+      <xs:element minOccurs="0" maxOccurs="unbounded" name="cars" type="xs:string" />
       <xs:element minOccurs="0" name="children" type="xs:string" />
       <xs:element minOccurs="0" name="connected" type="tns:Presence" />
       <xs:element minOccurs="0" name="currentLocation" type="tns:Address" />
       <xs:element minOccurs="0" name="displayName" type="xs:string" />
       <xs:element minOccurs="0" name="drinker" type="tns:Drinker" />
-      <xs:element minOccurs="0" name="emails" type="tns:ArrayOfEmail" />
+      <xs:element minOccurs="0" maxOccurs="unbounded" name="emails" type="tns:PluralPersonField" />
       <xs:element minOccurs="0" name="ethnicity" type="xs:string" />
       <xs:element minOccurs="0" name="fashion" type="xs:string" />
-      <xs:element minOccurs="0" name="food" type="tns:ArrayOfFoods" />
+      <xs:element minOccurs="0" maxOccurs="unbounded" name="food" type="xs:string" />
       <xs:element minOccurs="0" name="gender" type="xs:string" />
       <xs:element minOccurs="0" name="happiestWhen" type="xs:string" />
       <xs:element minOccurs="0" name="hasApp" type="xs:boolean" />
-      <xs:element minOccurs="0" name="heroes" type="tns:ArrayOfHeroes" />
+      <xs:element minOccurs="0" maxOccurs="unbounded" name="heroes" type="xs:string" />
       <xs:element minOccurs="0" name="humor" type="xs:string" />
       <xs:element minOccurs="0" name="id" type="xs:string" />
-      <xs:element minOccurs="0" name="ims" type="tns:ArrayOfIm"/>
-      <xs:element minOccurs="0" name="interests" type="tns:ArrayOfInterests" />
+      <xs:element minOccurs="0" maxOccurs="unbounded" name="ims" type="tns:PluralPersonField"/>
+      <xs:element minOccurs="0" maxOccurs="unbounded" name="interests" type="xs:string" />
       <xs:element minOccurs="0" name="jobInterests" type="xs:string" />
-      <xs:element minOccurs="0" name="languagesSpoken" type="tns:ArrayOfLanguages" />
+      <xs:element minOccurs="0" maxOccurs="unbounded" name="languagesSpoken" type="xs:string" />
       <xs:element minOccurs="0" name="livingArrangement" type="xs:string" />
       <xs:element minOccurs="0" name="lookingFor" type="xs:string" />
-      <xs:element minOccurs="0" name="movies" type="tns:ArrayOfMovies" />
-      <xs:element minOccurs="0" name="music" type="tns:ArrayOfMusic" />
-      <xs:element minOccurs="0" name="name" type="tns:name" />
+      <xs:element minOccurs="0" maxOccurs="unbounded" name="movies" type="xs:string" />
+      <xs:element minOccurs="0" maxOccurs="unbounded" name="music" type="xs:string" />
+      <xs:element minOccurs="0" name="name" type="tns:Name" />
       <xs:element minOccurs="0" name="nickname" type="xs:string" />
-      <xs:element minOccurs="0" name="organizations" type="tns:ArrayOfOrganization" />
+      <xs:element minOccurs="0" maxOccurs="unbounded" name="organizations" type="tns:Organization" />
       <xs:element minOccurs="0" name="pets" type="xs:string" />
-      <xs:element minOccurs="0" name="photos" type="tns:ArrayOfPhoto" />
-      <xs:element minOccurs="0" name="phoneNumbers" type="tns:ArrayOfPhone" />
+      <xs:element minOccurs="0" maxOccurs="unbounded" name="photos" type="tns:PluralPersonField" />
+      <xs:element minOccurs="0" maxOccurs="unbounded" name="phoneNumbers" type="tns:PluralPersonField" />
       <xs:element minOccurs="0" name="politicalViews" type="xs:string" />
       <xs:element minOccurs="0" name="preferredUsername" type="xs:string" />
       <xs:element minOccurs="0" name="profileSong" type="tns:Url" />
       <xs:element minOccurs="0" name="profileUrl" type="xs:string" />
       <xs:element minOccurs="0" name="profileVideo" type="tns:Url" />
       <xs:element minOccurs="0" name="published" type="xs:dateTime"/>
-      <xs:element minOccurs="0" name="quotes" type="tns:ArrayOfQuotes" />
-      <xs:element minOccurs="0" name="relationships" type="tns:ArrayOfRelationship" />
+      <xs:element minOccurs="0" maxOccurs="unbounded" name="quotes" type="xs:string" />
+      <xs:element minOccurs="0" maxOccurs="unbounded" name="relationships" type="xs:string" />
       <xs:element minOccurs="0" name="relationshipStatus" type="xs:string" />
       <xs:element minOccurs="0" name="religion" type="xs:string" />
       <xs:element minOccurs="0" name="romance" type="xs:string" />
       <xs:element minOccurs="0" name="scaredOf" type="xs:string" />
       <xs:element minOccurs="0" name="sexualOrientation" type="xs:string" />
       <xs:element minOccurs="0" name="smoker" type="tns:Smoker" />
-      <xs:element minOccurs="0" name="sports" type="tns:ArrayOfSports" />
-      <xs:element minOccurs="0" name="tags" type="tns:ArrayOfTags" />
+      <xs:element minOccurs="0" maxOccurs="unbounded" name="sports" type="xs:string" />
+      <xs:element minOccurs="0" maxOccurs="unbounded" name="tags" type="xs:string" />
       <xs:element minOccurs="0" name="thumbnailUrl" type="xs:string" />
-      <xs:element minOccurs="0" name="turnOffs" type="tns:ArrayOfTurnOffs" />
-      <xs:element minOccurs="0" name="turnOns" type="tns:ArrayOfTurnOns" />
-      <xs:element minOccurs="0" name="tvShows" type="tns:ArrayOfTvShows" />
+      <xs:element minOccurs="0" maxOccurs="unbounded" name="turnOffs" type="xs:string" />
+      <xs:element minOccurs="0" maxOccurs="unbounded" name="turnOns" type="xs:string" />
+      <xs:element minOccurs="0" maxOccurs="unbounded" name="tvShows" type="xs:string" />
       <xs:element minOccurs="0" name="updated" type="xs:dateTime"/>
-      <xs:element minOccurs="0" name="urls" type="tns:ArrayOfPersonUrl" />
+      <xs:element minOccurs="0" maxOccurs="unbounded" name="urls" type="tns:PluralPersonField" />
       <xs:element minOccurs="0" name="utcOffset" type="xs:int" />
-    </xs:all>
+    </xs:sequence>
   </xs:complexType>
-  <xs:element name="person" type="tns:person" />
-  <xs:element name="group" type="tns:group" />
-  <xs:complexType name="group">
+  
+  <xs:complexType name="Group">
     <xs:all>
       <xs:element minOccurs="0" name="id" type="xs:string" />
       <xs:element minOccurs="0" name="title" type="xs:string" />
     </xs:all>
   </xs:complexType>
-  <xs:element name="appdataEntry" type="tns:appdataEntry" />
-  <xs:complexType name="appdataEntry">
+  <xs:complexType name="AppdataEntry" mixed="true">
     <xs:all>
       <xs:element minOccurs="1" name="key" type="xs:string" />
-      <xs:element minOccurs="1" name="value" type="xs:string" />
+      <xs:element minOccurs="1" name="value"  type="xs:anyType" />
     </xs:all>
   </xs:complexType>
-  <xs:element name="appdata" type="tns:appdata" />
-  <xs:complexType name="appdata">
+  <xs:complexType name="Appdata">
     <xs:sequence>
-      <xs:element minOccurs="0" maxOccurs="unbounded" name="entry" type="tns:appdataEntry" />
+      <xs:element minOccurs="0" maxOccurs="unbounded" name="entry" type="tns:AppdataEntry" />
     </xs:sequence>
   </xs:complexType>
-  <xs:complexType name="ArrayOfgroup">
-    <xs:sequence>
-      <xs:element minOccurs="0" maxOccurs="unbounded" name="person" type="tns:group" />
-    </xs:sequence>
-  </xs:complexType>
-  <xs:element name="ArrayOfgroup" type="tns:ArrayOfgroup" />
-  <xs:complexType name="GroupCollection">
-    <xs:all>
-      <xs:element minOccurs="0" name="itemsPerPage" type="xs:int" />
-      <xs:element minOccurs="0" name="groups" type="tns:ArrayOfgroup" />
-      <xs:element minOccurs="0" name="startIndex" type="xs:long" />
-      <xs:element minOccurs="0" name="totalResults" type="xs:long" />
-    </xs:all>
-  </xs:complexType>
-  <xs:element name="GroupCollection" type="tns:GroupCollection" />
-  <xs:complexType name="ArrayOfActivities">
-    <xs:sequence>
-      <xs:element minOccurs="0" maxOccurs="unbounded" name="activity" type="xs:string" />
-    </xs:sequence>
-  </xs:complexType>
-  <xs:element name="ArrayOfActivities" type="tns:ArrayOfActivities" />
+  
   <xs:complexType name="BodyType">
     <xs:all>
       <xs:element minOccurs="0" name="build" type="xs:string" />
@@ -197,19 +188,7 @@
       <xs:element minOccurs="0" name="weight" type="xs:double" />
     </xs:all>
   </xs:complexType>
-  <xs:element name="BodyType" type="tns:BodyType" />
-  <xs:complexType name="ArrayOfBooks">
-    <xs:sequence>
-      <xs:element minOccurs="0" maxOccurs="unbounded" name="book" type="xs:string" />
-    </xs:sequence>
-  </xs:complexType>
-  <xs:element name="ArrayOfBooks" type="tns:ArrayOfBooks" />
-  <xs:complexType name="ArrayOfCars">
-    <xs:sequence>
-      <xs:element minOccurs="0" maxOccurs="unbounded" name="car" type="xs:string" />
-    </xs:sequence>
-  </xs:complexType>
-  <xs:element name="ArrayOfCars" type="tns:ArrayOfCars" />
+  
   <xs:complexType name="Address">
     <xs:all>
       <xs:element minOccurs="0" name="country" type="xs:string" />
@@ -226,102 +205,17 @@
       <xs:element minOccurs="0" name="formatted" type="xs:string" />
     </xs:all>
   </xs:complexType>
-  <xs:element name="Address" type="tns:Address" />
-  <xs:complexType name="Drinker">
-    <xs:all>
-      <xs:element minOccurs="0" name="displayvalue" type="xs:string" />
-      <xs:element minOccurs="0" name="key" type="tns:DrinkerType" />
-    </xs:all>
-  </xs:complexType>
-  <xs:element name="Drinker" type="tns:Drinker" />
-  <xs:simpleType name="DrinkerType">
-    <xs:restriction base="xs:string">
-      <xs:enumeration value="HEAVILY" />
-      <xs:enumeration value="NO" />
-      <xs:enumeration value="OCCASIONALLY" />
-      <xs:enumeration value="QUIT" />
-      <xs:enumeration value="QUITTING" />
-      <xs:enumeration value="REGULARLY" />
-      <xs:enumeration value="SOCIALLY" />
-      <xs:enumeration value="YES" />
-    </xs:restriction>
-  </xs:simpleType>
-  <xs:element name="DrinkerType" type="tns:DrinkerType" />
-  <xs:complexType name="ArrayOfPersonUrl">
-    <xs:sequence>
-      <xs:element minOccurs="0" maxOccurs="unbounded" name="url" type="tns:PluralPersonField" />
-    </xs:sequence>
-  </xs:complexType>
-  <xs:element name="ArrayOfPersonUrl" type="tns:ArrayOfPersonUrl" />
-  <xs:complexType name="ArrayOfEmail">
-    <xs:sequence>
-      <xs:element minOccurs="0" maxOccurs="unbounded" name="email" type="tns:PluralPersonField" />
-    </xs:sequence>
-  </xs:complexType>
-  <xs:element name="ArrayOfEmail" type="tns:ArrayOfEmail" />
-  <xs:complexType name="PluralPersonField">
-    <xs:all>
-      <xs:element minOccurs="0" name="value" type="xs:string" />
-      <xs:element minOccurs="0" name="type" type="xs:string" />
-      <xs:element minOccurs="0" name="primary" type="xs:boolean"/>
-    </xs:all>
-  </xs:complexType>
-  <xs:complexType name="ArrayOfIm">
-    <xs:sequence>
-      <xs:element minOccurs="0" maxOccurs="unbounded" name="im" type="tns:PluralPersonField" />
-    </xs:sequence>
-  </xs:complexType>
-  <xs:element name="ArrayOfIm" type="tns:ArrayOfIm" />
-  <xs:complexType name="ArrayOfPhoto">
-    <xs:sequence>
-      <xs:element minOccurs="0" maxOccurs="unbounded" name="photo" type="tns:PluralPersonField" />
-    </xs:sequence>
-  </xs:complexType>
-  <xs:element name="ArrayOfPhoto" type="tns:ArrayOfPhoto" />
-  <xs:complexType name="ArrayOfRelationship">
-    <xs:sequence>
-      <xs:element minOccurs="0" maxOccurs="unbounded" name="relationship" type="xs:string" />
-    </xs:sequence>
-  </xs:complexType>
-  <xs:element name="ArrayOfRelationship" type="tns:ArrayOfRelationship" />
-  <xs:element name="account" type="tns:account" />
-  <xs:complexType name="ArrayOfAccount">
-    <xs:sequence>
-      <xs:element minOccurs="0" maxOccurs="unbounded" name="account" type="tns:account" />
-    </xs:sequence>
-  </xs:complexType>
-  <xs:element name="ArrayOfAccount" type="tns:ArrayOfAccount" />
-  <xs:complexType name="account">
+  
+  
+  <xs:complexType name="Account">
     <xs:all>
       <xs:element minOccurs="0" name="domain" type="xs:string" />
       <xs:element minOccurs="0" name="primary" type="xs:boolean"/>
       <xs:element minOccurs="0" name="userid" type="xs:string" />
       <xs:element minOccurs="0" name="username" type="xs:string" />
     </xs:all>
-  </xs:complexType>  <xs:complexType name="ArrayOfFoods">
-    <xs:sequence>
-      <xs:element minOccurs="0" maxOccurs="unbounded" name="food" type="xs:string" />
-    </xs:sequence>
-  </xs:complexType>
-  <xs:element name="ArrayOfFoods" type="tns:ArrayOfFoods" />
-  <xs:complexType name="ArrayOfHeroes">
-    <xs:sequence>
-      <xs:element minOccurs="0" maxOccurs="unbounded" name="hero" type="xs:string" />
-    </xs:sequence>
-  </xs:complexType>
-  <xs:element name="ArrayOfHeroes" type="tns:ArrayOfHeroes" />
-  <xs:complexType name="ArrayOfInterests">
-    <xs:sequence>
-      <xs:element minOccurs="0" maxOccurs="unbounded" name="interest" type="xs:string" />
-    </xs:sequence>
-  </xs:complexType>
-  <xs:element name="ArrayOfInterests" type="tns:ArrayOfInterests" />
-  <xs:complexType name="ArrayOfOrganization">
-    <xs:sequence>
-      <xs:element minOccurs="0" maxOccurs="unbounded" name="Organization" type="tns:Organization" />
-    </xs:sequence>
-  </xs:complexType>
-  <xs:element name="ArrayOfOrganization" type="tns:ArrayOfOrganization" />
+  </xs:complexType> 
+  
   <xs:complexType name="Organization">
     <xs:all>
       <xs:element minOccurs="0" name="department" type="xs:string" />
@@ -334,26 +228,7 @@
       <xs:element minOccurs="0" name="title" type="xs:string" />
     </xs:all>
   </xs:complexType>
-  <xs:element name="Organization" type="tns:Organization" />
-  <xs:complexType name="ArrayOfLanguages">
-    <xs:sequence>
-      <xs:element minOccurs="0" maxOccurs="unbounded" name="language" type="xs:string" />
-    </xs:sequence>
-  </xs:complexType>
-  <xs:element name="ArrayOfLanguages" type="tns:ArrayOfLanguages" />
-  <xs:complexType name="ArrayOfMovies">
-    <xs:sequence>
-      <xs:element minOccurs="0" maxOccurs="unbounded" name="movie" type="xs:string" />
-    </xs:sequence>
-  </xs:complexType>
-  <xs:element name="ArrayOfMovies" type="tns:ArrayOfMovies" />
-  <xs:complexType name="ArrayOfMusic">
-    <xs:sequence>
-      <xs:element minOccurs="0" maxOccurs="unbounded" name="music" type="xs:string" />
-    </xs:sequence>
-  </xs:complexType>
-  <xs:element name="ArrayOfMusic" type="tns:ArrayOfMusic" />
-  <xs:complexType name="name">
+  <xs:complexType name="Name">
     <xs:all>
       <xs:element minOccurs="0" name="additionalName" type="xs:string" />
       <xs:element minOccurs="0" name="familyName" type="xs:string" />
@@ -362,14 +237,57 @@
       <xs:element minOccurs="0" name="formatted" type="xs:string" />
     </xs:all>
   </xs:complexType>
-  <xs:element name="name" type="tns:name" />
+  
+  <xs:complexType name="Url">
+    <xs:all>
+      <xs:element minOccurs="0" name="address" type="xs:string" />
+      <xs:element minOccurs="0" name="linkText" type="xs:string" />
+      <xs:element minOccurs="0" name="type" type="xs:string" />
+    </xs:all>
+  </xs:complexType>
+  
+  <xs:complexType name="MediaItem">
+    <xs:all>
+      <xs:element minOccurs="0" name="mimeType" type="xs:string" />
+      <xs:element minOccurs="0" name="type" type="tns:MediaItemType" />
+      <xs:element minOccurs="0" name="url" type="xs:string" />
+    </xs:all>
+  </xs:complexType>
+  <xs:simpleType name="MediaItemType">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="AUDIO" />
+      <xs:enumeration value="IMAGE" />
+      <xs:enumeration value="VIDEO" />
+    </xs:restriction>
+  </xs:simpleType>
+  
+  
+  <xs:complexType name="Drinker">
+    <xs:all>
+      <xs:element minOccurs="0" name="displayvalue" type="xs:string" />
+      <xs:element minOccurs="0" name="key" type="tns:DrinkerType" />
+    </xs:all>
+  </xs:complexType>
+  <xs:simpleType name="DrinkerType">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="HEAVILY" />
+      <xs:enumeration value="NO" />
+      <xs:enumeration value="OCCASIONALLY" />
+      <xs:enumeration value="QUIT" />
+      <xs:enumeration value="QUITTING" />
+      <xs:enumeration value="REGULARLY" />
+      <xs:enumeration value="SOCIALLY" />
+      <xs:enumeration value="YES" />
+    </xs:restriction>
+  </xs:simpleType>
+  
+  
   <xs:complexType name="Presence">
     <xs:all>
       <xs:element minOccurs="0" name="displayvalue" type="xs:string" />
       <xs:element minOccurs="0" name="key" type="tns:PresenceType" />
     </xs:all>
   </xs:complexType>
-  <xs:element name="Presence" type="tns:Presence" />
   <xs:simpleType name="PresenceType">
     <xs:restriction base="xs:string">
       <xs:enumeration value="AWAY" />
@@ -380,34 +298,14 @@
       <xs:enumeration value="XA" />
     </xs:restriction>
   </xs:simpleType>
-  <xs:element name="PresenceType" type="tns:PresenceType" />
-  <xs:complexType name="ArrayOfPhone">
-    <xs:sequence>
-      <xs:element minOccurs="0" maxOccurs="unbounded" name="phone" type="tns:PluralPersonField" />
-    </xs:sequence>
-  </xs:complexType>
-  <xs:element name="ArrayOfPhone" type="tns:ArrayOfPhone" />
-  <xs:complexType name="Url">
-    <xs:all>
-      <xs:element minOccurs="0" name="address" type="xs:string" />
-      <xs:element minOccurs="0" name="linkText" type="xs:string" />
-      <xs:element minOccurs="0" name="type" type="xs:string" />
-    </xs:all>
-  </xs:complexType>
-  <xs:element name="Url" type="tns:Url" />
-  <xs:complexType name="ArrayOfQuotes">
-    <xs:sequence>
-      <xs:element minOccurs="0" maxOccurs="unbounded" name="quote" type="xs:string" />
-    </xs:sequence>
-  </xs:complexType>
-  <xs:element name="ArrayOfQuotes" type="tns:ArrayOfQuotes" />
+  
+  
   <xs:complexType name="Smoker">
     <xs:all>
       <xs:element minOccurs="0" name="displayvalue" type="xs:string" />
       <xs:element minOccurs="0" name="key" type="tns:SmokerType" />
     </xs:all>
   </xs:complexType>
-  <xs:element name="Smoker" type="tns:Smoker" />
   <xs:simpleType name="SmokerType">
     <xs:restriction base="xs:string">
       <xs:enumeration value="HEAVILY" />
@@ -420,98 +318,35 @@
       <xs:enumeration value="YES" />
     </xs:restriction>
   </xs:simpleType>
-  <xs:element name="SmokerType" type="tns:SmokerType" />
-  <xs:complexType name="ArrayOfSports">
-    <xs:sequence>
-      <xs:element minOccurs="0" maxOccurs="unbounded" name="sport" type="xs:string" />
-    </xs:sequence>
-  </xs:complexType>
-  <xs:element name="ArrayOfSports" type="tns:ArrayOfSports" />
-  <xs:complexType name="ArrayOfTags">
-    <xs:sequence>
-      <xs:element minOccurs="0" maxOccurs="unbounded" name="tag" type="xs:string" />
-    </xs:sequence>
-  </xs:complexType>
-  <xs:element name="ArrayOfTags" type="tns:ArrayOfTags" />
-  <xs:complexType name="ArrayOfTurnOffs">
-    <xs:sequence>
-      <xs:element minOccurs="0" maxOccurs="unbounded" name="turnOff" type="xs:string" />
-    </xs:sequence>
-  </xs:complexType>
-  <xs:element name="ArrayOfTurnOffs" type="tns:ArrayOfTurnOffs" />
-  <xs:complexType name="ArrayOfTurnOns">
-    <xs:sequence>
-      <xs:element minOccurs="0" maxOccurs="unbounded" name="turnOn" type="xs:string" />
-    </xs:sequence>
-  </xs:complexType>
-  <xs:element name="ArrayOfTurnOns" type="tns:ArrayOfTurnOns" />
-  <xs:complexType name="ArrayOfTvShows">
-    <xs:sequence>
-      <xs:element minOccurs="0" maxOccurs="unbounded" name="tvShow" type="xs:string" />
-    </xs:sequence>
-  </xs:complexType>
-  <xs:element name="ArrayOfTvShows" type="tns:ArrayOfTvShows" />
-  <xs:complexType name="ArrayOfUrl">
-    <xs:sequence>
-      <xs:element minOccurs="0" maxOccurs="unbounded" name="Url" type="tns:Url" />
-    </xs:sequence>
-  </xs:complexType>
-  <xs:element name="ArrayOfUrl" type="tns:ArrayOfUrl" />
-  <xs:complexType name="UrlCollection">
-    <xs:all>
-      <xs:element minOccurs="0" name="itemsPerPage" type="xs:int" />
-      <xs:element minOccurs="0" name="startIndex" type="xs:long" />
-      <xs:element minOccurs="0" name="totalResults" type="xs:long" />
-      <xs:element minOccurs="0" name="urls" type="tns:ArrayOfUrl" />
-    </xs:all>
-  </xs:complexType>
-  <xs:element name="UrlCollection" type="tns:UrlCollection" />
+  
   <xs:complexType name="CreateActivityPriority">
     <xs:all>
       <xs:element minOccurs="0" name="displayvalue" type="xs:string" />
       <xs:element minOccurs="0" name="key" type="tns:CreateActivityPriorityType" />
     </xs:all>
   </xs:complexType>
-  <xs:element name="CreateActivityPriority" type="tns:CreateActivityPriority" />
   <xs:simpleType name="CreateActivityPriorityType">
     <xs:restriction base="xs:string">
       <xs:enumeration value="HIGH" />
       <xs:enumeration value="LOW" />
     </xs:restriction>
   </xs:simpleType>
-  <xs:element name="CreateActivityPriorityType" type="tns:CreateActivityPriorityType" />
+  
   <xs:complexType name="EscapeType">
     <xs:all>
       <xs:element minOccurs="0" name="displayvalue" type="xs:string" />
       <xs:element minOccurs="0" name="key" type="tns:EscapeTypeType" />
     </xs:all>
   </xs:complexType>
-  <xs:element name="EscapeType" type="tns:EscapeType" />
   <xs:simpleType name="EscapeTypeType">
     <xs:restriction base="xs:string">
       <xs:enumeration value="HTML_ESCAPE" />
       <xs:enumeration value="NONE" />
     </xs:restriction>
   </xs:simpleType>
-  <xs:element name="EscapeTypeType" type="tns:EscapeTypeType" />
-  <xs:complexType name="PhoneCollection">
-    <xs:all>
-      <xs:element minOccurs="0" name="itemsPerPage" type="xs:int" />
-      <xs:element minOccurs="0" name="phones" type="tns:ArrayOfPhone" />
-      <xs:element minOccurs="0" name="startIndex" type="xs:long" />
-      <xs:element minOccurs="0" name="totalResults" type="xs:long" />
-    </xs:all>
-  </xs:complexType>
-  <xs:element name="PhoneCollection" type="tns:PhoneCollection" />
-  <xs:complexType name="EmailCollection">
-    <xs:all>
-      <xs:element minOccurs="0" name="emails" type="tns:ArrayOfEmail" />
-      <xs:element minOccurs="0" name="itemsPerPage" type="xs:int" />
-      <xs:element minOccurs="0" name="startIndex" type="xs:long" />
-      <xs:element minOccurs="0" name="totalResults" type="xs:long" />
-    </xs:all>
-  </xs:complexType>
-  <xs:element name="EmailCollection" type="tns:EmailCollection" />
+  
+  
+  
   <xs:complexType name="Message">
     <xs:all>
       <xs:element minOccurs="0" name="body" type="xs:string" />
@@ -520,16 +355,29 @@
       <xs:element minOccurs="0" name="titleId" type="xs:string" />
     </xs:all>
   </xs:complexType>
-  <xs:element name="Message" type="tns:Message" />
-  <xs:complexType name="MediaItemCollection">
+  <xs:complexType name="MessageType">
     <xs:all>
-      <xs:element minOccurs="0" name="itemsPerPage" type="xs:int" />
-      <xs:element minOccurs="0" name="mediaItems" type="tns:ArrayOfMediaItem" />
-      <xs:element minOccurs="0" name="startIndex" type="xs:long" />
-      <xs:element minOccurs="0" name="totalResults" type="xs:long" />
+      <xs:element minOccurs="0" name="displayvalue" type="xs:string" />
+      <xs:element minOccurs="0" name="key" type="tns:MessageTypeType" />
     </xs:all>
   </xs:complexType>
-  <xs:element name="MediaItemCollection" type="tns:MediaItemCollection" />
+  <xs:simpleType name="MessageTypeType">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="EMAIL" />
+      <xs:enumeration value="NOTIFICATION" />
+      <xs:enumeration value="PRIVATE_MESSAGE" />
+      <xs:enumeration value="PUBLIC_MESSAGE" />
+    </xs:restriction>
+  </xs:simpleType>
+  
+  
+  
+  <xs:complexType name="Environment">
+    <xs:all>
+      <xs:element minOccurs="0" name="displayvalue" type="xs:string" />
+      <xs:element minOccurs="0" name="key" type="tns:EnvironmentType" />
+    </xs:all>
+  </xs:complexType>
   <xs:simpleType name="EnvironmentType">
     <xs:restriction base="xs:string">
       <xs:enumeration value="ACTIVITY" />
@@ -548,23 +396,16 @@
       <xs:enumeration value="URL" />
     </xs:restriction>
   </xs:simpleType>
-  <xs:element name="EnvironmentType" type="tns:EnvironmentType" />
-  <xs:complexType name="MessageType">
+  
+  
+  
+  
+  <xs:complexType name="LookingFor">
     <xs:all>
       <xs:element minOccurs="0" name="displayvalue" type="xs:string" />
-      <xs:element minOccurs="0" name="key" type="tns:MessageTypeType" />
+      <xs:element minOccurs="0" name="key" type="tns:LookingForType" />
     </xs:all>
   </xs:complexType>
-  <xs:element name="MessageType" type="tns:MessageType" />
-  <xs:simpleType name="MessageTypeType">
-    <xs:restriction base="xs:string">
-      <xs:enumeration value="EMAIL" />
-      <xs:enumeration value="NOTIFICATION" />
-      <xs:enumeration value="PRIVATE_MESSAGE" />
-      <xs:enumeration value="PUBLIC_MESSAGE" />
-    </xs:restriction>
-  </xs:simpleType>
-  <xs:element name="MessageTypeType" type="tns:MessageTypeType" />
   <xs:simpleType name="LookingForType">
     <xs:restriction base="xs:string">
       <xs:enumeration value="ACTIVITY_PARTNERS" />
@@ -575,62 +416,14 @@
       <xs:enumeration value="RELATIONSHIP" />
     </xs:restriction>
   </xs:simpleType>
-  <xs:element name="LookingForType" type="tns:LookingForType" />
-  <xs:complexType name="Container">
-    <xs:all />
-  </xs:complexType>
-  <xs:element name="Container" type="tns:Container" />
-  <xs:complexType name="Environment">
+  
+  <xs:complexType name="PluralPersonField">
     <xs:all>
-      <xs:element minOccurs="0" name="displayvalue" type="xs:string" />
-      <xs:element minOccurs="0" name="key" type="tns:EnvironmentType" />
+      <xs:element minOccurs="0" name="value" type="xs:string" />
+      <xs:element minOccurs="0" name="type" type="xs:string" />
+      <xs:element minOccurs="0" name="primary" type="xs:boolean"/>
     </xs:all>
   </xs:complexType>
-  <xs:element name="Environment" type="tns:Environment" />
-  <xs:complexType name="AddressCollection">
-    <xs:all>
-      <xs:element minOccurs="0" name="addresses" type="tns:ArrayOfAddress" />
-      <xs:element minOccurs="0" name="itemsPerPage" type="xs:int" />
-      <xs:element minOccurs="0" name="startIndex" type="xs:long" />
-      <xs:element minOccurs="0" name="totalResults" type="xs:long" />
-    </xs:all>
-  </xs:complexType>
-  <xs:element name="AddressCollection" type="tns:AddressCollection" />
-  <xs:complexType name="ArrayOfAddress">
-    <xs:sequence>
-      <xs:element minOccurs="0" maxOccurs="unbounded" name="Address" type="tns:Address" />
-    </xs:sequence>
-  </xs:complexType>
-  <xs:element name="ArrayOfAddress" type="tns:ArrayOfAddress" />
-  <xs:complexType name="PersonCollection">
-    <xs:all>
-      <xs:element minOccurs="0" name="itemsPerPage" type="xs:int" />
-      <xs:element minOccurs="0" name="people" type="tns:ArrayOfperson" />
-      <xs:element minOccurs="0" name="startIndex" type="xs:long" />
-      <xs:element minOccurs="0" name="totalResults" type="xs:long" />
-    </xs:all>
-  </xs:complexType>
-  <xs:element name="PersonCollection" type="tns:PersonCollection" />
-  <xs:complexType name="ArrayOfperson">
-    <xs:sequence>
-      <xs:element minOccurs="0" maxOccurs="unbounded" name="person" type="tns:person" />
-    </xs:sequence>
-  </xs:complexType>
-  <xs:element name="ArrayOfperson" type="tns:ArrayOfperson" />
-  <xs:complexType name="OrganizationCollection">
-    <xs:all>
-      <xs:element minOccurs="0" name="itemsPerPage" type="xs:int" />
-      <xs:element minOccurs="0" name="organizations" type="tns:ArrayOfOrganization" />
-      <xs:element minOccurs="0" name="startIndex" type="xs:long" />
-      <xs:element minOccurs="0" name="totalResults" type="xs:long" />
-    </xs:all>
-  </xs:complexType>
-  <xs:element name="OrganizationCollection" type="tns:OrganizationCollection" />
-  <xs:complexType name="LookingFor">
-    <xs:all>
-      <xs:element minOccurs="0" name="displayvalue" type="xs:string" />
-      <xs:element minOccurs="0" name="key" type="tns:LookingForType" />
-    </xs:all>
-  </xs:complexType>
-  <xs:element name="LookingFor" type="tns:LookingFor" />
+  
+  
 </xs:schema>

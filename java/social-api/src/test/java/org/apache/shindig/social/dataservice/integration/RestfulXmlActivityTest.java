@@ -19,6 +19,7 @@ package org.apache.shindig.social.dataservice.integration;
 
 import org.apache.shindig.social.core.model.ActivityImpl;
 import org.apache.shindig.social.opensocial.model.Activity;
+import org.apache.shindig.social.opensocial.util.XSDValidator;
 
 import org.junit.Test;
 import org.w3c.dom.Node;
@@ -33,7 +34,7 @@ import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathFactory;
 
-public class RestfulXmlActivityDisabled extends AbstractLargeRestfulTests {
+public class RestfulXmlActivityTest extends AbstractLargeRestfulTests {
   Activity johnsActivity;
   private XPathFactory xpathFactory;
 
@@ -49,10 +50,19 @@ public class RestfulXmlActivityDisabled extends AbstractLargeRestfulTests {
   }
 
   /**
-   * Expected response for an activity in xml: <map> <entry> <key>entry</key>
-   * <value> <id>1</id> <userId>john.doe</userId> <title>yellow</title>
-   * <body>what a color!</body> </value> </entry> </map>
-   *
+   * Expected response for an activity in xml:
+   * 
+   * <pre>
+   * &lt;response&gt;
+   *    &lt;activity&gt;
+   *       &lt;id&gt;1&lt;/id&gt;
+   *       &lt;userId&gt;john.doe&lt;/userId&gt;
+   *       &lt;title&gt;yellow&lt;/title&gt;
+   *       &lt;body&gt;body&lt;/body&gt;
+   *    &lt;/activity&gt;
+   * &lt;/response&gt;
+   * </pre>
+   * 
    * @throws Exception
    *           if test encounters an error
    */
@@ -60,6 +70,8 @@ public class RestfulXmlActivityDisabled extends AbstractLargeRestfulTests {
   public void testGetActivityJson() throws Exception {
     String resp = getResponse("/activities/john.doe/@self/@app/1", "GET",
         "xml", "application/xml");
+    System.err.println("Got:\n" + resp);
+
     InputSource source = new InputSource(new StringReader(resp));
     XPath xp = xpathFactory.newXPath();
     NodeList result = (NodeList) xp.evaluate("/response/activity", source,
@@ -75,11 +87,41 @@ public class RestfulXmlActivityDisabled extends AbstractLargeRestfulTests {
 
   /**
    * Expected response for a list of activities in json:
-   *
-   * { "totalResults" : 1, "startIndex" : 0 "itemsPerPage" : 10 // Note: the js
-   * doesn't support paging. Should rest? "entry" : [ {<activity>} // layed out
-   * like above ] }
-   *
+   * 
+   * <pre>
+   * &lt;response xmlns=&quot;http://ns.opensocial.org/2008/opensocial&quot;
+   *    xmlns:xsi=&quot;http://www.w3.org/2001/XMLSchema-instance&quot;
+   *    xsi:schemaLocation=&quot;http://ns.opensocial.org/2008/opensocial file:/Users/ieb/Apache/shindig/trunk/java/social-api/src/test/resources/org/apache/shindig/social/opensocial/util/opensocial.xsd&quot;&gt;
+   *   &lt;activity&gt;
+   *     &lt;itemsPerPage&gt;10&lt;/itemsPerPage&gt;
+   *     &lt;startIndex&gt;0&lt;/startIndex&gt;
+   *     &lt;totalResults&gt;1&lt;/totalResults&gt;
+   *     &lt;entry&gt;
+   *       &lt;appId&gt;&lt;/appId&gt;
+   *       &lt;body&gt;&lt;/body&gt;
+   *       &lt;bodyId&gt;&lt;/bodyId&gt;
+   *       &lt;externalId&gt;&lt;/externalId&gt;
+   *       &lt;id&gt;&lt;/id&gt;
+   *       &lt;mediaItems&gt;
+   *         &lt;mimeType&gt;&lt;/mimeType&gt;
+   *         &lt;type&gt;&lt;/type&gt;
+   *         &lt;url&gt;&lt;/url&gt;
+   *       &lt;/mediaItems&gt;
+   *       &lt;postedTime&gt;&lt;/postedTime&gt;
+   *       &lt;priority&gt;&lt;/priority&gt;
+   *       &lt;streamFaviconUrl&gt;&lt;/streamFaviconUrl&gt;
+   *       &lt;streamSourceUrl&gt;&lt;/streamSourceUrl&gt;
+   *       &lt;streamTitle&gt;&lt;/streamTitle&gt;
+   *       &lt;streamUrl&gt;&lt;/streamUrl&gt;
+   *       &lt;title&gt;&lt;/title&gt;
+   *       &lt;titleId&gt;&lt;/titleId&gt;
+   *       &lt;url&gt;&lt;/url&gt;
+   *       &lt;userId&gt;&lt;/userId&gt;
+   *     &lt;/entry&gt;
+   *   &lt;/activity&gt;
+   * &lt;/response&gt;
+   * </pre>
+   * 
    * @throws Exception
    *           if test encounters an error
    */
@@ -87,14 +129,14 @@ public class RestfulXmlActivityDisabled extends AbstractLargeRestfulTests {
   public void testGetActivitiesJson() throws Exception {
     String resp = getResponse("/activities/john.doe/@self", "GET", "xml",
         "application/xml");
-    System.err.println("Got " + resp);
+    System.err.println("Got testGetActivitiesJson:\n" + resp);
     XPath xp = xpathFactory.newXPath();
     assertEquals("0", xp.evaluate("/response/startIndex", new InputSource(
         new StringReader(resp))));
     assertEquals("1", xp.evaluate("/response/totalResults", new InputSource(
         new StringReader(resp))));
-    NodeList nl = (NodeList) xp.evaluate("/response/entry", new InputSource(
-        new StringReader(resp)), XPathConstants.NODESET);
+    NodeList nl = (NodeList) xp.evaluate("/response/entry/activity",
+        new InputSource(new StringReader(resp)), XPathConstants.NODESET);
     assertEquals(1, nl.getLength());
 
     assertActivitiesEqual(johnsActivity, childNodesToMap(nl.item(0)));
@@ -102,11 +144,44 @@ public class RestfulXmlActivityDisabled extends AbstractLargeRestfulTests {
 
   /**
    * Expected response for a list of activities in json:
-   *
-   * { "totalResults" : 3, "startIndex" : 0 "itemsPerPage" : 10 // Note: the js
-   * doesn't support paging. Should rest? "entry" : [ {<activity>} // layed out
-   * like above, except for jane.doe ] }
-   *
+   * 
+   * 
+   * <pre>
+   * &lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;
+   * &lt;response xmlns=&quot;http://ns.opensocial.org/2008/opensocial&quot;
+   *    xmlns:xsi=&quot;http://www.w3.org/2001/XMLSchema-instance&quot;
+   *    xsi:schemaLocation=&quot;http://ns.opensocial.org/2008/opensocial file:/Users/ieb/Apache/shindig/trunk/java/social-api/src/test/resources/org/apache/shindig/social/opensocial/util/opensocial.xsd&quot;&gt;
+   *   &lt;activity&gt;
+   *     &lt;itemsPerPage&gt;3&lt;/itemsPerPage&gt;
+   *     &lt;startIndex&gt;0&lt;/startIndex&gt;
+   *     &lt;totalResults&gt;10&lt;/totalResults&gt;
+   *     &lt;entry&gt;
+   *       &lt;appId&gt;&lt;/appId&gt;
+   *       &lt;body&gt;&lt;/body&gt;
+   *       &lt;bodyId&gt;&lt;/bodyId&gt;
+   *       &lt;externalId&gt;&lt;/externalId&gt;
+   *       &lt;id&gt;&lt;/id&gt;
+   *       &lt;mediaItems&gt;
+   *         &lt;mimeType&gt;&lt;/mimeType&gt;
+   *         &lt;type&gt;&lt;/type&gt;
+   *         &lt;url&gt;&lt;/url&gt;
+   *       &lt;/mediaItems&gt;
+   *       &lt;postedTime&gt;&lt;/postedTime&gt;
+   *       &lt;priority&gt;&lt;/priority&gt;
+   *       &lt;streamFaviconUrl&gt;&lt;/streamFaviconUrl&gt;
+   *       &lt;streamSourceUrl&gt;&lt;/streamSourceUrl&gt;
+   *       &lt;streamTitle&gt;&lt;/streamTitle&gt;
+   *       &lt;streamUrl&gt;&lt;/streamUrl&gt;
+   *       &lt;title&gt;&lt;/title&gt;
+   *       &lt;titleId&gt;&lt;/titleId&gt;
+   *       &lt;url&gt;&lt;/url&gt;
+   *       &lt;userId&gt;&lt;/userId&gt;
+   *     &lt;/entry&gt;
+   *   &lt;/activity&gt;
+   * &lt;/response&gt;
+   * </pre>
+   * 
+   * 
    * @throws Exception
    *           if test encounters an error
    */
@@ -114,7 +189,7 @@ public class RestfulXmlActivityDisabled extends AbstractLargeRestfulTests {
   public void testGetFriendsActivitiesJson() throws Exception {
     String resp = getResponse("/activities/john.doe/@friends", "GET", "xml",
         "application/xml");
-    System.err.println("Got " + resp);
+    System.err.println("Got:\n" + resp);
 
     XPath xp = xpathFactory.newXPath();
     assertEquals("0", xp.evaluate("/response/startIndex", new InputSource(
@@ -137,21 +212,21 @@ public class RestfulXmlActivityDisabled extends AbstractLargeRestfulTests {
 
   @Test
   public void testCreateActivity() throws Exception {
-    String postData = "{title : 'hi mom!', body : 'and dad.'}";
+    String postData = XSDValidator.XMLDEC+"<activity><body>and dad.</body><title>hi mom!</title></activity>";
     String createResponse = getResponse("/activities/john.doe/@self", "POST",
         postData, "xml", "application/xml");
-    System.err.println("Got " + createResponse);
+    System.err.println("Got testCreateActivity1 " + createResponse);
 
     String resp = getResponse("/activities/john.doe/@self", "GET", "xml",
         "application/xml");
-    System.err.println("Got " + resp);
+    System.err.println("Got testCreateActivity2 " + resp);
 
     XPath xp = xpathFactory.newXPath();
     assertEquals("0", xp.evaluate("/response/startIndex", new InputSource(
         new StringReader(resp))));
     assertEquals("2", xp.evaluate("/response/totalResults", new InputSource(
         new StringReader(resp))));
-    NodeList nl = (NodeList) xp.evaluate("/response/entry", new InputSource(
+    NodeList nl = (NodeList) xp.evaluate("/response/entry/activity", new InputSource(
         new StringReader(resp)), XPathConstants.NODESET);
     assertEquals(2, nl.getLength());
 

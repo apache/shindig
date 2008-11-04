@@ -54,12 +54,12 @@ import java.util.Map;
 import java.util.TreeMap;
 
 public class BeanXStreamConverterTest extends TestCase {
-  private static final String XMLDEC = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n";
   private static final String XMLSCHEMA = " xmlns=\"http://ns.opensocial.org/2008/opensocial\" \n"
       + " xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" \n"
       + " xsi:schemaLocation=\"http://ns.opensocial.org/2008/opensocial classpath:opensocial.xsd\" ";
   private static final Log log = LogFactory
       .getLog(BeanXStreamConverterTest.class);
+  private static final String XSDRESOURCE = "opensocial.xsd";
   private Person johnDoe;
   private Activity activity;
 
@@ -120,14 +120,16 @@ public class BeanXStreamConverterTest extends TestCase {
   }
 
   public void testPersonToXml() throws Exception {
-    String xml = validate(beanXmlConverter.convertToXml(johnDoe));
+    String xml = XSDValidator.validate(beanXmlConverter.convertToXml(johnDoe),
+        XMLSCHEMA, XSDRESOURCE);
     Element element = XmlUtil.parse(xml);
     Node id = element.getElementsByTagName("id").item(0);
     assertEquals(johnDoe.getId(), id.getTextContent());
   }
 
   public void testActivityToXml() throws Exception {
-    String xml = validate(beanXmlConverter.convertToXml(activity));
+    String xml = XSDValidator.validate(beanXmlConverter.convertToXml(activity),
+        XMLSCHEMA, XSDRESOURCE);
 
     Element element = XmlUtil.parse(xml);
     Node id = element.getElementsByTagName("id").item(0);
@@ -197,67 +199,26 @@ public class BeanXStreamConverterTest extends TestCase {
     activities.add(activity);
     activities.add(activity);
     activities.add(activity);
-    String xml = validate(beanXmlConverter.convertToXml(activities));
+    String xml = XSDValidator.validate(beanXmlConverter
+        .convertToXml(activities), XMLSCHEMA, XSDRESOURCE);
     XmlUtil.parse(xml);
-    String expectedXml = "<response>" + "<list.container>" + "  <Activity>"
-        + "    <id>activityId</id>" + "    <mediaItems>" + "      <MediaItem>"
+    String expectedXml = "<response>" + "<list.container>" + "  <activity>"
+        + "    <id>activityId</id>" + "    <mediaItems>"
         + "        <mimeType>image/jpg</mimeType>"
         + "        <type>IMAGE</type>" + "        <url>http://foo.bar</url>"
-        + "      </MediaItem>" + "    </mediaItems>"
-        + "    <userId>johnDoeId</userId>" + "  </Activity>" + "  <Activity>"
-        + "    <id>activityId</id>" + "    <mediaItems>" + "      <MediaItem>"
-        + "        <mimeType>image/jpg</mimeType>"
+        + "    </mediaItems>" + "    <userId>johnDoeId</userId>"
+        + "  </activity>" + "  <activity>" + "    <id>activityId</id>"
+        + "    <mediaItems>" + "        <mimeType>image/jpg</mimeType>"
         + "        <type>IMAGE</type>" + "        <url>http://foo.bar</url>"
-        + "      </MediaItem>" + "    </mediaItems>"
-        + "    <userId>johnDoeId</userId>" + "  </Activity>" + "  <Activity>"
-        + "    <id>activityId</id>" + "    <mediaItems>" + "      <MediaItem>"
-        + "        <mimeType>image/jpg</mimeType>"
+        + "    </mediaItems>" + "    <userId>johnDoeId</userId>"
+        + "  </activity>" + "  <activity>" + "    <id>activityId</id>"
+        + "    <mediaItems>" + "        <mimeType>image/jpg</mimeType>"
         + "        <type>IMAGE</type>" + "        <url>http://foo.bar</url>"
-        + "      </MediaItem>" + "    </mediaItems>"
-        + "    <userId>johnDoeId</userId>" + "  </Activity>"
-        + "</list.container>" + "</response>";
-    expectedXml = insertSchema(expectedXml, true);
+        + "    </mediaItems>" + "    <userId>johnDoeId</userId>"
+        + "  </activity>" + "</list.container>" + "</response>";
+    expectedXml = XSDValidator.insertSchema(expectedXml, XMLSCHEMA, true);
     assertEquals(StringUtils.deleteWhitespace(expectedXml), StringUtils
         .deleteWhitespace(xml));
-  }
-
-  /**
-   * @param convertToXml
-   * @return
-   */
-  private String validate(String xmlFragment) {
-    String xml = insertSchema(xmlFragment, true);
-    log.debug("Valiating " + xml);
-
-    assertEquals("", XSDValidator.validate(xml, this.getClass()
-        .getResourceAsStream("opensocial.xsd")));
-    return xml;
-  }
-
-  /**
-   * Process the response string to strip the container element and insert the
-   * opensocial schema.
-   * 
-   * @param xml
-   * @return
-   */
-  private String insertSchema(String xml, boolean container) {
-    if (xml == null || xml.trim().length() == 0) {
-      return xml;
-    }
-    if (xml.startsWith("<response>")) {
-      xml = xml.substring("<response>".length());
-    }
-    if (xml.endsWith("</response>")) {
-      xml = xml.substring(0, xml.length() - "</response>".length());
-    }
-    xml = xml.trim();
-
-    int gt = xml.indexOf('>');
-    if (gt > 0) {
-      return XMLDEC + xml.substring(0, gt) + XMLSCHEMA + xml.substring(gt);
-    }
-    return xml;
   }
 
   public void testPerson1() throws XmlException, IOException {

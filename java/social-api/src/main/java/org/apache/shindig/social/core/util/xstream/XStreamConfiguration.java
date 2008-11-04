@@ -19,9 +19,10 @@ package org.apache.shindig.social.core.util.xstream;
 
 import com.google.inject.ImplementedBy;
 
-
-import java.util.List;
-import java.util.Map;
+import com.thoughtworks.xstream.XStream;
+import com.thoughtworks.xstream.converters.reflection.ReflectionProvider;
+import com.thoughtworks.xstream.io.HierarchicalStreamDriver;
+import com.thoughtworks.xstream.mapper.Mapper;
 
 /**
  * The configuration for the XStream converter, this class encapsulates the
@@ -29,25 +30,27 @@ import java.util.Map;
  */
 @ImplementedBy(XStream081Configuration.class)
 public interface XStreamConfiguration {
+  public static enum ConverterSet {
+    MAP(), COLLECTION(), DEFAULT(); 
+  };
+
 
   /**
+   * @param c
+   * @param dmapper 
+   * @param writerStack
    * @return
    */
-  List<ClassFieldMapping> getListElementMappingList();
+  InterfaceClassMapper getMapper(ConverterSet c, Mapper dmapper, WriterStack writerStack);
 
   /**
+   * @param c
+   * @param rp
+   * @param mapper
+   * @param driver
    * @return
    */
-  List<ClassFieldMapping> getElementMappingList();
-
-  /**
-   * @return
-   */
-  Map<String, Class<?>[]> getOmitMap();
-
-  /**
-   * @return
-   */
-  Map<String, Class<?>> getElementClassMap();
+  XStream getXStream(ConverterSet c, ReflectionProvider rp, Mapper mapper,
+      HierarchicalStreamDriver driver);
 
 }

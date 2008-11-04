@@ -20,7 +20,6 @@ package org.apache.shindig.social.core.util;
 import com.google.inject.Inject;
 
 import com.thoughtworks.xstream.XStream;
-import com.thoughtworks.xstream.converters.Converter;
 import com.thoughtworks.xstream.converters.reflection.PureJavaReflectionProvider;
 import com.thoughtworks.xstream.converters.reflection.ReflectionProvider;
 import com.thoughtworks.xstream.io.HierarchicalStreamDriver;
@@ -29,25 +28,41 @@ import com.thoughtworks.xstream.mapper.DefaultMapper;
 import com.thoughtworks.xstream.mapper.Mapper;
 
 import org.apache.shindig.social.core.util.xstream.InterfaceClassMapper;
-import org.apache.shindig.social.core.util.xstream.MapConverter;
 import org.apache.shindig.social.core.util.xstream.StackDriver;
 import org.apache.shindig.social.core.util.xstream.ThreadSafeWriterStack;
 import org.apache.shindig.social.core.util.xstream.WriterStack;
 import org.apache.shindig.social.core.util.xstream.XStreamConfiguration;
 import org.apache.shindig.social.opensocial.service.BeanConverter;
+import org.apache.shindig.social.opensocial.spi.RestfulCollection;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import java.util.HashMap;
+import java.util.Map;
+
 public class BeanXStreamConverter implements BeanConverter {
   public static final String XML_DECL = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>";
+  private static final XStreamConfiguration.ConverterSet[] MAPPER_SCOPES = new XStreamConfiguration.ConverterSet[] {
+      XStreamConfiguration.ConverterSet.MAP,
+      XStreamConfiguration.ConverterSet.COLLECTION,
+      XStreamConfiguration.ConverterSet.DEFAULT };
   private static Log log = LogFactory.getLog(BeanXStreamConverter.class);
-  private Converter mapConverter;
-  private InterfaceClassMapper icmapper;
   private ReflectionProvider rp;
   private HierarchicalStreamDriver driver;
   private WriterStack writerStack;
-  private XStream xstream;
+
+  protected class ConverterConfig {
+    protected InterfaceClassMapper mapper;
+    protected XStream xstream;
+
+    protected ConverterConfig(InterfaceClassMapper mapper, XStream xstream) {
+      this.mapper = mapper;
+      this.xstream = xstream;
+    }
+  }
+
+  private Map<XStreamConfiguration.ConverterSet, ConverterConfig> converterMap = new HashMap<XStreamConfiguration.ConverterSet, ConverterConfig>();
 
   @Inject
   public BeanXStreamConverter(XStreamConfiguration configuration) {
@@ -65,21 +80,14 @@ public class BeanXStreamConverter implements BeanConverter {
      */
     driver = new StackDriver(new XppDriver(), writerStack);
     /*
-     * Create an interface class mapper that understands class hierarchy
+     * Create an interface class mapper that understands class hierarchy for
+     * single items
      */
-    icmapper = new InterfaceClassMapper(writerStack, dmapper, configuration
-        .getElementMappingList(), configuration.getListElementMappingList(),
-        configuration.getOmitMap(), configuration.getElementClassMap());
-    /*
-     * Create a map converter to ensure that maps are converted in the
-     * compressed form.
-     */
-    mapConverter = new MapConverter(icmapper);
-
-    xstream = new XStream(rp, icmapper, driver);
-    xstream.registerConverter(mapConverter);
-    xstream.setMode(XStream.NO_REFERENCES);
-
+    for (XStreamConfiguration.ConverterSet c : MAPPER_SCOPES) {
+      InterfaceClassMapper mapper = configuration.getMapper(c,dmapper,writerStack);
+      XStream xstream = configuration.getXStream(c,rp,mapper,driver);
+      converterMap.put(c, new ConverterConfig(mapper, xstream));
+    }
   }
 
   public String getContentType() {
@@ -100,16 +108,38 @@ public class BeanXStreamConverter implements BeanConverter {
   public String convertToXml(Object obj) {
 
     writerStack.reset();
-    icmapper.setBaseObject(obj); // thread safe method
+    if (obj instanceof Map) {
+      Map<?, ?> m = (Map<?, ?>) obj;
+      ConverterConfig cc = converterMap
+          .get(XStreamConfiguration.ConverterSet.MAP);
+      if (m.size() == 1) {
+        Object s = m.values().iterator().next();
+        cc.mapper.setBaseObject(s); // thread safe method
+        String result = cc.xstream.toXML(s);
+        log.debug("Result is " + result);
+        return "<response>" + result + "</response>";
+      }
+    } else if (obj instanceof RestfulCollection) {
+      ConverterConfig cc = converterMap
+          .get(XStreamConfiguration.ConverterSet.COLLECTION);
+      cc.mapper.setBaseObject(obj); // thread safe method
+      String result = cc.xstream.toXML(obj);
+      log.debug("Result is " + result);
+      return result;
+    }
+    ConverterConfig cc = converterMap
+        .get(XStreamConfiguration.ConverterSet.DEFAULT);
 
-    String result = xstream.toXML(obj);
+    cc.mapper.setBaseObject(obj); // thread safe method
+    String result = cc.xstream.toXML(obj);
     log.debug("Result is " + result);
     return "<response>" + result + "</response>";
   }
 
   @SuppressWarnings("unchecked")
   public <T> T convertToObject(String xml, Class<T> className) {
-    return (T) xstream.fromXML(xml);
+    ConverterConfig cc = converterMap.get(XStreamConfiguration.ConverterSet.DEFAULT);
+    return (T) cc.xstream.fromXML(xml);
   }
 
 }

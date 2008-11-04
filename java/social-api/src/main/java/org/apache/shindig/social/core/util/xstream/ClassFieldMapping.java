@@ -21,6 +21,34 @@ package org.apache.shindig.social.core.util.xstream;
  * This represents the mapping between a class and a field, potentially with a
  * parent element. It is used to define the element names that are used to
  * serialize the contents of a class.
+ * 
+ * eg
+ * <pre>
+ * &lt;outerobject&gt;
+ * &lt;listcontainer&gt;
+ *    &lt;listelement&gt;
+ *       &lt;objectcontent&gt;
+ *    &lt;/listelement&gt;
+ * &lt;/listcontainer&gt;
+ * ...
+ * &lt;/outerobject&gt;
+ * </pre>
+ * or (not currently used in OS)
+ * <pre>
+ * &lt;person&gt;
+ *    &lt;emails&gt;
+ *       &lt;email&gt;
+ *          &lt;type&gt;&lt;/type&gt;
+ *          &lt;value&gt;&lt;/value&gt;
+ *       &lt;/email&gt;
+ *       ...
+ *    &lt;/emails&gt;
+ *    ...
+ * &lt;/person&gt;
+ * </pre>
+ * For a more compact mapping {@link ItemFieldMapping}.
+ * 
+ * 
  */
 /**
  *
@@ -43,8 +71,11 @@ public class ClassFieldMapping {
 
   /**
    * Create a simple element class mapping, applicable to all parent elements.
-   * @param elementName the name of the element
-   * @param mappedClazz the class to map to the name of the element
+   * 
+   * @param elementName
+   *          the name of the element
+   * @param mappedClazz
+   *          the class to map to the name of the element
    */
   public ClassFieldMapping(String elementName, Class<?> mappedClazz) {
     this.elementName = elementName;
@@ -53,10 +84,15 @@ public class ClassFieldMapping {
   }
 
   /**
-   * Create a element class mapping, that only applies to one parent element name.
-   * @param parentName the name of the parent element that this mapping applies to
-   * @param elementName the name of the element
-   * @param mappedClazz the class to map to the name of the element
+   * Create a element class mapping, that only applies to one parent element
+   * name.
+   * 
+   * @param parentName
+   *          the name of the parent element that this mapping applies to
+   * @param elementName
+   *          the name of the element
+   * @param mappedClazz
+   *          the class to map to the name of the element
    */
   public ClassFieldMapping(String parentName, String elementName,
       Class<?> mappedClazz) {
@@ -81,8 +117,11 @@ public class ClassFieldMapping {
 
   /**
    * Does this ClassFieldMapping match the supplied parent and type.
-   * @param parent the parent element, which may be null
-   * @param type the type of the field being stored
+   * 
+   * @param parent
+   *          the parent element, which may be null
+   * @param type
+   *          the type of the field being stored
    * @return true if this mapping is a match for the combination
    */
   public boolean matches(String parent, Class<?> type) {

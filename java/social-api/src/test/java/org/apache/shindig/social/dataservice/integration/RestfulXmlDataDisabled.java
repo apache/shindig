@@ -62,6 +62,8 @@ public class RestfulXmlDataDisabled extends AbstractLargeRestfulTests {
     extraParams.put("fields", "count");
     String resp = getResponse("/appdata/john.doe/@friends/app", "GET",
         extraParams, "xml", "application/xml");
+    
+    System.err.println("Got Response \n"+resp);
 
     XPath xp = xpathFactory.newXPath();
     NodeList result = (NodeList) xp.evaluate("/appdata/entry", new InputSource(
@@ -100,6 +102,8 @@ public class RestfulXmlDataDisabled extends AbstractLargeRestfulTests {
     String resp = getResponse("/appdata/john.doe/@self/app", "GET",
         extraParams, "xml", "application/xml");
 
+    System.err.println("Got Response \n"+resp);
+
     XPath xp = xpathFactory.newXPath();
     NodeList result = (NodeList) xp.evaluate("/appdata/entry", new InputSource(
         new StringReader(resp)), XPathConstants.NODESET);
@@ -130,6 +134,8 @@ public class RestfulXmlDataDisabled extends AbstractLargeRestfulTests {
     extraParams.put("fields", "count");
     String resp = getResponse("/appdata/john.doe/@self/app", "GET",
         extraParams, "xml", "application/xml");
+
+    System.err.println("Got Response \n"+resp);
 
     XPath xp = xpathFactory.newXPath();
     NodeList result = (NodeList) xp.evaluate("/appdata/entry", new InputSource(
@@ -162,6 +168,8 @@ public class RestfulXmlDataDisabled extends AbstractLargeRestfulTests {
     String resp = getResponse("/appdata/john.doe/@self/app", "GET",
         extraParams, "xml", "application/xml");
 
+    System.err.println("Got Response \n"+resp);
+
     XPath xp = xpathFactory.newXPath();
     NodeList result = (NodeList) xp.evaluate("/appdata/entry", new InputSource(
         new StringReader(resp)), XPathConstants.NODESET);
@@ -181,8 +189,10 @@ public class RestfulXmlDataDisabled extends AbstractLargeRestfulTests {
     // With the wrong field
     Map<String, String> extraParams = Maps.newHashMap();
     extraParams.put("fields", "peabody");
-    getResponse("/appdata/john.doe/@self/app", "DELETE", extraParams, "xml",
+    String resp = getResponse("/appdata/john.doe/@self/app", "DELETE", extraParams, "xml",
         "application/xml");
+
+    System.err.println("Got Response \n"+resp);
 
     assertCount("0");
 
@@ -202,8 +212,10 @@ public class RestfulXmlDataDisabled extends AbstractLargeRestfulTests {
     extraParams.put("fields", "count");
     // should be xml ?
     String postData = "{count : 5}";
-    getResponse("/appdata/john.doe/@self/app", "POST", extraParams, postData,
+    String resp = getResponse("/appdata/john.doe/@self/app", "POST", extraParams, postData,
         "xml", "application/xml");
+    
+    System.err.println("Got Response \n"+resp);
 
     assertCount("5");
   }
@@ -211,6 +223,9 @@ public class RestfulXmlDataDisabled extends AbstractLargeRestfulTests {
   private void assertCount(String expectedCount) throws Exception {
     String resp = getResponse("/appdata/john.doe/@self/app", "GET", "xml",
         "application/xml");
+    
+    System.err.println("Got Response \n"+resp);
+
 
     XPath xp = xpathFactory.newXPath();
     NodeList result = (NodeList) xp.evaluate("/appdata/entry", new InputSource(
