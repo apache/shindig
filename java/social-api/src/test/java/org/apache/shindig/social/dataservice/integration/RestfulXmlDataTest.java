@@ -19,6 +19,8 @@ package org.apache.shindig.social.dataservice.integration;
 
 import com.google.common.collect.Maps;
 
+import org.apache.shindig.social.opensocial.util.XSDValidator;
+
 import org.junit.Test;
 import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
@@ -31,7 +33,7 @@ import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathFactory;
 
-public class RestfulXmlDataDisabled extends AbstractLargeRestfulTests {
+public class RestfulXmlDataTest extends AbstractLargeRestfulTests {
 
   private XPathFactory xpathFactory;
 
@@ -63,8 +65,6 @@ public class RestfulXmlDataDisabled extends AbstractLargeRestfulTests {
     String resp = getResponse("/appdata/john.doe/@friends/app", "GET",
         extraParams, "xml", "application/xml");
     
-    System.err.println("Got Response \n"+resp);
-
     XPath xp = xpathFactory.newXPath();
     NodeList result = (NodeList) xp.evaluate("/appdata/entry", new InputSource(
         new StringReader(resp)), XPathConstants.NODESET);
@@ -76,7 +76,7 @@ public class RestfulXmlDataDisabled extends AbstractLargeRestfulTests {
     assertTrue(v.containsKey("jane.doe"));
     assertTrue(v.containsKey("george.doe"));
     assertTrue(v.containsKey("maija.m"));
-
+    
     assertEquals(1, v.get("jane.doe").size());
     assertEquals(1, v.get("george.doe").size());
     assertEquals(0, v.get("maija.m").size());
@@ -101,8 +101,6 @@ public class RestfulXmlDataDisabled extends AbstractLargeRestfulTests {
     extraParams.put("fields", null);
     String resp = getResponse("/appdata/john.doe/@self/app", "GET",
         extraParams, "xml", "application/xml");
-
-    System.err.println("Got Response \n"+resp);
 
     XPath xp = xpathFactory.newXPath();
     NodeList result = (NodeList) xp.evaluate("/appdata/entry", new InputSource(
@@ -135,7 +133,6 @@ public class RestfulXmlDataDisabled extends AbstractLargeRestfulTests {
     String resp = getResponse("/appdata/john.doe/@self/app", "GET",
         extraParams, "xml", "application/xml");
 
-    System.err.println("Got Response \n"+resp);
 
     XPath xp = xpathFactory.newXPath();
     NodeList result = (NodeList) xp.evaluate("/appdata/entry", new InputSource(
@@ -168,7 +165,6 @@ public class RestfulXmlDataDisabled extends AbstractLargeRestfulTests {
     String resp = getResponse("/appdata/john.doe/@self/app", "GET",
         extraParams, "xml", "application/xml");
 
-    System.err.println("Got Response \n"+resp);
 
     XPath xp = xpathFactory.newXPath();
     NodeList result = (NodeList) xp.evaluate("/appdata/entry", new InputSource(
@@ -192,8 +188,6 @@ public class RestfulXmlDataDisabled extends AbstractLargeRestfulTests {
     String resp = getResponse("/appdata/john.doe/@self/app", "DELETE", extraParams, "xml",
         "application/xml");
 
-    System.err.println("Got Response \n"+resp);
-
     assertCount("0");
 
     // should be xml ?
@@ -211,11 +205,10 @@ public class RestfulXmlDataDisabled extends AbstractLargeRestfulTests {
     Map<String, String> extraParams = Maps.newHashMap();
     extraParams.put("fields", "count");
     // should be xml ?
-    String postData = "{count : 5}";
+    String postData = XSDValidator.XMLDEC+"<map><entry><key>count</key><value>5</value></entry></map>";
     String resp = getResponse("/appdata/john.doe/@self/app", "POST", extraParams, postData,
         "xml", "application/xml");
     
-    System.err.println("Got Response \n"+resp);
 
     assertCount("5");
   }
@@ -224,7 +217,6 @@ public class RestfulXmlDataDisabled extends AbstractLargeRestfulTests {
     String resp = getResponse("/appdata/john.doe/@self/app", "GET", "xml",
         "application/xml");
     
-    System.err.println("Got Response \n"+resp);
 
 
     XPath xp = xpathFactory.newXPath();

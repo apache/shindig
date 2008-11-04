@@ -34,6 +34,7 @@ import org.apache.shindig.social.opensocial.model.Name;
 import org.apache.shindig.social.opensocial.model.Organization;
 import org.apache.shindig.social.opensocial.model.Person;
 import org.apache.shindig.social.opensocial.model.Url;
+import org.apache.shindig.social.opensocial.spi.DataCollection;
 import org.apache.shindig.social.opensocial.spi.RestfulCollection;
 
 import java.util.ArrayList;
@@ -105,6 +106,8 @@ public class XStream081Configuration implements XStreamConfiguration {
 
     defaultElementMappingList.add(new ClassFieldMapping("response",
         RestfulCollection.class));
+    defaultElementMappingList.add(new ClassFieldMapping("appdata",
+        DataCollection.class));
     defaultElementMappingList.add(new ClassFieldMapping("list", List.class));
     defaultElementMappingList.add(new ClassFieldMapping("map", Map.class));
 
@@ -171,7 +174,7 @@ public class XStream081Configuration implements XStreamConfiguration {
     defaultElementClassMap.put("phone", ListField.class);
     defaultElementClassMap.put("list", ArrayList.class);
     defaultElementClassMap.put("map", ConcurrentHashMap.class);
-    defaultElementClassMap.put("appdata", ConcurrentHashMap.class);
+    defaultElementClassMap.put("appdata", DataCollection.class);
     defaultElementClassMap.put("activity", Activity.class);
     defaultElementClassMap.put("account", Account.class);
     defaultElementClassMap.put("address", Address.class);
@@ -281,7 +284,8 @@ public class XStream081Configuration implements XStreamConfiguration {
 
   private Converter[] getConverters(Mapper mapper, ConverterSet c) {
     return new Converter[] { new MapConverter(mapper),
-        new RestfullCollectionConverter(mapper) };
+        new RestfullCollectionConverter(mapper),
+        new DataCollectionConverter(mapper)};
   }
 
   /**

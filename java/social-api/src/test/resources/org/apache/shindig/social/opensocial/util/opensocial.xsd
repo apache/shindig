@@ -16,9 +16,9 @@
   
   <xs:complexType name="Response">
     <xs:choice>
+      <xs:element name="group" type="tns:GroupCollection" />
       <xs:element name="activity" type="tns:ActivityCollection" />
       <xs:element name="person" type="tns:PersonCollection" />
-      <xs:element name="group" type="tns:GroupCollection" />
     </xs:choice>
   </xs:complexType>
   

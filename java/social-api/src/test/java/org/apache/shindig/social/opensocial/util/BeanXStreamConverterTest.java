@@ -32,6 +32,7 @@ import org.apache.shindig.social.opensocial.model.Address;
 import org.apache.shindig.social.opensocial.model.ListField;
 import org.apache.shindig.social.opensocial.model.MediaItem;
 import org.apache.shindig.social.opensocial.model.Person;
+import org.apache.shindig.social.opensocial.spi.DataCollection;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
