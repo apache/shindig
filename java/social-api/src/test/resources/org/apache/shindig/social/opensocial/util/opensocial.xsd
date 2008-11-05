@@ -15,53 +15,31 @@
   <xs:element name="list.container" type="xs:anyType" />
   
   <xs:complexType name="Response">
-    <xs:choice>
-      <xs:element name="group" type="tns:GroupCollection" />
-      <xs:element name="activity" type="tns:ActivityCollection" />
-      <xs:element name="person" type="tns:PersonCollection" />
-    </xs:choice>
-  </xs:complexType>
-  
-  <xs:complexType name="Collection" abstract="true">
     <xs:sequence>
       <xs:element minOccurs="0" name="itemsPerPage" type="xs:int" />
       <xs:element minOccurs="0" name="startIndex" type="xs:long" />
       <xs:element minOccurs="0" name="totalResults" type="xs:long" />
+      <xs:element minOccurs="0" name="isFiltered" type="xs:boolean" />
+      <xs:element minOccurs="0" name="isSorted" type="xs:boolean" />
+      <xs:element minOccurs="0" name="isUpdatedSince" type="xs:boolean" />
+      <xs:element minOccurs="0" name="group" type="tns:Group" />
+      <xs:element minOccurs="0" name="activity" type="tns:Activity" />
+      <xs:element minOccurs="0" name="person" type="tns:Person" />
+      <xs:element minOccurs="0"  maxOccurs="unbounded" name="entry" type="tns:Entry" />
+      <!--  this is to allow responses to create to validate -->
+      <xs:element minOccurs="0" name="map" type="xs:anyType" />
     </xs:sequence>
   </xs:complexType>
   
-  <xs:complexType name="ActivityCollection" >
-    <xs:complexContent>
-      <xs:extension base="tns:Collection">
-        <xs:sequence>
-          <xs:element minOccurs="0" maxOccurs="unbounded" name="entry" type="tns:Activity" />      
-        </xs:sequence>
-      </xs:extension>
-    </xs:complexContent>
-  </xs:complexType>
-
-  <xs:complexType name="PersonCollection" >
-    <xs:complexContent>
-      <xs:extension base="tns:Collection">
-        <xs:sequence>
-          <xs:element minOccurs="0" maxOccurs="unbounded" name="entry" type="tns:Person" />      
-        </xs:sequence>
-      </xs:extension>
-    </xs:complexContent>
-  </xs:complexType>
-
-  <xs:complexType name="GroupCollection" >
-    <xs:complexContent>
-      <xs:extension base="tns:Collection">
-        <xs:sequence>
-          <xs:element minOccurs="0" maxOccurs="unbounded" name="entry" type="tns:Group" />      
-        </xs:sequence>
-      </xs:extension>
-    </xs:complexContent>
+  <xs:complexType name="Entry" >
+    <xs:choice>
+      <xs:element minOccurs="0" name="activity" type="tns:Activity" />
+      <xs:element minOccurs="0" name="person" type="tns:Person" />
+      <xs:element minOccurs="0" name="group" type="tns:Group" />
+    </xs:choice>
   </xs:complexType>
   
-  
-  
+    
   <xs:complexType name="Activity">
     <xs:sequence>
       <xs:element minOccurs="0" name="appId" type="xs:string" />
