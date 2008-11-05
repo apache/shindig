@@ -41,14 +41,14 @@ public class PersonImpl implements Person {
   private List<String> activities;
   private List<Address> addresses;
   private Integer age;
+  private Date birthday;
   private BodyType bodyType;
   private List<String> books;
   private List<String> cars;
   private String children;
   private Address currentLocation;
-  private Date birthday;
-  private Enum<Enum.Drinker> drinker;
   private String displayName;
+  private Enum<Enum.Drinker> drinker;
   private List<ListField> emails;
   private String ethnicity;
   private String fashion;
@@ -63,7 +63,6 @@ public class PersonImpl implements Person {
   private List<String> interests;
   private String jobInterests;
   private List<String> languagesSpoken;
-  private Date updated;
   private String livingArrangement;
   private List<Enum<Enum.LookingFor>> lookingFor;
   private List<String> movies;
@@ -92,6 +91,7 @@ public class PersonImpl implements Person {
   private List<String> turnOffs;
   private List<String> turnOns;
   private List<String> tvShows;
+  private Date updated;
   private List<Url> urls;
 
   // Note: Not in the opensocial js person object directly

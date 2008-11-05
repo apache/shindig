@@ -19,14 +19,21 @@ package org.apache.shindig.social.core.util.xstream;
 
 import com.thoughtworks.xstream.XStream;
 import com.thoughtworks.xstream.converters.Converter;
+import com.thoughtworks.xstream.converters.extended.ISO8601DateConverter;
+import com.thoughtworks.xstream.converters.extended.ISO8601GregorianCalendarConverter;
+import com.thoughtworks.xstream.converters.extended.ISO8601SqlTimestampConverter;
 import com.thoughtworks.xstream.converters.reflection.ReflectionProvider;
 import com.thoughtworks.xstream.io.HierarchicalStreamDriver;
+import com.thoughtworks.xstream.mapper.FieldAliasingMapper;
 import com.thoughtworks.xstream.mapper.Mapper;
 
+import org.apache.shindig.social.core.model.EnumImpl;
+import org.apache.shindig.social.core.model.UrlImpl;
 import org.apache.shindig.social.opensocial.model.Account;
 import org.apache.shindig.social.opensocial.model.Activity;
 import org.apache.shindig.social.opensocial.model.Address;
 import org.apache.shindig.social.opensocial.model.BodyType;
+import org.apache.shindig.social.opensocial.model.Enum;
 import org.apache.shindig.social.opensocial.model.ListField;
 import org.apache.shindig.social.opensocial.model.MediaItem;
 import org.apache.shindig.social.opensocial.model.Message;
@@ -34,6 +41,7 @@ import org.apache.shindig.social.opensocial.model.Name;
 import org.apache.shindig.social.opensocial.model.Organization;
 import org.apache.shindig.social.opensocial.model.Person;
 import org.apache.shindig.social.opensocial.model.Url;
+import org.apache.shindig.social.opensocial.model.Enum.Drinker;
 import org.apache.shindig.social.opensocial.spi.DataCollection;
 import org.apache.shindig.social.opensocial.spi.RestfulCollection;
 
@@ -236,6 +244,8 @@ public class XStream081Configuration implements XStreamConfiguration {
         Organization.class, "organizations"));
     defaultItemFieldMappings.add(new ItemFieldMapping(Person.class, "urls",
         Url.class, "urls"));
+    defaultItemFieldMappings.add(new ItemFieldMapping(Person.class, "lookingFor",
+        EnumImpl.class, "lookingFor"));
     
     
     defaultItemFieldMappings.add(new ItemFieldMapping(Activity.class, "mediaItems",
@@ -308,7 +318,8 @@ public class XStream081Configuration implements XStreamConfiguration {
    */
   public InterfaceClassMapper getMapper(ConverterSet c, Mapper dmapper,
       WriterStack writerStack) {
-    return new InterfaceClassMapper(writerStack, dmapper,
+    FieldAliasingMapper emapper = new FieldAliasingMapper(dmapper);
+    return new InterfaceClassMapper(writerStack, emapper,
         getElementMappingList(c), getListElementMappingList(c),
         getItemFieldMappings(c), getOmitMap(c), getElementClassMap(c));
   }
@@ -327,7 +338,11 @@ public class XStream081Configuration implements XStreamConfiguration {
     for (Converter converter : getConverters(mapper, c)) {
       xstream.registerConverter(converter);
     }
-
+    xstream.registerConverter(new ISO8601DateConverter());
+    xstream.registerConverter(new ISO8601GregorianCalendarConverter());
+    xstream.registerConverter(new ISO8601SqlTimestampConverter());
+    // these really need to be on interface.
+    xstream.aliasField("key", EnumImpl.class, "value");
     xstream.setMode(XStream.NO_REFERENCES);
     return xstream;
   }

@@ -76,9 +76,10 @@
   <xs:complexType name="Person">
     <xs:sequence>
       <xs:element minOccurs="0" name="aboutMe" type="xs:string" />
-      <xs:element minOccurs="0" maxOccurs="unbounded" name="addresses" type="tns:Address" />
-      <xs:element minOccurs="0" maxOccurs="unbounded" name="activities" type="xs:string" />
       <xs:element minOccurs="0" name="accounts" type="tns:Account"/>
+      <xs:element minOccurs="0" maxOccurs="unbounded" name="activities" type="xs:string" />
+      <xs:element minOccurs="0" maxOccurs="unbounded" name="addresses" type="tns:Address" />
+      <xs:element minOccurs="0" name="age" type="xs:string"/>
       <xs:element minOccurs="0" name="anniversary" type="xs:dateTime" />
       <xs:element minOccurs="0" name="birthday" type="xs:dateTime" />
       <xs:element minOccurs="0" name="bodyType" type="tns:BodyType" />
@@ -104,15 +105,16 @@
       <xs:element minOccurs="0" name="jobInterests" type="xs:string" />
       <xs:element minOccurs="0" maxOccurs="unbounded" name="languagesSpoken" type="xs:string" />
       <xs:element minOccurs="0" name="livingArrangement" type="xs:string" />
-      <xs:element minOccurs="0" name="lookingFor" type="xs:string" />
+      <xs:element minOccurs="0" maxOccurs="unbounded" name="lookingFor" type="tns:LookingFor" />
       <xs:element minOccurs="0" maxOccurs="unbounded" name="movies" type="xs:string" />
       <xs:element minOccurs="0" maxOccurs="unbounded" name="music" type="xs:string" />
       <xs:element minOccurs="0" name="name" type="tns:Name" />
+      <xs:element minOccurs="0" name="networkPresence" type="tns:NetworkPresence" />
       <xs:element minOccurs="0" name="nickname" type="xs:string" />
       <xs:element minOccurs="0" maxOccurs="unbounded" name="organizations" type="tns:Organization" />
       <xs:element minOccurs="0" name="pets" type="xs:string" />
-      <xs:element minOccurs="0" maxOccurs="unbounded" name="photos" type="tns:PluralPersonField" />
       <xs:element minOccurs="0" maxOccurs="unbounded" name="phoneNumbers" type="tns:PluralPersonField" />
+      <xs:element minOccurs="0" maxOccurs="unbounded" name="photos" type="tns:PluralPersonField" />
       <xs:element minOccurs="0" name="politicalViews" type="xs:string" />
       <xs:element minOccurs="0" name="preferredUsername" type="xs:string" />
       <xs:element minOccurs="0" name="profileSong" type="tns:Url" />
@@ -194,16 +196,22 @@
     </xs:all>
   </xs:complexType> 
   
+  
   <xs:complexType name="Organization">
     <xs:all>
+      <xs:element minOccurs="0" name="address" type="tns:Address" />
       <xs:element minOccurs="0" name="department" type="xs:string" />
       <xs:element minOccurs="0" name="description" type="xs:string" />
       <xs:element minOccurs="0" name="endDate" type="xs:dateTime" />
-      <xs:element minOccurs="0" name="location" type="tns:Address" />
       <xs:element minOccurs="0" name="name" type="xs:string" />
       <xs:element minOccurs="0" name="startDate" type="xs:dateTime" />
       <xs:element minOccurs="0" name="type" type="xs:string" />
       <xs:element minOccurs="0" name="title" type="xs:string" />
+      <xs:element minOccurs="0" name="field" type="xs:string" />
+      <xs:element minOccurs="0" name="subField" type="xs:string" />
+      <xs:element minOccurs="0" name="webpage" type="xs:string" />
+      <xs:element minOccurs="0" name="salary" type="xs:string" />
+   
     </xs:all>
   </xs:complexType>
   <xs:complexType name="Name">
@@ -212,6 +220,7 @@
       <xs:element minOccurs="0" name="familyName" type="xs:string" />
       <xs:element minOccurs="0" name="givenName" type="xs:string" />
       <xs:element minOccurs="0" name="honorificPrefix" type="xs:string" />
+      <xs:element minOccurs="0" name="honorificSuffix" type="xs:string" />
       <xs:element minOccurs="0" name="formatted" type="xs:string" />
     </xs:all>
   </xs:complexType>
@@ -242,7 +251,7 @@
   
   <xs:complexType name="Drinker">
     <xs:all>
-      <xs:element minOccurs="0" name="displayvalue" type="xs:string" />
+      <xs:element minOccurs="0" name="displayValue" type="xs:string" />
       <xs:element minOccurs="0" name="key" type="tns:DrinkerType" />
     </xs:all>
   </xs:complexType>
@@ -262,7 +271,7 @@
   
   <xs:complexType name="Presence">
     <xs:all>
-      <xs:element minOccurs="0" name="displayvalue" type="xs:string" />
+      <xs:element minOccurs="0" name="displayValue" type="xs:string" />
       <xs:element minOccurs="0" name="key" type="tns:PresenceType" />
     </xs:all>
   </xs:complexType>
@@ -280,7 +289,7 @@
   
   <xs:complexType name="Smoker">
     <xs:all>
-      <xs:element minOccurs="0" name="displayvalue" type="xs:string" />
+      <xs:element minOccurs="0" name="displayValue" type="xs:string" />
       <xs:element minOccurs="0" name="key" type="tns:SmokerType" />
     </xs:all>
   </xs:complexType>
@@ -299,7 +308,7 @@
   
   <xs:complexType name="CreateActivityPriority">
     <xs:all>
-      <xs:element minOccurs="0" name="displayvalue" type="xs:string" />
+      <xs:element minOccurs="0" name="displayValue" type="xs:string" />
       <xs:element minOccurs="0" name="key" type="tns:CreateActivityPriorityType" />
     </xs:all>
   </xs:complexType>
@@ -312,7 +321,7 @@
   
   <xs:complexType name="EscapeType">
     <xs:all>
-      <xs:element minOccurs="0" name="displayvalue" type="xs:string" />
+      <xs:element minOccurs="0" name="displayValue" type="xs:string" />
       <xs:element minOccurs="0" name="key" type="tns:EscapeTypeType" />
     </xs:all>
   </xs:complexType>
@@ -335,7 +344,7 @@
   </xs:complexType>
   <xs:complexType name="MessageType">
     <xs:all>
-      <xs:element minOccurs="0" name="displayvalue" type="xs:string" />
+      <xs:element minOccurs="0" name="displayValue" type="xs:string" />
       <xs:element minOccurs="0" name="key" type="tns:MessageTypeType" />
     </xs:all>
   </xs:complexType>
@@ -352,7 +361,7 @@
   
   <xs:complexType name="Environment">
     <xs:all>
-      <xs:element minOccurs="0" name="displayvalue" type="xs:string" />
+      <xs:element minOccurs="0" name="displayValue" type="xs:string" />
       <xs:element minOccurs="0" name="key" type="tns:EnvironmentType" />
     </xs:all>
   </xs:complexType>
@@ -380,7 +389,7 @@
   
   <xs:complexType name="LookingFor">
     <xs:all>
-      <xs:element minOccurs="0" name="displayvalue" type="xs:string" />
+      <xs:element minOccurs="0" name="displayValue" type="xs:string" />
       <xs:element minOccurs="0" name="key" type="tns:LookingForType" />
     </xs:all>
   </xs:complexType>
@@ -392,6 +401,22 @@
       <xs:enumeration value="NETWORKING" />
       <xs:enumeration value="RANDOM" />
       <xs:enumeration value="RELATIONSHIP" />
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:complexType name="NetworkPresence">
+    <xs:all>
+      <xs:element minOccurs="0" name="displayValue" type="xs:string" />
+      <xs:element minOccurs="0" name="key" type="tns:NetworkPresenceType" />
+    </xs:all>
+  </xs:complexType>
+  <xs:simpleType name="NetworkPresenceType">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="AWAY" />
+      <xs:enumeration value="CHAT" />
+      <xs:enumeration value="DND" />
+      <xs:enumeration value="OFFLINE" />
+      <xs:enumeration value="ONLINE" />
+      <xs:enumeration value="XA" />
     </xs:restriction>
   </xs:simpleType>
   
