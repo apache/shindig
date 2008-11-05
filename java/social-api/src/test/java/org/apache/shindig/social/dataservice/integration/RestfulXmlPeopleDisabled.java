@@ -88,8 +88,8 @@ public class RestfulXmlPeopleDisabled extends AbstractLargeRestfulTests {
     bodyType.setBuild("svelte");
     bodyType.setEyeColor("blue");
     bodyType.setHairColor("black");
-    bodyType.setHeight("1.84M");
-    bodyType.setWeight("184lbs");
+    bodyType.setHeight(1.84F); // meters as per spec
+    bodyType.setWeight(74F); // kg as per spec
     canonical.setBodyType(bodyType);
 
     canonical.setBooks(Lists.newArrayList("The Cathedral & the Bazaar",
@@ -265,8 +265,8 @@ public class RestfulXmlPeopleDisabled extends AbstractLargeRestfulTests {
     assertStringField(bodyMap, body.getBuild(), BodyType.Field.BUILD);
     assertStringField(bodyMap, body.getEyeColor(), BodyType.Field.EYE_COLOR);
     assertStringField(bodyMap, body.getHairColor(), BodyType.Field.HAIR_COLOR);
-    assertStringField(bodyMap, body.getHeight(), BodyType.Field.HEIGHT);
-    assertStringField(bodyMap, body.getWeight(), BodyType.Field.WEIGHT);
+    assertFloatField(bodyMap, body.getHeight(), BodyType.Field.HEIGHT);
+    assertFloatField(bodyMap, body.getWeight(), BodyType.Field.WEIGHT);
 
     assertStringListField(result, canonical.getBooks(), Person.Field.BOOKS);
     assertStringListField(result, canonical.getCars(), Person.Field.CARS);
