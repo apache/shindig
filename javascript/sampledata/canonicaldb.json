@@ -42,8 +42,8 @@
 "build" : "svelte",
 "eyeColor" : "blue",
 "hairColor" : "black",
-"height" : "1.84M",
-"weight" : "184lbs"
+"height" : 1.84,
+"weight" : 74
 },
 "books" : ["The Cathedral & the Bazaar","Catch 22"],
 "cars" : ["beetle","prius"],
