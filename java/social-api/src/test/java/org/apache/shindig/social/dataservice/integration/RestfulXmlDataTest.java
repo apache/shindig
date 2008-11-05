@@ -65,6 +65,8 @@ public class RestfulXmlDataTest extends AbstractLargeRestfulTests {
     String resp = getResponse("/appdata/john.doe/@friends/app", "GET",
         extraParams, "xml", "application/xml");
     
+    XSDValidator.validate(resp, XMLSCHEMA, XSDRESOURCE,false);
+    
     XPath xp = xpathFactory.newXPath();
     NodeList result = (NodeList) xp.evaluate("/appdata/entry", new InputSource(
         new StringReader(resp)), XPathConstants.NODESET);
@@ -101,6 +103,8 @@ public class RestfulXmlDataTest extends AbstractLargeRestfulTests {
     extraParams.put("fields", null);
     String resp = getResponse("/appdata/john.doe/@self/app", "GET",
         extraParams, "xml", "application/xml");
+    
+    XSDValidator.validate(resp, XMLSCHEMA, XSDRESOURCE,false);
 
     XPath xp = xpathFactory.newXPath();
     NodeList result = (NodeList) xp.evaluate("/appdata/entry", new InputSource(
@@ -133,6 +137,7 @@ public class RestfulXmlDataTest extends AbstractLargeRestfulTests {
     String resp = getResponse("/appdata/john.doe/@self/app", "GET",
         extraParams, "xml", "application/xml");
 
+    XSDValidator.validate(resp, XMLSCHEMA, XSDRESOURCE,false);
 
     XPath xp = xpathFactory.newXPath();
     NodeList result = (NodeList) xp.evaluate("/appdata/entry", new InputSource(
@@ -165,6 +170,7 @@ public class RestfulXmlDataTest extends AbstractLargeRestfulTests {
     String resp = getResponse("/appdata/john.doe/@self/app", "GET",
         extraParams, "xml", "application/xml");
 
+    XSDValidator.validate(resp, XMLSCHEMA, XSDRESOURCE,false);
 
     XPath xp = xpathFactory.newXPath();
     NodeList result = (NodeList) xp.evaluate("/appdata/entry", new InputSource(
@@ -188,12 +194,16 @@ public class RestfulXmlDataTest extends AbstractLargeRestfulTests {
     String resp = getResponse("/appdata/john.doe/@self/app", "DELETE", extraParams, "xml",
         "application/xml");
 
+    XSDValidator.validate(resp, XMLSCHEMA, XSDRESOURCE,false);
+
     assertCount("0");
 
     // should be xml ?
     extraParams.put("fields", "count");
     getResponse("/appdata/john.doe/@self/app", "DELETE", extraParams, "xml",
         "application/xml");
+
+    XSDValidator.validate(resp, XMLSCHEMA, XSDRESOURCE,false);
 
     assertCount(null);
   }
@@ -209,6 +219,8 @@ public class RestfulXmlDataTest extends AbstractLargeRestfulTests {
     String resp = getResponse("/appdata/john.doe/@self/app", "POST", extraParams, postData,
         "xml", "application/xml");
     
+    XSDValidator.validate(resp, XMLSCHEMA, XSDRESOURCE,false);
+
 
     assertCount("5");
   }
@@ -217,6 +229,7 @@ public class RestfulXmlDataTest extends AbstractLargeRestfulTests {
     String resp = getResponse("/appdata/john.doe/@self/app", "GET", "xml",
         "application/xml");
     
+    XSDValidator.validate(resp, XMLSCHEMA, XSDRESOURCE,false);
 
 
     XPath xp = xpathFactory.newXPath();

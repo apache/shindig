@@ -35,7 +35,11 @@ import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathFactory;
 
 public class RestfulXmlActivityTest extends AbstractLargeRestfulTests {
-  Activity johnsActivity;
+  private static final String XMLSCHEMA = " xmlns=\"http://ns.opensocial.org/2008/opensocial\" \n"
+    + " xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" \n"
+    + " xsi:schemaLocation=\"http://ns.opensocial.org/2008/opensocial classpath:opensocial.xsd\" ";
+  private static final String XSDRESOURCE = "opensocial.xsd";
+  private Activity johnsActivity;
   private XPathFactory xpathFactory;
 
   @Override
@@ -71,6 +75,8 @@ public class RestfulXmlActivityTest extends AbstractLargeRestfulTests {
     String resp = getResponse("/activities/john.doe/@self/@app/1", "GET",
         "xml", "application/xml");
 
+    XSDValidator.validate(resp, XMLSCHEMA, XSDRESOURCE,false);
+    
     InputSource source = new InputSource(new StringReader(resp));
     XPath xp = xpathFactory.newXPath();
     NodeList result = (NodeList) xp.evaluate("/response/activity", source,
@@ -128,6 +134,9 @@ public class RestfulXmlActivityTest extends AbstractLargeRestfulTests {
   public void testGetActivitiesJson() throws Exception {
     String resp = getResponse("/activities/john.doe/@self", "GET", "xml",
         "application/xml");
+    System.err.println("Response Is "+resp);
+    XSDValidator.validate(resp, XMLSCHEMA, XSDRESOURCE,false);
+    
     XPath xp = xpathFactory.newXPath();
     assertEquals("0", xp.evaluate("/response/startIndex", new InputSource(
         new StringReader(resp))));
@@ -187,6 +196,8 @@ public class RestfulXmlActivityTest extends AbstractLargeRestfulTests {
   public void testGetFriendsActivitiesJson() throws Exception {
     String resp = getResponse("/activities/john.doe/@friends", "GET", "xml",
         "application/xml");
+
+    XSDValidator.validate(resp, XMLSCHEMA, XSDRESOURCE,false);
  
     XPath xp = xpathFactory.newXPath();
     assertEquals("0", xp.evaluate("/response/startIndex", new InputSource(
@@ -213,9 +224,14 @@ public class RestfulXmlActivityTest extends AbstractLargeRestfulTests {
     String createResponse = getResponse("/activities/john.doe/@self", "POST",
         postData, "xml", "application/xml");
 
+    XSDValidator.validate(createResponse, XMLSCHEMA, XSDRESOURCE,false);
+
     String resp = getResponse("/activities/john.doe/@self", "GET", "xml",
         "application/xml");
+    
+    XSDValidator.validate(resp, XMLSCHEMA, XSDRESOURCE,false);
 
+    
     XPath xp = xpathFactory.newXPath();
     assertEquals("0", xp.evaluate("/response/startIndex", new InputSource(
         new StringReader(resp))));

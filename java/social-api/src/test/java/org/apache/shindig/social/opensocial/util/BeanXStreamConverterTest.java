@@ -58,8 +58,6 @@ public class BeanXStreamConverterTest extends TestCase {
   private static final String XMLSCHEMA = " xmlns=\"http://ns.opensocial.org/2008/opensocial\" \n"
       + " xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" \n"
       + " xsi:schemaLocation=\"http://ns.opensocial.org/2008/opensocial classpath:opensocial.xsd\" ";
-  private static final Log log = LogFactory
-      .getLog(BeanXStreamConverterTest.class);
   private static final String XSDRESOURCE = "opensocial.xsd";
   private Person johnDoe;
   private Activity activity;
@@ -122,7 +120,7 @@ public class BeanXStreamConverterTest extends TestCase {
 
   public void testPersonToXml() throws Exception {
     String xml = XSDValidator.validate(beanXmlConverter.convertToXml(johnDoe),
-        XMLSCHEMA, XSDRESOURCE);
+        XMLSCHEMA, XSDRESOURCE, true);
     Element element = XmlUtil.parse(xml);
     Node id = element.getElementsByTagName("id").item(0);
     assertEquals(johnDoe.getId(), id.getTextContent());
@@ -130,7 +128,7 @@ public class BeanXStreamConverterTest extends TestCase {
 
   public void testActivityToXml() throws Exception {
     String xml = XSDValidator.validate(beanXmlConverter.convertToXml(activity),
-        XMLSCHEMA, XSDRESOURCE);
+        XMLSCHEMA, XSDRESOURCE, true);
 
     Element element = XmlUtil.parse(xml);
     Node id = element.getElementsByTagName("id").item(0);
@@ -201,7 +199,7 @@ public class BeanXStreamConverterTest extends TestCase {
     activities.add(activity);
     activities.add(activity);
     String xml = XSDValidator.validate(beanXmlConverter
-        .convertToXml(activities), XMLSCHEMA, XSDRESOURCE);
+        .convertToXml(activities), XMLSCHEMA, XSDRESOURCE, true);
     XmlUtil.parse(xml);
     String expectedXml = "<response>" + "<list.container>" + "  <activity>"
         + "    <id>activityId</id>" + "    <mediaItems>"

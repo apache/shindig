@@ -42,7 +42,7 @@ public class XSDValidator {
    * The schema language being used.
    */
   private static final String W3C_XML_SCHEMA = "http://www.w3.org/2001/XMLSchema";
-  
+
   /**
    * The XML declaration
    */
@@ -52,9 +52,11 @@ public class XSDValidator {
 
   /**
    * Validate a xml string against a supplied schema.
-   *
-   * @param xml the xml presented as a string
-   * @param schema an input stream containing the xsd
+   * 
+   * @param xml
+   *          the xml presented as a string
+   * @param schema
+   *          an input stream containing the xsd
    * @return a list of errors or a 0 lenght string if none.
    */
   public static String validate(String xml, InputStream schema) {
@@ -67,8 +69,11 @@ public class XSDValidator {
 
   /**
    * Validate a xml input stream against a supplied schema.
-   * @param xml a stream containing the xml
-   * @param schema a stream containing the schema
+   * 
+   * @param xml
+   *          a stream containing the xml
+   * @param schema
+   *          a stream containing the schema
    * @return a list of errors or warnings, a 0 lenght string if none.
    */
   public static String validate(InputStream xml, InputStream schema) {
@@ -80,20 +85,20 @@ public class XSDValidator {
     try {
       SchemaFactory schemaFactory = SchemaFactory.newInstance(W3C_XML_SCHEMA);
       Schema s = schemaFactory.newSchema(new StreamSource(schema));
-      
-      
+
       Validator validator = s.newValidator();
       final LSResourceResolver lsr = validator.getResourceResolver();
       validator.setResourceResolver(new LSResourceResolver() {
 
         public LSInput resolveResource(String arg0, String arg1, String arg2,
             String arg3, String arg4) {
-          log.info("resolveResource("+arg0+","+arg1+","+arg2+","+arg3+","+arg4+")");
+          log.info("resolveResource(" + arg0 + "," + arg1 + "," + arg2 + ","
+              + arg3 + "," + arg4 + ")");
           return lsr.resolveResource(arg0, arg1, arg2, arg3, arg4);
         }
-        
+
       });
-      
+
       validator.validate(new StreamSource(xml));
     } catch (IOException e) {
     } catch (SAXException e) {
@@ -102,8 +107,7 @@ public class XSDValidator {
 
     return errors.toString();
   }
-  
-  
+
   /**
    * Process the response string to strip the container element and insert the
    * opensocial schema.
@@ -111,21 +115,26 @@ public class XSDValidator {
    * @param xml
    * @return
    */
-  public static String insertSchema(String xml, String schemaStatement, boolean container) {
+  public static String insertSchema(String xml, String schemaStatement,
+      boolean removeContainer) {
     if (xml == null || xml.trim().length() == 0) {
       return xml;
     }
-    if (xml.startsWith("<response>")) {
-      xml = xml.substring("<response>".length());
-    }
-    if (xml.endsWith("</response>")) {
-      xml = xml.substring(0, xml.length() - "</response>".length());
+
+    if (removeContainer) {
+      if (xml.startsWith("<response>")) {
+        xml = xml.substring("<response>".length());
+      }
+      if (xml.endsWith("</response>")) {
+        xml = xml.substring(0, xml.length() - "</response>".length());
+      }
     }
     xml = xml.trim();
 
     int gt = xml.indexOf('>');
     if (gt > 0) {
-      return XMLDEC + xml.substring(0, gt) + schemaStatement + xml.substring(gt);
+      return XMLDEC + xml.substring(0, gt) + schemaStatement
+          + xml.substring(gt);
     }
     return xml;
   }
@@ -134,16 +143,17 @@ public class XSDValidator {
    * @param xmlFragment
    * @return a list of errors
    */
-  public static String validate(String xmlFragment, String schemaStatement, String schemaResource ) {
-    String xml = XSDValidator.insertSchema(xmlFragment, schemaStatement, true);
+  public static String validate(String xmlFragment, String schemaStatement,
+      String schemaResource, boolean removeContainer) {
+    String xml = XSDValidator.insertSchema(xmlFragment, schemaStatement, removeContainer);
     log.debug("Valiating " + xml);
     String errors = XSDValidator.validate(xml, XSDValidator.class
         .getResourceAsStream(schemaResource));
-    if ( !"".equals(errors) ) {
-      log.error("Failed to validate "+xml);
+    if (!"".equals(errors)) {
+      log.error("Failed to validate " + xml);
     }
-    if ( !"".equals(errors) ) {
-      throw new Error("XML document does not validate \n"+errors+"\n"+xml);
+    if (!"".equals(errors)) {
+      throw new Error("XML document does not validate \n" + errors + "\n" + xml);
     }
     return xml;
   }

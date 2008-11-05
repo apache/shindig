@@ -57,6 +57,10 @@ import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 
 public abstract class AbstractLargeRestfulTests extends TestCase {
+  protected static final String XMLSCHEMA = " xmlns=\"http://ns.opensocial.org/2008/opensocial\" \n"
+    + " xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" \n"
+    + " xsi:schemaLocation=\"http://ns.opensocial.org/2008/opensocial classpath:opensocial.xsd\" ";
+  protected static final String XSDRESOURCE = "opensocial.xsd";
 
   private HttpServletRequest req;
 
