@@ -32,6 +32,8 @@ import javax.servlet.http.HttpServletRequest;
 public class UrlParameterAuthenticationHandler implements AuthenticationHandler {
   public static final String AUTH_URL_PARAMETER = "SecurityTokenUrlParameter";
 
+  private static final String TOKEN_PARAM = "st";
+
   private static final Logger logger = Logger.getLogger(
       UrlParameterAuthenticationHandler.class.getName());
 
@@ -48,7 +50,8 @@ public class UrlParameterAuthenticationHandler implements AuthenticationHandler 
 
   public SecurityToken getSecurityTokenFromRequest(HttpServletRequest request) {
     try {
-      String token = request.getParameter("st");
+      String token = request.getParameter(TOKEN_PARAM);
+      if (token == null) return null;
       Map<String, String> parameters
           = Collections.singletonMap(SecurityTokenDecoder.SECURITY_TOKEN_NAME, token);
       return securityTokenDecoder.createToken(parameters);
