@@ -33,6 +33,7 @@ import org.apache.shindig.social.opensocial.model.Name;
 import org.apache.shindig.social.opensocial.model.Organization;
 import org.apache.shindig.social.opensocial.model.Person;
 import org.apache.shindig.social.opensocial.model.Url;
+import org.apache.shindig.social.opensocial.util.XSDValidator;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
@@ -227,6 +228,8 @@ public class RestfulXmlPeopleDisabled extends AbstractLargeRestfulTests {
     // Currently, for Shindig {pid}/@all/{uid} == {uid}/@self
     String resp = getResponse("/people/canonical/@self", "GET", extraParams,
         "xml", "application/xml");
+    
+    XSDValidator.validate(resp, XMLSCHEMA, XSDRESOURCE,false);
     
     System.err.println("Got Response \n"+resp);
 
@@ -493,6 +496,8 @@ public class RestfulXmlPeopleDisabled extends AbstractLargeRestfulTests {
     String resp = getResponse("/people/john.doe/@friends", "GET", extraParams,
         "xml", "application/xml");
     
+    XSDValidator.validate(resp, XMLSCHEMA, XSDRESOURCE,false);
+   
     System.err.println("Got Response \n"+resp);
 
     XPath xp = xpathFactory.newXPath();
@@ -526,7 +531,9 @@ public class RestfulXmlPeopleDisabled extends AbstractLargeRestfulTests {
 
     String resp = getResponse("/people/john.doe/@friends", "GET", extraParams,
         "xml", "application/xml");
-    
+
+    XSDValidator.validate(resp, XMLSCHEMA, XSDRESOURCE,false);
+
     System.err.println("Got Response \n"+resp);
 
     XPath xp = xpathFactory.newXPath();
@@ -548,6 +555,9 @@ public class RestfulXmlPeopleDisabled extends AbstractLargeRestfulTests {
     extraParams.put("startIndex", "1");
     resp = getResponse("/people/john.doe/@friends", "GET", extraParams, "xml",
         "application/xml");
+    
+    XSDValidator.validate(resp, XMLSCHEMA, XSDRESOURCE,false);
+
     xp = xpathFactory.newXPath();
     resultNodeList = (NodeList) xp.evaluate("/response", new InputSource(
         new StringReader(resp)), XPathConstants.NODESET);
