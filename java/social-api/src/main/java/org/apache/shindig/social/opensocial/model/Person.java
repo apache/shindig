@@ -326,6 +326,22 @@ public interface Person {
   void setAge(Integer age);
 
   /**
+   * Get the person's date of birth, specified as a {@link Date} object. Container support for this
+   * field is OPTIONAL.
+   *
+   * @return the person's data of birth
+   */
+  Date getBirthday();
+
+  /**
+   * Set the person's date of birth, specified as a {@link Date} object. Container support for this
+   * field is OPTIONAL.
+   *
+   * @param birthday the person's data of birth
+   */
+  void setBirthday(Date birthday);
+  
+  /**
    * Get the person's body characteristics, specified as an BodyType. Container support for this
    * field is OPTIONAL.
    *
@@ -405,21 +421,6 @@ public interface Person {
    */
   void setCurrentLocation(Address currentLocation);
 
-  /**
-   * Get the person's date of birth, specified as a {@link Date} object. Container support for this
-   * field is OPTIONAL.
-   *
-   * @return the person's data of birth
-   */
-  Date getBirthday();
-
-  /**
-   * Set the person's date of birth, specified as a {@link Date} object. Container support for this
-   * field is OPTIONAL.
-   *
-   * @param birthday the person's data of birth
-   */
-  void setBirthday(Date birthday);
 
   /**
    * Get the person's drinking status, specified as an {@link Enum} with the enum's key referencing

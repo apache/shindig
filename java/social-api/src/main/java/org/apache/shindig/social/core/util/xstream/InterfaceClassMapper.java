@@ -22,6 +22,8 @@ import com.google.inject.ImplementedBy;
 import com.thoughtworks.xstream.mapper.Mapper;
 import com.thoughtworks.xstream.mapper.MapperWrapper;
 
+import org.apache.shindig.social.opensocial.model.Person;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -339,4 +341,6 @@ public class InterfaceClassMapper extends MapperWrapper {
     return super.getImplicitCollectionDefForFieldName(itemType, fieldName);
   }
 
+
+  
 }
