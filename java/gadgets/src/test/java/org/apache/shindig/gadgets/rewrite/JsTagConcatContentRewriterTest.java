@@ -18,34 +18,15 @@
  */
 package org.apache.shindig.gadgets.rewrite;
 
-import com.google.inject.Guice;
-import com.google.inject.Injector;
-import org.apache.shindig.common.uri.Uri;
-import org.apache.shindig.gadgets.parse.GadgetHtmlParser;
-import org.apache.shindig.gadgets.parse.ParseModule;
-import org.apache.shindig.gadgets.spec.GadgetSpec;
-import static org.easymock.EasyMock.expect;
-import org.easymock.classextension.EasyMock;
-import static org.easymock.classextension.EasyMock.replay;
-import org.w3c.dom.Document;
-
-public class JsTagConcatContentRewriterTest extends FeatureBasedRewriterTestBase {
+public class JsTagConcatContentRewriterTest extends BaseRewriterTestCase {
   private JsTagConcatContentRewriter rewriter;
   private String concatBase;
-  private GadgetHtmlParser htmlParser;
 
   @Override
   protected void setUp() throws Exception {
     super.setUp();
-    ContentRewriterFeature jsFeature = makeFeature("script");
-    Injector injector = Guice.createInjector(new ParseModule());
-    htmlParser = injector.getInstance(GadgetHtmlParser.class);
-    ContentRewriterFeature.Factory factory = mockContentRewriterFeatureFactory(jsFeature);
-    rewriter = new JsTagConcatContentRewriter(factory, null);
-    GadgetSpec spec = EasyMock.createNiceMock(GadgetSpec.class);
-    expect(spec.getUrl()).andReturn(Uri.fromJavaUri(baseUri)).anyTimes();
-    replay(spec);
-    concatBase = rewriter.getJsConcatBase(spec, jsFeature);
+    rewriter = new JsTagConcatContentRewriter(rewriterFeatureFactory, DEFAULT_PROXY_BASE);
+    concatBase = rewriter.getJsConcatBase(SPEC_URL, defaultRewriterFeature);
   }
 
   public void testJSMergePreserveNoExternal() throws Exception {
@@ -53,16 +34,14 @@ public class JsTagConcatContentRewriterTest extends FeatureBasedRewriterTestBase
         + "doSomething\n"
         + "</script>";
 
-    Document document = htmlParser.parseDom(s);
-    String rewritten = rewriteHelper(rewriter, s, document);
+    String rewritten = rewriteHelper(rewriter, s);
     assertEquals(rewritten, s);
   }
 
   public void testJSMergePreserveNoScript() throws Exception {
     String s
         = "<DIV id=\"test\">ceci ne pas une script</DIV>";
-    Document document = htmlParser.parseDom(s);
-    String rewritten = rewriteHelper(rewriter, s, document);
+    String rewritten = rewriteHelper(rewriter, s);
     assertEquals(rewritten, s);
   }
 
@@ -70,16 +49,14 @@ public class JsTagConcatContentRewriterTest extends FeatureBasedRewriterTestBase
     String s = "<script>" +
         "<!--\ndoSomething\n-->" +
         "</script>";
-    Document document = htmlParser.parseDom(s);
-    String rewritten = rewriteHelper(rewriter, s, document);
+    String rewritten = rewriteHelper(rewriter, s);
     assertEquals(rewritten, s);
   }
 
   public void testJSMergeSingleScriptReWrite() throws Exception {
     String s = "<script src=\"http://a.b.com/1.js\"></script>";
     String expected = "<script src=\"" + concatBase + "1=http%3A%2F%2Fa.b.com%2F1.js\"></script>";
-    Document document = htmlParser.parseDom(s);
-    String rewritten = rewriteHelper(rewriter, s, document);
+    String rewritten = rewriteHelper(rewriter, s);
     assertEquals(rewritten, expected);
   }
 
@@ -88,8 +65,7 @@ public class JsTagConcatContentRewriterTest extends FeatureBasedRewriterTestBase
         + "<script src=\"http://a.b.com/2.js\"></script>";
     String expected
         = "<script src=\"" + concatBase + "1=http%3A%2F%2Fa.b.com%2F1.js&2=http%3A%2F%2Fa.b.com%2F2.js\"></script>";
-    Document document = htmlParser.parseDom(s);
-    String rewritten = rewriteHelper(rewriter, s, document);
+    String rewritten = rewriteHelper(rewriter, s);
     assertEquals(rewritten, expected);
   }
 
@@ -109,8 +85,7 @@ public class JsTagConcatContentRewriterTest extends FeatureBasedRewriterTestBase
         + "<script>\n"
         + "doSomething\n"
         + "</script>";
-    Document document = htmlParser.parseDom(s);
-    String rewritten = rewriteHelper(rewriter, s, document);
+    String rewritten = rewriteHelper(rewriter, s);
     assertEquals(rewritten, expected);
   }
 
@@ -124,26 +99,23 @@ public class JsTagConcatContentRewriterTest extends FeatureBasedRewriterTestBase
         "<script src=\"" + concatBase + "1=http%3A%2F%2Fa.b.com%2F1.js&2=http%3A%2F%2Fa.b.com%2F2.js\"></script>" +
         "<script><!-- doSomething --></script>" +
         "<script src=\"" + concatBase + "1=http%3A%2F%2Fa.b.com%2F3.js&2=http%3A%2F%2Fa.b.com%2F4.js\"></script>";
-    Document document = htmlParser.parseDom(s);
-    String rewritten = rewriteHelper(rewriter, s, document);
+    String rewritten = rewriteHelper(rewriter, s);
     assertEquals(expected, rewritten);
   }
 
   public void testJSMergeDerelativizeHostRelative() throws Exception {
     String s = "<script src=\"/1.js\"></script>";
     String expected
-        = "<script src=\"" + concatBase + "1=http%3A%2F%2Fgadget.org%2F1.js\"></script>";
-    Document document = htmlParser.parseDom(s);
-    String rewritten = rewriteHelper(rewriter, s, document);
+        = "<script src=\"" + concatBase + "1=http%3A%2F%2Fexample.org%2F1.js\"></script>";
+    String rewritten = rewriteHelper(rewriter, s);
     assertEquals(rewritten, expected);
   }
 
   public void testJSMergeDerelativizePathRelative() throws Exception {
     String s = "<script src=\"1.js\"></script>";
     String expected
-        = "<script src=\"" + concatBase + "1=http%3A%2F%2Fgadget.org%2Fdir%2F1.js\"></script>";
-    Document document = htmlParser.parseDom(s);
-    String rewritten = rewriteHelper(rewriter, s, document);
+        = "<script src=\"" + concatBase + "1=http%3A%2F%2Fexample.org%2Fdir%2F1.js\"></script>";
+    String rewritten = rewriteHelper(rewriter, s);
     assertEquals(rewritten, expected);
   }
 }

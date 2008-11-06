@@ -56,8 +56,7 @@ public class ProxyingLinkRewriter implements LinkRewriter {
       if (rewriterFeature.shouldRewriteURL(uri.toString())) {
         String result = prefix
             + Utf8UrlCoder.encode(uri.toString())
-            + "&gadget="
-            + Utf8UrlCoder.encode(gadgetUri.toString())
+            + ((gadgetUri == null) ? "" : "&gadget=" + Utf8UrlCoder.encode(gadgetUri.toString()))
             + "&fp="
             + rewriterFeature.getFingerprint();
         if (rewriterFeature.getExpires() != null) {

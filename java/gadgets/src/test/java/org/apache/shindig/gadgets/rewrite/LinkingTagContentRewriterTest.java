@@ -18,32 +18,27 @@
  */
 package org.apache.shindig.gadgets.rewrite;
 
-import com.google.inject.Guice;
-import com.google.inject.Injector;
-import org.apache.shindig.gadgets.parse.GadgetHtmlParser;
-import org.apache.shindig.gadgets.parse.ParseModule;
-import org.w3c.dom.Document;
-
 import java.net.URI;
 
-public class LinkingTagContentRewriterTest extends FeatureBasedRewriterTestBase {
+public class LinkingTagContentRewriterTest extends BaseRewriterTestCase {
   private LinkingTagContentRewriter rewriter;
-  private GadgetHtmlParser htmlParser;
   
   private static final String LINK_PREFIX = "px-";
 
   @Override
   protected void setUp() throws Exception {
     super.setUp();
-    Injector injector = Guice.createInjector(new ParseModule());
-    htmlParser = injector.getInstance(GadgetHtmlParser.class);
-    LinkRewriter pfxLinkRewriter = new LinkRewriter() {
-      public String rewrite(String uri, URI context) {
-        // Just prefixes with LINK_PREFIX
-        return LINK_PREFIX + uri;
+    rewriter = new LinkingTagContentRewriter(rewriterFeatureFactory, DEFAULT_PROXY_BASE) {
+      @Override
+      protected LinkRewriter createLinkRewriter(URI gadgetUri, ContentRewriterFeature feature) {
+        return new LinkRewriter() {
+          public String rewrite(String uri, URI context) {
+            // Just prefixes with LINK_PREFIX
+            return LINK_PREFIX + uri;
+          }
+        };
       }
     };
-    rewriter = new LinkingTagContentRewriter(pfxLinkRewriter, null);
   }
   
   public void testLinkingTagStandardRewrite() throws Exception {
@@ -55,21 +50,14 @@ public class LinkingTagContentRewriterTest extends FeatureBasedRewriterTestBase 
         + "<img src=\"" + LINK_PREFIX + "http://a.b.com/img2.gif\">"
         + "<embed src=\"" + LINK_PREFIX + "http://a.b.com/some.mov\"></embed>"
         + "<link href=\"" + LINK_PREFIX + "http://a.b.com/link.html\">";
-    Document document = htmlParser.parseDom(s);
-    String rewritten = rewriteHelper(rewriter, s, document);
+    String rewritten = rewriteHelper(rewriter, s);
     assertEquals(rewritten, expected);
   }
+
   
-  public void testLinkingTagIgnoredWithNoRewriter() throws Exception {
-    String s = "<img src=\"http://a.b.com/img.gif\"></img>";
-    Document document = htmlParser.parseDom(s);
-    String rewritten = rewriteHelper(new LinkingTagContentRewriter(null, null), s, document);
-    assertEquals(s, rewritten);
-  }
-  
-  public void testLinkingTagIgnoredWithBadParse() throws Exception {
+  public void testLinkingTagWithBadParse() throws Exception {
     String s = "<img src=\"http://a.b.com/img.gif></img>";
-    String rewritten = rewriteHelper(rewriter, s, null);
+    String rewritten = rewriteHelper(rewriter, s);
     assertEquals(s, rewritten);  // null = couldn't parse
   }
 }

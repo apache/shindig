@@ -91,6 +91,22 @@ public class MutableContent {
       }
     }
   }
+
+
+  /**
+   * Sets the object's document. Note, this operation
+   * may be done at any time, even after a parse tree node has been retrieved
+   * and modified (though a warning will be emitted in this case).
+   * @param doc New document.
+   */
+  public void setDocument(Document doc) {
+    document = doc;
+    if (editListener != null) {
+      editListener.nodeEdited();
+    } else {
+      editListener = new ContentEditListener();
+    }
+  }
   
   /**
    * Retrieves the object contents in parse tree form, if a
@@ -136,7 +152,7 @@ public class MutableContent {
   }
   
   // Intermediary object tracking edit behavior for the MutableHtmlContent to help maintain
-  // state consistency. GadgetHtmlNode calls nodeEdited whenever a modification
+  // state consistency. Modifiers of doucments call nodeEdited whenever a modification
   // is made to its original source.
   private class ContentEditListener {
     private boolean stringEdited = false;

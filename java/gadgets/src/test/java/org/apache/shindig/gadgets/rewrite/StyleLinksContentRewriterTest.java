@@ -19,37 +19,27 @@
 package org.apache.shindig.gadgets.rewrite;
 
 import com.google.common.collect.Sets;
-import com.google.inject.Guice;
-import com.google.inject.Injector;
-import org.apache.shindig.gadgets.parse.GadgetHtmlParser;
-import org.apache.shindig.gadgets.parse.ParseModule;
-import org.w3c.dom.Document;
 
 import java.net.URI;
 
-public class StyleLinksContentRewriterTest extends FeatureBasedRewriterTestBase {
-  private LinkRewriter pfxLinkRewriter;
-  private ContentRewriterFeature styleFeature;
+public class StyleLinksContentRewriterTest extends BaseRewriterTestCase {
   private StyleLinksContentRewriter rewriter;
   
   private static final String LINK_PREFIX = "px-";
 
-  private GadgetHtmlParser htmlParser;
-
   @Override
   protected void setUp() throws Exception {
     super.setUp();
-    Injector injector = Guice.createInjector(new ParseModule());
-    htmlParser = injector.getInstance(GadgetHtmlParser.class);
-    pfxLinkRewriter = new LinkRewriter() {
-      public String rewrite(String uri, URI context) {
-        // Just prefixes with LINK_PREFIX
-        return LINK_PREFIX + uri;
+    rewriter = new StyleLinksContentRewriter(rewriterFeatureFactory, DEFAULT_PROXY_BASE) {
+      protected LinkRewriter createLinkRewriter(URI gadgetUri, ContentRewriterFeature feature) {
+        return new LinkRewriter() {
+          public String rewrite(String uri, URI context) {
+            // Just prefixes with LINK_PREFIX
+            return LINK_PREFIX + uri;
+          }
+        };
       }
     };
-    styleFeature = makeFeature("style");
-    ContentRewriterFeature.Factory factory = mockContentRewriterFeatureFactory(styleFeature);
-    rewriter = new StyleLinksContentRewriter(factory, pfxLinkRewriter);
   }
   
   public void testStyleTagRewrites() throws Exception {
@@ -58,46 +48,27 @@ public class StyleLinksContentRewriterTest extends FeatureBasedRewriterTestBase 
       ".someid {background-image:url(http://a.b.com/bigimg.png);float:right;width:165px;height:23px;margin-top:4px;margin-left:5px}";
     String s = "<style>" + css + "</style>";
 
-    Document document = htmlParser.parseDom(s);
-
     String rewritten =
       "div {list-style-image:url(\"" + LINK_PREFIX + "http://a.b.com/bullet.gif\");list-style-position:outside;margin:5px;padding:0}\n" +
       ".someid {background-image:url(\"" + LINK_PREFIX + "http://a.b.com/bigimg.png\");float:right;width:165px;height:23px;margin-top:4px;margin-left:5px}";
     // Rewrite, document is mutated in-place
-    rewriteHelper(rewriter, s, document);
+    MutableContent content = rewriteContent(rewriter, s);
     assertEquals(rewritten,
-        HtmlContentRewriter.getElementsByTagNameCaseInsensitive(document,
+        RewriterUtils.getElementsByTagNameCaseInsensitive(content.getDocument(),
             Sets.newHashSet("style")).get(0).getTextContent());
   }
   
-  public void testStyleTagRewritesIgnoredOnBadParse() throws Exception {
-    String css = 
-      "div {list-style-image:url('http://a.b.com/bullet.gif');list-style-position:outside;margin:5px;padding:0}\n" +
-      ".someid {background-image:url(http://a.b.com/bigimg.png);float:right;width:165px;height:23px;margin-top:4px;margin-left:5px}";
-    String s = "<style>" + css + "</style";
-    assertEquals(s, rewriteHelper(rewriter, s, null));
-  }
-  
   public void testStyleTagRewritesIgnoredOnNoFeatureKey() throws Exception {
-    ContentRewriterFeature overrideFeature = makeFeature("foo");  // doesn't include "style"
-    ContentRewriterFeature.Factory factory = mockContentRewriterFeatureFactory(overrideFeature);
-    StyleLinksContentRewriter overrideRewriter = new StyleLinksContentRewriter(factory, pfxLinkRewriter);
+    ContentRewriterFeature overrideFeature =
+        rewriterFeatureFactory.get(createSpecWithRewrite(".*", "", "HTTP",
+            Sets.newConcurrentHashSet("foo")));  // doesn't include "style"
+    ContentRewriterFeatureFactory factory = mockContentRewriterFeatureFactory(overrideFeature);
+    StyleLinksContentRewriter overrideRewriter =
+        new StyleLinksContentRewriter(factory, LINK_PREFIX);
     String css =
       "div {list-style-image:url('http://a.b.com/bullet.gif');list-style-position:outside;margin:5px;padding:0}\n" +
       ".someid {background-image:url(http://a.b.com/bigimg.png);float:right;width:165px;height:23px;margin-top:4px;margin-left:5px}";
     String s = "<style>" + css + "</style>";
-    Document document = htmlParser.parseDom(s);
-    assertEquals(s, rewriteHelper(overrideRewriter, s, document));
-  }
-  
-  public void testStyleTagRewritesIgnoredOnNullLinkRewriter() throws Exception {
-    ContentRewriterFeature.Factory factory = mockContentRewriterFeatureFactory(styleFeature);
-    StyleLinksContentRewriter overrideRewriter = new StyleLinksContentRewriter(factory, null);
-    String css =
-      "div {list-style-image:url('http://a.b.com/bullet.gif');list-style-position:outside;margin:5px;padding:0}\n" +
-      ".someid {background-image:url(http://a.b.com/bigimg.png);float:right;width:165px;height:23px;margin-top:4px;margin-left:5px}";
-    String s = "<style>" + css + "</style>";
-    Document document = htmlParser.parseDom(s);
-    assertEquals(s, rewriteHelper(overrideRewriter, s, document));
+    assertEquals(s, rewriteHelper(overrideRewriter, s));
   }
 }

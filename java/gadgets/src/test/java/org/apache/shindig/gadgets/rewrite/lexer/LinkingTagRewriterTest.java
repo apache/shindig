@@ -38,8 +38,7 @@ public class LinkingTagRewriterTest extends BaseRewriterTestCase {
     super.setUp();
     dummyUri = new URI("http://www.w3c.org");
     URI relativeBase = new URI("http://a.b.com/");
-    LinkingTagRewriter rewriter = new LinkingTagRewriter(defaultRewriter, relativeBase);
-
+    LinkingTagRewriter rewriter = new LinkingTagRewriter(defaultLinkRewriter, relativeBase);
     defaultTransformerMap = new HashMap<String, HtmlTagTransformer>();
     for (String tag : rewriter.getSupportedTags()) {
       defaultTransformerMap
@@ -61,9 +60,9 @@ public class LinkingTagRewriterTest extends BaseRewriterTestCase {
     String original = "<img src=\"http://a.b.com/img.gif\"></img>\n"
         + "<IMG src=\"http://a.b.com/img.gif\"/>\n"
         + "<eMbeD src=\"http://a.b.com/some.mov\" width=\"100\" height=\"30px\"/>";
-    String expected = "<img src=\"http://www.test.com/proxy?url=http%3A%2F%2Fa.b.com%2Fimg.gif&gadget=http%3A%2F%2Fexample.org%2Fg.xml&fp=-840722081\"></img>\n"
-        + "<IMG src=\"http://www.test.com/proxy?url=http%3A%2F%2Fa.b.com%2Fimg.gif&gadget=http%3A%2F%2Fexample.org%2Fg.xml&fp=-840722081\"/>\n"
-        + "<eMbeD src=\"http://www.test.com/proxy?url=http%3A%2F%2Fa.b.com%2Fsome.mov&gadget=http%3A%2F%2Fexample.org%2Fg.xml&fp=-840722081\" width=\"100\" height=\"30px\"/>";
+    String expected = "<img src=\"http://www.test.com/dir/proxy?url=http%3A%2F%2Fa.b.com%2Fimg.gif&gadget=http%3A%2F%2Fexample.org%2Fdir%2Fg.xml&fp=-182800334\"></img>\n"
+        + "<IMG src=\"http://www.test.com/dir/proxy?url=http%3A%2F%2Fa.b.com%2Fimg.gif&gadget=http%3A%2F%2Fexample.org%2Fdir%2Fg.xml&fp=-182800334\"/>\n"
+        + "<eMbeD src=\"http://www.test.com/dir/proxy?url=http%3A%2F%2Fa.b.com%2Fsome.mov&gadget=http%3A%2F%2Fexample.org%2Fdir%2Fg.xml&fp=-182800334\" width=\"100\" height=\"30px\"/>";
     validateRewritten(original, expected);
   }
 
