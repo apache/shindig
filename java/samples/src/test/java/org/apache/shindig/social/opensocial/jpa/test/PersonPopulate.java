@@ -296,14 +296,14 @@ public class PersonPopulate {
 
   private BodyType getNewBodyType(int i) {
     BodyType bodyType = findOne(BodyTypeDb.FINDBY_HEIGHT, new String[] { BodyTypeDb.PARAM_HEIGHT },
-        new Object[] { String.valueOf(i % 10) });
+        new Object[] { new Float(i % 10) });
     if (bodyType == null) {
       bodyType = new BodyTypeDb();
       bodyType.setBuild("Build " + i);
       bodyType.setEyeColor("Build " + i);
       bodyType.setHairColor("Build " + i);
-      bodyType.setHeight(String.valueOf(i % 10));
-      bodyType.setWeight(String.valueOf(i % 15));
+      bodyType.setHeight(new Float(i % 10));
+      bodyType.setWeight(new Float(i % 15));
     }
     return bodyType;
   }
