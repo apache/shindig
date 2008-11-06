@@ -22,18 +22,12 @@ import org.apache.shindig.common.util.HashUtil;
 import org.apache.shindig.common.xml.XmlException;
 import org.apache.shindig.common.xml.XmlUtil;
 import org.apache.shindig.gadgets.variables.Substitutions;
-
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Represents a gadget specification root element (Module).
@@ -188,7 +182,7 @@ public class GadgetSpec {
    * Used by handler classes to use specs to carry context.
    * Not defined by the specification
    */
-  private final Map<String, Object> attributes = new HashMap<String, Object>();
+  private final Map<String, Object> attributes = new ConcurrentHashMap<String, Object>();
   public Object getAttribute(String key) {
     return attributes.get(key);
   }
