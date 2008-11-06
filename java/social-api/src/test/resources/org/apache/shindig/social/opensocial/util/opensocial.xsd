@@ -15,7 +15,7 @@
   <xs:element name="list.container" type="xs:anyType" />
   
   <xs:complexType name="Response">
-    <xs:sequence>
+    <xs:choice minOccurs="0" maxOccurs="unbounded" >
       <xs:element minOccurs="0" name="itemsPerPage" type="xs:int" />
       <xs:element minOccurs="0" name="startIndex" type="xs:long" />
       <xs:element minOccurs="0" name="totalResults" type="xs:long" />
@@ -28,7 +28,7 @@
       <xs:element minOccurs="0"  maxOccurs="unbounded" name="entry" type="tns:Entry" />
       <!--  this is to allow responses to create to validate -->
       <xs:element minOccurs="0" name="map" type="xs:anyType" />
-    </xs:sequence>
+    </xs:choice>
   </xs:complexType>
   
   <xs:complexType name="Entry" >
@@ -41,7 +41,7 @@
   
     
   <xs:complexType name="Activity">
-    <xs:sequence>
+    <xs:choice minOccurs="0" maxOccurs="unbounded">
       <xs:element minOccurs="0" name="appId" type="xs:string" />
       <xs:element minOccurs="0" name="body" type="xs:string" />
       <xs:element minOccurs="0" name="bodyId" type="xs:string" />
@@ -59,7 +59,7 @@
       <xs:element minOccurs="0" name="titleId" type="xs:string" />
       <xs:element minOccurs="0" name="url" type="xs:string" />
       <xs:element minOccurs="0" name="userId" type="xs:string" />
-    </xs:sequence>
+    </xs:choice>
   </xs:complexType>
   
   
@@ -74,7 +74,7 @@
   </xs:complexType>
   
   <xs:complexType name="Person">
-    <xs:sequence>
+    <xs:choice minOccurs="1" maxOccurs="unbounded">
       <xs:element minOccurs="0" name="aboutMe" type="xs:string" />
       <xs:element minOccurs="0" name="accounts" type="tns:Account"/>
       <xs:element minOccurs="0" maxOccurs="unbounded" name="activities" type="xs:string" />
@@ -138,7 +138,7 @@
       <xs:element minOccurs="0" name="updated" type="xs:dateTime"/>
       <xs:element minOccurs="0" maxOccurs="unbounded" name="urls" type="tns:PluralPersonField" />
       <xs:element minOccurs="0" name="utcOffset" type="xs:int" />
-    </xs:sequence>
+    </xs:choice>
   </xs:complexType>
   
   <xs:complexType name="Group">
