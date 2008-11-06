@@ -51,19 +51,41 @@ class CacheFileTest extends PHPUnit_Framework_TestCase {
 	 */
 	public function testDelete()
 	{
+		@rmdir("/tmp/shindig/te");
 		$cache = new CacheFile();
 		$cache->set("test", "testing");
 		$cache->delete("test");
 		$this->assertEquals("", $cache->get("test"));
+		$this->assertTrue(rmdir("/tmp/shindig/te"));
+	}
+
+	/**
+	 * Tests CacheFile->delete()
+	 */
+	public function testDeleteException()
+	{
+		$cache = new CacheFile();
+		$this->setExpectedException("CacheException");
+		$cache->delete("test");
 	}
 
 	/**
 	 * Tests CacheFile->get()
 	 */
 	public function testGet()
-	{	
-		$this->CacheFile->set("test", "testing");	
+	{
+		$this->CacheFile->set("test", "testing");
 		$this->assertEquals("testing", $this->CacheFile->get("test"));
+	}
+
+	/**
+	 * Tests CacheFile->get()
+	 */
+	public function testExpiredGet()
+	{
+		$this->CacheFile->set("test", "testing");
+		@sleep(1);
+		$this->assertFalse($this->CacheFile->get("test", 1));
 	}
 
 	/**
@@ -71,8 +93,27 @@ class CacheFileTest extends PHPUnit_Framework_TestCase {
 	 */
 	public function testSet()
 	{
-		$this->CacheFile->set("test", "testing");	
+		@unlink("/tmp/shindig/te/test");
+		@rmdir("/tmp/shindig/te");
+		$this->CacheFile->set("test", "testing");
 		$this->assertEquals("testing", $this->CacheFile->get("test"));
+		@unlink("/tmp/shindig/te/test");
+		@rmdir("/tmp/shindig/te");
 	}
 
+	/**
+	 * Tests CacheFile->set()
+	 */
+	public function testSetException()
+	{
+		@rmdir("/tmp/shindig/te");
+		$this->assertTrue(touch("/tmp/shindig/te"));
+		$this->setExpectedException("CacheException");
+		try {
+			$this->CacheFile->set("test", "testing");
+		} catch (Exception $e) {
+			$this->assertTrue(unlink("/tmp/shindig/te"));
+			throw $e;
+		}
+	}
 }
