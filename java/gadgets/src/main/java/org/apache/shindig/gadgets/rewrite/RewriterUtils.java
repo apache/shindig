@@ -19,64 +19,21 @@
 package org.apache.shindig.gadgets.rewrite;
 
 import com.google.common.collect.Lists;
-import org.apache.shindig.common.uri.Uri;
-import org.apache.shindig.gadgets.Gadget;
 import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.http.HttpResponse;
-import org.apache.shindig.gadgets.spec.View;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.traversal.DocumentTraversal;
 import org.w3c.dom.traversal.NodeFilter;
 import org.w3c.dom.traversal.NodeIterator;
 
-import java.net.URI;
 import java.util.List;
 import java.util.Set;
 
 /**
- * Simple helper base class for ContentRewriters that manipulate an
- * HTML parse tree, whether in rewriting a {@code Gadget} or an
- * {@code HttpResponse}. Passes in the URI from which the content
- * was derived in doing so.
+ * Various utility functions used by rewriters
  */
-public abstract class HtmlContentRewriter implements ContentRewriter {
-
-  protected abstract RewriterResults rewrite(Document doc, URI baseUri);
-
-  public static String getMimeType(HttpRequest request, HttpResponse original) {
-    String mimeType = request.getRewriteMimeType();
-    if (mimeType == null) {
-      mimeType = original.getHeader("Content-Type");
-    }
-    return mimeType != null ? mimeType.toLowerCase() : null;
-  }
-
-  public RewriterResults rewrite(HttpRequest request, HttpResponse original,
-      MutableContent content) {
-    String mimeType = getMimeType(request, original);
-    if (mimeType.toLowerCase().contains("html")) {
-      return rewriteHtml(content.getDocument(), request.getUri().toJavaUri());
-    }
-    return null;
-  }
-
-  public RewriterResults rewrite(Gadget gadget, MutableContent content) {
-    Uri base = gadget.getSpec().getUrl();
-    View view = gadget.getCurrentView();
-    if (view != null && view.getHref() != null) {
-      base = view.getHref();
-    }
-    return rewriteHtml(content.getDocument(), base.toJavaUri());
-  }
-
-  private RewriterResults rewriteHtml(Document doc, URI baseUri) {
-    if (doc != null) {
-      return rewrite(doc, baseUri);
-    }
-    return null;
-  }
-
+public class RewriterUtils {
   public static List<Node> getElementsByTagNameCaseInsensitive(Document doc,
       final Set<String> lowerCaseNames) {
     final List<Node> result = Lists.newArrayList();
@@ -94,5 +51,28 @@ public abstract class HtmlContentRewriter implements ContentRewriter {
       result.add(n);
     }
     return result;
+  }
+
+  public static boolean isHtml(HttpRequest request, HttpResponse original) {
+    String mimeType = getMimeType(request, original);
+    return mimeType != null && (mimeType.contains("html"));
+  }
+
+  public static boolean isCss(HttpRequest request, HttpResponse original) {
+    String mimeType = getMimeType(request, original);
+    return mimeType != null && mimeType.contains("css");
+  }
+
+  public static boolean isJavascript(HttpRequest request, HttpResponse original) {
+    String mimeType = getMimeType(request, original);
+    return mimeType != null && mimeType.contains("javascript");
+  }
+
+  public static String getMimeType(HttpRequest request, HttpResponse original) {
+    String mimeType = request.getRewriteMimeType();
+    if (mimeType == null) {
+      mimeType = original.getHeader("Content-Type");
+    }
+    return mimeType != null ? mimeType.toLowerCase() : null;
   }
 }

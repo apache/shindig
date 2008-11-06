@@ -19,6 +19,8 @@
 package org.apache.shindig.gadgets.rewrite;
 
 import com.google.common.collect.Sets;
+import com.google.inject.Inject;
+import com.google.inject.name.Named;
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.common.xml.XmlUtil;
 import org.apache.shindig.gadgets.Gadget;
@@ -32,31 +34,37 @@ import java.net.URI;
 import java.util.List;
 
 public class StyleLinksContentRewriter implements ContentRewriter {
-  // TODO: consider providing helper base class for node-visitor content rewriters
-  private final ContentRewriterFeature.Factory rewriterFeatureFactory;
-  private final LinkRewriter linkRewriter;
+  private final ContentRewriterFeatureFactory rewriterFeatureFactory;
+  private final String proxyUrl;
 
-  public StyleLinksContentRewriter(ContentRewriterFeature.Factory rewriterFeatureFactory,
-      LinkRewriter linkRewriter) {
+  @Inject
+  public StyleLinksContentRewriter(ContentRewriterFeatureFactory rewriterFeatureFactory,
+      @Named("shindig.content-rewrite.proxy-url")String proxyUrl) {
     this.rewriterFeatureFactory = rewriterFeatureFactory;
-    this.linkRewriter = linkRewriter;
+    this.proxyUrl = proxyUrl;
   }
 
   public RewriterResults rewrite(HttpRequest request, HttpResponse original,
       MutableContent content) {
-    String mimeType = HtmlContentRewriter.getMimeType(request, original);
-    if (mimeType.contains("html")) {
-      rewriteHtml(content.getDocument(), request.getUri().toJavaUri());
-    } else if (mimeType.contains("css")) {
-      content.setContent(rewriteCss(content.getContent(), request.getUri().toJavaUri()));
+    ContentRewriterFeature rewriterFeature = rewriterFeatureFactory.get(request);
+    if (!rewriterFeature.isRewriteEnabled() ||
+        !rewriterFeature.getIncludedTags().contains("style")) {
+      return null;
+    }
+
+    if (RewriterUtils.isHtml(request, original)) {
+      rewriteHtml(content.getDocument(), request.getUri().toJavaUri(),
+          createLinkRewriter(request.getGadget().toJavaUri(), rewriterFeature));
+    } else if (RewriterUtils.isCss(request, original)) {
+      content.setContent(rewriteCss(content.getContent(), request.getUri().toJavaUri(),
+          createLinkRewriter(request.getGadget().toJavaUri(), rewriterFeature)));
     }
     return RewriterResults.cacheableIndefinitely();
   }
 
   public RewriterResults rewrite(Gadget gadget, MutableContent content) {
     ContentRewriterFeature rewriterFeature = rewriterFeatureFactory.get(gadget.getSpec());
-    if (linkRewriter == null ||
-        !rewriterFeature.isRewriteEnabled() ||
+    if (!rewriterFeature.isRewriteEnabled() ||
         !rewriterFeature.getIncludedTags().contains("style")) {
       return null;
     }
@@ -67,10 +75,15 @@ public class StyleLinksContentRewriter implements ContentRewriter {
       base = view.getHref();
     }
 
-    return rewriteHtml(content.getDocument(), base.toJavaUri());
+    return rewriteHtml(content.getDocument(), base.toJavaUri(),
+        createLinkRewriter(gadget.getSpec().getUrl().toJavaUri(), rewriterFeature));
   }
 
-  private RewriterResults rewriteHtml(Document doc, URI baseUri) {
+  protected LinkRewriter createLinkRewriter(URI gadgetUri, ContentRewriterFeature feature) {
+    return new ProxyingLinkRewriter(gadgetUri, feature, proxyUrl);
+  }
+
+  private RewriterResults rewriteHtml(Document doc, URI baseUri, LinkRewriter linkRewriter) {
     if (doc == null) {
       return null;
     }
@@ -85,7 +98,7 @@ public class StyleLinksContentRewriter implements ContentRewriter {
 
     // Move all style tags into head
     // TODO Convert all @imports into a concatenated link tag
-    List<Node> styleTags = HtmlContentRewriter.getElementsByTagNameCaseInsensitive(doc,
+    List<Node> styleTags = RewriterUtils.getElementsByTagNameCaseInsensitive(doc,
         Sets.newHashSet("style"));
     for (Node styleNode : styleTags) {      
       mutated = true;
@@ -93,7 +106,7 @@ public class StyleLinksContentRewriter implements ContentRewriter {
         styleNode.getParentNode().removeChild(styleNode);
         head.appendChild(styleNode);
       }
-      styleNode.setTextContent(rewriteCss(styleNode.getTextContent(), baseUri));
+      styleNode.setTextContent(rewriteCss(styleNode.getTextContent(), baseUri, linkRewriter));
     }
 
     if (mutated) {
@@ -102,7 +115,7 @@ public class StyleLinksContentRewriter implements ContentRewriter {
     return RewriterResults.cacheableIndefinitely();
   }
 
-  private String rewriteCss(String styleText, URI baseUri) {
+  private String rewriteCss(String styleText, URI baseUri, LinkRewriter linkRewriter) {
     return CssRewriter.rewrite(styleText, baseUri, linkRewriter);
   }
 }

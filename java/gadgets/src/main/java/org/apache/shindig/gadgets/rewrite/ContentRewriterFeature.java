@@ -17,10 +17,9 @@
  */
 package org.apache.shindig.gadgets.rewrite;
 
+import com.google.common.collect.Lists;
 import org.apache.shindig.gadgets.spec.Feature;
 import org.apache.shindig.gadgets.spec.GadgetSpec;
-
-import com.google.common.collect.Lists;
 
 import java.util.List;
 import java.util.Set;
@@ -72,7 +71,10 @@ public class ContentRewriterFeature {
                                 String defaultExclude,
                                 String defaultExpires,
       Set<String> defaultTags) {
-    Feature f = spec.getModulePrefs().getFeatures().get("content-rewrite");
+    Feature f = null;
+    if (spec != null) {
+      f = spec.getModulePrefs().getFeatures().get("content-rewrite");
+    }
     String includeRegex = normalizeParam(defaultInclude, null);
     String excludeRegex = normalizeParam(defaultExclude, null);
 
@@ -194,31 +196,5 @@ public class ContentRewriterFeature {
       fingerprint =  result;
     }
     return fingerprint;
-  }
-
-  public static class Factory {
-    private final String defaultIncludeUrls;
-    private final String defaultExcludeUrls;
-    private final String defaultExpires;
-    private final Set<String> defaultIncludeTags;
-
-    public Factory(String includeUrls, String excludeUrls, String expires,
-        Set<String> includeTags) {
-      defaultIncludeUrls = includeUrls;
-      defaultExcludeUrls = excludeUrls;
-      defaultExpires = expires;
-      defaultIncludeTags = includeTags;
-    }
-
-    public ContentRewriterFeature get(GadgetSpec spec) {
-      ContentRewriterFeature rewriterFeature =
-        (ContentRewriterFeature)spec.getAttribute("content-rewrite");
-      if (rewriterFeature == null) {
-        rewriterFeature = new ContentRewriterFeature(spec, defaultIncludeUrls,
-            defaultExcludeUrls, defaultExpires, defaultIncludeTags);
-        spec.setAttribute("content-rewrite", rewriterFeature);
-      }
-      return rewriterFeature;
-    }
   }
 }

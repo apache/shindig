@@ -20,13 +20,14 @@ package org.apache.shindig.gadgets.rewrite;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
+import com.google.inject.Inject;
+import com.google.inject.name.Named;
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.common.util.Utf8UrlCoder;
 import org.apache.shindig.gadgets.Gadget;
 import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.http.HttpResponse;
 import org.apache.shindig.gadgets.servlet.ProxyBase;
-import org.apache.shindig.gadgets.spec.GadgetSpec;
 import org.apache.shindig.gadgets.spec.View;
 import org.w3c.dom.Node;
 
@@ -39,15 +40,15 @@ import java.util.List;
 
 public class JsTagConcatContentRewriter implements ContentRewriter {
   private final static int MAX_URL_LENGTH = 1500;
-
-  private final ContentRewriterFeature.Factory rewriterFeatureFactory;
-  private final String concatUrlBase;
-
   private static final String DEFAULT_CONCAT_URL_BASE = "/gadgets/concat?";
   private static final HashSet<String> TAG_NAMES = Sets.newHashSet("script");
 
-  public JsTagConcatContentRewriter(ContentRewriterFeature.Factory rewriterFeatureFactory,
-      String concatUrlBase) {
+  private final ContentRewriterFeatureFactory rewriterFeatureFactory;
+  private final String concatUrlBase;
+
+  @Inject
+  public JsTagConcatContentRewriter(ContentRewriterFeatureFactory rewriterFeatureFactory,
+      @Named("shindig.content-rewrite.concat-url")String concatUrlBase) {
     this.rewriterFeatureFactory = rewriterFeatureFactory;
     if (concatUrlBase != null) {
       this.concatUrlBase = concatUrlBase;
@@ -58,28 +59,36 @@ public class JsTagConcatContentRewriter implements ContentRewriter {
 
   public RewriterResults rewrite(HttpRequest request, HttpResponse original,
       MutableContent content) {
-    // JS Concatenation not supported for HTTP responses at present.
+    if (RewriterUtils.isHtml(request, original)) {
+      ContentRewriterFeature feature = rewriterFeatureFactory.get(request);
+      return rewriteImpl(feature, getJsConcatBase(request.getGadget(), feature),
+          request.getUri(), content);
+    }
     return null;
   }
 
   public RewriterResults rewrite(Gadget gadget, MutableContent content) {
-    ContentRewriterFeature rewriterFeature = rewriterFeatureFactory.get(gadget.getSpec());
-    if (!rewriterFeature.isRewriteEnabled() ||
-        !rewriterFeature.getIncludedTags().contains("script")) {
-      return null;
-    }
-
-    // Get all the script tags
-    List<Node> nodeList =
-        HtmlContentRewriter.getElementsByTagNameCaseInsensitive(content.getDocument(), TAG_NAMES);
-
-
-    String concatBase = getJsConcatBase(gadget.getSpec(), rewriterFeature);
+    ContentRewriterFeature feature = rewriterFeatureFactory.get(gadget.getSpec());
     Uri contentBase = gadget.getSpec().getUrl();
     View view = gadget.getCurrentView();
     if (view != null && view.getHref() != null) {
       contentBase = view.getHref();
     }
+    return rewriteImpl(feature, getJsConcatBase(gadget.getSpec().getUrl(), feature), contentBase,
+        content);
+  }
+
+  protected RewriterResults rewriteImpl(ContentRewriterFeature feature, String concatBase,
+                                        Uri contentBase, MutableContent content) {
+    if (!feature.isRewriteEnabled() ||
+        !feature.getIncludedTags().contains("script") ||
+        content.getDocument() == null) {
+      return null;
+    } 
+
+    // Get all the script tags
+    List<Node> nodeList =
+        RewriterUtils.getElementsByTagNameCaseInsensitive(content.getDocument(), TAG_NAMES);
 
     boolean mutated = false;
     List<Node> concatenateable = new ArrayList<Node>();
@@ -171,12 +180,11 @@ public class JsTagConcatContentRewriter implements ContentRewriter {
     return concatUris;
   }
 
-  String getJsConcatBase(GadgetSpec spec, ContentRewriterFeature rewriterFeature) {
+  String getJsConcatBase(Uri gadgetUri, ContentRewriterFeature rewriterFeature) {
     return concatUrlBase +
            ProxyBase.REWRITE_MIME_TYPE_PARAM +
            "=text/javascript&" +
-           "gadget=" +
-           Utf8UrlCoder.encode(spec.getUrl().toString()) +
+           ((gadgetUri == null) ? "" : "&gadget=" + Utf8UrlCoder.encode(gadgetUri.toString())) +
            "&fp=" +
            rewriterFeature.getFingerprint() +
            '&';
@@ -189,5 +197,4 @@ public class JsTagConcatContentRewriter implements ContentRewriter {
     }
     return n;
   }
-
 }
