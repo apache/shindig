@@ -18,11 +18,15 @@
  */
 package org.apache.shindig.gadgets.rewrite;
 
-import com.google.inject.Guice;
-import com.google.inject.Injector;
 import org.apache.shindig.gadgets.parse.GadgetHtmlParser;
 import org.apache.shindig.gadgets.parse.ParseModule;
-import static org.junit.Assert.*;
+
+import com.google.inject.Guice;
+import com.google.inject.Injector;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertTrue;
 import org.junit.Before;
 import org.junit.Test;
 import org.w3c.dom.Document;
@@ -47,7 +51,8 @@ public class MutableContentTest {
   
     Document document = mhc.getDocument();
     assertEquals(2, document.getFirstChild().getChildNodes().getLength());
-    assertTrue(document.getFirstChild().getChildNodes().item(1).getNodeType() == Node.TEXT_NODE);
+    assertTrue(document.getFirstChild().getChildNodes().item(1).getFirstChild().getNodeType() ==
+        Node.TEXT_NODE);
     assertEquals(content, document.getFirstChild().getChildNodes().item(1).getTextContent());
   
     assertSame(content, mhc.getContent());

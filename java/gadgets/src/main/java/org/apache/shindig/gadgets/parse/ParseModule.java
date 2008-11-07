@@ -17,9 +17,11 @@
  */
 package org.apache.shindig.gadgets.parse;
 
+import org.apache.shindig.gadgets.parse.nekohtml.NekoSimplifiedHtmlParser;
+
 import com.google.inject.AbstractModule;
 import com.google.inject.Provider;
-import org.apache.shindig.gadgets.parse.caja.CajaHtmlParser;
+
 import org.w3c.dom.DOMImplementation;
 import org.w3c.dom.bootstrap.DOMImplementationRegistry;
 
@@ -33,8 +35,7 @@ public class ParseModule extends AbstractModule {
    */
   @Override
   protected void configure() {
-    //bind(GadgetHtmlParser.class).to(NekoHtmlParser.class);
-    bind(GadgetHtmlParser.class).to(CajaHtmlParser.class);
+    bind(GadgetHtmlParser.class).to(NekoSimplifiedHtmlParser.class);
     bind(DOMImplementation.class).toProvider(DOMImplementationProvider.class);
   }
 

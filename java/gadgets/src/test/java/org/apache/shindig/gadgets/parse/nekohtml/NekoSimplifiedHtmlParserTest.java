@@ -17,11 +17,13 @@
  */
 package org.apache.shindig.gadgets.parse.nekohtml;
 
-import junit.framework.TestCase;
 import org.apache.shindig.gadgets.parse.ParseModule;
+
 import org.apache.xml.serialize.HTMLSerializer;
 import org.apache.xml.serialize.OutputFormat;
 import org.w3c.dom.Document;
+
+import junit.framework.TestCase;
 
 import java.io.IOException;
 import java.io.StringWriter;
@@ -55,6 +57,19 @@ public class NekoSimplifiedHtmlParserTest extends TestCase {
     parseAndCompareBalanced("<html><body><br />content<br></html>",
         "<HTML><head></head><body><br />content<br></body></HTML>");
   }
+
+  /*
+  public void testLarge() throws Exception {
+    String file = "<some bug file>"
+    File inputFile = new File(file);
+    if (!inputFile.exists() || !inputFile.canRead()) {
+      System.err.println("Input file: " + file + " not found or can't be read.");
+      System.exit(1);
+    }
+    String content = new String(IOUtils.toByteArray(new FileInputStream(file)));
+    parseAndCompareBalanced(content, content);
+  }
+  */
 
   private void parseAndCompareBalanced(String content, String expected) throws Exception {
     NekoSimplifiedHtmlParser builder = new NekoSimplifiedHtmlParser(
