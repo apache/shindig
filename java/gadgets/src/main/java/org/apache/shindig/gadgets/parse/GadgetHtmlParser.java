@@ -17,9 +17,11 @@
  */
 package org.apache.shindig.gadgets.parse;
 
-import com.google.inject.ImplementedBy;
 import org.apache.shindig.gadgets.GadgetException;
-import org.apache.shindig.gadgets.parse.caja.CajaHtmlParser;
+import org.apache.shindig.gadgets.parse.nekohtml.NekoSimplifiedHtmlParser;
+
+import com.google.inject.ImplementedBy;
+
 import org.w3c.dom.Document;
 
 /**
@@ -30,7 +32,7 @@ import org.w3c.dom.Document;
  * 
  * {@see ParsedHtmlNode} for parsing details
  */
-@ImplementedBy(CajaHtmlParser.class)
+@ImplementedBy(NekoSimplifiedHtmlParser.class)
 public abstract class GadgetHtmlParser {
 
   /**

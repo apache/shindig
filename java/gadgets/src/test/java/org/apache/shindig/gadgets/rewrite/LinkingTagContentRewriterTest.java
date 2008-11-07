@@ -43,13 +43,13 @@ public class LinkingTagContentRewriterTest extends BaseRewriterTestCase {
   
   public void testLinkingTagStandardRewrite() throws Exception {
     String s = "<img src=\"http://a.b.com/img.gif\"></img>"
-        + "<IMG src=\"http://a.b.com/img2.gif\"/>"
-        + "<eMbeD src=\"http://a.b.com/some.mov\"/>"
+        + "<img src=\"http://a.b.com/img2.gif\"/>"
+        + "<embed src=\"http://a.b.com/some.mov\"></embed>"
         + "<link href=\"http://a.b.com/link.html\"></link>";
-    String expected = "<head></head><img src=\"" + LINK_PREFIX + "http://a.b.com/img.gif\">"
+    String expected = "<head></head><BODY><img src=\"" + LINK_PREFIX + "http://a.b.com/img.gif\">"
         + "<img src=\"" + LINK_PREFIX + "http://a.b.com/img2.gif\">"
         + "<embed src=\"" + LINK_PREFIX + "http://a.b.com/some.mov\"></embed>"
-        + "<link href=\"" + LINK_PREFIX + "http://a.b.com/link.html\">";
+        + "<link href=\"" + LINK_PREFIX + "http://a.b.com/link.html\"></BODY>";
     String rewritten = rewriteHelper(rewriter, s);
     assertEquals(rewritten, expected);
   }
