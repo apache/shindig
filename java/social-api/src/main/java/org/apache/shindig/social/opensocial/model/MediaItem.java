@@ -25,6 +25,7 @@ import com.google.inject.ImplementedBy;
  * A container for the media item.
  */
 @ImplementedBy(MediaItemImpl.class)
+@Exportablebean
 public interface MediaItem {
 
   /**

@@ -28,6 +28,7 @@ import org.apache.shindig.social.SocialApiTestsGuiceModule;
 import org.apache.shindig.social.core.util.BeanJsonConverter;
 import org.apache.shindig.social.core.util.BeanXStreamAtomConverter;
 import org.apache.shindig.social.core.util.BeanXStreamConverter;
+import org.apache.shindig.social.core.util.xstream.GuiceBeanProvider;
 import org.apache.shindig.social.core.util.xstream.XStream081Configuration;
 import org.apache.shindig.social.opensocial.service.DataServiceServlet;
 import org.apache.shindig.social.opensocial.service.HandlerDispatcher;
@@ -79,8 +80,8 @@ public abstract class AbstractLargeRestfulTests extends TestCase {
 
     servlet.setHandlerDispatcher(injector.getInstance(HandlerDispatcher.class));
     servlet.setBeanConverters(new BeanJsonConverter(injector),
-        new BeanXStreamConverter(new XStream081Configuration()),
-        new BeanXStreamAtomConverter(new XStream081Configuration()));
+        new BeanXStreamConverter(new XStream081Configuration(injector)),
+        new BeanXStreamAtomConverter(new XStream081Configuration(injector)));
 
     req = EasyMock.createMock(HttpServletRequest.class);
     res = EasyMock.createMock(HttpServletResponse.class);

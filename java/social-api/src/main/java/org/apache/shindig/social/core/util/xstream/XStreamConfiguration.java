@@ -35,22 +35,27 @@ public interface XStreamConfiguration {
   };
 
 
-  /**
-   * @param c
-   * @param dmapper 
-   * @param writerStack
-   * @return
-   */
-  InterfaceClassMapper getMapper(ConverterSet c, Mapper dmapper, WriterStack writerStack);
+  public class ConverterConfig {
+    public InterfaceClassMapper mapper;
+    public XStream xstream;
+
+    public ConverterConfig(InterfaceClassMapper mapper, XStream xstream) {
+      this.mapper = mapper;
+      this.xstream = xstream;
+    }
+  }
+
+
 
   /**
    * @param c
    * @param rp
-   * @param mapper
+   * @param dmapper
    * @param driver
+   * @param writerStack
    * @return
    */
-  XStream getXStream(ConverterSet c, ReflectionProvider rp, Mapper mapper,
-      HierarchicalStreamDriver driver);
+  ConverterConfig getConverterConfig(ConverterSet c, ReflectionProvider rp,
+      Mapper dmapper, HierarchicalStreamDriver driver, WriterStack writerStack);
 
 }

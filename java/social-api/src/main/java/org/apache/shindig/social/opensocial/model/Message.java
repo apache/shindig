@@ -31,7 +31,7 @@ import com.google.inject.ImplementedBy;
  */
 
 @ImplementedBy(MessageImpl.class)
-
+@Exportablebean
 public interface Message {
 
   /**

@@ -27,11 +27,13 @@ import org.apache.shindig.social.core.util.BeanJsonConverter;
 import org.apache.shindig.social.core.util.BeanXStreamAtomConverter;
 import org.apache.shindig.social.core.util.BeanXStreamConverter;
 import org.apache.shindig.social.core.util.BeanXmlConverter;
+import org.apache.shindig.social.core.util.xstream.GuiceBeanProvider;
 import org.apache.shindig.social.core.util.xstream.XStream081Configuration;
 import org.apache.shindig.social.opensocial.spi.SocialSpiException;
 
 import com.google.common.collect.Maps;
 import com.google.inject.Guice;
+import com.google.inject.Injector;
 import com.google.inject.Provider;
 
 import junit.framework.TestCase;
@@ -201,10 +203,11 @@ public class DataServiceServletTest extends TestCase {
   }
 
   public void testGetConverterForRequest() throws Exception {
-    BeanJsonConverter json = new BeanJsonConverter(
-        Guice.createInjector(new SocialApiTestsGuiceModule()));
-    BeanXStreamConverter xml = new BeanXStreamConverter(new XStream081Configuration());
-    BeanXStreamAtomConverter atom = new BeanXStreamAtomConverter(new XStream081Configuration());
+
+    Injector injector = Guice.createInjector(new SocialApiTestsGuiceModule());
+    BeanJsonConverter json = new BeanJsonConverter(injector);
+    BeanXStreamConverter xml = new BeanXStreamConverter(new XStream081Configuration(injector));
+    BeanXStreamAtomConverter atom = new BeanXStreamAtomConverter(new XStream081Configuration(injector));
     servlet.setBeanConverters(json, xml, atom);
 
     assertConverter(atom, "atom");
@@ -215,10 +218,10 @@ public class DataServiceServletTest extends TestCase {
   }
 
   public void testGetConverterForRequestContentType() throws Exception {
-    BeanJsonConverter json = new BeanJsonConverter(Guice
-        .createInjector(new SocialApiTestsGuiceModule()));
-    BeanXStreamConverter xml = new BeanXStreamConverter(new XStream081Configuration());
-    BeanXStreamAtomConverter atom = new BeanXStreamAtomConverter(new XStream081Configuration());
+    Injector injector = Guice.createInjector(new SocialApiTestsGuiceModule());
+    BeanJsonConverter json = new BeanJsonConverter(injector);
+    BeanXStreamConverter xml = new BeanXStreamConverter(new XStream081Configuration(injector));
+    BeanXStreamAtomConverter atom = new BeanXStreamAtomConverter(new XStream081Configuration(injector));
     servlet.setBeanConverters(json, xml, atom);
 
     assertConverterForContentType(atom, "application/atom+xml");

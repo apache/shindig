@@ -74,6 +74,7 @@ import java.util.Map;
  *
  */
 @ImplementedBy(ActivityImpl.class)
+@Exportablebean
 public interface Activity {
 
   /**

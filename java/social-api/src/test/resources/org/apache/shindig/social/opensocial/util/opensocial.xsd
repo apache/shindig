@@ -130,13 +130,14 @@
       <xs:element minOccurs="0" name="sexualOrientation" type="xs:string" />
       <xs:element minOccurs="0" name="smoker" type="tns:Smoker" />
       <xs:element minOccurs="0" maxOccurs="unbounded" name="sports" type="xs:string" />
+      <xs:element minOccurs="0" name="status" type="xs:string" />
       <xs:element minOccurs="0" maxOccurs="unbounded" name="tags" type="xs:string" />
       <xs:element minOccurs="0" name="thumbnailUrl" type="xs:string" />
       <xs:element minOccurs="0" maxOccurs="unbounded" name="turnOffs" type="xs:string" />
       <xs:element minOccurs="0" maxOccurs="unbounded" name="turnOns" type="xs:string" />
       <xs:element minOccurs="0" maxOccurs="unbounded" name="tvShows" type="xs:string" />
       <xs:element minOccurs="0" name="updated" type="xs:dateTime"/>
-      <xs:element minOccurs="0" maxOccurs="unbounded" name="urls" type="tns:PluralPersonField" />
+      <xs:element minOccurs="0" maxOccurs="unbounded" name="urls" type="tns:Url" />
       <xs:element minOccurs="0" name="utcOffset" type="xs:int" />
     </xs:choice>
   </xs:complexType>
@@ -227,7 +228,7 @@
   
   <xs:complexType name="Url">
     <xs:all>
-      <xs:element minOccurs="0" name="address" type="xs:string" />
+      <xs:element minOccurs="0" name="value" type="xs:string" />
       <xs:element minOccurs="0" name="linkText" type="xs:string" />
       <xs:element minOccurs="0" name="type" type="xs:string" />
     </xs:all>
@@ -252,7 +253,7 @@
   <xs:complexType name="Drinker">
     <xs:all>
       <xs:element minOccurs="0" name="displayValue" type="xs:string" />
-      <xs:element minOccurs="0" name="key" type="tns:DrinkerType" />
+      <xs:element minOccurs="0" name="value" type="tns:DrinkerType" />
     </xs:all>
   </xs:complexType>
   <xs:simpleType name="DrinkerType">
@@ -272,7 +273,7 @@
   <xs:complexType name="Presence">
     <xs:all>
       <xs:element minOccurs="0" name="displayValue" type="xs:string" />
-      <xs:element minOccurs="0" name="key" type="tns:PresenceType" />
+      <xs:element minOccurs="0" name="value" type="tns:PresenceType" />
     </xs:all>
   </xs:complexType>
   <xs:simpleType name="PresenceType">
@@ -290,7 +291,7 @@
   <xs:complexType name="Smoker">
     <xs:all>
       <xs:element minOccurs="0" name="displayValue" type="xs:string" />
-      <xs:element minOccurs="0" name="key" type="tns:SmokerType" />
+      <xs:element minOccurs="0" name="value" type="tns:SmokerType" />
     </xs:all>
   </xs:complexType>
   <xs:simpleType name="SmokerType">
@@ -309,7 +310,7 @@
   <xs:complexType name="CreateActivityPriority">
     <xs:all>
       <xs:element minOccurs="0" name="displayValue" type="xs:string" />
-      <xs:element minOccurs="0" name="key" type="tns:CreateActivityPriorityType" />
+      <xs:element minOccurs="0" name="value" type="tns:CreateActivityPriorityType" />
     </xs:all>
   </xs:complexType>
   <xs:simpleType name="CreateActivityPriorityType">
@@ -322,7 +323,7 @@
   <xs:complexType name="EscapeType">
     <xs:all>
       <xs:element minOccurs="0" name="displayValue" type="xs:string" />
-      <xs:element minOccurs="0" name="key" type="tns:EscapeTypeType" />
+      <xs:element minOccurs="0" name="value" type="tns:EscapeTypeType" />
     </xs:all>
   </xs:complexType>
   <xs:simpleType name="EscapeTypeType">
@@ -345,7 +346,7 @@
   <xs:complexType name="MessageType">
     <xs:all>
       <xs:element minOccurs="0" name="displayValue" type="xs:string" />
-      <xs:element minOccurs="0" name="key" type="tns:MessageTypeType" />
+      <xs:element minOccurs="0" name="value" type="tns:MessageTypeType" />
     </xs:all>
   </xs:complexType>
   <xs:simpleType name="MessageTypeType">
@@ -362,7 +363,7 @@
   <xs:complexType name="Environment">
     <xs:all>
       <xs:element minOccurs="0" name="displayValue" type="xs:string" />
-      <xs:element minOccurs="0" name="key" type="tns:EnvironmentType" />
+      <xs:element minOccurs="0" name="value" type="tns:EnvironmentType" />
     </xs:all>
   </xs:complexType>
   <xs:simpleType name="EnvironmentType">
@@ -390,7 +391,7 @@
   <xs:complexType name="LookingFor">
     <xs:all>
       <xs:element minOccurs="0" name="displayValue" type="xs:string" />
-      <xs:element minOccurs="0" name="key" type="tns:LookingForType" />
+      <xs:element minOccurs="0" name="value" type="tns:LookingForType" />
     </xs:all>
   </xs:complexType>
   <xs:simpleType name="LookingForType">
@@ -406,7 +407,7 @@
   <xs:complexType name="NetworkPresence">
     <xs:all>
       <xs:element minOccurs="0" name="displayValue" type="xs:string" />
-      <xs:element minOccurs="0" name="key" type="tns:NetworkPresenceType" />
+      <xs:element minOccurs="0" name="value" type="tns:NetworkPresenceType" />
     </xs:all>
   </xs:complexType>
   <xs:simpleType name="NetworkPresenceType">

@@ -86,7 +86,7 @@ public class InterfaceClassMapper extends MapperWrapper {
   /**
    * A list of explicit mapping specifications. 
    */
-  private List<ItemFieldMapping> itemFieldMappings;
+  private List<ImplicitCollectionFieldMapping> itemFieldMappings;
 
   /**
    * Create an Interface Class Mapper with a configuration.
@@ -112,7 +112,7 @@ public class InterfaceClassMapper extends MapperWrapper {
   public InterfaceClassMapper(WriterStack writerStack, Mapper wrapped,
       List<ClassFieldMapping> elementMappingList,
       List<ClassFieldMapping> listElementMappingList,
-      List<ItemFieldMapping> itemFieldMappings,
+      List<ImplicitCollectionFieldMapping> itemFieldMappings,
       Map<String, Class<?>[]> omitMap, Map<String, Class<?>> elementClassMap) {
     super(wrapped);
     this.elementClassMap = elementClassMap;
@@ -333,7 +333,7 @@ public class InterfaceClassMapper extends MapperWrapper {
   @Override
   public ImplicitCollectionMapping getImplicitCollectionDefForFieldName(
       Class itemType, String fieldName) {
-    for ( ItemFieldMapping ifm : itemFieldMappings) {
+    for ( ImplicitCollectionFieldMapping ifm : itemFieldMappings) {
       if ( ifm.matches(itemType, fieldName) ) {
         return ifm;
       }

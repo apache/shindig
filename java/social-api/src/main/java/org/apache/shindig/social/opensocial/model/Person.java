@@ -34,6 +34,7 @@ import java.util.Set;
  *
  */
 @ImplementedBy(PersonImpl.class)
+@Exportablebean
 public interface Person {
   /**
    * The type of a profile url when represented as a list field.

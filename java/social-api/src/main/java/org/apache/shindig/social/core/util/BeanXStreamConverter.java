@@ -32,6 +32,7 @@ import org.apache.shindig.social.core.util.xstream.StackDriver;
 import org.apache.shindig.social.core.util.xstream.ThreadSafeWriterStack;
 import org.apache.shindig.social.core.util.xstream.WriterStack;
 import org.apache.shindig.social.core.util.xstream.XStreamConfiguration;
+import org.apache.shindig.social.core.util.xstream.XStreamConfiguration.ConverterConfig;
 import org.apache.shindig.social.opensocial.service.BeanConverter;
 import org.apache.shindig.social.opensocial.spi.DataCollection;
 import org.apache.shindig.social.opensocial.spi.RestfulCollection;
@@ -53,15 +54,6 @@ public class BeanXStreamConverter implements BeanConverter {
   private HierarchicalStreamDriver driver;
   private WriterStack writerStack;
 
-  protected class ConverterConfig {
-    protected InterfaceClassMapper mapper;
-    protected XStream xstream;
-
-    protected ConverterConfig(InterfaceClassMapper mapper, XStream xstream) {
-      this.mapper = mapper;
-      this.xstream = xstream;
-    }
-  }
 
   private Map<XStreamConfiguration.ConverterSet, ConverterConfig> converterMap = new HashMap<XStreamConfiguration.ConverterSet, ConverterConfig>();
 
@@ -85,9 +77,8 @@ public class BeanXStreamConverter implements BeanConverter {
      * single items
      */
     for (XStreamConfiguration.ConverterSet c : MAPPER_SCOPES) {
-      InterfaceClassMapper mapper = configuration.getMapper(c,dmapper,writerStack);
-      XStream xstream = configuration.getXStream(c,rp,mapper,driver);
-      converterMap.put(c, new ConverterConfig(mapper, xstream));
+      converterMap.put(c, configuration.getConverterConfig(c,rp,dmapper,driver,writerStack));
+  
     }
   }
 
