@@ -18,9 +18,7 @@
  */
 package org.apache.shindig.gadgets.render;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-
+import com.google.common.collect.Maps;
 import org.apache.shindig.auth.AnonymousSecurityToken;
 import org.apache.shindig.auth.SecurityToken;
 import org.apache.shindig.common.uri.Uri;
@@ -37,9 +35,8 @@ import org.apache.shindig.gadgets.preload.Preloads;
 import org.apache.shindig.gadgets.rewrite.ContentRewriterRegistry;
 import org.apache.shindig.gadgets.spec.GadgetSpec;
 import org.apache.shindig.gadgets.spec.View;
-
-import com.google.common.collect.Maps;
-
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import org.junit.Test;
 
 import java.util.Arrays;
@@ -213,6 +210,10 @@ public class HtmlRendererTest {
 
   private static class FakeContentRewriterRegistry implements ContentRewriterRegistry {
     private boolean wasRewritten = false;
+
+    public String rewriteGadget(Gadget gadget, View currentView) throws GadgetException {
+      throw new UnsupportedOperationException();
+    }
 
     public String rewriteGadget(Gadget gadget, String content) {
       wasRewritten = true;

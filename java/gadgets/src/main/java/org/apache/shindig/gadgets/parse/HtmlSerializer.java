@@ -54,11 +54,21 @@ public abstract class HtmlSerializer {
   }
 
   /**
+   * Copy serializer from one document to another. Note this requires that
+   * serializers are thread safe
+   */
+  public static void copySerializer(Document from, Document to) {
+    Integer length = (Integer)from.getUserData(ORIGINAL_LENGTH);
+    if (length != null) to.setUserData(ORIGINAL_LENGTH, length, null);
+    to.setUserData(KEY, from.getUserData(KEY), null);
+  }
+
+  /**
    * Get the length of the original version of the document
    * @param doc
    * @return
    */
-  protected static int getOriginalLength(Document doc) {
+  private static int getOriginalLength(Document doc) {
     Integer length = (Integer)doc.getUserData(ORIGINAL_LENGTH);
     if (length == null) return -1;
     return length;

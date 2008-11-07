@@ -108,8 +108,7 @@ public abstract class BaseRewriterTestCase extends EasyMockTestCase {
 
   MutableContent rewriteContent(ContentRewriter rewriter, String s)
       throws Exception {
-    MutableContent mc = new MutableContent(parser);
-    mc.setContent(s);
+    MutableContent mc = new MutableContent(parser, s, null);
 
     GadgetSpec spec = new GadgetSpec(SPEC_URL,
         "<Module><ModulePrefs title=''/><Content><![CDATA[" + s + "]]></Content></Module>");

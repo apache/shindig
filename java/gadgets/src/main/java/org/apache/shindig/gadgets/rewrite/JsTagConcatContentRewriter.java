@@ -27,6 +27,7 @@ import org.apache.shindig.common.util.Utf8UrlCoder;
 import org.apache.shindig.gadgets.Gadget;
 import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.http.HttpResponse;
+import org.apache.shindig.gadgets.parse.DomUtil;
 import org.apache.shindig.gadgets.servlet.ProxyBase;
 import org.apache.shindig.gadgets.spec.View;
 import org.w3c.dom.Node;
@@ -88,7 +89,7 @@ public class JsTagConcatContentRewriter implements ContentRewriter {
 
     // Get all the script tags
     List<Node> nodeList =
-        RewriterUtils.getElementsByTagNameCaseInsensitive(content.getDocument(), TAG_NAMES);
+        DomUtil.getElementsByTagNameCaseInsensitive(content.getDocument(), TAG_NAMES);
 
     boolean mutated = false;
     List<Node> concatenateable = new ArrayList<Node>();

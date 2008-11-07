@@ -17,13 +17,15 @@
  */
 package org.apache.shindig.gadgets.rewrite;
 
+import com.google.inject.Inject;
 import org.apache.shindig.gadgets.Gadget;
+import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.http.HttpResponse;
 import org.apache.shindig.gadgets.http.HttpResponseBuilder;
 import org.apache.shindig.gadgets.parse.GadgetHtmlParser;
-
-import com.google.inject.Inject;
+import org.apache.shindig.gadgets.spec.GadgetSpec;
+import org.apache.shindig.gadgets.spec.View;
 
 import java.util.Collections;
 import java.util.LinkedList;
@@ -31,8 +33,6 @@ import java.util.List;
 
 /**
  * Basic registry -- just iterates over rewriters and invokes them sequentially.
- *
- * TODO: Make abstract and bind CachingContentRewriterRegistry as the default.
  */
 public class DefaultContentRewriterRegistry implements ContentRewriterRegistry {
   protected final List<ContentRewriter> rewriters;
@@ -49,6 +49,20 @@ public class DefaultContentRewriterRegistry implements ContentRewriterRegistry {
   }
 
   /** {@inheritDoc} */
+  public String rewriteGadget(Gadget gadget, View currentView) throws GadgetException {
+    if (currentView == null) {
+      // Nothing to rewrite.
+      return null;
+    }
+    MutableContent mc = getMutableContent(gadget.getSpec(), currentView);
+
+    for (ContentRewriter rewriter : rewriters) {
+      rewriter.rewrite(gadget, mc);
+    }
+    return mc.getContent();
+  }
+
+  /** {@inheritDoc} */
   public String rewriteGadget(Gadget gadget, String content) {
     if (content == null) {
       // Nothing to rewrite.
@@ -58,7 +72,6 @@ public class DefaultContentRewriterRegistry implements ContentRewriterRegistry {
     MutableContent mc = getMutableContent(content);
 
     for (ContentRewriter rewriter : rewriters) {
-      mc.getContent();
       rewriter.rewrite(gadget, mc);
     }
 
@@ -83,8 +96,13 @@ public class DefaultContentRewriterRegistry implements ContentRewriterRegistry {
   }
 
   protected MutableContent getMutableContent(String content) {
-    MutableContent mc = new MutableContent(htmlParser);
-    mc.setContent(content);
+    MutableContent mc = new MutableContent(htmlParser, content, null);
+    return mc;
+  }
+
+  protected MutableContent getMutableContent(GadgetSpec spec, View v) throws GadgetException {
+    // TODO - Consider using caching here to avoid parse costs
+    MutableContent mc = new MutableContent(htmlParser, v.getContent(), null);
     return mc;
   }
 

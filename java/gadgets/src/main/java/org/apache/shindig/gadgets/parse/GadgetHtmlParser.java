@@ -42,10 +42,22 @@ public abstract class GadgetHtmlParser {
     return normalized.contains("<!DOCTYPE") || normalized.contains("<HTML");
   }
 
+  public final Document parseDom(String source) throws GadgetException {
+    Document document = parseDomImpl(source);
+    // Ensure head tag exists
+    if (DomUtil.getFirstNamedChildNode(document.getDocumentElement(), "head") == null) {
+      // Add as first element
+      document.getDocumentElement().insertBefore(
+          document.createElement("head"),
+          document.getDocumentElement().getFirstChild());
+    }
+    return document;
+  }
+
   /**
    * @param source
    * @return a parsed document or document fragment
    * @throws GadgetException
    */
-  public abstract Document parseDom(String source) throws GadgetException;
+  protected abstract Document parseDomImpl(String source) throws GadgetException;
 }

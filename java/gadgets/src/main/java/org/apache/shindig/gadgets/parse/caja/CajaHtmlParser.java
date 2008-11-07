@@ -51,7 +51,7 @@ public class CajaHtmlParser extends GadgetHtmlParser {
   }
 
   @Override
-  public Document parseDom(String source) throws GadgetException {
+  public Document parseDomImpl(String source) throws GadgetException {
     // Wrap the whole thing in a top-level node to get full contents.
     Document document = makeDocument(getFragment(source));
     HtmlSerializer.attach(document, new Serializer(), source);

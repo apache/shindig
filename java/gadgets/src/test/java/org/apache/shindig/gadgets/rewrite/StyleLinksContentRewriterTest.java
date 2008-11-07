@@ -19,6 +19,7 @@
 package org.apache.shindig.gadgets.rewrite;
 
 import com.google.common.collect.Sets;
+import org.apache.shindig.gadgets.parse.DomUtil;
 
 import java.net.URI;
 
@@ -54,7 +55,7 @@ public class StyleLinksContentRewriterTest extends BaseRewriterTestCase {
     // Rewrite, document is mutated in-place
     MutableContent content = rewriteContent(rewriter, s);
     assertEquals(rewritten,
-        RewriterUtils.getElementsByTagNameCaseInsensitive(content.getDocument(),
+        DomUtil.getElementsByTagNameCaseInsensitive(content.getDocument(),
             Sets.newHashSet("style")).get(0).getTextContent());
   }
   

@@ -22,10 +22,10 @@ import com.google.common.collect.Sets;
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
 import org.apache.shindig.common.uri.Uri;
-import org.apache.shindig.common.xml.XmlUtil;
 import org.apache.shindig.gadgets.Gadget;
 import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.http.HttpResponse;
+import org.apache.shindig.gadgets.parse.DomUtil;
 import org.apache.shindig.gadgets.spec.View;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
@@ -89,20 +89,15 @@ public class StyleLinksContentRewriter implements ContentRewriter {
     }
     boolean mutated = false;
 
-    // TODO This should move into parsers
-    Node head = XmlUtil.getFirstNamedChildNode(doc.getDocumentElement(), "head");
-    if (head == null) {
-      mutated = true;
-      head = doc.getDocumentElement().appendChild(doc.createElement("head"));
-    }
+    Node head = DomUtil.getFirstNamedChildNode(doc.getDocumentElement(), "head");
 
     // Move all style tags into head
     // TODO Convert all @imports into a concatenated link tag
-    List<Node> styleTags = RewriterUtils.getElementsByTagNameCaseInsensitive(doc,
+    List<Node> styleTags = DomUtil.getElementsByTagNameCaseInsensitive(doc,
         Sets.newHashSet("style"));
     for (Node styleNode : styleTags) {      
       mutated = true;
-      if (!styleNode.getParentNode().getNodeName().equalsIgnoreCase("HEAD")) {
+      if (styleNode.getParentNode() != head) {
         styleNode.getParentNode().removeChild(styleNode);
         head.appendChild(styleNode);
       }

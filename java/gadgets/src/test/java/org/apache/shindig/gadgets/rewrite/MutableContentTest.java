@@ -37,8 +37,7 @@ public class MutableContentTest {
     // sufficient given that this test doesn't exercise the parser extensively at all,
     // instead focusing on the additional utility provided by MutableHtmlContent
     Injector injector = Guice.createInjector(new ParseModule());
-    mhc = new MutableContent(injector.getInstance(GadgetHtmlParser.class));
-    mhc.setContent("DEFAULT VIEW");
+    mhc = new MutableContent(injector.getInstance(GadgetHtmlParser.class), "DEFAULT VIEW", null);
   }
   
   @Test
@@ -47,9 +46,9 @@ public class MutableContentTest {
     assertEquals("DEFAULT VIEW", content);
   
     Document document = mhc.getDocument();
-    assertEquals(1, document.getFirstChild().getChildNodes().getLength());
-    assertTrue(document.getFirstChild().getChildNodes().item(0).getNodeType() == Node.TEXT_NODE);
-    assertEquals(content, document.getFirstChild().getChildNodes().item(0).getTextContent());
+    assertEquals(2, document.getFirstChild().getChildNodes().getLength());
+    assertTrue(document.getFirstChild().getChildNodes().item(1).getNodeType() == Node.TEXT_NODE);
+    assertEquals(content, document.getFirstChild().getChildNodes().item(1).getTextContent());
   
     assertSame(content, mhc.getContent());
     assertSame(document, mhc.getDocument());
@@ -79,36 +78,5 @@ public class MutableContentTest {
   
     // GadgetHtmlNode hasn't changed because string hasn't changed
     assertSame(document, mhc.getDocument());
-  }
-  
-  @Test
-  public void staleTreeEditsInvalidatedAfterContentSet() throws Exception {
-    Document document = mhc.getDocument();
-  
-    // Re-set content
-    mhc.setContent("INVALIDATING CONTENT");
-  
-    // Should still be able to obtain this.
-    Document document2 = mhc.getDocument();
-    assertNotSame(document, document2);
-  
-    // Should be able to *obtain* first child node...
-    Node firstTextNode = document.getFirstChild().getChildNodes().item(0);
-    try {
-      // ...but not edit it.
-      firstTextNode.setTextContent("STALE-SET CONTENT");
-      MutableContent.notifyEdit(document);
-      fail("Should not be able to modify stale parse tree");
-    } catch (IllegalStateException e) {
-      // Expected condition.
-    }
-  
-    assertEquals("INVALIDATING CONTENT",
-        document2.getFirstChild().getChildNodes().item(0).getTextContent());
-  
-    // For good measure, modify secondRoot and get content
-    document2.getFirstChild().getChildNodes().item(0).setTextContent("NEW CONTENT");
-    MutableContent.notifyEdit(document2);
-    assertTrue(mhc.getContent().contains("NEW CONTENT"));
   }
 }

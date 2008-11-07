@@ -139,8 +139,7 @@ public class LexerVsDomRewriteBenchmark {
   private void runLexer() throws Exception {
    long startTime = System.currentTimeMillis();
     for (int i = 0; i < numRuns; i++) {
-      MutableContent mc = new MutableContent(null);
-      mc.setContent(content);
+      MutableContent mc = new MutableContent(null, content, null);
       lexerRewriter.rewrite(gadget, mc);
       mc.getContent();
     }
@@ -152,8 +151,7 @@ public class LexerVsDomRewriteBenchmark {
   private void run(GadgetHtmlParser parser) throws Exception {
     long startTime = System.currentTimeMillis();
     for (int i = 0; i < numRuns; i++) {
-      MutableContent mc = new MutableContent(parser);
-      mc.setContent(content);
+      MutableContent mc = new MutableContent(parser, content, null);
       linkRewriter.rewrite(gadget, mc);
       jsConcatRewriter.rewrite(gadget, mc);
       styleLinksRewriter.rewrite(gadget, mc);
@@ -169,8 +167,7 @@ public class LexerVsDomRewriteBenchmark {
     Document doc = parser.parseDom(content);
     long startTime = System.currentTimeMillis();
     for (int i = 0; i < numRuns; i++) {
-      MutableContent mc = new MutableContent(parser);
-      mc.setDocument((Document)doc.cloneNode(true));
+      MutableContent mc = new MutableContent(parser, null, doc);
       linkRewriter.rewrite(gadget, mc);
       jsConcatRewriter.rewrite(gadget, mc);
       styleLinksRewriter.rewrite(gadget, mc);
