@@ -32,6 +32,7 @@ import java.util.Date;
  */
 
 @ImplementedBy(OrganizationImpl.class)
+@Exportablebean
 public interface Organization {
 
   /**

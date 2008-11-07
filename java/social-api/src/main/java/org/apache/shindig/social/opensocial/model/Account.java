@@ -42,6 +42,7 @@ import com.google.inject.ImplementedBy;
  * </p>
  */
 @ImplementedBy(AccountImpl.class)
+@Exportablebean
 public interface Account {
 
 

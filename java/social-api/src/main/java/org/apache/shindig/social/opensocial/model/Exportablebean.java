@@ -15,25 +15,18 @@
  * KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-package org.apache.shindig.social.opensocial.spi;
+package org.apache.shindig.social.opensocial.model;
 
-import java.util.Map;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Inherited;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
-public class DataCollection {
-  private Map<String, Map<String, String>> entry;
-  
-  
-
-  public DataCollection(Map<String, Map<String, String>> entry) {
-    this.entry = entry;
-  }
-
-  public Map<String, Map<String, String>> getEntry() {
-    return entry;
-  }
-
-  public void setEntry(Map<String, Map<String, String>> entry) {
-    this.entry = entry;
-  }
-
-}
+/**
+ * 
+ */
+@Retention(RetentionPolicy.RUNTIME)
+@Target(ElementType.TYPE)
+@Inherited()
+public @interface Exportablebean {}

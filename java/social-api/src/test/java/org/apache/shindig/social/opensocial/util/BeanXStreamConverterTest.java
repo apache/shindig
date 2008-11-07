@@ -19,6 +19,7 @@ package org.apache.shindig.social.opensocial.util;
 
 import org.apache.shindig.common.xml.XmlException;
 import org.apache.shindig.common.xml.XmlUtil;
+import org.apache.shindig.social.SocialApiTestsGuiceModule;
 import org.apache.shindig.social.core.model.ActivityImpl;
 import org.apache.shindig.social.core.model.AddressImpl;
 import org.apache.shindig.social.core.model.ListFieldImpl;
@@ -26,6 +27,7 @@ import org.apache.shindig.social.core.model.MediaItemImpl;
 import org.apache.shindig.social.core.model.NameImpl;
 import org.apache.shindig.social.core.model.PersonImpl;
 import org.apache.shindig.social.core.util.BeanXStreamConverter;
+import org.apache.shindig.social.core.util.xstream.GuiceBeanProvider;
 import org.apache.shindig.social.core.util.xstream.XStream081Configuration;
 import org.apache.shindig.social.opensocial.model.Activity;
 import org.apache.shindig.social.opensocial.model.Address;
@@ -36,6 +38,8 @@ import org.apache.shindig.social.opensocial.spi.DataCollection;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.google.inject.Guice;
+import com.google.inject.Injector;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
@@ -67,6 +71,8 @@ public class BeanXStreamConverterTest extends TestCase {
   @Override
   public void setUp() throws Exception {
     super.setUp();
+    Injector injector = Guice.createInjector(new SocialApiTestsGuiceModule());
+    
     johnDoe = new PersonImpl("johnDoeId", "Johnny", new NameImpl("John Doe"));
     johnDoe.setPhoneNumbers(Lists.<ListField> newArrayList(new ListFieldImpl(
         "home", "+33H000000000"), new ListFieldImpl("mobile", "+33M000000000"),
@@ -82,9 +88,11 @@ public class BeanXStreamConverterTest extends TestCase {
 
     activity.setMediaItems(Lists.<MediaItem> newArrayList(new MediaItemImpl(
         "image/jpg", MediaItem.Type.IMAGE, "http://foo.bar")));
+    
 
-    beanXmlConverter = new BeanXStreamConverter(new XStream081Configuration());
+    beanXmlConverter = new BeanXStreamConverter(new XStream081Configuration(injector));
   }
+  
 
   public static class SimplePerson {
     private String id;
@@ -109,7 +117,6 @@ public class BeanXStreamConverterTest extends TestCase {
     // we cant validate
     SimplePerson cassie = new SimplePerson("5", "robot");
     String xml = beanXmlConverter.convertToXml(cassie);
-
     Element element = XmlUtil.parse(xml);
     Node id = element.getElementsByTagName("id").item(0);
     Node name = element.getElementsByTagName("name").item(0);

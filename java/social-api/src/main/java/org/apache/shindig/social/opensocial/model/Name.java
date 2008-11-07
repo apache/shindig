@@ -29,7 +29,7 @@ import com.google.inject.ImplementedBy;
  */
 
 @ImplementedBy(NameImpl.class)
-
+@Exportablebean
 public interface Name {
 
   /**

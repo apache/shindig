@@ -134,7 +134,6 @@ public class RestfulXmlActivityTest extends AbstractLargeRestfulTests {
   public void testGetActivitiesJson() throws Exception {
     String resp = getResponse("/activities/john.doe/@self", "GET", "xml",
         "application/xml");
-    System.err.println("Response Is "+resp);
     XSDValidator.validate(resp, XMLSCHEMA, XSDRESOURCE,false);
     
     XPath xp = xpathFactory.newXPath();

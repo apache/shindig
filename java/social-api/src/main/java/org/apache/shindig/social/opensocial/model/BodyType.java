@@ -27,6 +27,7 @@ import com.google.inject.ImplementedBy;
  *
  */
 @ImplementedBy(BodyTypeImpl.class)
+@Exportablebean
 public interface BodyType {
 
   /**

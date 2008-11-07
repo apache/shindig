@@ -27,6 +27,7 @@ import com.google.inject.ImplementedBy;
  *
  */
 @ImplementedBy(AddressImpl.class)
+@Exportablebean
 public interface Address {
 
   /**

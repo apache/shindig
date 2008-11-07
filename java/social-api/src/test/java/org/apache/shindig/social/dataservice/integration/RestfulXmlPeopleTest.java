@@ -51,7 +51,7 @@ import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathFactory;
 
-public class RestfulXmlPeopleDisabled extends AbstractLargeRestfulTests {
+public class RestfulXmlPeopleTest extends AbstractLargeRestfulTests {
   private Person canonical;
   private XPathFactory xpathFactory;
 
@@ -231,8 +231,6 @@ public class RestfulXmlPeopleDisabled extends AbstractLargeRestfulTests {
     
     XSDValidator.validate(resp, XMLSCHEMA, XSDRESOURCE,false);
     
-    System.err.println("Got Response \n"+resp);
-
     XPath xp = xpathFactory.newXPath();
     NodeList resultNodeList = (NodeList) xp.evaluate("/response/person",
         new InputSource(new StringReader(resp)), XPathConstants.NODESET);
@@ -440,7 +438,17 @@ public class RestfulXmlPeopleDisabled extends AbstractLargeRestfulTests {
 
   private void assertStringField(Map<String, List<String>> result,
       String expected, Object field) {
-    assertEquals(expected, result.get(field.toString()).get(0));
+    List<String> v = result.get(field.toString());
+    String t = null;
+    if ( v == null || v.size() == 0 ) {
+      if (expected == null ) {
+        return;
+      }
+      t = "";
+    } else {
+      t = v.get(0);
+    } 
+    assertEquals(expected, t);
   }
 
   private void assertStringListField(Map<String, List<String>> result,
@@ -498,10 +506,8 @@ public class RestfulXmlPeopleDisabled extends AbstractLargeRestfulTests {
     
     XSDValidator.validate(resp, XMLSCHEMA, XSDRESOURCE,false);
    
-    System.err.println("Got Response \n"+resp);
-
     XPath xp = xpathFactory.newXPath();
-    NodeList resultNodeList = (NodeList) xp.evaluate("/response/entry",
+    NodeList resultNodeList = (NodeList) xp.evaluate("/response",
         new InputSource(new StringReader(resp)), XPathConstants.NODESET);
     assertEquals(1, resultNodeList.getLength());
 
@@ -513,9 +519,13 @@ public class RestfulXmlPeopleDisabled extends AbstractLargeRestfulTests {
     assertEquals("0", result.get("startIndex").get(0));
 
     // The users should be in alphabetical order
-    assertPerson(childNodesToNodeMap(resultNodes.get("entry").get(0)),
+    Map<String, List<Node>> entryOne = childNodesToNodeMap(resultNodes.get("entry").get(0));
+    
+    assertPerson(childNodesToNodeMap(entryOne.get("person").get(0)),
         "george.doe", "George Doe");
-    assertPerson(childNodesToNodeMap(resultNodes.get("entry").get(1)),
+    
+    Map<String, List<Node>> entryTwo = childNodesToNodeMap(resultNodes.get("entry").get(1));
+    assertPerson(childNodesToNodeMap(entryTwo.get("person").get(0)),
         "jane.doe", "Jane Doe");
   }
 
@@ -534,8 +544,6 @@ public class RestfulXmlPeopleDisabled extends AbstractLargeRestfulTests {
 
     XSDValidator.validate(resp, XMLSCHEMA, XSDRESOURCE,false);
 
-    System.err.println("Got Response \n"+resp);
-
     XPath xp = xpathFactory.newXPath();
     NodeList resultNodeList = (NodeList) xp.evaluate("/response",
         new InputSource(new StringReader(resp)), XPathConstants.NODESET);
@@ -548,7 +556,9 @@ public class RestfulXmlPeopleDisabled extends AbstractLargeRestfulTests {
     assertEquals("3", result.get("totalResults").get(0));
     assertEquals("0", result.get("startIndex").get(0));
 
-    assertPerson(childNodesToNodeMap(resultNodes.get("entry").get(0)),
+    Map<String, List<Node>> entryOne = childNodesToNodeMap(resultNodes.get("entry").get(0));
+    
+    assertPerson(childNodesToNodeMap(entryOne.get("person").get(0)),
         "george.doe", "George Doe");
 
     // Get the second page
@@ -569,7 +579,8 @@ public class RestfulXmlPeopleDisabled extends AbstractLargeRestfulTests {
     assertEquals("3", result.get("totalResults").get(0));
     assertEquals("1", result.get("startIndex").get(0));
 
-    assertPerson(childNodesToNodeMap(resultNodes.get("entry").get(0)),
+    Map<String, List<Node>> entryTwo = childNodesToNodeMap(resultNodes.get("entry").get(0));
+    assertPerson(childNodesToNodeMap(entryTwo.get("person").get(0)),
         "jane.doe", "Jane Doe");
   }
 

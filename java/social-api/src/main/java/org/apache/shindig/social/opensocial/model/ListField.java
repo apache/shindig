@@ -32,6 +32,7 @@ import com.google.inject.ImplementedBy;
  * </p>
  */
 @ImplementedBy(ListFieldImpl.class)
+@Exportablebean
 public interface ListField {
 
   /**

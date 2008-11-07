@@ -23,6 +23,7 @@ package org.apache.shindig.social.opensocial.model;
  * Base class for all Enum objects. This class allows containers to use constants for fields that
  * have a common set of values.
  */
+@Exportablebean
 public interface Enum<E extends Enum.EnumKey> {
 
   /**

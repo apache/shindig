@@ -67,7 +67,7 @@ import com.thoughtworks.xstream.mapper.Mapper.ImplicitCollectionMapping;
  * ListField.class, "emails");
  * </p>
  */
-public class ItemFieldMapping implements ImplicitCollectionMapping {
+public class ImplicitCollectionFieldMapping implements ImplicitCollectionMapping {
 
   /**
    * The Class that the field is defined in.
@@ -101,7 +101,7 @@ public class ItemFieldMapping implements ImplicitCollectionMapping {
    *          the name of element in the xml
    *
    */
-  public ItemFieldMapping(Class<?> definedIn, String fieldName,
+  public ImplicitCollectionFieldMapping(Class<?> definedIn, String fieldName,
       Class<?> itemType, String itemFieldName) {
     this.definedIn = definedIn;
     this.itemType = itemType;
