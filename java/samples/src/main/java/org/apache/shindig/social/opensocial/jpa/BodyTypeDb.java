@@ -104,16 +104,16 @@ public class BodyTypeDb implements BodyType, DbObject {
    * @see org.apache.shindig.social.opensocial.model.BodyType
    */
   @Basic
-  @Column(name = "height", length = 255)
-  private float height;
+  @Column(name = "height")
+  private Float height;
 
   /**
    * model field.
    * @see org.apache.shindig.social.opensocial.model.BodyType
    */
   @Basic
-  @Column(name = "weight", length = 255)
-  private float weight;
+  @Column(name = "weight")
+  private Float weight;
 
   /** 
    * {@inheritDoc}
@@ -167,7 +167,7 @@ public class BodyTypeDb implements BodyType, DbObject {
    * {@inheritDoc}
    * @see org.apache.shindig.social.opensocial.model.BodyType#getHeight()
    */
-  public float getHeight() {
+  public Float getHeight() {
     return height;
   }
 
@@ -175,7 +175,7 @@ public class BodyTypeDb implements BodyType, DbObject {
    * {@inheritDoc}
    * @see org.apache.shindig.social.opensocial.model.BodyType#setHeight(java.lang.String)
    */
-  public void setHeight(float height) {
+  public void setHeight(Float height) {
     this.height = height;
   }
 
@@ -183,7 +183,7 @@ public class BodyTypeDb implements BodyType, DbObject {
    * {@inheritDoc}
    * @see org.apache.shindig.social.opensocial.model.BodyType#getWeight()
    */
-  public float getWeight() {
+  public Float getWeight() {
     return weight;
   }
 
@@ -191,7 +191,7 @@ public class BodyTypeDb implements BodyType, DbObject {
    * {@inheritDoc}
    * @see org.apache.shindig.social.opensocial.model.BodyType#setWeight(java.lang.String)
    */
-  public void setWeight(float weight) {
+  public void setWeight(Float weight) {
     this.weight = weight;
   }
 

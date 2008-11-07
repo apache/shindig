@@ -124,7 +124,7 @@ public interface BodyType {
    *
    * @return the height of the person in meters
    */
-  float getHeight();
+  Float getHeight();
 
   /**
    * The height of the person in meters, specified as a number. Container support for this field is
@@ -132,7 +132,7 @@ public interface BodyType {
    *
    * @param height the height of the person in meters
    */
-  void setHeight(float height);
+  void setHeight(Float height);
 
   /**
    * The weight of the person in kilograms, specified as a number. Container support for this field
@@ -140,7 +140,7 @@ public interface BodyType {
    *
    * @return the weight of the person in kilograms
    */
-  float getWeight();
+  Float getWeight();
 
   /**
    * The weight of the person in kilograms, specified as a number. Container support for this field
@@ -148,5 +148,5 @@ public interface BodyType {
    *
    * @param weight weight of the person in kilograms
    */
-  void setWeight(float weight);
+  void setWeight(Float weight);
 }
