@@ -25,7 +25,7 @@ import static org.easymock.classextension.EasyMock.replay;
 import static org.junit.Assert.assertEquals;
 
 import org.apache.shindig.common.cache.CacheProvider;
-import org.apache.shindig.common.cache.DefaultCacheProvider;
+import org.apache.shindig.common.cache.LruCacheProvider;
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.gadgets.http.HttpFetcher;
 import org.apache.shindig.gadgets.http.HttpRequest;
@@ -40,9 +40,9 @@ import org.junit.Test;
 import java.util.Locale;
 
 /**
- * Tests for BasicMessageBundleFactory
+ * Tests for DefaultMessageBundleFactory
  */
-public class BasicMessageBundleFactoryTest {
+public class DefaultMessageBundleFactoryTest {
   private static final Uri BUNDLE_URI = Uri.parse("http://example.org/messagex.xml");
   private static final Uri SPEC_URI = Uri.parse("http://example.org/gadget.xml");
 
@@ -80,15 +80,15 @@ public class BasicMessageBundleFactoryTest {
         "<Content type='html'/>" +
         "</Module>";
 
+  private static final int MAX_AGE = -10000;
 
   private final HttpFetcher fetcher = EasyMock.createNiceMock(HttpFetcher.class);
-  private final MessageBundleFactory bundleFactory;
-  private final CacheProvider cacheProvider;
+  private final CacheProvider cacheProvider = new LruCacheProvider(10);
+  private final MessageBundleFactory bundleFactory
+      = new DefaultMessageBundleFactory(fetcher, cacheProvider, MAX_AGE);
   private final GadgetSpec gadgetSpec;
 
-  public BasicMessageBundleFactoryTest() {
-    cacheProvider = new DefaultCacheProvider();
-    bundleFactory = new BasicMessageBundleFactory(fetcher, cacheProvider, 5, -1000, 1000);
+  public DefaultMessageBundleFactoryTest() {
     try {
       gadgetSpec = new GadgetSpec(SPEC_URI, BASIC_SPEC);
     } catch (GadgetException e) {
@@ -148,17 +148,13 @@ public class BasicMessageBundleFactoryTest {
   }
 
   @Test
-  public void identicalMaxTtlAndMinTtlPropagatesToFetcher() throws Exception {
+  public void ttlPropagatesToFetcher() throws Exception {
     CapturingFetcher capturingFetcher = new CapturingFetcher();
 
-    BasicMessageBundleFactory forcedBundleFactory
-        = new BasicMessageBundleFactory(capturingFetcher, cacheProvider, 5, 10000, 10000);
+    MessageBundleFactory forcedTtlFactory
+        = new DefaultMessageBundleFactory(capturingFetcher, cacheProvider, 10000);
 
-    HttpRequest request = new HttpRequest(BUNDLE_URI)
-        .setIgnoreCache(false)
-        .setCacheTtl(10);
-
-    forcedBundleFactory.getBundle(gadgetSpec, LOCALE, false);
+    forcedTtlFactory.getBundle(gadgetSpec, LOCALE, false);
 
     assertEquals(10, capturingFetcher.request.getCacheTtl());
   }

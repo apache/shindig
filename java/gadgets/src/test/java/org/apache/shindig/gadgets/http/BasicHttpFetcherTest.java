@@ -18,15 +18,16 @@
 package org.apache.shindig.gadgets.http;
 
 import org.apache.shindig.common.cache.CacheProvider;
-import org.apache.shindig.common.cache.DefaultCacheProvider;
+import org.apache.shindig.common.cache.LruCacheProvider;
+
 import org.junit.Before;
 
 public class BasicHttpFetcherTest extends AbstractHttpFetcherTest {
 
   @Before
   public void setUp() {
-    CacheProvider cacheProvider = new DefaultCacheProvider();
-    HttpCache cache = new BasicHttpCache(cacheProvider,10);
+    CacheProvider cacheProvider = new LruCacheProvider(10);
+    HttpCache cache = new DefaultHttpCache(cacheProvider);
     fetcher = new BasicHttpFetcher(cache, Integer.MAX_VALUE);
   }
 }

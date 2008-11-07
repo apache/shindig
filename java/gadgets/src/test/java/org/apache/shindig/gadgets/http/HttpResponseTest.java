@@ -23,6 +23,10 @@ import junit.framework.TestCase;
 
 import org.apache.commons.io.IOUtils;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.util.Arrays;
 
 public class HttpResponseTest extends TestCase {
@@ -64,7 +68,7 @@ public class HttpResponseTest extends TestCase {
         .create();
     assertEquals("TEST-CHARACTER-SET", response.getEncoding());
   }
-  
+
   public void testEncodingDetectionUtf8WithBom() throws Exception {
      HttpResponse response = new HttpResponseBuilder()
          .addHeader("Content-Type", "text/plain; charset=UTF-8")
@@ -330,5 +334,62 @@ public class HttpResponseTest extends TestCase {
         assertTrue("Status above 400 considered to be an error", response.isError());
       }
     }
+  }
+
+  public void testSerialization() throws Exception {
+    ByteArrayOutputStream baos = new ByteArrayOutputStream();
+    ObjectOutputStream out = new ObjectOutputStream(baos);
+
+    HttpResponse response = new HttpResponseBuilder()
+        .addHeader("Foo", "bar")
+        .addHeader("Foo", "baz")
+        .addHeader("Blah", "blah")
+        .setHttpStatusCode(204)
+        .setResponseString("This is the response string")
+        .create();
+
+    out.writeObject(response);
+
+    ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
+    ObjectInputStream in = new ObjectInputStream(bais);
+
+    HttpResponse deserialized = (HttpResponse)in.readObject();
+
+    assertEquals(response, deserialized);
+  }
+
+  public void testSerializationWithTransientFields() throws Exception {
+    ByteArrayOutputStream baos = new ByteArrayOutputStream();
+    ObjectOutputStream out = new ObjectOutputStream(baos);
+
+    long now = System.currentTimeMillis();
+
+    HttpResponse response = new HttpResponseBuilder()
+        .addHeader("Foo", "bar")
+        .addHeader("Foo", "baz")
+        .addHeader("Blah", "blah")
+        .addHeader("Date", DateUtil.formatDate(now))
+        .setHttpStatusCode(204)
+        .setResponseString("This is the response string")
+        .setMetadata("foo", "bar")
+        .create();
+
+    out.writeObject(response);
+
+    ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
+    ObjectInputStream in = new ObjectInputStream(bais);
+
+    HttpResponse deserialized = (HttpResponse)in.readObject();
+
+    HttpResponse expectedResponse = new HttpResponseBuilder()
+        .addHeader("Foo", "bar")
+        .addHeader("Foo", "baz")
+        .addHeader("Blah", "blah")
+        .addHeader("Date", DateUtil.formatDate(now))
+        .setHttpStatusCode(204)
+        .setResponseString("This is the response string")
+        .create();
+
+    assertEquals(expectedResponse, deserialized);
   }
 }

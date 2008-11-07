@@ -18,8 +18,8 @@
  */
 package org.apache.shindig.common.servlet;
 
-import com.google.inject.Injector;
 import com.google.inject.Guice;
+import com.google.inject.Injector;
 import com.google.inject.Module;
 import com.google.inject.Stage;
 import com.google.inject.tools.jmx.Manager;
@@ -47,7 +47,10 @@ public class GuiceServletContextListener implements ServletContextListener {
     if (moduleNames != null) {
       for (String moduleName : moduleNames.split(":")) {
         try {
-          modules.add((Module)Class.forName(moduleName).newInstance());
+          moduleName = moduleName.trim();
+          if (moduleName.length() > 0) {
+            modules.add((Module)Class.forName(moduleName).newInstance());
+          }
         } catch (InstantiationException e) {
           throw new RuntimeException(e);
         } catch (ClassNotFoundException e) {

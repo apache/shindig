@@ -27,7 +27,7 @@ import java.util.Locale;
 /**
  * Factory of message bundles
  */
-@ImplementedBy(BasicMessageBundleFactory.class)
+@ImplementedBy(DefaultMessageBundleFactory.class)
 public interface MessageBundleFactory {
   /**
    * Retrieves a messagMessageBundle for the provided GadgetSpec and Locale. Implementations must be

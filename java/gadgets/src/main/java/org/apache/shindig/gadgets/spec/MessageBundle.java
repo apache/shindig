@@ -17,9 +17,11 @@
  */
 package org.apache.shindig.gadgets.spec;
 
-import com.google.common.collect.Maps;
 import org.apache.shindig.common.xml.XmlException;
 import org.apache.shindig.common.xml.XmlUtil;
+
+import com.google.common.collect.Maps;
+
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 
@@ -72,14 +74,17 @@ public class MessageBundle {
    */
   public MessageBundle(MessageBundle parent, MessageBundle child) {
     Map<String, String> merged = Maps.newHashMap();
+    String dir = null;
     if (parent != null) {
       merged.putAll(parent.messages);
+      dir = parent.languageDirection;
     }
     if (child != null) {
       merged.putAll(child.messages);
+      dir = child.languageDirection;
     }
     messages = Collections.unmodifiableMap(merged);
-    languageDirection = child.languageDirection;
+    languageDirection = dir;
   }
 
   private MessageBundle() {

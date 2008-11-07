@@ -17,25 +17,26 @@
  */
 package org.apache.shindig.gadgets.http;
 
-import junit.framework.TestCase;
 import org.apache.shindig.common.cache.CacheProvider;
-import org.apache.shindig.common.cache.DefaultCacheProvider;
+import org.apache.shindig.common.cache.LruCacheProvider;
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.common.util.DateUtil;
+
+import junit.framework.TestCase;
 
 import java.util.Date;
 
 /**
  * Tests for basic content cache
  */
-public class BasicHttpCacheTest extends TestCase {
+public class DefaultHttpCacheTest extends TestCase {
 
   private HttpCache cache;
 
   @Override
   public void setUp() throws Exception {
     super.setUp();
-    cache = new BasicHttpCache(getCacheProvider(),10);
+    cache = new DefaultHttpCache(getCacheProvider());
   }
 
 
@@ -50,9 +51,9 @@ public class BasicHttpCacheTest extends TestCase {
    * @return default cache provider
    */
   protected CacheProvider getCacheProvider() {
-    return new DefaultCacheProvider();
+    return new LruCacheProvider(5);
   }
-  
+
   private static HttpRequest createRequest(String method) {
     return new HttpRequest(Uri.parse("http://www.example.org")).setMethod(method);
   }

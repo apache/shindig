@@ -18,8 +18,9 @@
  */
 package org.apache.shindig.gadgets;
 
+import org.apache.shindig.common.cache.Cache;
 import org.apache.shindig.common.cache.CacheProvider;
-import org.apache.shindig.common.cache.TtlCache;
+import org.apache.shindig.common.cache.SoftExpiringCache;
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.gadgets.http.HttpFetcher;
 import org.apache.shindig.gadgets.http.HttpRequest;
@@ -34,26 +35,24 @@ import com.google.inject.name.Named;
 import java.util.logging.Logger;
 
 /**
- * Basic implementation of a message bundle factory.
+ * Default implementation of a message bundle factory.
  */
 @Singleton
-public class BasicMessageBundleFactory extends AbstractMessageBundleFactory {
-  static final Logger logger = Logger.getLogger(BasicMessageBundleFactory.class.getName());
+public class DefaultMessageBundleFactory extends AbstractMessageBundleFactory {
+  public static final String CACHE_NAME = "messageBundles";
+  static final Logger LOG = Logger.getLogger(DefaultMessageBundleFactory.class.getName());
   private final HttpFetcher fetcher;
-  private final TtlCache<Uri, MessageBundle> ttlCache;
-  private final long minTtl;
-  private final long maxTtl;
+  private final SoftExpiringCache<Uri, MessageBundle> cache;
+  private final long expiration;
 
   @Inject
-  public BasicMessageBundleFactory(HttpFetcher fetcher,
-                                   CacheProvider cacheProvider,
-                                   @Named("shindig.message-bundle.cache.capacity")int capacity,
-                                   @Named("shindig.message-bundle.cache.minTTL")long minTtl,
-                                   @Named("shindig.message-bundle.cache.maxTTL")long maxTtl) {
+  public DefaultMessageBundleFactory(HttpFetcher fetcher,
+                                     CacheProvider cacheProvider,
+                                     @Named("shindig.cache.expirationMs") long expiration) {
     this.fetcher = fetcher;
-    this.minTtl = minTtl;
-    this.maxTtl = maxTtl;
-    this.ttlCache = new TtlCache<Uri, MessageBundle>(cacheProvider, capacity, minTtl, maxTtl);
+    Cache<Uri, MessageBundle> baseCache = cacheProvider.createCache(CACHE_NAME);
+    this.cache = new SoftExpiringCache<Uri, MessageBundle>(baseCache);
+    this.expiration = expiration;
   }
 
   @Override
@@ -63,36 +62,39 @@ public class BasicMessageBundleFactory extends AbstractMessageBundleFactory {
       return fetchAndCacheBundle(locale, ignoreCache);
     }
 
-    TtlCache.CachedObject<MessageBundle> cached = null;
+    Uri uri = locale.getMessages();
 
-    synchronized(ttlCache) {
-      cached = ttlCache.getElementWithExpiration(locale.getMessages());
-    }
+    SoftExpiringCache.CachedObject<MessageBundle> cached = cache.getElement(uri);
 
-    if (cached.obj == null || cached.isExpired) {
+    MessageBundle bundle = null;
+    if (cached == null || cached.isExpired) {
       try {
-        return fetchAndCacheBundle(locale, ignoreCache);
+        bundle = fetchAndCacheBundle(locale, ignoreCache);
       } catch (GadgetException e) {
-        if (cached.obj == null) {
-          throw e;
+        // Enforce negative caching.
+        if (cached != null) {
+          bundle = cached.obj;
         } else {
-          logger.info("Message bundle fetch failed for " + locale + " -  using cached.");
+          // We create this dummy spec to avoid the cost of re-parsing when a remote site is out.
+          bundle = MessageBundle.EMPTY;
         }
+        LOG.info("MessageBundle fetch failed for " + uri + " - using cached.");
+        cache.addElement(uri, bundle, expiration);
       }
+    } else {
+      bundle = cached.obj;
     }
 
-    return cached.obj;
+    return bundle;
   }
 
   private MessageBundle fetchAndCacheBundle(LocaleSpec locale, boolean ignoreCache)
       throws GadgetException {
     Uri url = locale.getMessages();
     HttpRequest request = new HttpRequest(url).setIgnoreCache(ignoreCache);
-    if (minTtl == maxTtl) {
-      // Since we don't allow any variance in cache time, we should just force the cache time
-      // globally. This ensures propagation to shared caches when this is set.
-      request.setCacheTtl((int) (maxTtl / 1000));
-    }
+    // Since we don't allow any variance in cache time, we should just force the cache time
+    // globally. This ensures propagation to shared caches when this is set.
+    request.setCacheTtl((int) (expiration / 1000));
 
     HttpResponse response = fetcher.fetch(request);
     if (response.getHttpStatusCode() != HttpResponse.SC_OK) {
@@ -102,7 +104,7 @@ public class BasicMessageBundleFactory extends AbstractMessageBundleFactory {
     }
 
     MessageBundle bundle  = new MessageBundle(locale, response.getResponseAsString());
-    ttlCache.addElement(url, bundle, response.getCacheExpiration());
+    cache.addElement(url, bundle, expiration);
     return bundle;
   }
 }

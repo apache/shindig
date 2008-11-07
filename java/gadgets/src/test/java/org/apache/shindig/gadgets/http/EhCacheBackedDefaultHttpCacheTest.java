@@ -15,30 +15,19 @@
  * KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-package org.apache.shindig.common.cache;
+package org.apache.shindig.gadgets.http;
 
-import org.junit.Test;
-import org.junit.Assert;
+import org.apache.shindig.common.cache.CacheProvider;
+import org.apache.shindig.common.cache.ehcache.EhCacheCacheProvider;
 
 /**
- *
+ * Performs the same set of tests for the EhCacheProvider, if there is a problem here, its the more
+ * likely to be the fault of the EhCacheProvider rather than the BasicHttpCache
  */
-public class DefaultCacheProviderTest {
-
-  @Test
-  public void getAnonCache() {
-    CacheProvider defaultProvider = new DefaultCacheProvider();
-    Cache<String, String> cache = defaultProvider.createCache(100);
-    Assert.assertNotNull(cache);
+public class EhCacheBackedDefaultHttpCacheTest extends DefaultHttpCacheTest {
+  @Override
+  protected CacheProvider getCacheProvider() {
+    return new EhCacheCacheProvider(
+        "/org/apache/shindig/common/cache/ehcache/ehcacheConfig.xml", true);
   }
-  
-  @Test
-  public void getNamedCache() {
-    CacheProvider defaultProvider = new DefaultCacheProvider();
-    Cache<String, String> cache = defaultProvider.createCache(100, "testcache");
-    Cache<String, String> cache2 = defaultProvider.createCache(100, "testcache");
-    Assert.assertNotNull(cache);
-    Assert.assertEquals(cache, cache2);
-  }
-  
 }
