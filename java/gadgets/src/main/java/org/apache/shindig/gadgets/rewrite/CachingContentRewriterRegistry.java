@@ -17,17 +17,18 @@
  */
 package org.apache.shindig.gadgets.rewrite;
 
+import com.google.inject.Inject;
+import com.google.inject.name.Named;
 import org.apache.shindig.common.cache.CacheProvider;
 import org.apache.shindig.common.cache.TtlCache;
 import org.apache.shindig.common.util.HashUtil;
 import org.apache.shindig.gadgets.Gadget;
+import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.http.HttpResponse;
 import org.apache.shindig.gadgets.http.HttpResponseBuilder;
 import org.apache.shindig.gadgets.parse.GadgetHtmlParser;
-
-import com.google.inject.Inject;
-import com.google.inject.name.Named;
+import org.apache.shindig.gadgets.spec.View;
 
 import java.util.List;
 
@@ -88,6 +89,40 @@ public class CachingContentRewriterRegistry extends DefaultContentRewriterRegist
     return rewritersKey;
   }
 
+  public String rewriteGadget(Gadget gadget, View currentView) throws GadgetException {
+    if (gadget.getContext().getIgnoreCache()) {
+      return super.rewriteGadget(gadget, currentView);
+    }
+
+    String cacheKey = getGadgetCacheKey(gadget, currentView.getContent());
+    String cached = rewrittenCache.getElement(cacheKey);
+
+    if (cached != null) {
+      return cached;
+    }
+
+    MutableContent mc = getMutableContent(gadget.getSpec(), currentView);
+
+    long cacheTtl = Long.MAX_VALUE;
+    for (ContentRewriter rewriter : getRewriters()) {
+      RewriterResults rr = rewriter.rewrite(gadget, mc);
+      if (rr == null) {
+        cacheTtl = 0;
+      } else {
+        cacheTtl = Math.min(cacheTtl, rr.getCacheTtl());
+      }
+    }
+
+    if (cacheTtl >= minCacheTtl) {
+      // Only cache if the cacheTtl is greater than the minimum time configured for doing so.
+      // This prevents cache churn and may be more efficient when rewriting is cheaper
+      // than a cache lookup.
+      rewrittenCache.addElementWithTtl(cacheKey, currentView.getContent(), cacheTtl);
+    }
+
+    return mc.getContent();
+  }
+
   /** {@inheritDoc} */
   @Override
   public String rewriteGadget(Gadget gadget, String content) {
@@ -101,7 +136,6 @@ public class CachingContentRewriterRegistry extends DefaultContentRewriterRegist
     if (cached != null) {
       return cached;
     }
-
     MutableContent mc = getMutableContent(content);
 
     long cacheTtl = Long.MAX_VALUE;
@@ -121,7 +155,7 @@ public class CachingContentRewriterRegistry extends DefaultContentRewriterRegist
       rewrittenCache.addElementWithTtl(cacheKey, content, cacheTtl);
     }
 
-    return content;
+    return mc.getContent();
   }
 
   /** {@inheritDoc} */

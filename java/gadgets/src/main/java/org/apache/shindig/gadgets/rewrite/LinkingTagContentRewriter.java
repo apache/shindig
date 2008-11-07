@@ -26,6 +26,7 @@ import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.gadgets.Gadget;
 import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.http.HttpResponse;
+import org.apache.shindig.gadgets.parse.DomUtil;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 
@@ -45,7 +46,7 @@ public class LinkingTagContentRewriter implements ContentRewriter {
   }
 
   private final ContentRewriterFeatureFactory rewriterFactory;
-  private String proxyUrl;
+  private final String proxyUrl;
 
   @Inject
   public LinkingTagContentRewriter(ContentRewriterFeatureFactory rewriterFactory,
@@ -73,7 +74,7 @@ public class LinkingTagContentRewriter implements ContentRewriter {
 
     Set<String> tags = SUPPORTED_TAG_ATTRS.keySet();
     tags.retainAll(feature.getIncludedTags());
-    List<Node> nodes = RewriterUtils.getElementsByTagNameCaseInsensitive(
+    List<Node> nodes = DomUtil.getElementsByTagNameCaseInsensitive(
         content.getDocument(), tags);
 
     for (Node node : nodes) {

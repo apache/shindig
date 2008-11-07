@@ -18,7 +18,6 @@
 package org.apache.shindig.common.xml;
 
 import org.apache.shindig.common.uri.Uri;
-
 import org.w3c.dom.Element;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
@@ -27,15 +26,14 @@ import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 import org.xml.sax.SAXParseException;
 
-import java.io.IOException;
-import java.io.StringReader;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
 import javax.xml.XMLConstants;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
+import java.io.IOException;
+import java.io.StringReader;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Utility class for simplifying parsing of xml documents. Documents are not validated, and
@@ -263,20 +261,6 @@ public class XmlUtil {
    */
   public static int getIntAttribute(Node node, String attr) {
     return getIntAttribute(node, attr, 0);
-  }
-
-  /**
-   * @return first child node matching the specified name
-   */
-  public static Node getFirstNamedChildNode(Node root, String nodeName) {
-    Node current = root.getFirstChild();
-    while (current != null) {
-      if (current.getNodeName().equalsIgnoreCase(nodeName)) {
-        return current;
-      }
-      current = current.getNextSibling();
-    }
-    return null;
   }
 
   /**

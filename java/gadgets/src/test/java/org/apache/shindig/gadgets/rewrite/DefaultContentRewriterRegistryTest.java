@@ -17,34 +17,38 @@
  */
 package org.apache.shindig.gadgets.rewrite;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-
+import com.google.common.collect.Lists;
+import com.google.inject.Guice;
+import com.google.inject.Injector;
+import junit.framework.TestCase;
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.gadgets.Gadget;
 import org.apache.shindig.gadgets.GadgetContext;
 import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.http.HttpResponse;
+import org.apache.shindig.gadgets.parse.GadgetHtmlParser;
+import org.apache.shindig.gadgets.parse.ParseModule;
 import org.apache.shindig.gadgets.spec.GadgetSpec;
-
-import com.google.common.collect.Lists;
-
-import org.junit.Test;
 
 import java.util.Arrays;
 import java.util.List;
 
-public class DefaultContentRewriterRegistryTest {
+public class DefaultContentRewriterRegistryTest extends TestCase {
   private static final Uri SPEC_URL = Uri.parse("http://example.org/gadget.xml");
-  private final List<CaptureRewriter> rewriters
-      = Arrays.asList(new CaptureRewriter(), new CaptureRewriter());
-  private final List<ContentRewriter> contentRewriters
-      = Lists.<ContentRewriter>newArrayList(rewriters);
-  private final ContentRewriterRegistry registry
-      = new DefaultContentRewriterRegistry(contentRewriters, null);
+  private List<CaptureRewriter> rewriters;
+  private List<ContentRewriter> contentRewriters;
+  private ContentRewriterRegistry registry;
+  private GadgetHtmlParser parser;
 
-  @Test
-  public void rewriteGadget() throws Exception {
+  protected void setUp() throws Exception {
+    Injector injector = Guice.createInjector(new ParseModule());
+    parser = injector.getInstance(GadgetHtmlParser.class);
+    rewriters = Arrays.asList(new CaptureRewriter(), new CaptureRewriter());
+    contentRewriters = Lists.<ContentRewriter>newArrayList(rewriters);
+    registry = new DefaultContentRewriterRegistry(contentRewriters, parser);
+  }
+
+  public void testRewriteGadget() throws Exception {
     String body = "Hello, world";
     String xml = "<Module><ModulePrefs title=''/><Content>" + body + "</Content></Module>";
     GadgetSpec spec = new GadgetSpec(SPEC_URL, xml);
@@ -61,8 +65,7 @@ public class DefaultContentRewriterRegistryTest {
     assertEquals(body, rewritten);
   }
 
-  @Test
-  public void rewriteHttpResponse() throws Exception {
+  public void testRewriteHttpResponse() throws Exception {
     String body = "Hello, world";
     HttpRequest request = new HttpRequest(SPEC_URL);
     HttpResponse response = new HttpResponse(body);
@@ -73,5 +76,22 @@ public class DefaultContentRewriterRegistryTest {
     assertTrue("Second rewriter not invoked.", rewriters.get(1).responseWasRewritten());
 
     assertEquals(response, rewritten);
+  }
+
+  public void testRewriteView() throws Exception {
+    String body = "Hello, world";
+    String xml = "<Module><ModulePrefs title=''/><Content>" + body + "</Content></Module>";
+    GadgetSpec spec = new GadgetSpec(SPEC_URL, xml);
+    GadgetContext context = new GadgetContext();
+    Gadget gadget = new Gadget()
+        .setContext(context)
+        .setSpec(spec);
+
+    String rewritten = registry.rewriteGadget(gadget, spec.getView("default"));
+
+    assertTrue("First rewriter invoked.", rewriters.get(0).viewWasRewritten());
+    assertTrue("Second rewriter invoked.", rewriters.get(1).viewWasRewritten());
+
+    assertEquals(body, rewritten); 
   }
 }

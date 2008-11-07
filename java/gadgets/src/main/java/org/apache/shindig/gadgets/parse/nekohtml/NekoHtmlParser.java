@@ -18,8 +18,8 @@
 package org.apache.shindig.gadgets.parse.nekohtml;
 
 import com.google.inject.Inject;
-import org.apache.shindig.common.xml.XmlUtil;
 import org.apache.shindig.gadgets.GadgetException;
+import org.apache.shindig.gadgets.parse.DomUtil;
 import org.apache.shindig.gadgets.parse.GadgetHtmlParser;
 import org.apache.shindig.gadgets.parse.HtmlSerializer;
 import org.apache.xml.serialize.HTMLSerializer;
@@ -54,7 +54,7 @@ public class NekoHtmlParser extends GadgetHtmlParser {
   }
 
   @Override
-  public Document parseDom(String source) throws GadgetException {
+  public Document parseDomImpl(String source) throws GadgetException {
     try {
       Document document = parseFragment(source);
       HtmlSerializer.attach(document, new Serializer(), source);
@@ -71,7 +71,7 @@ public class NekoHtmlParser extends GadgetHtmlParser {
     Document htmlDoc = documentProvider.createDocument(null, null, null);
     DocumentFragment fragment = htmlDoc.createDocumentFragment();
     parser.parse(input, fragment);
-    Node htmlNode = XmlUtil.getFirstNamedChildNode(fragment, "HTML");
+    Node htmlNode = DomUtil.getFirstNamedChildNode(fragment, "HTML");
     if (htmlNode != null) {
       htmlDoc.appendChild(htmlNode);
     } else {

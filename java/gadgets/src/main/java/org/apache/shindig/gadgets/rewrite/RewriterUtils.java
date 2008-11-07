@@ -18,41 +18,14 @@
  */
 package org.apache.shindig.gadgets.rewrite;
 
-import com.google.common.collect.Lists;
 import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.http.HttpResponse;
-import org.w3c.dom.Document;
-import org.w3c.dom.Node;
-import org.w3c.dom.traversal.DocumentTraversal;
-import org.w3c.dom.traversal.NodeFilter;
-import org.w3c.dom.traversal.NodeIterator;
-
-import java.util.List;
-import java.util.Set;
 
 /**
  * Various utility functions used by rewriters
  */
 public class RewriterUtils {
-  public static List<Node> getElementsByTagNameCaseInsensitive(Document doc,
-      final Set<String> lowerCaseNames) {
-    final List<Node> result = Lists.newArrayList();
-    NodeIterator nodeIterator = ((DocumentTraversal) doc)
-        .createNodeIterator(doc, NodeFilter.SHOW_ELEMENT,
-            new NodeFilter() {
-              public short acceptNode(Node n) {
-                if (lowerCaseNames.contains(n.getNodeName().toLowerCase())) {
-                  return NodeFilter.FILTER_ACCEPT;
-                }
-                return NodeFilter.FILTER_REJECT;
-              }
-            }, false);
-    for (Node n = nodeIterator.nextNode(); n != null ; n = nodeIterator.nextNode()) {
-      result.add(n);
-    }
-    return result;
-  }
-
+  
   public static boolean isHtml(HttpRequest request, HttpResponse original) {
     String mimeType = getMimeType(request, original);
     return mimeType != null && (mimeType.contains("html"));

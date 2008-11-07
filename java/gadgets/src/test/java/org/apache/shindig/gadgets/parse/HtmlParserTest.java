@@ -44,7 +44,7 @@ public class HtmlParserTest extends TestCase {
   private void parseSimpleString(GadgetHtmlParser htmlParser) throws Exception {
     Document doc = htmlParser.parseDom("content");
 
-    Node node = doc.getDocumentElement().getFirstChild();
+    Node node = doc.getDocumentElement().getFirstChild().getNextSibling();
     assertNotNull(node);
     assertEquals("content", node.getTextContent());
     assertNull(node.getAttributes());
@@ -60,7 +60,7 @@ public class HtmlParserTest extends TestCase {
   void parseTagWithStringContents(GadgetHtmlParser htmlParser) throws Exception {
     Document doc = htmlParser.parseDom("<span>content</span>");
 
-    Node node = doc.getDocumentElement().getFirstChild();
+    Node node = doc.getDocumentElement().getFirstChild().getNextSibling();
     assertEquals("content", node.getTextContent());
     assertEquals("span", node.getNodeName().toLowerCase());
   }
@@ -73,7 +73,7 @@ public class HtmlParserTest extends TestCase {
   void parseTagWithAttributes(GadgetHtmlParser htmlParser) throws Exception {
     Document doc = htmlParser.parseDom("<div id=\"foo\">content</div>");
 
-    Node node = doc.getDocumentElement().getFirstChild();
+    Node node = doc.getDocumentElement().getFirstChild().getNextSibling();
     assertNotNull(node);
     assertNotNull(node.getAttributes());
     assertEquals(1, node.getAttributes().getLength());
@@ -92,7 +92,7 @@ public class HtmlParserTest extends TestCase {
   void parseStringUnescapesProperly(GadgetHtmlParser htmlParser) throws Exception {
     Document doc = htmlParser.parseDom("&lt;content&amp;&apos;chrome&apos;&gt;");
 
-    Node node = doc.getDocumentElement().getFirstChild();
+    Node node = doc.getDocumentElement().getFirstChild().getNextSibling();
     assertNotNull(node);
     assertEquals("<content&'chrome'>", node.getTextContent());
     assertNull(node.getAttributes());
@@ -107,7 +107,7 @@ public class HtmlParserTest extends TestCase {
   void parseNestedContentWithNoCloseForBrAndHr(GadgetHtmlParser htmlParser) throws Exception {
     Document doc = htmlParser.parseDom("<div><br>  and  <hr></div>");
 
-    Node divNode = doc.getDocumentElement().getFirstChild();
+    Node divNode = doc.getDocumentElement().getFirstChild().getNextSibling();
     assertEquals("div", divNode.getNodeName().toLowerCase());
     assertNotNull(divNode.getAttributes());
     assertEquals(0, divNode.getAttributes().getLength());

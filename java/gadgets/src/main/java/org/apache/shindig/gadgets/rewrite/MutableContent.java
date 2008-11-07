@@ -29,23 +29,32 @@ import org.w3c.dom.Document;
 public class MutableContent {
   private String content;
   private Document document;
-  private ContentEditListener editListener;
-  private int parseEditId;
-  private int contentParseId;
   private final GadgetHtmlParser contentParser;
 
   private static final String MUTABLE_CONTENT_LISTENER = "MutableContentListener";
 
   public static void notifyEdit(Document doc) {
-    ContentEditListener listener = (ContentEditListener)doc.getUserData(MUTABLE_CONTENT_LISTENER);
-    if (listener != null) {
-      listener.nodeEdited();
+    MutableContent mc = (MutableContent) doc.getUserData(MUTABLE_CONTENT_LISTENER);
+    if (mc != null) {
+      mc.documentChanged();
     }
   }
 
-  public MutableContent(GadgetHtmlParser contentParser) {
+  /**
+   * NOTE! Passed documents are cloned to ensure they are safe prior to rewriting
+   */
+  public MutableContent(GadgetHtmlParser contentParser, String content, Document document) {
     this.contentParser = contentParser;
-    this.contentParseId = parseEditId = 0;
+    this.content = content;
+    this.document = document;
+    if (document != null) {
+      // There are many shared document instances so cloning is essential
+      // TODO - Consider doing a late clone
+      this.document = (Document) document.cloneNode(true);
+      HtmlSerializer.copySerializer(document, this.document);
+      this.document.setUserData(MUTABLE_CONTENT_LISTENER, this, null);
+    }
+
   }
 
   /**
@@ -59,15 +68,7 @@ public class MutableContent {
    * @return Renderable/active content.
    */
   public String getContent() {
-    if (parseEditId > contentParseId) {
-      // Regenerate content from parse tree node, since the parse tree
-      // was modified relative to the last time content was generated from it.
-      // This is an expensive operation that should happen only once
-      // per rendering cycle: all rewriters (or other manipulators)
-      // operating on the parse tree should happen together.
-      contentParseId = parseEditId;
-
-      // Parser will have bound an HTML serializer to the document
+    if (content == null && document != null) {
       content = HtmlSerializer.serialize(document);
     }
     return content;
@@ -75,103 +76,53 @@ public class MutableContent {
   
   /**
    * Sets the object's content as a raw String. Note, this operation
-   * may be done at any time, even after a parse tree node has been retrieved
-   * and modified (though a warning will be emitted in this case). Once
-   * new content has been set, all subsequent edits to parse trees generated
-   * from the <i>previous</i> content will be invalid, throwing an
-   * {@code IllegalStateException}.
+   * may clears the document if the content has changed
    * @param newContent New content.
    */
   public void setContent(String newContent) {
-    if (content == null ||
-        !content.equals(newContent)) {
+    // TODO - Equality check may be unnecessary overhead
+    if (content == null || !content.equals(newContent)) {
       content = newContent;
-      if (editListener != null) {
-        editListener.stringEdited();
-      }
+      document = null;
     }
   }
 
 
   /**
-   * Sets the object's document. Note, this operation
-   * may be done at any time, even after a parse tree node has been retrieved
-   * and modified (though a warning will be emitted in this case).
-   * @param doc New document.
+   * Notification that the content of the document has changed. Causes the content
+   * string to be cleared
    */
-  public void setDocument(Document doc) {
-    document = doc;
-    if (editListener != null) {
-      editListener.nodeEdited();
-    } else {
-      editListener = new ContentEditListener();
+  public void documentChanged() {
+    if (document != null) {
+      content = null;
     }
   }
   
   /**
-   * Retrieves the object contents in parse tree form, if a
+   * Retrieves the object contents in parsed form, if a
    * {@code GadgetHtmlParser} is configured and is able to parse the string
-   * contents appropriately. The resultant parse tree has a special,
-   * single top-level node that wraps all subsequent content, with
-   * tag name {@code ROOT_NODE_TAG_NAME}. While it may be edited just
-   * as any other node may, doing so is pointless since the root node
-   * is stripped out during rendering. Any edits to the returned parse
-   * tree performed after the source {@code MutableHtmlContent} has new content
-   * set via {@code setContent} will throw an {@code IllegalStateException}
-   * to maintain content consistency in the object. To modify the object's
+   * contents appropriately. To modify the object's
    * contents by parse tree after setting new String contents,
    * this method must be called again. However, this practice is highly
-   * discouraged, as parsing a tree from String is a costly operation.
-   * @return Top-level node whose children represent the gadget's contents, or
-   *         null if no parser is configured, String contents are null, or contents unparseable.
+   * discouraged, as parsing a tree from String is a costly operation and should
+   * be done at most once per rewrite.
    */
   public Document getDocument() {
-    if (document != null && !editListener.stringWasEdited()) {
+    // TODO - Consider actually imposing one parse limit on rewriter pipeline
+    if (document != null) {
       return document;
     }
-  
     if (content == null || contentParser == null) {
       return null;
     }
   
-    // One ContentEditListener per parse tree.
-    editListener = new ContentEditListener();
     try {
       document = contentParser.parseDom(content);
-      if (document != null) {
-        document.setUserData(MUTABLE_CONTENT_LISTENER, editListener, null);
-      }
+      document.setUserData(MUTABLE_CONTENT_LISTENER, this, null);
     } catch (GadgetException e) {
       // TODO: emit info message
       return null;
     }
-  
-    // Parse tree created from content: edit IDs are the same
-    contentParseId = parseEditId;
     return document;
-  }
-  
-  // Intermediary object tracking edit behavior for the MutableHtmlContent to help maintain
-  // state consistency. Modifiers of doucments call nodeEdited whenever a modification
-  // is made to its original source.
-  private class ContentEditListener {
-    private boolean stringEdited = false;
-
-    public void nodeEdited() {
-      ++parseEditId;
-      if (stringEdited) {
-        // Parse tree is invalid: a new String representation was set
-        // as tree source in the meantime.
-        throw new IllegalStateException("Edited parse node after setting String content");
-      }
-    }
-
-    private void stringEdited() {
-      stringEdited = true;
-    }
-
-    private boolean stringWasEdited() {
-      return stringEdited;
-    }
   }
 }

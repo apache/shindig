@@ -55,7 +55,7 @@ public class JsTagConcatContentRewriterTest extends BaseRewriterTestCase {
 
   public void testJSMergeSingleScriptReWrite() throws Exception {
     String s = "<script src=\"http://a.b.com/1.js\"></script>";
-    String expected = "<script src=\"" + concatBase + "1=http%3A%2F%2Fa.b.com%2F1.js\"></script>";
+    String expected = "<head></head><script src=\"" + concatBase + "1=http%3A%2F%2Fa.b.com%2F1.js\"></script>";
     String rewritten = rewriteHelper(rewriter, s);
     assertEquals(rewritten, expected);
   }
@@ -64,7 +64,7 @@ public class JsTagConcatContentRewriterTest extends BaseRewriterTestCase {
     String s = "<script src=\"http://a.b.com/1.js\"></script>"
         + "<script src=\"http://a.b.com/2.js\"></script>";
     String expected
-        = "<script src=\"" + concatBase + "1=http%3A%2F%2Fa.b.com%2F1.js&2=http%3A%2F%2Fa.b.com%2F2.js\"></script>";
+        = "<head></head><script src=\"" + concatBase + "1=http%3A%2F%2Fa.b.com%2F1.js&2=http%3A%2F%2Fa.b.com%2F2.js\"></script>";
     String rewritten = rewriteHelper(rewriter, s);
     assertEquals(rewritten, expected);
   }
@@ -78,7 +78,7 @@ public class JsTagConcatContentRewriterTest extends BaseRewriterTestCase {
         + "<script>\n"
         + "doSomething\n"
         + "</script>";
-    String expected = "<script>\n"
+    String expected = "<head></head><script>\n"
         + "doSomething\n"
         + "</script>"
         + "<script src=\"" + concatBase + "1=http%3A%2F%2Fa.b.com%2F1.js&2=http%3A%2F%2Fa.b.com%2F2.js\"></script>"
@@ -96,7 +96,7 @@ public class JsTagConcatContentRewriterTest extends BaseRewriterTestCase {
         + "<script src=\"http://a.b.com/3.js\"></script>"
         + "<script src=\"http://a.b.com/4.js\"></script>";
     String expected =
-        "<script src=\"" + concatBase + "1=http%3A%2F%2Fa.b.com%2F1.js&2=http%3A%2F%2Fa.b.com%2F2.js\"></script>" +
+        "<head></head><script src=\"" + concatBase + "1=http%3A%2F%2Fa.b.com%2F1.js&2=http%3A%2F%2Fa.b.com%2F2.js\"></script>" +
         "<script><!-- doSomething --></script>" +
         "<script src=\"" + concatBase + "1=http%3A%2F%2Fa.b.com%2F3.js&2=http%3A%2F%2Fa.b.com%2F4.js\"></script>";
     String rewritten = rewriteHelper(rewriter, s);
@@ -106,7 +106,7 @@ public class JsTagConcatContentRewriterTest extends BaseRewriterTestCase {
   public void testJSMergeDerelativizeHostRelative() throws Exception {
     String s = "<script src=\"/1.js\"></script>";
     String expected
-        = "<script src=\"" + concatBase + "1=http%3A%2F%2Fexample.org%2F1.js\"></script>";
+        = "<head></head><script src=\"" + concatBase + "1=http%3A%2F%2Fexample.org%2F1.js\"></script>";
     String rewritten = rewriteHelper(rewriter, s);
     assertEquals(rewritten, expected);
   }
@@ -114,7 +114,7 @@ public class JsTagConcatContentRewriterTest extends BaseRewriterTestCase {
   public void testJSMergeDerelativizePathRelative() throws Exception {
     String s = "<script src=\"1.js\"></script>";
     String expected
-        = "<script src=\"" + concatBase + "1=http%3A%2F%2Fexample.org%2Fdir%2F1.js\"></script>";
+        = "<head></head><script src=\"" + concatBase + "1=http%3A%2F%2Fexample.org%2Fdir%2F1.js\"></script>";
     String rewritten = rewriteHelper(rewriter, s);
     assertEquals(rewritten, expected);
   }

@@ -20,7 +20,7 @@ package org.apache.shindig.gadgets.parse.nekohtml;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 import com.google.inject.Inject;
-import org.apache.shindig.common.xml.XmlUtil;
+import org.apache.shindig.gadgets.parse.DomUtil;
 import org.apache.shindig.gadgets.parse.GadgetHtmlParser;
 import org.apache.shindig.gadgets.parse.HtmlSerializer;
 import org.apache.xerces.xni.*;
@@ -58,7 +58,8 @@ public class NekoSimplifiedHtmlParser extends GadgetHtmlParser {
     this.documentFactory = documentFactory;
   }
 
-  public Document parseDom(String source) {
+  @Override
+  protected Document parseDomImpl(String source) {
 
     HTMLScanner htmlScanner = new HTMLScanner();
     HTMLTagBalancer tagBalancer = new HTMLTagBalancer();
@@ -76,7 +77,7 @@ public class NekoSimplifiedHtmlParser extends GadgetHtmlParser {
       htmlScanner.scanDocument(true);
       Document document = handler.getDocument();
       DocumentFragment fragment = handler.getFragment();
-      Node htmlNode = XmlUtil.getFirstNamedChildNode(fragment, "HTML");
+      Node htmlNode = DomUtil.getFirstNamedChildNode(fragment, "HTML");
       if (htmlNode != null) {
         document.appendChild(htmlNode);
       } else {

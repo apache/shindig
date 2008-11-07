@@ -33,27 +33,27 @@ public class NekoSimplifiedHtmlParserTest extends TestCase {
 
   public void testUnbalanced() throws Exception {
     parseAndCompareBalanced("<html><body><center>content</body></html>",
-        "<html><body><center>content</body></html>");
+        "<html><head></head><body><center>content</body></html>");
   }
 
   public void testUnbalanced2() throws Exception {
     parseAndCompareBalanced("<html><body><img>content<img>content</body></html>",
-        "<HTML><body><IMG>content<IMG>content</body></HTML>");
+        "<HTML><head></head><body><IMG>content<IMG>content</body></HTML>");
   }
 
   public void testUnbalanced3() throws Exception {
     parseAndCompareBalanced("<html><body><select><option>content<option></body></html>",
-        "<html><body><select><option>content<option></body></html>");
+        "<html><head></head><body><select><option>content<option></body></html>");
   }
 
   public void testUnbalanced4() throws Exception {
     parseAndCompareBalanced("<html><body>Something awful</html>",
-        "<HTML><body>Something awful</body></HTML>");
+        "<HTML><head></head><body>Something awful</body></HTML>");
   }
 
   public void testUnbalanced5() throws Exception {
     parseAndCompareBalanced("<html><body><br />content<br></html>",
-        "<HTML><body><br />content<br></body></HTML>");
+        "<HTML><head></head><body><br />content<br></body></HTML>");
   }
 
   private void parseAndCompareBalanced(String content, String expected) throws Exception {
