@@ -7,7 +7,7 @@
  * "License"); you may not use this file except in compliance
  * with the License.  You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
@@ -16,25 +16,27 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.shindig.gadgets;
+package org.apache.shindig.common.cache;
 
-import org.apache.shindig.gadgets.spec.GadgetSpec;
+import com.google.inject.Inject;
+import com.google.inject.name.Named;
 
-import com.google.inject.ImplementedBy;
+/**
+ * A cache provider that always produces LRU caches. Generally only useful for testing, as it always
+ * returns an anonymous cache with a fixed capacity.
+ *
+ * For a production-worthy cache, use {@code EhCacheCacheProvider}.
+ */
+public class LruCacheProvider implements CacheProvider {
+  private final int capacity;
 
-import java.net.URI;
+  @Inject
+  public LruCacheProvider(@Named("shindig.cache.capacity") int capacity) {
+    this.capacity = capacity;
+  }
 
-/** Factory of gadget specs */
-
-@ImplementedBy(DefaultGadgetSpecFactory.class)
-
-public interface GadgetSpecFactory {
-
-  /** Return a gadget spec for a context */
-  public GadgetSpec getGadgetSpec(GadgetContext context) throws GadgetException;
-
-  /** Return a gadget spec for a URI */
-  public GadgetSpec getGadgetSpec(URI gadgetUri, boolean ignoreCache)
-      throws GadgetException;
-
+  @SuppressWarnings("unchecked")
+  public <K, V> Cache<K, V> createCache(String name) {
+    return new LruCache<K, V>(capacity);
+  }
 }

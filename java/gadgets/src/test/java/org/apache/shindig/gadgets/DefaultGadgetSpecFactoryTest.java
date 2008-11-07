@@ -24,7 +24,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
 import org.apache.shindig.common.cache.CacheProvider;
-import org.apache.shindig.common.cache.DefaultCacheProvider;
+import org.apache.shindig.common.cache.LruCacheProvider;
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.gadgets.http.HttpFetcher;
 import org.apache.shindig.gadgets.http.HttpRequest;
@@ -38,9 +38,9 @@ import org.junit.Test;
 import java.net.URI;
 
 /**
- * Tests for BasicGadgetSpecFactory
+ * Tests for DefaultGadgetSpecFactory
  */
-public class BasicGadgetSpecFactoryTest {
+public class DefaultGadgetSpecFactoryTest {
   private final static Uri SPEC_URL = Uri.parse("http://example.org/gadget.xml");
   private final static Uri REMOTE_URL = Uri.parse("http://example.org/remote.html");
   private final static String LOCAL_CONTENT = "Hello, local content!";
@@ -92,19 +92,21 @@ public class BasicGadgetSpecFactoryTest {
 
     @Override
     public String getParameter(String param) {
-      if (param.equals(BasicGadgetSpecFactory.RAW_GADGETSPEC_XML_PARAM_NAME)) {
+      if (param.equals(DefaultGadgetSpecFactory.RAW_GADGETSPEC_XML_PARAM_NAME)) {
         return RAWXML_SPEC_XML;
       }
       return null;
     }
   };
 
+  private static final int MAX_AGE = 10000;
+
   private final HttpFetcher fetcher = EasyMock.createNiceMock(HttpFetcher.class);
 
-  private final CacheProvider cacheProvider = new DefaultCacheProvider();
+  private final CacheProvider cacheProvider = new LruCacheProvider(5);
 
-  private final BasicGadgetSpecFactory specFactory
-      = new BasicGadgetSpecFactory(fetcher, cacheProvider, 5, 1000, 1000);
+  private final DefaultGadgetSpecFactory specFactory
+      = new DefaultGadgetSpecFactory(fetcher, cacheProvider, MAX_AGE);
 
   @Test
   public void specFetched() throws Exception {
@@ -142,7 +144,7 @@ public class BasicGadgetSpecFactoryTest {
     GadgetSpec spec = specFactory.getGadgetSpec(RAWXML_GADGET_CONTEXT);
 
     assertEquals(RAWXML_CONTENT, spec.getView(GadgetSpec.DEFAULT_VIEW).getContent());
-    assertEquals(BasicGadgetSpecFactory.RAW_GADGET_URI, spec.getUrl());
+    assertEquals(DefaultGadgetSpecFactory.RAW_GADGET_URI, spec.getUrl());
   }
 
   @Test
@@ -183,15 +185,11 @@ public class BasicGadgetSpecFactoryTest {
   }
 
   @Test
-  public void identicalMaxTtlAndMinTtlPropagatesToFetcher() throws Exception {
+  public void ttlPropagatesToFetcher() throws Exception {
     CapturingFetcher capturingFetcher = new CapturingFetcher();
 
-    BasicGadgetSpecFactory forcedCacheFactory
-        = new BasicGadgetSpecFactory(capturingFetcher, cacheProvider, 5, 10000, 10000);
-
-    new HttpRequest(SPEC_URL)
-        .setIgnoreCache(false)
-        .setCacheTtl(10);
+    DefaultGadgetSpecFactory forcedCacheFactory
+        = new DefaultGadgetSpecFactory(capturingFetcher, cacheProvider, 10000);
 
     forcedCacheFactory.getGadgetSpec(SPEC_URL.toJavaUri(), false);
 

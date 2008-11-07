@@ -28,7 +28,11 @@ import com.ibm.icu.text.CharsetDetector;
 import com.ibm.icu.text.CharsetMatch;
 
 import java.io.ByteArrayInputStream;
+import java.io.Externalizable;
+import java.io.IOException;
 import java.io.InputStream;
+import java.io.ObjectInput;
+import java.io.ObjectOutput;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.util.Arrays;
@@ -44,7 +48,9 @@ import java.util.Map;
  * HttpResponse objects are immutable in order to allow them to be safely used in concurrent
  * caches and by multiple threads without worrying about concurrent modification.
  */
-public final class HttpResponse {
+public final class HttpResponse implements Externalizable {
+  private static final long serialVersionUID = 7526471155622776147L;
+
   public static final int SC_CONTINUE = 100;
   public static final int SC_SWITCHING_PROTOCOLS = 101;
 
@@ -122,14 +128,19 @@ public final class HttpResponse {
   // Holds character sets for fast conversion
   private static final Map<String, Charset> encodingToCharset = Maps.newConcurrentHashMap();
 
-  private final int httpStatusCode;
-  private final Map<String, List<String>> headers;
-  private final byte[] responseBytes;
-  private String responseString;
-  private final Map<String, String> metadata;
+  private transient String responseString;
+  private transient long date;
+  private transient String encoding;
+  private transient Map<String, String> metadata;
 
-  private final long date;
-  private final String encoding;
+  private int httpStatusCode;
+  private Map<String, List<String>> headers;
+  private byte[] responseBytes;
+
+  /**
+   * Needed for serialization. Do not use this for any other purpose.
+   */
+  public HttpResponse() {}
 
   /**
    * Construct an HttpResponse from a builder (called by HttpResponseBuilder.create).
@@ -471,5 +482,34 @@ public final class HttpResponse {
    */
   byte[] getResponseAsBytes() {
     return responseBytes;
+  }
+
+  /**
+   * Expected layout:
+   *
+   * int - status code
+   * Map<String, List<String>> - headers
+   * int - length of body
+   * byte array - body, of previously specified length
+   */
+  @SuppressWarnings("unchecked")
+  public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
+    httpStatusCode = in.readInt();
+    Map<String, List<String>> headerCopy = (Map<String, List<String>>)in.readObject();
+    int bodyLength = in.readInt();
+    responseBytes = new byte[bodyLength];
+    in.read(responseBytes, 0, bodyLength);
+
+    date = getAndUpdateDate(headerCopy);
+    encoding = getAndUpdateEncoding(headerCopy, responseBytes);
+    headers = Collections.unmodifiableMap(headerCopy);
+    metadata = Collections.emptyMap();
+  }
+
+  public void writeExternal(ObjectOutput out) throws IOException {
+    out.writeInt(httpStatusCode);
+    out.writeObject(headers);
+    out.writeInt(responseBytes.length);
+    out.write(responseBytes);
   }
 }

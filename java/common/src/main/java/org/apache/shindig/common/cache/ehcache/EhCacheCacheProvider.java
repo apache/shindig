@@ -18,60 +18,46 @@
  */
 package org.apache.shindig.common.cache.ehcache;
 
-import net.sf.ehcache.CacheManager;
-import net.sf.ehcache.management.ManagementService;
-
 import org.apache.shindig.common.cache.Cache;
 import org.apache.shindig.common.cache.CacheProvider;
 
+import com.google.common.collect.Maps;
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
 
-import javax.management.MBeanServer;
+import net.sf.ehcache.CacheManager;
+import net.sf.ehcache.management.ManagementService;
 
 import java.lang.management.ManagementFactory;
 import java.net.URL;
-import java.util.HashMap;
 import java.util.Map;
+import java.util.logging.Logger;
 
-/**
- *
- */
+import javax.management.MBeanServer;
+
 public class EhCacheCacheProvider implements CacheProvider {
-
-  private CacheManager cacheManager;
-  private Map<String, Cache<?, ?>> caches = new HashMap<String, Cache<?, ?>>();
-
-  public EhCacheCacheProvider() {
-    create("/org/apache/shindig/common/cache/ehcache/ehcacheConfig.xml", "true");
-  }
+  private final Logger LOG = Logger.getLogger(EhCacheCacheProvider.class.getName());
+  private final CacheManager cacheManager;
+  private final Map<String, Cache<?, ?>> caches = Maps.newConcurrentHashMap();
 
   @Inject
-  public EhCacheCacheProvider(@Named("cache.config")
-  String configPath, @Named("cache.jmx.stats")
-  String withCacheStatistics) {
-    create(configPath, withCacheStatistics);
-  }
-
-  public void create(String configPath, String withCacheStatistics) {
+  public EhCacheCacheProvider(@Named("cache.config") String configPath,
+                              @Named("cache.jmx.stats") boolean withCacheStats) {
     URL url = getClass().getResource(configPath);
     cacheManager = new CacheManager(url);
+    create(withCacheStats);
+  }
 
+  public void create(boolean withCacheStats) {
     /*
      * Add in a shutdown hook
      */
     Runtime.getRuntime().addShutdownHook(new Thread() {
-      /*
-       * (non-Javadoc)
-       *
-       * @see java.lang.Thread#run()
-       */
       @Override
       public void run() {
         try {
           shutdown();
         } catch (Throwable t) {
-
           // I really do want to swallow this, and make the shutdown clean for
           // others
         }
@@ -80,9 +66,7 @@ public class EhCacheCacheProvider implements CacheProvider {
 
     // register the cache manager with JMX
     MBeanServer mBeanServer = ManagementFactory.getPlatformMBeanServer();
-    ManagementService.registerMBeans(cacheManager, mBeanServer, true, true, true, Boolean.valueOf(
-        withCacheStatistics).booleanValue());
-
+    ManagementService.registerMBeans(cacheManager, mBeanServer, true, true, true, withCacheStats);
   }
 
   /**
@@ -92,31 +76,19 @@ public class EhCacheCacheProvider implements CacheProvider {
     cacheManager.shutdown();
   }
 
-  /*
-   * (non-Javadoc)
-   *
-   * @see org.apache.shindig.common.cache.CacheProvider#createCache(int)
-   */
-  public <K, V> Cache<K, V> createCache(int capacity) {
-    return createCache(capacity, null);
-  }
-
-  /*
-   * (non-Javadoc)
-   *
-   * @see org.apache.shindig.common.cache.CacheProvider#createCache(int, java.lang.String)
-   */
   @SuppressWarnings("unchecked")
-  public <K, V> Cache<K, V> createCache(int capacity, String name) {
+  public <K, V> Cache<K, V> createCache(String name) {
     if (name == null) {
-      return new EhConfiguredCache<K, V>(capacity, name, cacheManager);
+      LOG.info("Creating anonymous cache");
+      return new EhConfiguredCache<K, V>(name, cacheManager);
     } else {
-      Cache<K, V> c = (Cache<K, V>) caches.get(name);
-      if (c == null) {
-        c = new EhConfiguredCache<K, V>(capacity, name, cacheManager);
-        caches.put(name, c);
+      Cache<K, V> cache = (Cache<K, V>) caches.get(name);
+      if (cache == null) {
+        LOG.info("Creating cache named " + name);
+        cache = new EhConfiguredCache<K, V>(name, cacheManager);
+        caches.put(name, cache);
       }
-      return c;
+      return cache;
     }
   }
 

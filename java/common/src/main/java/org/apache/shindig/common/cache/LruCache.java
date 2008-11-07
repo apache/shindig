@@ -22,39 +22,30 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 /**
- * A basic LRU cache.
+ * A basic LRU cache. Prefer using EhCache for most purposes to this class.
  */
 public class LruCache<K, V> extends LinkedHashMap<K, V> implements Cache<K, V> {
-
   private final int capacity;
-
-  public V getElement(K key) {
-    return super.get(key);
-  }
-
-  public void addElement(K key, V value) {
-    super.put(key, value);
-  }
-
-  public V removeElement(K key) {
-    return super.remove(key);
-  }
-
-  @Override
-  protected boolean removeEldestEntry(Map.Entry<K, V> eldest) {
-    return size() > capacity;
-  }
-
-  /**
-   * Convenience method for producing a new cache that takes advantage of
-   * type inference.
-   */
-  public static <K, V> LruCache<K, V> create(int capacity) {
-    return new LruCache<K, V>(capacity);
-  }
 
   public LruCache(int capacity) {
     super(capacity, 0.75f, true);
     this.capacity = capacity;
+  }
+
+  public synchronized V getElement(K key) {
+    return super.get(key);
+  }
+
+  public synchronized void addElement(K key, V value) {
+    super.put(key, value);
+  }
+
+  public synchronized V removeElement(K key) {
+    return super.remove(key);
+  }
+
+  @Override
+  protected synchronized boolean removeEldestEntry(Map.Entry<K, V> eldest) {
+    return size() > capacity;
   }
 }

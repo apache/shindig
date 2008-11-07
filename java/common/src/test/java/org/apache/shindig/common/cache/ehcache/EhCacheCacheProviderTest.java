@@ -20,13 +20,12 @@ package org.apache.shindig.common.cache.ehcache;
 
 import org.apache.shindig.common.cache.Cache;
 import org.apache.shindig.common.cache.CacheProvider;
-import org.apache.shindig.common.cache.ehcache.EhCacheCacheProvider;
 
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 
-import org.junit.Test;
 import org.junit.Assert;
+import org.junit.Test;
 
 /**
  *
@@ -36,8 +35,8 @@ public class EhCacheCacheProviderTest {
   @Test
   public void getAnonCache() {
     CacheProvider defaultProvider = new EhCacheCacheProvider(
-        "/org/apache/shindig/common/cache/ehcache/ehcacheConfig.xml", "true");
-    Cache<String, String> cache = defaultProvider.createCache(100);
+        "/org/apache/shindig/common/cache/ehcache/ehcacheConfig.xml", true);
+    Cache<String, String> cache = defaultProvider.createCache(null);
     Assert.assertNotNull(cache);
     Assert.assertNull(cache.getElement("test"));
     cache.addElement("test", "value1");
@@ -50,9 +49,9 @@ public class EhCacheCacheProviderTest {
   @Test
   public void getNamedCache() {
     CacheProvider defaultProvider = new EhCacheCacheProvider(
-        "/org/apache/shindig/common/cache/ehcache/ehcacheConfig.xml", "true");
-    Cache<String, String> cache = defaultProvider.createCache(100, "testcache");
-    Cache<String, String> cache2 = defaultProvider.createCache(100, "testcache");
+        "/org/apache/shindig/common/cache/ehcache/ehcacheConfig.xml", true);
+    Cache<String, String> cache = defaultProvider.createCache("testcache");
+    Cache<String, String> cache2 = defaultProvider.createCache("testcache");
     Assert.assertNotNull(cache);
     Assert.assertEquals(cache, cache2);
     Assert.assertNull(cache.getElement("test"));
@@ -60,41 +59,14 @@ public class EhCacheCacheProviderTest {
     Assert.assertEquals(cache.getElement("test"), "value1");
     cache.removeElement("test");
     Assert.assertNull(cache.getElement("test"));
-  }
-
-  @Test
-  public void getAnonCacheNoConfig() {
-    CacheProvider defaultProvider = new EhCacheCacheProvider();
-    Cache<String, String> cache = defaultProvider.createCache(100);
-    Assert.assertNotNull(cache);
-    Assert.assertNull(cache.getElement("test"));
-    cache.addElement("test", "value1");
-    Assert.assertEquals(cache.getElement("test"), "value1");
-    cache.removeElement("test");
-    Assert.assertNull(cache.getElement("test"));
-
-  }
-
-  @Test
-  public void getNamedCacheNoConfig() {
-    CacheProvider defaultProvider = new EhCacheCacheProvider();
-    Cache<String, String> cache = defaultProvider.createCache(100, "testcache");
-    Cache<String, String> cache2 = defaultProvider.createCache(100, "testcache");
-    Assert.assertNotNull(cache);
-    Assert.assertEquals(cache, cache2);
-    Assert.assertNull(cache.getElement("test"));
-    cache.addElement("test", "value1");
-    Assert.assertEquals(cache.getElement("test"), "value1");
-    cache.removeElement("test");
-    Assert.assertNull(cache.getElement("test"));
-  }
+  }  
 
   @Test
   public void testGuiceModule() {
-    Injector i = Guice.createInjector(new EhCacheGuiceCacheModule());
+    Injector i = Guice.createInjector(new EhCacheModule());
     CacheProvider cacheProvider = i.getInstance(CacheProvider.class);
-    Cache<String, String> cache = cacheProvider.createCache(100, "testcache");
-    Cache<String, String> cache2 = cacheProvider.createCache(100, "testcache");
+    Cache<String, String> cache = cacheProvider.createCache("testcache");
+    Cache<String, String> cache2 = cacheProvider.createCache("testcache");
     Assert.assertNotNull(cache);
     Assert.assertEquals(cache, cache2);
     Assert.assertNull(cache.getElement("test"));

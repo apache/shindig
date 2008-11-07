@@ -18,19 +18,20 @@
  */
 package org.apache.shindig.common.cache.ehcache;
 
+import org.apache.shindig.common.cache.Cache;
+
 import net.sf.ehcache.CacheManager;
 import net.sf.ehcache.Element;
 
-import org.apache.shindig.common.cache.Cache;
 
 /**
- *
+ * Produces a cache configured from ehcache.
  */
 public class EhConfiguredCache<K, V> implements Cache<K, V> {
 
   private net.sf.ehcache.Cache cache;
 
-  public EhConfiguredCache(int capacity, String cacheName, CacheManager cacheManager) {
+  public EhConfiguredCache(String cacheName, CacheManager cacheManager) {
     if (cacheName == null) {
       cacheName = "default";
     }

@@ -17,16 +17,37 @@
  */
 package org.apache.shindig.gadgets.http;
 
+import org.apache.shindig.common.cache.Cache;
 import org.apache.shindig.common.cache.CacheProvider;
-import org.apache.shindig.common.cache.ehcache.EhCacheCacheProvider;
+
+import com.google.inject.Inject;
 
 /**
- * Performs the same set of tests for the EhCacheProvider, if there is a problem here, its the more
- * likely to be the fault of the EhCacheProvider rather than the BasicHttpCache
+ * Simple cache of HttpResponses. It is recommended that this cache be configured with a shared
+ * cache rather than a memory only cache.
  */
-public class BasicHttpEhCacheTest extends BasicHttpCacheTest {
+public class DefaultHttpCache extends AbstractHttpCache {
+  public static final String CACHE_NAME = "httpResponses";
+
+  private final Cache<String, HttpResponse> cache;
+
+  @Inject
+  public DefaultHttpCache(CacheProvider cacheProvider) {
+    cache = cacheProvider.createCache(CACHE_NAME);
+  }
+
   @Override
-  protected CacheProvider getCacheProvider() {
-    return new EhCacheCacheProvider("/org/apache/shindig/common/cache/ehcache/ehcacheConfig.xml","true");
+  protected HttpResponse getResponseImpl(String key) {
+    return cache.getElement(key);
+  }
+
+  @Override
+  protected void addResponseImpl(String key, HttpResponse response) {
+    cache.addElement(key, response);
+  }
+
+  @Override
+  protected HttpResponse removeResponseImpl(String key) {
+    return cache.removeElement(key);
   }
 }

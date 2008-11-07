@@ -23,9 +23,10 @@ import static org.junit.Assert.assertEquals;
 import org.junit.Test;
 
 public class LruCacheTest {
-
   private static final int TEST_CAPACITY = 2;
-  private LruCache<String, String> cache = LruCache.create(TEST_CAPACITY);
+
+  private final LruCache<String, String> cache
+      = new LruCache<String, String>(TEST_CAPACITY);
 
   @Test
   public void normalCapacityOk() {

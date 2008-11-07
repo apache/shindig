@@ -18,11 +18,6 @@
  */
 package org.apache.shindig.common.cache.ehcache;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.Arrays;
-import java.util.Properties;
-
 import org.apache.shindig.common.cache.CacheProvider;
 import org.apache.shindig.common.util.ResourceLoader;
 
@@ -32,10 +27,15 @@ import com.google.inject.Scopes;
 import com.google.inject.name.Names;
 import com.google.inject.spi.Message;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Arrays;
+import java.util.Properties;
+
 /**
  * Creates a module to supply a EhCache Provider
  */
-public class EhCacheGuiceCacheModule extends AbstractModule {
+public class EhCacheModule extends AbstractModule {
   private final Properties properties;
   private final static String DEFAULT_PROPERTIES = "ehcache.properties";
 
@@ -46,14 +46,14 @@ public class EhCacheGuiceCacheModule extends AbstractModule {
     bind(CacheProvider.class).to(EhCacheCacheProvider.class).in(Scopes.SINGLETON);
   }
 
-  public EhCacheGuiceCacheModule(Properties properties) {
+  public EhCacheModule(Properties properties) {
     this.properties = properties;
   }
 
   /**
    * Creates module with standard properties.
    */
-  public EhCacheGuiceCacheModule() {
+  public EhCacheModule() {
     Properties properties = null;
     try {
       InputStream is = ResourceLoader.openResource(DEFAULT_PROPERTIES);

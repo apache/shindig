@@ -19,39 +19,17 @@ package org.apache.shindig.common.cache;
 
 import com.google.inject.ImplementedBy;
 
-/**
- * 
- */
-@ImplementedBy(DefaultCacheProvider.class)
+@ImplementedBy(LruCacheProvider.class)
 public interface CacheProvider {
   /**
    * Create a named single instance cache in this cache manager, if the cache
    * already exists, return it if the name is null, a new anonymous cache is
    * created
-   * 
-   * @param <K>
-   *                The Key type for the cache
-   * @param <V>
-   *                The pay-load type
-   * @param capacity
-   *                the initial size of the cache
-   * @param name
-   *                the name of the cache.
-   * @return a Cache configured to the required specification
+   *
+   * @param <K>  The Key type for the cache
+   * @param <V>  The pay-load type
+   * @param name The name of the cache.
+   * @return A Cache configured to the required specification.
    */
-  public <K, V> Cache<K, V> createCache(int capacity, String name);
-
-  /**
-   * Create an anonymous cache.
-   * 
-   * @param <K>
-   *                The Key type for the cache
-   * @param <V>
-   *                The pay-load type
-   * @param capacity
-   *                the size of the cache
-   * @return a Cache configured to the required specification.
-   */
-  public <K, V> Cache<K, V> createCache(int capacity);
-
+  public <K, V> Cache<K, V> createCache(String name);
 }

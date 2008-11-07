@@ -18,9 +18,11 @@
  */
 package org.apache.shindig.gadgets;
 
+import org.apache.shindig.common.cache.Cache;
 import org.apache.shindig.common.cache.CacheProvider;
-import org.apache.shindig.common.cache.TtlCache;
+import org.apache.shindig.common.cache.SoftExpiringCache;
 import org.apache.shindig.common.uri.Uri;
+import org.apache.shindig.common.util.Check;
 import org.apache.shindig.gadgets.http.HttpFetcher;
 import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.http.HttpResponse;
@@ -34,31 +36,29 @@ import java.net.URI;
 import java.util.logging.Logger;
 
 /**
- * Basic implementation of a gadget spec factory.
+ * Default implementation of a gadget spec factory.
  */
 @Singleton
-public class BasicGadgetSpecFactory implements GadgetSpecFactory {
+public class DefaultGadgetSpecFactory implements GadgetSpecFactory {
+  public static final String CACHE_NAME = "gadgetSpecs";
   static final String RAW_GADGETSPEC_XML_PARAM_NAME = "rawxml";
   static final Uri RAW_GADGET_URI = Uri.parse("http://localhost/raw.xml");
   static final String ERROR_SPEC = "<Module><ModulePrefs title='Error'/><Content/></Module>";
   static final String ERROR_KEY = "parse.exception";
-  static final Logger logger = Logger.getLogger(BasicGadgetSpecFactory.class.getName());
+  static final Logger LOG = Logger.getLogger(DefaultGadgetSpecFactory.class.getName());
 
   private final HttpFetcher fetcher;
-  private final TtlCache<Uri, GadgetSpec> ttlCache;
-  private final long minTtl;
-  private final long maxTtl;
+  private final SoftExpiringCache<Uri, GadgetSpec> cache;
+  private final long expiration;
 
   @Inject
-  public BasicGadgetSpecFactory(HttpFetcher fetcher,
-                                CacheProvider cacheProvider,
-                                @Named("shindig.gadget-spec.cache.capacity") int capacity,
-                                @Named("shindig.gadget-spec.cache.minTTL") long minTtl,
-                                @Named("shindig.gadget-spec.cache.maxTTL") long maxTtl) {
+  public DefaultGadgetSpecFactory(HttpFetcher fetcher,
+                                  CacheProvider cacheProvider,
+                                  @Named("shindig.cache.expirationMs") long expiration) {
     this.fetcher = fetcher;
-    this.minTtl = minTtl;
-    this.maxTtl = maxTtl;
-    this.ttlCache = new TtlCache<Uri, GadgetSpec>(cacheProvider, capacity, minTtl, maxTtl);
+    Cache<Uri, GadgetSpec> baseCache = cacheProvider.createCache(CACHE_NAME);
+    this.cache = new SoftExpiringCache<Uri, GadgetSpec>(baseCache);
+    this.expiration = expiration;
   }
 
   public GadgetSpec getGadgetSpec(GadgetContext context) throws GadgetException {
@@ -81,35 +81,34 @@ public class BasicGadgetSpecFactory implements GadgetSpecFactory {
       return fetchObjectAndCache(uri, ignoreCache);
     }
 
-    TtlCache.CachedObject<GadgetSpec> cached = null;
-    synchronized(ttlCache) {
-      cached = ttlCache.getElementWithExpiration(uri);
-    }
+    SoftExpiringCache.CachedObject<GadgetSpec> cached = cache.getElement(uri);
 
-    if (cached.obj == null || cached.isExpired) {
+    GadgetSpec spec = null;
+    if (cached == null || cached.isExpired) {
       try {
-        return fetchObjectAndCache(uri, ignoreCache);
+        spec = fetchObjectAndCache(uri, ignoreCache);
       } catch (GadgetException e) {
         // Enforce negative caching.
-        GadgetSpec spec;
-        if (cached.obj != null) {
+        if (cached != null) {
           spec = cached.obj;
+          Check.notNull(spec);
         } else {
           // We create this dummy spec to avoid the cost of re-parsing when a remote site is out.
           spec = new GadgetSpec(uri, ERROR_SPEC);
           spec.setAttribute(ERROR_KEY, e);
-          cached.obj = spec;
         }
-        logger.info("GadgetSpec fetch failed for " + uri + " - using cached for " + minTtl + " ms");
-        ttlCache.addElementWithTtl(uri, spec, minTtl);
+        LOG.info("GadgetSpec fetch failed for " + uri + " - using cached.");
+        cache.addElement(uri, spec, expiration);
       }
+    } else {
+      spec = cached.obj;
     }
 
-    GadgetException exception = (GadgetException) cached.obj.getAttribute(ERROR_KEY);
+    GadgetException exception = (GadgetException) spec.getAttribute(ERROR_KEY);
     if (exception != null) {
       throw exception;
     }
-    return cached.obj;
+    return spec;
   }
 
   /**
@@ -118,11 +117,9 @@ public class BasicGadgetSpecFactory implements GadgetSpecFactory {
    */
   private GadgetSpec fetchObjectAndCache(Uri url, boolean ignoreCache) throws GadgetException {
     HttpRequest request = new HttpRequest(url).setIgnoreCache(ignoreCache);
-    if (minTtl == maxTtl) {
-      // Since we don't allow any variance in cache time, we should just force the cache time
-      // globally. This ensures propagation to shared caches when this is set.
-      request.setCacheTtl((int) (maxTtl / 1000));
-    }
+    // Since we don't allow any variance in cache time, we should just force the cache time
+    // globally. This ensures propagation to shared caches when this is set.
+    request.setCacheTtl((int) (expiration / 1000));
 
     HttpResponse response = fetcher.fetch(request);
     if (response.getHttpStatusCode() != HttpResponse.SC_OK) {
@@ -132,9 +129,7 @@ public class BasicGadgetSpecFactory implements GadgetSpecFactory {
     }
 
     GadgetSpec spec = new GadgetSpec(url, response.getResponseAsString());
-
-    ttlCache.addElement(url, spec, response.getCacheExpiration());
-
+    cache.addElement(url, spec, expiration);
     return spec;
   }
 }
