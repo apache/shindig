@@ -23,10 +23,6 @@
  */
 class BasicOAuthDataStore extends OAuthDataStore {
 
-	function __construct()
-	{
-	}
-
 	function lookup_consumer($consumer_key)
 	{
 		return new OAuthConsumer($consumer_key, "fake-consumer-secret");
@@ -36,14 +32,11 @@ class BasicOAuthDataStore extends OAuthDataStore {
 	{
 		if ($token_type == "request") {
 			return new OAuthToken($token, "fake-request-secret");
+		} elseif ($token_type == "access") {
+			return new OAuthToken($token, "fake-access-secret");
 		} else {
-			if ($token_type == "access") {
-				return new OAuthToken($token, "fake-access-secret");
-			} else {
-				throw new OAuthException("unexpected token type: $token_type");
-			}
+			throw new OAuthException("unexpected token type: $token_type");
 		}
-		return null;
 	}
 
 	function lookup_nonce($consumer, $token, $nonce, $timestamp)
@@ -63,6 +56,6 @@ class BasicOAuthDataStore extends OAuthDataStore {
 
 	function authorize_request_token($token)
 	{
-		// mark the given requst token as having been authorized by the user
+		// mark the given request token as having been authorized by the user
 	}
 }
