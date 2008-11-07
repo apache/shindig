@@ -33,7 +33,7 @@ import javax.persistence.Table;
 @PrimaryKeyJoinColumn(name = "oid")
 public class ApplicationPropertyDb extends ListFieldDb {
   /**
-   * The group relationship connected with this property.
+   * The application  relationship connected with this property.
    */
   @ManyToOne(targetEntity = ApplicationDb.class)
   @JoinColumn(name = "application_id", referencedColumnName = "oid")
