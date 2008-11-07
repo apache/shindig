@@ -141,7 +141,7 @@ public class PersonPopulate {
     organizations2.add(getPersonOrganization(i + 5, "school"));
     organizations2.add(getPersonOrganization(i + 6, "school"));
     organizations2.add(getPersonOrganization(i + 7, "school"));
-    person.setOrganizations(organizations);
+    person.setOrganizations(organizations2);
     person.setSexualOrientation("sexualOrientation");
     person.setSmoker(new EnumImpl<Smoker>(Smoker.QUITTING));
     person.setSports(getList("Sports"));
