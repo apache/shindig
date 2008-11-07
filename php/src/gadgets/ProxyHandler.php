@@ -77,7 +77,7 @@ class ProxyHandler {
 			if (isset($_GET['contentType']) && $_GET['contentType'] == 'FEED') {
 				require 'external/Zend/Feed.php';
 				$numEntries = $_GET['numEntries'];
-				$getSummaries = $_GET['getSummaries'];
+				$getSummaries = ! empty($_GET['getSummaries']) && $_GET['getSummaries'] != 'false' ? true : false;
 				$channel = array();
 				$request = new RemoteContentRequest($url);
 				$request = $this->context->getHttpFetcher()->fetch($request, $this->context);
@@ -86,45 +86,96 @@ class ProxyHandler {
 					try {
 						$feed = Zend_Feed::importString($content);
 						if ($feed instanceof Zend_Feed_Rss) {
-							$channel = array('title' => $feed->title(), 
-									'link' => $feed->link(), 
-									'description' => $feed->description(), 
-									'pubDate' => $feed->pubDate(), 
-									'language' => $feed->language(), 
-									'category' => $feed->category(), 'items' => array());
+							// Try get author
+							if ($feed->author()) {
+								$author = $feed->author();
+							} else 
+								if ($feed->creator()) {
+									$author = $feed->creator();
+								}
 							// Loop over each channel item and store relevant data
 							$counter = 0;
+							$channel['Entry'] = array();
 							foreach ($feed as $item) {
 								if ($counter >= $numEntries) {
 									break;
 								}
+								$_entry = array();
+								$_entry['Title'] = $item->title();
+								$_entry['Link'] = $item->link();
+								if ($getSummaries && $item->description()) {
+									$_entry['Summary'] = $item->description();
+								}
+								$date = 0;
+								if ($item->date()) {
+									$date = strtotime($item->date());
+								} else {
+									if ($item->pubDate()) {
+										$date = strtotime($item->pubDate());
+									}
+								}
+								$_entry['Date'] = $date;
+								$channel['Entry'][] = $_entry;
+								// Remember author if first found
+								if (empty($author) && $item->author()) {
+									$author = $item->author();
+								} else 
+									if ($item->creator()) {
+										$author = $item->creator();
+									}
 								$counter ++;
-								$channel['items'][] = array('title' => $item->title(), 
-										'link' => $item->link(), 
-										'author' => $item->author(), 
-										'description' => $getSummaries ? $item->description() : '', 
-										'category' => $item->category(), 
-										'comments' => $item->comments(), 
-										'pubDate' => $item->pubDate());
 							}
+							$channel['Title'] = $feed->title();
+							$channel['URL'] = $url;
+							$channel['Description'] = $feed->description();
+							if ($feed->link()) {
+								if (is_array($feed->link())) {
+									foreach ($feed->link() as $_link) {
+										if ($_link->nodeValue)
+											$channel['Link'] = $_link->nodeValue;
+									}
+								} else {
+									$channel['Link'] = $feed->link();
+								}
+							}
+							$channel['Author'] = $author;
 						} elseif ($feed instanceof Zend_Feed_Atom) {
-							$channel = array('title' => $feed->title(), 
-									'link' => $feed->link(), 'id' => $feed->id(), 
-									'subtitle' => $feed->subtitle(), 'items' => array());
+							// Try get author
+							$author = $feed->author() ? $feed->author() : '';
+							// Loop over each entries and store relevant data
 							$counter = 0;
+							$channel['Entry'] = array();
 							foreach ($feed as $entry) {
 								if ($counter >= $numEntries) {
 									break;
 								}
-								$channel['items'][] = array('id' => $entry->id(), 
-										'title' => $entry->title(), 
-										'link' => $entry->link('alternate'), 
-										'summary' => $entry->summary(), 
-										'content' => $entry->content(), 
-										'author' => $entry->author(), 
-										'published' => $entry->published(), 
-										'updated' => $entry->updated());
+								$_entry = array();
+								$_entry['Title'] = $entry->title();
+								$_entry['Link'] = $entry->link('alternate');
+								if ($getSummaries && $entry->summary()) {
+									$_entry['Summary'] = $entry->summary();
+								}
+								$date = 0;
+								if ($entry->updated()) {
+									$date = strtotime($entry->updated());
+								} else 
+									if ($entry->published()) {
+										$date = strtotime($entry->published());
+									}
+								$_entry['Date'] = $date;
+								
+								$channel['Entry'][] = $_entry;
+								// Remember author if first found
+								if (empty($author) && $entry->author()) {
+									$author = $entry->author();
+								}
+								$counter ++;
 							}
+							$channel['Title'] = $feed->title();
+							$channel['URL'] = $url;
+							$channel['Description'] = $feed->subtitle();
+							$channel['Link'] = $feed->link('alternate');
+							$channel['Author'] = $author;
 						} else {
 							throw new Exception('Invalid feed type');
 						}
