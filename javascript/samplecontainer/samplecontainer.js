@@ -62,6 +62,11 @@ shindig.samplecontainer = {};
   var viewerId = "john.doe";
   var ownerId = "john.doe";
 
+  var viewMatches = /[?&]view=((?:[^#&]+|&amp;)+)/.exec(parentUrl);
+  var current_view = (viewMatches)
+      ? viewMatches[1]
+      : "default";
+
   /**
    * Public Variables
    */
@@ -140,6 +145,7 @@ shindig.samplecontainer = {};
 
   function generateGadgets(metadata) {
     // TODO: The gadget.js file should really have a clearGadgets method
+    gadgets.container.view_ = current_view; 
     gadgets.container.gadgets_ = {};
     for (var i = 0; i < metadata.gadgets.length; i++) {
       gadget = gadgets.container.createGadget(
@@ -162,6 +168,7 @@ shindig.samplecontainer = {};
       var specUrl = metadata.gadgets[0].url;
       gadgets.container.gadgets_[gadget].title = newtitle;
       gadgets.container.gadgets_[gadget].specUrl = specUrl;
+      gadgets.container.gadgets_[gadget].secureToken = escape(generateSecureToken());
     }
     reloadStateFile(function() {
       gadgets.container.renderGadgets();
@@ -173,7 +180,7 @@ shindig.samplecontainer = {};
       context: {
         country: "default",
         language: "default",
-        view: "default",
+        view: current_view,
         container: "default"
       },
       gadgets: [{
