@@ -87,29 +87,35 @@ abstract class ApiServlet {
 		$userId = $request->get_parameter('xoauth_requestor_id'); // from Consumer Request extension (2-legged OAuth)
 		$signature = $request->get_parameter('oauth_signature');
 		
-		// TODO: also allow userId to be specified via oauth token and/or in URL?
 		if ($appUrl && $signature) {
 			//if ($appUrl && $signature && $userId) {
 			// look up the user and perms for this oauth request
 			$oauthLookupService = Config::get('oauth_lookup_service');
 			$oauthLookupService = new $oauthLookupService();
-			if ($oauthLookupService->thirdPartyHasAccessToUser($request, $appUrl, $userId)) {
-				return $oauthLookupService->getSecurityToken($appUrl, $userId);
+			$token = $oauthLookupService->getSecurityToken($request, $appUrl, $userId);
+			if ($token) {
+				return $token;
 			} else {
-				return null; // invalid oauth request
+				return null; // invalid oauth request, or 3rd party doesn't have access to this user
 			}
 		} // else, not a valid oauth request, so don't bother
+		
 
 		// look for encrypted security token
 		$token = isset($_POST['st']) ? $_POST['st'] : (isset($_GET['st']) ? $_GET['st'] : '');
 		if (empty($token)) {
-			// no security token, continue anonymously, remeber to check
-			// for private profiles etc in your code so their not publicly
-			// accessable to anoymous users! Anonymous == owner = viewer = appId = modId = 0
-			//FIXME change this to a new AnonymousToken when reworking auth token
-			$gadgetSigner = Config::get('security_token');
-			// create token with 0 values, no gadget url, no domain and 0 duration
-			return new $gadgetSigner(null, 0, 0, 0, 0, '', '', 0);
+			if (Config::get('allow_anonymous_token')) {
+				// no security token, continue anonymously, remeber to check
+				// for private profiles etc in your code so their not publicly
+				// accessable to anoymous users! Anonymous == owner = viewer = appId = modId = 0
+				// create token with 0 values, no gadget url, no domain and 0 duration
+				
+				//FIXME change this to a new AnonymousToken when reworking auth token
+				$gadgetSigner = Config::get('security_token');
+				return new $gadgetSigner(null, 0, 0, 0, 0, '', '', 0);
+			} else {
+				return null;
+			}
 		}
 		if (count(explode(':', $token)) != 6) {
 			$token = urldecode(base64_decode($token));

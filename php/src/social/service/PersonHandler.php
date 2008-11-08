@@ -74,7 +74,7 @@ class PersonHandler extends DataRequestHandler {
 		$options->setFilterValue($request->getFilterValue());
 		$options->setStartIndex($request->getStartIndex());
 		$options->setCount($request->getCount());
-		
+		// personId: Array (     [0] => 8 ) 
 		if (count($userIds) == 1) {
 			if (count($optionalPersonId) == 0) {
 				if ($groupId->getType() == 'self') {
@@ -83,8 +83,7 @@ class PersonHandler extends DataRequestHandler {
 					return $this->personService->getPeople($userIds, $groupId, $options, $fields, $request->getToken());
 				}
 			} elseif (count($optionalPersonId) == 1) {
-				// TODO: Add some crazy concept to handle the userId?
-				return $this->personService->getPerson(new UserId('userId', $optionalPersonId[0]), $groupId, $fields, $request->getToken());
+				return $this->personService->getPerson($optionalPersonId[0], $groupId, $fields, $request->getToken());
 			} else {
 				$personIds = array();
 				foreach ($optionalPersonId as $pid) {

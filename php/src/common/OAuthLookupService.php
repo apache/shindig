@@ -22,9 +22,6 @@
  * Interface for handling the validation of OAuth requests.
  */
 abstract class OAuthLookupService {
-
-	abstract public function thirdPartyHasAccessToUser($oauthRequest, $appUrl, $userId);
-
-	abstract public function getSecurityToken($appUrl, $userId);
+	abstract public function getSecurityToken($oauthRequest, $appUrl, $userId);
 }
 
