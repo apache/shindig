@@ -23,33 +23,7 @@
  */
 class BasicOAuthLookupService extends OAuthLookupService {
 
-	public function thirdPartyHasAccessToUser($oauthRequest, $appUrl, $userId)
-	{
-		$appId = $this->getAppId($appUrl);
-		return $this->hasValidSignature($oauthRequest, $appUrl, $appId) && $this->userHasAppInstalled($userId, $appId);
-	}
-
-	private function hasValidSignature($oauthRequest, $appUrl, $appId)
-	{
-		try {
-			$server = new OAuthServer(new BasicOAuthDataStore());
-			$server->add_signature_method(new OAuthSignatureMethod_HMAC_SHA1());
-			$server->add_signature_method(new OAuthSignatureMethod_PLAINTEXT());
-			list($consumer, $token) = $server->verify_request($oauthRequest);
-			return true;
-		} catch (OAuthException $e) {
-			//FIXME seems some old debugging code? should clean this up if so
-			echo "OAuthException: " . $e->getMessage();
-		}
-		return false;
-	}
-
-	private function userHasAppInstalled($apUrl, $appId)
-	{
-		return true; // a real implementation would look this up
-	}
-
-	public function getSecurityToken($appUrl, $userId)
+	public function getSecurityToken($oauthRequest, $appUrl, $userId)
 	{
 		return new OAuthSecurityToken($userId, $appUrl, $this->getAppId($appUrl), "samplecontainer");
 	}
