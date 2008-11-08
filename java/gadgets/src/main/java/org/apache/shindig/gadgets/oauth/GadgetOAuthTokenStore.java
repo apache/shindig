@@ -160,6 +160,8 @@ public class GadgetOAuthTokenStore {
       // We cached the access token on the client
       accessorBuilder.setAccessToken(clientState.getAccessToken());
       accessorBuilder.setTokenSecret(clientState.getAccessTokenSecret());
+      accessorBuilder.setSessionHandle(clientState.getSessionHandle());
+      accessorBuilder.setTokenExpireMillis(clientState.getTokenExpireMillis());
     } else {
       // No useful client-side state, check persistent storage
       TokenInfo tokenInfo = store.getTokenInfo(securityToken, consumerInfo,
@@ -168,6 +170,8 @@ public class GadgetOAuthTokenStore {
         // We have an access token in persistent storage, use that.
         accessorBuilder.setAccessToken(tokenInfo.getAccessToken());
         accessorBuilder.setTokenSecret(tokenInfo.getTokenSecret());
+        accessorBuilder.setSessionHandle(tokenInfo.getSessionHandle());
+        accessorBuilder.setTokenExpireMillis(tokenInfo.getTokenExpireMillis());
       } else {
         // We don't have an access token yet, but the client sent us a (hopefully) preapproved
         // request token.

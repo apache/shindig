@@ -89,4 +89,16 @@ public class OAuthClientStateTest {
     state = new OAuthClientState(crypter, encrypted);
     assertNull(state.getRequestToken());    
   }
+  
+  @Test
+  public void testNullValue() throws Exception {
+    OAuthClientState state = new OAuthClientState(crypter);
+    state.setRequestToken("reqtoken");
+    state.setRequestToken(null);
+    state.setOwner("owner");
+    String encrypted = state.getEncryptedState();
+    state = new OAuthClientState(crypter, encrypted);
+    assertNull(state.getRequestToken());   
+    assertEquals("owner", state.getOwner());
+  }
 }
