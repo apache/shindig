@@ -58,6 +58,11 @@ class OAuthProtocolException extends Exception {
    */
   private static Set<String> temporaryProblems;
   
+  /**
+   * Problems that should have us try to refresh the access token.
+   */
+  private static Set<String> extensionProblems;
+  
   static {
     fatalProblems = new HashSet<String>();
     fatalProblems.add("version_rejected");
@@ -68,6 +73,9 @@ class OAuthProtocolException extends Exception {
     
     temporaryProblems = new HashSet<String>();
     temporaryProblems.add("consumer_key_refused");
+    
+    extensionProblems = new HashSet<String>();
+    extensionProblems.add("access_token_expired");
   }
   
   private final String problemCode;
@@ -77,11 +85,14 @@ class OAuthProtocolException extends Exception {
 
   private final boolean startFromScratch;
   
+  private final boolean canExtend;
+  
   OAuthProtocolException(boolean canRetry) {
     this.problemCode = null;
     this.problemText = null;
     this.canRetry = canRetry;
     this.startFromScratch = false;
+    this.canExtend = false;
   }
   
   public OAuthProtocolException(OAuthMessage reply) {
@@ -95,12 +106,19 @@ class OAuthProtocolException extends Exception {
     if (fatalProblems.contains(problem)) {
       startFromScratch = true;
       canRetry = false;
+      canExtend = false;
     } else if (temporaryProblems.contains(problem)) {
       startFromScratch = false;
       canRetry = false;
+      canExtend = false;
+    } else if (extensionProblems.contains(problem)) {
+      startFromScratch = false;
+      canRetry = true;
+      canExtend = true;
     } else {
       startFromScratch = true;
       canRetry = true;
+      canExtend = false;
     }
   }
 
@@ -119,6 +137,7 @@ class OAuthProtocolException extends Exception {
       startFromScratch = true;
       canRetry = false;
     }
+    canExtend = false;
   }
 
   /**
@@ -136,7 +155,15 @@ class OAuthProtocolException extends Exception {
   public boolean canRetry() {
     return canRetry;
   }
-
+  
+  /**
+   * @return true if we think we can make progress by attempting to extend the lifetime of the
+   * access token.
+   */
+  public boolean canExtend() {
+    return canExtend;
+  }
+  
   public HttpResponse getResponseForGadget() {
     return new HttpResponseBuilder()
         .setHttpStatusCode(0)

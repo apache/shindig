@@ -78,15 +78,34 @@ public interface OAuthStore {
   public static class TokenInfo {
     private final String accessToken;
     private final String tokenSecret;
-    public TokenInfo(String token, String secret) {
-      accessToken = token;
-      tokenSecret = secret;
+    private final String sessionHandle;
+    private final long tokenExpireMillis;
+    
+    /**
+     * @param accessToken the token
+     * @param tokenSecret the secret for the token
+     * @param sessionHandle the session handle
+     *     (http://oauth.googlecode.com/svn/spec/ext/session/1.0/drafts/1/spec.html)
+     * @param tokenExpireMillis time (milliseconds since epoch) when the token expires
+     */
+    public TokenInfo(String accessToken, String tokenSecret, String sessionHandle,
+        long tokenExpireMillis) {
+      this.accessToken = accessToken;
+      this.tokenSecret = tokenSecret;
+      this.sessionHandle = sessionHandle;
+      this.tokenExpireMillis = tokenExpireMillis;
     }
     public String getAccessToken() {
       return accessToken;
     }
     public String getTokenSecret() {
       return tokenSecret;
+    }
+    public String getSessionHandle() {
+      return sessionHandle;
+    }
+    public long getTokenExpireMillis() {
+      return tokenExpireMillis;
     }
   }
 

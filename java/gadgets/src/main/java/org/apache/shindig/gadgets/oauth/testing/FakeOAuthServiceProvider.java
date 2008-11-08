@@ -28,6 +28,7 @@ import net.oauth.signature.RSA_SHA1;
 
 import org.apache.commons.codec.binary.Base64;
 import org.apache.shindig.common.crypto.Crypto;
+import org.apache.shindig.common.util.TimeSource;
 import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.http.HttpFetcher;
 import org.apache.shindig.gadgets.http.HttpRequest;
@@ -63,6 +64,8 @@ public class FakeOAuthServiceProvider implements HttpFetcher {
   public final static String CONSUMER_KEY = "consumer";
   public final static String CONSUMER_SECRET = "secret";
   
+  public final static int TOKEN_EXPIRATION_SECONDS = 60;
+  
   public static final String PRIVATE_KEY_TEXT =
     "MIICdgIBADANBgkqhkiG9w0BAQEFAASCAmAwggJcAgEAAoGBALRiMLAh9iimur8V" +
     "A7qVvdqxevEuUkW4K+2KdMXmnQbG9Aa7k7eBjK1S+0LYmVjPKlJGNXHDGuy5Fw/d" +
@@ -92,17 +95,20 @@ public class FakeOAuthServiceProvider implements HttpFetcher {
     "WpkUQDIDJEoFUzKMVuJf4KO/FJ345+BNLGgbJ6WujreoM1X/gYfdnJ/J\n" +
     "-----END CERTIFICATE-----";
   
-  private static class TokenState {
+  enum State {
+    PENDING,
+    APPROVED_UNCLAIMED,
+    APPROVED,
+    REVOKED,
+  }
+  
+  private class TokenState {
     String tokenSecret;
     OAuthConsumer consumer;
     State state;
     String userData;
-
-    enum State {
-      PENDING,
-      APPROVED,
-      REVOKED,
-    }
+    String sessionHandle;
+    long issued;
 
     public TokenState(String tokenSecret, OAuthConsumer consumer) {
       this.tokenSecret = tokenSecret;
@@ -111,15 +117,24 @@ public class FakeOAuthServiceProvider implements HttpFetcher {
       this.userData = null;
     }
 
-    public static TokenState makeAccessTokenState(String tokenSecret,
-        OAuthConsumer consumer) {
-      TokenState s = new TokenState(tokenSecret, consumer);
-      s.setState(State.APPROVED);
-      return s;
+    public void approveToken() {
+      // Waiting for the consumer to claim the token
+      state = State.APPROVED_UNCLAIMED;
+      issued = clock.currentTimeMillis();
+    }
+    
+    public void claimToken() {
+      // consumer taking the token
+      state = State.APPROVED;
+      sessionHandle = Crypto.getRandomString(8);
+    }
+    
+    public void renewToken() {
+      issued = clock.currentTimeMillis();
     }
 
-    public void setState(State state) {
-      this.state = state;
+    public void revokeToken() {
+      state = State.REVOKED;
     }
 
     public State getState() {
@@ -146,9 +161,12 @@ public class FakeOAuthServiceProvider implements HttpFetcher {
   private final OAuthValidator validator;
   private final OAuthConsumer signedFetchConsumer;
   private final OAuthConsumer oauthConsumer;
+  private final TimeSource clock;
 
-  private boolean throttled;
-  private boolean vagueErrors;
+  private boolean throttled = false;
+  private boolean vagueErrors = false;
+  private boolean reportExpirationTimes = true;
+  private boolean sessionExtension = false;
 
   private int requestTokenCount = 0;
 
@@ -158,7 +176,8 @@ public class FakeOAuthServiceProvider implements HttpFetcher {
 
   private Set<OAuthParamLocation> validParamLocations;
 
-  public FakeOAuthServiceProvider() {
+  public FakeOAuthServiceProvider(TimeSource clock) {
+    this.clock = clock;
     OAuthServiceProvider provider = new OAuthServiceProvider(
         REQUEST_TOKEN_URL, APPROVAL_URL, ACCESS_TOKEN_URL);
     
@@ -168,8 +187,7 @@ public class FakeOAuthServiceProvider implements HttpFetcher {
     oauthConsumer = new OAuthConsumer(null, CONSUMER_KEY, CONSUMER_SECRET, provider);
     
     tokenState = new HashMap<String, TokenState>();
-    validator = new SimpleOAuthValidator();
-    vagueErrors = false;
+    validator = new FakeTimeOAuthValidator();
     validParamLocations = new HashSet<OAuthParamLocation>();
     validParamLocations.add(OAuthParamLocation.URI_QUERY);
   }
@@ -177,7 +195,15 @@ public class FakeOAuthServiceProvider implements HttpFetcher {
   public void setVagueErrors(boolean vagueErrors) {
     this.vagueErrors = vagueErrors;
   }
+  
+  public void setSessionExtension(boolean sessionExtension) {
+    this.sessionExtension = sessionExtension;
+  }
 
+  public void setReportExpirationTimes(boolean reportExpirationTimes) {
+    this.reportExpirationTimes = reportExpirationTimes;
+  }
+  
   public void addParamLocation(OAuthParamLocation paramLocation) {
     validParamLocations.add(paramLocation);
   }
@@ -401,7 +427,7 @@ public class FakeOAuthServiceProvider implements HttpFetcher {
     ParsedUrl parsed = new ParsedUrl(url);
     String requestToken = parsed.getQueryParam("oauth_token");
     TokenState state = tokenState.get(requestToken);
-    state.setState(TokenState.State.APPROVED);
+    state.approveToken();
     // Not part of the OAuth spec, just a handy thing for testing.
     state.setUserData(parsed.getQueryParam("user_data"));
   }
@@ -426,7 +452,7 @@ public class FakeOAuthServiceProvider implements HttpFetcher {
     String requestToken = Crypto.getRandomString(16);
     String requestTokenSecret = Crypto.getRandomString(16);
     TokenState state = new TokenState(requestTokenSecret, oauthConsumer);
-    state.setState(TokenState.State.APPROVED);
+    state.approveToken();
     state.setUserData(userData);
     tokenState.put(requestToken, state);
     return new TokenPair(requestToken, requestTokenSecret);
@@ -439,7 +465,16 @@ public class FakeOAuthServiceProvider implements HttpFetcher {
    */
   public void revokeAllAccessTokens() throws Exception {
     for (TokenState state : tokenState.values()) {
-      state.setState(TokenState.State.REVOKED);
+      state.revokeToken();
+    }
+  }
+  
+  /**
+   * Changes session handles to prevent renewal from working.
+   */
+  public void changeAllSessionHandles() throws Exception {
+    for (TokenState state : tokenState.values()) {
+      state.sessionHandle = null;
     }
   }
 
@@ -454,22 +489,45 @@ public class FakeOAuthServiceProvider implements HttpFetcher {
     } else if (state == null) {
       return makeOAuthProblemReport("token_rejected", "Unknown request token");
     }
-    if (state.getState() != TokenState.State.APPROVED) {
-      throw new Exception("Token not approved");
-    }
+    
     OAuthAccessor accessor = new OAuthAccessor(oauthConsumer);
     accessor.requestToken = requestToken;
     accessor.tokenSecret = state.tokenSecret;
     message.validateMessage(accessor, validator);
+        
+    if (state.getState() == State.APPROVED_UNCLAIMED) {
+      state.claimToken();
+    } else if (state.getState() == State.APPROVED) {
+      // Verify can refresh
+      String sentHandle = message.getParameter("oauth_session_handle");
+      if (sentHandle == null) {
+        throw new Exception("No oauth_session_handle");
+      }
+      if (!sentHandle.equals(state.sessionHandle)) {
+        return makeOAuthProblemReport("token_invalid", "token not valid");
+      }
+      state.renewToken();
+    } else if (state.getState() == State.REVOKED){
+      return makeOAuthProblemReport("token_revoked", "Revoked access token can't be renewed");
+    } else {
+      throw new Exception("Token in weird state " + state.getState());
+    }
+
     String accessToken = Crypto.getRandomString(16);
     String accessTokenSecret = Crypto.getRandomString(16);
     state.tokenSecret = accessTokenSecret;
     tokenState.put(accessToken, state);
     tokenState.remove(requestToken);
-    String resp = OAuth.formEncode(OAuth.newList(
+    List<OAuth.Parameter> params = OAuth.newList(
         "oauth_token", accessToken,
-        "oauth_token_secret", accessTokenSecret));
-    return new HttpResponse(resp);
+        "oauth_token_secret", accessTokenSecret);
+    if (sessionExtension) {
+      params.add(new OAuth.Parameter("oauth_session_handle", state.sessionHandle));
+      if (reportExpirationTimes) {
+        params.add(new OAuth.Parameter("oauth_expires_in", "" + TOKEN_EXPIRATION_SECONDS));
+      }
+    }
+    return new HttpResponse(OAuth.formEncode(params));
   }
 
   private HttpResponse handleResourceUrl(HttpRequest request)
@@ -500,20 +558,30 @@ public class FakeOAuthServiceProvider implements HttpFetcher {
         return makeOAuthProblemReport(
             "token_rejected", "Access token unknown");
       }
-      if (state.getState() != TokenState.State.APPROVED) {
+      // Check the signature
+      accessor.accessToken = accessToken;
+      accessor.tokenSecret = state.getSecret();
+      info.message.validateMessage(accessor, validator);
+      
+      if (state.getState() != State.APPROVED) {
         return makeOAuthProblemReport(
             "token_revoked", "User revoked permissions");
       }
-      accessor.accessToken = accessToken;
-      accessor.tokenSecret = state.getSecret();
+      if (sessionExtension) {
+        long expiration = state.issued + TOKEN_EXPIRATION_SECONDS * 1000;
+        if (expiration < clock.currentTimeMillis()) {
+          return makeOAuthProblemReport("access_token_expired", "token needs to be refreshed");
+        }
+      }
       responseBody = "User data is " + state.getUserData();
     } else {
+      // Check the signature
+      info.message.validateMessage(accessor, validator);
+      
       // For signed fetch, just echo back the query parameters in the body
       responseBody = request.getUri().getQuery();
     }
     
-    // Check the signature
-    info.message.validateMessage(accessor, validator);
     
     // Send back a response
     HttpResponseBuilder resp = new HttpResponseBuilder()
@@ -561,5 +629,15 @@ public class FakeOAuthServiceProvider implements HttpFetcher {
    */
   public int getResourceAccessCount() {
     return resourceAccessCount;
+  }
+  
+  /**
+   * Validate oauth messages using a fake time source.
+   */
+  private class FakeTimeOAuthValidator extends SimpleOAuthValidator {
+    @Override
+    protected long currentTimeMsec() {
+      return clock.currentTimeMillis();
+    }
   }
 }

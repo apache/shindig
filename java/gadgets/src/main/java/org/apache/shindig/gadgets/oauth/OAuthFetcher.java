@@ -93,6 +93,13 @@ public class OAuthFetcher extends ChainedContentFetcher {
   protected static final String XOAUTH_PUBLIC_KEY = "xoauth_signature_publickey";
   
   protected static final Pattern ALLOWED_PARAM_NAME = Pattern.compile("[-:\\w~!@$*()_\\[\\]:,./]+");
+  
+  private static final String OAUTH_SESSION_HANDLE = "oauth_session_handle";
+  
+  private static final String OAUTH_EXPIRES_IN = "oauth_expires_in";
+  
+  private static final long ACCESS_TOKEN_EXPIRE_UNKNOWN = 0;
+  private static final long ACCESS_TOKEN_FORCE_EXPIRE = -1;
 
   /**
    * State information from client
@@ -140,11 +147,6 @@ public class OAuthFetcher extends ChainedContentFetcher {
 
   /**
    * Retrieves metadata from our persistent store.
-   *
-   * TODO(beaton): can we fix this so it avoids hitting the persistent data
-   * store when a client makes multiple requests with an approved access token?
-   *
-   * @throws GadgetException
    */
   private void lookupOAuthMetadata() throws GadgetException {
     accessorInfo = fetcherConfig.getTokenStore().getOAuthAccessor(
@@ -232,12 +234,16 @@ public class OAuthFetcher extends ChainedContentFetcher {
 
   private boolean handleProtocolException(
       OAuthProtocolException pe, int attempts) throws GadgetException {
-    if (pe.startFromScratch()) {
+    if (pe.canExtend()) {
+      accessorInfo.setTokenExpireMillis(ACCESS_TOKEN_FORCE_EXPIRE);
+    } else if (pe.startFromScratch()) {
       fetcherConfig.getTokenStore().removeToken(realRequest.getSecurityToken(),
           accessorInfo.getConsumer(), realRequest.getOAuthArguments());
       accessorInfo.getAccessor().accessToken = null;
       accessorInfo.getAccessor().requestToken = null;
       accessorInfo.getAccessor().tokenSecret = null;
+      accessorInfo.setSessionHandle(null);
+      accessorInfo.setTokenExpireMillis(ACCESS_TOKEN_EXPIRE_UNKNOWN);
     }
     return (attempts < MAX_ATTEMPTS && pe.canRetry());
   }
@@ -381,6 +387,9 @@ public class OAuthFetcher extends ChainedContentFetcher {
     if (accessorInfo.getConsumer().getKeyName() != null) {
       params.add(new Parameter(XOAUTH_PUBLIC_KEY, accessorInfo.getConsumer().getKeyName()));
     }
+    params.add(new Parameter(OAuth.OAUTH_VERSION, OAuth.VERSION_1_0));
+    params.add(new Parameter(OAuth.OAUTH_TIMESTAMP,
+        Long.toString(fetcherConfig.getClock().currentTimeMillis() / 1000)));
   }
 
   private static String getAuthorizationHeader(
@@ -576,11 +585,22 @@ public class OAuthFetcher extends ChainedContentFetcher {
    * Do we need to exchange a request token for an access token?
    */
   private boolean needAccessToken() {
-    return (realRequest.getOAuthArguments().mustUseToken()
-            && accessorInfo.getAccessor().requestToken != null
-            && accessorInfo.getAccessor().accessToken == null);
+    if (realRequest.getOAuthArguments().mustUseToken()
+        && accessorInfo.getAccessor().requestToken != null
+        && accessorInfo.getAccessor().accessToken == null) {
+      return true;
+    }
+    if (realRequest.getOAuthArguments().mayUseToken() && accessTokenExpired()) {
+      return true;
+    }
+    return false;
   }
 
+  private boolean accessTokenExpired() {
+    return (accessorInfo.getTokenExpireMillis() != ACCESS_TOKEN_EXPIRE_UNKNOWN
+        && accessorInfo.getTokenExpireMillis() < fetcherConfig.getClock().currentTimeMillis());
+  }
+  
   /**
    * Implements section 6.3 of the OAuth spec.
    * @throws OAuthProtocolException
@@ -588,6 +608,12 @@ public class OAuthFetcher extends ChainedContentFetcher {
   private void exchangeRequestToken()
       throws GadgetException, OAuthProtocolException {
     try {
+      if (accessorInfo.getAccessor().accessToken != null) {
+        // session extension per
+        // http://oauth.googlecode.com/svn/spec/ext/session/1.0/drafts/1/spec.html
+        accessorInfo.getAccessor().requestToken = accessorInfo.getAccessor().accessToken;
+        accessorInfo.getAccessor().accessToken = null;
+      }
       OAuthAccessor accessor = accessorInfo.getAccessor();
       HttpRequest request = new HttpRequest(
           Uri.parse(accessor.consumer.serviceProvider.accessTokenURL));
@@ -598,6 +624,9 @@ public class OAuthFetcher extends ChainedContentFetcher {
       
       List<Parameter> msgParams = new ArrayList<Parameter>();
       msgParams.add(new Parameter(OAuth.OAUTH_TOKEN, accessor.requestToken));
+      if (accessorInfo.getSessionHandle() != null) {
+        msgParams.add(new Parameter(OAUTH_SESSION_HANDLE, accessorInfo.getSessionHandle()));
+      }
       
       HttpRequest signed = sanitizeAndSign(request, msgParams);
       
@@ -605,6 +634,19 @@ public class OAuthFetcher extends ChainedContentFetcher {
       
       accessor.accessToken = OAuthUtil.getParameter(reply, OAuth.OAUTH_TOKEN);
       accessor.tokenSecret = OAuthUtil.getParameter(reply, OAuth.OAUTH_TOKEN_SECRET);
+      accessorInfo.setSessionHandle(OAuthUtil.getParameter(reply, OAUTH_SESSION_HANDLE));
+      accessorInfo.setTokenExpireMillis(ACCESS_TOKEN_EXPIRE_UNKNOWN);
+      if (OAuthUtil.getParameter(reply, OAUTH_EXPIRES_IN) != null) {
+        try {
+          int expireSecs = Integer.parseInt(OAuthUtil.getParameter(reply, OAUTH_EXPIRES_IN));
+          long expireMillis = fetcherConfig.getClock().currentTimeMillis() + expireSecs * 1000;
+          accessorInfo.setTokenExpireMillis(expireMillis);
+        } catch (NumberFormatException e) {
+          // Hrm.  Bogus server.  We can safely ignore this, we'll just wait for the server to
+          // tell us when the access token has expired.
+          logger.log(Level.WARNING, "server returned bogus expiration: " + reply);
+        }
+      }
     } catch (OAuthException e) {
       throw new UserVisibleOAuthException(e.getMessage(), e);
     }
@@ -617,7 +659,8 @@ public class OAuthFetcher extends ChainedContentFetcher {
    */
   private void saveAccessToken() throws GadgetException {
     OAuthAccessor accessor = accessorInfo.getAccessor();
-    TokenInfo tokenInfo = new TokenInfo(accessor.accessToken, accessor.tokenSecret);
+    TokenInfo tokenInfo = new TokenInfo(accessor.accessToken, accessor.tokenSecret,
+        accessorInfo.getSessionHandle(), accessorInfo.getTokenExpireMillis());
     fetcherConfig.getTokenStore().storeTokenKeyAndSecret(realRequest.getSecurityToken(),
         accessorInfo.getConsumer(), realRequest.getOAuthArguments(), tokenInfo);
   }
@@ -630,6 +673,8 @@ public class OAuthFetcher extends ChainedContentFetcher {
     responseParams.getNewClientState().setAccessToken(accessor.accessToken);
     responseParams.getNewClientState().setAccessTokenSecret(accessor.tokenSecret);
     responseParams.getNewClientState().setOwner(realRequest.getSecurityToken().getOwnerId());
+    responseParams.getNewClientState().setSessionHandle(accessorInfo.getSessionHandle());
+    responseParams.getNewClientState().setTokenExpireMillis(accessorInfo.getTokenExpireMillis());
   }
 
   /**

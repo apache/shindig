@@ -95,7 +95,7 @@ public class BasicOAuthStoreTest {
     t.setViewerId("viewer-one");
     assertNull(store.getTokenInfo(t, consumer, "", ""));
     
-    TokenInfo info = new TokenInfo("token", "secret");
+    TokenInfo info = new TokenInfo("token", "secret", null, 0);
     store.setTokenInfo(t, consumer, "service", "token", info);
     
     info = store.getTokenInfo(t, consumer, "service", "token");

@@ -35,6 +35,8 @@ public class AccessorInfoBuilder {
   private String requestToken;
   private String accessToken;
   private String tokenSecret;
+  private String sessionHandle;
+  private long tokenExpireMillis;
   private OAuthParamLocation location;
   private HttpMethod method;
 
@@ -56,7 +58,7 @@ public class AccessorInfoBuilder {
     accessor.requestToken = requestToken;
     accessor.accessToken = accessToken;
     accessor.tokenSecret = tokenSecret;
-    return new AccessorInfo(accessor, consumer, method, location);
+    return new AccessorInfo(accessor, consumer, method, location, sessionHandle, tokenExpireMillis);
   }
 
   public void setConsumer(ConsumerInfo consumer) {
@@ -81,5 +83,13 @@ public class AccessorInfoBuilder {
 
   public void setMethod(HttpMethod method) {
     this.method = method;
+  }
+
+  public void setSessionHandle(String sessionHandle) {
+    this.sessionHandle = sessionHandle;
+  }
+
+  public void setTokenExpireMillis(long tokenExpireMillis) {
+    this.tokenExpireMillis = tokenExpireMillis;
   }
 }

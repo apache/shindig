@@ -29,6 +29,7 @@ import org.apache.shindig.auth.SecurityToken;
 import org.apache.shindig.common.cache.LruCacheProvider;
 import org.apache.shindig.common.crypto.BasicBlobCrypter;
 import org.apache.shindig.common.util.CharsetUtil;
+import org.apache.shindig.common.util.FakeTimeSource;
 import org.apache.shindig.gadgets.FakeGadgetSpecFactory;
 import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.RequestSigningException;
@@ -67,6 +68,7 @@ public class OAuthFetcherTest {
   private FakeOAuthServiceProvider serviceProvider;
   private BasicOAuthStore base;
   private final List<LogRecord> logRecords = Lists.newArrayList();
+  private FakeTimeSource clock = new FakeTimeSource();
 
   public static final String GADGET_URL = "http://www.example.com/gadget.xml";
   public static final String GADGET_URL_NO_KEY = "http://www.example.com/nokey.xml";
@@ -76,11 +78,12 @@ public class OAuthFetcherTest {
   @Before
   public void setUp() throws Exception {
     base = new BasicOAuthStore();
-    serviceProvider = new FakeOAuthServiceProvider();
+    serviceProvider = new FakeOAuthServiceProvider(clock);
     fetcherConfig = new OAuthFetcherConfig(
         new BasicBlobCrypter("abcdefghijklmnop".getBytes()),
         getOAuthStore(base),
-        new DefaultHttpCache(new LruCacheProvider(10)));
+        new DefaultHttpCache(new LruCacheProvider(10)),
+        clock);
 
     Logger logger = Logger.getLogger(OAuthFetcher.class.getName());
     logger.addHandler(new Handler() {
@@ -929,6 +932,190 @@ public class OAuthFetcherTest {
     client.sendFormPost(FakeOAuthServiceProvider.RESOURCE_URL, "oauth_foo=bar");
   }
 
+  // Test we can refresh an expired access token.
+  @Test
+  public void testAccessTokenExpires_onClient() throws Exception {
+    serviceProvider.setSessionExtension(true);
+    MakeRequestClient client = makeNonSocialClient("owner", "owner", GADGET_URL);
+    
+    HttpResponse response = client.sendGet(FakeOAuthServiceProvider.RESOURCE_URL);
+    assertEquals("", response.getResponseAsString());
+    client.approveToken("user_data=hello-oauth");
+    
+    response = client.sendGet(FakeOAuthServiceProvider.RESOURCE_URL);
+    assertEquals("User data is hello-oauth", response.getResponseAsString());
+    
+    assertEquals(1, serviceProvider.getRequestTokenCount());
+    assertEquals(1, serviceProvider.getAccessTokenCount());
+    assertEquals(1, serviceProvider.getResourceAccessCount());
+
+    clock.incrementSeconds(FakeOAuthServiceProvider.TOKEN_EXPIRATION_SECONDS + 1);
+    
+    response = client.sendGet(FakeOAuthServiceProvider.RESOURCE_URL + "?cb=1");
+    assertEquals("User data is hello-oauth", response.getResponseAsString());
+    
+    assertEquals(1, serviceProvider.getRequestTokenCount());
+    assertEquals(2, serviceProvider.getAccessTokenCount());
+    assertEquals(2, serviceProvider.getResourceAccessCount());
+    
+    response = client.sendGet(FakeOAuthServiceProvider.RESOURCE_URL + "?cb=3");
+    assertEquals("User data is hello-oauth", response.getResponseAsString());
+
+    assertEquals(1, serviceProvider.getRequestTokenCount());
+    assertEquals(2, serviceProvider.getAccessTokenCount());
+    assertEquals(3, serviceProvider.getResourceAccessCount());
+    
+    clock.incrementSeconds(FakeOAuthServiceProvider.TOKEN_EXPIRATION_SECONDS + 1);
+    
+    response = client.sendGet(FakeOAuthServiceProvider.RESOURCE_URL + "?cb=4");
+    assertEquals("User data is hello-oauth", response.getResponseAsString());
+    
+    assertEquals(1, serviceProvider.getRequestTokenCount());
+    assertEquals(3, serviceProvider.getAccessTokenCount());
+    assertEquals(4, serviceProvider.getResourceAccessCount());
+  }
+  
+  // Tests the case where the server doesn't tell us when the token will expire.  This requires
+  // an extra round trip to discover that the token has expired.
+  @Test
+  public void testAccessTokenExpires_onClientNoPredictedExpiration() throws Exception {
+    serviceProvider.setSessionExtension(true);
+    serviceProvider.setReportExpirationTimes(false);
+    MakeRequestClient client = makeNonSocialClient("owner", "owner", GADGET_URL);
+    
+    HttpResponse response = client.sendGet(FakeOAuthServiceProvider.RESOURCE_URL);
+    assertEquals("", response.getResponseAsString());
+    client.approveToken("user_data=hello-oauth");
+    
+    response = client.sendGet(FakeOAuthServiceProvider.RESOURCE_URL);
+    assertEquals("User data is hello-oauth", response.getResponseAsString());
+    
+    assertEquals(1, serviceProvider.getRequestTokenCount());
+    assertEquals(1, serviceProvider.getAccessTokenCount());
+    assertEquals(1, serviceProvider.getResourceAccessCount());
+
+    clock.incrementSeconds(FakeOAuthServiceProvider.TOKEN_EXPIRATION_SECONDS + 1);
+    
+    response = client.sendGet(FakeOAuthServiceProvider.RESOURCE_URL + "?cb=1");
+    assertEquals("User data is hello-oauth", response.getResponseAsString());
+    
+    assertEquals(1, serviceProvider.getRequestTokenCount());
+    assertEquals(2, serviceProvider.getAccessTokenCount());
+    assertEquals(3, serviceProvider.getResourceAccessCount());
+    
+    response = client.sendGet(FakeOAuthServiceProvider.RESOURCE_URL + "?cb=3");
+    assertEquals("User data is hello-oauth", response.getResponseAsString());
+
+    assertEquals(1, serviceProvider.getRequestTokenCount());
+    assertEquals(2, serviceProvider.getAccessTokenCount());
+    assertEquals(4, serviceProvider.getResourceAccessCount());
+    
+    clock.incrementSeconds(FakeOAuthServiceProvider.TOKEN_EXPIRATION_SECONDS + 1);
+    
+    response = client.sendGet(FakeOAuthServiceProvider.RESOURCE_URL + "?cb=4");
+    assertEquals("User data is hello-oauth", response.getResponseAsString());
+    
+    assertEquals(1, serviceProvider.getRequestTokenCount());
+    assertEquals(3, serviceProvider.getAccessTokenCount());
+    assertEquals(6, serviceProvider.getResourceAccessCount());
+  }
+  
+  @Test
+  public void testAccessTokenExpires_onServer() throws Exception {
+    serviceProvider.setSessionExtension(true);
+    MakeRequestClient client = makeNonSocialClient("owner", "owner", GADGET_URL);
+    
+    HttpResponse response = client.sendGet(FakeOAuthServiceProvider.RESOURCE_URL);
+    assertEquals("", response.getResponseAsString());
+    client.approveToken("user_data=hello-oauth");
+    
+    response = client.sendGet(FakeOAuthServiceProvider.RESOURCE_URL);
+    assertEquals("User data is hello-oauth", response.getResponseAsString());
+    assertEquals(1, serviceProvider.getRequestTokenCount());
+    assertEquals(1, serviceProvider.getAccessTokenCount());
+    assertEquals(1, serviceProvider.getResourceAccessCount());
+    
+    // clears oauthState
+    client = makeNonSocialClient("owner", "owner", GADGET_URL);
+
+    clock.incrementSeconds(FakeOAuthServiceProvider.TOKEN_EXPIRATION_SECONDS + 1);
+    
+    response = client.sendGet(FakeOAuthServiceProvider.RESOURCE_URL + "?cb=1");
+    assertEquals("User data is hello-oauth", response.getResponseAsString());
+    
+    assertEquals(1, serviceProvider.getRequestTokenCount());
+    assertEquals(2, serviceProvider.getAccessTokenCount());
+    assertEquals(2, serviceProvider.getResourceAccessCount());
+  }
+  
+  @Test
+  public void testAccessTokenExpired_andRevoked() throws Exception {
+    serviceProvider.setSessionExtension(true);
+    MakeRequestClient client = makeNonSocialClient("owner", "owner", GADGET_URL);
+    
+    HttpResponse response = client.sendGet(FakeOAuthServiceProvider.RESOURCE_URL);
+    assertEquals("", response.getResponseAsString());
+    client.approveToken("user_data=hello-oauth");
+    
+    response = client.sendGet(FakeOAuthServiceProvider.RESOURCE_URL);
+    assertEquals("User data is hello-oauth", response.getResponseAsString());
+
+    assertEquals(1, serviceProvider.getRequestTokenCount());
+    assertEquals(1, serviceProvider.getAccessTokenCount());
+    assertEquals(1, serviceProvider.getResourceAccessCount());
+    
+    clock.incrementSeconds(FakeOAuthServiceProvider.TOKEN_EXPIRATION_SECONDS + 1);
+    serviceProvider.revokeAllAccessTokens();
+    
+    response = client.sendGet(FakeOAuthServiceProvider.RESOURCE_URL + "?cb=1");
+    assertEquals("", response.getResponseAsString());
+    assertEquals(2, serviceProvider.getRequestTokenCount());
+    assertEquals(2, serviceProvider.getAccessTokenCount());
+    assertEquals(1, serviceProvider.getResourceAccessCount());
+    
+    client.approveToken("user_data=renewed");
+    
+    response = client.sendGet(FakeOAuthServiceProvider.RESOURCE_URL + "?cb=1");
+    assertEquals(2, serviceProvider.getRequestTokenCount());
+    assertEquals(3, serviceProvider.getAccessTokenCount());
+    assertEquals(2, serviceProvider.getResourceAccessCount());
+    assertEquals("User data is renewed", response.getResponseAsString());
+  }
+  
+  @Test
+  public void testBadSessionHandle() throws Exception {
+    serviceProvider.setSessionExtension(true);
+    MakeRequestClient client = makeNonSocialClient("owner", "owner", GADGET_URL);
+    
+    HttpResponse response = client.sendGet(FakeOAuthServiceProvider.RESOURCE_URL);
+    assertEquals("", response.getResponseAsString());
+    client.approveToken("user_data=hello-oauth");
+
+    response = client.sendGet(FakeOAuthServiceProvider.RESOURCE_URL);
+    assertEquals("User data is hello-oauth", response.getResponseAsString());
+
+    assertEquals(1, serviceProvider.getRequestTokenCount());
+    assertEquals(1, serviceProvider.getAccessTokenCount());
+    assertEquals(1, serviceProvider.getResourceAccessCount());
+    
+    clock.incrementSeconds(FakeOAuthServiceProvider.TOKEN_EXPIRATION_SECONDS + 1);
+    serviceProvider.changeAllSessionHandles();
+
+    response = client.sendGet(FakeOAuthServiceProvider.RESOURCE_URL + "?cb=1");
+    assertEquals("", response.getResponseAsString());
+    assertEquals(2, serviceProvider.getRequestTokenCount());
+    assertEquals(2, serviceProvider.getAccessTokenCount());
+    assertEquals(1, serviceProvider.getResourceAccessCount());
+    
+    client.approveToken("user_data=renewed");
+    
+    response = client.sendGet(FakeOAuthServiceProvider.RESOURCE_URL + "?cb=1");
+    assertEquals(2, serviceProvider.getRequestTokenCount());
+    assertEquals(3, serviceProvider.getAccessTokenCount());
+    assertEquals(2, serviceProvider.getResourceAccessCount());
+    assertEquals("User data is renewed", response.getResponseAsString());
+  }
+  
   // Checks whether the given parameter list contains the specified
   // key/value pair
   private boolean contains(List<Parameter> params, String key, String value) {

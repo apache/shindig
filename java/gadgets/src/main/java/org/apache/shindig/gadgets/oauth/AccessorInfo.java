@@ -38,13 +38,17 @@ public class AccessorInfo {
   private final ConsumerInfo consumer;
   private final HttpMethod httpMethod;
   private final OAuthParamLocation paramLocation;
+  private String sessionHandle;
+  private long tokenExpireMillis;
   
   public AccessorInfo(OAuthAccessor accessor, ConsumerInfo consumer, HttpMethod httpMethod,
-      OAuthParamLocation paramLocation) {
+      OAuthParamLocation paramLocation, String sessionHandle, long tokenExpireMillis) {
     this.accessor = accessor;
     this.consumer = consumer;
     this.httpMethod = httpMethod;
     this.paramLocation = paramLocation;
+    this.sessionHandle = sessionHandle;
+    this.tokenExpireMillis = tokenExpireMillis;
   }
 
   public OAuthParamLocation getParamLocation() {
@@ -61,5 +65,21 @@ public class AccessorInfo {
 
   public HttpMethod getHttpMethod() {
     return httpMethod;
+  }
+
+  public String getSessionHandle() {
+    return sessionHandle;
+  }
+  
+  public void setSessionHandle(String sessionHandle) {
+    this.sessionHandle = sessionHandle;
+  }
+
+  public long getTokenExpireMillis() {
+    return tokenExpireMillis;
+  }
+  
+  public void setTokenExpireMillis(long tokenExpireMillis) {
+    this.tokenExpireMillis = tokenExpireMillis;
   }
 }

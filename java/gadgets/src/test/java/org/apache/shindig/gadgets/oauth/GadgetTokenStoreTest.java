@@ -234,7 +234,7 @@ public class GadgetTokenStoreTest {
     backingStore.setConsumerKeyAndSecret(index, cks);
     
     backingStore.setTokenInfo(privateToken, null, "testservice", "",
-        new TokenInfo("token", "secret"));
+        new TokenInfo("token", "secret", null, 0));
     
     // Owner views their own page
     OAuthArguments arguments = new OAuthArguments();
@@ -339,12 +339,15 @@ public class GadgetTokenStoreTest {
     OAuthArguments arguments = new OAuthArguments();
     arguments.setServiceName("testservice");
     arguments.setUseToken(UseToken.ALWAYS);
-    store.storeTokenKeyAndSecret(privateToken, null, arguments, new TokenInfo("access", "secret"));
+    store.storeTokenKeyAndSecret(privateToken, null, arguments,
+        new TokenInfo("access", "secret", "sessionhandle", 12345L));
     
     AccessorInfo info = store.getOAuthAccessor(privateToken, arguments, clientState);
     assertNull(info.getAccessor().requestToken);
     assertEquals("access", info.getAccessor().accessToken);
     assertEquals("secret", info.getAccessor().tokenSecret);
+    assertEquals("sessionhandle", info.getSessionHandle());
+    assertEquals(12345L, info.getTokenExpireMillis());
   }
   
   @Test
@@ -352,15 +355,20 @@ public class GadgetTokenStoreTest {
     OAuthArguments arguments = new OAuthArguments();
     arguments.setServiceName("testservice");
     arguments.setUseToken(UseToken.ALWAYS);
-    store.storeTokenKeyAndSecret(privateToken, null, arguments, new TokenInfo("access", "secret"));
+    store.storeTokenKeyAndSecret(privateToken, null, arguments,
+        new TokenInfo("access", "secret", null, 0));
     
     clientState.setAccessToken("clienttoken");
     clientState.setAccessTokenSecret("clienttokensecret");
+    clientState.setSessionHandle("clienthandle");
+    clientState.setTokenExpireMillis(56789L);
     
     AccessorInfo info = store.getOAuthAccessor(privateToken, arguments, clientState);
     assertNull(info.getAccessor().requestToken);
     assertEquals("clienttoken", info.getAccessor().accessToken);
     assertEquals("clienttokensecret", info.getAccessor().tokenSecret);
+    assertEquals("clienthandle", info.getSessionHandle());
+    assertEquals(56789L, info.getTokenExpireMillis());
   }
   
   @Test
@@ -368,7 +376,8 @@ public class GadgetTokenStoreTest {
     OAuthArguments arguments = new OAuthArguments();
     arguments.setServiceName("testservice");
     arguments.setUseToken(UseToken.ALWAYS);
-    store.storeTokenKeyAndSecret(privateToken, null, arguments, new TokenInfo("access", "secret"));
+    store.storeTokenKeyAndSecret(privateToken, null, arguments,
+        new TokenInfo("access", "secret", null, 0));
     
     clientState.setRequestToken("request");
     clientState.setRequestTokenSecret("requestsecret");
@@ -386,7 +395,8 @@ public class GadgetTokenStoreTest {
     arguments.setUseToken(UseToken.ALWAYS);
     arguments.setRequestToken("preapproved");
     arguments.setRequestTokenSecret("preapprovedsecret");
-    store.storeTokenKeyAndSecret(privateToken, null, arguments, new TokenInfo("access", "secret"));
+    store.storeTokenKeyAndSecret(privateToken, null, arguments,
+        new TokenInfo("access", "secret", null, 0));
     
     AccessorInfo info = store.getOAuthAccessor(privateToken, arguments, clientState);
     assertNull(info.getAccessor().requestToken);
@@ -413,7 +423,8 @@ public class GadgetTokenStoreTest {
     OAuthArguments arguments = new OAuthArguments();
     arguments.setServiceName("testservice");
     arguments.setUseToken(UseToken.ALWAYS);
-    store.storeTokenKeyAndSecret(privateToken, null, arguments, new TokenInfo("access", "secret"));
+    store.storeTokenKeyAndSecret(privateToken, null, arguments,
+        new TokenInfo("access", "secret", null, 0));
     
     AccessorInfo info = store.getOAuthAccessor(privateToken, arguments, clientState);
     assertNull(info.getAccessor().requestToken);

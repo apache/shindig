@@ -39,6 +39,8 @@ public class OAuthClientState {
   private static final String ACCESS_TOKEN_KEY = "a";
   private static final String ACCESS_TOKEN_SECRET_KEY = "as";
   private static final String OWNER_KEY = "o";
+  private static final String SESSION_HANDLE_KEY = "sh";
+  private static final String ACCESS_TOKEN_EXPIRATION_KEY = "e";
 
   /** Name/value pairs */
   private final Map<String, String> state;
@@ -104,7 +106,7 @@ public class OAuthClientState {
   }
   
   public void setRequestToken(String requestToken) {
-    state.put(REQ_TOKEN_KEY, requestToken);
+    setNullCheck(REQ_TOKEN_KEY, requestToken);
   }
   
   /**
@@ -115,7 +117,7 @@ public class OAuthClientState {
   }
   
   public void setRequestTokenSecret(String requestTokenSecret) {
-    state.put(REQ_TOKEN_SECRET_KEY, requestTokenSecret);
+    setNullCheck(REQ_TOKEN_SECRET_KEY, requestTokenSecret);
   }
 
   /**
@@ -126,7 +128,7 @@ public class OAuthClientState {
   }
   
   public void setAccessToken(String accessToken) {
-    state.put(ACCESS_TOKEN_KEY, accessToken);
+    setNullCheck(ACCESS_TOKEN_KEY, accessToken);
   }
   
   /**
@@ -137,7 +139,34 @@ public class OAuthClientState {
   }
   
   public void setAccessTokenSecret(String accessTokenSecret) {
-    state.put(ACCESS_TOKEN_SECRET_KEY, accessTokenSecret);
+    setNullCheck(ACCESS_TOKEN_SECRET_KEY, accessTokenSecret);
+  }
+  
+  /**
+   * Session handle (http://oauth.googlecode.com/svn/spec/ext/session/1.0/drafts/1/spec.html)
+   */
+  public String getSessionHandle() {
+    return state.get(SESSION_HANDLE_KEY);
+  }
+  
+  public void setSessionHandle(String sessionHandle) {
+    setNullCheck(SESSION_HANDLE_KEY, sessionHandle);
+  }
+  
+  /**
+   * Expiration of access token
+   * (http://oauth.googlecode.com/svn/spec/ext/session/1.0/drafts/1/spec.html)
+   */
+  public long getTokenExpireMillis() {
+    String expiration = state.get(ACCESS_TOKEN_EXPIRATION_KEY);
+    if (expiration == null) {
+      return 0;
+    }
+    return Long.parseLong(expiration);
+  }
+
+  public void setTokenExpireMillis(long expirationMillis) {
+    setNullCheck(ACCESS_TOKEN_EXPIRATION_KEY, Long.toString(expirationMillis));
   }
   
   /**
@@ -148,7 +177,14 @@ public class OAuthClientState {
   }
   
   public void setOwner(String owner) {
-    state.put(OWNER_KEY, owner);
+    setNullCheck(OWNER_KEY, owner);
   }
-  
+
+  private void setNullCheck(String key, String value) {
+    if (value == null) {
+      state.remove(key);
+    } else {
+      state.put(key, value);
+    }
+  }
 }
