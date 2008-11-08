@@ -97,8 +97,9 @@ class DataServiceServlet extends ApiServlet {
 				break;
 		}
 		header("HTTP/1.0 $code", true);
-		if ($unauthorized)
+		if ($unauthorized) {
 			header("WWW-Authenticate: OAuth realm", true);
+		}
 		echo "$code - $errorMessage";
 		die();
 	}
@@ -119,6 +120,11 @@ class DataServiceServlet extends ApiServlet {
 		$requestItem = RestRequestItem::createWithRequest($servletRequest, $token, $inputConverter, $outputConverter);
 		$responseItem = $this->getResponseItem($this->handleRequestItem($requestItem));
 		if ($responseItem->getError() == null) {
+			$response = $responseItem->getResponse();
+			if (!($response instanceof DataCollection) && !($response instanceof RestfulCollection)) {
+				$response = array("entry" => $response);
+				$responseItem->setResponse($response);
+			}
 			$outputConverter->outputResponse($responseItem, $requestItem);
 		} else {
 			$this->sendError($responseItem);
