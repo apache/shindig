@@ -89,10 +89,13 @@ class ProxyHandler {
 							// Try get author
 							if ($feed->author()) {
 								$author = $feed->author();
-							} else 
+							} else {
 								if ($feed->creator()) {
 									$author = $feed->creator();
+								} else {
+									$author = null;
 								}
+							}
 							// Loop over each channel item and store relevant data
 							$counter = 0;
 							$channel['Entry'] = array();
@@ -138,7 +141,9 @@ class ProxyHandler {
 									$channel['Link'] = $feed->link();
 								}
 							}
-							$channel['Author'] = $author;
+							if ($author != null) {
+								$channel['Author'] = $author;
+							}
 						} elseif ($feed instanceof Zend_Feed_Atom) {
 							// Try get author
 							$author = $feed->author() ? $feed->author() : '';
@@ -158,16 +163,18 @@ class ProxyHandler {
 								$date = 0;
 								if ($entry->updated()) {
 									$date = strtotime($entry->updated());
-								} else 
+								} else {
 									if ($entry->published()) {
 										$date = strtotime($entry->published());
 									}
+								}
 								$_entry['Date'] = $date;
-								
 								$channel['Entry'][] = $_entry;
 								// Remember author if first found
 								if (empty($author) && $entry->author()) {
 									$author = $entry->author();
+								} elseif (empty($author)) {
+									$author = null;
 								}
 								$counter ++;
 							}
@@ -175,7 +182,9 @@ class ProxyHandler {
 							$channel['URL'] = $url;
 							$channel['Description'] = $feed->subtitle();
 							$channel['Link'] = $feed->link('alternate');
-							$channel['Author'] = $author;
+							if (!empty($author)) {
+								$channel['Author'] = $author;
+							}
 						} else {
 							throw new Exception('Invalid feed type');
 						}
