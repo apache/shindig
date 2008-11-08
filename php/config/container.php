@@ -56,7 +56,11 @@ $shindigConfig = array(
 	
 	// The X-XRDS-Location value for your implementing container, if any, see http://code.google.com/p/partuza/source/browse/trunk/Library/XRDS.php for an example
 	'xrds_location' => '',
-	
+
+	// Allow anonymous (READ) access to the profile information? (aka REST and JSON-RPC interfaces)
+	// setting this to false means you have to be authenticated through OAuth to read the data
+	'allow_anonymous_token' => true,	
+
 	// The encryption keys for encrypting the security token, and the expiration of it. Make sure these match the keys used in your container/site
 	'token_cipher_key' => 'INSECURE_DEFAULT_KEY',
 	'token_hmac_key' => 'INSECURE_DEFAULT_KEY', 
