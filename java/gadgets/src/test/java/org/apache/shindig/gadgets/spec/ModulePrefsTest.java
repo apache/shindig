@@ -197,6 +197,17 @@ public class ModulePrefsTest {
     assertEquals(preHref, prefs.getPreloads().get(0).getHref().toString());
   }
 
+  @Test
+  public void malformedIntAttributeTreatedAsZero() throws Exception {
+    String xml = "<ModulePrefs title='' height='100px' width='foobar' arbitrary='0xff'/>";
+
+    ModulePrefs prefs = new ModulePrefs(XmlUtil.parse(xml), SPEC_URL);
+
+    assertEquals(0, prefs.getHeight());
+    assertEquals(0, prefs.getWidth());
+    assertEquals(0, prefs.getIntAttribute("arbitrary"));
+  }
+
   @Test(expected = SpecParserException.class)
   public void missingTitleThrows() throws Exception {
     String xml = "<ModulePrefs/>";
