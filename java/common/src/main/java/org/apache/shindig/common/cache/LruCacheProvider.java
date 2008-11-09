@@ -18,25 +18,77 @@
  */
 package org.apache.shindig.common.cache;
 
+import com.google.common.collect.Maps;
 import com.google.inject.Inject;
+import com.google.inject.Injector;
+import com.google.inject.Key;
 import com.google.inject.name.Named;
+import com.google.inject.name.Names;
+
+import java.util.Map;
+import java.util.logging.Logger;
 
 /**
- * A cache provider that always produces LRU caches. Generally only useful for testing, as it always
- * returns an anonymous cache with a fixed capacity.
+ * A cache provider that always produces LRU caches.
  *
- * For a production-worthy cache, use {@code EhCacheCacheProvider}.
+ * LRU cache sizes can be configured by specifying property names in the form
+ *
+ * shindig.cache.lru.<cache name>.capacity=foo
+ *
+ * The default value is expected under shindig.cache.lru.default.capacity
+ *
+ * An in memory LRU cache only scales so far. For a production-worthy cache, use
+ * {@code EhCacheCacheProvider}.
  */
 public class LruCacheProvider implements CacheProvider {
-  private final int capacity;
+  private static final Logger LOG = Logger.getLogger(LruCacheProvider.class.getName());
+  private final int defaultCapacity;
+  private final Injector injector;
+  private final Map<String, Cache<?, ?>> caches = Maps.newConcurrentHashMap();
 
   @Inject
-  public LruCacheProvider(@Named("shindig.cache.capacity") int capacity) {
-    this.capacity = capacity;
+  public LruCacheProvider(Injector injector,
+      @Named("shindig.cache.lru.default.capacity") int defaultCapacity) {
+    this.injector = injector;
+    this.defaultCapacity = defaultCapacity;
+  }
+
+  public LruCacheProvider(int capacity) {
+    this(null, capacity);
+  }
+
+  private int getCapacity(String name) {
+    if (injector != null && name != null) {
+      String key = "shindig.cache.lru." + name + ".capacity";
+      Key<String> guiceKey = Key.get(String.class, Names.named(key));
+      if (injector.getBinding(guiceKey) == null) {
+        LOG.warning("No LRU capacity configured for " + name);
+      } else {
+        String value = injector.getInstance(guiceKey);
+        try {
+          return Integer.parseInt(value);
+        } catch (NumberFormatException e) {
+          LOG.warning("Invalid LRU capacity configured for " + name);
+        }
+      }
+    }
+    return defaultCapacity;
   }
 
   @SuppressWarnings("unchecked")
   public <K, V> Cache<K, V> createCache(String name) {
-    return new LruCache<K, V>(capacity);
+    int capacity = getCapacity(name);
+    if (name == null) {
+      LOG.info("Creating anonymous cache");
+      return new LruCache<K, V>(capacity);
+    } else {
+      Cache<K, V> cache = (Cache<K, V>) caches.get(name);
+      if (cache == null) {
+        LOG.info("Creating cache named " + name);
+        cache = new LruCache<K, V>(capacity);
+        caches.put(name, cache);
+      }
+      return cache;
+    }
   }
 }

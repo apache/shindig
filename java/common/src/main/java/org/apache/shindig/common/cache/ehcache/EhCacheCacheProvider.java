@@ -20,6 +20,7 @@ package org.apache.shindig.common.cache.ehcache;
 
 import org.apache.shindig.common.cache.Cache;
 import org.apache.shindig.common.cache.CacheProvider;
+import org.apache.shindig.common.util.ResourceLoader;
 
 import com.google.common.collect.Maps;
 import com.google.inject.Inject;
@@ -28,8 +29,9 @@ import com.google.inject.name.Named;
 import net.sf.ehcache.CacheManager;
 import net.sf.ehcache.management.ManagementService;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.lang.management.ManagementFactory;
-import java.net.URL;
 import java.util.Map;
 import java.util.logging.Logger;
 
@@ -41,10 +43,11 @@ public class EhCacheCacheProvider implements CacheProvider {
   private final Map<String, Cache<?, ?>> caches = Maps.newConcurrentHashMap();
 
   @Inject
-  public EhCacheCacheProvider(@Named("cache.config") String configPath,
-                              @Named("cache.jmx.stats") boolean withCacheStats) {
-    URL url = getClass().getResource(configPath);
-    cacheManager = new CacheManager(url);
+  public EhCacheCacheProvider(@Named("shindig.cache.ehcache.config") String configPath,
+                              @Named("shindig.cache.ehcache.jmx.stats") boolean withCacheStats)
+      throws IOException {
+    InputStream configStream = ResourceLoader.open(configPath);
+    cacheManager = new CacheManager(configStream);
     create(withCacheStats);
   }
 

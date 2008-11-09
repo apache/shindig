@@ -26,8 +26,8 @@ import org.apache.shindig.common.cache.ehcache.EhCacheCacheProvider;
  */
 public class EhCacheBackedDefaultHttpCacheTest extends DefaultHttpCacheTest {
   @Override
-  protected CacheProvider getCacheProvider() {
+  protected CacheProvider getCacheProvider() throws Exception {
     return new EhCacheCacheProvider(
-        "/org/apache/shindig/common/cache/ehcache/ehcacheConfig.xml", true);
+        "res://org/apache/shindig/common/cache/ehcache/ehcacheConfig.xml", true);
   }
 }

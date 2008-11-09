@@ -50,7 +50,7 @@ public class DefaultHttpCacheTest extends TestCase {
    * gets the cache provider to use for the set of tests
    * @return default cache provider
    */
-  protected CacheProvider getCacheProvider() {
+  protected CacheProvider getCacheProvider() throws Exception {
     return new LruCacheProvider(5);
   }
 
