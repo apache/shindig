@@ -380,15 +380,18 @@ public class ModulePrefs {
 
   /**
    * @return the attribute by name converted to an interger, or 0 if the
-   *     attribute doesn't exist
+   *     attribute doesn't exist or is not a valid number.
    */
   public int getIntAttribute(String name) {
     String value = getAttribute(name);
     if (value == null) {
       return 0;
     } else {
-      // TODO might want to handle parse exception here
-      return Integer.parseInt(value);
+      try {
+        return Integer.parseInt(value);
+      } catch (NumberFormatException e) {
+        return 0;
+      }
     }
   }
 
