@@ -28,6 +28,6 @@ public class EhCacheBackedDefaultHttpCacheTest extends DefaultHttpCacheTest {
   @Override
   protected CacheProvider getCacheProvider() throws Exception {
     return new EhCacheCacheProvider(
-        "res://org/apache/shindig/common/cache/ehcache/ehcacheConfig.xml", true);
+        "res://org/apache/shindig/common/cache/ehcache/ehcacheConfig.xml", true, true);
   }
 }

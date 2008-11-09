@@ -44,14 +44,15 @@ public class EhCacheCacheProvider implements CacheProvider {
 
   @Inject
   public EhCacheCacheProvider(@Named("shindig.cache.ehcache.config") String configPath,
+                              @Named("shindig.cache.ehcache.jmx.enabled") boolean jmxEnabled,
                               @Named("shindig.cache.ehcache.jmx.stats") boolean withCacheStats)
       throws IOException {
     InputStream configStream = ResourceLoader.open(configPath);
     cacheManager = new CacheManager(configStream);
-    create(withCacheStats);
+    create(jmxEnabled, withCacheStats);
   }
 
-  public void create(boolean withCacheStats) {
+  public void create(boolean jmxEnabled, boolean withCacheStats) {
     /*
      * Add in a shutdown hook
      */
@@ -68,8 +69,10 @@ public class EhCacheCacheProvider implements CacheProvider {
     });
 
     // register the cache manager with JMX
-    MBeanServer mBeanServer = ManagementFactory.getPlatformMBeanServer();
-    ManagementService.registerMBeans(cacheManager, mBeanServer, true, true, true, withCacheStats);
+    if (jmxEnabled) {
+      MBeanServer mBeanServer = ManagementFactory.getPlatformMBeanServer();
+      ManagementService.registerMBeans(cacheManager, mBeanServer, true, true, true, withCacheStats);
+    }
   }
 
   /**
