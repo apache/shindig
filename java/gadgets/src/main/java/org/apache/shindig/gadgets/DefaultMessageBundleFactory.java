@@ -43,16 +43,16 @@ public class DefaultMessageBundleFactory extends AbstractMessageBundleFactory {
   static final Logger LOG = Logger.getLogger(DefaultMessageBundleFactory.class.getName());
   private final HttpFetcher fetcher;
   private final SoftExpiringCache<Uri, MessageBundle> cache;
-  private final long expiration;
+  private final long refresh;
 
   @Inject
   public DefaultMessageBundleFactory(HttpFetcher fetcher,
                                      CacheProvider cacheProvider,
-                                     @Named("shindig.cache.expirationMs") long expiration) {
+                                     @Named("shindig.cache.xml.refreshInterval") long refresh) {
     this.fetcher = fetcher;
     Cache<Uri, MessageBundle> baseCache = cacheProvider.createCache(CACHE_NAME);
     this.cache = new SoftExpiringCache<Uri, MessageBundle>(baseCache);
-    this.expiration = expiration;
+    this.refresh = refresh;
   }
 
   @Override
@@ -79,7 +79,7 @@ public class DefaultMessageBundleFactory extends AbstractMessageBundleFactory {
           bundle = MessageBundle.EMPTY;
         }
         LOG.info("MessageBundle fetch failed for " + uri + " - using cached.");
-        cache.addElement(uri, bundle, expiration);
+        cache.addElement(uri, bundle, refresh);
       }
     } else {
       bundle = cached.obj;
@@ -94,7 +94,7 @@ public class DefaultMessageBundleFactory extends AbstractMessageBundleFactory {
     HttpRequest request = new HttpRequest(url).setIgnoreCache(ignoreCache);
     // Since we don't allow any variance in cache time, we should just force the cache time
     // globally. This ensures propagation to shared caches when this is set.
-    request.setCacheTtl((int) (expiration / 1000));
+    request.setCacheTtl((int) (refresh / 1000));
 
     HttpResponse response = fetcher.fetch(request);
     if (response.getHttpStatusCode() != HttpResponse.SC_OK) {
@@ -104,7 +104,7 @@ public class DefaultMessageBundleFactory extends AbstractMessageBundleFactory {
     }
 
     MessageBundle bundle  = new MessageBundle(locale, response.getResponseAsString());
-    cache.addElement(url, bundle, expiration);
+    cache.addElement(url, bundle, refresh);
     return bundle;
   }
 }

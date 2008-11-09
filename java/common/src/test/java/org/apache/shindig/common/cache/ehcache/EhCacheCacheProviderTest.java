@@ -21,9 +21,6 @@ package org.apache.shindig.common.cache.ehcache;
 import org.apache.shindig.common.cache.Cache;
 import org.apache.shindig.common.cache.CacheProvider;
 
-import com.google.inject.Guice;
-import com.google.inject.Injector;
-
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -33,9 +30,9 @@ import org.junit.Test;
 public class EhCacheCacheProviderTest {
 
   @Test
-  public void getAnonCache() {
+  public void getAnonCache() throws Exception {
     CacheProvider defaultProvider = new EhCacheCacheProvider(
-        "/org/apache/shindig/common/cache/ehcache/ehcacheConfig.xml", true);
+        "res://org/apache/shindig/common/cache/ehcache/ehcacheConfig.xml", true);
     Cache<String, String> cache = defaultProvider.createCache(null);
     Assert.assertNotNull(cache);
     Assert.assertNull(cache.getElement("test"));
@@ -47,26 +44,11 @@ public class EhCacheCacheProviderTest {
   }
 
   @Test
-  public void getNamedCache() {
+  public void getNamedCache() throws Exception {
     CacheProvider defaultProvider = new EhCacheCacheProvider(
-        "/org/apache/shindig/common/cache/ehcache/ehcacheConfig.xml", true);
+        "res://org/apache/shindig/common/cache/ehcache/ehcacheConfig.xml", true);
     Cache<String, String> cache = defaultProvider.createCache("testcache");
     Cache<String, String> cache2 = defaultProvider.createCache("testcache");
-    Assert.assertNotNull(cache);
-    Assert.assertEquals(cache, cache2);
-    Assert.assertNull(cache.getElement("test"));
-    cache.addElement("test", "value1");
-    Assert.assertEquals(cache.getElement("test"), "value1");
-    cache.removeElement("test");
-    Assert.assertNull(cache.getElement("test"));
-  }  
-
-  @Test
-  public void testGuiceModule() {
-    Injector i = Guice.createInjector(new EhCacheModule());
-    CacheProvider cacheProvider = i.getInstance(CacheProvider.class);
-    Cache<String, String> cache = cacheProvider.createCache("testcache");
-    Cache<String, String> cache2 = cacheProvider.createCache("testcache");
     Assert.assertNotNull(cache);
     Assert.assertEquals(cache, cache2);
     Assert.assertNull(cache.getElement("test"));

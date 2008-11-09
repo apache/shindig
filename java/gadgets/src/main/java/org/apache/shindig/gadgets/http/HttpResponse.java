@@ -119,10 +119,10 @@ public final class HttpResponse implements Externalizable {
 
   static final String DEFAULT_ENCODING = "UTF-8";
 
-  @Inject @Named("shindig.http.cache.negativeCacheTtl")
+  @Inject @Named("shindig.cache.http.negativeCacheTtl")
   private static long negativeCacheTtl = DEFAULT_NEGATIVE_CACHE_TTL;
 
-  @Inject @Named("shindig.http.cache.defaultTtl")
+  @Inject @Named("shindig.cache.http.defaultTtl")
   private static long defaultTtl = DEFAULT_TTL;
 
   // Holds character sets for fast conversion

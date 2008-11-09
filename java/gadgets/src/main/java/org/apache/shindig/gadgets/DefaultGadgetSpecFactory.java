@@ -49,16 +49,16 @@ public class DefaultGadgetSpecFactory implements GadgetSpecFactory {
 
   private final HttpFetcher fetcher;
   private final SoftExpiringCache<Uri, GadgetSpec> cache;
-  private final long expiration;
+  private final long refresh;
 
   @Inject
   public DefaultGadgetSpecFactory(HttpFetcher fetcher,
                                   CacheProvider cacheProvider,
-                                  @Named("shindig.cache.expirationMs") long expiration) {
+                                  @Named("shindig.cache.xml.refreshInterval") long refresh) {
     this.fetcher = fetcher;
     Cache<Uri, GadgetSpec> baseCache = cacheProvider.createCache(CACHE_NAME);
     this.cache = new SoftExpiringCache<Uri, GadgetSpec>(baseCache);
-    this.expiration = expiration;
+    this.refresh = refresh;
   }
 
   public GadgetSpec getGadgetSpec(GadgetContext context) throws GadgetException {
@@ -98,7 +98,7 @@ public class DefaultGadgetSpecFactory implements GadgetSpecFactory {
           spec.setAttribute(ERROR_KEY, e);
         }
         LOG.info("GadgetSpec fetch failed for " + uri + " - using cached.");
-        cache.addElement(uri, spec, expiration);
+        cache.addElement(uri, spec, refresh);
       }
     } else {
       spec = cached.obj;
@@ -119,7 +119,7 @@ public class DefaultGadgetSpecFactory implements GadgetSpecFactory {
     HttpRequest request = new HttpRequest(url).setIgnoreCache(ignoreCache);
     // Since we don't allow any variance in cache time, we should just force the cache time
     // globally. This ensures propagation to shared caches when this is set.
-    request.setCacheTtl((int) (expiration / 1000));
+    request.setCacheTtl((int) (refresh / 1000));
 
     HttpResponse response = fetcher.fetch(request);
     if (response.getHttpStatusCode() != HttpResponse.SC_OK) {
@@ -129,7 +129,7 @@ public class DefaultGadgetSpecFactory implements GadgetSpecFactory {
     }
 
     GadgetSpec spec = new GadgetSpec(url, response.getResponseAsString());
-    cache.addElement(url, spec, expiration);
+    cache.addElement(url, spec, refresh);
     return spec;
   }
 }
