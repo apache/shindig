@@ -32,7 +32,7 @@ public class EhCacheCacheProviderTest {
   @Test
   public void getAnonCache() throws Exception {
     CacheProvider defaultProvider = new EhCacheCacheProvider(
-        "res://org/apache/shindig/common/cache/ehcache/ehcacheConfig.xml", true);
+        "res://org/apache/shindig/common/cache/ehcache/ehcacheConfig.xml", true, true);
     Cache<String, String> cache = defaultProvider.createCache(null);
     Assert.assertNotNull(cache);
     Assert.assertNull(cache.getElement("test"));
@@ -46,7 +46,7 @@ public class EhCacheCacheProviderTest {
   @Test
   public void getNamedCache() throws Exception {
     CacheProvider defaultProvider = new EhCacheCacheProvider(
-        "res://org/apache/shindig/common/cache/ehcache/ehcacheConfig.xml", true);
+        "res://org/apache/shindig/common/cache/ehcache/ehcacheConfig.xml", true, true);
     Cache<String, String> cache = defaultProvider.createCache("testcache");
     Cache<String, String> cache2 = defaultProvider.createCache("testcache");
     Assert.assertNotNull(cache);
