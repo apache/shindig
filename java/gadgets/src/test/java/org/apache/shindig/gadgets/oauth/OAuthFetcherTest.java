@@ -48,6 +48,7 @@ import net.oauth.OAuth;
 import net.oauth.OAuth.Parameter;
 
 import org.apache.commons.codec.binary.Base64;
+import org.json.JSONObject;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -214,7 +215,19 @@ public class OAuthFetcherTest {
   public void tearDown() throws Exception {
   }
 
+  /** Client that does OAuth and sends opensocial_* params */
   private MakeRequestClient makeNonSocialClient(String owner, String viewer, String gadget)
+      throws Exception {
+    SecurityToken securityToken = getSecurityToken(owner, viewer, gadget);
+    MakeRequestClient client = new MakeRequestClient(securityToken, fetcherConfig, serviceProvider,
+        FakeGadgetSpecFactory.SERVICE_NAME);
+    client.getBaseArgs().setSignOwner(true);
+    client.getBaseArgs().setSignViewer(true);
+    return client;
+  }
+  
+  /** Client that does OAuth and does not send opensocial_* params */
+  private MakeRequestClient makeStrictNonSocialClient(String owner, String viewer, String gadget)
       throws Exception {
     SecurityToken securityToken = getSecurityToken(owner, viewer, gadget);
     return new MakeRequestClient(securityToken, fetcherConfig, serviceProvider,
@@ -1116,6 +1129,86 @@ public class OAuthFetcherTest {
     assertEquals("User data is renewed", response.getResponseAsString());
   }
   
+  @Test
+  public void testExtraParamsRejected() throws Exception {
+    serviceProvider.setRejectExtraParams(true);
+    MakeRequestClient client = makeNonSocialClient("owner", "owner", GADGET_URL);
+    
+    HttpResponse response = client.sendGet(FakeOAuthServiceProvider.RESOURCE_URL);
+    assertEquals("parameter_rejected", response.getMetadata().get("oauthError"));
+  }
+  
+  @Test
+  public void testExtraParamsSuppressed() throws Exception {
+    serviceProvider.setRejectExtraParams(true);
+    MakeRequestClient client = makeStrictNonSocialClient("owner", "owner", GADGET_URL);
+  
+    HttpResponse response = client.sendGet(FakeOAuthServiceProvider.RESOURCE_URL);
+    assertEquals("", response.getResponseAsString());
+    client.approveToken("user_data=hello-oauth");
+
+    response = client.sendGet(FakeOAuthServiceProvider.RESOURCE_URL);
+    assertEquals("User data is hello-oauth", response.getResponseAsString());
+  }
+  
+  @Test
+  public void testCanRetrieveAccessTokenData() throws Exception {
+    serviceProvider.setReturnAccessTokenData(true);
+    
+    MakeRequestClient client = makeNonSocialClient("owner", "owner", GADGET_URL);
+
+    HttpResponse response = client.sendGet(FakeOAuthServiceProvider.ACCESS_TOKEN_URL);
+    assertEquals("", response.getResponseAsString());
+    client.approveToken("user_data=hello-oauth");
+
+    response = client.sendGet(FakeOAuthServiceProvider.ACCESS_TOKEN_URL);
+    assertEquals("application/json; charset=utf-8", response.getHeader("Content-Type"));
+    JSONObject json = new JSONObject(response.getResponseAsString());
+    assertEquals("userid value", json.get("userid"));
+    assertEquals("xoauth_stuff value", json.get("xoauth_stuff"));
+    
+    response = client.sendGet(FakeOAuthServiceProvider.RESOURCE_URL);
+    assertEquals("User data is hello-oauth", response.getResponseAsString());
+  }
+
+  @Test
+  public void testAccessTokenData_noOAuthParams() throws Exception {
+    serviceProvider.setReturnAccessTokenData(true);
+    
+    MakeRequestClient client = makeNonSocialClient("owner", "owner", GADGET_URL);
+
+    HttpResponse response = client.sendGet(FakeOAuthServiceProvider.ACCESS_TOKEN_URL);
+    assertEquals("", response.getResponseAsString());
+    client.approveToken("user_data=hello-oauth");
+
+    response = client.sendGet(FakeOAuthServiceProvider.ACCESS_TOKEN_URL);
+    JSONObject json = new JSONObject(response.getResponseAsString());
+    assertEquals("userid value", json.get("userid"));
+    assertEquals("xoauth_stuff value", json.get("xoauth_stuff"));
+    assertEquals(2, json.length());
+    
+    response = client.sendGet(FakeOAuthServiceProvider.RESOURCE_URL);
+    assertEquals("User data is hello-oauth", response.getResponseAsString());
+  }
+
+  @Test
+  public void testAccessTokenData_noDirectRequest() throws Exception {
+    serviceProvider.setReturnAccessTokenData(true);
+    
+    MakeRequestClient client = makeNonSocialClient("owner", "owner", GADGET_URL);
+
+    HttpResponse response = client.sendGet(FakeOAuthServiceProvider.ACCESS_TOKEN_URL);
+    assertEquals("", response.getResponseAsString());
+    client.approveToken("user_data=hello-oauth");
+    
+    response = client.sendGet(FakeOAuthServiceProvider.RESOURCE_URL);
+    assertEquals("User data is hello-oauth", response.getResponseAsString());
+    
+    response = client.sendGet(FakeOAuthServiceProvider.ACCESS_TOKEN_URL);
+    assertEquals("", response.getResponseAsString());
+    assertTrue(response.getMetadata().containsKey("oauthApprovalUrl"));
+  }
+
   // Checks whether the given parameter list contains the specified
   // key/value pair
   private boolean contains(List<Parameter> params, String key, String value) {
