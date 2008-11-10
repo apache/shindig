@@ -44,7 +44,7 @@ public class PersonOrganizationDb extends OrganizationDb {
   public static final String PERSON_ORG_FINDBY_NAME = "q.personorganizationdb.findbyname";
 
   @Basic
-  @Column(name = "primary_organization", table = "person_organization")
+  @Column(name = "primary_organization")
   private Boolean primary;
 
   @ManyToOne(targetEntity = PersonDb.class)
@@ -52,7 +52,7 @@ public class PersonOrganizationDb extends OrganizationDb {
   protected Person person;
 
   @Basic
-  @Column(name = "type", length = 255, table = "person_organization")
+  @Column(name = "type", length = 255)
   private String type;
 
   public PersonOrganizationDb() {

@@ -24,6 +24,7 @@ import javax.persistence.Column;
 import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
+import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.ManyToOne;
 import static javax.persistence.CascadeType.PERSIST;
@@ -58,7 +59,7 @@ public class OrganizationAddressDb extends AddressDb {
    * This address is associated with a single organization in this form.
    *
    */
-  @ManyToOne(targetEntity = OrganizationDb.class, cascade = { PERSIST, MERGE, REFRESH })
+  @OneToOne(targetEntity = OrganizationDb.class)
   @JoinColumn(name = "organization_id", referencedColumnName = "oid")
   private Organization organization;
 

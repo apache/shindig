@@ -23,10 +23,13 @@ import org.apache.shindig.social.opensocial.jpa.AddressDb;
 import org.apache.shindig.social.opensocial.jpa.BodyTypeDb;
 import org.apache.shindig.social.opensocial.jpa.EmailDb;
 import org.apache.shindig.social.opensocial.jpa.NameDb;
+import org.apache.shindig.social.opensocial.jpa.OrganizationAddressDb;
 import org.apache.shindig.social.opensocial.jpa.OrganizationDb;
+import org.apache.shindig.social.opensocial.jpa.PersonAddressDb;
 import org.apache.shindig.social.opensocial.jpa.PersonDb;
 import org.apache.shindig.social.opensocial.jpa.PersonOrganizationDb;
 import org.apache.shindig.social.opensocial.jpa.PhoneDb;
+import org.apache.shindig.social.opensocial.jpa.PhotoDb;
 import org.apache.shindig.social.opensocial.jpa.UrlDb;
 import org.apache.shindig.social.opensocial.model.Address;
 import org.apache.shindig.social.opensocial.model.BodyType;
@@ -81,8 +84,8 @@ public class PersonPopulate {
     c.add(Calendar.YEAR, -age);
     c.add(Calendar.MONTH, 12 - i % 12);
     List<Address> a = new ArrayList<Address>();
-    a.add(getNewAddress(i));
-    a.add(getNewAddress(i + 2));
+    a.add(getNewPersonAddress(i));
+    a.add(getNewPersonAddress(i + 2));
     person.setAddresses(a);
     person.setAge(random.nextInt(105));
     person.setBodyType(getNewBodyType(i));
@@ -147,7 +150,12 @@ public class PersonPopulate {
     person.setSports(getList("Sports"));
     person.setStatus("Status");
     person.setTags(getList("tags"));
-    person.setThumbnailUrl("Thumbnail URL");
+    
+    List<ListField> photos = new ArrayList<ListField>();
+    photos.add(getNewPhoto(i));
+    photos.add(getNewPhoto(i * 3));
+
+    person.setPhotos(photos);
     person.setUtcOffset(1L);
     person.setTurnOffs(getList("TurnOff"));
     person.setTurnOns(getList("TurnOns"));
@@ -199,6 +207,18 @@ public class PersonPopulate {
     }
     return phone;
   }
+  
+  private PhotoDb getNewPhoto(int i) {
+    String targetPhoto = String.valueOf(i % 33);
+    PhotoDb photo = findOne(PhotoDb.FINDBY_PHOTO,
+        new String[] { PhotoDb.PARAM_PHOTO }, new Object[] { targetPhoto });
+    if (photo == null) {
+      photo = new PhotoDb();
+      photo.setValue(targetPhoto);
+      photo.setType("Mobile");
+    }
+    return photo;
+  }
 
   private Name getNewName(int i) {
     String targetName = String.valueOf("FamilyName" + (i % 25));
@@ -232,7 +252,7 @@ public class PersonPopulate {
 
     if (organization == null) {
       organization = new OrganizationDb();
-      organization.setAddress(getNewAddress(i * 3));
+      organization.setAddress(getNewOrganizationAddress(i * 3));
       organization.setName(targetOrg);
       organization.setSubField("SubField");
       organization.setTitle("Title");
@@ -250,7 +270,7 @@ public class PersonPopulate {
       organization.setDescription("Description");
       organization.setEndDate(new Date(System.currentTimeMillis()
           + (24L * 3600L * 1000L * 365L * 2L)));
-      organization.setAddress(getNewAddress(i * 3));
+      organization.setAddress(getNewOrganizationAddress(i * 3));
       organization.setName(targetOrg);
       organization.setSalary(String.valueOf(i * 1000));
       organization.setStartDate(new Date(System.currentTimeMillis()
@@ -313,6 +333,46 @@ public class PersonPopulate {
         new Object[] { String.valueOf(i % 10) });
     if (address == null) {
       address = new AddressDb();
+      address.setCountry("UK");
+      address.setLatitude(new Float(0.5));
+      address.setLongitude(new Float(0.0));
+      address.setPostalCode(String.valueOf(i % 10));
+      address.setRegion("CAMBS");
+      address.setStreetAddress("High Street");
+      address.setType("sometype:");
+      address.setFormatted("formatted address");
+      address.setLocality("locality");
+      address.setPrimary(false);
+      address.setType("home");
+    }
+    return address;
+  }
+  
+  private Address getNewOrganizationAddress(int i) {
+    Address address = findOne(AddressDb.FINDBY_POSTCODE, new String[] { AddressDb.PARAM_POSTCODE },
+        new Object[] { String.valueOf(i % 10) });
+    if (address == null) {
+      address = new OrganizationAddressDb();
+      address.setCountry("UK");
+      address.setLatitude(new Float(0.5));
+      address.setLongitude(new Float(0.0));
+      address.setPostalCode(String.valueOf(i % 10));
+      address.setRegion("CAMBS");
+      address.setStreetAddress("High Street");
+      address.setType("sometype:");
+      address.setFormatted("formatted address");
+      address.setLocality("locality");
+      address.setPrimary(false);
+      address.setType("home");
+    }
+    return address;
+  }
+  
+  private Address getNewPersonAddress(int i) {
+    Address address = findOne(AddressDb.FINDBY_POSTCODE, new String[] { AddressDb.PARAM_POSTCODE },
+        new Object[] { String.valueOf(i % 10) });
+    if (address == null) {
+      address = new PersonAddressDb();
       address.setCountry("UK");
       address.setLatitude(new Float(0.5));
       address.setLongitude(new Float(0.0));
