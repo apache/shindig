@@ -22,6 +22,7 @@ import org.apache.shindig.social.opensocial.model.Person;
 import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.NamedQuery;
 import javax.persistence.PrimaryKeyJoinColumn;
 import javax.persistence.Table;
 
@@ -32,7 +33,18 @@ import javax.persistence.Table;
 @Entity
 @Table(name="photo")
 @PrimaryKeyJoinColumn(name="oid")
+@NamedQuery(name = PhotoDb.FINDBY_PHOTO, 
+    query = "select p from PhotoDb p where p.value = :photo ")
 public class PhotoDb extends ListFieldDb {
+  
+  /**
+   * The name of the JPA query to find phone numbers by phone number (bit odd)
+   */
+  public static final String FINDBY_PHOTO = "q.pphoto.findbyphoto";
+  /**
+   * The name of the phone number parameter in JPA queries
+   */
+  public static final String PARAM_PHOTO = "photo";
 
   /**
    * The person who is using this photo.

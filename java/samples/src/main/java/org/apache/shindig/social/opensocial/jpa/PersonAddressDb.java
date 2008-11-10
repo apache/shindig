@@ -45,7 +45,7 @@ public class PersonAddressDb extends AddressDb {
   @Column(name="primary_address")
   private Boolean primary;
   
-  @ManyToOne(targetEntity=PersonDb.class, cascade = { PERSIST, MERGE, REFRESH })
+  @ManyToOne(targetEntity=PersonDb.class)
   @JoinColumn(name="person_id", referencedColumnName="oid")
   private Person person;
   
