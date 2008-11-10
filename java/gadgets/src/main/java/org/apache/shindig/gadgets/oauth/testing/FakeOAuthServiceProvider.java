@@ -34,6 +34,7 @@ import org.apache.shindig.gadgets.http.HttpFetcher;
 import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.http.HttpResponse;
 import org.apache.shindig.gadgets.http.HttpResponseBuilder;
+import org.apache.shindig.gadgets.oauth.OAuthUtil;
 import org.apache.shindig.gadgets.oauth.AccessorInfo.OAuthParamLocation;
 
 import java.io.ByteArrayOutputStream;
@@ -44,6 +45,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.Map.Entry;
 
 public class FakeOAuthServiceProvider implements HttpFetcher {
 
@@ -167,6 +169,8 @@ public class FakeOAuthServiceProvider implements HttpFetcher {
   private boolean vagueErrors = false;
   private boolean reportExpirationTimes = true;
   private boolean sessionExtension = false;
+  private boolean rejectExtraParams = false;
+  private boolean returnAccessTokenData = false;
 
   private int requestTokenCount = 0;
 
@@ -204,6 +208,14 @@ public class FakeOAuthServiceProvider implements HttpFetcher {
     this.reportExpirationTimes = reportExpirationTimes;
   }
   
+  public void setRejectExtraParams(boolean rejectExtraParams) {
+    this.rejectExtraParams = rejectExtraParams;
+  }
+  
+  public void setReturnAccessTokenData(boolean returnAccessTokenData) {
+    this.returnAccessTokenData = returnAccessTokenData;
+  }
+  
   public void addParamLocation(OAuthParamLocation paramLocation) {
     validParamLocations.add(paramLocation);
   }
@@ -217,9 +229,7 @@ public class FakeOAuthServiceProvider implements HttpFetcher {
     validParamLocations.add(paramLocation);
   }
 
-  @SuppressWarnings("unused")
-  public HttpResponse fetch(HttpRequest request)
-      throws GadgetException {
+  public HttpResponse fetch(HttpRequest request) throws GadgetException {
     return realFetch(request);
   }
 
@@ -262,6 +272,12 @@ public class FakeOAuthServiceProvider implements HttpFetcher {
       return makeOAuthProblemReport(
           "consumer_key_refused", "exceeded quota exhausted");
     }
+    if (rejectExtraParams) {
+      String extra = hasExtraParams(message);
+      if (extra != null) {
+        return makeOAuthProblemReport("parameter_rejected", extra);
+      }
+    }
     OAuthAccessor accessor = new OAuthAccessor(consumer);
     message.validateMessage(accessor, validator);
     String requestToken = Crypto.getRandomString(16);
@@ -272,6 +288,16 @@ public class FakeOAuthServiceProvider implements HttpFetcher {
         "oauth_token", requestToken,
         "oauth_token_secret", requestTokenSecret));
     return new HttpResponse(resp);
+  }
+
+  private String hasExtraParams(OAuthMessage message) {
+    for (Entry<String, String> param : OAuthUtil.getParameters(message)) {
+      // Our request token URL allows "param" as a query param, and also oauth params of course.
+      if (!param.getKey().startsWith("oauth") && !param.getKey().equals("param")) {
+        return param.getKey();
+      }
+    }
+    return null;
   }
 
   private HttpResponse makeOAuthProblemReport(String code, String text) throws IOException {
@@ -488,6 +514,12 @@ public class FakeOAuthServiceProvider implements HttpFetcher {
           "consumer_key_refused", "exceeded quota");
     } else if (state == null) {
       return makeOAuthProblemReport("token_rejected", "Unknown request token");
+    }   
+    if (rejectExtraParams) {
+      String extra = hasExtraParams(message);
+      if (extra != null) {
+        return makeOAuthProblemReport("parameter_rejected", extra);
+      }
     }
     
     OAuthAccessor accessor = new OAuthAccessor(oauthConsumer);
@@ -501,7 +533,7 @@ public class FakeOAuthServiceProvider implements HttpFetcher {
       // Verify can refresh
       String sentHandle = message.getParameter("oauth_session_handle");
       if (sentHandle == null) {
-        throw new Exception("No oauth_session_handle");
+        return makeOAuthProblemReport("parameter_absent", "no oauth_session_handle");
       }
       if (!sentHandle.equals(state.sessionHandle)) {
         return makeOAuthProblemReport("token_invalid", "token not valid");
@@ -526,6 +558,11 @@ public class FakeOAuthServiceProvider implements HttpFetcher {
       if (reportExpirationTimes) {
         params.add(new OAuth.Parameter("oauth_expires_in", "" + TOKEN_EXPIRATION_SECONDS));
       }
+    }
+    if (returnAccessTokenData) {
+      params.add(new OAuth.Parameter("userid", "userid value"));
+      params.add(new OAuth.Parameter("xoauth_stuff", "xoauth_stuff value"));
+      params.add(new OAuth.Parameter("oauth_stuff", "oauth_stuff value"));
     }
     return new HttpResponse(OAuth.formEncode(params));
   }

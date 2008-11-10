@@ -46,10 +46,13 @@ import net.oauth.OAuthException;
 import net.oauth.OAuthMessage;
 import net.oauth.OAuthProblemException;
 
+import org.json.JSONObject;
+
 import java.io.FileInputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Pattern;
@@ -127,6 +130,11 @@ public class OAuthFetcher extends ChainedContentFetcher {
    * The request the client really wants to make.
    */
   private HttpRequest realRequest;
+  
+  /**
+   * Data returned along with OAuth access token, null if this is not an access token request
+   */
+  private Map<String, String> accessTokenData;
 
   /**
    * @param fetcherConfig configuration options for the fetcher
@@ -354,6 +362,14 @@ public class OAuthFetcher extends ChainedContentFetcher {
    * Add identity information, such as owner/viewer/gadget.
    */
   private void addIdentityParams(List<Parameter> params) {
+    // If no owner or viewer information is required, don't add any identity params.  This lets
+    // us be compatible with strict OAuth service providers that reject extra parameters on
+    // requests.
+    if (!realRequest.getOAuthArguments().getSignOwner() &&
+        !realRequest.getOAuthArguments().getSignViewer()) {
+      return;
+    }
+    
     String owner = realRequest.getSecurityToken().getOwnerId();
     if (owner != null && realRequest.getOAuthArguments().getSignOwner()) {
       params.add(new Parameter(OPENSOCIAL_OWNERID, owner));
@@ -373,17 +389,16 @@ public class OAuthFetcher extends ChainedContentFetcher {
     if (appUrl != null) {
       params.add(new Parameter(OPENSOCIAL_APPURL, appUrl));
     }
-    
-    if (accessorInfo.getConsumer().getConsumer().consumerKey == null) {
-      params.add(
-          new Parameter(OAuth.OAUTH_CONSUMER_KEY, realRequest.getSecurityToken().getDomain()));
-    }
   }
   
   /**
    * Add signature type to the message.
    */
   private void addSignatureParams(List<Parameter> params) {
+    if (accessorInfo.getConsumer().getConsumer().consumerKey == null) {
+      params.add(
+          new Parameter(OAuth.OAUTH_CONSUMER_KEY, realRequest.getSecurityToken().getDomain()));
+    }
     if (accessorInfo.getConsumer().getKeyName() != null) {
       params.add(new Parameter(XOAUTH_PUBLIC_KEY, accessorInfo.getConsumer().getKeyName()));
     }
@@ -615,8 +630,8 @@ public class OAuthFetcher extends ChainedContentFetcher {
         accessorInfo.getAccessor().accessToken = null;
       }
       OAuthAccessor accessor = accessorInfo.getAccessor();
-      HttpRequest request = new HttpRequest(
-          Uri.parse(accessor.consumer.serviceProvider.accessTokenURL));
+      Uri accessTokenUri = Uri.parse(accessor.consumer.serviceProvider.accessTokenURL);
+      HttpRequest request = new HttpRequest(accessTokenUri);
       request.setMethod(accessorInfo.getHttpMethod().toString());
       if (accessorInfo.getHttpMethod() == HttpMethod.POST) {
         request.setHeader("Content-Type", OAuth.FORM_ENCODED);
@@ -645,6 +660,27 @@ public class OAuthFetcher extends ChainedContentFetcher {
           // Hrm.  Bogus server.  We can safely ignore this, we'll just wait for the server to
           // tell us when the access token has expired.
           logger.log(Level.WARNING, "server returned bogus expiration: " + reply);
+        }
+      }
+      
+      // Clients may want to retrieve extra information returned with the access token.  Several
+      // OAuth service providers (e.g. Yahoo, NetFlix) return a user id along with the access
+      // token, and the user id is required to use their APIs.  Clients signal that they need this
+      // extra data by sending a fetch request for the access token URL.
+      //
+      // We don't return oauth* parameters from the response, because we know how to handle those
+      // ourselves and some of them (such as oauth_token_secret) aren't supposed to be sent to the
+      // client.
+      //
+      // Note that this data is not stored server-side.  Clients need to cache these user-ids or
+      // other data themselves, probably in user prefs, if they expect to need the data in the
+      // future.
+      if (accessTokenUri.equals(realRequest.getUri())) {
+        accessTokenData = Maps.newHashMap();
+        for (Entry<String, String> param : OAuthUtil.getParameters(reply)) {
+          if (!param.getKey().startsWith("oauth")) {
+            accessTokenData.put(param.getKey(), param.getValue());
+          } 
         }
       }
     } catch (OAuthException e) {
@@ -684,21 +720,43 @@ public class OAuthFetcher extends ChainedContentFetcher {
    * related error instead of user data.
    */
   private HttpResponse fetchData() throws GadgetException, OAuthProtocolException {
-    HttpRequest signed = sanitizeAndSign(realRequest, null);
+    HttpResponseBuilder builder = null;
+    if (accessTokenData != null) {
+      // This is a request for access token data, return it.
+      builder = formatAccessTokenData();
+    } else {
+      HttpRequest signed = sanitizeAndSign(realRequest, null);
 
-    HttpResponse response = nextFetcher.fetch(signed);
+      HttpResponse response = nextFetcher.fetch(signed);
 
-    try {
-      checkForProtocolProblem(response);
-    } catch (OAuthProtocolException e) {
-      logServiceProviderError(signed, response);
-      throw e;
+      try {
+        checkForProtocolProblem(response);
+      } catch (OAuthProtocolException e) {
+        logServiceProviderError(signed, response);
+        throw e;
+      }
+      builder = new HttpResponseBuilder(response);
     }
-
     // Track metadata on the response
-    HttpResponseBuilder builder = new HttpResponseBuilder(response);
     responseParams.addToResponse(builder);
     return builder.create();
+  }
+  
+  /**
+   * Access token data is returned to the gadget as json key/value pairs:
+   *
+   *    { "user_id": "12345678" }
+   */
+  private HttpResponseBuilder formatAccessTokenData() {
+    HttpResponseBuilder builder = new HttpResponseBuilder();
+    builder.addHeader("Content-Type", "application/json; charset=utf-8");
+    builder.setHttpStatusCode(HttpResponse.SC_OK);
+    // no need to cache this, these requests should be fairly rare, and the results should be
+    // cached in gadget.
+    builder.setStrictNoCache(); 
+    JSONObject json = new JSONObject(accessTokenData);
+    builder.setResponseString(json.toString());
+    return builder;
   }
 
   /**
