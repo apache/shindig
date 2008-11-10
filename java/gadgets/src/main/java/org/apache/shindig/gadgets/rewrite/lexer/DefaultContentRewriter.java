@@ -23,13 +23,7 @@ import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.GadgetSpecFactory;
 import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.http.HttpResponse;
-import org.apache.shindig.gadgets.rewrite.ContentRewriter;
-import org.apache.shindig.gadgets.rewrite.ContentRewriterFeature;
-import org.apache.shindig.gadgets.rewrite.CssRewriter;
-import org.apache.shindig.gadgets.rewrite.LinkRewriter;
-import org.apache.shindig.gadgets.rewrite.MutableContent;
-import org.apache.shindig.gadgets.rewrite.ProxyingLinkRewriter;
-import org.apache.shindig.gadgets.rewrite.RewriterResults;
+import org.apache.shindig.gadgets.rewrite.*;
 import org.apache.shindig.gadgets.spec.GadgetSpec;
 import org.apache.shindig.gadgets.spec.View;
 
@@ -37,13 +31,7 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.inject.name.Named;
 
-import java.io.ByteArrayOutputStream;
-import java.io.OutputStreamWriter;
-import java.io.Reader;
-import java.io.StringReader;
-import java.io.StringWriter;
-import java.io.UnsupportedEncodingException;
-import java.io.Writer;
+import java.io.*;
 import java.net.URI;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -175,7 +163,7 @@ public class DefaultContentRewriter implements ContentRewriter {
       return true;
     } else if (isCSS(mimeType)) {
       if (getProxyUrl() != null) {
-        CssRewriter.rewrite(r, source, createLinkRewriter(spec, rewriterFeature), w);
+        CssRewriter.rewrite(r, source, createLinkRewriter(spec, rewriterFeature), w, false);
         return true;
       } else {
         return false;
@@ -185,17 +173,11 @@ public class DefaultContentRewriter implements ContentRewriter {
   }
 
   private boolean isHTML(String mime) {
-    if (mime == null) {
-      return false;
-    }
-    return (mime.toLowerCase().contains("html"));
+    return mime != null && (mime.toLowerCase().contains("html"));
   }
 
   private boolean isCSS(String mime) {
-    if (mime == null) {
-      return false;
-    }
-    return (mime.toLowerCase().contains("css"));
+    return mime != null && (mime.toLowerCase().contains("css"));
   }
 
   // TODO: This needs to be per-container

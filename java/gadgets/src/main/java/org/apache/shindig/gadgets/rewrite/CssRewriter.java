@@ -17,19 +17,12 @@
  */
 package org.apache.shindig.gadgets.rewrite;
 
-import com.google.caja.lexer.CharProducer;
-import com.google.caja.lexer.CssLexer;
-import com.google.caja.lexer.CssTokenType;
-import com.google.caja.lexer.InputSource;
-import com.google.caja.lexer.ParseException;
-import com.google.caja.lexer.Token;
+import com.google.caja.lexer.*;
+import com.google.common.collect.Lists;
 
-import java.io.IOException;
-import java.io.Reader;
-import java.io.StringReader;
-import java.io.StringWriter;
-import java.io.Writer;
+import java.io.*;
 import java.net.URI;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -45,24 +38,47 @@ public class CssRewriter {
   public static String rewrite(String content, URI source,
       LinkRewriter linkRewriter) {
     StringWriter sw = new StringWriter((content.length() * 110) / 100);
-    rewrite(new StringReader(content), source, linkRewriter, sw);
+    rewrite(new StringReader(content), source, linkRewriter, sw, false);
     return sw.toString();
   }
 
-  public static void rewrite(Reader content, URI source,
+  public static List<String> rewrite(Reader content, URI source,
       LinkRewriter rewriter,
-      Writer writer) {
+      Writer writer,
+      boolean extractImports) {
+    List<String> imports = Lists.newArrayList();
     CharProducer producer = CharProducer.Factory.create(content,
         new InputSource(source));
     CssLexer lexer = new CssLexer(producer);
     try {
+      boolean inImport = false;
       while (lexer.hasNext()) {
         Token<CssTokenType> token = lexer.next();
-        if (token.type == CssTokenType.URI) {
-          writer.write(rewriteLink(token, source, rewriter));
-          continue;
+        if (extractImports) {
+          if (token.type == CssTokenType.SYMBOL && token.text.equalsIgnoreCase("@import")) {
+            inImport = true;
+            continue;
+          }
+          if (inImport) {
+            if (token.type == CssTokenType.URI) {
+              Matcher matcher = urlMatcher.matcher(token.text);
+              if (matcher.find()) {
+                imports.add(matcher.group(2).trim());
+              }
+            } else if (token.type != CssTokenType.SPACE && token.type != CssTokenType.PUNCTUATION) {
+              inImport = false;
+            }
+          }
+          if (!inImport) {
+            writer.write(token.text);
+          }
+        } else {
+          if (token.type == CssTokenType.URI) {
+            writer.write(rewriteLink(token, source, rewriter));
+            continue;
+          }
+          writer.write(token.text);
         }
-        writer.write(token.text);
       }
       writer.flush();
     } catch (ParseException pe) {
@@ -70,6 +86,7 @@ public class CssRewriter {
     } catch (IOException ioe) {
       ioe.printStackTrace();
     }
+    return imports;
   }
 
   private static String rewriteLink(Token<CssTokenType> token, URI base, LinkRewriter rewriter) {

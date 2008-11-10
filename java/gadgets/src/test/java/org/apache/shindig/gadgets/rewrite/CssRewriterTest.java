@@ -17,7 +17,12 @@
  */
 package org.apache.shindig.gadgets.rewrite;
 
+import com.google.common.collect.Lists;
+
+import java.io.StringReader;
+import java.io.StringWriter;
 import java.net.URI;
+import java.util.List;
 
 /**
  * test CSS link rewriting
@@ -46,9 +51,26 @@ public class CssRewriterTest extends BaseRewriterTestCase {
         "div {list-style-image:url('http://a.b.com/bullet.gif');list-style-position:outside;margin:5px;padding:0}\n" +
          ".someid {background-image:url(http://a.b.com/bigimg.png);float:right;width:165px;height:23px;margin-top:4px;margin-left:5px}";
     String rewritten =
-        "div {list-style-image:url(\"http://www.test.com/dir/proxy?url=http%3A%2F%2Fa.b.com%2Fbullet.gif&gadget=http%3A%2F%2Fexample.org%2Fdir%2Fg.xml&fp=-182800334\");list-style-position:outside;margin:5px;padding:0}\n" +
-         ".someid {background-image:url(\"http://www.test.com/dir/proxy?url=http%3A%2F%2Fa.b.com%2Fbigimg.png&gadget=http%3A%2F%2Fexample.org%2Fdir%2Fg.xml&fp=-182800334\");float:right;width:165px;height:23px;margin-top:4px;margin-left:5px}";
+        "div {list-style-image:url(\"http://www.test.com/dir/proxy?url=http%3A%2F%2Fa.b.com%2Fbullet.gif&gadget=http%3A%2F%2Fwww.example.org%2Fdir%2Fg.xml&fp=-182800334\");list-style-position:outside;margin:5px;padding:0}\n" +
+         ".someid {background-image:url(\"http://www.test.com/dir/proxy?url=http%3A%2F%2Fa.b.com%2Fbigimg.png&gadget=http%3A%2F%2Fwww.example.org%2Fdir%2Fg.xml&fp=-182800334\");float:right;width:165px;height:23px;margin-top:4px;margin-left:5px}";
     validateRewritten(original, rewritten);
   }
 
+  public void testExtractImports() {
+    String original = " @import url(www.example.org/some.css);\n" +
+        " div { color: blue; }\n" +
+        "@import url('www.example.org/someother.css')\n" +
+        " p { color: black; }\n" +
+        "@import url(\"www.example.org/another.css\")\n" +
+        " span { color: red; }";
+    String expected = " div { color: blue; }\n"
+        + "p { color: black; }\n"
+        + "span { color: red; }";
+    StringWriter sw = new StringWriter();
+    List<String> stringList = CssRewriter
+        .rewrite(new StringReader(original), dummyUri, defaultLinkRewriter, sw, true);
+    assertEquals(expected, sw.toString());
+    assertEquals(stringList, Lists.newArrayList("www.example.org/some.css",
+        "www.example.org/someother.css", "www.example.org/another.css"));
+  }
 }

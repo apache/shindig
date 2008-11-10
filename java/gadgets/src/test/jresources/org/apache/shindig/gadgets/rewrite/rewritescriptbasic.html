@@ -1,0 +1,19 @@
+<html>
+  <head>
+    <script type="text/javascript">headScript1</script>
+  </head>
+  <body>
+    <!-- Test to make sure script tags arent merged across intervening content and
+    contiguous script src=xxx are concatenated. 
+    -->
+    <script type="text/javascript">bodyScript1</script>
+    <script type="text/javascript" src="http://www.example.org/1.js"></script>
+
+
+    <script type="text/javascript" src="http://www.example.org/2.js"></script>
+    <script type="text/javascript">bodyScript2</script>
+    <script type="text/javascript" src="http://www.example.org/3.js"></script>
+    <div>untouched</div>
+    <script type="text/javascript"><!-- retain-comment --></script>
+  </body>
+</html>

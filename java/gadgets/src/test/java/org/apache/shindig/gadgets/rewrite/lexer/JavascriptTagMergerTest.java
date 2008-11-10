@@ -77,7 +77,7 @@ public class JavascriptTagMergerTest extends BaseRewriterTestCase {
   public void testSingleScriptReWrite() {
     String original = "<script src=\"http://a.b.com/1.js\"></script>";
     String rewritten
-        = "<script src=\"http://www.test.com/concat?rewriteMime=text/javascript&gadget=http%3A%2F%2Fexample.org%2Fdir%2Fg.xml&fp=-182800334&1=http%3A%2F%2Fa.b.com%2F1.js\" type=\"text/javascript\"></script>";
+        = "<script src=\"http://www.test.com/concat?rewriteMime=text/javascript&gadget=http%3A%2F%2Fwww.example.org%2Fdir%2Fg.xml&fp=-182800334&1=http%3A%2F%2Fa.b.com%2F1.js\" type=\"text/javascript\"></script>";
     validateRewritten(original, rewritten);
   }
 
@@ -85,7 +85,7 @@ public class JavascriptTagMergerTest extends BaseRewriterTestCase {
     String original = "<script src=\"http://a.b.com/1.js\"></script>\n"
         + "<script src=\"http://a.b.com/2.js\"></script>";
     String rewritten
-        = "<script src=\"http://www.test.com/concat?rewriteMime=text/javascript&gadget=http%3A%2F%2Fexample.org%2Fdir%2Fg.xml&fp=-182800334&1=http%3A%2F%2Fa.b.com%2F1.js&2=http%3A%2F%2Fa.b.com%2F2.js\" type=\"text/javascript\"></script>";
+        = "<script src=\"http://www.test.com/concat?rewriteMime=text/javascript&gadget=http%3A%2F%2Fwww.example.org%2Fdir%2Fg.xml&fp=-182800334&1=http%3A%2F%2Fa.b.com%2F1.js&2=http%3A%2F%2Fa.b.com%2F2.js\" type=\"text/javascript\"></script>";
     validateRewritten(original, rewritten);
   }
 
@@ -101,7 +101,7 @@ public class JavascriptTagMergerTest extends BaseRewriterTestCase {
     String rewritten = "<script type=\"text/javascript\">\n"
         + "doSomething\n"
         + "</script>"
-        + "<script src=\"http://www.test.com/concat?rewriteMime=text/javascript&gadget=http%3A%2F%2Fexample.org%2Fdir%2Fg.xml&fp=-182800334&1=http%3A%2F%2Fa.b.com%2F1.js&2=http%3A%2F%2Fa.b.com%2F2.js\" type=\"text/javascript\"></script>"
+        + "<script src=\"http://www.test.com/concat?rewriteMime=text/javascript&gadget=http%3A%2F%2Fwww.example.org%2Fdir%2Fg.xml&fp=-182800334&1=http%3A%2F%2Fa.b.com%2F1.js&2=http%3A%2F%2Fa.b.com%2F2.js\" type=\"text/javascript\"></script>"
         + "<script type=\"text/javascript\">\n"
         + "doSomething\n"
         + "</script>";
@@ -115,23 +115,23 @@ public class JavascriptTagMergerTest extends BaseRewriterTestCase {
         + "<script src=\"http://a.b.com/3.js\"></script>\n"
         + "<script src=\"http://a.b.com/4.js\"></script>";
     String rewritten =
-        "<script src=\"http://www.test.com/concat?rewriteMime=text/javascript&gadget=http%3A%2F%2Fexample.org%2Fdir%2Fg.xml&fp=-182800334&1=http%3A%2F%2Fa.b.com%2F1.js&2=http%3A%2F%2Fa.b.com%2F2.js\" type=\"text/javascript\"></script>"
+        "<script src=\"http://www.test.com/concat?rewriteMime=text/javascript&gadget=http%3A%2F%2Fwww.example.org%2Fdir%2Fg.xml&fp=-182800334&1=http%3A%2F%2Fa.b.com%2F1.js&2=http%3A%2F%2Fa.b.com%2F2.js\" type=\"text/javascript\"></script>"
             + "<script type=\"text/javascript\"><!-- doSomething --></script>"
-            + "<script src=\"http://www.test.com/concat?rewriteMime=text/javascript&gadget=http%3A%2F%2Fexample.org%2Fdir%2Fg.xml&fp=-182800334&1=http%3A%2F%2Fa.b.com%2F3.js&2=http%3A%2F%2Fa.b.com%2F4.js\" type=\"text/javascript\"></script>";
+            + "<script src=\"http://www.test.com/concat?rewriteMime=text/javascript&gadget=http%3A%2F%2Fwww.example.org%2Fdir%2Fg.xml&fp=-182800334&1=http%3A%2F%2Fa.b.com%2F3.js&2=http%3A%2F%2Fa.b.com%2F4.js\" type=\"text/javascript\"></script>";
     validateRewritten(original, rewritten);
   }
 
   public void testDerelativizeHostRelative() {
     String original = "<script src=\"/1.js\"></script>";
     String rewritten
-        = "<script src=\"http://www.test.com/concat?rewriteMime=text/javascript&gadget=http%3A%2F%2Fexample.org%2Fdir%2Fg.xml&fp=-182800334&1=http%3A%2F%2Fa.b.com%2F1.js\" type=\"text/javascript\"></script>";
+        = "<script src=\"http://www.test.com/concat?rewriteMime=text/javascript&gadget=http%3A%2F%2Fwww.example.org%2Fdir%2Fg.xml&fp=-182800334&1=http%3A%2F%2Fa.b.com%2F1.js\" type=\"text/javascript\"></script>";
     validateRewritten(original, rewritten);
   }
 
   public void testDerelativizePathRelative() {
     String original = "<script src=\"1.js\"></script>";
     String rewritten
-        = "<script src=\"http://www.test.com/concat?rewriteMime=text/javascript&gadget=http%3A%2F%2Fexample.org%2Fdir%2Fg.xml&fp=-182800334&1=http%3A%2F%2Fa.b.com%2F1.js\" type=\"text/javascript\"></script>";
+        = "<script src=\"http://www.test.com/concat?rewriteMime=text/javascript&gadget=http%3A%2F%2Fwww.example.org%2Fdir%2Fg.xml&fp=-182800334&1=http%3A%2F%2Fa.b.com%2F1.js\" type=\"text/javascript\"></script>";
     validateRewritten(original, rewritten);
   }
 

@@ -20,49 +20,32 @@ package org.apache.shindig.gadgets.parse.nekohtml;
 import org.apache.shindig.gadgets.parse.DomUtil;
 import org.apache.shindig.gadgets.parse.GadgetHtmlParser;
 import org.apache.shindig.gadgets.parse.HtmlSerializer;
-
-import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Lists;
-import com.google.inject.Inject;
-
-import org.apache.xerces.xni.Augmentations;
-import org.apache.xerces.xni.NamespaceContext;
-import org.apache.xerces.xni.QName;
-import org.apache.xerces.xni.XMLAttributes;
-import org.apache.xerces.xni.XMLDocumentHandler;
-import org.apache.xerces.xni.XMLLocator;
-import org.apache.xerces.xni.XMLResourceIdentifier;
-import org.apache.xerces.xni.XMLString;
-import org.apache.xerces.xni.XNIException;
+import org.apache.xerces.xni.*;
 import org.apache.xerces.xni.parser.XMLDocumentSource;
 import org.apache.xerces.xni.parser.XMLInputSource;
 import org.apache.xml.serialize.HTMLSerializer;
 import org.apache.xml.serialize.OutputFormat;
-import org.cyberneko.html.HTMLEventInfo;
+
+import com.google.common.collect.ImmutableSet;
+import com.google.inject.Inject;
+import org.cyberneko.html.HTMLElements;
+import org.cyberneko.html.HTMLEntities;
 import org.cyberneko.html.HTMLScanner;
 import org.cyberneko.html.HTMLTagBalancer;
-import org.w3c.dom.DOMImplementation;
-import org.w3c.dom.Document;
-import org.w3c.dom.DocumentFragment;
-import org.w3c.dom.Element;
-import org.w3c.dom.Node;
-import org.w3c.dom.Text;
+import org.w3c.dom.*;
 
 import java.io.IOException;
 import java.io.StringReader;
 import java.io.StringWriter;
-import java.util.List;
 import java.util.Set;
 import java.util.Stack;
 
 /**
- * Creates a greatly simplified DOM model that contains elements for only the specified
- * element set and creates unescaped text nodes for all other content.
- * It requires special serialization to prevent escaping of text nodes but behaves like a
- * regular DOM in all other respects. Only element types which are produced are balanced.
+ * Neko based DOM parser that concatentates elements which we dont care about into
+ * text nodes to keep DOM model simplified. Much of this code is based on
+ * org.cyberneko.html.filters.Writer
  */
 public class NekoSimplifiedHtmlParser extends GadgetHtmlParser {
-
   private static final Set<String> elements =
       ImmutableSet.of("html", "body", "head", "link", "img", "style", "script", "embed");
 
@@ -75,14 +58,11 @@ public class NekoSimplifiedHtmlParser extends GadgetHtmlParser {
 
   @Override
   protected Document parseDomImpl(String source) {
-
     HTMLScanner htmlScanner = new HTMLScanner();
     HTMLTagBalancer tagBalancer = new HTMLTagBalancer();
     DocumentHandler handler = new DocumentHandler(source);
     tagBalancer.setDocumentHandler(handler);
     htmlScanner.setDocumentHandler(tagBalancer);
-    tagBalancer.setFeature("http://cyberneko.org/html/features/augmentations", true);
-    htmlScanner.setFeature("http://cyberneko.org/html/features/augmentations", true);
 
     XMLInputSource inputSource = new XMLInputSource(null, null, null);
     inputSource.setEncoding("UTF-8");
@@ -111,32 +91,15 @@ public class NekoSimplifiedHtmlParser extends GadgetHtmlParser {
    * Handler for XNI events from Neko
    */
   private class DocumentHandler implements XMLDocumentHandler {
-    private final List<Integer> lines;
     private final Stack<Node> elementStack = new Stack<Node>();
-    private final int[] startCharOffsets;
-    private final int[] lastCharOffsets;
+    private final StringBuilder builder;
+
+
     private DocumentFragment documentFragment;
     private Document document;
-    private final String content;
 
     public DocumentHandler(String content) {
-      this.content = content;
-      // Populate lines
-      lines = Lists.newArrayListWithExpectedSize(content.length() / 30);
-      lines.add(0);
-      for (int i = 0; i < content.length(); i++) {
-        char c = content.charAt(i);
-        if (c == '\n' || c == '\r') {
-          if (i + 1 < content.length() && (c == '\r' && content.charAt(i+1) == '\n')) {
-            i++;
-            lines.add(i);
-          } else {
-            lines.add(i);
-          }
-        }
-      }
-      startCharOffsets = new int[]{-1,-1};
-      lastCharOffsets = new int[]{-1,-1};
+      builder = new StringBuilder(content.length() / 10);
     }
 
     public DocumentFragment getFragment() {
@@ -147,91 +110,6 @@ public class NekoSimplifiedHtmlParser extends GadgetHtmlParser {
       return document;
     }
 
-    private HTMLEventInfo getEventInfo(Augmentations augmentations) {
-      HTMLEventInfo htmlEventInfo =
-          (HTMLEventInfo) augmentations.getItem("http://cyberneko.org/html/features/augmentations");
-      return htmlEventInfo;
-    }
-
-    private String getUnstructuredString(int[] start, int[] end) {
-      if (start[0] == -1) return "";
-
-      int charStart = start[0];
-      int charEnd;
-      if (end[0] == -1) {
-        charEnd = start[1];
-      } else {
-        charEnd = end[1];
-      }
-      String s = content.substring(charStart, charEnd);
-      return s;
-    }
-
-    private void recordStartEnd(HTMLEventInfo info, int[] offsets) {
-      offsets[0] = lines.get(info.getBeginLineNumber() - 1) + info.getBeginColumnNumber() - 1;
-      offsets[1] = lines.get(info.getEndLineNumber() - 1) + info.getEndColumnNumber() - 1;
-    }
-
-    public void handleEvent(boolean shouldClose, Object content, Augmentations augs) {
-      HTMLEventInfo info = getEventInfo(augs);
-      if (info.isSynthesized()) {
-        // NOTE! Remove this to balance synthesized close tags
-        if (!shouldClose) return;
-        // Must close with existing content
-        String unstructured = getUnstructuredString(startCharOffsets, lastCharOffsets);
-        if (content != null) {
-          unstructured += content.toString();
-        }
-        if (unstructured.length() > 0) {
-          elementStack.peek().appendChild(document.createTextNode(unstructured));
-        }
-        startCharOffsets[0] = -1;
-        lastCharOffsets[0] = -1;
-      } else {
-        if (shouldClose) {
-          String unstructured = getUnstructuredString(startCharOffsets, lastCharOffsets);
-          if (unstructured.length() > 0) {
-            elementStack.peek().appendChild(document.createTextNode(unstructured));
-          }
-          startCharOffsets[0] = -1;
-          lastCharOffsets[0] = -1;
-        } else if (startCharOffsets[0] == -1) {
-          recordStartEnd(info, startCharOffsets);
-          // HACK - Neko seems to be incorrectly reporting the start offset for certain content
-          // See https://sourceforge.net/tracker2/?func=detail&aid=2236681&group_id=195122&atid=952178
-          if (content != null) {
-            String contentString = content.toString();
-            if (startCharOffsets[1] - startCharOffsets[0] != contentString.length()) {
-              Node lastChild = elementStack.peek().getLastChild();
-              if (lastChild instanceof Text) {
-                ((Text)lastChild).appendData(contentString);
-              } else {
-                elementStack.peek().appendChild(document.createTextNode(contentString));
-              }
-              startCharOffsets[0] = -1;
-              lastCharOffsets[0] = -1;
-            }
-          }
-          lastCharOffsets[0] = -1;
-        } else {
-          recordStartEnd(info, lastCharOffsets);
-        }
-      }
-    }
-
-    private void trace(String prefix, Augmentations augmentations) {
-      HTMLEventInfo info = getEventInfo(augmentations);
-      String text = "";
-      if (!info.isSynthesized()) {
-        int[] startEnd = new int[2];
-        recordStartEnd(info, startEnd);
-        text = content.substring(startEnd[0], startEnd[1]);
-        text = text.replaceAll("\n", "\\n");
-        text = text.replaceAll("\r", "\\r");
-      }
-      System.out.println("Event " + prefix + info.toString() + " -> " + text);
-    }
-
     public void startDocument(XMLLocator xmlLocator, String encoding,
                               NamespaceContext namespaceContext, Augmentations augs)
         throws XNIException {
@@ -239,13 +117,22 @@ public class NekoSimplifiedHtmlParser extends GadgetHtmlParser {
       elementStack.clear();
       documentFragment = document.createDocumentFragment();
       elementStack.push(documentFragment);
-      //trace("StartDoc", augs);
     }
 
     public void xmlDecl(String version, String encoding, String standalone, Augmentations augs)
         throws XNIException {
-      //trace("xmlDecl", augs);
-      handleEvent(false, null, augs);
+      // Dont really do anything with this
+      builder.append("<?xml");
+      if (version != null) {
+        builder.append(" version=\"").append(version).append("\"");
+      }
+      if (encoding != null) {
+        builder.append(" encoding=\"").append(encoding).append("\"");
+      }
+      if (standalone != null) {
+        builder.append(" standalone=\"").append(standalone).append("\"");
+      }
+      builder.append(">");
     }
 
     public void doctypeDecl(String rootElement, String publicId, String systemId,
@@ -256,27 +143,24 @@ public class NekoSimplifiedHtmlParser extends GadgetHtmlParser {
       elementStack.clear();
       documentFragment = document.createDocumentFragment();
       elementStack.push(documentFragment);
-      //trace("docTypeDecl", augs);
-      handleEvent(false, null, augs);
     }
 
-    public void comment(XMLString xmlString, Augmentations augs) throws XNIException {
-      //trace("comment", augs);
-      handleEvent(false, xmlString, augs);
-      //trackInfo(augs);
+    public void comment(XMLString text, Augmentations augs) throws XNIException {
+      builder.append("<!--").append(text.ch, text.offset, text.length).append("-->");
     }
 
     public void processingInstruction(String s, XMLString xmlString, Augmentations augs)
         throws XNIException {
-      //trace("PI", augs);
-      handleEvent(false, xmlString, augs);
+      // No-op
     }
 
     public void startElement(QName qName, XMLAttributes xmlAttributes, Augmentations augs)
         throws XNIException {
-      //trace("StartElem(" + qName.rawname + ")", augs);
       if (elements.contains(qName.rawname.toLowerCase())) {
-        handleEvent(true, null, augs);
+        if (builder.length() > 0) {
+          elementStack.peek().appendChild(document.createTextNode(builder.toString()));
+          builder.setLength(0);
+        }
         Element element = document.createElement(qName.rawname);
         for (int i = 0; i < xmlAttributes.getLength(); i++) {
           element.setAttribute(xmlAttributes.getLocalName(i) , xmlAttributes.getValue(i));
@@ -284,76 +168,134 @@ public class NekoSimplifiedHtmlParser extends GadgetHtmlParser {
         elementStack.peek().appendChild(element);
         elementStack.push(element);
       } else {
-        handleEvent(false, null, augs);
+        builder.append("<").append(qName.rawname);
+        for (int i = 0; i < xmlAttributes.getLength(); i++) {
+          builder.append(" ").append(xmlAttributes.getLocalName(i)).append("=\"");
+          appendAttributeValue(xmlAttributes.getValue(i));
+          builder.append("\"");
+        }
+        builder.append(">");
       }
     }
 
     public void emptyElement(QName qName, XMLAttributes xmlAttributes, Augmentations augs)
         throws XNIException {
-      //trace("EmptyElemm(" + qName.rawname + ")", augs);
       if (elements.contains(qName.rawname.toLowerCase())) {
-        handleEvent(true, null, augs);
+        if (builder.length() > 0) {
+          elementStack.peek().appendChild(document.createTextNode(builder.toString()));
+          builder.setLength(0);
+        }
         Element element = document.createElement(qName.rawname);
         for (int i = 0; i < xmlAttributes.getLength(); i++) {
           element.setAttribute(xmlAttributes.getLocalName(i) , xmlAttributes.getValue(i));
         }
         elementStack.peek().appendChild(element);
       } else {
-        handleEvent(false, null, augs);
+        builder.append("<").append(qName.rawname);
+        for (int i = 0; i < xmlAttributes.getLength(); i++) {
+          builder.append(" ").append(xmlAttributes.getLocalName(i)).append("=\"");
+          appendAttributeValue(xmlAttributes.getValue(i));
+          builder.append("\"");
+        }
+        builder.append(">");
       }
-
     }
 
-    public void startGeneralEntity(String s, XMLResourceIdentifier xmlResourceIdentifier, String s1,
+    private void appendAttributeValue(String text) {
+      for (int i = 0; i < text.length(); i++) {
+        char c = text.charAt(i);
+        if (c == '"') {
+          builder.append("&quot;");
+        } else {
+          builder.append(c);
+        }
+      }
+    }
+
+    public void startGeneralEntity(String name, XMLResourceIdentifier id, String encoding,
         Augmentations augs) throws XNIException {
-      //trace("StartEntity(" + s + ")", augs);
-      handleEvent(false, null, augs);
+      if (name.startsWith("#")) {
+        try {
+          boolean hex = name.startsWith("#x");
+          int offset = hex ? 2 : 1;
+          int base = hex ? 16 : 10;
+          int value = Integer.parseInt(name.substring(offset), base);
+          String entity = HTMLEntities.get(value);
+          if (entity != null) {
+            name = entity;
+          }
+        }
+        catch (NumberFormatException e) {
+          // ignore
+        }
+      }
+      printEntity(name);
+    }
+
+    private void printEntity(String name) {
+      builder.append('&');
+      builder.append(name);
+      builder.append(';');
     }
 
     public void textDecl(String s, String s1, Augmentations augs) throws XNIException {
-      //trace("Textdecl(" + s + ")", augs);
-      handleEvent(false, null, augs);
+      builder.append(s);
     }
 
     public void endGeneralEntity(String s, Augmentations augs) throws XNIException {
-      //trace("EndEntity(" + s + ")", augs);
-      handleEvent(false, null, augs);
+      // No-op
     }
 
-    public void characters(XMLString xmlString, Augmentations augs) throws XNIException {
-      handleEvent(false, xmlString, augs);
+    public void characters(XMLString text, Augmentations augs) throws XNIException {
+      if (HTMLElements.getElement(elementStack.peek().getNodeName()).isSpecial()) {
+        builder.append(text.ch, text.offset, text.length);
+      } else {
+        for (int i = 0; i < text.length; i++) {
+          char c = text.ch[text.offset + i];
+          if (c != '\n') {
+            String entity = HTMLEntities.get(c);
+            if (entity != null) {
+              printEntity(entity);
+            } else {
+              builder.append(c);
+            }
+          } else {
+            builder.append("\n");
+          }
+        }
+      }
     }
 
-    public void ignorableWhitespace(XMLString xmlString, Augmentations augs) throws XNIException {
-      //trace("Whitespace", augs);
-      handleEvent(false, xmlString, augs);
-      //trackInfo(augs);
+    public void ignorableWhitespace(XMLString text, Augmentations augs) throws XNIException {
+      builder.append(text.ch, text.offset, text.length);
     }
 
     public void endElement(QName qName, Augmentations augs) throws XNIException {
-      //trace("EndElem(" + qName.rawname + ")", augs);
       if (elements.contains(qName.rawname.toLowerCase())) {
-        handleEvent(true, null, augs);
-        // FIXME - Balancer
+        if (builder.length() > 0) {
+          elementStack.peek().appendChild(document.createTextNode(builder.toString()));
+          builder.setLength(0);
+        }
         elementStack.pop();
       } else {
-        handleEvent(false, "</" + qName.rawname + ">", augs);
+        builder.append("</").append(qName.rawname).append(">");
       }
     }
 
     public void startCDATA(Augmentations augs) throws XNIException {
-      //trace("startCData", augs);
-      handleEvent(false, null, augs);
+      //No-op
     }
 
     public void endCDATA(Augmentations augs) throws XNIException {
-      //trace("endCData", augs);
-      handleEvent(false, null, augs);
+      //No-op
     }
 
     public void endDocument(Augmentations augs) throws XNIException {
-      //trace("endDoc", augs);
-      handleEvent(false, null, augs);
+      if (builder.length() > 0) {
+        elementStack.peek().appendChild(document.createTextNode(builder.toString()));
+        builder.setLength(0);
+      }
+      elementStack.pop();
     }
 
     public void setDocumentSource(XMLDocumentSource xmlDocumentSource) {
@@ -365,7 +307,7 @@ public class NekoSimplifiedHtmlParser extends GadgetHtmlParser {
   }
 
   static class Serializer extends HtmlSerializer {
-    
+
     static final OutputFormat outputFormat = new OutputFormat();
     static {
       outputFormat.setPreserveSpace(true);
@@ -390,4 +332,5 @@ public class NekoSimplifiedHtmlParser extends GadgetHtmlParser {
       }
     }
   }
+
 }
