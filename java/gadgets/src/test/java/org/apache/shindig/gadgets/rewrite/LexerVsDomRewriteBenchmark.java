@@ -18,8 +18,6 @@
  */
 package org.apache.shindig.gadgets.rewrite;
 
-import com.google.inject.Guice;
-import com.google.inject.Injector;
 import org.apache.commons.io.IOUtils;
 import org.apache.shindig.common.PropertiesModule;
 import org.apache.shindig.common.uri.Uri;
@@ -35,6 +33,9 @@ import org.apache.shindig.gadgets.parse.nekohtml.NekoSimplifiedHtmlParser;
 import org.apache.shindig.gadgets.rewrite.lexer.DefaultContentRewriter;
 import org.apache.shindig.gadgets.rewrite.lexer.HtmlTagTransformer;
 import org.apache.shindig.gadgets.spec.GadgetSpec;
+
+import com.google.inject.Guice;
+import com.google.inject.Injector;
 import org.w3c.dom.Document;
 
 import java.io.File;
@@ -62,9 +63,7 @@ public class LexerVsDomRewriteBenchmark {
   // Caja lexer
   private Map<String, HtmlTagTransformer> defaultTransformerMap;
 
-  private LinkingTagContentRewriter linkRewriter;
-  private JsTagConcatContentRewriter jsConcatRewriter;
-  private StyleLinksContentRewriter styleLinksRewriter;
+  private HTMLContentRewriter htmlRewriter;
   private boolean warmup;
   private ContentRewriterFeatureFactory factory;
   private DefaultContentRewriter lexerRewriter;
@@ -85,9 +84,7 @@ public class LexerVsDomRewriteBenchmark {
     // End lexer setup
 
     // DOM setup
-    this.linkRewriter = injector.getInstance(LinkingTagContentRewriter.class);
-    this.jsConcatRewriter = injector.getInstance(JsTagConcatContentRewriter.class);
-    this.styleLinksRewriter = injector.getInstance(StyleLinksContentRewriter.class);
+    this.htmlRewriter = injector.getInstance(HTMLContentRewriter.class);
     factory = injector.getInstance(ContentRewriterFeatureFactory.class);
     // End DOM setup
 
@@ -108,20 +105,21 @@ public class LexerVsDomRewriteBenchmark {
 
     content = new String(IOUtils.toByteArray(new FileInputStream(file)));
     this.numRuns = numRuns;
+
     warmup = true;
-    runLexer();
+    //runLexer();
     //run(cajaParser);
     run(nekoParser);
-    run(nekoSimpleParser);
+    //run(nekoSimpleParser);
     runNoParse(nekoSimpleParser);
     Thread.sleep(5000L);
     warmup = false;
-    System.out.println("Lexer------");
-    runLexer();
+    //System.out.println("Lexer------");
+    //runLexer();
     //System.out.println("Caja-------");
     //run(cajaParser);
-    System.out.println("Neko-------");
-    run(nekoParser);
+    //System.out.println("Neko-------");
+    //run(nekoParser);
     System.out.println("NekoSimple-------");
     run(nekoSimpleParser);
     System.out.println("No-Parse rewrite full DOM-------");
@@ -152,9 +150,10 @@ public class LexerVsDomRewriteBenchmark {
     long startTime = System.currentTimeMillis();
     for (int i = 0; i < numRuns; i++) {
       MutableContent mc = new MutableContent(parser, content, null);
-      linkRewriter.rewrite(gadget, mc);
-      jsConcatRewriter.rewrite(gadget, mc);
-      styleLinksRewriter.rewrite(gadget, mc);
+      //linkRewriter.rewrite(gadget, mc);
+      //jsConcatRewriter.rewrite(gadget, mc);
+      //styleLinksRewriter.rewrite(gadget, mc);
+      htmlRewriter.rewrite(gadget, mc);
       mc.getContent();
     }
     long time = System.currentTimeMillis() - startTime;
@@ -168,9 +167,7 @@ public class LexerVsDomRewriteBenchmark {
     long startTime = System.currentTimeMillis();
     for (int i = 0; i < numRuns; i++) {
       MutableContent mc = new MutableContent(parser, null, doc);
-      linkRewriter.rewrite(gadget, mc);
-      jsConcatRewriter.rewrite(gadget, mc);
-      styleLinksRewriter.rewrite(gadget, mc);
+      htmlRewriter.rewrite(gadget, mc);          
       mc.getContent();
     }
     long time = System.currentTimeMillis() - startTime;

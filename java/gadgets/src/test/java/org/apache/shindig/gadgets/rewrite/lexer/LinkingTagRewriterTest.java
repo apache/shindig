@@ -60,9 +60,9 @@ public class LinkingTagRewriterTest extends BaseRewriterTestCase {
     String original = "<img src=\"http://a.b.com/img.gif\"></img>\n"
         + "<IMG src=\"http://a.b.com/img.gif\"/>\n"
         + "<eMbeD src=\"http://a.b.com/some.mov\" width=\"100\" height=\"30px\"/>";
-    String expected = "<img src=\"http://www.test.com/dir/proxy?url=http%3A%2F%2Fa.b.com%2Fimg.gif&gadget=http%3A%2F%2Fexample.org%2Fdir%2Fg.xml&fp=-182800334\"></img>\n"
-        + "<IMG src=\"http://www.test.com/dir/proxy?url=http%3A%2F%2Fa.b.com%2Fimg.gif&gadget=http%3A%2F%2Fexample.org%2Fdir%2Fg.xml&fp=-182800334\"/>\n"
-        + "<eMbeD src=\"http://www.test.com/dir/proxy?url=http%3A%2F%2Fa.b.com%2Fsome.mov&gadget=http%3A%2F%2Fexample.org%2Fdir%2Fg.xml&fp=-182800334\" width=\"100\" height=\"30px\"/>";
+    String expected = "<img src=\"http://www.test.com/dir/proxy?url=http%3A%2F%2Fa.b.com%2Fimg.gif&gadget=http%3A%2F%2Fwww.example.org%2Fdir%2Fg.xml&fp=-182800334\"></img>\n"
+        + "<IMG src=\"http://www.test.com/dir/proxy?url=http%3A%2F%2Fa.b.com%2Fimg.gif&gadget=http%3A%2F%2Fwww.example.org%2Fdir%2Fg.xml&fp=-182800334\"/>\n"
+        + "<eMbeD src=\"http://www.test.com/dir/proxy?url=http%3A%2F%2Fa.b.com%2Fsome.mov&gadget=http%3A%2F%2Fwww.example.org%2Fdir%2Fg.xml&fp=-182800334\" width=\"100\" height=\"30px\"/>";
     validateRewritten(original, expected);
   }
 

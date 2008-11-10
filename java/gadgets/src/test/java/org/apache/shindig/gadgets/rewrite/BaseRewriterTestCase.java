@@ -17,8 +17,6 @@
  */
 package org.apache.shindig.gadgets.rewrite;
 
-import com.google.inject.Guice;
-import com.google.inject.Injector;
 import org.apache.commons.lang.StringUtils;
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.gadgets.EasyMockTestCase;
@@ -30,6 +28,9 @@ import org.apache.shindig.gadgets.parse.GadgetHtmlParser;
 import org.apache.shindig.gadgets.parse.ParseModule;
 import org.apache.shindig.gadgets.spec.GadgetSpec;
 
+import com.google.inject.Guice;
+import com.google.inject.Injector;
+
 import java.net.URI;
 import java.util.Set;
 
@@ -37,8 +38,9 @@ import java.util.Set;
  * Base class for testing content rewriting functionality
  */
 public abstract class BaseRewriterTestCase extends EasyMockTestCase {
-  public static final Uri SPEC_URL = Uri.parse("http://example.org/dir/g.xml");
+  public static final Uri SPEC_URL = Uri.parse("http://www.example.org/dir/g.xml");
   public static final String DEFAULT_PROXY_BASE = "http://www.test.com/dir/proxy?url=";
+  public static final String DEFAULT_CONCAT_BASE = "http://www.test.com/dir/concat?";
 
   protected Set<String> tags;
   protected ContentRewriterFeature defaultRewriterFeature;

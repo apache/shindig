@@ -17,76 +17,30 @@
  */
 package org.apache.shindig.gadgets.parse.nekohtml;
 
+import org.apache.commons.io.IOUtils;
+import org.apache.shindig.gadgets.parse.HtmlSerializer;
 import org.apache.shindig.gadgets.parse.ParseModule;
 
-import org.apache.xml.serialize.HTMLSerializer;
-import org.apache.xml.serialize.OutputFormat;
-import org.w3c.dom.Document;
-
 import junit.framework.TestCase;
-
-import java.io.IOException;
-import java.io.StringWriter;
+import org.w3c.dom.Document;
 
 /**
  * Test behavior of simplified HTML parser
  */
 public class NekoSimplifiedHtmlParserTest extends TestCase {
 
-  public void testUnbalanced() throws Exception {
-    parseAndCompareBalanced("<html><body><center>content</body></html>",
-        "<html><head></head><body><center>content</body></html>");
+  public void testParser() throws Exception {
+    String content = IOUtils.toString(this.getClass().getClassLoader().
+        getResourceAsStream("org/apache/shindig/gadgets/parse/nekohtml/test.html"));
+    String expected = IOUtils.toString(this.getClass().getClassLoader().
+        getResourceAsStream("org/apache/shindig/gadgets/parse/nekohtml/test-expected.html"));
+    parseAndCompareBalanced(content, expected);
   }
-
-  public void testUnbalanced2() throws Exception {
-    parseAndCompareBalanced("<html><body><img>content<img>content</body></html>",
-        "<HTML><head></head><body><IMG>content<IMG>content</body></HTML>");
-  }
-
-  public void testUnbalanced3() throws Exception {
-    parseAndCompareBalanced("<html><body><select><option>content<option></body></html>",
-        "<html><head></head><body><select><option>content<option></body></html>");
-  }
-
-  public void testUnbalanced4() throws Exception {
-    parseAndCompareBalanced("<html><body>Something awful</html>",
-        "<HTML><head></head><body>Something awful</body></HTML>");
-  }
-
-  public void testUnbalanced5() throws Exception {
-    parseAndCompareBalanced("<html><body><br />content<br></html>",
-        "<HTML><head></head><body><br />content<br></body></HTML>");
-  }
-
-  /*
-  public void testLarge() throws Exception {
-    String file = "<some bug file>"
-    File inputFile = new File(file);
-    if (!inputFile.exists() || !inputFile.canRead()) {
-      System.err.println("Input file: " + file + " not found or can't be read.");
-      System.exit(1);
-    }
-    String content = new String(IOUtils.toByteArray(new FileInputStream(file)));
-    parseAndCompareBalanced(content, content);
-  }
-  */
 
   private void parseAndCompareBalanced(String content, String expected) throws Exception {
     NekoSimplifiedHtmlParser builder = new NekoSimplifiedHtmlParser(
         new ParseModule.DOMImplementationProvider().get());
     Document document = builder.parseDom(content);
-    StringWriter sw = new StringWriter();
-    OutputFormat outputFormat = new OutputFormat();
-    outputFormat.setPreserveSpace(true);
-    outputFormat.setOmitDocumentType(true);
-    HTMLSerializer serializer = new HTMLSerializer(sw, outputFormat) {
-      protected void characters(String s) throws IOException {
-        this.content();
-        this._printer.printText(s);
-      }
-    };
-    serializer.serialize(document);
-
-    assertEquals(sw.toString().toLowerCase(), expected.toLowerCase());
+    assertEquals(expected, HtmlSerializer.serialize(document));
   }
 }
