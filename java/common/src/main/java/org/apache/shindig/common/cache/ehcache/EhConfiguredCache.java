@@ -82,4 +82,13 @@ public class EhConfiguredCache<K, V> implements Cache<K, V> {
     return (V) value;
   }
 
+  /*
+   * (non-Javadoc)
+   *
+   * @see org.apache.shindig.common.cache.Cache#getCapacity()
+   */
+  public long getCapacity() {
+    return cache.getCacheConfiguration().getMaxElementsInMemory() +
+        cache.getCacheConfiguration().getMaxElementsOnDisk();
+  }
 }

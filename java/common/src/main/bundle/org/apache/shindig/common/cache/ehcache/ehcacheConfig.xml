@@ -35,6 +35,14 @@
     diskPersistent="false"
     memoryStoreEvictionPolicy="LFU"/>
 
+  <!-- By default do not cache any parsed documents. This is experimental -->
+  <cache name="parsedDocuments"
+    maxElementsInMemory="0"
+    eternal="true"
+    overflowToDisk="false"
+    diskPersistent="false"
+    memoryStoreEvictionPolicy="LFU"/>
+
   <!-- 
     This configuration is only suitable for a modest sized HTTP cache.
     You should configure a shared cache for production use.

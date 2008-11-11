@@ -43,4 +43,12 @@ public interface Cache<K, V> {
    * @return The entry stored under the given key, or null if it doesn't exist.
    */
   public V removeElement(K key);
+
+  /**
+   * Returns the capacity of the cache.
+   *
+   * @return a positive integer indicating the upper bound on the number of allowed elements
+   * in the cace, -1 signifies that the capacity is unbounded
+   */
+  public long getCapacity();
 }

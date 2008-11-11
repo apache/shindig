@@ -17,23 +17,30 @@
  */
 package org.apache.shindig.gadgets.parse;
 
+import org.apache.shindig.common.cache.Cache;
+import org.apache.shindig.common.cache.CacheProvider;
+import org.apache.shindig.common.util.HashUtil;
 import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.parse.nekohtml.NekoSimplifiedHtmlParser;
 
 import com.google.inject.ImplementedBy;
-
+import com.google.inject.Inject;
 import org.w3c.dom.Document;
 
 /**
- * Parser for arbitrary HTML content. The content may simply be a
- * fragment or snippet of HTML rather than a fully-structured Document,
- * so the interface returns a list of {@code ParsedHtmlNode} objects
- * rather than a single top-level item.
- * 
- * {@see ParsedHtmlNode} for parsing details
+ * Parser for arbitrary HTML content
  */
 @ImplementedBy(NekoSimplifiedHtmlParser.class)
 public abstract class GadgetHtmlParser {
+
+  public static final String PARSED_DOUCMENTS = "parsedDocuments";
+
+  private Cache<String, Document> documentCache;
+
+  @Inject
+  public void setCacheProvider(CacheProvider cacheProvider) {
+    documentCache = cacheProvider.createCache(PARSED_DOUCMENTS);
+  }
 
   /**
    * @param content
@@ -45,15 +52,38 @@ public abstract class GadgetHtmlParser {
   }
 
   public final Document parseDom(String source) throws GadgetException {
-    Document document = parseDomImpl(source);
-    // Ensure head tag exists
-    if (DomUtil.getFirstNamedChildNode(document.getDocumentElement(), "head") == null) {
-      // Add as first element
-      document.getDocumentElement().insertBefore(
-          document.createElement("head"),
-          document.getDocumentElement().getFirstChild());
+    Document document = null;
+    String key = null;  
+    // Avoid checksum overhead if we arent caching
+    boolean shouldCache = shouldCache();
+    if (shouldCache) {
+      // TODO - Consider using the source if its under a certain size
+      key = HashUtil.rawChecksum(source.getBytes());
+      document = documentCache.getElement(key);
+    }
+    if (document == null) {
+      document = parseDomImpl(source);
+      // Ensure head tag exists
+      if (DomUtil.getFirstNamedChildNode(document.getDocumentElement(), "head") == null) {
+        // Add as first element
+        document.getDocumentElement().insertBefore(
+            document.createElement("head"),
+            document.getDocumentElement().getFirstChild());
+      }
+      if (shouldCache) {
+        documentCache.addElement(key, document);
+      }
+    }
+    if (shouldCache) {
+      Document copy = (Document)document.cloneNode(true);
+      HtmlSerializer.copySerializer(document, copy);
+      return copy;
     }
     return document;
+  }
+
+  private boolean shouldCache() {
+    return documentCache != null && documentCache.getCapacity() != 0;
   }
 
   /**
