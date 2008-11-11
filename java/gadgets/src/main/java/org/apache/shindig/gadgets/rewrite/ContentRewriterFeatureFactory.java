@@ -17,13 +17,15 @@
  */
 package org.apache.shindig.gadgets.rewrite;
 
-import com.google.inject.Inject;
-import com.google.inject.name.Named;
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.GadgetSpecFactory;
 import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.spec.GadgetSpec;
+
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
+import com.google.inject.name.Named;
 
 import java.net.URI;
 import java.util.HashSet;
@@ -32,6 +34,7 @@ import java.util.Set;
 /**
  * Factory for content rewriter features
  */
+@Singleton
 public class ContentRewriterFeatureFactory {
 
   private final GadgetSpecFactory specFactory;
