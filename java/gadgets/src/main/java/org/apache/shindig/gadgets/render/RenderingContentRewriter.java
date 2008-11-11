@@ -81,7 +81,8 @@ import java.util.regex.Pattern;
 public class RenderingContentRewriter implements ContentRewriter {
   private static final Logger LOG = Logger.getLogger(RenderingContentRewriter.class.getName());
   static final Pattern DOCUMENT_SPLIT_PATTERN = Pattern.compile(
-      "(.*)<head>(.*?)<\\/head>(?:.*)<body(.*?)>(.*?)<\\/body>(?:.*)", Pattern.DOTALL);
+      "(.*)<head>(.*?)<\\/head>(?:.*)<body(.*?)>(.*?)<\\/body>(?:.*)", Pattern.DOTALL |
+      Pattern.CASE_INSENSITIVE);
   static final int BEFORE_HEAD_GROUP = 1;
   static final int HEAD_GROUP = 2;
   static final int BODY_ATTRIBUTES_GROUP = 3;
@@ -389,7 +390,9 @@ public class RenderingContentRewriter implements ContentRewriter {
    */
   private GadgetContent createGadgetContent(Gadget gadget, MutableContent mutableContent) {
     String doc = mutableContent.getContent();
-    if (doc.contains("<html>") && doc.contains("</html>")) {
+    // Quick check for full document tags
+    String head = doc.substring(0, Math.min(150, doc.length()));
+    if (head.contains("<HTML") || head.contains("<html")) {
       Matcher matcher = DOCUMENT_SPLIT_PATTERN.matcher(doc);
       if (matcher.matches()) {
         GadgetContent content = new GadgetContent();
