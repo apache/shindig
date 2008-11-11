@@ -32,7 +32,6 @@ import com.google.inject.Singleton;
 import com.google.inject.name.Named;
 
 import java.io.*;
-import java.net.URI;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -95,7 +94,7 @@ public class DefaultContentRewriter implements ContentRewriter {
       if (request.getGadget() != null) {
         spec = specFactory.getGadgetSpec(request.getGadget().toJavaUri(), false);
       }
-      if (rewrite(spec, request.getUri().toJavaUri(),
+      if (rewrite(spec, request.getUri(),
                   new StringReader(content.getContent()),
                   mimeType,
                   output)) {
@@ -119,13 +118,13 @@ public class DefaultContentRewriter implements ContentRewriter {
     if (view != null && view.getHref() != null) {
       base = view.getHref();
     }
-    if (rewrite(spec, base.toJavaUri(), reader, "text/html", sw)) {
+    if (rewrite(spec, base, reader, "text/html", sw)) {
       content.setContent(sw.toString());
     }
     return RewriterResults.cacheableIndefinitely();
   }
 
-  private boolean rewrite(GadgetSpec spec, URI source, Reader r, String mimeType, Writer w) {
+  private boolean rewrite(GadgetSpec spec, Uri source, Reader r, String mimeType, Writer w) {
     // Dont rewrite content if the spec is unavailable
     if (spec == null) {
       return false;
@@ -192,6 +191,6 @@ public class DefaultContentRewriter implements ContentRewriter {
 
   protected LinkRewriter createLinkRewriter(GadgetSpec spec,
       ContentRewriterFeature rewriterFeature) {
-    return new ProxyingLinkRewriter(spec.getUrl().toJavaUri(), rewriterFeature, getProxyUrl());
+    return new ProxyingLinkRewriter(spec.getUrl(), rewriterFeature, getProxyUrl());
   }
 }

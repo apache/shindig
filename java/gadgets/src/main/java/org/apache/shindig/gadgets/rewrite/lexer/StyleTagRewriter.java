@@ -18,25 +18,24 @@
  */
 package org.apache.shindig.gadgets.rewrite.lexer;
 
+import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.gadgets.rewrite.CssRewriter;
 import org.apache.shindig.gadgets.rewrite.LinkRewriter;
 
 import com.google.caja.lexer.HtmlTokenType;
 import com.google.caja.lexer.Token;
 
-import java.net.URI;
-
 /**
  * Rewrite the CSS content of a style tag
  */
 public class StyleTagRewriter implements HtmlTagTransformer {
 
-  private URI source;
+  private Uri source;
   private LinkRewriter linkRewriter;
 
   private StringBuffer sb;
 
-  public StyleTagRewriter(URI source, LinkRewriter linkRewriter) {
+  public StyleTagRewriter(Uri source, LinkRewriter linkRewriter) {
     this.source = source;
     this.linkRewriter = linkRewriter;
     sb = new StringBuffer(500);

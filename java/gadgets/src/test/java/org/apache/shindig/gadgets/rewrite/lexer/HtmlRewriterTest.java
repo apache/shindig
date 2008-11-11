@@ -18,9 +18,9 @@
  */
 package org.apache.shindig.gadgets.rewrite.lexer;
 
+import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.gadgets.rewrite.BaseRewriterTestCase;
 
-import java.net.URI;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -29,18 +29,18 @@ import java.util.Map;
  */
 public class HtmlRewriterTest extends BaseRewriterTestCase {
 
-  private URI dummyUri;
+  private Uri dummyUri;
 
   private Map<String, HtmlTagTransformer> defaultTransformerMap;
 
   @Override
   protected void setUp() throws Exception {
     super.setUp();
-    dummyUri = new URI("http://www.w3c.org");
+    dummyUri = Uri.parse("http://www.w3c.org");
     defaultTransformerMap = new HashMap<String, HtmlTagTransformer>();
   }
 
-  private void validateRewritten(String content, URI base,
+  private void validateRewritten(String content, Uri base,
       Map<String, HtmlTagTransformer> transformerMap,
       String expected) {
     assertEquals(expected, HtmlRewriter.rewrite(content, base, transformerMap));

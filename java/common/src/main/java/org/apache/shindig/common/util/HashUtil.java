@@ -52,4 +52,24 @@ public class HashUtil {
     }
     return hexString.toString();
   }
+
+  /**
+   * Produces a raw checksum for the given input data.
+   *
+   * @param data
+   * @return The checksum.
+   */
+  public static String rawChecksum(byte[] data) {
+    MessageDigest md;
+    try {
+      md = MessageDigest.getInstance("MD5");
+    } catch (NoSuchAlgorithmException noMD5) {
+      try {
+        md = MessageDigest.getInstance("SHA");
+      } catch (NoSuchAlgorithmException noSha) {
+        throw new RuntimeException("No suitable MessageDigest found!");
+      }
+    }
+    return new String(md.digest(data));
+  }
 }

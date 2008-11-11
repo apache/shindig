@@ -17,14 +17,13 @@
  */
 package org.apache.shindig.gadgets.rewrite;
 
+import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.gadgets.Gadget;
 import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.http.HttpResponse;
 
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
-
-import java.net.URI;
 
 /**
  * Rewrite links to referenced content in stylsheets
@@ -51,13 +50,13 @@ public class CSSContentRewriter implements ContentRewriter {
       return null;      
     }
     ContentRewriterFeature feature = rewriterFeatureFactory.get(request);
-    content.setContent(CssRewriter.rewrite(content.getContent(), request.getUri().toJavaUri(),
-        createLinkRewriter(request.getGadget().toJavaUri(),  feature)));
+    content.setContent(CssRewriter.rewrite(content.getContent(), request.getUri(),
+        createLinkRewriter(request.getGadget(), feature)));
 
     return RewriterResults.cacheableIndefinitely();
   }
 
-  protected LinkRewriter createLinkRewriter(URI gadgetUri, ContentRewriterFeature feature) {
+  protected LinkRewriter createLinkRewriter(Uri gadgetUri, ContentRewriterFeature feature) {
     return new ProxyingLinkRewriter(gadgetUri, feature, proxyBaseNoGadget);
   }
 }

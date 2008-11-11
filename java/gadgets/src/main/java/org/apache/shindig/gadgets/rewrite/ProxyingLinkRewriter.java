@@ -18,11 +18,9 @@
  */
 package org.apache.shindig.gadgets.rewrite;
 
+import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.common.util.Utf8UrlCoder;
 import org.apache.shindig.gadgets.servlet.ProxyBase;
-
-import java.net.URI;
-import java.net.URISyntaxException;
 
 /**
  * Simple link rewriter that will rewrite a link to the form http://www.host.com/proxy/url=<url
@@ -34,16 +32,16 @@ public class ProxyingLinkRewriter implements LinkRewriter {
 
   private final ContentRewriterFeature rewriterFeature;
 
-  private final URI gadgetUri;
+  private final Uri gadgetUri;
 
-  public ProxyingLinkRewriter(URI gadgetUri, ContentRewriterFeature rewriterFeature,
+  public ProxyingLinkRewriter(Uri gadgetUri, ContentRewriterFeature rewriterFeature,
       String prefix) {
     this.prefix = prefix;
     this.rewriterFeature = rewriterFeature;
     this.gadgetUri = gadgetUri;
   }
 
-  public String rewrite(String link, URI context) {
+  public String rewrite(String link, Uri context) {
     link = link.trim();
     // We shouldnt bother proxying empty URLs
     if (link.length() == 0) {
@@ -51,8 +49,8 @@ public class ProxyingLinkRewriter implements LinkRewriter {
     }
 
     try {
-      URI linkUri = new URI(link);
-      URI uri = context.resolve(linkUri);
+      Uri linkUri = Uri.parse(link);
+      Uri uri = context.resolve(linkUri);
       if (rewriterFeature.shouldRewriteURL(uri.toString())) {
         String result = prefix
             + Utf8UrlCoder.encode(uri.toString())
@@ -66,7 +64,7 @@ public class ProxyingLinkRewriter implements LinkRewriter {
       } else {
         return uri.toString();
       }
-    } catch (URISyntaxException use) {
+    } catch (IllegalArgumentException use) {
       // Unrecoverable. Just return link
       return link;
     }

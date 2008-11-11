@@ -17,11 +17,12 @@
  */
 package org.apache.shindig.gadgets.rewrite;
 
+import org.apache.shindig.common.uri.Uri;
+
 import com.google.common.collect.Lists;
 
 import java.io.StringReader;
 import java.io.StringWriter;
-import java.net.URI;
 import java.util.List;
 
 /**
@@ -29,15 +30,15 @@ import java.util.List;
  */
 public class CssRewriterTest extends BaseRewriterTestCase {
 
-  private URI dummyUri;
+  private Uri dummyUri;
 
   @Override
   protected void setUp() throws Exception {
     super.setUp();
-    dummyUri = new URI("http://www.w3c.org");
+    dummyUri = Uri.parse("http://www.w3c.org");
   }
 
-  private void validateRewritten(String content, URI base,
+  private void validateRewritten(String content, Uri base,
       LinkRewriter rewriter, String expected) {
     assertEquals(expected, CssRewriter.rewrite(content, base, rewriter));
   }
