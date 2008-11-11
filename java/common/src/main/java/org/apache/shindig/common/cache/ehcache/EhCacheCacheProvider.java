@@ -25,17 +25,17 @@ import org.apache.shindig.common.util.ResourceLoader;
 import com.google.common.collect.Maps;
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
-
 import net.sf.ehcache.CacheManager;
+import net.sf.ehcache.config.Configuration;
+import net.sf.ehcache.config.ConfigurationFactory;
 import net.sf.ehcache.management.ManagementService;
 
+import javax.management.MBeanServer;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.management.ManagementFactory;
 import java.util.Map;
 import java.util.logging.Logger;
-
-import javax.management.MBeanServer;
 
 public class EhCacheCacheProvider implements CacheProvider {
   private final Logger LOG = Logger.getLogger(EhCacheCacheProvider.class.getName());
@@ -47,9 +47,21 @@ public class EhCacheCacheProvider implements CacheProvider {
                               @Named("shindig.cache.ehcache.jmx.enabled") boolean jmxEnabled,
                               @Named("shindig.cache.ehcache.jmx.stats") boolean withCacheStats)
       throws IOException {
-    InputStream configStream = ResourceLoader.open(configPath);
-    cacheManager = new CacheManager(configStream);
+    cacheManager = new CacheManager(getConfiguration(configPath));
     create(jmxEnabled, withCacheStats);
+  }
+
+  /**
+   * Read the cache conifuration from the specified resource.
+   * This function is intended to be overrideable to allow for programmatic
+   * cache configuration.
+   * @param configPath
+   * @return Configuration
+   * @throws IOException
+   */
+  protected Configuration getConfiguration(String configPath) throws IOException {
+    InputStream configStream = ResourceLoader.open(configPath);
+    return ConfigurationFactory.parseConfiguration(configStream);
   }
 
   public void create(boolean jmxEnabled, boolean withCacheStats) {
