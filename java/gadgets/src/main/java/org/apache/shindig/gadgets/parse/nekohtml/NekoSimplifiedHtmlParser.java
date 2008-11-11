@@ -20,19 +20,33 @@ package org.apache.shindig.gadgets.parse.nekohtml;
 import org.apache.shindig.gadgets.parse.DomUtil;
 import org.apache.shindig.gadgets.parse.GadgetHtmlParser;
 import org.apache.shindig.gadgets.parse.HtmlSerializer;
-import org.apache.xerces.xni.*;
+
+import com.google.common.collect.ImmutableSet;
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
+
+import org.apache.xerces.xni.Augmentations;
+import org.apache.xerces.xni.NamespaceContext;
+import org.apache.xerces.xni.QName;
+import org.apache.xerces.xni.XMLAttributes;
+import org.apache.xerces.xni.XMLDocumentHandler;
+import org.apache.xerces.xni.XMLLocator;
+import org.apache.xerces.xni.XMLResourceIdentifier;
+import org.apache.xerces.xni.XMLString;
+import org.apache.xerces.xni.XNIException;
 import org.apache.xerces.xni.parser.XMLDocumentSource;
 import org.apache.xerces.xni.parser.XMLInputSource;
 import org.apache.xml.serialize.HTMLSerializer;
 import org.apache.xml.serialize.OutputFormat;
-
-import com.google.common.collect.ImmutableSet;
-import com.google.inject.Inject;
 import org.cyberneko.html.HTMLElements;
 import org.cyberneko.html.HTMLEntities;
 import org.cyberneko.html.HTMLScanner;
 import org.cyberneko.html.HTMLTagBalancer;
-import org.w3c.dom.*;
+import org.w3c.dom.DOMImplementation;
+import org.w3c.dom.Document;
+import org.w3c.dom.DocumentFragment;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
 
 import java.io.IOException;
 import java.io.StringReader;
@@ -45,6 +59,7 @@ import java.util.Stack;
  * text nodes to keep DOM model simplified. Much of this code is based on
  * org.cyberneko.html.filters.Writer
  */
+@Singleton
 public class NekoSimplifiedHtmlParser extends GadgetHtmlParser {
   private static final Set<String> elements =
       ImmutableSet.of("html", "body", "head", "link", "img", "style", "script", "embed");

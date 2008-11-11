@@ -17,11 +17,14 @@
  */
 package org.apache.shindig.gadgets.parse.nekohtml;
 
-import com.google.inject.Inject;
 import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.parse.DomUtil;
 import org.apache.shindig.gadgets.parse.GadgetHtmlParser;
 import org.apache.shindig.gadgets.parse.HtmlSerializer;
+
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
+
 import org.apache.xml.serialize.HTMLSerializer;
 import org.apache.xml.serialize.OutputFormat;
 import org.cyberneko.html.parsers.DOMFragmentParser;
@@ -44,6 +47,7 @@ import java.io.StringWriter;
  * with Caja. This is probably unnecessary overhead and we would prefer that Caja
  * implements up to org.w3c.dom (or perhaps the Caja wrapper types should?)
  */
+@Singleton
 public class NekoHtmlParser extends GadgetHtmlParser {
 
   private final DOMImplementation documentProvider;
