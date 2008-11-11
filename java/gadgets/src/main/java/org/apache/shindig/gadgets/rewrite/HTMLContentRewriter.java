@@ -34,6 +34,7 @@ import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
+
 import org.w3c.dom.Element;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
@@ -43,7 +44,12 @@ import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URLEncoder;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.LinkedHashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * Perform rewriting of HTML content including
@@ -256,7 +262,7 @@ public class HTMLContentRewriter  implements ContentRewriter {
     boolean mutated = false;
     LinkRewriter rewriter = createLinkRewriter(gadgetUri, feature);
 
-    final Set<String> tagNames = LINKING_TAG_ATTRS.keySet();
+    final Set<String> tagNames = Sets.newHashSet(LINKING_TAG_ATTRS.keySet());
     tagNames.retainAll(feature.getIncludedTags());
 
     // Filter to just style tags
