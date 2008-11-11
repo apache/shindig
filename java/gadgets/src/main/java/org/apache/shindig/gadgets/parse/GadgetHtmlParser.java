@@ -25,6 +25,7 @@ import org.apache.shindig.gadgets.parse.nekohtml.NekoSimplifiedHtmlParser;
 
 import com.google.inject.ImplementedBy;
 import com.google.inject.Inject;
+
 import org.w3c.dom.Document;
 
 /**
@@ -33,13 +34,13 @@ import org.w3c.dom.Document;
 @ImplementedBy(NekoSimplifiedHtmlParser.class)
 public abstract class GadgetHtmlParser {
 
-  public static final String PARSED_DOUCMENTS = "parsedDocuments";
+  public static final String PARSED_DOCUMENTS = "parsedDocuments";
 
   private Cache<String, Document> documentCache;
 
   @Inject
   public void setCacheProvider(CacheProvider cacheProvider) {
-    documentCache = cacheProvider.createCache(PARSED_DOUCMENTS);
+    documentCache = cacheProvider.createCache(PARSED_DOCUMENTS);
   }
 
   /**
