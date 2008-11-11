@@ -18,22 +18,18 @@
  */
 package org.apache.shindig.gadgets.rewrite.lexer;
 
+import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.gadgets.rewrite.LinkRewriter;
 
 import com.google.caja.lexer.HtmlTokenType;
 import com.google.caja.lexer.Token;
 
-import java.net.URI;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 /** Rewrite a linking attribute of an HTML tag to an arbitrary scheme */
 public class LinkingTagRewriter implements HtmlTagTransformer {
 
-  private final URI relativeBase;
+  private final Uri relativeBase;
 
   private final LinkRewriter linkRewriter;
 
@@ -51,12 +47,12 @@ public class LinkingTagRewriter implements HtmlTagTransformer {
     return targets;
   }
 
-  public LinkingTagRewriter(LinkRewriter linkRewriter, URI relativeBase) {
+  public LinkingTagRewriter(LinkRewriter linkRewriter, Uri relativeBase) {
     this(getDefaultTargets(), linkRewriter, relativeBase);
   }
 
   public LinkingTagRewriter(Map<String, Set<String>> tagAttributeTargets,
-      LinkRewriter linkRewriter, URI relativeBase) {
+      LinkRewriter linkRewriter, Uri relativeBase) {
     this.tagAttributeTargets = tagAttributeTargets;
     this.linkRewriter = linkRewriter;
     this.relativeBase = relativeBase;

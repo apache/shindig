@@ -34,7 +34,6 @@ import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
-
 import org.w3c.dom.Element;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
@@ -44,12 +43,7 @@ import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URLEncoder;
-import java.util.ArrayList;
-import java.util.LinkedHashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Perform rewriting of HTML content including
@@ -153,7 +147,7 @@ public class HTMLContentRewriter  implements ContentRewriter {
       }
     }));
 
-    LinkRewriter linkRewriter = createLinkRewriter(gadgetUri.toJavaUri(), feature);
+    LinkRewriter linkRewriter = createLinkRewriter(gadgetUri, feature);
 
     for (Node styleNode : styleTags) {
       mutated |= true;
@@ -164,7 +158,7 @@ public class HTMLContentRewriter  implements ContentRewriter {
       String styleText = styleNode.getTextContent();
       StringWriter sw = new StringWriter(styleText.length());
       List<String> extractedUrls = CssRewriter.rewrite(new StringReader(styleText),
-          contentBase.toJavaUri(), linkRewriter, sw, true);
+          contentBase, linkRewriter, sw, true);
       styleText = sw.toString().trim();
       if (styleText.length() == 0 || (styleText.length() < 25 &&
         styleText.replace("<!--", "").replace("//-->", "").
@@ -204,7 +198,7 @@ public class HTMLContentRewriter  implements ContentRewriter {
     return mutated;
   }
 
-  protected LinkRewriter createLinkRewriter(URI gadgetUri, ContentRewriterFeature feature) {
+  protected LinkRewriter createLinkRewriter(Uri gadgetUri, ContentRewriterFeature feature) {
     return new ProxyingLinkRewriter(gadgetUri, feature, proxyBaseNoGadget);
   }
 
@@ -260,7 +254,7 @@ public class HTMLContentRewriter  implements ContentRewriter {
   protected boolean rewriteContentReferences(List<Node> nodeList, ContentRewriterFeature feature,
       Uri gadgetUri, Uri contentBase) {
     boolean mutated = false;
-    LinkRewriter rewriter = createLinkRewriter(gadgetUri.toJavaUri(), feature);
+    LinkRewriter rewriter = createLinkRewriter(gadgetUri, feature);
 
     final Set<String> tagNames = LINKING_TAG_ATTRS.keySet();
     tagNames.retainAll(feature.getIncludedTags());
@@ -279,7 +273,7 @@ public class HTMLContentRewriter  implements ContentRewriter {
         Node attr = attributes.item(i);
         if (rewriteable.contains(attr.getNodeName().toLowerCase())) {
           mutated = true;
-          attr.setNodeValue(rewriter.rewrite(attr.getNodeValue(), contentBase.toJavaUri()));
+          attr.setNodeValue(rewriter.rewrite(attr.getNodeValue(), contentBase));
         }
       }
     }

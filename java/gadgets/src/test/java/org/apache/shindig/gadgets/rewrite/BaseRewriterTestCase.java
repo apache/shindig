@@ -18,6 +18,7 @@
 package org.apache.shindig.gadgets.rewrite;
 
 import org.apache.commons.lang.StringUtils;
+import org.apache.shindig.common.PropertiesModule;
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.gadgets.EasyMockTestCase;
 import org.apache.shindig.gadgets.Gadget;
@@ -57,10 +58,10 @@ public abstract class BaseRewriterTestCase extends EasyMockTestCase {
     defaultRewriterFeature = rewriterFeatureFactory.getDefault();
     tags = defaultRewriterFeature.getIncludedTags();
     defaultLinkRewriter = new ProxyingLinkRewriter(
-      SPEC_URL.toJavaUri(),
+        SPEC_URL,
         defaultRewriterFeature,
         DEFAULT_PROXY_BASE);
-    injector = Guice.createInjector(new ParseModule());
+    injector = Guice.createInjector(new ParseModule(), new PropertiesModule());
     parser = injector.getInstance(GadgetHtmlParser.class);
   }
 

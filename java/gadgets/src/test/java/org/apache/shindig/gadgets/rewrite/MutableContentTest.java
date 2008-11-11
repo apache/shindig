@@ -18,15 +18,13 @@
  */
 package org.apache.shindig.gadgets.rewrite;
 
+import org.apache.shindig.common.PropertiesModule;
 import org.apache.shindig.gadgets.parse.GadgetHtmlParser;
 import org.apache.shindig.gadgets.parse.ParseModule;
 
 import com.google.inject.Guice;
 import com.google.inject.Injector;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 import org.junit.Before;
 import org.junit.Test;
 import org.w3c.dom.Document;
@@ -40,7 +38,7 @@ public class MutableContentTest {
     // Note dependency on CajaHtmlParser - this isn't particularly ideal but is
     // sufficient given that this test doesn't exercise the parser extensively at all,
     // instead focusing on the additional utility provided by MutableHtmlContent
-    Injector injector = Guice.createInjector(new ParseModule());
+    Injector injector = Guice.createInjector(new ParseModule(), new PropertiesModule());
     mhc = new MutableContent(injector.getInstance(GadgetHtmlParser.class), "DEFAULT VIEW", null);
   }
   

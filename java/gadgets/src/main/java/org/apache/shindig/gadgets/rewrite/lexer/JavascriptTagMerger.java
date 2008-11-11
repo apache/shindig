@@ -18,6 +18,7 @@
  */
 package org.apache.shindig.gadgets.rewrite.lexer;
 
+import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.common.util.Utf8UrlCoder;
 import org.apache.shindig.gadgets.rewrite.ContentRewriterFeature;
 import org.apache.shindig.gadgets.servlet.ProxyBase;
@@ -27,8 +28,6 @@ import com.google.caja.lexer.HtmlTokenType;
 import com.google.caja.lexer.Token;
 
 import java.io.UnsupportedEncodingException;
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.List;
@@ -47,7 +46,7 @@ public class JavascriptTagMerger implements HtmlTagTransformer {
 
   private final String concatBase;
 
-  private final URI relativeUrlBase;
+  private final Uri relativeUrlBase;
 
   private boolean isTagOpen = true;
 
@@ -57,7 +56,7 @@ public class JavascriptTagMerger implements HtmlTagTransformer {
    * @param relativeUrlBase to resolve relative urls
    */
   public JavascriptTagMerger(GadgetSpec spec, ContentRewriterFeature rewriterFeature,
-                             String concatBase, URI relativeUrlBase) {
+                             String concatBase, Uri relativeUrlBase) {
     // Force the mime-type to mimic browser expectation so rewriters
     // can function properly
     this.concatBase = concatBase
@@ -80,12 +79,12 @@ public class JavascriptTagMerger implements HtmlTagTransformer {
         if (lastToken != null &&
             lastToken.type == HtmlTokenType.ATTRNAME &&
             lastToken.text.equalsIgnoreCase("src")) {
-          scripts.add(new URI(stripQuotes(token.text)));
+          scripts.add(Uri.parse(stripQuotes(token.text)));
         } else if (token.type == HtmlTokenType.UNESCAPED) {
           scripts.add(token);
         }
       }
-    } catch (URISyntaxException use) {
+    } catch (IllegalArgumentException use) {
       throw new RuntimeException(use);
     }
   }
@@ -103,11 +102,11 @@ public class JavascriptTagMerger implements HtmlTagTransformer {
 
   @SuppressWarnings("unchecked")
   public String close() {
-    List<URI> concat = new ArrayList<URI>();
+    List<Uri> concat = new ArrayList<Uri>();
     StringBuilder builder = new StringBuilder(100);
     for (Object o : scripts) {
-      if (o instanceof URI) {
-        concat.add((URI) o);
+      if (o instanceof Uri) {
+        concat.add((Uri) o);
       } else {
         flushConcat(concat, builder);
         builder.append("<script type=\"text/javascript\">")
@@ -120,7 +119,7 @@ public class JavascriptTagMerger implements HtmlTagTransformer {
     return builder.toString();
   }
 
-  private void flushConcat(List<URI> concat, StringBuilder builder) {
+  private void flushConcat(List<Uri> concat, StringBuilder builder) {
     if (concat.isEmpty()) {
       return;
     }
@@ -129,7 +128,7 @@ public class JavascriptTagMerger implements HtmlTagTransformer {
     int paramIndex = 1;
     try {
       for (int i = 0; i < concat.size(); i++) {
-        URI srcUrl = concat.get(i);
+        Uri srcUrl = concat.get(i);
         if (!srcUrl.isAbsolute()) {
           srcUrl = relativeUrlBase.resolve(srcUrl);
         }

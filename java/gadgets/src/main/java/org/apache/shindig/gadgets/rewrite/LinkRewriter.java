@@ -18,13 +18,13 @@
  */
 package org.apache.shindig.gadgets.rewrite;
 
-import java.net.URI;
+import org.apache.shindig.common.uri.Uri;
 
 /**
  * Rewrite a link
  */
 public interface LinkRewriter {
 
-  public String rewrite(String link, URI context);
+  public String rewrite(String link, Uri context);
 
 }

@@ -17,11 +17,12 @@
  */
 package org.apache.shindig.gadgets.rewrite;
 
+import org.apache.shindig.common.uri.Uri;
+
 import com.google.caja.lexer.*;
 import com.google.common.collect.Lists;
 
 import java.io.*;
-import java.net.URI;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -35,20 +36,20 @@ public class CssRewriter {
       Pattern.compile("(url\\s*\\(\\s*['\"]?)([^\\)'\"]*)(['\"]?\\s*\\))",
         Pattern.CASE_INSENSITIVE);
 
-  public static String rewrite(String content, URI source,
+  public static String rewrite(String content, Uri source,
       LinkRewriter linkRewriter) {
     StringWriter sw = new StringWriter((content.length() * 110) / 100);
     rewrite(new StringReader(content), source, linkRewriter, sw, false);
     return sw.toString();
   }
 
-  public static List<String> rewrite(Reader content, URI source,
+  public static List<String> rewrite(Reader content, Uri source,
       LinkRewriter rewriter,
       Writer writer,
       boolean extractImports) {
     List<String> imports = Lists.newArrayList();
     CharProducer producer = CharProducer.Factory.create(content,
-        new InputSource(source));
+        new InputSource(source.toJavaUri()));
     CssLexer lexer = new CssLexer(producer);
     try {
       boolean inImport = false;
@@ -89,7 +90,7 @@ public class CssRewriter {
     return imports;
   }
 
-  private static String rewriteLink(Token<CssTokenType> token, URI base, LinkRewriter rewriter) {
+  private static String rewriteLink(Token<CssTokenType> token, Uri base, LinkRewriter rewriter) {
     Matcher matcher = urlMatcher.matcher(token.text);
     if (!matcher.find()) return token.text;
     return "url(\"" + rewriter.rewrite(matcher.group(2).trim(), base) + "\")";

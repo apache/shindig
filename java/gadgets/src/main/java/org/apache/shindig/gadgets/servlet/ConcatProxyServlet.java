@@ -18,27 +18,22 @@
 
 package org.apache.shindig.gadgets.servlet;
 
-import com.google.inject.Inject;
-
 import org.apache.shindig.common.servlet.InjectedServlet;
 import org.apache.shindig.gadgets.GadgetException;
 
-import java.io.IOException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import java.util.Locale;
+import com.google.inject.Inject;
 
 import javax.servlet.ServletOutputStream;
-import javax.servlet.http.Cookie;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletRequestWrapper;
-import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpServletResponseWrapper;
+import javax.servlet.http.*;
+import java.io.IOException;
+import java.util.Locale;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Servlet which concatenates the content of several proxied HTTP responses
  *
- * @see org.apache.shindig.gadgets.rewrite.JavascriptTagMerger
+ * @see org.apache.shindig.gadgets.rewrite.HTMLContentRewriter
  */
 public class ConcatProxyServlet extends InjectedServlet {
 

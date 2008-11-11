@@ -18,19 +18,11 @@
  */
 package org.apache.shindig.gadgets.rewrite.lexer;
 
-import com.google.caja.lexer.CharProducer;
-import com.google.caja.lexer.HtmlLexer;
-import com.google.caja.lexer.HtmlTokenType;
-import com.google.caja.lexer.InputSource;
-import com.google.caja.lexer.ParseException;
-import com.google.caja.lexer.Token;
+import org.apache.shindig.common.uri.Uri;
 
-import java.io.IOException;
-import java.io.Reader;
-import java.io.StringReader;
-import java.io.StringWriter;
-import java.io.Writer;
-import java.net.URI;
+import com.google.caja.lexer.*;
+
+import java.io.*;
 import java.util.Map;
 
 /**
@@ -41,18 +33,18 @@ public class HtmlRewriter {
   private HtmlRewriter() {
   }
 
-  public static String rewrite(String content, URI source,
+  public static String rewrite(String content, Uri source,
       Map<String, HtmlTagTransformer> transformers) {
     StringWriter sw = new StringWriter((content.length() * 110) / 100);
     rewrite(new StringReader(content), source, transformers, sw);
     return sw.toString();
   }
 
-  public static void rewrite(Reader content, URI source,
+  public static void rewrite(Reader content, Uri source,
       Map<String, HtmlTagTransformer> transformers,
       Writer writer) {
     CharProducer producer = CharProducer.Factory.create(content,
-        new InputSource(source));
+        new InputSource(source.toJavaUri()));
     HtmlLexer lexer = new HtmlLexer(producer);
     try {
       Token<HtmlTokenType> lastToken = null;

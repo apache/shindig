@@ -17,10 +17,7 @@
  */
 package org.apache.shindig.gadgets.rewrite;
 
-import com.google.common.collect.Lists;
-import com.google.inject.Guice;
-import com.google.inject.Injector;
-import junit.framework.TestCase;
+import org.apache.shindig.common.PropertiesModule;
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.gadgets.Gadget;
 import org.apache.shindig.gadgets.GadgetContext;
@@ -29,6 +26,11 @@ import org.apache.shindig.gadgets.http.HttpResponse;
 import org.apache.shindig.gadgets.parse.GadgetHtmlParser;
 import org.apache.shindig.gadgets.parse.ParseModule;
 import org.apache.shindig.gadgets.spec.GadgetSpec;
+
+import com.google.common.collect.Lists;
+import com.google.inject.Guice;
+import com.google.inject.Injector;
+import junit.framework.TestCase;
 
 import java.util.Arrays;
 import java.util.List;
@@ -41,7 +43,7 @@ public class DefaultContentRewriterRegistryTest extends TestCase {
   private GadgetHtmlParser parser;
 
   protected void setUp() throws Exception {
-    Injector injector = Guice.createInjector(new ParseModule());
+    Injector injector = Guice.createInjector(new ParseModule(), new PropertiesModule());
     parser = injector.getInstance(GadgetHtmlParser.class);
     rewriters = Arrays.asList(new CaptureRewriter(), new CaptureRewriter());
     contentRewriters = Lists.<ContentRewriter>newArrayList(rewriters);
