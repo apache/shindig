@@ -134,9 +134,14 @@ JsonRpcContainer.prototype.requestData = function(dataRequest, callback) {
     "POST_DATA" : gadgets.json.stringify(jsonBatchData)
   };
 
-  this.sendRequest(this.baseUrl_ + "/rpc?st=" +
-      encodeURIComponent(shindig.auth.getSecurityToken()),
-      sendResponse, makeRequestParams, "application/json");
+  var url = [this.baseUrl_, "/rpc"];
+  var token = shindig.auth.getSecurityToken();
+  if (token) {
+    url.push("?st=", encodeURIComponent(token));
+  }
+
+  this.sendRequest(url.join(''), sendResponse, makeRequestParams,
+      "application/json");
 };
 
 JsonRpcContainer.prototype.sendRequest = function(relativeUrl, callback, params, contentType) {
