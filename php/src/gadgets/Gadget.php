@@ -64,6 +64,7 @@ class Gadget {
 	public $scrolling;
 	public $views = array();
 	public $links = array();
+	public $icons = array();
 
 	public function __construct($id = false, $context)
 	{
@@ -298,6 +299,11 @@ class Gadget {
 		return false;
 	}
 
+	public function getIcons()
+	{
+		return $this->icons;
+	}
+
 	public function getViews()
 	{
 		return $this->views;
@@ -333,5 +339,3 @@ class Gadget {
 		return $this->checksum;
 	}
 }
-
-
