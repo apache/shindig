@@ -69,7 +69,9 @@ class GadgetSpecParser {
 		foreach ($doc->ModulePrefs->Optional as $feature) {
 			$this->processFeature($gadget, $feature, false);
 		}
-		//TODO Parse icons
+		foreach ($doc->ModulePrefs->Icon as $icon) {
+			$this->processIcon($gadget, $icon);
+		}
 		return $gadget;
 	}
 
@@ -168,6 +170,7 @@ class GadgetSpecParser {
 		$preference->name = trim($attributes['name']);
 		$preference->displayName = isset($attributes['display_name']) ? $gadget->getSubstitutions()->substitute(trim($attributes['display_name'])) : '';
 		// if its set -and- in our valid 'enum' of types, use it, otherwise assume STRING, to try and emulate java's enum behavior
+		$preference->required = isset($attributes['required']) ? $gadget->getSubstitutions()->substitute(trim($attributes['required'])) : 'false';
 		$preference->dataType = isset($attributes['datatype']) && in_array(strtoupper($attributes['datatype']), $preference->DataTypes) ? strtoupper($attributes['datatype']) : 'STRING';
 		$preference->defaultValue = isset($attributes['default_value']) ? $gadget->getSubstitutions()->substitute(trim($attributes['default_value'])) : '';
 		if (isset($pref->EnumValue)) {
@@ -226,6 +229,16 @@ class GadgetSpecParser {
 			$featureSpec->params[$name] = $value;
 		}
 		$gadget->requires[$featureSpec->name] = $featureSpec;
+	}
+
+	private function processIcon(Gadget &$gadget, $icon)
+	{
+		$attributes = $icon->attributes();
+		$iconSpec = new Icon();
+		$iconSpec->content = (string)(trim($icon));
+		$iconSpec->mode = isset($attributes['mode']) ? trim($attributes['mode']) : '';
+		$iconSpec->type = isset($attributes['type']) ? trim($attributes['type']) : '';
+		$gadget->icons[] = $iconSpec;
 	}
 
 	private function processOAuthSpec(Gadget &$gadget, $OAuthSpec)
