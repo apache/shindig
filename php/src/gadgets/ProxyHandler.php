@@ -74,10 +74,10 @@ class ProxyHandler {
 		//header("HTTP/1.1 $status", true);
 		if ($status == 200) {
 			$output = '';
-			if (isset($_GET['contentType']) && $_GET['contentType'] == 'FEED') {
+			if (isset($_REQUEST['contentType']) && $_REQUEST['contentType'] == 'FEED') {
 				require 'external/Zend/Feed.php';
-				$numEntries = $_GET['numEntries'];
-				$getSummaries = ! empty($_GET['getSummaries']) && $_GET['getSummaries'] != 'false' ? true : false;
+				$numEntries = $_REQUEST['numEntries'];
+				$getSummaries = ! empty($_REQUEST['getSummaries']) && $_REQUEST['getSummaries'] != 'false' ? true : false;
 				$channel = array();
 				$request = new RemoteContentRequest($url);
 				$request = $this->context->getHttpFetcher()->fetch($request, $this->context);
@@ -146,7 +146,18 @@ class ProxyHandler {
 							}
 						} elseif ($feed instanceof Zend_Feed_Atom) {
 							// Try get author
-							$author = $feed->author() ? $feed->author() : '';
+							if ($feed->author()) {
+								if ($feed->author->name()) {
+									$author = $feed->author->name();
+								} else 
+									if ($feed->author->email()) {
+										$author = $feed->author->email();
+									} else {
+										$author = $feed->author();
+									}
+							} else {
+								$author = null;
+							}
 							// Loop over each entries and store relevant data
 							$counter = 0;
 							$channel['Entry'] = array();
@@ -156,7 +167,23 @@ class ProxyHandler {
 								}
 								$_entry = array();
 								$_entry['Title'] = $entry->title();
-								$_entry['Link'] = $entry->link('alternate');
+								// get Link if rel="alternate"
+								if ($entry->link('alternate')) {
+									$_entry['Link'] = $entry->link('alternate');
+								} else {
+									// if there's no alternate, pick the one without "rel" attribtue
+									$_links = $entry->link;
+									if (is_array($_links)) {
+										foreach ($_links as $_link) {
+											if (empty($_link['rel'])) {
+												$_entry['Link'] = $_link['href'];
+												break;
+											}
+										}
+									} else {
+										$_entry['Link'] = $_links['href'];
+									}
+								}
 								if ($getSummaries && $entry->summary()) {
 									$_entry['Summary'] = $entry->summary();
 								}
@@ -172,7 +199,14 @@ class ProxyHandler {
 								$channel['Entry'][] = $_entry;
 								// Remember author if first found
 								if (empty($author) && $entry->author()) {
-									$author = $entry->author();
+									if ($entry->author->name()) {
+										$author = $entry->author->name();
+									} else 
+										if ($entry->author->email()) {
+											$author = $entry->author->email();
+										} else {
+											$author = $entry->author();
+										}
 								} elseif (empty($author)) {
 									$author = null;
 								}
@@ -181,8 +215,24 @@ class ProxyHandler {
 							$channel['Title'] = $feed->title();
 							$channel['URL'] = $url;
 							$channel['Description'] = $feed->subtitle();
-							$channel['Link'] = $feed->link('alternate');
-							if (!empty($author)) {
+							// get Link if rel="alternate"
+							if ($feed->link('alternate')) {
+								$channel['Link'] = $feed->link('alternate');
+							} else {
+								// if there's no alternate, pick the one without "rel" attribtue
+								$_links = $feed->link;
+								if (is_array($_links)) {
+									foreach ($_links as $_link) {
+										if (empty($_link['rel'])) {
+											$channel['Link'] = $_link['href'];
+											break;
+										}
+									}
+								} else {
+									$channel['Link'] = $_links['href'];
+								}
+							}
+							if (! empty($author)) {
 								$channel['Author'] = $author;
 							}
 						} else {
@@ -203,7 +253,7 @@ class ProxyHandler {
 			$json = json_encode($json);
 			$output = UNPARSEABLE_CRUFT . $json;
 			$this->setCachingHeaders();
-			header("Content-Type: application/json; charset=utf-8", true);
+			//	header("Content-Type: application/json; charset=utf-8", true);
 			echo $output;
 		} else {
 			@ob_end_clean();
