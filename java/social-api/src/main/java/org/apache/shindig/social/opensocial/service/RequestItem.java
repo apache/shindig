@@ -24,11 +24,14 @@ import org.apache.shindig.social.opensocial.spi.PersonService;
 import org.apache.shindig.social.opensocial.spi.SocialSpiException;
 import org.apache.shindig.social.opensocial.spi.UserId;
 
+import org.joda.time.DateTime;
+
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 
 import java.util.List;
 import java.util.Set;
+import java.util.Date;
 
 /**
  * Abstract base type for social API requests.
@@ -85,6 +88,17 @@ public abstract class RequestItem {
     } else {
       return appId;
     }
+  }
+
+  public Date getUpdatedSince() {
+    String updatedSince = getParameter("updatedSince");
+    if (updatedSince == null)
+      return null;
+
+    DateTime date = new DateTime(updatedSince);
+    if (date == null) return null;
+
+    return date.toDate();
   }
 
   public Set<UserId> getUsers() {
