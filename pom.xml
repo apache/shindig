@@ -130,6 +130,15 @@
       </roles>
     </developer>
     <developer>
+      <id>ieb</id>
+      <name>Ian Boston</name>
+      <email>ieb@apache.org</email>
+      <organization>ASF</organization>
+      <roles>
+        <role>PMC Member</role>
+      </roles>
+    </developer>
+    <developer>
       <id>evan</id>
       <name>Evan Gilbert</name>
       <email>evan@apache.org</email>
