@@ -92,6 +92,8 @@ public class BasicSecurityTokenDecoder implements SecurityTokenDecoder {
       throw new SecurityTokenException(e);
     } catch (UnsupportedEncodingException e) {
       throw new SecurityTokenException(e);
+    } catch (ArrayIndexOutOfBoundsException e) {
+      throw new SecurityTokenException(e);
     }
   }
 
