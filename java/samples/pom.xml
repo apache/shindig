@@ -45,8 +45,19 @@ under the License.
      <url>http://www.eclipse.org/downloads/download.php?r=1&amp;nf=1&amp;file=/rt/eclipselink/maven.repo</url>
     </repository>    
   </repositories> 
-
-
+  <build>
+    <resources>
+      <resource>
+        <targetPath>META-INF</targetPath>
+        <directory>${basedir}/../../</directory>
+        <includes>
+          <include>NOTICE</include>
+          <include>LICENSE</include>
+          <include>DISCLAIMER</include>
+        </includes>
+      </resource>
+    </resources>
+  </build>
   <dependencies>
     <!-- project dependencies -->
     <dependency>

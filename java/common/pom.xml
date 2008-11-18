@@ -57,6 +57,15 @@ under the License.
       <resource>
         <directory>conf</directory>
       </resource>
+      <resource>
+        <targetPath>META-INF</targetPath>
+        <directory>${basedir}/../../</directory>
+        <includes>
+          <include>NOTICE</include>
+          <include>LICENSE</include>
+          <include>DISCLAIMER</include>
+        </includes>
+      </resource>
     </resources>
   </build>
 
