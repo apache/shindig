@@ -19,6 +19,7 @@
 package org.apache.shindig.gadgets.render;
 
 import org.apache.shindig.common.ContainerConfig;
+import org.apache.shindig.common.PropertiesModule;
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.common.xml.XmlUtil;
 import org.apache.shindig.gadgets.Gadget;
@@ -29,17 +30,14 @@ import org.apache.shindig.gadgets.GadgetFeatureRegistry;
 import org.apache.shindig.gadgets.JsLibrary;
 import org.apache.shindig.gadgets.MessageBundleFactory;
 import org.apache.shindig.gadgets.UrlGenerator;
+import org.apache.shindig.gadgets.parse.GadgetHtmlParser;
+import org.apache.shindig.gadgets.parse.ParseModule;
 import org.apache.shindig.gadgets.preload.NullPreloads;
 import org.apache.shindig.gadgets.preload.PreloadException;
 import org.apache.shindig.gadgets.preload.PreloadedData;
 import org.apache.shindig.gadgets.preload.Preloads;
-import static org.apache.shindig.gadgets.render.RenderingContentRewriter.BEFORE_HEAD_GROUP;
-import static org.apache.shindig.gadgets.render.RenderingContentRewriter.BODY_ATTRIBUTES_GROUP;
-import static org.apache.shindig.gadgets.render.RenderingContentRewriter.BODY_GROUP;
 import static org.apache.shindig.gadgets.render.RenderingContentRewriter.DEFAULT_HEAD_CONTENT;
-import static org.apache.shindig.gadgets.render.RenderingContentRewriter.DOCUMENT_SPLIT_PATTERN;
 import static org.apache.shindig.gadgets.render.RenderingContentRewriter.FEATURES_KEY;
-import static org.apache.shindig.gadgets.render.RenderingContentRewriter.HEAD_GROUP;
 import static org.apache.shindig.gadgets.render.RenderingContentRewriter.INSERT_BASE_ELEMENT_KEY;
 import org.apache.shindig.gadgets.rewrite.MutableContent;
 import org.apache.shindig.gadgets.spec.GadgetSpec;
@@ -51,6 +49,8 @@ import com.google.caja.util.Join;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
+import com.google.inject.Guice;
+import com.google.inject.Injector;
 
 import static org.easymock.EasyMock.expect;
 import org.easymock.classextension.EasyMock;
@@ -86,12 +86,24 @@ public class RenderingContentRewriterTest {
 
   private FakeGadgetFeatureRegistry featureRegistry;
   private RenderingContentRewriter rewriter;
+  private GadgetHtmlParser parser;
+
+  static final Pattern DOCUMENT_SPLIT_PATTERN = Pattern.compile(
+      "(.*)<head>(.*?)<\\/head>(?:.*)<body(.*?)>(.*?)<\\/body>(?:.*)", Pattern.DOTALL |
+      Pattern.CASE_INSENSITIVE);
+
+  static final int BEFORE_HEAD_GROUP = 1;
+  static final int HEAD_GROUP = 2;
+  static final int BODY_ATTRIBUTES_GROUP = 3;
+  static final int BODY_GROUP = 4;
 
   @Before
   public void setUp() throws Exception {
     featureRegistry = new FakeGadgetFeatureRegistry();
     rewriter
         = new RenderingContentRewriter(messageBundleFactory, config, featureRegistry, urlGenerator);
+    Injector injector = Guice.createInjector(new ParseModule(), new PropertiesModule());
+    parser = injector.getInstance(GadgetHtmlParser.class);
   }
 
   private Gadget makeGadgetWithSpec(String gadgetXml) throws GadgetException {
@@ -108,7 +120,7 @@ public class RenderingContentRewriterTest {
   }
 
   private String rewrite(Gadget gadget, String content) {
-    MutableContent mc = new MutableContent(null, content);
+    MutableContent mc = new MutableContent(parser, content);
     assertEquals(0, rewriter.rewrite(gadget, mc).getCacheTtl());
     return mc.getContent();
   }
@@ -123,7 +135,8 @@ public class RenderingContentRewriterTest {
 
     Matcher matcher = DOCUMENT_SPLIT_PATTERN.matcher(rewritten);
     assertTrue("Output is not valid HTML.", matcher.matches());
-    assertTrue("Missing opening html tag", matcher.group(BEFORE_HEAD_GROUP).contains("<html>"));
+    assertTrue("Missing opening html tag", matcher.group(BEFORE_HEAD_GROUP).
+        toLowerCase().contains("<html>"));
     assertTrue("Default head content is missing.",
         matcher.group(HEAD_GROUP).contains(DEFAULT_HEAD_CONTENT));
     // Not very accurate -- could have just been user prefs.
@@ -137,9 +150,9 @@ public class RenderingContentRewriterTest {
 
   @Test
   public void completeDocument() throws Exception {
-    String docType = "<![DOCTYPE html]>";
-    String head = "<script src='foo.js'></script><style type='text/css'>body{color:red;}</style>";
-    String bodyAttr = " onload='foo();'";
+    String docType = "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01 Transitional//EN\" \"http://www.w3.org/TR/html4/loose.dtd\">";
+    String head = "<script src=\"foo.js\"></script><style type=\"text/css\">body{color:red;}</style>";
+    String bodyAttr = " onload=\"foo();\"";
     String body = "hello, world.";
     String doc = new StringBuilder()
         .append(docType)
@@ -201,7 +214,7 @@ public class RenderingContentRewriterTest {
     String rewritten = rewrite(gadget, "");
 
     assertTrue("Bi-directional locale settings not preserved.",
-        rewritten.contains("<body dir='rtl'>"));
+        rewritten.contains("<body dir=\"rtl\">"));
   }
 
   private Set<String> getInjectedScript(String content) {
@@ -308,7 +321,7 @@ public class RenderingContentRewriterTest {
     control.replay();
 
     String rewritten = rewrite(gadget,
-        "<html><head><script src='foo.js'></script></head><body>hello</body></html>");
+        "<html><head><script src=\"foo.js\"></script></head><body>hello</body></html>");
 
     Matcher matcher = DOCUMENT_SPLIT_PATTERN.matcher(rewritten);
     assertTrue("Output is not valid HTML.", matcher.matches());
@@ -316,7 +329,7 @@ public class RenderingContentRewriterTest {
     String headContent = matcher.group(HEAD_GROUP);
 
     // Locate user script.
-    int userPosition = headContent.indexOf("<script src='foo.js'></script>");
+    int userPosition = headContent.indexOf("<script src=\"foo.js\"></script>");
 
     // Anything else here, we added.
     int ourPosition = headContent.indexOf("<script>");
@@ -624,7 +637,7 @@ public class RenderingContentRewriterTest {
     Matcher matcher = DOCUMENT_SPLIT_PATTERN.matcher(content);
     assertTrue("Output is not valid HTML.", matcher.matches());
     Pattern baseElementPattern
-        = Pattern.compile("(?:.*)<base href='(.*?)'\\/>(?:.*)", Pattern.DOTALL);
+        = Pattern.compile("(?:.*)<base href=\"(.*?)\">(?:.*)", Pattern.DOTALL);
     Matcher baseElementMatcher = baseElementPattern.matcher(matcher.group(HEAD_GROUP));
     assertTrue("base element missing from head of document.", baseElementMatcher.matches());
     return baseElementMatcher.group(1);

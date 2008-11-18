@@ -33,6 +33,7 @@ import org.apache.shindig.gadgets.UnsupportedFeatureException;
 import org.apache.shindig.gadgets.UrlGenerator;
 import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.http.HttpResponse;
+import org.apache.shindig.gadgets.parse.DomUtil;
 import org.apache.shindig.gadgets.preload.PreloadException;
 import org.apache.shindig.gadgets.preload.Preloads;
 import org.apache.shindig.gadgets.rewrite.ContentRewriter;
@@ -46,21 +47,25 @@ import org.apache.shindig.gadgets.spec.ModulePrefs;
 import org.apache.shindig.gadgets.spec.UserPref;
 import org.apache.shindig.gadgets.spec.View;
 
+import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.google.inject.Inject;
 
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+import org.w3c.dom.Text;
 
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 /**
  * Produces a valid HTML document for the gadget output, automatically inserting appropriate HTML
@@ -80,20 +85,12 @@ import java.util.regex.Pattern;
  */
 public class RenderingContentRewriter implements ContentRewriter {
   private static final Logger LOG = Logger.getLogger(RenderingContentRewriter.class.getName());
-  static final Pattern DOCUMENT_SPLIT_PATTERN = Pattern.compile(
-      "(.*)<head>(.*?)<\\/head>(?:.*)<body(.*?)>(.*?)<\\/body>(?:.*)", Pattern.DOTALL |
-      Pattern.CASE_INSENSITIVE);
-  static final int BEFORE_HEAD_GROUP = 1;
-  static final int HEAD_GROUP = 2;
-  static final int BODY_ATTRIBUTES_GROUP = 3;
-  static final int BODY_GROUP = 4;
+
   static final String DEFAULT_HEAD_CONTENT =
-      "<style type=\"text/css\">" +
       "body,td,div,span,p{font-family:arial,sans-serif;}" +
       "a {color:#0000cc;}a:visited {color:#551a8b;}" +
       "a:active {color:#ff0000;}" +
-      "body{margin: 0px;padding: 0px;background-color:white;}" +
-      "</style>";
+      "body{margin: 0px;padding: 0px;background-color:white;}";
   static final String INSERT_BASE_ELEMENT_KEY = "gadgets.insertBaseElement";
   static final String FEATURES_KEY = "gadgets.features";
 
@@ -123,19 +120,50 @@ public class RenderingContentRewriter implements ContentRewriter {
 
   public RewriterResults rewrite(Gadget gadget, MutableContent mutableContent) {
     try {
-      GadgetContent content = createGadgetContent(gadget, mutableContent);
+      Element head = (Element)DomUtil.getFirstNamedChildNode(
+          mutableContent.getDocument().getDocumentElement(), "head");
 
-      injectBaseTag(gadget, content);
-      injectFeatureLibraries(gadget, content);
+      // Remove all the elements currently in head and add them back after we inject content
+      List<Node> existingHeadContent = Lists.newArrayList();
+      NodeList children = head.getChildNodes();
+      for (int i = 0; i < children.getLength(); i++) {
+        existingHeadContent.add(children.item(i));
+      }
+      for (Node n : existingHeadContent) {
+        head.removeChild(n);
+      }
+
+      Element defaultStyle = head.getOwnerDocument().createElement("style");
+      defaultStyle.setAttribute("type", "text/css");
+      head.appendChild(defaultStyle);
+      defaultStyle.appendChild(defaultStyle.getOwnerDocument().
+          createTextNode(DEFAULT_HEAD_CONTENT));
+
+      injectBaseTag(gadget, head);
+      injectFeatureLibraries(gadget, head);
+
       // This can be one script block.
-      content.appendHead("<script>");
-      injectMessageBundles(gadget, content);
-      injectDefaultPrefs(gadget, content);
-      injectPreloads(gadget, content);
-      content.appendHead("</script>");
-      injectOnLoadHandlers(content);
-      // TODO: Use preloads when RenderedGadget gets promoted to Gadget.
-      mutableContent.setContent(finalizeDocument(gadget, content));
+      Element mainScriptTag = head.getOwnerDocument().createElement("script");
+      injectMessageBundles(gadget, mainScriptTag);
+      injectDefaultPrefs(gadget, mainScriptTag);
+      injectPreloads(gadget, mainScriptTag);
+      head.appendChild(mainScriptTag);
+
+      Element body = (Element)DomUtil.getFirstNamedChildNode(
+          mutableContent.getDocument().getDocumentElement(), "body");
+      
+      LocaleSpec localeSpec = gadget.getLocale();
+      if (localeSpec != null) {
+        body.setAttribute("dir", localeSpec.getLanguageDirection());
+      }
+
+      injectOnLoadHandlers(body);
+
+      for (Node n : existingHeadContent) {
+        head.appendChild(n);
+      }
+
+      MutableContent.notifyEdit(mutableContent.getDocument());
       return RewriterResults.notCacheable();
     } catch (GadgetException e) {
       // TODO: Rewriter interface needs to be modified to handle GadgetException or
@@ -144,7 +172,7 @@ public class RenderingContentRewriter implements ContentRewriter {
     }
   }
 
-  private void injectBaseTag(Gadget gadget, GadgetContent content) {
+  private void injectBaseTag(Gadget gadget, Node headTag) {
     GadgetContext context = gadget.getContext();
     if ("true".equals(containerConfig.get(context.getContainer(), INSERT_BASE_ELEMENT_KEY))) {
       Uri base = gadget.getSpec().getUrl();
@@ -152,18 +180,23 @@ public class RenderingContentRewriter implements ContentRewriter {
       if (view != null && view.getHref() != null) {
         base = view.getHref();
       }
-      content.appendHead("<base href='" + base + "'/>");
+      Element baseTag = headTag.getOwnerDocument().createElement("base");
+      baseTag.setAttribute("href", base.toString());
+      headTag.appendChild(baseTag);
     }
   }
 
-  private void injectOnLoadHandlers(GadgetContent content) {
-    content.appendBody("<script>gadgets.util.runOnLoadHandlers();</script>");
+  private void injectOnLoadHandlers(Node bodyTag) {
+    Element onloadScript = bodyTag.getOwnerDocument().createElement("script");
+    bodyTag.appendChild(onloadScript);
+    onloadScript.appendChild(bodyTag.getOwnerDocument().createTextNode(
+        "gadgets.util.runOnLoadHandlers();"));
   }
 
   /**
    * Injects javascript libraries needed to satisfy feature dependencies.
    */
-  private void injectFeatureLibraries(Gadget gadget, GadgetContent content) throws GadgetException {
+  private void injectFeatureLibraries(Gadget gadget, Node headTag) throws GadgetException {
     // TODO: If there isn't any js in the document, we can skip this. Unfortunately, that means
     // both script tags (easy to detect) and event handlers (much more complex).
     GadgetContext context = gadget.getContext();
@@ -176,12 +209,14 @@ public class RenderingContentRewriter implements ContentRewriter {
       forced = Sets.newHashSet(forcedLibs.split(":"));
     }
 
-    String externFmt = "<script src=\"%s\"></script>";
 
     // Forced libs are always done first.
     if (!forced.isEmpty()) {
       String jsUrl = urlGenerator.getBundledJsUrl(forced, context);
-      content.appendHead(String.format(externFmt, jsUrl));
+      Element libsTag = headTag.getOwnerDocument().createElement("script");
+      libsTag.setAttribute("src", jsUrl.toString());
+      headTag.appendChild(libsTag);
+
       // Forced transitive deps need to be added as well so that they don't get pulled in twice.
       // TODO: Figure out a clean way to avoid having to call getFeatures twice.
       for (GadgetFeature dep : featureRegistry.getFeatures(forced)) {
@@ -200,12 +235,14 @@ public class RenderingContentRewriter implements ContentRewriter {
       for (JsLibrary library : feature.getJsLibraries(RenderingContext.GADGET, container)) {
         if (library.getType().equals(JsLibrary.Type.URL)) {
           if (inlineJs.length() > 0) {
-            content.appendHead("<script>")
-                   .appendHead(inlineJs)
-                   .appendHead("</script>");
+            Element inlineTag = headTag.getOwnerDocument().createElement("script");
+            headTag.appendChild(inlineTag);
+            inlineTag.appendChild(headTag.getOwnerDocument().createTextNode(inlineJs.toString()));
             inlineJs.setLength(0);
           }
-          content.appendHead(String.format(externFmt, library.getContent()));
+          Element referenceTag = headTag.getOwnerDocument().createElement("script");
+          referenceTag.setAttribute("src", library.getContent());
+          headTag.appendChild(referenceTag);
         } else {
           if (!forced.contains(feature.getName())) {
             // already pulled this file in from the shared contents.
@@ -223,9 +260,9 @@ public class RenderingContentRewriter implements ContentRewriter {
     inlineJs.append(getLibraryConfig(gadget, features));
 
     if (inlineJs.length() > 0) {
-      content.appendHead("<script>")
-             .appendHead(inlineJs)
-             .appendHead("</script>");
+      Element inlineTag = headTag.getOwnerDocument().createElement("script");
+      headTag.appendChild(inlineTag);
+      inlineTag.appendChild(headTag.getOwnerDocument().createTextNode(inlineJs.toString()));
     }
   }
 
@@ -332,21 +369,23 @@ public class RenderingContentRewriter implements ContentRewriter {
    * Injects message bundles into the gadget output.
    * @throws GadgetException If we are unable to retrieve the message bundle.
    */
-  private void injectMessageBundles(Gadget gadget, GadgetContent content) throws GadgetException {
+  private void injectMessageBundles(Gadget gadget, Node scriptTag) throws GadgetException {
     GadgetContext context = gadget.getContext();
     MessageBundle bundle = messageBundleFactory.getBundle(
         gadget.getSpec(), context.getLocale(), context.getIgnoreCache());
 
     String msgs = new JSONObject(bundle.getMessages()).toString();
-    content.appendHead("gadgets.Prefs.setMessages_(")
-           .appendHead(msgs)
-           .appendHead(");");
+
+    Text text = scriptTag.getOwnerDocument().createTextNode("gadgets.Prefs.setMessages_(");
+    text.appendData(msgs.toString());
+    text.appendData(");");
+    scriptTag.appendChild(text);
   }
 
   /**
    * Injects default values for user prefs into the gadget output.
    */
-  private void injectDefaultPrefs(Gadget gadget, GadgetContent content) {
+  private void injectDefaultPrefs(Gadget gadget, Node scriptTag) {
     JSONObject defaultPrefs = new JSONObject();
     try {
       for (UserPref up : gadget.getSpec().getUserPrefs()) {
@@ -355,9 +394,10 @@ public class RenderingContentRewriter implements ContentRewriter {
     } catch (JSONException e) {
       // Never happens. Name is required (cannot be null). Default value is a String.
     }
-    content.appendHead("gadgets.Prefs.setDefaultPrefs_(")
-           .appendHead(defaultPrefs.toString())
-           .appendHead(");");
+    Text text = scriptTag.getOwnerDocument().createTextNode("gadgets.Prefs.setDefaultPrefs_(");
+    text.appendData(defaultPrefs.toString());
+    text.appendData(");");
+    scriptTag.appendChild(text);
   }
 
   /**
@@ -365,7 +405,7 @@ public class RenderingContentRewriter implements ContentRewriter {
    *
    * If preloading fails for any reason, we just output an empty object.
    */
-  private void injectPreloads(Gadget gadget, GadgetContent content) {
+  private void injectPreloads(Gadget gadget, Node scriptTag) {
     JSONObject preload = new JSONObject();
     Preloads preloads = gadget.getPreloads();
 
@@ -380,107 +420,9 @@ public class RenderingContentRewriter implements ContentRewriter {
         throw new RuntimeException(e);
       }
     }
-
-    content.appendHead("gadgets.io.preloaded_=")
-           .appendHead(preload.toString())
-           .appendHead(";");
-  }
-
-  /**
-   * Produces GadgetContent by parsing the document into 3 pieces (head, body, and tail). If the
-   */
-  private GadgetContent createGadgetContent(Gadget gadget, MutableContent mutableContent) {
-    String doc = mutableContent.getContent();
-    // Quick check for full document tags
-    String head = doc.substring(0, Math.min(150, doc.length()));
-    if (head.contains("<HTML") || head.contains("<html")) {
-      Matcher matcher = DOCUMENT_SPLIT_PATTERN.matcher(doc);
-      if (matcher.matches()) {
-        GadgetContent content = new GadgetContent();
-        content.appendHead(matcher.group(BEFORE_HEAD_GROUP))
-               .appendHead("<head>");
-
-        content.appendBody(matcher.group(HEAD_GROUP))
-               .appendBody("</head>")
-               .appendBody(createBodyTag(gadget, matcher.group(BODY_ATTRIBUTES_GROUP)))
-               .appendBody(matcher.group(BODY_GROUP));
-
-        content.appendTail("</body></html>");
-        return content;
-      } else {
-        return makeDefaultContent(gadget, mutableContent);
-      }
-    }
-    return makeDefaultContent(gadget, mutableContent);
-  }
-
-  /**
-   * Inserts basic content for a gadget. Used when the content does not contain a valid html doc.
-   */
-  private GadgetContent makeDefaultContent(Gadget gadget, MutableContent mutableContent) {
-    GadgetContent content = new GadgetContent();
-    content.appendHead("<html><head>");
-    content.appendHead(DEFAULT_HEAD_CONTENT);
-    content.appendBody("</head>");
-    content.appendBody(createBodyTag(gadget, ""));
-    content.appendBody(mutableContent.getContent());
-    content.appendTail("</body></html>");
-    return content;
-  }
-
-  /**
-   * Produces the default body tag, inserting language direction as needed.
-   */
-  private String createBodyTag(Gadget gadget, String extra) {
-    LocaleSpec localeSpec = gadget.getLocale();
-    if (localeSpec == null) {
-      return "<body" + extra + ">";
-    } else {
-      return "<body" + extra + " dir='" + localeSpec.getLanguageDirection() + "'>";
-    }
-  }
-
-  /**
-   * Produces a final document for the gadget's content.
-   */
-  private String finalizeDocument(Gadget gadget, GadgetContent content) {
-    return content.assemble();
-  }
-
-  private static class GadgetContent {
-    private final StringBuilder head = new StringBuilder();
-    private final StringBuilder body = new StringBuilder();
-    private final StringBuilder tail = new StringBuilder();
-
-    GadgetContent appendHead(CharSequence content) {
-      head.append(content);
-      return this;
-    }
-
-    GadgetContent appendBody(CharSequence content) {
-      body.append(content);
-      return this;
-    }
-
-    GadgetContent appendTail(CharSequence content) {
-      tail.append(content);
-      return this;
-    }
-
-    /**
-     * @return The final content for the gadget.
-     */
-    String assemble() {
-      return new StringBuilder(head.length() + body.length() + tail.length())
-          .append(head)
-          .append(body)
-          .append(tail)
-          .toString();
-    }
-
-    @Override
-    public String toString() {
-      return assemble();
-    }
+    Text text = scriptTag.getOwnerDocument().createTextNode("gadgets.io.preloaded_=");
+    text.appendData(preload.toString());
+    text.appendData(";");
+    scriptTag.appendChild(text);
   }
 }

@@ -71,6 +71,8 @@ public class NekoHtmlParser extends GadgetHtmlParser {
   private Document parseFragment(String source) throws SAXException, IOException {
     InputSource input = new InputSource(new StringReader(source));
     DOMFragmentParser parser = new DOMFragmentParser();
+    parser.setProperty("http://cyberneko.org/html/properties/names/elems", "default");
+
 
     Document htmlDoc = documentProvider.createDocument(null, null, null);
     DocumentFragment fragment = htmlDoc.createDocumentFragment();
