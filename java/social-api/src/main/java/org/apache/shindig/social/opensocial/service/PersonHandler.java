@@ -78,14 +78,7 @@ public class PersonHandler extends DataRequestHandler {
       throw new IllegalArgumentException("Cannot fetch personIds for multiple userIds");
     }
 
-    CollectionOptions options = new CollectionOptions();
-    options.setSortBy(request.getSortBy());
-    options.setSortOrder(request.getSortOrder());
-    options.setFilter(request.getFilterBy());
-    options.setFilterOperation(request.getFilterOperation());
-    options.setFilterValue(request.getFilterValue());
-    options.setFirst(request.getStartIndex());
-    options.setMax(request.getCount());
+    CollectionOptions options = new CollectionOptions(request);
 
     if (userIds.size() == 1) {
       if (optionalPersonId.isEmpty()) {
