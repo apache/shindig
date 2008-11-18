@@ -31,7 +31,11 @@ public class ThreadSafeWriterStack implements WriterStack {
   /**
    * A thread local holder for the stack.
    */
-  private ThreadLocal<List<String>> stackHolder = new ThreadLocal<List<String>>();
+  private ThreadLocal<List<String>> stackHolder = new ThreadLocal<List<String>>() { 
+      protected List<String> initialValue() {
+        return new ArrayList<String>();
+      }
+  };
 
   /**
    * Create a {@link WriterStack} that is thread safe. The stack will store its
@@ -40,7 +44,6 @@ public class ThreadSafeWriterStack implements WriterStack {
    * writer per thread.
    */
   public ThreadSafeWriterStack() {
-    stackHolder.set(new ArrayList<String>());
   }
 
   /**
@@ -89,5 +92,4 @@ public class ThreadSafeWriterStack implements WriterStack {
   public void reset() {
     stackHolder.get().clear();
   }
-
 }
