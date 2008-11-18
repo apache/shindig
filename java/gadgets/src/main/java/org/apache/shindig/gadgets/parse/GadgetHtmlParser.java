@@ -71,6 +71,12 @@ public abstract class GadgetHtmlParser {
             document.createElement("head"),
             document.getDocumentElement().getFirstChild());
       }
+      // If body not found the document was entirely empty. Create the
+      // element anyway
+      if (DomUtil.getFirstNamedChildNode(document.getDocumentElement(), "body") == null) {
+        document.getDocumentElement().appendChild(
+            document.createElement("body"));
+      }
       if (shouldCache) {
         documentCache.addElement(key, document);
       }
