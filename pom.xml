@@ -513,6 +513,23 @@
 
     <plugins>
       <plugin>
+        <groupId>org.apache.geronimo.genesis.plugins</groupId>
+        <artifactId>tools-maven-plugin</artifactId>
+        <version>1.4</version>
+        <executions>
+          <execution>
+            <id>verify-legal-files</id>
+            <phase>verify</phase>
+            <goals>
+              <goal>verify-legal-files</goal>
+            </goals>
+            <configuration>
+              <strict>true</strict>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin> 
+      <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-war-plugin</artifactId>
       </plugin>
@@ -550,7 +567,7 @@
           </execution>
         </executions>
         <configuration>
-          <excludeResources>true</excludeResources>
+          <excludeResources>false</excludeResources>
           <attach>true</attach>
         </configuration>
       </plugin>
@@ -630,6 +647,7 @@
           </excludes>
         </configuration>
       </plugin> 
+
     </plugins>
 
     <pluginManagement>
