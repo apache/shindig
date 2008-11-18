@@ -32,7 +32,7 @@ public interface ContentRewriter {
    * @param request Originating request, as context.
    * @param original Original HTTP response, for context.
    * @param content Original content.
-   * @return Object indicating results cacheability, or null (indicates not cacheable).
+   * @return Object indicating results cacheability or null indicating no rewriting occurred
    */
   RewriterResults rewrite(HttpRequest request, HttpResponse original, MutableContent content);
 
@@ -41,7 +41,7 @@ public interface ContentRewriter {
    * for the bulk of this.
    *
    * @param gadget Gadget to rewrite.
-   * @return Object indicating results cacheability, or null (indicates not cacheable).
+   * @return Object indicating results cacheability or null indicating no rewriting occurred
    */
   RewriterResults rewrite(Gadget gadget, MutableContent content);
 }

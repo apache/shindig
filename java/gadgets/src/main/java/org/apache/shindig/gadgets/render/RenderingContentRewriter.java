@@ -116,8 +116,9 @@ public class RenderingContentRewriter implements ContentRewriter {
     this.urlGenerator = urlGenerator;
   }
 
-  public RewriterResults rewrite(HttpRequest req, HttpResponse resp,  MutableContent content) {
-    return RewriterResults.cacheableIndefinitely();
+  public RewriterResults rewrite(HttpRequest req, HttpResponse resp, MutableContent content) {
+    // Rendering does not rewrite arbitrary HTTP responses currently
+    return null;
   }
 
   public RewriterResults rewrite(Gadget gadget, MutableContent mutableContent) {

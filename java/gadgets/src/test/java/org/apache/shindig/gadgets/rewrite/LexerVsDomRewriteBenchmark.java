@@ -18,7 +18,6 @@
  */
 package org.apache.shindig.gadgets.rewrite;
 
-import org.apache.commons.io.IOUtils;
 import org.apache.shindig.common.PropertiesModule;
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.gadgets.DefaultGuiceModule;
@@ -36,7 +35,8 @@ import org.apache.shindig.gadgets.spec.GadgetSpec;
 
 import com.google.inject.Guice;
 import com.google.inject.Injector;
-import org.w3c.dom.Document;
+
+import org.apache.commons.io.IOUtils;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -107,25 +107,20 @@ public class LexerVsDomRewriteBenchmark {
     this.numRuns = numRuns;
 
     warmup = true;
-    //runLexer();
+    runLexer();
     //run(cajaParser);
     run(nekoParser);
-    //run(nekoSimpleParser);
-    runNoParse(nekoSimpleParser);
+    run(nekoSimpleParser);
     Thread.sleep(5000L);
     warmup = false;
-    //System.out.println("Lexer------");
-    //runLexer();
+    System.out.println("Lexer------");
+    runLexer();
     //System.out.println("Caja-------");
     //run(cajaParser);
-    //System.out.println("Neko-------");
-    //run(nekoParser);
+    System.out.println("Neko-------");
+    run(nekoParser);
     System.out.println("NekoSimple-------");
     run(nekoSimpleParser);
-    System.out.println("No-Parse rewrite full DOM-------");
-    runNoParse(nekoParser);
-    System.out.println("No-Parse rewrite simple DOM-------");
-    runNoParse(nekoSimpleParser);
   }
 
   private void output(String content) {
@@ -137,7 +132,7 @@ public class LexerVsDomRewriteBenchmark {
   private void runLexer() throws Exception {
    long startTime = System.currentTimeMillis();
     for (int i = 0; i < numRuns; i++) {
-      MutableContent mc = new MutableContent(null, content, null);
+      MutableContent mc = new MutableContent(null, content);
       lexerRewriter.rewrite(gadget, mc);
       mc.getContent();
     }
@@ -149,7 +144,7 @@ public class LexerVsDomRewriteBenchmark {
   private void run(GadgetHtmlParser parser) throws Exception {
     long startTime = System.currentTimeMillis();
     for (int i = 0; i < numRuns; i++) {
-      MutableContent mc = new MutableContent(parser, content, null);
+      MutableContent mc = new MutableContent(parser, content);
       //linkRewriter.rewrite(gadget, mc);
       //jsConcatRewriter.rewrite(gadget, mc);
       //styleLinksRewriter.rewrite(gadget, mc);
@@ -161,21 +156,6 @@ public class LexerVsDomRewriteBenchmark {
           ((double)time)/numRuns + "ms/run]");
 
   }
-
-  private void runNoParse(GadgetHtmlParser parser) throws Exception {
-    Document doc = parser.parseDom(content);
-    long startTime = System.currentTimeMillis();
-    for (int i = 0; i < numRuns; i++) {
-      MutableContent mc = new MutableContent(parser, null, doc);
-      htmlRewriter.rewrite(gadget, mc);          
-      mc.getContent();
-    }
-    long time = System.currentTimeMillis() - startTime;
-    output("DOM no-parse Rewrite [" + time + " ms total: " +
-          ((double)time)/numRuns + "ms/run]");
-
-  }
-
 
   public static void main(String[] args) {
     // Test can be run as standalone program to test out serialization and parsing

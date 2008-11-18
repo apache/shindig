@@ -17,34 +17,28 @@
  */
 package org.apache.shindig.gadgets.rewrite;
 
-import org.apache.shindig.common.PropertiesModule;
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.gadgets.Gadget;
 import org.apache.shindig.gadgets.GadgetContext;
 import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.http.HttpResponse;
-import org.apache.shindig.gadgets.parse.GadgetHtmlParser;
-import org.apache.shindig.gadgets.parse.ParseModule;
 import org.apache.shindig.gadgets.spec.GadgetSpec;
 
 import com.google.common.collect.Lists;
-import com.google.inject.Guice;
-import com.google.inject.Injector;
-import junit.framework.TestCase;
+
+import org.easymock.classextension.EasyMock;
 
 import java.util.Arrays;
 import java.util.List;
 
-public class DefaultContentRewriterRegistryTest extends TestCase {
+public class DefaultContentRewriterRegistryTest extends BaseRewriterTestCase {
   private static final Uri SPEC_URL = Uri.parse("http://example.org/gadget.xml");
   private List<CaptureRewriter> rewriters;
   private List<ContentRewriter> contentRewriters;
   private ContentRewriterRegistry registry;
-  private GadgetHtmlParser parser;
 
   protected void setUp() throws Exception {
-    Injector injector = Guice.createInjector(new ParseModule(), new PropertiesModule());
-    parser = injector.getInstance(GadgetHtmlParser.class);
+    super.setUp();
     rewriters = Arrays.asList(new CaptureRewriter(), new CaptureRewriter());
     contentRewriters = Lists.<ContentRewriter>newArrayList(rewriters);
     registry = new DefaultContentRewriterRegistry(contentRewriters, parser);
@@ -95,5 +89,27 @@ public class DefaultContentRewriterRegistryTest extends TestCase {
     assertTrue("Second rewriter invoked.", rewriters.get(1).viewWasRewritten());
 
     assertEquals(body, rewritten); 
+  }
+
+  /**
+   * This test ensures that we dont call HttpRespose.getResponseAsString for content types
+   * that are not rewriteable by the default set of content rewriters. This is important
+   * from a performance and content consistency standpoint. Because HttpResonse is final
+   * we test that no new
+   */
+  public void testNoDecodeHttpResponseForUnRewriteableMimeTypes() {
+    List<ContentRewriter> rewriters = Lists.newArrayList();
+    rewriters.add(injector.getInstance(HTMLContentRewriter.class));
+    rewriters.add(injector.getInstance(CSSContentRewriter.class));
+    registry = new DefaultContentRewriterRegistry(rewriters, parser);
+
+    HttpRequest req = mock(HttpRequest.class);
+    EasyMock.expect(req.getRewriteMimeType()).andReturn("unknown");
+
+    replay();
+    HttpResponse rewritten = registry.rewriteHttpResponse(req, fakeResponse);
+    // Assert that response is untouched
+    assertTrue(rewritten == fakeResponse);
+    verify();
   }
 }

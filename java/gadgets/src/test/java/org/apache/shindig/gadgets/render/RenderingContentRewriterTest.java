@@ -18,34 +18,58 @@
  */
 package org.apache.shindig.gadgets.render;
 
-import com.google.caja.util.Join;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
-import com.google.common.collect.Sets;
 import org.apache.shindig.common.ContainerConfig;
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.common.xml.XmlUtil;
-import org.apache.shindig.gadgets.*;
+import org.apache.shindig.gadgets.Gadget;
+import org.apache.shindig.gadgets.GadgetContext;
+import org.apache.shindig.gadgets.GadgetException;
+import org.apache.shindig.gadgets.GadgetFeature;
+import org.apache.shindig.gadgets.GadgetFeatureRegistry;
+import org.apache.shindig.gadgets.JsLibrary;
+import org.apache.shindig.gadgets.MessageBundleFactory;
+import org.apache.shindig.gadgets.UrlGenerator;
 import org.apache.shindig.gadgets.preload.NullPreloads;
 import org.apache.shindig.gadgets.preload.PreloadException;
 import org.apache.shindig.gadgets.preload.PreloadedData;
 import org.apache.shindig.gadgets.preload.Preloads;
-import static org.apache.shindig.gadgets.render.RenderingContentRewriter.*;
+import static org.apache.shindig.gadgets.render.RenderingContentRewriter.BEFORE_HEAD_GROUP;
+import static org.apache.shindig.gadgets.render.RenderingContentRewriter.BODY_ATTRIBUTES_GROUP;
+import static org.apache.shindig.gadgets.render.RenderingContentRewriter.BODY_GROUP;
+import static org.apache.shindig.gadgets.render.RenderingContentRewriter.DEFAULT_HEAD_CONTENT;
+import static org.apache.shindig.gadgets.render.RenderingContentRewriter.DOCUMENT_SPLIT_PATTERN;
+import static org.apache.shindig.gadgets.render.RenderingContentRewriter.FEATURES_KEY;
+import static org.apache.shindig.gadgets.render.RenderingContentRewriter.HEAD_GROUP;
+import static org.apache.shindig.gadgets.render.RenderingContentRewriter.INSERT_BASE_ELEMENT_KEY;
 import org.apache.shindig.gadgets.rewrite.MutableContent;
 import org.apache.shindig.gadgets.spec.GadgetSpec;
 import org.apache.shindig.gadgets.spec.LocaleSpec;
 import org.apache.shindig.gadgets.spec.MessageBundle;
 import org.apache.shindig.gadgets.spec.View;
+
+import com.google.caja.util.Join;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
+
 import static org.easymock.EasyMock.expect;
 import org.easymock.classextension.EasyMock;
 import org.easymock.classextension.IMocksControl;
 import org.json.JSONException;
 import org.json.JSONObject;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -84,7 +108,7 @@ public class RenderingContentRewriterTest {
   }
 
   private String rewrite(Gadget gadget, String content) {
-    MutableContent mc = new MutableContent(null, content, null);
+    MutableContent mc = new MutableContent(null, content);
     assertEquals(0, rewriter.rewrite(gadget, mc).getCacheTtl());
     return mc.getContent();
   }

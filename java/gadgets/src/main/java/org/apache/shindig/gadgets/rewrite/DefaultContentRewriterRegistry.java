@@ -17,15 +17,15 @@
  */
 package org.apache.shindig.gadgets.rewrite;
 
-import com.google.inject.Inject;
 import org.apache.shindig.gadgets.Gadget;
 import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.http.HttpResponse;
 import org.apache.shindig.gadgets.http.HttpResponseBuilder;
 import org.apache.shindig.gadgets.parse.GadgetHtmlParser;
-import org.apache.shindig.gadgets.spec.GadgetSpec;
 import org.apache.shindig.gadgets.spec.View;
+
+import com.google.inject.Inject;
 
 import java.util.Collections;
 import java.util.LinkedList;
@@ -54,7 +54,7 @@ public class DefaultContentRewriterRegistry implements ContentRewriterRegistry {
       // Nothing to rewrite.
       return null;
     }
-    MutableContent mc = getMutableContent(gadget.getSpec(), currentView);
+    MutableContent mc = new MutableContent(htmlParser, currentView.getContent());
 
     for (ContentRewriter rewriter : rewriters) {
       rewriter.rewrite(gadget, mc);
@@ -68,8 +68,7 @@ public class DefaultContentRewriterRegistry implements ContentRewriterRegistry {
       // Nothing to rewrite.
       return null;
     }
-
-    MutableContent mc = getMutableContent(content);
+    MutableContent mc = new MutableContent(htmlParser, content);
 
     for (ContentRewriter rewriter : rewriters) {
       rewriter.rewrite(gadget, mc);
@@ -80,30 +79,17 @@ public class DefaultContentRewriterRegistry implements ContentRewriterRegistry {
 
   /** {@inheritDoc} */
   public HttpResponse rewriteHttpResponse(HttpRequest req, HttpResponse resp) {
-    String originalContent = resp.getResponseAsString();
-    MutableContent mc = getMutableContent(originalContent);
+    MutableContent mc = new MutableContent(htmlParser, resp);
 
+    boolean wasRewritten = false;
     for (ContentRewriter rewriter : rewriters) {
-      rewriter.rewrite(req, resp, mc);
+      wasRewritten |= (rewriter.rewrite(req, resp, mc) != null);
     }
 
-    String rewrittenContent = mc.getContent();
-    if (rewrittenContent.equals(originalContent)) {
-      return resp;
+    if (wasRewritten) {
+      return new HttpResponseBuilder(resp).setResponseString(mc.getContent()).create();
     }
-
-    return new HttpResponseBuilder(resp).setResponseString(rewrittenContent).create();
-  }
-
-  protected MutableContent getMutableContent(String content) {
-    MutableContent mc = new MutableContent(htmlParser, content, null);
-    return mc;
-  }
-
-  protected MutableContent getMutableContent(GadgetSpec spec, View v) throws GadgetException {
-    // TODO - Consider using caching here to avoid parse costs
-    MutableContent mc = new MutableContent(htmlParser, v.getContent(), null);
-    return mc;
+    return resp;
   }
 
   protected List<ContentRewriter> getRewriters() {
