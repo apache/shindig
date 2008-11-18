@@ -17,11 +17,13 @@
  */
 package org.apache.shindig.gadgets.rewrite;
 
-import org.apache.commons.io.IOUtils;
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.http.HttpResponse;
 import org.apache.shindig.gadgets.http.HttpResponseBuilder;
+
+import org.apache.commons.io.IOUtils;
+import org.easymock.classextension.EasyMock;
 
 /**
  *
@@ -51,10 +53,19 @@ public class CSSContentRewriterTest extends BaseRewriterTestCase {
     HttpResponse response = new HttpResponseBuilder().setHeader("Content-Type", "text/css")
       .setResponseString(content).create();
 
-    MutableContent mc = new MutableContent(null, content, null);
+    MutableContent mc = new MutableContent(null, content);
     rewriter.rewrite(request, response, mc);
 
     assertEquals(expected, mc.getContent());
   }
 
+    public void testNoRewriteUnknownMimeType() {
+    // Strict mock as we expect no calls
+    MutableContent mc = mock(MutableContent.class, true);
+    HttpRequest req = mock(HttpRequest.class);
+    EasyMock.expect(req.getRewriteMimeType()).andReturn("unknown");
+    replay();
+    assertNull(rewriter.rewrite(req, fakeResponse, mc));
+    verify();
+  }
 }

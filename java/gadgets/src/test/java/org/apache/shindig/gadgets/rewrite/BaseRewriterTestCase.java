@@ -17,7 +17,6 @@
  */
 package org.apache.shindig.gadgets.rewrite;
 
-import org.apache.commons.lang.StringUtils;
 import org.apache.shindig.common.PropertiesModule;
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.gadgets.EasyMockTestCase;
@@ -25,12 +24,16 @@ import org.apache.shindig.gadgets.Gadget;
 import org.apache.shindig.gadgets.GadgetContext;
 import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.http.HttpRequest;
+import org.apache.shindig.gadgets.http.HttpResponse;
+import org.apache.shindig.gadgets.http.HttpResponseBuilder;
 import org.apache.shindig.gadgets.parse.GadgetHtmlParser;
 import org.apache.shindig.gadgets.parse.ParseModule;
 import org.apache.shindig.gadgets.spec.GadgetSpec;
 
 import com.google.inject.Guice;
 import com.google.inject.Injector;
+
+import org.apache.commons.lang.StringUtils;
 
 import java.net.URI;
 import java.util.Set;
@@ -49,6 +52,7 @@ public abstract class BaseRewriterTestCase extends EasyMockTestCase {
   protected LinkRewriter defaultLinkRewriter;
   protected GadgetHtmlParser parser;
   protected Injector injector;
+  protected HttpResponse fakeResponse;
 
   @Override
   protected void setUp() throws Exception {
@@ -63,6 +67,8 @@ public abstract class BaseRewriterTestCase extends EasyMockTestCase {
         DEFAULT_PROXY_BASE);
     injector = Guice.createInjector(new ParseModule(), new PropertiesModule());
     parser = injector.getInstance(GadgetHtmlParser.class);
+    fakeResponse = new HttpResponseBuilder().setHeader("Content-Type", "unknown")
+        .setResponse(new byte[]{ (byte)0xFE, (byte)0xFF}).create();
   }
 
   public static GadgetSpec createSpecWithRewrite(String include, String exclude, String expires,
@@ -111,7 +117,7 @@ public abstract class BaseRewriterTestCase extends EasyMockTestCase {
 
   MutableContent rewriteContent(ContentRewriter rewriter, String s)
       throws Exception {
-    MutableContent mc = new MutableContent(parser, s, null);
+    MutableContent mc = new MutableContent(parser, s);
 
     GadgetSpec spec = new GadgetSpec(SPEC_URL,
         "<Module><ModulePrefs title=''/><Content><![CDATA[" + s + "]]></Content></Module>");

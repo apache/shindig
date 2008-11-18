@@ -50,7 +50,7 @@ public class CajaContentRewriter implements ContentRewriter {
   private final Logger logger = Logger.getLogger(CajaContentRewriter.class.getName());
 
   public RewriterResults rewrite(HttpRequest req, HttpResponse resp, MutableContent content) {
-    return RewriterResults.cacheableIndefinitely();
+    return null;
   }
 
   public RewriterResults rewrite(Gadget gadget, MutableContent content) {
@@ -105,7 +105,7 @@ public class CajaContentRewriter implements ContentRewriter {
       }      
       content.setContent(output.toString());
     }
-    return RewriterResults.notCacheable();
+    return null;
   }
 
   private void throwCajolingException(Exception cause, MessageQueue mq) {

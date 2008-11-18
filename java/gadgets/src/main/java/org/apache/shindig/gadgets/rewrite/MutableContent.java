@@ -18,8 +18,10 @@
 package org.apache.shindig.gadgets.rewrite;
 
 import org.apache.shindig.gadgets.GadgetException;
+import org.apache.shindig.gadgets.http.HttpResponse;
 import org.apache.shindig.gadgets.parse.GadgetHtmlParser;
 import org.apache.shindig.gadgets.parse.HtmlSerializer;
+
 import org.w3c.dom.Document;
 
 /**
@@ -28,6 +30,7 @@ import org.w3c.dom.Document;
  */
 public class MutableContent {
   private String content;
+  private HttpResponse contentSource;
   private Document document;
   private final GadgetHtmlParser contentParser;
 
@@ -41,21 +44,22 @@ public class MutableContent {
   }
 
   /**
-   * NOTE! Passed documents are cloned to ensure they are safe prior to rewriting
+   * Construct with decoded string content
    */
-  public MutableContent(GadgetHtmlParser contentParser, String content, Document document) {
+  public MutableContent(GadgetHtmlParser contentParser, String content) {
     this.contentParser = contentParser;
     this.content = content;
-    this.document = document;
-    if (document != null) {
-      // There are many shared document instances so cloning is essential
-      // TODO - Consider doing a late clone
-      this.document = (Document) document.cloneNode(true);
-      HtmlSerializer.copySerializer(document, this.document);
-      this.document.setUserData(MUTABLE_CONTENT_LISTENER, this, null);
-    }
-
   }
+
+  /**
+   * Construct with HttpResponse so we can defer string decoding until we actually need
+   * the content. Given that we dont rewrite many mime types this is a performance advantage
+   */
+  public MutableContent(GadgetHtmlParser contentParser, HttpResponse contentSource) {
+    this.contentParser = contentParser;
+    this.contentSource = contentSource;
+  }
+
 
   /**
    * Retrieves the current content for this object in String form.
@@ -68,8 +72,14 @@ public class MutableContent {
    * @return Renderable/active content.
    */
   public String getContent() {
-    if (content == null && document != null) {
-      content = HtmlSerializer.serialize(document);
+    if (content == null) {
+      if (contentSource != null) {
+        content = contentSource.getResponseAsString();
+        // Clear on first use
+        contentSource = null;
+      } else if (document != null) {
+        content = HtmlSerializer.serialize(document);
+      }
     }
     return content;
   }
@@ -84,6 +94,7 @@ public class MutableContent {
     if (content == null || !content.equals(newContent)) {
       content = newContent;
       document = null;
+      contentSource = null;
     }
   }
 
@@ -95,6 +106,7 @@ public class MutableContent {
   public void documentChanged() {
     if (document != null) {
       content = null;
+      contentSource = null;
     }
   }
   
@@ -112,17 +124,21 @@ public class MutableContent {
     if (document != null) {
       return document;
     }
-    if (content == null || contentParser == null) {
-      return null;
-    }
-  
     try {
-      document = contentParser.parseDom(content);
+      document = contentParser.parseDom(getContent());
       document.setUserData(MUTABLE_CONTENT_LISTENER, this, null);
     } catch (GadgetException e) {
       // TODO: emit info message
       return null;
     }
     return document;
+  }
+
+  /**
+   * True if current state has a parsed document. Allows rewriters to switch mode based on
+   * which content is most readily available
+   */
+  public boolean hasDocument() {
+    return (document != null);
   }
 }

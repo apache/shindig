@@ -17,8 +17,10 @@
  */
 package org.apache.shindig.gadgets.rewrite;
 
-import org.apache.commons.io.IOUtils;
+import org.apache.shindig.gadgets.http.HttpRequest;
 
+import org.apache.commons.io.IOUtils;
+import org.easymock.classextension.EasyMock;
 import org.w3c.dom.Document;
 
 /**
@@ -155,4 +157,13 @@ public class HTMLContentRewriterTest extends BaseRewriterTestCase {
         "div { color : black; }");
   }
 
+  public void testNoRewriteUnknownMimeType() {
+    // Strict mock as we expect no calls
+    MutableContent mc = mock(MutableContent.class, true);
+    HttpRequest req = mock(HttpRequest.class);
+    EasyMock.expect(req.getRewriteMimeType()).andReturn("unknown");
+    replay();
+    assertNull(rewriter.rewrite(req, fakeResponse, mc));
+    verify();
+  }
 }
