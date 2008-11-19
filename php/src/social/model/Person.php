@@ -174,7 +174,7 @@ class Person {
 
 	public function setBirthday($birthday)
 	{
-		// TODO: enforce YYYY-MM-DD format here?
+		$birthday = date('Y-m-d', strtotime($birthday));
 		$this->setFieldImpl('birthday', $birthday);
 	}
 
