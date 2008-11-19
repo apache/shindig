@@ -19,8 +19,8 @@ package org.apache.shindig.gadgets.variables;
 
 import org.apache.shindig.common.uri.Uri;
 
-import java.util.EnumMap;
-import java.util.HashMap;
+import com.google.common.collect.Maps;
+
 import java.util.Map;
 
 /**
@@ -28,11 +28,11 @@ import java.util.Map;
  * variables.
  */
 public class Substitutions {
-
   /**
    * Defines all of the valid types of message substitutions.
-   * Note: Order is important here, since the order of the enum is the
-   * order of evaluation. Don't change this unless you know what you're doing.
+   *
+   * NOTE: Order is critical here, since substitutions are only recursive on nodes with lower order
+   * this is to prevent infinite recursion in substitution logic.
    */
   public enum Type {
     /**
@@ -55,7 +55,7 @@ public class Substitutions {
      */
     MODULE("MODULE");
 
-    private String prefix;
+    private final String prefix;
 
     /**
      * Creates a Type with the specified prefix.
@@ -64,25 +64,16 @@ public class Substitutions {
      *        The placeholder prefix for substituted strings.
      */
     Type(String prefix) {
-      this.prefix = "__" + prefix + '_';
-    }
-
-    public String getPrefix() {
-      return prefix;
+      this.prefix = "__" + prefix +  "_";
     }
   }
 
-  private Map<Type, Map<String, String>> substitutions =
-      new EnumMap<Type, Map<String, String>>(Type.class);
+  private final Map<String, String> substitutions;
 
-  /**
-   * Create a basic substitution coordinator.
-   */
   public Substitutions() {
-    for (Type type : Type.values()) {
-      substitutions.put(type, new HashMap<String, String>());
-    }
+    substitutions = Maps.newHashMap();
   }
+
 
   /**
    * Adds a new substitution for the given type.
@@ -92,7 +83,14 @@ public class Substitutions {
    * @param value
    */
   public void addSubstitution(Type type, String key, String value) {
-    substitutions.get(type).put(key, value);
+    substitutions.put(type.prefix + key + "__", value);
+  }
+
+  /**
+   * @return The value stored for the given type and key, or null.
+   */
+  public String getSubstitution(Type type, String key) {
+    return substitutions.get(type.prefix + key + "__");
   }
 
   /**
@@ -102,87 +100,74 @@ public class Substitutions {
    * @param entries
    */
   public void addSubstitutions(Type type, Map<String, String> entries) {
-    substitutions.get(type).putAll(entries);
+    for (Map.Entry<String, String> entry : entries.entrySet()) {
+      addSubstitution(type, entry.getKey(), entry.getValue());
+    }
   }
 
-  /**
-   * @param type
-   * @param name
-   * @return The substitution set under the given type / name, or null.
-   */
-  public String getSubstitution(Type type, String name) {
-    return substitutions.get(type).get(name);
+  private void performSubstitutions(String input, StringBuilder output, boolean isNested) {
+    int lastPosition = 0, i;
+    while ((i = input.indexOf("__", lastPosition)) != -1) {
+      int next = input.indexOf("__", i + 2);
+      if (next == -1) {
+        // No matches, we're done.
+        break;
+      }
+
+      output.append(input.substring(lastPosition, i));
+      lastPosition = next + 2;
+
+      String pattern = input.substring(i, lastPosition);
+
+      boolean isMessage = pattern.startsWith(Type.MESSAGE.prefix);
+      String replacement;
+      if (isMessage && isNested) {
+        replacement = pattern;
+      } else {
+        replacement = substitutions.get(pattern);
+      }
+
+      if (replacement == null) {
+        // Keep it.
+        output.append(pattern);
+      } else  if (isMessage && !isNested) {
+        // Messages can get recursive
+        performSubstitutions(replacement, output, true);
+      } else {
+        output.append(replacement);
+      }
+    }
+
+    output.append(input.substring(lastPosition));
   }
 
   /**
    * Performs string substitution only for the specified type. If no
    * substitution for {@code input} was provided or {@code input} is null,
    * the output is left untouched.
-   *
-   * @param type
-   *        The type you wish to perform substitutions for.
-   * @param input
-   *        The base string, with substitution markers.
+   * @param input The base string, with substitution markers.
    * @return The substituted string.
    */
-  public String substituteString(Type type, String input) {
-    if (input == null) {
-      return null;
+  public String substituteString(String input) {
+    if (input.contains("__")) {
+      StringBuilder output = new StringBuilder(input.length() * 120 / 100);
+      performSubstitutions(input, output, false);
+      return output.toString();
     }
-
-    if (type == null) {
-      for (Type t : Type.values()) {
-        input = substituteString(t, input);
-      }
-      return input;
-    }
-
-    if (substitutions.get(type).isEmpty() || !input.contains(type.prefix)) {
-      return input;
-    }
-
-    StringBuilder output = new StringBuilder();
-    for (int i = 0, j = input.length(); i < j; ++i) {
-      if (input.regionMatches(i, type.prefix, 0, type.prefix.length())) {
-        // Look for a trailing "__". If we don't find it, then this isn't a
-        // properly formed substitution.
-        int start = i + type.prefix.length();
-        int end = input.indexOf("__", start);
-        if (end != -1) {
-          String name = input.substring(start, end);
-          String replacement = substitutions.get(type).get(name);
-          if (replacement != null) {
-            output.append(replacement);
-          } else {
-            output.append(input.substring(i, end + 2));
-          }
-          i = end + 1;
-        } else {
-          // If we didn't find any occurances of "__", then the rest of the
-          // string can't contain any more valid translations.
-          output.append(input.substring(i));
-          break;
-        }
-      } else {
-        output.append(input.charAt(i));
-      }
-    }
-
-    return output.toString();
+    return input;
   }
 
   /**
    * Substitutes a uri
-   * @param type The type to substitute, or null for all types.
    * @param uri
    * @return The substituted uri, or a dummy value if the result is invalid.
    */
-  public Uri substituteUri(Type type, Uri uri) {
+  public Uri substituteUri(Uri uri) {
     if (uri == null) {
       return null;
     }
     try {
-      return Uri.parse(substituteString(type, uri.toString()));
+      return Uri.parse(substituteString(uri.toString()));
     } catch (IllegalArgumentException e) {
       return Uri.parse("");
     }

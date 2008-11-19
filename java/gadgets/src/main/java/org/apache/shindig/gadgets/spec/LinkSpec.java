@@ -43,9 +43,9 @@ public class LinkSpec {
   }
 
   private LinkSpec(LinkSpec rhs, Substitutions substitutions) {
-    rel = substitutions.substituteString(null, rhs.rel);
+    rel = substitutions.substituteString(rhs.rel);
     base = rhs.base;
-    href = base.resolve(substitutions.substituteUri(null, rhs.href));
+    href = base.resolve(substitutions.substituteUri(rhs.href));
   }
 
   /**

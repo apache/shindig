@@ -146,7 +146,7 @@ public class ModulePrefs {
     Map<String, String> attributes
         = new HashMap<String, String>(prefs.attributes.size());
     for (Map.Entry<String, String> attr : prefs.attributes.entrySet()) {
-      String substituted = substituter.substituteString(null, attr.getValue());
+      String substituted = substituter.substituteString(attr.getValue());
       attributes.put(attr.getKey(), substituted);
     }
     this.attributes = Collections.unmodifiableMap(attributes);

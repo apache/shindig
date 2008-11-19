@@ -89,10 +89,10 @@ public class Preload implements RequestAuthenticationInfo {
     auth = preload.auth;
     signOwner = preload.signOwner;
     signViewer = preload.signViewer;
-    href = base.resolve(substituter.substituteUri(null, preload.href));
+    href = base.resolve(substituter.substituteUri(preload.href));
     Map<String, String> attributes = Maps.newHashMap();
     for (Map.Entry<String, String> entry : preload.attributes.entrySet()) {
-      attributes.put(entry.getKey(), substituter.substituteString(null, entry.getValue()));
+      attributes.put(entry.getKey(), substituter.substituteString(entry.getValue()));
     }
     this.attributes = Collections.unmodifiableMap(attributes);
   }
