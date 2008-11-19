@@ -27,13 +27,17 @@ import com.thoughtworks.xstream.converters.extended.ISO8601GregorianCalendarConv
 import com.thoughtworks.xstream.converters.extended.ISO8601SqlTimestampConverter;
 import com.thoughtworks.xstream.converters.reflection.ReflectionProvider;
 import com.thoughtworks.xstream.io.HierarchicalStreamDriver;
+import com.thoughtworks.xstream.mapper.AttributeMapper;
 import com.thoughtworks.xstream.mapper.Mapper;
 
 import org.apache.shindig.social.core.model.EnumImpl;
+import org.apache.shindig.social.core.util.atom.AtomAttribute;
+import org.apache.shindig.social.core.util.atom.AtomAttributeConverter;
 import org.apache.shindig.social.core.util.atom.AtomContent;
 import org.apache.shindig.social.core.util.atom.AtomEntry;
 import org.apache.shindig.social.core.util.atom.AtomFeed;
 import org.apache.shindig.social.core.util.atom.AtomKeyValue;
+import org.apache.shindig.social.core.util.atom.AtomLinkConverter;
 import org.apache.shindig.social.opensocial.model.Account;
 import org.apache.shindig.social.opensocial.model.Activity;
 import org.apache.shindig.social.opensocial.model.Address;
@@ -361,7 +365,8 @@ public class XStream081Configuration implements XStreamConfiguration {
   private Converter[] getConverters(Mapper mapper, ConverterSet c) {
     return new Converter[] { new MapConverter(mapper),
         new RestfullCollectionConverter(mapper),
-        new DataCollectionConverter(mapper) };
+        new DataCollectionConverter(mapper),
+        new AtomLinkConverter()};
   }
 
   /**
@@ -408,9 +413,13 @@ public class XStream081Configuration implements XStreamConfiguration {
     InterfaceClassMapper fmapper = new InterfaceClassMapper(writerStack, emapper,
         getElementMappingList(c), getListElementMappingList(c),
         getItemFieldMappings(c), getOmitMap(c), getElementClassMap(c));
+    AttributeMapper amapper = new AttributeMapper(fmapper);
+    
+    
 
-    XStream xstream = new XStream(rp, fmapper, driver);
-
+    
+    XStream xstream = new XStream(rp, amapper, driver);
+    amapper.addAttributeFor(AtomAttribute.class);
     for (Converter converter : getConverters(fmapper, c)) {
       xstream.registerConverter(converter);
     }
@@ -418,6 +427,7 @@ public class XStream081Configuration implements XStreamConfiguration {
     xstream.registerConverter(new ISO8601GregorianCalendarConverter());
     xstream.registerConverter(new ISO8601SqlTimestampConverter());
     xstream.registerConverter(new GuiceBeanConverter(fmapper, injector));
+    xstream.registerConverter(new AtomAttributeConverter());
     xstream.setMode(XStream.NO_REFERENCES);
 
     return new ConverterConfig(fmapper,xstream);

@@ -127,7 +127,6 @@ public class BeanXStreamAtomConverterTest extends TestCase {
 
   public void testPersonToXml() throws Exception {
     String xml = beanXmlConverter.convertToString(johnDoe);
-
     Element element = XmlUtil.parse(xml);
     Node id = element.getElementsByTagName("id").item(0);
     assertEquals("urn:guid:" + johnDoe.getId(), id.getTextContent());
@@ -158,8 +157,8 @@ public class BeanXStreamAtomConverterTest extends TestCase {
     XmlUtil.parse(xml);
 
     String expectedXml = " <feed xmlns=\"http://ns.opensocial.org/2008/opensocial\" xmlos:osearch=\"http://a9.com/-/spec/opensearch/1.1\" > "
-        + " <entry><id>item1</id><content><entry><key>value</key><value>1</value></entry></content></entry> "
-        + " <entry><id>item2</id><content><entry><key>value</key><value>2</value></entry></content></entry> "
+        + " <entry><id>item1</id><content type=\"application/xml\" ><entry><key>value</key><value>1</value></entry></content></entry> "
+        + " <entry><id>item2</id><content type=\"application/xml\" ><entry><key>value</key><value>2</value></entry></content></entry> "
         + " <osearch:startIndex>0</osearch:startIndex> "
         + " <osearch:totalResults>2</osearch:totalResults> "
         + " <osearch:itemsPerPage>2</osearch:itemsPerPage></feed> ";
@@ -175,8 +174,8 @@ public class BeanXStreamAtomConverterTest extends TestCase {
     XmlUtil.parse(xml);
     String expectedXml = "<feed xmlns=\"http://ns.opensocial.org/2008/opensocial\" "
         + " xmlos:osearch=\"http://a9.com/-/spec/opensearch/1.1\">"
-        + "   <entry><id>key1</id><content><value>value1</value></content></entry>"
-        + "   <entry><id>key2</id><content><value>value2</value></content></entry>"
+        + "   <entry><id>key1</id><content type=\"application/xml\" ><value>value1</value></content></entry>"
+        + "   <entry><id>key2</id><content type=\"application/xml\" ><value>value2</value></content></entry>"
         + "  <osearch:startIndex>0</osearch:startIndex>"
         + "  <osearch:totalResults>2</osearch:totalResults>"
         + "  <osearch:itemsPerPage>2</osearch:itemsPerPage></feed>";

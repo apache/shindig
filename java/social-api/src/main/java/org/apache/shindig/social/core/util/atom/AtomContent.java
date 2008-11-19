@@ -34,8 +34,8 @@ public class AtomContent {
   private Person person;
   @SuppressWarnings("unused")
   private Activity activity;
-  // @SuppressWarnings("unused")
-  // private String type = "application/xml";
+  @SuppressWarnings("unused")
+  private AtomAttribute type = new AtomAttribute("application/xml");
   @SuppressWarnings("unused")
   private Object entry;
   @SuppressWarnings("unused")
