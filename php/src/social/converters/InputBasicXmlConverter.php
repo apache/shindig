@@ -22,12 +22,12 @@
  */
 class InputBasicXmlConverter {
 
-	public function loadString($requestParam, $namespace = null)
+	public static function loadString($requestParam, $namespace = null)
 	{
 		return simplexml_load_string($requestParam, 'SimpleXMLElement', LIBXML_NOCDATA, $namespace);
 	}
 
-	public function convertActivities($xml, $activityXml)
+	public static function convertActivities($xml, $activityXml)
 	{
 		$activity = array();
 		if (! isset($xml->title)) {
@@ -58,7 +58,7 @@ class InputBasicXmlConverter {
 		return $activity;
 	}
 
-	public function convertMessages($requestParam, $xml, $content)
+	public static function convertMessages($requestParam, $xml, $content)
 	{
 		$message = array();
 		if (! isset($xml->title) || ! isset($content)) {
