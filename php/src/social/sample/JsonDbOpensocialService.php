@@ -304,7 +304,7 @@ class JsonDbOpensocialService implements ActivityService, PersonService, AppData
 		throw new SocialSpiException("Activity not found", ResponseError::$NOT_FOUND);
 	}
 
-	public function getActivities($userIds, $groupId, $appId, $sortBy, $filterBy, $startIndex, $count, $fields, $token)
+	public function getActivities($userIds, $groupId, $appId, $sortBy, $filterBy, $filterOp, $filterValue, $startIndex, $count, $fields, $token)
 	{
 		$db = $this->getDb();
 		$friendsTable = $db[self::$FRIEND_LINK_TABLE];
@@ -314,7 +314,33 @@ class JsonDbOpensocialService implements ActivityService, PersonService, AppData
 		$activities = array();
 		foreach ($ids as $id) {
 			if (isset($allActivities[$id])) {
-				$activities = array_merge($activities, $allActivities[$id]);
+				$personsActivities = $allActivities[$id];
+				$activities = array_merge($activities, $personsActivities);
+				if ($fields) {
+					$newPersonsActivities = array();
+					foreach ($personsActivities as $activity) {
+						$newActivity = array();
+						foreach ($fields as $field => $present) {
+							$newActivity[$present] = $activity[$present];
+						}
+						$newPersonsActivities[] = $newActivity;
+					}
+					$personsActivities = $newPersonsActivities;
+					$activities = $personsActivities;
+				}
+				if ($filterBy && $filterValue) {
+					$newActivities = array();
+					foreach ($activities as $activity) {
+						if (array_key_exists($filterBy, $activity)) {
+							if ($this->passesStringFilter($activity[$filterBy], $filterOp, $filterValue)) {
+								$newActivities[] = $activity;
+							}
+						} else {
+							throw new SocialSpiException("Invalid filterby parameter", ResponseError::$NOT_FOUND);
+						}
+					}
+					$activities = $newActivities;
+				}
 			}
 		}
 		$totalResults = count($activities);
@@ -324,6 +350,31 @@ class JsonDbOpensocialService implements ActivityService, PersonService, AppData
 		$ret = new RestfulCollection($activities, $startIndex, $totalResults);
 		$ret->setItemsPerPage($count);
 		return $ret;
+	}
+
+	/*
+	* 
+	* to check the activity against filter
+	*
+	*/
+	private function passesStringFilter($fieldValue, $filterOp, $filterValue)
+	{
+		switch ($filterOp) {
+			case CollectionOptions::FILTER_OP_PRESENT:
+				if ($fieldValue and isset($fieldValue) and $fieldValue != "") {
+					return true;
+				} else {
+					return false;
+				}
+			case CollectionOptions::FILTER_OP_EQUALS:
+				return $fieldValue == $filterValue;
+			case CollectionOptions::FILTER_OP_CONTAINS:
+				return strpos($fieldValue, $filterValue) !== false;
+			case CollectionOptions::FILTER_OP_STARTSWITH:
+				return strpos($fieldValue, $filterValue) === 0;
+			default:
+				return false;
+		}
 	}
 
 	public function createActivity($userId, $groupId, $appId, $fields, $activity, SecurityToken $token)
