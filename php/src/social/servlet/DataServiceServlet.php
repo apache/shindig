@@ -121,7 +121,7 @@ class DataServiceServlet extends ApiServlet {
 		$responseItem = $this->getResponseItem($this->handleRequestItem($requestItem));
 		if ($responseItem->getError() == null) {
 			$response = $responseItem->getResponse();
-			if (!($response instanceof DataCollection) && !($response instanceof RestfulCollection)) {
+			if (!($response instanceof DataCollection) && !($response instanceof RestfulCollection) && count($response)) {
 				$response = array("entry" => $response);
 				$responseItem->setResponse($response);
 			}
