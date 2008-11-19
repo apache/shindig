@@ -17,7 +17,7 @@
  * specific language governing permissions and limitations under the License.
  */
 
-if (!class_exists('Enum')) {
+if (! class_exists('Enum')) {
 	require 'Enum.php';
 }
 
@@ -657,6 +657,9 @@ class Person {
 	public function setUtcOffset($utcOffset)
 	{
 		// TODO: validate +00:00 format here?
+		$sign = ($utcOffset >= 0) ? "+" : "-";
+		$utcOffset = date('h:i', strtotime($utcOffset));
+		$utcOffset = $sign . $utcOffset;
 		$this->setFieldImpl('utcOffset', $utcOffset);
 	}
 
