@@ -65,8 +65,7 @@ public class Icon {
    */
   public Icon substitute(Substitutions substituter) {
     Icon icon = new Icon(this);
-    icon.content
-        = substituter.substituteString(Substitutions.Type.MESSAGE, content);
+    icon.content = substituter.substituteString(content);
     return icon;
   }
 

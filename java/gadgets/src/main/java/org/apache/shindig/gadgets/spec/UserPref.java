@@ -37,7 +37,7 @@ public class UserPref {
    * UserPref@name
    * Message bundles
    */
-  private String name;
+  private final String name;
   public String getName() {
     return name;
   }
@@ -86,7 +86,7 @@ public class UserPref {
   public Map<String, String> getEnumValues() {
     return enumValues;
   }
-  
+
   /**
    * UserPref.EnumValue (ordered)
    * Useful for rendering ordered lists of user prefs with enum type.
@@ -105,17 +105,14 @@ public class UserPref {
    */
   public UserPref substitute(Substitutions substituter) {
     UserPref pref = new UserPref(this);
-    Substitutions.Type type = Substitutions.Type.MESSAGE;
-    pref.displayName = substituter.substituteString(type, displayName);
-    pref.defaultValue = substituter.substituteString(type, defaultValue);
+    pref.displayName = substituter.substituteString(displayName);
+    pref.defaultValue = substituter.substituteString(defaultValue);
     if (enumValues.isEmpty()) {
       pref.enumValues = Collections.emptyMap();
     } else {
-      Map<String, String> values
-          = new HashMap<String, String>(enumValues.size());
+      Map<String, String> values = new HashMap<String, String>(enumValues.size());
       for (Map.Entry<String, String> entry : enumValues.entrySet()) {
-        values.put(entry.getKey(),
-            substituter.substituteString(type, entry.getValue()));
+        values.put(entry.getKey(), substituter.substituteString(entry.getValue()));
       }
       pref.enumValues = Collections.unmodifiableMap(values);
     }
@@ -126,7 +123,7 @@ public class UserPref {
           = new LinkedList<EnumValuePair>();
       for (EnumValuePair evp : orderedEnumValues) {
         orderedValues.add(new EnumValuePair(evp.getValue(),
-            substituter.substituteString(type, evp.getDisplayValue())));
+            substituter.substituteString(evp.getDisplayValue())));
       }
       pref.orderedEnumValues = Collections.unmodifiableList(orderedValues);
     }
@@ -236,7 +233,7 @@ public class UserPref {
       return STRING;
     }
   }
-  
+
   /**
    * Simple data structure representing a value/displayValue pair
    * for UserPref enums. Value is EnumValue@value, and DisplayValue is EnumValue@displayValue.
@@ -244,16 +241,16 @@ public class UserPref {
   public static class EnumValuePair {
     private final String value;
     private final String displayValue;
-    
+
     private EnumValuePair(String value, String displayValue) {
       this.value = value;
       this.displayValue = displayValue;
     }
-    
+
     public String getValue() {
       return value;
     }
-    
+
     public String getDisplayValue() {
       return displayValue;
     }

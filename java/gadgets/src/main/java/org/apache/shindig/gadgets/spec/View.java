@@ -129,12 +129,12 @@ public class View implements RequestAuthenticationInfo {
     signOwner = view.signOwner;
     signViewer = view.signViewer;
 
-    content = substituter.substituteString(null, view.content);
+    content = substituter.substituteString(view.content);
     base = view.base;
-    href = base.resolve(substituter.substituteUri(null, view.href));
+    href = base.resolve(substituter.substituteUri(view.href));
     Map<String, String> attributes = Maps.newHashMap();
     for (Map.Entry<String, String> entry : view.attributes.entrySet()) {
-      attributes.put(entry.getKey(), substituter.substituteString(null, entry.getValue()));
+      attributes.put(entry.getKey(), substituter.substituteString(entry.getValue()));
     }
     this.attributes = Collections.unmodifiableMap(attributes);
   }
