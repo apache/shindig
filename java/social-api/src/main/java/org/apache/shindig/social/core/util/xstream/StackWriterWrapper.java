@@ -20,6 +20,9 @@ package org.apache.shindig.social.core.util.xstream;
 import com.thoughtworks.xstream.io.HierarchicalStreamWriter;
 import com.thoughtworks.xstream.io.WriterWrapper;
 
+import java.util.Map;
+import java.util.Map.Entry;
+
 /**
  * A Writer that provides a Stack based tracking of the location of the
  * underlying writer.
@@ -30,28 +33,31 @@ public class StackWriterWrapper extends WriterWrapper {
    * The stack that keeps track of current node.
    */
   private WriterStack writerStack;
+  private Map<String, NamespaceSet> namespaces;
 
   /**
    * Create a {@link StackWriterWrapper} that wraps a
    * {@link HierarchicalStreamWriter} and tracks where that writer is in the
    * hierarchy.
-   *
+   * 
    * @param wrapped
    *          the underlying writer
    * @param writerStack
    *          the stack that will record where the writer is.
+   * @param namespaces
    */
   public StackWriterWrapper(HierarchicalStreamWriter wrapped,
-      WriterStack writerStack) {
+      WriterStack writerStack, Map<String, NamespaceSet> namespaces) {
     super(wrapped);
     this.writerStack = writerStack;
+    this.namespaces = namespaces;
   }
 
   /**
    * Set attribute values on the current node, but filter out class attributes
    * from the writer, this is not strictly a feature of this class, but is
    * required (for shindig to meet the XSD requirements.
-   *
+   * 
    * @param name
    *          the name of attribute
    * @param value
@@ -67,16 +73,16 @@ public class StackWriterWrapper extends WriterWrapper {
 
   /**
    * Begin a new element or node of the supplied name.
-   *
+   * 
    * @param name
    *          the name of the node.
-   *
+   * 
    * @see com.thoughtworks.xstream.io.WriterWrapper#startNode(java.lang.String )
    */
   @Override
   public void startNode(String name) {
-    writerStack.push(name);
-    super.startNode(name);
+    super.startNode(translateName(name));
+    addNamespace(name);
   }
 
   /**
@@ -87,11 +93,49 @@ public class StackWriterWrapper extends WriterWrapper {
    * @see com.thoughtworks.xstream.io.WriterWrapper#startNode(java.lang.String ,
    *      java.lang.Class)
    */
-  @SuppressWarnings("unchecked") //API is not generic
+  @SuppressWarnings("unchecked")
+  // API is not generic
   @Override
   public void startNode(String name, Class clazz) {
-    writerStack.push(name);
-    super.startNode(name, clazz);
+    super.startNode(translateName(name), clazz);
+    addNamespace(name);
+  }
+
+  /**
+   * @param name
+   * @return
+   */
+  private String translateName(String name) {
+    NamespaceSet namespaceSet = namespaces.get(name);
+    NamespaceSet currentNamespace = writerStack.peekNamespace();
+    // specified by not current
+    if (namespaceSet != null &&  namespaceSet != currentNamespace) {
+        return namespaceSet.getElementName(name);
+    }
+    // current has been specified
+    if ( currentNamespace != null ) {
+      return currentNamespace.getElementName(name);
+    }
+    return name;
+
+  }
+
+  /**
+   * @param name
+   */
+  private void addNamespace(String name) {
+    NamespaceSet namespaceSet = namespaces.get(name);
+    NamespaceSet currentNamespace = writerStack.peekNamespace();
+    // specified and not current
+    if ( namespaceSet != null && namespaceSet != currentNamespace ) {
+      for (Entry<String, String> e : namespaceSet.nameSpaceEntrySet()) {
+        super.addAttribute(e.getKey(), e.getValue());
+      }
+      currentNamespace = namespaceSet;
+    } else {
+      
+    }
+    writerStack.push(name, currentNamespace);
   }
 
   /**
@@ -104,5 +148,6 @@ public class StackWriterWrapper extends WriterWrapper {
     writerStack.pop();
     super.endNode();
   }
+  
 
 }

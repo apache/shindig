@@ -131,10 +131,21 @@ public class XSDValidator {
     }
     xml = xml.trim();
 
-    int gt = xml.indexOf('>');
-    if (gt > 0) {
-      return XMLDEC + xml.substring(0, gt) + schemaStatement
-          + xml.substring(gt);
+    int start = 0;
+    if ( xml.startsWith("<?") ) {
+      start = xml.indexOf(">")+1;
+      int gt = xml.indexOf('>',start);
+      if (gt > 0) {
+        return xml.substring(0, gt) + schemaStatement
+            + xml.substring(gt);
+      }
+    } else {
+      int gt = xml.indexOf('>',start);
+      if (gt > 0) {
+        return XMLDEC + xml.substring(0, gt) + schemaStatement
+            + xml.substring(gt);
+      }
+
     }
     return xml;
   }

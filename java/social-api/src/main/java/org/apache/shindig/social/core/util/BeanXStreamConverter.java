@@ -19,15 +19,14 @@ package org.apache.shindig.social.core.util;
 
 import com.google.inject.Inject;
 
-import com.thoughtworks.xstream.XStream;
 import com.thoughtworks.xstream.converters.reflection.PureJavaReflectionProvider;
 import com.thoughtworks.xstream.converters.reflection.ReflectionProvider;
 import com.thoughtworks.xstream.io.HierarchicalStreamDriver;
+import com.thoughtworks.xstream.io.xml.StaxDriver;
 import com.thoughtworks.xstream.io.xml.XppDriver;
 import com.thoughtworks.xstream.mapper.DefaultMapper;
 import com.thoughtworks.xstream.mapper.Mapper;
 
-import org.apache.shindig.social.core.util.xstream.InterfaceClassMapper;
 import org.apache.shindig.social.core.util.xstream.StackDriver;
 import org.apache.shindig.social.core.util.xstream.ThreadSafeWriterStack;
 import org.apache.shindig.social.core.util.xstream.WriterStack;
@@ -52,10 +51,10 @@ public class BeanXStreamConverter implements BeanConverter {
   private static Log log = LogFactory.getLog(BeanXStreamConverter.class);
   private ReflectionProvider rp;
   private HierarchicalStreamDriver driver;
-  private WriterStack writerStack;
+  protected WriterStack writerStack;
 
 
-  private Map<XStreamConfiguration.ConverterSet, ConverterConfig> converterMap = new HashMap<XStreamConfiguration.ConverterSet, ConverterConfig>();
+  protected Map<XStreamConfiguration.ConverterSet, ConverterConfig> converterMap = new HashMap<XStreamConfiguration.ConverterSet, ConverterConfig>();
 
   @Inject
   public BeanXStreamConverter(XStreamConfiguration configuration) {
@@ -67,18 +66,19 @@ public class BeanXStreamConverter implements BeanConverter {
      * matter unless the class is extended.
      */
     writerStack = new ThreadSafeWriterStack();
+        
+
     /*
      * create a driver that wires into a standard driver, and updates the stack
      * position.
      */
-    driver = new StackDriver(new XppDriver(), writerStack);
+    driver = new StackDriver(new XppDriver(), writerStack, configuration.getNameSpaces());
     /*
      * Create an interface class mapper that understands class hierarchy for
      * single items
      */
     for (XStreamConfiguration.ConverterSet c : MAPPER_SCOPES) {
       converterMap.put(c, configuration.getConverterConfig(c,rp,dmapper,driver,writerStack));
-  
     }
   }
 
@@ -93,11 +93,11 @@ public class BeanXStreamConverter implements BeanConverter {
   /**
    * convert an Object to XML, but make certain that only one of these is run on
    * a thread at any one time. This only matters if this class is extended.
-   * 
+   *
    * @param obj
    * @return
    */
-  public String convertToXml(Object obj) {
+  private String convertToXml(Object obj) {
 
     writerStack.reset();
     if (obj instanceof Map) {

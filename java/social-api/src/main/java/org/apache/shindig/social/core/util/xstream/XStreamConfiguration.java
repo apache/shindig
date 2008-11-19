@@ -24,6 +24,8 @@ import com.thoughtworks.xstream.converters.reflection.ReflectionProvider;
 import com.thoughtworks.xstream.io.HierarchicalStreamDriver;
 import com.thoughtworks.xstream.mapper.Mapper;
 
+import java.util.Map;
+
 /**
  * The configuration for the XStream converter, this class encapsulates the
  * lists and maps that define the how xstream converts the model.
@@ -57,5 +59,12 @@ public interface XStreamConfiguration {
    */
   ConverterConfig getConverterConfig(ConverterSet c, ReflectionProvider rp,
       Mapper dmapper, HierarchicalStreamDriver driver, WriterStack writerStack);
+
+
+
+  /**
+   * @return
+   */
+  Map<String, NamespaceSet> getNameSpaces();
 
 }
