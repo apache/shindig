@@ -18,12 +18,13 @@
  * 
  */
 
-/*
+
+/**
  * Basic remote content fetcher, uses curl_multi to fetch multiple resources at the same time
  */
-
 class BasicRemoteContentFetcher extends RemoteContentFetcher {
 	private $requests = array();
+	private $USER_AGENT =  'Shindig PHP';
 
 	public function fetchRequest($request)
 	{
@@ -48,11 +49,12 @@ class BasicRemoteContentFetcher extends RemoteContentFetcher {
 				if (strpos($header, ':')) {
 					$key = trim(substr($header, 0, strpos($header, ':')));
 					$val = trim(substr($header, strpos($header, ':') + 1));
-					if (strcasecmp($key, "Transfer-Encoding") != 0 && strcasecmp($key, "Cache-Control") != 0 && strcasecmp($key, "Expires") != 0 && strcasecmp($key, "Content-Length") != 0) {
+					if (strcmp($key, "User-Agent") != 0 && strcasecmp($key, "Transfer-Encoding") != 0 && strcasecmp($key, "Cache-Control") != 0 && strcasecmp($key, "Expires") != 0 && strcasecmp($key, "Content-Length") != 0) {
 						$outHeaders[] = "$key: $val";
 					}
 				}
 			}
+			$outHeaders[] = "User-Agent: " . $this->USER_AGENT;
 			curl_setopt($request->handle, CURLOPT_HTTPHEADER, $outHeaders);
 		}
 		if ($request->isPost()) {
@@ -111,12 +113,12 @@ class BasicRemoteContentFetcher extends RemoteContentFetcher {
 					if (strpos($header, ':')) {
 						$key = trim(substr($header, 0, strpos($header, ':')));
 						$val = trim(substr($header, strpos($header, ':') + 1));
-						if (strcasecmp($key, "Transfer-Encoding") != 0 && strcasecmp($key, "Cache-Control") != 0 && strcasecmp($key, "Expires") != 0 && strcasecmp($key, "Content-Length") != 0) {
+						if (strcmp($key, "User-Agent") != 0 && strcasecmp($key, "Transfer-Encoding") != 0 && strcasecmp($key, "Cache-Control") != 0 && strcasecmp($key, "Expires") != 0 && strcasecmp($key, "Content-Length") != 0) {
 							$outHeaders[] = "$key: $val";
 						}
 					}
 				}
-				$outHeaders[] = "User-Agent: Shindig PHP";
+				$outHeaders[] = "User-Agent: " . $this->USER_AGENT;
 				curl_setopt($request->handle, CURLOPT_HTTPHEADER, $outHeaders);
 			}
 			if ($request->isPost()) {
