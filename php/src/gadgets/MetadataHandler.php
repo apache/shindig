@@ -46,7 +46,7 @@ class MetadataHandler {
 		foreach ($gadget->getUserPrefs() as $pref) {
 			$prefs[$pref->getName()] = array('displayName' => $pref->getDisplayName(), 
 					'type' => $pref->getDataType(), 'default' => $pref->getDefaultValue(), 
-					'enumValues' => $pref->getEnumValues());
+					'enumValues' => $pref->getEnumValues(), 'requred' => $pref->isRequired());
 		}
 		$features = array();
 		foreach ($gadget->getRequires() as $feature) {
@@ -61,6 +61,10 @@ class MetadataHandler {
 		$links = array();
 		foreach ($gadget->links as $link) {
 			$links[] = $link;
+		}
+		$icons = array();
+		foreach ($gadget->getIcons() as $icon) {
+			$icons[] = $icon;
 		}
 		$response['author'] = $gadget->getAuthor();
 		$response['authorEmail'] = $gadget->getAuthorEmail();
@@ -87,6 +91,7 @@ class MetadataHandler {
 		$response['scrolling'] = $gadget->getScrolling();
 		$response['links'] = $links;
 		$response['views'] = $views;
+		$response['icons'] = $icons;
 		$response['moduleId'] = $gadgetModuleId;
 		$response['url'] = $gadgetUrl;
 		$response['iframeUrl'] = UrlGenerator::getIframeURL($gadget, $context);
