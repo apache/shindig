@@ -17,6 +17,13 @@
  */
 package org.apache.shindig.social.opensocial.util;
 
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
+import com.google.inject.Guice;
+import com.google.inject.Injector;
+
+import junit.framework.TestCase;
+
 import org.apache.shindig.common.xml.XmlException;
 import org.apache.shindig.common.xml.XmlUtil;
 import org.apache.shindig.social.SocialApiTestsGuiceModule;
@@ -27,32 +34,17 @@ import org.apache.shindig.social.core.model.MediaItemImpl;
 import org.apache.shindig.social.core.model.NameImpl;
 import org.apache.shindig.social.core.model.PersonImpl;
 import org.apache.shindig.social.core.util.BeanXStreamAtomConverter;
-import org.apache.shindig.social.core.util.BeanXStreamConverter;
-import org.apache.shindig.social.core.util.xstream.GuiceBeanProvider;
 import org.apache.shindig.social.core.util.xstream.XStream081Configuration;
 import org.apache.shindig.social.opensocial.model.Activity;
 import org.apache.shindig.social.opensocial.model.Address;
 import org.apache.shindig.social.opensocial.model.ListField;
 import org.apache.shindig.social.opensocial.model.MediaItem;
 import org.apache.shindig.social.opensocial.model.Person;
-import org.apache.shindig.social.opensocial.spi.DataCollection;
-
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
-import com.google.inject.Guice;
-import com.google.inject.Injector;
 
 import org.apache.commons.lang.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
-import junit.framework.TestCase;
-
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -157,8 +149,12 @@ public class BeanXStreamAtomConverterTest extends TestCase {
     XmlUtil.parse(xml);
 
     String expectedXml = " <feed xmlns=\"http://ns.opensocial.org/2008/opensocial\" xmlos:osearch=\"http://a9.com/-/spec/opensearch/1.1\" > "
-        + " <entry><id>item1</id><content type=\"application/xml\" ><entry><key>value</key><value>1</value></entry></content></entry> "
-        + " <entry><id>item2</id><content type=\"application/xml\" ><entry><key>value</key><value>2</value></entry></content></entry> "
+        + " <entry><id>item1</id>"
+        + "    <content type=\"application/xml\" ><entry><key>value</key><value>1</value></entry></content>"
+        + " </entry> "
+        + " <entry><id>item2</id>"
+        + "     <content type=\"application/xml\" ><entry><key>value</key><value>2</value></entry></content>"
+        + " </entry> "
         + " <osearch:startIndex>0</osearch:startIndex> "
         + " <osearch:totalResults>2</osearch:totalResults> "
         + " <osearch:itemsPerPage>2</osearch:itemsPerPage></feed> ";
@@ -174,8 +170,12 @@ public class BeanXStreamAtomConverterTest extends TestCase {
     XmlUtil.parse(xml);
     String expectedXml = "<feed xmlns=\"http://ns.opensocial.org/2008/opensocial\" "
         + " xmlos:osearch=\"http://a9.com/-/spec/opensearch/1.1\">"
-        + "   <entry><id>key1</id><content type=\"application/xml\" ><value>value1</value></content></entry>"
-        + "   <entry><id>key2</id><content type=\"application/xml\" ><value>value2</value></content></entry>"
+        + "  <entry><id>key1</id><content type=\"application/xml\" >"
+        + "    <value>value1</value></content>"
+        + "  </entry>"
+        + "  <entry><id>key2</id>"
+        + "     <content type=\"application/xml\" ><value>value2</value></content>"
+        + "  </entry>"
         + "  <osearch:startIndex>0</osearch:startIndex>"
         + "  <osearch:totalResults>2</osearch:totalResults>"
         + "  <osearch:itemsPerPage>2</osearch:itemsPerPage></feed>";

@@ -18,7 +18,7 @@
 package org.apache.shindig.social.core.util.atom;
 
 /**
- * represents an atom:link element
+ * represents an atom:link element.
  */
 public class AtomLink {
 
@@ -35,12 +35,12 @@ public class AtomLink {
   }
 
   /**
-   * @return
+   * @return the link href
    */
   public String getHref() {
     return href;
   }
-  
+
   /**
    * @return the rel
    */

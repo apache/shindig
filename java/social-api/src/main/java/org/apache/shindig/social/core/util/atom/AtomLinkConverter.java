@@ -30,7 +30,7 @@ public class AtomLinkConverter implements Converter {
 
   /**
    * {@inheritDoc}
-   * 
+   *
    * @see com.thoughtworks.xstream.converters.Converter#marshal(java.lang.Object,
    *      com.thoughtworks.xstream.io.HierarchicalStreamWriter,
    *      com.thoughtworks.xstream.converters.MarshallingContext)
@@ -48,7 +48,7 @@ public class AtomLinkConverter implements Converter {
 
   /**
    * {@inheritDoc}
-   * 
+   *
    * @see com.thoughtworks.xstream.converters.Converter#unmarshal(com.thoughtworks.xstream.io.HierarchicalStreamReader,
    *      com.thoughtworks.xstream.converters.UnmarshallingContext)
    */
@@ -62,7 +62,7 @@ public class AtomLinkConverter implements Converter {
 
   /**
    * {@inheritDoc}
-   * 
+   *
    * @see com.thoughtworks.xstream.converters.ConverterMatcher#canConvert(java.lang.Class)
    */
   public boolean canConvert(Class clazz) {

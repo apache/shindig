@@ -25,7 +25,7 @@ public interface WriterStack {
 
   /**
    * Peek into the current location of the writer.
-   * 
+   *
    * @return the name of the current node.
    */
   String peek();
@@ -43,7 +43,7 @@ public interface WriterStack {
   /**
    * add a node name into the stack indicating that the writer has moved into a
    * new child element.
-   * 
+   *
    * @param name
    *          the name of the new child element.
    * @param namespace
@@ -60,7 +60,7 @@ public interface WriterStack {
   String pop();
 
   /**
-   * @return
+   * @return the size of the statck
    */
   int size();
 
