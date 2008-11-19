@@ -32,7 +32,7 @@ class OutputJsonConverter extends OutputConverter {
 				$response->itemsPerPage = $itemsPerPage;
 		}
 		// several service calls return a null value
-		if (!is_null($response)) {
+		if (! is_null($response)) {
 			if (Config::get('debug')) {
 				echo self::json_format(json_encode($response)); // TODO: add a query option to pretty-print json output
 			} else {

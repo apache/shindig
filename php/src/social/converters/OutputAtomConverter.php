@@ -40,7 +40,7 @@ class OutputAtomConverter extends OutputConverter {
 		$requestType = $this->getRequestType($requestItem);
 		$data = $responseItem->getResponse();
 		$params = $requestItem->getParameters();
-		$userId = isset($params['userId']) ? $params['userId'][0] : ''; 
+		$userId = isset($params['userId']) ? $params['userId'][0] : '';
 		$guid = 'urn:guid:' . $userId;
 		$authorName = $_SERVER['HTTP_HOST'] . ':' . $userId;
 		$updatedAtom = date(DATE_ATOM);
@@ -140,25 +140,9 @@ class OutputAtomConverter extends OutputConverter {
 	 * @param string $nameSpace optional namespace to use when creating node
 	 * @return DOMElement node
 	 */
-	private function addNode($node, $name, $value = '', $attributes = false, $nameSpace = false)
+	private function addNode(DOMElement $node, $name, $value = '', $attributes = false, $nameSpace = false)
 	{
-		if ($nameSpace) {
-			$childNode = $node->appendChild($this->doc->createElementNS($nameSpace, $name));
-		} else {
-			$childNode = $node->appendChild($this->doc->createElement($name));
-		}
-		if (! empty($value) || $value == '0') {
-			$childNode->appendChild($this->doc->createTextNode($value));
-		}
-		if ($attributes && is_array($attributes)) {
-			foreach ($attributes as $attrName => $attrVal) {
-				$childNodeAttr = $childNode->appendChild($this->doc->createAttribute($attrName));
-				if (! empty($attrVal)) {
-					$childNodeAttr->appendChild($this->doc->createTextNode($attrVal));
-				}
-			}
-		}
-		return $childNode;
+		return OutputBasicXmlConverter::addNode($this->doc, $node, $name, $value, $attributes, $nameSpace);
 	}
 
 	/**
@@ -216,28 +200,12 @@ class OutputAtomConverter extends OutputConverter {
 	 */
 	private function getRequestType($requestItem)
 	{
-		// map the Request URL to the content type to use  
-		$params = $requestItem->getParameters();
-		if (! is_array($params)) {
-			throw new Exception("Unsupported request type");
-		}
-		$type = false;
-		foreach ($params as $key => $val) {
-			if (isset(self::$entryTypes[$key])) {
-				$type = self::$entryTypes[$key];
-				break;
-			}
-		}
-		if (!$type) {
-			throw new Exception("Unsupported request type");
-		}
-		return $type;
+		return OutputBasicXmlConverter::getRequestType($requestItem, self::$entryTypes);
 	}
 
 	/**
 	 * Recursive function that maps an data array or object to it's xml represantation 
 	 *
-	 * @param DOMDocument $doc the root document
 	 * @param DOMElement $element the element to append the new node(s) to
 	 * @param string $name the name of the to be created node
 	 * @param array or object $data the data to map to xml
@@ -246,53 +214,6 @@ class OutputAtomConverter extends OutputConverter {
 	 */
 	private function addData(DOMElement $element, $name, $data, $nameSpace = false)
 	{
-		if ($nameSpace) {
-			$newElement = $element->appendChild($this->doc->createElementNS($nameSpace, $name));
-		} else {
-			$newElement = $element->appendChild($this->doc->createElement($name));
-		}
-		if (is_array($data)) {
-			foreach ($data as $key => $val) {
-				if (is_array($val) || is_object($val)) {
-					// prevent invalid names.. try to guess a good one :)
-					if (is_numeric($key)) {
-						$key = is_object($val) ? get_class($val) : $key = $name;
-					}
-					$this->addData($newElement, $key, $val);
-				} else {
-					if (is_numeric($key)) {
-						$key = is_object($val) ? get_class($val) : $key = $name;
-					}
-					$elm = $newElement->appendChild($this->doc->createElement($key));
-					$elm->appendChild($this->doc->createTextNode($val));
-				}
-			}
-		} elseif (is_object($data)) {
-			if ($data instanceof Enum) {
-				if (isset($data->key)) {
-					// enums are output as : <NAME key="$key">$displayValue</NAME> 
-					$keyEntry = $newElement->appendChild($this->doc->createAttribute('key'));
-					$keyEntry->appendChild($this->doc->createTextNode($data->key));
-					$newElement->appendChild($this->doc->createTextNode($data->getDisplayValue()));
-				}			
-			} else {
-				$vars = get_object_vars($data);
-				foreach ($vars as $key => $val) {
-					if (is_array($val) || is_object($val)) {
-						// prevent invalid names.. try to guess a good one :)
-						if (is_numeric($key)) {
-							$key = is_object($val) ? get_class($val) : $key = $name;
-						}
-						$this->addData($newElement, $key, $val);
-					} else {
-						$elm = $newElement->appendChild($this->doc->createElement($key));
-						$elm->appendChild($this->doc->createTextNode($val));
-					}
-				}
-			}
-		} else {
-			$newElement->appendChild($this->doc->createTextNode($data));
-		}
-		return $newElement;
+		return OutputBasicXmlConverter::addData($this->doc, $element, $name, $data, $nameSpace);
 	}
 }
