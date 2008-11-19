@@ -24,7 +24,7 @@
  */
 class BasicRemoteContentFetcher extends RemoteContentFetcher {
 	private $requests = array();
-	private $USER_AGENT =  'Shindig PHP';
+	const USER_AGENT =  'Shindig PHP';
 
 	public function fetchRequest($request)
 	{
@@ -54,7 +54,7 @@ class BasicRemoteContentFetcher extends RemoteContentFetcher {
 					}
 				}
 			}
-			$outHeaders[] = "User-Agent: " . $this->USER_AGENT;
+			$outHeaders[] = "User-Agent: " . BasicRemoteContentFetcher::USER_AGENT;
 			curl_setopt($request->handle, CURLOPT_HTTPHEADER, $outHeaders);
 		}
 		if ($request->isPost()) {
@@ -118,7 +118,7 @@ class BasicRemoteContentFetcher extends RemoteContentFetcher {
 						}
 					}
 				}
-				$outHeaders[] = "User-Agent: " . $this->USER_AGENT;
+				$outHeaders[] = "User-Agent: " . BasicRemoteContentFetcher::USER_AGENT;
 				curl_setopt($request->handle, CURLOPT_HTTPHEADER, $outHeaders);
 			}
 			if ($request->isPost()) {
