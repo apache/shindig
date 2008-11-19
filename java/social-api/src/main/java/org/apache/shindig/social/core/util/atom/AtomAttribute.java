@@ -18,34 +18,27 @@
 package org.apache.shindig.social.core.util.atom;
 
 /**
- * represents an atom:link element
+ * Represents an attribute in atom, ties into attribute converters.
  */
-public class AtomLink {
+public class AtomAttribute {
 
-  private String href;
-  private String rel;
+  private String value;
 
   /**
-   * @param string
-   * @param string2
+   * @param value
    */
-  public AtomLink(String rel, String href) {
-    this.rel = rel;
-    this.href = href;
+  public AtomAttribute(String value) {
+    this.value = value;
   }
 
   /**
-   * @return
+   * {@inheritDoc}
+   * 
+   * @see java.lang.Object#toString()
    */
-  public String getHref() {
-    return href;
-  }
-  
-  /**
-   * @return the rel
-   */
-  public String getRel() {
-    return rel;
+  @Override
+  public String toString() {
+    return value;
   }
 
 }
