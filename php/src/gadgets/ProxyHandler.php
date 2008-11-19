@@ -338,11 +338,12 @@ class ProxyHandler {
 	private function fetchContent($url, $method)
 	{
 		//TODO get actual character encoding from the request
+		
 
 		// Check the protocol requested - curl doesn't really support file:// 
 		// requests but the 'error' should be handled properly
 		$protocolSplit = split(":\/\/", $url);
-		if (!count($protocolSplit)) {
+		if (! count($protocolSplit)) {
 			throw new Exception("Invalid protocol specified for url: $url");
 		} else {
 			$protocol = strtoupper($protocolSplit[0]);
@@ -451,9 +452,11 @@ class ProxyHandler {
 	 */
 	private function validateUrl($url)
 	{
-		//TODO should really make a PHP version of the URI class and validate in all the locations the java version does
-		// why not use Zend::Uri:
-		return $url;
+		if (!@parse_url($url)) {
+			throw new Exception("Invalid Url");
+		} else {
+			return $url;
+		}
 	}
 
 	private function request_headers()
