@@ -26,7 +26,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 /**
- * Represents and atom:content element
+ * Represents and atom:content element.
  */
 public class AtomContent {
 

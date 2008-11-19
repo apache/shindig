@@ -39,7 +39,7 @@ public class StackWriterWrapper extends WriterWrapper {
    * Create a {@link StackWriterWrapper} that wraps a
    * {@link HierarchicalStreamWriter} and tracks where that writer is in the
    * hierarchy.
-   * 
+   *
    * @param wrapped
    *          the underlying writer
    * @param writerStack
@@ -57,7 +57,7 @@ public class StackWriterWrapper extends WriterWrapper {
    * Set attribute values on the current node, but filter out class attributes
    * from the writer, this is not strictly a feature of this class, but is
    * required (for shindig to meet the XSD requirements.
-   * 
+   *
    * @param name
    *          the name of attribute
    * @param value
@@ -73,10 +73,10 @@ public class StackWriterWrapper extends WriterWrapper {
 
   /**
    * Begin a new element or node of the supplied name.
-   * 
+   *
    * @param name
    *          the name of the node.
-   * 
+   *
    * @see com.thoughtworks.xstream.io.WriterWrapper#startNode(java.lang.String )
    */
   @Override
@@ -132,8 +132,6 @@ public class StackWriterWrapper extends WriterWrapper {
         super.addAttribute(e.getKey(), e.getValue());
       }
       currentNamespace = namespaceSet;
-    } else {
-      
     }
     writerStack.push(name, currentNamespace);
   }
@@ -148,6 +146,4 @@ public class StackWriterWrapper extends WriterWrapper {
     writerStack.pop();
     super.endNode();
   }
-  
-
 }

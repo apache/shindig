@@ -33,7 +33,7 @@ public class AtomAttribute {
 
   /**
    * {@inheritDoc}
-   * 
+   *
    * @see java.lang.Object#toString()
    */
   @Override

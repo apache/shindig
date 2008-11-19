@@ -314,16 +314,19 @@ public class XStream081Configuration implements XStreamConfiguration {
     // defaultFieldAliasMappingList.add(new
     // InterfaceFieldAliasMapping("address",
     // ListField.class,"value","profileVideo"));
-    
+
 
     fieldAliasMappingList.put(ConverterSet.DEFAULT,
         defaultFieldAliasMappingList);
   }
 
+  /**
+   * The Guice injector, used for creating new instances of the model.
+   */
   private Injector injector;
 
   /**
-   * 
+   *
    */
   @Inject
   public XStream081Configuration(Injector injector) {
@@ -397,9 +400,9 @@ public class XStream081Configuration implements XStreamConfiguration {
 
   /**
    * {@inheritDoc}
-   * 
+   *
    * @param writerStack
-   * 
+   *
    * @see org.apache.shindig.social.core.util.xstream.XStreamConfiguration#getXStream(org.apache.shindig.social.core.util.xstream.XStreamConfiguration.ConverterSet,
    *      com.thoughtworks.xstream.converters.reflection.ReflectionProvider,
    *      com.thoughtworks.xstream.mapper.Mapper,
@@ -414,10 +417,7 @@ public class XStream081Configuration implements XStreamConfiguration {
         getElementMappingList(c), getListElementMappingList(c),
         getItemFieldMappings(c), getOmitMap(c), getElementClassMap(c));
     AttributeMapper amapper = new AttributeMapper(fmapper);
-    
-    
 
-    
     XStream xstream = new XStream(rp, amapper, driver);
     amapper.addAttributeFor(AtomAttribute.class);
     for (Converter converter : getConverters(fmapper, c)) {

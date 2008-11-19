@@ -33,9 +33,8 @@ import java.util.Map;
 @ImplementedBy(XStream081Configuration.class)
 public interface XStreamConfiguration {
   public static enum ConverterSet {
-    MAP(), COLLECTION(), DEFAULT(); 
+    MAP(), COLLECTION(), DEFAULT();
   };
-
 
   public class ConverterConfig {
     public InterfaceClassMapper mapper;
@@ -47,23 +46,26 @@ public interface XStreamConfiguration {
     }
   }
 
-
-
   /**
+   * Generate the converter config.
+   * 
    * @param c
+   *          which converter set.
    * @param rp
+   *          an XStream reflection provider.
    * @param dmapper
+   *          the XStream mapper.
    * @param driver
+   *          the XStream driver
    * @param writerStack
-   * @return
+   *          a hirachical stack recorder.
+   * @return the converter config, used for serialization.
    */
   ConverterConfig getConverterConfig(ConverterSet c, ReflectionProvider rp,
       Mapper dmapper, HierarchicalStreamDriver driver, WriterStack writerStack);
 
-
-
   /**
-   * @return
+   * @return get the namespace mappings used by the driver.
    */
   Map<String, NamespaceSet> getNameSpaces();
 
