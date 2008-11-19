@@ -83,7 +83,7 @@ class RestRequestItem extends RequestItem {
 				throw new Exception("Invalid or unknown service endpoint: $service");
 				break;
 		}
-		
+	
 	}
 
 	static function getServiceFromPath($pathInfo)
@@ -111,23 +111,19 @@ class RestRequestItem extends RequestItem {
 		return $parameters;
 	}
 
-	/*
-	 * Takes any url params out of the url and puts them into the param map.
+	/** 
+	 * Use this function to parse out the query array element 
 	 * Usually the servlet request code does this for us but the batch request calls have to do it
-	 * by hand.
+	 * by hand
+	 * 
+	 * @param the output of parse_url(). 
 	 */
-	private function putUrlParamsIntoParameters()
+	private function parseQuery($val)
 	{
-		$fullUrl = $this->url;
-		$queryParamIndex = strpos($fullUrl, "?");
-		if ($queryParamIndex > 0) {
-			$this->url = substr($fullUrl, 0, $queryParamIndex);
-			$queryParams = substr($fullUrl, $queryParamIndex + 1);
-			$params = explode("&", $queryParams);
-			foreach ($params as $param) {
-				$paramPieces = explode("=", $param, 2);
-				$this->params[$paramPieces[0]] = count($paramPieces) == 2 ? urldecode($paramPieces[1]) : "";
-			}
+		$params = explode('&', $val);
+		foreach ($params as $param) {
+			$queryParams = explode('=', $param);
+			$this->params[$queryParams[0]] = $queryParams[1];
 		}
 	}
 
@@ -139,14 +135,15 @@ class RestRequestItem extends RequestItem {
 	 */
 	public function applyUrlTemplate($urlTemplate)
 	{
-		$this->putUrlParamsIntoParameters();
-		$actualUrl = explode("/", $this->url);
+		$paramPieces = parse_url($this->url);
+		$this->parseQuery($paramPieces['query']);
+		$actualUrl = explode("/", $paramPieces['path']);
 		$expectedUrl = explode("/", $urlTemplate);
-		for ($i = 0; $i < count($actualUrl); $i ++) {
+		for ($i = 1; $i < count($actualUrl); $i ++) {
 			$actualPart = isset($actualUrl[$i]) ? $actualUrl[$i] : null;
 			$expectedPart = isset($expectedUrl[$i]) ? $expectedUrl[$i] : null;
 			if (strpos($expectedPart, "{") !== false) {
-				$this->params[substr($expectedPart, 1, strlen($expectedPart) - 2)] = explode(',', $actualPart);
+				$this->params[preg_replace('/\{|\}/', '', $expectedPart)] = explode(',', $actualPart);
 			} elseif (strpos($actualPart, ',') !== false) {
 				throw new IllegalArgumentException("Cannot expect plural value " + $actualPart + " for singular field " + $expectedPart + " in " + $this->url);
 			} else {
