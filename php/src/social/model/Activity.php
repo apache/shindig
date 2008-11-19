@@ -1,4 +1,5 @@
 <?php
+
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements. See the NOTICE file
@@ -183,7 +184,7 @@ class Activity {
 
 	public function setTitle($title)
 	{
-		$this->title = $title;
+		$this->title = strip_tags($title, '<b><i><a><span><img>');
 	}
 
 	public function getTitleId()
@@ -215,4 +216,5 @@ class Activity {
 	{
 		$this->userId = $userId;
 	}
+
 }
