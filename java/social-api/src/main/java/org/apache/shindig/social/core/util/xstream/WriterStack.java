@@ -25,10 +25,15 @@ public interface WriterStack {
 
   /**
    * Peek into the current location of the writer.
-   *
+   * 
    * @return the name of the current node.
    */
   String peek();
+
+  /**
+   * @return the current namespace.
+   */
+  NamespaceSet peekNamespace();
 
   /**
    * Reset the stack to its default state.
@@ -38,18 +43,25 @@ public interface WriterStack {
   /**
    * add a node name into the stack indicating that the writer has moved into a
    * new child element.
-   *
+   * 
    * @param name
    *          the name of the new child element.
+   * @param namespace
+   *          the namespace set associated with the current element.
    */
-  void push(String name);
+  void push(String name, NamespaceSet namespace);
 
   /**
    * Remove and return the current node name, making the parent node the active
    * node name.
-   *
+   * 
    * @return the node name just removed from the stack.
    */
   String pop();
+
+  /**
+   * @return
+   */
+  int size();
 
 }

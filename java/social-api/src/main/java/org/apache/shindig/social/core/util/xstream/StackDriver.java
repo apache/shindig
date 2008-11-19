@@ -25,6 +25,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.Reader;
 import java.io.Writer;
+import java.util.Map;
 
 /**
  * A StackDriver wraps other forms of Drivers and updates a WriterStack with the
@@ -40,25 +41,29 @@ public class StackDriver implements HierarchicalStreamDriver {
    * A Writer Stack implementation that records where the writer is.
    */
   private WriterStack writerStack;
+  private Map<String, NamespaceSet> namespaces;
 
   /**
    * Create a {@link StackDriver}, wrapping a {@link HierarchicalStreamDriver}
    * and updating a {@link WriterStack}.
-   *
+   * 
    * @param parent
    *          the driver to be wrapped
    * @param writerStack
    *          the thread safe writer stack that records where the writer is.
+   * @param map
    */
-  public StackDriver(HierarchicalStreamDriver parent, WriterStack writerStack) {
+  public StackDriver(HierarchicalStreamDriver parent, WriterStack writerStack,
+      Map<String, NamespaceSet> map) {
     this.parent = parent;
     this.writerStack = writerStack;
+    this.namespaces = map;
   }
 
   /**
    * Create a {@link HierarchicalStreamReader}, using the wrapped
    * {@link HierarchicalStreamDriver}.
-   *
+   * 
    * @param reader
    *          the Reader that will be used to read from the underlying stream
    * @return the reader
@@ -72,7 +77,7 @@ public class StackDriver implements HierarchicalStreamDriver {
   /**
    * Create a {@link HierarchicalStreamReader}, using the wrapped
    * {@link HierarchicalStreamDriver}.
-   *
+   * 
    * @param inputStream
    *          the input stream that will be used to read from the underlying
    *          stream
@@ -87,7 +92,7 @@ public class StackDriver implements HierarchicalStreamDriver {
   /**
    * Create a {@link HierarchicalStreamWriter} that tracks the path to the
    * current element based on a {@link Writer}.
-   *
+   * 
    * @param writer
    *          the underlying writer that will perform the writes.
    * @return the writer
@@ -96,13 +101,13 @@ public class StackDriver implements HierarchicalStreamDriver {
    */
   public HierarchicalStreamWriter createWriter(Writer writer) {
     HierarchicalStreamWriter parentWriter = parent.createWriter(writer);
-    return new StackWriterWrapper(parentWriter, writerStack);
+    return new StackWriterWrapper(parentWriter, writerStack, namespaces);
   }
 
   /**
    * Create a {@link HierarchicalStreamWriter} that tracks the path to the
    * current element based on a {@link OutputStream}.
-   *
+   * 
    * @param outputStream
    *          the underlying output stream that will perform the writes.
    * @return the writer
@@ -111,7 +116,7 @@ public class StackDriver implements HierarchicalStreamDriver {
    */
   public HierarchicalStreamWriter createWriter(OutputStream outputStream) {
     HierarchicalStreamWriter parentWriter = parent.createWriter(outputStream);
-    return new StackWriterWrapper(parentWriter, writerStack);
+    return new StackWriterWrapper(parentWriter, writerStack, namespaces);
   }
 
 }

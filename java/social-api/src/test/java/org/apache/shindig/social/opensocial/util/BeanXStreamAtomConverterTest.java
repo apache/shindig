@@ -26,6 +26,7 @@ import org.apache.shindig.social.core.model.ListFieldImpl;
 import org.apache.shindig.social.core.model.MediaItemImpl;
 import org.apache.shindig.social.core.model.NameImpl;
 import org.apache.shindig.social.core.model.PersonImpl;
+import org.apache.shindig.social.core.util.BeanXStreamAtomConverter;
 import org.apache.shindig.social.core.util.BeanXStreamConverter;
 import org.apache.shindig.social.core.util.xstream.GuiceBeanProvider;
 import org.apache.shindig.social.core.util.xstream.XStream081Configuration;
@@ -58,7 +59,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
-public class BeanXStreamConverterTest extends TestCase {
+public class BeanXStreamAtomConverterTest extends TestCase {
   private static final String XMLSCHEMA = " xmlns=\"http://ns.opensocial.org/2008/opensocial\" \n"
       + " xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" \n"
       + " xsi:schemaLocation=\"http://ns.opensocial.org/2008/opensocial classpath:opensocial.xsd\" ";
@@ -66,13 +67,13 @@ public class BeanXStreamConverterTest extends TestCase {
   private Person johnDoe;
   private Activity activity;
 
-  private BeanXStreamConverter beanXmlConverter;
+  private BeanXStreamAtomConverter beanXmlConverter;
 
   @Override
   public void setUp() throws Exception {
     super.setUp();
     Injector injector = Guice.createInjector(new SocialApiTestsGuiceModule());
-    
+
     johnDoe = new PersonImpl("johnDoeId", "Johnny", new NameImpl("John Doe"));
     johnDoe.setPhoneNumbers(Lists.<ListField> newArrayList(new ListFieldImpl(
         "home", "+33H000000000"), new ListFieldImpl("mobile", "+33M000000000"),
@@ -88,11 +89,10 @@ public class BeanXStreamConverterTest extends TestCase {
 
     activity.setMediaItems(Lists.<MediaItem> newArrayList(new MediaItemImpl(
         "image/jpg", MediaItem.Type.IMAGE, "http://foo.bar")));
-    
 
-    beanXmlConverter = new BeanXStreamConverter(new XStream081Configuration(injector));
+    beanXmlConverter = new BeanXStreamAtomConverter(
+        new XStream081Configuration(injector));
   }
-  
 
   public static class SimplePerson {
     private String id;
@@ -126,16 +126,15 @@ public class BeanXStreamConverterTest extends TestCase {
   }
 
   public void testPersonToXml() throws Exception {
-    String xml = XSDValidator.validate(beanXmlConverter.convertToString(johnDoe),
-        XMLSCHEMA, XSDRESOURCE, true);
+    String xml = beanXmlConverter.convertToString(johnDoe);
+
     Element element = XmlUtil.parse(xml);
     Node id = element.getElementsByTagName("id").item(0);
-    assertEquals(johnDoe.getId(), id.getTextContent());
+    assertEquals("urn:guid:" + johnDoe.getId(), id.getTextContent());
   }
 
   public void testActivityToXml() throws Exception {
-    String xml = XSDValidator.validate(beanXmlConverter.convertToString(activity),
-        XMLSCHEMA, XSDRESOURCE, true);
+    String xml = beanXmlConverter.convertToString(activity);
 
     Element element = XmlUtil.parse(xml);
     Node id = element.getElementsByTagName("id").item(0);
@@ -158,10 +157,12 @@ public class BeanXStreamConverterTest extends TestCase {
 
     XmlUtil.parse(xml);
 
-    String expectedXml = "<response><map>"
-        + "  <entry><key>item1</key><value><entry><key>value</key><value>1</value></entry></value></entry> "
-        + "  <entry><key>item2</key><value><entry><key>value</key><value>2</value></entry></value></entry> "
-        + "</map></response>";
+    String expectedXml = " <feed xmlns=\"http://ns.opensocial.org/2008/opensocial\" xmlos:osearch=\"http://a9.com/-/spec/opensearch/1.1\" > "
+        + " <entry><id>item1</id><content><entry><key>value</key><value>1</value></entry></content></entry> "
+        + " <entry><id>item2</id><content><entry><key>value</key><value>2</value></entry></content></entry> "
+        + " <osearch:startIndex>0</osearch:startIndex> "
+        + " <osearch:totalResults>2</osearch:totalResults> "
+        + " <osearch:itemsPerPage>2</osearch:itemsPerPage></feed> ";
     assertEquals(StringUtils.deleteWhitespace(expectedXml), StringUtils
         .deleteWhitespace(xml));
   }
@@ -172,19 +173,28 @@ public class BeanXStreamConverterTest extends TestCase {
     m.put("key2", "value2");
     String xml = beanXmlConverter.convertToString(m);
     XmlUtil.parse(xml);
-    String expectedXml = "<response><map>"
-        + "  <entry><key>key1</key><value>value1</value></entry> "
-        + "  <entry><key>key2</key><value>value2</value></entry> "
-        + "</map></response>";
+    String expectedXml = "<feed xmlns=\"http://ns.opensocial.org/2008/opensocial\" "
+        + " xmlos:osearch=\"http://a9.com/-/spec/opensearch/1.1\">"
+        + "   <entry><id>key1</id><content><value>value1</value></content></entry>"
+        + "   <entry><id>key2</id><content><value>value2</value></content></entry>"
+        + "  <osearch:startIndex>0</osearch:startIndex>"
+        + "  <osearch:totalResults>2</osearch:totalResults>"
+        + "  <osearch:itemsPerPage>2</osearch:itemsPerPage></feed>";
     assertEquals(StringUtils.deleteWhitespace(expectedXml), StringUtils
         .deleteWhitespace(xml));
+
   }
 
   public void testEmptyList() throws XmlException {
     List<String> empty = new ArrayList<String>();
     String xml = beanXmlConverter.convertToString(empty);
     XmlUtil.parse(xml);
-    String expectedXml = "<response><list/></response>";
+    String expectedXml = "<feed xmlns=\"http://ns.opensocial.org/2008/opensocial\" "
+        + "xmlos:osearch=\"http://a9.com/-/spec/opensearch/1.1\" >"
+        + "<entry><content/></entry>"
+        + "<osearch:startIndex>0</osearch:startIndex>"
+        + "<osearch:totalResults>1</osearch:totalResults>"
+        + "<osearch:itemsPerPage>1</osearch:itemsPerPage></feed>";
     assertEquals(StringUtils.deleteWhitespace(expectedXml), StringUtils
         .deleteWhitespace(xml));
 
@@ -194,10 +204,15 @@ public class BeanXStreamConverterTest extends TestCase {
     emptyLists.add(new ArrayList<String>());
     xml = beanXmlConverter.convertToString(emptyLists);
     XmlUtil.parse(xml);
-    expectedXml = "<response><list.container>" + "  <list/>" + "  <list/>"
-        + "  <list/>" + "</list.container></response>";
+    expectedXml = "<feed xmlns=\"http://ns.opensocial.org/2008/opensocial\" "
+        + "xmlos:osearch=\"http://a9.com/-/spec/opensearch/1.1\" >"
+        + "<entry><content><list/><list/><list/></content></entry>"
+        + "<osearch:startIndex>0</osearch:startIndex>"
+        + "<osearch:totalResults>1</osearch:totalResults>"
+        + "<osearch:itemsPerPage>1</osearch:itemsPerPage></feed>";
     assertEquals(StringUtils.deleteWhitespace(expectedXml), StringUtils
         .deleteWhitespace(xml));
+
   }
 
   public void testElementNamesInList() throws XmlException {
@@ -205,61 +220,44 @@ public class BeanXStreamConverterTest extends TestCase {
     activities.add(activity);
     activities.add(activity);
     activities.add(activity);
-    String xml = XSDValidator.validate(beanXmlConverter
-        .convertToString(activities), XMLSCHEMA, XSDRESOURCE, true);
+    String xml = beanXmlConverter.convertToString(activities);
     XmlUtil.parse(xml);
-    String expectedXml = "<response>" + "<list.container>" + "  <activity>"
-        + "    <id>activityId</id>" + "    <mediaItems>"
+    String expectedXml = "<feed xmlns=\"http://ns.opensocial.org/2008/opensocial\" "
+        + "   xmlos:osearch=\"http://a9.com/-/spec/opensearch/1.1\"><entry><content>"
+        + "  <activity>"
+        + "    <id>activityId</id>"
+        + "    <mediaItems>"
         + "        <mimeType>image/jpg</mimeType>"
-        + "        <type>IMAGE</type>" + "        <url>http://foo.bar</url>"
-        + "    </mediaItems>" + "    <userId>johnDoeId</userId>"
-        + "  </activity>" + "  <activity>" + "    <id>activityId</id>"
-        + "    <mediaItems>" + "        <mimeType>image/jpg</mimeType>"
-        + "        <type>IMAGE</type>" + "        <url>http://foo.bar</url>"
-        + "    </mediaItems>" + "    <userId>johnDoeId</userId>"
-        + "  </activity>" + "  <activity>" + "    <id>activityId</id>"
-        + "    <mediaItems>" + "        <mimeType>image/jpg</mimeType>"
-        + "        <type>IMAGE</type>" + "        <url>http://foo.bar</url>"
-        + "    </mediaItems>" + "    <userId>johnDoeId</userId>"
-        + "  </activity>" + "</list.container>" + "</response>";
-    expectedXml = XSDValidator.insertSchema(expectedXml, XMLSCHEMA, true);
+        + "        <type>IMAGE</type>"
+        + "        <url>http://foo.bar</url>"
+        + "    </mediaItems>"
+        + "    <userId>johnDoeId</userId>"
+        + "  </activity>"
+        + "  <activity>"
+        + "    <id>activityId</id>"
+        + "    <mediaItems>"
+        + "        <mimeType>image/jpg</mimeType>"
+        + "        <type>IMAGE</type>"
+        + "        <url>http://foo.bar</url>"
+        + "    </mediaItems>"
+        + "    <userId>johnDoeId</userId>"
+        + "  </activity>"
+        + "  <activity>"
+        + "    <id>activityId</id>"
+        + "    <mediaItems>"
+        + "        <mimeType>image/jpg</mimeType>"
+        + "        <type>IMAGE</type>"
+        + "        <url>http://foo.bar</url>"
+        + "    </mediaItems>"
+        + "    <userId>johnDoeId</userId>"
+        + "  </activity>"
+        + "</content></entry>"
+        + "<osearch:startIndex>0</osearch:startIndex>"
+        + "<osearch:totalResults>1</osearch:totalResults>"
+        + "<osearch:itemsPerPage>1</osearch:itemsPerPage>" + "</feed>";
     assertEquals(StringUtils.deleteWhitespace(expectedXml), StringUtils
         .deleteWhitespace(xml));
-  }
 
-  public void testPerson1() throws XmlException, IOException {
-    String xml = loadXML("testxml/person1.xml");
-    beanXmlConverter.convertToObject(xml, Person.class);
-  }
-
-  public void testActivity1() throws XmlException, IOException {
-    String xml = loadXML("testxml/activity1.xml");
-    beanXmlConverter.convertToObject(xml, Activity.class);
-  }
-
-  public void testAppdata1() throws XmlException, IOException {
-    String xml = loadXML("testxml/appdata1.xml");
-    beanXmlConverter.convertToObject(xml, Map.class);
-  }
-
-  public void testGroup1() throws XmlException {
-    // TODO
-  }
-
-  /**
-   * @param string
-   * @return
-   * @throws IOException
-   */
-  private String loadXML(String resource) throws IOException {
-    BufferedReader in = new BufferedReader(new InputStreamReader(this
-        .getClass().getResourceAsStream(resource)));
-    StringBuilder sb = new StringBuilder();
-    for (String line = in.readLine(); line != null; line = in.readLine()) {
-      sb.append(line);
-    }
-    in.close();
-    return sb.toString();
   }
 
 }

@@ -31,9 +31,9 @@ public class ThreadSafeWriterStack implements WriterStack {
   /**
    * A thread local holder for the stack.
    */
-  private ThreadLocal<List<String>> stackHolder = new ThreadLocal<List<String>>() { 
-      protected List<String> initialValue() {
-        return new ArrayList<String>();
+  private ThreadLocal<List<Object[]>> stackHolder = new ThreadLocal<List<Object[]>>() { 
+      protected List<Object[]> initialValue() {
+        return new ArrayList<Object[]>();
       }
   };
 
@@ -52,8 +52,8 @@ public class ThreadSafeWriterStack implements WriterStack {
    * @param name
    *          the node name just added.
    */
-  public void push(String name) {
-    stackHolder.get().add(name);
+  public void push(String name, NamespaceSet namespaceSet) {
+    stackHolder.get().add(new Object[]{name, namespaceSet});
   }
 
   /**
@@ -62,25 +62,48 @@ public class ThreadSafeWriterStack implements WriterStack {
    * @return the node name just ended.
    */
   public String pop() {
-    List<String> stack = stackHolder.get();
+    List<Object[]> stack = stackHolder.get();
     if (stack.size() == 0) {
       return null;
     } else {
-      return stack.remove(stack.size() - 1);
+      Object[] o =  stack.remove(stack.size() - 1);
+      if ( o != null && o.length > 0 ) {
+        return (String) o[0];
+      }
+      return null;
     }
   }
 
+  /**
+   * {@inheritDoc}
+   * @see org.apache.shindig.social.core.util.xstream.WriterStack#peek()
+   */
+  public String peek() {
+    return (String) peek(0);
+  }
+
+  /**
+   * {@inheritDoc}
+   * @see org.apache.shindig.social.core.util.xstream.WriterStack#peekNamespace()
+   */
+  public NamespaceSet peekNamespace() {
+    return (NamespaceSet) peek(1);
+  }
   /**
    * Look at the node name on the top of the stack on the current thread.
    *
    * @return the current node name.
    */
-  public String peek() {
-    List<String> stack = stackHolder.get();
+  public Object peek(int i) {
+    List<Object[]> stack = stackHolder.get();
     if (stack.size() == 0) {
       return null;
     } else {
-      return stack.get(stack.size() - 1);
+      Object[] o = stack.get(stack.size() - 1);
+      if ( o != null && o.length > i ) {
+        return o[i];
+      }
+      return null;
     }
   }
 
@@ -92,4 +115,18 @@ public class ThreadSafeWriterStack implements WriterStack {
   public void reset() {
     stackHolder.get().clear();
   }
+
+  /**
+   * {@inheritDoc}
+   * @see org.apache.shindig.social.core.util.xstream.WriterStack#size()
+   */
+  public int size() {
+    List<Object[]> s = stackHolder.get();
+    if ( s == null ) {
+      return 0;
+    } else {
+      return s.size();
+    }
+  }
+
 }

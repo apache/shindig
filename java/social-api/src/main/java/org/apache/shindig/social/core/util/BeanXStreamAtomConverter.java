@@ -19,12 +19,19 @@ package org.apache.shindig.social.core.util;
 
 import com.google.inject.Inject;
 
+import org.apache.shindig.social.core.util.atom.AtomFeed;
 import org.apache.shindig.social.core.util.xstream.XStreamConfiguration;
+import org.apache.shindig.social.core.util.xstream.XStreamConfiguration.ConverterConfig;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 /**
- * 
+ * Converts output to atom.
  */
 public class BeanXStreamAtomConverter extends BeanXStreamConverter {
+
+  private static Log log = LogFactory.getLog(BeanXStreamAtomConverter.class);
 
   /**
    * @param configuration
@@ -33,13 +40,31 @@ public class BeanXStreamAtomConverter extends BeanXStreamConverter {
   public BeanXStreamAtomConverter(XStreamConfiguration configuration) {
     super(configuration);
   }
-  
+
   /**
    * {@inheritDoc}
+   *
    * @see org.apache.shindig.social.core.util.BeanXStreamConverter#getContentType()
    */
   public String getContentType() {
     return "application/atom+xml";
+  }
+
+  /**
+   * {@inheritDoc}
+   *
+   * @see org.apache.shindig.social.core.util.BeanXStreamConverter#convertToString(java.lang.Object)
+   */
+  @Override
+  public String convertToString(Object obj) {
+    writerStack.reset();
+    AtomFeed af = new AtomFeed(obj);
+    ConverterConfig cc = converterMap
+        .get(XStreamConfiguration.ConverterSet.DEFAULT);
+    cc.mapper.setBaseObject(af); // thread safe method
+    String result = cc.xstream.toXML(af);
+    
+    return result;
   }
 
 }

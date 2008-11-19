@@ -30,7 +30,10 @@ import com.thoughtworks.xstream.io.HierarchicalStreamDriver;
 import com.thoughtworks.xstream.mapper.Mapper;
 
 import org.apache.shindig.social.core.model.EnumImpl;
-import org.apache.shindig.social.core.util.xstream.XStreamConfiguration.ConverterConfig;
+import org.apache.shindig.social.core.util.atom.AtomContent;
+import org.apache.shindig.social.core.util.atom.AtomEntry;
+import org.apache.shindig.social.core.util.atom.AtomFeed;
+import org.apache.shindig.social.core.util.atom.AtomKeyValue;
 import org.apache.shindig.social.opensocial.model.Account;
 import org.apache.shindig.social.opensocial.model.Activity;
 import org.apache.shindig.social.opensocial.model.Address;
@@ -76,9 +79,44 @@ public class XStream081Configuration implements XStreamConfiguration {
   private static final Map<ConverterSet, Map<String, Class<?>>> elementClassMap = new HashMap<ConverterSet, Map<String, Class<?>>>();
   private static final Map<ConverterSet, List<ImplicitCollectionFieldMapping>> itemFieldMappings = new HashMap<ConverterSet, List<ImplicitCollectionFieldMapping>>();
   private static final Map<ConverterSet, List<InterfaceFieldAliasMapping>> fieldAliasMappingList = new HashMap<ConverterSet, List<InterfaceFieldAliasMapping>>();
+  private static final Map<String, NamespaceSet> namepaces = new HashMap<String, NamespaceSet>();
+  private static final String ATOM_NS = "http://www.w3.org/2005/Atom";
+  private static final String OS_NS = "http://ns.opensocial.org/2008/opensocial";
+  private static final String OSEARCH_NS = "http://a9.com/-/spec/opensearch/1.1";
+  
   static {
+    // configure the name space mapping. This does not need to be all the elments in the
+    // namespace, just the point of translation from one namespace to another.
+    // It would have been good to use a standard parser/serializer approach, but 
+    // the xstream namespace implementation does not work exactly how we need it to.
+    NamespaceSet atom = new NamespaceSet();
+    atom.addNamespace("xmlns", ATOM_NS);
+    atom.addNamespace("xmlos:osearch",OSEARCH_NS);
+    atom.addPrefixedElement("totalResults","osearch:totalResults");
+    atom.addPrefixedElement("startIndex","osearch:startIndex");
+    atom.addPrefixedElement("itemsPerPage","osearch:itemsPerPage");
+    namepaces.put("feed", atom);
+    NamespaceSet os = new NamespaceSet();
+    atom.addNamespace("xmlns", OS_NS);
+    namepaces.put("person", os);
+    namepaces.put("activity", os);
+    namepaces.put("account", os);
+    namepaces.put("address", os);
+    namepaces.put("bodyType", os);
+    namepaces.put("message", os);
+    namepaces.put("mediaItem", os);
+    namepaces.put("name", os);
+    namepaces.put("url", os);
+    namepaces.put("reponse", os);
+    namepaces.put("appdata", os);
+
     List<ClassFieldMapping> defaultElementMappingList = new ArrayList<ClassFieldMapping>();
     // this is order specific, so put the more specified interfaces at the top.
+    defaultElementMappingList.add(new ClassFieldMapping("feed",
+        AtomFeed.class));
+    defaultElementMappingList.add(new ClassFieldMapping("content",
+        AtomContent.class));
+
     defaultElementMappingList.add(new ClassFieldMapping("activity",
         Activity.class));
     defaultElementMappingList.add(new ClassFieldMapping("account",
@@ -121,6 +159,11 @@ public class XStream081Configuration implements XStreamConfiguration {
     // element setup for RestfullCollection Responses
 
     List<ClassFieldMapping> collectionElementMappingList = new ArrayList<ClassFieldMapping>();
+
+    collectionElementMappingList.add(new ClassFieldMapping("feed",
+        AtomFeed.class));
+    collectionElementMappingList.add(new ClassFieldMapping("content",
+        AtomContent.class));
 
     collectionElementMappingList.add(new ClassFieldMapping("activity",
         Activity.class));
@@ -174,6 +217,8 @@ public class XStream081Configuration implements XStreamConfiguration {
     omitMap.put(ConverterSet.DEFAULT, defaultOmitMap);
 
     Map<String, Class<?>> defaultElementClassMap = new HashMap<String, Class<?>>();
+    defaultElementClassMap.put("feed", AtomFeed.class);
+    defaultElementClassMap.put("content", AtomContent.class);
     defaultElementClassMap.put("person", Person.class);
     defaultElementClassMap.put("email", ListField.class);
     defaultElementClassMap.put("phone", ListField.class);
@@ -194,6 +239,10 @@ public class XStream081Configuration implements XStreamConfiguration {
     elementClassMap.put(ConverterSet.DEFAULT, defaultElementClassMap);
 
     List<ImplicitCollectionFieldMapping> defaultItemFieldMappings = new ArrayList<ImplicitCollectionFieldMapping>();
+    defaultItemFieldMappings.add(new ImplicitCollectionFieldMapping(
+        AtomFeed.class, "entry", AtomEntry.class, "entry"));
+    defaultItemFieldMappings.add(new ImplicitCollectionFieldMapping(
+        AtomContent.class, "entry", AtomKeyValue.class, "entry"));
     defaultItemFieldMappings.add(new ImplicitCollectionFieldMapping(
         Person.class, "books", String.class, "books"));
     defaultItemFieldMappings.add(new ImplicitCollectionFieldMapping(
@@ -261,6 +310,7 @@ public class XStream081Configuration implements XStreamConfiguration {
     // defaultFieldAliasMappingList.add(new
     // InterfaceFieldAliasMapping("address",
     // ListField.class,"value","profileVideo"));
+    
 
     fieldAliasMappingList.put(ConverterSet.DEFAULT,
         defaultFieldAliasMappingList);
@@ -372,5 +422,14 @@ public class XStream081Configuration implements XStreamConfiguration {
 
     return new ConverterConfig(fmapper,xstream);
 
+  }
+
+
+  /**
+   * {@inheritDoc}
+   * @see org.apache.shindig.social.core.util.xstream.XStreamConfiguration#getNameSpaces()
+   */
+  public Map<String, NamespaceSet> getNameSpaces() {
+    return namepaces;
   }
 }
