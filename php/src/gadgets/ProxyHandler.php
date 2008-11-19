@@ -338,8 +338,19 @@ class ProxyHandler {
 	private function fetchContent($url, $method)
 	{
 		//TODO get actual character encoding from the request
-		
 
+		// Check the protocol requested - curl doesn't really support file:// 
+		// requests but the 'error' should be handled properly
+		$protocolSplit = split(":\/\/", $url);
+		if (!count($protocolSplit)) {
+			throw new Exception("Invalid protocol specified for url: $url");
+		} else {
+			$protocol = strtoupper($protocolSplit[0]);
+			if ($protocol != "HTTP" && $protocol != "HTTPS" && $protocol != "FTP") {
+				throw new Exception("Invalid protocol specified in url ($protocol)");
+			}
+		}
+		
 		// Extract the request headers from the $_SERVER super-global (this -does- unfortunatly mean that any header that php doesn't understand won't be proxied thru though)
 		// if this turns out to be a problem we could add support for HTTP_RAW_HEADERS, but this depends on a php.ini setting, so i'd rather prevent that from being required
 		$headers = '';
