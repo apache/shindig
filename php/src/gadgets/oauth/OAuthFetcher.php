@@ -137,8 +137,8 @@ class OAuthFetcher extends RemoteContentFetcher {
 		if ($origClientState != null && strlen($origClientState) > 0) {
 			try {
 				$this->origClientState = $this->oauthCrypter->unwrap($origClientState, self::$CLIENT_STATE_MAX_AGE_SECS);
-			} catch (BlobCrypterException $e) {	// Probably too old, pretend we never saw it at all.
-			}
+			} catch (BlobCrypterException $e) {// Probably too old, pretend we never saw it at all.
+}
 		}
 		if ($this->origClientState == null) {
 			$this->origClientState = array();
@@ -613,5 +613,10 @@ class OAuthFetcher extends RemoteContentFetcher {
 		if ($this->errorText != null) {
 			$this->responseMetadata[self::$ERROR_TEXT] = $this->errorText;
 		}
+	}
+
+	public function multiFetchRequest(Array $requests)
+	{
+		// Do nothing  
 	}
 }
