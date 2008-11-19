@@ -20,7 +20,7 @@ class BasicRemoteContentTest extends PHPUnit_Framework_TestCase {
 	protected function setUp()
 	{
 		parent::setUp();
-		$this->BasicRemoteContent = new BasicRemoteContent();	
+		$this->BasicRemoteContent = new BasicRemoteContent();
 	}
 
 	/**
@@ -28,7 +28,7 @@ class BasicRemoteContentTest extends PHPUnit_Framework_TestCase {
 	 */
 	protected function tearDown()
 	{
-		$this->BasicRemoteContent = null;		
+		$this->BasicRemoteContent = null;
 		parent::tearDown();
 	}
 
@@ -43,7 +43,7 @@ class BasicRemoteContentTest extends PHPUnit_Framework_TestCase {
 		$content = $ret->getResponseContent();
 		$this->assertEquals("OK", trim($content));
 	}
-	
+
 	/**
 	 * Tests BasicRemoteContent->fetch() 404 response
 	 */
@@ -54,7 +54,7 @@ class BasicRemoteContentTest extends PHPUnit_Framework_TestCase {
 		$ret = $this->BasicRemoteContent->fetch($request, $context);
 		$this->assertEquals('404', $ret->getHttpCode());
 	}
-	
+
 	/**
 	 * Tests BasicRemoteContent->fetch() 200, 200 and 200 responses
 	 */
@@ -80,7 +80,7 @@ class BasicRemoteContentTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals('200', $rets[1]->getHttpCode());
 		$this->assertEquals('200', $rets[2]->getHttpCode());
 	}
-	
+
 	/**
 	 * Tests BasicRemoteContent->Multifetch() 200, 200 and 404 responses
 	 */
@@ -94,7 +94,7 @@ class BasicRemoteContentTest extends PHPUnit_Framework_TestCase {
 		$contexts[] = new TestContext();
 		$contexts[] = new TestContext();
 		$contexts[] = new TestContext();
-
+		
 		$rets = $this->BasicRemoteContent->multiFetch($requests, $contexts);
 		$content_0 = $rets[0]->getResponseContent();
 		$content_1 = $rets[1]->getResponseContent();
@@ -122,5 +122,17 @@ class BasicRemoteContentTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals('404', $rets[0]->getHttpCode());
 		$this->assertEquals('404', $rets[1]->getHttpCode());
 		$this->assertEquals('404', $rets[2]->getHttpCode());
+	}
+
+	/*
+	 * Tests BasicRemoteContent->fetch. This unit test is for reproduce SHINDIG-674.
+	 */
+	public function testFeedFetch()
+	{
+		$request = new RemoteContentRequest('http://adwordsapi.blogspot.com/atom.xml');
+		$context = new TestContext();
+		$ret = $this->BasicRemoteContent->fetch($request, $context);
+		$content = $ret->getResponseContent();
+		$this->assertNotEquals(null, $content);
 	}
 }
