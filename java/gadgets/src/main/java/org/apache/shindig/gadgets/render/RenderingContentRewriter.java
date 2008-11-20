@@ -374,10 +374,10 @@ public class RenderingContentRewriter implements ContentRewriter {
     MessageBundle bundle = messageBundleFactory.getBundle(
         gadget.getSpec(), context.getLocale(), context.getIgnoreCache());
 
-    String msgs = new JSONObject(bundle.getMessages()).toString();
+    String msgs = bundle.toJSONString();
 
     Text text = scriptTag.getOwnerDocument().createTextNode("gadgets.Prefs.setMessages_(");
-    text.appendData(msgs.toString());
+    text.appendData(msgs);
     text.appendData(");");
     scriptTag.appendChild(text);
   }

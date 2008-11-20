@@ -22,6 +22,7 @@ import org.apache.shindig.common.xml.XmlUtil;
 
 import com.google.common.collect.Maps;
 
+import org.json.JSONObject;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 
@@ -108,6 +109,14 @@ public class MessageBundle {
   }
 
   /**
+   * Return the contents as a JSON encoded string
+   */
+  private String jsonString;
+  public String toJSONString() {
+    return jsonString;  
+  }
+
+  /**
    * Extracts messages from an element.
    */
   private Map<String, String> parseMessages(Element element)
@@ -125,6 +134,7 @@ public class MessageBundle {
       }
       messages.put(name, msg.getTextContent().trim());
     }
+    jsonString = new JSONObject(messages).toString();
     return Collections.unmodifiableMap(messages);
   }
 
