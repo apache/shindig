@@ -81,7 +81,7 @@ class Zend_Loader {
 			self::loadFile($file, $dirs, true);
 		} else {
 			self::_securityCheck($file);
-			include_once 'src/common/' . $file;
+			include_once 'external/' . $file;
 		}
 		
 		if (! class_exists($class, false) && ! interface_exists($class, false)) {
