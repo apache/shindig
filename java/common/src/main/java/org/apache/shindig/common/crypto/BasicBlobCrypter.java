@@ -136,7 +136,7 @@ public class BasicBlobCrypter implements BlobCrypter {
   public String wrap(Map<String, String> in)
   throws BlobCrypterException {
     if (in.containsKey(TIMESTAMP_KEY)) {
-      throw new IllegalArgumentException("No 't' keys allowed for BlobCrypter");
+      throw new IllegalArgumentException("No '" + TIMESTAMP_KEY + "' key allowed for BlobCrypter");
     }
     try {
       byte[] encoded = serializeAndTimestamp(in);
