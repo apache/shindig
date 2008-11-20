@@ -342,6 +342,15 @@ class GadgetRenderingServlet extends HttpServlet {
 				}
 			}
 		}
+
+		// Add gadgets.util support. This is calculated dynamically based on request inputs.
+		// See java/org/apache/shindig/gadgets/render/RenderingContentRewriter.java for reference.
+		$requires = array();
+		foreach ($gadget->getRequires() as $feature) {
+			$requires[$feature->name] = new EmptyClass();
+		}
+		$gadgetConfig['core.util'] = $requires;
+
 		return "gadgets.config.init(" . json_encode($gadgetConfig) . ");\n";
 	}
 
@@ -436,4 +445,11 @@ class GadgetRenderingServlet extends HttpServlet {
 		$resp = count($resp) ? json_encode($resp) : "{}";
 		return "gadgets.io.preloaded_ = " . $resp . ";\n";
 	}
+}
+
+/*
+ * An empty class for generate "{}" code in JavaScript.
+ */
+class EmptyClass
+{
 }
