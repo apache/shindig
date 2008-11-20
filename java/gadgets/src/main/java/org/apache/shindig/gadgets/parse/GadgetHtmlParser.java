@@ -27,6 +27,8 @@ import com.google.inject.ImplementedBy;
 import com.google.inject.Inject;
 
 import org.w3c.dom.Document;
+import org.w3c.dom.DocumentFragment;
+import org.w3c.dom.Node;
 
 /**
  * Parser for arbitrary HTML content
@@ -99,4 +101,37 @@ public abstract class GadgetHtmlParser {
    * @throws GadgetException
    */
   protected abstract Document parseDomImpl(String source) throws GadgetException;
+
+  /**
+   * Normalize head and body tags in the passed fragment before including it
+   * in the document
+   * @param document
+   * @param fragment
+   */
+  protected void normalizeFragment(Document document, DocumentFragment fragment) {
+    Node htmlNode = DomUtil.getFirstNamedChildNode(fragment, "HTML");
+    if (htmlNode != null) {
+      document.appendChild(htmlNode);
+    } else {
+      Node bodyNode = DomUtil.getFirstNamedChildNode(fragment, "body");
+      Node headNode = DomUtil.getFirstNamedChildNode(fragment, "head");
+      if (bodyNode != null || headNode != null) {
+        // We have either a head or body so put fragment into HTML tag
+        Node root = document.appendChild(document.createElement("html"));
+        if (headNode != null && bodyNode == null) {
+          fragment.removeChild(headNode);
+          root.appendChild(headNode);
+          Node body = root.appendChild(document.createElement("body"));
+          body.appendChild(fragment);
+        } else {
+          root.appendChild(fragment);
+        }
+      } else {
+        // No head or body so put fragment into a body
+        Node root = document.appendChild(document.createElement("html"));
+        Node body = root.appendChild(document.createElement("body"));
+        body.appendChild(fragment);
+      }
+    }
+  }
 }
