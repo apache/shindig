@@ -39,6 +39,7 @@ public class MessageBundle {
 
   private final Map<String, String> messages;
   private final String languageDirection;
+  private final String jsonString;
 
    /**
    * Constructs a message bundle from input xml (fetched from an external file).
@@ -56,6 +57,7 @@ public class MessageBundle {
           + ": " + e.getMessage());
     }
     messages = parseMessages(doc);
+    jsonString = new JSONObject(messages).toString();
     languageDirection = locale.getLanguageDirection();
   }
 
@@ -64,6 +66,7 @@ public class MessageBundle {
    */
   public MessageBundle(Element element) throws SpecParserException {
     messages = parseMessages(element);
+    jsonString = new JSONObject(messages).toString();
     languageDirection = XmlUtil.getAttribute(element, "language_direction", "ltr");
   }
 
@@ -85,11 +88,13 @@ public class MessageBundle {
       dir = child.languageDirection;
     }
     messages = Collections.unmodifiableMap(merged);
+    jsonString = new JSONObject(messages).toString();
     languageDirection = dir;
   }
 
   private MessageBundle() {
     this.messages = Collections.emptyMap();
+    jsonString = "{}";
     languageDirection = "ltr";
   }
 
@@ -111,9 +116,8 @@ public class MessageBundle {
   /**
    * Return the contents as a JSON encoded string
    */
-  private String jsonString;
   public String toJSONString() {
-    return jsonString;  
+    return jsonString;
   }
 
   /**
@@ -134,7 +138,6 @@ public class MessageBundle {
       }
       messages.put(name, msg.getTextContent().trim());
     }
-    jsonString = new JSONObject(messages).toString();
     return Collections.unmodifiableMap(messages);
   }
 
