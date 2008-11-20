@@ -18,7 +18,6 @@
 package org.apache.shindig.gadgets.parse.nekohtml;
 
 import org.apache.shindig.gadgets.GadgetException;
-import org.apache.shindig.gadgets.parse.DomUtil;
 import org.apache.shindig.gadgets.parse.GadgetHtmlParser;
 import org.apache.shindig.gadgets.parse.HtmlSerializer;
 
@@ -31,7 +30,6 @@ import org.cyberneko.html.parsers.DOMFragmentParser;
 import org.w3c.dom.DOMImplementation;
 import org.w3c.dom.Document;
 import org.w3c.dom.DocumentFragment;
-import org.w3c.dom.Node;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
@@ -72,18 +70,12 @@ public class NekoHtmlParser extends GadgetHtmlParser {
     InputSource input = new InputSource(new StringReader(source));
     DOMFragmentParser parser = new DOMFragmentParser();
     parser.setProperty("http://cyberneko.org/html/properties/names/elems", "default");
-
+    parser.setFeature("http://cyberneko.org/html/features/document-fragment", true);
 
     Document htmlDoc = documentProvider.createDocument(null, null, null);
     DocumentFragment fragment = htmlDoc.createDocumentFragment();
     parser.parse(input, fragment);
-    Node htmlNode = DomUtil.getFirstNamedChildNode(fragment, "HTML");
-    if (htmlNode != null) {
-      htmlDoc.appendChild(htmlNode);
-    } else {
-      Node root = htmlDoc.appendChild(htmlDoc.createElement("HTML"));
-      root.appendChild(fragment);
-    }
+    normalizeFragment(htmlDoc, fragment);
     return htmlDoc;
   }
 

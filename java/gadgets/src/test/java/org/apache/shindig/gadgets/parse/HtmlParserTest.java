@@ -17,12 +17,13 @@
  */
 package org.apache.shindig.gadgets.parse;
 
-import junit.framework.TestCase;
-import org.apache.shindig.gadgets.parse.caja.CajaHtmlParser;
 import org.apache.shindig.gadgets.parse.nekohtml.NekoHtmlParser;
+import org.apache.shindig.gadgets.rewrite.XPathWrapper;
+
 import org.w3c.dom.Document;
-import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
+
+import junit.framework.TestCase;
 
 /**
  * Note these tests are of marginal use. Consider removing. More useful tests would exercise
@@ -30,117 +31,60 @@ import org.w3c.dom.NodeList;
  */
 public class HtmlParserTest extends TestCase {
 
-  private final GadgetHtmlParser cajaParser = new CajaHtmlParser(
-      new ParseModule.DOMImplementationProvider().get());
-
   private final GadgetHtmlParser nekoParser = new NekoHtmlParser(
       new ParseModule.DOMImplementationProvider().get());
 
   public void testParseSimpleString() throws Exception {
-    parseSimpleString(cajaParser);
     parseSimpleString(nekoParser);
   }
 
   private void parseSimpleString(GadgetHtmlParser htmlParser) throws Exception {
     Document doc = htmlParser.parseDom("content");
-
-    Node node = doc.getDocumentElement().getFirstChild().getNextSibling();
-    assertNotNull(node);
-    assertEquals("content", node.getTextContent());
-    assertNull(node.getAttributes());
-    assertNullOrEmpty(node.getChildNodes());
-    assertEquals(Node.TEXT_NODE, node.getNodeType());
+    XPathWrapper wrapper = new XPathWrapper(doc);
+    assertEquals("content", wrapper.getValue("/html/body"));
   }
 
   public void testParseTagWithStringContents() throws Exception {
     parseTagWithStringContents(nekoParser);
-    parseTagWithStringContents(cajaParser);
   }
 
   void parseTagWithStringContents(GadgetHtmlParser htmlParser) throws Exception {
     Document doc = htmlParser.parseDom("<span>content</span>");
-
-    Node node = doc.getDocumentElement().getFirstChild().getNextSibling();
-    assertEquals("content", node.getTextContent());
-    assertEquals("span", node.getNodeName().toLowerCase());
+    XPathWrapper wrapper = new XPathWrapper(doc);
+    assertEquals("content", wrapper.getValue("/html/body/span"));
   }
 
   public void testParseTagWithAttributes() throws Exception {
     parseTagWithAttributes(nekoParser);
-    parseTagWithAttributes(cajaParser);
   }
 
   void parseTagWithAttributes(GadgetHtmlParser htmlParser) throws Exception {
     Document doc = htmlParser.parseDom("<div id=\"foo\">content</div>");
-
-    Node node = doc.getDocumentElement().getFirstChild().getNextSibling();
-    assertNotNull(node);
-    assertNotNull(node.getAttributes());
-    assertEquals(1, node.getAttributes().getLength());
-    assertEquals("id", node.getAttributes().item(0).getNodeName());
-    assertEquals("foo", node.getAttributes().item(0).getNodeValue());
-    assertNotNull(node.getChildNodes());
-    assertEquals(1, node.getChildNodes().getLength());
-    assertEquals("content", node.getChildNodes().item(0).getTextContent());
+    XPathWrapper wrapper = new XPathWrapper(doc);
+    assertEquals("content", wrapper.getValue("/html/body/div"));
+    assertEquals("foo", wrapper.getValue("/html/body/div/@id"));
   }
 
   public void testParseStringUnescapesProperly() throws Exception {
     parseStringUnescapesProperly(nekoParser);
-    parseStringUnescapesProperly(cajaParser);
   }
 
   void parseStringUnescapesProperly(GadgetHtmlParser htmlParser) throws Exception {
     Document doc = htmlParser.parseDom("&lt;content&amp;&apos;chrome&apos;&gt;");
-
-    Node node = doc.getDocumentElement().getFirstChild().getNextSibling();
-    assertNotNull(node);
-    assertEquals("<content&'chrome'>", node.getTextContent());
-    assertNull(node.getAttributes());
-    assertNullOrEmpty(node.getChildNodes());
+    XPathWrapper wrapper = new XPathWrapper(doc);
+    assertEquals("<content&'chrome'>", wrapper.getValue("/html/body"));
   }
 
   public void testParseNestedContentWithNoCloseForBrAndHr() throws Exception {
     parseNestedContentWithNoCloseForBrAndHr(nekoParser);
-    parseNestedContentWithNoCloseForBrAndHr(cajaParser);
   }
 
   void parseNestedContentWithNoCloseForBrAndHr(GadgetHtmlParser htmlParser) throws Exception {
-    Document doc = htmlParser.parseDom("<div><br>  and  <hr></div>");
-
-    Node divNode = doc.getDocumentElement().getFirstChild().getNextSibling();
-    assertEquals("div", divNode.getNodeName().toLowerCase());
-    assertNotNull(divNode.getAttributes());
-    assertEquals(0, divNode.getAttributes().getLength());
-    assertNotNull(divNode.getChildNodes());
-    assertEquals(3, divNode.getChildNodes().getLength());
-    
-    {
-      // <br>
-      Node divChild = divNode.getChildNodes().item(0);
-      assertNotNull(divChild);
-      assertEquals("br", divChild.getNodeName().toLowerCase());
-      assertNotNull(divChild.getAttributes());
-      assertEquals(0, divChild.getAttributes().getLength());
-      assertEquals(0, divChild.getChildNodes().getLength());
-    }
-    
-    {
-      // text
-      Node divChild = divNode.getChildNodes().item(1);
-      assertEquals("  and  ", divChild.getTextContent());
-      assertNull(divChild.getAttributes());
-      assertNullOrEmpty(divChild.getChildNodes());
-    }
-    
-    {
-      // <hr> should be parsed lieniently
-      Node divChild = divNode.getChildNodes().item(2);
-      assertNotNull(divChild);
-      assertEquals("hr", divChild.getNodeName().toLowerCase());
-      assertNotNull(divChild.getAttributes());
-      assertEquals(0, divChild.getAttributes().getLength());
-      assertEquals(0, divChild.getChildNodes().getLength());
-    }
+    Document doc = htmlParser.parseDom("<div>x and y<br> and <hr>z</div>");
+    XPathWrapper wrapper = new XPathWrapper(doc);
+    assertEquals("x and y and z", wrapper.getValue("/html/body/div"));
+    assertEquals(1, wrapper.getNodeList("/html/body/div/br").getLength());
+    assertEquals(1, wrapper.getNodeList("/html/body/div/hr").getLength());
   }
 
   // TODO: figure out to what extent it makes sense to test "invalid"

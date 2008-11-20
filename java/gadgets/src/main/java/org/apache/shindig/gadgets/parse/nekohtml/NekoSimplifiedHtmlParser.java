@@ -17,7 +17,6 @@
  */
 package org.apache.shindig.gadgets.parse.nekohtml;
 
-import org.apache.shindig.gadgets.parse.DomUtil;
 import org.apache.shindig.gadgets.parse.GadgetHtmlParser;
 import org.apache.shindig.gadgets.parse.HtmlSerializer;
 
@@ -38,6 +37,7 @@ import org.apache.xerces.xni.parser.XMLDocumentSource;
 import org.apache.xerces.xni.parser.XMLInputSource;
 import org.apache.xml.serialize.HTMLSerializer;
 import org.apache.xml.serialize.OutputFormat;
+import org.cyberneko.html.HTMLConfiguration;
 import org.cyberneko.html.HTMLElements;
 import org.cyberneko.html.HTMLEntities;
 import org.cyberneko.html.HTMLScanner;
@@ -79,6 +79,11 @@ public class NekoSimplifiedHtmlParser extends GadgetHtmlParser {
     tagBalancer.setDocumentHandler(handler);
     htmlScanner.setDocumentHandler(tagBalancer);
 
+    HTMLConfiguration config = new HTMLConfiguration();
+    config.setProperty("http://cyberneko.org/html/properties/names/elems", "match");
+    config.setFeature("http://cyberneko.org/html/features/balance-tags/document-fragment", true);
+    tagBalancer.reset(config);
+    htmlScanner.reset(config);
     XMLInputSource inputSource = new XMLInputSource(null, null, null);
     inputSource.setEncoding("UTF-8");
     inputSource.setCharacterStream(new StringReader(source));
@@ -87,20 +92,13 @@ public class NekoSimplifiedHtmlParser extends GadgetHtmlParser {
       htmlScanner.scanDocument(true);
       Document document = handler.getDocument();
       DocumentFragment fragment = handler.getFragment();
-      Node htmlNode = DomUtil.getFirstNamedChildNode(fragment, "HTML");
-      if (htmlNode != null) {
-        document.appendChild(htmlNode);
-      } else {
-        Node root = document.appendChild(document.createElement("HTML"));
-        root.appendChild(fragment);
-      }
+      normalizeFragment(document, fragment);
       HtmlSerializer.attach(document, new Serializer(), source);
       return document;
     } catch (IOException ioe) {
       return null;
     }
   }
-
 
   /**
    * Handler for XNI events from Neko
@@ -152,7 +150,6 @@ public class NekoSimplifiedHtmlParser extends GadgetHtmlParser {
 
     public void doctypeDecl(String rootElement, String publicId, String systemId,
         Augmentations augs) throws XNIException {
-      // Recreate the document with the specific doctype
       document = documentFactory.createDocument(null, null,
           documentFactory.createDocumentType(rootElement, publicId, systemId));
       elementStack.clear();
@@ -339,6 +336,7 @@ public class NekoSimplifiedHtmlParser extends GadgetHtmlParser {
           this._printer.printText(s);
         }
       };
+      
       try {
         serializer.serialize(doc);
         return sw.toString();
