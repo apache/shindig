@@ -41,7 +41,8 @@ import java.util.regex.Pattern;
 public class RpcServlet extends InjectedServlet {
   static final String GET_REQUEST_REQ_PARAM = "req";
   static final String GET_REQUEST_CALLBACK_PARAM = "callback";
-  static final Pattern GET_REQUEST_CALLBACK_PATTERN = Pattern.compile("[A-Za-z_\\.]+");
+  // Starts with alpha or underscore, followed by alphanum, underscore or period
+  static final Pattern GET_REQUEST_CALLBACK_PATTERN = Pattern.compile("[A-Za-z_][A-Za-z0-9_\\.]+");
 
   private static final int POST_REQUEST_MAX_SIZE = 1024 * 128;
   private static final Logger logger = Logger.getLogger("org.apache.shindig.gadgets");
