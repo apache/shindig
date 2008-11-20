@@ -26,6 +26,8 @@ import org.apache.shindig.common.xml.XmlUtil;
 
 import com.google.common.collect.Maps;
 
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
 import org.w3c.dom.Element;
@@ -118,5 +120,41 @@ public class MessageBundleTest {
     MessageBundle b0 = new MessageBundle(locale, XML);
     MessageBundle b1 = new MessageBundle(locale, b0.toString());
     assertEquals(b0.getMessages(), b1.getMessages());
+  }
+
+  private static void assertJsonEquals(JSONObject left, JSONObject right) throws JSONException {
+    assertEquals(left.length(), right.length());
+    for (String key : JSONObject.getNames(left)) {
+      assertEquals(left.get(key), right.get(key));
+    }
+  }
+
+  @Test
+  public void toJSONStringMatchesValues() throws Exception {
+    MessageBundle simple = new MessageBundle(XmlUtil.parse(PARENT_LOCALE));
+
+    JSONObject fromString = new JSONObject(simple.toJSONString());
+    JSONObject fromMap = new JSONObject(simple.getMessages());
+    assertJsonEquals(fromString, fromMap);
+  }
+
+  @Test
+  public void toJSONStringMatchesValuesLocaleCtor() throws Exception {
+    MessageBundle bundle = new MessageBundle(locale, XML);
+
+    JSONObject fromString = new JSONObject(bundle.toJSONString());
+    JSONObject fromMap = new JSONObject(bundle.getMessages());
+    assertJsonEquals(fromString, fromMap);
+  }
+
+  @Test
+  public void toJSONStringMatchesValuesWithChild() throws Exception {
+    MessageBundle parent = new MessageBundle(XmlUtil.parse(PARENT_LOCALE));
+    MessageBundle child = new MessageBundle(XmlUtil.parse(XML));
+    MessageBundle bundle = new MessageBundle(parent, child);
+
+    JSONObject fromString = new JSONObject(bundle.toJSONString());
+    JSONObject fromMap = new JSONObject(bundle.getMessages());
+    assertJsonEquals(fromString, fromMap);
   }
 }
