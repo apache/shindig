@@ -178,8 +178,8 @@ class PersonTest extends PHPUnit_Framework_TestCase {
 	 */
 	public function testGetDateOfBirth()
 	{
-		$this->Person->setBirthday('DATEOFBIRTH');
-		$this->assertEquals('DATEOFBIRTH', $this->Person->getBirthday());
+		$this->Person->setBirthday('10/10/2010');
+		$this->assertEquals('2010-10-10', $this->Person->getBirthday());
 	}
 
 	/**
@@ -624,8 +624,8 @@ class PersonTest extends PHPUnit_Framework_TestCase {
 	 */
 	public function testSetDateOfBirth()
 	{
-		$this->Person->setBirthday('dateofbirth');
-		$this->assertEquals('dateofbirth', $this->Person->getBirthday());
+		$this->Person->setBirthday('10/10/2010');
+		$this->assertEquals('2010-10-10', $this->Person->getBirthday());
 	}
 
 	/**
