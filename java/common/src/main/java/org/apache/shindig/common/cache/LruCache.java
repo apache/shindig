@@ -48,6 +48,10 @@ public class LruCache<K, V> extends LinkedHashMap<K, V> implements Cache<K, V> {
     return capacity;
   }
 
+  public long getSize() {
+    return size();
+  }
+
   @Override
   protected synchronized boolean removeEldestEntry(Map.Entry<K, V> eldest) {
     return size() > capacity;

@@ -56,5 +56,7 @@ public class EhCacheCacheProviderTest {
     Assert.assertEquals(cache.getElement("test"), "value1");
     cache.removeElement("test");
     Assert.assertNull(cache.getElement("test"));
+    Assert.assertEquals(cache.getCapacity(), cache2.getCapacity());
+    Assert.assertEquals(cache.getSize(), cache2.getSize());
   }
 }
