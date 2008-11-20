@@ -339,11 +339,10 @@ class ProxyHandler {
 	{
 		//TODO get actual character encoding from the request
 		
-
 		// Check the protocol requested - curl doesn't really support file:// 
 		// requests but the 'error' should be handled properly
-		$protocolSplit = split(":\/\/", $url);
-		if (! count($protocolSplit)) {
+		$protocolSplit = explode('://', $url, 2);
+		if (count($protocolSplit) < 2) {
 			throw new Exception("Invalid protocol specified for url: $url");
 		} else {
 			$protocol = strtoupper($protocolSplit[0]);
