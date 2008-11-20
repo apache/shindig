@@ -115,22 +115,23 @@ public class HTMLContentRewriter  implements ContentRewriter {
     }
 
     // Get ALL interesting tags
-    List<Node> nodeList =
+    List<Element> tagList =
         DomUtil.getElementsByTagNameCaseInsensitive(content.getDocument(), TAGS);
 
-    Node head = DomUtil.getFirstNamedChildNode(content.getDocument().getDocumentElement(), "head");
+    Element head = (Element)DomUtil.getFirstNamedChildNode(
+        content.getDocument().getDocumentElement(), "head");
 
     boolean mutated = false;
 
 
     // 1st step. Rewrite links in all embedded style tags. Convert @import statements into
-    // links and add them to the node list.
+    // links and add them to the tag list.
     // Move all style and link tags into head and concat the link tags
-    mutated = rewriteStyleTags(head, nodeList, feature, gadgetUri, contentBase);
+    mutated = rewriteStyleTags(head, tagList, feature, gadgetUri, contentBase);
     // Concat script links
-    mutated |= rewriteJsTags(nodeList, feature, gadgetUri, contentBase);
+    mutated |= rewriteJsTags(tagList, feature, gadgetUri, contentBase);
     // Rewrite links in images, embeds etc
-    mutated |= rewriteContentReferences(nodeList, feature, gadgetUri, contentBase);
+    mutated |= rewriteContentReferences(tagList, feature, gadgetUri, contentBase);
 
     if (mutated) {
       MutableContent.notifyEdit(content.getDocument());
@@ -139,7 +140,7 @@ public class HTMLContentRewriter  implements ContentRewriter {
     return RewriterResults.cacheableIndefinitely();
   }
 
-  protected boolean rewriteStyleTags(Node head, List<Node> nodeList,
+  protected boolean rewriteStyleTags(Element head, List<Element> elementList,
       ContentRewriterFeature feature, Uri gadgetUri, Uri contentBase) {
     if (!feature.getIncludedTags().contains("style")) {
       return false;
@@ -147,21 +148,22 @@ public class HTMLContentRewriter  implements ContentRewriter {
     boolean mutated = false;
 
     // Filter to just style tags
-    Iterable<Node> styleTags = Lists.newArrayList(Iterables.filter(nodeList, new Predicate<Node>() {
-      public boolean apply(@Nullable Node node) {
-        return node.getNodeName().equalsIgnoreCase("style");
+    Iterable<Element> styleTags = Lists.newArrayList(Iterables.filter(elementList,
+        new Predicate<Element>() {
+      public boolean apply(@Nullable Element element) {
+        return element.getNodeName().equalsIgnoreCase("style");
       }
     }));
 
     LinkRewriter linkRewriter = createLinkRewriter(gadgetUri, feature);
 
-    for (Node styleNode : styleTags) {
+    for (Element styleTag : styleTags) {
       mutated |= true;
-      if (styleNode.getParentNode() != head) {
-        styleNode.getParentNode().removeChild(styleNode);
-        head.appendChild(styleNode);
+      if (styleTag.getParentNode() != head) {
+        styleTag.getParentNode().removeChild(styleTag);
+        head.appendChild(styleTag);
       }
-      String styleText = styleNode.getTextContent();
+      String styleText = styleTag.getTextContent();
       StringWriter sw = new StringWriter(styleText.length());
       List<String> extractedUrls = CssRewriter.rewrite(new StringReader(styleText),
           contentBase, linkRewriter, sw, true);
@@ -169,10 +171,10 @@ public class HTMLContentRewriter  implements ContentRewriter {
       if (styleText.length() == 0 || (styleText.length() < 25 &&
         styleText.replace("<!--", "").replace("//-->", "").
             replace("-->", "").trim().length() == 0)) {
-        styleNode.getParentNode().removeChild(styleNode);
-        nodeList.remove(styleNode);
+        styleTag.getParentNode().removeChild(styleTag);
+        elementList.remove(styleTag);
       } else {
-        styleNode.setTextContent(styleText);
+        styleTag.setTextContent(styleText);
       }
       for (String extractedUrl : extractedUrls) {
         // Add extracted urls as link elements to head
@@ -181,20 +183,19 @@ public class HTMLContentRewriter  implements ContentRewriter {
         newLink.setAttribute("type", "text/css");
         newLink.setAttribute("href", extractedUrl);
         head.appendChild(newLink);
-        nodeList.add(newLink);
+        elementList.add(newLink);
       }
     }
 
     // Filter to just stylesheet link tags
-    List<Node> linkTags = Lists.newArrayList(Iterables.filter(nodeList, new Predicate<Node>() {
-      public boolean apply(@Nullable Node node) {
-         return node.getNodeName().equalsIgnoreCase("link") &&
-          (node.getAttributes().getNamedItem("rel").
-              getNodeValue().equalsIgnoreCase("stylesheet") ||
-           node.getAttributes().getNamedItem("type").
-               getNodeValue().toLowerCase().contains("css"));
-      }
-    }));
+    List<Element> linkTags = Lists.newArrayList(Iterables.filter(elementList,
+        new Predicate<Element>() {
+          public boolean apply(@Nullable Element element) {
+            return element.getNodeName().equalsIgnoreCase("link") &&
+                ("stylesheet".equalsIgnoreCase(element.getAttribute("rel")) ||
+                    element.getAttribute("type").toLowerCase().contains("css"));
+          }
+        }));
 
     String concatBase = getConcatBase(gadgetUri.toJavaUri(), feature,
       "text/css");
@@ -216,7 +217,7 @@ public class HTMLContentRewriter  implements ContentRewriter {
            "&fp=" + feature.getFingerprint() +'&';
   }
 
-  protected boolean rewriteJsTags(List<Node> nodeList, ContentRewriterFeature feature,
+  protected boolean rewriteJsTags(List<Element> elementList, ContentRewriterFeature feature,
       Uri gadgetUri, Uri contentBase) {
     if (!feature.getIncludedTags().contains("script")) {
       return false;
@@ -224,22 +225,23 @@ public class HTMLContentRewriter  implements ContentRewriter {
     boolean mutated = false;
 
     // Filter to just script tags
-    List<Node> scriptNodes = Lists.newArrayList(Iterables.filter(nodeList, new Predicate<Node>() {
-      public boolean apply(@Nullable Node node) {
+    List<Element> scriptTags = Lists.newArrayList(Iterables.filter(elementList,
+        new Predicate<Element>() {
+      public boolean apply(@Nullable Element node) {
         return node.getNodeName().equalsIgnoreCase("script");
       }
     }));
 
     String concatBase = getConcatBase(gadgetUri.toJavaUri(), feature, "text/javascript");
-    List<Node> concatenateable = new ArrayList<Node>();
-    for (int i = 0; i < scriptNodes.size(); i++) {
-      Node scriptTag = scriptNodes.get(i);
-      Node nextSciptTag = null;
-      if (i + 1 < scriptNodes.size()) {
-        nextSciptTag = scriptNodes.get(i+1);
+    List<Element> concatenateable = new ArrayList<Element>();
+    for (int i = 0; i < scriptTags.size(); i++) {
+      Element scriptTag = scriptTags.get(i);
+      Element nextSciptTag = null;
+      if (i + 1 < scriptTags.size()) {
+        nextSciptTag = scriptTags.get(i+1);
       }
-      Node src = scriptTag.getAttributes().getNamedItem("src");
-      if (src != null && feature.shouldRewriteURL(src.getNodeValue())) {
+      if (scriptTag.hasAttribute("src") &&
+          feature.shouldRewriteURL(scriptTag.getAttribute("src"))) {
         mutated = true;
         concatenateable.add(scriptTag);
         if (nextSciptTag == null ||
@@ -257,8 +259,8 @@ public class HTMLContentRewriter  implements ContentRewriter {
     return mutated;
   }
 
-  protected boolean rewriteContentReferences(List<Node> nodeList, ContentRewriterFeature feature,
-      Uri gadgetUri, Uri contentBase) {
+  protected boolean rewriteContentReferences(List<Element> elementList,
+      ContentRewriterFeature feature, Uri gadgetUri, Uri contentBase) {
     boolean mutated = false;
     LinkRewriter rewriter = createLinkRewriter(gadgetUri, feature);
 
@@ -266,13 +268,13 @@ public class HTMLContentRewriter  implements ContentRewriter {
     tagNames.retainAll(feature.getIncludedTags());
 
     // Filter to just style tags
-    Iterable<Node> tags = Iterables.filter(nodeList, new Predicate<Node>() {
-      public boolean apply(@Nullable Node node) {
+    Iterable<Element> tags = Iterables.filter(elementList, new Predicate<Element>() {
+      public boolean apply(@Nullable Element node) {
         return tagNames.contains(node.getNodeName().toLowerCase());
       }
     });
 
-    for (Node node : tags) {
+    for (Element node : tags) {
       NamedNodeMap attributes = node.getAttributes();
       Set<String> rewriteable = LINKING_TAG_ATTRS.get(node.getNodeName().toLowerCase());
       for (int i = 0; i < attributes.getLength(); i++) {
@@ -287,23 +289,20 @@ public class HTMLContentRewriter  implements ContentRewriter {
   }
 
   private static void concatenateTags(final ContentRewriterFeature feature,
-                               List<Node> tags, String concatBase, Uri contentBase,
+                               List<Element> tags, String concatBase, Uri contentBase,
                                final String attr) {
     // Filter out excluded URLs
-    tags = Lists.newArrayList(Iterables.filter(tags, new Predicate<Node>() {
-      public boolean apply(@Nullable Node node) {
-        Node item = node.getAttributes().getNamedItem(attr);
-        return (item != null && feature.shouldRewriteURL(item.getNodeValue()));
+    tags = Lists.newArrayList(Iterables.filter(tags, new Predicate<Element>() {
+      public boolean apply(@Nullable Element element) {
+        return (element.hasAttribute(attr) && feature.shouldRewriteURL(element.getAttribute(attr)));
       }
     }));
 
     // Eliminate duplicates while maintaining order
     LinkedHashSet<Uri> nodeRefList = Sets.newLinkedHashSet();
-    for (Node tag : tags) {
+    for (Element tag : tags) {
       try {
-        nodeRefList.add(
-            contentBase.resolve(
-                Uri.parse(tag.getAttributes().getNamedItem(attr).getNodeValue())));
+        nodeRefList.add(contentBase.resolve(Uri.parse(tag.getAttribute(attr))));
       } catch (IllegalArgumentException e) {
         // Same behavior as JavascriptTagMerger
         // Perhaps switch to ignoring script src instead?
@@ -315,8 +314,7 @@ public class HTMLContentRewriter  implements ContentRewriter {
     for (int i = 0; i < tags.size(); i++) {
       if (i < concatented.size()) {
         // Set new URLs into existing tags
-        tags.get(i).getAttributes().getNamedItem(attr).setNodeValue(
-            concatented.get(i).toString());
+        tags.get(i).setAttribute(attr, concatented.get(i).toString());
       } else {
         // Remove remainder
         tags.get(i).getParentNode().removeChild(tags.get(i));
@@ -357,12 +355,12 @@ public class HTMLContentRewriter  implements ContentRewriter {
   }
 
 
-  private Node getNextSiblingElement(Node n) {
+  private Element getNextSiblingElement(Element elem) {
+    Node n = elem;
     n = n.getNextSibling();
     while (n != null && n.getNodeType() != Node.ELEMENT_NODE) {
       n = n.getNextSibling();
     }
-    return n;
+    return (Element)n;
   }
-
 }

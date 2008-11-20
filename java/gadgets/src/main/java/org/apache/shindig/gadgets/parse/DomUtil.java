@@ -19,7 +19,9 @@
 package org.apache.shindig.gadgets.parse;
 
 import com.google.common.collect.Lists;
+
 import org.w3c.dom.Document;
+import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.traversal.DocumentTraversal;
 import org.w3c.dom.traversal.NodeFilter;
@@ -46,9 +48,9 @@ public class DomUtil {
     return null;
   }
 
-  public static List<Node> getElementsByTagNameCaseInsensitive(Document doc,
+  public static List<Element> getElementsByTagNameCaseInsensitive(Document doc,
       final Set<String> lowerCaseNames) {
-    final List<Node> result = Lists.newArrayList();
+    final List<Element> result = Lists.newArrayList();
     NodeIterator nodeIterator = ((DocumentTraversal) doc)
         .createNodeIterator(doc, NodeFilter.SHOW_ELEMENT,
             new NodeFilter() {
@@ -60,7 +62,7 @@ public class DomUtil {
               }
             }, false);
     for (Node n = nodeIterator.nextNode(); n != null ; n = nodeIterator.nextNode()) {
-      result.add(n);
+      result.add((Element)n);
     }
     return result;
   }
