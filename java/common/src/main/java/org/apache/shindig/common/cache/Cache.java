@@ -51,4 +51,9 @@ public interface Cache<K, V> {
    * in the cace, -1 signifies that the capacity is unbounded
    */
   public long getCapacity();
+
+  /**
+   * @return The current size of the cache, or -1 if the cache does not support returning sizes.
+   */
+  public long getSize();
 }

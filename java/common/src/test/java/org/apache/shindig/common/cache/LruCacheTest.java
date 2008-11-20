@@ -34,6 +34,8 @@ public class LruCacheTest {
       cache.addElement(Integer.toString(i), Integer.toString(i));
     }
     assertEquals(TEST_CAPACITY, cache.size());
+    assertEquals(TEST_CAPACITY, cache.getSize());
+    assertEquals(TEST_CAPACITY, cache.getCapacity());
     assertEquals("0", cache.getElement("0"));
   }
 
@@ -43,6 +45,8 @@ public class LruCacheTest {
       cache.addElement(Integer.toString(i), Integer.toString(i));
     }
     assertEquals(TEST_CAPACITY, cache.size());
+    assertEquals(TEST_CAPACITY, cache.getSize());
+    assertEquals(TEST_CAPACITY, cache.getCapacity());
     assertEquals(null, cache.getElement("0"));
   }
 }

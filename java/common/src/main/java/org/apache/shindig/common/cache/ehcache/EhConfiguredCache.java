@@ -47,20 +47,10 @@ public class EhConfiguredCache<K, V> implements Cache<K, V> {
     }
   }
 
-  /*
-   * (non-Javadoc)
-   *
-   * @see org.apache.shindig.common.cache.Cache#addElement(java.lang.Object, java.lang.Object)
-   */
   public void addElement(K key, V value) {
     cache.put(new Element(key, value));
   }
 
-  /*
-   * (non-Javadoc)
-   *
-   * @see org.apache.shindig.common.cache.Cache#getElement(java.lang.Object)
-   */
   @SuppressWarnings("unchecked")
   public V getElement(K key) {
     Element cacheElement = cache.get(key);
@@ -70,11 +60,6 @@ public class EhConfiguredCache<K, V> implements Cache<K, V> {
     return null;
   }
 
-  /*
-   * (non-Javadoc)
-   *
-   * @see org.apache.shindig.common.cache.Cache#removeElement(java.lang.Object)
-   */
   @SuppressWarnings("unchecked")
   public V removeElement(K key) {
     Object value = getElement(key);
@@ -82,13 +67,18 @@ public class EhConfiguredCache<K, V> implements Cache<K, V> {
     return (V) value;
   }
 
-  /*
-   * (non-Javadoc)
-   *
-   * @see org.apache.shindig.common.cache.Cache#getCapacity()
-   */
   public long getCapacity() {
     return cache.getCacheConfiguration().getMaxElementsInMemory() +
         cache.getCacheConfiguration().getMaxElementsOnDisk();
+  }
+
+  /**
+   * @return The current size of the cache.
+   *
+   * Note that this does not call getSize on the underlying cache, which is very expensive. This
+   * will not include the size of remote caches.
+   */
+  public long getSize() {
+    return cache.getMemoryStoreSize() + cache.getDiskStoreSize();
   }
 }
