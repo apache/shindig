@@ -60,11 +60,10 @@ import java.util.Set;
  */
 public class HTMLContentRewriter  implements ContentRewriter {
   private final static int MAX_URL_LENGTH = 1500;
-  private static final String DEFAULT_CONCAT_URL_BASE = "/gadgets/concat?";
 
   public final static Set<String> TAGS =
       Sets.newHashSet("img", "embed", "link", "script", "style");
-                                                                                       
+
   private final static Map<String, Set<String>> LINKING_TAG_ATTRS = Maps.newHashMap();
 
   static {
@@ -81,11 +80,7 @@ public class HTMLContentRewriter  implements ContentRewriter {
       @Named("shindig.content-rewrite.proxy-url")String proxyBaseNoGadget,
       @Named("shindig.content-rewrite.concat-url")String concatBaseNoGadget) {
     this.rewriterFeatureFactory = rewriterFeatureFactory;
-    if (concatBaseNoGadget != null) {
-      this.concatBaseNoGadget = concatBaseNoGadget;
-    } else {
-      this.concatBaseNoGadget = DEFAULT_CONCAT_URL_BASE;
-    }
+    this.concatBaseNoGadget = concatBaseNoGadget;
     this.proxyBaseNoGadget = proxyBaseNoGadget;
   }
 
