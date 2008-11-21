@@ -186,12 +186,13 @@ os.Loader.processNamespaceNode = function(node) {
  */
 os.Loader.processTemplateDefNode = function(node) {
   var tag = node.getAttribute("tag");
+  var name = node.getAttribute("name");
   for (var child = node.firstChild; child; child = child.nextSibling) {
     if (child.nodeType == DOM_ELEMENT_NODE) {
       // TODO(levik): This won't work once compiler does name mangling.
       var handler = os.Loader.getProcessorFunction_(child.tagName);
       if (handler) {
-        handler(child, tag);
+        handler(child, tag, name);
       }
     }
   }
@@ -200,8 +201,9 @@ os.Loader.processTemplateDefNode = function(node) {
 /**
  * Processes the <Template> node
  */
-os.Loader.processTemplateNode = function(node, opt_tag) {
+os.Loader.processTemplateNode = function(node, opt_tag, opt_name) {
   var tag = opt_tag || node.getAttribute("tag");
+  var name = opt_name || node.getAttribute("name");
   if (tag) {
     var tagParts = tag.split(":");
     if (tagParts.length != 2) {
@@ -214,7 +216,11 @@ os.Loader.processTemplateNode = function(node, opt_tag) {
     }
     var template = os.compileXMLNode(node);
     nsObj[tagParts[1]] = os.createTemplateCustomTag(template);
-  } 
+  } else if (name) {
+    var template = os.compileXMLNode(node);
+    template.id = name;
+    os.registerTemplate(template);
+  }
 };
 
 /**
