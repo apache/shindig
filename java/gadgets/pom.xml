@@ -23,7 +23,7 @@ under the License.
   <parent>
     <groupId>org.apache.shindig</groupId>
     <artifactId>shindig-parent</artifactId>
-    <version>1-SNAPSHOT</version>
+    <version>0.8.1-1-SNAPSHOT</version>
     <relativePath>../pom.xml</relativePath>
   </parent>
 
@@ -35,9 +35,9 @@ under the License.
     all javascript required by the OpenSocial specification.</description>
 
   <scm>
-    <connection>scm:svn:http://svn.apache.org/repos/asf/incubator/shindig/trunk/java/gadgets</connection>
-    <developerConnection>scm:svn:https://svn.apache.org/repos/asf/incubator/shindig/trunk/java/gadgets</developerConnection>
-    <url>http://svn.apache.org/viewvc/incubator/shindig/trunk/java/gadgets</url>
+    <connection>scm:svn:http://svn.apache.org/repos/asf/incubator/shindig/branches/0.8.1-x/java/gadgets</connection>
+    <developerConnection>scm:svn:https://svn.apache.org/repos/asf/incubator/shindig/branches/0.8.1-x/java/gadgets</developerConnection>
+    <url>http://svn.apache.org/viewvc/incubator/shindig/branches/0.8.1-x/java/gadgets</url>
   </scm>
 
   <build>
