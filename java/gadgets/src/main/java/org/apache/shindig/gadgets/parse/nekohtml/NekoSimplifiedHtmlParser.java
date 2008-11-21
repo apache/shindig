@@ -326,6 +326,7 @@ public class NekoSimplifiedHtmlParser extends GadgetHtmlParser {
       outputFormat.setPreserveEmptyAttributes(false);
     }
 
+    @Override
     public String serializeImpl(Document doc) {
       StringWriter sw = createWriter(doc);
       HTMLSerializer serializer = new HTMLSerializer(sw, outputFormat) {
@@ -336,7 +337,7 @@ public class NekoSimplifiedHtmlParser extends GadgetHtmlParser {
           this._printer.printText(s);
         }
       };
-      
+
       try {
         serializer.serialize(doc);
         return sw.toString();
