@@ -50,7 +50,7 @@ class JsFeatureLoader {
 	private function loadFiles($path, &$features)
 	{
 		$featuresFile = $path . '/features.txt';
-		if (file_exists($featuresFile) && is_readable($featuresFile)) {
+		if (File::exists($featuresFile)) {
 			$files = explode("\n", file_get_contents($featuresFile));
 			// custom sort, else core.io seems to bubble up before core, which breaks the dep chain order
 			usort($files, array($this, 'sortFeaturesFiles'));
@@ -67,7 +67,7 @@ class JsFeatureLoader {
 	private function processFile($file)
 	{
 		$feature = null;
-		if (file_exists($file) && is_file($file) && is_readable($file)) {
+		if (File::exists($file)) {
 			if (($content = @file_get_contents($file))) {
 				$feature = $this->parse($content, dirname($file));
 			}

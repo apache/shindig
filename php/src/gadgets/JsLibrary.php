@@ -1,4 +1,5 @@
 <?php
+
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements. See the NOTICE file
@@ -92,14 +93,16 @@ class JsLibrary {
 		if (empty($fileName) || (strpos($fileName, 'res://') !== false)) {
 			return '';
 		}
-		if (! file_exists($fileName)) {
-			throw new Exception("JsLibrary file missing: $fileName");
-		}
-		if (! is_file($fileName)) {
-			throw new Exception("JsLibrary file is not a file: $fileName");
-		}
-		if (! is_readable($fileName)) {
-			throw new Exception("JsLibrary file not readable: $fileName");
+		if (Config::get('debug')) {
+			if (! ile::exists($fileName)) {
+				throw new Exception("JsLibrary file missing: $fileName");
+			}
+			if (! is_file($fileName)) {
+				throw new Exception("JsLibrary file is not a file: $fileName");
+			}
+			if (! File::readable($fileName)) {
+				throw new Exception("JsLibrary file not readable: $fileName");
+			}
 		}
 		if (! ($content = @file_get_contents($fileName))) {
 			throw new Exception("JsLibrary error reading file: $fileName");
