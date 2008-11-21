@@ -32,11 +32,11 @@ class ContainerConfig {
 
 	private function loadContainers($containers)
 	{
-		if (! file_exists($containers) || ! is_dir($containers)) {
+		if (! File::exists($containers)) {
 			throw new Exception("Invalid container path");
 		}
 		foreach (glob("$containers/*.js") as $file) {
-			if (! is_readable($file)) {
+			if (! File::readable($file)) {
 				throw new Exception("Could not read container config: $file");
 			}
 			if (is_dir($file)) {

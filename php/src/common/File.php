@@ -15,41 +15,27 @@
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
  * KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
- * 
  */
 
-/**
- * Basic example blacklist class. This class takes a text file with regex
- * rules against which URL's are tested.
- * The default file location is {$base_path}/blacklist.txt
- *
- */
-class BasicGadgetBlacklist implements GadgetBlacklist {
-	private $rules = array();
+class File {
 
-	public function __construct($file = false)
+	public static function exists($file)
 	{
-		if (!$file) {
-			$file = Config::get('base_path') . '/blacklist.txt';
-		}
-		if (File::exists($file)) {
-			$this->rules = explode("\n", @file_get_contents($file));
+		// only really check if check_file_exists == true, big performance hit on production systems, but also much safer :)
+		if (Config::get('check_file_exists')) {
+			return file_exists($file);
+		} else {
+			return true;
 		}
 	}
-
-	/**
-	 * Check the URL against the blacklist rules
-	 *
-	 * @param string $url
-	 * @return boolean is blacklisted or not?
-	 */
-	function isBlacklisted($url)
+	
+	public static function readable($file)
 	{
-		foreach ($this->rules as $rule) {
-			if (!empty($rule) && preg_match($rule, $url)) {
-				return true;
-			}
+		// only really check if check_file_exists == true, big performance hit on production systems, but also much safer :)
+		if (Config::get('check_file_exists')) {
+			return is_readable($file);
+		} else {
+			return true;
 		}
-		return false;
 	}
 }

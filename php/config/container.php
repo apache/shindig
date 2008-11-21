@@ -35,7 +35,8 @@
  * 	'app_data_service' => 'MyAppDataService',
  * 	'app_data_service' => 'MyAppDataService',
  * 	'oauth_lookup_service' => 'MyOAuthLookupService'
- * 	'xrds_location' => 'http://www.mycontainer.com/xrds'
+ * 	'xrds_location' => 'http://www.mycontainer.com/xrds',
+ *      'check_file_exists' => false
  * );
  *  
  */
@@ -43,6 +44,9 @@
 $shindigConfig = array(
 	// Show debug backtrace's. Disable this on a production site
 	'debug' => true,
+	// do real file_exist checks? Turning this off can be a big performance gain on prod servers but also risky & less verbose errors
+        'check_file_exists' => true,
+
 	// Allow plain text security tokens, this is only here to allow the sample files to work. Disable on a production site
 	'allow_plaintext_token' => true,
 	// Compress the inlined javascript, saves upto 50% of the document size

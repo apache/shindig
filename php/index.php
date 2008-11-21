@@ -18,6 +18,7 @@
  */
 
 include_once ('config.php');
+include_once ('src/common/File.php');
 
 // Basic sanity check if we have all required modules
 $modules = array('json', 'SimpleXML', 'libxml', 'curl', 'openssl');

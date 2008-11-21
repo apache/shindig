@@ -48,8 +48,8 @@ class SigningFetcherFactory {
 		if (! empty($keyFile)) {
 			$privateKey = null;
 			try {
-				if (file_exists($keyFile)) {
-					if (is_readable($keyFile)) {
+				if (File::exists($keyFile)) {
+					if (File::readable($keyFile)) {
 						$rsa_private_key = @file_get_contents($keyFile);
 					} else {
 						throw new Exception("Could not read keyfile ($keyFile), check the file name and permission");

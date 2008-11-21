@@ -100,7 +100,7 @@ class CacheFile extends Cache {
 		if ($this->isLocked($cacheFile)) {
 			$this->waitForLock($cacheFile);
 		}
-		if (file_exists($cacheFile) && is_readable($cacheFile)) {
+		if (File::exists($cacheFile) && File::readable($cacheFile)) {
 			$now = time();
 			if (($mtime = filemtime($cacheFile)) !== false && ($now - $mtime) < $expiration) {
 				if (($data = @file_get_contents($cacheFile)) !== false) {
