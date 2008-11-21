@@ -36,7 +36,8 @@ public class NekoParsersTest extends TestCase {
   private NekoHtmlParser full = new NekoHtmlParser(
         new ParseModule.DOMImplementationProvider().get());
 
-  public void testParser() throws Exception {
+  public void testDocWithDoctype() throws Exception {
+    // Note that doctype is properly retained
     String content = IOUtils.toString(this.getClass().getClassLoader().
         getResourceAsStream("org/apache/shindig/gadgets/parse/nekohtml/test.html"));
     String expected = IOUtils.toString(this.getClass().getClassLoader().
@@ -45,7 +46,16 @@ public class NekoParsersTest extends TestCase {
     parseAndCompareBalanced(content, expected, simple);
   }
 
+  public void testDocNoDoctype() throws Exception {
+    // Note that no doctype is properly created when none specified
+    String content = IOUtils.toString(this.getClass().getClassLoader().
+        getResourceAsStream("org/apache/shindig/gadgets/parse/nekohtml/test-fulldocnodoctype.html"));
+    assertNull(full.parseDom(content).getDoctype());
+    assertNull(simple.parseDom(content).getDoctype());
+  }
+
   public void testNotADocument() throws Exception {
+    // Note that no doctype is injected for fragments
     String content = IOUtils.toString(this.getClass().getClassLoader().
         getResourceAsStream("org/apache/shindig/gadgets/parse/nekohtml/test-fragment.html"));
     String expected = IOUtils.toString(this.getClass().getClassLoader().
@@ -55,6 +65,7 @@ public class NekoParsersTest extends TestCase {
   }
 
   public void testNoBody() throws Exception {
+    // Note that no doctype is injected for fragments
     String content = IOUtils.toString(this.getClass().getClassLoader().
         getResourceAsStream("org/apache/shindig/gadgets/parse/nekohtml/test-headnobody.html"));
     String expected = IOUtils.toString(this.getClass().getClassLoader().

@@ -51,7 +51,7 @@ public abstract class GadgetHtmlParser {
    * @return true if we detect a preamble of doctype or html
    */
   protected static boolean attemptFullDocParseFirst(String content) {
-    String normalized = content.substring(Math.min(100, content.length())).toUpperCase();
+    String normalized = content.substring(0, Math.min(100, content.length())).toUpperCase();
     return normalized.contains("<!DOCTYPE") || normalized.contains("<HTML");
   }
 
