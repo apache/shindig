@@ -48,6 +48,12 @@ under the License.
   <build>
     <resources>
       <resource>
+        <directory>${basedir}/src/main/resources</directory>
+        <includes>
+          <include>**/*</include>
+        </includes>
+      </resource>
+      <resource>
         <targetPath>META-INF</targetPath>
         <directory>${basedir}/../../</directory>
         <includes>
