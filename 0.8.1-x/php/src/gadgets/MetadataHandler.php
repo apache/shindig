@@ -46,7 +46,7 @@ class MetadataHandler {
 		foreach ($gadget->getUserPrefs() as $pref) {
 			$prefs[$pref->getName()] = array('displayName' => $pref->getDisplayName(), 
 					'type' => $pref->getDataType(), 'default' => $pref->getDefaultValue(), 
-					'enumValues' => $pref->getEnumValues(), 'requred' => $pref->isRequired());
+					'enumValues' => $pref->getEnumValues(), 'required' => $pref->isRequired());
 		}
 		$features = array();
 		foreach ($gadget->getRequires() as $feature) {
