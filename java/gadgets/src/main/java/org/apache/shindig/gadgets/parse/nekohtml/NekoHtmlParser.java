@@ -17,7 +17,6 @@
  */
 package org.apache.shindig.gadgets.parse.nekohtml;
 
-import org.apache.shindig.common.xml.DomUtil;
 import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.parse.GadgetHtmlParser;
 import org.apache.shindig.gadgets.parse.HtmlSerializer;
@@ -28,6 +27,7 @@ import com.google.inject.Singleton;
 import org.apache.xml.serialize.HTMLSerializer;
 import org.apache.xml.serialize.OutputFormat;
 import org.cyberneko.html.parsers.DOMFragmentParser;
+import org.cyberneko.html.parsers.DOMParser;
 import org.w3c.dom.DOMImplementation;
 import org.w3c.dom.Document;
 import org.w3c.dom.DocumentFragment;
@@ -69,26 +69,34 @@ public class NekoHtmlParser extends GadgetHtmlParser {
 
   private Document parseFragment(String source) throws SAXException, IOException {
     InputSource input = new InputSource(new StringReader(source));
-    DOMFragmentParser parser = new DOMFragmentParser();
-    parser.setProperty("http://cyberneko.org/html/properties/names/elems", "default");
-    parser.setFeature("http://cyberneko.org/html/features/document-fragment", true);
-
-    Document htmlDoc = documentProvider.createDocument(null, null, null);
-    DocumentFragment fragment = htmlDoc.createDocumentFragment();
-    parser.parse(input, fragment);
-    normalizeFragment(htmlDoc, fragment);
-    return htmlDoc;
+    if (attemptFullDocParseFirst(source)) {
+      DOMParser parser = new DOMParser();
+      // Force parser not to use HTMLDocumentImpl as document implementation
+      parser.setProperty("http://apache.org/xml/properties/dom/document-class-name", null);
+      parser.setProperty("http://cyberneko.org/html/properties/names/elems", "default");
+      parser.parse(input);
+      return parser.getDocument();
+    } else {
+      Document htmlDoc = documentProvider.createDocument(null, null, null);
+      DOMFragmentParser parser = new DOMFragmentParser();
+      parser.setProperty("http://cyberneko.org/html/properties/names/elems", "default");
+      parser.setFeature("http://cyberneko.org/html/features/document-fragment", true);
+      DocumentFragment fragment = htmlDoc.createDocumentFragment();
+      parser.parse(input, fragment);
+      normalizeFragment(htmlDoc, fragment);
+      return htmlDoc;
+    }
   }
 
   static class Serializer extends HtmlSerializer {
 
-    static final OutputFormat outputFormat = new OutputFormat();
-    static {
+    public String serializeImpl(Document doc) {
+      OutputFormat outputFormat = new OutputFormat();
       outputFormat.setPreserveSpace(true);
       outputFormat.setPreserveEmptyAttributes(false);
-    }
-
-    public String serializeImpl(Document doc) {
+      if (doc.getDoctype() == null) {
+        outputFormat.setOmitDocumentType(true);
+      }
       StringWriter sw = createWriter(doc);
       HTMLSerializer serializer = new HTMLSerializer(sw, outputFormat);
       try {

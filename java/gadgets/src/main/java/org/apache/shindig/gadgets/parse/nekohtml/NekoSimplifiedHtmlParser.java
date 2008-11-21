@@ -320,14 +320,14 @@ public class NekoSimplifiedHtmlParser extends GadgetHtmlParser {
 
   static class Serializer extends HtmlSerializer {
 
-    static final OutputFormat outputFormat = new OutputFormat();
-    static {
-      outputFormat.setPreserveSpace(true);
-      outputFormat.setPreserveEmptyAttributes(false);
-    }
-
     @Override
     public String serializeImpl(Document doc) {
+      OutputFormat outputFormat = new OutputFormat();
+      outputFormat.setPreserveSpace(true);
+      outputFormat.setPreserveEmptyAttributes(false);
+      if (doc.getDoctype() == null) {
+        outputFormat.setOmitDocumentType(true);
+      }
       StringWriter sw = createWriter(doc);
       HTMLSerializer serializer = new HTMLSerializer(sw, outputFormat) {
         // Overridden to prevent escaping of literal text
