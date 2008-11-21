@@ -23,7 +23,7 @@ under the License.
   <parent>
     <groupId>org.apache.shindig</groupId>
     <artifactId>shindig-parent</artifactId>
-    <version>1-SNAPSHOT</version>
+    <version>0.8.1-1-SNAPSHOT</version>
     <relativePath>../pom.xml</relativePath>
   </parent>
 
@@ -34,9 +34,9 @@ under the License.
   <description>Serves OpenSocial Data and the RESTful APIs.</description>
 
   <scm>
-    <connection>scm:svn:http://svn.apache.org/repos/asf/incubator/shindig/trunk/java/social-api</connection>
-    <developerConnection>scm:svn:https://svn.apache.org/repos/asf/incubator/shindig/trunk/java/social-api</developerConnection>
-    <url>http://svn.apache.org/viewvc/incubator/shindig/trunk/java/social-api</url>
+    <connection>scm:svn:http://svn.apache.org/repos/asf/incubator/shindig/branches/0.8.1-x/java/social-api</connection>
+    <developerConnection>scm:svn:https://svn.apache.org/repos/asf/incubator/shindig/branches/0.8.1-x/java/social-api</developerConnection>
+    <url>http://svn.apache.org/viewvc/incubator/shindig/branches/0.8.1-x/java/social-api</url>
   </scm>
 
   <build>
