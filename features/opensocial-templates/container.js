@@ -97,7 +97,11 @@ os.Container.onDomLoad_ = function() {
     return;
   }
   while (os.Container.domLoadCallbacks_.length) {
-    os.Container.domLoadCallbacks_.pop()();
+  try {
+      os.Container.domLoadCallbacks_.pop()();
+    } catch (e) {
+      os.log(e);
+    }
   }
   os.Container.domLoaded_ = true;  
 };

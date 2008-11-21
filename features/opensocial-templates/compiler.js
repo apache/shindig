@@ -182,6 +182,12 @@ os.variableMap_ = {
  * @return {string} Expression with replacements
  */
 os.replaceTopLevelVars_ = function(text) {
+	
+  // Currently, values specced to be inside the "Context" variable are placed
+  // by JSTemplate into the top-level of the data context.
+  // To make references like "Context.Index" work, remove the "Context." prefix. 
+  text = text.replace(/Context[.]/g, "");
+	
   // This line needed because there wasn't an obvious way to match
   // [^.$a-zA-Z0-9] or the start of the line
   text = ' ' + text;
@@ -719,9 +725,12 @@ os.getValueFromObject_ = function(object, name) {
  * Object, Element or array of Elements.
  */
 os.getValueFromNode_ = function(node, name) {
-  var ret = node[name] || node.getAttribute(name);
+  var ret = node[name];
+  if (typeof(ret) == "undefined" || ret == null) {
+    ret = node.getAttribute(name);
+  }
   
-  if (!ret) {
+  if (typeof(ret) == "undefined" || ret == null) {
     if (name) {
       name = name.toLowerCase();
     }
