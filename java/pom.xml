@@ -23,7 +23,7 @@ under the License.
   <parent>
     <groupId>org.apache.shindig</groupId>
     <artifactId>shindig-project</artifactId>
-    <version>0.8.1-1-SNAPSHOT</version>
+    <version>0.9-1-SNAPSHOT</version>
   </parent>
 
   <artifactId>shindig-parent</artifactId>
@@ -41,8 +41,8 @@ under the License.
   </modules>
 
   <scm>
-    <connection>scm:svn:http://svn.apache.org/repos/asf/incubator/shindig/branches/0.8.1-x/java</connection>
-    <developerConnection>scm:svn:https://svn.apache.org/repos/asf/incubator/shindig/branches/0.8.1-x/java</developerConnection>
-    <url>http://svn.apache.org/viewvc/incubator/shindig/branches/0.8.1-x/java</url>
+    <connection>scm:svn:http://svn.apache.org/repos/asf/incubator/shindig/trunk/java</connection>
+    <developerConnection>scm:svn:https://svn.apache.org/repos/asf/incubator/shindig/trunk/java</developerConnection>
+    <url>http://svn.apache.org/viewvc/incubator/shindig/trunk/java</url>
   </scm>
 </project>

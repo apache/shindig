@@ -28,7 +28,7 @@
 
   <groupId>org.apache.shindig</groupId>
   <artifactId>shindig-project</artifactId>
-  <version>0.8.1-1-SNAPSHOT</version>
+  <version>0.9-1-SNAPSHOT</version>
   <packaging>pom</packaging>
 
   <name>Apache Shindig Project</name>
@@ -45,9 +45,9 @@
   </prerequisites>
 
   <scm>
-    <connection>scm:svn:http://svn.apache.org/repos/asf/incubator/shindig/branches/0.8.1-x</connection>
-    <developerConnection>scm:svn:https://svn.apache.org/repos/asf/incubator/shindig/branches/0.8.1-x</developerConnection>
-    <url>http://svn.apache.org/viewvc/incubator/shindig/branches/0.8.1-x</url>
+    <connection>scm:svn:http://svn.apache.org/repos/asf/incubator/shindig/trunk</connection>
+    <developerConnection>scm:svn:https://svn.apache.org/repos/asf/incubator/shindig/trunk</developerConnection>
+    <url>http://svn.apache.org/viewvc/incubator/shindig/trunk</url>
   </scm>
 
   <issueManagement>
@@ -877,27 +877,27 @@
       <dependency>
         <groupId>org.apache.shindig</groupId>
         <artifactId>shindig-features</artifactId>
-        <version>0.8.1-1-SNAPSHOT</version>
+        <version>0.9-1-SNAPSHOT</version>
       </dependency>
       <dependency>
         <groupId>org.apache.shindig</groupId>
         <artifactId>shindig-common</artifactId>
-        <version>0.8.1-1-SNAPSHOT</version>
+        <version>0.9-1-SNAPSHOT</version>
       </dependency>
       <dependency>
         <groupId>org.apache.shindig</groupId>
         <artifactId>shindig-gadgets</artifactId>
-        <version>0.8.1-1-SNAPSHOT</version>
+        <version>0.9-1-SNAPSHOT</version>
       </dependency>
       <dependency>
         <groupId>org.apache.shindig</groupId>
         <artifactId>shindig-server</artifactId>
-        <version>0.8.1-1-SNAPSHOT</version>
+        <version>0.9-1-SNAPSHOT</version>
       </dependency>
       <dependency>
         <groupId>org.apache.shindig</groupId>
         <artifactId>shindig-social-api</artifactId>
-        <version>0.8.1-1-SNAPSHOT</version>
+        <version>0.9-1-SNAPSHOT</version>
       </dependency>
 
       <!-- external dependencies -->
