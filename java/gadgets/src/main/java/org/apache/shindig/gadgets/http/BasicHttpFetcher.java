@@ -19,7 +19,10 @@ package org.apache.shindig.gadgets.http;
 
 import com.google.common.collect.Maps;
 import com.google.inject.Inject;
+import com.google.inject.Provider;
 import com.google.inject.Singleton;
+import com.google.inject.name.Named;
+
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
@@ -28,6 +31,7 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
+import java.net.Proxy;
 import java.net.URL;
 import java.util.List;
 import java.util.Map;
@@ -46,6 +50,7 @@ public class BasicHttpFetcher implements HttpFetcher {
   private static final int DEFAULT_MAX_OBJECT_SIZE = 1024 * 1024;
 
   private final HttpCache cache;
+  private Provider<Proxy> proxyProvider;
 
   /**
    * Creates a new fetcher for fetching HTTP objects.  Not really suitable
@@ -68,6 +73,11 @@ public class BasicHttpFetcher implements HttpFetcher {
     this(cache, DEFAULT_MAX_OBJECT_SIZE);
   }
 
+  @Inject(optional=true)
+  public void setProxyProvider(Provider<Proxy> proxyProvider) {
+    this.proxyProvider = proxyProvider;
+  }
+
   /**
    * Initializes the connection.
    *
@@ -77,7 +87,8 @@ public class BasicHttpFetcher implements HttpFetcher {
    */
   private HttpURLConnection getConnection(HttpRequest request) throws IOException {
     URL url = new URL(request.getUri().toString());
-    HttpURLConnection fetcher = (HttpURLConnection)url.openConnection();
+    HttpURLConnection fetcher = (HttpURLConnection) ( proxyProvider == null ?
+        url.openConnection() : url.openConnection(proxyProvider.get()));
     fetcher.setConnectTimeout(CONNECT_TIMEOUT_MS);
     fetcher.setRequestProperty("Accept-Encoding", "gzip, deflate");
     fetcher.setInstanceFollowRedirects(request.getFollowRedirects());
@@ -125,7 +136,7 @@ public class BasicHttpFetcher implements HttpFetcher {
     } else if (encoding.equalsIgnoreCase("deflate")) {
       Inflater inflater = new Inflater(true);
       is = new InflaterInputStream(baseIs, inflater);
-    }    
+    }
 
     byte[] body = IOUtils.toByteArray(is);
     return new HttpResponseBuilder()
