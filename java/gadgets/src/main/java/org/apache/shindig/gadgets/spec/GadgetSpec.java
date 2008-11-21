@@ -31,7 +31,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Represents a gadget specification root element (Module).
- * @see <a href="http://code.google.com/apis/gadgets/docs/gadgets-extended-xsd.html">gadgets spec</a>
+ * @see <a href="http://www.opensocial.org/Technical-Resources/opensocial-spec-v08/gadget-spec">gadgets spec</a>
  */
 public class GadgetSpec {
   public static final String DEFAULT_VIEW = "default";
