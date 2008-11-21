@@ -23,7 +23,7 @@ under the License.
   <parent>
     <groupId>org.apache.shindig</groupId>
     <artifactId>shindig-parent</artifactId>
-    <version>0.8.1-1-SNAPSHOT</version>
+    <version>0.9-1-SNAPSHOT</version>
     <relativePath>../pom.xml</relativePath>
   </parent>
 
@@ -34,9 +34,9 @@ under the License.
   <description>Common java code for Shindig</description>
 
   <scm>
-    <connection>scm:svn:http://svn.apache.org/repos/asf/incubator/shindig/branches/0.8.1-x/java/common</connection>
-    <developerConnection>scm:svn:https://svn.apache.org/repos/asf/incubator/shindig/branches/0.8.1-x/java/common</developerConnection>
-    <url>http://svn.apache.org/viewvc/incubator/shindig/branches/0.8.1-x/java/common</url>
+    <connection>scm:svn:http://svn.apache.org/repos/asf/incubator/shindig/trunk/java/common</connection>
+    <developerConnection>scm:svn:https://svn.apache.org/repos/asf/incubator/shindig/trunk/java/common</developerConnection>
+    <url>http://svn.apache.org/viewvc/incubator/shindig/trunk/java/common</url>
   </scm>
 
   <build>
