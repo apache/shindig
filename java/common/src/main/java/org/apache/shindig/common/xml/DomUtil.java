@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.shindig.gadgets.parse;
+package org.apache.shindig.common.xml;
 
 import com.google.common.collect.Lists;
 
@@ -34,6 +34,9 @@ import java.util.Set;
  * Utility functions for navigating DOM
  */
 public class DomUtil {
+
+  private DomUtil() {}
+
   /**
    * @return first child node matching the specified name
    */
@@ -44,6 +47,20 @@ public class DomUtil {
         return current;
       }
       current = current.getNextSibling();
+    }
+    return null;
+  }
+
+  /**
+   * @return last child node matching the specified name.
+   */
+  public static Node getLastNamedChildNode(Node root, String nodeName) {
+    Node current = root.getLastChild();
+    while (current != null) {
+      if (current.getNodeName().equalsIgnoreCase(nodeName)) {
+        return current;
+      }
+      current = current.getPreviousSibling();
     }
     return null;
   }
