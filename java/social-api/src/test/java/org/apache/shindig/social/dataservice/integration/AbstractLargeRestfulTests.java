@@ -135,14 +135,16 @@ public abstract class AbstractLargeRestfulTests extends TestCase {
       postData = "";
     }
 
-    final InputStream stream = new ByteArrayInputStream(postData.getBytes());
-    ServletInputStream servletStream = new ServletInputStream() {
-      @Override
-      public int read() throws IOException {
-        return stream.read();
-      }
-    };
-    EasyMock.expect(req.getInputStream()).andReturn(servletStream);
+    if (!("GET").equals(method) && !("HEAD").equals(method)) {
+      final InputStream stream = new ByteArrayInputStream(postData.getBytes());
+      ServletInputStream servletStream = new ServletInputStream() {
+        @Override
+        public int read() throws IOException {
+          return stream.read();
+        }
+      };
+      EasyMock.expect(req.getInputStream()).andReturn(servletStream);
+    }
 
     ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
     PrintWriter writer = new PrintWriter(outputStream);

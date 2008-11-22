@@ -179,12 +179,14 @@ public class DataServiceServletTest extends TestCase {
   private void setupRequest(String pathInfo, String actualMethod, String overrideMethod)
       throws IOException {
     EasyMock.expect(req.getCharacterEncoding()).andStubReturn("UTF-8");
-    EasyMock.expect(req.getInputStream()).andStubReturn(dummyPostData);
+    if (!("GET").equals(overrideMethod) && !("HEAD").equals(overrideMethod)) {
+      EasyMock.expect(req.getInputStream()).andStubReturn(dummyPostData);
+    }
     EasyMock.expect(req.getPathInfo()).andStubReturn(pathInfo);
     EasyMock.expect(req.getMethod()).andStubReturn(actualMethod);
     EasyMock.expect(req.getParameterNames()).andStubReturn(new StringTokenizer(""));
     EasyMock.expect(req.getParameter(RestfulRequestItem.X_HTTP_METHOD_OVERRIDE)).andReturn(
-        overrideMethod);
+        overrideMethod).times(2);
     EasyMock.expect(req.getParameter(DataServiceServlet.FORMAT_PARAM)).andReturn(null);
 
     EasyMock.expect(req.getAttribute(EasyMock.isA(String.class))).andReturn(FAKE_GADGET_TOKEN);

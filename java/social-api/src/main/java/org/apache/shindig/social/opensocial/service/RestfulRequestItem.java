@@ -69,11 +69,14 @@ public class RestfulRequestItem extends RequestItem {
     this.url = servletRequest.getPathInfo();
     this.params = createParameterMap(servletRequest);
 
-    try {
-      ServletInputStream is = servletRequest.getInputStream();
-      postData = IOUtils.toString(is, servletRequest.getCharacterEncoding());
-    } catch (IOException e) {
-      throw new RuntimeException("Could not get the post data from the request", e);
+    String method = getMethod(servletRequest);
+    if (method != null && !("GET").equals(method) && !("HEAD").equals(method)) {
+      try {
+        ServletInputStream is = servletRequest.getInputStream();
+        postData = IOUtils.toString(is, servletRequest.getCharacterEncoding());
+      } catch (IOException e) {
+        throw new RuntimeException("Could not get the post data from the request", e);
+      }
     }
   }
 
