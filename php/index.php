@@ -53,6 +53,7 @@ function __autoload($className) {
     'src/social/opensocial',
     'src/social/model',
     'src/social/spi', 
+    'src/social/converters',
     'src/social/oauth',
     'src/social/sample'
   );
