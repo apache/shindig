@@ -92,7 +92,7 @@ class DataServiceServlet extends ApiServlet {
         $code = '500 Internal Server Error';
         break;
     }
-    header("HTTP/1.0 $code", true);
+    @header("HTTP/1.0 $code", true);
     if ($unauthorized) {
       header("WWW-Authenticate: OAuth realm", true);
     }

@@ -32,6 +32,7 @@ class BasicRemoteContent extends RemoteContent {
     if (! $context->getIgnoreCache() && ! $request->isPost() && ($cachedRequest = $cache->get($request->toHash(), $context->getRefreshInterval())) !== false) {
       $ret = $cachedRequest;
     } else {
+      syslog(5," fetching: ".print_r($request, true));
       $ret = $remoteContentFetcher->fetchRequest($request);
       // only cache requests that returned a 200 OK and is not a POST
       if ($request->getHttpCode() == '200' && ! $request->isPost()) {

@@ -219,7 +219,7 @@ class OAuthRequest {
       // next check for the auth header, we need to do some extra stuff
       // if that is the case, namely suck in the parameters from GET or POST
       // so that we can include them in the signature
-      if (@substr($request_headers['Authorization'], 0, 5) == "OAuth") {
+      if (isset($request_headers['Authorization']) && @substr($request_headers['Authorization'], 0, 5) == "OAuth") {
         $header_parameters = OAuthRequest::split_header($request_headers['Authorization']);
         $parameters = array_merge($req_parameters, $header_parameters);
         $req = new OAuthRequest($http_method, $http_url, $parameters);

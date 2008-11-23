@@ -32,6 +32,7 @@ require 'src/gadgets/UserPrefs.php';
 require 'src/gadgets/Substitutions.php';
 require 'src/gadgets/LocaleSpec.php';
 require 'src/gadgets/LocaleMessageBundle.php';
+require 'src/gadgets/GadgetBlacklist.php';
 require 'src/common/Locale.php';
 require 'src/gadgets/UserPref.php';
 require 'src/gadgets/ViewSpec.php';
@@ -45,6 +46,10 @@ require 'src/gadgets/JsLibraryFeatureFactory.php';
 require 'src/gadgets/JsLibrary.php';
 require 'src/gadgets/HttpUtil.php';
 require 'src/gadgets/ContainerConfig.php';
+require 'src/common/JsMin.php';
+require 'src/common/SecurityTokenDecoder.php';
+require 'src/common/SecurityToken.php';
+require 'src/common/BlobCrypter.php';
 require 'src/gadgets/rewrite/ContentRewriter.php';
 require 'src/gadgets/rewrite/ContentRewriteFeature.php';
 

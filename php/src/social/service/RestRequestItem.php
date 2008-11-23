@@ -126,8 +126,10 @@ class RestRequestItem extends RequestItem {
    * @param urlTemplate The template the url follows
    */
   public function applyUrlTemplate($urlTemplate) {
-    $paramPieces = parse_url($this->url);
-    $this->parseQuery($paramPieces['query']);
+    $paramPieces = @parse_url($this->url);
+    if (isset($paramPieces['query'])) {
+      $this->parseQuery($paramPieces['query']);
+    }
     $actualUrl = explode("/", $paramPieces['path']);
     $expectedUrl = explode("/", $urlTemplate);
     for ($i = 1; $i < count($actualUrl); $i ++) {
