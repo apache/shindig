@@ -60,42 +60,38 @@ require_once '_files/OutputTestCase.php';
  * @link       http://www.phpunit.de/
  * @since      Class available since Release 3.0.0
  */
-class Extensions_OutputTestCaseTest extends PHPUnit_Framework_TestCase
-{
-    public function testExpectOutputStringFooActualFoo()
-    {
-        $test   = new OutputTestCase('testExpectOutputStringFooActualFoo');
-        $result = $test->run();
+class Extensions_OutputTestCaseTest extends PHPUnit_Framework_TestCase {
 
-        $this->assertEquals(1, count($result));
-        $this->assertTrue($result->wasSuccessful());
-    }
+  public function testExpectOutputStringFooActualFoo() {
+    $test = new OutputTestCase('testExpectOutputStringFooActualFoo');
+    $result = $test->run();
+    
+    $this->assertEquals(1, count($result));
+    $this->assertTrue($result->wasSuccessful());
+  }
 
-    public function testExpectOutputStringFooActualBar()
-    {
-        $test   = new OutputTestCase('testExpectOutputStringFooActualBar');
-        $result = $test->run();
+  public function testExpectOutputStringFooActualBar() {
+    $test = new OutputTestCase('testExpectOutputStringFooActualBar');
+    $result = $test->run();
+    
+    $this->assertEquals(1, count($result));
+    $this->assertFalse($result->wasSuccessful());
+  }
 
-        $this->assertEquals(1, count($result));
-        $this->assertFalse($result->wasSuccessful());
-    }
+  public function testExpectOutputRegexFooActualFoo() {
+    $test = new OutputTestCase('testExpectOutputRegexFooActualFoo');
+    $result = $test->run();
+    
+    $this->assertEquals(1, count($result));
+    $this->assertTrue($result->wasSuccessful());
+  }
 
-    public function testExpectOutputRegexFooActualFoo()
-    {
-        $test   = new OutputTestCase('testExpectOutputRegexFooActualFoo');
-        $result = $test->run();
-
-        $this->assertEquals(1, count($result));
-        $this->assertTrue($result->wasSuccessful());
-    }
-
-    public function testExpectOutputRegexFooActualBar()
-    {
-        $test   = new OutputTestCase('testExpectOutputRegexFooActualBar');
-        $result = $test->run();
-
-        $this->assertEquals(1, count($result));
-        $this->assertFalse($result->wasSuccessful());
-    }
+  public function testExpectOutputRegexFooActualBar() {
+    $test = new OutputTestCase('testExpectOutputRegexFooActualBar');
+    $result = $test->run();
+    
+    $this->assertEquals(1, count($result));
+    $this->assertFalse($result->wasSuccessful());
+  }
 }
 ?>

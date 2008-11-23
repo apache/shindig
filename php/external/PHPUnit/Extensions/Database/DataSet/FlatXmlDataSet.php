@@ -63,32 +63,30 @@ PHPUnit_Util_Filter::addFileToFilter(__FILE__, 'PHPUNIT');
  * @link       http://www.phpunit.de/
  * @since      Class available since Release 3.2.0
  */
-class PHPUnit_Extensions_Database_DataSet_FlatXmlDataSet extends PHPUnit_Extensions_Database_DataSet_AbstractXmlDataSet
-{
+class PHPUnit_Extensions_Database_DataSet_FlatXmlDataSet extends PHPUnit_Extensions_Database_DataSet_AbstractXmlDataSet {
 
-    protected function getTableInfo(Array &$tableColumns, Array &$tableValues)
-    {
-        if ($this->xmlFileContents->getName() != 'dataset') {
-            throw new Exception("The root element of a flat xml file must be called <dataset>");
+  protected function getTableInfo(Array &$tableColumns, Array &$tableValues) {
+    if ($this->xmlFileContents->getName() != 'dataset') {
+      throw new Exception("The root element of a flat xml file must be called <dataset>");
+    }
+    
+    foreach ($this->xmlFileContents->children() as $row) {
+      $tableName = $row->getName();
+      
+      if (! isset($tableColumns[$tableName])) {
+        $tableColumns[$tableName] = array();
+      }
+      
+      $values = array();
+      foreach ($row->attributes() as $name => $value) {
+        if (! in_array($name, $tableColumns[$tableName])) {
+          $tableColumns[$tableName][] = $name;
         }
         
-        foreach ($this->xmlFileContents->children() as $row) {
-            $tableName = $row->getName();
-            
-            if (!isset($tableColumns[$tableName])) {
-                $tableColumns[$tableName] = array();
-            }
-            
-            $values = array();
-            foreach ($row->attributes() as $name => $value) {
-                if (!in_array($name, $tableColumns[$tableName])) {
-                    $tableColumns[$tableName][] = $name;
-                }
-                
-                $values[$name] = $value;
-            }
-            $tableValues[$tableName][] = $values;
-        }
+        $values[$name] = $value;
+      }
+      $tableValues[$tableName][] = $values;
     }
+  }
 }
 ?>

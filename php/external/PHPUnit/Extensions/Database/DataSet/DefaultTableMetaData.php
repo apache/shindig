@@ -63,29 +63,27 @@ PHPUnit_Util_Filter::addFileToFilter(__FILE__, 'PHPUNIT');
  * @link       http://www.phpunit.de/
  * @since      Class available since Release 3.2.0
  */
-class PHPUnit_Extensions_Database_DataSet_DefaultTableMetaData extends PHPUnit_Extensions_Database_DataSet_AbstractTableMetaData
-{
+class PHPUnit_Extensions_Database_DataSet_DefaultTableMetaData extends PHPUnit_Extensions_Database_DataSet_AbstractTableMetaData {
 
-    /**
-     * Creates a new default table meta data object.
-     *
-     * @param string $tableName
-     * @param array $columns
-     * @param array $primaryKeys
-     */
-    public function __construct($tableName, Array $columns, Array $primaryKeys = array())
-    {
-        $this->tableName = $tableName;
-        $this->columns = $columns;
-        $this->primaryKeys = array();
-        
-        foreach ($primaryKeys as $columnName) {
-            if (!in_array($columnName, $this->columns)) {
-                throw new InvalidArgumentException("Primary key column passed that is not in the column list.");
-            } else {
-                $this->primaryKeys[] = $columnName;
-            }
-        }
+  /**
+   * Creates a new default table meta data object.
+   *
+   * @param string $tableName
+   * @param array $columns
+   * @param array $primaryKeys
+   */
+  public function __construct($tableName, Array $columns, Array $primaryKeys = array()) {
+    $this->tableName = $tableName;
+    $this->columns = $columns;
+    $this->primaryKeys = array();
+    
+    foreach ($primaryKeys as $columnName) {
+      if (! in_array($columnName, $this->columns)) {
+        throw new InvalidArgumentException("Primary key column passed that is not in the column list.");
+      } else {
+        $this->primaryKeys[] = $columnName;
+      }
     }
+  }
 }
 ?>

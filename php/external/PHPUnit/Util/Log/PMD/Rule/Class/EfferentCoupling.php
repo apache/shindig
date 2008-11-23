@@ -61,26 +61,18 @@ PHPUnit_Util_Filter::addFileToFilter(__FILE__, 'PHPUNIT');
  * @link       http://www.phpunit.de/
  * @since      Class available since Release 3.2.0
  */
-class PHPUnit_Util_Log_PMD_Rule_Class_EfferentCoupling extends PHPUnit_Util_Log_PMD_Rule_Class
-{
-    public function __construct($threshold = 20, $priority = 1)
-    {
-        parent::__construct($threshold);
-    }
+class PHPUnit_Util_Log_PMD_Rule_Class_EfferentCoupling extends PHPUnit_Util_Log_PMD_Rule_Class {
 
-    public function apply(PHPUnit_Util_Metrics $metrics)
-    {
-        $ce = $metrics->getCe();
+  public function __construct($threshold = 20, $priority = 1) {
+    parent::__construct($threshold);
+  }
 
-        if ($ce > $this->threshold) {
-            return sprintf(
-              "Class depends on %d other classes.\n" .
-              'The number of other classes that the class ' .
-              'depends upon is an indicator of the class\' ' .
-              'independence.',
-              $ce
-            );
-        }
+  public function apply(PHPUnit_Util_Metrics $metrics) {
+    $ce = $metrics->getCe();
+    
+    if ($ce > $this->threshold) {
+      return sprintf("Class depends on %d other classes.\n" . 'The number of other classes that the class ' . 'depends upon is an indicator of the class\' ' . 'independence.', $ce);
     }
+  }
 }
 ?>

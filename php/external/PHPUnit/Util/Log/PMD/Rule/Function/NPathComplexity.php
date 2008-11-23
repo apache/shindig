@@ -61,27 +61,18 @@ PHPUnit_Util_Filter::addFileToFilter(__FILE__, 'PHPUNIT');
  * @link       http://www.phpunit.de/
  * @since      Class available since Release 3.2.0
  */
-class PHPUnit_Util_Log_PMD_Rule_Function_NPathComplexity extends PHPUnit_Util_Log_PMD_Rule_Function
-{
-    public function __construct($threshold = 200, $priority = 1)
-    {
-        parent::__construct($threshold);
-    }
+class PHPUnit_Util_Log_PMD_Rule_Function_NPathComplexity extends PHPUnit_Util_Log_PMD_Rule_Function {
 
-    public function apply(PHPUnit_Util_Metrics $metrics)
-    {
-        $npath = $metrics->getNPath();
+  public function __construct($threshold = 200, $priority = 1) {
+    parent::__construct($threshold);
+  }
 
-        if ($npath >= $this->threshold) {
-            return sprintf(
-              "The NPath complexity is %d.\n" .
-              'The NPath complexity of a function or method is the number of ' .
-              'acyclic execution paths through that method. A threshold of 200 ' .
-              'is generally considered the point where measures should be taken ' .
-              'to reduce complexity.',
-              $npath
-            );
-        }
+  public function apply(PHPUnit_Util_Metrics $metrics) {
+    $npath = $metrics->getNPath();
+    
+    if ($npath >= $this->threshold) {
+      return sprintf("The NPath complexity is %d.\n" . 'The NPath complexity of a function or method is the number of ' . 'acyclic execution paths through that method. A threshold of 200 ' . 'is generally considered the point where measures should be taken ' . 'to reduce complexity.', $npath);
     }
+  }
 }
 ?>

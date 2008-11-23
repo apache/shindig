@@ -67,25 +67,25 @@ PHPUnit_Util_Filter::addFileToFilter(__FILE__, 'PHPUNIT');
  * @link       http://www.phpunit.de/
  * @since      Interface available since Release 3.0.0
  */
-interface PHPUnit_Framework_MockObject_Invokable extends PHPUnit_Framework_MockObject_Verifiable
-{
-    /**
-     * Invokes the invocation object $invocation so that it can be checked for
-     * expectations or matched against stubs.
-     *
-     * @return Object
-     * @param PHPUnit_Framework_MockObject_Invocation $invocation The invocation object passed from
-     *                                                              mock object.
-     */
-    public function invoke(PHPUnit_Framework_MockObject_Invocation $invocation);
+interface PHPUnit_Framework_MockObject_Invokable extends PHPUnit_Framework_MockObject_Verifiable {
 
-    /**
-     * Checks if the invocation matches.
-     *
-     * @return bool
-     * @param PHPUnit_Framework_MockObject_Invocation $invocation The invocation object passed from
-     *                                                              mock object.
-     */
-    public function matches(PHPUnit_Framework_MockObject_Invocation $invocation);
+  /**
+   * Invokes the invocation object $invocation so that it can be checked for
+   * expectations or matched against stubs.
+   *
+   * @return Object
+   * @param PHPUnit_Framework_MockObject_Invocation $invocation The invocation object passed from
+   *                                                              mock object.
+   */
+  public function invoke(PHPUnit_Framework_MockObject_Invocation $invocation);
+
+  /**
+   * Checks if the invocation matches.
+   *
+   * @return bool
+   * @param PHPUnit_Framework_MockObject_Invocation $invocation The invocation object passed from
+   *                                                              mock object.
+   */
+  public function matches(PHPUnit_Framework_MockObject_Invocation $invocation);
 }
 ?>

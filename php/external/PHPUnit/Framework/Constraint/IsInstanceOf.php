@@ -67,66 +67,51 @@ PHPUnit_Util_Filter::addFileToFilter(__FILE__, 'PHPUNIT');
  * @link       http://www.phpunit.de/
  * @since      Class available since Release 3.0.0
  */
-class PHPUnit_Framework_Constraint_IsInstanceOf extends PHPUnit_Framework_Constraint
-{
-    protected $className;
+class PHPUnit_Framework_Constraint_IsInstanceOf extends PHPUnit_Framework_Constraint {
+  protected $className;
 
-    public function __construct($className)
-    {
-        $this->className = $className;
-    }
+  public function __construct($className) {
+    $this->className = $className;
+  }
 
-    /**
-     * Evaluates the constraint for parameter $other. Returns TRUE if the
-     * constraint is met, FALSE otherwise.
-     *
-     * @param mixed $other Value or object to evaluate.
-     * @return bool
-     */
-    public function evaluate($other)
-    {
-        return ($other instanceof $this->className);
-    }
+  /**
+   * Evaluates the constraint for parameter $other. Returns TRUE if the
+   * constraint is met, FALSE otherwise.
+   *
+   * @param mixed $other Value or object to evaluate.
+   * @return bool
+   */
+  public function evaluate($other) {
+    return ($other instanceof $this->className);
+  }
 
-    /**
-     * Creates the appropriate exception for the constraint which can be caught
-     * by the unit test system. This can be called if a call to evaluate() fails.
-     *
-     * @param   mixed   $other The value passed to evaluate() which failed the
-     *                         constraint check.
-     * @param   string  $description A string with extra description of what was
-     *                               going on while the evaluation failed.
-     * @param   boolean $not Flag to indicate negation.
-     * @throws  PHPUnit_Framework_ExpectationFailedException
-     */
-    public function fail($other, $description, $not = FALSE)
-    {
-        throw new PHPUnit_Framework_ExpectationFailedException(
-          sprintf(
-            '%sFailed asserting that %s is %san instance of class "%s".',
+  /**
+   * Creates the appropriate exception for the constraint which can be caught
+   * by the unit test system. This can be called if a call to evaluate() fails.
+   *
+   * @param   mixed   $other The value passed to evaluate() which failed the
+   *                         constraint check.
+   * @param   string  $description A string with extra description of what was
+   *                               going on while the evaluation failed.
+   * @param   boolean $not Flag to indicate negation.
+   * @throws  PHPUnit_Framework_ExpectationFailedException
+   */
+  public function fail($other, $description, $not = FALSE) {
+    throw new PHPUnit_Framework_ExpectationFailedException(sprintf('%sFailed asserting that %s is %san instance of class "%s".', 
 
-            !empty($description) ? $description . "\n" : '',
-            PHPUnit_Util_Type::toString($other, TRUE),
-            $not ? 'not ' : '',
-            $this->className
-          ),
-          NULL
-        );
-    }
+    ! empty($description) ? $description . "\n" : '', PHPUnit_Util_Type::toString($other, TRUE), $not ? 'not ' : '', $this->className), NULL);
+  }
 
-    /**
-     * Returns a string representation of the constraint.
-     *
-     * @return string
-     * @access public
-     */
-    public function toString()
-    {
-        return sprintf(
-          'is instance of class "%s"',
+  /**
+   * Returns a string representation of the constraint.
+   *
+   * @return string
+   * @access public
+   */
+  public function toString() {
+    return sprintf('is instance of class "%s"', 
 
-          $this->className
-        );
-    }
+    $this->className);
+  }
 }
 ?>

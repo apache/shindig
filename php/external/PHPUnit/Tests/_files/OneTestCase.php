@@ -61,14 +61,10 @@ PHPUnit_Util_Filter::addFileToFilter(__FILE__);
  * @link       http://www.phpunit.de/
  * @since      Class available since Release 2.0.0
  */
-class OneTestCase extends PHPUnit_Framework_TestCase
-{
-    public function noTestCase()
-    {
-    }
+class OneTestCase extends PHPUnit_Framework_TestCase {
 
-    public function testCase($arg = '')
-    {
-    }
+  public function noTestCase() {}
+
+  public function testCase($arg = '') {}
 }
 ?>

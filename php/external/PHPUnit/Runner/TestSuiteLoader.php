@@ -60,21 +60,21 @@ PHPUnit_Util_Filter::addFileToFilter(__FILE__, 'PHPUNIT');
  * @link       http://www.phpunit.de/
  * @since      Interface available since Release 2.0.0
  */
-interface PHPUnit_Runner_TestSuiteLoader
-{
-    /**
-     * @param  string  $suiteClassName
-     * @param  string  $suiteClassFile
-     * @return ReflectionClass
-     * @access public
-     */
-    public function load($suiteClassName, $suiteClassFile = '');
+interface PHPUnit_Runner_TestSuiteLoader {
 
-    /**
-     * @param  ReflectionClass $aClass
-     * @return ReflectionClass
-     * @access public
-     */
-    public function reload(ReflectionClass $aClass);
+  /**
+   * @param  string  $suiteClassName
+   * @param  string  $suiteClassFile
+   * @return ReflectionClass
+   * @access public
+   */
+  public function load($suiteClassName, $suiteClassFile = '');
+
+  /**
+   * @param  ReflectionClass $aClass
+   * @return ReflectionClass
+   * @access public
+   */
+  public function reload(ReflectionClass $aClass);
 }
 ?>

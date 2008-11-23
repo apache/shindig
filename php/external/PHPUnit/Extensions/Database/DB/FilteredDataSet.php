@@ -63,33 +63,30 @@ PHPUnit_Util_Filter::addFileToFilter(__FILE__, 'PHPUNIT');
  * @link       http://www.phpunit.de/
  * @since      Class available since Release 3.2.0
  */
-class PHPUnit_Extensions_Database_DB_FilteredDataSet extends PHPUnit_Extensions_Database_DB_DataSet
-{
+class PHPUnit_Extensions_Database_DB_FilteredDataSet extends PHPUnit_Extensions_Database_DB_DataSet {
+  
+  /**
+   * @var Array
+   */
+  protected $tableNames;
 
-    /**
-     * @var Array
-     */
-    protected $tableNames;
+  /**
+   * Creates a new dataset using the given database connection.
+   *
+   * @param PHPUnit_Extensions_Database_DB_DefaultDatabaseConnection $databaseConnection
+   */
+  public function __construct(PHPUnit_Extensions_Database_DB_DefaultDatabaseConnection $databaseConnection, Array $tableNames) {
+    parent::__construct($databaseConnection);
+    $this->tableNames = $tableNames;
+  }
 
-    /**
-     * Creates a new dataset using the given database connection.
-     *
-     * @param PHPUnit_Extensions_Database_DB_DefaultDatabaseConnection $databaseConnection
-     */
-    public function __construct(PHPUnit_Extensions_Database_DB_DefaultDatabaseConnection $databaseConnection, Array $tableNames)
-    {
-        parent::__construct($databaseConnection);
-        $this->tableNames = $tableNames;
-    }
-
-    /**
-     * Returns a list of table names for the database
-     * 
-     * @return Array
-     */
-    public function getTableNames()
-    {
-        return $this->tableNames;
-    }
+  /**
+   * Returns a list of table names for the database
+   * 
+   * @return Array
+   */
+  public function getTableNames() {
+    return $this->tableNames;
+  }
 }
 ?>

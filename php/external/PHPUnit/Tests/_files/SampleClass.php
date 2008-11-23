@@ -60,17 +60,15 @@ PHPUnit_Util_Filter::addFileToFilter(__FILE__);
  * @link       http://www.phpunit.de/
  * @since      Class available since Release 3.0.0
  */
-class SampleClass
-{
-    public $a;
-    protected $b;
-    protected $c;
+class SampleClass {
+  public $a;
+  protected $b;
+  protected $c;
 
-    public function __construct($a, $b, $c)
-    {
-        $this->a = $a;
-        $this->b = $b;
-        $this->c = $c;
-    }
+  public function __construct($a, $b, $c) {
+    $this->a = $a;
+    $this->b = $b;
+    $this->c = $c;
+  }
 }
 ?>

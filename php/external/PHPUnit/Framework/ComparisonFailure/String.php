@@ -63,58 +63,47 @@ PHPUnit_Util_Filter::addFileToFilter(__FILE__, 'PHPUNIT');
  * @link       http://www.phpunit.de/
  * @since      Class available since Release 3.0.0
  */
-class PHPUnit_Framework_ComparisonFailure_String extends PHPUnit_Framework_ComparisonFailure
-{
-    /**
-     * Returns a string describing the difference between
-     * the expected and the actual string value.
-     */
-    public function toString()
-    {
-        $expected = (string)$this->expected;
-        $actual   = (string)$this->actual;
+class PHPUnit_Framework_ComparisonFailure_String extends PHPUnit_Framework_ComparisonFailure {
 
-        if (strpos($expected, "\n") !== FALSE || strpos($actual, "\n") !== FALSE) {
-            if ($this->hasDiff()) {
-                return $this->diff($expected, $actual);
-            } else {
-                return '';
-            }
-        }
-
-        $expectedLen = strlen($expected);
-        $actualLen   = strlen($actual);
-        $minLen      = min($expectedLen, $actualLen);
-        $maxLen      = max($expectedLen, $actualLen);
-
-        for ($i = 0; $i < $minLen; ++$i) {
-            if ($expected[$i] != $actual[$i]) break;
-        }
-
-        $startPos = $i;
-        $endPos   = $minLen;
-
-        if ($minLen > 0) {
-            for ($i = $minLen - 1; $i > $startPos; --$i) {
-                if ($expected[$i] != $actual[$i]) break;
-            }
-
-            $endPos = $i + 1;
-        }
-
-        return sprintf(
-          "%s%sexpected string <%s>\n" .
-          "%sdifference      <%s>\n" .
-          '%sgot string      <%s>',
-
-          $this->message,
-          ($this->message != '') ? ' ' : '',
-          $expected,
-          ($this->message != '') ? str_repeat(' ', strlen($this->message) + 1) : '',
-          str_repeat(' ', $startPos) . str_repeat('x', $endPos - $startPos) . str_repeat('?', $maxLen - $minLen),
-          ($this->message != '') ? str_repeat(' ', strlen($this->message) + 1) : '',
-          $actual
-        );
+  /**
+   * Returns a string describing the difference between
+   * the expected and the actual string value.
+   */
+  public function toString() {
+    $expected = (string)$this->expected;
+    $actual = (string)$this->actual;
+    
+    if (strpos($expected, "\n") !== FALSE || strpos($actual, "\n") !== FALSE) {
+      if ($this->hasDiff()) {
+        return $this->diff($expected, $actual);
+      } else {
+        return '';
+      }
     }
+    
+    $expectedLen = strlen($expected);
+    $actualLen = strlen($actual);
+    $minLen = min($expectedLen, $actualLen);
+    $maxLen = max($expectedLen, $actualLen);
+    
+    for ($i = 0; $i < $minLen; ++ $i) {
+      if ($expected[$i] != $actual[$i]) break;
+    }
+    
+    $startPos = $i;
+    $endPos = $minLen;
+    
+    if ($minLen > 0) {
+      for ($i = $minLen - 1; $i > $startPos; -- $i) {
+        if ($expected[$i] != $actual[$i]) break;
+      }
+      
+      $endPos = $i + 1;
+    }
+    
+    return sprintf("%s%sexpected string <%s>\n" . "%sdifference      <%s>\n" . '%sgot string      <%s>', 
+
+    $this->message, ($this->message != '') ? ' ' : '', $expected, ($this->message != '') ? str_repeat(' ', strlen($this->message) + 1) : '', str_repeat(' ', $startPos) . str_repeat('x', $endPos - $startPos) . str_repeat('?', $maxLen - $minLen), ($this->message != '') ? str_repeat(' ', strlen($this->message) + 1) : '', $actual);
+  }
 }
 ?>

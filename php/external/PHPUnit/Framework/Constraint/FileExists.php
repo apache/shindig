@@ -65,58 +65,51 @@ PHPUnit_Util_Filter::addFileToFilter(__FILE__, 'PHPUNIT');
  * @link       http://www.phpunit.de/
  * @since      Class available since Release 3.0.0
  */
-class PHPUnit_Framework_Constraint_FileExists extends PHPUnit_Framework_Constraint
-{
-    /**
-     * Evaluates the constraint for parameter $other. Returns TRUE if the
-     * constraint is met, FALSE otherwise.
-     *
-     * @param mixed $other Value or object to evaluate.
-     * @return bool
-     */
-    public function evaluate($other)
-    {
-        return file_exists($other);
+class PHPUnit_Framework_Constraint_FileExists extends PHPUnit_Framework_Constraint {
+
+  /**
+   * Evaluates the constraint for parameter $other. Returns TRUE if the
+   * constraint is met, FALSE otherwise.
+   *
+   * @param mixed $other Value or object to evaluate.
+   * @return bool
+   */
+  public function evaluate($other) {
+    return file_exists($other);
+  }
+
+  /**
+   * @param   mixed   $other The value passed to evaluate() which failed the
+   *                         constraint check.
+   * @param   string  $description A string with extra description of what was
+   *                               going on while the evaluation failed.
+   * @param   boolean $not Flag to indicate negation.
+   * @throws  PHPUnit_Framework_ExpectationFailedException
+   */
+  public function fail($other, $description, $not = FALSE) {
+    $failureDescription = sprintf('Failed asserting that file "%s" exists.', 
+
+    $other);
+    
+    if ($not) {
+      $failureDescription = self::negate($failureDescription);
     }
-
-    /**
-     * @param   mixed   $other The value passed to evaluate() which failed the
-     *                         constraint check.
-     * @param   string  $description A string with extra description of what was
-     *                               going on while the evaluation failed.
-     * @param   boolean $not Flag to indicate negation.
-     * @throws  PHPUnit_Framework_ExpectationFailedException
-     */
-    public function fail($other, $description, $not = FALSE)
-    {
-        $failureDescription = sprintf(
-          'Failed asserting that file "%s" exists.',
-
-           $other
-        );
-
-        if ($not) {
-            $failureDescription = self::negate($failureDescription);
-        }
-
-        if (!empty($description)) {
-            $failureDescription = $description . "\n" . $failureDescription;
-        }
-
-        throw new PHPUnit_Framework_ExpectationFailedException(
-          $failureDescription
-        );
+    
+    if (! empty($description)) {
+      $failureDescription = $description . "\n" . $failureDescription;
     }
+    
+    throw new PHPUnit_Framework_ExpectationFailedException($failureDescription);
+  }
 
-    /**
-     * Returns a string representation of the constraint.
-     *
-     * @return string
-     * @access public
-     */
-    public function toString()
-    {
-        return 'file exists';
-    }
+  /**
+   * Returns a string representation of the constraint.
+   *
+   * @return string
+   * @access public
+   */
+  public function toString() {
+    return 'file exists';
+  }
 }
 ?>

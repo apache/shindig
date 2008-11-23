@@ -60,10 +60,8 @@ PHPUnit_Util_Filter::addFileToFilter(__FILE__, 'PHPUNIT');
  * @link       http://www.phpunit.de/
  * @since      Class available since Release 3.1.4
  */
-class PHPUnit_Extensions_PhptTestCase_Logger
-{
-    public function log($level, $msg, $append_crlf = TRUE)
-    {
-    }
+class PHPUnit_Extensions_PhptTestCase_Logger {
+
+  public function log($level, $msg, $append_crlf = TRUE) {}
 }
 ?>

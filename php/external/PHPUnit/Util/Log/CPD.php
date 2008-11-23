@@ -64,70 +64,48 @@ PHPUnit_Util_Filter::addFileToFilter(__FILE__, 'PHPUNIT');
  * @link       http://www.phpunit.de/
  * @since      Class available since Release 3.2.0
  */
-class PHPUnit_Util_Log_CPD extends PHPUnit_Util_Printer
-{
-    /**
-     * @param  PHPUnit_Framework_TestResult $result
-     * @access public
-     */
-    public function process(PHPUnit_Framework_TestResult $result, $minLines = 5, $minMatches = 70)
-    {
-        $codeCoverage = $result->getCodeCoverageInformation();
-        $summary      = PHPUnit_Util_CodeCoverage::getSummary($codeCoverage);
-        $files        = array_keys($summary);
-        $metrics      = new PHPUnit_Util_Metrics_Project($files, $summary, TRUE, $minLines, $minMatches);
+class PHPUnit_Util_Log_CPD extends PHPUnit_Util_Printer {
 
-        $document = new DOMDocument('1.0', 'UTF-8');
-        $document->formatOutput = TRUE;
-
-        $cpd = $document->createElement('pmd-cpd');
-        $cpd->setAttribute('version', 'PHPUnit ' . PHPUnit_Runner_Version::id());
-        $document->appendChild($cpd);
-
-        foreach ($metrics->getDuplicates() as $duplicate) {
-            $xmlDuplication = $cpd->appendChild(
-              $document->createElement('duplication')
-            );
-
-            $xmlDuplication->setAttribute('lines', $duplicate['numLines']);
-            $xmlDuplication->setAttribute('tokens', $duplicate['numTokens']);
-
-            $xmlFile = $xmlDuplication->appendChild(
-              $document->createElement('file')
-            );
-
-            $xmlFile->setAttribute('path', $duplicate['fileA']->getPath());
-            $xmlFile->setAttribute('line', $duplicate['firstLineA']);
-
-            $xmlFile = $xmlDuplication->appendChild(
-              $document->createElement('file')
-            );
-
-            $xmlFile->setAttribute('path', $duplicate['fileB']->getPath());
-            $xmlFile->setAttribute('line', $duplicate['firstLineB']);
-
-            $codefragment = $xmlDuplication->appendChild(
-              $document->createElement('codefragment')
-            );
-
-            $codefragment->appendChild(
-              $document->createCDATASection(
-                utf8_encode(
-                  join(
-                    '',
-                    array_slice(
-                      $duplicate['fileA']->getLines(),
-                      $duplicate['firstLineA'] - 1,
-                      $duplicate['numLines']
-                    )
-                  )
-                )
-              )
-            );
-        }
-
-        $this->write($document->saveXML());
-        $this->flush();
+  /**
+   * @param  PHPUnit_Framework_TestResult $result
+   * @access public
+   */
+  public function process(PHPUnit_Framework_TestResult $result, $minLines = 5, $minMatches = 70) {
+    $codeCoverage = $result->getCodeCoverageInformation();
+    $summary = PHPUnit_Util_CodeCoverage::getSummary($codeCoverage);
+    $files = array_keys($summary);
+    $metrics = new PHPUnit_Util_Metrics_Project($files, $summary, TRUE, $minLines, $minMatches);
+    
+    $document = new DOMDocument('1.0', 'UTF-8');
+    $document->formatOutput = TRUE;
+    
+    $cpd = $document->createElement('pmd-cpd');
+    $cpd->setAttribute('version', 'PHPUnit ' . PHPUnit_Runner_Version::id());
+    $document->appendChild($cpd);
+    
+    foreach ($metrics->getDuplicates() as $duplicate) {
+      $xmlDuplication = $cpd->appendChild($document->createElement('duplication'));
+      
+      $xmlDuplication->setAttribute('lines', $duplicate['numLines']);
+      $xmlDuplication->setAttribute('tokens', $duplicate['numTokens']);
+      
+      $xmlFile = $xmlDuplication->appendChild($document->createElement('file'));
+      
+      $xmlFile->setAttribute('path', $duplicate['fileA']->getPath());
+      $xmlFile->setAttribute('line', $duplicate['firstLineA']);
+      
+      $xmlFile = $xmlDuplication->appendChild($document->createElement('file'));
+      
+      $xmlFile->setAttribute('path', $duplicate['fileB']->getPath());
+      $xmlFile->setAttribute('line', $duplicate['firstLineB']);
+      
+      $codefragment = $xmlDuplication->appendChild($document->createElement('codefragment'));
+      
+      $codefragment->appendChild($document->createCDATASection(utf8_encode(join('', array_slice($duplicate['fileA']->getLines(), $duplicate['firstLineA'] - 1, $duplicate['numLines'])))));
     }
+    
+    $this->write($document->saveXML());
+    $this->flush();
+  }
 }
 ?>

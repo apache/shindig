@@ -68,67 +68,58 @@ PHPUnit_Util_Filter::addFileToFilter(__FILE__, 'PHPUNIT');
  * @link       http://www.phpunit.de/
  * @since      Class available since Release 3.0.0
  */
-class PHPUnit_Framework_MockObject_Matcher_InvokedCount extends PHPUnit_Framework_MockObject_Matcher_InvokedRecorder
-{
-    protected $expectedCount;
+class PHPUnit_Framework_MockObject_Matcher_InvokedCount extends PHPUnit_Framework_MockObject_Matcher_InvokedRecorder {
+  protected $expectedCount;
 
-    public function __construct($expectedCount)
-    {
-        $this->expectedCount = $expectedCount;
+  public function __construct($expectedCount) {
+    $this->expectedCount = $expectedCount;
+  }
+
+  public function toString() {
+    return 'invoked ' . $this->expectedCount . ' time(s)';
+  }
+
+  public function invoked(PHPUnit_Framework_MockObject_Invocation $invocation) {
+    parent::invoked($invocation);
+    
+    $count = $this->getInvocationCount();
+    
+    if ($count > $this->expectedCount) {
+      $message = (string)$invocation;
+      
+      switch ($this->expectedCount == 0) {
+        case 0:
+          {
+            $message .= ' was not expected to be called.';
+          }
+          break;
+        
+        case 1:
+          {
+            $message .= ' was not expected to be called more than once.';
+          }
+          break;
+        
+        default:
+          {
+            $message .= sprintf(' was not expected to be called more than %d times.', 
+
+            $this->expectedCount);
+          }
+      }
+      
+      throw new PHPUnit_Framework_ExpectationFailedException($message);
     }
+  }
 
-    public function toString()
-    {
-        return 'invoked ' . $this->expectedCount . ' time(s)';
+  public function verify() {
+    $count = $this->getInvocationCount();
+    
+    if ($count !== $this->expectedCount) {
+      throw new PHPUnit_Framework_ExpectationFailedException(sprintf('Method was expected to be called %d times, actually called %d times.', 
+
+      $this->expectedCount, $count));
     }
-
-    public function invoked(PHPUnit_Framework_MockObject_Invocation $invocation)
-    {
-        parent::invoked($invocation);
-
-        $count = $this->getInvocationCount();
-
-        if ($count > $this->expectedCount) {
-            $message = (string)$invocation;
-
-            switch ($this->expectedCount == 0) {
-                case 0: {
-                    $message .= ' was not expected to be called.';
-                }
-                break;
-
-                case 1: {
-                    $message .= ' was not expected to be called more than once.';
-                }
-                break;
-
-                default: {
-                    $message .= sprintf(
-                      ' was not expected to be called more than %d times.',
-
-                      $this->expectedCount
-                    );
-                }
-            }
-
-            throw new PHPUnit_Framework_ExpectationFailedException($message);
-        }
-    }
-
-    public function verify()
-    {
-        $count = $this->getInvocationCount();
-
-        if ($count !== $this->expectedCount) {
-            throw new PHPUnit_Framework_ExpectationFailedException(
-              sprintf(
-                'Method was expected to be called %d times, actually called %d times.',
-
-                $this->expectedCount,
-                $count
-              )
-            );
-        }
-    }
+  }
 }
 ?>

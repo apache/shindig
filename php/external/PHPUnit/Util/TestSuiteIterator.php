@@ -60,104 +60,95 @@ PHPUnit_Util_Filter::addFileToFilter(__FILE__, 'PHPUNIT');
  * @link       http://www.phpunit.de/
  * @since      Class available since Release 3.1.0
  */
-class PHPUnit_Util_TestSuiteIterator implements RecursiveIterator
-{
-    /**
-     * @var    integer
-     * @access protected
-     */
-    protected $position;
+class PHPUnit_Util_TestSuiteIterator implements RecursiveIterator {
+  /**
+   * @var    integer
+   * @access protected
+   */
+  protected $position;
+  
+  /**
+   * @var    PHPUnit_Framework_Test[]
+   * @access protected
+   */
+  protected $tests;
 
-    /**
-     * @var    PHPUnit_Framework_Test[]
-     * @access protected
-     */
-    protected $tests;
+  /**
+   * Constructor.
+   *
+   * @param  PHPUnit_Framework_TestSuite $suite
+   * @access public
+   */
+  public function __construct(PHPUnit_Framework_TestSuite $testSuite) {
+    $this->tests = $testSuite->tests();
+  }
 
-    /**
-     * Constructor.
-     *
-     * @param  PHPUnit_Framework_TestSuite $suite
-     * @access public
-     */
-    public function __construct(PHPUnit_Framework_TestSuite $testSuite)
-    {
-        $this->tests = $testSuite->tests();
-    }
+  /**
+   * Rewinds the Iterator to the first element.
+   *
+   * @access public
+   */
+  public function rewind() {
+    $this->position = 0;
+  }
 
-    /**
-     * Rewinds the Iterator to the first element.
-     *
-     * @access public
-     */
-    public function rewind()
-    {
-        $this->position = 0;
-    }
+  /**
+   * Checks if there is a current element after calls to rewind() or next().
+   *
+   * @return boolean
+   * @access public
+   */
+  public function valid() {
+    return $this->position < count($this->tests);
+  }
 
-    /**
-     * Checks if there is a current element after calls to rewind() or next().
-     *
-     * @return boolean
-     * @access public
-     */
-    public function valid()
-    {
-        return $this->position < count($this->tests);
-    }
+  /**
+   * Returns the key of the current element.
+   *
+   * @return integer
+   * @access public
+   */
+  public function key() {
+    return $this->position;
+  }
 
-    /**
-     * Returns the key of the current element.
-     *
-     * @return integer
-     * @access public
-     */
-    public function key()
-    {
-        return $this->position;
-    }
+  /**
+   * Returns the current element.
+   *
+   * @return PHPUnit_Framework_Test
+   * @access public
+   */
+  public function current() {
+    return $this->valid() ? $this->tests[$this->position] : NULL;
+  }
 
-    /**
-     * Returns the current element.
-     *
-     * @return PHPUnit_Framework_Test
-     * @access public
-     */
-    public function current()
-    {
-        return $this->valid() ? $this->tests[$this->position] : NULL;
-    }
+  /**
+   * Moves forward to next element.
+   *
+   * @access public
+   */
+  public function next() {
+    $this->position ++;
+  }
 
-    /**
-     * Moves forward to next element.
-     *
-     * @access public
-     */
-    public function next()
-    {
-        $this->position++;
-    }
+  /**
+   * Returns the sub iterator for the current element.
+   *
+   * @return PHPUnit_Util_TestSuiteIterator
+   * @access public
+   */
+  public function getChildren() {
+    return new PHPUnit_Util_TestSuiteIterator($this->tests[$this->position]);
+  }
 
-    /**
-     * Returns the sub iterator for the current element.
-     *
-     * @return PHPUnit_Util_TestSuiteIterator
-     * @access public
-     */
-    public function getChildren()
-    {
-        return new PHPUnit_Util_TestSuiteIterator($this->tests[$this->position]);
-    }
-
-    /**
-     * Checks whether the current element has children.
-     *
-     * @return boolean
-     * @access public
-     */
-    public function hasChildren()
-    {
-        return $this->tests[$this->position] instanceof PHPUnit_Framework_TestSuite;
-    }
+  /**
+   * Checks whether the current element has children.
+   *
+   * @return boolean
+   * @access public
+   */
+  public function hasChildren() {
+    return $this->tests[$this->position] instanceof PHPUnit_Framework_TestSuite;
+  }
 }
 ?>

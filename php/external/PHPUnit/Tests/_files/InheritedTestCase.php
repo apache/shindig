@@ -62,10 +62,8 @@ require_once 'OneTestCase.php';
  * @link       http://www.phpunit.de/
  * @since      Class available since Release 2.0.0
  */
-class InheritedTestCase extends OneTestCase
-{
-    public function test2()
-    {
-    }
+class InheritedTestCase extends OneTestCase {
+
+  public function test2() {}
 }
 ?>

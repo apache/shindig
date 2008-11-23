@@ -65,102 +65,94 @@ PHPUnit_Util_Filter::addFileToFilter(__FILE__, 'PHPUNIT');
  * @link       http://www.phpunit.de/
  * @since      Class available since Release 2.0.0
  */
-class PHPUnit_Extensions_TestDecorator extends PHPUnit_Framework_Assert implements PHPUnit_Framework_Test, PHPUnit_Framework_SelfDescribing
-{
-    /**
-     * The Test to be decorated.
-     *
-     * @var    object
-     * @access protected
-     */
-    protected $test = NULL;
+class PHPUnit_Extensions_TestDecorator extends PHPUnit_Framework_Assert implements PHPUnit_Framework_Test, PHPUnit_Framework_SelfDescribing {
+  /**
+   * The Test to be decorated.
+   *
+   * @var    object
+   * @access protected
+   */
+  protected $test = NULL;
 
-    /**
-     * Constructor.
-     *
-     * @param  PHPUnit_Framework_Test $test
-     * @access public
-     */
-    public function __construct(PHPUnit_Framework_Test $test)
-    {
-        $this->test = $test;
+  /**
+   * Constructor.
+   *
+   * @param  PHPUnit_Framework_Test $test
+   * @access public
+   */
+  public function __construct(PHPUnit_Framework_Test $test) {
+    $this->test = $test;
+  }
+
+  /**
+   * Returns a string representation of the test.
+   *
+   * @return string
+   * @access public
+   */
+  public function toString() {
+    return $this->test->toString();
+  }
+
+  /**
+   * Runs the test and collects the
+   * result in a TestResult.
+   *
+   * @param  PHPUnit_Framework_TestResult $result
+   * @access public
+   */
+  public function basicRun(PHPUnit_Framework_TestResult $result) {
+    $this->test->run($result);
+  }
+
+  /**
+   * Counts the number of test cases that
+   * will be run by this test.
+   *
+   * @return integer
+   * @access public
+   */
+  public function count() {
+    return count($this->test);
+  }
+
+  /**
+   * Creates a default TestResult object.
+   *
+   * @return PHPUnit_Framework_TestResult
+   * @access protected
+   */
+  protected function createResult() {
+    return new PHPUnit_Framework_TestResult();
+  }
+
+  /**
+   * Returns the test to be run.
+   *
+   * @return PHPUnit_Framework_Test
+   * @access public
+   */
+  public function getTest() {
+    return $this->test;
+  }
+
+  /**
+   * Runs the decorated test and collects the
+   * result in a TestResult.
+   *
+   * @param  PHPUnit_Framework_TestResult $result
+   * @return PHPUnit_Framework_TestResult
+   * @throws InvalidArgumentException
+   * @access public
+   */
+  public function run(PHPUnit_Framework_TestResult $result = NULL) {
+    if ($result === NULL) {
+      $result = $this->createResult();
     }
-
-    /**
-     * Returns a string representation of the test.
-     *
-     * @return string
-     * @access public
-     */
-    public function toString()
-    {
-        return $this->test->toString();
-    }
-
-    /**
-     * Runs the test and collects the
-     * result in a TestResult.
-     *
-     * @param  PHPUnit_Framework_TestResult $result
-     * @access public
-     */
-    public function basicRun(PHPUnit_Framework_TestResult $result)
-    {
-        $this->test->run($result);
-    }
-
-    /**
-     * Counts the number of test cases that
-     * will be run by this test.
-     *
-     * @return integer
-     * @access public
-     */
-    public function count()
-    {
-        return count($this->test);
-    }
-
-    /**
-     * Creates a default TestResult object.
-     *
-     * @return PHPUnit_Framework_TestResult
-     * @access protected
-     */
-    protected function createResult()
-    {
-        return new PHPUnit_Framework_TestResult;
-    }
-
-    /**
-     * Returns the test to be run.
-     *
-     * @return PHPUnit_Framework_Test
-     * @access public
-     */
-    public function getTest()
-    {
-        return $this->test;
-    }
-
-    /**
-     * Runs the decorated test and collects the
-     * result in a TestResult.
-     *
-     * @param  PHPUnit_Framework_TestResult $result
-     * @return PHPUnit_Framework_TestResult
-     * @throws InvalidArgumentException
-     * @access public
-     */
-    public function run(PHPUnit_Framework_TestResult $result = NULL)
-    {
-        if ($result === NULL) {
-            $result = $this->createResult();
-        }
-
-        $this->basicRun($result);
-
-        return $result;
-    }
+    
+    $this->basicRun($result);
+    
+    return $result;
+  }
 }
 ?>

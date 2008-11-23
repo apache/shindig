@@ -1,5 +1,5 @@
 <?php
-/*
+/**
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -22,55 +22,52 @@
  * MessageBundleParser test case.
  */
 class MessageBundleParserTest extends PHPUnit_Framework_TestCase {
-	
-	/**
-	 * @var MessageBundleParser
-	 */
-	private $MessageBundleParser;
-	private $MessageBundle;
+  
+  /**
+   * @var MessageBundleParser
+   */
+  private $MessageBundleParser;
+  private $MessageBundle;
 
-	/**
-	 * Prepares the environment before running a test.
-	 */
-	protected function setUp()
-	{
-		parent::setUp();
-		
-		$this->MessageBundleParser = new MessageBundleParser(/* parameters */);
-	
-	}
+  /**
+   * Prepares the environment before running a test.
+   */
+  protected function setUp() {
+    parent::setUp();
+    
+    $this->MessageBundleParser = new MessageBundleParser(/* parameters */);
+  
+  }
 
-	/**
-	 * Cleans up the environment after running a test.
-	 */
-	protected function tearDown()
-	{
-		
-		$this->MessageBundleParser = null;
-		$this->MessageBundle = null;
-		
-		parent::tearDown();
-	}
+  /**
+   * Cleans up the environment after running a test.
+   */
+  protected function tearDown() {
+    
+    $this->MessageBundleParser = null;
+    $this->MessageBundle = null;
+    
+    parent::tearDown();
+  }
 
-	/**
-	 * Tests MessageBundleParser->parse()
-	 */
-	public function testParse()
-	{
-		
-		$xml = '<?xml version="1.0" encoding="UTF-8" ?>
+  /**
+   * Tests MessageBundleParser->parse()
+   */
+  public function testParse() {
+    
+    $xml = '<?xml version="1.0" encoding="UTF-8" ?>
 <doc>
 	<msg name="name1">Message 1</msg>
 	<msg name="name2">Message 2</msg>
 	<msg name="name3">Message 3</msg>
 	<msg name="name4">Message 4</msg>
 </doc>';
-		
-		$this->MessageBundle = $this->MessageBundleParser->parse($xml);
-		
-		$this->assertTrue($this->MessageBundle instanceof MessageBundle);
-	
-	}
+    
+    $this->MessageBundle = $this->MessageBundleParser->parse($xml);
+    
+    $this->assertTrue($this->MessageBundle instanceof MessageBundle);
+  
+  }
 
 }
 

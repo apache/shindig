@@ -61,11 +61,10 @@ PHPUnit_Util_Filter::addFileToFilter(__FILE__);
  * @link       http://www.phpunit.de/
  * @since      Class available since Release 2.0.0
  */
-class Error extends PHPUnit_Framework_TestCase
-{
-    public function runTest()
-    {
-        throw new Exception;
-    }
+class Error extends PHPUnit_Framework_TestCase {
+
+  public function runTest() {
+    throw new Exception();
+  }
 }
 ?>

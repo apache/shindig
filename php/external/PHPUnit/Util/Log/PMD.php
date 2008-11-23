@@ -72,269 +72,219 @@ PHPUnit_Util_Filter::addFileToFilter(__FILE__, 'PHPUNIT');
  * @link       http://www.phpunit.de/
  * @since      Class available since Release 3.2.0
  */
-class PHPUnit_Util_Log_PMD extends PHPUnit_Util_Printer
-{
-    protected $added;
+class PHPUnit_Util_Log_PMD extends PHPUnit_Util_Printer {
+  protected $added;
+  
+  protected $rules = array('project' => array(), 'file' => array(), 'class' => array(), 'function' => array());
 
-    protected $rules = array(
-      'project'  => array(),
-      'file'     => array(),
-      'class'    => array(),
-      'function' => array()
-    );
+  /**
+   * Constructor.
+   *
+   * @param  mixed $out
+   * @param  array $configuration
+   * @throws InvalidArgumentException
+   * @access public
+   */
+  public function __construct($out = NULL, array $configuration = array()) {
+    parent::__construct($out);
+    $this->loadClasses($configuration);
+  }
 
-    /**
-     * Constructor.
-     *
-     * @param  mixed $out
-     * @param  array $configuration
-     * @throws InvalidArgumentException
-     * @access public
-     */
-    public function __construct($out = NULL, array $configuration = array())
-    {
-        parent::__construct($out);
-        $this->loadClasses($configuration);
+  /**
+   * @param  PHPUnit_Framework_TestResult $result
+   * @access public
+   */
+  public function process(PHPUnit_Framework_TestResult $result) {
+    $codeCoverage = $result->getCodeCoverageInformation();
+    $summary = PHPUnit_Util_CodeCoverage::getSummary($codeCoverage);
+    $files = array_keys($summary);
+    $metrics = new PHPUnit_Util_Metrics_Project($files, $summary);
+    
+    $document = new DOMDocument('1.0', 'UTF-8');
+    $document->formatOutput = TRUE;
+    
+    $pmd = $document->createElement('pmd');
+    $pmd->setAttribute('version', 'PHPUnit ' . PHPUnit_Runner_Version::id());
+    $document->appendChild($pmd);
+    
+    foreach ($this->rules['project'] as $ruleName => $rule) {
+      $result = $rule->apply($metrics);
+      
+      if ($result !== NULL) {
+        $this->addViolation($result, $pmd, $rule);
+      }
     }
-
-    /**
-     * @param  PHPUnit_Framework_TestResult $result
-     * @access public
-     */
-    public function process(PHPUnit_Framework_TestResult $result)
-    {
-        $codeCoverage = $result->getCodeCoverageInformation();
-        $summary      = PHPUnit_Util_CodeCoverage::getSummary($codeCoverage);
-        $files        = array_keys($summary);
-        $metrics      = new PHPUnit_Util_Metrics_Project($files, $summary);
-
-        $document = new DOMDocument('1.0', 'UTF-8');
-        $document->formatOutput = TRUE;
-
-        $pmd = $document->createElement('pmd');
-        $pmd->setAttribute('version', 'PHPUnit ' . PHPUnit_Runner_Version::id());
-        $document->appendChild($pmd);
-
-        foreach ($this->rules['project'] as $ruleName => $rule) {
-            $result = $rule->apply($metrics);
-
+    
+    foreach ($metrics->getFiles() as $fileName => $fileMetrics) {
+      $xmlFile = $document->createElement('file');
+      $xmlFile->setAttribute('name', $fileName);
+      
+      $this->added = FALSE;
+      
+      foreach ($this->rules['file'] as $ruleName => $rule) {
+        $result = $rule->apply($fileMetrics);
+        
+        if ($result !== NULL) {
+          $this->addViolation($result, $xmlFile, $rule);
+          
+          $this->added = TRUE;
+        }
+      }
+      
+      foreach ($fileMetrics->getClasses() as $className => $classMetrics) {
+        if (! $classMetrics->getClass()->isInterface()) {
+          $classStartLine = $classMetrics->getClass()->getStartLine();
+          $classEndLine = $classMetrics->getClass()->getEndLine();
+          $classPackage = $classMetrics->getPackage();
+          
+          foreach ($this->rules['class'] as $ruleName => $rule) {
+            $result = $rule->apply($classMetrics);
+            
             if ($result !== NULL) {
-                $this->addViolation(
-                  $result,
-                  $pmd,
-                  $rule
-                );
+              $this->addViolation($result, $xmlFile, $rule, $classStartLine, $classEndLine, $classPackage, $className);
+              
+              $this->added = TRUE;
             }
+          }
+          
+          foreach ($classMetrics->getMethods() as $methodName => $methodMetrics) {
+            if (! $methodMetrics->getMethod()->isAbstract()) {
+              $this->processFunctionOrMethod($xmlFile, $methodMetrics, $classPackage);
+            }
+          }
         }
-
-        foreach ($metrics->getFiles() as $fileName => $fileMetrics) {
-            $xmlFile = $document->createElement('file');
-            $xmlFile->setAttribute('name', $fileName);
-
-            $this->added = FALSE;
-
-            foreach ($this->rules['file'] as $ruleName => $rule) {
-                $result = $rule->apply($fileMetrics);
-
-                if ($result !== NULL) {
-                    $this->addViolation(
-                      $result,
-                      $xmlFile,
-                      $rule
-                    );
-
-                    $this->added = TRUE;
-                }
-            }
-
-            foreach ($fileMetrics->getClasses() as $className => $classMetrics) {
-                if (!$classMetrics->getClass()->isInterface()) {
-                    $classStartLine = $classMetrics->getClass()->getStartLine();
-                    $classEndLine   = $classMetrics->getClass()->getEndLine();
-                    $classPackage   = $classMetrics->getPackage();
-
-                    foreach ($this->rules['class'] as $ruleName => $rule) {
-                        $result = $rule->apply($classMetrics);
-
-                        if ($result !== NULL) {
-                            $this->addViolation(
-                              $result,
-                              $xmlFile,
-                              $rule,
-                              $classStartLine,
-                              $classEndLine,
-                              $classPackage,
-                              $className
-                            );
-
-                            $this->added = TRUE;
-                        }
-                    }
-
-                    foreach ($classMetrics->getMethods() as $methodName => $methodMetrics) {
-                        if (!$methodMetrics->getMethod()->isAbstract()) {
-                            $this->processFunctionOrMethod($xmlFile, $methodMetrics, $classPackage);
-                        }
-                    }
-                }
-            }
-
-            foreach ($fileMetrics->getFunctions() as $functionName => $functionMetrics) {
-                $this->processFunctionOrMethod($xmlFile, $functionMetrics);
-            }
-
-            if ($this->added) {
-                $pmd->appendChild($xmlFile);
-            }
-        }
-
-        $this->write($document->saveXML());
-        $this->flush();
+      }
+      
+      foreach ($fileMetrics->getFunctions() as $functionName => $functionMetrics) {
+        $this->processFunctionOrMethod($xmlFile, $functionMetrics);
+      }
+      
+      if ($this->added) {
+        $pmd->appendChild($xmlFile);
+      }
     }
+    
+    $this->write($document->saveXML());
+    $this->flush();
+  }
 
-    /**
-     * @param  string                    $violation
-     * @param  DOMElement                $element
-     * @param  PHPUnit_Util_Log_PMD_Rule $rule
-     * @param  integer                   $line
-     * @param  integer                   $toLine
-     * @param  string                    $package
-     * @param  string                    $class
-     * @param  string                    $method
-     * @access public
-     */
-    protected function addViolation($violation, DOMElement $element, PHPUnit_Util_Log_PMD_Rule $rule, $line = '', $toLine = '', $package = '', $class = '', $method = '', $function = '')
-    {
-        $violationXml = $element->appendChild(
-          $element->ownerDocument->createElement('violation', $violation)
-        );
-
-        $violationXml->setAttribute('rule', $rule->getName());
-        $violationXml->setAttribute('priority', $rule->getPriority());
-
-        if (!empty($line)) {
-            $violationXml->setAttribute('line', $line);
-        }
-
-        if (!empty($toLine)) {
-            $violationXml->setAttribute('to-line', $toLine);
-        }
-
-        if (empty($package)) {
-            $package = 'global';
-        }
-
-        if (!empty($package)) {
-            $violationXml->setAttribute('package', $package);
-        }
-
-        if (!empty($class)) {
-            $violationXml->setAttribute('class', $class);
-        }
-
-        if (!empty($method)) {
-            $violationXml->setAttribute('method', $method);
-        }
-
-        if (!empty($function)) {
-            $violationXml->setAttribute('function', $function);
-        }
+  /**
+   * @param  string                    $violation
+   * @param  DOMElement                $element
+   * @param  PHPUnit_Util_Log_PMD_Rule $rule
+   * @param  integer                   $line
+   * @param  integer                   $toLine
+   * @param  string                    $package
+   * @param  string                    $class
+   * @param  string                    $method
+   * @access public
+   */
+  protected function addViolation($violation, DOMElement $element, PHPUnit_Util_Log_PMD_Rule $rule, $line = '', $toLine = '', $package = '', $class = '', $method = '', $function = '') {
+    $violationXml = $element->appendChild($element->ownerDocument->createElement('violation', $violation));
+    
+    $violationXml->setAttribute('rule', $rule->getName());
+    $violationXml->setAttribute('priority', $rule->getPriority());
+    
+    if (! empty($line)) {
+      $violationXml->setAttribute('line', $line);
     }
-
-    protected function processFunctionOrMethod(DOMElement $element, $metrics, $package = '')
-    {
-        $scope = '';
-
-        if ($metrics->getFunction() instanceof ReflectionMethod) {
-            $scope = $metrics->getFunction()->getDeclaringClass()->getName();
-        }
-
-        $startLine = $metrics->getFunction()->getStartLine();
-        $endLine   = $metrics->getFunction()->getEndLine();
-        $name      = $metrics->getFunction()->getName();
-
-        foreach ($this->rules['function'] as $ruleName => $rule) {
-            $result = $rule->apply($metrics);
-
-            if ($result !== NULL) {
-                $this->addViolation(
-                  $result,
-                  $element,
-                  $rule,
-                  $startLine,
-                  $endLine,
-                  $package,
-                  $scope,
-                  $name
-                );
-
-                $this->added = TRUE;
-            }
-        }
+    
+    if (! empty($toLine)) {
+      $violationXml->setAttribute('to-line', $toLine);
     }
-
-    protected function loadClasses(array $configuration)
-    {
-        $basedir = dirname(__FILE__) . DIRECTORY_SEPARATOR .
-                   'PMD' . DIRECTORY_SEPARATOR . 'Rule';
-
-        $dirs = array(
-          $basedir . DIRECTORY_SEPARATOR . 'Class',
-          $basedir . DIRECTORY_SEPARATOR . 'File',
-          $basedir . DIRECTORY_SEPARATOR . 'Function',
-          $basedir . DIRECTORY_SEPARATOR . 'Project'
-        );
-
-        foreach ($dirs as $dir) {
-            if (file_exists($dir)) {
-                $iterator = new PHPUnit_Util_FilterIterator(
-                  new RecursiveIteratorIterator(
-                    new RecursiveDirectoryIterator($dir)
-                  ),
-                  '.php'
-                );
-
-                foreach ($iterator as $file) {
-                    include_once $file->getPathname();
-                }
-            }
-        }
-
-        $classes = get_declared_classes();
-
-        foreach ($classes as $className) {
-            $class = new ReflectionClass($className);
-
-            if (!$class->isAbstract() && $class->isSubclassOf('PHPUnit_Util_Log_PMD_Rule')) {
-                $rule = explode('_', $className);
-                $rule = $rule[count($rule)-1];
-
-                if (isset($configuration[$className])) {
-                    $object = new $className(
-                      $configuration[$className]['threshold'],
-                      $configuration[$className]['priority']
-                    );
-                } else {
-                    $object = new $className;
-                }
-
-                if ($class->isSubclassOf('PHPUnit_Util_Log_PMD_Rule_Project')) {
-                    $this->rules['project'][$rule] = $object;
-                }
-
-                if ($class->isSubclassOf('PHPUnit_Util_Log_PMD_Rule_File')) {
-                    $this->rules['file'][$rule] = $object;
-                }
-
-                else if ($class->isSubclassOf('PHPUnit_Util_Log_PMD_Rule_Class')) {
-                    $this->rules['class'][$rule] = $object;
-                }
-
-                else if ($class->isSubclassOf('PHPUnit_Util_Log_PMD_Rule_Function')) {
-                    $this->rules['function'][$rule] = $object;
-                }
-            }
-        }
+    
+    if (empty($package)) {
+      $package = 'global';
     }
+    
+    if (! empty($package)) {
+      $violationXml->setAttribute('package', $package);
+    }
+    
+    if (! empty($class)) {
+      $violationXml->setAttribute('class', $class);
+    }
+    
+    if (! empty($method)) {
+      $violationXml->setAttribute('method', $method);
+    }
+    
+    if (! empty($function)) {
+      $violationXml->setAttribute('function', $function);
+    }
+  }
+
+  protected function processFunctionOrMethod(DOMElement $element, $metrics, $package = '') {
+    $scope = '';
+    
+    if ($metrics->getFunction() instanceof ReflectionMethod) {
+      $scope = $metrics->getFunction()->getDeclaringClass()->getName();
+    }
+    
+    $startLine = $metrics->getFunction()->getStartLine();
+    $endLine = $metrics->getFunction()->getEndLine();
+    $name = $metrics->getFunction()->getName();
+    
+    foreach ($this->rules['function'] as $ruleName => $rule) {
+      $result = $rule->apply($metrics);
+      
+      if ($result !== NULL) {
+        $this->addViolation($result, $element, $rule, $startLine, $endLine, $package, $scope, $name);
+        
+        $this->added = TRUE;
+      }
+    }
+  }
+
+  protected function loadClasses(array $configuration) {
+    $basedir = dirname(__FILE__) . DIRECTORY_SEPARATOR . 'PMD' . DIRECTORY_SEPARATOR . 'Rule';
+    
+    $dirs = array($basedir . DIRECTORY_SEPARATOR . 'Class', $basedir . DIRECTORY_SEPARATOR . 'File', 
+        $basedir . DIRECTORY_SEPARATOR . 'Function', 
+        $basedir . DIRECTORY_SEPARATOR . 'Project');
+    
+    foreach ($dirs as $dir) {
+      if (file_exists($dir)) {
+        $iterator = new PHPUnit_Util_FilterIterator(new RecursiveIteratorIterator(new RecursiveDirectoryIterator($dir)), '.php');
+        
+        foreach ($iterator as $file) {
+          include_once $file->getPathname();
+        }
+      }
+    }
+    
+    $classes = get_declared_classes();
+    
+    foreach ($classes as $className) {
+      $class = new ReflectionClass($className);
+      
+      if (! $class->isAbstract() && $class->isSubclassOf('PHPUnit_Util_Log_PMD_Rule')) {
+        $rule = explode('_', $className);
+        $rule = $rule[count($rule) - 1];
+        
+        if (isset($configuration[$className])) {
+          $object = new $className($configuration[$className]['threshold'], $configuration[$className]['priority']);
+        } else {
+          $object = new $className();
+        }
+        
+        if ($class->isSubclassOf('PHPUnit_Util_Log_PMD_Rule_Project')) {
+          $this->rules['project'][$rule] = $object;
+        }
+        
+        if ($class->isSubclassOf('PHPUnit_Util_Log_PMD_Rule_File')) {
+          $this->rules['file'][$rule] = $object;
+        } 
+
+        else if ($class->isSubclassOf('PHPUnit_Util_Log_PMD_Rule_Class')) {
+          $this->rules['class'][$rule] = $object;
+        } 
+
+        else if ($class->isSubclassOf('PHPUnit_Util_Log_PMD_Rule_Function')) {
+          $this->rules['function'][$rule] = $object;
+        }
+      }
+    }
+  }
 }
 ?>

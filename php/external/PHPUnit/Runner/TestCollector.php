@@ -61,12 +61,12 @@ PHPUnit_Util_Filter::addFileToFilter(__FILE__, 'PHPUNIT');
  * @link       http://www.phpunit.de/
  * @since      Interface available since Release 2.0.0
  */
-interface PHPUnit_Runner_TestCollector
-{
-    /**
-     * @return array
-     * @access public
-     */
-    public function collectTests();
+interface PHPUnit_Runner_TestCollector {
+
+  /**
+   * @return array
+   * @access public
+   */
+  public function collectTests();
 }
 ?>

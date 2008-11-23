@@ -60,11 +60,10 @@ PHPUnit_Util_Filter::addFileToFilter(__FILE__);
  * @link       http://www.phpunit.de/
  * @since      Class available since Release 2.0.0
  */
-class NonStatic
-{
-    public function suite()
-    {
-        return NULL;
-    }
+class NonStatic {
+
+  public function suite() {
+    return NULL;
+  }
 }
 ?>

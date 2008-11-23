@@ -73,82 +73,74 @@ PHPUnit_Util_Filter::addFileToFilter(__FILE__, 'PHPUNIT');
  * @link       http://www.phpunit.de/
  * @since      Class available since Release 3.0.0
  */
-class PHPUnit_Framework_MockObject_InvocationMocker implements PHPUnit_Framework_MockObject_Stub_MatcherCollection, PHPUnit_Framework_MockObject_Invokable, PHPUnit_Framework_MockObject_Builder_Namespace
-{
-    protected $matchers = array();
+class PHPUnit_Framework_MockObject_InvocationMocker implements PHPUnit_Framework_MockObject_Stub_MatcherCollection, PHPUnit_Framework_MockObject_Invokable, PHPUnit_Framework_MockObject_Builder_Namespace {
+  protected $matchers = array();
+  
+  protected $builderMap = array();
 
-    protected $builderMap = array();
+  public function addMatcher(PHPUnit_Framework_MockObject_Matcher_Invocation $matcher) {
+    $this->matchers[] = $matcher;
+  }
 
-    public function addMatcher(PHPUnit_Framework_MockObject_Matcher_Invocation $matcher)
-    {
-        $this->matchers[] = $matcher;
+  public function lookupId($id) {
+    if (isset($this->builderMap[$id])) {
+      return $this->builderMap[$id];
     }
+    
+    return NULL;
+  }
 
-    public function lookupId($id)
-    {
-        if (isset($this->builderMap[$id])) {
-            return $this->builderMap[$id];
+  public function registerId($id, PHPUnit_Framework_MockObject_Builder_Match $builder) {
+    if (isset($this->builderMap[$id])) {
+      throw new RuntimeException("Match builder with id <{$id}> is already registered.");
+    }
+    
+    $this->builderMap[$id] = $builder;
+  }
+
+  public function expects(PHPUnit_Framework_MockObject_Matcher_Invocation $matcher) {
+    $builder = new PHPUnit_Framework_MockObject_Builder_InvocationMocker($this, $matcher);
+    
+    return $builder;
+  }
+
+  public function invoke(PHPUnit_Framework_MockObject_Invocation $invocation) {
+    $hasReturnValue = FALSE;
+    
+    if (strtolower($invocation->methodName) == '__tostring') {
+      $returnValue = '';
+    } else {
+      $returnValue = NULL;
+    }
+    
+    foreach ($this->matchers as $match) {
+      if ($match->matches($invocation)) {
+        $value = $match->invoked($invocation);
+        
+        if (! $hasReturnValue) {
+          $returnValue = $value;
+          $hasReturnValue = TRUE;
         }
-
-        return NULL;
+      }
     }
+    
+    return $returnValue;
+  }
 
-    public function registerId($id, PHPUnit_Framework_MockObject_Builder_Match $builder)
-    {
-        if (isset($this->builderMap[$id])) {
-            throw new RuntimeException("Match builder with id <{$id}> is already registered.");
-        }
-
-        $this->builderMap[$id] = $builder;
+  public function matches(PHPUnit_Framework_MockObject_Invocation $invocation) {
+    foreach ($this->matchers as $matcher) {
+      if (! $matcher->matches($invocation)) {
+        return FALSE;
+      }
     }
+    
+    return TRUE;
+  }
 
-    public function expects(PHPUnit_Framework_MockObject_Matcher_Invocation $matcher)
-    {
-        $builder = new PHPUnit_Framework_MockObject_Builder_InvocationMocker($this, $matcher);
-
-        return $builder;
+  public function verify() {
+    foreach ($this->matchers as $matcher) {
+      $matcher->verify();
     }
-
-    public function invoke(PHPUnit_Framework_MockObject_Invocation $invocation)
-    {
-        $hasReturnValue = FALSE;
-
-        if (strtolower($invocation->methodName) == '__tostring') {
-            $returnValue = '';
-        } else {
-            $returnValue = NULL;
-        }
-
-        foreach($this->matchers as $match) {
-            if ($match->matches($invocation)) {
-                $value = $match->invoked($invocation);
-
-                if (!$hasReturnValue) {
-                    $returnValue    = $value;
-                    $hasReturnValue = TRUE;
-                }
-            }
-        }
-
-        return $returnValue;
-    }
-
-    public function matches(PHPUnit_Framework_MockObject_Invocation $invocation)
-    {
-        foreach($this->matchers as $matcher) {
-            if (!$matcher->matches($invocation)) {
-                return FALSE;
-            }
-        }
-
-        return TRUE;
-    }
-
-    public function verify()
-    {
-        foreach($this->matchers as $matcher) {
-            $matcher->verify();
-        }
-    }
+  }
 }
 ?>

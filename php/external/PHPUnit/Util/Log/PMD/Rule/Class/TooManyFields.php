@@ -61,28 +61,18 @@ PHPUnit_Util_Filter::addFileToFilter(__FILE__, 'PHPUNIT');
  * @link       http://www.phpunit.de/
  * @since      Class available since Release 3.2.0
  */
-class PHPUnit_Util_Log_PMD_Rule_Class_TooManyFields extends PHPUnit_Util_Log_PMD_Rule_Class
-{
-    public function __construct($threshold = 15, $priority = 1)
-    {
-        parent::__construct($threshold);
-    }
+class PHPUnit_Util_Log_PMD_Rule_Class_TooManyFields extends PHPUnit_Util_Log_PMD_Rule_Class {
 
-    public function apply(PHPUnit_Util_Metrics $metrics)
-    {
-        $varsNp = $metrics->getVARSnp();
+  public function __construct($threshold = 15, $priority = 1) {
+    parent::__construct($threshold);
+  }
 
-        if ($varsNp > $this->threshold) {
-            return sprintf(
-              "Class has %d public fields.\n" .
-              'Classes that have too many fields could be redesigned ' .
-              'to have fewer fields, possibly through some nested ' .
-              'object grouping of some of the information. For ' .
-              'example, a class with city/state/zip fields could ' .
-              'instead have one Address field.',
-              $varsNp
-            );
-        }
+  public function apply(PHPUnit_Util_Metrics $metrics) {
+    $varsNp = $metrics->getVARSnp();
+    
+    if ($varsNp > $this->threshold) {
+      return sprintf("Class has %d public fields.\n" . 'Classes that have too many fields could be redesigned ' . 'to have fewer fields, possibly through some nested ' . 'object grouping of some of the information. For ' . 'example, a class with city/state/zip fields could ' . 'instead have one Address field.', $varsNp);
     }
+  }
 }
 ?>

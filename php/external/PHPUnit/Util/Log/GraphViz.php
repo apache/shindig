@@ -67,243 +67,207 @@ PHPUnit_Util_Filter::addFileToFilter(__FILE__, 'PHPUNIT');
  * @link       http://www.phpunit.de/
  * @since      Class available since Release 3.0.0
  */
-class PHPUnit_Util_Log_GraphViz extends PHPUnit_Util_Printer implements PHPUnit_Framework_TestListener
-{
-    /**
-     * @var    Image_GraphViz
-     * @access protected
-     */
-    protected $graph;
+class PHPUnit_Util_Log_GraphViz extends PHPUnit_Util_Printer implements PHPUnit_Framework_TestListener {
+  /**
+   * @var    Image_GraphViz
+   * @access protected
+   */
+  protected $graph;
+  
+  /**
+   * @var    boolean
+   * @access protected
+   */
+  protected $currentTestSuccess = TRUE;
+  
+  /**
+   * @var    string[]
+   * @access protected
+   */
+  protected $testSuites = array();
+  
+  /**
+   * @var    integer
+   * @access protected
+   */
+  protected $testSuiteLevel = 0;
+  
+  /**
+   * @var    integer[]
+   * @access protected
+   */
+  protected $testSuiteFailureOrErrorCount = array(0);
+  
+  /**
+   * @var    integer[]
+   * @access protected
+   */
+  protected $testSuiteIncompleteOrSkippedCount = array(0);
 
-    /**
-     * @var    boolean
-     * @access protected
-     */
-    protected $currentTestSuccess = TRUE;
+  /**
+   * Constructor.
+   *
+   * @param  mixed $out
+   * @access public
+   */
+  public function __construct($out = NULL) {
+    $this->graph = new Image_GraphViz(TRUE, array('overlap' => 'scale', 'splines' => 'true', 
+        'sep' => '.1', 'fontsize' => '8'));
+    
+    parent::__construct($out);
+  }
 
-    /**
-     * @var    string[]
-     * @access protected
-     */
-    protected $testSuites = array();
+  /**
+   * Flush buffer and close output.
+   *
+   * @access public
+   */
+  public function flush() {
+    $this->write($this->graph->parse());
+    
+    parent::flush();
+  }
 
-    /**
-     * @var    integer
-     * @access protected
-     */
-    protected $testSuiteLevel = 0;
+  /**
+   * An error occurred.
+   *
+   * @param  PHPUnit_Framework_Test $test
+   * @param  Exception              $e
+   * @param  float                  $time
+   * @access public
+   */
+  public function addError(PHPUnit_Framework_Test $test, Exception $e, $time) {
+    $this->addTestNode($test, 'red');
+    $this->testSuiteFailureOrErrorCount[$this->testSuiteLevel] ++;
+    
+    $this->currentTestSuccess = FALSE;
+  }
 
-    /**
-     * @var    integer[]
-     * @access protected
-     */
-    protected $testSuiteFailureOrErrorCount = array(0);
+  /**
+   * A failure occurred.
+   *
+   * @param  PHPUnit_Framework_Test                 $test
+   * @param  PHPUnit_Framework_AssertionFailedError $e
+   * @param  float                                  $time
+   * @access public
+   */
+  public function addFailure(PHPUnit_Framework_Test $test, PHPUnit_Framework_AssertionFailedError $e, $time) {
+    $this->addTestNode($test, 'red');
+    $this->testSuiteFailureOrErrorCount[$this->testSuiteLevel] ++;
+    
+    $this->currentTestSuccess = FALSE;
+  }
 
-    /**
-     * @var    integer[]
-     * @access protected
-     */
-    protected $testSuiteIncompleteOrSkippedCount = array(0);
+  /**
+   * Incomplete test.
+   *
+   * @param  PHPUnit_Framework_Test $test
+   * @param  Exception              $e
+   * @param  float                  $time
+   * @access public
+   */
+  public function addIncompleteTest(PHPUnit_Framework_Test $test, Exception $e, $time) {
+    $this->addTestNode($test, 'yellow');
+    $this->testSuiteIncompleteOrSkippedCount[$this->testSuiteLevel] ++;
+    
+    $this->currentTestSuccess = FALSE;
+  }
 
-    /**
-     * Constructor.
-     *
-     * @param  mixed $out
-     * @access public
-     */
-    public function __construct($out = NULL)
-    {
-        $this->graph = new Image_GraphViz(
-          TRUE,
-          array(
-            'overlap'  => 'scale',
-            'splines'  => 'true',
-            'sep'      => '.1',
-            'fontsize' => '8'
-          )
-        );
+  /**
+   * Skipped test.
+   *
+   * @param  PHPUnit_Framework_Test $test
+   * @param  Exception              $e
+   * @param  float                  $time
+   * @access public
+   */
+  public function addSkippedTest(PHPUnit_Framework_Test $test, Exception $e, $time) {
+    $this->addTestNode($test, 'yellow');
+    $this->testSuiteIncompleteOrSkippedCount[$this->testSuiteLevel] ++;
+    
+    $this->currentTestSuccess = FALSE;
+  }
 
-        parent::__construct($out);
+  /**
+   * A testsuite started.
+   *
+   * @param  PHPUnit_Framework_TestSuite $suite
+   * @access public
+   */
+  public function startTestSuite(PHPUnit_Framework_TestSuite $suite) {
+    $this->graph->addNode($suite->getName());
+    
+    if ($this->testSuiteLevel > 0) {
+      $this->graph->addEdge(array($this->testSuites[$this->testSuiteLevel] => $suite->getName()));
     }
+    
+    $this->testSuiteLevel ++;
+    $this->testSuites[$this->testSuiteLevel] = $suite->getName();
+    $this->testSuiteFailureOrErrorCount[$this->testSuiteLevel] = 0;
+    $this->testSuiteIncompleteOrSkippedCount[$this->testSuiteLevel] = 0;
+  }
 
-    /**
-     * Flush buffer and close output.
-     *
-     * @access public
-     */
-    public function flush()
-    {
-        $this->write($this->graph->parse());
+  /**
+   * A testsuite ended.
+   *
+   * @param  PHPUnit_Framework_TestSuite $suite
+   * @access public
+   */
+  public function endTestSuite(PHPUnit_Framework_TestSuite $suite) {
+    $color = 'red';
+    
+    if ($this->testSuiteFailureOrErrorCount[$this->testSuiteLevel] == 0 && $this->testSuiteIncompleteOrSkippedCount[$this->testSuiteLevel] == 0) {
+      $color = 'green';
+    } 
 
-        parent::flush();
+    else if ($this->testSuiteFailureOrErrorCount[$this->testSuiteLevel] == 0 && $this->testSuiteIncompleteOrSkippedCount[$this->testSuiteLevel] > 0) {
+      $color = 'yellow';
     }
-
-    /**
-     * An error occurred.
-     *
-     * @param  PHPUnit_Framework_Test $test
-     * @param  Exception              $e
-     * @param  float                  $time
-     * @access public
-     */
-    public function addError(PHPUnit_Framework_Test $test, Exception $e, $time)
-    {
-        $this->addTestNode($test, 'red');
-        $this->testSuiteFailureOrErrorCount[$this->testSuiteLevel]++;
-
-        $this->currentTestSuccess = FALSE;
+    
+    $this->graph->addNode($this->testSuites[$this->testSuiteLevel], array('color' => $color));
+    
+    if ($this->testSuiteLevel > 1) {
+      $this->testSuiteFailureOrErrorCount[$this->testSuiteLevel - 1] += $this->testSuiteFailureOrErrorCount[$this->testSuiteLevel];
+      $this->testSuiteIncompleteOrSkippedCount[$this->testSuiteLevel - 1] += $this->testSuiteIncompleteOrSkippedCount[$this->testSuiteLevel];
     }
+    
+    $this->testSuiteLevel --;
+  }
 
-    /**
-     * A failure occurred.
-     *
-     * @param  PHPUnit_Framework_Test                 $test
-     * @param  PHPUnit_Framework_AssertionFailedError $e
-     * @param  float                                  $time
-     * @access public
-     */
-    public function addFailure(PHPUnit_Framework_Test $test, PHPUnit_Framework_AssertionFailedError $e, $time)
-    {
-        $this->addTestNode($test, 'red');
-        $this->testSuiteFailureOrErrorCount[$this->testSuiteLevel]++;
+  /**
+   * A test started.
+   *
+   * @param  PHPUnit_Framework_Test $test
+   * @access public
+   */
+  public function startTest(PHPUnit_Framework_Test $test) {
+    $this->currentTestSuccess = TRUE;
+  }
 
-        $this->currentTestSuccess = FALSE;
+  /**
+   * A test ended.
+   *
+   * @param  PHPUnit_Framework_Test $test
+   * @param  float                  $time
+   * @access public
+   */
+  public function endTest(PHPUnit_Framework_Test $test, $time) {
+    if ($this->currentTestSuccess) {
+      $this->addTestNode($test, 'green');
     }
+  }
 
-    /**
-     * Incomplete test.
-     *
-     * @param  PHPUnit_Framework_Test $test
-     * @param  Exception              $e
-     * @param  float                  $time
-     * @access public
-     */
-    public function addIncompleteTest(PHPUnit_Framework_Test $test, Exception $e, $time)
-    {
-        $this->addTestNode($test, 'yellow');
-        $this->testSuiteIncompleteOrSkippedCount[$this->testSuiteLevel]++;
-
-        $this->currentTestSuccess = FALSE;
-    }
-
-    /**
-     * Skipped test.
-     *
-     * @param  PHPUnit_Framework_Test $test
-     * @param  Exception              $e
-     * @param  float                  $time
-     * @access public
-     */
-    public function addSkippedTest(PHPUnit_Framework_Test $test, Exception $e, $time)
-    {
-        $this->addTestNode($test, 'yellow');
-        $this->testSuiteIncompleteOrSkippedCount[$this->testSuiteLevel]++;
-
-        $this->currentTestSuccess = FALSE;
-    }
-
-    /**
-     * A testsuite started.
-     *
-     * @param  PHPUnit_Framework_TestSuite $suite
-     * @access public
-     */
-    public function startTestSuite(PHPUnit_Framework_TestSuite $suite)
-    {
-        $this->graph->addNode($suite->getName());
-
-        if ($this->testSuiteLevel > 0) {
-            $this->graph->addEdge(
-              array(
-                $this->testSuites[$this->testSuiteLevel] => $suite->getName()
-              )
-            );
-        }
-
-        $this->testSuiteLevel++;
-        $this->testSuites[$this->testSuiteLevel]                        = $suite->getName();
-        $this->testSuiteFailureOrErrorCount[$this->testSuiteLevel]      = 0;
-        $this->testSuiteIncompleteOrSkippedCount[$this->testSuiteLevel] = 0;
-    }
-
-    /**
-     * A testsuite ended.
-     *
-     * @param  PHPUnit_Framework_TestSuite $suite
-     * @access public
-     */
-    public function endTestSuite(PHPUnit_Framework_TestSuite $suite)
-    {
-        $color = 'red';
-
-        if ($this->testSuiteFailureOrErrorCount[$this->testSuiteLevel] == 0 &&
-            $this->testSuiteIncompleteOrSkippedCount[$this->testSuiteLevel] == 0) {
-            $color = 'green';
-        }
-
-        else if ($this->testSuiteFailureOrErrorCount[$this->testSuiteLevel] == 0 &&
-                 $this->testSuiteIncompleteOrSkippedCount[$this->testSuiteLevel] > 0) {
-            $color = 'yellow';
-        }
-
-        $this->graph->addNode(
-          $this->testSuites[$this->testSuiteLevel],
-          array('color' => $color)
-        );
-
-        if ($this->testSuiteLevel > 1) {
-            $this->testSuiteFailureOrErrorCount[$this->testSuiteLevel - 1]      += $this->testSuiteFailureOrErrorCount[$this->testSuiteLevel];
-            $this->testSuiteIncompleteOrSkippedCount[$this->testSuiteLevel - 1] += $this->testSuiteIncompleteOrSkippedCount[$this->testSuiteLevel];
-        }
-
-        $this->testSuiteLevel--;
-    }
-
-    /**
-     * A test started.
-     *
-     * @param  PHPUnit_Framework_Test $test
-     * @access public
-     */
-    public function startTest(PHPUnit_Framework_Test $test)
-    {
-        $this->currentTestSuccess = TRUE;
-    }
-
-    /**
-     * A test ended.
-     *
-     * @param  PHPUnit_Framework_Test $test
-     * @param  float                  $time
-     * @access public
-     */
-    public function endTest(PHPUnit_Framework_Test $test, $time)
-    {
-        if ($this->currentTestSuccess) {
-            $this->addTestNode($test, 'green');
-        }
-    }
-
-    /**
-     * @param  PHPUnit_Framework_Test $test
-     * @param  string                  $color
-     * @access protected
-     */
-    protected function addTestNode(PHPUnit_Framework_Test $test, $color)
-    {
-        $name = PHPUnit_Util_Test::describe($test, FALSE);
-
-        $this->graph->addNode(
-          $name[1],
-          array('color' => $color),
-          $this->testSuites[$this->testSuiteLevel]
-        );
-
-        $this->graph->addEdge(
-          array(
-            $this->testSuites[$this->testSuiteLevel] => $name[1]
-          )
-        );
-    }
+  /**
+   * @param  PHPUnit_Framework_Test $test
+   * @param  string                  $color
+   * @access protected
+   */
+  protected function addTestNode(PHPUnit_Framework_Test $test, $color) {
+    $name = PHPUnit_Util_Test::describe($test, FALSE);
+    
+    $this->graph->addNode($name[1], array('color' => $color), $this->testSuites[$this->testSuiteLevel]);
+    
+    $this->graph->addEdge(array($this->testSuites[$this->testSuiteLevel] => $name[1]));
+  }
 }
 ?>

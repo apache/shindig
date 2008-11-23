@@ -63,60 +63,49 @@ PHPUnit_Util_Filter::addFileToFilter(__FILE__, 'PHPUNIT');
  * @link       http://www.phpunit.de/
  * @since      Class available since Release 2.1.0
  */
-abstract class PHPUnit_Extensions_PerformanceTestCase extends PHPUnit_Framework_TestCase
-{
-    /**
-     * @var    integer
-     * @access protected
-     */
-    protected $maxRunningTime = 0;
+abstract class PHPUnit_Extensions_PerformanceTestCase extends PHPUnit_Framework_TestCase {
+  /**
+   * @var    integer
+   * @access protected
+   */
+  protected $maxRunningTime = 0;
 
-    /**
-     * @access protected
-     */
-    protected function runTest()
-    {
-        PHPUnit_Util_Timer::start();
-        parent::runTest();
-        $time = PHPUnit_Util_Timer::stop();
+  /**
+   * @access protected
+   */
+  protected function runTest() {
+    PHPUnit_Util_Timer::start();
+    parent::runTest();
+    $time = PHPUnit_Util_Timer::stop();
+    
+    if ($this->maxRunningTime != 0 && $time > $this->maxRunningTime) {
+      $this->fail(sprintf('expected running time: <= %s but was: %s', 
 
-        if ($this->maxRunningTime != 0 &&
-            $time > $this->maxRunningTime) {
-            $this->fail(
-              sprintf(
-                'expected running time: <= %s but was: %s',
-
-                $this->maxRunningTime,
-                $time
-              )
-            );
-        }
+      $this->maxRunningTime, $time));
     }
+  }
 
-    /**
-     * @param  integer $maxRunningTime
-     * @throws InvalidArgumentException
-     * @access public
-     * @since  Method available since Release 2.3.0
-     */
-    public function setMaxRunningTime($maxRunningTime)
-    {
-        if (is_integer($maxRunningTime) &&
-            $maxRunningTime >= 0) {
-            $this->maxRunningTime = $maxRunningTime;
-        } else {
-            throw new InvalidArgumentException;
-        }
+  /**
+   * @param  integer $maxRunningTime
+   * @throws InvalidArgumentException
+   * @access public
+   * @since  Method available since Release 2.3.0
+   */
+  public function setMaxRunningTime($maxRunningTime) {
+    if (is_integer($maxRunningTime) && $maxRunningTime >= 0) {
+      $this->maxRunningTime = $maxRunningTime;
+    } else {
+      throw new InvalidArgumentException();
     }
+  }
 
-    /**
-     * @return integer
-     * @access public
-     * @since  Method available since Release 2.3.0
-     */
-    public function getMaxRunningTime()
-    {
-        return $this->maxRunningTime;
-    }
+  /**
+   * @return integer
+   * @access public
+   * @since  Method available since Release 2.3.0
+   */
+  public function getMaxRunningTime() {
+    return $this->maxRunningTime;
+  }
 }
 ?>

@@ -61,7 +61,6 @@ PHPUnit_Util_Filter::addFileToFilter(__FILE__, 'PHPUNIT');
  * @link       http://www.phpunit.de/
  * @since      Class available since Release 3.2.0
  */
-abstract class PHPUnit_Util_Log_PMD_Rule_File extends PHPUnit_Util_Log_PMD_Rule
-{
+abstract class PHPUnit_Util_Log_PMD_Rule_File extends PHPUnit_Util_Log_PMD_Rule {
 }
 ?>

@@ -63,62 +63,57 @@ PHPUnit_Util_Filter::addFileToFilter(__FILE__, 'PHPUNIT');
  * @link       http://www.phpunit.de/
  * @since      Class available since Release 3.2.0
  */
-class PHPUnit_Extensions_Database_DataSet_DefaultTable extends PHPUnit_Extensions_Database_DataSet_AbstractTable
-{
+class PHPUnit_Extensions_Database_DataSet_DefaultTable extends PHPUnit_Extensions_Database_DataSet_AbstractTable {
 
-    /**
-     * Creates a new table object using the given $tableMetaData
-     *
-     * @param PHPUnit_Extensions_Database_DataSet_ITableMetaData $tableMetaData
-     */
-    public function __construct(PHPUnit_Extensions_Database_DataSet_ITableMetaData $tableMetaData)
-    {
-        $this->setTableMetaData($tableMetaData);
-        $this->data = array();
-    }
+  /**
+   * Creates a new table object using the given $tableMetaData
+   *
+   * @param PHPUnit_Extensions_Database_DataSet_ITableMetaData $tableMetaData
+   */
+  public function __construct(PHPUnit_Extensions_Database_DataSet_ITableMetaData $tableMetaData) {
+    $this->setTableMetaData($tableMetaData);
+    $this->data = array();
+  }
 
-    /**
-     * Adds a row to the table with optional values.
-     *
-     * @param array $values
-     */
-    public function addRow($values = array())
-    {
-        $columnNames = $this->getTableMetaData()->getColumns();
-        $this->data[] = array_merge(array_fill_keys($columnNames, null), $values);
-    }
+  /**
+   * Adds a row to the table with optional values.
+   *
+   * @param array $values
+   */
+  public function addRow($values = array()) {
+    $columnNames = $this->getTableMetaData()->getColumns();
+    $this->data[] = array_merge(array_fill_keys($columnNames, null), $values);
+  }
 
-    /**
-     * Adds the rows in the passed table to the current table.
-     *
-     * @param PHPUnit_Extensions_Database_DataSet_ITable $table
-     */
-    public function addTableRows(PHPUnit_Extensions_Database_DataSet_ITable $table)
-    {
-        $tableColumns = $this->getTableMetaData()->getColumns();
-        for ($i = 0; $i < $table->getRowCount(); $i++) {
-            $newRow = array();
-            foreach ($tableColumns as $columnName) {
-                $newRow[$columnName] = $table->getValue($i, $columnName);
-            }
-            $this->addRow($newRow);
-        }
+  /**
+   * Adds the rows in the passed table to the current table.
+   *
+   * @param PHPUnit_Extensions_Database_DataSet_ITable $table
+   */
+  public function addTableRows(PHPUnit_Extensions_Database_DataSet_ITable $table) {
+    $tableColumns = $this->getTableMetaData()->getColumns();
+    for ($i = 0; $i < $table->getRowCount(); $i ++) {
+      $newRow = array();
+      foreach ($tableColumns as $columnName) {
+        $newRow[$columnName] = $table->getValue($i, $columnName);
+      }
+      $this->addRow($newRow);
     }
+  }
 
-    /**
-     * Sets the specified column of the specied row to the specified value.
-     *
-     * @param int $row
-     * @param string $column
-     * @param mixed $value
-     */
-    public function setValue($row, $column, $value)
-    {
-        if (isset($this->data[$row])) {
-            $this->data[$row][$column] = $value;
-        } else {
-            throw new InvalidArgumentException("The row given does not exist.");
-        }
+  /**
+   * Sets the specified column of the specied row to the specified value.
+   *
+   * @param int $row
+   * @param string $column
+   * @param mixed $value
+   */
+  public function setValue($row, $column, $value) {
+    if (isset($this->data[$row])) {
+      $this->data[$row][$column] = $value;
+    } else {
+      throw new InvalidArgumentException("The row given does not exist.");
     }
+  }
 }
 ?>

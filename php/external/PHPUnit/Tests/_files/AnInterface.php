@@ -60,8 +60,8 @@ PHPUnit_Util_Filter::addFileToFilter(__FILE__);
  * @link       http://www.phpunit.de/
  * @since      Class available since Release 3.0.0
  */
-interface AnInterface
-{
-    public function doSomething();
+interface AnInterface {
+
+  public function doSomething();
 }
 ?>

@@ -60,47 +60,36 @@ PHPUnit_Util_Filter::addFileToFilter(__FILE__, 'PHPUNIT');
  * @link       http://www.phpunit.de/
  * @since      Class available since Release 3.2.0
  */
-class PHPUnit_Util_XML
-{
-    public static function load($filename, $html = FALSE)
-    {
-        $document = new DOMDocument;
+class PHPUnit_Util_XML {
 
-        if (is_readable($filename)) {
-            libxml_use_internal_errors(TRUE);
-
-            if (!$html) {
-                $loaded = @$document->load($filename);
-            } else {
-                $loaded = @$document->loadHTMLFile($filename);
-            }
-
-            if ($loaded === FALSE) {
-                $message = '';
-
-                foreach (libxml_get_errors() as $error) {
-                    $message .= $error->message;
-                }
-
-                throw new RuntimeException(
-                  sprintf(
-                    'Could not load "%s".%s',
-
-                    $filename,
-                    $message != '' ? "\n" . $message : ''
-                  )
-                );
-            }
-        } else {
-            throw new RuntimeException(
-              sprintf(
-                'Could not read "%s".',
-                $filename
-              )
-            );
+  public static function load($filename, $html = FALSE) {
+    $document = new DOMDocument();
+    
+    if (is_readable($filename)) {
+      libxml_use_internal_errors(TRUE);
+      
+      if (! $html) {
+        $loaded = @$document->load($filename);
+      } else {
+        $loaded = @$document->loadHTMLFile($filename);
+      }
+      
+      if ($loaded === FALSE) {
+        $message = '';
+        
+        foreach (libxml_get_errors() as $error) {
+          $message .= $error->message;
         }
+        
+        throw new RuntimeException(sprintf('Could not load "%s".%s', 
 
-        return $document;
+        $filename, $message != '' ? "\n" . $message : ''));
+      }
+    } else {
+      throw new RuntimeException(sprintf('Could not read "%s".', $filename));
     }
+    
+    return $document;
+  }
 }
 ?>

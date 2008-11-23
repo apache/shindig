@@ -59,15 +59,22 @@ require_once 'MoneyBag.php';
  * @link       http://www.phpunit.de/
  * @since      Class available since Release 2.3.0
  */
-interface IMoney
-{
-    public function add(IMoney $m);
-    public function addMoney(Money $m);
-    public function addMoneyBag(MoneyBag $s);
-    public function isZero();
-    public function multiply($factor);
-    public function negate();
-    public function subtract(IMoney $m);
-    public function appendTo(MoneyBag $m);
+interface IMoney {
+
+  public function add(IMoney $m);
+
+  public function addMoney(Money $m);
+
+  public function addMoneyBag(MoneyBag $s);
+
+  public function isZero();
+
+  public function multiply($factor);
+
+  public function negate();
+
+  public function subtract(IMoney $m);
+
+  public function appendTo(MoneyBag $m);
 }
 ?>

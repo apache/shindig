@@ -62,30 +62,26 @@ require_once 'PHPUnit/Extensions/OutputTestCase.php';
  * @link       http://www.phpunit.de/
  * @since      Class available since Release 2.0.0
  */
-class OutputTestCase extends PHPUnit_Extensions_OutputTestCase
-{
-    public function testExpectOutputStringFooActualFoo()
-    {
-        $this->expectOutputString('foo');
-        print 'foo';
-    }
+class OutputTestCase extends PHPUnit_Extensions_OutputTestCase {
 
-    public function testExpectOutputStringFooActualBar()
-    {
-        $this->expectOutputString('foo');
-        print 'bar';
-    }
+  public function testExpectOutputStringFooActualFoo() {
+    $this->expectOutputString('foo');
+    print 'foo';
+  }
 
-    public function testExpectOutputRegexFooActualFoo()
-    {
-        $this->expectOutputRegex('/foo/');
-        print 'foo';
-    }
+  public function testExpectOutputStringFooActualBar() {
+    $this->expectOutputString('foo');
+    print 'bar';
+  }
 
-    public function testExpectOutputRegexFooActualBar()
-    {
-        $this->expectOutputRegex('/foo/');
-        print 'bar';
-    }
+  public function testExpectOutputRegexFooActualFoo() {
+    $this->expectOutputRegex('/foo/');
+    print 'foo';
+  }
+
+  public function testExpectOutputRegexFooActualBar() {
+    $this->expectOutputRegex('/foo/');
+    print 'bar';
+  }
 }
 ?>

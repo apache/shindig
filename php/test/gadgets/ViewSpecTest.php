@@ -1,5 +1,5 @@
 <?php
-/*
+/**
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -22,16 +22,16 @@
  * ViewSpec test case.
  */
 class ViewSpecTest extends PHPUnit_Framework_TestCase {
-	
-	/**
-	 * @var ViewSpec
-	 */
-	private $ViewSpec;
-	
-	/**
-	 * @var GadgetXML
-	 */
-	private $GadgetXML = '<?xml version="1.0" encoding="UTF-8" ?>
+  
+  /**
+   * @var ViewSpec
+   */
+  private $ViewSpec;
+  
+  /**
+   * @var GadgetXML
+   */
+  private $GadgetXML = '<?xml version="1.0" encoding="UTF-8" ?>
 <Module>
   <ModulePrefs title="Dummie gadget" />
     <Require feature="rpc">
@@ -42,37 +42,34 @@ class ViewSpecTest extends PHPUnit_Framework_TestCase {
 </Module>
 	';
 
-	/**
-	 * Prepares the environment before running a test.
-	 */
-	protected function setUp()
-	{
-		parent::setUp();
-	}
+  /**
+   * Prepares the environment before running a test.
+   */
+  protected function setUp() {
+    parent::setUp();
+  }
 
-	/**
-	 * Cleans up the environment after running a test.
-	 */
-	protected function tearDown()
-	{
-		parent::tearDown();
-	}
+  /**
+   * Cleans up the environment after running a test.
+   */
+  protected function tearDown() {
+    parent::tearDown();
+  }
 
-	/**
-	 * Tests ViewSpec->__construct()
-	 */
-	public function test__construct()
-	{
-		$doc = simplexml_load_string($this->GadgetXML, 'SimpleXMLElement', LIBXML_NOCDATA);
-		$content = $doc->Content[0];
-		$attributes = $content->attributes();
-		$view = isset($attributes['view']) ? trim($attributes['view']) : DEFAULT_VIEW;
-		$attributes['type'] = 'url';
-		
-		$this->setExpectedException('SpecParserException');
-		$this->ViewSpec = new ViewSpec($view, $content);
-	
-	}
+  /**
+   * Tests ViewSpec->__construct()
+   */
+  public function test__construct() {
+    $doc = simplexml_load_string($this->GadgetXML, 'SimpleXMLElement', LIBXML_NOCDATA);
+    $content = $doc->Content[0];
+    $attributes = $content->attributes();
+    $view = isset($attributes['view']) ? trim($attributes['view']) : DEFAULT_VIEW;
+    $attributes['type'] = 'url';
+    
+    $this->setExpectedException('SpecParserException');
+    $this->ViewSpec = new ViewSpec($view, $content);
+  
+  }
 
 }
 

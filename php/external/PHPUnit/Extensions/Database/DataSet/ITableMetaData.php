@@ -61,35 +61,34 @@ PHPUnit_Util_Filter::addFileToFilter(__FILE__, 'PHPUNIT');
  * @link       http://www.phpunit.de/
  * @since      Class available since Release 3.2.0
  */
-interface PHPUnit_Extensions_Database_DataSet_ITableMetaData
-{
+interface PHPUnit_Extensions_Database_DataSet_ITableMetaData {
 
-    /**
-     * Returns the names of the columns in the table.
-     *
-     * @return array
-     */
-    public function getColumns();
+  /**
+   * Returns the names of the columns in the table.
+   *
+   * @return array
+   */
+  public function getColumns();
 
-    /**
-     * Returns the names of the primary key columns in the table.
-     *
-     * @return array
-     */
-    public function getPrimaryKeys();
+  /**
+   * Returns the names of the primary key columns in the table.
+   *
+   * @return array
+   */
+  public function getPrimaryKeys();
 
-    /**
-     * Returns the name of the table.
-     *
-     * @return string
-     */
-    public function getTableName();
+  /**
+   * Returns the name of the table.
+   *
+   * @return string
+   */
+  public function getTableName();
 
-    /**
-     * Asserts that the given tableMetaData matches this tableMetaData.
-     *
-     * @param PHPUnit_Extensions_Database_DataSet_ITableMetaData $other
-     */
-    public function assertEquals(PHPUnit_Extensions_Database_DataSet_ITableMetaData $other);
+  /**
+   * Asserts that the given tableMetaData matches this tableMetaData.
+   *
+   * @param PHPUnit_Extensions_Database_DataSet_ITableMetaData $other
+   */
+  public function assertEquals(PHPUnit_Extensions_Database_DataSet_ITableMetaData $other);
 }
 ?>

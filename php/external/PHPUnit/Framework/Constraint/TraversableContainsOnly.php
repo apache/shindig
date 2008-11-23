@@ -63,49 +63,45 @@ PHPUnit_Util_Filter::addFileToFilter(__FILE__, 'PHPUNIT');
  * @link       http://www.phpunit.de/
  * @since      Class available since Release 3.1.4
  */
-class PHPUnit_Framework_Constraint_TraversableContainsOnly extends PHPUnit_Framework_Constraint
-{
-    protected $constraint;
-    protected $type;
+class PHPUnit_Framework_Constraint_TraversableContainsOnly extends PHPUnit_Framework_Constraint {
+  protected $constraint;
+  protected $type;
 
-    public function __construct($type, $isNativeType = TRUE)
-    {
-        if ($isNativeType) {
-            $this->constraint = new PHPUnit_Framework_Constraint_IsType($type);
-        } else {
-            $this->constraint = new PHPUnit_Framework_Constraint_IsInstanceOf($type);
-        }
-
-        $this->type = $type;
+  public function __construct($type, $isNativeType = TRUE) {
+    if ($isNativeType) {
+      $this->constraint = new PHPUnit_Framework_Constraint_IsType($type);
+    } else {
+      $this->constraint = new PHPUnit_Framework_Constraint_IsInstanceOf($type);
     }
+    
+    $this->type = $type;
+  }
 
-    /**
-     * Evaluates the constraint for parameter $other. Returns TRUE if the
-     * constraint is met, FALSE otherwise.
-     *
-     * @param mixed $other Value or object to evaluate.
-     * @return bool
-     */
-    public function evaluate($other)
-    {
-        foreach ($other as $item) {
-            if (!$this->constraint->evaluate($item)) {
-                return FALSE;
-            }
-        }
-
-        return TRUE;
+  /**
+   * Evaluates the constraint for parameter $other. Returns TRUE if the
+   * constraint is met, FALSE otherwise.
+   *
+   * @param mixed $other Value or object to evaluate.
+   * @return bool
+   */
+  public function evaluate($other) {
+    foreach ($other as $item) {
+      if (! $this->constraint->evaluate($item)) {
+        return FALSE;
+      }
     }
+    
+    return TRUE;
+  }
 
-    /**
-     * Returns a string representation of the constraint.
-     *
-     * @return string
-     * @access public
-     */
-    public function toString()
-    {
-        return 'contains only values of type "' . $this->type . '"';
-    }
+  /**
+   * Returns a string representation of the constraint.
+   *
+   * @return string
+   * @access public
+   */
+  public function toString() {
+    return 'contains only values of type "' . $this->type . '"';
+  }
 }
 ?>

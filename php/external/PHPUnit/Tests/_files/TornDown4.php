@@ -62,11 +62,10 @@ require_once 'TornDown.php';
  * @link       http://www.phpunit.de/
  * @since      Class available since Release 2.0.0
  */
-class TornDown4 extends TornDown
-{
-    protected function tearDown()
-    {
-        throw new Exception('tearDown');
-    }
+class TornDown4 extends TornDown {
+
+  protected function tearDown() {
+    throw new Exception('tearDown');
+  }
 }
 ?>

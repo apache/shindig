@@ -1,5 +1,5 @@
 <?php
-/*
+/**
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -22,44 +22,41 @@
  * MessageBundle test case.
  */
 class MessageBundleTest extends PHPUnit_Framework_TestCase {
-	
-	/**
-	 * @var MessageBundle
-	 */
-	private $MessageBundle;
-	
-	/**
-	 * @var Message
-	 */
-	private $Messages = array('Dummie Message', 'Hello World');
+  
+  /**
+   * @var MessageBundle
+   */
+  private $MessageBundle;
+  
+  /**
+   * @var Message
+   */
+  private $Messages = array('Dummie Message', 'Hello World');
 
-	/**
-	 * Prepares the environment before running a test.
-	 */
-	protected function setUp()
-	{
-		parent::setUp();
-		$this->MessageBundle = new MessageBundle($this->Messages);
-	
-	}
+  /**
+   * Prepares the environment before running a test.
+   */
+  protected function setUp() {
+    parent::setUp();
+    $this->MessageBundle = new MessageBundle($this->Messages);
+  
+  }
 
-	/**
-	 * Cleans up the environment after running a test.
-	 */
-	protected function tearDown()
-	{
-		$this->MessageBundle = null;
-		parent::tearDown();
-	}
+  /**
+   * Cleans up the environment after running a test.
+   */
+  protected function tearDown() {
+    $this->MessageBundle = null;
+    parent::tearDown();
+  }
 
-	/**
-	 * Tests MessageBundle->getMessages()
-	 */
-	public function testGetMessages()
-	{
-		$this->assertEquals($this->Messages, $this->MessageBundle->getMessages());
-	
-	}
+  /**
+   * Tests MessageBundle->getMessages()
+   */
+  public function testGetMessages() {
+    $this->assertEquals($this->Messages, $this->MessageBundle->getMessages());
+  
+  }
 
 }
 

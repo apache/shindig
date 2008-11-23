@@ -61,147 +61,138 @@ PHPUnit_Util_Filter::addFileToFilter(__FILE__, 'PHPUNIT');
  * @link       http://www.phpunit.de/
  * @since      Class available since Release 3.0.0
  */
-abstract class PHPUnit_Extensions_OutputTestCase extends PHPUnit_Framework_TestCase
-{
-    /**
-     * @var    string
-     * @access protected
-     */
-    protected $expectedRegex = NULL;
+abstract class PHPUnit_Extensions_OutputTestCase extends PHPUnit_Framework_TestCase {
+  /**
+   * @var    string
+   * @access protected
+   */
+  protected $expectedRegex = NULL;
+  
+  /**
+   * @var    string
+   * @access protected
+   */
+  protected $expectedString = NULL;
+  
+  /**
+   * @var    string
+   * @access protected
+   */
+  protected $output = '';
+  
+  /**
+   * @var    mixed
+   * @access protected
+   */
+  protected $outputCallback = FALSE;
 
-    /**
-     * @var    string
-     * @access protected
-     */
-    protected $expectedString = NULL;
-
-    /**
-     * @var    string
-     * @access protected
-     */
-    protected $output = '';
-
-    /**
-     * @var    mixed
-     * @access protected
-     */
-    protected $outputCallback = FALSE;
-
-    /**
-     * @return bool
-     * @access public
-     */
-    public function setOutputCallback($callback)
-    {
-        if (is_callable($callback)) {
-            $this->outputCallback = $callback;
-            $set = TRUE;
-        } else {
-            $set = FALSE;
-        }
-
-        return $set;
+  /**
+   * @return bool
+   * @access public
+   */
+  public function setOutputCallback($callback) {
+    if (is_callable($callback)) {
+      $this->outputCallback = $callback;
+      $set = TRUE;
+    } else {
+      $set = FALSE;
     }
+    
+    return $set;
+  }
 
-    /**
-     * @return string
-     * @access public
-     */
-    public function normalizeOutput($buffer)
-    {
-        return str_replace("\r", '', $buffer);
+  /**
+   * @return string
+   * @access public
+   */
+  public function normalizeOutput($buffer) {
+    return str_replace("\r", '', $buffer);
+  }
+
+  /**
+   * @return string
+   * @access public
+   */
+  public function getActualOutput() {
+    return $this->output;
+  }
+
+  /**
+   * @return string
+   * @access public
+   */
+  public function expectedRegex() {
+    return $this->expectedRegex;
+  }
+
+  /**
+   * @param  string  $expectedRegex
+   * @access public
+   */
+  public function expectOutputRegex($expectedRegex) {
+    if ($this->expectedString !== NULL) {
+      throw new RuntimeException();
     }
-
-    /**
-     * @return string
-     * @access public
-     */
-    public function getActualOutput()
-    {
-        return $this->output;
+    
+    if (is_string($expectedRegex) || is_null($expectedRegex)) {
+      $this->expectedRegex = $expectedRegex;
     }
+  }
 
-    /**
-     * @return string
-     * @access public
-     */
-    public function expectedRegex()
-    {
-        return $this->expectedRegex;
+  /**
+   * @return string
+   * @access public
+   */
+  public function expectedString() {
+    return $this->expectedOutput;
+  }
+
+  /**
+   * @param  string  $expectedString
+   * @access public
+   */
+  public function expectOutputString($expectedString) {
+    if ($this->expectedRegex !== NULL) {
+      throw new RuntimeException();
     }
-
-    /**
-     * @param  string  $expectedRegex
-     * @access public
-     */
-    public function expectOutputRegex($expectedRegex)
-    {
-        if ($this->expectedString !== NULL) {
-            throw new RuntimeException;
-        }
-
-        if (is_string($expectedRegex) || is_null($expectedRegex)) {
-            $this->expectedRegex = $expectedRegex;
-        }
+    
+    if (is_string($expectedString) || is_null($expectedString)) {
+      $this->expectedString = $expectedString;
     }
+  }
 
-    /**
-     * @return string
-     * @access public
-     */
-    public function expectedString()
-    {
-        return $this->expectedOutput;
+  /**
+   * @access protected
+   */
+  protected function runTest() {
+    ob_start();
+    
+    try {
+      parent::runTest();
+    } 
+
+    catch (Exception $e) {
+      ob_end_clean();
+      throw $e;
     }
-
-    /**
-     * @param  string  $expectedString
-     * @access public
-     */
-    public function expectOutputString($expectedString)
-    {
-        if ($this->expectedRegex !== NULL) {
-            throw new RuntimeException;
-        }
-
-        if (is_string($expectedString) || is_null($expectedString)) {
-            $this->expectedString = $expectedString;
-        }
+    
+    if ($this->outputCallback === FALSE) {
+      $this->output = ob_get_contents();
+    } else {
+      $this->output = call_user_func_array($this->outputCallback, array(ob_get_contents()));
     }
+    
+    ob_end_clean();
+    
+    if ($this->expectedRegex !== NULL) {
+      $this->assertRegExp($this->expectedRegex, $this->output);
+      $this->expectedRegex = NULL;
+    } 
 
-    /**
-     * @access protected
-     */
-    protected function runTest()
-    {
-        ob_start();
-
-        try {
-            parent::runTest();
-        }
-
-        catch (Exception $e) {
-            ob_end_clean();
-            throw $e;
-        }
-
-        if ($this->outputCallback === FALSE) {
-            $this->output = ob_get_contents();
-        } else {
-            $this->output = call_user_func_array($this->outputCallback, array(ob_get_contents()));
-        }
-
-        ob_end_clean();
-
-        if ($this->expectedRegex !== NULL) {
-            $this->assertRegExp($this->expectedRegex, $this->output);
-            $this->expectedRegex = NULL;
-        }
-
-        else if ($this->expectedString !== NULL) {
-            $this->assertEquals($this->expectedString, $this->output);
-            $this->expectedString = NULL;
-        }
+    else if ($this->expectedString !== NULL) {
+      $this->assertEquals($this->expectedString, $this->output);
+      $this->expectedString = NULL;
     }
+  }
 }
 ?>

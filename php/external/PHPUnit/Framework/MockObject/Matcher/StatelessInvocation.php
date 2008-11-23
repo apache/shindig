@@ -68,14 +68,10 @@ PHPUnit_Util_Filter::addFileToFilter(__FILE__, 'PHPUNIT');
  * @since      Class available since Release 3.0.0
  * @abstract
  */
-abstract class PHPUnit_Framework_MockObject_Matcher_StatelessInvocation implements PHPUnit_Framework_MockObject_Matcher_Invocation
-{
-    public function invoked(PHPUnit_Framework_MockObject_Invocation $invocation)
-    {
-    }
+abstract class PHPUnit_Framework_MockObject_Matcher_StatelessInvocation implements PHPUnit_Framework_MockObject_Matcher_Invocation {
 
-    public function verify()
-    {
-    }
+  public function invoked(PHPUnit_Framework_MockObject_Invocation $invocation) {}
+
+  public function verify() {}
 }
 ?>

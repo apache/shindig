@@ -61,29 +61,25 @@ PHPUnit_Util_Filter::addFileToFilter(__FILE__, 'PHPUNIT');
  * @link       http://www.phpunit.de/
  * @since      Class available since Release 3.2.0
  */
-abstract class PHPUnit_Util_Log_PMD_Rule
-{
-    protected $threshold;
-    protected $priority;
+abstract class PHPUnit_Util_Log_PMD_Rule {
+  protected $threshold;
+  protected $priority;
 
-    public function __construct($threshold, $priority = 1)
-    {
-        $this->threshold = $threshold;
-        $this->priority  = $priority;
-    }
+  public function __construct($threshold, $priority = 1) {
+    $this->threshold = $threshold;
+    $this->priority = $priority;
+  }
 
-    public function getName()
-    {
-        $name = explode('_', get_class($this));
+  public function getName() {
+    $name = explode('_', get_class($this));
+    
+    return array_pop($name);
+  }
 
-        return array_pop($name);
-    }
+  public function getPriority() {
+    return $this->priority;
+  }
 
-    public function getPriority()
-    {
-        return $this->priority;
-    }
-
-    abstract public function apply(PHPUnit_Util_Metrics $metrics);
+  abstract public function apply(PHPUnit_Util_Metrics $metrics);
 }
 ?>

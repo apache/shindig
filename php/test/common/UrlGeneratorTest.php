@@ -1,5 +1,5 @@
 <?php
-/*
+/**
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -22,17 +22,16 @@
  * UrlGenerator test case.
  */
 class UrlGeneratorTest extends PHPUnit_Framework_TestCase {
-	
-	private $UrlGenerator;
-	private $context;
-	private $gadget;
-	private $gadgetXML;
+  
+  private $UrlGenerator;
+  private $context;
+  private $gadget;
+  private $gadgetXML;
 
-	protected function setUp()
-	{
-		parent::setUp();
-		
-		$this->gadgetXML = simplexml_load_string('<?xml version="1.0" encoding="UTF-8" ?>
+  protected function setUp() {
+    parent::setUp();
+    
+    $this->gadgetXML = simplexml_load_string('<?xml version="1.0" encoding="UTF-8" ?>
 <Module>
   <ModulePrefs title="Test" />
   <Content type="html">
@@ -41,50 +40,47 @@ class UrlGeneratorTest extends PHPUnit_Framework_TestCase {
   ]]>
   </Content>
 </Module>');
-		
-		$this->UrlGenerator = new UrlGenerator(/* parameters */);
-		$this->context = new GadgetContext('GADGET');
-		$this->gadget = new Gadget(false, $this->context);
-		$this->gadget->views = array(
-				DEFAULT_VIEW => new ViewSpec('test', $this->gadgetXML->Content));
-	
-	}
+    
+    $this->UrlGenerator = new UrlGenerator(/* parameters */);
+    $this->context = new GadgetContext('GADGET');
+    $this->gadget = new Gadget(false, $this->context);
+    $this->gadget->views = array(DEFAULT_VIEW => new ViewSpec('test', $this->gadgetXML->Content));
+  
+  }
 
-	/**
-	 * Cleans up the environment after running a test.
-	 */
-	protected function tearDown()
-	{
-		
-		$this->UrlGenerator = null;
-		$this->context = null;
-		$this->gadget = null;
-		
-		parent::tearDown();
-	}
+  /**
+   * Cleans up the environment after running a test.
+   */
+  protected function tearDown() {
+    
+    $this->UrlGenerator = null;
+    $this->context = null;
+    $this->gadget = null;
+    
+    parent::tearDown();
+  }
 
-	public function testGetIframeURL()
-	{
-		
-		$uri = UrlGenerator::getIframeURL($this->gadget, $this->context);
-		
-		$query = parse_url($uri, PHP_URL_QUERY);
-		
-		$query = explode('&', $query);
-		
-		$args = array();
-		
-		foreach ($query as $param) {
-			$param = explode('=', $param);
-			list($key, $value) = $param;
-			$args[$key] = $value ? $value : '';
-		}
-		
-		$this->assertArrayHasKey('container', $args);
-		$this->assertArrayHasKey('lang', $args);
-		$this->assertArrayHasKey('country', $args);
-		$this->assertArrayHasKey('view', $args);
-		$this->assertArrayHasKey('url', $args);
-	}
+  public function testGetIframeURL() {
+    
+    $uri = UrlGenerator::getIframeURL($this->gadget, $this->context);
+    
+    $query = parse_url($uri, PHP_URL_QUERY);
+    
+    $query = explode('&', $query);
+    
+    $args = array();
+    
+    foreach ($query as $param) {
+      $param = explode('=', $param);
+      list($key, $value) = $param;
+      $args[$key] = $value ? $value : '';
+    }
+    
+    $this->assertArrayHasKey('container', $args);
+    $this->assertArrayHasKey('lang', $args);
+    $this->assertArrayHasKey('country', $args);
+    $this->assertArrayHasKey('view', $args);
+    $this->assertArrayHasKey('url', $args);
+  }
 
 }

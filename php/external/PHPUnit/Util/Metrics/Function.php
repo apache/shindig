@@ -61,462 +61,439 @@ PHPUnit_Util_Filter::addFileToFilter(__FILE__, 'PHPUNIT');
  * @link       http://www.phpunit.de/
  * @since      Class available since Release 3.2.0
  */
-class PHPUnit_Util_Metrics_Function extends PHPUnit_Util_Metrics
-{
-    protected $ccn           = 1;
-    protected $npath         = 1;
-    protected $coverage      = 0;
-    protected $crap;
-    protected $loc           = 0;
-    protected $locExecutable = 0;
-    protected $locExecuted   = 0;
-    protected $parameters    = 0;
+class PHPUnit_Util_Metrics_Function extends PHPUnit_Util_Metrics {
+  protected $ccn = 1;
+  protected $npath = 1;
+  protected $coverage = 0;
+  protected $crap;
+  protected $loc = 0;
+  protected $locExecutable = 0;
+  protected $locExecuted = 0;
+  protected $parameters = 0;
+  
+  protected $function;
+  protected $scope;
+  protected $tokens;
+  
+  protected $dependencies = array();
+  
+  protected static $cache = array();
 
-    protected $function;
-    protected $scope;
-    protected $tokens;
+  /**
+   * Constructor.
+   *
+   * @param  string                              $scope
+   * @param  ReflectionFunction|ReflectionMethod $function
+   * @param  array                               $codeCoverage
+   * @access protected
+   */
+  protected function __construct($scope, $function, &$codeCoverage = array()) {
+    $this->scope = $scope;
+    $this->function = $function;
+    
+    $source = PHPUnit_Util_Class::getMethodSource($scope, $function->getName());
+    
+    if ($source !== FALSE) {
+      $this->tokens = token_get_all('<?php' . $source . '?>');
+      $this->parameters = $function->getNumberOfParameters();
+      
+      $this->calculateCCN();
+      $this->calculateNPath();
+      $this->calculateDependencies();
+    }
+    
+    $this->setCoverage($codeCoverage);
+  }
 
-    protected $dependencies = array();
+  /**
+   * Factory.
+   *
+   * @param  ReflectionFunction|ReflectionMethod $function
+   * @param  array                               $codeCoverage
+   * @return PHPUnit_Util_Metrics_Method
+   * @access public
+   * @static
+   */
+  public static function factory($function, &$codeCoverage = array()) {
+    if ($function instanceof ReflectionMethod) {
+      $scope = $function->getDeclaringClass()->getName();
+    } else {
+      $scope = 'global';
+    }
+    
+    $name = $function->getName();
+    
+    if (! isset(self::$cache[$scope][$name])) {
+      self::$cache[$scope][$name] = new PHPUnit_Util_Metrics_Function($scope, $function, $codeCoverage);
+    } 
 
-    protected static $cache = array();
+    else if (! empty($codeCoverage) && self::$cache[$scope][$name]->getCoverage() == 0) {
+      self::$cache[$scope][$name]->setCoverage($codeCoverage);
+    }
+    
+    return self::$cache[$scope][$name];
+  }
 
-    /**
-     * Constructor.
-     *
-     * @param  string                              $scope
-     * @param  ReflectionFunction|ReflectionMethod $function
-     * @param  array                               $codeCoverage
-     * @access protected
-     */
-    protected function __construct($scope, $function, &$codeCoverage = array())
-    {
-        $this->scope    = $scope;
-        $this->function = $function;
+  /**
+   * @param  array $codeCoverage
+   * @access public
+   */
+  public function setCoverage(array &$codeCoverage) {
+    if (! empty($codeCoverage)) {
+      $this->calculateCodeCoverage($codeCoverage);
+      $this->calculateCrapIndex();
+    }
+  }
 
-        $source = PHPUnit_Util_Class::getMethodSource(
-          $scope, $function->getName()
-        );
+  /**
+   * Returns the function.
+   *
+   * @return ReflectionFunction
+   * @access public
+   */
+  public function getFunction() {
+    return $this->function;
+  }
 
-        if ($source !== FALSE) {
-            $this->tokens     = token_get_all('<?php' . $source . '?>');
-            $this->parameters = $function->getNumberOfParameters();
+  /**
+   * Returns the method.
+   * Alias for getFunction().
+   *
+   * @return ReflectionMethod
+   * @access public
+   */
+  public function getMethod() {
+    return $this->function;
+  }
 
-            $this->calculateCCN();
-            $this->calculateNPath();
-            $this->calculateDependencies();
+  /**
+   * Returns the names of the classes this function or method depends on.
+   *
+   * @return array
+   * @access public
+   */
+  public function getDependencies() {
+    return $this->dependencies;
+  }
+
+  /**
+   * Lines of Code (LOC).
+   *
+   * @return int
+   * @access public
+   */
+  public function getLoc() {
+    return $this->loc;
+  }
+
+  /**
+   * Executable Lines of Code (ELOC).
+   *
+   * @return int
+   * @access public
+   */
+  public function getLocExecutable() {
+    return $this->locExecutable;
+  }
+
+  /**
+   * Executed Lines of Code.
+   *
+   * @return int
+   * @access public
+   */
+  public function getLocExecuted() {
+    return $this->locExecuted;
+  }
+
+  /**
+   * Number of Parameters.
+   *
+   * @return int
+   * @access public
+   */
+  public function getParameters() {
+    return $this->parameters;
+  }
+
+  /**
+   * Returns the Cyclomatic Complexity Number (CCN) for the method.
+   * This is also known as the McCabe metric.
+   *
+   * Each method has a minimum value of 1 per default. For each of the
+   * following PHP keywords/statements this value gets incremented by one:
+   *
+   *   - if
+   *   - for
+   *   - foreach
+   *   - while
+   *   - case
+   *   - catch
+   *   - AND, &&
+   *   - OR, ||
+   *   - ?
+   *
+   * Note that 'else', 'default', and 'finally' don't increment the value
+   * any further. On the other hand, a simple method with a 'switch'
+   * statement and a huge block of 'case 'statements can have a surprisingly
+   * high value (still it has the same value when converting a 'switch'
+   * block to an equivalent sequence of 'if' statements).
+   *
+   * @return integer
+   * @access public
+   * @see    http://en.wikipedia.org/wiki/Cyclomatic_complexity
+   */
+  public function getCCN() {
+    return $this->ccn;
+  }
+
+  /**
+   * Returns the Change Risk Analysis and Predictions (CRAP) index for the
+   * method.
+   *
+   * @return float
+   * @access public
+   * @see    http://www.artima.com/weblogs/viewpost.jsp?thread=210575
+   */
+  public function getCrapIndex() {
+    return $this->crap;
+  }
+
+  /**
+   * Returns the Code Coverage for the method.
+   *
+   * @return float
+   * @access public
+   */
+  public function getCoverage() {
+    return $this->coverage;
+  }
+
+  /**
+   * Returns the NPath Complexity for the method.
+   *
+   * @return integer
+   * @access public
+   */
+  public function getNPath() {
+    return $this->npath;
+  }
+
+  /**
+   * Calculates the Cyclomatic Complexity Number (CCN) for the method.
+   *
+   * @access protected
+   */
+  protected function calculateCCN() {
+    foreach ($this->tokens as $token) {
+      if (is_string($token)) {
+        $token = trim($token);
+        
+        if ($token == '?') {
+          $this->ccn ++;
         }
-
-        $this->setCoverage($codeCoverage);
+        
+        continue;
+      }
+      
+      list($token, $value) = $token;
+      
+      switch ($token) {
+        case T_IF:
+        case T_FOR:
+        case T_FOREACH:
+        case T_WHILE:
+        case T_CASE:
+        case T_CATCH:
+        case T_BOOLEAN_AND:
+        case T_LOGICAL_AND:
+        case T_BOOLEAN_OR:
+        case T_LOGICAL_OR:
+          {
+            $this->ccn ++;
+          }
+          break;
+      }
     }
+  }
 
-    /**
-     * Factory.
-     *
-     * @param  ReflectionFunction|ReflectionMethod $function
-     * @param  array                               $codeCoverage
-     * @return PHPUnit_Util_Metrics_Method
-     * @access public
-     * @static
-     */
-    public static function factory($function, &$codeCoverage = array())
-    {
-        if ($function instanceof ReflectionMethod) {
-            $scope = $function->getDeclaringClass()->getName();
-        } else {
-            $scope = 'global';
+  /**
+   * Calculates the NPath Complexity for the method.
+   *
+   * @access protected
+   */
+  protected function calculateNPath() {
+    $npathStack = array();
+    $stack = array();
+    
+    foreach ($this->tokens as $token) {
+      if (is_string($token)) {
+        $token = trim($token);
+        
+        if ($token == '?') {
+          $this->npath = ($this->npath + 1) * $this->npath;
         }
-
-        $name = $function->getName();
-
-        if (!isset(self::$cache[$scope][$name])) {
-            self::$cache[$scope][$name] = new PHPUnit_Util_Metrics_Function($scope, $function, $codeCoverage);
+        
+        if ($token == '{') {
+          if (isset($scope)) {
+            array_push($stack, $scope);
+            array_push($npathStack, $this->npath);
+            $this->npath = 1;
+          } else {
+            array_push($stack, NULL);
+          }
         }
-
-        else if (!empty($codeCoverage) && self::$cache[$scope][$name]->getCoverage() == 0) {
-            self::$cache[$scope][$name]->setCoverage($codeCoverage);
-        }
-
-        return self::$cache[$scope][$name];
-    }
-
-    /**
-     * @param  array $codeCoverage
-     * @access public
-     */
-    public function setCoverage(array &$codeCoverage)
-    {
-        if (!empty($codeCoverage)) {
-            $this->calculateCodeCoverage($codeCoverage);
-            $this->calculateCrapIndex();
-        }
-    }
-
-    /**
-     * Returns the function.
-     *
-     * @return ReflectionFunction
-     * @access public
-     */
-    public function getFunction()
-    {
-        return $this->function;
-    }
-
-    /**
-     * Returns the method.
-     * Alias for getFunction().
-     *
-     * @return ReflectionMethod
-     * @access public
-     */
-    public function getMethod()
-    {
-        return $this->function;
-    }
-
-    /**
-     * Returns the names of the classes this function or method depends on.
-     *
-     * @return array
-     * @access public
-     */
-    public function getDependencies()
-    {
-        return $this->dependencies;
-    }
-
-    /**
-     * Lines of Code (LOC).
-     *
-     * @return int
-     * @access public
-     */
-    public function getLoc()
-    {
-        return $this->loc;
-    }
-
-    /**
-     * Executable Lines of Code (ELOC).
-     *
-     * @return int
-     * @access public
-     */
-    public function getLocExecutable()
-    {
-        return $this->locExecutable;
-    }
-
-    /**
-     * Executed Lines of Code.
-     *
-     * @return int
-     * @access public
-     */
-    public function getLocExecuted()
-    {
-        return $this->locExecuted;
-    }
-
-    /**
-     * Number of Parameters.
-     *
-     * @return int
-     * @access public
-     */
-    public function getParameters()
-    {
-        return $this->parameters;
-    }
-
-    /**
-     * Returns the Cyclomatic Complexity Number (CCN) for the method.
-     * This is also known as the McCabe metric.
-     *
-     * Each method has a minimum value of 1 per default. For each of the
-     * following PHP keywords/statements this value gets incremented by one:
-     *
-     *   - if
-     *   - for
-     *   - foreach
-     *   - while
-     *   - case
-     *   - catch
-     *   - AND, &&
-     *   - OR, ||
-     *   - ?
-     *
-     * Note that 'else', 'default', and 'finally' don't increment the value
-     * any further. On the other hand, a simple method with a 'switch'
-     * statement and a huge block of 'case 'statements can have a surprisingly
-     * high value (still it has the same value when converting a 'switch'
-     * block to an equivalent sequence of 'if' statements).
-     *
-     * @return integer
-     * @access public
-     * @see    http://en.wikipedia.org/wiki/Cyclomatic_complexity
-     */
-    public function getCCN()
-    {
-        return $this->ccn;
-    }
-
-    /**
-     * Returns the Change Risk Analysis and Predictions (CRAP) index for the
-     * method.
-     *
-     * @return float
-     * @access public
-     * @see    http://www.artima.com/weblogs/viewpost.jsp?thread=210575
-     */
-    public function getCrapIndex()
-    {
-        return $this->crap;
-    }
-
-    /**
-     * Returns the Code Coverage for the method.
-     *
-     * @return float
-     * @access public
-     */
-    public function getCoverage()
-    {
-        return $this->coverage;
-    }
-
-    /**
-     * Returns the NPath Complexity for the method.
-     *
-     * @return integer
-     * @access public
-     */
-    public function getNPath()
-    {
-        return $this->npath;
-    }
-
-    /**
-     * Calculates the Cyclomatic Complexity Number (CCN) for the method.
-     *
-     * @access protected
-     */
-    protected function calculateCCN()
-    {
-        foreach ($this->tokens as $token) {
-            if (is_string($token)) {
-                $token = trim($token);
-
-                if ($token == '?') {
-                    $this->ccn++;
+        
+        if ($token == '}') {
+          $scope = array_pop($stack);
+          
+          if ($scope !== NULL) {
+            switch ($scope) {
+              case T_WHILE:
+              case T_DO:
+              case T_FOR:
+              case T_FOREACH:
+              case T_IF:
+              case T_TRY:
+              case T_SWITCH:
+                {
+                  $this->npath = ($this->npath + 1) * array_pop($npathStack);
                 }
-
-                continue;
-            }
-
-            list ($token, $value) = $token;
-
-            switch ($token) {
-                case T_IF:
-                case T_FOR:
-                case T_FOREACH:
-                case T_WHILE:
-                case T_CASE:
-                case T_CATCH:
-                case T_BOOLEAN_AND:
-                case T_LOGICAL_AND:
-                case T_BOOLEAN_OR:
-                case T_LOGICAL_OR: {
-                    $this->ccn++;
+                break;
+              
+              case T_ELSE:
+              case T_CATCH:
+              case T_CASE:
+                {
+                  $this->npath = ($this->npath - 1) + array_pop($npathStack);
                 }
                 break;
             }
+          }
         }
+        
+        continue;
+      }
+      
+      list($token, $value) = $token;
+      
+      switch ($token) {
+        case T_WHILE:
+        case T_DO:
+        case T_FOR:
+        case T_FOREACH:
+        case T_IF:
+        case T_TRY:
+        case T_SWITCH:
+        case T_ELSE:
+        case T_CATCH:
+        case T_CASE:
+          {
+            $scope = $token;
+          }
+          break;
+      }
     }
+  }
 
-    /**
-     * Calculates the NPath Complexity for the method.
-     *
-     * @access protected
-     */
-    protected function calculateNPath()
-    {
-        $npathStack = array();
-        $stack      = array();
+  /**
+   * Calculates the Code Coverage for the method.
+   *
+   * @param  array $codeCoverage
+   * @access protected
+   */
+  protected function calculateCodeCoverage(&$codeCoverage) {
+    $statistics = PHPUnit_Util_CodeCoverage::getStatistics($codeCoverage, $this->function->getFileName(), $this->function->getStartLine(), $this->function->getEndLine());
+    
+    $this->coverage = $statistics['coverage'];
+    $this->loc = $statistics['loc'];
+    $this->locExecutable = $statistics['locExecutable'];
+    $this->locExecuted = $statistics['locExecuted'];
+  }
 
-        foreach ($this->tokens as $token) {
-            if (is_string($token)) {
-                $token = trim($token);
+  /**
+   * Calculates the Change Risk Analysis and Predictions (CRAP) index for the
+   * method.
+   *
+   * @access public
+   */
+  protected function calculateCrapIndex() {
+    if ($this->coverage == 0) {
+      $this->crap = pow($this->ccn, 2) + $this->ccn;
+    } 
 
-                if ($token == '?') {
-                    $this->npath = ($this->npath + 1) * $this->npath;
-                }
+    else if ($this->coverage >= 95) {
+      $this->crap = $this->ccn;
+    } 
 
-                if ($token == '{') {
-                    if (isset($scope)) {
-                        array_push($stack, $scope);
-                        array_push($npathStack, $this->npath);
-                        $this->npath = 1;
-                    } else {
-                        array_push($stack, NULL);
-                    }
-                }
-
-                if ($token == '}') {
-                    $scope = array_pop($stack);
-
-                    if ($scope !== NULL) {
-                        switch ($scope) {
-                            case T_WHILE:
-                            case T_DO:
-                            case T_FOR:
-                            case T_FOREACH:
-                            case T_IF:
-                            case T_TRY:
-                            case T_SWITCH: {
-                                $this->npath = ($this->npath + 1) * array_pop($npathStack);
-                            }
-                            break;
-
-                            case T_ELSE:
-                            case T_CATCH:
-                            case T_CASE: {
-                                $this->npath = ($this->npath - 1) + array_pop($npathStack);
-                            }
-                            break;
-                        }
-                    }
-                }
-
-                continue;
-            }
-
-            list ($token, $value) = $token;
-
-            switch ($token) {
-                case T_WHILE:
-                case T_DO:
-                case T_FOR:
-                case T_FOREACH:
-                case T_IF:
-                case T_TRY:
-                case T_SWITCH:
-                case T_ELSE:
-                case T_CATCH:
-                case T_CASE: {
-                    $scope = $token;
-                }
-                break;
-            }
-        }
+    else {
+      $this->crap = pow($this->ccn, 2) * (pow(1 - $this->coverage / 100, 3) + $this->ccn);
     }
+  }
 
-    /**
-     * Calculates the Code Coverage for the method.
-     *
-     * @param  array $codeCoverage
-     * @access protected
-     */
-    protected function calculateCodeCoverage(&$codeCoverage)
-    {
-        $statistics = PHPUnit_Util_CodeCoverage::getStatistics(
-          $codeCoverage,
-          $this->function->getFileName(),
-          $this->function->getStartLine(),
-          $this->function->getEndLine()
-        );
+  /**
+   * Calculates the dependencies for this function or method.
+   *
+   * @access public
+   */
+  protected function calculateDependencies() {
+    foreach ($this->function->getParameters() as $parameter) {
+      try {
+        $class = $parameter->getClass();
+        
+        if ($class) {
+          $className = $class->getName();
+          
+          if ($className != $this->scope && ! in_array($className, $this->dependencies)) {
+            $this->dependencies[] = $className;
+          }
+        }
+      } 
 
-        $this->coverage      = $statistics['coverage'];
-        $this->loc           = $statistics['loc'];
-        $this->locExecutable = $statistics['locExecutable'];
-        $this->locExecuted   = $statistics['locExecuted'];
+      catch (ReflectionException $e) {}
     }
-
-    /**
-     * Calculates the Change Risk Analysis and Predictions (CRAP) index for the
-     * method.
-     *
-     * @access public
-     */
-    protected function calculateCrapIndex()
-    {
-        if ($this->coverage == 0) {
-            $this->crap = pow($this->ccn, 2) + $this->ccn;
+    
+    $inNew = FALSE;
+    
+    foreach ($this->tokens as $token) {
+      if (is_string($token)) {
+        if (trim($token) == ';') {
+          $inNew = FALSE;
         }
+        
+        continue;
+      }
+      
+      list($token, $value) = $token;
+      
+      switch ($token) {
+        case T_NEW:
+          {
+            $inNew = TRUE;
+          }
+          break;
+        
+        case T_STRING:
+          {
+            if ($inNew) {
+              if ($value != $this->scope && class_exists($value, FALSE)) {
+                try {
+                  $class = new ReflectionClass($value);
+                  
+                  if ($class->isUserDefined() && ! in_array($value, $this->dependencies)) {
+                    $this->dependencies[] = $value;
+                  }
+                } 
 
-        else if ($this->coverage >= 95) {
-            $this->crap = $this->ccn;
-        }
-
-        else {
-            $this->crap = pow($this->ccn, 2) * (pow(1 - $this->coverage/100, 3) + $this->ccn);
-        }
+                catch (ReflectionException $e) {}
+              }
+            }
+            
+            $inNew = FALSE;
+          }
+          break;
+      }
     }
-
-    /**
-     * Calculates the dependencies for this function or method.
-     *
-     * @access public
-     */
-    protected function calculateDependencies()
-    {
-        foreach ($this->function->getParameters() as $parameter) {
-            try {
-                $class = $parameter->getClass();
-
-                if ($class) {
-                    $className = $class->getName();
-
-                    if ($className != $this->scope && !in_array($className, $this->dependencies)) {
-                        $this->dependencies[] = $className;
-                    }
-                }
-            }
-
-            catch (ReflectionException $e) {
-            }
-        }
-
-        $inNew = FALSE;
-
-        foreach ($this->tokens as $token) {
-            if (is_string($token)) {
-                if (trim($token) == ';') {
-                    $inNew = FALSE;
-                }
-
-                continue;
-            }
-
-            list ($token, $value) = $token;
-
-            switch ($token) {
-                case T_NEW: {
-                    $inNew = TRUE;
-                }
-                break;
-
-                case T_STRING: {
-                    if ($inNew) {
-                        if ($value != $this->scope && class_exists($value, FALSE)) {
-                            try {
-                                $class = new ReflectionClass($value);
-
-                                if ($class->isUserDefined() && !in_array($value, $this->dependencies)) {
-                                    $this->dependencies[] = $value;
-                                }
-                            }
-
-                            catch (ReflectionException $e) {
-                            }
-                        }
-                    }
-
-                    $inNew = FALSE;
-                }
-                break;
-            }
-        }
-    }
+  }
 }
 ?>

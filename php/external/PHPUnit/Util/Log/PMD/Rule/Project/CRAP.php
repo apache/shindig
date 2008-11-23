@@ -61,49 +61,37 @@ PHPUnit_Util_Filter::addFileToFilter(__FILE__, 'PHPUNIT');
  * @link       http://www.phpunit.de/
  * @since      Class available since Release 3.2.0
  */
-class PHPUnit_Util_Log_PMD_Rule_Project_CRAP extends PHPUnit_Util_Log_PMD_Rule_Project
-{
-    public function __construct($threshold = array(5, 30), $priority = 1)
-    {
-        parent::__construct($threshold);
+class PHPUnit_Util_Log_PMD_Rule_Project_CRAP extends PHPUnit_Util_Log_PMD_Rule_Project {
+
+  public function __construct($threshold = array(5, 30), $priority = 1) {
+    parent::__construct($threshold);
+  }
+
+  public function apply(PHPUnit_Util_Metrics $metrics) {
+    $numCrappyMethods = 0;
+    $numMethods = 0;
+    
+    foreach ($metrics->getClasses() as $class) {
+      $methods = $class->getMethods();
+      
+      foreach ($methods as $method) {
+        if ($method->getCrapIndex() > $this->threshold[1]) {
+          $numCrappyMethods ++;
+        }
+      }
+      
+      $numMethods += count($methods);
     }
-
-    public function apply(PHPUnit_Util_Metrics $metrics)
-    {
-        $numCrappyMethods = 0;
-        $numMethods       = 0;
-
-        foreach ($metrics->getClasses() as $class) {
-            $methods = $class->getMethods();
-
-            foreach ($methods as $method) {
-                if ($method->getCrapIndex() > $this->threshold[1]) {
-                    $numCrappyMethods++;
-                }
-            }
-
-            $numMethods += count($methods);
-        }
-
-        if ($numMethods > 0) {
-            $percent = ($numCrappyMethods / $numMethods) * 100;
-        } else {
-            $percent = 0;
-        }
-
-        if ($percent > $this->threshold[0]) {
-            return sprintf(
-              "More than %01.2f%% of the project's methods have a Change Risk " .
-              'Analysis and Predictions (CRAP) index that is above the threshold ' .
-              "of %d.\n" .
-              'The CRAP index of a function or method uses cyclomatic complexity ' .
-              'and code coverage from automated tests to help estimate the ' .
-              'effort and risk associated with maintaining legacy code. A CRAP ' .
-              'index over 30 is a good indicator of crappy code.',
-              $this->threshold[0],
-              $this->threshold[1]
-            );
-        }
+    
+    if ($numMethods > 0) {
+      $percent = ($numCrappyMethods / $numMethods) * 100;
+    } else {
+      $percent = 0;
     }
+    
+    if ($percent > $this->threshold[0]) {
+      return sprintf("More than %01.2f%% of the project's methods have a Change Risk " . 'Analysis and Predictions (CRAP) index that is above the threshold ' . "of %d.\n" . 'The CRAP index of a function or method uses cyclomatic complexity ' . 'and code coverage from automated tests to help estimate the ' . 'effort and risk associated with maintaining legacy code. A CRAP ' . 'index over 30 is a good indicator of crappy code.', $this->threshold[0], $this->threshold[1]);
+    }
+  }
 }
 ?>

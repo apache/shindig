@@ -62,63 +62,56 @@ PHPUnit_Util_Filter::addFileToFilter(__FILE__, 'PHPUNIT');
  * @link       http://www.phpunit.de/
  * @since      Class available since Release 2.0.0
  */
-class PHPUnit_Runner_StandardTestSuiteLoader implements PHPUnit_Runner_TestSuiteLoader
-{
-    /**
-     * @param  string  $suiteClassName
-     * @param  string  $suiteClassFile
-     * @param  boolean $syntaxCheck
-     * @return ReflectionClass
-     * @throws RuntimeException
-     * @access public
-     */
-    public function load($suiteClassName, $suiteClassFile = '', $syntaxCheck = TRUE)
-    {
-        $suiteClassName = str_replace('.php', '', $suiteClassName);
+class PHPUnit_Runner_StandardTestSuiteLoader implements PHPUnit_Runner_TestSuiteLoader {
 
-        if (empty($suiteClassFile)) {
-            $suiteClassFile = str_replace(array('_', '::'), DIRECTORY_SEPARATOR, $suiteClassName) . '.php';
-        }
-
-        if (!class_exists($suiteClassName, FALSE)) {
-            if(!file_exists($suiteClassFile)) {
-                $includePaths = explode(PATH_SEPARATOR, get_include_path());
-
-                foreach ($includePaths as $includePath) {
-                    $file = $includePath . DIRECTORY_SEPARATOR . $suiteClassFile;
-
-                    if (file_exists($file)) {
-                        $suiteClassFile = $file;
-                        break;
-                    }
-                }
-            }
-
-            PHPUnit_Util_Fileloader::checkAndLoad($suiteClassFile, $syntaxCheck);
-        }
-
-        if (class_exists($suiteClassName, FALSE)) {
-            return new ReflectionClass($suiteClassName);
-        } else {
-            throw new RuntimeException(
-              sprintf(
-                'Class %s could not be found in %s.',
-
-                $suiteClassName,
-                $suiteClassFile
-              )
-            );
-        }
+  /**
+   * @param  string  $suiteClassName
+   * @param  string  $suiteClassFile
+   * @param  boolean $syntaxCheck
+   * @return ReflectionClass
+   * @throws RuntimeException
+   * @access public
+   */
+  public function load($suiteClassName, $suiteClassFile = '', $syntaxCheck = TRUE) {
+    $suiteClassName = str_replace('.php', '', $suiteClassName);
+    
+    if (empty($suiteClassFile)) {
+      $suiteClassFile = str_replace(array('_', '::'), DIRECTORY_SEPARATOR, $suiteClassName) . '.php';
     }
-
-    /**
-     * @param  ReflectionClass  $aClass
-     * @return ReflectionClass
-     * @access public
-     */
-    public function reload(ReflectionClass $aClass)
-    {
-        return $aClass;
+    
+    if (! class_exists($suiteClassName, FALSE)) {
+      if (! file_exists($suiteClassFile)) {
+        $includePaths = explode(PATH_SEPARATOR, get_include_path());
+        
+        foreach ($includePaths as $includePath) {
+          $file = $includePath . DIRECTORY_SEPARATOR . $suiteClassFile;
+          
+          if (file_exists($file)) {
+            $suiteClassFile = $file;
+            break;
+          }
+        }
+      }
+      
+      PHPUnit_Util_Fileloader::checkAndLoad($suiteClassFile, $syntaxCheck);
     }
+    
+    if (class_exists($suiteClassName, FALSE)) {
+      return new ReflectionClass($suiteClassName);
+    } else {
+      throw new RuntimeException(sprintf('Class %s could not be found in %s.', 
+
+      $suiteClassName, $suiteClassFile));
+    }
+  }
+
+  /**
+   * @param  ReflectionClass  $aClass
+   * @return ReflectionClass
+   * @access public
+   */
+  public function reload(ReflectionClass $aClass) {
+    return $aClass;
+  }
 }
 ?>

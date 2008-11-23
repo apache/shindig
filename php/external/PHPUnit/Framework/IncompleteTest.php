@@ -48,24 +48,23 @@ require_once 'PHPUnit/Util/Filter.php';
 
 PHPUnit_Util_Filter::addFileToFilter(__FILE__, 'PHPUNIT');
 
-if (!interface_exists('PHPUnit_Framework_IncompleteTest', FALSE)) {
+if (! interface_exists('PHPUnit_Framework_IncompleteTest', FALSE)) {
 
-/**
- * A marker interface for marking any exception/error as result of an unit
- * test as incomplete implementation or currently not implemented.
- *
- * @category   Testing
- * @package    PHPUnit
- * @author     Sebastian Bergmann <sb@sebastian-bergmann.de>
- * @copyright  2002-2008 Sebastian Bergmann <sb@sebastian-bergmann.de>
- * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
- * @version    Release: 3.2.9
- * @link       http://www.phpunit.de/
- * @since      Interface available since Release 2.0.0
- */
-interface PHPUnit_Framework_IncompleteTest
-{
-}
+  /**
+   * A marker interface for marking any exception/error as result of an unit
+   * test as incomplete implementation or currently not implemented.
+   *
+   * @category   Testing
+   * @package    PHPUnit
+   * @author     Sebastian Bergmann <sb@sebastian-bergmann.de>
+   * @copyright  2002-2008 Sebastian Bergmann <sb@sebastian-bergmann.de>
+   * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
+   * @version    Release: 3.2.9
+   * @link       http://www.phpunit.de/
+   * @since      Interface available since Release 2.0.0
+   */
+  interface PHPUnit_Framework_IncompleteTest {
+  }
 
 }
 ?>

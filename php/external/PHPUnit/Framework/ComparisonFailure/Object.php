@@ -63,82 +63,71 @@ PHPUnit_Util_Filter::addFileToFilter(__FILE__, 'PHPUNIT');
  * @link       http://www.phpunit.de/
  * @since      Class available since Release 3.0.0
  */
-class PHPUnit_Framework_ComparisonFailure_Object extends PHPUnit_Framework_ComparisonFailure
-{
-    /**
-     * Returns a string describing the difference between the expected and the
-     * actual object.
-     *
-     * @note Diffing is only done for one level.
-     */
-    public function toString()
-    {
-        if ($this->hasDiff()) {
-            return $this->diff(
-              print_r($this->expected, TRUE),
-              print_r($this->actual, TRUE)
-            );
-        }
+class PHPUnit_Framework_ComparisonFailure_Object extends PHPUnit_Framework_ComparisonFailure {
 
-        $expectedClass = get_class($this->expected);
-        $actualClass   = get_class($this->actual);
-
-        if ($expectedClass !== $actualClass) {
-            return sprintf(
-              "%s%sexpected class <%s>\n" .
-              '%sgot class      <%s>',
-
-              $this->message,
-              ($this->message != '') ? ' ' : '',
-              $expectedClass,
-              ($this->message != '') ? str_repeat(' ', strlen($this->message) + 1) : '',
-              $actualClass
-            );
-        } else {
-            $expectedReflection = new ReflectionClass($expectedClass);
-            $actualReflection   = new ReflectionClass($actualClass);
-
-            $diff = "in object of class <{$expectedClass}>:\n";
-            $i    = 0;
-
-            foreach($expectedReflection->getProperties() as $expectedAttribute) {
-                if ($expectedAttribute->isPrivate() || $expectedAttribute->isProtected()) continue;
-
-                $actualAttribute = $actualReflection->getProperty($expectedAttribute->getName());
-                $expectedValue  = $expectedAttribute->getValue($this->expected);
-                $actualValue    = $actualAttribute->getValue($this->actual);
-
-                if ($expectedValue !== $actualValue) {
-                    if ($i > 0) {
-                        $diff .= "\n";
-                    }
-
-                    ++$i;
-
-                    $expectedType = gettype($expectedValue);
-                    $actualType   = gettype($actualValue);
-
-                    if ($expectedType !== $actualType) {
-                        $diffObject = new PHPUnit_Framework_ComparisonFailure_Type($expectedValue, $actualValue, $this->message . 'attribute <' . $expectedAttribute->getName() . '>: ');
-                        $diff .= $diffObject->toString();
-                    }
-
-                    elseif (is_object($expectedValue)) {
-                        if (get_class($expectedValue) !== get_class($actualValue)) {
-                            $diffObject = new PHPUnit_Framework_ComparisonFailure_Type($expectedValue, $actualValue, $this->message . 'attribute <' . $expectedAttribute->getName() . '>: ');
-                            $diff .= $diffObject->toString();
-                        } else {
-                            $diff .= 'attribute <' . $expectedAttribute->getName() . '> contains object <' . get_class($expectedValue) . '> with different attributes';
-                        }
-                    } else {
-                        $diffObject = PHPUnit_Framework_ComparisonFailure::diffIdentical($expectedValue, $actualValue, $this->message . 'attribute <' . $expectedAttribute->getName() . '>: ');
-                        $diff .= $diffObject->toString();
-                    }
-                }
-            }
-
-            return $diff;
-        }
+  /**
+   * Returns a string describing the difference between the expected and the
+   * actual object.
+   *
+   * @note Diffing is only done for one level.
+   */
+  public function toString() {
+    if ($this->hasDiff()) {
+      return $this->diff(print_r($this->expected, TRUE), print_r($this->actual, TRUE));
     }
+    
+    $expectedClass = get_class($this->expected);
+    $actualClass = get_class($this->actual);
+    
+    if ($expectedClass !== $actualClass) {
+      return sprintf("%s%sexpected class <%s>\n" . '%sgot class      <%s>', 
+
+      $this->message, ($this->message != '') ? ' ' : '', $expectedClass, ($this->message != '') ? str_repeat(' ', strlen($this->message) + 1) : '', $actualClass);
+    } else {
+      $expectedReflection = new ReflectionClass($expectedClass);
+      $actualReflection = new ReflectionClass($actualClass);
+      
+      $diff = "in object of class <{$expectedClass}>:\n";
+      $i = 0;
+      
+      foreach ($expectedReflection->getProperties() as $expectedAttribute) {
+        if ($expectedAttribute->isPrivate() || $expectedAttribute->isProtected()) continue;
+        
+        $actualAttribute = $actualReflection->getProperty($expectedAttribute->getName());
+        $expectedValue = $expectedAttribute->getValue($this->expected);
+        $actualValue = $actualAttribute->getValue($this->actual);
+        
+        if ($expectedValue !== $actualValue) {
+          if ($i > 0) {
+            $diff .= "\n";
+          }
+          
+          ++ $i;
+          
+          $expectedType = gettype($expectedValue);
+          $actualType = gettype($actualValue);
+          
+          if ($expectedType !== $actualType) {
+            $diffObject = new PHPUnit_Framework_ComparisonFailure_Type($expectedValue, $actualValue, $this->message . 'attribute <' . $expectedAttribute->getName() . '>: ');
+            $diff .= $diffObject->toString();
+          } 
+
+          elseif (is_object($expectedValue)) {
+            if (get_class($expectedValue) !== get_class($actualValue)) {
+              $diffObject = new PHPUnit_Framework_ComparisonFailure_Type($expectedValue, $actualValue, $this->message . 'attribute <' . $expectedAttribute->getName() . '>: ');
+              $diff .= $diffObject->toString();
+            } else {
+              $diff .= 'attribute <' . $expectedAttribute->getName() . '> contains object <' . get_class($expectedValue) . '> with different attributes';
+            }
+          } else {
+            $diffObject = PHPUnit_Framework_ComparisonFailure::diffIdentical($expectedValue, $actualValue, $this->message . 'attribute <' . $expectedAttribute->getName() . '>: ');
+            $diff .= $diffObject->toString();
+          }
+        }
+      }
+      
+      return $diff;
+    }
+  }
 }
 ?>

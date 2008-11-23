@@ -63,66 +63,65 @@ PHPUnit_Util_Filter::addFileToFilter(__FILE__, 'PHPUNIT');
  * @link       http://www.phpunit.de/
  * @since      Class available since Release 3.2.0
  */
-interface PHPUnit_Extensions_Database_ITester
-{
+interface PHPUnit_Extensions_Database_ITester {
 
-    /**
-     * Closes the specified connection.
-     *
-     * @param PHPUnit_Extensions_Database_DB_IDatabaseConnection $connection
-     */
-    public function closeConnection(PHPUnit_Extensions_Database_DB_IDatabaseConnection $connection);
+  /**
+   * Closes the specified connection.
+   *
+   * @param PHPUnit_Extensions_Database_DB_IDatabaseConnection $connection
+   */
+  public function closeConnection(PHPUnit_Extensions_Database_DB_IDatabaseConnection $connection);
 
-    /**
-     * Returns the test database connection.
-     *
-     * @return PHPUnit_Extensions_Database_DB_IDatabaseConnection
-     */
-    public function getConnection();
+  /**
+   * Returns the test database connection.
+   *
+   * @return PHPUnit_Extensions_Database_DB_IDatabaseConnection
+   */
+  public function getConnection();
 
-    /**
-     * Returns the test dataset.
-     *
-     * @return PHPUnit_Extensions_Database_DataSet_IDataSet
-     */
-    public function getDataSet();
+  /**
+   * Returns the test dataset.
+   *
+   * @return PHPUnit_Extensions_Database_DataSet_IDataSet
+   */
+  public function getDataSet();
 
-    /**
-     * TestCases must call this method inside setUp().
-     */
-    public function onSetUp();
+  /**
+   * TestCases must call this method inside setUp().
+   */
+  public function onSetUp();
 
-    /**
-     * TestCases must call this method inside teadDown().
-     */
-    public function onTearDown();
+  /**
+   * TestCases must call this method inside teadDown().
+   */
+  public function onTearDown();
 
-    /**
-     * Sets the test dataset to use.
-     *
-     * @param PHPUnit_Extensions_Database_DataSet_IDataSet $dataSet
-     */
-    public function setDataSet(PHPUnit_Extensions_Database_DataSet_IDataSet $dataSet);
+  /**
+   * Sets the test dataset to use.
+   *
+   * @param PHPUnit_Extensions_Database_DataSet_IDataSet $dataSet
+   */
+  public function setDataSet(PHPUnit_Extensions_Database_DataSet_IDataSet $dataSet);
 
-    /**
-     * Sets the schema value.
-     *
-     * @param string $schema
-     */
-    public function setSchema($schema);
+  /**
+   * Sets the schema value.
+   *
+   * @param string $schema
+   */
+  public function setSchema($schema);
 
-    /**
-     * Sets the DatabaseOperation to call when starting the test.
-     *
-     * @param PHPUnit_Extensions_Database_Operation_DatabaseOperation $setUpOperation
-     */
-    public function setSetUpOperation(PHPUnit_Extensions_Database_Operation_IDatabaseOperation $setUpOperation);
+  /**
+   * Sets the DatabaseOperation to call when starting the test.
+   *
+   * @param PHPUnit_Extensions_Database_Operation_DatabaseOperation $setUpOperation
+   */
+  public function setSetUpOperation(PHPUnit_Extensions_Database_Operation_IDatabaseOperation $setUpOperation);
 
-    /**
-     * Sets the DatabaseOperation to call when starting the test.
-     *
-     * @param PHPUnit_Extensions_Database_Operation_DatabaseOperation $tearDownOperation
-     */
-    public function setTearDownOperation(PHPUnit_Extensions_Database_Operation_IDatabaseOperation $tearDownOperation);
+  /**
+   * Sets the DatabaseOperation to call when starting the test.
+   *
+   * @param PHPUnit_Extensions_Database_Operation_DatabaseOperation $tearDownOperation
+   */
+  public function setTearDownOperation(PHPUnit_Extensions_Database_Operation_IDatabaseOperation $tearDownOperation);
 }
 ?>

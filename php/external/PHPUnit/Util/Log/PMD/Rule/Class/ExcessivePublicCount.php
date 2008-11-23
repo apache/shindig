@@ -61,27 +61,18 @@ PHPUnit_Util_Filter::addFileToFilter(__FILE__, 'PHPUNIT');
  * @link       http://www.phpunit.de/
  * @since      Class available since Release 3.2.0
  */
-class PHPUnit_Util_Log_PMD_Rule_Class_ExcessivePublicCount extends PHPUnit_Util_Log_PMD_Rule_Class
-{
-    public function __construct($threshold = 45, $priority = 1)
-    {
-        parent::__construct($threshold);
-    }
+class PHPUnit_Util_Log_PMD_Rule_Class_ExcessivePublicCount extends PHPUnit_Util_Log_PMD_Rule_Class {
 
-    public function apply(PHPUnit_Util_Metrics $metrics)
-    {
-        $publicMethods = $metrics->getPublicMethods();
+  public function __construct($threshold = 45, $priority = 1) {
+    parent::__construct($threshold);
+  }
 
-        if ($publicMethods > $this->threshold) {
-            return sprintf(
-              "Class has %d public methods.\n" .
-              'A large number of public methods and attributes ' .
-              'declared in a class can indicate the class may need ' .
-              'to be broken up as increased effort will be required ' .
-              'to thoroughly test it.',
-              $publicMethods
-            );
-        }
+  public function apply(PHPUnit_Util_Metrics $metrics) {
+    $publicMethods = $metrics->getPublicMethods();
+    
+    if ($publicMethods > $this->threshold) {
+      return sprintf("Class has %d public methods.\n" . 'A large number of public methods and attributes ' . 'declared in a class can indicate the class may need ' . 'to be broken up as increased effort will be required ' . 'to thoroughly test it.', $publicMethods);
     }
+  }
 }
 ?>

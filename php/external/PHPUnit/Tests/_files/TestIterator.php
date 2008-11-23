@@ -60,39 +60,32 @@ PHPUnit_Util_Filter::addFileToFilter(__FILE__);
  * @link       http://www.phpunit.de/
  * @since      Class available since Release 2.0.0
  */
-class TestIterator implements Iterator
-{
-    protected $array;
-    protected $position;
+class TestIterator implements Iterator {
+  protected $array;
+  protected $position;
 
-    public function __construct($array = array())
-    {
-        $this->array = $array;
-    }
+  public function __construct($array = array()) {
+    $this->array = $array;
+  }
 
-    public function rewind()
-    {
-        $this->position = 0;
-    }
+  public function rewind() {
+    $this->position = 0;
+  }
 
-    public function valid()
-    {
-        return $this->position < count($this->array);
-    }
+  public function valid() {
+    return $this->position < count($this->array);
+  }
 
-    public function key()
-    {
-        return $this->position;
-    }
+  public function key() {
+    return $this->position;
+  }
 
-    public function current()
-    {
-        return $this->array[$this->position];
-    }
+  public function current() {
+    return $this->array[$this->position];
+  }
 
-    public function next()
-    {
-        $this->position++;
-    }
+  public function next() {
+    $this->position ++;
+  }
 }
 ?>

@@ -20,12 +20,10 @@
  * @version    $Id: InArray.php 8064 2008-02-16 10:58:39Z thomas $
  */
 
-
 /**
  * @see Zend_Validate_Abstract
  */
 require_once 'external/Zend/Validate/Abstract.php';
-
 
 /**
  * @category   Zend
@@ -33,106 +31,96 @@ require_once 'external/Zend/Validate/Abstract.php';
  * @copyright  Copyright (c) 2005-2008 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  */
-class Zend_Validate_InArray extends Zend_Validate_Abstract
-{
+class Zend_Validate_InArray extends Zend_Validate_Abstract {
+  
+  const NOT_IN_ARRAY = 'notInArray';
+  
+  /**
+   * @var array
+   */
+  protected $_messageTemplates = array(self::NOT_IN_ARRAY => "'%value%' was not found in the haystack");
+  
+  /**
+   * Haystack of possible values
+   *
+   * @var array
+   */
+  protected $_haystack;
+  
+  /**
+   * Whether a strict in_array() invocation is used
+   *
+   * @var boolean
+   */
+  protected $_strict;
 
-    const NOT_IN_ARRAY = 'notInArray';
+  /**
+   * Sets validator options
+   *
+   * @param  array   $haystack
+   * @param  boolean $strict
+   * @return void
+   */
+  public function __construct(array $haystack, $strict = false) {
+    $this->setHaystack($haystack)->setStrict($strict);
+  }
 
-    /**
-     * @var array
-     */
-    protected $_messageTemplates = array(
-        self::NOT_IN_ARRAY => "'%value%' was not found in the haystack"
-    );
+  /**
+   * Returns the haystack option
+   *
+   * @return mixed
+   */
+  public function getHaystack() {
+    return $this->_haystack;
+  }
 
-    /**
-     * Haystack of possible values
-     *
-     * @var array
-     */
-    protected $_haystack;
+  /**
+   * Sets the haystack option
+   *
+   * @param  mixed $haystack
+   * @return Zend_Validate_InArray Provides a fluent interface
+   */
+  public function setHaystack(array $haystack) {
+    $this->_haystack = $haystack;
+    return $this;
+  }
 
-    /**
-     * Whether a strict in_array() invocation is used
-     *
-     * @var boolean
-     */
-    protected $_strict;
+  /**
+   * Returns the strict option
+   *
+   * @return boolean
+   */
+  public function getStrict() {
+    return $this->_strict;
+  }
 
-    /**
-     * Sets validator options
-     *
-     * @param  array   $haystack
-     * @param  boolean $strict
-     * @return void
-     */
-    public function __construct(array $haystack, $strict = false)
-    {
-        $this->setHaystack($haystack)
-             ->setStrict($strict);
+  /**
+   * Sets the strict option
+   *
+   * @param  boolean $strict
+   * @return Zend_Validate_InArray Provides a fluent interface
+   */
+  public function setStrict($strict) {
+    $this->_strict = $strict;
+    return $this;
+  }
+
+  /**
+   * Defined by Zend_Validate_Interface
+   *
+   * Returns true if and only if $value is contained in the haystack option. If the strict
+   * option is true, then the type of $value is also checked.
+   *
+   * @param  mixed $value
+   * @return boolean
+   */
+  public function isValid($value) {
+    $this->_setValue($value);
+    if (! in_array($value, $this->_haystack, $this->_strict)) {
+      $this->_error();
+      return false;
     }
-
-    /**
-     * Returns the haystack option
-     *
-     * @return mixed
-     */
-    public function getHaystack()
-    {
-        return $this->_haystack;
-    }
-
-    /**
-     * Sets the haystack option
-     *
-     * @param  mixed $haystack
-     * @return Zend_Validate_InArray Provides a fluent interface
-     */
-    public function setHaystack(array $haystack)
-    {
-        $this->_haystack = $haystack;
-        return $this;
-    }
-
-    /**
-     * Returns the strict option
-     *
-     * @return boolean
-     */
-    public function getStrict()
-    {
-        return $this->_strict;
-    }
-
-    /**
-     * Sets the strict option
-     *
-     * @param  boolean $strict
-     * @return Zend_Validate_InArray Provides a fluent interface
-     */
-    public function setStrict($strict)
-    {
-        $this->_strict = $strict;
-        return $this;
-    }
-
-    /**
-     * Defined by Zend_Validate_Interface
-     *
-     * Returns true if and only if $value is contained in the haystack option. If the strict
-     * option is true, then the type of $value is also checked.
-     *
-     * @param  mixed $value
-     * @return boolean
-     */
-    public function isValid($value)
-    {
-        $this->_setValue($value);
-        if (!in_array($value, $this->_haystack, $this->_strict)) {
-            $this->_error();
-            return false;
-        }
-        return true;
-    }
+    return true;
+  }
 
 }

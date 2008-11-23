@@ -48,9 +48,9 @@ require_once 'PHPUnit/Util/Filter.php';
 
 PHPUnit_Util_Filter::addFileToFilter(__FILE__);
 
-if (!defined('PHPUnit_MAIN_METHOD')) {
-    define('PHPUnit_MAIN_METHOD', 'Runner_AllTests::main');
-    chdir(dirname(dirname(__FILE__)));
+if (! defined('PHPUnit_MAIN_METHOD')) {
+  define('PHPUnit_MAIN_METHOD', 'Runner_AllTests::main');
+  chdir(dirname(dirname(__FILE__)));
 }
 
 require_once 'PHPUnit/Framework/TestSuite.php';
@@ -71,24 +71,22 @@ require_once 'Runner/BaseTestRunnerTest.php';
  * @link       http://www.phpunit.de/
  * @since      Class available since Release 2.0.0
  */
-class Runner_AllTests
-{
-    public static function main()
-    {
-        PHPUnit_TextUI_TestRunner::run(self::suite());
-    }
+class Runner_AllTests {
 
-    public static function suite()
-    {
-        $suite = new PHPUnit_Framework_TestSuite('PHPUnit_Runner');
+  public static function main() {
+    PHPUnit_TextUI_TestRunner::run(self::suite());
+  }
 
-        $suite->addTestSuite('Runner_BaseTestRunnerTest');
-
-        return $suite;
-    }
+  public static function suite() {
+    $suite = new PHPUnit_Framework_TestSuite('PHPUnit_Runner');
+    
+    $suite->addTestSuite('Runner_BaseTestRunnerTest');
+    
+    return $suite;
+  }
 }
 
 if (PHPUnit_MAIN_METHOD == 'Runner_AllTests::main') {
-    Runner_AllTests::main();
+  Runner_AllTests::main();
 }
 ?>

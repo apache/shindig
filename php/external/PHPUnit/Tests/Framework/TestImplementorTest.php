@@ -62,26 +62,21 @@ require_once '_files/Success.php';
  * @link       http://www.phpunit.de/
  * @since      Class available since Release 2.0.0
  */
-class Framework_TestImplementorTest extends PHPUnit_Framework_TestCase
-{
-    protected $test;
+class Framework_TestImplementorTest extends PHPUnit_Framework_TestCase {
+  protected $test;
 
-    public function __construct()
-    {
-        $this->test = new DoubleTestCase(
-          new Success
-        );
-    }
+  public function __construct() {
+    $this->test = new DoubleTestCase(new Success());
+  }
 
-    public function testSuccessfulRun()
-    {
-        $result = new PHPUnit_Framework_TestResult;
-
-        $this->test->run($result);
-
-        $this->assertEquals(count($this->test), count($result));
-        $this->assertEquals(0, $result->errorCount());
-        $this->assertEquals(0, $result->failureCount());
-    }
+  public function testSuccessfulRun() {
+    $result = new PHPUnit_Framework_TestResult();
+    
+    $this->test->run($result);
+    
+    $this->assertEquals(count($this->test), count($result));
+    $this->assertEquals(0, $result->errorCount());
+    $this->assertEquals(0, $result->failureCount());
+  }
 }
 ?>

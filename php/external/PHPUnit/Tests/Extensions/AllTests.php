@@ -48,9 +48,9 @@ require_once 'PHPUnit/Util/Filter.php';
 
 PHPUnit_Util_Filter::addFileToFilter(__FILE__);
 
-if (!defined('PHPUnit_MAIN_METHOD')) {
-    define('PHPUnit_MAIN_METHOD', 'Extensions_AllTests::main');
-    chdir(dirname(dirname(__FILE__)));
+if (! defined('PHPUnit_MAIN_METHOD')) {
+  define('PHPUnit_MAIN_METHOD', 'Extensions_AllTests::main');
+  chdir(dirname(dirname(__FILE__)));
 }
 
 require_once 'PHPUnit/Framework/TestSuite.php';
@@ -75,28 +75,26 @@ require_once 'Extensions/Database/AllTests.php';
  * @link       http://www.phpunit.de/
  * @since      Class available since Release 2.0.0
  */
-class Extensions_AllTests
-{
-    public static function main()
-    {
-        PHPUnit_TextUI_TestRunner::run(self::suite());
-    }
+class Extensions_AllTests {
 
-    public static function suite()
-    {
-        $suite = new PHPUnit_Framework_TestSuite('PHPUnit_Extensions');
+  public static function main() {
+    PHPUnit_TextUI_TestRunner::run(self::suite());
+  }
 
-        $suite->addTestSuite('Extensions_OutputTestCaseTest');
-        $suite->addTestSuite('Extensions_PerformanceTestCaseTest');
-        $suite->addTestSuite('Extensions_RepeatedTestTest');
-        $suite->addTestSuite('Extensions_SeleniumTestCaseTest');
-        $suite->addTest(Extensions_Database_AllTests::suite());
-
-        return $suite;
-    }
+  public static function suite() {
+    $suite = new PHPUnit_Framework_TestSuite('PHPUnit_Extensions');
+    
+    $suite->addTestSuite('Extensions_OutputTestCaseTest');
+    $suite->addTestSuite('Extensions_PerformanceTestCaseTest');
+    $suite->addTestSuite('Extensions_RepeatedTestTest');
+    $suite->addTestSuite('Extensions_SeleniumTestCaseTest');
+    $suite->addTest(Extensions_Database_AllTests::suite());
+    
+    return $suite;
+  }
 }
 
 if (PHPUnit_MAIN_METHOD == 'Extensions_AllTests::main') {
-    Extensions_AllTests::main();
+  Extensions_AllTests::main();
 }
 ?>

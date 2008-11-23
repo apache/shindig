@@ -62,35 +62,29 @@ PHPUnit_Util_Filter::addFileToFilter(__FILE__, 'PHPUNIT');
  * @link       http://www.phpunit.de/
  * @since      Class available since Release 3.1.4
  */
-class PHPUnit_Extensions_PhptTestSuite extends PHPUnit_Framework_TestSuite
-{
-    /**
-     * Constructs a new TestSuite for .phpt test cases.
-     *
-     * @param  string $directory
-     * @param  array  $options Array with ini settings for the php instance run,
-     *                         key being the name if the setting, value the ini value.
-     * @throws InvalidArgumentException
-     * @access public
-     */
-    public function __construct($directory, $options = array())
-    {
-        if (is_dir($directory)) {
-            $this->setName($directory);
+class PHPUnit_Extensions_PhptTestSuite extends PHPUnit_Framework_TestSuite {
 
-            $iterator = new PHPUnit_Util_FilterIterator(
-              new RecursiveIteratorIterator(
-                new RecursiveDirectoryIterator($directory)
-              ),
-              '.phpt'
-            );
-
-            foreach ($iterator as $testFile) {
-                $this->addTestFile($testFile->getPathname(), TRUE, $options);
-            }
-        } else {
-            throw new InvalidArgumentException;
-        }
+  /**
+   * Constructs a new TestSuite for .phpt test cases.
+   *
+   * @param  string $directory
+   * @param  array  $options Array with ini settings for the php instance run,
+   *                         key being the name if the setting, value the ini value.
+   * @throws InvalidArgumentException
+   * @access public
+   */
+  public function __construct($directory, $options = array()) {
+    if (is_dir($directory)) {
+      $this->setName($directory);
+      
+      $iterator = new PHPUnit_Util_FilterIterator(new RecursiveIteratorIterator(new RecursiveDirectoryIterator($directory)), '.phpt');
+      
+      foreach ($iterator as $testFile) {
+        $this->addTestFile($testFile->getPathname(), TRUE, $options);
+      }
+    } else {
+      throw new InvalidArgumentException();
     }
+  }
 }
 ?>

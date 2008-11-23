@@ -63,88 +63,76 @@ PHPUnit_Util_Filter::addFileToFilter(__FILE__, 'PHPUNIT');
  * @link       http://www.phpunit.de/
  * @since      Class available since Release 3.0.0
  */
-class PHPUnit_Framework_Constraint_Xor extends PHPUnit_Framework_Constraint
-{
-    protected $constraints = array();
+class PHPUnit_Framework_Constraint_Xor extends PHPUnit_Framework_Constraint {
+  protected $constraints = array();
 
-    public function setConstraints(array $constraints)
-    {
-        $this->constraints = array();
+  public function setConstraints(array $constraints) {
+    $this->constraints = array();
+    
+    foreach ($constraints as $key => $constraint) {
+      if (! ($constraint instanceof PHPUnit_Framework_Constraint)) {
+        $constraint = new PHPUnit_Framework_Constraint_IsEqual($constraint);
+      }
+      
+      $this->constraints[] = $constraint;
+    }
+  }
 
-        foreach($constraints as $key => $constraint) {
-            if (!($constraint instanceof PHPUnit_Framework_Constraint)) {
-                $constraint = new PHPUnit_Framework_Constraint_IsEqual($constraint);
-            }
-
-            $this->constraints[] = $constraint;
+  /**
+   * Evaluates the constraint for parameter $other. Returns TRUE if the
+   * constraint is met, FALSE otherwise.
+   *
+   * @param mixed $other Value or object to evaluate.
+   * @return bool
+   */
+  public function evaluate($other) {
+    $result = FALSE;
+    
+    foreach ($this->constraints as $constraint) {
+      if ($constraint->evaluate($other)) {
+        if ($result) {
+          return FALSE;
         }
+        
+        $result = TRUE;
+      }
     }
+    
+    return $result;
+  }
 
-    /**
-     * Evaluates the constraint for parameter $other. Returns TRUE if the
-     * constraint is met, FALSE otherwise.
-     *
-     * @param mixed $other Value or object to evaluate.
-     * @return bool
-     */
-    public function evaluate($other)
-    {
-        $result = FALSE;
+  /**
+   * @param   mixed   $other The value passed to evaluate() which failed the
+   *                         constraint check.
+   * @param   string  $description A string with extra description of what was
+   *                               going on while the evaluation failed.
+   * @param   boolean $not Flag to indicate negation.
+   * @throws  PHPUnit_Framework_ExpectationFailedException
+   */
+  public function fail($other, $description, $not = FALSE) {
+    throw new PHPUnit_Framework_ExpectationFailedException(sprintf('Failed asserting that %s.', 
 
-        foreach($this->constraints as $constraint) {
-            if ($constraint->evaluate($other)) {
-                if ( $result )
-                {
-                    return FALSE;
-                }
+    $this->toString(), NULL, $description));
+  }
 
-                $result = TRUE;
-            }
-        }
-
-        return $result;
+  /**
+   * Returns a string representation of the constraint.
+   *
+   * @return string
+   * @access public
+   */
+  public function toString() {
+    $text = '';
+    
+    foreach ($this->constraints as $key => $constraint) {
+      if ($key > 0) {
+        $text .= ' xor ';
+      }
+      
+      $text .= $constraint->toString();
     }
-
-    /**
-     * @param   mixed   $other The value passed to evaluate() which failed the
-     *                         constraint check.
-     * @param   string  $description A string with extra description of what was
-     *                               going on while the evaluation failed.
-     * @param   boolean $not Flag to indicate negation.
-     * @throws  PHPUnit_Framework_ExpectationFailedException
-     */
-    public function fail($other, $description, $not = FALSE)
-    {
-        throw new PHPUnit_Framework_ExpectationFailedException(
-          sprintf(
-            'Failed asserting that %s.',
-
-             $this->toString(),
-             NULL,
-             $description
-          )
-        );
-    }
-
-    /**
-     * Returns a string representation of the constraint.
-     *
-     * @return string
-     * @access public
-     */
-    public function toString()
-    {
-        $text = '';
-
-        foreach($this->constraints as $key => $constraint) {
-            if ($key > 0) {
-                $text .= ' xor ';
-            }
-
-            $text .= $constraint->toString();
-        }
-
-        return $text;
-    }
+    
+    return $text;
+  }
 }
 ?>

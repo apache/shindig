@@ -64,62 +64,57 @@ PHPUnit_Util_Filter::addFileToFilter(__FILE__, 'PHPUNIT');
  * @link       http://www.phpunit.de/
  * @since      Class available since Release 3.2.0
  */
-class PHPUnit_Extensions_Database_DataSet_TableMetaDataFilter extends PHPUnit_Extensions_Database_DataSet_AbstractTableMetaData
-{
+class PHPUnit_Extensions_Database_DataSet_TableMetaDataFilter extends PHPUnit_Extensions_Database_DataSet_AbstractTableMetaData {
+  
+  /**
+   * The table meta data being decorated.
+   * @var PHPUnit_Extensions_Database_DataSet_ITableMetaData
+   */
+  protected $originalMetaData;
+  
+  /**
+   * The columns to exclude from the meta data.
+   * @var Array
+   */
+  protected $excludeColumns;
 
-    /**
-     * The table meta data being decorated.
-     * @var PHPUnit_Extensions_Database_DataSet_ITableMetaData
-     */
-    protected $originalMetaData;
+  /**
+   * Creates a new filtered table meta data object filtering out 
+   * $excludeColumns.
+   *
+   * @param PHPUnit_Extensions_Database_DataSet_ITableMetaData $originalMetaData
+   * @param array $excludeColumns
+   */
+  public function __construct(PHPUnit_Extensions_Database_DataSet_ITableMetaData $originalMetaData, Array $excludeColumns) {
+    $this->originalMetaData = $originalMetaData;
+    $this->excludeColumns = $excludeColumns;
+  }
 
-    /**
-     * The columns to exclude from the meta data.
-     * @var Array
-     */
-    protected $excludeColumns;
+  /**
+   * Returns the names of the columns in the table.
+   *
+   * @return array
+   */
+  public function getColumns() {
+    return array_values(array_diff($this->originalMetaData->getColumns(), $this->excludeColumns));
+  }
 
-    /**
-     * Creates a new filtered table meta data object filtering out 
-     * $excludeColumns.
-     *
-     * @param PHPUnit_Extensions_Database_DataSet_ITableMetaData $originalMetaData
-     * @param array $excludeColumns
-     */
-    public function __construct(PHPUnit_Extensions_Database_DataSet_ITableMetaData $originalMetaData, Array $excludeColumns)
-    {
-        $this->originalMetaData = $originalMetaData;
-        $this->excludeColumns = $excludeColumns;
-    }
+  /**
+   * Returns the names of the primary key columns in the table.
+   *
+   * @return array
+   */
+  public function getPrimaryKeys() {
+    return $this->originalMetaData->getPrimaryKeys();
+  }
 
-    /**
-     * Returns the names of the columns in the table.
-     *
-     * @return array
-     */
-    public function getColumns()
-    {
-        return array_values(array_diff($this->originalMetaData->getColumns(), $this->excludeColumns));
-    }
-
-    /**
-     * Returns the names of the primary key columns in the table.
-     *
-     * @return array
-     */
-    public function getPrimaryKeys()
-    {
-        return $this->originalMetaData->getPrimaryKeys();
-    }
-
-    /**
-     * Returns the name of the table.
-     *
-     * @return string
-     */
-    public function getTableName()
-    {
-        return $this->originalMetaData->getTableName();
-    }
+  /**
+   * Returns the name of the table.
+   *
+   * @return string
+   */
+  public function getTableName() {
+    return $this->originalMetaData->getTableName();
+  }
 }
 ?>

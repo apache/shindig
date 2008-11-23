@@ -57,37 +57,30 @@ PHPUnit_Util_Filter::addFileToFilter(__FILE__, 'PHPUNIT');
  * @throws PHPUnit_Framework_Error
  * @since  Function available since Release 2.3.0
  */
-function PHPUnit_Util_ErrorHandler($errno, $errstr, $errfile, $errline)
-{
-    if (!($errno & error_reporting())) {
-        return;
+function PHPUnit_Util_ErrorHandler($errno, $errstr, $errfile, $errline) {
+  if (! ($errno & error_reporting())) {
+    return;
+  }
+  
+  $trace = debug_backtrace();
+  array_shift($trace);
+  
+  foreach ($trace as $frame) {
+    if ($frame['function'] == '__toString') {
+      return;
     }
-
-    $trace = debug_backtrace();
-    array_shift($trace);
-
-    foreach ($trace as $frame) {
-        if ($frame['function'] == '__toString') {
-            return;
-        }
+  }
+  
+  if ($errno == E_NOTICE || $errno == E_STRICT) {
+    if (PHPUnit_Framework_Notice::$enabled !== TRUE) {
+      return;
     }
-
-    if ($errno == E_NOTICE || $errno == E_STRICT) {
-        if (PHPUnit_Framework_Notice::$enabled !== TRUE) {
-            return;
-        }
-
-        $exception = 'PHPUnit_Framework_Notice';
-    } else {
-        $exception = 'PHPUnit_Framework_Error';
-    }
-
-    throw new $exception(
-      $errstr,
-      $errno,
-      $errfile,
-      $errline,
-      $trace
-    );
+    
+    $exception = 'PHPUnit_Framework_Notice';
+  } else {
+    $exception = 'PHPUnit_Framework_Error';
+  }
+  
+  throw new $exception($errstr, $errno, $errfile, $errline, $trace);
 }
 ?>

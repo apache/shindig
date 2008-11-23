@@ -20,7 +20,6 @@
  * @version    $Id: Interface.php 8064 2008-02-16 10:58:39Z thomas $
  */
 
-
 /**
  * Input feed data interface
  *
@@ -32,21 +31,21 @@
  * @copyright  Copyright (c) 2005-2008 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  */
-interface Zend_Feed_Builder_Interface
-{
-    /**
-     * Returns an instance of Zend_Feed_Builder_Header
-     * describing the header of the feed
-     *
-     * @return Zend_Feed_Builder_Header
-     */
-    public function getHeader();
+interface Zend_Feed_Builder_Interface {
 
-    /**
-     * Returns an array of Zend_Feed_Builder_Entry instances
-     * describing the entries of the feed
-     *
-     * @return array of Zend_Feed_Builder_Entry
-     */
-    public function getEntries();
+  /**
+   * Returns an instance of Zend_Feed_Builder_Header
+   * describing the header of the feed
+   *
+   * @return Zend_Feed_Builder_Header
+   */
+  public function getHeader();
+
+  /**
+   * Returns an array of Zend_Feed_Builder_Entry instances
+   * describing the entries of the feed
+   *
+   * @return array of Zend_Feed_Builder_Entry
+   */
+  public function getEntries();
 }

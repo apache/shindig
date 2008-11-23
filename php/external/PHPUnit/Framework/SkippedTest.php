@@ -48,23 +48,22 @@ require_once 'PHPUnit/Util/Filter.php';
 
 PHPUnit_Util_Filter::addFileToFilter(__FILE__, 'PHPUNIT');
 
-if (!interface_exists('PHPUnit_Framework_SkippedTest', FALSE)) {
+if (! interface_exists('PHPUnit_Framework_SkippedTest', FALSE)) {
 
-/**
- * A marker interface for marking a unit test as being skipped.
- *
- * @category   Testing
- * @package    PHPUnit
- * @author     Sebastian Bergmann <sb@sebastian-bergmann.de>
- * @copyright  2002-2008 Sebastian Bergmann <sb@sebastian-bergmann.de>
- * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
- * @version    Release: 3.2.9
- * @link       http://www.phpunit.de/
- * @since      Interface available since Release 3.0.0
- */
-interface PHPUnit_Framework_SkippedTest
-{
-}
+  /**
+   * A marker interface for marking a unit test as being skipped.
+   *
+   * @category   Testing
+   * @package    PHPUnit
+   * @author     Sebastian Bergmann <sb@sebastian-bergmann.de>
+   * @copyright  2002-2008 Sebastian Bergmann <sb@sebastian-bergmann.de>
+   * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
+   * @version    Release: 3.2.9
+   * @link       http://www.phpunit.de/
+   * @since      Interface available since Release 3.0.0
+   */
+  interface PHPUnit_Framework_SkippedTest {
+  }
 
 }
 ?>

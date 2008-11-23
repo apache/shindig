@@ -72,44 +72,33 @@ PHPUnit_Util_Filter::addFileToFilter(__FILE__, 'PHPUNIT');
  * @link       http://www.phpunit.de/
  * @since      Class available since Release 3.0.0
  */
-class PHPUnit_Framework_MockObject_Matcher_InvokedAtIndex implements PHPUnit_Framework_MockObject_Matcher_Invocation
-{
-    protected $sequenceIndex;
+class PHPUnit_Framework_MockObject_Matcher_InvokedAtIndex implements PHPUnit_Framework_MockObject_Matcher_Invocation {
+  protected $sequenceIndex;
+  
+  protected $currentIndex = - 1;
 
-    protected $currentIndex = -1;
+  public function __construct($sequenceIndex) {
+    $this->sequenceIndex = $sequenceIndex;
+  }
 
-    public function __construct($sequenceIndex)
-    {
-        $this->sequenceIndex = $sequenceIndex;
+  public function toString() {
+    return 'invoked at sequence index ' . $this->sequenceIndex;
+  }
+
+  public function matches(PHPUnit_Framework_MockObject_Invocation $invocation) {
+    $this->currentIndex ++;
+    
+    return $this->currentIndex == $this->sequenceIndex;
+  }
+
+  public function invoked(PHPUnit_Framework_MockObject_Invocation $invocation) {}
+
+  public function verify() {
+    if ($this->currentIndex < $this->sequenceIndex) {
+      throw new PHPUnit_Framework_ExpectationFailedException(sprintf('The expected invocation at index %s was never reached.', 
+
+      $this->sequenceIndex));
     }
-
-    public function toString()
-    {
-        return 'invoked at sequence index ' . $this->sequenceIndex;
-    }
-
-    public function matches(PHPUnit_Framework_MockObject_Invocation $invocation)
-    {
-        $this->currentIndex++;
-
-        return $this->currentIndex == $this->sequenceIndex;
-    }
-
-    public function invoked(PHPUnit_Framework_MockObject_Invocation $invocation)
-    {
-    }
-
-    public function verify()
-    {
-        if ($this->currentIndex < $this->sequenceIndex) {
-            throw new PHPUnit_Framework_ExpectationFailedException(
-              sprintf(
-                'The expected invocation at index %s was never reached.',
-
-                $this->sequenceIndex
-              )
-            );
-        }
-    }
+  }
 }
 ?>

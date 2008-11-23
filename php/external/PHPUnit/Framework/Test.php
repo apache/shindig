@@ -49,22 +49,22 @@ require_once 'PHPUnit/Util/Filter.php';
 
 PHPUnit_Util_Filter::addFileToFilter(__FILE__, 'PHPUNIT');
 
-if (!interface_exists('PHPUnit_Framework_Test', FALSE)) {
+if (! interface_exists('PHPUnit_Framework_Test', FALSE)) {
 
-/**
- * A Test can be run and collect its results.
- *
- * @category   Testing
- * @package    PHPUnit
- * @author     Sebastian Bergmann <sb@sebastian-bergmann.de>
- * @copyright  2002-2008 Sebastian Bergmann <sb@sebastian-bergmann.de>
- * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
- * @version    Release: 3.2.9
- * @link       http://www.phpunit.de/
- * @since      Interface available since Release 2.0.0
- */
-interface PHPUnit_Framework_Test extends Countable
-{
+  /**
+   * A Test can be run and collect its results.
+   *
+   * @category   Testing
+   * @package    PHPUnit
+   * @author     Sebastian Bergmann <sb@sebastian-bergmann.de>
+   * @copyright  2002-2008 Sebastian Bergmann <sb@sebastian-bergmann.de>
+   * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
+   * @version    Release: 3.2.9
+   * @link       http://www.phpunit.de/
+   * @since      Interface available since Release 2.0.0
+   */
+  interface PHPUnit_Framework_Test extends Countable {
+
     /**
      * Runs a test and collects its result in a TestResult instance.
      *
@@ -73,7 +73,7 @@ interface PHPUnit_Framework_Test extends Countable
      * @access public
      */
     public function run(PHPUnit_Framework_TestResult $result = NULL);
-}
+  }
 
 }
 ?>

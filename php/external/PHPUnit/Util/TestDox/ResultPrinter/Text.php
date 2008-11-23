@@ -61,39 +61,36 @@ PHPUnit_Util_Filter::addFileToFilter(__FILE__, 'PHPUNIT');
  * @link       http://www.phpunit.de/
  * @since      Class available since Release 2.1.0
  */
-class PHPUnit_Util_TestDox_ResultPrinter_Text extends PHPUnit_Util_TestDox_ResultPrinter
-{
-    /**
-     * Handler for 'start class' event.
-     *
-     * @param  string $name
-     * @access protected
-     */
-    protected function startClass($name)
-    {
-        $this->write($name . "\n");
-    }
+class PHPUnit_Util_TestDox_ResultPrinter_Text extends PHPUnit_Util_TestDox_ResultPrinter {
 
-    /**
-     * Handler for 'on test' event.
-     *
-     * @param  string $name
-     * @access protected
-     */
-    protected function onTest($name)
-    {
-        $this->write(' - ' . $name . "\n");
-    }
+  /**
+   * Handler for 'start class' event.
+   *
+   * @param  string $name
+   * @access protected
+   */
+  protected function startClass($name) {
+    $this->write($name . "\n");
+  }
 
-    /**
-     * Handler for 'end class' event.
-     *
-     * @param  string $name
-     * @access protected
-     */
-    protected function endClass($name)
-    {
-        $this->write("\n");
-    }
+  /**
+   * Handler for 'on test' event.
+   *
+   * @param  string $name
+   * @access protected
+   */
+  protected function onTest($name) {
+    $this->write(' - ' . $name . "\n");
+  }
+
+  /**
+   * Handler for 'end class' event.
+   *
+   * @param  string $name
+   * @access protected
+   */
+  protected function endClass($name) {
+    $this->write("\n");
+  }
 }
 ?>

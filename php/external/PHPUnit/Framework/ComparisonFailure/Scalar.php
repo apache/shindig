@@ -63,46 +63,32 @@ PHPUnit_Util_Filter::addFileToFilter(__FILE__, 'PHPUNIT');
  * @link       http://www.phpunit.de/
  * @since      Class available since Release 3.0.0
  */
-class PHPUnit_Framework_ComparisonFailure_Scalar extends PHPUnit_Framework_ComparisonFailure
-{
-    /**
-     * Returns a string describing the difference between the expected and the
-     * actual scalar value.
-     */
-    public function toString()
-    {
-        if (is_int($this->expected) || is_float($this->expected)) {
-            $type             = gettype($this->expected);
-            $expectedString   = print_r($this->expected, TRUE);
-            $actualString     = print_r($this->actual, TRUE);
-            $differenceString = print_r(abs($this->actual - $this->expected), TRUE);
+class PHPUnit_Framework_ComparisonFailure_Scalar extends PHPUnit_Framework_ComparisonFailure {
 
-            $expectedLen      = strlen($expectedString);
-            $actualLen        = strlen($actualString);
-            $differenceLen    = strlen($differenceString);
-            $maxLen           = max($expectedLen, $actualLen, $differenceLen);
+  /**
+   * Returns a string describing the difference between the expected and the
+   * actual scalar value.
+   */
+  public function toString() {
+    if (is_int($this->expected) || is_float($this->expected)) {
+      $type = gettype($this->expected);
+      $expectedString = print_r($this->expected, TRUE);
+      $actualString = print_r($this->actual, TRUE);
+      $differenceString = print_r(abs($this->actual - $this->expected), TRUE);
+      
+      $expectedLen = strlen($expectedString);
+      $actualLen = strlen($actualString);
+      $differenceLen = strlen($differenceString);
+      $maxLen = max($expectedLen, $actualLen, $differenceLen);
+      
+      $expectedString = str_pad($expectedString, $maxLen, ' ', STR_PAD_LEFT);
+      $differenceString = str_pad($differenceString, $maxLen, ' ', STR_PAD_LEFT);
+      $actualString = str_pad($actualString, $maxLen, ' ', STR_PAD_LEFT);
+      
+      return sprintf("%s%sexpected %s <%s>\n" . "%sdifference%s<%s>\n" . '%sgot %s      <%s>', 
 
-            $expectedString   = str_pad($expectedString, $maxLen, ' ', STR_PAD_LEFT);
-            $differenceString = str_pad($differenceString, $maxLen, ' ', STR_PAD_LEFT);
-            $actualString     = str_pad($actualString, $maxLen, ' ', STR_PAD_LEFT);
-
-            return sprintf(
-              "%s%sexpected %s <%s>\n" .
-              "%sdifference%s<%s>\n" .
-              '%sgot %s      <%s>',
-
-              $this->message,
-              ($this->message != '') ? ' ' : '',
-              $type,
-              $expectedString,
-              ($this->message != '') ? str_repeat(' ', strlen($this->message) + 1) : '',
-              str_repeat(' ', strlen($type)),
-              $differenceString,
-              ($this->message != '') ? str_repeat(' ', strlen($this->message) + 1) : '',
-              $type,
-              $actualString
-            );
-        }
+      $this->message, ($this->message != '') ? ' ' : '', $type, $expectedString, ($this->message != '') ? str_repeat(' ', strlen($this->message) + 1) : '', str_repeat(' ', strlen($type)), $differenceString, ($this->message != '') ? str_repeat(' ', strlen($this->message) + 1) : '', $type, $actualString);
     }
+  }
 }
 ?>

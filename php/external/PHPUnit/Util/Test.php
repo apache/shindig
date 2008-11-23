@@ -60,183 +60,169 @@ PHPUnit_Util_Filter::addFileToFilter(__FILE__, 'PHPUNIT');
  * @link       http://www.phpunit.de/
  * @since      Class available since Release 3.0.0
  */
-class PHPUnit_Util_Test
-{
-    /**
-     * @param  PHPUnit_Framework_Test $test
-     * @param  boolean                $asString
-     * @return mixed
-     * @access public
-     * @static
-     */
-    public static function describe(PHPUnit_Framework_Test $test, $asString = TRUE)
-    {
-        if ($asString) {
-            if ($test instanceof PHPUnit_Framework_SelfDescribing) {
-                return $test->toString();
-            } else {
-                return get_class($test);
+class PHPUnit_Util_Test {
+
+  /**
+   * @param  PHPUnit_Framework_Test $test
+   * @param  boolean                $asString
+   * @return mixed
+   * @access public
+   * @static
+   */
+  public static function describe(PHPUnit_Framework_Test $test, $asString = TRUE) {
+    if ($asString) {
+      if ($test instanceof PHPUnit_Framework_SelfDescribing) {
+        return $test->toString();
+      } else {
+        return get_class($test);
+      }
+    } else {
+      if ($test instanceof PHPUnit_Framework_TestCase) {
+        return array(get_class($test), $test->getName());
+      } 
+
+      else if ($test instanceof PHPUnit_Framework_SelfDescribing) {
+        return array('', $test->toString());
+      } 
+
+      else {
+        return array('', get_class($test));
+      }
+    }
+  }
+
+  /**
+   * @param  PHPUnit_Framework_Test       $test
+   * @param  PHPUnit_Framework_TestResult $result
+   * @return mixed
+   * @access public
+   * @static
+   */
+  public static function lookupResult(PHPUnit_Framework_Test $test, PHPUnit_Framework_TestResult $result) {
+    $testName = self::describe($test);
+    
+    foreach ($result->errors() as $error) {
+      if ($testName == self::describe($error->failedTest())) {
+        return $error;
+      }
+    }
+    
+    foreach ($result->failures() as $failure) {
+      if ($testName == self::describe($failure->failedTest())) {
+        return $failure;
+      }
+    }
+    
+    foreach ($result->notImplemented() as $notImplemented) {
+      if ($testName == self::describe($notImplemented->failedTest())) {
+        return $notImplemented;
+      }
+    }
+    
+    foreach ($result->skipped() as $skipped) {
+      if ($testName == self::describe($skipped->failedTest())) {
+        return $skipped;
+      }
+    }
+    
+    return PHPUnit_Runner_BaseTestRunner::STATUS_PASSED;
+  }
+
+  /**
+   * Returns the files and lines a test method wants to cover.
+   *
+   * @param  string $className
+   * @param  string $methodName
+   * @return array
+   * @access public
+   * @static
+   * @since  Method available since Release 3.2.0
+   */
+  public static function getLinesToBeCovered($className, $methodName) {
+    $result = array();
+    
+    try {
+      $class = new ReflectionClass($className);
+      $method = new ReflectionMethod($className, $methodName);
+      $docComment = $class->getDocComment() . $method->getDocComment();
+      
+      if (preg_match_all('/@covers[\s]+([\:\.\w]+)/', $docComment, $matches)) {
+        foreach ($matches[1] as $method) {
+          if (strpos($method, '::') !== FALSE) {
+            list($className, $methodName) = explode('::', $method);
+            
+            $_method = new ReflectionMethod($className, $methodName);
+            $fileName = $_method->getFileName();
+            $startLine = $_method->getStartLine();
+            $endLine = $_method->getEndLine();
+            
+            if (! isset($result[$fileName])) {
+              $result[$fileName] = array();
             }
+            
+            $result[$fileName] = array_merge($result[$fileName], range($startLine, $endLine));
+          }
+        }
+      }
+    } 
+
+    catch (ReflectionException $e) {}
+    
+    return $result;
+  }
+
+  /**
+   * Returns the groups for a test class or method.
+   *
+   * @param  Reflector $reflector
+   * @param  array     $groups
+   * @return array
+   * @access public
+   * @static
+   * @since  Method available since Release 3.2.0
+   */
+  public static function getGroups(Reflector $reflector, array $groups = array()) {
+    $docComment = $reflector->getDocComment();
+    
+    if (preg_match_all('/@group[\s]+([\.\w]+)/', $docComment, $matches)) {
+      $groups = array_merge($groups, $matches[1]);
+    }
+    
+    return $groups;
+  }
+
+  /**
+   * Returns the provided data for a method.
+   *
+   * @param  string $className
+   * @param  string $methodName
+   * @return array
+   * @access public
+   * @static
+   * @since  Method available since Release 3.2.0
+   */
+  public static function getProvidedData($className, $methodName) {
+    $method = new ReflectionMethod($className, $methodName);
+    $docComment = $method->getDocComment();
+    
+    if (preg_match('/@dataProvider[\s]+([:\.\w]+)/', $docComment, $matches)) {
+      try {
+        $dataProvider = explode('::', $matches[1]);
+        $dataProviderMethodName = array_pop($dataProvider);
+        
+        if (! empty($dataProvider)) {
+          $dataProviderClassName = join('::', $dataProvider);
         } else {
-            if ($test instanceof PHPUnit_Framework_TestCase) {
-                return array(
-                  get_class($test), $test->getName()
-                );
-            }
-
-            else if ($test instanceof PHPUnit_Framework_SelfDescribing) {
-                return array('', $test->toString());
-            }
-
-            else {
-                return array('', get_class($test));
-            }
+          $dataProviderClassName = $className;
         }
+        
+        $dataProviderMethod = new ReflectionMethod($dataProviderClassName, $dataProviderMethodName);
+        
+        return $dataProviderMethod->invoke(NULL);
+      } 
+
+      catch (ReflectionException $e) {}
     }
-
-    /**
-     * @param  PHPUnit_Framework_Test       $test
-     * @param  PHPUnit_Framework_TestResult $result
-     * @return mixed
-     * @access public
-     * @static
-     */
-    public static function lookupResult(PHPUnit_Framework_Test $test, PHPUnit_Framework_TestResult $result)
-    {
-        $testName = self::describe($test);
-
-        foreach ($result->errors() as $error) {
-            if ($testName == self::describe($error->failedTest())) {
-                return $error;
-            }
-        }
-
-        foreach ($result->failures() as $failure) {
-            if ($testName == self::describe($failure->failedTest())) {
-                return $failure;
-            }
-        }
-
-        foreach ($result->notImplemented() as $notImplemented) {
-            if ($testName == self::describe($notImplemented->failedTest())) {
-                return $notImplemented;
-            }
-        }
-
-        foreach ($result->skipped() as $skipped) {
-            if ($testName == self::describe($skipped->failedTest())) {
-                return $skipped;
-            }
-        }
-
-        return PHPUnit_Runner_BaseTestRunner::STATUS_PASSED;
-    }
-
-    /**
-     * Returns the files and lines a test method wants to cover.
-     *
-     * @param  string $className
-     * @param  string $methodName
-     * @return array
-     * @access public
-     * @static
-     * @since  Method available since Release 3.2.0
-     */
-    public static function getLinesToBeCovered($className, $methodName)
-    {
-        $result = array();
-
-        try {
-            $class      = new ReflectionClass($className);
-            $method     = new ReflectionMethod($className, $methodName);
-            $docComment = $class->getDocComment() . $method->getDocComment();
-
-            if (preg_match_all('/@covers[\s]+([\:\.\w]+)/', $docComment, $matches)) {
-                foreach ($matches[1] as $method) {
-                    if (strpos($method, '::') !== FALSE) {
-                        list($className, $methodName) = explode('::', $method);
-
-                        $_method   = new ReflectionMethod($className, $methodName);
-                        $fileName  = $_method->getFileName();
-                        $startLine = $_method->getStartLine();
-                        $endLine   = $_method->getEndLine();
-
-                        if (!isset($result[$fileName])) {
-                            $result[$fileName] = array();
-                        }
-
-                        $result[$fileName] = array_merge(
-                          $result[$fileName],
-                          range($startLine, $endLine)
-                        );
-                    }
-                }
-            }
-        }
-
-        catch (ReflectionException $e) {
-        }
-
-        return $result;
-    }
-
-    /**
-     * Returns the groups for a test class or method.
-     *
-     * @param  Reflector $reflector
-     * @param  array     $groups
-     * @return array
-     * @access public
-     * @static
-     * @since  Method available since Release 3.2.0
-     */
-    public static function getGroups(Reflector $reflector, array $groups = array())
-    {
-        $docComment = $reflector->getDocComment();
-
-        if (preg_match_all('/@group[\s]+([\.\w]+)/', $docComment, $matches)) {
-            $groups = array_merge($groups, $matches[1]);
-        }
-
-        return $groups;
-    }
-
-    /**
-     * Returns the provided data for a method.
-     *
-     * @param  string $className
-     * @param  string $methodName
-     * @return array
-     * @access public
-     * @static
-     * @since  Method available since Release 3.2.0
-     */
-    public static function getProvidedData($className, $methodName)
-    {
-        $method     = new ReflectionMethod($className, $methodName);
-        $docComment = $method->getDocComment();
-
-        if (preg_match('/@dataProvider[\s]+([:\.\w]+)/', $docComment, $matches)) {
-            try {
-                $dataProvider           = explode('::', $matches[1]);
-                $dataProviderMethodName = array_pop($dataProvider);
-
-                if (!empty($dataProvider)) {
-                    $dataProviderClassName = join('::', $dataProvider);
-                } else {
-                    $dataProviderClassName = $className;
-                }
-
-                $dataProviderMethod = new ReflectionMethod(
-                  $dataProviderClassName, $dataProviderMethodName
-                );
-
-                return $dataProviderMethod->invoke(NULL);
-            }
-
-            catch (ReflectionException $e) {
-            }
-        }
-    }
+  }
 }
 ?>

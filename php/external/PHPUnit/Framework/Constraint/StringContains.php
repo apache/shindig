@@ -70,53 +70,47 @@ PHPUnit_Util_Filter::addFileToFilter(__FILE__, 'PHPUNIT');
  * @link       http://www.phpunit.de/
  * @since      Class available since Release 3.0.0
  */
-class PHPUnit_Framework_Constraint_StringContains extends PHPUnit_Framework_Constraint
-{
-    protected $string;
+class PHPUnit_Framework_Constraint_StringContains extends PHPUnit_Framework_Constraint {
+  protected $string;
+  
+  protected $case;
 
-    protected $case;
+  public function __construct($string, $case = TRUE) {
+    $this->string = $string;
+    $this->case = $case;
+  }
 
-    public function __construct($string, $case = TRUE)
-    {
-        $this->string = $string;
-        $this->case   = $case;
+  /**
+   * Evaluates the constraint for parameter $other. Returns TRUE if the
+   * constraint is met, FALSE otherwise.
+   *
+   * @param mixed $other Value or object to evaluate.
+   * @return bool
+   */
+  public function evaluate($other) {
+    if ($this->case) {
+      return strpos($other, $this->string) !== FALSE;
+    } else {
+      return stripos($other, $this->string) !== FALSE;
     }
+  }
 
-    /**
-     * Evaluates the constraint for parameter $other. Returns TRUE if the
-     * constraint is met, FALSE otherwise.
-     *
-     * @param mixed $other Value or object to evaluate.
-     * @return bool
-     */
-    public function evaluate($other)
-    {
-        if ($this->case) {
-            return strpos($other, $this->string) !== FALSE;
-        } else {
-            return stripos($other, $this->string) !== FALSE;
-        }
+  /**
+   * Returns a string representation of the constraint.
+   *
+   * @return string
+   * @access public
+   */
+  public function toString() {
+    if ($this->case) {
+      $string = $this->string;
+    } else {
+      $string = strtolower($this->string);
     }
+    
+    return sprintf('contains "%s"', 
 
-    /**
-     * Returns a string representation of the constraint.
-     *
-     * @return string
-     * @access public
-     */
-    public function toString()
-    {
-        if ($this->case) {
-            $string = $this->string;
-        } else {
-            $string = strtolower($this->string);
-        }
-
-        return sprintf(
-          'contains "%s"',
-
-          $string
-        );
-    }
+    $string);
+  }
 }
 ?>

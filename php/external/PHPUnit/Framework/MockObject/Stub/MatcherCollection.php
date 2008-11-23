@@ -63,14 +63,14 @@ PHPUnit_Util_Filter::addFileToFilter(__FILE__, 'PHPUNIT');
  * @link       http://www.phpunit.de/
  * @since      Interface available since Release 3.0.0
  */
-interface PHPUnit_Framework_MockObject_Stub_MatcherCollection
-{
-    /**
-     * Adds a new matcher to the collection which can be used as an expectation
-     * or a stub.
-     *
-     * @param PHPUnit_Framework_MockObject_Matcher_Invocation $matcher Matcher for invocations to mock objects.
-     */
-    public function addMatcher(PHPUnit_Framework_MockObject_Matcher_Invocation $matcher);
+interface PHPUnit_Framework_MockObject_Stub_MatcherCollection {
+
+  /**
+   * Adds a new matcher to the collection which can be used as an expectation
+   * or a stub.
+   *
+   * @param PHPUnit_Framework_MockObject_Matcher_Invocation $matcher Matcher for invocations to mock objects.
+   */
+  public function addMatcher(PHPUnit_Framework_MockObject_Matcher_Invocation $matcher);
 }
 ?>

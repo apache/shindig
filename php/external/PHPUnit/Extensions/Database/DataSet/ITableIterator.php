@@ -61,21 +61,20 @@ PHPUnit_Util_Filter::addFileToFilter(__FILE__, 'PHPUNIT');
  * @link       http://www.phpunit.de/
  * @since      Class available since Release 3.2.0
  */
-interface PHPUnit_Extensions_Database_DataSet_ITableIterator extends Iterator
-{
+interface PHPUnit_Extensions_Database_DataSet_ITableIterator extends Iterator {
 
-    /**
-     * Returns the current table.
-     *
-     * @return PHPUnit_Extensions_Database_DataSet_ITable
-     */
-    public function getTable();
+  /**
+   * Returns the current table.
+   *
+   * @return PHPUnit_Extensions_Database_DataSet_ITable
+   */
+  public function getTable();
 
-    /**
-     * Returns the current table's meta data.
-     *
-     * @return PHPUnit_Extensions_Database_DataSet_ITableMetaData
-     */
-    public function getTableMetaData();
+  /**
+   * Returns the current table's meta data.
+   *
+   * @return PHPUnit_Extensions_Database_DataSet_ITableMetaData
+   */
+  public function getTableMetaData();
 }
 ?>

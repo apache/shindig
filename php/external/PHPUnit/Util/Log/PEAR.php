@@ -63,185 +63,139 @@ PHPUnit_Util_Filter::addFileToFilter(__FILE__, 'PHPUNIT');
  * @link       http://www.phpunit.de/
  * @since      Class available since Release 2.1.0
  */
-class PHPUnit_Util_Log_PEAR implements PHPUnit_Framework_TestListener
-{
-    /**
-     * Log.
-     *
-     * @var    Log
-     * @access protected
-     */
-    protected $log;
+class PHPUnit_Util_Log_PEAR implements PHPUnit_Framework_TestListener {
+  /**
+   * Log.
+   *
+   * @var    Log
+   * @access protected
+   */
+  protected $log;
 
-    /**
-     * @param string $type      The type of concrete Log subclass to use.
-     *                          Currently, valid values are 'console',
-     *                          'syslog', 'sql', 'file', and 'mcal'.
-     * @param string $name      The name of the actually log file, table, or
-     *                          other specific store to use. Defaults to an
-     *                          empty string, with which the subclass will
-     *                          attempt to do something intelligent.
-     * @param string $ident     The identity reported to the log system.
-     * @param array  $conf      A hash containing any additional configuration
-     *                          information that a subclass might need.
-     * @param int $maxLevel     Maximum priority level at which to log.
-     * @access public
-     */
-    public function __construct($type, $name = '', $ident = '', $conf = array(), $maxLevel = PEAR_LOG_DEBUG)
-    {
-        $this->log = Log::factory($type, $name, $ident, $conf, $maxLevel);
-    }
+  /**
+   * @param string $type      The type of concrete Log subclass to use.
+   *                          Currently, valid values are 'console',
+   *                          'syslog', 'sql', 'file', and 'mcal'.
+   * @param string $name      The name of the actually log file, table, or
+   *                          other specific store to use. Defaults to an
+   *                          empty string, with which the subclass will
+   *                          attempt to do something intelligent.
+   * @param string $ident     The identity reported to the log system.
+   * @param array  $conf      A hash containing any additional configuration
+   *                          information that a subclass might need.
+   * @param int $maxLevel     Maximum priority level at which to log.
+   * @access public
+   */
+  public function __construct($type, $name = '', $ident = '', $conf = array(), $maxLevel = PEAR_LOG_DEBUG) {
+    $this->log = Log::factory($type, $name, $ident, $conf, $maxLevel);
+  }
 
-    /**
-     * An error occurred.
-     *
-     * @param  PHPUnit_Framework_Test $test
-     * @param  Exception              $e
-     * @param  float                  $time
-     * @access public
-     */
-    public function addError(PHPUnit_Framework_Test $test, Exception $e, $time)
-    {
-        $this->log->crit(
-          sprintf(
-            'Test "%s" failed: %s',
+  /**
+   * An error occurred.
+   *
+   * @param  PHPUnit_Framework_Test $test
+   * @param  Exception              $e
+   * @param  float                  $time
+   * @access public
+   */
+  public function addError(PHPUnit_Framework_Test $test, Exception $e, $time) {
+    $this->log->crit(sprintf('Test "%s" failed: %s', 
 
-            $test->getName(),
-            $e->getMessage()
-          )
-        );
-    }
+    $test->getName(), $e->getMessage()));
+  }
 
-    /**
-     * A failure occurred.
-     *
-     * @param  PHPUnit_Framework_Test                 $test
-     * @param  PHPUnit_Framework_AssertionFailedError $e
-     * @param  float                                  $time
-     * @access public
-     */
-    public function addFailure(PHPUnit_Framework_Test $test, PHPUnit_Framework_AssertionFailedError $e, $time)
-    {
-        $this->log->err(
-          sprintf(
-            'Test "%s" failed: %s',
+  /**
+   * A failure occurred.
+   *
+   * @param  PHPUnit_Framework_Test                 $test
+   * @param  PHPUnit_Framework_AssertionFailedError $e
+   * @param  float                                  $time
+   * @access public
+   */
+  public function addFailure(PHPUnit_Framework_Test $test, PHPUnit_Framework_AssertionFailedError $e, $time) {
+    $this->log->err(sprintf('Test "%s" failed: %s', 
 
-            $test->getName(),
-            $e->getMessage()
-          )
-        );
-    }
+    $test->getName(), $e->getMessage()));
+  }
 
-    /**
-     * Incomplete test.
-     *
-     * @param  PHPUnit_Framework_Test $test
-     * @param  Exception              $e
-     * @param  float                  $time
-     * @access public
-     */
-    public function addIncompleteTest(PHPUnit_Framework_Test $test, Exception $e, $time)
-    {
-        $this->log->info(
-          sprintf(
-            'Test "%s" incomplete: %s',
+  /**
+   * Incomplete test.
+   *
+   * @param  PHPUnit_Framework_Test $test
+   * @param  Exception              $e
+   * @param  float                  $time
+   * @access public
+   */
+  public function addIncompleteTest(PHPUnit_Framework_Test $test, Exception $e, $time) {
+    $this->log->info(sprintf('Test "%s" incomplete: %s', 
 
-            $test->getName(),
-            $e->getMessage()
-          )
-        );
-    }
+    $test->getName(), $e->getMessage()));
+  }
 
-    /**
-     * Skipped test.
-     *
-     * @param  PHPUnit_Framework_Test $test
-     * @param  Exception              $e
-     * @param  float                  $time
-     * @access public
-     * @since  Method available since Release 3.0.0
-     */
-    public function addSkippedTest(PHPUnit_Framework_Test $test, Exception $e, $time)
-    {
-        $this->log->info(
-          sprintf(
-            'Test "%s" skipped: %s',
+  /**
+   * Skipped test.
+   *
+   * @param  PHPUnit_Framework_Test $test
+   * @param  Exception              $e
+   * @param  float                  $time
+   * @access public
+   * @since  Method available since Release 3.0.0
+   */
+  public function addSkippedTest(PHPUnit_Framework_Test $test, Exception $e, $time) {
+    $this->log->info(sprintf('Test "%s" skipped: %s', 
 
-            $test->getName(),
-            $e->getMessage()
-          )
-        );
-    }
+    $test->getName(), $e->getMessage()));
+  }
 
-    /**
-     * A test suite started.
-     *
-     * @param  PHPUnit_Framework_TestSuite $suite
-     * @access public
-     * @since  Method available since Release 2.2.0
-     */
-    public function startTestSuite(PHPUnit_Framework_TestSuite $suite)
-    {
-        $this->log->info(
-          sprintf(
-            'TestSuite "%s" started.',
+  /**
+   * A test suite started.
+   *
+   * @param  PHPUnit_Framework_TestSuite $suite
+   * @access public
+   * @since  Method available since Release 2.2.0
+   */
+  public function startTestSuite(PHPUnit_Framework_TestSuite $suite) {
+    $this->log->info(sprintf('TestSuite "%s" started.', 
 
-            $suite->getName()
-          )
-        );
-    }
+    $suite->getName()));
+  }
 
-    /**
-     * A test suite ended.
-     *
-     * @param  PHPUnit_Framework_TestSuite $suite
-     * @access public
-     * @since  Method available since Release 2.2.0
-     */
-    public function endTestSuite(PHPUnit_Framework_TestSuite $suite)
-    {
-        $this->log->info(
-          sprintf(
-            'TestSuite "%s" ended.',
+  /**
+   * A test suite ended.
+   *
+   * @param  PHPUnit_Framework_TestSuite $suite
+   * @access public
+   * @since  Method available since Release 2.2.0
+   */
+  public function endTestSuite(PHPUnit_Framework_TestSuite $suite) {
+    $this->log->info(sprintf('TestSuite "%s" ended.', 
 
-            $suite->getName()
-          )
-        );
-    }
+    $suite->getName()));
+  }
 
-    /**
-     * A test started.
-     *
-     * @param  PHPUnit_Framework_Test $test
-     * @access public
-     */
-    public function startTest(PHPUnit_Framework_Test $test)
-    {
-        $this->log->info(
-          sprintf(
-            'Test "%s" started.',
+  /**
+   * A test started.
+   *
+   * @param  PHPUnit_Framework_Test $test
+   * @access public
+   */
+  public function startTest(PHPUnit_Framework_Test $test) {
+    $this->log->info(sprintf('Test "%s" started.', 
 
-            $test->getName()
-          )
-        );
-    }
+    $test->getName()));
+  }
 
-    /**
-     * A test ended.
-     *
-     * @param  PHPUnit_Framework_Test $test
-     * @param  float                  $time
-     * @access public
-     */
-    public function endTest(PHPUnit_Framework_Test $test, $time)
-    {
-        $this->log->info(
-          sprintf(
-            'Test "%s" ended.',
+  /**
+   * A test ended.
+   *
+   * @param  PHPUnit_Framework_Test $test
+   * @param  float                  $time
+   * @access public
+   */
+  public function endTest(PHPUnit_Framework_Test $test, $time) {
+    $this->log->info(sprintf('Test "%s" ended.', 
 
-            $test->getName()
-          )
-        );
-    }
+    $test->getName()));
+  }
 }
 ?>

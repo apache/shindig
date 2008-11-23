@@ -62,11 +62,10 @@ require_once 'PHPUnit/Extensions/PerformanceTestCase.php';
  * @link       http://www.phpunit.de/
  * @since      Class available since Release 2.0.0
  */
-class Sleep extends PHPUnit_Extensions_PerformanceTestCase
-{
-    public function testSleepTwoSeconds()
-    {
-        sleep(2);
-    }
+class Sleep extends PHPUnit_Extensions_PerformanceTestCase {
+
+  public function testSleepTwoSeconds() {
+    sleep(2);
+  }
 }
 ?>

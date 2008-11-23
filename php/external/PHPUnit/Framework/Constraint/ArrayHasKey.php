@@ -69,36 +69,32 @@ PHPUnit_Util_Filter::addFileToFilter(__FILE__, 'PHPUNIT');
  * @link       http://www.phpunit.de/
  * @since      Class available since Release 3.0.0
  */
-class PHPUnit_Framework_Constraint_ArrayHasKey extends PHPUnit_Framework_Constraint
-{
-    protected $key;
+class PHPUnit_Framework_Constraint_ArrayHasKey extends PHPUnit_Framework_Constraint {
+  protected $key;
 
-    public function __construct($key)
-    {
-        $this->key = $key;
-    }
+  public function __construct($key) {
+    $this->key = $key;
+  }
 
-    /**
-     * Evaluates the constraint for parameter $other. Returns TRUE if the
-     * constraint is met, FALSE otherwise.
-     *
-     * @param mixed $other Value or object to evaluate.
-     * @return bool
-     */
-    public function evaluate($other)
-    {
-        return array_key_exists($this->key, $other);
-    }
+  /**
+   * Evaluates the constraint for parameter $other. Returns TRUE if the
+   * constraint is met, FALSE otherwise.
+   *
+   * @param mixed $other Value or object to evaluate.
+   * @return bool
+   */
+  public function evaluate($other) {
+    return array_key_exists($this->key, $other);
+  }
 
-    /**
-     * Returns a string representation of the constraint.
-     *
-     * @return string
-     * @access public
-     */
-    public function toString()
-    {
-        return 'has key ' . PHPUnit_Util_Type::toString($this->key);
-    }
+  /**
+   * Returns a string representation of the constraint.
+   *
+   * @return string
+   * @access public
+   */
+  public function toString() {
+    return 'has key ' . PHPUnit_Util_Type::toString($this->key);
+  }
 }
 ?>

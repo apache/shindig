@@ -64,33 +64,30 @@ PHPUnit_Util_Filter::addFileToFilter(__FILE__, 'PHPUNIT');
  * @link       http://www.phpunit.de/
  * @since      Class available since Release 3.2.0
  */
-class PHPUnit_Extensions_Database_Operation_Delete extends PHPUnit_Extensions_Database_Operation_RowBased
-{
+class PHPUnit_Extensions_Database_Operation_Delete extends PHPUnit_Extensions_Database_Operation_RowBased {
+  
+  protected $operationName = 'DELETE';
 
-    protected $operationName = 'DELETE';
-
-    protected function buildOperationQuery(PHPUnit_Extensions_Database_DataSet_ITableMetaData $databaseTableMetaData, PHPUnit_Extensions_Database_DataSet_ITable $table, PHPUnit_Extensions_Database_DB_IDatabaseConnection $connection)
-    {
-        $keys = $databaseTableMetaData->getPrimaryKeys();
-        
-        $whereStatement = 'WHERE ' . implode(' AND ', $this->buildPreparedColumnArray($keys, $connection));
-        
-        $query = "
+  protected function buildOperationQuery(PHPUnit_Extensions_Database_DataSet_ITableMetaData $databaseTableMetaData, PHPUnit_Extensions_Database_DataSet_ITable $table, PHPUnit_Extensions_Database_DB_IDatabaseConnection $connection) {
+    $keys = $databaseTableMetaData->getPrimaryKeys();
+    
+    $whereStatement = 'WHERE ' . implode(' AND ', $this->buildPreparedColumnArray($keys, $connection));
+    
+    $query = "
 			DELETE FROM {$connection->quoteSchemaObject($table->getTableMetaData()->getTableName())}
 			{$whereStatement}
 		";
-        
-        return $query;
-    }
+    
+    return $query;
+  }
 
-    protected function buildOperationArguments(PHPUnit_Extensions_Database_DataSet_ITableMetaData $databaseTableMetaData, PHPUnit_Extensions_Database_DataSet_ITable $table, $row)
-    {
-        $args = array();
-        foreach ($databaseTableMetaData->getPrimaryKeys() as $columnName) {
-            $args[] = $table->getValue($row, $columnName);
-        }
-        
-        return $args;
+  protected function buildOperationArguments(PHPUnit_Extensions_Database_DataSet_ITableMetaData $databaseTableMetaData, PHPUnit_Extensions_Database_DataSet_ITable $table, $row) {
+    $args = array();
+    foreach ($databaseTableMetaData->getPrimaryKeys() as $columnName) {
+      $args[] = $table->getValue($row, $columnName);
     }
+    
+    return $args;
+  }
 }
 ?>

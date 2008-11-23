@@ -67,148 +67,137 @@ PHPUnit_Util_Filter::addFileToFilter(__FILE__, 'PHPUNIT');
  * @link       http://www.phpunit.de/
  * @since      Class available since Release 3.2.0
  */
-class PHPUnit_Extensions_Database_DB_DefaultDatabaseConnection implements PHPUnit_Extensions_Database_DB_IDatabaseConnection
-{
+class PHPUnit_Extensions_Database_DB_DefaultDatabaseConnection implements PHPUnit_Extensions_Database_DB_IDatabaseConnection {
+  
+  /**
+   * @var PDO
+   */
+  protected $connection;
+  
+  /**
+   * @var string
+   */
+  protected $schema;
+  
+  /**
+   * The metadata object used to retrieve table meta data from the database.
+   * 
+   * @var PHPUnit_Extensions_Database_DB_IMetaData
+   */
+  protected $metaData;
 
-    /**
-     * @var PDO
-     */
-    protected $connection;
-
-    /**
-     * @var string
-     */
-    protected $schema;
-
-    /**
-     * The metadata object used to retrieve table meta data from the database.
-     * 
-     * @var PHPUnit_Extensions_Database_DB_IMetaData
-     */
-    protected $metaData;
-
-    /**
-     * Creates a new database connection
-     *
-     * @param PDO $connection
-     * @param string $schema - The name of the database schema you will be testing against.
-     */
-    public function __construct(PDO $connection, $schema)
-    {
-        $this->connection = $connection;
-        $this->metaData = PHPUnit_Extensions_Database_DB_MetaData::createMetaData($connection, $schema);
-        $this->schema = $schema;
-        
-        $connection->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-    }
-
-    /**
-     * Close this connection.
-     */
-    public function close()
-    {
-        unset($this->connection);
-    }
-
-    /**
-     * Returns a database metadata object that can be used to retrieve table 
-     * meta data from the database.
-     *
-     * @return PHPUnit_Extensions_Database_DB_IMetaData
-     */
-    public function getMetaData()
-    {
-        return $this->metaData;
-    }
-
-    /**
-     * Returns the schema for the connection.
-     *
-     * @return string
-     */
-    public function getSchema()
-    {
-        return $this->schema;
-    }
-
-    /**
-     * Creates a dataset containing the specified table names. If no table 
-     * names are specified then it will created a dataset over the entire 
-     * database.
-     *
-     * @param array $tableNames
-     * @return PHPUnit_Extensions_Database_DataSet_IDataSet
-     * @todo Implement the filtered data set.
-     */
-    public function createDataSet(Array $tableNames = null)
-    {
-        if (empty($tableNames)) {
-            return new PHPUnit_Extensions_Database_DB_DataSet($this);
-        } else {
-            return new PHPUnit_Extensions_Database_DB_FilteredDataSet($this, $tableNames);
-        }
-    }
-
-    /**
-     * Creates a table with the result of the specified SQL statement.
-     *
-     * @param string $resultName
-     * @param string $sql
-     * @return PHPUnit_Extensions_Database_DB_Table
-     */
-    public function createQueryTable($resultName, $sql)
-    {
-        $statement = $this->connection->query($sql);
-        return new PHPUnit_Extensions_Database_DB_ResultSetTable($resultName, $statement);
-    }
-
-    /**
-     * Returns this connection database configuration 
-     *
-     * @return PHPUnit_Extensions_Database_Database_DatabaseConfig
-     */
-    public function getConfig()
-    {
+  /**
+   * Creates a new database connection
+   *
+   * @param PDO $connection
+   * @param string $schema - The name of the database schema you will be testing against.
+   */
+  public function __construct(PDO $connection, $schema) {
+    $this->connection = $connection;
+    $this->metaData = PHPUnit_Extensions_Database_DB_MetaData::createMetaData($connection, $schema);
+    $this->schema = $schema;
     
-    }
+    $connection->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+  }
 
-    /**
-     * Returns a PDO Connection
-     *
-     * @return PDO
-     */
-    public function getConnection()
-    {
-        return $this->connection;
-    }
+  /**
+   * Close this connection.
+   */
+  public function close() {
+    unset($this->connection);
+  }
 
-    /**
-     * Returns the number of rows in the given table. You can specify an 
-     * optional where clause to return a subset of the table.
-     *
-     * @param string $tableName
-     * @param string $whereClause
-     * @param int
-     */
-    public function getRowCount($tableName, $whereClause = null)
-    {
-        $query = "SELECT COUNT(*) FROM {$tableName}";
-        
-        if (isset($whereClause)) {
-            $query .= " WHERE {$whereClause}";
-        }
-    }
+  /**
+   * Returns a database metadata object that can be used to retrieve table 
+   * meta data from the database.
+   *
+   * @return PHPUnit_Extensions_Database_DB_IMetaData
+   */
+  public function getMetaData() {
+    return $this->metaData;
+  }
 
-    /**
-     * Returns a quoted schema object. (table name, column name, etc)
-     *
-     * @param string $object
-     * @return string
-     */
-    public function quoteSchemaObject($object)
-    {
-    	return $this->getMetaData()->quoteSchemaObject($object);
+  /**
+   * Returns the schema for the connection.
+   *
+   * @return string
+   */
+  public function getSchema() {
+    return $this->schema;
+  }
+
+  /**
+   * Creates a dataset containing the specified table names. If no table 
+   * names are specified then it will created a dataset over the entire 
+   * database.
+   *
+   * @param array $tableNames
+   * @return PHPUnit_Extensions_Database_DataSet_IDataSet
+   * @todo Implement the filtered data set.
+   */
+  public function createDataSet(Array $tableNames = null) {
+    if (empty($tableNames)) {
+      return new PHPUnit_Extensions_Database_DB_DataSet($this);
+    } else {
+      return new PHPUnit_Extensions_Database_DB_FilteredDataSet($this, $tableNames);
     }
+  }
+
+  /**
+   * Creates a table with the result of the specified SQL statement.
+   *
+   * @param string $resultName
+   * @param string $sql
+   * @return PHPUnit_Extensions_Database_DB_Table
+   */
+  public function createQueryTable($resultName, $sql) {
+    $statement = $this->connection->query($sql);
+    return new PHPUnit_Extensions_Database_DB_ResultSetTable($resultName, $statement);
+  }
+
+  /**
+   * Returns this connection database configuration 
+   *
+   * @return PHPUnit_Extensions_Database_Database_DatabaseConfig
+   */
+  public function getConfig() {
+
+  }
+
+  /**
+   * Returns a PDO Connection
+   *
+   * @return PDO
+   */
+  public function getConnection() {
+    return $this->connection;
+  }
+
+  /**
+   * Returns the number of rows in the given table. You can specify an 
+   * optional where clause to return a subset of the table.
+   *
+   * @param string $tableName
+   * @param string $whereClause
+   * @param int
+   */
+  public function getRowCount($tableName, $whereClause = null) {
+    $query = "SELECT COUNT(*) FROM {$tableName}";
+    
+    if (isset($whereClause)) {
+      $query .= " WHERE {$whereClause}";
+    }
+  }
+
+  /**
+   * Returns a quoted schema object. (table name, column name, etc)
+   *
+   * @param string $object
+   * @return string
+   */
+  public function quoteSchemaObject($object) {
+    return $this->getMetaData()->quoteSchemaObject($object);
+  }
 
 }
 ?>

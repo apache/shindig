@@ -60,105 +60,96 @@ require_once 'PHPUnit/Extensions/SeleniumTestCase.php';
  * @link       http://www.phpunit.de/
  * @since      Class available since Release 3.0.0
  */
-class Extensions_SeleniumTestCaseTest extends PHPUnit_Extensions_SeleniumTestCase
-{
-    public function setUp()
-    {
-        if (!PHPUNIT_TESTSUITE_EXTENSION_SELENIUM_ENABLED) {
-            $this->markTestSkipped(
-              'The Selenium tests are disabled.'
-            );
-        }
+class Extensions_SeleniumTestCaseTest extends PHPUnit_Extensions_SeleniumTestCase {
 
-        $this->setHost(PHPUNIT_TESTSUITE_EXTENSION_SELENIUM_HOST);
-        $this->setPort(PHPUNIT_TESTSUITE_EXTENSION_SELENIUM_PORT);
-        $this->setBrowser(PHPUNIT_TESTSUITE_EXTENSION_SELENIUM_BROWSER);
-        $this->setBrowserUrl('http://www.openqa.org/');
-        $this->setTimeout(10000);
+  public function setUp() {
+    if (! PHPUNIT_TESTSUITE_EXTENSION_SELENIUM_ENABLED) {
+      $this->markTestSkipped('The Selenium tests are disabled.');
     }
+    
+    $this->setHost(PHPUNIT_TESTSUITE_EXTENSION_SELENIUM_HOST);
+    $this->setPort(PHPUNIT_TESTSUITE_EXTENSION_SELENIUM_PORT);
+    $this->setBrowser(PHPUNIT_TESTSUITE_EXTENSION_SELENIUM_BROWSER);
+    $this->setBrowserUrl('http://www.openqa.org/');
+    $this->setTimeout(10000);
+  }
 
-    public function testOpen()
-    {
-        $this->open('http://www.openqa.org/selenium-core/demo/passing/html/test_open.html');
-        $this->assertTextPresent('This is a test of the open command.');
+  public function testOpen() {
+    $this->open('http://www.openqa.org/selenium-core/demo/passing/html/test_open.html');
+    $this->assertTextPresent('This is a test of the open command.');
+  }
+
+  public function testClick() {
+    $this->open('http://www.openqa.org/selenium-core/demo/passing/html/test_click_page1.html');
+    $this->assertElementContainsText('nextPage', 'Click here for next page');
+    $this->clickAndWait('nextPage');
+    $this->assertLocationEquals('http://www.openqa.org/selenium-core/demo/passing/html/test_click_page2.html');
+    $this->assertTextPresent('This is a test of the click command.');
+    $this->clickAndWait('previousPage');
+    $this->assertLocationEquals('http://www.openqa.org/selenium-core/demo/passing/html/test_click_page1.html');
+  }
+
+  public function testType() {
+    $this->open('http://www.openqa.org/selenium-core/demo/passing/html/test_type_page1.html');
+    $this->assertElementPresent('username');
+    $this->type('username', 'TestUser');
+    $this->assertElementValueEquals('username', 'TestUser');
+    $this->assertElementPresent('password');
+    $this->type('password', 'testUserPassword');
+    $this->assertElementValueEquals('password', 'testUserPassword');
+    $this->clickAndWait('submitButton');
+    $this->assertTextPresent('Welcome, TestUser!');
+  }
+
+  public function testOpenFail() {
+    $this->open('http://www.openqa.org/selenium-core/demo/failing/html/test_open.html');
+    
+    try {
+      $this->assertTextPresent('This test has been modified so it will fail.');
+    } 
+
+    catch (Exception $e) {
+      return;
     }
+    
+    $this->fail();
+  }
 
-    public function testClick()
-    {
-        $this->open('http://www.openqa.org/selenium-core/demo/passing/html/test_click_page1.html');
-        $this->assertElementContainsText('nextPage', 'Click here for next page');
-        $this->clickAndWait('nextPage');
-        $this->assertLocationEquals('http://www.openqa.org/selenium-core/demo/passing/html/test_click_page2.html');
-        $this->assertTextPresent('This is a test of the click command.');
-        $this->clickAndWait('previousPage');
-        $this->assertLocationEquals('http://www.openqa.org/selenium-core/demo/passing/html/test_click_page1.html');
+  public function testTypeFail() {
+    $this->open('http://www.openqa.org/selenium-core/demo/failing/html/test_type_page1.html');
+    $this->assertElementPresent('username');
+    $this->type('username', 'TestUser');
+    $this->assertElementValueEquals('username', 'TestUser');
+    $this->assertElementPresent('password');
+    $this->type('password', 'usersPassword');
+    
+    try {
+      $this->assertElementValueEquals('password', 'testUserPassword');
+    } 
+
+    catch (Exception $e) {
+      return;
     }
+    
+    $this->fail();
+  }
 
-    public function testType()
-    {
-        $this->open('http://www.openqa.org/selenium-core/demo/passing/html/test_type_page1.html');
-        $this->assertElementPresent('username');
-        $this->type('username', 'TestUser');
-        $this->assertElementValueEquals('username', 'TestUser');
-        $this->assertElementPresent('password');
-        $this->type('password', 'testUserPassword');
-        $this->assertElementValueEquals('password', 'testUserPassword');
-        $this->clickAndWait('submitButton');
-        $this->assertTextPresent('Welcome, TestUser!');
-    }
-
-    public function testOpenFail()
-    {
-        $this->open('http://www.openqa.org/selenium-core/demo/failing/html/test_open.html');
-
-        try {
-            $this->assertTextPresent('This test has been modified so it will fail.');
-        }
-
-        catch (Exception $e) {
-            return;
-        }
-
-        $this->fail();
-    }
-
-    public function testTypeFail()
-    {
-        $this->open('http://www.openqa.org/selenium-core/demo/failing/html/test_type_page1.html');
-        $this->assertElementPresent('username');
-        $this->type('username', 'TestUser');
-        $this->assertElementValueEquals('username', 'TestUser');
-        $this->assertElementPresent('password');
-        $this->type('password', 'usersPassword');
-
-        try {
-            $this->assertElementValueEquals('password', 'testUserPassword');
-        }
-
-        catch (Exception $e) {
-            return;
-        }
-
-        $this->fail();  
-    }
-
-    public function testInPlaceEditor()
-    {
-        $this->open('http://www.openqa.org/selenium-core/ajaxdemo/scriptaculous-js-1.6.1/test/functional/ajax_inplaceeditor_test.html');
-        $this->mouseOver('tobeedited');
-        $this->click('tobeedited');
-        $this->assertNotVisible('tobeedited');
-        $this->assertElementPresent('tobeedited-inplaceeditor');
-        $this->click('link=cancel');
-        $this->assertElementContainsText('tobeedited', 'To be edited');
-        $this->assertVisible('tobeedited');
-        $this->click('tobeedited');
-        $this->click("//input[@class='editor_ok_button']");
-        $this->assertVisible('tobeedited');
-#       $this->waitForText('tobeedited', 'Server received: To be edited');
-        // Workaround for not yet implemented waitForText
-        sleep(1);
-        $this->assertElementContainsText('tobeedited', 'Server received: To be edited');
-    }
+  public function testInPlaceEditor() {
+    $this->open('http://www.openqa.org/selenium-core/ajaxdemo/scriptaculous-js-1.6.1/test/functional/ajax_inplaceeditor_test.html');
+    $this->mouseOver('tobeedited');
+    $this->click('tobeedited');
+    $this->assertNotVisible('tobeedited');
+    $this->assertElementPresent('tobeedited-inplaceeditor');
+    $this->click('link=cancel');
+    $this->assertElementContainsText('tobeedited', 'To be edited');
+    $this->assertVisible('tobeedited');
+    $this->click('tobeedited');
+    $this->click("//input[@class='editor_ok_button']");
+    $this->assertVisible('tobeedited');
+    #       $this->waitForText('tobeedited', 'Server received: To be edited');
+    // Workaround for not yet implemented waitForText
+    sleep(1);
+    $this->assertElementContainsText('tobeedited', 'Server received: To be edited');
+  }
 }
 ?>

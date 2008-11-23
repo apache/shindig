@@ -69,27 +69,23 @@ PHPUnit_Util_Filter::addFileToFilter(__FILE__, 'PHPUNIT');
  * @link       http://www.phpunit.de/
  * @since      Class available since Release 3.0.0
  */
-class PHPUnit_Framework_MockObject_Matcher_MethodName extends PHPUnit_Framework_MockObject_Matcher_StatelessInvocation
-{
-    protected $constraint;
+class PHPUnit_Framework_MockObject_Matcher_MethodName extends PHPUnit_Framework_MockObject_Matcher_StatelessInvocation {
+  protected $constraint;
 
-    public function __construct($constraint)
-    {
-        if (!($constraint instanceof PHPUnit_Framework_Constraint)) {
-            $constraint = new PHPUnit_Framework_Constraint_IsEqual($constraint);
-        }
-
-        $this->constraint = $constraint;
+  public function __construct($constraint) {
+    if (! ($constraint instanceof PHPUnit_Framework_Constraint)) {
+      $constraint = new PHPUnit_Framework_Constraint_IsEqual($constraint);
     }
+    
+    $this->constraint = $constraint;
+  }
 
-    public function toString()
-    {
-        return 'method name ' . $this->constraint->toString();
-    }
+  public function toString() {
+    return 'method name ' . $this->constraint->toString();
+  }
 
-    public function matches(PHPUnit_Framework_MockObject_Invocation $invocation)
-    {
-        return $this->constraint->evaluate($invocation->methodName);
-    }
+  public function matches(PHPUnit_Framework_MockObject_Invocation $invocation) {
+    return $this->constraint->evaluate($invocation->methodName);
+  }
 }
 ?>

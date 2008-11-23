@@ -67,22 +67,22 @@ PHPUnit_Util_Filter::addFileToFilter(__FILE__, 'PHPUNIT');
  * @link       http://www.phpunit.de/
  * @since      Interface available since Release 3.0.0
  */
-interface PHPUnit_Framework_MockObject_MockObject extends PHPUnit_Framework_MockObject_Verifiable
-{
-    /**
-     * Returns the current invocation mocker which keeps track of expecations
-     * and stubs.
-     * @return PHPUnit_Framework_MockObject_InvocationMocker
-     */
-    public function getInvocationMocker();
+interface PHPUnit_Framework_MockObject_MockObject extends PHPUnit_Framework_MockObject_Verifiable {
 
-    /**
-     * Registers a new expectation in the mock object and returns the match
-     * object which can be infused with further details.
-     *
-     * @param  PHPUnit_Framework_MockObject_Matcher_Invocation $invocation The invocation handler for the method calls.
-     * @return PHPUnit_Framework_MockObject_Builder_MethodNameMatch
-     */
-    public function expects(PHPUnit_Framework_MockObject_Matcher_Invocation $invocation);
+  /**
+   * Returns the current invocation mocker which keeps track of expecations
+   * and stubs.
+   * @return PHPUnit_Framework_MockObject_InvocationMocker
+   */
+  public function getInvocationMocker();
+
+  /**
+   * Registers a new expectation in the mock object and returns the match
+   * object which can be infused with further details.
+   *
+   * @param  PHPUnit_Framework_MockObject_Matcher_Invocation $invocation The invocation handler for the method calls.
+   * @return PHPUnit_Framework_MockObject_Builder_MethodNameMatch
+   */
+  public function expects(PHPUnit_Framework_MockObject_Matcher_Invocation $invocation);
 }
 ?>

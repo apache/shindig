@@ -65,36 +65,32 @@ PHPUnit_Util_Filter::addFileToFilter(__FILE__, 'PHPUNIT');
  * @link       http://www.phpunit.de/
  * @since      Class available since Release 3.0.0
  */
-class PHPUnit_Framework_Constraint_GreaterThan extends PHPUnit_Framework_Constraint
-{
-    protected $value;
+class PHPUnit_Framework_Constraint_GreaterThan extends PHPUnit_Framework_Constraint {
+  protected $value;
 
-    public function __construct($value)
-    {
-        $this->value = $value;
-    }
+  public function __construct($value) {
+    $this->value = $value;
+  }
 
-    /**
-     * Evaluates the constraint for parameter $other. Returns TRUE if the
-     * constraint is met, FALSE otherwise.
-     *
-     * @param mixed $other Value or object to evaluate.
-     * @return bool
-     */
-    public function evaluate($other)
-    {
-        return $this->value < $other;
-    }
+  /**
+   * Evaluates the constraint for parameter $other. Returns TRUE if the
+   * constraint is met, FALSE otherwise.
+   *
+   * @param mixed $other Value or object to evaluate.
+   * @return bool
+   */
+  public function evaluate($other) {
+    return $this->value < $other;
+  }
 
-    /**
-     * Returns a string representation of the constraint.
-     *
-     * @return string
-     * @access public
-     */
-    public function toString()
-    {
-        return 'is greater than ' . PHPUnit_Util_Type::toString($this->value);
-    }
+  /**
+   * Returns a string representation of the constraint.
+   *
+   * @return string
+   * @access public
+   */
+  public function toString() {
+    return 'is greater than ' . PHPUnit_Util_Type::toString($this->value);
+  }
 }
 ?>

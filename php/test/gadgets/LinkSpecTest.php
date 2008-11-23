@@ -1,5 +1,5 @@
 <?php
-/*
+/**
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -8,7 +8,7 @@
  * "License"); you may not use this file except in compliance
  * with the License.  You may obtain a copy of the License at
  *
- *   http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
@@ -22,59 +22,53 @@
  * LinkSpec test case.
  */
 class LinkSpecTest extends PHPUnit_Framework_TestCase {
-	
-	/**
-	 * @var LinkSpec
-	 */
-	private $LinkSpec;
+  
+  /**
+   * @var LinkSpec
+   */
+  private $LinkSpec;
 
-	/**
-	 * Prepares the environment before running a test.
-	 */
-	protected function setUp()
-	{
-		parent::setUp();
-		$this->LinkSpec = new LinkSpec('rel', 'href', 'method');	
-	}
+  /**
+   * Prepares the environment before running a test.
+   */
+  protected function setUp() {
+    parent::setUp();
+    $this->LinkSpec = new LinkSpec('rel', 'href', 'method');
+  }
 
-	/**
-	 * Cleans up the environment after running a test.
-	 */
-	protected function tearDown()
-	{
-		$this->LinkSpec = null;		
-		parent::tearDown();
-	}
+  /**
+   * Cleans up the environment after running a test.
+   */
+  protected function tearDown() {
+    $this->LinkSpec = null;
+    parent::tearDown();
+  }
 
-	/**
-	 * Tests LinkSpec->__construct()
-	 */
-	public function test__construct()
-	{
-		$this->LinkSpec = new LinkSpec('rel', 'href', 'method');	
-	}
+  /**
+   * Tests LinkSpec->__construct()
+   */
+  public function test__construct() {
+    $this->LinkSpec = new LinkSpec('rel', 'href', 'method');
+  }
 
-	/**
-	 * Tests LinkSpec->getHref()
-	 */
-	public function testGetHref()
-	{
-		$this->assertEquals('href', $this->LinkSpec->getHref());	
-	}
+  /**
+   * Tests LinkSpec->getHref()
+   */
+  public function testGetHref() {
+    $this->assertEquals('href', $this->LinkSpec->getHref());
+  }
 
-	/**
-	 * Tests LinkSpec->getMethod()
-	 */
-	public function testGetMethod()
-	{
-		$this->assertEquals('method', $this->LinkSpec->getMethod());
-	}
+  /**
+   * Tests LinkSpec->getMethod()
+   */
+  public function testGetMethod() {
+    $this->assertEquals('method', $this->LinkSpec->getMethod());
+  }
 
-	/**
-	 * Tests LinkSpec->getRel()
-	 */
-	public function testGetRel()
-	{
-		$this->assertEquals('rel', $this->LinkSpec->getRel());
-	}
+  /**
+   * Tests LinkSpec->getRel()
+   */
+  public function testGetRel() {
+    $this->assertEquals('rel', $this->LinkSpec->getRel());
+  }
 }

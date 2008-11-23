@@ -63,118 +63,108 @@ PHPUnit_Util_Filter::addFileToFilter(__FILE__, 'PHPUNIT');
  * @link       http://www.phpunit.de/
  * @since      Class available since Release 3.2.0
  */
-abstract class PHPUnit_Extensions_Database_DB_MetaData implements PHPUnit_Extensions_Database_DB_IMetaData
-{
-    protected static $metaDataClassMap = array(
-        'mysql'  => 'PHPUnit_Extensions_Database_DB_MetaData_MySQL',
-        'oci'    => 'PHPUnit_Extensions_Database_DB_MetaData_Oci',
-        'sqlite' => 'PHPUnit_Extensions_Database_DB_MetaData_Sqlite'
-    );
+abstract class PHPUnit_Extensions_Database_DB_MetaData implements PHPUnit_Extensions_Database_DB_IMetaData {
+  protected static $metaDataClassMap = array('mysql' => 'PHPUnit_Extensions_Database_DB_MetaData_MySQL', 
+      'oci' => 'PHPUnit_Extensions_Database_DB_MetaData_Oci', 
+      'sqlite' => 'PHPUnit_Extensions_Database_DB_MetaData_Sqlite');
+  
+  /**
+   * The PDO connection used to retreive database meta data
+   * 
+   * @var PDO
+   */
+  protected $pdo;
+  
+  /**
+   * The default schema name for the meta data object.
+   * 
+   * @var string
+   */
+  protected $schema;
+  
+  /**
+   * The character used to quote schema objects.
+   */
+  protected $schemaObjectQuoteChar = '"';
 
-    /**
-     * The PDO connection used to retreive database meta data
-     * 
-     * @var PDO
-     */
-    protected $pdo;
+  /**
+   * Creates a new database meta data object using the given pdo connection 
+   * and schema name.
+   *
+   * @param PDO $pdo
+   * @param string $schema
+   */
+  public final function __construct(PDO $pdo, $schema) {
+    $this->pdo = $pdo;
+    $this->schema = $schema;
+  }
 
-    /**
-     * The default schema name for the meta data object.
-     * 
-     * @var string
-     */
-    protected $schema;
-
-    /**
-     * The character used to quote schema objects.
-     */
-    protected $schemaObjectQuoteChar = '"';
-
-    /**
-     * Creates a new database meta data object using the given pdo connection 
-     * and schema name.
-     *
-     * @param PDO $pdo
-     * @param string $schema
-     */
-    public final function __construct(PDO $pdo, $schema)
-    {
-        $this->pdo = $pdo;
-        $this->schema = $schema;
+  /**
+   * Creates a meta data object based on the driver of given $pdo object and 
+   * $schema name.
+   *
+   * @param PDO $pdo
+   * @param string $schema
+   * @return PHPUnit_Extensions_Database_DB_MetaData
+   */
+  public static function createMetaData(PDO $pdo, $schema) {
+    $driverName = $pdo->getAttribute(PDO::ATTR_DRIVER_NAME);
+    if (isset(self::$metaDataClassMap[$driverName])) {
+      $className = self::$metaDataClassMap[$driverName];
+      
+      if ($className instanceof ReflectionClass) {
+        return $className->newInstance($pdo, $schema);
+      } else {
+        return self::registerClassWithDriver($className, $driverName)->newInstance($pdo, $schema);
+      }
+    } else {
+      throw new Exception("Could not find a meta data driver for {$driverName} pdo driver.");
     }
+  }
 
-    /**
-     * Creates a meta data object based on the driver of given $pdo object and 
-     * $schema name.
-     *
-     * @param PDO $pdo
-     * @param string $schema
-     * @return PHPUnit_Extensions_Database_DB_MetaData
-     */
-    public static function createMetaData(PDO $pdo, $schema)
-    {
-        $driverName = $pdo->getAttribute(PDO::ATTR_DRIVER_NAME);
-        if (isset(self::$metaDataClassMap[$driverName])) {
-            $className = self::$metaDataClassMap[$driverName];
-            
-            if ($className instanceof ReflectionClass) {
-                return $className->newInstance($pdo, $schema);
-            } else {
-                return self::registerClassWithDriver($className, $driverName)->newInstance($pdo, $schema);
-            }
-        } else {
-            throw new Exception("Could not find a meta data driver for {$driverName} pdo driver.");
-        }
+  /**
+   * Validates and registers the given $className with the given $pdoDriver. 
+   * It should be noted that this function will not attempt to include / 
+   * require the file. The $pdoDriver can be determined by the value of the 
+   * PDO::ATTR_DRIVER_NAME attribute for a pdo object.
+   * 
+   * A reflection of the $className is returned.
+   *
+   * @param string $className
+   * @param string $pdoDriver
+   * @return ReflectionClass
+   */
+  public static function registerClassWithDriver($className, $pdoDriver) {
+    if (! class_exists($className)) {
+      throw new Exception("Specified class for {$pdoDriver} driver ({$className}) does not exist.");
     }
+    
+    $reflection = new ReflectionClass($className);
+    if ($reflection->isSubclassOf('PHPUnit_Extensions_Database_DB_MetaData')) {
+      return self::$metaDataClassMap[$pdoDriver] = $reflection;
+    } else {
+      throw new Exception("Specified class for {$pdoDriver} driver ({$className}) does not extend PHPUnit_Extensions_Database_DB_MetaData.");
+    }
+  }
 
-    /**
-     * Validates and registers the given $className with the given $pdoDriver. 
-     * It should be noted that this function will not attempt to include / 
-     * require the file. The $pdoDriver can be determined by the value of the 
-     * PDO::ATTR_DRIVER_NAME attribute for a pdo object.
-     * 
-     * A reflection of the $className is returned.
-     *
-     * @param string $className
-     * @param string $pdoDriver
-     * @return ReflectionClass
-     */
-    public static function registerClassWithDriver($className, $pdoDriver)
-    {
-        if (!class_exists($className)) {
-            throw new Exception("Specified class for {$pdoDriver} driver ({$className}) does not exist.");
-        }
-        
-        $reflection = new ReflectionClass($className);
-        if ($reflection->isSubclassOf('PHPUnit_Extensions_Database_DB_MetaData')) {
-            return self::$metaDataClassMap[$pdoDriver] = $reflection;
-        } else {
-            throw new Exception("Specified class for {$pdoDriver} driver ({$className}) does not extend PHPUnit_Extensions_Database_DB_MetaData.");
-        }
-    }
+  /**
+   * Returns the schema for the connection.
+   *
+   * @return string
+   */
+  public function getSchema() {
+    return $this->schema;
+  }
 
-    /**
-     * Returns the schema for the connection.
-     *
-     * @return string
-     */
-    public function getSchema()
-    {
-        return $this->schema;
-    }
-
-    /**
-     * Returns a quoted schema object. (table name, column name, etc)
-     *
-     * @param string $object
-     * @return string
-     */
-    public function quoteSchemaObject($object)
-    {
-    	return $this->schemaObjectQuoteChar.
-		str_replace($this->schemaObjectQuoteChar, $this->schemaObjectQuoteChar.$this->schemaObjectQuoteChar, $object).
-		$this->schemaObjectQuoteChar;
-    }
+  /**
+   * Returns a quoted schema object. (table name, column name, etc)
+   *
+   * @param string $object
+   * @return string
+   */
+  public function quoteSchemaObject($object) {
+    return $this->schemaObjectQuoteChar . str_replace($this->schemaObjectQuoteChar, $this->schemaObjectQuoteChar . $this->schemaObjectQuoteChar, $object) . $this->schemaObjectQuoteChar;
+  }
 }
 
 /**

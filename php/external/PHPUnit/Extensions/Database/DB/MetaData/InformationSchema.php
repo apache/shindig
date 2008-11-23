@@ -62,21 +62,19 @@ PHPUnit_Util_Filter::addFileToFilter(__FILE__, 'PHPUNIT');
  * @link       http://www.phpunit.de/
  * @since      Class available since Release 3.2.0
  */
-class PHPUnit_Extensions_Database_DB_MetaData_InformationSchema extends PHPUnit_Extensions_Database_DB_MetaData
-{
+class PHPUnit_Extensions_Database_DB_MetaData_InformationSchema extends PHPUnit_Extensions_Database_DB_MetaData {
+  
+  protected $columns = array();
+  
+  protected $keys = array();
 
-    protected $columns = array();
-
-    protected $keys = array();
-
-    /**
-     * Returns an array containing the names of all the tables in the database.
-     *
-     * @return array
-     */
-    public function getTableNames()
-    {
-        $query = "
+  /**
+   * Returns an array containing the names of all the tables in the database.
+   *
+   * @return array
+   */
+  public function getTableNames() {
+    $query = "
             SELECT DISTINCT
             	TABLE_NAME 
             FROM INFORMATION_SCHEMA.TABLES
@@ -85,61 +83,58 @@ class PHPUnit_Extensions_Database_DB_MetaData_InformationSchema extends PHPUnit_
                 TABLE_SCHEMA = ?
             ORDER BY TABLE_NAME
         ";
-        
-        $statement = $this->pdo->prepare($query);
-        $statement->execute(array($this->getSchema()));
-        
-        $tableNames = array();
-        while ($tableName = $statement->fetchColumn(0)) {
-            $tableNames[] = $tableName;
-        }
-        
-        return $tableNames;
+    
+    $statement = $this->pdo->prepare($query);
+    $statement->execute(array($this->getSchema()));
+    
+    $tableNames = array();
+    while ($tableName = $statement->fetchColumn(0)) {
+      $tableNames[] = $tableName;
     }
+    
+    return $tableNames;
+  }
 
-    /**
-     * Returns an array containing the names of all the columns in the 
-     * $tableName table,
-     *
-     * @param string $tableName
-     * @return array
-     */
-    public function getTableColumns($tableName)
-    {
-        if (!isset($this->columns[$tableName])) {
-            $this->loadColumnInfo($tableName);
-        }
-        
-        return $this->columns[$tableName];
+  /**
+   * Returns an array containing the names of all the columns in the 
+   * $tableName table,
+   *
+   * @param string $tableName
+   * @return array
+   */
+  public function getTableColumns($tableName) {
+    if (! isset($this->columns[$tableName])) {
+      $this->loadColumnInfo($tableName);
     }
+    
+    return $this->columns[$tableName];
+  }
 
-    /**
-     * Returns an array containing the names of all the primary key columns in 
-     * the $tableName table.
-     *
-     * @param string $tableName
-     * @return array
-     */
-    public function getTablePrimaryKeys($tableName)
-    {
-        if (!isset($this->keys[$tableName])) {
-            $this->loadColumnInfo($tableName);
-        }
-        
-        return $this->keys[$tableName];
+  /**
+   * Returns an array containing the names of all the primary key columns in 
+   * the $tableName table.
+   *
+   * @param string $tableName
+   * @return array
+   */
+  public function getTablePrimaryKeys($tableName) {
+    if (! isset($this->keys[$tableName])) {
+      $this->loadColumnInfo($tableName);
     }
+    
+    return $this->keys[$tableName];
+  }
 
-    /**
-     * Loads column info from a sqlite database.
-     *
-     * @param string $tableName
-     */
-    protected function loadColumnInfo($tableName)
-    {
-        $this->columns[$tableName] = array();
-        $this->keys[$tableName] = array();
-        
-        $columnQuery = "
+  /**
+   * Loads column info from a sqlite database.
+   *
+   * @param string $tableName
+   */
+  protected function loadColumnInfo($tableName) {
+    $this->columns[$tableName] = array();
+    $this->keys[$tableName] = array();
+    
+    $columnQuery = "
             SELECT DISTINCT
             	COLUMN_NAME 
             FROM INFORMATION_SCHEMA.COLUMNS
@@ -148,15 +143,15 @@ class PHPUnit_Extensions_Database_DB_MetaData_InformationSchema extends PHPUnit_
                 TABLE_SCHEMA = ?
             ORDER BY ORDINAL_POSITION
         ";
-        
-        $columnStatement = $this->pdo->prepare($columnQuery);
-        $columnStatement->execute(array($tableName, $this->getSchema()));
-        
-        while ($columName = $columnStatement->fetchColumn(0)) {
-            $this->columns[$tableName][] = $columName;
-        }
-        
-        $keyQuery = "
+    
+    $columnStatement = $this->pdo->prepare($columnQuery);
+    $columnStatement->execute(array($tableName, $this->getSchema()));
+    
+    while ($columName = $columnStatement->fetchColumn(0)) {
+      $this->columns[$tableName][] = $columName;
+    }
+    
+    $keyQuery = "
 			SELECT
 				KCU.COLUMN_NAME
 			FROM
@@ -172,13 +167,13 @@ class PHPUnit_Extensions_Database_DB_MetaData_InformationSchema extends PHPUnit_
 			ORDER BY
 				KCU.ORDINAL_POSITION ASC
     	";
-        
-        $keyStatement = $this->pdo->prepare($keyQuery);
-        $keyStatement->execute(array($tableName, $this->getSchema()));
-        
-        while ($columName = $keyStatement->fetchColumn(0)) {
-            $this->keys[$tableName][] = $columName;
-        }
+    
+    $keyStatement = $this->pdo->prepare($keyQuery);
+    $keyStatement->execute(array($tableName, $this->getSchema()));
+    
+    while ($columName = $keyStatement->fetchColumn(0)) {
+      $this->keys[$tableName][] = $columName;
     }
+  }
 }
 ?>

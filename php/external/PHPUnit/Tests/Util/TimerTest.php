@@ -60,19 +60,18 @@ require_once 'PHPUnit/Util/Timer.php';
  * @link       http://www.phpunit.de/
  * @since      Class available since Release 2.1.0
  */
-class Util_TimerTest extends PHPUnit_Framework_TestCase
-{
-    public function testSecondsToTimeString()
-    {
-        $this->assertEquals('0 seconds', PHPUnit_Util_Timer::secondsToTimeString(0));
-        $this->assertEquals('1 second', PHPUnit_Util_Timer::secondsToTimeString(1));
-        $this->assertEquals('2 seconds', PHPUnit_Util_Timer::secondsToTimeString(2));
-        $this->assertEquals('01:00', PHPUnit_Util_Timer::secondsToTimeString(60));
-        $this->assertEquals('01:01', PHPUnit_Util_Timer::secondsToTimeString(61));
-        $this->assertEquals('02:00', PHPUnit_Util_Timer::secondsToTimeString(120));
-        $this->assertEquals('02:01', PHPUnit_Util_Timer::secondsToTimeString(121));
-        $this->assertEquals('01:00:00', PHPUnit_Util_Timer::secondsToTimeString(3600));
-        $this->assertEquals('01:00:01', PHPUnit_Util_Timer::secondsToTimeString(3601));
-    }
+class Util_TimerTest extends PHPUnit_Framework_TestCase {
+
+  public function testSecondsToTimeString() {
+    $this->assertEquals('0 seconds', PHPUnit_Util_Timer::secondsToTimeString(0));
+    $this->assertEquals('1 second', PHPUnit_Util_Timer::secondsToTimeString(1));
+    $this->assertEquals('2 seconds', PHPUnit_Util_Timer::secondsToTimeString(2));
+    $this->assertEquals('01:00', PHPUnit_Util_Timer::secondsToTimeString(60));
+    $this->assertEquals('01:01', PHPUnit_Util_Timer::secondsToTimeString(61));
+    $this->assertEquals('02:00', PHPUnit_Util_Timer::secondsToTimeString(120));
+    $this->assertEquals('02:01', PHPUnit_Util_Timer::secondsToTimeString(121));
+    $this->assertEquals('01:00:00', PHPUnit_Util_Timer::secondsToTimeString(3600));
+    $this->assertEquals('01:00:01', PHPUnit_Util_Timer::secondsToTimeString(3601));
+  }
 }
 ?>

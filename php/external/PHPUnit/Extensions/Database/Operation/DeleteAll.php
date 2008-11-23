@@ -64,24 +64,22 @@ PHPUnit_Util_Filter::addFileToFilter(__FILE__, 'PHPUNIT');
  * @link       http://www.phpunit.de/
  * @since      Class available since Release 3.2.0
  */
-class PHPUnit_Extensions_Database_Operation_DeleteAll implements PHPUnit_Extensions_Database_Operation_IDatabaseOperation
-{
+class PHPUnit_Extensions_Database_Operation_DeleteAll implements PHPUnit_Extensions_Database_Operation_IDatabaseOperation {
 
-    public function execute(PHPUnit_Extensions_Database_DB_IDatabaseConnection $connection, PHPUnit_Extensions_Database_DataSet_IDataSet $dataSet)
-    {
-        foreach ($dataSet as $table) {
-            /* @var $table PHPUnit_Extensions_Database_DataSet_ITable */
-            
-            $query = "
+  public function execute(PHPUnit_Extensions_Database_DB_IDatabaseConnection $connection, PHPUnit_Extensions_Database_DataSet_IDataSet $dataSet) {
+    foreach ($dataSet as $table) {
+      /* @var $table PHPUnit_Extensions_Database_DataSet_ITable */
+      
+      $query = "
                 DELETE FROM {$connection->quoteSchemaObject($table->getTableMetaData()->getTableName())}
             ";
-            
-            try {
-                $connection->getConnection()->query($query);
-            } catch (PDOException $e) {
-                throw new PHPUnit_Extensions_Database_Operation_Exception('DELETE_ALL', $query, array(), $table, $e->getMessage());
-            }
-        }
+      
+      try {
+        $connection->getConnection()->query($query);
+      } catch (PDOException $e) {
+        throw new PHPUnit_Extensions_Database_Operation_Exception('DELETE_ALL', $query, array(), $table, $e->getMessage());
+      }
     }
+  }
 }
 ?>

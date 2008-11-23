@@ -64,34 +64,28 @@ PHPUnit_Util_Filter::addFileToFilter(__FILE__, 'PHPUNIT');
  * @link       http://www.phpunit.de/
  * @since      Class available since Release 3.0.0
  */
-class PHPUnit_Framework_MockObject_Stub_ConsecutiveCalls implements PHPUnit_Framework_MockObject_Stub
-{
-    protected $stack;
-    protected $value;
+class PHPUnit_Framework_MockObject_Stub_ConsecutiveCalls implements PHPUnit_Framework_MockObject_Stub {
+  protected $stack;
+  protected $value;
 
-    public function __construct($stack)
-    {
-        $this->stack = $stack;
+  public function __construct($stack) {
+    $this->stack = $stack;
+  }
+
+  public function invoke(PHPUnit_Framework_MockObject_Invocation $invocation) {
+    $this->value = array_shift($this->stack);
+    
+    if ($this->value instanceof PHPUnit_Framework_MockObject_Stub) {
+      $this->value = $this->value->invoke($invocation);
     }
+    
+    return $this->value;
+  }
 
-    public function invoke(PHPUnit_Framework_MockObject_Invocation $invocation)
-    {
-        $this->value = array_shift($this->stack);
+  public function toString() {
+    return sprintf('return user-specified value %s', 
 
-        if ($this->value instanceof PHPUnit_Framework_MockObject_Stub) {
-            $this->value = $this->value->invoke($invocation);
-        }
-
-        return $this->value;
-    }
-
-    public function toString()
-    {
-        return sprintf(
-          'return user-specified value %s',
-
-          PHPUnit_Util_Type::toString($this->value)
-        );
-    }
+    PHPUnit_Util_Type::toString($this->value));
+  }
 }
 ?>

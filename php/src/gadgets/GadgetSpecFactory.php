@@ -1,5 +1,5 @@
 <?php
-/*
+/**
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -21,10 +21,10 @@
 /** Factory of gadget specs */
 interface GadgetSpecFactory {
 
-	/** Return a gadget spec for a context */
-	public function getGadgetSpec(GadgetContext $context);
+  /** Return a gadget spec for a context */
+  public function getGadgetSpec(GadgetContext $context);
 
-	/** Return a gadget spec for a URI */
-	public function getGadgetSpecUri($url, $ignoreCache);
+  /** Return a gadget spec for a URI */
+  public function getGadgetSpecUri($url, $ignoreCache);
 
 }

@@ -48,9 +48,9 @@ require_once 'PHPUnit/Util/Filter.php';
 
 PHPUnit_Util_Filter::addFileToFilter(__FILE__);
 
-if (!defined('PHPUnit_MAIN_METHOD')) {
-    define('PHPUnit_MAIN_METHOD', 'Util_TestDox_AllTests::main');
-    chdir(dirname(dirname(dirname(__FILE__))));
+if (! defined('PHPUnit_MAIN_METHOD')) {
+  define('PHPUnit_MAIN_METHOD', 'Util_TestDox_AllTests::main');
+  chdir(dirname(dirname(dirname(__FILE__))));
 }
 
 require_once 'PHPUnit/Framework/TestSuite.php';
@@ -70,24 +70,22 @@ require_once 'Util/TestDox/NamePrettifierTest.php';
  * @link       http://www.phpunit.de/
  * @since      Class available since Release 2.1.0
  */
-class Util_TestDox_AllTests
-{
-    public static function main()
-    {
-        PHPUnit_TextUI_TestRunner::run(self::suite());
-    }
+class Util_TestDox_AllTests {
 
-    public static function suite()
-    {
-        $suite = new PHPUnit_Framework_TestSuite('PHPUnit_Util_TestDox');
+  public static function main() {
+    PHPUnit_TextUI_TestRunner::run(self::suite());
+  }
 
-        $suite->addTestSuite('Util_TestDox_NamePrettifierTest');
-
-        return $suite;
-    }
+  public static function suite() {
+    $suite = new PHPUnit_Framework_TestSuite('PHPUnit_Util_TestDox');
+    
+    $suite->addTestSuite('Util_TestDox_NamePrettifierTest');
+    
+    return $suite;
+  }
 }
 
 if (PHPUnit_MAIN_METHOD == 'Util_TestDox_AllTests::main') {
-    Util_TestDox_AllTests::main();
+  Util_TestDox_AllTests::main();
 }
 ?>
