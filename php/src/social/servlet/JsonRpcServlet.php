@@ -48,10 +48,7 @@ class JsonRpcServlet extends ApiServlet {
       return;
     }
     if (isset($GLOBALS['HTTP_RAW_POST_DATA']) || isset($_POST['request'])) {
-      $requestParam = isset($GLOBALS['HTTP_RAW_POST_DATA']) ? $GLOBALS['HTTP_RAW_POST_DATA'] : $_POST['request'];
-      if (get_magic_quotes_gpc()) {
-        $requestParam = stripslashes($requestParam);
-      }
+      $requestParam = isset($GLOBALS['HTTP_RAW_POST_DATA']) ? $GLOBALS['HTTP_RAW_POST_DATA'] : (get_magic_quotes_gpc() ? stripslashes($_POST['request']) : $_POST['request']);
       $request = json_decode($requestParam, true);
       if ($request == $requestParam) {
         throw new InvalidArgumentException("Malformed json string");
