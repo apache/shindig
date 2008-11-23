@@ -61,23 +61,18 @@ PHPUnit_Util_Filter::addFileToFilter(__FILE__, 'PHPUNIT');
  * @link       http://www.phpunit.de/
  * @since      Class available since Release 3.2.0
  */
-class PHPUnit_Util_Log_PMD_Rule_Class_DepthOfInheritanceTree extends PHPUnit_Util_Log_PMD_Rule_Class
-{
-    public function __construct($threshold = 6, $priority = 1)
-    {
-        parent::__construct($threshold);
-    }
+class PHPUnit_Util_Log_PMD_Rule_Class_DepthOfInheritanceTree extends PHPUnit_Util_Log_PMD_Rule_Class {
 
-    public function apply(PHPUnit_Util_Metrics $metrics)
-    {
-        $dit = $metrics->getDIT();
+  public function __construct($threshold = 6, $priority = 1) {
+    parent::__construct($threshold);
+  }
 
-        if ($dit > $this->threshold) {
-            return sprintf(
-              'Depth of Inheritance Tree (DIT) is %d.',
-              $dit
-            );
-        }
+  public function apply(PHPUnit_Util_Metrics $metrics) {
+    $dit = $metrics->getDIT();
+    
+    if ($dit > $this->threshold) {
+      return sprintf('Depth of Inheritance Tree (DIT) is %d.', $dit);
     }
+  }
 }
 ?>

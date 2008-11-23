@@ -63,75 +63,68 @@ PHPUnit_Util_Filter::addFileToFilter(__FILE__, 'PHPUNIT');
  * @link       http://www.phpunit.de/
  * @since      Class available since Release 3.2.0
  */
-class PHPUnit_Extensions_Database_Operation_Exception extends RuntimeException
-{
+class PHPUnit_Extensions_Database_Operation_Exception extends RuntimeException {
+  
+  /**
+   * @var string
+   */
+  protected $operation;
+  
+  /**
+   * @var string
+   */
+  protected $preparedQuery;
+  
+  /**
+   * @var array
+   */
+  protected $preparedArgs;
+  
+  /**
+   * @var PHPUnit_Extensions_Database_DataSet_ITable
+   */
+  protected $table;
+  
+  /**
+   * @var string
+   */
+  protected $error;
 
-    /**
-     * @var string
-     */
-    protected $operation;
+  /**
+   * Creates a new dbunit operation exception
+   *
+   * @param string $operation
+   * @param string $current_query
+   * @param PHPUnit_Extensions_Database_DataSet_ITable $current_table
+   * @param string $error
+   */
+  public function __construct($operation, $current_query, $current_args, $current_table, $error) {
+    parent::__construct("{$operation} operation failed on query: {$current_query} using args: " . print_r($current_args, true) . " [{$error}]");
+    $this->operation = $operation;
+    $this->preparedQuery = $current_query;
+    $this->preparedArgs = $current_args;
+    $this->table = $current_table;
+    $this->error = $error;
+  }
 
-    /**
-     * @var string
-     */
-    protected $preparedQuery;
+  public function getOperation() {
+    return $this->operation;
+  }
 
-    /**
-     * @var array
-     */
-    protected $preparedArgs;
+  public function getQuery() {
+    return $this->preparedQuery;
+  }
 
-    /**
-     * @var PHPUnit_Extensions_Database_DataSet_ITable
-     */
-    protected $table;
+  public function getTable() {
+    return $this->table;
+  }
 
-    /**
-     * @var string
-     */
-    protected $error;
+  public function getArgs() {
+    return $this->preparedArgs;
+  }
 
-    /**
-     * Creates a new dbunit operation exception
-     *
-     * @param string $operation
-     * @param string $current_query
-     * @param PHPUnit_Extensions_Database_DataSet_ITable $current_table
-     * @param string $error
-     */
-    public function __construct($operation, $current_query, $current_args, $current_table, $error)
-    {
-        parent::__construct("{$operation} operation failed on query: {$current_query} using args: " . print_r($current_args, true) . " [{$error}]");
-        $this->operation = $operation;
-        $this->preparedQuery = $current_query;
-        $this->preparedArgs = $current_args;
-        $this->table = $current_table;
-        $this->error = $error;
-    }
-
-    public function getOperation()
-    {
-        return $this->operation;
-    }
-
-    public function getQuery()
-    {
-        return $this->preparedQuery;
-    }
-
-    public function getTable()
-    {
-        return $this->table;
-    }
-
-    public function getArgs()
-    {
-        return $this->preparedArgs;
-    }
-
-    public function getError()
-    {
-        return $this->error;
-    }
+  public function getError() {
+    return $this->error;
+  }
 }
 ?>

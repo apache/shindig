@@ -60,138 +60,118 @@ PHPUnit_Util_Filter::addFileToFilter(__FILE__, 'PHPUNIT');
  * @link       http://www.phpunit.de/
  * @since      Class available since Release 3.0.0
  */
-class PHPUnit_Util_Type
-{
-    public static function isType($type)
-    {
-        return in_array(
-          $type,
-          array(
-            'numeric',
-            'integer',
-            'int',
-            'float',
-            'string',
-            'boolean',
-            'bool',
-            'null',
-            'array',
-            'object',
-            'resource'
-          )
-        );
-    }
+class PHPUnit_Util_Type {
 
-    public static function shortenedExport($value)
-    {
-        if (is_string($value)) {
-            return self::shortenedString($value);
-        }
+  public static function isType($type) {
+    return in_array($type, array('numeric', 'integer', 'int', 'float', 'string', 'boolean', 'bool', 
+        'null', 'array', 'object', 'resource'));
+  }
 
-        elseif (is_array($value)) {
-            if (count($value) == 0) {
-                return 'array()';
-            }
+  public static function shortenedExport($value) {
+    if (is_string($value)) {
+      return self::shortenedString($value);
+    } 
 
-            $a1 = array_slice($value, 0, 1, TRUE);
-            $k1 = key($a1);
-            $v1 = $a1[$k1];
+    elseif (is_array($value)) {
+      if (count($value) == 0) {
+        return 'array()';
+      }
+      
+      $a1 = array_slice($value, 0, 1, TRUE);
+      $k1 = key($a1);
+      $v1 = $a1[$k1];
+      
+      if (is_string($v1)) {
+        $v1 = self::shortenedString($v1);
+      } 
 
-            if (is_string($v1)) {
-                $v1 = self::shortenedString($v1);
-            }
+      elseif (is_array($v1)) {
+        $v1 = 'array(...)';
+      } else {
+        $v1 = self::toString($v1);
+      }
+      
+      $a2 = FALSE;
+      
+      if (count($value) > 1) {
+        $a2 = array_slice($value, - 1, 1, TRUE);
+        $k2 = key($a2);
+        $v2 = $a2[$k2];
+        
+        if (is_string($v2)) {
+          $v2 = self::shortenedString($v2);
+        } 
 
-            elseif (is_array($v1)) {
-                $v1 = 'array(...)';
-            } else {
-                $v1 = self::toString($v1);
-            }
-
-            $a2 = FALSE;
-
-            if (count($value) > 1) {
-                $a2 = array_slice($value, -1, 1, TRUE);
-                $k2 = key($a2);
-                $v2 = $a2[$k2];
-
-                if (is_string($v2)) {
-                    $v2 = self::shortenedString($v2);
-                }
-
-                elseif (is_array($v2)) {
-                    $v2 = 'array(...)';
-                } else {
-                    $v2 = self::toString($v2);
-                }
-            }
-
-            $text = 'array( ' . self::toString($k1) . ' => ' . $v1;
-
-            if ($a2 !== FALSE) {
-                $text .= ', ..., ' . self::toString($k2) . ' => ' . $v2 . ' )';
-            } else {
-                $text .= ' )';
-            }
-
-            return $text;
-        }
-
-        elseif (is_object($value)) {
-            return get_class($value) . '(...)';
-        }
-
-        return self::toString($value);
-    }
-
-    public static function shortenedString($string)
-    {
-        $string = preg_replace('#\n|\r\n|\r#', ' ', $string);
-
-        if (strlen($string) > 14) {
-            return PHPUnit_Util_Type::toString(
-              substr($string, 0, 7) . '...' . substr($string, -7)
-            );
+        elseif (is_array($v2)) {
+          $v2 = 'array(...)';
         } else {
-            return PHPUnit_Util_Type::toString($string);
+          $v2 = self::toString($v2);
         }
+      }
+      
+      $text = 'array( ' . self::toString($k1) . ' => ' . $v1;
+      
+      if ($a2 !== FALSE) {
+        $text .= ', ..., ' . self::toString($k2) . ' => ' . $v2 . ' )';
+      } else {
+        $text .= ' )';
+      }
+      
+      return $text;
+    } 
+
+    elseif (is_object($value)) {
+      return get_class($value) . '(...)';
     }
+    
+    return self::toString($value);
+  }
 
-    public static function toString($value, $short = FALSE)
-    {
-        if (is_array($value) || is_object($value)) {
-            if (!$short) {
-                return "\n" . print_r($value, TRUE);
-            } else {
-                if (is_array($value)) {
-                    return '<array>';
-                } else {
-                    return '<' . get_class($value) . '>';
-                }
-            }
-        }
+  public static function shortenedString($string) {
+    $string = preg_replace('#\n|\r\n|\r#', ' ', $string);
+    
+    if (strlen($string) > 14) {
+      return PHPUnit_Util_Type::toString(substr($string, 0, 7) . '...' . substr($string, - 7));
+    } else {
+      return PHPUnit_Util_Type::toString($string);
+    }
+  }
 
-        if (is_string($value) && strpos($value, "\n") !== FALSE) {
-            return '<text>';
-        }
-
-        if (!is_null($value)) {
-            $type = gettype($value) . ':';
+  public static function toString($value, $short = FALSE) {
+    if (is_array($value) || is_object($value)) {
+      if (! $short) {
+        return "\n" . print_r($value, TRUE);
+      } else {
+        if (is_array($value)) {
+          return '<array>';
         } else {
-            $type  = '';
-            $value = 'null';
+          return '<' . get_class($value) . '>';
         }
-
-        if (is_bool($value)) {
-            if ($value === TRUE) {
-                $value = 'true';
-            }
-
-            else if ($value === FALSE) {
-                $value = 'false';
-            }
-        }
-
-        return '<' . $type . $value . '>';
+      }
     }
+    
+    if (is_string($value) && strpos($value, "\n") !== FALSE) {
+      return '<text>';
+    }
+    
+    if (! is_null($value)) {
+      $type = gettype($value) . ':';
+    } else {
+      $type = '';
+      $value = 'null';
+    }
+    
+    if (is_bool($value)) {
+      if ($value === TRUE) {
+        $value = 'true';
+      } 
+
+      else if ($value === FALSE) {
+        $value = 'false';
+      }
+    }
+    
+    return '<' . $type . $value . '>';
+  }
 }
 ?>

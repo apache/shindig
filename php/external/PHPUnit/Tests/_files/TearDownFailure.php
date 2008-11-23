@@ -62,11 +62,10 @@ require_once 'Success.php';
  * @link       http://www.phpunit.de/
  * @since      Class available since Release 2.0.0
  */
-class TearDownFailure extends Success
-{
-    protected function tearDown()
-    {
-        throw new Exception;
-    }
+class TearDownFailure extends Success {
+
+  protected function tearDown() {
+    throw new Exception();
+  }
 }
 ?>

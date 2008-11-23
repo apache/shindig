@@ -65,42 +65,36 @@ PHPUnit_Util_Filter::addFileToFilter(__FILE__, 'PHPUNIT');
  * @link       http://www.phpunit.de/
  * @since      Class available since Release 3.1.0
  */
-class PHPUnit_Framework_Constraint_ClassHasAttribute extends PHPUnit_Framework_Constraint
-{
-    protected $attributeName;
+class PHPUnit_Framework_Constraint_ClassHasAttribute extends PHPUnit_Framework_Constraint {
+  protected $attributeName;
 
-    public function __construct($attributeName)
-    {
-        $this->attributeName = $attributeName;
-    }
+  public function __construct($attributeName) {
+    $this->attributeName = $attributeName;
+  }
 
-    /**
-     * Evaluates the constraint for parameter $other. Returns TRUE if the
-     * constraint is met, FALSE otherwise.
-     *
-     * @param mixed $other Value or object to evaluate.
-     * @return bool
-     */
-    public function evaluate($other)
-    {
-        $class = new ReflectionClass($other);
+  /**
+   * Evaluates the constraint for parameter $other. Returns TRUE if the
+   * constraint is met, FALSE otherwise.
+   *
+   * @param mixed $other Value or object to evaluate.
+   * @return bool
+   */
+  public function evaluate($other) {
+    $class = new ReflectionClass($other);
+    
+    return $class->hasProperty($this->attributeName);
+  }
 
-        return $class->hasProperty($this->attributeName);
-    }
+  /**
+   * Returns a string representation of the constraint.
+   *
+   * @return string
+   * @access public
+   */
+  public function toString() {
+    return sprintf('has attribute "%s"', 
 
-    /**
-     * Returns a string representation of the constraint.
-     *
-     * @return string
-     * @access public
-     */
-    public function toString()
-    {
-        return sprintf(
-          'has attribute "%s"',
-
-          $this->attributeName
-        );
-    }
+    $this->attributeName);
+  }
 }
 ?>

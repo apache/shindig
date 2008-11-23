@@ -63,20 +63,16 @@ PHPUnit_Util_Filter::addFileToFilter(__FILE__, 'PHPUNIT');
  * @link       http://www.phpunit.de/
  * @since      Class available since Release 3.0.0
  */
-class PHPUnit_Framework_ComparisonFailure_Type extends PHPUnit_Framework_ComparisonFailure
-{
-    /**
-     * Returns a string describing the type difference between the expected
-     * and the actual value.
-     */
-    public function toString()
-    {
-        return sprintf(
-          '%s does not match expected type "%s".',
+class PHPUnit_Framework_ComparisonFailure_Type extends PHPUnit_Framework_ComparisonFailure {
 
-          PHPUnit_Util_Type::toString($this->actual),
-          gettype($this->expected)
-        );
-    }
+  /**
+   * Returns a string describing the type difference between the expected
+   * and the actual value.
+   */
+  public function toString() {
+    return sprintf('%s does not match expected type "%s".', 
+
+    PHPUnit_Util_Type::toString($this->actual), gettype($this->expected));
+  }
 }
 ?>

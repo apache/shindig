@@ -63,40 +63,36 @@ PHPUnit_Util_Filter::addFileToFilter(__FILE__, 'PHPUNIT');
  * @link       http://www.phpunit.de/
  * @since      Class available since Release 3.0.0
  */
-class PHPUnit_Framework_Constraint_IsAnything extends PHPUnit_Framework_Constraint
-{
-    /**
-     * Evaluates the constraint for parameter $other. Returns TRUE if the
-     * constraint is met, FALSE otherwise.
-     *
-     * @param mixed $other Value or object to evaluate.
-     * @return bool
-     */
-    public function evaluate($other)
-    {
-        return TRUE;
-    }
+class PHPUnit_Framework_Constraint_IsAnything extends PHPUnit_Framework_Constraint {
 
-    /**
-     * @param   mixed   $other The value passed to evaluate() which failed the
-     *                         constraint check.
-     * @param   string  $description A string with extra description of what was
-     *                               going on while the evaluation failed.
-     * @param   boolean $not Flag to indicate negation.
-     */
-    public function fail($other, $description, $not = FALSE)
-    {
-    }
+  /**
+   * Evaluates the constraint for parameter $other. Returns TRUE if the
+   * constraint is met, FALSE otherwise.
+   *
+   * @param mixed $other Value or object to evaluate.
+   * @return bool
+   */
+  public function evaluate($other) {
+    return TRUE;
+  }
 
-    /**
-     * Returns a string representation of the constraint.
-     *
-     * @return string
-     * @access public
-     */
-    public function toString()
-    {
-        return 'is anything';
-    }
+  /**
+   * @param   mixed   $other The value passed to evaluate() which failed the
+   *                         constraint check.
+   * @param   string  $description A string with extra description of what was
+   *                               going on while the evaluation failed.
+   * @param   boolean $not Flag to indicate negation.
+   */
+  public function fail($other, $description, $not = FALSE) {}
+
+  /**
+   * Returns a string representation of the constraint.
+   *
+   * @return string
+   * @access public
+   */
+  public function toString() {
+    return 'is anything';
+  }
 }
 ?>

@@ -70,67 +70,50 @@ PHPUnit_Util_Filter::addFileToFilter(__FILE__, 'PHPUNIT');
  * @link       http://www.phpunit.de/
  * @since      Class available since Release 3.0.0
  */
-class PHPUnit_Framework_Constraint_IsIdentical extends PHPUnit_Framework_Constraint
-{
-    protected $value;
+class PHPUnit_Framework_Constraint_IsIdentical extends PHPUnit_Framework_Constraint {
+  protected $value;
 
-    public function __construct($value)
-    {
-        $this->value = $value;
+  public function __construct($value) {
+    $this->value = $value;
+  }
+
+  /**
+   * Evaluates the constraint for parameter $other. Returns TRUE if the
+   * constraint is met, FALSE otherwise.
+   *
+   * @param mixed $other Value or object to evaluate.
+   * @return bool
+   */
+  public function evaluate($other) {
+    return $this->value === $other;
+  }
+
+  /**
+   * @param   mixed   $other The value passed to evaluate() which failed the
+   *                         constraint check.
+   * @param   string  $description A string with extra description of what was
+   *                               going on while the evaluation failed.
+   * @param   boolean $not Flag to indicate negation.
+   * @throws  PHPUnit_Framework_ExpectationFailedException
+   */
+  public function fail($other, $description, $not = FALSE) {
+    $failureDescription = $this->failureDescription($other, $description, $not);
+    
+    if (! $not) {
+      throw new PHPUnit_Framework_ExpectationFailedException($failureDescription, PHPUnit_Framework_ComparisonFailure::diffIdentical($this->value, $other), $description);
+    } else {
+      throw new PHPUnit_Framework_ExpectationFailedException($failureDescription, NULL, $description);
     }
+  }
 
-    /**
-     * Evaluates the constraint for parameter $other. Returns TRUE if the
-     * constraint is met, FALSE otherwise.
-     *
-     * @param mixed $other Value or object to evaluate.
-     * @return bool
-     */
-    public function evaluate($other)
-    {
-        return $this->value === $other;
-    }
-
-    /**
-     * @param   mixed   $other The value passed to evaluate() which failed the
-     *                         constraint check.
-     * @param   string  $description A string with extra description of what was
-     *                               going on while the evaluation failed.
-     * @param   boolean $not Flag to indicate negation.
-     * @throws  PHPUnit_Framework_ExpectationFailedException
-     */
-    public function fail($other, $description, $not = FALSE)
-    {
-        $failureDescription = $this->failureDescription(
-          $other,
-          $description,
-          $not
-        );
-
-        if (!$not) {
-            throw new PHPUnit_Framework_ExpectationFailedException(
-              $failureDescription,
-              PHPUnit_Framework_ComparisonFailure::diffIdentical($this->value, $other),
-              $description
-            );
-        } else {
-            throw new PHPUnit_Framework_ExpectationFailedException(
-              $failureDescription,
-              NULL,
-              $description
-            );
-        }
-    }
-
-    /**
-     * Returns a string representation of the constraint.
-     *
-     * @return string
-     * @access public
-     */
-    public function toString()
-    {
-        return 'is identical to ' . PHPUnit_Util_Type::toString($this->value);
-    }
+  /**
+   * Returns a string representation of the constraint.
+   *
+   * @return string
+   * @access public
+   */
+  public function toString() {
+    return 'is identical to ' . PHPUnit_Util_Type::toString($this->value);
+  }
 }
 ?>

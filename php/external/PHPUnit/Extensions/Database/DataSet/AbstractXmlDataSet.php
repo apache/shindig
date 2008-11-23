@@ -66,85 +66,80 @@ PHPUnit_Util_Filter::addFileToFilter(__FILE__, 'PHPUNIT');
  * @link       http://www.phpunit.de/
  * @since      Class available since Release 3.2.0
  */
-abstract class PHPUnit_Extensions_Database_DataSet_AbstractXmlDataSet extends PHPUnit_Extensions_Database_DataSet_AbstractDataSet
-{
+abstract class PHPUnit_Extensions_Database_DataSet_AbstractXmlDataSet extends PHPUnit_Extensions_Database_DataSet_AbstractDataSet {
+  
+  /**
+   * @var array
+   */
+  protected $tables;
+  
+  /**
+   * @var SimpleXmlElement
+   */
+  protected $xmlFileContents;
 
-    /**
-     * @var array
-     */
-    protected $tables;
-
-    /**
-     * @var SimpleXmlElement
-     */
-    protected $xmlFileContents;
-
-    /**
-     * Creates a new dataset using the given tables.
-     *
-     * @param array $tables
-     */
-    public function __construct($xmlFile)
-    {
-        if (!is_file($xmlFile)) {
-            throw new InvalidArgumentException("Could not find xml file: {$xmlFile}");
-        }
-        $this->xmlFileContents = @simplexml_load_file($xmlFile);
-        
-        if ($this->xmlFileContents === FALSE) {
-            throw new InvalidArgumentException("File is not valid xml: {$xmlFile}");
-        }
-        
-        $tableColumns = array();
-        $tableValues = array();
-        
-        $this->getTableInfo($tableColumns, $tableValues);
-        $this->createTables($tableColumns, $tableValues);
+  /**
+   * Creates a new dataset using the given tables.
+   *
+   * @param array $tables
+   */
+  public function __construct($xmlFile) {
+    if (! is_file($xmlFile)) {
+      throw new InvalidArgumentException("Could not find xml file: {$xmlFile}");
     }
-
-    /**
-     * Reads the simple xml object and creates the appropriate tables and meta 
-     * data for this dataset.
-     */
-    protected abstract function getTableInfo(Array &$tableColumns, Array &$tableValues);
-
-    protected function createTables(Array &$tableColumns, Array &$tableValues)
-    {
-        foreach ($tableValues as $tableName => $values) {
-            $table = $this->getOrCreateTable($tableName, $tableColumns[$tableName]);
-            foreach ($values as $value) {
-                $table->addRow($value);
-            }
-        }
+    $this->xmlFileContents = @simplexml_load_file($xmlFile);
+    
+    if ($this->xmlFileContents === FALSE) {
+      throw new InvalidArgumentException("File is not valid xml: {$xmlFile}");
     }
+    
+    $tableColumns = array();
+    $tableValues = array();
+    
+    $this->getTableInfo($tableColumns, $tableValues);
+    $this->createTables($tableColumns, $tableValues);
+  }
 
-    /**
-     * Returns the table with the matching name. If the table does not exist 
-     * an empty one is created.
-     *
-     * @param string $tableName
-     * @return PHPUnit_Extensions_Database_DataSet_ITable
-     */
-    protected function getOrCreateTable($tableName, $tableColumns)
-    {
-        if (empty($this->tables[$tableName])) {
-            $tableMetaData = new PHPUnit_Extensions_Database_DataSet_DefaultTableMetaData($tableName, $tableColumns);
-            $this->tables[$tableName] = new PHPUnit_Extensions_Database_DataSet_DefaultTable($tableMetaData);
-        }
-        
-        return $this->tables[$tableName];
-    }
+  /**
+   * Reads the simple xml object and creates the appropriate tables and meta 
+   * data for this dataset.
+   */
+  protected abstract function getTableInfo(Array &$tableColumns, Array &$tableValues);
 
-    /**
-     * Creates an iterator over the tables in the data set. If $reverse is 
-     * true a reverse iterator will be returned.
-     *
-     * @param bool $reverse
-     * @return PHPUnit_Extensions_Database_DataSet_ITableIterator
-     */
-    protected function createIterator($reverse = false)
-    {
-        return new PHPUnit_Extensions_Database_DataSet_DefaultTableIterator($this->tables, $reverse);
+  protected function createTables(Array &$tableColumns, Array &$tableValues) {
+    foreach ($tableValues as $tableName => $values) {
+      $table = $this->getOrCreateTable($tableName, $tableColumns[$tableName]);
+      foreach ($values as $value) {
+        $table->addRow($value);
+      }
     }
+  }
+
+  /**
+   * Returns the table with the matching name. If the table does not exist 
+   * an empty one is created.
+   *
+   * @param string $tableName
+   * @return PHPUnit_Extensions_Database_DataSet_ITable
+   */
+  protected function getOrCreateTable($tableName, $tableColumns) {
+    if (empty($this->tables[$tableName])) {
+      $tableMetaData = new PHPUnit_Extensions_Database_DataSet_DefaultTableMetaData($tableName, $tableColumns);
+      $this->tables[$tableName] = new PHPUnit_Extensions_Database_DataSet_DefaultTable($tableMetaData);
+    }
+    
+    return $this->tables[$tableName];
+  }
+
+  /**
+   * Creates an iterator over the tables in the data set. If $reverse is 
+   * true a reverse iterator will be returned.
+   *
+   * @param bool $reverse
+   * @return PHPUnit_Extensions_Database_DataSet_ITableIterator
+   */
+  protected function createIterator($reverse = false) {
+    return new PHPUnit_Extensions_Database_DataSet_DefaultTableIterator($this->tables, $reverse);
+  }
 }
 ?>

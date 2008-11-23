@@ -62,14 +62,12 @@ PHPUnit_Util_Filter::addFileToFilter(__FILE__, 'PHPUNIT');
  * @link       http://www.phpunit.de/
  * @since      Class available since Release 3.2.0
  */
-class PHPUnit_Extensions_Database_DB_TableMetaData extends PHPUnit_Extensions_Database_DataSet_DefaultTableMetaData
-{
+class PHPUnit_Extensions_Database_DB_TableMetaData extends PHPUnit_Extensions_Database_DataSet_DefaultTableMetaData {
 
-    public function __construct($tableName, PHPUnit_Extensions_Database_DB_IMetaData $databaseMetaData)
-    {
-        $this->tableName = $tableName;
-        $this->columns = $databaseMetaData->getTableColumns($tableName);
-        $this->primaryKeys = $databaseMetaData->getTablePrimaryKeys($tableName);
-    }
+  public function __construct($tableName, PHPUnit_Extensions_Database_DB_IMetaData $databaseMetaData) {
+    $this->tableName = $tableName;
+    $this->columns = $databaseMetaData->getTableColumns($tableName);
+    $this->primaryKeys = $databaseMetaData->getTablePrimaryKeys($tableName);
+  }
 }
 ?>

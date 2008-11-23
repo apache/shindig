@@ -60,28 +60,26 @@ PHPUnit_Util_Filter::addFileToFilter(__FILE__, 'PHPUNIT');
  * @link       http://www.phpunit.de/
  * @since      Class available since Release 2.0.0
  */
-class PHPUnit_Runner_Version
-{
-    /**
-     * Returns the current version of PHPUnit.
-     *
-     * @return string
-     * @access public
-     * @static
-     */
-  	public static function id()
-  	{
-    		return '3.2.9';
-  	}
+class PHPUnit_Runner_Version {
 
-    /**
-     * @return string
-     * @access public
-     * @static
-     */
-    public static function getVersionString()
-    {
-        return 'PHPUnit 3.2.9 by Sebastian Bergmann.';
-    }
+  /**
+   * Returns the current version of PHPUnit.
+   *
+   * @return string
+   * @access public
+   * @static
+   */
+  public static function id() {
+    return '3.2.9';
+  }
+
+  /**
+   * @return string
+   * @access public
+   * @static
+   */
+  public static function getVersionString() {
+    return 'PHPUnit 3.2.9 by Sebastian Bergmann.';
+  }
 }
 ?>

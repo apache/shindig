@@ -61,26 +61,18 @@ PHPUnit_Util_Filter::addFileToFilter(__FILE__, 'PHPUNIT');
  * @link       http://www.phpunit.de/
  * @since      Class available since Release 3.2.0
  */
-class PHPUnit_Util_Log_PMD_Rule_Class_ExcessiveClassLength extends PHPUnit_Util_Log_PMD_Rule_Class
-{
-    public function __construct($threshold = 1000, $priority = 1)
-    {
-        parent::__construct($threshold);
-    }
+class PHPUnit_Util_Log_PMD_Rule_Class_ExcessiveClassLength extends PHPUnit_Util_Log_PMD_Rule_Class {
 
-    public function apply(PHPUnit_Util_Metrics $metrics)
-    {
-        $locExecutable = $metrics->getLocExecutable();
+  public function __construct($threshold = 1000, $priority = 1) {
+    parent::__construct($threshold);
+  }
 
-        if ($locExecutable > $this->threshold) {
-            return sprintf(
-              "Class has %d lines of executable code.\n" .
-              'This is an indication that the class may be ' .
-              'trying to do too much. Try to break it down, ' .
-              'and reduce the size to something manageable.',
-              $locExecutable
-            );
-        }
+  public function apply(PHPUnit_Util_Metrics $metrics) {
+    $locExecutable = $metrics->getLocExecutable();
+    
+    if ($locExecutable > $this->threshold) {
+      return sprintf("Class has %d lines of executable code.\n" . 'This is an indication that the class may be ' . 'trying to do too much. Try to break it down, ' . 'and reduce the size to something manageable.', $locExecutable);
     }
+  }
 }
 ?>

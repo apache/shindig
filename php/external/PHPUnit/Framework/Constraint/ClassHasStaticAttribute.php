@@ -65,26 +65,25 @@ PHPUnit_Util_Filter::addFileToFilter(__FILE__, 'PHPUNIT');
  * @link       http://www.phpunit.de/
  * @since      Class available since Release 3.1.0
  */
-class PHPUnit_Framework_Constraint_ClassHasStaticAttribute extends PHPUnit_Framework_Constraint_ClassHasAttribute
-{
-    /**
-     * Evaluates the constraint for parameter $other. Returns TRUE if the
-     * constraint is met, FALSE otherwise.
-     *
-     * @param mixed $other Value or object to evaluate.
-     * @return bool
-     */
-    public function evaluate($other)
-    {
-        $class = new ReflectionClass($other);
+class PHPUnit_Framework_Constraint_ClassHasStaticAttribute extends PHPUnit_Framework_Constraint_ClassHasAttribute {
 
-        if ($class->hasProperty($this->attributeName)) {
-            $attribute = $class->getProperty($this->attributeName);
-
-            return $attribute->isStatic();
-        } else {
-            return FALSE;
-        }
+  /**
+   * Evaluates the constraint for parameter $other. Returns TRUE if the
+   * constraint is met, FALSE otherwise.
+   *
+   * @param mixed $other Value or object to evaluate.
+   * @return bool
+   */
+  public function evaluate($other) {
+    $class = new ReflectionClass($other);
+    
+    if ($class->hasProperty($this->attributeName)) {
+      $attribute = $class->getProperty($this->attributeName);
+      
+      return $attribute->isStatic();
+    } else {
+      return FALSE;
     }
+  }
 }
 ?>

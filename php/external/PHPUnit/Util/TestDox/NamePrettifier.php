@@ -60,128 +60,119 @@ PHPUnit_Util_Filter::addFileToFilter(__FILE__, 'PHPUNIT');
  * @link       http://www.phpunit.de/
  * @since      Class available since Release 2.1.0
  */
-class PHPUnit_Util_TestDox_NamePrettifier
-{
-    /**
-     * @var    string
-     * @access protected
-     */
-    protected $prefix = 'Test';
+class PHPUnit_Util_TestDox_NamePrettifier {
+  /**
+   * @var    string
+   * @access protected
+   */
+  protected $prefix = 'Test';
+  
+  /**
+   * @var    string
+   * @access protected
+   */
+  protected $suffix = 'Test';
+  
+  /**
+   * @var    array
+   * @access protected
+   */
+  protected $strings = array();
 
-    /**
-     * @var    string
-     * @access protected
-     */
-    protected $suffix = 'Test';
-
-    /**
-     * @var    array
-     * @access protected
-     */
-    protected $strings = array();
-
-    /**
-     * Prettifies the name of a test class.
-     *
-     * @param  string  $testClassName
-     * @return string
-     * @access public
-     */
-    public function prettifyTestClass($testClassName)
-    {
-        $title = $testClassName;
-
-        if ($this->suffix !== NULL &&
-            $this->suffix == substr($testClassName, -1 * strlen($this->suffix))) {
-            $title = substr($title, 0, strripos($title, $this->suffix));
-        }
-
-        if ($this->prefix !== NULL &&
-            $this->prefix == substr($testClassName, 0, strlen($this->prefix))) {
-            $title = substr($title, strlen($this->prefix));
-        }
-
-        return $title;
+  /**
+   * Prettifies the name of a test class.
+   *
+   * @param  string  $testClassName
+   * @return string
+   * @access public
+   */
+  public function prettifyTestClass($testClassName) {
+    $title = $testClassName;
+    
+    if ($this->suffix !== NULL && $this->suffix == substr($testClassName, - 1 * strlen($this->suffix))) {
+      $title = substr($title, 0, strripos($title, $this->suffix));
     }
-
-    /**
-     * Prettifies the name of a test method.
-     *
-     * @param  string  $testMethodName
-     * @return string
-     * @access public
-     */
-    public function prettifyTestMethod($testMethodName)
-    {
-        $buffer = '';
-
-        if (!is_string($testMethodName) || strlen($testMethodName) == 0) {
-            return $buffer;
-        }
-
-        $string = preg_replace('#\d+$#', '', $testMethodName);
-
-        if (in_array($string, $this->strings)) {
-            $testMethodName = $string;
-        } else {
-            $this->strings[] = $string;
-        }
-
-        $max = strlen($testMethodName);
-
-        if (substr($testMethodName, 0, 4) == 'test') {
-            $offset = 4;
-        } else {
-            $offset = 0;
-            $testMethodName[0] = strtoupper($testMethodName[0]);
-        }
-
-        $wasNumeric = FALSE;
-
-        for ($i = $offset; $i < $max; $i++) {
-            if ($i > $offset &&
-                ord($testMethodName[$i]) >= 65 &&
-                ord($testMethodName[$i]) <= 90) {
-                $buffer .= ' ' . strtolower($testMethodName[$i]);
-            } else {
-                $isNumeric = is_numeric($testMethodName[$i]);
-
-                if (!$wasNumeric && $isNumeric) {
-                    $buffer .= ' ';
-                    $wasNumeric = TRUE;
-                }
-
-                if ($wasNumeric && !$isNumeric) {
-                    $wasNumeric = FALSE;
-                }
-
-                $buffer .= $testMethodName[$i];
-            }
-        }
-
-        return $buffer;
+    
+    if ($this->prefix !== NULL && $this->prefix == substr($testClassName, 0, strlen($this->prefix))) {
+      $title = substr($title, strlen($this->prefix));
     }
+    
+    return $title;
+  }
 
-    /**
-     * Sets the prefix of test names.
-     *
-     * @param  string  $prefix
-     * @access public
-     */
-    public function setPrefix($prefix)
-    {
-        $this->prefix = $prefix;
+  /**
+   * Prettifies the name of a test method.
+   *
+   * @param  string  $testMethodName
+   * @return string
+   * @access public
+   */
+  public function prettifyTestMethod($testMethodName) {
+    $buffer = '';
+    
+    if (! is_string($testMethodName) || strlen($testMethodName) == 0) {
+      return $buffer;
     }
+    
+    $string = preg_replace('#\d+$#', '', $testMethodName);
+    
+    if (in_array($string, $this->strings)) {
+      $testMethodName = $string;
+    } else {
+      $this->strings[] = $string;
+    }
+    
+    $max = strlen($testMethodName);
+    
+    if (substr($testMethodName, 0, 4) == 'test') {
+      $offset = 4;
+    } else {
+      $offset = 0;
+      $testMethodName[0] = strtoupper($testMethodName[0]);
+    }
+    
+    $wasNumeric = FALSE;
+    
+    for ($i = $offset; $i < $max; $i ++) {
+      if ($i > $offset && ord($testMethodName[$i]) >= 65 && ord($testMethodName[$i]) <= 90) {
+        $buffer .= ' ' . strtolower($testMethodName[$i]);
+      } else {
+        $isNumeric = is_numeric($testMethodName[$i]);
+        
+        if (! $wasNumeric && $isNumeric) {
+          $buffer .= ' ';
+          $wasNumeric = TRUE;
+        }
+        
+        if ($wasNumeric && ! $isNumeric) {
+          $wasNumeric = FALSE;
+        }
+        
+        $buffer .= $testMethodName[$i];
+      }
+    }
+    
+    return $buffer;
+  }
 
-    /**
-     * Sets the suffix of test names.
-     *
-     * @param  string  $prefix
-     * @access public
-     */
-    public function setSuffix($suffix)
-    {
-        $this->suffix = $suffix;
-    }
+  /**
+   * Sets the prefix of test names.
+   *
+   * @param  string  $prefix
+   * @access public
+   */
+  public function setPrefix($prefix) {
+    $this->prefix = $prefix;
+  }
+
+  /**
+   * Sets the suffix of test names.
+   *
+   * @param  string  $prefix
+   * @access public
+   */
+  public function setSuffix($suffix) {
+    $this->suffix = $suffix;
+  }
 }
 ?>

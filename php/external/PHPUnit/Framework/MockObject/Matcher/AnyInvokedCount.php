@@ -65,15 +65,12 @@ PHPUnit_Util_Filter::addFileToFilter(__FILE__, 'PHPUNIT');
  * @link       http://www.phpunit.de/
  * @since      Class available since Release 3.0.0
  */
-class PHPUnit_Framework_MockObject_Matcher_AnyInvokedCount extends PHPUnit_Framework_MockObject_Matcher_InvokedRecorder
-{
-    public function toString()
-    {
-        return 'invoked zero or more times';
-    }
+class PHPUnit_Framework_MockObject_Matcher_AnyInvokedCount extends PHPUnit_Framework_MockObject_Matcher_InvokedRecorder {
 
-    public function verify()
-    {
-    }
+  public function toString() {
+    return 'invoked zero or more times';
+  }
+
+  public function verify() {}
 }
 ?>

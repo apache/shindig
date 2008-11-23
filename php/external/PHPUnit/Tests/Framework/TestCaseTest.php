@@ -72,164 +72,140 @@ require_once '_files/WasRun.php';
  * @link       http://www.phpunit.de/
  * @since      Class available since Release 2.0.0
  */
-class Framework_TestCaseTest extends PHPUnit_Framework_TestCase
-{
-    public function testCaseToString()
-    {
-        $this->assertEquals(
-          'testCaseToString(Framework_TestCaseTest)',
-          $this->toString()
-        );
-    }
+class Framework_TestCaseTest extends PHPUnit_Framework_TestCase {
 
-    public function testError()
-    {
-        $this->verifyError(new Error);
-    }
+  public function testCaseToString() {
+    $this->assertEquals('testCaseToString(Framework_TestCaseTest)', $this->toString());
+  }
 
-    public function testExceptionRunningAndTearDown()
-    {
-        $result = new PHPUnit_Framework_TestResult();
-        $t      = new TornDown4;
+  public function testError() {
+    $this->verifyError(new Error());
+  }
 
-        $t->run($result);
+  public function testExceptionRunningAndTearDown() {
+    $result = new PHPUnit_Framework_TestResult();
+    $t = new TornDown4();
+    
+    $t->run($result);
+    
+    $errors = $result->errors();
+    
+    $this->assertEquals('tearDown', $errors[0]->thrownException()->getMessage());
+  }
 
-        $errors = $result->errors();
+  public function testFailure() {
+    $this->verifyFailure(new Failure());
+  }
 
-        $this->assertEquals(
-          'tearDown',
-          $errors[0]->thrownException()->getMessage()
-        );
-    }
-
-    public function testFailure()
-    {
-        $this->verifyFailure(new Failure);
-    }
-
-    /* PHP does not support anonymous classes
+  /* PHP does not support anonymous classes
     public function testNamelessTestCase()
     {
     }
     */
+  
+  public function testNoArgTestCasePasses() {
+    $result = new PHPUnit_Framework_TestResult();
+    $t = new PHPUnit_Framework_TestSuite('NoArgTestCaseTest');
+    
+    $t->run($result);
+    
+    $this->assertEquals(1, count($result));
+    $this->assertEquals(0, $result->failureCount());
+    $this->assertEquals(0, $result->errorCount());
+  }
 
-    public function testNoArgTestCasePasses()
-    {
-        $result = new PHPUnit_Framework_TestResult();
-        $t      = new PHPUnit_Framework_TestSuite('NoArgTestCaseTest');
+  public function testRunAndTearDownFails() {
+    $fails = new TornDown2();
+    
+    $this->verifyError($fails);
+    $this->assertTrue($fails->tornDown);
+  }
 
-        $t->run($result);
+  public function testSetupFails() {
+    $this->verifyError(new SetupFailure());
+  }
 
-        $this->assertEquals(1, count($result));
-        $this->assertEquals(0, $result->failureCount());
-        $this->assertEquals(0, $result->errorCount());
-    }
+  public function testSuccess() {
+    $this->verifySuccess(new Success());
+  }
 
-    public function testRunAndTearDownFails()
-    {
-        $fails = new TornDown2;
+  public function testTearDownAfterError() {
+    $fails = new TornDown();
+    
+    $this->verifyError($fails);
+    $this->assertTrue($fails->tornDown);
+  }
 
-		    $this->verifyError($fails);
-		    $this->assertTrue($fails->tornDown);
-    }
+  public function testTearDownFails() {
+    $this->verifyError(new TearDownFailure());
+  }
 
-    public function testSetupFails()
-    {
-        $this->verifyError(new SetupFailure);
-    }
+  public function testTearDownSetupFails() {
+    $fails = new TornDown3();
+    
+    $this->verifyError($fails);
+    $this->assertFalse($fails->tornDown);
+  }
 
-    public function testSuccess()
-    {
-        $this->verifySuccess(new Success);
-    }
+  public function testWasRun() {
+    $test = new WasRun();
+    $test->run();
+    
+    $this->assertTrue($test->wasRun);
+  }
 
-    public function testTearDownAfterError()
-    {
-        $fails = new TornDown;
+  public function testException() {
+    $test = new ThrowExceptionTestCase('test');
+    $test->setExpectedException('Exception');
+    
+    $result = $test->run();
+    
+    $this->assertEquals(1, count($result));
+    $this->assertTrue($result->wasSuccessful());
+  }
 
-		    $this->verifyError($fails);
-		    $this->assertTrue($fails->tornDown);
-    }
+  public function testNoException() {
+    $test = new ThrowNoExceptionTestCase('test');
+    $test->setExpectedException('Exception');
+    
+    $result = $test->run();
+    
+    $this->assertEquals(1, $result->failureCount());
+    $this->assertEquals(1, count($result));
+  }
 
-    public function testTearDownFails()
-    {
-        $this->verifyError(new TearDownFailure);
-    }
+  public function testWrongException() {
+    $test = new ThrowExceptionTestCase('test');
+    $test->setExpectedException('RuntimeException');
+    
+    $result = $test->run();
+    
+    $this->assertEquals(1, $result->errorCount());
+    $this->assertEquals(1, count($result));
+  }
 
-    public function testTearDownSetupFails()
-    {
-        $fails = new TornDown3;
+  protected function verifyError(PHPUnit_Framework_TestCase $test) {
+    $result = $test->run();
+    
+    $this->assertEquals(1, $result->errorCount());
+    $this->assertEquals(0, $result->failureCount());
+    $this->assertEquals(1, count($result));
+  }
 
-		    $this->verifyError($fails);
-		    $this->assertFalse($fails->tornDown);
-    }
+  protected function verifyFailure(PHPUnit_Framework_TestCase $test) {
+    $result = $test->run();
+    
+    $this->assertEquals(0, $result->errorCount());
+    $this->assertEquals(1, $result->failureCount());
+    $this->assertEquals(1, count($result));
+  }
 
-    public function testWasRun()
-    {
-        $test = new WasRun;
-        $test->run();
-
-        $this->assertTrue($test->wasRun);
-    }
-
-    public function testException()
-    {
-        $test = new ThrowExceptionTestCase('test');
-        $test->setExpectedException('Exception');
-
-        $result = $test->run();
-
-        $this->assertEquals(1, count($result));
-        $this->assertTrue($result->wasSuccessful());
-    }
-
-    public function testNoException()
-    {
-        $test = new ThrowNoExceptionTestCase('test');
-        $test->setExpectedException('Exception');
-
-        $result = $test->run();
-
-        $this->assertEquals(1, $result->failureCount());
-        $this->assertEquals(1, count($result));
-    }
-
-    public function testWrongException()
-    {
-        $test = new ThrowExceptionTestCase('test');
-        $test->setExpectedException('RuntimeException');
-
-        $result = $test->run();
-
-        $this->assertEquals(1, $result->errorCount());
-        $this->assertEquals(1, count($result));
-    }
-
-    protected function verifyError(PHPUnit_Framework_TestCase $test)
-    {
-        $result = $test->run();
-
-        $this->assertEquals(1, $result->errorCount());
-        $this->assertEquals(0, $result->failureCount());
-        $this->assertEquals(1, count($result));
-    }
-
-    protected function verifyFailure(PHPUnit_Framework_TestCase $test)
-    {
-        $result = $test->run();
-
-        $this->assertEquals(0, $result->errorCount());
-        $this->assertEquals(1, $result->failureCount());
-        $this->assertEquals(1, count($result));
-    }
-
-    protected function verifySuccess(PHPUnit_Framework_TestCase $test)
-    {
-        $result = $test->run();
-
-        $this->assertEquals(0, $result->errorCount());
-        $this->assertEquals(0, $result->failureCount());
-        $this->assertEquals(1, count($result));
-    }
+  protected function verifySuccess(PHPUnit_Framework_TestCase $test) {
+    $result = $test->run();
+    
+    $this->assertEquals(0, $result->errorCount());
+    $this->assertEquals(0, $result->failureCount());
+    $this->assertEquals(1, count($result));
+  }
 }
 ?>

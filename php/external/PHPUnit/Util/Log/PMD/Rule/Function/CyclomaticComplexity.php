@@ -61,29 +61,18 @@ PHPUnit_Util_Filter::addFileToFilter(__FILE__, 'PHPUNIT');
  * @link       http://www.phpunit.de/
  * @since      Class available since Release 3.2.0
  */
-class PHPUnit_Util_Log_PMD_Rule_Function_CyclomaticComplexity extends PHPUnit_Util_Log_PMD_Rule_Function
-{
-    public function __construct($threshold = 20, $priority = 1)
-    {
-        parent::__construct($threshold);
-    }
+class PHPUnit_Util_Log_PMD_Rule_Function_CyclomaticComplexity extends PHPUnit_Util_Log_PMD_Rule_Function {
 
-    public function apply(PHPUnit_Util_Metrics $metrics)
-    {
-        $ccn = $metrics->getCCN();
+  public function __construct($threshold = 20, $priority = 1) {
+    parent::__construct($threshold);
+  }
 
-        if ($ccn >= $this->threshold) {
-            return sprintf(
-              "The cyclomatic complexity is %d.\n" .
-              'Complexity is determined by the number of decision points in a ' .
-              'function or method plus one for the function or method entry. ' .
-              'The decision points are "if", "for", "foreach", "while", "case", ' .
-              '"catch", "&amp;&amp;", "||", and "?:". Generally, 1-4 is low ' .
-              'complexity, 5-7 indicates moderate complexity, 8-10 is high ' .
-              'complexity, and 11+ is very high complexity.',
-              $ccn
-            );
-        }
+  public function apply(PHPUnit_Util_Metrics $metrics) {
+    $ccn = $metrics->getCCN();
+    
+    if ($ccn >= $this->threshold) {
+      return sprintf("The cyclomatic complexity is %d.\n" . 'Complexity is determined by the number of decision points in a ' . 'function or method plus one for the function or method entry. ' . 'The decision points are "if", "for", "foreach", "while", "case", ' . '"catch", "&amp;&amp;", "||", and "?:". Generally, 1-4 is low ' . 'complexity, 5-7 indicates moderate complexity, 8-10 is high ' . 'complexity, and 11+ is very high complexity.', $ccn);
     }
+  }
 }
 ?>

@@ -70,40 +70,34 @@ PHPUnit_Util_Filter::addFileToFilter(__FILE__, 'PHPUNIT');
  * @link       http://www.phpunit.de/
  * @since      Class available since Release 3.0.0
  */
-class PHPUnit_Framework_Constraint_PCREMatch extends PHPUnit_Framework_Constraint
-{
-    protected $pattern;
+class PHPUnit_Framework_Constraint_PCREMatch extends PHPUnit_Framework_Constraint {
+  protected $pattern;
 
-    public function __construct($pattern)
-    {
-        $this->pattern = $pattern;
-    }
+  public function __construct($pattern) {
+    $this->pattern = $pattern;
+  }
 
-    /**
-     * Evaluates the constraint for parameter $other. Returns TRUE if the
-     * constraint is met, FALSE otherwise.
-     *
-     * @param mixed $other Value or object to evaluate.
-     * @return bool
-     */
-    public function evaluate($other)
-    {
-        return preg_match($this->pattern, $other) > 0;
-    }
+  /**
+   * Evaluates the constraint for parameter $other. Returns TRUE if the
+   * constraint is met, FALSE otherwise.
+   *
+   * @param mixed $other Value or object to evaluate.
+   * @return bool
+   */
+  public function evaluate($other) {
+    return preg_match($this->pattern, $other) > 0;
+  }
 
-    /**
-     * Returns a string representation of the constraint.
-     *
-     * @return string
-     * @access public
-     */
-    public function toString()
-    {
-        return sprintf(
-          'matches PCRE pattern "%s"',
+  /**
+   * Returns a string representation of the constraint.
+   *
+   * @return string
+   * @access public
+   */
+  public function toString() {
+    return sprintf('matches PCRE pattern "%s"', 
 
-          $this->pattern
-        );
-    }
+    $this->pattern);
+  }
 }
 ?>

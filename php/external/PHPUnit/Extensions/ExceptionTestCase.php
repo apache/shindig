@@ -49,11 +49,7 @@ require_once 'PHPUnit/Util/Filter.php';
 
 PHPUnit_Util_Filter::addFileToFilter(__FILE__, 'PHPUNIT');
 
-trigger_error(
-  "Class PHPUnit_Extensions_ExceptionTestCase is deprecated. ".
-  "It will be removed in PHPUnit 3.3. ".
-  "The functionality has been merged into PHPUnit_Framework_TestCase."
-);
+trigger_error("Class PHPUnit_Extensions_ExceptionTestCase is deprecated. " . "It will be removed in PHPUnit 3.3. " . "The functionality has been merged into PHPUnit_Framework_TestCase.");
 
 /**
  * A TestCase that expects a specified Exception to be thrown.
@@ -67,7 +63,6 @@ trigger_error(
  * @link       http://www.phpunit.de/
  * @since      Class available since Release 2.0.0
  */
-abstract class PHPUnit_Extensions_ExceptionTestCase extends PHPUnit_Framework_TestCase
-{
+abstract class PHPUnit_Extensions_ExceptionTestCase extends PHPUnit_Framework_TestCase {
 }
 ?>

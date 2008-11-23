@@ -70,87 +70,78 @@ PHPUnit_Util_Filter::addFileToFilter(__FILE__, 'PHPUNIT');
  * @link       http://www.phpunit.de/
  * @since      Class available since Release 3.0.0
  */
-class PHPUnit_Framework_MockObject_Builder_InvocationMocker implements PHPUnit_Framework_MockObject_Builder_MethodNameMatch
-{
-    protected $collection;
+class PHPUnit_Framework_MockObject_Builder_InvocationMocker implements PHPUnit_Framework_MockObject_Builder_MethodNameMatch {
+  protected $collection;
+  
+  protected $matcher;
 
-    protected $matcher;
+  public function __construct(PHPUnit_Framework_MockObject_Stub_MatcherCollection $collection, PHPUnit_Framework_MockObject_Matcher_Invocation $invocationMatcher) {
+    $this->collection = $collection;
+    $this->matcher = new PHPUnit_Framework_MockObject_Matcher($invocationMatcher);
+    
+    $this->collection->addMatcher($this->matcher);
+  }
 
-    public function __construct(PHPUnit_Framework_MockObject_Stub_MatcherCollection $collection, PHPUnit_Framework_MockObject_Matcher_Invocation $invocationMatcher)
-    {
-        $this->collection = $collection;
-        $this->matcher    = new PHPUnit_Framework_MockObject_Matcher($invocationMatcher);
+  public function getMatcher() {
+    return $this->matcher;
+  }
 
-        $this->collection->addMatcher($this->matcher);
+  public function id($id) {
+    $this->collection->registerId($id, $this);
+    
+    return $this;
+  }
+
+  public function will(PHPUnit_Framework_MockObject_Stub $stub) {
+    $this->matcher->stub = $stub;
+    
+    return $this;
+  }
+
+  public function after($id) {
+    $this->matcher->afterMatchBuilderId = $id;
+    
+    return $this;
+  }
+
+  public function with() {
+    $args = func_get_args();
+    
+    if ($this->matcher->methodNameMatcher === NULL) {
+      throw new RuntimeException('Method name matcher is not defined, cannot define parameter matcher without one');
     }
-
-    public function getMatcher()
-    {
-        return $this->matcher;
+    
+    if ($this->matcher->parametersMatcher !== NULL) {
+      throw new RuntimeException('Parameter matcher is already defined, cannot redefine');
     }
+    
+    $this->matcher->parametersMatcher = new PHPUnit_Framework_MockObject_Matcher_Parameters($args);
+    
+    return $this;
+  }
 
-    public function id($id)
-    {
-        $this->collection->registerId($id, $this);
-
-        return $this;
+  public function withAnyParameters() {
+    if ($this->matcher->methodNameMatcher === NULL) {
+      throw new RuntimeException('Method name matcher is not defined, cannot define parameter matcher without one');
     }
-
-    public function will(PHPUnit_Framework_MockObject_Stub $stub)
-    {
-        $this->matcher->stub = $stub;
-
-        return $this;
+    
+    if ($this->matcher->parametersMatcher !== NULL) {
+      throw new RuntimeException('Parameter matcher is already defined, cannot redefine');
     }
+    
+    $this->matcher->parametersMatcher = new PHPUnit_Framework_MockObject_Matcher_AnyParameters();
+    
+    return $this;
+  }
 
-    public function after($id)
-    {
-        $this->matcher->afterMatchBuilderId = $id;
-
-        return $this;
+  public function method($constraint) {
+    if ($this->matcher->methodNameMatcher !== NULL) {
+      throw new RuntimeException('Method name matcher is already defined, cannot redefine');
     }
-
-    public function with()
-    {
-        $args = func_get_args();
-
-        if ($this->matcher->methodNameMatcher === NULL) {
-            throw new RuntimeException('Method name matcher is not defined, cannot define parameter matcher without one');
-        }
-
-        if ( $this->matcher->parametersMatcher !== NULL) {
-            throw new RuntimeException('Parameter matcher is already defined, cannot redefine');
-        }
-
-        $this->matcher->parametersMatcher = new PHPUnit_Framework_MockObject_Matcher_Parameters($args);
-
-        return $this;
-    }
-
-    public function withAnyParameters()
-    {
-        if ($this->matcher->methodNameMatcher === NULL) {
-            throw new RuntimeException('Method name matcher is not defined, cannot define parameter matcher without one');
-        }
-
-        if ($this->matcher->parametersMatcher !== NULL) {
-            throw new RuntimeException('Parameter matcher is already defined, cannot redefine');
-        }
-
-        $this->matcher->parametersMatcher = new PHPUnit_Framework_MockObject_Matcher_AnyParameters();
-
-        return $this;
-    }
-
-    public function method($constraint)
-    {
-        if ($this->matcher->methodNameMatcher !== NULL) {
-            throw new RuntimeException('Method name matcher is already defined, cannot redefine');
-        }
-
-        $this->matcher->methodNameMatcher = new PHPUnit_Framework_MockObject_Matcher_MethodName($constraint);
-
-        return $this;
-    }
+    
+    $this->matcher->methodNameMatcher = new PHPUnit_Framework_MockObject_Matcher_MethodName($constraint);
+    
+    return $this;
+  }
 }
 ?>

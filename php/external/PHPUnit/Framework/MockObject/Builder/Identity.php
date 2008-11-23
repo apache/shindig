@@ -67,14 +67,14 @@ PHPUnit_Util_Filter::addFileToFilter(__FILE__, 'PHPUNIT');
  * @link       http://www.phpunit.de/
  * @since      Interface available since Release 3.0.0
  */
-interface PHPUnit_Framework_MockObject_Builder_Identity
-{
-    /**
-     * Sets the identification of the expectation to $id.
-     *
-     * @note The identifier is unique per mock object.
-     * @param string $id Unique identifiation of expectation.
-     */
-    public function id($id);
+interface PHPUnit_Framework_MockObject_Builder_Identity {
+
+  /**
+   * Sets the identification of the expectation to $id.
+   *
+   * @note The identifier is unique per mock object.
+   * @param string $id Unique identifiation of expectation.
+   */
+  public function id($id);
 }
 ?>

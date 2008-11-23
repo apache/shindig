@@ -62,99 +62,90 @@ PHPUnit_Util_Filter::addFileToFilter(__FILE__, 'PHPUNIT');
  * @link       http://www.phpunit.de/
  * @since      Class available since Release 2.0.0
  */
-class PHPUnit_Extensions_RepeatedTest extends PHPUnit_Extensions_TestDecorator
-{
-    /**
-     * @var    mixed
-     * @access protected
-     */
-    protected $filter = FALSE;
+class PHPUnit_Extensions_RepeatedTest extends PHPUnit_Extensions_TestDecorator {
+  /**
+   * @var    mixed
+   * @access protected
+   */
+  protected $filter = FALSE;
+  
+  /**
+   * @var    array
+   * @access protected
+   */
+  protected $groups = array();
+  
+  /**
+   * @var    array
+   * @access protected
+   */
+  protected $excludeGroups = array();
+  
+  /**
+   * @var    integer
+   * @access protected
+   */
+  protected $timesRepeat = 1;
 
-    /**
-     * @var    array
-     * @access protected
-     */
-    protected $groups = array();
-
-    /**
-     * @var    array
-     * @access protected
-     */
-    protected $excludeGroups = array();
-
-    /**
-     * @var    integer
-     * @access protected
-     */
-    protected $timesRepeat = 1;
-
-    /**
-     * Constructor.
-     *
-     * @param  PHPUnit_Framework_Test $test
-     * @param  integer                $timesRepeat
-     * @param  mixed                  $filter
-     * @param  array                  $groups
-     * @param  array                  $excludeGroups
-     * @throws InvalidArgumentException
-     * @access public
-     */
-    public function __construct(PHPUnit_Framework_Test $test, $timesRepeat = 1, $filter = FALSE, array $groups = array(), array $excludeGroups = array())
-    {
-        parent::__construct($test);
-
-        if (is_integer($timesRepeat) &&
-            $timesRepeat >= 0) {
-            $this->timesRepeat = $timesRepeat;
-        } else {
-            throw new InvalidArgumentException(
-              'Argument 2 must be a positive integer.'
-            );
-        }
-
-        $this->filter        = $filter;
-        $this->groups        = $groups;
-        $this->excludeGroups = $excludeGroups;
+  /**
+   * Constructor.
+   *
+   * @param  PHPUnit_Framework_Test $test
+   * @param  integer                $timesRepeat
+   * @param  mixed                  $filter
+   * @param  array                  $groups
+   * @param  array                  $excludeGroups
+   * @throws InvalidArgumentException
+   * @access public
+   */
+  public function __construct(PHPUnit_Framework_Test $test, $timesRepeat = 1, $filter = FALSE, array $groups = array(), array $excludeGroups = array()) {
+    parent::__construct($test);
+    
+    if (is_integer($timesRepeat) && $timesRepeat >= 0) {
+      $this->timesRepeat = $timesRepeat;
+    } else {
+      throw new InvalidArgumentException('Argument 2 must be a positive integer.');
     }
+    
+    $this->filter = $filter;
+    $this->groups = $groups;
+    $this->excludeGroups = $excludeGroups;
+  }
 
-    /**
-     * Counts the number of test cases that
-     * will be run by this test.
-     *
-     * @return integer
-     * @access public
-     */
-    public function count()
-    {
-        return $this->timesRepeat * count($this->test);
+  /**
+   * Counts the number of test cases that
+   * will be run by this test.
+   *
+   * @return integer
+   * @access public
+   */
+  public function count() {
+    return $this->timesRepeat * count($this->test);
+  }
+
+  /**
+   * Runs the decorated test and collects the
+   * result in a TestResult.
+   *
+   * @param  PHPUnit_Framework_TestResult $result
+   * @return PHPUnit_Framework_TestResult
+   * @throws InvalidArgumentException
+   * @access public
+   */
+  public function run(PHPUnit_Framework_TestResult $result = NULL) {
+    if ($result === NULL) {
+      $result = $this->createResult();
     }
-
-    /**
-     * Runs the decorated test and collects the
-     * result in a TestResult.
-     *
-     * @param  PHPUnit_Framework_TestResult $result
-     * @return PHPUnit_Framework_TestResult
-     * @throws InvalidArgumentException
-     * @access public
-     */
-    public function run(PHPUnit_Framework_TestResult $result = NULL)
-    {
-        if ($result === NULL) {
-            $result = $this->createResult();
-        }
-
-        for ($i = 0; $i < $this->timesRepeat && !$result->shouldStop(); $i++) {
-            if ($this->test instanceof PHPUnit_Framework_TestSuite) {
-                $this->test->run(
-                  $result, $this->filter, $this->groups, $this->excludeGroups
-                );
-            } else {
-                $this->test->run($result);
-            }
-        }
-
-        return $result;
+    
+    for ($i = 0; $i < $this->timesRepeat && ! $result->shouldStop(); $i ++) {
+      if ($this->test instanceof PHPUnit_Framework_TestSuite) {
+        $this->test->run($result, $this->filter, $this->groups, $this->excludeGroups);
+      } else {
+        $this->test->run($result);
+      }
     }
+    
+    return $result;
+  }
 }
 ?>

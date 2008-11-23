@@ -48,29 +48,28 @@ require_once 'PHPUnit/Util/Filter.php';
 
 PHPUnit_Util_Filter::addFileToFilter(__FILE__, 'PHPUNIT');
 
-if (!class_exists('PHPUnit_Framework_Notice', FALSE)) {
+if (! class_exists('PHPUnit_Framework_Notice', FALSE)) {
 
-/**
- * Wrapper for PHP notices.
- * You can disable notice-to-exception conversion by setting
- *
- * <code>
- * PHPUnit_Framework_Notice::$enabled = FALSE;
- * </code>
- *
- * @category   Testing
- * @package    PHPUnit
- * @author     Sebastian Bergmann <sb@sebastian-bergmann.de>
- * @copyright  2002-2008 Sebastian Bergmann <sb@sebastian-bergmann.de>
- * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
- * @version    Release: 3.2.9
- * @link       http://www.phpunit.de/
- * @since      Class available since Release 3.1.0
- */
-class PHPUnit_Framework_Notice extends PHPUnit_Framework_Error
-{
+  /**
+   * Wrapper for PHP notices.
+   * You can disable notice-to-exception conversion by setting
+   *
+   * <code>
+   * PHPUnit_Framework_Notice::$enabled = FALSE;
+   * </code>
+   *
+   * @category   Testing
+   * @package    PHPUnit
+   * @author     Sebastian Bergmann <sb@sebastian-bergmann.de>
+   * @copyright  2002-2008 Sebastian Bergmann <sb@sebastian-bergmann.de>
+   * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
+   * @version    Release: 3.2.9
+   * @link       http://www.phpunit.de/
+   * @since      Class available since Release 3.1.0
+   */
+  class PHPUnit_Framework_Notice extends PHPUnit_Framework_Error {
     public static $enabled = TRUE;
-}
+  }
 
 }
 ?>

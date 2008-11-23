@@ -61,26 +61,18 @@ PHPUnit_Util_Filter::addFileToFilter(__FILE__, 'PHPUNIT');
  * @link       http://www.phpunit.de/
  * @since      Class available since Release 3.2.0
  */
-class PHPUnit_Util_Log_PMD_Rule_Function_ExcessiveMethodLength extends PHPUnit_Util_Log_PMD_Rule_Function
-{
-    public function __construct($threshold = 100, $priority = 1)
-    {
-        parent::__construct($threshold);
-    }
+class PHPUnit_Util_Log_PMD_Rule_Function_ExcessiveMethodLength extends PHPUnit_Util_Log_PMD_Rule_Function {
 
-    public function apply(PHPUnit_Util_Metrics $metrics)
-    {
-        $locExecutable = $metrics->getLocExecutable();
+  public function __construct($threshold = 100, $priority = 1) {
+    parent::__construct($threshold);
+  }
 
-        if ($locExecutable >= $this->threshold) {
-            return sprintf(
-              "Function or method has %d lines of executable code.\n" .
-              'Violations of this rule usually indicate that the method is ' .
-              'doing too much. Try to reduce the method size by creating ' .
-              'helper methods and removing any copy/pasted code.',
-              $locExecutable
-            );
-        }
+  public function apply(PHPUnit_Util_Metrics $metrics) {
+    $locExecutable = $metrics->getLocExecutable();
+    
+    if ($locExecutable >= $this->threshold) {
+      return sprintf("Function or method has %d lines of executable code.\n" . 'Violations of this rule usually indicate that the method is ' . 'doing too much. Try to reduce the method size by creating ' . 'helper methods and removing any copy/pasted code.', $locExecutable);
     }
+  }
 }
 ?>

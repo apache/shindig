@@ -67,18 +67,18 @@ PHPUnit_Util_Filter::addFileToFilter(__FILE__, 'PHPUNIT');
  * @link       http://www.phpunit.de/
  * @since      Interface available since Release 3.0.0
  */
-interface PHPUnit_Framework_MockObject_Stub extends PHPUnit_Framework_SelfDescribing
-{
-    /**
-     * Fakes the processesing of the invocation $invocation by returning a
-     * specific value.
-     *
-     * @return mixed
-     * @param PHPUnit_Framework_MockObject_Invocation $invocation The invocation which was mocked
-     *                                                  and matched by the current method
-     *                                                  and argument matchers.
-     */
-    public function invoke(PHPUnit_Framework_MockObject_Invocation $invocation);
+interface PHPUnit_Framework_MockObject_Stub extends PHPUnit_Framework_SelfDescribing {
+
+  /**
+   * Fakes the processesing of the invocation $invocation by returning a
+   * specific value.
+   *
+   * @return mixed
+   * @param PHPUnit_Framework_MockObject_Invocation $invocation The invocation which was mocked
+   *                                                  and matched by the current method
+   *                                                  and argument matchers.
+   */
+  public function invoke(PHPUnit_Framework_MockObject_Invocation $invocation);
 }
 
 require_once 'PHPUnit/Framework/MockObject/Stub/ConsecutiveCalls.php';

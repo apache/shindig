@@ -63,42 +63,38 @@ PHPUnit_Util_Filter::addFileToFilter(__FILE__, 'PHPUNIT');
  * @link       http://www.phpunit.de/
  * @since      Class available since Release 3.0.0
  */
-class PHPUnit_Framework_Constraint_TraversableContains extends PHPUnit_Framework_Constraint
-{
-    protected $value;
+class PHPUnit_Framework_Constraint_TraversableContains extends PHPUnit_Framework_Constraint {
+  protected $value;
 
-    public function __construct($value)
-    {
-        $this->value = $value;
+  public function __construct($value) {
+    $this->value = $value;
+  }
+
+  /**
+   * Evaluates the constraint for parameter $other. Returns TRUE if the
+   * constraint is met, FALSE otherwise.
+   *
+   * @param mixed $other Value or object to evaluate.
+   * @return bool
+   */
+  public function evaluate($other) {
+    foreach ($other as $straw) {
+      if ($straw === $this->value) {
+        return TRUE;
+      }
     }
+    
+    return FALSE;
+  }
 
-    /**
-     * Evaluates the constraint for parameter $other. Returns TRUE if the
-     * constraint is met, FALSE otherwise.
-     *
-     * @param mixed $other Value or object to evaluate.
-     * @return bool
-     */
-    public function evaluate($other)
-    {
-        foreach ($other as $straw) {
-            if ($straw === $this->value) {
-                return TRUE;
-            }
-        }
-
-        return FALSE;
-    }
-
-    /**
-     * Returns a string representation of the constraint.
-     *
-     * @return string
-     * @access public
-     */
-    public function toString()
-    {
-        return 'contains ' . PHPUnit_Util_Type::toString($this->value);
-    }
+  /**
+   * Returns a string representation of the constraint.
+   *
+   * @return string
+   * @access public
+   */
+  public function toString() {
+    return 'contains ' . PHPUnit_Util_Type::toString($this->value);
+  }
 }
 ?>

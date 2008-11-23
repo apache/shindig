@@ -70,79 +70,73 @@ require_once 'PHPUnit/Extensions/Database/Operation/Delete.php';
  * @link       http://www.phpunit.de/
  * @since      Class available since Release 3.2.0
  */
-class PHPUnit_Extensions_Database_Operation_Factory
-{
+class PHPUnit_Extensions_Database_Operation_Factory {
 
-    /**
-     * Returns a null database operation
-     * 
-     * @return PHPUnit_Extensions_Database_Operation_IDatabaseOperation
-     */
-    public static function NONE()
-    {
-        return new PHPUnit_Extensions_Database_Operation_Null();
-    }
+  /**
+   * Returns a null database operation
+   * 
+   * @return PHPUnit_Extensions_Database_Operation_IDatabaseOperation
+   */
+  public static function NONE() {
+    return new PHPUnit_Extensions_Database_Operation_Null();
+  }
 
-    /**
-     * Returns a clean insert database operation. It will remove all contents 
-     * from the table prior to re-inserting rows.
-     * 
-     * @return PHPUnit_Extensions_Database_Operation_IDatabaseOperation
-     */
-    public static function CLEAN_INSERT()
-    {
-        return new PHPUnit_Extensions_Database_Operation_Composite(array(new PHPUnit_Extensions_Database_Operation_Truncate(), new PHPUnit_Extensions_Database_Operation_Insert()));
-    }
+  /**
+   * Returns a clean insert database operation. It will remove all contents 
+   * from the table prior to re-inserting rows.
+   * 
+   * @return PHPUnit_Extensions_Database_Operation_IDatabaseOperation
+   */
+  public static function CLEAN_INSERT() {
+    return new PHPUnit_Extensions_Database_Operation_Composite(array(
+        new PHPUnit_Extensions_Database_Operation_Truncate(), 
+        new PHPUnit_Extensions_Database_Operation_Insert()));
+  }
 
-    /**
-     * Returns an insert database operation.
-     * 
-     * @return PHPUnit_Extensions_Database_Operation_IDatabaseOperation
-     */
-    public static function INSERT()
-    {
-        return new PHPUnit_Extensions_Database_Operation_Insert();
-    }
+  /**
+   * Returns an insert database operation.
+   * 
+   * @return PHPUnit_Extensions_Database_Operation_IDatabaseOperation
+   */
+  public static function INSERT() {
+    return new PHPUnit_Extensions_Database_Operation_Insert();
+  }
 
-    /**
-     * Returns a truncate database operation.
-     * 
-     * @return PHPUnit_Extensions_Database_Operation_IDatabaseOperation
-     */
-    public static function TRUNCATE()
-    {
-        return new PHPUnit_Extensions_Database_Operation_Truncate();
-    }
+  /**
+   * Returns a truncate database operation.
+   * 
+   * @return PHPUnit_Extensions_Database_Operation_IDatabaseOperation
+   */
+  public static function TRUNCATE() {
+    return new PHPUnit_Extensions_Database_Operation_Truncate();
+  }
 
-    /**
-     * Returns a delete database operation.
-     * 
-     * @return PHPUnit_Extensions_Database_Operation_IDatabaseOperation
-     */
-    public static function DELETE()
-    {
-        return new PHPUnit_Extensions_Database_Operation_Delete();
-    }
+  /**
+   * Returns a delete database operation.
+   * 
+   * @return PHPUnit_Extensions_Database_Operation_IDatabaseOperation
+   */
+  public static function DELETE() {
+    return new PHPUnit_Extensions_Database_Operation_Delete();
+  }
 
-    /**
-     * Returns a delete_all database operation.
-     * 
-     * @return PHPUnit_Extensions_Database_Operation_IDatabaseOperation
-     */
-    public static function DELETE_ALL()
-    {
-        return new PHPUnit_Extensions_Database_Operation_DeleteAll();
-    }
+  /**
+   * Returns a delete_all database operation.
+   * 
+   * @return PHPUnit_Extensions_Database_Operation_IDatabaseOperation
+   */
+  public static function DELETE_ALL() {
+    return new PHPUnit_Extensions_Database_Operation_DeleteAll();
+  }
 
-    /**
-     * Returns an update database operation.
-     * 
-     * @return PHPUnit_Extensions_Database_Operation_IDatabaseOperation
-     */
-    public static function UPDATE()
-    {
-        return new PHPUnit_Extensions_Database_Operation_Update();
-    }
+  /**
+   * Returns an update database operation.
+   * 
+   * @return PHPUnit_Extensions_Database_Operation_IDatabaseOperation
+   */
+  public static function UPDATE() {
+    return new PHPUnit_Extensions_Database_Operation_Update();
+  }
 
 }
 ?>

@@ -61,89 +61,83 @@ PHPUnit_Util_Filter::addFileToFilter(__FILE__, 'PHPUNIT');
  * @since      Class available since Release 2.0.0
  * @abstract
  */
-abstract class PHPUnit_Util_Printer
-{
-    /**
-     * @var    resource
-     * @access protected
-     */
-    protected $out;
+abstract class PHPUnit_Util_Printer {
+  /**
+   * @var    resource
+   * @access protected
+   */
+  protected $out;
+  
+  /**
+   * @var    string
+   * @access protected
+   */
+  protected $outTarget;
+  
+  /**
+   * @var    boolean
+   * @access protected
+   */
+  protected $printsHTML = FALSE;
 
-    /**
-     * @var    string
-     * @access protected
-     */
-    protected $outTarget;
-
-    /**
-     * @var    boolean
-     * @access protected
-     */
-    protected $printsHTML = FALSE;
-
-    /**
-     * Constructor.
-     *
-     * @param  mixed $out
-     * @throws InvalidArgumentException
-     * @access public
-     */
-    public function __construct($out = NULL)
-    {
-        if ($out !== NULL) {
-            if (is_string($out)) {
-                if (strpos($out, 'socket://') === 0) {
-                    $out = explode(':', str_replace('socket://', '', $out));
-
-                    if (sizeof($out) != 2) {
-                        throw new InvalidArgumentException;
-                    }                    
-
-                    $this->out = fsockopen($out[0], $out[1]);
-                } else {
-                    $this->out = fopen($out, 'wt');
-                }
-
-                $this->outTarget = $out;
-            } else {
-                $this->out = $out;
-            }
-        }
-    }
-
-    /**
-     * Flush buffer, optionally tidy up HTML, and close output.
-     *
-     * @access public
-     */
-    public function flush()
-    {
-        if ($this->out !== NULL) {
-            fclose($this->out);
-        }
-
-        if ($this->printsHTML === TRUE && $this->outTarget !== NULL && extension_loaded('tidy')) {
-            file_put_contents(
-              $this->outTarget, tidy_repair_file($this->outTarget)
-            );
-        }
-    }
-
-    /**
-     * @param  string $buffer
-     * @access public
-     */
-    public function write($buffer)
-    {
-        if ($this->out !== NULL) {
-            fwrite($this->out, $buffer);
+  /**
+   * Constructor.
+   *
+   * @param  mixed $out
+   * @throws InvalidArgumentException
+   * @access public
+   */
+  public function __construct($out = NULL) {
+    if ($out !== NULL) {
+      if (is_string($out)) {
+        if (strpos($out, 'socket://') === 0) {
+          $out = explode(':', str_replace('socket://', '', $out));
+          
+          if (sizeof($out) != 2) {
+            throw new InvalidArgumentException();
+          }
+          
+          $this->out = fsockopen($out[0], $out[1]);
         } else {
-            if (php_sapi_name() != 'cli') {
-                $buffer = htmlentities($buffer);
-            }
-
-            print $buffer;
+          $this->out = fopen($out, 'wt');
         }
+        
+        $this->outTarget = $out;
+      } else {
+        $this->out = $out;
+      }
     }
+  }
+
+  /**
+   * Flush buffer, optionally tidy up HTML, and close output.
+   *
+   * @access public
+   */
+  public function flush() {
+    if ($this->out !== NULL) {
+      fclose($this->out);
+    }
+    
+    if ($this->printsHTML === TRUE && $this->outTarget !== NULL && extension_loaded('tidy')) {
+      file_put_contents($this->outTarget, tidy_repair_file($this->outTarget));
+    }
+  }
+
+  /**
+   * @param  string $buffer
+   * @access public
+   */
+  public function write($buffer) {
+    if ($this->out !== NULL) {
+      fwrite($this->out, $buffer);
+    } else {
+      if (php_sapi_name() != 'cli') {
+        $buffer = htmlentities($buffer);
+      }
+      
+      print $buffer;
+    }
+  }
 }
 ?>

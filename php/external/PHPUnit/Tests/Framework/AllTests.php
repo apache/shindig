@@ -48,9 +48,9 @@ require_once 'PHPUnit/Util/Filter.php';
 
 PHPUnit_Util_Filter::addFileToFilter(__FILE__);
 
-if (!defined('PHPUnit_MAIN_METHOD')) {
-    define('PHPUnit_MAIN_METHOD', 'Framework_AllTests::main');
-    chdir(dirname(dirname(__FILE__)));
+if (! defined('PHPUnit_MAIN_METHOD')) {
+  define('PHPUnit_MAIN_METHOD', 'Framework_AllTests::main');
+  chdir(dirname(dirname(__FILE__)));
 }
 
 require_once 'PHPUnit/Framework/TestSuite.php';
@@ -78,31 +78,29 @@ require_once 'Framework/TestListenerTest.php';
  * @link       http://www.phpunit.de/
  * @since      Class available since Release 2.0.0
  */
-class Framework_AllTests
-{
-    public static function main()
-    {
-        PHPUnit_TextUI_TestRunner::run(self::suite());
-    }
+class Framework_AllTests {
 
-    public static function suite()
-    {
-        $suite = new PHPUnit_Framework_TestSuite('PHPUnit_Framework');
+  public static function main() {
+    PHPUnit_TextUI_TestRunner::run(self::suite());
+  }
 
-        $suite->addTestSuite('Framework_AssertTest');
-        $suite->addTestSuite('Framework_ComparisonFailureTest');
-        $suite->addTestSuite('Framework_ConstraintTest');
-        $suite->addTestSuite('Framework_MockObjectTest');
-        $suite->addTestSuite('Framework_SuiteTest');
-        $suite->addTestSuite('Framework_TestCaseTest');
-        $suite->addTestSuite('Framework_TestImplementorTest');
-        $suite->addTestSuite('Framework_TestListenerTest');
-
-        return $suite;
-    }
+  public static function suite() {
+    $suite = new PHPUnit_Framework_TestSuite('PHPUnit_Framework');
+    
+    $suite->addTestSuite('Framework_AssertTest');
+    $suite->addTestSuite('Framework_ComparisonFailureTest');
+    $suite->addTestSuite('Framework_ConstraintTest');
+    $suite->addTestSuite('Framework_MockObjectTest');
+    $suite->addTestSuite('Framework_SuiteTest');
+    $suite->addTestSuite('Framework_TestCaseTest');
+    $suite->addTestSuite('Framework_TestImplementorTest');
+    $suite->addTestSuite('Framework_TestListenerTest');
+    
+    return $suite;
+  }
 }
 
 if (PHPUnit_MAIN_METHOD == 'Framework_AllTests::main') {
-    Framework_AllTests::main();
+  Framework_AllTests::main();
 }
 ?>

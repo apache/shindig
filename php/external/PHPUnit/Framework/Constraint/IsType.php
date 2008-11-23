@@ -66,104 +66,105 @@ PHPUnit_Util_Filter::addFileToFilter(__FILE__, 'PHPUNIT');
  * @link       http://www.phpunit.de/
  * @since      Class available since Release 3.0.0
  */
-class PHPUnit_Framework_Constraint_IsType extends PHPUnit_Framework_Constraint
-{
-    protected $type;
+class PHPUnit_Framework_Constraint_IsType extends PHPUnit_Framework_Constraint {
+  protected $type;
 
-    public function __construct($type)
-    {
-        switch ($type) {
-            case 'numeric':
-            case 'integer':
-            case 'int':
-            case 'float':
-            case 'string':
-            case 'boolean':
-            case 'bool':
-            case 'null':
-            case 'array':
-            case 'object':
-            case 'resource': {
-              break;
-            }
-
-            default: {
-              throw new InvalidArgumentException(
-                sprintf(
-                  'Type specified for PHPUnit_Framework_Constraint_IsType <%s> is not a valid type.',
-
-                  $type
-                )
-              );
-            }
+  public function __construct($type) {
+    switch ($type) {
+      case 'numeric':
+      case 'integer':
+      case 'int':
+      case 'float':
+      case 'string':
+      case 'boolean':
+      case 'bool':
+      case 'null':
+      case 'array':
+      case 'object':
+      case 'resource':
+        {
+          break;
         }
+      
+      default:
+        {
+          throw new InvalidArgumentException(sprintf('Type specified for PHPUnit_Framework_Constraint_IsType <%s> is not a valid type.', 
 
-        $this->type = $type;
-    }
-
-    /**
-     * Evaluates the constraint for parameter $other. Returns TRUE if the
-     * constraint is met, FALSE otherwise.
-     *
-     * @param mixed $other Value or object to evaluate.
-     * @return bool
-     */
-    public function evaluate($other)
-    {
-        switch ($this->type) {
-            case 'numeric': {
-              return is_numeric($other);
-            }
-
-            case 'integer':
-            case 'int': {
-              return is_integer($other);
-            }
-
-            case 'float': {
-              return is_float($other);
-            }
-
-            case 'string': {
-              return is_string($other);
-            }
-
-            case 'boolean':
-            case 'bool': {
-              return is_bool($other);
-            }
-
-            case 'null': {
-              return is_null($other);
-            }
-
-            case 'array': {
-              return is_array($other);
-            }
-
-            case 'object': {
-              return is_object($other);
-            }
-
-            case 'resource': {
-              return is_resource($other);
-            }
+          $type));
         }
     }
+    
+    $this->type = $type;
+  }
 
-    /**
-     * Returns a string representation of the constraint.
-     *
-     * @return string
-     * @access public
-     */
-    public function toString()
-    {
-        return sprintf(
-          'is of type "%s"',
-
-          $this->type
-        );
+  /**
+   * Evaluates the constraint for parameter $other. Returns TRUE if the
+   * constraint is met, FALSE otherwise.
+   *
+   * @param mixed $other Value or object to evaluate.
+   * @return bool
+   */
+  public function evaluate($other) {
+    switch ($this->type) {
+      case 'numeric':
+        {
+          return is_numeric($other);
+        }
+      
+      case 'integer':
+      case 'int':
+        {
+          return is_integer($other);
+        }
+      
+      case 'float':
+        {
+          return is_float($other);
+        }
+      
+      case 'string':
+        {
+          return is_string($other);
+        }
+      
+      case 'boolean':
+      case 'bool':
+        {
+          return is_bool($other);
+        }
+      
+      case 'null':
+        {
+          return is_null($other);
+        }
+      
+      case 'array':
+        {
+          return is_array($other);
+        }
+      
+      case 'object':
+        {
+          return is_object($other);
+        }
+      
+      case 'resource':
+        {
+          return is_resource($other);
+        }
     }
+  }
+
+  /**
+   * Returns a string representation of the constraint.
+   *
+   * @return string
+   * @access public
+   */
+  public function toString() {
+    return sprintf('is of type "%s"', 
+
+    $this->type);
+  }
 }
 ?>

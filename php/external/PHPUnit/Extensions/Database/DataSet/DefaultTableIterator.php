@@ -63,111 +63,102 @@ PHPUnit_Util_Filter::addFileToFilter(__FILE__, 'PHPUNIT');
  * @link       http://www.phpunit.de/
  * @since      Class available since Release 3.2.0
  */
-class PHPUnit_Extensions_Database_DataSet_DefaultTableIterator implements PHPUnit_Extensions_Database_DataSet_ITableIterator
-{
+class PHPUnit_Extensions_Database_DataSet_DefaultTableIterator implements PHPUnit_Extensions_Database_DataSet_ITableIterator {
+  
+  /**
+   * An array of tables in the iterator.
+   *
+   * @var Array
+   */
+  protected $tables;
+  
+  /**
+   * If this property is true then the tables will be iterated in reverse 
+   * order.
+   * 
+   * @var bool
+   */
+  protected $reverse;
 
-    /**
-     * An array of tables in the iterator.
-     *
-     * @var Array
-     */
-    protected $tables;
+  /**
+   * Creates a new default table iterator object.
+   *
+   * @param array $tables
+   * @param bool $reverse
+   */
+  public function __construct(Array $tables, $reverse = false) {
+    $this->tables = $tables;
+    $this->reverse = $reverse;
+    
+    $this->rewind();
+  }
 
-    /**
-     * If this property is true then the tables will be iterated in reverse 
-     * order.
-     * 
-     * @var bool
-     */
-    protected $reverse;
+  /**
+   * Returns the current table.
+   *
+   * @return PHPUnit_Extensions_Database_DataSet_ITable
+   */
+  public function getTable() {
+    $this->current();
+  }
 
-    /**
-     * Creates a new default table iterator object.
-     *
-     * @param array $tables
-     * @param bool $reverse
-     */
-    public function __construct(Array $tables, $reverse = false)
-    {
-        $this->tables = $tables;
-        $this->reverse = $reverse;
-        
-        $this->rewind();
+  /**
+   * Returns the current table's meta data.
+   *
+   * @return PHPUnit_Extensions_Database_DataSet_ITableMetaData
+   */
+  public function getTableMetaData() {
+    $this->current()->getTableMetaData();
+  }
+
+  /**
+   * Returns the current table.
+   *
+   * @return PHPUnit_Extensions_Database_DataSet_ITable
+   */
+  public function current() {
+    return current($this->tables);
+  }
+
+  /**
+   * Returns the name of the current table.
+   *
+   * @return string
+   */
+  public function key() {
+    return $this->current()->getTableMetaData()->getTableName();
+  }
+
+  /**
+   * advances to the next element.
+   *
+   */
+  public function next() {
+    if ($this->reverse) {
+      prev($this->tables);
+    } else {
+      next($this->tables);
     }
+  }
 
-    /**
-     * Returns the current table.
-     *
-     * @return PHPUnit_Extensions_Database_DataSet_ITable
-     */
-    public function getTable()
-    {
-        $this->current();
+  /**
+   * Rewinds to the first element
+   */
+  public function rewind() {
+    if ($this->reverse) {
+      end($this->tables);
+    } else {
+      reset($this->tables);
     }
+  }
 
-    /**
-     * Returns the current table's meta data.
-     *
-     * @return PHPUnit_Extensions_Database_DataSet_ITableMetaData
-     */
-    public function getTableMetaData()
-    {
-        $this->current()->getTableMetaData();
-    }
-
-    /**
-     * Returns the current table.
-     *
-     * @return PHPUnit_Extensions_Database_DataSet_ITable
-     */
-    public function current()
-    {
-        return current($this->tables);
-    }
-
-    /**
-     * Returns the name of the current table.
-     *
-     * @return string
-     */
-    public function key()
-    {
-        return $this->current()->getTableMetaData()->getTableName();
-    }
-
-    /**
-     * advances to the next element.
-     *
-     */
-    public function next()
-    {
-        if ($this->reverse) {
-            prev($this->tables);
-        } else {
-            next($this->tables);
-        }
-    }
-
-    /**
-     * Rewinds to the first element
-     */
-    public function rewind()
-    {
-        if ($this->reverse) {
-            end($this->tables);
-        } else {
-            reset($this->tables);
-        }
-    }
-
-    /**
-     * Returns true if the current index is valid
-     * 
-     * @return bool
-     */
-    public function valid()
-    {
-        return ($this->current() !== false);
-    }
+  /**
+   * Returns true if the current index is valid
+   * 
+   * @return bool
+   */
+  public function valid() {
+    return ($this->current() !== false);
+  }
 }
 ?>

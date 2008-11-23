@@ -61,28 +61,18 @@ PHPUnit_Util_Filter::addFileToFilter(__FILE__, 'PHPUNIT');
  * @link       http://www.phpunit.de/
  * @since      Class available since Release 3.2.0
  */
-class PHPUnit_Util_Log_PMD_Rule_Function_CRAP extends PHPUnit_Util_Log_PMD_Rule_Function
-{
-    public function __construct($threshold = 30, $priority = 1)
-    {
-        parent::__construct($threshold);
-    }
+class PHPUnit_Util_Log_PMD_Rule_Function_CRAP extends PHPUnit_Util_Log_PMD_Rule_Function {
 
-    public function apply(PHPUnit_Util_Metrics $metrics)
-    {
-        $crap = $metrics->getCrapIndex();
+  public function __construct($threshold = 30, $priority = 1) {
+    parent::__construct($threshold);
+  }
 
-        if ($crap >= $this->threshold) {
-            return sprintf(
-              "The CRAP index is %d.\n" .
-              'The Change Risk Analysis and Predictions (CRAP) index of a ' .
-              'function or method uses cyclomatic complexity and code coverage ' .
-              'from automated tests to help estimate the effort and risk ' .
-              'associated with maintaining legacy code. A CRAP index over 30 ' .
-              'is a good indicator of crappy code.',
-              $crap
-            );
-        }
+  public function apply(PHPUnit_Util_Metrics $metrics) {
+    $crap = $metrics->getCrapIndex();
+    
+    if ($crap >= $this->threshold) {
+      return sprintf("The CRAP index is %d.\n" . 'The Change Risk Analysis and Predictions (CRAP) index of a ' . 'function or method uses cyclomatic complexity and code coverage ' . 'from automated tests to help estimate the effort and risk ' . 'associated with maintaining legacy code. A CRAP index over 30 ' . 'is a good indicator of crappy code.', $crap);
     }
+  }
 }
 ?>

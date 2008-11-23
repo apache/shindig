@@ -62,22 +62,14 @@ PHPUnit_Util_Filter::addFileToFilter(__FILE__);
  * @link       http://www.phpunit.de/
  * @since      Class available since Release 2.0.0
  */
-class MockRunner extends PHPUnit_Runner_BaseTestRunner
-{
-    public function testEnded($testName)
-    {
-    }
+class MockRunner extends PHPUnit_Runner_BaseTestRunner {
 
-    public function testFailed($status, PHPUnit_Framework_Test $test, PHPUnit_Framework_AssertionFailedError $e)
-    {
-    }
+  public function testEnded($testName) {}
 
-    public function testStarted($testName)
-    {
-    }
+  public function testFailed($status, PHPUnit_Framework_Test $test, PHPUnit_Framework_AssertionFailedError $e) {}
 
-    protected function runFailed($message)
-    {
-    }
+  public function testStarted($testName) {}
+
+  protected function runFailed($message) {}
 }
 ?>

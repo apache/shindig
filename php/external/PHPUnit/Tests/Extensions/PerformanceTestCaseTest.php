@@ -62,24 +62,22 @@ require_once '_files/Sleep.php';
  * @link       http://www.phpunit.de/
  * @since      Class available since Release 2.0.0
  */
-class Extensions_PerformanceTestCaseTest extends PHPUnit_Framework_TestCase
-{
-    public function testDoesNotExceedMaxRunningTime()
-    {
-        $test = new Sleep('testSleepTwoSeconds');
-        $test->setMaxRunningTime(3);
+class Extensions_PerformanceTestCaseTest extends PHPUnit_Framework_TestCase {
 
-        $result = $test->run();
-        $this->assertEquals(0, $result->failureCount());
-    }
+  public function testDoesNotExceedMaxRunningTime() {
+    $test = new Sleep('testSleepTwoSeconds');
+    $test->setMaxRunningTime(3);
+    
+    $result = $test->run();
+    $this->assertEquals(0, $result->failureCount());
+  }
 
-    public function testExceedsMaxRunningTime()
-    {
-        $test = new Sleep('testSleepTwoSeconds');
-        $test->setMaxRunningTime(1);
-
-        $result = $test->run();
-        $this->assertEquals(1, $result->failureCount());
-    }
+  public function testExceedsMaxRunningTime() {
+    $test = new Sleep('testSleepTwoSeconds');
+    $test->setMaxRunningTime(1);
+    
+    $result = $test->run();
+    $this->assertEquals(1, $result->failureCount());
+  }
 }
 ?>

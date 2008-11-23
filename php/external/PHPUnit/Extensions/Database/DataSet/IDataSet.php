@@ -61,44 +61,43 @@ PHPUnit_Util_Filter::addFileToFilter(__FILE__, 'PHPUNIT');
  * @link       http://www.phpunit.de/
  * @since      Class available since Release 3.2.0
  */
-interface PHPUnit_Extensions_Database_DataSet_IDataSet extends IteratorAggregate
-{
+interface PHPUnit_Extensions_Database_DataSet_IDataSet extends IteratorAggregate {
 
-    /**
-     * Returns an array of table names contained in the dataset.
-     *
-     * @return array
-     */
-    public function getTableNames();
+  /**
+   * Returns an array of table names contained in the dataset.
+   *
+   * @return array
+   */
+  public function getTableNames();
 
-    /**
-     * Returns a table meta data object for the given table.
-     *
-     * @param string $tableName
-     * @return PHPUnit_Extensions_Database_DataSet_ITableMetaData
-     */
-    public function getTableMetaData($tableName);
+  /**
+   * Returns a table meta data object for the given table.
+   *
+   * @param string $tableName
+   * @return PHPUnit_Extensions_Database_DataSet_ITableMetaData
+   */
+  public function getTableMetaData($tableName);
 
-    /**
-     * Returns a table object for the given table.
-     *
-     * @param string $tableName
-     * @return PHPUnit_Extensions_Database_DataSet_ITable
-     */
-    public function getTable($tableName);
+  /**
+   * Returns a table object for the given table.
+   *
+   * @param string $tableName
+   * @return PHPUnit_Extensions_Database_DataSet_ITable
+   */
+  public function getTable($tableName);
 
-    /**
-     * Returns a reverse iterator for all table objects in the given dataset.
-     *
-     * @return PHPUnit_Extensions_Database_DataSet_ITableIterator
-     */
-    public function getReverseIterator();
+  /**
+   * Returns a reverse iterator for all table objects in the given dataset.
+   *
+   * @return PHPUnit_Extensions_Database_DataSet_ITableIterator
+   */
+  public function getReverseIterator();
 
-    /**
-     * Asserts that the given data set matches this data set.
-     *
-     * @param PHPUnit_Extensions_Database_DataSet_IDataSet $other
-     */
-    public function assertEquals(PHPUnit_Extensions_Database_DataSet_IDataSet $other);
+  /**
+   * Asserts that the given data set matches this data set.
+   *
+   * @param PHPUnit_Extensions_Database_DataSet_IDataSet $other
+   */
+  public function assertEquals(PHPUnit_Extensions_Database_DataSet_IDataSet $other);
 }
 ?>

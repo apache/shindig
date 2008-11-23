@@ -1,5 +1,5 @@
 <?php
-/*
+/**
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -8,7 +8,7 @@
  * "License"); you may not use this file except in compliance
  * with the License.  You may obtain a copy of the License at
  *
- *   http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
@@ -22,41 +22,38 @@
  * ContainerConfig test case.
  */
 class ContainerConfigTest extends PHPUnit_Framework_TestCase {
-	
-	/**
-	 * @var ContainerConfig
-	 */
-	private $ContainerConfig;
+  
+  /**
+   * @var ContainerConfig
+   */
+  private $ContainerConfig;
 
-	/**
-	 * Prepares the environment before running a test.
-	 */
-	protected function setUp()
-	{
-		parent::setUp();
-		$this->ContainerConfig = new ContainerConfig(Config::get('container_path'));
-	}
+  /**
+   * Prepares the environment before running a test.
+   */
+  protected function setUp() {
+    parent::setUp();
+    $this->ContainerConfig = new ContainerConfig(Config::get('container_path'));
+  }
 
-	/**
-	 * Cleans up the environment after running a test.
-	 */
-	protected function tearDown()
-	{
-		$this->ContainerConfig = null;
-		parent::tearDown();
-	}
+  /**
+   * Cleans up the environment after running a test.
+   */
+  protected function tearDown() {
+    $this->ContainerConfig = null;
+    parent::tearDown();
+  }
 
-	/**
-	 * Tests ContainerConfig->getConfig()
-	 */
-	public function testGetConfig()
-	{
-		$config = $this->ContainerConfig->getConfig('default', 'gadgets.features');
-		$this->assertArrayHasKey('core.io', $config);
-		$this->assertArrayHasKey('views', $config);
-		$this->assertArrayHasKey('rpc', $config);
-		$this->assertArrayHasKey('skins', $config);
-		$this->assertArrayHasKey('opensocial-0.8', $config);
-		$this->assertArrayHasKey('path', $config['opensocial-0.8']);
-	}
+  /**
+   * Tests ContainerConfig->getConfig()
+   */
+  public function testGetConfig() {
+    $config = $this->ContainerConfig->getConfig('default', 'gadgets.features');
+    $this->assertArrayHasKey('core.io', $config);
+    $this->assertArrayHasKey('views', $config);
+    $this->assertArrayHasKey('rpc', $config);
+    $this->assertArrayHasKey('skins', $config);
+    $this->assertArrayHasKey('opensocial-0.8', $config);
+    $this->assertArrayHasKey('path', $config['opensocial-0.8']);
+  }
 }

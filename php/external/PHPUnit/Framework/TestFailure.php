@@ -49,28 +49,27 @@ require_once 'PHPUnit/Util/Filter.php';
 
 PHPUnit_Util_Filter::addFileToFilter(__FILE__, 'PHPUNIT');
 
-if (!class_exists('PHPUnit_Framework_TestFailure', FALSE)) {
+if (! class_exists('PHPUnit_Framework_TestFailure', FALSE)) {
 
-/**
- * A TestFailure collects a failed test together with the caught exception.
- *
- * @category   Testing
- * @package    PHPUnit
- * @author     Sebastian Bergmann <sb@sebastian-bergmann.de>
- * @copyright  2002-2008 Sebastian Bergmann <sb@sebastian-bergmann.de>
- * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
- * @version    Release: 3.2.9
- * @link       http://www.phpunit.de/
- * @since      Class available since Release 2.0.0
- */
-class PHPUnit_Framework_TestFailure
-{
+  /**
+   * A TestFailure collects a failed test together with the caught exception.
+   *
+   * @category   Testing
+   * @package    PHPUnit
+   * @author     Sebastian Bergmann <sb@sebastian-bergmann.de>
+   * @copyright  2002-2008 Sebastian Bergmann <sb@sebastian-bergmann.de>
+   * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
+   * @version    Release: 3.2.9
+   * @link       http://www.phpunit.de/
+   * @since      Class available since Release 2.0.0
+   */
+  class PHPUnit_Framework_TestFailure {
     /**
      * @var    PHPUnit_Framework_Test
      * @access protected
      */
     protected $failedTest;
-
+    
     /**
      * @var    Exception
      * @access protected
@@ -84,10 +83,9 @@ class PHPUnit_Framework_TestFailure
      * @param  Exception               $thrownException
      * @access public
      */
-    public function __construct(PHPUnit_Framework_Test $failedTest, Exception $thrownException)
-    {
-        $this->failedTest      = $failedTest;
-        $this->thrownException = $thrownException;
+    public function __construct(PHPUnit_Framework_Test $failedTest, Exception $thrownException) {
+      $this->failedTest = $failedTest;
+      $this->thrownException = $thrownException;
     }
 
     /**
@@ -96,14 +94,10 @@ class PHPUnit_Framework_TestFailure
      * @return string
      * @access public
      */
-    public function toString()
-    {
-        return sprintf(
-          '%s: %s',
+    public function toString() {
+      return sprintf('%s: %s', 
 
-          $this->failedTest,
-          $this->thrownException->getMessage()
-        );
+      $this->failedTest, $this->thrownException->getMessage());
     }
 
     /**
@@ -114,9 +108,8 @@ class PHPUnit_Framework_TestFailure
      * @access public
      * @since  Method available since Release 3.2.0
      */
-    public function toStringVerbose($verbose = FALSE)
-    {
-        return self::exceptionToString($this->thrownException, $verbose);
+    public function toStringVerbose($verbose = FALSE) {
+      return self::exceptionToString($this->thrownException, $verbose);
     }
 
     /**
@@ -129,76 +122,64 @@ class PHPUnit_Framework_TestFailure
      * @static
      * @since  Method available since Release 3.2.0
      */
-    public static function exceptionToString(Exception $e, $verbose = FALSE)
-    {
-        if ($e instanceof PHPUnit_Framework_SelfDescribing) {
-            if ($e instanceof PHPUnit_Framework_ExpectationFailedException) {
-                $comparisonFailure = $e->getComparisonFailure();
+    public static function exceptionToString(Exception $e, $verbose = FALSE) {
+      if ($e instanceof PHPUnit_Framework_SelfDescribing) {
+        if ($e instanceof PHPUnit_Framework_ExpectationFailedException) {
+          $comparisonFailure = $e->getComparisonFailure();
+          
+          if ($comparisonFailure !== NULL) {
+            if ($comparisonFailure->identical()) {
+              if ($comparisonFailure instanceof PHPUnit_Framework_ComparisonFailure_Object) {
+                $buffer = "Failed asserting that two variables reference the same object.\n";
+              } else {
+                $buffer = $comparisonFailure->toString() . "\n";
+              }
+            } else {
+              if ($comparisonFailure instanceof PHPUnit_Framework_ComparisonFailure_Scalar) {
+                $buffer = sprintf("Failed asserting that %s matches expected value %s.\n", 
 
-                if ($comparisonFailure !== NULL) {
-                    if ($comparisonFailure->identical()) {
-                        if ($comparisonFailure instanceof PHPUnit_Framework_ComparisonFailure_Object) {
-                            $buffer = "Failed asserting that two variables reference the same object.\n";
-                        } else {
-                            $buffer = $comparisonFailure->toString() . "\n";
-                        }
-                    } else {
-                        if ($comparisonFailure instanceof PHPUnit_Framework_ComparisonFailure_Scalar) {
-                            $buffer = sprintf(
-                              "Failed asserting that %s matches expected value %s.\n",
+                PHPUnit_Util_Type::toString($comparisonFailure->getActual()), PHPUnit_Util_Type::toString($comparisonFailure->getExpected()));
+              } 
 
-                              PHPUnit_Util_Type::toString($comparisonFailure->getActual()),
-                              PHPUnit_Util_Type::toString($comparisonFailure->getExpected())
-                            );
-                        }
+              else if ($comparisonFailure instanceof PHPUnit_Framework_ComparisonFailure_Array || $comparisonFailure instanceof PHPUnit_Framework_ComparisonFailure_Object || $comparisonFailure instanceof PHPUnit_Framework_ComparisonFailure_String) {
+                $buffer = sprintf("Failed asserting that two %ss are equal.\n%s\n", 
 
-                        else if ($comparisonFailure instanceof PHPUnit_Framework_ComparisonFailure_Array ||
-                                 $comparisonFailure instanceof PHPUnit_Framework_ComparisonFailure_Object ||
-                                 $comparisonFailure instanceof PHPUnit_Framework_ComparisonFailure_String) {
-                            $buffer = sprintf(
-                              "Failed asserting that two %ss are equal.\n%s\n",
-
-                              strtolower(substr(get_class($comparisonFailure), 36)),
-                              $comparisonFailure->toString()
-                            );
-                        }
-
-                        if ($verbose &&
-                           !$comparisonFailure instanceof PHPUnit_Framework_ComparisonFailure_Array &&
-                           !$comparisonFailure instanceof PHPUnit_Framework_ComparisonFailure_Object &&
-                           !$comparisonFailure instanceof PHPUnit_Framework_ComparisonFailure_String) {
-                            $buffer = $comparisonFailure->toString() . "\n";
-                        }
-                    }
-                } else {
-                    $buffer = $e->toString();
-
-                    if (!empty($buffer)) {
-                        $buffer .= "\n";
-                    }
-
-                    $buffer .= $e->getDescription() . "\n";
-                }
+                strtolower(substr(get_class($comparisonFailure), 36)), $comparisonFailure->toString());
+              }
+              
+              if ($verbose && ! $comparisonFailure instanceof PHPUnit_Framework_ComparisonFailure_Array && ! $comparisonFailure instanceof PHPUnit_Framework_ComparisonFailure_Object && ! $comparisonFailure instanceof PHPUnit_Framework_ComparisonFailure_String) {
+                $buffer = $comparisonFailure->toString() . "\n";
+              }
             }
-
-            else {
-                $buffer = $e->toString();
-
-                if (!empty($buffer)) {
-                    $buffer .= "\n";
-                }
+          } else {
+            $buffer = $e->toString();
+            
+            if (! empty($buffer)) {
+              $buffer .= "\n";
             }
-        }
-
-        else if ($e instanceof PHPUnit_Framework_Error) {
-            $buffer = $e->getMessage() . "\n";
-        }
+            
+            $buffer .= $e->getDescription() . "\n";
+          }
+        } 
 
         else {
-            $buffer = get_class($e) . ': ' . $e->getMessage() . "\n";
+          $buffer = $e->toString();
+          
+          if (! empty($buffer)) {
+            $buffer .= "\n";
+          }
         }
+      } 
 
-        return $buffer;
+      else if ($e instanceof PHPUnit_Framework_Error) {
+        $buffer = $e->getMessage() . "\n";
+      } 
+
+      else {
+        $buffer = get_class($e) . ': ' . $e->getMessage() . "\n";
+      }
+      
+      return $buffer;
     }
 
     /**
@@ -207,9 +188,8 @@ class PHPUnit_Framework_TestFailure
      * @return Test
      * @access public
      */
-    public function failedTest()
-    {
-        return $this->failedTest;
+    public function failedTest() {
+      return $this->failedTest;
     }
 
     /**
@@ -218,9 +198,8 @@ class PHPUnit_Framework_TestFailure
      * @return Exception
      * @access public
      */
-    public function thrownException()
-    {
-        return $this->thrownException;
+    public function thrownException() {
+      return $this->thrownException;
     }
 
     /**
@@ -229,9 +208,8 @@ class PHPUnit_Framework_TestFailure
      * @return string
      * @access public
      */
-    public function exceptionMessage()
-    {
-        return $this->thrownException()->getMessage();
+    public function exceptionMessage() {
+      return $this->thrownException()->getMessage();
     }
 
     /**
@@ -241,11 +219,10 @@ class PHPUnit_Framework_TestFailure
      * @return boolean
      * @access public
      */
-    public function isFailure()
-    {
-        return ($this->thrownException() instanceof PHPUnit_Framework_AssertionFailedError);
+    public function isFailure() {
+      return ($this->thrownException() instanceof PHPUnit_Framework_AssertionFailedError);
     }
-}
+  }
 
 }
 ?>

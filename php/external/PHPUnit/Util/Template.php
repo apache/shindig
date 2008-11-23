@@ -60,113 +60,110 @@ PHPUnit_Util_Filter::addFileToFilter(__FILE__, 'PHPUNIT');
  * @link       http://www.phpunit.de/
  * @since      Class available since Release 3.0.0
  */
-class PHPUnit_Util_Template
-{
-    /**
-     * @var    string
-     * @access protected
-     */
-    protected static $date = '';
+class PHPUnit_Util_Template {
+  /**
+   * @var    string
+   * @access protected
+   */
+  protected static $date = '';
+  
+  /**
+   * @var    string
+   * @access protected
+   */
+  protected $template = '';
+  
+  /**
+   * @var    array
+   * @access protected
+   */
+  protected $values = array();
 
-    /**
-     * @var    string
-     * @access protected
-     */
-    protected $template = '';
+  /**
+   * Constructor.
+   *
+   * @param  string $file
+   * @throws InvalidArgumentException
+   * @access public
+   */
+  public function __construct($file = '') {
+    $this->setFile($file);
+  }
 
-    /**
-     * @var    array
-     * @access protected
-     */
-    protected $values = array();
-
-    /**
-     * Constructor.
-     *
-     * @param  string $file
-     * @throws InvalidArgumentException
-     * @access public
-     */
-    public function __construct($file = '') {
-        $this->setFile($file);
+  /**
+   * Sets the template file.
+   *
+   * @param  string $file
+   * @throws InvalidArgumentException
+   * @access public
+   */
+  public function setFile($file) {
+    if ($file != '' && file_exists($file)) {
+      $this->template = file_get_contents($file);
+    } else {
+      throw new InvalidArgumentException('Template file could not be loaded.');
     }
+  }
 
-    /**
-     * Sets the template file.
-     *
-     * @param  string $file
-     * @throws InvalidArgumentException
-     * @access public
-     */
-    public function setFile($file) {
-        if ($file != '' && file_exists($file)) {
-            $this->template = file_get_contents($file);
-        } else {
-            throw new InvalidArgumentException(
-              'Template file could not be loaded.'
-            );
-        }
+  /**
+   * Sets one or more template variables.
+   *
+   * @param  array   $values
+   * @param  boolean $merge
+   * @access public
+   */
+  public function setVar(array $values, $merge = TRUE) {
+    if (! $merge || empty($this->values)) {
+      $this->values = $values;
+    } else {
+      $this->values = array_merge($this->values, $values);
     }
+  }
 
-    /**
-     * Sets one or more template variables.
-     *
-     * @param  array   $values
-     * @param  boolean $merge
-     * @access public
-     */
-    public function setVar(array $values, $merge = TRUE) {
-        if (!$merge || empty($this->values)) {
-            $this->values = $values;
-        } else {
-            $this->values = array_merge($this->values, $values);
-        }
+  /**
+   * Renders the template and returns the result.
+   *
+   * @return string
+   * @access public
+   */
+  public function render() {
+    $keys = array();
+    
+    foreach ($this->values as $key => $value) {
+      $keys[] = '{' . $key . '}';
     }
+    
+    return str_replace($keys, $this->values, $this->template);
+  }
 
-    /**
-     * Renders the template and returns the result.
-     *
-     * @return string
-     * @access public
-     */
-    public function render() {
-        $keys = array();
-
-        foreach ($this->values as $key => $value) {
-            $keys[] = '{' . $key . '}';
-        }
-
-        return str_replace($keys, $this->values, $this->template);
+  /**
+   * Renders the template and writes the result to a file.
+   *
+   * @param string $target
+   * @access public
+   */
+  public function renderTo($target) {
+    if ($fp = @fopen($target, 'wt')) {
+      fwrite($fp, $this->render());
+      fclose($fp);
+    } else {
+      throw new RuntimeException('Could not write to ' . $target . '.');
     }
+  }
 
-    /**
-     * Renders the template and writes the result to a file.
-     *
-     * @param string $target
-     * @access public
-     */
-    public function renderTo($target) {
-        if ($fp = @fopen($target, 'wt')) {
-            fwrite($fp, $this->render());
-            fclose($fp);
-        } else {
-            throw new RuntimeException('Could not write to ' . $target . '.');
-        }
+  /**
+   * Returns the cached result of date('D M j G:i:s T Y').
+   *
+   * @return string
+   * @access public
+   * @since  Method available since Release 3.0.1
+   */
+  public static function getDate() {
+    if (self::$date == '') {
+      self::$date = date('D M j G:i:s T Y');
     }
-
-    /**
-     * Returns the cached result of date('D M j G:i:s T Y').
-     *
-     * @return string
-     * @access public
-     * @since  Method available since Release 3.0.1
-     */
-    public static function getDate() {
-        if (self::$date == '') {
-            self::$date = date('D M j G:i:s T Y');
-        }
-
-        return self::$date;
-    }
+    
+    return self::$date;
+  }
 }
 ?>

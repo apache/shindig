@@ -64,66 +64,61 @@ PHPUnit_Util_Filter::addFileToFilter(__FILE__, 'PHPUNIT');
  * @since      Class available since Release 3.0.0
  */
 
-class PHPUnit_Framework_Constraint_Not extends PHPUnit_Framework_Constraint
-{
-    protected $constraint;
+class PHPUnit_Framework_Constraint_Not extends PHPUnit_Framework_Constraint {
+  protected $constraint;
 
-    public function __construct($constraint)
-    {
-        if (!($constraint instanceof PHPUnit_Framework_Constraint)) {
-            $constraint = new PHPUnit_Framework_Constraint_IsEqual($constraint);
+  public function __construct($constraint) {
+    if (! ($constraint instanceof PHPUnit_Framework_Constraint)) {
+      $constraint = new PHPUnit_Framework_Constraint_IsEqual($constraint);
+    }
+    
+    $this->constraint = $constraint;
+  }
+
+  /**
+   * Evaluates the constraint for parameter $other. Returns TRUE if the
+   * constraint is met, FALSE otherwise.
+   *
+   * @param mixed $other Value or object to evaluate.
+   * @return bool
+   */
+  public function evaluate($other) {
+    return ! $this->constraint->evaluate($other);
+  }
+
+  /**
+   * @param   mixed   $other The value passed to evaluate() which failed the
+   *                         constraint check.
+   * @param   string  $description A string with extra description of what was
+   *                               going on while the evaluation failed.
+   * @param   boolean $not Flag to indicate negation.
+   * @throws  PHPUnit_Framework_ExpectationFailedException
+   */
+  public function fail($other, $description, $not = FALSE) {
+    $this->constraint->fail($other, $description, TRUE);
+  }
+
+  /**
+   * Returns a string representation of the constraint.
+   *
+   * @return string
+   * @access public
+   */
+  public function toString() {
+    switch (get_class($this->constraint)) {
+      case 'PHPUnit_Framework_Constraint_And':
+      case 'PHPUnit_Framework_Constraint_Not':
+      case 'PHPUnit_Framework_Constraint_Or':
+        {
+          return 'not( ' . $this->constraint->toString() . ' )';
         }
-
-        $this->constraint = $constraint;
-    }
-
-    /**
-     * Evaluates the constraint for parameter $other. Returns TRUE if the
-     * constraint is met, FALSE otherwise.
-     *
-     * @param mixed $other Value or object to evaluate.
-     * @return bool
-     */
-    public function evaluate($other)
-    {
-        return !$this->constraint->evaluate($other);
-    }
-
-    /**
-     * @param   mixed   $other The value passed to evaluate() which failed the
-     *                         constraint check.
-     * @param   string  $description A string with extra description of what was
-     *                               going on while the evaluation failed.
-     * @param   boolean $not Flag to indicate negation.
-     * @throws  PHPUnit_Framework_ExpectationFailedException
-     */
-    public function fail($other, $description, $not = FALSE)
-    {
-        $this->constraint->fail($other, $description, TRUE);
-    }
-
-    /**
-     * Returns a string representation of the constraint.
-     *
-     * @return string
-     * @access public
-     */
-    public function toString()
-    {
-        switch (get_class($this->constraint)) {
-            case 'PHPUnit_Framework_Constraint_And':
-            case 'PHPUnit_Framework_Constraint_Not':
-            case 'PHPUnit_Framework_Constraint_Or': {
-                return 'not( ' . $this->constraint->toString() . ' )';
-            }
-            break;
-
-            default: {
-                return PHPUnit_Framework_Constraint::negate(
-                  $this->constraint->toString()
-                );
-            }
+        break;
+      
+      default:
+        {
+          return PHPUnit_Framework_Constraint::negate($this->constraint->toString());
         }
     }
+  }
 }
 ?>

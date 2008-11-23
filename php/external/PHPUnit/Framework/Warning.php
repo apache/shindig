@@ -49,22 +49,21 @@ require_once 'PHPUnit/Util/Filter.php';
 
 PHPUnit_Util_Filter::addFileToFilter(__FILE__, 'PHPUNIT');
 
-if (!class_exists('PHPUnit_Framework_Warning', FALSE)) {
+if (! class_exists('PHPUnit_Framework_Warning', FALSE)) {
 
-/**
- * A warning.
- *
- * @category   Testing
- * @package    PHPUnit
- * @author     Sebastian Bergmann <sb@sebastian-bergmann.de>
- * @copyright  2002-2008 Sebastian Bergmann <sb@sebastian-bergmann.de>
- * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
- * @version    Release: 3.2.9
- * @link       http://www.phpunit.de/
- * @since      Class available since Release 2.0.0
- */
-class PHPUnit_Framework_Warning extends PHPUnit_Framework_TestCase
-{
+  /**
+   * A warning.
+   *
+   * @category   Testing
+   * @package    PHPUnit
+   * @author     Sebastian Bergmann <sb@sebastian-bergmann.de>
+   * @copyright  2002-2008 Sebastian Bergmann <sb@sebastian-bergmann.de>
+   * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
+   * @version    Release: 3.2.9
+   * @link       http://www.phpunit.de/
+   * @since      Class available since Release 2.0.0
+   */
+  class PHPUnit_Framework_Warning extends PHPUnit_Framework_TestCase {
     /**
      * @var    string
      * @access protected
@@ -75,18 +74,16 @@ class PHPUnit_Framework_Warning extends PHPUnit_Framework_TestCase
      * @param  string  $message
      * @access public
      */
-    public function __construct($message = '')
-    {
-        $this->message = $message;
-        parent::__construct('Warning');
+    public function __construct($message = '') {
+      $this->message = $message;
+      parent::__construct('Warning');
     }
 
     /**
      * @access protected
      */
-    protected function runTest()
-    {
-        $this->fail($this->message);
+    protected function runTest() {
+      $this->fail($this->message);
     }
 
     /**
@@ -94,11 +91,10 @@ class PHPUnit_Framework_Warning extends PHPUnit_Framework_TestCase
      * @access public
      * @since  Method available since Release 3.0.0
      */
-    public function getMessage()
-    {
-        return $this->message;
+    public function getMessage() {
+      return $this->message;
     }
-}
+  }
 
 }
 ?>

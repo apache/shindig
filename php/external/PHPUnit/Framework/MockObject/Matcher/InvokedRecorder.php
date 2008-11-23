@@ -68,33 +68,27 @@ PHPUnit_Util_Filter::addFileToFilter(__FILE__, 'PHPUNIT');
  * @since      Class available since Release 3.0.0
  * @abstract
  */
-abstract class PHPUnit_Framework_MockObject_Matcher_InvokedRecorder implements PHPUnit_Framework_MockObject_Matcher_Invocation
-{
-    protected $invocations = array();
+abstract class PHPUnit_Framework_MockObject_Matcher_InvokedRecorder implements PHPUnit_Framework_MockObject_Matcher_Invocation {
+  protected $invocations = array();
 
-    public function getInvocationCount()
-    {
-        return count($this->invocations);
-    }
+  public function getInvocationCount() {
+    return count($this->invocations);
+  }
 
-    public function getInvocations()
-    {
-        return $this->invocations;
-    }
+  public function getInvocations() {
+    return $this->invocations;
+  }
 
-    public function hasBeenInvoked()
-    {
-        return count($this->invocations) > 0;
-    }
+  public function hasBeenInvoked() {
+    return count($this->invocations) > 0;
+  }
 
-    public function invoked(PHPUnit_Framework_MockObject_Invocation $invocation)
-    {
-        $this->invocations[] = $invocation;
-    }
+  public function invoked(PHPUnit_Framework_MockObject_Invocation $invocation) {
+    $this->invocations[] = $invocation;
+  }
 
-    public function matches(PHPUnit_Framework_MockObject_Invocation $invocation)
-    {
-        return TRUE;
-    }
+  public function matches(PHPUnit_Framework_MockObject_Invocation $invocation) {
+    return TRUE;
+  }
 }
 ?>

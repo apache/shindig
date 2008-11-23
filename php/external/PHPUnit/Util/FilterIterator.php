@@ -61,32 +61,29 @@ PHPUnit_Util_Filter::addFileToFilter(__FILE__, 'PHPUNIT');
  * @since      Class available since Release 3.0.0
  */
 
-class PHPUnit_Util_FilterIterator extends FilterIterator
-{
-    /**
-     * @var    string
-     * @access protected
-     */
-    protected $suffix;
+class PHPUnit_Util_FilterIterator extends FilterIterator {
+  /**
+   * @var    string
+   * @access protected
+   */
+  protected $suffix;
 
-    /**
-     * @param  Iterator $iterator
-     * @param  string   $suffix
-     * @access public
-     */
-    public function __construct(Iterator $iterator, $suffix = 'Test.php')
-    {
-        parent::__construct($iterator);
-        $this->suffix = $suffix;
-    }
+  /**
+   * @param  Iterator $iterator
+   * @param  string   $suffix
+   * @access public
+   */
+  public function __construct(Iterator $iterator, $suffix = 'Test.php') {
+    parent::__construct($iterator);
+    $this->suffix = $suffix;
+  }
 
-    /**
-     * @return boolean
-     * @access public
-     */
-    public function accept()
-    {
-        return substr($this->getInnerIterator()->current(), -1 * strlen($this->suffix)) == $this->suffix;
-    }
+  /**
+   * @return boolean
+   * @access public
+   */
+  public function accept() {
+    return substr($this->getInnerIterator()->current(), - 1 * strlen($this->suffix)) == $this->suffix;
+  }
 }
 ?>

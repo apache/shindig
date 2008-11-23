@@ -61,334 +61,285 @@ PHPUnit_Util_Filter::addFileToFilter(__FILE__, 'PHPUNIT');
  * @link       http://www.phpunit.de/
  * @since      Class available since Release 2.1.0
  */
-class PHPUnit_Util_Skeleton
-{
-    /**
-     * @var    string
-     * @access protected
-     */
-    protected $className;
+class PHPUnit_Util_Skeleton {
+  /**
+   * @var    string
+   * @access protected
+   */
+  protected $className;
+  
+  /**
+   * @var    string
+   * @access protected
+   */
+  protected $classSourceFile;
+  
+  /**
+   * @var    string
+   * @access protected
+   */
+  protected $testSourceFile;
+  
+  /**
+   * @var    array
+   * @access protected
+   */
+  protected $methodNameCounter = array();
 
-    /**
-     * @var    string
-     * @access protected
-     */
-    protected $classSourceFile;
+  /**
+   * Constructor.
+   *
+   * @param  string  $className
+   * @param  string  $classSourceFile
+   * @throws RuntimeException
+   * @access public
+   */
+  public function __construct($className, $classSourceFile = '') {
+    $this->className = $className;
+    $this->testSourceFile = $className . 'Test.php';
+    
+    if (class_exists($className)) {
+      $this->classSourceFile = '<internal>';
+    } 
 
-    /**
-     * @var    string
-     * @access protected
-     */
-    protected $testSourceFile;
+    else if (empty($classSourceFile) && is_file($className . '.php')) {
+      $this->classSourceFile = $className . '.php';
+    } 
 
-    /**
-     * @var    array
-     * @access protected
-     */
-    protected $methodNameCounter = array();
+    else if (empty($classSourceFile) || is_file(str_replace('_', '/', $className) . '.php')) {
+      $this->classSourceFile = str_replace('_', '/', $className) . '.php';
+      $this->testSourceFile = str_replace('_', '/', $className) . 'Test.php';
+    } 
 
-    /**
-     * Constructor.
-     *
-     * @param  string  $className
-     * @param  string  $classSourceFile
-     * @throws RuntimeException
-     * @access public
-     */
-    public function __construct($className, $classSourceFile = '')
-    {
-        $this->className      = $className;
-        $this->testSourceFile = $className . 'Test.php';
+    else if (empty($classSourceFile)) {
+      throw new RuntimeException(sprintf('Neither "%s.php" nor "%s.php" could be opened.', $className, str_replace('_', '/', $className)));
+    } 
 
-        if (class_exists($className)) {
-            $this->classSourceFile = '<internal>';
-        }
+    else if (! is_file($classSourceFile)) {
+      throw new RuntimeException(sprintf('"%s" could not be opened.', 
 
-        else if (empty($classSourceFile) && is_file($className . '.php')) {
-            $this->classSourceFile = $className . '.php';
-        }
-
-        else if (empty($classSourceFile) ||
-                 is_file(str_replace('_', '/', $className) . '.php')) {
-            $this->classSourceFile = str_replace('_', '/', $className) . '.php';
-            $this->testSourceFile  = str_replace('_', '/', $className) . 'Test.php';
-        }
-
-        else if (empty($classSourceFile)) {
-            throw new RuntimeException(
-              sprintf(
-                'Neither "%s.php" nor "%s.php" could be opened.',
-                $className,
-                str_replace('_', '/', $className)
-              )
-            );
-        }
-
-        else if (!is_file($classSourceFile)) {
-            throw new RuntimeException(
-              sprintf(
-                '"%s" could not be opened.',
-
-                $classSourceFile
-              )
-            );
-        } else {
-            $this->classSourceFile = $classSourceFile;
-        }
-
-        if ($this->classSourceFile != '<internal>') {
-            include_once $this->classSourceFile;
-        }
-
-        if (!class_exists($className)) {
-            throw new RuntimeException(
-              sprintf(
-                'Could not find class "%s" in "%s".',
-
-                $className,
-                realpath($this->classSourceFile)
-              )
-            );
-        }
+      $classSourceFile));
+    } else {
+      $this->classSourceFile = $classSourceFile;
     }
+    
+    if ($this->classSourceFile != '<internal>') {
+      include_once $this->classSourceFile;
+    }
+    
+    if (! class_exists($className)) {
+      throw new RuntimeException(sprintf('Could not find class "%s" in "%s".', 
 
-    /**
-     * Generates the test class' source.
-     *
-     * @param  boolean $verbose
-     * @return mixed
-     * @access public
-     */
-    public function generate($verbose = FALSE)
-    {
-        $class             = new ReflectionClass($this->className);
-        $methods           = '';
-        $incompleteMethods = '';
+      $className, realpath($this->classSourceFile)));
+    }
+  }
 
-        foreach ($class->getMethods() as $method) {
-            if (!$method->isConstructor() &&
-                !$method->isAbstract() &&
-                 $method->isPublic() &&
-                 $method->getDeclaringClass()->getName() == $this->className) {
-                $assertAnnotationFound = FALSE;
+  /**
+   * Generates the test class' source.
+   *
+   * @param  boolean $verbose
+   * @return mixed
+   * @access public
+   */
+  public function generate($verbose = FALSE) {
+    $class = new ReflectionClass($this->className);
+    $methods = '';
+    $incompleteMethods = '';
+    
+    foreach ($class->getMethods() as $method) {
+      if (! $method->isConstructor() && ! $method->isAbstract() && $method->isPublic() && $method->getDeclaringClass()->getName() == $this->className) {
+        $assertAnnotationFound = FALSE;
+        
+        if (preg_match_all('/@assert(.*)$/Um', $method->getDocComment(), $annotations)) {
+          foreach ($annotations[1] as $annotation) {
+            if (preg_match('/\((.*)\)\s+([^\s]*)\s+(.*)/', $annotation, $matches)) {
+              switch ($matches[2]) {
+                case '==':
+                  {
+                    $assertion = 'Equals';
+                  }
+                  break;
+                
+                case '!=':
+                  {
+                    $assertion = 'NotEquals';
+                  }
+                  break;
+                
+                case '===':
+                  {
+                    $assertion = 'Same';
+                  }
+                  break;
+                
+                case '!==':
+                  {
+                    $assertion = 'NotSame';
+                  }
+                  break;
+                
+                case '>':
+                  {
+                    $assertion = 'GreaterThan';
+                  }
+                  break;
+                
+                case '>=':
+                  {
+                    $assertion = 'GreaterThanOrEqual';
+                  }
+                  break;
+                
+                case '<':
+                  {
+                    $assertion = 'LessThan';
+                  }
+                  break;
+                
+                case '<=':
+                  {
+                    $assertion = 'LessThanOrEqual';
+                  }
+                  break;
+                
+                case 'throws':
+                  {
+                    $assertion = 'exception';
+                  }
+                  break;
+                
+                default:
+                  {
+                    throw new RuntimeException();
+                  }
+              }
+              
+              if ($assertion == 'exception') {
+                $template = 'TestMethodException';
+              } 
 
-                if (preg_match_all('/@assert(.*)$/Um', $method->getDocComment(), $annotations)) {
-                    foreach ($annotations[1] as $annotation) {
-                        if (preg_match('/\((.*)\)\s+([^\s]*)\s+(.*)/', $annotation, $matches)) {
-                            switch ($matches[2]) {
-                                case '==': {
-                                    $assertion = 'Equals';
-                                }
-                                break;
+              else if ($assertion == 'Equals' && strtolower($matches[3]) == 'true') {
+                $assertion = 'True';
+                $template = 'TestMethodBool';
+              } 
 
-                                case '!=': {
-                                    $assertion = 'NotEquals';
-                                }
-                                break;
+              else if ($assertion == 'NotEquals' && strtolower($matches[3]) == 'true') {
+                $assertion = 'False';
+                $template = 'TestMethodBool';
+              } 
 
-                                case '===': {
-                                    $assertion = 'Same';
-                                }
-                                break;
+              else if ($assertion == 'Equals' && strtolower($matches[3]) == 'false') {
+                $assertion = 'False';
+                $template = 'TestMethodBool';
+              } 
 
-                                case '!==': {
-                                    $assertion = 'NotSame';
-                                }
-                                break;
+              else if ($assertion == 'NotEquals' && strtolower($matches[3]) == 'false') {
+                $assertion = 'True';
+                $template = 'TestMethodBool';
+              } 
 
-                                case '>': {
-                                    $assertion = 'GreaterThan';
-                                }
-                                break;
+              else {
+                $template = 'TestMethod';
+              }
+              
+              if ($method->isStatic()) {
+                $template .= 'Static';
+              }
+              
+              $methodTemplate = new PHPUnit_Util_Template(sprintf('%s%sSkeleton%s%s.tpl', 
 
-                                case '>=': {
-                                    $assertion = 'GreaterThanOrEqual';
-                                }
-                                break;
-
-                                case '<': {
-                                    $assertion = 'LessThan';
-                                }
-                                break;
-
-                                case '<=': {
-                                    $assertion = 'LessThanOrEqual';
-                                }
-                                break;
-
-                                case 'throws': {
-                                    $assertion = 'exception';
-                                }
-                                break;
-
-                                default: {
-                                    throw new RuntimeException;
-                                }
-                            }
-
-                            if ($assertion == 'exception') {
-                                $template = 'TestMethodException';
-                            }
-
-                            else if ($assertion == 'Equals' && strtolower($matches[3]) == 'true') {
-                                $assertion = 'True';
-                                $template  = 'TestMethodBool';
-                            }
-
-                            else if ($assertion == 'NotEquals' && strtolower($matches[3]) == 'true') {
-                                $assertion = 'False';
-                                $template  = 'TestMethodBool';
-                            }
-
-                            else if ($assertion == 'Equals' && strtolower($matches[3]) == 'false') {
-                                $assertion = 'False';
-                                $template  = 'TestMethodBool';
-                            }
-
-                            else if ($assertion == 'NotEquals' && strtolower($matches[3]) == 'false') {
-                                $assertion = 'True';
-                                $template  = 'TestMethodBool';
-                            }
-
-                            else {
-                                $template = 'TestMethod';
-                            }
-
-                            if ($method->isStatic()) {
-                                $template .= 'Static';
-                            }
-
-                            $methodTemplate = new PHPUnit_Util_Template(
-                              sprintf(
-                                '%s%sSkeleton%s%s.tpl',
-
-                                dirname(__FILE__),
-                                DIRECTORY_SEPARATOR,
-                                DIRECTORY_SEPARATOR,
-                                $template
-                              )
-                            );
-
-                            $origMethodName = $method->getName();
-                            $methodName     = ucfirst($origMethodName);
-
-                            if (isset($this->methodNameCounter[$methodName])) {
-                                $this->methodNameCounter[$methodName]++;
-                            } else {
-                                $this->methodNameCounter[$methodName] = 1;
-                            }
-
-                            if ($this->methodNameCounter[$methodName] > 1) {
-                                $methodName .= $this->methodNameCounter[$methodName];
-                            }
-
-                            $methodTemplate->setVar(
-                              array(
-                                'annotation'     => trim($annotation),
-                                'arguments'      => $matches[1],
-                                'assertion'      => isset($assertion) ? $assertion : '',
-                                'expected'       => $matches[3],
-                                'origMethodName' => $origMethodName,
-                                'className'      => $this->className,
-                                'methodName'     => $methodName
-                              )
-                            );
-
-                            $methods .= $methodTemplate->render();
-
-                            $assertAnnotationFound = TRUE;
-                        }
-                    }
-                }
-
-                if (!$assertAnnotationFound) {
-                    $methodTemplate = new PHPUnit_Util_Template(
-                      sprintf(
-                        '%s%sSkeleton%sIncompleteTestMethod.tpl',
-
-                        dirname(__FILE__),
-                        DIRECTORY_SEPARATOR,
-                        DIRECTORY_SEPARATOR
-                      )
-                    );
-
-                    $methodTemplate->setVar(
-                      array(
-                        'methodName' => ucfirst($method->getName())
-                      )
-                    );
-
-                    $incompleteMethods .= $methodTemplate->render();
-                }
+              dirname(__FILE__), DIRECTORY_SEPARATOR, DIRECTORY_SEPARATOR, $template));
+              
+              $origMethodName = $method->getName();
+              $methodName = ucfirst($origMethodName);
+              
+              if (isset($this->methodNameCounter[$methodName])) {
+                $this->methodNameCounter[$methodName] ++;
+              } else {
+                $this->methodNameCounter[$methodName] = 1;
+              }
+              
+              if ($this->methodNameCounter[$methodName] > 1) {
+                $methodName .= $this->methodNameCounter[$methodName];
+              }
+              
+              $methodTemplate->setVar(array(
+                  'annotation' => trim($annotation), 
+                  'arguments' => $matches[1], 
+                  'assertion' => isset($assertion) ? $assertion : '', 
+                  'expected' => $matches[3], 
+                  'origMethodName' => $origMethodName, 
+                  'className' => $this->className, 
+                  'methodName' => $methodName));
+              
+              $methods .= $methodTemplate->render();
+              
+              $assertAnnotationFound = TRUE;
             }
+          }
         }
+        
+        if (! $assertAnnotationFound) {
+          $methodTemplate = new PHPUnit_Util_Template(sprintf('%s%sSkeleton%sIncompleteTestMethod.tpl', 
 
-        $classTemplate = new PHPUnit_Util_Template(
-          sprintf(
-            '%s%sSkeleton%sTestClass.tpl',
-
-            dirname(__FILE__),
-            DIRECTORY_SEPARATOR,
-            DIRECTORY_SEPARATOR
-          )
-        );
-
-        if ($this->classSourceFile != '<internal>') {
-            $requireClassFile = sprintf(
-              "\n\nrequire_once '%s';",
-
-              $this->classSourceFile
-            );
-        } else {
-            $requireClassFile = '';
+          dirname(__FILE__), DIRECTORY_SEPARATOR, DIRECTORY_SEPARATOR));
+          
+          $methodTemplate->setVar(array(
+              'methodName' => ucfirst($method->getName())));
+          
+          $incompleteMethods .= $methodTemplate->render();
         }
-
-        $classTemplate->setVar(
-          array(
-            'className'        => $this->className,
-            'requireClassFile' => $requireClassFile,
-            'methods'          => $methods . $incompleteMethods,
-            'date'             => date('Y-m-d'),
-            'time'             => date('H:i:s')
-          )
-        );
-
-        if (!$verbose) {
-            return $classTemplate->render();
-        } else {
-            return array(
-              'code'       => $classTemplate->render(),
-              'incomplete' => empty($methods)
-            );
-        }
+      }
     }
+    
+    $classTemplate = new PHPUnit_Util_Template(sprintf('%s%sSkeleton%sTestClass.tpl', 
 
-    /**
-     * Generates the test class and writes it to a source file.
-     *
-     * @param  string  $file
-     * @access public
-     */
-    public function write($file = '')
-    {
-        if ($file == '') {
-            $file = $this->testSourceFile;
-        }
+    dirname(__FILE__), DIRECTORY_SEPARATOR, DIRECTORY_SEPARATOR));
+    
+    if ($this->classSourceFile != '<internal>') {
+      $requireClassFile = sprintf("\n\nrequire_once '%s';", 
 
-        if ($fp = @fopen($file, 'wt')) {
-            @fwrite($fp, $this->generate());
-            @fclose($fp);
-        }
+      $this->classSourceFile);
+    } else {
+      $requireClassFile = '';
     }
-
-    /**
-     * @return string
-     * @access public
-     * @since  Method available since Release 3.0.0
-     */
-    public function getTestSourceFile()
-    {
-        return $this->testSourceFile;
+    
+    $classTemplate->setVar(array('className' => $this->className, 
+        'requireClassFile' => $requireClassFile, 
+        'methods' => $methods . $incompleteMethods, 'date' => date('Y-m-d'), 
+        'time' => date('H:i:s')));
+    
+    if (! $verbose) {
+      return $classTemplate->render();
+    } else {
+      return array('code' => $classTemplate->render(), 'incomplete' => empty($methods));
     }
+  }
+
+  /**
+   * Generates the test class and writes it to a source file.
+   *
+   * @param  string  $file
+   * @access public
+   */
+  public function write($file = '') {
+    if ($file == '') {
+      $file = $this->testSourceFile;
+    }
+    
+    if ($fp = @fopen($file, 'wt')) {
+      @fwrite($fp, $this->generate());
+      @fclose($fp);
+    }
+  }
+
+  /**
+   * @return string
+   * @access public
+   * @since  Method available since Release 3.0.0
+   */
+  public function getTestSourceFile() {
+    return $this->testSourceFile;
+  }
 }
 ?>

@@ -69,130 +69,103 @@ require_once '_files/OverrideTestCase.php';
  * @since      Class available since Release 2.0.0
  */
 class Framework_SuiteTest extends PHPUnit_Framework_TestCase {
-    protected $result;
+  protected $result;
 
-    protected function setUp()
-    {
-        $this->result = new PHPUnit_Framework_TestResult;
-    }
+  protected function setUp() {
+    $this->result = new PHPUnit_Framework_TestResult();
+  }
 
-    public static function suite()
-    {
-        $suite = new PHPUnit_Framework_TestSuite;
+  public static function suite() {
+    $suite = new PHPUnit_Framework_TestSuite();
+    
+    $suite->addTest(new Framework_SuiteTest('testAddTestSuite'));
+    $suite->addTest(new Framework_SuiteTest('testInheritedTests'));
+    $suite->addTest(new Framework_SuiteTest('testNoTestCases'));
+    $suite->addTest(new Framework_SuiteTest('testNoTestCaseClass'));
+    $suite->addTest(new Framework_SuiteTest('testNotExistingTestCase'));
+    $suite->addTest(new Framework_SuiteTest('testNotPublicTestCase'));
+    $suite->addTest(new Framework_SuiteTest('testNotVoidTestCase'));
+    $suite->addTest(new Framework_SuiteTest('testOneTestCase'));
+    $suite->addTest(new Framework_SuiteTest('testShadowedTests'));
+    
+    return $suite;
+  }
 
-        $suite->addTest(new Framework_SuiteTest('testAddTestSuite'));
-        $suite->addTest(new Framework_SuiteTest('testInheritedTests'));
-        $suite->addTest(new Framework_SuiteTest('testNoTestCases'));
-        $suite->addTest(new Framework_SuiteTest('testNoTestCaseClass'));
-        $suite->addTest(new Framework_SuiteTest('testNotExistingTestCase'));
-        $suite->addTest(new Framework_SuiteTest('testNotPublicTestCase'));
-        $suite->addTest(new Framework_SuiteTest('testNotVoidTestCase'));
-        $suite->addTest(new Framework_SuiteTest('testOneTestCase'));
-        $suite->addTest(new Framework_SuiteTest('testShadowedTests'));
+  public function testAddTestSuite() {
+    $suite = new PHPUnit_Framework_TestSuite('OneTestCase');
+    
+    $suite->run($this->result);
+    
+    $this->assertEquals(1, count($this->result));
+  }
 
-        return $suite;
-    }
+  public function testInheritedTests() {
+    $suite = new PHPUnit_Framework_TestSuite('InheritedTestCase');
+    
+    $suite->run($this->result);
+    
+    $this->assertTrue($this->result->wasSuccessful());
+    $this->assertEquals(2, count($this->result));
+  }
 
-    public function testAddTestSuite()
-    {
-        $suite = new PHPUnit_Framework_TestSuite(
-          'OneTestCase'
-        );
+  public function testNoTestCases() {
+    $suite = new PHPUnit_Framework_TestSuite('NoTestCases');
+    
+    $suite->run($this->result);
+    
+    $this->assertTrue(! $this->result->wasSuccessful());
+    $this->assertEquals(1, $this->result->failureCount());
+    $this->assertEquals(1, count($this->result));
+  }
 
-        $suite->run($this->result);
+  public function testNoTestCaseClass() {
+    $suite = new PHPUnit_Framework_TestSuite('NoTestCaseClass');
+    
+    $suite->run($this->result);
+    
+    $this->assertTrue(! $this->result->wasSuccessful());
+    $this->assertEquals(1, count($this->result));
+  }
 
-        $this->assertEquals(1, count($this->result));
-    }
+  public function testNotExistingTestCase() {
+    $suite = new Framework_SuiteTest('notExistingMethod');
+    
+    $suite->run($this->result);
+    
+    $this->assertEquals(0, $this->result->errorCount());
+    $this->assertEquals(1, $this->result->failureCount());
+    $this->assertEquals(1, count($this->result));
+  }
 
-    public function testInheritedTests()
-    {
-        $suite = new PHPUnit_Framework_TestSuite(
-          'InheritedTestCase'
-        );
+  public function testNotPublicTestCase() {
+    $suite = new PHPUnit_Framework_TestSuite('NotPublicTestCase');
+    
+    $this->assertEquals(2, count($suite));
+  }
 
-        $suite->run($this->result);
+  public function testNotVoidTestCase() {
+    $suite = new PHPUnit_Framework_TestSuite('NotVoidTestCase');
+    
+    $this->assertEquals(1, count($suite));
+  }
 
-        $this->assertTrue($this->result->wasSuccessful());
-        $this->assertEquals(2, count($this->result));
-    }
+  public function testOneTestCase() {
+    $suite = new PHPUnit_Framework_TestSuite('OneTestCase');
+    
+    $suite->run($this->result);
+    
+    $this->assertEquals(0, $this->result->errorCount());
+    $this->assertEquals(0, $this->result->failureCount());
+    $this->assertEquals(1, count($this->result));
+    $this->assertTrue($this->result->wasSuccessful());
+  }
 
-    public function testNoTestCases()
-    {
-        $suite = new PHPUnit_Framework_TestSuite(
-          'NoTestCases'
-        );
-
-        $suite->run($this->result);
-
-        $this->assertTrue(!$this->result->wasSuccessful());
-        $this->assertEquals(1, $this->result->failureCount());
-        $this->assertEquals(1, count($this->result));
-    }
-
-    public function testNoTestCaseClass()
-    {
-        $suite = new PHPUnit_Framework_TestSuite(
-          'NoTestCaseClass'
-        );
-
-        $suite->run($this->result);
-
-        $this->assertTrue(!$this->result->wasSuccessful());
-        $this->assertEquals(1, count($this->result));
-    }
-
-    public function testNotExistingTestCase()
-    {
-        $suite = new Framework_SuiteTest('notExistingMethod');
-
-        $suite->run($this->result);
-
-        $this->assertEquals(0, $this->result->errorCount());
-        $this->assertEquals(1, $this->result->failureCount());
-        $this->assertEquals(1, count($this->result));
-    }
-
-    public function testNotPublicTestCase()
-    {
-        $suite = new PHPUnit_Framework_TestSuite(
-          'NotPublicTestCase'
-        );
-
-        $this->assertEquals(2, count($suite));
-    }
-
-    public function testNotVoidTestCase()
-    {
-        $suite = new PHPUnit_Framework_TestSuite(
-          'NotVoidTestCase'
-        );
-
-        $this->assertEquals(1, count($suite));
-    }
-
-    public function testOneTestCase()
-    {
-        $suite = new PHPUnit_Framework_TestSuite(
-          'OneTestCase'
-        );
-
-        $suite->run($this->result);
-
-        $this->assertEquals(0, $this->result->errorCount());
-        $this->assertEquals(0, $this->result->failureCount());
-        $this->assertEquals(1, count($this->result));
-        $this->assertTrue($this->result->wasSuccessful());
-    }
-
-    public function testShadowedTests()
-    {
-        $suite = new PHPUnit_Framework_TestSuite(
-          'OverrideTestCase'
-        );
-
-        $suite->run($this->result);
-
-        $this->assertEquals(1, count($this->result));
-    }
+  public function testShadowedTests() {
+    $suite = new PHPUnit_Framework_TestSuite('OverrideTestCase');
+    
+    $suite->run($this->result);
+    
+    $this->assertEquals(1, count($this->result));
+  }
 }
 ?>

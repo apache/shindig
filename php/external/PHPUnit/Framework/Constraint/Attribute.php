@@ -62,61 +62,46 @@ PHPUnit_Util_Filter::addFileToFilter(__FILE__, 'PHPUNIT');
  * @since      Class available since Release 3.1.0
  */
 
-class PHPUnit_Framework_Constraint_Attribute extends PHPUnit_Framework_Constraint
-{
-    protected $attributeName;
-    protected $constraint;
+class PHPUnit_Framework_Constraint_Attribute extends PHPUnit_Framework_Constraint {
+  protected $attributeName;
+  protected $constraint;
 
-    public function __construct(PHPUnit_Framework_Constraint $constraint, $attributeName)
-    {
-        $this->attributeName = $attributeName;
-        $this->constraint    = $constraint;
-    }
+  public function __construct(PHPUnit_Framework_Constraint $constraint, $attributeName) {
+    $this->attributeName = $attributeName;
+    $this->constraint = $constraint;
+  }
 
-    /**
-     * Evaluates the constraint for parameter $other. Returns TRUE if the
-     * constraint is met, FALSE otherwise.
-     *
-     * @param mixed $other Value or object to evaluate.
-     * @return bool
-     */
-    public function evaluate($other)
-    {
-        return $this->constraint->evaluate(
-          PHPUnit_Framework_Assert::readAttribute(
-            $other, $this->attributeName
-          )
-        );
-    }
+  /**
+   * Evaluates the constraint for parameter $other. Returns TRUE if the
+   * constraint is met, FALSE otherwise.
+   *
+   * @param mixed $other Value or object to evaluate.
+   * @return bool
+   */
+  public function evaluate($other) {
+    return $this->constraint->evaluate(PHPUnit_Framework_Assert::readAttribute($other, $this->attributeName));
+  }
 
-    /**
-     * @param   mixed   $other The value passed to evaluate() which failed the
-     *                         constraint check.
-     * @param   string  $description A string with extra description of what was
-     *                               going on while the evaluation failed.
-     * @param   boolean $not Flag to indicate negation.
-     * @throws  PHPUnit_Framework_ExpectationFailedException
-     */
-    public function fail($other, $description, $not = FALSE)
-    {
-        parent::fail(
-          PHPUnit_Framework_Assert::readAttribute(
-            $other, $this->attributeName
-          ),
-          $description,
-          $not
-        );
-    }
+  /**
+   * @param   mixed   $other The value passed to evaluate() which failed the
+   *                         constraint check.
+   * @param   string  $description A string with extra description of what was
+   *                               going on while the evaluation failed.
+   * @param   boolean $not Flag to indicate negation.
+   * @throws  PHPUnit_Framework_ExpectationFailedException
+   */
+  public function fail($other, $description, $not = FALSE) {
+    parent::fail(PHPUnit_Framework_Assert::readAttribute($other, $this->attributeName), $description, $not);
+  }
 
-    /**
-     * Returns a string representation of the constraint.
-     *
-     * @return string
-     * @access public
-     */
-    public function toString()
-    {
-        return $this->constraint->toString();
-    }
+  /**
+   * Returns a string representation of the constraint.
+   *
+   * @return string
+   * @access public
+   */
+  public function toString() {
+    return $this->constraint->toString();
+  }
 }
 ?>

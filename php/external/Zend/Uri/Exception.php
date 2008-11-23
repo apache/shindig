@@ -18,12 +18,10 @@
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  */
 
-
 /**
  * @see Zend_Exception
  */
 require_once 'external/Zend/Exception.php';
-
 
 /**
  * @category   Zend
@@ -31,6 +29,6 @@ require_once 'external/Zend/Exception.php';
  * @copyright  Copyright (c) 2005-2008 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  */
-class Zend_Uri_Exception extends Zend_Exception
-{}
+class Zend_Uri_Exception extends Zend_Exception {
+}
 

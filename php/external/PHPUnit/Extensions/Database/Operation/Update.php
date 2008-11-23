@@ -64,40 +64,37 @@ PHPUnit_Util_Filter::addFileToFilter(__FILE__, 'PHPUNIT');
  * @link       http://www.phpunit.de/
  * @since      Class available since Release 3.2.0
  */
-class PHPUnit_Extensions_Database_Operation_Update extends PHPUnit_Extensions_Database_Operation_RowBased
-{
+class PHPUnit_Extensions_Database_Operation_Update extends PHPUnit_Extensions_Database_Operation_RowBased {
+  
+  protected $operationName = 'UPDATE';
 
-    protected $operationName = 'UPDATE';
-
-    protected function buildOperationQuery(PHPUnit_Extensions_Database_DataSet_ITableMetaData $databaseTableMetaData, PHPUnit_Extensions_Database_DataSet_ITable $table, PHPUnit_Extensions_Database_DB_IDatabaseConnection $connection)
-    {
-        $keys = $databaseTableMetaData->getPrimaryKeys();
-        $columns = $table->getTableMetaData()->getColumns();
-        
-        $whereStatement = 'WHERE ' . implode(' AND ', $this->buildPreparedColumnArray($keys, $connection));
-        $setStatement = 'SET ' . implode(', ', $this->buildPreparedColumnArray($columns, $connection));
-        
-        $query = "
+  protected function buildOperationQuery(PHPUnit_Extensions_Database_DataSet_ITableMetaData $databaseTableMetaData, PHPUnit_Extensions_Database_DataSet_ITable $table, PHPUnit_Extensions_Database_DB_IDatabaseConnection $connection) {
+    $keys = $databaseTableMetaData->getPrimaryKeys();
+    $columns = $table->getTableMetaData()->getColumns();
+    
+    $whereStatement = 'WHERE ' . implode(' AND ', $this->buildPreparedColumnArray($keys, $connection));
+    $setStatement = 'SET ' . implode(', ', $this->buildPreparedColumnArray($columns, $connection));
+    
+    $query = "
 			UPDATE {$connection->quoteSchemaObject($table->getTableMetaData()->getTableName())}
 			{$setStatement}
 			{$whereStatement}
 		";
-        
-        return $query;
-    }
+    
+    return $query;
+  }
 
-    protected function buildOperationArguments(PHPUnit_Extensions_Database_DataSet_ITableMetaData $databaseTableMetaData, PHPUnit_Extensions_Database_DataSet_ITable $table, $row)
-    {
-        $args = array();
-        foreach ($table->getTableMetaData()->getColumns() as $columnName) {
-            $args[] = $table->getValue($row, $columnName);
-        }
-        
-        foreach ($databaseTableMetaData->getPrimaryKeys() as $columnName) {
-            $args[] = $table->getValue($row, $columnName);
-        }
-        
-        return $args;
+  protected function buildOperationArguments(PHPUnit_Extensions_Database_DataSet_ITableMetaData $databaseTableMetaData, PHPUnit_Extensions_Database_DataSet_ITable $table, $row) {
+    $args = array();
+    foreach ($table->getTableMetaData()->getColumns() as $columnName) {
+      $args[] = $table->getValue($row, $columnName);
     }
+    
+    foreach ($databaseTableMetaData->getPrimaryKeys() as $columnName) {
+      $args[] = $table->getValue($row, $columnName);
+    }
+    
+    return $args;
+  }
 }
 ?>

@@ -60,10 +60,8 @@ PHPUnit_Util_Filter::addFileToFilter(__FILE__);
  * @link       http://www.phpunit.de/
  * @since      Class available since Release 2.0.0
  */
-class ThrowNoExceptionTestCase extends PHPUnit_Framework_TestCase
-{
-    public function test()
-    {
-    }
+class ThrowNoExceptionTestCase extends PHPUnit_Framework_TestCase {
+
+  public function test() {}
 }
 ?>

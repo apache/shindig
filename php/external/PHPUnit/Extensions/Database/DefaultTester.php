@@ -64,32 +64,29 @@ PHPUnit_Util_Filter::addFileToFilter(__FILE__, 'PHPUNIT');
  * @link       http://www.phpunit.de/
  * @since      Class available since Release 3.2.0
  */
-class PHPUnit_Extensions_Database_DefaultTester extends PHPUnit_Extensions_Database_AbstractTester
-{
+class PHPUnit_Extensions_Database_DefaultTester extends PHPUnit_Extensions_Database_AbstractTester {
+  
+  /**
+   * @var PHPUnit_Extensions_Database_DB_IDatabaseConnection
+   */
+  protected $connection;
 
-    /**
-     * @var PHPUnit_Extensions_Database_DB_IDatabaseConnection
-     */
-    protected $connection;
+  /**
+   * Creates a new default database tester using the given connection.
+   *
+   * @param PHPUnit_Extensions_Database_DB_IDatabaseConnection $connection
+   */
+  public function __construct(PHPUnit_Extensions_Database_DB_IDatabaseConnection $connection) {
+    $this->connection = $connection;
+  }
 
-    /**
-     * Creates a new default database tester using the given connection.
-     *
-     * @param PHPUnit_Extensions_Database_DB_IDatabaseConnection $connection
-     */
-    public function __construct(PHPUnit_Extensions_Database_DB_IDatabaseConnection $connection)
-    {
-        $this->connection = $connection;
-    }
-
-    /**
-     * Returns the test database connection.
-     *
-     * @return PHPUnit_Extensions_Database_DB_IDatabaseConnection
-     */
-    public function getConnection()
-    {
-        return $this->connection;
-    }
+  /**
+   * Returns the test database connection.
+   *
+   * @return PHPUnit_Extensions_Database_DB_IDatabaseConnection
+   */
+  public function getConnection() {
+    return $this->connection;
+  }
 }
 ?>

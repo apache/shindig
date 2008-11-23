@@ -62,17 +62,16 @@ PHPUnit_Util_Filter::addFileToFilter(__FILE__, 'PHPUNIT');
  * @link       http://www.phpunit.de/
  * @since      Class available since Release 3.2.0
  */
-interface PHPUnit_Extensions_Database_Operation_IDatabaseOperation
-{
+interface PHPUnit_Extensions_Database_Operation_IDatabaseOperation {
 
-    /**
-     * Executes the database operation against the given $connection for the 
-     * given $dataSet.
-     *
-     * @param PHPUnit_Extensions_Database_DB_IDatabaseConnection $connection
-     * @param PHPUnit_Extensions_Database_DataSet_IDataSet $dataSet
-     * @throws PHPUnit_Extensions_Database_Operation_Exception
-     */
-    public function execute(PHPUnit_Extensions_Database_DB_IDatabaseConnection $connection, PHPUnit_Extensions_Database_DataSet_IDataSet $dataSet);
+  /**
+   * Executes the database operation against the given $connection for the 
+   * given $dataSet.
+   *
+   * @param PHPUnit_Extensions_Database_DB_IDatabaseConnection $connection
+   * @param PHPUnit_Extensions_Database_DataSet_IDataSet $dataSet
+   * @throws PHPUnit_Extensions_Database_Operation_Exception
+   */
+  public function execute(PHPUnit_Extensions_Database_DB_IDatabaseConnection $connection, PHPUnit_Extensions_Database_DataSet_IDataSet $dataSet);
 }
 ?>

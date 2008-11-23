@@ -64,395 +64,353 @@ PHPUnit_Util_Filter::addFileToFilter(__FILE__, 'PHPUNIT');
  * @link       http://www.phpunit.de/
  * @since      Class available since Release 2.1.0
  */
-class PHPUnit_Util_Log_XML extends PHPUnit_Util_Printer implements PHPUnit_Framework_TestListener
-{
-    /**
-     * @var    DOMDocument
-     * @access protected
-     */
-    protected $document;
+class PHPUnit_Util_Log_XML extends PHPUnit_Util_Printer implements PHPUnit_Framework_TestListener {
+  /**
+   * @var    DOMDocument
+   * @access protected
+   */
+  protected $document;
+  
+  /**
+   * @var    DOMElement
+   * @access protected
+   */
+  protected $root;
+  
+  /**
+   * @var    boolean
+   * @access protected
+   */
+  protected $logIncompleteSkipeed = FALSE;
+  
+  /**
+   * @var    boolean
+   * @access protected
+   */
+  protected $writeDocument = TRUE;
+  
+  /**
+   * @var    DOMElement[]
+   * @access protected
+   */
+  protected $testSuites = array();
+  
+  /**
+   * @var    integer[]
+   * @access protected
+   */
+  protected $testSuiteTests = array(0);
+  
+  /**
+   * @var    integer[]
+   * @access protected
+   */
+  protected $testSuiteErrors = array(0);
+  
+  /**
+   * @var    integer[]
+   * @access protected
+   */
+  protected $testSuiteFailures = array(0);
+  
+  /**
+   * @var    integer[]
+   * @access protected
+   */
+  protected $testSuiteTimes = array(0);
+  
+  /**
+   * @var    integer
+   * @access protected
+   */
+  protected $testSuiteLevel = 0;
+  
+  /**
+   * @var    DOMElement
+   * @access protected
+   */
+  protected $currentTestCase = NULL;
+  
+  /**
+   * @var    boolean
+   * @access protected
+   */
+  protected $attachCurrentTestCase = TRUE;
 
-    /**
-     * @var    DOMElement
-     * @access protected
-     */
-    protected $root;
+  /**
+   * Constructor.
+   *
+   * @param  mixed   $out
+   * @param  boolean $logIncompleteSkipped
+   * @access public
+   */
+  public function __construct($out = NULL, $logIncompleteSkipped = FALSE) {
+    $this->document = new DOMDocument('1.0', 'UTF-8');
+    $this->document->formatOutput = TRUE;
+    
+    $this->root = $this->document->createElement('testsuites');
+    $this->document->appendChild($this->root);
+    
+    parent::__construct($out);
+    
+    $this->logIncompleteSkipped = $logIncompleteSkipped;
+  }
 
-    /**
-     * @var    boolean
-     * @access protected
-     */
-    protected $logIncompleteSkipeed = FALSE;
-
-    /**
-     * @var    boolean
-     * @access protected
-     */
-    protected $writeDocument = TRUE;
-
-    /**
-     * @var    DOMElement[]
-     * @access protected
-     */
-    protected $testSuites = array();
-
-    /**
-     * @var    integer[]
-     * @access protected
-     */
-    protected $testSuiteTests = array(0);
-
-    /**
-     * @var    integer[]
-     * @access protected
-     */
-    protected $testSuiteErrors = array(0);
-
-    /**
-     * @var    integer[]
-     * @access protected
-     */
-    protected $testSuiteFailures = array(0);
-
-    /**
-     * @var    integer[]
-     * @access protected
-     */
-    protected $testSuiteTimes = array(0);
-
-    /**
-     * @var    integer
-     * @access protected
-     */
-    protected $testSuiteLevel = 0;
-
-    /**
-     * @var    DOMElement
-     * @access protected
-     */
-    protected $currentTestCase = NULL;
-
-    /**
-     * @var    boolean
-     * @access protected
-     */
-    protected $attachCurrentTestCase = TRUE;
-
-    /**
-     * Constructor.
-     *
-     * @param  mixed   $out
-     * @param  boolean $logIncompleteSkipped
-     * @access public
-     */
-    public function __construct($out = NULL, $logIncompleteSkipped = FALSE)
-    {
-        $this->document = new DOMDocument('1.0', 'UTF-8');
-        $this->document->formatOutput = TRUE;
-
-        $this->root = $this->document->createElement('testsuites');
-        $this->document->appendChild($this->root);
-
-        parent::__construct($out);
-
-        $this->logIncompleteSkipped = $logIncompleteSkipped;
+  /**
+   * Flush buffer and close output.
+   *
+   * @access public
+   */
+  public function flush() {
+    if ($this->writeDocument === TRUE) {
+      $this->write($this->getXML());
     }
+    
+    parent::flush();
+  }
 
-    /**
-     * Flush buffer and close output.
-     *
-     * @access public
-     */
-    public function flush()
-    {
-        if ($this->writeDocument === TRUE) {
-            $this->write($this->getXML());
+  /**
+   * An error occurred.
+   *
+   * @param  PHPUnit_Framework_Test $test
+   * @param  Exception              $e
+   * @param  float                  $time
+   * @access public
+   */
+  public function addError(PHPUnit_Framework_Test $test, Exception $e, $time) {
+    $error = $this->document->createElement('error');
+    $error->setAttribute('type', get_class($e));
+    
+    if ($test instanceof PHPUnit_Framework_SelfDescribing) {
+      $buffer = $test->toString() . "\n";
+    } else {
+      $buffer = '';
+    }
+    
+    $buffer .= PHPUnit_Framework_TestFailure::exceptionToString($e) . "\n" . PHPUnit_Util_Filter::getFilteredStacktrace($e, FALSE);
+    
+    $error->appendChild($this->document->createCDATASection(utf8_encode($buffer)));
+    
+    $this->currentTestCase->appendChild($error);
+    
+    $this->testSuiteErrors[$this->testSuiteLevel] ++;
+  }
+
+  /**
+   * A failure occurred.
+   *
+   * @param  PHPUnit_Framework_Test                 $test
+   * @param  PHPUnit_Framework_AssertionFailedError $e
+   * @param  float                                  $time
+   * @access public
+   */
+  public function addFailure(PHPUnit_Framework_Test $test, PHPUnit_Framework_AssertionFailedError $e, $time) {
+    $failure = $this->document->createElement('failure');
+    $failure->setAttribute('type', get_class($e));
+    
+    if ($test instanceof PHPUnit_Framework_SelfDescribing) {
+      $buffer = $test->toString() . "\n";
+    } else {
+      $buffer = '';
+    }
+    
+    $buffer .= PHPUnit_Framework_TestFailure::exceptionToString($e) . "\n" . PHPUnit_Util_Filter::getFilteredStacktrace($e, FALSE);
+    
+    $failure->appendChild($this->document->createCDATASection(utf8_encode($buffer)));
+    
+    $this->currentTestCase->appendChild($failure);
+    
+    $this->testSuiteFailures[$this->testSuiteLevel] ++;
+  }
+
+  /**
+   * Incomplete test.
+   *
+   * @param  PHPUnit_Framework_Test $test
+   * @param  Exception              $e
+   * @param  float                  $time
+   * @access public
+   */
+  public function addIncompleteTest(PHPUnit_Framework_Test $test, Exception $e, $time) {
+    if ($this->logIncompleteSkipped) {
+      $error = $this->document->createElement('error');
+      $error->setAttribute('type', get_class($e));
+      
+      $error->appendChild($this->document->createCDATASection(utf8_encode("Incomplete Test\n" . PHPUnit_Util_Filter::getFilteredStacktrace($e, FALSE))));
+      
+      $this->currentTestCase->appendChild($error);
+      
+      $this->testSuiteErrors[$this->testSuiteLevel] ++;
+    } else {
+      $this->attachCurrentTestCase = FALSE;
+    }
+  }
+
+  /**
+   * Skipped test.
+   *
+   * @param  PHPUnit_Framework_Test $test
+   * @param  Exception              $e
+   * @param  float                  $time
+   * @access public
+   * @since  Method available since Release 3.0.0
+   */
+  public function addSkippedTest(PHPUnit_Framework_Test $test, Exception $e, $time) {
+    if ($this->logIncompleteSkipped) {
+      $error = $this->document->createElement('error');
+      $error->setAttribute('type', get_class($e));
+      
+      $error->appendChild($this->document->createCDATASection(utf8_encode("Skipped Test\n" . PHPUnit_Util_Filter::getFilteredStacktrace($e, FALSE))));
+      
+      $this->currentTestCase->appendChild($error);
+      
+      $this->testSuiteErrors[$this->testSuiteLevel] ++;
+    } else {
+      $this->attachCurrentTestCase = FALSE;
+    }
+  }
+
+  /**
+   * A testsuite started.
+   *
+   * @param  PHPUnit_Framework_TestSuite $suite
+   * @access public
+   * @since  Method available since Release 2.2.0
+   */
+  public function startTestSuite(PHPUnit_Framework_TestSuite $suite) {
+    $testSuite = $this->document->createElement('testsuite');
+    $testSuite->setAttribute('name', $suite->getName());
+    
+    if (class_exists($suite->getName(), FALSE)) {
+      try {
+        $class = new ReflectionClass($suite->getName());
+        
+        $testSuite->setAttribute('file', $class->getFileName());
+        
+        $packageInformation = PHPUnit_Util_Class::getPackageInformation($suite->getName());
+        
+        if (! empty($packageInformation['category'])) {
+          $testSuite->setAttribute('category', $packageInformation['category']);
         }
-
-        parent::flush();
-    }
-
-    /**
-     * An error occurred.
-     *
-     * @param  PHPUnit_Framework_Test $test
-     * @param  Exception              $e
-     * @param  float                  $time
-     * @access public
-     */
-    public function addError(PHPUnit_Framework_Test $test, Exception $e, $time)
-    {
-        $error = $this->document->createElement('error');
-        $error->setAttribute('type', get_class($e));
-
-        if ($test instanceof PHPUnit_Framework_SelfDescribing) {
-            $buffer = $test->toString() . "\n";
-        } else {
-            $buffer = '';
+        
+        if (! empty($packageInformation['package'])) {
+          $testSuite->setAttribute('package', $packageInformation['package']);
         }
-
-        $buffer .= PHPUnit_Framework_TestFailure::exceptionToString($e) . "\n" .
-                   PHPUnit_Util_Filter::getFilteredStacktrace($e, FALSE);
-
-        $error->appendChild(
-          $this->document->createCDATASection(
-            utf8_encode($buffer)
-          )
-        );
-
-        $this->currentTestCase->appendChild($error);
-
-        $this->testSuiteErrors[$this->testSuiteLevel]++;
-    }
-
-    /**
-     * A failure occurred.
-     *
-     * @param  PHPUnit_Framework_Test                 $test
-     * @param  PHPUnit_Framework_AssertionFailedError $e
-     * @param  float                                  $time
-     * @access public
-     */
-    public function addFailure(PHPUnit_Framework_Test $test, PHPUnit_Framework_AssertionFailedError $e, $time)
-    {
-        $failure = $this->document->createElement('failure');
-        $failure->setAttribute('type', get_class($e));
-
-        if ($test instanceof PHPUnit_Framework_SelfDescribing) {
-            $buffer = $test->toString() . "\n";
-        } else {
-            $buffer = '';
+        
+        if (! empty($packageInformation['subpackage'])) {
+          $testSuite->setAttribute('subpackage', $packageInformation['subpackage']);
         }
+      } 
 
-        $buffer .= PHPUnit_Framework_TestFailure::exceptionToString($e) . "\n" .
-                   PHPUnit_Util_Filter::getFilteredStacktrace($e, FALSE);
-
-        $failure->appendChild(
-          $this->document->createCDATASection(
-            utf8_encode($buffer)
-          )
-        );
-
-        $this->currentTestCase->appendChild($failure);
-
-        $this->testSuiteFailures[$this->testSuiteLevel]++;
+      catch (ReflectionException $e) {}
     }
-
-    /**
-     * Incomplete test.
-     *
-     * @param  PHPUnit_Framework_Test $test
-     * @param  Exception              $e
-     * @param  float                  $time
-     * @access public
-     */
-    public function addIncompleteTest(PHPUnit_Framework_Test $test, Exception $e, $time)
-    {
-        if ($this->logIncompleteSkipped) {
-            $error = $this->document->createElement('error');
-            $error->setAttribute('type', get_class($e));
-
-            $error->appendChild(
-              $this->document->createCDATASection(
-                utf8_encode(
-                  "Incomplete Test\n" .
-                  PHPUnit_Util_Filter::getFilteredStacktrace($e, FALSE)
-                )
-              )
-            );
-
-            $this->currentTestCase->appendChild($error);
-
-            $this->testSuiteErrors[$this->testSuiteLevel]++;
-        } else {
-            $this->attachCurrentTestCase = FALSE;
-        }
+    
+    if ($this->testSuiteLevel > 0) {
+      $this->testSuites[$this->testSuiteLevel]->appendChild($testSuite);
+    } else {
+      $this->root->appendChild($testSuite);
     }
+    
+    $this->testSuiteLevel ++;
+    $this->testSuites[$this->testSuiteLevel] = $testSuite;
+    $this->testSuiteTests[$this->testSuiteLevel] = 0;
+    $this->testSuiteErrors[$this->testSuiteLevel] = 0;
+    $this->testSuiteFailures[$this->testSuiteLevel] = 0;
+    $this->testSuiteTimes[$this->testSuiteLevel] = 0;
+  }
 
-    /**
-     * Skipped test.
-     *
-     * @param  PHPUnit_Framework_Test $test
-     * @param  Exception              $e
-     * @param  float                  $time
-     * @access public
-     * @since  Method available since Release 3.0.0
-     */
-    public function addSkippedTest(PHPUnit_Framework_Test $test, Exception $e, $time)
-    {
-        if ($this->logIncompleteSkipped) {
-            $error = $this->document->createElement('error');
-            $error->setAttribute('type', get_class($e));
-
-            $error->appendChild(
-              $this->document->createCDATASection(
-                utf8_encode(
-                  "Skipped Test\n" .
-                  PHPUnit_Util_Filter::getFilteredStacktrace($e, FALSE)
-                )
-              )
-            );
-
-            $this->currentTestCase->appendChild($error);
-
-            $this->testSuiteErrors[$this->testSuiteLevel]++;
-        } else {
-            $this->attachCurrentTestCase = FALSE;
-        }
+  /**
+   * A testsuite ended.
+   *
+   * @param  PHPUnit_Framework_TestSuite $suite
+   * @access public
+   * @since  Method available since Release 2.2.0
+   */
+  public function endTestSuite(PHPUnit_Framework_TestSuite $suite) {
+    $this->testSuites[$this->testSuiteLevel]->setAttribute('tests', $this->testSuiteTests[$this->testSuiteLevel]);
+    $this->testSuites[$this->testSuiteLevel]->setAttribute('failures', $this->testSuiteFailures[$this->testSuiteLevel]);
+    $this->testSuites[$this->testSuiteLevel]->setAttribute('errors', $this->testSuiteErrors[$this->testSuiteLevel]);
+    $this->testSuites[$this->testSuiteLevel]->setAttribute('time', sprintf('%F', $this->testSuiteTimes[$this->testSuiteLevel]));
+    
+    if ($this->testSuiteLevel > 1) {
+      $this->testSuiteTests[$this->testSuiteLevel - 1] += $this->testSuiteTests[$this->testSuiteLevel];
+      $this->testSuiteErrors[$this->testSuiteLevel - 1] += $this->testSuiteErrors[$this->testSuiteLevel];
+      $this->testSuiteFailures[$this->testSuiteLevel - 1] += $this->testSuiteFailures[$this->testSuiteLevel];
+      $this->testSuiteTimes[$this->testSuiteLevel - 1] += $this->testSuiteTimes[$this->testSuiteLevel];
     }
+    
+    $this->testSuiteLevel --;
+  }
 
-    /**
-     * A testsuite started.
-     *
-     * @param  PHPUnit_Framework_TestSuite $suite
-     * @access public
-     * @since  Method available since Release 2.2.0
-     */
-    public function startTestSuite(PHPUnit_Framework_TestSuite $suite)
-    {
-        $testSuite = $this->document->createElement('testsuite');
-        $testSuite->setAttribute('name', $suite->getName());
-
-        if (class_exists($suite->getName(), FALSE)) {
-            try {
-                $class = new ReflectionClass($suite->getName());
-
-                $testSuite->setAttribute('file', $class->getFileName());
-
-                $packageInformation = PHPUnit_Util_Class::getPackageInformation(
-                  $suite->getName()
-                );
-
-                if (!empty($packageInformation['category'])) {
-                    $testSuite->setAttribute('category', $packageInformation['category']);
-                }
-
-                if (!empty($packageInformation['package'])) {
-                    $testSuite->setAttribute('package', $packageInformation['package']);
-                }
-
-                if (!empty($packageInformation['subpackage'])) {
-                    $testSuite->setAttribute('subpackage', $packageInformation['subpackage']);
-                }
-            }
-
-            catch (ReflectionException $e) {
-            }
-        }
-
-        if ($this->testSuiteLevel > 0) {
-            $this->testSuites[$this->testSuiteLevel]->appendChild($testSuite);
-        } else {
-            $this->root->appendChild($testSuite);
-        }
-
-        $this->testSuiteLevel++;
-        $this->testSuites[$this->testSuiteLevel]        = $testSuite;
-        $this->testSuiteTests[$this->testSuiteLevel]    = 0;
-        $this->testSuiteErrors[$this->testSuiteLevel]   = 0;
-        $this->testSuiteFailures[$this->testSuiteLevel] = 0;
-        $this->testSuiteTimes[$this->testSuiteLevel]    = 0;
+  /**
+   * A test started.
+   *
+   * @param  PHPUnit_Framework_Test $test
+   * @access public
+   */
+  public function startTest(PHPUnit_Framework_Test $test) {
+    $testCase = $this->document->createElement('testcase');
+    $testCase->setAttribute('name', $test->getName());
+    
+    if ($test instanceof PHPUnit_Framework_TestCase) {
+      $class = new ReflectionClass($test);
+      $method = $class->getMethod($test->getName());
+      
+      $testCase->setAttribute('class', $class->getName());
+      $testCase->setAttribute('file', $class->getFileName());
+      $testCase->setAttribute('line', $method->getStartLine());
     }
+    
+    $this->currentTestCase = $testCase;
+  }
 
-    /**
-     * A testsuite ended.
-     *
-     * @param  PHPUnit_Framework_TestSuite $suite
-     * @access public
-     * @since  Method available since Release 2.2.0
-     */
-    public function endTestSuite(PHPUnit_Framework_TestSuite $suite)
-    {
-        $this->testSuites[$this->testSuiteLevel]->setAttribute('tests', $this->testSuiteTests[$this->testSuiteLevel]);
-        $this->testSuites[$this->testSuiteLevel]->setAttribute('failures', $this->testSuiteFailures[$this->testSuiteLevel]);
-        $this->testSuites[$this->testSuiteLevel]->setAttribute('errors', $this->testSuiteErrors[$this->testSuiteLevel]);
-        $this->testSuites[$this->testSuiteLevel]->setAttribute('time', sprintf('%F', $this->testSuiteTimes[$this->testSuiteLevel]));
-
-        if ($this->testSuiteLevel > 1) {
-            $this->testSuiteTests[$this->testSuiteLevel - 1]    += $this->testSuiteTests[$this->testSuiteLevel];
-            $this->testSuiteErrors[$this->testSuiteLevel - 1]   += $this->testSuiteErrors[$this->testSuiteLevel];
-            $this->testSuiteFailures[$this->testSuiteLevel - 1] += $this->testSuiteFailures[$this->testSuiteLevel];
-            $this->testSuiteTimes[$this->testSuiteLevel - 1]    += $this->testSuiteTimes[$this->testSuiteLevel];
-        }
-
-        $this->testSuiteLevel--;
+  /**
+   * A test ended.
+   *
+   * @param  PHPUnit_Framework_Test $test
+   * @param  float                  $time
+   * @access public
+   */
+  public function endTest(PHPUnit_Framework_Test $test, $time) {
+    if ($this->attachCurrentTestCase) {
+      $this->currentTestCase->setAttribute('time', sprintf('%F', $time));
+      
+      $this->testSuites[$this->testSuiteLevel]->appendChild($this->currentTestCase);
+      
+      $this->testSuiteTests[$this->testSuiteLevel] ++;
+      $this->testSuiteTimes[$this->testSuiteLevel] += $time;
     }
+    
+    $this->currentTestCase = NULL;
+    $this->attachCurrentTestCase = TRUE;
+  }
 
-    /**
-     * A test started.
-     *
-     * @param  PHPUnit_Framework_Test $test
-     * @access public
-     */
-    public function startTest(PHPUnit_Framework_Test $test)
-    {
-        $testCase = $this->document->createElement('testcase');
-        $testCase->setAttribute('name', $test->getName());
+  /**
+   * Returns the XML as a string.
+   *
+   * @return string
+   * @access public
+   * @since  Method available since Release 2.2.0
+   */
+  public function getXML() {
+    return $this->document->saveXML();
+  }
 
-        if ($test instanceof PHPUnit_Framework_TestCase) {
-            $class  = new ReflectionClass($test);
-            $method = $class->getMethod($test->getName());
-
-            $testCase->setAttribute('class', $class->getName());
-            $testCase->setAttribute('file', $class->getFileName());
-            $testCase->setAttribute('line', $method->getStartLine());
-        }
-
-        $this->currentTestCase = $testCase;
+  /**
+   * Enables or disables the writing of the document
+   * in flush().
+   *
+   * This is a "hack" needed for the integration of
+   * PHPUnit with Phing.
+   *
+   * @return string
+   * @access public
+   * @since  Method available since Release 2.2.0
+   */
+  public function setWriteDocument($flag) {
+    if (is_bool($flag)) {
+      $this->writeDocument = $flag;
     }
-
-    /**
-     * A test ended.
-     *
-     * @param  PHPUnit_Framework_Test $test
-     * @param  float                  $time
-     * @access public
-     */
-    public function endTest(PHPUnit_Framework_Test $test, $time)
-    {
-        if ($this->attachCurrentTestCase) {
-            $this->currentTestCase->setAttribute('time', sprintf('%F', $time));
-
-            $this->testSuites[$this->testSuiteLevel]->appendChild(
-              $this->currentTestCase
-            );
-
-            $this->testSuiteTests[$this->testSuiteLevel]++;
-            $this->testSuiteTimes[$this->testSuiteLevel] += $time;
-        }
-
-        $this->currentTestCase       = NULL;
-        $this->attachCurrentTestCase = TRUE;
-    }
-
-    /**
-     * Returns the XML as a string.
-     *
-     * @return string
-     * @access public
-     * @since  Method available since Release 2.2.0
-     */
-    public function getXML()
-    {
-        return $this->document->saveXML();
-    }
-
-    /**
-     * Enables or disables the writing of the document
-     * in flush().
-     *
-     * This is a "hack" needed for the integration of
-     * PHPUnit with Phing.
-     *
-     * @return string
-     * @access public
-     * @since  Method available since Release 2.2.0
-     */
-    public function setWriteDocument($flag)
-    {
-        if (is_bool($flag)) {
-            $this->writeDocument = $flag;
-        }
-    }
+  }
 }
 ?>

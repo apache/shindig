@@ -64,185 +64,158 @@ PHPUnit_Util_Filter::addFileToFilter(__FILE__, 'PHPUNIT');
  * @link       http://www.phpunit.de/
  * @since      Class available since Release 3.1.4
  */
-class PHPUnit_Extensions_PhptTestCase implements PHPUnit_Framework_Test
-{
-    /**
-     * The filename of the .phpt file.
-     *
-     * @var    string
-     * @access protected
-     */
-    protected $filename;
+class PHPUnit_Extensions_PhptTestCase implements PHPUnit_Framework_Test {
+  /**
+   * The filename of the .phpt file.
+   *
+   * @var    string
+   * @access protected
+   */
+  protected $filename;
+  
+  protected $options = array();
 
-    protected $options = array();
-
-    /**
-     * Constructs a test case with the given filename.
-     *
-     * @param  string $filename
-     * @param  array  $options Array with ini settings for the php instance run,
-     *                         key being the name if the setting, value the ini value.
-     * @access public
-     */
-    public function __construct($filename, $options = array())
-    {
-        if (!is_string($filename)) {
-            throw new InvalidArgumentException;
-        }
-
-        if (!is_file($filename)) {
-            throw new RuntimeException(
-              sprintf(
-                'File "%s" does not exist.',
-                $filename
-              )
-            );
-        }
-
-        if (!is_array($options)) {
-            throw new InvalidArgumentException;
-        }
-
-        $this->filename = $filename;
-        $this->options  = $options;
+  /**
+   * Constructs a test case with the given filename.
+   *
+   * @param  string $filename
+   * @param  array  $options Array with ini settings for the php instance run,
+   *                         key being the name if the setting, value the ini value.
+   * @access public
+   */
+  public function __construct($filename, $options = array()) {
+    if (! is_string($filename)) {
+      throw new InvalidArgumentException();
     }
-
-    /**
-     * Counts the number of test cases executed by run(TestResult result).
-     *
-     * @return integer
-     * @access public
-     */
-    public function count()
-    {
-        return 1;
+    
+    if (! is_file($filename)) {
+      throw new RuntimeException(sprintf('File "%s" does not exist.', $filename));
     }
-
-    /**
-     * Runs a test and collects its result in a TestResult instance.
-     *
-     * @param  PHPUnit_Framework_TestResult $result
-     * @param  array $options Array with ini settings for the php instance run,
-     *                        key being the name if the setting, value the ini value.
-     * @return PHPUnit_Framework_TestResult
-     * @access public
-     */
-    public function run(PHPUnit_Framework_TestResult $result = NULL, $options = array())
-    {
-        if (!class_exists('PEAR_RunTest', FALSE)) {
-            throw new RuntimeException('Class PEAR_RunTest not found.');
-        }
-
-        if ($result === NULL) {
-            $result = new PHPUnit_Framework_TestResult;
-        }
-
-        if (!is_array($options)) {
-            throw new InvalidArgumentException;
-        }
-
-        $options = array_merge($options, $this->options);
-
-        $coverage = $result->getCollectCodeCoverageInformation();
-
-        if ($coverage) {
-            $options = array('coverage' => TRUE);
-        } else {
-            $options = array();
-        }
-
-        $runner = new PEAR_RunTest(new PHPUnit_Extensions_PhptTestCase_Logger, $options);
-
-        if ($coverage){
-            $runner->xdebug_loaded = TRUE;
-        } else {
-            $runner->xdebug_loaded = FALSE;
-        }
-
-        $result->startTest($this);
-
-        PHPUnit_Util_Timer::start();
-        $buffer = $runner->run($this->filename, $options);
-        $time = PHPUnit_Util_Timer::stop();
-
-        $base         = basename($this->filename);
-        $path         = dirname($this->filename);
-        $coverageFile = $path . DIRECTORY_SEPARATOR . str_replace('.phpt', '.xdebug', $base);
-        $diffFile     = $path . DIRECTORY_SEPARATOR . str_replace('.phpt', '.diff', $base);
-        $expFile      = $path . DIRECTORY_SEPARATOR . str_replace('.phpt', '.exp', $base);
-        $logFile      = $path . DIRECTORY_SEPARATOR . str_replace('.phpt', '.log', $base);
-        $outFile      = $path . DIRECTORY_SEPARATOR . str_replace('.phpt', '.out', $base);
-        $phpFile      = $path . DIRECTORY_SEPARATOR . str_replace('.phpt', '.php', $base);
-
-        if (is_object($buffer) && $buffer instanceof PEAR_Error) {
-            $result->addError( 
-              $this, 
-              new RuntimeException($buffer->getMessage()),
-              $time 
-            ); 
-        }
-
-        else if ($buffer == 'SKIPPED') {
-            $result->addFailure($this, new PHPUnit_Framework_SkippedTestError, 0);
-        }
-
-        else if ($buffer != 'PASSED') {
-            $result->addFailure(
-              $this,
-              PHPUnit_Framework_ComparisonFailure::diffEqual(
-                file_get_contents($expFile),
-                file_get_contents($outFile),
-                FALSE,
-                $this->getName()
-              ),
-              $time
-            );
-        }
-
-        foreach (array($diffFile, $expFile, $logFile, $phpFile, $outFile) as $file) {
-            if (file_exists($file)) {
-                unlink($file);
-            }
-        }
-
-        if ($coverage) {
-            eval('$coverageData = ' . file_get_contents($coverageFile) . ';');
-            unset($coverageData[$phpFile]);
-
-            $codeCoverageInformation = array(
-              'test'  => $this,
-              'files' => $coverageData
-            );
-
-            $result->appendCodeCoverageInformation($this, $codeCoverageInformation);
-            unlink($coverageFile);
-        }
-
-        $result->endTest($this, $time);
-
-        return $result;
+    
+    if (! is_array($options)) {
+      throw new InvalidArgumentException();
     }
+    
+    $this->filename = $filename;
+    $this->options = $options;
+  }
 
-    /**
-     * Returns the name of the test case.
-     *
-     * @return string
-     * @access public
-     */
-    public function getName()
-    {
-        return $this->toString();
-    }
+  /**
+   * Counts the number of test cases executed by run(TestResult result).
+   *
+   * @return integer
+   * @access public
+   */
+  public function count() {
+    return 1;
+  }
 
-    /**
-     * Returns a string representation of the test case.
-     *
-     * @return string
-     * @access public
-     */
-    public function toString()
-    {
-        return $this->filename;
+  /**
+   * Runs a test and collects its result in a TestResult instance.
+   *
+   * @param  PHPUnit_Framework_TestResult $result
+   * @param  array $options Array with ini settings for the php instance run,
+   *                        key being the name if the setting, value the ini value.
+   * @return PHPUnit_Framework_TestResult
+   * @access public
+   */
+  public function run(PHPUnit_Framework_TestResult $result = NULL, $options = array()) {
+    if (! class_exists('PEAR_RunTest', FALSE)) {
+      throw new RuntimeException('Class PEAR_RunTest not found.');
     }
+    
+    if ($result === NULL) {
+      $result = new PHPUnit_Framework_TestResult();
+    }
+    
+    if (! is_array($options)) {
+      throw new InvalidArgumentException();
+    }
+    
+    $options = array_merge($options, $this->options);
+    
+    $coverage = $result->getCollectCodeCoverageInformation();
+    
+    if ($coverage) {
+      $options = array('coverage' => TRUE);
+    } else {
+      $options = array();
+    }
+    
+    $runner = new PEAR_RunTest(new PHPUnit_Extensions_PhptTestCase_Logger(), $options);
+    
+    if ($coverage) {
+      $runner->xdebug_loaded = TRUE;
+    } else {
+      $runner->xdebug_loaded = FALSE;
+    }
+    
+    $result->startTest($this);
+    
+    PHPUnit_Util_Timer::start();
+    $buffer = $runner->run($this->filename, $options);
+    $time = PHPUnit_Util_Timer::stop();
+    
+    $base = basename($this->filename);
+    $path = dirname($this->filename);
+    $coverageFile = $path . DIRECTORY_SEPARATOR . str_replace('.phpt', '.xdebug', $base);
+    $diffFile = $path . DIRECTORY_SEPARATOR . str_replace('.phpt', '.diff', $base);
+    $expFile = $path . DIRECTORY_SEPARATOR . str_replace('.phpt', '.exp', $base);
+    $logFile = $path . DIRECTORY_SEPARATOR . str_replace('.phpt', '.log', $base);
+    $outFile = $path . DIRECTORY_SEPARATOR . str_replace('.phpt', '.out', $base);
+    $phpFile = $path . DIRECTORY_SEPARATOR . str_replace('.phpt', '.php', $base);
+    
+    if (is_object($buffer) && $buffer instanceof PEAR_Error) {
+      $result->addError($this, new RuntimeException($buffer->getMessage()), $time);
+    } 
+
+    else if ($buffer == 'SKIPPED') {
+      $result->addFailure($this, new PHPUnit_Framework_SkippedTestError(), 0);
+    } 
+
+    else if ($buffer != 'PASSED') {
+      $result->addFailure($this, PHPUnit_Framework_ComparisonFailure::diffEqual(file_get_contents($expFile), file_get_contents($outFile), FALSE, $this->getName()), $time);
+    }
+    
+    foreach (array($diffFile, $expFile, $logFile, $phpFile, $outFile) as $file) {
+      if (file_exists($file)) {
+        unlink($file);
+      }
+    }
+    
+    if ($coverage) {
+      eval('$coverageData = ' . file_get_contents($coverageFile) . ';');
+      unset($coverageData[$phpFile]);
+      
+      $codeCoverageInformation = array('test' => $this, 'files' => $coverageData);
+      
+      $result->appendCodeCoverageInformation($this, $codeCoverageInformation);
+      unlink($coverageFile);
+    }
+    
+    $result->endTest($this, $time);
+    
+    return $result;
+  }
+
+  /**
+   * Returns the name of the test case.
+   *
+   * @return string
+   * @access public
+   */
+  public function getName() {
+    return $this->toString();
+  }
+
+  /**
+   * Returns a string representation of the test case.
+   *
+   * @return string
+   * @access public
+   */
+  public function toString() {
+    return $this->filename;
+  }
 }
 ?>

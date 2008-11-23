@@ -64,79 +64,74 @@ PHPUnit_Util_Filter::addFileToFilter(__FILE__, 'PHPUNIT');
  * @link       http://www.phpunit.de/
  * @since      Class available since Release 3.0.0
  */
-class PHPUnit_Framework_Constraint_And extends PHPUnit_Framework_Constraint
-{
-    protected $constraints = array();
+class PHPUnit_Framework_Constraint_And extends PHPUnit_Framework_Constraint {
+  protected $constraints = array();
+  
+  protected $lastConstraint = NULL;
 
-    protected $lastConstraint = NULL;
-
-    public function setConstraints(array $constraints)
-    {
-        $this->constraints = array();
-
-        foreach($constraints as $key => $constraint) {
-            if (!($constraint instanceof PHPUnit_Framework_Constraint)) {
-                throw new InvalidArgumentException('All parameters to ' . __CLASS__ . ' must be a constraint object.');
-            }
-
-            $this->constraints[] = $constraint;
-        }
+  public function setConstraints(array $constraints) {
+    $this->constraints = array();
+    
+    foreach ($constraints as $key => $constraint) {
+      if (! ($constraint instanceof PHPUnit_Framework_Constraint)) {
+        throw new InvalidArgumentException('All parameters to ' . __CLASS__ . ' must be a constraint object.');
+      }
+      
+      $this->constraints[] = $constraint;
     }
+  }
 
-    /**
-     * Evaluates the constraint for parameter $other. Returns TRUE if the
-     * constraint is met, FALSE otherwise.
-     *
-     * @param mixed $other Value or object to evaluate.
-     * @return bool
-     */
-    public function evaluate($other)
-    {
-        $this->lastConstraint = NULL;
-
-        foreach($this->constraints as $constraint) {
-            $this->lastConstraint = $constraint;
-
-            if (!$constraint->evaluate($other)) {
-                return FALSE;
-            }
-        }
-
-        return TRUE;
+  /**
+   * Evaluates the constraint for parameter $other. Returns TRUE if the
+   * constraint is met, FALSE otherwise.
+   *
+   * @param mixed $other Value or object to evaluate.
+   * @return bool
+   */
+  public function evaluate($other) {
+    $this->lastConstraint = NULL;
+    
+    foreach ($this->constraints as $constraint) {
+      $this->lastConstraint = $constraint;
+      
+      if (! $constraint->evaluate($other)) {
+        return FALSE;
+      }
     }
+    
+    return TRUE;
+  }
 
-    /**
-     * @param   mixed   $other The value passed to evaluate() which failed the
-     *                         constraint check.
-     * @param   string  $description A string with extra description of what was
-     *                               going on while the evaluation failed.
-     * @param   boolean $not Flag to indicate negation.
-     * @throws  PHPUnit_Framework_ExpectationFailedException
-     */
-    public function fail($other, $description, $not = FALSE)
-    {
-        $this->lastConstraint->fail($other, $description, $not);
+  /**
+   * @param   mixed   $other The value passed to evaluate() which failed the
+   *                         constraint check.
+   * @param   string  $description A string with extra description of what was
+   *                               going on while the evaluation failed.
+   * @param   boolean $not Flag to indicate negation.
+   * @throws  PHPUnit_Framework_ExpectationFailedException
+   */
+  public function fail($other, $description, $not = FALSE) {
+    $this->lastConstraint->fail($other, $description, $not);
+  }
+
+  /**
+   * Returns a string representation of the constraint.
+   *
+   * @return string
+   * @access public
+   */
+  public function toString() {
+    $text = '';
+    
+    foreach ($this->constraints as $key => $constraint) {
+      if ($key > 0) {
+        $text .= ' and ';
+      }
+      
+      $text .= $constraint->toString();
     }
-
-    /**
-     * Returns a string representation of the constraint.
-     *
-     * @return string
-     * @access public
-     */
-    public function toString()
-    {
-        $text = '';
-
-        foreach($this->constraints as $key => $constraint) {
-            if ($key > 0) {
-                $text .= ' and ';
-            }
-
-            $text .= $constraint->toString();
-        }
-
-        return $text;
-    }
+    
+    return $text;
+  }
 }
 ?>

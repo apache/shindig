@@ -20,12 +20,10 @@
  * @version    $Id: Float.php 8910 2008-03-19 20:19:23Z thomas $
  */
 
-
 /**
  * @see Zend_Validate_Abstract
  */
 require_once 'external/Zend/Validate/Abstract.php';
-
 
 /**
  * @category   Zend
@@ -33,43 +31,39 @@ require_once 'external/Zend/Validate/Abstract.php';
  * @copyright  Copyright (c) 2005-2008 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  */
-class Zend_Validate_Float extends Zend_Validate_Abstract
-{
+class Zend_Validate_Float extends Zend_Validate_Abstract {
+  
+  const NOT_FLOAT = 'notFloat';
+  
+  /**
+   * @var array
+   */
+  protected $_messageTemplates = array(self::NOT_FLOAT => "'%value%' does not appear to be a float");
 
-    const NOT_FLOAT = 'notFloat';
-
-    /**
-     * @var array
-     */
-    protected $_messageTemplates = array(
-        self::NOT_FLOAT => "'%value%' does not appear to be a float"
-    );
-
-    /**
-     * Defined by Zend_Validate_Interface
-     *
-     * Returns true if and only if $value is a floating-point value
-     *
-     * @param  string $value
-     * @return boolean
-     */
-    public function isValid($value)
-    {
-        $valueString = (string) $value;
-
-        $this->_setValue($valueString);
-
-        $locale = localeconv();
-
-        $valueFiltered = str_replace($locale['thousands_sep'], '', $valueString);
-        $valueFiltered = str_replace($locale['decimal_point'], '.', $valueFiltered);
-
-        if (strval(floatval($valueFiltered)) != $valueFiltered) {
-            $this->_error();
-            return false;
-        }
-
-        return true;
+  /**
+   * Defined by Zend_Validate_Interface
+   *
+   * Returns true if and only if $value is a floating-point value
+   *
+   * @param  string $value
+   * @return boolean
+   */
+  public function isValid($value) {
+    $valueString = (string)$value;
+    
+    $this->_setValue($valueString);
+    
+    $locale = localeconv();
+    
+    $valueFiltered = str_replace($locale['thousands_sep'], '', $valueString);
+    $valueFiltered = str_replace($locale['decimal_point'], '.', $valueFiltered);
+    
+    if (strval(floatval($valueFiltered)) != $valueFiltered) {
+      $this->_error();
+      return false;
     }
+    
+    return true;
+  }
 
 }

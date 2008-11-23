@@ -50,23 +50,23 @@ require_once 'PHPUnit/Util/Filter.php';
 
 PHPUnit_Util_Filter::addFileToFilter(__FILE__, 'PHPUNIT');
 
-if (!class_exists('PHPUnit_Framework_Constraint', FALSE)) {
+if (! class_exists('PHPUnit_Framework_Constraint', FALSE)) {
 
-/**
- * Abstract base class for constraints. which are placed upon any value.
- *
- * @category   Testing
- * @package    PHPUnit
- * @author     Jan Borsodi <jb@ez.no>
- * @author     Sebastian Bergmann <sb@sebastian-bergmann.de>
- * @copyright  2002-2008 Sebastian Bergmann <sb@sebastian-bergmann.de>
- * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
- * @version    Release: 3.2.9
- * @link       http://www.phpunit.de/
- * @since      Interface available since Release 3.0.0
- */
-abstract class PHPUnit_Framework_Constraint implements PHPUnit_Framework_SelfDescribing
-{
+  /**
+   * Abstract base class for constraints. which are placed upon any value.
+   *
+   * @category   Testing
+   * @package    PHPUnit
+   * @author     Jan Borsodi <jb@ez.no>
+   * @author     Sebastian Bergmann <sb@sebastian-bergmann.de>
+   * @copyright  2002-2008 Sebastian Bergmann <sb@sebastian-bergmann.de>
+   * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
+   * @version    Release: 3.2.9
+   * @link       http://www.phpunit.de/
+   * @since      Interface available since Release 3.0.0
+   */
+  abstract class PHPUnit_Framework_Constraint implements PHPUnit_Framework_SelfDescribing {
+
     /**
      * Evaluates the constraint for parameter $other. Returns TRUE if the
      * constraint is met, FALSE otherwise.
@@ -88,55 +88,32 @@ abstract class PHPUnit_Framework_Constraint implements PHPUnit_Framework_SelfDes
      * @param   boolean $not Flag to indicate negation.
      * @throws  PHPUnit_Framework_ExpectationFailedException
      */
-    public function fail($other, $description, $not = FALSE)
-    {
-        throw new PHPUnit_Framework_ExpectationFailedException(
-          $this->failureDescription($other, $description, $not),
-          NULL
-        );
+    public function fail($other, $description, $not = FALSE) {
+      throw new PHPUnit_Framework_ExpectationFailedException($this->failureDescription($other, $description, $not), NULL);
     }
 
-    protected function failureDescription($other, $description, $not)
-    {
-        $failureDescription = sprintf(
-          'Failed asserting that %s %s.',
+    protected function failureDescription($other, $description, $not) {
+      $failureDescription = sprintf('Failed asserting that %s %s.', 
 
-           PHPUnit_Util_Type::toString($other),
-           $this->toString()
-        );
-
-        if ($not) {
-            $failureDescription = self::negate($failureDescription);
-        }
-
-        if (!empty($description)) {
-            $failureDescription = $description . "\n" . $failureDescription;
-        }
-
-        return $failureDescription;
+      PHPUnit_Util_Type::toString($other), $this->toString());
+      
+      if ($not) {
+        $failureDescription = self::negate($failureDescription);
+      }
+      
+      if (! empty($description)) {
+        $failureDescription = $description . "\n" . $failureDescription;
+      }
+      
+      return $failureDescription;
     }
 
-    public static function negate($string)
-    {
-        return str_replace(
-          array(
-            'contains ',
-            'exists',
-            'has ',
-            'is ',
-            'matches '
-          ),
-          array(
-            'does not contain ',
-            'does not exist',
-            'does not have ',
-            'is not ',
-            'does not match '
-          ),
-          $string
-        );
+    public static function negate($string) {
+      return str_replace(array('contains ', 'exists', 'has ', 'is ', 'matches '), array(
+          'does not contain ', 'does not exist', 'does not have ', 'is not ', 
+          'does not match '), $string);
     }
-}
+  }
 
 }
 

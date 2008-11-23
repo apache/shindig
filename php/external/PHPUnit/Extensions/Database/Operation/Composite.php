@@ -67,40 +67,37 @@ PHPUnit_Util_Filter::addFileToFilter(__FILE__, 'PHPUNIT');
  * @link       http://www.phpunit.de/
  * @since      Class available since Release 3.2.0
  */
-class PHPUnit_Extensions_Database_Operation_Composite implements PHPUnit_Extensions_Database_Operation_IDatabaseOperation
-{
+class PHPUnit_Extensions_Database_Operation_Composite implements PHPUnit_Extensions_Database_Operation_IDatabaseOperation {
+  
+  /**
+   * @var array
+   */
+  protected $operations = array();
 
-    /**
-     * @var array
-     */
-    protected $operations = array();
-
-    /**
-     * Creates a composite operation.
-     *
-     * @param array $operations
-     */
-    public function __construct(Array $operations)
-    {
-        foreach ($operations as $operation) {
-            if ($operation instanceof PHPUnit_Extensions_Database_Operation_IDatabaseOperation) {
-                $this->operations[] = $operation;
-            } else {
-                throw new InvalidArgumentException("Only database operation instances can be passed to a composite database operation.");
-            }
-        }
+  /**
+   * Creates a composite operation.
+   *
+   * @param array $operations
+   */
+  public function __construct(Array $operations) {
+    foreach ($operations as $operation) {
+      if ($operation instanceof PHPUnit_Extensions_Database_Operation_IDatabaseOperation) {
+        $this->operations[] = $operation;
+      } else {
+        throw new InvalidArgumentException("Only database operation instances can be passed to a composite database operation.");
+      }
     }
+  }
 
-    public function execute(PHPUnit_Extensions_Database_DB_IDatabaseConnection $connection, PHPUnit_Extensions_Database_DataSet_IDataSet $dataSet)
-    {
-        try {
-            foreach ($this->operations as $operation) {
-                /* @var $operation PHPUnit_Extensions_Database_Operation_IDatabaseOperation */
-                $operation->execute($connection, $dataSet);
-            }
-        } catch (PHPUnit_Extensions_Database_Operation_Exception $e) {
-            throw new PHPUnit_Extensions_Database_Operation_Exception("COMPOSITE[{$e->getOperation()}]", $e->getQuery(), $e->getArgs(), $e->getTable(), $e->getError());
-        }
+  public function execute(PHPUnit_Extensions_Database_DB_IDatabaseConnection $connection, PHPUnit_Extensions_Database_DataSet_IDataSet $dataSet) {
+    try {
+      foreach ($this->operations as $operation) {
+        /* @var $operation PHPUnit_Extensions_Database_Operation_IDatabaseOperation */
+        $operation->execute($connection, $dataSet);
+      }
+    } catch (PHPUnit_Extensions_Database_Operation_Exception $e) {
+      throw new PHPUnit_Extensions_Database_Operation_Exception("COMPOSITE[{$e->getOperation()}]", $e->getQuery(), $e->getArgs(), $e->getTable(), $e->getError());
     }
+  }
 }
 ?>

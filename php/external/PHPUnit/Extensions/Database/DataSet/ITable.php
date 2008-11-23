@@ -61,36 +61,35 @@ PHPUnit_Util_Filter::addFileToFilter(__FILE__, 'PHPUNIT');
  * @link       http://www.phpunit.de/
  * @since      Class available since Release 3.2.0
  */
-interface PHPUnit_Extensions_Database_DataSet_ITable
-{
+interface PHPUnit_Extensions_Database_DataSet_ITable {
 
-    /**
-     * Returns the table's meta data.
-     *
-     * @return PHPUnit_Extensions_Database_DataSet_ITableMetaData
-     */
-    public function getTableMetaData();
+  /**
+   * Returns the table's meta data.
+   *
+   * @return PHPUnit_Extensions_Database_DataSet_ITableMetaData
+   */
+  public function getTableMetaData();
 
-    /**
-     * Returns the number of rows in this table.
-     *
-     * @return int
-     */
-    public function getRowCount();
+  /**
+   * Returns the number of rows in this table.
+   *
+   * @return int
+   */
+  public function getRowCount();
 
-    /**
-     * Returns the value for the given column on the given row.
-     *
-     * @param int $row
-     * @param int $column
-     */
-    public function getValue($row, $column);
+  /**
+   * Returns the value for the given column on the given row.
+   *
+   * @param int $row
+   * @param int $column
+   */
+  public function getValue($row, $column);
 
-    /**
-     * Asserts that the given table matches this table.
-     *
-     * @param PHPUnit_Extensions_Database_DataSet_ITable $other
-     */
-    public function assertEquals(PHPUnit_Extensions_Database_DataSet_ITable $other);
+  /**
+   * Asserts that the given table matches this table.
+   *
+   * @param PHPUnit_Extensions_Database_DataSet_ITable $other
+   */
+  public function assertEquals(PHPUnit_Extensions_Database_DataSet_ITable $other);
 }
 ?>

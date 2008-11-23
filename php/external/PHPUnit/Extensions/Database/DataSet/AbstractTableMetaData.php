@@ -63,74 +63,69 @@ PHPUnit_Util_Filter::addFileToFilter(__FILE__, 'PHPUNIT');
  * @link       http://www.phpunit.de/
  * @since      Class available since Release 3.2.0
  */
-abstract class PHPUnit_Extensions_Database_DataSet_AbstractTableMetaData implements PHPUnit_Extensions_Database_DataSet_ITableMetaData
-{
+abstract class PHPUnit_Extensions_Database_DataSet_AbstractTableMetaData implements PHPUnit_Extensions_Database_DataSet_ITableMetaData {
+  
+  /**
+   * The names of all columns in the table.
+   * 
+   * @var Array
+   */
+  protected $columns;
+  
+  /**
+   * The names of all the primary keys in the table.
+   * 
+   * @var Array
+   */
+  protected $primaryKeys;
+  
+  /**
+   * @var string
+   */
+  protected $tableName;
 
-    /**
-     * The names of all columns in the table.
-     * 
-     * @var Array
-     */
-    protected $columns;
+  /**
+   * Returns the names of the columns in the table.
+   *
+   * @return array
+   */
+  public function getColumns() {
+    return $this->columns;
+  }
 
-    /**
-     * The names of all the primary keys in the table.
-     * 
-     * @var Array
-     */
-    protected $primaryKeys;
+  /**
+   * Returns the names of the primary key columns in the table.
+   *
+   * @return array
+   */
+  public function getPrimaryKeys() {
+    return $this->primaryKeys;
+  }
 
-    /**
-     * @var string
-     */
-    protected $tableName;
+  /**
+   * Returns the name of the table.
+   *
+   * @return string
+   */
+  public function getTableName() {
+    return $this->tableName;
+  }
 
-    /**
-     * Returns the names of the columns in the table.
-     *
-     * @return array
-     */
-    public function getColumns()
-    {
-        return $this->columns;
+  /**
+   * Asserts that the given tableMetaData matches this tableMetaData.
+   *
+   * @param PHPUnit_Extensions_Database_DataSet_ITableMetaData $other
+   */
+  public function assertEquals(PHPUnit_Extensions_Database_DataSet_ITableMetaData $other) {
+    if ($this->getTableName() != $other->getTableName()) {
+      throw new Exception("Expected table name of {$this->getTableName()}, has a name of {$other->getTableName()}");
     }
-
-    /**
-     * Returns the names of the primary key columns in the table.
-     *
-     * @return array
-     */
-    public function getPrimaryKeys()
-    {
-        return $this->primaryKeys;
+    
+    if ($this->getColumns() != $other->getColumns()) {
+      throw new Exception("Expected following columns: " . implode(', ', $this->getColumns()) . "; has columns: " . implode(', ', $other->getColumns()));
     }
-
-    /**
-     * Returns the name of the table.
-     *
-     * @return string
-     */
-    public function getTableName()
-    {
-        return $this->tableName;
-    }
-
-    /**
-     * Asserts that the given tableMetaData matches this tableMetaData.
-     *
-     * @param PHPUnit_Extensions_Database_DataSet_ITableMetaData $other
-     */
-    public function assertEquals(PHPUnit_Extensions_Database_DataSet_ITableMetaData $other)
-    {
-        if ($this->getTableName() != $other->getTableName()) {
-            throw new Exception("Expected table name of {$this->getTableName()}, has a name of {$other->getTableName()}");
-        }
-        
-        if ($this->getColumns() != $other->getColumns()) {
-            throw new Exception("Expected following columns: " . implode(', ', $this->getColumns()) . "; has columns: " . implode(', ', $other->getColumns()));
-        }
-        
-        return TRUE;
-    }
+    
+    return TRUE;
+  }
 }
 ?>

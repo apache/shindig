@@ -64,27 +64,21 @@ PHPUnit_Util_Filter::addFileToFilter(__FILE__, 'PHPUNIT');
  * @link       http://www.phpunit.de/
  * @since      Class available since Release 3.0.0
  */
-class PHPUnit_Framework_MockObject_Stub_Return implements PHPUnit_Framework_MockObject_Stub
-{
-    protected $value;
+class PHPUnit_Framework_MockObject_Stub_Return implements PHPUnit_Framework_MockObject_Stub {
+  protected $value;
 
-    public function __construct($value)
-    {
-        $this->value = $value;
-    }
+  public function __construct($value) {
+    $this->value = $value;
+  }
 
-    public function invoke(PHPUnit_Framework_MockObject_Invocation $invocation)
-    {
-        return $this->value;
-    }
+  public function invoke(PHPUnit_Framework_MockObject_Invocation $invocation) {
+    return $this->value;
+  }
 
-    public function toString()
-    {
-        return sprintf(
-          'return user-specified value %s',
+  public function toString() {
+    return sprintf('return user-specified value %s', 
 
-          PHPUnit_Util_Type::toString($this->value)
-        );
-    }
+    PHPUnit_Util_Type::toString($this->value));
+  }
 }
 ?>

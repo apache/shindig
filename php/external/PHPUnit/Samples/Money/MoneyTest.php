@@ -61,188 +61,164 @@ require_once 'MoneyBag.php';
  * @link       http://www.phpunit.de/
  * @since      Class available since Release 2.3.0
  */
-class MoneyTest extends PHPUnit_Framework_TestCase
-{
-    protected $f12EUR;
-    protected $f14EUR;
-    protected $f7USD;
-    protected $f21USD;
+class MoneyTest extends PHPUnit_Framework_TestCase {
+  protected $f12EUR;
+  protected $f14EUR;
+  protected $f7USD;
+  protected $f21USD;
+  
+  protected $fMB1;
+  protected $fMB2;
 
-    protected $fMB1;
-    protected $fMB2;
+  protected function setUp() {
+    $this->f12EUR = new Money(12, 'EUR');
+    $this->f14EUR = new Money(14, 'EUR');
+    $this->f7USD = new Money(7, 'USD');
+    $this->f21USD = new Money(21, 'USD');
+    
+    $this->fMB1 = MoneyBag::create($this->f12EUR, $this->f7USD);
+    $this->fMB2 = MoneyBag::create($this->f14EUR, $this->f21USD);
+  }
 
-    protected function setUp()
-    {
-        $this->f12EUR = new Money(12, 'EUR');
-        $this->f14EUR = new Money(14, 'EUR');
-        $this->f7USD  = new Money( 7, 'USD');
-        $this->f21USD = new Money(21, 'USD');
+  public function testBagMultiply() {
+    // {[12 EUR][7 USD]} *2 == {[24 EUR][14 USD]}
+    $expected = MoneyBag::create(new Money(24, 'EUR'), new Money(14, 'USD'));
+    
+    $this->assertTrue($expected->equals($this->fMB1->multiply(2)));
+    $this->assertTrue($this->fMB1->equals($this->fMB1->multiply(1)));
+    $this->assertTrue($this->fMB1->multiply(0)->isZero());
+  }
 
-        $this->fMB1 = MoneyBag::create($this->f12EUR, $this->f7USD);
-        $this->fMB2 = MoneyBag::create($this->f14EUR, $this->f21USD);
-    }
+  public function testBagNegate() {
+    // {[12 EUR][7 USD]} negate == {[-12 EUR][-7 USD]}
+    $expected = MoneyBag::create(new Money(- 12, 'EUR'), new Money(- 7, 'USD'));
+    $this->assertTrue($expected->equals($this->fMB1->negate()));
+  }
 
-    public function testBagMultiply()
-    {
-        // {[12 EUR][7 USD]} *2 == {[24 EUR][14 USD]}
-        $expected = MoneyBag::create(new Money(24, 'EUR'), new Money(14, 'USD'));
+  public function testBagSimpleAdd() {
+    // {[12 EUR][7 USD]} + [14 EUR] == {[26 EUR][7 USD]}
+    $expected = MoneyBag::create(new Money(26, 'EUR'), new Money(7, 'USD'));
+    $this->assertTrue($expected->equals($this->fMB1->add($this->f14EUR)));
+  }
 
-        $this->assertTrue($expected->equals($this->fMB1->multiply(2)));
-        $this->assertTrue($this->fMB1->equals($this->fMB1->multiply(1)));
-        $this->assertTrue($this->fMB1->multiply(0)->isZero());
-    }
+  public function testBagSubtract() {
+    // {[12 EUR][7 USD]} - {[14 EUR][21 USD] == {[-2 EUR][-14 USD]}
+    $expected = MoneyBag::create(new Money(- 2, 'EUR'), new Money(- 14, 'USD'));
+    $this->assertTrue($expected->equals($this->fMB1->subtract($this->fMB2)));
+  }
 
-    public function testBagNegate()
-    {
-        // {[12 EUR][7 USD]} negate == {[-12 EUR][-7 USD]}
-        $expected = MoneyBag::create(new Money(-12, 'EUR'), new Money(-7, 'USD'));
-        $this->assertTrue($expected->equals($this->fMB1->negate()));
-    }
+  public function testBagSumAdd() {
+    // {[12 EUR][7 USD]} + {[14 EUR][21 USD]} == {[26 EUR][28 USD]}
+    $expected = MoneyBag::create(new Money(26, 'EUR'), new Money(28, 'USD'));
+    $this->assertTrue($expected->equals($this->fMB1->add($this->fMB2)));
+  }
 
-    public function testBagSimpleAdd()
-    {
-        // {[12 EUR][7 USD]} + [14 EUR] == {[26 EUR][7 USD]}
-        $expected = MoneyBag::create(new Money(26, 'EUR'), new Money(7, 'USD'));
-        $this->assertTrue($expected->equals($this->fMB1->add($this->f14EUR)));
-    }
+  public function testIsZero() {
+    //$this->assertTrue($this->fMB1->subtract($this->fMB1)->isZero());
+    $this->assertTrue(MoneyBag::create(new Money(0, 'EUR'), new Money(0, 'USD'))->isZero());
+  }
 
-    public function testBagSubtract()
-    {
-        // {[12 EUR][7 USD]} - {[14 EUR][21 USD] == {[-2 EUR][-14 USD]}
-        $expected = MoneyBag::create(new Money(-2, 'EUR'), new Money(-14, 'USD'));
-        $this->assertTrue($expected->equals($this->fMB1->subtract($this->fMB2)));
-    }
+  public function testMixedSimpleAdd() {
+    // [12 EUR] + [7 USD] == {[12 EUR][7 USD]}
+    $expected = MoneyBag::create($this->f12EUR, $this->f7USD);
+    $this->assertTrue($expected->equals($this->f12EUR->add($this->f7USD)));
+  }
 
-    public function testBagSumAdd()
-    {
-        // {[12 EUR][7 USD]} + {[14 EUR][21 USD]} == {[26 EUR][28 USD]}
-        $expected = MoneyBag::create(new Money(26, 'EUR'), new Money(28, 'USD'));
-        $this->assertTrue($expected->equals($this->fMB1->add($this->fMB2)));
-    }
+  public function testBagNotEquals() {
+    $bag1 = MoneyBag::create($this->f12EUR, $this->f7USD);
+    $bag2 = new Money(12, 'CHF');
+    $bag2->add($this->f7USD);
+    $this->assertFalse($bag1->equals($bag2));
+  }
 
-    public function testIsZero()
-    {
-        //$this->assertTrue($this->fMB1->subtract($this->fMB1)->isZero());
-        $this->assertTrue(MoneyBag::create(new Money (0, 'EUR'), new Money (0, 'USD'))->isZero());
-    }
+  public function testMoneyBagEquals() {
+    $this->assertTrue(! $this->fMB1->equals(NULL));
+    
+    $this->assertTrue($this->fMB1->equals($this->fMB1));
+    $equal = MoneyBag::create(new Money(12, 'EUR'), new Money(7, 'USD'));
+    $this->assertTrue($this->fMB1->equals($equal));
+    $this->assertTrue(! $this->fMB1->equals($this->f12EUR));
+    $this->assertTrue(! $this->f12EUR->equals($this->fMB1));
+    $this->assertTrue(! $this->fMB1->equals($this->fMB2));
+  }
 
-    public function testMixedSimpleAdd()
-    {
-        // [12 EUR] + [7 USD] == {[12 EUR][7 USD]}
-        $expected = MoneyBag::create($this->f12EUR, $this->f7USD);
-        $this->assertTrue($expected->equals($this->f12EUR->add($this->f7USD)));
-    }
+  public function testMoneyBagHash() {
+    $equal = MoneyBag::create(new Money(12, 'EUR'), new Money(7, 'USD'));
+    $this->assertEquals($this->fMB1->hashCode(), $equal->hashCode());
+  }
 
-    public function testBagNotEquals()
-    {
-        $bag1 = MoneyBag::create($this->f12EUR, $this->f7USD);
-        $bag2 = new Money(12, 'CHF');
-        $bag2->add($this->f7USD);
-        $this->assertFalse($bag1->equals($bag2));
-    }
+  public function testMoneyEquals() {
+    $this->assertTrue(! $this->f12EUR->equals(NULL));
+    $equalMoney = new Money(12, 'EUR');
+    $this->assertTrue($this->f12EUR->equals($this->f12EUR));
+    $this->assertTrue($this->f12EUR->equals($equalMoney));
+    $this->assertEquals($this->f12EUR->hashCode(), $equalMoney->hashCode());
+    $this->assertFalse($this->f12EUR->equals($this->f14EUR));
+  }
 
-    public function testMoneyBagEquals()
-    {
-        $this->assertTrue(!$this->fMB1->equals(NULL));
+  public function testMoneyHash() {
+    $this->assertNotNull($this->f12EUR);
+    $equal = new Money(12, 'EUR');
+    $this->assertEquals($this->f12EUR->hashCode(), $equal->hashCode());
+  }
 
-        $this->assertTrue($this->fMB1->equals($this->fMB1));
-        $equal = MoneyBag::create(new Money(12, 'EUR'), new Money(7, 'USD'));
-        $this->assertTrue($this->fMB1->equals($equal));
-        $this->assertTrue(!$this->fMB1->equals($this->f12EUR));
-        $this->assertTrue(!$this->f12EUR->equals($this->fMB1));
-        $this->assertTrue(!$this->fMB1->equals($this->fMB2));
-    }
+  public function testSimplify() {
+    $money = MoneyBag::create(new Money(26, 'EUR'), new Money(28, 'EUR'));
+    $this->assertTrue($money->equals(new Money(54, 'EUR')));
+  }
 
-    public function testMoneyBagHash()
-    {
-        $equal = MoneyBag::create(new Money(12, 'EUR'), new Money(7, 'USD'));
-        $this->assertEquals($this->fMB1->hashCode(), $equal->hashCode());
-    }
+  public function testNormalize2() {
+    // {[12 EUR][7 USD]} - [12 EUR] == [7 USD]
+    $expected = new Money(7, 'USD');
+    $this->assertTrue($expected->equals($this->fMB1->subtract($this->f12EUR)));
+  }
 
-    public function testMoneyEquals()
-    {
-        $this->assertTrue(!$this->f12EUR->equals(NULL));
-        $equalMoney = new Money(12, 'EUR');
-        $this->assertTrue($this->f12EUR->equals($this->f12EUR));
-        $this->assertTrue($this->f12EUR->equals($equalMoney));
-        $this->assertEquals($this->f12EUR->hashCode(), $equalMoney->hashCode());
-        $this->assertFalse($this->f12EUR->equals($this->f14EUR));
-    }
+  public function testNormalize3() {
+    // {[12 EUR][7 USD]} - {[12 EUR][3 USD]} == [4 USD]
+    $ms1 = MoneyBag::create(new Money(12, 'EUR'), new Money(3, 'USD'));
+    $expected = new Money(4, 'USD');
+    $this->assertTrue($expected->equals($this->fMB1->subtract($ms1)));
+  }
 
-    public function testMoneyHash()
-    {
-        $this->assertNotNull($this->f12EUR);
-        $equal= new Money(12, 'EUR');
-        $this->assertEquals($this->f12EUR->hashCode(), $equal->hashCode());
-    }
+  public function testNormalize4() {
+    // [12 EUR] - {[12 EUR][3 USD]} == [-3 USD]
+    $ms1 = MoneyBag::create(new Money(12, 'EUR'), new Money(3, 'USD'));
+    $expected = new Money(- 3, 'USD');
+    $this->assertTrue($expected->equals($this->f12EUR->subtract($ms1)));
+  }
 
-    public function testSimplify()
-    {
-        $money = MoneyBag::create(new Money(26, 'EUR'), new Money(28, 'EUR'));
-        $this->assertTrue($money->equals(new Money(54, 'EUR')));
-    }
+  public function testPrint() {
+    $this->assertEquals('[12 EUR]', $this->f12EUR->toString());
+  }
 
-    public function testNormalize2()
-    {
-        // {[12 EUR][7 USD]} - [12 EUR] == [7 USD]
-        $expected = new Money(7, 'USD');
-        $this->assertTrue($expected->equals($this->fMB1->subtract($this->f12EUR)));
-    }
+  public function testSimpleAdd() {
+    // [12 EUR] + [14 EUR] == [26 EUR]
+    $expected = new Money(26, 'EUR');
+    $this->assertTrue($expected->equals($this->f12EUR->add($this->f14EUR)));
+  }
 
-    public function testNormalize3()
-    {
-        // {[12 EUR][7 USD]} - {[12 EUR][3 USD]} == [4 USD]
-        $ms1 = MoneyBag::create(new Money(12, 'EUR'), new Money(3, 'USD'));
-        $expected = new Money(4, 'USD');
-        $this->assertTrue($expected->equals($this->fMB1->subtract($ms1)));
-    }
+  public function testSimpleBagAdd() {
+    // [14 EUR] + {[12 EUR][7 USD]} == {[26 EUR][7 USD]}
+    $expected = MoneyBag::create(new Money(26, 'EUR'), new Money(7, 'USD'));
+    $this->assertTrue($expected->equals($this->f14EUR->add($this->fMB1)));
+  }
 
-    public function testNormalize4()
-    {
-        // [12 EUR] - {[12 EUR][3 USD]} == [-3 USD]
-        $ms1 = MoneyBag::create(new Money(12, 'EUR'), new Money(3, 'USD'));
-        $expected = new Money(-3, 'USD');
-        $this->assertTrue($expected->equals($this->f12EUR->subtract($ms1)));
-    }
+  public function testSimpleMultiply() {
+    // [14 EUR] *2 == [28 EUR]
+    $expected = new Money(28, 'EUR');
+    $this->assertTrue($expected->equals($this->f14EUR->multiply(2)));
+  }
 
-    public function testPrint()
-    {
-        $this->assertEquals('[12 EUR]', $this->f12EUR->toString());
-    }
+  public function testSimpleNegate() {
+    // [14 EUR] negate == [-14 EUR]
+    $expected = new Money(- 14, 'EUR');
+    $this->assertTrue($expected->equals($this->f14EUR->negate()));
+  }
 
-    public function testSimpleAdd()
-    {
-        // [12 EUR] + [14 EUR] == [26 EUR]
-        $expected = new Money(26, 'EUR');
-        $this->assertTrue($expected->equals($this->f12EUR->add($this->f14EUR)));
-    }
-
-    public function testSimpleBagAdd()
-    {
-        // [14 EUR] + {[12 EUR][7 USD]} == {[26 EUR][7 USD]}
-        $expected = MoneyBag::create(new Money(26, 'EUR'), new Money(7, 'USD'));
-        $this->assertTrue($expected->equals($this->f14EUR->add($this->fMB1)));
-    }
-
-    public function testSimpleMultiply()
-    {
-        // [14 EUR] *2 == [28 EUR]
-        $expected = new Money(28, 'EUR');
-        $this->assertTrue($expected->equals($this->f14EUR->multiply(2)));
-    }
-
-    public function testSimpleNegate()
-    {
-        // [14 EUR] negate == [-14 EUR]
-        $expected = new Money(-14, 'EUR');
-        $this->assertTrue($expected->equals($this->f14EUR->negate()));
-    }
-
-    public function testSimpleSubtract()
-    {
-        // [14 EUR] - [12 EUR] == [2 EUR]
-        $expected = new Money(2, 'EUR');
-        $this->assertTrue($expected->equals($this->f14EUR->subtract($this->f12EUR)));
-    }
+  public function testSimpleSubtract() {
+    // [14 EUR] - [12 EUR] == [2 EUR]
+    $expected = new Money(2, 'EUR');
+    $this->assertTrue($expected->equals($this->f14EUR->subtract($this->f12EUR)));
+  }
 }
 ?>

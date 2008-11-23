@@ -60,153 +60,143 @@ PHPUnit_Util_Filter::addFileToFilter(__FILE__, 'PHPUNIT');
  * @link       http://www.phpunit.de/
  * @since      Class available since Release 2.3.0
  */
-class PHPUnit_Util_Fileloader
-{
-    /**
-     * Path to the PHP interpreter that is to be used.
-     *
-     * @var    string $phpBinary
-     * @access public
-     * @static
-     */
-    public static $phpBinary = NULL;
+class PHPUnit_Util_Fileloader {
+  /**
+   * Path to the PHP interpreter that is to be used.
+   *
+   * @var    string $phpBinary
+   * @access public
+   * @static
+   */
+  public static $phpBinary = NULL;
 
-    /**
-     * Checks if a PHP sourcefile is readable and is optionally checked for
-     * syntax errors through the syntaxCheck() method. The sourcefile is
-     * loaded through the load() method.
-     *
-     * @param  string  $filename
-     * @param  boolean $syntaxCheck
-     * @throws RuntimeException
-     * @access public
-     * @static
-     */
-    public static function checkAndLoad($filename, $syntaxCheck = TRUE)
-    {
-        if (!is_readable($filename)) {
-            $filename = './' . $filename;
-        }
-
-        if (!is_readable($filename)) {
-            throw new RuntimeException(
-              sprintf(
-                'File "%s" could not be found or is not readable.',
-
-                str_replace('./', '', $filename)
-              )
-            );
-        }
-
-        if ($syntaxCheck) {
-            self::syntaxCheck($filename);
-        }
-
-        self::load($filename);
+  /**
+   * Checks if a PHP sourcefile is readable and is optionally checked for
+   * syntax errors through the syntaxCheck() method. The sourcefile is
+   * loaded through the load() method.
+   *
+   * @param  string  $filename
+   * @param  boolean $syntaxCheck
+   * @throws RuntimeException
+   * @access public
+   * @static
+   */
+  public static function checkAndLoad($filename, $syntaxCheck = TRUE) {
+    if (! is_readable($filename)) {
+      $filename = './' . $filename;
     }
+    
+    if (! is_readable($filename)) {
+      throw new RuntimeException(sprintf('File "%s" could not be found or is not readable.', 
 
-    /**
-     * Loads a PHP sourcefile.
-     *
-     * When the Xdebug extension is loaded and its "xdebug.collect_vars"
-     * configuration directive is enabled, all global variables declared
-     * in the loaded PHP sourcefile will be added to $GLOBALS.
-     *
-     * @param  string $filename
-     * @access protected
-     * @static
-     * @since  Method available since Release 3.0.0
-     */
-    protected static function load($filename)
-    {
-        $xdebugLoaded      = extension_loaded('xdebug');
-        $xdebugCollectVars = $xdebugLoaded && ini_get('xdebug.collect_vars') == '1';
-
-        if ($xdebugCollectVars) {
-            $variables = xdebug_get_declared_vars();
-        }
-
-        include_once $filename;
-
-        if ($xdebugCollectVars) {
-            $variables = array_values(
-              array_diff(xdebug_get_declared_vars(), $variables)
-            );
-
-            foreach ($variables as $variable) {
-                if (isset($$variable)) {
-                    $GLOBALS[$variable] = $$variable;
-                }
-            }
-        }
+      str_replace('./', '', $filename)));
     }
-
-    /**
-     * Uses a separate process to perform a syntax check on a PHP sourcefile.
-     *
-     * PHPUnit_Util_Fileloader::$phpBinary contains the path to the PHP
-     * interpreter used for this. If unset, the following assumptions will
-     * be made:
-     *
-     *   1. When the PHP CLI/CGI binary configured with the PEAR Installer
-     *      (php_bin configuration value) is readable, it will be used.
-     *
-     *   2. When PHPUnit is run using the CLI SAPI and the $_SERVER['_']
-     *      variable does not contain the string "PHPUnit", $_SERVER['_']
-     *      is assumed to contain the path to the current PHP interpreter
-     *      and that will be used.
-     *
-     *   3. When PHPUnit is run using the CLI SAPI and the $_SERVER['_']
-     *      variable contains the string "PHPUnit", the file that $_SERVER['_']
-     *      points is assumed to be the PHPUnit TextUI CLI wrapper script
-     *      "phpunit" and the binary set up using #! on that file's first
-     *      line of code is assumed to contain the path to the current PHP
-     *      interpreter and that will be used.
-     *
-     *   4. The current PHP interpreter is assumed to be in the $PATH and
-     *      to be invokable through "php".
-     *
-     * @param  string $filename
-     * @throws RuntimeException
-     * @access protected
-     * @static
-     * @since  Method available since Release 3.0.0
-     */
-    protected static function syntaxCheck($filename)
-    {
-        if (self::$phpBinary === NULL) {
-            if (is_readable('@php_bin@')) {
-                self::$phpBinary = '@php_bin@';
-            }
-
-            else if (PHP_SAPI == 'cli' && isset($_SERVER['_'])) {
-                self::$phpBinary = $_SERVER['_'];
-
-                if (strpos(self::$phpBinary, 'phpunit') !== FALSE) {
-                    $file            = file(self::$phpBinary);
-                    $tmp             = explode(' ', $file[0]);
-                    self::$phpBinary = trim($tmp[1]);
-                }
-            }
-
-            if (!is_readable(self::$phpBinary)) {
-                self::$phpBinary = 'php';
-            } else {
-                self::$phpBinary = escapeshellarg(self::$phpBinary);
-            }
-        }
-
-        $command = self::$phpBinary . ' -l ' . escapeshellarg($filename);
-
-        if (DIRECTORY_SEPARATOR == '\\') {
-            $command = '"' . $command . '"';
-        }
-
-        $output = shell_exec($command);
-
-        if (strpos($output, 'Errors parsing') !== FALSE) {
-            throw new RuntimeException($output);
-        }
+    
+    if ($syntaxCheck) {
+      self::syntaxCheck($filename);
     }
+    
+    self::load($filename);
+  }
+
+  /**
+   * Loads a PHP sourcefile.
+   *
+   * When the Xdebug extension is loaded and its "xdebug.collect_vars"
+   * configuration directive is enabled, all global variables declared
+   * in the loaded PHP sourcefile will be added to $GLOBALS.
+   *
+   * @param  string $filename
+   * @access protected
+   * @static
+   * @since  Method available since Release 3.0.0
+   */
+  protected static function load($filename) {
+    $xdebugLoaded = extension_loaded('xdebug');
+    $xdebugCollectVars = $xdebugLoaded && ini_get('xdebug.collect_vars') == '1';
+    
+    if ($xdebugCollectVars) {
+      $variables = xdebug_get_declared_vars();
+    }
+    
+    include_once $filename;
+    
+    if ($xdebugCollectVars) {
+      $variables = array_values(array_diff(xdebug_get_declared_vars(), $variables));
+      
+      foreach ($variables as $variable) {
+        if (isset($$variable)) {
+          $GLOBALS[$variable] = $$variable;
+        }
+      }
+    }
+  }
+
+  /**
+   * Uses a separate process to perform a syntax check on a PHP sourcefile.
+   *
+   * PHPUnit_Util_Fileloader::$phpBinary contains the path to the PHP
+   * interpreter used for this. If unset, the following assumptions will
+   * be made:
+   *
+   *   1. When the PHP CLI/CGI binary configured with the PEAR Installer
+   *      (php_bin configuration value) is readable, it will be used.
+   *
+   *   2. When PHPUnit is run using the CLI SAPI and the $_SERVER['_']
+   *      variable does not contain the string "PHPUnit", $_SERVER['_']
+   *      is assumed to contain the path to the current PHP interpreter
+   *      and that will be used.
+   *
+   *   3. When PHPUnit is run using the CLI SAPI and the $_SERVER['_']
+   *      variable contains the string "PHPUnit", the file that $_SERVER['_']
+   *      points is assumed to be the PHPUnit TextUI CLI wrapper script
+   *      "phpunit" and the binary set up using #! on that file's first
+   *      line of code is assumed to contain the path to the current PHP
+   *      interpreter and that will be used.
+   *
+   *   4. The current PHP interpreter is assumed to be in the $PATH and
+   *      to be invokable through "php".
+   *
+   * @param  string $filename
+   * @throws RuntimeException
+   * @access protected
+   * @static
+   * @since  Method available since Release 3.0.0
+   */
+  protected static function syntaxCheck($filename) {
+    if (self::$phpBinary === NULL) {
+      if (is_readable('@php_bin@')) {
+        self::$phpBinary = '@php_bin@';
+      } 
+
+      else if (PHP_SAPI == 'cli' && isset($_SERVER['_'])) {
+        self::$phpBinary = $_SERVER['_'];
+        
+        if (strpos(self::$phpBinary, 'phpunit') !== FALSE) {
+          $file = file(self::$phpBinary);
+          $tmp = explode(' ', $file[0]);
+          self::$phpBinary = trim($tmp[1]);
+        }
+      }
+      
+      if (! is_readable(self::$phpBinary)) {
+        self::$phpBinary = 'php';
+      } else {
+        self::$phpBinary = escapeshellarg(self::$phpBinary);
+      }
+    }
+    
+    $command = self::$phpBinary . ' -l ' . escapeshellarg($filename);
+    
+    if (DIRECTORY_SEPARATOR == '\\') {
+      $command = '"' . $command . '"';
+    }
+    
+    $output = shell_exec($command);
+    
+    if (strpos($output, 'Errors parsing') !== FALSE) {
+      throw new RuntimeException($output);
+    }
+  }
 }
 ?>

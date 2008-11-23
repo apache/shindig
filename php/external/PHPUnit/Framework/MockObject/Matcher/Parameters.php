@@ -69,77 +69,60 @@ PHPUnit_Util_Filter::addFileToFilter(__FILE__, 'PHPUNIT');
  * @link       http://www.phpunit.de/
  * @since      Class available since Release 3.0.0
  */
-class PHPUnit_Framework_MockObject_Matcher_Parameters extends PHPUnit_Framework_MockObject_Matcher_StatelessInvocation
-{
-    protected $parameters = array();
+class PHPUnit_Framework_MockObject_Matcher_Parameters extends PHPUnit_Framework_MockObject_Matcher_StatelessInvocation {
+  protected $parameters = array();
+  
+  protected $invocation;
 
-    protected $invocation;
-
-    public function __construct($parameters)
-    {
-        foreach($parameters as $parameter) {
-            if (!($parameter instanceof PHPUnit_Framework_Constraint)) {
-                $parameter = new PHPUnit_Framework_Constraint_IsEqual($parameter);
-            }
-
-            $this->parameters[] = $parameter;
-        }
+  public function __construct($parameters) {
+    foreach ($parameters as $parameter) {
+      if (! ($parameter instanceof PHPUnit_Framework_Constraint)) {
+        $parameter = new PHPUnit_Framework_Constraint_IsEqual($parameter);
+      }
+      
+      $this->parameters[] = $parameter;
     }
+  }
 
-    public function toString()
-    {
-        $text = 'with parameter';
-
-        foreach($this->parameters as $index => $parameter) {
-            if ($index > 0) {
-                $text .= ' and';
-            }
-
-            $text .= ' ' . $index . ' ' . $parameter->toString();
-        }
-
-        return $text;
+  public function toString() {
+    $text = 'with parameter';
+    
+    foreach ($this->parameters as $index => $parameter) {
+      if ($index > 0) {
+        $text .= ' and';
+      }
+      
+      $text .= ' ' . $index . ' ' . $parameter->toString();
     }
+    
+    return $text;
+  }
 
-    public function matches(PHPUnit_Framework_MockObject_Invocation $invocation)
-    {
-        $this->invocation = $invocation;
-        $this->verify();
+  public function matches(PHPUnit_Framework_MockObject_Invocation $invocation) {
+    $this->invocation = $invocation;
+    $this->verify();
+    
+    return count($invocation->parameters) < count($this->parameters);
+  }
 
-        return count($invocation->parameters) < count($this->parameters);
+  public function verify() {
+    if ($this->invocation === NULL) {
+      throw new PHPUnit_Framework_ExpectationFailedException('Mocked method does not exist.');
     }
+    
+    if (count($this->invocation->parameters) < count($this->parameters)) {
+      throw new PHPUnit_Framework_ExpectationFailedException(sprintf('Parameter count for invocation %s is too low.', 
 
-    public function verify()
-    {
-        if ($this->invocation === NULL) {
-            throw new PHPUnit_Framework_ExpectationFailedException(
-              'Mocked method does not exist.'
-            );
-        }
-
-        if (count($this->invocation->parameters) < count($this->parameters)) {
-            throw new PHPUnit_Framework_ExpectationFailedException(
-              sprintf(
-                'Parameter count for invocation %s is too low.',
-
-                $this->invocation->toString()
-              )
-            );
-        }
-
-        foreach ($this->parameters as $i => $parameter) {
-            if (!$parameter->evaluate($this->invocation->parameters[$i])) {
-                $parameter->fail(
-                  $this->invocation->parameters[$i],
-                  sprintf(
-                    'Parameter %s for invocation %s does not match expected value.',
-
-                    $i,
-                    $this->invocation->toString()
-                  )
-                );
-            }
-        }
+      $this->invocation->toString()));
     }
+    
+    foreach ($this->parameters as $i => $parameter) {
+      if (! $parameter->evaluate($this->invocation->parameters[$i])) {
+        $parameter->fail($this->invocation->parameters[$i], sprintf('Parameter %s for invocation %s does not match expected value.', 
+
+        $i, $this->invocation->toString()));
+      }
+    }
+  }
 }
 ?>

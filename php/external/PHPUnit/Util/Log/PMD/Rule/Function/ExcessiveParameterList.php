@@ -61,26 +61,18 @@ PHPUnit_Util_Filter::addFileToFilter(__FILE__, 'PHPUNIT');
  * @link       http://www.phpunit.de/
  * @since      Class available since Release 3.2.0
  */
-class PHPUnit_Util_Log_PMD_Rule_Function_ExcessiveParameterList extends PHPUnit_Util_Log_PMD_Rule_Function
-{
-    public function __construct($threshold = 10, $priority = 1)
-    {
-        parent::__construct($threshold);
-    }
+class PHPUnit_Util_Log_PMD_Rule_Function_ExcessiveParameterList extends PHPUnit_Util_Log_PMD_Rule_Function {
 
-    public function apply(PHPUnit_Util_Metrics $metrics)
-    {
-        $parameters = $metrics->getParameters();
+  public function __construct($threshold = 10, $priority = 1) {
+    parent::__construct($threshold);
+  }
 
-        if ($parameters >= $this->threshold) {
-            return sprintf(
-              "Function or method has %d parameters.\n" .
-              'Long parameter lists can indicate that a new object should be ' .
-              'created to wrap the numerous parameters. Basically, try to '.
-              'group the parameters together.',
-              $parameters
-            );
-        }
+  public function apply(PHPUnit_Util_Metrics $metrics) {
+    $parameters = $metrics->getParameters();
+    
+    if ($parameters >= $this->threshold) {
+      return sprintf("Function or method has %d parameters.\n" . 'Long parameter lists can indicate that a new object should be ' . 'created to wrap the numerous parameters. Basically, try to ' . 'group the parameters together.', $parameters);
     }
+  }
 }
 ?>

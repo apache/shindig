@@ -64,44 +64,40 @@ PHPUnit_Util_Filter::addFileToFilter(__FILE__, 'PHPUNIT');
  * @link       http://www.phpunit.de/
  * @since      Class available since Release 3.2.0
  */
-class PHPUnit_Extensions_Database_DataSet_TableFilter extends PHPUnit_Extensions_Database_DataSet_AbstractTable
-{
+class PHPUnit_Extensions_Database_DataSet_TableFilter extends PHPUnit_Extensions_Database_DataSet_AbstractTable {
+  
+  /**
+   * The table meta data being decorated.
+   * @var PHPUnit_Extensions_Database_DataSet_ITable
+   */
+  protected $originalTable;
 
-    /**
-     * The table meta data being decorated.
-     * @var PHPUnit_Extensions_Database_DataSet_ITable
-     */
-    protected $originalTable;
+  public function __construct(PHPUnit_Extensions_Database_DataSet_ITable $originalTable, Array $excludeColumns) {
+    $this->originalTable = $originalTable;
+    $this->setTableMetaData(new PHPUnit_Extensions_Database_DataSet_TableMetaDataFilter($originalTable->getTableMetaData(), $excludeColumns));
+  }
 
-    public function __construct(PHPUnit_Extensions_Database_DataSet_ITable $originalTable, Array $excludeColumns)
-    {
-        $this->originalTable = $originalTable;
-        $this->setTableMetaData(new PHPUnit_Extensions_Database_DataSet_TableMetaDataFilter($originalTable->getTableMetaData(), $excludeColumns));
+  /**
+   * Returns the number of rows in this table.
+   *
+   * @return int
+   */
+  public function getRowCount() {
+    return $this->originalTable->getRowCount();
+  }
+
+  /**
+   * Returns the value for the given column on the given row.
+   *
+   * @param int $row
+   * @param int $column
+   */
+  public function getValue($row, $column) {
+    if (in_array($column, $this->getTableMetaData()->getColumns())) {
+      return $this->originalTable->getValue($row, $column);
+    } else {
+      throw new InvalidArgumentException("The given row ({$row}) and column ({$column}) do not exist in table {$this->getTableMetaData()->getTableName()}");
     }
-
-    /**
-     * Returns the number of rows in this table.
-     *
-     * @return int
-     */
-    public function getRowCount()
-    {
-        return $this->originalTable->getRowCount();
-    }
-
-    /**
-     * Returns the value for the given column on the given row.
-     *
-     * @param int $row
-     * @param int $column
-     */
-    public function getValue($row, $column)
-    {
-        if (in_array($column, $this->getTableMetaData()->getColumns())) {
-            return $this->originalTable->getValue($row, $column);
-        } else {
-            throw new InvalidArgumentException("The given row ({$row}) and column ({$column}) do not exist in table {$this->getTableMetaData()->getTableName()}");
-        }
-    }
+  }
 }
 ?>

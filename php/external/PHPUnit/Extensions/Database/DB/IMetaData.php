@@ -61,48 +61,47 @@ PHPUnit_Util_Filter::addFileToFilter(__FILE__, 'PHPUNIT');
  * @link       http://www.phpunit.de/
  * @since      Class available since Release 3.2.0
  */
-interface PHPUnit_Extensions_Database_DB_IMetaData
-{
+interface PHPUnit_Extensions_Database_DB_IMetaData {
 
-    /**
-     * Returns an array containing the names of all the tables in the database.
-     *
-     * @return array
-     */
-    public function getTableNames();
+  /**
+   * Returns an array containing the names of all the tables in the database.
+   *
+   * @return array
+   */
+  public function getTableNames();
 
-    /**
-     * Returns an array containing the names of all the columns in the 
-     * $tableName table,
-     *
-     * @param string $tableName
-     * @return array
-     */
-    public function getTableColumns($tableName);
+  /**
+   * Returns an array containing the names of all the columns in the 
+   * $tableName table,
+   *
+   * @param string $tableName
+   * @return array
+   */
+  public function getTableColumns($tableName);
 
-    /**
-     * Returns an array containing the names of all the primary key columns in 
-     * the $tableName table.
-     *
-     * @param string $tableName
-     * @return array
-     */
-    public function getTablePrimaryKeys($tableName);
+  /**
+   * Returns an array containing the names of all the primary key columns in 
+   * the $tableName table.
+   *
+   * @param string $tableName
+   * @return array
+   */
+  public function getTablePrimaryKeys($tableName);
 
-    /**
-     * Returns the name of the default schema.
-     * 
-     * @return string
-     */
-    public function getSchema();
+  /**
+   * Returns the name of the default schema.
+   * 
+   * @return string
+   */
+  public function getSchema();
 
-    /**
-     * Returns a quoted schema object. (table name, column name, etc)
-     *
-     * @param string $object
-     * @return string
-     */
-    public function quoteSchemaObject($object);
+  /**
+   * Returns a quoted schema object. (table name, column name, etc)
+   *
+   * @param string $object
+   * @return string
+   */
+  public function quoteSchemaObject($object);
 
 }
 ?>

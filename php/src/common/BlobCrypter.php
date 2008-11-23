@@ -1,5 +1,5 @@
 <?php
-/*
+/**
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -18,7 +18,9 @@
  * under the License.
  */
 
-class BlobCrypterException extends Exception {}
+
+class BlobCrypterException extends Exception {
+}
 
 /**
  * Utility interface for managing signed, encrypted, and time stamped blobs.
@@ -28,25 +30,25 @@ class BlobCrypterException extends Exception {}
  */
 abstract class BlobCrypter {
 
-	/**
-	 * Time stamps, encrypts, and signs a blob.
-	 * 
-	 * @param in name/value pairs to encrypt
-	 * @return a base64 encoded blob
-	 * 
-	 * @throws BlobCrypterException
-	 */
-	abstract public function wrap(Array $in);
+  /**
+   * Time stamps, encrypts, and signs a blob.
+   * 
+   * @param in name/value pairs to encrypt
+   * @return a base64 encoded blob
+   * 
+   * @throws BlobCrypterException
+   */
+  abstract public function wrap(Array $in);
 
-	/**
-	 * Unwraps a blob.
-	 * 
-	 * @param in blob
-	 * @param maxAgeSec maximum age for the blob
-	 * @return the name/value pairs, including the origin timestamp.
-	 * 
-	 * @throws BlobExpiredException if the blob is too old to be accepted.
-	 * @throws BlobCrypterException if the blob can't be decoded.
-	 */
-	abstract public function unwrap($in, $maxAgeSec);
+  /**
+   * Unwraps a blob.
+   * 
+   * @param in blob
+   * @param maxAgeSec maximum age for the blob
+   * @return the name/value pairs, including the origin timestamp.
+   * 
+   * @throws BlobExpiredException if the blob is too old to be accepted.
+   * @throws BlobCrypterException if the blob can't be decoded.
+   */
+  abstract public function unwrap($in, $maxAgeSec);
 }

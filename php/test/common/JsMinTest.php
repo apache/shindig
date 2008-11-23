@@ -1,5 +1,5 @@
 <?php
-/*
+/**
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -22,53 +22,46 @@
  * JsMin test case.
  */
 class JsMinTest extends PHPUnit_Framework_TestCase {
-	
-	/**
-	 * @var JsMin
-	 */
-	private $JsMin;
+  
+  /**
+   * @var JsMin
+   */
+  private $JsMin;
 
-	/**
-	 * Prepares the environment before running a test.
-	 */
-	protected function setUp()
-	{
-		parent::setUp();
-		$this->JsMin = new JsMin();
-	}
+  /**
+   * Prepares the environment before running a test.
+   */
+  protected function setUp() {
+    parent::setUp();
+    $this->JsMin = new JsMin();
+  }
 
-	/**
-	 * Cleans up the environment after running a test.
-	 */
-	protected function tearDown()
-	{
-		$this->JsMin = null;		
-		parent::tearDown();
-	}
+  /**
+   * Cleans up the environment after running a test.
+   */
+  protected function tearDown() {
+    $this->JsMin = null;
+    parent::tearDown();
+  }
 
-	/**
-	 * Constructs the test case.
-	 */
-	public function __construct()
-	{
-	}
+  /**
+   * Constructs the test case.
+   */
+  public function __construct() {}
 
-	/**
-	 * Tests JsMin->__construct()
-	 */
-	public function test__construct()
-	{		
-		$this->JsMin->__construct();
-	}
+  /**
+   * Tests JsMin->__construct()
+   */
+  public function test__construct() {
+    $this->JsMin->__construct();
+  }
 
-	/**
-	 * Tests JsMin::minify()
-	 */
-	public function testMinify()
-	{
-		$expect = "\nfunction foo(bar)\n{if(bar==2){return true;}else{return false;}}";
-		$javascript = 
-'
+  /**
+   * Tests JsMin::minify()
+   */
+  public function testMinify() {
+    $expect = "\nfunction foo(bar)\n{if(bar==2){return true;}else{return false;}}";
+    $javascript = '
 function foo(bar)
 {
 	if (bar == 2) {
@@ -78,6 +71,6 @@ function foo(bar)
 	}
 }
 ';
-		$this->assertEquals($expect, JsMin::minify($javascript));
-	}
+    $this->assertEquals($expect, JsMin::minify($javascript));
+  }
 }

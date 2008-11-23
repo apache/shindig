@@ -69,45 +69,42 @@ PHPUnit_Util_Filter::addFileToFilter(__FILE__, 'PHPUNIT');
  * @link       http://www.phpunit.de/
  * @since      Class available since Release 3.2.0
  */
-abstract class PHPUnit_Extensions_Database_Operation_RowBased implements PHPUnit_Extensions_Database_Operation_IDatabaseOperation
-{
+abstract class PHPUnit_Extensions_Database_Operation_RowBased implements PHPUnit_Extensions_Database_Operation_IDatabaseOperation {
+  
+  protected $operationName;
 
-    protected $operationName;
+  protected abstract function buildOperationQuery(PHPUnit_Extensions_Database_DataSet_ITableMetaData $databaseTableMetaData, PHPUnit_Extensions_Database_DataSet_ITable $table, PHPUnit_Extensions_Database_DB_IDatabaseConnection $connection);
 
-    protected abstract function buildOperationQuery(PHPUnit_Extensions_Database_DataSet_ITableMetaData $databaseTableMetaData, PHPUnit_Extensions_Database_DataSet_ITable $table, PHPUnit_Extensions_Database_DB_IDatabaseConnection $connection);
+  protected abstract function buildOperationArguments(PHPUnit_Extensions_Database_DataSet_ITableMetaData $databaseTableMetaData, PHPUnit_Extensions_Database_DataSet_ITable $table, $row);
 
-    protected abstract function buildOperationArguments(PHPUnit_Extensions_Database_DataSet_ITableMetaData $databaseTableMetaData, PHPUnit_Extensions_Database_DataSet_ITable $table, $row);
-
-    /**
-     * @param PHPUnit_Extensions_Database_DB_IDatabaseConnection $connection
-     * @param PHPUnit_Extensions_Database_DataSet_IDataSet $dataSet
-     */
-    public function execute(PHPUnit_Extensions_Database_DB_IDatabaseConnection $connection, PHPUnit_Extensions_Database_DataSet_IDataSet $dataSet)
-    {
-        $databaseDataSet = $connection->createDataSet();
-        foreach ($dataSet as $table) {
-            /* @var $table PHPUnit_Extensions_Database_DataSet_ITable */
-            $databaseTableMetaData = $databaseDataSet->getTableMetaData($table->getTableMetaData()->getTableName());
-            $query = $this->buildOperationQuery($databaseTableMetaData, $table, $connection);
-            $statement = $connection->getConnection()->prepare($query);
-            for ($i = 0; $i < $table->getRowCount(); $i++) {
-                $args = $this->buildOperationArguments($databaseTableMetaData, $table, $i);
-                try {
-                    $statement->execute($args);
-                } catch (Exception $e) {
-                    throw new PHPUnit_Extensions_Database_Operation_Exception($this->operationName, $query, $args, $table, $e->getMessage());
-                }
-            }
+  /**
+   * @param PHPUnit_Extensions_Database_DB_IDatabaseConnection $connection
+   * @param PHPUnit_Extensions_Database_DataSet_IDataSet $dataSet
+   */
+  public function execute(PHPUnit_Extensions_Database_DB_IDatabaseConnection $connection, PHPUnit_Extensions_Database_DataSet_IDataSet $dataSet) {
+    $databaseDataSet = $connection->createDataSet();
+    foreach ($dataSet as $table) {
+      /* @var $table PHPUnit_Extensions_Database_DataSet_ITable */
+      $databaseTableMetaData = $databaseDataSet->getTableMetaData($table->getTableMetaData()->getTableName());
+      $query = $this->buildOperationQuery($databaseTableMetaData, $table, $connection);
+      $statement = $connection->getConnection()->prepare($query);
+      for ($i = 0; $i < $table->getRowCount(); $i ++) {
+        $args = $this->buildOperationArguments($databaseTableMetaData, $table, $i);
+        try {
+          $statement->execute($args);
+        } catch (Exception $e) {
+          throw new PHPUnit_Extensions_Database_Operation_Exception($this->operationName, $query, $args, $table, $e->getMessage());
         }
+      }
     }
+  }
 
-    protected function buildPreparedColumnArray($columns, PHPUnit_Extensions_Database_DB_IDatabaseConnection $connection)
-    {
-        $columnArray = array();
-        foreach ($columns as $columnName) {
-            $columnArray[] = "{$connection->quoteSchemaObject($columnName)} = ?";
-        }
-        return $columnArray;
+  protected function buildPreparedColumnArray($columns, PHPUnit_Extensions_Database_DB_IDatabaseConnection $connection) {
+    $columnArray = array();
+    foreach ($columns as $columnName) {
+      $columnArray[] = "{$connection->quoteSchemaObject($columnName)} = ?";
     }
+    return $columnArray;
+  }
 }
 ?>

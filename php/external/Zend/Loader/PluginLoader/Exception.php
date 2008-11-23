@@ -33,6 +33,5 @@ require_once 'external/Zend/Loader/Exception.php';
  * @copyright  Copyright (c) 2005-2008 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  */
-class Zend_Loader_PluginLoader_Exception extends Zend_Loader_Exception
-{
+class Zend_Loader_PluginLoader_Exception extends Zend_Loader_Exception {
 }

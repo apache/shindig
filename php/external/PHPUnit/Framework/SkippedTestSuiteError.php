@@ -49,24 +49,23 @@ require_once 'PHPUnit/Util/Filter.php';
 
 PHPUnit_Util_Filter::addFileToFilter(__FILE__, 'PHPUNIT');
 
-if (!class_exists('PHPUnit_Framework_SkippedTestSuiteError', FALSE)) {
+if (! class_exists('PHPUnit_Framework_SkippedTestSuiteError', FALSE)) {
 
-/**
- * Extension to PHPUnit_Framework_AssertionFailedError to mark the special
- * case of a skipped test suite.
- *
- * @category   Testing
- * @package    PHPUnit
- * @author     Sebastian Bergmann <sb@sebastian-bergmann.de>
- * @copyright  2002-2008 Sebastian Bergmann <sb@sebastian-bergmann.de>
- * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
- * @version    Release: 3.2.9
- * @link       http://www.phpunit.de/
- * @since      Class available since Release 3.1.0
- */
-class PHPUnit_Framework_SkippedTestSuiteError extends PHPUnit_Framework_AssertionFailedError implements PHPUnit_Framework_SkippedTest
-{
-}
+  /**
+   * Extension to PHPUnit_Framework_AssertionFailedError to mark the special
+   * case of a skipped test suite.
+   *
+   * @category   Testing
+   * @package    PHPUnit
+   * @author     Sebastian Bergmann <sb@sebastian-bergmann.de>
+   * @copyright  2002-2008 Sebastian Bergmann <sb@sebastian-bergmann.de>
+   * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
+   * @version    Release: 3.2.9
+   * @link       http://www.phpunit.de/
+   * @since      Class available since Release 3.1.0
+   */
+  class PHPUnit_Framework_SkippedTestSuiteError extends PHPUnit_Framework_AssertionFailedError implements PHPUnit_Framework_SkippedTest {
+  }
 
 }
 ?>

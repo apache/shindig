@@ -62,468 +62,401 @@ PHPUnit_Util_Filter::addFileToFilter(__FILE__, 'PHPUNIT');
  * @link       http://www.phpunit.de/
  * @since      Class available since Release 3.1.0
  */
-class PHPUnit_Util_Log_Database implements PHPUnit_Framework_TestListener
-{
-    /**
-     * @var    PHPUnit_Util_Log_Database
-     * @access protected
-     * @static
-     */
-    protected static $instance = NULL;
+class PHPUnit_Util_Log_Database implements PHPUnit_Framework_TestListener {
+  /**
+   * @var    PHPUnit_Util_Log_Database
+   * @access protected
+   * @static
+   */
+  protected static $instance = NULL;
+  
+  /**
+   * @var    integer
+   * @access protected
+   */
+  protected $currentTestId;
+  
+  /**
+   * @var    integer
+   * @access protected
+   */
+  protected $runId;
+  
+  /**
+   * @var    integer[]
+   * @access protected
+   */
+  protected $testSuites = array();
+  
+  /**
+   * @var    boolean
+   * @access protected
+   */
+  protected $currentTestSuccess = TRUE;
+  
+  /**
+   * @var    PDO
+   * @access protected
+   */
+  protected $dbh;
 
-    /**
-     * @var    integer
-     * @access protected
-     */
-    protected $currentTestId;
-
-    /**
-     * @var    integer
-     * @access protected
-     */
-    protected $runId;
-
-    /**
-     * @var    integer[]
-     * @access protected
-     */
-    protected $testSuites = array();
-
-    /**
-     * @var    boolean
-     * @access protected
-     */
-    protected $currentTestSuccess = TRUE;
-
-    /**
-     * @var    PDO
-     * @access protected
-     */
-    protected $dbh;
-
-    /**
-     * Constructor.
-     *
-     * @param  PDO     $dbh
-     * @param  integer $revision
-     * @param  string  $information
-     * @throws PDOException
-     * @throws RuntimeException
-     * @access protected
-     */
-    protected function __construct(PDO $dbh, $revision, $information = '')
-    {
-        $this->dbh = $dbh;
-
-        $stmt = $this->dbh->prepare(
-          'INSERT INTO run
+  /**
+   * Constructor.
+   *
+   * @param  PDO     $dbh
+   * @param  integer $revision
+   * @param  string  $information
+   * @throws PDOException
+   * @throws RuntimeException
+   * @access protected
+   */
+  protected function __construct(PDO $dbh, $revision, $information = '') {
+    $this->dbh = $dbh;
+    
+    $stmt = $this->dbh->prepare('INSERT INTO run
                        (timestamp, revision, information)
-                 VALUES(:timestamp, :revision, :information);'
-        );
+                 VALUES(:timestamp, :revision, :information);');
+    
+    $timestamp = time();
+    
+    $stmt->bindParam(':timestamp', $timestamp, PDO::PARAM_INT);
+    $stmt->bindParam(':revision', $revision, PDO::PARAM_INT);
+    $stmt->bindParam(':information', $information, PDO::PARAM_STR);
+    $stmt->execute();
+    
+    $this->runId = $this->dbh->lastInsertId();
+  }
 
-        $timestamp = time();
-
-        $stmt->bindParam(':timestamp', $timestamp, PDO::PARAM_INT);
-        $stmt->bindParam(':revision', $revision, PDO::PARAM_INT);
-        $stmt->bindParam(':information', $information, PDO::PARAM_STR);
-        $stmt->execute();
-
-        $this->runId = $this->dbh->lastInsertId();
-    }
-
-    /**
-     * @param  PDO     $dbh
-     * @param  integer $revision
-     * @param  string  $information
-     * @return PHPUnit_Util_Log_Database
-     * @throws InvalidArgumentException
-     * @throws PDOException
-     * @throws RuntimeException
-     * @access public
-     * @static
-     */
-    public static function getInstance(PDO $dbh = NULL, $revision = '', $information = '')
-    {
-        if ($dbh === NULL) {
-            if (self::$instance != NULL) {
-                return self::$instance;
-            } else {
-                return FALSE;
-            }
-        }
-
-        if (self::$instance != NULL) {
-            throw new RuntimeException;
-        }
-
-        if (empty($revision)) {
-            throw new InvalidArgumentException;
-        }
-
-        self::$instance = new PHPUnit_Util_Log_Database(
-          $dbh, $revision, $information
-        );
-
+  /**
+   * @param  PDO     $dbh
+   * @param  integer $revision
+   * @param  string  $information
+   * @return PHPUnit_Util_Log_Database
+   * @throws InvalidArgumentException
+   * @throws PDOException
+   * @throws RuntimeException
+   * @access public
+   * @static
+   */
+  public static function getInstance(PDO $dbh = NULL, $revision = '', $information = '') {
+    if ($dbh === NULL) {
+      if (self::$instance != NULL) {
         return self::$instance;
+      } else {
+        return FALSE;
+      }
     }
-
-    /**
-     * Returns the ID of the current test.
-     *
-     * @return integer
-     * @access public
-     */
-    public function getCurrentTestId()
-    {
-        return $this->currentTestId;
+    
+    if (self::$instance != NULL) {
+      throw new RuntimeException();
     }
-
-    /**
-     * Returns the ID of this test run.
-     *
-     * @return integer
-     * @access public
-     */
-    public function getRunId()
-    {
-        return $this->runId;
+    
+    if (empty($revision)) {
+      throw new InvalidArgumentException();
     }
+    
+    self::$instance = new PHPUnit_Util_Log_Database($dbh, $revision, $information);
+    
+    return self::$instance;
+  }
 
-    /**
-     * An error occurred.
-     *
-     * @param  PHPUnit_Framework_Test $test
-     * @param  Exception              $e
-     * @param  float                  $time
-     * @access public
-     */
-    public function addError(PHPUnit_Framework_Test $test, Exception $e, $time)
-    {
-        $message = PHPUnit_Framework_TestFailure::exceptionToString($e) . "\n" .
-                   PHPUnit_Util_Filter::getFilteredStacktrace($e, FALSE);
+  /**
+   * Returns the ID of the current test.
+   *
+   * @return integer
+   * @access public
+   */
+  public function getCurrentTestId() {
+    return $this->currentTestId;
+  }
 
-        $this->storeResult(
-          PHPUnit_Runner_BaseTestRunner::STATUS_ERROR,
-          $time,
-          $message
-        );
+  /**
+   * Returns the ID of this test run.
+   *
+   * @return integer
+   * @access public
+   */
+  public function getRunId() {
+    return $this->runId;
+  }
 
-        $this->updateParents(
-          $time, PHPUnit_Runner_BaseTestRunner::STATUS_ERROR
-        );
+  /**
+   * An error occurred.
+   *
+   * @param  PHPUnit_Framework_Test $test
+   * @param  Exception              $e
+   * @param  float                  $time
+   * @access public
+   */
+  public function addError(PHPUnit_Framework_Test $test, Exception $e, $time) {
+    $message = PHPUnit_Framework_TestFailure::exceptionToString($e) . "\n" . PHPUnit_Util_Filter::getFilteredStacktrace($e, FALSE);
+    
+    $this->storeResult(PHPUnit_Runner_BaseTestRunner::STATUS_ERROR, $time, $message);
+    
+    $this->updateParents($time, PHPUnit_Runner_BaseTestRunner::STATUS_ERROR);
+    
+    $this->currentTestSuccess = FALSE;
+  }
 
-        $this->currentTestSuccess = FALSE;
+  /**
+   * A failure occurred.
+   *
+   * @param  PHPUnit_Framework_Test                 $test
+   * @param  PHPUnit_Framework_AssertionFailedError $e
+   * @param  float                                  $time
+   * @access public
+   */
+  public function addFailure(PHPUnit_Framework_Test $test, PHPUnit_Framework_AssertionFailedError $e, $time) {
+    $message = PHPUnit_Framework_TestFailure::exceptionToString($e) . "\n" . PHPUnit_Util_Filter::getFilteredStacktrace($e, FALSE);
+    
+    $this->storeResult(PHPUnit_Runner_BaseTestRunner::STATUS_FAILURE, $time, $message);
+    
+    $this->updateParents($time, PHPUnit_Runner_BaseTestRunner::STATUS_FAILURE);
+    
+    $this->currentTestSuccess = FALSE;
+  }
+
+  /**
+   * Incomplete test.
+   *
+   * @param  PHPUnit_Framework_Test $test
+   * @param  Exception              $e
+   * @param  float                  $time
+   * @access public
+   */
+  public function addIncompleteTest(PHPUnit_Framework_Test $test, Exception $e, $time) {
+    $message = PHPUnit_Framework_TestFailure::exceptionToString($e) . "\n" . PHPUnit_Util_Filter::getFilteredStacktrace($e, FALSE);
+    
+    $this->storeResult(PHPUnit_Runner_BaseTestRunner::STATUS_INCOMPLETE, $time, $message);
+    
+    $this->currentTestSuccess = FALSE;
+  }
+
+  /**
+   * Skipped test.
+   *
+   * @param  PHPUnit_Framework_Test $test
+   * @param  Exception              $e
+   * @param  float                  $time
+   * @access public
+   */
+  public function addSkippedTest(PHPUnit_Framework_Test $test, Exception $e, $time) {
+    $message = PHPUnit_Framework_TestFailure::exceptionToString($e) . "\n" . PHPUnit_Util_Filter::getFilteredStacktrace($e, FALSE);
+    
+    $this->storeResult(PHPUnit_Runner_BaseTestRunner::STATUS_SKIPPED, $time, $message);
+    
+    $this->currentTestSuccess = FALSE;
+  }
+
+  /**
+   * A test suite started.
+   *
+   * @param  PHPUnit_Framework_TestSuite $suite
+   * @access public
+   */
+  public function startTestSuite(PHPUnit_Framework_TestSuite $suite) {
+    if (empty($this->testSuites)) {
+      $testSuiteId = $this->insertRootNode($suite->getName());
+    } else {
+      $testSuiteId = $this->insertNode($suite);
     }
+    
+    $this->testSuites[] = array('id' => $testSuiteId, 
+        'result' => PHPUnit_Runner_BaseTestRunner::STATUS_PASSED);
+  }
 
-    /**
-     * A failure occurred.
-     *
-     * @param  PHPUnit_Framework_Test                 $test
-     * @param  PHPUnit_Framework_AssertionFailedError $e
-     * @param  float                                  $time
-     * @access public
-     */
-    public function addFailure(PHPUnit_Framework_Test $test, PHPUnit_Framework_AssertionFailedError $e, $time)
-    {
-        $message = PHPUnit_Framework_TestFailure::exceptionToString($e) . "\n" .
-                   PHPUnit_Util_Filter::getFilteredStacktrace($e, FALSE);
+  /**
+   * A test suite ended.
+   *
+   * @param  PHPUnit_Framework_TestSuite $suite
+   * @access public
+   */
+  public function endTestSuite(PHPUnit_Framework_TestSuite $suite) {
+    array_pop($this->testSuites);
+  }
 
-        $this->storeResult(
-          PHPUnit_Runner_BaseTestRunner::STATUS_FAILURE,
-          $time,
-          $message
-        );
+  /**
+   * A test started.
+   *
+   * @param  PHPUnit_Framework_Test $test
+   * @access public
+   */
+  public function startTest(PHPUnit_Framework_Test $test) {
+    $this->insertNode($test);
+    $this->currentTestSuccess = TRUE;
+  }
 
-        $this->updateParents(
-          $time, PHPUnit_Runner_BaseTestRunner::STATUS_FAILURE
-        );
-
-        $this->currentTestSuccess = FALSE;
+  /**
+   * A test ended.
+   *
+   * @param  PHPUnit_Framework_Test $test
+   * @param  float                  $time
+   * @access public
+   */
+  public function endTest(PHPUnit_Framework_Test $test, $time) {
+    if ($this->currentTestSuccess) {
+      $this->storeResult(PHPUnit_Runner_BaseTestRunner::STATUS_PASSED, $time);
+      
+      $this->updateParents($time);
     }
+  }
 
-    /**
-     * Incomplete test.
-     *
-     * @param  PHPUnit_Framework_Test $test
-     * @param  Exception              $e
-     * @param  float                  $time
-     * @access public
-     */
-    public function addIncompleteTest(PHPUnit_Framework_Test $test, Exception $e, $time)
-    {
-        $message = PHPUnit_Framework_TestFailure::exceptionToString($e) . "\n" .
-                   PHPUnit_Util_Filter::getFilteredStacktrace($e, FALSE);
-
-        $this->storeResult(
-          PHPUnit_Runner_BaseTestRunner::STATUS_INCOMPLETE,
-          $time,
-          $message
-        );
-
-        $this->currentTestSuccess = FALSE;
-    }
-
-    /**
-     * Skipped test.
-     *
-     * @param  PHPUnit_Framework_Test $test
-     * @param  Exception              $e
-     * @param  float                  $time
-     * @access public
-     */
-    public function addSkippedTest(PHPUnit_Framework_Test $test, Exception $e, $time)
-    {
-        $message = PHPUnit_Framework_TestFailure::exceptionToString($e) . "\n" .
-                   PHPUnit_Util_Filter::getFilteredStacktrace($e, FALSE);
-
-        $this->storeResult(
-          PHPUnit_Runner_BaseTestRunner::STATUS_SKIPPED,
-          $time,
-          $message
-        );
-
-        $this->currentTestSuccess = FALSE;
-    }
-
-    /**
-     * A test suite started.
-     *
-     * @param  PHPUnit_Framework_TestSuite $suite
-     * @access public
-     */
-    public function startTestSuite(PHPUnit_Framework_TestSuite $suite)
-    {
-        if (empty($this->testSuites)) {
-            $testSuiteId = $this->insertRootNode($suite->getName());
-        } else {
-            $testSuiteId = $this->insertNode($suite);
-        }
-
-        $this->testSuites[] = array(
-          'id'     => $testSuiteId,
-          'result' => PHPUnit_Runner_BaseTestRunner::STATUS_PASSED
-        );
-    }
-
-    /**
-     * A test suite ended.
-     *
-     * @param  PHPUnit_Framework_TestSuite $suite
-     * @access public
-     */
-    public function endTestSuite(PHPUnit_Framework_TestSuite $suite)
-    {
-        array_pop($this->testSuites);
-    }
-
-    /**
-     * A test started.
-     *
-     * @param  PHPUnit_Framework_Test $test
-     * @access public
-     */
-    public function startTest(PHPUnit_Framework_Test $test)
-    {
-        $this->insertNode($test);
-        $this->currentTestSuccess = TRUE;
-    }
-
-    /**
-     * A test ended.
-     *
-     * @param  PHPUnit_Framework_Test $test
-     * @param  float                  $time
-     * @access public
-     */
-    public function endTest(PHPUnit_Framework_Test $test, $time)
-    {
-        if ($this->currentTestSuccess) {
-            $this->storeResult(
-              PHPUnit_Runner_BaseTestRunner::STATUS_PASSED, $time
-            );
-
-            $this->updateParents($time);
-        }
-    }
-
-    /**
-     * Inserts the root node into the tree.
-     *
-     * @param  string $name
-     * @return integer
-     * @throws PDOException
-     * @access protected
-     */
-    protected function insertRootNode($name)
-    {
-        $this->dbh->beginTransaction();
-
-        $stmt = $this->dbh->prepare(
-          'INSERT INTO test
+  /**
+   * Inserts the root node into the tree.
+   *
+   * @param  string $name
+   * @return integer
+   * @throws PDOException
+   * @access protected
+   */
+  protected function insertRootNode($name) {
+    $this->dbh->beginTransaction();
+    
+    $stmt = $this->dbh->prepare('INSERT INTO test
                        (run_id, test_name, node_left, node_right, node_is_leaf)
-                 VALUES(:runId, :testName, 1, 2, 0);'
-        );
-
-        $stmt->bindParam(':runId', $this->runId, PDO::PARAM_INT);
-        $stmt->bindParam(':testName', $name, PDO::PARAM_STR);
-        $stmt->execute();
-
-        $rootId = $this->dbh->lastInsertId();
-
-        $stmt = $this->dbh->prepare(
-          'UPDATE test
+                 VALUES(:runId, :testName, 1, 2, 0);');
+    
+    $stmt->bindParam(':runId', $this->runId, PDO::PARAM_INT);
+    $stmt->bindParam(':testName', $name, PDO::PARAM_STR);
+    $stmt->execute();
+    
+    $rootId = $this->dbh->lastInsertId();
+    
+    $stmt = $this->dbh->prepare('UPDATE test
               SET node_root = :root
-            WHERE test_id = :testId;'
-        );
+            WHERE test_id = :testId;');
+    
+    $stmt->bindParam(':root', $rootId, PDO::PARAM_INT);
+    $stmt->bindParam(':testId', $rootId, PDO::PARAM_INT);
+    $stmt->execute();
+    
+    $this->dbh->commit();
+    
+    return $rootId;
+  }
 
-        $stmt->bindParam(':root', $rootId, PDO::PARAM_INT);
-        $stmt->bindParam(':testId', $rootId, PDO::PARAM_INT);
-        $stmt->execute();
-
-        $this->dbh->commit();
-
-        return $rootId;
-    }
-
-    /**
-     * Inserts a node into the tree.
-     *
-     * @param  PHPUnit_Framework_Test $test
-     * @throws PDOException
-     * @access protected
-     */
-    protected function insertNode(PHPUnit_Framework_Test $test)
-    {
-        $isLeaf = (int)!$test instanceof PHPUnit_Framework_TestSuite;
-
-        $this->dbh->beginTransaction();
-
-        $stmt = $this->dbh->prepare(
-          'SELECT node_right
+  /**
+   * Inserts a node into the tree.
+   *
+   * @param  PHPUnit_Framework_Test $test
+   * @throws PDOException
+   * @access protected
+   */
+  protected function insertNode(PHPUnit_Framework_Test $test) {
+    $isLeaf = (int)! $test instanceof PHPUnit_Framework_TestSuite;
+    
+    $this->dbh->beginTransaction();
+    
+    $stmt = $this->dbh->prepare('SELECT node_right
              FROM test
-            WHERE test_id = :testId;'
-        );
-
-        $stmt->bindParam(':testId', $this->testSuites[count($this->testSuites)-1]['id'], PDO::PARAM_INT);
-        $stmt->execute();
-
-        $right = (int)$stmt->fetchColumn();
-        unset($stmt);
-
-        $stmt = $this->dbh->prepare(
-          'UPDATE test
+            WHERE test_id = :testId;');
+    
+    $stmt->bindParam(':testId', $this->testSuites[count($this->testSuites) - 1]['id'], PDO::PARAM_INT);
+    $stmt->execute();
+    
+    $right = (int)$stmt->fetchColumn();
+    unset($stmt);
+    
+    $stmt = $this->dbh->prepare('UPDATE test
               SET node_left = node_left + 2
             WHERE node_root = :root
-              AND node_left > :left;'
-        );
-
-        $stmt->bindParam(':root', $this->testSuites[0]['id'], PDO::PARAM_INT);
-        $stmt->bindParam(':left', $right, PDO::PARAM_INT);
-        $stmt->execute();
-
-        $stmt = $this->dbh->prepare(
-          'UPDATE test
+              AND node_left > :left;');
+    
+    $stmt->bindParam(':root', $this->testSuites[0]['id'], PDO::PARAM_INT);
+    $stmt->bindParam(':left', $right, PDO::PARAM_INT);
+    $stmt->execute();
+    
+    $stmt = $this->dbh->prepare('UPDATE test
               SET node_right  = node_right + 2
             WHERE node_root   = :root
-              AND node_right >= :right;'
-        );
-
-        $stmt->bindParam(':root', $this->testSuites[0]['id'], PDO::PARAM_INT);
-        $stmt->bindParam(':right', $right, PDO::PARAM_INT);
-        $stmt->execute();
-
-        $testName = $test->getName();
-        $left     = $right;
-        $right    = $right + 1;
-
-        $stmt = $this->dbh->prepare(
-          'INSERT INTO test
+              AND node_right >= :right;');
+    
+    $stmt->bindParam(':root', $this->testSuites[0]['id'], PDO::PARAM_INT);
+    $stmt->bindParam(':right', $right, PDO::PARAM_INT);
+    $stmt->execute();
+    
+    $testName = $test->getName();
+    $left = $right;
+    $right = $right + 1;
+    
+    $stmt = $this->dbh->prepare('INSERT INTO test
                        (run_id, test_name, test_result, test_message,
                         test_execution_time, node_root, node_left, node_right,
                         node_is_leaf)
                  VALUES(:runId, :testName, 0, "", 0, :root, :left, :right,
-                        :isLeaf);'
-        );
-
-        $stmt->bindParam(':runId', $this->runId, PDO::PARAM_INT);
-        $stmt->bindParam(':testName', $testName, PDO::PARAM_STR);
-        $stmt->bindParam(':root', $this->testSuites[0]['id'], PDO::PARAM_INT);
-        $stmt->bindParam(':left', $left, PDO::PARAM_INT);
-        $stmt->bindParam(':right', $right, PDO::PARAM_INT);
-        $stmt->bindParam(':isLeaf', $isLeaf, PDO::PARAM_INT);
-        $stmt->execute();
-
-        $this->currentTestId = $this->dbh->lastInsertId();
-        $this->dbh->commit();
-
-        if (!$test instanceof PHPUnit_Framework_TestSuite) {
-            $test->__db_id = $this->currentTestId;
-        }
-
-        return $this->currentTestId;
+                        :isLeaf);');
+    
+    $stmt->bindParam(':runId', $this->runId, PDO::PARAM_INT);
+    $stmt->bindParam(':testName', $testName, PDO::PARAM_STR);
+    $stmt->bindParam(':root', $this->testSuites[0]['id'], PDO::PARAM_INT);
+    $stmt->bindParam(':left', $left, PDO::PARAM_INT);
+    $stmt->bindParam(':right', $right, PDO::PARAM_INT);
+    $stmt->bindParam(':isLeaf', $isLeaf, PDO::PARAM_INT);
+    $stmt->execute();
+    
+    $this->currentTestId = $this->dbh->lastInsertId();
+    $this->dbh->commit();
+    
+    if (! $test instanceof PHPUnit_Framework_TestSuite) {
+      $test->__db_id = $this->currentTestId;
     }
+    
+    return $this->currentTestId;
+  }
 
-    /**
-     * Stores a test result.
-     *
-     * @param  integer $result
-     * @param  float   $time
-     * @param  string  $message
-     * @throws PDOException
-     * @access protected
-     */
-    protected function storeResult($result = PHPUnit_Runner_BaseTestRunner::STATUS_PASSED, $time = 0, $message = '')
-    {
-        $stmt = $this->dbh->prepare(
-          'UPDATE test
+  /**
+   * Stores a test result.
+   *
+   * @param  integer $result
+   * @param  float   $time
+   * @param  string  $message
+   * @throws PDOException
+   * @access protected
+   */
+  protected function storeResult($result = PHPUnit_Runner_BaseTestRunner::STATUS_PASSED, $time = 0, $message = '') {
+    $stmt = $this->dbh->prepare('UPDATE test
               SET test_result         = :result,
                   test_message        = :message,
                   test_execution_time = :executionTime
-            WHERE test_id             = :testId;'
-        );
+            WHERE test_id             = :testId;');
+    
+    $stmt->bindParam(':result', $result, PDO::PARAM_INT);
+    $stmt->bindParam(':message', $message, PDO::PARAM_STR);
+    $stmt->bindParam(':executionTime', $time);
+    $stmt->bindParam(':testId', $this->currentTestId, PDO::PARAM_INT);
+    $stmt->execute();
+  }
 
-        $stmt->bindParam(':result', $result, PDO::PARAM_INT);
-        $stmt->bindParam(':message', $message, PDO::PARAM_STR);
-        $stmt->bindParam(':executionTime', $time);
-        $stmt->bindParam(':testId', $this->currentTestId, PDO::PARAM_INT);
-        $stmt->execute();
-    }
-
-    /**
-     * @param  float   $time
-     * @param  integer $result
-     * @throws PDOException
-     * @access protected
-     */
-    protected function updateParents($time, $result = NULL)
-    {
-        $stmtUpdateResultAndTime = $this->dbh->prepare(
-          'UPDATE test
+  /**
+   * @param  float   $time
+   * @param  integer $result
+   * @throws PDOException
+   * @access protected
+   */
+  protected function updateParents($time, $result = NULL) {
+    $stmtUpdateResultAndTime = $this->dbh->prepare('UPDATE test
               SET test_result         = :result,
                   test_execution_time = test_execution_time + :time
-            WHERE test_id             = :testSuiteId;'
-        );
-
-        $stmtUpdateTime = $this->dbh->prepare(
-          'UPDATE test
+            WHERE test_id             = :testSuiteId;');
+    
+    $stmtUpdateTime = $this->dbh->prepare('UPDATE test
               SET test_execution_time = test_execution_time + :time
-            WHERE test_id             = :testSuiteId;'
-        );
-
-        foreach ($this->testSuites as &$testSuite) {
-            if ($result > $testSuite['result']) {
-                $stmtUpdateResultAndTime->bindParam(':result', $result, PDO::PARAM_INT);
-                $stmtUpdateResultAndTime->bindParam(':testSuiteId', $testSuite['id'], PDO::PARAM_INT);
-                $stmtUpdateResultAndTime->bindParam(':time', $time);
-                $stmtUpdateResultAndTime->execute();
-
-                $testSuite['result'] = $result;
-            } else {
-                $stmtUpdateTime->bindParam(':testSuiteId', $testSuite['id'], PDO::PARAM_INT);
-                $stmtUpdateTime->bindParam(':time', $time);
-                $stmtUpdateTime->execute();
-            }
-        }
+            WHERE test_id             = :testSuiteId;');
+    
+    foreach ($this->testSuites as &$testSuite) {
+      if ($result > $testSuite['result']) {
+        $stmtUpdateResultAndTime->bindParam(':result', $result, PDO::PARAM_INT);
+        $stmtUpdateResultAndTime->bindParam(':testSuiteId', $testSuite['id'], PDO::PARAM_INT);
+        $stmtUpdateResultAndTime->bindParam(':time', $time);
+        $stmtUpdateResultAndTime->execute();
+        
+        $testSuite['result'] = $result;
+      } else {
+        $stmtUpdateTime->bindParam(':testSuiteId', $testSuite['id'], PDO::PARAM_INT);
+        $stmtUpdateTime->bindParam(':time', $time);
+        $stmtUpdateTime->execute();
+      }
     }
+  }
 }
 ?>

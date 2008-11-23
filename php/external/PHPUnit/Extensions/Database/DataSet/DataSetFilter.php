@@ -65,80 +65,77 @@ PHPUnit_Util_Filter::addFileToFilter(__FILE__, 'PHPUNIT');
  * @link       http://www.phpunit.de/
  * @since      Class available since Release 3.2.0
  */
-class PHPUnit_Extensions_Database_DataSet_DataSetFilter extends PHPUnit_Extensions_Database_DataSet_AbstractDataSet
-{
+class PHPUnit_Extensions_Database_DataSet_DataSetFilter extends PHPUnit_Extensions_Database_DataSet_AbstractDataSet {
+  
+  /**
+   * The dataset being decorated.
+   * @var PHPUnit_Extensions_Database_DataSet_IDataSet
+   */
+  protected $originalDataSet;
+  
+  /**
+   * The tables to exclude from the data set.
+   * @var Array
+   */
+  protected $excludeTables;
+  
+  /**
+   * The columns to exclude from the data set.
+   * @var Array
+   */
+  protected $excludeColumns;
 
-    /**
-     * The dataset being decorated.
-     * @var PHPUnit_Extensions_Database_DataSet_IDataSet
-     */
-    protected $originalDataSet;
-
-    /**
-     * The tables to exclude from the data set.
-     * @var Array
-     */
-    protected $excludeTables;
-
-    /**
-     * The columns to exclude from the data set.
-     * @var Array
-     */
-    protected $excludeColumns;
-
-    /**
-     * Creates a new filtered data set. 
-     * 
-     * The $exclude tables should be an associative array using table names as 
-     * the key and an array of column names to exclude for the value. If you 
-     * would like to exclude a full table set the value of the table's entry 
-     * to the special string '*'.
-     *
-     * @param PHPUnit_Extensions_Database_DataSet_IDataSet $originalDataSet
-     * @param Array $excludeTables
-     */
-    public function __construct(PHPUnit_Extensions_Database_DataSet_IDataSet $originalDataSet, Array $excludeTables)
-    {
-        $this->originalDataSet = $originalDataSet;
-        $this->excludeTables = $excludeTables;
-        
-        foreach ($this->excludeTables as $tableName => $values) {
-            if (is_array($values)) {
-                $this->excludeColumns[$tableName] = $values;
-            } elseif ($values == '*') {
-                $this->excludeTables[] = $tableName;
-            } else {
-                $this->excludeColumns[$tableName] = (array)$values;
-            }
-        }
+  /**
+   * Creates a new filtered data set. 
+   * 
+   * The $exclude tables should be an associative array using table names as 
+   * the key and an array of column names to exclude for the value. If you 
+   * would like to exclude a full table set the value of the table's entry 
+   * to the special string '*'.
+   *
+   * @param PHPUnit_Extensions_Database_DataSet_IDataSet $originalDataSet
+   * @param Array $excludeTables
+   */
+  public function __construct(PHPUnit_Extensions_Database_DataSet_IDataSet $originalDataSet, Array $excludeTables) {
+    $this->originalDataSet = $originalDataSet;
+    $this->excludeTables = $excludeTables;
+    
+    foreach ($this->excludeTables as $tableName => $values) {
+      if (is_array($values)) {
+        $this->excludeColumns[$tableName] = $values;
+      } elseif ($values == '*') {
+        $this->excludeTables[] = $tableName;
+      } else {
+        $this->excludeColumns[$tableName] = (array)$values;
+      }
     }
+  }
 
-    /**
-     * Creates an iterator over the tables in the data set. If $reverse is 
-     * true a reverse iterator will be returned.
-     *
-     * @param bool $reverse
-     * @return PHPUnit_Extensions_Database_DataSet_ITableIterator
-     */
-    protected function createIterator($reverse = false)
-    {
-        $original_tables = $this->originalDataSet->getIterator($reverse);
-        $new_tables = array();
-        
-        foreach ($original_tables as $table) {
-            /* @var $table PHPUnit_Extensions_Database_DataSet_ITable */
-            $tableName = $table->getTableMetaData()->getTableName();
-            
-            if (in_array($tableName, $this->excludeTables)) {
-                continue;
-            } elseif (array_key_exists($tableName, $this->excludeColumns)) {
-                $new_tables[] = new PHPUnit_Extensions_Database_DataSet_TableFilter($table, $this->excludeColumns[$tableName]);
-            } else {
-                $new_tables[] = $table;
-            }
-        }
-        
-        return new PHPUnit_Extensions_Database_DataSet_DefaultTableIterator($new_tables);
+  /**
+   * Creates an iterator over the tables in the data set. If $reverse is 
+   * true a reverse iterator will be returned.
+   *
+   * @param bool $reverse
+   * @return PHPUnit_Extensions_Database_DataSet_ITableIterator
+   */
+  protected function createIterator($reverse = false) {
+    $original_tables = $this->originalDataSet->getIterator($reverse);
+    $new_tables = array();
+    
+    foreach ($original_tables as $table) {
+      /* @var $table PHPUnit_Extensions_Database_DataSet_ITable */
+      $tableName = $table->getTableMetaData()->getTableName();
+      
+      if (in_array($tableName, $this->excludeTables)) {
+        continue;
+      } elseif (array_key_exists($tableName, $this->excludeColumns)) {
+        $new_tables[] = new PHPUnit_Extensions_Database_DataSet_TableFilter($table, $this->excludeColumns[$tableName]);
+      } else {
+        $new_tables[] = $table;
+      }
     }
+    
+    return new PHPUnit_Extensions_Database_DataSet_DefaultTableIterator($new_tables);
+  }
 }
 ?>

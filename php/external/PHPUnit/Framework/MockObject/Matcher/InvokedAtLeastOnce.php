@@ -66,22 +66,18 @@ PHPUnit_Util_Filter::addFileToFilter(__FILE__, 'PHPUNIT');
  * @link       http://www.phpunit.de/
  * @since      Class available since Release 3.0.0
  */
-class PHPUnit_Framework_MockObject_Matcher_InvokedAtLeastOnce extends PHPUnit_Framework_MockObject_Matcher_InvokedRecorder
-{
-    public function toString()
-    {
-        return 'invoked at least once';
-    }
+class PHPUnit_Framework_MockObject_Matcher_InvokedAtLeastOnce extends PHPUnit_Framework_MockObject_Matcher_InvokedRecorder {
 
-    public function verify()
-    {
-        $count = $this->getInvocationCount();
+  public function toString() {
+    return 'invoked at least once';
+  }
 
-        if ($count < 1) {
-            throw new PHPUnit_Framework_ExpectationFailedException(
-              'Expected invocation at least once but it never occured.'
-            );
-        }
+  public function verify() {
+    $count = $this->getInvocationCount();
+    
+    if ($count < 1) {
+      throw new PHPUnit_Framework_ExpectationFailedException('Expected invocation at least once but it never occured.');
     }
+  }
 }
 ?>

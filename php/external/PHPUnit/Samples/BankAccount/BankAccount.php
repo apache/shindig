@@ -1,4 +1,5 @@
 <?php
+
 /**
  * PHPUnit
  *
@@ -44,7 +45,8 @@
  * @since      File available since Release 2.3.0
  */
 
-class BankAccountException extends RuntimeException {}
+class BankAccountException extends RuntimeException {
+}
 
 /**
  * A bank account.
@@ -58,69 +60,64 @@ class BankAccountException extends RuntimeException {}
  * @link       http://www.phpunit.de/
  * @since      Class available since Release 2.3.0
  */
-class BankAccount
-{
-    /**
-     * The bank account's balance.
-     *
-     * @var    float
-     * @access protected
-     */
-    protected $balance = 0;
+class BankAccount {
+  /**
+   * The bank account's balance.
+   *
+   * @var    float
+   * @access protected
+   */
+  protected $balance = 0;
 
-    /**
-     * Returns the bank account's balance.
-     *
-     * @return float
-     * @access public
-     */
-    public function getBalance()
-    {
-        return $this->balance;
+  /**
+   * Returns the bank account's balance.
+   *
+   * @return float
+   * @access public
+   */
+  public function getBalance() {
+    return $this->balance;
+  }
+
+  /**
+   * Sets the bank account's balance.
+   *
+   * @param  float $balance
+   * @throws BankAccountException
+   * @access protected
+   */
+  protected function setBalance($balance) {
+    if ($balance >= 0) {
+      $this->balance = $balance;
+    } else {
+      throw new BankAccountException();
     }
+  }
 
-    /**
-     * Sets the bank account's balance.
-     *
-     * @param  float $balance
-     * @throws BankAccountException
-     * @access protected
-     */
-    protected function setBalance($balance)
-    {
-        if ($balance >= 0) {
-            $this->balance = $balance;
-        } else {
-            throw new BankAccountException;
-        }
-    }
+  /**
+   * Deposits an amount of money to the bank account.
+   *
+   * @param  float $balance
+   * @throws BankAccountException
+   * @access public
+   */
+  public function depositMoney($balance) {
+    $this->setBalance($this->getBalance() + $balance);
+    
+    return $this->getBalance();
+  }
 
-    /**
-     * Deposits an amount of money to the bank account.
-     *
-     * @param  float $balance
-     * @throws BankAccountException
-     * @access public
-     */
-    public function depositMoney($balance)
-    {
-        $this->setBalance($this->getBalance() + $balance);
-
-        return $this->getBalance();
-    }
-
-    /**
-     * Withdraws an amount of money from the bank account.
-     *
-     * @param  float $balance
-     * @throws BankAccountException
-     * @access public
-     */
-    public function withdrawMoney($balance)
-    {
-        $this->setBalance($this->getBalance() - $balance);
-
-        return $this->getBalance();
-    }
+  /**
+   * Withdraws an amount of money from the bank account.
+   *
+   * @param  float $balance
+   * @throws BankAccountException
+   * @access public
+   */
+  public function withdrawMoney($balance) {
+    $this->setBalance($this->getBalance() - $balance);
+    
+    return $this->getBalance();
+  }
 }
 ?>

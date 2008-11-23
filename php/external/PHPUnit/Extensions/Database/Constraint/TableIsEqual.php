@@ -62,89 +62,80 @@ PHPUnit_Util_Filter::addFileToFilter(__FILE__, 'PHPUNIT');
  * @link       http://www.phpunit.de/
  * @since      Class available since Release 3.2.0
  */
-class PHPUnit_Extensions_Database_Constraint_TableIsEqual extends PHPUnit_Framework_Constraint
-{
+class PHPUnit_Extensions_Database_Constraint_TableIsEqual extends PHPUnit_Framework_Constraint {
+  
+  /**
+   * @var PHPUnit_Extensions_Database_DataSet_ITable
+   */
+  protected $value;
+  
+  /**
+   * @var string
+   */
+  protected $failure_reason;
 
-    /**
-     * @var PHPUnit_Extensions_Database_DataSet_ITable
-     */
-    protected $value;
+  /**
+   * Creates a new constraint.
+   *
+   * @param PHPUnit_Extensions_Database_DataSet_ITable $value
+   */
+  public function __construct(PHPUnit_Extensions_Database_DataSet_ITable $value) {
+    $this->value = $value;
+  }
 
-    /**
-     * @var string
-     */
-    protected $failure_reason;
-
-    /**
-     * Creates a new constraint.
-     *
-     * @param PHPUnit_Extensions_Database_DataSet_ITable $value
-     */
-    public function __construct(PHPUnit_Extensions_Database_DataSet_ITable $value)
-    {
-        $this->value = $value;
+  /**
+   * Determines whether or not the given table matches the table used to 
+   * create this constraint.
+   *
+   * @param PHPUnit_Extensions_Database_DataSet_ITable $other
+   * @return bool
+   */
+  public function evaluate($other) {
+    if ($other instanceof PHPUnit_Extensions_Database_DataSet_ITable) {
+      try {
+        $this->value->assertEquals($other);
+        return TRUE;
+      } catch (Exception $e) {
+        $this->failure_reason = $e->getMessage();
+        return FALSE;
+      }
+    } else {
+      throw new InvalidArgumentException("PHPUnit_Extensions_Database_DataSet_ITable expected");
     }
+  }
 
-    /**
-     * Determines whether or not the given table matches the table used to 
-     * create this constraint.
-     *
-     * @param PHPUnit_Extensions_Database_DataSet_ITable $other
-     * @return bool
-     */
-    public function evaluate($other)
-    {
-        if ($other instanceof PHPUnit_Extensions_Database_DataSet_ITable) {
-            try {
-                $this->value->assertEquals($other);
-                return TRUE;
-            } catch (Exception $e) {
-                $this->failure_reason = $e->getMessage();
-                return FALSE;
-            }
-        } else {
-            throw new InvalidArgumentException("PHPUnit_Extensions_Database_DataSet_ITable expected");
-        }
+  /**
+   * @param   mixed   $other The value passed to evaluate() which failed the
+   *                         constraint check.
+   * @param   string  $description A string with extra description of what was
+   *                               going on while the evaluation failed.
+   * @param   boolean $not Flag to indicate negation.
+   * @throws  PHPUnit_Framework_ExpectationFailedException
+   */
+  protected function failureDescription($other, $description, $not) {
+    $failureDescription = sprintf('Failed asserting that %s %s Reason: %s', $other->__toString(), $this->toString(), $this->failure_reason);
+    
+    if ($not) {
+      $failureDescription = self::negate($failureDescription);
     }
-
-    /**
-     * @param   mixed   $other The value passed to evaluate() which failed the
-     *                         constraint check.
-     * @param   string  $description A string with extra description of what was
-     *                               going on while the evaluation failed.
-     * @param   boolean $not Flag to indicate negation.
-     * @throws  PHPUnit_Framework_ExpectationFailedException
-     */
-    protected function failureDescription($other, $description, $not)
-    {
-        $failureDescription = sprintf('Failed asserting that %s %s Reason: %s', 
-            $other->__toString(), 
-            $this->toString(), 
-            $this->failure_reason
-        );
-        
-        if ($not) {
-            $failureDescription = self::negate($failureDescription);
-        }
-        
-        if (!empty($description)) {
-            $failureDescription = $description . "\n" . $failureDescription;
-        }
-        
-        return $failureDescription;
+    
+    if (! empty($description)) {
+      $failureDescription = $description . "\n" . $failureDescription;
     }
+    
+    return $failureDescription;
+  }
 
-    /**
-     * Returns a string representation of the constraint.
-     *
-     * @return string
-     * @access public
-     */
-    public function toString()
-    {
-        return sprintf('is equal to %s', 
+  /**
+   * Returns a string representation of the constraint.
+   *
+   * @return string
+   * @access public
+   */
+  public function toString() {
+    return sprintf('is equal to %s', 
 
-        PHPUnit_Util_Type::toString($this->value));
-    }
+    PHPUnit_Util_Type::toString($this->value));
+  }
 }
 ?>

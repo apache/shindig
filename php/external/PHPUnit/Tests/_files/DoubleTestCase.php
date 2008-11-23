@@ -61,28 +61,24 @@ PHPUnit_Util_Filter::addFileToFilter(__FILE__);
  * @link       http://www.phpunit.de/
  * @since      Class available since Release 2.0.0
  */
-class DoubleTestCase implements PHPUnit_Framework_Test
-{
-    protected $testCase;
+class DoubleTestCase implements PHPUnit_Framework_Test {
+  protected $testCase;
 
-    public function __construct(PHPUnit_Framework_TestCase $testCase)
-    {
-        $this->testCase = $testCase;
-    }
+  public function __construct(PHPUnit_Framework_TestCase $testCase) {
+    $this->testCase = $testCase;
+  }
 
-    public function count()
-    {
-        return 2;
-    }
+  public function count() {
+    return 2;
+  }
 
-    public function run(PHPUnit_Framework_TestResult $result = NULL)
-    {
-        $result->startTest($this);
-
-        $this->testCase->runBare();
-        $this->testCase->runBare();
-
-        $result->endTest($this, 0);
-    }
+  public function run(PHPUnit_Framework_TestResult $result = NULL) {
+    $result->startTest($this);
+    
+    $this->testCase->runBare();
+    $this->testCase->runBare();
+    
+    $result->endTest($this, 0);
+  }
 }
 ?>

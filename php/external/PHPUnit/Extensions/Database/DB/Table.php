@@ -63,22 +63,20 @@ PHPUnit_Util_Filter::addFileToFilter(__FILE__, 'PHPUNIT');
  * @link       http://www.phpunit.de/
  * @since      Class available since Release 3.2.0
  */
-class PHPUnit_Extensions_Database_DB_Table extends PHPUnit_Extensions_Database_DataSet_AbstractTable
-{
+class PHPUnit_Extensions_Database_DB_Table extends PHPUnit_Extensions_Database_DataSet_AbstractTable {
 
-    /**
-     * Creates a new database table object.
-     *
-     * @param PHPUnit_Extensions_Database_DataSet_ITableMetaData $tableMetaData
-     * @param PHPUnit_Extensions_Database_DB_IDatabaseConnection $databaseConnection
-     */
-    public function __construct(PHPUnit_Extensions_Database_DataSet_ITableMetaData $tableMetaData, PHPUnit_Extensions_Database_DB_IDatabaseConnection $databaseConnection)
-    {
-        $this->setTableMetaData($tableMetaData);
-        
-        $pdoStatement = $databaseConnection->getConnection()->prepare(PHPUnit_Extensions_Database_DB_DataSet::buildTableSelect($tableMetaData));
-        $pdoStatement->execute();
-        $this->data = $pdoStatement->fetchAll(PDO::FETCH_ASSOC);
-    }
+  /**
+   * Creates a new database table object.
+   *
+   * @param PHPUnit_Extensions_Database_DataSet_ITableMetaData $tableMetaData
+   * @param PHPUnit_Extensions_Database_DB_IDatabaseConnection $databaseConnection
+   */
+  public function __construct(PHPUnit_Extensions_Database_DataSet_ITableMetaData $tableMetaData, PHPUnit_Extensions_Database_DB_IDatabaseConnection $databaseConnection) {
+    $this->setTableMetaData($tableMetaData);
+    
+    $pdoStatement = $databaseConnection->getConnection()->prepare(PHPUnit_Extensions_Database_DB_DataSet::buildTableSelect($tableMetaData));
+    $pdoStatement->execute();
+    $this->data = $pdoStatement->fetchAll(PDO::FETCH_ASSOC);
+  }
 }
 ?>

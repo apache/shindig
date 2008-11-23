@@ -63,136 +63,128 @@ PHPUnit_Util_Filter::addFileToFilter(__FILE__, 'PHPUNIT');
  * @link       http://www.phpunit.de/
  * @since      Class available since Release 3.2.0
  */
-class PHPUnit_Extensions_Database_DataSet_AbstractTable implements PHPUnit_Extensions_Database_DataSet_ITable
-{
+class PHPUnit_Extensions_Database_DataSet_AbstractTable implements PHPUnit_Extensions_Database_DataSet_ITable {
+  
+  /**
+   * @var PHPUnit_Extensions_Database_DataSet_ITableMetaData
+   */
+  protected $tableMetaData;
+  
+  /**
+   * A 2-dimensional array containing the data for this table.
+   *
+   * @var array
+   */
+  protected $data;
 
-    /**
-     * @var PHPUnit_Extensions_Database_DataSet_ITableMetaData
-     */
-    protected $tableMetaData;
+  /**
+   * Sets the metadata for this table.
+   *
+   * @param PHPUnit_Extensions_Database_DataSet_ITableMetaData $tableMetaData
+   */
+  protected function setTableMetaData(PHPUnit_Extensions_Database_DataSet_ITableMetaData $tableMetaData) {
+    $this->tableMetaData = $tableMetaData;
+  }
 
-    /**
-     * A 2-dimensional array containing the data for this table.
-     *
-     * @var array
-     */
-    protected $data;
+  /**
+   * Returns the table's meta data.
+   *
+   * @return PHPUnit_Extensions_Database_DataSet_ITableMetaData
+   */
+  public function getTableMetaData() {
+    return $this->tableMetaData;
+  }
 
-    /**
-     * Sets the metadata for this table.
-     *
-     * @param PHPUnit_Extensions_Database_DataSet_ITableMetaData $tableMetaData
-     */
-    protected function setTableMetaData(PHPUnit_Extensions_Database_DataSet_ITableMetaData $tableMetaData)
-    {
-        $this->tableMetaData = $tableMetaData;
+  /**
+   * Returns the number of rows in this table.
+   *
+   * @return int
+   */
+  public function getRowCount() {
+    return count($this->data);
+  }
+
+  /**
+   * Returns the value for the given column on the given row.
+   *
+   * @param int $row
+   * @param int $column
+   * @todo reorganize this function to throw the exception first.
+   */
+  public function getValue($row, $column) {
+    if (isset($this->data[$row][$column])) {
+      return (string)$this->data[$row][$column];
+    } else {
+      if (! in_array($column, $this->getTableMetaData()->getColumns()) || $this->getRowCount() <= $row) {
+        throw new InvalidArgumentException("The given row ({$row}) and column ({$column}) do not exist in table {$this->getTableMetaData()->getTableName()}");
+      } else {
+        return null;
+      }
     }
+  }
 
-    /**
-     * Returns the table's meta data.
-     *
-     * @return PHPUnit_Extensions_Database_DataSet_ITableMetaData
-     */
-    public function getTableMetaData()
-    {
-        return $this->tableMetaData;
+  /**
+   * Asserts that the given table matches this table.
+   *
+   * @param PHPUnit_Extensions_Database_DataSet_ITable $other
+   */
+  public function assertEquals(PHPUnit_Extensions_Database_DataSet_ITable $other) {
+    $thisMetaData = $this->getTableMetaData();
+    $otherMetaData = $other->getTableMetaData();
+    
+    $thisMetaData->assertEquals($otherMetaData);
+    
+    if ($this->getRowCount() != $other->getRowCount()) {
+      throw new Exception("Expected row count of {$this->getRowCount()}, has a row count of {$other->getRowCount()}");
     }
-
-    /**
-     * Returns the number of rows in this table.
-     *
-     * @return int
-     */
-    public function getRowCount()
-    {
-        return count($this->data);
-    }
-
-    /**
-     * Returns the value for the given column on the given row.
-     *
-     * @param int $row
-     * @param int $column
-     * @todo reorganize this function to throw the exception first.
-     */
-    public function getValue($row, $column)
-    {
-        if (isset($this->data[$row][$column])) {
-            return (string)$this->data[$row][$column];
-        } else {
-            if (!in_array($column, $this->getTableMetaData()->getColumns()) || $this->getRowCount() <= $row) {
-                throw new InvalidArgumentException("The given row ({$row}) and column ({$column}) do not exist in table {$this->getTableMetaData()->getTableName()}");
-            } else {
-                return null;
-            }
+    
+    $columns = $thisMetaData->getColumns();
+    for ($i = 0; $i < $this->getRowCount(); $i ++) {
+      foreach ($columns as $columnName) {
+        if ($this->getValue($i, $columnName) != $other->getValue($i, $columnName)) {
+          throw new Exception("Expected value of {$this->getValue($i, $columnName)} for row {$i} column {$columnName}, has a value of {$other->getValue($i, $columnName)}");
         }
+      }
     }
+    
+    return TRUE;
+  }
 
-    /**
-     * Asserts that the given table matches this table.
-     *
-     * @param PHPUnit_Extensions_Database_DataSet_ITable $other
-     */
-    public function assertEquals(PHPUnit_Extensions_Database_DataSet_ITable $other)
-    {
-        $thisMetaData = $this->getTableMetaData();
-        $otherMetaData = $other->getTableMetaData();
-        
-        $thisMetaData->assertEquals($otherMetaData);
-        
-        if ($this->getRowCount() != $other->getRowCount()) {
-            throw new Exception("Expected row count of {$this->getRowCount()}, has a row count of {$other->getRowCount()}");
-        }
-        
-        $columns = $thisMetaData->getColumns();
-        for ($i = 0; $i < $this->getRowCount(); $i++) {
-            foreach ($columns as $columnName) {
-                if ($this->getValue($i, $columnName) != $other->getValue($i, $columnName)) {
-                    throw new Exception("Expected value of {$this->getValue($i, $columnName)} for row {$i} column {$columnName}, has a value of {$other->getValue($i, $columnName)}");
-                }
-            }
-        }
-        
-        return TRUE;
+  public function __toString() {
+    $columns = $this->getTableMetaData()->getColumns();
+    
+    $lineSeperator = str_repeat('+----------------------', count($columns)) . "+\n";
+    $lineLength = strlen($lineSeperator) - 1;
+    
+    $tableString = $lineSeperator;
+    $tableString .= '| ' . str_pad($this->getTableMetaData()->getTableName(), $lineLength - 4, ' ', STR_PAD_RIGHT) . " |\n";
+    $tableString .= $lineSeperator;
+    $tableString .= $this->rowToString($columns);
+    $tableString .= $lineSeperator;
+    
+    for ($i = 0; $i < $this->getRowCount(); $i ++) {
+      $values = array();
+      foreach ($columns as $columnName) {
+        $values[] = $this->getValue($i, $columnName);
+      }
+      
+      $tableString .= $this->rowToString($values);
+      $tableString .= $lineSeperator;
     }
+    
+    return "\n" . $tableString . "\n";
+  }
 
-    public function __toString()
-    {
-        $columns = $this->getTableMetaData()->getColumns();
-        
-        $lineSeperator = str_repeat('+----------------------', count($columns)) . "+\n";
-        $lineLength = strlen($lineSeperator) - 1;
-        
-        $tableString = $lineSeperator;
-        $tableString .= '| ' . str_pad($this->getTableMetaData()->getTableName(), $lineLength - 4, ' ', STR_PAD_RIGHT) . " |\n";
-        $tableString .= $lineSeperator;
-        $tableString .= $this->rowToString($columns);
-        $tableString .= $lineSeperator;
-        
-        for ($i = 0; $i < $this->getRowCount(); $i++) {
-            $values = array();
-            foreach ($columns as $columnName) {
-                $values[] = $this->getValue($i, $columnName);
-            }
-            
-            $tableString .= $this->rowToString($values);
-            $tableString .= $lineSeperator;
-        }
-        
-        return "\n" . $tableString . "\n";
+  protected function rowToString(Array $row) {
+    $rowString = '';
+    foreach ($row as $value) {
+      if (is_null($value)) {
+        $value = 'NULL';
+      }
+      $rowString .= '| ' . str_pad(substr($value, 0, 20), 20, ' ', STR_PAD_BOTH) . ' ';
     }
-
-    protected function rowToString(Array $row)
-    {
-        $rowString = '';
-        foreach ($row as $value) {
-            if (is_null($value)) {
-                $value = 'NULL';
-            }
-            $rowString .= '| ' . str_pad(substr($value, 0, 20), 20, ' ', STR_PAD_BOTH) . ' ';
-        }
-        
-        return $rowString . "|\n";
-    }
+    
+    return $rowString . "|\n";
+  }
 }
 ?>

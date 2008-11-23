@@ -63,67 +63,65 @@ PHPUnit_Util_Filter::addFileToFilter(__FILE__, 'PHPUNIT');
  * @link       http://www.phpunit.de/
  * @since      Class available since Release 3.2.0
  */
-class PHPUnit_Extensions_Database_DataSet_XmlDataSet extends PHPUnit_Extensions_Database_DataSet_AbstractXmlDataSet
-{
+class PHPUnit_Extensions_Database_DataSet_XmlDataSet extends PHPUnit_Extensions_Database_DataSet_AbstractXmlDataSet {
 
-    protected function getTableInfo(Array &$tableColumns, Array &$tableValues)
-    {
-        if ($this->xmlFileContents->getName() != 'dataset') {
-            throw new Exception("The root element of a flat xml file must be called <dataset>");
+  protected function getTableInfo(Array &$tableColumns, Array &$tableValues) {
+    if ($this->xmlFileContents->getName() != 'dataset') {
+      throw new Exception("The root element of a flat xml file must be called <dataset>");
+    }
+    
+    foreach ($this->xmlFileContents->xpath('/dataset/table') as $tableElement) {
+      if (empty($tableElement['name'])) {
+        throw new Exception("Table elements must include a name attribute specifying the table name.");
+      }
+      
+      $tableName = (string)$tableElement['name'];
+      
+      if (! isset($tableColumns[$tableName])) {
+        $tableColumns[$tableName] = array();
+      }
+      
+      if (! isset($tableValues[$tableName])) {
+        $tableValues[$tableName] = array();
+      }
+      
+      $tableInstanceColumns = array();
+      
+      foreach ($tableElement->xpath('./column') as $columnElement) {
+        $columnName = (string)$columnElement;
+        if (empty($columnName)) {
+          throw new Exception("column elements cannot be empty");
         }
         
-        foreach ($this->xmlFileContents->xpath('/dataset/table') as $tableElement) {
-            if (empty($tableElement['name'])) {
-                throw new Exception("Table elements must include a name attribute specifying the table name.");
-            }
-            
-            $tableName = (string)$tableElement['name'];
-            
-            if (!isset($tableColumns[$tableName])) {
-                $tableColumns[$tableName] = array();
-            }
-            
-            if (!isset($tableValues[$tableName])) {
-                $tableValues[$tableName] = array();
-            }
-            
-            $tableInstanceColumns = array();
-            
-            foreach ($tableElement->xpath('./column') as $columnElement) {
-                $columnName = (string)$columnElement;
-                if (empty($columnName)) {
-                    throw new Exception("column elements cannot be empty");
-                }
-                
-                if (!in_array($columnName, $tableColumns[$tableName])) {
-                    $tableColumns[$tableName][] = $columnName;
-                }
-                
-                $tableInstanceColumns[] = $columnName;
-            }
-            
-            foreach ($tableElement->xpath('./row') as $rowElement) {
-                $rowValues = array();
-                $index = 0;
-                foreach ($rowElement->children() as $columnValue) {
-                    switch ($columnValue->getName()) {
-                        case 'value':
-                            $rowValues[$tableInstanceColumns[$index]] = (string)$columnValue;
-                            $index++;
-                            break;
-                        case 'null':
-                            $rowValues[$tableInstanceColumns[$index]] = null;
-                            $index++;
-                            break;
-                        default:
-                            throw new Exception("Unknown child in the a row element.");
-                    }
-                }
-                
-                $tableValues[$tableName][] = $rowValues;
-            }
+        if (! in_array($columnName, $tableColumns[$tableName])) {
+          $tableColumns[$tableName][] = $columnName;
         }
+        
+        $tableInstanceColumns[] = $columnName;
+      }
+      
+      foreach ($tableElement->xpath('./row') as $rowElement) {
+        $rowValues = array();
+        $index = 0;
+        foreach ($rowElement->children() as $columnValue) {
+          switch ($columnValue->getName()) {
+            case 'value':
+              $rowValues[$tableInstanceColumns[$index]] = (string)$columnValue;
+              $index ++;
+              break;
+            case 'null':
+              $rowValues[$tableInstanceColumns[$index]] = null;
+              $index ++;
+              break;
+            default:
+              throw new Exception("Unknown child in the a row element.");
+          }
+        }
+        
+        $tableValues[$tableName][] = $rowValues;
+      }
     }
+  }
 
 }
 ?>

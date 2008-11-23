@@ -61,12 +61,11 @@ require_once '_files/NonStatic.php';
  * @link       http://www.phpunit.de/
  * @since      Class available since Release 2.0.0
  */
-class Runner_BaseTestRunnerTest extends PHPUnit_Framework_TestCase
-{
-    public function testInvokeNonStaticSuite()
-    {
-        $runner = new MockRunner;
-        $runner->getTest('NonStatic');
-    }
+class Runner_BaseTestRunnerTest extends PHPUnit_Framework_TestCase {
+
+  public function testInvokeNonStaticSuite() {
+    $runner = new MockRunner();
+    $runner->getTest('NonStatic');
+  }
 }
 ?>

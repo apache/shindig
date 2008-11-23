@@ -48,22 +48,22 @@ require_once 'PHPUnit/Util/Filter.php';
 
 PHPUnit_Util_Filter::addFileToFilter(__FILE__, 'PHPUNIT');
 
-if (!class_exists('PHPUnit_Framework_Error', FALSE)) {
+if (! class_exists('PHPUnit_Framework_Error', FALSE)) {
 
-/**
- * Wrapper for PHP errors.
- *
- * @category   Testing
- * @package    PHPUnit
- * @author     Sebastian Bergmann <sb@sebastian-bergmann.de>
- * @copyright  2002-2008 Sebastian Bergmann <sb@sebastian-bergmann.de>
- * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
- * @version    Release: 3.2.9
- * @link       http://www.phpunit.de/
- * @since      Class available since Release 2.2.0
- */
-class PHPUnit_Framework_Error extends Exception
-{
+  /**
+   * Wrapper for PHP errors.
+   *
+   * @category   Testing
+   * @package    PHPUnit
+   * @author     Sebastian Bergmann <sb@sebastian-bergmann.de>
+   * @copyright  2002-2008 Sebastian Bergmann <sb@sebastian-bergmann.de>
+   * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
+   * @version    Release: 3.2.9
+   * @link       http://www.phpunit.de/
+   * @since      Class available since Release 2.2.0
+   */
+  class PHPUnit_Framework_Error extends Exception {
+
     /**
      * Constructor.
      *
@@ -74,15 +74,14 @@ class PHPUnit_Framework_Error extends Exception
      * @param  array   $trace
      * @access public
      */
-    public function __construct($message, $code, $file, $line, $trace)
-    {
-        parent::__construct($message, $code);
-
-        $this->file  = $file;
-        $this->line  = $line;
-        $this->trace = $trace;
+    public function __construct($message, $code, $file, $line, $trace) {
+      parent::__construct($message, $code);
+      
+      $this->file = $file;
+      $this->line = $line;
+      $this->trace = $trace;
     }
-}
+  }
 
 }
 ?>

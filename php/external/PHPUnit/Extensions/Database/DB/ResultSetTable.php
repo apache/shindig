@@ -64,26 +64,24 @@ require_once 'PHPUnit/Extensions/Database/DataSet/AbstractTable.php';
  * @link       http://www.phpunit.de/
  * @since      Class available since Release 3.2.0
  */
-class PHPUnit_Extensions_Database_DB_ResultSetTable extends PHPUnit_Extensions_Database_DataSet_AbstractTable
-{
+class PHPUnit_Extensions_Database_DB_ResultSetTable extends PHPUnit_Extensions_Database_DataSet_AbstractTable {
 
-    /**
-     * Creates a new result set table.
-     *
-     * @param string $tableName
-     * @param PDOStatement $pdoStatement
-     */
-    public function __construct($tableName, PDOStatement $pdoStatement)
-    {
-        $this->data = $pdoStatement->fetchAll(PDO::FETCH_ASSOC);
-        
-        if (count($this->data)) {
-            $columns = array_keys($this->data[0]);
-        } else {
-            $columns = array();
-        }
-        
-        $this->setTableMetaData(new PHPUnit_Extensions_Database_DataSet_DefaultTableMetaData($tableName, $columns));
+  /**
+   * Creates a new result set table.
+   *
+   * @param string $tableName
+   * @param PDOStatement $pdoStatement
+   */
+  public function __construct($tableName, PDOStatement $pdoStatement) {
+    $this->data = $pdoStatement->fetchAll(PDO::FETCH_ASSOC);
+    
+    if (count($this->data)) {
+      $columns = array_keys($this->data[0]);
+    } else {
+      $columns = array();
     }
+    
+    $this->setTableMetaData(new PHPUnit_Extensions_Database_DataSet_DefaultTableMetaData($tableName, $columns));
+  }
 }
 ?>

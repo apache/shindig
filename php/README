@@ -62,3 +62,23 @@ Then you can run the gadget by pointing your browser to:
 
 http://<your.host>/shindig/php/gadgets/ifr?url=http://www.labpixies.com/campaigns/todo/todo.xml
 
+Going forward
+============================================
+Check out the php/config/container.php file, in local.php you only have to specificy the
+fields you want to overwrite with other values, for example on a production system you 
+would probably want to have something like:
+ $shindigConfig = array(
+  'debug' => false,
+  'allow_plaintext_token' => false,
+  'token_cipher_key' => 'MySecretKey',
+  'token_hmac_key' => 'MyOtherSecret',
+  'private_key_phrase' => 'MyCertificatePassword',
+  'people_service' => 'MyPeopleService',
+  'activity_service' => 'MyActivitiesService',
+  'app_data_service' => 'MyAppDataService',
+  'app_data_service' => 'MyAppDataService',
+  'oauth_lookup_service' => 'MyOAuthLookupService'
+  'xrds_location' => 'http://www.mycontainer.com/xrds',
+  'check_file_exists' => false
+ 
+ and implement your own service and oauth lookup classes

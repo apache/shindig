@@ -63,12 +63,9 @@ PHPUnit_Util_Filter::addFileToFilter(__FILE__, 'PHPUNIT');
  * @link       http://www.phpunit.de/
  * @since      Class available since Release 3.2.0
  */
-class PHPUnit_Extensions_Database_Operation_Null implements PHPUnit_Extensions_Database_Operation_IDatabaseOperation
-{
+class PHPUnit_Extensions_Database_Operation_Null implements PHPUnit_Extensions_Database_Operation_IDatabaseOperation {
 
-    public function execute(PHPUnit_Extensions_Database_DB_IDatabaseConnection $connection, PHPUnit_Extensions_Database_DataSet_IDataSet $dataSet)
-    {
-        /* do nothing */
-    }
+  public function execute(PHPUnit_Extensions_Database_DB_IDatabaseConnection $connection, PHPUnit_Extensions_Database_DataSet_IDataSet $dataSet) {  /* do nothing */
+  }
 }
 ?>

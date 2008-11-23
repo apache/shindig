@@ -61,31 +61,26 @@ PHPUnit_Util_Filter::addFileToFilter(__FILE__, 'PHPUNIT');
  * @link       http://www.phpunit.de/
  * @since      Class available since Release 3.2.0
  */
-class PHPUnit_Util_Log_PMD_Rule_Function_CodeCoverage extends PHPUnit_Util_Log_PMD_Rule_Function
-{
-    public function __construct($threshold = array(35, 70), $priority = 1)
-    {
-        parent::__construct($threshold);
+class PHPUnit_Util_Log_PMD_Rule_Function_CodeCoverage extends PHPUnit_Util_Log_PMD_Rule_Function {
+
+  public function __construct($threshold = array(35, 70), $priority = 1) {
+    parent::__construct($threshold);
+  }
+
+  public function apply(PHPUnit_Util_Metrics $metrics) {
+    $coverage = $metrics->getCoverage();
+    
+    if ($coverage <= $this->threshold[0]) {
+      $violation = 'The code coverage is %01.2F which is considered low.';
+    } 
+
+    else if ($coverage > $this->threshold[0] && $coverage < $this->threshold[1]) {
+      $violation = 'The code coverage is %01.2F which is considered medium.';
     }
-
-    public function apply(PHPUnit_Util_Metrics $metrics)
-    {
-        $coverage = $metrics->getCoverage();
-
-        if ($coverage <= $this->threshold[0]) {
-            $violation = 'The code coverage is %01.2F which is considered low.';
-        }
-
-        else if ($coverage > $this->threshold[0] && $coverage < $this->threshold[1]) {
-            $violation = 'The code coverage is %01.2F which is considered medium.';
-        }
-
-        if (isset($violation)) {
-            return sprintf(
-              $violation,
-              $coverage
-            );
-        }
+    
+    if (isset($violation)) {
+      return sprintf($violation, $coverage);
     }
+  }
 }
 ?>

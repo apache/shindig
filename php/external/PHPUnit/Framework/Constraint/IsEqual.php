@@ -70,221 +70,193 @@ PHPUnit_Util_Filter::addFileToFilter(__FILE__, 'PHPUNIT');
  * @link       http://www.phpunit.de/
  * @since      Class available since Release 3.0.0
  */
-class PHPUnit_Framework_Constraint_IsEqual extends PHPUnit_Framework_Constraint
-{
-    protected $value;
-    protected $delta = 0;
-    protected $maxDepth = 10;
+class PHPUnit_Framework_Constraint_IsEqual extends PHPUnit_Framework_Constraint {
+  protected $value;
+  protected $delta = 0;
+  protected $maxDepth = 10;
 
-    public function __construct($value, $delta = 0, $maxDepth = 10)
-    {
-        $this->value    = $value;
-        $this->delta    = $delta;
-        $this->maxDepth = $maxDepth;
+  public function __construct($value, $delta = 0, $maxDepth = 10) {
+    $this->value = $value;
+    $this->delta = $delta;
+    $this->maxDepth = $maxDepth;
+  }
+
+  /**
+   * Evaluates the constraint for parameter $other. Returns TRUE if the
+   * constraint is met, FALSE otherwise.
+   *
+   * @param mixed $other Value or object to evaluate.
+   * @return bool
+   */
+  public function evaluate($other) {
+    return $this->recursiveComparison($this->value, $other);
+  }
+
+  /**
+   * @param   mixed   $other The value passed to evaluate() which failed the
+   *                         constraint check.
+   * @param   string  $description A string with extra description of what was
+   *                               going on while the evaluation failed.
+   * @param   boolean $not Flag to indicate negation.
+   * @throws  PHPUnit_Framework_ExpectationFailedException
+   */
+  public function fail($other, $description, $not = FALSE) {
+    $failureDescription = $this->failureDescription($other, $description, $not);
+    
+    if (! $not) {
+      if ($this->value instanceof DOMDocument) {
+        $value = $this->domToText($this->value);
+      } else {
+        $value = $this->value;
+      }
+      
+      if ($other instanceof DOMDocument) {
+        $other = $this->domToText($other);
+      }
+      
+      throw new PHPUnit_Framework_ExpectationFailedException($failureDescription, PHPUnit_Framework_ComparisonFailure::diffEqual($value, $other), $description);
+    } else {
+      throw new PHPUnit_Framework_ExpectationFailedException($failureDescription, NULL);
     }
+  }
 
-    /**
-     * Evaluates the constraint for parameter $other. Returns TRUE if the
-     * constraint is met, FALSE otherwise.
-     *
-     * @param mixed $other Value or object to evaluate.
-     * @return bool
-     */
-    public function evaluate($other)
-    {
-        return $this->recursiveComparison($this->value, $other);
+  /**
+   * Returns a string representation of the constraint.
+   *
+   * @return string
+   * @access public
+   */
+  public function toString() {
+    $delta = '';
+    
+    if (is_string($this->value)) {
+      if (strpos($this->value, "\n") !== FALSE) {
+        return 'is equal to <text>';
+      } else {
+        return sprintf('is equal to <string:%s>', 
+
+        $this->value);
+      }
+    } else {
+      if ($this->delta != 0) {
+        $delta = sprintf(' with delta <%F>', 
+
+        $this->delta);
+      }
+      
+      return sprintf('is equal to %s%s', 
+
+      PHPUnit_Util_Type::toString($this->value), $delta);
     }
+  }
 
-    /**
-     * @param   mixed   $other The value passed to evaluate() which failed the
-     *                         constraint check.
-     * @param   string  $description A string with extra description of what was
-     *                               going on while the evaluation failed.
-     * @param   boolean $not Flag to indicate negation.
-     * @throws  PHPUnit_Framework_ExpectationFailedException
-     */
-    public function fail($other, $description, $not = FALSE)
-    {
-        $failureDescription = $this->failureDescription(
-          $other,
-          $description,
-          $not
-        );
-
-        if (!$not) {
-            if ($this->value instanceof DOMDocument) {
-                $value = $this->domToText($this->value);
-            } else {
-                $value = $this->value;
-            }
-
-            if ($other instanceof DOMDocument) {
-                $other = $this->domToText($other);
-            }
-
-            throw new PHPUnit_Framework_ExpectationFailedException(
-              $failureDescription,
-              PHPUnit_Framework_ComparisonFailure::diffEqual($value, $other),
-              $description
-            );
-        } else {
-            throw new PHPUnit_Framework_ExpectationFailedException(
-              $failureDescription,
-              NULL
-            );
-        }
+  /**
+   * Perform the actual recursive comparision of two values
+   * 
+   * @param mixed $a First value
+   * @param mixed $b Second value
+   * @param int $depth Depth
+   * @return bool
+   */
+  protected function recursiveComparison($a, $b, $depth = 0) {
+    if ($a === $b) {
+      return TRUE;
     }
-
-    /**
-     * Returns a string representation of the constraint.
-     *
-     * @return string
-     * @access public
-     */
-    public function toString()
-    {
-        $delta = '';
-
-        if (is_string($this->value)) {
-            if (strpos($this->value, "\n") !== FALSE) {
-                return 'is equal to <text>';
-            } else {
-                return sprintf(
-                  'is equal to <string:%s>',
-
-                  $this->value
-                );
-            }
-        } else {
-            if ($this->delta != 0) {
-                $delta = sprintf(
-                  ' with delta <%F>',
-
-                  $this->delta
-                );
-            }
-
-            return sprintf(
-              'is equal to %s%s',
-
-              PHPUnit_Util_Type::toString($this->value),
-              $delta
-            );
-        }
+    
+    if ($depth >= $this->maxDepth) {
+      return TRUE;
     }
-
-    /**
-     * Perform the actual recursive comparision of two values
-     * 
-     * @param mixed $a First value
-     * @param mixed $b Second value
-     * @param int $depth Depth
-     * @return bool
-     */
-    protected function recursiveComparison($a, $b, $depth = 0)
-    {
-        if ($a === $b) {
-            return TRUE;
-        }
-
-        if ($depth >= $this->maxDepth) {
-            return TRUE;
-        }
-
-        if (is_numeric($a) XOR is_numeric($b)) {
-            return FALSE;
-        }
-
-        if (is_array($a) XOR is_array($b)) {
-            return FALSE;
-        }
-
-        if (is_object($a) XOR is_object($b)) {
-            return FALSE;
-        }
-
-        if ($a instanceof DOMDocument) {
-            $a = $this->domToText($a);
-        }
-
-        if ($b instanceof DOMDocument) {
-            $b = $this->domToText($b);
-        }
-
-        if (is_object($a) && is_object($b) &&
-           (get_class($a) !== get_class($b))) {
-            return FALSE;
-        }
-
-        // Normal comparision for scalar values.
-        if ((!is_array($a) && !is_object($a)) ||
-            (!is_array($b) && !is_object($b))) {
-            if (is_numeric($a) && is_numeric($b)) {
-                // Optionally apply delta on numeric values.
-                return $this->numericComparison($a, $b);
-            } else {
-                return ($a == $b);
-            }
-        }
-
-        if (is_object($a)) {
-            $a = (array) $a;
-            $b = (array) $b;
-        }
-
-        foreach ($a as $key => $v) {
-            if (!array_key_exists($key, $b)) {
-                // Abort on missing key in $b.
-                return FALSE;
-            }
-
-            if (!$this->recursiveComparison($a[$key], $b[$key], $depth + 1)) {
-                // FALSE, if child comparision fails.
-                return FALSE;
-            }
-
-            // Unset key to check whether all keys of b are compared.
-            unset($b[$key]);
-        }
-
-        if (count($b)) {
-            // There is something in $b, that is missing in $a.
-            return FALSE;
-        }
-
-        return TRUE;
+    
+    if (is_numeric($a) xor is_numeric($b)) {
+      return FALSE;
     }
-
-    /**
-     * Compares two numeric values - use delta if applieable
-     * 
-     * @param mixed $a First value
-     * @param mixed $b Second value
-     * @return bool
-     */
-    protected function numericComparison($a, $b)
-    {
-        if ($this->delta === FALSE) {
-            return ($a == $b);
-        } else {
-            return (abs($a - $b) <= $this->delta);
-        }
+    
+    if (is_array($a) xor is_array($b)) {
+      return FALSE;
     }
-
-    /**
-     * Returns the normalized, whitespace-cleaned, and indented textual
-     * representation of a DOMDocument.
-     * 
-     * @param DOMDocument $document
-     * @return string
-     */
-    protected function domToText(DOMDocument $document)
-    {
-        $document->formatOutput = true;
-        $document->preserveWhiteSpace = false;
-        $document->normalizeDocument();
-
-        return $document->saveXML();
+    
+    if (is_object($a) xor is_object($b)) {
+      return FALSE;
     }
+    
+    if ($a instanceof DOMDocument) {
+      $a = $this->domToText($a);
+    }
+    
+    if ($b instanceof DOMDocument) {
+      $b = $this->domToText($b);
+    }
+    
+    if (is_object($a) && is_object($b) && (get_class($a) !== get_class($b))) {
+      return FALSE;
+    }
+    
+    // Normal comparision for scalar values.
+    if ((! is_array($a) && ! is_object($a)) || (! is_array($b) && ! is_object($b))) {
+      if (is_numeric($a) && is_numeric($b)) {
+        // Optionally apply delta on numeric values.
+        return $this->numericComparison($a, $b);
+      } else {
+        return ($a == $b);
+      }
+    }
+    
+    if (is_object($a)) {
+      $a = (array)$a;
+      $b = (array)$b;
+    }
+    
+    foreach ($a as $key => $v) {
+      if (! array_key_exists($key, $b)) {
+        // Abort on missing key in $b.
+        return FALSE;
+      }
+      
+      if (! $this->recursiveComparison($a[$key], $b[$key], $depth + 1)) {
+        // FALSE, if child comparision fails.
+        return FALSE;
+      }
+      
+      // Unset key to check whether all keys of b are compared.
+      unset($b[$key]);
+    }
+    
+    if (count($b)) {
+      // There is something in $b, that is missing in $a.
+      return FALSE;
+    }
+    
+    return TRUE;
+  }
+
+  /**
+   * Compares two numeric values - use delta if applieable
+   * 
+   * @param mixed $a First value
+   * @param mixed $b Second value
+   * @return bool
+   */
+  protected function numericComparison($a, $b) {
+    if ($this->delta === FALSE) {
+      return ($a == $b);
+    } else {
+      return (abs($a - $b) <= $this->delta);
+    }
+  }
+
+  /**
+   * Returns the normalized, whitespace-cleaned, and indented textual
+   * representation of a DOMDocument.
+   * 
+   * @param DOMDocument $document
+   * @return string
+   */
+  protected function domToText(DOMDocument $document) {
+    $document->formatOutput = true;
+    $document->preserveWhiteSpace = false;
+    $document->normalizeDocument();
+    
+    return $document->saveXML();
+  }
 }
 ?>

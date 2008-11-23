@@ -50,11 +50,7 @@ require_once 'PHPUnit/Util/Filter.php';
 
 PHPUnit_Util_Filter::addFileToFilter(__FILE__, 'PHPUNIT');
 
-trigger_error(
-  "Class PHPUnit_Extensions_TestSetup is deprecated. ".
-  "It will be removed in PHPUnit 3.3. ".
-  "Please use the new functionality in PHPUnit_Framework_TestSuite instead."
-);
+trigger_error("Class PHPUnit_Extensions_TestSetup is deprecated. " . "It will be removed in PHPUnit 3.3. " . "Please use the new functionality in PHPUnit_Framework_TestSuite instead.");
 
 /**
  * A Decorator to set up and tear down additional fixture state.
@@ -70,83 +66,76 @@ trigger_error(
  * @link       http://www.phpunit.de/
  * @since      Class available since Release 2.0.0
  */
-class PHPUnit_Extensions_TestSetup extends PHPUnit_Extensions_TestDecorator
-{
-    /**
-     * Runs the decorated test and collects the
-     * result in a TestResult.
-     *
-     * @param  PHPUnit_Framework_TestResult $result
-     * @return PHPUnit_Framework_TestResult
-     * @throws InvalidArgumentException
-     * @access public
-     */
-    public function run(PHPUnit_Framework_TestResult $result = NULL)
-    {
-        if ($result === NULL) {
-            $result = $this->createResult();
-        }
+class PHPUnit_Extensions_TestSetup extends PHPUnit_Extensions_TestDecorator {
 
-        $this->setUp();
-        $this->copyFixtureToTest();
-        $this->basicRun($result);
-        $this->tearDown();
-
-        return $result;
+  /**
+   * Runs the decorated test and collects the
+   * result in a TestResult.
+   *
+   * @param  PHPUnit_Framework_TestResult $result
+   * @return PHPUnit_Framework_TestResult
+   * @throws InvalidArgumentException
+   * @access public
+   */
+  public function run(PHPUnit_Framework_TestResult $result = NULL) {
+    if ($result === NULL) {
+      $result = $this->createResult();
     }
+    
+    $this->setUp();
+    $this->copyFixtureToTest();
+    $this->basicRun($result);
+    $this->tearDown();
+    
+    return $result;
+  }
 
-    /**
-     * Copies the fixture set up by setUp() to the test.
-     *
-     * @access private
-     * @since  Method available since Release 2.3.0
-     */
-    private function copyFixtureToTest()
-    {
-        $object = new ReflectionClass($this);
-
-        foreach ($object->getProperties() as $attribute) {
-            $name = $attribute->getName();
-
-            if ($name != 'test') {
-                $this->doCopyFixtureToTest($this->test, $name, $this->$name);
-            }
-        }
+  /**
+   * Copies the fixture set up by setUp() to the test.
+   *
+   * @access private
+   * @since  Method available since Release 2.3.0
+   */
+  private function copyFixtureToTest() {
+    $object = new ReflectionClass($this);
+    
+    foreach ($object->getProperties() as $attribute) {
+      $name = $attribute->getName();
+      
+      if ($name != 'test') {
+        $this->doCopyFixtureToTest($this->test, $name, $this->$name);
+      }
     }
+  }
 
-    /**
-     * @access private
-     * @since  Method available since Release 2.3.0
-     */
-    private function doCopyFixtureToTest($object, $name, &$value)
-    {
-        if ($object instanceof PHPUnit_Framework_TestSuite) {
-            foreach ($object->tests() as $test) {
-                $this->doCopyFixtureToTest($test, $name, $value);
-            }
-        } else {
-            $object->$name =& $value;
-        }
+  /**
+   * @access private
+   * @since  Method available since Release 2.3.0
+   */
+  private function doCopyFixtureToTest($object, $name, &$value) {
+    if ($object instanceof PHPUnit_Framework_TestSuite) {
+      foreach ($object->tests() as $test) {
+        $this->doCopyFixtureToTest($test, $name, $value);
+      }
+    } else {
+      $object->$name = & $value;
     }
+  }
 
-    /**
-     * Sets up the fixture. Override to set up additional fixture
-     * state.
-     *
-     * @access protected
-     */
-    protected function setUp()
-    {
-    }
+  /**
+   * Sets up the fixture. Override to set up additional fixture
+   * state.
+   *
+   * @access protected
+   */
+  protected function setUp() {}
 
-    /**
-     * Tears down the fixture. Override to tear down the additional
-     * fixture state.
-     *
-     * @access protected
-     */
-    protected function tearDown()
-    {
-    }
+  /**
+   * Tears down the fixture. Override to tear down the additional
+   * fixture state.
+   *
+   * @access protected
+   */
+  protected function tearDown() {}
 }
 ?>

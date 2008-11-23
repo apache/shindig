@@ -60,8 +60,7 @@ PHPUnit_Util_Filter::addFileToFilter(__FILE__, 'PHPUNIT');
  * @link       http://www.phpunit.de/
  * @since      Class available since Release 3.2.0
  */
-abstract class PHPUnit_Util_Metrics
-{
+abstract class PHPUnit_Util_Metrics {
 }
 
 require_once 'PHPUnit/Util/Metrics/Project.php';

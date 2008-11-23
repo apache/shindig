@@ -60,13 +60,11 @@ PHPUnit_Util_Filter::addFileToFilter(__FILE__);
  * @link       http://www.phpunit.de/
  * @since      Class available since Release 3.0.0
  */
-class Struct
-{
-    public $var;
+class Struct {
+  public $var;
 
-    public function __construct($var)
-    {
-        $this->var = $var;
-    }
+  public function __construct($var) {
+    $this->var = $var;
+  }
 }
 ?>
