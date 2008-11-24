@@ -21,19 +21,21 @@
 include_once ('config.php');
 include_once ('src/common/File.php');
 
-// Basic sanity check if we have all required modules
-$modules = array('json', 'SimpleXML', 'libxml', 'curl', 'openssl');
-// if plain text tokens are disallowed we require mcrypt
-if (! Config::get('allow_plaintext_token')) {
-  $modules[] = 'mcrypt';
-}
-// if you selected the memcache caching backend, you need the memcache extention too :)
-if (Config::get('data_cache') == 'CacheMemcache') {
-  $modules[] = 'memcache';
-}
-foreach ($modules as $module) {
-  if (! extension_loaded($module)) {
-    die("Shindig requires the {$module} extention, see <a href='http://www.php.net/{$module}'>http://www.php.net/{$module}</a> for more info");
+if (Config::get('debug')) {
+  // Basic sanity check if we have all required modules
+  $modules = array('json', 'SimpleXML', 'libxml', 'curl', 'openssl');
+  // if plain text tokens are disallowed we require mcrypt
+  if (! Config::get('allow_plaintext_token')) {
+    $modules[] = 'mcrypt';
+  }
+  // if you selected the memcache caching backend, you need the memcache extention too :)
+  if (Config::get('data_cache') == 'CacheMemcache') {
+    $modules[] = 'memcache';
+  }
+  foreach ($modules as $module) {
+    if (! extension_loaded($module)) {
+      die("Shindig requires the {$module} extention, see <a href='http://www.php.net/{$module}'>http://www.php.net/{$module}</a> for more info");
+    }
   }
 }
 
