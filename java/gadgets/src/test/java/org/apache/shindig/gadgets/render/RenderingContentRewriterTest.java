@@ -340,6 +340,36 @@ public class RenderingContentRewriterTest {
   }
 
   @Test
+  public void featuresDeclaredBeforeUsed() throws Exception {
+    String gadgetXml =
+      "<Module><ModulePrefs title=''>" +
+      "  <Require feature='foo'/>" +
+      "</ModulePrefs>" +
+      "<Content type='html'/>" +
+      "</Module>";
+
+    Gadget gadget = makeGadgetWithSpec(gadgetXml);
+
+    featureRegistry.addInline("foo", "gadgets.Prefs.setMessages_ = function(){};");
+    control.replay();
+
+    String rewritten = rewrite(gadget, BODY_CONTENT);
+
+    Matcher matcher = DOCUMENT_SPLIT_PATTERN.matcher(rewritten);
+    assertTrue("Output is not valid HTML.", matcher.matches());
+
+    String headContent = matcher.group(HEAD_GROUP);
+
+    // Locate user script.
+    int declaredPosition = headContent.indexOf("foo_content();");
+
+    // Anything else here, we added.
+    int usedPosition = headContent.indexOf("gadgets.Prefs.setMessages_");
+
+    assertTrue("Inline JS needs to exist before it is used.", declaredPosition < usedPosition);
+  }
+
+  @Test
   public void urlFeaturesForcedExternal() throws Exception {
     String gadgetXml =
       "<Module><ModulePrefs title=''>" +

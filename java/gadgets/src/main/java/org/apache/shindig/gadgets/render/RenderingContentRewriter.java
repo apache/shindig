@@ -47,6 +47,7 @@ import org.apache.shindig.gadgets.spec.ModulePrefs;
 import org.apache.shindig.gadgets.spec.UserPref;
 import org.apache.shindig.gadgets.spec.View;
 
+import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.google.inject.Inject;
 
@@ -55,11 +56,13 @@ import org.json.JSONObject;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 import org.w3c.dom.Text;
 
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.logging.Level;
@@ -122,6 +125,18 @@ public class RenderingContentRewriter implements ContentRewriter {
 
       Element head = (Element)DomUtil.getFirstNamedChildNode(document.getDocumentElement(), "head");
 
+      // Remove all the elements currently in head and add them back after we inject content
+      NodeList children = head.getChildNodes();
+      List<Node> existingHeadContent = Lists.newArrayListWithCapacity(children.getLength());
+      for (int i = 0; i < children.getLength(); i++) {
+        existingHeadContent.add(children.item(i));
+      }
+
+      for (Node n : existingHeadContent) {
+        head.removeChild(n);
+      }
+
+
       // Only inject default styles if no doctype was specified.
       if (document.getDoctype() == null) {
         Element defaultStyle = document.createElement("style");
@@ -141,13 +156,18 @@ public class RenderingContentRewriter implements ContentRewriter {
       injectPreloads(gadget, mainScriptTag);
 
       // We need to inject our script before any developer scripts.
-      head.insertBefore(mainScriptTag, DomUtil.getFirstNamedChildNode(head, "script"));
+      head.appendChild(mainScriptTag);
 
       Element body = (Element)DomUtil.getFirstNamedChildNode(document.getDocumentElement(), "body");
 
       LocaleSpec localeSpec = gadget.getLocale();
       if (localeSpec != null) {
         body.setAttribute("dir", localeSpec.getLanguageDirection());
+      }
+
+      // re append head content
+      for (Node node : existingHeadContent) {
+        head.appendChild(node);
       }
 
       injectOnLoadHandlers(body);
