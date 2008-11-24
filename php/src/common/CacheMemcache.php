@@ -56,7 +56,7 @@ class CacheMemcache extends Cache {
   private function removeLock($key) {
     $this->check();
     // suppress all warnings, if some other process removed it that's ok too
-    @memcache_delete($key . '.lock');
+    @memcache_delete($this->connection, $key . '.lock');
   }
 
   private function waitForLock($key) {
