@@ -29,7 +29,7 @@ under the License.
     <relativePath>../java/pom.xml</relativePath>
   </parent>
 
-  <artifactId>shindig-php</artifactId>
+  <artifactId>shindig</artifactId>
   <packaging>pom</packaging>
 
   <name>Apache Shindig PhP assembly</name>
@@ -49,7 +49,8 @@ under the License.
         <artifactId>maven-assembly-plugin</artifactId>
         <configuration>
           <descriptors>
-            <descriptor>src/main/assembly/deploy.xml</descriptor>
+            <descriptor>src/main/assembly/php.xml</descriptor>
+            <descriptor>src/main/assembly/source.xml</descriptor>
           </descriptors>
         </configuration>
         <executions>
@@ -59,6 +60,23 @@ under the License.
             <goals>
               <goal>attached</goal> <!-- goals == mojos -->
             </goals>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.geronimo.genesis.plugins</groupId>
+        <artifactId>tools-maven-plugin</artifactId>
+        <version>1.4</version>
+        <executions>
+          <execution>
+            <id>verify-legal-files</id>
+            <phase>verify</phase>
+            <goals>
+              <goal>verify-legal-files</goal>
+            </goals>
+            <configuration>
+              <strict>false</strict>
+            </configuration>
           </execution>
         </executions>
       </plugin>
