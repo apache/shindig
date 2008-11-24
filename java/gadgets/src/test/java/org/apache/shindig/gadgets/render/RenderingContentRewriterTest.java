@@ -18,6 +18,14 @@
  */
 package org.apache.shindig.gadgets.render;
 
+import static org.apache.shindig.gadgets.render.RenderingContentRewriter.DEFAULT_CSS;
+import static org.apache.shindig.gadgets.render.RenderingContentRewriter.FEATURES_KEY;
+import static org.apache.shindig.gadgets.render.RenderingContentRewriter.INSERT_BASE_ELEMENT_KEY;
+import static org.easymock.EasyMock.expect;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+
 import org.apache.shindig.common.ContainerConfig;
 import org.apache.shindig.common.PropertiesModule;
 import org.apache.shindig.common.uri.Uri;
@@ -36,9 +44,6 @@ import org.apache.shindig.gadgets.preload.NullPreloads;
 import org.apache.shindig.gadgets.preload.PreloadException;
 import org.apache.shindig.gadgets.preload.PreloadedData;
 import org.apache.shindig.gadgets.preload.Preloads;
-import static org.apache.shindig.gadgets.render.RenderingContentRewriter.DEFAULT_HEAD_CONTENT;
-import static org.apache.shindig.gadgets.render.RenderingContentRewriter.FEATURES_KEY;
-import static org.apache.shindig.gadgets.render.RenderingContentRewriter.INSERT_BASE_ELEMENT_KEY;
 import org.apache.shindig.gadgets.rewrite.MutableContent;
 import org.apache.shindig.gadgets.spec.GadgetSpec;
 import org.apache.shindig.gadgets.spec.LocaleSpec;
@@ -52,14 +57,10 @@ import com.google.common.collect.Sets;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 
-import static org.easymock.EasyMock.expect;
 import org.easymock.classextension.EasyMock;
 import org.easymock.classextension.IMocksControl;
 import org.json.JSONException;
 import org.json.JSONObject;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -137,8 +138,7 @@ public class RenderingContentRewriterTest {
     assertTrue("Output is not valid HTML.", matcher.matches());
     assertTrue("Missing opening html tag", matcher.group(BEFORE_HEAD_GROUP).
         toLowerCase().contains("<html>"));
-    assertTrue("Default head content is missing.",
-        matcher.group(HEAD_GROUP).contains(DEFAULT_HEAD_CONTENT));
+    assertTrue("Default CSS missing.", matcher.group(HEAD_GROUP).contains(DEFAULT_CSS));
     // Not very accurate -- could have just been user prefs.
     assertTrue("Default javascript not included.",
         matcher.group(HEAD_GROUP).contains("<script>"));
@@ -188,6 +188,8 @@ public class RenderingContentRewriterTest {
     assertTrue("Custom head content is missing.", matcher.group(HEAD_GROUP).contains(head));
     assertTrue("Forced javascript not included.",
         matcher.group(HEAD_GROUP).contains("<script src=\"/js/foo\">"));
+    assertFalse("Default styling was injected when a doctype was specified.",
+        matcher.group(HEAD_GROUP).contains(DEFAULT_CSS));
     assertTrue("Custom body attributes missing.",
         matcher.group(BODY_ATTRIBUTES_GROUP).contains(bodyAttr));
     assertTrue("Original document not preserved.",
@@ -637,9 +639,10 @@ public class RenderingContentRewriterTest {
     Matcher matcher = DOCUMENT_SPLIT_PATTERN.matcher(content);
     assertTrue("Output is not valid HTML.", matcher.matches());
     Pattern baseElementPattern
-        = Pattern.compile("(?:.*)<base href=\"(.*?)\">(?:.*)", Pattern.DOTALL);
+        = Pattern.compile("^<base href=\"(.*?)\">(?:.*)", Pattern.DOTALL);
     Matcher baseElementMatcher = baseElementPattern.matcher(matcher.group(HEAD_GROUP));
-    assertTrue("base element missing from head of document.", baseElementMatcher.matches());
+    assertTrue("Base element does not exist at the beginning of the head element.",
+        baseElementMatcher.matches());
     return baseElementMatcher.group(1);
   }
 
