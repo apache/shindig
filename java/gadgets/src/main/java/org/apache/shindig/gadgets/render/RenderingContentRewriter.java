@@ -47,21 +47,19 @@ import org.apache.shindig.gadgets.spec.ModulePrefs;
 import org.apache.shindig.gadgets.spec.UserPref;
 import org.apache.shindig.gadgets.spec.View;
 
-import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.google.inject.Inject;
 
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
 import org.w3c.dom.Text;
 
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.logging.Level;
@@ -86,7 +84,7 @@ import java.util.logging.Logger;
 public class RenderingContentRewriter implements ContentRewriter {
   private static final Logger LOG = Logger.getLogger(RenderingContentRewriter.class.getName());
 
-  static final String DEFAULT_HEAD_CONTENT =
+  static final String DEFAULT_CSS =
       "body,td,div,span,p{font-family:arial,sans-serif;}" +
       "a {color:#0000cc;}a:visited {color:#551a8b;}" +
       "a:active {color:#ff0000;}" +
@@ -120,38 +118,33 @@ public class RenderingContentRewriter implements ContentRewriter {
 
   public RewriterResults rewrite(Gadget gadget, MutableContent mutableContent) {
     try {
-      Element head = (Element)DomUtil.getFirstNamedChildNode(
-          mutableContent.getDocument().getDocumentElement(), "head");
+      Document document = mutableContent.getDocument();
 
-      // Remove all the elements currently in head and add them back after we inject content
-      List<Node> existingHeadContent = Lists.newArrayList();
-      NodeList children = head.getChildNodes();
-      for (int i = 0; i < children.getLength(); i++) {
-        existingHeadContent.add(children.item(i));
-      }
-      for (Node n : existingHeadContent) {
-        head.removeChild(n);
-      }
+      Element head = (Element)DomUtil.getFirstNamedChildNode(document.getDocumentElement(), "head");
 
-      Element defaultStyle = head.getOwnerDocument().createElement("style");
-      defaultStyle.setAttribute("type", "text/css");
-      head.appendChild(defaultStyle);
-      defaultStyle.appendChild(defaultStyle.getOwnerDocument().
-          createTextNode(DEFAULT_HEAD_CONTENT));
+      // Only inject default styles if no doctype was specified.
+      if (document.getDoctype() == null) {
+        Element defaultStyle = document.createElement("style");
+        defaultStyle.setAttribute("type", "text/css");
+        head.appendChild(defaultStyle);
+        defaultStyle.appendChild(defaultStyle.getOwnerDocument().
+            createTextNode(DEFAULT_CSS));
+      }
 
       injectBaseTag(gadget, head);
       injectFeatureLibraries(gadget, head);
 
       // This can be one script block.
-      Element mainScriptTag = head.getOwnerDocument().createElement("script");
+      Element mainScriptTag = document.createElement("script");
       injectMessageBundles(gadget, mainScriptTag);
       injectDefaultPrefs(gadget, mainScriptTag);
       injectPreloads(gadget, mainScriptTag);
-      head.appendChild(mainScriptTag);
 
-      Element body = (Element)DomUtil.getFirstNamedChildNode(
-          mutableContent.getDocument().getDocumentElement(), "body");
-      
+      // We need to inject our script before any developer scripts.
+      head.insertBefore(mainScriptTag, DomUtil.getFirstNamedChildNode(head, "script"));
+
+      Element body = (Element)DomUtil.getFirstNamedChildNode(document.getDocumentElement(), "body");
+
       LocaleSpec localeSpec = gadget.getLocale();
       if (localeSpec != null) {
         body.setAttribute("dir", localeSpec.getLanguageDirection());
@@ -159,11 +152,7 @@ public class RenderingContentRewriter implements ContentRewriter {
 
       injectOnLoadHandlers(body);
 
-      for (Node n : existingHeadContent) {
-        head.appendChild(n);
-      }
-
-      MutableContent.notifyEdit(mutableContent.getDocument());
+      mutableContent.documentChanged();
       return RewriterResults.notCacheable();
     } catch (GadgetException e) {
       // TODO: Rewriter interface needs to be modified to handle GadgetException or
@@ -182,7 +171,7 @@ public class RenderingContentRewriter implements ContentRewriter {
       }
       Element baseTag = headTag.getOwnerDocument().createElement("base");
       baseTag.setAttribute("href", base.toString());
-      headTag.appendChild(baseTag);
+      headTag.insertBefore(baseTag, headTag.getFirstChild());
     }
   }
 
