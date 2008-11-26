@@ -95,7 +95,7 @@ public class XStream081Configuration implements XStreamConfiguration {
     // the xstream namespace implementation does not work exactly how we need it to.
     NamespaceSet atom = new NamespaceSet();
     atom.addNamespace("xmlns", ATOM_NS);
-    atom.addNamespace("xmlos:osearch",OSEARCH_NS);
+    atom.addNamespace("xmlns:osearch",OSEARCH_NS);
     atom.addPrefixedElement("totalResults","osearch:totalResults");
     atom.addPrefixedElement("startIndex","osearch:startIndex");
     atom.addPrefixedElement("itemsPerPage","osearch:itemsPerPage");
