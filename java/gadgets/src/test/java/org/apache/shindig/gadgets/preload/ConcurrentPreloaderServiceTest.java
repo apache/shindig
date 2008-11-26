@@ -18,9 +18,9 @@
 package org.apache.shindig.gadgets.preload;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import org.apache.shindig.common.testing.TestExecutorService;
 import org.apache.shindig.gadgets.GadgetContext;
@@ -99,20 +99,19 @@ public class ConcurrentPreloaderServiceTest {
 
     service.preload(null, null);
 
-    TestPreloadCallable first = (TestPreloadCallable)preloader.tasks.get(PRELOAD_STRING_KEY);
-    TestPreloadCallable second = (TestPreloadCallable)preloader.tasks.get(PRELOAD_NUMERIC_KEY);
-    TestPreloadCallable third = (TestPreloadCallable)preloader.tasks.get(PRELOAD_MAP_KEY);
+    TestPreloadCallable ranInSameThread = null;
+    for (Callable<PreloadedData> callable : preloader.tasks.values()) {
+      TestPreloadCallable preloadCallable = (TestPreloadCallable)callable;
+      if (ranInSameThread != null) {
+        fail("More than one request ran in the current thread.");
+      }
 
-    assertFalse("Multiple preloads executed in the same thread",
-        first.executedThread == second.executedThread ||
-        first.executedThread == third.executedThread ||
-        second.executedThread == third.executedThread);
+      if (preloadCallable.executedThread == Thread.currentThread()) {
+        ranInSameThread = preloadCallable;
+      }
+    }
 
-    Thread current = Thread.currentThread();
-    assertTrue("No preloads executed in the current thread.",
-        current == first.executedThread ||
-        current == second.executedThread ||
-        current == third.executedThread);
+    assertNotNull("No preloads executed in the current thread. ", ranInSameThread);
   }
 
   @Test
@@ -125,10 +124,10 @@ public class ConcurrentPreloaderServiceTest {
 
     service.preload(null, null);
 
-    TestPreloadCallable first = (TestPreloadCallable)preloader.tasks.get(PRELOAD_STRING_KEY);
+    TestPreloadCallable callable = (TestPreloadCallable)preloader.tasks.get(PRELOAD_STRING_KEY);
 
     assertSame("Single request not run in current thread",
-        Thread.currentThread(), first.executedThread);
+        Thread.currentThread(), callable.executedThread);
   }
 
   @Test(expected = PreloadException.class)
