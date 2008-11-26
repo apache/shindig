@@ -58,6 +58,7 @@ public class HttpResponseTest extends TestCase {
   public void testGetEncoding() throws Exception {
     HttpResponse response = new HttpResponseBuilder()
         .addHeader("Content-Type", "text/plain; charset=TEST-CHARACTER-SET")
+        .setResponse(new byte[] {'j', 'u', 'n', 'k'})
         .create();
     assertEquals("TEST-CHARACTER-SET", response.getEncoding());
   }
@@ -65,6 +66,7 @@ public class HttpResponseTest extends TestCase {
   public void testGetEncodingQuotes() throws Exception {
     HttpResponse response = new HttpResponseBuilder()
         .addHeader("Content-Type", "text/plain; charset=\"TEST-CHARACTER-SET\"")
+        .setResponse(new byte[] {'j', 'u', 'n', 'k'})
         .create();
     assertEquals("TEST-CHARACTER-SET", response.getEncoding());
   }
@@ -124,8 +126,7 @@ public class HttpResponseTest extends TestCase {
      HttpResponse response = new HttpResponseBuilder()
         .setResponse(LATIN1_DATA)
         .create();
-    assertEquals("ISO-8859-1", response.getEncoding().toUpperCase());
-    assertEquals(LATIN1_STRING, response.getResponseAsString());
+    assertEquals(HttpResponse.DEFAULT_ENCODING, response.getEncoding());
   }
 
   public void testGetEncodingForImageContentType() throws Exception {

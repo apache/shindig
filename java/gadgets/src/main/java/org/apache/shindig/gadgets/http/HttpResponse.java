@@ -18,14 +18,13 @@
 package org.apache.shindig.gadgets.http;
 
 import org.apache.shindig.common.util.DateUtil;
+import org.apache.shindig.gadgets.encoding.EncodingDetector;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
-import com.ibm.icu.text.CharsetDetector;
-import com.ibm.icu.text.CharsetMatch;
 
 import java.io.ByteArrayInputStream;
 import java.io.Externalizable;
@@ -119,11 +118,14 @@ public final class HttpResponse implements Externalizable {
 
   static final String DEFAULT_ENCODING = "UTF-8";
 
-  @Inject @Named("shindig.cache.http.negativeCacheTtl")
+  @Inject(optional = true) @Named("shindig.cache.http.negativeCacheTtl")
   private static long negativeCacheTtl = DEFAULT_NEGATIVE_CACHE_TTL;
 
-  @Inject @Named("shindig.cache.http.defaultTtl")
+  @Inject(optional = true) @Named("shindig.cache.http.defaultTtl")
   private static long defaultTtl = DEFAULT_TTL;
+
+  @Inject(optional = true) @Named("shindig.http.fast-encoding-detection")
+  private static boolean fastEncodingDetection = true;
 
   // Holds character sets for fast conversion
   private static final Map<String, Charset> encodingToCharset = Maps.newConcurrentHashMap();
@@ -412,6 +414,10 @@ public final class HttpResponse implements Externalizable {
    * @return The detected encoding or DEFAULT_ENCODING.
    */
   private static String getAndUpdateEncoding(Map<String, List<String>> headers, byte[] body) {
+    if (body == null || body.length == 0) {
+      return DEFAULT_ENCODING;
+    }
+
     List<String> values = headers.get("Content-Type");
     String contentType = values == null ? null : values.isEmpty() ? null : values.get(0);
     if (contentType != null) {
@@ -431,24 +437,16 @@ public final class HttpResponse implements Externalizable {
           return charset;
         }
       }
-    }
-
-    if (body == null || body.length == 0) {
-      return DEFAULT_ENCODING;
-    }
-
-    // If the header doesn't specify the charset, try to determine it by examining the content.
-    CharsetDetector detector = new CharsetDetector();
-    detector.setText(body);
-    CharsetMatch match = detector.detect();
-
-    if (contentType != null) {
+      String encoding = EncodingDetector.detectEncoding(body, fastEncodingDetection);
       // Record the charset in the content-type header so that its value can be cached
       // and re-used. This is a BIG performance win.
-      headers.put("Content-Type",
-          Lists.newArrayList(contentType + "; charset=" + match.getName().toUpperCase()));
+      headers.put("Content-Type", Lists.newArrayList(contentType + "; charset=" + encoding));
+      return encoding;
+    } else {
+      // If no content type was specified, we'll assume an unknown binary type.
+      contentType = "application/octet-stream";
+      return DEFAULT_ENCODING;
     }
-    return match.getName().toUpperCase();
   }
 
   @Override
