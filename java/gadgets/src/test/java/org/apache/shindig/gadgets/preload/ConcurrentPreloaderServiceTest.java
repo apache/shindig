@@ -18,6 +18,9 @@
 package org.apache.shindig.gadgets.preload;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertTrue;
 
 import org.apache.shindig.common.testing.TestExecutorService;
 import org.apache.shindig.gadgets.GadgetContext;
@@ -30,6 +33,7 @@ import org.junit.Test;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.concurrent.Callable;
+import java.util.concurrent.Executors;
 
 /**
  * Tests for FuturePreloaderService.
@@ -79,6 +83,54 @@ public class ConcurrentPreloaderServiceTest {
     assertEquals(PRELOAD_MAP_VALUE, preloads.getData(PRELOAD_MAP_KEY).toJson());
   }
 
+  @Test
+  public void multiplePreloadsFiresJustOneInCurrentThread() throws Exception {
+    preloader.tasks.put(PRELOAD_STRING_KEY,
+        new TestPreloadCallable(new DataPreload(PRELOAD_STRING_VALUE)));
+
+    preloader.tasks.put(PRELOAD_NUMERIC_KEY,
+        new TestPreloadCallable(new DataPreload(PRELOAD_MAP_VALUE)));
+
+    preloader.tasks.put(PRELOAD_MAP_KEY,
+        new TestPreloadCallable(new DataPreload(PRELOAD_NUMERIC_VALUE)));
+
+    PreloaderService service = new ConcurrentPreloaderService(Executors.newFixedThreadPool(5),
+        Arrays.<Preloader>asList(preloader));
+
+    service.preload(null, null);
+
+    TestPreloadCallable first = (TestPreloadCallable)preloader.tasks.get(PRELOAD_STRING_KEY);
+    TestPreloadCallable second = (TestPreloadCallable)preloader.tasks.get(PRELOAD_NUMERIC_KEY);
+    TestPreloadCallable third = (TestPreloadCallable)preloader.tasks.get(PRELOAD_MAP_KEY);
+
+    assertFalse("Multiple preloads executed in the same thread",
+        first.executedThread == second.executedThread ||
+        first.executedThread == third.executedThread ||
+        second.executedThread == third.executedThread);
+
+    Thread current = Thread.currentThread();
+    assertTrue("No preloads executed in the current thread.",
+        current == first.executedThread ||
+        current == second.executedThread ||
+        current == third.executedThread);
+  }
+
+  @Test
+  public void singlePreloadExecutesInCurrentThread() throws Exception {
+    preloader.tasks.put(PRELOAD_STRING_KEY,
+        new TestPreloadCallable(new DataPreload(PRELOAD_STRING_VALUE)));
+
+    PreloaderService service = new ConcurrentPreloaderService(Executors.newCachedThreadPool(),
+        Arrays.<Preloader>asList(preloader));
+
+    service.preload(null, null);
+
+    TestPreloadCallable first = (TestPreloadCallable)preloader.tasks.get(PRELOAD_STRING_KEY);
+
+    assertSame("Single request not run in current thread",
+        Thread.currentThread(), first.executedThread);
+  }
+
   @Test(expected = PreloadException.class)
   public void exceptionsArePropagated() throws PreloadException {
     preloader.tasks.put(PRELOAD_STRING_KEY, new TestPreloadCallable(null));
@@ -98,12 +150,14 @@ public class ConcurrentPreloaderServiceTest {
 
   private static class TestPreloadCallable implements Callable<PreloadedData> {
     private final PreloadedData preload;
+    public Thread executedThread;
 
     public TestPreloadCallable(PreloadedData preload) {
       this.preload = preload;
     }
 
     public PreloadedData call() throws Exception {
+      executedThread = Thread.currentThread();
       if (preload == null) {
         throw new PreloadException("No preload for this test.");
       }

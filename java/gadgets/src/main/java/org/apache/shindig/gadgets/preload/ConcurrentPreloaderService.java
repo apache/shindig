@@ -20,16 +20,21 @@ package org.apache.shindig.gadgets.preload;
 import org.apache.shindig.gadgets.GadgetContext;
 import org.apache.shindig.gadgets.spec.GadgetSpec;
 
+import com.google.common.collect.Maps;
 import com.google.inject.Inject;
 
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.FutureTask;
 
 /**
  * Preloads will be fetched concurrently using the injected ExecutorService, and they can be read
  * lazily using the returned map of futures.
+ *
+ * The last preloaded object always executes in the current thread to avoid creating unnecessary
+ * additional threads when we're blocking the current request anyway.
  */
 public class ConcurrentPreloaderService implements PreloaderService {
   private final ExecutorService executor;
@@ -43,9 +48,20 @@ public class ConcurrentPreloaderService implements PreloaderService {
 
   public Preloads preload(GadgetContext context, GadgetSpec gadget) {
     ConcurrentPreloads preloads = new ConcurrentPreloads();
+    Map<String, Callable<PreloadedData>> tasks = Maps.newHashMap();
     for (Preloader preloader : preloaders) {
-      Map<String, Callable<PreloadedData>> tasks = preloader.createPreloadTasks(context, gadget);
-      for (Map.Entry<String, Callable<PreloadedData>> entry : tasks.entrySet()) {
+      tasks.putAll(preloader.createPreloadTasks(context, gadget));
+    }
+
+    int processed = tasks.size();
+    for (Map.Entry<String, Callable<PreloadedData>> entry : tasks.entrySet()) {
+      processed -= 1;
+      if (processed == 0) {
+        // The last preload fires in the current thread.
+        FutureTask<PreloadedData> futureTask = new FutureTask<PreloadedData>(entry.getValue());
+        futureTask.run();
+        preloads.add(entry.getKey(), futureTask);
+      } else {
         preloads.add(entry.getKey(), executor.submit(entry.getValue()));
       }
     }
