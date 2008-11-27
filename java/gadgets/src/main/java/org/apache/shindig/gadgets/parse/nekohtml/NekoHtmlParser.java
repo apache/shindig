@@ -23,9 +23,6 @@ import org.apache.shindig.gadgets.parse.HtmlSerializer;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-
-import org.apache.xml.serialize.HTMLSerializer;
-import org.apache.xml.serialize.OutputFormat;
 import org.cyberneko.html.parsers.DOMFragmentParser;
 import org.cyberneko.html.parsers.DOMParser;
 import org.w3c.dom.DOMImplementation;
@@ -36,15 +33,11 @@ import org.xml.sax.SAXException;
 
 import java.io.IOException;
 import java.io.StringReader;
-import java.io.StringWriter;
 
 /**
- * Parser that uses the NekoHtml parser.
+ * Parser that uses the NekoHtml parser and produces an un-abridged DOM
  *
- * TODO:
- * Currently this code uses the ParsedXXX wrapper types so we can share abstraction
- * with Caja. This is probably unnecessary overhead and we would prefer that Caja
- * implements up to org.w3c.dom (or perhaps the Caja wrapper types should?)
+ * TODO: Create a reusable instance in ThreadLocal
  */
 @Singleton
 public class NekoHtmlParser extends GadgetHtmlParser {
@@ -60,7 +53,7 @@ public class NekoHtmlParser extends GadgetHtmlParser {
   public Document parseDomImpl(String source) throws GadgetException {
     try {
       Document document = parseFragment(source);
-      HtmlSerializer.attach(document, new Serializer(), source);
+      HtmlSerializer.attach(document, new NekoSerializer(), source);
       return document;
     } catch (Exception e) {
       throw new GadgetException(GadgetException.Code.HTML_PARSE_ERROR, e);
@@ -71,40 +64,35 @@ public class NekoHtmlParser extends GadgetHtmlParser {
     InputSource input = new InputSource(new StringReader(source));
     if (attemptFullDocParseFirst(source)) {
       DOMParser parser = new DOMParser();
-      // Force parser not to use HTMLDocumentImpl as document implementation
-      parser.setProperty("http://apache.org/xml/properties/dom/document-class-name", null);
+      // Force parser not to use HTMLDocumentImpl as document implementation otherwise
+      // it forces all element names to uppercase.
+      parser.setProperty("http://apache.org/xml/properties/dom/document-class-name",
+          "org.apache.xerces.dom.DocumentImpl");
+      // Dont convert element names to upper/lowercase
       parser.setProperty("http://cyberneko.org/html/properties/names/elems", "default");
+      // Preserve case of attributes
+      parser.setProperty("http://cyberneko.org/html/properties/names/attrs", "no-change");
+      // Record entity references
+      parser.setFeature("http://apache.org/xml/features/scanner/notify-char-refs", true);
+      parser.setFeature("http://cyberneko.org/html/features/scanner/notify-builtin-refs", true);
+      // No need to defer as full DOM is walked later
+      parser.setFeature("http://apache.org/xml/features/dom/defer-node-expansion", false);
       parser.parse(input);
       return parser.getDocument();
     } else {
       Document htmlDoc = documentProvider.createDocument(null, null, null);
+      // Workaround for error check failure adding text node to entity ref as a child
+      htmlDoc.setStrictErrorChecking(false);
       DOMFragmentParser parser = new DOMFragmentParser();
       parser.setProperty("http://cyberneko.org/html/properties/names/elems", "default");
       parser.setFeature("http://cyberneko.org/html/features/document-fragment", true);
+      parser.setProperty("http://cyberneko.org/html/properties/names/attrs", "no-change");
+      parser.setFeature("http://apache.org/xml/features/scanner/notify-char-refs", true);
+      parser.setFeature("http://cyberneko.org/html/features/scanner/notify-builtin-refs", true);
       DocumentFragment fragment = htmlDoc.createDocumentFragment();
       parser.parse(input, fragment);
       normalizeFragment(htmlDoc, fragment);
       return htmlDoc;
-    }
-  }
-
-  static class Serializer extends HtmlSerializer {
-
-    public String serializeImpl(Document doc) {
-      OutputFormat outputFormat = new OutputFormat();
-      outputFormat.setPreserveSpace(true);
-      outputFormat.setPreserveEmptyAttributes(false);
-      if (doc.getDoctype() == null) {
-        outputFormat.setOmitDocumentType(true);
-      }
-      StringWriter sw = createWriter(doc);
-      HTMLSerializer serializer = new HTMLSerializer(sw, outputFormat);
-      try {
-        serializer.serialize(doc);
-        return sw.toString();
-      } catch (IOException ioe) {
-        return null;
-      }
     }
   }
 }

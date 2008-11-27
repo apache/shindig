@@ -18,32 +18,18 @@
  */
 package org.apache.shindig.gadgets.render;
 
-import static org.apache.shindig.gadgets.render.RenderingContentRewriter.DEFAULT_CSS;
-import static org.apache.shindig.gadgets.render.RenderingContentRewriter.FEATURES_KEY;
-import static org.apache.shindig.gadgets.render.RenderingContentRewriter.INSERT_BASE_ELEMENT_KEY;
-import static org.easymock.EasyMock.expect;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-
 import org.apache.shindig.common.ContainerConfig;
 import org.apache.shindig.common.PropertiesModule;
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.common.xml.XmlUtil;
-import org.apache.shindig.gadgets.Gadget;
-import org.apache.shindig.gadgets.GadgetContext;
-import org.apache.shindig.gadgets.GadgetException;
-import org.apache.shindig.gadgets.GadgetFeature;
-import org.apache.shindig.gadgets.GadgetFeatureRegistry;
-import org.apache.shindig.gadgets.JsLibrary;
-import org.apache.shindig.gadgets.MessageBundleFactory;
-import org.apache.shindig.gadgets.UrlGenerator;
+import org.apache.shindig.gadgets.*;
 import org.apache.shindig.gadgets.parse.GadgetHtmlParser;
 import org.apache.shindig.gadgets.parse.ParseModule;
 import org.apache.shindig.gadgets.preload.NullPreloads;
 import org.apache.shindig.gadgets.preload.PreloadException;
 import org.apache.shindig.gadgets.preload.PreloadedData;
 import org.apache.shindig.gadgets.preload.Preloads;
+import static org.apache.shindig.gadgets.render.RenderingContentRewriter.*;
 import org.apache.shindig.gadgets.rewrite.MutableContent;
 import org.apache.shindig.gadgets.spec.GadgetSpec;
 import org.apache.shindig.gadgets.spec.LocaleSpec;
@@ -56,21 +42,16 @@ import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
-
+import static org.easymock.EasyMock.expect;
 import org.easymock.classextension.EasyMock;
 import org.easymock.classextension.IMocksControl;
 import org.json.JSONException;
 import org.json.JSONObject;
+import static org.junit.Assert.*;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -150,7 +131,7 @@ public class RenderingContentRewriterTest {
 
   @Test
   public void completeDocument() throws Exception {
-    String docType = "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01 Transitional//EN\" \"http://www.w3.org/TR/html4/loose.dtd\">";
+    String docType = "<!DOCTYPE html PUBLIC \"-//W3C//DTD HTML 4.01 Transitional//EN\" \"http://www.w3.org/TR/html4/loose.dtd\">";
     String head = "<script src=\"foo.js\"></script><style type=\"text/css\">body{color:red;}</style>";
     String bodyAttr = " onload=\"foo();\"";
     String body = "hello, world.";
