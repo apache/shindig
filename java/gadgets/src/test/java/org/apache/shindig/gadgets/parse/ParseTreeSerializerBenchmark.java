@@ -69,14 +69,14 @@ public class ParseTreeSerializerBenchmark {
     this.numRuns = 10;
     warmup = true;
     //runCaja();
-    //runNeko();
+    runNeko();
     runNekoSimple();
     //Sleep to let JIT kick in
     Thread.sleep(10000L);
-    this.numRuns = 50; //numRuns;
+    this.numRuns = numRuns;
     warmup = false;
     //runCaja();
-    //runNeko();
+    runNeko();
     runNekoSimple();
   }
 

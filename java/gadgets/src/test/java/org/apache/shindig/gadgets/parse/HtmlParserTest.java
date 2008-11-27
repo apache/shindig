@@ -20,10 +20,9 @@ package org.apache.shindig.gadgets.parse;
 import org.apache.shindig.gadgets.parse.nekohtml.NekoHtmlParser;
 import org.apache.shindig.gadgets.rewrite.XPathWrapper;
 
+import junit.framework.TestCase;
 import org.w3c.dom.Document;
 import org.w3c.dom.NodeList;
-
-import junit.framework.TestCase;
 
 /**
  * Note these tests are of marginal use. Consider removing. More useful tests would exercise
@@ -65,19 +64,9 @@ public class HtmlParserTest extends TestCase {
     assertEquals("foo", wrapper.getValue("/html/body/div/@id"));
   }
 
-  public void testParseStringUnescapesProperly() throws Exception {
-    parseStringUnescapesProperly(nekoParser);
-  }
-
-  void parseStringUnescapesProperly(GadgetHtmlParser htmlParser) throws Exception {
-    Document doc = htmlParser.parseDom("&lt;content&amp;&apos;chrome&apos;&gt;");
-    XPathWrapper wrapper = new XPathWrapper(doc);
-    assertEquals("<content&'chrome'>", wrapper.getValue("/html/body"));
-  }
-
   public void testParseNestedContentWithNoCloseForBrAndHr() throws Exception {
     parseNestedContentWithNoCloseForBrAndHr(nekoParser);
-  }
+  }                     
 
   void parseNestedContentWithNoCloseForBrAndHr(GadgetHtmlParser htmlParser) throws Exception {
     Document doc = htmlParser.parseDom("<div>x and y<br> and <hr>z</div>");

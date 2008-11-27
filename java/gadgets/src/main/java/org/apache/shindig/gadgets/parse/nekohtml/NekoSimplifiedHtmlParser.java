@@ -19,38 +19,21 @@ package org.apache.shindig.gadgets.parse.nekohtml;
 
 import org.apache.shindig.gadgets.parse.GadgetHtmlParser;
 import org.apache.shindig.gadgets.parse.HtmlSerializer;
+import org.apache.xerces.xni.*;
+import org.apache.xerces.xni.parser.XMLDocumentSource;
+import org.apache.xerces.xni.parser.XMLInputSource;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-
-import org.apache.xerces.xni.Augmentations;
-import org.apache.xerces.xni.NamespaceContext;
-import org.apache.xerces.xni.QName;
-import org.apache.xerces.xni.XMLAttributes;
-import org.apache.xerces.xni.XMLDocumentHandler;
-import org.apache.xerces.xni.XMLLocator;
-import org.apache.xerces.xni.XMLResourceIdentifier;
-import org.apache.xerces.xni.XMLString;
-import org.apache.xerces.xni.XNIException;
-import org.apache.xerces.xni.parser.XMLDocumentSource;
-import org.apache.xerces.xni.parser.XMLInputSource;
-import org.apache.xml.serialize.HTMLSerializer;
-import org.apache.xml.serialize.OutputFormat;
 import org.cyberneko.html.HTMLConfiguration;
-import org.cyberneko.html.HTMLElements;
 import org.cyberneko.html.HTMLEntities;
 import org.cyberneko.html.HTMLScanner;
 import org.cyberneko.html.HTMLTagBalancer;
-import org.w3c.dom.DOMImplementation;
-import org.w3c.dom.Document;
-import org.w3c.dom.DocumentFragment;
-import org.w3c.dom.Element;
-import org.w3c.dom.Node;
+import org.w3c.dom.*;
 
 import java.io.IOException;
 import java.io.StringReader;
-import java.io.StringWriter;
 import java.util.Set;
 import java.util.Stack;
 
@@ -58,6 +41,8 @@ import java.util.Stack;
  * Neko based DOM parser that concatentates elements which we dont care about into
  * text nodes to keep DOM model simplified. Much of this code is based on
  * org.cyberneko.html.filters.Writer
+ *
+ * TODO: Create a reusable instance in ThreadLocal
  */
 @Singleton
 public class NekoSimplifiedHtmlParser extends GadgetHtmlParser {
@@ -80,8 +65,14 @@ public class NekoSimplifiedHtmlParser extends GadgetHtmlParser {
     htmlScanner.setDocumentHandler(tagBalancer);
 
     HTMLConfiguration config = new HTMLConfiguration();
+    // Maintain original case for elements and attributes
     config.setProperty("http://cyberneko.org/html/properties/names/elems", "match");
+    config.setProperty("http://cyberneko.org/html/properties/names/attrs", "no-change");
+    // Parse as fragment.
     config.setFeature("http://cyberneko.org/html/features/balance-tags/document-fragment", true);
+    // Get notified of entity and character references
+    config.setFeature("http://apache.org/xml/features/scanner/notify-char-refs", true);
+    config.setFeature("http://cyberneko.org/html/features/scanner/notify-builtin-refs", true);
     tagBalancer.reset(config);
     htmlScanner.reset(config);
     XMLInputSource inputSource = new XMLInputSource(null, null, null);
@@ -93,7 +84,7 @@ public class NekoSimplifiedHtmlParser extends GadgetHtmlParser {
       Document document = handler.getDocument();
       DocumentFragment fragment = handler.getFragment();
       normalizeFragment(document, fragment);
-      HtmlSerializer.attach(document, new Serializer(), source);
+      HtmlSerializer.attach(document, new NekoSerializer(), source);
       return document;
     } catch (IOException ioe) {
       return null;
@@ -106,6 +97,7 @@ public class NekoSimplifiedHtmlParser extends GadgetHtmlParser {
   private class DocumentHandler implements XMLDocumentHandler {
     private final Stack<Node> elementStack = new Stack<Node>();
     private final StringBuilder builder;
+    private boolean inEntity = false;
 
 
     private DocumentFragment documentFragment;
@@ -242,6 +234,7 @@ public class NekoSimplifiedHtmlParser extends GadgetHtmlParser {
         }
       }
       printEntity(name);
+      inEntity = true;
     }
 
     private void printEntity(String name) {
@@ -255,27 +248,14 @@ public class NekoSimplifiedHtmlParser extends GadgetHtmlParser {
     }
 
     public void endGeneralEntity(String s, Augmentations augs) throws XNIException {
-      // No-op
+      inEntity = false;
     }
 
     public void characters(XMLString text, Augmentations augs) throws XNIException {
-      if (HTMLElements.getElement(elementStack.peek().getNodeName()).isSpecial()) {
-        builder.append(text.ch, text.offset, text.length);
-      } else {
-        for (int i = 0; i < text.length; i++) {
-          char c = text.ch[text.offset + i];
-          if (c != '\n') {
-            String entity = HTMLEntities.get(c);
-            if (entity != null) {
-              printEntity(entity);
-            } else {
-              builder.append(c);
-            }
-          } else {
-            builder.append("\n");
-          }
-        }
+      if (inEntity) {
+        return;
       }
+      builder.append(text.ch, text.offset, text.length);
     }
 
     public void ignorableWhitespace(XMLString text, Augmentations augs) throws XNIException {
@@ -317,34 +297,4 @@ public class NekoSimplifiedHtmlParser extends GadgetHtmlParser {
       return null;
     }
   }
-
-  static class Serializer extends HtmlSerializer {
-
-    @Override
-    public String serializeImpl(Document doc) {
-      OutputFormat outputFormat = new OutputFormat();
-      outputFormat.setPreserveSpace(true);
-      outputFormat.setPreserveEmptyAttributes(false);
-      if (doc.getDoctype() == null) {
-        outputFormat.setOmitDocumentType(true);
-      }
-      StringWriter sw = createWriter(doc);
-      HTMLSerializer serializer = new HTMLSerializer(sw, outputFormat) {
-        // Overridden to prevent escaping of literal text
-        @Override
-        protected void characters(String s) throws IOException {
-          this.content();
-          this._printer.printText(s);
-        }
-      };
-
-      try {
-        serializer.serialize(doc);
-        return sw.toString();
-      } catch (IOException ioe) {
-        return null;
-      }
-    }
-  }
-
 }
