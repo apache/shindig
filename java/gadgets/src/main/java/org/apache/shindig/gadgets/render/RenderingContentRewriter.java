@@ -218,7 +218,6 @@ public class RenderingContentRewriter implements ContentRewriter {
       forced = Sets.newHashSet(forcedLibs.split(":"));
     }
 
-
     // Forced libs are always done first.
     if (!forced.isEmpty()) {
       String jsUrl = urlGenerator.getBundledJsUrl(forced, context);
@@ -227,6 +226,8 @@ public class RenderingContentRewriter implements ContentRewriter {
       headTag.appendChild(libsTag);
 
       // Forced transitive deps need to be added as well so that they don't get pulled in twice.
+      // Without this, a shared dependency between forced and non-forced libs would get pulled into
+      // both the external forced script and the inlined script.
       // TODO: Figure out a clean way to avoid having to call getFeatures twice.
       for (GadgetFeature dep : featureRegistry.getFeatures(forced)) {
         forced.add(dep.getName());

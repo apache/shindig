@@ -27,9 +27,11 @@ import com.google.inject.name.Named;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.logging.Logger;
 
 /**
@@ -46,8 +48,7 @@ public class GadgetFeatureRegistry {
   private final Map<String, GadgetFeature> core;
 
   // Caches the transitive dependencies to enable faster lookups.
-  private final Map<Collection<String>, Collection<GadgetFeature>> cache
-      = Maps.newConcurrentHashMap();
+  final Map<Set<String>, Collection<GadgetFeature>> cache = Maps.newConcurrentHashMap();
 
   private boolean graphComplete = false;
 
@@ -125,27 +126,33 @@ public class GadgetFeatureRegistry {
   public Collection<GadgetFeature> getFeatures(Collection<String> needed,
                                                Collection<String> unsupported) {
     graphComplete = true;
+
+    Set<String> neededSet;
     if (needed.isEmpty()) {
-      needed = core.keySet();
+      neededSet = core.keySet();
+    } else {
+      neededSet = new HashSet<String>(needed);
     }
+
     // We use the cache only for situations where all needed are available.
     // if any are missing, the result won't be cached.
-    Collection<GadgetFeature> libCache = cache.get(needed);
+    Collection<GadgetFeature> libCache = cache.get(neededSet);
     if (libCache != null) {
       return libCache;
     }
     List<GadgetFeature> ret = new LinkedList<GadgetFeature>();
-    populateDependencies(needed, ret);
+    populateDependencies(neededSet, ret);
     // Fill in anything that was optional but missing. These won't be cached.
     if (unsupported != null) {
-      for (String feature : needed) {
+      for (String feature : neededSet) {
         if (!features.containsKey(feature)) {
           unsupported.add(feature);
         }
       }
     }
     if (unsupported == null || unsupported.isEmpty()) {
-      cache.put(needed, Collections.unmodifiableList(ret));
+      cache.put(neededSet, Collections.unmodifiableList(ret));
+      logger.info("Added to cache. Size is now: " + cache.size());
     }
     return ret;
   }
