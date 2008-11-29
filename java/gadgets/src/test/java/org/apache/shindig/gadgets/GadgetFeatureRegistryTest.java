@@ -20,7 +20,13 @@
 package org.apache.shindig.gadgets;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
+
+import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
+
+import edu.emory.mathcs.backport.java.util.Collections;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -87,6 +93,33 @@ public class GadgetFeatureRegistryTest {
     registry.getFeatures(Arrays.asList(FEATURE_NAME, "FAKE FAKE FAKE"),
                          unsupported);
     assertEquals("FAKE FAKE FAKE", unsupported.get(0));
+  }
+
+  @Test
+  @SuppressWarnings("unchecked")
+  public void getFeaturesUsesCache() throws GadgetException {
+    registry.register(makeFeature(DEP_NAME, DEP_CONTENT, null));
+    registry.register(makeFeature("feat0", CONTENT, DEP_NAME));
+    registry.register(makeFeature("feat1", CONTENT, DEP_NAME));
+
+    Set<String> setKeys = Sets.immutableSortedSet("feat0", "feat1");
+    List<String> listKeys = Lists.newLinkedList("feat0", "feat1");
+    Collection<String> collectKeys
+        = Collections.unmodifiableCollection(Lists.newArrayList("feat0", "feat1"));
+
+    // Fill the cache.
+    assertEquals(0, registry.cache.size());
+    registry.getFeatures(collectKeys);
+    assertEquals(1, registry.cache.size());
+
+    Collection<GadgetFeature> setFeatures = registry.getFeatures(setKeys);
+    assertEquals(1, registry.cache.size());
+    Collection<GadgetFeature> listFeatures = registry.getFeatures(listKeys);
+    assertEquals(1, registry.cache.size());
+    Collection<GadgetFeature> collectFeatures = registry.getFeatures(collectKeys);
+    assertEquals(1, registry.cache.size());
+    assertSame(listFeatures, collectFeatures);
+    assertSame(setFeatures, listFeatures);
   }
 
   @Test
