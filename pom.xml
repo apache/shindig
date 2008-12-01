@@ -56,8 +56,8 @@
   </issueManagement>
 
   <ciManagement>
-    <system>CruiseControl</system>
-    <url>http://shindig-ci.bigr2.info:8080/dashboard/tab/dashboard</url>
+    <system>Hudson</system>
+    <url>http://hudson.zones.apache.org/hudson/job/Shindig/</url>
   </ciManagement>
 
   <!-- ====================================================================== -->
