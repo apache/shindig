@@ -313,6 +313,14 @@
         <module>java/common</module>
       </modules>
     </profile>
+    
+    <!-- profile to build java/samples -->
+    <profile>
+      <id>samples</id>
+      <modules>
+        <module>java/samples</module>
+      </modules>
+    </profile>
 
     <profile>
       <id>run</id>
