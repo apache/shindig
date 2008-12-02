@@ -17,25 +17,18 @@
  */
 package org.apache.shindig.gadgets.parse.caja;
 
-import com.google.caja.lexer.CharProducer;
-import com.google.caja.lexer.CssLexer;
-import com.google.caja.lexer.CssTokenType;
-import com.google.caja.lexer.InputSource;
-import com.google.caja.lexer.ParseException;
-import com.google.caja.lexer.Token;
-import com.google.caja.lexer.TokenConsumer;
-import com.google.caja.lexer.TokenQueue;
+import org.apache.shindig.gadgets.GadgetException;
+import org.apache.shindig.gadgets.parse.GadgetCssParser;
+import org.apache.shindig.gadgets.parse.ParsedCssDeclaration;
+import org.apache.shindig.gadgets.parse.ParsedCssRule;
+
+import com.google.caja.lexer.*;
 import com.google.caja.parser.css.CssParser;
 import com.google.caja.parser.css.CssTree;
 import com.google.caja.reporting.MessageContext;
 import com.google.caja.reporting.RenderContext;
 import com.google.caja.util.Criterion;
 import com.google.inject.Singleton;
-
-import org.apache.shindig.gadgets.GadgetException;
-import org.apache.shindig.gadgets.parse.GadgetCssParser;
-import org.apache.shindig.gadgets.parse.ParsedCssDeclaration;
-import org.apache.shindig.gadgets.parse.ParsedCssRule;
 
 import java.io.StringReader;
 import java.net.URI;
@@ -163,7 +156,7 @@ public class CajaCssParser implements GadgetCssParser {
     private final String value;
     
     private CajaParsedCssDeclaration(CssTree.Declaration declaration) {
-      key = declaration.getProperty().getPropertyName();
+      key = declaration.getProperty().getPropertyName().getCanonicalForm();
       value = renderCssTreeElement(declaration.getExpr());
     }
     

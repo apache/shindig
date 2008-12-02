@@ -17,18 +17,20 @@
  */
 package org.apache.shindig.gadgets.parse.caja;
 
-import com.google.caja.lexer.*;
-import com.google.caja.parser.html.DomParser;
-import com.google.caja.parser.html.DomTree;
-import com.google.caja.reporting.MessageQueue;
-import com.google.caja.reporting.SimpleMessageQueue;
-import com.google.inject.Inject;
-import com.google.inject.Singleton;
 import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.parse.GadgetHtmlParser;
 import org.apache.shindig.gadgets.parse.HtmlSerializer;
 import org.apache.xml.serialize.HTMLSerializer;
 import org.apache.xml.serialize.OutputFormat;
+
+import com.google.caja.lexer.*;
+import com.google.caja.parser.html.DomParser;
+import com.google.caja.parser.html.DomTree;
+import com.google.caja.reporting.MessageQueue;
+import com.google.caja.reporting.SimpleMessageQueue;
+import com.google.caja.util.Name;
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
 import org.w3c.dom.*;
 
 import java.io.IOException;
@@ -95,7 +97,7 @@ public class CajaHtmlParser extends GadgetHtmlParser {
     // Check if doc contains an HTML node. If so just add it and recurse
     for (DomTree node : fragment.children()) {
       if (node instanceof DomTree.Tag &&
-          ((DomTree.Tag)node).getTagName().equalsIgnoreCase("HTML")) {
+          ((DomTree.Tag)node).getTagName().equals(Name.html("HTML"))) {
         recurseDocument(htmlDocument, htmlDocument, node);
         return htmlDocument;
       }
@@ -110,14 +112,14 @@ public class CajaHtmlParser extends GadgetHtmlParser {
   private static void recurseDocument(Document doc, Node parent, DomTree elem) {
     if (elem instanceof DomTree.Tag) {
       DomTree.Tag tag = (DomTree.Tag) elem;
-      Element element = doc.createElement(tag.getTagName());
+      Element element = doc.createElement(tag.getTagName().getCanonicalForm());
       parent.appendChild(element);
       for (DomTree child : elem.children()) {
         recurseDocument(doc, element, child);
       }
     } else if (elem instanceof DomTree.Attrib) {
       DomTree.Attrib attrib = (DomTree.Attrib) elem;
-      Attr domAttrib = doc.createAttribute(attrib.getAttribName());
+      Attr domAttrib = doc.createAttribute(attrib.getAttribName().getCanonicalForm());
       parent.getAttributes().setNamedItem(domAttrib);
       domAttrib.setValue(attrib.getAttribValue());
     } else if (elem instanceof DomTree.Text) {
