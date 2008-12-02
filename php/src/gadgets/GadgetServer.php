@@ -40,24 +40,43 @@ class GadgetServer {
     return $gadget;
   }
 
-  private function getBundle(LocaleSpec $localeSpec = null, $context) {
-    if ($localeSpec != null) {
-      $uri = $localeSpec->getURI();
-      if ($uri != null) {
-        $fetcher = $context->getHttpFetcher();
-        $response = $fetcher->fetch(new RemoteContentRequest($uri), $context);
-        $parser = new MessageBundleParser();
-        $bundle = $parser->parse($response->getResponseContent());
-        return $bundle;
-      } else {
-        $messages = array();
-        foreach ($localeSpec->getLocaleMessageBundles() as $messageBundle) {
-          $messages[$messageBundle->getName()] = $messageBundle->getDesc();
-        }
-        return new MessageBundle($messages);
+  private function getBundle($context, $gadget) {
+    $locale = $context->getLocale();
+    $localeSpec = $this->localeSpec($gadget, $locale); // en-US
+    $language_allSpec = $this->localeSpec($gadget, new Locale($locale->getLanguage(), "all")); // en-all
+    $all_allSpec = $this->localeSpec($gadget, new Locale("all", "all")); // all-all
+    $messagesArray = $this->getMessagesArrayForSpecs($context, array($localeSpec, $language_allSpec, $all_allSpec));
+    if (count($messagesArray) == 0) {
+      return null;
+    }
+    for ($i = 1; $i < count($messagesArray); ++ $i) {
+      $diff = array_diff_key($messagesArray[$i], $messagesArray[0]);
+      foreach ($diff as $diffKey => $diffValue) {
+        $messagesArray[0][$diffKey] = $diffValue;
       }
     }
-    return null;
+    return new MessageBundle($messagesArray[0]);
+  }
+
+  private function getMessagesArrayForSpecs($context, Array $specs) {
+    $requestArray = array();
+    $contextArray = array();
+    $messagesArray = array();
+    foreach ($specs as $spec) {
+      if ($spec == null) continue;
+      $uri = $spec->getURI();
+      if ($uri == null) continue;
+      $requestArray[] = new RemoteContentRequest($uri);
+      $contextArray[] = $context;
+    }
+    if (count($requestArray) == 0) return array();
+    $fetcher = $context->getHttpFetcher();
+    $responseArray = $fetcher->multiFetch($requestArray, $contextArray);
+    $parser = new MessageBundleParser();
+    foreach ($responseArray as $response) {
+      $messagesArray[] = $parser->parse($response->getResponseContent());
+    }
+    return $messagesArray;
   }
 
   private function localeSpec($gadget, $locale) {
@@ -71,53 +90,30 @@ class GadgetServer {
     return null;
   }
 
-  private function getLocaleSpec($gadget, $context) {
-    $locale = $context->getLocale();
-    // en-US
-    $localeSpec = $this->localeSpec($gadget, $locale);
-    if ($localeSpec == null) {
-      // en-all
-      $localeSpec = $this->localeSpec($gadget, new Locale($locale->getLanguage(), "all"));
-    }
-    if ($localeSpec == null) {
-      // all-all
-      $localeSpec = $this->localeSpec($gadget, new Locale("all", "all"));
-    }
-    return $localeSpec;
-  }
-
   private function featuresLoad(Gadget $gadget, $context) {
     //NOTE i've been a bit liberal here with folding code into this function, while it did get a bit long, the many include()'s are slowing us down
-    // Should really clean this up a bit in the future though
-    $localeSpec = $this->getLocaleSpec($gadget, $context);
-    
-    // get the message bundle for this gadget
-    $bundle = $this->getBundle($localeSpec, $context);
-    
+  	// get the message bundle for this gadget
+    $bundle = $this->getBundle($context, $gadget);
     //FIXME this is a half-assed solution between following the refactoring and maintaining some of the old code, fixing this up later
     $gadget->setMessageBundle($bundle);
-    
     // perform substitutions
     $substitutor = $gadget->getSubstitutions();
-    
     // Module ID
     $substitutor->addSubstitution('MODULE', "ID", $gadget->getId()->getModuleId());
-    
-    // Messages (multi-language)
     if ($bundle) {
       $gadget->getSubstitutions()->addSubstitutions('MSG', $bundle->getMessages());
-    }
-    
+    }    
     // Bidi support
     $rtl = false;
+    $locale = $context->getLocale();
+    $localeSpec = $this->localeSpec($gadget, $locale); // en-US
     if ($localeSpec != null) {
       $rtl = $localeSpec->isRightToLeft();
     }
     $substitutor->addSubstitution('BIDI', "START_EDGE", $rtl ? "right" : "left");
     $substitutor->addSubstitution('BIDI', "END_EDGE", $rtl ? "left" : "right");
     $substitutor->addSubstitution('BIDI', "DIR", $rtl ? "rtl" : "ltr");
-    $substitutor->addSubstitution('BIDI', "REVERSE_DIR", $rtl ? "ltr" : "rtl");
-    
+    $substitutor->addSubstitution('BIDI', "REVERSE_DIR", $rtl ? "ltr" : "rtl");    
     // userPref's
     $upValues = $gadget->getUserPrefValues();
     foreach ($gadget->getUserPrefs() as $pref) {
@@ -131,9 +127,7 @@ class GadgetServer {
       }
       $substitutor->addSubstitution('UP', $name, $value);
     }
-    
     $this->substitutePreloads($gadget, $substitutor);
-    
     // Process required / desired features
     $requires = $gadget->getRequires();
     $needed = array();

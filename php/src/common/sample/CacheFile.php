@@ -96,7 +96,7 @@ class CacheFile extends Cache {
     }
     if (File::exists($cacheFile) && File::readable($cacheFile)) {
       $now = time();
-      if (($mtime = filemtime($cacheFile)) !== false && ($now - $mtime) < $expiration) {
+      if (($mtime = @filemtime($cacheFile)) !== false && ($now - $mtime) < $expiration) {
         if (($data = @file_get_contents($cacheFile)) !== false) {
           $data = unserialize($data);
           return $data;
