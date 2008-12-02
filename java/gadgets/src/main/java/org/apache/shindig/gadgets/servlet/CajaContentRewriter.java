@@ -29,11 +29,7 @@ import com.google.caja.lexer.CharProducer;
 import com.google.caja.lexer.ExternalReference;
 import com.google.caja.lexer.FilePosition;
 import com.google.caja.lexer.InputSource;
-import com.google.caja.opensocial.DefaultGadgetRewriter;
-import com.google.caja.opensocial.GadgetRewriteException;
-import com.google.caja.opensocial.UriCallback;
-import com.google.caja.opensocial.UriCallbackException;
-import com.google.caja.opensocial.UriCallbackOption;
+import com.google.caja.opensocial.*;
 import com.google.caja.reporting.Message;
 import com.google.caja.reporting.MessageContext;
 import com.google.caja.reporting.MessageQueue;
@@ -91,7 +87,7 @@ public class CajaContentRewriter implements ContentRewriter {
       DefaultGadgetRewriter rw = new DefaultGadgetRewriter(mq);
       CharProducer input = CharProducer.Factory.create(
           new StringReader(content.getContent()),
-          FilePosition.instance(new InputSource(retrievedUri), 2, 2, 1, 1));
+          FilePosition.instance(new InputSource(retrievedUri), 2, 1, 1));
       StringBuilder output = new StringBuilder();
 
       try {
