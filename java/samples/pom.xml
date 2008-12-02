@@ -115,7 +115,6 @@ under the License.
     <dependency>
         <groupId>findbugs</groupId>
         <artifactId>annotations</artifactId>
-        <scope>compile</scope> 
     </dependency>
     <dependency>
       <groupId>org.hibernate</groupId>
