@@ -98,11 +98,15 @@ function _IG_FetchFeedAsJSON(url, callback, numItems, getDescriptions,
       }, params);
 }
 
-function _IG_GetCachedUrl(url) {
-  return gadgets.io.getProxyUrl(url);
+function _IG_GetCachedUrl(url, opt_params) {
+  var params = { 'REFRESH_INTERVAL': 3600 };
+  if (opt_params && opt_params.refreshInterval) {
+    params['REFRESH_INTERVAL'] = opt_params.refreshInterval;
+  }
+  return gadgets.io.getProxyUrl(url, params);
 }
-function _IG_GetImageUrl(url) {
-  return gadgets.io.getProxyUrl(url);
+function _IG_GetImageUrl(url, opt_params) {
+  return _IG_GetCachedUrl(url, opt_params);
 }
 function _IG_GetImage(url) {
   var img = document.createElement('img');
