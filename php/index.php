@@ -18,7 +18,7 @@
  * under the License.
  */
 
-include_once ('config.php');
+include_once ('src/common/Config.php');
 include_once ('src/common/File.php');
 
 if (Config::get('debug')) {
