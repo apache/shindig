@@ -38,6 +38,6 @@ class MessageBundleParser {
         $this->processMessage($messages, $msg);
       }
     }
-    return new MessageBundle($messages);
+    return $messages;
   }
 }

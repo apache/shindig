@@ -46,7 +46,6 @@ class MessageBundleParserTest extends PHPUnit_Framework_TestCase {
     
     $this->MessageBundleParser = null;
     $this->MessageBundle = null;
-    
     parent::tearDown();
   }
 
@@ -65,8 +64,10 @@ class MessageBundleParserTest extends PHPUnit_Framework_TestCase {
     
     $this->MessageBundle = $this->MessageBundleParser->parse($xml);
     
-    $this->assertTrue($this->MessageBundle instanceof MessageBundle);
-  
+    $this->assertEquals('Message 1', $this->MessageBundle['name1']);
+    $this->assertEquals('Message 2', $this->MessageBundle['name2']);
+    $this->assertEquals('Message 3', $this->MessageBundle['name3']);
+    $this->assertEquals('Message 4', $this->MessageBundle['name4']);
   }
 
 }
