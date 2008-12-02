@@ -35,7 +35,7 @@ class ResponseError {
   /** value representing INTERNAL SERVER ERROR. */
   public static $INTERNAL_ERROR = 500;
   /** value representing EXPECTATION FAILED. */
-  public static $LIMIT_EXCEEDED = 509;
+  public static $LIMIT_EXCEEDED = 409;
   
   /**
    * The json value of the error.
