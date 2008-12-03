@@ -44,6 +44,7 @@ class SigningFetcherFactory {
   public function __construct($keyFile = null) {
     $this->keyName = 'http://' . $_SERVER["HTTP_HOST"] . Config::get('web_prefix') . '/public.cer';
     if (! empty($keyFile)) {
+      $rsa_private_key = false;
       $privateKey = null;
       try {
         if (File::exists($keyFile)) {
