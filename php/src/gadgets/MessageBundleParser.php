@@ -29,6 +29,10 @@ class MessageBundleParser {
 
   public function parse($xml) {
     $doc = @simplexml_load_string($xml);
+    return $this->getMessages($doc);
+  }
+
+  public function getMessages(SimpleXMLElement $doc) {
     if (! $doc) {
       throw new Exception("Invalid XML structure in message bundle");
     }
