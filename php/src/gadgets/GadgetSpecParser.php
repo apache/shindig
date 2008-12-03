@@ -29,26 +29,23 @@ class GadgetSpecParser {
     }
     // make sure we can generate a detailed error report
     libxml_use_internal_errors(true);
-    //TODO add libxml_get_errors() functionality so we can have a bit more understandable errors..
     if (($doc = simplexml_load_string($xml, 'SimpleXMLElement', LIBXML_NOCDATA)) == false) {
-      $errors = libxml_get_errors();
+      $errors = @libxml_get_errors();
       $xmlErrors = '';
       foreach ($errors as $error) {
         $xmlErrors .= $this->displayXmlError($error);
       }
-      libxml_clear_errors();
-      throw new SpecParserException("<b>Invalid XML Document</b> <br>" . $xmlErrors);
+      @libxml_clear_errors();
+      throw new SpecParserException("<b>Invalid XML Document</b><br/>\n" . $xmlErrors);
     }
     if (count($doc->ModulePrefs) != 1) {
       throw new SpecParserException("Missing or duplicated <ModulePrefs>");
     }
     $gadget = new Gadget($context->getGadgetId(), $context);
-    
     // record Checksum to trace xml version
     $gadget->setChecksum($xml);
-    
     // process ModulePref attributes
-    $this->processModulePrefs($gadget, $doc->ModulePrefs, $context);
+    $this->processModulePrefs($gadget, $doc->ModulePrefs);
     if (isset($doc->ModulePrefs->OAuth)) {
       // process OAuthPref attributes
       $this->processOAuthSpec($gadget, $doc->ModulePrefs->OAuth, $context);
@@ -75,7 +72,7 @@ class GadgetSpecParser {
     return $gadget;
   }
 
-  private function processModulePrefs(&$gadget, $ModulePrefs, $context) {
+  private function processModulePrefs(&$gadget, $ModulePrefs) {
     $attributes = $ModulePrefs->attributes();
     if (empty($attributes['title'])) {
       throw new SpecParserException("Missing or empty \"title\" attribute.");
@@ -135,22 +132,11 @@ class GadgetSpecParser {
     $rightToLeft = $rtlAttr == 'rtl';
     $localeMessageBundles = array();
     if ($messageAttr == '') {
-      $messageBundle = $locale->messagebundle;
-      if (! empty($messageBundle)) {
-        $messageName = $messageBundle->msg;
-        if (! empty($messageName)) {
-          foreach ($messageName as $name) {
-            $attrs = $name->attributes();
-            $localeMessageBundle = new LocalMessageBundle((string)$attrs['name'], (string)$name);
-            $localeMessageBundles[] = $localeMessageBundle;
-          }
-        }
-      }
+      $parser = new MessageBundleParser();
+      $localeMessageBundles = $parser->getMessages($locale);
     }
     $locale = new LocaleSpec();
     $locale->rightToLeft = $rightToLeft;
-    //FIXME java seems to use a baseurl here, probably for the http:// part but i'm not sure yet.
-    // Should verify behavior later to see if i got it right
     $locale->url = $messageAttr;
     $locale->localeMessageBundles = $localeMessageBundles;
     $locale->locale = new Locale($languageAttr, $countryAttr);

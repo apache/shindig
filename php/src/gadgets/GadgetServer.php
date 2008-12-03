@@ -45,7 +45,8 @@ class GadgetServer {
     $localeSpec = $this->localeSpec($gadget, $locale); // en-US
     $language_allSpec = $this->localeSpec($gadget, new Locale($locale->getLanguage(), "all")); // en-all
     $all_allSpec = $this->localeSpec($gadget, new Locale("all", "all")); // all-all
-    $messagesArray = $this->getMessagesArrayForSpecs($context, array($localeSpec, $language_allSpec, $all_allSpec));
+    $messagesArray = $this->getMessagesArrayForSpecs($context, array($localeSpec, $language_allSpec, 
+        $all_allSpec));
     if (count($messagesArray) == 0) {
       return null;
     }
@@ -65,16 +66,29 @@ class GadgetServer {
     foreach ($specs as $spec) {
       if ($spec == null) continue;
       $uri = $spec->getURI();
-      if ($uri == null) continue;
+      if ($uri == null) {
+        if ($spec->getLocaleMessageBundles() != null) {
+          $messagesArray[] = $spec->getLocaleMessageBundles();
+        } else {
+          $messagesArray[] = array();
+        }
+        continue;
+      }
       $requestArray[] = new RemoteContentRequest($uri);
       $contextArray[] = $context;
+      $messagesArray[] = null;
     }
-    if (count($requestArray) == 0) return array();
+    if (count($messagesArray) == 0) {
+      return array();
+    }
     $fetcher = $context->getHttpFetcher();
     $responseArray = $fetcher->multiFetch($requestArray, $contextArray);
     $parser = new MessageBundleParser();
-    foreach ($responseArray as $response) {
-      $messagesArray[] = $parser->parse($response->getResponseContent());
+    for ($i = 0, $j = 0; $i < count($messagesArray); ++ $i) {
+      if ($messagesArray[$i] == null) {
+        $messagesArray[$i] = $parser->parse($responseArray[$j]->getResponseContent());
+        ++ $j;
+      }
     }
     return $messagesArray;
   }
@@ -92,7 +106,7 @@ class GadgetServer {
 
   private function featuresLoad(Gadget $gadget, $context) {
     //NOTE i've been a bit liberal here with folding code into this function, while it did get a bit long, the many include()'s are slowing us down
-  	// get the message bundle for this gadget
+    // get the message bundle for this gadget
     $bundle = $this->getBundle($context, $gadget);
     //FIXME this is a half-assed solution between following the refactoring and maintaining some of the old code, fixing this up later
     $gadget->setMessageBundle($bundle);
@@ -102,7 +116,7 @@ class GadgetServer {
     $substitutor->addSubstitution('MODULE', "ID", $gadget->getId()->getModuleId());
     if ($bundle) {
       $gadget->getSubstitutions()->addSubstitutions('MSG', $bundle->getMessages());
-    }    
+    }
     // Bidi support
     $rtl = false;
     $locale = $context->getLocale();
@@ -113,7 +127,7 @@ class GadgetServer {
     $substitutor->addSubstitution('BIDI', "START_EDGE", $rtl ? "right" : "left");
     $substitutor->addSubstitution('BIDI', "END_EDGE", $rtl ? "left" : "right");
     $substitutor->addSubstitution('BIDI', "DIR", $rtl ? "rtl" : "ltr");
-    $substitutor->addSubstitution('BIDI', "REVERSE_DIR", $rtl ? "ltr" : "rtl");    
+    $substitutor->addSubstitution('BIDI', "REVERSE_DIR", $rtl ? "ltr" : "rtl");
     // userPref's
     $upValues = $gadget->getUserPrefValues();
     foreach ($gadget->getUserPrefs() as $pref) {
@@ -178,6 +192,3 @@ class GadgetServer {
     $gadget->preloads = $preloads;
   }
 }
-
-
-
