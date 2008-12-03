@@ -64,7 +64,9 @@ class GadgetServer {
     $contextArray = array();
     $messagesArray = array();
     foreach ($specs as $spec) {
-      if ($spec == null) continue;
+      if ($spec == null) {
+        continue;
+      }
       $uri = $spec->getURI();
       if ($uri == null) {
         if ($spec->getLocaleMessageBundles() != null) {
@@ -73,6 +75,13 @@ class GadgetServer {
           $messagesArray[] = array();
         }
         continue;
+      }
+      $parsedUri = parse_url($uri);
+      if (empty($parsedUri['host'])) {
+        // relative path's in the locale spec uri
+        $gadgetUrl = $context->getUrl();
+        $gadgetUrl = substr($gadgetUrl, 0, strrpos($gadgetUrl, '/') + 1);
+        $uri = $gadgetUrl.$uri;
       }
       $requestArray[] = new RemoteContentRequest($uri);
       $contextArray[] = $context;
