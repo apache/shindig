@@ -42,7 +42,6 @@ import org.w3c.dom.Node;
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
-import java.net.URI;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
@@ -192,8 +191,7 @@ public class HTMLContentRewriter  implements ContentRewriter {
           }
         }));
 
-    String concatBase = getConcatBase(gadgetUri.toJavaUri(), feature,
-      "text/css");
+    String concatBase = getConcatBase(gadgetUri, feature, "text/css");
 
     concatenateTags(feature, linkTags, concatBase, contentBase, "href");
 
@@ -204,7 +202,7 @@ public class HTMLContentRewriter  implements ContentRewriter {
     return new ProxyingLinkRewriter(gadgetUri, feature, proxyBaseNoGadget);
   }
 
-  protected String getConcatBase(URI gadgetUri, ContentRewriterFeature feature, String mimeType) {
+  protected String getConcatBase(Uri gadgetUri, ContentRewriterFeature feature, String mimeType) {
     return concatBaseNoGadget +
            ProxyBase.REWRITE_MIME_TYPE_PARAM +
            "=" + mimeType +
@@ -227,7 +225,7 @@ public class HTMLContentRewriter  implements ContentRewriter {
       }
     }));
 
-    String concatBase = getConcatBase(gadgetUri.toJavaUri(), feature, "text/javascript");
+    String concatBase = getConcatBase(gadgetUri, feature, "text/javascript");
     List<Element> concatenateable = new ArrayList<Element>();
     for (int i = 0; i < scriptTags.size(); i++) {
       Element scriptTag = scriptTags.get(i);
