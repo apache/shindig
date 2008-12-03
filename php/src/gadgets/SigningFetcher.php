@@ -120,10 +120,10 @@ class SigningFetcher extends RemoteContentFetcher {
       $postDataParams = array();
       if (isset($_POST['postData']) && count($postDataParts = split('&', urldecode($_POST['postData']))) > 0) {
         foreach ($postDataParts as $postDataPart) {
-          $postDataPartsPair = split('=', $postDataPart);
-          if (count($postDataPartsPair) === 2) {
-            $postDataParams[$postDataPartsPair[0]] = $postDataPartsPair[1];
-          }
+          $position = strpos($postDataPart, '=');
+          $key = substr($postDataPart, 0, $position);
+          $value = substr($postDataPart, $position + 1);
+          $postDataParams[$key] = $value;
         }
       }
       $postParams = array_merge($postParams, $this->sanitize($postDataParams));
