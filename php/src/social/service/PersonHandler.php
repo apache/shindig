@@ -58,7 +58,7 @@ class PersonHandler extends DataRequestHandler {
     // Preconditions
     if (count($userIds) < 1) {
       throw new IllegalArgumentException("No userId specified");
-    } elseif (count($userIds) > 1) {
+    } elseif (count($userIds) > 1 && count($optionalPersonId) != 0) {
       throw new IllegalArgumentException("Cannot fetch personIds for multiple userIds");
     }
     
