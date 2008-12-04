@@ -273,6 +273,7 @@ class ProxyHandler {
     $status = (int)$result->getHttpCode();
     if ($status == 200) {
       $headers = explode("\n", $result->getResponseHeaders());
+      $isShockwaveFlash = false;
       foreach ($headers as $header) {
         if (strpos($header, ':')) {
           $key = trim(substr($header, 0, strpos($header, ':')));
@@ -280,9 +281,17 @@ class ProxyHandler {
           // filter out headers that would otherwise mess up our output
           if (strcasecmp($key, "Transfer-Encoding") != 0 && strcasecmp($key, "Cache-Control") != 0 && strcasecmp($key, "Expires") != 0 && strcasecmp($key, "Content-Length") != 0 && strcasecmp($key, "ETag") != 0) {
             header("$key: $val");
+          } elseif ($key == 'Content-Type' && $val == 'application/x-shockwave-flash') {
+            // We're skipping the content disposition header for flash due to an issue with Flash player 10
+            // This does make some sites a higher value phishing target, but this can be mitigated by
+            // additional referer checks.
+            $isShockwaveFlash = true;
           }
         }
       }
+      if (!$isShockwaveFlash) {
+        header('Content-Disposition: attachment;filename=p.txt');
+      }      
       $etag = md5($result->getResponseContent());
       $lastModified = $result->getResponseHeader('Last-Modified') != null ? $result->getResponseHeader('Last-Modified') : gmdate('D, d M Y H:i:s', $result->getCreated()) . ' GMT';
       $notModified = false;
@@ -329,7 +338,6 @@ class ProxyHandler {
   private function fetchContent($url, $method) {
     //TODO get actual character encoding from the request
     
-
     // Check the protocol requested - curl doesn't really support file:// 
     // requests but the 'error' should be handled properly
     $protocolSplit = explode('://', $url, 2);
