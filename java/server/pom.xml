@@ -23,7 +23,7 @@ under the License.
   <parent>
     <groupId>org.apache.shindig</groupId>
     <artifactId>shindig-parent</artifactId>
-    <version>0.9-1-SNAPSHOT</version>
+    <version> 1.0.0-incubating-SNAPSHOT</version>
     <relativePath>../pom.xml</relativePath>
   </parent>
 
@@ -34,9 +34,9 @@ under the License.
   <description>Default server war containing both the gadget rendering code and the social api code.</description>
 
   <scm>
-    <connection>scm:svn:http://svn.apache.org/repos/asf/incubator/shindig/trunk/java/server</connection>
-    <developerConnection>scm:svn:https://svn.apache.org/repos/asf/incubator/shindig/trunk/java/server</developerConnection>
-    <url>http://svn.apache.org/viewvc/incubator/shindig/trunk/java/server</url>
+    <connection>scm:svn:http://svn.apache.org/repos/asf/incubator/shindig/branches/1.0.x-incubating/java/server</connection>
+    <developerConnection>scm:svn:https://svn.apache.org/repos/asf/incubator/shindig/branches/1.0.x-incubating/java/server</developerConnection>
+    <url>http://svn.apache.org/viewvc/incubator/shindig/branches/1.0.x-incubating/java/server</url>
   </scm>
 
   <properties>
