@@ -276,55 +276,10 @@ public class InterfaceClassMapper extends MapperWrapper {
     if (clazz == null) {
       clazz = super.realClass(elementName);
     }
-    clazz = getImplementation(clazz);
     return clazz;
   }
 
-  /**
-   * get the implementation of a class, based on the ImplementedBy annotation.
-   *
-   * @param clazz
-   *          the class to be checked.
-   * @return the class providing the default implementation.
-   */
-  private Class<?> getImplementation(Class<?> clazz) {
-    // get the guice default implementation on the class.
-    // we might use the injector to discover this
-    Class<?> cl = clazz;
-    ImplementedBy implementedBy = clazz.getAnnotation(ImplementedBy.class);
-    if (implementedBy != null) {
-      Class<?> c = implementedBy.value();
-      if (log.isDebugEnabled()) {
-        log.debug("===================Class " + clazz + " is implemented by "
-            + c);
-      }
-      cl = c;
-    } else {
-      if (log.isDebugEnabled()) {
-        log.debug("===================Class " + clazz
-            + " no implementation, assume concrete ");
-      }
-    }
-    return cl;
-  }
 
-  /*
-   * (non-Javadoc)
-   * 
-   * @see
-   * com.thoughtworks.xstream.mapper.MapperWrapper#defaultImplementationOf(java
-   * .lang.Class)
-   */
-  @SuppressWarnings("unchecked")
-  // API is not generic
-  @Override
-  public Class defaultImplementationOf(Class type) {
-    Class<?> clazz = getImplementation(super.defaultImplementationOf(type));
-    if (log.isDebugEnabled()) {
-      log.debug("====defaultImplementationOf==Class " + type + " is " + clazz);
-    }
-    return clazz;
-  }
   
   /**
    * {@inheritDoc}
