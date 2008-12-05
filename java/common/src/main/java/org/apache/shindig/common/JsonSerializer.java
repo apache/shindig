@@ -45,12 +45,10 @@ public final class JsonSerializer {
   private JsonSerializer() {}
 
   private static String[] createUnicodeTable() {
-    int size = 0;
     String[] table = new String['\u2100'];
     for (char c = 0; c < table.length; ++c) {
       String hex = Integer.toHexString(c);
       table[c] =  "u" + (("000" + hex).substring(hex.length() - 1));
-      size += 2 + (2 * table[c].length());
     }
     // Other characters can be sent with plain UTF-8 encoding.
     return table;
