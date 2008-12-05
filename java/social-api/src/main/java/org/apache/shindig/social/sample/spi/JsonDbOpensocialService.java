@@ -63,8 +63,8 @@ public class JsonDbOpensocialService implements ActivityService, PersonService, 
 
   private static final Comparator<Person> NAME_COMPARATOR = new Comparator<Person>() {
     public int compare(Person person, Person person1) {
-      String name = person.getName().getFormatted();
-      String name1 = person1.getName().getFormatted();
+      String name = person.getName().getUnstructured();
+      String name1 = person1.getName().getUnstructured();
       return name.compareTo(name1);
     }
   };

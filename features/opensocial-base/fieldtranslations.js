@@ -84,11 +84,6 @@ FieldTranslations.translateServerPersonToJsPerson = function(serverJson) {
       }
     }
   }
-
-  if (serverJson.name) {
-    serverJson.name.unstructured = serverJson.name.formatted;
-  }
-
 }
 
 FieldTranslations.translateEnumJson = function(enumJson) {

@@ -230,7 +230,7 @@ public class PersonPopulate {
       name.setGivenName("GivenName");
       name.setHonorificPrefix("Hprefix");
       name.setHonorificSuffix("HSufix");
-      name.setFormatted("formatted");
+      name.setUnstructured("unstructured");
       name.setAdditionalName("Additional Names");
     }
     return name;

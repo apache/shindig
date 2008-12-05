@@ -125,8 +125,8 @@ public class NameDb implements Name, DbObject {
    * @see org.apache.shindig.social.opensocial.model.Name
    */
   @Basic
-  @Column(name = "formatted", length = 255)
-  private String formatted;
+  @Column(name = "unstructured", length = 255)
+  private String unstructured;
 
   /**
    * 
@@ -135,10 +135,10 @@ public class NameDb implements Name, DbObject {
   }
 
   /**
-   * @param formatted
+   * @param unstructured
    */
-  public NameDb(String formatted) {
-    this.formatted = formatted;
+  public NameDb(String unstructured) {
+    this.unstructured = unstructured;
   }
 
   /**
@@ -262,18 +262,18 @@ public class NameDb implements Name, DbObject {
   /**
    * {@inheritDoc}
    * 
-   * @see org.apache.shindig.social.opensocial.model.Name#getFormatted()
+   * @see org.apache.shindig.social.opensocial.model.Name#getUnstructured()
    */
-  public String getFormatted() {
-    return formatted;
+  public String getUnstructured() {
+    return unstructured;
   }
 
   /**
    * {@inheritDoc}
    * 
-   * @see org.apache.shindig.social.opensocial.model.Name#setFormatted(java.lang.String)
+   * @see org.apache.shindig.social.opensocial.model.Name#setUnstructured(java.lang.String)
    */
-  public void setFormatted(String formatted) {
-    this.formatted = formatted;
+  public void setUnstructured(String unstructured) {
+    this.unstructured = unstructured;
   }
 }
