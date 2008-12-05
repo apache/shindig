@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<activity xmlns="http://ns.opensocial.org/2008/opensocial">
+  <body>Some details for some activity</body>
+  <bodyId>383777272</bodyId>
+  <id>http://example.org/activities/example.org:87ead8dead6beef/self/af3778</id>
+  <postedTime>12312312312312</postedTime> 
+  <title>&lt;a href=\"foo\"&gt;some activity&lt;/a&gt;</title>
+  <url>http://api.example.org/activity/feeds/.../af3778</url>
+  <userId>example.org:34KJDCSKJN2HHF0DW20394</userId>
+</activity>
