@@ -78,7 +78,7 @@ public class BeanJsonConverter implements BeanConverter {
    * @param pojo The object to convert
    * @return An object whos toString method will return json
    */
-  public String convertToString(Object pojo) {
+  public String convertToString(final Object pojo) {
     return convertToJson(pojo).toString();
   }
 
@@ -88,7 +88,7 @@ public class BeanJsonConverter implements BeanConverter {
    * @param pojo The object to convert
    * @return An object whos toString method will return json
    */
-  public Object convertToJson(Object pojo) {
+  public Object convertToJson(final Object pojo) {
     try {
       return translateObjectToJson(pojo);
     } catch (JSONException e) {
@@ -96,7 +96,7 @@ public class BeanJsonConverter implements BeanConverter {
     }
   }
 
-  private Object translateObjectToJson(Object val) throws JSONException {
+  private Object translateObjectToJson(final Object val) throws JSONException {
     if (val instanceof Object[]) {
       JSONArray array = new JSONArray();
       for (Object asd : (Object[]) val) {
@@ -143,7 +143,7 @@ public class BeanJsonConverter implements BeanConverter {
    * @param pojo The object to convert
    * @return A JSONObject representing this pojo
    */
-  private JSONObject convertMethodsToJson(Object pojo) {
+  private JSONObject convertMethodsToJson(final Object pojo) {
     List<MethodPair> availableGetters;
 
     availableGetters = GETTER_METHODS.get(pojo.getClass());
@@ -154,31 +154,34 @@ public class BeanJsonConverter implements BeanConverter {
 
     JSONObject toReturn = new JSONObject();
     for (MethodPair getter : availableGetters) {
-      String errorMessage = "Could not encode the " + getter.method + " method on "
-        + pojo.getClass().getName();
       try {
         Object val = getter.method.invoke(pojo, EMPTY_OBJECT);
         if (val != null) {
           toReturn.put(getter.fieldName, translateObjectToJson(val));
         }
       } catch (JSONException e) {
-        throw new RuntimeException(errorMessage, e);
+        throw new RuntimeException(errorMessage(pojo, getter), e);
       } catch (IllegalAccessException e) {
-        throw new RuntimeException(errorMessage, e);
+        throw new RuntimeException(errorMessage(pojo, getter), e);
       } catch (InvocationTargetException e) {
-        throw new RuntimeException(errorMessage, e);
+        throw new RuntimeException(errorMessage(pojo, getter), e);
       } catch (IllegalArgumentException e) {
-        throw new RuntimeException(errorMessage, e);
+        throw new RuntimeException(errorMessage(pojo, getter), e);
       }
     }
     return toReturn;
   }
 
-  private static class MethodPair {
+  private static String errorMessage(Object pojo, MethodPair getter) {
+    return "Could not encode the " + getter.method + " method on "
+        + pojo.getClass().getName();
+  }
+
+  private static final class MethodPair {
     public Method method;
     public String fieldName;
 
-    private MethodPair(Method method, String fieldName) {
+    private MethodPair(final Method method, final String fieldName) {
       this.method = method;
       this.fieldName = fieldName;
     }
