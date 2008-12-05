@@ -139,16 +139,17 @@ public class JsonSerializerTest {
     return result;
   }
 
-  private static String runNetSfJsonTest(Map<String, Object> data, int iterations) {
-    net.sf.json.JSONObject object = net.sf.json.JSONObject.fromObject(data);
-    long start = System.currentTimeMillis();
-    String result = null;
-    for (int i = 0; i < iterations; ++i) {
-      result = object.toString();
-    }
-    System.out.println("net.sf.json: " + avg(start, System.currentTimeMillis(), iterations) + "ms");
-    return result;
-  }
+
+  // private static String runNetSfJsonTest(Map<String, Object> data, int iterations) {
+  //   net.sf.json.JSONObject object = net.sf.json.JSONObject.fromObject(data);
+  //   long start = System.currentTimeMillis();
+  //   String result = null;
+  //   for (int i = 0; i < iterations; ++i) {
+  //     result = object.toString();
+  //   }
+  //   System.out.println("net.sf.json: " + avg(start, System.currentTimeMillis(), iterations) + "ms");
+  //   return result;
+  // }
 
   public static Map<String, Object> perfComparison100SmallValues() {
     Map<String, Object> data = Maps.newHashMap();
@@ -239,15 +240,15 @@ public class JsonSerializerTest {
 
         String jsonOrg = runJsonOrgTest(data, iterations);
         String serializer = runSerializerTest(data, iterations);
-        String netSfJson = runNetSfJsonTest(data, iterations);
+        // String netSfJson = runNetSfJsonTest(data, iterations);
 
         if (!jsonEquals(jsonOrg, serializer)) {
           System.out.println("Serializer did not produce results matching the reference impl.");
         }
 
-        if (!jsonEquals(jsonOrg, netSfJson)) {
-          System.out.println("net.sf.json did not produce results matching the reference impl.");
-        }
+        // if (!jsonEquals(jsonOrg, netSfJson)) {
+        //   System.out.println("net.sf.json did not produce results matching the reference impl.");
+        // }
         System.out.println("-----------------------");
       }
     }
