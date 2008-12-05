@@ -59,7 +59,7 @@ public interface Name {
     /**
      * The unstructured name.
      */
-    FORMATTED("formatted");
+    UNSTRUCTURED("unstructured");
 
     /**
      * the json key for this field.
@@ -85,15 +85,15 @@ public interface Name {
   }
 
   /**
-   * @return the name, formatted.
+   * @return the name, unstructured.
    */
-  String getFormatted();
+  String getUnstructured();
 
   /**
-   * set the name formatted.
-   * @param formatted the name, formatted.
+   * set the name unstructured.
+   * @param unstructured the name, unstructured.
    */
-  void setFormatted(String formatted);
+  void setUnstructured(String unstructured);
 
   /**
    * @return get the additional name.

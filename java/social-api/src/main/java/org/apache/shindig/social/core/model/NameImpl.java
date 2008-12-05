@@ -26,21 +26,21 @@ public class NameImpl implements Name {
   private String givenName;
   private String honorificPrefix;
   private String honorificSuffix;
-  private String formatted;
+  private String unstructured;
 
   public NameImpl() {
   }
 
-  public NameImpl(String formatted) {
-    this.formatted = formatted;
+  public NameImpl(String unstructured) {
+    this.unstructured = unstructured;
   }
 
-  public String getFormatted() {
-    return formatted;
+  public String getUnstructured() {
+    return unstructured;
   }
 
-  public void setFormatted(String formatted) {
-    this.formatted = formatted;
+  public void setUnstructured(String unstructured) {
+    this.unstructured = unstructured;
   }
 
   public String getAdditionalName() {

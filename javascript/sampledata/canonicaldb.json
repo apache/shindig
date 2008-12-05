@@ -116,7 +116,7 @@
 "givenName" : "Shin",
 "honorificPrefix" : "Sir",
 "honorificSuffix" : "Social Butterfly",
-"formatted" : "Sir Shin H. Digg Social Butterfly"
+"unstructured" : "Sir Shin H. Digg Social Butterfly"
 },
 "networkPresence" : {
 "value" : "ONLINE",
@@ -179,7 +179,7 @@
 "name" : {
 "familyName" : "Doe",
 "givenName" : "John",
-"formatted" : "John Doe"
+"unstructured" : "John Doe"
 }
 },
 {
@@ -190,7 +190,7 @@
 "name" : {
 "familyName" : "Doe",
 "givenName" : "Jane",
-"formatted" : "Jane Doe"
+"unstructured" : "Jane Doe"
 }
 },
 {
@@ -201,7 +201,7 @@
 "name" : {
 "familyName" : "Doe",
 "givenName" : "George",
-"formatted" : "George Doe"
+"unstructured" : "George Doe"
 }
 },
 {
@@ -212,7 +212,7 @@
 "name" : {
 "familyName" : "Rossi",
 "givenName" : "Mario",
-"formatted" : "Mario Rossi"
+"unstructured" : "Mario Rossi"
 }
 },
 {
@@ -223,7 +223,7 @@
 "name" : {
 "familyName" : "Meikäläinen",
 "givenName" : "Maija",
-"formatted" : "Maija Meikäläinen"
+"unstructured" : "Maija Meikäläinen"
 }
 }],
 //

@@ -222,7 +222,7 @@
       <xs:element minOccurs="0" name="givenName" type="xs:string" />
       <xs:element minOccurs="0" name="honorificPrefix" type="xs:string" />
       <xs:element minOccurs="0" name="honorificSuffix" type="xs:string" />
-      <xs:element minOccurs="0" name="formatted" type="xs:string" />
+      <xs:element minOccurs="0" name="unstructured" type="xs:string" />
     </xs:all>
   </xs:complexType>
   

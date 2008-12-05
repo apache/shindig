@@ -62,7 +62,7 @@ public class BeanJsonLibConverterTest extends TestCase {
 
   // taken from opensocial-reference/name.js
   private static final String[] NAME_FIELDS = { "familyName", "givenName", "additionalName",
-      "honorificPrefix", "honorificSuffix", "formatted" };
+      "honorificPrefix", "honorificSuffix", "unstructured" };
 
   private Person johnDoe;
   private Activity activity;
@@ -157,7 +157,7 @@ public class BeanJsonLibConverterTest extends TestCase {
     Name name = parseCassie.getName();
     Name cassieName = cassie.getName();
     assertNotNull(name);
-    assertEquals(cassieName.getFormatted(), name.getFormatted());
+    assertEquals(cassieName.getUnstructured(), name.getUnstructured());
     assertEquals(cassieName.getAdditionalName(), name.getAdditionalName());
     assertEquals(cassieName.getFamilyName(), name.getFamilyName());
     assertEquals(cassieName.getGivenName(), name.getGivenName());
@@ -184,9 +184,9 @@ public class BeanJsonLibConverterTest extends TestCase {
         optional, nullfields);
     ApiValidator.dump(nameJSON);
 
-    assertNotNull(nameJSON.get("formatted"));
-    assertEquals(String.class, nameJSON.get("formatted").getClass());
-    assertEquals(name, nameJSON.get("formatted"));
+    assertNotNull(nameJSON.get("unstructured"));
+    assertEquals(String.class, nameJSON.get("unstructured").getClass());
+    assertEquals(name, nameJSON.get("unstructured"));
 
     // additional name
     assertNull(nameJSON.get("additionalName"));
@@ -201,7 +201,7 @@ public class BeanJsonLibConverterTest extends TestCase {
     Person parsedPerson = beanJsonConverter.convertToObject(result, Person.class);
 
     assertEquals(johnDoe.getId(), parsedPerson.getId());
-    assertEquals(johnDoe.getName().getFormatted(), parsedPerson.getName().getFormatted());
+    assertEquals(johnDoe.getName().getUnstructured(), parsedPerson.getName().getUnstructured());
 
     List<Address> addresses = parsedPerson.getAddresses();
     if (outputInfo) {
@@ -212,9 +212,9 @@ public class BeanJsonLibConverterTest extends TestCase {
 
     assertEquals(1, addresses.size());
     Address address = addresses.get(0);
-    String unstructured = address.getFormatted();
+    String formatted = address.getFormatted();
 
-    assertNotNull(unstructured);
+    assertNotNull(formatted);
     assertEquals(johnDoe.getAddresses().get(0).getFormatted(), parsedPerson
         .getAddresses().get(0).getFormatted());
 
