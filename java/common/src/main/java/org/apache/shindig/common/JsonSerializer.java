@@ -40,19 +40,11 @@ public final class JsonSerializer {
   // Multiplier to use for allocating the buffer.
   private static final int BASE_MULTIPLIER = 256;
 
-  private static final String[] UNICODE_TABLE = createUnicodeTable();
+  private static final char[] HEX_DIGITS = {
+    '0','1','2','3','4','5','6','7','8','9','A','B','C','D','E','F'
+  };
 
   private JsonSerializer() {}
-
-  private static String[] createUnicodeTable() {
-    String[] table = new String['\u2100'];
-    for (char c = 0; c < table.length; ++c) {
-      String hex = Integer.toHexString(c);
-      table[c] =  "u" + (("000" + hex).substring(hex.length() - 1));
-    }
-    // Other characters can be sent with plain UTF-8 encoding.
-    return table;
-  }
 
   /**
    * Serialize a JSONObject. Does not guard against cyclical references.
@@ -320,9 +312,18 @@ public final class JsonSerializer {
                 // 2. for (int i = 0; i < 4 - value.length(); ++i) { buf.append('0'); }
                 // 3. buf.append(value)
                 //
-                // Of these, the second proved fastest. The current implementation performs slightly
-                // faster than the second in the benchmark found in JsonSerializerTest.
-                buf.append(UNICODE_TABLE[current]);
+                // Method 4 (Sun conversion from java.util.Properties)
+                // 1. Append '\'
+                // 2. Append 'u'
+                // 3. Append each of 4 octets by indexing into a hex array.
+                //
+                // Method 5
+                // Index into a single lookup table of all relevant lookup values.
+                buf.append('u');
+                buf.append(HEX_DIGITS[(current >> 12) & 0xF]);
+                buf.append(HEX_DIGITS[(current >>  8) & 0xF]);
+                buf.append(HEX_DIGITS[(current >>  4) & 0xF]);
+                buf.append(HEX_DIGITS[current & 0xF]);
              }
           } else {
             buf.append(current);
