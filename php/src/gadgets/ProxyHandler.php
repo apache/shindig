@@ -281,7 +281,8 @@ class ProxyHandler {
           // filter out headers that would otherwise mess up our output
           if (strcasecmp($key, "Transfer-Encoding") != 0 && strcasecmp($key, "Cache-Control") != 0 && strcasecmp($key, "Expires") != 0 && strcasecmp($key, "Content-Length") != 0 && strcasecmp($key, "ETag") != 0) {
             header("$key: $val");
-          } elseif ($key == 'Content-Type' && $val == 'application/x-shockwave-flash') {
+          }
+          if ($key == 'Content-Type' && $val == 'application/x-shockwave-flash') {
             // We're skipping the content disposition header for flash due to an issue with Flash player 10
             // This does make some sites a higher value phishing target, but this can be mitigated by
             // additional referer checks.
