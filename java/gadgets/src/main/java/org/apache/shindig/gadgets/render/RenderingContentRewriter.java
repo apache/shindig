@@ -234,12 +234,23 @@ public class RenderingContentRewriter implements ContentRewriter {
       }
     }
 
-    StringBuilder inlineJs = new StringBuilder();
-
     // Inline any libs that weren't forced. The ugly context switch between inline and external
     // Js is needed to allow both inline and external scripts declared in feature.xml.
     String container = context.getContainer();
     Collection<GadgetFeature> features = getFeatures(spec, forced);
+
+    // Precalculate the maximum length in order to avoid excessive garbage generation.
+    int size = 0;
+    for (GadgetFeature feature : features) {
+      for (JsLibrary library : feature.getJsLibraries(RenderingContext.GADGET, container)) {
+        if (library.getType().equals(JsLibrary.Type.URL)) {
+          size += library.getContent().length();
+        }
+      }
+    }
+
+    // Really inexact.
+    StringBuilder inlineJs = new StringBuilder(size);
 
     for (GadgetFeature feature : features) {
       for (JsLibrary library : feature.getJsLibraries(RenderingContext.GADGET, container)) {

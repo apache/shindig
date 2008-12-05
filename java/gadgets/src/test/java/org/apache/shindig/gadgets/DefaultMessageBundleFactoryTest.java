@@ -23,10 +23,13 @@ import static org.easymock.EasyMock.isA;
 import static org.easymock.EasyMock.verify;
 import static org.easymock.classextension.EasyMock.replay;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertSame;
 
+import org.apache.shindig.common.cache.Cache;
 import org.apache.shindig.common.cache.CacheProvider;
 import org.apache.shindig.common.cache.LruCacheProvider;
 import org.apache.shindig.common.uri.Uri;
+import org.apache.shindig.common.util.TimeSource;
 import org.apache.shindig.gadgets.http.HttpFetcher;
 import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.http.HttpResponse;
@@ -38,6 +41,7 @@ import org.easymock.EasyMock;
 import org.junit.Test;
 
 import java.util.Locale;
+import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * Tests for DefaultMessageBundleFactory
@@ -80,11 +84,13 @@ public class DefaultMessageBundleFactoryTest {
         "<Content type='html'/>" +
         "</Module>";
 
-  private static final int MAX_AGE = -10000;
+  private static final int MAX_AGE = 10000;
 
   private final HttpFetcher fetcher = EasyMock.createNiceMock(HttpFetcher.class);
   private final CacheProvider cacheProvider = new LruCacheProvider(10);
-  private final MessageBundleFactory bundleFactory
+  private final Cache<String, MessageBundle> cache
+      = cacheProvider.createCache(DefaultMessageBundleFactory.CACHE_NAME);
+  private final DefaultMessageBundleFactory bundleFactory
       = new DefaultMessageBundleFactory(fetcher, cacheProvider, MAX_AGE);
   private final GadgetSpec gadgetSpec;
 
@@ -111,6 +117,18 @@ public class DefaultMessageBundleFactoryTest {
   }
 
   @Test
+  public void getBundleFromCache() throws Exception {
+    HttpResponse response = new HttpResponse(BASIC_BUNDLE);
+    expect(fetcher.fetch(isA(HttpRequest.class))).andReturn(response).once();
+    replay(fetcher);
+
+    MessageBundle bundle0 = bundleFactory.getBundle(gadgetSpec, LOCALE, false);
+    MessageBundle bundle1 = bundleFactory.getBundle(gadgetSpec, LOCALE, false);
+
+    assertSame("Different objects returned out of the cache", bundle0, bundle1);
+  }
+
+  @Test
   public void getParentBundle() throws Exception {
     MessageBundle bundle = bundleFactory.getBundle(gadgetSpec, PARENT_LOCALE, true);
 
@@ -123,6 +141,12 @@ public class DefaultMessageBundleFactoryTest {
   public void getAllAllBundle() throws Exception {
     MessageBundle bundle = bundleFactory.getBundle(gadgetSpec, new Locale("all", "ALL"), true);
     assertEquals(MSG_0_VALUE, bundle.getMessages().get(MSG_0_NAME));
+  }
+
+  @Test
+  public void ignoreCacheDoesNotStore() throws Exception {
+    bundleFactory.getBundle(gadgetSpec, new Locale("all", "ALL"), true);
+    assertEquals(0, cache.getSize());
   }
 
   @Test
@@ -139,24 +163,53 @@ public class DefaultMessageBundleFactoryTest {
         .andReturn(badResponse).once();
     replay(fetcher);
 
-    MessageBundle bundle = bundleFactory.getBundle(gadgetSpec, LOCALE, true);
-    bundle = bundleFactory.getBundle(gadgetSpec, LOCALE, false);
+    final AtomicLong time = new AtomicLong();
+
+    bundleFactory.cache.setTimeSource(new TimeSource() {
+      @Override
+      public long currentTimeMillis() {
+        return time.get();
+      }
+    });
+
+    time.set(System.currentTimeMillis());
+
+    MessageBundle bundle0 = bundleFactory.getBundle(gadgetSpec, LOCALE, false);
+
+    time.set(time.get() + MAX_AGE + 1);
+
+    MessageBundle bundle1 = bundleFactory.getBundle(gadgetSpec, LOCALE, false);
 
     verify(fetcher);
 
-    assertEquals(MSG_0_VALUE, bundle.getMessages().get(MSG_0_NAME));
+    assertSame("Did not respond from cache when refresh failed.", bundle0, bundle1);
+  }
+
+  @Test
+  public void badResponseIsEmptyWhenNotInCache() throws Exception {
+    HttpResponse badResponse = HttpResponse.error();
+
+    expect(fetcher.fetch(isA(HttpRequest.class)))
+        .andReturn(badResponse).once();
+    replay(fetcher);
+
+    MessageBundle bundle = bundleFactory.getBundle(gadgetSpec, LOCALE, false);
+
+    verify(fetcher);
+
+    assertEquals(0, bundle.getMessages().size());
   }
 
   @Test
   public void ttlPropagatesToFetcher() throws Exception {
     CapturingFetcher capturingFetcher = new CapturingFetcher();
 
-    MessageBundleFactory forcedTtlFactory
-        = new DefaultMessageBundleFactory(capturingFetcher, cacheProvider, 10000);
+    MessageBundleFactory factory
+        = new DefaultMessageBundleFactory(capturingFetcher, cacheProvider, MAX_AGE);
 
-    forcedTtlFactory.getBundle(gadgetSpec, LOCALE, false);
+    factory.getBundle(gadgetSpec, LOCALE, false);
 
-    assertEquals(10, capturingFetcher.request.getCacheTtl());
+    assertEquals(MAX_AGE / 1000, capturingFetcher.request.getCacheTtl());
   }
 
   private static class CapturingFetcher implements HttpFetcher {
