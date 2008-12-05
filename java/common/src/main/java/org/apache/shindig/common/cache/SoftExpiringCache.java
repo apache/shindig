@@ -93,7 +93,7 @@ public class SoftExpiringCache<K, V> {
    * Set a new time source. Used for testing, so package-private.
    * @param timeSource New time source to use.
    */
-  void setTimeSource(TimeSource timeSource) {
+  public void setTimeSource(TimeSource timeSource) {
     this.timeSource = timeSource;
   }
 

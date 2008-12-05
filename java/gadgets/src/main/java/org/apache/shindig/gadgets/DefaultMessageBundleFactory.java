@@ -21,10 +21,12 @@ package org.apache.shindig.gadgets;
 import org.apache.shindig.common.cache.Cache;
 import org.apache.shindig.common.cache.CacheProvider;
 import org.apache.shindig.common.cache.SoftExpiringCache;
+import org.apache.shindig.common.cache.SoftExpiringCache.CachedObject;
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.gadgets.http.HttpFetcher;
 import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.http.HttpResponse;
+import org.apache.shindig.gadgets.spec.GadgetSpec;
 import org.apache.shindig.gadgets.spec.LocaleSpec;
 import org.apache.shindig.gadgets.spec.MessageBundle;
 
@@ -32,17 +34,22 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.inject.name.Named;
 
+import java.util.Locale;
 import java.util.logging.Logger;
 
 /**
  * Default implementation of a message bundle factory.
+ *
+ * Containers wishing to implement custom bundle fetching behavior should override
+ * {@link #fetchBundle}.
  */
 @Singleton
-public class DefaultMessageBundleFactory extends AbstractMessageBundleFactory {
+public class DefaultMessageBundleFactory implements MessageBundleFactory {
+  private static final Locale ALL_ALL = new Locale("all", "ALL");
   public static final String CACHE_NAME = "messageBundles";
   static final Logger LOG = Logger.getLogger(DefaultMessageBundleFactory.class.getName());
   private final HttpFetcher fetcher;
-  private final SoftExpiringCache<Uri, MessageBundle> cache;
+  final SoftExpiringCache<String, MessageBundle> cache;
   private final long refresh;
 
   @Inject
@@ -50,37 +57,37 @@ public class DefaultMessageBundleFactory extends AbstractMessageBundleFactory {
                                      CacheProvider cacheProvider,
                                      @Named("shindig.cache.xml.refreshInterval") long refresh) {
     this.fetcher = fetcher;
-    Cache<Uri, MessageBundle> baseCache = cacheProvider.createCache(CACHE_NAME);
-    this.cache = new SoftExpiringCache<Uri, MessageBundle>(baseCache);
+    Cache<String, MessageBundle> baseCache = cacheProvider.createCache(CACHE_NAME);
+    this.cache = new SoftExpiringCache<String, MessageBundle>(baseCache);
     this.refresh = refresh;
   }
 
-  @Override
-  protected MessageBundle fetchBundle(LocaleSpec locale, boolean ignoreCache)
+  public MessageBundle getBundle(GadgetSpec spec, Locale locale, boolean ignoreCache)
       throws GadgetException {
+
     if (ignoreCache) {
-      return fetchAndCacheBundle(locale, ignoreCache);
+      return getNestedBundle(spec, locale, true);
     }
 
-    Uri uri = locale.getMessages();
+    String key = spec.getUrl().toString() + '.' + locale.toString();
+    CachedObject<MessageBundle> cached = cache.getElement(key);
 
-    SoftExpiringCache.CachedObject<MessageBundle> cached = cache.getElement(uri);
-
-    MessageBundle bundle = null;
+    MessageBundle bundle;
     if (cached == null || cached.isExpired) {
       try {
-        bundle = fetchAndCacheBundle(locale, ignoreCache);
+        bundle = getNestedBundle(spec, locale, ignoreCache);
       } catch (GadgetException e) {
         // Enforce negative caching.
         if (cached != null) {
+          LOG.info("MessageBundle fetch failed for " + key + " - using cached.");
           bundle = cached.obj;
         } else {
           // We create this dummy spec to avoid the cost of re-parsing when a remote site is out.
+          LOG.info("MessageBundle fetch failed for " + key + " - using default.");
           bundle = MessageBundle.EMPTY;
         }
-        LOG.info("MessageBundle fetch failed for " + uri + " - using cached.");
-        cache.addElement(uri, bundle, refresh);
       }
+      cache.addElement(key, bundle, refresh);
     } else {
       bundle = cached.obj;
     }
@@ -88,7 +95,38 @@ public class DefaultMessageBundleFactory extends AbstractMessageBundleFactory {
     return bundle;
   }
 
-  private MessageBundle fetchAndCacheBundle(LocaleSpec locale, boolean ignoreCache)
+  private MessageBundle getNestedBundle(GadgetSpec spec, Locale locale, boolean ignoreCache)
+      throws GadgetException {
+    MessageBundle parent = getParentBundle(spec, locale, ignoreCache);
+    MessageBundle child = null;
+    LocaleSpec localeSpec = spec.getModulePrefs().getLocale(locale);
+    if (localeSpec == null) {
+      return parent == null ? MessageBundle.EMPTY : parent;
+    }
+    Uri messages = localeSpec.getMessages();
+    if (messages == null || messages.toString().length() == 0) {
+      child = localeSpec.getMessageBundle();
+    } else {
+      child = fetchBundle(localeSpec, ignoreCache);
+    }
+    return new MessageBundle(parent, child);
+  }
+
+  private MessageBundle getParentBundle(GadgetSpec spec, Locale locale, boolean ignoreCache)
+      throws GadgetException {
+    if (locale.getLanguage().equalsIgnoreCase("all")) {
+      // Top most locale already.
+      return null;
+    }
+
+    if (locale.getCountry().equalsIgnoreCase("ALL")) {
+      return getBundle(spec, ALL_ALL, ignoreCache);
+    }
+
+    return getBundle(spec, new Locale(locale.getLanguage(), "ALL"), ignoreCache);
+  }
+
+  protected MessageBundle fetchBundle(LocaleSpec locale, boolean ignoreCache)
       throws GadgetException {
     Uri url = locale.getMessages();
     HttpRequest request = new HttpRequest(url).setIgnoreCache(ignoreCache);
@@ -104,7 +142,6 @@ public class DefaultMessageBundleFactory extends AbstractMessageBundleFactory {
     }
 
     MessageBundle bundle  = new MessageBundle(locale, response.getResponseAsString());
-    cache.addElement(url, bundle, refresh);
     return bundle;
   }
 }
