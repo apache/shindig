@@ -54,7 +54,8 @@ public final class JsonSerializer {
     try {
       appendJsonObject(buf, object);
     } catch (IOException e) {
-      // Can't happen.
+      // Shouldn't ever happen unless someone adds something to append*.
+      throw new RuntimeException(e);
     }
     return buf.toString();
   }
@@ -67,7 +68,8 @@ public final class JsonSerializer {
     try {
       appendMap(buf, map);
     } catch (IOException e) {
-      // Can't happen.
+      // Shouldn't ever happen unless someone adds something to append*.
+      throw new RuntimeException(e);
     }
     return buf.toString();
   }
@@ -80,7 +82,8 @@ public final class JsonSerializer {
     try {
       appendCollection(buf, collection);
     } catch (IOException e) {
-      // Can't happen.
+      // Shouldn't ever happen unless someone adds something to append*.
+      throw new RuntimeException(e);
     }
     return buf.toString();
   }
@@ -93,7 +96,8 @@ public final class JsonSerializer {
     try {
       appendArray(buf, array);
     } catch (IOException e) {
-      // Can't happen.
+      // Shouldn't ever happen unless someone adds something to append*.
+      throw new RuntimeException(e);
     }
     return buf.toString();
   }
@@ -106,7 +110,8 @@ public final class JsonSerializer {
     try {
       appendJsonArray(buf, array);
     } catch (IOException e) {
-      // Can't happen.
+      // Shouldn't ever happen unless someone adds something to append*.
+      throw new RuntimeException(e);
     }
     return buf.toString();
   }
