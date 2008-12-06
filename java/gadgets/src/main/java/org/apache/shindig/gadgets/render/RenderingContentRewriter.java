@@ -20,6 +20,7 @@ package org.apache.shindig.gadgets.render;
 
 import org.apache.shindig.auth.SecurityToken;
 import org.apache.shindig.common.ContainerConfig;
+import org.apache.shindig.common.JsonSerializer;
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.common.xml.DomUtil;
 import org.apache.shindig.gadgets.Gadget;
@@ -48,10 +49,10 @@ import org.apache.shindig.gadgets.spec.UserPref;
 import org.apache.shindig.gadgets.spec.View;
 
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.google.inject.Inject;
 
-import org.json.JSONException;
 import org.json.JSONObject;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -342,48 +343,44 @@ public class RenderingContentRewriter implements ContentRewriter {
 
     JSONObject features = containerConfig.getJsonObject(context.getContainer(), FEATURES_KEY);
 
-    try {
+    Map<String, Object> config
+        = Maps.newHashMapWithExpectedSize(features == null ? 2 : features.length() + 2);
+
+    if (features != null) {
       // Discard what we don't care about.
-      JSONObject config;
-      if (features == null) {
-        config = new JSONObject();
-      } else {
-        String[] properties = new String[reqs.size()];
-        int i = 0;
-        for (GadgetFeature feature : reqs) {
-          properties[i++] = feature.getName();
+      for (GadgetFeature feature : reqs) {
+        String name = feature.getName();
+        Object conf = features.opt(name);
+        if (conf != null) {
+          config.put(name, conf);
         }
-        config = new JSONObject(features, properties);
       }
-
-      // Add gadgets.util support. This is calculated dynamically based on request inputs.
-      ModulePrefs prefs = gadget.getSpec().getModulePrefs();
-      JSONObject featureMap = new JSONObject();
-
-      for (Feature feature : prefs.getFeatures().values()) {
-        featureMap.put(feature.getName(), feature.getParams());
-      }
-      config.put("core.util", featureMap);
-
-      // Add authentication token config
-      SecurityToken authToken = context.getToken();
-      if (authToken != null) {
-        JSONObject authConfig = new JSONObject();
-        String updatedToken = authToken.getUpdatedToken();
-        if (updatedToken != null) {
-          authConfig.put("authToken", updatedToken);
-        }
-        String trustedJson = authToken.getTrustedJson();
-        if (trustedJson != null) {
-          authConfig.put("trustedJson", trustedJson);
-        }
-        config.put("shindig.auth", authConfig);
-      }
-      return "gadgets.config.init(" + config.toString() + ");\n";
-    } catch (JSONException e) {
-      // Shouldn't be possible.
-      throw new RuntimeException(e);
     }
+
+    // Add gadgets.util support. This is calculated dynamically based on request inputs.
+    ModulePrefs prefs = gadget.getSpec().getModulePrefs();
+    Collection<Feature> values = prefs.getFeatures().values();
+    Map<String, Map<String, String>> featureMap = Maps.newHashMapWithExpectedSize(values.size());
+    for (Feature feature : values) {
+      featureMap.put(feature.getName(), feature.getParams());
+    }
+    config.put("core.util", featureMap);
+
+    // Add authentication token config
+    SecurityToken authToken = context.getToken();
+    if (authToken != null) {
+      Map<String, String> authConfig = Maps.newHashMapWithExpectedSize(2);
+      String updatedToken = authToken.getUpdatedToken();
+      if (updatedToken != null) {
+        authConfig.put("authToken", updatedToken);
+      }
+      String trustedJson = authToken.getTrustedJson();
+      if (trustedJson != null) {
+        authConfig.put("trustedJson", trustedJson);
+      }
+      config.put("shindig.auth", authConfig);
+    }
+    return "gadgets.config.init(" + JsonSerializer.serialize(config) + ");\n";
   }
 
   /**
@@ -407,16 +404,13 @@ public class RenderingContentRewriter implements ContentRewriter {
    * Injects default values for user prefs into the gadget output.
    */
   private void injectDefaultPrefs(Gadget gadget, Node scriptTag) {
-    JSONObject defaultPrefs = new JSONObject();
-    try {
-      for (UserPref up : gadget.getSpec().getUserPrefs()) {
-        defaultPrefs.put(up.getName(), up.getDefaultValue());
-      }
-    } catch (JSONException e) {
-      // Never happens. Name is required (cannot be null). Default value is a String.
+    List<UserPref> prefs = gadget.getSpec().getUserPrefs();
+    Map<String, String> defaultPrefs = Maps.newHashMapWithExpectedSize(prefs.size());
+    for (UserPref up : prefs) {
+      defaultPrefs.put(up.getName(), up.getDefaultValue());
     }
     Text text = scriptTag.getOwnerDocument().createTextNode("gadgets.Prefs.setDefaultPrefs_(");
-    text.appendData(defaultPrefs.toString());
+    text.appendData(JsonSerializer.serialize(defaultPrefs));
     text.appendData(");");
     scriptTag.appendChild(text);
   }
@@ -427,22 +421,21 @@ public class RenderingContentRewriter implements ContentRewriter {
    * If preloading fails for any reason, we just output an empty object.
    */
   private void injectPreloads(Gadget gadget, Node scriptTag) {
-    JSONObject preload = new JSONObject();
     Preloads preloads = gadget.getPreloads();
 
-    for (String name : preloads.getKeys()) {
+    Collection<String> keys = preloads.getKeys();
+    Map<String, Object> preload = Maps.newHashMapWithExpectedSize(keys.size());
+
+    for (String name : keys) {
       try {
         preload.put(name, preloads.getData(name).toJson());
       } catch (PreloadException e) {
         // This will be thrown in the event of some unexpected exception. We can move on.
         LOG.log(Level.WARNING, "Unexpected error attempting to preload " + name, e);
-      } catch (JSONException e) {
-        // Shouldn't ever happen. Probably indicates a big problem, so we'll abort.
-        throw new RuntimeException(e);
       }
     }
     Text text = scriptTag.getOwnerDocument().createTextNode("gadgets.io.preloaded_=");
-    text.appendData(preload.toString());
+    text.appendData(JsonSerializer.serialize(preload));
     text.appendData(";");
     scriptTag.appendChild(text);
   }
