@@ -60,6 +60,8 @@ gadgets.flash.getMajorVersion = function() {
   return flashMajorVersion;
 }
 
+gadgets.flash.swfContainerId_ = 0;
+
 /**
  * Injects a Flash file into the DOM tree.
  * @param {String} swfUrl SWF URL.
@@ -118,6 +120,12 @@ gadgets.flash.embedFlash = function(swfUrl, swfContainer, swfVersion,
       // on top of other html elements.
       if (typeof opt_params.wmode != 'string') {
         opt_params.wmode = 'opaque';
+      }
+      while (!opt_params.id) {
+        var newId = 'swfContainer' + gadgets.flash.swfContainerId_++;
+        if (!document.getElementById(newId)) {
+          opt_params.id = newId;
+        }
       }
       // Prepare html snippet
       var html;
