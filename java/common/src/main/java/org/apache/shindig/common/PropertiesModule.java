@@ -32,7 +32,8 @@ import java.util.Arrays;
 import java.util.Properties;
 
 /**
- * Injects everything from the shindig.properties as a Named value.
+ * Injects everything from the a property file as a Named value
+ * Uses the default shindig.properties file if no other is provided
  */
 public class PropertiesModule extends AbstractModule {
 
@@ -41,23 +42,11 @@ public class PropertiesModule extends AbstractModule {
   private final Properties properties;
   
   public PropertiesModule() {
-    InputStream is = null;
-    try {
-      is = ResourceLoader.openResource(DEFAULT_PROPERTIES);
-      properties = new Properties();
-      properties.load(is);
-    } catch (IOException e) {
-      throw new CreationException(Arrays.asList(
-          new Message("Unable to load properties: " + DEFAULT_PROPERTIES)));
-    } finally {
-      try {
-        if (is != null) {
-          is.close();
-        }
-      } catch (IOException e) {
-        // weird
-      }
-    }
+    this.properties = readPropertyFile(DEFAULT_PROPERTIES);
+  }
+
+  public PropertiesModule(String propertyFile) {
+    this.properties = readPropertyFile(propertyFile);
   }
   
   public PropertiesModule(Properties properties) {
@@ -67,6 +56,28 @@ public class PropertiesModule extends AbstractModule {
   @Override
   protected void configure() {
     Names.bindProperties(this.binder(), properties);
+  }
+  
+  private Properties readPropertyFile(String propertyFile) {
+    Properties properties = new Properties();
+    InputStream is = null;
+    try {
+      is = ResourceLoader.openResource(propertyFile);
+      properties.load(is);
+    } catch (IOException e) {
+      throw new CreationException(Arrays.asList(
+          new Message("Unable to load properties: " + propertyFile)));
+    } finally {
+      try {
+        if (is != null) {
+          is.close();
+        }
+      } catch (IOException e) {
+        // weird
+      }
+    }
+    
+    return properties;
   }
 
 }
