@@ -52,6 +52,7 @@ public class EndToEndTest {
     "fetchPersonTest.xml",
     "fetchPeopleTest.xml",
     "errorTest.xml",
+    "cajaTest.xml",
     "testframework.js"
   };
 
