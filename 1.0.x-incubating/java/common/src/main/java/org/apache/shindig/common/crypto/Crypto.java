@@ -154,13 +154,30 @@ public class Crypto {
   public static byte[] aes128cbcEncrypt(byte[] key, byte[] plain)
   throws GeneralSecurityException {
     Cipher cipher = Cipher.getInstance(CIPHER_TYPE);
-    Key cipherKey = new SecretKeySpec(key, CIPHER_KEY_TYPE);
     byte iv[] = getRandomBytes(cipher.getBlockSize());
+    return concat(iv, aes128cbcEncryptWithIV(key, iv, plain));
+  }
+
+  /**
+   * AES-128-CBC encryption with a given IV.
+   *
+   * @param key
+   * @param iv
+   * @param plain
+   *
+   * @return the cipher text
+   *
+   * @throws GeneralSecurityException
+   */
+  public static byte[] aes128cbcEncryptWithIV(byte[] key, byte[] iv, byte[] plain)
+  throws GeneralSecurityException {
+    Cipher cipher = Cipher.getInstance(CIPHER_TYPE);
+    Key cipherKey = new SecretKeySpec(key, CIPHER_KEY_TYPE);
     IvParameterSpec ivSpec = new IvParameterSpec(iv);
     cipher.init(Cipher.ENCRYPT_MODE, cipherKey, ivSpec);
-    byte[] cipherText = cipher.doFinal(plain);
-    return concat(iv, cipherText);
+    return cipher.doFinal(plain);
   }
+
 
   /**
    * AES-128-CBC decryption.  The IV is assumed to be the first 16 bytes
