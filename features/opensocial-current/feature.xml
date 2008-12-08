@@ -55,10 +55,6 @@
           }
 
           opensocial.Container.setContainer(new ShindigContainer());
-
-          if (configParams.enableCaja) {
-            opensocial.Container.get().enableCaja();
-          }
       });
     </script>
   </gadget>

@@ -99,11 +99,17 @@ public class CajaContentRewriter implements ContentRewriter {
         throwCajolingException(e, mq);
         return RewriterResults.notCacheable();
       }      
-      content.setContent(output.toString());
+      content.setContent(tameCajaClientApi() + output.toString());
     }
     return null;
   }
 
+  private String tameCajaClientApi() {
+    return "<script>" +
+      "opensocial.Container.get().enableCaja();" +
+      "</script>";
+  }
+  
   private void throwCajolingException(Exception cause, MessageQueue mq) {
     StringBuilder errbuilder = new StringBuilder();
     MessageContext mc = new MessageContext();
