@@ -25,7 +25,7 @@ import org.apache.shindig.gadgets.variables.Substitutions;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
 
-import edu.emory.mathcs.backport.java.util.Collections;
+import java.util.Collections;
 
 import org.w3c.dom.Element;
 import org.w3c.dom.NamedNodeMap;
