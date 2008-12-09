@@ -35,7 +35,7 @@ class OAuthSecurityToken extends SecurityToken {
   }
 
   public function isAnonymous() {
-    return ($this->userId != null);
+    return ($this->userId == null);
   }
 
   public function getOwnerId() {
