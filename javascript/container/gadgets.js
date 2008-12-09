@@ -233,7 +233,7 @@ gadgets.IfrGadgetService.prototype.requestNavigateTo = function(view,
   var url = this.getUrlForView(view);
 
   if (opt_params) {
-    var paramStr = JSON.stringify(opt_params);
+    var paramStr = gadgets.json.stringify(opt_params);
     if (paramStr.length > 0) {
       url += '&appParams=' + encodeURIComponent(paramStr);
     }
@@ -549,7 +549,7 @@ gadgets.IfrGadget.prototype.getIframeUrl = function() {
       '&url=' + encodeURIComponent(this.specUrl) +
       '#rpctoken=' + this.rpcToken +
       (this.viewParams ?
-          '&view-params=' +  encodeURIComponent(JSON.stringify(this.viewParams)) : '') +
+          '&view-params=' +  encodeURIComponent(gadgets.json.stringify(this.viewParams)) : '') +
       (this.hashData ? '&' + this.hashData : '');
 };
 
