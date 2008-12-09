@@ -115,7 +115,7 @@ class RestRequestItem extends RequestItem {
     $params = explode('&', $val);
     foreach ($params as $param) {
       $queryParams = explode('=', $param);
-      $this->params[$queryParams[0]] = $queryParams[1];
+      $this->params[$queryParams[0]] = isset($queryParams[1]) ? $queryParams[1] : '';
     }
   }
 
