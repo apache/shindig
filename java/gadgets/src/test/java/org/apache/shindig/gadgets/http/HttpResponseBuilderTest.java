@@ -17,6 +17,7 @@
  */
 package org.apache.shindig.gadgets.http;
 
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import static org.junit.Assert.assertEquals;
@@ -56,7 +57,7 @@ public class HttpResponseBuilderTest {
 
   @Test
   public void addHeadersMap() {
-    Map<String, String> headers = Maps.immutableMap("foo", "bar", "blah", "blah");    
+    Map<String, String> headers = ImmutableMap.of("foo", "bar", "blah", "blah");    
 
     HttpResponseBuilder builder = new HttpResponseBuilder()
         .addHeaders(headers);

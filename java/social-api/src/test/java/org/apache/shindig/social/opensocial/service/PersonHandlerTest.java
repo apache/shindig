@@ -30,8 +30,10 @@ import org.apache.shindig.social.opensocial.spi.UserId;
 import org.apache.shindig.social.opensocial.spi.SocialSpiException;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSortedSet;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
+
 import junit.framework.TestCase;
 import org.easymock.classextension.EasyMock;
 
@@ -163,7 +165,7 @@ public class PersonHandlerTest extends TestCase {
     EasyMock.expect(personService.getPeople(
         JOHN_DOE,
         new GroupId(GroupId.Type.friends, null), options,
-        Sets.newLinkedHashSet("money", "fame", "fortune"), token))
+        ImmutableSortedSet.of("money", "fame", "fortune"), token))
         .andReturn(ImmediateFuture.newInstance(data));
 
     replay();

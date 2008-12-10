@@ -20,7 +20,7 @@ package org.apache.shindig.social.opensocial.service;
 import org.apache.shindig.auth.SecurityTokenDecoder;
 import org.apache.shindig.common.servlet.ParameterFetcher;
 
-import com.google.common.collect.Maps;
+import com.google.common.collect.ImmutableMap;
 
 import java.util.Map;
 
@@ -33,7 +33,7 @@ import javax.servlet.http.HttpServletRequest;
 public class DataServiceServletFetcher implements ParameterFetcher {
 
   public Map<String, String> fetch(HttpServletRequest req) {
-    return Maps.immutableMap(SecurityTokenDecoder.SECURITY_TOKEN_NAME, req.getParameter("st"));
+    return ImmutableMap.of(SecurityTokenDecoder.SECURITY_TOKEN_NAME, req.getParameter("st"));
   }
 }
 

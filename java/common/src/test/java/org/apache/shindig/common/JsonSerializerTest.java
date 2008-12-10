@@ -22,6 +22,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 import com.google.common.collect.Maps;
+import com.google.common.collect.ImmutableMap;
 
 import org.apache.commons.lang.StringUtils;
 import org.json.JSONArray;
@@ -50,7 +51,7 @@ public class JsonSerializerTest {
 
   @Test
   public void serializeSimpleMap() throws Exception {
-    Map<String, String> map = Maps.immutableMap("hello", "world", "foo", "bar");
+    Map<String, String> map = ImmutableMap.of("hello", "world", "foo", "bar");
     assertTrue("Did not produce results matching reference implementation.",
         jsonEquals(new JSONObject(map).toString(), JsonSerializer.serialize(map)));
   }
@@ -75,11 +76,11 @@ public class JsonSerializerTest {
 
   @Test
   public void serializeMixedObjects() throws Exception {
-    Map<String, ? extends Object> map = Maps.immutableMap(
+    Map<String, ? extends Object> map = ImmutableMap.of(
         "integer", Integer.valueOf(100),
         "double", Double.valueOf(233333333333.7d),
         "boolean", Boolean.TRUE,
-        "map", Maps.immutableMap("hello", "world", "foo", "bar"),
+        "map", ImmutableMap.of("hello", "world", "foo", "bar"),
         "string", "hello!");
     assertTrue("Did not produce results matching reference implementation.",
         jsonEquals(new JSONObject(map).toString(), JsonSerializer.serialize(map)));

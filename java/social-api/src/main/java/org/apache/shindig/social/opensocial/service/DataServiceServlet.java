@@ -21,6 +21,7 @@ import org.apache.shindig.auth.SecurityToken;
 import org.apache.shindig.social.opensocial.spi.DataCollection;
 import org.apache.shindig.social.opensocial.spi.RestfulCollection;
 
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 
 import java.io.IOException;
@@ -107,7 +108,7 @@ public class DataServiceServlet extends ApiServlet {
       Object response = responseItem.getResponse();
       // TODO: ugliness resulting from not using RestfulItem
       if (!(response instanceof DataCollection) && !(response instanceof RestfulCollection)) {
-        response = Maps.immutableMap("entry", response);
+        response = ImmutableMap.of("entry", response);
       }
 
       writer.write(converter.convertToString(response));

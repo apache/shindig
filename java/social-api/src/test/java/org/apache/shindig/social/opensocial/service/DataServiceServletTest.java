@@ -31,6 +31,7 @@ import org.apache.shindig.social.core.util.xstream.GuiceBeanProvider;
 import org.apache.shindig.social.core.util.xstream.XStream081Configuration;
 import org.apache.shindig.social.opensocial.spi.SocialSpiException;
 
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
@@ -159,7 +160,7 @@ public class DataServiceServletTest extends TestCase {
     EasyMock.expect(handler.handleItem(EasyMock.isA(RequestItem.class)));
     EasyMock.expectLastCall().andReturn(ImmediateFuture.newInstance(jsonObject));
 
-    EasyMock.expect(jsonConverter.convertToString(Maps.immutableMap("entry", jsonObject)))
+    EasyMock.expect(jsonConverter.convertToString(ImmutableMap.of("entry", jsonObject)))
         .andReturn("{ 'entry' : " + jsonObject + " }");
 
     PrintWriter writerMock = EasyMock.createMock(PrintWriter.class);
