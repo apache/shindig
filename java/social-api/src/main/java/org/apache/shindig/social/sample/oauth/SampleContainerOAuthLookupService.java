@@ -21,6 +21,7 @@ import org.apache.shindig.auth.SecurityToken;
 import org.apache.shindig.social.core.oauth.OAuthSecurityToken;
 import org.apache.shindig.social.opensocial.oauth.OAuthLookupService;
 
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 
@@ -39,7 +40,7 @@ import java.util.Map;
 
 public class SampleContainerOAuthLookupService implements OAuthLookupService {
   // If we were a real social network this would probably be a function
-  private static Map<String, String> sampleContainerUrlToAppIdMap = Maps.immutableMap(
+  private static Map<String, String> sampleContainerUrlToAppIdMap = ImmutableMap.of(
       "http://localhost:8080/gadgets/files/samplecontainer/examples/SocialHelloWorld.xml",
       "7810",
       "http://localhost:8080/gadgets/files/samplecontainer/examples/SocialActivitiesWorld.xml",
@@ -47,12 +48,12 @@ public class SampleContainerOAuthLookupService implements OAuthLookupService {
   );
 
   // If we were a real social network we would probably be keeping track of this in a db somewhere
-  private static Map<String, ArrayList<String>> sampleContainerAppInstalls = Maps.immutableMap(
+  private static Map<String, ArrayList<String>> sampleContainerAppInstalls = ImmutableMap.of(
       "john.doe", Lists.newArrayList("7810", "8355")
   );
 
   // If we were a real social network we would establish shared secrets with each of our gadgets
-  private static Map<String, String> sampleContainerSharedSecrets = Maps.immutableMap(
+  private static Map<String, String> sampleContainerSharedSecrets = ImmutableMap.of(
       "7810", "SocialHelloWorldSharedSecret",
       "8355", "SocialActivitiesWorldSharedSecret"
   );

@@ -915,9 +915,9 @@
         <version>1.0</version>
       </dependency>
       <dependency>
-        <groupId>com.google.code.google-collections</groupId>
-        <artifactId>google-collect</artifactId>
-        <version>snapshot-20080321</version>
+        <groupId>com.google.collections</groupId>
+        <artifactId>google-collections</artifactId>
+        <version>0.8</version>
       </dependency>
       <dependency>
         <groupId>commons-codec</groupId>

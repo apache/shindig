@@ -26,6 +26,7 @@ import org.apache.shindig.common.testing.TestExecutorService;
 import org.apache.shindig.gadgets.GadgetContext;
 import org.apache.shindig.gadgets.spec.GadgetSpec;
 
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 
 import org.junit.Test;
@@ -45,7 +46,7 @@ public class ConcurrentPreloaderServiceTest {
   private static final String PRELOAD_STRING_VALUE = "Some random string";
   private static final Integer PRELOAD_NUMERIC_VALUE = 5;
   private static final Map<String, String> PRELOAD_MAP_VALUE
-      = Maps.immutableMap("foo", "bar", "baz", "blah");
+      = ImmutableMap.of("foo", "bar", "baz", "blah");
 
   private final TestPreloader preloader = new TestPreloader();
   private final TestPreloader preloader2 = new TestPreloader();
