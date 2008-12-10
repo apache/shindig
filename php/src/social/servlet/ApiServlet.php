@@ -54,7 +54,7 @@ require 'src/social/oauth/OAuth.php';
 /**
  * Common base class for API servlets.
  */
-abstract class ApiServlet {
+abstract class ApiServlet extends HttpServlet {
   protected $handlers = array();
   
   protected static $DEFAULT_ENCODING = "UTF-8";
@@ -65,6 +65,7 @@ abstract class ApiServlet {
   public static $MESSAGE_ROUTE = "messages";
 
   public function __construct() {
+    parent::__construct();
     $this->handlers[self::$PEOPLE_ROUTE] = new PersonHandler();
     $this->handlers[self::$ACTIVITY_ROUTE] = new ActivityHandler();
     $this->handlers[self::$APPDATA_ROUTE] = new AppDataHandler();
