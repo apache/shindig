@@ -141,7 +141,7 @@ public class PersonServiceDb implements PersonService {
     String uid = id.getUserId(token);
     Query q = entiyManager.createNamedQuery(PersonDb.FINDBY_PERSONID);
     q.setParameter(PersonDb.PARAM_PERSONID, uid);
-    q.setFirstResult(1);
+    q.setFirstResult(0);
     q.setMaxResults(1);
     List<?> plist = q.getResultList();
     Person person = null;
