@@ -163,7 +163,7 @@ class GadgetRenderingServlet extends HttpServlet {
     // Forced libs first.
     if (! empty($forcedLibs)) {
       $libs = explode(':', $forcedLibs);
-      echo sprintf($externFmt, Config::get('default_js_prefix') . $this->getJsUrl($libs, $gadget) . "&container=" . $context->getContainer()) . "\n";
+      $content .= sprintf($externFmt, Config::get('default_js_prefix') . $this->getJsUrl($libs, $gadget) . "&container=" . $context->getContainer()) . "\n";
     }
     $content .= "<script>\n";
     
