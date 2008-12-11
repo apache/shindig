@@ -62,14 +62,12 @@ class OutputXmlConverterTest extends PHPUnit_Framework_TestCase {
     $output = ob_get_clean();
     $expected = '<?xml version="1.0" encoding="UTF-8"?>
 <response>
-  <person>
-    <entry>
-      <isOwner></isOwner>
-      <isViewer></isViewer>
-      <displayName>1 1</displayName>
-      <id>1</id>
-    </entry>
-  </person>
+  <entry>
+    <isOwner></isOwner>
+    <isViewer></isViewer>
+    <displayName>1 1</displayName>
+    <id>1</id>
+  </entry>
 </response>
 ';
     $this->assertEquals($expected, $output);

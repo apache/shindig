@@ -142,6 +142,8 @@ class BasicRemoteContentTest extends PHPUnit_Framework_TestCase {
     $request = new RemoteContentRequest('http://adwordsapi.blogspot.com/atom.xml');
     $context = new TestContext();
     $ret = $this->BasicRemoteContent->fetch($request, $context);
+    print_r($ret);
+    die();
     $content = $ret->getResponseContent();
     $this->assertNotEquals(null, $content);
   }
