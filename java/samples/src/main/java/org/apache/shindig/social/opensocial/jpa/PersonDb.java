@@ -173,7 +173,7 @@ public class PersonDb implements Person, DbObject {
     /**
      * {@inheritDoc}
      */
-    public String getFilterableProperty(String fieldName, FilterOperation filterOperation) {
+    public String findFilterableProperty(String fieldName, FilterOperation filterOperation) {
       FilterSpecification spec = FILTER_COLUMNS.get(fieldName);
       if (spec != null) {
         return spec.translateProperty(filterOperation);

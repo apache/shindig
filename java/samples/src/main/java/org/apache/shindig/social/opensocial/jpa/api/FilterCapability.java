@@ -33,5 +33,5 @@ public interface FilterCapability {
    * @return the final property that is being filtered or null is the filter operation specified is
    *         not applicable
    */
-  String getFilterableProperty(String fieldName, PersonService.FilterOperation filterOperation);
+  String findFilterableProperty(String fieldName, PersonService.FilterOperation filterOperation);
 }

@@ -66,6 +66,10 @@ public class Bootstrap {
     this.minWrite = minWrite;
 
   }
+  
+  public Bootstrap() {
+    
+  }
 
   public void init(String unitName) {
 
