@@ -30,7 +30,7 @@ class OutputBasicXmlConverter {
    * @param array $entryTypes the map of entries
    * @return string the request type
    */
-  public function getRequestType($requestItem, $entryTypes) {
+  public static function getRequestType($requestItem, $entryTypes) {
     // map the Request URL to the content type to use  
     $params = $requestItem->getParameters();
     if (! is_array($params)) {
@@ -60,7 +60,7 @@ class OutputBasicXmlConverter {
    * @param string $nameSpace optional namespace to use when creating node
    * @return DOMElement node
    */
-  public function addNode(DOMDocument $doc, DOMElement $node, $name, $value = '', $attributes = false, $nameSpace = false) {
+  public static function addNode(DOMDocument $doc, $node, $name, $value = '', $attributes = false, $nameSpace = false) {
     if ($nameSpace) {
       $childNode = $node->appendChild($doc->createElementNS($nameSpace, $name));
     } else {
@@ -90,7 +90,7 @@ class OutputBasicXmlConverter {
    * @param string $nameSpace if specified, the node is created using this namespace
    * @return DOMElement returns newly created element
    */
-  public function addData(DOMDocument $doc, DOMElement $element, $name, $data, $nameSpace = false) {
+  public static function addData(DOMDocument $doc, DOMElement $element, $name, $data, $nameSpace = false) {
     if ($nameSpace) {
       $newElement = $element->appendChild($doc->createElementNS($nameSpace, $name));
     } else {
