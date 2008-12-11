@@ -32,7 +32,7 @@ under the License.
   <artifactId>shindig</artifactId>
   <packaging>pom</packaging>
 
-  <name>Apache Shindig PhP assembly</name>
+  <name>Apache Shindig Distribution assembly</name>
   <description>Assembles the PHP code base into a deployment package.</description>
 
   <scm>
