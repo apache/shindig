@@ -47,7 +47,7 @@ function __autoload($className) {
 
 set_include_path(get_include_path() . PATH_SEPARATOR . realpath('./php') . PATH_SEPARATOR . realpath('./php/external'));
 ini_set('error_reporting', E_COMPILE_ERROR | E_ERROR | E_CORE_ERROR);
-require_once 'config.php';
+require_once 'src/common/Config.php';
 require_once 'test/TestContext.php';
 
 if (defined('PHPUnit_MAIN_METHOD') === false) {
