@@ -164,7 +164,7 @@ public class PersonServiceDb implements PersonService {
   private int addFilterClause(StringBuilder sb, FilterCapability filterable,
       CollectionOptions collectionOptions, int lastPos) {
     // this makes the filter value safe
-    String filter = filterable.getFilterableProperty(collectionOptions.getFilter(),
+    String filter = filterable.findFilterableProperty(collectionOptions.getFilter(),
         collectionOptions.getFilterOperation());
     String filterValue = collectionOptions.getFilterValue();
     int filterPos = 0;
