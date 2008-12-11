@@ -7,40 +7,35 @@
     <format>tar.bz2</format>
   </formats>
   <includeBaseDirectory>false</includeBaseDirectory>
+  <dependencySets>
+    <dependencySet>
+      <outputDirectory>shindig-binary</outputDirectory>
+      <outputFileNameMapping>${artifact.artifactId}-${artifact.version}${dashClassifier?}.${artifact.extension}</outputFileNameMapping>
+      <useTransitiveDependencies>false</useTransitiveDependencies>
+      <includes>
+        <include>*:war:*</include>
+        <include>*:jar:*</include>
+      </includes>
+    </dependencySet>
+  </dependencySets>
   <fileSets>
     <fileSet>
       <outputDirectory>shindig-binary</outputDirectory>
-      <directory>../features/target/</directory>
+      <directory>../</directory>
       <includes>
-        <include>*.jar</include>
+        <include>COMMITTERS</include>
+        <include>COPYING</include>
+        <include>DISCLAIMER</include>
+        <include>LICENSE</include>
+        <include>NOTICE</include>
       </includes>
     </fileSet>
     <fileSet>
       <outputDirectory>shindig-binary</outputDirectory>
-      <directory>../java/common/target/</directory>
+      <directory>src/main/assembly/binary-src/</directory>
+      <filtered>true</filtered>
       <includes>
-        <include>*.jar</include>
-      </includes>
-    </fileSet>
-    <fileSet>
-      <outputDirectory>shindig-binary</outputDirectory>
-      <directory>../java/gadgets/target/</directory>
-      <includes>
-        <include>*.jar</include>
-      </includes>
-    </fileSet>
-    <fileSet>
-      <outputDirectory>shindig-binary</outputDirectory>
-      <directory>../java/social-api/target/</directory>
-      <includes>
-        <include>*.jar</include>
-      </includes>
-    </fileSet>
-    <fileSet>
-      <outputDirectory>shindig-binary</outputDirectory>
-      <directory>../java/server/target/</directory>
-      <includes>
-        <include>*.war</include>
+        <include>**/*</include>
       </includes>
     </fileSet>
   </fileSets>
