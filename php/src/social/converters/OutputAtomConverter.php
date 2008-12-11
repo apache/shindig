@@ -139,7 +139,7 @@ class OutputAtomConverter extends OutputConverter {
    * @param string $nameSpace optional namespace to use when creating node
    * @return DOMElement node
    */
-  private function addNode(DOMElement $node, $name, $value = '', $attributes = false, $nameSpace = false) {
+  private function addNode($node, $name, $value = '', $attributes = false, $nameSpace = false) {
     return OutputBasicXmlConverter::addNode($this->doc, $node, $name, $value, $attributes, $nameSpace);
   }
 
