@@ -119,25 +119,25 @@ under the License.
     <dependency>
       <groupId>org.hibernate</groupId>
       <artifactId>hibernate</artifactId>
-      <version>3.2.2.ga</version>
+      <version>3.2.6.ga</version>
     </dependency>
 
     <dependency>
       <groupId>org.hibernate</groupId>
       <artifactId>hibernate-annotations</artifactId>
-      <version>3.2.1.ga</version>
+      <version>3.3.1.GA</version>
     </dependency>
 
     <dependency>
       <groupId>org.hibernate</groupId>
       <artifactId>hibernate-entitymanager</artifactId>
-      <version>3.2.1.ga</version>
+      <version>3.3.1.ga</version>
     </dependency>
 
     <dependency>
       <groupId>org.hibernate</groupId>
       <artifactId>hibernate-tools</artifactId>
-      <version>3.2.0.beta9a</version>
+      <version>3.2.0.ga</version>
     </dependency>
     <dependency>
       <groupId>hsqldb</groupId>
