@@ -66,6 +66,7 @@ abstract class ApiServlet extends HttpServlet {
 
   public function __construct() {
     parent::__construct();
+    $this->setNoCache(true);
     $this->handlers[self::$PEOPLE_ROUTE] = new PersonHandler();
     $this->handlers[self::$ACTIVITY_ROUTE] = new ActivityHandler();
     $this->handlers[self::$APPDATA_ROUTE] = new AppDataHandler();
