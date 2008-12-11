@@ -1,3 +1,11 @@
+Welcome to Apache Shindig!
+
+* Read javascript/README for instructions for using the Shindig Gadget
+  Container JavaScript to enable your page to render Gadgets.
+* Read the instructions below for how to use PHP Shindig
+* For more information, see http://incubator.apache.org/shindig/
+
+
 Installing and Running The PHP Shindig Gadget Server
 ============================================
 
@@ -12,7 +20,7 @@ In order to build and run Shindig for PHP, you must have the following:
 - PHP 5.2.x with the json, simplexml, mcrypt and curl extentions enabled.
 
 
-Getting the code
+Getting the code (if your running from svn and not a release tarball)
 ============================================
 Create a subdirectory in your web document root, e.g. /var/www/html and
 checkout the Shindig code from its Subversion repository
@@ -81,4 +89,4 @@ would probably want to have something like:
   'xrds_location' => 'http://www.mycontainer.com/xrds',
   'check_file_exists' => false
  
- and implement your own service and oauth lookup classes
+And then implement your own service and oauth lookup classes.
