@@ -29,7 +29,7 @@ class JsonRpcServlet extends ApiServlet {
    */
   public function doGet() {
     $token = $this->getSecurityToken();
-    if (token == null) {
+    if ($token == null) {
       $this->sendSecurityError();
       return;
     }

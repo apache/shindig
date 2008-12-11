@@ -60,7 +60,7 @@ class OutputXmlConverter extends OutputConverter {
       // Single entry = Xml:Entry	
       $entry = $this->addNode($doc, 'response', '');
       // addData loops through the responseItem data recursively creating a matching XML structure
-      $this->addData($entry, $requestType, $data);
+      $this->addData($entry, 'entry', $data['entry']);
     }
     $xml = $doc->saveXML();
     echo $xml;
@@ -79,7 +79,7 @@ class OutputXmlConverter extends OutputConverter {
    * @param array $attributes optional array of attributes, false by default. If set attributes are added to the node using the key => val pairs
    * @return DOMElement node
    */
-  private function addNode(DOMElement $node, $name, $value = '', $attributes = false) {
+  private function addNode($node, $name, $value = '', $attributes = false) {
     return OutputBasicXmlConverter::addNode($this->doc, $node, $name, $value, $attributes);
   }
 
