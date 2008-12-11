@@ -51,7 +51,9 @@ under the License.
           <descriptors>
             <descriptor>src/main/assembly/php.xml</descriptor>
             <descriptor>src/main/assembly/source.xml</descriptor>
+            <descriptor>src/main/assembly/binary.xml</descriptor>
           </descriptors>
+          <tarLongFileMode>gnu</tarLongFileMode>
         </configuration>
         <executions>
           <execution>
