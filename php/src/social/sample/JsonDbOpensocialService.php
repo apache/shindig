@@ -182,7 +182,7 @@ class JsonDbOpensocialService implements ActivityService, PersonService, AppData
         if (! $token->isAnonymous() && $id == $token->getOwnerId()) {
           $person['isOwner'] = true;
         }
-        if (! isset($fields['@all'])) {
+        if ($fields[0] != '@all') {
           $newPerson = array();
           $newPerson['isOwner'] = isset($person['isOwner']) ? $person['isOwner'] : false;
           $newPerson['isViewer'] = isset($person['isViewer']) ? $person['isViewer'] : false;
@@ -196,17 +196,71 @@ class JsonDbOpensocialService implements ActivityService, PersonService, AppData
           }
           $person = $newPerson;
         }
-        $people[] = $person;
+        $people[$id] = $person;
       }
     }
     if ($sortOrder == 'name') {
       usort($people, array($this, 'comparator'));
     }
+    
+    try {
+      $people = $this->filterResults($people, $options);
+    } catch(Exception $e) {
+      $people['filtered'] = 'false';
+    }
+    
     //TODO: The samplecontainer doesn't support any filters yet. We should fix this.
     $totalSize = count($people);
     $collection = new RestfulCollection($people, $options->getStartIndex(), $totalSize);
     $collection->setItemsPerPage($options->getCount());
     return $collection;
+  }
+  
+  private function filterResults($peopleById, $options) {
+    if (! $options->getFilterBy()) {
+      return $peopleById; // no filtering specified
+    }
+    $filterBy = $options->getFilterBy();
+    $op = $options->getFilterOperation();
+    if (! $op) {
+      $op = CollectionOptions::FILTER_OP_EQUALS; // use this container-specific default
+    }
+    $value = $options->getFilterValue();
+    $filteredResults = array();
+    $numFilteredResults = 0;
+    foreach ($peopleById as $id => $person) {
+      if ($this->passesFilter($person, $filterBy, $op, $value)) {
+        $filteredResults[$id] = $person;
+        $numFilteredResults ++;
+      }
+    }
+    return $filteredResults;
+  }
+
+  private function passesFilter($person, $filterBy, $op, $value) {
+    $fieldValue = $person[$filterBy];
+    if (! $fieldValue || (is_array($fieldValue) && ! count($fieldValue))) {
+      return false; // person is missing the field being filtered for
+    }
+    if ($op == CollectionOptions::FILTER_OP_PRESENT) {
+      return true; // person has a non-empty value for the requested field
+    }
+    if (!$value) {
+      return false; // can't do an equals/startswith/contains filter on an empty filter value
+    }
+    // grab string value for comparison
+    if (is_array($fieldValue)) {
+      // plural fields match if any instance of that field matches
+      foreach ($fieldValue as $field) {
+        if ($this->passesStringFilter($field, $op, $value)) {
+          return true;
+        }
+      }
+    } else {
+      return $this->passesStringFilter($fieldValue, $op, $value);
+    }
+    
+    return false;
   }
 
   public function getPersonData($userId, GroupId $groupId, $appId, $fields, SecurityToken $token) {
@@ -346,12 +400,6 @@ class JsonDbOpensocialService implements ActivityService, PersonService, AppData
 	*/
   private function passesStringFilter($fieldValue, $filterOp, $filterValue) {
     switch ($filterOp) {
-      case CollectionOptions::FILTER_OP_PRESENT:
-        if ($fieldValue and isset($fieldValue) and $fieldValue != "") {
-          return true;
-        } else {
-          return false;
-        }
       case CollectionOptions::FILTER_OP_EQUALS:
         return $fieldValue == $filterValue;
       case CollectionOptions::FILTER_OP_CONTAINS:
@@ -359,7 +407,7 @@ class JsonDbOpensocialService implements ActivityService, PersonService, AppData
       case CollectionOptions::FILTER_OP_STARTSWITH:
         return strpos($fieldValue, $filterValue) === 0;
       default:
-        return false;
+        throw new Exception('unrecognized filterOp');
     }
   }
 
