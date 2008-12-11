@@ -60,23 +60,22 @@ class OutputAtomConverterTest extends PHPUnit_Framework_TestCase {
     ob_start();
     $outputConverter->outputResponse($responseItem, $requestItem);
     $output = ob_get_clean();
-    $expected = '<?xml version="1.0" encoding="UTF-8"?>
-<entry xmlns="http://www.w3.org/2005/Atom">
+    $expected = '<entry xmlns="http://www.w3.org/2005/Atom">
   <title>person entry for shindig:1</title>
   <author>
     <uri>urn:guid:1</uri>
     <name>shindig:1</name>
   </author>
   <id>urn:guid:1</id>
-  <updated>2008-11-17T11:24:39-08:00</updated>
+
+  <updated>2008-12-11T19:58:31+01:00</updated>
   <content type="application/xml">
     <person xmlns="http://ns.opensocial.org/2008/opensocial">
-      <entry>
-        <isOwner></isOwner>
-        <isViewer></isViewer>
-        <displayName>1 1</displayName>
-        <id>1</id>
-      </entry>
+      <isOwner></isOwner>
+      <isViewer></isViewer>
+      <displayName>1 1</displayName>
+      <id>1</id>
+
     </person>
   </content>
 </entry>
