@@ -264,6 +264,9 @@ class JsonDbOpensocialService implements ActivityService, PersonService, AppData
   }
 
   public function getPersonData($userId, GroupId $groupId, $appId, $fields, SecurityToken $token) {
+    if (! isset($fields[0])) {
+      $fields[0] = '@all';
+    }
     $db = $this->getDb();
     $allData = $this->getAllData();
     $friendsTable = $db[self::$FRIEND_LINK_TABLE];
@@ -311,6 +314,14 @@ class JsonDbOpensocialService implements ActivityService, PersonService, AppData
   }
 
   public function deletePersonData($userId, GroupId $groupId, $appId, $fields, SecurityToken $token) {
+  	$db = $this->getDb();
+  	$allData = $this->getAllData();
+  	if ($fields == null || $fields[0] == '*') {
+      $allData[$userId->getUserId($token)] = null;
+      $db[self::$DATA_TABLE] = $allData;
+      $this->saveDb($db);
+      return null;
+  	}
     foreach ($fields as $key => $present) {
       if (! $this->isValidKey($key)) {
         throw new SocialSpiException("The person app data key had invalid characters", ResponseError::$BAD_REQUEST);
