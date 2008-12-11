@@ -84,5 +84,32 @@ under the License.
       </plugin>
     </plugins>
   </build>
-  <dependencies/>
+  <dependencies>
+    <dependency>
+      <groupId>org.apache.shindig</groupId>
+      <artifactId>shindig-common</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.shindig</groupId>
+      <artifactId>shindig-gadgets</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.shindig</groupId>
+      <artifactId>shindig-social-api</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.shindig</groupId>
+      <artifactId>shindig-features</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.shindig</groupId>
+      <artifactId>shindig-server</artifactId>
+      <version>${project.version}</version>
+      <type>war</type>
+    </dependency>
+  </dependencies>
 </project>
