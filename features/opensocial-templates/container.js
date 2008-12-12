@@ -46,7 +46,7 @@ os.Container.inlineTemplates_ = [];
 
 /**
  * @type {Array.<Function>} An array of callbacks to fire when the page DOM has
- * loaded. This will be null until the first callback is added 
+ * loaded. This will be null until the first callback is added
  * @see registerDomListener_
  * @private
  */
@@ -61,20 +61,20 @@ os.Container.domLoaded_ = false;
 /**
  * Registers the DOM Load listener to fire when the page DOM is available.
  * TODO: See if we can use gadgets.util.regiterOnLoadHandler() here.
- * TODO: Currently for everything but Mozilla, this just registers an 
- * onLoad listener on the window. Should use DOMContentLoaded on Opera9, 
+ * TODO: Currently for everything but Mozilla, this just registers an
+ * onLoad listener on the window. Should use DOMContentLoaded on Opera9,
  * appropriate hacks (polling?) on IE and Safari.
  * @private
  */
 os.Container.registerDomLoadListener_ = function() {
   var gadgets = window['gadgets'];
   if (gadgets && gadgets.util) {
-    gadgets.util.registerOnLoadHandler(os.Container.onDomLoad_); 
+    gadgets.util.registerOnLoadHandler(os.Container.onDomLoad_);
   } else if (navigator.product == 'Gecko') {
     window.addEventListener("DOMContentLoaded", os.Container.onDomLoad_, false);
   } if (window.addEventListener) {
     window.addEventListener("load", os.Container.onDomLoad_, false);
-  } else {          
+  } else {
     if (!document.body) {
       setTimeout(arguments.callee, 0);
       return;
@@ -83,7 +83,7 @@ os.Container.registerDomLoadListener_ = function() {
     window.onload = function() {
       oldOnLoad();
       os.Container.onDomLoad_();
-    }              
+    }
   }
 };
 
@@ -103,7 +103,7 @@ os.Container.onDomLoad_ = function() {
       os.log(e);
     }
   }
-  os.Container.domLoaded_ = true;  
+  os.Container.domLoaded_ = true;
 };
 
 /**
@@ -113,7 +113,7 @@ os.Container.onDomLoad_ = function() {
  */
 os.Container.executeOnDomLoad = function(callback) {
   if (os.Container.domLoaded_) {
-    setTimeout(callback, 0);    
+    setTimeout(callback, 0);
   } else {
     if (os.Container.domLoadCallbacks_ == null) {
       os.Container.domLoadCallbacks_ = [];
@@ -144,8 +144,6 @@ os.Container.registerDocumentTemplates = function(opt_doc) {
     }
   }
 };
-
-os.Container.executeOnDomLoad(os.Container.registerDocumentTemplates);
 
 /**
  * Compiles and registers all unnamed templates in the document.
@@ -179,6 +177,8 @@ os.Container.compileInlineTemplates = function(opt_data, opt_doc) {
  */
 os.Container.renderInlineTemplates = function(opt_data, opt_doc) {
   var doc = opt_doc || document;
+  var context = opt_data ?
+      os.createContext(opt_data) : os.data.getDataContext().getContext();
   var inlined = os.Container.inlineTemplates_;
   for (var i = 0; i < inlined.length; ++i) {
     var template = inlined[i].template;
@@ -191,24 +191,58 @@ os.Container.renderInlineTemplates = function(opt_data, opt_doc) {
       node.parentNode.insertBefore(el, node);
     }
 
-    var beforeData = node.getAttribute('beforeData');
+    var beforeData = node.getAttribute('before') ||
+        node.getAttribute('beforeData');
     if (beforeData) {
       // Automatically hide this template when specified data is available.
       var keys = beforeData.split(/[\, ]+/);
       os.data.DataContext.registerListener(keys,
-          os.createHideElementClosure(el));
+          os.Container.createHideElementClosure(el));
     }
 
-    var requiredData = node.getAttribute('requireData');
+    var requiredData = node.getAttribute('require') ||
+        node.getAttribute('requireData');
     if (requiredData) {
       // This template will render when the specified data is available.
       var keys = requiredData.split(/[\, ]+/);
       os.data.DataContext.registerListener(keys,
-          os.createRenderClosure(template, el, os.data.DataContext));
+          os.Container.createRenderClosure(template, el, null,
+              os.data.DataContext.getContext()));
     } else {
-      template.renderInto(el, opt_data);
+      template.renderInto(el, null, context);
     }
   }
+};
+
+/**
+* Creates a closure that will render the a template into an element with
+* optional data.
+* @param {Object} template The template object to use.
+* @param {Element} element The DOM element to inject the template into.
+* @param {Object} opt_data Optional data to be used as to create a context.
+* @param {Object} opt_context Optional pre-constructed rendering context.
+* @return {Function} The constructed closure.
+* TODO(davidbyttow): Move this into util.js
+*/
+os.Container.createRenderClosure = function(template, element, opt_data,
+    opt_context) {
+ var closure = function() {
+   template.renderInto(element, opt_data, opt_context);
+ };
+ return closure;
+};
+
+/**
+ * Creates a closure that will hide a DOM element.
+ * @param {Element} element The DOM element to inject the template into.
+ * @return {Function} The constructed closure.
+ * TODO(davidbyttow): Move this into util.js
+ */
+os.Container.createHideElementClosure = function(element) {
+  var closure = function() {
+    displayNone(element);
+  };
+  return closure;
 };
 
 /**
@@ -251,35 +285,13 @@ os.Container.renderElement = function(elementId, templateId, opt_data) {
 };
 
 /**
- * Loads and executes all inline data request sections.
- * @param {Object} opt_doc Optional document to use instead of window.document.
- * TODO(davidbyttow): Currently this processes all 'script' blocks together,
- *     instead of collecting them all and then processing together. Not sure
- *     which is preferred yet.
- * TODO(davidbyttow: Figure out a way to pass in params used only for data
- *     and not for template rendering.
- */
-os.Container.loadDataRequests = function(opt_doc) {
-  var doc = opt_doc || document;
-  var nodes = doc.getElementsByTagName(os.Container.TAG_script_);
-  for (var i = 0; i < nodes.length; ++i) {
-    var node = nodes[i];
-    if (node.type == os.Container.dataType_) {
-      os.data.loadRequests(node);
-    }
-  }
-  os.data.executeRequests();
-};
-
-/**
  * Compiles and renders all inline templates.
  * @param {Object} opt_data Optional JSON data.
  * @param {Object} opt_doc Optional document to use instead of window.document.
  */
 os.Container.processInlineTemplates = function(opt_data, opt_doc) {
-  var data = opt_data || os.data.DataContext;
   os.Container.compileInlineTemplates(opt_doc);
-  os.Container.renderInlineTemplates(data, opt_doc);
+  os.Container.renderInlineTemplates(opt_data, opt_doc);
 };
 
 /**
@@ -289,10 +301,11 @@ os.Container.processInlineTemplates = function(opt_data, opt_doc) {
  * @param {Object} opt_doc Optional document to use instead of window.document.
  */
 os.Container.processDocument = function(opt_data, opt_doc) {
-  os.Container.loadDataRequests(opt_doc);
   os.Container.registerDocumentTemplates(opt_doc);
   os.Container.processInlineTemplates(opt_data, opt_doc);
 };
+
+os.Container.executeOnDomLoad(os.Container.processDocument);
 
 /***
  * @type {string} Tag name of a template.
@@ -309,14 +322,8 @@ os.Container.templateTypes_ = {};
 os.Container.templateTypes_['text/os-template'] = true;
 os.Container.templateTypes_['text/template'] = true;
 
-/***
- * @type {string} Type name of data request sections.
- * @private
- */
-os.Container.dataType_ = 'text/os-data';
-
 /**
- * Checks if a given type name is properly named as a template. 
+ * Checks if a given type name is properly named as a template.
  * @param {string} typeName Name of a given type.
  * @return {boolean} This type is considered a template.
  * @private

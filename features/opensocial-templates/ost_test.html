@@ -99,8 +99,8 @@ limitations under the License.
       <span if="'101'!='101'">FALSE</span>
     </xmp>
     <xmp id="_T_Conditional_Mixed" style="display: none">
-      <span if="'101'>42">TRUE</span>
-      <span if="!('101'>42)">FALSE</span>
+      <span if="'101' gt 42">TRUE</span>
+      <span if="'101' lt 42">FALSE</span>
     </xmp>
 
     <xmp id="_T_Repeat" style="display: none">
@@ -116,22 +116,18 @@ limitations under the License.
     </xmp>
 
     <xmp id="custom:list" style="display: none">
-      <div repeat="$my.item"><os:renderAll content="title"/><os:renderAll content="body"/></div>
+      <div repeat="$my.item"><os:renderAll content="header"/><os:renderAll content="body"/></div>
     </xmp>
 
     <xmp id="_T_List" style="display: none">
       <custom:list>
         <item>
-          <title>hello</title>
+          <header>hello</header>
           <body>world</body>
         </item>
       </custom:list>
     </xmp>  
 
-    <xmp id="_T_Tag_input" style="display: none">
-      <!-- Uses a controller to grab the value ${def} as the default -->
-      <custom:input value="data"/>
-    </xmp>
     <xmp id="_T_Tag_blink" style="display: none">
       <custom:blink>blink text</custom:blink>
     </xmp>

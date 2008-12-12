@@ -35,7 +35,7 @@ function compileAndRender_(templateId, opt_context) {
 /**
  * Takes a string representing a the markup of single DOM node, and returns
  * the corresponding DOM node.
- * 
+ *
  * @param {string} markup Markup text of the DOM node
  * @return {Node} The DOM node
  */
@@ -65,7 +65,7 @@ function isRealAttribute(attr) {
  *   that don't start with "js". This leaves the contents of the tag
  * - Removes nodes with style="display: none;", which is what JsTemplate does
  *   to nodes that aren't officially output.
- * 
+ *
  * @param {Node} node The DOM node
  * @return {string} The normalized markup
  */
@@ -80,11 +80,11 @@ function nodeToNormalizedMarkup(node) {
         hasRealAttributes = true;
       }
     }
-    
+
     if (node.getAttribute('customtag') != null) {
       hasRealAttributes = false;
     }
-    
+
     if (node.nodeName == 'SPAN' && !hasRealAttributes) {
       var text = '';
       for (var i = 0; i < node.childNodes.length; i++) {
@@ -95,7 +95,7 @@ function nodeToNormalizedMarkup(node) {
     if (node.style.display == 'none') {
       return '';
     }
-    
+
     var text = '<' + node.nodeName;
     for (var i = 0; i < node.attributes.length; i++) {
       var att = node.attributes[i];
@@ -115,10 +115,10 @@ function nodeToNormalizedMarkup(node) {
 
 /**
  * Normalizes a node or text string to normalized text of the DOM node
- * 
+ *
  * @param {Node|string} nodeOrText The DOM node or text of the DOM node
  * @return {string} The normalized markup text
- * 
+ *
  */
 function normalizeNodeOrMarkup(nodeOrText) {
   var node = typeof nodeOrText == 'string'
@@ -129,14 +129,14 @@ function normalizeNodeOrMarkup(nodeOrText) {
 
 /*
  * Checks if two DOM node are equal, ingoring template artefacts.
- * 
+ *
  * @param {Node|string} lhs First DOM node or string of markup contents
  * @param {Node|string} rhs Second DOM node or string of markup contents
  */
 function assertTemplateDomEquals(lhs, rhs) {
   lhs = normalizeNodeOrMarkup(lhs);
   rhs = normalizeNodeOrMarkup(rhs);
-  
+
   assertEquals(lhs, rhs);
 }
 
@@ -145,7 +145,7 @@ function assertTemplateDomEquals(lhs, rhs) {
  * Allow testing of templates passed in a strings. Allows for calling
  * a template, passing in a map of named templates, and passing in the data
  * context.
- * 
+ *
  * @param {string} templateText The text of the inline template to evaluate
  * @param {string} output The expected output
  * @param {Object?} context The data context
@@ -153,7 +153,7 @@ function assertTemplateDomEquals(lhs, rhs) {
  */
 function assertTemplateOutput(templateText, output, context,
     namedTemplates) {
-  
+
   // Parse and register named templates
   if (namedTemplates instanceof Array) {
     for (var i = 0; i < namedTemplates.length; i++) {
@@ -163,9 +163,9 @@ function assertTemplateOutput(templateText, output, context,
       os.Loader.processTemplatesNode(dom);
     }
   }
-  
+
   var template = os.compileTemplateString(templateText);
-  
+
   // Process the template and output the result
   var outputNode = document.createElement("div");
   template.renderInto(outputNode, context);
@@ -283,21 +283,21 @@ function testSubstitution_nested() {
 function testConditional_Number() {
   var outputNode = os.compileTemplateString(
       '<span if="42==42">TRUE</span><span if="!(42==42)">FALSE</span>'
-      ).render();   
+      ).render();
   assertEquals("TRUE", domutil.getVisibleTextTrim(outputNode));
 }
 
 function testConditional_String() {
   var outputNode = os.compileTemplateString(
       "<span if=\"'101'=='101'\">TRUE</span><span if=\"'101'!='101'\">FALSE</span>"
-      ).render(); 
+      ).render();
   assertEquals("TRUE", domutil.getVisibleTextTrim(outputNode));
 }
 
 function testConditional_Mixed() {
   var outputNode = os.compileTemplateString(
       "<span if=\"'101' gt 42\">TRUE</span><span if=\"'101' lt 42\">FALSE</span>"
-      ).render();   
+      ).render();
   assertEquals("TRUE", domutil.getVisibleTextTrim(outputNode));
 }
 
@@ -339,7 +339,7 @@ function testSelect() {
   };
   var outputNode = compileAndRender_("_T_Options", data);
   var selectNode = outputNode.firstChild;
-  
+
   assertEquals(data.options.length, selectNode.options.length);
   for (var i = 0; i < data.options.length; i++) {
     var entry = data.options[i];
@@ -352,6 +352,7 @@ function testSelect() {
 function testList() {
   os.Container.registerTag('custom:list');
   var output = compileAndRender_('_T_List');
+  document.body.appendChild(output);
   assertEquals('helloworld', domutil.getVisibleText(output));
 }
 
@@ -374,13 +375,13 @@ function testTag_input() {
 
   var data = {
     data: "Some default data"
-  };  
+  };
   var template = os.compileTemplateString("<custom:input value=\"data\"/>");
   var output = template.render(data);
-  
+
   // extract contentNode
   var contentNode = output.getElementsByTagName("input")[0];
-  
+
   assertEquals(contentNode.value, data.data);
 }
 
@@ -443,7 +444,7 @@ function testParameter() {
       null,
       ['<Template tag="os:HelloWorldWithParam">' + content + '</Template>']);
   }
-  
+
   tryTemplateContent('${$my.text}');
   tryTemplateContent('${My.text}');
   tryTemplateContent('${my.text}');
@@ -463,7 +464,7 @@ function testContent() {
       null,
       ['<Template tag="os:HelloWorldWithContent">' + content + '</Template>']);
   }
-    
+
   tryTemplateContent('<os:renderAll/>');
   tryTemplateContent('<os:RenderAll/>');
 }
@@ -478,14 +479,14 @@ function testNamedContent() {
         '<Content>Hello <b>world!</b></Content>' +
       '</os:HelloWorldWithNamedContent>' +
       '</div>',
-      
+
       '<div>Hello <b>world!</b></div>',
       null,
       ['<Template tag="os:HelloWorldWithNamedContent">' + content + '</Template>']);
   }
   tryTemplateContent('<os:renderAll content="os:Content"/>');
   tryTemplateContent('<os:renderAll content="Content"/>');
-  
+
   // Not working yet:
   /*
   tryTemplateContent('<os:renderAll content="${my.os:Content}"/>');
@@ -507,7 +508,7 @@ function testRepeatedContent() {
         '<os:Word>Hello</os:Word>' +
         '<os:Word>world!</os:Word>' +
       '</os:HelloWorldRepeatedContent>',
-      
+
       '<div>Helloworld!</div>',
       null,
       ['<Template tag="os:HelloWorldRepeatedContent">' + content + '</Template>']);
@@ -543,7 +544,7 @@ function testRepeatedContentTwice() {
       '<os:Word>Hello</os:Word>' +
       '<os:Word>world!</os:Word>' +
     '</os:HelloWorldRepeatedContent>',
-    
+
     '<div><div>Helloworld!</div><div>Helloworld!</div></div>',
     null,
     ['<Template tag="os:HelloWorldRepeatedContent">
@@ -558,7 +559,7 @@ function testRepeatedContentTwice() {
 /**
  * Currently, expression inside "content" attribute is equiv of no attribute.
  * Probably should just include no data.
- * 
+ *
  * I.e.
  * <os:renderAll content="${os:NoMatch}"/> currently has same output as
  * <os:renderAll/>
@@ -571,10 +572,10 @@ function testRenderAllBadExprInContent() {
       '<os:Content>Hello world!</os:Content>' +
     '</os:HelloWorldBadExpr>' +
     '</div>',
-    
+
     '<div></div>',
     null,
-    ['<Template tag="os:HelloWorldBadExpr">' + 
+    ['<Template tag="os:HelloWorldBadExpr">' +
      '<os:renderAll content="${os:NoMatch}"/>' +
      '</Template>']);
   */
@@ -586,17 +587,17 @@ function testBooleanTrue() {
     '<span if="${BooleanTrue}">Hello world!</span>',
     '<span>Hello world!</span>',
     {BooleanTrue: true});
-    
+
   assertTemplateOutput(
     '<span if="BooleanTrue">Hello world!</span>',
     '<span>Hello world!</span>',
     {BooleanTrue: true});
-    
+
   assertTemplateOutput(
     '<span if="!BooleanTrue">Hello world!</span>',
     '<span></span>',
     {BooleanTrue: true});
-    
+
   assertTemplateOutput(
     '<span if="${!BooleanTrue}">Hello world!</span>',
     '<span></span>',
@@ -609,12 +610,12 @@ function testBooleanFalse() {
     '<span if="BooleanFalse">Hello world!</span>',
     '<span></span>',
     {BooleanFalse: false});
-    
+
   assertTemplateOutput(
     '<span if="!BooleanFalse">Hello world!</span>',
     '<span>Hello world!</span>',
     {BooleanFalse: false});
-    
+
   assertTemplateOutput(
     '<span if="${!BooleanFalse}">Hello world!</span>',
     '<span>Hello world!</span>',
@@ -637,7 +638,7 @@ function testRepeatedNode() {
         WordObjects: [{value: 'Hello'}, {value: 'world!'}]
       });
   }
-  
+
   tryTemplateContent('<div><span repeat="WordObjects">${$cur.value}</span></div>');
   tryTemplateContent('<div><span repeat="WordObjects">${value}</span></div>');
   tryTemplateContent('<div><span repeat="WordObjects">${cur.value}</span></div>');
@@ -650,7 +651,7 @@ function testRepeatedNode() {
 };
 
 function testDynamicRepeatedContent() {
- 
+
   assertTemplateOutput(
     '<os:DynamicRepeat>' +
       '<Word repeat="WordObjects">${$cur.value}</Word>' +
@@ -658,7 +659,7 @@ function testDynamicRepeatedContent() {
     '<div>Helloworld!</div>',
     {WordObjects: [{value: 'Hello'}, {value: 'world!'}]},
 
-    ['<Template tag="os:DynamicRepeat">' + 
+    ['<Template tag="os:DynamicRepeat">' +
      '<div><span repeat="$my.Word"><os:renderAll/></span></div>' +
      '</Template>']);
 
@@ -668,7 +669,7 @@ function testReplaceTopLevelVars() {
   function test(src, dest) {
     assertEquals(dest, os.replaceTopLevelVars_(src));
   }
-  
+
   // Basic substitution for each replacement
   test('my.man', '$my.man');
   test('my', '$my');
@@ -678,7 +679,7 @@ function testReplaceTopLevelVars() {
   test('cur', '$this');
   test('Cur.man', '$this.man');
   test('Cur', '$this');
-  
+
   // Basic no sustitution
   test('$my.man', '$my.man');
   test('$my', '$my');
@@ -687,23 +688,23 @@ function testReplaceTopLevelVars() {
   test('Cur*2', '$this*2');
   test('Cur[My.name]', '$this[$my.name]');
   test('Cur||\'Nothing\'', '$this||\'Nothing\'');
-  
+
   // Single operator, both fist and last expression
   test('My.man+your.man', '$my.man+your.man');
   test('your.man>My.man', 'your.man>$my.man');
-  
+
   // Tests a specific operator
   function testOperator(operator) {
     test('My.man' + operator + 'your.man',
         '$my.man' + operator + 'your.man');
-        
+
     test('your.man' + operator + 'My.man',
         'your.man' + operator + '$my.man');
-    
+
     test('My' + operator + 'My',
         '$my' + operator + '$my');
   }
-  
+
   // All operators
   testOperator('+');
   testOperator(' + ');
@@ -731,7 +732,7 @@ function testHtmlTag() {
   var template = os.compileTemplateString('<os:Html code="${foo}"/>');
   var output = template.render({foo: 'Hello <b>world</b>!'});
   var boldNodes = output.getElementsByTagName("b");
-  assertEquals(1, boldNodes.length); 
+  assertEquals(1, boldNodes.length);
 };
 
 function testOnAttachAttribute() {

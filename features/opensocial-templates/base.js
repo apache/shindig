@@ -90,7 +90,8 @@ os.VAR_callbacks = "$callbacks_";
  * TODO(levik): Move all regular expressions here.
  */
 os.regExps_ = {
-  onlyWhitespace: /^[ \t\n]*$/
+  onlyWhitespace: /^[ \t\n]*$/,
+  variableSubstitution: /^([^$]*)(\$\{[^\}]*\})([\w\W]*)$/
 };
 
 /**
