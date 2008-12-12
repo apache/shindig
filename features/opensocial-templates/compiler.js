@@ -30,11 +30,11 @@ os.SEMICOLON = ';';
 
 /**
  * Check if the browser is Internet Explorer.
- * 
+ *
  * TODO(levik): Find a better, more general way to do this, esp. if we need
  * to do other browser checks elswhere.
  */
-os.isIe = navigator.userAgent.indexOf('Opera') != 0 && 
+os.isIe = navigator.userAgent.indexOf('Opera') != 0 &&
     navigator.userAgent.indexOf('MSIE') != -1;
 
 /**
@@ -50,7 +50,7 @@ os.compileXMLNode = function(node, opt_id) {
     if (child.nodeType == DOM_ELEMENT_NODE) {
       nodes.push(os.compileNode_(child));
     } else if (child.nodeType == DOM_TEXT_NODE) {
-      if (child != node.firstChild || 
+      if (child != node.firstChild ||
           !child.nodeValue.match(os.regExps_.onlyWhitespace)) {
         var compiled = os.breakTextNode_(child);
         for (var i = 0; i < compiled.length; i++) {
@@ -76,7 +76,7 @@ os.compileXMLDoc = function(doc, opt_id) {
   while (node.nodeType != DOM_ELEMENT_NODE) {
     node = node.nextSibling;
   }
-  
+
   return os.compileXMLNode(node, opt_id);
 };
 
@@ -121,10 +121,10 @@ os.operatorMap = {
 
 /**
  * Parses operator markup into JS code. See operator map above.
- * 
+ *
  * TODO: Simplify this to only work on neccessary operators - binary ones that
- * use "<" or ">". 
- * 
+ * use "<" or ">".
+ *
  * @param {string} src The string snippet to parse.
  */
 os.remapOperators_ = function(src) {
@@ -154,11 +154,11 @@ os.remapOperators_ = function(src) {
 /**
  * Remap variable references in the expression.
  * @param {string} expr The expression to transform.
- * @return {string} Transformed exression. 
+ * @return {string} Transformed exression.
  */
 os.transformVariables_ = function(expr) {
   expr = os.replaceTopLevelVars_(expr);
-      
+
   return expr;
 };
 
@@ -182,21 +182,21 @@ os.variableMap_ = {
  * @return {string} Expression with replacements
  */
 os.replaceTopLevelVars_ = function(text) {
-	
+
   // Currently, values specced to be inside the "Context" variable are placed
   // by JSTemplate into the top-level of the data context.
-  // To make references like "Context.Index" work, remove the "Context." prefix. 
+  // To make references like "Context.Index" work, remove the "Context." prefix.
   text = text.replace(/Context[.]/g, "");
-	
+
   // This line needed because there wasn't an obvious way to match
   // [^.$a-zA-Z0-9] or the start of the line
   text = ' ' + text;
   var regex = /([^.$a-zA-Z0-9])([$a-zA-Z0-9]+)/g;
-  
+
   var results;
   var dest = '';
   var index = 0;
- 
+
   while ((results = regex.exec(text)) != null) {
     dest += text.substring(index, regex.lastIndex - results[0].length);
     dest += results[1];
@@ -208,7 +208,7 @@ os.replaceTopLevelVars_ = function(text) {
     index = regex.lastIndex;
   }
   dest += text.substring(index, text.length);
-  
+
   return dest.substring(1);
 };
 
@@ -217,7 +217,7 @@ os.replaceTopLevelVars_ = function(text) {
  * By default only a simple lookup is performed, but using
  * os.setIdentifierResolver() it's possible to plug in a more complex function,
  * for example one that looks up foo -> getFoo() -> get("foo").
- * 
+ *
  * TODO: This should not be in compiler.
  */
 os.identifierResolver_ = function(data, name) {
@@ -225,9 +225,9 @@ os.identifierResolver_ = function(data, name) {
 };
 
 /**
- * Sets the Identifier resolver function. This is global, and must be done 
- * before any compilation of templates takes place. 
- * 
+ * Sets the Identifier resolver function. This is global, and must be done
+ * before any compilation of templates takes place.
+ *
  * TODO: This should possibly not be in compiler?
  */
 os.setIdentifierResolver = function(resolver) {
@@ -239,9 +239,9 @@ os.setIdentifierResolver = function(resolver) {
  * Gets a named property from a JsEvalContext (by checking data_ and vars_) or
  * from a simple JSON object by looking at properties. The IdentifierResolver
  * function is used in either case.
- * 
+ *
  * TODO: This should not be in compiler.
- * 
+ *
  * @param {JsEvalContext|Object} context Context to get property from
  * @param {String} name Name of the property
  * @return {Object|String}
@@ -250,7 +250,7 @@ os.getFromContext = function(context, name, opt_default) {
   var ret;
   // Check if this is a context object.
   if (context.vars_ && context.data_) {
-    // Is the context payload a DOM node?              
+    // Is the context payload a DOM node?
     if (context.data_.nodeType == DOM_ELEMENT_NODE) {
       ret = os.getValueFromNode_(context.data_, name);
       if (ret == null) {
@@ -282,7 +282,7 @@ os.getFromContext = function(context, name, opt_default) {
 /**
  * Prepares an expression for JS evaluation.
  * @param {string} expr The expression snippet to parse.
- * @param {string} opt_default An optional default value reference (such as the 
+ * @param {string} opt_default An optional default value reference (such as the
  * literal string 'null').
  */
 os.transformExpression_ = function(expr, opt_default) {
@@ -291,7 +291,7 @@ os.transformExpression_ = function(expr, opt_default) {
   if (os.identifierResolver_) {
     expr = os.wrapIdentifiersInExpression(expr, opt_default);
   }
-  return expr;  
+  return expr;
 };
 
 /**
@@ -316,18 +316,18 @@ os.appendJSTAttribute_ = function(node, attrName, value) {
 };
 
 /**
- * Copies attributes from one node (xml or html) to another (html),. 
- * Special OpenSocial attributes are substituted for their JStemplate 
+ * Copies attributes from one node (xml or html) to another (html),.
+ * Special OpenSocial attributes are substituted for their JStemplate
  * counterparts.
  * @param {Element} from An XML or HTML node to copy attributes from.
  * @param {Element} to An HTML node to copy attributes to.
- * @param {String} opt_customTag The name of the custom tag, being processed if 
+ * @param {String} opt_customTag The name of the custom tag, being processed if
  * any.
- * 
+ *
  * TODO(levik): On IE, some properties/attributes might be case sensitive when
  * set through script (such as "colSpan") - since they're not case sensitive
  * when defined in HTML, we need to support this type of use.
- */ 
+ */
 os.copyAttributes_ = function(from, to, opt_customTag) {
 
   var dynamicAttributes = null;
@@ -338,10 +338,10 @@ os.copyAttributes_ = function(from, to, opt_customTag) {
     if (name && value) {
       if (name == 'var') {
         os.appendJSTAttribute_(to, ATT_vars, from.getAttribute(name) +
-            ': $this'); 
+            ': $this');
       } else if (name == 'index') {
         os.appendJSTAttribute_(to, ATT_vars, from.getAttribute(name) +
-            ': $index');        
+            ': $index');
       } else if (name.length < 7 || name.substring(0, 6) != 'xmlns:') {
         if (os.customAttributes_[name]) {
           os.appendJSTAttribute_(to, ATT_eval, "os.doAttribute(this, '" + name +
@@ -351,14 +351,14 @@ os.copyAttributes_ = function(from, to, opt_customTag) {
               "os.setContextNode_($this, $context)");
         }
         var outName = os.attributeMap_[name] || name;
-        var substitution = 
+        var substitution =
             (os.attributeMap_[name] ||
-                opt_customTag && os.globalDisallowedAttributes_[outName]) ? 
+                opt_customTag && os.globalDisallowedAttributes_[outName]) ?
             null : os.parseAttribute_(value);
 
         if (substitution) {
           if (outName == 'class') {
-            // Dynamically setting the @class attribute gets ignored by the 
+            // Dynamically setting the @class attribute gets ignored by the
             // browser. We need to set the .className property instead.
             outName = '.className';
           } else if (outName == 'style') {
@@ -378,7 +378,7 @@ os.copyAttributes_ = function(from, to, opt_customTag) {
             substitution = 'new Function(' + substitution + ')';
           }
 
-          // TODO: reuse static array (IE6 perf).          
+          // TODO: reuse static array (IE6 perf).
           if (!dynamicAttributes) {
             dynamicAttributes = [];
           }
@@ -387,8 +387,8 @@ os.copyAttributes_ = function(from, to, opt_customTag) {
           // For special attributes, do variable transformation.
           if (os.attributeMap_[name]) {
             // If the attribute value looks like "${expr}", just use the "expr".
-            if (value.length > 3 && 
-              value.substring(0, 2) == '${' && 
+            if (value.length > 3 &&
+              value.substring(0, 2) == '${' &&
               value.charAt(value.length - 1) == '}') {
               value = value.substring(2, value.length - 1);
             }
@@ -401,7 +401,7 @@ os.copyAttributes_ = function(from, to, opt_customTag) {
             // Similarly, on IE, setting the @style attribute has no effect.
             // The cssText property of the style object must be set instead.
             to.style.cssText = value;
-          } 
+          }
           if (os.isIe && !os.customAttributes_[outName] &&
               outName.substring(0, 2).toLowerCase() == 'on') {
             // In IE, setAttribute doesn't create event handlers, so we must
@@ -415,7 +415,7 @@ os.copyAttributes_ = function(from, to, opt_customTag) {
       }
     }
   }
-  
+
   if (dynamicAttributes) {
     os.appendJSTAttribute_(to, ATT_values, dynamicAttributes.join(';'));
   }
@@ -439,7 +439,7 @@ os.compileNode_ = function(node) {
       output.setAttribute(os.ATT_customtag, node.tagName);
 
       var custom = node.tagName.split(":");
-      os.appendJSTAttribute_(output, ATT_eval, "os.doTag(this, \"" 
+      os.appendJSTAttribute_(output, ATT_eval, "os.doTag(this, \""
           + custom[0] + "\", \"" + custom[1] + "\", $this, $context)");
       var context = node.getAttribute("context") || "$this||true";
       output.setAttribute(ATT_select, context);
@@ -450,7 +450,7 @@ os.compileNode_ = function(node) {
         os.appendJSTAttribute_(output, ATT_values, os.VAR_parentnode + ":" +
             os.VAR_node);
       }
-      
+
       os.copyAttributes_(node, output, node.tagName);
     } else {
       output = os.xmlToHtml_(node);
@@ -459,19 +459,19 @@ os.compileNode_ = function(node) {
       for (var child = node.firstChild; child; child = child.nextSibling) {
         var compiledChild = os.compileNode_(child);
         if (compiledChild) {
-          if (!compiledChild.tagName && 
+          if (!compiledChild.tagName &&
               typeof(compiledChild.length) == 'number') {
             for (var i = 0; i < compiledChild.length; i++) {
               output.appendChild(compiledChild[i]);
             }
           } else {
-            // If inserting a TR into a TABLE, inject a TBODY element. 
+            // If inserting a TR into a TABLE, inject a TBODY element.
             if (compiledChild.tagName == 'TR' && output.tagName == 'TABLE') {
               var lastEl = output.lastChild;
-              while (lastEl && lastEl.nodeType != DOM_ELEMENT_NODE && 
+              while (lastEl && lastEl.nodeType != DOM_ELEMENT_NODE &&
                   lastEl.previousSibling) {
                 lastEl = lastEl.previousSibling;
-              } 
+              }
               if (!lastEl || lastEl.tagName != 'TBODY') {
                 lastEl = document.createElement('tbody');
                 output.appendChild(lastEl);
@@ -486,30 +486,30 @@ os.compileNode_ = function(node) {
     }
     return output;
   }
-  return null;      
+  return null;
 };
 
 /**
  * XHTML Entities we need to support in XML, definted in DOCTYPE format.
- * 
- * TODO(levik): A better way to do this. 
+ *
+ * TODO(levik): A better way to do this.
  */
 os.ENTITIES = "<!ENTITY nbsp \"&#160;\">";
 
 /**
- * Prepares an XML string to be compiled as a template. Injects a DOCTYPE 
+ * Prepares an XML string to be compiled as a template. Injects a DOCTYPE
  * with entities and a top-level <root> element to encapsulate the template.
  * @param {string} templateSrc XML string to be prepared.
  * @return {string} XML string prepared for template compilation.
  */
 os.prepareTemplateXML_ = function(templateSrc) {
   var namespaces = os.getRequiredNamespaces(templateSrc);
-  return "<!DOCTYPE root [" + os.ENTITIES + "]><root xml:space=\"preserve\"" + 
+  return "<!DOCTYPE root [" + os.ENTITIES + "]><root xml:space=\"preserve\"" +
       namespaces + ">" + templateSrc + "</root>";;
 };
 
 /**
- * Creates an HTML node that's a shallow copy of an XML node 
+ * Creates an HTML node that's a shallow copy of an XML node
  * (includes attributes).
  */
 os.xmlToHtml_ = function(xmlNode) {
@@ -519,7 +519,7 @@ os.xmlToHtml_ = function(xmlNode) {
 };
 
 /**
- * Creates a context object out of a json data object. 
+ * Creates a context object out of a json data object.
  */
 os.createContext = function(data, opt_globals) {
   var context = JsEvalContext.create(data);
@@ -530,11 +530,11 @@ os.createContext = function(data, opt_globals) {
       context.setVariable(global, opt_globals[global]);
     }
   }
-  return context;            
+  return context;
 };
 
 /**
- * Fires callbacks on a context object 
+ * Fires callbacks on a context object
  */
 os.fireCallbacks = function(context) {
   var callbacks = context.getVariable(os.VAR_callbacks);
@@ -546,14 +546,14 @@ os.fireCallbacks = function(context) {
     } else {
       callback();
     }
-  }            
+  }
 };
 
 /**
  * Checks for an processes an optimized case where a node only has text content.
- * In this instance, any variable substitutions happen without creating 
+ * In this instance, any variable substitutions happen without creating
  * intermediary spans.
- * 
+ *
  * This will work when node content looks like:
  *   - "Plain text"
  *   - "${var}"
@@ -561,13 +561,13 @@ os.fireCallbacks = function(context) {
  * But not when it is
  *   - "Text <b>With HTML content</b> (with or without a ${var})
  *   - Custom tags are also exempt from this optimization.
- * 
- * @return {boolean} true if node only had text data and needs no further 
+ *
+ * @return {boolean} true if node only had text data and needs no further
  * processing, false otherwise.
  */
 os.processTextContent_ = function(fromNode, toNode) {
-  if (fromNode.childNodes.length == 1 && 
-      !toNode.getAttribute(os.ATT_customtag) && 
+  if (fromNode.childNodes.length == 1 &&
+      !toNode.getAttribute(os.ATT_customtag) &&
       fromNode.firstChild.nodeType == DOM_TEXT_NODE) {
     var substitution = os.parseAttribute_(fromNode.firstChild.data);
     if (substitution) {
@@ -582,7 +582,7 @@ os.processTextContent_ = function(fromNode, toNode) {
 };
 
 /**
- * IE does not hide extra whitespace if it is manually injected into a text 
+ * IE does not hide extra whitespace if it is manually injected into a text
  * node, so we need to remove extra whitespace by hand.
  * @param {String} text A string to be create a text node.
  * @return {TextNode} A TextNode constructed with the specified text.
@@ -597,9 +597,9 @@ os.pushTextNode = function(array, text) {
  * Removes extra whitespace and newline characters for IE - to be used for
  * transforming strings that are destined for textNode content.
  * @param {String} string The string to trim spaces from.
- * @param {boolean} opt_trimStart Trim the start of the string. 
+ * @param {boolean} opt_trimStart Trim the start of the string.
  * @param {boolean} opt_trimEnd Trim the end of the string.
- * @return {String} The string with extra spaces removed on IE, original 
+ * @return {String} The string with extra spaces removed on IE, original
  * string on other browsers.
  */
 os.trimWhitespaceForIE_ = function(string, opt_trimStart, opt_trimEnd) {
@@ -621,12 +621,12 @@ os.trimWhitespaceForIE_ = function(string, opt_trimStart, opt_trimEnd) {
 /**
  * Breaks up a text node with special ${var} markup into a series of text nodes
  * and spans with appropriate jscontent attribute.
- * 
- * @return {Array.<Node>} An array of textNodes and Span Elements if variable 
- * substitutions were found, or an empty array if none were.  
+ *
+ * @return {Array.<Node>} An array of textNodes and Span Elements if variable
+ * substitutions were found, or an empty array if none were.
  */
 os.breakTextNode_ = function(textNode) {
-  var substRex = /^([^$]*)(\$\{[^\}]*\})([\w\W]*)$/;
+  var substRex = os.regExps_.variableSubstitution;
   var text = textNode.data;
   var nodes = [];
   var match = text.match(substRex);
@@ -648,7 +648,7 @@ os.breakTextNode_ = function(textNode) {
   if (text.length > 0) {
     os.pushTextNode(nodes, os.trimWhitespaceForIE_(text));
   }
-  return nodes; 
+  return nodes;
 };
 
 /**
@@ -666,14 +666,14 @@ os.transformLiteral_ = function(string) {
 /**
  * Parses an attribute value into a JS expression. "Hello, ${user}!" becomes
  * "Hello, " + user + "!".
- * 
+ *
  * TODO: Rename to parseExpression()
  */
 os.parseAttribute_ = function(value) {
   if (!value.length) {
     return null;
   }
-  var substRex = /^([^$]*)(\$\{[^\}]*\})([\w\W]*)$/;
+  var substRex = os.regExps_.variableSubstitution;
   var text = value;
   var parts = [];
   var match = text.match(substRex);
@@ -729,15 +729,15 @@ os.getValueFromNode_ = function(node, name) {
   if (typeof(ret) == "undefined" || ret == null) {
     ret = node.getAttribute(name);
   }
-  
+
   if (typeof(ret) == "undefined" || ret == null) {
     if (name) {
       name = name.toLowerCase();
     }
 
-    // A special character meaning "get all child nodes".  
+    // A special character meaning "get all child nodes".
     var allChildren = ("*" == name);
-    
+
     ret = [];
     for (var child = node.firstChild; child; child = child.nextSibling) {
       if (allChildren) {
@@ -754,13 +754,13 @@ os.getValueFromNode_ = function(node, name) {
       tagName = tagName.toLowerCase();
       if (tagName == name) {
         ret.push(child);
-      }    
+      }
     }
     if (ret.length == 0) {
       ret = null;
     }
-    
-    // Check for "optimized" dynamic content. A tag like: 
+
+    // Check for "optimized" dynamic content. A tag like:
     // <div>${a}</div> would have compiled to <div jscontent="a"/>, and we
     // need to reconstruct its content here into a span.
     var content;
@@ -769,15 +769,16 @@ os.getValueFromNode_ = function(node, name) {
       var span = document.createElement("span");
       span.setAttribute(ATT_content, content);
       ret = [ span ];
-    } 
+    }
   }
-  
+
   // Process special cases where ret would be wrongly evaluated as "true"
   if (ret == "false") {
     ret = false;
   } else if (ret == "0") {
     ret = 0;
   }
+
   return ret;
 };
 
@@ -787,8 +788,8 @@ os.getValueFromNode_ = function(node, name) {
 //------------------------------------------------------------------------------
 
 /**
- * A map of identifiers that should not be wrapped 
- * (such as JS built-ins and special method names). 
+ * A map of identifiers that should not be wrapped
+ * (such as JS built-ins and special method names).
  */
 os.identifiersNotToWrap_ = {};
 os.identifiersNotToWrap_['true'] = true;
@@ -808,9 +809,9 @@ os.identifiersNotToWrap_[VAR_count] = true;
  * @return {boolean} This character can start an identifier.
  */
 os.canStartIdentifier= function(ch) {
-  return (ch >= 'a' && ch <= 'z') || 
-      (ch >= 'A' && ch <= 'Z') || 
-      ch == '_' || ch == '$'; 
+  return (ch >= 'a' && ch <= 'z') ||
+      (ch >= 'A' && ch <= 'Z') ||
+      ch == '_' || ch == '$';
 };
 
 /**
@@ -841,18 +842,18 @@ os.canBeInToken = function(ch) {
  * os.VAR_idenfitierresolver ("$_ir") is used as the function name.
  * So, "foo.bar" becomes "$_ir($_ir($context, 'foo'), 'bar')"
  * @param {string} iden A string representing an identifier.
- * @param {string} opt_context A string expression to use for context. 
- * @param {string} opt_default An optional default value reference (such as the 
- * literal string 'null'). 
+ * @param {string} opt_context A string expression to use for context.
+ * @param {string} opt_default An optional default value reference (such as the
+ * literal string 'null').
  */
 os.wrapSingleIdentifier = function(iden, opt_context, opt_default) {
   if (os.identifiersNotToWrap_[iden]) {
-    return iden; 
+    return iden;
   }
-  return os.VAR_identifierresolver + '(' + 
-      (opt_context || VAR_context) + ', \'' + iden + '\'' + 
-      (opt_default ? ', ' + opt_default : '') + 
-      ')';  
+  return os.VAR_identifierresolver + '(' +
+      (opt_context || VAR_context) + ', \'' + iden + '\'' +
+      (opt_default ? ', ' + opt_default : '') +
+      ')';
 };
 
 /**
@@ -863,17 +864,17 @@ os.wrapIdentifiersInToken = function(token, opt_default) {
     return token;
   }
 
-  // If the identifier is accessing a message 
+  // If the identifier is accessing a message
   // (and gadget messages are obtainable), inline it here.
-  // TODO: This is inefficient for times when the message contains no markup - 
-  // such cases should be optimized.  
-  if (token.substring(0, os.VAR_msg.length + 1) == (os.VAR_msg + '.') && 
+  // TODO: This is inefficient for times when the message contains no markup -
+  // such cases should be optimized.
+  if (token.substring(0, os.VAR_msg.length + 1) == (os.VAR_msg + '.') &&
       os.gadgetPrefs_) {
     var key = token.split(".")[1];
     var msg = os.getPrefMessage(key) || '';
     return os.parseAttribute_(msg) || os.transformLiteral_(msg);
   }
-  
+
   var identifiers = os.tokenToIdentifiers(token);
   var parts = false;
   var buffer = [];
@@ -883,7 +884,7 @@ os.wrapIdentifiersInToken = function(token, opt_default) {
     parts = os.breakUpParens(iden);
     if (!parts) {
       output = os.wrapSingleIdentifier(iden, output, opt_default);
-    } else {         
+    } else {
       buffer.length = 0;
       buffer.push(os.wrapSingleIdentifier(parts[0], output));
       for (var j = 1; j < parts.length; j+= 3) {
@@ -903,8 +904,8 @@ os.wrapIdentifiersInToken = function(token, opt_default) {
  * Wraps all identifiers in a JS expression. The expression is tokenized, then
  * each token is wrapped individually.
  * @param {string} expr The expression to wrap.
- * @param {string} opt_default An optional default value reference (such as the 
- * literal string 'null'). 
+ * @param {string} opt_default An optional default value reference (such as the
+ * literal string 'null').
  */
 os.wrapIdentifiersInExpression = function(expr, opt_default) {
   var out = [];
@@ -916,11 +917,11 @@ os.wrapIdentifiersInExpression = function(expr, opt_default) {
 };
 
 /**
- * Tokenizes a JS expression. Each token is either an operator, a literal 
+ * Tokenizes a JS expression. Each token is either an operator, a literal
  * string, an identifier, or a function call.
- * For example, 
+ * For example,
  *   "foo||bar" is tokenized as ["foo", "||", "bar"], but
- *   "bing(foo||bar)" becomes   ["bing(foo||bar)"]. 
+ *   "bing(foo||bar)" becomes   ["bing(foo||bar)"].
  */
 os.expressionToTokens = function(expr) {
   var tokens = [];
@@ -939,8 +940,8 @@ os.expressionToTokens = function(expr) {
         escaped = true;
       } else {
         escaped = false;
-      } 
-      buffer.push(ch);      
+      }
+      buffer.push(ch);
     } else {
       if (ch == "'" || ch == '"') {
         inquotes = true;
@@ -961,7 +962,7 @@ os.expressionToTokens = function(expr) {
         if (buffer.length > 0) {
           tokens.push(buffer.join(''));
           buffer.length = 0;
-        }          
+        }
         inidentifier = true;
         buffer.push(ch);
         continue;
@@ -976,13 +977,13 @@ os.expressionToTokens = function(expr) {
           buffer.push(ch);
         }
       } else {
-        buffer.push(ch);        
+        buffer.push(ch);
       }
     }
   }
   tokens.push(buffer.join(''));
-  return tokens;            
-}; 
+  return tokens;
+};
 
 /**
  * Breaks up a JS token into identifiers, separated by '.'
@@ -990,10 +991,10 @@ os.expressionToTokens = function(expr) {
  */
 os.tokenToIdentifiers = function(token) {
   var inquotes = false;
-  var quotestart = null;    
+  var quotestart = null;
   var escaped = false;
   var buffer = [];
-  var identifiers = [];  
+  var identifiers = [];
   for (var i = 0; i < token.length; i++) {
     var ch = token.charAt(i);
     if (inquotes) {
@@ -1003,9 +1004,9 @@ os.tokenToIdentifiers = function(token) {
         escaped = true;
       } else {
         escaped = false;
-      } 
+      }
       buffer.push(ch);
-      continue;      
+      continue;
     } else {
       if (ch == "'" || ch == '"') {
         buffer.push(ch);
@@ -1018,7 +1019,7 @@ os.tokenToIdentifiers = function(token) {
       identifiers.push(buffer.join(''));
       buffer.length = 0;
       continue;
-    } 
+    }
     buffer.push(ch);
   }
   identifiers.push(buffer.join(''));
@@ -1045,7 +1046,7 @@ os.breakUpParens = function(identifier) {
     parts.push(identifier.substring(0, bracketIndex));
   } else {
     bracketIndex = 0;
-    parts.push(identifier.substring(0, parenIndex));      
+    parts.push(identifier.substring(0, parenIndex));
   }
   var parenstart = null;
   var inquotes = false;
@@ -1062,8 +1063,8 @@ os.breakUpParens = function(identifier) {
         escaped = true;
       } else {
         escaped = false;
-      } 
-      buffer.push(ch);      
+      }
+      buffer.push(ch);
     } else {
       if (ch == "'" || ch == '"') {
         inquotes = true;
@@ -1079,7 +1080,7 @@ os.breakUpParens = function(identifier) {
           buffer.length = 0;
         }
       } else {
-        if ((parenstart == '(' && ch == ')') || 
+        if ((parenstart == '(' && ch == ')') ||
           (parenstart == '[' && ch == ']')) {
           parenlevel--;
           if (parenlevel == 0) {

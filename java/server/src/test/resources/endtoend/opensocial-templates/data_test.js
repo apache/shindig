@@ -35,19 +35,16 @@ function verifyNamespace(name) {
 function testRequestHandler() {
   verifyNamespace('test');
   var results = {};
-  os.data.registerRequestHandler('test:request', function(key, tag) {
-    results[key] = tag.getAttribute('data');
+  os.data.registerRequestHandler('test:request', function(descriptor) {
+    results[descriptor.key] = descriptor.getAttribute('data');
   });
-  var xmlData = '<os:dataSet key="first">' +
-      '  <test:request data="testData"/>' +
-      '</os:dataSet>' +
-      '<os:dataSet key="second">' +
-      '  <test:request data="${foo}"/>' +
-      '</os:dataSet>';
+  var xmlData = 
+      '<test:request key="first" data="testData"/>' +
+      '<test:request key="second" data="${foo}"/>';
+
   os.data.loadRequests(xmlData);
-  assertNotNull(os.data.requests_['test']);
-  assertNotNull(os.data.requests_['test']['first']);
-  assertNotNull(os.data.requests_['test']['second']);
+  assertNotNull(os.data.requests_['first']);
+  assertNotNull(os.data.requests_['second']);
 
   os.data.DataContext.putDataSet("foo", "bar");
   os.data.executeRequests();
@@ -59,13 +56,10 @@ function testRequestHandler() {
 /**
  * Unit test to test data result handlers.
  */
-function testResultHandler() {
+function testPutDataSet() {
   var key = 'test1';
   var value = 'foo';
-  var handler = function(callback) {
-    callback(value);
-  };
-  os.data.DataContext.putDataResult(key, handler);
+  os.data.DataContext.putDataSet(key, value);
   assertEquals(value, os.data.DataContext.getDataSet(key));
 }
 
