@@ -23,7 +23,7 @@ under the License.
   <parent>
     <groupId>org.apache.shindig</groupId>
     <artifactId>shindig-parent</artifactId>
-    <version>1.0.0-incubating-RC1</version>
+    <version>1.0.0-incubating-SNAPSHOT</version>
     <relativePath>../pom.xml</relativePath>
   </parent>
 
@@ -34,9 +34,9 @@ under the License.
   <description>Provides Sample implementations of the SPI and API's inside the core of Shindig.</description>
 
   <scm>
-    <connection>scm:svn:http://svn.apache.org/repos/asf/incubator/shindig/tags/1.0.0-incubating-RC1-test</connection>
-    <developerConnection>scm:svn:https://svn.apache.org/repos/asf/incubator/shindig/tags/1.0.0-incubating-RC1-test</developerConnection>
-    <url>http://svn.apache.org/viewvc/incubator/shindig/tags/1.0.0-incubating-RC1-test</url>
+    <connection>scm:svn:http://svn.apache.org/repos/asf/incubator/shindig/trunk/java/samples</connection>
+    <developerConnection>scm:svn:https://svn.apache.org/repos/asf/incubator/shindig/trunk/java/samples</developerConnection>
+    <url>http://svn.apache.org/viewvc/incubator/shindig/trunk/java/samples</url>
   </scm>
 
   <repositories>
