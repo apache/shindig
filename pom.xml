@@ -283,6 +283,14 @@
         <module>java</module>
       </modules>
     </profile>
+    <profile>
+      <id>release-all</id>
+      <modules>
+        <module>java</module>
+        <module>java/samples</module>
+        <module>assembly</module>
+      </modules>
+    </profile>
 
     <!-- profile to build features jar -->
     <profile>
