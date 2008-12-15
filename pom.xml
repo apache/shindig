@@ -283,14 +283,6 @@
         <module>java</module>
       </modules>
     </profile>
-    <profile>
-      <id>release-all</id>
-      <modules>
-        <module>java</module>
-        <module>java/samples</module>
-        <module>assembly</module>
-      </modules>
-    </profile>
 
     <!-- profile to build features jar -->
     <profile>
@@ -477,6 +469,18 @@
           </plugin>
           <plugin>
             <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-source-plugin</artifactId>
+            <executions>
+              <execution>
+                <id>attach-sources</id>
+                <goals>
+                  <goal>jar</goal>
+                </goals>
+              </execution>
+            </executions>
+          </plugin>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-javadoc-plugin</artifactId>
             <executions>
               <execution>
@@ -489,6 +493,11 @@
           </plugin>
         </plugins>
       </build>
+      <modules>
+        <module>java</module>
+        <module>java/samples</module>
+        <module>assembly</module>
+      </modules>
     </profile>
 
     <profile>
@@ -540,7 +549,7 @@
               <goal>verify-legal-files</goal>
             </goals>
             <configuration>
-              <strict>true</strict>
+              <strict>false</strict>
             </configuration>
           </execution>
         </executions>
