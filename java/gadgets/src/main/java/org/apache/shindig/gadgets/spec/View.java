@@ -67,6 +67,12 @@ public class View implements RequestAuthenticationInfo {
     boolean signViewer = true;
     Map<String, String> attributes = Maps.newHashMap();
     StringBuilder content = new StringBuilder();
+
+    boolean needOwner = false;
+    boolean needViewer = false;
+
+    PipelinedData pipelinedData = null;
+
     for (Element element : elements) {
       contentType = XmlUtil.getAttribute(element, "type");
       if (contentType != null) {
@@ -92,6 +98,13 @@ public class View implements RequestAuthenticationInfo {
           attributes.put(attr.getNodeName(), attr.getNodeValue());
         }
       }
+
+      // For proxied rendering, parse all SocialData inside the View element
+      if (href != null && (type != ContentType.URL)) {
+        pipelinedData = new PipelinedData(element, base);
+        needOwner = needOwner || pipelinedData.needsOwner();
+        needViewer = needViewer || pipelinedData.needsViewer();
+      }
     }
     this.content = content.toString();
     this.needsUserPrefSubstitution = this.content.contains("__UP_");
@@ -102,11 +115,26 @@ public class View implements RequestAuthenticationInfo {
     this.preferredHeight = preferredHeight;
     this.preferredWidth = preferredWidth;
     this.attributes = Collections.unmodifiableMap(attributes);
+    this.pipelinedData = pipelinedData;
+
     this.authType = AuthType.parse(auth);
     this.signOwner = signOwner;
     this.signViewer = signViewer;
     if (type == ContentType.URL && this.href == null) {
       throw new SpecParserException("Content@href must be set when Content@type is \"url\".");
+    }
+
+    // Verify that there is no use of viewer and/or owner data when the request
+    // is not signed by viewer and/or owner
+
+    // TODO: this does not catch use of <Preload> with sign-by-owner
+    // for proxied rendering that is not sign-by-owner
+    if (needOwner && (!this.signOwner || this.authType == AuthType.NONE)) {
+      throw new SpecParserException("Must sign by owner to request owner.");
+    }
+
+    if (needViewer && (!this.signViewer || this.authType == AuthType.NONE)) {
+      throw new SpecParserException("Must sign by viewer to request viewer.");
     }
   }
 
@@ -134,6 +162,7 @@ public class View implements RequestAuthenticationInfo {
       attributes.put(entry.getKey(), substituter.substituteString(entry.getValue()));
     }
     this.attributes = Collections.unmodifiableMap(attributes);
+    pipelinedData = view.pipelinedData == null ? null : view.pipelinedData.substitute(substituter);
   }
 
   /**
@@ -255,6 +284,15 @@ public class View implements RequestAuthenticationInfo {
   private final Map<String, String> attributes;
   public Map<String, String> getAttributes() {
     return attributes;
+  }
+
+  private final PipelinedData pipelinedData;
+
+  /**
+   * All os: preloads.
+   */
+  public PipelinedData getPipelinedData() {
+    return pipelinedData;
   }
 
   /**

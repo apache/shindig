@@ -18,14 +18,11 @@
  */
 package org.apache.shindig.gadgets.preload;
 
+import java.util.Collection;
 import java.util.Collections;
-import java.util.Set;
 
 public class NullPreloads implements Preloads {
-  public PreloadedData getData(String key) {
-    throw new UnsupportedOperationException();
-  }
-  public Set<String> getKeys() {
-    return Collections.emptySet();
+  public Collection<PreloadedData> getData() {
+    return Collections.emptyList();
   }
 }
