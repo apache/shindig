@@ -103,8 +103,14 @@ public class GadgetSpecTest extends TestCase {
     substituter.addSubstitution(Type.USER_PREF, "title", title);
     substituter.addSubstitution(Type.MESSAGE, "content", content);
 
-    GadgetSpec spec = new GadgetSpec(SPEC_URL, xml).substitute(substituter);
+    GadgetSpec baseSpec = new GadgetSpec(SPEC_URL, xml);
+    baseSpec.setAttribute("foo", 100);
+    baseSpec.setAttribute("bar", "baz");
+
+    GadgetSpec spec = baseSpec.substitute(substituter);
     assertEquals(title, spec.getModulePrefs().getTitle());
     assertEquals(content, spec.getView(GadgetSpec.DEFAULT_VIEW).getContent());
+    assertEquals(100, spec.getAttribute("foo"));
+    assertEquals("baz", spec.getAttribute("bar"));
   }
 }

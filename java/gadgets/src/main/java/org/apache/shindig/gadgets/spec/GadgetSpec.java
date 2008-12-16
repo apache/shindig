@@ -17,21 +17,25 @@
  */
 package org.apache.shindig.gadgets.spec;
 
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
-
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.common.util.HashUtil;
 import org.apache.shindig.common.xml.XmlException;
 import org.apache.shindig.common.xml.XmlUtil;
 import org.apache.shindig.gadgets.variables.Substitutions;
+
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
+
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
-import java.util.*;
+import java.util.Collections;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -128,6 +132,7 @@ public class GadgetSpec {
   private GadgetSpec(GadgetSpec spec) {
     url = spec.url;
     checksum = spec.checksum;
+    attributes.putAll(spec.attributes);
   }
 
   /**
@@ -191,6 +196,13 @@ public class GadgetSpec {
     return attributes.get(key);
   }
 
+  /**
+   * Sets an attribute on the gadget spec. This should only be done during a constructing phase, as
+   * a GadgetSpec should be effectively immutable after it is constructed.
+   *
+   * @param key The attribute name.
+   * @param o The value of the attribute.
+   */
   public void setAttribute(String key, Object o) {
     attributes.put(key, o);
   }
