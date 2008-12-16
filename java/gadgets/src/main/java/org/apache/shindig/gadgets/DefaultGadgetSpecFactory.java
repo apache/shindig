@@ -18,6 +18,7 @@
  */
 package org.apache.shindig.gadgets;
 
+import org.apache.shindig.common.ContainerConfig;
 import org.apache.shindig.common.cache.Cache;
 import org.apache.shindig.common.cache.CacheProvider;
 import org.apache.shindig.common.cache.SoftExpiringCache;
@@ -69,16 +70,22 @@ public class DefaultGadgetSpecFactory implements GadgetSpecFactory {
       // gadget whose spec is hosted non-locally.
       return new GadgetSpec(RAW_GADGET_URI, rawxml);
     }
-    return getGadgetSpec(context.getUrl(), context.getIgnoreCache());
+    return getGadgetSpec(context.getUrl(), context.getContainer(), context.getIgnoreCache());
   }
 
   /**
    * Retrieves a gadget specification from the cache or from the Internet.
+   * TODO: This should be removed. Too much context is missing from this request.
    */
   public GadgetSpec getGadgetSpec(URI gadgetUri, boolean ignoreCache) throws GadgetException {
+    return getGadgetSpec(gadgetUri, ContainerConfig.DEFAULT_CONTAINER, ignoreCache);
+  }
+
+  private GadgetSpec getGadgetSpec(URI gadgetUri, String container, boolean ignoreCache)
+      throws GadgetException {
     Uri uri = Uri.fromJavaUri(gadgetUri);
     if (ignoreCache) {
-      return fetchObjectAndCache(uri, ignoreCache);
+      return fetchObjectAndCache(uri, container, ignoreCache);
     }
 
     SoftExpiringCache.CachedObject<GadgetSpec> cached = cache.getElement(uri);
@@ -86,7 +93,7 @@ public class DefaultGadgetSpecFactory implements GadgetSpecFactory {
     GadgetSpec spec = null;
     if (cached == null || cached.isExpired) {
       try {
-        spec = fetchObjectAndCache(uri, ignoreCache);
+        spec = fetchObjectAndCache(uri, container, ignoreCache);
       } catch (GadgetException e) {
         // Enforce negative caching.
         if (cached != null) {
@@ -115,8 +122,13 @@ public class DefaultGadgetSpecFactory implements GadgetSpecFactory {
    * Retrieves a gadget specification from the Internet, processes its views and
    * adds it to the cache.
    */
-  private GadgetSpec fetchObjectAndCache(Uri url, boolean ignoreCache) throws GadgetException {
-    HttpRequest request = new HttpRequest(url).setIgnoreCache(ignoreCache);
+  private GadgetSpec fetchObjectAndCache(Uri url, String container, boolean ignoreCache)
+      throws GadgetException {
+    HttpRequest request = new HttpRequest(url)
+        .setIgnoreCache(ignoreCache)
+        .setGadget(url)
+        .setContainer(container);
+
     // Since we don't allow any variance in cache time, we should just force the cache time
     // globally. This ensures propagation to shared caches when this is set.
     request.setCacheTtl((int) (refresh / 1000));
