@@ -19,6 +19,9 @@
 
 package org.apache.shindig.gadgets.variables;
 
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Maps;
+
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.gadgets.UserPrefs;
 import org.apache.shindig.gadgets.spec.GadgetSpec;
@@ -59,9 +62,7 @@ public class UserPrefSubstituterTest extends TestCase {
   }
 
   public void testSubstitutions() throws Exception {
-    Map<String, String> map = new HashMap<String, String>();
-    map.put(USER_NAME, USER_VALUE);
-    map.put(OVERRIDE_NAME, OVERRIDE_VALUE);
+    Map<String, String> map = ImmutableMap.of(USER_NAME, USER_VALUE, OVERRIDE_NAME, OVERRIDE_VALUE);
     UserPrefs prefs = new UserPrefs(map);
     UserPrefSubstituter.addSubstitutions(substituter, spec, prefs);
 
@@ -74,8 +75,7 @@ public class UserPrefSubstituterTest extends TestCase {
   }
 
   public void testEscaping() throws Exception {
-    Map<String, String> map = new HashMap<String, String>();
-    map.put(USER_NAME, UNESCAPED_USER_VALUE);
+    Map<String, String> map = ImmutableMap.of(USER_NAME, UNESCAPED_USER_VALUE);
     UserPrefs prefs = new UserPrefs(map);
     UserPrefSubstituter.addSubstitutions(substituter, spec, prefs);
     assertEquals(ESCAPED_USER_VALUE,

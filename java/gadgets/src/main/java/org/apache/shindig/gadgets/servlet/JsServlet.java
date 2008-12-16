@@ -17,6 +17,8 @@
  */
 package org.apache.shindig.gadgets.servlet;
 
+import com.google.common.collect.ImmutableSet;
+
 import org.apache.shindig.common.ContainerConfig;
 import org.apache.shindig.common.servlet.InjectedServlet;
 import org.apache.shindig.gadgets.GadgetFeature;
@@ -70,12 +72,7 @@ public class JsServlet extends InjectedServlet {
           0, resourceName.length() - ".js".length());
     }
 
-    Set<String> needed = new HashSet<String>();
-    if (resourceName.contains(":")) {
-      needed.addAll(Arrays.asList(resourceName.split(":")));
-    } else {
-      needed.add(resourceName);
-    }
+    Set<String> needed = ImmutableSet.of(resourceName.split(":"));
 
     String debugStr = req.getParameter("debug");
     String container = req.getParameter("container");

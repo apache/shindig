@@ -17,6 +17,8 @@
  */
 package org.apache.shindig.gadgets;
 
+import com.google.common.collect.Maps;
+
 import org.apache.shindig.common.ContainerConfig;
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.gadgets.http.HttpRequest;
@@ -149,7 +151,7 @@ public class JsFeatureLoaderTest extends GadgetTestFixture {
                         file2.getAbsolutePath(), registry);
     Collection<GadgetFeature> features = registry.getAllFeatures();
 
-    Map<String, GadgetFeature> map = new HashMap<String, GadgetFeature>();
+    Map<String, GadgetFeature> map = Maps.newHashMap();
     for (GadgetFeature feature : features) {
       map.put(feature.getName(), feature);
     }

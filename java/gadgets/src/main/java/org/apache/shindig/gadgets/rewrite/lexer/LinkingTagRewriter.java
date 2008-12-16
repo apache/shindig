@@ -24,6 +24,9 @@ import org.apache.shindig.gadgets.rewrite.LinkRewriter;
 import com.google.caja.lexer.HtmlTokenType;
 import com.google.caja.lexer.Token;
 
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
+
 import java.util.*;
 
 /** Rewrite a linking attribute of an HTML tag to an arbitrary scheme */
@@ -40,10 +43,10 @@ public class LinkingTagRewriter implements HtmlTagTransformer {
   private Set<String> currentTagAttrs;
 
   public static Map<String, Set<String>> getDefaultTargets() {
-    Map<String, Set<String>> targets  = new HashMap<String, Set<String>>();
-    targets.put("img", new HashSet<String>(Arrays.asList("src")));
-    targets.put("embed", new HashSet<String>(Arrays.asList("src")));
-    targets.put("link", new HashSet<String>(Arrays.asList("href")));
+      Map<String, Set<String>> targets  = new ImmutableMap.Builder<String,Set<String>>()
+	  .put("img", ImmutableSet.of("src"))
+          .put("embed", ImmutableSet.of("src"))
+          .put("link", ImmutableSet.of("href")).build();
     return targets;
   }
 

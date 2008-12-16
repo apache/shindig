@@ -17,6 +17,8 @@
  */
 package org.apache.shindig.gadgets;
 
+import com.google.common.collect.ImmutableMap;
+
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -52,8 +54,7 @@ public class UserPrefs {
    * @param prefs The preferences to populate.
    */
   public UserPrefs(Map<String, String> prefs) {
-    this.prefs
-        = Collections.unmodifiableMap(new HashMap<String, String>(prefs));
+    this.prefs = ImmutableMap.copyOf(prefs);
   }
 
   /**

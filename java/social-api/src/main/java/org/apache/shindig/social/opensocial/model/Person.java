@@ -19,10 +19,15 @@ package org.apache.shindig.social.opensocial.model;
 
 import org.apache.shindig.social.core.model.PersonImpl;
 
+import com.google.common.collect.EnumHashBiMap;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
+import com.google.common.base.Functions;
+
 import com.google.inject.ImplementedBy;
 
 import java.util.Date;
+import java.util.EnumSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -196,25 +201,28 @@ public interface Person {
     URLS("urls");
 
     /**
+     * a Map to convert json string to Field representations.
+     */
+  
+    private static final Map<String,Field> lookup = Maps.uniqueIndex(EnumSet.allOf(Field.class), Functions.TO_STRING);
+
+    /**
      * The json field that the instance represents.
      */
     private final String urlString;
 
     /**
-     * The set of required fields.
-     */
-    public static final Set<String> DEFAULT_FIELDS = EnumUtil.getEnumStrings(ID, NAME,
-        THUMBNAIL_URL);
-
-    /**
      * The set of all fields.
      */
-    public static final Set<String> ALL_FIELDS = EnumUtil.getEnumStrings(Field.values());
+    public static final Set<String> ALL_FIELDS = lookup.keySet();
 
     /**
-     * a Map to convert json string to Field representations.
+     * The set of default fields returned fields.
      */
-    private static Map<String, Field> URL_STRING_TO_FIELD_MAP;
+    public static final Set<String> DEFAULT_FIELDS = ImmutableSet.of(
+        ID.toString(), 
+        NAME.toString(),
+        THUMBNAIL_URL.toString());
 
     /**
      * create a field base on the a json element.
@@ -242,14 +250,7 @@ public interface Person {
      * @return The corresponding person field.
      */
     public static Person.Field fromUrlString(String urlString) {
-      if (URL_STRING_TO_FIELD_MAP == null) {
-        URL_STRING_TO_FIELD_MAP = Maps.newHashMap();
-        for (Person.Field field : Person.Field.values()) {
-          URL_STRING_TO_FIELD_MAP.put(field.toString(), field);
-        }
-      }
-
-      return URL_STRING_TO_FIELD_MAP.get(urlString);
+      return lookup.get(urlString);
     }
   }
 

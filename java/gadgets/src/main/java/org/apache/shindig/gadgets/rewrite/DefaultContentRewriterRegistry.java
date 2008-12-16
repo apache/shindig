@@ -25,6 +25,7 @@ import org.apache.shindig.gadgets.http.HttpResponseBuilder;
 import org.apache.shindig.gadgets.parse.GadgetHtmlParser;
 import org.apache.shindig.gadgets.spec.View;
 
+import com.google.common.collect.Lists;
 import com.google.inject.Inject;
 
 import java.util.Collections;
@@ -44,7 +45,7 @@ public class DefaultContentRewriterRegistry implements ContentRewriterRegistry {
     if (rewriters == null) {
       rewriters = Collections.emptyList();
     }
-    this.rewriters = new LinkedList<ContentRewriter>(rewriters);
+    this.rewriters = Lists.newLinkedList(rewriters);
     this.htmlParser = htmlParser;
   }
 

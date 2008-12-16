@@ -167,7 +167,7 @@ public class BeanXStreamConverterTest extends TestCase {
   }
 
   public void testMapToXml() throws XmlException {
-    Map<String, String> m = new LinkedHashMap<String, String>();
+    Map<String, String> m = Maps.newLinkedHashMap();
     m.put("key1", "value1");
     m.put("key2", "value2");
     String xml = beanXmlConverter.convertToString(m);
@@ -181,17 +181,18 @@ public class BeanXStreamConverterTest extends TestCase {
   }
 
   public void testEmptyList() throws XmlException {
-    List<String> empty = new ArrayList<String>();
+    List<String> empty = Lists.newArrayList();
     String xml = beanXmlConverter.convertToString(empty);
     XmlUtil.parse(xml);
     String expectedXml = "<response><list/></response>";
     assertEquals(StringUtils.deleteWhitespace(expectedXml), StringUtils
         .deleteWhitespace(xml));
 
-    List<List<String>> emptyLists = new ArrayList<List<String>>();
-    emptyLists.add(new ArrayList<String>());
-    emptyLists.add(new ArrayList<String>());
-    emptyLists.add(new ArrayList<String>());
+    List<List<String>> emptyLists = Lists.newArrayList();
+    List<String> emptyList = Lists.newArrayList();
+    emptyLists.add(emptyList);
+    emptyLists.add(emptyList);
+    emptyLists.add(emptyList);
     xml = beanXmlConverter.convertToString(emptyLists);
     XmlUtil.parse(xml);
     expectedXml = "<response><list.container>" + "  <list/>" + "  <list/>"
@@ -201,7 +202,7 @@ public class BeanXStreamConverterTest extends TestCase {
   }
 
   public void testElementNamesInList() throws XmlException {
-    List<Activity> activities = new ArrayList<Activity>();
+    List<Activity> activities = Lists.newArrayList();
     activities.add(activity);
     activities.add(activity);
     activities.add(activity);

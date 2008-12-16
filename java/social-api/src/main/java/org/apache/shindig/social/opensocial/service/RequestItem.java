@@ -26,12 +26,14 @@ import org.apache.shindig.social.opensocial.spi.UserId;
 
 import org.joda.time.DateTime;
 
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 
+import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 import java.util.Set;
-import java.util.Date;
 
 /**
  * Abstract base type for social API requests.
@@ -183,12 +185,11 @@ public abstract class RequestItem {
   }
 
   public Set<String> getFields() {
-    return getFields(Sets.<String>newHashSet());
+    return getFields(Collections.<String>emptySet());
   }
 
   public Set<String> getFields(Set<String> defaultValue) {
-    Set<String> result = Sets.newHashSet();
-    result.addAll(getListParameter(FIELDS));
+    Set<String> result = ImmutableSet.copyOf(getListParameter(FIELDS));
     if (result.isEmpty()) {
       return defaultValue;
     }

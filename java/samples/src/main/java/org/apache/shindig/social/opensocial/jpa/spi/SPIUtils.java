@@ -17,6 +17,8 @@
  */
 package org.apache.shindig.social.opensocial.jpa.spi;
 
+import com.google.common.collect.Maps;
+
 import org.apache.shindig.auth.SecurityToken;
 import org.apache.shindig.social.opensocial.spi.UserId;
 
@@ -36,8 +38,8 @@ public class SPIUtils {
    * @return
    */
   public static List<String> getUserList(Set<UserId> userIds, SecurityToken token) {
-    HashMap<String, String> userIdMap = new HashMap<String, String>();
-    List<String> paramList = new ArrayList<String>();
+    HashMap<String, String> userIdMap = Maps.newHashMap();
+    List<String> paramList = Lists.newArrayList();
     for (UserId u : userIds) {
       try {
         String uid = u.getUserId(token);

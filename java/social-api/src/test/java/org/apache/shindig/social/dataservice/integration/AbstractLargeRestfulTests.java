@@ -17,7 +17,9 @@
  */
 package org.apache.shindig.social.dataservice.integration;
 
+import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 
@@ -101,7 +103,7 @@ public abstract class AbstractLargeRestfulTests extends TestCase {
 
   protected String getResponse(String path, String method, String postData,
       String format, String contentType) throws Exception {
-    return getResponse(path, method, Maps.<String, String> newHashMap(),
+    return getResponse(path, method, Maps.<String,String> newHashMap(),
         postData, format, contentType);
   }
 
@@ -208,14 +210,14 @@ public abstract class AbstractLargeRestfulTests extends TestCase {
    *         element.
    */
   protected Map<String, List<String>> childNodesToMap(Node n) {
-    Map<String, List<String>> v = new HashMap<String, List<String>>();
+    Map<String, List<String>> v = Maps.newHashMap();
     NodeList result = n.getChildNodes();
     for (int i = 0; i < result.getLength(); i++) {
       Node nv = result.item(i);
       if (nv.getNodeType() == Node.ELEMENT_NODE) {
         List<String> l = v.get(nv.getLocalName());
         if (l == null) {
-          l = new ArrayList<String>();
+          l = Lists.newArrayList();
           v.put(nv.getLocalName(), l);
         }
         l.add(nv.getTextContent());
@@ -236,7 +238,7 @@ public abstract class AbstractLargeRestfulTests extends TestCase {
    */
   protected Map<String, Map<String, List<String>>> childNodesToMapofMap(
       NodeList result) {
-    Map<String, Map<String, List<String>>> v = new HashMap<String, Map<String, List<String>>>();
+    Map<String, Map<String, List<String>>> v = Maps.newHashMap();
     for (int i = 0; i < result.getLength(); i++) {
       Map<String, List<Node>> keyValue = childNodesToNodeMap(result.item(i));
 
@@ -246,7 +248,7 @@ public abstract class AbstractLargeRestfulTests extends TestCase {
       Node valueNode = keyValue.get("value").get(0);
       Node key = keyValue.get("key").get(0);
       NodeList entryList = valueNode.getChildNodes();
-      Map<String, List<String>> pv = new HashMap<String, List<String>>();
+      Map<String, List<String>> pv = Maps.newHashMap();
       v.put(key.getTextContent(), pv);
       for (int j = 0; j < entryList.getLength(); j++) {
         Node n = entryList.item(j);
@@ -255,7 +257,7 @@ public abstract class AbstractLargeRestfulTests extends TestCase {
           assertTrue(ve.containsKey("key"));
           List<String> l = pv.get(ve.get("key").get(0));
           if ( l == null ) {
-            l = new ArrayList<String>();
+            l = Lists.newArrayList();
             pv.put(ve.get("key").get(0), l);
           }
           l.add(ve.get("value").get(0));
@@ -270,14 +272,14 @@ public abstract class AbstractLargeRestfulTests extends TestCase {
    * @return
    */
   protected Map<String, List<Node>> childNodesToNodeMap(Node n) {
-    Map<String, List<Node>> v = new HashMap<String, List<Node>>();
+    Map<String, List<Node>> v = Maps.newHashMap();
     NodeList result = n.getChildNodes();
     for (int i = 0; i < result.getLength(); i++) {
       Node nv = result.item(i);
       if (nv.getNodeType() == Node.ELEMENT_NODE) {
         List<Node> l = v.get(nv.getLocalName());
         if (l == null) {
-          l = new ArrayList<Node>();
+          l = Lists.newArrayList();
           v.put(nv.getLocalName(), l);
         }
         l.add(nv);

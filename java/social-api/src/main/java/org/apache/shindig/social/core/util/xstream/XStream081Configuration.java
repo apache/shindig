@@ -17,6 +17,9 @@
  */
 package org.apache.shindig.social.core.util.xstream;
 
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
+
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 
@@ -67,23 +70,23 @@ public class XStream081Configuration implements XStreamConfiguration {
    * Defines the type of the list container when at the top level where there
    * are no methods to specify the name of the list.
    */
-  private static final Map<ConverterSet, List<ClassFieldMapping>> listElementMappingList = new HashMap<ConverterSet, List<ClassFieldMapping>>();
+  private static final Map<ConverterSet, List<ClassFieldMapping>> listElementMappingList = Maps.newHashMap();
   /**
    * Specifies a priority sorted list of Class to Element Name mappings.
    */
-  private static final Map<ConverterSet, List<ClassFieldMapping>> elementMappingList = new HashMap<ConverterSet, List<ClassFieldMapping>>();
+  private static final Map<ConverterSet, List<ClassFieldMapping>> elementMappingList = Maps.newHashMap();
   /**
    * A list of omits, the potential field is the key, and if the class which the
    * field is in, is also in the list, the field is supressed.
    */
-  private static final Map<ConverterSet, Map<String, Class<?>[]>> omitMap = new HashMap<ConverterSet, Map<String, Class<?>[]>>();
+  private static final Map<ConverterSet, Map<String, Class<?>[]>> omitMap = Maps.newHashMap();
   /**
    * Maps elements names to classes.
    */
-  private static final Map<ConverterSet, Map<String, Class<?>>> elementClassMap = new HashMap<ConverterSet, Map<String, Class<?>>>();
-  private static final Map<ConverterSet, List<ImplicitCollectionFieldMapping>> itemFieldMappings = new HashMap<ConverterSet, List<ImplicitCollectionFieldMapping>>();
-  private static final Map<ConverterSet, List<InterfaceFieldAliasMapping>> fieldAliasMappingList = new HashMap<ConverterSet, List<InterfaceFieldAliasMapping>>();
-  private static final Map<String, NamespaceSet> namepaces = new HashMap<String, NamespaceSet>();
+  private static final Map<ConverterSet, Map<String, Class<?>>> elementClassMap = Maps.newHashMap();
+  private static final Map<ConverterSet, List<ImplicitCollectionFieldMapping>> itemFieldMappings = Maps.newHashMap();
+  private static final Map<ConverterSet, List<InterfaceFieldAliasMapping>> fieldAliasMappingList = Maps.newHashMap();
+  private static final Map<String, NamespaceSet> namepaces = Maps.newHashMap();
   private static final String ATOM_NS = "http://www.w3.org/2005/Atom";
   private static final String OS_NS = "http://ns.opensocial.org/2008/opensocial";
   private static final String OSEARCH_NS = "http://a9.com/-/spec/opensearch/1.1";
@@ -114,7 +117,7 @@ public class XStream081Configuration implements XStreamConfiguration {
     namepaces.put("reponse", os);
     namepaces.put("appdata", os);
 
-    List<ClassFieldMapping> defaultElementMappingList = new ArrayList<ClassFieldMapping>();
+    List<ClassFieldMapping> defaultElementMappingList = Lists.newArrayList();
     // this is order specific, so put the more specified interfaces at the top.
     defaultElementMappingList.add(new ClassFieldMapping("feed",
         AtomFeed.class));
@@ -162,7 +165,7 @@ public class XStream081Configuration implements XStreamConfiguration {
 
     // element setup for RestfullCollection Responses
 
-    List<ClassFieldMapping> collectionElementMappingList = new ArrayList<ClassFieldMapping>();
+    List<ClassFieldMapping> collectionElementMappingList = Lists.newArrayList();
 
     collectionElementMappingList.add(new ClassFieldMapping("feed",
         AtomFeed.class));
@@ -215,12 +218,12 @@ public class XStream081Configuration implements XStreamConfiguration {
     // Entries here might indicate a hole in the spec.
     // This not in the XSD for 81, but is in the wording of the spec.
     // omitMap.put("addresses", new Class[] { Person.class });
-    Map<String, Class<?>[]> defaultOmitMap = new HashMap<String, Class<?>[]>();
+    Map<String, Class<?>[]> defaultOmitMap = Maps.newHashMap();
     defaultOmitMap.put("isOwner", new Class[] { Person.class });
     defaultOmitMap.put("isViewer", new Class[] { Person.class });
     omitMap.put(ConverterSet.DEFAULT, defaultOmitMap);
 
-    Map<String, Class<?>> defaultElementClassMap = new HashMap<String, Class<?>>();
+    Map<String, Class<?>> defaultElementClassMap = Maps.newHashMap();
     defaultElementClassMap.put("feed", AtomFeed.class);
     defaultElementClassMap.put("content", AtomContent.class);
     defaultElementClassMap.put("person", Person.class);
@@ -242,7 +245,7 @@ public class XStream081Configuration implements XStreamConfiguration {
     defaultElementClassMap.put("listField", ListField.class);
     elementClassMap.put(ConverterSet.DEFAULT, defaultElementClassMap);
 
-    List<ImplicitCollectionFieldMapping> defaultItemFieldMappings = new ArrayList<ImplicitCollectionFieldMapping>();
+    List<ImplicitCollectionFieldMapping> defaultItemFieldMappings = Lists.newArrayList();
     defaultItemFieldMappings.add(new ImplicitCollectionFieldMapping(
         AtomFeed.class, "entry", AtomEntry.class, "entry"));
     defaultItemFieldMappings.add(new ImplicitCollectionFieldMapping(
@@ -301,11 +304,11 @@ public class XStream081Configuration implements XStreamConfiguration {
 
     itemFieldMappings.put(ConverterSet.DEFAULT, defaultItemFieldMappings);
 
-    List<ClassFieldMapping> defaultListElementMappingList = new ArrayList<ClassFieldMapping>();
+    List<ClassFieldMapping> defaultListElementMappingList = Lists.newArrayList();
     listElementMappingList.put(ConverterSet.DEFAULT,
         defaultListElementMappingList);
 
-    List<InterfaceFieldAliasMapping> defaultFieldAliasMappingList = new ArrayList<InterfaceFieldAliasMapping>();
+    List<InterfaceFieldAliasMapping> defaultFieldAliasMappingList = Lists.newArrayList();
     // defaultFieldAliasMappingList.add(new
     // InterfaceFieldAliasMapping("address",ListField.class,"value","urls"));
     // defaultFieldAliasMappingList.add(new

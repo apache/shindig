@@ -17,6 +17,9 @@
  */
 package org.apache.shindig.gadgets;
 
+import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
+
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.inject.name.Named;
@@ -74,8 +77,8 @@ public class BasicGadgetBlacklist implements GadgetBlacklist {
    *    the file
    */
   public BasicGadgetBlacklist(File blacklistFile) throws IOException {
-    exactMatches = new HashSet<String>();
-    regexpMatches = new ArrayList<Pattern>();
+    exactMatches = Sets.newHashSet();
+    regexpMatches = Lists.newArrayList();
     if (blacklistFile.exists()) {
       parseBlacklist(blacklistFile);
     }

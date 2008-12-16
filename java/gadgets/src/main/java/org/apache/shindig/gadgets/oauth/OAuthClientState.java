@@ -16,6 +16,8 @@
  */
 package org.apache.shindig.gadgets.oauth;
 
+import com.google.common.collect.Maps;
+
 import org.apache.shindig.common.crypto.BlobCrypter;
 import org.apache.shindig.common.crypto.BlobCrypterException;
 
@@ -54,7 +56,7 @@ public class OAuthClientState {
    * @param crypter
    */
   public OAuthClientState(BlobCrypter crypter) {
-    this.state = new HashMap<String, String>();
+    this.state = Maps.newHashMap();
     this.crypter = crypter;
   }
 
@@ -75,11 +77,8 @@ public class OAuthClientState {
         // Probably too old, pretend we never saw it at all.
       }
     }
-    if (state != null) {
-      this.state = state;
-    } else {
-      this.state = new HashMap<String, String>();
-    }
+    if (state == null) state = Maps.newHashMap();
+    this.state = state; 
   }
   
   /**

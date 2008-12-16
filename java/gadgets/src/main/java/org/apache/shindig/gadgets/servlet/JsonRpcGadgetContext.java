@@ -18,6 +18,8 @@
  */
 package org.apache.shindig.gadgets.servlet;
 
+import com.google.common.collect.Maps;
+
 import org.apache.shindig.gadgets.GadgetContext;
 import org.apache.shindig.gadgets.RenderingContext;
 import org.apache.shindig.gadgets.UserPrefs;
@@ -196,7 +198,7 @@ public class JsonRpcGadgetContext extends GadgetContext {
     if (prefs == null) {
       return null;
     }
-    Map<String, String> p = new HashMap<String, String>();
+    Map<String, String> p = Maps.newHashMap();
     Iterator i = prefs.keys();
     while (i.hasNext()) {
       String key = (String)i.next();

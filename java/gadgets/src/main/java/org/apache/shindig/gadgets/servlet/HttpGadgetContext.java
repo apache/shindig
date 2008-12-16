@@ -19,6 +19,8 @@
 
 package org.apache.shindig.gadgets.servlet;
 
+import com.google.common.collect.Maps;
+
 import org.apache.shindig.auth.AuthInfo;
 import org.apache.shindig.auth.SecurityToken;
 import org.apache.shindig.gadgets.GadgetContext;
@@ -270,7 +272,7 @@ public class HttpGadgetContext extends GadgetContext {
    */
   @SuppressWarnings("unchecked")
   private static UserPrefs getUserPrefs(HttpServletRequest req) {
-    Map<String, String> prefs = new HashMap<String, String>();
+    Map<String, String> prefs = Maps.newHashMap();
     Enumeration<String> paramNames = req.getParameterNames();
     if (paramNames == null) {
       return null;

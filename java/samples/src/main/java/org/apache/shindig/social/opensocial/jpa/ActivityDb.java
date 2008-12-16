@@ -616,7 +616,7 @@ public class ActivityDb implements Activity, DbObject {
         a.name = e.getKey();
         a.value = e.getValue();
         a.activity = this;
-        // a.activities = new ArrayList<Activity>();
+        // a.activities = Lists.newArrayList();
         // a.activities.add(this);
         templateParamsDb.put(e.getKey(), a);
       } else {
@@ -624,7 +624,7 @@ public class ActivityDb implements Activity, DbObject {
       }
     }
     // remove old entries
-    List<String> toRemove = new ArrayList<String>();
+    List<String> toRemove = Lists.newArrayList();
     for (Entry<String, ActivityTemplateParamsDb> e : templateParamsDb
         .entrySet()) {
       if (!templateParams.containsKey(e.getKey())) {

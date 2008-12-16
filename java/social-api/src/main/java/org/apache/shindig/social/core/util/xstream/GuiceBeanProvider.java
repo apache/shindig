@@ -17,6 +17,8 @@
  */
 package org.apache.shindig.social.core.util.xstream;
 
+import com.google.common.collect.Lists;
+
 import com.google.inject.Injector;
 
 import com.thoughtworks.xstream.converters.reflection.ObjectAccessException;
@@ -111,8 +113,7 @@ public class GuiceBeanProvider {
 
   private PropertyDescriptor[] getSerializableProperties(Object object) {
     Map<String, PropertyDescriptor> nameMap = getNameMap(object.getClass());
-    List<PropertyDescriptor> result = new ArrayList<PropertyDescriptor>(nameMap
-        .size());
+    List<PropertyDescriptor> result = Lists.newArrayListWithExpectedSize(nameMap.size());
     Set<String> names = nameMap.keySet();
     if (propertyNameComparator != null) {
       Set<String> sortedSet = new TreeSet<String>(propertyNameComparator);

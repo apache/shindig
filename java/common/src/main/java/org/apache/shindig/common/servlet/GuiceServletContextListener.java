@@ -18,6 +18,8 @@
  */
 package org.apache.shindig.common.servlet;
 
+import com.google.common.collect.Lists;
+
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.google.inject.Module;
@@ -43,7 +45,7 @@ public class GuiceServletContextListener implements ServletContextListener {
   public void contextInitialized(ServletContextEvent event) {
     ServletContext context = event.getServletContext();
     String moduleNames = context.getInitParameter(MODULES_ATTRIBUTE);
-    List<Module> modules = new LinkedList<Module>();
+    List<Module> modules = Lists.newLinkedList();
     if (moduleNames != null) {
       for (String moduleName : moduleNames.split(":")) {
         try {
