@@ -17,13 +17,13 @@
  */
 package org.apache.shindig.gadgets.preload;
 
-import com.google.common.collect.Maps;
+import com.google.common.collect.Lists;
 import com.google.inject.Inject;
 import org.apache.shindig.gadgets.GadgetContext;
 import org.apache.shindig.gadgets.spec.GadgetSpec;
 
+import java.util.Collection;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.FutureTask;
@@ -45,23 +45,31 @@ public class ConcurrentPreloaderService implements PreloaderService {
     this.preloaders = preloaders;
   }
 
-  public Preloads preload(GadgetContext context, GadgetSpec gadget) {
-    ConcurrentPreloads preloads = new ConcurrentPreloads();
-    Map<String, Callable<PreloadedData>> tasks = Maps.newHashMap();
-    for (Preloader preloader : preloaders) {
-      tasks.putAll(preloader.createPreloadTasks(context, gadget));
+  public Preloads preload(GadgetContext context, GadgetSpec gadget, PreloadPhase phase) {
+    if (preloaders.isEmpty()) {
+      return new NullPreloads();
     }
 
+    List<Callable<PreloadedData>> tasks = Lists.newArrayList();
+    for (Preloader preloader : preloaders) {
+      Collection<Callable<PreloadedData>> taskCollection =
+          preloader.createPreloadTasks(context, gadget, phase);
+      tasks.addAll(taskCollection);
+    }
+
+    ConcurrentPreloads preloads = new ConcurrentPreloads();
     int processed = tasks.size();
-    for (Map.Entry<String, Callable<PreloadedData>> entry : tasks.entrySet()) {
+    for (Callable<PreloadedData> task : tasks) {
       processed -= 1;
       if (processed == 0) {
         // The last preload fires in the current thread.
-        FutureTask<PreloadedData> futureTask = new FutureTask<PreloadedData>(entry.getValue());
+        // TODO: for the HTML_RENDER phase, if there's also a proxied fetch, this
+        // is counter-productive
+        FutureTask<PreloadedData> futureTask = new FutureTask<PreloadedData>(task);
         futureTask.run();
-        preloads.add(entry.getKey(), futureTask);
+        preloads.add(futureTask);
       } else {
-        preloads.add(entry.getKey(), executor.submit(entry.getValue()));
+        preloads.add(executor.submit(task));
       }
     }
     return preloads;

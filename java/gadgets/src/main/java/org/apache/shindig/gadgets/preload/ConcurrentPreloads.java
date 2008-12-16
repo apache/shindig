@@ -18,59 +18,73 @@
  */
 package org.apache.shindig.gadgets.preload;
 
-import com.google.common.collect.Maps;
+import com.google.common.base.Function;
+import com.google.common.collect.Lists;
 
+import java.util.Collection;
+import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
 /**
- * Preloads data by processing all Runnables concurrently.
+ * Preloads data by evaluating Futures for PreloadedData.
+ * This class is not, however, thread-safe - tasks must be
+ * added and read from a single thread..
  */
 class ConcurrentPreloads implements Preloads {
-  private final Map<String, Future<PreloadedData>> preloads;
+  private final List<Future<PreloadedData>> tasks;
 
   ConcurrentPreloads() {
-    preloads = Maps.newHashMap();
+    tasks = Lists.newArrayList();
   }
 
   /**
    * Add an active preloading process.
    *
-   * @param key The key that this preload will be stored under.
    * @param futureData A future that will return the preloaded data.
    */
-  ConcurrentPreloads add(String key, Future<PreloadedData> futureData) {
-    preloads.put(key, futureData);
+  ConcurrentPreloads add(Future<PreloadedData> futureData) {
+    tasks.add(futureData);
     return this;
   }
 
-  public Set<String> getKeys() {
-    return preloads.keySet();
+  public Collection<PreloadedData> getData() {
+    return Lists.transform(tasks, new Function<Future<PreloadedData>, PreloadedData>() {
+      public PreloadedData apply(Future<PreloadedData> preloadedDataFuture) {
+        return getPreloadedData(preloadedDataFuture);
+      }
+    });
   }
 
-  public PreloadedData getData(String key) throws PreloadException {
-    Future<PreloadedData> future = preloads.get(key);
+  /**
+   * Gets the preloaded data, handling any exceptions from Future processing.
+   */
+  private PreloadedData getPreloadedData(Future<PreloadedData> preloadedDataFuture) {
+    try {
+     return preloadedDataFuture.get();
+    } catch (ExecutionException ee) {
+      return new FailedPreload(ee.getCause());
+    } catch (InterruptedException ie) {
+      // Do NOT Propagate the interrupt
+      throw new RuntimeException("Preloading was interrupted by thread termination", ie);
+    }
+  }
 
-    if (future == null) {
-      return null;
+  /** PreloadData implementation that reports failure */
+  private class FailedPreload implements PreloadedData {
+    private final Throwable t;
+
+    public FailedPreload(Throwable t) {
+      this.t = t;
     }
 
-    try {
-      // TODO: Determine if timeouts should be supported.
-      return future.get();
-    } catch (InterruptedException e) {
-      // Thread was interrupted. We might want to throw a RTE here, but this is probably only going
-      // to happen if we're shutting down the server anyway.
-      throw new PreloadException("Preloading was interrupted by thread termination.", e);
-    } catch (ExecutionException e) {
-      // Callable threw an exception. Throw the original.
-      Throwable cause = e.getCause();
-      if (cause instanceof PreloadException) {
-        throw (PreloadException) cause;
+    public Map<String, Object> toJson() throws PreloadException {
+      if (t instanceof PreloadException) {
+        throw (PreloadException) t;
       }
-      throw new PreloadException(cause);
+
+      throw new PreloadException(t);
     }
   }
 }

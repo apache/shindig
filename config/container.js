@@ -74,6 +74,11 @@
 // Use an insecure security token by default
 "gadgets.securityTokenType" : "insecure",
 
+// Config param to load Opensocial data for social
+// preloads in data pipelining.  %host% will be
+// substituted with the current host.
+"gadgets.osDataUri" : "http://%host%/social/rpc",
+
 // Uncomment these to switch to a secure version
 // 
 //"gadgets.securityTokenType" : "secure",

@@ -32,6 +32,7 @@ import org.apache.shindig.gadgets.*;
 import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.http.HttpResponse;
 import org.apache.shindig.gadgets.preload.PreloadException;
+import org.apache.shindig.gadgets.preload.PreloadedData;
 import org.apache.shindig.gadgets.preload.Preloads;
 import org.apache.shindig.gadgets.rewrite.ContentRewriter;
 import org.apache.shindig.gadgets.rewrite.MutableContent;
@@ -202,7 +203,7 @@ public class RenderingContentRewriter implements ContentRewriter {
     if (!forced.isEmpty()) {
       String jsUrl = urlGenerator.getBundledJsUrl(forced, context);
       Element libsTag = headTag.getOwnerDocument().createElement("script");
-      libsTag.setAttribute("src", jsUrl.toString());
+      libsTag.setAttribute("src", jsUrl);
       headTag.appendChild(libsTag);
 
       // Forced transitive deps need to be added as well so that they don't get pulled in twice.
@@ -403,16 +404,16 @@ public class RenderingContentRewriter implements ContentRewriter {
    */
   private void injectPreloads(Gadget gadget, Node scriptTag) {
     Preloads preloads = gadget.getPreloads();
+    Map<String, Object> preload = Maps.newHashMap();
 
-    Collection<String> keys = preloads.getKeys();
-    Map<String, Object> preload = Maps.newHashMapWithExpectedSize(keys.size());
-
-    for (String name : keys) {
+    for (PreloadedData preloaded : preloads.getData()) {
       try {
-        preload.put(name, preloads.getData(name).toJson());
-      } catch (PreloadException e) {
+        for (Map.Entry<String, Object> entry : preloaded.toJson().entrySet()) {
+          preload.put(entry.getKey(), entry.getValue());
+        }
+      } catch (PreloadException pe) {
         // This will be thrown in the event of some unexpected exception. We can move on.
-        LOG.log(Level.WARNING, "Unexpected error attempting to preload " + name, e);
+        LOG.log(Level.WARNING, "Unexpected error when preloading", pe);
       }
     }
     Text text = scriptTag.getOwnerDocument().createTextNode("gadgets.io.preloaded_=");

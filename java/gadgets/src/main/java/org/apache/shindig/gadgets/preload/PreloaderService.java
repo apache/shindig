@@ -28,13 +28,27 @@ import org.apache.shindig.gadgets.spec.GadgetSpec;
 @ImplementedBy(ConcurrentPreloaderService.class)
 public interface PreloaderService {
   /**
+   * Phases for preloading.
+   */
+  public enum PreloadPhase {
+    /**
+     * Preloaded content that will be POSTed to a proxied render.
+     */
+    PROXY_FETCH,
+
+    /**
+     * Preloaded content that will be delivered to the final render
+     */
+    HTML_RENDER
+  }
+
+  /**
    * Begin all preload operations.
    *
    * @param context The request that needs preloading.
    * @param gadget The gadget that the operations will be performed for.
+   * @param phase the preloading phase
    * @return The preloads for the gadget.
-   *
-   * TODO: This should probably have a read only input. If we can
    */
-  Preloads preload(GadgetContext context, GadgetSpec gadget);
+  Preloads preload(GadgetContext context, GadgetSpec gadget, PreloadPhase phase);
 }

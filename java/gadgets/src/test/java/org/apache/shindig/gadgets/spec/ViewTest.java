@@ -195,4 +195,53 @@ public class ViewTest {
     assertFalse("sign_owner parsed incorrectly.", view.isSignOwner());
     assertFalse("sign_viewer parsed incorrectly.", view.isSignViewer());
   }
+
+  @Test
+  public void testSocialPreload() throws Exception {
+    String xml = "<Content href=\"http://example.org/proxied.php\" "
+        + "authz=\"SIGNED\">"
+        + "<OwnerRequest xmlns=\"" + PipelinedData.OPENSOCIAL_NAMESPACE + "\" "
+        + " key=\"key\""
+        + " fields=\"name,id\""
+        + "/></Content>";
+    View view = new View("test", Arrays.asList(XmlUtil.parse(xml)), SPEC_URL);
+    assertEquals(1, view.getPipelinedData().getSocialPreloads().size());
+    assertTrue(view.getPipelinedData().getSocialPreloads().containsKey("key"));
+  }
+
+  @Test(expected = SpecParserException.class)
+  public void testSocialPreloadWithoutAuth() throws Exception {
+    // Not signed, so a parse exception will result
+    String xml = "<Content href=\"http://example.org/proxied.php\" "
+        + "sign_owner=\"true\">"
+        + "<OwnerRequest xmlns=\"" + PipelinedData.OPENSOCIAL_NAMESPACE + "\" "
+        + " key=\"key\""
+        + " fields=\"name,id\""
+        + "/></Content>";
+    new View("test", Arrays.asList(XmlUtil.parse(xml)), SPEC_URL);
+  }
+
+  @Test(expected = SpecParserException.class)
+  public void testSocialPreloadWithoutSignOwner() throws Exception {
+    // Signed, but not by owner when owner data is fetched
+    String xml = "<Content href=\"http://example.org/proxied.php\" "
+        + "authz=\"SIGNED\" sign_owner=\"false\">"
+        + "<OwnerRequest xmlns=\"" + PipelinedData.OPENSOCIAL_NAMESPACE + "\" "
+        + " key=\"key\""
+        + " fields=\"name,id\""
+        + "/></Content>";
+    new View("test", Arrays.asList(XmlUtil.parse(xml)), SPEC_URL);
+  }
+
+  @Test(expected = SpecParserException.class)
+  public void testSocialPreloadWithoutSignViewer() throws Exception {
+    // Signed, but not by viewer when viewer data is fetched
+    String xml = "<Content href=\"http://example.org/proxied.php\" "
+        + "authz=\"SIGNED\" sign_viewer=\"false\">"
+        + "<ViewerRequest xmlns=\"" + PipelinedData.OPENSOCIAL_NAMESPACE + "\" "
+        + " key=\"key\""
+        + " fields=\"name,id\""
+        + "/></Content>";
+    new View("test", Arrays.asList(XmlUtil.parse(xml)), SPEC_URL);
+  }
 }
