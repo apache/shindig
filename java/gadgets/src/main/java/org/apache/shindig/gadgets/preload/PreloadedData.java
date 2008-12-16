@@ -17,8 +17,6 @@
  */
 package org.apache.shindig.gadgets.preload;
 
-import java.util.Map;
-
 /**
  * Contains preloaded data and methods for manipulating it.
  */
@@ -29,5 +27,5 @@ public interface PreloadedData {
    *
    * @return A JSON object suitable for passing to org.json.JSONObject.put(String, Object).
    */
-  Map<String, Object> toJson() throws PreloadException;
+  Object toJson();
 }

@@ -18,8 +18,6 @@
  */
 package org.apache.shindig.gadgets.render;
 
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import org.apache.shindig.auth.AnonymousSecurityToken;
 import org.apache.shindig.auth.SecurityToken;
@@ -32,20 +30,18 @@ import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.http.ContentFetcherFactory;
 import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.http.HttpResponse;
-import org.apache.shindig.gadgets.preload.PreloadException;
-import org.apache.shindig.gadgets.preload.PreloadedData;
 import org.apache.shindig.gadgets.preload.PreloaderService;
 import org.apache.shindig.gadgets.preload.Preloads;
 import org.apache.shindig.gadgets.rewrite.ContentRewriterRegistry;
 import org.apache.shindig.gadgets.spec.GadgetSpec;
 import org.apache.shindig.gadgets.spec.View;
-import org.json.JSONArray;
-import org.json.JSONObject;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import org.junit.Test;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.Locale;
+import java.util.Map;
 
 /**
  * Tests for HtmlRenderer
@@ -139,55 +135,6 @@ public class HtmlRendererTest {
   }
 
   @Test
-  public void renderProxiedWithPreload() throws Exception {
-    JSONObject prefetchedJson = new JSONObject("{id: 'foo', data: 'bar'}");
-
-    preloaderService.preloads = new FakePreloads(
-        ImmutableMap.of("key", (Object) prefetchedJson));
-    
-    fetcher.plainResponses.put(EXPECTED_PROXIED_HTML_HREF, new HttpResponse(PROXIED_HTML_CONTENT));
-    String content = renderer.render(makeHrefGadget("none"));
-    assertEquals(PROXIED_HTML_CONTENT, content);
-
-    HttpRequest lastHttpRequest = fetcher.getLastHttpRequest();
-    assertEquals("POST", lastHttpRequest.getMethod());
-    assertEquals("GET", lastHttpRequest.getHeader("X-Method-Override"));
-    String postBody = lastHttpRequest.getPostBodyAsString();
-    JSONArray actualJson = new JSONArray(postBody);
-
-    assertEquals(1, actualJson.length());
-    assertEquals(prefetchedJson.toString(), actualJson.getJSONObject(0).toString());
-  }
-
-  @Test
-  public void renderProxiedWithFailedPreload() throws Exception {
-    JSONObject prefetchedJson = new JSONObject("{id: 'foo', data: 'bar'}");
-
-    preloaderService.preloads = new Preloads() {
-      public Collection<PreloadedData> getData() {
-        PreloadedData preloadedData = new PreloadedData() {
-          public Map<String, Object> toJson() throws PreloadException {
-            throw new PreloadException("test");
-          }
-        };
-        return Lists.newArrayList(preloadedData);
-      }
-    };
-
-    fetcher.plainResponses.put(EXPECTED_PROXIED_HTML_HREF, new HttpResponse(PROXIED_HTML_CONTENT));
-    String content = renderer.render(makeHrefGadget("none"));
-    assertEquals(PROXIED_HTML_CONTENT, content);
-
-    HttpRequest lastHttpRequest = fetcher.getLastHttpRequest();
-    assertEquals("POST", lastHttpRequest.getMethod());
-    assertEquals("GET", lastHttpRequest.getHeader("X-Method-Override"));
-    String postBody = lastHttpRequest.getPostBodyAsString();
-    JSONArray actualJson = new JSONArray(postBody);
-
-    assertEquals(0, actualJson.length());
-  }
-
-  @Test
   public void doPreloading() throws Exception {
     renderer.render(makeGadget(BASIC_HTML_CONTENT));
     assertTrue("Preloading not performed.", preloaderService.wasPreloaded);
@@ -203,7 +150,6 @@ public class HtmlRendererTest {
     private final Map<Uri, HttpResponse> plainResponses = Maps.newHashMap();
     private final Map<Uri, HttpResponse> signedResponses = Maps.newHashMap();
     private final Map<Uri, HttpResponse> oauthResponses = Maps.newHashMap();
-    private HttpRequest lastHttpRequest;
 
     public FakeContentFetcherFactory() {
       super(null, null);
@@ -211,8 +157,6 @@ public class HtmlRendererTest {
 
     @Override
     public HttpResponse fetch(HttpRequest request) throws GadgetException {
-      lastHttpRequest = request;
-
       if (request.getGadget() == null) {
         throw new GadgetException(GadgetException.Code.FAILED_TO_RETRIEVE_CONTENT,
             "No gadget associated with rendering request.");
@@ -254,38 +198,16 @@ public class HtmlRendererTest {
       }
       return response;
     }
-
-    public HttpRequest getLastHttpRequest() {
-      return lastHttpRequest;
-    }
   }
 
   private static class FakePreloaderService implements PreloaderService {
     private boolean wasPreloaded;
-    Preloads preloads;
-
-    public Preloads preload(GadgetContext context, GadgetSpec gadget, PreloadPhase phase) {
+    public Preloads preload(GadgetContext context, GadgetSpec gadget) {
       wasPreloaded = true;
-      return preloads;
+      return null;
     }
   }
 
-  private static class FakePreloads implements Preloads {
-    private final PreloadedData preloadedData;
-
-    public Collection<PreloadedData> getData() {
-      return Collections.singletonList(preloadedData);
-    }
-
-    public FakePreloads(final Map<String, Object> preloadData) {
-      this.preloadedData = new PreloadedData() {
-        public Map<String, Object> toJson() throws PreloadException {
-          return preloadData;
-        }
-      };
-    }
-  }
-  
   private static class FakeContentRewriterRegistry implements ContentRewriterRegistry {
     private boolean wasRewritten = false;
 

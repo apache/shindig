@@ -54,17 +54,6 @@ public class HttpCacheKeyTest {
   }
 
   @Test
-  public void testNonGetWithOverride() throws Exception {
-    HttpRequest request = new HttpRequest(target).setMethod("POST")
-        .addHeader("X-Method-Override", "GET");
-    HttpCacheKey key = new HttpCacheKey(request);
-    assertTrue(key.isCacheable());
-    assertEquals(
-        "[{\"method\":\"POST\"},{\"url\":\"http://www.example.com/\"}]",
-        key.toString());
-  }
-
-  @Test
   public void testOrdered() {
     HttpCacheKey key = new HttpCacheKey(new HttpRequest(target));
     key.set("c", "c");

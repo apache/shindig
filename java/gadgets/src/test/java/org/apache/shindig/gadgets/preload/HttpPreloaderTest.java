@@ -20,8 +20,11 @@ package org.apache.shindig.gadgets.preload;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
+import org.apache.shindig.auth.SecurityToken;
+import org.apache.shindig.common.testing.FakeGadgetToken;
+import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.gadgets.AuthType;
+import org.apache.shindig.gadgets.GadgetContext;
 import org.apache.shindig.gadgets.http.*;
 import org.apache.shindig.gadgets.spec.GadgetSpec;
 import org.json.JSONException;
@@ -29,7 +32,7 @@ import org.json.JSONObject;
 import static org.junit.Assert.*;
 import org.junit.Test;
 
-import java.util.Collection;
+import java.net.URI;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -38,10 +41,12 @@ import java.util.concurrent.Callable;
 /**
  * Tests for HttpPreloader.
  */
-public class HttpPreloaderTest extends PreloaderTestFixture {
+public class HttpPreloaderTest {
   private static final String PRELOAD_HREF = "http://www.example.org/file";
   private static final String PRELOAD_HREF2 = "http://www.example.org/file-two";
   private static final String PRELOAD_CONTENT = "Preloaded data";
+  private static final String CONTAINER = "some-container";
+  private static final Uri GADGET_URL = Uri.parse("http://example.org/gadget.xml");
   private static final Map<String, String> PRELOAD_METADATA = ImmutableMap.of("foo", "bar");
   private final RecordingHttpFetcher plainFetcher = new RecordingHttpFetcher();
   private final RecordingHttpFetcher oauthFetcher = new RecordingHttpFetcher();
@@ -53,6 +58,23 @@ public class HttpPreloaderTest extends PreloaderTestFixture {
         return plainFetcher.fetch(request);
       }
       return oauthFetcher.fetch(request);
+    }
+  };
+
+  private final GadgetContext context = new GadgetContext() {
+    @Override
+    public SecurityToken getToken() {
+      return new FakeGadgetToken();
+    }
+
+    @Override
+    public String getContainer() {
+      return CONTAINER;
+    }
+
+    @Override
+    public URI getUrl() {
+      return GADGET_URL.toJavaUri();
     }
   };
 
@@ -74,6 +96,7 @@ public class HttpPreloaderTest extends PreloaderTestFixture {
   }
 
   @Test
+  @SuppressWarnings("unchecked")
   public void normalPreloads() throws Exception {
     String xml =
         "<Module><ModulePrefs title=''>" +
@@ -82,14 +105,12 @@ public class HttpPreloaderTest extends PreloaderTestFixture {
     GadgetSpec gadget = new GadgetSpec(GADGET_URL, xml);
     Preloader preloader = new HttpPreloader(fetchers);
 
-    Collection<Callable<PreloadedData>> preloaded =
-        preloader.createPreloadTasks(context, gadget, PreloaderService.PreloadPhase.HTML_RENDER);
+    Map<String, Callable<PreloadedData>> preloaded = preloader.createPreloadTasks(context, gadget);
 
-    assertEquals(1, preloaded.size());
-    PreloadedData data = preloaded.iterator().next().call();
+    PreloadedData data = preloaded.get(PRELOAD_HREF).call();
 
     checkRequest(plainFetcher.requests.get(0));
-    checkResults((JSONObject) data.toJson().get(PRELOAD_HREF));
+    checkResults((JSONObject)data.toJson());
   }
 
   @Test
@@ -101,17 +122,15 @@ public class HttpPreloaderTest extends PreloaderTestFixture {
     GadgetSpec gadget = new GadgetSpec(GADGET_URL, xml);
     Preloader preloader = new HttpPreloader(fetchers);
 
-    Collection<Callable<PreloadedData>> preloaded =
-        preloader.createPreloadTasks(context, gadget, PreloaderService.PreloadPhase.HTML_RENDER);
+    Map<String, Callable<PreloadedData>> preloaded = preloader.createPreloadTasks(context, gadget);
 
-    assertEquals(1, preloaded.size());
-    PreloadedData data = preloaded.iterator().next().call();
+    PreloadedData data = preloaded.get(PRELOAD_HREF).call();
 
     HttpRequest request = oauthFetcher.requests.get(0);
     checkRequest(request);
     assertTrue(request.getOAuthArguments().getSignOwner());
     assertFalse(request.getOAuthArguments().getSignViewer());
-    checkResults((JSONObject) data.toJson().get(PRELOAD_HREF));
+    checkResults((JSONObject) data.toJson());
   }
 
   @Test
@@ -124,15 +143,13 @@ public class HttpPreloaderTest extends PreloaderTestFixture {
     GadgetSpec gadget = new GadgetSpec(GADGET_URL, xml);
     Preloader preloader = new HttpPreloader(fetchers);
 
-    Collection<Callable<PreloadedData>> preloaded = preloader.createPreloadTasks(
-        context, gadget, PreloaderService.PreloadPhase.HTML_RENDER);
+    Map<String, Callable<PreloadedData>> preloaded = preloader.createPreloadTasks(context, gadget);
 
-    assertEquals(1, preloaded.size());
-    PreloadedData data = preloaded.iterator().next().call();
+    PreloadedData data = preloaded.get(PRELOAD_HREF).call();
 
     HttpRequest request = oauthFetcher.requests.get(0);
     checkRequest(request);
-    checkResults((JSONObject) data.toJson().get(PRELOAD_HREF));
+    checkResults((JSONObject) data.toJson());
   }
 
   @Test
@@ -145,27 +162,15 @@ public class HttpPreloaderTest extends PreloaderTestFixture {
     GadgetSpec gadget = new GadgetSpec(GADGET_URL, xml);
     Preloader preloader = new HttpPreloader(fetchers);
 
-    Collection<Callable<PreloadedData>> preloaded = preloader.createPreloadTasks(
-        context, gadget, PreloaderService.PreloadPhase.HTML_RENDER);
+    Map<String, Callable<PreloadedData>> preloaded = preloader.createPreloadTasks(context, gadget);
 
-    assertEquals(2, preloaded.size());
-    Map<String, Object> map = getAll(preloaded);
-
+    PreloadedData data = preloaded.get(PRELOAD_HREF).call();
     checkRequest(plainFetcher.requests.get(0));
-    checkResults((JSONObject) map.get(PRELOAD_HREF));
+    checkResults((JSONObject) data.toJson());
 
+    data = preloaded.get(PRELOAD_HREF2).call();
     checkRequest(plainFetcher.requests.get(1));
-    checkResults((JSONObject) map.get(PRELOAD_HREF2));
-  }
-
-  private Map<String, Object> getAll(
-      Collection<Callable<PreloadedData>> preloaded) throws Exception {
-    Map<String, Object> map = Maps.newHashMap();
-    for (Callable<PreloadedData> preloadCallable : preloaded) {
-      map.putAll(preloadCallable.call().toJson());
-    }
-
-    return map;
+    checkResults((JSONObject) data.toJson());
   }
 
   @Test
@@ -178,32 +183,36 @@ public class HttpPreloaderTest extends PreloaderTestFixture {
     GadgetSpec gadget = new GadgetSpec(GADGET_URL, xml);
     Preloader preloader = new HttpPreloader(fetchers);
 
-    view = "foo";
+    GadgetContext fooViewContext = new GadgetContext() {
+      @Override
+      public SecurityToken getToken() {
+        return new FakeGadgetToken();
+      }
 
-    Collection<Callable<PreloadedData>> preloaded
-        = preloader.createPreloadTasks(context, gadget, PreloaderService.PreloadPhase.HTML_RENDER);
+      @Override
+      public String getContainer() {
+        return CONTAINER;
+      }
 
-    Map<String, Object> map = getAll(preloaded);
+      @Override
+      public URI getUrl() {
+        return GADGET_URL.toJavaUri();
+      }
 
+      @Override
+      public String getView() {
+        return "foo";
+      }
+    };
+
+    Map<String, Callable<PreloadedData>> preloaded
+        = preloader.createPreloadTasks(fooViewContext, gadget);
+
+    PreloadedData data = preloaded.get(PRELOAD_HREF).call();
     checkRequest(plainFetcher.requests.get(0));
-    checkResults((JSONObject) map.get(PRELOAD_HREF));
+    checkResults((JSONObject) data.toJson());
 
-    assertFalse("Preloaded an item that should not have been.", map.containsKey(PRELOAD_HREF2));
-  }
-
-  @Test
-  public void proxiedPreloadIsEmpty() throws Exception {
-    String xml =
-        "<Module><ModulePrefs title=''>" +
-        " <Preload href='" + PRELOAD_HREF + "'/>" +
-        "</ModulePrefs><Content/></Module>";
-    GadgetSpec gadget = new GadgetSpec(GADGET_URL, xml);
-    Preloader preloader = new HttpPreloader(fetchers);
-
-    Collection<Callable<PreloadedData>> preloaded =
-        preloader.createPreloadTasks(context, gadget, PreloaderService.PreloadPhase.PROXY_FETCH);
-
-    assertEquals(0, preloaded.size());
+    assertNull("Preloaded an item that should not have been.", preloaded.get(PRELOAD_HREF2));
   }
 
   private static class RecordingHttpFetcher implements HttpFetcher {

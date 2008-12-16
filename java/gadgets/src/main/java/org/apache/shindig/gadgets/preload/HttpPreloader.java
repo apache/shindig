@@ -18,25 +18,20 @@
  */
 package org.apache.shindig.gadgets.preload;
 
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import com.google.inject.Inject;
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.gadgets.FetchResponseUtils;
 import org.apache.shindig.gadgets.GadgetContext;
-import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.http.ContentFetcherFactory;
 import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.http.HttpResponse;
 import org.apache.shindig.gadgets.oauth.OAuthArguments;
 import org.apache.shindig.gadgets.spec.GadgetSpec;
 import org.apache.shindig.gadgets.spec.Preload;
-import org.apache.shindig.gadgets.spec.RequestAuthenticationInfo;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.util.Collection;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Callable;
@@ -55,50 +50,39 @@ public class HttpPreloader implements Preloader {
     this.fetcher = fetcherFactory;
   }
 
-  public Collection<Callable<PreloadedData>> createPreloadTasks(GadgetContext context,
-      GadgetSpec gadget, PreloaderService.PreloadPhase phase) {
-    List<Callable<PreloadedData>> preloads = Lists.newArrayList();
+  public Map<String, Callable<PreloadedData>> createPreloadTasks(GadgetContext context,
+      GadgetSpec gadget) {
+    Map<String, Callable<PreloadedData>> preloads = Maps.newHashMap();
 
-    if (phase == PreloaderService.PreloadPhase.HTML_RENDER) {
-      for (Preload preload : gadget.getModulePrefs().getPreloads()) {
-        Set<String> preloadViews = preload.getViews();
-        if (preloadViews.isEmpty() || preloadViews.contains(context.getView())) {
-          preloads.add(new PreloadTask(context, preload, preload.getHref().toString()));
-        }
+    for (Preload preload : gadget.getModulePrefs().getPreloads()) {
+      Set<String> preloadViews = preload.getViews();
+      if (preloadViews.isEmpty() || preloadViews.contains(context.getView())) {
+        preloads.put(preload.getHref().toString(), new PreloadTask(context, preload));
       }
     }
 
     return preloads;
   }
 
-
-  // TODO: move somewhere more sensible
-  public static HttpRequest newHttpRequest(GadgetContext context,
-      RequestAuthenticationInfo authenticationInfo) throws GadgetException {
-    HttpRequest request = new HttpRequest(authenticationInfo.getHref())
-        .setSecurityToken(context.getToken())
-        .setOAuthArguments(new OAuthArguments(authenticationInfo))
-        .setAuthType(authenticationInfo.getAuthType())
-        .setContainer(context.getContainer())
-        .setGadget(Uri.fromJavaUri(context.getUrl()));
-    return request;
-  }
-
-  class PreloadTask implements Callable<PreloadedData> {
+  private class PreloadTask implements Callable<PreloadedData> {
     private final GadgetContext context;
     private final Preload preload;
-    private final String key;
 
-    public PreloadTask(GadgetContext context, Preload preload, String key) {
+    public PreloadTask(GadgetContext context, Preload preload) {
       this.context = context;
       this.preload = preload;
-      this.key = key;
     }
 
     public PreloadedData call() throws Exception {
-      HttpRequest request = newHttpRequest(context, preload);
-
-      return new HttpPreloadData(fetcher.fetch(request), key);
+      // TODO: This should be extracted into a common helper that takes any
+      // org.apache.shindig.gadgets.spec.RequestAuthenticationInfo.
+      HttpRequest request = new HttpRequest(preload.getHref())
+          .setSecurityToken(context.getToken())
+          .setOAuthArguments(new OAuthArguments(preload))
+          .setAuthType(preload.getAuthType())
+          .setContainer(context.getContainer())
+          .setGadget(Uri.fromJavaUri(context.getUrl()));
+      return new HttpPreloadData(fetcher.fetch(request));
     }
   }
 
@@ -107,9 +91,8 @@ public class HttpPreloader implements Preloader {
    */
   private static class HttpPreloadData implements PreloadedData {
     private final JSONObject data;
-    private final String key;
 
-    public HttpPreloadData(HttpResponse response, String key) {
+    public HttpPreloadData(HttpResponse response) {
       JSONObject data = null;
       try {
         data = FetchResponseUtils.getResponseAsJson(response, response.getResponseAsString());
@@ -117,11 +100,10 @@ public class HttpPreloader implements Preloader {
         data = new JSONObject();
       }
       this.data = data;
-      this.key = key;
     }
 
-    public Map<String, Object> toJson() {
-      return ImmutableMap.of(key, (Object) data);
+    public Object toJson() {
+      return data;
     }
   }
 }

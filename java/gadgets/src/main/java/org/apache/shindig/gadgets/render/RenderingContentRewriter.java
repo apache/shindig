@@ -32,7 +32,6 @@ import org.apache.shindig.gadgets.*;
 import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.http.HttpResponse;
 import org.apache.shindig.gadgets.preload.PreloadException;
-import org.apache.shindig.gadgets.preload.PreloadedData;
 import org.apache.shindig.gadgets.preload.Preloads;
 import org.apache.shindig.gadgets.rewrite.ContentRewriter;
 import org.apache.shindig.gadgets.rewrite.MutableContent;
@@ -404,16 +403,16 @@ public class RenderingContentRewriter implements ContentRewriter {
    */
   private void injectPreloads(Gadget gadget, Node scriptTag) {
     Preloads preloads = gadget.getPreloads();
-    Map<String, Object> preload = Maps.newHashMap();
 
-    for (PreloadedData preloaded : preloads.getData()) {
+    Collection<String> keys = preloads.getKeys();
+    Map<String, Object> preload = Maps.newHashMapWithExpectedSize(keys.size());
+
+    for (String name : keys) {
       try {
-        for (Map.Entry<String, Object> entry : preloaded.toJson().entrySet()) {
-          preload.put(entry.getKey(), entry.getValue());
-        }
-      } catch (PreloadException pe) {
+        preload.put(name, preloads.getData(name).toJson());
+      } catch (PreloadException e) {
         // This will be thrown in the event of some unexpected exception. We can move on.
-        LOG.log(Level.WARNING, "Unexpected error when preloading", pe);
+        LOG.log(Level.WARNING, "Unexpected error attempting to preload " + name, e);
       }
     }
     Text text = scriptTag.getOwnerDocument().createTextNode("gadgets.io.preloaded_=");
