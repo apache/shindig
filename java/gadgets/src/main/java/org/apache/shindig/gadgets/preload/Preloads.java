@@ -18,24 +18,12 @@
  */
 package org.apache.shindig.gadgets.preload;
 
-import java.util.Set;
+import java.util.Collection;
 
 /**
- * Container that holds preload operations, which are actually contained as futures.
+ * Container that holds preload operations.
+ * TODO: delete this class, which doesn't have enough state to be worth keeping.
  */
 public interface Preloads {
-  /**
-   * @return Keys for all preloaded data.
-   */
-  Set<String> getKeys();
-
-  /**
-   * Retrieve a single preload.
-   * 
-   * @param key The key that the preload is stored under.
-   * @return The preloaded data, or null if there is no preload under the specified key (including
-   * failure to preload).
-   * @throws PreloadException If there was any issue while preloading.
-   */
-  PreloadedData getData(String key) throws PreloadException;
+  Collection<PreloadedData> getData();
 }

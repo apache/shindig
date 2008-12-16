@@ -18,14 +18,12 @@
  */
 package org.apache.shindig.gadgets.preload;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-
-import com.google.common.collect.Sets;
-
+import com.google.common.collect.ImmutableMap;
+import static org.junit.Assert.*;
 import org.junit.Test;
 
+import java.util.Iterator;
+import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
@@ -36,79 +34,109 @@ import java.util.concurrent.TimeUnit;
 public class ConcurrentPreloadsTest {
 
   @Test
-  public void getKeys() {
+  public void getData() throws Exception {
     ConcurrentPreloads preloads = new ConcurrentPreloads();
-    preloads.add("foo", TestFuture.returnsNormal());
-    preloads.add("throwsInterrupted", TestFuture.throwsInterrupted());
+    preloads.add(TestFuture.returnsNormal("foo"));
+    preloads.add(TestFuture.returnsNormal("bar"));
 
-    assertEquals(Sets.newHashSet("foo", "throwsInterrupted"), preloads.getKeys());
+    assertEquals(2, preloads.getData().size());
+    Iterator<PreloadedData> iterator = preloads.getData().iterator();
+    assertEquals(TestFuture.expectedResult("foo"), iterator.next().toJson());
+    assertEquals(TestFuture.expectedResult("bar"), iterator.next().toJson());
+    assertFalse(iterator.hasNext());
   }
 
   @Test
-  public void getPreloadedDataNormal() throws Exception {
+  public void getDataWithRuntimeException() throws Exception{
     ConcurrentPreloads preloads = new ConcurrentPreloads();
-    preloads.add("foo", TestFuture.returnsNormal());
+    preloads.add(TestFuture.throwsExecution());
+    preloads.add(TestFuture.returnsNormal("foo"));
 
-    assertNotNull(preloads.getData("foo"));
+    assertEquals(2, preloads.getData().size());
+    Iterator<PreloadedData> iterator = preloads.getData().iterator();
+
+    // First item should throw an exception, a PreloadException around
+    // a RuntimeException
+    PreloadedData withError = iterator.next();
+    try {
+      withError.toJson();
+      fail();
+    } catch (PreloadException pe) {
+      assertEquals(pe.getCause().getClass(), RuntimeException.class);
+    }
+
+    // And iteration should continue
+    assertEquals(TestFuture.expectedResult("foo"), iterator.next().toJson());
   }
 
   @Test
-  public void getPreloadedDataNull() throws Exception {
+  public void getDataWithPreloadException() throws Exception{
     ConcurrentPreloads preloads = new ConcurrentPreloads();
-    preloads.add("foo", null);
-    assertNull(preloads.getData("foo"));
+    preloads.add(TestFuture.throwsExecutionWrapped());
+    preloads.add(TestFuture.returnsNormal("foo"));
+
+    assertEquals(2, preloads.getData().size());
+    Iterator<PreloadedData> iterator = preloads.getData().iterator();
+
+    // First item should throw an exception, a straight PreloadException
+    PreloadedData withError = iterator.next();
+    try {
+      withError.toJson();
+      fail();
+    } catch (PreloadException pe) {
+      assertNull(pe.getCause());
+    }
+
+    // And iteration should continue
+    assertEquals(TestFuture.expectedResult("foo"), iterator.next().toJson());
   }
 
-  @Test(expected = PreloadException.class)
-  public void getPreloadedDataThrowsInterrupted() throws Exception {
+  @Test(expected = RuntimeException.class)
+  public void getDataThrowsInterruped() throws Exception{
     ConcurrentPreloads preloads = new ConcurrentPreloads();
-    preloads.add("foo", TestFuture.throwsInterrupted());
-    preloads.getData("foo");
-  }
+    preloads.add(TestFuture.throwsInterrupted());
+    preloads.add(TestFuture.returnsNormal("foo"));
 
-  @Test(expected = PreloadException.class)
-  public void getPreloadedThrowsExecution() throws Exception {
-    ConcurrentPreloads preloads = new ConcurrentPreloads();
-    preloads.add("foo", TestFuture.throwsExecution());
-    preloads.getData("foo");
-  }
-
-  @Test(expected = PreloadException.class)
-  public void getPreloadedThrowsExecutionWrapped() throws Exception {
-    ConcurrentPreloads preloads = new ConcurrentPreloads();
-    preloads.add("foo", TestFuture.throwsExecutionWrapped());
-    preloads.getData("foo");
+    assertEquals(2, preloads.getData().size());
+    Iterator<PreloadedData> iterator = preloads.getData().iterator();
+    // InterruptedException should immediately terminate
+    iterator.next();
   }
 
   private static class TestFuture implements Future<PreloadedData> {
     private boolean throwsInterrupted;
     private boolean throwsExecution;
     private boolean throwsExecutionWrapped;
+    private final String key;
 
-    public static TestFuture returnsNormal() {
-      return new TestFuture();
+    private TestFuture(String key) {
+      this.key = key;
     }
 
-    public static TestFuture returnsNull() {
-      return new TestFuture();
+    public static TestFuture returnsNormal(String key) {
+      return new TestFuture(key);
     }
 
     public static TestFuture throwsInterrupted() {
-      TestFuture future = new TestFuture();
+      TestFuture future = new TestFuture(null);
       future.throwsInterrupted = true;
       return future;
     }
 
     public static TestFuture throwsExecution() {
-      TestFuture future = new TestFuture();
+      TestFuture future = new TestFuture(null);
       future.throwsExecution = true;
       return future;
     }
 
     public static TestFuture throwsExecutionWrapped() {
-      TestFuture future = new TestFuture();
+      TestFuture future = new TestFuture(null);
       future.throwsExecutionWrapped = true;
       return future;
+    }
+
+    public static Map<String, Object> expectedResult(String key) {
+      return ImmutableMap.of(key, (Object) "Preloaded");
     }
 
     public PreloadedData get() throws InterruptedException, ExecutionException {
@@ -125,8 +153,8 @@ public class ConcurrentPreloadsTest {
       }
 
       return new PreloadedData() {
-        public Object toJson() {
-          return "Preloaded";
+        public Map<String, Object> toJson() {
+          return expectedResult(key);
         }
       };
     }
@@ -145,7 +173,7 @@ public class ConcurrentPreloadsTest {
     }
 
     public boolean isDone() {
-      return false;
+      return true;
     }
   }
 }

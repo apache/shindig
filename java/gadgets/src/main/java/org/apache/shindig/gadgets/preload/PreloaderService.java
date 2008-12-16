@@ -17,10 +17,9 @@
  */
 package org.apache.shindig.gadgets.preload;
 
+import com.google.inject.ImplementedBy;
 import org.apache.shindig.gadgets.GadgetContext;
 import org.apache.shindig.gadgets.spec.GadgetSpec;
-
-import com.google.inject.ImplementedBy;
 
 /**
  * Handles preloading operations, such as HTTP fetches, social data retrieval, or anything else that
@@ -28,14 +27,18 @@ import com.google.inject.ImplementedBy;
  */
 @ImplementedBy(ConcurrentPreloaderService.class)
 public interface PreloaderService {
+  public enum PreloadPhase {
+    PROXY_FETCH,
+    HTML_RENDER
+  }
+
   /**
    * Begin all preload operations.
    *
    * @param context The request that needs preloading.
    * @param gadget The gadget that the operations will be performed for.
    * @return The preloads for the gadget.
-   *
-   * TODO: This should probably have a read only input. If we can
    */
-  Preloads preload(GadgetContext context, GadgetSpec gadget);
+  Preloads preload(GadgetContext context, GadgetSpec gadget,
+      PreloadPhase phase);
 }

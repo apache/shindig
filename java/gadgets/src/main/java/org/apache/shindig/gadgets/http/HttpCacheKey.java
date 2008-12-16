@@ -16,12 +16,9 @@ package org.apache.shindig.gadgets.http;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-
 import org.json.JSONArray;
 
-import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -44,11 +41,8 @@ public class HttpCacheKey {
    */
   public HttpCacheKey(HttpRequest request) {
     data = Maps.newHashMap();
-    setCacheable(true);
-    if (!"GET".equals(request.getMethod()) ||
-        request.getIgnoreCache()) {
-      setCacheable(false);
-    }
+    setCacheable(isCacheable(request));
+
     // In theory we only cache GET, but including the method in the cache key
     // provides some additional insurance that we aren't mixing cache content.
     set("method", request.getMethod());
@@ -100,4 +94,16 @@ public class HttpCacheKey {
     return json.toString();
   }
 
+  private boolean isCacheable(HttpRequest request) {
+    if (request.getIgnoreCache()) {
+      return false;
+    }
+
+    if (!"GET".equals(request.getMethod()) &&
+        !"GET".equals(request.getHeader("X-Method-Override"))) {
+      return false;
+    }
+
+    return true;
+  }
 }
