@@ -18,57 +18,30 @@
  */
 package org.apache.shindig.gadgets.render;
 
-import org.apache.shindig.auth.SecurityToken;
-import org.apache.shindig.common.ContainerConfig;
-import org.apache.shindig.common.JsonSerializer;
-import org.apache.shindig.common.uri.Uri;
-import org.apache.shindig.common.xml.DomUtil;
-import org.apache.shindig.gadgets.Gadget;
-import org.apache.shindig.gadgets.GadgetContext;
-import org.apache.shindig.gadgets.GadgetException;
-import org.apache.shindig.gadgets.GadgetFeature;
-import org.apache.shindig.gadgets.GadgetFeatureRegistry;
-import org.apache.shindig.gadgets.JsLibrary;
-import org.apache.shindig.gadgets.MessageBundleFactory;
-import org.apache.shindig.gadgets.RenderingContext;
-import org.apache.shindig.gadgets.UnsupportedFeatureException;
-import org.apache.shindig.gadgets.UrlGenerator;
-import org.apache.shindig.gadgets.http.HttpRequest;
-import org.apache.shindig.gadgets.http.HttpResponse;
-import org.apache.shindig.gadgets.preload.PreloadException;
-import org.apache.shindig.gadgets.preload.Preloads;
-import org.apache.shindig.gadgets.rewrite.ContentRewriter;
-import org.apache.shindig.gadgets.rewrite.MutableContent;
-import org.apache.shindig.gadgets.rewrite.RewriterResults;
-import org.apache.shindig.gadgets.spec.Feature;
-import org.apache.shindig.gadgets.spec.GadgetSpec;
-import org.apache.shindig.gadgets.spec.LocaleSpec;
-import org.apache.shindig.gadgets.spec.MessageBundle;
-import org.apache.shindig.gadgets.spec.ModulePrefs;
-import org.apache.shindig.gadgets.spec.UserPref;
-import org.apache.shindig.gadgets.spec.View;
-
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.google.inject.Inject;
-
+import org.apache.shindig.auth.SecurityToken;
+import org.apache.shindig.common.ContainerConfig;
+import org.apache.shindig.common.JsonSerializer;
+import org.apache.shindig.common.uri.Uri;
+import org.apache.shindig.common.xml.DomUtil;
+import org.apache.shindig.gadgets.*;
+import org.apache.shindig.gadgets.http.HttpRequest;
+import org.apache.shindig.gadgets.http.HttpResponse;
+import org.apache.shindig.gadgets.preload.PreloadException;
+import org.apache.shindig.gadgets.preload.PreloadedData;
+import org.apache.shindig.gadgets.preload.Preloads;
+import org.apache.shindig.gadgets.rewrite.ContentRewriter;
+import org.apache.shindig.gadgets.rewrite.MutableContent;
+import org.apache.shindig.gadgets.rewrite.RewriterResults;
+import org.apache.shindig.gadgets.spec.*;
 import org.json.JSONObject;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
-import org.w3c.dom.Text;
+import org.w3c.dom.*;
 
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -431,16 +404,16 @@ public class RenderingContentRewriter implements ContentRewriter {
    */
   private void injectPreloads(Gadget gadget, Node scriptTag) {
     Preloads preloads = gadget.getPreloads();
+    Map<String, Object> preload = Maps.newHashMap();
 
-    Collection<String> keys = preloads.getKeys();
-    Map<String, Object> preload = Maps.newHashMapWithExpectedSize(keys.size());
-
-    for (String name : keys) {
+    for (PreloadedData preloaded : preloads.getData()) {
       try {
-        preload.put(name, preloads.getData(name).toJson());
-      } catch (PreloadException e) {
+        for (Map.Entry<String, Object> entry : preloaded.toJson().entrySet()) {
+          preload.put(entry.getKey(), entry.getValue());
+        }
+      } catch (PreloadException pe) {
         // This will be thrown in the event of some unexpected exception. We can move on.
-        LOG.log(Level.WARNING, "Unexpected error attempting to preload " + name, e);
+        LOG.log(Level.WARNING, "Unexpected error when preloading", pe);
       }
     }
     Text text = scriptTag.getOwnerDocument().createTextNode("gadgets.io.preloaded_=");

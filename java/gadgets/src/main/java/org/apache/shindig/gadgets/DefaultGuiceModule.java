@@ -18,20 +18,20 @@
  */
 package org.apache.shindig.gadgets;
 
-import org.apache.shindig.gadgets.http.HttpResponse;
-import org.apache.shindig.gadgets.parse.ParseModule;
-import org.apache.shindig.gadgets.preload.HttpPreloader;
-import org.apache.shindig.gadgets.preload.Preloader;
-import org.apache.shindig.gadgets.render.RenderingContentRewriter;
-import org.apache.shindig.gadgets.rewrite.ContentRewriter;
-import org.apache.shindig.gadgets.rewrite.lexer.DefaultContentRewriter;
-import org.apache.shindig.gadgets.servlet.CajaContentRewriter;
-
 import com.google.common.collect.Lists;
 import com.google.inject.AbstractModule;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.TypeLiteral;
+import org.apache.shindig.gadgets.http.HttpResponse;
+import org.apache.shindig.gadgets.parse.ParseModule;
+import org.apache.shindig.gadgets.preload.HttpPreloader;
+import org.apache.shindig.gadgets.preload.Preloader;
+import org.apache.shindig.gadgets.preload.SocialPreloader;
+import org.apache.shindig.gadgets.render.RenderingContentRewriter;
+import org.apache.shindig.gadgets.rewrite.ContentRewriter;
+import org.apache.shindig.gadgets.rewrite.lexer.DefaultContentRewriter;
+import org.apache.shindig.gadgets.servlet.CajaContentRewriter;
 
 import java.util.List;
 import java.util.concurrent.Executor;
@@ -82,8 +82,8 @@ public class DefaultGuiceModule extends AbstractModule {
     private final List<Preloader> preloaders;
 
     @Inject
-    public PreloaderProvider(HttpPreloader httpPreloader) {
-      preloaders = Lists.<Preloader>newArrayList(httpPreloader);
+    public PreloaderProvider(HttpPreloader httpPreloader, SocialPreloader socialPreloader) {
+      preloaders = Lists.newArrayList(httpPreloader, socialPreloader);
     }
 
     public List<Preloader> get() {

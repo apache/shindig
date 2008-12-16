@@ -17,20 +17,17 @@
  */
 package org.apache.shindig.gadgets.spec;
 
+import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Maps;
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.common.xml.XmlUtil;
 import org.apache.shindig.gadgets.AuthType;
 import org.apache.shindig.gadgets.variables.Substitutions;
-
-import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Maps;
-
-import java.util.Collections;
-
 import org.w3c.dom.Element;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -70,6 +67,12 @@ public class View implements RequestAuthenticationInfo {
     boolean signViewer = true;
     Map<String, String> attributes = Maps.newHashMap();
     StringBuilder content = new StringBuilder();
+
+    boolean needOwner = false;
+    boolean needViewer = false;
+
+    SocialData socialData = null;
+
     for (Element element : elements) {
       contentType = XmlUtil.getAttribute(element, "type");
       if (contentType != null) {
@@ -95,6 +98,13 @@ public class View implements RequestAuthenticationInfo {
           attributes.put(attr.getNodeName(), attr.getNodeValue());
         }
       }
+
+      // For proxied rendering, parse all SocialData inside the View element
+      if (href != null && (type != ContentType.URL)) {
+        socialData = new SocialData(element, base);
+        needOwner = needOwner || socialData.needsOwner();
+        needViewer = needViewer || socialData.needsViewer();
+      }
     }
     this.content = content.toString();
     this.needsUserPrefSubstitution = this.content.contains("__UP_");
@@ -105,11 +115,26 @@ public class View implements RequestAuthenticationInfo {
     this.preferredHeight = preferredHeight;
     this.preferredWidth = preferredWidth;
     this.attributes = Collections.unmodifiableMap(attributes);
+    this.socialData = socialData;
+
     this.authType = AuthType.parse(auth);
     this.signOwner = signOwner;
     this.signViewer = signViewer;
     if (type == ContentType.URL && this.href == null) {
       throw new SpecParserException("Content@href must be set when Content@type is \"url\".");
+    }
+
+    // Verify that there is no use of viewer and/or owner data when the request
+    // is not signed by viewer and/or owner
+
+    // TODO: this does not catch use of <Preload> with sign-by-owner
+    // for proxied rendering that is not sign-by-owner
+    if (needOwner && (!this.signOwner || this.authType == AuthType.NONE)) {
+      throw new SpecParserException("Must sign by owner to request owner.");
+    }
+
+    if (needViewer && (!this.signViewer || this.authType == AuthType.NONE)) {
+      throw new SpecParserException("Must sign by viewer to request viewer.");
     }
   }
 
@@ -137,6 +162,7 @@ public class View implements RequestAuthenticationInfo {
       attributes.put(entry.getKey(), substituter.substituteString(entry.getValue()));
     }
     this.attributes = Collections.unmodifiableMap(attributes);
+    socialData = view.socialData == null ? null : view.socialData.substitute(substituter);
   }
 
   /**
@@ -258,6 +284,15 @@ public class View implements RequestAuthenticationInfo {
   private final Map<String, String> attributes;
   public Map<String, String> getAttributes() {
     return attributes;
+  }
+
+  private final SocialData socialData;
+
+  /**
+   * All os: preloads.
+   */
+  public SocialData getSocialData() {
+    return socialData;
   }
 
   /**

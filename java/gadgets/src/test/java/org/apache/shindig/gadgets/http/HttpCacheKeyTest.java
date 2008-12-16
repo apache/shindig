@@ -16,9 +16,7 @@ package org.apache.shindig.gadgets.http;
 import org.apache.shindig.common.uri.Uri;
 import org.json.JSONArray;
 import org.json.JSONObject;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 import org.junit.Test;
 
 public class HttpCacheKeyTest {
@@ -50,6 +48,17 @@ public class HttpCacheKeyTest {
     HttpRequest request = new HttpRequest(target).setMethod("POST");
     HttpCacheKey key = new HttpCacheKey(request);
     assertFalse(key.isCacheable());
+    assertEquals(
+        "[{\"method\":\"POST\"},{\"url\":\"http://www.example.com/\"}]",
+        key.toString());
+  }
+
+  @Test
+  public void testNonGetWithOverride() throws Exception {
+    HttpRequest request = new HttpRequest(target).setMethod("POST")
+        .addHeader("X-Method-Override", "GET");
+    HttpCacheKey key = new HttpCacheKey(request);
+    assertTrue(key.isCacheable());
     assertEquals(
         "[{\"method\":\"POST\"},{\"url\":\"http://www.example.com/\"}]",
         key.toString());
