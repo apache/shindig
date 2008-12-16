@@ -149,12 +149,13 @@ public class HttpResponseBuilder {
   }
 
   /**
-   * @param expriationTime The expiration time for this response, in seconds.
+   * @param expirationTime The expiration time for this response, in
+   * milliseconds since the Unix epoch.
    */
-  public HttpResponseBuilder setExpirationTime(int expriationTime) {
+  public HttpResponseBuilder setExpirationTime(long expirationTime) {
     headers.remove("Cache-Control");
     headers.remove("Pragma");
-    headers.put("Expires", Lists.newLinkedList(DateUtil.formatDate(expriationTime)));
+    headers.put("Expires", Lists.newLinkedList(DateUtil.formatDate(expirationTime)));
     return this;
   }
 
