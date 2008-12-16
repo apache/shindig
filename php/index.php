@@ -18,6 +18,10 @@
  * under the License.
  */
 
+// Some people forget to set their timezone in their php.ini,
+// this prevents that from generating warnings
+@date_default_timezone_set(@date_default_timezone_get());
+
 include_once ('src/common/Config.php');
 include_once ('src/common/File.php');
 
