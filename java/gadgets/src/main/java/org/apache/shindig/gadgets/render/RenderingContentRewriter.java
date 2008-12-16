@@ -48,6 +48,7 @@ import org.apache.shindig.gadgets.spec.ModulePrefs;
 import org.apache.shindig.gadgets.spec.UserPref;
 import org.apache.shindig.gadgets.spec.View;
 
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
@@ -60,7 +61,9 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.w3c.dom.Text;
 
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -212,14 +215,18 @@ public class RenderingContentRewriter implements ContentRewriter {
     GadgetContext context = gadget.getContext();
     GadgetSpec spec = gadget.getSpec();
     String forcedLibs = context.getParameter("libs");
+
+    // List of libraries we need
     Set<String> forced;
+
+    // gather the libraries we'll need to generate the forced libs
     if (forcedLibs == null || forcedLibs.length() == 0) {
-      forced = Sets.newHashSet();
+      // TODO allow containers to have a default set of forced libs
+      forced = ImmutableSet.of();
     } else {
-      forced = Sets.newHashSet(forcedLibs.split(":"));
+      forced = Sets.newTreeSet(Arrays.asList(forcedLibs.split(":")));
     }
 
-    // Forced libs are always done first.
     if (!forced.isEmpty()) {
       String jsUrl = urlGenerator.getBundledJsUrl(forced, context);
       Element libsTag = headTag.getOwnerDocument().createElement("script");
@@ -234,6 +241,8 @@ public class RenderingContentRewriter implements ContentRewriter {
         forced.add(dep.getName());
       }
     }
+    // Make this read-only
+    forced = ImmutableSet.copyOf(forced);
 
     // Inline any libs that weren't forced. The ugly context switch between inline and external
     // Js is needed to allow both inline and external scripts declared in feature.xml.
@@ -302,7 +311,7 @@ public class RenderingContentRewriter implements ContentRewriter {
       libs.addAll(forced);
     }
 
-    Set<String> unsupported = new HashSet<String>();
+    Set<String> unsupported = Sets.newHashSet();
     Collection<GadgetFeature> feats = featureRegistry.getFeatures(libs, unsupported);
 
     unsupported.removeAll(forced);

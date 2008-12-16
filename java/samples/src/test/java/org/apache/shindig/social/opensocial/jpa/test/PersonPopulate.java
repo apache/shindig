@@ -83,7 +83,7 @@ public class PersonPopulate {
     c.setTimeInMillis(System.currentTimeMillis());
     c.add(Calendar.YEAR, -age);
     c.add(Calendar.MONTH, 12 - i % 12);
-    List<Address> a = new ArrayList<Address>();
+    List<Address> a = Lists.newArrayList();
     a.add(getNewPersonAddress(i));
     a.add(getNewPersonAddress(i + 2));
     person.setAddresses(a);
@@ -95,7 +95,7 @@ public class PersonPopulate {
     person.setCurrentLocation(getNewAddress(i + 5));
     person.setBirthday(c.getTime());
     person.setDrinker(new EnumImpl<Drinker>(Drinker.OCCASIONALLY));
-    List<ListField> emails = new ArrayList<ListField>();
+    List<ListField> emails = Lists.newArrayList();
     emails.add(getNewEmail(i));
     emails.add(getNewEmail(i + 1));
     person.setEmails(emails);
@@ -110,14 +110,14 @@ public class PersonPopulate {
     person.setIsOwner(true);
     person.setIsViewer(true);
     person.setJobInterests("job interest");
-    List<Organization> organizations = new ArrayList<Organization>();
+    List<Organization> organizations = Lists.newArrayList();
     organizations.add(getPersonOrganization(i, "job"));
     organizations.add(getPersonOrganization(i + 1, "job"));
     organizations.add(getPersonOrganization(i + 2, "job"));
     person.setOrganizations(organizations);
     person.setLanguagesSpoken(getList("LanguagesSpoken"));
     person.setLivingArrangement("living Arrangement");
-    List<Enum<LookingFor>> lookingFor = new ArrayList<Enum<LookingFor>>();
+    List<Enum<LookingFor>> lookingFor = Lists.newArrayList();
     lookingFor.add(new EnumImpl<LookingFor>(LookingFor.RANDOM));
     lookingFor.add(new EnumImpl<LookingFor>(LookingFor.NETWORKING));
     person.setLookingFor(lookingFor);
@@ -126,7 +126,7 @@ public class PersonPopulate {
     person.setName(getNewName(i));
     person.setNickname("NickName");
     person.setPets("Pets");
-    List<ListField> phoneNumbers = new ArrayList<ListField>();
+    List<ListField> phoneNumbers = Lists.newArrayList();
     phoneNumbers.add(getNewPhone(i));
     phoneNumbers.add(getNewPhone(i * 3));
 
@@ -151,7 +151,7 @@ public class PersonPopulate {
     person.setStatus("Status");
     person.setTags(getList("tags"));
     
-    List<ListField> photos = new ArrayList<ListField>();
+    List<ListField> photos = Lists.newArrayList();
     photos.add(getNewPhoto(i));
     photos.add(getNewPhoto(i * 3));
 
@@ -161,7 +161,7 @@ public class PersonPopulate {
     person.setTurnOns(getList("TurnOns"));
     person.setTvShows(getList("TvShows"));
     person.setUpdated(new Date());
-    List<Url> urls = new ArrayList<Url>();
+    List<Url> urls = Lists.newArrayList();
     urls.add(getNewUrl(i * 4));
     urls.add(getNewUrl(i * 5));
     urls.add(getNewUrl(i * 6));
@@ -237,7 +237,7 @@ public class PersonPopulate {
   }
 
   private List<String> getList(String base) {
-    List<String> list = new ArrayList<String>();
+    List<String> list = Lists.newArrayList();
     for (int i = 0; i < 10; i++) {
       list.add(base + i);
     }

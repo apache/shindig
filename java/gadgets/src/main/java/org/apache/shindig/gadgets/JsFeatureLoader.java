@@ -17,6 +17,10 @@
  */
 package org.apache.shindig.gadgets;
 
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
+
 import org.apache.shindig.common.ContainerConfig;
 import org.apache.shindig.common.util.ResourceLoader;
 import org.apache.shindig.common.xml.XmlException;
@@ -74,23 +78,23 @@ public class JsFeatureLoader {
    */
   public void loadFeatures(String path, GadgetFeatureRegistry registry)
       throws GadgetException {
-    List<ParsedFeature> features = new LinkedList<ParsedFeature>();
+    List<ParsedFeature> features = Lists.newLinkedList();
     try {
       for (String location : StringUtils.split(path, FILE_SEPARATOR)) {
         if (location.startsWith("res://")) {
           location = location.substring(6);
           logger.info("Loading resources from: " + location);
           if (location.endsWith(".txt")) {
-            List<String> resources = new ArrayList<String>();
+            List<String> resources = Lists.newArrayList();
             for(String resource : StringUtils.split(ResourceLoader.getContent(location), "[\r\n]+")) {
               // Skip blank/commented lines
 	      if (StringUtils.trim(resource).length() > 0 && resource.charAt(0) != '#') {
                 resources.add(StringUtils.trim(resource));
               }
             }
-            loadResources(resources.toArray(new String [resources.size()]), features);
+            loadResources(resources, features);
           } else {
-            loadResources(new String[]{location}, features);
+            loadResources(ImmutableList.of(location), features);
           }
         } else {
           logger.info("Loading files from: " + location);
@@ -151,7 +155,7 @@ public class JsFeatureLoader {
    * @param features The set of all loaded features
    * @throws GadgetException
    */
-  private void loadResources(String[] paths, List<ParsedFeature> features)
+  private void loadResources(List<String> paths, List<ParsedFeature> features)
       throws GadgetException {
     try {
       for (String file : paths) {
@@ -319,19 +323,19 @@ class ParsedFeature {
   public ParsedFeature() {
     libraries = new EnumMap<RenderingContext, Map<String, List<JsLibrary>>>(
         RenderingContext.class);
-    deps = new LinkedList<String>();
+    deps = Lists.newLinkedList();
   }
 
   public void addLibrary(RenderingContext ctx, String cont, JsLibrary library) {
     Map<String, List<JsLibrary>> ctxLibs = libraries.get(ctx);
     if (ctxLibs == null) {
-      ctxLibs = new HashMap<String, List<JsLibrary>>();
+      ctxLibs = Maps.newHashMap();
       libraries.put(ctx, ctxLibs);
     }
 
     List<JsLibrary> containerLibs = ctxLibs.get(cont);
     if (containerLibs == null) {
-      containerLibs = new LinkedList<JsLibrary>();
+      containerLibs = Lists.newLinkedList();
       ctxLibs.put(cont, containerLibs);
     }
 

@@ -26,6 +26,8 @@ import org.apache.shindig.common.ContainerConfig;
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.gadgets.spec.GadgetSpec;
 
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 
 import junitx.framework.StringAssert;
@@ -83,9 +85,7 @@ public class DefaultUrlGeneratorTest extends GadgetTestFixture {
   }
 
   public void testGetBundledJsParam() throws Exception {
-    List<String> features = new ArrayList<String>();
-    features.add("foo");
-    features.add("bar");
+    List<String> features = ImmutableList.of("foo", "bar");
     expect(context.getDebug()).andReturn(true);
     replay();
 
@@ -96,7 +96,7 @@ public class DefaultUrlGeneratorTest extends GadgetTestFixture {
   }
 
   public void testGetBundledJsParamWithBadFeatureName() throws Exception {
-    List<String> features = new ArrayList<String>();
+    List<String> features = Lists.newArrayList();
     features.add("foo!");
     features.add("bar");
     expect(context.getDebug()).andReturn(true);
@@ -108,7 +108,7 @@ public class DefaultUrlGeneratorTest extends GadgetTestFixture {
   }
 
   public void testGetBundledJsParamWithNoFeatures() throws Exception {
-    List<String> features = new ArrayList<String>();
+    List<String> features = Lists.newArrayList();
     expect(context.getDebug()).andReturn(false);
     replay();
 

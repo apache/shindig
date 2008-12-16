@@ -17,6 +17,8 @@
  */
 package org.apache.shindig.gadgets.parse;
 
+import com.google.common.collect.Lists;
+
 import static org.easymock.EasyMock.expect;
 import static org.easymock.classextension.EasyMock.replay;
 import org.easymock.classextension.EasyMock;
@@ -43,14 +45,13 @@ public class GadgetCssRuleTest extends TestCase {
   private ParsedCssRule makeParsedRule(String[] selectors, String[][] decls) {
     ParsedCssRule parsedMock = EasyMock.createNiceMock(ParsedCssRule.class);
     
-    List<String> selectorList = new LinkedList<String>();
+    List<String> selectorList = Lists.newLinkedList();
     for (String sel : selectors) {
       selectorList.add(sel);
     }
     expect(parsedMock.getSelectors()).andReturn(selectorList).anyTimes();
     
-    List<ParsedCssDeclaration> declList =
-        new LinkedList<ParsedCssDeclaration>();
+    List<ParsedCssDeclaration> declList = Lists.newLinkedList();
     for (String[] decl : decls) {
       declList.add(makeParsedDecl(decl[0], decl[1]));
     }

@@ -20,6 +20,8 @@ package org.apache.shindig.gadgets.servlet;
 
 import static org.easymock.EasyMock.expect;
 
+import com.google.common.collect.Maps;
+
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.http.HttpRequest;
@@ -105,7 +107,7 @@ public class ProxyHandlerTest extends ServletTestFixture {
     String domain = "example.org";
     String contentType = "text/evil; charset=utf-8";
     String magicGarbage = "fadfdfdfd";
-    Map<String, List<String>> headers = new HashMap<String, List<String>>();
+    Map<String, List<String>> headers = Maps.newHashMap();
     headers.put("Content-Type", Arrays.asList(contentType));
     headers.put("X-Magic-Garbage", Arrays.asList(magicGarbage));
 

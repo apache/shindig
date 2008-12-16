@@ -18,6 +18,8 @@
 
 package org.apache.shindig.social.opensocial.jpa.hibernate;
 
+import com.google.collect.common.Maps;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -73,7 +75,7 @@ public class Bootstrap {
 
   public void init(String unitName) {
 
-    Map<String, String> properties = new HashMap<String, String>();
+    Map<String, String> properties = Maps.newHashMap();
 
     LOG.info("Starting connection manager with properties " + properties);
 

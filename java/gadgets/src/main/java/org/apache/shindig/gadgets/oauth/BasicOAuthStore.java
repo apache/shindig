@@ -17,6 +17,8 @@
  */
 package org.apache.shindig.gadgets.oauth;
 
+import com.google.common.collect.Maps;
+
 import com.google.inject.Singleton;
 
 import net.oauth.OAuth;
@@ -81,8 +83,8 @@ public class BasicOAuthStore implements OAuthStore {
   private int accessTokenRemoveCount = 0;
 
   public BasicOAuthStore() {
-    consumerInfos = new HashMap<BasicOAuthStoreConsumerIndex, BasicOAuthStoreConsumerKeyAndSecret>();
-    tokens = new HashMap<BasicOAuthStoreTokenIndex, TokenInfo>();
+    consumerInfos = Maps.newHashMap();
+    tokens = Maps.newHashMap();
   }
   
   public void initFromConfigString(String oauthConfigStr) throws GadgetException {

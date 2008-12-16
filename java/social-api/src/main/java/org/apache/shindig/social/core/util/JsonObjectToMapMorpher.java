@@ -17,6 +17,8 @@
  */
 package org.apache.shindig.social.core.util;
 
+import com.google.common.collect.Maps;
+
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -51,7 +53,7 @@ public class JsonObjectToMapMorpher implements Morpher, ObjectMorpher {
    * @return the morphed bean (a map)
    */
   public Object morph(Object bean) {
-    Map<Object, Object> result = new HashMap<Object, Object>();
+    Map<Object, Object> result = Maps.newHashMap();
     JSONObject jsonObject = (JSONObject) bean;
     for (Object entry : jsonObject.entrySet()) {
       result.put(((Entry)entry).getKey(), ((Entry)entry).getValue());

@@ -17,6 +17,8 @@
  */
 package org.apache.shindig.gadgets.spec;
 
+import com.google.common.collect.Maps;
+
 import org.apache.shindig.common.uri.Uri;
 
 import org.w3c.dom.Element;
@@ -38,7 +40,7 @@ public class OAuthSpec {
   private final Map<String, OAuthService> serviceMap;
 
   public OAuthSpec(Element element, Uri base) throws SpecParserException {
-    serviceMap = new HashMap<String, OAuthService>();
+    serviceMap = Maps.newHashMap();
     NodeList services = element.getElementsByTagName("Service");
     for (int i=0; i < services.getLength(); ++i) {
       Node node = services.item(i);

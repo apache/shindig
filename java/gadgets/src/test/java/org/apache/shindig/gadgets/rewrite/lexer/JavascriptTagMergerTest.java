@@ -18,6 +18,8 @@
  */
 package org.apache.shindig.gadgets.rewrite.lexer;
 
+import com.google.common.collect.ImmutableMap;
+
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.gadgets.rewrite.BaseRewriterTestCase;
 
@@ -38,10 +40,9 @@ public class JavascriptTagMergerTest extends BaseRewriterTestCase {
     super.setUp();
     dummyUri = Uri.parse("http://www.w3c.org");
     Uri relativeBase = Uri.parse("http://a.b.com/");
-    defaultTransformerMap = new HashMap<String, HtmlTagTransformer>();
-    defaultTransformerMap
-        .put("script", new JavascriptTagMerger(createSpecWithoutRewrite(), defaultRewriterFeature,
-            "http://www.test.com/concat?", relativeBase));
+    defaultTransformerMap = new ImmutableMap.Builder<String, HtmlTagTransformer>()
+        .put("script", new JavascriptTagMerger(createSpecWithoutRewrite(), defaultRewriterFeature, "http://www.test.com/concat?", relativeBase))
+        .build();
   }
 
   private void validateRewritten(String content, Uri base,

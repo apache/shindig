@@ -21,6 +21,7 @@ import org.apache.shindig.social.core.model.EnumImpl;
 import org.apache.shindig.social.opensocial.model.Enum;
 import org.apache.shindig.social.opensocial.service.BeanConverter;
 
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
@@ -53,7 +54,7 @@ import java.util.regex.Pattern;
 public class BeanJsonConverter implements BeanConverter {
 
   private static final Object[] EMPTY_OBJECT = {};
-  private static final Set<String> EXCLUDED_FIELDS = Sets.newHashSet("class", "declaringclass");
+  private static final Set<String> EXCLUDED_FIELDS = ImmutableSet.of("class", "declaringclass");
   private static final String GETTER_PREFIX  = "get";
   private static final String SETTER_PREFIX = "set";
 

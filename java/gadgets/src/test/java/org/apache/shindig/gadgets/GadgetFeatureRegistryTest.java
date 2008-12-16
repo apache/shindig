@@ -64,7 +64,7 @@ public class GadgetFeatureRegistryTest {
   private GadgetFeature makeFeature(String name, String content, String dep)
       throws GadgetException {
     JsLibrary lib = JsLibrary.create(JsLibrary.Type.INLINE, content, name, null);
-    List<String> deps = new LinkedList<String>();
+    List<String> deps = Lists.newLinkedList();
     if (deps != null) {
       deps.add(dep);
     }
@@ -90,7 +90,7 @@ public class GadgetFeatureRegistryTest {
   @Test
   public void getUnknownLibraries() throws GadgetException {
     registry.register(makeFeature(FEATURE_NAME, CONTENT, DEP_NAME));
-    List<String> unsupported = new ArrayList<String>();
+    List<String> unsupported = Lists.newArrayList();
     registry.getFeatures(Arrays.asList(FEATURE_NAME, "FAKE FAKE FAKE"),
                          unsupported);
     assertEquals("FAKE FAKE FAKE", unsupported.get(0));
@@ -129,7 +129,7 @@ public class GadgetFeatureRegistryTest {
       registry.register(makeFeature(feature, CONTENT, DEP_NAME));
     }
 
-    Set<String> found = new HashSet<String>();
+    Set<String> found = Sets.newHashSet();
     for (GadgetFeature feature : registry.getAllFeatures()) {
       found.add(feature.getName());
     }

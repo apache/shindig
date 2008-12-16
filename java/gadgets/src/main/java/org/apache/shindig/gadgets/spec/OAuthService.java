@@ -18,6 +18,8 @@
  */
 package org.apache.shindig.gadgets.spec;
 
+import com.google.common.collect.Maps;
+
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.common.xml.XmlUtil;
 
@@ -127,10 +129,9 @@ public class OAuthService {
   public enum Method {
     GET, POST;
 
-    private static Map<String, Method> METHODS;
+    private static Map<String, Method> METHODS = Maps.newHashMap();
 
     static {
-      METHODS = new HashMap<String, Method>();
       for (Method m : Method.values()) {
         METHODS.put(m.toString(), m);
       }
@@ -160,7 +161,7 @@ public class OAuthService {
     private static Map<String, Location> LOCATIONS;
 
     static {
-      LOCATIONS = new HashMap<String, Location>();
+      LOCATIONS = Maps.newHashMap();
       for (Location l : Location.values()) {
         LOCATIONS.put(l.locationString, l);
       }
