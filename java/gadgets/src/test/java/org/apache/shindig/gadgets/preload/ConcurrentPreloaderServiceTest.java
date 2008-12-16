@@ -18,7 +18,6 @@
 package org.apache.shindig.gadgets.preload;
 
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import org.apache.shindig.common.testing.TestExecutorService;
 import org.apache.shindig.gadgets.GadgetContext;
@@ -27,7 +26,6 @@ import static org.junit.Assert.*;
 import org.junit.Test;
 
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.Executors;
@@ -48,77 +46,62 @@ public class ConcurrentPreloaderServiceTest {
   private final TestPreloader preloader2 = new TestPreloader();
 
   @Test
-  public void preloadSingleService() throws Exception {
-    preloader.tasks.add(new TestPreloadCallable(
-        new DataPreload(PRELOAD_STRING_KEY, PRELOAD_STRING_VALUE)));
+  public void preloadSingleService() throws PreloadException {
+    preloader.tasks.put(PRELOAD_STRING_KEY,
+        new TestPreloadCallable(new DataPreload(PRELOAD_STRING_VALUE)));
 
     PreloaderService service = new ConcurrentPreloaderService(new TestExecutorService(),
         Arrays.<Preloader>asList(preloader));
 
-    Preloads preloads = service.preload(null, null, PreloaderService.PreloadPhase.HTML_RENDER);
-
-    Map<String, Object> preloaded = getAll(preloads);
-    assertEquals(ImmutableMap.of(PRELOAD_STRING_KEY, PRELOAD_STRING_VALUE), preloaded);
-  }
-
-  /** Load all the data out of a Preloads object */
-  private Map<String, Object> getAll(Preloads preloads) throws PreloadException {
-    Map<String, Object> map = Maps.newHashMap();
-    for (PreloadedData preloadCallable : preloads.getData()) {
-      map.putAll(preloadCallable.toJson());
-    }
-
-    return map;
+    assertEquals(PRELOAD_STRING_VALUE,
+                 service.preload(null, null).getData(PRELOAD_STRING_KEY).toJson());
   }
 
   @Test
   public void preloadMultipleServices() throws PreloadException {
-    preloader.tasks.add(new TestPreloadCallable(
-        new DataPreload(PRELOAD_STRING_KEY, PRELOAD_STRING_VALUE)));
+    preloader.tasks.put(PRELOAD_STRING_KEY,
+        new TestPreloadCallable(new DataPreload(PRELOAD_STRING_VALUE)));
 
-    preloader.tasks.add(new TestPreloadCallable(
-        new DataPreload(PRELOAD_NUMERIC_KEY, PRELOAD_NUMERIC_VALUE)));
+    preloader.tasks.put(PRELOAD_NUMERIC_KEY,
+        new TestPreloadCallable(new DataPreload(PRELOAD_NUMERIC_VALUE)));
 
-    preloader2.tasks.add(new TestPreloadCallable(
-        new DataPreload(PRELOAD_MAP_KEY, PRELOAD_MAP_VALUE)));
+    preloader2.tasks.put(PRELOAD_MAP_KEY,
+        new TestPreloadCallable(new DataPreload(PRELOAD_MAP_VALUE)));
 
     PreloaderService service = new ConcurrentPreloaderService(new TestExecutorService(),
         Arrays.<Preloader>asList(preloader, preloader2));
 
-    Preloads preloads = service.preload(null, null, PreloaderService.PreloadPhase.HTML_RENDER);
+    Preloads preloads = service.preload(null, null);
 
-    Map<String, Object> preloaded = getAll(preloads);
-    assertEquals(ImmutableMap.of(
-        PRELOAD_STRING_KEY, PRELOAD_STRING_VALUE,
-        PRELOAD_NUMERIC_KEY, PRELOAD_NUMERIC_VALUE,
-        PRELOAD_MAP_KEY, PRELOAD_MAP_VALUE), preloaded);
+    assertEquals(PRELOAD_STRING_VALUE, preloads.getData(PRELOAD_STRING_KEY).toJson());
+    assertEquals(PRELOAD_NUMERIC_VALUE, preloads.getData(PRELOAD_NUMERIC_KEY).toJson());
+    assertEquals(PRELOAD_MAP_VALUE, preloads.getData(PRELOAD_MAP_KEY).toJson());
   }
 
   @Test
   public void multiplePreloadsFiresJustOneInCurrentThread() throws Exception {
-    TestPreloadCallable first =
-        new TestPreloadCallable(new DataPreload(PRELOAD_STRING_KEY, PRELOAD_STRING_VALUE));
-    TestPreloadCallable second =
-        new TestPreloadCallable(new DataPreload(PRELOAD_NUMERIC_KEY, PRELOAD_MAP_VALUE));
-    TestPreloadCallable third =
-        new TestPreloadCallable(new DataPreload(PRELOAD_MAP_KEY, PRELOAD_NUMERIC_VALUE));
+    preloader.tasks.put(PRELOAD_STRING_KEY,
+        new TestPreloadCallable(new DataPreload(PRELOAD_STRING_VALUE)));
 
-    preloader.tasks.add(first);
-    preloader.tasks.add(second);
-    preloader.tasks.add(third);
+    preloader.tasks.put(PRELOAD_NUMERIC_KEY,
+        new TestPreloadCallable(new DataPreload(PRELOAD_MAP_VALUE)));
+
+    preloader.tasks.put(PRELOAD_MAP_KEY,
+        new TestPreloadCallable(new DataPreload(PRELOAD_NUMERIC_VALUE)));
 
     PreloaderService service = new ConcurrentPreloaderService(Executors.newFixedThreadPool(5),
         Arrays.<Preloader>asList(preloader));
 
-    service.preload(null, null, PreloaderService.PreloadPhase.HTML_RENDER);
+    service.preload(null, null);
 
     TestPreloadCallable ranInSameThread = null;
-    for (TestPreloadCallable preloadCallable: Lists.newArrayList(first, second, third)) {
-      if (preloadCallable.executedThread == Thread.currentThread()) {
-        if (ranInSameThread != null) {
-          fail("More than one request ran in the current thread.");
-        }
+    for (Callable<PreloadedData> callable : preloader.tasks.values()) {
+      TestPreloadCallable preloadCallable = (TestPreloadCallable)callable;
+      if (ranInSameThread != null) {
+        fail("More than one request ran in the current thread.");
+      }
 
+      if (preloadCallable.executedThread == Thread.currentThread()) {
         ranInSameThread = preloadCallable;
       }
     }
@@ -128,25 +111,33 @@ public class ConcurrentPreloaderServiceTest {
 
   @Test
   public void singlePreloadExecutesInCurrentThread() throws Exception {
-    TestPreloadCallable callable =
-        new TestPreloadCallable(new DataPreload(PRELOAD_STRING_KEY, PRELOAD_STRING_VALUE));
-    preloader.tasks.add(callable);
+    preloader.tasks.put(PRELOAD_STRING_KEY,
+        new TestPreloadCallable(new DataPreload(PRELOAD_STRING_VALUE)));
 
     PreloaderService service = new ConcurrentPreloaderService(Executors.newCachedThreadPool(),
         Arrays.<Preloader>asList(preloader));
 
-    service.preload(null, null, PreloaderService.PreloadPhase.HTML_RENDER);
+    service.preload(null, null);
+
+    TestPreloadCallable callable = (TestPreloadCallable)preloader.tasks.get(PRELOAD_STRING_KEY);
 
     assertSame("Single request not run in current thread",
         Thread.currentThread(), callable.executedThread);
   }
 
-  private static class TestPreloader implements Preloader {
-    private final Collection<Callable<PreloadedData>> tasks = Lists.newArrayList();
+  @Test(expected = PreloadException.class)
+  public void exceptionsArePropagated() throws PreloadException {
+    preloader.tasks.put(PRELOAD_STRING_KEY, new TestPreloadCallable(null));
+    PreloaderService service = new ConcurrentPreloaderService(new TestExecutorService(),
+        Arrays.<Preloader>asList(preloader));
+    service.preload(null, null).getData(PRELOAD_STRING_KEY);
+  }
 
-    public Collection<Callable<PreloadedData>> createPreloadTasks(
-        GadgetContext context, GadgetSpec spec, PreloaderService.PreloadPhase phase) {
-      assertEquals(PreloaderService.PreloadPhase.HTML_RENDER, phase);
+  private static class TestPreloader implements Preloader {
+    private final Map<String, Callable<PreloadedData>> tasks = Maps.newHashMap();
+
+    public Map<String, Callable<PreloadedData>> createPreloadTasks(
+        GadgetContext context, GadgetSpec spec) {
       return tasks;
     }
   }
@@ -164,22 +155,19 @@ public class ConcurrentPreloaderServiceTest {
       if (preload == null) {
         throw new PreloadException("No preload for this test.");
       }
-
       return preload;
     }
   }
 
   private static class DataPreload implements PreloadedData {
-    private final String key;
     private final Object data;
 
-    public DataPreload(String key, Object data) {
-      this.key = key;
+    public DataPreload(Object data) {
       this.data = data;
     }
 
-    public Map<String, Object> toJson() {
-      return ImmutableMap.of(key, data);
+    public Object toJson() {
+      return data;
     }
   }
 }

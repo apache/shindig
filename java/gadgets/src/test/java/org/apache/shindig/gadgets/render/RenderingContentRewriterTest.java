@@ -600,14 +600,17 @@ public class RenderingContentRewriterTest {
     // implementing equals.
 
     Preloads preloads = new Preloads() {
-      public Collection<PreloadedData> getData() {
-        PreloadedData preloadedData = new PreloadedData() {
-          public Map<String, Object> toJson() throws PreloadException {
-            return preloadData;
+
+      public PreloadedData getData(final String key) {
+        return new PreloadedData() {
+          public Object toJson() {
+            return preloadData.get(key);
           }
         };
+      }
 
-        return Lists.newArrayList(preloadedData);
+      public Set<String> getKeys() {
+        return preloadData.keySet();
       }
     };
 
@@ -625,14 +628,11 @@ public class RenderingContentRewriterTest {
   @Test
   public void failedPreloadHandledGracefully() throws Exception {
     Preloads preloads = new Preloads() {
-      public Collection<PreloadedData> getData() {
-        PreloadedData preloadedData = new PreloadedData() {
-          public Map<String, Object> toJson() throws PreloadException {
-            throw new PreloadException("test");
-          }
-        };
-
-        return Lists.newArrayList(preloadedData);
+      public PreloadedData getData(final String key) throws PreloadException {
+        throw new PreloadException("broken");
+      }
+      public Set<String> getKeys() {
+        return ImmutableSortedSet.of("foo");
       }
     };
 

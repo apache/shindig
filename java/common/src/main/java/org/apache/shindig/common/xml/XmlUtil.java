@@ -74,9 +74,6 @@ public class XmlUtil {
         };
 
   static {
-    // Namespace support is required for <os:> elements
-    builderFactory.setNamespaceAware(true);
-
     // Disable various insecure and/or expensive options.
     builderFactory.setValidating(false);
 

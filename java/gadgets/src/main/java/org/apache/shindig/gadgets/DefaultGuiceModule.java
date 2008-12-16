@@ -27,7 +27,6 @@ import org.apache.shindig.gadgets.http.HttpResponse;
 import org.apache.shindig.gadgets.parse.ParseModule;
 import org.apache.shindig.gadgets.preload.HttpPreloader;
 import org.apache.shindig.gadgets.preload.Preloader;
-import org.apache.shindig.gadgets.preload.SocialPreloader;
 import org.apache.shindig.gadgets.render.RenderingContentRewriter;
 import org.apache.shindig.gadgets.rewrite.ContentRewriter;
 import org.apache.shindig.gadgets.rewrite.lexer.DefaultContentRewriter;
@@ -82,8 +81,8 @@ public class DefaultGuiceModule extends AbstractModule {
     private final List<Preloader> preloaders;
 
     @Inject
-    public PreloaderProvider(HttpPreloader httpPreloader, SocialPreloader socialPreloader) {
-      preloaders = Lists.newArrayList(httpPreloader, socialPreloader);
+    public PreloaderProvider(HttpPreloader httpPreloader) {
+      preloaders = Lists.<Preloader>newArrayList(httpPreloader);
     }
 
     public List<Preloader> get() {

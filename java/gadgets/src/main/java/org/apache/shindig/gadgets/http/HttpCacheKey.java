@@ -41,8 +41,11 @@ public class HttpCacheKey {
    */
   public HttpCacheKey(HttpRequest request) {
     data = Maps.newHashMap();
-    setCacheable(isCacheable(request));
-
+    setCacheable(true);
+    if (!"GET".equals(request.getMethod()) ||
+        request.getIgnoreCache()) {
+      setCacheable(false);
+    }
     // In theory we only cache GET, but including the method in the cache key
     // provides some additional insurance that we aren't mixing cache content.
     set("method", request.getMethod());
@@ -94,16 +97,4 @@ public class HttpCacheKey {
     return json.toString();
   }
 
-  private boolean isCacheable(HttpRequest request) {
-    if (request.getIgnoreCache()) {
-      return false;
-    }
-
-    if (!"GET".equals(request.getMethod()) &&
-        !"GET".equals(request.getHeader("X-Method-Override"))) {
-      return false;
-    }
-
-    return true;
-  }
 }
