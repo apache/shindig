@@ -90,8 +90,8 @@ os.VAR_callbacks = "$callbacks_";
  * TODO(levik): Move all regular expressions here.
  */
 os.regExps_ = {
-  onlyWhitespace: /^[ \t\n]*$/,
-  variableSubstitution: /^([^$]*)(\$\{[^\}]*\})([\w\W]*)$/
+  ONLY_WHITESPACE: /^[ \t\n]*$/,
+  VARIABLE_SUBSTITUTION: /^([\w\W]*?)(\$\{[^\}]*\})([\w\W]*)$/
 };
 
 /**
@@ -334,5 +334,3 @@ os.markNodeToSkip = function(node) {
   node[PROP_jstcache] = null;
   node.removeAttribute(ATT_jstcache);
 };
-
- 
