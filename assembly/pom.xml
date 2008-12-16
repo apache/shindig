@@ -22,7 +22,7 @@
   <parent>
     <groupId>org.apache.shindig</groupId>
     <artifactId>shindig-parent</artifactId>
-    <version>1.0.0-incubating-RC1</version>
+    <version>1.0.0-incubating-SNAPSHOT</version>
     <relativePath>../java/pom.xml</relativePath>
   </parent>
 
@@ -33,9 +33,9 @@
   <description>Assembles the PHP code base into a deployment package.</description>
 
   <scm>
-    <connection>scm:svn:http://svn.apache.org/repos/asf/incubator/shindig/tags/1.0.0-incubating-RC1-test2/assembly</connection>
-    <developerConnection>scm:svn:https://svn.apache.org/repos/asf/incubator/shindig/tags/1.0.0-incubating-RC1-test2/assembly</developerConnection>
-    <url>http://svn.apache.org/viewvc/incubator/shindig/tags/1.0.0-incubating-RC1-test2/assembly</url>
+    <connection>scm:svn:http://svn.apache.org/repos/asf/incubator/shindig/branches/1.0.x-incubating/assembly</connection>
+    <developerConnection>scm:svn:https://svn.apache.org/repos/asf/incubator/shindig/branches/1.0.x-incubating/assembly</developerConnection>
+    <url>http://svn.apache.org/viewvc/incubator/shindig/branches/1.0.x-incubating/assembly</url>
   </scm>
 
   <build>
