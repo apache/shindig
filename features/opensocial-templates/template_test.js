@@ -352,7 +352,6 @@ function testSelect() {
 function testList() {
   os.Container.registerTag('custom:list');
   var output = compileAndRender_('_T_List');
-  document.body.appendChild(output);
   assertEquals('helloworld', domutil.getVisibleText(output));
 }
 

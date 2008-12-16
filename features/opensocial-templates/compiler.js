@@ -51,7 +51,7 @@ os.compileXMLNode = function(node, opt_id) {
       nodes.push(os.compileNode_(child));
     } else if (child.nodeType == DOM_TEXT_NODE) {
       if (child != node.firstChild ||
-          !child.nodeValue.match(os.regExps_.onlyWhitespace)) {
+          !child.nodeValue.match(os.regExps_.ONLY_WHITESPACE)) {
         var compiled = os.breakTextNode_(child);
         for (var i = 0; i < compiled.length; i++) {
           nodes.push(compiled[i]);
@@ -626,7 +626,7 @@ os.trimWhitespaceForIE_ = function(string, opt_trimStart, opt_trimEnd) {
  * substitutions were found, or an empty array if none were.
  */
 os.breakTextNode_ = function(textNode) {
-  var substRex = os.regExps_.variableSubstitution;
+  var substRex = os.regExps_.VARIABLE_SUBSTITUTION;
   var text = textNode.data;
   var nodes = [];
   var match = text.match(substRex);
@@ -636,7 +636,7 @@ os.breakTextNode_ = function(textNode) {
     }
     var token = match[2].substring(2, match[2].length - 1);
     if (!token) {
-      token = '$this';
+      token = VAR_this;
     }
     var tokenSpan = document.createElement("span");
     tokenSpan.setAttribute(ATT_content, os.transformExpression_(token));
@@ -673,7 +673,7 @@ os.parseAttribute_ = function(value) {
   if (!value.length) {
     return null;
   }
-  var substRex = os.regExps_.variableSubstitution;
+  var substRex = os.regExps_.VARIABLE_SUBSTITUTION;
   var text = value;
   var parts = [];
   var match = text.match(substRex);
@@ -686,6 +686,9 @@ os.parseAttribute_ = function(value) {
           os.trimWhitespaceForIE_(match[1], parts.length == 0)));
     }
     var expr = match[2].substring(2, match[2].length - 1);
+    if (!expr) {
+      expr = VAR_this;
+    }
     parts.push('(' + os.transformExpression_(expr) + ')');
     text = match[3];
     match = text.match(substRex);
@@ -740,6 +743,7 @@ os.getValueFromNode_ = function(node, name) {
 
     ret = [];
     for (var child = node.firstChild; child; child = child.nextSibling) {
+      console.log(child);
       if (allChildren) {
         ret.push(child);
         continue;
@@ -778,7 +782,6 @@ os.getValueFromNode_ = function(node, name) {
   } else if (ret == "0") {
     ret = 0;
   }
-
   return ret;
 };
 

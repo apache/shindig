@@ -137,7 +137,7 @@ os.data.RequestDescriptor.prototype.getSendRequestClosure = function() {
  * @private
  */
 os.data.RequestDescriptor.prototype.computeNeededKeys_ = function(attribute) {
-  var substRex = os.regExps_.variableSubstitution;
+  var substRex = os.regExps_.VARIABLE_SUBSTITUTION;
   var match = attribute.match(substRex);
   while (match) {
     var token = match[2].substring(2, match[2].length - 1);

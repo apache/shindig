@@ -16,6 +16,24 @@
  * specific language governing permissions and limitations under the License.
  */
 
+function testSubstitution() {
+  var values = [
+    [ "hello world", null ],
+    [ "hello $world", null ],
+    [ "hello ${Cur} world", "'hello '+($this)+' world'" ],
+    [ "${Cur} hello", "($this)+' hello'" ],
+    [ "hello ${Cur}", "'hello '+($this)" ],
+    [ "$ ${Cur}", "'$ '+($this)" ],
+    [ "$${Cur}", "'$'+($this)" ],
+    [ "${Cur} ${Index}", "($this)+' '+($index)"],
+    [ "a ${Cur} b ${Index} c", "'a '+($this)+' b '+($index)+' c'"]
+  ];
+  for (var i = 0; i < values.length; i++) {
+    var compiled = os.parseAttribute_(values[i][0]);
+    assertEquals(values[i][1], compiled);
+  }
+};
+
 /**
  * Unit test for compiler identifier wrapping.
  * TODO(kjin): test all of the following:

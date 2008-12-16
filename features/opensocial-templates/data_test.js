@@ -41,7 +41,7 @@ function testRequestHandler() {
   var xmlData =
       '<test:request key="first" data="testData"/>' +
       '<test:request key="second" data="${foo}"/>';
-window.console.log(os.data);
+
   os.data.loadRequests(xmlData);
   assertNotNull(os.data.requests_['first']);
   assertNotNull(os.data.requests_['second']);
