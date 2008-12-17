@@ -19,6 +19,8 @@ package org.apache.shindig.social.opensocial.jpa;
 
 import static javax.persistence.GenerationType.IDENTITY;
 
+import com.google.common.collect.Lists;
+
 import org.apache.shindig.social.opensocial.jpa.api.DbObject;
 import org.apache.shindig.social.opensocial.model.Person;
 
