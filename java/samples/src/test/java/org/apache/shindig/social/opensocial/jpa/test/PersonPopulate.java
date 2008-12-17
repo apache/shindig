@@ -18,6 +18,8 @@
 
 package org.apache.shindig.social.opensocial.jpa.test;
 
+import com.google.common.collect.Lists;
+
 import org.apache.shindig.social.core.model.EnumImpl;
 import org.apache.shindig.social.opensocial.jpa.AddressDb;
 import org.apache.shindig.social.opensocial.jpa.BodyTypeDb;
