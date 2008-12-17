@@ -18,7 +18,7 @@
 
 package org.apache.shindig.social.opensocial.jpa.hibernate;
 
-import com.google.collect.common.Maps;
+import com.google.common.collect.Maps;
 
 import java.util.HashMap;
 import java.util.Map;

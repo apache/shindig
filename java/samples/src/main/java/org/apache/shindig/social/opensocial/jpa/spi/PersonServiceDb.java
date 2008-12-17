@@ -31,6 +31,7 @@ import org.apache.shindig.social.opensocial.spi.RestfulCollection;
 import org.apache.shindig.social.opensocial.spi.SocialSpiException;
 import org.apache.shindig.social.opensocial.spi.UserId;
 
+import com.google.common.collect.Lists;
 import com.google.inject.Inject;
 
 import javax.persistence.EntityManager;
