@@ -26,14 +26,12 @@ import static org.junit.Assert.fail;
 
 import org.apache.shindig.auth.BasicSecurityToken;
 import org.apache.shindig.auth.SecurityToken;
-import org.apache.shindig.common.cache.LruCacheProvider;
 import org.apache.shindig.common.crypto.BasicBlobCrypter;
 import org.apache.shindig.common.util.CharsetUtil;
 import org.apache.shindig.common.util.FakeTimeSource;
 import org.apache.shindig.gadgets.FakeGadgetSpecFactory;
 import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.RequestSigningException;
-import org.apache.shindig.gadgets.http.DefaultHttpCache;
 import org.apache.shindig.gadgets.http.HttpResponse;
 import org.apache.shindig.gadgets.oauth.AccessorInfo.OAuthParamLocation;
 import org.apache.shindig.gadgets.oauth.BasicOAuthStoreConsumerKeyAndSecret.KeyType;
@@ -63,13 +61,13 @@ import java.util.logging.Logger;
 /**
  * Tests for signing requests.
  */
-public class OAuthFetcherTest {
+public class OAuthRequestTest {
 
   private OAuthFetcherConfig fetcherConfig;
   private FakeOAuthServiceProvider serviceProvider;
   private BasicOAuthStore base;
   private final List<LogRecord> logRecords = Lists.newArrayList();
-  private FakeTimeSource clock = new FakeTimeSource();
+  private final FakeTimeSource clock = new FakeTimeSource();
 
   public static final String GADGET_URL = "http://www.example.com/gadget.xml";
   public static final String GADGET_URL_NO_KEY = "http://www.example.com/nokey.xml";
@@ -83,10 +81,9 @@ public class OAuthFetcherTest {
     fetcherConfig = new OAuthFetcherConfig(
         new BasicBlobCrypter("abcdefghijklmnop".getBytes()),
         getOAuthStore(base),
-        new DefaultHttpCache(new LruCacheProvider(10)),
         clock);
 
-    Logger logger = Logger.getLogger(OAuthFetcher.class.getName());
+    Logger logger = Logger.getLogger(OAuthRequestTest.class.getName());
     logger.addHandler(new Handler() {
       @Override
       public void close() throws SecurityException {
@@ -225,7 +222,7 @@ public class OAuthFetcherTest {
     client.getBaseArgs().setSignViewer(true);
     return client;
   }
-  
+
   /** Client that does OAuth and does not send opensocial_* params */
   private MakeRequestClient makeStrictNonSocialClient(String owner, String viewer, String gadget)
       throws Exception {
@@ -428,8 +425,6 @@ public class OAuthFetcherTest {
     serviceProvider.revokeAllAccessTokens();
 
     response = client.sendGet(FakeOAuthServiceProvider.RESOURCE_URL + "?cachebust=2");
-    checkLogContains("GET /data?cachebust=2");
-    checkLogContains("HTTP/1.1 401");
     assertEquals("", response.getResponseAsString());
     assertNotNull(response.getMetadata().get("oauthApprovalUrl"));
 
@@ -469,9 +464,6 @@ public class OAuthFetcherTest {
     assertNotNull(metadata);
     assertEquals("403", metadata.get("oauthError"));
     assertNull(metadata.get("oauthErrorText"));
-    checkLogContains("HTTP/1.1 403");
-    checkLogContains("GET /request");
-    checkLogContains("some vague error");
   }
 
   @Test
@@ -659,33 +651,6 @@ public class OAuthFetcherTest {
   }
 
   @Test
-  public void testCachedResponse() throws Exception {
-    assertEquals(0, serviceProvider.getRequestTokenCount());
-    assertEquals(0, serviceProvider.getAccessTokenCount());
-    assertEquals(0, serviceProvider.getResourceAccessCount());
-
-    MakeRequestClient client = makeNonSocialClient("owner", "owner", GADGET_URL);
-
-    HttpResponse response = client.sendGet(FakeOAuthServiceProvider.RESOURCE_URL);
-    assertEquals("", response.getResponseAsString());
-    client.approveToken("user_data=hello-oauth");
-
-    response = client.sendGet(FakeOAuthServiceProvider.RESOURCE_URL);
-    assertEquals("User data is hello-oauth", response.getResponseAsString());
-
-    assertEquals(1, serviceProvider.getRequestTokenCount());
-    assertEquals(1, serviceProvider.getAccessTokenCount());
-    assertEquals(1, serviceProvider.getResourceAccessCount());
-
-    response = client.sendGet(FakeOAuthServiceProvider.RESOURCE_URL);
-    assertEquals("User data is hello-oauth", response.getResponseAsString());
-
-    assertEquals(1, serviceProvider.getRequestTokenCount());
-    assertEquals(1, serviceProvider.getAccessTokenCount());
-    assertEquals(1, serviceProvider.getResourceAccessCount());
-  }
-
-  @Test
   public void testSignedFetchParametersSet() throws Exception {
     MakeRequestClient client = makeSignedFetchClient("o", "v", "http://www.example.com/app");
     HttpResponse resp = client.sendGet(FakeOAuthServiceProvider.RESOURCE_URL);
@@ -780,55 +745,6 @@ public class OAuthFetcherTest {
     List<Parameter> queryParams = OAuth.decodeForm(resp.getResponseAsString());
     assertFalse(contains(queryParams, "opensocial_owner_id", "o"));
     assertTrue(contains(queryParams, "opensocial_viewer_id", "v"));
-  }
-
-  @Test
-  public void testCacheHit() throws Exception {
-    MakeRequestClient client = makeSignedFetchClient("o", "v", "http://www.example.com/app");
-    client.sendGet(FakeOAuthServiceProvider.RESOURCE_URL);
-    assertEquals(1, serviceProvider.getResourceAccessCount());
-
-    client.sendGet(FakeOAuthServiceProvider.RESOURCE_URL);
-    assertEquals(1, serviceProvider.getResourceAccessCount());
-  }
-
-  @Test
-  public void testCacheMiss_noOwner() throws Exception {
-    MakeRequestClient client = makeSignedFetchClient("o", "v", "http://www.example.com/app");
-    client.getBaseArgs().setSignOwner(false);
-    client.sendGet(FakeOAuthServiceProvider.RESOURCE_URL);
-    assertEquals(1, serviceProvider.getResourceAccessCount());
-
-    MakeRequestClient client2 = makeSignedFetchClient("o", "v", "http://www.example.com/app");
-    client2.sendGet(FakeOAuthServiceProvider.RESOURCE_URL);
-    assertEquals(2, serviceProvider.getResourceAccessCount());
-  }
-
-  @Test
-  public void testCacheHit_ownerOnly() throws Exception {
-    MakeRequestClient client = makeSignedFetchClient("o", "v1", "http://www.example.com/app");
-    client.getBaseArgs().setSignViewer(false);
-    client.sendGet(FakeOAuthServiceProvider.RESOURCE_URL);
-    assertEquals(1, serviceProvider.getResourceAccessCount());
-
-    MakeRequestClient client2 = makeSignedFetchClient("o", "v2", "http://www.example.com/app");
-    client2.getBaseArgs().setSignViewer(false);
-    client2.sendGet(FakeOAuthServiceProvider.RESOURCE_URL);
-    assertEquals(1, serviceProvider.getResourceAccessCount());
-  }
-
-  @Test
-  public void testCacheMiss_bypassCache() throws Exception {
-    MakeRequestClient client = makeSignedFetchClient("o", "v1", "http://www.example.com/app");
-    client.getBaseArgs().setSignViewer(false);
-    client.sendGet(FakeOAuthServiceProvider.RESOURCE_URL);
-    assertEquals(1, serviceProvider.getResourceAccessCount());
-
-    MakeRequestClient client2 = makeSignedFetchClient("o", "v", "http://www.example.com/app");
-    client2.setIgnoreCache(true);
-    client2.getBaseArgs().setSignViewer(false);
-    client2.sendGet(FakeOAuthServiceProvider.RESOURCE_URL);
-    assertEquals(2, serviceProvider.getResourceAccessCount());
   }
 
   @Test(expected = RequestSigningException.class)
@@ -950,44 +866,44 @@ public class OAuthFetcherTest {
   public void testAccessTokenExpires_onClient() throws Exception {
     serviceProvider.setSessionExtension(true);
     MakeRequestClient client = makeNonSocialClient("owner", "owner", GADGET_URL);
-    
+
     HttpResponse response = client.sendGet(FakeOAuthServiceProvider.RESOURCE_URL);
     assertEquals("", response.getResponseAsString());
     client.approveToken("user_data=hello-oauth");
-    
+
     response = client.sendGet(FakeOAuthServiceProvider.RESOURCE_URL);
     assertEquals("User data is hello-oauth", response.getResponseAsString());
-    
+
     assertEquals(1, serviceProvider.getRequestTokenCount());
     assertEquals(1, serviceProvider.getAccessTokenCount());
     assertEquals(1, serviceProvider.getResourceAccessCount());
 
     clock.incrementSeconds(FakeOAuthServiceProvider.TOKEN_EXPIRATION_SECONDS + 1);
-    
+
     response = client.sendGet(FakeOAuthServiceProvider.RESOURCE_URL + "?cb=1");
     assertEquals("User data is hello-oauth", response.getResponseAsString());
-    
+
     assertEquals(1, serviceProvider.getRequestTokenCount());
     assertEquals(2, serviceProvider.getAccessTokenCount());
     assertEquals(2, serviceProvider.getResourceAccessCount());
-    
+
     response = client.sendGet(FakeOAuthServiceProvider.RESOURCE_URL + "?cb=3");
     assertEquals("User data is hello-oauth", response.getResponseAsString());
 
     assertEquals(1, serviceProvider.getRequestTokenCount());
     assertEquals(2, serviceProvider.getAccessTokenCount());
     assertEquals(3, serviceProvider.getResourceAccessCount());
-    
+
     clock.incrementSeconds(FakeOAuthServiceProvider.TOKEN_EXPIRATION_SECONDS + 1);
-    
+
     response = client.sendGet(FakeOAuthServiceProvider.RESOURCE_URL + "?cb=4");
     assertEquals("User data is hello-oauth", response.getResponseAsString());
-    
+
     assertEquals(1, serviceProvider.getRequestTokenCount());
     assertEquals(3, serviceProvider.getAccessTokenCount());
     assertEquals(4, serviceProvider.getResourceAccessCount());
   }
-  
+
   // Tests the case where the server doesn't tell us when the token will expire.  This requires
   // an extra round trip to discover that the token has expired.
   @Test
@@ -995,111 +911,111 @@ public class OAuthFetcherTest {
     serviceProvider.setSessionExtension(true);
     serviceProvider.setReportExpirationTimes(false);
     MakeRequestClient client = makeNonSocialClient("owner", "owner", GADGET_URL);
-    
+
     HttpResponse response = client.sendGet(FakeOAuthServiceProvider.RESOURCE_URL);
     assertEquals("", response.getResponseAsString());
     client.approveToken("user_data=hello-oauth");
-    
+
     response = client.sendGet(FakeOAuthServiceProvider.RESOURCE_URL);
     assertEquals("User data is hello-oauth", response.getResponseAsString());
-    
+
     assertEquals(1, serviceProvider.getRequestTokenCount());
     assertEquals(1, serviceProvider.getAccessTokenCount());
     assertEquals(1, serviceProvider.getResourceAccessCount());
 
     clock.incrementSeconds(FakeOAuthServiceProvider.TOKEN_EXPIRATION_SECONDS + 1);
-    
+
     response = client.sendGet(FakeOAuthServiceProvider.RESOURCE_URL + "?cb=1");
     assertEquals("User data is hello-oauth", response.getResponseAsString());
-    
+
     assertEquals(1, serviceProvider.getRequestTokenCount());
     assertEquals(2, serviceProvider.getAccessTokenCount());
     assertEquals(3, serviceProvider.getResourceAccessCount());
-    
+
     response = client.sendGet(FakeOAuthServiceProvider.RESOURCE_URL + "?cb=3");
     assertEquals("User data is hello-oauth", response.getResponseAsString());
 
     assertEquals(1, serviceProvider.getRequestTokenCount());
     assertEquals(2, serviceProvider.getAccessTokenCount());
     assertEquals(4, serviceProvider.getResourceAccessCount());
-    
+
     clock.incrementSeconds(FakeOAuthServiceProvider.TOKEN_EXPIRATION_SECONDS + 1);
-    
+
     response = client.sendGet(FakeOAuthServiceProvider.RESOURCE_URL + "?cb=4");
     assertEquals("User data is hello-oauth", response.getResponseAsString());
-    
+
     assertEquals(1, serviceProvider.getRequestTokenCount());
     assertEquals(3, serviceProvider.getAccessTokenCount());
     assertEquals(6, serviceProvider.getResourceAccessCount());
   }
-  
+
   @Test
   public void testAccessTokenExpires_onServer() throws Exception {
     serviceProvider.setSessionExtension(true);
     MakeRequestClient client = makeNonSocialClient("owner", "owner", GADGET_URL);
-    
+
     HttpResponse response = client.sendGet(FakeOAuthServiceProvider.RESOURCE_URL);
     assertEquals("", response.getResponseAsString());
     client.approveToken("user_data=hello-oauth");
-    
+
     response = client.sendGet(FakeOAuthServiceProvider.RESOURCE_URL);
     assertEquals("User data is hello-oauth", response.getResponseAsString());
     assertEquals(1, serviceProvider.getRequestTokenCount());
     assertEquals(1, serviceProvider.getAccessTokenCount());
     assertEquals(1, serviceProvider.getResourceAccessCount());
-    
+
     // clears oauthState
     client = makeNonSocialClient("owner", "owner", GADGET_URL);
 
     clock.incrementSeconds(FakeOAuthServiceProvider.TOKEN_EXPIRATION_SECONDS + 1);
-    
+
     response = client.sendGet(FakeOAuthServiceProvider.RESOURCE_URL + "?cb=1");
     assertEquals("User data is hello-oauth", response.getResponseAsString());
-    
+
     assertEquals(1, serviceProvider.getRequestTokenCount());
     assertEquals(2, serviceProvider.getAccessTokenCount());
     assertEquals(2, serviceProvider.getResourceAccessCount());
   }
-  
+
   @Test
   public void testAccessTokenExpired_andRevoked() throws Exception {
     serviceProvider.setSessionExtension(true);
     MakeRequestClient client = makeNonSocialClient("owner", "owner", GADGET_URL);
-    
+
     HttpResponse response = client.sendGet(FakeOAuthServiceProvider.RESOURCE_URL);
     assertEquals("", response.getResponseAsString());
     client.approveToken("user_data=hello-oauth");
-    
+
     response = client.sendGet(FakeOAuthServiceProvider.RESOURCE_URL);
     assertEquals("User data is hello-oauth", response.getResponseAsString());
 
     assertEquals(1, serviceProvider.getRequestTokenCount());
     assertEquals(1, serviceProvider.getAccessTokenCount());
     assertEquals(1, serviceProvider.getResourceAccessCount());
-    
+
     clock.incrementSeconds(FakeOAuthServiceProvider.TOKEN_EXPIRATION_SECONDS + 1);
     serviceProvider.revokeAllAccessTokens();
-    
+
     response = client.sendGet(FakeOAuthServiceProvider.RESOURCE_URL + "?cb=1");
     assertEquals("", response.getResponseAsString());
     assertEquals(2, serviceProvider.getRequestTokenCount());
     assertEquals(2, serviceProvider.getAccessTokenCount());
     assertEquals(1, serviceProvider.getResourceAccessCount());
-    
+
     client.approveToken("user_data=renewed");
-    
+
     response = client.sendGet(FakeOAuthServiceProvider.RESOURCE_URL + "?cb=1");
     assertEquals(2, serviceProvider.getRequestTokenCount());
     assertEquals(3, serviceProvider.getAccessTokenCount());
     assertEquals(2, serviceProvider.getResourceAccessCount());
     assertEquals("User data is renewed", response.getResponseAsString());
   }
-  
+
   @Test
   public void testBadSessionHandle() throws Exception {
     serviceProvider.setSessionExtension(true);
     MakeRequestClient client = makeNonSocialClient("owner", "owner", GADGET_URL);
-    
+
     HttpResponse response = client.sendGet(FakeOAuthServiceProvider.RESOURCE_URL);
     assertEquals("", response.getResponseAsString());
     client.approveToken("user_data=hello-oauth");
@@ -1110,7 +1026,7 @@ public class OAuthFetcherTest {
     assertEquals(1, serviceProvider.getRequestTokenCount());
     assertEquals(1, serviceProvider.getAccessTokenCount());
     assertEquals(1, serviceProvider.getResourceAccessCount());
-    
+
     clock.incrementSeconds(FakeOAuthServiceProvider.TOKEN_EXPIRATION_SECONDS + 1);
     serviceProvider.changeAllSessionHandles();
 
@@ -1119,30 +1035,30 @@ public class OAuthFetcherTest {
     assertEquals(2, serviceProvider.getRequestTokenCount());
     assertEquals(2, serviceProvider.getAccessTokenCount());
     assertEquals(1, serviceProvider.getResourceAccessCount());
-    
+
     client.approveToken("user_data=renewed");
-    
+
     response = client.sendGet(FakeOAuthServiceProvider.RESOURCE_URL + "?cb=1");
     assertEquals(2, serviceProvider.getRequestTokenCount());
     assertEquals(3, serviceProvider.getAccessTokenCount());
     assertEquals(2, serviceProvider.getResourceAccessCount());
     assertEquals("User data is renewed", response.getResponseAsString());
   }
-  
+
   @Test
   public void testExtraParamsRejected() throws Exception {
     serviceProvider.setRejectExtraParams(true);
     MakeRequestClient client = makeNonSocialClient("owner", "owner", GADGET_URL);
-    
+
     HttpResponse response = client.sendGet(FakeOAuthServiceProvider.RESOURCE_URL);
     assertEquals("parameter_rejected", response.getMetadata().get("oauthError"));
   }
-  
+
   @Test
   public void testExtraParamsSuppressed() throws Exception {
     serviceProvider.setRejectExtraParams(true);
     MakeRequestClient client = makeStrictNonSocialClient("owner", "owner", GADGET_URL);
-  
+
     HttpResponse response = client.sendGet(FakeOAuthServiceProvider.RESOURCE_URL);
     assertEquals("", response.getResponseAsString());
     client.approveToken("user_data=hello-oauth");
@@ -1150,11 +1066,11 @@ public class OAuthFetcherTest {
     response = client.sendGet(FakeOAuthServiceProvider.RESOURCE_URL);
     assertEquals("User data is hello-oauth", response.getResponseAsString());
   }
-  
+
   @Test
   public void testCanRetrieveAccessTokenData() throws Exception {
     serviceProvider.setReturnAccessTokenData(true);
-    
+
     MakeRequestClient client = makeNonSocialClient("owner", "owner", GADGET_URL);
 
     HttpResponse response = client.sendGet(FakeOAuthServiceProvider.ACCESS_TOKEN_URL);
@@ -1166,7 +1082,7 @@ public class OAuthFetcherTest {
     JSONObject json = new JSONObject(response.getResponseAsString());
     assertEquals("userid value", json.get("userid"));
     assertEquals("xoauth_stuff value", json.get("xoauth_stuff"));
-    
+
     response = client.sendGet(FakeOAuthServiceProvider.RESOURCE_URL);
     assertEquals("User data is hello-oauth", response.getResponseAsString());
   }
@@ -1174,7 +1090,7 @@ public class OAuthFetcherTest {
   @Test
   public void testAccessTokenData_noOAuthParams() throws Exception {
     serviceProvider.setReturnAccessTokenData(true);
-    
+
     MakeRequestClient client = makeNonSocialClient("owner", "owner", GADGET_URL);
 
     HttpResponse response = client.sendGet(FakeOAuthServiceProvider.ACCESS_TOKEN_URL);
@@ -1186,7 +1102,7 @@ public class OAuthFetcherTest {
     assertEquals("userid value", json.get("userid"));
     assertEquals("xoauth_stuff value", json.get("xoauth_stuff"));
     assertEquals(2, json.length());
-    
+
     response = client.sendGet(FakeOAuthServiceProvider.RESOURCE_URL);
     assertEquals("User data is hello-oauth", response.getResponseAsString());
   }
@@ -1194,16 +1110,16 @@ public class OAuthFetcherTest {
   @Test
   public void testAccessTokenData_noDirectRequest() throws Exception {
     serviceProvider.setReturnAccessTokenData(true);
-    
+
     MakeRequestClient client = makeNonSocialClient("owner", "owner", GADGET_URL);
 
     HttpResponse response = client.sendGet(FakeOAuthServiceProvider.ACCESS_TOKEN_URL);
     assertEquals("", response.getResponseAsString());
     client.approveToken("user_data=hello-oauth");
-    
+
     response = client.sendGet(FakeOAuthServiceProvider.RESOURCE_URL);
     assertEquals("User data is hello-oauth", response.getResponseAsString());
-    
+
     response = client.sendGet(FakeOAuthServiceProvider.ACCESS_TOKEN_URL);
     assertEquals("", response.getResponseAsString());
     assertTrue(response.getMetadata().containsKey("oauthApprovalUrl"));

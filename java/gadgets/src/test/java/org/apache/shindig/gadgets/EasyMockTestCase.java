@@ -19,11 +19,10 @@ package org.apache.shindig.gadgets;
 
 import com.google.common.collect.Lists;
 
-import org.easymock.classextension.EasyMock;
-
 import junit.framework.TestCase;
 
-import java.util.ArrayList;
+import org.easymock.classextension.EasyMock;
+
 import java.util.List;
 
 
@@ -72,6 +71,10 @@ public abstract class EasyMockTestCase extends TestCase {
     EasyMock.replay(mocks.toArray());
   }
 
+  protected void replay(Object mock) {
+    EasyMock.replay(mock);
+  }
+
   /**
    * Verifies each mock in the order they were created. Call this at the end of each test
    * to verify the expectations were satisfied.
@@ -79,11 +82,15 @@ public abstract class EasyMockTestCase extends TestCase {
   protected void verify() {
     EasyMock.verify(mocks.toArray());
   }
-  
+
   /**
    * Resets all of the mocks.
    */
   protected void reset() {
     EasyMock.reset(mocks.toArray());
+  }
+
+  protected void reset(Object mock) {
+    EasyMock.reset(mock);
   }
 }

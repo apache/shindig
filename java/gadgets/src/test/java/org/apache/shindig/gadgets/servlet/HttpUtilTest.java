@@ -20,20 +20,22 @@ package org.apache.shindig.gadgets.servlet;
 
 import static org.easymock.EasyMock.expect;
 
+import org.apache.shindig.common.ContainerConfig;
+import org.apache.shindig.gadgets.GadgetContext;
+
 import com.google.common.collect.ImmutableSet;
 
-import org.apache.shindig.gadgets.GadgetContext;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.Set;
 
 public class HttpUtilTest extends ServletTestFixture {
   private final static String CONTAINER = "container";
   private final static String FEATURE_0 = "featureZero";
   private final static String FEATURE_1 = "feature-One";
+  private final ContainerConfig containerConfig = mock(ContainerConfig.class);
 
   private final GadgetContext context = mock(GadgetContext.class);
 

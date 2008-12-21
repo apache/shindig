@@ -18,9 +18,9 @@
  */
 package org.apache.shindig.gadgets.render;
 
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+
 import org.apache.shindig.auth.AnonymousSecurityToken;
 import org.apache.shindig.auth.SecurityToken;
 import org.apache.shindig.common.uri.Uri;
@@ -29,9 +29,10 @@ import org.apache.shindig.common.xml.XmlUtil;
 import org.apache.shindig.gadgets.Gadget;
 import org.apache.shindig.gadgets.GadgetContext;
 import org.apache.shindig.gadgets.GadgetException;
-import org.apache.shindig.gadgets.http.ContentFetcherFactory;
+import org.apache.shindig.gadgets.http.AbstractHttpCache;
 import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.http.HttpResponse;
+import org.apache.shindig.gadgets.http.RequestPipeline;
 import org.apache.shindig.gadgets.preload.PreloadException;
 import org.apache.shindig.gadgets.preload.PreloadedData;
 import org.apache.shindig.gadgets.preload.PreloaderService;
@@ -39,13 +40,20 @@ import org.apache.shindig.gadgets.preload.Preloads;
 import org.apache.shindig.gadgets.rewrite.ContentRewriterRegistry;
 import org.apache.shindig.gadgets.spec.GadgetSpec;
 import org.apache.shindig.gadgets.spec.View;
+
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
+
 import org.json.JSONArray;
 import org.json.JSONObject;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 import org.junit.Test;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Locale;
+import java.util.Map;
 
 /**
  * Tests for HtmlRenderer
@@ -64,10 +72,12 @@ public class HtmlRendererTest {
     }
   };
 
-  private final FakeContentFetcherFactory fetcher = new FakeContentFetcherFactory();
+  private final FakeHttpCache cache = new FakeHttpCache();
+  private final FakeRequestPipeline pipeline = new FakeRequestPipeline();
   private final FakePreloaderService preloaderService = new FakePreloaderService();
   private final FakeContentRewriterRegistry rewriter = new FakeContentRewriterRegistry();
-  private final HtmlRenderer renderer = new HtmlRenderer(fetcher, preloaderService, rewriter);
+  private final HtmlRenderer renderer
+      = new HtmlRenderer(pipeline, cache, preloaderService, rewriter);
 
   private Gadget makeGadget(String content) throws GadgetException {
     GadgetSpec spec = new GadgetSpec(SPEC_URL,
@@ -95,14 +105,26 @@ public class HtmlRendererTest {
 
   @Test
   public void renderProxied() throws Exception {
-    fetcher.plainResponses.put(EXPECTED_PROXIED_HTML_HREF, new HttpResponse(PROXIED_HTML_CONTENT));
+    HttpRequest request = new HttpRequest(EXPECTED_PROXIED_HTML_HREF);
+    HttpResponse response = new HttpResponse(PROXIED_HTML_CONTENT);
+    pipeline.plainResponses.put(EXPECTED_PROXIED_HTML_HREF, response);
+    String content = renderer.render(makeHrefGadget("none"));
+    assertEquals(PROXIED_HTML_CONTENT, content);
+    assertEquals(response, cache.getResponse(request));
+  }
+
+  @Test
+  public void renderProxiedFromCache() throws Exception {
+    HttpRequest request = new HttpRequest(EXPECTED_PROXIED_HTML_HREF);
+    HttpResponse response = new HttpResponse(PROXIED_HTML_CONTENT);
+    cache.addResponse(request, response);
     String content = renderer.render(makeHrefGadget("none"));
     assertEquals(PROXIED_HTML_CONTENT, content);
   }
 
   @Test
   public void renderProxiedSigned() throws Exception {
-    fetcher.signedResponses.put(EXPECTED_PROXIED_HTML_HREF, new HttpResponse(PROXIED_HTML_CONTENT));
+    pipeline.signedResponses.put(EXPECTED_PROXIED_HTML_HREF, new HttpResponse(PROXIED_HTML_CONTENT));
     String content = renderer.render(makeHrefGadget("signed"));
     assertEquals(PROXIED_HTML_CONTENT, content);
   }
@@ -110,7 +132,7 @@ public class HtmlRendererTest {
   @Test
   public void renderProxiedOAuth() throws Exception {
     // TODO: We need to disambiguate between oauth and signed.
-    fetcher.oauthResponses.put(EXPECTED_PROXIED_HTML_HREF, new HttpResponse(PROXIED_HTML_CONTENT));
+    pipeline.oauthResponses.put(EXPECTED_PROXIED_HTML_HREF, new HttpResponse(PROXIED_HTML_CONTENT));
     String content = renderer.render(makeHrefGadget("oauth"));
     assertEquals(PROXIED_HTML_CONTENT, content);
   }
@@ -133,7 +155,7 @@ public class HtmlRendererTest {
       }
     });
 
-    fetcher.plainResponses.put(uri.toUri(), new HttpResponse(PROXIED_HTML_CONTENT));
+    pipeline.plainResponses.put(uri.toUri(), new HttpResponse(PROXIED_HTML_CONTENT));
     String content = renderer.render(gadget);
     assertEquals(PROXIED_HTML_CONTENT, content);
   }
@@ -144,14 +166,14 @@ public class HtmlRendererTest {
 
     preloaderService.preloads = new FakePreloads(
         ImmutableMap.of("key", (Object) prefetchedJson));
-    
-    fetcher.plainResponses.put(EXPECTED_PROXIED_HTML_HREF, new HttpResponse(PROXIED_HTML_CONTENT));
+
+    pipeline.plainResponses.put(EXPECTED_PROXIED_HTML_HREF, new HttpResponse(PROXIED_HTML_CONTENT));
     String content = renderer.render(makeHrefGadget("none"));
     assertEquals(PROXIED_HTML_CONTENT, content);
 
-    HttpRequest lastHttpRequest = fetcher.getLastHttpRequest();
+    HttpRequest lastHttpRequest = pipeline.getLastHttpRequest();
     assertEquals("POST", lastHttpRequest.getMethod());
-    assertEquals("GET", lastHttpRequest.getHeader("X-Method-Override"));
+    assertEquals("text/json;charset=utf-8", lastHttpRequest.getHeader("Content-Type"));
     String postBody = lastHttpRequest.getPostBodyAsString();
     JSONArray actualJson = new JSONArray(postBody);
 
@@ -161,7 +183,7 @@ public class HtmlRendererTest {
 
   @Test
   public void renderProxiedWithFailedPreload() throws Exception {
-    JSONObject prefetchedJson = new JSONObject("{id: 'foo', data: 'bar'}");
+    new JSONObject("{id: 'foo', data: 'bar'}");
 
     preloaderService.preloads = new Preloads() {
       public Collection<PreloadedData> getData() {
@@ -174,13 +196,13 @@ public class HtmlRendererTest {
       }
     };
 
-    fetcher.plainResponses.put(EXPECTED_PROXIED_HTML_HREF, new HttpResponse(PROXIED_HTML_CONTENT));
+    pipeline.plainResponses.put(EXPECTED_PROXIED_HTML_HREF, new HttpResponse(PROXIED_HTML_CONTENT));
     String content = renderer.render(makeHrefGadget("none"));
     assertEquals(PROXIED_HTML_CONTENT, content);
 
-    HttpRequest lastHttpRequest = fetcher.getLastHttpRequest();
+    HttpRequest lastHttpRequest = pipeline.getLastHttpRequest();
     assertEquals("POST", lastHttpRequest.getMethod());
-    assertEquals("GET", lastHttpRequest.getHeader("X-Method-Override"));
+    assertEquals("text/json;charset=utf-8", lastHttpRequest.getHeader("Content-Type"));
     String postBody = lastHttpRequest.getPostBodyAsString();
     JSONArray actualJson = new JSONArray(postBody);
 
@@ -199,18 +221,32 @@ public class HtmlRendererTest {
     assertTrue("Rewriting not performed.", rewriter.wasRewritten);
   }
 
-  private static class FakeContentFetcherFactory extends ContentFetcherFactory {
+  private static class FakeHttpCache extends AbstractHttpCache {
+    private final Map<String, HttpResponse> map = Maps.newHashMap();
+
+    @Override
+    protected void addResponseImpl(String key, HttpResponse response) {
+      map.put(key, response);
+    }
+
+    @Override
+    protected HttpResponse getResponseImpl(String key) {
+      return map.get(key);
+    }
+
+    @Override
+    protected HttpResponse removeResponseImpl(String key) {
+      return map.remove(key);
+    }
+  }
+
+  private static class FakeRequestPipeline implements RequestPipeline {
     private final Map<Uri, HttpResponse> plainResponses = Maps.newHashMap();
     private final Map<Uri, HttpResponse> signedResponses = Maps.newHashMap();
     private final Map<Uri, HttpResponse> oauthResponses = Maps.newHashMap();
     private HttpRequest lastHttpRequest;
 
-    public FakeContentFetcherFactory() {
-      super(null, null);
-    }
-
-    @Override
-    public HttpResponse fetch(HttpRequest request) throws GadgetException {
+    public HttpResponse execute(HttpRequest request) throws GadgetException {
       lastHttpRequest = request;
 
       if (request.getGadget() == null) {
@@ -279,17 +315,17 @@ public class HtmlRendererTest {
 
     public FakePreloads(final Map<String, Object> preloadData) {
       this.preloadedData = new PreloadedData() {
-        public Map<String, Object> toJson() throws PreloadException {
+        public Map<String, Object> toJson() {
           return preloadData;
         }
       };
     }
   }
-  
+
   private static class FakeContentRewriterRegistry implements ContentRewriterRegistry {
     private boolean wasRewritten = false;
 
-    public String rewriteGadget(Gadget gadget, View currentView) throws GadgetException {
+    public String rewriteGadget(Gadget gadget, View currentView) {
       throw new UnsupportedOperationException();
     }
 

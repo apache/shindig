@@ -23,7 +23,6 @@ import org.apache.shindig.gadgets.encoding.EncodingDetector;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
 
@@ -36,7 +35,6 @@ import java.io.ObjectOutput;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
@@ -324,9 +322,19 @@ public final class HttpResponse implements Externalizable {
   }
 
   /**
+   * @return True if this result is stale.
+   */
+  public boolean isStale() {
+    return getCacheTtl() <= 0;
+  }
+
+  /**
    * @return true if a strict no-cache header is set in Cache-Control or Pragma
    */
   public boolean isStrictNoCache() {
+    if (isError() && !NEGATIVE_CACHING_EXEMPT_STATUS.contains(httpStatusCode)) {
+      return true;
+    }
     String cacheControl = getHeader("Cache-Control");
     if (cacheControl != null) {
       String[] directives = cacheControl.split(",");

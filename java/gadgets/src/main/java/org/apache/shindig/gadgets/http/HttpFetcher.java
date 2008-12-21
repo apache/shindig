@@ -18,22 +18,24 @@
 package org.apache.shindig.gadgets.http;
 
 import org.apache.shindig.gadgets.GadgetException;
+
 import com.google.inject.ImplementedBy;
 
 /**
- *  Provide HttpResponse for a HttpRequest
+ * Perform an request for the given resource. Does not perform caching, authentication, or stats.
+ * This class should only be used to implement network-level fetching of resources. While we use
+ * HTTP to represent the transport layer, it's important to note that this fetcher may be used for
+ * other types of URI-based resources and does not necessarily require HTTP.
  */
 @ImplementedBy(BasicHttpFetcher.class)
-
 public interface HttpFetcher {
 
   /**
    * Fetch HTTP content.
    *
    * @param request The request to fetch.
-   * @return HttpResponse
-   * @throws org.apache.shindig.gadgets.GadgetException
+   * @return An HTTP response from the relevant resource, including error conditions.
+   * @throws GadgetException In the event of a failure that can't be mapped to an HTTP result code.
    */
-  HttpResponse fetch(HttpRequest request)
-      throws GadgetException;
+  HttpResponse fetch(HttpRequest request) throws GadgetException;
 }

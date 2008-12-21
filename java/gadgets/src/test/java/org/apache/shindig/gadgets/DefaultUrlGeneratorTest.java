@@ -37,7 +37,6 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.net.URI;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
@@ -47,7 +46,7 @@ import java.util.Map;
 /**
  * Tests for DefaultUrlGenerator.
  */
-public class DefaultUrlGeneratorTest extends GadgetTestFixture {
+public class DefaultUrlGeneratorTest extends EasyMockTestCase {
   private static final String IFR_BASE = "/gadgets/eye-frame";
   private static final String JS_BASE = "http://%host%/get-together/livescript/%js%";
   private static final String SPEC_URL = "http://example.org/gadget.xml";
@@ -64,8 +63,9 @@ public class DefaultUrlGeneratorTest extends GadgetTestFixture {
 
   private final GadgetContext context = mock(GadgetContext.class);
   private final LockedDomainService lockedDomainService = mock(LockedDomainService.class);
+  private final GadgetFeatureRegistry registry = mock(GadgetFeatureRegistry.class);
   private final FakeContainerConfig config = new FakeContainerConfig();
-  private DefaultUrlGenerator realUrlGenerator;
+  private UrlGenerator urlGenerator;
 
   @Override
   public void setUp() throws Exception {
@@ -79,9 +79,17 @@ public class DefaultUrlGeneratorTest extends GadgetTestFixture {
     expect(context.getModuleId()).andReturn(MODULE_ID).anyTimes();
     expect(context.getView()).andReturn(VIEW).anyTimes();
 
+    Collection<GadgetFeature> features = Lists.newArrayList();
+
+    expect(registry.getAllFeatures()).andReturn(features);
+
     config.properties.put(DefaultUrlGenerator.IFRAME_URI_PARAM, IFR_BASE);
     config.properties.put(DefaultUrlGenerator.JS_URI_PARAM, JS_BASE);
-    realUrlGenerator = new DefaultUrlGenerator(config, lockedDomainService, registry);
+
+    // Yikes!
+    replay(registry);
+    urlGenerator = new DefaultUrlGenerator(config, lockedDomainService, registry);
+    reset(registry);
   }
 
   public void testGetBundledJsParam() throws Exception {
@@ -89,7 +97,7 @@ public class DefaultUrlGeneratorTest extends GadgetTestFixture {
     expect(context.getDebug()).andReturn(true);
     replay();
 
-    String jsParam = realUrlGenerator.getBundledJsParam(features, context);
+    String jsParam = urlGenerator.getBundledJsParam(features, context);
 
     assertTrue(
         jsParam.matches("foo:bar\\.js\\?v=[0-9a-zA-Z]*&container=" + CONTAINER + "&debug=1"));
@@ -102,7 +110,7 @@ public class DefaultUrlGeneratorTest extends GadgetTestFixture {
     expect(context.getDebug()).andReturn(true);
     replay();
 
-    String jsParam = realUrlGenerator.getBundledJsParam(features, context);
+    String jsParam = urlGenerator.getBundledJsParam(features, context);
 
     assertTrue(jsParam.matches("bar\\.js\\?v=[0-9a-zA-Z]*&container=" + CONTAINER + "&debug=1"));
   }
@@ -112,7 +120,7 @@ public class DefaultUrlGeneratorTest extends GadgetTestFixture {
     expect(context.getDebug()).andReturn(false);
     replay();
 
-    String jsParam = realUrlGenerator.getBundledJsParam(features, context);
+    String jsParam = urlGenerator.getBundledJsParam(features, context);
 
     assertTrue(jsParam.matches("core\\.js\\?v=[0-9a-zA-Z]*&container=" + CONTAINER + "&debug=0"));
   }
@@ -123,7 +131,7 @@ public class DefaultUrlGeneratorTest extends GadgetTestFixture {
     expect(context.getHost()).andReturn("example.org");
     replay();
 
-    String jsParam = realUrlGenerator.getBundledJsUrl(features, context);
+    String jsParam = urlGenerator.getBundledJsUrl(features, context);
 
     Uri uri = Uri.parse(jsParam);
 
@@ -149,7 +157,7 @@ public class DefaultUrlGeneratorTest extends GadgetTestFixture {
         .setSpec(spec)
         .setCurrentView(spec.getView("default"));
 
-    Uri iframeUrl = Uri.parse(realUrlGenerator.getIframeUrl(gadget));
+    Uri iframeUrl = Uri.parse(urlGenerator.getIframeUrl(gadget));
 
     assertEquals(IFR_BASE, iframeUrl.getPath());
     assertEquals(CONTAINER, iframeUrl.getQueryParameter("container"));
@@ -176,7 +184,7 @@ public class DefaultUrlGeneratorTest extends GadgetTestFixture {
         .setSpec(spec)
         .setCurrentView(spec.getView("default"));
 
-    Uri iframeUrl = Uri.parse(realUrlGenerator.getIframeUrl(gadget));
+    Uri iframeUrl = Uri.parse(urlGenerator.getIframeUrl(gadget));
 
     assertEquals("locked.example.org", iframeUrl.getAuthority());
     assertEquals(IFR_BASE, iframeUrl.getPath());
@@ -201,7 +209,7 @@ public class DefaultUrlGeneratorTest extends GadgetTestFixture {
         .setSpec(spec)
         .setCurrentView(spec.getView("default"));
 
-    URI iframeUrl = URI.create(realUrlGenerator.getIframeUrl(gadget));
+    URI iframeUrl = URI.create(urlGenerator.getIframeUrl(gadget));
 
     assertEquals(TYPE_URL_HREF_HOST, iframeUrl.getAuthority());
     assertEquals(TYPE_URL_HREF_PATH, iframeUrl.getPath());

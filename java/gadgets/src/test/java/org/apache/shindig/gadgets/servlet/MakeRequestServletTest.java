@@ -48,7 +48,7 @@ public class MakeRequestServletTest extends ServletTestFixture {
       = Collections.enumeration(Collections.<String>emptyList());
 
   private final MakeRequestServlet servlet = new MakeRequestServlet();
-  private final MakeRequestHandler handler = new MakeRequestHandler(fetcherFactory, null);
+  private final MakeRequestHandler handler = new MakeRequestHandler(pipeline, null);
 
   private final HttpRequest internalRequest = new HttpRequest(REQUEST_URL);
   private final HttpResponse internalResponse = new HttpResponse(RESPONSE_BODY);
@@ -87,7 +87,7 @@ public class MakeRequestServletTest extends ServletTestFixture {
 
   public void testDoGetNormal() throws Exception {
     setupGet();
-    expect(fetcherFactory.fetch(internalRequest)).andReturn(internalResponse);
+    expect(pipeline.execute(internalRequest)).andReturn(internalResponse);
     replay();
 
     servlet.doGet(request, recorder);
@@ -97,7 +97,7 @@ public class MakeRequestServletTest extends ServletTestFixture {
 
   public void testDoGetHttpError() throws Exception {
     setupGet();
-    expect(fetcherFactory.fetch(internalRequest)).andReturn(HttpResponse.notFound());
+    expect(pipeline.execute(internalRequest)).andReturn(HttpResponse.notFound());
     replay();
 
     servlet.doGet(request, recorder);
@@ -107,7 +107,7 @@ public class MakeRequestServletTest extends ServletTestFixture {
 
   public void testDoGetException() throws Exception {
     setupGet();
-    expect(fetcherFactory.fetch(internalRequest)).andThrow(
+    expect(pipeline.execute(internalRequest)).andThrow(
         new GadgetException(GadgetException.Code.FAILED_TO_RETRIEVE_CONTENT, ERROR_MESSAGE));
     replay();
 
@@ -119,7 +119,7 @@ public class MakeRequestServletTest extends ServletTestFixture {
 
   public void testDoPostNormal() throws Exception {
     setupPost();
-    expect(fetcherFactory.fetch(internalRequest)).andReturn(internalResponse);
+    expect(pipeline.execute(internalRequest)).andReturn(internalResponse);
     replay();
 
     servlet.doPost(request, recorder);
@@ -129,7 +129,7 @@ public class MakeRequestServletTest extends ServletTestFixture {
 
   public void testDoPostHttpError() throws Exception {
     setupPost();
-    expect(fetcherFactory.fetch(internalRequest)).andReturn(HttpResponse.notFound());
+    expect(pipeline.execute(internalRequest)).andReturn(HttpResponse.notFound());
     replay();
 
     servlet.doGet(request, recorder);
@@ -139,7 +139,7 @@ public class MakeRequestServletTest extends ServletTestFixture {
 
   public void testDoPostException() throws Exception {
     setupPost();
-    expect(fetcherFactory.fetch(internalRequest)).andThrow(
+    expect(pipeline.execute(internalRequest)).andThrow(
         new GadgetException(GadgetException.Code.FAILED_TO_RETRIEVE_CONTENT, ERROR_MESSAGE));
     replay();
 

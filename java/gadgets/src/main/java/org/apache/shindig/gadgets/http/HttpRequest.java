@@ -69,6 +69,8 @@ public class HttpRequest {
 
   // For signed fetch & OAuth
   private SecurityToken securityToken;
+
+  // TODO: Move this into OAuthRequest.
   private OAuthArguments oauthArguments;
   private AuthType authType;
 

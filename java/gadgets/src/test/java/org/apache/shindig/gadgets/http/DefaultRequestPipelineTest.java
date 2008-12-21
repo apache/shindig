@@ -1,0 +1,207 @@
+/**
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements. See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership. The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License. You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations under the License.
+ */
+package org.apache.shindig.gadgets.http;
+
+import static org.junit.Assert.assertEquals;
+
+import com.google.common.collect.Maps;
+import com.google.inject.Provider;
+
+import org.apache.shindig.common.uri.Uri;
+import org.apache.shindig.gadgets.AuthType;
+import org.apache.shindig.gadgets.GadgetException;
+import org.apache.shindig.gadgets.oauth.OAuthRequest;
+import org.junit.Test;
+
+import java.util.Map;
+
+public class DefaultRequestPipelineTest {
+  private static final Uri DEFAULT_URI = Uri.parse("http://example.org/gadget.xml");
+
+  private final FakeHttpFetcher fetcher = new FakeHttpFetcher();
+  private final FakeHttpCache cache = new FakeHttpCache();
+  private final FakeOAuthRequestProvider oauth = new FakeOAuthRequestProvider();
+
+  private final RequestPipeline pipeline = new DefaultRequestPipeline(fetcher, cache, oauth);
+
+  @Test
+  public void authTypeNoneNotCached() throws Exception {
+    HttpRequest request = new HttpRequest(DEFAULT_URI)
+        .setAuthType(AuthType.NONE);
+
+    fetcher.response = new HttpResponse("response");
+
+    HttpResponse response = pipeline.execute(request);
+
+    assertEquals(request, fetcher.request);
+    assertEquals(fetcher.response, response);
+    assertEquals(response, cache.data.get(DEFAULT_URI));
+    assertEquals(1, cache.readCount);
+    assertEquals(1, cache.writeCount);
+    assertEquals(1, fetcher.fetchCount);
+  }
+
+  @Test
+  public void authTypeNoneWasCached() throws Exception {
+    HttpRequest request = new HttpRequest(DEFAULT_URI)
+        .setAuthType(AuthType.NONE);
+
+    HttpResponse cached = new HttpResponse("cached");
+    cache.data.put(DEFAULT_URI, cached);
+
+    HttpResponse response = pipeline.execute(request);
+
+    assertEquals(cached, response);
+    assertEquals(1, cache.readCount);
+    assertEquals(0, cache.writeCount);
+    assertEquals(0, fetcher.fetchCount);
+  }
+
+  @Test
+  public void authTypeNoneWasCachedButStale() throws Exception {
+    HttpRequest request = new HttpRequest(DEFAULT_URI)
+        .setAuthType(AuthType.NONE);
+
+    HttpResponse cached = new HttpResponseBuilder().setStrictNoCache().create();
+    cache.data.put(DEFAULT_URI, cached);
+
+    HttpResponse fetched = new HttpResponse("fetched");
+    fetcher.response = fetched;
+
+    HttpResponse response = pipeline.execute(request);
+
+    assertEquals(fetched, response);
+    assertEquals(request, fetcher.request);
+    assertEquals(fetched, cache.data.get(DEFAULT_URI));
+    assertEquals(1, cache.readCount);
+    assertEquals(1, cache.writeCount);
+    assertEquals(1, fetcher.fetchCount);
+  }
+
+  @Test
+  public void authTypeNoneIgnoreCache() throws Exception {
+    HttpRequest request = new HttpRequest(DEFAULT_URI)
+        .setAuthType(AuthType.NONE)
+        .setIgnoreCache(true);
+
+    HttpResponse fetched = new HttpResponse("fetched");
+    fetcher.response = fetched;
+
+    HttpResponse response = pipeline.execute(request);
+
+    assertEquals(fetched, response);
+    assertEquals(request, fetcher.request);
+    assertEquals(0, cache.readCount);
+    assertEquals(0, cache.writeCount);
+    assertEquals(1, fetcher.fetchCount);
+  }
+
+  @Test
+  public void authTypeOAuthNotCached() throws Exception {
+    HttpRequest request = new HttpRequest(DEFAULT_URI)
+        .setAuthType(AuthType.OAUTH);
+
+    oauth.httpResponse = new HttpResponse("oauth result");
+
+    HttpResponse response = pipeline.execute(request);
+
+    assertEquals(oauth.httpResponse, response);
+    assertEquals(request, oauth.httpRequest);
+    assertEquals(response, cache.data.get(DEFAULT_URI));
+    assertEquals(1, oauth.fetchCount);
+    assertEquals(0, fetcher.fetchCount);
+    assertEquals(1, cache.readCount);
+    assertEquals(1, cache.writeCount);
+  }
+
+  @Test
+  public void authTypeOAuthWasCached() throws Exception {
+    HttpRequest request = new HttpRequest(DEFAULT_URI)
+        .setAuthType(AuthType.OAUTH);
+
+    HttpResponse cached = new HttpResponse("cached");
+    cache.data.put(DEFAULT_URI, cached);
+
+    HttpResponse response = pipeline.execute(request);
+
+    assertEquals(cached, response);
+    assertEquals(0, oauth.fetchCount);
+    assertEquals(0, fetcher.fetchCount);
+    assertEquals(1, cache.readCount);
+    assertEquals(0, cache.writeCount);
+  }
+
+  private static class FakeHttpFetcher implements HttpFetcher {
+    private HttpRequest request;
+    private HttpResponse response;
+    private int fetchCount = 0;
+
+    public HttpResponse fetch(HttpRequest request) throws GadgetException {
+      fetchCount++;
+      this.request = request;
+      if (response == null) {
+        throw new GadgetException(GadgetException.Code.FAILED_TO_RETRIEVE_CONTENT);
+      }
+      return response;
+    }
+  }
+
+  private static class FakeHttpCache implements HttpCache {
+    private final Map<Uri, HttpResponse> data = Maps.newHashMap();
+    private int writeCount = 0;
+    private int readCount = 0;
+
+    public HttpResponse addResponse(HttpRequest request, HttpResponse response) {
+      writeCount++;
+      data.put(request.getUri(), response);
+      return response;
+    }
+
+    public HttpResponse getResponse(HttpRequest request) {
+      readCount++;
+      return data.get(request.getUri());
+    }
+
+    public HttpResponse removeResponse(HttpRequest key) {
+      throw new UnsupportedOperationException();
+    }
+  }
+
+  private static class FakeOAuthRequestProvider implements Provider<OAuthRequest> {
+    private int fetchCount = 0;
+    private HttpRequest httpRequest;
+    private HttpResponse httpResponse;
+
+    private final OAuthRequest oauthRequest = new OAuthRequest(null, null) {
+      @Override
+      public HttpResponse fetch(HttpRequest request) throws GadgetException {
+        fetchCount++;
+        httpRequest = request;
+        if (httpResponse == null) {
+          throw new GadgetException(GadgetException.Code.FAILED_TO_RETRIEVE_CONTENT);
+        }
+        return httpResponse;
+      }
+    };
+
+    public OAuthRequest get() {
+      return oauthRequest;
+    }
+
+  }
+}

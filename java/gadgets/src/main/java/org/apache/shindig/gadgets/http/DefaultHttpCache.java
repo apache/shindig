@@ -21,11 +21,13 @@ import org.apache.shindig.common.cache.Cache;
 import org.apache.shindig.common.cache.CacheProvider;
 
 import com.google.inject.Inject;
+import com.google.inject.Singleton;
 
 /**
  * Simple cache of HttpResponses. It is recommended that this cache be configured with a shared
  * cache rather than a memory only cache.
  */
+@Singleton
 public class DefaultHttpCache extends AbstractHttpCache {
   public static final String CACHE_NAME = "httpResponses";
 

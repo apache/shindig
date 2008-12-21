@@ -44,7 +44,7 @@ public class ProxyServletTest extends ServletTestFixture {
   private static final String ERROR_MESSAGE = "Broken!";
 
   private final ProxyHandler proxyHandler
-      = new ProxyHandler(fetcher, lockedDomainService, null);
+      = new ProxyHandler(pipeline, lockedDomainService, null);
   private final ProxyServlet servlet = new ProxyServlet();
   private final HttpRequest internalRequest = new HttpRequest(REQUEST_URL);
   private final HttpResponse internalResponse = new HttpResponse(RESPONSE_BODY);
@@ -74,7 +74,7 @@ public class ProxyServletTest extends ServletTestFixture {
 
   public void testDoGetNormal() throws Exception {
     setupBasic();
-    expect(fetcher.fetch(internalRequest)).andReturn(internalResponse);
+    expect(pipeline.execute(internalRequest)).andReturn(internalResponse);
     replay();
 
     servlet.doGet(request, recorder);
@@ -84,7 +84,7 @@ public class ProxyServletTest extends ServletTestFixture {
 
   public void testDoGetHttpError() throws Exception {
     setupBasic();
-    expect(fetcher.fetch(internalRequest)).andReturn(HttpResponse.notFound());
+    expect(pipeline.execute(internalRequest)).andReturn(HttpResponse.notFound());
     replay();
 
     servlet.doGet(request, recorder);
@@ -94,7 +94,7 @@ public class ProxyServletTest extends ServletTestFixture {
 
   public void testDoGetException() throws Exception {
     setupBasic();
-    expect(fetcher.fetch(internalRequest)).andThrow(
+    expect(pipeline.execute(internalRequest)).andThrow(
         new GadgetException(GadgetException.Code.FAILED_TO_RETRIEVE_CONTENT, ERROR_MESSAGE));
     replay();
 
@@ -107,7 +107,7 @@ public class ProxyServletTest extends ServletTestFixture {
   public void testDoGetAlternateSyntax() throws Exception {
     setupAltSyntax();
     expect(request.getRequestURI()).andReturn(ALT_SYNTAX_URL);
-    expect(fetcher.fetch(internalRequest)).andReturn(internalResponse);
+    expect(pipeline.execute(internalRequest)).andReturn(internalResponse);
     replay();
 
     servlet.doGet(request, recorder);

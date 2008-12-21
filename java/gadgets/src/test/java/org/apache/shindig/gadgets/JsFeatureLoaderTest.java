@@ -17,26 +17,29 @@
  */
 package org.apache.shindig.gadgets;
 
-import com.google.common.collect.Maps;
+import static org.easymock.EasyMock.eq;
+import static org.easymock.EasyMock.expect;
 
 import org.apache.shindig.common.ContainerConfig;
 import org.apache.shindig.common.uri.Uri;
+import org.apache.shindig.gadgets.http.HttpFetcher;
 import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.http.HttpResponse;
 import org.apache.shindig.gadgets.http.HttpResponseBuilder;
-import static org.easymock.EasyMock.eq;
-import static org.easymock.EasyMock.expect;
+
+import com.google.common.collect.Maps;
 
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class JsFeatureLoaderTest extends GadgetTestFixture {
-  JsFeatureLoader loader;
+public class JsFeatureLoaderTest extends EasyMockTestCase {
+  private final HttpFetcher fetcher = mock(HttpFetcher.class);
+  private final JsFeatureLoader loader = new JsFeatureLoader(fetcher);
+  private GadgetFeatureRegistry registry;
 
   private static final String FEATURE_NAME = "test";
   private static final String ALT_FEATURE_NAME = "test2";
@@ -48,8 +51,7 @@ public class JsFeatureLoaderTest extends GadgetTestFixture {
 
   @Override
   public void setUp() throws Exception {
-    super.setUp();
-    loader = new JsFeatureLoader(fetcher);
+    registry = new GadgetFeatureRegistry(null, fetcher);
   }
 
   private JsLibrary getJsLib(GadgetFeature feature) {

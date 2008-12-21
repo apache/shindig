@@ -22,8 +22,14 @@ import static junitx.framework.ComparableAssert.assertGreater;
 import static junitx.framework.ComparableAssert.assertLesser;
 
 import org.apache.shindig.common.util.DateUtil;
-import org.apache.shindig.gadgets.GadgetTestFixture;
+import org.apache.shindig.common.util.FakeTimeSource;
+import org.apache.shindig.gadgets.EasyMockTestCase;
 import org.apache.shindig.gadgets.LockedDomainService;
+import org.apache.shindig.gadgets.http.RequestPipeline;
+import org.apache.shindig.gadgets.rewrite.CaptureRewriter;
+import org.apache.shindig.gadgets.rewrite.ContentRewriter;
+import org.apache.shindig.gadgets.rewrite.ContentRewriterRegistry;
+import org.apache.shindig.gadgets.rewrite.DefaultContentRewriterRegistry;
 
 import org.apache.commons.lang.StringUtils;
 
@@ -34,13 +40,21 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 /**
- * Contains everything needed for making servlet requests.
+ * Contains everything needed for making servlet requests, plus a bunch of stuff that shouldn't be
+ * here.
+ *
+ * TODO: Get rid of 'stuff that shouldn't be here'.
  */
-public class ServletTestFixture extends GadgetTestFixture {
+public class ServletTestFixture extends EasyMockTestCase {
+  public final RequestPipeline pipeline = mock(RequestPipeline.class);
+  public final CaptureRewriter rewriter = new CaptureRewriter();
+  public final ContentRewriterRegistry rewriterRegistry
+      = new DefaultContentRewriterRegistry(Arrays.<ContentRewriter>asList(rewriter), null);
   public final HttpServletRequest request = mock(HttpServletRequest.class);
   public final HttpServletResponse response = mock(HttpServletResponse.class);
   public final HttpServletResponseRecorder recorder = new HttpServletResponseRecorder(response);
   public final LockedDomainService lockedDomainService = mock(LockedDomainService.class);
+  public final FakeTimeSource timeSource = new FakeTimeSource();
 
   private final long testStartTime = timeSource.currentTimeMillis();
 

@@ -18,21 +18,23 @@
  */
 package org.apache.shindig.gadgets.preload;
 
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
-import com.google.inject.Inject;
 import org.apache.shindig.common.ContainerConfig;
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.common.uri.UriBuilder;
 import org.apache.shindig.gadgets.AuthType;
 import org.apache.shindig.gadgets.GadgetContext;
-import org.apache.shindig.gadgets.http.ContentFetcherFactory;
 import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.http.HttpResponse;
+import org.apache.shindig.gadgets.http.RequestPipeline;
 import org.apache.shindig.gadgets.spec.GadgetSpec;
 import org.apache.shindig.gadgets.spec.Preload;
 import org.apache.shindig.gadgets.spec.View;
+
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
+import com.google.inject.Inject;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -45,18 +47,17 @@ import java.util.Map;
 import java.util.concurrent.Callable;
 
 /**
- * Preloader for loading Data Pipelining Preload data. 
+ * Preloader for loading Data Pipelining Preload data.
  */
 public class PipelinedDataPreloader implements Preloader {
-  // TODO: This needs to be fixed.
-  private final ContentFetcherFactory fetcher;
+  private final RequestPipeline requestPipeline;
   private final ContainerConfig config;
 
   private static final Charset UTF8 = Charset.forName("UTF-8");
 
   @Inject
-  public PipelinedDataPreloader(ContentFetcherFactory fetcher, ContainerConfig config) {
-    this.fetcher = fetcher;
+  public PipelinedDataPreloader(RequestPipeline requestPipeline, ContainerConfig config) {
+    this.requestPipeline = requestPipeline;
     this.config = config;
   }
 
@@ -113,15 +114,16 @@ public class PipelinedDataPreloader implements Preloader {
     public PreloadedData call() throws Exception {
       Uri uri = getSocialUri(context);
       HttpRequest request = new HttpRequest(uri)
+          .setIgnoreCache(context.getIgnoreCache())
           .setSecurityToken(context.getToken())
           .setMethod("POST")
           .setAuthType(AuthType.NONE)
           .setPostBody(UTF8.encode(array.toString()).array())
-          .setContainer(context.getContainer())
           .addHeader("Content-Type", "application/json; charset=UTF-8")
+          .setContainer(context.getContainer())
           .setGadget(Uri.fromJavaUri(context.getUrl()));
 
-      HttpResponse response = fetcher.fetch(request);
+      HttpResponse response = requestPipeline.execute(request);
 
       // Unpack the response into a map of PreloadedData responses
       final Map<String, Object> data = Maps.newHashMap();
@@ -135,7 +137,7 @@ public class PipelinedDataPreloader implements Preloader {
       }
 
       return new PreloadedData() {
-        public Map<String, Object> toJson() throws PreloadException {
+        public Map<String, Object> toJson() {
           return data;
         }
       };
@@ -156,7 +158,7 @@ public class PipelinedDataPreloader implements Preloader {
 
     public PreloadedData call() throws Exception {
       HttpRequest request = HttpPreloader.newHttpRequest(context, preload);
-      return new Data(fetcher.fetch(request));
+      return new Data(requestPipeline.execute(request));
     }
 
     // TODO: is this format correct?
