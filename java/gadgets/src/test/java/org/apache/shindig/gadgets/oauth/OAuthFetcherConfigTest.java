@@ -21,6 +21,7 @@ import org.apache.shindig.common.crypto.BlobCrypter;
 import org.apache.shindig.common.util.TimeSource;
 import org.apache.shindig.gadgets.EasyMockTestCase;
 import org.apache.shindig.gadgets.http.HttpCache;
+
 import org.junit.Test;
 
 /**
@@ -31,11 +32,10 @@ public class OAuthFetcherConfigTest extends EasyMockTestCase {
   @Test
   public void testOAuthFetcherConfig() {
     BlobCrypter crypter = mock(BlobCrypter.class);
-    HttpCache cache = mock(HttpCache.class);
+    mock(HttpCache.class);
     GadgetOAuthTokenStore tokenStore = mock(GadgetOAuthTokenStore.class);
-    OAuthFetcherConfig config = new OAuthFetcherConfig(crypter, tokenStore, cache, new TimeSource());
+    OAuthFetcherConfig config = new OAuthFetcherConfig(crypter, tokenStore, new TimeSource());
     assertEquals(crypter, config.getStateCrypter());
-    assertEquals(cache, config.getHttpCache());
     assertEquals(tokenStore, config.getTokenStore());
   }
 }

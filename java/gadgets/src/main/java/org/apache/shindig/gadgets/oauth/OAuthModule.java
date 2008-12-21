@@ -17,24 +17,26 @@
  */
 package org.apache.shindig.gadgets.oauth;
 
-import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang.StringUtils;
 import org.apache.shindig.common.crypto.BasicBlobCrypter;
 import org.apache.shindig.common.crypto.BlobCrypter;
 import org.apache.shindig.common.crypto.Crypto;
 import org.apache.shindig.common.util.ResourceLoader;
+import org.apache.shindig.gadgets.http.HttpFetcher;
 import org.apache.shindig.gadgets.oauth.BasicOAuthStoreConsumerKeyAndSecret.KeyType;
-
-import java.io.File;
-import java.io.IOException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.name.Named;
 import com.google.inject.name.Names;
+
+import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang.StringUtils;
+
+import java.io.File;
+import java.io.IOException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Loads pre-reqs for OAuth.
@@ -52,9 +54,10 @@ public class OAuthModule extends AbstractModule {
     // Used for encrypting client-side OAuth state.
     bind(BlobCrypter.class).annotatedWith(Names.named(OAuthFetcherConfig.OAUTH_STATE_CRYPTER))
         .toProvider(OAuthCrypterProvider.class);
-    
+
     // Used for persistent storage of OAuth access tokens.
     bind(OAuthStore.class).toProvider(OAuthStoreProvider.class);
+    bind(OAuthRequest.class).toProvider(OAuthRequestProvider.class);
   }
 
   public static class OAuthCrypterProvider implements Provider<BlobCrypter> {
@@ -78,9 +81,24 @@ public class OAuthModule extends AbstractModule {
     }
   }
 
+  public static class OAuthRequestProvider implements Provider<OAuthRequest> {
+    private final HttpFetcher fetcher;
+    private final OAuthFetcherConfig config;
+
+    @Inject
+    public OAuthRequestProvider(HttpFetcher fetcher, OAuthFetcherConfig config) {
+      this.fetcher = fetcher;
+      this.config = config;
+    }
+
+    public OAuthRequest get() {
+      return new OAuthRequest(config, fetcher);
+    }
+  }
+
   public static class OAuthStoreProvider implements Provider<OAuthStore> {
 
-    private BasicOAuthStore store;
+    private final BasicOAuthStore store;
 
     @Inject
     public OAuthStoreProvider(
@@ -114,7 +132,7 @@ public class OAuthModule extends AbstractModule {
             "\n" +
             "Then edit gadgets.properties and add these lines:\n" +
             OAUTH_SIGNING_KEY_FILE + "=<path-to-oauthkey.pem>\n" +
-            OAUTH_SIGNING_KEY_NAME + "=mykey\n");    
+            OAUTH_SIGNING_KEY_NAME + "=mykey\n");
       }
     }
 

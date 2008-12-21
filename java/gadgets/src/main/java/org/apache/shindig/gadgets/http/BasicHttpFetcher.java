@@ -21,7 +21,6 @@ import com.google.common.collect.Maps;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
-import com.google.inject.name.Named;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.ArrayUtils;
@@ -40,16 +39,22 @@ import java.util.zip.Inflater;
 import java.util.zip.InflaterInputStream;
 
 /**
- * Implementation of a {@code RemoteObjectFetcher} using standard java.net
- * classes. Only one instance of this should be present at any time, so we
- * annotate it as a Singleton to resolve Guice injection limitations.
+ * A very primitive HTTP fetcher implementation. Not recommended for production deployments until
+ * the following issues are addressed:
+ *
+ * 1. This class potentially allows access to resources behind an organization's firewall.
+ * 2. This class does not handle most advanced HTTP functionality correctly (SSL, gzip, etc.)
+ * 3. This class does not enforce any limits on what is fetched from remote hosts.
+ *
+ * It is highly likely that this will be replaced by an apache commons HttpClient in the future.
+ *
+ * TODO: Replace with commons HttpClient.
  */
 @Singleton
 public class BasicHttpFetcher implements HttpFetcher {
   private static final int CONNECT_TIMEOUT_MS = 5000;
   private static final int DEFAULT_MAX_OBJECT_SIZE = 1024 * 1024;
 
-  private final HttpCache cache;
   private Provider<Proxy> proxyProvider;
 
   /**
@@ -61,16 +66,15 @@ public class BasicHttpFetcher implements HttpFetcher {
    * @param maxObjSize Maximum size, in bytes, of object to fetch.  Except this
    * isn't actually implemented.
    */
-  public BasicHttpFetcher(HttpCache cache, int maxObjSize) {
-    this.cache = cache;
+  public BasicHttpFetcher(int maxObjSize) {
   }
 
   /**
    * Creates a new fetcher using the default maximum object size.
    */
   @Inject
-  public BasicHttpFetcher(HttpCache cache) {
-    this(cache, DEFAULT_MAX_OBJECT_SIZE);
+  public BasicHttpFetcher() {
+    this(DEFAULT_MAX_OBJECT_SIZE);
   }
 
   @Inject(optional=true)
@@ -148,11 +152,6 @@ public class BasicHttpFetcher implements HttpFetcher {
 
   /** {@inheritDoc} */
   public HttpResponse fetch(HttpRequest request) {
-    HttpCacheKey cacheKey = new HttpCacheKey(request);
-    HttpResponse response = cache.getResponse(cacheKey, request);
-    if (response != null) {
-      return response;
-    }
     try {
       HttpURLConnection fetcher = getConnection(request);
       fetcher.setRequestMethod(request.getMethod());
@@ -165,8 +164,7 @@ public class BasicHttpFetcher implements HttpFetcher {
             String.valueOf(request.getPostBodyLength()));
         IOUtils.copy(request.getPostBody(), fetcher.getOutputStream());
       }
-      response = makeResponse(fetcher);
-      return cache.addResponse(cacheKey, request, response);
+      return makeResponse(fetcher);
     } catch (IOException e) {
       if (e instanceof java.net.SocketTimeoutException ||
           e instanceof java.net.SocketException) {

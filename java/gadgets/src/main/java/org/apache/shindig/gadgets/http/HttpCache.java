@@ -21,18 +21,16 @@ import com.google.inject.ImplementedBy;
 
 /**
  * Cache of HttpResponse.
- * 
+ *
  * Keys are made of more or less arbitrary name/value pairs (the HttpCacheKey)
  * and data about the HttpRequest.  The values are the HttpResponse.
  */
 @ImplementedBy(DefaultHttpCache.class)
 public interface HttpCache {
 
-  public HttpResponse getResponse(HttpCacheKey key, HttpRequest request);
+  HttpResponse getResponse(HttpRequest request);
 
-  public HttpResponse addResponse(HttpCacheKey key, HttpRequest request,
-      HttpResponse response);
+  HttpResponse addResponse(HttpRequest request, HttpResponse response);
 
-  public HttpResponse removeResponse(HttpCacheKey key);
-
+  HttpResponse removeResponse(HttpRequest key);
 }

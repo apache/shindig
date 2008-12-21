@@ -18,15 +18,15 @@
  */
 package org.apache.shindig.gadgets.render;
 
-import com.google.inject.Inject;
 import org.apache.shindig.common.JsonSerializer;
 import org.apache.shindig.common.uri.UriBuilder;
 import org.apache.shindig.gadgets.Gadget;
 import org.apache.shindig.gadgets.GadgetContext;
 import org.apache.shindig.gadgets.GadgetException;
-import org.apache.shindig.gadgets.http.ContentFetcherFactory;
+import org.apache.shindig.gadgets.http.HttpCache;
 import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.http.HttpResponse;
+import org.apache.shindig.gadgets.http.RequestPipeline;
 import org.apache.shindig.gadgets.oauth.OAuthArguments;
 import org.apache.shindig.gadgets.preload.PreloadException;
 import org.apache.shindig.gadgets.preload.PreloadedData;
@@ -35,6 +35,9 @@ import org.apache.shindig.gadgets.preload.Preloads;
 import org.apache.shindig.gadgets.rewrite.ContentRewriterRegistry;
 import org.apache.shindig.gadgets.spec.GadgetSpec;
 import org.apache.shindig.gadgets.spec.View;
+
+import com.google.inject.Inject;
+
 import org.json.JSONArray;
 
 import java.nio.charset.Charset;
@@ -46,18 +49,27 @@ import java.util.logging.Logger;
  * Handles producing output markup for a gadget based on the provided context.
  */
 public class HtmlRenderer {
-  private final ContentFetcherFactory fetcher;
+  private final RequestPipeline requestPipeline;
+  private final HttpCache httpCache;
   private final PreloaderService preloader;
   private final ContentRewriterRegistry rewriter;
 
   private static final Charset UTF8 = Charset.forName("UTF-8");
   private static final Logger logger = Logger.getLogger(HtmlRenderer.class.getName());
 
+  /**
+   * @param requestPipeline Used for performing the proxy request. Always ignores caching because
+   *                        we want to skip preloading when the object is in the cache.
+   * @param httpCache The shared http cache. Used before checking the request pipeline to determine
+   *                  whether to perform the preload / fetch cycle.
+   */
   @Inject
-  public HtmlRenderer(ContentFetcherFactory fetcher,
+  public HtmlRenderer(RequestPipeline requestPipeline,
+                      HttpCache httpCache,
                       PreloaderService preloader,
                       ContentRewriterRegistry rewriter) {
-    this.fetcher = fetcher;
+    this.requestPipeline = requestPipeline;
+    this.httpCache = httpCache;
     this.preloader = preloader;
     this.rewriter = rewriter;
   }
@@ -81,6 +93,7 @@ public class HtmlRenderer {
       GadgetContext context = gadget.getContext();
       GadgetSpec spec = gadget.getSpec();
 
+      // We always execute these preloads, they have nothing to do with the cache output.
       Preloads preloads = preloader.preload(context, spec,
           PreloaderService.PreloadPhase.HTML_RENDER);
       gadget.setPreloads(preloads);
@@ -90,10 +103,6 @@ public class HtmlRenderer {
       if (view.getHref() == null) {
         content = view.getContent();
       } else {
-        Preloads proxyPreloads = preloader.preload(context, spec,
-            PreloaderService.PreloadPhase.PROXY_FETCH);
-
-        // TODO: Add current url to GadgetContext to support transitive proxying.
         UriBuilder uri = new UriBuilder(view.getHref());
         uri.addQueryParameter("lang", context.getLocale().getLanguage());
         uri.addQueryParameter("country", context.getLocale().getCountry());
@@ -106,35 +115,17 @@ public class HtmlRenderer {
             .setContainer(context.getContainer())
             .setGadget(spec.getUrl());
 
-        // POST any preloaded content
-        if ((proxyPreloads != null) && !proxyPreloads.getData().isEmpty()) {
-          JSONArray array = new JSONArray();
+        HttpResponse response = httpCache.getResponse(request);
 
-          for (PreloadedData preload : proxyPreloads.getData()) {
-            try {
-              Map<String, Object> dataMap = preload.toJson();
-              for (Map.Entry<String, Object> entry : dataMap.entrySet()) {
-                // TODO: the existing, supported content is JSONObjects that contain the
-                // key already.  Discarding the key is odd.
-                array.put(entry.getValue());
-              }
-            } catch (PreloadException pe) {
-              logger.log(Level.WARNING, "Unexpected error when preloading", pe);
-            }
-          }
-
-          String postContent = JsonSerializer.serialize(array);
-          // POST the preloaded content, with a method override of GET
-          // to enable caching
-          request.setMethod("POST")
-              .addHeader("X-Method-Override", "GET")
-              .setPostBody(UTF8.encode(postContent).array());
+        if (response == null || response.isStale()) {
+          HttpRequest proxyRequest = createPipelinedProxyRequest(gadget, request);
+          response = requestPipeline.execute(proxyRequest);
+          httpCache.addResponse(request, response);
         }
 
-        HttpResponse response = fetcher.fetch(request);
-        if (response.getHttpStatusCode() != HttpResponse.SC_OK) {
+        if (response.isError()) {
           throw new RenderingException("Unable to reach remote host. HTTP status " +
-              response.getHttpStatusCode());
+            response.getHttpStatusCode());
         }
 
         content = response.getResponseAsString();
@@ -144,5 +135,47 @@ public class HtmlRenderer {
     } catch (GadgetException e) {
       throw new RenderingException(e.getMessage(), e);
     }
+  }
+
+  /**
+   * Creates a proxy request by fetching pipelined data and adding it to an existing request.
+   *
+   */
+  private HttpRequest createPipelinedProxyRequest(Gadget gadget, HttpRequest original) {
+    HttpRequest request = new HttpRequest(original);
+    request.setIgnoreCache(true);
+    GadgetSpec spec = gadget.getSpec();
+    GadgetContext context = gadget.getContext();
+    Preloads proxyPreloads = preloader.preload(context, spec,
+          PreloaderService.PreloadPhase.PROXY_FETCH);
+    // TODO: Add current url to GadgetContext to support transitive proxying.
+
+    // POST any preloaded content
+    if ((proxyPreloads != null) && !proxyPreloads.getData().isEmpty()) {
+      JSONArray array = new JSONArray();
+
+      for (PreloadedData preload : proxyPreloads.getData()) {
+        try {
+          Map<String, Object> dataMap = preload.toJson();
+          for (Map.Entry<String, Object> entry : dataMap.entrySet()) {
+            // TODO: the existing, supported content is JSONObjects that contain the
+            // key already.  Discarding the key is odd.
+            array.put(entry.getValue());
+          }
+        } catch (PreloadException pe) {
+          // TODO: Determine whether this is a terminal path for the request. The spec is not
+          // clear.
+          logger.log(Level.WARNING, "Unexpected error when preloading", pe);
+        }
+      }
+
+      String postContent = JsonSerializer.serialize(array);
+      // POST the preloaded content, with a method override of GET
+      // to enable caching
+      request.setMethod("POST")
+          .setPostBody(UTF8.encode(postContent).array())
+          .setHeader("Content-Type", "text/json;charset=utf-8");
+    }
+    return request;
   }
 }

@@ -18,18 +18,21 @@
  */
 package org.apache.shindig.gadgets.preload;
 
-import com.google.common.collect.Lists;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+
 import org.apache.shindig.common.ContainerConfig;
-import org.apache.shindig.gadgets.http.ContentFetcherFactory;
 import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.http.HttpResponse;
 import org.apache.shindig.gadgets.http.HttpResponseBuilder;
+import org.apache.shindig.gadgets.http.RequestPipeline;
 import org.apache.shindig.gadgets.spec.GadgetSpec;
 import org.apache.shindig.gadgets.spec.PipelinedData;
+
+import com.google.common.collect.Lists;
+
 import org.easymock.EasyMock;
 import org.json.JSONObject;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -64,8 +67,8 @@ public class PipelinedDataPreloaderTest extends PreloaderTestFixture {
     GadgetSpec spec = new GadgetSpec(GADGET_URL, XML);
 
     String socialResult = "[{id:'p', data:1}, {id:'a', data:2}]";
-    RecordingHttpFetcher fetcher = new RecordingHttpFetcher(socialResult);
-    PipelinedDataPreloader preloader = new PipelinedDataPreloader(fetcher, containerConfig);
+    RecordingRequestPipeline pipeline = new RecordingRequestPipeline(socialResult);
+    PipelinedDataPreloader preloader = new PipelinedDataPreloader(pipeline, containerConfig);
     view = "profile";
     contextParams.put("st", "token");
 
@@ -73,7 +76,7 @@ public class PipelinedDataPreloaderTest extends PreloaderTestFixture {
         preloader.createPreloadTasks(context, spec, PreloaderService.PreloadPhase.PROXY_FETCH);
     assertEquals(1, tasks.size());
     // Nothing fetched yet
-    assertEquals(0, fetcher.requests.size());
+    assertEquals(0, pipeline.requests.size());
 
     Map<String, Object> result = tasks.iterator().next().call().toJson();
     assertEquals(2, result.size());
@@ -84,8 +87,8 @@ public class PipelinedDataPreloaderTest extends PreloaderTestFixture {
     assertEquals(resultWithKeyA.toString(), result.get("a").toString());
 
     // Should have only fetched one request
-    assertEquals(1, fetcher.requests.size());
-    HttpRequest request = fetcher.requests.get(0);
+    assertEquals(1, pipeline.requests.size());
+    HttpRequest request = pipeline.requests.get(0);
 
     assertEquals("http://" + context.getHost() + "/social/rpc?st=token",
         request.getUri().toString());
@@ -98,8 +101,8 @@ public class PipelinedDataPreloaderTest extends PreloaderTestFixture {
     GadgetSpec spec = new GadgetSpec(GADGET_URL, XML);
 
     String socialResult = "[{id:'p', data:1}, {id:'a', data:2}]";
-    RecordingHttpFetcher fetcher = new RecordingHttpFetcher(socialResult);
-    PipelinedDataPreloader preloader = new PipelinedDataPreloader(fetcher, containerConfig);
+    RecordingRequestPipeline pipeline = new RecordingRequestPipeline(socialResult);
+    PipelinedDataPreloader preloader = new PipelinedDataPreloader(pipeline, containerConfig);
     view = "canvas";
     contextParams.put("st", "token");
 
@@ -113,8 +116,8 @@ public class PipelinedDataPreloaderTest extends PreloaderTestFixture {
     GadgetSpec spec = new GadgetSpec(GADGET_URL, XML);
 
     String socialResult = "[{id:'p', data:1}, {id:'a', data:2}]";
-    RecordingHttpFetcher fetcher = new RecordingHttpFetcher(socialResult);
-    PipelinedDataPreloader preloader = new PipelinedDataPreloader(fetcher, containerConfig);
+    RecordingRequestPipeline pipeline = new RecordingRequestPipeline(socialResult);
+    PipelinedDataPreloader preloader = new PipelinedDataPreloader(pipeline, containerConfig);
     view = "profile";
     contextParams.put("st", "token");
 
@@ -125,17 +128,15 @@ public class PipelinedDataPreloaderTest extends PreloaderTestFixture {
 
   // TODO: test HttpPreloads
 
-  private static class RecordingHttpFetcher extends ContentFetcherFactory {
+  private static class RecordingRequestPipeline implements RequestPipeline {
     public final List<HttpRequest> requests = Lists.newArrayList();
     private final String content;
 
-    public RecordingHttpFetcher(String content) {
-      super(null, null);
+    public RecordingRequestPipeline(String content) {
       this.content = content;
     }
 
-    @Override
-    public HttpResponse fetch(HttpRequest request) {
+    public HttpResponse execute(HttpRequest request) {
       requests.add(request);
       return new HttpResponseBuilder()
           .setResponseString(content)

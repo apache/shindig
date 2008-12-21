@@ -26,9 +26,9 @@ import org.apache.shindig.gadgets.AuthType;
 import org.apache.shindig.gadgets.FeedProcessor;
 import org.apache.shindig.gadgets.FetchResponseUtils;
 import org.apache.shindig.gadgets.GadgetException;
-import org.apache.shindig.gadgets.http.ContentFetcherFactory;
 import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.http.HttpResponse;
+import org.apache.shindig.gadgets.http.RequestPipeline;
 import org.apache.shindig.gadgets.oauth.OAuthArguments;
 import org.apache.shindig.gadgets.rewrite.ContentRewriterRegistry;
 
@@ -62,13 +62,13 @@ public class MakeRequestHandler extends ProxyBase {
   public static final String GET_SUMMARIES_PARAM = "getSummaries";
   public static final String AUTHZ_PARAM = "authz";
 
-  private final ContentFetcherFactory contentFetcherFactory;
+  private final RequestPipeline requestPipeline;
   private final ContentRewriterRegistry contentRewriterRegistry;
 
   @Inject
-  public MakeRequestHandler(ContentFetcherFactory contentFetcherFactory,
+  public MakeRequestHandler(RequestPipeline requestPipeline,
       ContentRewriterRegistry contentRewriterRegistry) {
-    this.contentFetcherFactory = contentFetcherFactory;
+    this.requestPipeline = requestPipeline;
     this.contentRewriterRegistry = contentRewriterRegistry;
   }
 
@@ -81,7 +81,7 @@ public class MakeRequestHandler extends ProxyBase {
     HttpRequest rcr = buildHttpRequest(request);
 
     // Serialize the response
-    HttpResponse results = contentFetcherFactory.fetch(rcr);
+    HttpResponse results = requestPipeline.execute(rcr);
 
     // Rewrite the response
     if (contentRewriterRegistry != null) {

@@ -18,15 +18,24 @@
  */
 package org.apache.shindig.gadgets.preload;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+
+import org.apache.shindig.gadgets.AuthType;
+import org.apache.shindig.gadgets.http.HttpFetcher;
+import org.apache.shindig.gadgets.http.HttpRequest;
+import org.apache.shindig.gadgets.http.HttpResponse;
+import org.apache.shindig.gadgets.http.HttpResponseBuilder;
+import org.apache.shindig.gadgets.http.RequestPipeline;
+import org.apache.shindig.gadgets.spec.GadgetSpec;
+
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import org.apache.shindig.gadgets.AuthType;
-import org.apache.shindig.gadgets.http.*;
-import org.apache.shindig.gadgets.spec.GadgetSpec;
+
 import org.json.JSONException;
 import org.json.JSONObject;
-import static org.junit.Assert.*;
 import org.junit.Test;
 
 import java.util.Collection;
@@ -46,9 +55,8 @@ public class HttpPreloaderTest extends PreloaderTestFixture {
   private final RecordingHttpFetcher plainFetcher = new RecordingHttpFetcher();
   private final RecordingHttpFetcher oauthFetcher = new RecordingHttpFetcher();
 
-  private final ContentFetcherFactory fetchers = new ContentFetcherFactory(null, null) {
-    @Override
-    public HttpResponse fetch(HttpRequest request) {
+  private final RequestPipeline requestPipeline = new RequestPipeline() {
+    public HttpResponse execute(HttpRequest request) {
       if (request.getAuthType() == AuthType.NONE) {
         return plainFetcher.fetch(request);
       }
@@ -80,7 +88,7 @@ public class HttpPreloaderTest extends PreloaderTestFixture {
         " <Preload href='" + PRELOAD_HREF + "'/>" +
         "</ModulePrefs><Content/></Module>";
     GadgetSpec gadget = new GadgetSpec(GADGET_URL, xml);
-    Preloader preloader = new HttpPreloader(fetchers);
+    Preloader preloader = new HttpPreloader(requestPipeline);
 
     Collection<Callable<PreloadedData>> preloaded =
         preloader.createPreloadTasks(context, gadget, PreloaderService.PreloadPhase.HTML_RENDER);
@@ -99,7 +107,7 @@ public class HttpPreloaderTest extends PreloaderTestFixture {
         " <Preload href='" + PRELOAD_HREF + "' authz='signed' sign_viewer='false'/>" +
         "</ModulePrefs><Content/></Module>";
     GadgetSpec gadget = new GadgetSpec(GADGET_URL, xml);
-    Preloader preloader = new HttpPreloader(fetchers);
+    Preloader preloader = new HttpPreloader(requestPipeline);
 
     Collection<Callable<PreloadedData>> preloaded =
         preloader.createPreloadTasks(context, gadget, PreloaderService.PreloadPhase.HTML_RENDER);
@@ -122,7 +130,7 @@ public class HttpPreloaderTest extends PreloaderTestFixture {
         " <Preload href='" + PRELOAD_HREF + "' authz='oauth'/>" +
         "</ModulePrefs><Content/></Module>";
     GadgetSpec gadget = new GadgetSpec(GADGET_URL, xml);
-    Preloader preloader = new HttpPreloader(fetchers);
+    Preloader preloader = new HttpPreloader(requestPipeline);
 
     Collection<Callable<PreloadedData>> preloaded = preloader.createPreloadTasks(
         context, gadget, PreloaderService.PreloadPhase.HTML_RENDER);
@@ -143,7 +151,7 @@ public class HttpPreloaderTest extends PreloaderTestFixture {
         " <Preload href='" + PRELOAD_HREF2 + "'/>" +
         "</ModulePrefs><Content/></Module>";
     GadgetSpec gadget = new GadgetSpec(GADGET_URL, xml);
-    Preloader preloader = new HttpPreloader(fetchers);
+    Preloader preloader = new HttpPreloader(requestPipeline);
 
     Collection<Callable<PreloadedData>> preloaded = preloader.createPreloadTasks(
         context, gadget, PreloaderService.PreloadPhase.HTML_RENDER);
@@ -176,7 +184,7 @@ public class HttpPreloaderTest extends PreloaderTestFixture {
         " <Preload href='" + PRELOAD_HREF2 + "' views='bar'/>" +
         "</ModulePrefs><Content/></Module>";
     GadgetSpec gadget = new GadgetSpec(GADGET_URL, xml);
-    Preloader preloader = new HttpPreloader(fetchers);
+    Preloader preloader = new HttpPreloader(requestPipeline);
 
     view = "foo";
 
@@ -198,7 +206,7 @@ public class HttpPreloaderTest extends PreloaderTestFixture {
         " <Preload href='" + PRELOAD_HREF + "'/>" +
         "</ModulePrefs><Content/></Module>";
     GadgetSpec gadget = new GadgetSpec(GADGET_URL, xml);
-    Preloader preloader = new HttpPreloader(fetchers);
+    Preloader preloader = new HttpPreloader(requestPipeline);
 
     Collection<Callable<PreloadedData>> preloaded =
         preloader.createPreloadTasks(context, gadget, PreloaderService.PreloadPhase.PROXY_FETCH);

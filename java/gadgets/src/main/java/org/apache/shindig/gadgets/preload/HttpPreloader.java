@@ -18,20 +18,22 @@
  */
 package org.apache.shindig.gadgets.preload;
 
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Lists;
-import com.google.inject.Inject;
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.gadgets.FetchResponseUtils;
 import org.apache.shindig.gadgets.GadgetContext;
 import org.apache.shindig.gadgets.GadgetException;
-import org.apache.shindig.gadgets.http.ContentFetcherFactory;
 import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.http.HttpResponse;
+import org.apache.shindig.gadgets.http.RequestPipeline;
 import org.apache.shindig.gadgets.oauth.OAuthArguments;
 import org.apache.shindig.gadgets.spec.GadgetSpec;
 import org.apache.shindig.gadgets.spec.Preload;
 import org.apache.shindig.gadgets.spec.RequestAuthenticationInfo;
+
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Lists;
+import com.google.inject.Inject;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -47,12 +49,11 @@ import java.util.concurrent.Callable;
  * @see org.apache.shindig.gadgets.spec.Preload
  */
 public class HttpPreloader implements Preloader {
-  // TODO: This needs to be fixed.
-  private final ContentFetcherFactory fetcher;
+  private final RequestPipeline requestPipeline;
 
   @Inject
-  public HttpPreloader(ContentFetcherFactory fetcherFactory) {
-    this.fetcher = fetcherFactory;
+  public HttpPreloader(RequestPipeline requestPipeline) {
+    this.requestPipeline = requestPipeline;
   }
 
   public Collection<Callable<PreloadedData>> createPreloadTasks(GadgetContext context,
@@ -98,7 +99,7 @@ public class HttpPreloader implements Preloader {
     public PreloadedData call() throws Exception {
       HttpRequest request = newHttpRequest(context, preload);
 
-      return new HttpPreloadData(fetcher.fetch(request), key);
+      return new HttpPreloadData(requestPipeline.execute(request), key);
     }
   }
 

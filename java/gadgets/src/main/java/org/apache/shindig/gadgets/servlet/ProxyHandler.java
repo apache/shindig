@@ -21,21 +21,18 @@ package org.apache.shindig.gadgets.servlet;
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.LockedDomainService;
-import org.apache.shindig.gadgets.http.HttpFetcher;
 import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.http.HttpResponse;
+import org.apache.shindig.gadgets.http.RequestPipeline;
 import org.apache.shindig.gadgets.rewrite.ContentRewriterRegistry;
 
-import com.google.common.collect.Sets;
 import com.google.common.collect.ImmutableSet;
-
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
 import org.apache.commons.io.IOUtils;
 
 import java.io.IOException;
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -56,15 +53,15 @@ public class ProxyHandler extends ProxyBase {
       "vary", "expires", "date", "pragma", "cache-control"
   );
 
-  private final HttpFetcher fetcher;
+  private final RequestPipeline requestPipeline;
   private final LockedDomainService lockedDomainService;
   private final ContentRewriterRegistry contentRewriterRegistry;
 
   @Inject
-  public ProxyHandler(HttpFetcher fetcher,
+  public ProxyHandler(RequestPipeline requestPipeline,
                       LockedDomainService lockedDomainService,
                       ContentRewriterRegistry contentRewriterRegistry) {
-    this.fetcher = fetcher;
+    this.requestPipeline = requestPipeline;
     this.lockedDomainService = lockedDomainService;
     this.contentRewriterRegistry = contentRewriterRegistry;
   }
@@ -130,7 +127,7 @@ public class ProxyHandler extends ProxyBase {
     }
 
     HttpRequest rcr = buildHttpRequest(request);
-    HttpResponse results = fetcher.fetch(rcr);
+    HttpResponse results = requestPipeline.execute(rcr);
     if (contentRewriterRegistry != null) {
       results = contentRewriterRegistry.rewriteHttpResponse(rcr, results);
     }

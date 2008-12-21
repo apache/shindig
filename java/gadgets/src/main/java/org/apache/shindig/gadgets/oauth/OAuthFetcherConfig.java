@@ -17,58 +17,47 @@
 
 package org.apache.shindig.gadgets.oauth;
 
+import org.apache.shindig.common.crypto.BlobCrypter;
+import org.apache.shindig.common.util.TimeSource;
+
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
 
-import org.apache.shindig.common.crypto.BlobCrypter;
-import org.apache.shindig.common.util.TimeSource;
-import org.apache.shindig.gadgets.http.HttpCache;
-
 /**
- * Configuration parameters for an OAuthFetcher
+ * Configuration parameters for an OAuthRequest
  */
 public class OAuthFetcherConfig {
-  
+
   public static final String OAUTH_STATE_CRYPTER = "shindig.oauth.state-crypter";
-  
+
   private final BlobCrypter stateCrypter;
   private final GadgetOAuthTokenStore tokenStore;
-  private final HttpCache httpCache;
   private final TimeSource clock;
-  
+
   @Inject
   public OAuthFetcherConfig(
       @Named(OAUTH_STATE_CRYPTER) BlobCrypter stateCrypter,
       GadgetOAuthTokenStore tokenStore,
-      HttpCache httpCache,
       TimeSource clock) {
     this.stateCrypter = stateCrypter;
     this.tokenStore = tokenStore;
-    this.httpCache = httpCache;
     this.clock = clock;
   }
-  
+
   /**
    * Used to encrypt state stored on the client.
    */
   public BlobCrypter getStateCrypter() {
     return stateCrypter;
   }
-  
+
   /**
    * Persistent token storage.
    */
   public GadgetOAuthTokenStore getTokenStore() {
     return tokenStore;
   }
-  
-  /**
-   * Cache for OAuth responses.
-   */
-  public HttpCache getHttpCache() {
-    return httpCache;
-  }
-  
+
   /**
    * Clock
    */

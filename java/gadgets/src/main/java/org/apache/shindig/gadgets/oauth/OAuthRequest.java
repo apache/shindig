@@ -16,16 +16,12 @@
  */
 package org.apache.shindig.gadgets.oauth;
 
-import org.apache.shindig.auth.SecurityToken;
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.common.uri.UriBuilder;
 import org.apache.shindig.common.util.CharsetUtil;
-import org.apache.shindig.gadgets.ChainedContentFetcher;
 import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.RequestSigningException;
 import org.apache.shindig.gadgets.http.BasicHttpFetcher;
-import org.apache.shindig.gadgets.http.HttpCache;
-import org.apache.shindig.gadgets.http.HttpCacheKey;
 import org.apache.shindig.gadgets.http.HttpFetcher;
 import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.http.HttpResponse;
@@ -37,16 +33,15 @@ import org.apache.shindig.gadgets.oauth.OAuthStore.TokenInfo;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 
-import org.apache.commons.io.IOUtils;
-
 import net.oauth.OAuth;
-import net.oauth.OAuth.Parameter;
 import net.oauth.OAuthAccessor;
 import net.oauth.OAuthConsumer;
 import net.oauth.OAuthException;
 import net.oauth.OAuthMessage;
 import net.oauth.OAuthProblemException;
+import net.oauth.OAuth.Parameter;
 
+import org.apache.commons.io.IOUtils;
 import org.json.JSONObject;
 
 import java.io.FileInputStream;
@@ -61,64 +56,67 @@ import java.util.regex.Pattern;
 /**
  * Implements both signed fetch and full OAuth for gadgets, as well as a combination of the two that
  * is necessary to build OAuth enabled gadgets for social sites.
- * 
+ *
  * Signed fetch sticks identity information in the query string, signed either with the container's
  * private key, or else with a secret shared between the container and the gadget.
- * 
+ *
  * Full OAuth redirects the user to the OAuth service provider site to obtain the user's permission
  * to access their data.  Read the example in the appendix to the OAuth spec for a summary of how
  * this works (The spec is at http://oauth.net/core/1.0/).
- * 
+ *
  * The combination protocol works by sending identity information in all requests, and allows the
  * OAuth dance to happen as well when owner == viewer.  This lets OAuth service providers build up
  * an identity mapping from ids on social network sites to their own local ids.
  */
-public class OAuthFetcher extends ChainedContentFetcher {
+public class OAuthRequest {
 
   // Logger
-  private static final Logger logger = Logger.getLogger(OAuthFetcher.class.getName());
-  
+  private static final Logger logger = Logger.getLogger(OAuthRequest.class.getName());
+
   // Maximum number of attempts at the protocol before giving up.
   private static final int MAX_ATTEMPTS = 2;
 
   // names of additional OAuth parameters we include in outgoing requests
   // TODO(beaton): can we do away with this bit in favor of the opensocial param?
   public static final String XOAUTH_APP_URL = "xoauth_app_url";
-  
+
   protected static final String OPENSOCIAL_OWNERID = "opensocial_owner_id";
 
   protected static final String OPENSOCIAL_VIEWERID = "opensocial_viewer_id";
 
   protected static final String OPENSOCIAL_APPID = "opensocial_app_id";
-  
+
   // TODO(beaton): figure out if this is the name in the 0.8 spec.
   protected static final String OPENSOCIAL_APPURL = "opensocial_app_url";
 
   protected static final String XOAUTH_PUBLIC_KEY = "xoauth_signature_publickey";
-  
+
   protected static final Pattern ALLOWED_PARAM_NAME = Pattern.compile("[-:\\w~!@$*()_\\[\\]:,./]+");
-  
+
   private static final String OAUTH_SESSION_HANDLE = "oauth_session_handle";
-  
+
   private static final String OAUTH_EXPIRES_IN = "oauth_expires_in";
-  
+
   private static final long ACCESS_TOKEN_EXPIRE_UNKNOWN = 0;
   private static final long ACCESS_TOKEN_FORCE_EXPIRE = -1;
 
-  /**
-   * State information from client
-   */
-  protected final OAuthClientState clientState;
 
   /**
    * Configuration options for the fetcher.
    */
   protected final OAuthFetcherConfig fetcherConfig;
 
+  private final HttpFetcher fetcher;
+
+  /**
+   * State information from client
+   */
+  protected OAuthClientState clientState;
+
   /**
    * OAuth specific stuff to include in the response.
    */
-  protected final OAuthResponseParams responseParams;
+  protected OAuthResponseParams responseParams;
 
   /**
    * The accessor we use for signing messages. This also holds metadata about
@@ -131,7 +129,7 @@ public class OAuthFetcher extends ChainedContentFetcher {
    * The request the client really wants to make.
    */
   private HttpRequest realRequest;
-  
+
   /**
    * Data returned along with OAuth access token, null if this is not an access token request
    */
@@ -139,19 +137,11 @@ public class OAuthFetcher extends ChainedContentFetcher {
 
   /**
    * @param fetcherConfig configuration options for the fetcher
-   * @param nextFetcher fetcher to use for actually making requests
-   * @param request request that will be sent through the fetcher
+   * @param fetcher fetcher to use for actually making requests
    */
-  public OAuthFetcher(
-      OAuthFetcherConfig fetcherConfig,
-      HttpFetcher nextFetcher,
-      HttpRequest request) {
-    super(nextFetcher);
+  public OAuthRequest(OAuthFetcherConfig fetcherConfig, HttpFetcher fetcher) {
     this.fetcherConfig = fetcherConfig;
-    this.clientState = new OAuthClientState(
-        fetcherConfig.getStateCrypter(),
-        request.getOAuthArguments().getOrigClientState());
-    this.responseParams = new OAuthResponseParams(fetcherConfig.getStateCrypter());
+    this.fetcher = fetcher;
   }
 
   /**
@@ -163,12 +153,13 @@ public class OAuthFetcher extends ChainedContentFetcher {
   }
 
   public HttpResponse fetch(HttpRequest request) throws GadgetException {
+    this.clientState = new OAuthClientState(
+        fetcherConfig.getStateCrypter(),
+        request.getOAuthArguments().getOrigClientState());
+    this.responseParams = new OAuthResponseParams(fetcherConfig.getStateCrypter());
     this.realRequest = request;
-    HttpCacheKey cacheKey = makeCacheKey();
-    HttpResponse response = fetcherConfig.getHttpCache().getResponse(cacheKey, request);
-    if (response != null) {
-      return response;
-    }
+
+    HttpResponse response = null;
 
     try {
       lookupOAuthMetadata();
@@ -200,34 +191,7 @@ public class OAuthFetcher extends ChainedContentFetcher {
           GadgetException.Code.INTERNAL_SERVER_ERROR,
           "No response for OAuth fetch to " + realRequest.getUri());
     }
-    return fetcherConfig.getHttpCache().addResponse(cacheKey, request, response);
-  }
-
-  // Builds up a cache key.  Full OAuth and signed fetch have slightly different cache semantics
-  // that both need to be accounted for here.  For signed fetch, we need to remember what identity
-  // information we passed along (owner only?  viewer only?  both?).  For OAuth, we need to
-  // remember whose OAuth token we used.  We only use the OAuth token when owner == viewer, and
-  // it's possible we won't do it even then.
-  private HttpCacheKey makeCacheKey() {
-    HttpCacheKey key = new HttpCacheKey(realRequest);
-    SecurityToken st = realRequest.getSecurityToken();
-    key.set("authentication", "oauth");
-    if (realRequest.getOAuthArguments().getSignOwner()) {
-      key.set("owner", st.getOwnerId());
-    }
-    if (realRequest.getOAuthArguments().getSignViewer()) {
-      key.set("viewer", st.getViewerId());
-    }
-    if (st.getOwnerId() != null
-        && st.getOwnerId().equals(st.getViewerId())
-        && realRequest.getOAuthArguments().mayUseToken()) {
-      key.set("tokenOwner", st.getOwnerId());
-    }
-    key.set("gadget", st.getAppUrl());
-    key.set("instance", Long.toString(st.getModuleId()));
-    key.set("service", realRequest.getOAuthArguments().getServiceName());
-    key.set("token", realRequest.getOAuthArguments().getTokenName());
-    return key;
+    return response;
   }
 
   private HttpResponse buildErrorResponse(GadgetException e) {
@@ -287,7 +251,7 @@ public class OAuthFetcher extends ChainedContentFetcher {
             && accessorInfo.getAccessor().requestToken == null
             && accessorInfo.getAccessor().accessToken == null);
   }
-  
+
   /**
    * Make sure the user is authorized to approve access tokens.  At the moment
    * we restrict this to page owner's viewing their own pages.
@@ -320,11 +284,11 @@ public class OAuthFetcher extends ChainedContentFetcher {
       if (accessorInfo.getHttpMethod() == HttpMethod.POST) {
         request.setHeader("Content-Type", OAuth.FORM_ENCODED);
       }
-      
+
       HttpRequest signed = sanitizeAndSign(request, null);
- 
+
       OAuthMessage reply = sendOAuthMessage(signed);
-      
+
       accessor.requestToken = OAuthUtil.getParameter(reply, OAuth.OAUTH_TOKEN);
       accessor.tokenSecret = OAuthUtil.getParameter(reply, OAuth.OAUTH_TOKEN_SECRET);
     } catch (OAuthException e) {
@@ -334,7 +298,7 @@ public class OAuthFetcher extends ChainedContentFetcher {
 
   /**
    * Strip out any owner or viewer identity information passed by the client.
-   * 
+   *
    * @throws RequestSigningException
    */
   private List<Parameter> sanitize(List<Parameter> params)
@@ -350,7 +314,7 @@ public class OAuthFetcher extends ChainedContentFetcher {
     }
     return list;
   }
-  
+
   private boolean allowParam(String paramName) {
     String canonParamName = paramName.toLowerCase();
     return (!(canonParamName.startsWith("oauth") ||
@@ -358,7 +322,7 @@ public class OAuthFetcher extends ChainedContentFetcher {
         canonParamName.startsWith("opensocial")) &&
         ALLOWED_PARAM_NAME.matcher(canonParamName).matches());
   }
-   
+
   /**
    * Add identity information, such as owner/viewer/gadget.
    */
@@ -370,7 +334,7 @@ public class OAuthFetcher extends ChainedContentFetcher {
         !realRequest.getOAuthArguments().getSignViewer()) {
       return;
     }
-    
+
     String owner = realRequest.getSecurityToken().getOwnerId();
     if (owner != null && realRequest.getOAuthArguments().getSignOwner()) {
       params.add(new Parameter(OPENSOCIAL_OWNERID, owner));
@@ -385,13 +349,13 @@ public class OAuthFetcher extends ChainedContentFetcher {
     if (app != null) {
       params.add(new Parameter(OPENSOCIAL_APPID, app));
     }
-    
+
     String appUrl = realRequest.getSecurityToken().getAppUrl();
     if (appUrl != null) {
       params.add(new Parameter(OPENSOCIAL_APPURL, appUrl));
     }
   }
-  
+
   /**
    * Add signature type to the message.
    */
@@ -427,7 +391,7 @@ public class OAuthFetcher extends ChainedContentFetcher {
     return result.toString();
   }
 
-  
+
   /*
     Start with an HttpRequest.
     Throw if there are any attacks in the query.
@@ -451,11 +415,11 @@ public class OAuthFetcher extends ChainedContentFetcher {
     }
 
     addIdentityParams(params);
-    
+
     addSignatureParams(params);
 
     try {
-      OAuthMessage signed = OAuthUtil.newRequestMessage(accessorInfo.getAccessor(), 
+      OAuthMessage signed = OAuthUtil.newRequestMessage(accessorInfo.getAccessor(),
           base.getMethod(), target.toString(), params);
       HttpRequest oauthHttpRequest = createHttpRequest(base, selectOAuthParams(signed));
       // Following 302s on OAuth responses is unlikely to be productive.
@@ -474,7 +438,7 @@ public class OAuthFetcher extends ChainedContentFetcher {
     // paramLocation could be overriden by a run-time parameter to fetchRequest
 
     HttpRequest result = new HttpRequest(base);
-    
+
     // If someone specifies that OAuth parameters go in the body, but then sends a request for
     // data using GET, we've got a choice.  We can throw some type of error, since a GET request
     // can't have a body, or we can stick the parameters somewhere else, like, say, the header.
@@ -518,7 +482,7 @@ public class OAuthFetcher extends ChainedContentFetcher {
    */
   private OAuthMessage sendOAuthMessage(HttpRequest request)
       throws GadgetException, OAuthProtocolException, OAuthProblemException {
-    HttpResponse response = nextFetcher.fetch(request);
+    HttpResponse response = fetcher.fetch(request);
     boolean done = false;
     try {
       checkForProtocolProblem(response);
@@ -616,7 +580,7 @@ public class OAuthFetcher extends ChainedContentFetcher {
     return (accessorInfo.getTokenExpireMillis() != ACCESS_TOKEN_EXPIRE_UNKNOWN
         && accessorInfo.getTokenExpireMillis() < fetcherConfig.getClock().currentTimeMillis());
   }
-  
+
   /**
    * Implements section 6.3 of the OAuth spec.
    * @throws OAuthProtocolException
@@ -637,17 +601,17 @@ public class OAuthFetcher extends ChainedContentFetcher {
       if (accessorInfo.getHttpMethod() == HttpMethod.POST) {
         request.setHeader("Content-Type", OAuth.FORM_ENCODED);
       }
-      
+
       List<Parameter> msgParams = Lists.newArrayList();
       msgParams.add(new Parameter(OAuth.OAUTH_TOKEN, accessor.requestToken));
       if (accessorInfo.getSessionHandle() != null) {
         msgParams.add(new Parameter(OAUTH_SESSION_HANDLE, accessorInfo.getSessionHandle()));
       }
-      
+
       HttpRequest signed = sanitizeAndSign(request, msgParams);
-      
+
       OAuthMessage reply = sendOAuthMessage(signed);
-      
+
       accessor.accessToken = OAuthUtil.getParameter(reply, OAuth.OAUTH_TOKEN);
       accessor.tokenSecret = OAuthUtil.getParameter(reply, OAuth.OAUTH_TOKEN_SECRET);
       accessorInfo.setSessionHandle(OAuthUtil.getParameter(reply, OAUTH_SESSION_HANDLE));
@@ -663,7 +627,7 @@ public class OAuthFetcher extends ChainedContentFetcher {
           logger.log(Level.WARNING, "server returned bogus expiration: " + reply);
         }
       }
-      
+
       // Clients may want to retrieve extra information returned with the access token.  Several
       // OAuth service providers (e.g. Yahoo, NetFlix) return a user id along with the access
       // token, and the user id is required to use their APIs.  Clients signal that they need this
@@ -681,7 +645,7 @@ public class OAuthFetcher extends ChainedContentFetcher {
         for (Entry<String, String> param : OAuthUtil.getParameters(reply)) {
           if (!param.getKey().startsWith("oauth")) {
             accessTokenData.put(param.getKey(), param.getValue());
-          } 
+          }
         }
       }
     } catch (OAuthException e) {
@@ -728,7 +692,7 @@ public class OAuthFetcher extends ChainedContentFetcher {
     } else {
       HttpRequest signed = sanitizeAndSign(realRequest, null);
 
-      HttpResponse response = nextFetcher.fetch(signed);
+      HttpResponse response = fetcher.fetch(signed);
 
       try {
         checkForProtocolProblem(response);
@@ -742,7 +706,7 @@ public class OAuthFetcher extends ChainedContentFetcher {
     responseParams.addToResponse(builder);
     return builder.create();
   }
-  
+
   /**
    * Access token data is returned to the gadget as json key/value pairs:
    *
@@ -754,14 +718,14 @@ public class OAuthFetcher extends ChainedContentFetcher {
     builder.setHttpStatusCode(HttpResponse.SC_OK);
     // no need to cache this, these requests should be fairly rare, and the results should be
     // cached in gadget.
-    builder.setStrictNoCache(); 
+    builder.setStrictNoCache();
     JSONObject json = new JSONObject(accessTokenData);
     builder.setResponseString(json.toString());
     return builder;
   }
 
   /**
-   * Look for an OAuth protocol problem.  For cases where no access token is in play 
+   * Look for an OAuth protocol problem.  For cases where no access token is in play
    * @param response
    * @throws OAuthProtocolException
    */
@@ -776,7 +740,7 @@ public class OAuthFetcher extends ChainedContentFetcher {
       throw new OAuthProtocolException(response.getHttpStatusCode());
     }
   }
-  
+
   /**
    * Check if a response might be due to an OAuth protocol error.  We don't want to intercept
    * errors for signed fetch, we only care about places where we are dealing with OAuth request
@@ -831,8 +795,8 @@ public class OAuthFetcher extends ChainedContentFetcher {
     key = key.toLowerCase();
     return key.startsWith("oauth") || key.startsWith("xoauth") || key.startsWith("opensocial");
   }
-  
-  
+
+
   /** Logging for errors that service providers return to us, useful for integration problems */
   private void logServiceProviderError(HttpRequest request, HttpResponse response) {
     logger.log(Level.INFO, "OAuth request failed:\n" + request + "\nresponse:\n" + response);
@@ -938,21 +902,7 @@ public class OAuthFetcher extends ChainedContentFetcher {
     }
     request.setMethod(method);
 
-    HttpCache nullCache = new HttpCache() {
-      public HttpResponse getResponse(HttpCacheKey key, HttpRequest request) {
-        return null;
-      }
-
-      public HttpResponse addResponse(HttpCacheKey key, HttpRequest request,
-          HttpResponse response) {
-        return response;
-      }
-
-      public HttpResponse removeResponse(HttpCacheKey key) {
-        return null;
-      }
-    };
-    HttpFetcher fetcher = new BasicHttpFetcher(nullCache);
+    HttpFetcher fetcher = new BasicHttpFetcher();
     HttpResponse response = fetcher.fetch(request);
 
     System.out.println("Request ------------------------------");

@@ -20,16 +20,15 @@ package org.apache.shindig.gadgets.servlet;
 
 import static org.easymock.EasyMock.expect;
 
-import com.google.common.collect.Maps;
-
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.http.HttpResponse;
 import org.apache.shindig.gadgets.http.HttpResponseBuilder;
 
+import com.google.common.collect.Maps;
+
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -40,19 +39,19 @@ public class ProxyHandlerTest extends ServletTestFixture {
   private final static String DATA_ONE = "hello world";
 
   private final ProxyHandler proxyHandler
-      = new ProxyHandler(fetcher, lockedDomainService, rewriterRegistry);
+      = new ProxyHandler(pipeline, lockedDomainService, rewriterRegistry);
 
   private void expectGetAndReturnData(String url, byte[] data) throws Exception {
     HttpRequest req = new HttpRequest(Uri.parse(url));
     HttpResponse resp = new HttpResponseBuilder().setResponse(data).create();
-    expect(fetcher.fetch(req)).andReturn(resp);
+    expect(pipeline.execute(req)).andReturn(resp);
   }
 
   private void expectGetAndReturnHeaders(String url, Map<String, List<String>> headers)
       throws Exception {
     HttpRequest req = new HttpRequest(Uri.parse(url));
     HttpResponse resp = new HttpResponseBuilder().addAllHeaders(headers).create();
-    expect(fetcher.fetch(req)).andReturn(resp);
+    expect(pipeline.execute(req)).andReturn(resp);
   }
 
   private void setupProxyRequestMock(String host, String url) throws Exception {
@@ -134,7 +133,7 @@ public class ProxyHandlerTest extends ServletTestFixture {
 
     HttpRequest req = new HttpRequest(Uri.parse(url)).setIgnoreCache(true);
     HttpResponse resp = new HttpResponse("Hello");
-    expect(fetcher.fetch(req)).andReturn(resp);
+    expect(pipeline.execute(req)).andReturn(resp);
 
     replay();
 

@@ -48,7 +48,7 @@ public class MakeRequestHandlerTest extends ServletTestFixture {
   private static final SecurityToken DUMMY_TOKEN = new FakeGadgetToken();
 
   private final MakeRequestHandler handler
-      = new MakeRequestHandler(fetcherFactory, rewriterRegistry);
+      = new MakeRequestHandler(pipeline, rewriterRegistry);
 
   private void expectGetAndReturnBody(String response) throws Exception {
     expectGetAndReturnBody(AuthType.NONE, response);
@@ -56,7 +56,7 @@ public class MakeRequestHandlerTest extends ServletTestFixture {
 
   private void expectGetAndReturnBody(AuthType authType, String response) throws Exception {
     HttpRequest request = new HttpRequest(REQUEST_URL).setAuthType(authType);
-    expect(fetcherFactory.fetch(request)).andReturn(new HttpResponse(response));
+    expect(pipeline.execute(request)).andReturn(new HttpResponse(response));
   }
 
   private void expectPostAndReturnBody(String postData, String response) throws Exception {
@@ -68,7 +68,7 @@ public class MakeRequestHandlerTest extends ServletTestFixture {
     HttpRequest req = new HttpRequest(REQUEST_URL).setMethod("POST")
         .setPostBody(REQUEST_BODY.getBytes("UTF-8"))
         .setAuthType(authType);
-    expect(fetcherFactory.fetch(req)).andReturn(new HttpResponse(response));
+    expect(pipeline.execute(req)).andReturn(new HttpResponse(response));
     expect(request.getParameter(MakeRequestHandler.METHOD_PARAM)).andReturn("POST");
     expect(request.getParameter(MakeRequestHandler.POST_DATA_PARAM))
         .andReturn(REQUEST_BODY);
@@ -106,7 +106,7 @@ public class MakeRequestHandlerTest extends ServletTestFixture {
     HttpRequest expected = new HttpRequest(REQUEST_URL)
         .addHeader("X-Foo", "bar")
         .addHeader("X-Bar", "baz foo");
-    expect(fetcherFactory.fetch(expected)).andReturn(new HttpResponse(RESPONSE_BODY));
+    expect(pipeline.execute(expected)).andReturn(new HttpResponse(RESPONSE_BODY));
     expect(request.getParameter(MakeRequestHandler.HEADERS_PARAM)).andReturn(headerString);
     replay();
 
@@ -232,7 +232,7 @@ public class MakeRequestHandlerTest extends ServletTestFixture {
         .andReturn(AuthType.SIGNED.toString()).atLeastOnce();
     HttpRequest expected = new HttpRequest(REQUEST_URL)
         .setAuthType(AuthType.SIGNED);
-    expect(fetcherFactory.fetch(expected))
+    expect(pipeline.execute(expected))
         .andReturn(new HttpResponse(RESPONSE_BODY));
     replay();
 
@@ -283,7 +283,7 @@ public class MakeRequestHandlerTest extends ServletTestFixture {
 
   public void testDoOAuthRequest() throws Exception {
     // Doesn't actually do oauth dance since it returns the standard fetcher.
-    // OAuth tests are in OAuthFetcherTest
+    // OAuth tests are in OAuthRequestTest
     expectGetAndReturnBody(AuthType.OAUTH, RESPONSE_BODY);
     FakeGadgetToken authToken = new FakeGadgetToken().setUpdatedToken("updated");
     expect(request.getAttribute(AuthInfo.Attribute.SECURITY_TOKEN.getId()))
@@ -317,7 +317,7 @@ public class MakeRequestHandlerTest extends ServletTestFixture {
 
   public void testBadHttpResponseIsPropagated() throws Exception {
     HttpRequest internalRequest = new HttpRequest(REQUEST_URL);
-    expect(fetcherFactory.fetch(internalRequest)).andReturn(HttpResponse.error());
+    expect(pipeline.execute(internalRequest)).andReturn(HttpResponse.error());
     replay();
 
     handler.fetch(request, recorder);
@@ -349,7 +349,7 @@ public class MakeRequestHandlerTest extends ServletTestFixture {
         .setMetadata("foo", RESPONSE_BODY)
         .create();
 
-    expect(fetcherFactory.fetch(internalRequest)).andReturn(response);
+    expect(pipeline.execute(internalRequest)).andReturn(response);
     replay();
 
     handler.fetch(request, recorder);
@@ -367,7 +367,7 @@ public class MakeRequestHandlerTest extends ServletTestFixture {
         .addHeader("Set-Cookie", "name=value")
         .create();
 
-    expect(fetcherFactory.fetch(internalRequest)).andReturn(response);
+    expect(pipeline.execute(internalRequest)).andReturn(response);
     replay();
 
     handler.fetch(request, recorder);
@@ -388,7 +388,7 @@ public class MakeRequestHandlerTest extends ServletTestFixture {
         .addHeader("Location", "somewhere else")
         .create();
 
-    expect(fetcherFactory.fetch(internalRequest)).andReturn(response);
+    expect(pipeline.execute(internalRequest)).andReturn(response);
     replay();
 
     handler.fetch(request, recorder);
