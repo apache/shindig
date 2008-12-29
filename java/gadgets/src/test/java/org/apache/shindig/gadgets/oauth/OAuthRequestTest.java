@@ -83,7 +83,7 @@ public class OAuthRequestTest {
         getOAuthStore(base),
         clock);
 
-    Logger logger = Logger.getLogger(OAuthRequestTest.class.getName());
+    Logger logger = Logger.getLogger(OAuthRequest.class.getName());
     logger.addHandler(new Handler() {
       @Override
       public void close() throws SecurityException {
@@ -425,6 +425,8 @@ public class OAuthRequestTest {
     serviceProvider.revokeAllAccessTokens();
 
     response = client.sendGet(FakeOAuthServiceProvider.RESOURCE_URL + "?cachebust=2");
+    checkLogContains("GET /data?cachebust=2");
+    checkLogContains("HTTP/1.1 401");
     assertEquals("", response.getResponseAsString());
     assertNotNull(response.getMetadata().get("oauthApprovalUrl"));
 
@@ -464,6 +466,9 @@ public class OAuthRequestTest {
     assertNotNull(metadata);
     assertEquals("403", metadata.get("oauthError"));
     assertNull(metadata.get("oauthErrorText"));
+    checkLogContains("HTTP/1.1 403");
+    checkLogContains("GET /request");
+    checkLogContains("some vague error");
   }
 
   @Test
