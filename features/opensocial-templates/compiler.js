@@ -743,7 +743,6 @@ os.getValueFromNode_ = function(node, name) {
 
     ret = [];
     for (var child = node.firstChild; child; child = child.nextSibling) {
-      console.log(child);
       if (allChildren) {
         ret.push(child);
         continue;
