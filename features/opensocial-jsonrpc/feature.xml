@@ -20,6 +20,7 @@
 <feature>
   <name>opensocial-jsonrpc</name>
   <dependency>opensocial-base</dependency>
+  <dependency>rpc</dependency>
   <gadget>   
     <script src="jsonrpccontainer.js"></script>
   </gadget>
