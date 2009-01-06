@@ -42,7 +42,7 @@ public class PropertiesModule extends AbstractModule {
   private final Properties properties;
   
   public PropertiesModule() {
-    this.properties = readPropertyFile(DEFAULT_PROPERTIES);
+    this.properties = readPropertyFile(getDefaultPropertiesPath());
   }
 
   public PropertiesModule(String propertyFile) {
@@ -55,9 +55,17 @@ public class PropertiesModule extends AbstractModule {
 
   @Override
   protected void configure() {
-    Names.bindProperties(this.binder(), properties);
+    Names.bindProperties(this.binder(), getProperties());
   }
-  
+
+  protected static String getDefaultPropertiesPath() {
+      return DEFAULT_PROPERTIES;
+  }
+
+  protected Properties getProperties() {
+      return properties;
+  }
+
   private Properties readPropertyFile(String propertyFile) {
     Properties properties = new Properties();
     InputStream is = null;
