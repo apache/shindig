@@ -17,6 +17,9 @@
  */
 package org.apache.shindig.social.opensocial.jpa.spi;
 
+import com.google.common.collect.Lists;
+import com.google.inject.Inject;
+
 import org.apache.shindig.auth.SecurityToken;
 import org.apache.shindig.common.util.ImmediateFuture;
 import org.apache.shindig.social.ResponseError;
@@ -31,16 +34,12 @@ import org.apache.shindig.social.opensocial.spi.RestfulCollection;
 import org.apache.shindig.social.opensocial.spi.SocialSpiException;
 import org.apache.shindig.social.opensocial.spi.UserId;
 
-import com.google.common.collect.Lists;
-import com.google.inject.Inject;
-
-import javax.persistence.EntityManager;
-import javax.persistence.Query;
-
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.Future;
+
+import javax.persistence.EntityManager;
+import javax.persistence.Query;
 
 /**
  * Implements the PersonService from the SPI binding to the JPA model and providing queries to
@@ -94,6 +93,9 @@ public class PersonServiceDb implements PersonService {
       // select all friends (subset of contacts)
       sb.append(PersonDb.JPQL_FINDPERSON_BY_FRIENDS);
       lastPos = JPQLUtils.addInClause(sb, "p", "id", lastPos, paramList.size());
+      sb.append(") ");
+      // TODO Group by doesn't work in HSQLDB or Derby - causes a "Not in aggregate function or group by clause" jdbc exception
+      // sb.append(" group by p ");
       break;
     case groupId:
       // select those in the group
@@ -115,7 +117,6 @@ public class PersonServiceDb implements PersonService {
 
     }
 
-
     int filterPos = addFilterClause(sb, PersonDb.getFilterCapability(), collectionOptions,
         lastPos);
     if (filterPos > 0) {
@@ -128,9 +129,10 @@ public class PersonServiceDb implements PersonService {
     if (plist == null) {
       plist = Lists.newArrayList();
     }
+
     // all of the above could equally have been placed into a thread to overlay the
     // db wait times.
-    return ImmediateFuture.newInstance(new RestfulCollection<Person>(plist));
+    return ImmediateFuture.newInstance(new RestfulCollection<Person>(plist, collectionOptions.getFirst(), plist.size()));
 
   }
 
@@ -230,10 +232,17 @@ public class PersonServiceDb implements PersonService {
     String sortBy = collectionOptions.getSortBy();
     if (sortBy != null && sortBy.length() > 0) {
       if (PersonService.TOP_FRIENDS_SORT.equals(sortBy)) {
+        // TODO sorting by friend.score doesn't work right now because of group by issue (see above TODO)
         // this assumes that the query is a join with the friends store.
         sb.append(" order by f.score ");
       } else {
-        sb.append(" order by p.").append(sortBy);
+        if ("name".equals(sortBy)) {
+          // TODO Is this correct?
+          // If sortBy is name then order by p.name.familyName, p.name.givenName.
+          sb.append(" order by p.name.familyName, p.name.givenName ");
+        } else {
+          sb.append(" order by p." + sortBy);
+        }
         switch (collectionOptions.getSortOrder()) {
         case ascending:
           sb.append(" asc ");

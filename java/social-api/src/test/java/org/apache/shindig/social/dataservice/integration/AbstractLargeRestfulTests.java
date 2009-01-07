@@ -19,7 +19,6 @@ package org.apache.shindig.social.dataservice.integration;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 
@@ -30,7 +29,6 @@ import org.apache.shindig.social.SocialApiTestsGuiceModule;
 import org.apache.shindig.social.core.util.BeanJsonConverter;
 import org.apache.shindig.social.core.util.BeanXStreamAtomConverter;
 import org.apache.shindig.social.core.util.BeanXStreamConverter;
-import org.apache.shindig.social.core.util.xstream.GuiceBeanProvider;
 import org.apache.shindig.social.core.util.xstream.XStream081Configuration;
 import org.apache.shindig.social.opensocial.service.DataServiceServlet;
 import org.apache.shindig.social.opensocial.service.HandlerDispatcher;
@@ -45,8 +43,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintWriter;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Vector;
@@ -169,7 +165,7 @@ public abstract class AbstractLargeRestfulTests extends TestCase {
 
   /**
    * parse entry.content xml into a Map<> struct
-   * 
+   *
    * @param str
    *          input content string
    * @return the map<> of <name, value> pairs from the content xml
@@ -203,7 +199,7 @@ public abstract class AbstractLargeRestfulTests extends TestCase {
   /**
    * Converts a node which child nodes into a map keyed on element names
    * containing the text inside each child node.
-   * 
+   *
    * @param n
    *          the node to convert.
    * @return a map keyed on element name, containing the contents of each
@@ -230,9 +226,9 @@ public abstract class AbstractLargeRestfulTests extends TestCase {
    * Converts <entry> <key>k</key> <value> <entry> <key>count</key>
    * <value>val</value> </entry> <entry> <key>lastUpdate</key>
    * <value>val</value> </entry> </value> </entry>
-   * 
+   *
    * To map.get("k").get("count")
-   * 
+   *
    * @param result
    * @return
    */

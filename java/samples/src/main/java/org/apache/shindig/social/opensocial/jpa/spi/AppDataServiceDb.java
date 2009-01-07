@@ -19,6 +19,7 @@ package org.apache.shindig.social.opensocial.jpa.spi;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.google.inject.Inject;
 
 import org.apache.shindig.auth.SecurityToken;
 import org.apache.shindig.common.util.ImmediateFuture;
@@ -29,19 +30,16 @@ import org.apache.shindig.social.opensocial.spi.GroupId;
 import org.apache.shindig.social.opensocial.spi.SocialSpiException;
 import org.apache.shindig.social.opensocial.spi.UserId;
 
-import com.google.inject.Inject;
-
-import javax.persistence.EntityManager;
-
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Future;
 
+import javax.persistence.EntityManager;
+
 /**
- * 
+ *
  */
 public class AppDataServiceDb implements AppDataService {
 
@@ -61,11 +59,16 @@ public class AppDataServiceDb implements AppDataService {
     List<ApplicationDataMapDb> dataMaps = getDataMap(userId, groupId, appId, token);
     for (ApplicationDataMapDb adm : dataMaps) {
       for (String f : fields) {
-        adm.remove(f);
+        adm.getValues().remove(f);
       }
     }
+     // TODO How should transactions be managed? Should samples be using warp-persist instead?
+     if (!entityManager.getTransaction().isActive()) {
+       entityManager.getTransaction().begin();
+     }
 
     entityManager.flush();
+    entityManager.getTransaction().commit();
 
     return ImmediateFuture.newInstance(null);
   }
@@ -112,12 +115,12 @@ public class AppDataServiceDb implements AppDataService {
     default: // including self
       // userId is the user Id
       sb.append(ApplicationDataMapDb.FINDBY_SELF_GROUP);
-      sb.append(" and am.personId = ?").append(lastParam);
+      sb.append(" am.personId = ?").append(lastParam);
       lastParam++;
       break;
 
     }
-    sb.append(" and a.id = ?").append(lastParam);
+    sb.append(" and am.application.id = ?").append(lastParam);
     lastParam++;
     paramList.add(appId);
     return JPQLUtils.getListQuery(entityManager, sb.toString(), paramList, null);
@@ -144,7 +147,8 @@ public class AppDataServiceDb implements AppDataService {
       break;
     case friends:
       sb.append(ApplicationDataMapDb.FINDBY_FRIENDS_GROUP);
-      lastParam = JPQLUtils.addInClause(sb, "am", "personId", lastParam, paramList.size());
+      lastParam = JPQLUtils.addInClause(sb, "p", "id", lastParam, paramList.size());
+      sb.append(")");
       // userId translates into all friends
       break;
     case groupId:
@@ -162,7 +166,7 @@ public class AppDataServiceDb implements AppDataService {
       break;
 
     }
-    sb.append(" and a.id = ?").append(lastParam);
+    sb.append(" and am.application.id = ?").append(lastParam);
     lastParam++;
     paramList.add(appId);
 
@@ -174,13 +178,16 @@ public class AppDataServiceDb implements AppDataService {
     // only add in the fields
     if (fields == null || fields.size() == 0) {
       for (ApplicationDataMapDb adm : dataMaps) {
-        results.put(adm.getPersonId(), adm);
+        results.put(adm.getPersonId(), adm.getValues());
       }
     } else {
       for (ApplicationDataMapDb adm : dataMaps) {
         Map<String, String> m = Maps.newHashMap();
         for (String f : fields) {
-          m.put(f, adm.get(f));
+          String value = adm.getValues().get(f);
+          if (null != value) {
+            m.put(f, value);
+          }
         }
         results.put(adm.getPersonId(), m);
       }
@@ -198,11 +205,16 @@ public class AppDataServiceDb implements AppDataService {
     List<ApplicationDataMapDb> dataMaps = getDataMap(userId, groupId, appId, token);
     for (ApplicationDataMapDb adm : dataMaps) {
       for (String f : fields) {
-        adm.put(f, values.get(f));
+        adm.getValues().put(f, values.get(f));
       }
     }
 
+    // TODO How should transactions be managed? Should samples be using warp-persist instead?
+    if (!entityManager.getTransaction().isActive()) {
+      entityManager.getTransaction().begin();
+    }
     entityManager.flush();
+    entityManager.getTransaction().commit();
 
     return ImmediateFuture.newInstance(null);
   }

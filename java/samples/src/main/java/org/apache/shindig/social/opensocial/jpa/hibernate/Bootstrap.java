@@ -19,22 +19,20 @@
 package org.apache.shindig.social.opensocial.jpa.hibernate;
 
 import com.google.common.collect.Maps;
+import com.google.inject.Inject;
+import com.google.inject.name.Named;
 
-import java.util.HashMap;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import java.util.Map;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
-import com.google.inject.Inject;
-import com.google.inject.name.Named;
-
 /**
- * 
+ *
  */
 public class Bootstrap {
 
@@ -68,9 +66,9 @@ public class Bootstrap {
     this.minWrite = minWrite;
 
   }
-  
+ 
   public Bootstrap() {
-    
+   
   }
 
   public void init(String unitName) {
