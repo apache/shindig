@@ -28,10 +28,13 @@ import org.apache.shindig.gadgets.spec.View;
 
 import com.google.common.base.Nullable;
 import com.google.common.base.Predicate;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
+
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
 
@@ -60,15 +63,12 @@ import java.util.Set;
 public class HTMLContentRewriter  implements ContentRewriter {
   private final static int MAX_URL_LENGTH = 1500;
 
-  public final static Set<String> TAGS =
-      Sets.newHashSet("img", "embed", "link", "script", "style");
+  public final static Set<String> TAGS = ImmutableSet.of("img", "embed", "link", "script", "style");
 
-  private final static Map<String, Set<String>> LINKING_TAG_ATTRS = Maps.newHashMap();
-
-  static {
-    LINKING_TAG_ATTRS.put("img", Sets.newHashSet("src"));
-    LINKING_TAG_ATTRS.put("embed", Sets.newHashSet("src"));
-  }
+  private final static ImmutableMap<String, ImmutableSet<String>> LINKING_TAG_ATTRS = ImmutableMap.of(
+      "img", ImmutableSet.of("src"),
+      "embed", ImmutableSet.of("src")
+  );
 
   private final ContentRewriterFeatureFactory rewriterFeatureFactory;
   private final String proxyBaseNoGadget;
@@ -226,7 +226,7 @@ public class HTMLContentRewriter  implements ContentRewriter {
     }));
 
     String concatBase = getConcatBase(gadgetUri, feature, "text/javascript");
-    List<Element> concatenateable = new ArrayList<Element>();
+    List<Element> concatenateable = Lists.newArrayList();
     for (int i = 0; i < scriptTags.size(); i++) {
       Element scriptTag = scriptTags.get(i);
       Element nextSciptTag = null;
@@ -257,8 +257,7 @@ public class HTMLContentRewriter  implements ContentRewriter {
     boolean mutated = false;
     LinkRewriter rewriter = createLinkRewriter(gadgetUri, feature);
 
-    final Set<String> tagNames = Sets.newHashSet(LINKING_TAG_ATTRS.keySet());
-    tagNames.retainAll(feature.getIncludedTags());
+    final Set<String> tagNames = Sets.intersection(LINKING_TAG_ATTRS.keySet(), feature.getIncludedTags());
 
     // Filter to just style tags
     Iterable<Element> tags = Iterables.filter(elementList, new Predicate<Element>() {
@@ -316,7 +315,7 @@ public class HTMLContentRewriter  implements ContentRewriter {
   }
 
   private static List<Uri> getConcatenatedUris(String concatBase, LinkedHashSet<Uri> uris) {
-    List<Uri> concatUris = new LinkedList<Uri>();
+    List<Uri> concatUris = Lists.newLinkedList();
     int paramIndex = 1;
     StringBuilder builder = null;
     int maxUriLen = MAX_URL_LENGTH + concatBase.length();

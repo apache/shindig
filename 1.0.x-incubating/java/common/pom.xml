@@ -75,8 +75,8 @@
       <artifactId>guice</artifactId>
     </dependency>
     <dependency>
-      <groupId>com.google.code.google-collections</groupId>
-      <artifactId>google-collect</artifactId>
+      <groupId>com.google.collections</groupId>
+      <artifactId>google-collections</artifactId>
     </dependency>
     <dependency>
       <groupId>commons-codec</groupId>

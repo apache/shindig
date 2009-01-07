@@ -17,6 +17,9 @@
  */
 package org.apache.shindig.gadgets.parse;
 
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
+
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -54,8 +57,8 @@ public class GadgetCssRule {
    * for the rule to be valid (and serializable).
    */
   public GadgetCssRule() {
-    selectors = new LinkedList<String>();
-    declarations = new HashMap<String, String>();
+    selectors = Lists.newLinkedList();
+    declarations = Maps.newHashMap();
   }
   
   /**

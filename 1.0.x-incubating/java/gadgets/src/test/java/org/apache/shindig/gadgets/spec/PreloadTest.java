@@ -21,6 +21,8 @@ package org.apache.shindig.gadgets.spec;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
+import com.google.common.collect.ImmutableSet;
+
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.common.xml.XmlUtil;
 import org.apache.shindig.gadgets.AuthType;
@@ -39,8 +41,7 @@ import java.util.Set;
 public class PreloadTest {
   private static final Uri SPEC_URL = Uri.parse("http://example.org/g.xml");
   private final static String HREF = "http://example.org/preload.xml";
-  private final static Set<String> VIEWS
-      = new HashSet<String>(Arrays.asList("view0", "view1"));
+  private final static Set<String> VIEWS = ImmutableSet.of("view0", "view1");
 
   @Test
   public void basicPreload() throws Exception {

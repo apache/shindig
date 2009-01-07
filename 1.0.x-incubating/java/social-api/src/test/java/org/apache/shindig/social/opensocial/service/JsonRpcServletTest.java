@@ -25,7 +25,9 @@ import org.apache.shindig.social.core.util.BeanXStreamAtomConverter;
 import org.apache.shindig.social.core.util.BeanXStreamConverter;
 import org.apache.shindig.social.core.util.BeanXmlConverter;
 
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
+
 import com.google.inject.Provider;
 
 import junit.framework.TestCase;
@@ -157,11 +159,11 @@ public class JsonRpcServletTest extends TestCase {
     EasyMock.expectLastCall().andReturn(ImmediateFuture.newInstance(resultObject));
 
     EasyMock.expect(jsonConverter.convertToJson(resultObject))
-        .andReturn(new JSONObject(Maps.immutableMap("foo", "bar")));
+        .andReturn(new JSONObject(ImmutableMap.of("foo", "bar")));
 
     JSONObject result = new JSONObject();
     result.put("id", "id");
-    result.put("data", Maps.immutableMap("foo", "bar"));
+    result.put("data", ImmutableMap.of("foo", "bar"));
     PrintWriter writerMock = EasyMock.createMock(PrintWriter.class);
     EasyMock.expect(res.getWriter()).andReturn(writerMock);
     writerMock.write(EasyMock.eq(result.toString()));
@@ -186,7 +188,7 @@ public class JsonRpcServletTest extends TestCase {
     EasyMock.expectLastCall().andReturn(responseItemFuture);
 
     EasyMock.expect(jsonConverter.convertToJson(resultObject))
-        .andStubReturn(new JSONObject(Maps.immutableMap("foo", "bar")));
+        .andStubReturn(new JSONObject(ImmutableMap.of("foo", "bar")));
 
     JSONArray result = new JSONArray("[{id:'1',data:{foo:'bar'}}," + "{id:'2',data:{foo:'bar'}}]");
     PrintWriter writerMock = EasyMock.createMock(PrintWriter.class);
@@ -202,7 +204,7 @@ public class JsonRpcServletTest extends TestCase {
 
   public void testGetExecution() throws Exception {
     EasyMock.expect(req.getParameterMap()).andStubReturn(
-        Maps.immutableMap("method", new String[]{"people.get"}, "id", new String[]{"1"}));
+        ImmutableMap.of("method", new String[]{"people.get"}, "id", new String[]{"1"}));
     EasyMock.expect(req.getMethod()).andStubReturn("GET");
     EasyMock.expect(req.getAttribute(EasyMock.isA(String.class))).andReturn(FAKE_GADGET_TOKEN);
     EasyMock.expect(req.getCharacterEncoding()).andStubReturn("UTF-8");
@@ -215,7 +217,7 @@ public class JsonRpcServletTest extends TestCase {
     EasyMock.expectLastCall().andReturn(responseItemFuture);
 
     EasyMock.expect(jsonConverter.convertToJson(resultObject))
-        .andReturn(new JSONObject(Maps.immutableMap("foo", "bar")));
+        .andReturn(new JSONObject(ImmutableMap.of("foo", "bar")));
 
     JSONObject result = new JSONObject("{id:'1',data:{foo:'bar'}}");
     PrintWriter writerMock = EasyMock.createMock(PrintWriter.class);

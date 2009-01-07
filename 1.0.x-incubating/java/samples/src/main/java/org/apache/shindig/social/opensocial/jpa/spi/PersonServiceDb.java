@@ -125,7 +125,7 @@ public class PersonServiceDb implements PersonService {
     plist = JPQLUtils.getListQuery(entiyManager, sb.toString(), paramList, collectionOptions);
 
     if (plist == null) {
-      plist = new ArrayList<Person>();
+      plist = Lists.newArrayList();
     }
     // all of the above could equally have been placed into a thread to overlay the
     // db wait times.

@@ -19,6 +19,7 @@ package org.apache.shindig.common.util;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.google.common.collect.ImmutableMap;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -73,26 +74,26 @@ public class JsonConversionUtilTest extends TestCase {
 
   public void testParameterMapToJsonParsing()
       throws Exception {
-    assertJsonEquals(JsonConversionUtil.parametersToJsonObject(Maps.immutableMap("a.b.c", "1")),
+    assertJsonEquals(JsonConversionUtil.parametersToJsonObject(ImmutableMap.of("a.b.c", "1")),
         new JSONObject("{a:{b:{c:1}}}"));
     assertJsonEquals(
-        JsonConversionUtil.parametersToJsonObject(Maps.immutableMap("a.b.c", "\"1\"")),
+        JsonConversionUtil.parametersToJsonObject(ImmutableMap.of("a.b.c", "\"1\"")),
         new JSONObject("{a:{b:{c:\"1\"}}}"));
-    assertJsonEquals(JsonConversionUtil.parametersToJsonObject(Maps.immutableMap("a.b.c", "true")),
+    assertJsonEquals(JsonConversionUtil.parametersToJsonObject(ImmutableMap.of("a.b.c", "true")),
         new JSONObject("{a:{b:{c:true}}}"));
     assertJsonEquals(
-        JsonConversionUtil.parametersToJsonObject(Maps.immutableMap("a.b.c", "false")),
+        JsonConversionUtil.parametersToJsonObject(ImmutableMap.of("a.b.c", "false")),
         new JSONObject("{a:{b:{c:false}}}"));
-    assertJsonEquals(JsonConversionUtil.parametersToJsonObject(Maps.immutableMap("a.b.c", "null")),
+    assertJsonEquals(JsonConversionUtil.parametersToJsonObject(ImmutableMap.of("a.b.c", "null")),
         new JSONObject("{a:{b:{c:null}}}"));
     assertJsonEquals(JsonConversionUtil.parametersToJsonObject(
-        Maps.immutableMap("a.b(0).c", "hello", "a.b(1).c", "hello")),
+        ImmutableMap.of("a.b(0).c", "hello", "a.b(1).c", "hello")),
         new JSONObject("{a:{b:[{c:\"hello\"},{c:\"hello\"}]}}"));
     assertJsonEquals(JsonConversionUtil.parametersToJsonObject(
-        Maps.immutableMap("a.b.c", "hello, true, false, null, 1,2, \"null\", \"()\"")),
+        ImmutableMap.of("a.b.c", "hello, true, false, null, 1,2, \"null\", \"()\"")),
         new JSONObject("{a:{b:{c:[\"hello\",true,false,null,1,2,\"null\",\"()\"]}}}"));
     assertJsonEquals(JsonConversionUtil.parametersToJsonObject(
-        Maps.immutableMap("a.b.c", "\"hello, true, false, null, 1,2\"")),
+        ImmutableMap.of("a.b.c", "\"hello, true, false, null, 1,2\"")),
         new JSONObject("{a:{b:{c:\"hello, true, false, null, 1,2\"}}}"));
   }
 

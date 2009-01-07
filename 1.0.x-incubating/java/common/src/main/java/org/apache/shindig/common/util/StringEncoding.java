@@ -20,6 +20,8 @@ package org.apache.shindig.common.util;
 
 import org.apache.commons.lang.ArrayUtils;
 
+import com.google.common.collect.Sets;
+
 import java.util.Arrays;
 import java.util.TreeSet;
 
@@ -33,7 +35,7 @@ public class StringEncoding {
 
   /** Creates a new encoding based on the supplied set of digits. */
   public StringEncoding(final char[] userDigits) {
-    TreeSet<Character> t = new TreeSet<Character>();
+    TreeSet<Character> t = Sets.newTreeSet();
     for (char c : userDigits) {
       t.add(c);
     }

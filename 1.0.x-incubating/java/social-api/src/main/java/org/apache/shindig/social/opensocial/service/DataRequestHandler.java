@@ -21,7 +21,7 @@ import org.apache.shindig.common.util.ImmediateFuture;
 import org.apache.shindig.social.ResponseError;
 import org.apache.shindig.social.opensocial.spi.SocialSpiException;
 
-import com.google.common.collect.Sets;
+import com.google.common.collect.ImmutableSet;
 
 import java.util.Collection;
 import java.util.Set;
@@ -29,10 +29,10 @@ import java.util.concurrent.Future;
 
 public abstract class DataRequestHandler {
 
-  private static final Set<String> GET_SYNONYMS = Sets.newHashSet("get");
-  private static final Set<String> CREATE_SYNONYMS = Sets.newHashSet("put", "create");
-  private static final Set<String> UPDATE_SYNONYMS = Sets.newHashSet("post", "update");
-  private static final Set<String> DELETE_SYNONYMS = Sets.newHashSet("delete");
+  private static final Set<String> GET_SYNONYMS = ImmutableSet.of("get");
+  private static final Set<String> CREATE_SYNONYMS = ImmutableSet.of("put", "create");
+  private static final Set<String> UPDATE_SYNONYMS = ImmutableSet.of("post", "update");
+  private static final Set<String> DELETE_SYNONYMS = ImmutableSet.of("delete");
 
   public Future<?> handleItem(RequestItem request) {
     if (request.getOperation() == null) {

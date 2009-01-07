@@ -24,6 +24,8 @@ import org.apache.shindig.gadgets.rewrite.ContentRewriterFeature;
 import org.apache.shindig.gadgets.servlet.ProxyBase;
 import org.apache.shindig.gadgets.spec.GadgetSpec;
 
+import com.google.common.collect.Lists;
+
 import com.google.caja.lexer.HtmlTokenType;
 import com.google.caja.lexer.Token;
 
@@ -42,7 +44,7 @@ public class JavascriptTagMerger implements HtmlTagTransformer {
 
   private final static int MAX_URL_LENGTH = 1500;
 
-  private final List<Object> scripts = new ArrayList<Object>();
+  private final List<Object> scripts = Lists.newArrayList();
 
   private final String concatBase;
 
@@ -102,7 +104,7 @@ public class JavascriptTagMerger implements HtmlTagTransformer {
 
   @SuppressWarnings("unchecked")
   public String close() {
-    List<Uri> concat = new ArrayList<Uri>();
+    List<Uri> concat = Lists.newArrayList();
     StringBuilder builder = new StringBuilder(100);
     for (Object o : scripts) {
       if (o instanceof Uri) {

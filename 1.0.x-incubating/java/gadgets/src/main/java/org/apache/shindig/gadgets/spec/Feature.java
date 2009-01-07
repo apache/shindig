@@ -16,6 +16,9 @@
  * specific language governing permissions and limitations under the License.
  */
 package org.apache.shindig.gadgets.spec;
+
+import com.google.common.collect.ImmutableMap;
+
 import org.apache.shindig.common.xml.XmlUtil;
 
 import org.w3c.dom.Element;
@@ -96,7 +99,8 @@ public class Feature {
     this.name = name;
     NodeList children = feature.getElementsByTagName("Param");
     if (children.getLength() > 0) {
-      Map<String, String> params = new HashMap<String, String>(children.getLength(),1);
+      ImmutableMap.Builder<String, String> params = ImmutableMap.builder();
+
       for (int i = 0, j = children.getLength(); i < j; ++i) {
         Element param = (Element)children.item(i);
         String paramName = XmlUtil.getAttribute(param, "name");
@@ -105,7 +109,7 @@ public class Feature {
         }
         params.put(paramName, param.getTextContent());
       }
-      this.params = Collections.unmodifiableMap(params);
+      this.params = params.build();
     } else {
       this.params = Collections.emptyMap();
     }

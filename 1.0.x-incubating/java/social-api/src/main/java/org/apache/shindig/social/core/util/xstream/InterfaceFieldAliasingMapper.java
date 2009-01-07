@@ -17,6 +17,9 @@
  */
 package org.apache.shindig.social.core.util.xstream;
 
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
+
 import com.thoughtworks.xstream.mapper.FieldAliasingMapper;
 import com.thoughtworks.xstream.mapper.Mapper;
 import com.thoughtworks.xstream.mapper.MapperWrapper;
@@ -31,8 +34,8 @@ import java.util.Map;
  */
 public class InterfaceFieldAliasingMapper extends MapperWrapper {
 
-  private Map<String, List<InterfaceFieldAliasMapping>> serializedMap = new HashMap<String, List<InterfaceFieldAliasMapping>>();
-  private Map<String, List<InterfaceFieldAliasMapping>> membersMap = new HashMap<String, List<InterfaceFieldAliasMapping>>();
+  private Map<String, List<InterfaceFieldAliasMapping>> serializedMap = Maps.newHashMap();
+  private Map<String, List<InterfaceFieldAliasMapping>> membersMap = Maps.newHashMap();
   private WriterStack writerStack;
 
   /**
@@ -44,17 +47,15 @@ public class InterfaceFieldAliasingMapper extends MapperWrapper {
     this.writerStack = writerStack;
     for (InterfaceFieldAliasMapping ifa : ifaList) {
 
-      List<InterfaceFieldAliasMapping> serializedMatches = serializedMap
-          .get(ifa.getFieldName());
+      List<InterfaceFieldAliasMapping> serializedMatches = serializedMap.get(ifa.getFieldName());
       if (serializedMatches == null) {
-        serializedMatches = new ArrayList<InterfaceFieldAliasMapping>();
+        serializedMatches = Lists.newArrayList();
         serializedMap.put(ifa.getFieldName(), serializedMatches);
       }
       serializedMatches.add(ifa);
-      List<InterfaceFieldAliasMapping> memberMatches = membersMap.get(ifa
-          .getAlias());
+      List<InterfaceFieldAliasMapping> memberMatches = membersMap.get(ifa.getAlias());
       if (memberMatches == null) {
-        memberMatches = new ArrayList<InterfaceFieldAliasMapping>();
+        memberMatches = Lists.newArrayList();
         membersMap.put(ifa.getAlias(), memberMatches);
       }
       memberMatches.add(ifa);

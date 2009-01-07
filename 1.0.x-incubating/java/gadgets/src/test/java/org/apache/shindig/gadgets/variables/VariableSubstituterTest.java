@@ -29,6 +29,7 @@ import org.apache.shindig.gadgets.spec.GadgetSpec;
 import org.apache.shindig.gadgets.spec.LocaleSpec;
 import org.apache.shindig.gadgets.spec.MessageBundle;
 
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 
 import org.junit.Test;
@@ -86,7 +87,7 @@ public class VariableSubstituterTest {
     GadgetContext context = new GadgetContext() {
       @Override
       public UserPrefs getUserPrefs() {
-        return new UserPrefs(Maps.immutableMap("foo", "shindig"));
+        return new UserPrefs(ImmutableMap.of("foo", "shindig"));
       }
     };
 

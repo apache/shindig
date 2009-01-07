@@ -35,6 +35,7 @@ import org.apache.shindig.social.opensocial.spi.RestfulCollection;
 import org.apache.shindig.social.opensocial.spi.SocialSpiException;
 import org.apache.shindig.social.opensocial.spi.UserId;
 
+import com.google.common.collect.ImmutableSortedSet;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
@@ -380,7 +381,7 @@ public class JsonDbOpensocialService implements ActivityService, PersonService, 
     String userId = user.getUserId(token);
 
     if (group == null) {
-      return Sets.newLinkedHashSet(userId);
+      return ImmutableSortedSet.of(userId);
     }
 
     Set<String> returnVal = Sets.newLinkedHashSet();

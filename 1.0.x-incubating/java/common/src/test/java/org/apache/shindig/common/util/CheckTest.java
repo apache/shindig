@@ -25,6 +25,9 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.junit.Assert.fail;
 import org.junit.Test;
 
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -308,13 +311,13 @@ public class CheckTest {
 
   @Test(expected = IllegalArgumentException.class)
   public void notEmptyCollection_ThrowsWhenEmpty() {
-    Collection<String> collection = new ArrayList<String>();
+    Collection<String> collection = Lists.newArrayList();
     Check.notEmpty(collection);
   }
 
   @Test public void notEmptyCollection_ReturnsWhenNotEmpty() {
     try {
-      Collection<String> collection = new ArrayList<String>();
+      Collection<String> collection = Lists.newArrayList();
       collection.add(null);
       Check.notEmpty(collection);
     } catch (IllegalArgumentException  e) {
@@ -330,13 +333,13 @@ public class CheckTest {
 
   @Test(expected = IllegalArgumentException.class)
   public void notEmptyCollection_Message_ThrowsWhenEmpty() {
-    Collection<String> collection = new ArrayList<String>();
+    Collection<String> collection = Lists.newArrayList();
     Check.notEmpty(collection, STATIC_MESSAGE);
   }
 
   @Test public void notEmptyCollection_Message_ReturnsWhenNotEmpty() {
     try {
-      Collection<String> collection = new ArrayList<String>();
+      Collection<String> collection = Lists.newArrayList();
       collection.add(null);
       Check.notEmpty(collection, STATIC_MESSAGE);
     } catch (IllegalArgumentException  e) {
@@ -352,13 +355,13 @@ public class CheckTest {
 
   @Test(expected = IllegalArgumentException.class)
   public void notEmptyCollection_MessageArgs_ThrowsWhenEmpty() {
-    Collection<String> collection = new ArrayList<String>();
+    Collection<String> collection = Lists.newArrayList();
     Check.notEmpty(collection, MESSAGE_FORMAT, MESSAGE_VALUE);
   }
 
   @Test public void notEmptyCollection_MessageArgs_ReturnsWhenNotEmpty() {
     try {
-      Collection<String> collection = new ArrayList<String>();
+      Collection<String> collection = Lists.newArrayList();
       collection.add(null);
       Check.notEmpty(collection, MESSAGE_FORMAT, MESSAGE_VALUE);
     } catch (IllegalArgumentException  e) {
@@ -374,13 +377,13 @@ public class CheckTest {
 
   @Test(expected = IllegalArgumentException.class)
   public void notEmptyMap_ThrowsWhenEmpty() {
-    Map<String, String> map = new HashMap<String, String>();
+    Map<String, String> map = Maps.newHashMap();
     Check.notEmpty(map);
   }
 
   @Test public void notEmptyMap_ReturnsWhenNotEmpty() {
     try {
-      Map<String, String> map = new HashMap<String, String>();
+      Map<String, String> map = Maps.newHashMap();
       map.put(null, null);
       Check.notEmpty(map);
     } catch (IllegalArgumentException  e) {
@@ -396,13 +399,13 @@ public class CheckTest {
 
   @Test(expected = IllegalArgumentException.class)
   public void notEmptyMap_Message_ThrowsWhenEmpty() {
-    Map<String, String> map = new HashMap<String, String>();
+    Map<String, String> map = Maps.newHashMap();
     Check.notEmpty(map, STATIC_MESSAGE);
   }
 
   @Test public void notEmptyMap_Message_ReturnsWhenNotEmpty() {
     try {
-      Map<String, String> map = new HashMap<String, String>();
+      Map<String, String> map = Maps.newHashMap();
       map.put(null, null);
       Check.notEmpty(map, STATIC_MESSAGE);
     } catch (IllegalArgumentException  e) {
@@ -418,13 +421,13 @@ public class CheckTest {
 
   @Test(expected = IllegalArgumentException.class)
   public void notEmptyMap_MessageArgs_ThrowsWhenEmpty() {
-    Map<String, String> map = new HashMap<String, String>();
+    Map<String, String> map = Maps.newHashMap();
     Check.notEmpty(map, MESSAGE_FORMAT, MESSAGE_VALUE);
   }
 
   @Test public void notEmptyMap_MessageArgs_ReturnsWhenNotEmpty() {
     try {
-      Map<String, String> map = new HashMap<String, String>();
+      Map<String, String> map = Maps.newHashMap();
       map.put(null, null);
       Check.notEmpty(map, MESSAGE_FORMAT, MESSAGE_VALUE);
     } catch (IllegalArgumentException  e) {
@@ -542,7 +545,7 @@ public class CheckTest {
 
   @Test public void noNullsList_ReturnsWhenEmpty() {
     try {
-      List<String> iterable = new ArrayList<String>();
+      List<String> iterable = Lists.newArrayList();
       Check.noNulls(iterable);
     } catch (IllegalArgumentException  e) {
       fail();
@@ -551,7 +554,7 @@ public class CheckTest {
 
   @Test public void noNullsList_ReturnsWhenNotEmptyWithNoNulls() {
     try {
-      List<String> iterable = new ArrayList<String>();
+      List<String> iterable = Lists.newArrayList();
       iterable.add("bob");
       Check.noNulls(iterable);
     } catch (IllegalArgumentException  e) {
@@ -561,7 +564,7 @@ public class CheckTest {
 
   @Test(expected = IllegalArgumentException.class)
   public void noNullsList_ThrowsWhenHasANull() {
-    List<String> iterable = new ArrayList<String>();
+    List<String> iterable = Lists.newArrayList();
     iterable.add("bob");
     iterable.add(null);
     Check.noNulls(iterable);
@@ -578,7 +581,7 @@ public class CheckTest {
 
   @Test public void noNullsList_Message_ReturnsWhenEmpty() {
     try {
-      List<String> iterable = new ArrayList<String>();
+      List<String> iterable = Lists.newArrayList();
       Check.noNulls(iterable, STATIC_MESSAGE);
     } catch (IllegalArgumentException  e) {
       fail();
@@ -587,7 +590,7 @@ public class CheckTest {
 
   @Test public void noNullsList_Message_ReturnsWhenNotEmptyWithNoNulls() {
     try {
-      List<String> iterable = new ArrayList<String>();
+      List<String> iterable = Lists.newArrayList();
       iterable.add("bob");
       Check.noNulls(iterable, STATIC_MESSAGE);
     } catch (IllegalArgumentException  e) {
@@ -597,7 +600,7 @@ public class CheckTest {
 
   @Test(expected = IllegalArgumentException.class)
   public void noNullsList_Message_ThrowsWhenHasANull() {
-    List<String> iterable = new ArrayList<String>();
+    List<String> iterable = Lists.newArrayList();
     iterable.add("bob");
     iterable.add(null);
     Check.noNulls(iterable, STATIC_MESSAGE);
@@ -614,7 +617,7 @@ public class CheckTest {
 
   @Test public void noNullsList_MessageArgs_ReturnsWhenEmpty() {
     try {
-      List<String> iterable = new ArrayList<String>();
+      List<String> iterable = Lists.newArrayList();
       Check.noNulls(iterable, MESSAGE_FORMAT, MESSAGE_VALUE);
     } catch (IllegalArgumentException  e) {
       fail();
@@ -623,7 +626,7 @@ public class CheckTest {
 
   @Test public void noNullsList_MessageArgs_ReturnsWhenNotEmptyWithNoNulls() {
     try {
-      List<String> iterable = new ArrayList<String>();
+      List<String> iterable = Lists.newArrayList();
       iterable.add("bob");
       Check.noNulls(iterable, MESSAGE_FORMAT, MESSAGE_VALUE);
     } catch (IllegalArgumentException  e) {
@@ -633,7 +636,7 @@ public class CheckTest {
 
   @Test(expected = IllegalArgumentException.class)
   public void noNullsList_MessageArgs_ThrowsWhenHasANull() {
-    List<String> iterable = new ArrayList<String>();
+    List<String> iterable = Lists.newArrayList();
     iterable.add("bob");
     iterable.add(null);
     Check.noNulls(iterable, MESSAGE_FORMAT, MESSAGE_VALUE);

@@ -29,6 +29,7 @@ import org.apache.shindig.gadgets.spec.ModulePrefs;
 import org.apache.shindig.gadgets.spec.UserPref;
 import org.apache.shindig.gadgets.spec.View;
 
+import com.google.common.collect.Lists;
 import com.google.inject.Inject;
 
 import org.json.JSONArray;
@@ -74,7 +75,7 @@ public class JsonRpcHandler {
 
     // Process all JSON first so that we don't wind up with hanging threads if
     // a JSONException is thrown.
-    gadgets = new ArrayList<GadgetContext>(requestedGadgets.length());
+    gadgets = Lists.newArrayListWithExpectedSize(requestedGadgets.length());
     for (int i = 0, j = requestedGadgets.length(); i < j; ++i) {
       GadgetContext context = new JsonRpcGadgetContext(
           requestContext, requestedGadgets.getJSONObject(i));
@@ -219,7 +220,7 @@ public class JsonRpcHandler {
 
     private List<JSONObject> getOrderedEnums(UserPref pref) throws JSONException {
       List<UserPref.EnumValuePair> orderedEnums = pref.getOrderedEnumValues();
-      List<JSONObject> jsonEnums = new ArrayList<JSONObject>(orderedEnums.size());
+      List<JSONObject> jsonEnums = Lists.newArrayListWithExpectedSize(orderedEnums.size());
       for (UserPref.EnumValuePair evp : orderedEnums) {
         JSONObject curEnum = new JSONObject();
         curEnum.put("value", evp.getValue());

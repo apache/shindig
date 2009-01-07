@@ -17,7 +17,10 @@
  */
 package org.apache.shindig.gadgets.rewrite;
 
+import com.google.common.collect.ImmutableSortedSet;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
+
 import org.apache.shindig.gadgets.spec.Feature;
 import org.apache.shindig.gadgets.spec.GadgetSpec;
 
@@ -45,7 +48,7 @@ public class ContentRewriterFeature {
   public static final String EXPIRES_DEFAULT = "HTTP";
 
   // Use tree set to maintain order for fingerprint
-  private TreeSet<String> includeTags;
+  private Set<String> includeTags;
 
   private boolean includeAll;
   private boolean includeNone;
@@ -78,7 +81,7 @@ public class ContentRewriterFeature {
     String includeRegex = normalizeParam(defaultInclude, null);
     String excludeRegex = normalizeParam(defaultExclude, null);
 
-    this.includeTags = new TreeSet<String>(defaultTags);
+    this.includeTags = ImmutableSortedSet.copyOf(defaultTags);
 
     List<String> expiresOptions = Lists.newArrayListWithCapacity(3);
     if (f != null) {
@@ -93,7 +96,7 @@ public class ContentRewriterFeature {
       }
       String includeTagList = f.getParams().get(INCLUDE_TAGS);
       if (includeTagList != null) {
-        TreeSet<String> tags = new TreeSet<String>();
+        Set<String> tags = Sets.newTreeSet();
         for (String tag : includeTagList.split(",")) {
           if (tag != null) {
             tags.add(tag.trim().toLowerCase());

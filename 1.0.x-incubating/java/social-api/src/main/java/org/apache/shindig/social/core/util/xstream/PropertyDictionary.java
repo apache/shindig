@@ -17,6 +17,9 @@
  */
 package org.apache.shindig.social.core.util.xstream;
 
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
+
 import com.thoughtworks.xstream.converters.javabean.BeanProperty;
 import com.thoughtworks.xstream.converters.reflection.ObjectAccessException;
 
@@ -79,7 +82,7 @@ public class PropertyDictionary {
           // is possible that a class have two writable only
           // properties that have the same name
           // but different types
-          final Map<PropertyKey, BeanProperty> propertyMap = new HashMap<PropertyKey, BeanProperty>();
+          final Map<PropertyKey, BeanProperty> propertyMap = Maps.newHashMap();
           Method[] methods = cls.getMethods();
 
           for (int i = 0; i < methods.length; i++) {
@@ -114,7 +117,7 @@ public class PropertyDictionary {
 
           // retain only those that can be both read and written and
           // sort them by name
-          List<BeanProperty> serializableProperties = new ArrayList<BeanProperty>();
+          List<BeanProperty> serializableProperties = Lists.newArrayList();
           for (BeanProperty property : propertyMap.values()) {
             if (property.isReadable() || property.isWritable()) {
               serializableProperties.add(property);
@@ -209,7 +212,7 @@ public class PropertyDictionary {
 
   private static class OrderRetainingMap<K, V> extends HashMap<K, V> {
     private static final long serialVersionUID = 1565370254073638221L;
-    private List<V> valueOrder = new ArrayList<V>();
+    private List<V> valueOrder = Lists.newArrayList();
 
     public V put(K key, V value) {
       valueOrder.add(value);
