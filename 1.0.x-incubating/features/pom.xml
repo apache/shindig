@@ -44,6 +44,13 @@
     <plugins>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-resources-plugin</artifactId>
+        <configuration>
+          <encoding>UTF-8</encoding>
+        </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-eclipse-plugin</artifactId>
       </plugin>
       <plugin>
@@ -150,8 +157,9 @@
     </plugins>
     <resources>
       <resource>
-        <targetPath>/features</targetPath>
+        <targetPath>features</targetPath>
         <directory>${basedir}</directory>
+        <filtering>false</filtering>
         <excludes>
           <exclude>pom.xml</exclude>
           <exclude>target/**</exclude>
