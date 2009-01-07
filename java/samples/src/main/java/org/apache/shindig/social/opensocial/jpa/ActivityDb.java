@@ -17,16 +17,15 @@
  */
 package org.apache.shindig.social.opensocial.jpa;
 
-import com.google.common.collect.Lists;
-
 import static javax.persistence.CascadeType.ALL;
 import static javax.persistence.GenerationType.IDENTITY;
+
+import com.google.common.collect.Lists;
 
 import org.apache.shindig.social.opensocial.jpa.api.DbObject;
 import org.apache.shindig.social.opensocial.model.Activity;
 import org.apache.shindig.social.opensocial.model.MediaItem;
 
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -42,6 +41,8 @@ import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
 import javax.persistence.MapKey;
+import javax.persistence.NamedQueries;
+import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
 import javax.persistence.PostLoad;
 import javax.persistence.PrePersist;
@@ -56,15 +57,23 @@ import javax.persistence.Version;
  */
 @Entity
 @Table(name = "activity")
+@NamedQueries(value = {
+    @NamedQuery(name = ActivityDb.FINDBY_ACTIVITY_ID, 
+        query = "select activity from ActivityDb activity where activity.userId = :userId and activity.id = :activityId")
+    })
 public class ActivityDb implements Activity, DbObject {
 
-  public static final String FINDBY_ACTIVITY_ID = null;
+  public static final String FINDBY_ACTIVITY_ID = "q.activity.findbyactivityid";
 
-  public static final String PARAM_USERID = null;
-
-  public static final String PARAM_ACTIVITYID = null;
-
+  public static final String PARAM_USERID = "userId";
+  
+  public static final String PARAM_ACTIVITYID = "activityId";
+   
   public static final String JPQL_FINDBY_ACTIVITIES = null;
+  
+  public static final String JPQL_FINDACTIVITY = "select a from ActivityDb a where ";
+  
+  public static final String JPQL_FINDACTIVITY_BY_FRIENDS = "select a from ActivityDb a where a.userId in (select p.id from PersonDb p where p.objectId in (select f.friend.objectId from PersonDb p, FriendDb f where p.objectId = f.person.objectId and ";
 
   /**
    * The internal object ID used for references to this object. Should be
@@ -610,31 +619,33 @@ public class ActivityDb implements Activity, DbObject {
    */
   @PrePersist
   public void populateDbFields() {
-    // add new entries
-    for (Entry<String, String> e : templateParams.entrySet()) {
-      ActivityTemplateParamsDb a = templateParamsDb.get(e.getKey());
-      if (a == null) {
-        a = new ActivityTemplateParamsDb();
-        a.name = e.getKey();
-        a.value = e.getValue();
-        a.activity = this;
-        // a.activities = Lists.newArrayList();
-        // a.activities.add(this);
-        templateParamsDb.put(e.getKey(), a);
-      } else {
-        a.value = e.getValue();
+    if (templateParams != null) {
+      // add new entries
+      for (Entry<String, String> e : templateParams.entrySet()) {
+        ActivityTemplateParamsDb a = templateParamsDb.get(e.getKey());
+        if (a == null) {
+          a = new ActivityTemplateParamsDb();
+          a.name = e.getKey();
+          a.value = e.getValue();
+          a.activity = this;
+          // a.activities = Lists.newArrayList();
+          // a.activities.add(this);
+          templateParamsDb.put(e.getKey(), a);
+        } else {
+          a.value = e.getValue();
+        }
       }
-    }
-    // remove old entries
-    List<String> toRemove = Lists.newArrayList();
-    for (Entry<String, ActivityTemplateParamsDb> e : templateParamsDb
-        .entrySet()) {
-      if (!templateParams.containsKey(e.getKey())) {
-        toRemove.add(e.getKey());
+      // remove old entries
+      List<String> toRemove = Lists.newArrayList();
+      for (Entry<String, ActivityTemplateParamsDb> e : templateParamsDb
+          .entrySet()) {
+        if (!templateParams.containsKey(e.getKey())) {
+          toRemove.add(e.getKey());
+        }
       }
-    }
-    for (String r : toRemove) {
-      templateParamsDb.remove(r);
+      for (String r : toRemove) {
+        templateParamsDb.remove(r);
+      }
     }
   }
 

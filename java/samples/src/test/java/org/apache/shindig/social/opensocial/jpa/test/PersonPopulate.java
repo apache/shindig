@@ -45,25 +45,25 @@ import org.apache.shindig.social.opensocial.model.Enum.Drinker;
 import org.apache.shindig.social.opensocial.model.Enum.LookingFor;
 import org.apache.shindig.social.opensocial.model.Enum.Smoker;
 import org.apache.shindig.social.opensocial.model.Person.Gender;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import javax.persistence.EntityManager;
-import javax.persistence.Query;
-
-import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.List;
 import java.util.Random;
 
+import javax.persistence.EntityManager;
+import javax.persistence.Query;
+
 public class PersonPopulate {
 
   private EntityManager entityManager;
 
   /**
-   * 
+   *
    */
   public PersonPopulate(EntityManager entityManager) {
     this.entityManager = entityManager;
@@ -152,7 +152,7 @@ public class PersonPopulate {
     person.setSports(getList("Sports"));
     person.setStatus("Status");
     person.setTags(getList("tags"));
-    
+
     List<ListField> photos = Lists.newArrayList();
     photos.add(getNewPhoto(i));
     photos.add(getNewPhoto(i * 3));
@@ -185,7 +185,7 @@ public class PersonPopulate {
 
   private Url getNewUrl(int i) {
     String targetUrl = "http://sdfsdfsd.sdfdsf/" + String.valueOf(i % 33);
-    List<?> l = find(UrlDb.FINDBY_URL, 
+    List<?> l = find(UrlDb.FINDBY_URL,
         new String[] { UrlDb.PARAM_URL }, new Object[] { targetUrl });
     if (l.size() == 0) {
       Url url = new UrlDb();
@@ -209,7 +209,7 @@ public class PersonPopulate {
     }
     return phone;
   }
-  
+
   private PhotoDb getNewPhoto(int i) {
     String targetPhoto = String.valueOf(i % 33);
     PhotoDb photo = findOne(PhotoDb.FINDBY_PHOTO,
@@ -349,7 +349,7 @@ public class PersonPopulate {
     }
     return address;
   }
-  
+
   private Address getNewOrganizationAddress(int i) {
     Address address = findOne(AddressDb.FINDBY_POSTCODE, new String[] { AddressDb.PARAM_POSTCODE },
         new Object[] { String.valueOf(i % 10) });
@@ -369,7 +369,7 @@ public class PersonPopulate {
     }
     return address;
   }
-  
+
   private Address getNewPersonAddress(int i) {
     Address address = findOne(AddressDb.FINDBY_POSTCODE, new String[] { AddressDb.PARAM_POSTCODE },
         new Object[] { String.valueOf(i % 10) });

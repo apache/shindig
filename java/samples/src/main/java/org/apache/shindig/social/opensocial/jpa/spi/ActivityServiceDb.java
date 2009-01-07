@@ -17,27 +17,29 @@
  */
 package org.apache.shindig.social.opensocial.jpa.spi;
 
+import com.google.inject.Inject;
+
 import org.apache.shindig.auth.SecurityToken;
 import org.apache.shindig.common.util.ImmediateFuture;
 import org.apache.shindig.social.ResponseError;
 import org.apache.shindig.social.opensocial.jpa.ActivityDb;
-import org.apache.shindig.social.opensocial.jpa.ApplicationDataMapDb;
+import org.apache.shindig.social.opensocial.jpa.MediaItemDb;
 import org.apache.shindig.social.opensocial.model.Activity;
+import org.apache.shindig.social.opensocial.model.MediaItem;
 import org.apache.shindig.social.opensocial.spi.ActivityService;
 import org.apache.shindig.social.opensocial.spi.GroupId;
 import org.apache.shindig.social.opensocial.spi.RestfulCollection;
 import org.apache.shindig.social.opensocial.spi.SocialSpiException;
 import org.apache.shindig.social.opensocial.spi.UserId;
 
-import com.google.inject.Inject;
-
-import javax.persistence.EntityManager;
-import javax.persistence.Query;
-
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.Future;
+
+import javax.persistence.EntityManager;
+import javax.persistence.Query;
 
 /**
  *
@@ -56,7 +58,54 @@ public class ActivityServiceDb implements ActivityService {
    */
   public Future<Void> createActivity(UserId userId, GroupId groupId, String appId,
       Set<String> fields, Activity activity, SecurityToken token) throws SocialSpiException {
-    // TODO Auto-generated method stub
+    String uid = SPIUtils.getUserList(userId, token);
+
+    try {
+      // Map activity into a new ActivityDb instance
+      // TODO Could we use dozer to do this mapping instead, for future-proofing reasons?
+      ActivityDb activityDb = new ActivityDb();
+      activityDb.setPostedTime(new Date().getTime());
+      activityDb.setAppId(appId);
+      activityDb.setUserId(uid);
+      activityDb.setId(activity.getId());
+      activityDb.setBodyId(activity.getBodyId());
+      activityDb.setBody(activity.getBody());
+      activityDb.setExternalId(activity.getExternalId());
+      activityDb.setTitleId(activity.getTitleId());
+      activityDb.setTitle(activity.getTitle());
+      activityDb.setUpdated(new Date());
+      activityDb.setPriority(activity.getPriority());
+      activityDb.setStreamFaviconUrl(activity.getStreamFaviconUrl());
+      activityDb.setStreamSourceUrl(activity.getStreamSourceUrl());
+      activityDb.setStreamTitle(activity.getStreamTitle());
+      activityDb.setStreamUrl(activity.getStreamUrl());
+      activityDb.setUrl(activity.getUrl());
+      if(activity.getMediaItems() != null) {
+        List<MediaItem> mediaItems = new ArrayList<MediaItem>();
+        for(MediaItem m : activity.getMediaItems()) {
+          MediaItemDb mediaItem = new MediaItemDb();
+          mediaItem.setMimeType(m.getMimeType());
+          mediaItem.setType(m.getType());
+          mediaItem.setUrl(m.getUrl());
+          mediaItems.add(mediaItem);
+        }
+        activityDb.setMediaItems(mediaItems);
+      }
+      if (activity.getTemplateParams() != null) {
+        activityDb.setTemplateParams(activity.getTemplateParams());
+      }
+
+      // TODO How should transactions be managed? Should samples be using warp-persist instead?
+      if (!entityManager.getTransaction().isActive()) {
+        entityManager.getTransaction().begin();
+      }
+      entityManager.persist(activityDb);
+      entityManager.getTransaction().commit();
+
+    } catch (Exception e) {
+      throw new SocialSpiException(ResponseError.INTERNAL_ERROR, "Failed to create activity", e);
+    }
+
     return null;
   }
 
@@ -74,8 +123,60 @@ public class ActivityServiceDb implements ActivityService {
    */
   public Future<RestfulCollection<Activity>> getActivities(Set<UserId> userIds, GroupId groupId,
       String appId, Set<String> fields, SecurityToken token) throws SocialSpiException {
-    // TODO Auto-generated method stub
-    return null;
+
+    // TODO currently the implementation of this method ignores the fields variable. Is this correct?
+
+    List<Activity> plist = null;
+    int lastPos = 1;
+
+    StringBuilder sb = new StringBuilder();
+    // sanitize the list to get the uid's and remove duplicates
+    List<String> paramList = SPIUtils.getUserList(userIds, token);
+    // select the group Id as this will drive the query
+    switch (groupId.getType()) {
+    case all:
+      // select all contacts
+      sb.append("");
+      lastPos = JPQLUtils.addInClause(sb, "p", "id", lastPos, paramList.size());
+      break;
+    case friends:
+      // select all friends (subset of contacts)
+      sb.append(ActivityDb.JPQL_FINDACTIVITY_BY_FRIENDS);
+      lastPos = JPQLUtils.addInClause(sb, "p", "id", lastPos, paramList.size());
+      sb.append(")) ");
+      // TODO Group by doesn't work in HSQLDB or Derby - causes a "Not in aggregate function or group by clause" jdbc exception
+      // sb.append(" group by p ");
+      break;
+    case groupId:
+      // select those in the group
+      // TODO Needs implementing and then have a unit test created to test it.
+      sb.append("");
+      lastPos = JPQLUtils.addInClause(sb, "p", "id", lastPos, paramList.size());
+      sb.append(" and g.id = ?").append(lastPos);
+      lastPos++;
+      break;
+    case deleted:
+      // ???
+      break;
+    case self:
+      // select self
+      sb.append(ActivityDb.JPQL_FINDACTIVITY);
+      lastPos = JPQLUtils.addInClause(sb, "a", "userId", lastPos, paramList.size());
+      break;
+    default:
+      throw new SocialSpiException(ResponseError.BAD_REQUEST, "Group ID not recognized");
+
+    }
+
+    plist = JPQLUtils.getListQuery(entityManager, sb.toString(), paramList, null);
+
+    if (plist == null) {
+      plist = new ArrayList<Activity>();
+    }
+
+    // all of the above could equally have been placed into a thread to overlay the
+    // db wait times.
+    return ImmediateFuture.newInstance(new RestfulCollection<Activity>(plist));
   }
 
   /* (non-Javadoc)
@@ -99,7 +200,7 @@ public class ActivityServiceDb implements ActivityService {
     throw new SocialSpiException(ResponseError.BAD_REQUEST,"Cant find activity");
   }
 
-  
+
   /**
    * @param userId
    * @param groupId
@@ -113,11 +214,11 @@ public class ActivityServiceDb implements ActivityService {
     String uid = SPIUtils.getUserList(userId, token);
     q.setParameter(ActivityDb.PARAM_USERID, uid);
     q.setParameter(ActivityDb.PARAM_ACTIVITYID, activityId);
-    q.setFirstResult(1);
+    q.setFirstResult(0);
     q.setMaxResults(1);
     List<?> activities = q.getResultList();
     if ( activities != null && activities.size() > 0 ) {
-      return (Activity) activities.get(1);
+      return (Activity) activities.get(0);
     }
     return null;
   }

@@ -39,6 +39,7 @@ public class SPIUtils {
    * @return
    */
   public static List<String> getUserList(Set<UserId> userIds, SecurityToken token) {
+    // TODO What's the use of userIdMap?
     HashMap<String, String> userIdMap = Maps.newHashMap();
     List<String> paramList = Lists.newArrayList();
     for (UserId u : userIds) {
@@ -63,7 +64,7 @@ public class SPIUtils {
   public static String getUserList(UserId userId, SecurityToken token) {
     return userId.getUserId(token);
   }
-  
+
   public static <T> List<T> toList(Set<T> s) {
     List<T> l = new ArrayList<T>();
     l.addAll(s);

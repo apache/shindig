@@ -17,14 +17,17 @@
  */
 package org.apache.shindig.social.opensocial.jpa;
 
-import com.google.common.collect.Maps;
-
+import static javax.persistence.CascadeType.ALL;
+import static javax.persistence.CascadeType.MERGE;
+import static javax.persistence.CascadeType.PERSIST;
+import static javax.persistence.CascadeType.REFRESH;
 import static javax.persistence.GenerationType.IDENTITY;
 
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 
-import org.apache.shindig.social.opensocial.jpa.api.FilterCapability;
 import org.apache.shindig.social.opensocial.jpa.api.DbObject;
+import org.apache.shindig.social.opensocial.jpa.api.FilterCapability;
 import org.apache.shindig.social.opensocial.jpa.api.FilterSpecification;
 import org.apache.shindig.social.opensocial.model.Account;
 import org.apache.shindig.social.opensocial.model.Address;
@@ -41,7 +44,11 @@ import org.apache.shindig.social.opensocial.model.Enum.NetworkPresence;
 import org.apache.shindig.social.opensocial.model.Enum.Smoker;
 import org.apache.shindig.social.opensocial.spi.PersonService.FilterOperation;
 
-import com.google.common.collect.Lists;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 
 import javax.persistence.Basic;
 import javax.persistence.Column;
@@ -63,26 +70,15 @@ import javax.persistence.TemporalType;
 import javax.persistence.Transient;
 import javax.persistence.Version;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import static javax.persistence.CascadeType.ALL;
-import static javax.persistence.CascadeType.PERSIST;
-import static javax.persistence.CascadeType.REFRESH;
-import static javax.persistence.CascadeType.MERGE;
-
 /**
  * Default Implementation of the Person object in the org.apache.shindig.social.opensocial.jpa.
  */
 @Entity
 @Table(name = "person")
 @NamedQueries(value = {
-    @NamedQuery(name = PersonDb.FINDBY_PERSONID, 
+    @NamedQuery(name = PersonDb.FINDBY_PERSONID,
         query = "select p from PersonDb p where p.id = :id "),
-    @NamedQuery(name = PersonDb.FINDBY_LIKE_PERSONID, 
+    @NamedQuery(name = PersonDb.FINDBY_LIKE_PERSONID,
         query = "select p from PersonDb p where p.id like :id") })
 public class PersonDb implements Person, DbObject {
 
@@ -124,7 +120,7 @@ public class PersonDb implements Person, DbObject {
 
   private static final String TVSHOWS_PROPERTY = "tvshow";
 
-  private static final Map<String, FilterSpecification> FILTER_COLUMNS = 
+  private static final Map<String, FilterSpecification> FILTER_COLUMNS =
     new HashMap<String, FilterSpecification>();
 
   private static final FilterOperation[] ALL_FILTEROPTIONS = new FilterOperation[] {
@@ -132,7 +128,7 @@ public class PersonDb implements Person, DbObject {
       FilterOperation.startsWith };
   private static final FilterOperation[] NUMERIC_FILTEROPTIONS = new FilterOperation[] {
       FilterOperation.equals, FilterOperation.present };
-  private static final FilterOperation[] EQUALS_FILTEROPTIONS = 
+  private static final FilterOperation[] EQUALS_FILTEROPTIONS =
     new FilterOperation[] { FilterOperation.equals };
 
   static {
@@ -189,7 +185,10 @@ public class PersonDb implements Person, DbObject {
 
   public static final String JPQL_FINDALLPERSON = null;
 
-  public static final String JPQL_FINDPERSON_BY_FRIENDS = null;
+  // TODO The commented out query supports sorting by friend.score but needs a join with FriendDb which returns duplicates.
+  // Using 'group by' to avoid duplicates doesn't work in HSQLDB or Derby - causes a "Not in aggregate function or group by clause" jdbc exception.
+  // public static final String JPQL_FINDPERSON_BY_FRIENDS = "select p from PersonDb p join FriendDb f on p.objectId = f.friend.objectId where p.objectId in (select f.friend.objectId from PersonDb p, FriendDb f where p.objectId = f.person.objectId and ";
+  public static final String JPQL_FINDPERSON_BY_FRIENDS = "select p from PersonDb p where p.objectId in (select f.friend.objectId from PersonDb p, FriendDb f where p.objectId = f.person.objectId and ";
 
   public static final Object JPQL_FINDPERSON_BY_GROUP = null;
 
@@ -205,7 +204,7 @@ public class PersonDb implements Person, DbObject {
   private long objectId;
 
   /**
-   * An optimistic locking field
+   * An optimistic locking field.
    */
   @Version
   @Column(name = "version")
@@ -246,14 +245,14 @@ public class PersonDb implements Person, DbObject {
   protected String children;
 
   /**
-   * 
+   *
    */
   @ManyToOne(targetEntity = AddressDb.class, cascade = { PERSIST, MERGE, REFRESH })
   @JoinColumn(name = "address_id", referencedColumnName = "oid")
   protected Address currentLocation;
 
   /**
-   * 
+   *
    */
   @Basic
   @Column(name = "birthday")
@@ -261,7 +260,7 @@ public class PersonDb implements Person, DbObject {
   protected Date birthday;
 
   /**
-   * 
+   *
    */
   @Basic
   @Column(name = "drinker", length = 255)
@@ -275,33 +274,33 @@ public class PersonDb implements Person, DbObject {
   private String displayName;
 
   /**
-   * 
+   *
    */
   @OneToMany(targetEntity = EmailDb.class, mappedBy = "person", cascade = ALL)
   protected List<ListField> emails;
 
   /**
-   * 
+   *
    */
   @Basic
   @Column(name = "ethnicity", length = 255)
   protected String ethnicity;
 
   /**
-   * 
+   *
    */
   @Basic
   @Column(name = "fashion", length = 255)
   protected String fashion;
 
   /**
-   * 
+   *
    */
   @Transient
   protected List<String> food;
 
   /**
-   * 
+   *
    */
   @Basic
   @Column(name = "gender", length = 255)
@@ -311,65 +310,65 @@ public class PersonDb implements Person, DbObject {
   protected Gender gender;
 
   /**
-   * 
+   *
    */
   @Basic
   @Column(name = "happiest_when", length = 255)
   protected String happiestWhen;
 
   /**
-   * 
+   *
    */
   @Transient
   protected Boolean hasApp;
 
   /**
-   * 
+   *
    */
   @Transient
   protected List<String> heroes;
 
   /**
-   * 
+   *
    */
   @Basic
   @Column(name = "humor", length = 255)
   protected String humor;
 
   /**
-   * 
+   *
    */
   @Basic
   @Column(name = "person_id", length = 255)
   protected String id;
 
   /**
-   * 
+   *
    */
   @OneToMany(targetEntity = ImDb.class, mappedBy = "person", cascade = ALL)
   protected List<ListField> ims;
 
   /**
-   * 
+   *
    */
   @Transient
   protected List<String> interests;
 
   /**
-   * 
+   *
    */
   @Basic
   @Column(name = "job_interests", length = 255)
   protected String jobInterests;
 
   /**
-   * 
+   *
    */
   @Transient
   protected List<String> languagesSpoken;
 
   /**
-   * 
+   *
    */
   @Basic
   @Column(name = "updated")
@@ -377,40 +376,40 @@ public class PersonDb implements Person, DbObject {
   protected Date updated;
 
   /**
-   * 
+   *
    */
   @Basic
   @Column(name = "living_arrangement", length = 255)
   protected String livingArrangement;
 
   /**
-   * 
+   *
    */
   @Transient
   // stored as a property, processed on get,set
   protected List<Enum<Enum.LookingFor>> lookingFor;
 
   /**
-   * 
+   *
    */
   @Transient
   protected List<String> movies;
 
   /**
-   * 
+   *
    */
   @Transient
   protected List<String> music;
 
   /**
-   * 
+   *
    */
   @ManyToOne(targetEntity = NameDb.class, cascade = ALL)
   @JoinColumn(name = "name_id", referencedColumnName = "oid")
   protected Name name;
 
   /**
-   * 
+   *
    */
   @Basic
   @Column(name = "network_presence", length = 255)
@@ -421,34 +420,34 @@ public class PersonDb implements Person, DbObject {
       NetworkPresence.XA);
 
   /**
-   * 
+   *
    */
   @Basic
   @Column(name = "nickname", length = 255)
   protected String nickname;
 
   /**
-   * 
+   *
    */
   @OneToMany(targetEntity = PersonOrganizationDb.class, mappedBy = "person", cascade = { PERSIST,
       MERGE, REFRESH })
   protected List<Organization> organizations;
 
   /**
-   * 
+   *
    */
   @Basic
   @Column(name = "pets", length = 255)
   protected String pets;
 
   /**
-   * 
+   *
    */
   @OneToMany(targetEntity = PhoneDb.class, mappedBy = "person", cascade = ALL)
   protected List<ListField> phoneNumbers;
 
   /**
-   * 
+   *
    */
   @OneToMany(targetEntity = PhotoDb.class, mappedBy = "person", cascade = ALL)
   protected List<ListField> photos;
@@ -457,60 +456,60 @@ public class PersonDb implements Person, DbObject {
   protected String politicalViews;
 
   /**
-   * 
+   *
    */
   @Transient
   protected Url profileSong;
 
   /**
-   * 
+   *
    */
   @Transient
   protected Url profileVideo;
 
   /**
-   * 
+   *
    */
   @Transient
   protected List<String> quotes;
 
   /**
-   * 
+   *
    */
   @Basic
   @Column(name = "relationship_status", length = 255)
   protected String relationshipStatus;
 
   /**
-   * 
+   *
    */
   @Basic
   @Column(name = "religion", length = 255)
   protected String religion;
 
   /**
-   * 
+   *
    */
   @Basic
   @Column(name = "romance", length = 255)
   protected String romance;
 
   /**
-   * 
+   *
    */
   @Basic
   @Column(name = "scared_of", length = 255)
   protected String scaredOf;
 
   /**
-   * 
+   *
    */
   @Basic
   @Column(name = "sexual_orientation", length = 255)
   protected String sexualOrientation;
 
   /**
-   * 
+   *
    */
   @Basic
   @Column(name = "smoker", length = 255)
@@ -520,51 +519,51 @@ public class PersonDb implements Person, DbObject {
   protected Enum<Enum.Smoker> smoker;
 
   /**
-   * 
+   *
    */
   @Transient
   protected List<String> sports;
 
   /**
-   * 
+   *
    */
   @Basic
   @Column(name = "status", length = 255)
   protected String status;
 
   /**
-   * 
+   *
    */
   @Transient
   protected List<String> tags;
 
   /**
-   * 
+   *
    */
   @Basic
   @Column(name = "utc_offset")
   protected Long utcOffset;
 
   /**
-   * 
+   *
    */
   @Transient
   protected List<String> turnOffs;
 
   /**
-   * 
+   *
    */
   @Transient
   protected List<String> turnOns;
 
   /**
-   * 
+   *
    */
   @Transient
   protected List<String> tvShows;
 
   /**
-   * 
+   *
    */
   @OneToMany(targetEntity = UrlDb.class, mappedBy = "person", cascade = ALL)
   protected List<Url> urls;
@@ -583,8 +582,8 @@ public class PersonDb implements Person, DbObject {
    * to application.oid.
    */
   @ManyToMany(targetEntity = ApplicationDb.class)
-  @JoinTable(name = "person_application", 
-      joinColumns = @JoinColumn(name = "person_id", referencedColumnName = "oid"), 
+  @JoinTable(name = "person_application",
+      joinColumns = @JoinColumn(name = "person_id", referencedColumnName = "oid"),
       inverseJoinColumns = @JoinColumn(name = "application_id", referencedColumnName = "oid"))
   protected List<ApplicationDb> applictions;
 
@@ -1262,7 +1261,7 @@ public class PersonDb implements Person, DbObject {
 
   /*
    * (non-Javadoc)
-   * 
+   *
    * @see org.apache.shindig.social.opensocial.model.Person#getDisplayName()
    */
   public String getDisplayName() {
@@ -1271,7 +1270,7 @@ public class PersonDb implements Person, DbObject {
 
   /*
    * (non-Javadoc)
-   * 
+   *
    * @see org.apache.shindig.social.opensocial.model.Person#setDisplayName(java.lang.String)
    */
   public void setDisplayName(String displayName) {
@@ -1282,7 +1281,6 @@ public class PersonDb implements Person, DbObject {
     return FILTER_CAPABILITY;
 
   }
-
   /**
    * @return the applictions
    */

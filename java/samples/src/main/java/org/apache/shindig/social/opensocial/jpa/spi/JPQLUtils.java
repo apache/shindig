@@ -19,10 +19,10 @@ package org.apache.shindig.social.opensocial.jpa.spi;
 
 import org.apache.shindig.social.opensocial.spi.CollectionOptions;
 
+import java.util.List;
+
 import javax.persistence.EntityManager;
 import javax.persistence.Query;
-
-import java.util.List;
 
 /**
  *
@@ -41,7 +41,10 @@ public class JPQLUtils {
       int nfields) {
     sb.append(alias).append(".").append(inField).append(" in (");
     for (int i = firstField; i < (firstField + nfields); i++) {
-      sb.append(" ?").append(i).append(" ");
+      if (i != firstField) {
+        sb.append(", ");
+      }
+      sb.append("?").append(i);
     }
     sb.append(")");
     return firstField + nfields;
@@ -67,7 +70,7 @@ public class JPQLUtils {
     }
     if (collectionOptions != null) {
       q.setFirstResult(collectionOptions.getFirst());
-      q.setMaxResults(collectionOptions.getFirst() + collectionOptions.getMax());
+      q.setMaxResults(collectionOptions.getMax());
     }
     return (List<T>) q.getResultList();
   }
