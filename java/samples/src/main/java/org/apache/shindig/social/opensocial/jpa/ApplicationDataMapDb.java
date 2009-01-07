@@ -115,7 +115,7 @@ public class ApplicationDataMapDb extends ConcurrentHashMap<String, String> impl
       }
     }
     // remove old entries
-    List<String> toRemove = new ArrayList<String>();
+    List<String> toRemove = Lists.newArrayList();
     for (Entry<String, ApplicationDataMapValueDb> e : valuesDb.entrySet()) {
       if (!this.containsKey(e.getKey())) {
         toRemove.add(e.getKey());

@@ -18,6 +18,8 @@
  */
 package org.apache.shindig.gadgets.servlet;
 
+import com.google.common.collect.Maps;
+
 import org.apache.shindig.common.util.Utf8UrlCoder;
 
 import java.util.Collections;
@@ -48,7 +50,7 @@ public class ProxyServletRequest extends HttpServletRequestWrapper {
         = CHAINED_SYNTAX_PATTERN.matcher(request.getRequestURI());
     usingChainedSyntax = chainedMatcher.matches();
     if (usingChainedSyntax) {
-      extractedParameters = new HashMap<String, String>();
+      extractedParameters = Maps.newHashMap();
 
       Matcher paramMatcher
           = PARAMETER_PAIR_PATTERN.matcher(chainedMatcher.group(1));

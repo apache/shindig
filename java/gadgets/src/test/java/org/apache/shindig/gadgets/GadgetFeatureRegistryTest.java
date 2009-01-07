@@ -23,6 +23,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 
+import com.google.common.collect.ImmutableSortedSet;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 
@@ -63,7 +64,7 @@ public class GadgetFeatureRegistryTest {
   private GadgetFeature makeFeature(String name, String content, String dep)
       throws GadgetException {
     JsLibrary lib = JsLibrary.create(JsLibrary.Type.INLINE, content, name, null);
-    List<String> deps = new LinkedList<String>();
+    List<String> deps = Lists.newLinkedList();
     if (deps != null) {
       deps.add(dep);
     }
@@ -89,7 +90,7 @@ public class GadgetFeatureRegistryTest {
   @Test
   public void getUnknownLibraries() throws GadgetException {
     registry.register(makeFeature(FEATURE_NAME, CONTENT, DEP_NAME));
-    List<String> unsupported = new ArrayList<String>();
+    List<String> unsupported = Lists.newArrayList();
     registry.getFeatures(Arrays.asList(FEATURE_NAME, "FAKE FAKE FAKE"),
                          unsupported);
     assertEquals("FAKE FAKE FAKE", unsupported.get(0));
@@ -102,7 +103,7 @@ public class GadgetFeatureRegistryTest {
     registry.register(makeFeature("feat0", CONTENT, DEP_NAME));
     registry.register(makeFeature("feat1", CONTENT, DEP_NAME));
 
-    Set<String> setKeys = Sets.immutableSortedSet("feat0", "feat1");
+    Set<String> setKeys = ImmutableSortedSet.of("feat0", "feat1");
     List<String> listKeys = Lists.newLinkedList("feat0", "feat1");
     Collection<String> collectKeys
         = Collections.unmodifiableCollection(Lists.newArrayList("feat0", "feat1"));
@@ -128,7 +129,7 @@ public class GadgetFeatureRegistryTest {
       registry.register(makeFeature(feature, CONTENT, DEP_NAME));
     }
 
-    Set<String> found = new HashSet<String>();
+    Set<String> found = Sets.newHashSet();
     for (GadgetFeature feature : registry.getAllFeatures()) {
       found.add(feature.getName());
     }

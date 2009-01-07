@@ -24,6 +24,7 @@ import org.apache.shindig.gadgets.variables.Substitutions;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 
 import org.apache.commons.lang.StringUtils;
 import org.w3c.dom.Element;
@@ -60,7 +61,7 @@ public class Preload implements RequestAuthenticationInfo {
 
     // Record all the associated views
     String viewNames = XmlUtil.getAttribute(preload, "views", "");
-    Set<String> views = new HashSet<String>();
+    Set<String> views = Sets.newHashSet();
     for (String s : viewNames.split(",")) {
       s = s.trim();
       if (s.length() > 0) {

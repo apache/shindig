@@ -18,6 +18,8 @@
  */
 package org.apache.shindig.auth;
 
+import com.google.common.collect.Maps;
+
 import org.apache.shindig.common.crypto.BasicBlobCrypter;
 import org.apache.shindig.common.crypto.BlobCrypter;
 import org.apache.shindig.common.crypto.BlobCrypterException;
@@ -66,7 +68,7 @@ public class BasicSecurityToken implements SecurityToken {
 
   public BasicSecurityToken(String owner, String viewer, String app,
       String domain, String appUrl, String moduleId) throws BlobCrypterException {
-    tokenData = new HashMap<String, String>(5,1);
+    tokenData = Maps.newHashMapWithExpectedSize(5);
     putNullSafe(OWNER_KEY, owner);
     putNullSafe(VIEWER_KEY, viewer);
     putNullSafe(APP_KEY, app);

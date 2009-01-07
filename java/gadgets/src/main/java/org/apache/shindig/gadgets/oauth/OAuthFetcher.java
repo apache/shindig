@@ -34,6 +34,7 @@ import org.apache.shindig.gadgets.oauth.AccessorInfo.HttpMethod;
 import org.apache.shindig.gadgets.oauth.AccessorInfo.OAuthParamLocation;
 import org.apache.shindig.gadgets.oauth.OAuthStore.TokenInfo;
 
+import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 
 import org.apache.commons.io.IOUtils;
@@ -338,7 +339,7 @@ public class OAuthFetcher extends ChainedContentFetcher {
    */
   private List<Parameter> sanitize(List<Parameter> params)
       throws RequestSigningException {
-    ArrayList<Parameter> list = new ArrayList<Parameter>();
+    ArrayList<Parameter> list = Lists.newArrayList();
     for (Parameter p : params) {
       String name = p.getKey();
       if (allowParam(name)) {
@@ -439,7 +440,7 @@ public class OAuthFetcher extends ChainedContentFetcher {
   public HttpRequest sanitizeAndSign(HttpRequest base, List<Parameter> params)
       throws GadgetException {
     if (params == null) {
-      params = new ArrayList<Parameter>();
+      params = Lists.newArrayList();
     }
     UriBuilder target = new UriBuilder(base.getUri());
     String query = target.getQuery();
@@ -637,7 +638,7 @@ public class OAuthFetcher extends ChainedContentFetcher {
         request.setHeader("Content-Type", OAuth.FORM_ENCODED);
       }
       
-      List<Parameter> msgParams = new ArrayList<Parameter>();
+      List<Parameter> msgParams = Lists.newArrayList();
       msgParams.add(new Parameter(OAuth.OAUTH_TOKEN, accessor.requestToken));
       if (accessorInfo.getSessionHandle() != null) {
         msgParams.add(new Parameter(OAUTH_SESSION_HANDLE, accessorInfo.getSessionHandle()));
@@ -816,8 +817,8 @@ public class OAuthFetcher extends ChainedContentFetcher {
    */
   private static List<Map.Entry<String, String>>
       selectOAuthParams(OAuthMessage message) {
-    List<Map.Entry<String, String>> result =
-        new ArrayList<Map.Entry<String, String>>();
+
+    List<Map.Entry<String, String>> result = Lists.newArrayList();
     for (Map.Entry<String, String> param : OAuthUtil.getParameters(message)) {
       if (isContainerInjectedParameter(param.getKey())) {
         result.add(param);
@@ -889,7 +890,7 @@ public class OAuthFetcher extends ChainedContentFetcher {
     }
 
 
-    List<OAuth.Parameter> oauthParams = new ArrayList<OAuth.Parameter>();
+    List<OAuth.Parameter> oauthParams = Lists.newArrayList();
     UriBuilder target = new UriBuilder(Uri.parse(url));
     String query = target.getQuery();
     target.setQuery(null);

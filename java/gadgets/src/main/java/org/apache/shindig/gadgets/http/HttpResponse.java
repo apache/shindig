@@ -20,9 +20,10 @@ package org.apache.shindig.gadgets.http;
 import org.apache.shindig.common.util.DateUtil;
 import org.apache.shindig.gadgets.encoding.EncodingDetector;
 
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import com.google.common.collect.Sets;
+
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
 
@@ -40,6 +41,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Represents the results of an HTTP content retrieval operation.
@@ -96,7 +98,7 @@ public final class HttpResponse implements Externalizable {
   public static final int SC_HTTP_VERSION_NOT_SUPPORTED = 505;
 
   // These content types can always skip encoding detection.
-  private static final Collection<String> BINARY_CONTENT_TYPES = Sets.newHashSet(
+  private static final Set<String> BINARY_CONTENT_TYPES = ImmutableSet.of(
       "image/jpeg", "image/png", "image/gif", "image/jpg", "application/x-shockwave-flash",
       "application/octet-stream", "application/ogg", "application/zip", "audio/mpeg",
       "audio/x-ms-wma", "audio/vnd.rn-realaudio", "audio/x-wav", "video/mpeg", "video/mp4",
@@ -106,8 +108,8 @@ public final class HttpResponse implements Externalizable {
 
   // These HTTP status codes should always honor the HTTP status returned by the remote host. All
   // other error codes are treated as errors and will use the negativeCacheTtl value.
-  private static final Collection<Integer> NEGATIVE_CACHING_EXEMPT_STATUS
-      = Sets.newHashSet(SC_UNAUTHORIZED, SC_FORBIDDEN);
+  private static final Set<Integer> NEGATIVE_CACHING_EXEMPT_STATUS
+      = ImmutableSet.of(SC_UNAUTHORIZED, SC_FORBIDDEN);
 
   // TTL to use when an error response is fetched. This should be non-zero to
   // avoid high rates of requests to bad urls in high-traffic situations.

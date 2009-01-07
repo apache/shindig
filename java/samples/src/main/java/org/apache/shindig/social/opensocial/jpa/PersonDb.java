@@ -17,6 +17,8 @@
  */
 package org.apache.shindig.social.opensocial.jpa;
 
+import com.google.common.collect.Maps;
+
 import static javax.persistence.GenerationType.IDENTITY;
 
 import org.apache.shindig.social.opensocial.jpa.api.FilterCapability;
@@ -212,7 +214,7 @@ public class PersonDb implements Person, DbObject {
   protected String aboutMe;
 
   @OneToMany(targetEntity = PersonPropertyDb.class, mappedBy = "person", cascade = ALL)
-  protected List<PersonPropertyDb> properties = new ArrayList<PersonPropertyDb>();
+  protected List<PersonPropertyDb> properties = Lists.newArrayList();
 
   @OneToMany(targetEntity = PersonAccountDb.class, mappedBy = "person", cascade = ALL)
   protected List<Account> accounts;
@@ -1135,7 +1137,7 @@ public class PersonDb implements Person, DbObject {
     networkPresenceDb = networkPresence.toString();
     smokerDb = smoker.toString();
 
-    List<String> lookingFor = new ArrayList<String>();
+    List<String> lookingFor = Lists.newArrayList();
     for (Enum<Enum.LookingFor> np : this.lookingFor) {
       lookingFor.add(np.toString());
     }
@@ -1174,7 +1176,7 @@ public class PersonDb implements Person, DbObject {
         }
       }
       // remove missing entries
-      List<PersonPropertyDb> toRemove = new ArrayList<PersonPropertyDb>();
+      List<PersonPropertyDb> toRemove = Lists.newArrayList();
       for (PersonPropertyDb pp : properties) {
         if (e.getKey().equals(pp.getType())) {
           boolean present = false;
@@ -1206,24 +1208,24 @@ public class PersonDb implements Person, DbObject {
     networkPresence = new EnumDb<NetworkPresence>(NetworkPresence.valueOf(networkPresenceDb));
     smoker = new EnumDb<Smoker>(Smoker.valueOf(smokerDb));
 
-    List<String> lookingFor = new ArrayList<String>();
-    this.activities = new ArrayList<String>();
-    this.books = new ArrayList<String>();
-    this.cars = new ArrayList<String>();
-    this.food = new ArrayList<String>();
-    this.heroes = new ArrayList<String>();
-    this.interests = new ArrayList<String>();
-    this.languagesSpoken = new ArrayList<String>();
-    this.movies = new ArrayList<String>();
-    this.music = new ArrayList<String>();
-    this.quotes = new ArrayList<String>();
-    this.sports = new ArrayList<String>();
-    this.tags = new ArrayList<String>();
-    this.turnOffs = new ArrayList<String>();
-    this.turnOns = new ArrayList<String>();
-    this.tvShows = new ArrayList<String>();
+    List<String> lookingFor = Lists.newArrayList();
+    this.activities = Lists.newArrayList();
+    this.books = Lists.newArrayList();
+    this.cars = Lists.newArrayList();
+    this.food = Lists.newArrayList();
+    this.heroes = Lists.newArrayList();
+    this.interests = Lists.newArrayList();
+    this.languagesSpoken = Lists.newArrayList();
+    this.movies = Lists.newArrayList();
+    this.music = Lists.newArrayList();
+    this.quotes = Lists.newArrayList();
+    this.sports = Lists.newArrayList();
+    this.tags = Lists.newArrayList();
+    this.turnOffs = Lists.newArrayList();
+    this.turnOns = Lists.newArrayList();
+    this.tvShows = Lists.newArrayList();
 
-    Map<String, List<String>> toSave = new HashMap<String, List<String>>();
+    Map<String, List<String>> toSave = Maps.newHashMap();
 
     toSave.put(LOOKING_FOR_PROPERTY, lookingFor);
     toSave.put(ACTIVITIES_PROPERTY, this.activities);
@@ -1249,7 +1251,7 @@ public class PersonDb implements Person, DbObject {
       }
     }
 
-    this.lookingFor = new ArrayList<Enum<LookingFor>>();
+    this.lookingFor = Lists.newArrayList();
     for (String lf : lookingFor) {
       this.lookingFor.add(new EnumDb<LookingFor>(LookingFor.valueOf(lf)));
     }

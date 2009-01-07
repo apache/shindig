@@ -37,6 +37,7 @@ import org.apache.shindig.gadgets.spec.MessageBundle;
 import org.apache.shindig.gadgets.spec.View;
 
 import com.google.caja.util.Join;
+import com.google.common.collect.ImmutableSortedSet;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
@@ -240,7 +241,7 @@ public class RenderingContentRewriterTest {
     String rewritten = rewrite(gadget, "");
 
     Set<String> actual = getInjectedScript(rewritten);
-    Set<String> expected = Sets.immutableSortedSet("foo", "bar", "baz");
+    Set<String> expected = ImmutableSortedSet.of("foo", "bar", "baz");
     assertEquals(expected, actual);
   }
 
@@ -293,7 +294,7 @@ public class RenderingContentRewriterTest {
     String rewritten = rewrite(gadget, "");
 
     Set<String> actual = getInjectedScript(rewritten);
-    Set<String> expected = Sets.immutableSortedSet("bar", "baz");
+    Set<String> expected = ImmutableSortedSet.of("bar", "baz");
     assertEquals(expected, actual);
     assertTrue("Requested scripts not inlined.", rewritten.contains("foo_content();"));
   }
@@ -380,7 +381,7 @@ public class RenderingContentRewriterTest {
     String rewritten = rewrite(gadget, "");
 
     Set<String> actual = getInjectedScript(rewritten);
-    Set<String> expected = Sets.immutableSortedSet("baz");
+    Set<String> expected = ImmutableSortedSet.of("baz");
     assertEquals(expected, actual);
     assertTrue("Requested scripts not inlined.", rewritten.contains("foo_content();"));
     assertTrue("Forced external file not forced.",
@@ -632,7 +633,7 @@ public class RenderingContentRewriterTest {
         throw new PreloadException("broken");
       }
       public Set<String> getKeys() {
-        return Sets.immutableSortedSet("foo");
+        return ImmutableSortedSet.of("foo");
       }
     };
 

@@ -19,6 +19,7 @@ package org.apache.shindig.gadgets;
 
 import org.apache.shindig.common.ContainerConfig;
 
+import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 
 import java.util.Collection;
@@ -88,7 +89,7 @@ public class GadgetFeature {
       // For this special case we return all JS libraries in a single list.
       // This is usually only used for debugging or at startup, so it's ok
       // that we're creating new objects every time.
-      libs = new LinkedList<JsLibrary>();
+      libs = Lists.newLinkedList();
       for (Map<String, List<JsLibrary>> ctx : libraries.values()) {
         for (List<JsLibrary> lib : ctx.values()) {
           libs.addAll(lib);

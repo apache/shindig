@@ -30,6 +30,9 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.mozilla.javascript.Context;
@@ -200,17 +203,17 @@ public class ApiValidator {
   public Map<String, Object> validateObject(Object jsonObject, String[] fieldNames,
       String[] optionalFields, String[] nullFields)
       throws ApiValidatorExpcetion {
-    Map<String, String> optional = new HashMap<String, String>();
+    Map<String, String> optional = Maps.newHashMap();
     for (String opt : optionalFields) {
       optional.put(opt, opt);
     }
-    Map<String, String> nullf = new HashMap<String, String>();
+    Map<String, String> nullf = Maps.newHashMap();
     for (String nf : nullFields) {
       nullf.put(nf, nf);
     }
 
 
-    Map<String, Object> resultFields = new HashMap<String, Object>();
+    Map<String, Object> resultFields = Maps.newHashMap();
 
     if (jsonObject instanceof ScriptableObject) {
       ScriptableObject parsedJSONObject = (ScriptableObject) jsonObject;
@@ -316,7 +319,7 @@ public class ApiValidator {
 
     List<String> scripts = getScripts(spec);
 
-    List<Script> compiled = new ArrayList<Script>();
+    List<Script> compiled = Lists.newArrayList();
     for (String script : scripts) {
       String scriptPath = spec + "/" + script;
       InputStream in = this.getClass().getClassLoader().getResourceAsStream(
@@ -386,7 +389,7 @@ public class ApiValidator {
     DocumentBuilder documentBuilder = builderFactory.newDocumentBuilder();
     Document doc = documentBuilder.parse(in);
     NodeList nl = doc.getElementsByTagName("script");
-    List<String> scripts = new ArrayList<String>();
+    List<String> scripts = Lists.newArrayList();
     for (int i = 0; i < nl.getLength(); i++) {
       Node scriptNode = nl.item(i);
       NamedNodeMap attributes = scriptNode.getAttributes();

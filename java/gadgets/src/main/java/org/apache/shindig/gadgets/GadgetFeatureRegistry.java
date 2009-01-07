@@ -19,7 +19,11 @@ package org.apache.shindig.gadgets;
 
 import org.apache.shindig.gadgets.http.HttpFetcher;
 
+import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
+
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.inject.name.Named;
@@ -65,8 +69,10 @@ public class GadgetFeatureRegistry {
   @Inject
   public GadgetFeatureRegistry(@Named("shindig.features.default") String featureFiles,
       HttpFetcher httpFetcher) throws GadgetException {
-    features = new HashMap<String, GadgetFeature>();
-    core = new HashMap<String, GadgetFeature>();
+
+    features = Maps.newHashMap();
+    core = Maps.newHashMap();
+
     if (featureFiles != null) {
       JsFeatureLoader loader = new JsFeatureLoader(httpFetcher);
       loader.loadFeatures(featureFiles, this);
@@ -131,7 +137,7 @@ public class GadgetFeatureRegistry {
     if (needed.isEmpty()) {
       neededSet = core.keySet();
     } else {
-      neededSet = new HashSet<String>(needed);
+      neededSet = ImmutableSet.copyOf(needed);
     }
 
     // We use the cache only for situations where all needed are available.
@@ -140,7 +146,7 @@ public class GadgetFeatureRegistry {
     if (libCache != null) {
       return libCache;
     }
-    List<GadgetFeature> ret = new LinkedList<GadgetFeature>();
+    List<GadgetFeature> ret = Lists.newLinkedList();
     populateDependencies(neededSet, ret);
     // Fill in anything that was optional but missing. These won't be cached.
     if (unsupported != null) {

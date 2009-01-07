@@ -17,6 +17,8 @@
  */
 package org.apache.shindig.social.opensocial.jpa.spi;
 
+import com.google.common.collect.Maps;
+
 import org.apache.shindig.auth.SecurityToken;
 import org.apache.shindig.common.util.ImmediateFuture;
 import org.apache.shindig.social.opensocial.jpa.ApplicationDataMapDb;
@@ -76,7 +78,7 @@ public class AppDataServiceDb implements AppDataService {
    */
   private List<ApplicationDataMapDb> getDataMap(UserId userId, GroupId groupId, String appId,
       SecurityToken token) {
-    List<String> paramList = new ArrayList<String>();
+    List<String> paramList = Lists.newArrayList();
     paramList.add(SPIUtils.getUserList(userId, token));
     int lastParam = 1;
     StringBuilder sb = new StringBuilder();
@@ -175,7 +177,7 @@ public class AppDataServiceDb implements AppDataService {
       }
     } else {
       for (ApplicationDataMapDb adm : dataMaps) {
-        Map<String, String> m = new HashMap<String, String>();
+        Map<String, String> m = Maps.newHashMap();
         for (String f : fields) {
           m.put(f, adm.get(f));
         }

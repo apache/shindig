@@ -17,6 +17,10 @@
  */
 package org.apache.shindig.gadgets.oauth.testing;
 
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
+
 import net.oauth.OAuth;
 import net.oauth.OAuthAccessor;
 import net.oauth.OAuthConsumer;
@@ -190,9 +194,9 @@ public class FakeOAuthServiceProvider implements HttpFetcher {
 
     oauthConsumer = new OAuthConsumer(null, CONSUMER_KEY, CONSUMER_SECRET, provider);
     
-    tokenState = new HashMap<String, TokenState>();
+    tokenState = Maps.newHashMap();
     validator = new FakeTimeOAuthValidator();
-    validParamLocations = new HashSet<OAuthParamLocation>();
+    validParamLocations = Sets.newHashSet();
     validParamLocations.add(OAuthParamLocation.URI_QUERY);
   }
 
@@ -327,7 +331,7 @@ public class FakeOAuthServiceProvider implements HttpFetcher {
     String method = request.getMethod();
     ParsedUrl parsed = new ParsedUrl(request.getUri().toString());
     
-    List<OAuth.Parameter> params = new ArrayList<OAuth.Parameter>();
+    List<OAuth.Parameter> params = Lists.newArrayList();
     params.addAll(parsed.getParsedQuery());
     
     if (!validParamLocations.contains(OAuthParamLocation.URI_QUERY)) {
@@ -428,7 +432,7 @@ public class FakeOAuthServiceProvider implements HttpFetcher {
         if (query != null) {
           decodedQuery = OAuth.decodeForm(query);
         } else {
-          decodedQuery = new ArrayList<OAuth.Parameter>();
+          decodedQuery = Lists.newArrayList();
         }
       }
       return decodedQuery;

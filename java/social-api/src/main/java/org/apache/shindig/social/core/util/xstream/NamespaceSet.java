@@ -17,6 +17,8 @@
  */
 package org.apache.shindig.social.core.util.xstream;
 
+import com.google.common.collect.Maps;
+
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -33,11 +35,11 @@ public class NamespaceSet {
   /**
    * A map namespace attributes to the namespace uri.
    */
-  private Map<String, String> namespaces = new HashMap<String, String>();
+  private Map<String, String> namespaces = Maps.newHashMap();
   /**
    * A map of localElement names to prefixed element names.
    */
-  private Map<String, String> elementNames = new HashMap<String, String>();
+  private Map<String, String> elementNames = Maps.newHashMap();
 
   /**
    * Add a namespace to the list.

@@ -17,6 +17,8 @@
  */
 package org.apache.shindig.social.core.util.atom;
 
+import com.google.common.collect.Lists;
+
 import org.apache.shindig.social.opensocial.model.Activity;
 import org.apache.shindig.social.opensocial.model.Person;
 
@@ -61,7 +63,7 @@ public class AtomContent {
   public AtomContent(Object value) {
     if (value instanceof Map) {
       Map<?, ?> entries = (Map<?, ?>) value;
-      List<AtomKeyValue> keyValues = new ArrayList<AtomKeyValue>();
+      List<AtomKeyValue> keyValues = Lists.newArrayList();
       for ( Entry<?, ?> e : entries.entrySet() ) {
         keyValues.add(new AtomKeyValue(e));
       }

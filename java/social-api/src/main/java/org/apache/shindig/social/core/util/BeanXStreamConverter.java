@@ -17,6 +17,8 @@
  */
 package org.apache.shindig.social.core.util;
 
+import com.google.common.collect.Maps;
+
 import com.google.inject.Inject;
 
 import com.thoughtworks.xstream.converters.reflection.PureJavaReflectionProvider;
@@ -54,7 +56,7 @@ public class BeanXStreamConverter implements BeanConverter {
   protected WriterStack writerStack;
 
 
-  protected Map<XStreamConfiguration.ConverterSet, ConverterConfig> converterMap = new HashMap<XStreamConfiguration.ConverterSet, ConverterConfig>();
+  protected Map<XStreamConfiguration.ConverterSet, ConverterConfig> converterMap = Maps.newHashMap();
 
   @Inject
   public BeanXStreamConverter(XStreamConfiguration configuration) {

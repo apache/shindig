@@ -23,6 +23,8 @@ import org.apache.shindig.gadgets.GadgetSpecFactory;
 import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.spec.GadgetSpec;
 
+import com.google.common.collect.Sets;
+
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.inject.name.Named;
@@ -56,7 +58,7 @@ public class ContentRewriterFeatureFactory {
     this.includeUrls = includeUrls;
     this.excludeUrls = excludeUrls;
     this.expires = expires;
-    this.includeTags = new HashSet<String>();
+    this.includeTags = Sets.newHashSet();
     for (String s : includeTags.split(",")) {
       if (s != null && s.trim().length() > 0) {
         this.includeTags.add(s.trim().toLowerCase());

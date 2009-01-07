@@ -14,6 +14,9 @@
 
 package org.apache.shindig.gadgets.http;
 
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
+
 import org.json.JSONArray;
 
 import java.util.ArrayList;
@@ -40,7 +43,7 @@ public class HttpCacheKey {
    * @param request
    */
   public HttpCacheKey(HttpRequest request) {
-    data = new HashMap<String,String>();
+    data = Maps.newHashMap();
     setCacheable(true);
     if (!"GET".equals(request.getMethod()) ||
         request.getIgnoreCache()) {
@@ -87,7 +90,7 @@ public class HttpCacheKey {
    */
   @Override
   public String toString() {
-    List<String> list = new ArrayList<String>();
+    List<String> list = Lists.newArrayList();
     list.addAll(data.keySet());
     Collections.sort(list);
     JSONArray json = new JSONArray();

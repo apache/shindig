@@ -29,6 +29,7 @@ import org.apache.shindig.common.crypto.BlobCrypter;
 import org.apache.shindig.common.util.CharsetUtil;
 import org.apache.shindig.common.util.FakeTimeSource;
 
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 
@@ -113,7 +114,7 @@ public class BlobCrypterSecurityTokenDecoderTest {
     String encrypted = t.encrypt();
 
     SecurityToken t2 = decoder.createToken(
-        Maps.immutableMap(SecurityTokenDecoder.SECURITY_TOKEN_NAME, encrypted));
+        ImmutableMap.of(SecurityTokenDecoder.SECURITY_TOKEN_NAME, encrypted));
 
     assertEquals("http://www.example.com/gadget.xml", t2.getAppId());
     assertEquals("http://www.example.com/gadget.xml", t2.getAppUrl());
@@ -137,7 +138,7 @@ public class BlobCrypterSecurityTokenDecoderTest {
     encrypted = encrypted.replace("container:", "other:");
 
     try {
-      decoder.createToken(Maps.immutableMap(SecurityTokenDecoder.SECURITY_TOKEN_NAME, encrypted));
+      decoder.createToken(ImmutableMap.of(SecurityTokenDecoder.SECURITY_TOKEN_NAME, encrypted));
       fail("should have reported that container was unknown");
     } catch (SecurityTokenException e) {
       assertTrue(e.getMessage(), e.getMessage().contains("Unknown container"));
@@ -157,7 +158,7 @@ public class BlobCrypterSecurityTokenDecoderTest {
     encrypted = encrypted.replace("container:", "example:");
 
     try {
-      decoder.createToken(Maps.immutableMap(SecurityTokenDecoder.SECURITY_TOKEN_NAME, encrypted));
+      decoder.createToken(ImmutableMap.of(SecurityTokenDecoder.SECURITY_TOKEN_NAME, encrypted));
       fail("should have tried to decrypt with wrong key");
     } catch (SecurityTokenException e) {
       assertTrue(e.getMessage(), e.getMessage().contains("Invalid token signature"));
@@ -177,7 +178,7 @@ public class BlobCrypterSecurityTokenDecoderTest {
 
     timeSource.incrementSeconds(3600 + 181); // one hour plus clock skew
     try {
-      decoder.createToken(Maps.immutableMap(SecurityTokenDecoder.SECURITY_TOKEN_NAME, encrypted));
+      decoder.createToken(ImmutableMap.of(SecurityTokenDecoder.SECURITY_TOKEN_NAME, encrypted));
       fail("should have expired");
     } catch (SecurityTokenException e) {
       assertTrue(e.getMessage(), e.getMessage().contains("Blob expired"));
@@ -187,7 +188,7 @@ public class BlobCrypterSecurityTokenDecoderTest {
   @Test
   public void testMalformed() throws Exception {
     try {
-      decoder.createToken(Maps.immutableMap(SecurityTokenDecoder.SECURITY_TOKEN_NAME, "foo"));
+      decoder.createToken(ImmutableMap.of(SecurityTokenDecoder.SECURITY_TOKEN_NAME, "foo"));
       fail("should have tried to decrypt with wrong key");
     } catch (SecurityTokenException e) {
       assertTrue(e.getMessage(), e.getMessage().contains("Invalid security token foo"));
@@ -197,10 +198,10 @@ public class BlobCrypterSecurityTokenDecoderTest {
   @Test
   public void testAnonymous() throws Exception {
     SecurityToken t = decoder.createToken(
-        Maps.immutableMap(SecurityTokenDecoder.SECURITY_TOKEN_NAME, "   "));
+        ImmutableMap.of(SecurityTokenDecoder.SECURITY_TOKEN_NAME, "   "));
     assertTrue(t.isAnonymous());
 
-    Map<String, String> empty = Maps.immutableMap();
+    Map<String, String> empty = ImmutableMap.of();
     t = decoder.createToken(empty);
     assertTrue(t.isAnonymous());
   }

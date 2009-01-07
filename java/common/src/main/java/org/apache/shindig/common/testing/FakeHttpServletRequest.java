@@ -18,7 +18,9 @@
  */
 package org.apache.shindig.common.testing;
 
+import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
@@ -88,10 +90,9 @@ public class FakeHttpServletRequest implements HttpServletRequest {
 
   // Use a LinkedHashMap so we can generate a query string that is in the same
   // order that we set the parameters
-  protected Map<String, String[]> parameters =
-      new LinkedHashMap<String, String[]>();
+  protected Map<String, String[]> parameters = Maps.newLinkedHashMap();
 
-  protected Set<String> postParameters = new HashSet<String>();
+  protected Set<String> postParameters = Sets.newHashSet();
 
   protected Map<String, Cookie> cookies = new Hashtable<String, Cookie>();
 
@@ -432,7 +433,7 @@ public class FakeHttpServletRequest implements HttpServletRequest {
   }
 
   public Enumeration<?> getHeaders(String name) {
-    List<String> values = new ArrayList<String>();
+    List<String> values = Lists.newArrayList();
     for (Map.Entry<String, String> entry : headers.entrySet()) {
       if (name.equalsIgnoreCase(entry.getKey())) {
         values.add(entry.getValue());

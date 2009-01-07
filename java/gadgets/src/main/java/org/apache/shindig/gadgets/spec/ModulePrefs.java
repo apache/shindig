@@ -19,6 +19,9 @@ package org.apache.shindig.gadgets.spec;
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.gadgets.variables.Substitutions;
 
+import com.google.common.base.Join;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 
@@ -73,7 +76,7 @@ public class ModulePrefs {
 
   public ModulePrefs(Element element, Uri base) throws SpecParserException {
     this.base = base;
-    attributes = new HashMap<String, String>();
+    attributes = Maps.newHashMap();
     NamedNodeMap attributeNodes = element.getAttributes();
     for (int i = 0; i < attributeNodes.getLength(); i++) {
       Node node = attributeNodes.item(i);
@@ -95,14 +98,15 @@ public class ModulePrefs {
     LocaleVisitor localeVisitor = new LocaleVisitor();
     LinkVisitor linkVisitor = new LinkVisitor();
 
-    Map<String, ElementVisitor> visitors = Maps.newHashMapWithExpectedSize(6);
-    visitors.put("Preload", preloadVisitor);
-    visitors.put("Optional", featureVisitor);
-    visitors.put("Require", featureVisitor);
-    visitors.put("OAuth", oauthVisitor);
-    visitors.put("Icon", iconVisitor);
-    visitors.put("Locale", localeVisitor);
-    visitors.put("Link", linkVisitor);
+    Map<String, ElementVisitor> visitors = new ImmutableMap.Builder<String,ElementVisitor>()
+        .put("Preload", preloadVisitor)
+        .put("Optional", featureVisitor)
+        .put("Require", featureVisitor)
+        .put("OAuth", oauthVisitor)
+        .put("Icon", iconVisitor)
+        .put("Locale", localeVisitor)
+        .put("Link", linkVisitor)
+        .build();
 
     walk(element, visitors);
 
@@ -124,32 +128,31 @@ public class ModulePrefs {
     locales = prefs.getLocales();
     oauth = prefs.oauth;
 
-    List<Preload> preloads = new ArrayList<Preload>(prefs.preloads.size());
+    List<Preload> preloads = Lists.newArrayList();
     for (Preload preload : prefs.preloads) {
       preloads.add(preload.substitute(substituter));
     }
-    this.preloads = Collections.unmodifiableList(preloads);
+    this.preloads = ImmutableList.copyOf(preloads);
 
-    List<Icon> icons = new ArrayList<Icon>(prefs.icons.size());
+    List<Icon> icons = Lists.newArrayList();
     for (Icon icon : prefs.icons) {
       icons.add(icon.substitute(substituter));
     }
-    this.icons = Collections.unmodifiableList(icons);
+    this.icons = ImmutableList.copyOf(icons);
 
-    Map<String, LinkSpec> links = new HashMap<String, LinkSpec>(prefs.links.size());
+    ImmutableMap.Builder<String, LinkSpec> links = ImmutableMap.builder();
     for (LinkSpec link : prefs.links.values()) {
       LinkSpec sub = link.substitute(substituter);
       links.put(sub.getRel(), sub);
     }
-    this.links = Collections.unmodifiableMap(links);
+    this.links = links.build();
 
-    Map<String, String> attributes
-        = new HashMap<String, String>(prefs.attributes.size());
+    ImmutableMap.Builder<String, String> attributes = ImmutableMap.builder();
     for (Map.Entry<String, String> attr : prefs.attributes.entrySet()) {
       String substituted = substituter.substituteString(attr.getValue());
       attributes.put(attr.getKey(), substituted);
     }
-    this.attributes = Collections.unmodifiableMap(attributes);
+    this.attributes = attributes.build();
   }
 
   // Canonical spec items first.
@@ -519,21 +522,12 @@ public class ModulePrefs {
     }
     buf.append(">\n");
 
-    for (Preload preload : preloads) {
-      buf.append(preload).append('\n');
-    }
-    for (Feature feature : features.values()) {
-      buf.append(feature).append('\n');
-    }
-    for (Icon icon : icons) {
-      buf.append(icon).append('\n');
-    }
-    for (LocaleSpec locale : locales.values()) {
-      buf.append(locale).append('\n');
-    }
-    for (LinkSpec link : links.values()) {
-      buf.append(link).append('\n');
-    }
+    Join.join(buf, "\n", preloads);
+    Join.join(buf, "\n", features.values());
+    Join.join(buf, "\n", icons);
+    Join.join(buf, "\n", locales.values());
+    Join.join(buf, "\n", links.values());
+
     if (oauth != null) {
       buf.append(oauth).append('\n');
     }

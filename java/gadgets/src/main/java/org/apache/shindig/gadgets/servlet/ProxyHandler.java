@@ -27,6 +27,8 @@ import org.apache.shindig.gadgets.http.HttpResponse;
 import org.apache.shindig.gadgets.rewrite.ContentRewriterRegistry;
 
 import com.google.common.collect.Sets;
+import com.google.common.collect.ImmutableSet;
+
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
@@ -36,6 +38,7 @@ import java.io.IOException;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.logging.Logger;
 
 import javax.servlet.http.HttpServletRequest;
@@ -48,7 +51,7 @@ import javax.servlet.http.HttpServletResponse;
 public class ProxyHandler extends ProxyBase {
   private static final Logger logger = Logger.getLogger(ProxyHandler.class.getName());
 
-  private static final Collection<String> DISALLOWED_RESPONSE_HEADERS = Sets.newHashSet(
+  private static final Set<String> DISALLOWED_RESPONSE_HEADERS = ImmutableSet.of(
       "set-cookie", "content-length", "content-encoding", "etag", "last-modified" ,"accept-ranges",
       "vary", "expires", "date", "pragma", "cache-control"
   );
