@@ -21,6 +21,7 @@ import org.apache.shindig.social.opensocial.model.Activity;
 import org.apache.shindig.social.opensocial.spi.ActivityService;
 import org.apache.shindig.social.opensocial.spi.SocialSpiException;
 import org.apache.shindig.social.opensocial.spi.UserId;
+import org.apache.shindig.social.opensocial.spi.CollectionOptions;
 
 import com.google.common.collect.Sets;
 import com.google.inject.Inject;
@@ -108,6 +109,8 @@ public class ActivityHandler extends DataRequestHandler {
     Set<UserId> userIds = request.getUsers();
     Set<String> optionalActivityIds = Sets.newLinkedHashSet(request.getListParameter("activityId"));
 
+    CollectionOptions options = new CollectionOptions(request);
+
     // Preconditions
     Preconditions.requireNotEmpty(userIds, "No userId specified");
     if (userIds.size() > 1 && !optionalActivityIds.isEmpty()) {
@@ -121,7 +124,7 @@ public class ActivityHandler extends DataRequestHandler {
             request.getToken());
       } else {
         return service.getActivities(userIds.iterator().next(), request.getGroup(),
-            request.getAppId(), request.getFields(), optionalActivityIds, request.getToken());
+            request.getAppId(), request.getFields(), options, optionalActivityIds, request.getToken());
       }
     }
 
@@ -129,7 +132,7 @@ public class ActivityHandler extends DataRequestHandler {
         request.getAppId(),
         // TODO: add pagination and sorting support
         // getSortBy(params), getFilterBy(params), getStartIndex(params), getCount(params),
-        request.getFields(), request.getToken());
+        request.getFields(), options, request.getToken());
   }
 
 }

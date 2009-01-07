@@ -28,6 +28,7 @@ import org.apache.shindig.social.core.model.ActivityImpl;
 import org.apache.shindig.social.core.util.BeanJsonConverter;
 import org.apache.shindig.social.opensocial.model.Activity;
 import org.apache.shindig.social.opensocial.spi.ActivityService;
+import org.apache.shindig.social.opensocial.spi.CollectionOptions;
 import org.apache.shindig.social.opensocial.spi.GroupId;
 import org.apache.shindig.social.opensocial.spi.RestfulCollection;
 import org.apache.shindig.social.opensocial.spi.SocialSpiException;
@@ -86,7 +87,7 @@ public class ActivityHandlerTest extends TestCase {
     List<Activity> activityList = ImmutableList.of();
     RestfulCollection<Activity> data = new RestfulCollection<Activity>(activityList);
     EasyMock.expect(activityService.getActivities(JOHN_DOE,
-        new GroupId(group, null), null, Sets.<String>newHashSet(), token)).andReturn(
+       new GroupId(group, null), null, Sets.<String>newHashSet(), new CollectionOptions(request), token)).andReturn(
         ImmediateFuture.newInstance(data));
 
     replay();
@@ -114,8 +115,8 @@ public class ActivityHandlerTest extends TestCase {
     Set<UserId> userIdSet = Sets.newLinkedHashSet(JOHN_DOE);
     userIdSet.add(new UserId(UserId.Type.userId, "jane.doe"));
     EasyMock.expect(activityService.getActivities(userIdSet,
-        new GroupId(GroupId.Type.self, null), "appId", Sets.<String>newHashSet(), token)).andReturn(
-        ImmediateFuture.newInstance(data));
+        new GroupId(GroupId.Type.self, null), "appId", Sets.<String>newHashSet(), new CollectionOptions(request), token)).andReturn(
+          ImmediateFuture.newInstance(data));
 
     replay();
     assertEquals(data, handler.handleGet(request).get());
