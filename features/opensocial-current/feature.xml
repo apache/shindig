@@ -18,7 +18,7 @@
   under the License.
 -->
 <feature>
-  <name>opensocial-0.8</name>
+  <name>opensocial-0.9</name>
   <dependency>opensocial-jsonrpc</dependency>
   <dependency>opensocial-rest</dependency>
   <!-- <dependency>caja</dependency> -->
