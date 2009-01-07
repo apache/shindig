@@ -17,6 +17,8 @@
  */
 package org.apache.shindig.social.core.util;
 
+import com.google.common.collect.Maps;
+
 import org.apache.shindig.social.opensocial.model.Address;
 import org.apache.shindig.social.opensocial.model.Enum;
 import org.apache.shindig.social.opensocial.model.ListField;
@@ -78,7 +80,7 @@ public class BeanJsonLibConfig extends JsonConfig {
     setJavaPropertyFilter(new NullPropertyFilter());
     // the classMap deals with the basic json string to bean conversion
 
-    Map<String, Class<?>> classMap = new HashMap<String, Class<?>>();
+    Map<String, Class<?>> classMap = Maps.newHashMap();
 
     /*
      * mappings are required where there is a List of objects in the interface

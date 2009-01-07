@@ -301,7 +301,7 @@ public class BeanJsonLibConverterTest extends TestCase {
     // appear
     // to be allowed in json
     // just check that the list is in the holder correctly
-    List<Map<String, String>> list = new ArrayList<Map<String, String>>();
+    List<Map<String, String>> list = Lists.newArrayList();
     list.add(item1Map);
     list.add(item2Map);
     String result = beanJsonConverter.convertToString(list);

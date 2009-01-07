@@ -17,6 +17,8 @@
  */
 package org.apache.shindig.gadgets;
 
+import com.google.common.collect.Lists;
+
 import org.easymock.classextension.EasyMock;
 
 import junit.framework.TestCase;
@@ -24,9 +26,10 @@ import junit.framework.TestCase;
 import java.util.ArrayList;
 import java.util.List;
 
+
 public abstract class EasyMockTestCase extends TestCase {
   /** Tracks all EasyMock objects created for a test. */
-  private final List<Object> mocks = new ArrayList<Object>();
+  private final List<Object> mocks = Lists.newArrayList();
 
   public EasyMockTestCase() {
     super();

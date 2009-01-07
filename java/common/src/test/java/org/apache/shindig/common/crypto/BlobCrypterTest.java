@@ -18,6 +18,9 @@
  */
 package org.apache.shindig.common.crypto;
 
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Maps;
+
 import org.apache.shindig.common.crypto.BasicBlobCrypter;
 import org.apache.shindig.common.crypto.BlobCrypter;
 import org.apache.shindig.common.crypto.BlobCrypterException;
@@ -61,7 +64,7 @@ public class BlobCrypterTest {
   }
 
   private void checkString(String string) throws Exception {
-    Map<String, String> in = new HashMap<String, String>();
+    Map<String, String> in = Maps.newHashMap();
     if (string != null) {
       in.put("a", string);
     }
@@ -90,7 +93,7 @@ public class BlobCrypterTest {
 
   @Test
   public void testManyEntries() throws Exception {
-    Map<String, String> in = new HashMap<String, String>();
+    Map<String, String> in = Maps.newHashMap();
     for (int i=0; i < 1000; i++) {
       in.put(Integer.toString(i), Integer.toString(i));
     }
@@ -110,8 +113,7 @@ public class BlobCrypterTest {
     try {
 
       timeSource.setCurrentTimeMillis(start);
-      Map<String, String> in = new HashMap<String, String>();
-      in.put("a", "b");
+      Map<String, String> in = ImmutableMap.of("a","b");
       String blob = crypter.wrap(in);
       timeSource.incrementSeconds(realAge);
       crypter.unwrap(blob, maxAge);
@@ -126,8 +128,8 @@ public class BlobCrypterTest {
   @Test
   public void testTamperIV() throws Exception {
     try {
-      Map<String, String> in = new HashMap<String, String>();
-      in.put("a", "b");
+      Map<String, String> in = ImmutableMap.of("a","b");
+
       String blob = crypter.wrap(in);
       byte[] blobBytes = Base64.decodeBase64(blob.getBytes());
       blobBytes[0] ^= 0x01;
@@ -142,8 +144,7 @@ public class BlobCrypterTest {
   @Test
   public void testTamperData() throws Exception {
     try {
-      Map<String, String> in = new HashMap<String, String>();
-      in.put("a", "b");
+      Map<String, String> in = ImmutableMap.of("a","b");
       String blob = crypter.wrap(in);
       byte[] blobBytes = Base64.decodeBase64(blob.getBytes());
       blobBytes[30] ^= 0x01;
@@ -158,8 +159,8 @@ public class BlobCrypterTest {
   @Test
   public void testTamperMac() throws Exception {
     try {
-      Map<String, String> in = new HashMap<String, String>();
-      in.put("a", "b");
+      Map<String, String> in = ImmutableMap.of("a","b");
+
       String blob = crypter.wrap(in);
       byte[] blobBytes = Base64.decodeBase64(blob.getBytes());
       blobBytes[blobBytes.length-1] ^= 0x01;
@@ -174,8 +175,8 @@ public class BlobCrypterTest {
   @Test
   public void testFixedKey() throws Exception {
     BlobCrypter alt = new BasicBlobCrypter("0123456789abcdef".getBytes());
-    Map<String, String> in = new HashMap<String, String>();
-    in.put("a", "b");
+    Map<String, String> in = ImmutableMap.of("a","b");
+
     String blob = crypter.wrap(in);
     Map<String, String> out = alt.unwrap(blob, 30);
     assertEquals("b", out.get("a"));
@@ -184,8 +185,8 @@ public class BlobCrypterTest {
   @Test
   public void testBadKey() throws Exception {
     BlobCrypter alt = new BasicBlobCrypter("1123456789abcdef".getBytes());
-    Map<String, String> in = new HashMap<String, String>();
-    in.put("a", "b");
+    Map<String, String> in = ImmutableMap.of("a","b");
+
     String blob = crypter.wrap(in);
     try {
       alt.unwrap(blob, 30);

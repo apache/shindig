@@ -23,6 +23,8 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
+import com.google.common.collect.Maps;
+
 import org.apache.shindig.auth.AnonymousSecurityToken;
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.gadgets.AuthType;
@@ -69,7 +71,7 @@ public class HttpRequestTest {
 
   @Test
   public void getHeader() throws Exception {
-    Map<String, List<String>> headers = new HashMap<String, List<String>>();
+    Map<String, List<String>> headers = Maps.newHashMap();
     headers.put(TEST_HEADER_KEY, Arrays.asList(TEST_HEADER_VALUE));
     HttpRequest request = new HttpRequest(DEFAULT_URI)
         .addHeader(TEST_HEADER_KEY, TEST_HEADER_VALUE);

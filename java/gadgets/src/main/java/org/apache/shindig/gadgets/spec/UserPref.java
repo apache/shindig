@@ -17,6 +17,10 @@
  */
 package org.apache.shindig.gadgets.spec;
 
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
+
 import org.apache.shindig.common.xml.XmlUtil;
 import org.apache.shindig.gadgets.variables.Substitutions;
 
@@ -110,17 +114,16 @@ public class UserPref {
     if (enumValues.isEmpty()) {
       pref.enumValues = Collections.emptyMap();
     } else {
-      Map<String, String> values = new HashMap<String, String>(enumValues.size());
+      Map<String, String> values = Maps.newHashMapWithExpectedSize(enumValues.size());
       for (Map.Entry<String, String> entry : enumValues.entrySet()) {
         values.put(entry.getKey(), substituter.substituteString(entry.getValue()));
       }
-      pref.enumValues = Collections.unmodifiableMap(values);
+      pref.enumValues = ImmutableMap.copyOf(values);
     }
     if (orderedEnumValues.isEmpty()) {
       pref.orderedEnumValues = Collections.emptyList();
     } else {
-      List<EnumValuePair> orderedValues
-          = new LinkedList<EnumValuePair>();
+      List<EnumValuePair> orderedValues = Lists.newLinkedList();
       for (EnumValuePair evp : orderedEnumValues) {
         orderedValues.add(new EnumValuePair(evp.getValue(),
             substituter.substituteString(evp.getDisplayValue())));
@@ -181,8 +184,8 @@ public class UserPref {
 
     NodeList children = element.getElementsByTagName("EnumValue");
     if (children.getLength() > 0) {
-      Map<String, String> enumValues = new HashMap<String, String>();
-      List<EnumValuePair> orderedEnumValues = new LinkedList<EnumValuePair>();
+      Map<String, String> enumValues = Maps.newHashMap();
+      List<EnumValuePair> orderedEnumValues = Lists.newLinkedList();
       for (int i = 0, j = children.getLength(); i < j; ++i) {
         Element child = (Element)children.item(i);
         String value = XmlUtil.getAttribute(child, "value");

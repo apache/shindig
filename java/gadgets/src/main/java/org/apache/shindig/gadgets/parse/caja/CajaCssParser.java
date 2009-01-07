@@ -28,6 +28,8 @@ import com.google.caja.parser.css.CssTree;
 import com.google.caja.reporting.MessageContext;
 import com.google.caja.reporting.RenderContext;
 import com.google.caja.util.Criterion;
+
+import com.google.common.collect.Lists;
 import com.google.inject.Singleton;
 
 import java.io.StringReader;
@@ -41,7 +43,7 @@ public class CajaCssParser implements GadgetCssParser {
 
   public List<ParsedCssRule> parse(String css) throws GadgetException {
     if (css.matches("\\s*")) {
-      return new ArrayList<ParsedCssRule>(0);
+      return Lists.newArrayList();
     }
     
     CssParser parser = getParser(css);
@@ -53,8 +55,8 @@ public class CajaCssParser implements GadgetCssParser {
       throw new GadgetException(GadgetException.Code.CSS_PARSE_ERROR, e);
     }
     
-    ArrayList<ParsedCssRule> rules =
-        new ArrayList<ParsedCssRule>(stylesheet.children().size());
+    ArrayList<ParsedCssRule> rules = 
+        Lists.newArrayListWithExpectedSize(stylesheet.children().size());
     for (CssTree node : stylesheet.children()) {
       if (node instanceof CssTree.RuleSet) {
         rules.add(new CajaParsedCssRule((CssTree.RuleSet)node));
@@ -67,7 +69,7 @@ public class CajaCssParser implements GadgetCssParser {
   public List<ParsedCssDeclaration> parseInline(String style)
       throws GadgetException {
     if (style.matches("\\s*")) {
-      return new ArrayList<ParsedCssDeclaration>();
+      return Lists.newArrayList();
     }
     
     CssParser parser = getParser(style);
@@ -80,7 +82,7 @@ public class CajaCssParser implements GadgetCssParser {
     }
     
     List<ParsedCssDeclaration> attributes =
-        new ArrayList<ParsedCssDeclaration>(declGroup.children().size());
+        Lists.newArrayListWithExpectedSize(declGroup.children().size());
     for (CssTree node : declGroup.children()) {
       if (node instanceof CssTree.Declaration) {
         CssTree.Declaration decl = (CssTree.Declaration)node;
@@ -127,8 +129,8 @@ public class CajaCssParser implements GadgetCssParser {
     private final List<String> selectors;
     
     private CajaParsedCssRule(CssTree.RuleSet ruleSet) {
-      attributes = new ArrayList<ParsedCssDeclaration>();
-      selectors = new ArrayList<String>();
+      attributes = Lists.newArrayList();
+      selectors = Lists.newArrayList();
       
       for (CssTree child : ruleSet.children()) {
         if (child instanceof CssTree.Selector) {

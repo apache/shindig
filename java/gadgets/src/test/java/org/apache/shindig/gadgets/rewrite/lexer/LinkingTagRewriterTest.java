@@ -18,6 +18,8 @@
  */
 package org.apache.shindig.gadgets.rewrite.lexer;
 
+import com.google.common.collect.Maps;
+
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.gadgets.rewrite.BaseRewriterTestCase;
 
@@ -39,7 +41,7 @@ public class LinkingTagRewriterTest extends BaseRewriterTestCase {
     dummyUri = Uri.parse("http://www.w3c.org");
     Uri relativeBase = Uri.parse("http://a.b.com/");
     LinkingTagRewriter rewriter = new LinkingTagRewriter(defaultLinkRewriter, relativeBase);
-    defaultTransformerMap = new HashMap<String, HtmlTagTransformer>();
+    defaultTransformerMap = Maps.newHashMap();
     for (String tag : rewriter.getSupportedTags()) {
       defaultTransformerMap
         .put(tag, rewriter);

@@ -17,6 +17,8 @@
  */
 package org.apache.shindig.gadgets.oauth;
 
+import com.google.common.collect.ImmutableSet;
+
 import net.oauth.OAuthMessage;
 import net.oauth.OAuthProblemException;
 import org.apache.shindig.gadgets.http.HttpResponse;
@@ -50,33 +52,25 @@ class OAuthProtocolException extends Exception {
    * Problems that should force us to abort the protocol right away,
    * and next time the user visits ask them for permission again.
    */
-  private static Set<String> fatalProblems;
+  private static Set<String> fatalProblems =
+      ImmutableSet.of("version_rejected",
+                      "signature_method_rejected",
+                      "consumer_key_unknown",
+                      "consumer_key_rejected",
+                      "timestamp_refused");
   
   /**
    * Problems that should force us to abort the protocol right away,
    * but we can still try to use the access token again later.
    */
-  private static Set<String> temporaryProblems;
+  private static Set<String> temporaryProblems = 
+      ImmutableSet.of("consumer_key_refused");
   
   /**
    * Problems that should have us try to refresh the access token.
    */
-  private static Set<String> extensionProblems;
-  
-  static {
-    fatalProblems = new HashSet<String>();
-    fatalProblems.add("version_rejected");
-    fatalProblems.add("signature_method_rejected");
-    fatalProblems.add("consumer_key_unknown");
-    fatalProblems.add("consumer_key_rejected");
-    fatalProblems.add("timestamp_refused");
-    
-    temporaryProblems = new HashSet<String>();
-    temporaryProblems.add("consumer_key_refused");
-    
-    extensionProblems = new HashSet<String>();
-    extensionProblems.add("access_token_expired");
-  }
+  private static Set<String> extensionProblems =
+      ImmutableSet.of("access_token_expired");
   
   private final String problemCode;
   private final String problemText;

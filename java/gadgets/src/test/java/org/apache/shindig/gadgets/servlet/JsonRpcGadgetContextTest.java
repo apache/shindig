@@ -18,6 +18,8 @@
  */
 package org.apache.shindig.gadgets.servlet;
 
+import com.google.common.collect.Maps;
+
 import org.apache.shindig.gadgets.GadgetContext;
 
 import junit.framework.TestCase;
@@ -33,7 +35,7 @@ public class JsonRpcGadgetContextTest extends TestCase {
   final static int SPEC_ID = 1234;
   final static String[] PREF_KEYS = new String[] {"hello", "foo"};
   final static String[] PREF_VALUES = new String[] {"world", "bar"};
-  final static Map<String, String> prefs = new HashMap<String, String>();
+  final static Map<String, String> prefs = Maps.newHashMap();
   static {
     for (int i = 0, j = PREF_KEYS.length; i < j; ++i) {
       prefs.put(PREF_KEYS[i], PREF_VALUES[i]);

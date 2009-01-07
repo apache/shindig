@@ -30,6 +30,8 @@ import static org.eclipse.persistence.config.PersistenceUnitProperties.LOGGING_T
 import static org.eclipse.persistence.config.PersistenceUnitProperties.TARGET_SERVER;
 import static org.eclipse.persistence.config.PersistenceUnitProperties.TRANSACTION_TYPE;
 
+import com.google.common.collect.Maps;
+
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
 
@@ -85,7 +87,7 @@ public class Bootstrap {
 
   public void init(String unitName) {
 
-    Map<String, String> properties = new HashMap<String, String>();
+    Map<String, String> properties = Maps.newHashMap();
 
     // Ensure RESOURCE_LOCAL transactions is used.
     properties.put(TRANSACTION_TYPE, PersistenceUnitTransactionType.RESOURCE_LOCAL.name());

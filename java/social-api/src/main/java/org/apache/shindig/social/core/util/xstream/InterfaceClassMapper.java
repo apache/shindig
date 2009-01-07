@@ -17,6 +17,8 @@
  */
 package org.apache.shindig.social.core.util.xstream;
 
+import com.google.common.collect.Maps;
+
 import com.google.inject.ImplementedBy;
 
 import com.thoughtworks.xstream.mapper.Mapper;
@@ -51,7 +53,7 @@ public class InterfaceClassMapper extends MapperWrapper {
   /**
    * A map of element names to classes.
    */
-  private Map<String, Class<?>> elementClassMap = new HashMap<String, Class<?>>();
+  private Map<String, Class<?>> elementClassMap = Maps.newHashMap();
   /**
    * The first child of the root object. If the root object is not a collection,
    * this is null. If the root object is a collection and all the elements are

@@ -20,6 +20,8 @@ package org.apache.shindig.social.opensocial.service;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
+
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 
 import java.util.Map;
@@ -41,7 +43,7 @@ public class StandardHandlerDispatcher implements HandlerDispatcher {
   public StandardHandlerDispatcher(Provider<PersonHandler> personHandlerProvider,
       Provider<ActivityHandler> activityHandlerProvider,
       Provider<AppDataHandler> appDataHandlerProvider) {
-    this(Maps.immutableMap(
+    this(ImmutableMap.of(
         DataServiceServlet.PEOPLE_ROUTE, personHandlerProvider,
         DataServiceServlet.ACTIVITY_ROUTE, activityHandlerProvider,
         DataServiceServlet.APPDATA_ROUTE, appDataHandlerProvider));

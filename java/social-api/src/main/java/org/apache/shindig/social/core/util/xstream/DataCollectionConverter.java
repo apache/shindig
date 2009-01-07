@@ -17,6 +17,8 @@
  */
 package org.apache.shindig.social.core.util.xstream;
 
+import com.google.common.collect.Maps;
+
 import com.thoughtworks.xstream.converters.MarshallingContext;
 import com.thoughtworks.xstream.converters.UnmarshallingContext;
 import com.thoughtworks.xstream.converters.collections.AbstractCollectionConverter;
@@ -115,7 +117,7 @@ public class DataCollectionConverter extends AbstractCollectionConverter {
   public Object unmarshal(HierarchicalStreamReader reader,
       UnmarshallingContext context) {
     reader.moveDown();
-    Map<String, Object> m = new HashMap<String, Object>();
+    Map<String, Object> m = Maps.newHashMap();
     while (reader.hasMoreChildren()) {
       reader.moveDown(); // entry
       String ok = null;
@@ -128,7 +130,7 @@ public class DataCollectionConverter extends AbstractCollectionConverter {
         } else if ("value".equals(elname)) {
           ov = reader.getValue();
           if (reader.hasMoreChildren()) {
-            Map<String, String> innerMap = new HashMap<String, String>();
+            Map<String, String> innerMap = Maps.newHashMap();
             while (reader.hasMoreChildren()) {
               reader.moveDown();// entry
               String k = null;
@@ -162,14 +164,14 @@ public class DataCollectionConverter extends AbstractCollectionConverter {
         nonmap = true;
       }
     }
-    Map<String, Map<String, String>> fm = new HashMap<String, Map<String, String>>();
+    Map<String, Map<String, String>> fm = Maps.newHashMap();
     if (nonmap) {
       for (Entry<String, Object> e : m.entrySet()) {
         if (e.getValue() instanceof Map) {
           fm.put(e.getKey(), (Map<String, String>) e.getValue());
         } else {
           // not certain that this makes sense, but can't see how else.
-          Map<String, String> mv = new HashMap<String, String>();
+	  Map<String, String> mv = Maps.newHashMap();
           mv.put(e.getKey(), (String) e.getValue());
           fm.put(e.getKey(), mv);
         }

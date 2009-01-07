@@ -17,6 +17,11 @@
  */
 package org.apache.shindig.gadgets.spec;
 
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
+
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.common.util.HashUtil;
 import org.apache.shindig.common.xml.XmlException;
@@ -58,8 +63,8 @@ public class GadgetSpec {
     NodeList children = doc.getChildNodes();
 
     ModulePrefs modulePrefs = null;
-    List<UserPref> userPrefs = new LinkedList<UserPref>();
-    Map<String, List<Element>> views = new HashMap<String, List<Element>>();
+    List<UserPref> userPrefs = Lists.newLinkedList();
+    Map<String, List<Element>> views = Maps.newHashMap();
     for (int i = 0, j = children.getLength(); i < j; ++i) {
       Node child = children.item(i);
       if (!(child instanceof Element)) {
@@ -85,7 +90,7 @@ public class GadgetSpec {
           view = view.trim();
           List<Element> viewElements = views.get(view);
           if (viewElements == null) {
-            viewElements = new LinkedList<Element>();
+            viewElements = Lists.newLinkedList();
             views.put(view, viewElements);
           }
           viewElements.add(element);
@@ -102,18 +107,17 @@ public class GadgetSpec {
     if (views.isEmpty()) {
       throw new SpecParserException("At least 1 Content is required.");
     } else {
-      Map<String, View> tmpViews = new HashMap<String, View>();
+      Map<String, View> tmpViews = Maps.newHashMap();
       for (Map.Entry<String, List<Element>> view : views.entrySet()) {
         View v = new View(view.getKey(), view.getValue(), url);
         tmpViews.put(v.getName(), v);
       }
-      this.views = Collections.unmodifiableMap(tmpViews);
+      this.views = ImmutableMap.copyOf(tmpViews);
     }
-
-    if (!userPrefs.isEmpty()) {
-      this.userPrefs = Collections.unmodifiableList(userPrefs);
+    if (userPrefs.isEmpty()) {
+	this.userPrefs = Collections.emptyList();
     } else {
-      this.userPrefs = Collections.emptyList();
+        this.userPrefs = ImmutableList.copyOf(userPrefs);
     }
   }
 
@@ -201,20 +205,22 @@ public class GadgetSpec {
   public GadgetSpec substitute(Substitutions substituter) {
     GadgetSpec spec = new GadgetSpec(this);
     spec.modulePrefs = modulePrefs.substitute(substituter);
+
     if (userPrefs.isEmpty()) {
       spec.userPrefs = Collections.emptyList();
     } else {
-      List<UserPref> prefs = new ArrayList<UserPref>(userPrefs.size());
+      List<UserPref> prefs = Lists.newArrayListWithExpectedSize(userPrefs.size());
       for (UserPref pref : userPrefs) {
         prefs.add(pref.substitute(substituter));
       }
-      spec.userPrefs = Collections.unmodifiableList(prefs);
+      spec.userPrefs = ImmutableList.copyOf(prefs);
     }
-    Map<String, View> viewMap = new HashMap<String, View>(views.size());
+
+    ImmutableMap.Builder<String, View> viewMap = ImmutableMap.builder();
     for (View view : views.values()) {
       viewMap.put(view.getName(), view.substitute(substituter));
     }
-    spec.views = Collections.unmodifiableMap(viewMap);
+    spec.views = viewMap.build();
 
     return spec;
   }

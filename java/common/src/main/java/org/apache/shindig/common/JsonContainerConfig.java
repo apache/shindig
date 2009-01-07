@@ -21,6 +21,8 @@ package org.apache.shindig.common;
 
 import org.apache.shindig.common.util.ResourceLoader;
 
+import com.google.common.collect.Maps;
+
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.inject.name.Named;
@@ -64,7 +66,7 @@ public class JsonContainerConfig implements ContainerConfig {
   @Inject
   public JsonContainerConfig(@Named("shindig.containers.default") String containers)
       throws ContainerConfigException {
-    config = new HashMap<String, JSONObject>();
+    config = Maps.newHashMap();
     if (containers != null) {
       loadContainers(containers);
     }
@@ -270,8 +272,8 @@ public class JsonContainerConfig implements ContainerConfig {
 
       // Now that all containers are loaded, we go back through them and merge
       // recursively. This is done at startup to simplify lookups.
-      Map<String, JSONObject> merged
-          = new HashMap<String, JSONObject>(config.size());
+      Map<String, JSONObject> merged = Maps.newHashMapWithExpectedSize(config.size());
+
       for (String container : config.keySet()) {
         merged.put(container, mergeParents(container));
       }

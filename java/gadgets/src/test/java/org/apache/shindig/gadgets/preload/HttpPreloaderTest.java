@@ -35,6 +35,7 @@ import org.apache.shindig.gadgets.http.HttpResponse;
 import org.apache.shindig.gadgets.http.HttpResponseBuilder;
 import org.apache.shindig.gadgets.spec.GadgetSpec;
 
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 
@@ -57,7 +58,7 @@ public class HttpPreloaderTest {
   private static final String PRELOAD_CONTENT = "Preloaded data";
   private static final String CONTAINER = "some-container";
   private static final Uri GADGET_URL = Uri.parse("http://example.org/gadget.xml");
-  private static final Map<String, String> PRELOAD_METADATA = Maps.immutableMap("foo", "bar");
+  private static final Map<String, String> PRELOAD_METADATA = ImmutableMap.of("foo", "bar");
   private final RecordingHttpFetcher plainFetcher = new RecordingHttpFetcher();
   private final RecordingHttpFetcher oauthFetcher = new RecordingHttpFetcher();
 

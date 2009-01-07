@@ -33,6 +33,9 @@ import org.apache.shindig.gadgets.rewrite.RewriterResults;
 import org.apache.shindig.gadgets.spec.GadgetSpec;
 import org.apache.shindig.gadgets.spec.View;
 
+import com.google.common.collect.Sets;
+import com.google.common.collect.Maps;
+
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.inject.name.Named;
@@ -83,7 +86,7 @@ public class DefaultContentRewriter implements ContentRewriter {
     this.expires = expires;
     this.proxyUrl = proxyUrl;
     this.concatUrl = concatUrl;
-    this.includeTags = new HashSet<String>();
+    this.includeTags = Sets.newHashSet();
     for (String s : includeTags.split(",")) {
       if (s != null && s.trim().length() > 0) {
         this.includeTags.add(s.trim().toLowerCase());
@@ -145,15 +148,14 @@ public class DefaultContentRewriter implements ContentRewriter {
       return false;
     }
     if (isHTML(mimeType)) {
-      Map<String, HtmlTagTransformer> transformerMap
-          = new HashMap<String, HtmlTagTransformer>();
+      Map<String, HtmlTagTransformer> transformerMap = Maps.newHashMap();
 
       if (getProxyUrl() != null) {
         LinkRewriter linkRewriter = createLinkRewriter(spec, rewriterFeature);
         LinkingTagRewriter rewriter = new LinkingTagRewriter(
             linkRewriter,
             source);
-        Set<String> toProcess = new HashSet<String>(rewriter.getSupportedTags());
+        Set<String> toProcess = Sets.newHashSet(rewriter.getSupportedTags());
         toProcess.retainAll(rewriterFeature.getIncludedTags());
         for (String tag : toProcess) {
           transformerMap.put(tag, rewriter);

@@ -17,6 +17,8 @@
  */
 package org.apache.shindig.social.core.util.xstream;
 
+import com.google.common.collect.Lists;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -33,7 +35,7 @@ public class ThreadSafeWriterStack implements WriterStack {
    */
   private ThreadLocal<List<Object[]>> stackHolder = new ThreadLocal<List<Object[]>>() { 
       protected List<Object[]> initialValue() {
-        return new ArrayList<Object[]>();
+        return Lists.newArrayList();
       }
   };
 

@@ -20,6 +20,8 @@ package org.apache.shindig.gadgets.servlet;
 
 import static org.easymock.EasyMock.expect;
 
+import com.google.common.collect.ImmutableSet;
+
 import org.apache.shindig.gadgets.GadgetContext;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -97,9 +99,7 @@ public class HttpUtilTest extends ServletTestFixture {
         .put(FEATURE_0, "config")
         .put(FEATURE_1, "other config");
 
-    Set<String> needed = new HashSet<String>();
-    needed.add(FEATURE_0);
-    needed.add(FEATURE_1);
+    Set<String> needed = ImmutableSet.of(FEATURE_0, FEATURE_1);
 
     expect(context.getContainer()).andReturn(CONTAINER);
     expect(containerConfig.getJsonObject(CONTAINER, "gadgets.features"))
