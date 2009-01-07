@@ -449,7 +449,24 @@ opensocial.DataRequest.ActivityRequestFields = {
    * {String} If provided will filter all activities by this app Id.
    * @private - at the moment you can only request activities for your own app
    */
-  APP_ID : 'appId'
+  APP_ID : 'appId',
+  /**
+   * When paginating, the index of the first item to fetch.
+   * Specified as a <code>Number</code>.
+   *
+   * @member opensocial.DataRequest.ActivityRequestFields
+   */
+  FIRST : 'first',
+
+  /**
+   * The maximum number of items to fetch; defaults to 20. If set to a larger
+   * number, a container may honor the request, or may limit the number to a
+   * container-specified limit of at least 20.
+   * Specified as a <code>Number</code>.
+   *
+   * @member opensocial.DataRequest.ActivityRequestFields
+   */
+  MAX : 'max'
 };
 
 
@@ -471,6 +488,10 @@ opensocial.DataRequest.ActivityRequestFields = {
 opensocial.DataRequest.prototype.newFetchActivitiesRequest = function(idSpec,
     opt_params) {
   opt_params = opt_params || {};
+
+  this.addDefaultParam(opt_params, fields.FIRST, 0);
+  this.addDefaultParam(opt_params, fields.MAX, 20);
+
   return opensocial.Container.get().newFetchActivitiesRequest(idSpec,
       opt_params);
 };
