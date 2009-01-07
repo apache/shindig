@@ -57,6 +57,7 @@
       <xs:element minOccurs="0" name="templateParams" type="tns:ActivityTemplateParams" />
       <xs:element minOccurs="0" name="title" type="xs:string" />
       <xs:element minOccurs="0" name="titleId" type="xs:string" />
+      <xs:element minOccurs="0" name="updated" type="xs:dateTime"/>
       <xs:element minOccurs="0" name="url" type="xs:string" />
       <xs:element minOccurs="0" name="userId" type="xs:string" />
     </xs:choice>
