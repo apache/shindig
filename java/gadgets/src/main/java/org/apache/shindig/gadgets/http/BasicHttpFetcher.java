@@ -77,7 +77,10 @@ public class BasicHttpFetcher implements HttpFetcher {
     this(DEFAULT_MAX_OBJECT_SIZE);
   }
 
-  @Inject(optional=true)
+  // TODO Re-add Inject annotation once shindig is upgraded to guice 2.0, because at the moment this causes problems
+  // when running shindig behind a proxy as guice still injects a proxy provider even though optional is set to true.
+  // See issue http://code.google.com/p/google-guice/issues/detail?id=107 for more details.
+  // @Inject(optional=true)
   public void setProxyProvider(Provider<Proxy> proxyProvider) {
     this.proxyProvider = proxyProvider;
   }
