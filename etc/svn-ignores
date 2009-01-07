@@ -17,3 +17,6 @@ surefire*.properties
 .deployables
 .wtpmodules
 .externalToolBuilders
+create.sql
+drop.sql
+derby.log

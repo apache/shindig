@@ -97,3 +97,4 @@ svn propset svn:ignore -F etc/svn-ignores java/common
 svn propset svn:ignore -F etc/svn-ignores java/gadgets
 svn propset svn:ignore -F etc/svn-ignores java/social-api
 svn propset svn:ignore -F etc/svn-ignores java/server
+svn propset svn:ignore -F etc/svn-ignores java/samples
