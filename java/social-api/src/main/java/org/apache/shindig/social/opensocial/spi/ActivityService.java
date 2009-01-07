@@ -40,11 +40,12 @@ public interface ActivityService {
    * @param groupId Indicates whether to fetch activities for a group.
    * @param appId   The app id.
    * @param fields  The fields to return. Empty set implies all
+   * @param options The sorting/filtering/pagination options
    * @param token   A valid SecurityToken
    * @return a response item with the list of activities.
    */
   Future<RestfulCollection<Activity>> getActivities(Set<UserId> userIds,
-      GroupId groupId, String appId, Set<String> fields, SecurityToken token)
+      GroupId groupId, String appId, Set<String> fields, CollectionOptions options, SecurityToken token)
       throws SocialSpiException;
 
   /**
@@ -55,18 +56,19 @@ public interface ActivityService {
    * @param groupId     Indicates whether to fetch activities for a group.
    * @param appId       The app id.
    * @param fields      The fields to return. Empty set implies all
+   * @param options The sorting/filtering/pagination options
    * @param activityIds The set of activity ids to fetch.
    * @param token       A valid SecurityToken
    * @return a response item with the list of activities.
    */
   Future<RestfulCollection<Activity>> getActivities(UserId userId, GroupId groupId,
-      String appId, Set<String> fields, Set<String> activityIds, SecurityToken token)
+      String appId, Set<String> fields, CollectionOptions options, Set<String> activityIds, SecurityToken token)
       throws SocialSpiException;
 
 
   /**
-   * Returns a set of activities for the passed in user and group that corresponds to a single of
-   * activityId
+   * Returns an activity for the passed in user and group that corresponds to a single
+   * activityId.
    *
    * @param userId     The set of ids of the people to fetch activities for.
    * @param groupId    Indicates whether to fetch activities for a group.

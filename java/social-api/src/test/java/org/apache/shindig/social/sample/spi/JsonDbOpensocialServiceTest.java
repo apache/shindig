@@ -123,14 +123,14 @@ public class JsonDbOpensocialServiceTest extends TestCase {
 
   public void testGetExpectedActivities() throws Exception {
     RestfulCollection<Activity> responseItem = db.getActivities(
-        Sets.newHashSet(CANON_USER), SELF_GROUP, APP_ID, Collections.<String>emptySet(),
+        Sets.newHashSet(CANON_USER), SELF_GROUP, APP_ID, Collections.<String>emptySet(), null,
         new FakeGadgetToken()).get();
     assertTrue(responseItem.getTotalResults() == 2);
   }
 
   public void testGetExpectedActivitiesForPlural() throws Exception {
     RestfulCollection<Activity> responseItem = db.getActivities(
-        Sets.newHashSet(CANON_USER, JOHN_DOE), SELF_GROUP, APP_ID, Collections.<String>emptySet(),
+        Sets.newHashSet(CANON_USER, JOHN_DOE), SELF_GROUP, APP_ID, Collections.<String>emptySet(), null,
         new FakeGadgetToken()).get();
     assertTrue(responseItem.getTotalResults() == 3);
   }

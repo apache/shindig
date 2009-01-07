@@ -117,7 +117,7 @@ public class JsonDbOpensocialService implements ActivityService, PersonService, 
   }
 
   public Future<RestfulCollection<Activity>> getActivities(Set<UserId> userIds,
-      GroupId groupId, String appId, Set<String> fields, SecurityToken token)
+      GroupId groupId, String appId, Set<String> fields, CollectionOptions options, SecurityToken token)
       throws SocialSpiException  {
     List<Activity> result = Lists.newArrayList();
     try {
@@ -128,9 +128,9 @@ public class JsonDbOpensocialService implements ActivityService, PersonService, 
           for (int i = 0; i < activities.length(); i++) {
             JSONObject activity = activities.getJSONObject(i);
             if (appId == null || !activity.has(Activity.Field.APP_ID.toString())) {
-              result.add(convertToActivity(activity, fields));
+              result.add(filterFields(activity, fields, Activity.class));
             } else if (activity.get(Activity.Field.APP_ID.toString()).equals(appId)) {
-              result.add(convertToActivity(activity, fields));
+              result.add(filterFields(activity, fields, Activity.class));
             }
           }
         }
@@ -142,7 +142,7 @@ public class JsonDbOpensocialService implements ActivityService, PersonService, 
   }
 
   public Future<RestfulCollection<Activity>> getActivities(UserId userId,
-      GroupId groupId, String appId, Set<String> fields,
+      GroupId groupId, String appId, Set<String> fields, CollectionOptions options,
       Set<String> activityIds, SecurityToken token) throws SocialSpiException {
     List<Activity> result = Lists.newArrayList();
     try {
@@ -153,7 +153,7 @@ public class JsonDbOpensocialService implements ActivityService, PersonService, 
           JSONObject activity = activities.getJSONObject(i);
           if (activity.get(Activity.Field.USER_ID.toString()).equals(user)
               && activityIds.contains(activity.getString(Activity.Field.ID.toString()))) {
-            result.add(convertToActivity(activity, fields));
+            result.add(filterFields(activity, fields, Activity.class));
           }
         }
       }
@@ -174,7 +174,7 @@ public class JsonDbOpensocialService implements ActivityService, PersonService, 
           JSONObject activity = activities.getJSONObject(i);
           if (activity.get(Activity.Field.USER_ID.toString()).equals(user)
               && activity.get(Activity.Field.ID.toString()).equals(activityId)) {
-            return ImmediateFuture.newInstance(convertToActivity(activity, fields));
+            return ImmediateFuture.newInstance(filterFields(activity, fields, Activity.class));
           }
         }
       }
@@ -249,7 +249,7 @@ public class JsonDbOpensocialService implements ActivityService, PersonService, 
           continue;
         }
         // Add group support later
-        result.add(convertToPerson(person, fields));
+        result.add(filterFields(person, fields, Person.class));
       }
 
       // We can pretend that by default the people are in top friends order
@@ -284,7 +284,7 @@ public class JsonDbOpensocialService implements ActivityService, PersonService, 
         JSONObject person = people.getJSONObject(i);
         if (id != null && person.get(Person.Field.ID.toString())
             .equals(id.getUserId(token))) {
-          return ImmediateFuture.newInstance(convertToPerson(person, fields));
+          return ImmediateFuture.newInstance(filterFields(person, fields, Person.class));
         }
       }
       throw new SocialSpiException(ResponseError.BAD_REQUEST, "Person not found");
@@ -415,13 +415,6 @@ public class JsonDbOpensocialService implements ActivityService, PersonService, 
     return ids;
   }
 
-  private Activity convertToActivity(JSONObject object, Set<String> fields) throws JSONException {
-    if (!fields.isEmpty()) {
-      // Create a copy with just the specified fields
-      object = new JSONObject(object, fields.toArray(new String[fields.size()]));
-    }
-    return converter.convertToObject(object.toString(), Activity.class);
-  }
 
   private JSONObject convertFromActivity(Activity activity, Set<String> fields)
       throws JSONException {
@@ -429,11 +422,12 @@ public class JsonDbOpensocialService implements ActivityService, PersonService, 
     return new JSONObject(converter.convertToString(activity));
   }
 
-  private Person convertToPerson(JSONObject object, Set<String> fields) throws JSONException {
+
+  private <T> T filterFields(JSONObject object, Set<String> fields, Class<T> clz) throws JSONException {
     if (!fields.isEmpty()) {
       // Create a copy with just the specified fields
       object = new JSONObject(object, fields.toArray(new String[fields.size()]));
     }
-    return converter.convertToObject(object.toString(), Person.class);
+    return converter.convertToObject(object.toString(), clz);
   }
 }
