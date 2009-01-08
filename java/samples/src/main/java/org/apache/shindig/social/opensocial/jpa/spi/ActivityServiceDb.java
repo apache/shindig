@@ -27,6 +27,7 @@ import org.apache.shindig.social.opensocial.jpa.MediaItemDb;
 import org.apache.shindig.social.opensocial.model.Activity;
 import org.apache.shindig.social.opensocial.model.MediaItem;
 import org.apache.shindig.social.opensocial.spi.ActivityService;
+import org.apache.shindig.social.opensocial.spi.CollectionOptions;
 import org.apache.shindig.social.opensocial.spi.GroupId;
 import org.apache.shindig.social.opensocial.spi.RestfulCollection;
 import org.apache.shindig.social.opensocial.spi.SocialSpiException;
@@ -42,12 +43,18 @@ import javax.persistence.EntityManager;
 import javax.persistence.Query;
 
 /**
- *
+ * The Class ActivityServiceDb.
  */
 public class ActivityServiceDb implements ActivityService {
 
+  /** The entity manager. */
   private EntityManager entityManager;
 
+  /**
+   * Instantiates a new activity service db.
+   * 
+   * @param entityManager the entity manager
+   */
   @Inject
   public ActivityServiceDb(EntityManager entityManager) {
     this.entityManager = entityManager;
@@ -117,12 +124,13 @@ public class ActivityServiceDb implements ActivityService {
     // TODO Auto-generated method stub
     return null;
   }
-
+  
   /* (non-Javadoc)
-   * @see org.apache.shindig.social.opensocial.spi.ActivityService#getActivities(java.util.Set, org.apache.shindig.social.opensocial.spi.GroupId, java.lang.String, java.util.Set, org.apache.shindig.auth.SecurityToken)
+   * @see org.apache.shindig.social.opensocial.spi.ActivityService#getActivities(java.util.Set, org.apache.shindig.social.opensocial.spi.GroupId, java.lang.String, java.util.Set, org.apache.shindig.social.opensocial.spi.CollectionOptions, org.apache.shindig.auth.SecurityToken)
    */
-  public Future<RestfulCollection<Activity>> getActivities(Set<UserId> userIds, GroupId groupId,
-      String appId, Set<String> fields, SecurityToken token) throws SocialSpiException {
+  public Future<RestfulCollection<Activity>> getActivities(Set<UserId> userIds,
+      GroupId groupId, String appId, Set<String> fields,
+      CollectionOptions options, SecurityToken token) throws SocialSpiException {
 
     // TODO currently the implementation of this method ignores the fields variable. Is this correct?
 
@@ -178,12 +186,13 @@ public class ActivityServiceDb implements ActivityService {
     // db wait times.
     return ImmediateFuture.newInstance(new RestfulCollection<Activity>(plist));
   }
-
+  
   /* (non-Javadoc)
-   * @see org.apache.shindig.social.opensocial.spi.ActivityService#getActivities(org.apache.shindig.social.opensocial.spi.UserId, org.apache.shindig.social.opensocial.spi.GroupId, java.lang.String, java.util.Set, java.util.Set, org.apache.shindig.auth.SecurityToken)
+   * @see org.apache.shindig.social.opensocial.spi.ActivityService#getActivities(org.apache.shindig.social.opensocial.spi.UserId, org.apache.shindig.social.opensocial.spi.GroupId, java.lang.String, java.util.Set, org.apache.shindig.social.opensocial.spi.CollectionOptions, java.util.Set, org.apache.shindig.auth.SecurityToken)
    */
-  public Future<RestfulCollection<Activity>> getActivities(UserId userId, GroupId groupId,
-      String appId, Set<String> fields, Set<String> activityIds, SecurityToken token)
+  public Future<RestfulCollection<Activity>> getActivities(UserId userId,
+      GroupId groupId, String appId, Set<String> fields,
+      CollectionOptions options, Set<String> activityIds, SecurityToken token)
       throws SocialSpiException {
     return ImmediateFuture.newInstance(new RestfulCollection<Activity>(getActivities(userId, activityIds, token)));
   }
@@ -202,11 +211,13 @@ public class ActivityServiceDb implements ActivityService {
 
 
   /**
-   * @param userId
-   * @param groupId
-   * @param appId
-   * @param token
-   * @return
+   * Gets the activities.
+   * 
+   * @param userId the user id
+   * @param token the token
+   * @param activityId the activity id
+   * 
+   * @return the activities
    */
   private Activity getActivities(UserId userId, String activityId,
       SecurityToken token) {
@@ -225,11 +236,13 @@ public class ActivityServiceDb implements ActivityService {
 
 
   /**
-   * @param userId
-   * @param groupId
-   * @param appId
-   * @param token
-   * @return
+   * Gets the activities.
+   * 
+   * @param userId the user id
+   * @param token the token
+   * @param activityIds the activity ids
+   * 
+   * @return the activities
    */
   private List<Activity> getActivities(UserId userId, Set<String> activityIds,
       SecurityToken token) {
