@@ -22,6 +22,7 @@ import static org.junit.Assert.assertEquals;
 
 import org.apache.shindig.social.opensocial.model.Activity;
 import org.apache.shindig.social.opensocial.model.EnumUtil;
+import org.apache.shindig.social.opensocial.spi.CollectionOptions;
 import org.apache.shindig.social.opensocial.spi.GroupId;
 import org.apache.shindig.social.opensocial.spi.RestfulCollection;
 import org.apache.shindig.social.opensocial.spi.UserId;
@@ -64,7 +65,7 @@ public class ActivityServiceDbTest {
   
   @Test
   public void getJohnDoeActivities() throws Exception {
-    Future<RestfulCollection<Activity>> result = this.activityServiceDb.getActivities(SpiTestUtil.buildUserIds("john.doe"), new GroupId(GroupId.Type.self, "@self"), null, ACTIVITY_ALL_FIELDS, SpiTestUtil.DEFAULT_TEST_SECURITY_TOKEN);
+    Future<RestfulCollection<Activity>> result = this.activityServiceDb.getActivities(SpiTestUtil.buildUserIds("john.doe"), new GroupId(GroupId.Type.self, "@self"), null, ACTIVITY_ALL_FIELDS, new CollectionOptions(), SpiTestUtil.DEFAULT_TEST_SECURITY_TOKEN);
     RestfulCollection<Activity> activityCollection = result.get();
     assertEquals(1, activityCollection.getTotalResults());
     assertEquals(0, activityCollection.getStartIndex());
@@ -73,7 +74,7 @@ public class ActivityServiceDbTest {
   
   @Test
   public void getJohnDoeFriendsActivities() throws Exception {
-    Future<RestfulCollection<Activity>> result = this.activityServiceDb.getActivities(SpiTestUtil.buildUserIds("john.doe"), new GroupId(GroupId.Type.friends, "@friends"), null, ACTIVITY_ALL_FIELDS, SpiTestUtil.DEFAULT_TEST_SECURITY_TOKEN);
+    Future<RestfulCollection<Activity>> result = this.activityServiceDb.getActivities(SpiTestUtil.buildUserIds("john.doe"), new GroupId(GroupId.Type.friends, "@friends"), null, ACTIVITY_ALL_FIELDS, new CollectionOptions(), SpiTestUtil.DEFAULT_TEST_SECURITY_TOKEN);
     RestfulCollection<Activity> activityCollection = result.get();
     assertEquals(2, activityCollection.getTotalResults());
     assertEquals(0, activityCollection.getStartIndex());
@@ -88,7 +89,7 @@ public class ActivityServiceDbTest {
     this.activityServiceDb.createActivity(new UserId(Type.userId, "john.doe"), new GroupId(GroupId.Type.self, "@self"), "2", ACTIVITY_ALL_FIELDS, activity, SpiTestUtil.DEFAULT_TEST_SECURITY_TOKEN);
     
     // Check activity was created as expected
-    Future<RestfulCollection<Activity>> result = this.activityServiceDb.getActivities(SpiTestUtil.buildUserIds("john.doe"), new GroupId(GroupId.Type.self, "@self"), null, ACTIVITY_ALL_FIELDS, SpiTestUtil.DEFAULT_TEST_SECURITY_TOKEN);
+    Future<RestfulCollection<Activity>> result = this.activityServiceDb.getActivities(SpiTestUtil.buildUserIds("john.doe"), new GroupId(GroupId.Type.self, "@self"), null, ACTIVITY_ALL_FIELDS, new CollectionOptions(), SpiTestUtil.DEFAULT_TEST_SECURITY_TOKEN);
     RestfulCollection<Activity> activityCollection = result.get();
     assertEquals(2, activityCollection.getTotalResults());
     assertEquals(0, activityCollection.getStartIndex());
