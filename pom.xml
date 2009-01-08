@@ -44,21 +44,50 @@
     <maven>2.0.8</maven>
   </prerequisites>
 
+  <!-- ====================================================================== -->
+  <!-- S C M                                                                  -->
+  <!-- ====================================================================== -->
   <scm>
     <connection>scm:svn:http://svn.apache.org/repos/asf/incubator/shindig/trunk</connection>
     <developerConnection>scm:svn:https://svn.apache.org/repos/asf/incubator/shindig/trunk</developerConnection>
     <url>http://svn.apache.org/viewvc/incubator/shindig/trunk</url>
   </scm>
 
+  <!-- ====================================================================== -->
+  <!-- I S S U E  M A N A G E M E N T                                         -->
+  <!-- ====================================================================== -->
   <issueManagement>
     <system>jira</system>
     <url>http://issues.apache.org/jira/browse/SHINDIG</url>
   </issueManagement>
 
+  <!-- ====================================================================== -->
+  <!-- C I  M A N A G E M E N T                                               -->
+  <!-- ====================================================================== -->
   <ciManagement>
     <system>Hudson</system>
     <url>http://hudson.zones.apache.org/hudson/job/Shindig/</url>
   </ciManagement>
+
+  <!-- ====================================================================== -->
+  <!-- D I S T R I B U T I O N  M A N A G E M E N T                           -->
+  <!-- ====================================================================== -->
+  <distributionManagement>
+    <repository>
+      <id>apache.incubating</id>
+      <name>Apache Incubating Repository</name>
+      <url>scp://people.apache.org/www/people.apache.org/repo/m2-incubating-repository</url>
+    </repository>
+    <snapshotRepository>
+      <id>apache.snapshots</id>
+      <name>Apache Development Snapshot Repository</name>
+      <url>scp://people.apache.org/www/people.apache.org/repo/m2-snapshot-repository</url>
+    </snapshotRepository>
+    <site>
+      <id>apache.website</id>
+      <url>scp://people.apache.org/www/incubator.apache.org/shindig</url>
+    </site>
+  </distributionManagement>
 
   <!-- ====================================================================== -->
   <!-- M A I L I N G   L I S T S                                              -->
@@ -313,7 +342,7 @@
         <module>java/common</module>
       </modules>
     </profile>
-    
+
     <!-- profile to build java/samples -->
     <profile>
       <id>samples</id>
@@ -558,7 +587,7 @@
             </configuration>
           </execution>
         </executions>
-      </plugin> 
+      </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-war-plugin</artifactId>
@@ -676,7 +705,7 @@
             <exclude>**/jsunit/**/*</exclude>
           </excludes>
         </configuration>
-      </plugin> 
+      </plugin>
 
     </plugins>
 
@@ -733,7 +762,7 @@
                <goal>test-jar</goal>
              </goals>
            </execution>
-          </executions> 
+          </executions>
           <configuration>
             <archive>
               <manifest>
@@ -812,7 +841,7 @@
        <plugin>
          <groupId>org.codehaus.mojo</groupId>
          <artifactId>jxr-maven-plugin</artifactId>
-       </plugin>      
+       </plugin>
        <plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>jdepend-maven-plugin</artifactId>
@@ -842,18 +871,9 @@
             <include>**/*.java</include>
           </includes>
         </configuration>
-      </plugin> 
+      </plugin>
     </plugins>
   </reporting>
-  <!-- ====================================================================== -->
-  <!-- D I S T R I B U T I O N  M A N A G E M E N T                           -->
-  <!-- ====================================================================== -->
-  <distributionManagement>
-    <site>
-      <id>local</id>
-      <url>${site.localurl}</url>
-    </site>
-  </distributionManagement>
 
   <!-- ====================================================================== -->
   <!-- R E P O S I T O R I E S                                                -->
@@ -1075,7 +1095,7 @@
         <groupId>net.sourceforge.nekohtml</groupId>
         <artifactId>nekohtml</artifactId>
         <version>1.9.9</version>
-      </dependency>      
+      </dependency>
       <dependency>
         <groupId>xerces</groupId>
         <artifactId>xercesImpl</artifactId>
