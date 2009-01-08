@@ -562,195 +562,53 @@
   <!-- ====================================================================== -->
   <!-- B U I L D                                                              -->
   <!-- ====================================================================== -->
+
+  <properties>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+  </properties>
+
   <build>
     <defaultGoal>install</defaultGoal>
 
-    <plugins>
-      <!-- We want to package up license resources in the JARs produced -->
-       <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-remote-resources-plugin</artifactId>
-      </plugin>
-      <plugin>
-        <groupId>org.apache.geronimo.genesis.plugins</groupId>
-        <artifactId>tools-maven-plugin</artifactId>
-        <version>1.4</version>
-        <executions>
-          <execution>
-            <id>verify-legal-files</id>
-            <phase>verify</phase>
-            <goals>
-              <goal>verify-legal-files</goal>
-            </goals>
-            <configuration>
-              <strict>false</strict>
-            </configuration>
-          </execution>
-        </executions>
-      </plugin>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-war-plugin</artifactId>
-      </plugin>
-      <plugin>
-        <groupId>org.apache.maven.plugins </groupId>
-        <artifactId>maven-eclipse-plugin</artifactId>
-        <version>2.5.1</version>
-        <!--
-                <configuration>
-                  <projectNameTemplate>${project.groupId}-${project.artifactId}</projectNameTemplate>
-                </configuration>
-        -->
-      </plugin>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-compiler-plugin</artifactId>
-        <version>2.0.2</version>
-        <configuration>
-          <source>1.5</source>
-          <target>1.5</target>
-          <showDeprecation>true</showDeprecation>
-          <compilerArgument>-Xlint:unchecked,deprecation,fallthrough,finally</compilerArgument>
-          <fork>true</fork>
-        </configuration>
-      </plugin>
-      <plugin>
-        <artifactId>maven-source-plugin</artifactId>
-        <executions>
-          <execution>
-            <id>attach-sources</id>
-            <phase>package</phase>
-            <goals>
-              <goal>jar</goal>
-            </goals>
-          </execution>
-        </executions>
-        <configuration>
-          <excludeResources>false</excludeResources>
-          <attach>true</attach>
-        </configuration>
-      </plugin>
-      <!--
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-jar-plugin</artifactId>
-        <executions>
-          <execution>
-            <phase>package</phase>
-            <goals>
-              <goal>jar</goal>
-            </goals>
-          </execution>
-        </executions>
-      </plugin>
-      -->
-
-       <plugin>
-            <groupId>org.codehaus.mojo</groupId>
-            <artifactId>cobertura-maven-plugin</artifactId>
-            <version>2.2</version>
-            <configuration>
-                <check>
-                    <haltOnFailure>false</haltOnFailure>
-                    <regexes>
-                        <regex>
-                            <pattern>org.apache.shindig.*</pattern>
-                            <branchRate>90</branchRate>
-                            <lineRate>90</lineRate>
-                        </regex>
-                    </regexes>
-                </check>
-                <instrumentation>
-                    <includes>
-                        <include>org/apache/shindig/**/*.class</include>
-                    </includes>
-                </instrumentation>
-            </configuration>
-            <executions>
-                <execution>
-                    <id>clean</id>
-                    <phase>pre-site</phase>
-                    <goals>
-                        <goal>clean</goal>
-                    </goals>
-                </execution>
-                <execution>
-                    <id>instrument</id>
-                    <phase>site</phase>
-                    <goals>
-                        <goal>instrument</goal>
-                        <goal>cobertura</goal>
-                        <goal>check</goal>
-                    </goals>
-                </execution>
-            </executions>
-        </plugin>
-      <plugin>
-        <groupId>org.codehaus.mojo</groupId>
-        <artifactId>rat-maven-plugin</artifactId>
-        <version>1.0-alpha-3</version>
-        <executions>
-          <execution>
-            <phase>verify</phase>
-            <goals>
-              <goal>check</goal>
-            </goals>
-          </execution>
-        </executions>
-        <configuration>
-          <includes>
-            <include>**/*.java</include>
-          </includes>
-          <excludes>
-            <exclude>**/jsunit/**/*</exclude>
-          </excludes>
-        </configuration>
-      </plugin>
-
-    </plugins>
-
     <pluginManagement>
+      <!-- set versions/conf of common plugins for reproducibility, ordered alphabetically by owner -->
       <plugins>
-        <!-- We want to package up license resources in the JARs produced -->
+        <!-- Maven -->
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
-          <artifactId>maven-remote-resources-plugin</artifactId>
-          <version>1.0</version>
-          <executions>
-            <execution>
-              <goals>
-                <goal>process</goal>
-              </goals>
-              <configuration>
-                <resourceBundles>
-                  <resourceBundle>org.apache:apache-jar-resource-bundle:1.3</resourceBundle>
-                  <resourceBundle>org.apache:apache-incubator-disclaimer-resource-bundle:1.1</resourceBundle>
-                </resourceBundles>
-              </configuration>
-            </execution>
-          </executions>
+          <artifactId>maven-compiler-plugin</artifactId>
+          <version>2.0.2</version>
+          <configuration>
+            <source>1.5</source>
+            <target>1.5</target>
+            <showDeprecation>true</showDeprecation>
+            <compilerArgument>-Xlint:unchecked,deprecation,fallthrough,finally</compilerArgument>
+            <fork>true</fork>
+            <encoding>${project.build.sourceEncoding}</encoding>
+          </configuration>
         </plugin>
-        <plugin>
-          <groupId>org.mortbay.jetty</groupId>
-          <artifactId>maven-jetty-plugin</artifactId>
-          <version>6.1.14</version>
-        </plugin>
-
-        <!-- set versions of common plugins for reproducibility, ordered alphabetically -->
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-deploy-plugin</artifactId>
           <version>2.3</version>
         </plugin>
         <plugin>
-          <groupId>org.apache.maven.plugins</groupId>
-          <artifactId>maven-install-plugin</artifactId>
-          <version>2.2</version>
+          <groupId>org.apache.maven.plugins </groupId>
+          <artifactId>maven-eclipse-plugin</artifactId>
+          <version>2.5.1</version>
+<!--          <configuration>-->
+<!--            <projectNameTemplate>${project.groupId}-${project.artifactId}</projectNameTemplate>-->
+<!--          </configuration>-->
         </plugin>
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-gpg-plugin</artifactId>
           <version>1.0-alpha-4</version>
+        </plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-install-plugin</artifactId>
+          <version>2.2</version>
         </plugin>
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
@@ -779,6 +637,48 @@
           <configuration>
             <source>1.5</source>
             <target>1.5</target>
+            <encoding>${project.build.sourceEncoding}</encoding>
+            <links>
+              <link>http://java.sun.com/j2se/1.5.0/docs/api</link>
+              <link>http://java.sun.com/products/servlet/2.3/javadoc/</link>
+              <link>http://www.json.org/javadoc/</link>
+              <link>http://junit.sourceforge.net/javadoc/</link>
+            </links>
+          </configuration>
+        </plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-jxr-plugin</artifactId>
+          <version>2.1</version>
+          <configuration>
+            <inputEncoding>${project.build.sourceEncoding}</inputEncoding>
+          </configuration>
+        </plugin>
+        <!-- We want to package up license resources in the JARs produced -->
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-remote-resources-plugin</artifactId>
+          <version>1.0</version>
+          <executions>
+            <execution>
+              <goals>
+                <goal>process</goal>
+              </goals>
+              <configuration>
+                <resourceBundles>
+                  <resourceBundle>org.apache:apache-jar-resource-bundle:1.3</resourceBundle>
+                  <resourceBundle>org.apache:apache-incubator-disclaimer-resource-bundle:1.1</resourceBundle>
+                </resourceBundles>
+              </configuration>
+            </execution>
+          </executions>
+        </plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-resources-plugin</artifactId>
+          <version>2.3</version>
+          <configuration>
+            <encoding>${project.build.sourceEncoding}</encoding>
           </configuration>
         </plugin>
         <plugin>
@@ -797,70 +697,223 @@
           <version>2.4.3</version>
         </plugin>
         <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-war-plugin</artifactId>
+          <version>2.1-alpha-2</version>
+        </plugin>
+
+        <!-- Mojo -->
+        <plugin>
           <groupId>org.codehaus.mojo</groupId>
           <artifactId>cobertura-maven-plugin</artifactId>
           <version>2.2</version>
         </plugin>
+        <plugin>
+          <groupId>org.codehaus.mojo</groupId>
+          <artifactId>findbugs-maven-plugin</artifactId>
+          <version>1.2</version>
+        </plugin>
+        <plugin>
+          <groupId>org.codehaus.mojo</groupId>
+          <artifactId>jdepend-maven-plugin</artifactId>
+          <version>2.0-beta-2</version>
+        </plugin>
+        <plugin>
+          <groupId>org.codehaus.mojo</groupId>
+          <artifactId>rat-maven-plugin</artifactId>
+          <version>1.0-alpha-3</version>
+          <executions>
+            <execution>
+              <phase>verify</phase>
+              <goals>
+                <goal>check</goal>
+              </goals>
+            </execution>
+          </executions>
+          <configuration>
+            <includes>
+              <include>**/*.java</include>
+            </includes>
+            <excludes>
+              <exclude>**/jsunit/**/*</exclude>
+            </excludes>
+          </configuration>
+        </plugin>
+        <plugin>
+          <groupId>org.codehaus.mojo</groupId>
+          <artifactId>taglist-maven-plugin</artifactId>
+          <version>2.3</version>
+        </plugin>
+
+        <!-- Misc -->
+        <plugin>
+          <groupId>org.mortbay.jetty</groupId>
+          <artifactId>maven-jetty-plugin</artifactId>
+          <version>6.1.14</version>
+        </plugin>
+        <plugin>
+          <groupId>org.apache.geronimo.genesis.plugins</groupId>
+          <artifactId>tools-maven-plugin</artifactId>
+          <version>1.4</version>
+          <executions>
+            <execution>
+              <id>verify-legal-files</id>
+              <phase>verify</phase>
+              <goals>
+                <goal>verify-legal-files</goal>
+              </goals>
+              <configuration>
+                <strict>false</strict>
+              </configuration>
+            </execution>
+          </executions>
+        </plugin>
       </plugins>
     </pluginManagement>
+
+    <!-- ordered alphabetically by owner -->
+    <plugins>
+      <!-- Maven -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-eclipse-plugin</artifactId>
+      </plugin>
+      <!-- We want to package up license resources in the JARs produced -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-remote-resources-plugin</artifactId>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-resources-plugin</artifactId>
+      </plugin>
+      <plugin>
+        <artifactId>maven-source-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>attach-sources</id>
+            <phase>package</phase>
+            <goals>
+              <goal>jar</goal>
+            </goals>
+          </execution>
+        </executions>
+        <configuration>
+          <excludeResources>false</excludeResources>
+          <attach>true</attach>
+        </configuration>
+      </plugin>
+
+      <!-- Mojo -->
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>cobertura-maven-plugin</artifactId>
+        <configuration>
+          <check>
+            <haltOnFailure>false</haltOnFailure>
+            <regexes>
+              <regex>
+                <pattern>org.apache.shindig.*</pattern>
+                <branchRate>90</branchRate>
+                <lineRate>90</lineRate>
+              </regex>
+            </regexes>
+          </check>
+          <instrumentation>
+            <includes>
+              <include>org/apache/shindig/**/*.class</include>
+            </includes>
+          </instrumentation>
+        </configuration>
+        <executions>
+          <execution>
+            <id>clean</id>
+            <phase>pre-site</phase>
+            <goals>
+              <goal>clean</goal>
+            </goals>
+          </execution>
+          <execution>
+            <id>instrument</id>
+            <phase>site</phase>
+            <goals>
+              <goal>instrument</goal>
+              <goal>cobertura</goal>
+              <goal>check</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>rat-maven-plugin</artifactId>
+      </plugin>
+
+      <!-- Misc -->
+      <plugin>
+        <groupId>org.apache.geronimo.genesis.plugins</groupId>
+        <artifactId>tools-maven-plugin</artifactId>
+      </plugin>
+    </plugins>
   </build>
+
   <!-- ====================================================================== -->
   <!-- R E P O R T I N G                                                      -->
   <!-- ====================================================================== -->
   <reporting>
+    <!-- ordered alphabetically by owner -->
     <plugins>
+      <!-- Maven -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-checkstyle-plugin</artifactId>
+        <version>2.2</version>
+        <configuration>
+          <configLocation>http://svn.apache.org/repos/asf/incubator/shindig/trunk/site/checkstyle.xml</configLocation>
+        </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-javadoc-plugin</artifactId>
+        <version>2.5</version>
+        <configuration>
+          <aggregate>true</aggregate>
+        </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-jxr-plugin</artifactId>
+        <version>2.1</version>
+        <configuration>
+          <aggregate>true</aggregate>
+        </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-project-info-reports-plugin</artifactId>
+        <version>2.1</version>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-surefire-report-plugin</artifactId>
+        <version>2.4.3</version>
+      </plugin>
+
+      <!-- Mojo -->
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>cobertura-maven-plugin</artifactId>
+        <version>2.2</version>
+      </plugin>
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>findbugs-maven-plugin</artifactId>
         <version>1.2</version>
       </plugin>
-       <plugin>
-         <groupId>org.apache.maven.plugins</groupId>
-         <artifactId>maven-checkstyle-plugin</artifactId>
-         <configuration>
-          <configLocation>site/checkstyle.xml</configLocation>
-        </configuration>
-       </plugin>
-       <plugin>
-          <groupId>org.codehaus.mojo</groupId>
-          <artifactId>cobertura-maven-plugin</artifactId>
-       </plugin>
-       <plugin>
-          <groupId>org.apache.maven.plugins</groupId>
-          <artifactId>maven-javadoc-plugin</artifactId>
-          <configuration>
-             <aggregate>true</aggregate>
-             <links>
-               <link>http://java.sun.com/j2se/1.5.0/docs/api</link>
-               <link>http://java.sun.com/products/servlet/2.3/javadoc/</link>
-               <link>http://www.json.org/javadoc/</link>
-               <link>http://junit.sourceforge.net/javadoc/</link>
-             </links>
-          </configuration>
-       </plugin>
-       <plugin>
-         <groupId>org.codehaus.mojo</groupId>
-         <artifactId>jxr-maven-plugin</artifactId>
-       </plugin>
-       <plugin>
+      <plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>jdepend-maven-plugin</artifactId>
-      </plugin>
-      <plugin>
-        <groupId>org.codehaus.mojo</groupId>
-        <artifactId>taglist-maven-plugin</artifactId>
-        <configuration>
-          <tags>
-            <tag>TODO</tag>
-            <tag>FIXME</tag>
-            <tag>@todo</tag>
-            <tag>@deprecated</tag>
-          </tags>
-        </configuration>
-      </plugin>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-surefire-report-plugin</artifactId>
+        <version>2.0-beta-2</version>
       </plugin>
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
@@ -872,8 +925,22 @@
           </includes>
         </configuration>
       </plugin>
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>taglist-maven-plugin</artifactId>
+        <version>2.3</version>
+        <configuration>
+          <tags>
+            <tag>TODO</tag>
+            <tag>FIXME</tag>
+            <tag>@todo</tag>
+            <tag>@deprecated</tag>
+          </tags>
+        </configuration>
+      </plugin>
     </plugins>
   </reporting>
+
 
   <!-- ====================================================================== -->
   <!-- R E P O S I T O R I E S                                                -->
